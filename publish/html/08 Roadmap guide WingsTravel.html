@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roadmap cộng tác WingsTravel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f6efe4;--bg2:#f4f8f5;--ink:#17332d;--muted:#586c67;--line:rgba(23,51,45,.12);--accent:#c68b3c;--paper:rgba(255,255,255,.72);--shadow:0 22px 70px rgba(17,33,28,.12);--serif:"Montserrat","Segoe UI","Tahoma","Arial",sans-serif;--sans:"Montserrat","Segoe UI","Tahoma","Arial",sans-serif;--max:1540px}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:var(--sans);background:radial-gradient(circle at left top,rgba(198,139,60,.16),transparent 28%),radial-gradient(circle at right 12% top 18%,rgba(47,107,87,.16),transparent 24%),linear-gradient(180deg,var(--bg) 0%,#fbfaf7 36%,var(--bg2) 100%);overflow-x:hidden}
+    .shell{width:min(calc(100% - 48px),var(--max));margin:0 auto;display:grid;grid-template-columns:290px minmax(0,1fr);gap:40px;padding:28px 0 80px}
+    .rail{position:sticky;top:24px;align-self:start;height:calc(100svh - 48px);padding:28px 24px;border:1px solid rgba(255,255,255,.46);background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.42));backdrop-filter:blur(18px);border-radius:32px;box-shadow:var(--shadow);display:grid;grid-template-rows:auto auto 1fr auto;gap:22px}
+    .brand{margin:0;font-family:var(--serif);font-size:1.62rem;line-height:1.05;letter-spacing:-.03em}.brand small{display:block;margin-bottom:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-size:.78rem;font-family:var(--sans)}
+    .rail-copy{margin:0;color:var(--muted);line-height:1.55;font-size:.96rem}.agenda{display:grid;gap:8px}.agenda a{text-decoration:none;color:var(--muted);padding:10px 12px;border-radius:14px;border:1px solid transparent;transition:.18s ease;line-height:1.3;font-size:.95rem}.agenda a.active,.agenda a:hover{color:var(--ink);background:rgba(255,255,255,.64);border-color:rgba(23,51,45,.08);transform:translateX(4px)}
+    .rail-actions{display:grid;gap:10px}button{appearance:none;border:0;cursor:pointer;font:inherit;width:100%;padding:13px 16px;border-radius:999px;text-align:left}.toggle-notes{background:var(--ink);color:#fff}.jump-final{background:rgba(23,51,45,.06);color:var(--ink)}
+    main{display:grid;gap:26px}.panel{min-height:min(92svh,920px);border-radius:38px;padding:clamp(28px,4vw,56px);background:linear-gradient(180deg,rgba(255,255,255,.64),rgba(255,255,255,.48));border:1px solid rgba(255,255,255,.54);box-shadow:var(--shadow);overflow:hidden;scroll-margin-top:18px;opacity:0;transform:translateY(28px);transition:.7s cubic-bezier(.2,.8,.2,1)}.panel.visible{opacity:1;transform:none}
+    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:42px;align-items:end;background:radial-gradient(circle at 18% 14%,rgba(198,139,60,.18),transparent 24%),radial-gradient(circle at 88% 18%,rgba(33,79,142,.14),transparent 18%),linear-gradient(180deg,rgba(255,255,255,.76),rgba(255,255,255,.50))}
+    .eyebrow{margin:0 0 20px;font-size:.84rem;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}.display{margin:0;font-family:var(--serif);font-size:clamp(3.5rem,7vw,6.6rem);line-height:.92;letter-spacing:-.05em;max-width:9ch}.lede{margin:24px 0 0;max-width:58ch;color:var(--muted);font-size:1.08rem;line-height:1.7}
+    .hero-meta{display:grid;gap:18px}.meta-band{padding:24px;border-radius:24px;background:rgba(23,51,45,.92);color:#eef3f1}.meta-band strong{display:block;margin-bottom:8px;font-size:.84rem;text-transform:uppercase;letter-spacing:.13em;color:rgba(255,255,255,.7)}.meta-band p{margin:0;line-height:1.65;font-size:1.08rem}
+    .meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.meta-grid div{padding:18px;border-radius:20px;border:1px solid rgba(23,51,45,.08);background:rgba(255,255,255,.66)}.meta-grid span{display:block;margin-bottom:10px;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.12em}.meta-grid strong{font-size:1.16rem;line-height:1.35}
+    .section-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:32px;align-items:end;margin-bottom:28px}.section-title{margin:0;font-family:var(--serif);font-size:clamp(2.2rem,4vw,4.1rem);line-height:.98;letter-spacing:-.04em;max-width:11ch}.section-copy{margin:0;color:var(--muted);font-size:1.03rem;line-height:1.7;max-width:48ch;justify-self:end}
+    .divider{height:1px;background:linear-gradient(90deg,rgba(23,51,45,.12),rgba(23,51,45,.04));margin:0 0 24px}.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+    .list-block h3,.visual-block h3,.phase-block h3{margin:0 0 16px;font-size:.88rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+    .ruled-list{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}.ruled-list li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;padding:16px 0;border-bottom:1px solid var(--line);align-items:start;line-height:1.55;font-size:1.03rem}.index{font-family:var(--serif);font-size:1.35rem;color:rgba(23,51,45,.5);line-height:1;padding-top:2px}
+    .image-frame{padding:clamp(10px,1.8vw,18px);border-radius:30px;background:rgba(255,255,255,.74);border:1px solid rgba(23,51,45,.08);overflow:hidden}.image-frame img{display:block;width:100%;height:auto;border-radius:20px;cursor:zoom-in}
+    .phase-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}.phase{padding:18px;border-radius:22px;border:1px solid rgba(23,51,45,.08);background:rgba(255,255,255,.62);min-height:240px}.phase span{display:inline-block;margin-bottom:16px;padding:8px 12px;border-radius:999px;font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);background:rgba(23,51,45,.06)}.phase strong{display:block;margin-bottom:10px;font-size:1.18rem;line-height:1.3}.phase p{margin:0;color:var(--muted);line-height:1.6}
+    .callout{margin-top:24px;padding:22px 24px;border-radius:24px;background:rgba(23,51,45,.92);color:#eef5f2;line-height:1.7}.callout strong{display:block;margin-bottom:8px;color:rgba(255,255,255,.72);text-transform:uppercase;letter-spacing:.14em;font-size:.86rem}
+    .speaker-notes{margin-top:18px;padding-top:18px;border-top:1px dashed rgba(23,51,45,.2);color:#7c5a2f;display:none}body.show-notes .speaker-notes{display:block}
+    .next-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px}.mini-board{padding:22px;border-radius:24px;border:1px solid rgba(23,51,45,.08);background:rgba(255,255,255,.64)}.mini-board h3{margin:0 0 14px;font-size:.88rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}.mini-board ul{margin:0;padding:0;list-style:none;display:grid;gap:12px}.mini-board li{line-height:1.55;padding-left:22px;position:relative}.mini-board li::before{content:"";position:absolute;left:0;top:.48em;width:10px;height:10px;border-radius:50%;background:rgba(47,107,87,.18);border:1px solid rgba(47,107,87,.4)}
+    .lightbox{position:fixed;inset:0;z-index:1000;display:none;background:rgba(10,18,16,.88);backdrop-filter:blur(10px)}.lightbox.is-open{display:grid;grid-template-rows:auto 1fr}.lightbox-bar{display:flex;justify-content:flex-end;gap:10px;padding:16px}.lightbox-bar button{width:auto;min-width:48px;padding:12px 14px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.16)}.lightbox-stage{position:relative;overflow:hidden;touch-action:none;display:grid;place-items:center;padding:12px 20px 28px}.lightbox-figure{max-width:92vw;max-height:84vh;will-change:transform;transform-origin:center center;user-select:none;-webkit-user-drag:none;cursor:grab}.lightbox-figure.is-dragging{cursor:grabbing}.lightbox-caption{position:absolute;left:20px;right:20px;bottom:10px;color:rgba(255,255,255,.78);font-size:.95rem;text-align:center}
+    @media (max-width:1180px){.shell{grid-template-columns:1fr;width:min(calc(100% - 28px),var(--max))}.rail{position:relative;top:0;height:auto}.hero,.section-head,.split,.next-grid,.phase-grid{grid-template-columns:1fr}.section-copy{justify-self:start}}
+    @media (max-width:760px){.panel{min-height:auto;padding:24px 20px;border-radius:28px}.display{font-size:3.2rem}.section-title{max-width:none}.meta-grid{grid-template-columns:1fr}.lightbox-bar{justify-content:space-between;gap:8px}.lightbox-bar button{flex:1;min-width:0;text-align:center;padding:12px 10px}.lightbox-stage{padding:10px 12px 22px}.lightbox-figure{max-width:96vw;max-height:78vh}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div>
+        <h1 class="brand"><small>Roadmap Guide</small>WingsTravel</h1>
+        <p class="rail-copy">Một trang trình bày để mô tả kế hoạch cộng tác theo từng giai đoạn, đủ rõ để trao đổi với đối tác nhưng chưa đi vào deal hay chi phí.</p>
+      </div>
+      <nav class="agenda">
+        <a href="#hero">Mở đề bài</a>
+        <a href="#context">Bối cảnh và nguyên tắc</a>
+        <a href="#overview">Tổng quan roadmap</a>
+        <a href="#model">Mô hình cộng tác</a>
+        <a href="#priority">Thứ tự ưu tiên</a>
+        <a href="#phases">Chi tiết 5 giai đoạn</a>
+        <a href="#questions">Điểm cần làm rõ</a>
+        <a href="#next">Bước tiếp theo</a>
+      </nav>
+      <p class="rail-copy">Cách dùng: đi từ bức tranh lớn sang từng giai đoạn, dừng ở phần câu hỏi mở để khóa lại các điểm còn thiếu trước khi bàn sâu hơn.</p>
+      <div class="rail-actions">
+        <button class="toggle-notes" type="button">Hiện ghi chú trình bày</button>
+        <button class="jump-final" type="button" data-jump="#next">Nhảy tới phần kết</button>
+      </div>
+    </aside>
+    <main>
+      <section class="panel hero" id="hero">
+        <div>
+          <p class="eyebrow">Khung cộng tác định hướng cho WingsTravel</p>
+          <h2 class="display">Không đi theo hạng mục rời rạc. Đi theo từng lớp.</h2>
+          <p class="lede">Roadmap này được xây để hai bên có cùng một cách nhìn về hướng triển khai: bắt đầu từ thứ cần để ra thị trường và tạo lead, sau đó mới mở rộng sang website đầy đủ, vận hành và AI.</p>
+          <div class="speaker-notes">Câu mở nên đơn giản: “Em không muốn trình bày theo kiểu từng hạng mục nhỏ, mà muốn đưa một khung đi đường để nếu mình cùng làm thì sẽ đi theo từng lớp rõ ràng.”</div>
+        </div>
+        <div class="hero-meta">
+          <div class="meta-band"><strong>Tinh thần tài liệu</strong><p>Đây là roadmap cộng tác để thảo luận. Chưa phải proposal chi tiết, chưa phải báo giá, và chưa phải chốt phạm vi cuối cùng.</p></div>
+          <div class="meta-grid">
+            <div><span>Mục tiêu</span><strong>Thống nhất hướng đi theo giai đoạn</strong></div>
+            <div><span>Trọng tâm đầu</span><strong>Khách hàng, sản phẩm, landing page, lead</strong></div>
+            <div><span>Mở rộng sau</span><strong>Website, vận hành, dữ liệu, AI</strong></div>
+            <div><span>Cách dùng</span><strong>Trình bày, trao đổi, chốt phần còn mở</strong></div>
+          </div>
+        </div>
+      </section>
+      <section class="panel" id="context">
+        <div class="section-head">
+          <div><p class="eyebrow">Bối cảnh</p><h2 class="section-title">Một mảng mới cần nền tảng số, nhưng chưa nên xây tất cả cùng lúc</h2></div>
+          <p class="section-copy">Từ buổi trao đổi, có thể thấy WingsTravel đang được nhìn như một hướng đi mới có thể tận dụng hệ sinh thái hiện có. Trong đó, inbound là mảng được ưu tiên trước. Vì chưa có nhiều tài sản số và chưa khóa hết đầu vào, cách đi hợp lý là đi từng lớp thay vì nhảy vào hệ thống lớn ngay từ đầu.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="split">
+          <div class="list-block"><h3>Điểm xuất phát</h3><ol class="ruled-list">
+            <li><span class="index">01</span><div>WingsTravel đang xây từ đầu nhưng có thể tận dụng quan hệ và hệ sinh thái sẵn có.</div></li>
+            <li><span class="index">02</span><div>Nhóm khách được nhắc tới gồm Hàn Quốc, Trung Quốc và xa hơn là châu Âu.</div></li>
+            <li><span class="index">03</span><div>Hướng sản phẩm có thể gồm tour trọn gói, local experience và các dịch vụ bổ trợ.</div></li>
+          </ol></div>
+          <div class="list-block"><h3>Nguyên tắc nên giữ</h3><ol class="ruled-list">
+            <li><span class="index">01</span><div>Đi theo từng giai đoạn rõ ràng.</div></li>
+            <li><span class="index">02</span><div>Ưu tiên bài toán thực tế trước, có đo lường ở từng bước.</div></li>
+            <li><span class="index">03</span><div>Chỉ mở sang lớp tiếp theo khi lớp hiện tại đã đủ rõ.</div></li>
+          </ol></div>
+        </div>
+      </section>
+      <section class="panel" id="overview">
+        <div class="section-head">
+          <div><p class="eyebrow">Tổng quan</p><h2 class="section-title">5 giai đoạn để đi từ định hướng tới tăng trưởng</h2></div>
+          <p class="section-copy">Sơ đồ tổng quan này giúp nhìn toàn bộ hành trình. Cái quan trọng là mỗi giai đoạn có một công việc riêng, một loại đầu ra riêng và một điều kiện riêng để mở sang bước tiếp.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="image-frame"><img src="../../assets/visuals/WingsTravel-05-roadmap-overview.svg" alt="Tổng quan 5 giai đoạn roadmap của WingsTravel" /></div>
+      </section>
+      <section class="panel" id="model">
+        <div class="section-head">
+          <div><p class="eyebrow">Phối hợp</p><h2 class="section-title">Roadmap này là khung cộng tác giữa hai bên</h2></div>
+          <p class="section-copy">Phần này làm rõ vai trò. Phía đối tác giữ đầu vào kinh doanh và phản hồi thị trường. Phía công nghệ tham gia ở vai trò làm rõ bài toán, thiết kế hướng triển khai và cùng xây từng lớp nền tảng theo giai đoạn.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="split">
+          <div class="visual-block"><h3>Mô hình cộng tác</h3><div class="image-frame"><img src="../../assets/visuals/WingsTravel-06-collaboration-model.svg" alt="Mô hình cộng tác giữa hai bên" /></div></div>
+          <div class="list-block"><h3>Điểm cần cùng chốt</h3><ol class="ruled-list">
+            <li><span class="index">01</span><div>Mục tiêu của từng giai đoạn.</div></li>
+            <li><span class="index">02</span><div>Đầu ra và đầu mối phối hợp.</div></li>
+            <li><span class="index">03</span><div>Cách đo lường và điều kiện để mở sang lớp tiếp theo.</div></li>
+          </ol><div class="callout"><strong>Thông điệp nên dùng</strong>Đây không phải là cách giao từng việc nhỏ lẻ. Mục tiêu là tạo ra một khung cộng tác để mỗi bước đi đều có lý do, có đầu ra và có cơ sở để mở sang bước tiếp theo.</div></div>
+        </div>
+      </section>
+      <section class="panel" id="priority">
+        <div class="section-head">
+          <div><p class="eyebrow">Thứ tự ưu tiên</p><h2 class="section-title">Khách đi trước, sản phẩm đi sau, rồi mới tới landing page và hệ thống</h2></div>
+          <p class="section-copy">Sơ đồ này dùng để khóa logic làm việc. Nếu chưa rõ khách và sản phẩm đi trước, việc làm landing page hay bàn website lớn sẽ rất dễ lệch hướng hoặc bị làm lại nhiều lần.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="image-frame"><img src="../../assets/visuals/WingsTravel-07-priority-ladder.svg" alt="Thứ tự ưu tiên nên đi" /></div>
+        <div class="speaker-notes">Nhấn mạnh điểm này nếu đối tác muốn nhảy nhanh sang web hoặc hệ thống lớn: “Em nghĩ nên chốt khách và sản phẩm trước, vì đó là chỗ quyết định landing page, thông điệp và conversion.”</div>
+      </section>
+      <section class="panel" id="phases">
+        <div class="section-head">
+          <div><p class="eyebrow">Chi tiết</p><h2 class="section-title">Nội dung của từng giai đoạn</h2></div>
+          <p class="section-copy">Đây là phần dùng để đi sâu hơn một bước. Mỗi giai đoạn dưới đây chỉ nêu mục tiêu và ý nghĩa, chưa bóc sang phạm vi chi tiết hay thương mại.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="phase-grid">
+          <div class="phase"><span>Giai đoạn 1</span><strong>Làm rõ định hướng</strong><p>Khóa lại khách ưu tiên, sản phẩm ưu tiên, tài nguyên hiện có và cách nhận lead ban đầu.</p></div>
+          <div class="phase"><span>Giai đoạn 2</span><strong>Hiện diện và lead</strong><p>Dựng landing page, thông điệp, form, điểm nhận lead và bắt đầu đo lường.</p></div>
+          <div class="phase"><span>Giai đoạn 3</span><strong>Website và nội dung</strong><p>Nâng nền bên ngoài lên mức bài bản hơn với website đa ngôn ngữ, trang dịch vụ và lớp quản trị nội dung.</p></div>
+          <div class="phase"><span>Giai đoạn 4</span><strong>Vận hành và dữ liệu</strong><p>Chuẩn hóa log trao đổi, trạng thái xử lý, dữ liệu vận hành và giảm phụ thuộc vào trao đổi rời rạc.</p></div>
+          <div class="phase"><span>Giai đoạn 5</span><strong>AI và tự động hóa</strong><p>Đưa AI vào đúng các điểm tạo hiệu quả thật như phản hồi bước đầu, phân loại lead, nội dung và báo cáo.</p></div>
+        </div>
+        <div class="callout"><strong>Tinh thần triển khai</strong>Không phải giai đoạn nào cũng cần làm ngay. Mục tiêu là chọn đúng giai đoạn ưu tiên đầu tiên, làm cho rõ, rồi mới mở rộng khi có đủ đầu vào và phản hồi thực tế.</div>
+      </section>
+      <section class="panel" id="questions">
+        <div class="section-head">
+          <div><p class="eyebrow">Câu hỏi mở</p><h2 class="section-title">Những gì cần làm rõ trước khi đi tiếp</h2></div>
+          <p class="section-copy">Đây là phần rất hữu ích để kết thúc buổi trao đổi. Thay vì chốt vội, hai bên có thể thống nhất trước các câu hỏi còn mở để lấy đủ dữ liệu cho bước tiếp theo.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="split">
+          <div class="visual-block"><h3>Bản đồ câu hỏi mở</h3><div class="image-frame"><img src="../../assets/visuals/WingsTravel-08-open-questions-map.svg" alt="Bản đồ các câu hỏi cần làm rõ" /></div></div>
+          <div class="list-block"><h3>5 điểm nên khóa trước</h3><ol class="ruled-list">
+            <li><span class="index">01</span><div>Nhóm khách nào đi trước.</div></li>
+            <li><span class="index">02</span><div>Tour / sản phẩm nào đi trước.</div></li>
+            <li><span class="index">03</span><div>Tài nguyên nào đã có sẵn để triển khai.</div></li>
+            <li><span class="index">04</span><div>Ai là đầu mối phối hợp và ai xử lý lead.</div></li>
+            <li><span class="index">05</span><div>Tiêu chí nào để xem giai đoạn khởi động là hiệu quả.</div></li>
+          </ol></div>
+        </div>
+      </section>
+      <section class="panel" id="next">
+        <div class="section-head">
+          <div><p class="eyebrow">Bước tiếp theo</p><h2 class="section-title">Từ roadmap này, nên chốt một vòng làm rõ sâu hơn</h2></div>
+          <p class="section-copy">Phần kết nên giữ ở mức vừa đủ: chưa nhảy sang deal hay báo giá, mà chốt một vòng trao đổi tiếp theo để khóa giai đoạn ưu tiên đầu tiên và đầu vào cần thiết.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="next-grid">
+          <div class="mini-board"><h3>Điều nên chốt</h3><ul><li>Nhóm khách ưu tiên đầu tiên</li><li>Sản phẩm hoặc tour đi trước</li><li>Người phối hợp trực tiếp</li><li>Cách nhận và xử lý lead ban đầu</li></ul></div>
+          <div class="mini-board"><h3>Điều chưa cần chốt vội</h3><ul><li>Gói triển khai cuối cùng</li><li>Chi phí chi tiết</li><li>Toàn bộ hệ thống lớn về sau</li><li>Mọi hạng mục cùng lúc</li></ul></div>
+        </div>
+        <div class="callout"><strong>Câu chốt nên dùng</strong>Nếu hai bên thấy hợp với hướng đi này, bước tiếp theo phù hợp nhất là làm rõ sâu hơn giai đoạn đầu tiên để xác định đúng thứ nên làm trước, rồi khi đó mới bàn tiếp sang proposal hoặc phạm vi cụ thể hơn nếu cần.</div>
+        <div class="speaker-notes">Đây là phần quan trọng để giữ nhịp đúng. Không đẩy sang chốt deal. Chỉ cần chốt một “decision nhỏ nhưng rõ”: có tiếp tục vòng làm rõ hay không, và cần làm rõ các điểm nào.</div>
+      </section>
+    </main>
+  </div>
+  <div class="lightbox" id="imageLightbox" aria-hidden="true">
+    <div class="lightbox-bar">
+      <button type="button" data-lightbox-action="zoom-out" aria-label="Thu nhỏ">-</button>
+      <button type="button" data-lightbox-action="zoom-in" aria-label="Phóng to">+</button>
+      <button type="button" data-lightbox-action="reset" aria-label="Đặt lại">Reset</button>
+      <button type="button" data-lightbox-action="close" aria-label="Đóng">Đóng</button>
+    </div>
+    <div class="lightbox-stage">
+      <img class="lightbox-figure" alt="" />
+      <div class="lightbox-caption"></div>
+    </div>
+  </div>
+  <script>
+    const links=[...document.querySelectorAll('.agenda a')],sections=[...document.querySelectorAll('.panel')],notesButton=document.querySelector('.toggle-notes'),lightbox=document.getElementById('imageLightbox'),lightboxStage=lightbox.querySelector('.lightbox-stage'),lightboxFigure=lightbox.querySelector('.lightbox-figure'),lightboxCaption=lightbox.querySelector('.lightbox-caption'),zoomables=[...document.querySelectorAll('.image-frame img')];
+    let scale=1,translateX=0,translateY=0,dragStartX=0,dragStartY=0,startTranslateX=0,startTranslateY=0,isDragging=false,pinchDistance=0,pinchScaleStart=1,lastTap=0;const activePointers=new Map();
+    const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
+    const applyTransform=()=>{lightboxFigure.style.transform=`translate(${translateX}px, ${translateY}px) scale(${scale})`;};
+    const resetTransform=()=>{scale=1;translateX=0;translateY=0;applyTransform();};
+    const setScale=(nextScale)=>{scale=clamp(nextScale,1,4);if(scale===1){translateX=0;translateY=0;}applyTransform();};
+    const openLightbox=(img)=>{lightboxFigure.src=img.currentSrc||img.src;lightboxFigure.alt=img.alt||'';lightboxCaption.textContent=img.alt||'Ảnh minh họa';lightbox.classList.add('is-open');lightbox.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';resetTransform();};
+    const closeLightbox=()=>{lightbox.classList.remove('is-open');lightbox.setAttribute('aria-hidden','true');document.body.style.overflow='';lightboxFigure.removeAttribute('src');activePointers.clear();pinchDistance=0;isDragging=false;};
+    const getDistance=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+    zoomables.forEach((img)=>img.addEventListener('click',()=>openLightbox(img)));
+    const observer=new IntersectionObserver((entries)=>{entries.forEach((entry)=>{if(entry.isIntersecting){entry.target.classList.add('visible');const id=entry.target.id;links.forEach((link)=>link.classList.toggle('active',link.getAttribute('href')===`#${id}`));}})},{threshold:.38});
+    sections.forEach((section)=>observer.observe(section));
+    notesButton.addEventListener('click',()=>{document.body.classList.toggle('show-notes');notesButton.textContent=document.body.classList.contains('show-notes')?'Ẩn ghi chú trình bày':'Hiện ghi chú trình bày';});
+    lightbox.addEventListener('click',(event)=>{if(event.target===lightbox||event.target===lightboxStage)closeLightbox();});
+    lightbox.querySelectorAll('[data-lightbox-action]').forEach((button)=>{button.addEventListener('click',()=>{const action=button.getAttribute('data-lightbox-action');if(action==='close')closeLightbox();if(action==='reset')resetTransform();if(action==='zoom-in')setScale(scale+.4);if(action==='zoom-out')setScale(scale-.4);});});
+    lightboxStage.addEventListener('wheel',(event)=>{event.preventDefault();setScale(scale+(event.deltaY<0?.18:-.18));},{passive:false});
+    lightboxStage.addEventListener('pointerdown',(event)=>{activePointers.set(event.pointerId,event);lightboxStage.setPointerCapture(event.pointerId);if(activePointers.size===1&&scale>1){isDragging=true;lightboxFigure.classList.add('is-dragging');dragStartX=event.clientX;dragStartY=event.clientY;startTranslateX=translateX;startTranslateY=translateY;}if(activePointers.size===2){const[first,second]=[...activePointers.values()];pinchDistance=getDistance(first,second);pinchScaleStart=scale;isDragging=false;lightboxFigure.classList.remove('is-dragging');}});
+    lightboxStage.addEventListener('pointermove',(event)=>{if(!activePointers.has(event.pointerId))return;activePointers.set(event.pointerId,event);if(activePointers.size===2){const[first,second]=[...activePointers.values()];const nextDistance=getDistance(first,second);if(pinchDistance)setScale(pinchScaleStart*(nextDistance/pinchDistance));return;}if(!isDragging||scale<=1)return;translateX=startTranslateX+(event.clientX-dragStartX);translateY=startTranslateY+(event.clientY-dragStartY);applyTransform();});
+    const releasePointer=(event)=>{activePointers.delete(event.pointerId);if(activePointers.size<2)pinchDistance=0;if(activePointers.size===0){isDragging=false;lightboxFigure.classList.remove('is-dragging');}};
+    lightboxStage.addEventListener('pointerup',releasePointer);lightboxStage.addEventListener('pointercancel',releasePointer);
+    lightboxStage.addEventListener('touchend',()=>{const now=Date.now();if(now-lastTap<260)setScale(scale>1?1:2.2);lastTap=now;});
+    document.querySelector('[data-jump="#next"]').addEventListener('click',()=>{document.querySelector('#next').scrollIntoView({behavior:'smooth',block:'start'});});
+    window.addEventListener('keydown',(event)=>{if(event.key==='Escape'&&lightbox.classList.contains('is-open')){closeLightbox();return;}if(!['ArrowDown','ArrowUp','PageDown','PageUp'].includes(event.key))return;const current=links.findIndex((link)=>link.classList.contains('active'));const nextIndex=event.key==='ArrowDown'||event.key==='PageDown'?Math.min(current+1,links.length-1):Math.max(current-1,0);const target=document.querySelector(links[nextIndex].getAttribute('href'));if(target){target.scrollIntoView({behavior:'smooth',block:'start'});event.preventDefault();}},{passive:false});
+  </script>
+</body>
+</html>
+

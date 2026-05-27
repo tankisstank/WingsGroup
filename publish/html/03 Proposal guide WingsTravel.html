@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal Inbound Du lịch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f0e8;
+      --bg-2: #fbfaf6;
+      --ink: #16312d;
+      --muted: #526663;
+      --line: rgba(22, 49, 45, 0.14);
+      --accent: #c77a24;
+      --accent-2: #2e6b56;
+      --accent-3: #153d74;
+      --paper: rgba(255,255,255,0.74);
+      --shadow: 0 18px 60px rgba(22, 49, 45, 0.12);
+      --radius: 28px;
+      --serif: "Montserrat", "Segoe UI", "Tahoma", "Arial", sans-serif;
+      --sans: "Montserrat", "Segoe UI", "Tahoma", "Arial", sans-serif;
+      --max: 1480px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(199,122,36,0.14), transparent 28%),
+        radial-gradient(circle at right 12% top 18%, rgba(46,107,86,0.14), transparent 24%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 46%, #eef3ef 100%);
+      font-family: var(--sans);
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(28px);
+      opacity: 0.45;
+    }
+
+    body::before {
+      width: 34rem;
+      height: 34rem;
+      left: -10rem;
+      top: 8rem;
+      background: rgba(199,122,36,0.18);
+      border-radius: 50%;
+    }
+
+    body::after {
+      width: 28rem;
+      height: 28rem;
+      right: -8rem;
+      top: 18rem;
+      background: rgba(46,107,86,0.16);
+      border-radius: 50%;
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: min(calc(100% - 48px), var(--max));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 40px;
+      padding: 28px 0 80px;
+    }
+
+    .rail {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      height: calc(100svh - 48px);
+      padding: 28px 24px;
+      border: 1px solid rgba(255,255,255,0.45);
+      background: linear-gradient(180deg, rgba(255,255,255,0.68), rgba(255,255,255,0.4));
+      backdrop-filter: blur(18px);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 24px;
+    }
+
+    .brand {
+      font-family: var(--serif);
+      font-size: 1.55rem;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+
+    .brand small {
+      display: block;
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .rail-copy {
+      font-size: 0.96rem;
+      line-height: 1.55;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .agenda {
+      display: grid;
+      gap: 8px;
+    }
+
+    .agenda a {
+      text-decoration: none;
+      color: var(--muted);
+      padding: 10px 12px;
+      border-radius: 14px;
+      transition: 180ms ease;
+      font-size: 0.95rem;
+      line-height: 1.3;
+      border: 1px solid transparent;
+    }
+
+    .agenda a.active,
+    .agenda a:hover {
+      color: var(--ink);
+      background: rgba(255,255,255,0.62);
+      border-color: rgba(22,49,45,0.09);
+      transform: translateX(4px);
+    }
+
+    .rail-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .toggle-notes,
+    .jump-final {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 999px;
+      text-align: left;
+      transition: 180ms ease;
+    }
+
+    .toggle-notes {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .toggle-notes:hover { transform: translateY(-1px); }
+
+    .jump-final {
+      background: rgba(22,49,45,0.06);
+      color: var(--ink);
+    }
+
+    main {
+      display: grid;
+      gap: 26px;
+    }
+
+    .panel {
+      min-height: min(92svh, 920px);
+      border-radius: 36px;
+      padding: clamp(28px, 4vw, 56px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.46));
+      border: 1px solid rgba(255,255,255,0.52);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: clip;
+      scroll-margin-top: 18px;
+      opacity: 0;
+      transform: translateY(26px);
+      transition: 700ms cubic-bezier(.2,.8,.2,1);
+    }
+
+    .panel.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(22,49,45,0.18), rgba(255,255,255,0));
+    }
+
+    .hero {
+      display: grid;
+      align-items: end;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 40px;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(199,122,36,0.18), transparent 24%),
+        radial-gradient(circle at 88% 18%, rgba(21,61,116,0.14), transparent 18%),
+        linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.48));
+    }
+
+    .eyebrow {
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      margin: 0 0 20px;
+    }
+
+    .display {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(3.3rem, 7vw, 6.4rem);
+      line-height: 0.94;
+      letter-spacing: -0.05em;
+      max-width: 10ch;
+    }
+
+    .lede {
+      max-width: 56ch;
+      font-size: 1.08rem;
+      line-height: 1.7;
+      color: var(--muted);
+      margin: 24px 0 0;
+    }
+
+    .hero-meta {
+      display: grid;
+      gap: 18px;
+      align-self: stretch;
+      justify-content: stretch;
+    }
+
+    .meta-band {
+      padding: 24px;
+      border-radius: 24px;
+      background: rgba(22,49,45,0.9);
+      color: #eef3ef;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .meta-band strong {
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      color: rgba(255,255,255,0.72);
+    }
+
+    .meta-band p {
+      margin: 0;
+      font-size: 1.08rem;
+      line-height: 1.6;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .meta-grid div {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.64);
+      border: 1px solid rgba(22,49,45,0.08);
+    }
+
+    .meta-grid span {
+      display: block;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .meta-grid strong {
+      font-size: 1.15rem;
+      line-height: 1.35;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 32px;
+      align-items: end;
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(2.2rem, 4vw, 4rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      max-width: 11ch;
+    }
+
+    .section-copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.7;
+      max-width: 48ch;
+      justify-self: end;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(22,49,45,0.12), rgba(22,49,45,0.04));
+      margin: 0 0 24px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px;
+    }
+
+    .list-block h3,
+    .visual-block h3,
+    .estimate-block h3,
+    .question-strip h3 {
+      margin: 0 0 16px;
+      font-size: 0.88rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .ruled-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid var(--line);
+    }
+
+    .ruled-list li {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 14px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--line);
+      align-items: start;
+      font-size: 1.03rem;
+      line-height: 1.55;
+    }
+
+    .ruled-list li strong {
+      color: var(--ink);
+    }
+
+    .index {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      color: rgba(22,49,45,0.52);
+      line-height: 1;
+      padding-top: 2px;
+    }
+
+    .image-frame {
+      padding: clamp(10px, 1.8vw, 18px);
+      border-radius: 28px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(22,49,45,0.08);
+      overflow: hidden;
+    }
+
+    .image-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 20px;
+      cursor: zoom-in;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      background: rgba(10, 18, 16, 0.88);
+      backdrop-filter: blur(10px);
+    }
+
+    .lightbox.is-open {
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .lightbox-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 16px;
+    }
+
+    .lightbox-bar button {
+      width: auto;
+      min-width: 48px;
+      padding: 12px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+
+    .lightbox-stage {
+      position: relative;
+      overflow: hidden;
+      touch-action: none;
+      display: grid;
+      place-items: center;
+      padding: 12px 20px 28px;
+    }
+
+    .lightbox-figure {
+      max-width: 92vw;
+      max-height: 84vh;
+      will-change: transform;
+      transform-origin: center center;
+      user-select: none;
+      -webkit-user-drag: none;
+      cursor: grab;
+    }
+
+    .lightbox-figure.is-dragging {
+      cursor: grabbing;
+    }
+
+    .lightbox-caption {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: 10px;
+      color: rgba(255,255,255,0.78);
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    .lane-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .lane {
+      display: grid;
+      grid-template-columns: 190px 1fr 210px;
+      gap: 24px;
+      align-items: center;
+      padding: 18px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .lane:last-child {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .lane .label {
+      font-size: 1.25rem;
+      font-family: var(--serif);
+      letter-spacing: -0.02em;
+    }
+
+    .lane .scope {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .lane .price {
+      justify-self: end;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .question-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .question-strip {
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .question-strip ul {
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+      color: var(--ink);
+    }
+
+    .question-strip li {
+      position: relative;
+      padding-left: 28px;
+      line-height: 1.55;
+    }
+
+    .question-strip li::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(22,49,45,0.34);
+      position: absolute;
+      left: 0;
+      top: 0.42em;
+      background: rgba(255,255,255,0.6);
+    }
+
+    .callout {
+      padding: 22px 24px;
+      border-radius: 24px;
+      background: rgba(22,49,45,0.92);
+      color: #eff5f2;
+      line-height: 1.7;
+      margin-top: 24px;
+    }
+
+    .callout strong {
+      display: block;
+      font-size: 0.86rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 8px;
+    }
+
+    .next-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .big-statement {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 3.6vw, 3.6rem);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+      margin: 0 0 20px;
+      max-width: 12ch;
+    }
+
+    .chip-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(22,49,45,0.12);
+      background: rgba(255,255,255,0.66);
+      color: var(--ink);
+      font-size: 0.95rem;
+    }
+
+    .speaker-notes {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px dashed rgba(22,49,45,0.2);
+      color: #7a5931;
+      display: none;
+    }
+
+    body.show-notes .speaker-notes {
+      display: block;
+      animation: noteReveal 240ms ease;
+    }
+
+    @keyframes noteReveal {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero [data-reveal],
+    .hero .meta-band,
+    .hero .meta-grid {
+      opacity: 0;
+      transform: translateY(18px);
+      animation: rise 680ms cubic-bezier(.2,.8,.2,1) forwards;
+    }
+
+    .hero [data-reveal="1"] { animation-delay: 90ms; }
+    .hero [data-reveal="2"] { animation-delay: 180ms; }
+    .hero [data-reveal="3"] { animation-delay: 300ms; }
+    .hero .meta-band { animation-delay: 340ms; }
+    .hero .meta-grid { animation-delay: 420ms; }
+
+    @keyframes rise {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1100px) {
+      .shell {
+        grid-template-columns: 1fr;
+        width: min(calc(100% - 28px), var(--max));
+      }
+      .rail {
+        position: relative;
+        top: 0;
+        height: auto;
+        grid-template-rows: auto auto auto auto;
+      }
+      .hero,
+      .section-head,
+      .split,
+      .question-grid,
+      .next-grid,
+      .lane {
+        grid-template-columns: 1fr;
+      }
+      .lane .price {
+        justify-self: start;
+      }
+      .section-copy {
+        justify-self: start;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .panel {
+        min-height: auto;
+        border-radius: 28px;
+        padding: 24px 20px;
+      }
+      .display {
+        font-size: 3.1rem;
+      }
+      .section-title,
+      .big-statement {
+        max-width: none;
+      }
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+      .chip-line {
+        gap: 8px;
+      }
+      .chip {
+        width: 100%;
+        text-align: center;
+      }
+
+      .lightbox-bar {
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .lightbox-bar button {
+        flex: 1;
+        min-width: 0;
+        text-align: center;
+        padding: 12px 10px;
+      }
+
+      .lightbox-stage {
+        padding: 10px 12px 22px;
+      }
+
+      .lightbox-figure {
+        max-width: 96vw;
+        max-height: 78vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div>
+        <h1 class="brand"><small>Proposal Guide</small>WingsTravel</h1>
+        <p class="rail-copy">Một trang thay slideshow để dẫn cuộc trao đổi, thu thập thông tin và chốt hướng đồng hành công nghệ.</p>
+      </div>
+
+      <nav class="agenda">
+        <a href="#hero">Mở đề bài</a>
+        <a href="#context">Bối cảnh và mục tiêu</a>
+        <a href="#role">Vai trò đối tác công nghệ</a>
+        <a href="#plan">Lộ trình 30 ngày</a>
+        <a href="#flow">Luồng lead và vận hành</a>
+        <a href="#questions">Thông tin cần làm rõ</a>
+        <a href="#estimate">Khung estimate</a>
+        <a href="#next">Bước chốt tiếp theo</a>
+      </nav>
+
+      <div class="rail-copy">
+        Cách dùng: đi theo từng section, dừng ở phần câu hỏi để khai thác thông tin, và mở khung estimate ở cuối để chốt bước tiếp theo.
+      </div>
+
+      <div class="rail-actions">
+        <button class="toggle-notes" type="button">Hiện ghi chú trình bày</button>
+        <button class="jump-final" type="button" data-jump="#next">Nhảy tới phần chốt</button>
+      </div>
+    </aside>
+
+    <main>
+      <section class="panel hero" id="hero">
+        <div>
+          <p class="eyebrow" data-reveal="1">Đề xuất đồng hành công nghệ cho dự án WingsTravel</p>
+          <h2 class="display" data-reveal="2">Không bán một website. Bán một hướng đi.</h2>
+          <p class="lede" data-reveal="3">Trang này được dựng như một guide trình bày: giúp làm rõ bài toán kinh doanh, chứng minh vai trò đối tác công nghệ, đề xuất giai đoạn 30 ngày đầu và dẫn tới bước chốt cụ thể sau buổi gặp.</p>
+          <div class="speaker-notes">
+            Mở buổi bằng một câu ngắn: “Em muốn nhìn bài toán này không chỉ là làm web, mà là dựng nền tảng số đầu tiên cho một mảng kinh doanh mới.”
+          </div>
+        </div>
+
+        <div class="hero-meta">
+          <div class="meta-band">
+            <strong>Thông điệp chủ lực</strong>
+            <p>Đi nhanh từ hiện diện online tới luồng nhận lead, sau đó mới mở rộng thành website, vận hành, tự động hóa và AI.</p>
+          </div>
+          <div class="meta-grid">
+            <div>
+              <span>Vai trò</span>
+              <strong>Đối tác công nghệ / CTO thuê ngoài</strong>
+            </div>
+            <div>
+              <span>Đầu ra sớm</span>
+              <strong>Landing page, lead system, nội dung nền</strong>
+            </div>
+            <div>
+              <span>Mục tiêu buổi gặp</span>
+              <strong>Chốt định hướng hợp tác và pilot 30 ngày</strong>
+            </div>
+            <div>
+              <span>Cách dùng trang</span>
+              <strong>Show cho khách và dùng như checklist trao đổi</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="context">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Bối cảnh</p>
+            <h2 class="section-title">Một mảng kinh doanh mới cần một nền tảng số đầu tiên</h2>
+          </div>
+          <p class="section-copy">Phần này dùng để đặt lại đề bài: WingsTravel đang được xây như một thương hiệu dịch vụ mới trong hệ sinh thái, với mảng inbound là trọng tâm giai đoạn đầu. Vì vậy, điều cần chốt không phải một website đơn lẻ mà là hướng dựng năng lực ban đầu.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="split">
+          <div class="list-block">
+            <h3>Điểm đã rõ</h3>
+            <ol class="ruled-list">
+              <li><span class="index">01</span><div>Inbound là công ty con mới, có thể hưởng lợi từ hệ sinh thái vé máy bay và outbound.</div></li>
+              <li><span class="index">02</span><div>Ưu tiên gần là có thứ để trình bày ra ngoài và bắt đầu lấy lead.</div></li>
+              <li><span class="index">03</span><div>Bạn tham gia ở vai trò <strong>đối tác công nghệ</strong>, không chỉ nhận làm website.</div></li>
+            </ol>
+          </div>
+          <div class="list-block">
+            <h3>Điểm cần làm rõ ngay tại bàn</h3>
+            <ol class="ruled-list">
+              <li><span class="index">01</span><div>Khách hàng mục tiêu là ai, đến từ thị trường nào, mua gì trước.</div></li>
+              <li><span class="index">02</span><div>Ai là người quyết định cuối cùng và ai là đầu mối triển khai trực tiếp.</div></li>
+              <li><span class="index">03</span><div>Phía đối tác hiện có gì: hình ảnh, sản phẩm mẫu, data, ngân sách, kênh nhận lead.</div></li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="role">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Vai trò</p>
+            <h2 class="section-title">Khác biệt giữa đối tác công nghệ và agency làm web</h2>
+          </div>
+          <p class="section-copy">Section này là chỗ để bạn gỡ cuộc nói chuyện khỏi phạm vi “làm website giá bao nhiêu”. Tâm điểm là năng lực nhìn bài toán theo hệ thống: tăng trưởng, vận hành, dữ liệu và các chỗ phù hợp để đưa AI vào.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="split">
+          <div class="visual-block">
+            <h3>Mô hình vai trò</h3>
+            <div class="image-frame">
+          <img src="../../assets/visuals/WingsTravel-04-cto-role.svg" alt="Vai trò đối tác công nghệ / CTO thuê ngoài" />
+            </div>
+          </div>
+          <div class="list-block">
+            <h3>Các điểm cần nhấn mạnh</h3>
+            <ol class="ruled-list">
+              <li><span class="index">01</span><div>Không tiếp cận theo kiểu làm từng hạng mục rời rạc.</div></li>
+              <li><span class="index">02</span><div>Có kinh nghiệm phát triển và vận hành các dự án thương mại điện tử, hệ thống bán vé và SaaS.</div></li>
+              <li><span class="index">03</span><div>AI chỉ được đề xuất ở nơi tạo ra năng suất thật: phản hồi lead, hỗ trợ sale, nội dung, báo cáo.</div></li>
+            </ol>
+            <div class="callout">
+              <strong>Câu nói nên dùng</strong>
+              Nếu chỉ cần một website giới thiệu, agency có thể làm được. Nhưng nếu đang mở một mảng kinh doanh mới, cần một người hiểu cách nối giữa tăng trưởng, vận hành và công nghệ để đi theo lộ trình chứ không làm từng mảnh rời rạc.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="plan">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">30 ngày đầu</p>
+            <h2 class="section-title">Đi từ hiện diện online tới nền vận hành tối thiểu</h2>
+          </div>
+          <p class="section-copy">Khung này giúp khách nhìn được nhịp triển khai: không ôm đồm, không lan man, mỗi tuần có một nhiệm vụ rõ. Proposal 30 ngày là để dựng “lớp đầu” đủ tốt để ra thị trường và học từ phản hồi thật.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="image-frame">
+          <img src="../../assets/visuals/WingsTravel-01-30-day-overview.svg" alt="Tổng quan 30 ngày triển khai" />
+        </div>
+        <div class="speaker-notes">
+          Nhấn mạnh: “Trong 30 ngày đầu, mình không cố xây cả hệ thống lớn. Mình dựng thứ đủ rõ để bán, đủ gọn để vận hành, rồi mới mở lớp tiếp theo.”
+        </div>
+      </section>
+
+      <section class="panel" id="flow">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Lead flow</p>
+            <h2 class="section-title">Landing page chỉ là điểm vào. Giá trị nằm ở luồng xử lý lead.</h2>
+          </div>
+          <p class="section-copy">Đây là sơ đồ rất hữu ích khi khách có xu hướng nghĩ bài toán chỉ là giao diện. Nó kéo câu chuyện sang nơi có giá trị hơn: nguồn lead, form, điểm nhận, người follow-up, dữ liệu và khả năng nâng cấp bằng AI ở giai đoạn sau.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="split">
+          <div class="visual-block">
+            <h3>Luồng nhận lead</h3>
+            <div class="image-frame">
+          <img src="../../assets/visuals/WingsTravel-02-lead-flow.svg" alt="Luồng nhận lead và xử lý ban đầu" />
+            </div>
+          </div>
+          <div class="visual-block">
+            <h3>Lộ trình hệ thống</h3>
+            <div class="image-frame">
+          <img src="../../assets/visuals/WingsTravel-03-system-roadmap.svg" alt="Lộ trình phát triển hệ thống" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="questions">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Thu thập thông tin</p>
+            <h2 class="section-title">Những gì cần chốt ngay trong buổi trao đổi</h2>
+          </div>
+          <p class="section-copy">Phần này biến proposal thành công cụ làm việc. Bạn có thể giữ section này trên màn hình và đi lần lượt từng nhóm câu hỏi để thu đủ dữ liệu cho estimate chi tiết và đề xuất sau buổi gặp.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="question-grid">
+          <div class="question-strip">
+            <h3>Khách hàng và sản phẩm</h3>
+            <ul>
+              <li>Nhóm khách inbound mục tiêu là ai?</li>
+              <li>Dịch vụ nào cần bán trước?</li>
+              <li>Điểm khác biệt so với các đơn vị inbound khác là gì?</li>
+            </ul>
+          </div>
+          <div class="question-strip">
+            <h3>Tổ chức và quyết định</h3>
+            <ul>
+              <li>Ai là người quyết định cuối cùng?</li>
+              <li>Ai sẽ follow trực tiếp trong quá trình triển khai?</li>
+              <li>Mức ngân sách giai đoạn đầu đang hình dung ra sao?</li>
+            </ul>
+          </div>
+          <div class="question-strip">
+            <h3>Tài nguyên đầu vào</h3>
+            <ul>
+              <li>Đã có logo, hình ảnh, tài liệu, tour mẫu hay chưa?</li>
+              <li>Có data cũ hay kênh traffic nào tận dụng được không?</li>
+              <li>Kênh nhận lead ưu tiên là gì: form, hotline, Zalo, email?</li>
+            </ul>
+          </div>
+          <div class="question-strip">
+            <h3>Tiêu chí của 30 ngày đầu</h3>
+            <ul>
+              <li>Ưu tiên có lead nhanh hay dựng thương hiệu chuẩn hơn?</li>
+              <li>Thế nào được xem là pilot thành công?</li>
+              <li>Sau 30 ngày muốn chuyển tiếp sang giai đoạn nào?</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>Nguyên tắc trao đổi</strong>
+          Chỉ cần chốt đủ để ra quyết định cho giai đoạn 1. Những phần chưa rõ sâu có thể gom lại thành danh sách follow-up và bóc kỹ hơn sau buổi gặp.
+        </div>
+      </section>
+
+      <section class="panel" id="estimate">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Estimate mở trao đổi</p>
+            <h2 class="section-title">Mở bằng khung ngân sách, không mở bằng bảng giá website</h2>
+          </div>
+          <p class="section-copy">Estimate ở đây dùng để tạo cảm giác chuyên nghiệp và giúp khách hình dung các mức triển khai. Cách trình bày nên là khoảng ngân sách theo đầu ra và mức độ tham gia, không phải liệt kê từng tính năng rồi cộng tiền.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="estimate-block">
+          <h3>3 mức khởi động</h3>
+          <div class="lane-grid">
+            <div class="lane">
+              <div class="label">Khởi động nhanh</div>
+              <div class="scope">Landing page, form nhận lead, nội dung cơ bản, điểm nhận lead đơn giản.</div>
+              <div class="price">20 - 30 triệu</div>
+            </div>
+            <div class="lane">
+              <div class="label">Tiêu chuẩn</div>
+              <div class="scope">Landing page hoàn chỉnh hơn, lead flow rõ hơn, nội dung nền, review trải nghiệm và roadmap tiếp theo.</div>
+              <div class="price">35 - 50 triệu</div>
+            </div>
+            <div class="lane">
+              <div class="label">Mở rộng</div>
+              <div class="scope">Pilot 30 ngày đi kèm bóc tách vận hành ban đầu, định hướng kiến trúc hệ thống và use case AI.</div>
+              <div class="price">55 - 80 triệu</div>
+            </div>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>Cách nói nên dùng</strong>
+          “Nếu mình đi theo hướng khởi động trong 30 ngày để có landing page, hệ thống nhận lead và bộ khung marketing ban đầu, em đang hình dung ngân sách nằm trong khoảng 35 - 50 triệu cho gói tiêu chuẩn. Sau buổi này, nếu chốt được mục tiêu và đầu vào, em sẽ bóc lại estimate rõ hơn.”
+        </div>
+      </section>
+
+      <section class="panel" id="next">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Kết thúc buổi gặp</p>
+            <h2 class="section-title">Chốt bước tiếp theo rõ ràng, không dừng ở trao đổi chung chung</h2>
+          </div>
+          <p class="section-copy">Section cuối dùng để đưa cuộc nói chuyện từ “ý tưởng hay đấy” sang một bước có trách nhiệm. Mục tiêu là rời buổi gặp với một đầu ra cụ thể: hoặc chốt pilot 30 ngày, hoặc chốt danh sách thông tin để gửi proposal / estimate chi tiết sau đó.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="next-grid">
+          <div>
+            <p class="big-statement">Đầu ra tốt nhất sau buổi gặp là một quyết định nhỏ nhưng rõ.</p>
+            <div class="chip-line">
+              <div class="chip">Chốt định hướng hợp tác</div>
+              <div class="chip">Chốt pilot 30 ngày</div>
+              <div class="chip">Chốt đầu mối follow-up</div>
+              <div class="chip">Chốt timeline gửi estimate chi tiết</div>
+            </div>
+          </div>
+          <div class="list-block">
+            <h3>Follow-up sau buổi gặp</h3>
+            <ol class="ruled-list">
+              <li><span class="index">01</span><div>Gửi bản tóm tắt hiện trạng và nhu cầu đã chốt.</div></li>
+              <li><span class="index">02</span><div>Gửi proposal / estimate chi tiết cho giai đoạn 1.</div></li>
+              <li><span class="index">03</span><div>Đề xuất lộ trình website, vận hành và AI cho giai đoạn sau.</div></li>
+            </ol>
+          </div>
+        </div>
+        <div class="speaker-notes">
+          Câu chốt nên mềm nhưng rõ: “Nếu anh thấy hướng này hợp, sau buổi hôm nay em sẽ tổng hợp lại thành proposal và estimate chi tiết để mình chốt giai đoạn 1.”
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="lightbox" id="imageLightbox" aria-hidden="true">
+    <div class="lightbox-bar">
+      <button type="button" data-lightbox-action="zoom-out" aria-label="Thu nhỏ">-</button>
+      <button type="button" data-lightbox-action="zoom-in" aria-label="Phóng to">+</button>
+      <button type="button" data-lightbox-action="reset" aria-label="Đặt lại">Reset</button>
+      <button type="button" data-lightbox-action="close" aria-label="Đóng">Đóng</button>
+    </div>
+    <div class="lightbox-stage">
+      <img class="lightbox-figure" alt="" />
+      <div class="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <script>
+    const links = [...document.querySelectorAll('.agenda a')];
+    const sections = [...document.querySelectorAll('.panel')];
+    const notesButton = document.querySelector('.toggle-notes');
+    const lightbox = document.getElementById('imageLightbox');
+    const lightboxStage = lightbox.querySelector('.lightbox-stage');
+    const lightboxFigure = lightbox.querySelector('.lightbox-figure');
+    const lightboxCaption = lightbox.querySelector('.lightbox-caption');
+    const zoomables = [...document.querySelectorAll('.image-frame img')];
+    let scale = 1;
+    let translateX = 0;
+    let translateY = 0;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let startTranslateX = 0;
+    let startTranslateY = 0;
+    let isDragging = false;
+    let pinchDistance = 0;
+    let pinchScaleStart = 1;
+    const activePointers = new Map();
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+    const applyTransform = () => {
+      lightboxFigure.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    };
+
+    const resetTransform = () => {
+      scale = 1;
+      translateX = 0;
+      translateY = 0;
+      applyTransform();
+    };
+
+    const setScale = (nextScale) => {
+      scale = clamp(nextScale, 1, 4);
+      if (scale === 1) {
+        translateX = 0;
+        translateY = 0;
+      }
+      applyTransform();
+    };
+
+    const openLightbox = (img) => {
+      lightboxFigure.src = img.currentSrc || img.src;
+      lightboxFigure.alt = img.alt || '';
+      lightboxCaption.textContent = img.alt || 'Ảnh minh họa';
+      lightbox.classList.add('is-open');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      resetTransform();
+    };
+
+    const closeLightbox = () => {
+      lightbox.classList.remove('is-open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      lightboxFigure.removeAttribute('src');
+      activePointers.clear();
+      pinchDistance = 0;
+      isDragging = false;
+    };
+
+    const getDistance = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+
+    zoomables.forEach((img) => {
+      img.addEventListener('click', () => openLightbox(img));
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          const id = entry.target.id;
+          links.forEach((link) => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+          });
+        }
+      });
+    }, { threshold: 0.38 });
+
+    sections.forEach((section) => observer.observe(section));
+
+    notesButton.addEventListener('click', () => {
+      document.body.classList.toggle('show-notes');
+      notesButton.textContent = document.body.classList.contains('show-notes')
+        ? 'Ẩn ghi chú trình bày'
+        : 'Hiện ghi chú trình bày';
+    });
+
+    lightbox.addEventListener('click', (event) => {
+      if (event.target === lightbox || event.target === lightboxStage) {
+        closeLightbox();
+      }
+    });
+
+    lightbox.querySelectorAll('[data-lightbox-action]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const action = button.getAttribute('data-lightbox-action');
+        if (action === 'close') closeLightbox();
+        if (action === 'reset') resetTransform();
+        if (action === 'zoom-in') setScale(scale + 0.4);
+        if (action === 'zoom-out') setScale(scale - 0.4);
+      });
+    });
+
+    lightboxStage.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      setScale(scale + (event.deltaY < 0 ? 0.18 : -0.18));
+    }, { passive: false });
+
+    lightboxStage.addEventListener('pointerdown', (event) => {
+      activePointers.set(event.pointerId, event);
+      lightboxStage.setPointerCapture(event.pointerId);
+
+      if (activePointers.size === 1 && scale > 1) {
+        isDragging = true;
+        lightboxFigure.classList.add('is-dragging');
+        dragStartX = event.clientX;
+        dragStartY = event.clientY;
+        startTranslateX = translateX;
+        startTranslateY = translateY;
+      }
+
+      if (activePointers.size === 2) {
+        const [first, second] = [...activePointers.values()];
+        pinchDistance = getDistance(first, second);
+        pinchScaleStart = scale;
+        isDragging = false;
+        lightboxFigure.classList.remove('is-dragging');
+      }
+    });
+
+    lightboxStage.addEventListener('pointermove', (event) => {
+      if (!activePointers.has(event.pointerId)) return;
+      activePointers.set(event.pointerId, event);
+
+      if (activePointers.size === 2) {
+        const [first, second] = [...activePointers.values()];
+        const nextDistance = getDistance(first, second);
+        if (pinchDistance) setScale(pinchScaleStart * (nextDistance / pinchDistance));
+        return;
+      }
+
+      if (!isDragging || scale <= 1) return;
+      translateX = startTranslateX + (event.clientX - dragStartX);
+      translateY = startTranslateY + (event.clientY - dragStartY);
+      applyTransform();
+    });
+
+    const releasePointer = (event) => {
+      activePointers.delete(event.pointerId);
+      if (activePointers.size < 2) pinchDistance = 0;
+      if (activePointers.size === 0) {
+        isDragging = false;
+        lightboxFigure.classList.remove('is-dragging');
+      }
+    };
+
+    lightboxStage.addEventListener('pointerup', releasePointer);
+    lightboxStage.addEventListener('pointercancel', releasePointer);
+
+    let lastTap = 0;
+    lightboxStage.addEventListener('touchend', () => {
+      const now = Date.now();
+      if (now - lastTap < 260) {
+        setScale(scale > 1 ? 1 : 2.2);
+      }
+      lastTap = now;
+    });
+
+    document.querySelector('[data-jump="#next"]').addEventListener('click', () => {
+      document.querySelector('#next').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && lightbox.classList.contains('is-open')) {
+        closeLightbox();
+        return;
+      }
+      if (!['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp'].includes(event.key)) return;
+      const current = links.findIndex((link) => link.classList.contains('active'));
+      const nextIndex = event.key === 'ArrowDown' || event.key === 'PageDown'
+        ? Math.min(current + 1, links.length - 1)
+        : Math.max(current - 1, 0);
+      const target = document.querySelector(links[nextIndex].getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        event.preventDefault();
+      }
+    }, { passive: false });
+  </script>
+</body>
+</html>
+

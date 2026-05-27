@@ -1,0 +1,46 @@
+import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
+import React from 'react'
+
+import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
+import { CMSLink } from '@/components/Link'
+import { Logo } from '@/components/Logo/Logo'
+import { SiteLink } from '@/components/SiteLink'
+
+export async function Footer() {
+  const settings = await getCurrentSiteSettings()
+
+  const navItems = settings?.footerNavItems || []
+
+  return (
+    <footer className="site-chrome-gradient mt-auto border-t text-white">
+      <div className="container py-8 gap-8 flex flex-col md:flex-row md:justify-between">
+        <div className="flex flex-col gap-2">
+          <SiteLink className="flex items-center" href="/">
+            <Logo
+              accentColor={settings?.branding?.accentColor}
+              brandColor={settings?.branding?.brandColor}
+              logoText={settings?.branding?.logoText || settings?.siteName}
+            />
+          </SiteLink>
+          {settings?.siteName ? <div className="text-sm font-semibold">{settings.siteName}</div> : null}
+          {settings?.tagline ? <div className="text-sm text-white/70">{settings.tagline}</div> : null}
+          {settings?.footerNote ? <div className="text-xs text-white/60 max-w-md">{settings.footerNote}</div> : null}
+          {settings?.supportEmail || settings?.supportPhone ? (
+            <div className="text-xs text-white/60">
+              {[settings.supportEmail, settings.supportPhone].filter(Boolean).join(' | ')}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col-reverse items-start md:flex-row gap-4 md:items-center">
+          <ThemeSelector />
+          <nav aria-label="Footer navigation" className="flex flex-col md:flex-row gap-4">
+            {navItems.map(({ link }, i) => {
+              return <CMSLink className="theme-nav-link text-white" key={i} {...link} />
+            })}
+          </nav>
+        </div>
+      </div>
+    </footer>
+  )
+}

@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1400" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4FBF8"/>
+      <stop offset="1" stop-color="#F7F8FC"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0 0L12 6L0 12Z" fill="#2D6A4F"/>
+    </marker>
+  </defs>
+  <rect width="1400" height="760" fill="url(#bg)"/>
+  <text x="72" y="88" fill="#16302B" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Proposal 30 ngày: Tổng quan triển khai</text>
+  <text x="72" y="126" fill="#45605A" font-family="Segoe UI, Arial, sans-serif" font-size="18">Mục tiêu là ra thị trường nhanh, nhận lead sớm và tạo nền cho hệ thống vận hành sau đó.</text>
+
+  <rect x="72" y="180" width="1256" height="132" rx="28" fill="#FFFFFF" stroke="#D8E4DE" filter="url(#shadow)"/>
+  <text x="112" y="225" fill="#1F3B36" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">4 mục tiêu của 30 ngày đầu</text>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#3F5A55">
+    <text x="112" y="266">1. Có hiện diện online đủ rõ</text>
+    <text x="412" y="266">2. Có cơ chế nhận và theo dõi lead</text>
+    <text x="782" y="266">3. Có khung nội dung marketing ban đầu</text>
+    <text x="1120" y="266">4. Có roadmap cho giai đoạn tiếp theo</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="72" y="372" width="276" height="228" rx="26" fill="#FFFFFF" stroke="#DDE9E5"/>
+    <rect x="380" y="372" width="276" height="228" rx="26" fill="#FFFFFF" stroke="#DDE9E5"/>
+    <rect x="688" y="372" width="276" height="228" rx="26" fill="#FFFFFF" stroke="#DDE9E5"/>
+    <rect x="996" y="372" width="276" height="228" rx="26" fill="#FFFFFF" stroke="#DDE9E5"/>
+  </g>
+
+  <g>
+    <rect x="96" y="396" width="110" height="36" rx="18" fill="#DFF4EA"/>
+    <text x="122" y="420" fill="#2D6A4F" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">Tuần 1</text>
+    <text x="96" y="468" fill="#173530" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">Khảo sát và chốt hướng</text>
+    <g fill="#4A6660" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+      <text x="96" y="514">• Chốt mục tiêu kinh doanh</text>
+      <text x="96" y="544">• Xác định khách mục tiêu</text>
+      <text x="96" y="574">• Chốt dịch vụ ưu tiên</text>
+    </g>
+  </g>
+
+  <g>
+    <rect x="404" y="396" width="110" height="36" rx="18" fill="#E2F0FF"/>
+    <text x="430" y="420" fill="#2554A4" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">Tuần 2</text>
+    <text x="404" y="468" fill="#173530" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">Dựng nền tảng đầu tiên</text>
+    <g fill="#4A6660" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+      <text x="404" y="514">• Landing page</text>
+      <text x="404" y="544">• Nội dung cơ bản</text>
+      <text x="404" y="574">• Form và điểm nhận lead</text>
+    </g>
+  </g>
+
+  <g>
+    <rect x="712" y="396" width="110" height="36" rx="18" fill="#FFF0D9"/>
+    <text x="738" y="420" fill="#A15A00" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">Tuần 3</text>
+    <text x="712" y="468" fill="#173530" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">Kiểm tra và tối ưu</text>
+    <g fill="#4A6660" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+      <text x="712" y="514">• Rà soát trải nghiệm</text>
+      <text x="712" y="544">• Kiểm tra luồng lead</text>
+      <text x="712" y="574">• Chuẩn hóa xử lý ban đầu</text>
+    </g>
+  </g>
+
+  <g>
+    <rect x="1020" y="396" width="110" height="36" rx="18" fill="#FDE2E2"/>
+    <text x="1046" y="420" fill="#A73C3C" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">Tuần 4</text>
+    <text x="1020" y="468" fill="#173530" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">Bàn giao và mở rộng</text>
+    <g fill="#4A6660" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+      <text x="1020" y="514">• Bàn giao giai đoạn 1</text>
+      <text x="1020" y="544">• Đề xuất website đầy đủ</text>
+      <text x="1020" y="574">• Mở roadmap AI và vận hành</text>
+    </g>
+  </g>
+
+  <line x1="348" y1="486" x2="380" y2="486" stroke="#2D6A4F" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="656" y1="486" x2="688" y2="486" stroke="#2D6A4F" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="964" y1="486" x2="996" y2="486" stroke="#2D6A4F" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <text x="72" y="680" fill="#45605A" font-family="Segoe UI, Arial, sans-serif" font-size="18">Đầu ra mong muốn: có bộ mặt online, có lead, có khung nội dung, có cơ sở để chuyển sang website và tự động hóa.</text>
+</svg>

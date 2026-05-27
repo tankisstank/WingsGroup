@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WingsTravel - Ke hoach hoan thien</title>
+  <style>
+    :root {
+      --bg: #f5f1e8;
+      --paper: #fffdf8;
+      --ink: #203033;
+      --muted: #5f6f70;
+      --line: rgba(32, 48, 51, 0.12);
+      --brand: #1f5d54;
+      --brand-soft: #deeee9;
+      --accent: #b86f3c;
+      --accent-soft: #f7e3d4;
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+      --shadow: 0 18px 40px rgba(32, 48, 51, 0.07);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #f8f3eb 0%, var(--bg) 100%);
+    }
+    main {
+      width: min(calc(100% - 32px), 1180px);
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+    section {
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .tag {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.12;
+      letter-spacing: -0.04em;
+    }
+    .intro {
+      max-width: 760px;
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.72;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    article {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.7);
+    }
+    article span {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+    article strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 1.08rem;
+      line-height: 1.3;
+    }
+    article p, li, .callout {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    ul { margin: 12px 0 0; padding-left: 18px; }
+    .callout {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-left: 4px solid var(--brand);
+      border-radius: 0 16px 16px 0;
+      background: rgba(31, 93, 84, 0.08);
+      color: var(--ink);
+    }
+    @media (max-width: 840px) {
+      main { width: min(calc(100% - 18px), 1180px); }
+      section { padding: 22px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section>
+      <div class="tag">WingsTravel · Phần 3</div>
+      <h1>Kế hoạch hoàn thiện dự án</h1>
+      <p class="intro">
+        Kế hoạch này bám theo hướng hoàn thiện phase 1 trước cho đúng, sau đó
+        mới mở rộng. Mỗi bước đều có đầu ra rõ và gắn với khả năng vận hành
+        thật, không chỉ dừng ở mức demo.
+      </p>
+
+      <div class="grid">
+        <article>
+          <span>Bước 1</span>
+          <strong>Khóa product contract</strong>
+          <p>Giữ một nguồn sự thật rõ về scope, multisite rules, editorial flow và acceptance.</p>
+          <ul>
+            <li>Khóa phase 1 scope.</li>
+            <li>Khóa kiến trúc Payload-first.</li>
+            <li>Khóa topology dữ liệu theo môi trường.</li>
+          </ul>
+        </article>
+
+        <article>
+          <span>Bước 2</span>
+          <strong>Hoàn thiện nền multisite</strong>
+          <p>Củng cố `sites`, `site-settings`, site context và public layout để mỗi site được tách đúng về nội dung, branding, theme và metadata.</p>
+          <ul>
+            <li>Chuẩn hóa site registry.</li>
+            <li>Chuẩn hóa site-aware fetch và render.</li>
+            <li>Chốt theme foundation và brand override theo từng site.</li>
+            <li>Đảm bảo local path test cho nhiều site.</li>
+          </ul>
+        </article>
+
+        <article>
+          <span>Bước 3</span>
+          <strong>Hoàn thiện biên tập và phân quyền</strong>
+          <p>Tập trung vào localization, page composition và access control để đội ngũ có thể vận hành nội dung thật từ CMS.</p>
+          <ul>
+            <li>Locale flow cho `vi` và `en`.</li>
+            <li>Mẫu landing page tái sử dụng.</li>
+            <li>Role/site scoping trong admin.</li>
+            <li>Fill đầy đủ copy và asset hình ảnh cho các trang con bắt buộc.</li>
+            <li>Soạn tài liệu hướng dẫn riêng cho `super-admin`, `site-manager`, `editor`.</li>
+            <li>Chuẩn bị bộ tài liệu chuyển giao gồm deployment, server/VPS, domain và email server nếu có.</li>
+            <li>Research và implement AI Agent SEO baseline cho các route public quan trọng.</li>
+          </ul>
+        </article>
+
+        <article>
+          <span>Bước 4</span>
+          <strong>Chốt launch site đầu tiên</strong>
+          <p>Kiểm tra luồng public, metadata, responsive, publish flow và bằng chứng nghiệm thu để site đầu tiên cùng các site con trong scope có thể go-live gọn, đúng phạm vi.</p>
+          <ul>
+            <li>Smoke check route chính.</li>
+            <li>Kiểm tra mobile/desktop.</li>
+            <li>Khóa danh sách proof cho bàn giao.</li>
+            <li>Xác nhận các luồng up bài, quản lý bài, phân quyền ở mức production ready.</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="callout">
+        Theo trạng thái Harness hiện tại, 5 story packet đã được seed để bám kế
+        hoạch này: `US-003`, `US-004`, `US-005`, `US-006`, `US-007`.
+      </div>
+    </section>
+  </main>
+</body>
+</html>

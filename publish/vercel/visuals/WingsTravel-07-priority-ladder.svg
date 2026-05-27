@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7FBF9"/>
+      <stop offset="1" stop-color="#FFF8EF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#102A25" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <text x="84" y="94" fill="#17332D" font-family="Segoe UI, Arial, sans-serif" font-size="38" font-weight="700">Thứ tự ưu tiên nên đi</text>
+  <text x="84" y="136" fill="#5B6D69" font-family="Segoe UI, Arial, sans-serif" font-size="20">Sơ đồ này giúp chốt logic: không làm ngược thứ tự, không nhảy sang phần nặng khi đầu vào và tệp khách còn chưa rõ.</text>
+  <g filter="url(#shadow)" font-family="Segoe UI, Arial, sans-serif">
+    <rect x="170" y="640" width="1260" height="114" rx="30" fill="#16332D"/>
+    <rect x="282" y="508" width="1036" height="102" rx="30" fill="#2F6B57"/>
+    <rect x="394" y="388" width="812" height="90" rx="30" fill="#4E8B74"/>
+    <rect x="506" y="280" width="588" height="78" rx="30" fill="#8AAE80"/>
+    <rect x="618" y="184" width="364" height="66" rx="30" fill="#D8B56A"/>
+  </g>
+  <g fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif">
+    <text x="230" y="705" font-size="28" font-weight="700">5. Website / vận hành / AI</text>
+    <text x="230" y="740" font-size="20" fill="#D8E7E2">Chỉ mở khi đã có nền khách, nội dung và lead flow rõ</text>
+    <text x="334" y="566" font-size="28" font-weight="700">4. Chạy thử, đo lường, tối ưu</text>
+    <text x="334" y="596" font-size="20" fill="#E6F2EE">Bắt đầu nhìn conversion, chất lượng lead, phản hồi thị trường</text>
+    <text x="450" y="438" font-size="28" font-weight="700">3. Chốt landing page và thông điệp</text>
+    <text x="450" y="466" font-size="20" fill="#EEF6F2">Ra thứ đủ rõ để khách nhìn và để đội sales xử lý</text>
+    <text x="568" y="329" font-size="28" font-weight="700">2. Chốt sản phẩm / tour ưu tiên</text>
+    <text x="568" y="353" font-size="19" fill="#F5FAF7">Không có sản phẩm rõ thì không thể ra landing page đúng</text>
+    <text x="676" y="225" font-size="26" font-weight="700" fill="#4B3B1C">1. Chốt nhóm khách ưu tiên</text>
+  </g>
+  <text x="84" y="822" fill="#5B6D69" font-family="Segoe UI, Arial, sans-serif" font-size="20">Tóm lại: khách đi trước, sản phẩm đi sau, landing page đi tiếp, rồi mới tới đo lường và hệ thống lớn hơn.</text>
+</svg>

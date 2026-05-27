@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Báo giá giai đoạn 1 WingsTravel</title>
+  <style>
+    :root{
+      --ink:#1f2937;
+      --muted:#4b5563;
+      --line:#d1d5db;
+      --soft:#f8fafc;
+      --accent:#0f3d33;
+    }
+    *{box-sizing:border-box}
+    html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:#eef2f7;
+      font-family:"Times New Roman", Times, serif;
+      line-height:1.6;
+    }
+    .page{
+      width:210mm;
+      min-height:297mm;
+      margin:10mm auto;
+      background:#fff;
+      padding:18mm 18mm 16mm;
+      box-shadow:0 10px 28px rgba(15,23,42,.10);
+    }
+    .header{
+      border-bottom:2px solid var(--accent);
+      padding-bottom:10px;
+      margin-bottom:18px;
+    }
+    .title{
+      margin:0;
+      font-size:26px;
+      line-height:1.2;
+      font-weight:700;
+      color:#111827;
+      text-transform:uppercase;
+    }
+    .subtitle{
+      margin:8px 0 0;
+      font-size:15px;
+      color:var(--muted);
+    }
+    .meta{
+      margin-top:10px;
+      font-size:14px;
+      color:var(--muted);
+    }
+    h2{
+      margin:22px 0 10px;
+      font-size:19px;
+      color:#111827;
+    }
+    h3{
+      margin:16px 0 8px;
+      font-size:16px;
+      color:#111827;
+    }
+    p{margin:0 0 10px}
+    ul{
+      margin:8px 0 10px 20px;
+      padding:0;
+    }
+    li{margin:0 0 6px}
+    .intro{
+      background:var(--soft);
+      border:1px solid var(--line);
+      padding:12px 14px;
+      margin-bottom:18px;
+    }
+    .summary{
+      width:100%;
+      border-collapse:collapse;
+      margin:12px 0 18px;
+      font-size:14px;
+    }
+    .summary th,
+    .summary td{
+      border:1px solid var(--line);
+      padding:10px 12px;
+      vertical-align:top;
+    }
+    .summary th{
+      width:26%;
+      text-align:left;
+      background:#f3f4f6;
+      font-weight:700;
+    }
+    .milestone-table{
+      width:100%;
+      border-collapse:collapse;
+      margin:10px 0 18px;
+      font-size:14px;
+    }
+    .milestone-table th,
+    .milestone-table td{
+      border:1px solid var(--line);
+      padding:10px 12px;
+      vertical-align:top;
+    }
+    .milestone-table th{
+      background:#f3f4f6;
+      font-weight:700;
+      text-align:left;
+    }
+    .note{
+      margin-top:14px;
+      padding:12px 14px;
+      border-left:4px solid var(--accent);
+      background:#f9fafb;
+      font-size:14px;
+    }
+    .price-box{
+      margin:18px 0;
+      border:2px solid var(--accent);
+      padding:14px 16px;
+      background:#fcfffd;
+    }
+    .price-label{
+      font-size:14px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    .price{
+      font-size:28px;
+      font-weight:700;
+      color:var(--accent);
+      line-height:1.2;
+    }
+    .footer{
+      margin-top:26px;
+      padding-top:10px;
+      border-top:1px solid var(--line);
+      font-size:13px;
+      color:var(--muted);
+    }
+    .contact{
+      margin-top:6px;
+      color:#111827;
+      font-weight:700;
+    }
+    @page{
+      size:A4;
+      margin:12mm;
+    }
+    @media print{
+      body{background:#fff}
+      .page{
+        margin:0;
+        width:auto;
+        min-height:auto;
+        box-shadow:none;
+        padding:0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <h1 class="title">Báo giá đề xuất cho giai đoạn 1<br />Dự án WingsTravel</h1>
+      <p class="subtitle">Tài liệu này được dùng để trình bày phạm vi, mục tiêu, mốc triển khai và mức ngân sách đề xuất cho giai đoạn khởi động đầu tiên.</p>
+    </header>
+
+    <section class="intro">
+      <p>Ở thời điểm hiện tại, phương án phù hợp là chốt phạm vi và báo giá cho giai đoạn 1 trước, nhằm xây dựng một nền tảng đủ tốt để giới thiệu dịch vụ, triển khai truyền thông, tiếp nhận khách hàng tiềm năng và tạo cơ sở cho các bước tiếp theo.</p>
+      <p>Các giai đoạn sau như quản lý lead, vận hành nội bộ, dữ liệu và tự động hóa sẽ cần được làm rõ hơn về phạm vi công việc trước khi bóc tách chi phí cụ thể.</p>
+    </section>
+
+    <h2>1. Tóm tắt đề xuất giai đoạn 1</h2>
+    <table class="summary">
+      <tr>
+        <th>Tên giai đoạn</th>
+        <td>Website đa ngôn ngữ + CMS nền + khả năng tạo campaign landing page</td>
+      </tr>
+      <tr>
+        <th>Mục tiêu chính</th>
+        <td>Xây dựng nền tảng hiện diện online đủ tốt để giới thiệu dịch vụ, triển khai truyền thông, tiếp nhận lead và sẵn sàng mở rộng cho các giai đoạn tiếp theo.</td>
+      </tr>
+      <tr>
+        <th>Thời gian dự kiến</th>
+        <td>Khoảng 45 - 60 ngày làm việc, tùy tốc độ chốt đầu vào, phản hồi trong quá trình triển khai và khối lượng hoàn thiện nội dung.</td>
+      </tr>
+      <tr>
+        <th>Ngân sách đề xuất</th>
+        <td><strong>60.000.000 VNĐ</strong></td>
+      </tr>
+    </table>
+
+    <h2>2. Mục tiêu của giai đoạn 1</h2>
+    <ul>
+      <li>Có một website phiên bản đầu tiên đủ tốt để giới thiệu dịch vụ inbound một cách bài bản.</li>
+      <li>Có cấu trúc đa ngôn ngữ ở giai đoạn đầu, phục vụ định hướng phát triển theo từng thị trường.</li>
+      <li>Có CMS nền để đội ngũ có thể chủ động cập nhật nội dung mà không phải chỉnh sửa thủ công rời rạc.</li>
+      <li>Có khả năng tạo campaign landing page từ một khung nền, phục vụ nhu cầu chạy quảng cáo hoặc thử nghiệm theo từng nhóm khách hàng / sản phẩm.</li>
+      <li>Có form tiếp nhận thông tin khách hàng tiềm năng để sẵn sàng triển khai marketing.</li>
+    </ul>
+
+    <h2>3. Phạm vi công việc dự kiến</h2>
+    <ul>
+      <li>Xây dựng website giới thiệu dịch vụ / tour theo định hướng inbound.</li>
+      <li>Thiết lập cấu trúc đa ngôn ngữ cho giai đoạn đầu.</li>
+      <li>Xây dựng các trang nền: trang chủ, giới thiệu, nhóm tour / dịch vụ, chi tiết tour / dịch vụ, liên hệ, form tiếp nhận thông tin.</li>
+      <li>Xây dựng CMS nền để quản lý bài viết, trang và nội dung cơ bản.</li>
+      <li>Xây dựng khung campaign landing page có thể tái sử dụng cho từng thị trường hoặc từng nhóm sản phẩm.</li>
+      <li>Tối ưu hiển thị cơ bản cho desktop và mobile.</li>
+      <li>Tư vấn cấu trúc thông tin, cách trình bày nội dung và điểm chuyển đổi cơ bản.</li>
+    </ul>
+
+    <h3>3.1. Các tính năng cơ bản triển khai trong giai đoạn 1</h3>
+    <ul>
+      <li>Website giới thiệu dịch vụ / tour với cấu trúc hoàn chỉnh cho giai đoạn đầu.</li>
+      <li>Cấu trúc đa ngôn ngữ để phục vụ mở rộng theo từng thị trường.</li>
+      <li>Trang chủ, trang giới thiệu, trang nhóm tour / dịch vụ, trang chi tiết tour / dịch vụ, trang liên hệ.</li>
+      <li>CMS nền để quản lý bài viết, trang và nội dung cơ bản.</li>
+      <li>Khả năng tạo campaign landing page từ một khung nội dung chuẩn.</li>
+      <li>Form tiếp nhận thông tin khách hàng và điểm nhận dữ liệu cơ bản.</li>
+      <li>Quản lý và cập nhật nội dung theo từng ngôn ngữ.</li>
+      <li>Tối ưu hiển thị cơ bản trên thiết bị di động và máy tính.</li>
+      <li>Nền nội dung và cấu trúc sẵn sàng để triển khai marketing / chạy thử thị trường.</li>
+    </ul>
+
+    <div class="note">
+      <strong>Lưu ý phạm vi:</strong> Báo giá này phù hợp khi giai đoạn 1 được hiểu là nền website + CMS + khung landing page campaign. Nếu phát sinh thêm nhiều ngôn ngữ, nhiều mẫu trang đặc thù, tích hợp sâu hoặc khối lượng nội dung lớn hơn dự kiến, phạm vi sẽ cần được rà soát lại.
+    </div>
+
+    <h2>4. Tiêu chí đánh giá giai đoạn 1</h2>
+    <ul>
+      <li>Website phiên bản đầu tiên được hoàn thiện và có thể sử dụng để giới thiệu dịch vụ một cách bài bản.</li>
+      <li>CMS nền hoạt động ổn định để đội ngũ có thể chủ động cập nhật nội dung.</li>
+      <li>Có ít nhất 01 khung campaign landing page có thể tái sử dụng cho từng thị trường hoặc từng nhóm sản phẩm.</li>
+      <li>Form tiếp nhận thông tin khách hàng hoạt động ổn định.</li>
+      <li>Có thể bắt đầu triển khai hoạt động marketing / chạy thử thị trường ngay sau khi bàn giao.</li>
+      <li>Có cơ sở rõ hơn để xác định phạm vi công việc cho giai đoạn tiếp theo.</li>
+    </ul>
+
+    <h2>5. Milestone triển khai dự kiến</h2>
+    <table class="milestone-table">
+      <tr>
+        <th style="width:17%">Milestone</th>
+        <th style="width:18%">Thời lượng dự kiến</th>
+        <th>Nội dung chính</th>
+      </tr>
+      <tr>
+        <td><strong>Milestone 1</strong></td>
+        <td>5 - 7 ngày</td>
+        <td>Làm rõ cấu trúc website, ngôn ngữ ưu tiên, nhóm nội dung chính, khung landing page theo chiến dịch và các đầu vào cần chuẩn bị.</td>
+      </tr>
+      <tr>
+        <td><strong>Milestone 2</strong></td>
+        <td>15 - 20 ngày</td>
+        <td>Thiết kế và hoàn thiện website phiên bản đầu tiên cùng CMS nền, hình thành bộ khung nội dung và cấu trúc trang chính.</td>
+      </tr>
+      <tr>
+        <td><strong>Milestone 3</strong></td>
+        <td>10 - 15 ngày</td>
+        <td>Hoàn thiện form tiếp nhận thông tin, điểm tiếp nhận cơ bản và khung landing page có thể tái sử dụng theo từng chiến dịch.</td>
+      </tr>
+      <tr>
+        <td><strong>Milestone 4</strong></td>
+        <td>7 - 10 ngày</td>
+        <td>Rà soát, chỉnh sửa, kiểm tra hoàn thiện, bàn giao và chốt các ghi chú để làm rõ định hướng cho giai đoạn tiếp theo.</td>
+      </tr>
+    </table>
+
+    <p><strong>Tổng thời gian dự kiến:</strong> khoảng 45 - 60 ngày làm việc.</p>
+
+    <h2>6. Mức ngân sách đề xuất</h2>
+    <div class="price-box">
+      <div class="price-label">Ngân sách đề xuất cho giai đoạn 1</div>
+      <div class="price">60.000.000 VNĐ</div>
+    </div>
+
+    <h2>7. Các hạng mục chưa bao gồm trong báo giá này</h2>
+    <ul>
+      <li>Ngân sách quảng cáo.</li>
+      <li>Chi phí mua domain, hosting, email hoặc hạ tầng bên thứ ba.</li>
+      <li>Theme / giao diện website là một hạng mục riêng, không đính kèm trong báo giá này.</li>
+      <li>Chi phí chụp ảnh, quay dựng video, media số lượng lớn.</li>
+      <li>Chi phí dịch thuật số lượng lớn hoặc bản địa hóa nội dung chuyên sâu.</li>
+      <li>Các tích hợp ngoài phạm vi giai đoạn 1 nếu chưa được xác định trước trong scope.</li>
+    </ul>
+
+    <h2>8. Ghi chú cho các giai đoạn tiếp theo</h2>
+    <p>Các giai đoạn tiếp theo có thể bao gồm:</p>
+    <ul>
+      <li>Quản lý lead / CRM mini / vận hành nội bộ.</li>
+      <li>Dữ liệu nội bộ / tự động hóa.</li>
+      <li>Mô hình đồng hành theo vai trò đối tác công nghệ dài hạn.</li>
+    </ul>
+    <p>Tuy nhiên, các giai đoạn này chưa nên chốt báo giá ở thời điểm hiện tại. Sau khi giai đoạn 1 hoàn thành hoặc khi đầu vào đã rõ hơn, hai bên sẽ cần làm rõ thêm phạm vi công việc, tiêu chí đánh giá, đầu mối phối hợp và mức độ triển khai thực tế để bóc estimate chính xác hơn.</p>
+
+    <h2>9. Vai trò của nền tảng trong toàn roadmap</h2>
+    <p>Nếu đi đúng hướng, giai đoạn 1 không chỉ tạo ra một website đơn lẻ, mà tạo ra một nền tảng có thể phục vụ cho nhiều lớp phát triển tiếp theo. Nền tảng này nên được hiểu theo 3 lớp vai trò:</p>
+
+    <h3>Lớp 1: Quản trị nội dung và thông tin công khai</h3>
+    <ul>
+      <li>Quản lý nội dung website.</li>
+      <li>Quản lý nội dung theo ngôn ngữ.</li>
+      <li>Quản lý thông tin tour, dịch vụ, bài viết, FAQ.</li>
+    </ul>
+
+    <h3>Lớp 2: Tạo trang theo chiến dịch và theo thị trường</h3>
+    <ul>
+      <li>Tạo các trang theo khung nội dung chuẩn.</li>
+      <li>Tạo landing page cho từng thị trường, từng campaign hoặc từng nhóm sản phẩm.</li>
+      <li>Tái sử dụng các section để nhân bản page nhanh hơn và nhất quán hơn.</li>
+    </ul>
+
+    <h3>Lớp 3: Nền dữ liệu đầu tiên cho giai đoạn mở rộng</h3>
+    <ul>
+      <li>Lưu thông tin khách hàng tiềm năng ở mức cơ bản.</li>
+      <li>Lưu thông tin campaign, nguồn khách hàng và biểu mẫu gửi về.</li>
+      <li>Tạo nền để về sau mở sang lớp vận hành, báo cáo, dữ liệu và tự động hóa.</li>
+    </ul>
+
+    <div class="note">
+      <strong>Ý nghĩa:</strong> Giai đoạn 1 không nên được hiểu chỉ là “làm web”, mà là dựng nền website, nền nội dung, nền landing page và lớp dữ liệu đầu tiên cho tăng trưởng.
+    </div>
+
+    <h2>10. Bức tranh roadmap tổng thể</h2>
+    <p>Có thể hình dung toàn bộ lộ trình cộng tác theo 5 giai đoạn như sau:</p>
+    <ul>
+      <li><strong>Giai đoạn 1:</strong> Làm rõ định hướng và chuẩn hóa đầu vào.</li>
+      <li><strong>Giai đoạn 2:</strong> Xây website đa ngôn ngữ, CMS nền và campaign landing page.</li>
+      <li><strong>Giai đoạn 3:</strong> Mở rộng quản lý khách hàng tiềm năng và lớp dữ liệu đầu tiên.</li>
+      <li><strong>Giai đoạn 4:</strong> Chuẩn hóa vận hành nội bộ và tách lớp khi cần.</li>
+      <li><strong>Giai đoạn 5:</strong> Đưa tự động hóa và các lớp hỗ trợ thông minh vào các điểm có hiệu quả thực tế.</li>
+    </ul>
+
+    <p>Ở thời điểm hiện tại, báo giá này chỉ áp dụng cho giai đoạn 1. Các giai đoạn sau được đưa vào đây với vai trò định hướng để hai bên có cùng một cách nhìn dài hạn hơn về hệ thống.</p>
+
+    <h2>11. Roadmap chi tiết theo từng giai đoạn</h2>
+
+    <h3>Giai đoạn 1: Làm rõ định hướng và chuẩn hóa đầu vào</h3>
+    <ul>
+      <li><strong>Mục tiêu:</strong> Làm rõ nhóm khách ưu tiên, sản phẩm / tour ưu tiên, cách nhận lead ban đầu và các tài nguyên hiện có để đưa vào hệ thống.</li>
+      <li><strong>Nội dung chính:</strong> Chốt thị trường đi trước, chốt nhóm sản phẩm / tour đi trước, rà soát nội dung, hình ảnh, domain, đội ngũ phối hợp và các đầu vào cần thiết để triển khai.</li>
+      <li><strong>Đầu ra kỳ vọng:</strong> Cấu trúc đầu vào đủ rõ để triển khai đúng ngay từ giai đoạn xây dựng nền tảng.</li>
+    </ul>
+
+    <h3>Giai đoạn 2: Xây website đa ngôn ngữ, CMS nền và campaign landing page</h3>
+    <ul>
+      <li><strong>Mục tiêu:</strong> Có một nền website đủ tốt để ra thị trường, có khả năng quản trị nội dung chủ động và có thể tạo landing page campaign nhanh cho từng thị trường hoặc từng nhóm sản phẩm.</li>
+      <li><strong>Nội dung chính:</strong> Xây website, cấu trúc đa ngôn ngữ, bộ trang nền, khung quản trị nội dung, form tiếp nhận thông tin cơ bản và khung landing page campaign.</li>
+      <li><strong>Đầu ra kỳ vọng:</strong> Website đa ngôn ngữ phiên bản đầu tiên, nền CMS và tối thiểu một khung landing page có thể tái sử dụng.</li>
+    </ul>
+
+    <h3>Giai đoạn 3: Mở rộng quản lý khách hàng tiềm năng và lớp dữ liệu đầu tiên</h3>
+    <ul>
+      <li><strong>Mục tiêu:</strong> Không để thông tin khách hàng chỉ đi vào email hoặc inbox rồi thất lạc, đồng thời bắt đầu có lớp dữ liệu đủ để theo dõi chiến dịch và hiệu quả đầu vào.</li>
+      <li><strong>Nội dung chính:</strong> Tạo lớp lưu thông tin khách hàng, nguồn khách hàng, campaign, biểu mẫu gửi về và trạng thái xử lý ở mức cơ bản.</li>
+      <li><strong>Đầu ra kỳ vọng:</strong> Dữ liệu tập trung hơn, đo hiệu quả page / campaign rõ hơn, và có cơ sở để quyết định lớp quản lý và vận hành về sau.</li>
+    </ul>
+
+    <h3>Giai đoạn 4: Chuẩn hóa vận hành nội bộ và tách lớp khi cần</h3>
+    <ul>
+      <li><strong>Mục tiêu:</strong> Khi bài toán vận hành đã rõ hơn, không để toàn bộ logic bị gom vào một lớp duy nhất, mà phân định rõ giữa nội dung công khai, lớp khách hàng tiềm năng và lớp vận hành.</li>
+      <li><strong>Nội dung chính:</strong> Đánh giá quy trình thực tế, đầu mối xử lý khách hàng, nhu cầu booking, thanh toán, phối hợp đối tác, điều hành tour và quyết định phần nào nên giữ, phần nào nên tách ra.</li>
+      <li><strong>Đầu ra kỳ vọng:</strong> Cấu trúc vận hành rõ hơn giữa lớp nội dung, lớp tiếp nhận khách hàng và lớp vận hành nội bộ.</li>
+    </ul>
+
+    <h3>Giai đoạn 5: Tự động hóa và các lớp hỗ trợ thông minh</h3>
+    <ul>
+      <li><strong>Mục tiêu:</strong> Dùng dữ liệu đã có để tạo hiệu quả thực tế trong sale, marketing và vận hành, thay vì đầu tư dàn trải.</li>
+      <li><strong>Nội dung chính:</strong> Đồng bộ dữ liệu sang lớp tự động hóa, tận dụng nội dung chuẩn hóa làm nguồn thông tin, hỗ trợ nhắc việc, tổng hợp khách hàng, hỗ trợ trả lời và hỗ trợ tạo nội dung.</li>
+      <li><strong>Đầu ra kỳ vọng:</strong> Dữ liệu được tái sử dụng tốt hơn, quy trình được hỗ trợ tốt hơn và có nền để mở sang các ứng dụng thông minh thực tế.</li>
+    </ul>
+
+    <div class="footer">
+      <div>Tài liệu này được xây dựng nhằm phục vụ trao đổi và ra quyết định cho giai đoạn 1.</div>
+      <div class="contact">Dzung Do - +84.975.851.567</div>
+    </div>
+  </main>
+</body>
+</html>

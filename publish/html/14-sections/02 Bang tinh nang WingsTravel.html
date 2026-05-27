@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WingsTravel - Bang tinh nang</title>
+  <style>
+    :root {
+      --bg: #f5f1e8;
+      --paper: #fffdf8;
+      --ink: #203033;
+      --muted: #5f6f70;
+      --line: rgba(32, 48, 51, 0.12);
+      --brand: #1f5d54;
+      --brand-soft: #deeee9;
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+      --shadow: 0 18px 40px rgba(32, 48, 51, 0.07);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #f9f4ed 0%, var(--bg) 100%);
+    }
+    main {
+      width: min(calc(100% - 32px), 1180px);
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+    .sheet {
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .tag {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.12;
+      letter-spacing: -0.04em;
+    }
+    .intro {
+      max-width: 760px;
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.72;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.82);
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      vertical-align: top;
+      border-top: 1px solid var(--line);
+      line-height: 1.62;
+    }
+    thead th {
+      border-top: 0;
+      background: rgba(31, 93, 84, 0.08);
+      color: var(--brand);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    tbody td:first-child {
+      width: 17%;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .callout {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-left: 4px solid var(--brand);
+      border-radius: 0 16px 16px 0;
+      background: rgba(31, 93, 84, 0.08);
+      line-height: 1.72;
+    }
+    @media (max-width: 860px) {
+      main { width: min(calc(100% - 18px), 1180px); }
+      .sheet { padding: 22px; }
+      table, thead, tbody, th, td, tr { display: block; }
+      thead { display: none; }
+      tbody tr {
+        padding: 12px 0;
+        border-top: 1px solid var(--line);
+      }
+      tbody td {
+        border: 0;
+        padding: 6px 0;
+      }
+      tbody td::before {
+        content: attr(data-label);
+        display: block;
+        color: var(--brand);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="sheet">
+      <div class="tag">WingsTravel · Phần 2</div>
+      <h1>Bảng tính năng phase 1</h1>
+      <p class="intro">
+        Bảng này gom lại toàn bộ các nhóm tính năng cốt lõi, đầu ra cần có và
+        ghi chú phạm vi để bảo đảm phase 1 vừa đủ mạnh cho vận hành thật, vừa
+        không trượt sang những phần ngoài scope như CRM, payment hay AI.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nhóm</th>
+            <th>Mô tả tính năng</th>
+            <th>Đầu ra cần có</th>
+            <th>Ghi chú phạm vi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-label="Nhóm">Multi-site / multi-domain</td>
+            <td data-label="Mô tả tính năng">Một nền CMS chung phục vụ nhiều site, mỗi site có domain, nội dung, branding và quyền quản lý riêng.</td>
+            <td data-label="Đầu ra cần có">`sites`, `site-settings`, site-aware routing, site-specific header/footer/SEO và các site con trong scope phải chạy độc lập.</td>
+            <td data-label="Ghi chú phạm vi">Phase 1 không chỉ dừng ở mức sẵn sàng kiến trúc. Các site con đã chốt trong scope cần vận hành được như những public site đầy đủ.</td>
+          </tr>
+          <tr>
+            <td data-label="Nhóm">Đa ngôn ngữ</td>
+            <td data-label="Mô tả tính năng">Quản trị nội dung theo locale ngay trong CMS, không hardcode ở frontend.</td>
+            <td data-label="Đầu ra cần có">`vi`, `en` cho phase đầu; cấu trúc mở để thêm locale sau.</td>
+            <td data-label="Ghi chú phạm vi">Yêu cầu không bị lẫn nội dung sai ngôn ngữ trên các route chính.</td>
+          </tr>
+          <tr>
+            <td data-label="Nhóm">Page và landing page</td>
+            <td data-label="Mô tả tính năng">Website public và ít nhất một mẫu landing page có thể tái sử dụng cho từng dịch vụ hoặc campaign.</td>
+            <td data-label="Đầu ra cần có">Core page, block-based sections, hero, CTA, FAQ, testimonial, contact path.</td>
+            <td data-label="Ghi chú phạm vi">Tập trung vào khả năng tái sử dụng và chỉnh nội dung mà không sửa code cho các case chuẩn.</td>
+          </tr>
+          <tr>
+            <td data-label="Nhóm">Bộ theme phù hợp</td>
+            <td data-label="Mô tả tính năng">Cần xây dựng một bộ theme đủ phù hợp cho public site và các site con, vừa giữ nền nhận diện chung vừa cho phép brand override theo từng site.</td>
+            <td data-label="Đầu ra cần có">Theme foundation cho màu sắc, typography, spacing, CTA, header/footer và style của các section marketing chính.</td>
+            <td data-label="Ghi chú phạm vi">Theme phải đủ chuẩn để dùng lại và mở rộng cho multisite, không để phase 1 thành các trang rời rạc về thị giác.</td>
+          </tr>
+          <tr>
+            <td data-label="Nhóm">Quản trị nội dung</td>
+            <td data-label="Mô tả tính năng">Đội ngũ có thể tạo, sửa, preview và publish nội dung từ CMS.</td>
+            <td data-label="Đầu ra cần có">Pages, posts, media, shared site settings, editorial flow, up bài, quản lý bài và publish flow ở mức production ready.</td>
+            <td data-label="Ghi chú phạm vi">Các thay đổi nội dung thường xuyên không nên quay về sửa code. Luồng quản lý bài viết và bài đăng phải đủ ổn định cho vận hành thật.</td>
+          </tr>
+          <tr>
+            <td data-label="Nhóm">Phân quyền</td>
+            <td data-label="Mô tả tính năng">Mỗi user chỉ nhìn và quản lý đúng site được giao.</td>
+            <td data-label="Đầu ra cần có">`super-admin`, `site-manager`, `editor`, site-scoped access và tài liệu hướng dẫn riêng cho từng role.</td>
+            <td data-label="Ghi chú phạm vi">Cross-site leakage là lỗi blocker, đặc biệt ở admin flow. Việc bàn giao phải kèm hướng dẫn sử dụng theo role.</td>
+          </tr>
+          <tr>
+            <td data-label="Nhóm">Tài liệu chuyển giao</td>
+            <td data-label="Mô tả tính năng">Sau khi hoàn tất phase 1 cần có bộ tài liệu chuyển giao đủ để khách hàng tiếp nhận và vận hành.</td>
+            <td data-label="Đầu ra cần có">Project overview, phạm vi đã bàn giao, page inventory, hướng dẫn theo role, hướng dẫn cập nhật nội dung, media guide, access handover notes, cấu hình deployment, server/VPS, domain, email server nếu có, và ghi chú phạm vi cho phase sau.</td>
+            <td data-label="Ghi chú phạm vi">Đây là đầu ra bắt buộc của phase 1, không nên để thành việc phát sinh sau bàn giao.</td>
+          </tr>
+          <tr>
+            <td data-label="Nhóm">SEO cho AI Agent</td>
+            <td data-label="Mô tả tính năng">Cần research và triển khai lớp SEO giúp public site dễ được hiểu bởi search systems, AI-assisted search và browsing agents.</td>
+            <td data-label="Đầu ra cần có">Metadata chuẩn, canonical URL, sitemap, internal linking, breadcrumb và structured data phù hợp cho các route quan trọng.</td>
+            <td data-label="Ghi chú phạm vi">Phần này phải được nghiên cứu rồi implement vào dự án, sau đó chuẩn hóa thành docs để dùng lâu dài.</td>
+          </tr>
+          <tr>
+            <td data-label="Nhóm">Launch readiness</td>
+            <td data-label="Mô tả tính năng">Site đầu tiên đủ ổn định để launch, có branding, metadata và luồng quản trị chính hoàn chỉnh.</td>
+            <td data-label="Đầu ra cần có">Bộ route chính, responsive cơ bản, SEO defaults, publish flow, nội dung và hình ảnh đã được fill đủ cho các site trong scope, cùng bằng chứng kiểm tra.</td>
+            <td data-label="Ghi chú phạm vi">Không lấy CRM, payment hay AI làm điều kiện để công bố hoàn thành phase 1, nhưng các site trong scope phải đủ dữ liệu để vận hành thật.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        Bảng này phù hợp để in riêng thành một trang trình bày phạm vi bàn giao:
+        vừa đủ ngắn để đọc nhanh, nhưng vẫn thể hiện rõ các nghĩa vụ vận hành
+        thật như phân quyền, publish flow, nội dung hoàn chỉnh và handover docs.
+      </div>
+    </section>
+  </main>
+</body>
+</html>

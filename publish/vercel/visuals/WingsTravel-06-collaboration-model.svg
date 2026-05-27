@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5F8FD"/>
+      <stop offset="1" stop-color="#F8F5EE"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <text x="84" y="94" fill="#16324A" font-family="Segoe UI, Arial, sans-serif" font-size="38" font-weight="700">Mô hình cộng tác giữa hai bên</text>
+  <text x="84" y="136" fill="#617286" font-family="Segoe UI, Arial, sans-serif" font-size="20">Đây là roadmap cộng tác theo vai trò, không phải phân rã gói triển khai hay chốt trách nhiệm cuối cùng.</text>
+  <g filter="url(#shadow)" font-family="Segoe UI, Arial, sans-serif">
+    <rect x="88" y="228" width="520" height="494" rx="34" fill="#FFFFFF" stroke="#DCE4EE"/>
+    <rect x="992" y="228" width="520" height="494" rx="34" fill="#FFFFFF" stroke="#E6E1D7"/>
+    <rect x="634" y="170" width="332" height="612" rx="34" fill="#16342E"/>
+  </g>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="132" y="300" fill="#16324A" font-size="30" font-weight="700">Phía đối tác</text>
+    <text x="132" y="354" fill="#617286" font-size="20">Vai trò đầu vào và phản hồi thị trường</text>
+    <text x="132" y="430" fill="#41566E" font-size="22">• Định hướng kinh doanh</text>
+    <text x="132" y="474" fill="#41566E" font-size="22">• Sản phẩm / tour ưu tiên</text>
+    <text x="132" y="518" fill="#41566E" font-size="22">• Tài nguyên hiện có</text>
+    <text x="132" y="562" fill="#41566E" font-size="22">• Phản hồi từ thị trường</text>
+    <text x="132" y="606" fill="#41566E" font-size="22">• Đầu mối xử lý lead / phối hợp</text>
+    <text x="1036" y="300" fill="#4B3B1C" font-size="30" font-weight="700">Phía công nghệ</text>
+    <text x="1036" y="354" fill="#7A6B51" font-size="20">Vai trò tư vấn, thiết kế và triển khai theo từng lớp</text>
+    <text x="1036" y="430" fill="#6E614A" font-size="22">• Làm rõ bài toán</text>
+    <text x="1036" y="474" fill="#6E614A" font-size="22">• Thiết kế hướng triển khai</text>
+    <text x="1036" y="518" fill="#6E614A" font-size="22">• Xây nền tảng theo giai đoạn</text>
+    <text x="1036" y="562" fill="#6E614A" font-size="22">• Đo lường và tối ưu</text>
+    <text x="1036" y="606" fill="#6E614A" font-size="22">• Mở rộng sang vận hành / AI khi phù hợp</text>
+    <text x="678" y="254" fill="#FFFFFF" font-size="30" font-weight="700">Lớp giao nhau</text>
+    <text x="678" y="308" fill="#D6E7E1" font-size="20">Những thứ cần cùng chốt</text>
+    <text x="678" y="392" fill="#E8F0ED" font-size="22">• Mục tiêu từng giai đoạn</text>
+    <text x="678" y="442" fill="#E8F0ED" font-size="22">• Đầu ra của giai đoạn</text>
+    <text x="678" y="492" fill="#E8F0ED" font-size="22">• Thứ tự ưu tiên</text>
+    <text x="678" y="542" fill="#E8F0ED" font-size="22">• Người phối hợp</text>
+    <text x="678" y="592" fill="#E8F0ED" font-size="22">• Cách đo lường</text>
+    <text x="678" y="642" fill="#E8F0ED" font-size="22">• Điều kiện để mở sang lớp tiếp theo</text>
+  </g>
+  <rect x="88" y="766" width="1424" height="78" rx="22" fill="#FFFFFF" stroke="#DCE4EE"/>
+  <text x="126" y="816" fill="#617286" font-family="Segoe UI, Arial, sans-serif" font-size="20">Thông điệp dùng để trình bày: hai bên không đi theo kiểu giao việc đơn lẻ, mà cùng đi theo một khung cộng tác có đầu vào, đầu ra và điểm đo lường rõ ràng.</text>
+</svg>

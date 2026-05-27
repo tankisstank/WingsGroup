@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WingsTravel - Bản chức năng giai đoạn 1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,500;6..72,700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f3efe7;
+      --paper:#fbf8f1;
+      --panel:#fffdf8;
+      --ink:#17332d;
+      --muted:#5f6f69;
+      --line:rgba(23,51,45,.1);
+      --accent:#b98239;
+      --accent-soft:#ead6bc;
+      --green:#2e6a57;
+      --blue:#24578f;
+      --shadow:0 24px 80px rgba(20,34,30,.08);
+      --serif:"Newsreader", Georgia, serif;
+      --sans:"Montserrat","Segoe UI",Arial,sans-serif;
+      --max:1360px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:var(--sans);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(185,130,57,.12), transparent 24%),
+        radial-gradient(circle at 86% 12%, rgba(36,87,143,.12), transparent 20%),
+        linear-gradient(180deg, #f7f2ea 0%, #f4f7f3 100%);
+    }
+    .shell{
+      width:min(calc(100% - 36px),var(--max));
+      margin:0 auto;
+      padding:22px 0 54px;
+      display:grid;
+      grid-template-columns:280px minmax(0,1fr);
+      gap:28px;
+    }
+    .rail{
+      position:sticky;
+      top:20px;
+      align-self:start;
+      padding:24px 20px;
+      border-radius:28px;
+      background:rgba(255,253,248,.82);
+      border:1px solid rgba(255,255,255,.55);
+      backdrop-filter:blur(16px);
+      box-shadow:var(--shadow);
+    }
+    .brand{
+      margin:0;
+      font-size:1.55rem;
+      line-height:1.05;
+      font-weight:800;
+      letter-spacing:-.03em;
+    }
+    .brand small{
+      display:block;
+      margin-bottom:10px;
+      font-size:.75rem;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .rail p{
+      margin:14px 0 0;
+      color:var(--muted);
+      line-height:1.62;
+      font-size:.94rem;
+    }
+    .agenda{
+      display:grid;
+      gap:8px;
+      margin-top:22px;
+    }
+    .agenda a{
+      text-decoration:none;
+      color:var(--muted);
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:.93rem;
+      transition:.18s ease;
+    }
+    .agenda a:hover{background:rgba(23,51,45,.05);color:var(--ink);transform:translateX(4px)}
+    main{display:grid;gap:24px}
+    section{
+      background:linear-gradient(180deg, rgba(255,253,248,.92), rgba(255,255,255,.72));
+      border:1px solid rgba(255,255,255,.62);
+      box-shadow:var(--shadow);
+      border-radius:34px;
+      padding:34px;
+      overflow:hidden;
+    }
+    .hero{
+      min-height:calc(100svh - 44px);
+      display:grid;
+      grid-template-columns:1.02fr .98fr;
+      gap:32px;
+      align-items:end;
+      background:
+        radial-gradient(circle at 16% 18%, rgba(185,130,57,.16), transparent 24%),
+        radial-gradient(circle at 88% 16%, rgba(36,87,143,.12), transparent 22%),
+        linear-gradient(180deg, rgba(255,253,248,.96), rgba(255,255,255,.74));
+    }
+    .eyebrow{
+      margin:0 0 16px;
+      font-size:.78rem;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .display{
+      margin:0;
+      font-family:var(--serif);
+      font-size:clamp(3.5rem,7vw,6rem);
+      line-height:.92;
+      letter-spacing:-.04em;
+      max-width:10ch;
+      font-weight:700;
+    }
+    .lede{
+      margin:22px 0 0;
+      max-width:58ch;
+      color:var(--muted);
+      line-height:1.72;
+      font-size:1.03rem;
+    }
+    .hero-pills{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:22px;
+    }
+    .hero-pills span{
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.76);
+      border:1px solid rgba(23,51,45,.08);
+      font-size:.9rem;
+      font-weight:600;
+    }
+    .hero-visual{
+      display:grid;
+      gap:16px;
+      align-self:stretch;
+    }
+    .poster{
+      position:relative;
+      min-height:420px;
+      border-radius:28px;
+      padding:20px;
+      background:#16312b;
+      color:#f7f4ee;
+      overflow:hidden;
+    }
+    .poster::before,
+    .poster::after{
+      content:"";
+      position:absolute;
+      border-radius:999px;
+      filter:blur(0);
+    }
+    .poster::before{
+      width:220px;height:220px;right:-40px;top:-36px;background:rgba(185,130,57,.22);
+    }
+    .poster::after{
+      width:180px;height:180px;left:-32px;bottom:-34px;background:rgba(36,87,143,.18);
+    }
+    .poster .grid{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+      margin-top:72px;
+    }
+    .poster .cell{
+      min-height:116px;
+      padding:16px;
+      border-radius:22px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(8px);
+    }
+    .poster .cell strong{display:block;font-size:1rem;line-height:1.35}
+    .poster .cell span{display:block;margin-top:8px;font-size:.82rem;color:rgba(255,255,255,.72);line-height:1.5}
+    .poster .stamp{
+      position:relative;
+      z-index:1;
+      display:inline-flex;
+      padding:9px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.1);
+      font-size:.78rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-weight:700;
+    }
+    .section-head{
+      display:grid;
+      grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);
+      gap:24px;
+      align-items:end;
+      margin-bottom:24px;
+    }
+    .title{
+      margin:0;
+      font-family:var(--serif);
+      font-size:clamp(2.1rem,4vw,3.65rem);
+      line-height:.98;
+      letter-spacing:-.04em;
+      max-width:12ch;
+    }
+    .copy{
+      margin:0;
+      color:var(--muted);
+      line-height:1.72;
+      font-size:1rem;
+      max-width:52ch;
+      justify-self:end;
+    }
+    .divider{height:1px;background:linear-gradient(90deg,var(--line),transparent);margin-bottom:22px}
+    .five-grid{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:12px;
+    }
+    .five-grid article{
+      padding:18px 16px;
+      border-radius:22px;
+      background:rgba(255,255,255,.66);
+      border:1px solid rgba(23,51,45,.08);
+      min-height:210px;
+    }
+    .five-grid article span{
+      display:inline-flex;
+      width:34px;height:34px;
+      border-radius:50%;
+      align-items:center;justify-content:center;
+      background:rgba(23,51,45,.08);
+      font-size:.78rem;font-weight:800;
+      margin-bottom:12px;
+    }
+    .five-grid article h3{margin:0;font-size:1rem;line-height:1.35}
+    .five-grid article p{margin:10px 0 0;color:var(--muted);line-height:1.62;font-size:.92rem}
+    .diagram-wrap{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+    }
+    .diagram-card{
+      padding:20px;
+      border-radius:26px;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(23,51,45,.08);
+    }
+    .diagram-card h3{
+      margin:0 0 14px;
+      font-size:.82rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    svg{display:block;width:100%;height:auto}
+    .split{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+    }
+    .listbox{
+      padding:22px;
+      border-radius:24px;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(23,51,45,.08);
+    }
+    .listbox h3{
+      margin:0 0 14px;
+      font-size:.82rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .listbox ul{
+      margin:0;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:10px;
+    }
+    .listbox li{
+      padding-left:18px;
+      position:relative;
+      line-height:1.6;
+      color:var(--ink);
+    }
+    .listbox li::before{
+      content:"";
+      position:absolute;
+      left:0;top:.48em;
+      width:8px;height:8px;border-radius:50%;
+      background:var(--accent);
+    }
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:16px;
+    }
+    .kpi{
+      padding:22px;
+      border-radius:24px;
+      background:#17332d;
+      color:#f5f1e9;
+    }
+    .kpi strong{
+      display:block;
+      font-size:2rem;
+      line-height:1;
+      margin-bottom:10px;
+    }
+    .kpi p{
+      margin:0;
+      color:rgba(255,255,255,.78);
+      line-height:1.6;
+      font-size:.94rem;
+    }
+    .timeline{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:16px;
+    }
+    .step{
+      padding:20px;
+      border-radius:24px;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(23,51,45,.08);
+      min-height:230px;
+    }
+    .step span{
+      display:inline-flex;
+      padding:8px 11px;
+      border-radius:999px;
+      background:rgba(185,130,57,.14);
+      color:var(--ink);
+      font-size:.78rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-weight:700;
+      margin-bottom:14px;
+    }
+    .step strong{
+      display:block;
+      font-size:1.05rem;
+      line-height:1.4;
+      margin-bottom:12px;
+    }
+    .step ul{
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+      line-height:1.62;
+      font-size:.92rem;
+    }
+    .closing{
+      text-align:center;
+      padding-top:42px;
+      padding-bottom:42px;
+      background:
+        radial-gradient(circle at center, rgba(185,130,57,.14), transparent 24%),
+        linear-gradient(180deg, rgba(255,253,248,.94), rgba(255,255,255,.76));
+    }
+    .closing h2{
+      margin:0;
+      font-family:var(--serif);
+      font-size:clamp(2.5rem,4vw,4.2rem);
+      line-height:.96;
+      letter-spacing:-.04em;
+    }
+    .closing p{
+      margin:18px auto 0;
+      max-width:58ch;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:1rem;
+    }
+    .badge{
+      display:inline-flex;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(23,51,45,.08);
+      background:rgba(255,255,255,.76);
+      font-size:.8rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-weight:700;
+      margin-bottom:18px;
+    }
+    @media (max-width:1180px){
+      .shell{grid-template-columns:1fr}
+      .rail{position:relative;top:0}
+      .hero,.section-head,.diagram-wrap,.split,.kpi-grid,.timeline,.five-grid{grid-template-columns:1fr}
+      .copy{justify-self:start}
+      .hero{min-height:auto}
+    }
+    @media (max-width:760px){
+      .shell{width:min(calc(100% - 18px),var(--max));padding:12px 0 32px;gap:18px}
+      .rail,section{border-radius:24px;padding:22px 16px}
+      .display{font-size:clamp(2.8rem,14vw,3.7rem)}
+      .title{font-size:clamp(1.9rem,11vw,2.7rem)}
+      .poster{min-height:auto}
+      .poster .grid{grid-template-columns:1fr;margin-top:26px}
+      .timeline,.kpi-grid,.five-grid,.diagram-wrap,.split{gap:14px}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <h1 class="brand"><small>Release Scope</small>WingsTravel</h1>
+      <p>Bản mô tả chức năng giai đoạn 1 để chốt cùng khách hàng, bám theo đúng phạm vi đã trao đổi: nhiều site, đa ngôn ngữ, giao diện, quản trị và phân quyền.</p>
+      <nav class="agenda">
+        <a href="#hero">Tổng quan</a>
+        <a href="#scope">Phạm vi chức năng</a>
+        <a href="#diagrams">Sơ đồ minh họa</a>
+        <a href="#cms">Quản lý & phân quyền</a>
+        <a href="#kpi">KPI nghiệm thu</a>
+        <a href="#timeline">Tiến độ</a>
+        <a href="#closing">Kết luận</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="hero" id="hero">
+        <div>
+          <p class="eyebrow">Bản gửi khách hàng</p>
+          <h2 class="display">Một nền CMS rõ ràng để WingsTravel có thể mở thành nhiều site.</h2>
+          <p class="lede">Giai đoạn 1 không dừng ở một website đơn lẻ. Phạm vi release được chốt theo hướng một nền quản trị có thể mở rộng cho nhiều domain, quản lý đa ngôn ngữ, giao diện linh hoạt và phân quyền đúng theo từng site.</p>
+          <div class="hero-pills">
+            <span>Multi-domain</span>
+            <span>Đa ngôn ngữ</span>
+            <span>Landing page linh hoạt</span>
+            <span>CMS vận hành được</span>
+            <span>Phân quyền theo site</span>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="poster">
+            <div class="stamp">Giai đoạn 1</div>
+            <div class="grid">
+              <div class="cell">
+                <strong>WingsTravel</strong>
+                <span>Site đầu tiên go-live và làm chuẩn cho toàn hệ.</span>
+              </div>
+              <div class="cell">
+                <strong>WingsGo / WingsCare / WingsInsurance</strong>
+                <span>Sẵn sàng mở tiếp trên cùng một nền quản trị.</span>
+              </div>
+              <div class="cell">
+                <strong>Nhiều ngôn ngữ</strong>
+                <span>Cùng một cấu trúc nhưng có nội dung riêng theo từng thị trường.</span>
+              </div>
+              <div class="cell">
+                <strong>Đúng người quản lý</strong>
+                <span>Mỗi manager hoặc editor chỉ thấy đúng site mình phụ trách.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="scope">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Phạm vi chức năng</p>
+            <h2 class="title">5 nhóm chức năng chính của release giai đoạn 1</h2>
+          </div>
+          <p class="copy">Bản release được giữ gọn, bám đúng những gì hai bên đã chốt. Không mở quá sớm sang CRM, AI hay automation sâu. Trọng tâm là nền website và CMS đủ tốt để vận hành thật.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="five-grid">
+          <article>
+            <span>01</span>
+            <h3>Multi-domain / multi-site</h3>
+            <p>Một nền quản trị chung cho nhiều site trong hệ sinh thái, mỗi site có domain và nội dung riêng, nhưng vẫn đi trên cùng kiến trúc.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Đa ngôn ngữ</h3>
+            <p>Nội dung được quản lý theo từng ngôn ngữ trong CMS và hiển thị đúng theo locale trên website.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Giao diện website / landing page</h3>
+            <p>Triển khai site đầu tiên với các trang nền và khung landing page có thể tái sử dụng cho dịch vụ, thị trường hoặc campaign.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Quản lý nội dung</h3>
+            <p>Đội ngũ có thể tự tạo, sửa, preview và publish nội dung mà không phải quay lại sửa code cho các thay đổi thường xuyên.</p>
+          </article>
+          <article>
+            <span>05</span>
+            <h3>Phân quyền quản trị</h3>
+            <p>Phân quyền theo đúng vai trò và phạm vi site để tránh nhầm lẫn, đồng thời hỗ trợ một người quản lý nhiều site nếu cần.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="diagrams">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Sơ đồ minh họa</p>
+            <h2 class="title">Nhìn nhanh bằng hình khối để hiểu hệ thống sẽ vận hành như thế nào</h2>
+          </div>
+          <p class="copy">Các sơ đồ dưới đây không đi sâu kỹ thuật. Mục tiêu là giúp phía khách hàng nhìn ra cấu trúc triển khai, cách nội dung chảy theo ngôn ngữ và cách quyền quản trị được chia theo site.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="diagram-wrap">
+          <div class="diagram-card">
+            <h3>Mô hình nhiều site trên một nền CMS</h3>
+            <svg viewBox="0 0 640 380" aria-label="So do multi site WingsTravel">
+              <rect x="180" y="20" width="280" height="88" rx="26" fill="#17332d"/>
+              <text x="320" y="56" text-anchor="middle" fill="#f7f2e8" font-family="Montserrat, Arial, sans-serif" font-size="20" font-weight="700">WingsTravel CMS Core</text>
+              <text x="320" y="82" text-anchor="middle" fill="rgba(247,242,232,.76)" font-family="Montserrat, Arial, sans-serif" font-size="13">Một nền quản trị chung</text>
+              <line x1="320" y1="108" x2="320" y2="152" stroke="#17332d" stroke-width="2"/>
+              <line x1="140" y1="152" x2="500" y2="152" stroke="#17332d" stroke-width="2"/>
+              <line x1="120" y1="152" x2="120" y2="188" stroke="#17332d" stroke-width="2"/>
+              <line x1="270" y1="152" x2="270" y2="188" stroke="#17332d" stroke-width="2"/>
+              <line x1="420" y1="152" x2="420" y2="188" stroke="#17332d" stroke-width="2"/>
+              <line x1="520" y1="152" x2="520" y2="188" stroke="#17332d" stroke-width="2"/>
+              <rect x="24" y="188" width="192" height="108" rx="24" fill="#f4e6d2" stroke="#b98239"/>
+              <rect x="174" y="188" width="192" height="108" rx="24" fill="#e7f1ed" stroke="#2e6a57"/>
+              <rect x="324" y="188" width="192" height="108" rx="24" fill="#e4edf7" stroke="#24578f"/>
+              <rect x="424" y="188" width="192" height="108" rx="24" fill="#f1eadf" stroke="#7a5c35"/>
+              <text x="120" y="232" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700">WingsTravel</text>
+              <text x="120" y="256" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="13">domain riêng</text>
+              <text x="270" y="232" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700">WingsGo</text>
+              <text x="270" y="256" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="13">nội dung riêng</text>
+              <text x="420" y="232" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700">WingsCare</text>
+              <text x="420" y="256" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="13">manager riêng</text>
+              <text x="520" y="232" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700">WingsInsurance</text>
+              <text x="520" y="256" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="13">mở rộng tiếp</text>
+              <text x="320" y="342" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="14">Một kiến trúc chung, nhiều site tách biệt về nội dung và quản trị</text>
+            </svg>
+          </div>
+
+          <div class="diagram-card">
+            <h3>Mô hình đa ngôn ngữ cho từng site</h3>
+            <svg viewBox="0 0 640 380" aria-label="So do da ngon ngu WingsTravel">
+              <rect x="72" y="34" width="496" height="84" rx="24" fill="#17332d"/>
+              <text x="320" y="68" text-anchor="middle" fill="#f7f2e8" font-family="Montserrat, Arial, sans-serif" font-size="20" font-weight="700">Một nội dung - nhiều phiên bản ngôn ngữ</text>
+              <text x="320" y="92" text-anchor="middle" fill="rgba(247,242,232,.76)" font-family="Montserrat, Arial, sans-serif" font-size="13">Quản lý cùng cấu trúc, khác nội dung theo thị trường</text>
+              <rect x="40" y="162" width="150" height="108" rx="24" fill="#f4e6d2" stroke="#b98239"/>
+              <rect x="200" y="162" width="150" height="108" rx="24" fill="#e7f1ed" stroke="#2e6a57"/>
+              <rect x="360" y="162" width="150" height="108" rx="24" fill="#e4edf7" stroke="#24578f"/>
+              <rect x="520" y="162" width="80" height="108" rx="24" fill="#f0eee8" stroke="#9a8f7d"/>
+              <text x="115" y="210" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700">Tiếng Việt</text>
+              <text x="115" y="236" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="13">site nội địa</text>
+              <text x="275" y="210" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700">Tiếng Anh</text>
+              <text x="275" y="236" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="13">thị trường quốc tế</text>
+              <text x="435" y="210" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700">Tiếng Hàn</text>
+              <text x="435" y="236" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="13">campaign riêng</text>
+              <text x="560" y="224" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="24" font-weight="700">+</text>
+              <text x="320" y="320" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="14">Có thể mở thêm ngôn ngữ mà không phải làm lại cấu trúc nội dung</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section id="cms">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Quản lý và phân quyền</p>
+            <h2 class="title">CMS không chỉ để sửa text, mà để đội ngũ có thể vận hành đúng vai trò</h2>
+          </div>
+          <p class="copy">Giai đoạn 1 cần đủ rõ để bên vận hành tự cập nhật nội dung, còn việc ai được nhìn thấy site nào hay được publish tới đâu phải được khóa ngay từ đầu để tránh rối khi mở rộng.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="split">
+          <div class="listbox">
+            <h3>Đội ngũ có thể tự làm gì trong CMS</h3>
+            <ul>
+              <li>Tạo và cập nhật trang nội dung của từng site.</li>
+              <li>Quản lý dịch vụ, tour và landing page theo đúng cấu trúc đã chốt.</li>
+              <li>Upload hình ảnh, chọn media và thay nội dung dùng chung.</li>
+              <li>Xem trước nội dung trước khi publish.</li>
+              <li>Publish nội dung theo phạm vi quyền được giao.</li>
+            </ul>
+          </div>
+          <div class="diagram-card">
+            <h3>Phân quyền theo vai trò và site</h3>
+            <svg viewBox="0 0 640 360" aria-label="So do phan quyen WingsTravel">
+              <rect x="26" y="48" width="170" height="88" rx="24" fill="#17332d"/>
+              <rect x="236" y="28" width="170" height="108" rx="24" fill="#e7f1ed" stroke="#2e6a57"/>
+              <rect x="446" y="48" width="170" height="88" rx="24" fill="#f4e6d2" stroke="#b98239"/>
+              <text x="111" y="84" text-anchor="middle" fill="#f7f2e8" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700">Super Admin</text>
+              <text x="111" y="108" text-anchor="middle" fill="rgba(247,242,232,.74)" font-family="Montserrat, Arial, sans-serif" font-size="13">toàn hệ</text>
+              <text x="321" y="72" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700">Site Manager</text>
+              <text x="321" y="96" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="13">1 site hoặc nhiều site</text>
+              <text x="531" y="84" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700">Editor</text>
+              <text x="531" y="108" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="13">nội dung theo site</text>
+              <line x1="111" y1="136" x2="111" y2="194" stroke="#17332d" stroke-width="2"/>
+              <line x1="321" y1="136" x2="321" y2="194" stroke="#17332d" stroke-width="2"/>
+              <line x1="531" y1="136" x2="531" y2="194" stroke="#17332d" stroke-width="2"/>
+              <rect x="30" y="194" width="160" height="118" rx="22" fill="#fff" stroke="#d8ddd7"/>
+              <rect x="240" y="194" width="160" height="118" rx="22" fill="#fff" stroke="#d8ddd7"/>
+              <rect x="450" y="194" width="160" height="118" rx="22" fill="#fff" stroke="#d8ddd7"/>
+              <text x="110" y="226" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="700">Xem toàn bộ site</text>
+              <text x="110" y="249" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="12">cấu hình, user, nội dung</text>
+              <text x="320" y="226" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="700">Quản lý site phụ trách</text>
+              <text x="320" y="249" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="12">nội dung, page, publish</text>
+              <text x="530" y="226" text-anchor="middle" fill="#17332d" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="700">Biên tập nội dung</text>
+              <text x="530" y="249" text-anchor="middle" fill="#5f6f69" font-family="Montserrat, Arial, sans-serif" font-size="12">không vượt phạm vi site</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section id="kpi">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">KPI nghiệm thu</p>
+            <h2 class="title">KPI được gắn trực tiếp với những gì khách hàng sẽ nhận được</h2>
+          </div>
+          <p class="copy">Mục tiêu của KPI là để hai bên nhìn cùng một tiêu chuẩn bàn giao. Không cam kết lan sang các phần ngoài phạm vi như CRM đầy đủ, automation sâu hay AI ở giai đoạn này.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <strong>01</strong>
+            <p>Nền CMS hỗ trợ mô hình nhiều site / nhiều domain trong cùng một hệ quản trị.</p>
+          </div>
+          <div class="kpi">
+            <strong>02</strong>
+            <p>Site đầu tiên của WingsTravel được triển khai hoàn chỉnh và sẵn sàng go-live.</p>
+          </div>
+          <div class="kpi">
+            <strong>03</strong>
+            <p>Nội dung của site được quản lý theo các ngôn ngữ đã chốt ngay trong CMS.</p>
+          </div>
+          <div class="kpi">
+            <strong>04</strong>
+            <p>Đội ngũ có thể tự tạo, sửa và publish nội dung cơ bản mà không cần sửa code.</p>
+          </div>
+          <div class="kpi">
+            <strong>05</strong>
+            <p>Tối thiểu một khung landing page có thể tái sử dụng cho dịch vụ, thị trường hoặc campaign.</p>
+          </div>
+          <div class="kpi">
+            <strong>06</strong>
+            <p>Phân quyền quản trị theo site hoạt động đúng phạm vi người dùng.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="timeline">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Tiến độ đề xuất</p>
+            <h2 class="title">4 tuần để đi từ chốt cấu trúc tới bàn giao bản đầu tiên</h2>
+          </div>
+          <p class="copy">Tiến độ này bám theo một giai đoạn release đầu tiên. Nếu đầu vào được chốt nhanh và phối hợp tốt, đây là khung phù hợp để đưa site đầu tiên vào vận hành.</p>
+        </div>
+        <div class="divider"></div>
+        <div class="timeline">
+          <div class="step">
+            <span>Tuần 1</span>
+            <strong>Chốt cấu trúc và đầu vào</strong>
+            <ul>
+              <li>Chốt site đầu tiên triển khai.</li>
+              <li>Chốt ngôn ngữ đi trước.</li>
+              <li>Chốt cấu trúc page chính.</li>
+              <li>Chốt nhóm người dùng quản trị.</li>
+            </ul>
+          </div>
+          <div class="step">
+            <span>Tuần 2</span>
+            <strong>Dựng nền CMS và giao diện</strong>
+            <ul>
+              <li>Dựng cấu trúc CMS.</li>
+              <li>Dựng website nền cho site đầu tiên.</li>
+              <li>Dựng cấu trúc nội dung chính.</li>
+            </ul>
+          </div>
+          <div class="step">
+            <span>Tuần 3</span>
+            <strong>Hoàn thiện đa ngôn ngữ, landing page, phân quyền</strong>
+            <ul>
+              <li>Hoàn thiện nội dung đa ngôn ngữ.</li>
+              <li>Hoàn thiện landing page linh hoạt.</li>
+              <li>Hoàn thiện phân quyền quản trị.</li>
+            </ul>
+          </div>
+          <div class="step">
+            <span>Tuần 4</span>
+            <strong>Test, chỉnh sửa và bàn giao</strong>
+            <ul>
+              <li>Test nghiệm thu với phía khách hàng.</li>
+              <li>Chỉnh các điểm còn lại.</li>
+              <li>Bàn giao tài khoản quản trị.</li>
+              <li>Chốt KPI nghiệm thu.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="closing" id="closing">
+        <div class="badge">WingsTravel - Giai đoạn 1</div>
+        <h2>Một bản release gọn, rõ và đủ mạnh để mở tiếp về sau.</h2>
+        <p>Phạm vi của giai đoạn này được giữ đúng trọng tâm: nhiều site, nhiều ngôn ngữ, giao diện linh hoạt, quản trị nội dung và phân quyền. Đó là phần vừa đủ để khách hàng nhìn thấy giá trị thực tế ngay, đồng thời vẫn tạo được một nền đủ chuẩn để mở rộng ở các giai đoạn sau.</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

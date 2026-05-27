@@ -1,0 +1,80 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - heading "Partner Guide WingsTravel" [level=1] [ref=e5]
+      - paragraph [ref=e7]: "Một tài liệu hoàn chỉnh để chia sẻ với đối tác: vừa mô tả cách nhìn tổng thể, vừa cho thấy hướng khởi động cụ thể theo từng giai đoạn."
+    - navigation [ref=e8]:
+      - link "Mở đề bài" [ref=e9] [cursor=pointer]:
+        - /url: "#hero"
+      - link "Bối cảnh và định hướng" [ref=e10] [cursor=pointer]:
+        - /url: "#context"
+      - link "Roadmap cộng tác" [ref=e11] [cursor=pointer]:
+        - /url: "#roadmap"
+      - link "Mô hình phối hợp" [ref=e12] [cursor=pointer]:
+        - /url: "#collab"
+      - link "Thứ tự ưu tiên" [ref=e13] [cursor=pointer]:
+        - /url: "#priority"
+      - link "Kiến trúc hệ thống" [ref=e14] [cursor=pointer]:
+        - /url: "#architecture"
+      - link "Giai đoạn khởi động" [ref=e15] [cursor=pointer]:
+        - /url: "#launch"
+      - link "Lead flow và hệ thống" [ref=e16] [cursor=pointer]:
+        - /url: "#flow"
+      - link "Đầu ra 30 ngày" [ref=e17] [cursor=pointer]:
+        - /url: "#deliverables"
+      - link "Điểm cần làm rõ" [ref=e18] [cursor=pointer]:
+        - /url: "#questions"
+      - link "Bước tiếp theo" [ref=e19] [cursor=pointer]:
+        - /url: "#next"
+      - link "Phạm vi và chi phí" [ref=e20] [cursor=pointer]:
+        - /url: "#costing"
+      - link "Kết" [ref=e21] [cursor=pointer]:
+        - /url: "#closing"
+    - paragraph [ref=e22]: Tài liệu này đi từ bức tranh lớn tới giai đoạn khởi động, đủ rõ để thảo luận định hướng, thứ tự ưu tiên và bước tiếp theo giữa hai bên.
+    - button "Nhảy tới phần kết" [ref=e24] [cursor=pointer]
+  - main [ref=e25]:
+    - generic [ref=e26]:
+      - generic [ref=e27]
+      - generic [ref=e31]
+    - generic [ref=e48]:
+      - generic [ref=e49]
+      - generic [ref=e55]
+    - generic [ref=e80]:
+      - generic [ref=e81]
+      - img "Tổng quan 5 giai đoạn roadmap cộng tác cho mảng inbound" [ref=e88]
+    - generic [ref=e89]:
+      - generic [ref=e90]
+      - generic [ref=e96]
+    - generic [ref=e114]:
+      - generic [ref=e115]
+      - img "Thứ tự ưu tiên triển khai cho giai đoạn khởi động" [ref=e122]
+    - generic [ref=e123]:
+      - generic [ref=e124]
+      - generic [ref=e130]
+    - generic [ref=e156]:
+      - generic [ref=e157]
+      - generic [ref=e163]
+    - generic [ref=e183]:
+      - generic [ref=e184]
+      - generic [ref=e190]
+      - img "Sơ đồ sequence mô tả luồng từ quảng cáo, landing page, lead, CRM, RAG, n8n tới AI bot" [ref=e200]
+    - generic [ref=e201]:
+      - generic [ref=e202]
+      - generic [ref=e208]
+      - generic [ref=e218]
+      - generic [ref=e228]
+    - generic [ref=e230]:
+      - generic [ref=e232]
+      - generic [ref=e236]
+    - generic [ref=e259]:
+      - generic [ref=e261]
+      - generic [ref=e265]
+      - generic [ref=e280]
+    - generic [ref=e282]:
+      - generic [ref=e283]
+      - generic [ref=e289]
+      - generic [ref=e302]
+    - generic [ref=e305]:
+      - generic [ref=e306]: Inbound Partner Guide
+      - heading "Xây đúng nền từ đầu để đi nhanh hơn về sau." [level=2] [ref=e307]
+    - paragraph [ref=e308]: "Tài liệu này được xây để hai bên có cùng một cách nhìn về hướng đi của WingsTravel: không làm rời rạc, không làm tất cả cùng lúc, mà đi theo một lộ trình có thứ tự, có đầu ra và có khả năng mở rộng."

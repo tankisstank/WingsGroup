@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WingsTravel - Ban in tach trang</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 10mm;
+    }
+    :root {
+      --bg: #f6f1e8;
+      --paper: #fffdf8;
+      --ink: #203033;
+      --muted: #5f6f70;
+      --line: rgba(32, 48, 51, 0.12);
+      --brand: #1f5d54;
+      --brand-soft: #deeee9;
+      --accent: #b86f3c;
+      --accent-soft: #f7e3d4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .page-sheet {
+      width: 100%;
+      min-height: calc(297mm - 20mm);
+      padding: 9mm;
+      page-break-after: always;
+      break-after: page;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .page-sheet:last-child {
+      page-break-after: auto;
+      break-after: auto;
+    }
+    .card {
+      width: 100%;
+      height: 100%;
+      padding: 14mm 13mm;
+      border: 1px solid var(--line);
+      border-radius: 7mm;
+      background: var(--paper);
+    }
+    .hero-card {
+      background: linear-gradient(135deg, rgba(31, 93, 84, 0.96), rgba(24, 48, 50, 0.96));
+      color: #fbf7ef;
+      border-color: rgba(31, 93, 84, 0.4);
+    }
+    .hero-card p, .hero-card .mini span { color: rgba(251, 247, 239, 0.88); }
+    .eyebrow, .tag, .step {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 8.5pt;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+    }
+    .eyebrow { background: rgba(255,255,255,0.10); }
+    .tag { background: var(--brand-soft); color: var(--brand); }
+    .step { background: var(--accent-soft); color: var(--accent); margin-bottom: 7px; }
+    h1, h2, h3 { margin: 0; line-height: 1.14; }
+    h1 { margin-top: 12px; font-size: 28pt; letter-spacing: -0.04em; }
+    h2 { margin-top: 12px; font-size: 21pt; letter-spacing: -0.03em; }
+    h3 { font-size: 13pt; }
+    p { margin: 12px 0 0; line-height: 1.55; }
+    .mini {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .mini article {
+      padding: 10px;
+      border-radius: 4mm;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .mini strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 10.5pt;
+    }
+    .mini span {
+      font-size: 9.3pt;
+      line-height: 1.45;
+    }
+    table {
+      width: 100%;
+      margin-top: 14px;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      border-radius: 4mm;
+      overflow: hidden;
+      font-size: 8.8pt;
+    }
+    th, td {
+      padding: 8px 9px;
+      text-align: left;
+      vertical-align: top;
+      border-top: 1px solid var(--line);
+      line-height: 1.4;
+    }
+    thead th {
+      border-top: 0;
+      background: rgba(31, 93, 84, 0.08);
+      color: var(--brand);
+      font-size: 7.9pt;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    td:first-child { width: 17%; font-weight: 700; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .block {
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      border-radius: 4mm;
+      background: rgba(255,255,255,0.72);
+    }
+    .block p, .block ul { margin-top: 8px; color: var(--muted); }
+    .block ul {
+      padding-left: 15px;
+      line-height: 1.42;
+      font-size: 9.2pt;
+    }
+    .callout {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-left: 4px solid var(--brand);
+      border-radius: 0 4mm 4mm 0;
+      background: rgba(31, 93, 84, 0.08);
+      line-height: 1.46;
+      font-size: 9.5pt;
+    }
+  </style>
+</head>
+<body>
+  <section class="page-sheet">
+    <div class="card hero-card">
+      <div class="eyebrow">WingsTravel · Trang 1</div>
+      <h1>Tổng quan dự án và phạm vi hoàn thiện phase 1</h1>
+      <p>
+        Đây là phần mở đầu dùng để giải thích rõ dự án đang được triển khai theo
+        hướng nào, vì sao phase 1 không phải chỉ là một website đơn lẻ, và vì
+        sao các site con trong scope phải hoạt động đầy đủ, độc lập ngay ở giai
+        đoạn đầu.
+      </p>
+      <div class="mini">
+        <article>
+          <strong>Kiến trúc</strong>
+          <span>Payload-first, multisite-ready, site-aware frontend.</span>
+        </article>
+        <article>
+          <strong>Phạm vi phase 1</strong>
+          <span>Nhiều site hoạt động độc lập, đa ngôn ngữ, page/landing page, bộ theme phù hợp, quản trị nội dung, phân quyền.</span>
+        </article>
+        <article>
+          <strong>Dữ liệu</strong>
+          <span>SQLite cho local, PostgreSQL cho staging/production, Redis cho scale.</span>
+        </article>
+        <article>
+          <strong>Đầu ra</strong>
+          <span>Site đầu tiên và các site con trong scope sẵn sàng vận hành, có handover docs, theme system và AI Agent SEO baseline đi kèm.</span>
+        </article>
+      </div>
+      <div class="callout">
+        Trọng tâm của giai đoạn hiện tại là hoàn thiện lớp content platform:
+        site registry, site settings, localization, page composition, theme,
+        access control, publish flow, AI Agent SEO và launch readiness cho site
+        đầu tiên cùng các site con đã chốt trong scope.
+      </div>
+    </div>
+  </section>
+
+  <section class="page-sheet">
+    <div class="card">
+      <div class="tag">WingsTravel · Trang 2</div>
+      <h2>Bảng tính năng phase 1</h2>
+      <p>
+        Bảng này gom lại toàn bộ các nhóm tính năng cốt lõi, đầu ra cần có và
+        ghi chú phạm vi để bảo đảm phase 1 vừa đủ mạnh cho vận hành thật, vừa
+        không trượt sang những phần ngoài scope.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Nhóm</th>
+            <th>Mô tả</th>
+            <th>Đầu ra</th>
+            <th>Ghi chú</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Multi-site</td>
+            <td>Một nền CMS chung phục vụ nhiều site, mỗi site có domain, nội dung, branding và quyền quản lý riêng.</td>
+            <td>`sites`, `site-settings`, site-aware routing, header/footer/SEO theo site và site con chạy độc lập.</td>
+            <td>Các site con trong scope cần vận hành được như public site đầy đủ.</td>
+          </tr>
+          <tr>
+            <td>Đa ngôn ngữ</td>
+            <td>Quản trị nội dung theo locale ngay trong CMS, không hardcode ở frontend.</td>
+            <td>`vi`, `en` cho phase đầu; cấu trúc mở để thêm locale sau.</td>
+            <td>Không được lẫn nội dung sai ngôn ngữ trên các route chính.</td>
+          </tr>
+          <tr>
+            <td>Page và landing page</td>
+            <td>Website public và ít nhất một mẫu landing page có thể tái sử dụng cho dịch vụ hoặc campaign.</td>
+            <td>Core page, block-based sections, hero, CTA, FAQ, testimonial, contact path.</td>
+            <td>Tập trung vào khả năng tái sử dụng và chỉnh nội dung mà không sửa code cho case chuẩn.</td>
+          </tr>
+          <tr>
+            <td>Bộ theme</td>
+            <td>Cần xây dựng một bộ theme đủ phù hợp cho public site và các site con, vừa giữ nền nhận diện chung vừa cho phép brand override theo từng site.</td>
+            <td>Theme foundation cho màu sắc, typography, spacing, CTA, header/footer và style của các section marketing chính.</td>
+            <td>Theme phải đủ chuẩn để dùng lại và mở rộng cho multisite.</td>
+          </tr>
+          <tr>
+            <td>Quản trị nội dung</td>
+            <td>Đội ngũ có thể tạo, sửa, preview và publish nội dung từ CMS.</td>
+            <td>Pages, posts, media, editorial flow, up bài, quản lý bài và publish flow production ready.</td>
+            <td>Luồng quản lý bài viết và bài đăng phải đủ ổn định cho vận hành thật.</td>
+          </tr>
+          <tr>
+            <td>Phân quyền</td>
+            <td>Mỗi user chỉ nhìn và quản lý đúng site được giao.</td>
+            <td>`super-admin`, `site-manager`, `editor`, site-scoped access và tài liệu hướng dẫn từng role.</td>
+            <td>Cross-site leakage là lỗi blocker.</td>
+          </tr>
+          <tr>
+            <td>Handover docs</td>
+            <td>Có bộ tài liệu chuyển giao đủ để khách hàng tiếp nhận và vận hành.</td>
+            <td>Overview, page inventory, hướng dẫn role, cập nhật nội dung, media, access, deployment, server/VPS, domain, email server nếu có.</td>
+            <td>Đây là đầu ra bắt buộc của phase 1.</td>
+          </tr>
+          <tr>
+            <td>AI Agent SEO</td>
+            <td>Cần research và triển khai lớp SEO giúp public site dễ được hiểu bởi search systems, AI-assisted search và browsing agents.</td>
+            <td>Metadata chuẩn, canonical URL, sitemap, internal linking, breadcrumb và structured data phù hợp cho các route quan trọng.</td>
+            <td>Phần này phải được nghiên cứu, implement và chuẩn hóa thành docs.</td>
+          </tr>
+          <tr>
+            <td>Launch readiness</td>
+            <td>Site đầu tiên đủ ổn định để launch, có branding, metadata và luồng quản trị chính hoàn chỉnh.</td>
+            <td>Route chính, responsive, SEO defaults, publish flow, nội dung và hình ảnh đủ cho site trong scope, kèm bằng chứng kiểm tra.</td>
+            <td>Không lấy CRM, payment hay AI làm điều kiện hoàn thành phase 1.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="page-sheet">
+    <div class="card">
+      <div class="tag">WingsTravel · Trang 3</div>
+      <h2>Kế hoạch hoàn thiện dự án</h2>
+      <div class="grid-2">
+        <div class="block">
+          <div class="step">Bước 1</div>
+          <h3>Khóa product contract</h3>
+          <ul>
+            <li>Khóa phase 1 scope.</li>
+            <li>Khóa kiến trúc Payload-first.</li>
+            <li>Khóa topology dữ liệu theo môi trường.</li>
+          </ul>
+        </div>
+        <div class="block">
+          <div class="step">Bước 2</div>
+          <h3>Hoàn thiện nền multisite</h3>
+          <ul>
+            <li>Chuẩn hóa site registry.</li>
+            <li>Chuẩn hóa site-aware fetch và render.</li>
+            <li>Chốt theme foundation và brand override theo từng site.</li>
+            <li>Đảm bảo local path test cho nhiều site.</li>
+          </ul>
+        </div>
+        <div class="block">
+          <div class="step">Bước 3</div>
+          <h3>Hoàn thiện biên tập và phân quyền</h3>
+          <ul>
+            <li>Locale flow cho `vi` và `en`.</li>
+            <li>Mẫu landing page tái sử dụng.</li>
+            <li>Role/site scoping trong admin.</li>
+            <li>Fill đủ copy và asset hình ảnh cho các trang con bắt buộc.</li>
+            <li>Soạn tài liệu hướng dẫn theo role.</li>
+            <li>Chuẩn bị bộ tài liệu chuyển giao gồm deployment, server/VPS, domain và email server nếu có.</li>
+            <li>Research và implement AI Agent SEO baseline cho các route public quan trọng.</li>
+          </ul>
+        </div>
+        <div class="block">
+          <div class="step">Bước 4</div>
+          <h3>Chốt launch site đầu tiên</h3>
+          <ul>
+            <li>Smoke check route chính.</li>
+            <li>Kiểm tra mobile/desktop.</li>
+            <li>Khóa danh sách proof cho bàn giao.</li>
+            <li>Xác nhận các luồng up bài, quản lý bài, phân quyền production ready.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout">
+        Theo trạng thái Harness hiện tại, 5 story packet đã được seed để bám kế
+        hoạch này: `US-003`, `US-004`, `US-005`, `US-006`, `US-007`.
+      </div>
+    </div>
+  </section>
+
+  <section class="page-sheet">
+    <div class="card">
+      <div class="tag">WingsTravel · Trang 4</div>
+      <h2>Hướng mở rộng sau phase 1</h2>
+      <p>
+        Đây là những hướng phát triển hợp lý cho dự án, nhưng không nên kéo vào
+        phase 1 nếu chưa có intake riêng và chưa làm rõ nhu cầu thật.
+      </p>
+      <div class="grid-2">
+        <div class="block">
+          <h3>Giai đoạn 2</h3>
+          <p>Mở rộng block library, structured service content, landing page variations, SEO governance và media governance tốt hơn.</p>
+        </div>
+        <div class="block">
+          <h3>Giai đoạn 3</h3>
+          <p>Lead capture, campaign/source data, form submission records và lớp dữ liệu đầu tiên cho marketing và sale.</p>
+        </div>
+        <div class="block">
+          <h3>Giai đoạn 4</h3>
+          <p>Tách dần lớp vận hành nội bộ nếu quy trình lead, operator hoặc CRM mini đã đủ rõ và đủ lớn.</p>
+        </div>
+        <div class="block">
+          <h3>Giai đoạn 5</h3>
+          <p>Automation, RAG, AI assistant hoặc đồng bộ dữ liệu khi content layer và operational data đã đủ ổn định.</p>
+        </div>
+      </div>
+      <div class="callout">
+        Nguyên tắc giữ hệ sạch là: phần nào thuộc content platform thì làm chắc
+        trong Payload; phần nào đã trở thành workflow hay business system thì
+        phải có quyết định riêng trước khi nhét vào lõi hiện tại.
+      </div>
+    </div>
+  </section>
+</body>
+</html>

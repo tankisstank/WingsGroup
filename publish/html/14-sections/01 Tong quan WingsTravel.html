@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WingsTravel - Tong quan</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --paper: #fffdf8;
+      --ink: #203033;
+      --muted: #5d6d70;
+      --line: rgba(32, 48, 51, 0.12);
+      --brand: #1f5d54;
+      --brand-soft: #deeee9;
+      --shadow: 0 20px 44px rgba(32, 48, 51, 0.08);
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(184, 111, 60, 0.10), transparent 30%),
+        linear-gradient(180deg, #f7f2ea 0%, var(--bg) 100%);
+    }
+    main {
+      width: min(calc(100% - 32px), 1120px);
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+    .hero {
+      padding: 44px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(135deg, rgba(31, 93, 84, 0.96), rgba(24, 48, 50, 0.96));
+      color: #fbf7ef;
+      box-shadow: var(--shadow);
+    }
+    .eyebrow, .tag {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+    }
+    .eyebrow { background: rgba(255,255,255,0.10); }
+    h1, h2 { margin: 0; line-height: 1.12; }
+    h1 {
+      margin-top: 16px;
+      max-width: 780px;
+      font-size: clamp(2.1rem, 4vw, 3.8rem);
+      letter-spacing: -0.04em;
+    }
+    .hero p {
+      max-width: 760px;
+      margin: 18px 0 0;
+      color: rgba(251,247,239,0.88);
+      line-height: 1.75;
+      font-size: 1.04rem;
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .meta article, section {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+    }
+    .meta article {
+      padding: 18px;
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.10);
+    }
+    .meta strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+    .meta span {
+      color: rgba(251,247,239,0.80);
+      line-height: 1.55;
+      font-size: 0.94rem;
+    }
+    section {
+      margin-top: 22px;
+      padding: 30px;
+      box-shadow: 0 10px 24px rgba(32, 48, 51, 0.05);
+    }
+    .tag {
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+    .head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+    .head p, article p, .callout {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.72;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .grid article {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.68);
+    }
+    .grid strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 1.06rem;
+    }
+    .callout {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-left: 4px solid var(--brand);
+      border-radius: 0 16px 16px 0;
+      background: rgba(31, 93, 84, 0.08);
+      color: var(--ink);
+    }
+    @media (max-width: 920px) {
+      .meta, .grid { grid-template-columns: 1fr 1fr; }
+      .head { display: block; }
+    }
+    @media (max-width: 680px) {
+      main { width: min(calc(100% - 18px), 1120px); }
+      .hero, section { padding: 22px; }
+      .meta, .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <div class="eyebrow">WingsTravel · Phần 1</div>
+      <h1>Tổng quan dự án và phạm vi hoàn thiện phase 1</h1>
+      <p>
+        Đây là phần mở đầu dùng để giải thích rõ dự án đang được triển khai theo
+        hướng nào, vì sao phase 1 không phải chỉ là một website đơn lẻ, và vì
+        sao các site con trong scope phải hoạt động đầy đủ, độc lập ngay ở giai
+        đoạn đầu.
+      </p>
+      <div class="meta">
+        <article>
+          <strong>Kiến trúc</strong>
+          <span>Payload-first, multisite-ready, site-aware frontend.</span>
+        </article>
+        <article>
+          <strong>Phạm vi phase 1</strong>
+          <span>Nhiều site hoạt động độc lập, đa ngôn ngữ, page/landing page, bộ theme phù hợp, quản trị nội dung, phân quyền.</span>
+        </article>
+        <article>
+          <strong>Dữ liệu</strong>
+          <span>SQLite cho local, PostgreSQL cho staging và production, Redis cho scale.</span>
+        </article>
+        <article>
+          <strong>Đầu ra</strong>
+          <span>Site đầu tiên và các site con trong scope sẵn sàng vận hành, có handover docs đi kèm.</span>
+        </article>
+      </div>
+    </header>
+
+    <section>
+      <div class="head">
+        <div>
+          <div class="tag">Tổng quan dự án</div>
+          <h2>Dự án được khóa theo hướng rõ phạm vi trước, mở rộng sau</h2>
+        </div>
+        <p>
+          WingsTravel là một nền quản trị nội dung đa site, đa ngôn ngữ. Public
+          frontend và admin đều phải hiểu đúng ngữ cảnh theo từng site, không
+          được hardcode theo logic một website duy nhất.
+        </p>
+      </div>
+
+      <div class="grid">
+        <article>
+          <strong>Mục tiêu ngắn hạn</strong>
+          <p>Đưa site đầu tiên vào vận hành ổn định, đủ tốt để giới thiệu dịch vụ và làm nền cho truyền thông.</p>
+        </article>
+        <article>
+          <strong>Mục tiêu trung hạn</strong>
+          <p>Tạo một codebase chung nhưng các site con trong scope phase 1 vẫn phải vận hành đầy đủ và độc lập, không chỉ ở mức sẵn sàng kiến trúc.</p>
+        </article>
+        <article>
+          <strong>Nguyên tắc triển khai</strong>
+          <p>Không kéo phase 1 sang CRM, payment, workflow nội bộ hay AI khi đầu vào và nhu cầu chưa được khóa, nhưng các tính năng quản trị cốt lõi, theme system và AI Agent SEO baseline phải đạt mức production ready.</p>
+        </article>
+      </div>
+
+      <div class="callout">
+        Trọng tâm của giai đoạn hiện tại là hoàn thiện lớp content platform:
+        site registry, site settings, localization, page composition, theme,
+        access control, publish flow, AI Agent SEO và launch readiness cho site
+        đầu tiên cùng các site con đã chốt trong scope.
+      </div>
+    </section>
+  </main>
+</body>
+</html>

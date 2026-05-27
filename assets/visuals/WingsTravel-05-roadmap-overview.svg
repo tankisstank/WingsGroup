@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8F1E6"/>
+      <stop offset="1" stop-color="#F4F8F5"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#102A25" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M0 0L14 7L0 14Z" fill="#2F6B57"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <text x="84" y="96" fill="#17332D" font-family="Segoe UI, Arial, sans-serif" font-size="38" font-weight="700">Roadmap cộng tác WingsTravel</text>
+  <text x="84" y="136" fill="#5B6D69" font-family="Segoe UI, Arial, sans-serif" font-size="20">Đi từ định hướng rõ ràng tới nền tảng tăng trưởng, rồi mới mở rộng vận hành và AI.</text>
+  <g filter="url(#shadow)">
+    <rect x="84" y="220" width="252" height="440" rx="30" fill="#FFFFFF" stroke="#E4E0D8"/>
+    <rect x="388" y="220" width="252" height="440" rx="30" fill="#FFFFFF" stroke="#E4E0D8"/>
+    <rect x="692" y="220" width="252" height="440" rx="30" fill="#FFFFFF" stroke="#E4E0D8"/>
+    <rect x="996" y="220" width="252" height="440" rx="30" fill="#FFFFFF" stroke="#E4E0D8"/>
+    <rect x="1300" y="220" width="216" height="440" rx="30" fill="#17332D"/>
+  </g>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="108" y="248" width="128" height="38" rx="19" fill="#E9F5EF"/>
+    <text x="140" y="273" fill="#2F6B57" font-size="18" font-weight="700">Giai đoạn 1</text>
+    <text x="108" y="336" fill="#183630" font-size="28" font-weight="700">Làm rõ định hướng</text>
+    <text x="108" y="392" fill="#60736F" font-size="19">• Khách ưu tiên</text>
+    <text x="108" y="424" fill="#60736F" font-size="19">• Sản phẩm ưu tiên</text>
+    <text x="108" y="456" fill="#60736F" font-size="19">• Tài nguyên hiện có</text>
+    <text x="108" y="488" fill="#60736F" font-size="19">• Cách nhận lead</text>
+    <text x="108" y="572" fill="#17332D" font-size="18" font-weight="700">Đầu ra</text>
+    <text x="108" y="604" fill="#60736F" font-size="18">Khung định hướng rõ hơn</text>
+    <rect x="412" y="248" width="128" height="38" rx="19" fill="#EAF0FF"/>
+    <text x="444" y="273" fill="#315DA3" font-size="18" font-weight="700">Giai đoạn 2</text>
+    <text x="412" y="336" fill="#183630" font-size="28" font-weight="700">Hiện diện và lead</text>
+    <text x="412" y="392" fill="#60736F" font-size="19">• Landing page</text>
+    <text x="412" y="424" fill="#60736F" font-size="19">• Form / lead flow</text>
+    <text x="412" y="456" fill="#60736F" font-size="19">• Nội dung nền</text>
+    <text x="412" y="488" fill="#60736F" font-size="19">• Đo lường ban đầu</text>
+    <text x="412" y="572" fill="#17332D" font-size="18" font-weight="700">Đầu ra</text>
+    <text x="412" y="604" fill="#60736F" font-size="18">Ra thị trường nhanh</text>
+    <rect x="716" y="248" width="128" height="38" rx="19" fill="#FFF0D9"/>
+    <text x="748" y="273" fill="#9C5D11" font-size="18" font-weight="700">Giai đoạn 3</text>
+    <text x="716" y="336" fill="#183630" font-size="28" font-weight="700">Website và nội dung</text>
+    <text x="716" y="392" fill="#60736F" font-size="19">• Website đa ngôn ngữ</text>
+    <text x="716" y="424" fill="#60736F" font-size="19">• Trang dịch vụ / tour</text>
+    <text x="716" y="456" fill="#60736F" font-size="19">• Nội dung theo thị trường</text>
+    <text x="716" y="488" fill="#60736F" font-size="19">• Lớp quản trị nội dung</text>
+    <text x="716" y="572" fill="#17332D" font-size="18" font-weight="700">Đầu ra</text>
+    <text x="716" y="604" fill="#60736F" font-size="18">Nền bên ngoài rõ ràng hơn</text>
+    <rect x="1020" y="248" width="128" height="38" rx="19" fill="#FCE7EC"/>
+    <text x="1052" y="273" fill="#AF4562" font-size="18" font-weight="700">Giai đoạn 4</text>
+    <text x="1020" y="336" fill="#183630" font-size="28" font-weight="700">Vận hành và dữ liệu</text>
+    <text x="1020" y="392" fill="#60736F" font-size="19">• Quy trình xử lý lead</text>
+    <text x="1020" y="424" fill="#60736F" font-size="19">• Log trao đổi</text>
+    <text x="1020" y="456" fill="#60736F" font-size="19">• Trạng thái xử lý</text>
+    <text x="1020" y="488" fill="#60736F" font-size="19">• Dữ liệu vận hành</text>
+    <text x="1020" y="572" fill="#17332D" font-size="18" font-weight="700">Đầu ra</text>
+    <text x="1020" y="604" fill="#60736F" font-size="18">Nền cho CRM / backend</text>
+    <rect x="1324" y="248" width="128" height="38" rx="19" fill="#274841"/>
+    <text x="1356" y="273" fill="#E5F1ED" font-size="18" font-weight="700">Giai đoạn 5</text>
+    <text x="1324" y="336" fill="#FFFFFF" font-size="28" font-weight="700">AI và tự động hóa</text>
+    <text x="1324" y="392" fill="#D8E7E2" font-size="19">• Phản hồi bước đầu</text>
+    <text x="1324" y="424" fill="#D8E7E2" font-size="19">• Phân loại lead</text>
+    <text x="1324" y="456" fill="#D8E7E2" font-size="19">• Hỗ trợ nội dung</text>
+    <text x="1324" y="488" fill="#D8E7E2" font-size="19">• Báo cáo và tự động hóa</text>
+    <text x="1324" y="572" fill="#FFFFFF" font-size="18" font-weight="700">Đầu ra</text>
+    <text x="1324" y="604" fill="#D8E7E2" font-size="18">Tăng tốc và tối ưu</text>
+  </g>
+  <line x1="336" y1="440" x2="388" y2="440" stroke="#2F6B57" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="640" y1="440" x2="692" y2="440" stroke="#2F6B57" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="944" y1="440" x2="996" y2="440" stroke="#2F6B57" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="1248" y1="440" x2="1300" y2="440" stroke="#2F6B57" stroke-width="4" marker-end="url(#arrow)"/>
+  <rect x="84" y="736" width="1432" height="90" rx="24" fill="#FFFFFF" stroke="#E4E0D8"/>
+  <text x="124" y="792" fill="#5B6D69" font-family="Segoe UI, Arial, sans-serif" font-size="20">Nguyên tắc chính: chưa làm mọi thứ cùng lúc, chưa nhảy thẳng vào hệ thống lớn; đi từ thứ cần có để bán được, rồi mới mở lớp quản trị và tự động hóa.</text>
+</svg>

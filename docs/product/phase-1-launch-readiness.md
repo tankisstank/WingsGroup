@@ -1,0 +1,49 @@
+# WingsTravel Phase 1 Launch Readiness
+
+## Purpose
+
+This document is the phase-1 launch proof surface for the current
+Payload-first multisite implementation.
+
+## Current Launch State
+
+The platform is technically prepared for first-site validation:
+
+- site registry and settings are implemented
+- `vi` and `en` localization routing is implemented
+- editorial access is scoped by role and assigned site
+- metadata, canonical, sitemap, breadcrumb, and structured-data baselines exist
+- reusable page and landing page composition is implemented
+- handover documentation package exists under `docs/handover/`
+
+## Site Route Inventory
+
+| Site | Local route | Locale route example | Sample pages |
+| --- | --- | --- | --- |
+| WingsTravel | `/` | `/en` | `/`, `/contact`, `/campaign`, `/posts` |
+| WingsGo | `/wingsgo` | `/wingsgo/en` | `/wingsgo`, `/wingsgo/contact`, `/wingsgo/campaign`, `/wingsgo/posts` |
+| WingsCare | `/wingscare` | `/wingscare/en` | `/wingscare`, `/wingscare/contact`, `/wingscare/campaign`, `/wingscare/posts` |
+| WingsInsurance | `/wingsinsurance` | `/wingsinsurance/en` | `/wingsinsurance`, `/wingsinsurance/contact`, `/wingsinsurance/campaign`, `/wingsinsurance/posts` |
+
+## Launch Checklist
+
+- [x] Multisite context resolution implemented.
+- [x] Site-specific settings, branding, SEO defaults, navigation, footer, and
+  contact data implemented.
+- [x] Localized route simulation implemented for `vi` and `en`.
+- [x] Page/post metadata, canonical URLs, sitemap URLs, and JSON-LD baseline
+  implemented.
+- [x] Breadcrumb UI and matching `BreadcrumbList` implemented where visible.
+- [x] Reusable campaign landing pattern implemented.
+- [x] Site-scoped roles and write enforcement implemented.
+- [x] Handover document set exists.
+- [ ] Customer-approved final copy and images filled for every launched child
+  site.
+- [ ] Production deployment environment values confirmed.
+- [ ] Public domain, DNS, SSL, and email provider details confirmed.
+
+## Scope Guardrail
+
+Phase 1 launch proof does not depend on CRM, booking/payment, advanced
+analytics, internal operator workflow, or AI/RAG features. Those require
+separate intake and stories.

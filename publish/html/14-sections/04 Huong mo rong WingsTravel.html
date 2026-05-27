@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WingsTravel - Huong mo rong</title>
+  <style>
+    :root {
+      --bg: #f5f1e8;
+      --paper: #fffdf8;
+      --ink: #203033;
+      --muted: #5f6f70;
+      --line: rgba(32, 48, 51, 0.12);
+      --brand: #1f5d54;
+      --brand-soft: #deeee9;
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+      --shadow: 0 18px 40px rgba(32, 48, 51, 0.07);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #f8f3eb 0%, var(--bg) 100%);
+    }
+    main {
+      width: min(calc(100% - 32px), 1180px);
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+    section {
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .tag {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.12;
+      letter-spacing: -0.04em;
+    }
+    .intro {
+      max-width: 760px;
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.72;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    article {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.7);
+    }
+    article strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 1.08rem;
+    }
+    article p, .callout {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.72;
+    }
+    .callout {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-left: 4px solid var(--brand);
+      border-radius: 0 16px 16px 0;
+      background: rgba(31, 93, 84, 0.08);
+      color: var(--ink);
+    }
+    @media (max-width: 840px) {
+      main { width: min(calc(100% - 18px), 1180px); }
+      section { padding: 22px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section>
+      <div class="tag">WingsTravel · Phần 4</div>
+      <h1>Hướng mở rộng sau phase 1</h1>
+      <p class="intro">
+        Đây là những hướng phát triển hợp lý cho dự án, nhưng không nên kéo vào
+        phase 1 nếu chưa có intake riêng và chưa làm rõ nhu cầu thật. Mục tiêu
+        là giữ lõi Payload sạch và mở rộng đúng thời điểm.
+      </p>
+
+      <div class="grid">
+        <article>
+          <strong>Giai đoạn 2</strong>
+          <p>Mở rộng block library, structured service content, landing page variations, SEO governance và media governance tốt hơn.</p>
+        </article>
+        <article>
+          <strong>Giai đoạn 3</strong>
+          <p>Lead capture, campaign/source data, form submission records và lớp dữ liệu đầu tiên cho marketing và sale.</p>
+        </article>
+        <article>
+          <strong>Giai đoạn 4</strong>
+          <p>Tách dần lớp vận hành nội bộ nếu quy trình lead, operator hoặc CRM mini đã đủ rõ và đủ lớn.</p>
+        </article>
+        <article>
+          <strong>Giai đoạn 5</strong>
+          <p>Automation, RAG, AI assistant hoặc đồng bộ dữ liệu khi content layer và operational data đã đủ ổn định.</p>
+        </article>
+      </div>
+
+      <div class="callout">
+        Nguyên tắc giữ hệ sạch là: phần nào thuộc content platform thì làm chắc
+        trong Payload; phần nào đã trở thành workflow hay business system thì
+        phải có quyết định riêng trước khi nhét vào lõi hiện tại.
+      </div>
+    </section>
+  </main>
+</body>
+</html>

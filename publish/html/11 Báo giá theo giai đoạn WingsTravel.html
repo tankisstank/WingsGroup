@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bao gia giai doan 1 Inbound du lich</title>
+  <style>
+    :root{
+      --bg:#f6efe4;
+      --bg2:#f4f8f5;
+      --ink:#17332d;
+      --muted:#586c67;
+      --line:rgba(23,51,45,.12);
+      --accent:#c68b3c;
+      --accent2:#2f6b57;
+      --accent3:#214f8e;
+      --paper:rgba(255,255,255,.76);
+      --shadow:0 18px 52px rgba(17,33,28,.10);
+      --sans:"Montserrat","Segoe UI","Tahoma","Arial",sans-serif;
+      --max:1180px;
+    }
+    *{box-sizing:border-box}
+    html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:var(--sans);
+      background:
+        radial-gradient(circle at left top,rgba(198,139,60,.16),transparent 28%),
+        radial-gradient(circle at right 12% top 18%,rgba(47,107,87,.16),transparent 24%),
+        linear-gradient(180deg,var(--bg) 0%,#fbfaf7 36%,var(--bg2) 100%);
+    }
+    .doc{width:min(calc(100% - 48px),var(--max));margin:0 auto;padding:28px 0 52px}
+    .page{
+      margin-bottom:26px;
+      padding:34px;
+      border-radius:34px;
+      background:linear-gradient(180deg,rgba(255,255,255,.68),rgba(255,255,255,.52));
+      border:1px solid rgba(255,255,255,.56);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .hero{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:28px;
+      align-items:end;
+      min-height:260px;
+      background:
+        radial-gradient(circle at 18% 14%,rgba(198,139,60,.18),transparent 24%),
+        radial-gradient(circle at 88% 18%,rgba(33,79,142,.14),transparent 18%),
+        linear-gradient(180deg,rgba(255,255,255,.76),rgba(255,255,255,.50));
+    }
+    .eyebrow{
+      margin:0 0 16px;
+      font-size:.84rem;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .display{
+      margin:0;
+      font-size:4.35rem;
+      line-height:.92;
+      letter-spacing:-.055em;
+      max-width:8ch;
+      font-weight:800;
+    }
+    .lede{
+      margin:22px 0 0;
+      max-width:54ch;
+      color:var(--muted);
+      font-size:1.04rem;
+      line-height:1.72;
+    }
+    .pill-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.68);
+      border:1px solid rgba(23,51,45,.08);
+      color:var(--ink);
+      font-size:.92rem;
+      font-weight:600;
+    }
+    .hero-side{display:grid;gap:14px}
+    .meta-band{
+      padding:24px;
+      border-radius:24px;
+      background:rgba(23,51,45,.94);
+      color:#eef3f1;
+    }
+    .meta-band strong{
+      display:block;
+      margin-bottom:8px;
+      font-size:.84rem;
+      text-transform:uppercase;
+      letter-spacing:.13em;
+      color:rgba(255,255,255,.7);
+    }
+    .meta-band p{margin:0;line-height:1.66;font-size:1.05rem}
+    .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .stats div{
+      padding:18px;
+      border-radius:20px;
+      border:1px solid rgba(23,51,45,.08);
+      background:rgba(255,255,255,.68);
+    }
+    .stats span{
+      display:block;
+      margin-bottom:10px;
+      color:var(--muted);
+      font-size:.78rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+    .stats strong{font-size:1.06rem;line-height:1.36}
+    .section-head{
+      display:grid;
+      grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);
+      gap:28px;
+      align-items:end;
+      margin-bottom:24px;
+    }
+    .section-title{
+      margin:0;
+      font-size:2.65rem;
+      line-height:.96;
+      letter-spacing:-.045em;
+      max-width:12ch;
+      font-weight:800;
+    }
+    .section-copy{
+      margin:0;
+      color:var(--muted);
+      font-size:1rem;
+      line-height:1.68;
+      max-width:50ch;
+      justify-self:end;
+    }
+    .divider{height:1px;background:linear-gradient(90deg,rgba(23,51,45,.12),rgba(23,51,45,.04));margin-bottom:22px}
+    .split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .card,.stage-card,.price-card,.note-card{
+      padding:22px;
+      border-radius:24px;
+      background:rgba(255,255,255,.68);
+      border:1px solid rgba(23,51,45,.08);
+    }
+    .card h3,.stage-card h3,.price-card h3,.note-card h3{
+      margin:0 0 14px;
+      font-size:.88rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      color:var(--muted);
+    }
+    .card p,.note-card p{margin:0;color:var(--muted);line-height:1.62}
+    .ruled-list{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+    .ruled-list li{
+      display:grid;
+      grid-template-columns:34px minmax(0,1fr);
+      gap:14px;
+      padding:14px 0;
+      border-bottom:1px solid var(--line);
+      line-height:1.54;
+    }
+    .index{
+      font-size:1.18rem;
+      color:rgba(23,51,45,.5);
+      line-height:1;
+      padding-top:2px;
+      font-weight:700;
+    }
+    .stage-card{
+      break-inside:avoid;
+      margin-bottom:18px;
+      background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.58));
+    }
+    .stage-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:18px;
+      margin-bottom:16px;
+    }
+    .stage-badge{
+      display:inline-flex;
+      align-items:center;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(23,51,45,.06);
+      color:var(--muted);
+      font-size:.76rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-weight:700;
+    }
+    .stage-name{
+      margin:10px 0 0;
+      font-size:1.7rem;
+      line-height:1.02;
+      letter-spacing:-.04em;
+      font-weight:800;
+      max-width:12ch;
+    }
+    .price-chip{
+      flex:0 0 auto;
+      min-width:170px;
+      text-align:center;
+      padding:14px 18px;
+      border-radius:20px;
+      background:rgba(23,51,45,.94);
+      color:#eef5f2;
+    }
+    .price-chip span{
+      display:block;
+      margin-bottom:6px;
+      font-size:.76rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:rgba(255,255,255,.66);
+    }
+    .price-chip strong{font-size:1.4rem;letter-spacing:-.03em}
+    .stage-summary{
+      margin:0 0 18px;
+      color:var(--muted);
+      line-height:1.64;
+    }
+    .stage-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .mini h4{
+      margin:0 0 10px;
+      font-size:.82rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:var(--muted);
+    }
+    .mini ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+    .mini li{position:relative;padding-left:18px;line-height:1.56}
+    .mini li::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:.5em;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:rgba(47,107,87,.18);
+      border:1px solid rgba(47,107,87,.42);
+    }
+    .milestones{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+      margin-top:18px;
+    }
+    .milestone{
+      padding:16px;
+      border-radius:20px;
+      background:rgba(246,239,228,.84);
+      border:1px solid rgba(23,51,45,.07);
+      min-height:144px;
+    }
+    .milestone span{
+      display:inline-block;
+      margin-bottom:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.8);
+      color:var(--muted);
+      font-size:.74rem;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.11em;
+    }
+    .milestone p{margin:0;line-height:1.54;color:var(--ink)}
+    .callout{
+      margin-top:18px;
+      padding:20px 22px;
+      border-radius:22px;
+      background:rgba(23,51,45,.92);
+      color:#eef5f2;
+      line-height:1.68;
+    }
+    .callout strong{
+      display:block;
+      margin-bottom:8px;
+      color:rgba(255,255,255,.72);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-size:.84rem;
+    }
+    .quote{
+      padding:26px;
+      border-radius:28px;
+      background:rgba(255,255,255,.74);
+      border:1px solid rgba(23,51,45,.08);
+      font-size:1.08rem;
+      line-height:1.74;
+      color:var(--ink);
+    }
+    .quote p{margin:0}
+    .closing{
+      text-align:center;
+      min-height:220px;
+      display:grid;
+      place-items:center;
+      background:
+        radial-gradient(circle at center,rgba(198,139,60,.16),transparent 24%),
+        linear-gradient(180deg,rgba(255,255,255,.76),rgba(255,255,255,.52));
+    }
+    .seal{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:12px 18px;
+      border-radius:999px;
+      background:rgba(23,51,45,.08);
+      border:1px solid rgba(23,51,45,.08);
+      color:var(--ink);
+      font-size:.82rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-weight:700;
+      margin-bottom:22px;
+    }
+    .closing h2{
+      margin:0;
+      font-size:3.8rem;
+      line-height:.95;
+      letter-spacing:-.05em;
+      max-width:9ch;
+      font-weight:800;
+    }
+    .closing p{
+      margin:20px auto 0;
+      max-width:58ch;
+      color:var(--muted);
+      font-size:1.04rem;
+      line-height:1.72;
+    }
+    .contact{
+      margin-top:20px;
+      display:inline-flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:center;
+      padding:14px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(23,51,45,.08);
+      font-size:1rem;
+      color:var(--ink);
+    }
+    .contact strong{font-weight:700}
+    @page{size:A4 portrait;margin:12mm}
+    @media print{
+      body{background:#fff}
+      .doc{width:auto;margin:0;padding:0}
+      .page{box-shadow:none;margin:0 0 10mm;padding:26px 24px;page-break-after:auto}
+      .stage-card{break-inside:auto;page-break-inside:auto}
+      .price-card{break-inside:auto;page-break-inside:auto}
+      .milestones{break-inside:auto;page-break-inside:auto}
+      .milestone{break-inside:auto;page-break-inside:auto}
+    }
+  </style>
+</head>
+<body>
+  <div class="doc">
+    <section class="page hero">
+      <div>
+        <p class="eyebrow">Bao gia so bo theo giai doan</p>
+        <h1 class="display">Inbound du lich.</h1>
+        <p class="lede">Tai lieu nay duoc dung de chia khung gia du kien theo tung giai doan trien khai, giup doi tac hinh dung muc dau tu phu hop va cach mo rong he thong theo dung nhịp kinh doanh.</p>
+        <div class="pill-row">
+          <span class="pill">Bao gia giai doan 1</span>
+          <span class="pill">Chot 80 trieu</span>
+          <span class="pill">Giai doan sau scope roi moi bao gia</span>
+        </div>
+      </div>
+      <div class="hero-side">
+        <div class="meta-band">
+          <strong>Tinh than bao gia</strong>
+          <p>Hien tai chi chot bao gia cho giai doan 1. Muc tieu la co mot nen website, CMS va campaign landing page du tot de ra thi truong. Cac giai doan sau se can lam ro scope of work roi moi boc gia cu the.</p>
+        </div>
+        <div class="stats">
+          <div><span>Phuong an de xuat</span><strong>Gop website da ngon ngu, CMS nen va campaign landing page vao giai doan 1</strong></div>
+          <div><span>Moc gia mo dau</span><strong>80 trieu cho giai doan 1</strong></div>
+          <div><span>Huong di</span><strong>Giai doan sau se bao gia khi scope of work da du ro</strong></div>
+          <div><span>Vai tro</span><strong>Dong hanh nhu doi tac cong nghe, khong chi la don vi lam web</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Cach doc bao gia</p>
+          <h2 class="section-title">Chi chot bao gia cho giai doan 1, cac giai doan sau se boc sau</h2>
+        </div>
+        <p class="section-copy">Muc tieu la giu duoc kha nang ra quyet dinh nhanh cho doi tac, dong thoi tranh truot pham vi. Vi vay tai lieu nay chi tap trung vao phase dau tien: muc tieu, KPI, milestone, pham vi va muc gia de xuat.</p>
+      </div>
+      <div class="divider"></div>
+      <div class="split">
+        <div class="card">
+          <h3>Nguyen tac nen giu</h3>
+          <ol class="ruled-list">
+            <li><span class="index">01</span><div>Hien tai chi chot gia cho giai doan 1.</div></li>
+            <li><span class="index">02</span><div>Cac giai doan sau chi nen bao gia khi da ro scope of work.</div></li>
+            <li><span class="index">03</span><div>Gia ben duoi la gia dich vu trien khai va dong hanh cong nghe.</div></li>
+            <li><span class="index">04</span><div>Chua bao gom ngan sach quang cao, domain, hosting, media lon va tool ben thu ba.</div></li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>Nhung gi can khoa ro</h3>
+          <ol class="ruled-list">
+            <li><span class="index">01</span><div>So ngon ngu can ho tro trong giai doan dau.</div></li>
+            <li><span class="index">02</span><div>So loai landing page campaign can nhan ban.</div></li>
+            <li><span class="index">03</span><div>Khoi luong noi dung, hinh anh va tai san co san.</div></li>
+            <li><span class="index">04</span><div>Cach nhan lead va ai la dau moi xu ly ban dau.</div></li>
+          </ol>
+        </div>
+      </div>
+      <div class="callout">
+        <strong>Thong diep de trinh bay</strong>
+        Bao gia nay duoc xay de ho tro doi tac ra quyet dinh cho giai doan 1. Cac phase sau van nam trong dinh huong tong the, nhung se duoc scope lai roi moi bao gia cu the.
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Chi tiet giai doan 1</p>
+          <h2 class="section-title">Day la phase duoc de xuat de chot bao gia o thoi diem hien tai</h2>
+        </div>
+        <p class="section-copy">Trong boi canh hien tai, giai doan 1 nen duoc gop theo huong website da ngon ngu, CMS nen va campaign landing page. Cach nay giu duoc chat luong hien dien online, lead flow co ban va tinh san sang cho marketing ma chua can mo rong sang cac lop van hanh sau hon.</p>
+      </div>
+      <div class="divider"></div>
+
+      <article class="stage-card">
+        <div class="stage-top">
+          <div>
+            <div class="stage-badge">Giai doan 1</div>
+            <h3 class="stage-name">Website da ngon ngu + CMS nen + campaign landing page</h3>
+          </div>
+          <div class="price-chip">
+            <span>Gia du kien</span>
+            <strong>80 trieu</strong>
+          </div>
+        </div>
+        <p class="stage-summary">Day la phase xay nen hien dien online dau tien cho WingsTravel, voi trong tam giai doan dau la mang inbound: website v1 de gioi thieu dich vu, CMS nen de chu dong cap nhat noi dung, va khung landing page campaign co the nhan ban theo thi truong hoac nhom san pham.</p>
+        <div class="stage-grid">
+          <div class="mini note-card">
+            <h4>Muc tieu</h4>
+            <ul>
+              <li>Co mot nen website du tot de ra thi truong.</li>
+              <li>Co the trien khai landing page theo campaign, thi truong hoac nhom san pham.</li>
+              <li>Chu dong quan tri noi dung thay vi sua tay roi rac.</li>
+            </ul>
+          </div>
+          <div class="mini note-card">
+            <h4>KPI / tieu chi danh gia</h4>
+            <ul>
+              <li>Website v1 hoan thien va co the dung de gioi thieu dich vu bai ban.</li>
+              <li>CMS nen hoat dong on dinh de doi ngu chu dong cap nhat noi dung.</li>
+              <li>Co it nhat 1 khung campaign landing page co the tai su dung.</li>
+              <li>Form nhan lead va diem tiep nhan lead hoat dong on dinh.</li>
+              <li>Co the bat dau trien khai marketing ngay sau ban giao.</li>
+            </ul>
+          </div>
+          <div class="mini note-card">
+            <h4>Pham vi du kien</h4>
+            <ul>
+              <li>Website gioi thieu dich vu va tour cho WingsTravel, voi trong tam giai doan dau la inbound.</li>
+              <li>Cau truc da ngon ngu giai doan dau.</li>
+              <li>Cac trang nen, form nhan lead va diem tiep nhan lead co ban.</li>
+              <li>CMS nen de quan ly bai viet, trang va noi dung.</li>
+              <li>Khung campaign landing page co the nhan ban.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="milestones">
+          <div class="milestone"><span>Milestone 1</span><p>Lam ro cau truc website, ngon ngu uu tien, nhom noi dung va khung campaign landing page.</p></div>
+          <div class="milestone"><span>Milestone 2</span><p>Thiet ke va dung website v1 cung CMS nen.</p></div>
+          <div class="milestone"><span>Milestone 3</span><p>Hoan thien form nhan lead, luong tiep nhan lead co ban va khung landing page campaign.</p></div>
+          <div class="milestone"><span>Milestone 4</span><p>Review, chinh sua, ban giao va chot huong mo rong giai doan tiep theo.</p></div>
+        </div>
+        <div class="stage-grid" style="margin-top:18px">
+          <div class="mini note-card">
+            <h4>Dau ra chinh</h4>
+            <ul>
+              <li>Website v1 da ngon ngu.</li>
+              <li>CMS nen de chu dong cap nhat noi dung.</li>
+              <li>Co kha nang tao landing page campaign theo thi truong hoac san pham.</li>
+              <li>Co nen lead flow ban dau cho marketing va sale.</li>
+            </ul>
+          </div>
+          <div class="mini note-card">
+            <h4>Ghi chu pham vi</h4>
+            <ul>
+              <li>Muc nay phu hop khi khoa ro pham vi website v1 va mot khung landing page co the nhan ban.</li>
+              <li>Neu phat sinh them nhieu ngon ngu, nhieu loai campaign page, tich hop sau hoac logic tour phuc tap, se can boc bo sung.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="page">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Giai doan tiep theo</p>
+          <h2 class="section-title">Cac phase sau can lam ro scope of work truoc khi boc bao gia</h2>
+        </div>
+        <p class="section-copy">Sau khi giai doan 1 duoc xay xong va bat dau co dau vao thuc te, hai ben moi nen mo sang cac lop trong hon nhu lead, van hanh, du lieu va AI. O thoi diem hien tai, nhung phan nay chi nen giu o muc dinh huong, chua chot gia.</p>
+      </div>
+      <div class="divider"></div>
+
+      <div class="grid-3">
+        <article class="price-card">
+          <h3>Giai doan 2</h3>
+          <p style="margin:0 0 12px;font-size:1.3rem;font-weight:800;letter-spacing:-.03em">CRM mini, quan ly lead va van hanh noi bo v1</p>
+          <p style="margin:0 0 14px;color:var(--muted);line-height:1.6">Muc tieu la de lead di vao duoc theo doi co trang thai, co lich su xu ly va giam roi lead.</p>
+          <div class="pill-row" style="margin-top:0"><span class="pill">Se bao gia sau khi scope ro</span></div>
+          <ul class="ruled-list" style="margin-top:12px">
+            <li><span class="index">01</span><div>Can lam ro quy trinh xu ly lead va cac trang thai can quan ly.</div></li>
+            <li><span class="index">02</span><div>Can xac dinh pham vi chi quan ly lead hay mo rong sang booking, doi tac, thanh toan.</div></li>
+          </ul>
+        </article>
+
+        <article class="price-card">
+          <h3>Giai doan 3</h3>
+          <p style="margin:0 0 12px;font-size:1.3rem;font-weight:800;letter-spacing:-.03em">Du lieu noi bo, RAG va tu dong hoa v1</p>
+          <p style="margin:0 0 14px;color:var(--muted);line-height:1.6">Muc tieu la bat dau khai thac du lieu noi bo va dua automation vao nhung diem co gia tri thuc te.</p>
+          <div class="pill-row" style="margin-top:0"><span class="pill">Se bao gia sau khi scope ro</span></div>
+          <ul class="ruled-list" style="margin-top:12px">
+            <li><span class="index">01</span><div>Can danh gia do san sang cua du lieu va quy trinh van hanh truoc.</div></li>
+            <li><span class="index">02</span><div>Can xac dinh use case uu tien va du lieu co the dua vao he thong.</div></li>
+          </ul>
+        </article>
+
+        <article class="price-card">
+          <h3>Giai doan 4</h3>
+          <p style="margin:0 0 12px;font-size:1.3rem;font-weight:800;letter-spacing:-.03em">Mo hinh doi tac cong nghe dong hanh dai han</p>
+          <p style="margin:0 0 14px;color:var(--muted);line-height:1.6">Muc tieu la co mot dau moi cong nghe theo sat roadmap, kiem soat pham vi va toi uu dan he thong.</p>
+          <div class="pill-row" style="margin-top:0"><span class="pill">Se bao gia sau khi thong nhat cach phoi hop</span></div>
+          <ul class="ruled-list" style="margin-top:12px">
+            <li><span class="index">01</span><div>Can thong nhat ro muc do tham gia va nhịp phoi hop giua hai ben.</div></li>
+            <li><span class="index">02</span><div>Can xac dinh backlog, KPI va pham vi dong hanh theo thang.</div></li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="callout">
+        <strong>Ghi chu chien luoc</strong>
+        Giai doan 2 tro di la nhung phase de mo rong sau khi website va marketing nen da co chuyen dong thuc te. O giai doan hien tai, phu hop nhat la chot gia cho phase 1, con cac phase sau scope roi moi bao gia.
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Cach mo trao doi</p>
+          <h2 class="section-title">Co the gui theo huong ro gia cho phase 1, nhung van mo cho roadmap dai hon</h2>
+        </div>
+        <p class="section-copy">Phan nay dung de chot cach noi voi doi tac. Muc tieu la dua ra du gia tri de ra quyet dinh cho giai doan 1, nhung van giu duoc the cua doi tac cong nghe va huong mo rong sau khi scope cac phase tiep theo da ro.</p>
+      </div>
+      <div class="divider"></div>
+      <div class="quote">
+        <p>Theo goc nhin cua em, de phu hop voi giai doan hien tai thi minh nen chia theo tung giai doan thay vi bao mot cuc chung. Giai doan 1 em de xuat gop luon phan website da ngon ngu, CMS nen va kha nang tao campaign landing page de ben anh co mot nen du tot cho viec gioi thieu dich vu, chay thi truong va nhan lead. Voi pham vi nay, em dang hinh dung muc ngan sach phu hop la khoang <strong>80 trieu</strong>. Cac giai doan sau nhu quan ly lead, van hanh noi bo, du lieu hay AI thi em nghi nen lam ro them scope of work roi khi do em se boc tiep bao gia cu the cho tung phan.</p>
+      </div>
+      <div class="split" style="margin-top:20px">
+        <div class="note-card">
+          <h3>Nhung gi chua bao gom</h3>
+          <p>Ngan sach quang cao, mua domain, hosting, media lon, quay dung video, dich thuat so luong lon, va cac cong cu ben thu ba can license rieng.</p>
+        </div>
+        <div class="note-card">
+          <h3>Dieu kien de scope phase sau</h3>
+          <p>Sau khi phase 1 chay xong hoac dau vao da ro hon, can lam ro quy trinh lead, van hanh, du lieu, KPI va cach phoi hop de scope va bao gia chinh xac cho cac phase tiep theo.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="page closing">
+      <div>
+        <div class="seal">Bao gia theo giai doan</div>
+        <h2>Xay dung nen dung de mo rong ve sau.</h2>
+        <p>Phuong an de xuat la bat dau bang mot phase du ro, du chat luong va du gan voi nhu cau thi truong, sau do moi mo rong dan sang van hanh, du lieu va AI khi hai ben da co co so lam viec chung.</p>
+        <div class="contact"><strong>Dzung Do</strong><span>+84.975.851.567</span></div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+'use client'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import React, { useState, useEffect } from 'react'
+import { useDebounce } from '@/utilities/useDebounce'
+import { useRouter } from 'next/navigation'
+import { useSitePath } from '@/utilities/useSitePath'
+
+export const Search: React.FC = () => {
+  const [value, setValue] = useState('')
+  const router = useRouter()
+  const getSitePath = useSitePath()
+
+  const debouncedValue = useDebounce(value)
+
+  useEffect(() => {
+    router.push(getSitePath(`/search${debouncedValue ? `?q=${debouncedValue}` : ''}`))
+  }, [debouncedValue, getSitePath, router])
+
+  return (
+    <div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+        }}
+      >
+        <Label htmlFor="search" className="sr-only">
+          Search
+        </Label>
+        <Input
+          id="search"
+          onChange={(event) => {
+            setValue(event.target.value)
+          }}
+          placeholder="Search"
+        />
+        <button type="submit" className="sr-only">
+          submit
+        </button>
+      </form>
+    </div>
+  )
+}
