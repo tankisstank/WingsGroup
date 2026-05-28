@@ -1,0 +1,12 @@
+node_modules
+.next
+playwright-report
+test-results
+artifacts
+*.db
+.env
+.env.local
+.env.production
+public/media
+public/sitemap*.xml
+public/robots.txt

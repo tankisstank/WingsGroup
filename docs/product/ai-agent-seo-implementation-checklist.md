@@ -107,7 +107,7 @@ US-008 sitemap note:
 - [x] Implement `Article` for posts where content structure is suitable.
 - [x] Defer `FAQPage` until a page visibly contains FAQ entries.
 - [x] Ensure structured data always matches visible on-page content.
-- [ ] Validate JSON-LD output on representative pages before rollout.
+- [x] Validate JSON-LD output on representative pages before rollout.
 
 US-009 implementation note:
 
@@ -159,34 +159,41 @@ US-010 field note:
 
 ## Track 8: Server-Rendered Public HTML
 
-- [ ] Verify critical entity information appears in public HTML and not only
+- [x] Verify critical entity information appears in public HTML and not only
   after client-side interaction.
-- [ ] Verify titles, headings, and key content blocks render server-side on
+- [x] Verify titles, headings, and key content blocks render server-side on
   launch-critical routes.
-- [ ] Verify public pages are still understandable when JavaScript enhancement
+- [x] Verify public pages are still understandable when JavaScript enhancement
   is minimal.
 
 ## Track 9: Theme And SEO Alignment
 
-- [ ] Ensure theme work does not weaken semantic HTML structure.
-- [ ] Keep heading hierarchy meaningful within reusable blocks.
-- [ ] Ensure CTA and navigation styling does not hide crawlable links behind
+- [x] Ensure theme work does not weaken semantic HTML structure.
+- [x] Keep heading hierarchy meaningful within reusable blocks.
+- [x] Ensure CTA and navigation styling does not hide crawlable links behind
   inaccessible patterns.
-- [ ] Keep site-specific theme overrides compatible with shared metadata and
+- [x] Keep site-specific theme overrides compatible with shared metadata and
   structured-data components.
 
 ## Track 10: Validation
 
-- [ ] Build a manual validation checklist for representative routes:
+- [x] Build a manual validation checklist for representative routes:
   - one home page
   - one standard page
   - one post
   - one child-site page
-- [ ] Check page source for metadata, canonical, and JSON-LD presence.
-- [ ] Check sitemap outputs for the same routes.
+- [x] Check page source for metadata, canonical, and JSON-LD presence.
+- [x] Check sitemap outputs for the same routes.
 - [ ] Run Google Rich Results Test or equivalent manual validation on selected
   pages when public URLs exist.
-- [ ] Record proof and remaining gaps in Harness evidence or handover docs.
+- [x] Record proof and remaining gaps in Harness evidence or handover docs.
+
+US-009/US-011 proof note:
+
+- Playwright now parses JSON-LD from public HTML on `/wingsgo/campaign` and
+  confirms `Organization`, `WebSite`, `WebPage`, and `BreadcrumbList`.
+- Playwright also verifies WingsGo site theme tokens are rendered in public
+  HTML without hiding crawlable navigation or breadcrumb links.
 
 ## Suggested Backlog Slice
 

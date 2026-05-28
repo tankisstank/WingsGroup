@@ -66,3 +66,22 @@ This story gives the phase-1 theme requirement a durable engineering packet.
 - 2026-05-27: Validation notes: `pnpm run lint` is blocked by an existing ESLint 9
   circular config error; `pnpm exec tsc --noEmit` is blocked by existing seed,
   Payload alias, and test typing errors outside US-011 scope.
+
+2026-05-27 proof completion:
+
+- Added `getSiteThemeTokens` utility to normalize site-specific brand/accent
+  theme values and fallback defaults.
+- Public layout now consumes the shared theme-token helper for `theme-color`,
+  body style variables, and `data-site-theme`.
+- Added integration tests for default and site-specific theme-token mapping.
+- Added Playwright smoke coverage that verifies WingsGo renders its site theme
+  name, brand color, and accent color in public HTML.
+
+Validation:
+
+- `$env:DATABASE_URL='file:./payload-phase1-test.db'; pnpm run test:int`
+  passed outside sandbox with 8 files and 29 tests.
+- `pnpm run test:e2e` passed outside sandbox with 14 tests.
+- `pnpm lint` passed with zero warnings.
+- `pnpm exec tsc --noEmit --pretty false --incremental false` passed.
+- `pnpm build` passed outside sandbox.

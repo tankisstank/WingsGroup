@@ -72,3 +72,18 @@ Validation:
   errors.
 - `pnpm lint` remains blocked before project linting by the existing ESLint 9
   circular config error.
+
+2026-05-27 proof completion:
+
+- Added Playwright-authenticated REST smoke coverage for `site-manager` and
+  `editor` role behavior.
+- `site-manager` assigned to WingsGo can read WingsGo site settings and cannot
+  see WingsCare site settings through the authenticated API.
+- `editor` assigned to WingsGo receives `403` when attempting to create
+  `site-settings`.
+
+Validation:
+
+- `pnpm run test:e2e` passed outside sandbox with 14 tests.
+- `pnpm lint` passed with zero warnings.
+- `pnpm exec tsc --noEmit --pretty false --incremental false` passed.

@@ -110,3 +110,17 @@ of a separate schema-only URL path.
   existing baseline issues, but filtering the typecheck output for touched
   US-003/US-009/US-011 files returned no matching errors.
 - External rich-result validation remains pending until public URLs exist.
+
+2026-05-27 proof completion:
+
+- Added Playwright smoke coverage that parses public
+  `script[type="application/ld+json"]` on `/wingsgo/campaign`.
+- E2E asserts the rendered graph includes `Organization`, `WebSite`,
+  `WebPage`, and `BreadcrumbList`, proving structured data is present in public
+  HTML and aligned with visible breadcrumb content.
+
+Validation:
+
+- `pnpm run test:e2e` passed outside sandbox with 14 tests.
+- `pnpm lint` passed with zero warnings.
+- `pnpm exec tsc --noEmit --pretty false --incremental false` passed.

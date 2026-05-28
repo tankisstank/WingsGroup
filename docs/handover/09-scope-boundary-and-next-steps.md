@@ -33,6 +33,8 @@ Add any additional project-specific exclusions here.
   provider details.
 - Replace sample copy/images with customer-approved content for every launched
   site.
+- Choose an SMTP or transactional email provider before claiming production
+  email delivery readiness.
 - Run launch checklist on staging, then production.
 - Create separate intake for CRM, booking/payment, advanced analytics, or AI/RAG
   features if they become required.

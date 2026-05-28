@@ -1,3 +1,4 @@
+import { postgresAdapter } from '@payloadcms/db-postgres'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import sharp from 'sharp'
 import path from 'path'
@@ -19,6 +20,9 @@ import { getServerSideURL } from './utilities/getURL'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const databaseURL = process.env.DATABASE_URL || 'file:./payload.db'
+const isPostgresURL =
+  databaseURL.startsWith('postgres://') || databaseURL.startsWith('postgresql://')
 
 export default buildConfig({
   admin: {
@@ -59,11 +63,17 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  db: sqliteAdapter({
-    client: {
-      url: process.env.DATABASE_URL || '',
-    },
-  }),
+  db: isPostgresURL
+    ? postgresAdapter({
+        pool: {
+          connectionString: databaseURL,
+        },
+      })
+    : sqliteAdapter({
+        client: {
+          url: databaseURL,
+        },
+      }),
   collections: [
     Sites,
     SiteSettings,

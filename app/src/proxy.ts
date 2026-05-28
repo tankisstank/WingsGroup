@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { getLocaleFromPathname, getSiteAliasFromPathname, siteAliasToCodeMap } from '@/utilities/sitePaths'
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const siteAlias = getSiteAliasFromPathname(request.nextUrl.pathname)
   const locale = getLocaleFromPathname(request.nextUrl.pathname)
 

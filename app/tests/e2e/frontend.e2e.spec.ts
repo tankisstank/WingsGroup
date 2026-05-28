@@ -24,6 +24,14 @@ test.describe('Phase 1 public frontend smoke', () => {
     })
   }
 
+  test('renders site-specific theme tokens for child sites', async ({ page }) => {
+    await page.goto('http://localhost:3000/wingsgo')
+
+    await expect(page.locator('body')).toHaveAttribute('data-site-theme', 'WingsGo')
+    await expect(page.locator('body')).toHaveAttribute('style', /--site-brand:\s*#1D4ED8/i)
+    await expect(page.locator('body')).toHaveAttribute('style', /--site-accent:\s*#F97316/i)
+  })
+
   test('loads the seeded campaign landing page for a child site', async ({ page }) => {
     await page.goto('http://localhost:3000/wingsgo/campaign')
     await expect(page).toHaveTitle(/Campaign/)
@@ -37,5 +45,20 @@ test.describe('Phase 1 public frontend smoke', () => {
 
     expect(response?.ok()).toBe(true)
     await expect(page.locator('body')).toContainText('urlset')
+  })
+
+  test('renders parseable JSON-LD for site, page, and breadcrumb schema', async ({ page }) => {
+    await page.goto('http://localhost:3000/wingsgo/campaign')
+
+    const graphTypes = await page.locator('script[type="application/ld+json"]').evaluateAll((scripts) =>
+      scripts.flatMap((script) => {
+        const parsed = JSON.parse(script.textContent || '{}')
+        const graph = Array.isArray(parsed['@graph']) ? parsed['@graph'] : []
+
+        return graph.map((node) => node['@type'])
+      }),
+    )
+
+    expect(graphTypes).toEqual(expect.arrayContaining(['Organization', 'WebSite', 'WebPage', 'BreadcrumbList']))
   })
 })

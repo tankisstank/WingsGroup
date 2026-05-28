@@ -37,10 +37,20 @@ The platform is technically prepared for first-site validation:
 - [x] Reusable campaign landing pattern implemented.
 - [x] Site-scoped roles and write enforcement implemented.
 - [x] Handover document set exists.
+- [x] Production placeholder content and imagery are available for independent
+  child-site smoke checks.
+- [x] Docker VPS deployment shape is documented with PostgreSQL and Redis-ready
+  services.
 - [ ] Customer-approved final copy and images filled for every launched child
   site.
-- [ ] Production deployment environment values confirmed.
+- [ ] Production deployment environment values confirmed on the real VPS.
 - [ ] Public domain, DNS, SSL, and email provider details confirmed.
+
+## Content Readiness Status
+
+The current app can run Phase 1 smoke checks with production-shaped placeholder
+content. This proves site structure, routing, page composition, SEO fields, and
+media wiring. It does not replace customer-approved final content and imagery.
 
 ## Scope Guardrail
 

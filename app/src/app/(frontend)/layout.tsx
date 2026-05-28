@@ -18,6 +18,7 @@ import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getCurrentLocale } from '@/utilities/siteContext'
+import { getSiteThemeTokens } from '@/utilities/siteTheme'
 import { buildOrganizationJSONLD, buildWebSiteJSONLD } from '@/utilities/structuredData'
 import { getCanonicalURL, normalizeCanonicalDomain } from '@/utilities/siteURLs'
 
@@ -25,12 +26,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { isEnabled } = await draftMode()
   const settings = await getCurrentSiteSettings()
   const locale = await getCurrentLocale()
-  const brandColor = settings?.branding?.brandColor || '#0F172A'
-  const accentColor = settings?.branding?.accentColor || '#F59E0B'
-  const siteThemeStyle = {
-    '--site-brand': brandColor,
-    '--site-accent': accentColor,
-  } as React.CSSProperties
+  const siteTheme = getSiteThemeTokens(settings)
 
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang={locale} suppressHydrationWarning>
@@ -38,9 +34,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <InitTheme />
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
-        <meta content={brandColor} name="theme-color" />
+        <meta content={siteTheme.brandColor} name="theme-color" />
       </head>
-      <body data-site-theme={settings?.siteName || 'WingsTravel'} style={siteThemeStyle}>
+      <body data-site-theme={siteTheme.themeName} style={siteTheme.style}>
         <JsonLd data={[buildOrganizationJSONLD(settings), buildWebSiteJSONLD(settings)]} />
         <Providers>
           <AdminBar

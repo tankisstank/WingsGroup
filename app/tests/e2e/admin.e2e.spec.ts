@@ -1,12 +1,20 @@
 import { test, expect, Page } from '@playwright/test'
 import { login } from '../helpers/login'
 import { seedTestUser, cleanupTestUser, testUser } from '../helpers/seedUser'
+import {
+  cleanupRoleScopedUsers,
+  scopedUsers,
+  seedRoleScopedUsers,
+  type RoleScopeSeed,
+} from '../helpers/seedRoleUsers'
 
 test.describe('Admin Panel', () => {
   let page: Page
+  let roleScope: RoleScopeSeed
 
   test.beforeAll(async ({ browser }) => {
     await seedTestUser()
+    roleScope = await seedRoleScopedUsers()
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -15,6 +23,7 @@ test.describe('Admin Panel', () => {
   })
 
   test.afterAll(async () => {
+    await cleanupRoleScopedUsers()
     await cleanupTestUser()
   })
 
@@ -37,5 +46,40 @@ test.describe('Admin Panel', () => {
     await expect(page).toHaveURL(/\/admin\/collections\/pages\/[a-zA-Z0-9-_]+/)
     const editViewArtifact = page.locator('input[name="title"]')
     await expect(editViewArtifact).toBeVisible()
+  })
+
+  test('site manager can read only assigned site settings through authenticated API', async ({ request }) => {
+    const auth = await request.post('http://localhost:3000/api/users/login', {
+      data: scopedUsers.siteManager,
+    })
+    expect(auth.ok()).toBe(true)
+
+    const ownSiteSettings = await request.get(
+      `http://localhost:3000/api/site-settings?depth=0&where[site][equals]=${roleScope.wingsGoSiteID}`,
+    )
+    expect(ownSiteSettings.ok()).toBe(true)
+    expect((await ownSiteSettings.json()).docs).toHaveLength(1)
+
+    const otherSiteSettings = await request.get(
+      `http://localhost:3000/api/site-settings?depth=0&where[site][equals]=${roleScope.wingsCareSiteID}`,
+    )
+    expect(otherSiteSettings.ok()).toBe(true)
+    expect((await otherSiteSettings.json()).docs).toHaveLength(0)
+  })
+
+  test('editor cannot create site settings through authenticated API', async ({ request }) => {
+    const auth = await request.post('http://localhost:3000/api/users/login', {
+      data: scopedUsers.editor,
+    })
+    expect(auth.ok()).toBe(true)
+
+    const createSettings = await request.post('http://localhost:3000/api/site-settings', {
+      data: {
+        site: roleScope.wingsGoSiteID,
+        siteName: 'Unauthorized Editor Settings',
+      },
+    })
+
+    expect(createSettings.status()).toBe(403)
   })
 })
