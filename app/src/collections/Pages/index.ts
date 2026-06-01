@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
+import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/access/siteScope'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
@@ -38,7 +38,15 @@ export const Pages: CollectionConfig<'pages'> = {
     slug: true,
   },
   admin: {
+    components: {
+      edit: {
+        beforeDocumentControls: ['@/components/AdminGuidance/PageEditGuidance'],
+      },
+    },
+    description:
+      'Quản lý trang theo site. Editor chỉ lưu nháp; site-manager hoặc super-admin duyệt publish.',
     defaultColumns: ['title', 'site', 'slug', 'updatedAt'],
+    group: 'Nội dung',
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
@@ -58,6 +66,7 @@ export const Pages: CollectionConfig<'pages'> = {
   fields: [
     {
       name: 'title',
+      label: 'Tiêu đề',
       type: 'text',
       localized: true,
       required: true,
@@ -65,9 +74,10 @@ export const Pages: CollectionConfig<'pages'> = {
     siteField(),
     {
       name: 'parentPage',
+      label: 'Trang cha',
       type: 'relationship',
       admin: {
-        description: 'Optional hierarchy parent used for visible breadcrumbs and internal linking.',
+        description: 'Chọn trang cha nếu cần hiển thị breadcrumb hoặc nhóm nội dung liên quan.',
         position: 'sidebar',
       },
       filterOptions: sameSiteFilterOptions,
@@ -93,7 +103,7 @@ export const Pages: CollectionConfig<'pages'> = {
               },
             },
           ],
-          label: 'Content',
+          label: 'Nội dung',
         },
         {
           name: 'meta',
@@ -114,9 +124,10 @@ export const Pages: CollectionConfig<'pages'> = {
             MetaDescriptionField({}),
             {
               name: 'breadcrumbLabel',
+              label: 'Nhãn breadcrumb',
               type: 'text',
               admin: {
-                description: 'Short label used in visible breadcrumbs and BreadcrumbList schema.',
+                description: 'Tên ngắn hiển thị trong breadcrumb và schema BreadcrumbList.',
               },
               localized: true,
             },
@@ -134,9 +145,10 @@ export const Pages: CollectionConfig<'pages'> = {
     },
     {
       name: 'relatedPages',
+      label: 'Trang liên quan',
       type: 'relationship',
       admin: {
-        description: 'Optional same-site links rendered below page content to reduce orphaned pages.',
+        description: 'Các trang cùng site được hiển thị bên dưới nội dung để tăng liên kết nội bộ.',
         position: 'sidebar',
       },
       filterOptions: sameSiteFilterOptions,
@@ -145,16 +157,47 @@ export const Pages: CollectionConfig<'pages'> = {
     },
     {
       name: 'publishedAt',
+      label: 'Ngày xuất bản',
       type: 'date',
       admin: {
         position: 'sidebar',
       },
     },
-    slugField(),
+    slugField({
+      overrides: (field) => {
+        field.fields = field.fields.map((item) => {
+          if ('name' in item && item.name === 'slug') {
+            return {
+              ...item,
+              label: 'Đường dẫn',
+              admin: {
+                ...item.admin,
+                description: 'Phần URL của trang. Chỉ sửa khi thật sự cần đổi đường dẫn.',
+              },
+            } as typeof item
+          }
+
+          if ('name' in item && item.name === 'generateSlug') {
+            return {
+              ...item,
+              label: 'Tự tạo đường dẫn từ tiêu đề',
+            } as typeof item
+          }
+
+          return item
+        }) as typeof field.fields
+
+        return field
+      },
+    }),
   ],
+  labels: {
+    plural: 'Trang',
+    singular: 'Trang',
+  },
   hooks: {
     afterChange: [revalidatePage],
-    beforeChange: [enforceSiteAccess, populatePublishedAt],
+    beforeChange: [enforceSiteAccess, preventEditorPublish, populatePublishedAt],
     afterDelete: [revalidateDelete],
   },
   versions: {

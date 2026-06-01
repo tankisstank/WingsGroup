@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
+import { hideFromNonSuperAdmins } from '@/access/roles'
 import { link } from '@/fields/link'
 import { revalidateHeader } from './hooks/revalidateHeader'
 
@@ -7,6 +8,10 @@ export const Header: GlobalConfig = {
   slug: 'header',
   access: {
     read: () => true,
+  },
+  admin: {
+    group: 'Nâng cao',
+    hidden: hideFromNonSuperAdmins,
   },
   fields: [
     {
@@ -29,4 +34,5 @@ export const Header: GlobalConfig = {
   hooks: {
     afterChange: [revalidateHeader],
   },
+  label: 'Header global',
 }

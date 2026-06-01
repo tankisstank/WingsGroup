@@ -32,12 +32,31 @@ test.describe('Admin Panel', () => {
     await expect(page).toHaveURL('http://localhost:3000/admin')
     const dashboardArtifact = page.locator('span[title="Dashboard"]').first()
     await expect(dashboardArtifact).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Bảng điều hành CMS' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Console vận hành' }).first()).toBeVisible()
+    await expect(page.locator('#wings-travel-metrics-0').getByRole('link', { name: 'Tạo trang nhanh' })).toBeVisible()
+    await expect(page.locator('#wings-travel-metrics-0').getByRole('link', { name: 'Lead gửi về' })).toBeVisible()
+    await expect(page.locator('#wings-travel-metrics-0').getByRole('link', { name: /Trang \d+/ })).toBeVisible()
+  })
+
+  test('can open operator console', async () => {
+    await page.goto('http://localhost:3000/admin/console')
+    await expect(page.getByRole('heading', { name: 'Console vận hành' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Tạo trang nhanh' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Xem lead mới' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Nâng cao' })).toBeVisible()
+  })
+
+  test('can open quick page wizard', async () => {
+    await page.goto('http://localhost:3000/admin/page-wizard')
+    await expect(page.getByRole('heading', { name: 'Tạo trang nhanh' })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Landing page chiến dịch/ })).toBeVisible()
   })
 
   test('can navigate to list view', async () => {
     await page.goto('http://localhost:3000/admin/collections/users')
     await expect(page).toHaveURL('http://localhost:3000/admin/collections/users')
-    const listViewArtifact = page.locator('h1', { hasText: 'Users' }).first()
+    const listViewArtifact = page.locator('h1', { hasText: 'Người dùng' }).first()
     await expect(listViewArtifact).toBeVisible()
   })
 
@@ -81,5 +100,36 @@ test.describe('Admin Panel', () => {
     })
 
     expect(createSettings.status()).toBe(403)
+  })
+
+  test('editor console hides data exchange and advanced admin links', async ({ browser }) => {
+    const context = await browser.newContext()
+    const editorPage = await context.newPage()
+
+    await login({ page: editorPage, user: scopedUsers.editor })
+    await editorPage.goto('http://localhost:3000/admin/console')
+
+    await expect(editorPage.getByRole('heading', { name: 'Console vận hành' })).toBeVisible()
+    await expect(editorPage.getByRole('link', { name: 'Tạo trang nhanh' })).toBeVisible()
+    await expect(editorPage.getByRole('link', { name: 'Nhập dữ liệu' })).toHaveCount(0)
+    await expect(editorPage.getByRole('link', { name: 'Xuất dữ liệu' })).toHaveCount(0)
+    await expect(editorPage.getByRole('heading', { name: 'Nâng cao' })).toHaveCount(0)
+
+    await context.close()
+  })
+
+  test('site manager sees guided import and lead guidance', async ({ browser }) => {
+    const context = await browser.newContext()
+    const managerPage = await context.newPage()
+
+    await login({ page: managerPage, user: scopedUsers.siteManager })
+    await managerPage.goto('http://localhost:3000/admin/console')
+    await expect(managerPage.getByRole('link', { name: 'Nhập dữ liệu' }).first()).toBeVisible()
+    await expect(managerPage.getByRole('heading', { name: 'Nâng cao' })).toHaveCount(0)
+
+    await managerPage.goto('http://localhost:3000/admin/collections/form-submissions')
+    await expect(managerPage.getByText('Lead sẽ tự xuất hiện')).toBeVisible()
+
+    await context.close()
   })
 })

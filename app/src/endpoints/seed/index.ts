@@ -11,14 +11,15 @@ import { post2 } from './post-2'
 import { post3 } from './post-3'
 
 const collections: CollectionSlug[] = [
-  'sites',
-  'categories',
-  'media',
+  'form-submissions',
   'pages',
   'posts',
+  'categories',
+  'media',
   'forms',
-  'form-submissions',
+  'site-settings',
   'search',
+  'sites',
 ]
 
 const globals: GlobalSlug[] = ['header', 'footer']
@@ -270,7 +271,10 @@ export const seed = async ({
     depth: 0,
     req,
     context: seedContext,
-    data: contactFormData,
+    data: {
+      ...contactFormData,
+      site: seedSite.id,
+    },
   })
 
   payload.logger.info(`— Seeding pages...`)

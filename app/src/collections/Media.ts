@@ -25,10 +25,12 @@ export const Media: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['filename', 'alt', 'site', 'updatedAt'],
+    group: 'Media',
   },
   fields: [
     {
       name: 'alt',
+      label: 'Mô tả ảnh',
       type: 'text',
       localized: true,
       //required: true,
@@ -36,6 +38,7 @@ export const Media: CollectionConfig = {
     siteField(),
     {
       name: 'caption',
+      label: 'Chú thích',
       type: 'richText',
       localized: true,
       editor: lexicalEditor({
@@ -45,6 +48,10 @@ export const Media: CollectionConfig = {
       }),
     },
   ],
+  labels: {
+    plural: 'Thư viện media',
+    singular: 'Media',
+  },
   upload: {
     // Upload to the public/media directory in Next.js making them publicly accessible even outside of Payload
     staticDir: path.resolve(dirname, '../../public/media'),

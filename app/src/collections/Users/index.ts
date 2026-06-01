@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import {
   adminAccess,
+  hideFromNonSuperAdmins,
   superAdminFieldAccess,
   superAdminOnly,
   usersReadAccess,
@@ -21,16 +22,20 @@ export const Users: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['name', 'email', 'role'],
+    group: 'Nâng cao',
+    hidden: hideFromNonSuperAdmins,
     useAsTitle: 'name',
   },
   auth: true,
   fields: [
     {
       name: 'name',
+      label: 'Tên người dùng',
       type: 'text',
     },
     {
       name: 'role',
+      label: 'Vai trò',
       type: 'select',
       required: true,
       defaultValue: 'editor',
@@ -55,7 +60,7 @@ export const Users: CollectionConfig = {
     },
     {
       name: 'sites',
-      label: 'Assigned Sites',
+      label: 'Site được phân quyền',
       type: 'relationship',
       relationTo: 'sites',
       hasMany: true,
@@ -64,7 +69,7 @@ export const Users: CollectionConfig = {
       admin: {
         position: 'sidebar',
         condition: (_, siblingData) => siblingData?.role !== 'super-admin',
-        description: 'Users with site roles can only access the sites assigned here.',
+        description: 'Người dùng theo site chỉ truy cập được các site được gán tại đây.',
       },
       validate: (value: unknown, { siblingData }: { siblingData: { role?: AppRole } }) => {
         if (siblingData?.role === 'super-admin') {
@@ -75,7 +80,7 @@ export const Users: CollectionConfig = {
           return true
         }
 
-        return 'Please assign at least one site to this user.'
+        return 'Vui lòng gán ít nhất một site cho người dùng này.'
       },
       access: {
         create: superAdminFieldAccess,
@@ -84,4 +89,8 @@ export const Users: CollectionConfig = {
     },
   ],
   timestamps: true,
+  labels: {
+    plural: 'Người dùng',
+    singular: 'Người dùng',
+  },
 }

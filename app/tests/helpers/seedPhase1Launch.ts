@@ -126,7 +126,7 @@ export async function seedPhase1LaunchSmoke(): Promise<void> {
         },
         {
           slug: {
-            equals: 'campaign',
+            equals: 'wings-go-campaign',
           },
         },
       ],
@@ -210,6 +210,7 @@ export async function seedPhase1LaunchSmoke(): Promise<void> {
       req,
       data: seedData({
         title: 'WingsGo Contact Form',
+        site: site.id,
         submitButtonLabel: 'Send request',
         confirmationType: 'message',
         confirmationMessage: richText('Request received', 'Your message has been submitted.'),
@@ -235,9 +236,9 @@ export async function seedPhase1LaunchSmoke(): Promise<void> {
     collection: 'pages',
     context: seedContext,
     req,
-    data: seedData({
-      title: 'WingsGo Campaign Landing',
-      slug: 'campaign',
+      data: seedData({
+        title: 'WingsGo Campaign Landing',
+      slug: 'wings-go-campaign',
       _status: 'published',
       site: site.id,
       parentPage: homeResult.docs[0]?.id,

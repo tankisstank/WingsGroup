@@ -77,6 +77,8 @@ export interface Config {
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
+    exports: Export;
+    imports: Import;
     search: Search;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -96,6 +98,8 @@ export interface Config {
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
+    exports: ExportsSelect<false> | ExportsSelect<true>;
+    imports: ImportsSelect<false> | ImportsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -117,11 +121,14 @@ export interface Config {
   };
   locale: 'vi' | 'en';
   widgets: {
+    'wings-travel-metrics': WingsTravelMetricsWidget;
     collections: CollectionsWidget;
   };
   user: User;
   jobs: {
     tasks: {
+      createCollectionExport: TaskCreateCollectionExport;
+      createCollectionImport: TaskCreateCollectionImport;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -157,7 +164,7 @@ export interface Site {
   id: number;
   name: string;
   /**
-   * Internal code, for example wings-travel or wings-care.
+   * Mã nội bộ, ví dụ wings-travel hoặc wings-care.
    */
   code: string;
   primaryDomain: string;
@@ -185,11 +192,11 @@ export interface SiteSetting {
   branding?: {
     logoText?: string | null;
     /**
-     * Hex color for primary brand surfaces, for example #0F766E.
+     * Mã màu hex cho bề mặt thương hiệu chính, ví dụ #0F766E.
      */
     brandColor?: string | null;
     /**
-     * Hex color for secondary accents, for example #F59E0B.
+     * Mã màu hex cho điểm nhấn phụ, ví dụ #F59E0B.
      */
     accentColor?: string | null;
     logoImage?: (number | null) | Media;
@@ -341,6 +348,8 @@ export interface Media {
   };
 }
 /**
+ * Quản lý trang theo site. Editor chỉ lưu nháp; site-manager hoặc super-admin duyệt publish.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -349,7 +358,7 @@ export interface Page {
   title: string;
   site: number | Site;
   /**
-   * Optional hierarchy parent used for visible breadcrumbs and internal linking.
+   * Chọn trang cha nếu cần hiển thị breadcrumb hoặc nhóm nội dung liên quan.
    */
   parentPage?: (number | null) | Page;
   hero: {
@@ -404,12 +413,12 @@ export interface Page {
     image?: (number | null) | Media;
     description?: string | null;
     /**
-     * Short label used in visible breadcrumbs and BreadcrumbList schema.
+     * Tên ngắn hiển thị trong breadcrumb và schema BreadcrumbList.
      */
     breadcrumbLabel?: string | null;
   };
   /**
-   * Optional same-site links rendered below page content to reduce orphaned pages.
+   * Các trang cùng site được hiển thị bên dưới nội dung để tăng liên kết nội bộ.
    */
   relatedPages?: (number | Page)[] | null;
   publishedAt?: string | null;
@@ -417,12 +426,17 @@ export interface Page {
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
+  /**
+   * Phần URL của trang. Chỉ sửa khi thật sự cần đổi đường dẫn.
+   */
   slug: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Quản lý bài viết theo site. Editor chỉ lưu nháp; site-manager hoặc super-admin duyệt publish.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
@@ -456,7 +470,7 @@ export interface Post {
     image?: (number | null) | Media;
     description?: string | null;
     /**
-     * Short label used in visible breadcrumbs and BreadcrumbList schema.
+     * Tên ngắn hiển thị trong breadcrumb và schema BreadcrumbList.
      */
     breadcrumbLabel?: string | null;
   };
@@ -472,6 +486,9 @@ export interface Post {
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
+  /**
+   * Phần URL của bài viết. Chỉ sửa khi thật sự cần đổi đường dẫn.
+   */
   slug: string;
   updatedAt: string;
   createdAt: string;
@@ -511,7 +528,7 @@ export interface User {
   name?: string | null;
   role: 'super-admin' | 'site-manager' | 'editor';
   /**
-   * Users with site roles can only access the sites assigned here.
+   * Người dùng theo site chỉ truy cập được các site được gán tại đây.
    */
   sites?: (number | Site)[] | null;
   updatedAt: string;
@@ -707,6 +724,7 @@ export interface FormBlock {
  */
 export interface Form {
   id: number;
+  site?: (number | null) | Site;
   title: string;
   fields?:
     | (
@@ -907,6 +925,7 @@ export interface Redirect {
  */
 export interface FormSubmission {
   id: number;
+  site?: (number | null) | Site;
   form: number | Form;
   submissionData?:
     | {
@@ -917,6 +936,81 @@ export interface FormSubmission {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exports".
+ */
+export interface Export {
+  id: number;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'vi' | 'en') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "imports".
+ */
+export interface Import {
+  id: number;
+  collectionSlug: string;
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
@@ -1018,7 +1112,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
+        taskSlug: 'inline' | 'createCollectionExport' | 'createCollectionImport' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1051,7 +1145,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'createCollectionExport' | 'createCollectionImport' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -1563,6 +1657,7 @@ export interface RedirectsSelect<T extends boolean = true> {
  * via the `definition` "forms_select".
  */
 export interface FormsSelect<T extends boolean = true> {
+  site?: T;
   title?: T;
   fields?:
     | T
@@ -1696,6 +1791,7 @@ export interface FormsSelect<T extends boolean = true> {
  * via the `definition` "form-submissions_select".
  */
 export interface FormSubmissionsSelect<T extends boolean = true> {
+  site?: T;
   form?: T;
   submissionData?:
     | T
@@ -1706,6 +1802,65 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exports_select".
+ */
+export interface ExportsSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  page?: T;
+  sort?: T;
+  sortOrder?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "imports_select".
+ */
+export interface ImportsSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  importMode?: T;
+  matchField?: T;
+  status?: T;
+  summary?:
+    | T
+    | {
+        imported?: T;
+        updated?: T;
+        total?: T;
+        issues?: T;
+        issueDetails?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1911,6 +2066,16 @@ export interface FooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "wings-travel-metrics_widget".
+ */
+export interface WingsTravelMetricsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -1918,6 +2083,68 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateCollectionExport".
+ */
+export interface TaskCreateCollectionExport {
+  input: {
+    id: string;
+    name: string;
+    batchSize?: number | null;
+    collectionSlug:
+      | 'sites'
+      | 'site-settings'
+      | 'pages'
+      | 'posts'
+      | 'media'
+      | 'categories'
+      | 'users'
+      | 'redirects'
+      | 'forms'
+      | 'form-submissions'
+      | 'exports'
+      | 'imports';
+    drafts?: ('yes' | 'no') | null;
+    exportCollection: string;
+    fields?: string[] | null;
+    format: 'csv' | 'json';
+    limit?: number | null;
+    locale?: string | null;
+    maxLimit?: number | null;
+    page?: number | null;
+    sort?: string | null;
+    userCollection?: string | null;
+    userID?: string | null;
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateCollectionImport".
+ */
+export interface TaskCreateCollectionImport {
+  input: {
+    importId: string;
+    importCollection: string;
+    userID?: string | null;
+    userCollection?: string | null;
+    batchSize?: number | null;
+    debug?: boolean | null;
+    defaultVersionStatus?: ('draft' | 'published') | null;
+    maxLimit?: number | null;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

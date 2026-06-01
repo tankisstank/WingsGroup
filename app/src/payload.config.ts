@@ -1,5 +1,7 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
+import { en } from 'payload/i18n/en'
+import { vi } from 'payload/i18n/vi'
 import sharp from 'sharp'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
@@ -27,12 +29,39 @@ const isPostgresURL =
 export default buildConfig({
   admin: {
     components: {
-      // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below.
       beforeLogin: ['@/components/BeforeLogin'],
-      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below.
       beforeDashboard: ['@/components/BeforeDashboard'],
+      beforeNav: ['@/components/AdminNavIntro'],
+      graphics: {
+        Icon: '@/components/AdminBranding/Icon#AdminIcon',
+        Logo: '@/components/AdminBranding/Logo#AdminLogo',
+      },
+      views: {
+        operatorConsole: {
+          Component: '@/components/AdminOperatorConsole',
+          path: '/console',
+        },
+        pageWizard: {
+          Component: '@/components/PageWizard',
+          path: '/page-wizard',
+        },
+      },
+    },
+    dashboard: {
+      defaultLayout: [
+        {
+          widgetSlug: 'wings-travel-metrics',
+          width: 'full',
+        },
+      ],
+      widgets: [
+        {
+          slug: 'wings-travel-metrics',
+          Component: '@/components/AdminDashboard/WingsTravelMetrics#WingsTravelMetrics',
+          minWidth: 'full',
+          maxWidth: 'full',
+        },
+      ],
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -63,6 +92,13 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
+  i18n: {
+    fallbackLanguage: 'vi',
+    supportedLanguages: {
+      en,
+      vi,
+    },
+  },
   db: isPostgresURL
     ? postgresAdapter({
         pool: {
@@ -87,7 +123,7 @@ export default buildConfig({
     locales: [
       {
         code: 'vi',
-        label: 'Vietnamese',
+        label: 'Tiếng Việt',
       },
       {
         code: 'en',

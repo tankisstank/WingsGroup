@@ -256,7 +256,7 @@ async function seedSite(payload: Payload, req: PayloadRequest, siteSeed: SiteSee
   await clearSiteContent(payload, req, site.id)
   const homeSlug = siteSeed.code === 'wings-travel' ? 'home' : `${siteSeed.code}-home`
   const contactSlug = siteSeed.code === 'wings-travel' ? 'contact' : `${siteSeed.code}-contact`
-  const landingSlug = 'campaign'
+  const landingSlug = siteSeed.code === 'wings-travel' ? 'campaign' : `${siteSeed.code}-campaign`
 
   const heroFile = await fetchFileByURL(
     'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp',
@@ -310,6 +310,7 @@ async function seedSite(payload: Payload, req: PayloadRequest, siteSeed: SiteSee
     context: seedContext,
     data: {
       title: `${siteSeed.name} Contact Form`,
+      site: site.id,
       submitButtonLabel: 'Send request',
       confirmationType: 'message',
       confirmationMessage: richText(

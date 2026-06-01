@@ -9,7 +9,12 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { contentCreateAccess, contentDeleteAccess, normalizeRelationID } from '@/access/roles'
+import {
+  contentCreateAccess,
+  contentDeleteAccess,
+  normalizeRelationID,
+  preventEditorPublish,
+} from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/access/siteScope'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
@@ -49,7 +54,10 @@ export const Posts: CollectionConfig<'posts'> = {
     },
   },
   admin: {
+    description:
+      'Quản lý bài viết theo site. Editor chỉ lưu nháp; site-manager hoặc super-admin duyệt publish.',
     defaultColumns: ['title', 'site', 'slug', 'updatedAt'],
+    group: 'Nội dung',
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
@@ -69,6 +77,7 @@ export const Posts: CollectionConfig<'posts'> = {
   fields: [
     {
       name: 'title',
+      label: 'Tiêu đề',
       type: 'text',
       localized: true,
       required: true,
@@ -81,11 +90,13 @@ export const Posts: CollectionConfig<'posts'> = {
           fields: [
             {
               name: 'heroImage',
+              label: 'Ảnh chính',
               type: 'upload',
               relationTo: 'media',
             },
             {
               name: 'content',
+              label: 'Nội dung',
               type: 'richText',
               localized: true,
               editor: lexicalEditor({
@@ -100,16 +111,16 @@ export const Posts: CollectionConfig<'posts'> = {
                   ]
                 },
               }),
-              label: false,
               required: true,
             },
           ],
-          label: 'Content',
+          label: 'Nội dung',
         },
         {
           fields: [
             {
               name: 'relatedPosts',
+              label: 'Bài viết liên quan',
               type: 'relationship',
               admin: {
                 position: 'sidebar',
@@ -147,6 +158,7 @@ export const Posts: CollectionConfig<'posts'> = {
             },
             {
               name: 'categories',
+              label: 'Danh mục',
               type: 'relationship',
               admin: {
                 position: 'sidebar',
@@ -178,9 +190,10 @@ export const Posts: CollectionConfig<'posts'> = {
             MetaDescriptionField({}),
             {
               name: 'breadcrumbLabel',
+              label: 'Nhãn breadcrumb',
               type: 'text',
               admin: {
-                description: 'Short label used in visible breadcrumbs and BreadcrumbList schema.',
+                description: 'Tên ngắn hiển thị trong breadcrumb và schema BreadcrumbList.',
               },
               localized: true,
             },
@@ -198,6 +211,7 @@ export const Posts: CollectionConfig<'posts'> = {
     },
     {
       name: 'publishedAt',
+      label: 'Ngày xuất bản',
       type: 'date',
       admin: {
         date: {
@@ -218,6 +232,7 @@ export const Posts: CollectionConfig<'posts'> = {
     },
     {
       name: 'authors',
+      label: 'Tác giả',
       type: 'relationship',
       admin: {
         position: 'sidebar',
@@ -249,12 +264,42 @@ export const Posts: CollectionConfig<'posts'> = {
         },
       ],
     },
-    slugField(),
+    slugField({
+      overrides: (field) => {
+        field.fields = field.fields.map((item) => {
+          if ('name' in item && item.name === 'slug') {
+            return {
+              ...item,
+              label: 'Đường dẫn',
+              admin: {
+                ...item.admin,
+                description: 'Phần URL của bài viết. Chỉ sửa khi thật sự cần đổi đường dẫn.',
+              },
+            } as typeof item
+          }
+
+          if ('name' in item && item.name === 'generateSlug') {
+            return {
+              ...item,
+              label: 'Tự tạo đường dẫn từ tiêu đề',
+            } as typeof item
+          }
+
+          return item
+        }) as typeof field.fields
+
+        return field
+      },
+    }),
   ],
+  labels: {
+    plural: 'Bài viết',
+    singular: 'Bài viết',
+  },
   hooks: {
     afterChange: [revalidatePost],
     afterRead: [populateAuthors],
-    beforeChange: [enforceSiteAccess],
+    beforeChange: [enforceSiteAccess, preventEditorPublish],
     afterDelete: [revalidateDelete],
   },
   versions: {

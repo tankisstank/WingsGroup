@@ -35,7 +35,7 @@ test.describe('Phase 1 public frontend smoke', () => {
   test('loads the seeded campaign landing page for a child site', async ({ page }) => {
     await page.goto('http://localhost:3000/wingsgo/campaign')
     await expect(page).toHaveTitle(/Campaign/)
-    await expect(page.getByRole('heading', { name: /Campaign Landing/ }).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: /campaign landing page/i }).first()).toBeVisible()
     await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toContainText('Campaign')
     await expect(page.getByRole('link', { name: /Contact/i }).first()).toBeVisible()
   })

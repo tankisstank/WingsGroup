@@ -4,6 +4,8 @@
   margin-bottom: base(1.5);
 
   &__banner {
+    border-radius: 6px;
+
     & h4 {
       margin: 0;
     }
@@ -12,6 +14,7 @@
   &__instructions {
     list-style: decimal;
     margin-bottom: base(0.5);
+    padding-left: base(0.9);
 
     & li {
       width: 100%;

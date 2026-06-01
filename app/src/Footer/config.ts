@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
+import { hideFromNonSuperAdmins } from '@/access/roles'
 import { link } from '@/fields/link'
 import { revalidateFooter } from './hooks/revalidateFooter'
 
@@ -7,6 +8,10 @@ export const Footer: GlobalConfig = {
   slug: 'footer',
   access: {
     read: () => true,
+  },
+  admin: {
+    group: 'Nâng cao',
+    hidden: hideFromNonSuperAdmins,
   },
   fields: [
     {
@@ -29,4 +34,5 @@ export const Footer: GlobalConfig = {
   hooks: {
     afterChange: [revalidateFooter],
   },
+  label: 'Footer global',
 }

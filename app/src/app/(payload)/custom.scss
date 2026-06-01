@@ -1,0 +1,142 @@
+@import '@payloadcms/ui/scss';
+
+:root {
+  --wings-admin-accent: #0f766e;
+  --wings-admin-accent-soft: #d9f2ee;
+  --wings-admin-ink: #18312f;
+}
+
+.wings-admin-icon {
+  align-items: center;
+  background: var(--wings-admin-accent);
+  border-radius: 6px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-weight: 700;
+  height: 28px;
+  justify-content: center;
+  letter-spacing: 0;
+  line-height: 1;
+  width: 28px;
+}
+
+.wings-admin-logo {
+  align-items: center;
+  color: var(--theme-text);
+  display: inline-flex;
+  gap: base(0.45);
+  min-width: 0;
+
+  &__mark {
+    align-items: center;
+    background: var(--wings-admin-accent);
+    border-radius: 8px;
+    color: #fff;
+    display: inline-flex;
+    font-weight: 700;
+    height: 38px;
+    justify-content: center;
+    width: 38px;
+  }
+
+  &__text {
+    display: grid;
+    gap: 2px;
+    line-height: 1.1;
+
+    strong,
+    span {
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    span {
+      color: var(--theme-elevation-550);
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.wings-login-note {
+  border-left: 3px solid var(--wings-admin-accent);
+  color: var(--theme-text);
+  margin-bottom: base(0.75);
+  padding-left: base(0.55);
+
+  p {
+    margin: 0;
+  }
+}
+
+.wings-admin-nav-intro {
+  background: color-mix(in srgb, var(--theme-elevation-50) 86%, var(--wings-admin-accent-soft));
+  border: 1px solid var(--theme-elevation-100);
+  border-radius: 6px;
+  display: grid;
+  gap: 2px;
+  margin: 0 base(0.6) base(0.6);
+  padding: base(0.45);
+
+  span {
+    color: var(--theme-elevation-550);
+    font-size: 0.72rem;
+  }
+
+  strong {
+    color: var(--wings-admin-ink);
+    font-size: 0.9rem;
+  }
+
+  a {
+    color: var(--wings-admin-accent);
+    font-size: 0.82rem;
+    text-decoration: none;
+  }
+}
+
+.wings-admin-guidance {
+  border: 1px solid var(--theme-elevation-150);
+  border-left: 4px solid var(--wings-admin-accent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--theme-elevation-50) 90%, var(--wings-admin-accent-soft));
+  margin-bottom: base(0.8);
+  padding: base(0.65);
+
+  strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--theme-text);
+  }
+
+  p {
+    margin: 0;
+    color: var(--theme-elevation-700);
+    line-height: 1.5;
+  }
+
+  div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: base(0.45);
+  }
+
+  a {
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: 999px;
+    padding: 5px 9px;
+    color: var(--wings-admin-accent);
+    text-decoration: none;
+  }
+
+  &--warning {
+    border-left-color: var(--theme-warning-500);
+  }
+}
+
+.dashboard {
+  .dashboard__wrap {
+    gap: base(1);
+  }
+}

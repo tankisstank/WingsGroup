@@ -29,6 +29,12 @@ Before final delivery:
 4. Confirm that operational steps match the deployed environment and live role
    permissions.
 
+Current package status:
+
+- CMS operator console and quick page wizard guidance are documented.
+- Role guides reflect `super-admin`, `site-manager`, and `editor` restrictions.
+- Import/export and lead handling notes are aligned with phase-1 scope.
+
 ## Audience
 
 These docs are written for the customer-side operational team, not only for the

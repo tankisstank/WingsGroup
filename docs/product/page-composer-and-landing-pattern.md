@@ -17,6 +17,25 @@ The current composer surface is:
 - `parentPage` and `relatedPages`: hierarchy and crawlable internal linking.
 - `site` and localized fields: site-aware and locale-aware editorial control.
 
+## Guided Creation
+
+Phase 1 includes a guided creation flow at `/admin/page-wizard` with template
+scaffolds for common WingsTravel use cases:
+
+- Trang chủ site
+- Trang giới thiệu
+- Trang nội dung
+- Landing page chiến dịch
+- Trang dịch vụ
+- Trang tour / gói du lịch
+- Trang điểm đến
+- Trang bảo hiểm / chăm sóc
+- Trang thu lead
+- Trang liên hệ
+
+For lead-oriented templates, the wizard attempts to attach a site-relevant
+`formBlock` when a form exists. All wizard outputs are draft pages.
+
 ## Phase 1 Landing Pattern
 
 The reusable campaign landing pattern must include these block types:

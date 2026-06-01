@@ -158,8 +158,7 @@ const queryPageBySlug = cache(
     const { isEnabled: draft } = await draftMode()
 
     const payload = await getPayload({ config: configPromise })
-    const candidateSlugs =
-      siteCode && ['home', 'contact'].includes(slug) ? [slug, `${siteCode}-${slug}`] : [slug]
+    const candidateSlugs = siteCode ? [slug, `${siteCode}-${slug}`] : [slug]
     const where = await appendSiteWhere(
       {
         slug: {

@@ -1,6 +1,12 @@
 import type { AccessArgs } from 'payload'
 
-import { contentCreateAccess, contentDeleteAccess, usersReadAccess } from '@/access/roles'
+import {
+  contentCreateAccess,
+  contentDeleteAccess,
+  contentPublishAccess,
+  preventEditorPublish,
+  usersReadAccess,
+} from '@/access/roles'
 import { enforceSiteAccess, siteManagerScopedAccess, siteScopedAccess } from '@/access/siteScope'
 import type { AppUser } from '@/types/auth'
 import { describe, expect, it } from 'vitest'
@@ -39,6 +45,38 @@ describe('site-scoped editorial access', () => {
     expect(contentDeleteAccess(accessArgs(editor))).toBe(false)
     expect(contentDeleteAccess(accessArgs(siteManager))).toBe(true)
     expect(contentDeleteAccess(accessArgs(superAdmin))).toBe(true)
+
+    expect(contentPublishAccess(accessArgs(editor))).toBe(false)
+    expect(contentPublishAccess(accessArgs(siteManager))).toBe(true)
+    expect(contentPublishAccess(accessArgs(superAdmin))).toBe(true)
+  })
+
+  it('allows editors to save drafts but blocks direct publishing', () => {
+    expect(
+      preventEditorPublish({
+        data: {
+          _status: 'draft',
+        },
+        operation: 'create',
+        req: {
+          user: editor,
+        },
+      } as never),
+    ).toEqual({
+      _status: 'draft',
+    })
+
+    expect(() =>
+      preventEditorPublish({
+        data: {
+          _status: 'published',
+        },
+        operation: 'update',
+        req: {
+          user: editor,
+        },
+      } as never),
+    ).toThrow('Editors can save drafts but cannot publish content.')
   })
 
   it('scopes non-super-admin reads to assigned sites', () => {

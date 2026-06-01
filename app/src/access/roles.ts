@@ -1,4 +1,4 @@
-import type { Access, Where } from 'payload'
+import type { Access, CollectionBeforeChangeHook, Where } from 'payload'
 
 import type { AppRole, AppUser, RelationID, RelationValue } from '@/types/auth'
 
@@ -63,8 +63,30 @@ export const contentDeleteAccess: Access = ({ req }) => {
   return hasRole(req.user as AppUser | undefined, managerRoles)
 }
 
+export const contentPublishAccess: Access = ({ req }) => {
+  return hasRole(req.user as AppUser | undefined, managerRoles)
+}
+
+export const preventEditorPublish: CollectionBeforeChangeHook = ({ data, req }) => {
+  const user = req.user as AppUser | undefined
+
+  if (user?.role === 'editor' && data?._status === 'published') {
+    throw new Error('Editors can save drafts but cannot publish content.')
+  }
+
+  return data
+}
+
 export const superAdminOnly: Access = ({ req }) => {
   return isSuperAdmin(req.user as AppUser | undefined)
+}
+
+export const hideFromNonSuperAdmins = ({ user }: { user?: unknown }): boolean => {
+  return !isSuperAdmin(user as AppUser | undefined)
+}
+
+export const hideFromEditors = ({ user }: { user?: unknown }): boolean => {
+  return (user as AppUser | undefined)?.role === 'editor'
 }
 
 export const usersReadAccess: Access = ({ req }) => {

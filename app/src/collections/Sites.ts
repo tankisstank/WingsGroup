@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminAccess, superAdminOnly } from '@/access/roles'
+import { adminAccess, hideFromNonSuperAdmins, superAdminOnly } from '@/access/roles'
 import { siteScopedAccess } from '@/access/siteScope'
 
 export const Sites: CollectionConfig = {
@@ -14,31 +14,37 @@ export const Sites: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['name', 'code', 'primaryDomain', 'updatedAt'],
+    group: 'Nâng cao',
+    hidden: hideFromNonSuperAdmins,
     useAsTitle: 'name',
   },
   fields: [
     {
       name: 'name',
+      label: 'Tên site',
       type: 'text',
       required: true,
     },
     {
       name: 'code',
+      label: 'Mã site',
       type: 'text',
       required: true,
       unique: true,
       admin: {
-        description: 'Internal code, for example wings-travel or wings-care.',
+        description: 'Mã nội bộ, ví dụ wings-travel hoặc wings-care.',
       },
     },
     {
       name: 'primaryDomain',
+      label: 'Domain chính',
       type: 'text',
       required: true,
       unique: true,
     },
     {
       name: 'additionalDomains',
+      label: 'Domain bổ sung',
       type: 'array',
       admin: {
         initCollapsed: true,
@@ -46,6 +52,7 @@ export const Sites: CollectionConfig = {
       fields: [
         {
           name: 'domain',
+          label: 'Domain',
           type: 'text',
           required: true,
         },
@@ -53,13 +60,14 @@ export const Sites: CollectionConfig = {
     },
     {
       name: 'supportedLocales',
+      label: 'Ngôn ngữ hỗ trợ',
       type: 'select',
       hasMany: true,
       required: true,
       defaultValue: ['vi', 'en'],
       options: [
         {
-          label: 'Vietnamese',
+          label: 'Tiếng Việt',
           value: 'vi',
         },
         {
@@ -70,12 +78,13 @@ export const Sites: CollectionConfig = {
     },
     {
       name: 'defaultLocale',
+      label: 'Ngôn ngữ mặc định',
       type: 'select',
       required: true,
       defaultValue: 'vi',
       options: [
         {
-          label: 'Vietnamese',
+          label: 'Tiếng Việt',
           value: 'vi',
         },
         {
@@ -86,9 +95,14 @@ export const Sites: CollectionConfig = {
     },
     {
       name: 'isActive',
+      label: 'Đang hoạt động',
       type: 'checkbox',
       defaultValue: true,
     },
   ],
   timestamps: true,
+  labels: {
+    plural: 'Site',
+    singular: 'Site',
+  },
 }

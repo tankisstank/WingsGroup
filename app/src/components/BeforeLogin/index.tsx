@@ -2,10 +2,10 @@ import React from 'react'
 
 const BeforeLogin: React.FC = () => {
   return (
-    <div>
+    <div className="wings-login-note">
       <p>
-        <b>Welcome to your dashboard!</b>
-        {' This is where site admins will log in to manage your website.'}
+        <b>WingsTravel CMS</b>
+        {' Đăng nhập để quản lý nội dung theo site, xuất bản, media, lead và import/export dữ liệu.'}
       </p>
     </div>
   )
