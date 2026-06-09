@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WingsTravel Sites and Sitemaps</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --paper: #fbfaf6;
+        --paper-2: #f4efe3;
+        --ink: #1c1917;
+        --muted: #57534e;
+        --soft: #78716c;
+        --rule: rgba(28, 25, 23, 0.12);
+        --rule-strong: #d6d3d1;
+        --accent: #a16207;
+        --accent-tint: rgba(161, 98, 7, 0.08);
+        --link: #0f766e;
+        --card-shadow: 0 18px 46px rgba(28, 25, 23, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Geist", sans-serif;
+        background:
+          radial-gradient(circle at top right, rgba(161, 98, 7, 0.12), transparent 26rem),
+          radial-gradient(circle at top left, rgba(28, 25, 23, 0.08), transparent 22rem),
+          linear-gradient(180deg, #ffffff 0%, var(--paper) 54%, #f8f4ea 100%);
+      }
+
+      .page {
+        width: min(1440px, calc(100vw - 32px));
+        margin: 0 auto;
+        padding: 40px 0 72px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 24px;
+        margin-bottom: 40px;
+      }
+
+      .eyebrow,
+      .label,
+      .site-domain,
+      .route-tag,
+      .note {
+        font-family: "Geist Mono", monospace;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(38px, 5vw, 62px);
+        line-height: 1.02;
+        font-weight: 700;
+      }
+
+      .hero p,
+      .section-header p {
+        max-width: 960px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.75;
+      }
+
+      .meta-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .meta-card,
+      .panel,
+      .site-card {
+        border: 1px solid var(--rule);
+        background: rgba(255, 255, 255, 0.86);
+        box-shadow: var(--card-shadow);
+      }
+
+      .meta-card {
+        border-radius: 18px;
+        padding: 18px 20px;
+      }
+
+      .meta-card strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 18px;
+        line-height: 1.4;
+      }
+
+      .section {
+        margin-top: 42px;
+      }
+
+      .section-header {
+        margin-bottom: 20px;
+      }
+
+      .section-header h2 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        line-height: 1.15;
+      }
+
+      .panel {
+        border-radius: 24px;
+        padding: 28px;
+        background:
+          radial-gradient(circle at 100% 0, rgba(161, 98, 7, 0.08), transparent 18rem),
+          rgba(255, 255, 255, 0.86);
+      }
+
+      .overview-stack {
+        display: grid;
+        gap: 22px;
+      }
+
+      .overview-root {
+        width: min(420px, 100%);
+        margin: 0 auto;
+        padding: 22px 24px;
+        border: 1.5px solid var(--accent);
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(161, 98, 7, 0.07), rgba(255, 255, 255, 0.96));
+        text-align: center;
+      }
+
+      .overview-root h3,
+      .site-card h3,
+      .tree-root strong,
+      .group-title {
+        margin: 0;
+      }
+
+      .overview-root h3 {
+        font-size: 32px;
+      }
+
+      .overview-root p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .overview-line {
+        width: 2px;
+        height: 32px;
+        margin: 0 auto;
+        background: linear-gradient(180deg, var(--accent), rgba(161, 98, 7, 0.2));
+      }
+
+      .overview-sites {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .overview-site {
+        min-height: 170px;
+        padding: 18px;
+        border: 1px solid var(--rule);
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), var(--paper));
+      }
+
+      .overview-site .site-name {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        flex: 0 0 auto;
+      }
+
+      .overview-site p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .overview-footer {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 16px;
+      }
+
+      .overview-note {
+        border: 1px solid var(--rule);
+        border-radius: 18px;
+        padding: 18px 20px;
+        background: rgba(255, 255, 255, 0.86);
+      }
+
+      .overview-note p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .sites-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .site-card {
+        border-radius: 24px;
+        padding: 22px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), var(--paper));
+      }
+
+      .site-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .site-card h3 {
+        font-size: 24px;
+        line-height: 1.15;
+      }
+
+      .site-role {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .site-domain {
+        color: var(--link);
+        font-size: 12px;
+        line-height: 1.5;
+        white-space: nowrap;
+      }
+
+      .tree-root {
+        margin-bottom: 16px;
+        padding: 16px 18px;
+        border: 1px solid rgba(161, 98, 7, 0.34);
+        border-radius: 18px;
+        background: rgba(161, 98, 7, 0.05);
+      }
+
+      .tree-root strong {
+        display: block;
+        font-size: 22px;
+      }
+
+      .tree-root p {
+        margin: 6px 0 0;
+        color: var(--muted);
+      }
+
+      .tree-groups {
+        display: grid;
+        gap: 14px;
+      }
+
+      .tree-group {
+        border: 1px solid var(--rule);
+        border-radius: 18px;
+        padding: 16px 18px;
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .group-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: baseline;
+        margin-bottom: 12px;
+      }
+
+      .group-title {
+        font-size: 17px;
+        line-height: 1.4;
+      }
+
+      .route-tag {
+        color: var(--soft);
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      .route-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .route {
+        min-width: 0;
+        padding: 10px 12px;
+        border: 1px solid var(--rule);
+        border-radius: 14px;
+        background: white;
+        box-shadow: 0 6px 18px rgba(28, 25, 23, 0.05);
+      }
+
+      a.route,
+      .tree-root a {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+      }
+
+      a.route:hover,
+      a.route:focus-visible,
+      .tree-root a:hover,
+      .tree-root a:focus-visible {
+        border-color: rgba(161, 98, 7, 0.72);
+        box-shadow: 0 10px 24px rgba(161, 98, 7, 0.14);
+        outline: none;
+        transform: translateY(-1px);
+      }
+
+      .tree-root a {
+        margin: -16px -18px;
+        padding: 16px 18px;
+        border: 1px solid transparent;
+        border-radius: 18px;
+      }
+
+      .route code {
+        display: block;
+        color: var(--ink);
+        font-family: "Geist Mono", monospace;
+        font-size: 12px;
+        line-height: 1.55;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      .route span {
+        display: block;
+        margin-top: 4px;
+        color: var(--soft);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .route.wide {
+        flex: 1 1 220px;
+      }
+
+      .route.tight {
+        flex: 1 1 180px;
+      }
+
+      .route.long {
+        flex: 1 1 280px;
+      }
+
+      .footer-note {
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 1px solid var(--rule);
+        color: var(--soft);
+        font-size: 12px;
+        line-height: 1.8;
+      }
+
+      .note {
+        display: inline-block;
+        color: var(--soft);
+        font-size: 12px;
+      }
+
+      @media (max-width: 1200px) {
+        .meta-strip,
+        .sites-grid,
+        .overview-sites,
+        .overview-footer {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .page {
+          width: min(100vw - 16px, 1440px);
+          padding: 24px 0 48px;
+        }
+
+        h1 {
+          font-size: 40px;
+        }
+
+        .hero p,
+        .section-header p {
+          font-size: 16px;
+        }
+
+        .panel,
+        .site-card,
+        .meta-card {
+          padding: 18px;
+        }
+
+        .site-card-header,
+        .group-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .site-domain,
+        .route-tag {
+          white-space: normal;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Wingstravel / Multisite Platform</p>
+          <h1>Sơ đồ hệ site và sitemap phase 1 đã xây dựng</h1>
+        </div>
+        <p>
+          Diagram này tổng hợp route tree đã seed trong <code>app/scripts/seed-subsites.ts</code>.
+          Nó thể hiện một umbrella site <code>WingsTravel</code> và 5 child site đang được phát
+          triển đồng thời: <code>WingsGo</code>, <code>WingsSide</code>, <code>WingsPass</code>,
+          <code>WingsPlus</code>, <code>WingsCare</code>.
+        </p>
+        <div class="meta-strip">
+          <div class="meta-card">
+            <div class="eyebrow">Structure</div>
+            <strong>1 umbrella site + 5 child sites</strong>
+          </div>
+          <div class="meta-card">
+            <div class="eyebrow">Source</div>
+            <strong>Seed routes lấy từ app code hiện tại</strong>
+          </div>
+          <div class="meta-card">
+            <div class="eyebrow">Locale</div>
+            <strong>Baseline vi/en, rollout theo từng site</strong>
+          </div>
+          <div class="meta-card">
+            <div class="eyebrow">SEO</div>
+            <strong>Production theo domain riêng cho từng site</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>Hệ site overview</h2>
+          <p>
+            <code>WingsTravel</code> đóng vai trò corporate hub và trust layer. Mỗi child site có
+            product role riêng, route tree riêng và định hướng production theo domain riêng.
+          </p>
+        </div>
+        <div class="panel">
+          <div class="overview-stack">
+            <div class="overview-root">
+              <h3>WingsTravel</h3>
+              <p>
+                Trang tổng, lớp định vị thương hiệu, điều hướng sang các site con và chuẩn hóa
+                trust signal toàn hệ.
+              </p>
+            </div>
+            <div class="overview-line" aria-hidden="true"></div>
+            <div class="overview-sites">
+              <article class="overview-site">
+                <div class="site-name"><span class="dot" style="background:#1d4ed8"></span>WingsGo</div>
+                <p>Outbound retail. Điều hướng theo thị trường, campaign mùa vụ, lịch khởi hành và tour detail.</p>
+              </article>
+              <article class="overview-site">
+                <div class="site-name"><span class="dot" style="background:#0c4a6e"></span>WingsSide</div>
+                <p>Inbound consultative. Kể chuyện điểm đến, style du lịch, sample package và inquiry flow.</p>
+              </article>
+              <article class="overview-site">
+                <div class="site-name"><span class="dot" style="background:#0b4f6c"></span>WingsPass</div>
+                <p>Sản phẩm vé và add-on. Tập trung bảng giá, sân bay, phụ trợ và FAQ giao dịch.</p>
+              </article>
+              <article class="overview-site">
+                <div class="site-name"><span class="dot" style="background:#a16207"></span>WingsPlus</div>
+                <p>High-touch premium / B2B. Private tours, MICE, special markets và proposal flow.</p>
+              </article>
+              <article class="overview-site">
+                <div class="site-name"><span class="dot" style="background:#15803d"></span>WingsCare</div>
+                <p>Bảo hiểm và hậu mãi. Product page, quyền lợi, claim support, FAQ và contact.</p>
+              </article>
+            </div>
+            <div class="overview-footer">
+              <div class="overview-note">
+                <div class="eyebrow">Cms Core</div>
+                <strong>Payload-first multisite</strong>
+                <p>
+                  Chung codebase, chung content model cốt lõi, quản trị site-aware và theme-aware.
+                  SQLite dùng local bootstrap; staging/production đi PostgreSQL, Redis hỗ trợ scale.
+                </p>
+              </div>
+              <div class="overview-note">
+                <div class="eyebrow">Seo Rule</div>
+                <strong>Domain-per-site ở production</strong>
+                <p>
+                  Mỗi child site chạy host riêng. <code>robots.txt</code>, <code>sitemap.xml</code>,
+                  <code>pages-sitemap.xml</code> và <code>posts-sitemap.xml</code> phải trả về theo host tương ứng.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>Sitemap theo từng site</h2>
+          <p>
+            Các nhóm dưới đây phản ánh cây route đã được seed trong app. Tôi giữ nguyên slug đang có trong code,
+            nhưng phần mô tả đã đổi sang tiếng Việt có dấu để dễ review. Mỗi node route hiện đã gắn link preview
+            tương ứng trên <code>http://localhost:3000</code>.
+          </p>
+        </div>
+        <div class="sites-grid">
+          <article class="site-card">
+            <div class="site-card-header">
+              <div>
+                <h3>WingsGo</h3>
+                <div class="site-role">
+                  Retail outbound, điều hướng theo thị trường, campaign mùa vụ và tour detail.
+                </div>
+              </div>
+              <div class="site-domain">wingsgo.local</div>
+            </div>
+            <div class="tree-root">
+              <a href="http://localhost:3000/wingsgo" target="_blank" rel="noopener noreferrer"><strong><code>/wingsgo</code></strong>
+              <p>Trang chủ site</p></a>
+            </div>
+            <div class="tree-groups">
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Nhóm điều hướng cấp 1</h4>
+                  <span class="route-tag">5 routes chính</span>
+                </div>
+                <div class="route-list">
+                  <a class="route tight" href="http://localhost:3000/wingsgo/gioi-thieu" target="_blank" rel="noopener noreferrer"><code>/gioi-thieu</code><span>Giới thiệu</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsgo/lien-he" target="_blank" rel="noopener noreferrer"><code>/lien-he</code><span>Liên hệ</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsgo/thi-truong" target="_blank" rel="noopener noreferrer"><code>/thi-truong</code><span>Hub thị trường</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsgo/campaign" target="_blank" rel="noopener noreferrer"><code>/campaign</code><span>Campaign mùa vụ</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsgo/lich-khoi-hanh" target="_blank" rel="noopener noreferrer"><code>/lich-khoi-hanh</code><span>Lịch khởi hành</span></a>
+                </div>
+              </section>
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Thị trường con</h4>
+                  <span class="route-tag">Từ /thi-truong</span>
+                </div>
+                <div class="route-list">
+                  <a class="route wide" href="http://localhost:3000/wingsgo/thi-truong/han-quoc" target="_blank" rel="noopener noreferrer"><code>/thi-truong/han-quoc</code><span>Trang thị trường Hàn Quốc</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsgo/thi-truong/nhat-ban" target="_blank" rel="noopener noreferrer"><code>/thi-truong/nhat-ban</code><span>Trang thị trường Nhật Bản</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsgo/thi-truong/trung-quoc" target="_blank" rel="noopener noreferrer"><code>/thi-truong/trung-quoc</code><span>Trang thị trường Trung Quốc</span></a>
+                </div>
+              </section>
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Campaign đã seed</h4>
+                  <span class="route-tag">Từ /campaign</span>
+                </div>
+                <div class="route-list">
+                  <a class="route long" href="http://localhost:3000/wingsgo/campaign/he-2026-han-quoc" target="_blank" rel="noopener noreferrer"><code>/campaign/he-2026-han-quoc</code><span>Chiến dịch hè 2026 - Hàn Quốc</span></a>
+                  <a class="route long" href="http://localhost:3000/wingsgo/campaign/he-2026-nhat-ban" target="_blank" rel="noopener noreferrer"><code>/campaign/he-2026-nhat-ban</code><span>Chiến dịch hè 2026 - Nhật Bản</span></a>
+                  <a class="route long" href="http://localhost:3000/wingsgo/campaign/trung-quoc-gia-ro" target="_blank" rel="noopener noreferrer"><code>/campaign/trung-quoc-gia-ro</code><span>Khuyến mại Trung Quốc giá tốt</span></a>
+                </div>
+              </section>
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Tour detail đại diện</h4>
+                  <span class="route-tag">Seeded examples</span>
+                </div>
+                <div class="route-list">
+                  <a class="route long" href="http://localhost:3000/wingsgo/tour/seoul-nami-everland-5n4d" target="_blank" rel="noopener noreferrer"><code>/tour/seoul-nami-everland-5n4d</code><span>Tour detail</span></a>
+                  <a class="route long" href="http://localhost:3000/wingsgo/tour/seoul-jeju-nami-camellia-hill-6n5d" target="_blank" rel="noopener noreferrer"><code>/tour/seoul-jeju-nami-camellia-hill-6n5d</code><span>Tour detail</span></a>
+                  <a class="route long" href="http://localhost:3000/wingsgo/tour/shizuoka-nui-phu-si-tokyo-5n4d" target="_blank" rel="noopener noreferrer"><code>/tour/shizuoka-nui-phu-si-tokyo-5n4d</code><span>Tour detail</span></a>
+                  <a class="route long" href="http://localhost:3000/wingsgo/tour/osaka-kobe-kyoto-nagoya-fuji-tokyo-6n5d" target="_blank" rel="noopener noreferrer"><code>/tour/osaka-kobe-kyoto-nagoya-fuji-tokyo-6n5d</code><span>Tour detail</span></a>
+                  <a class="route long" href="http://localhost:3000/wingsgo/tour/bac-kinh-van-ly-truong-thanh-5n4d" target="_blank" rel="noopener noreferrer"><code>/tour/bac-kinh-van-ly-truong-thanh-5n4d</code><span>Kèm thêm 2 detail seeded khác</span></a>
+                </div>
+              </section>
+            </div>
+            <div class="footer-note">Ngoài ra có archive <code>/posts</code> và editorial content phục vụ SEO.</div>
+          </article>
+
+          <article class="site-card">
+            <div class="site-card-header">
+              <div>
+                <h3>WingsSide</h3>
+                <div class="site-role">
+                  Inbound consultative site, storytelling theo điểm đến và inquiry flow.
+                </div>
+              </div>
+              <div class="site-domain">wingsside.local</div>
+            </div>
+            <div class="tree-root">
+              <a href="http://localhost:3000/wingsside" target="_blank" rel="noopener noreferrer"><strong><code>/wingsside</code></strong>
+              <p>Trang chủ site</p></a>
+            </div>
+            <div class="tree-groups">
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Nhóm điều hướng cấp 1</h4>
+                  <span class="route-tag">5 routes chính</span>
+                </div>
+                <div class="route-list">
+                  <a class="route tight" href="http://localhost:3000/wingsside/about-us" target="_blank" rel="noopener noreferrer"><code>/about-us</code><span>Định vị / trust</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsside/contact-us" target="_blank" rel="noopener noreferrer"><code>/contact-us</code><span>Liên hệ inquiry</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsside/destinations" target="_blank" rel="noopener noreferrer"><code>/destinations</code><span>Hub điểm đến</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsside/styles" target="_blank" rel="noopener noreferrer"><code>/styles</code><span>Travel styles</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsside/packages" target="_blank" rel="noopener noreferrer"><code>/packages</code><span>Sample itinerary</span></a>
+                </div>
+              </section>
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Điểm đến đã seed</h4>
+                  <span class="route-tag">Từ /destinations</span>
+                </div>
+                <div class="route-list">
+                  <a class="route wide" href="http://localhost:3000/wingsside/destinations/ha-noi" target="_blank" rel="noopener noreferrer"><code>/destinations/ha-noi</code><span>Trang điểm đến Hà Nội</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsside/destinations/ha-long" target="_blank" rel="noopener noreferrer"><code>/destinations/ha-long</code><span>Trang điểm đến Hạ Long</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsside/destinations/hoi-an" target="_blank" rel="noopener noreferrer"><code>/destinations/hoi-an</code><span>Trang điểm đến Hội An</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsside/destinations/hue" target="_blank" rel="noopener noreferrer"><code>/destinations/hue</code><span>Trang điểm đến Huế</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsside/destinations/mekong" target="_blank" rel="noopener noreferrer"><code>/destinations/mekong</code><span>Trang điểm đến Mekong</span></a>
+                </div>
+              </section>
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Travel styles</h4>
+                  <span class="route-tag">Từ /styles</span>
+                </div>
+                <div class="route-list">
+                  <a class="route wide" href="http://localhost:3000/wingsside/styles/luxury" target="_blank" rel="noopener noreferrer"><code>/styles/luxury</code><span>Luxury travel</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsside/styles/family" target="_blank" rel="noopener noreferrer"><code>/styles/family</code><span>Family travel</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsside/styles/culture" target="_blank" rel="noopener noreferrer"><code>/styles/culture</code><span>Culture travel</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsside/styles/adventure" target="_blank" rel="noopener noreferrer"><code>/styles/adventure</code><span>Adventure travel</span></a>
+                </div>
+              </section>
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Sample packages</h4>
+                  <span class="route-tag">Từ /packages</span>
+                </div>
+                <div class="route-list">
+                  <a class="route long" href="http://localhost:3000/wingsside/packages/vietnam-highlights" target="_blank" rel="noopener noreferrer"><code>/packages/vietnam-highlights</code><span>Gói Vietnam Highlights</span></a>
+                  <a class="route long" href="http://localhost:3000/wingsside/packages/northern-vietnam" target="_blank" rel="noopener noreferrer"><code>/packages/northern-vietnam</code><span>Gói Northern Vietnam</span></a>
+                  <a class="route long" href="http://localhost:3000/wingsside/packages/central-heritage" target="_blank" rel="noopener noreferrer"><code>/packages/central-heritage</code><span>Gói Central Heritage</span></a>
+                </div>
+              </section>
+            </div>
+            <div class="footer-note">
+              Ngoài ra có <code>/plan-your-trip</code>, <code>/travel-guide</code>, <code>/testimonials</code>
+              và seeded article content.
+            </div>
+          </article>
+
+          <article class="site-card">
+            <div class="site-card-header">
+              <div>
+                <h3>WingsPass</h3>
+                <div class="site-role">
+                  Site về vé và add-on, tối ưu cho bảng giá, sân bay và câu hỏi giao dịch.
+                </div>
+              </div>
+              <div class="site-domain">wingspass.local</div>
+            </div>
+            <div class="tree-root">
+              <a href="http://localhost:3000/wingspass" target="_blank" rel="noopener noreferrer"><strong><code>/wingspass</code></strong>
+              <p>Trang chủ site</p></a>
+            </div>
+            <div class="tree-groups">
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Nhóm điều hướng cấp 1</h4>
+                  <span class="route-tag">5 routes chính</span>
+                </div>
+                <div class="route-list">
+                  <a class="route tight" href="http://localhost:3000/wingspass/bang-gia" target="_blank" rel="noopener noreferrer"><code>/bang-gia</code><span>Bảng giá</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingspass/san-bay" target="_blank" rel="noopener noreferrer"><code>/san-bay</code><span>Hub sân bay</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingspass/add-on" target="_blank" rel="noopener noreferrer"><code>/add-on</code><span>Dịch vụ phụ trợ</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingspass/faq" target="_blank" rel="noopener noreferrer"><code>/faq</code><span>Câu hỏi thường gặp</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingspass/contact" target="_blank" rel="noopener noreferrer"><code>/contact</code><span>Liên hệ</span></a>
+                </div>
+              </section>
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Sân bay đã seed</h4>
+                  <span class="route-tag">Từ /san-bay</span>
+                </div>
+                <div class="route-list">
+                  <a class="route wide" href="http://localhost:3000/wingspass/san-bay/tan-son-nhat" target="_blank" rel="noopener noreferrer"><code>/san-bay/tan-son-nhat</code><span>Tân Sơn Nhất</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingspass/san-bay/noi-bai" target="_blank" rel="noopener noreferrer"><code>/san-bay/noi-bai</code><span>Nội Bài</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingspass/san-bay/da-nang" target="_blank" rel="noopener noreferrer"><code>/san-bay/da-nang</code><span>Đà Nẵng</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingspass/san-bay/phu-quoc" target="_blank" rel="noopener noreferrer"><code>/san-bay/phu-quoc</code><span>Phú Quốc</span></a>
+                </div>
+              </section>
+            </div>
+            <div class="footer-note">
+              Cây route hiện tập trung vào thông tin vé, add-on và nội dung hỗ trợ giao dịch.
+            </div>
+          </article>
+
+          <article class="site-card">
+            <div class="site-card-header">
+              <div>
+                <h3>WingsPlus</h3>
+                <div class="site-role">
+                  Premium / special market / proposal-led site cho nhóm sản phẩm giá trị cao.
+                </div>
+              </div>
+              <div class="site-domain">wingsplus.local</div>
+            </div>
+            <div class="tree-root">
+              <a href="http://localhost:3000/wingsplus" target="_blank" rel="noopener noreferrer"><strong><code>/wingsplus</code></strong>
+              <p>Trang chủ site</p></a>
+            </div>
+            <div class="tree-groups">
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Nhóm điều hướng cấp 1</h4>
+                  <span class="route-tag">6 routes chính</span>
+                </div>
+                <div class="route-list">
+                  <a class="route tight" href="http://localhost:3000/wingsplus/private-tours" target="_blank" rel="noopener noreferrer"><code>/private-tours</code><span>Private tours</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsplus/mice" target="_blank" rel="noopener noreferrer"><code>/mice</code><span>MICE</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsplus/special-markets" target="_blank" rel="noopener noreferrer"><code>/special-markets</code><span>Special markets</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsplus/destinations" target="_blank" rel="noopener noreferrer"><code>/destinations</code><span>Premium destinations</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsplus/case-studies" target="_blank" rel="noopener noreferrer"><code>/case-studies</code><span>Case studies</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingsplus/request-proposal" target="_blank" rel="noopener noreferrer"><code>/request-proposal</code><span>Request proposal</span></a>
+                </div>
+              </section>
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Điểm đến premium đã seed</h4>
+                  <span class="route-tag">Từ /destinations</span>
+                </div>
+                <div class="route-list">
+                  <a class="route wide" href="http://localhost:3000/wingsplus/destinations/maldives" target="_blank" rel="noopener noreferrer"><code>/destinations/maldives</code><span>Maldives</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsplus/destinations/europe" target="_blank" rel="noopener noreferrer"><code>/destinations/europe</code><span>Europe</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsplus/destinations/usa" target="_blank" rel="noopener noreferrer"><code>/destinations/usa</code><span>USA</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsplus/destinations/russia" target="_blank" rel="noopener noreferrer"><code>/destinations/russia</code><span>Russia</span></a>
+                </div>
+              </section>
+            </div>
+            <div class="footer-note">
+              Tập trung vào hành trình giá trị cao, đề xuất riêng và sales enablement content.
+            </div>
+          </article>
+
+          <article class="site-card">
+            <div class="site-card-header">
+              <div>
+                <h3>WingsCare</h3>
+                <div class="site-role">
+                  Site bảo hiểm và hỗ trợ sau bán, xoay quanh sản phẩm, quyền lợi và claim flow.
+                </div>
+              </div>
+              <div class="site-domain">wingscare.local</div>
+            </div>
+            <div class="tree-root">
+              <a href="http://localhost:3000/wingscare" target="_blank" rel="noopener noreferrer"><strong><code>/wingscare</code></strong>
+              <p>Trang chủ site</p></a>
+            </div>
+            <div class="tree-groups">
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Nhóm điều hướng cấp 1</h4>
+                  <span class="route-tag">5 routes chính</span>
+                </div>
+                <div class="route-list">
+                  <a class="route tight" href="http://localhost:3000/wingscare/san-pham-bao-hiem" target="_blank" rel="noopener noreferrer"><code>/san-pham-bao-hiem</code><span>Sản phẩm bảo hiểm</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingscare/quyen-loi" target="_blank" rel="noopener noreferrer"><code>/quyen-loi</code><span>Quyền lợi</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingscare/claim-support" target="_blank" rel="noopener noreferrer"><code>/claim-support</code><span>Hỗ trợ bồi thường</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingscare/faq" target="_blank" rel="noopener noreferrer"><code>/faq</code><span>Câu hỏi thường gặp</span></a>
+                  <a class="route tight" href="http://localhost:3000/wingscare/contact" target="_blank" rel="noopener noreferrer"><code>/contact</code><span>Liên hệ</span></a>
+                </div>
+              </section>
+            </div>
+            <div class="footer-note">
+              Cấu trúc hiện tại ưu tiên rõ sản phẩm, quyền lợi và tuyến hỗ trợ sau bán.
+            </div>
+          </article>
+
+          <article class="site-card">
+            <div class="site-card-header">
+              <div>
+                <h3>WingsTravel</h3>
+                <div class="site-role">
+                  Umbrella site của hệ, đóng vai trò trust layer, điều hướng sản phẩm và narrative thương hiệu.
+                </div>
+              </div>
+              <div class="site-domain">wingstravel.local</div>
+            </div>
+            <div class="tree-root">
+              <a href="http://localhost:3000/" target="_blank" rel="noopener noreferrer"><strong><code>/</code></strong>
+              <p>Trang tổng của toàn hệ site</p></a>
+            </div>
+            <div class="tree-groups">
+              <section class="tree-group">
+                <div class="group-head">
+                  <h4 class="group-title">Vai trò trong phase 1</h4>
+                  <span class="route-tag">Umbrella layer</span>
+                </div>
+                <div class="route-list">
+                  <a class="route wide" href="http://localhost:3000/" target="_blank" rel="noopener noreferrer"><code>/</code><span>Định vị thương hiệu tổng</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsgo" target="_blank" rel="noopener noreferrer"><code>/wingsgo</code><span>Điểm vào retail outbound</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsside" target="_blank" rel="noopener noreferrer"><code>/wingsside</code><span>Điểm vào inbound consultative</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingspass" target="_blank" rel="noopener noreferrer"><code>/wingspass</code><span>Điểm vào vé và add-on</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingsplus" target="_blank" rel="noopener noreferrer"><code>/wingsplus</code><span>Điểm vào premium / proposal</span></a>
+                  <a class="route wide" href="http://localhost:3000/wingscare" target="_blank" rel="noopener noreferrer"><code>/wingscare</code><span>Điểm vào bảo hiểm / hậu mãi</span></a>
+                </div>
+              </section>
+            </div>
+            <div class="footer-note">
+              Đây là lớp điều hướng umbrella; route tree chi tiết chủ yếu nằm ở 5 child site.
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -5,6 +5,7 @@ node_modules
 .env
 *.db
 *.db-*
+*.log
 .next
 next-env.d.ts
 tsconfig.tsbuildinfo
