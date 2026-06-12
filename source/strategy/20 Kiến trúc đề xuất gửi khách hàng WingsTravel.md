@@ -22,8 +22,10 @@ Theo định hướng này, hệ thống có thể phục vụ các site như:
 
 - `WingsTravel`
 - `WingsGo`
+- `WingsSide`
+- `WingsPlus`
 - `WingsCare`
-- `WingsInsurance`
+- `WingsPass`
 
 Điểm quan trọng là:
 
@@ -42,8 +44,10 @@ flowchart LR
     subgraph Sites["Các site trong hệ sinh thái"]
         A["WingsTravel"]
         B["WingsGo"]
-        C["WingsCare"]
-        D["WingsInsurance"]
+        C["WingsSide"]
+        D["WingsPlus"]
+        E["WingsCare"]
+        F["WingsPass"]
     end
 
     subgraph CMS["Nền CMS trung tâm"]
@@ -64,6 +68,8 @@ flowchart LR
     B --> CMS
     C --> CMS
     D --> CMS
+    E --> CMS
+    F --> CMS
 
     SA --> CMS
     SM --> CMS

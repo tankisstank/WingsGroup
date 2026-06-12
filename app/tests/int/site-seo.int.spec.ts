@@ -15,6 +15,9 @@ const settings = {
   createdAt: '2026-05-27T00:00:00.000Z',
   site: 1,
   siteName: 'WingsTravel',
+  branding: {
+    themeKey: 'wings-travel',
+  },
   updatedAt: '2026-05-27T00:00:00.000Z',
   seo: {
     canonicalDomain: 'https://wingstravel.com',
@@ -30,6 +33,9 @@ describe('site SEO utilities', () => {
     )
     expect(getCanonicalURL({ path: getPageCanonicalPath('about'), settings })).toBe(
       'https://wingstravel.com/about',
+    )
+    expect(getCanonicalURL({ path: getPageCanonicalPath('/destinations/ha-noi'), settings })).toBe(
+      'https://wingstravel.com/destinations/ha-noi',
     )
     expect(getCanonicalURL({ path: getPostCanonicalPath('launch'), settings })).toBe(
       'https://wingstravel.com/posts/launch',

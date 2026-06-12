@@ -11,7 +11,7 @@ import React from 'react'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
 
-export const revalidate = 600
+export const dynamic = 'force-dynamic'
 
 type Args = {
   params: Promise<{
@@ -57,7 +57,7 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>Posts</h1>
+          <h1>{locale === 'en' ? 'Posts' : 'Bài viết'}</h1>
           {site ? <p>{site.name}</p> : null}
         </div>
       </div>
@@ -88,36 +88,24 @@ export async function generateMetadata({
 }: Args): Promise<Metadata> {
   const { pageNumber } = await paramsPromise
   const resolvedSearchParams = searchParams ? await searchParams : undefined
-  await getCurrentLocale(resolvedSearchParams?.locale)
+  const locale = await getCurrentLocale(resolvedSearchParams?.locale)
 
   return generateMeta({
     doc: {
       meta: {
-        title: `Posts Page ${pageNumber || ''}`,
-        description: 'Paginated travel articles and updates.',
+        title:
+          locale === 'en'
+            ? `Posts Page ${pageNumber || ''}`
+            : `Trang bài viết ${pageNumber || ''}`,
+        description:
+          locale === 'en'
+            ? 'Paginated travel articles and updates.'
+            : 'Danh sách bài viết và cập nhật theo trang.',
       },
       slug: `posts/page/${pageNumber || ''}`,
     },
+    locale,
     path: `/posts/page/${pageNumber || ''}`,
     siteCode: resolvedSearchParams?.site,
   })
-}
-
-export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const { totalDocs } = await payload.count({
-    collection: 'posts',
-    locale: 'vi',
-    overrideAccess: false,
-  })
-
-  const totalPages = Math.ceil(totalDocs / 10)
-
-  const pages: { pageNumber: string }[] = []
-
-  for (let i = 1; i <= totalPages; i++) {
-    pages.push({ pageNumber: String(i) })
-  }
-
-  return pages
 }

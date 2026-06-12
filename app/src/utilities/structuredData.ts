@@ -1,7 +1,7 @@
 import type { Media, Page, Post, SiteSetting } from '@/payload-types'
 
 import { getServerSideURL } from './getURL'
-import { getCanonicalURL } from './siteURLs'
+import { getCanonicalURL, getPageCanonicalPath } from './siteURLs'
 
 type JsonLdValue =
   | boolean
@@ -163,7 +163,7 @@ export const buildPageJsonLd = ({
     {
       ...buildWebPageJSONLD({
         description: page.meta?.description,
-        path: path || (page.slug === 'home' ? '/' : `/${page.slug}`),
+        path: path || getPageCanonicalPath(page),
         settings,
         title: page.meta?.title || page.title,
       }),

@@ -20,10 +20,12 @@ The platform is technically prepared for first-site validation:
 
 | Site | Local route | Locale route example | Sample pages |
 | --- | --- | --- | --- |
-| WingsTravel | `/` | `/en` | `/`, `/contact`, `/campaign`, `/posts` |
+| WingsTravel | `/` | `/en` | `/`, `/he-sinh-thai`, `/nang-luc-dich-vu`, `/tin-tuc`, `/lien-he` |
 | WingsGo | `/wingsgo` | `/wingsgo/en` | `/wingsgo`, `/wingsgo/contact`, `/wingsgo/campaign`, `/wingsgo/posts` |
+| WingsSide | `/wingsside` | `/wingsside/en` | `/wingsside`, `/wingsside/contact`, `/wingsside/campaign`, `/wingsside/posts` |
+| WingsPlus | `/wingsplus` | `/wingsplus/en` | `/wingsplus`, `/wingsplus/contact`, `/wingsplus/campaign`, `/wingsplus/posts` |
 | WingsCare | `/wingscare` | `/wingscare/en` | `/wingscare`, `/wingscare/contact`, `/wingscare/campaign`, `/wingscare/posts` |
-| WingsInsurance | `/wingsinsurance` | `/wingsinsurance/en` | `/wingsinsurance`, `/wingsinsurance/contact`, `/wingsinsurance/campaign`, `/wingsinsurance/posts` |
+| WingsPass | `/wingspass` | `/wingspass/en` | `/wingspass`, `/wingspass/contact`, `/wingspass/campaign`, `/wingspass/posts` |
 
 ## Launch Checklist
 

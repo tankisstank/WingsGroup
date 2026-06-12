@@ -4,6 +4,7 @@ import { enforceSiteAccess, siteScopedOrAnyone } from '@/access/siteScope'
 import { contentCreateAccess, contentDeleteAccess, hideFromEditors } from '@/access/roles'
 import { siteScopedAccess } from '@/access/siteScope'
 import { siteField } from '@/fields/site'
+import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import { slugField } from 'payload'
 
 export const Categories: CollectionConfig = {
@@ -16,7 +17,7 @@ export const Categories: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['title', 'site', 'updatedAt'],
-    group: 'Nội dung',
+    group: adminGroups.content,
     hidden: hideFromEditors,
     useAsTitle: 'title',
   },
@@ -36,6 +37,7 @@ export const Categories: CollectionConfig = {
             return {
               ...item,
               label: 'Đường dẫn',
+              localized: false,
             } as typeof item
           }
 
@@ -55,8 +57,8 @@ export const Categories: CollectionConfig = {
     }),
   ],
   labels: {
-    plural: 'Danh mục',
-    singular: 'Danh mục',
+    plural: adminLabel('Danh mục', 'Categories'),
+    singular: adminLabel('Danh mục', 'Category'),
   },
   hooks: {
     beforeChange: [enforceSiteAccess],

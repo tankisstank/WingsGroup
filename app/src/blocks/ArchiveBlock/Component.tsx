@@ -6,6 +6,7 @@ import React from 'react'
 import RichText from '@/components/RichText'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
+import { appendSiteWhere } from '@/utilities/siteContext'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
@@ -26,19 +27,21 @@ export const ArchiveBlock: React.FC<
       else return category
     })
 
+    const where = await appendSiteWhere(
+      flattenedCategories && flattenedCategories.length > 0
+        ? {
+            categories: {
+              in: flattenedCategories,
+            },
+          }
+        : undefined,
+    )
+
     const fetchedPosts = await payload.find({
       collection: 'posts',
       depth: 1,
       limit,
-      ...(flattenedCategories && flattenedCategories.length > 0
-        ? {
-            where: {
-              categories: {
-                in: flattenedCategories,
-              },
-            },
-          }
-        : {}),
+      ...(where ? { where } : {}),
     })
 
     posts = fetchedPosts.docs

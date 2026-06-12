@@ -1,6 +1,7 @@
 import type { SiteSetting } from '@/payload-types'
 
 import { getPageCanonicalPath, getPostCanonicalPath } from './siteURLs'
+import type { SupportedLocaleCode } from './sitePaths'
 
 export type BreadcrumbItem = {
   label: string
@@ -13,6 +14,7 @@ type BreadcrumbMeta = {
 
 export type BreadcrumbPage = {
   meta?: BreadcrumbMeta | null
+  pathname?: null | string
   slug?: null | string
   title?: null | string
   parentPage?: BreadcrumbPage | number | null
@@ -24,35 +26,54 @@ export type BreadcrumbPost = {
   title?: null | string
 }
 
-const getPageLabel = (page: BreadcrumbPage) => page.meta?.breadcrumbLabel || page.title || 'Page'
+const getPageLabel = (page: BreadcrumbPage, locale?: SupportedLocaleCode) =>
+  page.meta?.breadcrumbLabel || page.title || (locale === 'en' ? 'Page' : 'Trang')
+
+const pushAncestorBreadcrumbs = (
+  items: BreadcrumbItem[],
+  page?: BreadcrumbPage | number | null,
+  locale?: SupportedLocaleCode,
+) => {
+  if (!page || typeof page !== 'object') {
+    return
+  }
+
+  pushAncestorBreadcrumbs(items, page.parentPage, locale)
+
+  const path = getPageCanonicalPath(page, locale)
+
+  if (path !== '/') {
+    items.push({
+      label: getPageLabel(page, locale),
+      path,
+    })
+  }
+}
 
 export const buildPageBreadcrumbItems = ({
+  locale,
   page,
   settings,
 }: {
+  locale?: SupportedLocaleCode
   page: BreadcrumbPage
   settings?: null | SiteSetting
 }): BreadcrumbItem[] => {
   const items: BreadcrumbItem[] = [
     {
-      label: settings?.siteName || 'Home',
-      path: '/',
+      label: settings?.siteName || (locale === 'en' ? 'Home' : 'Trang chủ'),
+      path: getPageCanonicalPath('/', locale),
     },
   ]
 
-  const parentPage = page.parentPage
+  pushAncestorBreadcrumbs(items, page.parentPage, locale)
 
-  if (parentPage && typeof parentPage === 'object' && parentPage.slug && parentPage.slug !== 'home') {
-    items.push({
-      label: getPageLabel(parentPage),
-      path: getPageCanonicalPath(parentPage.slug),
-    })
-  }
+  const currentPath = getPageCanonicalPath(page, locale)
 
-  if (page.slug && page.slug !== 'home') {
+  if (currentPath !== '/') {
     items.push({
-      label: getPageLabel(page),
-      path: getPageCanonicalPath(page.slug),
+      label: getPageLabel(page, locale),
+      path: currentPath,
     })
   }
 
@@ -60,22 +81,24 @@ export const buildPageBreadcrumbItems = ({
 }
 
 export const buildPostBreadcrumbItems = ({
+  locale,
   post,
   settings,
 }: {
+  locale?: SupportedLocaleCode
   post: BreadcrumbPost
   settings?: null | SiteSetting
 }): BreadcrumbItem[] => [
   {
-    label: settings?.siteName || 'Home',
-    path: '/',
+    label: settings?.siteName || (locale === 'en' ? 'Home' : 'Trang chủ'),
+    path: getPageCanonicalPath('/', locale),
   },
   {
-    label: 'Posts',
-    path: '/posts',
+    label: locale === 'en' ? 'Posts' : 'Bài viết',
+    path: getPostCanonicalPath(null, locale),
   },
   {
-    label: post.meta?.breadcrumbLabel || post.title || 'Post',
-    path: getPostCanonicalPath(post.slug),
+    label: post.meta?.breadcrumbLabel || post.title || (locale === 'en' ? 'Post' : 'Bài viết'),
+    path: getPostCanonicalPath(post.slug, locale),
   },
 ]

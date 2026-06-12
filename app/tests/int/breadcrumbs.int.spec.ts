@@ -68,7 +68,7 @@ describe('breadcrumb helpers', () => {
 
     expect(buildPostBreadcrumbItems({ post, settings })).toEqual([
       { label: 'WingsTravel', path: '/' },
-      { label: 'Posts', path: '/posts' },
+      { label: 'Bài viết', path: '/posts' },
       { label: 'Launch', path: '/posts/launch' },
     ])
   })

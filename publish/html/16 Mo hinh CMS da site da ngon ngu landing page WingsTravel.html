@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mô hình CMS đa site, đa ngôn ngữ, landing page - WingsTravel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f5efe6;
+      --paper:#fffaf2;
+      --panel:#fffdf9;
+      --ink:#18322d;
+      --muted:#62716c;
+      --line:rgba(24,50,45,.1);
+      --accent:#bf7d2c;
+      --accent-soft:#efdbc0;
+      --green:#2f6a58;
+      --green-soft:#e6f1ec;
+      --blue:#2d5f93;
+      --blue-soft:#e6eef8;
+      --sand:#f6ead8;
+      --shadow:0 28px 90px rgba(24,50,45,.09);
+      --serif:"Merriweather", Georgia, serif;
+      --sans:"Be Vietnam Pro","Segoe UI",Arial,sans-serif;
+      --max:1380px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:var(--sans);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(191,125,44,.16), transparent 24%),
+        radial-gradient(circle at 88% 12%, rgba(45,95,147,.12), transparent 20%),
+        linear-gradient(180deg, #f8f1e8 0%, #f5f8f4 100%);
+    }
+    .page{
+      width:min(calc(100% - 36px), var(--max));
+      margin:0 auto;
+      padding:28px 0 54px;
+    }
+    .hero,
+    .section{
+      background:linear-gradient(180deg, rgba(255,253,249,.94), rgba(255,255,255,.76));
+      border:1px solid rgba(255,255,255,.7);
+      box-shadow:var(--shadow);
+      border-radius:34px;
+      overflow:hidden;
+    }
+    .hero{
+      min-height:100svh;
+      padding:42px 40px 34px;
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:28px;
+      align-items:end;
+    }
+    .eyebrow{
+      margin:0 0 14px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      font-weight:700;
+      font-size:.8rem;
+    }
+    .display{
+      margin:0;
+      font-family:var(--serif);
+      font-size:clamp(3.7rem,7vw,6.3rem);
+      line-height:.92;
+      letter-spacing:-.05em;
+      max-width:10ch;
+    }
+    .lede{
+      margin:20px 0 0;
+      max-width:60ch;
+      color:var(--muted);
+      line-height:1.72;
+      font-size:1.04rem;
+    }
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:24px;
+    }
+    .pill{
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.82);
+      border:1px solid rgba(24,50,45,.08);
+      font-size:.9rem;
+      font-weight:600;
+    }
+    .hero-side{
+      display:grid;
+      gap:14px;
+    }
+    .feature-board{
+      position:relative;
+      min-height:500px;
+      padding:24px;
+      border-radius:30px;
+      color:#f9f4eb;
+      background:
+        radial-gradient(circle at 90% 12%, rgba(191,125,44,.22), transparent 18%),
+        radial-gradient(circle at 10% 88%, rgba(45,95,147,.16), transparent 22%),
+        linear-gradient(180deg, #17312c 0%, #1c4038 100%);
+      overflow:hidden;
+    }
+    .feature-board .stamp{
+      display:inline-flex;
+      padding:9px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.1);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-size:.78rem;
+      font-weight:700;
+    }
+    .feature-board h2{
+      margin:18px 0 10px;
+      font-family:var(--serif);
+      font-size:2.3rem;
+      line-height:.98;
+      letter-spacing:-.04em;
+      max-width:9ch;
+    }
+    .feature-board p{
+      margin:0;
+      color:rgba(255,255,255,.76);
+      line-height:1.68;
+      max-width:38ch;
+      font-size:.97rem;
+    }
+    .mini-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+      margin-top:24px;
+    }
+    .mini{
+      padding:16px;
+      border-radius:22px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.1);
+      backdrop-filter:blur(10px);
+    }
+    .mini strong{
+      display:block;
+      font-size:1rem;
+      line-height:1.35;
+    }
+    .mini span{
+      display:block;
+      margin-top:8px;
+      color:rgba(255,255,255,.74);
+      font-size:.83rem;
+      line-height:1.55;
+    }
+    .section{
+      margin-top:22px;
+      padding:34px;
+    }
+    .section-head{
+      display:grid;
+      grid-template-columns:1.02fr .98fr;
+      gap:24px;
+      align-items:end;
+      margin-bottom:22px;
+    }
+    .title{
+      margin:0;
+      font-family:var(--serif);
+      font-size:clamp(2.2rem,4.2vw,3.9rem);
+      line-height:.98;
+      letter-spacing:-.045em;
+      max-width:12ch;
+    }
+    .copy{
+      margin:0;
+      color:var(--muted);
+      line-height:1.72;
+      font-size:1rem;
+      max-width:56ch;
+      justify-self:end;
+    }
+    .divider{
+      height:1px;
+      background:linear-gradient(90deg, var(--line), transparent);
+      margin-bottom:24px;
+    }
+    .triple{
+      display:grid;
+      grid-template-columns:1.1fr .95fr .95fr;
+      gap:16px;
+    }
+    .card{
+      padding:22px;
+      border-radius:26px;
+      background:rgba(255,255,255,.78);
+      border:1px solid rgba(24,50,45,.08);
+    }
+    .card-label{
+      margin:0 0 14px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-size:.78rem;
+      font-weight:700;
+    }
+    .card h3{
+      margin:0 0 12px;
+      font-size:1.18rem;
+      line-height:1.35;
+    }
+    .card p,
+    .card li{
+      margin:0;
+      color:var(--muted);
+      line-height:1.68;
+      font-size:.95rem;
+    }
+    .card ul{
+      margin:0;
+      padding-left:18px;
+      display:grid;
+      gap:8px;
+    }
+    .flow-board{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:18px;
+    }
+    .poster{
+      padding:24px;
+      border-radius:28px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.68));
+      border:1px solid rgba(24,50,45,.08);
+    }
+    svg{display:block;width:100%;height:auto}
+    .stack{
+      display:grid;
+      gap:14px;
+    }
+    .stack .card{
+      min-height:unset;
+    }
+    .landing-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:14px;
+    }
+    .landing{
+      min-height:228px;
+      padding:18px;
+      border-radius:24px;
+      border:1px solid rgba(24,50,45,.08);
+      background:rgba(255,255,255,.78);
+    }
+    .landing .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:18px;
+    }
+    .tag{
+      display:inline-flex;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(191,125,44,.12);
+      font-size:.74rem;
+      font-weight:700;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    .dot{
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      background:var(--accent);
+    }
+    .landing h3{
+      margin:0 0 10px;
+      font-size:1.02rem;
+      line-height:1.35;
+    }
+    .landing p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:.92rem;
+    }
+    .landing ul{
+      margin:14px 0 0;
+      padding-left:16px;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:.9rem;
+    }
+    .benefit-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:16px;
+    }
+    .benefit{
+      padding:24px;
+      border-radius:28px;
+      color:#f8f3ea;
+      background:#18322d;
+    }
+    .benefit strong{
+      display:block;
+      margin-bottom:12px;
+      font-size:1.2rem;
+      line-height:1.35;
+    }
+    .benefit p{
+      margin:0;
+      color:rgba(255,255,255,.76);
+      line-height:1.68;
+      font-size:.94rem;
+    }
+    .closing{
+      margin-top:22px;
+      padding:42px 34px;
+      text-align:center;
+      background:
+        radial-gradient(circle at center, rgba(191,125,44,.14), transparent 24%),
+        linear-gradient(180deg, rgba(255,253,248,.94), rgba(255,255,255,.8));
+      border-radius:34px;
+      border:1px solid rgba(255,255,255,.72);
+      box-shadow:var(--shadow);
+    }
+    .closing .badge{
+      display:inline-flex;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(24,50,45,.08);
+      background:rgba(255,255,255,.8);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-size:.78rem;
+      font-weight:700;
+    }
+    .closing h2{
+      margin:18px 0 0;
+      font-family:var(--serif);
+      font-size:clamp(2.7rem,4vw,4.5rem);
+      line-height:.96;
+      letter-spacing:-.045em;
+    }
+    .closing p{
+      margin:16px auto 0;
+      max-width:62ch;
+      color:var(--muted);
+      line-height:1.72;
+      font-size:1rem;
+    }
+    @media (max-width:1180px){
+      .hero,
+      .section-head,
+      .triple,
+      .flow-board,
+      .landing-grid,
+      .benefit-grid{
+        grid-template-columns:1fr;
+      }
+      .copy{justify-self:start}
+      .hero{min-height:auto}
+    }
+    @media (max-width:760px){
+      .page{width:min(calc(100% - 18px), var(--max));padding:14px 0 32px}
+      .hero,.section,.closing{padding:22px 16px;border-radius:24px}
+      .display{font-size:clamp(3rem,14vw,4.2rem)}
+      .title{font-size:clamp(2rem,11vw,3rem)}
+      .mini-grid,
+      .landing-grid,
+      .benefit-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Bản thuyết trình định hướng CMS</p>
+        <h1 class="display">Một nền CMS để mở nhiều site, nhiều ngôn ngữ, nhiều landing page.</h1>
+        <p class="lede">
+          Trọng tâm của WingsTravel không phải chỉ là làm một website. Giá trị thực nằm ở việc tạo
+          một nền quản trị đủ rõ để mở thêm site mới nhanh hơn, vận hành đa ngôn ngữ gọn hơn,
+          và triển khai nhiều landing page mà không phải làm lại từ đầu.
+        </p>
+        <div class="pill-row">
+          <span class="pill">Đa site</span>
+          <span class="pill">Đa ngôn ngữ</span>
+          <span class="pill">Nhiều landing page</span>
+          <span class="pill">Quản trị tập trung</span>
+          <span class="pill">Mở rộng theo giai đoạn</span>
+        </div>
+      </div>
+
+      <div class="hero-side">
+        <div class="feature-board">
+          <div class="stamp">WingsTravel · Giai đoạn 1</div>
+          <h2>Một lõi quản trị, nhiều điểm tăng trưởng.</h2>
+          <p>
+            Cùng một nền CMS có thể phục vụ site thương hiệu chính, các site nhánh, các phiên bản ngôn ngữ
+            và các landing page phục vụ chiến dịch, thị trường hoặc dòng dịch vụ riêng.
+          </p>
+          <div class="mini-grid">
+            <div class="mini">
+              <strong>WingsTravel</strong>
+              <span>Site lõi, chuẩn nội dung và thương hiệu.</span>
+            </div>
+            <div class="mini">
+              <strong>WingsGo / WingsCare / WingsInsurance</strong>
+              <span>Mở rộng tiếp mà vẫn dùng chung một nền.</span>
+            </div>
+            <div class="mini">
+              <strong>Tiếng Việt / Anh / các ngôn ngữ khác</strong>
+              <span>Quản lý cùng cấu trúc, khác nội dung theo thị trường.</span>
+            </div>
+            <div class="mini">
+              <strong>Landing page theo mục tiêu</strong>
+              <span>Dùng cho campaign, dịch vụ hoặc nhóm khách hàng riêng.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Bức tranh tổng thể</p>
+          <h2 class="title">Điểm quan trọng không phải số lượng website, mà là cách chúng cùng vận hành.</h2>
+        </div>
+        <p class="copy">
+          Khi nhiều site, nhiều ngôn ngữ và nhiều landing page cùng chạy, thứ cần nhất là một mô hình quản trị
+          thống nhất. CMS phải giúp đội ngũ tái sử dụng cấu trúc, nhưng vẫn giữ được sự tách biệt về nội dung,
+          thương hiệu và người phụ trách của từng nhánh.
+        </p>
+      </div>
+      <div class="divider"></div>
+      <div class="triple">
+        <article class="card">
+          <p class="card-label">Đa site</p>
+          <h3>Mỗi site có thể là một nhánh thương hiệu hoặc một hướng tăng trưởng riêng</h3>
+          <p>
+            WingsTravel có thể đi từ site chính sang các site vệ tinh như WingsGo, WingsCare hay WingsInsurance,
+            nhưng đội ngũ không phải xây lại toàn bộ nền quản trị mỗi lần mở rộng.
+          </p>
+        </article>
+        <article class="card">
+          <p class="card-label">Đa ngôn ngữ</p>
+          <h3>Cùng một dịch vụ có thể được trình bày khác nhau theo từng thị trường</h3>
+          <p>
+            Tiếng Việt, tiếng Anh hoặc các ngôn ngữ khác không phải là các website tách rời hoàn toàn,
+            mà là các lớp nội dung được quản lý tập trung trong cùng CMS.
+          </p>
+        </article>
+        <article class="card">
+          <p class="card-label">Landing page</p>
+          <h3>Mỗi chiến dịch có thể có một điểm đến riêng mà không phá cấu trúc chung</h3>
+          <p>
+            Landing page được dùng để đẩy chuyển đổi cho dịch vụ, thị trường hoặc campaign,
+            nhưng vẫn bám cùng thư viện nội dung và cùng nền quản trị của toàn hệ.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Sơ đồ vận hành</p>
+          <h2 class="title">Một nền CMS đứng ở giữa, rồi phân phối nội dung ra nhiều hướng khác nhau.</h2>
+        </div>
+        <p class="copy">
+          Sơ đồ dưới đây cố ý không đi sâu hạ tầng. Mục tiêu là cho thấy CMS đóng vai trò trung tâm,
+          còn phần mở rộng nằm ở số lượng site, số lượng ngôn ngữ và số lượng landing page mà hệ có thể phục vụ.
+        </p>
+      </div>
+      <div class="divider"></div>
+      <div class="flow-board">
+        <div class="poster">
+          <svg viewBox="0 0 760 460" aria-label="Sơ đồ CMS đa site đa ngôn ngữ landing page">
+            <defs>
+              <marker id="arrow-main" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                <polygon points="0 0, 8 3, 0 6" fill="#18322d"></polygon>
+              </marker>
+              <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                <polygon points="0 0, 8 3, 0 6" fill="#bf7d2c"></polygon>
+              </marker>
+            </defs>
+            <rect width="760" height="460" rx="28" fill="#fffaf4"></rect>
+            <rect x="250" y="40" width="260" height="88" rx="28" fill="#18322d"></rect>
+            <text x="380" y="76" text-anchor="middle" fill="#f9f4eb" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="22" font-weight="700">CMS trung tâm</text>
+            <text x="380" y="100" text-anchor="middle" fill="rgba(249,244,235,.76)" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="13">quản trị nội dung, cấu trúc và luồng xuất bản</text>
+
+            <line x1="380" y1="128" x2="380" y2="174" stroke="#18322d" stroke-width="2" marker-end="url(#arrow-main)"></line>
+            <rect x="286" y="180" width="188" height="72" rx="22" fill="#f6ead8" stroke="#bf7d2c"></rect>
+            <text x="380" y="210" text-anchor="middle" fill="#18322d" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="18" font-weight="700">Thư viện nội dung chung</text>
+            <text x="380" y="232" text-anchor="middle" fill="#62716c" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="13">page, bài viết, media, block, cấu hình</text>
+
+            <line x1="380" y1="252" x2="380" y2="292" stroke="#bf7d2c" stroke-width="2" marker-end="url(#arrow-accent)"></line>
+            <line x1="150" y1="292" x2="610" y2="292" stroke="#bf7d2c" stroke-width="2"></line>
+            <line x1="150" y1="292" x2="150" y2="320" stroke="#bf7d2c" stroke-width="2"></line>
+            <line x1="380" y1="292" x2="380" y2="320" stroke="#bf7d2c" stroke-width="2"></line>
+            <line x1="610" y1="292" x2="610" y2="320" stroke="#bf7d2c" stroke-width="2"></line>
+
+            <rect x="36" y="320" width="228" height="100" rx="24" fill="#e6f1ec" stroke="#2f6a58"></rect>
+            <rect x="266" y="320" width="228" height="100" rx="24" fill="#e6eef8" stroke="#2d5f93"></rect>
+            <rect x="496" y="320" width="228" height="100" rx="24" fill="#f6ead8" stroke="#bf7d2c"></rect>
+
+            <text x="150" y="358" text-anchor="middle" fill="#18322d" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="18" font-weight="700">Nhiều site</text>
+            <text x="150" y="382" text-anchor="middle" fill="#62716c" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="13">WingsTravel, WingsGo, WingsCare...</text>
+
+            <text x="380" y="358" text-anchor="middle" fill="#18322d" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="18" font-weight="700">Nhiều ngôn ngữ</text>
+            <text x="380" y="382" text-anchor="middle" fill="#62716c" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="13">Việt, Anh, Hàn và các bản địa hóa khác</text>
+
+            <text x="610" y="358" text-anchor="middle" fill="#18322d" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="18" font-weight="700">Nhiều landing page</text>
+            <text x="610" y="382" text-anchor="middle" fill="#62716c" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="13">campaign, thị trường, dịch vụ, mùa bán hàng</text>
+          </svg>
+        </div>
+
+        <div class="stack">
+          <article class="card">
+            <p class="card-label">Điểm cốt lõi</p>
+            <h3>Không tạo nhiều hệ quản trị rời rạc</h3>
+            <p>
+              Nếu mỗi site hay mỗi ngôn ngữ là một hệ riêng, đội ngũ sẽ tăng chi phí quản lý rất nhanh.
+              Mô hình phù hợp hơn là một lõi CMS chung, nhưng có thể tách phạm vi nội dung theo từng hướng vận hành.
+            </p>
+          </article>
+          <article class="card">
+            <p class="card-label">Kết quả vận hành</p>
+            <ul>
+              <li>Mở site mới nhanh hơn vì đã có sẵn cấu trúc nền.</li>
+              <li>Mở ngôn ngữ mới mà không phải dựng lại toàn bộ website.</li>
+              <li>Nhân nhiều landing page mà vẫn giữ nhất quán thương hiệu.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Mở rộng landing page</p>
+          <h2 class="title">Landing page là lớp tăng trưởng linh hoạt nhất trong toàn mô hình.</h2>
+        </div>
+        <p class="copy">
+          Đây là nơi mô hình CMS phát huy rõ nhất: cùng một hệ thống nhưng có thể tạo ra nhiều điểm vào
+          cho các dịch vụ, thị trường, chiến dịch bán hàng hoặc nhóm khách hàng khác nhau.
+        </p>
+      </div>
+      <div class="divider"></div>
+      <div class="landing-grid">
+        <article class="landing">
+          <div class="top">
+            <span class="tag">Campaign</span>
+            <span class="dot"></span>
+          </div>
+          <h3>Landing page theo chiến dịch quảng bá</h3>
+          <p>Mỗi chiến dịch có thể có một câu chuyện, ưu đãi và hành trình nội dung riêng.</p>
+          <ul>
+            <li>Hero khác nhau</li>
+            <li>CTA khác nhau</li>
+            <li>Nội dung bám đúng campaign</li>
+          </ul>
+        </article>
+        <article class="landing">
+          <div class="top">
+            <span class="tag">Market</span>
+            <span class="dot"></span>
+          </div>
+          <h3>Landing page theo thị trường hoặc ngôn ngữ</h3>
+          <p>Cùng một dịch vụ nhưng có thể được kể khác nhau tùy khách nội địa hay quốc tế.</p>
+          <ul>
+            <li>Nội dung theo locale</li>
+            <li>Hình ảnh theo đối tượng</li>
+            <li>Thông điệp theo thị trường</li>
+          </ul>
+        </article>
+        <article class="landing">
+          <div class="top">
+            <span class="tag">Service</span>
+            <span class="dot"></span>
+          </div>
+          <h3>Landing page theo dịch vụ hoặc dòng sản phẩm</h3>
+          <p>Tạo các trang đích riêng cho tour, bảo hiểm, chăm sóc hoặc dịch vụ chuyên biệt.</p>
+          <ul>
+            <li>Định vị riêng</li>
+            <li>Khối nội dung tái sử dụng</li>
+            <li>Tối ưu chuyển đổi</li>
+          </ul>
+        </article>
+        <article class="landing">
+          <div class="top">
+            <span class="tag">Scale</span>
+            <span class="dot"></span>
+          </div>
+          <h3>Tăng số lượng page mà không tăng độ rối</h3>
+          <p>Landing page dùng chung thư viện khối nội dung nên đội ngũ mở rộng nhanh nhưng vẫn kiểm soát được.</p>
+          <ul>
+            <li>Không tách hệ riêng</li>
+            <li>Không phá cấu trúc chính</li>
+            <li>Dễ quản trị về sau</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Lợi ích thực tế</p>
+          <h2 class="title">Khách hàng nhận được gì từ mô hình này trong giai đoạn 1?</h2>
+        </div>
+        <p class="copy">
+          Giá trị của mô hình không nằm ở việc có nhiều tính năng kỹ thuật, mà ở chỗ giúp đội ngũ đi nhanh hơn
+          trong hiện tại nhưng không tự khóa mình khi mở thêm site, ngôn ngữ hay chiến dịch trong tương lai.
+        </p>
+      </div>
+      <div class="divider"></div>
+      <div class="benefit-grid">
+        <article class="benefit">
+          <strong>Mở rộng thương hiệu theo cùng một nền</strong>
+          <p>Thêm site mới nhanh hơn vì phần lõi về nội dung, giao diện và quản trị đã có sẵn.</p>
+        </article>
+        <article class="benefit">
+          <strong>Đội ngũ chủ động cập nhật nội dung</strong>
+          <p>Không cần quay lại sửa code cho những thay đổi nội dung thường xuyên của site hoặc landing page.</p>
+        </article>
+        <article class="benefit">
+          <strong>Triển khai nhiều chiến dịch mà vẫn giữ kiểm soát</strong>
+          <p>Landing page được nhân rộng có chủ đích, không làm vỡ cấu trúc thương hiệu hay quy trình vận hành.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="closing">
+      <div class="badge">Định hướng release đầu tiên</div>
+      <h2>Một bản CMS đủ đẹp để thuyết trình, đủ rõ để triển khai, và đủ gọn để mở rộng.</h2>
+      <p>
+        Nếu cần chốt ngắn gọn, trọng tâm của WingsTravel nên được hiểu là:
+        một nền quản trị chung cho nhiều site, hỗ trợ nhiều ngôn ngữ, và đủ linh hoạt để triển khai
+        nhiều landing page theo mục tiêu kinh doanh khác nhau mà không phải làm lại từ đầu.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

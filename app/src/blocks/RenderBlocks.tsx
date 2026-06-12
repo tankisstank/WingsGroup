@@ -5,15 +5,23 @@ import type { Page } from '@/payload-types'
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
+import { FAQBlock } from '@/blocks/FAQ/Component'
+import { FeatureGridBlock } from '@/blocks/FeatureGrid/Component'
 import { FormBlock } from '@/blocks/Form/Component'
+import { InfoStripBlock } from '@/blocks/InfoStrip/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
+import { PricingTableBlock } from '@/blocks/PricingTable/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
   cta: CallToActionBlock,
+  faq: FAQBlock,
+  featureGrid: FeatureGridBlock,
   formBlock: FormBlock,
+  infoStrip: InfoStripBlock,
   mediaBlock: MediaBlock,
+  pricingTable: PricingTableBlock,
 }
 
 export const RenderBlocks: React.FC<{

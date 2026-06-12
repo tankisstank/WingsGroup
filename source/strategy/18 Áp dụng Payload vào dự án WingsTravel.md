@@ -51,8 +51,10 @@ Payload là nơi giữ cấu trúc để một hệ có thể phục vụ nhiề
 
 - `WingsTravel`
 - `WingsGo`
+- `WingsSide`
+- `WingsPlus`
 - `WingsCare`
-- `WingsInsurance`
+- `WingsPass`
 
 Mỗi site có:
 
@@ -140,8 +142,10 @@ Nguyên tắc:
 
 - `WingsTravel`
 - `WingsGo`
+- `WingsSide`
+- `WingsPlus`
 - `WingsCare`
-- `WingsInsurance`
+- `WingsPass`
 
 ## 5.2. Global theo từng site
 

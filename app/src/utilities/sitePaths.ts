@@ -1,9 +1,14 @@
 export const siteAliasToCodeMap = {
   wingstravel: 'wings-travel',
   wingsgo: 'wings-go',
+  wingsside: 'wings-side',
+  wingspass: 'wings-pass',
+  wingsplus: 'wings-plus',
   wingscare: 'wings-care',
-  wingsinsurance: 'wings-insurance',
 } as const
+
+export const defaultSiteAlias = 'wingstravel' as const
+export const defaultSiteCode = siteAliasToCodeMap[defaultSiteAlias]
 
 export type SiteAlias = keyof typeof siteAliasToCodeMap
 
@@ -57,25 +62,32 @@ export const prefixPathWithSite = (
 ): string => {
   const normalizedPath = normalizeSiteAwarePath(path)
 
-  if (!siteAlias || /^https?:\/\//.test(normalizedPath)) {
+  if (/^https?:\/\//.test(normalizedPath)) {
     return normalizedPath
   }
 
-  const localePrefix = isSupportedLocale(locale) ? `/${locale}` : ''
-  const sitePrefix = `/${siteAlias}${localePrefix}`
-
   if (
-    normalizedPath === '/' ||
     normalizedPath.startsWith('/admin') ||
     normalizedPath.startsWith('/api') ||
     normalizedPath.startsWith('/next')
   ) {
-    return `${sitePrefix}${normalizedPath === '/' ? '' : normalizedPath}`
-  }
-
-  if (normalizedPath.startsWith(`/${siteAlias}`)) {
     return normalizedPath
   }
 
-  return `${sitePrefix}${normalizedPath}`
+  const localePrefix = isSupportedLocale(locale) ? `/${locale}` : ''
+  const sitePrefix = siteAlias ? `/${siteAlias}${localePrefix}` : localePrefix
+
+  if (!sitePrefix) {
+    return normalizedPath
+  }
+
+  if (
+    normalizedPath === sitePrefix ||
+    normalizedPath.startsWith(`${sitePrefix}/`) ||
+    (siteAlias && normalizedPath.startsWith(`/${siteAlias}`))
+  ) {
+    return normalizedPath
+  }
+
+  return `${sitePrefix}${normalizedPath === '/' ? '' : normalizedPath}`
 }

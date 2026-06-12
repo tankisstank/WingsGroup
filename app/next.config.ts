@@ -50,26 +50,40 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   redirects,
   async rewrites() {
-    return Object.entries(siteAliasToCodeMap).flatMap(([alias, code]) => [
+    const rootSiteCode = siteAliasToCodeMap.wingstravel
+
+    return [
       ...['vi', 'en'].flatMap((locale) => [
         {
-          source: `/${alias}/${locale}`,
-          destination: `/?site=${code}&siteAlias=${alias}&locale=${locale}`,
+          source: `/${locale}`,
+          destination: `/?site=${rootSiteCode}&siteAlias=wingstravel&locale=${locale}`,
         },
         {
-          source: `/${alias}/${locale}/:slug*`,
-          destination: `/:slug*?site=${code}&siteAlias=${alias}&locale=${locale}`,
+          source: `/${locale}/:slug*`,
+          destination: `/:slug*?site=${rootSiteCode}&siteAlias=wingstravel&locale=${locale}`,
         },
       ]),
-      {
-        source: `/${alias}`,
-        destination: `/?site=${code}&siteAlias=${alias}`,
-      },
-      {
-        source: `/${alias}/:slug*`,
-        destination: `/:slug*?site=${code}&siteAlias=${alias}`,
-      },
-    ])
+      ...Object.entries(siteAliasToCodeMap).flatMap(([alias, code]) => [
+        ...['vi', 'en'].flatMap((locale) => [
+          {
+            source: `/${alias}/${locale}`,
+            destination: `/?site=${code}&siteAlias=${alias}&locale=${locale}`,
+          },
+          {
+            source: `/${alias}/${locale}/:slug*`,
+            destination: `/:slug*?site=${code}&siteAlias=${alias}&locale=${locale}`,
+          },
+        ]),
+        {
+          source: `/${alias}`,
+          destination: `/?site=${code}&siteAlias=${alias}`,
+        },
+        {
+          source: `/${alias}/:slug*`,
+          destination: `/:slug*?site=${code}&siteAlias=${alias}`,
+        },
+      ]),
+    ]
   },
   turbopack: {
     root: path.resolve(dirname),

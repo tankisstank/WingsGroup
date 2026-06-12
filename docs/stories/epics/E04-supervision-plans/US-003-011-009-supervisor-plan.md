@@ -292,7 +292,7 @@ For each agent result, ask these questions before acceptance:
 - Did this work prove the story acceptance criteria, or only make plausible
   progress?
 - Does the patch preserve multisite behavior for `WingsTravel`, `WingsGo`,
-  `WingsCare`, and `WingsInsurance`?
+  `WingsSide`, `WingsPlus`, `WingsCare`, and `WingsPass`?
 - Are site-specific values hardcoded where they should come from `sites` or
   `site-settings`?
 - Did the agent confuse local path-prefix testing with production domain logic?

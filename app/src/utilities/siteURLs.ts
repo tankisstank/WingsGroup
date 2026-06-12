@@ -1,6 +1,7 @@
 import type { Site, SiteSetting } from '@/payload-types'
 
 import { getServerSideURL } from './getURL'
+import { isSupportedLocale, type SupportedLocaleCode } from './sitePaths'
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '')
 
@@ -22,28 +23,78 @@ export const normalizeCanonicalPath = (path?: null | string): string => {
   return normalizedPath.replace(/\/+/g, '/')
 }
 
+export const prefixCanonicalPathWithLocale = (
+  path?: null | string,
+  locale?: null | string,
+): string => {
+  const normalizedPath = normalizeCanonicalPath(path)
+
+  if (!isSupportedLocale(locale)) {
+    return normalizedPath
+  }
+
+  return `/${locale}${normalizedPath === '/' ? '' : normalizedPath}`.replace(/\/+/g, '/')
+}
+
 export const getCanonicalURL = ({
+  locale,
   path,
   settings,
 }: {
+  locale?: null | SupportedLocaleCode | string
   path?: null | string
   settings?: null | Pick<SiteSetting, 'seo'>
 }) => {
   const baseURL = normalizeCanonicalDomain(settings?.seo?.canonicalDomain)
-  const normalizedPath = normalizeCanonicalPath(path)
+  const normalizedPath = prefixCanonicalPathWithLocale(path, locale)
 
   return `${baseURL}${normalizedPath === '/' ? '' : normalizedPath}`
 }
 
-export const getPageCanonicalPath = (slug?: null | string) => {
-  if (!slug || slug === 'home') {
-    return '/'
+type PagePathValue =
+  | null
+  | string
+  | {
+      pathname?: null | string
+      slug?: null | string
+    }
+
+export const getPageCanonicalPath = (value?: PagePathValue, locale?: null | string) => {
+  let path = '/'
+
+  if (!value) {
+    return prefixCanonicalPathWithLocale(path, locale)
   }
 
-  return `/${slug}`
+  if (typeof value === 'object') {
+    if (value.pathname) {
+      path = normalizeCanonicalPath(value.pathname)
+      return prefixCanonicalPathWithLocale(path, locale)
+    }
+
+    if (!value.slug || value.slug === 'home') {
+      return prefixCanonicalPathWithLocale(path, locale)
+    }
+
+    path = normalizeCanonicalPath(value.slug)
+    return prefixCanonicalPathWithLocale(path, locale)
+  }
+
+  if (value === 'home') {
+    return prefixCanonicalPathWithLocale(path, locale)
+  }
+
+  path = normalizeCanonicalPath(value)
+  return prefixCanonicalPathWithLocale(path, locale)
 }
 
-export const getPostCanonicalPath = (slug?: null | string) => {
+export const getPostCanonicalPath = (slug?: null | string, locale?: null | string) => {
+  const path = slug ? `/posts/${slug}` : '/posts'
+
+  return prefixCanonicalPathWithLocale(path, locale)
+}
+
+export const getPostPath = (slug?: null | string) => {
   if (!slug) {
     return '/posts'
   }

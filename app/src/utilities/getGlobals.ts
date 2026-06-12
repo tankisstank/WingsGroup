@@ -1,6 +1,6 @@
 import configPromise from '@payload-config'
 import { type DataFromGlobalSlug, getPayload, type GlobalSlug } from 'payload'
-import { unstable_cache } from 'next/cache'
+import { unstable_cache } from 'next/cache.js'
 
 async function getGlobal<T extends GlobalSlug>(slug: T, depth = 0): Promise<DataFromGlobalSlug<T>> {
   const payload = await getPayload({ config: configPromise })

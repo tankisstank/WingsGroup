@@ -8,6 +8,7 @@ import React from 'react'
 
 import type { Page, Post } from '@/payload-types'
 import { getLocaleFromPathname, getSiteAliasFromPathname, prefixPathWithSite } from '@/utilities/sitePaths'
+import { getPageCanonicalPath } from '@/utilities/siteURLs'
 
 type CMSLinkType = {
   appearance?: 'inline' | ButtonProps['variant']
@@ -41,10 +42,12 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
   } = props
 
   const href =
-    type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-      ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
-          reference.value.slug
-        }`
+    type === 'reference' && typeof reference?.value === 'object'
+      ? reference?.relationTo === 'pages'
+        ? getPageCanonicalPath(reference.value as Page)
+        : reference.value.slug
+          ? `/${reference?.relationTo}/${reference.value.slug}`
+          : null
       : url
 
   if (!href) return null

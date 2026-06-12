@@ -38,8 +38,11 @@
 ## Domain And DNS
 
 - Primary domain(s): pending final customer domain values.
-- Child-site domain(s): pending final WingsGo, WingsCare, WingsInsurance domain
-  decisions.
+- Child-site domain(s): pending final WingsGo, WingsSide, WingsPlus, WingsCare,
+  and WingsPass domain decisions.
+- Each child site is expected to run on its own public domain. `robots.txt`,
+  sitemap index, and child sitemap URLs must resolve against the current host
+  for that site instead of one shared umbrella host.
 - DNS provider: pending.
 - DNS records relevant to the project: app host records, any verification
   records, and email records if transactional email is configured.

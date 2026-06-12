@@ -11,6 +11,7 @@ import { fileURLToPath } from 'url'
 import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrAnyone } from '@/access/siteScope'
 import { siteField } from '@/fields/site'
+import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +26,7 @@ export const Media: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['filename', 'alt', 'site', 'updatedAt'],
-    group: 'Media',
+    group: adminGroups.media,
   },
   fields: [
     {
@@ -49,8 +50,8 @@ export const Media: CollectionConfig = {
     },
   ],
   labels: {
-    plural: 'Thư viện media',
-    singular: 'Media',
+    plural: adminLabel('Thư viện media', 'Media library'),
+    singular: adminLabel('Media', 'Media'),
   },
   upload: {
     // Upload to the public/media directory in Next.js making them publicly accessible even outside of Payload

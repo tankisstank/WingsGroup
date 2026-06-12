@@ -13,6 +13,7 @@ import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { SiteSettings } from './collections/SiteSettings'
 import { Sites } from './collections/Sites'
+import { ThemePresets } from './collections/ThemePresets'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
@@ -25,6 +26,7 @@ const dirname = path.dirname(filename)
 const databaseURL = process.env.DATABASE_URL || 'file:./payload.db'
 const isPostgresURL =
   databaseURL.startsWith('postgres://') || databaseURL.startsWith('postgresql://')
+const shouldPushSQLiteSchema = process.env.PAYLOAD_DB_PUSH === 'true'
 
 export default buildConfig({
   admin: {
@@ -40,6 +42,10 @@ export default buildConfig({
         operatorConsole: {
           Component: '@/components/AdminOperatorConsole',
           path: '/console',
+        },
+        themeManager: {
+          Component: '@/components/ThemeManager',
+          path: '/theme',
         },
         pageWizard: {
           Component: '@/components/PageWizard',
@@ -109,9 +115,11 @@ export default buildConfig({
         client: {
           url: databaseURL,
         },
+        push: shouldPushSQLiteSchema,
       }),
   collections: [
     Sites,
+    ThemePresets,
     SiteSettings,
     Pages,
     Posts,

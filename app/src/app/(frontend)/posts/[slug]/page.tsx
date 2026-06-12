@@ -5,7 +5,7 @@ import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
-import React, { cache } from 'react'
+import React from 'react'
 import RichText from '@/components/RichText'
 
 import type { Post } from '@/payload-types'
@@ -26,26 +26,6 @@ import { buildPostBreadcrumbItems, type BreadcrumbPost } from '@/utilities/bread
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getPostCanonicalPath } from '@/utilities/siteURLs'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
-
-export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const posts = await payload.find({
-    collection: 'posts',
-    draft: false,
-    limit: 1000,
-    overrideAccess: false,
-    pagination: false,
-    select: {
-      slug: true,
-    },
-  })
-
-  const params = posts.docs.map(({ slug }) => {
-    return { slug }
-  })
-
-  return params
-}
 
 type Args = {
   params: Promise<{
@@ -72,8 +52,12 @@ export default async function Post({ params: paramsPromise, searchParams }: Args
   if (!post) return <PayloadRedirects url={url} />
 
   const settings = await getCurrentSiteSettings(resolvedSearchParams?.site)
-  const canonicalPath = getPostCanonicalPath(decodedSlug)
-  const breadcrumbItems = buildPostBreadcrumbItems({ post: post as BreadcrumbPost, settings })
+  const canonicalPath = getPostCanonicalPath(decodedSlug, locale)
+  const breadcrumbItems = buildPostBreadcrumbItems({
+    locale,
+    post: post as BreadcrumbPost,
+    settings,
+  })
 
   return (
     <article className="pt-16 pb-16">
@@ -100,7 +84,7 @@ export default async function Post({ params: paramsPromise, searchParams }: Args
       {draft && <LivePreviewListener />}
 
       <Breadcrumbs items={breadcrumbItems} />
-      <PostHero post={post} />
+      <PostHero locale={locale} post={post} />
 
       <div className="flex flex-col items-center gap-4 pt-8">
         <div className="container">
@@ -130,43 +114,42 @@ export async function generateMetadata({
 
   return generateMeta({
     doc: post,
+    locale,
     path: getPostCanonicalPath(decodedSlug),
     siteCode: resolvedSearchParams?.site,
   })
 }
 
-const queryPostBySlug = cache(
-  async ({
-    locale,
-    siteCode,
-    slug,
-  }: {
-    locale?: SupportedLocaleCode
-    siteCode?: string
-    slug: string
-  }) => {
-    const { isEnabled: draft } = await draftMode()
+const queryPostBySlug = async ({
+  locale,
+  siteCode,
+  slug,
+}: {
+  locale?: SupportedLocaleCode
+  siteCode?: string
+  slug: string
+}) => {
+  const { isEnabled: draft } = await draftMode()
 
-    const payload = await getPayload({ config: configPromise })
-    const where = await appendSiteWhere(
-      {
-        slug: {
-          equals: slug,
-        },
+  const payload = await getPayload({ config: configPromise })
+  const where = await appendSiteWhere(
+    {
+      slug: {
+        equals: slug,
       },
-      siteCode,
-    )
+    },
+    siteCode,
+  )
 
-    const result = await payload.find({
-      collection: 'posts',
-      draft,
-      locale,
-      limit: 1,
-      overrideAccess: draft,
-      pagination: false,
-      where,
-    })
+  const result = await payload.find({
+    collection: 'posts',
+    draft,
+    locale,
+    limit: 1,
+    overrideAccess: draft,
+    pagination: false,
+    where,
+  })
 
-    return result.docs?.[0] || null
-  },
-)
+  return result.docs?.[0] || null
+}

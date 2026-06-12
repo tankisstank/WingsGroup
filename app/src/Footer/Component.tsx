@@ -5,6 +5,7 @@ import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
 import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
 import { SiteLink } from '@/components/SiteLink'
+import { MailIcon, PhoneIcon } from 'lucide-react'
 
 export async function Footer() {
   const settings = await getCurrentSiteSettings()
@@ -12,7 +13,7 @@ export async function Footer() {
   const navItems = settings?.footerNavItems || []
 
   return (
-    <footer className="site-chrome-gradient mt-auto border-t text-white">
+    <footer className="site-footer mt-auto border-t">
       <div className="container py-8 gap-8 flex flex-col md:flex-row md:justify-between">
         <div className="flex flex-col gap-2">
           <SiteLink className="flex items-center" href="/">
@@ -23,11 +24,22 @@ export async function Footer() {
             />
           </SiteLink>
           {settings?.siteName ? <div className="text-sm font-semibold">{settings.siteName}</div> : null}
-          {settings?.tagline ? <div className="text-sm text-white/70">{settings.tagline}</div> : null}
-          {settings?.footerNote ? <div className="text-xs text-white/60 max-w-md">{settings.footerNote}</div> : null}
+          {settings?.tagline ? <div className="text-sm text-muted-foreground">{settings.tagline}</div> : null}
+          {settings?.footerNote ? <div className="text-xs text-muted-foreground max-w-md">{settings.footerNote}</div> : null}
           {settings?.supportEmail || settings?.supportPhone ? (
-            <div className="text-xs text-white/60">
-              {[settings.supportEmail, settings.supportPhone].filter(Boolean).join(' | ')}
+            <div className="site-footer__contacts">
+              {settings.supportEmail ? (
+                <span>
+                  <MailIcon aria-hidden="true" className="h-4 w-4" />
+                  {settings.supportEmail}
+                </span>
+              ) : null}
+              {settings.supportPhone ? (
+                <span>
+                  <PhoneIcon aria-hidden="true" className="h-4 w-4" />
+                  {settings.supportPhone}
+                </span>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -36,7 +48,7 @@ export async function Footer() {
           <ThemeSelector />
           <nav aria-label="Footer navigation" className="flex flex-col md:flex-row gap-4">
             {navItems.map(({ link }, i) => {
-              return <CMSLink className="theme-nav-link text-white" key={i} {...link} />
+              return <CMSLink className="theme-nav-link" key={i} {...link} />
             })}
           </nav>
         </div>

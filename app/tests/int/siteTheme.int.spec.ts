@@ -1,6 +1,5 @@
-import type { SiteSetting } from '@/payload-types'
-
 import { getSiteThemeTokens } from '@/utilities/siteTheme'
+import { defaultThemePresetByKey } from '@/utilities/themeTokens'
 import { describe, expect, it } from 'vitest'
 
 describe('site theme tokens', () => {
@@ -8,31 +7,71 @@ describe('site theme tokens', () => {
     expect(getSiteThemeTokens()).toEqual({
       accentColor: '#F59E0B',
       brandColor: '#0F172A',
+      buttonStyle: 'solid',
+      layoutStyle: 'corporate',
       style: {
+        '--section-space': 'clamp(4rem, 8vw, 7rem)',
+        '--section-space-sm': 'clamp(2rem, 5vw, 4rem)',
         '--site-accent': '#F59E0B',
+        '--site-background-style': 'soft-gradient',
+        '--site-border': 'color-mix(in oklch, #F59E0B 24%, var(--border))',
         '--site-brand': '#0F172A',
+        '--site-brand-contrast': '#ffffff',
+        '--site-button-style': 'solid',
+        '--site-font-body': 'var(--font-geist-sans)',
+        '--site-font-heading': 'var(--font-geist-sans)',
+        '--site-layout': 'corporate',
+        '--site-radius': '1.25rem',
+        '--site-shadow': '0 24px 80px color-mix(in oklch, #0F172A 16%, transparent)',
+        '--site-surface': '#F8FAFC',
+        '--site-surface-strong': '#E2E8F0',
+        '--site-theme-key': 'wings-travel',
+        '--site-theme-preset': 'corporate',
       },
+      themeKey: 'wings-travel',
       themeName: 'WingsTravel',
+      themePreset: 'corporate',
     })
   })
 
-  it('uses site-specific brand and accent colors from site settings', () => {
+  it('uses site-specific brand and accent colors from site settings and preset defaults', () => {
     const settings = {
-      siteName: 'WingsGo',
       branding: {
+        themeKey: 'wings-go',
+        themePreset: { key: 'retail', tokens: defaultThemePresetByKey.retail },
         brandColor: '#1D4ED8',
         accentColor: '#F97316',
       },
-    } as SiteSetting
+      siteName: 'WingsGo',
+    }
 
     expect(getSiteThemeTokens(settings)).toEqual({
       accentColor: '#F97316',
       brandColor: '#1D4ED8',
+      buttonStyle: 'solid',
+      layoutStyle: 'retail',
       style: {
+        '--section-space': 'clamp(2.75rem, 5vw, 4.25rem)',
+        '--section-space-sm': 'clamp(1.5rem, 3.5vw, 2.75rem)',
         '--site-accent': '#F97316',
+        '--site-background-style': 'soft-gradient',
+        '--site-border': 'color-mix(in oklch, #F97316 24%, var(--border))',
         '--site-brand': '#1D4ED8',
+        '--site-brand-contrast': '#ffffff',
+        '--site-button-style': 'solid',
+        '--site-font-body': 'var(--font-wingsgo-body), var(--font-geist-sans)',
+        '--site-font-heading': 'var(--font-wingsgo-heading), var(--font-geist-sans)',
+        '--site-layout': 'retail',
+        '--site-radius': '0.875rem',
+        '--site-shadow': '0 24px 80px color-mix(in oklch, #1D4ED8 16%, transparent)',
+        '--site-surface': '#F0F9FF',
+        '--site-surface-strong': '#DFF6FF',
+        '--site-theme-key': 'wings-go',
+        '--site-theme-preset': 'retail',
       },
+      themeKey: 'wings-go',
       themeName: 'WingsGo',
+      themePreset: 'retail',
     })
   })
 })

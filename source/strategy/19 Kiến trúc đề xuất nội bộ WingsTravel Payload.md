@@ -67,8 +67,10 @@ Nó là một lớp render chung cho:
 
 - `WingsTravel`
 - `WingsGo`
+- `WingsSide`
+- `WingsPlus`
 - `WingsCare`
-- `WingsInsurance`
+- `WingsPass`
 
 Mỗi site có thể khác nhau ở:
 
@@ -119,8 +121,10 @@ flowchart TB
     subgraph Public["Public Layer"]
         DomainA["wingstravel.com"]
         DomainB["wingsgo.com"]
-        DomainC["wingscare.com"]
-        DomainD["wingsinsurance.com"]
+        DomainC["wingsside.com"]
+        DomainD["wingsplus.com"]
+        DomainE["wingscare.com"]
+        DomainF["wingspass.com"]
     end
 
     subgraph Frontend["Next.js Frontend"]
@@ -149,6 +153,8 @@ flowchart TB
     DomainB --> Routing
     DomainC --> Routing
     DomainD --> Routing
+    DomainE --> Routing
+    DomainF --> Routing
 
     Routing --> Render
     Render --> Blocks
@@ -228,8 +234,10 @@ Nguyên tắc:
 - local test theo path prefix:
   - `/wingstravel`
   - `/wingsgo`
+  - `/wingsside`
+  - `/wingsplus`
   - `/wingscare`
-  - `/wingsinsurance`
+  - `/wingspass`
 - header/footer/site branding theo từng site
 - site-specific metadata và SEO mặc định
 
@@ -438,8 +446,10 @@ Không được làm mất:
 
 - `http://localhost:3000/wingstravel`
 - `http://localhost:3000/wingsgo`
+- `http://localhost:3000/wingsside`
+- `http://localhost:3000/wingsplus`
 - `http://localhost:3000/wingscare`
-- `http://localhost:3000/wingsinsurance`
+- `http://localhost:3000/wingspass`
 
 Lý do:
 

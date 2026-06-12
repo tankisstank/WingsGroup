@@ -53,7 +53,8 @@ Seeded from current strategy docs as a bounded phase-1 platform story.
 
 - Verified `sites` collection includes identity, code, primary/additional domains, supported/default locale, and active status.
 - Verified `site-settings` collection owns per-site brand, SEO defaults, header/footer nav, support contact, and footer note.
-- Added middleware-backed local path-prefix context so `/wingstravel`, `/wingsgo`, `/wingscare`, and `/wingsinsurance` set `x-site-code` and `x-site-prefix` for shared layout/header/footer reads.
+- Added middleware-backed local path-prefix context so local site aliases set
+  `x-site-code` and `x-site-prefix` for shared layout/header/footer reads.
 - Updated public site lookup to resolve only active site records.
 - Added integration tests for local path alias/code mapping and site-aware link prefixing.
 
@@ -66,7 +67,7 @@ Validation:
 2026-05-27 launch smoke update:
 
 - Added Playwright public smoke coverage for `/`, `/wingsgo`, `/wingscare`,
-  and `/wingsinsurance`.
+  and the then-current child-site route inventory.
 - E2E now runs with one worker because Payload + SQLite local bootstrap is not
   safe to initialize concurrently.
 - `pnpm run test:e2e` passed outside sandbox with 10 tests.
@@ -74,3 +75,9 @@ Validation:
 - `pnpm exec tsc --noEmit --pretty false --incremental false` passed.
 - `pnpm build` passed outside sandbox; Next.js still warns that the
   `middleware` file convention is deprecated in favor of `proxy`.
+
+2026-06-07 taxonomy update:
+
+- Current phase-1 site contract is `WingsTravel` as the umbrella site plus
+  `WingsGo`, `WingsSide`, `WingsPlus`, `WingsCare`, and `WingsPass` as child
+  sites developed in parallel.

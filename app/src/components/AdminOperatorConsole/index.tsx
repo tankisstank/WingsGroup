@@ -192,6 +192,7 @@ export default function AdminOperatorConsole() {
           <Link className={`${baseClass}__primary-action`} href="/admin/page-wizard">
             Tạo trang nhanh
           </Link>
+          {canPublish ? <Link href="/admin/theme">Quản lý theme</Link> : null}
           <Link href="/admin/collections/form-submissions">Xem lead mới</Link>
           <Link href="/admin/collections/pages?where[_status][equals]=draft">
             Duyệt bản nháp
@@ -262,6 +263,7 @@ export default function AdminOperatorConsole() {
             </div>
             {canPublish ? (
               <div className={`${baseClass}__link-list`}>
+                <Link href="/admin/theme">Theme Manager</Link>
                 <Link href="/admin/collections/site-settings">Cấu hình site</Link>
               </div>
             ) : null}

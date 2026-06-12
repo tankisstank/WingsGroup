@@ -1,11 +1,12 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-import { getCurrentSite } from './siteContext'
+import { getCurrentLocale, getCurrentSite } from './siteContext'
 
 export const getCurrentSiteSettings = async (siteCodeFromArgs?: string | null) => {
   const payload = await getPayload({ config: configPromise })
   const site = await getCurrentSite(siteCodeFromArgs)
+  const locale = await getCurrentLocale()
 
   if (!site) {
     return null
@@ -14,6 +15,7 @@ export const getCurrentSiteSettings = async (siteCodeFromArgs?: string | null) =
   const result = await payload.find({
     collection: 'site-settings',
     depth: 1,
+    locale,
     limit: 1,
     pagination: false,
     where: {

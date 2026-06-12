@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { adminAccess, hideFromNonSuperAdmins, superAdminOnly } from '@/access/roles'
 import { siteScopedAccess } from '@/access/siteScope'
+import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 
 export const Sites: CollectionConfig = {
   slug: 'sites',
@@ -14,7 +15,7 @@ export const Sites: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['name', 'code', 'primaryDomain', 'updatedAt'],
-    group: 'Nâng cao',
+    group: adminGroups.advanced,
     hidden: hideFromNonSuperAdmins,
     useAsTitle: 'name',
   },
@@ -102,7 +103,7 @@ export const Sites: CollectionConfig = {
   ],
   timestamps: true,
   labels: {
-    plural: 'Site',
-    singular: 'Site',
+    plural: adminLabel('Site', 'Sites'),
+    singular: adminLabel('Site', 'Site'),
   },
 }

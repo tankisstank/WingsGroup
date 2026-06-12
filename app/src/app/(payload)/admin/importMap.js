@@ -1,4 +1,6 @@
 import { ExportListMenuItem as ExportListMenuItem_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { default as default_5dbc566c85bd9cddc4d9a87abea0f042 } from '@/components/ThemePresetEditor/PreviewField'
+import { default as default_24e9bab7be9a712d38ced61f96d0adf8 } from '@/components/ThemePresetEditor/ColorField'
 import { ImportListMenuItem as ImportListMenuItem_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -46,6 +48,7 @@ import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/component
 import { default as default_f56b2388657bfe700e8ea4dd7cf32a54 } from '@/components/AdminNavIntro'
 import { ImportExportProvider as ImportExportProvider_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
 import { default as default_f9eef2fa35c867aa73ad97968a96fa57 } from '@/components/AdminOperatorConsole'
+import { default as default_dbfe8c9157153a1e71857346f3fece7d } from '@/components/ThemeManager'
 import { default as default_7bb177a4cdf8354fd123e1ad3491e461 } from '@/components/PageWizard'
 import { WingsTravelMetrics as WingsTravelMetrics_cb5553611f4beeb286edfe3a6df8cd2b } from '@/components/AdminDashboard/WingsTravelMetrics'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -53,6 +56,8 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 /** @type import('payload').ImportMap */
 export const importMap = {
   "@payloadcms/plugin-import-export/rsc#ExportListMenuItem": ExportListMenuItem_cdf7e044479f899a31f804427d568b36,
+  "@/components/ThemePresetEditor/PreviewField#default": default_5dbc566c85bd9cddc4d9a87abea0f042,
+  "@/components/ThemePresetEditor/ColorField#default": default_24e9bab7be9a712d38ced61f96d0adf8,
   "@payloadcms/plugin-import-export/rsc#ImportListMenuItem": ImportListMenuItem_cdf7e044479f899a31f804427d568b36,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -100,6 +105,7 @@ export const importMap = {
   "@/components/AdminNavIntro#default": default_f56b2388657bfe700e8ea4dd7cf32a54,
   "@payloadcms/plugin-import-export/rsc#ImportExportProvider": ImportExportProvider_cdf7e044479f899a31f804427d568b36,
   "@/components/AdminOperatorConsole#default": default_f9eef2fa35c867aa73ad97968a96fa57,
+  "@/components/ThemeManager#default": default_dbfe8c9157153a1e71857346f3fece7d,
   "@/components/PageWizard#default": default_7bb177a4cdf8354fd123e1ad3491e461,
   "@/components/AdminDashboard/WingsTravelMetrics#WingsTravelMetrics": WingsTravelMetrics_cb5553611f4beeb286edfe3a6df8cd2b,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

@@ -10,8 +10,7 @@ import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 
-export const dynamic = 'force-static'
-export const revalidate = 600
+export const dynamic = 'force-dynamic'
 
 type Args = {
   searchParams?: Promise<{
@@ -54,7 +53,7 @@ export default async function Page({ searchParams }: Args) {
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>Posts</h1>
+          <h1>{locale === 'en' ? 'Posts' : 'Bài viết'}</h1>
           {site ? <p>{site.name}</p> : null}
         </div>
       </div>
@@ -81,16 +80,20 @@ export default async function Page({ searchParams }: Args) {
 
 export async function generateMetadata({ searchParams }: Args): Promise<Metadata> {
   const resolvedSearchParams = searchParams ? await searchParams : undefined
-  await getCurrentLocale(resolvedSearchParams?.locale)
+  const locale = await getCurrentLocale(resolvedSearchParams?.locale)
 
   return generateMeta({
     doc: {
       meta: {
-        title: 'Posts',
-        description: 'Latest articles and travel updates.',
+        title: locale === 'en' ? 'Posts' : 'Bài viết',
+        description:
+          locale === 'en'
+            ? 'Latest articles and travel updates.'
+            : 'Các bài viết và cập nhật mới nhất.',
       },
       slug: 'posts',
     },
+    locale,
     path: '/posts',
     siteCode: resolvedSearchParams?.site,
   })

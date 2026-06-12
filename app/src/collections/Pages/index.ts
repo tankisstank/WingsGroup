@@ -5,14 +5,20 @@ import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/ac
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
+import { FAQ } from '../../blocks/FAQ/config'
+import { FeatureGrid } from '../../blocks/FeatureGrid/config'
 import { FormBlock } from '../../blocks/Form/config'
+import { InfoStrip } from '../../blocks/InfoStrip/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { PricingTable } from '../../blocks/PricingTable/config'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
+import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
+import { syncPagePathname } from './hooks/syncPagePathname'
 
 import {
   MetaDescriptionField,
@@ -34,6 +40,9 @@ export const Pages: CollectionConfig<'pages'> = {
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
   // Type safe if the collection slug generic is passed to `CollectionConfig` - `CollectionConfig<'pages'>
   defaultPopulate: {
+    meta: true,
+    pathname: true,
+    parentPage: true,
     title: true,
     slug: true,
   },
@@ -46,10 +55,11 @@ export const Pages: CollectionConfig<'pages'> = {
     description:
       'Quản lý trang theo site. Editor chỉ lưu nháp; site-manager hoặc super-admin duyệt publish.',
     defaultColumns: ['title', 'site', 'slug', 'updatedAt'],
-    group: 'Nội dung',
+    group: adminGroups.content,
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
+          pathname: data?.pathname,
           slug: data?.slug,
           collection: 'pages',
           req,
@@ -57,6 +67,7 @@ export const Pages: CollectionConfig<'pages'> = {
     },
     preview: (data, { req }) =>
       generatePreviewPath({
+        pathname: data?.pathname as string | undefined,
         slug: data?.slug as string,
         collection: 'pages',
         req,
@@ -84,6 +95,17 @@ export const Pages: CollectionConfig<'pages'> = {
       relationTo: 'pages',
     },
     {
+      name: 'pathname',
+      label: 'Đường dẫn đầy đủ',
+      type: 'text',
+      admin: {
+        description: 'Tự tính từ trang cha và slug để hỗ trợ URL phân cấp.',
+        position: 'sidebar',
+        readOnly: true,
+      },
+      index: true,
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -95,7 +117,17 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [
+                CallToAction,
+                Content,
+                FeatureGrid,
+                InfoStrip,
+                PricingTable,
+                FAQ,
+                MediaBlock,
+                Archive,
+                FormBlock,
+              ],
               localized: true,
               required: true,
               admin: {
@@ -170,6 +202,7 @@ export const Pages: CollectionConfig<'pages'> = {
             return {
               ...item,
               label: 'Đường dẫn',
+              localized: false,
               admin: {
                 ...item.admin,
                 description: 'Phần URL của trang. Chỉ sửa khi thật sự cần đổi đường dẫn.',
@@ -192,12 +225,12 @@ export const Pages: CollectionConfig<'pages'> = {
     }),
   ],
   labels: {
-    plural: 'Trang',
-    singular: 'Trang',
+    plural: adminLabel('Trang', 'Pages'),
+    singular: adminLabel('Trang', 'Page'),
   },
   hooks: {
     afterChange: [revalidatePage],
-    beforeChange: [enforceSiteAccess, preventEditorPublish, populatePublishedAt],
+    beforeChange: [enforceSiteAccess, syncPagePathname, preventEditorPublish, populatePublishedAt],
     afterDelete: [revalidateDelete],
   },
   versions: {

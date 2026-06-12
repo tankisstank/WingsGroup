@@ -5,25 +5,35 @@ import type { Post } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { formatAuthors } from '@/utilities/formatAuthors'
+import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 export const PostHero: React.FC<{
+  locale?: SupportedLocaleCode
   post: Post
-}> = ({ post }) => {
+}> = ({ locale = 'vi', post }) => {
   const { categories, heroImage, populatedAuthors, publishedAt, title } = post
 
   const hasAuthors =
     populatedAuthors && populatedAuthors.length > 0 && formatAuthors(populatedAuthors) !== ''
 
   return (
-    <div className="relative -mt-[10.4rem] flex items-end">
-      <div className="container z-10 relative lg:grid lg:grid-cols-[1fr_48rem_1fr] text-white pb-8">
+    <section className="relative overflow-hidden bg-neutral-950 text-white">
+      <div className="absolute inset-0 z-0 select-none">
+        {heroImage && typeof heroImage !== 'string' && (
+          <Media fill priority imgClassName="object-cover opacity-75" resource={heroImage} />
+        )}
+        <div className="absolute inset-0 bg-linear-to-t from-black via-black/55 to-black/20" />
+      </div>
+
+      <div className="container relative z-10 grid min-h-[22rem] items-end py-12 md:min-h-[28rem] md:py-16 lg:grid-cols-[1fr_48rem_1fr]">
         <div className="col-start-1 col-span-1 md:col-start-2 md:col-span-2">
           <div className="uppercase text-sm mb-6">
             {categories?.map((category, index) => {
               if (typeof category === 'object' && category !== null) {
                 const { title: categoryTitle } = category
 
-                const titleToUse = categoryTitle || 'Untitled category'
+                const titleToUse =
+                  categoryTitle || (locale === 'en' ? 'Untitled category' : 'Danh mục chưa đặt tên')
 
                 const isLast = index === categories.length - 1
 
@@ -46,7 +56,7 @@ export const PostHero: React.FC<{
             {hasAuthors && (
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm">Author</p>
+                  <p className="text-sm">{locale === 'en' ? 'Author' : 'Tác giả'}</p>
 
                   <p>{formatAuthors(populatedAuthors)}</p>
                 </div>
@@ -54,7 +64,7 @@ export const PostHero: React.FC<{
             )}
             {publishedAt && (
               <div className="flex flex-col gap-1">
-                <p className="text-sm">Date Published</p>
+                <p className="text-sm">{locale === 'en' ? 'Date Published' : 'Ngày xuất bản'}</p>
 
                 <time dateTime={publishedAt}>{formatDateTime(publishedAt)}</time>
               </div>
@@ -62,12 +72,6 @@ export const PostHero: React.FC<{
           </div>
         </div>
       </div>
-      <div className="min-h-[80vh] select-none">
-        {heroImage && typeof heroImage !== 'string' && (
-          <Media fill priority imgClassName="-z-10 object-cover" resource={heroImage} />
-        )}
-        <div className="absolute pointer-events-none left-0 bottom-0 w-full h-1/2 bg-linear-to-t from-black to-transparent" />
-      </div>
-    </div>
+    </section>
   )
 }

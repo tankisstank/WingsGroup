@@ -11,6 +11,7 @@ Start from:
 - `docs/product/acceptance-and-kpis.md`
 - `docs/product/ai-agent-seo-and-theme.md`
 - `docs/product/ai-agent-seo-implementation-checklist.md`
+- `docs/product/cms-theme-management.md`
 - `source/strategy/19 Kiến trúc đề xuất nội bộ WingsTravel Payload.md`
 - `source/strategy/20 Kiến trúc đề xuất gửi khách hàng WingsTravel.md`
 
@@ -26,6 +27,7 @@ Current seed set:
 - `acceptance-and-kpis.md`: acceptance baseline and KPI shape
 - `ai-agent-seo-and-theme.md`: AI-agent-oriented SEO direction and theme-system requirement
 - `ai-agent-seo-implementation-checklist.md`: engineering checklist for implementing AI Agent SEO in `app/`
+- `cms-theme-management.md`: CMS-managed multisite theme presets, tokens, admin UI, and validation contract
 
 ## Update Rule
 

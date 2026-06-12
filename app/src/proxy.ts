@@ -2,6 +2,13 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { getLocaleFromPathname, getSiteAliasFromPathname, siteAliasToCodeMap } from '@/utilities/sitePaths'
 
+const stripLeadingSegments = (pathname: string, count: number) => {
+  const segments = pathname.split('/').filter(Boolean)
+  const stripped = segments.slice(count).join('/')
+
+  return stripped ? `/${stripped}` : '/'
+}
+
 export function proxy(request: NextRequest) {
   const siteAlias = getSiteAliasFromPathname(request.nextUrl.pathname)
   const locale = getLocaleFromPathname(request.nextUrl.pathname)
@@ -13,8 +20,10 @@ export function proxy(request: NextRequest) {
 
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-locale', locale)
+    const url = request.nextUrl.clone()
+    url.pathname = stripLeadingSegments(request.nextUrl.pathname, 1)
 
-    return NextResponse.next({
+    return NextResponse.rewrite(url, {
       request: {
         headers: requestHeaders,
       },
@@ -27,8 +36,10 @@ export function proxy(request: NextRequest) {
     requestHeaders.set('x-locale', locale)
   }
   requestHeaders.set('x-site-prefix', `/${siteAlias}${locale ? `/${locale}` : ''}`)
+  const url = request.nextUrl.clone()
+  url.pathname = stripLeadingSegments(request.nextUrl.pathname, locale ? 2 : 1)
 
-  return NextResponse.next({
+  return NextResponse.rewrite(url, {
     request: {
       headers: requestHeaders,
     },

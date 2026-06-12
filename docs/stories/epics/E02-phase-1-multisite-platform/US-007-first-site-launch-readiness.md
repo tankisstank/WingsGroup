@@ -56,8 +56,8 @@ This story gives phase-1 launch a durable home instead of leaving it distributed
 - Added `docs/product/phase-1-launch-readiness.md` with route inventory,
   launch checklist, completed technical readiness items, and pending
   customer/content/environment items.
-- Updated handover site inventory with WingsTravel, WingsGo, WingsCare, and
-  WingsInsurance sample-ready route coverage.
+- Updated handover site inventory with the phase-1 umbrella site and child-site
+  route coverage.
 - Updated deployment/server/domain/email handover notes with Payload-first
   production assumptions: Node.js, PostgreSQL for staging/production, Redis
   production support when needed, domain/DNS/SSL/email pending customer facts.
@@ -96,3 +96,8 @@ Validation:
 - `pnpm build` passed outside sandbox and generated sitemap output.
 - Residual platform warning: Next.js 16 reports the `middleware` file convention
   is deprecated and should move to `proxy` in a later maintenance story.
+
+2026-06-07 taxonomy update:
+
+- Current phase-1 launch inventory is `WingsTravel`, `WingsGo`, `WingsSide`,
+  `WingsPlus`, `WingsCare`, and `WingsPass`.

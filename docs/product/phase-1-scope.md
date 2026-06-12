@@ -28,11 +28,13 @@ The shared platform is expected to support at least these site identities:
 
 - `WingsTravel`
 - `WingsGo`
+- `WingsSide`
+- `WingsPlus`
 - `WingsCare`
-- `WingsInsurance`
+- `WingsPass`
 
-Phase 1 does not require all of them to launch publicly, but the model must be
-ready for them.
+`WingsTravel` is the umbrella site. The other listed sites are phase-1 child
+sites being developed in parallel on the same platform.
 
 ## Required Capabilities
 

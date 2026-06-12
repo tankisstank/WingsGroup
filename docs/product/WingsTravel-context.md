@@ -21,8 +21,10 @@ The current product and architecture context lives first in:
 - one codebase serving multiple sites such as:
   - `WingsTravel`
   - `WingsGo`
+  - `WingsSide`
+  - `WingsPlus`
   - `WingsCare`
-  - `WingsInsurance`
+  - `WingsPass`
 - a phase-1 scope focused on:
   - multi-domain / multi-site
   - localization

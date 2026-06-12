@@ -25,11 +25,13 @@ Mục tiêu là:
 Giai đoạn 1 được hiểu là:
 
 - dựng nền website đầu tiên cho `WingsTravel`
-- chuẩn bị sẵn kiến trúc để mở thêm các site cùng hệ như:
+- phát triển đồng thời trang tổng và các site cùng hệ:
   - `WingsTravel`
   - `WingsGo`
+  - `WingsSide`
+  - `WingsPlus`
   - `WingsCare`
-  - `WingsInsurance`
+  - `WingsPass`
 - cho phép quản trị nội dung theo ngôn ngữ và theo từng site
 - có landing page / page linh hoạt cho từng dịch vụ hoặc campaign
 - có phân quyền để mỗi người chỉ quản lý đúng site hoặc nhóm site của mình
@@ -79,7 +81,7 @@ Với phạm vi đã chốt, `Payload` phù hợp vì có đúng những lớp c
 
 #### Cách hiểu thực tế với khách hàng
 
-- `WingsTravel`, `WingsGo`, `WingsCare`, `WingsInsurance` có thể đi trên cùng một nền CMS
+- `WingsTravel`, `WingsGo`, `WingsSide`, `WingsPlus`, `WingsCare`, `WingsPass` có thể đi trên cùng một nền CMS
 - nhưng vẫn tách được nội dung, domain và quyền quản lý
 
 #### Payload hỗ trợ phần này ở đâu

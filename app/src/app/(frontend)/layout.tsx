@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { cn } from '@/utilities/ui'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
+import { Inter, Nunito_Sans, Playfair_Display, Rubik } from 'next/font/google'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
@@ -22,6 +23,30 @@ import { getSiteThemeTokens } from '@/utilities/siteTheme'
 import { buildOrganizationJSONLD, buildWebSiteJSONLD } from '@/utilities/structuredData'
 import { getCanonicalURL, normalizeCanonicalDomain } from '@/utilities/siteURLs'
 
+const wingsGoHeading = Rubik({
+  display: 'swap',
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-wingsgo-heading',
+})
+
+const wingsGoBody = Nunito_Sans({
+  display: 'swap',
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-wingsgo-body',
+})
+
+const wingsSideHeading = Playfair_Display({
+  display: 'swap',
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-wingsside-heading',
+})
+
+const wingsSideBody = Inter({
+  display: 'swap',
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-wingsside-body',
+})
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
   const settings = await getCurrentSiteSettings()
@@ -29,14 +54,31 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const siteTheme = getSiteThemeTokens(settings)
 
   return (
-    <html className={cn(GeistSans.variable, GeistMono.variable)} lang={locale} suppressHydrationWarning>
+    <html
+      className={cn(
+        GeistSans.variable,
+        GeistMono.variable,
+        wingsGoHeading.variable,
+        wingsGoBody.variable,
+        wingsSideHeading.variable,
+        wingsSideBody.variable,
+      )}
+      lang={locale}
+      suppressHydrationWarning
+    >
       <head>
         <InitTheme />
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
         <meta content={siteTheme.brandColor} name="theme-color" />
       </head>
-      <body data-site-theme={siteTheme.themeName} style={siteTheme.style}>
+      <body
+        data-site-layout={siteTheme.layoutStyle}
+        data-site-preset={siteTheme.themePreset}
+        data-site-theme={siteTheme.themeKey}
+        data-site-button-style={siteTheme.buttonStyle}
+        style={siteTheme.style}
+      >
         <JsonLd data={[buildOrganizationJSONLD(settings), buildWebSiteJSONLD(settings)]} />
         <Providers>
           <AdminBar

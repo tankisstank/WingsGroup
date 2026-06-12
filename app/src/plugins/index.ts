@@ -19,6 +19,7 @@ import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { siteField } from '@/fields/site'
+import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -73,19 +74,19 @@ const restrictDataExchangeCollection = (collection: CollectionConfig): Collectio
       ...collection.admin?.components,
       beforeList: ['@/components/AdminGuidance/DataExchangeGuidance'],
     },
-    group: 'Dữ liệu',
+    group: adminGroups.data,
     hidden: hideFromEditors,
   },
   labels:
     collection.slug === 'imports'
       ? {
-          plural: 'Nhập dữ liệu',
-          singular: 'Nhập dữ liệu',
+          plural: adminLabel('Nhập dữ liệu', 'Imports'),
+          singular: adminLabel('Nhập dữ liệu', 'Import'),
         }
       : collection.slug === 'exports'
         ? {
-            plural: 'Xuất dữ liệu',
-            singular: 'Xuất dữ liệu',
+            plural: adminLabel('Xuất dữ liệu', 'Exports'),
+            singular: adminLabel('Xuất dữ liệu', 'Export'),
           }
         : collection.labels,
 })
@@ -112,12 +113,12 @@ export const plugins: Plugin[] = [
         afterChange: [revalidateRedirects],
       },
       admin: {
-        group: 'Nâng cao',
+        group: adminGroups.advanced,
         hidden: hideFromNonSuperAdmins,
       },
       labels: {
-        plural: 'Redirects',
-        singular: 'Redirect',
+        plural: adminLabel('Redirects', 'Redirects'),
+        singular: adminLabel('Redirect', 'Redirect'),
       },
     },
   }),
@@ -168,12 +169,12 @@ export const plugins: Plugin[] = [
         beforeChange: [enforceSiteAccess],
       },
       admin: {
-        group: 'Lead',
+        group: adminGroups.lead,
         hidden: hideFromEditors,
       },
       labels: {
-        plural: 'Biểu mẫu',
-        singular: 'Biểu mẫu',
+        plural: adminLabel('Biểu mẫu', 'Forms'),
+        singular: adminLabel('Biểu mẫu', 'Form'),
       },
     },
     formSubmissionOverrides: {
@@ -209,11 +210,11 @@ export const plugins: Plugin[] = [
           beforeList: ['@/components/AdminGuidance/LeadListGuidance'],
         },
         defaultColumns: ['form', 'site', 'createdAt'],
-        group: 'Lead',
+        group: adminGroups.lead,
       },
       labels: {
-        plural: 'Lead gửi về',
-        singular: 'Lead gửi về',
+        plural: adminLabel('Lead gửi về', 'Form submissions'),
+        singular: adminLabel('Lead gửi về', 'Form submission'),
       },
     },
   }),
@@ -234,6 +235,13 @@ export const plugins: Plugin[] = [
           defaultVersionStatus: 'draft',
           disableJobsQueue: true,
         },
+        export: {
+          disableJobsQueue: true,
+        },
+      },
+      {
+        slug: 'theme-presets',
+        import: false,
         export: {
           disableJobsQueue: true,
         },
@@ -297,15 +305,15 @@ export const plugins: Plugin[] = [
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
       admin: {
-        group: 'Nâng cao',
+        group: adminGroups.advanced,
         hidden: hideFromNonSuperAdmins,
       },
       fields: ({ defaultFields }) => {
         return [...defaultFields, ...searchFields]
       },
       labels: {
-        plural: 'Search Results',
-        singular: 'Search Result',
+        plural: adminLabel('Search Results', 'Search Results'),
+        singular: adminLabel('Search Result', 'Search Result'),
       },
     },
   }),

@@ -10,6 +10,7 @@ import {
 } from '@/access/roles'
 import { currentUserSiteFilter } from '@/fields/site'
 import type { AppRole } from '@/types/auth'
+import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -22,7 +23,7 @@ export const Users: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['name', 'email', 'role'],
-    group: 'Nâng cao',
+    group: adminGroups.advanced,
     hidden: hideFromNonSuperAdmins,
     useAsTitle: 'name',
   },
@@ -90,7 +91,7 @@ export const Users: CollectionConfig = {
   ],
   timestamps: true,
   labels: {
-    plural: 'Người dùng',
-    singular: 'Người dùng',
+    plural: adminLabel('Người dùng', 'Users'),
+    singular: adminLabel('Người dùng', 'User'),
   },
 }

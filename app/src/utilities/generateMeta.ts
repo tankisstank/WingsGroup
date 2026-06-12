@@ -23,22 +23,26 @@ const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
 
 export const generateMeta = async (args: {
   doc: Partial<Page> | Partial<Post> | null
+  locale?: null | string
   path?: null | string
   siteCode?: null | string
 }): Promise<Metadata> => {
-  const { doc, path, siteCode } = args
+  const { doc, locale, path, siteCode } = args
   const settings = await getCurrentSiteSettings(siteCode)
 
   const ogImage = getImageURL(doc?.meta?.image || settings?.seo?.defaultImage)
   const seoDefaultTitle = settings?.seo?.defaultTitle || settings?.siteName || 'WingsTravel'
   const seoTitleSuffix = settings?.seo?.titleSuffix
   const description = doc?.meta?.description || settings?.seo?.defaultDescription || settings?.tagline
-  const titleBase = doc?.meta?.title || seoDefaultTitle
+  const titleBase = doc?.title || doc?.meta?.title || seoDefaultTitle
   const title = [titleBase, seoTitleSuffix].filter(Boolean).join(' | ')
 
-  const slug = Array.isArray(doc?.slug) ? doc?.slug.join('/') : doc?.slug || ''
-  const canonicalPath = path || getPageCanonicalPath(slug)
-  const canonicalURL = getCanonicalURL({ path: canonicalPath, settings })
+  const pageLikeDoc =
+    doc && typeof doc === 'object' && ('pathname' in doc || 'slug' in doc)
+      ? (doc as { pathname?: null | string; slug?: null | string })
+      : undefined
+  const canonicalPath = path || getPageCanonicalPath(pageLikeDoc || doc?.slug || '')
+  const canonicalURL = getCanonicalURL({ locale, path: canonicalPath, settings })
 
   return {
     alternates: {

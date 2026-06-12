@@ -31,12 +31,14 @@ Hệ thống sẽ được xây theo hướng một nền quản trị chung cho
 - mỗi site có thể có người quản lý riêng
 - một người cũng có thể được phân quyền để quản lý nhiều site cùng lúc
 
-Ví dụ về sau có thể mở rộng theo cấu trúc như:
+Giai đoạn 1 chốt phát triển theo cấu trúc:
 
 - `WingsTravel`
 - `WingsGo`
+- `WingsSide`
+- `WingsPlus`
 - `WingsCare`
-- `WingsInsurance`
+- `WingsPass`
 
 ## 2.2. Quản lý đa ngôn ngữ
 

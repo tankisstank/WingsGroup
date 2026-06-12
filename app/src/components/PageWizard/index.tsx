@@ -111,6 +111,13 @@ const categoryLabels: Record<WizardTemplate['category'], string> = {
   service: 'Dịch vụ / sản phẩm',
 }
 
+const templateIconLabels: Record<WizardTemplate['category'], string> = {
+  core: 'C',
+  landing: 'L',
+  lead: 'F',
+  service: 'T',
+}
+
 const slugify = (value: string) =>
   value
     .normalize('NFD')
@@ -266,6 +273,9 @@ export default function PageWizardView() {
                         onClick={() => setTemplate(item.id)}
                         type="button"
                       >
+                        <span className={`${baseClass}__template-icon`} aria-hidden="true">
+                          {templateIconLabels[item.category]}
+                        </span>
                         <strong>{item.label}</strong>
                         <span>{item.description}</span>
                         <small>{item.sections}</small>

@@ -12,6 +12,7 @@ import { linkGroup } from '@/fields/linkGroup'
 export const hero: Field = {
   name: 'hero',
   type: 'group',
+  localized: true,
   fields: [
     {
       name: 'type',
@@ -52,6 +53,34 @@ export const hero: Field = {
         },
       }),
       label: false,
+    },
+    {
+      name: 'variant',
+      label: 'Hero variant',
+      type: 'select',
+      defaultValue: 'standard',
+      options: [
+        {
+          label: 'Standard',
+          value: 'standard',
+        },
+        {
+          label: 'Retail departures',
+          value: 'retail-departures',
+        },
+        {
+          label: 'Planner',
+          value: 'planner',
+        },
+        {
+          label: 'Utility',
+          value: 'utility',
+        },
+      ],
+      admin: {
+        condition: (_, { type } = {}) => type === 'highImpact',
+        description: 'Controls hero business behavior without checking site path.',
+      },
     },
     linkGroup({
       overrides: {

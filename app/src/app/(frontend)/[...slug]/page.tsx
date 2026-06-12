@@ -2,10 +2,9 @@ import type { Metadata } from 'next'
 
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
-import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
+import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
-import React, { cache } from 'react'
-import { homeStatic } from '@/endpoints/seed/home-static'
+import React from 'react'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
@@ -22,33 +21,9 @@ import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
-export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const pages = await payload.find({
-    collection: 'pages',
-    draft: false,
-    limit: 1000,
-    overrideAccess: false,
-    pagination: false,
-    select: {
-      slug: true,
-    },
-  })
-
-  const params = pages.docs
-    ?.filter((doc) => {
-      return doc.slug !== 'home'
-    })
-    .map(({ slug }) => {
-      return { slug }
-    })
-
-  return params
-}
-
 type Args = {
   params: Promise<{
-    slug?: string
+    slug?: string[]
   }>
   searchParams?: Promise<{
     site?: string
@@ -59,28 +34,18 @@ type Args = {
 
 export default async function Page({ params: paramsPromise, searchParams }: Args) {
   const { isEnabled: draft } = await draftMode()
-  const { slug = 'home' } = await paramsPromise
+  const { slug = [] } = await paramsPromise
   const resolvedSearchParams = searchParams ? await searchParams : undefined
   const locale = await getCurrentLocale(resolvedSearchParams?.locale)
   const sitePrefix = await getCurrentSitePrefix(resolvedSearchParams?.siteAlias)
-  // Decode to support slugs with special characters
-  const decodedSlug = decodeURIComponent(slug)
-  const url =
-    decodedSlug === 'home'
-      ? sitePrefix || '/'
-      : `${sitePrefix}/${decodedSlug}`.replace(/\/+/g, '/')
-  let page: RequiredDataFromCollectionSlug<'pages'> | null
-
-  page = await queryPageBySlug({
-    slug: decodedSlug,
-    siteCode: resolvedSearchParams?.site,
+  const decodedSegments = slug.map((segment) => decodeURIComponent(segment))
+  const requestedPath = decodedSegments.length > 0 ? `/${decodedSegments.join('/')}` : '/'
+  const url = `${sitePrefix}${requestedPath === '/' ? '' : requestedPath}`.replace(/\/+/g, '/')
+  const page = await queryPageByPath({
     locale,
+    requestedPath,
+    siteCode: resolvedSearchParams?.site,
   })
-
-  // Remove this code once your website is seeded
-  if (!page && slug === 'home') {
-    page = homeStatic
-  }
 
   if (!page) {
     return <PayloadRedirects url={url} />
@@ -88,8 +53,12 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
 
   const { hero, layout } = page
   const settings = await getCurrentSiteSettings(resolvedSearchParams?.site)
-  const canonicalPath = getPageCanonicalPath(decodedSlug)
-  const breadcrumbItems = buildPageBreadcrumbItems({ page: page as BreadcrumbPage, settings })
+  const canonicalPath = getPageCanonicalPath(page, locale)
+  const breadcrumbItems = buildPageBreadcrumbItems({
+    locale,
+    page: page as BreadcrumbPage,
+    settings,
+  })
   const relatedPages = (page as { relatedPages?: Parameters<typeof RelatedPages>[0]['pages'] })
     .relatedPages
 
@@ -110,7 +79,6 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
         ]}
       />
       <PageClient />
-      {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
 
       {draft && <LivePreviewListener />}
@@ -127,57 +95,67 @@ export async function generateMetadata({
   params: paramsPromise,
   searchParams,
 }: Args): Promise<Metadata> {
-  const { slug = 'home' } = await paramsPromise
+  const { slug = [] } = await paramsPromise
   const resolvedSearchParams = searchParams ? await searchParams : undefined
   const locale = await getCurrentLocale(resolvedSearchParams?.locale)
-  // Decode to support slugs with special characters
-  const decodedSlug = decodeURIComponent(slug)
-  const page = await queryPageBySlug({
-    slug: decodedSlug,
-    siteCode: resolvedSearchParams?.site,
+  const decodedSegments = slug.map((segment) => decodeURIComponent(segment))
+  const requestedPath = decodedSegments.length > 0 ? `/${decodedSegments.join('/')}` : '/'
+  const page = await queryPageByPath({
     locale,
+    requestedPath,
+    siteCode: resolvedSearchParams?.site,
   })
 
   return generateMeta({
     doc: page,
-    path: getPageCanonicalPath(decodedSlug),
+    locale,
+    path: requestedPath,
     siteCode: resolvedSearchParams?.site,
   })
 }
 
-const queryPageBySlug = cache(
-  async ({
-    locale,
-    siteCode,
-    slug,
-  }: {
-    locale?: SupportedLocaleCode
-    siteCode?: string
-    slug: string
-  }) => {
-    const { isEnabled: draft } = await draftMode()
-
-    const payload = await getPayload({ config: configPromise })
-    const candidateSlugs = siteCode ? [slug, `${siteCode}-${slug}`] : [slug]
-    const where = await appendSiteWhere(
-      {
-        slug: {
-          in: candidateSlugs,
+const queryPageByPath = async ({
+  locale,
+  requestedPath,
+  siteCode,
+}: {
+  locale?: SupportedLocaleCode
+  requestedPath: string
+  siteCode?: string
+}) => {
+  const { isEnabled: draft } = await draftMode()
+  const payload = await getPayload({ config: configPromise })
+  const segments = requestedPath.split('/').filter(Boolean)
+  const candidateSlug = segments[segments.length - 1] || 'home'
+  const candidateSlugs = siteCode ? [candidateSlug, `${siteCode}-${candidateSlug}`] : [candidateSlug]
+  const where = await appendSiteWhere(
+    {
+      or: [
+        {
+          pathname: {
+            equals: requestedPath,
+          },
         },
-      },
-      siteCode,
-    )
+        {
+          slug: {
+            in: candidateSlugs,
+          },
+        },
+      ],
+    },
+    siteCode,
+  )
 
-    const result = await payload.find({
-      collection: 'pages',
-      draft,
-      locale,
-      limit: 1,
-      pagination: false,
-      overrideAccess: draft,
-      where,
-    })
+  const result = await payload.find({
+    collection: 'pages',
+    draft,
+    locale,
+    depth: 3,
+    limit: 1,
+    pagination: false,
+    overrideAccess: draft,
+    where,
+  })
 
-    return result.docs?.[0] || null
-  },
-)
+  return result.docs?.[0] || null
+}

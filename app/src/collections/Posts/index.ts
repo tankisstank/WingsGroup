@@ -23,6 +23,7 @@ import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
 import { revalidateDelete, revalidatePost } from './hooks/revalidatePost'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
+import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 
 import {
   MetaDescriptionField,
@@ -57,7 +58,7 @@ export const Posts: CollectionConfig<'posts'> = {
     description:
       'Quản lý bài viết theo site. Editor chỉ lưu nháp; site-manager hoặc super-admin duyệt publish.',
     defaultColumns: ['title', 'site', 'slug', 'updatedAt'],
-    group: 'Nội dung',
+    group: adminGroups.content,
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
@@ -271,6 +272,7 @@ export const Posts: CollectionConfig<'posts'> = {
             return {
               ...item,
               label: 'Đường dẫn',
+              localized: false,
               admin: {
                 ...item.admin,
                 description: 'Phần URL của bài viết. Chỉ sửa khi thật sự cần đổi đường dẫn.',
@@ -293,8 +295,8 @@ export const Posts: CollectionConfig<'posts'> = {
     }),
   ],
   labels: {
-    plural: 'Bài viết',
-    singular: 'Bài viết',
+    plural: adminLabel('Bài viết', 'Posts'),
+    singular: adminLabel('Bài viết', 'Post'),
   },
   hooks: {
     afterChange: [revalidatePost],

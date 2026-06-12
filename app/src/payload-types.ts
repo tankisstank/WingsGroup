@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     sites: Site;
+    'theme-presets': ThemePreset;
     'site-settings': SiteSetting;
     pages: Page;
     posts: Post;
@@ -89,6 +90,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     sites: SitesSelect<false> | SitesSelect<true>;
+    'theme-presets': ThemePresetsSelect<false> | ThemePresetsSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -182,6 +184,70 @@ export interface Site {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "theme-presets".
+ */
+export interface ThemePreset {
+  id: number;
+  /**
+   * Tên dễ hiểu cho người quản trị, ví dụ Premium, Retail hoặc Care.
+   */
+  name: string;
+  /**
+   * Mã ổn định cho hệ thống, ví dụ retail hoặc premium. Chỉ nên đổi khi có yêu cầu kỹ thuật.
+   */
+  key: string;
+  description?: string | null;
+  isActive?: boolean | null;
+  /**
+   * Chỉnh các lựa chọn bên dưới và xem preview để hiểu thay đổi trên site thật.
+   */
+  tokens: {
+    /**
+     * Có thể bấm ô màu để chọn trực quan hoặc nhập mã hex.
+     */
+    brandColor: string;
+    /**
+     * Có thể bấm ô màu để chọn trực quan hoặc nhập mã hex.
+     */
+    accentColor: string;
+    /**
+     * Có thể bấm ô màu để chọn trực quan hoặc nhập mã hex.
+     */
+    surfaceColor: string;
+    /**
+     * Có thể bấm ô màu để chọn trực quan hoặc nhập mã hex.
+     */
+    surfaceStrongColor: string;
+    /**
+     * Quyết định cảm giác nền tổng thể: đơn giản, gradient mềm, editorial hoặc utility.
+     */
+    backgroundStyle: 'plain' | 'soft-gradient' | 'editorial' | 'utility';
+    /**
+     * Ảnh hưởng nút, card, form và các khối nội dung.
+     */
+    radius: 'sm' | 'md' | 'lg' | 'xl';
+    /**
+     * Compact hiển thị dày hơn, Airy thoáng hơn.
+     */
+    spacingScale: 'compact' | 'standard' | 'airy';
+    /**
+     * Chọn cảm giác chữ tổng thể cho heading và nội dung.
+     */
+    fontPreset: 'system' | 'modern' | 'retail' | 'editorial' | 'premium';
+    /**
+     * Ảnh hưởng CTA chính trên hero, card và form.
+     */
+    buttonStyle: 'solid' | 'soft' | 'outline' | 'pill';
+    /**
+     * Chọn phong cách bố cục phù hợp site: corporate, retail, editorial hoặc utility.
+     */
+    layoutStyle: 'corporate' | 'retail' | 'editorial' | 'utility';
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
  */
 export interface SiteSetting {
@@ -189,7 +255,7 @@ export interface SiteSetting {
   site: number | Site;
   siteName: string;
   tagline?: string | null;
-  branding?: {
+  branding: {
     logoText?: string | null;
     /**
      * Mã màu hex cho bề mặt thương hiệu chính, ví dụ #0F766E.
@@ -200,6 +266,46 @@ export interface SiteSetting {
      */
     accentColor?: string | null;
     logoImage?: (number | null) | Media;
+    /**
+     * Mã ổn định dùng cho render frontend. Không phụ thuộc tên hiển thị site.
+     */
+    themeKey: 'wings-travel' | 'wings-go' | 'wings-side' | 'wings-plus' | 'wings-care' | 'wings-pass' | 'custom';
+    /**
+     * Preset theme mặc định. Các field bên dưới sẽ override preset nếu được nhập.
+     */
+    themePreset?: (number | null) | ThemePreset;
+    /**
+     * Override màu nền phụ. Để trống để dùng preset.
+     */
+    surfaceColor?: string | null;
+    /**
+     * Override màu nền nhấn. Để trống để dùng preset.
+     */
+    surfaceStrongColor?: string | null;
+    /**
+     * Để trống để dùng preset.
+     */
+    backgroundStyle?: ('plain' | 'soft-gradient' | 'editorial' | 'utility') | null;
+    /**
+     * Để trống để dùng preset.
+     */
+    radius?: ('sm' | 'md' | 'lg' | 'xl') | null;
+    /**
+     * Để trống để dùng preset.
+     */
+    spacingScale?: ('compact' | 'standard' | 'airy') | null;
+    /**
+     * Để trống để dùng preset.
+     */
+    fontPreset?: ('system' | 'modern' | 'retail' | 'editorial' | 'premium') | null;
+    /**
+     * Để trống để dùng preset.
+     */
+    buttonStyle?: ('solid' | 'soft' | 'outline' | 'pill') | null;
+    /**
+     * Để trống để dùng preset.
+     */
+    layoutStyle?: ('corporate' | 'retail' | 'editorial' | 'utility') | null;
   };
   seo?: {
     defaultTitle?: string | null;
@@ -361,6 +467,10 @@ export interface Page {
    * Chọn trang cha nếu cần hiển thị breadcrumb hoặc nhóm nội dung liên quan.
    */
   parentPage?: (number | null) | Page;
+  /**
+   * Tự tính từ trang cha và slug để hỗ trợ URL phân cấp.
+   */
+  pathname?: string | null;
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
     richText?: {
@@ -378,6 +488,10 @@ export interface Page {
       };
       [k: string]: unknown;
     } | null;
+    /**
+     * Controls hero business behavior without checking site path.
+     */
+    variant?: ('standard' | 'retail-departures' | 'planner' | 'utility') | null;
     links?:
       | {
           link: {
@@ -404,7 +518,17 @@ export interface Page {
       | null;
     media?: (number | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout: (
+    | CallToActionBlock
+    | ContentBlock
+    | FeatureGridBlock
+    | InfoStripBlock
+    | PricingTableBlock
+    | FAQBlock
+    | MediaBlock
+    | ArchiveBlock
+    | FormBlock
+  )[];
   meta?: {
     title?: string | null;
     /**
@@ -647,6 +771,124 @@ export interface ContentBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureGridBlock".
+ */
+export interface FeatureGridBlock {
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  columns?: ('2' | '3' | '4') | null;
+  variant?: ('default' | 'highlight' | 'minimal') | null;
+  items?:
+    | {
+        eyebrow?: string | null;
+        title: string;
+        description?: string | null;
+        image?: (number | null) | Media;
+        meta?: string | null;
+        enableLink?: boolean | null;
+        link?: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: number | Post;
+              } | null);
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featureGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InfoStripBlock".
+ */
+export interface InfoStripBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  description?: string | null;
+  items?:
+    | {
+        value?: string | null;
+        label: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'infoStrip';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingTableBlock".
+ */
+export interface PricingTableBlock {
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  items?:
+    | {
+        title: string;
+        subtitle?: string | null;
+        departure?: string | null;
+        airline?: string | null;
+        price: string;
+        note?: string | null;
+        enableLink?: boolean | null;
+        link?: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: number | Post;
+              } | null);
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'pricingTable';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FAQBlock".
+ */
+export interface FAQBlock {
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  items?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'faq';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1164,6 +1406,10 @@ export interface PayloadLockedDocument {
         value: number | Site;
       } | null)
     | ({
+        relationTo: 'theme-presets';
+        value: number | ThemePreset;
+      } | null)
+    | ({
         relationTo: 'site-settings';
         value: number | SiteSetting;
       } | null)
@@ -1267,6 +1513,32 @@ export interface SitesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "theme-presets_select".
+ */
+export interface ThemePresetsSelect<T extends boolean = true> {
+  name?: T;
+  key?: T;
+  description?: T;
+  isActive?: T;
+  tokens?:
+    | T
+    | {
+        brandColor?: T;
+        accentColor?: T;
+        surfaceColor?: T;
+        surfaceStrongColor?: T;
+        backgroundStyle?: T;
+        radius?: T;
+        spacingScale?: T;
+        fontPreset?: T;
+        buttonStyle?: T;
+        layoutStyle?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -1280,6 +1552,16 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         brandColor?: T;
         accentColor?: T;
         logoImage?: T;
+        themeKey?: T;
+        themePreset?: T;
+        surfaceColor?: T;
+        surfaceStrongColor?: T;
+        backgroundStyle?: T;
+        radius?: T;
+        spacingScale?: T;
+        fontPreset?: T;
+        buttonStyle?: T;
+        layoutStyle?: T;
       };
   seo?:
     | T
@@ -1332,11 +1614,13 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   site?: T;
   parentPage?: T;
+  pathname?: T;
   hero?:
     | T
     | {
         type?: T;
         richText?: T;
+        variant?: T;
         links?:
           | T
           | {
@@ -1359,6 +1643,10 @@ export interface PagesSelect<T extends boolean = true> {
     | {
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
+        featureGrid?: T | FeatureGridBlockSelect<T>;
+        infoStrip?: T | InfoStripBlockSelect<T>;
+        pricingTable?: T | PricingTableBlockSelect<T>;
+        faq?: T | FAQBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
@@ -1424,6 +1712,108 @@ export interface ContentBlockSelect<T extends boolean = true> {
               label?: T;
               appearance?: T;
             };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureGridBlock_select".
+ */
+export interface FeatureGridBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  columns?: T;
+  variant?: T;
+  items?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        description?: T;
+        image?: T;
+        meta?: T;
+        enableLink?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InfoStripBlock_select".
+ */
+export interface InfoStripBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  items?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        description?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingTableBlock_select".
+ */
+export interface PricingTableBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        subtitle?: T;
+        departure?: T;
+        airline?: T;
+        price?: T;
+        note?: T;
+        enableLink?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FAQBlock_select".
+ */
+export interface FAQBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  items?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
         id?: T;
       };
   id?: T;
@@ -2095,6 +2485,7 @@ export interface TaskCreateCollectionExport {
     batchSize?: number | null;
     collectionSlug:
       | 'sites'
+      | 'theme-presets'
       | 'site-settings'
       | 'pages'
       | 'posts'

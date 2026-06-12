@@ -11,3 +11,4 @@ Bộ tài liệu này tổng hợp research từ `docs/Tai_lieu_trao_doi_vong_2`
 - `91-de-xuat-cac-trang-noi-dung-can-co.md`: đề xuất sitemap và nhóm trang nội dung nên có theo từng site.
 - `92-research-doi-thu-chuyen-sau-cong-nghe-seo-giao-dien.md`: research sâu về công nghệ, link, SEO, nội dung và giao diện đối thủ.
 - `93-ui-principles-va-wireframe-dinh-huong-theo-site.md`: định hướng UI và wireframe theo từng site trong hệ Wings.
+- `94-ui-preview-review-va-thiet-ke-de-xuat.md`: review UI trực tiếp bằng preview và thiết kế đề xuất để đưa `wingsgo`/`wingsside` lên mức production UI.

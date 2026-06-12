@@ -18,7 +18,7 @@ The feature is done when role-specific CMS surfaces work in browser tests and ex
 ## Fixtures
 
 - Seeded users from `seedPhase1Launch`.
-- Seeded sites: WingsTravel, WingsGo, WingsCare, WingsInsurance.
+- Seeded sites: WingsTravel, WingsGo, WingsSide, WingsPlus, WingsCare, WingsPass.
 - Seeded pages/posts/forms/submissions from local e2e helpers.
 
 ## Commands

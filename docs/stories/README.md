@@ -16,6 +16,8 @@ Current seeded epic:
   - `US-009` structured data and AI Agent SEO research
   - `US-010` breadcrumbs, internal linking, and SEO fields
   - `US-011` multisite theme foundation
+- `E05-cms-theme-management`
+  - `US-014` CMS-managed multisite theme configuration
 
 ## Normal Story
 

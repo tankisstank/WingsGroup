@@ -9,6 +9,7 @@ import { imageHero1 } from './image-hero-1'
 import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
+import { ensureThemePresetSeeds, siteThemeAssignments } from '@/utilities/themeSeed'
 
 const collections: CollectionSlug[] = [
   'form-submissions',
@@ -108,6 +109,26 @@ export const seed = async ({
       supportedLocales: ['vi', 'en'],
       defaultLocale: 'vi',
       isActive: true,
+    },
+  })
+
+  const themePresetIDs = await ensureThemePresetSeeds(payload, req)
+  const siteThemeAssignment = siteThemeAssignments['wings-travel']
+
+  await payload.create({
+    collection: 'site-settings',
+    req,
+    context: seedContext,
+    data: {
+      branding: {
+        accentColor: '#A16207',
+        brandColor: '#1C1917',
+        logoText: 'WingsTravel',
+        themeKey: 'wings-travel',
+        themePreset: themePresetIDs[siteThemeAssignment.themePreset],
+      },
+      site: seedSite.id,
+      siteName: 'WingsTravel',
     },
   })
 

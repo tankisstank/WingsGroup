@@ -10,7 +10,7 @@
 ## Delivery Summary
 
 Phase 1 delivered a production-ready multisite content platform based on
-Payload + Next.js. The system supports four sites in one codebase, role-scoped
+Payload + Next.js. The system supports one umbrella site and five child sites in one codebase, role-scoped
 CMS access, localization, page/post/media operations, editorial draft/publish
 workflow, and a role-aware CMS operator console.
 
@@ -18,8 +18,10 @@ workflow, and a role-aware CMS operator console.
 
 - WingsTravel
 - WingsGo
+- WingsSide
+- WingsPlus
 - WingsCare
-- WingsInsurance
+- WingsPass
 
 ## Core Capabilities Delivered
 
@@ -28,15 +30,26 @@ workflow, and a role-aware CMS operator console.
 - Content management: pages, posts, categories, media, forms, lead submissions.
 - Landing pages: reusable page-composer pattern and guided page wizard.
 - Access control: `super-admin`, `site-manager`, `editor` with site scope.
+- Theme management: approved presets, controlled site overrides, color pickers,
+  and live admin previews.
+- Site review: generated treeview for scanning every public site, page, post,
+  and utility route.
 
 ## Known Constraints
 
 - Phase 1 excludes CRM pipeline, booking/payment, and deep automation workflows.
 - Local bootstrap uses SQLite; staging/production target PostgreSQL (+ Redis for scale).
+- Automatic SQLite schema push is disabled locally. Schema changes must be
+  reviewed and applied deliberately instead of accepting an interactive
+  data-loss prompt.
 
 ## Links
 
 - Production URL(s): to be finalized per deployment environment.
 - Admin URL: `/admin` (operator console at `/admin/console`, wizard at `/admin/page-wizard`).
+- Theme Manager: `/admin/theme`.
+- Theme preset governance: `/admin/collections/theme-presets`.
+- Link review generator: `app/scripts/generate-site-link-review.ts`.
+- Generated review page: `app/output/site-link-review.html`.
 - Design or asset source: CMS-managed media library + customer-approved content assets.
 - Support channel: project support process defined by delivery team.

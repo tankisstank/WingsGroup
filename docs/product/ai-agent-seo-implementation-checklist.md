@@ -77,6 +77,9 @@ US-008 canonical rule:
   from local path-prefix aliases such as `/wingsgo`.
 - Home resolves to `/`, pages resolve to `/{slug}`, posts resolve to
   `/posts/{slug}`, and archive pages resolve to `/posts` or `/posts/page/{n}`.
+- Each child site runs on its own public domain. `robots.txt`, `sitemap.xml`,
+  `pages-sitemap.xml`, and `posts-sitemap.xml` must be emitted for the current
+  host and must not leak another site's host.
 
 ## Track 4: Sitemap Coverage
 
@@ -94,6 +97,9 @@ US-008 sitemap note:
 - `/posts` archive entries are generated per site settings.
 - Locale-specific sitemap expansion remains pending until US-004 finalizes
   locale-aware public routing.
+- Production host behavior is now explicitly domain-per-site. Robots and sitemap
+  index output must be host-aware instead of relying on one static build-time
+  host value for the entire platform.
 
 ## Track 5: Structured Data
 
