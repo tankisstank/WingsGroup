@@ -489,7 +489,11 @@ export interface Page {
       [k: string]: unknown;
     } | null;
     /**
-     * Controls hero business behavior without checking site path.
+     * Chỉ thay đổi bố cục hiển thị. Màu sắc, font và button tiếp tục lấy từ theme của site.
+     */
+    presentation?: ('centered-visual' | 'split-visual' | 'layered-visuals' | 'gradient-mesh') | null;
+    /**
+     * Điều khiển nội dung nghiệp vụ như lịch khởi hành hoặc planner, độc lập với kiểu hiển thị.
      */
     variant?: ('standard' | 'retail-departures' | 'planner' | 'utility') | null;
     links?:
@@ -517,6 +521,10 @@ export interface Page {
         }[]
       | null;
     media?: (number | null) | Media;
+    /**
+     * Tối đa 3 ảnh bổ sung cho style layered. Nếu để trống, hệ thống lặp visual chính để giữ layout ổn định.
+     */
+    supportingMedia?: (number | Media)[] | null;
   };
   layout: (
     | CallToActionBlock
@@ -1620,6 +1628,7 @@ export interface PagesSelect<T extends boolean = true> {
     | {
         type?: T;
         richText?: T;
+        presentation?: T;
         variant?: T;
         links?:
           | T
@@ -1637,6 +1646,7 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         media?: T;
+        supportingMedia?: T;
       };
   layout?:
     | T

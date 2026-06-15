@@ -8,6 +8,11 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { linkGroup } from '@/fields/linkGroup'
+import {
+  defaultHeroPresentation,
+  heroPresentationDefinitions,
+  heroPresentationOptions,
+} from '@/heros/presentations/registry'
 
 export const hero: Field = {
   name: 'hero',
@@ -55,8 +60,25 @@ export const hero: Field = {
       label: false,
     },
     {
+      name: 'presentation',
+      label: 'Kiểu hiển thị hero',
+      type: 'select',
+      defaultValue: defaultHeroPresentation,
+      options: heroPresentationOptions,
+      required: true,
+      admin: {
+        condition: (_, { type } = {}) => type === 'highImpact',
+        description:
+          'Chỉ thay đổi bố cục hiển thị. Màu sắc, font và button tiếp tục lấy từ theme của site.',
+      },
+      validate: (value: unknown) =>
+        !value ||
+        heroPresentationDefinitions.some((definition) => definition.value === value) ||
+        'Chọn một kiểu hero đã được đăng ký trong hệ thống.',
+    },
+    {
       name: 'variant',
-      label: 'Hero variant',
+      label: 'Hành vi nghiệp vụ',
       type: 'select',
       defaultValue: 'standard',
       options: [
@@ -79,7 +101,8 @@ export const hero: Field = {
       ],
       admin: {
         condition: (_, { type } = {}) => type === 'highImpact',
-        description: 'Controls hero business behavior without checking site path.',
+        description:
+          'Điều khiển nội dung nghiệp vụ như lịch khởi hành hoặc planner, độc lập với kiểu hiển thị.',
       },
     },
     linkGroup({
@@ -95,6 +118,20 @@ export const hero: Field = {
       },
       relationTo: 'media',
       required: true,
+    },
+    {
+      name: 'supportingMedia',
+      label: 'Visual bổ sung',
+      type: 'upload',
+      hasMany: true,
+      maxRows: 3,
+      relationTo: 'media',
+      admin: {
+        condition: (_, { presentation, type } = {}) =>
+          type === 'highImpact' && presentation === 'layered-visuals',
+        description:
+          'Tối đa 3 ảnh bổ sung cho style layered. Nếu để trống, hệ thống lặp visual chính để giữ layout ổn định.',
+      },
     },
   ],
   label: false,

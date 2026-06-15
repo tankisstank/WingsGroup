@@ -3193,6 +3193,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
     slug: 'home',
     hero: {
       type: 'highImpact',
+      presentation: 'centered-visual',
       variant: 'standard',
       media: ecosystemHeroImage.id,
       links: [linkItem('Khám phá hệ sinh thái', '/he-sinh-thai', 'default'), linkItem('Liên hệ tư vấn', '/lien-he', 'outline')],
@@ -3359,6 +3360,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
     title: 'WingsTravel',
     hero: {
       type: 'highImpact',
+      presentation: 'centered-visual',
       variant: 'standard',
       media: ecosystemHeroImage.id,
       links: [linkItem('Explore the ecosystem', '/he-sinh-thai', 'default'), linkItem('Contact the team', '/lien-he', 'outline')],

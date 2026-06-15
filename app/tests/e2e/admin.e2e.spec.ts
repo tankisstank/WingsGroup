@@ -8,16 +8,20 @@ import {
   seedRoleScopedUsers,
   type RoleScopeSeed,
 } from '../helpers/seedRoleUsers'
+import { seedHeroPresentationSmoke } from '../helpers/seedPhase1Launch'
+import { heroPresentationDefinitions } from '../../src/heros/presentations/registry'
 
 test.describe('Admin Panel', () => {
   let page: Page
   let roleScope: RoleScopeSeed
+  let heroPresentationFixtureIDs: Awaited<ReturnType<typeof seedHeroPresentationSmoke>>
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(90_000)
 
     await seedTestUser()
     roleScope = await seedRoleScopedUsers()
+    heroPresentationFixtureIDs = await seedHeroPresentationSmoke()
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -100,6 +104,25 @@ test.describe('Admin Panel', () => {
     await expect(page).toHaveURL(/\/admin\/collections\/pages\/[a-zA-Z0-9-_]+/)
     const editViewArtifact = page.locator('input[name="title"]')
     await expect(editViewArtifact).toBeVisible()
+  })
+
+  test('can select a governed high-impact hero presentation', async () => {
+    await page.goto(
+      `${e2eBaseURL}/admin/collections/pages/${heroPresentationFixtureIDs['centered-visual']}`,
+    )
+
+    const presentationControl = page.locator(
+      '#field-hero__presentation input[role="combobox"], #field-hero__presentation[role="combobox"]',
+    )
+    await expect(presentationControl).toBeVisible()
+    await presentationControl.click()
+
+    for (const definition of heroPresentationDefinitions) {
+      await expect(page.getByRole('option', { name: definition.label })).toBeVisible()
+    }
+
+    await page.getByRole('option', { name: 'Style 3 - Layered visuals' }).click()
+    await expect(page.getByText('Visual bổ sung', { exact: true })).toBeVisible()
   })
 
   test('site manager can read only assigned site settings through authenticated API', async ({ request }) => {

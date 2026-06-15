@@ -14,6 +14,7 @@ export const home = ({
     _status: 'published',
     hero: {
       type: 'highImpact',
+      presentation: 'centered-visual',
       links: [
         {
           link: {

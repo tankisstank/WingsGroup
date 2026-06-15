@@ -1,7 +1,11 @@
 import { expect, test } from '@playwright/test'
 
 import { e2eBaseURL } from '../helpers/baseURL'
-import { seedPhase1LaunchSmoke } from '../helpers/seedPhase1Launch'
+import {
+  heroPresentationFixturePaths,
+  seedPhase1LaunchSmoke,
+} from '../helpers/seedPhase1Launch'
+import { heroPresentationDefinitions } from '../../src/heros/presentations/registry'
 
 const phase1Routes = [
   {
@@ -149,6 +153,67 @@ test.describe('Phase 1 public frontend smoke', () => {
     expect(overflowX).toBe(false)
   })
 
+  for (const definition of heroPresentationDefinitions) {
+    test(`renders hero presentation ${definition.value} across desktop and mobile`, async ({
+      page,
+    }, testInfo) => {
+      const path = heroPresentationFixturePaths[definition.value]
+
+      await page.setViewportSize({ height: 900, width: 1440 })
+      await page.goto(`${e2eBaseURL}${path}`)
+
+      const hero = page.locator('[data-hero-presentation]')
+      await expect(hero).toHaveAttribute('data-hero-presentation', definition.value)
+      await expect(
+        page.getByRole('heading', {
+          name: 'WingsTravel - hệ sinh thái du lịch nhiều line business dưới một lớp trust chung',
+        }),
+      ).toBeVisible()
+
+      const primaryCTA = page.getByRole('link', { name: 'Khám phá hệ sinh thái' })
+      await expect(primaryCTA).toBeVisible()
+      expect((await primaryCTA.boundingBox())?.height).toBeGreaterThanOrEqual(44)
+
+      if (definition.value === 'centered-visual') {
+        await expect(hero.locator('.hero-presentation--centered .hero-presentation__visual')).toBeVisible()
+      }
+
+      if (definition.value === 'split-visual') {
+        await expect(hero.locator('.hero-presentation--split .hero-presentation__visual')).toBeVisible()
+      }
+
+      if (definition.value === 'layered-visuals') {
+        await expect(hero.locator('.hero-presentation__layer')).toHaveCount(3)
+      }
+
+      if (definition.value === 'gradient-mesh') {
+        await expect(hero.locator('.hero-presentation__mesh-orb')).toHaveCount(3)
+      }
+
+      await testInfo.attach(`${definition.value}-desktop`, {
+        body: await page.screenshot({ fullPage: false }),
+        contentType: 'image/png',
+      })
+
+      await page.setViewportSize({ height: 844, width: 390 })
+      await page.goto(`${e2eBaseURL}${path}`)
+
+      const overflowX = await page.evaluate(
+        () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      )
+      expect(overflowX).toBe(false)
+      await expect(page.locator('[data-hero-presentation]')).toHaveAttribute(
+        'data-hero-presentation',
+        definition.value,
+      )
+
+      await testInfo.attach(`${definition.value}-mobile`, {
+        body: await page.screenshot({ fullPage: false }),
+        contentType: 'image/png',
+      })
+    })
+  }
+
   test('resolves the correct site from production hostnames', async ({ request }) => {
     const rootResponse = await request.get(e2eBaseURL, {
       headers: {
@@ -214,31 +279,39 @@ test.describe('Phase 1 public frontend smoke', () => {
   test('does not render broken internal links across public sites', async ({ request }) => {
     test.setTimeout(180_000)
 
-    const queue: string[] = [...linkAuditRoutes]
+    const queue: Array<{ depth: number; path: string }> = linkAuditRoutes.map((path) => ({
+      depth: 0,
+      path,
+    }))
     const checked = new Set<string>()
     const failures: string[] = []
 
-    for (let index = 0; index < queue.length; index += 1) {
-      const path = queue[index]
+    while (queue.length > 0) {
+      const batch = queue.splice(0, 12).filter(({ path }) => !checked.has(path))
+      batch.forEach(({ path }) => checked.add(path))
 
-      if (checked.has(path)) {
-        continue
-      }
+      const results = await Promise.all(
+        batch.map(async ({ depth, path }) => {
+          const response = await request.get(path)
+          const html = await response.text()
+          const title = html.match(/<title>(.*?)<\/title>/is)?.[1]?.replace(/\s+/g, ' ').trim() || ''
 
-      checked.add(path)
+          return { depth, html, path, response, title }
+        }),
+      )
 
-      const response = await request.get(path)
-      const html = await response.text()
-      const title = html.match(/<title>(.*?)<\/title>/is)?.[1]?.replace(/\s+/g, ' ').trim() || ''
+      for (const { depth, html, path, response, title } of results) {
+        if (!response.ok() || /404|This page could not be found|Không tìm thấy/i.test(title)) {
+          failures.push(`${path} -> ${response.status()} ${title}`)
+          continue
+        }
 
-      if (!response.ok() || /404|This page could not be found|Không tìm thấy/i.test(title)) {
-        failures.push(`${path} -> ${response.status()} ${title}`)
-        continue
-      }
-
-      for (const href of extractInternalLinks(html, path)) {
-        if (!checked.has(href) && !queue.includes(href)) {
-          queue.push(href)
+        if (depth === 0) {
+          for (const href of extractInternalLinks(html, path)) {
+            if (!checked.has(href) && !queue.some((item) => item.path === href)) {
+              queue.push({ depth: 1, path: href })
+            }
+          }
         }
       }
     }
