@@ -5,12 +5,28 @@ import type { CallToActionBlock as CTABlockProps } from '@/payload-types'
 import RichText from '@/components/RichText'
 import { CMSLink } from '@/components/Link'
 
-export const CallToActionBlock: React.FC<CTABlockProps> = ({ links, richText }) => {
+export const CallToActionBlock: React.FC<CTABlockProps> = ({
+  eyebrow,
+  links,
+  presentation = 'card',
+  richText,
+  supportingQuote,
+}) => {
   return (
-    <section className="container theme-section--compact" aria-label="Call to action">
-      <div className="theme-card border p-6 lg:p-8 flex flex-col gap-8 md:flex-row md:justify-between md:items-center">
+    <section
+      className={`container theme-section--compact layout-block layout-block--cta layout-block--${presentation}`}
+      aria-label="Call to action"
+      data-block-presentation={presentation}
+    >
+      <div className="layout-cta theme-card border p-6 lg:p-8 flex flex-col gap-8 md:flex-row md:justify-between md:items-center">
         <div className="max-w-[48rem] flex items-center">
-          {richText && <RichText className="mb-0" data={richText} enableGutter={false} />}
+          <div>
+            {eyebrow ? <p className="site-brand-kicker mb-3">{eyebrow}</p> : null}
+            {richText && <RichText className="mb-0" data={richText} enableGutter={false} />}
+            {supportingQuote ? (
+              <blockquote className="layout-cta__quote">&ldquo;{supportingQuote}&rdquo;</blockquote>
+            ) : null}
+          </div>
         </div>
         <div className="flex flex-col gap-8">
           {(links || []).map(({ link }, i) => {

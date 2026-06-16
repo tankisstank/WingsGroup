@@ -1,5 +1,9 @@
 import type { Block } from 'payload'
 
+import {
+  asSelectOptions,
+  pricingPresentationDefinitions,
+} from '@/blocks/presentations'
 import { link } from '@/fields/link'
 
 export const PricingTable: Block = {
@@ -10,6 +14,13 @@ export const PricingTable: Block = {
     singular: 'Pricing table',
   },
   fields: [
+    {
+      name: 'presentation',
+      label: 'Kiểu hiển thị',
+      type: 'select',
+      defaultValue: 'departure-table',
+      options: asSelectOptions(pricingPresentationDefinitions),
+    },
     {
       name: 'eyebrow',
       label: 'Eyebrow',
@@ -63,6 +74,24 @@ export const PricingTable: Block = {
           name: 'note',
           label: 'Ghi chú',
           type: 'text',
+        },
+        {
+          name: 'featured',
+          label: 'Đề xuất',
+          type: 'checkbox',
+        },
+        {
+          name: 'features',
+          label: 'Quyền lợi',
+          type: 'array',
+          fields: [
+            {
+              name: 'label',
+              label: 'Nội dung',
+              type: 'text',
+              required: true,
+            },
+          ],
         },
         {
           name: 'enableLink',

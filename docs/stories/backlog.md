@@ -14,3 +14,4 @@ the work is selected or when a product decision needs a durable place to land.
 | E03-ai-agent-seo-and-theme | Phase-1 AI-agent-friendly SEO baseline plus multisite theme foundation | planned |
 | E04-supervision-plans | Supervisor delegation and adversarial audit plans for selected implementation bundles | planned |
 | E05-cms-theme-management | CMS-managed multisite theme presets, token overrides, and theme admin surface | planned |
+| E06-layout-preset-library | VibeUI-inspired public page layout presets and block presentation library | implemented |

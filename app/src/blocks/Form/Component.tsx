@@ -19,6 +19,7 @@ export type FormBlockType = {
   enableIntro: boolean
   form: FormType
   introContent?: DefaultTypedEditorState
+  presentation?: 'centered-card' | 'minimal' | 'split-contact' | 'support-channels'
 }
 
 const formCopy = {
@@ -81,6 +82,7 @@ export const FormBlock: React.FC<
     form: formFromProps,
     form: { id: formID, confirmationMessage, confirmationType, redirect, submitButtonLabel } = {},
     introContent,
+    presentation = 'split-contact',
   } = props
 
   const pathname = usePathname()
@@ -186,8 +188,11 @@ export const FormBlock: React.FC<
   )
 
   return (
-    <section className="container theme-section">
-      <div className="site-lead-form-shell">
+    <section
+      className={`container theme-section layout-block layout-block--form layout-block--${presentation}`}
+      data-block-presentation={presentation}
+    >
+      <div className="site-lead-form-shell layout-form">
         <aside className="site-lead-form-aside" aria-label={copy.asideLabel}>
           <div className="site-panel-icon">
             <HeadphonesIcon aria-hidden="true" className="h-5 w-5" />

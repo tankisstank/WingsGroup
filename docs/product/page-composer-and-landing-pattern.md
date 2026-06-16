@@ -11,8 +11,9 @@ landing pages by changing structured fields and blocks, not frontend code.
 The current composer surface is:
 
 - `hero`: editable hero type, rich text, media, and CTA links.
-- `layout`: ordered block list for `content`, `mediaBlock`, `cta`, `formBlock`,
-  and `archive`.
+- `layout`: ordered block list for content, media, CTA, form, archive, stats,
+  testimonials, comparison, FAQ, feature, pricing, and info-strip sections.
+- `layoutPresetKey`: provenance for pages generated from a code-owned preset.
 - `meta`: SEO title, description, image, and breadcrumb label.
 - `parentPage` and `relatedPages`: hierarchy and crawlable internal linking.
 - `site` and localized fields: site-aware and locale-aware editorial control.
@@ -20,21 +21,26 @@ The current composer surface is:
 ## Guided Creation
 
 Phase 1 includes a guided creation flow at `/admin/page-wizard` with template
-scaffolds for common WingsTravel use cases:
+scaffolds for common WingsTravel use cases. The current wizard uses code-owned
+layout presets:
 
-- Trang chủ site
-- Trang giới thiệu
-- Trang nội dung
-- Landing page chiến dịch
-- Trang dịch vụ
-- Trang tour / gói du lịch
-- Trang điểm đến
-- Trang bảo hiểm / chăm sóc
-- Trang thu lead
-- Trang liên hệ
+- Homepage editorial
+- Homepage service hub
+- Destination showcase
+- Tour conversion
+- Service detail
+- Campaign launch
+- Lead capture
+- Contact and support
+- Pricing and package comparison
+- Magazine and content hub
+- Long-form guide
+- Trust and social proof
 
-For lead-oriented templates, the wizard attempts to attach a site-relevant
-`formBlock` when a form exists. All wizard outputs are draft pages.
+For lead-oriented presets, the wizard attempts to attach a site-relevant
+`formBlock` when a form exists. All wizard outputs are draft pages. A generated
+page stores a snapshot of `hero` and `layout`; future preset updates do not
+mutate existing pages.
 
 ## Phase 1 Landing Pattern
 

@@ -226,10 +226,20 @@ That's it! The Docker instance will help you get up and running quickly while al
 
 To seed the database with a few pages, posts, and projects you can click the 'seed database' link from the admin panel.
 
+The WingsTravel local seed keeps a fixed super-admin user available:
+
+- Local Admin
+  - Email: `local-admin@wingstravel.test`
+  - Password: `test`
+
+The `/next/seed` endpoint and `scripts/seed-subsites.ts` both create or reset
+this account so reseeding a local database does not remove the known admin
+login.
+
 The seed script will also create a demo user for demonstration purposes only:
 
 - Demo Author
-  - Email: `demo-author@payloadcms.com`
+  - Email: `demo-author@example.com`
   - Password: `password`
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.

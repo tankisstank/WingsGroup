@@ -351,6 +351,14 @@ Payload mở thêm:
 - landing page variations
 - SEO governance tốt hơn
 
+Block library nên được mở rộng bằng registry/preset có kiểm soát:
+
+- preset do code quản lý để giữ chất lượng multisite
+- editor chọn preset hoặc presentation variant, không nhập CSS tùy ý
+- trang đã tạo lưu snapshot trong `Pages.layout`
+- nguồn cảm hứng bên ngoài như VibeUI chỉ dùng làm taxonomy tham khảo, không
+  sao chép code, asset hoặc nhận diện
+
 ### Phase 3
 
 Payload có thể giữ:

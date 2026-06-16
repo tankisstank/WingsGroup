@@ -6,11 +6,22 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
+import {
+  archivePresentationDefinitions,
+  asSelectOptions,
+} from '@/blocks/presentations'
 
 export const Archive: Block = {
   slug: 'archive',
   interfaceName: 'ArchiveBlock',
   fields: [
+    {
+      name: 'presentation',
+      label: 'Kiểu hiển thị',
+      type: 'select',
+      defaultValue: 'card-grid',
+      options: asSelectOptions(archivePresentationDefinitions),
+    },
     {
       name: 'introContent',
       type: 'richText',

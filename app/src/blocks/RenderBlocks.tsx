@@ -11,10 +11,14 @@ import { FormBlock } from '@/blocks/Form/Component'
 import { InfoStripBlock } from '@/blocks/InfoStrip/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { PricingTableBlock } from '@/blocks/PricingTable/Component'
+import { ComparisonBlock } from '@/blocks/Comparison/Component'
+import { StatsBlock } from '@/blocks/Stats/Component'
+import { TestimonialBlock } from '@/blocks/Testimonial/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
+  comparison: ComparisonBlock,
   cta: CallToActionBlock,
   faq: FAQBlock,
   featureGrid: FeatureGridBlock,
@@ -22,6 +26,8 @@ const blockComponents = {
   infoStrip: InfoStripBlock,
   mediaBlock: MediaBlock,
   pricingTable: PricingTableBlock,
+  stats: StatsBlock,
+  testimonial: TestimonialBlock,
 }
 
 export const RenderBlocks: React.FC<{

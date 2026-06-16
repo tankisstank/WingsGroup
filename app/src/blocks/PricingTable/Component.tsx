@@ -8,10 +8,52 @@ export const PricingTableBlock: React.FC<PricingTableBlockProps> = ({
   description,
   eyebrow,
   items,
+  presentation = 'departure-table',
   title,
 }) => {
+  if (presentation !== 'departure-table') {
+    return (
+      <section
+        className={`container theme-section layout-block layout-block--pricing layout-block--${presentation}`}
+        data-block-presentation={presentation}
+      >
+        <div className="layout-block__header">
+          {eyebrow ? <p className="site-brand-kicker">{eyebrow}</p> : null}
+          <h2>{title}</h2>
+          {description ? <p>{description}</p> : null}
+        </div>
+        <div className="layout-pricing">
+          {items?.map((item, index) => (
+            <article
+              className={`layout-pricing__item theme-card${item.featured ? ' is-featured' : ''}`}
+              key={`${item.title}-${index}`}
+            >
+              {item.featured ? <span className="layout-comparison__badge">Đề xuất</span> : null}
+              <h3>{item.title}</h3>
+              {item.subtitle ? <p>{item.subtitle}</p> : null}
+              <strong>{item.price}</strong>
+              {item.features?.length ? (
+                <ul>
+                  {item.features.map((feature, featureIndex) => (
+                    <li key={`${feature.label}-${featureIndex}`}>{feature.label}</li>
+                  ))}
+                </ul>
+              ) : null}
+              {item.link?.label && (item.link.url || item.link.reference) ? (
+                <CMSLink appearance="default" {...item.link} />
+              ) : null}
+            </article>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
   return (
-    <section className="container theme-section">
+    <section
+      className="container theme-section layout-block layout-block--pricing layout-block--departure-table"
+      data-block-presentation={presentation}
+    >
       <div className="mb-8 max-w-3xl">
         {eyebrow ? (
           <p className="site-brand-kicker mb-3 text-xs font-semibold uppercase tracking-[0.24em]">

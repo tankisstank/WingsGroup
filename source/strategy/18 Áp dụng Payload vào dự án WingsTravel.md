@@ -300,6 +300,22 @@ Giai đoạn 1 chỉ nên giữ bộ block gọn và đủ dùng.
 - `cta`
 - `contact-form`
 
+### 6.1. Mở rộng thư viện layout theo preset
+
+Khi cần tăng tốc dựng trang trong CMS, nên mở rộng theo 3 lớp:
+
+- block family dùng chung
+- presentation variant được kiểm soát bằng enum
+- page preset do code quản lý và tạo snapshot vào `Pages.layout`
+
+Các preset nên phục vụ website public như homepage, dịch vụ, tour, điểm đến,
+campaign, lead capture, pricing/package comparison, content hub và long-form
+guide.
+
+Không đưa Auth, Dashboard, Onboarding, Nav/Footer, cookie banner, 404 hoặc
+loading state vào `Pages.layout`; các phần đó thuộc auth, app shell hoặc site
+settings.
+
 ### Nguyên tắc
 
 - block phải có schema rõ

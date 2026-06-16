@@ -115,9 +115,9 @@ export const hero: Field = {
       type: 'upload',
       admin: {
         condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
+        description: 'Optional for preset-generated drafts; add media before publishing visual pages.',
       },
       relationTo: 'media',
-      required: true,
     },
     {
       name: 'supportingMedia',

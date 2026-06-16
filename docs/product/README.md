@@ -28,6 +28,19 @@ Current seed set:
 - `ai-agent-seo-and-theme.md`: AI-agent-oriented SEO direction and theme-system requirement
 - `ai-agent-seo-implementation-checklist.md`: engineering checklist for implementing AI Agent SEO in `app/`
 - `cms-theme-management.md`: CMS-managed multisite theme presets, tokens, admin UI, and validation contract
+- `layout-preset-library.md`: governed CMS page layout preset and block presentation library
+
+## Local Admin Credential
+
+Local seed/bootstrap keeps this super-admin account available for CMS review and
+development:
+
+- Email: `local-admin@wingstravel.test`
+- Password: `test`
+
+The account is code-owned in `app/src/utilities/adminSeed.ts`. The `/next/seed`
+endpoint and `app/scripts/seed-subsites.ts` both create or reset it so local DB
+reseeding does not leave the team without a known admin login.
 
 ## Update Rule
 

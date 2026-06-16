@@ -9,6 +9,7 @@ import { imageHero1 } from './image-hero-1'
 import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
+import { ensureLocalAdminUser, localAdminCredentials } from '@/utilities/adminSeed'
 import { ensureThemePresetSeeds, siteThemeAssignments } from '@/utilities/themeSeed'
 
 const collections: CollectionSlug[] = [
@@ -77,7 +78,10 @@ export const seed = async ({
       .map((collection) => payload.db.deleteVersions({ collection, req, where: {} })),
   )
 
-  payload.logger.info(`— Seeding demo author and user...`)
+  payload.logger.info(`— Seeding local admin and demo author...`)
+
+  await ensureLocalAdminUser(payload, req)
+  payload.logger.info(`— Local admin ready: ${localAdminCredentials.email}`)
 
   await payload.delete({
     collection: 'users',

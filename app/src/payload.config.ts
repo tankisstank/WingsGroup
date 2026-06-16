@@ -26,10 +26,14 @@ const dirname = path.dirname(filename)
 const databaseURL = process.env.DATABASE_URL || 'file:./payload.db'
 const isPostgresURL =
   databaseURL.startsWith('postgres://') || databaseURL.startsWith('postgresql://')
-const shouldPushSQLiteSchema = process.env.PAYLOAD_DB_PUSH === 'true'
+const shouldPushDatabaseSchema = process.env.PAYLOAD_DB_PUSH === 'true'
 
 export default buildConfig({
   admin: {
+    meta: {
+      titleSuffix: 'WingsTravel CMS',
+    },
+    suppressHydrationWarning: true,
     components: {
       beforeLogin: ['@/components/BeforeLogin'],
       beforeDashboard: ['@/components/BeforeDashboard'],
@@ -110,12 +114,13 @@ export default buildConfig({
         pool: {
           connectionString: databaseURL,
         },
+        push: shouldPushDatabaseSchema,
       })
     : sqliteAdapter({
         client: {
           url: databaseURL,
         },
-        push: shouldPushSQLiteSchema,
+        push: shouldPushDatabaseSchema,
       }),
   collections: [
     Sites,

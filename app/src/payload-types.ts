@@ -471,6 +471,10 @@ export interface Page {
    * Tự tính từ trang cha và slug để hỗ trợ URL phân cấp.
    */
   pathname?: string | null;
+  /**
+   * Ghi nhận preset đã dùng khi tạo trang. Nội dung hiện tại là snapshot và không tự đổi khi preset được cập nhật.
+   */
+  layoutPresetKey?: string | null;
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
     richText?: {
@@ -520,6 +524,9 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Optional for preset-generated drafts; add media before publishing visual pages.
+     */
     media?: (number | null) | Media;
     /**
      * Tối đa 3 ảnh bổ sung cho style layered. Nếu để trống, hệ thống lặp visual chính để giữ layout ổn định.
@@ -532,6 +539,9 @@ export interface Page {
     | FeatureGridBlock
     | InfoStripBlock
     | PricingTableBlock
+    | StatsBlock
+    | TestimonialBlock
+    | ComparisonBlock
     | FAQBlock
     | MediaBlock
     | ArchiveBlock
@@ -687,6 +697,19 @@ export interface User {
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
+  presentation?:
+    | (
+        | 'card'
+        | 'full-bleed'
+        | 'split-card'
+        | 'sticky-bar'
+        | 'patterned'
+        | 'dual-action'
+        | 'inline-form'
+        | 'testimonial'
+      )
+    | null;
+  eyebrow?: string | null;
   richText?: {
     root: {
       type: string;
@@ -726,6 +749,7 @@ export interface CallToActionBlock {
         id?: string | null;
       }[]
     | null;
+  supportingQuote?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'cta';
@@ -735,6 +759,7 @@ export interface CallToActionBlock {
  * via the `definition` "ContentBlock".
  */
 export interface ContentBlock {
+  presentation?: ('columns' | 'reading' | 'sidebar-toc' | 'editorial-split') | null;
   columns?:
     | {
         size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
@@ -785,10 +810,16 @@ export interface ContentBlock {
  * via the `definition` "FeatureGridBlock".
  */
 export interface FeatureGridBlock {
+  presentation?:
+    | ('icon-grid' | 'bento' | 'alternating' | 'tabs' | 'accordion' | 'sticky-reveal' | 'icon-wall' | 'before-after')
+    | null;
   eyebrow?: string | null;
   title: string;
   description?: string | null;
   columns?: ('2' | '3' | '4') | null;
+  /**
+   * Điều khiển mức nhấn mạnh màu sắc, độc lập với kiểu bố cục.
+   */
   variant?: ('default' | 'highlight' | 'minimal') | null;
   items?:
     | {
@@ -845,6 +876,9 @@ export interface InfoStripBlock {
  * via the `definition` "PricingTableBlock".
  */
 export interface PricingTableBlock {
+  presentation?:
+    | ('departure-table' | 'tier-cards' | 'comparison-table' | 'single-offer' | 'package-split' | 'mobile-stacked')
+    | null;
   eyebrow?: string | null;
   title: string;
   description?: string | null;
@@ -856,6 +890,13 @@ export interface PricingTableBlock {
         airline?: string | null;
         price: string;
         note?: string | null;
+        featured?: boolean | null;
+        features?:
+          | {
+              label: string;
+              id?: string | null;
+            }[]
+          | null;
         enableLink?: boolean | null;
         link?: {
           type?: ('reference' | 'custom') | null;
@@ -881,15 +922,112 @@ export interface PricingTableBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBlock".
+ */
+export interface StatsBlock {
+  presentation: 'inline-bar' | 'card-grid' | 'editorial' | 'logo-proof' | 'progress' | 'split-statement' | 'floating';
+  eyebrow?: string | null;
+  title?: string | null;
+  description?: string | null;
+  items?:
+    | {
+        value: string;
+        label: string;
+        description?: string | null;
+        /**
+         * Optional percentage used by the progress presentation.
+         */
+        progress?: number | null;
+        logo?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'stats';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialBlock".
+ */
+export interface TestimonialBlock {
+  presentation: 'quote-grid' | 'marquee' | 'masonry' | 'featured' | 'video' | 'social-wall' | 'logo-cloud' | 'carousel';
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  items?:
+    | {
+        quote: string;
+        name: string;
+        role?: string | null;
+        avatar?: (number | null) | Media;
+        logo?: (number | null) | Media;
+        videoURL?: string | null;
+        rating?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonial';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ComparisonBlock".
+ */
+export interface ComparisonBlock {
+  presentation: 'matrix' | 'before-after' | 'package-cards';
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  options?:
+    | {
+        title: string;
+        summary?: string | null;
+        price?: string | null;
+        featured?: boolean | null;
+        features?:
+          | {
+              label: string;
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: number | Post;
+              } | null);
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'comparison';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "FAQBlock".
  */
 export interface FAQBlock {
+  presentation?: ('single-column' | 'two-column' | 'chat-bubbles' | 'searchable' | 'categorized') | null;
   eyebrow?: string | null;
   title: string;
   description?: string | null;
   items?:
     | {
         question: string;
+        category?: string | null;
         answer: string;
         id?: string | null;
       }[]
@@ -903,6 +1041,7 @@ export interface FAQBlock {
  * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
+  presentation?: ('contained' | 'full-bleed' | 'editorial-offset' | 'framed') | null;
   media: number | Media;
   id?: string | null;
   blockName?: string | null;
@@ -913,6 +1052,7 @@ export interface MediaBlock {
  * via the `definition` "ArchiveBlock".
  */
 export interface ArchiveBlock {
+  presentation?: ('card-grid' | 'magazine' | 'compact-list') | null;
   introContent?: {
     root: {
       type: string;
@@ -947,6 +1087,7 @@ export interface ArchiveBlock {
  * via the `definition` "FormBlock".
  */
 export interface FormBlock {
+  presentation?: ('split-contact' | 'centered-card' | 'minimal' | 'support-channels') | null;
   form: number | Form;
   enableIntro?: boolean | null;
   introContent?: {
@@ -1623,6 +1764,7 @@ export interface PagesSelect<T extends boolean = true> {
   site?: T;
   parentPage?: T;
   pathname?: T;
+  layoutPresetKey?: T;
   hero?:
     | T
     | {
@@ -1656,6 +1798,9 @@ export interface PagesSelect<T extends boolean = true> {
         featureGrid?: T | FeatureGridBlockSelect<T>;
         infoStrip?: T | InfoStripBlockSelect<T>;
         pricingTable?: T | PricingTableBlockSelect<T>;
+        stats?: T | StatsBlockSelect<T>;
+        testimonial?: T | TestimonialBlockSelect<T>;
+        comparison?: T | ComparisonBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
@@ -1682,6 +1827,8 @@ export interface PagesSelect<T extends boolean = true> {
  * via the `definition` "CallToActionBlock_select".
  */
 export interface CallToActionBlockSelect<T extends boolean = true> {
+  presentation?: T;
+  eyebrow?: T;
   richText?: T;
   links?:
     | T
@@ -1698,6 +1845,7 @@ export interface CallToActionBlockSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  supportingQuote?: T;
   id?: T;
   blockName?: T;
 }
@@ -1706,6 +1854,7 @@ export interface CallToActionBlockSelect<T extends boolean = true> {
  * via the `definition` "ContentBlock_select".
  */
 export interface ContentBlockSelect<T extends boolean = true> {
+  presentation?: T;
   columns?:
     | T
     | {
@@ -1732,6 +1881,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
  * via the `definition` "FeatureGridBlock_select".
  */
 export interface FeatureGridBlockSelect<T extends boolean = true> {
+  presentation?: T;
   eyebrow?: T;
   title?: T;
   description?: T;
@@ -1784,6 +1934,7 @@ export interface InfoStripBlockSelect<T extends boolean = true> {
  * via the `definition` "PricingTableBlock_select".
  */
 export interface PricingTableBlockSelect<T extends boolean = true> {
+  presentation?: T;
   eyebrow?: T;
   title?: T;
   description?: T;
@@ -1796,7 +1947,97 @@ export interface PricingTableBlockSelect<T extends boolean = true> {
         airline?: T;
         price?: T;
         note?: T;
+        featured?: T;
+        features?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
         enableLink?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBlock_select".
+ */
+export interface StatsBlockSelect<T extends boolean = true> {
+  presentation?: T;
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  items?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        description?: T;
+        progress?: T;
+        logo?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialBlock_select".
+ */
+export interface TestimonialBlockSelect<T extends boolean = true> {
+  presentation?: T;
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  items?:
+    | T
+    | {
+        quote?: T;
+        name?: T;
+        role?: T;
+        avatar?: T;
+        logo?: T;
+        videoURL?: T;
+        rating?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ComparisonBlock_select".
+ */
+export interface ComparisonBlockSelect<T extends boolean = true> {
+  presentation?: T;
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  options?:
+    | T
+    | {
+        title?: T;
+        summary?: T;
+        price?: T;
+        featured?: T;
+        features?:
+          | T
+          | {
+              label?: T;
+              value?: T;
+              id?: T;
+            };
         link?:
           | T
           | {
@@ -1816,6 +2057,7 @@ export interface PricingTableBlockSelect<T extends boolean = true> {
  * via the `definition` "FAQBlock_select".
  */
 export interface FAQBlockSelect<T extends boolean = true> {
+  presentation?: T;
   eyebrow?: T;
   title?: T;
   description?: T;
@@ -1823,6 +2065,7 @@ export interface FAQBlockSelect<T extends boolean = true> {
     | T
     | {
         question?: T;
+        category?: T;
         answer?: T;
         id?: T;
       };
@@ -1834,6 +2077,7 @@ export interface FAQBlockSelect<T extends boolean = true> {
  * via the `definition` "MediaBlock_select".
  */
 export interface MediaBlockSelect<T extends boolean = true> {
+  presentation?: T;
   media?: T;
   id?: T;
   blockName?: T;
@@ -1843,6 +2087,7 @@ export interface MediaBlockSelect<T extends boolean = true> {
  * via the `definition` "ArchiveBlock_select".
  */
 export interface ArchiveBlockSelect<T extends boolean = true> {
+  presentation?: T;
   introContent?: T;
   populateBy?: T;
   relationTo?: T;
@@ -1857,6 +2102,7 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
  * via the `definition` "FormBlock_select".
  */
 export interface FormBlockSelect<T extends boolean = true> {
+  presentation?: T;
   form?: T;
   enableIntro?: T;
   introContent?: T;

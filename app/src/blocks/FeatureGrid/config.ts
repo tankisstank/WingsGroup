@@ -1,5 +1,9 @@
 import type { Block } from 'payload'
 
+import {
+  asSelectOptions,
+  featurePresentationDefinitions,
+} from '@/blocks/presentations'
 import { link } from '@/fields/link'
 
 export const FeatureGrid: Block = {
@@ -10,6 +14,13 @@ export const FeatureGrid: Block = {
     singular: 'Feature grid',
   },
   fields: [
+    {
+      name: 'presentation',
+      label: 'Kiểu bố cục',
+      type: 'select',
+      defaultValue: 'icon-grid',
+      options: asSelectOptions(featurePresentationDefinitions),
+    },
     {
       name: 'eyebrow',
       label: 'Eyebrow',
@@ -65,6 +76,9 @@ export const FeatureGrid: Block = {
           value: 'minimal',
         },
       ],
+      admin: {
+        description: 'Điều khiển mức nhấn mạnh màu sắc, độc lập với kiểu bố cục.',
+      },
     },
     {
       name: 'items',

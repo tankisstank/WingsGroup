@@ -13,7 +13,15 @@ export const ArchiveBlock: React.FC<
     id?: string
   }
 > = async (props) => {
-  const { id, categories, introContent, limit: limitFromProps, populateBy, selectedDocs } = props
+  const {
+    id,
+    categories,
+    introContent,
+    limit: limitFromProps,
+    populateBy,
+    presentation = 'card-grid',
+    selectedDocs,
+  } = props
 
   const limit = limitFromProps || 3
 
@@ -56,13 +64,19 @@ export const ArchiveBlock: React.FC<
   }
 
   return (
-    <section className="theme-section" id={`block-${id}`}>
+    <section
+      className={`theme-section layout-block layout-block--archive layout-block--${presentation}`}
+      data-block-presentation={presentation}
+      id={`block-${id}`}
+    >
       {introContent && (
         <div className="container mb-16">
           <RichText className="ms-0 max-w-[48rem]" data={introContent} enableGutter={false} />
         </div>
       )}
-      <CollectionArchive posts={posts} />
+      <div className={`layout-archive layout-archive--${presentation}`}>
+        <CollectionArchive posts={posts} />
+      </div>
     </section>
   )
 }

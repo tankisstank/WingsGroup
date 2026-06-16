@@ -6,11 +6,19 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
+import { asSelectOptions, formPresentationDefinitions } from '@/blocks/presentations'
 
 export const FormBlock: Block = {
   slug: 'formBlock',
   interfaceName: 'FormBlock',
   fields: [
+    {
+      name: 'presentation',
+      label: 'Kiểu hiển thị',
+      type: 'select',
+      defaultValue: 'split-contact',
+      options: asSelectOptions(formPresentationDefinitions),
+    },
     {
       name: 'form',
       type: 'relationship',

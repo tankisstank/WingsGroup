@@ -1,5 +1,7 @@
 import type { Block } from 'payload'
 
+import { asSelectOptions, faqPresentationDefinitions } from '@/blocks/presentations'
+
 export const FAQ: Block = {
   slug: 'faq',
   interfaceName: 'FAQBlock',
@@ -8,6 +10,13 @@ export const FAQ: Block = {
     singular: 'FAQ',
   },
   fields: [
+    {
+      name: 'presentation',
+      label: 'Kiểu hiển thị',
+      type: 'select',
+      defaultValue: 'single-column',
+      options: asSelectOptions(faqPresentationDefinitions),
+    },
     {
       name: 'eyebrow',
       label: 'Eyebrow',
@@ -35,6 +44,11 @@ export const FAQ: Block = {
           label: 'Câu hỏi',
           type: 'text',
           required: true,
+        },
+        {
+          name: 'category',
+          label: 'Nhóm câu hỏi',
+          type: 'text',
         },
         {
           name: 'answer',

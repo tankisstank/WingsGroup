@@ -9,6 +9,7 @@ import { createLocalReq, getPayload } from 'payload'
 
 import config from '../src/payload.config'
 import { normalizeRelationID } from '../src/access/roles'
+import { ensureLocalAdminUser, localAdminCredentials } from '../src/utilities/adminSeed'
 import { themePresetSeedCatalog } from '../src/utilities/themeSeed'
 import type { ThemePresetKey } from '../src/utilities/themeTokens'
 
@@ -7840,15 +7841,21 @@ async function _seedLightweightSite(
 
 async function main() {
   const payload = await getPayload({ config })
+  const seededAdminUser = await ensureLocalAdminUser(payload)
   const users = await payload.find({
     collection: 'users',
     depth: 0,
     limit: 1,
+    where: {
+      email: {
+        equals: localAdminCredentials.email,
+      },
+    },
   })
-  const currentUser = users.docs[0]
+  const currentUser = users.docs[0] || seededAdminUser
 
   if (!currentUser) {
-    throw new Error('No admin user found. Create the first user before running the multisite seed.')
+    throw new Error('No admin user found. The local admin seed did not complete.')
   }
 
   const adminUser =

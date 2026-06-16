@@ -11,6 +11,9 @@ import { FormBlock } from '../../blocks/Form/config'
 import { InfoStrip } from '../../blocks/InfoStrip/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { PricingTable } from '../../blocks/PricingTable/config'
+import { Comparison } from '../../blocks/Comparison/config'
+import { Stats } from '../../blocks/Stats/config'
+import { Testimonial } from '../../blocks/Testimonial/config'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import { hero } from '@/heros/config'
@@ -106,6 +109,18 @@ export const Pages: CollectionConfig<'pages'> = {
       index: true,
     },
     {
+      name: 'layoutPresetKey',
+      label: 'Preset bố cục nguồn',
+      type: 'text',
+      admin: {
+        description:
+          'Ghi nhận preset đã dùng khi tạo trang. Nội dung hiện tại là snapshot và không tự đổi khi preset được cập nhật.',
+        position: 'sidebar',
+        readOnly: true,
+      },
+      index: true,
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -123,6 +138,9 @@ export const Pages: CollectionConfig<'pages'> = {
                 FeatureGrid,
                 InfoStrip,
                 PricingTable,
+                Stats,
+                Testimonial,
+                Comparison,
                 FAQ,
                 MediaBlock,
                 Archive,

@@ -20,6 +20,7 @@ export const FeatureGridBlock: React.FC<FeatureGridBlockProps> = ({
   description,
   eyebrow,
   items,
+  presentation = 'icon-grid',
   title,
   variant = 'default',
 }) => {
@@ -31,7 +32,10 @@ export const FeatureGridBlock: React.FC<FeatureGridBlockProps> = ({
         : 'rounded-[var(--site-radius)] border bg-background/70 p-6'
 
   return (
-    <section className="container theme-section">
+    <section
+      className={`container theme-section layout-block layout-block--features layout-block--${presentation}`}
+      data-block-presentation={presentation}
+    >
       <div className="mb-8 max-w-3xl">
         {eyebrow ? (
           <p className="site-brand-kicker mb-3 text-xs font-semibold uppercase tracking-[0.24em]">
@@ -42,7 +46,12 @@ export const FeatureGridBlock: React.FC<FeatureGridBlockProps> = ({
         {description ? <p className="mt-3 text-base leading-7 text-muted-foreground">{description}</p> : null}
       </div>
 
-      <div className={cn('grid gap-5 md:grid-cols-2', gridColumns[columns || '3'])}>
+      <div
+        className={cn(
+          'layout-features grid gap-5 md:grid-cols-2',
+          presentation === 'icon-grid' && gridColumns[columns || '3'],
+        )}
+      >
         {items?.map((item, index) => {
           const Icon = featureIcons[index % featureIcons.length]
           const image = 'image' in item ? item.image : undefined
@@ -69,6 +78,12 @@ export const FeatureGridBlock: React.FC<FeatureGridBlockProps> = ({
               <h3 className="text-xl font-semibold text-foreground">{item.title}</h3>
               {item.meta ? <p className="mt-2 text-sm font-medium text-[color:var(--site-accent)]">{item.meta}</p> : null}
               {item.description ? <p className="mt-3 text-sm leading-7 text-muted-foreground">{item.description}</p> : null}
+              {presentation === 'accordion' || presentation === 'tabs' ? (
+                <details className="layout-feature__details">
+                  <summary>Xem chi tiết</summary>
+                  <p>{item.description || 'Bổ sung nội dung chi tiết cho mục này.'}</p>
+                </details>
+              ) : null}
               {item.enableLink && item.link?.label ? (
                 <div className="mt-5">
                   <CMSLink

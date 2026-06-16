@@ -8,11 +8,24 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { linkGroup } from '../../fields/linkGroup'
+import { asSelectOptions, ctaPresentationDefinitions } from '@/blocks/presentations'
 
 export const CallToAction: Block = {
   slug: 'cta',
   interfaceName: 'CallToActionBlock',
   fields: [
+    {
+      name: 'presentation',
+      label: 'Kiểu hiển thị',
+      type: 'select',
+      defaultValue: 'card',
+      options: asSelectOptions(ctaPresentationDefinitions),
+    },
+    {
+      name: 'eyebrow',
+      label: 'Eyebrow',
+      type: 'text',
+    },
     {
       name: 'richText',
       type: 'richText',
@@ -34,6 +47,14 @@ export const CallToAction: Block = {
         maxRows: 2,
       },
     }),
+    {
+      name: 'supportingQuote',
+      label: 'Trích dẫn hỗ trợ',
+      type: 'textarea',
+      admin: {
+        condition: (_, siblingData) => siblingData?.presentation === 'testimonial',
+      },
+    },
   ],
   labels: {
     plural: 'Calls to Action',

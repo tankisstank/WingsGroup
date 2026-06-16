@@ -25,6 +25,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
     enableGutter = true,
     imgClassName,
     media,
+    presentation = 'contained',
     staticImage,
     disableInnerContainer,
   } = props
@@ -35,7 +36,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
   return (
     <div
       className={cn(
-        '',
+        `layout-media layout-media--${presentation}`,
         {
           container: enableGutter,
         },

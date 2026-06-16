@@ -86,10 +86,41 @@ test.describe('Admin Panel', () => {
     await expect(page.locator('.theme-preset-preview__meta')).toContainText('#123456')
   })
 
-  test('can open quick page wizard', async () => {
+  test('can create a draft page from a governed layout preset', async () => {
+    const uniqueSlug = `campaign-launch-e2e-${Date.now()}`
+
     await page.goto(`${e2eBaseURL}/admin/page-wizard`)
     await expect(page.getByRole('heading', { name: 'Tạo trang nhanh' })).toBeVisible()
-    await expect(page.getByRole('button', { name: /Landing page chiến dịch/ })).toBeVisible()
+    await page.getByRole('button', { name: /Campaign launch/ }).click()
+    await expect(page.locator('.page-wizard__preset-summary').getByText('Hero mesh')).toBeVisible()
+    await page.getByRole('button', { name: 'Tiếp tục' }).click()
+
+    await page.getByPlaceholder('Ví dụ: Tour Nhật Bản mùa thu').fill('Campaign Launch E2E')
+    await page.getByPlaceholder('tour-nhat-ban-mua-thu').fill(uniqueSlug)
+    await page
+      .getByPlaceholder('Viết 1-2 câu giúp người đọc hiểu trang này dùng để làm gì.')
+      .fill('Draft created from the campaign launch layout preset.')
+    await page.getByRole('button', { name: 'Kiểm tra' }).click()
+    await expect(page.getByText('Campaign launch', { exact: true })).toBeVisible()
+    await expect(page.getByText('Hero mesh • Bento benefits • Stats • Social proof • Form • CTA')).toBeVisible()
+    await page.getByRole('button', { name: 'Tạo trang nháp' }).click()
+
+    await expect(page).toHaveURL(/\/admin\/collections\/pages\/[a-zA-Z0-9-_]+/)
+    const pageID = page.url().split('/').pop()
+    expect(pageID).toBeTruthy()
+
+    const createdPage = await page.evaluate(async (id) => {
+      const response = await fetch(`/api/pages/${id}?depth=0&draft=true`, {
+        credentials: 'include',
+      })
+
+      return response.json()
+    }, pageID)
+
+    expect(createdPage.layoutPresetKey).toBe('campaign-launch')
+    expect(createdPage.layout.map((block: { blockType: string }) => block.blockType)).toEqual(
+      expect.arrayContaining(['featureGrid', 'stats', 'testimonial', 'formBlock', 'cta']),
+    )
   })
 
   test('can navigate to list view', async () => {

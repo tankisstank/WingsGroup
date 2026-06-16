@@ -3,6 +3,12 @@
 import Link from 'next/link'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import {
+  layoutPresetDefinitions,
+  type LayoutPresetCategory,
+  type LayoutPresetKey,
+} from '@/utilities/layoutPresets'
+
 import './index.scss'
 
 type SiteOption = {
@@ -11,109 +17,20 @@ type SiteOption = {
   name?: string
 }
 
-type WizardTemplate = {
-  category: 'core' | 'landing' | 'service' | 'lead'
-  description: string
-  id:
-    | 'about'
-    | 'basic'
-    | 'campaign'
-    | 'contact'
-    | 'destination'
-    | 'home'
-    | 'insurance'
-    | 'leadMagnet'
-    | 'service'
-    | 'tour'
-  label: string
-  sections: string
-}
-
 const baseClass = 'page-wizard'
 
-const templates: WizardTemplate[] = [
-  {
-    category: 'core',
-    description: 'Trang chủ cho một site con với hero, điểm mạnh, nội dung nổi bật và CTA.',
-    id: 'home',
-    label: 'Trang chủ site',
-    sections: 'Hero, điểm mạnh, dịch vụ nổi bật, CTA',
-  },
-  {
-    category: 'core',
-    description: 'Trang giới thiệu thương hiệu, đội ngũ, năng lực và lý do khách hàng nên tin tưởng.',
-    id: 'about',
-    label: 'Trang giới thiệu',
-    sections: 'Câu chuyện, năng lực, cam kết, CTA',
-  },
-  {
-    category: 'core',
-    description: 'Trang nội dung chuẩn như giới thiệu, chính sách, thông tin dịch vụ.',
-    id: 'basic',
-    label: 'Trang nội dung',
-    sections: 'Hero, nội dung chính',
-  },
-  {
-    category: 'landing',
-    description: 'Trang chuyển đổi cho chiến dịch, có hero, nội dung thuyết phục và CTA.',
-    id: 'campaign',
-    label: 'Landing page chiến dịch',
-    sections: 'Vấn đề, lợi ích, bằng chứng, CTA',
-  },
-  {
-    category: 'service',
-    description: 'Trang giới thiệu một dịch vụ với lợi ích, nội dung chính và lời kêu gọi hành động.',
-    id: 'service',
-    label: 'Trang dịch vụ',
-    sections: 'Tổng quan, lợi ích, quy trình, CTA',
-  },
-  {
-    category: 'service',
-    description: 'Trang bán tour hoặc gói du lịch, phù hợp WingsTravel và WingsGo.',
-    id: 'tour',
-    label: 'Trang tour / gói du lịch',
-    sections: 'Lịch trình, điểm nổi bật, phù hợp với ai, CTA',
-  },
-  {
-    category: 'service',
-    description: 'Trang điểm đến để SEO theo thị trường, quốc gia hoặc thành phố.',
-    id: 'destination',
-    label: 'Trang điểm đến',
-    sections: 'Tổng quan điểm đến, trải nghiệm, lưu ý, CTA',
-  },
-  {
-    category: 'service',
-    description: 'Trang bảo hiểm, chăm sóc hoặc dịch vụ hỗ trợ trước/sau chuyến đi.',
-    id: 'insurance',
-    label: 'Trang bảo hiểm / chăm sóc',
-    sections: 'Đối tượng, quyền lợi, quy trình hỗ trợ, CTA',
-  },
-  {
-    category: 'lead',
-    description: 'Trang tải brochure, nhận tư vấn hoặc thu lead cho chiến dịch marketing.',
-    id: 'leadMagnet',
-    label: 'Trang thu lead',
-    sections: 'Offer, lợi ích, form nếu có, CTA',
-  },
-  {
-    category: 'lead',
-    description: 'Trang tiếp nhận yêu cầu, ưu tiên thông tin liên hệ và form lead.',
-    id: 'contact',
-    label: 'Trang liên hệ',
-    sections: 'Thông tin liên hệ, form nếu có, CTA',
-  },
-]
-
-const categoryLabels: Record<WizardTemplate['category'], string> = {
+const categoryLabels: Record<LayoutPresetCategory, string> = {
   core: 'Trang nền tảng',
-  landing: 'Landing / campaign',
+  campaign: 'Landing / campaign',
+  content: 'Nội dung / editorial',
   lead: 'Lead capture',
   service: 'Dịch vụ / sản phẩm',
 }
 
-const templateIconLabels: Record<WizardTemplate['category'], string> = {
+const templateIconLabels: Record<LayoutPresetCategory, string> = {
+  campaign: 'C',
+  content: 'B',
   core: 'C',
-  landing: 'L',
   lead: 'F',
   service: 'T',
 }
@@ -130,7 +47,7 @@ const slugify = (value: string) =>
 export default function PageWizardView() {
   const [sites, setSites] = useState<SiteOption[]>([])
   const [siteID, setSiteID] = useState('')
-  const [template, setTemplate] = useState<WizardTemplate['id']>('basic')
+  const [preset, setPreset] = useState<LayoutPresetKey>('homepage-editorial')
   const [title, setTitle] = useState('')
   const [summary, setSummary] = useState('')
   const [slug, setSlug] = useState('')
@@ -166,21 +83,21 @@ export default function PageWizardView() {
     }
   }, [isSlugTouched, title])
 
-  const selectedTemplate = useMemo(
-    () => templates.find((item) => item.id === template) ?? templates[0],
-    [template],
+  const selectedPreset = useMemo(
+    () => layoutPresetDefinitions.find((item) => item.key === preset) ?? layoutPresetDefinitions[0],
+    [preset],
   )
-  const groupedTemplates = useMemo(
+  const groupedPresets = useMemo(
     () =>
-      (['core', 'service', 'landing', 'lead'] as const).map((category) => ({
+      (['core', 'service', 'campaign', 'lead', 'content'] as const).map((category) => ({
         category,
-        items: templates.filter((item) => item.category === category),
+        items: layoutPresetDefinitions.filter((item) => item.category === category),
       })),
     [],
   )
   const selectedSite = sites.find((site) => String(site.id) === siteID)
-  const canContinueStepOne = Boolean(siteID && template)
-  const canCreate = Boolean(siteID && template && title.trim() && slug.trim())
+  const canContinueStepOne = Boolean(siteID && preset)
+  const canCreate = Boolean(siteID && preset && title.trim() && slug.trim())
 
   const createPage = async () => {
     if (!canCreate) {
@@ -197,7 +114,7 @@ export default function PageWizardView() {
           site: siteID,
           slug,
           summary,
-          template,
+          preset,
           title,
         }),
         credentials: 'include',
@@ -261,29 +178,51 @@ export default function PageWizardView() {
             </label>
 
             <h2>Chọn loại trang</h2>
-            <div className={`${baseClass}__template-groups`}>
-              {groupedTemplates.map((group) => (
-                <section key={group.category}>
-                  <h3>{categoryLabels[group.category]}</h3>
-                  <div className={`${baseClass}__templates`}>
-                    {group.items.map((item) => (
-                      <button
-                        className={template === item.id ? `${baseClass}__template--selected` : ''}
-                        key={item.id}
-                        onClick={() => setTemplate(item.id)}
-                        type="button"
-                      >
-                        <span className={`${baseClass}__template-icon`} aria-hidden="true">
-                          {templateIconLabels[item.category]}
-                        </span>
-                        <strong>{item.label}</strong>
-                        <span>{item.description}</span>
-                        <small>{item.sections}</small>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              ))}
+            <div className={`${baseClass}__selection-layout`}>
+              <div className={`${baseClass}__template-groups`}>
+                {groupedPresets.map((group) => (
+                  <section key={group.category}>
+                    <h3>{categoryLabels[group.category]}</h3>
+                    <div className={`${baseClass}__templates`}>
+                      {group.items.map((item) => (
+                        <button
+                          aria-pressed={preset === item.key}
+                          className={preset === item.key ? `${baseClass}__template--selected` : ''}
+                          key={item.key}
+                          onClick={() => setPreset(item.key)}
+                          type="button"
+                        >
+                          <span className={`${baseClass}__template-icon`} aria-hidden="true">
+                            {templateIconLabels[item.category]}
+                          </span>
+                          <strong>{item.label}</strong>
+                          <span>{item.description}</span>
+                          <span
+                            aria-hidden="true"
+                            className={`${baseClass}__preset-preview ${baseClass}__preset-preview--${item.preview.accent}`}
+                          >
+                            <i />
+                            <i />
+                            <i />
+                          </span>
+                          <small>{item.preview.sections.join(' • ')}</small>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+
+              <aside className={`${baseClass}__preset-summary`}>
+                <span>Đang chọn</span>
+                <h3>{selectedPreset.label}</h3>
+                <p>{selectedPreset.description}</p>
+                <ol>
+                  {selectedPreset.preview.sections.map((section) => (
+                    <li key={section}>{section}</li>
+                  ))}
+                </ol>
+              </aside>
             </div>
 
             <div className={`${baseClass}__actions`}>
@@ -347,11 +286,11 @@ export default function PageWizardView() {
               </div>
               <div>
                 <dt>Loại trang</dt>
-                <dd>{selectedTemplate.label}</dd>
+                <dd>{selectedPreset.label}</dd>
               </div>
               <div>
                 <dt>Cấu trúc gợi ý</dt>
-                <dd>{selectedTemplate.sections}</dd>
+                <dd>{selectedPreset.preview.sections.join(' • ')}</dd>
               </div>
               <div>
                 <dt>Tiêu đề</dt>

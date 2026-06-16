@@ -8,6 +8,10 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { link } from '@/fields/link'
+import {
+  asSelectOptions,
+  contentPresentationDefinitions,
+} from '@/blocks/presentations'
 
 const columnFields: Field[] = [
   {
@@ -67,6 +71,13 @@ export const Content: Block = {
   slug: 'content',
   interfaceName: 'ContentBlock',
   fields: [
+    {
+      name: 'presentation',
+      label: 'Kiểu bố cục',
+      type: 'select',
+      defaultValue: 'columns',
+      options: asSelectOptions(contentPresentationDefinitions),
+    },
     {
       name: 'columns',
       type: 'array',

@@ -36,7 +36,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `pnpm exec next dev --port ${e2ePort}`,
+    command: `cross-env PAYLOAD_DB_PUSH=true pnpm exec next dev --port ${e2ePort}`,
     reuseExistingServer: false,
     timeout: 120 * 1000,
     url: e2eBaseURL,
