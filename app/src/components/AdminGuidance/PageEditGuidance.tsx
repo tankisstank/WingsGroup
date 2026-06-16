@@ -5,8 +5,7 @@ export default function PageEditGuidance() {
     <section className="wings-admin-guidance">
       <strong>Luồng duyệt nội dung</strong>
       <p>
-        Editor lưu nội dung ở trạng thái nháp. Site-manager hoặc super-admin sẽ kiểm tra preview
-        và publish khi nội dung đã sẵn sàng.
+        Editor lưu nháp; site-manager hoặc super-admin kiểm tra preview rồi publish khi sẵn sàng.
       </p>
     </section>
   )
