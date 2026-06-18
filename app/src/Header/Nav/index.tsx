@@ -10,7 +10,13 @@ import { SiteLink } from '@/components/SiteLink'
 import { getLocaleFromPathname } from '@/utilities/sitePaths'
 import { MenuIcon, SearchIcon, XIcon } from 'lucide-react'
 
-export const HeaderNav: React.FC<{ data: { navItems?: HeaderType['navItems'] } }> = ({ data }) => {
+export const HeaderNav: React.FC<{
+  data: { navItems?: HeaderType['navItems'] }
+  primaryAction?: {
+    label: string
+    url: string
+  }
+}> = ({ data, primaryAction }) => {
   const navItems = data?.navItems || []
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
@@ -30,17 +36,27 @@ export const HeaderNav: React.FC<{ data: { navItems?: HeaderType['navItems'] } }
 
   return (
     <div className="site-header__nav">
-      <nav aria-label="Primary navigation" className="hidden items-center gap-3 lg:flex">
+      <nav aria-label="Primary navigation" className="hidden items-center gap-3 2xl:flex">
         {navItems.map(({ link }, i) => {
           return <CMSLink className="theme-nav-link" key={i} {...link} appearance="link" />
         })}
+        {primaryAction ? (
+          <SiteLink className="site-header-cta" href={primaryAction.url}>
+            {primaryAction.label}
+          </SiteLink>
+        ) : null}
         <SiteLink className="site-icon-button" href="/search">
           <span className="sr-only">{copy.search}</span>
           <SearchIcon aria-hidden="true" className="h-5 w-5" />
         </SiteLink>
       </nav>
 
-      <div className="flex items-center gap-2 lg:hidden">
+      <div className="flex items-center gap-2 2xl:hidden">
+        {primaryAction ? (
+          <SiteLink className="site-header-cta site-header-cta--mobile" href={primaryAction.url}>
+            {primaryAction.label}
+          </SiteLink>
+        ) : null}
         <SiteLink className="site-icon-button" href="/search">
           <span className="sr-only">{copy.search}</span>
           <SearchIcon aria-hidden="true" className="h-5 w-5" />
@@ -69,14 +85,14 @@ export const HeaderNav: React.FC<{ data: { navItems?: HeaderType['navItems'] } }
         >
           {navItems.map(({ link }, i) => {
             return (
-              <CMSLink
-                appearance="link"
-                className="site-mobile-nav__link"
-                key={i}
-                {...link}
-              />
+              <CMSLink appearance="inline" className="site-mobile-nav__link" key={i} {...link} />
             )
           })}
+          {primaryAction ? (
+            <SiteLink className="site-mobile-nav__link site-mobile-nav__link--primary" href={primaryAction.url}>
+              {primaryAction.label}
+            </SiteLink>
+          ) : null}
         </nav>
       ) : null}
     </div>

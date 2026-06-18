@@ -44,9 +44,9 @@ export async function Footer() {
           ) : null}
         </div>
 
-        <div className="flex flex-col-reverse items-start md:flex-row gap-4 md:items-center">
+        <div className="flex flex-col-reverse items-start gap-4 md:flex-row md:flex-wrap md:items-center md:justify-end">
           <ThemeSelector />
-          <nav aria-label="Footer navigation" className="flex flex-col md:flex-row gap-4">
+          <nav aria-label="Footer navigation" className="flex flex-col gap-4 md:flex-row md:flex-wrap md:justify-end">
             {navItems.map(({ link }, i) => {
               return <CMSLink className="theme-nav-link" key={i} {...link} />
             })}

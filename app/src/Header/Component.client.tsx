@@ -16,6 +16,10 @@ interface HeaderClientProps {
     navItems?: HeaderType['navItems']
   }
   logoText?: null | string
+  primaryAction?: {
+    label: string
+    url: string
+  }
   siteName?: null | string
   tagline?: null | string
 }
@@ -25,6 +29,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   brandColor,
   data,
   logoText,
+  primaryAction,
   siteName,
   tagline,
 }) => {
@@ -46,7 +51,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   return (
     <header className="container site-header" {...(theme ? { 'data-theme': theme } : {})}>
       <div className="site-header__bar py-8 flex justify-between border-b">
-        <div className="flex items-center gap-3">
+        <div className="site-header__brand flex items-center gap-3">
           <SiteLink href="/">
             <Logo
               accentColor={accentColor}
@@ -57,13 +62,15 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
             />
           </SiteLink>
           {siteName ? (
-            <div className="hidden md:block">
+            <div className="site-header__brand-copy hidden md:block">
               <div className="site-brand-kicker text-sm font-semibold">{siteName}</div>
-              {tagline ? <div className="text-xs text-muted-foreground">{tagline}</div> : null}
+              {tagline ? (
+                <div className="site-header__tagline text-xs text-muted-foreground">{tagline}</div>
+              ) : null}
             </div>
           ) : null}
         </div>
-        <HeaderNav data={data} />
+        <HeaderNav data={data} primaryAction={primaryAction} />
       </div>
     </header>
   )
