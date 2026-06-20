@@ -3,7 +3,7 @@ import type { NextConfig } from 'next'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { siteAliasToCodeMap } from './src/utilities/sitePaths'
+import { allSiteAliasToCodeMap, siteAliasToCodeMap } from './src/utilities/sitePaths'
 
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
@@ -50,20 +50,20 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   redirects,
   async rewrites() {
-    const rootSiteCode = siteAliasToCodeMap.wingstravel
+    const rootSiteCode = siteAliasToCodeMap.wingsgroup
 
     return [
       ...['vi', 'en'].flatMap((locale) => [
         {
           source: `/${locale}`,
-          destination: `/?site=${rootSiteCode}&siteAlias=wingstravel&locale=${locale}`,
+          destination: `/?site=${rootSiteCode}&siteAlias=wingsgroup&locale=${locale}`,
         },
         {
           source: `/${locale}/:slug*`,
-          destination: `/:slug*?site=${rootSiteCode}&siteAlias=wingstravel&locale=${locale}`,
+          destination: `/:slug*?site=${rootSiteCode}&siteAlias=wingsgroup&locale=${locale}`,
         },
       ]),
-      ...Object.entries(siteAliasToCodeMap).flatMap(([alias, code]) => [
+      ...Object.entries(allSiteAliasToCodeMap).flatMap(([alias, code]) => [
         ...['vi', 'en'].flatMap((locale) => [
           {
             source: `/${alias}/${locale}`,

@@ -1,4 +1,4 @@
-# WingsTravel Page Composer And Landing Pattern
+# WingsGroup Page Composer And Landing Pattern
 
 ## Purpose
 
@@ -21,7 +21,7 @@ The current composer surface is:
 ## Guided Creation
 
 Phase 1 includes a guided creation flow at `/admin/page-wizard` with template
-scaffolds for common WingsTravel use cases. The current wizard uses code-owned
+scaffolds for common WingsGroup use cases. The current wizard uses code-owned
 layout presets:
 
 - Homepage editorial

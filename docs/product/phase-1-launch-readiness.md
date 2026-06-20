@@ -1,4 +1,4 @@
-# WingsTravel Phase 1 Launch Readiness
+# WingsGroup Phase 1 Launch Readiness
 
 ## Purpose
 
@@ -20,7 +20,7 @@ The platform is technically prepared for first-site validation:
 
 | Site | Local route | Locale route example | Sample pages |
 | --- | --- | --- | --- |
-| WingsTravel | `/` | `/en` | `/`, `/he-sinh-thai`, `/nang-luc-dich-vu`, `/tin-tuc`, `/lien-he` |
+| WingsGroup | `/` | `/en` | `/`, `/he-sinh-thai`, `/nang-luc-dich-vu`, `/tin-tuc`, `/lien-he` |
 | WingsGo | `/wingsgo` | `/wingsgo/en` | `/wingsgo`, `/wingsgo/contact`, `/wingsgo/campaign`, `/wingsgo/posts` |
 | WingsSide | `/wingsside` | `/wingsside/en` | `/wingsside`, `/wingsside/contact`, `/wingsside/campaign`, `/wingsside/posts` |
 | WingsPlus | `/wingsplus` | `/wingsplus/en` | `/wingsplus`, `/wingsplus/contact`, `/wingsplus/campaign`, `/wingsplus/posts` |
@@ -43,6 +43,8 @@ The platform is technically prepared for first-site validation:
   child-site smoke checks.
 - [x] Docker VPS deployment shape is documented with PostgreSQL and Redis-ready
   services.
+- [x] Local go-live review pipeline exists for PM-facing page/site readiness
+  reports across technical, responsive, metadata, and content/copy gates.
 - [ ] Customer-approved final copy and images filled for every launched child
   site.
 - [ ] Production deployment environment values confirmed on the real VPS.
@@ -53,6 +55,19 @@ The platform is technically prepared for first-site validation:
 The current app can run Phase 1 smoke checks with production-shaped placeholder
 content. This proves site structure, routing, page composition, SEO fields, and
 media wiring. It does not replace customer-approved final content and imagery.
+
+Before a customer-facing go-live decision, run the local go-live review pipeline
+and attach the generated report to the launch evidence:
+
+```bash
+cd app
+pnpm run go-live:review -- --site wingsgo
+```
+
+The report is PM-facing launch evidence. It can identify missing conversion
+signals, weak first-screen CTA visibility, missing metadata, image alt gaps,
+runtime errors, and responsive overflow. It does not replace final human
+approval for pricing accuracy, legal claims, or customer-approved wording.
 
 ## Scope Guardrail
 

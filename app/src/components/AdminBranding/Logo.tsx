@@ -5,7 +5,7 @@ export function AdminLogo() {
     <span className="wings-admin-logo">
       <span className="wings-admin-logo__mark">W</span>
       <span className="wings-admin-logo__text">
-        <strong>WingsTravel</strong>
+        <strong>WingsGroup</strong>
         <span>CMS Console</span>
       </span>
     </span>

@@ -1,5 +1,5 @@
 export const siteAliasToCodeMap = {
-  wingstravel: 'wings-travel',
+  wingsgroup: 'wings-group',
   wingsgo: 'wings-go',
   wingsside: 'wings-side',
   wingspass: 'wings-pass',
@@ -7,16 +7,27 @@ export const siteAliasToCodeMap = {
   wingscare: 'wings-care',
 } as const
 
-export const defaultSiteAlias = 'wingstravel' as const
+export type SiteAlias = keyof typeof siteAliasToCodeMap
+
+export const legacySiteAliasToCodeMap = {
+  wingstravel: 'wings-group',
+} as const
+
+export const allSiteAliasToCodeMap = {
+  ...siteAliasToCodeMap,
+  ...legacySiteAliasToCodeMap,
+} as const
+
+export const defaultSiteAlias = 'wingsgroup' as const
 export const defaultSiteCode = siteAliasToCodeMap[defaultSiteAlias]
 
-export type SiteAlias = keyof typeof siteAliasToCodeMap
+export type SiteRouteAlias = keyof typeof allSiteAliasToCodeMap
 
 export const siteCodeToAliasMap = Object.fromEntries(
   Object.entries(siteAliasToCodeMap).map(([alias, code]) => [code, alias]),
-) as Record<string, string>
+) as Record<string, SiteAlias>
 
-export const knownSiteAliases = Object.keys(siteAliasToCodeMap) as SiteAlias[]
+export const knownSiteAliases = Object.keys(allSiteAliasToCodeMap) as SiteRouteAlias[]
 export const supportedLocaleCodes = ['vi', 'en'] as const
 
 export type SupportedLocaleCode = (typeof supportedLocaleCodes)[number]
@@ -24,19 +35,21 @@ export type SupportedLocaleCode = (typeof supportedLocaleCodes)[number]
 export const isSupportedLocale = (value?: null | string): value is SupportedLocaleCode =>
   Boolean(value && supportedLocaleCodes.includes(value as SupportedLocaleCode))
 
-export const getSiteAliasFromPathname = (pathname: string): SiteAlias | null => {
+export const getSiteAliasFromPathname = (pathname: string): SiteRouteAlias | null => {
   const [firstSegment] = pathname.split('/').filter(Boolean)
 
   if (!firstSegment) {
     return null
   }
 
-  return knownSiteAliases.includes(firstSegment as SiteAlias) ? (firstSegment as SiteAlias) : null
+  return knownSiteAliases.includes(firstSegment as SiteRouteAlias)
+    ? (firstSegment as SiteRouteAlias)
+    : null
 }
 
 export const getLocaleFromPathname = (pathname: string): SupportedLocaleCode | null => {
   const segments = pathname.split('/').filter(Boolean)
-  const localeCandidate = knownSiteAliases.includes(segments[0] as SiteAlias)
+  const localeCandidate = knownSiteAliases.includes(segments[0] as SiteRouteAlias)
     ? segments[1]
     : segments[0]
 

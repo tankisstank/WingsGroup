@@ -127,7 +127,7 @@ branding: {
   brandColor?: string
   accentColor?: string
 
-  themeKey: 'wings-travel' | 'wings-go' | 'wings-side' | 'wings-plus' | 'wings-care' | 'wings-pass' | 'custom'
+  themeKey: 'wings-group' | 'wings-go' | 'wings-side' | 'wings-plus' | 'wings-care' | 'wings-pass' | 'custom'
   themePreset: 'corporate' | 'retail' | 'premium' | 'utility' | 'care' | 'custom'
 
   surfaceColor?: string

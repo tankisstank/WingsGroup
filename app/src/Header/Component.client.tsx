@@ -3,7 +3,7 @@ import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
-import type { Header as HeaderType } from '@/payload-types'
+import type { Header as HeaderType, Media } from '@/payload-types'
 
 import { Logo } from '@/components/Logo/Logo'
 import { SiteLink } from '@/components/SiteLink'
@@ -15,6 +15,7 @@ interface HeaderClientProps {
   data: {
     navItems?: HeaderType['navItems']
   }
+  logoImage?: Media | null
   logoText?: null | string
   primaryAction?: {
     label: string
@@ -28,6 +29,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   accentColor,
   brandColor,
   data,
+  logoImage,
   logoText,
   primaryAction,
   siteName,
@@ -57,6 +59,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
               accentColor={accentColor}
               brandColor={brandColor}
               loading="eager"
+              logoImage={logoImage}
               logoText={logoText}
               priority="high"
             />

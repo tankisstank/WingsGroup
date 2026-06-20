@@ -2,7 +2,7 @@
 
 ## Project
 
-- Project name: WingsTravel
+- Project name: WingsGroup
 - Phase: Phase 1 - Payload-first multisite CMS
 - Delivery date: 2026-06-01
 - Primary contact: Internal implementation team (handover package owner)
@@ -16,7 +16,7 @@ workflow, and a role-aware CMS operator console.
 
 ## Included Sites
 
-- WingsTravel
+- WingsGroup
 - WingsGo
 - WingsSide
 - WingsPlus
@@ -42,6 +42,12 @@ workflow, and a role-aware CMS operator console.
 - Automatic SQLite schema push is disabled locally. Schema changes must be
   reviewed and applied deliberately instead of accepting an interactive
   data-loss prompt.
+- Operational environment details are recorded in
+  [08-deployment-server-domain-email.md](08-deployment-server-domain-email.md)
+  and [docs/accounts.md](../accounts.md); production pushes must be re-checked
+  against the live VPS before execution.
+- aaPanel access on the production VPS is intended to go through Tailscale and
+  not via public exposure unless a separate decision is documented.
 
 ## Links
 

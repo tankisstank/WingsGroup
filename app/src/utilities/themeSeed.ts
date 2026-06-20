@@ -13,7 +13,7 @@ export const siteThemeAssignments: Record<string, SiteThemeAssignment> = {
   'wings-pass': { heroVariant: 'utility', themePreset: 'utility' },
   'wings-plus': { heroVariant: 'standard', themePreset: 'premium' },
   'wings-side': { heroVariant: 'planner', themePreset: 'premium' },
-  'wings-travel': { heroVariant: 'standard', themePreset: 'corporate' },
+  'wings-group': { heroVariant: 'standard', themePreset: 'corporate' },
 }
 
 export const themePresetSeedCatalog: Record<
@@ -32,7 +32,7 @@ export const themePresetSeedCatalog: Record<
     tokens: defaultThemePresetByKey.care,
   },
   corporate: {
-    description: 'Umbrella WingsTravel brand foundation for ecosystem pages.',
+    description: 'Umbrella WingsGroup brand foundation for ecosystem pages.',
     isActive: true,
     name: 'Corporate',
     tokens: defaultThemePresetByKey.corporate,

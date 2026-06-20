@@ -1,4 +1,4 @@
-# WingsTravel Phase 1 Scope
+# WingsGroup Phase 1 Scope
 
 ## Purpose
 
@@ -7,7 +7,7 @@ contract for implementation and acceptance planning.
 
 ## In Scope
 
-Phase 1 for `WingsTravel` is a `Payload-first` multisite content platform that
+Phase 1 for `WingsGroup` is a `Payload-first` multisite content platform that
 must deliver:
 
 - one public site ready for first launch
@@ -26,14 +26,14 @@ must deliver:
 
 The shared platform is expected to support at least these site identities:
 
-- `WingsTravel`
+- `WingsGroup`
 - `WingsGo`
 - `WingsSide`
 - `WingsPlus`
 - `WingsCare`
 - `WingsPass`
 
-`WingsTravel` is the umbrella site. The other listed sites are phase-1 child
+`WingsGroup` is the umbrella site. The other listed sites are phase-1 child
 sites being developed in parallel on the same platform.
 
 ## Required Capabilities

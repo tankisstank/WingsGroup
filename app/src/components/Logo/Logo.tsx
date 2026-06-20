@@ -1,11 +1,17 @@
 import clsx from 'clsx'
+import NextImage from 'next/image'
 import React from 'react'
+
+import type { Media } from '@/payload-types'
+
+import { getMediaUrl } from '@/utilities/getMediaUrl'
 
 interface Props {
   accentColor?: null | string
   brandColor?: null | string
   className?: string
   loading?: 'lazy' | 'eager'
+  logoImage?: Media | null
   logoText?: null | string
   priority?: 'auto' | 'high' | 'low'
 }
@@ -17,15 +23,43 @@ export const Logo = (props: Props) => {
     loading: loadingFromProps,
     priority: priorityFromProps,
     className,
+    logoImage,
     logoText,
   } = props
 
   const loading = loadingFromProps || 'lazy'
   const priority = priorityFromProps || 'low'
+  const logoImageUrl = logoImage?.url ? getMediaUrl(logoImage.url, logoImage.updatedAt) : ''
+  const label = logoText || logoImage?.alt || 'Site logo'
+  const isPriorityImage = priority === 'high'
+  const resolvedLogoImage = logoImageUrl && logoImage ? logoImage : null
+
+  if (resolvedLogoImage) {
+    return (
+      <span
+        aria-label={label}
+        className={clsx('inline-flex items-center', className)}
+        data-fetch-priority={priority}
+        data-loading={loading}
+      >
+        <NextImage
+          alt=""
+          aria-hidden="true"
+          className="site-logo-image h-12 w-auto max-w-[160px] object-contain"
+          height={resolvedLogoImage.height || 96}
+          loading={isPriorityImage ? undefined : loading}
+          priority={isPriorityImage}
+          src={logoImageUrl}
+          unoptimized
+          width={resolvedLogoImage.width || 320}
+        />
+      </span>
+    )
+  }
 
   return (
     <span
-      aria-label={logoText || 'Site logo'}
+      aria-label={label}
       className={clsx('inline-flex items-center gap-3', className)}
       data-fetch-priority={priority}
       data-loading={loading}
@@ -51,7 +85,7 @@ export const Logo = (props: Props) => {
           className="site-logo-text text-base font-semibold tracking-tight"
           style={{ '--site-brand': brandColor || undefined } as React.CSSProperties}
         >
-          {logoText || 'WingsTravel'}
+          {logoText || 'WingsGroup'}
         </span>
       </span>
     </span>

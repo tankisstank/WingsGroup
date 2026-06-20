@@ -1,7 +1,7 @@
 import type { Validate } from 'payload'
 
 export const themeKeyOptions = [
-  { label: 'WingsTravel', value: 'wings-travel' },
+  { label: 'WingsGroup', value: 'wings-group' },
   { label: 'WingsGo', value: 'wings-go' },
   { label: 'WingsSide', value: 'wings-side' },
   { label: 'WingsPlus', value: 'wings-plus' },
@@ -126,10 +126,10 @@ export type ThemeSettingsLike = {
 const themeKeyToPresetKey: Record<string, ThemePresetKey> = {
   'wings-care': 'care',
   'wings-go': 'retail',
+  'wings-group': 'corporate',
   'wings-pass': 'utility',
   'wings-plus': 'premium',
   'wings-side': 'premium',
-  'wings-travel': 'corporate',
 }
 
 export const defaultThemePresetByKey: Record<ThemePresetKey, ThemePresetTokens> = {
@@ -221,7 +221,7 @@ export const normalizeThemePresetKey = (themeKey?: string | null): ThemePresetKe
 
 export const normalizeThemeKey = (themeKey?: string | null): ThemeKey => {
   if (!themeKey) {
-    return 'wings-travel'
+    return 'wings-group'
   }
 
   if (themeKeyOptions.some((option) => option.value === themeKey)) {

@@ -1,0 +1,18 @@
+{
+  "siteCode": "wingspass",
+  "displayTitle": "WingsPass",
+  "sourcePdf": "pdf/WINGS PASS.pdf",
+  "tagline": "Your Journey. Seamless.",
+  "valueLine": "EXCEPTIONAL EXPERIENCES",
+  "colors": {
+    "primary": "#005090",
+    "accent": "#008070"
+  },
+  "assets": {
+    "logoPrimary": "exports/wingspass/wingspass-logo-primary.png",
+    "logoReverse": "exports/wingspass/wingspass-logo-reverse.png",
+    "mark": "exports/wingspass/wingspass-mark.png",
+    "favicon": "exports/wingspass/wingspass-favicon.png",
+    "ogImage": "exports/wingspass/wingspass-og-image.png"
+  }
+}

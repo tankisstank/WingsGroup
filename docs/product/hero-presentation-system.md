@@ -2,7 +2,7 @@
 
 ## Mục tiêu
 
-Hero của `WingsTravel` là một feature có thể mở rộng, không phải một component
+Hero của `WingsGroup` là một feature có thể mở rộng, không phải một component
 đơn lẻ. Người quản trị chọn kiểu hiển thị trong Payload CMS; developer có thể
 thêm style mới mà không sửa route, site context, theme token hoặc các block nằm
 ngoài hero.

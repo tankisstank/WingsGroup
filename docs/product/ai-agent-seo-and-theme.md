@@ -1,4 +1,4 @@
-# WingsTravel AI Agent SEO And Theme System
+# WingsGroup AI Agent SEO And Theme System
 
 ## Purpose
 
@@ -91,7 +91,7 @@ Phase 1 should not treat this as an ad hoc SEO note. It needs a small durable
 output:
 
 - what AI-agent-oriented SEO patterns were reviewed
-- which structured data types are adopted in `WingsTravel`
+- which structured data types are adopted in `WingsGroup`
 - which routes receive markup first
 - what content fields need to exist in Payload to support this cleanly
 - what validation checks are used before release

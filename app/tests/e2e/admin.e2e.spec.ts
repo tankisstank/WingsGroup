@@ -41,9 +41,9 @@ test.describe('Admin Panel', () => {
     await expect(dashboardArtifact).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Bảng điều hành CMS' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Console vận hành' }).first()).toBeVisible()
-    await expect(page.locator('#wings-travel-metrics-0').getByRole('link', { name: 'Tạo trang nhanh' })).toBeVisible()
-    await expect(page.locator('#wings-travel-metrics-0').getByRole('link', { name: 'Lead gửi về' })).toBeVisible()
-    await expect(page.locator('#wings-travel-metrics-0').getByRole('link', { name: /Trang \d+/ })).toBeVisible()
+    await expect(page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Tạo trang nhanh' })).toBeVisible()
+    await expect(page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Lead gửi về' })).toBeVisible()
+    await expect(page.locator('#wings-group-metrics-0').getByRole('link', { name: /Trang \d+/ })).toBeVisible()
   })
 
   test('can open operator console', async () => {

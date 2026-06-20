@@ -5,7 +5,7 @@
 The Payload page composer provides a governed library of reusable page layout
 presets and block presentation variants for public website pages.
 
-The library is inspired by VibeUI's public prompt taxonomy, but WingsTravel owns
+The library is inspired by VibeUI's public prompt taxonomy, but WingsGroup owns
 the implementation. Do not copy VibeUI code, visual identity, assets, or prompt
 copy verbatim.
 
@@ -85,6 +85,6 @@ Each preset must generate a valid draft page using registered block types only.
   above cards on mobile.
 - Mobile spacing reserves room for Payload's floating admin control so it does
   not cover the first preset card.
-- Payload admin sets the title suffix to `WingsTravel CMS` and suppresses
+- Payload admin sets the title suffix to `WingsGroup CMS` and suppresses
   hydration warnings caused by browser extensions mutating `<html>` attributes
   before React hydrates.

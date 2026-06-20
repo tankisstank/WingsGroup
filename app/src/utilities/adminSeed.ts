@@ -1,7 +1,7 @@
 import type { Payload, PayloadRequest } from 'payload'
 
 export const localAdminCredentials = {
-  email: 'local-admin@wingstravel.test',
+  email: 'local-admin@wingsgroup.test',
   name: 'Local Admin',
   password: 'test',
   role: 'super-admin',

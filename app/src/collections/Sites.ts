@@ -33,7 +33,7 @@ export const Sites: CollectionConfig = {
       required: true,
       unique: true,
       admin: {
-        description: 'Mã nội bộ, ví dụ wings-travel hoặc wings-care.',
+        description: 'Mã nội bộ, ví dụ wings-group hoặc wings-care.',
       },
     },
     {

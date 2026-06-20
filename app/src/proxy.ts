@@ -1,6 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-import { getLocaleFromPathname, getSiteAliasFromPathname, siteAliasToCodeMap } from '@/utilities/sitePaths'
+import {
+  allSiteAliasToCodeMap,
+  getLocaleFromPathname,
+  getSiteAliasFromPathname,
+} from '@/utilities/sitePaths'
 
 const stripLeadingSegments = (pathname: string, count: number) => {
   const segments = pathname.split('/').filter(Boolean)
@@ -31,7 +35,7 @@ export function proxy(request: NextRequest) {
   }
 
   const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-site-code', siteAliasToCodeMap[siteAlias])
+  requestHeaders.set('x-site-code', allSiteAliasToCodeMap[siteAlias])
   if (locale) {
     requestHeaders.set('x-locale', locale)
   }

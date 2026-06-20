@@ -1,6 +1,6 @@
-# WingsTravel Product Context
+# WingsGroup Product Context
 
-This file connects the generic Harness structure to the actual `WingsTravel`
+This file connects the generic Harness structure to the actual `WingsGroup`
 workspace.
 
 ## Primary Product Sources
@@ -15,11 +15,11 @@ The current product and architecture context lives first in:
 
 ## Current Product Direction
 
-`WingsTravel` is being built as:
+`WingsGroup` is being built as:
 
 - a `Payload-first` multisite content platform
 - one codebase serving multiple sites such as:
-  - `WingsTravel`
+  - `WingsGroup`
   - `WingsGo`
   - `WingsSide`
   - `WingsPlus`

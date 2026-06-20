@@ -12,13 +12,13 @@ import { describe, expect, it } from 'vitest'
 const settings = {
   id: 1,
   site: 1,
-  siteName: 'WingsTravel',
+  siteName: 'WingsGroup',
   tagline: 'Premium travel services',
   seo: {
-    canonicalDomain: 'https://wingstravel.example',
-    defaultDescription: 'Default WingsTravel SEO description',
+    canonicalDomain: 'https://wingsgroup.example',
+    defaultDescription: 'Default WingsGroup SEO description',
   },
-  supportEmail: 'support@wingstravel.example',
+  supportEmail: 'support@wingsgroup.example',
   supportPhone: '+84123456789',
   updatedAt: '2026-01-01T00:00:00.000Z',
   createdAt: '2026-01-01T00:00:00.000Z',
@@ -29,12 +29,12 @@ describe('structured data builders', () => {
     const organization = buildOrganizationJSONLD(settings)
 
     expect(organization['@type']).toBe('Organization')
-    expect(organization.name).toBe('WingsTravel')
-    expect(organization.url).toBe('https://wingstravel.example')
+    expect(organization.name).toBe('WingsGroup')
+    expect(organization.url).toBe('https://wingsgroup.example')
     expect(organization.contactPoint).toEqual([
       {
         '@type': 'ContactPoint',
-        email: 'support@wingstravel.example',
+        email: 'support@wingsgroup.example',
         telephone: '+84123456789',
         contactType: 'customer support',
       },
@@ -43,16 +43,16 @@ describe('structured data builders', () => {
 
   it('builds WebPage using the shared canonical domain', () => {
     const webpage = buildWebPageJSONLD({
-      description: 'About WingsTravel',
+      description: 'About WingsGroup',
       path: '/about',
       settings,
       title: 'About',
     })
 
     expect(webpage['@type']).toBe('WebPage')
-    expect(webpage.url).toBe('https://wingstravel.example/about')
+    expect(webpage.url).toBe('https://wingsgroup.example/about')
     expect(webpage.isPartOf).toEqual({
-      '@id': 'https://wingstravel.example#website',
+      '@id': 'https://wingsgroup.example#website',
     })
   })
 
@@ -89,7 +89,7 @@ describe('structured data builders', () => {
     expect(article['@type']).toBe('Article')
     expect(article.headline).toBe('Travel Guide')
     expect(article.mainEntityOfPage).toEqual({
-      '@id': 'https://wingstravel.example/posts/travel-guide#webpage',
+      '@id': 'https://wingsgroup.example/posts/travel-guide#webpage',
     })
   })
 

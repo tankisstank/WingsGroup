@@ -31,7 +31,7 @@ export const generateMeta = async (args: {
   const settings = await getCurrentSiteSettings(siteCode)
 
   const ogImage = getImageURL(doc?.meta?.image || settings?.seo?.defaultImage)
-  const seoDefaultTitle = settings?.seo?.defaultTitle || settings?.siteName || 'WingsTravel'
+  const seoDefaultTitle = settings?.seo?.defaultTitle || settings?.siteName || 'WingsGroup'
   const seoTitleSuffix = settings?.seo?.titleSuffix
   const description = doc?.meta?.description || settings?.seo?.defaultDescription || settings?.tagline
   const titleBase = doc?.title || doc?.meta?.title || seoDefaultTitle

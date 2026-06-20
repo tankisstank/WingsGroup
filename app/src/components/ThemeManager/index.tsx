@@ -104,7 +104,7 @@ const getPresetLabel = (value: string, presets: ThemePresetDoc[]) => {
   return getOptionLabel(themePresetKeyOptions, value) || 'Chưa chọn preset'
 }
 
-const defaultFormState = (siteName = 'WingsTravel'): ThemeFormState => ({
+const defaultFormState = (siteName = 'WingsGroup'): ThemeFormState => ({
   accentColor: defaultThemePresetByKey.corporate.accentColor,
   backgroundStyle: defaultThemePresetByKey.corporate.backgroundStyle,
   brandColor: defaultThemePresetByKey.corporate.brandColor,
@@ -116,7 +116,7 @@ const defaultFormState = (siteName = 'WingsTravel'): ThemeFormState => ({
   spacingScale: defaultThemePresetByKey.corporate.spacingScale,
   surfaceColor: defaultThemePresetByKey.corporate.surfaceColor,
   surfaceStrongColor: defaultThemePresetByKey.corporate.surfaceStrongColor,
-  themeKey: 'wings-travel',
+  themeKey: 'wings-group',
   themePreset: '',
 })
 
@@ -198,7 +198,7 @@ export default function ThemeManagerView() {
         presets.find((preset) => String(preset.id) === String(themePresetDoc?.id)) ||
         presets.find((preset) => preset.key === themePresetKey) ||
         presets[0]
-      const resolvedPreset = resolveThemePresetTokens(settings.branding?.themeKey || 'wings-travel', {
+      const resolvedPreset = resolveThemePresetTokens(settings.branding?.themeKey || 'wings-group', {
         key: matchedPreset?.key || themePresetKey,
         tokens:
           themePresetDoc?.tokens ||
@@ -214,12 +214,12 @@ export default function ThemeManagerView() {
         buttonStyle: settings.branding?.buttonStyle || resolvedPreset.buttonStyle,
         fontPreset: settings.branding?.fontPreset || resolvedPreset.fontPreset,
         layoutStyle: settings.branding?.layoutStyle || resolvedPreset.layoutStyle,
-        logoText: settings.branding?.logoText || settings.siteName || 'WingsTravel',
+        logoText: settings.branding?.logoText || settings.siteName || 'WingsGroup',
         radius: settings.branding?.radius || resolvedPreset.radius,
         spacingScale: settings.branding?.spacingScale || resolvedPreset.spacingScale,
         surfaceColor: settings.branding?.surfaceColor || resolvedPreset.surfaceColor,
         surfaceStrongColor: settings.branding?.surfaceStrongColor || resolvedPreset.surfaceStrongColor,
-        themeKey: settings.branding?.themeKey || 'wings-travel',
+        themeKey: settings.branding?.themeKey || 'wings-group',
         themePreset: String(matchedPreset?.id || ''),
       }
 
@@ -363,7 +363,7 @@ export default function ThemeManagerView() {
         <div className={`${baseClass}__shell`}>
           <header className={`${baseClass}__header`}>
             <div>
-              <p>WingsTravel CMS</p>
+              <p>WingsGroup CMS</p>
               <h1>Theme Manager</h1>
               <span>Chỉ super-admin và site-manager mới được chỉnh theme.</span>
             </div>
@@ -379,7 +379,7 @@ export default function ThemeManagerView() {
       <div className={`${baseClass}__shell`}>
         <header className={`${baseClass}__header`}>
           <div>
-            <p>WingsTravel CMS</p>
+            <p>WingsGroup CMS</p>
             <h1>Theme Manager</h1>
             <span>Chọn preset, tinh chỉnh token và lưu trực tiếp vào site-settings.</span>
           </div>

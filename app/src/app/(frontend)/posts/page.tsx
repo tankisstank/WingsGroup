@@ -88,8 +88,8 @@ export async function generateMetadata({ searchParams }: Args): Promise<Metadata
         title: locale === 'en' ? 'Posts' : 'Bài viết',
         description:
           locale === 'en'
-            ? 'Latest articles and travel updates.'
-            : 'Các bài viết và cập nhật mới nhất.',
+            ? 'Read WingsGroup articles about tour planning, departure schedules, campaign guidance, and service updates across the travel ecosystem.'
+            : 'Đọc bài viết WingsGroup về kinh nghiệm chọn tour, lịch khởi hành, campaign du lịch và cập nhật dịch vụ trong hệ sinh thái.',
       },
       slug: 'posts',
     },

@@ -8,8 +8,12 @@ const baseClass = 'before-dashboard'
 const BeforeDashboard: React.FC = () => {
   return (
     <div className={baseClass}>
+      <div className={`${baseClass}__heading`}>
+        <p>WingsGroup CMS</p>
+        <h1>Bảng điều hành CMS</h1>
+      </div>
       <Banner className={`${baseClass}__banner`} type="success">
-        <h4>WingsTravel CMS đã sẵn sàng cho vận hành nội dung theo từng site.</h4>
+        <h4>WingsGroup CMS đã sẵn sàng cho vận hành nội dung theo từng site.</h4>
       </Banner>
       Dùng bảng điều hành bên dưới để xem số liệu thật, lead mới, bản nháp và các nhóm dữ
       liệu được mở theo quyền của bạn.

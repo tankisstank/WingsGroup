@@ -25,20 +25,6 @@ const seedAssetsDir = path.join(scriptDir, 'seed-assets')
 
 const seedData = <T>(data: T) => data as never
 
-const normalizeDiacritics = (value: string) =>
-  value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D')
-
-const slugifySeedValue = (value: string) =>
-  normalizeDiacritics(value)
-    .toLowerCase()
-    .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-
 const trimPathSlashes = (value: string) => value.replace(/^\/+|\/+$/g, '')
 
 const localizePathForSeed = (pathValue?: null | string, locale: SupportedSeedLocale = 'vi') => {
@@ -66,22 +52,6 @@ const localizeSeedTitle = (title?: unknown, locale: SupportedSeedLocale = 'vi') 
   }
 
   return englishTitleMap[title] || title
-}
-
-const deriveLocalizedSlug = (data: Record<string, unknown>, locale: SupportedSeedLocale) => {
-  const explicitSlug = typeof data.slug === 'string' ? data.slug : null
-
-  if (explicitSlug) {
-    return localizePathForSeed(explicitSlug, locale)?.replace(/^\/+/, '') || explicitSlug
-  }
-
-  const localizedTitle = localizeSeedTitle(data.title, locale)
-
-  if (typeof localizedTitle === 'string') {
-    return slugifySeedValue(localizedTitle) || 'home'
-  }
-
-  return 'home'
 }
 
 const deepLocalizeSeedLinks = (value: unknown, locale: SupportedSeedLocale): unknown => {
@@ -112,6 +82,22 @@ const deepLocalizeSeedLinks = (value: unknown, locale: SupportedSeedLocale): unk
 
       return [key, deepLocalizeSeedLinks(entry, locale)]
     }),
+  )
+}
+
+const stripGeneratedIDs = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(stripGeneratedIDs)
+  }
+
+  if (!value || typeof value !== 'object') {
+    return value
+  }
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter(([key]) => key !== 'id')
+      .map(([key, entry]) => [key, stripGeneratedIDs(entry)]),
   )
 }
 
@@ -155,7 +141,7 @@ type LinkAppearance = 'default' | 'outline'
 type SupportedSeedLocale = 'en' | 'vi'
 
 const englishPathSegmentMap: Record<string, string> = {
-  '5-site-trong-he-wingstravel-khac-nhau-ra-sao': 'how-the-five-wingstravel-sites-differ',
+  '5-site-trong-he-wingsgroup-khac-nhau-ra-sao': 'how-the-five-wingsgroup-sites-differ',
   'add-on': 'add-ons',
   'bac-kinh-van-ly-truong-thanh-5n4d': 'beijing-great-wall-5d4n',
   'bang-gia': 'pricing',
@@ -178,13 +164,13 @@ const englishPathSegmentMap: Record<string, string> = {
   'he-2026-han-quoc': 'summer-2026-korea',
   'he-2026-nhat-ban': 'summer-2026-japan',
   'he-sinh-thai': 'service-ecosystem',
-  'he-sinh-thai-wingstravel-la-gi': 'what-is-the-wingstravel-ecosystem',
+  'he-sinh-thai-wingsgroup-la-gi': 'what-is-the-wingsgroup-ecosystem',
   'huong-dan-yeu-cau-ho-tro': 'support-request-guide',
   'lien-he': 'contact',
   'lich-khoi-hanh': 'departures',
   'nang-luc-dich-vu': 'capabilities',
   'nang-luc-to-chuc-hanh-trinh-doan-va-mice-cua-vietwings': 'vietwings-group-and-mice-capabilities',
-  'nen-bat-dau-tu-site-nao-trong-he-sinh-thai-wingstravel': 'which-wingstravel-site-to-start-with',
+  'nen-bat-dau-tu-site-nao-trong-he-sinh-thai-wingsgroup': 'which-wingsgroup-site-to-start-with',
   'nhat-ban': 'japan',
   'nhung-gi-khach-hang-can-kiem-tra-truoc-khi-dat-dich-vu-du-lich': 'what-to-check-before-booking-travel-services',
   'noi-bai': 'noi-bai',
@@ -205,7 +191,7 @@ const englishPathSegmentMap: Record<string, string> = {
   'travel-insurance-va-care-support-can-hieu-dung-dieu-gi': 'travel-insurance-and-care-support-explained',
   'trung-quoc': 'china',
   'trung-quoc-gia-ro': 'china-clear-pricing',
-  've-wingstravel': 'about-wingstravel',
+  've-wingsgroup': 'about-wingsgroup',
   'vi-sao-viet-nam-phu-hop-cho-hanh-trinh-inbound-tailor-made': 'why-vietnam-works-for-tailor-made-inbound-journeys',
   'xu-huong-du-lich-cao-cap-va-private-journey-2026': 'premium-and-private-journey-trends-2026',
 }
@@ -240,7 +226,7 @@ const englishTitleMap: Record<string, string> = {
   'Hệ sinh thái dịch vụ': 'Service Ecosystem',
   'Liên hệ': 'Contact',
   'Liên hệ WingsGo': 'Contact WingsGo',
-  'Liên hệ WingsTravel': 'Contact WingsTravel',
+  'Liên hệ WingsGroup': 'Contact WingsGroup',
   'Liên hệ hỗ trợ': 'Contact Support',
   'Liên hệ đặt Fast Track': 'Book Fast Track',
   'Lịch khởi hành': 'Departures',
@@ -261,7 +247,7 @@ const englishTitleMap: Record<string, string> = {
   'Tour WingsGo': 'WingsGo Tours',
   'Tour riêng cao cấp': 'Premium Private Tours',
   'Trung Quốc giá rõ': 'China Clear Pricing',
-  'Về WingsTravel': 'About WingsTravel',
+  'Về WingsGroup': 'About WingsGroup',
   'Xem bảng giá': 'View Pricing',
   'Xem quyền lợi': 'View Benefits',
   'Điểm đến cao cấp': 'Premium Destinations',
@@ -272,11 +258,11 @@ const siteSeeds: SiteSeed[] = [
   {
     accentColor: '#A16207',
     brandColor: '#1C1917',
-    code: 'wings-travel',
-    domain: 'wingstravel.local',
-    name: 'WingsTravel',
+    code: 'wings-group',
+    domain: 'wingsgroup.local',
+    name: 'WingsGroup',
     seoDescription:
-      'Corporate hub and multisite content platform for the WingsTravel ecosystem, outbound tours, inbound journeys, fast track services, and premium travel programs.',
+      'Corporate hub and multisite content platform for the WingsGroup ecosystem, outbound tours, inbound journeys, fast track services, and premium travel programs.',
     seoSuffix: 'Travel Ecosystem',
     summary:
       'Corporate hub điều hướng sang WingsGo, WingsSide, WingsPass, WingsPlus và các line business khác của VietWings.',
@@ -289,10 +275,10 @@ const siteSeeds: SiteSeed[] = [
     domain: 'wingsgo.local',
     name: 'WingsGo',
     seoDescription:
-      'Outbound retail travel site with clear prices, departure schedules, campaign pages, and tour detail pages for Korea, Japan, and China.',
+      'Tour outbound Hàn, Nhật, Trung với giá rõ, lịch khởi hành rõ, campaign theo mùa và trang tour chi tiết dễ giữ chỗ.',
     seoSuffix: 'Outbound Tours',
     summary:
-      'Outbound retail site cho Hàn, Nhật, Trung với giá rõ, lịch khởi hành rõ và các CTA tư vấn hoặc giữ chỗ.',
+      'Tour outbound Hàn, Nhật, Trung với giá rõ, lịch khởi hành rõ và CTA tư vấn hoặc giữ chỗ nhanh.',
     themePreset: 'retail',
   },
   {
@@ -345,7 +331,7 @@ const siteSeeds: SiteSeed[] = [
     domain: 'wingscare.local',
     name: 'WingsCare',
     seoDescription:
-      'Service assurance and insurance-oriented support site for the WingsTravel ecosystem.',
+      'Service assurance and insurance-oriented support site for the WingsGroup ecosystem.',
     seoSuffix: 'Care And Support',
     summary:
       'Site hỗ trợ và chăm sóc, để sẵn nền cho insurance và post-sales service trong hệ sinh thái.',
@@ -871,42 +857,19 @@ async function updatePageLocale(
   locale: SupportedSeedLocale,
   data: Record<string, unknown>,
 ) {
-  const existingPage = await payload.findByID({
-    collection: 'pages',
-    id: pageID,
-    depth: 0,
-    locale,
-    overrideAccess: true,
-    req,
-  })
-  const localizedSlug = deriveLocalizedSlug(data, locale)
-  const explicitPathname = typeof data.pathname === 'string' ? localizePathForSeed(data.pathname, locale) : null
-  let localizedPathname = explicitPathname || (localizedSlug === 'home' ? '/' : `/${localizedSlug}`)
-  const parentPageID = normalizeRelationID(
-    (data.parentPage || existingPage.parentPage) as Parameters<typeof normalizeRelationID>[0],
-  )
-
-  if (!explicitPathname && parentPageID && localizedSlug !== 'home') {
-    const parentPage = await payload.findByID({
-      collection: 'pages',
-      id: parentPageID,
-      depth: 0,
-      locale,
-      overrideAccess: true,
-      req,
-    })
-    const parentPath = parentPage.pathname && parentPage.pathname !== '/' ? parentPage.pathname : ''
-    localizedPathname = `${parentPath}/${localizedSlug}`.replace(/\/+/g, '/')
-  }
-
-  const { site: _site, ...localizedData } = data
+  const {
+    pathname: _pathname,
+    site: _site,
+    slug: _slug,
+    ...localizedData
+  } = data
   const nextData = deepLocalizeSeedLinks(
+    stripGeneratedIDs(
     {
       ...localizedData,
-      pathname: localizedPathname,
-      slug: localizedSlug,
       title: localizeSeedTitle(localizedData.title, locale),
     },
+    ),
     locale,
   )
 
@@ -927,12 +890,14 @@ async function updatePostLocale(
   locale: SupportedSeedLocale,
   data: Record<string, unknown>,
 ) {
+  const { slug: _slug, ...localizedData } = data
   const nextData = deepLocalizeSeedLinks(
+    stripGeneratedIDs(
     {
-      ...data,
-      slug: deriveLocalizedSlug(data, locale),
-      title: localizeSeedTitle(data.title, locale),
+      ...localizedData,
+      title: localizeSeedTitle(localizedData.title, locale),
     },
+    ),
     locale,
   )
 
@@ -953,10 +918,10 @@ async function updateCategoryLocale(
   locale: SupportedSeedLocale,
   data: Record<string, unknown>,
 ) {
+  const { slug: _slug, ...localizedData } = data
   const nextData = {
-    ...data,
-    slug: deriveLocalizedSlug(data, locale),
-    title: localizeSeedTitle(data.title, locale),
+    ...localizedData,
+    title: localizeSeedTitle(localizedData.title, locale),
   }
 
   return payload.update({
@@ -1038,6 +1003,7 @@ async function createSiteSettings(
   overrides: {
     footerNote?: string
     footerNavItems?: Array<ReturnType<typeof linkItem>>
+    faviconImageID?: number | string
     headerNavItems?: Array<ReturnType<typeof linkItem>>
     logoImageID?: number | string | null
     supportEmail?: string
@@ -1058,6 +1024,7 @@ async function createSiteSettings(
         brandColor: siteSeed.brandColor,
         accentColor: siteSeed.accentColor,
         logoImage: overrides.logoImageID === undefined ? null : overrides.logoImageID,
+        faviconImage: overrides.faviconImageID || heroImageID,
         themeKey: siteSeed.code,
         themePreset: themePresetIDsByKey[siteSeed.themePreset],
       },
@@ -1074,7 +1041,7 @@ async function createSiteSettings(
       footerNavItems: overrides.footerNavItems || [linkItem('Trang chủ', '/')],
       footerNote:
         overrides.footerNote ||
-        `${siteSeed.name} runs as a child site inside the WingsTravel multisite platform.`,
+        `${siteSeed.name} runs as a child site inside the WingsGroup multisite platform.`,
     }),
   })
 }
@@ -1092,7 +1059,7 @@ async function updateSiteSettingsLocale(
     locale,
     req,
     context: seedContext,
-    data: seedData(deepLocalizeSeedLinks(data, locale)),
+    data: seedData(deepLocalizeSeedLinks(stripGeneratedIDs(data), locale)),
   })
 }
 
@@ -1243,7 +1210,7 @@ async function createRedirect(payload: Payload, req: PayloadRequest, from: strin
   })
 }
 
-async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: SiteSeed) {
+async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: SiteSeed) {
   const site = await upsertSite(payload, req, siteSeed)
   await clearSiteContent(payload, req, site.id)
 
@@ -1251,10 +1218,10 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
     payload,
     req,
     site.id,
-    'WingsTravel corporate hub',
-    'WingsTravel ecosystem',
+    'WingsGroup corporate hub',
+    'WingsGroup ecosystem',
     'Corporate hub for the VietWings digital ecosystem.',
-    path.join(seedAssetsDir, 'wingstravel-ecosystem-hero.png'),
+    path.join(seedAssetsDir, 'wingsgroup-ecosystem-hero.png'),
   )
   const legacyLogoImage = await createMedia(
     payload,
@@ -1271,7 +1238,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
     site.id,
     'Outbound travel programs',
     'Outbound retail routes',
-    'Representative outbound image for Korea, Japan, and broader retail travel programs under the WingsTravel ecosystem.',
+    'Representative outbound image for Korea, Japan, and broader retail travel programs under the WingsGroup ecosystem.',
     path.join(seedAssetsDir, 'wingsgo-shizuoka-fuji-tokyo.png'),
   )
   const inboundImage = await createMedia(
@@ -1316,7 +1283,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
     site.id,
     'Airport fast-track services',
     'Airport service capability',
-    'Airport fast-track and add-on service image used to explain high-speed airport support inside the WingsTravel ecosystem.',
+    'Airport fast-track and add-on service image used to explain high-speed airport support inside the WingsGroup ecosystem.',
     path.join(seedAssetsDir, 'wingspass-fast-track-hero.png'),
   )
   const premiumImage = await createMedia(
@@ -1342,10 +1309,10 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
     payload,
     req,
     site.id,
-    'WingsTravel Ecosystem Contact',
+    'WingsGroup Ecosystem Contact',
     'Gửi liên hệ',
     'Đã nhận thông tin',
-    'Đội quản trị WingsTravel sẽ phản hồi theo đúng line business liên quan.',
+    'Đội quản trị WingsGroup sẽ phản hồi theo đúng line business liên quan.',
     [
       {
         blockName: 'full-name',
@@ -1482,10 +1449,10 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
     hero: {
       type: 'mediumImpact',
       media: ecosystemHeroImage.id,
-      links: [linkItem('Khám phá WingsGo', '/wingsgo', 'default'), linkItem('Liên hệ tư vấn', '/lien-he', 'outline')],
+      links: [linkItem('Khám phá WingsGo', 'https://wingsgo.vn', 'default'), linkItem('Liên hệ tư vấn', '/lien-he', 'outline')],
       richText: richText(
         'Một hệ sinh thái, nhiều hành trình chuyên biệt',
-        'WingsTravel đóng vai trò lớp umbrella để khách hàng đi đúng site, đúng line business và đúng luồng tư vấn ngay từ lần truy cập đầu tiên.',
+        'WingsGroup đóng vai trò lớp umbrella để khách hàng đi đúng site, đúng line business và đúng luồng tư vấn ngay từ lần truy cập đầu tiên.',
         'h1',
       ),
     },
@@ -1499,35 +1466,35 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
             description: 'Điểm vào outbound retail với thị trường Hàn, Nhật, Trung, campaign mùa vụ, lịch khởi hành và tour detail rõ ràng.',
             imageID: outboundImage.id,
             meta: 'Outbound retail',
-            url: '/wingsgo',
+            url: 'https://wingsgo.vn',
           },
           {
             title: 'WingsSide',
             description: 'Điểm vào inbound Vietnam với destination storytelling, travel style, sample itinerary và inquiry flow cho khách quốc tế.',
             imageID: inboundImage.id,
             meta: 'Inbound consultative',
-            url: '/wingsside',
+            url: 'https://wingsside.vn',
           },
           {
             title: 'WingsPass',
             description: 'Điểm vào dịch vụ fast track theo sân bay, bảng giá, add-on và luồng gửi yêu cầu dịch vụ nhanh.',
             imageID: fastTrackImage.id,
             meta: 'Airport service',
-            url: '/wingspass',
+            url: 'https://wingspass.vn',
           },
           {
             title: 'WingsPlus',
             description: 'Điểm vào private tours, MICE, special markets và proposal flow cho nhu cầu high-value.',
             imageID: premiumImage.id,
             meta: 'Private / MICE',
-            url: '/wingsplus',
+            url: 'https://wingsplus.vn',
           },
           {
             title: 'WingsCare',
             description: 'Điểm vào insurance support, quyền lợi, claim guidance và after-sales care trong hệ sinh thái.',
             imageID: careImage.id,
             meta: 'Care support',
-            url: '/wingscare',
+            url: 'https://wingscare.vn',
           },
         ],
         'highlight',
@@ -1535,7 +1502,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
       infoStripBlock(
         'Khi nào nên vào site nào',
-        'Nếu khách đang tìm một tour bán lẻ có giá và lịch đi, họ không nên rơi vào một trang umbrella quá chung. Nếu khách chưa rõ nhu cầu, WingsTravel giữ vai trò điều hướng và tạo lớp trust trước khi chuyển tuyến.',
+        'Nếu khách đang tìm một tour bán lẻ có giá và lịch đi, họ không nên rơi vào một trang umbrella quá chung. Nếu khách chưa rõ nhu cầu, WingsGroup giữ vai trò điều hướng và tạo lớp trust trước khi chuyển tuyến.',
         [
           {
             label: 'Retail outbound',
@@ -1567,13 +1534,13 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
       ctaBlock(
         'Chưa chắc nên bắt đầu từ đâu?',
-        'Gửi nhu cầu chung và đội vận hành sẽ phân loại để chuyển đúng line business trong hệ WingsTravel.',
+        'Gửi nhu cầu chung và đội vận hành sẽ phân loại để chuyển đúng line business trong hệ WingsGroup.',
         [linkItem('Gửi yêu cầu tư vấn', '/lien-he')],
       ),
     ],
     meta: {
-      title: 'Hệ sinh thái WingsTravel',
-      description: 'Giải thích vai trò của WingsGo, WingsSide, WingsPass, WingsPlus và WingsCare trong hệ sinh thái WingsTravel.',
+      title: 'Hệ sinh thái WingsGroup',
+      description: 'Giải thích vai trò của WingsGo, WingsSide, WingsPass, WingsPlus và WingsCare trong hệ sinh thái WingsGroup.',
       image: ecosystemHeroImage.id,
       breadcrumbLabel: 'Hệ sinh thái',
     },
@@ -1582,10 +1549,10 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
     hero: {
       type: 'mediumImpact',
       media: ecosystemHeroImage.id,
-      links: [linkItem('Explore WingsGo', '/wingsgo', 'default'), linkItem('Contact the team', '/lien-he', 'outline')],
+      links: [linkItem('Explore WingsGo', 'https://wingsgo.vn', 'default'), linkItem('Contact the team', '/lien-he', 'outline')],
       richText: richText(
         'One ecosystem, several specialized customer journeys',
-        'WingsTravel acts as the umbrella layer that helps visitors enter the right site, product line, and consultation flow from the first visit.',
+        'WingsGroup acts as the umbrella layer that helps visitors enter the right site, product line, and consultation flow from the first visit.',
         'h1',
       ),
     },
@@ -1599,35 +1566,35 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
             description: 'Outbound retail entry with Korea, Japan, and China market pages, campaign routes, departure visibility, and tour detail pages.',
             imageID: outboundImage.id,
             meta: 'Outbound retail',
-            url: '/wingsgo',
+            url: 'https://wingsgo.vn',
           },
           {
             title: 'WingsSide',
             description: 'Inbound Vietnam entry with destination storytelling, travel styles, sample itineraries, and inquiry-first planning flows.',
             imageID: inboundImage.id,
             meta: 'Inbound consultative',
-            url: '/wingsside',
+            url: 'https://wingsside.vn',
           },
           {
             title: 'WingsPass',
             description: 'Airport-service entry for fast-track services, add-ons, pricing, and service requests.',
             imageID: fastTrackImage.id,
             meta: 'Airport service',
-            url: '/wingspass',
+            url: 'https://wingspass.vn',
           },
           {
             title: 'WingsPlus',
             description: 'Premium private-travel and MICE entry for high-value briefs that require tailored proposals.',
             imageID: premiumImage.id,
             meta: 'Private / MICE',
-            url: '/wingsplus',
+            url: 'https://wingsplus.vn',
           },
           {
             title: 'WingsCare',
             description: 'Support and insurance entry for benefits, claim guidance, and post-sales assistance.',
             imageID: careImage.id,
             meta: 'Care support',
-            url: '/wingscare',
+            url: 'https://wingscare.vn',
           },
         ],
         'highlight',
@@ -1667,26 +1634,26 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
       ctaBlock(
         'Not sure where to start?',
-        'Send one general inquiry and the operations team will route it to the right line inside the WingsTravel ecosystem.',
+        'Send one general inquiry and the operations team will route it to the right line inside the WingsGroup ecosystem.',
         [linkItem('Send an inquiry', '/lien-he')],
       ),
     ],
     meta: {
-      title: 'WingsTravel Ecosystem',
-      description: 'Understand the different roles of WingsGo, WingsSide, WingsPass, WingsPlus, and WingsCare inside the WingsTravel ecosystem.',
+      title: 'WingsGroup Ecosystem',
+      description: 'Understand the different roles of WingsGo, WingsSide, WingsPass, WingsPlus, and WingsCare inside the WingsGroup ecosystem.',
       image: ecosystemHeroImage.id,
       breadcrumbLabel: 'Ecosystem',
     },
   })
 
   const aboutPage = await createRootPage({
-    title: 'Về WingsTravel',
-    slug: 've-wingstravel',
+    title: 'Về WingsGroup',
+    slug: 've-wingsgroup',
     hero: {
       type: 'lowImpact',
       richText: richText(
         'VietWings Travel đi từ doanh nghiệp du lịch thật sang hệ sinh thái số rõ vai trò',
-        'WingsTravel kế thừa nền tảng pháp lý, năng lực vận hành và kinh nghiệm dịch vụ của doanh nghiệp cũ, rồi tách thành các site con rõ nhiệm vụ để phục vụ khách hàng tốt hơn.',
+        'WingsGroup kế thừa nền tảng pháp lý, năng lực vận hành và kinh nghiệm dịch vụ của doanh nghiệp cũ, rồi tách thành các site con rõ nhiệm vụ để phục vụ khách hàng tốt hơn.',
         'h1',
       ),
     },
@@ -1703,7 +1670,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
           size: 'half',
           title: 'Từ một website tổng hợp sang kiến trúc hệ sinh thái',
           paragraph:
-            'Thay vì dồn toàn bộ retail, inbound, airport service, premium và care support vào một site duy nhất, WingsTravel mới phân lớp vai trò để khách truy cập hiểu nhanh họ nên đi tiếp vào đâu.',
+            'Thay vì dồn toàn bộ retail, inbound, airport service, premium và care support vào một site duy nhất, WingsGroup mới phân lớp vai trò để khách truy cập hiểu nhanh họ nên đi tiếp vào đâu.',
         },
       ]),
       infoStripBlock(
@@ -1723,7 +1690,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
           {
             value: 'Thích ứng',
             label: 'Liên tục đổi mới',
-            description: 'WingsTravel được tổ chức để có thể mở thêm site, thêm nội dung và thêm locale mà không phải thay toàn bộ nền tảng.',
+            description: 'WingsGroup được tổ chức để có thể mở thêm site, thêm nội dung và thêm locale mà không phải thay toàn bộ nền tảng.',
           },
         ],
         'Company principles',
@@ -1747,23 +1714,23 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ]),
       ctaBlock(
         'Muốn xem rõ hệ đang được tổ chức như thế nào?',
-        'Đi tiếp sang trang Hệ sinh thái để so sánh vai trò từng site con trong hệ WingsTravel.',
+        'Đi tiếp sang trang Hệ sinh thái để so sánh vai trò từng site con trong hệ WingsGroup.',
         [linkItem('Xem hệ sinh thái', '/he-sinh-thai')],
       ),
     ],
     meta: {
-      title: 'Về WingsTravel',
-      description: 'Giới thiệu về VietWings Travel, định vị hệ sinh thái WingsTravel, và cách doanh nghiệp được tổ chức lại thành nhiều site chuyên biệt.',
+      title: 'Về WingsGroup',
+      description: 'Giới thiệu về VietWings Travel, định vị hệ sinh thái WingsGroup, và cách doanh nghiệp được tổ chức lại thành nhiều site chuyên biệt.',
       image: legacyLogoImage.id,
-      breadcrumbLabel: 'Về WingsTravel',
+      breadcrumbLabel: 'Về WingsGroup',
     },
   }, {
-    title: 'About WingsTravel',
+    title: 'About WingsGroup',
     hero: {
       type: 'lowImpact',
       richText: richText(
         'From a real travel company to a clearly structured digital ecosystem',
-        'WingsTravel carries forward the legal footprint, service capability, and operational experience of the legacy business, then reorganizes them into child sites with clearer roles.',
+        'WingsGroup carries forward the legal footprint, service capability, and operational experience of the legacy business, then reorganizes them into child sites with clearer roles.',
         'h1',
       ),
     },
@@ -1780,7 +1747,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
           size: 'half',
           title: 'From one broad site to a cleaner ecosystem',
           paragraph:
-            'Instead of forcing outbound retail, inbound Vietnam, airport support, premium proposals, and care support into one generic surface, WingsTravel now routes them into purpose-built child sites.',
+            'Instead of forcing outbound retail, inbound Vietnam, airport support, premium proposals, and care support into one generic surface, WingsGroup now routes them into purpose-built child sites.',
         },
       ]),
       infoStripBlock(
@@ -1824,13 +1791,13 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ]),
       ctaBlock(
         'Want to see how the ecosystem is organized?',
-        'Continue to the ecosystem page to compare the purpose of each child site inside WingsTravel.',
+        'Continue to the ecosystem page to compare the purpose of each child site inside WingsGroup.',
         [linkItem('View the ecosystem', '/he-sinh-thai')],
       ),
     ],
     meta: {
-      title: 'About WingsTravel',
-      description: 'Understand VietWings Travel, the WingsTravel umbrella role, and the transition from one broad legacy site to a structured multisite ecosystem.',
+      title: 'About WingsGroup',
+      description: 'Understand VietWings Travel, the WingsGroup umbrella role, and the transition from one broad legacy site to a structured multisite ecosystem.',
       image: legacyLogoImage.id,
       breadcrumbLabel: 'About',
     },
@@ -1845,7 +1812,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       links: [linkItem('Khám phá các site con', '/he-sinh-thai', 'default'), linkItem('Gửi nhu cầu dịch vụ', '/lien-he', 'outline')],
       richText: richText(
         'Một doanh nghiệp, nhiều lớp năng lực dịch vụ',
-        'WingsTravel không bán một loại hành trình duy nhất. Hệ này được tổ chức để phục vụ retail outbound, inbound Vietnam, airport service, premium proposal và after-sales support dưới các bề mặt khác nhau.',
+        'WingsGroup không bán một loại hành trình duy nhất. Hệ này được tổ chức để phục vụ retail outbound, inbound Vietnam, airport service, premium proposal và after-sales support dưới các bề mặt khác nhau.',
         'h1',
       ),
     },
@@ -1915,8 +1882,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'Năng lực dịch vụ WingsTravel',
-      description: 'Tổng quan outbound retail, inbound Vietnam, fast track, private / MICE và care support trong hệ sinh thái WingsTravel.',
+      title: 'Năng lực dịch vụ WingsGroup',
+      description: 'Tổng quan outbound retail, inbound Vietnam, fast track, private / MICE và care support trong hệ sinh thái WingsGroup.',
       image: premiumImage.id,
       breadcrumbLabel: 'Năng lực dịch vụ',
     },
@@ -1928,7 +1895,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       links: [linkItem('Explore the child sites', '/he-sinh-thai', 'default'), linkItem('Send a service brief', '/lien-he', 'outline')],
       richText: richText(
         'One business, several service layers',
-        'WingsTravel is not built around one generic travel offer. The ecosystem is structured to serve outbound retail, inbound Vietnam, airport support, premium proposals, and after-sales care through different surfaces.',
+        'WingsGroup is not built around one generic travel offer. The ecosystem is structured to serve outbound retail, inbound Vietnam, airport support, premium proposals, and after-sales care through different surfaces.',
         'h1',
       ),
     },
@@ -1997,8 +1964,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'WingsTravel Service Capabilities',
-      description: 'A corporate overview of outbound retail, inbound Vietnam, airport support, private / MICE, and care support inside WingsTravel.',
+      title: 'WingsGroup Service Capabilities',
+      description: 'A corporate overview of outbound retail, inbound Vietnam, airport support, private / MICE, and care support inside WingsGroup.',
       image: premiumImage.id,
       breadcrumbLabel: 'Capabilities',
     },
@@ -2011,7 +1978,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       type: 'lowImpact',
       richText: richText(
         'Lớp trust của hệ sinh thái cần nói rõ và kiểm chứng được',
-        'WingsTravel root site phải trả lời nhanh doanh nghiệp là ai, đang vận hành từ đâu, có giấy phép gì và khách nên liên hệ qua kênh nào.',
+        'WingsGroup root site phải trả lời nhanh doanh nghiệp là ai, đang vận hành từ đâu, có giấy phép gì và khách nên liên hệ qua kênh nào.',
         'h1',
       ),
     },
@@ -2060,7 +2027,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
           size: 'half',
           title: 'Giới hạn của page này',
           paragraph:
-            'Page này không thay thế điều khoản giao dịch chi tiết của từng line business. Nó là lớp xác minh doanh nghiệp và định tuyến trust cho toàn bộ hệ WingsTravel.',
+            'Page này không thay thế điều khoản giao dịch chi tiết của từng line business. Nó là lớp xác minh doanh nghiệp và định tuyến trust cho toàn bộ hệ WingsGroup.',
         },
       ]),
       faqBlock(
@@ -2082,8 +2049,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'Tin cậy và pháp lý WingsTravel',
-      description: 'Trang tập trung trust signal, pháp lý, hotline, địa chỉ và nguyên tắc liên hệ chính thức của WingsTravel.',
+      title: 'Tin cậy và pháp lý WingsGroup',
+      description: 'Trang tập trung trust signal, pháp lý, hotline, địa chỉ và nguyên tắc liên hệ chính thức của WingsGroup.',
       image: legacyLogoImage.id,
       breadcrumbLabel: 'Tin cậy & pháp lý',
     },
@@ -2093,7 +2060,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       type: 'lowImpact',
       richText: richText(
         'The ecosystem trust layer must be explicit and verifiable',
-        'The WingsTravel root site should quickly answer who the business is, where it operates from, what legal footing it presents, and how visitors should make contact.',
+        'The WingsGroup root site should quickly answer who the business is, where it operates from, what legal footing it presents, and how visitors should make contact.',
         'h1',
       ),
     },
@@ -2142,7 +2109,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
           size: 'half',
           title: 'What this page does not replace',
           paragraph:
-            'This page does not replace detailed transaction terms for each line business. It functions as the umbrella-level trust and legal layer for the WingsTravel ecosystem.',
+            'This page does not replace detailed transaction terms for each line business. It functions as the umbrella-level trust and legal layer for the WingsGroup ecosystem.',
         },
       ]),
       faqBlock(
@@ -2164,8 +2131,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'WingsTravel Trust And Legal',
-      description: 'The public trust, legal identity, office details, and primary contact layer for the WingsTravel ecosystem.',
+      title: 'WingsGroup Trust And Legal',
+      description: 'The public trust, legal identity, office details, and primary contact layer for the WingsGroup ecosystem.',
       image: legacyLogoImage.id,
       breadcrumbLabel: 'Trust & Legal',
     },
@@ -2185,7 +2152,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
     layout: [
       infoStripBlock(
         'Các nhóm nội dung đang xuất bản',
-        'Kho bài viết của WingsTravel được tổ chức theo vai trò umbrella thay vì trở thành một content hub tour tổng hợp.',
+        'Kho bài viết của WingsGroup được tổ chức theo vai trò umbrella thay vì trở thành một content hub tour tổng hợp.',
         [
           {
             label: 'Tin hệ sinh thái',
@@ -2212,14 +2179,14 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
       archiveBlock(
         [ecosystemCategory.id, capabilityCategory.id, guideCategory.id, trendCategory.id, trustCategory.id],
-        'Bài viết mới nhất từ WingsTravel',
+        'Bài viết mới nhất từ WingsGroup',
         'Kho bài viết này đóng vai trò trust, explanation và selection guide cho toàn hệ sinh thái.',
         12,
       ),
     ],
     meta: {
-      title: 'Tin tức WingsTravel',
-      description: 'Kho bài viết về hệ sinh thái, năng lực dịch vụ, trust và cẩm nang lựa chọn trong WingsTravel.',
+      title: 'Tin tức WingsGroup',
+      description: 'Kho bài viết về hệ sinh thái, năng lực dịch vụ, trust và cẩm nang lựa chọn trong WingsGroup.',
       image: ecosystemHeroImage.id,
       breadcrumbLabel: 'Tin tức',
     },
@@ -2236,7 +2203,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
     layout: [
       infoStripBlock(
         'Editorial groups published here',
-        'The WingsTravel archive is structured around umbrella-site roles rather than turning into a generic tour content hub.',
+        'The WingsGroup archive is structured around umbrella-site roles rather than turning into a generic tour content hub.',
         [
           {
             label: 'Ecosystem news',
@@ -2263,13 +2230,13 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
       archiveBlock(
         [ecosystemCategory.id, capabilityCategory.id, guideCategory.id, trendCategory.id, trustCategory.id],
-        'Latest posts from WingsTravel',
+        'Latest posts from WingsGroup',
         'This archive acts as the trust, explanation, and selection-guide layer for the ecosystem.',
         12,
       ),
     ],
     meta: {
-      title: 'WingsTravel News And Insights',
+      title: 'WingsGroup News And Insights',
       description: 'An editorial archive of ecosystem explainers, service capability notes, trust guidance, and selection guides.',
       image: ecosystemHeroImage.id,
       breadcrumbLabel: 'News',
@@ -2277,10 +2244,11 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
   })
 
   const contactPage = await createRootPage({
-    title: 'Liên hệ WingsTravel',
+    title: 'Liên hệ WingsGroup',
     slug: 'lien-he',
     hero: {
       type: 'lowImpact',
+      links: [linkItem('Gửi thông tin', '#contact-form', 'default'), linkItem('Chọn line business', '/he-sinh-thai', 'outline')],
       richText: richText(
         'Liên hệ một lần, điều phối đúng line business',
         'Nếu khách hàng chưa biết nên vào WingsGo, WingsSide, WingsPass, WingsPlus hay WingsCare, root site phải đóng vai trò tuyến tiếp nhận chung và điều phối về đội phù hợp.',
@@ -2360,15 +2328,16 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'Liên hệ WingsTravel',
-      description: 'Trang liên hệ và lead-routing chung cho toàn bộ hệ sinh thái WingsTravel.',
+      title: 'Liên hệ WingsGroup',
+      description: 'Trang liên hệ và lead-routing chung cho toàn bộ hệ sinh thái WingsGroup.',
       image: legacyLogoImage.id,
       breadcrumbLabel: 'Liên hệ',
     },
   }, {
-    title: 'Contact WingsTravel',
+    title: 'Contact WingsGroup',
     hero: {
       type: 'lowImpact',
+      links: [linkItem('Send your inquiry', '#contact-form', 'default'), linkItem('Choose a business line', '/service-ecosystem', 'outline')],
       richText: richText(
         'One contact layer, routed to the right business line',
         'If visitors are not sure whether they need WingsGo, WingsSide, WingsPass, WingsPlus, or WingsCare, the root site should work as the shared intake and routing surface.',
@@ -2448,8 +2417,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'Contact WingsTravel',
-      description: 'The shared contact and lead-routing page for the WingsTravel ecosystem.',
+      title: 'Contact WingsGroup',
+      description: 'The shared contact and lead-routing page for the WingsGroup ecosystem.',
       image: legacyLogoImage.id,
       breadcrumbLabel: 'Contact',
     },
@@ -2462,7 +2431,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       type: 'lowImpact',
       richText: richText(
         'Chính sách bảo mật ở mức umbrella',
-        'Trang này mô tả cách WingsTravel root site xử lý dữ liệu liên hệ và điều hướng yêu cầu ở cấp corporate. Điều khoản chi tiết hơn có thể áp dụng ở child site tương ứng khi phát sinh dịch vụ cụ thể.',
+        'Trang này mô tả cách WingsGroup root site xử lý dữ liệu liên hệ và điều hướng yêu cầu ở cấp corporate. Điều khoản chi tiết hơn có thể áp dụng ở child site tương ứng khi phát sinh dịch vụ cụ thể.',
         'h1',
       ),
     },
@@ -2472,7 +2441,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
           size: 'full',
           title: 'Phạm vi áp dụng',
           paragraph:
-            'Chính sách này áp dụng cho dữ liệu được gửi qua root site WingsTravel, bao gồm form liên hệ chung, yêu cầu điều hướng line business và các tương tác editorial ở cấp umbrella.',
+            'Chính sách này áp dụng cho dữ liệu được gửi qua root site WingsGroup, bao gồm form liên hệ chung, yêu cầu điều hướng line business và các tương tác editorial ở cấp umbrella.',
         },
         {
           size: 'full',
@@ -2506,8 +2475,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'Chính sách bảo mật WingsTravel',
-      description: 'Chính sách bảo mật ở cấp corporate cho root site WingsTravel và các yêu cầu điều hướng lead trong hệ sinh thái.',
+      title: 'Chính sách bảo mật WingsGroup',
+      description: 'Chính sách bảo mật ở cấp corporate cho root site WingsGroup và các yêu cầu điều hướng lead trong hệ sinh thái.',
       image: legacyLogoImage.id,
       breadcrumbLabel: 'Bảo mật',
     },
@@ -2517,7 +2486,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       type: 'lowImpact',
       richText: richText(
         'Umbrella-level privacy policy',
-        'This page explains how the WingsTravel root site handles contact data and routing requests at the corporate level. More specific service terms may apply on the relevant child site.',
+        'This page explains how the WingsGroup root site handles contact data and routing requests at the corporate level. More specific service terms may apply on the relevant child site.',
         'h1',
       ),
     },
@@ -2527,7 +2496,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
           size: 'full',
           title: 'Scope',
           paragraph:
-            'This policy applies to data submitted through the WingsTravel root site, including the general contact form, ecosystem routing requests, and umbrella-level editorial interactions.',
+            'This policy applies to data submitted through the WingsGroup root site, including the general contact form, ecosystem routing requests, and umbrella-level editorial interactions.',
         },
         {
           size: 'full',
@@ -2561,8 +2530,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'WingsTravel Privacy Policy',
-      description: 'The corporate-level privacy policy for the WingsTravel root site and ecosystem routing inquiries.',
+      title: 'WingsGroup Privacy Policy',
+      description: 'The corporate-level privacy policy for the WingsGroup root site and ecosystem routing inquiries.',
       image: legacyLogoImage.id,
       breadcrumbLabel: 'Privacy',
     },
@@ -2575,7 +2544,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       type: 'lowImpact',
       richText: richText(
         'Điều khoản sử dụng root site',
-        'Root site WingsTravel tồn tại để giới thiệu hệ sinh thái, cung cấp thông tin trust và tiếp nhận yêu cầu điều hướng. Nó không đồng nghĩa với việc mọi giao dịch đều diễn ra trực tiếp trên bề mặt này.',
+        'Root site WingsGroup tồn tại để giới thiệu hệ sinh thái, cung cấp thông tin trust và tiếp nhận yêu cầu điều hướng. Nó không đồng nghĩa với việc mọi giao dịch đều diễn ra trực tiếp trên bề mặt này.',
         'h1',
       ),
     },
@@ -2585,7 +2554,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
           size: 'full',
           title: 'Vai trò của root site',
           paragraph:
-            'WingsTravel root site là lớp corporate và umbrella. Người dùng được kỳ vọng sử dụng site này để hiểu hệ, xem trust signal, đọc bài viết định hướng và gửi yêu cầu chung.',
+            'WingsGroup root site là lớp corporate và umbrella. Người dùng được kỳ vọng sử dụng site này để hiểu hệ, xem trust signal, đọc bài viết định hướng và gửi yêu cầu chung.',
         },
         {
           size: 'full',
@@ -2613,8 +2582,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'Điều khoản sử dụng WingsTravel',
-      description: 'Điều khoản sử dụng ở cấp umbrella cho root site WingsTravel.',
+      title: 'Điều khoản sử dụng WingsGroup',
+      description: 'Điều khoản sử dụng ở cấp umbrella cho root site WingsGroup.',
       image: ecosystemHeroImage.id,
       breadcrumbLabel: 'Điều khoản',
     },
@@ -2624,7 +2593,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       type: 'lowImpact',
       richText: richText(
         'Terms of use for the root site',
-        'The WingsTravel root site exists to explain the ecosystem, present trust information, and receive routing inquiries. It should not be interpreted as the sole transaction surface for every service line.',
+        'The WingsGroup root site exists to explain the ecosystem, present trust information, and receive routing inquiries. It should not be interpreted as the sole transaction surface for every service line.',
         'h1',
       ),
     },
@@ -2634,7 +2603,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
           size: 'full',
           title: 'Role of the root site',
           paragraph:
-            'The WingsTravel root site is the corporate and umbrella surface. Visitors are expected to use it to understand the ecosystem, review trust signals, read explainers, and submit general inquiries.',
+            'The WingsGroup root site is the corporate and umbrella surface. Visitors are expected to use it to understand the ecosystem, review trust signals, read explainers, and submit general inquiries.',
         },
         {
           size: 'full',
@@ -2662,8 +2631,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'WingsTravel Terms Of Use',
-      description: 'Umbrella-level terms of use for the WingsTravel root site.',
+      title: 'WingsGroup Terms Of Use',
+      description: 'Umbrella-level terms of use for the WingsGroup root site.',
       image: ecosystemHeroImage.id,
       breadcrumbLabel: 'Terms',
     },
@@ -2714,8 +2683,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'Chính sách thanh toán WingsTravel',
-      description: 'Chính sách thanh toán umbrella-level cho root site WingsTravel và nguyên tắc xác nhận dịch vụ theo từng line business.',
+      title: 'Chính sách thanh toán WingsGroup',
+      description: 'Chính sách thanh toán umbrella-level cho root site WingsGroup và nguyên tắc xác nhận dịch vụ theo từng line business.',
       image: fastTrackImage.id,
       breadcrumbLabel: 'Thanh toán',
     },
@@ -2763,8 +2732,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'WingsTravel Payment Policy',
-      description: 'Umbrella-level payment guidance for the WingsTravel root site and line-specific service confirmation.',
+      title: 'WingsGroup Payment Policy',
+      description: 'Umbrella-level payment guidance for the WingsGroup root site and line-specific service confirmation.',
       image: fastTrackImage.id,
       breadcrumbLabel: 'Payment',
     },
@@ -2815,8 +2784,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'Chính sách hủy đổi WingsTravel',
-      description: 'Chính sách hủy đổi umbrella-level cho root site WingsTravel và nguyên tắc chuyển sang line business phù hợp để xác nhận chi tiết.',
+      title: 'Chính sách hủy đổi WingsGroup',
+      description: 'Chính sách hủy đổi umbrella-level cho root site WingsGroup và nguyên tắc chuyển sang line business phù hợp để xác nhận chi tiết.',
       image: careImage.id,
       breadcrumbLabel: 'Hủy đổi',
     },
@@ -2864,8 +2833,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
     ],
     meta: {
-      title: 'WingsTravel Cancellation And Change Policy',
-      description: 'Umbrella-level cancellation and change guidance for the WingsTravel root site and routing into the correct business line.',
+      title: 'WingsGroup Cancellation And Change Policy',
+      description: 'Umbrella-level cancellation and change guidance for the WingsGroup root site and routing into the correct business line.',
       image: careImage.id,
       breadcrumbLabel: 'Cancellation',
     },
@@ -2873,18 +2842,18 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
 
   const rootPostDefinitions = [
     {
-      viTitle: 'Hệ sinh thái WingsTravel là gì?',
-      enTitle: 'What is the WingsTravel ecosystem?',
-      slug: 'he-sinh-thai-wingstravel-la-gi',
+      viTitle: 'Hệ sinh thái WingsGroup là gì?',
+      enTitle: 'What is the WingsGroup ecosystem?',
+      slug: 'he-sinh-thai-wingsgroup-la-gi',
       heroImageID: ecosystemHeroImage.id,
       categoryIDs: [ecosystemCategory.id],
-      viDescription: 'Giải thích vai trò umbrella site của WingsTravel và lý do hệ được tách thành nhiều site con.',
-      enDescription: 'Explains the umbrella role of WingsTravel and why the ecosystem is split into several child sites.',
+      viDescription: 'Giải thích vai trò umbrella site của WingsGroup và lý do hệ được tách thành nhiều site con.',
+      enDescription: 'Explains the umbrella role of WingsGroup and why the ecosystem is split into several child sites.',
       viSections: [
         { kind: 'heading', tag: 'h2', text: 'Vì sao không giữ một website tổng hợp như cũ' },
         { kind: 'paragraph', text: 'Website cũ doicanhviet.com gom rất nhiều loại nội dung vào cùng một nơi: tour outbound, tour nội địa, bài viết, dịch vụ phụ trợ và legal footer. Điều đó tạo được độ rộng, nhưng khiến visitor khó hiểu nên bắt đầu từ đâu nếu họ có một nhu cầu cụ thể.' },
-        { kind: 'heading', tag: 'h2', text: 'WingsTravel mới giữ vai trò gì' },
-        { kind: 'paragraph', text: 'WingsTravel mới không cố thay mọi child site. Root site giữ vai trò umbrella: giới thiệu hệ sinh thái, xác lập trust signal, gom legal corporate và tiếp nhận yêu cầu chưa rõ line business.' },
+        { kind: 'heading', tag: 'h2', text: 'WingsGroup mới giữ vai trò gì' },
+        { kind: 'paragraph', text: 'WingsGroup mới không cố thay mọi child site. Root site giữ vai trò umbrella: giới thiệu hệ sinh thái, xác lập trust signal, gom legal corporate và tiếp nhận yêu cầu chưa rõ line business.' },
         { kind: 'heading', tag: 'h2', text: '5 site con giải quyết 5 hành trình khác nhau' },
         { kind: 'paragraph', text: 'WingsGo phục vụ retail outbound. WingsSide phục vụ inbound Vietnam. WingsPass phục vụ fast-track sân bay. WingsPlus phục vụ private, MICE và brief high-value. WingsCare phục vụ quyền lợi, care và hỗ trợ sau bán.' },
         { kind: 'heading', tag: 'h2', text: 'Visitor nên dùng root site thế nào' },
@@ -2893,7 +2862,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       enSections: [
         { kind: 'heading', tag: 'h2', text: 'Why not keep one broad legacy-style website' },
         { kind: 'paragraph', text: 'The legacy site gathered many different kinds of content in one place: outbound tours, domestic tours, articles, support services, and legal footer material. That breadth exists, but it makes it harder for visitors to understand where to start for a concrete need.' },
-        { kind: 'heading', tag: 'h2', text: 'What the new WingsTravel root site does' },
+        { kind: 'heading', tag: 'h2', text: 'What the new WingsGroup root site does' },
         { kind: 'paragraph', text: 'The new root site does not try to replace every child site. It acts as the umbrella layer: ecosystem explanation, trust presentation, corporate legal context, and intake for inquiries that are not yet clearly classified.' },
         { kind: 'heading', tag: 'h2', text: 'Five child sites for five different journeys' },
         { kind: 'paragraph', text: 'WingsGo handles retail outbound. WingsSide handles inbound Vietnam. WingsPass handles airport support. WingsPlus handles private, MICE, and high-value briefs. WingsCare handles benefits, care, and after-sales support.' },
@@ -2902,13 +2871,13 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ],
     },
     {
-      viTitle: '5 site trong hệ WingsTravel khác nhau ra sao?',
-      enTitle: 'How are the five WingsTravel child sites different?',
-      slug: '5-site-trong-he-wingstravel-khac-nhau-ra-sao',
+      viTitle: '5 site trong hệ WingsGroup khác nhau ra sao?',
+      enTitle: 'How are the five WingsGroup child sites different?',
+      slug: '5-site-trong-he-wingsgroup-khac-nhau-ra-sao',
       heroImageID: ecosystemHeroImage.id,
       categoryIDs: [ecosystemCategory.id, guideCategory.id],
-      viDescription: 'So sánh vai trò, đối tượng khách và CTA chính của từng site con trong hệ WingsTravel.',
-      enDescription: 'Compares the role, target audience, and main CTA of each child site in the WingsTravel ecosystem.',
+      viDescription: 'So sánh vai trò, đối tượng khách và CTA chính của từng site con trong hệ WingsGroup.',
+      enDescription: 'Compares the role, target audience, and main CTA of each child site in the WingsGroup ecosystem.',
       viSections: [
         { kind: 'heading', tag: 'h2', text: 'WingsGo: bán lẻ outbound' },
         { kind: 'paragraph', text: 'WingsGo dành cho khách muốn duyệt tour, xem campaign mùa vụ, đọc lịch khởi hành và so sánh chương trình retail outbound một cách trực tiếp.' },
@@ -2931,9 +2900,9 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ],
     },
     {
-      viTitle: 'Nên bắt đầu từ site nào trong hệ sinh thái WingsTravel?',
-      enTitle: 'Which WingsTravel site should a visitor start with?',
-      slug: 'nen-bat-dau-tu-site-nao-trong-he-sinh-thai-wingstravel',
+      viTitle: 'Nên bắt đầu từ site nào trong hệ sinh thái WingsGroup?',
+      enTitle: 'Which WingsGroup site should a visitor start with?',
+      slug: 'nen-bat-dau-tu-site-nao-trong-he-sinh-thai-wingsgroup',
       heroImageID: scheduleGuideImage.id,
       categoryIDs: [guideCategory.id],
       viDescription: 'Cẩm nang nhanh giúp visitor chọn đúng điểm vào giữa WingsGo, WingsSide, WingsPass, WingsPlus và WingsCare.',
@@ -3015,8 +2984,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       slug: 'travel-insurance-va-care-support-can-hieu-dung-dieu-gi',
       heroImageID: careImage.id,
       categoryIDs: [capabilityCategory.id, trustCategory.id],
-      viDescription: 'Giải thích vai trò của insurance, care support và hậu mãi trong hệ WingsTravel.',
-      enDescription: 'Explains the role of insurance, care support, and after-sales assistance in the WingsTravel ecosystem.',
+      viDescription: 'Giải thích vai trò của insurance, care support và hậu mãi trong hệ WingsGroup.',
+      enDescription: 'Explains the role of insurance, care support, and after-sales assistance in the WingsGroup ecosystem.',
       viSections: [
         { kind: 'heading', tag: 'h2', text: 'Bảo hiểm và care support không nên bị đẩy xuống footer' },
         { kind: 'paragraph', text: 'Website cũ có legal footer, nhưng customer support sau bán cần một bề mặt rõ hơn. Khách hàng muốn biết họ được hỗ trợ gì, liên hệ ở đâu và trường hợp nào cần chuẩn bị hồ sơ.' },
@@ -3190,7 +3159,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
   }
 
   await createRootPage({
-    title: 'WingsTravel',
+    title: 'WingsGroup',
     slug: 'home',
     hero: {
       type: 'highImpact',
@@ -3199,8 +3168,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       media: ecosystemHeroImage.id,
       links: [linkItem('Khám phá hệ sinh thái', '/he-sinh-thai', 'default'), linkItem('Liên hệ tư vấn', '/lien-he', 'outline')],
       richText: richText(
-        'WingsTravel - hệ sinh thái du lịch nhiều line business dưới một lớp trust chung',
-        'Từ outbound retail và inbound Vietnam đến airport service, private/MICE và care support, WingsTravel giúp khách đi đúng bề mặt, đúng nội dung và đúng đội phụ trách.',
+        'WingsGroup - hệ sinh thái du lịch nhiều line business dưới một lớp trust chung',
+        'Từ outbound retail và inbound Vietnam đến airport service, private/MICE và care support, WingsGroup giúp khách đi đúng bề mặt, đúng nội dung và đúng đội phụ trách.',
         'h1',
       ),
     },
@@ -3277,7 +3246,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
       featureGridBlock(
         'Năng lực ở cấp doanh nghiệp',
-        'Các cụm năng lực này cho khách thấy WingsTravel là lớp corporate, còn line business chi tiết sẽ được triển khai ở site chuyên biệt.',
+        'Các cụm năng lực này cho khách thấy WingsGroup là lớp corporate, còn line business chi tiết sẽ được triển khai ở site chuyên biệt.',
         [
           {
             title: 'Outbound retail',
@@ -3334,7 +3303,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ]),
       archiveBlock(
         [ecosystemCategory.id, capabilityCategory.id, guideCategory.id, trendCategory.id, trustCategory.id],
-        'Bài viết nổi bật từ WingsTravel',
+        'Bài viết nổi bật từ WingsGroup',
         'Lớp editorial ở root site giúp giải thích hệ, năng lực, trust và cách chọn đúng line business trước khi khách đi tiếp.',
         4,
       ),
@@ -3345,20 +3314,20 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
       formBlock(
         contactForm.id,
-        'Gửi brief chung cho hệ WingsTravel',
+        'Gửi brief chung cho hệ WingsGroup',
         'Điền nhu cầu, line business quan tâm và đầu mối liên hệ. Root site sẽ giữ vai trò intake và điều phối.',
       ),
     ],
     relatedPages: [ecosystemPage.id, aboutPage.id, servicesPage.id, trustPage.id, newsPage.id, contactPage.id],
     meta: {
-      title: 'WingsTravel',
+      title: 'WingsGroup',
       description:
-        'Trang umbrella của hệ sinh thái WingsTravel, kết nối outbound retail, inbound Vietnam, airport service, private / MICE và care support.',
+        'Trang umbrella của hệ sinh thái WingsGroup, kết nối outbound retail, inbound Vietnam, airport service, private / MICE và care support.',
       image: ecosystemHeroImage.id,
       breadcrumbLabel: 'Trang chủ',
     },
   }, {
-    title: 'WingsTravel',
+    title: 'WingsGroup',
     hero: {
       type: 'highImpact',
       presentation: 'centered-visual',
@@ -3366,8 +3335,8 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       media: ecosystemHeroImage.id,
       links: [linkItem('Explore the ecosystem', '/he-sinh-thai', 'default'), linkItem('Contact the team', '/lien-he', 'outline')],
       richText: richText(
-        'WingsTravel - a travel ecosystem with several business lines under one trust layer',
-        'From outbound retail and inbound Vietnam to airport support, private / MICE, and care services, WingsTravel helps visitors enter the right surface, content layer, and operating team.',
+        'WingsGroup - a travel ecosystem with several business lines under one trust layer',
+        'From outbound retail and inbound Vietnam to airport support, private / MICE, and care services, WingsGroup helps visitors enter the right surface, content layer, and operating team.',
         'h1',
       ),
     },
@@ -3444,7 +3413,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
       featureGridBlock(
         'Capability at the company layer',
-        'These clusters show that WingsTravel is the corporate surface, while the detailed conversion story belongs to specialist sites.',
+        'These clusters show that WingsGroup is the corporate surface, while the detailed conversion story belongs to specialist sites.',
         [
           {
             title: 'Outbound retail',
@@ -3501,7 +3470,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ]),
       archiveBlock(
         [ecosystemCategory.id, capabilityCategory.id, guideCategory.id, trendCategory.id, trustCategory.id],
-        'Featured posts from WingsTravel',
+        'Featured posts from WingsGroup',
         'The editorial layer on the root site explains the ecosystem, capability, trust, and business-line selection before visitors move deeper.',
         4,
       ),
@@ -3512,15 +3481,15 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       ),
       formBlock(
         contactForm.id,
-        'Send one brief to the WingsTravel ecosystem',
+        'Send one brief to the WingsGroup ecosystem',
         'Submit the need, line of interest, and contact details. The root site acts as the intake and routing layer.',
       ),
     ],
     relatedPages: [ecosystemPage.id, aboutPage.id, servicesPage.id, trustPage.id, newsPage.id, contactPage.id],
     meta: {
-      title: 'WingsTravel',
+      title: 'WingsGroup',
       description:
-        'The umbrella site of the WingsTravel ecosystem, connecting outbound retail, inbound Vietnam, airport service, private / MICE, and care support.',
+        'The umbrella site of the WingsGroup ecosystem, connecting outbound retail, inbound Vietnam, airport service, private / MICE, and care support.',
       image: ecosystemHeroImage.id,
       breadcrumbLabel: 'Home',
     },
@@ -3528,11 +3497,11 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
 
   const wingsTravelSettings = await createSiteSettings(payload, req, site, siteSeed, ecosystemHeroImage.id, {
     footerNote:
-      'WingsTravel đóng vai trò lớp umbrella, trust và điều hướng lead cho toàn bộ hệ sinh thái dịch vụ của VietWings Travel.',
+      'WingsGroup đóng vai trò lớp umbrella, trust và điều hướng lead cho toàn bộ hệ sinh thái dịch vụ của VietWings Travel.',
     headerNavItems: [
       linkItem('Trang chủ', '/'),
       linkItem('Hệ sinh thái', '/he-sinh-thai'),
-      linkItem('Về WingsTravel', '/ve-wingstravel'),
+      linkItem('Về WingsGroup', '/ve-wingsgroup'),
       linkItem('Năng lực dịch vụ', '/nang-luc-dich-vu'),
       linkItem('Tin cậy & pháp lý', '/tin-cay-va-phap-ly'),
       linkItem('Tin tức', '/tin-tuc'),
@@ -3551,22 +3520,22 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
     supportEmail: 'info@doicanhviet.com',
     supportPhone: '0975513886',
     tagline:
-      'Lớp umbrella của hệ sinh thái WingsTravel, kết nối outbound retail, inbound Vietnam, airport support, private / MICE và care support.',
+      'Lớp umbrella của hệ sinh thái WingsGroup, kết nối outbound retail, inbound Vietnam, airport support, private / MICE và care support.',
   })
 
   await updateSiteSettingsLocale(payload, req, wingsTravelSettings.id, 'en', {
     seo: {
       defaultDescription:
-        'The umbrella site of the WingsTravel ecosystem, connecting outbound retail, inbound Vietnam, airport support, premium proposals, and care support.',
-      defaultTitle: 'WingsTravel',
+        'The umbrella site of the WingsGroup ecosystem, connecting outbound retail, inbound Vietnam, airport support, premium proposals, and care support.',
+      defaultTitle: 'WingsGroup',
       titleSuffix: 'Travel Ecosystem',
     },
     footerNote:
-      'WingsTravel acts as the umbrella, trust, and lead-routing layer for the full VietWings Travel service ecosystem.',
+      'WingsGroup acts as the umbrella, trust, and lead-routing layer for the full VietWings Travel service ecosystem.',
     headerNavItems: [
       linkItem('Home', '/'),
       linkItem('Ecosystem', '/he-sinh-thai'),
-      linkItem('About WingsTravel', '/ve-wingstravel'),
+      linkItem('About WingsGroup', '/ve-wingsgroup'),
       linkItem('Capabilities', '/nang-luc-dich-vu'),
       linkItem('Trust & Legal', '/tin-cay-va-phap-ly'),
       linkItem('News', '/tin-tuc'),
@@ -3583,22 +3552,22 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       linkItem('Contact', '/lien-he'),
     ],
     tagline:
-      'The umbrella layer of the WingsTravel ecosystem, connecting outbound retail, inbound Vietnam, airport support, private / MICE, and care support.',
+      'The umbrella layer of the WingsGroup ecosystem, connecting outbound retail, inbound Vietnam, airport support, private / MICE, and care support.',
   })
 
   await updateSiteSettingsLocale(payload, req, wingsTravelSettings.id, 'vi', {
     seo: {
       defaultDescription:
-        'Trang umbrella của hệ sinh thái WingsTravel, kết nối outbound retail, inbound Vietnam, airport support, private / MICE và care support.',
-      defaultTitle: 'WingsTravel',
+        'Trang umbrella của hệ sinh thái WingsGroup, kết nối outbound retail, inbound Vietnam, airport support, private / MICE và care support.',
+      defaultTitle: 'WingsGroup',
       titleSuffix: 'Travel Ecosystem',
     },
     footerNote:
-      'WingsTravel đóng vai trò lớp umbrella, trust và điều hướng lead cho toàn bộ hệ sinh thái dịch vụ của VietWings Travel.',
+      'WingsGroup đóng vai trò lớp umbrella, trust và điều hướng lead cho toàn bộ hệ sinh thái dịch vụ của VietWings Travel.',
     headerNavItems: [
       linkItem('Trang chủ', '/'),
       linkItem('Hệ sinh thái', '/he-sinh-thai'),
-      linkItem('Về WingsTravel', '/ve-wingstravel'),
+      linkItem('Về WingsGroup', '/ve-wingsgroup'),
       linkItem('Năng lực dịch vụ', '/nang-luc-dich-vu'),
       linkItem('Tin cậy & pháp lý', '/tin-cay-va-phap-ly'),
       linkItem('Tin tức', '/tin-tuc'),
@@ -3615,7 +3584,7 @@ async function seedWingsTravel(payload: Payload, req: PayloadRequest, siteSeed: 
       linkItem('Liên hệ', '/lien-he'),
     ],
     tagline:
-      'Lớp umbrella của hệ sinh thái WingsTravel, kết nối outbound retail, inbound Vietnam, airport support, private / MICE và care support.',
+      'Lớp umbrella của hệ sinh thái WingsGroup, kết nối outbound retail, inbound Vietnam, airport support, private / MICE và care support.',
   })
 }
 
@@ -3628,8 +3597,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     req,
     site.id,
     'WingsGo outbound hero',
-    'WingsGo outbound campaigns',
-    'Outbound retail travel for Korea, Japan, and China with clear pricing and departure schedules.',
+    'Campaign tour outbound WingsGo',
+    'Hình đại diện các campaign tour Hàn, Nhật, Trung với giá và lịch khởi hành rõ.',
     path.join(docsDir, '338651170296767688.jpg'),
   )
   const japanPoster = await createMedia(
@@ -3655,8 +3624,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     req,
     site.id,
     'Thượng Hải Ô Trấn Hàng Châu tour cover',
-    'Jiangnan China tour image',
-    'Original bright travel image for Shanghai, Wuzhen, and Hangzhou 5N4D tour pages.',
+    'Hình minh họa tour Thượng Hải - Ô Trấn - Hàng Châu',
+    'Hình minh họa hành trình Thượng Hải, Ô Trấn và Hàng Châu 5N4D.',
     path.join(seedAssetsDir, 'wingsgo-shanghai-wuzhen-hangzhou.png'),
   )
   const chinaMarketImage = await createMedia(
@@ -3664,8 +3633,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     req,
     site.id,
     'WingsGo China market campaign cover',
-    'China retail market image',
-    'Original bright travel image combining China retail routes for market and campaign pages.',
+    'Hình minh họa thị trường tour Trung Quốc',
+    'Hình minh họa nhóm tour Trung Quốc retail dùng cho trang thị trường và campaign.',
     path.join(seedAssetsDir, 'wingsgo-china-market-campaign.png'),
   )
   const beijingGreatWallImage = await createMedia(
@@ -3673,8 +3642,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     req,
     site.id,
     'Bắc Kinh Vạn Lý Trường Thành tour cover',
-    'Beijing Great Wall tour image',
-    'Original bright travel image for Beijing and Great Wall 5N4D tour pages.',
+    'Hình minh họa tour Bắc Kinh - Vạn Lý Trường Thành',
+    'Hình minh họa hành trình Bắc Kinh và Vạn Lý Trường Thành 5N4D.',
     path.join(seedAssetsDir, 'wingsgo-beijing-great-wall.png'),
   )
   const scheduleGuideImage = await createMedia(
@@ -3682,8 +3651,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     req,
     site.id,
     'WingsGo schedule and price guide cover',
-    'Schedule and price guide image',
-    'Original editorial image for the WingsGo departure schedule and price guide article.',
+    'Hình minh họa lịch khởi hành WingsGo',
+    'Hình minh họa bài hướng dẫn đọc lịch khởi hành và giá tour WingsGo.',
     path.join(seedAssetsDir, 'wingsgo-schedule-price-guide.png'),
   )
   const seoulNamiEverlandImage = await createMedia(
@@ -3691,8 +3660,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     req,
     site.id,
     'Seoul Nami Everland tour cover',
-    'Seoul Nami Everland tour image',
-    'Original bright travel image for the Seoul, Nami, and Everland 5N4D route.',
+    'Hình minh họa tour Seoul - Nami - Everland',
+    'Hình minh họa hành trình Seoul, Nami và Everland 5N4D.',
     path.join(seedAssetsDir, 'wingsgo-seoul-nami-everland.png'),
   )
   const seoulJejuCamelliaImage = await createMedia(
@@ -3700,8 +3669,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     req,
     site.id,
     'Seoul Jeju Nami Camellia Hill tour cover',
-    'Seoul Jeju Nami Camellia Hill tour image',
-    'Original bright travel image for the Seoul, Jeju, Nami, and Camellia Hill 6N5D route.',
+    'Hình minh họa tour Seoul - Jeju - Nami - Camellia Hill',
+    'Hình minh họa hành trình Seoul, Jeju, Nami và Camellia Hill 6N5D.',
     path.join(seedAssetsDir, 'wingsgo-seoul-jeju-nami-camellia.png'),
   )
   const shizuokaFujiTokyoImage = await createMedia(
@@ -3709,8 +3678,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     req,
     site.id,
     'Shizuoka Núi Phú Sĩ Tokyo tour cover',
-    'Shizuoka Fuji Tokyo tour image',
-    'Original bright travel image for the Shizuoka, Mount Fuji, and Tokyo 5N4D route.',
+    'Hình minh họa tour Shizuoka - Núi Phú Sĩ - Tokyo',
+    'Hình minh họa hành trình Shizuoka, Núi Phú Sĩ và Tokyo 5N4D.',
     path.join(seedAssetsDir, 'wingsgo-shizuoka-fuji-tokyo.png'),
   )
   const osakaKyotoFujiTokyoImage = await createMedia(
@@ -3718,13 +3687,36 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     req,
     site.id,
     'Osaka Kyoto Fuji Tokyo tour cover',
-    'Osaka Kyoto Fuji Tokyo tour image',
-    'Original bright travel image for the Osaka, Kobe, Kyoto, Nagoya, Fuji, and Tokyo 6N5D route.',
+    'Hình minh họa tour Osaka - Kobe - Kyoto - Nagoya - Fuji - Tokyo',
+    'Hình minh họa hành trình Osaka, Kobe, Kyoto, Nagoya, Phú Sĩ và Tokyo 6N5D.',
     path.join(seedAssetsDir, 'wingsgo-osaka-kyoto-fuji-tokyo.png'),
   )
 
   const seasonCategory = await createCategory(payload, req, site.id, 'Campaign theo mùa', 'campaign-theo-mua')
   const guideCategory = await createCategory(payload, req, site.id, 'Cẩm nang outbound', 'cam-nang-outbound')
+  const wingsGoTrustStrip = () =>
+    infoStripBlock(
+      'Cần xác nhận trước khi giữ chỗ',
+      'Giá, lịch khởi hành và hãng bay trên website là thông tin bán hàng để khách so sánh nhanh; đội WingsGo sẽ xác nhận lại tình trạng chỗ và điều kiện áp dụng khi tư vấn.',
+      [
+        {
+          label: 'Phản hồi',
+          value: 'Trong giờ làm việc',
+          description: 'Sales kiểm tra lịch, số chỗ và mức giá mới nhất trước khi chốt.',
+        },
+        {
+          label: 'Hỗ trợ',
+          value: 'Visa | Hãng bay | Lịch trình',
+          description: 'Tư vấn theo đúng line tour, ngân sách và thời điểm khách muốn đi.',
+        },
+        {
+          label: 'Liên hệ',
+          value: '+84 903 000 111',
+          description: 'Có thể gửi yêu cầu qua form, hotline hoặc email sales@wingsgo.vn.',
+        },
+      ],
+      'Xác nhận & hỗ trợ',
+    )
 
   const quickInquiryForm = await createForm(
     payload,
@@ -3775,6 +3767,7 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     slug: 'lien-he',
     hero: {
       type: 'lowImpact',
+      links: [linkItem('Gửi yêu cầu nhanh', '#contact-form', 'default'), linkItem('Xem lịch khởi hành', '/lich-khoi-hanh', 'outline')],
       richText: richText(
         'Giữ chỗ hoặc nhận tư vấn outbound',
         'Để lại nhu cầu để đội ngũ WingsGo tư vấn lịch khởi hành, visa, hãng bay và mức giá phù hợp.',
@@ -3782,10 +3775,32 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       ),
     },
     layout: [
+      infoStripBlock(
+        'Kênh liên hệ nhanh',
+        'WingsGo tiếp nhận yêu cầu qua form, hotline và email để kiểm tra lịch khởi hành, số chỗ, visa và mức giá mới nhất.',
+        [
+          {
+            label: 'Hotline / Zalo',
+            value: '+84 903 000 111',
+            description: 'Ưu tiên phản hồi trong giờ làm việc.',
+          },
+          {
+            label: 'Email',
+            value: 'sales@wingsgo.vn',
+            description: 'Phù hợp khi gửi danh sách khách hoặc yêu cầu đoàn riêng.',
+          },
+          {
+            label: 'Bảo mật',
+            value: 'Chỉ dùng để tư vấn',
+            description: 'Thông tin liên hệ được dùng cho phản hồi tour và không hiển thị công khai.',
+          },
+        ],
+        'Hỗ trợ tư vấn',
+      ),
       formBlock(
         quickInquiryForm.id,
         'Gửi yêu cầu nhanh',
-        'Điền thị trường, tour quan tâm và mốc thời gian dự kiến để đội sales phản hồi đúng line sản phẩm.',
+        'Điền thị trường, tour quan tâm và mốc thời gian dự kiến. WingsGo chỉ dùng thông tin này để tư vấn và xác nhận dịch vụ phù hợp.',
       ),
       faqBlock(
         'Các câu hỏi thường gặp trước khi giữ chỗ',
@@ -3823,15 +3838,15 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     hero: {
       type: 'lowImpact',
       richText: richText(
-        'WingsGo focuses on the outbound lines customers ask for most',
-        'The current strength is airline operations and the Korea, Japan, and China retail portfolios, supported by clear schedules and campaign-ready content.',
+        'WingsGo tập trung các tuyến outbound khách hỏi nhiều nhất',
+        'Thế mạnh hiện tại là các line Hàn Quốc, Nhật Bản và Trung Quốc với lịch khởi hành, giá tham khảo và nội dung campaign rõ ràng.',
         'h1',
       ),
     },
     layout: [
       infoStripBlock(
-        'Why this site is structured for buying, not just browsing',
-        'The homepage and key pages surface price, departure, and market navigation early because that is what the customer explicitly asked for.',
+        'Thiết kế để khách dễ chọn tour, không chỉ xem thông tin',
+        'Các trang chính đưa giá, lịch khởi hành và lối vào theo thị trường lên sớm để khách so sánh nhanh trước khi gửi yêu cầu.',
         [
           {
             label: 'Thị trường chủ lực',
@@ -3854,20 +3869,20 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
             description: 'Có thể thêm market mới, campaign mùa mới và bảng khởi hành mới trong cùng mô hình.',
           },
         ],
-        'Positioning',
+        'Định vị WingsGo',
       ),
       contentBlock([
         {
           size: 'half',
-          title: 'Retail outbound with clear schedules',
+          title: 'Tour outbound có lịch và giá dễ kiểm tra',
           paragraph:
-            'Customers do not need to wait for a callback to know whether a departure exists or where the price starts. Schedule visibility is part of the product experience.',
+            'Khách có thể xem trước ngày khởi hành, hãng bay và mức giá từ trước khi để lại thông tin tư vấn.',
         },
         {
           size: 'half',
-          title: 'Content model mapped from operations',
+          title: 'Nội dung bám dữ liệu vận hành',
           paragraph:
-            'Tour posters, Google Docs, and the master schedule sheet are translated into reusable market pages, campaign pages, and tour detail pages.',
+            'Poster tour, tài liệu tư vấn và bảng lịch khởi hành được chuyển thành trang thị trường, campaign và trang tour chi tiết có cấu trúc.',
         },
       ]),
     ],
@@ -3896,29 +3911,29 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         [
           {
             title: 'Hàn Quốc',
-            description: 'Korea retail pages kết hợp mùa hè, mùa hoa, hành trình ngắn ngày và hàng không quen thuộc.',
-            meta: 'Korea retail',
+            description: 'Tour Hàn Quốc kết hợp mùa hè, mùa hoa, hành trình ngắn ngày và các hãng bay quen thuộc.',
+            meta: 'Tour Hàn Quốc',
             url: '/thi-truong/han-quoc',
           },
           {
             title: 'Nhật Bản',
-            description: 'Japan pages cần thể hiện line 5N4Đ, 6N5Đ và logic mùa rõ như research đã chốt.',
-            meta: 'Japan campaigns',
+            description: 'Tour Nhật Bản có các line 5N4Đ, 6N5Đ, dễ so sánh theo mùa, lịch và ngân sách.',
+            meta: 'Tour Nhật Bản',
             url: '/thi-truong/nhat-ban',
           },
           {
             title: 'Trung Quốc',
             description: 'China pages cần rõ route, giá bám lịch Air China và CTA dẫn sang chi tiết tour hoặc lịch khởi hành.',
-            meta: 'China departures',
+            meta: 'Tour Trung Quốc',
             url: '/thi-truong/trung-quoc',
           },
         ],
         'highlight',
-        'Outbound information architecture',
+        'Chọn thị trường',
       ),
       pricingTableBlock(
-        'Departure snapshot from the 2026 source sheet',
-        'This preview block is intentionally price-forward because that is one of the clearest customer requirements.',
+        'Lịch và giá tham khảo 2026',
+        'Bảng này giúp khách nhìn nhanh tuyến, ngày khởi hành, hãng bay và mức giá từ trước khi mở trang chi tiết.',
         [
           {
             title: 'Seoul - Nami - Everland 5N4D',
@@ -3948,7 +3963,7 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
             url: '/tour/bac-kinh-van-ly-truong-thanh-5n4d',
           },
         ],
-        'Quick view',
+        'Xem nhanh',
       ),
     ],
     relatedPages: [contactPage.id, aboutPage.id],
@@ -3966,41 +3981,43 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     hero: {
       type: 'mediumImpact',
       media: heroImage.id,
+      links: [linkItem('Xem campaign Hàn Quốc', '/campaign/he-2026-han-quoc', 'default'), linkItem('Xem lịch khởi hành', '/lich-khoi-hanh', 'outline')],
       richText: richText(
-        'Campaign pages drive seasonal retail conversion',
-        'Mỗi campaign gom nhiều package con, visual, giá rút gọn và CTA sang tour detail hoặc form tư vấn.',
+        'Campaign tour theo mùa: chọn nhanh line Hàn, Nhật, Trung',
+        'Mỗi campaign gom các gói tour nổi bật, hình ảnh, giá tham khảo và CTA để khách mở chi tiết hoặc giữ chỗ nhanh.',
         'h1',
       ),
     },
     layout: [
       featureGridBlock(
-        'Seasonal campaigns ready for launch',
-        'The current content is organized into reusable campaign patterns rather than one-off posters.',
+        'Campaign mùa vụ đang mở bán',
+        'Các campaign được tổ chức thành trang bán hàng có route, giá, lịch khởi hành và lối liên hệ rõ ràng.',
         [
           {
             title: 'Hè 2026 Hàn Quốc',
-            description: 'Jeju, Seoul, Nami, Camellia Hill, family-friendly and first-time Korea retail lines.',
-            meta: 'Summer Korea',
+            description: 'Jeju, Seoul, Nami, Camellia Hill và các line Hàn Quốc dễ chốt cho khách lần đầu đi Hàn.',
+            meta: 'Hè Hàn Quốc',
             url: '/campaign/he-2026-han-quoc',
           },
           {
             title: 'Hè 2026 Nhật Bản',
-            description: 'Shizuoka, Tokyo, Osaka, Kyoto, and Hokkaido lines with strong visible pricing.',
-            meta: 'Summer Japan',
+            description: 'Shizuoka, Tokyo, Osaka, Kyoto và các line Nhật Bản có giá, lịch dễ so sánh.',
+            meta: 'Hè Nhật Bản',
             url: '/campaign/he-2026-nhat-ban',
           },
           {
-            title: 'Trung Quốc city break',
-            description: 'Retail China packages with easy compare-and-inquire positioning.',
-            meta: 'China retail',
+            title: 'Tour Trung Quốc ngắn ngày',
+            description: 'Các gói Trung Quốc ngắn ngày, rõ route, rõ giá tham khảo và dễ gửi yêu cầu tư vấn.',
+            meta: 'Tour Trung Quốc',
             url: '/campaign/trung-quoc-gia-ro',
           },
         ],
       ),
+      wingsGoTrustStrip(),
     ],
     meta: {
       title: 'Campaign WingsGo',
-      description: 'Hub campaign theo mùa của WingsGo.',
+      description: 'Tổng hợp campaign tour Hàn, Nhật, Trung hè 2026 của WingsGo với giá rõ, lịch khởi hành và CTA giữ chỗ nhanh.',
       image: heroImage.id,
       breadcrumbLabel: 'Campaign',
     },
@@ -4019,42 +4036,42 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     },
     layout: [
       pricingTableBlock(
-        'Upcoming departures',
-        'This table is the public-facing translation of the operational source sheet.',
+        'Lịch khởi hành sắp tới',
+        'Bảng này tổng hợp các line tour đang bán để khách xem nhanh ngày đi, hãng bay, giá từ và mở trang chi tiết.',
         [
           {
             title: 'Seoul - Jeju - Nami - Camellia Hill 6N5D',
-            subtitle: 'Korea campaign line',
+            subtitle: 'Line campaign Hàn Quốc',
             departure: '11/07/2026, 28/08/2026',
             airline: 'Jeju Air',
             price: '23.900.000',
-            note: 'Poster-backed offer',
+            note: 'Xác nhận lại khi tư vấn',
             url: '/tour/seoul-jeju-nami-camellia-hill-6n5d',
           },
           {
             title: 'Osaka - Kobe - Kyoto - Nagoya - Fuji - Tokyo 6N5D',
-            subtitle: 'Japan long route',
+            subtitle: 'Line Nhật Bản dài ngày',
             departure: '25/06, 30/07, 27/08',
             airline: 'Vietnam Airlines',
             price: '32.900.000',
-            note: 'Peak summer line',
+            note: 'Xác nhận lại khi tư vấn',
             url: '/tour/osaka-kobe-kyoto-nagoya-fuji-tokyo-6n5d',
           },
           {
             title: 'Thượng Hải - Ô Trấn - Hàng Châu 5N4D',
-            subtitle: 'China retail package',
+            subtitle: 'Line Trung Quốc ngắn ngày',
             departure: '20/06, 18/07, 15/08',
             airline: 'Air China',
             price: '21.900.000',
-            note: 'Short holiday route',
+            note: 'Xác nhận lại khi tư vấn',
             url: '/tour/thuong-hai-o-tran-hang-chau-5n4d',
           },
         ],
-        'Outbound schedule',
+        'Lịch outbound',
       ),
       ctaBlock(
-        'Need a custom date or a team quote?',
-        'Use the inquiry page to request a later departure, a private group, or the latest airline confirmation.',
+        'Cần ngày khác hoặc báo giá đoàn riêng?',
+        'Gửi yêu cầu để WingsGo kiểm tra lịch mới nhất, số chỗ còn lại hoặc phương án riêng cho nhóm của bạn.',
         [linkItem('Liên hệ tư vấn', '/lien-he')],
       ),
     ],
@@ -4071,9 +4088,10 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     slug: 'tour',
     hero: {
       type: 'lowImpact',
+      links: [linkItem('Xem tour nổi bật', '/tour/seoul-nami-everland-5n4d', 'default'), linkItem('Giữ chỗ nhanh', '/lien-he', 'outline')],
       richText: richText(
-        'Trang tour chi tiết để bán được ngay',
-        'Mỗi tour có tóm tắt, điểm nổi bật, lịch khởi hành, giá, lịch trình và CTA giữ chỗ thay vì chỉ đăng một poster rời rạc.',
+        'Tour outbound nổi bật: giá, lịch và điểm nhấn rõ ràng',
+        'Mỗi tour có tóm tắt, điểm nổi bật, lịch khởi hành, giá tham khảo, lịch trình và CTA giữ chỗ để khách dễ ra quyết định.',
         'h1',
       ),
     },
@@ -4119,17 +4137,18 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
           },
           {
             title: 'Thượng Hải - Ô Trấn - Hàng Châu 5N4D',
-            description: 'Retail China package balancing city icons and softer scenic content.',
+            description: 'Tour Trung Quốc cân bằng giữa biểu tượng đô thị và trải nghiệm cảnh quan mềm hơn.',
             imageID: chinaJiangnanImage.id,
             meta: 'China | 5N4D',
             url: '/tour/thuong-hai-o-tran-hang-chau-5n4d',
           },
         ],
       ),
+      wingsGoTrustStrip(),
     ],
     meta: {
       title: 'Tour WingsGo',
-      description: 'Hub các trang tour detail của WingsGo.',
+      description: 'Khám phá các tour outbound nổi bật của WingsGo với giá tham khảo, lịch khởi hành, điểm nhấn và CTA giữ chỗ nhanh.',
       image: heroImage.id,
       breadcrumbLabel: 'Tour',
     },
@@ -4166,50 +4185,51 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       },
       layout: [
         infoStripBlock(
-          `${args.title} pages need visible buying signals`,
-          'Each market page combines selling points, departure schedule, tour cards, and FAQ instead of acting as a brochure-only page.',
+          `${args.title}: có đủ tín hiệu để khách chọn nhanh`,
+          'Mỗi trang thị trường kết hợp điểm bán, lịch khởi hành, tour nổi bật và câu hỏi thường gặp để khách đi tiếp vào trang chi tiết hoặc gửi yêu cầu.',
           [
             {
               label: 'CTA chính',
               value: 'Xem giá & giữ chỗ',
-              description: 'Market pages should move users into tour detail or inquiry fast.',
+              description: 'Trang thị trường cần dẫn khách nhanh sang tour chi tiết hoặc form tư vấn.',
             },
             {
               label: 'Khai thác nội dung',
               value: 'Tour + campaign',
-              description: 'Market pages connect directly to seasonal retail campaigns and line-specific detail pages.',
+              description: 'Trang thị trường nối trực tiếp sang campaign mùa vụ và các line tour cụ thể.',
             },
             {
-              label: 'SEO entry point',
+              label: 'Điểm vào SEO',
               value: args.title,
-              description: 'This level helps search and internal navigation before opening a specific program.',
+              description: 'Cấp trang này hỗ trợ tìm kiếm và điều hướng nội bộ trước khi khách mở một chương trình cụ thể.',
             },
             {
               label: 'Nguồn dữ liệu',
-              value: 'Google Sheet 2026',
-              description: 'Departure visibility follows the actual selling sheet structure.',
+              value: 'Lịch bán 2026',
+              description: 'Lịch khởi hành bám cấu trúc dữ liệu bán hàng hiện có.',
             },
           ],
-          'Market design',
+          'Thiết kế thị trường',
         ),
         pricingTableBlock(
-          'Departure preview',
-          'Short table first, then users continue to a specific tour detail page or the schedule page.',
+          'Lịch khởi hành xem nhanh',
+          'Bảng ngắn giúp khách nhìn ngày đi và giá từ trước khi mở trang tour chi tiết hoặc bảng lịch đầy đủ.',
           args.pricingItems.map((item) => ({
             ...item,
-            subtitle: 'Retail package',
-            note: 'Visible public price',
+            subtitle: 'Gói tour retail',
+            note: 'Xác nhận lại khi tư vấn',
           })),
-          'Quick schedule',
+          'Lịch nhanh',
         ),
         featureGridBlock(
-          'Featured tour lines',
-          'These cards mirror the browsing behavior the customer explicitly liked in stronger retail benchmarks.',
+          'Các line tour nổi bật',
+          'Các card này giúp khách so sánh nhanh tuyến, điểm nhấn và mở trang tour phù hợp.',
           args.tours,
           'default',
-          'Tour catalog',
+          'Danh mục tour',
         ),
-        faqBlock('FAQ', 'The FAQ answers common frictions before the user leaves the market page.', args.faq, 'Trust and objections'),
+        wingsGoTrustStrip(),
+        faqBlock('Câu hỏi thường gặp', 'FAQ giúp giải đáp các băn khoăn phổ biến trước khi khách rời trang thị trường.', args.faq, 'Tư vấn trước khi chốt'),
       ],
       meta: {
         title: args.title,
@@ -4397,8 +4417,13 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     slug: string
     summary: string
     title: string
-  }) =>
-    createPage(payload, req, site.id, {
+  }) => {
+    const firstDeparture = args.departures[0]
+    const heroSummary = firstDeparture
+      ? `${args.summary} Khởi hành gần nhất ${firstDeparture.departure}, ${firstDeparture.airline}, giá từ ${firstDeparture.price}đ.`
+      : args.summary
+
+    return createPage(payload, req, site.id, {
       title: args.title,
       slug: args.slug,
       parentPage: args.parentPageID,
@@ -4407,59 +4432,69 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         type: 'mediumImpact',
         media: args.imageID,
         links: [linkItem('Liên hệ giữ chỗ', '/lien-he', 'default'), linkItem('Xem lịch khởi hành', '/lich-khoi-hanh', 'outline')],
-        richText: richText(args.title, args.summary, 'h1'),
+        richText: richText(args.title, heroSummary, 'h1'),
       },
       layout: [
         infoStripBlock(
-          'Quick summary',
-          'Tour detail pages need to answer duration, route rhythm, public price visibility, and next CTA without forcing the user into a PDF.',
+          'Thông tin giữ chỗ cần biết',
+          'Trang tour tóm tắt các điểm quan trọng trước khi khách gửi yêu cầu: ngày khởi hành, hãng bay, giá tham khảo và phạm vi dịch vụ.',
           [
+            ...(firstDeparture
+              ? [
+                  {
+                    label: 'Khởi hành gần nhất',
+                    value: firstDeparture.departure,
+                    description: `${firstDeparture.airline} · từ ${firstDeparture.price}đ`,
+                  },
+                ]
+              : []),
             {
               label: 'Trạng thái page',
-              value: 'Sales-ready',
-              description: 'Summary, departures, highlights, itinerary, and inquiry are visible in one page.',
+              value: 'Đã có thông tin bán hàng',
+              description: 'Tóm tắt, lịch khởi hành, điểm nổi bật, lịch trình và form tư vấn đều nằm trên cùng một trang.',
             },
             {
               label: 'Mô hình hiển thị',
-              value: 'Public price',
-              description: 'Visible pricing is part of the experience requirement from the customer.',
+              value: 'Giá tham khảo công khai',
+              description: 'Mức giá giúp khách so sánh nhanh; sales sẽ xác nhận lại trước khi giữ chỗ.',
             },
             {
               label: 'Nguồn nội dung',
-              value: 'Sheet + Poster',
-              description: 'This seed combines departure data and visual campaign material into a structured page.',
+              value: 'Lịch + poster tour',
+              description: 'Dữ liệu lịch và hình ảnh bán hàng được chuyển thành trang tour có cấu trúc.',
             },
           ],
-          'Tour detail',
+          'Chi tiết tour',
         ),
         contentBlock(args.highlights.map((highlight) => ({ ...highlight, size: 'oneThird' }))),
         pricingTableBlock(
-          'Departure rows',
-          'Tour-level departure rows make the website usable as a selling surface, not only a reference brochure.',
+          'Các đợt khởi hành',
+          'Mỗi dòng hiển thị ngày đi, hãng bay và giá tham khảo để khách chọn đợt phù hợp trước khi tư vấn.',
           args.departures.map((row) => ({
             airline: row.airline,
             departure: row.departure,
             price: row.price,
-            subtitle: 'Retail departure',
+            subtitle: 'Khởi hành retail',
             title: args.title,
-            note: 'Giá công khai',
+            note: 'Xác nhận lại khi tư vấn',
           })),
-          'Schedule and pricing',
+          'Lịch và giá',
         ),
         contentBlock([
           {
             size: 'full',
-            title: 'Itinerary overview',
+            title: 'Tổng quan lịch trình',
             paragraph: args.itinerary,
           },
           {
             size: 'full',
-            title: 'Includes and service scope',
+            title: 'Bao gồm và phạm vi dịch vụ',
             paragraph: args.includes,
           },
         ]),
         mediaBlock(args.imageID),
-        faqBlock('FAQ before booking', 'Tour pages answer the final objections before the user contacts sales.', args.faq, 'Booking confidence'),
+        wingsGoTrustStrip(),
+        faqBlock('Câu hỏi trước khi giữ chỗ', 'Các thông tin dưới đây giúp khách hiểu rõ tour trước khi gửi yêu cầu cho sales.', args.faq, 'Tư vấn rõ ràng'),
         formBlock(
           quickInquiryForm.id,
           'Giữ chỗ / nhận lịch trình chi tiết',
@@ -4472,6 +4507,7 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         image: args.imageID,
       },
     })
+  }
 
   const seoulEverlandTour = await createTourPage({
     title: 'Seoul - Nami - Everland 5N4D',
@@ -4483,9 +4519,9 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       'Line Korea retail 5N4D cho khách lần đầu đi Hàn, dễ chốt nhờ route quen thuộc, thời lượng ngắn và nhịp khởi hành đều.',
     metaDescription: 'Trang chi tiết tour Seoul - Nami - Everland 5N4D của WingsGo với giá và lịch khởi hành.',
     highlights: [
-      { title: 'Classic Korea route', paragraph: 'Tập trung Seoul, đảo Nami, Everland và các trải nghiệm an toàn cho user retail đại trà.' },
-      { title: 'Quick decision structure', paragraph: 'Dễ hiểu khác biệt, dễ so sánh với line Jeju, phù hợp cho CTA giữ chỗ nhanh.' },
-      { title: 'Price-forward selling', paragraph: 'Các mốc giá và ngày đi xuất hiện sớm, không đẩy khách vào form trước khi biết ngân sách.' },
+      { title: 'Tuyến Hàn Quốc dễ chọn', paragraph: 'Tập trung Seoul, đảo Nami, Everland và các trải nghiệm an toàn cho khách đi Hàn lần đầu.' },
+      { title: 'Dễ so sánh và quyết nhanh', paragraph: 'Khác biệt rõ với line Jeju, phù hợp cho khách muốn giữ chỗ sau khi xem lịch và giá.' },
+      { title: 'Giá hiển thị sớm', paragraph: 'Các mốc giá và ngày đi xuất hiện sớm, không bắt khách để lại thông tin trước khi biết ngân sách.' },
     ],
     departures: [
       { departure: '08/07/2026', airline: 'Vietjet', price: '18.900.000' },
@@ -4512,9 +4548,9 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       'Line campaign mùa hè cho Hàn Quốc với Jeju Air, visual mạnh, giá public rõ và thông điệp bán hàng hướng trải nghiệm hoa và cảnh quan.',
     metaDescription: 'Trang chi tiết tour Seoul - Jeju - Nami - Camellia Hill 6N5D của WingsGo.',
     highlights: [
-      { title: 'Campaign-backed creative', paragraph: 'Tour tận dụng trực tiếp visual poster Jeju để tạo cảm giác chiến dịch rõ ngay trên page detail.' },
-      { title: 'Destination-led selling', paragraph: 'Jeju, Camellia Hill, Nami và các điểm biểu tượng giúp line này khác rõ route Seoul cổ điển.' },
-      { title: 'Retail conversion friendly', paragraph: 'Ngày khởi hành và giá được bộc lộ sớm để người dùng không phải đi vòng qua nhiều bước.' },
+      { title: 'Visual campaign rõ ràng', paragraph: 'Tour tận dụng poster Jeju để khách nhận diện ngay đây là line mùa hè đang mở bán.' },
+      { title: 'Bán theo điểm đến nổi bật', paragraph: 'Jeju, Camellia Hill, Nami và các điểm biểu tượng giúp line này khác rõ route Seoul cổ điển.' },
+      { title: 'Dễ gửi yêu cầu nhanh', paragraph: 'Ngày khởi hành và giá được hiển thị sớm để khách không phải đi vòng qua nhiều bước.' },
     ],
     departures: [
       { departure: '11/07/2026', airline: 'Jeju Air', price: '23.900.000' },
@@ -4540,9 +4576,9 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       'Line Nhật 5N4D thiên về quyết định nhanh, giá dễ đọc, dùng rất tốt cho traffic từ campaign mùa hè và hành vi compare route.',
     metaDescription: 'Trang chi tiết tour Shizuoka - Núi Phú Sĩ - Tokyo 5N4D của WingsGo.',
     highlights: [
-      { title: 'Short route logic', paragraph: 'Phù hợp nhóm khách muốn Nhật Bản nhưng chưa cần hành trình 6N5D dài hơn.' },
-      { title: 'Poster to page structure', paragraph: 'Các mốc giá và ngày từ poster được chuyển thành bảng công khai có thể cập nhật.' },
-      { title: 'Strong entry package', paragraph: 'Dùng tốt làm line mở đầu cho homepage, market page và bảng lịch khởi hành.' },
+      { title: 'Tuyến ngắn dễ chọn', paragraph: 'Phù hợp nhóm khách muốn đi Nhật Bản nhưng chưa cần hành trình 6N5D dài hơn.' },
+      { title: 'Giá và ngày rõ ràng', paragraph: 'Các mốc giá và ngày từ poster được chuyển thành bảng thông tin dễ cập nhật.' },
+      { title: 'Line mở đầu mạnh', paragraph: 'Dùng tốt làm tour nổi bật trên homepage, trang thị trường và bảng lịch khởi hành.' },
     ],
     departures: [
       { departure: '20/05/2026', airline: 'Vietjet', price: '22.500.000' },
@@ -4555,7 +4591,7 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       'Bao gồm vé máy bay khứ hồi, khách sạn tiêu chuẩn 3-4 sao, xe tham quan, vé vào cửa theo chương trình, HDV và hỗ trợ hồ sơ visa theo line. Giá chưa bao gồm chi tiêu ngoài chương trình và phí cá nhân phát sinh.',
     faq: [
       { question: 'Tour 5N4D này khác gì line 6N5D?', answer: 'Khác ở độ dài và số điểm dừng. 5N4D phù hợp khách muốn quyết nhanh và ngân sách gọn hơn, còn 6N5D phù hợp người muốn đi sâu hơn theo nhiều thành phố.' },
-      { question: 'Tại sao line Nhật cần giá sớm?', answer: 'Vì hành vi compare route rất mạnh. Nếu không cho thấy giá đủ sớm, user sẽ rời market page trước khi mở chi tiết.' },
+      { question: 'Tại sao line Nhật cần giá sớm?', answer: 'Vì khách thường so sánh tuyến và ngân sách rất nhanh. Nếu không thấy giá đủ sớm, khách dễ rời trang thị trường trước khi mở chi tiết.' },
     ],
   })
 
@@ -4569,9 +4605,9 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       'Line Nhật 6N5D cho khách muốn hành trình đầy hơn, nhiều điểm hơn và có lý do rõ để nâng ngân sách từ line 5N4D.',
     metaDescription: 'Trang chi tiết tour Osaka - Kobe - Kyoto - Nagoya - Fuji - Tokyo 6N5D của WingsGo.',
     highlights: [
-      { title: 'Full-route positioning', paragraph: 'Route dài để người dùng hiểu tại sao giá cao hơn và trải nghiệm nhiều hơn.' },
-      { title: 'Campaign bridge', paragraph: 'Có thể dùng chung cho summer, autumn và lá vàng nếu cập nhật visual và departure rows.' },
-      { title: 'Better for comparison UX', paragraph: 'Cặp line 5N4D và 6N5D cho cùng thị trường Nhật giúp homepage và market page mạnh hơn.' },
+      { title: 'Hành trình đầy đủ hơn', paragraph: 'Route dài giúp khách hiểu lý do giá cao hơn và trải nghiệm nhiều điểm hơn.' },
+      { title: 'Dễ dùng cho nhiều mùa', paragraph: 'Có thể dùng cho mùa hè, mùa thu hoặc mùa lá vàng nếu cập nhật hình ảnh và lịch khởi hành.' },
+      { title: 'Hỗ trợ so sánh tốt', paragraph: 'Cặp line 5N4D và 6N5D cho thị trường Nhật giúp khách chọn theo thời gian và ngân sách.' },
     ],
     departures: [
       { departure: '25/06/2026', airline: 'Vietnam Airlines', price: '32.900.000' },
@@ -4598,9 +4634,9 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       'Route Trung Quốc gọn cho khách thích điểm biểu tượng, thời lượng ngắn và mức giá retail dễ tiếp cận.',
     metaDescription: 'Trang chi tiết tour Bắc Kinh - Vạn Lý Trường Thành 5N4D của WingsGo.',
     highlights: [
-      { title: 'Symbol-led route', paragraph: 'Dễ bán nhờ landmark rõ, mức độ nhận diện cao và thời lượng phù hợp retail.' },
-      { title: 'China entry product', paragraph: 'Phù hợp làm route mở đầu cho market page Trung Quốc ở phase 1.' },
-      { title: 'Schedule-first selling', paragraph: 'Public departures giúp line này usable như một sản phẩm thật thay vì brochure ảnh.' },
+      { title: 'Tuyến biểu tượng dễ nhận diện', paragraph: 'Dễ bán nhờ Vạn Lý Trường Thành, mức độ nhận diện cao và thời lượng phù hợp khách retail.' },
+      { title: 'Sản phẩm mở đầu cho Trung Quốc', paragraph: 'Phù hợp làm route mở đầu cho trang thị trường Trung Quốc trong phase 1.' },
+      { title: 'Lịch khởi hành rõ', paragraph: 'Ngày đi công khai giúp line này giống một sản phẩm có thể hỏi mua ngay, không chỉ là brochure ảnh.' },
     ],
     departures: [
       { departure: '12/06/2026', airline: 'Air China', price: '19.900.000' },
@@ -4627,9 +4663,9 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       'Route Jiangnan mềm hơn cho thị trường Trung Quốc retail, phù hợp khách thích cân bằng giữa city icon và trải nghiệm cảnh quan.',
     metaDescription: 'Trang chi tiết tour Thượng Hải - Ô Trấn - Hàng Châu 5N4D của WingsGo.',
     highlights: [
-      { title: 'Balanced route', paragraph: 'Cân bằng giữa đô thị nổi tiếng và trải nghiệm cảnh quan mềm hơn.' },
-      { title: 'Retail comparison support', paragraph: 'Bổ sung lựa chọn thứ hai cho China market page để UX không bị một màu.' },
-      { title: 'Campaign extension ready', paragraph: 'Có thể gắn thêm visual chiến dịch hoặc nhóm khởi hành đặc biệt về sau.' },
+      { title: 'Route cân bằng', paragraph: 'Cân bằng giữa đô thị nổi tiếng và trải nghiệm cảnh quan mềm hơn.' },
+      { title: 'Thêm lựa chọn để so sánh', paragraph: 'Bổ sung lựa chọn thứ hai cho trang thị trường Trung Quốc để khách không chỉ thấy một route.' },
+      { title: 'Sẵn sàng mở campaign', paragraph: 'Có thể gắn thêm hình ảnh chiến dịch hoặc nhóm khởi hành đặc biệt về sau.' },
     ],
     departures: [
       { departure: '20/06/2026', airline: 'Air China', price: '21.900.000' },
@@ -4663,40 +4699,41 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     },
     layout: [
       pricingTableBlock(
-        'Campaign prices at a glance',
-        'This page behaves like a seasonal campaign landing rather than a generic page builder layout.',
+        'Giá và lịch campaign Hàn Quốc',
+        'Các line hè 2026 được gom để khách so sánh nhanh ngày đi, hãng bay và mức giá từ trước khi giữ chỗ.',
         [
           {
             title: 'Seoul - Jeju - Nami - Camellia Hill 6N5D',
-            subtitle: 'Jeju Air campaign line',
+            subtitle: 'Line Jeju Air mùa hè',
             departure: '11/07, 28/08',
             airline: 'Jeju Air',
             price: '23.900.000',
-            note: 'Best summer visual',
+            note: 'Xác nhận lại khi tư vấn',
             url: '/tour/seoul-jeju-nami-camellia-hill-6n5d',
           },
           {
             title: 'Seoul - Nami - Everland 5N4D',
-            subtitle: 'Classic retail line',
+            subtitle: 'Line Hàn Quốc dễ chọn',
             departure: '08/07, 22/07, 05/08',
             airline: 'Vietjet / Jeju Air',
             price: '18.900.000',
-            note: 'Fast-decision package',
+            note: 'Xác nhận lại khi tư vấn',
             url: '/tour/seoul-nami-everland-5n4d',
           },
         ],
-        'Summer campaign',
+        'Campaign hè',
       ),
       mediaBlock(jejuPoster.id),
+      wingsGoTrustStrip(),
       ctaBlock(
-        'Need seat confirmation for the next wave?',
-        'Use the inquiry flow to request the newest departure status or a custom group quote.',
+        'Cần xác nhận chỗ cho đợt khởi hành gần nhất?',
+        'Gửi yêu cầu để WingsGo kiểm tra số chỗ, giá mới nhất hoặc phương án riêng cho nhóm của bạn.',
         [linkItem('Gửi yêu cầu', '/lien-he')],
       ),
     ],
     meta: {
       title: 'Hè 2026 Hàn Quốc',
-      description: 'Landing page campaign mùa hè 2026 cho Hàn Quốc trên WingsGo.',
+      description: 'Campaign tour Hàn Quốc hè 2026 của WingsGo với line Jeju, Seoul, Nami, Camellia Hill, giá tham khảo và CTA giữ chỗ.',
       image: jejuPoster.id,
     },
   })
@@ -4712,41 +4749,42 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       links: [linkItem('Xem tour Nhật Bản', '/thi-truong/nhat-ban', 'default'), linkItem('Liên hệ tư vấn', '/lien-he', 'outline')],
       richText: richText(
         'Hè 2026 Nhật Bản',
-        'Campaign season page for visible Japan pricing, route comparison, and direct progression into detail pages.',
+        'Campaign hè cho các line Nhật Bản có giá rõ, lịch khởi hành dễ so sánh và lối mở nhanh sang trang tour chi tiết.',
         'h1',
       ),
     },
     layout: [
       pricingTableBlock(
-        'Japan campaign departure snapshot',
-        'Campaign logic is price-first and compare-friendly, following the benchmark direction already researched.',
+        'Giá và lịch campaign Nhật Bản',
+        'Các line Nhật được trình bày theo ngày đi, hãng bay và giá tham khảo để khách so sánh trước khi liên hệ.',
         [
           {
             title: 'Shizuoka - Núi Phú Sĩ - Tokyo 5N4D',
-            subtitle: 'Short route',
+            subtitle: 'Line ngắn dễ chọn',
             departure: '20/05, 17/06, 08/07',
             airline: 'Vietjet',
             price: '22.500.000',
-            note: 'Visible public fare',
+            note: 'Xác nhận lại khi tư vấn',
             url: '/tour/shizuoka-nui-phu-si-tokyo-5n4d',
           },
           {
             title: 'Osaka - Kobe - Kyoto - Nagoya - Fuji - Tokyo 6N5D',
-            subtitle: 'Full route',
+            subtitle: 'Line dài nhiều điểm',
             departure: '25/06, 30/07, 27/08',
             airline: 'Vietnam Airlines',
             price: '32.900.000',
-            note: 'Peak summer',
+            note: 'Xác nhận lại khi tư vấn',
             url: '/tour/osaka-kobe-kyoto-nagoya-fuji-tokyo-6n5d',
           },
         ],
-        'Summer Japan',
+        'Hè Nhật Bản',
       ),
       mediaBlock(japanPoster.id),
+      wingsGoTrustStrip(),
     ],
     meta: {
       title: 'Hè 2026 Nhật Bản',
-      description: 'Landing page campaign mùa hè 2026 cho Nhật Bản trên WingsGo.',
+      description: 'Campaign tour Nhật Bản hè 2026 của WingsGo với line Shizuoka, Phú Sĩ, Tokyo, Osaka, Kyoto, giá và lịch khởi hành.',
       image: japanPoster.id,
     },
   })
@@ -4761,36 +4799,37 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       media: chinaMarketImage.id,
       links: [linkItem('Xem thị trường Trung Quốc', '/thi-truong/trung-quoc', 'default'), linkItem('Nhận tư vấn', '/lien-he', 'outline')],
       richText: richText(
-        'China retail campaign with visible price positioning',
-        'This landing page introduces China lines in a compare-friendly format rather than relying on disconnected poster files.',
+        'Tour Trung Quốc giá rõ: chọn nhanh route ngắn ngày',
+        'Campaign Trung Quốc gom các route dễ bán, giá tham khảo và CTA tư vấn để khách so sánh trước khi giữ chỗ.',
         'h1',
       ),
     },
     layout: [
       featureGridBlock(
-        'Route options inside the campaign',
-        'Even seasonal campaign pages should link to structured detail pages, not stop at one visual announcement.',
+        'Route nổi bật trong campaign',
+        'Mỗi route dẫn sang trang tour chi tiết để khách xem lịch, giá, phạm vi dịch vụ và gửi yêu cầu tư vấn.',
         [
           {
             title: 'Bắc Kinh - Vạn Lý Trường Thành 5N4D',
-            description: 'Entry China route with strong landmark recognition.',
-            meta: 'China capital route',
+            description: 'Tuyến Trung Quốc dễ nhận diện với điểm nhấn Vạn Lý Trường Thành.',
+            meta: 'Tuyến Bắc Kinh',
             url: '/tour/bac-kinh-van-ly-truong-thanh-5n4d',
           },
           {
             title: 'Thượng Hải - Ô Trấn - Hàng Châu 5N4D',
-            description: 'Softer scenic route for comparison and broader retail appeal.',
-            meta: 'China Jiangnan route',
+            description: 'Tuyến cảnh quan mềm hơn, phù hợp khách muốn kết hợp đô thị và cổ trấn.',
+            meta: 'Tuyến Giang Nam',
             url: '/tour/thuong-hai-o-tran-hang-chau-5n4d',
           },
         ],
         'highlight',
-        'Campaign structure',
+        'Route campaign',
       ),
+      wingsGoTrustStrip(),
     ],
     meta: {
       title: 'Campaign Trung Quốc giá rõ',
-      description: 'Campaign page cho các line tour Trung Quốc retail trên WingsGo.',
+      description: 'Campaign tour Trung Quốc của WingsGo với route Bắc Kinh, Vạn Lý Trường Thành, Thượng Hải, Ô Trấn, Hàng Châu và giá rõ.',
       image: chinaMarketImage.id,
     },
   })
@@ -4807,7 +4846,7 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     categories: [guideCategory.id],
     meta: {
       title: 'Cách đọc lịch khởi hành và giá trên WingsGo',
-      description: 'Giải thích cách user nên đọc bảng khởi hành và giá trên WingsGo.',
+      description: 'Hướng dẫn cách đọc lịch khởi hành, hãng bay, giá từ và ghi chú tour trên WingsGo trước khi gửi yêu cầu tư vấn.',
       image: scheduleGuideImage.id,
     },
   })
@@ -4839,153 +4878,154 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       links: [linkItem('Xem lịch khởi hành', '/lich-khoi-hanh', 'default'), linkItem('Xem thị trường', '/thi-truong', 'outline')],
       richText: richText(
         'Chùm tour outbound giá rõ, lịch rõ',
-        'Hàn - Nhật - Trung và các campaign theo mùa được tổ chức theo market, departure, và tour detail để user duyệt và gửi yêu cầu nhanh.',
+        'Dễ so sánh tour Hàn, Nhật, Trung theo lịch khởi hành, giá và điểm nổi bật. Chọn line phù hợp, gửi yêu cầu giữ chỗ nhanh.',
         'h1',
       ),
     },
     layout: [
       infoStripBlock(
-        'WingsGo is built around clear retail signals',
-        'The homepage surfaces market entry, departure visibility, trust signals, and inquiry CTA in the first screen flow.',
+        'WingsGo giúp khách chọn tour theo tín hiệu rõ ràng',
+        'Trang chủ đưa thị trường, lịch khởi hành, giá tham khảo và CTA tư vấn lên sớm để khách dễ so sánh.',
         [
           {
-            label: 'Main action',
+            label: 'Hành động chính',
             value: 'Xem giá',
-            description: 'Khách hàng thích kiểu có luôn giá, không bắt user để lead rồi mới biết ngân sách.',
+            description: 'Khách thấy mức giá trước khi quyết định gửi yêu cầu tư vấn.',
           },
           {
-            label: 'Best data today',
+            label: 'Dữ liệu mạnh nhất',
             value: 'Hàn | Nhật | Trung',
             description: 'Ba market có nguồn sheet và poster mạnh nhất ở phase 1.',
           },
           {
-            label: 'Operating source',
-            value: 'Google Sheet 2026',
+            label: 'Nguồn vận hành',
+            value: 'Lịch 2026',
             description: 'Lịch khởi hành và line product bám nguồn vận hành thực tế của đội sales.',
           },
           {
-            label: 'UX direction',
-            value: 'Browse & compare',
-            description: 'User duyệt market, so giá, mở line tour, rồi gửi yêu cầu giữ chỗ.',
+            label: 'Trải nghiệm',
+            value: 'Duyệt và so sánh',
+            description: 'Khách chọn thị trường, xem giá, mở tour chi tiết rồi gửi yêu cầu giữ chỗ.',
           },
         ],
-        'Retail outbound UI',
+        'Tour outbound retail',
       ),
       featureGridBlock(
-        'Market entry points',
-        'Users should choose a market fast instead of scanning an undifferentiated long grid.',
+        'Chọn thị trường muốn đi',
+        'Khách có thể bắt đầu từ Hàn Quốc, Nhật Bản hoặc Trung Quốc thay vì phải đọc một danh sách tour quá dài.',
         [
           {
             title: 'Hàn Quốc',
-            description: 'Seoul, Nami, Everland, Jeju, Camellia Hill and summer campaign lines.',
-            meta: 'Korea market',
+            description: 'Seoul, Nami, Everland, Jeju, Camellia Hill và các line campaign mùa hè.',
+            meta: 'Tour Hàn Quốc',
             url: '/thi-truong/han-quoc',
           },
           {
             title: 'Nhật Bản',
-            description: 'Shizuoka, Fuji, Tokyo, Osaka, Kyoto, Nagoya, Hokkaido and seasonal comparison logic.',
-            meta: 'Japan market',
+            description: 'Shizuoka, Phú Sĩ, Tokyo, Osaka, Kyoto, Nagoya và các line theo mùa dễ so sánh.',
+            meta: 'Tour Nhật Bản',
             url: '/thi-truong/nhat-ban',
           },
           {
             title: 'Trung Quốc',
-            description: 'Capital icons and Jiangnan scenic routes with price-first public positioning.',
-            meta: 'China market',
+            description: 'Bắc Kinh, Vạn Lý Trường Thành, Thượng Hải, Ô Trấn, Hàng Châu với giá tham khảo rõ.',
+            meta: 'Tour Trung Quốc',
             url: '/thi-truong/trung-quoc',
           },
         ],
         'highlight',
-        'Markets',
+        'Thị trường',
       ),
       pricingTableBlock(
-        'Departure snapshot',
-        'The first schedule block is intentionally close to the top because price and date visibility are core requirements.',
+        'Lịch khởi hành nổi bật',
+        'Các line được đưa lên sớm để khách xem nhanh ngày đi, hãng bay và giá từ.',
         [
           {
             title: 'Seoul - Jeju - Nami - Camellia Hill 6N5D',
-            subtitle: 'Summer campaign',
+            subtitle: 'Campaign hè Hàn Quốc',
             departure: '11/07, 28/08',
             airline: 'Jeju Air',
             price: '23.900.000',
-            note: 'Campaign poster available',
+            note: 'Xác nhận lại khi tư vấn',
             url: '/tour/seoul-jeju-nami-camellia-hill-6n5d',
           },
           {
             title: 'Shizuoka - Núi Phú Sĩ - Tokyo 5N4D',
-            subtitle: 'Japan short route',
+            subtitle: 'Line Nhật ngắn ngày',
             departure: '20/05, 17/06, 08/07',
             airline: 'Vietjet',
             price: '22.500.000',
-            note: 'Summer 2026',
+            note: 'Xác nhận lại khi tư vấn',
             url: '/tour/shizuoka-nui-phu-si-tokyo-5n4d',
           },
           {
             title: 'Bắc Kinh - Vạn Lý Trường Thành 5N4D',
-            subtitle: 'China short route',
+            subtitle: 'Line Trung Quốc ngắn ngày',
             departure: '12/06, 10/07, 07/08',
             airline: 'Air China',
             price: '19.900.000',
-            note: 'Retail line',
+            note: 'Xác nhận lại khi tư vấn',
             url: '/tour/bac-kinh-van-ly-truong-thanh-5n4d',
           },
         ],
-        'Quick prices',
+        'Giá tham khảo',
       ),
       featureGridBlock(
-        'Campaigns by season',
-        'Campaign pages are treated as reusable sales surfaces, not ad-hoc image dumps.',
+        'Campaign theo mùa',
+        'Các campaign được tổ chức thành trang bán hàng có lịch, giá, route và lối gửi yêu cầu rõ ràng.',
         [
           {
             title: 'Hè 2026 Hàn Quốc',
-            description: 'Jeju-forward campaign with visible dates and strong retail creative.',
-            meta: 'Seasonal campaign',
+            description: 'Campaign Jeju và Seoul có ngày khởi hành, giá tham khảo và visual bán hàng rõ.',
+            meta: 'Campaign Hàn Quốc',
             url: '/campaign/he-2026-han-quoc',
           },
           {
             title: 'Hè 2026 Nhật Bản',
-            description: 'Compare-friendly Japan campaign with short and full routes.',
-            meta: 'Seasonal campaign',
+            description: 'Campaign Nhật Bản giúp so sánh line ngắn ngày và line nhiều điểm.',
+            meta: 'Campaign Nhật Bản',
             url: '/campaign/he-2026-nhat-ban',
           },
           {
             title: 'Trung Quốc giá rõ',
-            description: 'China campaign landing focused on clear route options and public prices.',
-            meta: 'Seasonal campaign',
+            description: 'Campaign Trung Quốc tập trung route rõ, giá rõ và CTA tư vấn nhanh.',
+            meta: 'Campaign Trung Quốc',
             url: '/campaign/trung-quoc-gia-ro',
           },
         ],
         'default',
-        'Campaigns',
+        'Campaign',
       ),
       featureGridBlock(
-        'Featured tours',
-        'Tour detail pages are the main bridge between campaign traffic and lead capture.',
+        'Tour nổi bật',
+        'Trang tour chi tiết là bước nối giữa campaign, lịch khởi hành và form giữ chỗ.',
         [
           {
             title: 'Seoul - Nami - Everland 5N4D',
-            description: 'Classic Korea starter line with direct and clear retail positioning.',
+            description: 'Line Hàn Quốc dễ chọn cho khách lần đầu đi Hàn, có lịch và giá tham khảo.',
             meta: 'Korea | 5N4D',
             url: '/tour/seoul-nami-everland-5n4d',
           },
           {
             title: 'Shizuoka - Núi Phú Sĩ - Tokyo 5N4D',
-            description: 'Japan short route ideal for seasonal ad traffic and comparison behavior.',
+            description: 'Line Nhật ngắn ngày phù hợp khách muốn so sánh nhanh theo lịch và ngân sách.',
             meta: 'Japan | 5N4D',
             url: '/tour/shizuoka-nui-phu-si-tokyo-5n4d',
           },
           {
             title: 'Thượng Hải - Ô Trấn - Hàng Châu 5N4D',
-            description: 'China retail route with softer visual tone and public pricing.',
+            description: 'Line Trung Quốc có nhịp cảnh quan mềm hơn và mức giá tham khảo dễ hỏi mua.',
             meta: 'China | 5N4D',
             url: '/tour/thuong-hai-o-tran-hang-chau-5n4d',
           },
         ],
         'minimal',
-        'Tour cards',
+        'Tour',
       ),
+      wingsGoTrustStrip(),
       ctaBlock(
-        'Need the latest seat status or a private quote?',
-        'Use the inquiry flow to request a confirmed seat count, the newest fare, or a group adaptation of an existing line.',
+        'Cần kiểm tra chỗ hoặc báo giá riêng?',
+        'Gửi yêu cầu để WingsGo xác nhận số chỗ còn lại, giá mới nhất hoặc phương án riêng cho nhóm của bạn.',
         [linkItem('Gửi yêu cầu tư vấn', '/lien-he')],
       ),
     ],
@@ -4999,7 +5039,7 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
 
   await createSiteSettings(payload, req, site, siteSeed, heroImage.id, {
     footerNote:
-      'WingsGo tập trung trải nghiệm browse-and-compare cho outbound retail với market pages, campaign pages và tour detail pages hiển thị giá.',
+      'WingsGo giúp khách so sánh tour outbound theo thị trường, campaign, lịch khởi hành và trang tour chi tiết có giá tham khảo.',
     headerNavItems: [
       linkItem('Trang chủ', '/'),
       linkItem('Thị trường', '/thi-truong'),
@@ -5129,7 +5169,9 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     title: 'Contact Us',
     slug: 'contact-us',
     hero: {
-      type: 'lowImpact',
+      type: 'mediumImpact',
+      media: heroImage.id,
+      links: [linkItem('Start your inquiry', '#trip-inquiry', 'default'), linkItem('Plan your trip', '/plan-your-trip', 'outline')],
       richText: richText(
         'Tell us what kind of Vietnam journey you want to build',
         'WingsSide is designed for custom inquiries, destination planning, and consultative conversations rather than price-only browsing.',
@@ -5137,6 +5179,28 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       ),
     },
     layout: [
+      infoStripBlock(
+        'What happens after you send a brief',
+        'Contact should feel like the beginning of planning, not a generic support page.',
+        [
+          {
+            label: 'Response path',
+            value: 'Planning team',
+            description: 'The request is reviewed for destination, travel style, timing, and group needs.',
+          },
+          {
+            label: 'Best input',
+            value: 'Month + group size',
+            description: 'Approximate timing and party size are enough to start a useful recommendation.',
+          },
+          {
+            label: 'Next step',
+            value: 'Tailored proposal',
+            description: 'The team follows up with a route direction instead of forcing fixed-package checkout.',
+          },
+        ],
+        'Inquiry flow',
+      ),
       formBlock(
         tripPlannerForm.id,
         'Start your inquiry',
@@ -7635,7 +7699,7 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
       links: [linkItem('Xem quyền lợi', '/quyen-loi', 'default'), linkItem('Gửi yêu cầu hỗ trợ', '/contact', 'outline')],
       richText: richText(
         'Travel care rõ quyền lợi, rõ hỗ trợ',
-        'WingsCare là site trust-first cho bảo hiểm du lịch, hướng dẫn quyền lợi và hỗ trợ sau bán trong hệ sinh thái WingsTravel.',
+        'WingsCare là site trust-first cho bảo hiểm du lịch, hướng dẫn quyền lợi và hỗ trợ sau bán trong hệ sinh thái WingsGroup.',
         'h1',
       ),
     },
@@ -7730,6 +7794,7 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
       brandColor: siteSeed.brandColor,
       accentColor: siteSeed.accentColor,
       logoImage: null,
+      faviconImage: heroImage.id,
       themeKey: siteSeed.code,
       themePreset: themePresetIDsByKey[siteSeed.themePreset],
     },
@@ -7841,6 +7906,7 @@ async function _seedLightweightSite(
 
 async function main() {
   const payload = await getPayload({ config })
+  const requestedSeed = process.env.SEED_ONLY_SITE?.trim().toLowerCase() || null
   const seededAdminUser = await ensureLocalAdminUser(payload)
   const users = await payload.find({
     collection: 'users',
@@ -7872,32 +7938,66 @@ async function main() {
 
   const req = await createLocalReq({ user: adminUser }, payload)
 
-  payload.logger.info('Seeding theme presets...')
-  await seedThemePresets(payload, req)
+  const seedOnlySite = requestedSeed
+  const runThemePresets = !seedOnlySite
 
-  const wingsTravelSeed = siteSeeds.find((site) => site.code === 'wings-travel')!
+  if (runThemePresets) {
+    payload.logger.info('Seeding theme presets...')
+    await seedThemePresets(payload, req)
+  }
+
+  const wingsGroupSeed = siteSeeds.find((site) => site.code === 'wings-group')!
   const wingsGoSeed = siteSeeds.find((site) => site.code === 'wings-go')!
   const wingsSideSeed = siteSeeds.find((site) => site.code === 'wings-side')!
   const wingsPassSeed = siteSeeds.find((site) => site.code === 'wings-pass')!
   const wingsPlusSeed = siteSeeds.find((site) => site.code === 'wings-plus')!
   const wingsCareSeed = siteSeeds.find((site) => site.code === 'wings-care')!
 
-  payload.logger.info('Seeding WingsTravel corporate hub...')
-  await seedWingsTravel(payload, req, wingsTravelSeed)
+  const seeders: Record<string, () => Promise<void>> = {
+    'wings-group': async () => {
+      payload.logger.info('Seeding WingsGroup corporate hub...')
+      await seedWingsGroup(payload, req, wingsGroupSeed)
+    },
+    'wings-go': async () => {
+      payload.logger.info('Seeding WingsGo production content...')
+      await seedWingsGo(payload, req, wingsGoSeed)
+    },
+    'wings-side': async () => {
+      payload.logger.info('Seeding WingsSide production content...')
+      await seedWingsSide(payload, req, wingsSideSeed)
+    },
+    'wings-pass': async () => {
+      payload.logger.info('Seeding WingsPass production content...')
+      await seedWingsPass(payload, req, wingsPassSeed)
+    },
+    'wings-plus': async () => {
+      payload.logger.info('Seeding WingsPlus production content...')
+      await seedWingsPlus(payload, req, wingsPlusSeed)
+    },
+    'wings-care': async () => {
+      payload.logger.info('Seeding WingsCare production content...')
+      await seedWingsCare(payload, req, wingsCareSeed)
+    },
+  }
 
-  payload.logger.info('Seeding WingsGo production content...')
+  if (seedOnlySite) {
+    const normalizedSite = seedOnlySite.replace(/^wingsplus$/, 'wings-plus')
+    const seedFn = seeders[normalizedSite]
+
+    if (!seedFn) {
+      throw new Error(`Unknown SEED_ONLY_SITE value: ${seedOnlySite}`)
+    }
+
+    await seedFn()
+    payload.logger.info(`Selective seed completed for ${normalizedSite}.`)
+    return
+  }
+
+  await seedWingsGroup(payload, req, wingsGroupSeed)
   await seedWingsGo(payload, req, wingsGoSeed)
-
-  payload.logger.info('Seeding WingsSide production content...')
   await seedWingsSide(payload, req, wingsSideSeed)
-
-  payload.logger.info('Seeding WingsPass production content...')
   await seedWingsPass(payload, req, wingsPassSeed)
-
-  payload.logger.info('Seeding WingsPlus production content...')
   await seedWingsPlus(payload, req, wingsPlusSeed)
-
-  payload.logger.info('Seeding WingsCare production content...')
   await seedWingsCare(payload, req, wingsCareSeed)
 
   await payload.updateGlobal({
@@ -7933,7 +8033,7 @@ async function main() {
         {
           link: {
             type: 'custom',
-            label: 'WingsTravel',
+            label: 'WingsGroup',
             url: '/',
           },
         },

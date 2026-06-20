@@ -123,7 +123,7 @@ export interface Config {
   };
   locale: 'vi' | 'en';
   widgets: {
-    'wings-travel-metrics': WingsTravelMetricsWidget;
+    'wings-group-metrics': WingsGroupMetricsWidget;
     collections: CollectionsWidget;
   };
   user: User;
@@ -166,7 +166,7 @@ export interface Site {
   id: number;
   name: string;
   /**
-   * Mã nội bộ, ví dụ wings-travel hoặc wings-care.
+   * Mã nội bộ, ví dụ wings-group hoặc wings-care.
    */
   code: string;
   primaryDomain: string;
@@ -267,9 +267,13 @@ export interface SiteSetting {
     accentColor?: string | null;
     logoImage?: (number | null) | Media;
     /**
+     * Biểu tượng bắt buộc cho tab trình duyệt và shortcut của từng site.
+     */
+    faviconImage: number | Media;
+    /**
      * Mã ổn định dùng cho render frontend. Không phụ thuộc tên hiển thị site.
      */
-    themeKey: 'wings-travel' | 'wings-go' | 'wings-side' | 'wings-plus' | 'wings-care' | 'wings-pass' | 'custom';
+    themeKey: 'wings-group' | 'wings-go' | 'wings-side' | 'wings-plus' | 'wings-care' | 'wings-pass' | 'custom';
     /**
      * Preset theme mặc định. Các field bên dưới sẽ override preset nếu được nhập.
      */
@@ -1701,6 +1705,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         brandColor?: T;
         accentColor?: T;
         logoImage?: T;
+        faviconImage?: T;
         themeKey?: T;
         themePreset?: T;
         surfaceColor?: T;
@@ -2712,9 +2717,9 @@ export interface FooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "wings-travel-metrics_widget".
+ * via the `definition` "wings-group-metrics_widget".
  */
-export interface WingsTravelMetricsWidget {
+export interface WingsGroupMetricsWidget {
   data?: {
     [k: string]: unknown;
   };

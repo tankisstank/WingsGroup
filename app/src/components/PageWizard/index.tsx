@@ -142,7 +142,7 @@ export default function PageWizardView() {
       <div className={`${baseClass}__shell`}>
         <header className={`${baseClass}__header`}>
           <div>
-            <p>WingsTravel CMS</p>
+            <p>WingsGroup CMS</p>
             <h1>Tạo trang nhanh</h1>
             <span>
               Dựng trang nháp theo từng bước. Sau khi tạo, bạn sẽ được chuyển sang màn chỉnh sửa

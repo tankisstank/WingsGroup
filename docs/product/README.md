@@ -1,10 +1,10 @@
 # Product Docs
 
-This folder is no longer empty-by-default for `WingsTravel`.
+This folder is no longer empty-by-default for `WingsGroup`.
 
 Start from:
 
-- `docs/product/WingsTravel-context.md`
+- `docs/product/WingsGroup-context.md`
 - `docs/product/phase-1-scope.md`
 - `docs/product/multisite-platform.md`
 - `docs/product/editorial-operations.md`
@@ -20,7 +20,7 @@ strategy sources.
 
 Current seed set:
 
-- `WingsTravel-context.md`: source hierarchy and high-level project direction
+- `WingsGroup-context.md`: source hierarchy and high-level project direction
 - `phase-1-scope.md`: locked phase-1 contract and out-of-scope boundary
 - `multisite-platform.md`: site model, platform rules, and environment topology
 - `editorial-operations.md`: minimum CMS and editorial behaviors
@@ -35,7 +35,7 @@ Current seed set:
 Local seed/bootstrap keeps this super-admin account available for CMS review and
 development:
 
-- Email: `local-admin@wingstravel.test`
+- Email: `local-admin@wingsgroup.test`
 - Password: `test`
 
 The account is code-owned in `app/src/utilities/adminSeed.ts`. The `/next/seed`

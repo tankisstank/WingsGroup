@@ -128,7 +128,7 @@ export default function ThemePresetPreviewField() {
         </div>
 
         <div className="theme-preset-preview__hero">
-          <p className="theme-preset-preview__kicker">WingsTravel</p>
+          <p className="theme-preset-preview__kicker">WingsGroup</p>
           <h4>Trang bán hàng và nội dung sẽ đổi theo preset này</h4>
           <p>
             Preview mô phỏng hero, card nội dung và CTA để người quản trị thấy tác động trực quan

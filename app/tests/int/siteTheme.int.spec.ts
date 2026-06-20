@@ -3,7 +3,7 @@ import { defaultThemePresetByKey } from '@/utilities/themeTokens'
 import { describe, expect, it } from 'vitest'
 
 describe('site theme tokens', () => {
-  it('falls back to WingsTravel defaults when no site settings exist', () => {
+  it('falls back to WingsGroup defaults when no site settings exist', () => {
     expect(getSiteThemeTokens()).toEqual({
       accentColor: '#F59E0B',
       brandColor: '#0F172A',
@@ -25,11 +25,11 @@ describe('site theme tokens', () => {
         '--site-shadow': '0 24px 80px color-mix(in oklch, #0F172A 16%, transparent)',
         '--site-surface': '#F8FAFC',
         '--site-surface-strong': '#E2E8F0',
-        '--site-theme-key': 'wings-travel',
+        '--site-theme-key': 'wings-group',
         '--site-theme-preset': 'corporate',
       },
-      themeKey: 'wings-travel',
-      themeName: 'WingsTravel',
+      themeKey: 'wings-group',
+      themeName: 'WingsGroup',
       themePreset: 'corporate',
     })
   })

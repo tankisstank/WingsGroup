@@ -27,7 +27,7 @@ const formCopy = {
     asideLabel: 'Consultation support information',
     asideTitle: 'Send a request, receive the right consultation',
     asideDescription:
-      'The WingsTravel team will review the timing, budget, destination, and service context before recommending the right next step.',
+      'The WingsGroup team will review the timing, budget, destination, and service context before recommending the right next step.',
     bullets: [
       'Business-hours response',
       'Advice based on real timing and budget',
@@ -55,7 +55,7 @@ const formCopy = {
     asideLabel: 'Thông tin hỗ trợ tư vấn',
     asideTitle: 'Gửi yêu cầu, nhận tư vấn đúng nhu cầu',
     asideDescription:
-      'Team WingsTravel sẽ kiểm tra lịch, ngân sách, điểm đến và phản hồi phương án phù hợp để khách không phải tự lọc quá nhiều thông tin.',
+      'Team WingsGroup sẽ kiểm tra lịch, ngân sách, điểm đến và phản hồi phương án phù hợp để khách không phải tự lọc quá nhiều thông tin.',
     bullets: [
       'Phản hồi theo giờ làm việc',
       'Tư vấn theo lịch và ngân sách thật',
@@ -191,6 +191,7 @@ export const FormBlock: React.FC<
     <section
       className={`container theme-section layout-block layout-block--form layout-block--${presentation}`}
       data-block-presentation={presentation}
+      id="contact-form"
     >
       <div className="site-lead-form-shell layout-form">
         <aside className="site-lead-form-aside" aria-label={copy.asideLabel}>

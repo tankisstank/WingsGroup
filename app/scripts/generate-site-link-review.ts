@@ -24,7 +24,7 @@ const siteAliasByCode: Record<string, string> = {
   'wings-pass': 'wingspass',
   'wings-plus': 'wingsplus',
   'wings-side': 'wingsside',
-  'wings-travel': '',
+  'wings-group': '',
 }
 
 type SiteRow = {
@@ -99,7 +99,7 @@ const buildHTML = ({ generatedAt, sites }: { generatedAt: string; sites: SiteNod
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WingsTravel Site Link Review</title>
+  <title>WingsGroup Site Link Review</title>
   <style>
     :root {
       --bg: #f6f7f9;
@@ -368,7 +368,7 @@ const buildHTML = ({ generatedAt, sites }: { generatedAt: string; sites: SiteNod
   <div class="app">
     <aside class="sidebar">
       <header class="sidebar__head">
-        <h1>WingsTravel Site Link Review</h1>
+        <h1>WingsGroup Site Link Review</h1>
         <p>Generated ${escapeHTML(generatedAt)}. Click một page/post ở bên trái để preview trong khung bên phải.</p>
       </header>
 
@@ -395,7 +395,7 @@ const buildHTML = ({ generatedAt, sites }: { generatedAt: string; sites: SiteNod
           <button id="reloadFrame" type="button">Reload preview</button>
         </div>
       </div>
-      <iframe id="preview" title="Preview selected WingsTravel page"></iframe>
+      <iframe id="preview" title="Preview selected WingsGroup page"></iframe>
     </main>
   </div>
 

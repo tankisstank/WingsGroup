@@ -54,7 +54,7 @@ export const serializeJsonLd = (data: JsonLdNode | JsonLdNode[]) =>
 export const stringifyJSONLD = serializeJsonLd
 
 export const buildOrganizationJSONLD = (settings?: SiteSetting | null): JsonLdNode => {
-  const siteName = settings?.siteName || settings?.seo?.defaultTitle || 'WingsTravel'
+  const siteName = settings?.siteName || settings?.seo?.defaultTitle || 'WingsGroup'
   const siteUrl = buildCanonicalUrl(settings)
   const logo = getMediaUrl(settings?.branding?.logoImage)
 
@@ -80,7 +80,7 @@ export const buildOrganizationJSONLD = (settings?: SiteSetting | null): JsonLdNo
 }
 
 export const buildWebSiteJSONLD = (settings?: SiteSetting | null): JsonLdNode => {
-  const siteName = settings?.siteName || settings?.seo?.defaultTitle || 'WingsTravel'
+  const siteName = settings?.siteName || settings?.seo?.defaultTitle || 'WingsGroup'
   const siteUrl = buildCanonicalUrl(settings)
 
   return {

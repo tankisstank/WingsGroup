@@ -111,14 +111,14 @@ export async function ensureHeroPresentationFixtures({
     req,
     where: {
       code: {
-        equals: 'wings-travel',
+        equals: 'wings-group',
       },
     },
   })
   const rootSite = rootSites.docs[0]
 
   if (!rootSite) {
-    throw new Error('The WingsTravel root site must exist before seeding hero presentation fixtures.')
+    throw new Error('The WingsGroup root site must exist before seeding hero presentation fixtures.')
   }
 
   const homePages = await payload.find({
@@ -145,7 +145,7 @@ export async function ensureHeroPresentationFixtures({
   const homePage = homePages.docs[0] as Page | undefined
 
   if (!homePage?.hero || homePage.hero.type !== 'highImpact') {
-    throw new Error('The WingsTravel home page must use a high-impact hero for fixture seeding.')
+    throw new Error('The WingsGroup home page must use a high-impact hero for fixture seeding.')
   }
 
   const media = await payload.find({

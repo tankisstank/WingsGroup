@@ -80,10 +80,20 @@ export const SiteSettings: CollectionConfig = {
           relationTo: 'media',
         },
         {
+          name: 'faviconImage',
+          label: 'Favicon',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+          admin: {
+            description: 'Biểu tượng bắt buộc cho tab trình duyệt và shortcut của từng site.',
+          },
+        },
+        {
           name: 'themeKey',
           label: 'Mã theme',
           type: 'select',
-          defaultValue: 'wings-travel',
+          defaultValue: 'wings-group',
           options: asSelectOptions(themeKeyOptions),
           required: true,
           admin: {

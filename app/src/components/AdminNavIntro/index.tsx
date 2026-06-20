@@ -13,6 +13,7 @@ const textByLocale = {
     managementLayer: 'Management layer',
     multisiteCMS: 'Multisite CMS',
     pageWizard: 'Quick page wizard',
+    siteReview: 'Site review',
     importData: 'Import data',
     users: 'Users',
   },
@@ -22,6 +23,7 @@ const textByLocale = {
     managementLayer: 'Nền quản trị',
     multisiteCMS: 'Multisite CMS',
     pageWizard: 'Tạo trang nhanh',
+    siteReview: 'Rà soát site',
     importData: 'Nhập dữ liệu',
     users: 'Người dùng',
   },
@@ -91,6 +93,7 @@ const AdminNavIntro: React.FC = () => {
       <span>{t.managementLayer}</span>
       <strong>{t.multisiteCMS}</strong>
       <Link href="/admin/console">{t.console}</Link>
+      <Link href="/admin/site-review">{t.siteReview}</Link>
       <Link href="/admin/page-wizard">{t.pageWizard}</Link>
       <Link href="/admin/collections/form-submissions">{t.leadInbox}</Link>
       {canManageData ? <Link href="/admin/collections/imports">{t.importData}</Link> : null}

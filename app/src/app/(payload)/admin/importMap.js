@@ -49,8 +49,9 @@ import { default as default_f56b2388657bfe700e8ea4dd7cf32a54 } from '@/component
 import { ImportExportProvider as ImportExportProvider_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
 import { default as default_f9eef2fa35c867aa73ad97968a96fa57 } from '@/components/AdminOperatorConsole'
 import { default as default_dbfe8c9157153a1e71857346f3fece7d } from '@/components/ThemeManager'
+import { default as default_dd8d1fa658e4f51ecc6d4467f29fe396 } from '@/components/SiteReview'
 import { default as default_7bb177a4cdf8354fd123e1ad3491e461 } from '@/components/PageWizard'
-import { WingsTravelMetrics as WingsTravelMetrics_cb5553611f4beeb286edfe3a6df8cd2b } from '@/components/AdminDashboard/WingsTravelMetrics'
+import { WingsGroupMetrics as WingsGroupMetrics_cb5553611f4beeb286edfe3a6df8cd2b } from '@/components/AdminDashboard/WingsGroupMetrics'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -106,7 +107,8 @@ export const importMap = {
   "@payloadcms/plugin-import-export/rsc#ImportExportProvider": ImportExportProvider_cdf7e044479f899a31f804427d568b36,
   "@/components/AdminOperatorConsole#default": default_f9eef2fa35c867aa73ad97968a96fa57,
   "@/components/ThemeManager#default": default_dbfe8c9157153a1e71857346f3fece7d,
+  "@/components/SiteReview#default": default_dd8d1fa658e4f51ecc6d4467f29fe396,
   "@/components/PageWizard#default": default_7bb177a4cdf8354fd123e1ad3491e461,
-  "@/components/AdminDashboard/WingsTravelMetrics#WingsTravelMetrics": WingsTravelMetrics_cb5553611f4beeb286edfe3a6df8cd2b,
+  "@/components/AdminDashboard/WingsGroupMetrics#WingsGroupMetrics": WingsGroupMetrics_cb5553611f4beeb286edfe3a6df8cd2b,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

@@ -1,0 +1,18 @@
+{
+  "siteCode": "wingsplus",
+  "displayTitle": "WingsPlus",
+  "sourcePdf": "pdf/WINGS PLUSS.pdf",
+  "tagline": "More Benefits. More Journeys.",
+  "valueLine": "TOGETHER WE GO FURTHER",
+  "colors": {
+    "primary": "#005090",
+    "accent": "#6040A0"
+  },
+  "assets": {
+    "logoPrimary": "exports/wingsplus/wingsplus-logo-primary.png",
+    "logoReverse": "exports/wingsplus/wingsplus-logo-reverse.png",
+    "mark": "exports/wingsplus/wingsplus-mark.png",
+    "favicon": "exports/wingsplus/wingsplus-favicon.png",
+    "ogImage": "exports/wingsplus/wingsplus-og-image.png"
+  }
+}

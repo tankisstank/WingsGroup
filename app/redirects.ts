@@ -1,6 +1,19 @@
 import type { NextConfig } from 'next'
 
 export const redirects: NextConfig['redirects'] = async () => {
+  const wingsGroupLegacyRedirects = [
+    {
+      destination: '/wingsgroup',
+      permanent: true,
+      source: '/wingstravel',
+    },
+    {
+      destination: '/wingsgroup/:path*',
+      permanent: true,
+      source: '/wingstravel/:path*',
+    },
+  ]
+
   const wingsPlusCapabilitiesRedirects = [
     {
       destination: '/wingsplus/nang-luc-dich-vu',
@@ -32,5 +45,5 @@ export const redirects: NextConfig['redirects'] = async () => {
     source: '/:path((?!ie-incompatible.html$).*)', // all pages except the incompatibility page
   }
 
-  return [...wingsPlusCapabilitiesRedirects, internetExplorerRedirect]
+  return [...wingsGroupLegacyRedirects, ...wingsPlusCapabilitiesRedirects, internetExplorerRedirect]
 }

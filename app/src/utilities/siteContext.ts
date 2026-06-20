@@ -3,37 +3,12 @@ import type { Site } from '@/payload-types'
 import configPromise from '@payload-config'
 import { headers } from 'next/headers'
 import { getPayload, type Where } from 'payload'
+import { domainCandidates, requestHostCandidates } from './siteDomains'
 import { defaultSiteCode, isSupportedLocale, type SupportedLocaleCode } from './sitePaths'
 
 type SiteCacheResult = null | Site
 const siteLookupCache = new Map<string, Promise<SiteCacheResult>>()
 const activeSitesCache = new Map<string, Promise<Site[]>>()
-
-const normalizeHost = (host?: null | string): string | null => {
-  if (!host) {
-    return null
-  }
-
-  const normalized = host.toLowerCase().split(':')[0]?.trim()
-
-  return normalized || null
-}
-
-const domainCandidates = (domain?: null | string): string[] => {
-  const normalized = normalizeHost(domain)
-
-  if (!normalized) {
-    return []
-  }
-
-  const candidates = [normalized]
-
-  if (normalized.endsWith('.local')) {
-    candidates.push(normalized.replace(/\.local$/, '.vn'))
-  }
-
-  return candidates
-}
 
 const getSiteByCode = async (code: string): Promise<SiteCacheResult> => {
   const payload = await getPayload({ config: configPromise })
@@ -111,10 +86,10 @@ const getMemoizedActiveSites = (): Promise<Site[]> => {
   return lookup
 }
 
-const getSiteByHost = async (host?: null | string): Promise<SiteCacheResult> => {
-  const normalizedHost = normalizeHost(host)
+const getSiteByHosts = async (hosts: string[]): Promise<SiteCacheResult> => {
+  const eligibleHosts = hosts.filter((host) => host !== 'localhost' && host !== '127.0.0.1')
 
-  if (!normalizedHost || normalizedHost === 'localhost' || normalizedHost === '127.0.0.1') {
+  if (eligibleHosts.length === 0) {
     return null
   }
 
@@ -124,28 +99,42 @@ const getSiteByHost = async (host?: null | string): Promise<SiteCacheResult> => 
     sites.find((site) => {
       const domains = [
         ...domainCandidates(site.primaryDomain),
-        ...((site.additionalDomains || []) as Array<{ domain?: null | string }>).flatMap(({ domain }) =>
-          domainCandidates(domain),
+        ...((site.additionalDomains || []) as Array<{ domain?: null | string }>).flatMap(
+          ({ domain }) => domainCandidates(domain),
         ),
       ]
 
-      return domains.includes(normalizedHost)
+      return domains.some((domain) => eligibleHosts.includes(domain))
     }) || null
   )
 }
 
-export const getCurrentSite = async (siteCodeFromArgs?: string | null): Promise<SiteCacheResult> => {
+export const getCurrentSite = async (
+  siteCodeFromArgs?: string | null,
+): Promise<SiteCacheResult> => {
   const requestHeaders = await headers()
-  const explicitSiteCode = siteCodeFromArgs || requestHeaders.get('x-site-code')
 
-  if (explicitSiteCode) {
-    return getMemoizedSiteByCode(explicitSiteCode)
+  if (siteCodeFromArgs) {
+    return getMemoizedSiteByCode(siteCodeFromArgs)
   }
 
-  const siteFromHost = await getSiteByHost(requestHeaders.get('host'))
+  const trustedSiteCodeFromHeader =
+    requestHeaders.get('x-site-code-source') === 'nginx' ? requestHeaders.get('x-site-code') : null
+
+  if (trustedSiteCodeFromHeader) {
+    return getMemoizedSiteByCode(trustedSiteCodeFromHeader)
+  }
+
+  const siteFromHost = await getSiteByHosts(requestHostCandidates(requestHeaders))
 
   if (siteFromHost) {
     return siteFromHost
+  }
+
+  const siteCodeFromHeader = requestHeaders.get('x-site-code')
+
+  if (siteCodeFromHeader) {
+    return getMemoizedSiteByCode(siteCodeFromHeader)
   }
 
   return getMemoizedSiteByCode(defaultSiteCode)

@@ -69,7 +69,7 @@ export type SiteThemeTokens = {
 }
 
 export const getSiteThemeTokens = (settings?: null | ThemeSettingsLike): SiteThemeTokens => {
-  const themeKey = normalizeThemeKey(settings?.branding?.themeKey || 'wings-travel')
+  const themeKey = normalizeThemeKey(settings?.branding?.themeKey || 'wings-group')
   const themePresetKey = normalizeThemePresetKey(themeKey)
   const presetTokens = resolveThemePresetTokens(themeKey, settings?.branding?.themePreset)
   const brandColor =
@@ -117,7 +117,7 @@ export const getSiteThemeTokens = (settings?: null | ThemeSettingsLike): SiteThe
       '--site-theme-preset': resolvedPresetKey,
     } as React.CSSProperties,
     themeKey,
-    themeName: settings?.siteName || 'WingsTravel',
+    themeName: settings?.siteName || 'WingsGroup',
     themePreset: resolvedPresetKey,
   }
 }

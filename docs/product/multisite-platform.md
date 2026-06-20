@@ -1,4 +1,4 @@
-# WingsTravel Multisite Platform
+# WingsGroup Multisite Platform
 
 ## Purpose
 
@@ -7,7 +7,7 @@ This document defines the durable platform rules behind the current
 
 ## Core Architecture
 
-`WingsTravel` is built as:
+`WingsGroup` is built as:
 
 - one `Next.js + Payload` codebase
 - one CMS and frontend stack

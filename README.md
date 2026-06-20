@@ -1,6 +1,6 @@
-# WingsTravel workspace
+# WingsGroup workspace
 
-Workspace nay da duoc tach theo vai tro va chot `Markdown` la `single source of truth` cho du an `WingsTravel`.
+Workspace nay da duoc tach theo vai tro va chot `Markdown` la `single source of truth` cho du an `WingsGroup`.
 
 ## Cau truc
 
@@ -22,6 +22,6 @@ Workspace nay da duoc tach theo vai tro va chot `Markdown` la `single source of 
 
 ## Ghi chu
 
-- Ten du an chinh thuc cua repo nay la `WingsTravel`.
+- Ten du an chinh thuc cua repo nay la `WingsGroup`.
 - `publish/vercel/` hien dang la ban deploy tuong doi doc lap va van giu ban copy rieng cua `visuals/` de khong lam gay ban deploy cu.
 - Neu muon chuan hoa tiep, buoc tiep theo hop ly la tao script xuat `source -> publish` de tranh sua tay nhieu noi.

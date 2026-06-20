@@ -14,31 +14,32 @@ const settings = {
   id: 1,
   createdAt: '2026-05-27T00:00:00.000Z',
   site: 1,
-  siteName: 'WingsTravel',
+  siteName: 'WingsGroup',
   branding: {
-    themeKey: 'wings-travel',
+    faviconImage: 1,
+    themeKey: 'wings-group',
   },
   updatedAt: '2026-05-27T00:00:00.000Z',
   seo: {
-    canonicalDomain: 'https://wingstravel.com',
+    canonicalDomain: 'https://wingsgroup.com',
     defaultDescription: 'Travel services',
-    defaultTitle: 'WingsTravel',
+    defaultTitle: 'WingsGroup',
   },
 } as const
 
 describe('site SEO utilities', () => {
   it('normalizes page and post canonical URLs', () => {
     expect(getCanonicalURL({ path: getPageCanonicalPath('home'), settings })).toBe(
-      'https://wingstravel.com',
+      'https://wingsgroup.com',
     )
     expect(getCanonicalURL({ path: getPageCanonicalPath('about'), settings })).toBe(
-      'https://wingstravel.com/about',
+      'https://wingsgroup.com/about',
     )
     expect(getCanonicalURL({ path: getPageCanonicalPath('/destinations/ha-noi'), settings })).toBe(
-      'https://wingstravel.com/destinations/ha-noi',
+      'https://wingsgroup.com/destinations/ha-noi',
     )
     expect(getCanonicalURL({ path: getPostCanonicalPath('launch'), settings })).toBe(
-      'https://wingstravel.com/posts/launch',
+      'https://wingsgroup.com/posts/launch',
     )
   })
 
@@ -59,7 +60,7 @@ describe('site SEO utilities', () => {
       },
     } as const
 
-    expect(getCanonicalURL({ path: '/about', settings })).toBe('https://wingstravel.com/about')
+    expect(getCanonicalURL({ path: '/about', settings })).toBe('https://wingsgroup.com/about')
     expect(getCanonicalURL({ path: '/about', settings: wingsGoSettings })).toBe(
       'https://wingsgo.vn/about',
     )
@@ -68,9 +69,9 @@ describe('site SEO utilities', () => {
   it('resolves sitemap settings by site id', () => {
     const settingsBySiteId = new Map([[settings.site, settings]])
 
-    expect(getSiteSettingForSite(settings.site, settingsBySiteId)?.siteName).toBe('WingsTravel')
+    expect(getSiteSettingForSite(settings.site, settingsBySiteId)?.siteName).toBe('WingsGroup')
     expect(getSiteSettingForSite({ id: settings.site } as never, settingsBySiteId)?.siteName).toBe(
-      'WingsTravel',
+      'WingsGroup',
     )
   })
 
@@ -87,13 +88,13 @@ describe('site SEO utilities', () => {
     expect(data?.itemListElement).toEqual([
       {
         '@type': 'ListItem',
-        item: 'https://wingstravel.com',
+        item: 'https://wingsgroup.com',
         name: 'Home',
         position: 1,
       },
       {
         '@type': 'ListItem',
-        item: 'https://wingstravel.com/posts',
+        item: 'https://wingsgroup.com/posts',
         name: 'Posts',
         position: 2,
       },

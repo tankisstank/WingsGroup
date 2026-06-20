@@ -1,22 +1,19 @@
 import { expect, test } from '@playwright/test'
 
 import { e2eBaseURL } from '../helpers/baseURL'
-import {
-  heroPresentationFixturePaths,
-  seedPhase1LaunchSmoke,
-} from '../helpers/seedPhase1Launch'
+import { heroPresentationFixturePaths, seedPhase1LaunchSmoke } from '../helpers/seedPhase1Launch'
 import { heroPresentationDefinitions } from '../../src/heros/presentations/registry'
 
 const phase1Routes = [
   {
     path: '/',
-    title: /WingsTravel/,
-    heading: 'WingsTravel - hệ sinh thái du lịch nhiều line business dưới một lớp trust chung',
+    title: /WingsGroup/,
+    heading: 'WingsGroup - hệ sinh thái du lịch nhiều line business dưới một lớp trust chung',
   },
   {
     path: '/en',
-    title: /WingsTravel/,
-    heading: 'WingsTravel - a travel ecosystem with several business lines under one trust layer',
+    title: /WingsGroup/,
+    heading: 'WingsGroup - a travel ecosystem with several business lines under one trust layer',
   },
   {
     path: '/he-sinh-thai',
@@ -38,7 +35,11 @@ const phase1Routes = [
   { path: '/wingsside', title: /WingsSide/, heading: 'Tailor-made Vietnam journeys' },
   { path: '/wingsside/destinations/ha-noi', title: /Ha Noi/, heading: 'Ha Noi' },
   { path: '/wingsplus', title: /WingsPlus/, heading: 'Hành trình may đo cho nhu cầu giá trị cao' },
-  { path: '/wingsplus/nang-luc-dich-vu', title: /Năng lực dịch vụ/, heading: 'Chứng minh năng lực trước khi xin brief' },
+  {
+    path: '/wingsplus/nang-luc-dich-vu',
+    title: /Năng lực dịch vụ/,
+    heading: 'Chứng minh năng lực trước khi xin brief',
+  },
   { path: '/wingscare', title: /WingsCare/ },
   { path: '/wingspass', title: /WingsPass/, heading: 'Fast Track rõ giá, rõ sân bay, đặt nhanh' },
   { path: '/wingsside/en', title: /WingsSide/, heading: 'Tailor-made Vietnam journeys' },
@@ -133,11 +134,15 @@ test.describe('Phase 1 public frontend smoke', () => {
     await page.setViewportSize({ height: 900, width: 1440 })
     await page.goto(`${e2eBaseURL}/wingsgo`)
 
-    await expect(page.getByRole('heading', { name: 'Chùm tour outbound giá rõ, lịch rõ' })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'Chùm tour outbound giá rõ, lịch rõ' }),
+    ).toBeVisible()
     await expect(page.getByRole('link', { name: 'Xem lịch khởi hành' }).first()).toBeVisible()
     await expect(page.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible()
 
-    let overflowX = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)
+    let overflowX = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    )
     expect(overflowX).toBe(false)
 
     await page.setViewportSize({ height: 844, width: 390 })
@@ -149,7 +154,9 @@ test.describe('Phase 1 public frontend smoke', () => {
     const ctaBox = await primaryCTA.boundingBox()
     expect(ctaBox?.y).toBeLessThan(520)
 
-    overflowX = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)
+    overflowX = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    )
     expect(overflowX).toBe(false)
   })
 
@@ -166,7 +173,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(hero).toHaveAttribute('data-hero-presentation', definition.value)
       await expect(
         page.getByRole('heading', {
-          name: 'WingsTravel - hệ sinh thái du lịch nhiều line business dưới một lớp trust chung',
+          name: 'WingsGroup - hệ sinh thái du lịch nhiều line business dưới một lớp trust chung',
         }),
       ).toBeVisible()
 
@@ -175,11 +182,15 @@ test.describe('Phase 1 public frontend smoke', () => {
       expect((await primaryCTA.boundingBox())?.height).toBeGreaterThanOrEqual(44)
 
       if (definition.value === 'centered-visual') {
-        await expect(hero.locator('.hero-presentation--centered .hero-presentation__visual')).toBeVisible()
+        await expect(
+          hero.locator('.hero-presentation--centered .hero-presentation__visual'),
+        ).toBeVisible()
       }
 
       if (definition.value === 'split-visual') {
-        await expect(hero.locator('.hero-presentation--split .hero-presentation__visual')).toBeVisible()
+        await expect(
+          hero.locator('.hero-presentation--split .hero-presentation__visual'),
+        ).toBeVisible()
       }
 
       if (definition.value === 'layered-visuals') {
@@ -217,7 +228,7 @@ test.describe('Phase 1 public frontend smoke', () => {
   test('resolves the correct site from production hostnames', async ({ request }) => {
     const rootResponse = await request.get(e2eBaseURL, {
       headers: {
-        Host: 'wingstravel.vn',
+        Host: 'wingsgroup.vn',
       },
     })
     const careResponse = await request.get(e2eBaseURL, {
@@ -225,17 +236,36 @@ test.describe('Phase 1 public frontend smoke', () => {
         Host: 'wingscare.vn',
       },
     })
+    const sideResponse = await request.get(e2eBaseURL, {
+      headers: {
+        Host: 'wingsside.vn',
+      },
+    })
+    const forwardedSideResponse = await request.get(e2eBaseURL, {
+      headers: {
+        Host: 'internal:3000',
+        'X-Forwarded-Host': 'wingsside.vn',
+      },
+    })
 
     expect(rootResponse.ok()).toBe(true)
     expect(careResponse.ok()).toBe(true)
+    expect(sideResponse.ok()).toBe(true)
+    expect(forwardedSideResponse.ok()).toBe(true)
 
     const rootHTML = await rootResponse.text()
     const careHTML = await careResponse.text()
+    const sideHTML = await sideResponse.text()
+    const forwardedSideHTML = await forwardedSideResponse.text()
 
-    expect(rootHTML).toContain('WingsTravel | Travel Ecosystem')
-    expect(rootHTML).toContain('WingsTravel - hệ sinh thái du lịch nhiều line business')
+    expect(rootHTML).toContain('WingsGroup | Travel Ecosystem')
+    expect(rootHTML).toContain('WingsGroup - hệ sinh thái du lịch nhiều line business')
     expect(careHTML).toContain('WingsCare | Care And Support')
     expect(careHTML).toContain('Travel care rõ quyền lợi, rõ hỗ trợ')
+    expect(sideHTML).toContain('WingsSide | Inbound Vietnam')
+    expect(sideHTML).toContain('data-site-theme="wings-side"')
+    expect(forwardedSideHTML).toContain('WingsSide | Inbound Vietnam')
+    expect(forwardedSideHTML).toContain('data-site-theme="wings-side"')
   })
 
   test('loads the seeded campaign landing page for a child site', async ({ page }) => {
@@ -256,23 +286,29 @@ test.describe('Phase 1 public frontend smoke', () => {
   test('renders parseable JSON-LD for site, page, and breadcrumb schema', async ({ page }) => {
     await page.goto(`${e2eBaseURL}/wingsgo/campaign/he-2026-han-quoc`)
 
-    const graphTypes = await page.locator('script[type="application/ld+json"]').evaluateAll((scripts) =>
-      scripts.flatMap((script) => {
-        const parsed = JSON.parse(script.textContent || '{}')
-        const graph = Array.isArray(parsed['@graph']) ? parsed['@graph'] : []
+    const graphTypes = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((scripts) =>
+        scripts.flatMap((script) => {
+          const parsed = JSON.parse(script.textContent || '{}')
+          const graph = Array.isArray(parsed['@graph']) ? parsed['@graph'] : []
 
-        return graph.map((node) => node['@type'])
-      }),
+          return graph.map((node) => node['@type'])
+        }),
+      )
+
+    expect(graphTypes).toEqual(
+      expect.arrayContaining(['Organization', 'WebSite', 'WebPage', 'BreadcrumbList']),
     )
-
-    expect(graphTypes).toEqual(expect.arrayContaining(['Organization', 'WebSite', 'WebPage', 'BreadcrumbList']))
   })
 
-  test('loads a detailed WingsTravel root-site article', async ({ page }) => {
-    await page.goto(`${e2eBaseURL}/posts/he-sinh-thai-wingstravel-la-gi`)
+  test('loads a detailed WingsGroup root-site article', async ({ page }) => {
+    await page.goto(`${e2eBaseURL}/posts/he-sinh-thai-wingsgroup-la-gi`)
 
-    await expect(page).toHaveTitle(/Hệ sinh thái WingsTravel là gì/i)
-    await expect(page.getByRole('heading', { name: /Hệ sinh thái WingsTravel là gì/i }).first()).toBeVisible()
+    await expect(page).toHaveTitle(/Hệ sinh thái WingsGroup là gì/i)
+    await expect(
+      page.getByRole('heading', { name: /Hệ sinh thái WingsGroup là gì/i }).first(),
+    ).toBeVisible()
     await expect(page.getByRole('link', { name: /Tin tức/i }).first()).toBeVisible()
   })
 
@@ -294,7 +330,11 @@ test.describe('Phase 1 public frontend smoke', () => {
         batch.map(async ({ depth, path }) => {
           const response = await request.get(path)
           const html = await response.text()
-          const title = html.match(/<title>(.*?)<\/title>/is)?.[1]?.replace(/\s+/g, ' ').trim() || ''
+          const title =
+            html
+              .match(/<title>(.*?)<\/title>/is)?.[1]
+              ?.replace(/\s+/g, ' ')
+              .trim() || ''
 
           return { depth, html, path, response, title }
         }),

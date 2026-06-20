@@ -18,7 +18,7 @@ const contactPathBySiteCode: Record<string, string> = {
   'wings-pass': '/contact',
   'wings-plus': '/request-proposal',
   'wings-side': '/contact-us',
-  'wings-travel': '/lien-he',
+  'wings-group': '/lien-he',
 }
 
 type Args = {
@@ -33,16 +33,16 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
   const payload = await getPayload({ config: configPromise })
   const locale = await getCurrentLocale(localeParam)
   const site = await getCurrentSite(siteCode)
-  const contactPath = contactPathBySiteCode[site?.code || 'wings-travel'] || '/lien-he'
+  const contactPath = contactPathBySiteCode[site?.code || 'wings-group'] || '/lien-he'
   const copy =
     locale === 'en'
       ? {
           cta: 'Request consultation',
           emptyHeading: 'No matching result found',
           emptyText:
-            'The content may not be published yet, or the request may need a consultation based on actual inventory and schedule. Send an inquiry so the WingsTravel team can review and respond with a suitable direction.',
+            'The content may not be published yet, or the request may need a consultation based on actual inventory and schedule. Send an inquiry so the WingsGroup team can review and respond with a suitable direction.',
           heading: 'Search tours, destinations, and campaigns quickly',
-          kicker: 'Search WingsTravel',
+          kicker: 'Search WingsGroup',
           paragraph:
             'Enter a market, travel season, city, or travel type. If the right content is not available yet, send a request so the team can review the relevant schedule and package options.',
           searchAria: 'Search suggestions',
@@ -52,9 +52,9 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
           cta: 'Gửi yêu cầu tư vấn',
           emptyHeading: 'Chưa tìm thấy kết quả phù hợp',
           emptyText:
-            'Có thể nội dung chưa được publish hoặc cần tư vấn theo lịch khởi hành thực tế. Gửi yêu cầu để team WingsTravel kiểm tra và phản hồi phương án phù hợp.',
+            'Có thể nội dung chưa được publish hoặc cần tư vấn theo lịch khởi hành thực tế. Gửi yêu cầu để team WingsGroup kiểm tra và phản hồi phương án phù hợp.',
           heading: 'Tìm nhanh tour, điểm đến và chiến dịch',
-          kicker: 'Tìm kiếm WingsTravel',
+          kicker: 'Tìm kiếm WingsGroup',
           paragraph:
             'Nhập thị trường, mùa đi, thành phố hoặc loại trải nghiệm. Nếu chưa tìm thấy nội dung phù hợp, hãy gửi yêu cầu để đội ngũ tư vấn kiểm tra lịch và gói phù hợp.',
           searchAria: 'Gợi ý tìm kiếm',
@@ -169,8 +169,8 @@ export async function generateMetadata({ searchParams }: Args): Promise<Metadata
           title: locale === 'en' ? 'Search' : 'Tìm kiếm',
           description:
             locale === 'en'
-              ? 'Search public WingsTravel content.'
-              : 'Tìm kiếm nội dung công khai của WingsTravel.',
+              ? 'Search WingsGroup tours, destinations, seasonal campaigns, departure schedules, and travel service articles across the public site.'
+              : 'Tìm kiếm tour, điểm đến, campaign theo mùa, lịch khởi hành và bài viết dịch vụ du lịch trên WingsGroup.',
         },
         slug: 'search',
       },

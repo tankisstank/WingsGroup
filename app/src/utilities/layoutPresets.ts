@@ -358,7 +358,7 @@ const cta = (
 ) => ({
   blockType: 'cta',
   presentation,
-  richText: richText(heading, 'Trao đổi với đội ngũ WingsTravel để nhận phương án phù hợp.'),
+  richText: richText(heading, 'Trao đổi với đội ngũ WingsGroup để nhận phương án phù hợp.'),
   links: [
     {
       link: {
@@ -466,7 +466,7 @@ export const createLayoutPresetData = (
         hero: hero(title, lead, 'split-visual'),
         layout: [
           features('bento', 'Khám phá dịch vụ', ['Tour trọn gói', 'Vé và lưu trú', 'Visa', 'Bảo hiểm', 'Dịch vụ doanh nghiệp']),
-          stats('inline-bar', 'WingsTravel trong những con số'),
+          stats('inline-bar', 'WingsGroup trong những con số'),
           testimonials('carousel'),
           cta('split-card'),
         ],
@@ -543,7 +543,7 @@ export const createLayoutPresetData = (
         layout: [
           archive('magazine'),
           stats('inline-bar', 'Cẩm nang từ kinh nghiệm thực tế'),
-          cta('inline-form', 'Nhận nội dung mới từ WingsTravel'),
+          cta('inline-form', 'Nhận nội dung mới từ WingsGroup'),
         ],
       }
     case 'long-form-guide':
@@ -564,7 +564,7 @@ export const createLayoutPresetData = (
           testimonials('featured'),
           testimonials('social-wall', 'Những trải nghiệm thực tế'),
           testimonials('logo-cloud', 'Đối tác đồng hành'),
-          cta('testimonial', 'Bắt đầu hành trình cùng WingsTravel'),
+          cta('testimonial', 'Bắt đầu hành trình cùng WingsGroup'),
         ],
       }
   }

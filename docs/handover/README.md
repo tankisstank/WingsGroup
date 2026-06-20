@@ -1,6 +1,6 @@
-# WingsTravel Handover Docs
+# WingsGroup Handover Docs
 
-This folder holds the customer-facing handover package for `WingsTravel` after
+This folder holds the customer-facing handover package for `WingsGroup` after
 phase 1.
 
 Use these files as the default delivery set unless a later intake narrows or
@@ -18,6 +18,8 @@ expands the package.
 - `07-access-and-account-handover.md`
 - `08-deployment-server-domain-email.md`
 - `09-scope-boundary-and-next-steps.md`
+- `10-acceptance-and-handover-procedure.md`
+- `templates/01-bien-ban-nghiem-thu-ban-giao.md`
 
 ## Update Rule
 
@@ -34,6 +36,8 @@ Current package status:
 - CMS operator console and quick page wizard guidance are documented.
 - Role guides reflect `super-admin`, `site-manager`, and `editor` restrictions.
 - Import/export and lead handling notes are aligned with phase-1 scope.
+- The acceptance procedure and bilateral handover record are available for
+  customer review and signature.
 
 ## Audience
 

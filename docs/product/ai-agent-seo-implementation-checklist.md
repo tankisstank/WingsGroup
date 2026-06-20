@@ -1,4 +1,4 @@
-# WingsTravel AI Agent SEO Implementation Checklist
+# WingsGroup AI Agent SEO Implementation Checklist
 
 ## Purpose
 

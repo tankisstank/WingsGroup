@@ -22,6 +22,17 @@ import { getCurrentLocale } from '@/utilities/siteContext'
 import { getSiteThemeTokens } from '@/utilities/siteTheme'
 import { buildOrganizationJSONLD, buildWebSiteJSONLD } from '@/utilities/structuredData'
 import { getCanonicalURL, normalizeCanonicalDomain } from '@/utilities/siteURLs'
+import { getMediaUrl } from '@/utilities/getMediaUrl'
+
+const getSiteFaviconURL = (settings: Awaited<ReturnType<typeof getCurrentSiteSettings>>) => {
+  const favicon = settings?.branding?.faviconImage
+
+  if (!favicon || typeof favicon !== 'object' || !favicon.url) {
+    return null
+  }
+
+  return getMediaUrl(favicon.url, favicon.updatedAt)
+}
 
 const wingsGoHeading = Rubik({
   display: 'swap',
@@ -52,6 +63,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const settings = await getCurrentSiteSettings()
   const locale = await getCurrentLocale()
   const siteTheme = getSiteThemeTokens(settings)
+  const faviconURL = getSiteFaviconURL(settings)
 
   return (
     <html
@@ -68,8 +80,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     >
       <head>
         <InitTheme />
-        <link href="/favicon.ico" rel="icon" sizes="32x32" />
-        <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+        {faviconURL ? (
+          <>
+            <link href={faviconURL} rel="icon" />
+            <link href={faviconURL} rel="apple-touch-icon" />
+          </>
+        ) : (
+          <>
+            <link href="/favicon.ico" rel="icon" sizes="32x32" />
+            <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+          </>
+        )}
         <meta content={siteTheme.brandColor} name="theme-color" />
       </head>
       <body
@@ -98,7 +119,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getCurrentSiteSettings()
-  const defaultTitle = settings?.seo?.defaultTitle || settings?.siteName || 'WingsTravel'
+  const defaultTitle = settings?.seo?.defaultTitle || settings?.siteName || 'WingsGroup'
   const titleSuffix = settings?.seo?.titleSuffix
   const title = [defaultTitle, titleSuffix].filter(Boolean).join(' | ')
   const description = settings?.seo?.defaultDescription || settings?.tagline || defaultTitle
@@ -131,7 +152,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     twitter: {
       card: 'summary_large_image',
-      creator: '@wingstravel',
+      creator: '@wingsgroup',
       title,
       description,
       images: [image],

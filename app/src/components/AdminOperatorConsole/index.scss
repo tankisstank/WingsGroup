@@ -2,15 +2,17 @@
 
 .cms-console {
   min-height: 100%;
-  background: var(--theme-elevation-0);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.82), rgb(255 255 255 / 0.96)),
+    var(--theme-elevation-50);
   color: var(--theme-text);
 
   &__shell {
     display: grid;
-    gap: 24px;
+    gap: 18px;
     margin: 0 auto;
-    max-width: 1180px;
-    padding: 36px 24px 56px;
+    max-width: 1200px;
+    padding: 28px 24px 48px;
   }
 
   &__header,
@@ -20,14 +22,15 @@
   &__advanced {
     border: 1px solid var(--theme-elevation-150);
     border-radius: 8px;
-    background: var(--theme-elevation-50);
+    background: var(--theme-elevation-0);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
   }
 
   &__header {
     display: flex;
     justify-content: space-between;
-    gap: 24px;
-    padding: 28px;
+    gap: 20px;
+    padding: 22px 24px;
 
     p {
       margin: 0 0 8px;
@@ -39,14 +42,14 @@
 
     h1 {
       margin: 0;
-      font-size: 34px;
+      font-size: 30px;
       line-height: 1.15;
     }
 
     span {
       display: block;
       max-width: 680px;
-      margin-top: 10px;
+      margin-top: 8px;
       color: var(--theme-elevation-700);
       line-height: 1.55;
     }
@@ -54,9 +57,12 @@
 
   &__role {
     align-self: flex-start;
-    min-width: 180px;
+    min-width: 190px;
+    border: 1px solid color-mix(in srgb, var(--theme-success-500) 30%, var(--theme-elevation-150));
     border-left: 3px solid var(--theme-success-500);
-    padding-left: 14px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--theme-success-100) 42%, var(--theme-elevation-0));
+    padding: 12px 14px;
 
     span {
       margin: 0;
@@ -74,8 +80,8 @@
   &__quick-actions,
   &__metrics {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
   }
 
   &__quick-actions a,
@@ -85,18 +91,43 @@
   &__link-list span {
     border: 1px solid var(--theme-elevation-150);
     border-radius: 6px;
-    background: var(--theme-elevation-50);
+    background: var(--theme-elevation-0);
     color: var(--theme-text);
     text-decoration: none;
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+
+  &__quick-actions a:hover,
+  &__metrics a:hover,
+  &__tasks a:hover,
+  &__link-list a:hover,
+  &__recent a:hover,
+  &__advanced a:hover {
+    border-color: color-mix(in srgb, var(--theme-success-500) 36%, var(--theme-elevation-150));
+    color: color-mix(in srgb, var(--theme-success-500) 72%, black);
+  }
+
+  &__quick-actions a:focus-visible,
+  &__metrics a:focus-visible,
+  &__tasks a:focus-visible,
+  &__link-list a:focus-visible,
+  &__recent a:focus-visible,
+  &__advanced a:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--theme-success-500) 65%, white);
+    outline-offset: 2px;
   }
 
   &__quick-actions a {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 48px;
+    min-height: 46px;
     padding: 0 14px;
     font-weight: 700;
+    text-align: center;
   }
 
   &__primary-action {
@@ -109,7 +140,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    padding: 22px;
+    padding: 18px 20px;
 
     h2,
     p {
@@ -132,21 +163,23 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      min-height: 46px;
       padding: 12px 14px;
     }
   }
 
   &__metrics a {
     display: grid;
-    gap: 8px;
-    padding: 18px;
+    gap: 7px;
+    min-height: 88px;
+    padding: 16px;
 
     span {
       color: var(--theme-elevation-650);
     }
 
     strong {
-      font-size: 28px;
+      font-size: 26px;
       line-height: 1;
     }
   }
@@ -164,7 +197,7 @@
     gap: 12px;
     min-height: 190px;
     border-bottom: 1px solid var(--theme-elevation-150);
-    padding: 22px;
+    padding: 20px;
 
     &:nth-child(odd) {
       border-right: 1px solid var(--theme-elevation-150);
@@ -182,14 +215,18 @@
   }
 
   &__link-list {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
     gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 
     a,
     span {
-      padding: 9px 11px;
+      align-items: center;
+      display: inline-flex;
+      min-height: 38px;
+      padding: 8px 11px;
       font-size: 13px;
+      font-weight: 600;
     }
   }
 
@@ -232,14 +269,18 @@
     }
 
     li {
-      display: grid;
-      gap: 4px;
       border-bottom: 1px solid var(--theme-elevation-100);
-      padding-bottom: 10px;
+      display: grid;
+      gap: 3px;
+      padding-bottom: 8px;
     }
 
     a {
+      border-radius: 6px;
       color: var(--theme-text);
+      display: block;
+      min-height: 38px;
+      padding: 8px 8px 7px;
       text-decoration: none;
     }
 
@@ -259,7 +300,8 @@
 
   @include mid-break {
     &__shell {
-      padding: 20px 12px 40px;
+      gap: 14px;
+      padding: 18px 12px 36px;
     }
 
     &__header,
@@ -268,7 +310,11 @@
     }
 
     &__header h1 {
-      font-size: 28px;
+      font-size: 27px;
+    }
+
+    &__role {
+      width: 100%;
     }
 
     &__tasks {
@@ -288,13 +334,37 @@
   }
 
   @include small-break {
+    &__shell {
+      padding-inline: 10px;
+    }
+
+    &__header,
+    &__today,
+    &__panel,
+    &__recent > div,
+    &__advanced {
+      padding: 16px;
+    }
+
+    &__quick-actions {
+      grid-template-columns: 1fr;
+    }
+
     &__metrics {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    &__workspace,
-    &__recent {
-      display: none;
+    &__metrics a {
+      min-height: 82px;
+      padding: 14px;
+    }
+
+    &__link-list {
+      grid-template-columns: 1fr;
+    }
+
+    &__advanced .cms-console__link-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 }

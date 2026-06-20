@@ -66,7 +66,7 @@ const heroVariantCopy = {
     postcards: ['Jeju summer', 'Seoul - Nami', 'Tokyo mùa lá'],
   },
   standard: {
-    badge: 'WingsTravel service ecosystem',
+    badge: 'WingsGroup service ecosystem',
     postcards: ['Travel planning', 'Local support', 'Trusted service'],
   },
   utility: {
@@ -172,7 +172,7 @@ export const HighImpactHero: React.FC<Page['hero']> = (props) => {
 
   return (
     <section
-      className="site-hero site-hero--presented relative -mt-[10.4rem] overflow-hidden"
+      className="site-hero site-hero--presented relative -mt-[8.2rem] overflow-hidden"
       data-hero-presentation={presentation}
       data-hero-variant={variant}
       data-theme="light"

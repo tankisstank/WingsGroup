@@ -12,11 +12,11 @@ import { describe, expect, it } from 'vitest'
 const settings = {
   id: 1,
   site: 1,
-  siteName: 'WingsTravel',
+  siteName: 'WingsGroup',
   updatedAt: '2026-05-27T00:00:00.000Z',
   createdAt: '2026-05-27T00:00:00.000Z',
   seo: {
-    canonicalDomain: 'https://wingstravel.com',
+    canonicalDomain: 'https://wingsgroup.com',
   },
 } as SiteSetting
 
@@ -30,7 +30,7 @@ describe('breadcrumb helpers', () => {
 
     const items = buildPageBreadcrumbItems({ page, settings })
 
-    expect(items).toEqual([{ label: 'WingsTravel', path: '/' }])
+    expect(items).toEqual([{ label: 'WingsGroup', path: '/' }])
     expect(buildBreadcrumbListJSONLD(items.map((item) => ({ name: item.label, path: item.path })), settings)).toBeNull()
   })
 
@@ -50,7 +50,7 @@ describe('breadcrumb helpers', () => {
     } as BreadcrumbPage
 
     expect(buildPageBreadcrumbItems({ page, settings })).toEqual([
-      { label: 'WingsTravel', path: '/' },
+      { label: 'WingsGroup', path: '/' },
       { label: 'Tours', path: '/tours' },
       { label: 'Detail', path: '/tour-detail' },
     ])
@@ -67,7 +67,7 @@ describe('breadcrumb helpers', () => {
     } as BreadcrumbPost
 
     expect(buildPostBreadcrumbItems({ post, settings })).toEqual([
-      { label: 'WingsTravel', path: '/' },
+      { label: 'WingsGroup', path: '/' },
       { label: 'Bài viết', path: '/posts' },
       { label: 'Launch', path: '/posts/launch' },
     ])

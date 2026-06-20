@@ -31,7 +31,7 @@ const shouldPushDatabaseSchema = process.env.PAYLOAD_DB_PUSH === 'true'
 export default buildConfig({
   admin: {
     meta: {
-      titleSuffix: 'WingsTravel CMS',
+      titleSuffix: 'WingsGroup CMS',
     },
     suppressHydrationWarning: true,
     components: {
@@ -51,6 +51,10 @@ export default buildConfig({
           Component: '@/components/ThemeManager',
           path: '/theme',
         },
+        siteReview: {
+          Component: '@/components/SiteReview',
+          path: '/site-review',
+        },
         pageWizard: {
           Component: '@/components/PageWizard',
           path: '/page-wizard',
@@ -60,14 +64,14 @@ export default buildConfig({
     dashboard: {
       defaultLayout: [
         {
-          widgetSlug: 'wings-travel-metrics',
+          widgetSlug: 'wings-group-metrics',
           width: 'full',
         },
       ],
       widgets: [
         {
-          slug: 'wings-travel-metrics',
-          Component: '@/components/AdminDashboard/WingsTravelMetrics#WingsTravelMetrics',
+          slug: 'wings-group-metrics',
+          Component: '@/components/AdminDashboard/WingsGroupMetrics#WingsGroupMetrics',
           minWidth: 'full',
           maxWidth: 'full',
         },

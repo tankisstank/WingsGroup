@@ -175,7 +175,7 @@ export default function AdminOperatorConsole() {
       <div className={`${baseClass}__shell`}>
         <header className={`${baseClass}__header`}>
           <div>
-            <p>WingsTravel CMS</p>
+            <p>WingsGroup CMS</p>
             <h1>Console vận hành</h1>
             <span>
               Một nơi để tạo nội dung, xem lead, duyệt bản nháp và xử lý dữ liệu theo quyền
@@ -192,6 +192,7 @@ export default function AdminOperatorConsole() {
           <Link className={`${baseClass}__primary-action`} href="/admin/page-wizard">
             Tạo trang nhanh
           </Link>
+          <Link href="/admin/site-review">Rà soát site/page</Link>
           {canPublish ? <Link href="/admin/theme">Quản lý theme</Link> : null}
           <Link href="/admin/collections/form-submissions">Xem lead mới</Link>
           <Link href="/admin/collections/pages?where[_status][equals]=draft">
@@ -235,6 +236,7 @@ export default function AdminOperatorConsole() {
           <div className={`${baseClass}__panel`}>
             <h2>Nội dung</h2>
             <div className={`${baseClass}__link-list`}>
+              <Link href="/admin/site-review">Rà soát site/page bằng preview</Link>
               <Link href="/admin/page-wizard">Tạo trang theo wizard</Link>
               <Link href="/admin/collections/pages">Quản lý trang</Link>
               <Link href="/admin/collections/posts">Quản lý bài viết</Link>
@@ -283,29 +285,37 @@ export default function AdminOperatorConsole() {
         <section className={`${baseClass}__recent`}>
           <div>
             <h2>Trang cập nhật gần đây</h2>
-            <ul>
-              {recentPages.map((doc) => (
-                <li key={doc.id}>
-                  <Link href={`/admin/collections/pages/${doc.id}`}>
-                    {doc.title || 'Trang chưa có tiêu đề'}
-                  </Link>
-                  <span>{formatDate(doc.updatedAt)}</span>
-                </li>
-              ))}
-            </ul>
+            {recentPages.length > 0 ? (
+              <ul>
+                {recentPages.map((doc) => (
+                  <li key={doc.id}>
+                    <Link href={`/admin/collections/pages/${doc.id}`}>
+                      {doc.title || 'Trang chưa có tiêu đề'}
+                    </Link>
+                    <span>{formatDate(doc.updatedAt)}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Chưa có trang nào được cập nhật gần đây.</p>
+            )}
           </div>
           <div>
             <h2>Lead mới nhất</h2>
-            <ul>
-              {recentLeads.map((doc) => (
-                <li key={doc.id}>
-                  <Link href={`/admin/collections/form-submissions/${doc.id}`}>
-                    {typeof doc.form === 'object' && doc.form?.title ? doc.form.title : 'Lead gửi về'}
-                  </Link>
-                  <span>{formatDate(doc.createdAt)}</span>
-                </li>
-              ))}
-            </ul>
+            {recentLeads.length > 0 ? (
+              <ul>
+                {recentLeads.map((doc) => (
+                  <li key={doc.id}>
+                    <Link href={`/admin/collections/form-submissions/${doc.id}`}>
+                      {typeof doc.form === 'object' && doc.form?.title ? doc.form.title : 'Lead gửi về'}
+                    </Link>
+                    <span>{formatDate(doc.createdAt)}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Chưa có lead mới.</p>
+            )}
           </div>
         </section>
 

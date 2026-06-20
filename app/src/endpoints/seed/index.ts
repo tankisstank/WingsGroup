@@ -102,9 +102,9 @@ export const seed = async ({
     req,
     context: seedContext,
     data: {
-      name: 'WingsTravel',
-      code: 'wings-travel',
-      primaryDomain: 'wingstravel.local',
+      name: 'WingsGroup',
+      code: 'wings-group',
+      primaryDomain: 'wingsgroup.local',
       additionalDomains: [
         {
           domain: 'wingsgo.local',
@@ -117,24 +117,7 @@ export const seed = async ({
   })
 
   const themePresetIDs = await ensureThemePresetSeeds(payload, req)
-  const siteThemeAssignment = siteThemeAssignments['wings-travel']
-
-  await payload.create({
-    collection: 'site-settings',
-    req,
-    context: seedContext,
-    data: {
-      branding: {
-        accentColor: '#A16207',
-        brandColor: '#1C1917',
-        logoText: 'WingsTravel',
-        themeKey: 'wings-travel',
-        themePreset: themePresetIDs[siteThemeAssignment.themePreset],
-      },
-      site: seedSite.id,
-      siteName: 'WingsTravel',
-    },
-  })
+  const siteThemeAssignment = siteThemeAssignments['wings-group']
 
   payload.logger.info(`— Seeding media...`)
 
@@ -208,6 +191,25 @@ export const seed = async ({
       site: seedSite.id,
     }),
     file: hero1Buffer,
+  })
+
+  await payload.create({
+    collection: 'site-settings',
+    req,
+    context: seedContext,
+    data: {
+      branding: {
+        accentColor: '#A16207',
+        brandColor: '#1C1917',
+        faviconImage: imageHomeDoc.id,
+        logoImage: imageHomeDoc.id,
+        logoText: 'WingsGroup',
+        themeKey: 'wings-group',
+        themePreset: themePresetIDs[siteThemeAssignment.themePreset],
+      },
+      site: seedSite.id,
+      siteName: 'WingsGroup',
+    },
   })
 
   for (const category of categories) {

@@ -1,4 +1,4 @@
-# WingsTravel Editorial Operations
+# WingsGroup Editorial Operations
 
 ## Purpose
 

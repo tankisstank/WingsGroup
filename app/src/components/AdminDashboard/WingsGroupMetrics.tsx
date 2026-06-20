@@ -91,7 +91,7 @@ const roleLabel: Record<string, string> = {
   'super-admin': 'Quản trị toàn hệ',
 }
 
-export async function WingsTravelMetrics({ req }: WidgetServerProps) {
+export async function WingsGroupMetrics({ req }: WidgetServerProps) {
   const user = req.user as AppUser | undefined
 
   if (!user) {
@@ -247,7 +247,7 @@ export async function WingsTravelMetrics({ req }: WidgetServerProps) {
     <section className={baseClass}>
       <div className={`${baseClass}__header`}>
         <div>
-          <p className={`${baseClass}__eyebrow`}>WingsTravel CMS</p>
+          <p className={`${baseClass}__eyebrow`}>WingsGroup CMS</p>
           <h2>Bảng điều hành CMS</h2>
           <p>
             {canPublish

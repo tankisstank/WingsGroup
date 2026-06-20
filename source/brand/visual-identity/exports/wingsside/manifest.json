@@ -1,0 +1,19 @@
+{
+  "siteCode": "wingsside",
+  "displayTitle": "Wing Side",
+  "sourcePdf": "pdf/WINGS SIDE.pdf",
+  "tagline": "See Vietnam Differently.",
+  "valueLine": "TRUST & CARE",
+  "colors": {
+    "primary": "#005090",
+    "accent": "#104030",
+    "secondaryAccent": "#C09030"
+  },
+  "assets": {
+    "logoPrimary": "exports/wingsside/wingsside-logo-primary.png",
+    "logoReverse": "exports/wingsside/wingsside-logo-reverse.png",
+    "mark": "exports/wingsside/wingsside-mark.png",
+    "favicon": "exports/wingsside/wingsside-favicon.png",
+    "ogImage": "exports/wingsside/wingsside-og-image.png"
+  }
+}
