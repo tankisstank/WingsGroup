@@ -1,0 +1,131 @@
+.hero-presentation-guide {
+  background:
+    radial-gradient(circle at top right, color-mix(in oklch, var(--theme-success-500) 16%, transparent), transparent 14rem),
+    var(--theme-elevation-50);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 10px;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.9fr);
+  margin: 0 0 1rem;
+  padding: 1rem;
+
+  &--muted {
+    display: block;
+  }
+
+  &__copy {
+    display: grid;
+    gap: 0.35rem;
+
+    span {
+      color: var(--theme-elevation-600);
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h3,
+    p {
+      margin: 0;
+    }
+  }
+
+  &__canvas {
+    background: linear-gradient(135deg, var(--theme-elevation-0), var(--theme-elevation-100));
+    border: 1px solid var(--theme-elevation-150);
+    border-radius: 10px;
+    display: grid;
+    gap: 0.65rem;
+    min-height: 9rem;
+    padding: 0.8rem;
+  }
+
+  &__headline,
+  &__visual {
+    align-items: center;
+    border-radius: 8px;
+    display: flex;
+    font-size: 0.82rem;
+    font-weight: 800;
+    justify-content: center;
+    padding: 0.7rem;
+    text-align: center;
+  }
+
+  &__headline {
+    background: var(--theme-elevation-0);
+    border: 1px dashed var(--theme-elevation-200);
+  }
+
+  &__visual {
+    background: color-mix(in oklch, var(--theme-success-500) 12%, var(--theme-elevation-0));
+    border: 1px solid color-mix(in oklch, var(--theme-success-500) 24%, var(--theme-elevation-150));
+    min-height: 4.5rem;
+  }
+
+  &[data-template='split-visual'] &__canvas,
+  &[data-template='planner-split'] &__canvas {
+    grid-template-columns: 0.85fr 1.15fr;
+  }
+
+  &[data-template='cinematic-carousel'] &__visual {
+    background: linear-gradient(135deg, var(--theme-elevation-800), var(--theme-elevation-500));
+    color: white;
+  }
+
+  &[data-template='video-background'] &__canvas {
+    background: linear-gradient(135deg, var(--theme-elevation-900), var(--theme-elevation-700));
+    color: white;
+  }
+
+  &[data-template='gradient-mesh'] &__visual {
+    background:
+      radial-gradient(circle at 30% 30%, #f59e0b, transparent 38%),
+      radial-gradient(circle at 70% 45%, #0ea5e9, transparent 42%),
+      radial-gradient(circle at 50% 80%, #22c55e, transparent 34%);
+    color: white;
+  }
+
+  &__requirements {
+    border-top: 1px solid var(--theme-elevation-150);
+    grid-column: 1 / -1;
+    padding-top: 0.75rem;
+
+    strong {
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      background: var(--theme-elevation-0);
+      border: 1px solid var(--theme-elevation-150);
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.35rem 0.6rem;
+    }
+  }
+
+  &__meta {
+    color: var(--theme-elevation-650);
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+}
+
+@media (width < 60rem) {
+  .hero-presentation-guide {
+    grid-template-columns: 1fr;
+  }
+}

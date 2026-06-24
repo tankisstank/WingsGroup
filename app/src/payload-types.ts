@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     sites: Site;
     'theme-presets': ThemePreset;
+    'hero-presentation-presets': HeroPresentationPreset;
     'site-settings': SiteSetting;
     pages: Page;
     posts: Post;
@@ -91,6 +92,7 @@ export interface Config {
   collectionsSelect: {
     sites: SitesSelect<false> | SitesSelect<true>;
     'theme-presets': ThemePresetsSelect<false> | ThemePresetsSelect<true>;
+    'hero-presentation-presets': HeroPresentationPresetsSelect<false> | HeroPresentationPresetsSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -248,6 +250,48 @@ export interface ThemePreset {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero-presentation-presets".
+ */
+export interface HeroPresentationPreset {
+  id: number;
+  name: string;
+  key: string;
+  description?: string | null;
+  isActive?: boolean | null;
+  baseTemplate:
+    | 'centered-visual'
+    | 'split-visual'
+    | 'layered-visuals'
+    | 'gradient-mesh'
+    | 'planner-split'
+    | 'cinematic-carousel'
+    | 'video-background';
+  slots?: {
+    showBadge?: boolean | null;
+    showPostcards?: boolean | null;
+    showBusinessPanel?: boolean | null;
+  };
+  visual?: {
+    contentPosition?: ('left' | 'center' | 'right') | null;
+    contentAlign?: ('left' | 'center' | 'right') | null;
+    mediaFit?: ('cover' | 'contain') | null;
+    overlayStrength?: ('none' | 'soft' | 'strong') | null;
+  };
+  behavior?: {
+    autoplay?: boolean | null;
+    intervalMs?: number | null;
+    transition?: ('crossfade' | 'slide' | 'zoom') | null;
+    transitionMs?: number | null;
+    loop?: boolean | null;
+    pauseOnHover?: boolean | null;
+    showArrows?: boolean | null;
+    showDots?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
  */
 export interface SiteSetting {
@@ -317,6 +361,13 @@ export interface SiteSetting {
     defaultDescription?: string | null;
     defaultImage?: (number | null) | Media;
     canonicalDomain?: string | null;
+  };
+  /**
+   * Presentation và hành vi mặc định cho page chọn kế thừa. Nội dung và media vẫn nằm trên từng page.
+   */
+  heroDefaults?: {
+    presentationPreset?: (number | null) | HeroPresentationPreset;
+    variant?: ('standard' | 'retail-departures' | 'planner' | 'utility') | null;
   };
   supportEmail?: string | null;
   supportPhone?: string | null;
@@ -499,7 +550,33 @@ export interface Page {
     /**
      * Chỉ thay đổi bố cục hiển thị. Màu sắc, font và button tiếp tục lấy từ theme của site.
      */
-    presentation?: ('centered-visual' | 'split-visual' | 'layered-visuals' | 'gradient-mesh') | null;
+    presentation?:
+      | (
+          | 'centered-visual'
+          | 'split-visual'
+          | 'layered-visuals'
+          | 'gradient-mesh'
+          | 'planner-split'
+          | 'cinematic-carousel'
+          | 'video-background'
+        )
+      | null;
+    /**
+     * Dữ liệu cũ chưa có lựa chọn này tiếp tục dùng presentation legacy để bảo toàn giao diện.
+     */
+    presentationMode?: ('inherit' | 'override') | null;
+    presentationPreset?: (number | null) | HeroPresentationPreset;
+    behaviorMode?: ('inherit' | 'override') | null;
+    behaviorOverrides?: {
+      autoplay?: boolean | null;
+      intervalMs?: number | null;
+      transition?: ('crossfade' | 'slide' | 'zoom') | null;
+      transitionMs?: number | null;
+      loop?: boolean | null;
+      pauseOnHover?: boolean | null;
+      showArrows?: boolean | null;
+      showDots?: boolean | null;
+    };
     /**
      * Điều khiển nội dung nghiệp vụ như lịch khởi hành hoặc planner, độc lập với kiểu hiển thị.
      */
@@ -529,13 +606,58 @@ export interface Page {
         }[]
       | null;
     /**
-     * Optional for preset-generated drafts; add media before publishing visual pages.
+     * Dùng cho centered, split, planner và layered hero. Với carousel, nhập ảnh trong Slides. Với video, nhập poster trong Video hero.
      */
     media?: (number | null) | Media;
     /**
-     * Tối đa 3 ảnh bổ sung cho style layered. Nếu để trống, hệ thống lặp visual chính để giữ layout ổn định.
+     * Dùng cho layered visuals hoặc các template cần ảnh phụ. Nếu template không dùng ảnh phụ, có thể để trống.
      */
     supportingMedia?: (number | Media)[] | null;
+    /**
+     * Dùng cho Cinematic carousel. Nếu template hiện tại không phải carousel, có thể để trống.
+     */
+    slides?:
+      | {
+          eyebrow?: string | null;
+          title?: string | null;
+          description?: string | null;
+          media: number | Media;
+          mobileMedia?: (number | null) | Media;
+          links?:
+            | {
+                link: {
+                  type?: ('reference' | 'custom') | null;
+                  newTab?: boolean | null;
+                  reference?:
+                    | ({
+                        relationTo: 'pages';
+                        value: number | Page;
+                      } | null)
+                    | ({
+                        relationTo: 'posts';
+                        value: number | Post;
+                      } | null);
+                  url?: string | null;
+                  label: string;
+                  /**
+                   * Choose how the link should be rendered.
+                   */
+                  appearance?: ('default' | 'outline') | null;
+                };
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Dùng cho Video background. Poster nên luôn có trước khi publish để làm fallback khi reduced-motion hoặc lỗi phát video.
+     */
+    video?: {
+      desktopVideo?: (number | null) | Media;
+      mobileVideo?: (number | null) | Media;
+      poster?: (number | null) | Media;
+    };
   };
   layout: (
     | CallToActionBlock
@@ -1563,6 +1685,10 @@ export interface PayloadLockedDocument {
         value: number | ThemePreset;
       } | null)
     | ({
+        relationTo: 'hero-presentation-presets';
+        value: number | HeroPresentationPreset;
+      } | null)
+    | ({
         relationTo: 'site-settings';
         value: number | SiteSetting;
       } | null)
@@ -1692,6 +1818,46 @@ export interface ThemePresetsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero-presentation-presets_select".
+ */
+export interface HeroPresentationPresetsSelect<T extends boolean = true> {
+  name?: T;
+  key?: T;
+  description?: T;
+  isActive?: T;
+  baseTemplate?: T;
+  slots?:
+    | T
+    | {
+        showBadge?: T;
+        showPostcards?: T;
+        showBusinessPanel?: T;
+      };
+  visual?:
+    | T
+    | {
+        contentPosition?: T;
+        contentAlign?: T;
+        mediaFit?: T;
+        overlayStrength?: T;
+      };
+  behavior?:
+    | T
+    | {
+        autoplay?: T;
+        intervalMs?: T;
+        transition?: T;
+        transitionMs?: T;
+        loop?: T;
+        pauseOnHover?: T;
+        showArrows?: T;
+        showDots?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -1725,6 +1891,12 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         defaultDescription?: T;
         defaultImage?: T;
         canonicalDomain?: T;
+      };
+  heroDefaults?:
+    | T
+    | {
+        presentationPreset?: T;
+        variant?: T;
       };
   supportEmail?: T;
   supportPhone?: T;
@@ -1776,6 +1948,21 @@ export interface PagesSelect<T extends boolean = true> {
         type?: T;
         richText?: T;
         presentation?: T;
+        presentationMode?: T;
+        presentationPreset?: T;
+        behaviorMode?: T;
+        behaviorOverrides?:
+          | T
+          | {
+              autoplay?: T;
+              intervalMs?: T;
+              transition?: T;
+              transitionMs?: T;
+              loop?: T;
+              pauseOnHover?: T;
+              showArrows?: T;
+              showDots?: T;
+            };
         variant?: T;
         links?:
           | T
@@ -1794,6 +1981,38 @@ export interface PagesSelect<T extends boolean = true> {
             };
         media?: T;
         supportingMedia?: T;
+        slides?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              description?: T;
+              media?: T;
+              mobileMedia?: T;
+              links?:
+                | T
+                | {
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                          appearance?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+            };
+        video?:
+          | T
+          | {
+              desktopVideo?: T;
+              mobileVideo?: T;
+              poster?: T;
+            };
       };
   layout?:
     | T
@@ -2747,6 +2966,7 @@ export interface TaskCreateCollectionExport {
     collectionSlug:
       | 'sites'
       | 'theme-presets'
+      | 'hero-presentation-presets'
       | 'site-settings'
       | 'pages'
       | 'posts'

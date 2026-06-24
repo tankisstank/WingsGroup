@@ -37,9 +37,9 @@ test.describe('Admin Panel', () => {
   test('can navigate to dashboard', async () => {
     await page.goto(`${e2eBaseURL}/admin`)
     await expect(page).toHaveURL(`${e2eBaseURL}/admin`)
-    const dashboardArtifact = page.locator('span[title="Dashboard"]').first()
-    await expect(dashboardArtifact).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Bảng điều hành CMS' })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Bảng điều hành CMS' }),
+    ).toBeVisible()
     await expect(page.getByRole('link', { name: 'Console vận hành' }).first()).toBeVisible()
     await expect(page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Tạo trang nhanh' })).toBeVisible()
     await expect(page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Lead gửi về' })).toBeVisible()
@@ -59,6 +59,12 @@ test.describe('Admin Panel', () => {
     await expect(page.getByRole('heading', { name: 'Theme Manager' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Colors' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Typography, shape & layout' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Hero presentation' })).toBeVisible()
+    await expect(page.locator('.theme-manager__hero-preview')).toBeVisible()
+    await expect(page.locator('.theme-manager__hero-preview')).toContainText(
+      'Trải nghiệm WingsGroup theo từng thị trường',
+    )
+    await expect(page.locator('.theme-manager__hero-preview-notes')).toBeVisible()
     await expect(page.locator('.theme-manager__preview-head strong')).not.toHaveText(/^\d+$/)
     await expect(page.getByLabel('Brand color picker')).toBeVisible()
     await expect(page.getByText(/Preview (live|chưa lưu)/)).toBeVisible()
@@ -153,7 +159,13 @@ test.describe('Admin Panel', () => {
     }
 
     await page.getByRole('option', { name: 'Style 3 - Layered visuals' }).click()
+    const heroGuide = page.locator('.hero-presentation-guide')
+    await expect(heroGuide.getByText('Preview cấu trúc hero')).toBeVisible()
+    await expect(heroGuide.getByRole('listitem').filter({ hasText: 'Ảnh hero chính' })).toBeVisible()
+    await expect(page.locator('#field-hero__media').getByText('Ảnh hero chính')).toBeVisible()
     await expect(page.getByText('Visual bổ sung', { exact: true })).toBeVisible()
+    await expect(page.getByText('Slides', { exact: true })).toBeVisible()
+    await expect(page.getByText('Video hero', { exact: true })).toBeVisible()
   })
 
   test('site manager can read only assigned site settings through authenticated API', async ({ request }) => {

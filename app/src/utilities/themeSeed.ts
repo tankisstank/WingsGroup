@@ -63,11 +63,50 @@ export const themePresetSeedCatalog: Record<
   },
 }
 
+const customThemePresetSeedCatalog: Array<{
+  description: string
+  isActive: boolean
+  key: string
+  name: string
+  tokens: ThemePresetTokens
+}> = [
+  {
+    description:
+      'Current WingsSide premium look preserved as a rollback-safe preset.',
+    isActive: true,
+    key: 'wings-side-classic',
+    name: 'WingsSide Classic',
+    tokens: {
+      ...defaultThemePresetByKey.premium,
+      accentColor: '#EA580C',
+      brandColor: '#0C4A6E',
+    },
+  },
+  {
+    description:
+      'Editorial premium travel preset for WingsSide using the site brand palette instead of the reference brand colors.',
+    isActive: true,
+    key: 'wings-side-editorial',
+    name: 'WingsSide Editorial',
+    tokens: {
+      ...defaultThemePresetByKey.premium,
+      accentColor: '#C09030',
+      backgroundStyle: 'editorial',
+      brandColor: '#104030',
+      buttonStyle: 'pill',
+      fontPreset: 'editorial',
+      radius: 'lg',
+      surfaceColor: '#F6F2E8',
+      surfaceStrongColor: '#E8DECB',
+    },
+  },
+]
+
 export async function ensureThemePresetSeeds(
   payload: Payload,
   req: PayloadRequest,
-): Promise<Record<ThemePresetKey, number>> {
-  const presetIDs = {} as Record<ThemePresetKey, number>
+): Promise<Record<string, number>> {
+  const presetIDs: Record<string, number> = {}
 
   for (const [key, preset] of Object.entries(themePresetSeedCatalog) as Array<
     [ThemePresetKey, (typeof themePresetSeedCatalog)[ThemePresetKey]]
@@ -111,6 +150,48 @@ export async function ensureThemePresetSeeds(
     }
 
     presetIDs[key] = Number(doc.id)
+  }
+
+  for (const preset of customThemePresetSeedCatalog) {
+    const existing = await payload.find({
+      collection: 'theme-presets',
+      depth: 0,
+      limit: 1,
+      pagination: false,
+      req,
+      where: {
+        key: {
+          equals: preset.key,
+        },
+      },
+    })
+
+    const data = {
+      description: preset.description,
+      isActive: preset.isActive,
+      key: preset.key,
+      name: preset.name,
+      tokens: preset.tokens,
+    }
+
+    const doc =
+      existing.docs[0] ||
+      (await payload.create({
+        collection: 'theme-presets',
+        data,
+        req,
+      }))
+
+    if (existing.docs[0]) {
+      await payload.update({
+        collection: 'theme-presets',
+        data,
+        id: doc.id,
+        req,
+      })
+    }
+
+    presetIDs[preset.key] = Number(doc.id)
   }
 
   return presetIDs

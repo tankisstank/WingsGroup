@@ -1,4 +1,4 @@
-import type { Site, SiteSetting } from '@/payload-types'
+import type { Config, Media, Site, SiteSetting } from '@/payload-types'
 
 import { getServerSideURL } from './getURL'
 import { isSupportedLocale, type SupportedLocaleCode } from './sitePaths'
@@ -49,6 +49,26 @@ export const getCanonicalURL = ({
   const normalizedPath = prefixCanonicalPathWithLocale(path, locale)
 
   return `${baseURL}${normalizedPath === '/' ? '' : normalizedPath}`
+}
+
+export const getAbsoluteMediaURL = ({
+  fallbackPath = '/website-template-OG.webp',
+  media,
+  settings,
+}: {
+  fallbackPath?: string
+  media?: Config['db']['defaultIDType'] | Media | null
+  settings?: null | Pick<SiteSetting, 'seo'>
+}) => {
+  const baseURL = normalizeCanonicalDomain(settings?.seo?.canonicalDomain)
+
+  if (media && typeof media === 'object' && 'url' in media && media.url) {
+    const mediaPath = media.sizes?.og?.url || media.url
+
+    return `${baseURL}${mediaPath}`
+  }
+
+  return `${baseURL}${fallbackPath}`
 }
 
 type PagePathValue =

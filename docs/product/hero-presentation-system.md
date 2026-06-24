@@ -3,9 +3,10 @@
 ## Mục tiêu
 
 Hero của `WingsGroup` là một feature có thể mở rộng, không phải một component
-đơn lẻ. Người quản trị chọn kiểu hiển thị trong Payload CMS; developer có thể
-thêm style mới mà không sửa route, site context, theme token hoặc các block nằm
-ngoài hero.
+đơn lẻ. Hệ thống dùng mô hình hybrid: developer quản trị base template,
+component, capability và validation trong code; super-admin quản trị preset an
+toàn; site-manager chọn default theo site; editor kế thừa hoặc override trên
+từng page.
 
 ## Phạm vi
 
@@ -25,7 +26,7 @@ Hero high-impact có hai trục độc lập:
 Không dùng `presentation` để kiểm tra site, domain hoặc line business. Không
 dùng `variant` để quyết định grid, vị trí visual hoặc background effect.
 
-Các presentation tích hợp sẵn:
+Các base template tích hợp sẵn:
 
 | Key | Tên CMS | Mục đích |
 | --- | --- | --- |
@@ -33,6 +34,19 @@ Các presentation tích hợp sẵn:
 | `split-visual` | Style 2 - Split visual | Nội dung một bên; visual hoặc mockup bên còn lại. |
 | `layered-visuals` | Style 3 - Layered visuals | Nhiều visual card nổi, nghiêng hoặc xếp lớp quanh nội dung trung tâm. |
 | `gradient-mesh` | Style 4 - Animated gradient mesh | Nội dung trung tâm trên nền mesh gradient chuyển động nhẹ. |
+| `planner-split` | Planner split | Nội dung tư vấn và planner panel kết hợp visual lớn. |
+| `cinematic-carousel` | Cinematic carousel | Hai đến tám ảnh, nội dung theo slide, autoplay và controls. |
+| `video-background` | Video background | Video desktop/mobile với poster và fallback. |
+
+Thứ tự resolve presentation:
+
+1. Page override hợp lệ.
+2. Page inherit và site có default preset.
+3. Dữ liệu cũ dùng `hero.presentation`.
+4. Fallback cũ theo `variant`.
+
+Site default chỉ chứa preset và business variant. Headline, CTA, ảnh, slide và
+video luôn thuộc page để tránh một thay đổi site làm đổi nội dung hàng loạt.
 
 `supportingMedia` là danh sách tối đa ba visual phụ, chỉ xuất hiện trong CMS
 khi chọn `layered-visuals`. Nếu thiếu visual phụ, frontend lặp visual chính để
@@ -44,6 +58,9 @@ layout vẫn ổn định.
 - Option trong CMS phải lấy từ
   `app/src/heros/presentations/registry.ts`; không khai báo danh sách thứ hai.
 - Field `Visual bổ sung` chỉ hiển thị với `layered-visuals`.
+- `presentationMode = inherit` dùng default từ `site-settings.heroDefaults`.
+- `presentationMode = override` yêu cầu chọn page-level presentation preset.
+- Carousel dùng 2-8 slide. Video hero yêu cầu poster cho preview/publish an toàn.
 - Theme màu, typography, radius, spacing và button style tiếp tục lấy từ
   `site-settings` và `ThemePresets`.
 - Người quản trị được đổi presentation trên từng page, theo từng locale hiện
@@ -82,18 +99,15 @@ field không xuất hiện, kiểm tra hero đang dùng đúng type `highImpact`
 - Không dùng animation làm thay đổi layout. Chỉ animate `transform`, `opacity`
   hoặc background layer.
 - Phải hỗ trợ `prefers-reduced-motion`.
+- Carousel phải có pause, keyboard-accessible controls, và dừng khi tab/hero
+  không active.
+- Video phải muted, playsInline và quay về poster khi lỗi hoặc reduced-motion.
 - Mobile không được có horizontal overflow.
 
 ## Quy tắc thêm presentation mới
 
-1. Thêm metadata vào `heroPresentationDefinitions`.
-2. Thêm component tương ứng vào `heroPresentationComponents`.
-3. Thêm CSS dưới namespace `hero-presentation`.
-4. Cập nhật tài liệu này với key, mục đích và field phụ nếu có.
-5. Thêm integration test cho registry và resolver.
-6. Thêm Playwright route fixture, desktop assertion và mobile overflow check.
-7. Chạy generate types nếu schema Payload thay đổi.
-8. Tạo migration trước khi đưa schema lên PostgreSQL staging/production.
+Chi tiết thực hiện nằm trong
+`docs/handover/hero-presentation-development-guide.md`.
 
 Không thêm `if (siteCode === ...)` hoặc `if (pathname === ...)` vào presentation.
 Khác biệt theo brand phải đi qua theme token; khác biệt nghiệp vụ phải đi qua

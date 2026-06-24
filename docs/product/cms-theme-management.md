@@ -18,6 +18,8 @@ Delivered surfaces:
 
 - `/admin/theme`: operator-friendly Theme Manager for selecting a site, applying
   a preset, editing controlled tokens, and previewing the result.
+- `/admin/theme` also controls the default governed hero presentation and
+  business behavior independently from the visual theme.
 - `/admin/collections/theme-presets`: preset collection for super-admin
   governance.
 - `/admin/collections/theme-presets/create`: preset editor with live preview

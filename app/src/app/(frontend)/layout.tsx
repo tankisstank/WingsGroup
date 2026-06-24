@@ -16,12 +16,15 @@ import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
 
 import './globals.css'
-import { getServerSideURL } from '@/utilities/getURL'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getCurrentLocale } from '@/utilities/siteContext'
 import { getSiteThemeTokens } from '@/utilities/siteTheme'
 import { buildOrganizationJSONLD, buildWebSiteJSONLD } from '@/utilities/structuredData'
-import { getCanonicalURL, normalizeCanonicalDomain } from '@/utilities/siteURLs'
+import {
+  getAbsoluteMediaURL,
+  getCanonicalURL,
+  normalizeCanonicalDomain,
+} from '@/utilities/siteURLs'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 
 const getSiteFaviconURL = (settings: Awaited<ReturnType<typeof getCurrentSiteSettings>>) => {
@@ -124,13 +127,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = [defaultTitle, titleSuffix].filter(Boolean).join(' | ')
   const description = settings?.seo?.defaultDescription || settings?.tagline || defaultTitle
   const canonicalURL = getCanonicalURL({ settings })
-  const image =
-    settings?.seo?.defaultImage &&
-    typeof settings.seo.defaultImage === 'object' &&
-    'url' in settings.seo.defaultImage &&
-    settings.seo.defaultImage.url
-      ? `${getServerSideURL()}${settings.seo.defaultImage.sizes?.og?.url || settings.seo.defaultImage.url}`
-      : `${getServerSideURL()}/website-template-OG.webp`
+  const image = getAbsoluteMediaURL({
+    media: settings?.seo?.defaultImage,
+    settings,
+  })
 
   return {
     description,

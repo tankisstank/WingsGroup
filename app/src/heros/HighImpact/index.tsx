@@ -10,9 +10,10 @@ import {
   type HeroPresentationProps,
 } from '@/heros/presentations'
 import {
-  resolveHeroPresentation,
   type HeroPresentationKey,
 } from '@/heros/presentations/registry'
+import { resolveHeroPresentationConfig } from '@/heros/presentations/resolver'
+import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
 import {
   BadgeCheckIcon,
   CalendarDaysIcon,
@@ -80,14 +81,21 @@ type HighImpactHeroData = Page['hero'] & {
   supportingMedia?: HeroPresentationProps['supportingMedia']
 }
 
-export const HighImpactHero: React.FC<Page['hero']> = (props) => {
+export const HighImpactHero: React.FC<
+  Page['hero'] & { siteHeroDefaults?: SiteHeroDefaultsLike | null }
+> = (props) => {
   const { links, media, richText, supportingMedia } = props as HighImpactHeroData
-  const variant = ((props as { variant?: keyof typeof heroVariantCopy }).variant || 'standard') as keyof typeof heroVariantCopy
+  const resolved = resolveHeroPresentationConfig({
+    hero: props as HighImpactHeroData,
+    siteDefaults: props.siteHeroDefaults,
+  })
+  const variant = ((
+    (props as { variant?: keyof typeof heroVariantCopy }).variant ||
+    props.siteHeroDefaults?.variant ||
+    'standard'
+  )) as keyof typeof heroVariantCopy
   const copy = heroVariantCopy[variant] || heroVariantCopy.standard
-  const presentation = resolveHeroPresentation(
-    (props as HighImpactHeroData).presentation,
-    variant,
-  )
+  const presentation = resolved.key
   const Presentation = heroPresentationComponents[presentation]
   const { setHeaderTheme } = useHeaderTheme()
   const isRetailDepartures = variant === 'retail-departures'
@@ -174,17 +182,26 @@ export const HighImpactHero: React.FC<Page['hero']> = (props) => {
     <section
       className="site-hero site-hero--presented relative -mt-[8.2rem] overflow-hidden"
       data-hero-presentation={presentation}
+      data-hero-preset={resolved.presetKey}
+      data-hero-source={resolved.source}
+      data-hero-template={resolved.key}
       data-hero-variant={variant}
       data-theme="light"
     >
       <Presentation
-        badge={copy.badge}
-        businessPanel={businessPanel}
+        badge={resolved.preset?.slots?.showBadge === false ? '' : copy.badge}
+        behavior={resolved.behavior}
+        businessPanel={
+          resolved.preset?.slots?.showBusinessPanel === false ? null : businessPanel
+        }
         links={links}
         media={media}
-        postcards={copy.postcards}
+        postcards={resolved.preset?.slots?.showPostcards === false ? [] : copy.postcards}
+        preset={resolved.preset}
         richText={richText}
+        slides={(props as HighImpactHeroData & { slides?: HeroPresentationProps['slides'] }).slides}
         supportingMedia={supportingMedia}
+        video={(props as HighImpactHeroData & { video?: HeroPresentationProps['video'] }).video}
       />
     </section>
   )

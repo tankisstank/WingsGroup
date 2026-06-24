@@ -45,7 +45,9 @@ describe('site SEO utilities', () => {
 
   it('normalizes canonical domains before metadata and sitemap use', () => {
     expect(normalizeCanonicalDomain('wingsgo.vn/')).toBe('https://wingsgo.vn')
-    expect(normalizeCanonicalDomain('https://wingscare.vn///')).toBe('https://wingscare.vn')
+    expect(normalizeCanonicalDomain('https://wingscare.wingsgroup.vn///')).toBe(
+      'https://wingscare.wingsgroup.vn',
+    )
   })
 
   it('keeps canonical URLs separated per site settings', () => {

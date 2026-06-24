@@ -1,7 +1,6 @@
 import type { Media, Page, Post, SiteSetting } from '@/payload-types'
 
-import { getServerSideURL } from './getURL'
-import { getCanonicalURL, getPageCanonicalPath } from './siteURLs'
+import { getAbsoluteMediaURL, getCanonicalURL, getPageCanonicalPath } from './siteURLs'
 
 type JsonLdValue =
   | boolean
@@ -31,14 +30,12 @@ export const buildCanonicalUrl = (settings: SiteSetting | null | undefined, path
   return getCanonicalURL({ path, settings })
 }
 
-const getMediaUrl = (media?: Media | number | null) => {
+const getMediaUrl = (media?: Media | number | null, settings?: SiteSetting | null) => {
   if (!media || typeof media !== 'object' || !('url' in media) || !media.url) {
     return null
   }
 
-  const mediaPath = media.sizes?.og?.url || media.url
-
-  return `${getServerSideURL()}${mediaPath}`
+  return getAbsoluteMediaURL({ media, settings })
 }
 
 export const serializeJsonLd = (data: JsonLdNode | JsonLdNode[]) =>
@@ -56,7 +53,7 @@ export const stringifyJSONLD = serializeJsonLd
 export const buildOrganizationJSONLD = (settings?: SiteSetting | null): JsonLdNode => {
   const siteName = settings?.siteName || settings?.seo?.defaultTitle || 'WingsGroup'
   const siteUrl = buildCanonicalUrl(settings)
-  const logo = getMediaUrl(settings?.branding?.logoImage)
+  const logo = getMediaUrl(settings?.branding?.logoImage, settings)
 
   return {
     '@id': `${siteUrl}#organization`,
@@ -157,7 +154,7 @@ export const buildPageJsonLd = ({
   path?: string
   settings?: SiteSetting | null
 }): JsonLdNode[] => {
-  const image = getMediaUrl(page.meta?.image || page.hero?.media)
+  const image = getMediaUrl(page.meta?.image || page.hero?.media, settings)
 
   return [
     {
@@ -185,7 +182,7 @@ export const buildArticleJSONLD = ({
 }): JsonLdNode => {
   const url = buildCanonicalUrl(settings, path || `/posts/${post.slug}`)
   const siteUrl = buildCanonicalUrl(settings)
-  const image = getMediaUrl(post.meta?.image || post.heroImage)
+  const image = getMediaUrl(post.meta?.image || post.heroImage, settings)
   const description = post.meta?.description || settings?.seo?.defaultDescription || settings?.tagline || undefined
   const name = post.meta?.title || post.title
   const authors = post.populatedAuthors?.map((author) => author.name).filter(Boolean)
@@ -226,7 +223,7 @@ export const buildPostJsonLd = ({
 }): JsonLdNode[] => {
   const url = buildCanonicalUrl(settings, path || `/posts/${post.slug}`)
   const siteUrl = buildCanonicalUrl(settings)
-  const image = getMediaUrl(post.meta?.image || post.heroImage)
+  const image = getMediaUrl(post.meta?.image || post.heroImage, settings)
   const description = post.meta?.description || settings?.seo?.defaultDescription || settings?.tagline || undefined
   const name = post.meta?.title || post.title
 

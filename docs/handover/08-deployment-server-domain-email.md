@@ -48,7 +48,8 @@
   [docs/accounts.md](../accounts.md); keep the panel off the public internet
   unless a separate exposure decision is recorded.
 - Public domains managed in production: `wingsgroup.vn`, `wingsgo.vn`,
-  `wingsside.vn`, `wingsplus.vn`
+  `wingside.vn`, `wingsplus.vn`, `wingspass.wingsgroup.vn`,
+  `wingscare.wingsgroup.vn`
 - TLS mode target: `Cloudflare Full`, with `Full (strict)` only after the
   origin certificate and origin validation path are confirmed end to end.
 
@@ -79,9 +80,9 @@
 
 ## Domain And DNS
 
-- Primary domain(s): pending final customer domain values.
-- Child-site domain(s): pending final WingsGo, WingsSide, WingsPlus, WingsCare,
-  and WingsPass domain decisions.
+- Primary domain: `wingsgroup.vn`.
+- Child-site domains: `wingsgo.vn`, `wingside.vn`, `wingsplus.vn`,
+  `wingspass.wingsgroup.vn`, and `wingscare.wingsgroup.vn`.
 - Each child site is expected to run on its own public domain. `robots.txt`,
   sitemap index, and child sitemap URLs must resolve against the current host
   for that site instead of one shared umbrella host.
@@ -90,6 +91,38 @@
   records, and email records if transactional email is configured.
 - SSL or certificate notes: SSL must be active for every production public
   domain before launch.
+
+### Production Domain State - 2026-06-24
+
+- `wingside.vn` is the correct WingsSide domain. Do not use the previous
+  typo `wingsside.vn` for new content, canonical URLs, or customer-facing
+  documentation.
+- `wingspass.vn` and `wingscare.vn` are not owned production domains for this
+  launch. Use:
+  - `wingspass.wingsgroup.vn`
+  - `wingscare.wingsgroup.vn`
+- Production Nginx must preserve the public `Host` / `X-Forwarded-Host` and
+  allow the app to resolve the site from the Payload site registry. Do not set
+  a fixed `X-Site-Code` for a shared server block that contains multiple child
+  site domains; this previously caused WingsPass and WingsCare to render as
+  WingsSide.
+- Current public verification:
+  - `https://wingsside.vn/`
+  - `https://wingspass.wingsgroup.vn/`
+  - `https://wingscare.wingsgroup.vn/`
+  all return HTTP 200, correct `data-site-theme`, and host-specific canonical
+  URLs.
+
+### Localization Content State - 2026-06-24
+
+- WingsPass has `vi` and `en` page locale rows in production. The `vi` locale
+  is required because WingsPass defaults to `vi`; missing `vi` page locales
+  cause the site shell to render with blank body cards.
+- WingsCare has explicit English page content for its core pages. Do not rely
+  on blind `vi -> en` mirroring for customer-facing English content.
+- The related-pages component is locale-aware:
+  - `vi`: `Tiếp tục khám phá` / `Trang liên quan`
+  - `en`: `Continue exploring` / `Related pages`
 
 ## Email Server Or Transactional Email
 

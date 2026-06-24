@@ -220,6 +220,40 @@ export const SiteSettings: CollectionConfig = {
       ],
     },
     {
+      name: 'heroDefaults',
+      label: 'Hero mặc định',
+      type: 'group',
+      admin: {
+        description:
+          'Presentation và hành vi mặc định cho page chọn kế thừa. Nội dung và media vẫn nằm trên từng page.',
+      },
+      fields: [
+        {
+          name: 'presentationPreset',
+          label: 'Hero presentation',
+          type: 'relationship',
+          relationTo: 'hero-presentation-presets',
+          filterOptions: {
+            isActive: {
+              equals: true,
+            },
+          },
+        },
+        {
+          name: 'variant',
+          label: 'Hành vi nghiệp vụ mặc định',
+          type: 'select',
+          defaultValue: 'standard',
+          options: [
+            { label: 'Standard', value: 'standard' },
+            { label: 'Retail departures', value: 'retail-departures' },
+            { label: 'Planner', value: 'planner' },
+            { label: 'Utility', value: 'utility' },
+          ],
+        },
+      ],
+    },
+    {
       name: 'supportEmail',
       label: 'Email hỗ trợ',
       type: 'email',

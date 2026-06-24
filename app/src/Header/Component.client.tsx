@@ -21,6 +21,7 @@ interface HeaderClientProps {
     label: string
     url: string
   }
+  resolvedLocale?: 'en' | 'vi'
   siteName?: null | string
   tagline?: null | string
 }
@@ -32,6 +33,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   logoImage,
   logoText,
   primaryAction,
+  resolvedLocale,
   siteName,
   tagline,
 }) => {
@@ -73,7 +75,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
             </div>
           ) : null}
         </div>
-        <HeaderNav data={data} primaryAction={primaryAction} />
+        <HeaderNav data={data} primaryAction={primaryAction} resolvedLocale={resolvedLocale} />
       </div>
     </header>
   )

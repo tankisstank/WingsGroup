@@ -13,6 +13,7 @@ import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997e
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { LinkFeatureClient as LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { default as default_431b18b5265ede03fd03b985498a2b50 } from '@/components/HeroPresentationGuide'
 import { OverviewComponent as OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
@@ -51,7 +52,7 @@ import { default as default_f9eef2fa35c867aa73ad97968a96fa57 } from '@/component
 import { default as default_dbfe8c9157153a1e71857346f3fece7d } from '@/components/ThemeManager'
 import { default as default_dd8d1fa658e4f51ecc6d4467f29fe396 } from '@/components/SiteReview'
 import { default as default_7bb177a4cdf8354fd123e1ad3491e461 } from '@/components/PageWizard'
-import { WingsGroupMetrics as WingsGroupMetrics_cb5553611f4beeb286edfe3a6df8cd2b } from '@/components/AdminDashboard/WingsGroupMetrics'
+import { WingsGroupMetrics as WingsGroupMetrics_22b0aded55feb244d1742f8771781af4 } from '@/components/AdminDashboard/WingsGroupMetrics'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -71,6 +72,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#LinkFeatureClient": LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/components/HeroPresentationGuide#default": default_431b18b5265ede03fd03b985498a2b50,
   "@payloadcms/plugin-seo/client#OverviewComponent": OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaTitleComponent": MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
@@ -109,6 +111,6 @@ export const importMap = {
   "@/components/ThemeManager#default": default_dbfe8c9157153a1e71857346f3fece7d,
   "@/components/SiteReview#default": default_dd8d1fa658e4f51ecc6d4467f29fe396,
   "@/components/PageWizard#default": default_7bb177a4cdf8354fd123e1ad3491e461,
-  "@/components/AdminDashboard/WingsGroupMetrics#WingsGroupMetrics": WingsGroupMetrics_cb5553611f4beeb286edfe3a6df8cd2b,
+  "@/components/AdminDashboard/WingsGroupMetrics#WingsGroupMetrics": WingsGroupMetrics_22b0aded55feb244d1742f8771781af4,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

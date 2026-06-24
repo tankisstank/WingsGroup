@@ -316,6 +316,16 @@ Không đưa Auth, Dashboard, Onboarding, Nav/Footer, cookie banner, 404 hoặc
 loading state vào `Pages.layout`; các phần đó thuộc auth, app shell hoặc site
 settings.
 
+Hero presentation được quản lý theo mô hình hybrid:
+
+- base template và capability do code quản lý
+- super-admin tạo preset từ template được cho phép
+- site chọn presentation mặc định
+- page được kế thừa hoặc override
+
+Không cho editor nhập CSS/JavaScript tùy ý. Carousel, video và animation phải
+có reduced-motion, poster/fallback và validation riêng.
+
 ### Nguyên tắc
 
 - block phải có schema rõ

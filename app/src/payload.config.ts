@@ -14,6 +14,7 @@ import { Posts } from './collections/Posts'
 import { SiteSettings } from './collections/SiteSettings'
 import { Sites } from './collections/Sites'
 import { ThemePresets } from './collections/ThemePresets'
+import { HeroPresentationPresets } from './collections/HeroPresentationPresets'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
@@ -129,6 +130,7 @@ export default buildConfig({
   collections: [
     Sites,
     ThemePresets,
+    HeroPresentationPresets,
     SiteSettings,
     Pages,
     Posts,

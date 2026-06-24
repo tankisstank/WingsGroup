@@ -21,7 +21,7 @@ const sites = [
     note: 'Current local hostname resolution renders the WingsGroup umbrella site for wingsgroup.vn.',
   },
   { key: 'wingsgo', label: 'wingsgo.vn', host: 'wingsgo.vn', pathPrefix: '/wingsgo', siteId: 2 },
-  { key: 'wingsside', label: 'wingside.vn', host: 'wingsside.vn', pathPrefix: '/wingsside', siteId: 3 },
+  { key: 'wingsside', label: 'wingside.vn', host: 'wingside.vn', pathPrefix: '/wingsside', siteId: 3 },
 ]
 
 const extraPublicRoutes = {

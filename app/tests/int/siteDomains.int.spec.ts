@@ -4,9 +4,9 @@ import { domainCandidates, normalizeHost, requestHostCandidates } from '@/utilit
 
 describe('site domain utilities', () => {
   it('normalizes direct and forwarded hosts', () => {
-    expect(normalizeHost('WingsSide.vn:443')).toBe('wingsside.vn')
-    expect(normalizeHost('https://www.wingsside.vn/path')).toBe('www.wingsside.vn')
-    expect(normalizeHost('wingsside.vn, internal:3000')).toBe('wingsside.vn')
+    expect(normalizeHost('WingSide.vn:443')).toBe('wingside.vn')
+    expect(normalizeHost('https://www.wingside.vn/path')).toBe('www.wingside.vn')
+    expect(normalizeHost('wingside.vn, internal:3000')).toBe('wingside.vn')
   })
 
   it('maps local seed domains to production domain variants', () => {
@@ -14,20 +14,26 @@ describe('site domain utilities', () => {
       expect.arrayContaining([
         'wingsside.local',
         'www.wingsside.local',
-        'wingsside.vn',
-        'www.wingsside.vn',
+        'wingside.vn',
+        'www.wingside.vn',
       ]),
+    )
+    expect(domainCandidates('wingspass.local')).toEqual(
+      expect.arrayContaining(['wingspass.local', 'wingspass.wingsgroup.vn']),
+    )
+    expect(domainCandidates('wingscare.local')).toEqual(
+      expect.arrayContaining(['wingscare.local', 'wingscare.wingsgroup.vn']),
     )
   })
 
   it('prefers the forwarded public host while retaining host fallbacks', () => {
     const headers = new Headers({
       host: 'app:3000',
-      'x-forwarded-host': 'wingsside.vn',
+      'x-forwarded-host': 'wingside.vn',
     })
 
     expect(requestHostCandidates(headers)).toEqual(
-      expect.arrayContaining(['wingsside.vn', 'www.wingsside.vn', 'app', 'www.app']),
+      expect.arrayContaining(['wingside.vn', 'www.wingside.vn', 'app', 'www.app']),
     )
   })
 })

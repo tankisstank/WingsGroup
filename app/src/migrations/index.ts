@@ -3,6 +3,7 @@ import * as migration_20260615_hero_presentations from './20260615_hero_presenta
 import * as migration_20260615_170207_layout_preset_library from './20260615_170207_layout_preset_library';
 import * as migration_20260619_114500_site_settings_favicon_image from './20260619_114500_site_settings_favicon_image';
 import * as migration_20260620_090000_wings_group_root_site from './20260620_090000_wings_group_root_site';
+import * as migration_20260623_hero_presentation_platform from './20260623_hero_presentation_platform';
 
 export const migrations = [
   {
@@ -29,5 +30,10 @@ export const migrations = [
     up: migration_20260620_090000_wings_group_root_site.up,
     down: migration_20260620_090000_wings_group_root_site.down,
     name: '20260620_090000_wings_group_root_site',
+  },
+  {
+    up: migration_20260623_hero_presentation_platform.up,
+    down: migration_20260623_hero_presentation_platform.down,
+    name: '20260623_hero_presentation_platform',
   },
 ];

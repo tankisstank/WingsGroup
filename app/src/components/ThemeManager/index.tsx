@@ -18,6 +18,7 @@ import {
   themeKeyOptions,
   themePresetKeyOptions,
 } from '@/utilities/themeTokens'
+import { heroPresentationDefinitions } from '@/heros/presentations/registry'
 
 type Role = 'editor' | 'site-manager' | 'super-admin'
 
@@ -38,6 +39,15 @@ type ThemePresetDoc = {
   tokens?: Record<string, string>
 }
 
+type HeroPresentationPresetDoc = {
+  baseTemplate?: string
+  description?: string
+  id: number | string
+  isActive?: boolean
+  key?: string
+  name?: string
+}
+
 type SiteSettingsDoc = {
   branding?: {
     accentColor?: string
@@ -53,6 +63,10 @@ type SiteSettingsDoc = {
     surfaceStrongColor?: string
     themeKey?: string
     themePreset?: ThemePresetDoc | number | string
+  }
+  heroDefaults?: {
+    presentationPreset?: HeroPresentationPresetDoc | number | string
+    variant?: string
   }
   id: number | string
   site?: SiteOption | number | string
@@ -73,6 +87,11 @@ type ThemeFormState = {
   surfaceStrongColor: string
   themeKey: string
   themePreset: string
+}
+
+type HeroFormState = {
+  presentationPreset: string
+  variant: string
 }
 
 type BackgroundStyle = (typeof backgroundStyleOptions)[number]['value']
@@ -120,6 +139,11 @@ const defaultFormState = (siteName = 'WingsGroup'): ThemeFormState => ({
   themePreset: '',
 })
 
+const defaultHeroFormState = (): HeroFormState => ({
+  presentationPreset: '',
+  variant: 'standard',
+})
+
 const fetchJSON = async <T,>(url: string): Promise<T | null> => {
   const response = await fetch(url, {
     credentials: 'include',
@@ -136,22 +160,28 @@ export default function ThemeManagerView() {
   const [user, setUser] = useState<CurrentUser>()
   const [sites, setSites] = useState<SiteOption[]>([])
   const [presets, setPresets] = useState<ThemePresetDoc[]>([])
+  const [heroPresets, setHeroPresets] = useState<HeroPresentationPresetDoc[]>([])
   const [selectedSiteID, setSelectedSiteID] = useState('')
   const [selectedSettingsID, setSelectedSettingsID] = useState<string | number | null>(null)
   const [form, setForm] = useState<ThemeFormState>(defaultFormState())
+  const [heroForm, setHeroForm] = useState<HeroFormState>(defaultHeroFormState())
   const [message, setMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [savedSignature, setSavedSignature] = useState('')
+  const [savedHeroSignature, setSavedHeroSignature] = useState('')
 
   useEffect(() => {
     const load = async () => {
       setIsLoading(true)
 
-      const [me, siteResult, presetResult] = await Promise.all([
+      const [me, siteResult, presetResult, heroPresetResult] = await Promise.all([
         fetchJSON<{ user?: CurrentUser }>('/api/users/me'),
         fetchJSON<{ docs?: SiteOption[] }>('/api/sites?depth=0&limit=100&sort=name'),
         fetchJSON<{ docs?: ThemePresetDoc[] }>('/api/theme-presets?depth=0&limit=100&sort=name'),
+        fetchJSON<{ docs?: HeroPresentationPresetDoc[] }>(
+          '/api/hero-presentation-presets?depth=0&limit=100&sort=name&where[isActive][equals]=true',
+        ),
       ])
 
       const siteDocs = siteResult?.docs ?? []
@@ -161,6 +191,7 @@ export default function ThemeManagerView() {
       setUser(me?.user)
       setSites(siteDocs)
       setPresets(presetDocs)
+      setHeroPresets(heroPresetResult?.docs ?? [])
       setSelectedSiteID((current) => current || siteID)
       setIsLoading(false)
     }
@@ -183,6 +214,7 @@ export default function ThemeManagerView() {
 
       if (!settings) {
         setForm(defaultFormState())
+        setHeroForm(defaultHeroFormState())
         setSelectedSettingsID(null)
         return
       }
@@ -225,10 +257,25 @@ export default function ThemeManagerView() {
 
       setForm(nextForm)
       setSavedSignature(JSON.stringify(nextForm))
+
+      const heroPresetDoc =
+        typeof settings.heroDefaults?.presentationPreset === 'object' && settings.heroDefaults.presentationPreset
+          ? settings.heroDefaults.presentationPreset
+          : null
+      const matchedHeroPreset =
+        heroPresets.find((preset) => String(preset.id) === String(heroPresetDoc?.id)) ||
+        heroPresets.find((preset) => preset.key === String(settings.heroDefaults?.presentationPreset || '')) ||
+        heroPresets[0]
+      const nextHeroForm = {
+        presentationPreset: String(matchedHeroPreset?.id || ''),
+        variant: settings.heroDefaults?.variant || 'standard',
+      }
+      setHeroForm(nextHeroForm)
+      setSavedHeroSignature(JSON.stringify(nextHeroForm))
     }
 
     void loadSiteSettings()
-  }, [presets, selectedSiteID])
+  }, [heroPresets, presets, selectedSiteID])
 
   const selectedSite = useMemo(
     () => sites.find((site) => String(site.id) === selectedSiteID),
@@ -288,10 +335,24 @@ export default function ThemeManagerView() {
 
   const previewStyle = previewTheme.style
   const presetLabel = getPresetLabel(form.themePreset, presets)
+  const selectedHeroPreset = heroPresets.find(
+    (preset) => String(preset.id) === String(heroForm.presentationPreset),
+  )
+  const selectedHeroDefinition = heroPresentationDefinitions.find(
+    (definition) => definition.value === selectedHeroPreset?.baseTemplate,
+  )
   const hasUnsavedChanges = savedSignature !== JSON.stringify(form)
+  const hasUnsavedHeroChanges = savedHeroSignature !== JSON.stringify(heroForm)
 
   const updateField = (field: keyof ThemeFormState, value: string) => {
     setForm((current) => ({
+      ...current,
+      [field]: value,
+    }))
+  }
+
+  const updateHeroField = (field: keyof HeroFormState, value: string) => {
+    setHeroForm((current) => ({
       ...current,
       [field]: value,
     }))
@@ -323,6 +384,13 @@ export default function ThemeManagerView() {
           themeKey: form.themeKey,
           themePreset: presets.find((preset) => String(preset.id) === String(form.themePreset))?.id || form.themePreset,
         },
+        heroDefaults: {
+          presentationPreset:
+            heroPresets.find((preset) => String(preset.id) === String(heroForm.presentationPreset))?.id ||
+            heroForm.presentationPreset ||
+            null,
+          variant: heroForm.variant,
+        },
       }),
       credentials: 'include',
       headers: {
@@ -340,7 +408,8 @@ export default function ThemeManagerView() {
     }
 
     setSavedSignature(JSON.stringify(form))
-    setMessage('Đã lưu theme cho site.')
+    setSavedHeroSignature(JSON.stringify(heroForm))
+    setMessage('Đã lưu theme và hero mặc định cho site.')
     setIsSaving(false)
   }
 
@@ -394,7 +463,7 @@ export default function ThemeManagerView() {
             <section className={`${baseClass}__field-group`}>
               <div className={`${baseClass}__field-group-head`}>
                 <h2>Preset</h2>
-                {hasUnsavedChanges ? <span>Chưa lưu</span> : <span>Đã đồng bộ</span>}
+                {hasUnsavedChanges || hasUnsavedHeroChanges ? <span>Chưa lưu</span> : <span>Đã đồng bộ</span>}
               </div>
               <label>
                 Site
@@ -438,6 +507,44 @@ export default function ThemeManagerView() {
                 Logo text
                 <input onChange={(event) => updateField('logoText', event.target.value)} value={form.logoText} />
               </label>
+            </section>
+
+            <section className={`${baseClass}__field-group`}>
+              <div className={`${baseClass}__field-group-head`}>
+                <h2>Hero presentation</h2>
+                <span>{hasUnsavedHeroChanges ? 'Chưa lưu' : 'Đã đồng bộ'}</span>
+              </div>
+              <div className={`${baseClass}__segments`}>
+                <label>
+                  Site default hero
+                  <select
+                    onChange={(event) => updateHeroField('presentationPreset', event.target.value)}
+                    value={heroForm.presentationPreset}
+                  >
+                    {heroPresets.map((preset) => (
+                      <option key={preset.id} value={preset.id}>
+                        {preset.name || preset.key || `Hero preset ${preset.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Business behavior
+                  <select
+                    onChange={(event) => updateHeroField('variant', event.target.value)}
+                    value={heroForm.variant}
+                  >
+                    <option value="standard">Standard</option>
+                    <option value="retail-departures">Retail departures</option>
+                    <option value="planner">Planner</option>
+                    <option value="utility">Utility</option>
+                  </select>
+                </label>
+              </div>
+              <p className={`${baseClass}__hint`}>
+                Site default chỉ điều khiển presentation và hành vi. Headline, CTA, ảnh, slide
+                và video vẫn nằm trong từng page.
+              </p>
             </section>
 
             <section className={`${baseClass}__field-group`}>
@@ -571,6 +678,71 @@ export default function ThemeManagerView() {
               <button type="button">Primary CTA</button>
             </div>
 
+            <div className={`${baseClass}__preview-card`}>
+              <span>Hero default</span>
+              <h2>{selectedHeroPreset?.name || 'Chưa chọn'}</h2>
+              <p>
+                Template {selectedHeroPreset?.baseTemplate || 'n/a'} · {heroForm.variant}
+              </p>
+            </div>
+
+            <div
+              className={`${baseClass}__hero-preview`}
+              data-template={selectedHeroPreset?.baseTemplate || 'centered-visual'}
+            >
+              <div className={`${baseClass}__hero-preview-copy`}>
+                <span>{selectedHeroPreset?.name || 'Hero presentation'}</span>
+                <h2>Trải nghiệm WingsGroup theo từng thị trường</h2>
+                <p>
+                  Preview mô phỏng cách template sắp xếp headline, CTA và vùng media. Nội dung thật
+                  vẫn lấy từ từng Page.
+                </p>
+                <div className={`${baseClass}__hero-preview-actions`}>
+                  <button type="button">Tư vấn hành trình</button>
+                  <button type="button">Xem dịch vụ</button>
+                </div>
+              </div>
+
+              <div className={`${baseClass}__hero-preview-visual`} aria-hidden="true">
+                {selectedHeroPreset?.baseTemplate === 'cinematic-carousel' ? (
+                  <>
+                    <div className={`${baseClass}__hero-slide ${baseClass}__hero-slide--active`}>
+                      Slide ảnh 1
+                    </div>
+                    <div className={`${baseClass}__hero-slide`}>Slide ảnh 2</div>
+                    <div className={`${baseClass}__hero-dots`}>
+                      <i />
+                      <i />
+                      <i />
+                    </div>
+                  </>
+                ) : selectedHeroPreset?.baseTemplate === 'video-background' ? (
+                  <>
+                    <div className={`${baseClass}__hero-video`}>Video nền</div>
+                    <div className={`${baseClass}__hero-poster`}>Poster fallback</div>
+                  </>
+                ) : selectedHeroPreset?.baseTemplate === 'planner-split' ? (
+                  <>
+                    <div className={`${baseClass}__hero-media-card`}>Ảnh hero</div>
+                    <div className={`${baseClass}__hero-panel`}>Planner panel</div>
+                  </>
+                ) : selectedHeroPreset?.baseTemplate === 'layered-visuals' ? (
+                  <>
+                    <div className={`${baseClass}__hero-media-card`}>Ảnh chính</div>
+                    <div className={`${baseClass}__hero-float ${baseClass}__hero-float--one`}>Ảnh phụ</div>
+                    <div className={`${baseClass}__hero-float ${baseClass}__hero-float--two`}>Nhãn</div>
+                  </>
+                ) : (
+                  <div className={`${baseClass}__hero-media-card`}>Ảnh hero</div>
+                )}
+              </div>
+
+              <div className={`${baseClass}__hero-preview-notes`}>
+                <strong>{selectedHeroDefinition?.label || selectedHeroPreset?.baseTemplate || 'Template'}</strong>
+                <p>{selectedHeroDefinition?.description || selectedHeroPreset?.description || 'Chọn preset để xem mô tả.'}</p>
+              </div>
+            </div>
+
             <div className={`${baseClass}__preview-row`}>
               <div className={`${baseClass}__preview-chip`}>Card</div>
               <div className={`${baseClass}__preview-chip`}>CTA</div>
@@ -588,6 +760,10 @@ export default function ThemeManagerView() {
             <div className={`${baseClass}__preview-summary`}>
               <p>Theme key: {form.themeKey}</p>
               <p>Preset: {previewTheme.themePreset}</p>
+              <p>
+                Hero templates:{' '}
+                {heroPresentationDefinitions.map((definition) => definition.value).join(', ')}
+              </p>
             </div>
           </aside>
         </section>

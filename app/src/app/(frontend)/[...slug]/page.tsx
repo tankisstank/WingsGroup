@@ -84,9 +84,9 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
       {draft && <LivePreviewListener />}
 
       <Breadcrumbs items={breadcrumbItems} />
-      <RenderHero {...hero} />
+      <RenderHero {...hero} siteHeroDefaults={settings?.heroDefaults} />
       <RenderBlocks blocks={layout} />
-      <RelatedPages pages={relatedPages} />
+      <RelatedPages locale={locale} pages={relatedPages} />
     </article>
   )
 }

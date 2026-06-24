@@ -1,13 +1,11 @@
 'use client'
 
 import React, { useState } from 'react'
-import { usePathname } from 'next/navigation'
 
 import type { Header as HeaderType } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
 import { SiteLink } from '@/components/SiteLink'
-import { getLocaleFromPathname } from '@/utilities/sitePaths'
 import { MenuIcon, SearchIcon, XIcon } from 'lucide-react'
 
 export const HeaderNav: React.FC<{
@@ -16,11 +14,21 @@ export const HeaderNav: React.FC<{
     label: string
     url: string
   }
-}> = ({ data, primaryAction }) => {
+  resolvedLocale?: 'en' | 'vi'
+}> = ({ data, primaryAction, resolvedLocale = 'vi' }) => {
   const navItems = data?.navItems || []
   const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
-  const locale = getLocaleFromPathname(pathname) || 'vi'
+  const locale = resolvedLocale
+  const shouldRenderPrimaryAction =
+    primaryAction &&
+    !navItems.some(({ link }) => {
+      const label = link?.label?.trim().toLowerCase()
+      const url = link?.url?.replace(/\/+$/, '') || '/'
+      const primaryLabel = primaryAction.label.trim().toLowerCase()
+      const primaryURL = primaryAction.url.replace(/\/+$/, '') || '/'
+
+      return label === primaryLabel || url === primaryURL
+    })
   const copy =
     locale === 'en'
       ? {
@@ -40,7 +48,7 @@ export const HeaderNav: React.FC<{
         {navItems.map(({ link }, i) => {
           return <CMSLink className="theme-nav-link" key={i} {...link} appearance="link" />
         })}
-        {primaryAction ? (
+        {shouldRenderPrimaryAction ? (
           <SiteLink className="site-header-cta" href={primaryAction.url}>
             {primaryAction.label}
           </SiteLink>
@@ -52,7 +60,7 @@ export const HeaderNav: React.FC<{
       </nav>
 
       <div className="flex items-center gap-2 2xl:hidden">
-        {primaryAction ? (
+        {shouldRenderPrimaryAction ? (
           <SiteLink className="site-header-cta site-header-cta--mobile" href={primaryAction.url}>
             {primaryAction.label}
           </SiteLink>
@@ -88,7 +96,7 @@ export const HeaderNav: React.FC<{
               <CMSLink appearance="inline" className="site-mobile-nav__link" key={i} {...link} />
             )
           })}
-          {primaryAction ? (
+          {shouldRenderPrimaryAction ? (
             <SiteLink className="site-mobile-nav__link site-mobile-nav__link--primary" href={primaryAction.url}>
               {primaryAction.label}
             </SiteLink>

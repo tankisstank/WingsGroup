@@ -8,6 +8,7 @@ import 'dotenv/config'
 
 const e2eBaseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3100'
 const e2ePort = new URL(e2eBaseURL).port || '3100'
+const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === 'true'
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -37,7 +38,7 @@ export default defineConfig({
   ],
   webServer: {
     command: `cross-env PAYLOAD_DB_PUSH=true pnpm exec next dev --port ${e2ePort}`,
-    reuseExistingServer: false,
+    reuseExistingServer,
     timeout: 120 * 1000,
     url: e2eBaseURL,
   },

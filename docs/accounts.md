@@ -156,8 +156,17 @@ SQL proxy, compared with approximately 2-10 ms when connecting directly to
 | Backup directory | `/home/ubuntu/wings-travel/shared/backups` |
 | Docker project | `wingstravel` |
 | Application binding | `127.0.0.1:3000` |
-| aaPanel-managed domains | `wingsgroup.vn`, `wingsgo.vn`, `wingsside.vn`, `wingsplus.vn` |
+| aaPanel-managed domains | `wingsgroup.vn`, `wingsgo.vn`, `wingside.vn`, `wingsplus.vn`, `wingspass.wingsgroup.vn`, `wingscare.wingsgroup.vn` |
 | TLS mode target | `Cloudflare Full` now, `Full (strict)` after origin cert rotation if needed |
+
+Production domain note, 2026-06-24:
+
+- Use `wingside.vn`, not `wingsside.vn`, for customer-facing WingsSide links.
+- WingsPass and WingsCare run on `wingspass.wingsgroup.vn` and
+  `wingscare.wingsgroup.vn`; no separate `wingspass.vn` or `wingscare.vn`
+  DNS/domain ownership is assumed for this launch.
+- The shared child-site Nginx vhost must not force `X-Site-Code: wings-side`.
+  Site resolution should use the preserved `Host` / `X-Forwarded-Host`.
 
 Current containers:
 

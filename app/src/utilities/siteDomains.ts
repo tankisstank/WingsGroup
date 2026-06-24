@@ -9,6 +9,12 @@ const addHostVariants = (hosts: Set<string>, host: string) => {
   }
 }
 
+const legacyLocalProductionHosts: Record<string, string> = {
+  'wingscare.local': 'wingscare.wingsgroup.vn',
+  'wingspass.local': 'wingspass.wingsgroup.vn',
+  'wingsside.local': 'wingside.vn',
+}
+
 export const normalizeHost = (host?: null | string): string | null => {
   if (!host) {
     return null
@@ -41,7 +47,8 @@ export const domainCandidates = (domain?: null | string): string[] => {
 
   for (const host of [...hosts]) {
     if (host.endsWith('.local')) {
-      addHostVariants(hosts, host.replace(/\.local$/, '.vn'))
+      const productionHost = legacyLocalProductionHosts[host] || host.replace(/\.local$/, '.vn')
+      addHostVariants(hosts, productionHost)
     }
   }
 

@@ -10,10 +10,26 @@ List every delivered site or child site included in the handover package.
 | --- | --- | --- | --- | --- | --- |
 | WingsGroup | `wingsgroup.vn` | `vi`, `en` | Active umbrella site | `/`, `/he-sinh-thai`, `/ve-wingsgroup`, `/nang-luc-dich-vu`, `/tin-tuc`, `/lien-he` | Umbrella site with production-facing trust, ecosystem routing, legal pages, and editorial package. |
 | WingsGo | `wingsgo.vn` | `vi`, `en` | Active child site | `/wingsgo`, `/wingsgo/thi-truong`, `/wingsgo/tour`, `/wingsgo/campaign`, `/wingsgo/lich-khoi-hanh`, `/wingsgo/lien-he` | Outbound retail site with market, tour detail, campaign, schedule, and contact flows. |
-| WingsSide | `wingsside.vn` | `en`, `vi` | Active child site | `/wingsside`, `/wingsside/destinations`, `/wingsside/styles`, `/wingsside/packages`, `/wingsside/plan-your-trip`, `/wingsside/contact-us` | Inbound Vietnam site with destination, travel-style, itinerary, and trip-planning flows. |
+| WingsSide | `wingside.vn` | `en`, `vi` | Active child site | `/wingsside`, `/wingsside/destinations`, `/wingsside/styles`, `/wingsside/packages`, `/wingsside/plan-your-trip`, `/wingsside/contact-us` | Inbound Vietnam site with destination, travel-style, itinerary, and trip-planning flows. |
 | WingsPlus | `wingsplus.vn` | `vi`, `en` | Active child site | `/wingsplus`, `/wingsplus/private-tours`, `/wingsplus/mice`, `/wingsplus/special-markets`, `/wingsplus/nang-luc-dich-vu`, `/wingsplus/request-proposal` | Premium/private/MICE site. Legacy `/wingsplus/case-studies` redirects to `/wingsplus/nang-luc-dich-vu`. |
-| WingsCare | `wingscare.vn` | `vi`, `en` | Active child site | `/wingscare`, `/wingscare/san-pham-bao-hiem`, `/wingscare/quyen-loi`, `/wingscare/claim-support`, `/wingscare/faq`, `/wingscare/contact` | Care, support, insurance-oriented information, and contact flows. |
-| WingsPass | `wingspass.vn` | `vi`, `en` | Active child site | `/wingspass`, `/wingspass/bang-gia`, `/wingspass/san-bay`, `/wingspass/add-on`, `/wingspass/faq`, `/wingspass/contact` | Fast Track pricing, airport, add-on, FAQ, and booking contact flows. |
+| WingsCare | `wingscare.wingsgroup.vn` | `vi`, `en` | Active child site | `/wingscare`, `/wingscare/san-pham-bao-hiem`, `/wingscare/quyen-loi`, `/wingscare/claim-support`, `/wingscare/faq`, `/wingscare/contact` | Care, support, insurance-oriented information, and contact flows. |
+| WingsPass | `wingspass.wingsgroup.vn` | `vi`, `en` | Active child site | `/wingspass`, `/wingspass/bang-gia`, `/wingspass/san-bay`, `/wingspass/add-on`, `/wingspass/faq`, `/wingspass/contact` | Fast Track pricing, airport, add-on, FAQ, and booking contact flows. |
+
+## Production Public Paths
+
+The key pages above use local multisite aliases when running all child sites
+under one local host. On production public domains, each child site is mounted
+at its own host root:
+
+- WingsSide: `https://wingside.vn/`, `/vi`, `/destinations`, `/styles`,
+  `/packages`, `/plan-your-trip`, `/contact-us`
+- WingsPass: `https://wingspass.wingsgroup.vn/`, `/en`, `/bang-gia`,
+  `/san-bay`, `/add-on`, `/faq`, `/contact`
+- WingsCare: `https://wingscare.wingsgroup.vn/`, `/en`,
+  `/san-pham-bao-hiem`, `/quyen-loi`, `/claim-support`, `/faq`, `/contact`
+
+Production verification on 2026-06-24 confirmed that WingsPass and WingsCare
+render from their own subdomains, not from the WingsSide host context.
 
 ## Required Check For Each Site
 

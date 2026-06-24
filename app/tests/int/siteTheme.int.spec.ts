@@ -1,5 +1,5 @@
 import { getSiteThemeTokens } from '@/utilities/siteTheme'
-import { defaultThemePresetByKey } from '@/utilities/themeTokens'
+import { defaultThemePresetByKey, type ThemePresetTokens } from '@/utilities/themeTokens'
 import { describe, expect, it } from 'vitest'
 
 describe('site theme tokens', () => {
@@ -72,6 +72,59 @@ describe('site theme tokens', () => {
       themeKey: 'wings-go',
       themeName: 'WingsGo',
       themePreset: 'retail',
+    })
+  })
+
+  it('supports custom preset records while keeping the original premium preset available for rollback', () => {
+    const editorialTokens: ThemePresetTokens = {
+      ...defaultThemePresetByKey.premium,
+      accentColor: '#C09030',
+      brandColor: '#104030',
+      buttonStyle: 'pill',
+      fontPreset: 'editorial',
+      radius: 'lg',
+      surfaceColor: '#F6F2E8',
+      surfaceStrongColor: '#E8DECB',
+    }
+
+    const settings = {
+      branding: {
+        themeKey: 'wings-side',
+        themePreset: {
+          key: 'wings-side-editorial',
+          tokens: editorialTokens,
+        },
+      },
+      siteName: 'WingsSide',
+    }
+
+    expect(getSiteThemeTokens(settings)).toEqual({
+      accentColor: '#C09030',
+      brandColor: '#104030',
+      buttonStyle: 'pill',
+      layoutStyle: 'editorial',
+      style: {
+        '--section-space': 'clamp(4.5rem, 9vw, 8rem)',
+        '--section-space-sm': 'clamp(2.5rem, 5vw, 4.5rem)',
+        '--site-accent': '#C09030',
+        '--site-background-style': 'editorial',
+        '--site-border': 'color-mix(in oklch, #C09030 24%, var(--border))',
+        '--site-brand': '#104030',
+        '--site-brand-contrast': '#ffffff',
+        '--site-button-style': 'pill',
+        '--site-font-body': 'var(--font-wingsside-body), var(--font-geist-sans)',
+        '--site-font-heading': 'var(--font-wingsside-heading), Georgia, serif',
+        '--site-layout': 'editorial',
+        '--site-radius': '1.25rem',
+        '--site-shadow': '0 24px 80px color-mix(in oklch, #104030 16%, transparent)',
+        '--site-surface': '#F6F2E8',
+        '--site-surface-strong': '#E8DECB',
+        '--site-theme-key': 'wings-side',
+        '--site-theme-preset': 'wings-side-editorial',
+      },
+      themeKey: 'wings-side',
+      themeName: 'WingsSide',
+      themePreset: 'wings-side-editorial',
     })
   })
 })

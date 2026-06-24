@@ -5,6 +5,7 @@ import type { Page } from '@/payload-types'
 import { HighImpactHero } from '@/heros/HighImpact'
 import { LowImpactHero } from '@/heros/LowImpact'
 import { MediumImpactHero } from '@/heros/MediumImpact'
+import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
 
 const heroes = {
   highImpact: HighImpactHero,
@@ -12,7 +13,9 @@ const heroes = {
   mediumImpact: MediumImpactHero,
 }
 
-export const RenderHero: React.FC<Page['hero']> = (props) => {
+export const RenderHero: React.FC<
+  Page['hero'] & { siteHeroDefaults?: SiteHeroDefaultsLike | null }
+> = (props) => {
   const { type } = props || {}
 
   if (!type || type === 'none') return null

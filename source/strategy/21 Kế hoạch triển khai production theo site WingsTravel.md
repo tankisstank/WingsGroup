@@ -5,8 +5,8 @@
 Tài liệu này chuyển các kết luận chiến lược và research vòng 2 thành một kế hoạch triển khai production cụ thể theo thứ tự đã chốt:
 
 1. `wingsgo.vn`
-2. `wingsside.vn`
-3. `wingspass`
+2. `wingside.vn`
+3. `wingspass.wingsgroup.vn`
 4. `wingsplus.vn`
 
 Kế hoạch này bao gồm luôn:
@@ -39,8 +39,8 @@ Kế hoạch này bám theo:
 Thứ tự thực hiện production:
 
 1. `wingsgo.vn`
-2. `wingsside.vn`
-3. `wingspass`
+2. `wingside.vn`
+3. `wingspass.wingsgroup.vn`
 4. `wingsplus.vn`
 
 ### 3.2. Production scope
@@ -170,7 +170,7 @@ Bao gồm:
 
 Done khi:
 
-- tạo được site record thật cho `wingsgo`, `wingsside`, `wingspass`, `wingsplus`
+- tạo được site record thật cho `wingsgo`, `wingside`, `wingspass.wingsgroup.vn`, `wingsplus`
 - staging và production topology rõ
 - local, staging, prod không dùng data model lệch nhau
 
@@ -339,7 +339,7 @@ Ra mắt site outbound public đầu tiên với dữ liệu thật, đủ để
 - giá/lịch khởi hành hiển thị được
 - team nội bộ cập nhật được ít nhất 1 đợt dữ liệu sau launch
 
-## 7.2. Site 2: `wingsside.vn`
+## 7.2. Site 2: `wingside.vn`
 
 ### Vai trò business
 

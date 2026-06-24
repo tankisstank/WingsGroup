@@ -359,6 +359,14 @@ Block library nên được mở rộng bằng registry/preset có kiểm soát:
 - nguồn cảm hứng bên ngoài như VibeUI chỉ dùng làm taxonomy tham khảo, không
   sao chép code, asset hoặc nhận diện
 
+Hero dùng registry riêng có capability và preset:
+
+- theme và hero presentation là hai trục độc lập
+- site-settings giữ default presentation/behavior
+- page giữ content/media và có thể override
+- template render do code quản lý; CMS chỉ ghép các option an toàn
+- multi-image, carousel và video phải có accessibility/performance contract
+
 ### Phase 3
 
 Payload có thể giữ:

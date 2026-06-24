@@ -1,5 +1,12 @@
 # Báo giá sơ bộ theo giai đoạn cho WingsTravel
 
+> **Tài liệu lịch sử - không dùng làm căn cứ thương mại hiện tại.**
+>
+> Báo giá đã chốt với đối tác là `60.000.000 VNĐ`, chưa bao gồm thuế, thời
+> gian dự kiến `45 - 60 ngày làm việc`, theo
+> `publish/html/12 Báo giá giai đoạn 1 WingsTravel - doc style.html`.
+> Các mức `80 triệu` bên dưới chỉ là đề xuất sơ bộ trước khi chốt.
+
 ## 1. Mục đích
 
 Tài liệu này dùng để gửi một khung giá dự kiến theo từng giai đoạn, bám theo logic đã trao đổi:

@@ -10,6 +10,10 @@ import { createLocalReq, getPayload } from 'payload'
 import config from '../src/payload.config'
 import { normalizeRelationID } from '../src/access/roles'
 import { ensureLocalAdminUser, localAdminCredentials } from '../src/utilities/adminSeed'
+import {
+  ensureHeroPresentationPresetSeeds,
+  siteHeroPresentationAssignments,
+} from '../src/utilities/heroPresentationSeed'
 import { themePresetSeedCatalog } from '../src/utilities/themeSeed'
 import type { ThemePresetKey } from '../src/utilities/themeTokens'
 
@@ -124,8 +128,8 @@ type RichTextSection =
     }
 
 type SiteSeed = {
-  accentColor: string
-  brandColor: string
+  accentColor?: null | string
+  brandColor?: null | string
   code: string
   defaultLocale?: 'en' | 'vi'
   domain: string
@@ -134,7 +138,7 @@ type SiteSeed = {
   seoSuffix: string
   supportedLocales?: Array<'en' | 'vi'>
   summary: string
-  themePreset: ThemePresetKey
+  themePreset: string
 }
 
 type LinkAppearance = 'default' | 'outline'
@@ -245,6 +249,7 @@ const englishTitleMap: Record<string, string> = {
   'Tour Hàn Quốc': 'Korea Tours',
   'Tour Nhật Bản': 'Japan Tours',
   'Tour WingsGo': 'WingsGo Tours',
+  'Trang chủ': 'Home',
   'Tour riêng cao cấp': 'Premium Private Tours',
   'Trung Quốc giá rõ': 'China Clear Pricing',
   'Về WingsGroup': 'About WingsGroup',
@@ -282,11 +287,9 @@ const siteSeeds: SiteSeed[] = [
     themePreset: 'retail',
   },
   {
-    accentColor: '#EA580C',
-    brandColor: '#0C4A6E',
     code: 'wings-side',
     defaultLocale: 'en',
-    domain: 'wingsside.local',
+    domain: 'wingside.vn',
     name: 'WingsSide',
     seoDescription:
       'Inbound Vietnam travel site focused on trust, destinations, travel styles, sample itineraries, and custom trip planning for international guests.',
@@ -294,13 +297,13 @@ const siteSeeds: SiteSeed[] = [
     supportedLocales: ['en', 'vi'],
     summary:
       'Inbound consultative site cho khách quốc tế với destination hub, travel styles, sample itineraries và luồng plan-your-trip.',
-    themePreset: 'premium',
+    themePreset: 'wings-side-editorial',
   },
   {
     accentColor: '#EA580C',
     brandColor: '#0B4F6C',
     code: 'wings-pass',
-    domain: 'wingspass.local',
+    domain: 'wingspass.wingsgroup.vn',
     name: 'WingsPass',
     seoDescription:
       'Fast Track service microsite with airport-specific service pricing, add-ons, and booking contact flows.',
@@ -328,7 +331,7 @@ const siteSeeds: SiteSeed[] = [
     accentColor: '#D97706',
     brandColor: '#15803D',
     code: 'wings-care',
-    domain: 'wingscare.local',
+    domain: 'wingscare.wingsgroup.vn',
     name: 'WingsCare',
     seoDescription:
       'Service assurance and insurance-oriented support site for the WingsGroup ecosystem.',
@@ -339,7 +342,8 @@ const siteSeeds: SiteSeed[] = [
   },
 ]
 
-const themePresetIDsByKey: Partial<Record<ThemePresetKey, number | string>> = {}
+const themePresetIDsByKey: Record<string, number | string> = {}
+const heroPresentationPresetIDsByKey: Record<string, number | string> = {}
 
 const richTextFromSections = (sections: readonly RichTextSection[]): SeedRichText => ({
   root: {
@@ -1013,6 +1017,7 @@ async function createSiteSettings(
 ) {
   return payload.create({
     collection: 'site-settings',
+    locale: 'vi',
     req,
     context: seedContext,
     data: seedData({
@@ -1021,12 +1026,19 @@ async function createSiteSettings(
       tagline: overrides.tagline || siteSeed.summary,
       branding: {
         logoText: siteSeed.name,
-        brandColor: siteSeed.brandColor,
-        accentColor: siteSeed.accentColor,
+        ...(siteSeed.brandColor ? { brandColor: siteSeed.brandColor } : {}),
+        ...(siteSeed.accentColor ? { accentColor: siteSeed.accentColor } : {}),
         logoImage: overrides.logoImageID === undefined ? null : overrides.logoImageID,
         faviconImage: overrides.faviconImageID || heroImageID,
         themeKey: siteSeed.code,
         themePreset: themePresetIDsByKey[siteSeed.themePreset],
+      },
+      heroDefaults: {
+        presentationPreset:
+          heroPresentationPresetIDsByKey[
+            siteHeroPresentationAssignments[siteSeed.code]?.presetKey || 'centered-classic'
+          ],
+        variant: siteHeroPresentationAssignments[siteSeed.code]?.variant || 'standard',
       },
       seo: {
         defaultTitle: siteSeed.name,
@@ -1473,14 +1485,14 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
             description: 'Điểm vào inbound Vietnam với destination storytelling, travel style, sample itinerary và inquiry flow cho khách quốc tế.',
             imageID: inboundImage.id,
             meta: 'Inbound consultative',
-            url: 'https://wingsside.vn',
+            url: 'https://wingside.vn',
           },
           {
             title: 'WingsPass',
             description: 'Điểm vào dịch vụ fast track theo sân bay, bảng giá, add-on và luồng gửi yêu cầu dịch vụ nhanh.',
             imageID: fastTrackImage.id,
             meta: 'Airport service',
-            url: 'https://wingspass.vn',
+            url: 'https://wingspass.wingsgroup.vn',
           },
           {
             title: 'WingsPlus',
@@ -1494,7 +1506,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
             description: 'Điểm vào insurance support, quyền lợi, claim guidance và after-sales care trong hệ sinh thái.',
             imageID: careImage.id,
             meta: 'Care support',
-            url: 'https://wingscare.vn',
+            url: 'https://wingscare.wingsgroup.vn',
           },
         ],
         'highlight',
@@ -1573,14 +1585,14 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
             description: 'Inbound Vietnam entry with destination storytelling, travel styles, sample itineraries, and inquiry-first planning flows.',
             imageID: inboundImage.id,
             meta: 'Inbound consultative',
-            url: 'https://wingsside.vn',
+            url: 'https://wingside.vn',
           },
           {
             title: 'WingsPass',
             description: 'Airport-service entry for fast-track services, add-ons, pricing, and service requests.',
             imageID: fastTrackImage.id,
             meta: 'Airport service',
-            url: 'https://wingspass.vn',
+            url: 'https://wingspass.wingsgroup.vn',
           },
           {
             title: 'WingsPlus',
@@ -1594,7 +1606,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
             description: 'Support and insurance entry for benefits, claim guidance, and post-sales assistance.',
             imageID: careImage.id,
             meta: 'Care support',
-            url: 'https://wingscare.vn',
+            url: 'https://wingscare.wingsgroup.vn',
           },
         ],
         'highlight',
@@ -5900,6 +5912,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     slug: 'home',
     hero: {
       type: 'highImpact',
+      presentationMode: 'inherit',
       variant: 'planner',
       media: heroImage.id,
       links: [linkItem('Plan your trip', '/plan-your-trip', 'default'), linkItem('Explore destinations', '/destinations', 'outline')],
@@ -6085,9 +6098,33 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     },
   })
 
-  await createSiteSettings(payload, req, site, siteSeed, heroImage.id, {
+  const wingsSideSettings = await createSiteSettings(payload, req, site, siteSeed, heroImage.id, {
     footerNote:
       'WingsSide tập trung inbound planning, destination storytelling, travel styles và trip inquiry thay vì retail tour grid.',
+    headerNavItems: [
+      linkItem('Trang chủ', '/'),
+      linkItem('Điểm đến', '/destinations'),
+      linkItem('Phong cách du lịch', '/styles'),
+      linkItem('Gói Việt Nam', '/packages'),
+      linkItem('Cẩm nang du lịch', '/travel-guide'),
+      linkItem('Giới thiệu', '/about-us'),
+      linkItem('Liên hệ', '/contact-us'),
+    ],
+    footerNavItems: [
+      linkItem('Điểm đến', '/destinations'),
+      linkItem('Lên kế hoạch', '/plan-your-trip'),
+      linkItem('Cẩm nang du lịch', '/travel-guide'),
+      linkItem('Liên hệ', '/contact-us'),
+    ],
+    logoImageID: null,
+    supportEmail: 'hello@wingside.vn',
+    supportPhone: '+84 903 000 222',
+    tagline: 'Lập kế hoạch inbound Vietnam với điểm đến, phong cách du lịch và luồng tư vấn.',
+  })
+
+  await updateSiteSettingsLocale(payload, req, wingsSideSettings.id, 'en', {
+    footerNote:
+      'WingsSide focuses on inbound planning, destination storytelling, travel styles, and trip inquiry instead of a retail tour grid.',
     headerNavItems: [
       linkItem('Home', '/'),
       linkItem('Destinations', '/destinations'),
@@ -6103,9 +6140,11 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       linkItem('Travel Guide', '/travel-guide'),
       linkItem('Contact', '/contact-us'),
     ],
-    logoImageID: null,
-    supportEmail: 'hello@wingsside.vn',
-    supportPhone: '+84 903 000 222',
+    seo: {
+      defaultDescription: siteSeed.seoDescription,
+      defaultTitle: siteSeed.name,
+      titleSuffix: siteSeed.seoSuffix,
+    },
     tagline: 'Inbound Vietnam planning with destination-led discovery and consultative inquiry flow.',
   })
 
@@ -6567,10 +6606,10 @@ async function seedWingsPass(payload: Payload, req: PayloadRequest, siteSeed: Si
     },
   })
 
-  await createSiteSettings(payload, req, site, siteSeed, heroImage.id, {
+  const wingsPassSettings = await createSiteSettings(payload, req, site, siteSeed, heroImage.id, {
     footerNote: 'WingsPass ưu tiên bảng giá, sân bay, add-on và quy trình đặt dịch vụ rõ ràng.',
     headerNavItems: [
-      linkItem('Home', '/'),
+      linkItem('Trang chủ', '/'),
       linkItem('Bảng giá', '/bang-gia'),
       linkItem('Sân bay', '/san-bay'),
       linkItem('Add-on', '/add-on'),
@@ -6578,11 +6617,35 @@ async function seedWingsPass(payload: Payload, req: PayloadRequest, siteSeed: Si
       linkItem('Liên hệ', '/contact'),
     ],
     footerNavItems: [linkItem('Bảng giá', '/bang-gia'), linkItem('FAQ', '/faq'), linkItem('Liên hệ', '/contact')],
-    supportEmail: 'booking@wingspass.vn',
+    supportEmail: 'booking@wingsgroup.vn',
     supportPhone: '+84 903 000 333',
   })
 
   await mirrorSiteContentToEnglish(payload, req, site.id)
+
+  await updateSiteSettingsLocale(payload, req, wingsPassSettings.id, 'en', {
+    footerNote:
+      'WingsPass prioritizes clear airport Fast Track pricing, add-ons, and service booking flows.',
+    headerNavItems: [
+      linkItem('Home', '/'),
+      linkItem('Pricing', '/bang-gia'),
+      linkItem('Airports', '/san-bay'),
+      linkItem('Add-ons', '/add-on'),
+      linkItem('FAQ', '/faq'),
+      linkItem('Contact', '/contact'),
+    ],
+    footerNavItems: [
+      linkItem('Pricing', '/bang-gia'),
+      linkItem('FAQ', '/faq'),
+      linkItem('Contact', '/contact'),
+    ],
+    seo: {
+      defaultDescription: siteSeed.seoDescription,
+      defaultTitle: siteSeed.name,
+      titleSuffix: siteSeed.seoSuffix,
+    },
+    tagline: 'Pricing-first airport Fast Track, add-ons, conditions, and service booking.',
+  })
 }
 
 async function seedWingsPlus(payload: Payload, req: PayloadRequest, siteSeed: SiteSeed) {
@@ -7429,6 +7492,31 @@ async function seedWingsPlus(payload: Payload, req: PayloadRequest, siteSeed: Si
     tagline: 'Proposal private, MICE và special-market cho nhu cầu du lịch high-value.',
   })
 
+  await updateSiteSettingsLocale(payload, req, wingsPlusSettings.id, 'vi', {
+    footerNote:
+      'WingsPlus phục vụ private tours, MICE, special markets và các brief high-value cần proposal riêng.',
+    headerNavItems: [
+      linkItem('Trang chủ', '/'),
+      linkItem('Tour riêng', '/private-tours'),
+      linkItem('MICE', '/mice'),
+      linkItem('Thị trường đặc biệt', '/special-markets'),
+      linkItem('Điểm đến', '/destinations'),
+      linkItem('Gửi yêu cầu', '/request-proposal'),
+    ],
+    footerNavItems: [
+      linkItem('Năng lực', '/nang-luc-dich-vu'),
+      linkItem('Gửi yêu cầu', '/request-proposal'),
+      linkItem('Liên hệ', '/request-proposal'),
+    ],
+    seo: {
+      defaultDescription:
+        'Site premium cho tour riêng, MICE, thị trường đặc biệt, điểm đến long-haul và các brief du lịch giá trị cao.',
+      defaultTitle: 'WingsPlus',
+      titleSuffix: 'Private, MICE và Proposal',
+    },
+    tagline: 'Proposal private, MICE và special-market cho nhu cầu du lịch high-value.',
+  })
+
   await updateSiteSettingsLocale(payload, req, wingsPlusSettings.id, 'en', {
     seo: {
       defaultDescription:
@@ -7554,6 +7642,48 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
   }
   const productsPage = await createPage(payload, req, site.id, productsPageData)
   await updatePageLocale(payload, req, productsPage.id, 'vi', productsPageData)
+  const productsPageEnglishData = {
+    title: 'Insurance Products',
+    hero: {
+      type: 'mediumImpact' as const,
+      media: heroImage.id,
+      richText: richText(
+        'Travel protection products',
+        'WingsCare presents insurance options and coverage scopes in plain language so travelers know what support is available before and after a trip.',
+        'h1',
+      ),
+    },
+    layout: [
+      featureGridBlock(
+        'Phase 1 product groups',
+        'Launch content should explain the core product groups and support flows before detailed provider policies are connected.',
+        [
+          {
+            title: 'Outbound travel insurance',
+            description: 'Protection for Korea, Japan, China, and long-haul outbound programs.',
+            meta: 'Outbound',
+          },
+          {
+            title: 'Inbound and international guest cover',
+            description: 'Support information for international guests traveling with WingsSide or tailor-made packages.',
+            meta: 'Inbound',
+          },
+          {
+            title: 'Post-sales support',
+            description: 'Guidance for claims, documents, contact channels, and situations that need follow-up.',
+            meta: 'Care',
+          },
+        ],
+        'highlight',
+        'Protection products',
+      ),
+    ],
+    meta: {
+      title: 'WingsCare Insurance Products',
+      description: 'Travel protection product groups and post-sales support from WingsCare.',
+      image: heroImage.id,
+    },
+  }
 
   const benefitsPageData = {
     title: 'Quyền lợi và phạm vi',
@@ -7594,6 +7724,46 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
   }
   const benefitsPage = await createPage(payload, req, site.id, benefitsPageData)
   await updatePageLocale(payload, req, benefitsPage.id, 'vi', benefitsPageData)
+  const benefitsPageEnglishData = {
+    title: 'Benefits and Coverage',
+    hero: {
+      type: 'lowImpact' as const,
+      richText: richText(
+        'Benefits should be quick to understand',
+        'Travel care pages should avoid heavy policy language at the top level. WingsCare groups benefits and next steps so customers can act quickly.',
+        'h1',
+      ),
+    },
+    layout: [
+      infoStripBlock(
+        'Benefit groups to standardize',
+        'This structure is ready for official provider terms once policy details are finalized.',
+        [
+          {
+            value: 'Medical',
+            label: 'Medical expenses',
+            description: 'Explain benefit limits, conditions, and exclusions in customer-friendly language.',
+          },
+          {
+            value: 'Trip',
+            label: 'Trip incidents',
+            description: 'Delays, cancellations, lost luggage, or itinerary changes that may require support.',
+          },
+          {
+            value: 'Assist',
+            label: 'Emergency assistance',
+            description: 'Contact channels, response expectations, and information travelers should prepare.',
+          },
+        ],
+        'Benefits',
+      ),
+    ],
+    meta: {
+      title: 'WingsCare Benefits and Coverage',
+      description: 'Coverage groups, benefit scope, and emergency assistance for travelers.',
+      image: heroImage.id,
+    },
+  }
 
   const claimsPageData = {
     title: 'Hướng dẫn yêu cầu hỗ trợ',
@@ -7635,6 +7805,47 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
   }
   const claimsPage = await createPage(payload, req, site.id, claimsPageData)
   await updatePageLocale(payload, req, claimsPage.id, 'vi', claimsPageData)
+  const claimsPageEnglishData = {
+    title: 'Support Request Guide',
+    hero: {
+      type: 'lowImpact' as const,
+      richText: richText(
+        'Know what to do when something happens',
+        'This page reduces post-sales friction by explaining what documents to prepare, who to contact, and what response timeline to expect.',
+        'h1',
+      ),
+    },
+    layout: [
+      featureGridBlock(
+        'Support process',
+        'The process should be clear enough that customers do not have to search across multiple channels.',
+        [
+          {
+            title: '1. Record the incident',
+            description: 'Collect trip details, tour code, timing, and a clear description of what happened.',
+            meta: 'Intake',
+          },
+          {
+            title: '2. Prepare documents',
+            description: 'Invoices, confirmations, boarding passes, reports, or other relevant documents.',
+            meta: 'Documents',
+          },
+          {
+            title: '3. Track the response',
+            description: 'Follow updates from the support team or insurance partner until the next step is clear.',
+            meta: 'Follow-up',
+          },
+        ],
+        'default',
+        'Support flow',
+      ),
+    ],
+    meta: {
+      title: 'WingsCare Support Request Guide',
+      description: 'How to prepare documents and request travel care or insurance support.',
+      image: heroImage.id,
+    },
+  }
 
   const faqPageData = {
     title: 'FAQ WingsCare',
@@ -7671,6 +7882,45 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
   }
   const faqPage = await createPage(payload, req, site.id, faqPageData)
   await updatePageLocale(payload, req, faqPage.id, 'vi', faqPageData)
+  const faqPageEnglishData = {
+    title: 'WingsCare FAQ',
+    hero: {
+      type: 'lowImpact' as const,
+      richText: richText(
+        'Frequently asked questions',
+        'The FAQ helps travelers understand protection scope and support process before contacting the team.',
+        'h1',
+      ),
+    },
+    layout: [
+      faqBlock(
+        'Insurance and support FAQ',
+        'Common questions about support flow and coverage scope should be visible before customers submit a request.',
+        [
+          {
+            question: 'When should I contact WingsCare?',
+            answer:
+              'Contact WingsCare when you need benefit information, document guidance, support during a trip, or post-trip assistance.',
+          },
+          {
+            question: 'Does WingsCare replace the insurance provider?',
+            answer:
+              'No. WingsCare provides guidance and information support. Specific benefits depend on the terms of the insurance provider.',
+          },
+          {
+            question: 'What should I prepare before requesting support?',
+            answer:
+              'Prepare trip information, tour or contract code, relevant documents, and a clear description of the situation.',
+          },
+        ],
+      ),
+    ],
+    meta: {
+      title: 'WingsCare FAQ',
+      description: 'Frequently asked questions about travel insurance and post-sales support.',
+      image: heroImage.id,
+    },
+  }
 
   const contactPageData = {
     title: 'Liên hệ hỗ trợ',
@@ -7688,6 +7938,29 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
   }
   const contactPage = await createPage(payload, req, site.id, contactPageData)
   await updatePageLocale(payload, req, contactPage.id, 'vi', contactPageData)
+  const contactPageEnglishData = {
+    title: 'Contact Support',
+    hero: {
+      type: 'lowImpact' as const,
+      richText: richText(
+        'Send a support request',
+        'Share your tour, contract, or policy code when available so the WingsCare team can classify the request faster.',
+        'h1',
+      ),
+    },
+    layout: [
+      formBlock(
+        supportForm.id,
+        'Support request details',
+        'This form supports travel care and insurance assistance for the phase 1 site.',
+      ),
+    ],
+    meta: {
+      title: 'Contact WingsCare',
+      description: 'Send a travel care, insurance, or post-sales support request.',
+      image: heroImage.id,
+    },
+  }
 
   const homePageData = {
     title: 'WingsCare',
@@ -7763,11 +8036,90 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
   }
   const homePage = await createPage(payload, req, site.id, homePageData)
   await updatePageLocale(payload, req, homePage.id, 'vi', homePageData)
+  const homePageEnglishData = {
+    title: 'WingsCare',
+    hero: {
+      type: 'highImpact' as const,
+      variant: 'standard' as const,
+      media: heroImage.id,
+      links: [
+        linkItem('View benefits', '/quyen-loi', 'default'),
+        linkItem('Send support request', '/contact', 'outline'),
+      ],
+      richText: richText(
+        'Travel care with clear benefits and support',
+        'WingsCare is the trust-first site for travel insurance, benefit guidance, and post-sales support across the WingsGroup ecosystem.',
+        'h1',
+      ),
+    },
+    layout: [
+      infoStripBlock(
+        'Trust signals customers need early',
+        'WingsCare should not feel like a generic blog. Customers need clear benefits, process, and support channels.',
+        [
+          {
+            value: 'Policy',
+            label: 'Clear benefits',
+            description: 'Explain coverage scope and conditions in plain language.',
+          },
+          {
+            value: 'Support',
+            label: 'Post-sales support',
+            description: 'Show the request channel, required documents, and expected response path.',
+          },
+          {
+            value: 'Care',
+            label: 'Connected to the journey',
+            description: 'Support can connect with outbound, inbound, private, or fast track trips.',
+          },
+        ],
+        'Care model',
+      ),
+      featureGridBlock(
+        'What this site must cover',
+        'These pages form the production foundation for travel care and insurance support.',
+        [
+          {
+            title: 'Insurance products',
+            description: 'Product groups, coverage scope, and intended traveler segments.',
+            meta: 'Products',
+            url: '/san-pham-bao-hiem',
+          },
+          {
+            title: 'Benefits',
+            description: 'Medical expenses, trip incidents, luggage, and emergency assistance.',
+            meta: 'Benefits',
+            url: '/quyen-loi',
+          },
+          {
+            title: 'Claim support',
+            description: 'Document guidance, support process, and contact workflow.',
+            meta: 'Support',
+            url: '/claim-support',
+          },
+        ],
+        'highlight',
+        'Trust-first IA',
+      ),
+      ctaBlock(
+        'Need support for a specific case?',
+        'Send your trip information and situation details so WingsCare can route the request to the right support path.',
+        [linkItem('Send support request', '/contact')],
+      ),
+    ],
+    relatedPages: [productsPage.id, benefitsPage.id, claimsPage.id, faqPage.id, contactPage.id],
+    meta: {
+      title: 'WingsCare',
+      description:
+        'Trust-first travel care site for insurance benefits, support guidance, and post-sales assistance.',
+      image: heroImage.id,
+    },
+  }
 
   const wingsCareSettingsData = {
     footerNote: 'WingsCare tập trung travel care, insurance support, quyền lợi và hướng dẫn hỗ trợ sau bán.',
     headerNavItems: [
-      linkItem('Home', '/'),
+      linkItem('Trang chủ', '/'),
       linkItem('Sản phẩm', '/san-pham-bao-hiem'),
       linkItem('Quyền lợi', '/quyen-loi'),
       linkItem('Claim support', '/claim-support'),
@@ -7775,7 +8127,7 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
       linkItem('Liên hệ', '/contact'),
     ],
     footerNavItems: [linkItem('Quyền lợi', '/quyen-loi'), linkItem('FAQ', '/faq'), linkItem('Liên hệ', '/contact')],
-    supportEmail: 'care@wingscare.vn',
+    supportEmail: 'care@wingsgroup.vn',
     supportPhone: '+84 903 000 555',
   }
   const wingsCareSettings = await createSiteSettings(
@@ -7791,8 +8143,8 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
     tagline: siteSeed.summary,
     branding: {
       logoText: siteSeed.name,
-      brandColor: siteSeed.brandColor,
-      accentColor: siteSeed.accentColor,
+      ...(siteSeed.brandColor ? { brandColor: siteSeed.brandColor } : {}),
+      ...(siteSeed.accentColor ? { accentColor: siteSeed.accentColor } : {}),
       logoImage: null,
       faviconImage: heroImage.id,
       themeKey: siteSeed.code,
@@ -7813,6 +8165,40 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
   })
 
   await mirrorSiteContentToEnglish(payload, req, site.id)
+
+  await updatePageLocale(payload, req, productsPage.id, 'en', productsPageEnglishData)
+  await updatePageLocale(payload, req, benefitsPage.id, 'en', benefitsPageEnglishData)
+  await updatePageLocale(payload, req, claimsPage.id, 'en', claimsPageEnglishData)
+  await updatePageLocale(payload, req, faqPage.id, 'en', faqPageEnglishData)
+  await updatePageLocale(payload, req, contactPage.id, 'en', contactPageEnglishData)
+  await updatePageLocale(payload, req, homePage.id, 'en', homePageEnglishData)
+
+  await updateSiteSettingsLocale(payload, req, wingsCareSettings.id, 'en', {
+    footerNote:
+      'WingsCare focuses on travel care, insurance support, benefit guidance, and post-sales assistance.',
+    headerNavItems: [
+      linkItem('Home', '/'),
+      linkItem('Products', '/san-pham-bao-hiem'),
+      linkItem('Benefits', '/quyen-loi'),
+      linkItem('Claim support', '/claim-support'),
+      linkItem('FAQ', '/faq'),
+      linkItem('Contact', '/contact'),
+    ],
+    footerNavItems: [
+      linkItem('Benefits', '/quyen-loi'),
+      linkItem('FAQ', '/faq'),
+      linkItem('Contact', '/contact'),
+    ],
+    seo: {
+      defaultTitle: siteSeed.name,
+      titleSuffix: 'Care And Support',
+      defaultDescription:
+        'Travel care, insurance support, benefit guidance, and post-sales assistance for WingsGroup travelers.',
+      defaultImage: heroImage.id,
+      canonicalDomain: `https://${siteSeed.domain}`,
+    },
+    tagline: 'Travel care, insurance support, and post-sales assistance.',
+  })
 }
 
 async function _seedLightweightSite(
@@ -7937,6 +8323,8 @@ async function main() {
         })
 
   const req = await createLocalReq({ user: adminUser }, payload)
+  const heroPresetIDs = await ensureHeroPresentationPresetSeeds(payload, req)
+  Object.assign(heroPresentationPresetIDsByKey, heroPresetIDs)
 
   const seedOnlySite = requestedSeed
   const runThemePresets = !seedOnlySite

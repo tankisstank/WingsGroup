@@ -13,8 +13,24 @@ type RelatedPage = Pick<Page, 'slug' | 'title'> & {
   pathname?: null | string
 }
 
-export const RelatedPages = ({ pages }: { pages?: Array<number | RelatedPage> | null }) => {
+export const RelatedPages = ({
+  locale = 'vi',
+  pages,
+}: {
+  locale?: 'en' | 'vi'
+  pages?: Array<number | RelatedPage> | null
+}) => {
   const relatedPages = pages?.filter((page): page is RelatedPage => typeof page === 'object') || []
+  const copy =
+    locale === 'en'
+      ? {
+          heading: 'Related pages',
+          kicker: 'Continue exploring',
+        }
+      : {
+          heading: 'Trang liên quan',
+          kicker: 'Tiếp tục khám phá',
+        }
 
   if (relatedPages.length === 0) {
     return null
@@ -29,10 +45,10 @@ export const RelatedPages = ({ pages }: { pages?: Array<number | RelatedPage> | 
           </div>
           <div>
             <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
-              Tiếp tục khám phá
+              {copy.kicker}
             </p>
             <h2 className="text-xl font-semibold" id="related-pages-heading">
-              Trang liên quan
+              {copy.heading}
             </h2>
           </div>
         </div>
