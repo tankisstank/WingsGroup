@@ -88,32 +88,91 @@
     color: white;
   }
 
+  &__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    grid-column: 1 / -1;
+
+    span {
+      background: var(--theme-elevation-0);
+      border: 1px solid var(--theme-elevation-150);
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.32rem 0.6rem;
+    }
+  }
+
+  &__warning {
+    background: color-mix(in oklch, var(--theme-warning-500) 12%, white);
+    border: 1px solid color-mix(in oklch, var(--theme-warning-500) 28%, white);
+    border-radius: 10px;
+    grid-column: 1 / -1;
+    padding: 0.8rem;
+  }
+
   &__requirements {
     border-top: 1px solid var(--theme-elevation-150);
+    display: grid;
+    gap: 0.9rem;
     grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     padding-top: 0.75rem;
 
     strong {
       display: block;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.45rem;
+    }
+
+    p {
+      color: var(--theme-elevation-650);
+      margin: 0;
     }
 
     ul {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
       gap: 0.45rem;
       list-style: none;
       margin: 0;
       padding: 0;
     }
+  }
 
-    li {
-      background: var(--theme-elevation-0);
-      border: 1px solid var(--theme-elevation-150);
-      border-radius: 999px;
-      font-size: 0.82rem;
+  &__requirement {
+    border: 1px solid var(--theme-elevation-150);
+    border-radius: 10px;
+    display: grid;
+    gap: 0.18rem;
+    padding: 0.7rem;
+
+    span {
       font-weight: 700;
-      padding: 0.35rem 0.6rem;
+    }
+
+    small {
+      color: var(--theme-elevation-650);
+      font-size: 0.8rem;
+      line-height: 1.35;
+    }
+
+    &--critical {
+      background: color-mix(in oklch, var(--theme-error-500) 8%, white);
+      border-color: color-mix(in oklch, var(--theme-error-500) 24%, white);
+    }
+
+    &--warning {
+      background: color-mix(in oklch, var(--theme-warning-500) 12%, white);
+      border-color: color-mix(in oklch, var(--theme-warning-500) 28%, white);
+    }
+
+    &--ready {
+      background: color-mix(in oklch, var(--theme-success-500) 8%, white);
+      border-color: color-mix(in oklch, var(--theme-success-500) 24%, white);
+    }
+
+    &--muted {
+      background: var(--theme-elevation-0);
     }
   }
 
@@ -127,5 +186,9 @@
 @media (width < 60rem) {
   .hero-presentation-guide {
     grid-template-columns: 1fr;
+
+    &__requirements {
+      grid-template-columns: 1fr;
+    }
   }
 }

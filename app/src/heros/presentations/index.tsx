@@ -166,11 +166,13 @@ export const PlannerSplitHero: React.FC<HeroPresentationProps> = ({
     data-media-fit={preset?.visual?.mediaFit || 'cover'}
   >
     <HeroCopy badge={badge} links={links} richText={richText} />
-    <div className="hero-presentation__planner-visual">
-      <HeroVisual media={media} priority />
-      <HeroPostcards postcards={postcards} />
+    <div className="hero-presentation__planner-stage">
+      <div className="hero-presentation__planner-visual">
+        <HeroVisual media={media} priority />
+        <HeroPostcards postcards={postcards} />
+      </div>
+      {businessPanel ? <div className="hero-presentation__business-panel">{businessPanel}</div> : null}
     </div>
-    {businessPanel ? <div className="hero-presentation__business-panel">{businessPanel}</div> : null}
   </div>
 )
 

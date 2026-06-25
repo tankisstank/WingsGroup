@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import type { Site } from '@/payload-types'
 
 import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/access/siteScope'
@@ -66,6 +67,7 @@ export const Pages: CollectionConfig<'pages'> = {
           slug: data?.slug,
           collection: 'pages',
           req,
+          site: data?.site as number | Site | null | undefined,
         }),
     },
     preview: (data, { req }) =>
@@ -74,6 +76,7 @@ export const Pages: CollectionConfig<'pages'> = {
         slug: data?.slug as string,
         collection: 'pages',
         req,
+        site: data?.site as number | Site | null | undefined,
       }),
     useAsTitle: 'title',
   },

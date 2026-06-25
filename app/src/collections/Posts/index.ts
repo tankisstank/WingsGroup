@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import type { Site } from '@/payload-types'
 
 import {
   BlocksFeature,
@@ -65,6 +66,7 @@ export const Posts: CollectionConfig<'posts'> = {
           slug: data?.slug,
           collection: 'posts',
           req,
+          site: data?.site as number | Site | null | undefined,
         }),
     },
     preview: (data, { req }) =>
@@ -72,6 +74,7 @@ export const Posts: CollectionConfig<'posts'> = {
         slug: data?.slug as string,
         collection: 'posts',
         req,
+        site: data?.site as number | Site | null | undefined,
       }),
     useAsTitle: 'title',
   },

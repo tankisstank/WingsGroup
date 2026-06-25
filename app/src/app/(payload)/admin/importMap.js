@@ -1,6 +1,7 @@
 import { ExportListMenuItem as ExportListMenuItem_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
 import { default as default_5dbc566c85bd9cddc4d9a87abea0f042 } from '@/components/ThemePresetEditor/PreviewField'
 import { default as default_24e9bab7be9a712d38ced61f96d0adf8 } from '@/components/ThemePresetEditor/ColorField'
+import { default as default_cbf8573eb8c8e46708c8e0a34465d9fd } from '@/components/HeroPresentationPresetEditor/PreviewField'
 import { ImportListMenuItem as ImportListMenuItem_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -60,6 +61,7 @@ export const importMap = {
   "@payloadcms/plugin-import-export/rsc#ExportListMenuItem": ExportListMenuItem_cdf7e044479f899a31f804427d568b36,
   "@/components/ThemePresetEditor/PreviewField#default": default_5dbc566c85bd9cddc4d9a87abea0f042,
   "@/components/ThemePresetEditor/ColorField#default": default_24e9bab7be9a712d38ced61f96d0adf8,
+  "@/components/HeroPresentationPresetEditor/PreviewField#default": default_cbf8573eb8c8e46708c8e0a34465d9fd,
   "@payloadcms/plugin-import-export/rsc#ImportListMenuItem": ImportListMenuItem_cdf7e044479f899a31f804427d568b36,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,

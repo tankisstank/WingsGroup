@@ -548,7 +548,7 @@ export interface Page {
       [k: string]: unknown;
     } | null;
     /**
-     * Chỉ thay đổi bố cục hiển thị. Màu sắc, font và button tiếp tục lấy từ theme của site.
+     * Trường tương thích dữ liệu cũ. Flow mới dùng Nguồn presentation + Presentation override.
      */
     presentation?:
       | (
@@ -562,7 +562,7 @@ export interface Page {
         )
       | null;
     /**
-     * Dữ liệu cũ chưa có lựa chọn này tiếp tục dùng presentation legacy để bảo toàn giao diện.
+     * Editor chọn kế thừa site default hoặc override riêng trên page. Dữ liệu cũ vẫn fallback qua legacy presentation nếu cần.
      */
     presentationMode?: ('inherit' | 'override') | null;
     presentationPreset?: (number | null) | HeroPresentationPreset;

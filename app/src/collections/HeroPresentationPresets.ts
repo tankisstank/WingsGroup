@@ -138,6 +138,15 @@ export const HeroPresentationPresets: CollectionConfig = {
       required: true,
     },
     {
+      name: 'preview',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/HeroPresentationPresetEditor/PreviewField',
+        },
+      },
+    },
+    {
       name: 'slots',
       label: 'Các vùng hiển thị',
       type: 'group',

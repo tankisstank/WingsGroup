@@ -9,7 +9,6 @@ import {
   type RoleScopeSeed,
 } from '../helpers/seedRoleUsers'
 import { seedHeroPresentationSmoke } from '../helpers/seedPhase1Launch'
-import { heroPresentationDefinitions } from '../../src/heros/presentations/registry'
 
 test.describe('Admin Panel', () => {
   let page: Page
@@ -57,14 +56,14 @@ test.describe('Admin Panel', () => {
   test('can review theme manager without leaking preset ids', async () => {
     await page.goto(`${e2eBaseURL}/admin/theme`)
     await expect(page.getByRole('heading', { name: 'Theme Manager' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Site context' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Colors' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Typography, shape & layout' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Hero presentation' })).toBeVisible()
     await expect(page.locator('.theme-manager__hero-preview')).toBeVisible()
-    await expect(page.locator('.theme-manager__hero-preview')).toContainText(
-      'Trải nghiệm WingsGroup theo từng thị trường',
-    )
-    await expect(page.locator('.theme-manager__hero-preview-notes')).toBeVisible()
+    await expect(page.locator('.theme-manager__preset-card')).toHaveCount(7)
+    await expect(page.locator('.theme-manager__usage-grid')).toContainText('Page kế thừa hero site')
+    await expect(page.locator('.theme-manager__requirement-list')).toBeVisible()
     await expect(page.locator('.theme-manager__preview-head strong')).not.toHaveText(/^\d+$/)
     await expect(page.getByLabel('Brand color picker')).toBeVisible()
     await expect(page.getByText(/Preview (live|chưa lưu)/)).toBeVisible()
@@ -90,6 +89,25 @@ test.describe('Admin Panel', () => {
 
     await expect(page.locator('.theme-preset-preview')).toContainText('Preview Test')
     await expect(page.locator('.theme-preset-preview__meta')).toContainText('#123456')
+  })
+
+  test('can preview a hero presentation preset while creating it', async () => {
+    test.setTimeout(90_000)
+
+    await page.goto(`${e2eBaseURL}/admin/collections/hero-presentation-presets/create`)
+
+    await expect(page.getByRole('heading', { name: /\[Untitled\]|\[Chưa có tiêu đề\]/ })).toBeVisible()
+    await expect(page.getByText('Preview hero preset')).toBeVisible()
+    await expect(page.locator('.hero-presentation-preset-preview')).toBeVisible()
+
+    await page.getByLabel('Tên presentation', { exact: false }).fill('Carousel Audit Preview')
+    await page.getByLabel('Mã hệ thống', { exact: false }).fill('carousel-audit-preview')
+    await page.locator('#field-baseTemplate').getByRole('combobox').click()
+    await page.getByRole('option', { name: 'Cinematic carousel' }).click()
+
+    await expect(page.locator('.hero-presentation-preset-preview')).toContainText('Carousel Audit Preview')
+    await expect(page.locator('.hero-presentation-preset-preview__visual')).toContainText('Slide 1')
+    await expect(page.locator('.hero-presentation-preset-preview__meta').nth(1)).toContainText('Autoplay')
   })
 
   test('can create a draft page from a governed layout preset', async () => {
@@ -143,29 +161,21 @@ test.describe('Admin Panel', () => {
     await expect(editViewArtifact).toBeVisible()
   })
 
-  test('can select a governed high-impact hero presentation', async () => {
+  test('can resolve inherited high-impact hero presentation in the page guide', async () => {
     await page.goto(
       `${e2eBaseURL}/admin/collections/pages/${heroPresentationFixtureIDs['centered-visual']}`,
     )
 
-    const presentationControl = page.locator(
-      '#field-hero__presentation input[role="combobox"], #field-hero__presentation[role="combobox"]',
-    )
-    await expect(presentationControl).toBeVisible()
-    await presentationControl.click()
-
-    for (const definition of heroPresentationDefinitions) {
-      await expect(page.getByRole('option', { name: definition.label })).toBeVisible()
-    }
-
-    await page.getByRole('option', { name: 'Style 3 - Layered visuals' }).click()
     const heroGuide = page.locator('.hero-presentation-guide')
     await expect(heroGuide.getByText('Preview cấu trúc hero')).toBeVisible()
-    await expect(heroGuide.getByRole('listitem').filter({ hasText: 'Ảnh hero chính' })).toBeVisible()
+    await expect(heroGuide.getByText('Nguồn áp dụng: site')).toBeVisible()
+    await expect(heroGuide.getByText('Business behavior:')).toBeVisible()
     await expect(page.locator('#field-hero__media').getByText('Ảnh hero chính')).toBeVisible()
-    await expect(page.getByText('Visual bổ sung', { exact: true })).toBeVisible()
-    await expect(page.getByText('Slides', { exact: true })).toBeVisible()
-    await expect(page.getByText('Video hero', { exact: true })).toBeVisible()
+    await page.locator('#field-hero__presentationMode').getByRole('combobox').click()
+    await page.getByRole('option', { name: 'Override trên page' }).click()
+    await expect(page.getByText('Presentation override')).toBeVisible()
+    await expect(heroGuide.getByText('Nguồn áp dụng: page chưa chọn preset')).toBeVisible()
+    await expect(heroGuide.getByText(/Page có thể/)).toBeVisible()
   })
 
   test('site manager can read only assigned site settings through authenticated API', async ({ request }) => {

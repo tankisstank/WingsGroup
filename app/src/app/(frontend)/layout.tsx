@@ -97,6 +97,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta content={siteTheme.brandColor} name="theme-color" />
       </head>
       <body
+        data-preview-mode={isEnabled ? 'true' : 'false'}
         data-site-layout={siteTheme.layoutStyle}
         data-site-preset={siteTheme.themePreset}
         data-site-theme={siteTheme.themeKey}
