@@ -36,6 +36,8 @@ test.describe('Admin Panel', () => {
   test('can navigate to dashboard', async () => {
     await page.goto(`${e2eBaseURL}/admin`)
     await expect(page).toHaveURL(`${e2eBaseURL}/admin`)
+    await expect(page.locator('html')).toHaveAttribute('data-admin-theme', 'finexy-soft')
+    await expect(page.locator('html')).toHaveClass(/wings-admin-theme-finexy/)
     await expect(
       page.getByRole('heading', { level: 1, name: 'Bảng điều hành CMS' }),
     ).toBeVisible()
@@ -43,6 +45,20 @@ test.describe('Admin Panel', () => {
     await expect(page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Tạo trang nhanh' })).toBeVisible()
     await expect(page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Lead gửi về' })).toBeVisible()
     await expect(page.locator('#wings-group-metrics-0').getByRole('link', { name: /Trang \d+/ })).toBeVisible()
+  })
+
+  test('can switch CMS backend themes with URL parameter and persist selection', async () => {
+    await page.goto(`${e2eBaseURL}/admin?adminTheme=ats-compact`)
+    await expect(page.locator('html')).toHaveAttribute('data-admin-theme', 'ats-compact')
+    await expect(page.locator('html')).toHaveClass(/wings-admin-theme-ats/)
+
+    await page.goto(`${e2eBaseURL}/admin/console`)
+    await expect(page.locator('html')).toHaveAttribute('data-admin-theme', 'ats-compact')
+    await expect(page.locator('html')).toHaveClass(/wings-admin-theme-ats/)
+
+    await page.goto(`${e2eBaseURL}/admin?adminTheme=not-a-theme`)
+    await expect(page.locator('html')).toHaveAttribute('data-admin-theme', 'finexy-soft')
+    await expect(page.locator('html')).toHaveClass(/wings-admin-theme-finexy/)
   })
 
   test('can open operator console', async () => {

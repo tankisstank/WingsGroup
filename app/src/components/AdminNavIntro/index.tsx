@@ -1,6 +1,15 @@
 'use client'
 
 import Link from 'next/link'
+import {
+  DatabaseIcon,
+  InboxIcon,
+  LayoutDashboardIcon,
+  type LucideIcon,
+  SearchCheckIcon,
+  UserRoundIcon,
+  WandSparklesIcon,
+} from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
 type Role = 'editor' | 'site-manager' | 'super-admin'
@@ -28,6 +37,24 @@ const textByLocale = {
     users: 'Người dùng',
   },
 } satisfies Record<AdminLocale, Record<string, string>>
+
+type QuickLinkKey = keyof (typeof textByLocale)['en']
+type QuickLink = {
+  href: string
+  Icon: LucideIcon
+  key: QuickLinkKey
+  requiresDataManager?: boolean
+  requiresSuperAdmin?: boolean
+}
+
+const quickLinks: QuickLink[] = [
+  { href: '/admin/console', Icon: LayoutDashboardIcon, key: 'console' },
+  { href: '/admin/site-review', Icon: SearchCheckIcon, key: 'siteReview' },
+  { href: '/admin/page-wizard', Icon: WandSparklesIcon, key: 'pageWizard' },
+  { href: '/admin/collections/form-submissions', Icon: InboxIcon, key: 'leadInbox' },
+  { href: '/admin/collections/imports', Icon: DatabaseIcon, key: 'importData', requiresDataManager: true },
+  { href: '/admin/collections/users', Icon: UserRoundIcon, key: 'users', requiresSuperAdmin: true },
+] as const
 
 const detectAdminLocale = (): AdminLocale => {
   const htmlLang = document.documentElement.lang?.toLowerCase()
@@ -90,14 +117,38 @@ const AdminNavIntro: React.FC = () => {
 
   return (
     <div className="wings-admin-nav-intro">
-      <span>{t.managementLayer}</span>
-      <strong>{t.multisiteCMS}</strong>
-      <Link href="/admin/console">{t.console}</Link>
-      <Link href="/admin/site-review">{t.siteReview}</Link>
-      <Link href="/admin/page-wizard">{t.pageWizard}</Link>
-      <Link href="/admin/collections/form-submissions">{t.leadInbox}</Link>
-      {canManageData ? <Link href="/admin/collections/imports">{t.importData}</Link> : null}
-      {isSuperAdmin ? <Link href="/admin/collections/users">{t.users}</Link> : null}
+      <div className="wings-admin-nav-intro__head">
+        <span>{t.managementLayer}</span>
+        <strong>{t.multisiteCMS}</strong>
+      </div>
+      <div className="wings-admin-nav-intro__links">
+        {quickLinks.map((link) => {
+          if (link.requiresDataManager && !canManageData) {
+            return null
+          }
+
+          if (link.requiresSuperAdmin && !isSuperAdmin) {
+            return null
+          }
+
+          const label = t[link.key]
+          const Icon = link.Icon
+
+          return (
+            <Link
+              aria-label={label}
+              href={link.href}
+              key={link.href}
+              title={label}
+            >
+              <span className="wings-admin-nav-intro__icon" aria-hidden="true">
+                <Icon />
+              </span>
+              <span>{label}</span>
+            </Link>
+          )
+        })}
+      </div>
     </div>
   )
 }

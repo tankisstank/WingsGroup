@@ -46,6 +46,7 @@ import { RowLabel as RowLabel_1f6ff6ff633e3695d348f4f3c58f1466 } from '@/Footer/
 import { AdminIcon as AdminIcon_edec53feed79ac3b71c9711169ea8044 } from '@/components/AdminBranding/Icon'
 import { AdminLogo as AdminLogo_82abef67c9cd33f1bb5a8d16e18f6a14 } from '@/components/AdminBranding/Logo'
 import { default as default_1a7510af427896d367a49dbf838d2de6 } from '@/components/BeforeDashboard'
+import { default as default_25ec89e89f52bc4500f96e91864b9a74 } from '@/components/AdminThemeBootstrap'
 import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/components/BeforeLogin'
 import { default as default_f56b2388657bfe700e8ea4dd7cf32a54 } from '@/components/AdminNavIntro'
 import { ImportExportProvider as ImportExportProvider_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
@@ -106,6 +107,7 @@ export const importMap = {
   "@/components/AdminBranding/Icon#AdminIcon": AdminIcon_edec53feed79ac3b71c9711169ea8044,
   "@/components/AdminBranding/Logo#AdminLogo": AdminLogo_82abef67c9cd33f1bb5a8d16e18f6a14,
   "@/components/BeforeDashboard#default": default_1a7510af427896d367a49dbf838d2de6,
+  "@/components/AdminThemeBootstrap#default": default_25ec89e89f52bc4500f96e91864b9a74,
   "@/components/BeforeLogin#default": default_8a7ab0eb7ab5c511aba12e68480bfe5e,
   "@/components/AdminNavIntro#default": default_f56b2388657bfe700e8ea4dd7cf32a54,
   "@payloadcms/plugin-import-export/rsc#ImportExportProvider": ImportExportProvider_cdf7e044479f899a31f804427d568b36,

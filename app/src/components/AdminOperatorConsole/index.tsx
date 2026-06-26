@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import AdminThemeBootstrap from '@/components/AdminThemeBootstrap'
+
 import './index.scss'
 
 type Role = 'editor' | 'site-manager' | 'super-admin'
@@ -172,9 +174,15 @@ export default function AdminOperatorConsole() {
 
   return (
     <main className={baseClass}>
+      <AdminThemeBootstrap />
       <div className={`${baseClass}__shell`}>
         <header className={`${baseClass}__header`}>
           <div>
+            <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
+              <Link href="/admin">Bảng điều hành admin</Link>
+              <span aria-hidden="true">/</span>
+              <span>Console vận hành</span>
+            </nav>
             <p>WingsGroup CMS</p>
             <h1>Console vận hành</h1>
             <span>
@@ -182,9 +190,14 @@ export default function AdminOperatorConsole() {
               được phân công.
             </span>
           </div>
-          <div className={`${baseClass}__role`}>
-            <span>Vai trò</span>
-            <strong>{roleLabel[role]}</strong>
+          <div className={`${baseClass}__header-side`}>
+            <Link className={`${baseClass}__admin-home`} href="/admin">
+              ← Về admin
+            </Link>
+            <div className={`${baseClass}__role`}>
+              <span>Vai trò</span>
+              <strong>{roleLabel[role]}</strong>
+            </div>
           </div>
         </header>
 

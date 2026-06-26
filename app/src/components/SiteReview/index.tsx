@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import AdminThemeBootstrap from '@/components/AdminThemeBootstrap'
+
 import './index.scss'
 
 type ReviewItem = {
@@ -118,9 +120,15 @@ export default function SiteReviewView() {
 
   return (
     <main className={baseClass}>
+      <AdminThemeBootstrap />
       <aside className={`${baseClass}__sidebar`}>
         <header className={`${baseClass}__head`}>
           <div>
+            <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
+              <Link href="/admin">Bảng điều hành admin</Link>
+              <span aria-hidden="true">/</span>
+              <span>Site review</span>
+            </nav>
             <p>WingsGroup CMS</p>
             <h1>Site review</h1>
             <span>
@@ -128,7 +136,12 @@ export default function SiteReviewView() {
               Payload.
             </span>
           </div>
-          <Link href="/admin/console">Console</Link>
+          <div className={`${baseClass}__head-actions`}>
+            <Link className={`${baseClass}__admin-home`} href="/admin">
+              ← Về admin
+            </Link>
+            <Link href="/admin/console">Console</Link>
+          </div>
         </header>
 
         <div className={`${baseClass}__tools`}>

@@ -36,9 +36,9 @@ export default buildConfig({
     },
     suppressHydrationWarning: true,
     components: {
-      beforeLogin: ['@/components/BeforeLogin'],
+      beforeLogin: ['@/components/AdminThemeBootstrap', '@/components/BeforeLogin'],
       beforeDashboard: ['@/components/BeforeDashboard'],
-      beforeNav: ['@/components/AdminNavIntro'],
+      beforeNav: ['@/components/AdminThemeBootstrap', '@/components/AdminNavIntro'],
       graphics: {
         Icon: '@/components/AdminBranding/Icon#AdminIcon',
         Logo: '@/components/AdminBranding/Logo#AdminLogo',

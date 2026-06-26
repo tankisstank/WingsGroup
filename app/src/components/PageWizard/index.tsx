@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import AdminThemeBootstrap from '@/components/AdminThemeBootstrap'
 import {
   layoutPresetDefinitions,
   type LayoutPresetCategory,
@@ -139,9 +140,15 @@ export default function PageWizardView() {
 
   return (
     <main className={baseClass}>
+      <AdminThemeBootstrap />
       <div className={`${baseClass}__shell`}>
         <header className={`${baseClass}__header`}>
           <div>
+            <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
+              <Link href="/admin">Bảng điều hành admin</Link>
+              <span aria-hidden="true">/</span>
+              <span>Tạo trang nhanh</span>
+            </nav>
             <p>WingsGroup CMS</p>
             <h1>Tạo trang nhanh</h1>
             <span>
@@ -149,7 +156,12 @@ export default function PageWizardView() {
               đầy đủ để kiểm tra nội dung và preview trước khi publish.
             </span>
           </div>
-          <Link href="/admin/console">Quay lại console</Link>
+          <div className={`${baseClass}__header-actions`}>
+            <Link className={`${baseClass}__admin-home`} href="/admin">
+              ← Về admin
+            </Link>
+            <Link href="/admin/console">Quay lại console</Link>
+          </div>
         </header>
 
         <ol className={`${baseClass}__steps`}>

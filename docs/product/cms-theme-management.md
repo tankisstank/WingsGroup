@@ -304,3 +304,43 @@ The implementation must prove:
 8. Update handover docs for site managers.
 
 All eight rollout steps are implemented in the current local application.
+
+## Separate CMS backend theme shell
+
+The public site theme system and the CMS backend/admin shell are separate
+concerns.
+
+The implemented public theme system controls how WingsGroup sites render to end
+users:
+
+- `site-settings.branding`
+- `theme-presets`
+- `hero-presentation-presets`
+- `getSiteThemeTokens()`
+- `--site-*` CSS variables
+- public frontend data attributes
+
+The CMS backend theme shell should be tracked separately. Its job is to improve
+operator experience inside Payload Admin, inspired by compact backoffice
+interfaces: persistent navigation, clear active states, searchable work areas,
+action toolbars, dense list views, and consistent dashboard/table styling.
+
+Rules for CMS backend theme work:
+
+- It must use `WingsGroup CMS` naming.
+- It must not change public site theme resolution.
+- It must not introduce a second CMS or duplicate Payload collection behavior.
+- It must preserve Payload auth, role access, site scoping, drafts, preview,
+  and collection edit flows.
+- It should reuse one admin shell visual system across `/admin/console`,
+  `/admin/theme`, `/admin/site-review`, `/admin/page-wizard`, dashboard
+  widgets, and safe Payload list/edit overrides.
+- Custom admin views must expose an explicit return path to the Payload admin
+  dashboard (`/admin`) because they do not always inherit the native Payload
+  sidebar/header shell.
+- It should stay tokenized and code-governed; editors must not receive
+  arbitrary CSS controls for the CMS backend.
+
+Tracked story:
+
+- `docs/stories/epics/E05-cms-theme-management/US-022-cms-backend-theme-shell.md`

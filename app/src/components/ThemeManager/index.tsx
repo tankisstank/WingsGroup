@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import AdminThemeBootstrap from '@/components/AdminThemeBootstrap'
+
 import './index.scss'
 
 import {
@@ -563,8 +565,25 @@ export default function ThemeManagerView() {
   if (isLoading) {
     return (
       <main className={baseClass}>
+        <AdminThemeBootstrap />
         <div className={`${baseClass}__shell`}>
-          <p>Đang tải Theme Manager...</p>
+          <header className={`${baseClass}__header`}>
+            <div>
+              <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
+                <Link href="/admin">Bảng điều hành admin</Link>
+                <span aria-hidden="true">/</span>
+                <span>Theme Manager</span>
+              </nav>
+              <p>WingsGroup CMS</p>
+              <h1>Theme Manager</h1>
+              <span>Đang tải Theme Manager...</span>
+            </div>
+            <div className={`${baseClass}__header-actions`}>
+              <Link className={`${baseClass}__admin-home`} href="/admin">
+                ← Về admin
+              </Link>
+            </div>
+          </header>
         </div>
       </main>
     )
@@ -573,14 +592,25 @@ export default function ThemeManagerView() {
   if (!canEdit) {
     return (
       <main className={baseClass}>
+        <AdminThemeBootstrap />
         <div className={`${baseClass}__shell`}>
           <header className={`${baseClass}__header`}>
             <div>
+              <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
+                <Link href="/admin">Bảng điều hành admin</Link>
+                <span aria-hidden="true">/</span>
+                <span>Theme Manager</span>
+              </nav>
               <p>WingsGroup CMS</p>
               <h1>Theme Manager</h1>
               <span>Chỉ super-admin và site-manager mới được chỉnh theme.</span>
             </div>
-            <Link href="/admin/console">Quay lại console</Link>
+            <div className={`${baseClass}__header-actions`}>
+              <Link className={`${baseClass}__admin-home`} href="/admin">
+                ← Về admin
+              </Link>
+              <Link href="/admin/console">Quay lại console</Link>
+            </div>
           </header>
         </div>
       </main>
@@ -589,9 +619,15 @@ export default function ThemeManagerView() {
 
   return (
     <main className={baseClass}>
+      <AdminThemeBootstrap />
       <div className={`${baseClass}__shell`}>
         <header className={`${baseClass}__header`}>
           <div>
+            <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
+              <Link href="/admin">Bảng điều hành admin</Link>
+              <span aria-hidden="true">/</span>
+              <span>Theme Manager</span>
+            </nav>
             <p>WingsGroup CMS</p>
             <h1>Theme Manager</h1>
             <span>
@@ -600,6 +636,9 @@ export default function ThemeManagerView() {
             </span>
           </div>
           <div className={`${baseClass}__header-actions`}>
+            <Link className={`${baseClass}__admin-home`} href="/admin">
+              ← Về admin
+            </Link>
             <Link href="/admin/collections/site-settings">Site settings</Link>
             <Link href="/admin/console">Quay lại console</Link>
           </div>
