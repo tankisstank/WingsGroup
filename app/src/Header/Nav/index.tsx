@@ -44,7 +44,7 @@ export const HeaderNav: React.FC<{
 
   return (
     <div className="site-header__nav">
-      <nav aria-label="Primary navigation" className="hidden items-center gap-3 2xl:flex">
+      <nav aria-label="Primary navigation" className="hidden items-center gap-3 xl:flex">
         {navItems.map(({ link }, i) => {
           return <CMSLink className="theme-nav-link" key={i} {...link} appearance="link" />
         })}
@@ -59,7 +59,7 @@ export const HeaderNav: React.FC<{
         </SiteLink>
       </nav>
 
-      <div className="flex items-center gap-2 2xl:hidden">
+      <div className="flex items-center gap-2 xl:hidden">
         {shouldRenderPrimaryAction ? (
           <SiteLink className="site-header-cta site-header-cta--mobile" href={primaryAction.url}>
             {primaryAction.label}

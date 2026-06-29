@@ -3,6 +3,8 @@ import 'dotenv/config'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
+import { DEFAULT_LOCAL_DATABASE_URL, resolveLocalDatabaseURL } from '../src/utilities/localDatabase'
+
 type TreeItem = {
   children?: TreeItem[]
   depth?: number
@@ -66,7 +68,7 @@ const sitePath = (siteCode: string, pathValue?: null | string) => {
 }
 
 const getDatabaseURL = () => {
-  const databaseURL = process.env.DATABASE_URL || 'file:./payload.db'
+  const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL || DEFAULT_LOCAL_DATABASE_URL)
 
   if (!databaseURL.startsWith('file:')) {
     throw new Error('generate-site-link-review currently supports local SQLite DATABASE_URL only.')

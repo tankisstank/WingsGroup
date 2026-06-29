@@ -122,6 +122,18 @@ export const getPostPath = (slug?: null | string) => {
   return `/posts/${slug}`
 }
 
+export const getTourProductPath = (slug?: null | string, locale?: null | string) => {
+  const path = slug ? `/tour/${slug}` : '/tour'
+
+  return prefixCanonicalPathWithLocale(path, locale)
+}
+
+export const getTourCampaignPath = (slug?: null | string, locale?: null | string) => {
+  const path = slug ? `/campaign/${slug}` : '/campaign'
+
+  return prefixCanonicalPathWithLocale(path, locale)
+}
+
 export const getSiteId = (site?: null | number | Site): number | null => {
   if (!site) {
     return null

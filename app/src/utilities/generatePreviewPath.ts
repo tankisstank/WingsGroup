@@ -1,17 +1,21 @@
 import { PreviewSearchParams } from '@/app/(frontend)/next/preview/route'
 import { normalizeRelationID } from '@/access/roles'
 import type { Site } from '@/payload-types'
-import { PayloadRequest, CollectionSlug } from 'payload'
+import { PayloadRequest } from 'payload'
 import { prefixCanonicalPathWithLocale } from './siteURLs'
 import { defaultSiteCode, prefixPathWithSite, siteCodeToAliasMap } from './sitePaths'
 
-const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
+type PreviewCollection = 'pages' | 'posts' | 'tour-campaigns' | 'tour-products'
+
+const collectionPrefixMap: Record<PreviewCollection, string> = {
   posts: '/posts',
   pages: '',
+  'tour-campaigns': '/campaign',
+  'tour-products': '/tour',
 }
 
 type Props = {
-  collection: keyof typeof collectionPrefixMap
+  collection: PreviewCollection
   pathname?: null | string
   site?: null | number | Site
   slug: string

@@ -6,6 +6,7 @@ import { execFileSync } from 'child_process'
 import { fileURLToPath } from 'url'
 
 import { createLocalReq, getPayload } from 'payload'
+import { DEFAULT_LOCAL_DATABASE_URL, resolveLocalDatabaseURL } from '../src/utilities/localDatabase'
 
 const filename = fileURLToPath(import.meta.url)
 const scriptDir = path.dirname(filename)
@@ -149,7 +150,7 @@ async function createBrandMedia({
 }
 
 async function main() {
-  const databaseURL = process.env.DATABASE_URL || 'file:./payload.db'
+  const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL || DEFAULT_LOCAL_DATABASE_URL)
   const isPostgresURL =
     databaseURL.startsWith('postgres://') || databaseURL.startsWith('postgresql://')
 

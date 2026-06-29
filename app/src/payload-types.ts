@@ -73,6 +73,10 @@ export interface Config {
     'site-settings': SiteSetting;
     pages: Page;
     posts: Post;
+    'tour-products': TourProduct;
+    'departure-variants': DepartureVariant;
+    'tour-departures': TourDeparture;
+    'tour-campaigns': TourCampaign;
     media: Media;
     categories: Category;
     users: User;
@@ -96,6 +100,10 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'tour-products': TourProductsSelect<false> | TourProductsSelect<true>;
+    'departure-variants': DepartureVariantsSelect<false> | DepartureVariantsSelect<true>;
+    'tour-departures': TourDeparturesSelect<false> | TourDeparturesSelect<true>;
+    'tour-campaigns': TourCampaignsSelect<false> | TourCampaignsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -1411,6 +1419,341 @@ export interface Form {
   createdAt: string;
 }
 /**
+ * Tour gốc cho WingsGo. Dữ liệu này là nguồn thật để render trang tour, bảng khởi hành, campaign và market page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tour-products".
+ */
+export interface TourProduct {
+  id: number;
+  title: string;
+  site: number | Site;
+  market: 'korea' | 'japan' | 'china';
+  tourCode?: string | null;
+  durationDays: number;
+  durationNights: number;
+  wrapperPage?: (number | null) | Page;
+  summary: string;
+  heroMedia?: (number | null) | Media;
+  gallery?: (number | Media)[] | null;
+  highlights?:
+    | {
+        title: string;
+        description: string;
+        id?: string | null;
+      }[]
+    | null;
+  factSummary?: {
+    routeSummary?: string | null;
+    mealsSummary?: string | null;
+    groupSizeSummary?: string | null;
+    operatorNote?: string | null;
+    holdNote?: string | null;
+    hotelSummary?: string | null;
+  };
+  reviewSnapshot?: {
+    score?: number | null;
+    reviewCount?: number | null;
+    travelerCount?: number | null;
+    sourceLabel?: string | null;
+    whyGuestsChoose?: string | null;
+    proofQuotes?:
+      | {
+          quote: string;
+          author?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  routeViz?: {
+    mapImage?: (number | null) | Media;
+    routeCaption?: string | null;
+    stops?:
+      | {
+          order: number;
+          label: string;
+          type?: ('origin' | 'arrival' | 'sightseeing' | 'overnight' | 'return') | null;
+          id?: string | null;
+        }[]
+      | null;
+    travelLegs?:
+      | {
+          from: string;
+          to: string;
+          mode?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  badges?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Dữ liệu hiển thị cho card tour trên trang thị trường. Badge và selling line ở đây được CMS kiểm soát, không suy đoán từ tiêu đề hay giá.
+   */
+  marketCard?: {
+    thumbnailOverride?: (number | null) | Media;
+    /**
+     * Tối đa 3 badge, ví dụ: Phù hợp người mới đi, Giá tốt, Line bán chạy.
+     */
+    badges?:
+      | {
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+    sellingLine?: string | null;
+    priorityLabel?: string | null;
+    featuredReason?: string | null;
+  };
+  primaryCTA: {
+    mode: 'inquiry' | 'hold-seat' | 'request-quote' | 'contact';
+    label?: string | null;
+    href?: string | null;
+    leadFormVariant?: string | null;
+    bookingIntentMode?: string | null;
+  };
+  itineraryDays: {
+    dayNumber: number;
+    title: string;
+    route?: string | null;
+    summary: string;
+    meals?: string | null;
+    transport?: string | null;
+    accommodation?: string | null;
+    notes?: string | null;
+    dayTheme?: string | null;
+    dayHighlight?: string | null;
+    sleepingStandard?: string | null;
+    equipmentNote?: string | null;
+    media?: (number | null) | Media;
+    gallery?: (number | Media)[] | null;
+    id?: string | null;
+  }[];
+  includes?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  excludes?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  servicesSummary?: {
+    hotelSummary?: string | null;
+    mealsSummary?: string | null;
+    transportSummary?: string | null;
+    operatorNotes?: string | null;
+    importantNotes?:
+      | {
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  faqItems?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  relatedTours?: (number | TourProduct)[] | null;
+  bcfg: {
+    template: 'dense-retail-default' | 'dense-retail-variant';
+    stickyCTAEnabled?: boolean | null;
+    ctaStyle?: ('hold-seat' | 'inquiry' | 'request-quote') | null;
+    routeMode?: ('route-map' | 'stop-timeline') | null;
+    itinMode?: ('timeline-cards' | 'accordion') | null;
+    depMode?: ('matrix' | 'cards') | null;
+  };
+  sectionVisibility?:
+    | (
+        | 'hero'
+        | 'facts'
+        | 'why-choose'
+        | 'route'
+        | 'itinerary'
+        | 'includes'
+        | 'departures'
+        | 'faq'
+        | 'related'
+        | 'reviews'
+        | 'services'
+        | 'sticky-cta'
+      )[]
+    | null;
+  sectionOrder?:
+    | (
+        | 'hero'
+        | 'facts'
+        | 'reviews'
+        | 'why-choose'
+        | 'route'
+        | 'itinerary'
+        | 'services'
+        | 'departures'
+        | 'faq'
+        | 'related'
+        | 'sticky-cta'
+      )[]
+    | null;
+  variantStrategy?: ('product-first' | 'variant-first') | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+    breadcrumbLabel?: string | null;
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Biến thể tour có kiểm soát để dùng lại một tour gốc cho nhiều điểm đi, hãng bay, hoặc nhịp hành trình khác nhau mà không nhân bản toàn bộ trang tour.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "departure-variants".
+ */
+export interface DepartureVariant {
+  id: number;
+  site: number | Site;
+  tourProduct: number | TourProduct;
+  variantKey: string;
+  label: string;
+  status: 'active' | 'inactive' | 'archived';
+  departureCity?: string | null;
+  airline?: string | null;
+  displayPriority?: number | null;
+  summaryOverride?: string | null;
+  heroMediaOverride?: (number | null) | Media;
+  rvo?: {
+    mapImage?: (number | null) | Media;
+    routeCaption?: string | null;
+    st?:
+      | {
+          order: number;
+          label: string;
+          tp?: ('origin' | 'arrival' | 'sightseeing' | 'overnight' | 'return') | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  servicesOverride?: {
+    hotelSummary?: string | null;
+    transportSummary?: string | null;
+    importantNotes?: string | null;
+  };
+  itineraryDayOverrides?:
+    | {
+        dayNumber: number;
+        title?: string | null;
+        route?: string | null;
+        summary?: string | null;
+        meals?: string | null;
+        transport?: string | null;
+        accommodation?: string | null;
+        dayTheme?: string | null;
+        dayHighlight?: string | null;
+        sleepingStandard?: string | null;
+        equipmentNote?: string | null;
+        gallery?: (number | Media)[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  activeDepartures?: (number | TourDeparture)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Lịch khởi hành và giá bán công khai. Mỗi record là một đợt đi để dùng lại trên tour detail, market, campaign và trang lịch.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tour-departures".
+ */
+export interface TourDeparture {
+  id: number;
+  site: number | Site;
+  tourProduct: number | TourProduct;
+  variantRef?: (number | null) | DepartureVariant;
+  variantKey?: string | null;
+  departureCity?: string | null;
+  departureDate: string;
+  returnDate?: string | null;
+  airline?: string | null;
+  priceFrom: number;
+  currency: 'VND';
+  promoLabel?: string | null;
+  urgencyLabel?: string | null;
+  availabilityBadge?: string | null;
+  availabilityStatus: 'open' | 'limited' | 'sold-out';
+  note?: string | null;
+  depositNote?: string | null;
+  holdNote?: string | null;
+  changePolicyNote?: string | null;
+  ctaLabelOverride?: string | null;
+  isFeatured?: boolean | null;
+  intentConfig?: {
+    leadFormVariant?: string | null;
+    bookingIntentMode?: string | null;
+    salesRoutingHint?: string | null;
+    bookingNote?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Campaign season cho tour. Dùng để gom product và departure theo mùa hoặc line bán hàng cụ thể.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tour-campaigns".
+ */
+export interface TourCampaign {
+  id: number;
+  title: string;
+  site: number | Site;
+  campaignCode?: string | null;
+  seasonKey: 'summer-2026' | 'always-on';
+  wrapperPage?: (number | null) | Page;
+  summary: string;
+  heroMedia?: (number | null) | Media;
+  linkedTours: (number | TourProduct)[];
+  featuredDepartures?: (number | TourDeparture)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+    breadcrumbLabel?: string | null;
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
@@ -1699,6 +2042,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'tour-products';
+        value: number | TourProduct;
+      } | null)
+    | ({
+        relationTo: 'departure-variants';
+        value: number | DepartureVariant;
+      } | null)
+    | ({
+        relationTo: 'tour-departures';
+        value: number | TourDeparture;
+      } | null)
+    | ({
+        relationTo: 'tour-campaigns';
+        value: number | TourCampaign;
       } | null)
     | ({
         relationTo: 'media';
@@ -2368,6 +2727,308 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tour-products_select".
+ */
+export interface TourProductsSelect<T extends boolean = true> {
+  title?: T;
+  site?: T;
+  market?: T;
+  tourCode?: T;
+  durationDays?: T;
+  durationNights?: T;
+  wrapperPage?: T;
+  summary?: T;
+  heroMedia?: T;
+  gallery?: T;
+  highlights?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  factSummary?:
+    | T
+    | {
+        routeSummary?: T;
+        mealsSummary?: T;
+        groupSizeSummary?: T;
+        operatorNote?: T;
+        holdNote?: T;
+        hotelSummary?: T;
+      };
+  reviewSnapshot?:
+    | T
+    | {
+        score?: T;
+        reviewCount?: T;
+        travelerCount?: T;
+        sourceLabel?: T;
+        whyGuestsChoose?: T;
+        proofQuotes?:
+          | T
+          | {
+              quote?: T;
+              author?: T;
+              id?: T;
+            };
+      };
+  routeViz?:
+    | T
+    | {
+        mapImage?: T;
+        routeCaption?: T;
+        stops?:
+          | T
+          | {
+              order?: T;
+              label?: T;
+              type?: T;
+              id?: T;
+            };
+        travelLegs?:
+          | T
+          | {
+              from?: T;
+              to?: T;
+              mode?: T;
+              id?: T;
+            };
+      };
+  badges?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  marketCard?:
+    | T
+    | {
+        thumbnailOverride?: T;
+        badges?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+        sellingLine?: T;
+        priorityLabel?: T;
+        featuredReason?: T;
+      };
+  primaryCTA?:
+    | T
+    | {
+        mode?: T;
+        label?: T;
+        href?: T;
+        leadFormVariant?: T;
+        bookingIntentMode?: T;
+      };
+  itineraryDays?:
+    | T
+    | {
+        dayNumber?: T;
+        title?: T;
+        route?: T;
+        summary?: T;
+        meals?: T;
+        transport?: T;
+        accommodation?: T;
+        notes?: T;
+        dayTheme?: T;
+        dayHighlight?: T;
+        sleepingStandard?: T;
+        equipmentNote?: T;
+        media?: T;
+        gallery?: T;
+        id?: T;
+      };
+  includes?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  excludes?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  servicesSummary?:
+    | T
+    | {
+        hotelSummary?: T;
+        mealsSummary?: T;
+        transportSummary?: T;
+        operatorNotes?: T;
+        importantNotes?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+      };
+  faqItems?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  relatedTours?: T;
+  bcfg?:
+    | T
+    | {
+        template?: T;
+        stickyCTAEnabled?: T;
+        ctaStyle?: T;
+        routeMode?: T;
+        itinMode?: T;
+        depMode?: T;
+      };
+  sectionVisibility?: T;
+  sectionOrder?: T;
+  variantStrategy?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+        breadcrumbLabel?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "departure-variants_select".
+ */
+export interface DepartureVariantsSelect<T extends boolean = true> {
+  site?: T;
+  tourProduct?: T;
+  variantKey?: T;
+  label?: T;
+  status?: T;
+  departureCity?: T;
+  airline?: T;
+  displayPriority?: T;
+  summaryOverride?: T;
+  heroMediaOverride?: T;
+  rvo?:
+    | T
+    | {
+        mapImage?: T;
+        routeCaption?: T;
+        st?:
+          | T
+          | {
+              order?: T;
+              label?: T;
+              tp?: T;
+              id?: T;
+            };
+      };
+  servicesOverride?:
+    | T
+    | {
+        hotelSummary?: T;
+        transportSummary?: T;
+        importantNotes?: T;
+      };
+  itineraryDayOverrides?:
+    | T
+    | {
+        dayNumber?: T;
+        title?: T;
+        route?: T;
+        summary?: T;
+        meals?: T;
+        transport?: T;
+        accommodation?: T;
+        dayTheme?: T;
+        dayHighlight?: T;
+        sleepingStandard?: T;
+        equipmentNote?: T;
+        gallery?: T;
+        id?: T;
+      };
+  activeDepartures?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tour-departures_select".
+ */
+export interface TourDeparturesSelect<T extends boolean = true> {
+  site?: T;
+  tourProduct?: T;
+  variantRef?: T;
+  variantKey?: T;
+  departureCity?: T;
+  departureDate?: T;
+  returnDate?: T;
+  airline?: T;
+  priceFrom?: T;
+  currency?: T;
+  promoLabel?: T;
+  urgencyLabel?: T;
+  availabilityBadge?: T;
+  availabilityStatus?: T;
+  note?: T;
+  depositNote?: T;
+  holdNote?: T;
+  changePolicyNote?: T;
+  ctaLabelOverride?: T;
+  isFeatured?: T;
+  intentConfig?:
+    | T
+    | {
+        leadFormVariant?: T;
+        bookingIntentMode?: T;
+        salesRoutingHint?: T;
+        bookingNote?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tour-campaigns_select".
+ */
+export interface TourCampaignsSelect<T extends boolean = true> {
+  title?: T;
+  site?: T;
+  campaignCode?: T;
+  seasonKey?: T;
+  wrapperPage?: T;
+  summary?: T;
+  heroMedia?: T;
+  linkedTours?: T;
+  featuredDepartures?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+        breadcrumbLabel?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -2970,6 +3631,10 @@ export interface TaskCreateCollectionExport {
       | 'site-settings'
       | 'pages'
       | 'posts'
+      | 'tour-products'
+      | 'departure-variants'
+      | 'tour-departures'
+      | 'tour-campaigns'
       | 'media'
       | 'categories'
       | 'users'
@@ -3034,6 +3699,22 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'posts';
           value: number | Post;
+        } | null)
+      | ({
+          relationTo: 'tour-products';
+          value: number | TourProduct;
+        } | null)
+      | ({
+          relationTo: 'departure-variants';
+          value: number | DepartureVariant;
+        } | null)
+      | ({
+          relationTo: 'tour-departures';
+          value: number | TourDeparture;
+        } | null)
+      | ({
+          relationTo: 'tour-campaigns';
+          value: number | TourCampaign;
         } | null);
     global?: string | null;
     user?: (number | null) | User;

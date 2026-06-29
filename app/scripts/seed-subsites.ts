@@ -207,7 +207,7 @@ const englishTitleMap: Record<string, string> = {
   'Bảng giá Fast Track': 'Fast Track Pricing',
   'Bắc Kinh - Vạn Lý Trường Thành 5N4D': 'Beijing - Great Wall 5D4N',
   'Campaign mùa hè nên dẫn khách vào đâu sau poster': 'Where Summer Campaigns Should Send Visitors After the Poster',
-  'Campaign theo mùa': 'Seasonal Campaigns',
+  'Tour theo mùa': 'Seasonal Tours',
   'Cách đọc lịch khởi hành và giá trên WingsGo': 'How to Read Departure Schedules and Prices on WingsGo',
   'Chính sách bảo mật': 'Privacy Policy',
   'Chính sách hủy đổi': 'Cancellation and Change Policy',
@@ -280,7 +280,7 @@ const siteSeeds: SiteSeed[] = [
     domain: 'wingsgo.local',
     name: 'WingsGo',
     seoDescription:
-      'Tour outbound Hàn, Nhật, Trung với giá rõ, lịch khởi hành rõ, campaign theo mùa và trang tour chi tiết dễ giữ chỗ.',
+      'Tour outbound Hàn, Nhật, Trung với giá rõ, lịch khởi hành rõ, tour theo mùa và trang chi tiết dễ giữ chỗ.',
     seoSuffix: 'Outbound Tours',
     summary:
       'Tour outbound Hàn, Nhật, Trung với giá rõ, lịch khởi hành rõ và CTA tư vấn hoặc giữ chỗ nhanh.',
@@ -660,6 +660,46 @@ async function upsertSite(payload: Payload, req: PayloadRequest, siteSeed: SiteS
 
 async function clearSiteContent(payload: Payload, req: PayloadRequest, siteID: number | string) {
   await payload.db.deleteMany({
+    collection: 'tour-departures' as never,
+    req,
+    where: {
+      site: {
+        equals: siteID,
+      },
+    },
+  })
+
+  await payload.db.deleteMany({
+    collection: 'departure-variants' as never,
+    req,
+    where: {
+      site: {
+        equals: siteID,
+      },
+    },
+  })
+
+  await payload.db.deleteMany({
+    collection: 'tour-campaigns' as never,
+    req,
+    where: {
+      site: {
+        equals: siteID,
+      },
+    },
+  })
+
+  await payload.db.deleteMany({
+    collection: 'tour-products' as never,
+    req,
+    where: {
+      site: {
+        equals: siteID,
+      },
+    },
+  })
+
+  await payload.db.deleteMany({
     collection: 'site-settings',
     req,
     where: {
@@ -850,6 +890,139 @@ async function createPage(
       pathname: resolvedPathname,
       site: siteID,
       slug: `${siteRecord.code}-${requestedSlug}`,
+    }),
+  })
+}
+
+const parsePriceNumber = (value: string) => Number(value.replace(/[^\d]/g, ''))
+
+const parseSeedDate = (value: string) => {
+  const [day, month, year] = value.split('/').map((part) => Number(part))
+
+  return new Date(Date.UTC(year, month - 1, day))
+}
+
+const toISODate = (value: Date) => value.toISOString()
+
+const addDays = (value: Date, days: number) => {
+  const next = new Date(value)
+  next.setUTCDate(next.getUTCDate() + days)
+  return next
+}
+
+const buildListItemsFromSentence = (value: string, fallback: string[] = []) => {
+  const normalized = value.replace(/\.$/, '')
+  const segments = normalized
+    .split(/,|;| và /g)
+    .map((segment) => segment.trim())
+    .filter((segment) => segment.length > 0)
+
+  const source = segments.length > 0 ? segments : fallback
+
+  return source.map((label) => ({ label }))
+}
+
+const buildItineraryDays = (
+  itinerary: string,
+  durationDays: number,
+  mediaID?: number | string,
+) => {
+  const rawDays = itinerary
+    .split(/\.\s+/)
+    .map((entry) => entry.trim().replace(/\.$/, ''))
+    .filter(Boolean)
+
+  return Array.from({ length: durationDays }, (_, index) => {
+    const summary = rawDays[index] || rawDays[rawDays.length - 1] || itinerary
+    const dayNumber = index + 1
+
+    return {
+      dayNumber,
+      title: `Ngày ${dayNumber}`,
+      route: summary.split(' ').slice(0, 5).join(' '),
+      summary,
+      meals: 'Theo chương trình',
+      transport: 'Máy bay / xe theo tuyến',
+      accommodation: 'Khách sạn tiêu chuẩn line bán',
+      notes: 'Có thể tinh chỉnh theo đợt khởi hành thực tế.',
+      dayTheme: `Nhịp ngày ${dayNumber}`,
+      dayHighlight: 'Ngày được tổ chức để khách nhìn rõ route, nhịp tham quan và mức độ phù hợp trước khi giữ chỗ.',
+      sleepingStandard: 'Khách sạn tiêu chuẩn line bán / xác nhận lại theo đợt đi',
+      equipmentNote: 'Phương tiện triển khai theo lịch công bố của line bán',
+      media: mediaID,
+      gallery: [mediaID],
+    }
+  })
+}
+
+async function createTourProduct(
+  payload: Payload,
+  req: PayloadRequest,
+  siteID: number | string,
+  data: Record<string, unknown>,
+) : Promise<any> {
+  return payload.create({
+    collection: 'tour-products' as never,
+    req,
+    context: seedContext,
+    data: seedData({
+      ...data,
+      _status: 'published',
+      site: siteID,
+    }),
+  })
+}
+
+async function createTourDeparture(
+  payload: Payload,
+  req: PayloadRequest,
+  siteID: number | string,
+  data: Record<string, unknown>,
+) : Promise<any> {
+  return payload.create({
+    collection: 'tour-departures' as never,
+    req,
+    context: seedContext,
+    data: seedData({
+      ...data,
+      _status: 'published',
+      site: siteID,
+    }),
+  })
+}
+
+async function createDepartureVariant(
+  payload: Payload,
+  req: PayloadRequest,
+  siteID: number | string,
+  data: Record<string, unknown>,
+): Promise<any> {
+  return payload.create({
+    collection: 'departure-variants' as never,
+    req,
+    context: seedContext,
+    data: seedData({
+      ...data,
+      _status: 'published',
+      site: siteID,
+    }),
+  })
+}
+
+async function createTourCampaign(
+  payload: Payload,
+  req: PayloadRequest,
+  siteID: number | string,
+  data: Record<string, unknown>,
+) : Promise<any> {
+  return payload.create({
+    collection: 'tour-campaigns' as never,
+    req,
+    context: seedContext,
+    data: seedData({
+      ...data,
+      _status: 'published',
+      site: siteID,
     }),
   })
 }
@@ -3609,8 +3782,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     req,
     site.id,
     'WingsGo outbound hero',
-    'Campaign tour outbound WingsGo',
-    'Hình đại diện các campaign tour Hàn, Nhật, Trung với giá và lịch khởi hành rõ.',
+    'Tour outbound WingsGo theo mùa',
+    'Hình đại diện các tour Hàn, Nhật, Trung với giá và lịch khởi hành rõ.',
     path.join(docsDir, '338651170296767688.jpg'),
   )
   const japanPoster = await createMedia(
@@ -3704,7 +3877,7 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     path.join(seedAssetsDir, 'wingsgo-osaka-kyoto-fuji-tokyo.png'),
   )
 
-  const seasonCategory = await createCategory(payload, req, site.id, 'Campaign theo mùa', 'campaign-theo-mua')
+  const seasonCategory = await createCategory(payload, req, site.id, 'Tour theo mùa', 'campaign-theo-mua')
   const guideCategory = await createCategory(payload, req, site.id, 'Cẩm nang outbound', 'cam-nang-outbound')
   const wingsGoTrustStrip = () =>
     infoStripBlock(
@@ -3988,22 +4161,22 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
   })
 
   const campaignHub = await createPage(payload, req, site.id, {
-    title: 'Campaign theo mùa',
+    title: 'Tour theo mùa',
     slug: 'campaign',
     hero: {
       type: 'mediumImpact',
       media: heroImage.id,
-      links: [linkItem('Xem campaign Hàn Quốc', '/campaign/he-2026-han-quoc', 'default'), linkItem('Xem lịch khởi hành', '/lich-khoi-hanh', 'outline')],
+      links: [linkItem('Xem tour Hàn Quốc hè', '/campaign/he-2026-han-quoc', 'default'), linkItem('Xem lịch khởi hành', '/lich-khoi-hanh', 'outline')],
       richText: richText(
-        'Campaign tour theo mùa: chọn nhanh line Hàn, Nhật, Trung',
-        'Mỗi campaign gom các gói tour nổi bật, hình ảnh, giá tham khảo và CTA để khách mở chi tiết hoặc giữ chỗ nhanh.',
+        'Tour theo mùa: chọn nhanh line Hàn, Nhật, Trung',
+        'Mỗi đợt mở bán gom các gói tour nổi bật, hình ảnh, giá tham khảo và CTA để khách mở chi tiết hoặc giữ chỗ nhanh.',
         'h1',
       ),
     },
     layout: [
       featureGridBlock(
-        'Campaign mùa vụ đang mở bán',
-        'Các campaign được tổ chức thành trang bán hàng có route, giá, lịch khởi hành và lối liên hệ rõ ràng.',
+        'Tour theo mùa đang mở bán',
+        'Các đợt tour được tổ chức thành trang bán hàng có route, giá, lịch khởi hành và lối liên hệ rõ ràng.',
         [
           {
             title: 'Hè 2026 Hàn Quốc',
@@ -4028,10 +4201,10 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       wingsGoTrustStrip(),
     ],
     meta: {
-      title: 'Campaign WingsGo',
-      description: 'Tổng hợp campaign tour Hàn, Nhật, Trung hè 2026 của WingsGo với giá rõ, lịch khởi hành và CTA giữ chỗ nhanh.',
+      title: 'Tour theo mùa WingsGo',
+      description: 'Tổng hợp tour Hàn, Nhật, Trung hè 2026 của WingsGo với giá rõ, lịch khởi hành và CTA giữ chỗ nhanh.',
       image: heroImage.id,
-      breadcrumbLabel: 'Campaign',
+      breadcrumbLabel: 'Tour theo mùa',
     },
   })
 
@@ -4047,40 +4220,14 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       ),
     },
     layout: [
-      pricingTableBlock(
-        'Lịch khởi hành sắp tới',
-        'Bảng này tổng hợp các line tour đang bán để khách xem nhanh ngày đi, hãng bay, giá từ và mở trang chi tiết.',
-        [
-          {
-            title: 'Seoul - Jeju - Nami - Camellia Hill 6N5D',
-            subtitle: 'Line campaign Hàn Quốc',
-            departure: '11/07/2026, 28/08/2026',
-            airline: 'Jeju Air',
-            price: '23.900.000',
-            note: 'Xác nhận lại khi tư vấn',
-            url: '/tour/seoul-jeju-nami-camellia-hill-6n5d',
-          },
-          {
-            title: 'Osaka - Kobe - Kyoto - Nagoya - Fuji - Tokyo 6N5D',
-            subtitle: 'Line Nhật Bản dài ngày',
-            departure: '25/06, 30/07, 27/08',
-            airline: 'Vietnam Airlines',
-            price: '32.900.000',
-            note: 'Xác nhận lại khi tư vấn',
-            url: '/tour/osaka-kobe-kyoto-nagoya-fuji-tokyo-6n5d',
-          },
-          {
-            title: 'Thượng Hải - Ô Trấn - Hàng Châu 5N4D',
-            subtitle: 'Line Trung Quốc ngắn ngày',
-            departure: '20/06, 18/07, 15/08',
-            airline: 'Air China',
-            price: '21.900.000',
-            note: 'Xác nhận lại khi tư vấn',
-            url: '/tour/thuong-hai-o-tran-hang-chau-5n4d',
-          },
-        ],
-        'Lịch outbound',
-      ),
+      contentBlock([
+        {
+          size: 'full',
+          title: 'Lịch khởi hành luôn được cập nhật',
+          paragraph:
+            'Tất cả đợt khởi hành Hàn, Nhật, Trung được tổng hợp tại đây kèm giá tham khảo và tình trạng chỗ, để bạn so sánh nhanh trước khi giữ chỗ.',
+        },
+      ]),
       ctaBlock(
         'Cần ngày khác hoặc báo giá đoàn riêng?',
         'Gửi yêu cầu để WingsGo kiểm tra lịch mới nhất, số chỗ còn lại hoặc phương án riêng cho nhóm của bạn.',
@@ -4196,52 +4343,26 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         richText: richText(args.title, args.description, 'h1'),
       },
       layout: [
-        infoStripBlock(
-          `${args.title}: có đủ tín hiệu để khách chọn nhanh`,
-          'Mỗi trang thị trường kết hợp điểm bán, lịch khởi hành, tour nổi bật và câu hỏi thường gặp để khách đi tiếp vào trang chi tiết hoặc gửi yêu cầu.',
-          [
-            {
-              label: 'CTA chính',
-              value: 'Xem giá & giữ chỗ',
-              description: 'Trang thị trường cần dẫn khách nhanh sang tour chi tiết hoặc form tư vấn.',
-            },
-            {
-              label: 'Khai thác nội dung',
-              value: 'Tour + campaign',
-              description: 'Trang thị trường nối trực tiếp sang campaign mùa vụ và các line tour cụ thể.',
-            },
-            {
-              label: 'Điểm vào SEO',
-              value: args.title,
-              description: 'Cấp trang này hỗ trợ tìm kiếm và điều hướng nội bộ trước khi khách mở một chương trình cụ thể.',
-            },
-            {
-              label: 'Nguồn dữ liệu',
-              value: 'Lịch bán 2026',
-              description: 'Lịch khởi hành bám cấu trúc dữ liệu bán hàng hiện có.',
-            },
-          ],
-          'Thiết kế thị trường',
-        ),
-        pricingTableBlock(
-          'Lịch khởi hành xem nhanh',
-          'Bảng ngắn giúp khách nhìn ngày đi và giá từ trước khi mở trang tour chi tiết hoặc bảng lịch đầy đủ.',
-          args.pricingItems.map((item) => ({
-            ...item,
-            subtitle: 'Gói tour retail',
-            note: 'Xác nhận lại khi tư vấn',
-          })),
-          'Lịch nhanh',
-        ),
-        featureGridBlock(
-          'Các line tour nổi bật',
-          'Các card này giúp khách so sánh nhanh tuyến, điểm nhấn và mở trang tour phù hợp.',
-          args.tours,
-          'default',
-          'Danh mục tour',
-        ),
+        contentBlock([
+          {
+            size: 'half',
+            title: 'Giá và lịch khởi hành luôn cập nhật',
+            paragraph:
+              'Mỗi line tour trong thị trường này hiển thị giá tham khảo, đợt khởi hành gần nhất và tình trạng chỗ để bạn dễ so sánh trước khi đi vào chi tiết.',
+          },
+          {
+            size: 'half',
+            title: 'Đi sâu vào từng tour chỉ trong một bước',
+            paragraph:
+              'Từ trang thị trường, bạn mở thẳng tour chi tiết với lịch trình theo ngày, dịch vụ đi kèm và lối giữ chỗ nhanh mà không phải tìm lại thông tin.',
+          },
+        ]),
         wingsGoTrustStrip(),
-        faqBlock('Câu hỏi thường gặp', 'FAQ giúp giải đáp các băn khoăn phổ biến trước khi khách rời trang thị trường.', args.faq, 'Tư vấn trước khi chốt'),
+        ctaBlock(
+          'Xem lịch hoặc mở tour chi tiết',
+          'Chọn nhanh đợt khởi hành phù hợp hoặc mở tour chi tiết để xem lịch trình, dịch vụ và giá tham khảo đầy đủ.',
+          [linkItem('Xem lịch khởi hành', '/lich-khoi-hanh'), linkItem('Liên hệ tư vấn', '/lien-he', 'outline')],
+        ),
       ],
       meta: {
         title: args.title,
@@ -4417,25 +4538,208 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
   })
 
   const createTourPage = async (args: {
-    departures: Array<{ airline: string; departure: string; price: string }>
+    badgeLabels?: string[]
+    marketCard?: {
+      badges?: string[]
+      featuredReason?: string
+      priorityLabel?: string
+      sellingLine?: string
+    }
+    departures: Array<{
+      airline: string
+      availabilityBadge?: string
+      ctaLabelOverride?: string
+      departure: string
+      departureCity?: string
+      depositNote?: string
+      holdNote?: string
+      price: string
+      promoLabel?: string
+      status?: 'limited' | 'open' | 'sold-out'
+      urgencyLabel?: string
+      variantKey?: string
+    }>
+    excludesList?: string[]
     faq: Array<{ answer: string; question: string }>
+    factSummaryOverride?: {
+      groupSizeSummary?: string
+      holdNote?: string
+      hotelSummary?: string
+      mealsSummary?: string
+      operatorNote?: string
+      routeSummary?: string
+    }
+    galleryIDs?: Array<number | string>
     highlights: Array<{ paragraph: string; title: string }>
     imageID: number | string
     includes: string
+    includesList?: string[]
     itinerary: string
+    itineraryDays?: Array<Record<string, unknown>>
+    market: 'china' | 'japan' | 'korea'
     metaDescription: string
     parentPageID: number | string
     relatedPageIDs: Array<number | string>
+    reviewSnapshot?: {
+      proofQuotes?: Array<{ author?: string; quote: string }>
+      reviewCount?: number
+      score?: number
+      sourceLabel?: string
+      travelerCount?: number
+      whyGuestsChoose?: string
+    }
+    routeVisual?: {
+      mapImage?: number | string
+      routeCaption?: string
+      routeStops?: Array<{ label: string; order: number; stopType?: string }>
+      travelLegs?: Array<{ from: string; mode?: string; to: string }>
+    }
+    servicesSummary?: {
+      hotelSummary?: string
+      importantNotes?: string[]
+      mealsSummary?: string
+      operatorNotes?: string
+      transportSummary?: string
+    }
     slug: string
     summary: string
     title: string
+    durationDays: number
+    durationNights: number
+    variantSeeds?: Array<{
+      airline?: string
+      departureCity?: string
+      displayPriority?: number
+      heroMediaOverride?: number | string
+      itineraryDayOverrides?: Array<Record<string, unknown>>
+      label: string
+      routeVisualOverride?: {
+        mapImage?: number | string
+        routeCaption?: string
+        routeStops?: Array<{ label: string; order: number; stopType?: string }>
+      }
+      servicesOverride?: {
+        hotelSummary?: string
+        importantNotes?: string
+        transportSummary?: string
+      }
+      summaryOverride?: string
+      variantKey: string
+    }>
   }) => {
+    const enrichedItineraryDays: Array<Record<string, any>> = ((args.itineraryDays || buildItineraryDays(args.itinerary, args.durationDays, args.imageID)) as Array<Record<string, any>>).map(
+      (day, index) => ({
+        dayTheme: (day.dayTheme as string) || `Ngày ${index + 1}: ${String(day.title || day.route || 'Theo chương trình')}`,
+        dayHighlight:
+          (day.dayHighlight as string) ||
+          'Điểm nhấn của ngày được giữ đủ rõ để khách biết vì sao chặng này đáng đi và mức độ phù hợp với nhu cầu của mình.',
+        equipmentNote:
+          (day.equipmentNote as string) ||
+          'Xe du lịch và dịch vụ triển khai theo line bán, điều hành xác nhận lại khi chốt đợt đi.',
+        gallery: Array.isArray(day.gallery) && day.gallery.length > 0 ? day.gallery : [args.imageID],
+        sleepingStandard:
+          (day.sleepingStandard as string) || `Ngủ đêm theo line bán tại ${String(day.accommodation || 'khách sạn tiêu chuẩn')}`,
+        ...day,
+      }),
+    )
+    const derivedRouteStops = (() => {
+      if (args.routeVisual?.routeStops?.length) {
+        return args.routeVisual.routeStops
+      }
+
+      const rawStops = args.title
+        .replace(/\s+\d+N\d+D$/, '')
+        .split('-')
+        .map((item) => item.trim())
+        .filter(Boolean)
+
+      return rawStops.map((label, index) => ({
+        label,
+        order: index + 1,
+        stopType: index === 0 ? 'arrival' : index === rawStops.length - 1 ? 'return' : 'sightseeing',
+      }))
+    })()
+    const derivedTravelLegs = args.routeVisual?.travelLegs?.length
+      ? args.routeVisual.travelLegs
+      : derivedRouteStops.slice(0, -1).map((stop, index) => ({
+          from: stop.label,
+          mode: 'Máy bay / xe theo tuyến',
+          to: derivedRouteStops[index + 1]?.label || stop.label,
+        }))
+    const reviewSnapshot = {
+      score: args.reviewSnapshot?.score || 4.8,
+      reviewCount: args.reviewSnapshot?.reviewCount || 36,
+      travelerCount: args.reviewSnapshot?.travelerCount || 120,
+      sourceLabel: args.reviewSnapshot?.sourceLabel || 'Đánh giá tổng hợp từ khách đã đi line này',
+      whyGuestsChoose:
+        args.reviewSnapshot?.whyGuestsChoose ||
+        'Khách chọn line này vì route rõ, giá dễ so sánh và nhịp chương trình đủ dễ hiểu để chốt nhanh.',
+      proofQuotes:
+        args.reviewSnapshot?.proofQuotes || [
+          {
+            author: 'Khách WingsGo',
+            quote: 'Lịch đi rõ, giá rõ và dễ chốt vì biết ngay mình sẽ đi đâu, ngủ ở đâu.',
+          },
+          {
+            author: 'Nhóm khách gia đình',
+            quote: 'Line gọn, không quá dày, sales giải thích ngày đi và hãng bay rất rõ trước khi giữ chỗ.',
+          },
+        ],
+    }
+    const routeVisual = {
+      mapImage: args.routeVisual?.mapImage,
+      routeCaption:
+        args.routeVisual?.routeCaption ||
+        'Route được trình bày như một hành trình bán hàng rõ ràng để khách biết tuyến đi, điểm ngủ đêm và nhịp tham quan.',
+      stops: derivedRouteStops.map((stop) => ({
+        ...stop,
+        type: stop.stopType,
+      })),
+      travelLegs: derivedTravelLegs,
+    }
+    const servicesSummary = {
+      hotelSummary:
+        args.servicesSummary?.hotelSummary ||
+        args.factSummaryOverride?.hotelSummary ||
+        'Khách sạn 3-4 sao theo line bán, bố trí 2 khách/phòng tiêu chuẩn và điều hành xác nhận lại trước ngày đi.',
+      mealsSummary:
+        args.servicesSummary?.mealsSummary ||
+        args.factSummaryOverride?.mealsSummary ||
+        'Ăn uống theo chương trình công bố, có thể thay đổi nhẹ theo giờ bay và điểm tham quan thực tế.',
+      transportSummary:
+        args.servicesSummary?.transportSummary ||
+        enrichedItineraryDays
+          .map((day) => day.transport)
+          .filter(Boolean)
+          .slice(0, 3)
+          .join('. '),
+      operatorNotes:
+        args.servicesSummary?.operatorNotes ||
+        args.factSummaryOverride?.operatorNote ||
+        'Điều hành xác nhận lại tồn chỗ, khách sạn, hãng bay và giờ tập trung trước khi khách giữ chỗ chính thức.',
+      importantNotes: (args.servicesSummary?.importantNotes || [
+        'Giá có thể thay đổi theo từng đợt mở bán và cần sales xác nhận lại trước khi chốt booking.',
+        'Lịch tham quan có thể điều chỉnh theo giờ bay, thời tiết và điều kiện vận hành thực tế nhưng vẫn giữ khung trải nghiệm chính.',
+      ]).map((label) => ({ label })),
+    }
     const firstDeparture = args.departures[0]
     const heroSummary = firstDeparture
       ? `${args.summary} Khởi hành gần nhất ${firstDeparture.departure}, ${firstDeparture.airline}, giá từ ${firstDeparture.price}đ.`
       : args.summary
+    const variantSeeds = args.variantSeeds?.length
+      ? args.variantSeeds
+      : [
+          {
+            airline: firstDeparture?.airline,
+            departureCity: firstDeparture?.departureCity || 'TP.HCM / Hà Nội',
+            displayPriority: 0,
+            label: `${args.title} • Đợt chuẩn`,
+            summaryOverride: args.summary,
+            variantKey: `${args.slug}-core`,
+          },
+        ]
 
-    return createPage(payload, req, site.id, {
+    const page = await createPage(payload, req, site.id, {
       title: args.title,
       slug: args.slug,
       parentPage: args.parentPageID,
@@ -4447,66 +4751,15 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         richText: richText(args.title, heroSummary, 'h1'),
       },
       layout: [
-        infoStripBlock(
-          'Thông tin giữ chỗ cần biết',
-          'Trang tour tóm tắt các điểm quan trọng trước khi khách gửi yêu cầu: ngày khởi hành, hãng bay, giá tham khảo và phạm vi dịch vụ.',
-          [
-            ...(firstDeparture
-              ? [
-                  {
-                    label: 'Khởi hành gần nhất',
-                    value: firstDeparture.departure,
-                    description: `${firstDeparture.airline} · từ ${firstDeparture.price}đ`,
-                  },
-                ]
-              : []),
-            {
-              label: 'Trạng thái page',
-              value: 'Đã có thông tin bán hàng',
-              description: 'Tóm tắt, lịch khởi hành, điểm nổi bật, lịch trình và form tư vấn đều nằm trên cùng một trang.',
-            },
-            {
-              label: 'Mô hình hiển thị',
-              value: 'Giá tham khảo công khai',
-              description: 'Mức giá giúp khách so sánh nhanh; sales sẽ xác nhận lại trước khi giữ chỗ.',
-            },
-            {
-              label: 'Nguồn nội dung',
-              value: 'Lịch + poster tour',
-              description: 'Dữ liệu lịch và hình ảnh bán hàng được chuyển thành trang tour có cấu trúc.',
-            },
-          ],
-          'Chi tiết tour',
-        ),
-        contentBlock(args.highlights.map((highlight) => ({ ...highlight, size: 'oneThird' }))),
-        pricingTableBlock(
-          'Các đợt khởi hành',
-          'Mỗi dòng hiển thị ngày đi, hãng bay và giá tham khảo để khách chọn đợt phù hợp trước khi tư vấn.',
-          args.departures.map((row) => ({
-            airline: row.airline,
-            departure: row.departure,
-            price: row.price,
-            subtitle: 'Khởi hành retail',
-            title: args.title,
-            note: 'Xác nhận lại khi tư vấn',
-          })),
-          'Lịch và giá',
-        ),
         contentBlock([
           {
             size: 'full',
-            title: 'Tổng quan lịch trình',
-            paragraph: args.itinerary,
-          },
-          {
-            size: 'full',
-            title: 'Bao gồm và phạm vi dịch vụ',
-            paragraph: args.includes,
+            title: 'Tất cả thông tin để chốt tour trong một trang',
+            paragraph:
+              'Tóm tắt hành trình, lịch trình theo ngày, các đợt khởi hành, dịch vụ bao gồm và FAQ được trình bày liền mạch để khách quyết định nhanh.',
           },
         ]),
-        mediaBlock(args.imageID),
         wingsGoTrustStrip(),
-        faqBlock('Câu hỏi trước khi giữ chỗ', 'Các thông tin dưới đây giúp khách hiểu rõ tour trước khi gửi yêu cầu cho sales.', args.faq, 'Tư vấn rõ ràng'),
         formBlock(
           quickInquiryForm.id,
           'Giữ chỗ / nhận lịch trình chi tiết',
@@ -4519,26 +4772,350 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         image: args.imageID,
       },
     })
+
+    const product = await createTourProduct(payload, req, site.id, {
+      title: args.title,
+      slug: args.slug,
+      market: args.market,
+      tourCode: args.slug.toUpperCase(),
+      durationDays: args.durationDays,
+      durationNights: args.durationNights,
+      wrapperPage: page.id,
+      summary: args.summary,
+      heroMedia: args.imageID,
+      gallery: args.galleryIDs?.length ? args.galleryIDs : [args.imageID],
+      highlights: args.highlights.map((item) => ({
+        title: item.title,
+        description: item.paragraph,
+      })),
+      factSummary: {
+        routeSummary: args.factSummaryOverride?.routeSummary || args.title.replace(/\s+\d+N\d+D$/, ''),
+        mealsSummary: args.factSummaryOverride?.mealsSummary || 'Ăn theo chương trình',
+        groupSizeSummary: args.factSummaryOverride?.groupSizeSummary || 'Đoàn retail ghép khách',
+        operatorNote:
+          args.factSummaryOverride?.operatorNote ||
+          'Điều hành WingsGo xác nhận lại chỗ và điều kiện áp dụng.',
+        holdNote:
+          args.factSummaryOverride?.holdNote ||
+          'Giữ chỗ sau khi sales kiểm tra đợt đi phù hợp.',
+        hotelSummary:
+          args.factSummaryOverride?.hotelSummary ||
+          'Khách sạn 3-4 sao theo line bán, điều hành xác nhận lại khu vực lưu trú trước ngày đi.',
+      },
+      reviewSnapshot,
+      routeViz: routeVisual,
+      badges: (args.badgeLabels || ['Giá công khai', 'Lịch khởi hành rõ', 'Retail ready']).map(
+        (label) => ({ label }),
+      ),
+      marketCard: args.marketCard
+        ? {
+            badges: (args.marketCard.badges || []).map((label) => ({ label })),
+            sellingLine: args.marketCard.sellingLine,
+            priorityLabel: args.marketCard.priorityLabel,
+            featuredReason: args.marketCard.featuredReason,
+          }
+        : undefined,
+      primaryCTA: {
+        mode: 'hold-seat',
+        label: 'Giữ chỗ / nhận tư vấn',
+        href: '/lien-he',
+        leadFormVariant: 'tour-quick-inquiry',
+        bookingIntentMode: 'tour-detail',
+      },
+      itineraryDays: enrichedItineraryDays,
+      includes: (args.includesList || buildListItemsFromSentence(args.includes).map((item) => item.label)).map(
+        (label) => ({ label }),
+      ),
+      excludes: (args.excludesList || [
+        'Chi phí cá nhân ngoài chương trình',
+        'Tips và phụ phí phát sinh theo điều kiện thực tế',
+        'Dịch vụ tự chọn không ghi trong chương trình',
+      ]).map((label) => ({ label })),
+      servicesSummary,
+      faqItems: args.faq,
+      meta: {
+        title: args.title,
+        description: args.metaDescription,
+        image: args.imageID,
+        breadcrumbLabel: args.title,
+      },
+      bcfg: {
+        template: 'dense-retail-default',
+        stickyCTAEnabled: true,
+        ctaStyle: 'hold-seat',
+        routeMode: 'route-map',
+        itinMode: 'timeline-cards',
+        depMode: 'matrix',
+      },
+      sectionVisibility: ['hero', 'facts', 'reviews', 'why-choose', 'route', 'itinerary', 'services', 'departures', 'faq', 'related', 'sticky-cta'],
+      sectionOrder: ['hero', 'facts', 'reviews', 'why-choose', 'route', 'itinerary', 'services', 'departures', 'faq', 'related', 'sticky-cta'],
+      variantStrategy: 'variant-first',
+    })
+
+    const variants = await Promise.all(
+      variantSeeds.map((variant, index) =>
+        createDepartureVariant(payload, req, site.id, {
+          tourProduct: product.id,
+          variantKey: variant.variantKey,
+          label: variant.label,
+          status: 'active',
+          departureCity: variant.departureCity || 'TP.HCM / Hà Nội',
+          airline: variant.airline || firstDeparture?.airline,
+          displayPriority: variant.displayPriority ?? index,
+          summaryOverride: variant.summaryOverride,
+          heroMediaOverride: variant.heroMediaOverride,
+          rvo: variant.routeVisualOverride
+            ? {
+                ...variant.routeVisualOverride,
+                st: variant.routeVisualOverride.routeStops?.map((stop) => ({
+                  ...stop,
+                  tp: stop.stopType,
+                })),
+              }
+            : undefined,
+          servicesOverride: variant.servicesOverride,
+          itineraryDayOverrides: variant.itineraryDayOverrides || [],
+        }),
+      ),
+    )
+
+    const departures = await Promise.all(
+      args.departures.map((row, index) => {
+        const departureDate = parseSeedDate(row.departure)
+        const variant =
+          variants.find((item) => item.variantKey === row.variantKey) ||
+          variants[index % Math.max(variants.length, 1)] ||
+          variants[0]
+
+        return createTourDeparture(payload, req, site.id, {
+          tourProduct: product.id,
+          variantRef: variant?.id,
+          variantKey: row.variantKey || variant?.variantKey || `${args.slug}-${index + 1}`,
+          departureCity: row.departureCity || variant?.departureCity || 'TP.HCM / Hà Nội',
+          departureDate: toISODate(departureDate),
+          returnDate: toISODate(addDays(departureDate, Math.max(args.durationDays - 1, 0))),
+          airline: row.airline,
+          priceFrom: parsePriceNumber(row.price),
+          currency: 'VND',
+          promoLabel: row.promoLabel || (index === 0 ? 'Đợt gần nhất' : undefined),
+          urgencyLabel: row.urgencyLabel || (index === 0 ? 'Ưu tiên giữ chỗ sớm' : 'Nên chốt sớm để giữ giá'),
+          availabilityBadge: row.availabilityBadge || (index === 0 ? 'Đang mở bán' : 'Sắp hết chỗ'),
+          availabilityStatus: row.status || (index === 0 ? 'open' : 'limited'),
+          note: 'Giá tham khảo công khai, sales xác nhận lại trước khi giữ chỗ.',
+          depositNote: row.depositNote || 'Đặt cọc theo xác nhận của sales sau khi giữ chỗ thành công.',
+          holdNote: row.holdNote || 'Giữ chỗ ngắn hạn theo tình trạng tồn chỗ thực tế.',
+          changePolicyNote: 'Điều kiện đổi/hủy phụ thuộc hãng bay, khách sạn và thời điểm chốt dịch vụ.',
+          ctaLabelOverride: row.ctaLabelOverride || (index === 0 ? 'Giữ chỗ' : 'Nhận tư vấn'),
+          isFeatured: index === 0,
+          intentConfig: {
+            leadFormVariant: 'tour-quick-inquiry',
+            bookingIntentMode: 'tour-detail',
+            salesRoutingHint: args.market,
+            bookingNote: 'Dùng structured IDs để prefill lead form ở phase 2.',
+          },
+        })
+      }),
+    )
+
+    await Promise.all(
+      variants.map((variant) => {
+        const linkedDepartures = departures
+          .filter((departure) => String(departure.variantRef) === String(variant.id))
+          .map((departure) => departure.id)
+
+        return payload.update({
+          collection: 'departure-variants' as never,
+          id: variant.id,
+          req,
+          context: seedContext,
+          data: seedData({
+            activeDepartures: linkedDepartures,
+          }),
+        })
+      }),
+    )
+
+    return {
+      departures,
+      page,
+      product,
+      variants,
+    }
   }
 
   const seoulEverlandTour = await createTourPage({
     title: 'Seoul - Nami - Everland 5N4D',
     slug: 'seoul-nami-everland-5n4d',
+    market: 'korea',
+    durationDays: 5,
+    durationNights: 4,
     parentPageID: tourHub.id,
     relatedPageIDs: [koreaPage.id, schedulePage.id, contactPage.id],
     imageID: seoulNamiEverlandImage.id,
     summary:
       'Line Korea retail 5N4D cho khách lần đầu đi Hàn, dễ chốt nhờ route quen thuộc, thời lượng ngắn và nhịp khởi hành đều.',
+    marketCard: {
+      badges: ['Phù hợp người mới đi'],
+      sellingLine: 'Route Hàn Quốc quen thuộc, dễ chốt cho khách đi lần đầu.',
+      priorityLabel: 'Gợi ý cho khách mới',
+    },
     metaDescription: 'Trang chi tiết tour Seoul - Nami - Everland 5N4D của WingsGo với giá và lịch khởi hành.',
     highlights: [
       { title: 'Tuyến Hàn Quốc dễ chọn', paragraph: 'Tập trung Seoul, đảo Nami, Everland và các trải nghiệm an toàn cho khách đi Hàn lần đầu.' },
       { title: 'Dễ so sánh và quyết nhanh', paragraph: 'Khác biệt rõ với line Jeju, phù hợp cho khách muốn giữ chỗ sau khi xem lịch và giá.' },
       { title: 'Giá hiển thị sớm', paragraph: 'Các mốc giá và ngày đi xuất hiện sớm, không bắt khách để lại thông tin trước khi biết ngân sách.' },
     ],
+    badgeLabels: [
+      'Category: Korea retail bestseller',
+      'Theme: City icons',
+      'Theme: Family-friendly',
+      'Suitable: First-time Korea travelers',
+      'Suitable: Gia đình nhỏ',
+      'Type: Group tour',
+      'Giá công khai',
+      'Free 3 days hold',
+      'Visa support',
+    ],
+    factSummaryOverride: {
+      routeSummary: 'Seoul - Nami - Everland - Myeongdong',
+      mealsSummary: '4 bữa sáng, 3 bữa chính theo chương trình',
+      groupSizeSummary: 'Ghép đoàn retail từ 20-28 khách',
+      hotelSummary: '4 đêm khách sạn 3-4 sao khu Seoul, phù hợp nhóm gia đình và khách đi Hàn lần đầu',
+      operatorNote:
+        'Điều hành WingsGo xác nhận lại lịch bay, khách sạn Seoul và vé Everland trước khi giữ chỗ.',
+      holdNote:
+        'Được giữ chỗ 72 giờ sau khi tư vấn nếu giá và tình trạng ghế còn phù hợp.',
+    },
+    reviewSnapshot: {
+      score: 4.9,
+      reviewCount: 58,
+      travelerCount: 240,
+      sourceLabel: 'Đánh giá tổng hợp từ khách đi Hàn line ngắn ngày',
+      whyGuestsChoose:
+        'Khách chọn line này vì route quen thuộc, đủ icon Seoul, có Nami và Everland nên dễ chốt cho gia đình nhỏ và khách đi lần đầu.',
+      proofQuotes: [
+        { author: 'Khách đi tháng 4', quote: 'Lịch gọn, không bị quá mệt, các điểm chính đều có và tối vẫn có thời gian tự do.' },
+        { author: 'Nhóm gia đình 6 khách', quote: 'Everland và Nami là hai điểm khiến cả nhà quyết rất nhanh ngay từ lúc xem lịch.' },
+      ],
+    },
+    routeVisual: {
+      routeCaption: 'Tuyến Seoul ngắn ngày, dễ chốt cho khách lần đầu với nhịp city icons, cảnh quan và vui chơi gia đình.',
+      routeStops: [
+        { label: 'Việt Nam', order: 1, stopType: 'origin' },
+        { label: 'Seoul', order: 2, stopType: 'arrival' },
+        { label: 'Nami', order: 3, stopType: 'sightseeing' },
+        { label: 'Everland', order: 4, stopType: 'sightseeing' },
+        { label: 'Seoul', order: 5, stopType: 'overnight' },
+        { label: 'Việt Nam', order: 6, stopType: 'return' },
+      ],
+    },
+    variantSeeds: [
+      {
+        variantKey: 'seoul-short-vj-sgn',
+        label: 'Đi TP.HCM • Vietjet • Nhịp ngắn dễ chốt',
+        departureCity: 'TP.HCM',
+        airline: 'Vietjet',
+        displayPriority: 0,
+        summaryOverride:
+          'Biến thể TP.HCM dùng Vietjet, phù hợp khách muốn đi nhanh, nhịp gọn và mức giá tiếp cận tốt cho line Hàn đầu tay.',
+      },
+      {
+        variantKey: 'seoul-family-vna-han',
+        label: 'Đi Hà Nội • Vietnam Airlines • Nhịp thoải mái hơn',
+        departureCity: 'Hà Nội',
+        airline: 'Vietnam Airlines',
+        displayPriority: 1,
+        summaryOverride:
+          'Biến thể Hà Nội dùng Vietnam Airlines, phù hợp khách gia đình hoặc khách ưu tiên nhịp bay và cảm giác dịch vụ ổn định hơn.',
+      },
+    ],
+    galleryIDs: [seoulNamiEverlandImage.id, jejuPoster.id],
+    includesList: [
+      'Vé máy bay khứ hồi theo đợt khởi hành công bố cùng 20kg hành lý ký gửi tiêu chuẩn',
+      '4 đêm khách sạn 3-4 sao khu Seoul hoặc tương đương, tiêu chuẩn 2 khách/phòng',
+      'Xe du lịch phục vụ theo lịch trình tham quan và đón tiễn sân bay',
+      'Hướng dẫn viên tiếng Việt xuyên tuyến và trưởng đoàn từ Việt Nam khi đủ số lượng',
+      'Vé vào cửa Everland, đảo Nami và các điểm tham quan ghi trong chương trình',
+      'Ăn uống theo chương trình, nước suối cơ bản trên xe và hỗ trợ hồ sơ visa Hàn Quốc',
+      'Bảo hiểm du lịch mức cơ bản theo line bán và quà tặng nhận diện đoàn',
+    ],
+    excludesList: [
+      'Hộ chiếu còn hạn tối thiểu 6 tháng, phí làm hộ chiếu hoặc hồ sơ cá nhân phát sinh',
+      'Tips cho hướng dẫn viên và tài xế theo quy định đoàn Hàn Quốc',
+      'Nâng hạng phòng đơn, mua sắm cá nhân và các bữa ăn tự do ngoài lịch trình',
+      'Chi phí đổi tên, đổi ngày hoặc nâng hạng vé máy bay ngoài điều kiện gói tour',
+    ],
+    itineraryDays: [
+      {
+        dayNumber: 1,
+        title: 'TP.HCM / Hà Nội - Seoul',
+        route: 'Việt Nam - Seoul',
+        summary:
+          'Khởi hành theo giờ bay của hãng công bố. Đến Seoul, đoàn làm thủ tục nhập cảnh, gặp xe và về khách sạn nghỉ ngơi để lấy lại sức sau chuyến bay.',
+        meals: 'Tự túc / ăn nhẹ trên máy bay',
+        transport: 'Máy bay quốc tế và xe đón sân bay',
+        accommodation: 'Khách sạn 3-4 sao khu Seoul',
+        notes:
+          'Đêm đầu ưu tiên nghỉ ngơi, khách có thể đi dạo khu lân cận khách sạn nếu giờ đến còn sớm.',
+        media: seoulNamiEverlandImage.id,
+      },
+      {
+        dayNumber: 2,
+        title: 'Khám phá city icons của Seoul',
+        route: 'Cung điện - quảng trường - tháp biểu tượng - Myeongdong',
+        summary:
+          'Ngày tham quan nhấn vào các điểm khách đi Hàn lần đầu thường muốn thấy: cung điện, quảng trường trung tâm, khu phố mua sắm và các điểm check-in đại diện cho Seoul hiện đại.',
+        meals: 'Ăn sáng / trưa / tối',
+        transport: 'Xe du lịch theo chương trình',
+        accommodation: 'Khách sạn 3-4 sao khu Seoul',
+        notes:
+          'Buổi tối có thời gian tự do tại Myeongdong để khách trải nghiệm mỹ phẩm, thời trang và ẩm thực đường phố.',
+        media: seoulNamiEverlandImage.id,
+      },
+      {
+        dayNumber: 3,
+        title: 'Đảo Nami - cảnh quan dễ bán cho khách lần đầu',
+        route: 'Seoul - Nami - Seoul',
+        summary:
+          'Rời Seoul đi đảo Nami, điểm đến rất mạnh về hình ảnh và cảm xúc. Trên tuyến có thể kết hợp thêm các điểm phụ trợ phù hợp mùa, giúp ngày thứ ba đủ thư giãn nhưng vẫn giàu trải nghiệm.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch và tàu vào đảo',
+        accommodation: 'Khách sạn 3-4 sao khu Seoul',
+        notes:
+          'Nami phù hợp cho nhóm gia đình, cặp đôi và khách thích khung cảnh lãng mạn, xanh mát để chụp ảnh.',
+        media: seoulNamiEverlandImage.id,
+      },
+      {
+        dayNumber: 4,
+        title: 'Everland - shopping - tự do theo nhịp retail',
+        route: 'Seoul - Everland - Seoul',
+        summary:
+          'Ngày thứ tư dành cho Everland và trải nghiệm vui chơi, sau đó quay lại Seoul để khách có thời gian mua sắm và hoàn thiện checklist trước khi kết thúc tour.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch theo đoàn',
+        accommodation: 'Khách sạn 3-4 sao khu Seoul',
+        notes:
+          'Đây là ngày giúp line 5N4D khác rõ các chương trình chỉ city tour đơn thuần, đặc biệt hấp dẫn với khách gia đình có trẻ em.',
+        media: seoulNamiEverlandImage.id,
+      },
+      {
+        dayNumber: 5,
+        title: 'Seoul - Việt Nam',
+        route: 'Seoul - Việt Nam',
+        summary:
+          'Trả phòng, ra sân bay theo giờ bay của đoàn. Kết thúc hành trình Hàn Quốc ngắn ngày với cấu trúc rõ ràng, dễ hiểu và dễ chốt cho nhóm khách retail.',
+        meals: 'Ăn sáng',
+        transport: 'Xe tiễn sân bay và máy bay quốc tế',
+        accommodation: 'Không áp dụng',
+        notes:
+          'Lịch bay ngày cuối phụ thuộc từng đợt khởi hành; điều hành sẽ gửi giờ tập trung chính thức khi chốt tour.',
+        media: seoulNamiEverlandImage.id,
+      },
+    ],
     departures: [
-      { departure: '08/07/2026', airline: 'Vietjet', price: '18.900.000' },
-      { departure: '22/07/2026', airline: 'Jeju Air', price: '19.500.000' },
-      { departure: '05/08/2026', airline: 'Vietnam Airlines', price: '21.900.000' },
+      { departure: '08/07/2026', airline: 'Vietjet', price: '18.900.000', variantKey: 'seoul-short-vj-sgn', departureCity: 'TP.HCM', urgencyLabel: 'Giá mở bán đầu mùa', promoLabel: 'Bán chạy' },
+      { departure: '22/07/2026', airline: 'Jeju Air', price: '19.500.000', variantKey: 'seoul-short-vj-sgn', departureCity: 'TP.HCM', status: 'limited' },
+      { departure: '05/08/2026', airline: 'Vietnam Airlines', price: '21.900.000', variantKey: 'seoul-family-vna-han', departureCity: 'Hà Nội', availabilityBadge: 'Ghế đẹp', ctaLabelOverride: 'Nhận tư vấn line bay đẹp' },
     ],
     itinerary:
       'Ngày 1 bay đến Seoul và nhận nhịp city orientation. Ngày 2 khám phá cung điện, tháp biểu tượng và khu mua sắm. Ngày 3 đi Nami và các điểm check-in cảnh quan. Ngày 4 trải nghiệm Everland, shopping và tự do theo nhịp retail. Ngày 5 trả phòng, ra sân bay và kết thúc hành trình.',
@@ -4553,16 +5130,131 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
   const jejuTour = await createTourPage({
     title: 'Seoul - Jeju - Nami - Camellia Hill 6N5D',
     slug: 'seoul-jeju-nami-camellia-hill-6n5d',
+    market: 'korea',
+    durationDays: 6,
+    durationNights: 5,
     parentPageID: tourHub.id,
     relatedPageIDs: [koreaPage.id, campaignHub.id, contactPage.id],
     imageID: seoulJejuCamelliaImage.id,
     summary:
       'Line campaign mùa hè cho Hàn Quốc với Jeju Air, visual mạnh, giá public rõ và thông điệp bán hàng hướng trải nghiệm hoa và cảnh quan.',
+    marketCard: {
+      badges: ['Nổi bật mùa hè'],
+      sellingLine: 'Trải nghiệm hoa và cảnh quan Jeju, đậm chất mùa hè.',
+      priorityLabel: 'Campaign mùa hè',
+    },
     metaDescription: 'Trang chi tiết tour Seoul - Jeju - Nami - Camellia Hill 6N5D của WingsGo.',
     highlights: [
       { title: 'Visual campaign rõ ràng', paragraph: 'Tour tận dụng poster Jeju để khách nhận diện ngay đây là line mùa hè đang mở bán.' },
       { title: 'Bán theo điểm đến nổi bật', paragraph: 'Jeju, Camellia Hill, Nami và các điểm biểu tượng giúp line này khác rõ route Seoul cổ điển.' },
       { title: 'Dễ gửi yêu cầu nhanh', paragraph: 'Ngày khởi hành và giá được hiển thị sớm để khách không phải đi vòng qua nhiều bước.' },
+    ],
+    badgeLabels: [
+      'Category: Summer Korea campaign',
+      'Theme: Jeju scenery',
+      'Theme: Relaxation',
+      'Suitable: Couples',
+      'Suitable: Khách thích chụp ảnh',
+      'Type: Group tour',
+      'Giá công khai',
+      'Campaign-ready',
+      'Jeju Air focus',
+    ],
+    factSummaryOverride: {
+      routeSummary: 'Seoul - Jeju - Camellia Hill - Nami',
+      mealsSummary: '5 bữa sáng, 4 bữa chính theo lịch trình',
+      groupSizeSummary: 'Đoàn campaign 18-25 khách',
+      operatorNote:
+        'Line này cần chốt kỹ giờ bay nội địa nối Jeju và khách sạn theo mùa; sales sẽ confirm lại ngay khi giữ chỗ.',
+      holdNote: 'Giữ chỗ ngắn hạn theo tồn chỗ Jeju Air và room allotment thực tế.',
+    },
+    galleryIDs: [seoulJejuCamelliaImage.id, jejuPoster.id],
+    includesList: [
+      'Vé máy bay quốc tế và chặng nối nội địa theo cấu trúc tour được công bố',
+      '5 đêm khách sạn 3-4 sao tại Seoul và Jeju, bố trí 2 khách/phòng tiêu chuẩn',
+      'Xe tham quan, hướng dẫn viên và trưởng đoàn theo line campaign',
+      'Ăn uống, vé tham quan Camellia Hill, Nami và các điểm chính theo chương trình',
+      'Hỗ trợ hồ sơ visa, bảo hiểm du lịch cơ bản và nước uống trên xe',
+      'Quà tặng đoàn và hỗ trợ điều phối ảnh/chỗ check-in tại các điểm nổi bật',
+    ],
+    excludesList: [
+      'Chi phí cá nhân, tips, minibar, giặt ủi và mua sắm tự do ngoài chương trình',
+      'Phí đổi vé, nâng hạng ghế hoặc thay đổi lịch trình do nhu cầu cá nhân',
+      'Phòng đơn hoặc phụ phí mùa cao điểm nếu khách có yêu cầu riêng ngoài tiêu chuẩn đoàn',
+    ],
+    itineraryDays: [
+      {
+        dayNumber: 1,
+        title: 'Việt Nam - Seoul',
+        route: 'TP.HCM / Hà Nội - Seoul',
+        summary:
+          'Đoàn khởi hành sang Hàn Quốc, nhập cảnh và di chuyển về Seoul nghỉ ngơi. Buổi đầu ưu tiên hồi sức và làm quen nhịp chương trình.',
+        meals: 'Tự túc / ăn nhẹ trên máy bay',
+        transport: 'Máy bay quốc tế và xe sân bay',
+        accommodation: 'Khách sạn 3-4 sao khu Seoul',
+        notes: 'Nếu giờ đến thuận lợi, khách có thể tự do khám phá khu mua sắm gần khách sạn.',
+        media: seoulJejuCamelliaImage.id,
+      },
+      {
+        dayNumber: 2,
+        title: 'Bay nối Jeju - cảnh quan mở đầu campaign',
+        route: 'Seoul - Jeju',
+        summary:
+          'Nối chuyến nội địa đến Jeju, bắt đầu nhịp visual của chương trình với những điểm tham quan thiên về biển, cảnh quan và hình ảnh dễ bán mùa hè.',
+        meals: 'Ăn sáng / trưa / tối',
+        transport: 'Máy bay nội địa và xe du lịch',
+        accommodation: 'Khách sạn 3-4 sao tại Jeju',
+        notes: 'Ngày này quyết định cảm xúc của campaign, nên thường được ưu tiên lịch tham quan có nhịp nhẹ và hình ảnh đẹp.',
+        media: seoulJejuCamelliaImage.id,
+      },
+      {
+        dayNumber: 3,
+        title: 'Camellia Hill - bờ biển Jeju - trải nghiệm thư giãn',
+        route: 'Jeju',
+        summary:
+          'Khám phá Camellia Hill và các điểm nhìn ra biển đặc trưng của Jeju. Đây là ngày tour thiên về thư giãn, cảnh sắc và thời gian chụp ảnh nhiều hơn city tour.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch theo chương trình',
+        accommodation: 'Khách sạn 3-4 sao tại Jeju',
+        notes: 'Phù hợp với khách cặp đôi, nhóm bạn hoặc khách hàng muốn một line Hàn Quốc có chất nghỉ dưỡng rõ hơn.',
+        media: seoulJejuCamelliaImage.id,
+      },
+      {
+        dayNumber: 4,
+        title: 'Quay lại Seoul - Nami',
+        route: 'Jeju - Seoul - Nami',
+        summary:
+          'Rời Jeju quay về Seoul, sau đó tiếp tục một tuyến tham quan giàu hình ảnh với đảo Nami để giữ nhịp cảm xúc của chương trình.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Máy bay nội địa, xe du lịch và tàu vào đảo',
+        accommodation: 'Khách sạn 3-4 sao khu Seoul',
+        notes: 'Ngày di chuyển nhiều hơn, điều hành thường tối ưu thời gian để đoàn vẫn có đủ khoảng nghỉ.',
+        media: seoulJejuCamelliaImage.id,
+      },
+      {
+        dayNumber: 5,
+        title: 'Seoul highlights - shopping',
+        route: 'Seoul',
+        summary:
+          'Khám phá các điểm city icon còn lại tại Seoul kết hợp thời gian mua sắm để khách hoàn tất nhu cầu cá nhân trước ngày về.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch theo đoàn',
+        accommodation: 'Khách sạn 3-4 sao khu Seoul',
+        notes: 'Buổi tối tự do là khoảng khách retail rất thích vì có thể linh hoạt shopping hoặc dạo phố.',
+        media: seoulJejuCamelliaImage.id,
+      },
+      {
+        dayNumber: 6,
+        title: 'Seoul - Việt Nam',
+        route: 'Seoul - Việt Nam',
+        summary:
+          'Trả phòng và ra sân bay theo giờ bay. Kết thúc line Hàn Quốc mùa hè với cấu trúc vừa có cảnh quan Jeju vừa có city Seoul quen thuộc.',
+        meals: 'Ăn sáng',
+        transport: 'Xe tiễn sân bay và máy bay quốc tế',
+        accommodation: 'Không áp dụng',
+        notes: 'Điều hành sẽ chốt thời gian tập trung sân bay theo giờ bay từng đợt.',
+        media: seoulJejuCamelliaImage.id,
+      },
     ],
     departures: [
       { departure: '11/07/2026', airline: 'Jeju Air', price: '23.900.000' },
@@ -4581,21 +5273,155 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
   const shizuokaTour = await createTourPage({
     title: 'Shizuoka - Núi Phú Sĩ - Tokyo 5N4D',
     slug: 'shizuoka-nui-phu-si-tokyo-5n4d',
+    market: 'japan',
+    durationDays: 5,
+    durationNights: 4,
     parentPageID: tourHub.id,
     relatedPageIDs: [japanPage.id, schedulePage.id, contactPage.id],
     imageID: shizuokaFujiTokyoImage.id,
     summary:
       'Line Nhật 5N4D thiên về quyết định nhanh, giá dễ đọc, dùng rất tốt cho traffic từ campaign mùa hè và hành vi compare route.',
+    marketCard: {
+      badges: ['Giá tốt'],
+      sellingLine: 'Route Nhật ngắn ngày, giá dễ đọc và dễ quyết.',
+      priorityLabel: 'Giá tốt trong tháng',
+    },
     metaDescription: 'Trang chi tiết tour Shizuoka - Núi Phú Sĩ - Tokyo 5N4D của WingsGo.',
     highlights: [
       { title: 'Tuyến ngắn dễ chọn', paragraph: 'Phù hợp nhóm khách muốn đi Nhật Bản nhưng chưa cần hành trình 6N5D dài hơn.' },
       { title: 'Giá và ngày rõ ràng', paragraph: 'Các mốc giá và ngày từ poster được chuyển thành bảng thông tin dễ cập nhật.' },
       { title: 'Line mở đầu mạnh', paragraph: 'Dùng tốt làm tour nổi bật trên homepage, trang thị trường và bảng lịch khởi hành.' },
     ],
+    badgeLabels: [
+      'Category: Japan short route',
+      'Theme: Mt. Fuji',
+      'Theme: Summer compare',
+      'Suitable: First-time Japan travelers',
+      'Suitable: Khách ngân sách gọn',
+      'Type: Group tour',
+      'Giá công khai',
+      'Visa support',
+      'Tokyo finale',
+    ],
+    factSummaryOverride: {
+      routeSummary: 'Shizuoka - Núi Phú Sĩ - Tokyo',
+      mealsSummary: '4 bữa sáng, 3 bữa chính theo chương trình',
+      groupSizeSummary: 'Đoàn Nhật 20-26 khách',
+      hotelSummary: '4 đêm khách sạn 3-4 sao, có đêm nghỉ gần tuyến Fuji để giữ nhịp route ngắn nhưng dễ bán',
+      operatorNote:
+        'Điều hành ưu tiên xác nhận khách sạn khu vực Fuji và lịch tham quan theo thời tiết từng đợt.',
+      holdNote: 'Có thể giữ chỗ ngắn hạn, nhưng giá line Nhật thay đổi nhanh theo mùa.',
+    },
+    reviewSnapshot: {
+      score: 4.7,
+      reviewCount: 31,
+      travelerCount: 110,
+      sourceLabel: 'Đánh giá line Nhật short route',
+      whyGuestsChoose:
+        'Khách chọn line này khi muốn đi Nhật lần đầu nhưng chưa cần hành trình dài 6N5D và muốn nhìn giá rõ ngay từ market page.',
+    },
+    routeVisual: {
+      routeCaption: 'Route Nhật ngắn, chuyển mượt từ cảnh quan Fuji sang city Tokyo để khách dễ so sánh với line Nhật 6N5D.',
+    },
+    variantSeeds: [
+      {
+        variantKey: 'japan-short-vj-sgn',
+        label: 'TP.HCM • Vietjet • Ngân sách gọn',
+        departureCity: 'TP.HCM',
+        airline: 'Vietjet',
+        displayPriority: 0,
+        summaryOverride:
+          'Biến thể giá gọn cho khách muốn đi Nhật 5N4D rõ ràng, so sánh nhanh và chốt nhanh theo ngân sách.',
+      },
+      {
+        variantKey: 'japan-short-vna-han',
+        label: 'Hà Nội • Vietnam Airlines • Dịch vụ êm hơn',
+        departureCity: 'Hà Nội',
+        airline: 'Vietnam Airlines',
+        displayPriority: 1,
+        summaryOverride:
+          'Biến thể Hà Nội dành cho khách ưu tiên nhịp bay và cảm giác dịch vụ ổn định hơn, vẫn giữ khung route 5N4D.',
+      },
+    ],
+    galleryIDs: [shizuokaFujiTokyoImage.id, japanPoster.id],
+    includesList: [
+      'Vé máy bay khứ hồi theo chặng công bố cùng hành lý ký gửi tiêu chuẩn',
+      '4 đêm khách sạn 3-4 sao, trong đó có đêm nghỉ khu vực gần tuyến Núi Phú Sĩ',
+      'Xe tham quan, hướng dẫn viên tiếng Việt và vé vào cửa các điểm chính theo lịch trình',
+      'Bữa ăn theo chương trình, hỗ trợ hồ sơ visa Nhật và nước suối cơ bản trên xe',
+      'Bảo hiểm du lịch cơ bản cùng hỗ trợ điều phối đoàn xuyên tuyến',
+    ],
+    excludesList: [
+      'Tips, chi tiêu cá nhân, minibar, giặt ủi và các bữa ăn tự do ngoài chương trình',
+      'Phụ phí phòng đơn, phụ phí mùa lễ hoặc chênh lệch hãng bay nếu khách chọn phương án khác',
+      'Chi phí phát sinh do đổi tên, đổi ngày hoặc yêu cầu tách đoàn riêng',
+    ],
+    itineraryDays: [
+      {
+        dayNumber: 1,
+        title: 'Việt Nam - Nhật Bản',
+        route: 'TP.HCM / Hà Nội - Nhật Bản',
+        summary:
+          'Khởi hành sang Nhật Bản theo chuyến bay của đoàn. Sau khi nhập cảnh, xe đưa đoàn về khu vực lưu trú đầu tiên để nghỉ ngơi.',
+        meals: 'Tự túc / ăn nhẹ trên máy bay',
+        transport: 'Máy bay quốc tế và xe sân bay',
+        accommodation: 'Khách sạn 3-4 sao tại khu vực Shizuoka / phụ cận',
+        notes: 'Đêm đầu thường được bố trí tối ưu để ngày hôm sau vào nhịp tham quan thuận lợi.',
+        media: shizuokaFujiTokyoImage.id,
+      },
+      {
+        dayNumber: 2,
+        title: 'Shizuoka - tuyến cảnh quan gắn với Núi Phú Sĩ',
+        route: 'Shizuoka - khu vực Núi Phú Sĩ',
+        summary:
+          'Ngày trọng tâm của route ngắn: tham quan khu vực Shizuoka, các điểm nhìn ra Núi Phú Sĩ và những stop có hình ảnh mùa hè rất dễ bán.',
+        meals: 'Ăn sáng / trưa / tối',
+        transport: 'Xe du lịch theo tuyến',
+        accommodation: 'Khách sạn 3-4 sao khu vực gần Fuji',
+        notes: 'Lịch điểm ngắm núi có thể đổi thứ tự theo thời tiết để đảm bảo trải nghiệm thực tế tốt nhất.',
+        media: shizuokaFujiTokyoImage.id,
+      },
+      {
+        dayNumber: 3,
+        title: 'Tuyến Fuji - vào Tokyo',
+        route: 'Fuji - Tokyo',
+        summary:
+          'Tiếp tục các điểm chính quanh tuyến Fuji rồi dịch chuyển về Tokyo. Cảm giác tour bắt đầu chuyển từ thiên nhiên sang city experience rõ hơn từ ngày này.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch xuyên tuyến',
+        accommodation: 'Khách sạn 3-4 sao khu Tokyo',
+        notes: 'Ngày có di chuyển đường dài hơn, điều hành thường kiểm soát chặt giờ đoàn để tối vẫn có thời gian nghỉ.',
+        media: shizuokaFujiTokyoImage.id,
+      },
+      {
+        dayNumber: 4,
+        title: 'Tokyo city highlights - shopping',
+        route: 'Tokyo',
+        summary:
+          'Khám phá các biểu tượng của Tokyo kết hợp thời gian mua sắm và tự do. Đây là ngày cân bằng giữa sightseeing và retail rất phù hợp với khách outbound phổ thông.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch theo chương trình',
+        accommodation: 'Khách sạn 3-4 sao khu Tokyo',
+        notes: 'Nếu khách cần trải nghiệm riêng buổi tối, đây thường là ngày linh hoạt nhất của line 5N4D.',
+        media: shizuokaFujiTokyoImage.id,
+      },
+      {
+        dayNumber: 5,
+        title: 'Tokyo - Việt Nam',
+        route: 'Tokyo - Việt Nam',
+        summary:
+          'Trả phòng, ra sân bay và kết thúc chương trình Nhật 5N4D. Đây là line phù hợp khi khách muốn đi Nhật rõ ràng, vừa đủ và ngân sách gọn.',
+        meals: 'Ăn sáng',
+        transport: 'Xe tiễn sân bay và máy bay quốc tế',
+        accommodation: 'Không áp dụng',
+        notes: 'Giờ bay và thời gian tập trung phụ thuộc từng đợt khởi hành.',
+        media: shizuokaFujiTokyoImage.id,
+      },
+    ],
     departures: [
-      { departure: '20/05/2026', airline: 'Vietjet', price: '22.500.000' },
-      { departure: '17/06/2026', airline: 'Vietjet', price: '22.900.000' },
-      { departure: '08/07/2026', airline: 'Vietjet', price: '22.900.000' },
+      { departure: '20/05/2026', airline: 'Vietjet', price: '22.500.000', variantKey: 'japan-short-vj-sgn', departureCity: 'TP.HCM', status: 'limited' },
+      { departure: '17/06/2026', airline: 'Vietjet', price: '22.900.000', variantKey: 'japan-short-vj-sgn', departureCity: 'TP.HCM', status: 'limited' },
+      { departure: '08/07/2026', airline: 'Vietnam Airlines', price: '24.900.000', variantKey: 'japan-short-vna-han', departureCity: 'Hà Nội', urgencyLabel: 'Đợt dễ chốt cho khách ưu tiên hãng bay', availabilityBadge: 'Mở bán' },
     ],
     itinerary:
       'Ngày 1 bay đến Nhật và vào nhịp chương trình. Ngày 2 khám phá Shizuoka, cảnh quan gắn với Núi Phú Sĩ và các điểm dừng hình ảnh mạnh. Ngày 3 chuyển về Tokyo, trải nghiệm city icons và các khu phố biểu tượng. Ngày 4 tự do theo tuyến shopping hoặc điểm tham quan bổ sung. Ngày 5 trả phòng và bay về Việt Nam.',
@@ -4610,16 +5436,130 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
   const osakaTour = await createTourPage({
     title: 'Osaka - Kobe - Kyoto - Nagoya - Fuji - Tokyo 6N5D',
     slug: 'osaka-kobe-kyoto-nagoya-fuji-tokyo-6n5d',
+    market: 'japan',
+    durationDays: 6,
+    durationNights: 5,
     parentPageID: tourHub.id,
     relatedPageIDs: [japanPage.id, schedulePage.id, contactPage.id],
     imageID: osakaKyotoFujiTokyoImage.id,
     summary:
       'Line Nhật 6N5D cho khách muốn hành trình đầy hơn, nhiều điểm hơn và có lý do rõ để nâng ngân sách từ line 5N4D.',
+    marketCard: {
+      badges: ['Route nhiều điểm'],
+      sellingLine: 'Hành trình Nhật đầy đủ Osaka, Kyoto, Phú Sĩ và Tokyo.',
+      priorityLabel: 'Route nhiều điểm',
+    },
     metaDescription: 'Trang chi tiết tour Osaka - Kobe - Kyoto - Nagoya - Fuji - Tokyo 6N5D của WingsGo.',
     highlights: [
       { title: 'Hành trình đầy đủ hơn', paragraph: 'Route dài giúp khách hiểu lý do giá cao hơn và trải nghiệm nhiều điểm hơn.' },
       { title: 'Dễ dùng cho nhiều mùa', paragraph: 'Có thể dùng cho mùa hè, mùa thu hoặc mùa lá vàng nếu cập nhật hình ảnh và lịch khởi hành.' },
       { title: 'Hỗ trợ so sánh tốt', paragraph: 'Cặp line 5N4D và 6N5D cho thị trường Nhật giúp khách chọn theo thời gian và ngân sách.' },
+    ],
+    badgeLabels: [
+      'Category: Japan full route',
+      'Theme: Multi-city discovery',
+      'Theme: Cultural highlights',
+      'Suitable: Khách muốn đi sâu hơn',
+      'Suitable: Nhóm bạn / gia đình có thời gian',
+      'Type: Group tour',
+      'Giá công khai',
+      'Vietnam Airlines',
+      'Full-route compare',
+    ],
+    factSummaryOverride: {
+      routeSummary: 'Osaka - Kobe - Kyoto - Nagoya - Fuji - Tokyo',
+      mealsSummary: '5 bữa sáng, 4 bữa chính theo lịch trình',
+      groupSizeSummary: 'Đoàn Nhật 20-26 khách',
+      operatorNote:
+        'Line dài ngày cần điều phối khách sạn đa chặng và xe xuyên tuyến; điều hành sẽ chốt rooming và giờ tập trung kỹ hơn so với line 5N4D.',
+      holdNote: 'Giữ chỗ theo allotment của line Nhật, ưu tiên xác nhận sớm với khách muốn đi mùa đẹp.',
+    },
+    galleryIDs: [osakaKyotoFujiTokyoImage.id, japanPoster.id],
+    includesList: [
+      'Vé máy bay khứ hồi quốc tế và hành lý ký gửi tiêu chuẩn theo hãng bay công bố',
+      '5 đêm khách sạn 3-4 sao xuyên tuyến Osaka - Kyoto - Fuji - Tokyo, tiêu chuẩn 2 khách/phòng',
+      'Xe tham quan suốt tuyến, hướng dẫn viên và vé tham quan các điểm chính theo chương trình',
+      'Bữa ăn theo lịch trình, hỗ trợ hồ sơ visa Nhật và nước suối cơ bản trên xe',
+      'Bảo hiểm du lịch cơ bản và điều phối đoàn cho line nhiều điểm dừng',
+    ],
+    excludesList: [
+      'Tips, chi tiêu ngoài chương trình, phòng đơn và các dịch vụ cá nhân phát sinh',
+      'Phụ phí mùa cao điểm, vé tham quan tự chọn hoặc hoạt động riêng của khách',
+      'Chi phí đổi ngày, đổi tên hoặc tách đoàn theo yêu cầu cá nhân',
+    ],
+    itineraryDays: [
+      {
+        dayNumber: 1,
+        title: 'Việt Nam - Osaka',
+        route: 'TP.HCM / Hà Nội - Osaka',
+        summary:
+          'Khởi hành sang Osaka, nhập cảnh và về khách sạn nghỉ ngơi. Ngày đầu nhẹ để đoàn chuẩn bị cho tuyến nhiều thành phố từ ngày tiếp theo.',
+        meals: 'Tự túc / ăn nhẹ trên máy bay',
+        transport: 'Máy bay quốc tế và xe sân bay',
+        accommodation: 'Khách sạn 3-4 sao khu Osaka',
+        notes: 'Line 6N5D ưu tiên giữ sức cho đoàn ngay từ đầu vì nhịp di chuyển các ngày sau dày hơn.',
+        media: osakaKyotoFujiTokyoImage.id,
+      },
+      {
+        dayNumber: 2,
+        title: 'Osaka - Kobe - Kyoto',
+        route: 'Osaka - Kobe - Kyoto',
+        summary:
+          'Bắt đầu tuyến multi-city với Osaka, Kobe và Kyoto. Ngày này giúp khách cảm nhận rất rõ lợi thế của line dài: trải nghiệm dày và nhiều bối cảnh khác nhau trong cùng một hành trình.',
+        meals: 'Ăn sáng / trưa / tối',
+        transport: 'Xe du lịch xuyên tuyến',
+        accommodation: 'Khách sạn 3-4 sao khu Kyoto / Nagoya',
+        notes: 'Điều hành tối ưu thứ tự điểm để tránh dồn đoàn vào cùng một time slot quá căng.',
+        media: osakaKyotoFujiTokyoImage.id,
+      },
+      {
+        dayNumber: 3,
+        title: 'Kyoto - Nagoya',
+        route: 'Kyoto - Nagoya',
+        summary:
+          'Tiếp tục tuyến với các điểm văn hóa và city stop quan trọng trước khi nối sang chặng Fuji. Ngày thứ ba là điểm khác biệt lớn giữa line 6N5D và line 5N4D.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch theo chương trình',
+        accommodation: 'Khách sạn 3-4 sao khu Nagoya / phụ cận',
+        notes: 'Khách cần chuẩn bị hành lý gọn để thuận tiện cho các chặng khách sạn đổi liên tục.',
+        media: osakaKyotoFujiTokyoImage.id,
+      },
+      {
+        dayNumber: 4,
+        title: 'Nagoya - tuyến Fuji',
+        route: 'Nagoya - khu vực Núi Phú Sĩ',
+        summary:
+          'Rời Nagoya đi khu vực Fuji, nơi chương trình chuyển từ nhịp city sang thiên nhiên. Đây là ngày tạo chiều sâu trải nghiệm cho khách muốn “đi Nhật cho đáng chuyến”.',
+        meals: 'Ăn sáng / trưa / tối',
+        transport: 'Xe du lịch xuyên tuyến',
+        accommodation: 'Khách sạn 3-4 sao khu Fuji / Yamanashi',
+        notes: 'Điểm ngắm Fuji có thể thay đổi theo thực tế thời tiết để đảm bảo trải nghiệm tốt hơn.',
+        media: osakaKyotoFujiTokyoImage.id,
+      },
+      {
+        dayNumber: 5,
+        title: 'Fuji - Tokyo',
+        route: 'Fuji - Tokyo',
+        summary:
+          'Hoàn tất tuyến Fuji rồi vào Tokyo. Buổi cuối tại thủ đô cho phép khách vừa sightseeing vừa shopping, tạo cái kết cân bằng cho hành trình dài ngày.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch theo tuyến',
+        accommodation: 'Khách sạn 3-4 sao khu Tokyo',
+        notes: 'Tối cuối thường được khách tận dụng để mua sắm hoặc dạo phố tự do.',
+        media: osakaKyotoFujiTokyoImage.id,
+      },
+      {
+        dayNumber: 6,
+        title: 'Tokyo - Việt Nam',
+        route: 'Tokyo - Việt Nam',
+        summary:
+          'Trả phòng, ra sân bay và kết thúc line Nhật 6N5D. Đây là lựa chọn phù hợp cho khách có thêm thời gian và muốn nhiều điểm đến hơn trong một chuyến.',
+        meals: 'Ăn sáng',
+        transport: 'Xe tiễn sân bay và máy bay quốc tế',
+        accommodation: 'Không áp dụng',
+        notes: 'Giờ tập trung chính thức sẽ được gửi khi điều hành chốt giờ bay cuối cùng.',
+        media: osakaKyotoFujiTokyoImage.id,
+      },
     ],
     departures: [
       { departure: '25/06/2026', airline: 'Vietnam Airlines', price: '32.900.000' },
@@ -4636,19 +5576,121 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     ],
   })
 
-  await createTourPage({
+  const beijingTour = await createTourPage({
     title: 'Bắc Kinh - Vạn Lý Trường Thành 5N4D',
     slug: 'bac-kinh-van-ly-truong-thanh-5n4d',
+    market: 'china',
+    durationDays: 5,
+    durationNights: 4,
     parentPageID: tourHub.id,
     relatedPageIDs: [chinaPage.id, schedulePage.id, contactPage.id],
     imageID: beijingGreatWallImage.id,
     summary:
       'Route Trung Quốc gọn cho khách thích điểm biểu tượng, thời lượng ngắn và mức giá retail dễ tiếp cận.',
+    marketCard: {
+      badges: ['Nhịp nhẹ'],
+      sellingLine: 'Hành trình gọn, nhịp tham quan nhẹ nhàng theo biểu tượng.',
+      priorityLabel: 'Nhịp nhẹ',
+    },
     metaDescription: 'Trang chi tiết tour Bắc Kinh - Vạn Lý Trường Thành 5N4D của WingsGo.',
     highlights: [
       { title: 'Tuyến biểu tượng dễ nhận diện', paragraph: 'Dễ bán nhờ Vạn Lý Trường Thành, mức độ nhận diện cao và thời lượng phù hợp khách retail.' },
       { title: 'Sản phẩm mở đầu cho Trung Quốc', paragraph: 'Phù hợp làm route mở đầu cho trang thị trường Trung Quốc trong phase 1.' },
       { title: 'Lịch khởi hành rõ', paragraph: 'Ngày đi công khai giúp line này giống một sản phẩm có thể hỏi mua ngay, không chỉ là brochure ảnh.' },
+    ],
+    badgeLabels: [
+      'Category: China entry route',
+      'Theme: Capital icons',
+      'Theme: History',
+      'Suitable: First-time China travelers',
+      'Suitable: Khách thích biểu tượng nổi tiếng',
+      'Type: Group tour',
+      'Giá công khai',
+      'Air China',
+      'Short holiday',
+    ],
+    factSummaryOverride: {
+      routeSummary: 'Bắc Kinh - Vạn Lý Trường Thành',
+      mealsSummary: '4 bữa sáng, 3 bữa chính theo lịch trình',
+      groupSizeSummary: 'Đoàn Trung Quốc 18-24 khách',
+      operatorNote:
+        'Điều hành tập trung tối ưu visa đoàn, khách sạn Bắc Kinh và tuyến tham quan biểu tượng để tour dễ bán, dễ vận hành.',
+      holdNote: 'Giữ chỗ theo tồn ghế Air China và visa list từng đợt đi.',
+    },
+    galleryIDs: [beijingGreatWallImage.id, chinaMarketImage.id],
+    includesList: [
+      'Vé máy bay khứ hồi theo chặng công bố, hành lý ký gửi tiêu chuẩn và xe đón tiễn sân bay',
+      '4 đêm khách sạn tiêu chuẩn 3-4 sao khu Bắc Kinh, bố trí 2 khách/phòng',
+      'Hướng dẫn viên, xe tham quan và vé vào cửa các điểm chính theo chương trình',
+      'Ăn uống theo lịch trình, hỗ trợ thủ tục theo line bán và nước uống cơ bản trên xe',
+      'Bảo hiểm du lịch cơ bản và điều phối đoàn theo tuyến ngắn ngày',
+    ],
+    excludesList: [
+      'Chi tiêu cá nhân, tips, phòng đơn và các chương trình tự chọn ngoài lịch trình',
+      'Chi phí phát sinh do đổi ngày, đổi tên hoặc nâng hạng dịch vụ theo yêu cầu',
+      'Các khoản ngoài phạm vi chương trình đã công bố khi sales xác nhận giữ chỗ',
+    ],
+    itineraryDays: [
+      {
+        dayNumber: 1,
+        title: 'Việt Nam - Bắc Kinh',
+        route: 'TP.HCM / Hà Nội - Bắc Kinh',
+        summary:
+          'Đoàn bay đến Bắc Kinh, nhập cảnh và về khách sạn nghỉ ngơi. Ngày đầu giữ nhịp nhẹ để ngày hôm sau vào tuyến lịch sử - biểu tượng thuận lợi.',
+        meals: 'Tự túc / ăn nhẹ trên máy bay',
+        transport: 'Máy bay quốc tế và xe sân bay',
+        accommodation: 'Khách sạn 3-4 sao khu Bắc Kinh',
+        notes: 'Tùy giờ bay, khách có thể có thêm thời gian tự do quanh khu khách sạn.',
+        media: beijingGreatWallImage.id,
+      },
+      {
+        dayNumber: 2,
+        title: 'Bắc Kinh city icons',
+        route: 'Quảng trường - cung điện - khu trung tâm',
+        summary:
+          'Ngày tham quan tập trung các biểu tượng nội đô để khách có cảm giác “đi Bắc Kinh là phải thấy” những điểm cốt lõi ngay trong 48 giờ đầu.',
+        meals: 'Ăn sáng / trưa / tối',
+        transport: 'Xe du lịch theo đoàn',
+        accommodation: 'Khách sạn 3-4 sao khu Bắc Kinh',
+        notes: 'Line này phù hợp với khách retail muốn nội dung đơn giản, rõ ràng, dễ hiểu.',
+        media: beijingGreatWallImage.id,
+      },
+      {
+        dayNumber: 3,
+        title: 'Vạn Lý Trường Thành - điểm nhấn chính của tour',
+        route: 'Bắc Kinh - Vạn Lý Trường Thành - Bắc Kinh',
+        summary:
+          'Ngày đắt giá nhất của chương trình với tuyến Vạn Lý Trường Thành. Đây là lý do lớn nhất khiến khách chọn route Bắc Kinh thay vì các line Trung Quốc mềm hơn.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch theo tuyến',
+        accommodation: 'Khách sạn 3-4 sao khu Bắc Kinh',
+        notes: 'Điều hành sẽ căn tuyến tham quan theo lượng khách và thời tiết để tránh dồn quá đông ở điểm chính.',
+        media: beijingGreatWallImage.id,
+      },
+      {
+        dayNumber: 4,
+        title: 'Mua sắm - city leisure',
+        route: 'Bắc Kinh',
+        summary:
+          'Ngày nhẹ hơn để khách mua sắm, hoàn tất trải nghiệm city break và chuẩn bị cho ngày về. Đây là khoảng đệm hợp lý cho khách retail ngắn ngày.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch theo chương trình',
+        accommodation: 'Khách sạn 3-4 sao khu Bắc Kinh',
+        notes: 'Khách có thể cân nhắc các điểm tự do bổ sung nếu thời gian cho phép.',
+        media: beijingGreatWallImage.id,
+      },
+      {
+        dayNumber: 5,
+        title: 'Bắc Kinh - Việt Nam',
+        route: 'Bắc Kinh - Việt Nam',
+        summary:
+          'Trả phòng, ra sân bay và kết thúc hành trình Bắc Kinh - Vạn Lý Trường Thành 5N4D. Đây là route mở đầu tốt cho khách muốn thử Trung Quốc bằng một chương trình rất rõ cấu trúc.',
+        meals: 'Ăn sáng',
+        transport: 'Xe tiễn sân bay và máy bay quốc tế',
+        accommodation: 'Không áp dụng',
+        notes: 'Giờ tập trung và hành lý được điều hành nhắc lại trước ngày về.',
+        media: beijingGreatWallImage.id,
+      },
     ],
     departures: [
       { departure: '12/06/2026', airline: 'Air China', price: '19.900.000' },
@@ -4665,19 +5707,121 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     ],
   })
 
-  await createTourPage({
+  const shanghaiTour = await createTourPage({
     title: 'Thượng Hải - Ô Trấn - Hàng Châu 5N4D',
     slug: 'thuong-hai-o-tran-hang-chau-5n4d',
+    market: 'china',
+    durationDays: 5,
+    durationNights: 4,
     parentPageID: tourHub.id,
     relatedPageIDs: [chinaPage.id, schedulePage.id, contactPage.id],
     imageID: chinaJiangnanImage.id,
     summary:
       'Route Jiangnan mềm hơn cho thị trường Trung Quốc retail, phù hợp khách thích cân bằng giữa city icon và trải nghiệm cảnh quan.',
+    marketCard: {
+      badges: ['Line bán chạy'],
+      sellingLine: 'Cân bằng city icon và cảnh quan Jiangnan, được khách chọn nhiều.',
+      priorityLabel: 'Bán chạy',
+    },
     metaDescription: 'Trang chi tiết tour Thượng Hải - Ô Trấn - Hàng Châu 5N4D của WingsGo.',
     highlights: [
       { title: 'Route cân bằng', paragraph: 'Cân bằng giữa đô thị nổi tiếng và trải nghiệm cảnh quan mềm hơn.' },
       { title: 'Thêm lựa chọn để so sánh', paragraph: 'Bổ sung lựa chọn thứ hai cho trang thị trường Trung Quốc để khách không chỉ thấy một route.' },
       { title: 'Sẵn sàng mở campaign', paragraph: 'Có thể gắn thêm hình ảnh chiến dịch hoặc nhóm khởi hành đặc biệt về sau.' },
+    ],
+    badgeLabels: [
+      'Category: China scenic route',
+      'Theme: Jiangnan atmosphere',
+      'Theme: City + ancient town',
+      'Suitable: Couples',
+      'Suitable: Khách thích cảnh quan mềm',
+      'Type: Group tour',
+      'Giá công khai',
+      'Air China',
+      'Campaign-ready',
+    ],
+    factSummaryOverride: {
+      routeSummary: 'Thượng Hải - Ô Trấn - Hàng Châu',
+      mealsSummary: '4 bữa sáng, 3 bữa chính theo lịch trình',
+      groupSizeSummary: 'Đoàn Trung Quốc 18-24 khách',
+      operatorNote:
+        'Điều hành cần chốt tốt nhịp di chuyển giữa city và cổ trấn để tour giữ được chất mềm, đẹp như đúng định vị của route.',
+      holdNote: 'Giữ chỗ theo ghế Air China và allotment khách sạn trên tuyến Giang Nam.',
+    },
+    galleryIDs: [chinaJiangnanImage.id, chinaMarketImage.id],
+    includesList: [
+      'Vé máy bay khứ hồi, hành lý ký gửi tiêu chuẩn và xe đón tiễn sân bay',
+      '4 đêm khách sạn 3-4 sao trên tuyến Thượng Hải - Hàng Châu hoặc tương đương',
+      'Xe tham quan, hướng dẫn viên, vé tham quan các điểm chính theo lịch trình',
+      'Bữa ăn theo chương trình, hỗ trợ thủ tục line bán và nước uống cơ bản trên xe',
+      'Bảo hiểm du lịch cơ bản và điều phối đoàn theo tuyến ngắn ngày',
+    ],
+    excludesList: [
+      'Chi tiêu cá nhân, tips, phòng đơn, giặt ủi và các bữa ăn tự do ngoài lịch trình',
+      'Phí phát sinh do đổi ngày bay, đổi tên hoặc mua thêm dịch vụ cá nhân',
+      'Các hoạt động riêng ngoài phạm vi chương trình sau khi sales đã chốt tour',
+    ],
+    itineraryDays: [
+      {
+        dayNumber: 1,
+        title: 'Việt Nam - Thượng Hải',
+        route: 'TP.HCM / Hà Nội - Thượng Hải',
+        summary:
+          'Đoàn bay đến Thượng Hải, nhập cảnh và về khách sạn nghỉ ngơi. Ngày đầu làm quen nhịp chương trình và chuẩn bị cho tuyến city - scenic route những ngày sau.',
+        meals: 'Tự túc / ăn nhẹ trên máy bay',
+        transport: 'Máy bay quốc tế và xe sân bay',
+        accommodation: 'Khách sạn 3-4 sao khu Thượng Hải',
+        notes: 'Nếu giờ đến thuận lợi, khách có thể tự do khám phá khu vực quanh khách sạn.',
+        media: chinaJiangnanImage.id,
+      },
+      {
+        dayNumber: 2,
+        title: 'Thượng Hải city icons',
+        route: 'Thượng Hải',
+        summary:
+          'Ngày tập trung các điểm nhìn và city icon của Thượng Hải. Đây là phần giúp khách nhận diện chương trình không chỉ có cổ trấn mà vẫn có nhịp đô thị rõ ràng.',
+        meals: 'Ăn sáng / trưa / tối',
+        transport: 'Xe du lịch theo đoàn',
+        accommodation: 'Khách sạn 3-4 sao khu Thượng Hải',
+        notes: 'Khách retail thường thích ngày này vì có đủ city feel, ảnh đẹp và thời gian shopping vừa phải.',
+        media: chinaJiangnanImage.id,
+      },
+      {
+        dayNumber: 3,
+        title: 'Ô Trấn - chất mềm của tuyến Giang Nam',
+        route: 'Thượng Hải - Ô Trấn',
+        summary:
+          'Rời nhịp đô thị để vào Ô Trấn, điểm giúp route này khác hẳn line Bắc Kinh. Cổ trấn, mặt nước và không khí chậm hơn tạo nên cảm giác thư giãn dễ chịu.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch xuyên tuyến',
+        accommodation: 'Khách sạn 3-4 sao khu Ô Trấn / Hàng Châu',
+        notes: 'Đây là ngày rất mạnh về hình ảnh, phù hợp khách cặp đôi hoặc nhóm bạn thích trải nghiệm mềm hơn.',
+        media: chinaJiangnanImage.id,
+      },
+      {
+        dayNumber: 4,
+        title: 'Hàng Châu - cảnh quan và city leisure',
+        route: 'Ô Trấn - Hàng Châu',
+        summary:
+          'Tiếp tục tuyến với Hàng Châu, nơi giữ sự cân bằng giữa cảnh quan và cảm giác thành phố. Chương trình đủ dày nhưng không quá nặng vận động.',
+        meals: 'Ăn sáng / trưa',
+        transport: 'Xe du lịch theo tuyến',
+        accommodation: 'Khách sạn 3-4 sao khu Hàng Châu / Thượng Hải',
+        notes: 'Điều hành thường tối ưu giờ di chuyển để khách vẫn có thời gian thư thả trong ngày.',
+        media: chinaJiangnanImage.id,
+      },
+      {
+        dayNumber: 5,
+        title: 'Tuyến về - Việt Nam',
+        route: 'Hàng Châu / Thượng Hải - Việt Nam',
+        summary:
+          'Trả phòng, di chuyển ra sân bay và kết thúc hành trình Giang Nam 5N4D. Đây là lựa chọn tốt cho khách muốn một route Trung Quốc có chất cảnh quan rõ hơn.',
+        meals: 'Ăn sáng',
+        transport: 'Xe tiễn sân bay và máy bay quốc tế',
+        accommodation: 'Không áp dụng',
+        notes: 'Thời gian sân bay và chặng ra sân bay phụ thuộc lịch bay cuối cùng của đoàn.',
+        media: chinaJiangnanImage.id,
+      },
     ],
     departures: [
       { departure: '20/06/2026', airline: 'Air China', price: '21.900.000' },
@@ -4694,11 +5838,66 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     ],
   })
 
-  await createPage(payload, req, site.id, {
+  await payload.update({
+    collection: 'tour-products' as never,
+    id: seoulEverlandTour.product.id,
+    req,
+    context: seedContext,
+    data: seedData({
+      relatedTours: [jejuTour.product.id, shizuokaTour.product.id],
+    }),
+  })
+  await payload.update({
+    collection: 'tour-products' as never,
+    id: jejuTour.product.id,
+    req,
+    context: seedContext,
+    data: seedData({
+      relatedTours: [seoulEverlandTour.product.id, shizuokaTour.product.id],
+    }),
+  })
+  await payload.update({
+    collection: 'tour-products' as never,
+    id: shizuokaTour.product.id,
+    req,
+    context: seedContext,
+    data: seedData({
+      relatedTours: [osakaTour.product.id, seoulEverlandTour.product.id],
+    }),
+  })
+  await payload.update({
+    collection: 'tour-products' as never,
+    id: osakaTour.product.id,
+    req,
+    context: seedContext,
+    data: seedData({
+      relatedTours: [shizuokaTour.product.id, shanghaiTour.product.id],
+    }),
+  })
+  await payload.update({
+    collection: 'tour-products' as never,
+    id: beijingTour.product.id,
+    req,
+    context: seedContext,
+    data: seedData({
+      relatedTours: [shanghaiTour.product.id, seoulEverlandTour.product.id],
+    }),
+  })
+  await payload.update({
+    collection: 'tour-products' as never,
+    id: shanghaiTour.product.id,
+    req,
+    context: seedContext,
+    data: seedData({
+      relatedTours: [beijingTour.product.id, shizuokaTour.product.id],
+    }),
+  })
+
+  const summerKoreaCampaignPage = await createPage(payload, req, site.id, {
     title: 'Hè 2026 Hàn Quốc',
     slug: 'he-2026-han-quoc',
     parentPage: campaignHub.id,
-    relatedPages: [koreaPage.id, seoulEverlandTour.id, jejuTour.id, contactPage.id],
+    relatedPages: [koreaPage.id, seoulEverlandTour.page.id, jejuTour.page.id, contactPage.id],
     hero: {
       type: 'mediumImpact',
       media: jejuPoster.id,
@@ -4710,32 +5909,14 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       ),
     },
     layout: [
-      pricingTableBlock(
-        'Giá và lịch campaign Hàn Quốc',
-        'Các line hè 2026 được gom để khách so sánh nhanh ngày đi, hãng bay và mức giá từ trước khi giữ chỗ.',
-        [
-          {
-            title: 'Seoul - Jeju - Nami - Camellia Hill 6N5D',
-            subtitle: 'Line Jeju Air mùa hè',
-            departure: '11/07, 28/08',
-            airline: 'Jeju Air',
-            price: '23.900.000',
-            note: 'Xác nhận lại khi tư vấn',
-            url: '/tour/seoul-jeju-nami-camellia-hill-6n5d',
-          },
-          {
-            title: 'Seoul - Nami - Everland 5N4D',
-            subtitle: 'Line Hàn Quốc dễ chọn',
-            departure: '08/07, 22/07, 05/08',
-            airline: 'Vietjet / Jeju Air',
-            price: '18.900.000',
-            note: 'Xác nhận lại khi tư vấn',
-            url: '/tour/seoul-nami-everland-5n4d',
-          },
-        ],
-        'Campaign hè',
-      ),
-      mediaBlock(jejuPoster.id),
+      contentBlock([
+        {
+          size: 'full',
+          title: 'Các line Hàn Quốc bán nhanh trong mùa hè',
+          paragraph:
+            'Mỗi campaign gom những line đang được khách chọn nhiều nhất theo mùa, kèm giá tham khảo và lịch khởi hành rõ ràng để khách so sánh và giữ chỗ nhanh.',
+        },
+      ]),
       wingsGoTrustStrip(),
       ctaBlock(
         'Cần xác nhận chỗ cho đợt khởi hành gần nhất?',
@@ -4745,63 +5926,45 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     ],
     meta: {
       title: 'Hè 2026 Hàn Quốc',
-      description: 'Campaign tour Hàn Quốc hè 2026 của WingsGo với line Jeju, Seoul, Nami, Camellia Hill, giá tham khảo và CTA giữ chỗ.',
+      description: 'Tour Hàn Quốc hè 2026 của WingsGo với line Jeju, Seoul, Nami, Camellia Hill, giá tham khảo và CTA giữ chỗ.',
       image: jejuPoster.id,
     },
   })
 
-  await createPage(payload, req, site.id, {
+  const summerJapanCampaignPage = await createPage(payload, req, site.id, {
     title: 'Hè 2026 Nhật Bản',
     slug: 'he-2026-nhat-ban',
     parentPage: campaignHub.id,
-    relatedPages: [japanPage.id, shizuokaTour.id, osakaTour.id, contactPage.id],
+    relatedPages: [japanPage.id, shizuokaTour.page.id, osakaTour.page.id, contactPage.id],
     hero: {
       type: 'mediumImpact',
       media: japanPoster.id,
       links: [linkItem('Xem tour Nhật Bản', '/thi-truong/nhat-ban', 'default'), linkItem('Liên hệ tư vấn', '/lien-he', 'outline')],
       richText: richText(
         'Hè 2026 Nhật Bản',
-        'Campaign hè cho các line Nhật Bản có giá rõ, lịch khởi hành dễ so sánh và lối mở nhanh sang trang tour chi tiết.',
+        'Đợt hè cho các line Nhật Bản có giá rõ, lịch khởi hành dễ so sánh và lối mở nhanh sang trang tour chi tiết.',
         'h1',
       ),
     },
     layout: [
-      pricingTableBlock(
-        'Giá và lịch campaign Nhật Bản',
-        'Các line Nhật được trình bày theo ngày đi, hãng bay và giá tham khảo để khách so sánh trước khi liên hệ.',
-        [
-          {
-            title: 'Shizuoka - Núi Phú Sĩ - Tokyo 5N4D',
-            subtitle: 'Line ngắn dễ chọn',
-            departure: '20/05, 17/06, 08/07',
-            airline: 'Vietjet',
-            price: '22.500.000',
-            note: 'Xác nhận lại khi tư vấn',
-            url: '/tour/shizuoka-nui-phu-si-tokyo-5n4d',
-          },
-          {
-            title: 'Osaka - Kobe - Kyoto - Nagoya - Fuji - Tokyo 6N5D',
-            subtitle: 'Line dài nhiều điểm',
-            departure: '25/06, 30/07, 27/08',
-            airline: 'Vietnam Airlines',
-            price: '32.900.000',
-            note: 'Xác nhận lại khi tư vấn',
-            url: '/tour/osaka-kobe-kyoto-nagoya-fuji-tokyo-6n5d',
-          },
-        ],
-        'Hè Nhật Bản',
-      ),
-      mediaBlock(japanPoster.id),
+      contentBlock([
+        {
+          size: 'full',
+          title: 'So sánh nhanh các line Nhật Bản theo mùa',
+          paragraph:
+            'Mỗi route hiển thị giá tham khảo, lịch khởi hành và lối mở nhanh sang trang tour chi tiết để khách chọn đúng line theo ngân sách và thời lượng.',
+        },
+      ]),
       wingsGoTrustStrip(),
     ],
     meta: {
       title: 'Hè 2026 Nhật Bản',
-      description: 'Campaign tour Nhật Bản hè 2026 của WingsGo với line Shizuoka, Phú Sĩ, Tokyo, Osaka, Kyoto, giá và lịch khởi hành.',
+      description: 'Tour Nhật Bản hè 2026 của WingsGo với line Shizuoka, Phú Sĩ, Tokyo, Osaka, Kyoto, giá và lịch khởi hành.',
       image: japanPoster.id,
     },
   })
 
-  await createPage(payload, req, site.id, {
+  const chinaCampaignPage = await createPage(payload, req, site.id, {
     title: 'Trung Quốc giá rõ',
     slug: 'trung-quoc-gia-ro',
     parentPage: campaignHub.id,
@@ -4812,37 +5975,94 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       links: [linkItem('Xem thị trường Trung Quốc', '/thi-truong/trung-quoc', 'default'), linkItem('Nhận tư vấn', '/lien-he', 'outline')],
       richText: richText(
         'Tour Trung Quốc giá rõ: chọn nhanh route ngắn ngày',
-        'Campaign Trung Quốc gom các route dễ bán, giá tham khảo và CTA tư vấn để khách so sánh trước khi giữ chỗ.',
+        'Các tour Trung Quốc gom route dễ chọn, giá tham khảo và CTA tư vấn để khách so sánh trước khi giữ chỗ.',
         'h1',
       ),
     },
     layout: [
-      featureGridBlock(
-        'Route nổi bật trong campaign',
-        'Mỗi route dẫn sang trang tour chi tiết để khách xem lịch, giá, phạm vi dịch vụ và gửi yêu cầu tư vấn.',
-        [
-          {
-            title: 'Bắc Kinh - Vạn Lý Trường Thành 5N4D',
-            description: 'Tuyến Trung Quốc dễ nhận diện với điểm nhấn Vạn Lý Trường Thành.',
-            meta: 'Tuyến Bắc Kinh',
-            url: '/tour/bac-kinh-van-ly-truong-thanh-5n4d',
-          },
-          {
-            title: 'Thượng Hải - Ô Trấn - Hàng Châu 5N4D',
-            description: 'Tuyến cảnh quan mềm hơn, phù hợp khách muốn kết hợp đô thị và cổ trấn.',
-            meta: 'Tuyến Giang Nam',
-            url: '/tour/thuong-hai-o-tran-hang-chau-5n4d',
-          },
-        ],
-        'highlight',
-        'Route campaign',
-      ),
+      contentBlock([
+        {
+          size: 'full',
+          title: 'Route Trung Quốc dễ chọn theo giá và thời lượng',
+          paragraph:
+            'Các route nổi bật được gom kèm giá tham khảo và lịch khởi hành để khách so sánh nhanh trước khi nhận tư vấn giữ chỗ.',
+        },
+      ]),
       wingsGoTrustStrip(),
     ],
     meta: {
-      title: 'Campaign Trung Quốc giá rõ',
-      description: 'Campaign tour Trung Quốc của WingsGo với route Bắc Kinh, Vạn Lý Trường Thành, Thượng Hải, Ô Trấn, Hàng Châu và giá rõ.',
+      title: 'Tour Trung Quốc giá rõ',
+      description: 'Tour Trung Quốc của WingsGo với route Bắc Kinh, Vạn Lý Trường Thành, Thượng Hải, Ô Trấn, Hàng Châu và giá rõ.',
       image: chinaMarketImage.id,
+    },
+  })
+
+  await createTourCampaign(payload, req, site.id, {
+    title: 'Hè 2026 Hàn Quốc',
+    slug: 'he-2026-han-quoc',
+    campaignCode: 'WG-KR-SUMMER-2026',
+    seasonKey: 'summer-2026',
+    wrapperPage: summerKoreaCampaignPage.id,
+    summary:
+      'Campaign gom các line Hàn Quốc đang mở bán mạnh nhất, ưu tiên visual rõ, giá công khai và lối mở nhanh sang giữ chỗ.',
+    heroMedia: jejuPoster.id,
+    linkedTours: [seoulEverlandTour.product.id, jejuTour.product.id],
+    featuredDepartures: [
+      ...jejuTour.departures.slice(0, 1).map((item) => item.id),
+      ...seoulEverlandTour.departures.slice(0, 1).map((item) => item.id),
+    ],
+    meta: {
+      title: 'Hè 2026 Hàn Quốc',
+      description:
+        'Tour Hàn Quốc hè 2026 của WingsGo với các line nổi bật, giá công khai và lịch khởi hành rõ ràng.',
+      image: jejuPoster.id,
+      breadcrumbLabel: 'Hè 2026 Hàn Quốc',
+    },
+  })
+
+  await createTourCampaign(payload, req, site.id, {
+    title: 'Hè 2026 Nhật Bản',
+    slug: 'he-2026-nhat-ban',
+    campaignCode: 'WG-JP-SUMMER-2026',
+    seasonKey: 'summer-2026',
+    wrapperPage: summerJapanCampaignPage.id,
+    summary:
+      'Campaign gom các route Nhật Bản ngắn và dài để khách so sánh nhanh theo ngân sách, thời lượng và đợt đi.',
+    heroMedia: japanPoster.id,
+    linkedTours: [shizuokaTour.product.id, osakaTour.product.id],
+    featuredDepartures: [
+      ...shizuokaTour.departures.slice(0, 1).map((item) => item.id),
+      ...osakaTour.departures.slice(0, 1).map((item) => item.id),
+    ],
+    meta: {
+      title: 'Hè 2026 Nhật Bản',
+      description:
+        'Tour Nhật Bản hè 2026 của WingsGo với lựa chọn tuyến ngắn, tuyến dài, giá công khai và lịch khởi hành rõ ràng.',
+      image: japanPoster.id,
+      breadcrumbLabel: 'Hè 2026 Nhật Bản',
+    },
+  })
+
+  await createTourCampaign(payload, req, site.id, {
+    title: 'Trung Quốc giá rõ',
+    slug: 'trung-quoc-gia-ro',
+    campaignCode: 'WG-CN-CLEAR-PRICE',
+    seasonKey: 'always-on',
+    wrapperPage: chinaCampaignPage.id,
+    summary:
+      'Campaign cho các route Trung Quốc retail, nhấn vào giá công khai, route ngắn ngày và CTA tư vấn nhanh.',
+    heroMedia: chinaMarketImage.id,
+    linkedTours: [beijingTour.product.id, shanghaiTour.product.id],
+    featuredDepartures: [
+      ...beijingTour.departures.slice(0, 1).map((item) => item.id),
+      ...shanghaiTour.departures.slice(0, 1).map((item) => item.id),
+    ],
+    meta: {
+      title: 'Trung Quốc giá rõ',
+      description:
+        'Tour Trung Quốc của WingsGo với các route dễ chọn, giá công khai và lịch khởi hành rõ ràng.',
+      image: chinaMarketImage.id,
+      breadcrumbLabel: 'Trung Quốc giá rõ',
     },
   })
 
@@ -4983,30 +6203,30 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         'Giá tham khảo',
       ),
       featureGridBlock(
-        'Campaign theo mùa',
-        'Các campaign được tổ chức thành trang bán hàng có lịch, giá, route và lối gửi yêu cầu rõ ràng.',
+        'Tour theo mùa',
+        'Các đợt tour được tổ chức thành trang bán hàng có lịch, giá, route và lối gửi yêu cầu rõ ràng.',
         [
           {
             title: 'Hè 2026 Hàn Quốc',
-            description: 'Campaign Jeju và Seoul có ngày khởi hành, giá tham khảo và visual bán hàng rõ.',
-            meta: 'Campaign Hàn Quốc',
+            description: 'Đợt Jeju và Seoul có ngày khởi hành, giá tham khảo và visual bán hàng rõ.',
+            meta: 'Tour Hàn Quốc',
             url: '/campaign/he-2026-han-quoc',
           },
           {
             title: 'Hè 2026 Nhật Bản',
-            description: 'Campaign Nhật Bản giúp so sánh line ngắn ngày và line nhiều điểm.',
-            meta: 'Campaign Nhật Bản',
+            description: 'Tour Nhật Bản giúp so sánh line ngắn ngày và line nhiều điểm.',
+            meta: 'Tour Nhật Bản',
             url: '/campaign/he-2026-nhat-ban',
           },
           {
             title: 'Trung Quốc giá rõ',
-            description: 'Campaign Trung Quốc tập trung route rõ, giá rõ và CTA tư vấn nhanh.',
-            meta: 'Campaign Trung Quốc',
+            description: 'Tour Trung Quốc tập trung route rõ, giá rõ và CTA tư vấn nhanh.',
+            meta: 'Tour Trung Quốc',
             url: '/campaign/trung-quoc-gia-ro',
           },
         ],
         'default',
-        'Campaign',
+        'Tour theo mùa',
       ),
       featureGridBlock(
         'Tour nổi bật',
@@ -5051,12 +6271,12 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
 
   await createSiteSettings(payload, req, site, siteSeed, heroImage.id, {
     footerNote:
-      'WingsGo giúp khách so sánh tour outbound theo thị trường, campaign, lịch khởi hành và trang tour chi tiết có giá tham khảo.',
+      'WingsGo giúp khách so sánh tour outbound theo thị trường, tour theo mùa, lịch khởi hành và trang chi tiết có giá tham khảo.',
     headerNavItems: [
       linkItem('Trang chủ', '/'),
       linkItem('Thị trường', '/thi-truong'),
       linkItem('Lịch khởi hành', '/lich-khoi-hanh'),
-      linkItem('Campaign', '/campaign'),
+      linkItem('Tour theo mùa', '/campaign'),
       linkItem('Tour', '/tour'),
       linkItem('Liên hệ', '/lien-he'),
     ],

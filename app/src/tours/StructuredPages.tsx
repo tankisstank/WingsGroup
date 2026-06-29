@@ -1,0 +1,1286 @@
+import React from 'react'
+
+import { Media } from '@/components/Media'
+import { SiteLink } from '@/components/SiteLink'
+
+import { defaultTourSectionOrder, defaultTourSectionVisibility } from './sectionRegistry'
+import { ScheduleInteractiveDepartures } from './ScheduleInteractiveDepartures'
+import type {
+  DepartureCardViewModel,
+  MarketPageViewModel,
+  SchedulePageViewModel,
+  TourCardViewModel,
+  TourResolvedData,
+  TourSectionID,
+} from './types'
+import {
+  formatTourDate,
+  formatTourPrice,
+  getAvailabilityLabel,
+  getContactPath,
+  getDurationLabel,
+  getLowestPrice,
+  getMarketConfig,
+  getSchedulePath,
+  getTourInquiryPath,
+  getTourPath,
+  type TourInquiryIntent,
+} from './utils'
+
+const asArray = <T,>(value?: T[] | null) => (Array.isArray(value) ? value : [])
+
+const asDoc = <T extends object>(value: T | number | string | null | undefined): T | null =>
+  value && typeof value === 'object' ? value : null
+
+const splitSummaryParagraphs = (summary?: null | string) =>
+  String(summary || '')
+    .split(/(?<=\.)\s+/)
+    .filter(Boolean)
+
+const Panel = ({
+  children,
+  className = '',
+  ...props
+}: React.HTMLAttributes<HTMLElement>) => (
+  <section className={`rounded-[28px] border border-border/70 bg-card/95 p-6 shadow-sm ${className}`} {...props}>
+    {children}
+  </section>
+)
+
+const SectionHeading = ({
+  eyebrow,
+  title,
+  description,
+  level = 'h2',
+}: {
+  description?: null | string
+  eyebrow: string
+  level?: 'h1' | 'h2'
+  title: string
+}) => (
+  <div className="mb-6">
+    <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">{eyebrow}</p>
+    {level === 'h1' ? (
+      <h1 className="mt-2 text-3xl font-semibold text-foreground md:text-4xl">{title}</h1>
+    ) : (
+      <h2 className="mt-2 text-2xl font-semibold text-foreground md:text-3xl">{title}</h2>
+    )}
+    {description ? <p className="mt-2 max-w-4xl text-sm text-muted-foreground md:text-base">{description}</p> : null}
+  </div>
+)
+
+const getBadgeGroups = (badges: Array<Record<string, any>>) => {
+  const groups = {
+    categories: [] as string[],
+    suitable: [] as string[],
+    themes: [] as string[],
+    trust: [] as string[],
+    types: [] as string[],
+  }
+
+  for (const badge of badges) {
+    const label = String(badge.label || '')
+
+    if (label.startsWith('Category:')) {
+      groups.categories.push(label.replace('Category:', '').trim())
+      continue
+    }
+
+    if (label.startsWith('Theme:')) {
+      groups.themes.push(label.replace('Theme:', '').trim())
+      continue
+    }
+
+    if (label.startsWith('Type:')) {
+      groups.types.push(label.replace('Type:', '').trim())
+      continue
+    }
+
+    if (label.startsWith('Suitable:')) {
+      groups.suitable.push(label.replace('Suitable:', '').trim())
+      continue
+    }
+
+    groups.trust.push(label)
+  }
+
+  return groups
+}
+
+const collectAccommodationStops = (days: Array<Record<string, any>>) => {
+  const seen = new Set<string>()
+  const items: Array<Record<string, any>> = []
+
+  for (const day of days) {
+    const accommodation = String(day.accommodation || '').trim()
+
+    if (!accommodation || seen.has(accommodation)) {
+      continue
+    }
+
+    seen.add(accommodation)
+    items.push({
+      accommodation,
+      dayNumber: day.dayNumber,
+      notes: day.notes,
+      route: day.route,
+      sleepingStandard: day.sleepingStandard,
+    })
+  }
+
+  return items
+}
+
+const getMarketTourBadges = (tour: Record<string, any>) => {
+  const governedBadges = asArray<Record<string, any>>(tour.marketCard?.badges)
+    .map((badge) => String(badge.label || '').trim())
+    .filter(Boolean)
+
+  if (governedBadges.length > 0) {
+    return Array.from(new Set(governedBadges)).slice(0, 3)
+  }
+
+  const explicitBadges = getBadgeGroups(asArray<Record<string, any>>(tour.badges))
+  const fallbackBadges = [
+    ...explicitBadges.suitable,
+    ...explicitBadges.themes,
+    ...explicitBadges.trust,
+  ].filter(Boolean)
+
+  return Array.from(new Set(fallbackBadges)).slice(0, 3)
+}
+
+const ReviewSnapshotCard = ({
+  reviewSnapshot,
+}: {
+  reviewSnapshot?: null | Record<string, any>
+}) => {
+  if (!reviewSnapshot || !reviewSnapshot.score) {
+    return null
+  }
+
+  return (
+    <div className="rounded-[24px] border border-border/60 bg-muted/20 p-4">
+      <div className="flex items-end gap-3">
+        <p className="text-4xl font-semibold leading-none text-foreground">{Number(reviewSnapshot.score).toFixed(1)}</p>
+        <div>
+          <p className="text-sm font-semibold text-foreground">Đánh giá tour</p>
+          <p className="text-sm text-muted-foreground">
+            {reviewSnapshot.reviewCount || 0} review • {reviewSnapshot.travelerCount || 0}+ khách đã đi
+          </p>
+        </div>
+      </div>
+      {reviewSnapshot.sourceLabel ? (
+        <p className="mt-2 text-sm text-muted-foreground">{reviewSnapshot.sourceLabel}</p>
+      ) : null}
+    </div>
+  )
+}
+
+const TourDecisionHeader = ({
+  locale,
+  nextDeparture,
+  tour,
+  variants,
+}: {
+  locale: 'en' | 'vi'
+  nextDeparture: Record<string, any> | null
+  tour: Record<string, any>
+  variants: Array<Record<string, any>>
+}) => {
+  const reviewSnapshot = tour.reviewSnapshot || null
+  const summaryParagraphs = splitSummaryParagraphs(tour.summary)
+  const badgeGroups = getBadgeGroups(asArray<Record<string, any>>(tour.badges))
+  const durationLabel = getDurationLabel(tour.durationDays, tour.durationNights)
+  const cta = tour.primaryCTA || {}
+  const ctaIntent: TourInquiryIntent = cta.mode || tour.bcfg?.ctaStyle || 'hold-seat'
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1.15fr_0.95fr]">
+      <Panel className="overflow-hidden p-0">
+        <div className="relative aspect-[16/10] bg-muted">
+          <Media
+            fill
+            imgClassName="object-cover"
+            pictureClassName="absolute inset-0"
+            priority
+            resource={tour.heroMedia || asArray(tour.gallery)[0] || null}
+          />
+        </div>
+      </Panel>
+      <div className="space-y-4">
+        <Panel>
+          <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">Tour outbound giá rõ</p>
+          <h1 className="mt-2 text-3xl font-semibold leading-tight md:text-4xl">{tour.title}</h1>
+          {tour.variantLabel ? (
+            <p className="mt-2 text-sm font-medium text-[var(--site-brand)]">{tour.variantLabel}</p>
+          ) : null}
+          {summaryParagraphs[0] ? (
+            <p className="mt-3 text-sm text-muted-foreground md:text-base">{summaryParagraphs[0]}</p>
+          ) : null}
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl bg-muted/50 p-4">
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Giá từ</p>
+              <p className="mt-1 text-3xl font-semibold text-foreground">
+                {formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency) || 'Liên hệ'}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {nextDeparture?.depositNote || tour.factSummary?.holdNote || 'Sales xác nhận lại giá trước khi giữ chỗ.'}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-muted/50 p-4">
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Khởi hành gần nhất</p>
+              <p className="mt-1 text-lg font-semibold text-foreground">
+                {formatTourDate(nextDeparture?.departureDate, locale) || 'Đang cập nhật'}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {[nextDeparture?.airline, nextDeparture?.departureCity].filter(Boolean).join(' • ') || 'Đang cập nhật'}
+              </p>
+            </div>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <ReviewSnapshotCard reviewSnapshot={reviewSnapshot} />
+            <div className="rounded-[24px] border border-border/60 bg-background p-4">
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Quyết định nhanh</p>
+              <div className="mt-3 grid gap-2 text-sm text-foreground">
+                <p>{durationLabel || 'Theo chương trình'}</p>
+                <p>{tour.factSummary?.routeSummary || tour.title}</p>
+                <p>{tour.factSummary?.hotelSummary || tour.servicesSummary?.hotelSummary || 'Khách sạn 3-4 sao theo line bán'}</p>
+                <p>{getAvailabilityLabel(nextDeparture?.availabilityStatus, locale)}</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {badgeGroups.trust.slice(0, 6).map((label, index) => (
+              <span
+                className="rounded-full border border-border/70 bg-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em]"
+                key={`${label}-${index}`}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <SiteLink
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-5 text-sm font-semibold text-white no-underline"
+              href={
+                cta.href ||
+                getTourInquiryPath({
+                  departureId: nextDeparture?.id,
+                  intent: ctaIntent,
+                  source: 'tour-detail-hero',
+                  tourId: tour.id,
+                  tourSlug: tour.slug,
+                })
+              }
+            >
+              {nextDeparture?.ctaLabelOverride || cta.label || 'Giữ chỗ'}
+            </SiteLink>
+            <SiteLink
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-5 text-sm font-semibold no-underline"
+              href={getSchedulePath()}
+            >
+              Xem lịch khởi hành
+            </SiteLink>
+            <SiteLink
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-5 text-sm font-semibold no-underline"
+              href={getTourInquiryPath({
+                departureId: nextDeparture?.id,
+                intent: 'inquiry',
+                source: 'tour-detail-hero',
+                tourId: tour.id,
+                tourSlug: tour.slug,
+              })}
+            >
+              Nhận tư vấn nhanh
+            </SiteLink>
+          </div>
+          {variants.length > 0 ? (
+            <div className="mt-6 rounded-[24px] border border-border/60 bg-muted/20 p-4">
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Biến thể tour</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {variants.map((variant) => (
+                  <span
+                    className="rounded-full border border-border bg-background px-3 py-1 text-sm font-medium text-foreground"
+                    key={variant.id}
+                  >
+                    {[variant.label, variant.airline || null, variant.departureCity || null].filter(Boolean).join(' • ')}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </Panel>
+      </div>
+    </div>
+  )
+}
+
+const TourFactGrid = ({ tour }: { tour: Record<string, any> }) => {
+  const durationLabel = getDurationLabel(tour.durationDays, tour.durationNights)
+
+  return (
+    <Panel id="facts">
+      <SectionHeading
+        eyebrow="Thông tin quyết định"
+        title="Thông tin tour cần thấy ngay"
+        description="Khối này gom các tín hiệu khách thường cần để chốt nhanh: route, thời lượng, nhịp ăn ở, quy mô đoàn và cách giữ chỗ."
+      />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {[
+          ['Thời lượng', durationLabel],
+          ['Route', tour.factSummary?.routeSummary],
+          ['Bữa ăn', tour.factSummary?.mealsSummary || tour.servicesSummary?.mealsSummary],
+          ['Đoàn khách', tour.factSummary?.groupSizeSummary],
+          ['Điều hành', tour.factSummary?.operatorNote],
+          ['Khách sạn', tour.factSummary?.hotelSummary || tour.servicesSummary?.hotelSummary],
+        ].map(([label, value]) =>
+          value ? (
+            <div className="rounded-[24px] border border-border/60 bg-muted/35 p-5" key={label}>
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+              <p className="mt-2 text-sm font-medium leading-7 text-foreground">{value}</p>
+            </div>
+          ) : null,
+        )}
+      </div>
+    </Panel>
+  )
+}
+
+const TourReviewsProofSection = ({ tour }: { tour: Record<string, any> }) => {
+  const snapshot = tour.reviewSnapshot || {}
+  const quotes = asArray<Record<string, any>>(snapshot.proofQuotes)
+
+  if (!snapshot.score && quotes.length === 0) {
+    return null
+  }
+
+  return (
+    <Panel id="reviews">
+      <SectionHeading
+        eyebrow="Đánh giá & trust"
+        title="Khách chốt tour này vì điều gì"
+        description={snapshot.whyGuestsChoose || 'Đánh giá thực tế, tín hiệu trust và lý do khách chọn line này được gom lại để người xem quyết nhanh hơn.'}
+      />
+      <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
+        <div className="rounded-[28px] border border-border/60 bg-muted/25 p-5">
+          <p className="text-5xl font-semibold text-foreground">{snapshot.score ? Number(snapshot.score).toFixed(1) : '--'}</p>
+          <p className="mt-2 text-sm font-semibold text-foreground">{snapshot.sourceLabel || 'Đánh giá khách đã đi'}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {snapshot.reviewCount || 0} review • {snapshot.travelerCount || 0}+ khách đã trải nghiệm
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {quotes.map((quote, index) => (
+            <div className="rounded-[24px] border border-border/60 bg-background p-5" key={`${quote.author}-${index}`}>
+              <p className="text-sm leading-7 text-muted-foreground">“{quote.quote}”</p>
+              {quote.author ? <p className="mt-4 text-sm font-semibold text-foreground">{quote.author}</p> : null}
+            </div>
+          ))}
+        </div>
+      </div>
+    </Panel>
+  )
+}
+
+const TourWhyChooseSection = ({ tour }: { tour: Record<string, any> }) => {
+  const highlights = asArray<Record<string, any>>(tour.highlights)
+
+  if (highlights.length === 0) {
+    return null
+  }
+
+  return (
+    <Panel id="why-choose">
+      <SectionHeading
+        eyebrow="Điểm nổi bật"
+        title="Vì sao khách dễ chọn chương trình này"
+        description="Mỗi điểm nổi bật phải giải thích được sự khác biệt thật của line tour này, không chỉ liệt kê chung chung."
+      />
+      <div className="grid gap-4 md:grid-cols-3">
+        {highlights.map((item, index) => (
+          <div className="rounded-[24px] border border-border/60 bg-muted/35 p-5" key={`${item.title}-${index}`}>
+            <h3 className="text-lg font-semibold">{item.title}</h3>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.description}</p>
+          </div>
+        ))}
+      </div>
+    </Panel>
+  )
+}
+
+const TourRouteVisualSection = ({ tour }: { tour: Record<string, any> }) => {
+  const routeStops = asArray<Record<string, any>>(tour.routeViz?.stops)
+  const travelLegs = asArray<Record<string, any>>(tour.routeViz?.travelLegs)
+  const mapImage = tour.routeViz?.mapImage
+  const summaryParagraphs = splitSummaryParagraphs(tour.summary)
+
+  return (
+    <Panel id="route">
+      <SectionHeading
+        eyebrow="Hành trình trực quan"
+        title="Nhịp hành trình và route thực tế"
+        description={tour.routeViz?.routeCaption || 'Route được hiển thị như một cấu trúc dễ đọc để khách hiểu đi đâu trước, ngủ ở đâu và nhịp chương trình nặng hay nhẹ.'}
+      />
+      <div className="grid gap-6 lg:grid-cols-[1fr_0.95fr]">
+        <div className="space-y-4">
+          <div className="rounded-[24px] border border-border/60 bg-muted/20 p-5">
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Tóm tắt route</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{tour.factSummary?.routeSummary || tour.title}</p>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
+              {summaryParagraphs[1] || summaryParagraphs[0] || tour.summary}
+            </p>
+          </div>
+          <div className="grid gap-4">
+            {routeStops.length > 0 ? (
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {routeStops
+                  .slice()
+                  .sort((left, right) => Number(left.order || 0) - Number(right.order || 0))
+                  .map((stop, index) => (
+                    <div className="rounded-[24px] border border-border/60 bg-background p-4" key={`${stop.label}-${index}`}>
+                      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                        Bước {String(index + 1).padStart(2, '0')}
+                      </p>
+                      <p className="mt-2 text-base font-semibold text-foreground">{stop.label}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{stop.type || 'Điểm trong chương trình'}</p>
+                    </div>
+                  ))}
+              </div>
+            ) : null}
+            {travelLegs.length > 0 ? (
+              <div className="rounded-[24px] border border-border/60 bg-background p-5">
+                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Chặng di chuyển</p>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {travelLegs.map((leg, index) => (
+                    <div className="rounded-[20px] bg-muted/35 p-4" key={`${leg.from}-${leg.to}-${index}`}>
+                      <p className="text-sm font-semibold text-foreground">
+                        {leg.from} → {leg.to}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">{leg.mode || 'Theo tuyến'}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <div className="relative min-h-80 overflow-hidden rounded-[28px] border border-border/60 bg-muted">
+          {mapImage ? (
+            <Media
+              fill
+              imgClassName="object-cover"
+              pictureClassName="absolute inset-0"
+              resource={mapImage}
+            />
+          ) : (
+            <div className="flex h-full flex-col justify-center gap-4 p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Route fallback</p>
+              <div className="flex flex-wrap gap-3">
+                {routeStops.map((stop, index) => (
+                  <React.Fragment key={`${stop.label}-${index}`}>
+                    <span className="rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground">
+                      {stop.label}
+                    </span>
+                    {index < routeStops.length - 1 ? <span className="self-center text-muted-foreground">→</span> : null}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </Panel>
+  )
+}
+
+const TourItinerarySection = ({ tour }: { tour: Record<string, any> }) => {
+  const itineraryDays = asArray<Record<string, any>>(tour.itineraryDays)
+  const groupedThemeCount = new Set(itineraryDays.map((day) => day.route).filter(Boolean)).size
+
+  return (
+    <Panel id="itinerary">
+      <SectionHeading
+        eyebrow="Lịch trình"
+        title="Lịch trình theo ngày"
+        description="Mỗi ngày hiển thị rõ route, ăn gì, đi bằng gì, ngủ ở đâu và điểm nhấn bán hàng để khách không phải đoán nhịp tour."
+      />
+      <div className="mb-6 grid gap-4 md:grid-cols-4">
+        {[
+          ['Thời lượng', getDurationLabel(tour.durationDays, tour.durationNights)],
+          ['Cụm điểm đến', groupedThemeCount ? `${groupedThemeCount} cụm` : null],
+          ['Nhịp tour', 'Cân bằng tham quan, nghỉ và thời gian tự do'],
+          ['Phù hợp', getBadgeGroups(asArray<Record<string, any>>(tour.badges)).suitable.join(' · ') || 'Khách retail cần route rõ'],
+        ].map(([label, value]) => (
+          <div className="rounded-[24px] border border-border/60 bg-muted/25 p-5" key={label}>
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+            <p className="mt-2 text-sm font-semibold leading-7 text-foreground">{value}</p>
+          </div>
+        ))}
+      </div>
+      <div className="space-y-5">
+        {itineraryDays.map((day, index) => {
+          const gallery = asArray(day.gallery)
+          const fallbackGallery = gallery.length > 0 ? gallery : asArray(tour.gallery).slice(0, 3)
+
+          return (
+            <div
+              className="grid gap-5 rounded-[28px] border border-border/60 bg-muted/15 p-5 lg:grid-cols-[96px_1fr_320px]"
+              key={`${day.dayNumber}-${index}`}
+            >
+              <div className="rounded-[20px] bg-muted/45 p-4">
+                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Day {day.dayNumber}</p>
+                <p className="mt-2 text-3xl font-semibold">{String(day.dayNumber).padStart(2, '0')}</p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-foreground">{day.title}</h3>
+                {day.dayTheme ? <p className="mt-2 text-sm font-semibold text-[var(--site-brand)]">{day.dayTheme}</p> : null}
+                <p className="mt-2 text-sm font-medium text-foreground">{day.route}</p>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{day.summary}</p>
+                {day.dayHighlight ? (
+                  <div className="mt-4 rounded-[20px] border border-border/60 bg-background p-4">
+                    <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Điểm nhấn bán hàng</p>
+                    <p className="mt-2 text-sm leading-7 text-foreground">{day.dayHighlight}</p>
+                  </div>
+                ) : null}
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {[
+                    ['Bữa ăn', day.meals],
+                    ['Di chuyển', day.transport],
+                    ['Lưu trú', day.accommodation],
+                    ['Tiêu chuẩn nghỉ', day.sleepingStandard || 'Theo line bán'],
+                  ].map(([label, value]) => (
+                    <div className="rounded-[20px] border border-border/60 bg-background p-4" key={label}>
+                      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+                      <p className="mt-2 text-sm font-medium leading-7 text-foreground">{value || 'Đang cập nhật'}</p>
+                    </div>
+                  ))}
+                </div>
+                {day.equipmentNote || day.notes ? (
+                  <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                    {[day.equipmentNote, day.notes].filter(Boolean).join(' ')}
+                  </p>
+                ) : null}
+              </div>
+              <div className="space-y-3">
+                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                  {gallery.length > 0 ? 'Gallery theo ngày' : 'Ảnh minh họa chương trình'}
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                  {fallbackGallery.slice(0, 3).map((item, imageIndex) => (
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-[22px] border border-border/60 bg-muted" key={imageIndex}>
+                      <Media
+                        fill
+                        imgClassName="object-cover"
+                        pictureClassName="absolute inset-0"
+                        resource={item as any}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </Panel>
+  )
+}
+
+const TourServicesSection = ({ tour }: { tour: Record<string, any> }) => {
+  const includes = asArray<Record<string, any>>(tour.includes)
+  const excludes = asArray<Record<string, any>>(tour.excludes)
+  const accommodationStops = collectAccommodationStops(asArray<Record<string, any>>(tour.itineraryDays))
+  const servicesSummary = tour.servicesSummary || {}
+
+  return (
+    <Panel id="services">
+      <SectionHeading
+        eyebrow="Dịch vụ & lưu trú"
+        title="Giá đã gồm gì, ngủ ở đâu, lưu ý điều hành nào cần biết"
+        description="Phần này được trình bày theo logic mua tour: những gì đã có trong giá, phần khách tự túc, tiêu chuẩn khách sạn, bữa ăn, di chuyển và lưu ý điều hành."
+      />
+      <div className="grid gap-5 xl:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2">
+          <div className="rounded-[24px] border border-border/60 bg-muted/20 p-5">
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Giá đã gồm</p>
+            <ul className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
+              {includes.map((item, index) => (
+                <li key={`${item.label}-${index}`}>{item.label}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-[24px] border border-border/60 bg-muted/20 p-5">
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Chi phí tự túc</p>
+            <ul className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
+              {excludes.map((item, index) => (
+                <li key={`${item.label}-${index}`}>{item.label}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-[24px] border border-border/60 bg-background p-5">
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Khách sạn / nghỉ đêm</p>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
+              {servicesSummary.hotelSummary || tour.factSummary?.hotelSummary || 'Khách sạn theo line bán, xác nhận lại trước ngày đi.'}
+            </p>
+          </div>
+          <div className="rounded-[24px] border border-border/60 bg-background p-5">
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Di chuyển & ăn uống</p>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
+              {[servicesSummary.transportSummary, servicesSummary.mealsSummary].filter(Boolean).join(' ')}
+            </p>
+          </div>
+        </div>
+        <div className="space-y-5">
+          <div className="rounded-[24px] border border-border/60 bg-background p-5">
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Điểm ngủ đêm trong tour</p>
+            <div className="mt-4 grid gap-3">
+              {accommodationStops.map((stop, index) => (
+                <div className="rounded-[20px] bg-muted/25 p-4" key={`${stop.accommodation}-${index}`}>
+                  <p className="text-sm font-semibold text-foreground">
+                    Đêm {stop.dayNumber}: {stop.accommodation}
+                  </p>
+                  {stop.sleepingStandard ? (
+                    <p className="mt-1 text-sm text-muted-foreground">{stop.sleepingStandard}</p>
+                  ) : null}
+                  {stop.route ? <p className="mt-1 text-sm text-muted-foreground">{stop.route}</p> : null}
+                </div>
+              ))}
+            </div>
+          </div>
+          {(servicesSummary.operatorNotes || asArray<Record<string, any>>(servicesSummary.importantNotes).length > 0) ? (
+            <div className="rounded-[24px] border border-border/60 bg-background p-5">
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Lưu ý điều hành</p>
+              {servicesSummary.operatorNotes ? (
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{servicesSummary.operatorNotes}</p>
+              ) : null}
+              <ul className="mt-3 space-y-2 text-sm leading-7 text-muted-foreground">
+                {asArray<Record<string, any>>(servicesSummary.importantNotes).map((item, index) => (
+                  <li key={`${item.label}-${index}`}>{item.label}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </Panel>
+  )
+}
+
+const DepartureMatrix = ({
+  departures,
+  locale,
+}: {
+  departures: DepartureCardViewModel[]
+  locale: 'en' | 'vi'
+}) => {
+  if (departures.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="space-y-4">
+      {departures.map((departure) => {
+        const variant = asDoc<Record<string, any>>(departure.variantRef)
+        const product = asDoc<Record<string, any>>(departure.tourProduct)
+
+        return (
+          <div
+            className="grid gap-4 rounded-[28px] border border-border/70 bg-card/95 p-5 lg:grid-cols-[1.35fr_repeat(4,minmax(0,1fr))_220px]"
+            key={departure.id}
+          >
+            <div>
+              <p className="text-lg font-semibold text-foreground">
+                {[formatTourDate(departure.departureDate, locale), variant?.label].filter(Boolean).join(' • ')}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {[departure.departureCity, departure.airline].filter(Boolean).join(' • ')}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
+                  {departure.availabilityBadge || getAvailabilityLabel(departure.availabilityStatus, locale)}
+                </span>
+                {departure.urgencyLabel ? (
+                  <span className="rounded-full border border-[var(--site-accent)]/40 bg-[var(--site-accent)]/10 px-3 py-1 text-xs font-semibold text-foreground">
+                    {departure.urgencyLabel}
+                  </span>
+                ) : null}
+                {departure.promoLabel ? (
+                  <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground">
+                    {departure.promoLabel}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Khởi hành</p>
+              <p className="mt-2 text-base font-semibold">{formatTourDate(departure.departureDate, locale)}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Ngày về</p>
+              <p className="mt-2 text-base font-semibold">{formatTourDate(departure.returnDate, locale) || 'Theo lịch bay'}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Điểm đi</p>
+              <p className="mt-2 text-base font-semibold">{departure.departureCity || 'Theo đợt bán'}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Giá từ</p>
+              <p className="mt-2 text-xl font-semibold text-foreground">
+                {formatTourPrice(departure.priceFrom, departure.currency) || 'Liên hệ'}
+              </p>
+            </div>
+            <div className="flex flex-col justify-between gap-3">
+              <div className="space-y-2 text-sm text-muted-foreground">
+                {departure.depositNote ? <p>{departure.depositNote}</p> : null}
+                {departure.holdNote ? <p>{departure.holdNote}</p> : null}
+                {departure.changePolicyNote ? <p>{departure.changePolicyNote}</p> : null}
+                {!departure.depositNote && !departure.holdNote && departure.note ? <p>{departure.note}</p> : null}
+              </div>
+              <SiteLink
+                className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline"
+                href={getTourInquiryPath({
+                  departureId: departure.id,
+                  intent: 'hold-seat',
+                  source: 'tour-detail-departures',
+                  tourId: product?.id,
+                  tourSlug: product?.slug,
+                })}
+              >
+                {departure.ctaLabelOverride || 'Giữ chỗ'}
+              </SiteLink>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+const TourDepartureSection = ({
+  departures,
+  locale,
+}: {
+  departures: DepartureCardViewModel[]
+  locale: 'en' | 'vi'
+}) => (
+  <Panel id="departures">
+    <SectionHeading
+      eyebrow="Khởi hành mở bán"
+      title="Các đợt đang mở bán cho line tour này"
+      description="Mỗi đợt được hiển thị như một commerce row: ngày đi, ngày về, hãng bay, tình trạng chỗ, giá từ và ghi chú giữ chỗ."
+    />
+    <DepartureMatrix departures={departures} locale={locale} />
+  </Panel>
+)
+
+const TourFAQSection = ({ tour }: { tour: Record<string, any> }) => {
+  const faqItems = asArray<Record<string, any>>(tour.faqItems)
+
+  if (faqItems.length === 0) {
+    return null
+  }
+
+  return (
+    <Panel id="faq">
+      <SectionHeading eyebrow="FAQ" title="Câu hỏi khách thường hỏi trước khi chốt" />
+      <div className="space-y-4">
+        {faqItems.map((item, index) => (
+          <div className="rounded-[24px] border border-border/60 bg-background p-5" key={`${item.question}-${index}`}>
+            <h3 className="text-lg font-semibold text-foreground">{item.question}</h3>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.answer}</p>
+          </div>
+        ))}
+      </div>
+    </Panel>
+  )
+}
+
+const TourRelatedSection = ({ tour }: { tour: Record<string, any> }) => {
+  const relatedTours = asArray<Record<string, any>>(tour.relatedTours).filter((item) => typeof item === 'object')
+
+  if (relatedTours.length === 0) {
+    return null
+  }
+
+  return (
+    <Panel id="related">
+      <SectionHeading
+        eyebrow="Tour liên quan"
+        title="Các line gần với nhu cầu này"
+        description="Giữ người xem ở lại trong cùng thị trường bằng các line có nhịp, ngân sách hoặc trải nghiệm gần nhau."
+      />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {relatedTours.map((item) => (
+          <div className="rounded-[24px] border border-border/60 bg-background p-5" key={item.id}>
+            <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.summary}</p>
+            {item.slug ? (
+              <SiteLink className="mt-4 inline-flex text-sm font-semibold no-underline" href={getTourPath(item.slug)}>
+                Xem tour
+              </SiteLink>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </Panel>
+  )
+}
+
+const StickyBookingCTASection = ({ nextDeparture, tour }: { nextDeparture: Record<string, any> | null; tour: Record<string, any> }) => (
+  <div className="sticky bottom-3 z-20 max-w-full md:bottom-4">
+    <div className="overflow-hidden rounded-[28px] border border-border/70 bg-background/95 px-4 py-3 shadow-lg backdrop-blur sm:px-5 sm:py-4">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
+          <p className="overflow-hidden text-ellipsis whitespace-nowrap text-base font-semibold text-foreground sm:text-sm">
+            {tour.title}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {[
+              formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency),
+              formatTourDate(nextDeparture?.departureDate),
+              nextDeparture?.airline || null,
+            ]
+              .filter(Boolean)
+              .join(' • ')}
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 md:flex md:flex-wrap">
+          <SiteLink
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline"
+            href={getTourInquiryPath({
+              departureId: nextDeparture?.id,
+              intent: tour.bcfg?.ctaStyle || 'hold-seat',
+              source: 'tour-detail-sticky',
+              tourId: tour.id,
+              tourSlug: tour.slug,
+            })}
+          >
+            <span className="sm:hidden">{nextDeparture?.ctaLabelOverride || 'Tư vấn'}</span>
+            <span className="hidden sm:inline">{nextDeparture?.ctaLabelOverride || 'Giữ chỗ ngay'}</span>
+          </SiteLink>
+          <SiteLink
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold no-underline"
+            href={getSchedulePath()}
+          >
+            <span className="sm:hidden">Các đợt đi</span>
+            <span className="hidden sm:inline">So sánh các đợt đi</span>
+          </SiteLink>
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
+export const TourDetailPage = ({
+  data,
+  locale,
+}: {
+  data: TourResolvedData
+  locale: 'en' | 'vi'
+}) => {
+  const tour = data.tour
+  const visibleSections = new Set(data.sectionVisibility || defaultTourSectionVisibility)
+  const sectionOrder = (data.sectionOrder || defaultTourSectionOrder).filter((section) => visibleSections.has(section))
+
+  const sections: Record<TourSectionID, React.ReactNode> = {
+    hero: <TourDecisionHeader locale={locale} nextDeparture={data.nextDeparture} tour={tour} variants={data.variants} />,
+    facts: <TourFactGrid tour={tour} />,
+    reviews: <TourReviewsProofSection tour={tour} />,
+    'why-choose': <TourWhyChooseSection tour={tour} />,
+    route: <TourRouteVisualSection tour={tour} />,
+    itinerary: <TourItinerarySection tour={tour} />,
+    services: <TourServicesSection tour={tour} />,
+    departures: <TourDepartureSection departures={data.departures} locale={locale} />,
+    faq: <TourFAQSection tour={tour} />,
+    related: <TourRelatedSection tour={tour} />,
+    'sticky-cta': <StickyBookingCTASection nextDeparture={data.nextDeparture} tour={tour} />,
+  }
+
+  const navSections = sectionOrder.filter((section) => !['hero', 'sticky-cta'].includes(section))
+  const navLabels: Record<string, { long: string; short: string }> = {
+    departures: { long: 'Lịch khởi hành', short: 'Khởi hành' },
+    facts: { long: 'Thông tin tour', short: 'Thông tin' },
+    faq: { long: 'FAQ', short: 'FAQ' },
+    itinerary: { long: 'Lịch trình', short: 'Lịch trình' },
+    related: { long: 'Tour liên quan', short: 'Liên quan' },
+    reviews: { long: 'Đánh giá', short: 'Đánh giá' },
+    route: { long: 'Hành trình', short: 'Hành trình' },
+    services: { long: 'Dịch vụ & lưu trú', short: 'Dịch vụ' },
+    'why-choose': { long: 'Điểm nổi bật', short: 'Nổi bật' },
+  }
+
+  return (
+    <div className="container space-y-8">
+      {sections.hero}
+
+      <div className="sticky top-0 z-10 rounded-[28px] border border-border/70 bg-background/95 p-2 shadow-sm backdrop-blur sm:p-3">
+        <nav className="grid grid-cols-2 gap-2 text-xs font-semibold sm:grid-cols-3 sm:text-sm lg:flex lg:flex-wrap lg:items-center lg:gap-3">
+          {navSections.map((section) => (
+            <a
+              className="flex min-h-10 items-center justify-center rounded-full px-3 py-2 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:min-h-11"
+              href={`#${section}`}
+              key={section}
+            >
+              <span className="sm:hidden">{navLabels[section]?.short || section}</span>
+              <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
+            </a>
+          ))}
+        </nav>
+      </div>
+
+      {sectionOrder
+        .filter((section) => section !== 'hero' && section !== 'sticky-cta')
+        .map((section) => (
+          <React.Fragment key={section}>{sections[section]}</React.Fragment>
+        ))}
+
+      {visibleSections.has('sticky-cta') ? sections['sticky-cta'] : null}
+    </div>
+  )
+}
+
+const DepartureStrip = ({
+  departures,
+  locale,
+}: {
+  departures: DepartureCardViewModel[]
+  locale: 'en' | 'vi'
+}) => {
+  const items = departures.slice(0, 6)
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-3">
+      {items.map((departure) => {
+        const product = asDoc<Record<string, any>>(departure.tourProduct)
+
+        return (
+          <article
+            className="group relative rounded-[28px] border border-border/70 bg-card/95 p-5 shadow-sm transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-1 hover:border-[color:var(--site-accent)]/40 hover:bg-background hover:shadow-[0_20px_52px_color-mix(in_oklch,var(--site-brand)_14%,transparent)]"
+            key={departure.id}
+          >
+            <div>
+              {product?.slug ? (
+                <SiteLink
+                  className="text-sm font-semibold text-foreground no-underline transition-colors duration-200 hover:text-[var(--site-brand)] group-hover:text-[var(--site-brand)]"
+                  href={getTourPath(product.slug)}
+                >
+                  {product.title || 'Tour'}
+                </SiteLink>
+              ) : (
+                <p className="text-sm font-semibold text-foreground">{product?.title || 'Tour'}</p>
+              )}
+              <p className="mt-1 text-sm text-muted-foreground">
+                {[formatTourDate(departure.departureDate, locale), departure.airline].filter(Boolean).join(' • ')}
+              </p>
+              <p className="mt-4 text-2xl font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+                {formatTourPrice(departure.priceFrom, departure.currency) || 'Liên hệ'}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
+                  {departure.availabilityBadge || getAvailabilityLabel(departure.availabilityStatus, locale)}
+                </span>
+                {departure.promoLabel ? (
+                  <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground">
+                    {departure.promoLabel}
+                  </span>
+                ) : null}
+              </div>
+              <div className="mt-5 flex gap-3">
+                <SiteLink
+                  className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_color-mix(in_oklch,var(--site-brand)_18%,transparent)]"
+                  href={getTourInquiryPath({
+                    departureId: departure.id,
+                    intent: 'hold-seat',
+                    source: 'departure-strip',
+                    tourId: product?.id,
+                    tourSlug: product?.slug,
+                  })}
+                >
+                  {departure.ctaLabelOverride || 'Giữ chỗ'}
+                </SiteLink>
+                {product?.slug ? (
+                  <SiteLink
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold no-underline transition-[transform,color,border-color,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--site-brand)]/30 hover:bg-[var(--site-brand)]/6 hover:text-[var(--site-brand)] hover:shadow-[0_12px_28px_color-mix(in_oklch,var(--site-brand)_10%,transparent)]"
+                    href={getTourPath(product.slug)}
+                  >
+                    Xem tour
+                  </SiteLink>
+                ) : null}
+              </div>
+            </div>
+          </article>
+        )
+      })}
+    </div>
+  )
+}
+
+export const TourMarketPage = ({
+  departures,
+  locale,
+  marketKey,
+  tours,
+}: {
+  departures: DepartureCardViewModel[]
+  locale: 'en' | 'vi'
+  marketKey: string
+  tours: TourCardViewModel[]
+}) => {
+  const market = getMarketConfig(marketKey)
+
+  return (
+    <div className="container space-y-8">
+      <Panel>
+      <SectionHeading
+        eyebrow="Thị trường outbound"
+        level="h1"
+        title={market?.heading || 'Tour outbound'}
+        description="Các line tour được tổ chức theo thị trường để khách so sánh route, mức giá và nhịp khởi hành trước khi đi vào từng tour detail."
+      />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {tours.map((tour) => {
+            const tourBadges = getMarketTourBadges(tour)
+
+            return (
+              <article
+                className="group relative rounded-[24px] border border-border/60 bg-background p-5 shadow-sm transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-1 hover:border-[color:var(--site-accent)]/40 hover:bg-card hover:shadow-[0_18px_46px_color-mix(in_oklch,var(--site-brand)_14%,transparent)]"
+                key={tour.id}
+              >
+                <div className="relative z-10">
+                  <div className="relative mb-4 aspect-[16/10] overflow-hidden rounded-[20px] bg-muted">
+                    <Media
+                      fill
+                      imgClassName="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                      pictureClassName="absolute inset-0"
+                      resource={tour.heroMedia || asArray(tour.gallery)[0] || null}
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent p-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/90">
+                        {tour.hasFutureDepartures === false
+                          ? 'Đang cập nhật đợt mới'
+                          : tour.departureCount
+                            ? `${tour.departureCount} đợt đang mở bán`
+                            : 'Line tour đang bán'}
+                      </p>
+                    </div>
+                  </div>
+                  {tourBadges.length > 0 ? (
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      {tourBadges.map((badge) => (
+                        <span
+                          className="rounded-full border border-border/70 bg-muted/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-foreground transition-colors duration-200 group-hover:border-[var(--site-brand)]/20 group-hover:text-[var(--site-brand)]"
+                          key={badge}
+                        >
+                          {badge}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {tour.slug ? (
+                    <SiteLink
+                      className="text-lg font-semibold text-foreground no-underline transition-colors duration-200 group-hover:text-[var(--site-brand)]"
+                      href={getTourPath(tour.slug)}
+                    >
+                      {tour.title}
+                    </SiteLink>
+                  ) : (
+                    <p className="text-lg font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+                      {tour.title}
+                    </p>
+                  )}
+                  <p className="mt-2 text-sm leading-7 text-muted-foreground">{tour.summary}</p>
+                  <div className="mt-4 flex items-end justify-between gap-3">
+                    <p className="text-2xl font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+                      {formatTourPrice(tour.lowestPrice) || 'Liên hệ'}
+                    </p>
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+                      Giá tham khảo
+                    </span>
+                  </div>
+                  {tour.nextDeparture ? (
+                    <div className="mt-3 rounded-[18px] border border-border/60 bg-muted/25 px-4 py-3 transition-colors duration-200 group-hover:border-[var(--site-brand)]/18 group-hover:bg-[var(--site-brand)]/4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        {tour.hasFutureDepartures === false ? 'Đang cập nhật đợt mới' : 'Đợt gần nhất'}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {tour.hasFutureDepartures === false
+                          ? 'Liên hệ để nhận lịch khởi hành sắp mở'
+                          : [formatTourDate(tour.nextDeparture.departureDate, locale), tour.nextDeparture.airline]
+                              .filter(Boolean)
+                              .join(' • ')}
+                      </p>
+                    </div>
+                  ) : null}
+                  {tour.slug ? (
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <SiteLink
+                        className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold no-underline transition-[transform,color,border-color,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--site-brand)]/30 hover:bg-[var(--site-brand)]/6 hover:text-[var(--site-brand)] hover:shadow-[0_12px_28px_color-mix(in_oklch,var(--site-brand)_10%,transparent)]"
+                        href={getTourPath(tour.slug)}
+                      >
+                        Xem chi tiết tour
+                      </SiteLink>
+                      <SiteLink
+                        className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_color-mix(in_oklch,var(--site-brand)_18%,transparent)]"
+                        href={tour.nextDeparture ? `${getTourPath(tour.slug)}#departures` : getTourPath(tour.slug)}
+                      >
+                        {tour.nextDeparture ? 'Xem lịch đi gần nhất' : 'Xem đợt đi'}
+                      </SiteLink>
+                    </div>
+                  ) : null}
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      </Panel>
+      <Panel>
+        <SectionHeading
+          eyebrow="Đợt đi gần"
+          title="Một số đợt khởi hành đang mở bán"
+          description="Khách có thể nhìn nhanh các đợt gần nhất theo thị trường trước khi đi sâu vào từng line tour."
+        />
+        <DepartureStrip departures={departures} locale={locale} />
+      </Panel>
+    </div>
+  )
+}
+
+export const TourCampaignPage = ({
+  campaign,
+  departures,
+  locale,
+}: {
+  campaign: Record<string, any>
+  departures: Array<Record<string, any>>
+  locale: 'en' | 'vi'
+}) => (
+  <div className="container space-y-8">
+    <Panel className="overflow-hidden p-0">
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="p-6">
+          <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">Campaign theo mùa</p>
+          <h1 className="mt-2 text-3xl font-semibold leading-tight md:text-4xl">{campaign.title}</h1>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">{campaign.summary}</p>
+        </div>
+        <div className="relative min-h-72 bg-muted">
+          <Media
+            fill
+            imgClassName="object-cover"
+            pictureClassName="absolute inset-0"
+            resource={campaign.heroMedia || null}
+          />
+        </div>
+      </div>
+    </Panel>
+    <Panel>
+      <SectionHeading
+        eyebrow="Đợt nổi bật"
+        title="Các đợt nổi bật trong campaign"
+        description="Campaign dùng chung dữ liệu tour và departure để giữ một nguồn thật cho giá, route và lịch khởi hành."
+      />
+      <DepartureStrip departures={departures} locale={locale} />
+    </Panel>
+  </div>
+)
+
+export const TourSchedulePage = ({
+  schedule,
+}: {
+  schedule: SchedulePageViewModel
+}) => (
+  <div className="container space-y-8">
+    <Panel>
+      <SectionHeading
+        eyebrow="Lịch khởi hành outbound"
+        level="h1"
+        title="Lịch khởi hành WingsGo"
+        description="So sánh nhanh các đợt đang mở bán theo thị trường, hãng bay và tình trạng chỗ. Giá, ngày đi và CTA đều hiển thị sớm để khách không phải đi vòng."
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.2fr_repeat(3,minmax(0,1fr))]">
+        <div className="rounded-[24px] border border-border/60 bg-background p-5">
+          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Toàn cảnh mở bán</p>
+          <p className="mt-2 text-3xl font-semibold text-foreground">
+            {schedule.heroStats.openCount} đợt • giá từ {formatTourPrice(schedule.heroStats.lowestPrice) || 'Liên hệ'}
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">Hàn Quốc, Nhật Bản, Trung Quốc với lịch đi rõ và CTA giữ chỗ ngay.</p>
+        </div>
+        <div className="rounded-[24px] bg-muted/35 p-5">
+          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Đợt gần nhất</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">
+            {formatTourDate(schedule.heroStats.nextDeparture?.departureDate) || 'Đang cập nhật'}
+          </p>
+        </div>
+        <div className="rounded-[24px] bg-muted/35 p-5">
+          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Giá thấp nhất</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">
+            {formatTourPrice(schedule.heroStats.lowestPrice) || 'Liên hệ'}
+          </p>
+        </div>
+        <div className="rounded-[24px] bg-muted/35 p-5">
+          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">CTA nhanh</p>
+          <div className="mt-3 flex flex-col gap-3">
+            <SiteLink
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline"
+              href={getContactPath()}
+            >
+              Nhận tư vấn chọn đợt đi
+            </SiteLink>
+          </div>
+        </div>
+      </div>
+    </Panel>
+
+    <Panel>
+      <SectionHeading
+        eyebrow="Đợt nên xem trước"
+        title="Đợt nổi bật nên xem trước"
+        description="Các đợt gần, giá tốt hoặc đang được ưu tiên hiển thị được gom lên đầu để giảm cảm giác phải đọc cả bảng dài."
+      />
+      <DepartureStrip departures={schedule.featuredDepartures} locale="vi" />
+    </Panel>
+
+    <Panel>
+      <SectionHeading
+        eyebrow="Lọc và so sánh"
+        title="Tất cả đợt khởi hành đang mở bán"
+        description="Lọc nhanh theo thị trường, hãng bay và trạng thái rồi so sánh từng đợt trong cùng một màn hình."
+      />
+      <ScheduleInteractiveDepartures departures={schedule.departures} />
+    </Panel>
+
+    <Panel>
+      <SectionHeading
+        eyebrow="Hỗ trợ & cam kết"
+        title="Những điều khách thường cần xác nhận trước khi giữ chỗ"
+      />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {schedule.trustSignals.map((item) => (
+          <div className="rounded-[24px] border border-border/60 bg-background p-5" key={item}>
+            <p className="text-sm font-semibold leading-7 text-foreground">{item}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-6 rounded-[24px] border border-border/60 bg-muted/20 p-5">
+        <p className="text-lg font-semibold text-foreground">Chưa chọn được đợt phù hợp?</p>
+        <p className="mt-2 text-sm leading-7 text-muted-foreground">
+          Gửi nhu cầu ngày đi, số khách và thị trường quan tâm để đội sales gợi ý đúng line, đúng đợt và đúng nhịp ngân sách.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <SiteLink
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-5 text-sm font-semibold text-white no-underline"
+            href={getContactPath()}
+          >
+            Nhận tư vấn nhanh
+          </SiteLink>
+          <SiteLink
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-5 text-sm font-semibold no-underline"
+            href="/thi-truong"
+          >
+            Xem theo thị trường
+          </SiteLink>
+        </div>
+      </div>
+    </Panel>
+  </div>
+)

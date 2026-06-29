@@ -17,11 +17,14 @@
 - Workspace: `E:\repo\WingsTravel` repo workspace; public product identity:
   `WingsGroup`
 - App source: `app/`
-- Local bootstrap database: SQLite via `DATABASE_URL=file:./payload.db`
+- Local bootstrap database: SQLite via `DATABASE_URL=file:./payload-tourplatform.db`
 - Local schema push: `PAYLOAD_DB_PUSH=false` by default; only enable when
   intentionally bootstrapping or resetting local schema.
 - Local runtime intent: use SQLite for fast bootstrap and editor/dev work. Keep
   PostgreSQL for staging and production only.
+- Legacy note: `app/payload.db` is an old pre-tour-platform SQLite snapshot and
+  should be treated as backup only. Normal local dev should run against
+  `app/payload-tourplatform.db`.
 - Local production-shaped test stack: `app/docker-compose.yml` uses PostgreSQL
   and Redis support services for production-like verification when needed.
 - Local environment variables: copy `app/.env.example` to `app/.env` when

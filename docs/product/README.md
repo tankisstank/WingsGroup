@@ -29,6 +29,11 @@ Current seed set:
 - `ai-agent-seo-implementation-checklist.md`: engineering checklist for implementing AI Agent SEO in `app/`
 - `cms-theme-management.md`: CMS-managed multisite theme presets, tokens, admin UI, and validation contract
 - `layout-preset-library.md`: governed CMS page layout preset and block presentation library
+- `tour-product-platform.md`: structured tour product model and governed tour detail builder contract for price-first travel pages
+- `tour-detail-builder-foundation.md`: governed section registry and builder-ready admin foundation for tour detail pages
+- `tour-variant-model.md`: bounded override model for departure variants
+- `tour-editorial-operations.md`: editor workflow for tours, departures, and variants
+- `tour-import-mapping.md`: mapping rules from sheets, docs, and poster assets into structured tour records
 
 ## Local Admin Credential
 

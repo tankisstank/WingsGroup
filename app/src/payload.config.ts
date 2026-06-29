@@ -13,6 +13,10 @@ import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { SiteSettings } from './collections/SiteSettings'
 import { Sites } from './collections/Sites'
+import { DepartureVariants } from './collections/DepartureVariants'
+import { TourCampaigns } from './collections/TourCampaigns'
+import { TourDepartures } from './collections/TourDepartures'
+import { TourProducts } from './collections/TourProducts'
 import { ThemePresets } from './collections/ThemePresets'
 import { HeroPresentationPresets } from './collections/HeroPresentationPresets'
 import { Users } from './collections/Users'
@@ -21,13 +25,19 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { resolveLocalDatabaseURL } from './utilities/localDatabase'
+import { repairLocalSQLiteSchema } from './utilities/repairLocalSQLiteSchema'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const databaseURL = process.env.DATABASE_URL || 'file:./payload.db'
+const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL)
 const isPostgresURL =
   databaseURL.startsWith('postgres://') || databaseURL.startsWith('postgresql://')
 const shouldPushDatabaseSchema = process.env.PAYLOAD_DB_PUSH === 'true'
+
+if (!isPostgresURL) {
+  await repairLocalSQLiteSchema(databaseURL)
+}
 
 export default buildConfig({
   admin: {
@@ -134,6 +144,10 @@ export default buildConfig({
     SiteSettings,
     Pages,
     Posts,
+    TourProducts,
+    DepartureVariants,
+    TourDepartures,
+    TourCampaigns,
     Media,
     Categories,
     Users,

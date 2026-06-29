@@ -20,6 +20,19 @@ import { buildPageBreadcrumbItems, type BreadcrumbPage } from '@/utilities/bread
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+import {
+  getResolvedScheduleData,
+  getResolvedTourDetailBySlug,
+  getTourCampaignBySlug,
+  getToursByMarketRoute,
+  isWingsGoSite,
+} from '@/tours/queries'
+import {
+  TourCampaignPage,
+  TourDetailPage,
+  TourMarketPage,
+  TourSchedulePage,
+} from '@/tours/StructuredPages'
 
 type Args = {
   params: Promise<{
@@ -51,7 +64,6 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
     return <PayloadRedirects url={url} />
   }
 
-  const { hero, layout } = page
   const settings = await getCurrentSiteSettings(resolvedSearchParams?.site)
   const canonicalPath = getPageCanonicalPath(page, locale)
   const breadcrumbItems = buildPageBreadcrumbItems({
@@ -61,6 +73,11 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
   })
   const relatedPages = (page as { relatedPages?: Parameters<typeof RelatedPages>[0]['pages'] })
     .relatedPages
+  const structuredPage = await resolveStructuredTourPage({
+    locale,
+    requestedPath,
+    siteCode: resolvedSearchParams?.site,
+  })
 
   return (
     <article className="pt-16 pb-24">
@@ -84,9 +101,15 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
       {draft && <LivePreviewListener />}
 
       <Breadcrumbs items={breadcrumbItems} />
-      <RenderHero {...hero} siteHeroDefaults={settings?.heroDefaults} />
-      <RenderBlocks blocks={layout} />
-      <RelatedPages locale={locale} pages={relatedPages} />
+      {structuredPage ? (
+        structuredPage
+      ) : (
+        <>
+          <RenderHero {...page.hero} siteHeroDefaults={settings?.heroDefaults} />
+          <RenderBlocks blocks={page.layout} />
+          <RelatedPages locale={locale} pages={relatedPages} />
+        </>
+      )}
     </article>
   )
 }
@@ -158,4 +181,91 @@ const queryPageByPath = async ({
   })
 
   return result.docs?.[0] || null
+}
+
+const resolveStructuredTourPage = async ({
+  locale,
+  requestedPath,
+  siteCode,
+}: {
+  locale: SupportedLocaleCode
+  requestedPath: string
+  siteCode?: string
+}) => {
+  if (!(await isWingsGoSite(siteCode))) {
+    return null
+  }
+
+  const { isEnabled: draft } = await draftMode()
+  const segments = requestedPath.split('/').filter(Boolean)
+
+  if (segments[0] === 'tour' && segments[1]) {
+    const tourData = await getResolvedTourDetailBySlug({
+      draft,
+      locale,
+      siteCode,
+      slug: segments[1],
+    })
+
+    if (!tourData) {
+      return null
+    }
+
+    return <TourDetailPage data={tourData} locale={locale} />
+  }
+
+  if (segments[0] === 'lich-khoi-hanh') {
+    const schedule = await getResolvedScheduleData({
+      draft,
+      locale,
+      siteCode,
+    })
+
+    return <TourSchedulePage schedule={schedule} />
+  }
+
+  if (segments[0] === 'thi-truong' && segments[1]) {
+    const marketData = await getToursByMarketRoute({
+      draft,
+      locale,
+      marketRouteSlug: segments[1],
+      siteCode,
+    })
+
+    if (!marketData) {
+      return null
+    }
+
+    return (
+      <TourMarketPage
+        departures={marketData.departures}
+        locale={locale}
+        marketKey={marketData.marketKey}
+        tours={marketData.tours}
+      />
+    )
+  }
+
+  if (segments[0] === 'campaign' && segments[1]) {
+    const campaignData = await getTourCampaignBySlug({
+      draft,
+      locale,
+      siteCode,
+      slug: segments[1],
+    })
+
+    if (!campaignData) {
+      return null
+    }
+
+    return (
+      <TourCampaignPage
+        campaign={campaignData.campaign}
+        departures={campaignData.departures}
+        locale={locale}
+      />
+    )
+  }
+
+  return null
 }

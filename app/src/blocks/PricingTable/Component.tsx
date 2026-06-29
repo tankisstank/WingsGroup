@@ -25,11 +25,19 @@ export const PricingTableBlock: React.FC<PricingTableBlockProps> = ({
         <div className="layout-pricing">
           {items?.map((item, index) => (
             <article
-              className={`layout-pricing__item theme-card${item.featured ? ' is-featured' : ''}`}
+              className={`layout-pricing__item theme-card group${item.featured ? ' is-featured' : ''}`}
               key={`${item.title}-${index}`}
             >
               {item.featured ? <span className="layout-comparison__badge">Đề xuất</span> : null}
-              <h3>{item.title}</h3>
+              <h3>
+                {item.link?.label && (item.link.url || item.link.reference) ? (
+                  <CMSLink appearance="inline" {...item.link}>
+                    {item.title}
+                  </CMSLink>
+                ) : (
+                  item.title
+                )}
+              </h3>
               {item.subtitle ? <p>{item.subtitle}</p> : null}
               <strong>{item.price}</strong>
               {item.features?.length ? (
@@ -40,7 +48,13 @@ export const PricingTableBlock: React.FC<PricingTableBlockProps> = ({
                 </ul>
               ) : null}
               {item.link?.label && (item.link.url || item.link.reference) ? (
-                <CMSLink appearance="default" {...item.link} />
+                <div className="pt-1">
+                  <CMSLink
+                    appearance="default"
+                    {...item.link}
+                    className="rounded-full transition-[transform,box-shadow,background-color,border-color,color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_color-mix(in_oklch,var(--site-brand)_10%,transparent)]"
+                  />
+                </div>
               ) : null}
             </article>
           ))}
@@ -75,9 +89,21 @@ export const PricingTableBlock: React.FC<PricingTableBlockProps> = ({
 
         <div className="divide-y">
           {items?.map((item, index) => (
-            <article className="grid gap-3 px-6 py-5 md:grid-cols-[2fr_1.2fr_1fr_1fr_auto] md:items-center md:gap-4" key={`${item.title}-${index}`}>
+            <article className="group grid gap-3 px-6 py-5 md:grid-cols-[2fr_1.2fr_1fr_1fr_auto] md:items-center md:gap-4" key={`${item.title}-${index}`}>
               <div>
-                <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
+                <h3 className="text-lg font-semibold text-foreground">
+                  {item.link?.label && (item.link.url || item.link.reference) ? (
+                    <CMSLink
+                      appearance="inline"
+                      {...item.link}
+                      className="no-underline transition-colors duration-200 hover:text-[color:var(--site-brand)]"
+                    >
+                      {item.title}
+                    </CMSLink>
+                  ) : (
+                    item.title
+                  )}
+                </h3>
                 {item.subtitle ? <p className="mt-1 text-sm text-muted-foreground">{item.subtitle}</p> : null}
                 {item.note ? <p className="mt-2 text-xs font-medium text-[color:var(--site-accent)]">{item.note}</p> : null}
               </div>
@@ -98,7 +124,7 @@ export const PricingTableBlock: React.FC<PricingTableBlockProps> = ({
                   <CMSLink
                     appearance="default"
                     {...item.link}
-                    className="w-full rounded-full px-4 py-2 text-sm md:w-auto"
+                    className="w-full rounded-full px-4 py-2 text-sm transition-[transform,box-shadow,background-color,border-color,color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_color-mix(in_oklch,var(--site-brand)_10%,transparent)] md:w-auto"
                   />
                 ) : null}
               </div>
