@@ -28,6 +28,8 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-032 | normal | implemented | Header, mega menu, language switcher |
 | US-033 | normal | implemented | Content and media seed |
 | US-034 | normal | implemented | Launch readiness proof |
+| US-045 | high-risk | implemented locally | BestPrice 22 import and publish preparation |
+| US-046 | high-risk | in review | WingSide consultative tour detail and hi-fi adoption |
 
 ## Current evidence
 
@@ -72,6 +74,11 @@ architecture and avoids building a parallel site, CMS, or page builder.
   canonical/hreflang/sitemap checks all have recorded evidence. Full local
   E2E prepare-db remains documented as SQLite `SQLITE_BUSY` when a second local
   writer tries to push the test schema.
+- US-046 isolates WingSide structured tour detail from WingsGo retail
+  capabilities, adopts the approved hi-fi Home/Specials posture, and adds an
+  atomic batch-scoped cleanup for the 22 imported tours. Local targeted and
+  adapter proof is complete; full gates, 22-URL browser smoke and production
+  release evidence remain pending.
 
 ## Current constraints
 
