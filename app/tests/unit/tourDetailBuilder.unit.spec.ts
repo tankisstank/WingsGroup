@@ -61,15 +61,16 @@ describe('tour detail builder inquiry and departure utilities', () => {
   })
 
   it('prefers future departures when deriving next departure and month groups', () => {
+    const now = new Date('2026-07-01T12:00:00.000Z')
     const departures = [
       { departureDate: '2026-06-20T00:00:00.000Z', id: 'past' },
       { departureDate: '2026-07-15T00:00:00.000Z', id: 'next' },
       { departureDate: '2026-08-02T00:00:00.000Z', id: 'later' },
     ]
 
-    expect(getFutureDepartures(departures).map((item) => item.id)).toEqual(['next', 'later'])
-    expect(getNextDeparture(departures)?.id).toBe('next')
-    expect(groupDeparturesByMonth(getFutureDepartures(departures)).map((group) => group.key)).toEqual([
+    expect(getFutureDepartures(departures, now).map((item) => item.id)).toEqual(['next', 'later'])
+    expect(getNextDeparture(departures, now)?.id).toBe('next')
+    expect(groupDeparturesByMonth(getFutureDepartures(departures, now)).map((group) => group.key)).toEqual([
       '2026-07',
       '2026-08',
     ])

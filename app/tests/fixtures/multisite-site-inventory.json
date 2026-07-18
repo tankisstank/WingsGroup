@@ -1,0 +1,104 @@
+{
+  "generatedAt": "2026-07-13T00:00:00.000Z",
+  "sites": [
+    {
+      "name": "wings-care",
+      "localAlias": "wingscare",
+      "primaryDomain": "wingscare.wingsgroup.vn",
+      "canonicalDomain": "https://wingscare.wingsgroup.vn",
+      "hosts": ["wingscare.wingsgroup.vn"],
+      "additionalDomains": [],
+      "defaultLocale": "vi",
+      "publicLocales": ["vi", "en"],
+      "supportedLocales": ["vi", "en"],
+      "themeKey": "wings-care",
+      "nestedRouteSamples": { "vi": "/claim-support", "en": "/claim-support" },
+      "formRouteSample": "/contact",
+      "postRouteSample": null
+    },
+    {
+      "name": "wings-go",
+      "localAlias": "wingsgo",
+      "primaryDomain": "wingsgo.local",
+      "canonicalDomain": "https://wingsgo.vn",
+      "hosts": ["wingsgo.vn", "www.wingsgo.vn"],
+      "additionalDomains": ["www.wingsgo.vn"],
+      "defaultLocale": "vi",
+      "publicLocales": ["vi", "en"],
+      "supportedLocales": ["vi", "en"],
+      "themeKey": "wings-go",
+      "nestedRouteSamples": { "vi": "/campaign", "en": "/campaign" },
+      "formRouteSample": "/lien-he",
+      "postRouteSample": "/posts/campaign-mua-he-dan-khach-di-dau"
+    },
+    {
+      "name": "wings-group",
+      "localAlias": "wingsgroup",
+      "primaryDomain": "wingsgroup.local",
+      "canonicalDomain": "https://wingsgroup.vn",
+      "hosts": ["wingsgroup.vn", "www.wingsgroup.vn"],
+      "additionalDomains": ["www.wingsgroup.vn"],
+      "defaultLocale": "vi",
+      "publicLocales": ["vi", "en"],
+      "supportedLocales": ["vi", "en"],
+      "themeKey": "wings-group",
+      "nestedRouteSamples": {
+        "vi": "/chinh-sach-bao-mat",
+        "en": "/chinh-sach-bao-mat"
+      },
+      "formRouteSample": "/lien-he",
+      "postRouteSample": "/posts/giay-phep-lu-hanh-va-cac-tin-hieu-trust-khi-chon-cong-ty-du-lich"
+    },
+    {
+      "name": "wings-pass",
+      "localAlias": "wingspass",
+      "primaryDomain": "wingspass.wingsgroup.vn",
+      "canonicalDomain": "https://wingspass.wingsgroup.vn",
+      "hosts": ["wingspass.wingsgroup.vn"],
+      "additionalDomains": [],
+      "defaultLocale": "vi",
+      "publicLocales": ["vi", "en"],
+      "supportedLocales": ["vi", "en"],
+      "themeKey": "wings-pass",
+      "nestedRouteSamples": { "vi": "/add-on", "en": "/add-on" },
+      "formRouteSample": null,
+      "postRouteSample": null
+    },
+    {
+      "name": "wings-plus",
+      "localAlias": "wingsplus",
+      "primaryDomain": "wingsplus.local",
+      "canonicalDomain": "https://wingsplus.vn",
+      "hosts": ["wingsplus.vn", "www.wingsplus.vn"],
+      "additionalDomains": ["www.wingsplus.vn"],
+      "defaultLocale": "vi",
+      "publicLocales": ["vi", "en"],
+      "supportedLocales": ["vi", "en"],
+      "themeKey": "wings-plus",
+      "nestedRouteSamples": { "vi": "/destinations", "en": "/destinations" },
+      "formRouteSample": "/request-proposal",
+      "postRouteSample": null
+    },
+    {
+      "name": "wings-side",
+      "localAlias": "wingsside",
+      "primaryDomain": "wingside.vn",
+      "canonicalDomain": "https://wingside.vn",
+      "hosts": ["wingside.vn", "www.wingside.vn"],
+      "additionalDomains": ["www.wingside.vn"],
+      "defaultLocale": "en",
+      "publicLocales": ["en", "vi", "it", "es", "pt"],
+      "supportedLocales": ["en", "vi", "it", "es", "pt"],
+      "themeKey": "wings-side",
+      "nestedRouteSamples": {
+        "en": "/about-us",
+        "vi": "/about-us",
+        "it": "/about-us",
+        "es": "/about-us",
+        "pt": "/about-us"
+      },
+      "formRouteSample": "/plan-your-trip",
+      "postRouteSample": "/posts/what-makes-a-vietnam-trip-feel-luxury"
+    }
+  ]
+}

@@ -34,14 +34,7 @@ export const loadMultisiteAuditInventory = (): InventoryDocument => {
     return cachedInventory
   }
 
-  const file = join(
-    process.cwd(),
-    '..',
-    'artifacts',
-    'audits',
-    'multisite-remediation-2026-07-13',
-    'site-inventory.json',
-  )
+  const file = join(process.cwd(), 'tests', 'fixtures', 'multisite-site-inventory.json')
 
   cachedInventory = JSON.parse(readFileSync(file, 'utf8')) as InventoryDocument
 

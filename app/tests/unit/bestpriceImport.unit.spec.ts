@@ -1,6 +1,8 @@
+import fs from 'node:fs/promises'
+import os from 'node:os'
 import path from 'node:path'
 
-import { describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import {
   bestPriceSlug,
@@ -10,10 +12,79 @@ import {
   readBestPriceManifest,
 } from '../../scripts/lib/bestprice22'
 
-const repoRoot = path.resolve(process.cwd(), '..')
-const manifestPath = path.join(repoRoot, 'output', 'doc', 'tour-source-match-20260717.csv')
-const crawlerRoot = 'E:\\repo\\tour-crawlers'
-const rawPath = path.join(crawlerRoot, 'bestprice_tours.json')
+let fixtureRoot = ''
+let crawlerRoot = ''
+let manifestPath = ''
+let rawPath = ''
+
+beforeAll(async () => {
+  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'wings-bestprice-unit-'))
+  crawlerRoot = path.join(fixtureRoot, 'crawler')
+  manifestPath = path.join(fixtureRoot, 'tour-source-match.csv')
+  rawPath = path.join(crawlerRoot, 'bestprice_tours.json')
+
+  const manifestRows = [
+    'status,candidate_source,document,candidate_url,tour_title',
+  ]
+  const records = []
+
+  for (let index = 1; index <= 22; index += 1) {
+    const suffix = String(index).padStart(2, '0')
+    const isIndochina = index === 22
+    const sourceId = isIndochina
+      ? 'indochina-tours--codex-fixture-22'
+      : `vietnam-tours--codex-fixture-${suffix}`
+    const title = isIndochina
+      ? 'Best of Vietnam and Cambodia Fixture 2 days'
+      : `Vietnam Fixture Journey ${suffix} 2 days`
+    const sourceUrl = `https://www.bestpricetravel.com/${
+      isIndochina ? 'indochina-tours' : 'vietnam-tours'
+    }/codex-fixture-${suffix}.html`
+    const imageRelativePath = `images\\bestprice\\${sourceId}\\01.jpg`
+    const imagePath = path.join(
+      crawlerRoot,
+      'storage',
+      'images',
+      'bestprice',
+      sourceId,
+      '01.jpg',
+    )
+
+    await fs.mkdir(path.dirname(imagePath), { recursive: true })
+    await fs.writeFile(imagePath, Buffer.from(`synthetic-image-${suffix}`, 'utf8'))
+
+    manifestRows.push(`full,bestprice,fixture-${suffix}.docx,${sourceUrl},${title}`)
+    records.push({
+      url: sourceUrl,
+      tour_id: sourceId,
+      category: isIndochina ? 'indochina-tours' : 'vietnam-tours',
+      meta: { description: `Synthetic parser fixture ${suffix}.` },
+      content: {
+        heading: title,
+        price: index === 1 ? '' : '99 USD',
+        body_html:
+          '<div class="itinerary-box"><span class="iti-day-title">Day 1 Hanoi</span><div class="itinerary-content"><p>Explore Hanoi.</p></div></div>',
+        body_text: 'Duration :\\n2 days',
+      },
+      images: [
+        {
+          alt: `Synthetic fixture ${suffix}`,
+          local_path: imageRelativePath,
+        },
+      ],
+    })
+  }
+
+  await fs.mkdir(crawlerRoot, { recursive: true })
+  await fs.writeFile(manifestPath, `${manifestRows.join('\n')}\n`, 'utf8')
+  await fs.writeFile(rawPath, `${JSON.stringify(records)}\n`, 'utf8')
+})
+
+afterAll(async () => {
+  if (fixtureRoot) {
+    await fs.rm(fixtureRoot, { force: true, recursive: true })
+  }
+})
 
 describe('BestPrice 22 tour import parser', () => {
   it('should load exactly the 22 full BestPrice manifest rows', async () => {
@@ -21,6 +92,7 @@ describe('BestPrice 22 tour import parser', () => {
 
     expect(manifest).toHaveLength(22)
     expect(manifest.every((row) => row.sourceUrl.includes('bestpricetravel.com'))).toBe(true)
+    expect(manifest.every((row) => row.sourceUrl.includes('codex-fixture-'))).toBe(true)
   })
 
   it('should map the accepted routes to Vietnam and Indochina markets', async () => {

@@ -188,10 +188,10 @@ const toDateOnly = (value?: null | string) => {
 
 export const getFutureDepartures = <T extends { departureDate?: null | string }>(
   departures?: T[] | null,
+  now = new Date(),
 ) => {
-  const today = new Date()
   const threshold = new Date(
-    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
   )
 
   return (departures || []).filter((departure) => {
@@ -203,7 +203,8 @@ export const getFutureDepartures = <T extends { departureDate?: null | string }>
 
 export const getNextDeparture = <T extends { departureDate?: null | string }>(
   departures?: T[] | null,
-) => getFutureDepartures(departures)[0] || (departures?.[0] ?? null)
+  now = new Date(),
+) => getFutureDepartures(departures, now)[0] || (departures?.[0] ?? null)
 
 export const groupDeparturesByMonth = <T extends { departureDate?: null | string }>(
   departures?: T[] | null,
