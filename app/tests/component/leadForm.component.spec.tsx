@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { FormBlock } from '@/blocks/Form/Component'
 
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/',
+  usePathname: () => '/en',
   useRouter: () => ({ push: vi.fn() }),
 }))
 vi.mock('@/utilities/getURL', () => ({ getClientSideURL: () => '' }))
@@ -16,16 +16,20 @@ const form = {
   confirmationType: 'message',
   fields: [{ blockType: 'text', label: 'Name', name: 'name', required: true }],
   id: 'lead-form',
-  submitButtonLabel: 'Submit',
+  submitButtonLabel: 'Send brief',
   title: 'Lead form',
 }
 
 describe('lead form hardened submission', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    window.history.replaceState({}, '', '/en')
   })
 
-  afterEach(() => cleanup())
+  afterEach(() => {
+    cleanup()
+    window.history.replaceState({}, '', '/')
+  })
 
   it('uses the bounded endpoint and prevents a second submit while pending', async () => {
     let resolveFetch: ((value: Response) => void) | undefined
