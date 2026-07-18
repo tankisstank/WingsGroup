@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 const mocks = vi.hoisted(() => ({
   getPayload: vi.fn(),
@@ -19,6 +21,7 @@ import {
   getCurrentSite,
   invalidateSiteContextCache,
 } from '@/utilities/siteContext'
+import { Sites } from '@/collections/Sites'
 
 const sites = [
   {
@@ -77,6 +80,12 @@ describe('site context security', () => {
     await expect(getCurrentSite()).resolves.toMatchObject({ code: 'wings-go' })
   })
 
+  it('resolves an allowed production host through the trusted proxy context', async () => {
+    mocks.headers.mockResolvedValue(trustedHeaders({ 'x-site-host': 'wingsgo.vn' }))
+
+    await expect(getCurrentSite()).resolves.toMatchObject({ code: 'wings-go' })
+  })
+
   it('fails closed for an unknown trusted host', async () => {
     mocks.headers.mockResolvedValue(trustedHeaders({ 'x-site-host': 'attacker.example' }))
 
@@ -126,5 +135,15 @@ describe('site context security', () => {
         { slug: { equals: 'shared-slug' } },
       ],
     })
+  })
+
+  it('keeps anonymous Sites access closed while allowing only two trusted directory lookups', () => {
+    const readAccess = Sites.access?.read
+    expect(typeof readAccess).toBe('function')
+    expect((readAccess as (args: unknown) => unknown)({ req: {} })).toBe(false)
+
+    const source = readFileSync(join(process.cwd(), 'src', 'utilities', 'siteContext.ts'), 'utf8')
+    expect(source.match(/overrideAccess:\s*true/g)).toHaveLength(2)
+    expect(source).not.toMatch(/collection:\s*['"](?:pages|tour-products|tour-departures)['"][\s\S]{0,180}overrideAccess:\s*true/)
   })
 })

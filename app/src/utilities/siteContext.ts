@@ -29,6 +29,9 @@ const getSiteByCode = async (code: string): Promise<SiteCacheResult> => {
     collection: 'sites',
     depth: 0,
     limit: 1,
+    // Server-only tenant-directory lookup. The site code is restricted to the
+    // local registry before this call and never comes from an untrusted header.
+    overrideAccess: true,
     pagination: false,
     where: {
       and: [
@@ -55,6 +58,9 @@ const getActiveSites = async (): Promise<Site[]> => {
     collection: 'sites',
     depth: 0,
     limit: 100,
+    // Server-only host resolution must inspect active tenant domains while the
+    // Sites collection itself remains non-enumerable to anonymous callers.
+    overrideAccess: true,
     pagination: false,
     where: {
       isActive: {
