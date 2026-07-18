@@ -334,7 +334,6 @@ const productData = ({
   highlights: [],
   factSummary: {
     routeSummary: tour.category,
-    operatorNote: 'Imported from BestPrice Travel raw crawl for WingSide editorial review.',
   },
   primaryCTA: primaryCTAFor(tour),
   itineraryDays: tour.itineraryDays.map((day) => ({
@@ -357,8 +356,6 @@ const productData = ({
       .map((day) => day.meals)
       .filter(Boolean)
       .join('; '),
-    operatorNotes: 'BestPrice source does not provide fixed future departure dates in this raw batch.',
-    notes: [{ label: 'Sales must confirm final price and departure availability before publishing.' }],
   },
   faqItems: [],
   bcfg: {
