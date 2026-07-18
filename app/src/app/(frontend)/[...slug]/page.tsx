@@ -4,6 +4,7 @@ import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
@@ -28,11 +29,14 @@ import { getCopyLocale } from '@/utilities/locales'
 import { isSupportedLocale, type SupportedLocaleCode } from '@/utilities/sitePaths'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 import {
+  isRetailTourEnabledSiteCode,
+  isStructuredTourDetailEnabledSiteCode,
+} from '@/utilities/siteCapabilities'
+import {
   getResolvedScheduleData,
   getResolvedTourDetailBySlug,
   getTourCampaignBySlug,
   getToursByMarketRoute,
-  isWingsGoSite,
 } from '@/tours/queries'
 import {
   TourCampaignPage,
@@ -40,6 +44,8 @@ import {
   TourMarketPage,
   TourSchedulePage,
 } from '@/tours/StructuredPages'
+import { WingSideTourDetailPage } from '@/tours/WingSideTourDetailPage'
+import { hasMatchingWingSideTourWrapper } from '@/tours/wingsSideTourViewModel'
 
 type Args = {
   params: Promise<{
@@ -81,6 +87,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   const structuredPage = await resolveStructuredTourPage({
     locale,
     requestedPath,
+    wrapperPageID: page.id,
   })
 
   return (
@@ -237,22 +244,22 @@ const queryPageByPath = async ({
 const resolveStructuredTourPage = async ({
   locale,
   requestedPath,
+  wrapperPageID,
 }: {
   locale: SupportedLocaleCode
   requestedPath: string
+  wrapperPageID: number | string
 }) => {
-  const copyLocale = getCopyLocale(locale)
-
-  if (!(await isWingsGoSite())) {
-    return null
-  }
-
   const { isEnabled: draft } = await draftMode()
   const segments = requestedPath.split('/').filter(Boolean)
+  const site = await getCurrentSite()
 
-  if (segments[0] === 'tour' && segments[1]) {
+  if (segments.length === 2 && segments[0] === 'tour' && segments[1]) {
+    if (!isStructuredTourDetailEnabledSiteCode(site.code)) return null
+
     const tourData = await getResolvedTourDetailBySlug({
       draft,
+      fallbackLocale: site.code === 'wings-side' ? 'en' : undefined,
       locale,
       slug: segments[1],
     })
@@ -261,8 +268,17 @@ const resolveStructuredTourPage = async ({
       return null
     }
 
-    return <TourDetailPage data={tourData} locale={copyLocale} />
+    if (site.code === 'wings-side') {
+      if (!hasMatchingWingSideTourWrapper(tourData.tour, wrapperPageID)) notFound()
+      return <WingSideTourDetailPage data={tourData} locale={locale} />
+    }
+
+    return <TourDetailPage data={tourData} locale={getCopyLocale(locale)} />
   }
+
+  if (!isRetailTourEnabledSiteCode(site.code)) return null
+
+  const copyLocale = getCopyLocale(locale)
 
   if (segments[0] === 'lich-khoi-hanh') {
     const schedule = await getResolvedScheduleData({

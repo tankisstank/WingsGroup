@@ -46,6 +46,7 @@ const queryCollection = async ({
   collection,
   depth = 2,
   draft,
+  fallbackLocale,
   limit = 20,
   locale,
   where,
@@ -53,6 +54,7 @@ const queryCollection = async ({
   collection: never
   depth?: number
   draft: boolean
+  fallbackLocale?: SupportedLocaleCode | false
   limit?: number
   locale?: SupportedLocaleCode
   where: Record<string, unknown>
@@ -64,6 +66,7 @@ const queryCollection = async ({
     collection,
     depth,
     draft,
+    fallbackLocale,
     limit,
     locale,
     overrideAccess: draft,
@@ -207,10 +210,12 @@ const mergeTourVariant = ({
 
 export const getTourProductBySlug = async ({
   draft,
+  fallbackLocale,
   locale,
   slug,
 }: {
   draft: boolean
+  fallbackLocale?: SupportedLocaleCode | false
   locale?: SupportedLocaleCode
   slug: string
 }): Promise<any> => {
@@ -218,6 +223,7 @@ export const getTourProductBySlug = async ({
     collection: tourProductsCollection,
     depth: 2,
     draft,
+    fallbackLocale,
     limit: 1,
     locale,
     where: {
@@ -232,10 +238,12 @@ export const getTourProductBySlug = async ({
 
 export const getTourDeparturesForProduct = async ({
   draft,
+  fallbackLocale,
   locale,
   tourProductId,
 }: {
   draft: boolean
+  fallbackLocale?: SupportedLocaleCode | false
   locale?: SupportedLocaleCode
   tourProductId: number | string
 }): Promise<any[]> => {
@@ -243,6 +251,7 @@ export const getTourDeparturesForProduct = async ({
     collection: tourDeparturesCollection,
     depth: 2,
     draft,
+    fallbackLocale,
     limit: 50,
     locale,
     where: {
@@ -257,10 +266,12 @@ export const getTourDeparturesForProduct = async ({
 
 export const getDepartureVariantsForProduct = async ({
   draft,
+  fallbackLocale,
   locale,
   tourProductId,
 }: {
   draft: boolean
+  fallbackLocale?: SupportedLocaleCode | false
   locale?: SupportedLocaleCode
   tourProductId: number | string
 }) => {
@@ -268,6 +279,7 @@ export const getDepartureVariantsForProduct = async ({
     collection: departureVariantsCollection,
     depth: 2,
     draft,
+    fallbackLocale,
     limit: 20,
     locale,
     where: {
@@ -284,15 +296,18 @@ export const getDepartureVariantsForProduct = async ({
 
 export const getResolvedTourDetailBySlug = async ({
   draft,
+  fallbackLocale,
   locale,
   slug,
 }: {
   draft: boolean
+  fallbackLocale?: SupportedLocaleCode | false
   locale?: SupportedLocaleCode
   slug: string
 }): Promise<TourResolvedData | null> => {
   const tour = await getTourProductBySlug({
     draft,
+    fallbackLocale,
     locale,
     slug,
   })
@@ -303,12 +318,14 @@ export const getResolvedTourDetailBySlug = async ({
 
   const departures = await getTourDeparturesForProduct({
     draft,
+    fallbackLocale,
     locale,
     tourProductId: tour.id,
   })
 
   const variants = await getDepartureVariantsForProduct({
     draft,
+    fallbackLocale,
     locale,
     tourProductId: tour.id,
   })

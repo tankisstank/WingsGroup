@@ -40,6 +40,14 @@ const sites = [
     name: 'WingsGo',
     primaryDomain: 'wingsgo.vn',
   },
+  {
+    id: 3,
+    code: 'wings-side',
+    defaultLocale: 'en',
+    isActive: true,
+    name: 'WingsSide',
+    primaryDomain: 'wingside.vn',
+  },
 ]
 
 const trustedHeaders = (values: Record<string, string> = {}) =>
@@ -84,6 +92,12 @@ describe('site context security', () => {
     mocks.headers.mockResolvedValue(trustedHeaders({ 'x-site-host': 'wingsgo.vn' }))
 
     await expect(getCurrentSite()).resolves.toMatchObject({ code: 'wings-go' })
+  })
+
+  it('resolves wingside.vn to the WingSide tenant', async () => {
+    mocks.headers.mockResolvedValue(trustedHeaders({ 'x-site-host': 'wingside.vn' }))
+
+    await expect(getCurrentSite()).resolves.toMatchObject({ code: 'wings-side', id: 3 })
   })
 
   it('fails closed for an unknown trusted host', async () => {
