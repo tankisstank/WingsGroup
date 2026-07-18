@@ -3912,6 +3912,11 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .hero-presentation__sli
   }
 }
 
+/* Reserve a safe footer landing zone for the WingSide tour consultation bar. */
+body[data-theme-key='wings-side'][data-public-pathname*='/tour/'] .site-footer {
+  padding-bottom: 7rem;
+}
+
 html {
   opacity: 0;
 }

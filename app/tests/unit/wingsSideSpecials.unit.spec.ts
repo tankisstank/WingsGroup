@@ -36,6 +36,8 @@ describe('WingSide Specials helpers', () => {
 
   it('renders only on the exact WingSide Home pathname', () => {
     expect(shouldRenderWingsSideSpecials('wings-side', '/')).toBe(true)
+    expect(shouldRenderWingsSideSpecials('wings-side', '/it')).toBe(true)
+    expect(shouldRenderWingsSideSpecials('wings-side', '/wingsside/pt')).toBe(true)
     expect(shouldRenderWingsSideSpecials('wings-side', '/packages')).toBe(false)
     expect(shouldRenderWingsSideSpecials('wings-go', '/')).toBe(false)
     expect(shouldRenderWingsSideSpecials('wings-side', '/?campaign=hot')).toBe(false)

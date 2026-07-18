@@ -7,7 +7,7 @@ import {
 export const WINGSSIDE_SPECIALS_DISMISSED_KEY = 'wingside-promo-dismissed'
 
 export const shouldRenderWingsSideSpecials = (siteCode: string, publicPathname: string): boolean =>
-  siteCode === 'wings-side' && publicPathname === '/'
+  siteCode === 'wings-side' && isWingsSideSpecialsHomePathname(publicPathname)
 
 export const isWingsSideSpecialsHomePathname = (pathname: string): boolean => {
   const segments = pathname.split('/').filter(Boolean)
