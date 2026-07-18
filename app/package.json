@@ -51,7 +51,7 @@
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node scripts/run-phase1-e2e.mjs",
     "test:e2e:sqlite": "cross-env E2E_DATABASE_ENGINE=sqlite NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node scripts/run-phase1-e2e.mjs",
     "test:e2e:prepare-db": "cross-env NODE_OPTIONS=--no-deprecation node scripts/prepare-phase1-e2e-db.mjs",
-    "test:int": "cross-env PAYLOAD_SECRET=test-only-secret-not-for-production NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation node scripts/run-integration-tests.mjs",
     "test:unit": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.unit.config.mts",
     "validate:wingsside:locales": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/validate-wingsside-locales.ts"
   },
