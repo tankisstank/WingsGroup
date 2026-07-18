@@ -58,6 +58,19 @@ const getFontPresetTokens = (fontPreset?: string | null) => {
   return fontPresetMap[fontPreset || 'system'] || fontPresetMap.system
 }
 
+export const wingsSideHiFiTokens = {
+  background: '#F8F5EE',
+  border: '#D8D2C4',
+  foreground: '#162523',
+  gold: '#C9A75C',
+  muted: '#5D6B67',
+  promoInk: '#0A0A0A',
+  promoRed: '#D62D2D',
+  surface: '#FFFDF8',
+  surfaceStrong: '#EFE8DA',
+  wine: '#7F1D3B',
+} as const
+
 export type SiteThemeTokens = {
   accentColor: string
   brandColor: string
@@ -92,6 +105,21 @@ export const getSiteThemeTokens = (settings?: null | ThemeSettingsLike): SiteThe
     settings?.branding?.themePreset && typeof settings.branding.themePreset === 'object' && 'key' in settings.branding.themePreset
       ? String(settings.branding.themePreset.key || themePresetKey)
       : themePresetKey
+  const wingsSideSemanticTokens =
+    themeKey === 'wings-side'
+      ? {
+          '--site-background': wingsSideHiFiTokens.background,
+          '--site-border': wingsSideHiFiTokens.border,
+          '--site-foreground': wingsSideHiFiTokens.foreground,
+          '--site-gold': wingsSideHiFiTokens.gold,
+          '--site-muted': wingsSideHiFiTokens.muted,
+          '--site-promo-ink': wingsSideHiFiTokens.promoInk,
+          '--site-promo-red': wingsSideHiFiTokens.promoRed,
+          '--site-surface': wingsSideHiFiTokens.surface,
+          '--site-surface-strong': wingsSideHiFiTokens.surfaceStrong,
+          '--site-wine': wingsSideHiFiTokens.wine,
+        }
+      : {}
 
   return {
     accentColor,
@@ -116,7 +144,8 @@ export const getSiteThemeTokens = (settings?: null | ThemeSettingsLike): SiteThe
       '--site-surface-strong': surfaceStrongColor,
       '--site-theme-key': themeKey,
       '--site-theme-preset': resolvedPresetKey,
-    } as React.CSSProperties,
+      ...wingsSideSemanticTokens,
+    } as unknown as React.CSSProperties,
     themeKey,
     themeName: settings?.siteName || 'WingsGroup',
     themePreset: resolvedPresetKey,
