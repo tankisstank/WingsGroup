@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 import type { Header as HeaderType, Media } from '@/payload-types'
+import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 import { Logo } from '@/components/Logo/Logo'
 import { SiteLink } from '@/components/SiteLink'
@@ -21,9 +22,11 @@ interface HeaderClientProps {
     label: string
     url: string
   }
-  resolvedLocale?: 'en' | 'vi'
+  publicPathname?: string
+  resolvedLocale?: SupportedLocaleCode
   siteName?: null | string
   tagline?: null | string
+  themeKey?: string
 }
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({
@@ -33,9 +36,11 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   logoImage,
   logoText,
   primaryAction,
+  publicPathname,
   resolvedLocale,
   siteName,
   tagline,
+  themeKey,
 }) => {
   /* Storing the value in a useState to avoid hydration errors */
   const [theme, setTheme] = useState<string | null>(null)
@@ -75,7 +80,13 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
             </div>
           ) : null}
         </div>
-        <HeaderNav data={data} primaryAction={primaryAction} resolvedLocale={resolvedLocale} />
+        <HeaderNav
+          data={data}
+          primaryAction={primaryAction}
+          publicPathname={publicPathname}
+          resolvedLocale={resolvedLocale}
+          themeKey={themeKey}
+        />
       </div>
     </header>
   )

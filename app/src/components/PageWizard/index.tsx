@@ -125,10 +125,13 @@ export default function PageWizardView() {
         method: 'POST',
       })
 
-      const data = (await response.json()) as { id?: number | string; message?: string }
+      const data = (await response.json().catch(() => null)) as {
+        id?: number | string
+        message?: string
+      } | null
 
-      if (!response.ok || !data.id) {
-        throw new Error(data.message || 'Không tạo được trang nháp.')
+      if (!response.ok || !data?.id) {
+        throw new Error(data?.message || 'Không tạo được trang nháp.')
       }
 
       window.location.href = `/admin/collections/pages/${data.id}`

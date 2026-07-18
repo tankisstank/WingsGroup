@@ -1,14 +1,18 @@
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
+import { getCurrentLocale } from '@/utilities/siteContext'
 import React from 'react'
 
 import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
 import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
 import { SiteLink } from '@/components/SiteLink'
+import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { MailIcon, PhoneIcon } from 'lucide-react'
 
 export async function Footer() {
   const settings = await getCurrentSiteSettings()
+  const locale = await getCurrentLocale()
+  const chromeCopy = getRuntimeLocaleCopy(publicChromeCopy, locale)
 
   const navItems = settings?.footerNavItems || []
 
@@ -45,8 +49,8 @@ export async function Footer() {
         </div>
 
         <div className="flex flex-col-reverse items-start gap-4 md:flex-row md:flex-wrap md:items-center md:justify-end">
-          <ThemeSelector />
-          <nav aria-label="Footer navigation" className="flex flex-col gap-4 md:flex-row md:flex-wrap md:justify-end">
+          <ThemeSelector copy={chromeCopy.themeSelector} />
+          <nav aria-label={chromeCopy.footerNavigation} className="flex flex-col gap-4 md:flex-row md:flex-wrap md:justify-end">
             {navItems.map(({ link }, i) => {
               return <CMSLink className="theme-nav-link" key={i} {...link} />
             })}

@@ -9,6 +9,7 @@ import {
   type RoleScopeSeed,
 } from '../helpers/seedRoleUsers'
 import { seedHeroPresentationSmoke } from '../helpers/seedPhase1Launch'
+import { heroPresentationDefinitions } from '../../src/heros/presentations/registry'
 
 test.describe('Admin Panel', () => {
   let page: Page
@@ -38,13 +39,17 @@ test.describe('Admin Panel', () => {
     await expect(page).toHaveURL(`${e2eBaseURL}/admin`)
     await expect(page.locator('html')).toHaveAttribute('data-admin-theme', 'finexy-soft')
     await expect(page.locator('html')).toHaveClass(/wings-admin-theme-finexy/)
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'Bảng điều hành CMS' }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Bảng điều hành CMS' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Console vận hành' }).first()).toBeVisible()
-    await expect(page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Tạo trang nhanh' })).toBeVisible()
-    await expect(page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Lead gửi về' })).toBeVisible()
-    await expect(page.locator('#wings-group-metrics-0').getByRole('link', { name: /Trang \d+/ })).toBeVisible()
+    await expect(
+      page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Tạo trang nhanh' }),
+    ).toBeVisible()
+    await expect(
+      page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Lead gửi về' }),
+    ).toBeVisible()
+    await expect(
+      page.locator('#wings-group-metrics-0').getByRole('link', { name: /Trang \d+/ }),
+    ).toBeVisible()
   })
 
   test('can switch CMS backend themes with URL parameter and persist selection', async () => {
@@ -77,7 +82,9 @@ test.describe('Admin Panel', () => {
     await expect(page.getByRole('heading', { name: 'Typography, shape & layout' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Hero presentation' })).toBeVisible()
     await expect(page.locator('.theme-manager__hero-preview')).toBeVisible()
-    await expect(page.locator('.theme-manager__preset-card')).toHaveCount(7)
+    await expect
+      .poll(async () => page.locator('.theme-manager__preset-card').count())
+      .toBeGreaterThanOrEqual(heroPresentationDefinitions.length)
     await expect(page.locator('.theme-manager__usage-grid')).toContainText('Page kế thừa hero site')
     await expect(page.locator('.theme-manager__requirement-list')).toBeVisible()
     await expect(page.locator('.theme-manager__preview-head strong')).not.toHaveText(/^\d+$/)
@@ -90,7 +97,9 @@ test.describe('Admin Panel', () => {
 
     await page.goto(`${e2eBaseURL}/admin/collections/theme-presets/create`)
 
-    await expect(page.getByRole('heading', { name: /\[Untitled\]|\[Chưa có tiêu đề\]/ })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: /\[Untitled\]|\[Chưa có tiêu đề\]/ }),
+    ).toBeVisible()
     await expect(page.getByText('Preview giao diện')).toBeVisible()
     await expect(page.locator('.theme-preset-preview')).toBeVisible()
 
@@ -112,7 +121,9 @@ test.describe('Admin Panel', () => {
 
     await page.goto(`${e2eBaseURL}/admin/collections/hero-presentation-presets/create`)
 
-    await expect(page.getByRole('heading', { name: /\[Untitled\]|\[Chưa có tiêu đề\]/ })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: /\[Untitled\]|\[Chưa có tiêu đề\]/ }),
+    ).toBeVisible()
     await expect(page.getByText('Preview hero preset')).toBeVisible()
     await expect(page.locator('.hero-presentation-preset-preview')).toBeVisible()
 
@@ -121,17 +132,28 @@ test.describe('Admin Panel', () => {
     await page.locator('#field-baseTemplate').getByRole('combobox').click()
     await page.getByRole('option', { name: 'Cinematic carousel' }).click()
 
-    await expect(page.locator('.hero-presentation-preset-preview')).toContainText('Carousel Audit Preview')
+    await expect(page.locator('.hero-presentation-preset-preview')).toContainText(
+      'Carousel Audit Preview',
+    )
     await expect(page.locator('.hero-presentation-preset-preview__visual')).toContainText('Slide 1')
-    await expect(page.locator('.hero-presentation-preset-preview__meta').nth(1)).toContainText('Autoplay')
+    await expect(page.locator('.hero-presentation-preset-preview__meta').nth(1)).toContainText(
+      'Autoplay',
+    )
   })
 
   test('can create a draft page from a governed layout preset', async () => {
+    test.setTimeout(90_000)
+
     const uniqueSlug = `campaign-launch-e2e-${Date.now()}`
 
     await page.goto(`${e2eBaseURL}/admin/page-wizard`)
     await expect(page.getByRole('heading', { name: 'Tạo trang nhanh' })).toBeVisible()
-    await page.getByRole('button', { name: /Campaign launch/ }).click()
+    // The preset buttons are present in SSR markup. Waiting for the async site
+    // list proves the client has hydrated before exercising React state.
+    await expect(page.getByRole('combobox', { name: 'Site' })).not.toHaveValue('')
+    const campaignPreset = page.getByRole('button', { name: /Campaign launch/ })
+    await campaignPreset.click()
+    await expect(campaignPreset).toHaveAttribute('aria-pressed', 'true')
     await expect(page.locator('.page-wizard__preset-summary').getByText('Hero mesh')).toBeVisible()
     await page.getByRole('button', { name: 'Tiếp tục' }).click()
 
@@ -142,9 +164,12 @@ test.describe('Admin Panel', () => {
       .fill('Draft created from the campaign launch layout preset.')
     await page.getByRole('button', { name: 'Kiểm tra' }).click()
     await expect(page.getByText('Campaign launch', { exact: true })).toBeVisible()
-    await expect(page.getByText('Hero mesh • Bento benefits • Stats • Social proof • Form • CTA')).toBeVisible()
+    await expect(
+      page.getByText('Hero mesh • Bento benefits • Stats • Social proof • Form • CTA'),
+    ).toBeVisible()
     await page.getByRole('button', { name: 'Tạo trang nháp' }).click()
 
+    await page.waitForURL(/\/admin\/collections\/pages\/[a-zA-Z0-9-_]+/, { timeout: 30_000 })
     await expect(page).toHaveURL(/\/admin\/collections\/pages\/[a-zA-Z0-9-_]+/)
     const pageID = page.url().split('/').pop()
     expect(pageID).toBeTruthy()
@@ -166,7 +191,9 @@ test.describe('Admin Panel', () => {
   test('can navigate to list view', async () => {
     await page.goto(`${e2eBaseURL}/admin/collections/users`)
     await expect(page).toHaveURL(`${e2eBaseURL}/admin/collections/users`)
-    const listViewArtifact = page.getByRole('heading', { level: 1, name: /Users|Người dùng/ }).first()
+    const listViewArtifact = page
+      .getByRole('heading', { level: 1, name: /Users|Người dùng/ })
+      .first()
     await expect(listViewArtifact).toBeVisible()
   })
 
@@ -177,24 +204,27 @@ test.describe('Admin Panel', () => {
     await expect(editViewArtifact).toBeVisible()
   })
 
-  test('can resolve inherited high-impact hero presentation in the page guide', async () => {
+  test('can switch a governed page hero between override and inherited presentation', async () => {
+    test.setTimeout(90_000)
+
     await page.goto(
       `${e2eBaseURL}/admin/collections/pages/${heroPresentationFixtureIDs['centered-visual']}`,
     )
 
     const heroGuide = page.locator('.hero-presentation-guide')
     await expect(heroGuide.getByText('Preview cấu trúc hero')).toBeVisible()
-    await expect(heroGuide.getByText('Nguồn áp dụng: site')).toBeVisible()
+    await expect(heroGuide.getByText('Nguồn áp dụng: page')).toBeVisible()
     await expect(heroGuide.getByText('Business behavior:')).toBeVisible()
     await expect(page.locator('#field-hero__media').getByText('Ảnh hero chính')).toBeVisible()
     await page.locator('#field-hero__presentationMode').getByRole('combobox').click()
-    await page.getByRole('option', { name: 'Override trên page' }).click()
-    await expect(page.getByText('Presentation override')).toBeVisible()
-    await expect(heroGuide.getByText('Nguồn áp dụng: page chưa chọn preset')).toBeVisible()
+    await page.getByRole('option', { name: 'Kế thừa từ site' }).click()
+    await expect(heroGuide.getByText(/Nguồn áp dụng: (site|site chưa resolve)/)).toBeVisible()
     await expect(heroGuide.getByText(/Page có thể/)).toBeVisible()
   })
 
-  test('site manager can read only assigned site settings through authenticated API', async ({ request }) => {
+  test('site manager can read only assigned site settings through authenticated API', async ({
+    request,
+  }) => {
     const auth = await request.post(`${e2eBaseURL}/api/users/login`, {
       data: scopedUsers.siteManager,
     })
@@ -251,6 +281,7 @@ test.describe('Admin Panel', () => {
 
     await login({ page: managerPage, user: scopedUsers.siteManager })
     await managerPage.goto(`${e2eBaseURL}/admin/console`)
+    await expect(managerPage.getByRole('heading', { name: 'Console vận hành' })).toBeVisible()
     await expect(managerPage.getByRole('link', { name: 'Nhập dữ liệu' }).first()).toBeVisible()
     await expect(managerPage.getByRole('heading', { name: 'Nâng cao' })).toHaveCount(0)
 

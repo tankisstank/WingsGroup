@@ -1,8 +1,8 @@
 'use client'
 import type { FormFieldBlock, Form as FormType } from '@payloadcms/plugin-form-builder/types'
 
-import { usePathname, useRouter } from 'next/navigation'
-import React, { useCallback, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
@@ -11,13 +11,16 @@ import { BadgeCheckIcon, ClockIcon, HeadphonesIcon, SendIcon } from 'lucide-reac
 
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
-import { getLocaleFromPathname } from '@/utilities/sitePaths'
+import { useSitePublicLocale } from '@/providers/SitePath'
+import { useSitePath } from '@/utilities/useSitePath'
+import { getCopyLocale } from '@/utilities/locales'
+import { TurnstileWidget } from './TurnstileWidget'
 
 export type FormBlockType = {
   blockName?: string
   blockType?: 'formBlock'
   enableIntro: boolean
-  form: FormType
+  form: FormType | null
   introContent?: DefaultTypedEditorState
   presentation?: 'centered-card' | 'minimal' | 'split-contact' | 'support-channels'
 }
@@ -48,8 +51,92 @@ const formCopy = {
     loading: 'Sending your request, please wait...',
     submit: 'Send brief',
     successDescription:
-      'The WingsPlus team will review the private or MICE brief and respond with a suitable proposal direction.',
+      'The planning team will review the brief and respond with a suitable proposal direction.',
     successTitle: 'Brief received',
+  },
+  es: {
+    asideLabel: 'Información de apoyo para la planificación',
+    asideTitle: 'Envía tu solicitud y recibe una orientación adecuada',
+    asideDescription:
+      'El equipo revisará fechas, destinos, estilo de viaje y tamaño del grupo antes de recomendar el siguiente paso.',
+    bullets: [
+      'Respuesta en horario laboral',
+      'Asesoría según fechas y necesidades reales',
+      'Solicitud dirigida al equipo adecuado',
+    ],
+    fieldLabels: {
+      airport: 'Aeropuerto',
+      brief: 'Necesidades / presupuesto / fechas',
+      company: 'Empresa / grupo de viajeros',
+      email: 'Email',
+      'full-name': 'Nombre completo',
+      'group-size': 'Tamaño estimado del grupo',
+      message: 'Mensaje',
+      phone: 'Teléfono',
+      'policy-code': 'Código de tour / contrato / póliza si aplica',
+      'service-date': 'Fecha del servicio',
+    } as Record<string, string>,
+    loading: 'Enviando tu solicitud, por favor espera...',
+    submit: 'Enviar solicitud',
+    successDescription:
+      'El equipo revisará el brief y responderá con una dirección de propuesta adecuada.',
+    successTitle: 'Solicitud recibida',
+  },
+  it: {
+    asideLabel: 'Informazioni di supporto alla pianificazione',
+    asideTitle: 'Invia una richiesta e ricevi il consiglio giusto',
+    asideDescription:
+      'Il team valuterà periodo, destinazioni, stile di viaggio e dimensione del gruppo prima di suggerire il passo successivo.',
+    bullets: [
+      'Risposta in orario lavorativo',
+      'Consulenza basata su tempi ed esigenze reali',
+      'Richiesta indirizzata al team corretto',
+    ],
+    fieldLabels: {
+      airport: 'Aeroporto',
+      brief: 'Esigenze / budget / periodo',
+      company: 'Azienda / gruppo di viaggiatori',
+      email: 'Email',
+      'full-name': 'Nome completo',
+      'group-size': 'Dimensione stimata del gruppo',
+      message: 'Messaggio',
+      phone: 'Telefono',
+      'policy-code': 'Codice tour / contratto / polizza se disponibile',
+      'service-date': 'Data del servizio',
+    } as Record<string, string>,
+    loading: 'Invio della richiesta in corso...',
+    submit: 'Invia richiesta',
+    successDescription:
+      'Il team leggerà il brief e risponderà con una direzione di proposta adatta.',
+    successTitle: 'Richiesta ricevuta',
+  },
+  pt: {
+    asideLabel: 'Informação de apoio ao planeamento',
+    asideTitle: 'Envie um pedido e receba a orientação certa',
+    asideDescription:
+      'A equipa irá rever datas, destinos, estilo de viagem e dimensão do grupo antes de recomendar o próximo passo.',
+    bullets: [
+      'Resposta em horário útil',
+      'Aconselhamento baseado em datas e necessidades reais',
+      'Pedido encaminhado para a equipa certa',
+    ],
+    fieldLabels: {
+      airport: 'Aeroporto',
+      brief: 'Necessidades / orçamento / datas',
+      company: 'Empresa / grupo de viajantes',
+      email: 'Email',
+      'full-name': 'Nome completo',
+      'group-size': 'Dimensão estimada do grupo',
+      message: 'Mensagem',
+      phone: 'Telefone',
+      'policy-code': 'Código de tour / contrato / apólice se disponível',
+      'service-date': 'Data do serviço',
+    } as Record<string, string>,
+    loading: 'A enviar o seu pedido...',
+    submit: 'Enviar pedido',
+    successDescription:
+      'A equipa irá rever o brief e responder com uma direção de proposta adequada.',
+    successTitle: 'Pedido recebido',
   },
   vi: {
     asideLabel: 'Thông tin hỗ trợ tư vấn',
@@ -69,6 +156,11 @@ const formCopy = {
   },
 } as const
 
+type FormCopyLocale = keyof typeof formCopy
+
+const getFormCopyLocale = (locale?: null | string): FormCopyLocale =>
+  locale && locale in formCopy ? (locale as FormCopyLocale) : getCopyLocale(locale)
+
 const getFieldName = (field: FormFieldBlock) =>
   'name' in field && typeof field.name === 'string' ? field.name : null
 
@@ -77,17 +169,18 @@ export const FormBlock: React.FC<
     id?: string
   } & FormBlockType
 > = (props) => {
+  const { enableIntro, form: formFromProps, introContent, presentation = 'split-contact' } = props
   const {
-    enableIntro,
-    form: formFromProps,
-    form: { id: formID, confirmationMessage, confirmationType, redirect, submitButtonLabel } = {},
-    introContent,
-    presentation = 'split-contact',
-  } = props
+    id: formID,
+    confirmationMessage,
+    confirmationType,
+    redirect,
+    submitButtonLabel,
+  } = formFromProps || {}
 
-  const pathname = usePathname()
-  const locale = getLocaleFromPathname(pathname) || 'vi'
-  const copy = formCopy[locale]
+  const locale = useSitePublicLocale()
+  const copyLocale = getFormCopyLocale(locale)
+  const copy = formCopy[copyLocale]
   const localizedFields =
     formFromProps?.fields?.map((field) => {
       const fieldName = getFieldName(field)
@@ -106,7 +199,7 @@ export const FormBlock: React.FC<
   }
 
   const formMethods = useForm({
-    defaultValues: formFromProps.fields,
+    defaultValues: formFromProps?.fields || [],
   })
   const {
     control,
@@ -118,29 +211,43 @@ export const FormBlock: React.FC<
   const [isLoading, setIsLoading] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState<boolean>()
   const [error, setError] = useState<{ message: string; status?: string } | undefined>()
+  const [challengeSiteKey, setChallengeSiteKey] = useState<string>()
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const [honeypot, setHoneypot] = useState('')
+  const errorRef = useRef<HTMLDivElement>(null)
+  const submittingRef = useRef(false)
+  const idempotencyKeyRef = useRef<string | null>(null)
   const router = useRouter()
+  const toSitePath = useSitePath()
+
+  useEffect(() => {
+    if (error) {
+      errorRef.current?.focus()
+    }
+  }, [error])
 
   const onSubmit = useCallback(
     (data: FormFieldBlock[]) => {
-      let loadingTimerID: ReturnType<typeof setTimeout>
+      if (submittingRef.current) return
+      submittingRef.current = true
+      idempotencyKeyRef.current ||= crypto.randomUUID()
+
       const submitForm = async () => {
         setError(undefined)
+        setIsLoading(true)
 
-        const dataToSend = Object.entries(data).map(([name, value]) => ({
-          field: name,
-          value,
-        }))
-
-        // delay loading indicator by 1s
-        loadingTimerID = setTimeout(() => {
-          setIsLoading(true)
-        }, 1000)
+        const dataToSend = Object.entries(data)
+          .filter(([name]) => name !== '_website')
+          .map(([name, value]) => ({ field: name, value }))
 
         try {
-          const req = await fetch(`${getClientSideURL()}/api/form-submissions`, {
+          const req = await fetch(`${getClientSideURL()}/api/lead-submissions`, {
             body: JSON.stringify({
-              form: formID,
+              formId: formID,
+              honeypot,
+              idempotencyKey: idempotencyKeyRef.current,
               submissionData: dataToSend,
+              turnstileToken: turnstileToken || undefined,
             }),
             headers: {
               'Content-Type': 'application/json',
@@ -150,14 +257,24 @@ export const FormBlock: React.FC<
 
           const res = await req.json()
 
-          clearTimeout(loadingTimerID)
-
           if (req.status >= 400) {
+            submittingRef.current = false
             setIsLoading(false)
 
+            if (req.status === 403 && res.challengeRequired && typeof res.siteKey === 'string') {
+              setChallengeSiteKey(res.siteKey)
+            }
+
             setError({
-              message: res.errors?.[0]?.message || 'Internal Server Error',
-              status: res.status,
+              message:
+                req.status === 403
+                  ? copyLocale === 'en'
+                    ? 'Please complete the security verification and submit again.'
+                    : 'Vui lòng hoàn tất bước xác minh bảo mật và gửi lại.'
+                  : copyLocale === 'en'
+                    ? 'We could not submit your request. Please try again.'
+                    : 'Chưa thể gửi yêu cầu. Vui lòng thử lại.',
+              status: String(req.status),
             })
 
             return
@@ -165,27 +282,46 @@ export const FormBlock: React.FC<
 
           setIsLoading(false)
           setHasSubmitted(true)
+          idempotencyKeyRef.current = null
 
           if (confirmationType === 'redirect' && redirect) {
             const { url } = redirect
 
-            const redirectUrl = url
+            const redirectUrl = url ? toSitePath(url) : null
 
             if (redirectUrl) router.push(redirectUrl)
           }
         } catch (err) {
           console.warn(err)
+          submittingRef.current = false
           setIsLoading(false)
           setError({
-            message: locale === 'en' ? 'Something went wrong.' : 'Đã có lỗi xảy ra.',
+            message: copyLocale === 'en' ? 'Something went wrong.' : 'Đã có lỗi xảy ra.',
           })
         }
       }
 
       void submitForm()
     },
-    [router, formID, redirect, confirmationType, locale],
+    [router, formID, redirect, confirmationType, copyLocale, honeypot, toSitePath, turnstileToken],
   )
+
+  if (!formFromProps || !formID) {
+    return (
+      <section
+        className="container theme-section layout-block layout-block--form"
+        id="contact-form"
+      >
+        <div className="site-lead-form-card theme-card--quiet border p-4 lg:p-6" role="alert">
+          <h2>{copy.asideTitle}</h2>
+          <p>
+            Biểu mẫu liên hệ hiện chưa được cấu hình. Vui lòng thử lại sau hoặc liên hệ trực tiếp
+            với WingsGo.
+          </p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section
@@ -220,54 +356,94 @@ export const FormBlock: React.FC<
           {enableIntro && introContent && !hasSubmitted && (
             <RichText className="mb-8 lg:mb-10" data={introContent} enableGutter={false} />
           )}
-        <FormProvider {...formMethods}>
-          {!isLoading && hasSubmitted && confirmationType === 'message' && (
-            <div className="site-form-state site-form-state--success">
-              <BadgeCheckIcon aria-hidden="true" className="h-5 w-5" />
-              {locale === 'en' ? (
-                <div>
-                  <h2>{copy.successTitle}</h2>
-                  <p>{copy.successDescription}</p>
-                </div>
-              ) : (
-                <RichText data={confirmationMessage} />
-              )}
-            </div>
-          )}
-          {isLoading && !hasSubmitted && <p className="site-form-state">{copy.loading}</p>}
-          {error && <div className="site-form-state site-form-state--error">{`${error.status || '500'}: ${error.message || ''}`}</div>}
-          {!hasSubmitted && (
-            <form id={formID} onSubmit={handleSubmit(onSubmit)}>
-              <div className="mb-4 last:mb-0">
-                {localizedForm &&
-                  localizedForm.fields &&
-                  localizedForm.fields?.map((field, index) => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const Field: React.FC<any> = fields?.[field.blockType as keyof typeof fields]
-                    if (Field) {
-                      return (
-                        <div className="mb-6 last:mb-0" key={index}>
-                          <Field
-                            form={localizedForm}
-                            {...field}
-                            {...formMethods}
-                            control={control}
-                            errors={errors}
-                            register={register}
-                          />
-                        </div>
-                      )
-                    }
-                    return null
-                  })}
+          <FormProvider {...formMethods}>
+            {!isLoading && hasSubmitted && confirmationType === 'message' && (
+              <div
+                aria-live="polite"
+                className="site-form-state site-form-state--success"
+                role="status"
+              >
+                <BadgeCheckIcon aria-hidden="true" className="h-5 w-5" />
+                {copy.successTitle ? (
+                  <div>
+                    <h2>{copy.successTitle}</h2>
+                    <p>{copy.successDescription}</p>
+                  </div>
+                ) : (
+                  <RichText data={confirmationMessage} />
+                )}
               </div>
+            )}
+            {isLoading && !hasSubmitted && (
+              <p aria-live="polite" className="site-form-state" role="status">
+                {copy.loading}
+              </p>
+            )}
+            {error && (
+              <div
+                className="site-form-state site-form-state--error"
+                ref={errorRef}
+                role="alert"
+                tabIndex={-1}
+              >
+                {`${error.status || '500'}: ${error.message || ''}`}
+              </div>
+            )}
+            {!hasSubmitted && (
+              <form aria-busy={isLoading} id={formID} onSubmit={handleSubmit(onSubmit)}>
+                <div aria-hidden="true" className="absolute left-[-10000px]" tabIndex={-1}>
+                  <label htmlFor={`${formID}-website`}>Website</label>
+                  <input
+                    autoComplete="off"
+                    id={`${formID}-website`}
+                    tabIndex={-1}
+                    type="text"
+                    onChange={(event) => setHoneypot(event.target.value)}
+                    value={honeypot}
+                  />
+                </div>
+                <div className="mb-4 last:mb-0">
+                  {localizedForm &&
+                    localizedForm.fields &&
+                    localizedForm.fields?.map((field, index) => {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      const Field: React.FC<any> = fields?.[field.blockType as keyof typeof fields]
+                      if (Field) {
+                        return (
+                          <div className="mb-6 last:mb-0" key={index}>
+                            <Field
+                              form={localizedForm}
+                              {...field}
+                              {...formMethods}
+                              control={control}
+                              errors={errors}
+                              register={register}
+                            />
+                          </div>
+                        )
+                      }
+                      return null
+                    })}
+                </div>
 
-              <Button className="site-form-submit" form={formID} type="submit" variant="default">
-                {locale === 'en' ? copy.submit : submitButtonLabel}
-              </Button>
-            </form>
-          )}
-        </FormProvider>
+                {challengeSiteKey && (
+                  <div className="mb-4">
+                    <TurnstileWidget onToken={setTurnstileToken} siteKey={challengeSiteKey} />
+                  </div>
+                )}
+
+                <Button
+                  className="site-form-submit"
+                  disabled={isLoading}
+                  form={formID}
+                  type="submit"
+                  variant="default"
+                >
+                  {isLoading ? copy.loading : copy.submit || submitButtonLabel}
+                </Button>
+              </form>
+            )}
+          </FormProvider>
         </div>
       </div>
     </section>

@@ -21,7 +21,14 @@ export const TourDepartures: CollectionConfig = {
   admin: {
     description:
       'Lịch khởi hành và giá bán công khai. Mỗi record là một đợt đi để dùng lại trên tour detail, market, campaign và trang lịch.',
-    defaultColumns: ['tourProduct', 'variantRef', 'departureDate', 'departureCity', 'priceFrom', 'availabilityStatus'],
+    defaultColumns: [
+      'tourProduct',
+      'variantRef',
+      'departureDate',
+      'departureCity',
+      'priceFrom',
+      'availabilityStatus',
+    ],
     group: adminGroups.content,
     useAsTitle: 'departureDate',
   },
@@ -107,7 +114,10 @@ export const TourDepartures: CollectionConfig = {
       required: true,
       type: 'select',
       defaultValue: 'VND',
-      options: [{ label: 'VND', value: 'VND' }],
+      options: [
+        { label: 'VND', value: 'VND' },
+        { label: 'USD', value: 'USD' },
+      ],
     },
     {
       name: 'promoLabel',

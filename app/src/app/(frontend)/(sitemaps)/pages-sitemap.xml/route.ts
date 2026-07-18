@@ -1,100 +1,97 @@
+import config from '@payload-config'
 import { getServerSideSitemap } from 'next-sitemap'
 import { getPayload } from 'payload'
-import config from '@payload-config'
-import { unstable_cache } from 'next/cache.js'
-import { getCanonicalURL, getPageCanonicalPath, getSiteId, getSiteSettingForSite } from '@/utilities/siteURLs'
-import { supportedLocaleCodes } from '@/utilities/sitePaths'
 
-const getPagesSitemap = unstable_cache(
-  async () => {
-    const payload = await getPayload({ config })
+import { getCurrentSite } from '@/utilities/siteContext'
+import { getPageCanonicalPath } from '@/utilities/siteURLs'
+import {
+  getCanonicalSiteOrigin,
+  getSiteSitemapLocales,
+  getSiteSitemapURL,
+} from '@/utilities/siteSEO'
 
-    const dateFallback = new Date().toISOString()
-    const sitemap = []
+export const dynamic = 'force-dynamic'
 
-    for (const locale of supportedLocaleCodes) {
-      const settings = await payload.find({
-        collection: 'site-settings',
-        depth: 1,
-        limit: 1000,
-        locale,
-        pagination: false,
-      })
+export async function GET(request: Request) {
+  const site = await getCurrentSite()
 
-      const settingsBySiteId = new Map(
-        settings.docs
-          .map((setting) => {
-            const siteId = getSiteId(setting.site)
+  if (!site) {
+    return new Response('Not found', { status: 404 })
+  }
 
-            return siteId ? ([siteId, setting] as const) : null
-          })
-          .filter((entry): entry is readonly [number, (typeof settings.docs)[number]] =>
-            Boolean(entry),
-          ),
-      )
+  const payload = await getPayload({ config })
+  const settings = await payload.find({
+    collection: 'site-settings',
+    depth: 0,
+    limit: 1,
+    pagination: false,
+    where: {
+      site: {
+        equals: site.id,
+      },
+    },
+  })
+  const origin = getCanonicalSiteOrigin({
+    requestOrigin: new URL(request.url).origin,
+    settings: settings.docs[0],
+    site,
+  })
+  const dateFallback = new Date().toISOString()
+  const sitemap = []
 
-      sitemap.push(
-        ...settings.docs.map((setting) => ({
-          loc: getCanonicalURL({
-            locale,
-            path: '/posts',
-            settings: setting,
-          }),
-          lastmod: setting.updatedAt || dateFallback,
-        })),
-      )
+  for (const locale of getSiteSitemapLocales(site)) {
+    sitemap.push({
+      loc: getSiteSitemapURL({ locale, origin, path: '/posts' }),
+      lastmod: settings.docs[0]?.updatedAt || dateFallback,
+    })
 
-      const results = await payload.find({
-        collection: 'pages',
-        overrideAccess: false,
-        draft: false,
-        depth: 1,
-        limit: 1000,
-        locale,
-        pagination: false,
-        where: {
-          _status: {
-            equals: 'published',
+    const results = await payload.find({
+      collection: 'pages',
+      overrideAccess: false,
+      draft: false,
+      depth: 0,
+      limit: 1000,
+      locale,
+      pagination: false,
+      where: {
+        and: [
+          {
+            site: {
+              equals: site.id,
+            },
           },
-        },
-        select: {
-          slug: true,
-          pathname: true,
-          site: true,
-          updatedAt: true,
-        },
-      })
+          {
+            _status: {
+              equals: 'published',
+            },
+          },
+        ],
+      },
+      select: {
+        slug: true,
+        pathname: true,
+        updatedAt: true,
+      },
+    })
 
-      sitemap.push(
-        ...results.docs
-          .filter((page) => Boolean(page?.pathname || page?.slug))
-          .map((page) => {
-            const siteSettings = getSiteSettingForSite(page.site, settingsBySiteId)
-
-            return {
-              loc: getCanonicalURL({
-                locale,
-                path: getPageCanonicalPath(page),
-                settings: siteSettings,
-              }),
-              lastmod: page.updatedAt || dateFallback,
-            }
+    sitemap.push(
+      ...results.docs
+        .filter((page) => Boolean(page?.pathname || page?.slug))
+        .map((page) => ({
+          loc: getSiteSitemapURL({
+            locale,
+            origin,
+            path: getPageCanonicalPath(page),
           }),
-      )
-    }
-
-    return sitemap.filter(
-      (entry, index, entries) => entries.findIndex((candidate) => candidate.loc === entry.loc) === index,
+          lastmod: page.updatedAt || dateFallback,
+        })),
     )
-  },
-  ['pages-sitemap'],
-  {
-    tags: ['pages-sitemap'],
-  },
-)
+  }
 
-export async function GET() {
-  const sitemap = await getPagesSitemap()
-
-  return getServerSideSitemap(sitemap)
+  return getServerSideSitemap(
+    sitemap.filter(
+      (entry, index, entries) =>
+        entries.findIndex((candidate) => candidate.loc === entry.loc) === index,
+    ),
+  )
 }

@@ -5,6 +5,7 @@ import type { Post } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { formatAuthors } from '@/utilities/formatAuthors'
+import { getCopyLocale } from '@/utilities/locales'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 export const PostHero: React.FC<{
@@ -12,6 +13,18 @@ export const PostHero: React.FC<{
   post: Post
 }> = ({ locale = 'vi', post }) => {
   const { categories, heroImage, populatedAuthors, publishedAt, title } = post
+  const copy = {
+    en: {
+      author: 'Author',
+      publishedAt: 'Date Published',
+      untitledCategory: 'Untitled category',
+    },
+    vi: {
+      author: 'Tác giả',
+      publishedAt: 'Ngày xuất bản',
+      untitledCategory: 'Danh mục chưa đặt tên',
+    },
+  }[getCopyLocale(locale)]
 
   const hasAuthors =
     populatedAuthors && populatedAuthors.length > 0 && formatAuthors(populatedAuthors) !== ''
@@ -32,8 +45,7 @@ export const PostHero: React.FC<{
               if (typeof category === 'object' && category !== null) {
                 const { title: categoryTitle } = category
 
-                const titleToUse =
-                  categoryTitle || (locale === 'en' ? 'Untitled category' : 'Danh mục chưa đặt tên')
+                const titleToUse = categoryTitle || copy.untitledCategory
 
                 const isLast = index === categories.length - 1
 
@@ -56,7 +68,7 @@ export const PostHero: React.FC<{
             {hasAuthors && (
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm">{locale === 'en' ? 'Author' : 'Tác giả'}</p>
+                  <p className="text-sm">{copy.author}</p>
 
                   <p>{formatAuthors(populatedAuthors)}</p>
                 </div>
@@ -64,7 +76,7 @@ export const PostHero: React.FC<{
             )}
             {publishedAt && (
               <div className="flex flex-col gap-1">
-                <p className="text-sm">{locale === 'en' ? 'Date Published' : 'Ngày xuất bản'}</p>
+                <p className="text-sm">{copy.publishedAt}</p>
 
                 <time dateTime={publishedAt}>{formatDateTime(publishedAt)}</time>
               </div>

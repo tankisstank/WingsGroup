@@ -1,3 +1,6 @@
+import { getCopyLocale, type CopyLocaleCode } from '@/utilities/locales'
+import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+
 const marketConfig = {
   china: {
     heading: 'Tour Trung Quốc',
@@ -14,6 +17,13 @@ const marketConfig = {
     routeSlug: 'han-quoc',
     shortLabel: 'Hàn Quốc',
   },
+  vietnam: { heading: 'Vietnam Tours', routeSlug: 'vietnam', shortLabel: 'Vietnam' },
+  thailand: { heading: 'Thailand Tours', routeSlug: 'thailand', shortLabel: 'Thailand' },
+  cambodia: { heading: 'Cambodia Tours', routeSlug: 'cambodia', shortLabel: 'Cambodia' },
+  laos: { heading: 'Laos Tours', routeSlug: 'laos', shortLabel: 'Laos' },
+  myanmar: { heading: 'Myanmar Tours', routeSlug: 'myanmar', shortLabel: 'Myanmar' },
+  indochina: { heading: 'Indochina Tours', routeSlug: 'indochina', shortLabel: 'Indochina' },
+  other: { heading: 'Other Tours', routeSlug: 'other', shortLabel: 'Other' },
 } as const
 
 export type TourMarketKey = keyof typeof marketConfig
@@ -42,7 +52,10 @@ export const formatTourPrice = (value?: null | number, currency?: null | string)
   }).format(value)
 }
 
-export const formatTourDate = (value?: null | string, locale: 'en' | 'vi' = 'vi') => {
+export const formatTourDate = (
+  value?: null | string,
+  locale: CopyLocaleCode | SupportedLocaleCode = 'vi',
+) => {
   if (!value) {
     return null
   }
@@ -53,7 +66,7 @@ export const formatTourDate = (value?: null | string, locale: 'en' | 'vi' = 'vi'
     return value
   }
 
-  return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'vi-VN', {
+  return new Intl.DateTimeFormat(getCopyLocale(locale) === 'en' ? 'en-GB' : 'vi-VN', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -69,12 +82,13 @@ export const getDurationLabel = (days?: null | number, nights?: null | number) =
     return `${days}N${nights}Đ`
   }
 
-  return [days ? `${days} ngày` : null, nights ? `${nights} đêm` : null]
-    .filter(Boolean)
-    .join(' / ')
+  return [days ? `${days} ngày` : null, nights ? `${nights} đêm` : null].filter(Boolean).join(' / ')
 }
 
-export const getAvailabilityLabel = (status?: null | string, locale: 'en' | 'vi' = 'vi') => {
+export const getAvailabilityLabel = (
+  status?: null | string,
+  locale: CopyLocaleCode | SupportedLocaleCode = 'vi',
+) => {
   const vi: Record<string, string> = {
     limited: 'Sắp hết chỗ',
     open: 'Mở bán',
@@ -87,10 +101,10 @@ export const getAvailabilityLabel = (status?: null | string, locale: 'en' | 'vi'
   }
 
   if (!status) {
-    return locale === 'en' ? 'Open' : 'Mở bán'
+    return getCopyLocale(locale) === 'en' ? 'Open' : 'Mở bán'
   }
 
-  return (locale === 'en' ? en : vi)[status] || status
+  return (getCopyLocale(locale) === 'en' ? en : vi)[status] || status
 }
 
 export const getSchedulePath = () => '/lich-khoi-hanh'
@@ -147,8 +161,9 @@ export const getTourPath = (slug?: null | string) => (slug ? `/tour/${slug}` : '
 
 export const getLowestPrice = (departures?: Array<{ priceFrom?: null | number }> | null) => {
   const values =
-    departures?.map((departure) => departure.priceFrom).filter((value): value is number => typeof value === 'number') ||
-    []
+    departures
+      ?.map((departure) => departure.priceFrom)
+      .filter((value): value is number => typeof value === 'number') || []
 
   if (values.length === 0) {
     return null
@@ -175,7 +190,9 @@ export const getFutureDepartures = <T extends { departureDate?: null | string }>
   departures?: T[] | null,
 ) => {
   const today = new Date()
-  const threshold = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()))
+  const threshold = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
+  )
 
   return (departures || []).filter((departure) => {
     const date = toDateOnly(departure.departureDate)
@@ -184,10 +201,13 @@ export const getFutureDepartures = <T extends { departureDate?: null | string }>
   })
 }
 
-export const getNextDeparture = <T extends { departureDate?: null | string }>(departures?: T[] | null) =>
-  getFutureDepartures(departures)[0] || (departures?.[0] ?? null)
+export const getNextDeparture = <T extends { departureDate?: null | string }>(
+  departures?: T[] | null,
+) => getFutureDepartures(departures)[0] || (departures?.[0] ?? null)
 
-export const groupDeparturesByMonth = <T extends { departureDate?: null | string }>(departures?: T[] | null) => {
+export const groupDeparturesByMonth = <T extends { departureDate?: null | string }>(
+  departures?: T[] | null,
+) => {
   const groups = new Map<string, T[]>()
 
   for (const departure of departures || []) {

@@ -1,6 +1,7 @@
 import type React from 'react'
 
 import {
+  defaultThemeKey,
   defaultThemePresetByKey,
   normalizeThemeKey,
   normalizeThemePresetKey,
@@ -32,20 +33,20 @@ const spacingMap: Record<'compact' | 'standard' | 'airy', { large: string; small
 
 const fontPresetMap: Record<string, { body: string; heading: string }> = {
   editorial: {
-    body: 'var(--font-wingsside-body), var(--font-geist-sans)',
-    heading: 'var(--font-wingsside-heading), Georgia, serif',
+    body: 'var(--font-editorial-body), var(--font-geist-sans)',
+    heading: 'var(--font-editorial-heading), Georgia, serif',
   },
   modern: {
     body: 'var(--font-geist-sans)',
     heading: 'var(--font-geist-sans)',
   },
   premium: {
-    body: 'var(--font-wingsside-body), var(--font-geist-sans)',
-    heading: 'var(--font-wingsside-heading), Georgia, serif',
+    body: 'var(--font-editorial-body), var(--font-geist-sans)',
+    heading: 'var(--font-editorial-heading), Georgia, serif',
   },
   retail: {
-    body: 'var(--font-wingsgo-body), var(--font-geist-sans)',
-    heading: 'var(--font-wingsgo-heading), var(--font-geist-sans)',
+    body: 'var(--font-retail-body), var(--font-geist-sans)',
+    heading: 'var(--font-retail-heading), var(--font-geist-sans)',
   },
   system: {
     body: 'var(--font-geist-sans)',
@@ -69,7 +70,7 @@ export type SiteThemeTokens = {
 }
 
 export const getSiteThemeTokens = (settings?: null | ThemeSettingsLike): SiteThemeTokens => {
-  const themeKey = normalizeThemeKey(settings?.branding?.themeKey || 'wings-group')
+  const themeKey = normalizeThemeKey(settings?.branding?.themeKey || defaultThemeKey)
   const themePresetKey = normalizeThemePresetKey(themeKey)
   const presetTokens = resolveThemePresetTokens(themeKey, settings?.branding?.themePreset)
   const brandColor =

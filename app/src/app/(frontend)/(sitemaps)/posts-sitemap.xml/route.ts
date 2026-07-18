@@ -1,88 +1,91 @@
+import config from '@payload-config'
 import { getServerSideSitemap } from 'next-sitemap'
 import { getPayload } from 'payload'
-import config from '@payload-config'
-import { unstable_cache } from 'next/cache.js'
-import { getCanonicalURL, getPostCanonicalPath, getSiteId, getSiteSettingForSite } from '@/utilities/siteURLs'
-import { supportedLocaleCodes } from '@/utilities/sitePaths'
 
-const getPostsSitemap = unstable_cache(
-  async () => {
-    const payload = await getPayload({ config })
+import { getCurrentSite } from '@/utilities/siteContext'
+import { getPostCanonicalPath } from '@/utilities/siteURLs'
+import {
+  getCanonicalSiteOrigin,
+  getSiteSitemapLocales,
+  getSiteSitemapURL,
+} from '@/utilities/siteSEO'
 
-    const dateFallback = new Date().toISOString()
-    const sitemap = []
+export const dynamic = 'force-dynamic'
 
-    for (const locale of supportedLocaleCodes) {
-      const settings = await payload.find({
-        collection: 'site-settings',
-        depth: 1,
-        limit: 1000,
-        locale,
-        pagination: false,
-      })
+export async function GET(request: Request) {
+  const site = await getCurrentSite()
 
-      const settingsBySiteId = new Map(
-        settings.docs
-          .map((setting) => {
-            const siteId = getSiteId(setting.site)
+  if (!site) {
+    return new Response('Not found', { status: 404 })
+  }
 
-            return siteId ? ([siteId, setting] as const) : null
-          })
-          .filter((entry): entry is readonly [number, (typeof settings.docs)[number]] =>
-            Boolean(entry),
-          ),
-      )
+  const payload = await getPayload({ config })
+  const settings = await payload.find({
+    collection: 'site-settings',
+    depth: 0,
+    limit: 1,
+    pagination: false,
+    where: {
+      site: {
+        equals: site.id,
+      },
+    },
+  })
+  const origin = getCanonicalSiteOrigin({
+    requestOrigin: new URL(request.url).origin,
+    settings: settings.docs[0],
+    site,
+  })
+  const dateFallback = new Date().toISOString()
+  const sitemap = []
 
-      const results = await payload.find({
-        collection: 'posts',
-        overrideAccess: false,
-        draft: false,
-        depth: 1,
-        limit: 1000,
-        locale,
-        pagination: false,
-        where: {
-          _status: {
-            equals: 'published',
+  for (const locale of getSiteSitemapLocales(site)) {
+    const results = await payload.find({
+      collection: 'posts',
+      overrideAccess: false,
+      draft: false,
+      depth: 0,
+      limit: 1000,
+      locale,
+      pagination: false,
+      where: {
+        and: [
+          {
+            site: {
+              equals: site.id,
+            },
           },
-        },
-        select: {
-          slug: true,
-          site: true,
-          updatedAt: true,
-        },
-      })
+          {
+            _status: {
+              equals: 'published',
+            },
+          },
+        ],
+      },
+      select: {
+        slug: true,
+        updatedAt: true,
+      },
+    })
 
-      sitemap.push(
-        ...results.docs
-          .filter((post) => Boolean(post?.slug))
-          .map((post) => {
-            const siteSettings = getSiteSettingForSite(post.site, settingsBySiteId)
-
-            return {
-              loc: getCanonicalURL({
-                locale,
-                path: getPostCanonicalPath(post.slug),
-                settings: siteSettings,
-              }),
-              lastmod: post.updatedAt || dateFallback,
-            }
+    sitemap.push(
+      ...results.docs
+        .filter((post) => Boolean(post?.slug))
+        .map((post) => ({
+          loc: getSiteSitemapURL({
+            locale,
+            origin,
+            path: getPostCanonicalPath(post.slug),
           }),
-      )
-    }
-
-    return sitemap.filter(
-      (entry, index, entries) => entries.findIndex((candidate) => candidate.loc === entry.loc) === index,
+          lastmod: post.updatedAt || dateFallback,
+        })),
     )
-  },
-  ['posts-sitemap'],
-  {
-    tags: ['posts-sitemap'],
-  },
-)
+  }
 
-export async function GET() {
-  const sitemap = await getPostsSitemap()
-
-  return getServerSideSitemap(sitemap)
+  return getServerSideSitemap(
+    sitemap.filter(
+      (entry, index, entries) =>
+        entries.findIndex((candidate) => candidate.loc === entry.loc) === index,
+    ),
+  )
 }

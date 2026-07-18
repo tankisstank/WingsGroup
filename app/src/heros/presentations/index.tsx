@@ -48,7 +48,7 @@ const HeroVisual: React.FC<{
   </div>
 )
 
-const HeroPostcards: React.FC<Pick<HeroPresentationProps, 'postcards'>> = ({ postcards }) => (
+const HeroPostcards: React.FC<Pick<HeroPresentationProps, 'postcards'>> = ({ postcards }) =>
   postcards.length > 0 ? (
     <div className="hero-presentation__postcards">
       {postcards.map((label) => (
@@ -56,7 +56,6 @@ const HeroPostcards: React.FC<Pick<HeroPresentationProps, 'postcards'>> = ({ pos
       ))}
     </div>
   ) : null
-)
 
 const CenteredVisualHero: React.FC<HeroPresentationProps> = ({
   badge,
@@ -90,7 +89,9 @@ const SplitVisualHero: React.FC<HeroPresentationProps> = ({
       <HeroVisual media={media} priority />
       <HeroPostcards postcards={postcards} />
     </div>
-    {businessPanel ? <div className="hero-presentation__business-panel">{businessPanel}</div> : null}
+    {businessPanel ? (
+      <div className="hero-presentation__business-panel">{businessPanel}</div>
+    ) : null}
   </div>
 )
 
@@ -126,7 +127,9 @@ const LayeredVisualsHero: React.FC<HeroPresentationProps> = ({
       </div>
       <HeroCopy badge={badge} centered links={links} richText={richText} />
       <HeroPostcards postcards={postcards} />
-      {businessPanel ? <div className="hero-presentation__business-panel">{businessPanel}</div> : null}
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
     </div>
   )
 }
@@ -139,13 +142,24 @@ const GradientMeshHero: React.FC<HeroPresentationProps> = ({
   richText,
 }) => (
   <div className="hero-presentation hero-presentation--mesh">
-    <div className="hero-presentation__mesh-orb hero-presentation__mesh-orb--one" aria-hidden="true" />
-    <div className="hero-presentation__mesh-orb hero-presentation__mesh-orb--two" aria-hidden="true" />
-    <div className="hero-presentation__mesh-orb hero-presentation__mesh-orb--three" aria-hidden="true" />
+    <div
+      className="hero-presentation__mesh-orb hero-presentation__mesh-orb--one"
+      aria-hidden="true"
+    />
+    <div
+      className="hero-presentation__mesh-orb hero-presentation__mesh-orb--two"
+      aria-hidden="true"
+    />
+    <div
+      className="hero-presentation__mesh-orb hero-presentation__mesh-orb--three"
+      aria-hidden="true"
+    />
     <div className="container hero-presentation__mesh-content">
       <HeroCopy badge={badge} centered links={links} richText={richText} />
       <HeroPostcards postcards={postcards} />
-      {businessPanel ? <div className="hero-presentation__business-panel">{businessPanel}</div> : null}
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
     </div>
   </div>
 )
@@ -171,7 +185,9 @@ export const PlannerSplitHero: React.FC<HeroPresentationProps> = ({
         <HeroVisual media={media} priority />
         <HeroPostcards postcards={postcards} />
       </div>
-      {businessPanel ? <div className="hero-presentation__business-panel">{businessPanel}</div> : null}
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
     </div>
   </div>
 )
@@ -185,12 +201,14 @@ const getSlideMedia = (slide: HeroSlide, mobile = false) => {
 export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
   badge,
   behavior,
+  businessPanel,
   links,
   preset,
   richText,
   slides,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [clientReady, setClientReady] = useState(false)
   const [paused, setPaused] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [documentVisible, setDocumentVisible] = useState(true)
@@ -198,6 +216,9 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
   const safeSlides = (slides || []).filter((slide) => getSlideMedia(slide))
   const canAutoplay =
     behavior.autoplay && !paused && isVisible && documentVisible && safeSlides.length > 1
+  const semanticHeading = safeSlides[0]?.title || null
+
+  useEffect(() => setClientReady(true), [])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -239,6 +260,7 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
 
   const goTo = (index: number) => {
     if (safeSlides.length === 0) return
+    setPaused(true)
     setActiveIndex((index + safeSlides.length) % safeSlides.length)
   }
 
@@ -254,13 +276,21 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
     <div
       aria-roledescription="carousel"
       className="hero-presentation hero-presentation--carousel"
+      data-business-panel={businessPanel ? 'true' : 'false'}
+      data-client-ready={clientReady ? 'true' : 'false'}
       data-transition={behavior.transition}
       onMouseEnter={() => behavior.pauseOnHover && setPaused(true)}
       onMouseLeave={() => behavior.pauseOnHover && setPaused(false)}
       ref={rootRef}
       role="region"
-      style={{ '--hero-transition-ms': `${behavior.transitionMs}ms` } as React.CSSProperties}
+      style={
+        {
+          '--hero-ken-burns-ms': `${behavior.intervalMs}ms`,
+          '--hero-transition-ms': `${behavior.transitionMs}ms`,
+        } as React.CSSProperties
+      }
     >
+      {semanticHeading ? <h1 className="sr-only">{semanticHeading}</h1> : null}
       <div className="hero-presentation__carousel-stage">
         {safeSlides.map((slide, index) => {
           const desktopMedia = getSlideMedia(slide)
@@ -275,7 +305,10 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
               data-active={isActive}
               key={slide.id || `${slide.title}-${index}`}
             >
-              <div className="hero-presentation__slide-media hero-presentation__slide-media--desktop">
+              <div
+                className="hero-presentation__slide-media hero-presentation__slide-media--desktop"
+                data-ken-burns={isActive && !paused ? 'active' : 'idle'}
+              >
                 {desktopMedia ? (
                   <Media
                     fill
@@ -285,7 +318,10 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
                   />
                 ) : null}
               </div>
-              <div className="hero-presentation__slide-media hero-presentation__slide-media--mobile">
+              <div
+                className="hero-presentation__slide-media hero-presentation__slide-media--mobile"
+                data-ken-burns={isActive && !paused ? 'active' : 'idle'}
+              >
                 {mobileMedia ? (
                   <Media
                     fill
@@ -312,6 +348,9 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
           )
         })}
       </div>
+      {businessPanel ? (
+        <div className="container hero-presentation__carousel-business-panel">{businessPanel}</div>
+      ) : null}
       <div className="container hero-presentation__carousel-controls">
         {behavior.showArrows ? (
           <div>

@@ -13,7 +13,12 @@ import type { Post } from '@/payload-types'
 import { PostHero } from '@/heros/PostHero'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { generateMeta } from '@/utilities/generateMeta'
-import { appendSiteWhere, getCurrentLocale, getCurrentSitePrefix } from '@/utilities/siteContext'
+import {
+  appendSiteWhere,
+  getCurrentLocale,
+  getCurrentSite,
+  getCurrentSitePrefix,
+} from '@/utilities/siteContext'
 import { JsonLd } from '@/components/JsonLd'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
@@ -26,32 +31,29 @@ import { buildPostBreadcrumbItems, type BreadcrumbPost } from '@/utilities/bread
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getPostCanonicalPath } from '@/utilities/siteURLs'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 
 type Args = {
   params: Promise<{
     slug?: string
   }>
-  searchParams?: Promise<{
-    site?: string
-    siteAlias?: string
-    locale?: SupportedLocaleCode
-  }>
 }
 
-export default async function Post({ params: paramsPromise, searchParams }: Args) {
+export default async function Post({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
   const { slug = '' } = await paramsPromise
-  const resolvedSearchParams = searchParams ? await searchParams : undefined
-  const locale = await getCurrentLocale(resolvedSearchParams?.locale)
-  const sitePrefix = await getCurrentSitePrefix(resolvedSearchParams?.siteAlias)
+  const locale = await getCurrentLocale()
+  const sitePrefix = await getCurrentSitePrefix()
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const url = `${sitePrefix}/posts/${decodedSlug}`.replace(/\/+/g, '/')
-  const post = await queryPostBySlug({ slug: decodedSlug, siteCode: resolvedSearchParams?.site, locale })
+  const post = await queryPostBySlug({ slug: decodedSlug, locale })
 
   if (!post) return <PayloadRedirects url={url} />
 
-  const settings = await getCurrentSiteSettings(resolvedSearchParams?.site)
+  const settings = await getCurrentSiteSettings()
+  const site = await getCurrentSite()
+  const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
   const canonicalPath = getPostCanonicalPath(decodedSlug, locale)
   const breadcrumbItems = buildPostBreadcrumbItems({
     locale,
@@ -64,15 +66,17 @@ export default async function Post({ params: paramsPromise, searchParams }: Args
       <JsonLd
         data={[
           buildWebPageJSONLD({
+            canonicalOrigin,
             description: post.meta?.description,
             path: canonicalPath,
             settings,
             title: post.meta?.title || post.title,
           }),
-          buildArticleJSONLD({ path: canonicalPath, post, settings }),
+          buildArticleJSONLD({ canonicalOrigin, path: canonicalPath, post, settings }),
           buildBreadcrumbListJSONLD(
             breadcrumbItems.map((item) => ({ name: item.label, path: item.path })),
             settings,
+            { canonicalOrigin },
           ),
         ]}
       />
@@ -103,30 +107,25 @@ export default async function Post({ params: paramsPromise, searchParams }: Args
 
 export async function generateMetadata({
   params: paramsPromise,
-  searchParams,
 }: Args): Promise<Metadata> {
   const { slug = '' } = await paramsPromise
-  const resolvedSearchParams = searchParams ? await searchParams : undefined
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
-  const locale = await getCurrentLocale(resolvedSearchParams?.locale)
-  const post = await queryPostBySlug({ slug: decodedSlug, siteCode: resolvedSearchParams?.site, locale })
+  const locale = await getCurrentLocale()
+  const post = await queryPostBySlug({ slug: decodedSlug, locale })
 
   return generateMeta({
     doc: post,
     locale,
     path: getPostCanonicalPath(decodedSlug),
-    siteCode: resolvedSearchParams?.site,
   })
 }
 
 const queryPostBySlug = async ({
   locale,
-  siteCode,
   slug,
 }: {
   locale?: SupportedLocaleCode
-  siteCode?: string
   slug: string
 }) => {
   const { isEnabled: draft } = await draftMode()
@@ -138,7 +137,6 @@ const queryPostBySlug = async ({
         equals: slug,
       },
     },
-    siteCode,
   )
 
   const result = await payload.find({

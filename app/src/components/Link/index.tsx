@@ -3,19 +3,20 @@
 import { Button, type ButtonProps } from '@/components/ui/button'
 import { cn } from '@/utilities/ui'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import React from 'react'
 
 import type { Page, Post } from '@/payload-types'
-import { getLocaleFromPathname, getSiteAliasFromPathname, prefixPathWithSite } from '@/utilities/sitePaths'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
+import { useSitePath } from '@/utilities/useSitePath'
 
 type CMSLinkType = {
+  ariaLabel?: string
   appearance?: 'inline' | ButtonProps['variant']
   children?: React.ReactNode
   className?: string
   label?: string | null
   newTab?: boolean | null
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>
   reference?: {
     relationTo: 'pages' | 'posts'
     value: Page | Post | string | number
@@ -26,16 +27,16 @@ type CMSLinkType = {
 }
 
 export const CMSLink: React.FC<CMSLinkType> = (props) => {
-  const pathname = usePathname()
-  const siteAlias = getSiteAliasFromPathname(pathname)
-  const locale = getLocaleFromPathname(pathname)
+  const toSitePath = useSitePath()
   const {
+    ariaLabel,
     type,
     appearance = 'inline',
     children,
     className,
     label,
     newTab,
+    onClick,
     reference,
     size: sizeFromProps,
     url,
@@ -52,7 +53,7 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
 
   if (!href) return null
 
-  const siteAwareHref = prefixPathWithSite(href, siteAlias, locale)
+  const siteAwareHref = toSitePath(href)
 
   const size = appearance === 'link' ? 'clear' : sizeFromProps
   const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
@@ -60,7 +61,13 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
   /* Ensure we don't break any styles set by richText */
   if (appearance === 'inline') {
     return (
-      <Link className={cn(className)} href={siteAwareHref} {...newTabProps}>
+      <Link
+        aria-label={ariaLabel}
+        className={cn(className)}
+        href={siteAwareHref}
+        onClick={onClick}
+        {...newTabProps}
+      >
         {label && label}
         {children && children}
       </Link>
@@ -69,7 +76,13 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
 
   return (
     <Button asChild className={className} size={size} variant={appearance}>
-      <Link className={cn(className)} href={siteAwareHref} {...newTabProps}>
+      <Link
+        aria-label={ariaLabel}
+        className={cn(className)}
+        href={siteAwareHref}
+        onClick={onClick}
+        {...newTabProps}
+      >
         {label && label}
         {children && children}
       </Link>

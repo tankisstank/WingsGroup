@@ -37,12 +37,40 @@ const splitSummaryParagraphs = (summary?: null | string) =>
     .split(/(?<=\.)\s+/)
     .filter(Boolean)
 
-const Panel = ({
-  children,
-  className = '',
-  ...props
-}: React.HTMLAttributes<HTMLElement>) => (
-  <section className={`rounded-[28px] border border-border/70 bg-card/95 p-6 shadow-sm ${className}`} {...props}>
+const unusableContentPatterns = [
+  /^dang cap nhat$/iu,
+  /^theo line ban$/iu,
+  /^route fallback$/iu,
+  /^khach retail can route ro$/iu,
+  /^can bang tham quan, nghi va thoi gian tu do$/iu,
+]
+
+const normalizeComparableText = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[đĐ]/g, 'd')
+    .toLowerCase()
+    .trim()
+
+const isUsableText = (value: unknown): value is string => {
+  const text = String(value || '').trim()
+  if (!text) return false
+
+  const comparable = normalizeComparableText(text)
+  return !unusableContentPatterns.some((pattern) => pattern.test(comparable))
+}
+
+const compactInfoItems = (items: Array<[string, unknown]>) =>
+  items
+    .filter(([, value]) => isUsableText(value))
+    .map(([label, value]) => [label, String(value).trim()] as const)
+
+const Panel = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLElement>) => (
+  <section
+    className={`rounded-[28px] border border-border/70 bg-card/95 p-6 shadow-sm ${className}`}
+    {...props}
+  >
     {children}
   </section>
 )
@@ -65,7 +93,9 @@ const SectionHeading = ({
     ) : (
       <h2 className="mt-2 text-2xl font-semibold text-foreground md:text-3xl">{title}</h2>
     )}
-    {description ? <p className="mt-2 max-w-4xl text-sm text-muted-foreground md:text-base">{description}</p> : null}
+    {description ? (
+      <p className="mt-2 max-w-4xl text-sm text-muted-foreground md:text-base">{description}</p>
+    ) : null}
   </div>
 )
 
@@ -162,11 +192,14 @@ const ReviewSnapshotCard = ({
   return (
     <div className="rounded-[24px] border border-border/60 bg-muted/20 p-4">
       <div className="flex items-end gap-3">
-        <p className="text-4xl font-semibold leading-none text-foreground">{Number(reviewSnapshot.score).toFixed(1)}</p>
+        <p className="text-4xl font-semibold leading-none text-foreground">
+          {Number(reviewSnapshot.score).toFixed(1)}
+        </p>
         <div>
           <p className="text-sm font-semibold text-foreground">Đánh giá tour</p>
           <p className="text-sm text-muted-foreground">
-            {reviewSnapshot.reviewCount || 0} review • {reviewSnapshot.travelerCount || 0}+ khách đã đi
+            {reviewSnapshot.reviewCount || 0} review • {reviewSnapshot.travelerCount || 0}+ khách đã
+            đi
           </p>
         </div>
       </div>
@@ -210,13 +243,17 @@ const TourDecisionHeader = ({
       </Panel>
       <div className="space-y-4">
         <Panel>
-          <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">Tour outbound giá rõ</p>
+          <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
+            Tour outbound giá rõ
+          </p>
           <h1 className="mt-2 text-3xl font-semibold leading-tight md:text-4xl">{tour.title}</h1>
           {tour.variantLabel ? (
             <p className="mt-2 text-sm font-medium text-[var(--site-brand)]">{tour.variantLabel}</p>
           ) : null}
           {summaryParagraphs[0] ? (
-            <p className="mt-3 text-sm text-muted-foreground md:text-base">{summaryParagraphs[0]}</p>
+            <p className="mt-3 text-sm text-muted-foreground md:text-base">
+              {summaryParagraphs[0]}
+            </p>
           ) : null}
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl bg-muted/50 p-4">
@@ -225,27 +262,39 @@ const TourDecisionHeader = ({
                 {formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency) || 'Liên hệ'}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {nextDeparture?.depositNote || tour.factSummary?.holdNote || 'Sales xác nhận lại giá trước khi giữ chỗ.'}
+                {nextDeparture?.depositNote ||
+                  tour.factSummary?.holdNote ||
+                  'Sales xác nhận lại giá trước khi giữ chỗ.'}
               </p>
             </div>
             <div className="rounded-2xl bg-muted/50 p-4">
-              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Khởi hành gần nhất</p>
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                Khởi hành gần nhất
+              </p>
               <p className="mt-1 text-lg font-semibold text-foreground">
                 {formatTourDate(nextDeparture?.departureDate, locale) || 'Đang cập nhật'}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {[nextDeparture?.airline, nextDeparture?.departureCity].filter(Boolean).join(' • ') || 'Đang cập nhật'}
+                {[nextDeparture?.airline, nextDeparture?.departureCity]
+                  .filter(Boolean)
+                  .join(' • ') || 'Đang cập nhật'}
               </p>
             </div>
           </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <ReviewSnapshotCard reviewSnapshot={reviewSnapshot} />
             <div className="rounded-[24px] border border-border/60 bg-background p-4">
-              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Quyết định nhanh</p>
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                Quyết định nhanh
+              </p>
               <div className="mt-3 grid gap-2 text-sm text-foreground">
                 <p>{durationLabel || 'Theo chương trình'}</p>
                 <p>{tour.factSummary?.routeSummary || tour.title}</p>
-                <p>{tour.factSummary?.hotelSummary || tour.servicesSummary?.hotelSummary || 'Khách sạn 3-4 sao theo line bán'}</p>
+                <p>
+                  {tour.factSummary?.hotelSummary ||
+                    tour.servicesSummary?.hotelSummary ||
+                    'Khách sạn 3-4 sao theo line bán'}
+                </p>
                 <p>{getAvailabilityLabel(nextDeparture?.availabilityStatus, locale)}</p>
               </div>
             </div>
@@ -297,14 +346,18 @@ const TourDecisionHeader = ({
           </div>
           {variants.length > 0 ? (
             <div className="mt-6 rounded-[24px] border border-border/60 bg-muted/20 p-4">
-              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Biến thể tour</p>
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                Biến thể tour
+              </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {variants.map((variant) => (
                   <span
                     className="rounded-full border border-border bg-background px-3 py-1 text-sm font-medium text-foreground"
                     key={variant.id}
                   >
-                    {[variant.label, variant.airline || null, variant.departureCity || null].filter(Boolean).join(' • ')}
+                    {[variant.label, variant.airline || null, variant.departureCity || null]
+                      .filter(Boolean)
+                      .join(' • ')}
                   </span>
                 ))}
               </div>
@@ -360,21 +413,33 @@ const TourReviewsProofSection = ({ tour }: { tour: Record<string, any> }) => {
       <SectionHeading
         eyebrow="Đánh giá & trust"
         title="Khách chốt tour này vì điều gì"
-        description={snapshot.whyGuestsChoose || 'Đánh giá thực tế, tín hiệu trust và lý do khách chọn line này được gom lại để người xem quyết nhanh hơn.'}
+        description={
+          snapshot.whyGuestsChoose ||
+          'Đánh giá thực tế, tín hiệu trust và lý do khách chọn line này được gom lại để người xem quyết nhanh hơn.'
+        }
       />
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
         <div className="rounded-[28px] border border-border/60 bg-muted/25 p-5">
-          <p className="text-5xl font-semibold text-foreground">{snapshot.score ? Number(snapshot.score).toFixed(1) : '--'}</p>
-          <p className="mt-2 text-sm font-semibold text-foreground">{snapshot.sourceLabel || 'Đánh giá khách đã đi'}</p>
+          <p className="text-5xl font-semibold text-foreground">
+            {snapshot.score ? Number(snapshot.score).toFixed(1) : '--'}
+          </p>
+          <p className="mt-2 text-sm font-semibold text-foreground">
+            {snapshot.sourceLabel || 'Đánh giá khách đã đi'}
+          </p>
           <p className="mt-2 text-sm text-muted-foreground">
             {snapshot.reviewCount || 0} review • {snapshot.travelerCount || 0}+ khách đã trải nghiệm
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {quotes.map((quote, index) => (
-            <div className="rounded-[24px] border border-border/60 bg-background p-5" key={`${quote.author}-${index}`}>
+            <div
+              className="rounded-[24px] border border-border/60 bg-background p-5"
+              key={`${quote.author}-${index}`}
+            >
               <p className="text-sm leading-7 text-muted-foreground">“{quote.quote}”</p>
-              {quote.author ? <p className="mt-4 text-sm font-semibold text-foreground">{quote.author}</p> : null}
+              {quote.author ? (
+                <p className="mt-4 text-sm font-semibold text-foreground">{quote.author}</p>
+              ) : null}
             </div>
           ))}
         </div>
@@ -395,11 +460,14 @@ const TourWhyChooseSection = ({ tour }: { tour: Record<string, any> }) => {
       <SectionHeading
         eyebrow="Điểm nổi bật"
         title="Vì sao khách dễ chọn chương trình này"
-        description="Mỗi điểm nổi bật phải giải thích được sự khác biệt thật của line tour này, không chỉ liệt kê chung chung."
+        description={null}
       />
       <div className="grid gap-4 md:grid-cols-3">
         {highlights.map((item, index) => (
-          <div className="rounded-[24px] border border-border/60 bg-muted/35 p-5" key={`${item.title}-${index}`}>
+          <div
+            className="rounded-[24px] border border-border/60 bg-muted/35 p-5"
+            key={`${item.title}-${index}`}
+          >
             <h3 className="text-lg font-semibold">{item.title}</h3>
             <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.description}</p>
           </div>
@@ -420,13 +488,17 @@ const TourRouteVisualSection = ({ tour }: { tour: Record<string, any> }) => {
       <SectionHeading
         eyebrow="Hành trình trực quan"
         title="Nhịp hành trình và route thực tế"
-        description={tour.routeViz?.routeCaption || 'Route được hiển thị như một cấu trúc dễ đọc để khách hiểu đi đâu trước, ngủ ở đâu và nhịp chương trình nặng hay nhẹ.'}
+        description={isUsableText(tour.routeViz?.routeCaption) ? tour.routeViz.routeCaption : null}
       />
       <div className="grid gap-6 lg:grid-cols-[1fr_0.95fr]">
         <div className="space-y-4">
           <div className="rounded-[24px] border border-border/60 bg-muted/20 p-5">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Tóm tắt route</p>
-            <p className="mt-2 text-lg font-semibold text-foreground">{tour.factSummary?.routeSummary || tour.title}</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              Tóm tắt route
+            </p>
+            <p className="mt-2 text-lg font-semibold text-foreground">
+              {tour.factSummary?.routeSummary || tour.title}
+            </p>
             <p className="mt-3 text-sm leading-7 text-muted-foreground">
               {summaryParagraphs[1] || summaryParagraphs[0] || tour.summary}
             </p>
@@ -438,26 +510,38 @@ const TourRouteVisualSection = ({ tour }: { tour: Record<string, any> }) => {
                   .slice()
                   .sort((left, right) => Number(left.order || 0) - Number(right.order || 0))
                   .map((stop, index) => (
-                    <div className="rounded-[24px] border border-border/60 bg-background p-4" key={`${stop.label}-${index}`}>
+                    <div
+                      className="rounded-[24px] border border-border/60 bg-background p-4"
+                      key={`${stop.label}-${index}`}
+                    >
                       <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
                         Bước {String(index + 1).padStart(2, '0')}
                       </p>
                       <p className="mt-2 text-base font-semibold text-foreground">{stop.label}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{stop.type || 'Điểm trong chương trình'}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {stop.type || 'Điểm trong chương trình'}
+                      </p>
                     </div>
                   ))}
               </div>
             ) : null}
             {travelLegs.length > 0 ? (
               <div className="rounded-[24px] border border-border/60 bg-background p-5">
-                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Chặng di chuyển</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                  Chặng di chuyển
+                </p>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   {travelLegs.map((leg, index) => (
-                    <div className="rounded-[20px] bg-muted/35 p-4" key={`${leg.from}-${leg.to}-${index}`}>
+                    <div
+                      className="rounded-[20px] bg-muted/35 p-4"
+                      key={`${leg.from}-${leg.to}-${index}`}
+                    >
                       <p className="text-sm font-semibold text-foreground">
                         {leg.from} → {leg.to}
                       </p>
-                      <p className="mt-1 text-sm text-muted-foreground">{leg.mode || 'Theo tuyến'}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {leg.mode || 'Theo tuyến'}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -475,16 +559,26 @@ const TourRouteVisualSection = ({ tour }: { tour: Record<string, any> }) => {
             />
           ) : (
             <div className="flex h-full flex-col justify-center gap-4 p-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Route fallback</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Các điểm chính
+              </p>
               <div className="flex flex-wrap gap-3">
-                {routeStops.map((stop, index) => (
-                  <React.Fragment key={`${stop.label}-${index}`}>
-                    <span className="rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground">
-                      {stop.label}
-                    </span>
-                    {index < routeStops.length - 1 ? <span className="self-center text-muted-foreground">→</span> : null}
-                  </React.Fragment>
-                ))}
+                {routeStops.length > 0
+                  ? routeStops.map((stop, index) => (
+                      <React.Fragment key={`${stop.label}-${index}`}>
+                        <span className="rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground">
+                          {stop.label}
+                        </span>
+                        {index < routeStops.length - 1 ? (
+                          <span className="self-center text-muted-foreground">→</span>
+                        ) : null}
+                      </React.Fragment>
+                    ))
+                  : summaryParagraphs.slice(0, 2).map((paragraph, index) => (
+                      <p className="text-sm leading-7 text-muted-foreground" key={index}>
+                        {paragraph}
+                      </p>
+                    ))}
               </div>
             </div>
           )}
@@ -500,18 +594,16 @@ const TourItinerarySection = ({ tour }: { tour: Record<string, any> }) => {
 
   return (
     <Panel id="itinerary">
-      <SectionHeading
-        eyebrow="Lịch trình"
-        title="Lịch trình theo ngày"
-        description="Mỗi ngày hiển thị rõ route, ăn gì, đi bằng gì, ngủ ở đâu và điểm nhấn bán hàng để khách không phải đoán nhịp tour."
-      />
+      <SectionHeading eyebrow="Lịch trình" title="Lịch trình theo ngày" description={null} />
       <div className="mb-6 grid gap-4 md:grid-cols-4">
-        {[
+        {compactInfoItems([
           ['Thời lượng', getDurationLabel(tour.durationDays, tour.durationNights)],
           ['Cụm điểm đến', groupedThemeCount ? `${groupedThemeCount} cụm` : null],
-          ['Nhịp tour', 'Cân bằng tham quan, nghỉ và thời gian tự do'],
-          ['Phù hợp', getBadgeGroups(asArray<Record<string, any>>(tour.badges)).suitable.join(' · ') || 'Khách retail cần route rõ'],
-        ].map(([label, value]) => (
+          [
+            'Phù hợp',
+            getBadgeGroups(asArray<Record<string, any>>(tour.badges)).suitable.join(' · ') || null,
+          ],
+        ]).map(([label, value]) => (
           <div className="rounded-[24px] border border-border/60 bg-muted/25 p-5" key={label}>
             <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
             <p className="mt-2 text-sm font-semibold leading-7 text-foreground">{value}</p>
@@ -521,64 +613,90 @@ const TourItinerarySection = ({ tour }: { tour: Record<string, any> }) => {
       <div className="space-y-5">
         {itineraryDays.map((day, index) => {
           const gallery = asArray(day.gallery)
-          const fallbackGallery = gallery.length > 0 ? gallery : asArray(tour.gallery).slice(0, 3)
+          const infoItems = compactInfoItems([
+            ['Bữa ăn', day.meals],
+            ['Di chuyển', day.transport],
+            ['Lưu trú', day.accommodation],
+            ['Tiêu chuẩn nghỉ', day.sleepingStandard],
+          ])
 
           return (
             <div
-              className="grid gap-5 rounded-[28px] border border-border/60 bg-muted/15 p-5 lg:grid-cols-[96px_1fr_320px]"
+              className={`grid gap-5 rounded-[28px] border border-border/60 bg-muted/15 p-5 ${
+                gallery.length > 0 ? 'lg:grid-cols-[96px_1fr_320px]' : 'lg:grid-cols-[96px_1fr]'
+              }`}
               key={`${day.dayNumber}-${index}`}
             >
               <div className="rounded-[20px] bg-muted/45 p-4">
-                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Day {day.dayNumber}</p>
-                <p className="mt-2 text-3xl font-semibold">{String(day.dayNumber).padStart(2, '0')}</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                  Day {day.dayNumber}
+                </p>
+                <p className="mt-2 text-3xl font-semibold">
+                  {String(day.dayNumber).padStart(2, '0')}
+                </p>
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-foreground">{day.title}</h3>
-                {day.dayTheme ? <p className="mt-2 text-sm font-semibold text-[var(--site-brand)]">{day.dayTheme}</p> : null}
+                {day.dayTheme ? (
+                  <p className="mt-2 text-sm font-semibold text-[var(--site-brand)]">
+                    {day.dayTheme}
+                  </p>
+                ) : null}
                 <p className="mt-2 text-sm font-medium text-foreground">{day.route}</p>
                 <p className="mt-3 text-sm leading-7 text-muted-foreground">{day.summary}</p>
                 {day.dayHighlight ? (
                   <div className="mt-4 rounded-[20px] border border-border/60 bg-background p-4">
-                    <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Điểm nhấn bán hàng</p>
+                    <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                      Điểm nhấn bán hàng
+                    </p>
                     <p className="mt-2 text-sm leading-7 text-foreground">{day.dayHighlight}</p>
                   </div>
                 ) : null}
-                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  {[
-                    ['Bữa ăn', day.meals],
-                    ['Di chuyển', day.transport],
-                    ['Lưu trú', day.accommodation],
-                    ['Tiêu chuẩn nghỉ', day.sleepingStandard || 'Theo line bán'],
-                  ].map(([label, value]) => (
-                    <div className="rounded-[20px] border border-border/60 bg-background p-4" key={label}>
-                      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
-                      <p className="mt-2 text-sm font-medium leading-7 text-foreground">{value || 'Đang cập nhật'}</p>
-                    </div>
-                  ))}
-                </div>
+                {infoItems.length > 0 ? (
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    {infoItems.map(([label, value]) => (
+                      <div
+                        className="rounded-[20px] border border-border/60 bg-background p-4"
+                        key={label}
+                      >
+                        <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                          {label}
+                        </p>
+                        <p className="mt-2 text-sm font-medium leading-7 text-foreground">
+                          {value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
                 {day.equipmentNote || day.notes ? (
                   <p className="mt-4 text-sm leading-7 text-muted-foreground">
                     {[day.equipmentNote, day.notes].filter(Boolean).join(' ')}
                   </p>
                 ) : null}
               </div>
-              <div className="space-y-3">
-                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                  {gallery.length > 0 ? 'Gallery theo ngày' : 'Ảnh minh họa chương trình'}
-                </p>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                  {fallbackGallery.slice(0, 3).map((item, imageIndex) => (
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-[22px] border border-border/60 bg-muted" key={imageIndex}>
-                      <Media
-                        fill
-                        imgClassName="object-cover"
-                        pictureClassName="absolute inset-0"
-                        resource={item as any}
-                      />
-                    </div>
-                  ))}
+              {gallery.length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                    Hình ảnh trong ngày
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                    {gallery.slice(0, 3).map((item, imageIndex) => (
+                      <div
+                        className="relative aspect-[4/3] overflow-hidden rounded-[22px] border border-border/60 bg-muted"
+                        key={imageIndex}
+                      >
+                        <Media
+                          fill
+                          imgClassName="object-cover"
+                          pictureClassName="absolute inset-0"
+                          resource={item as any}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           )
         })}
@@ -590,7 +708,9 @@ const TourItinerarySection = ({ tour }: { tour: Record<string, any> }) => {
 const TourServicesSection = ({ tour }: { tour: Record<string, any> }) => {
   const includes = asArray<Record<string, any>>(tour.includes)
   const excludes = asArray<Record<string, any>>(tour.excludes)
-  const accommodationStops = collectAccommodationStops(asArray<Record<string, any>>(tour.itineraryDays))
+  const accommodationStops = collectAccommodationStops(
+    asArray<Record<string, any>>(tour.itineraryDays),
+  )
   const servicesSummary = tour.servicesSummary || {}
 
   return (
@@ -598,7 +718,7 @@ const TourServicesSection = ({ tour }: { tour: Record<string, any> }) => {
       <SectionHeading
         eyebrow="Dịch vụ & lưu trú"
         title="Giá đã gồm gì, ngủ ở đâu, lưu ý điều hành nào cần biết"
-        description="Phần này được trình bày theo logic mua tour: những gì đã có trong giá, phần khách tự túc, tiêu chuẩn khách sạn, bữa ăn, di chuyển và lưu ý điều hành."
+        description={null}
       />
       <div className="grid gap-5 xl:grid-cols-2">
         <div className="grid gap-5 md:grid-cols-2">
@@ -611,7 +731,9 @@ const TourServicesSection = ({ tour }: { tour: Record<string, any> }) => {
             </ul>
           </div>
           <div className="rounded-[24px] border border-border/60 bg-muted/20 p-5">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Chi phí tự túc</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              Chi phí tự túc
+            </p>
             <ul className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
               {excludes.map((item, index) => (
                 <li key={`${item.label}-${index}`}>{item.label}</li>
@@ -619,43 +741,63 @@ const TourServicesSection = ({ tour }: { tour: Record<string, any> }) => {
             </ul>
           </div>
           <div className="rounded-[24px] border border-border/60 bg-background p-5">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Khách sạn / nghỉ đêm</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              Khách sạn / nghỉ đêm
+            </p>
             <p className="mt-3 text-sm leading-7 text-muted-foreground">
-              {servicesSummary.hotelSummary || tour.factSummary?.hotelSummary || 'Khách sạn theo line bán, xác nhận lại trước ngày đi.'}
+              {servicesSummary.hotelSummary ||
+                tour.factSummary?.hotelSummary ||
+                'Tiêu chuẩn lưu trú được xác nhận theo từng chương trình.'}
             </p>
           </div>
           <div className="rounded-[24px] border border-border/60 bg-background p-5">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Di chuyển & ăn uống</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              Di chuyển & ăn uống
+            </p>
             <p className="mt-3 text-sm leading-7 text-muted-foreground">
-              {[servicesSummary.transportSummary, servicesSummary.mealsSummary].filter(Boolean).join(' ')}
+              {[servicesSummary.transportSummary, servicesSummary.mealsSummary]
+                .filter(Boolean)
+                .join(' ')}
             </p>
           </div>
         </div>
         <div className="space-y-5">
           <div className="rounded-[24px] border border-border/60 bg-background p-5">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Điểm ngủ đêm trong tour</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              Điểm ngủ đêm trong tour
+            </p>
             <div className="mt-4 grid gap-3">
               {accommodationStops.map((stop, index) => (
-                <div className="rounded-[20px] bg-muted/25 p-4" key={`${stop.accommodation}-${index}`}>
+                <div
+                  className="rounded-[20px] bg-muted/25 p-4"
+                  key={`${stop.accommodation}-${index}`}
+                >
                   <p className="text-sm font-semibold text-foreground">
                     Đêm {stop.dayNumber}: {stop.accommodation}
                   </p>
                   {stop.sleepingStandard ? (
                     <p className="mt-1 text-sm text-muted-foreground">{stop.sleepingStandard}</p>
                   ) : null}
-                  {stop.route ? <p className="mt-1 text-sm text-muted-foreground">{stop.route}</p> : null}
+                  {stop.route ? (
+                    <p className="mt-1 text-sm text-muted-foreground">{stop.route}</p>
+                  ) : null}
                 </div>
               ))}
             </div>
           </div>
-          {(servicesSummary.operatorNotes || asArray<Record<string, any>>(servicesSummary.importantNotes).length > 0) ? (
+          {servicesSummary.operatorNotes ||
+          asArray<Record<string, any>>(servicesSummary.notes).length > 0 ? (
             <div className="rounded-[24px] border border-border/60 bg-background p-5">
-              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Lưu ý điều hành</p>
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                Lưu ý điều hành
+              </p>
               {servicesSummary.operatorNotes ? (
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">{servicesSummary.operatorNotes}</p>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                  {servicesSummary.operatorNotes}
+                </p>
               ) : null}
               <ul className="mt-3 space-y-2 text-sm leading-7 text-muted-foreground">
-                {asArray<Record<string, any>>(servicesSummary.importantNotes).map((item, index) => (
+                {asArray<Record<string, any>>(servicesSummary.notes).map((item, index) => (
                   <li key={`${item.label}-${index}`}>{item.label}</li>
                 ))}
               </ul>
@@ -691,14 +833,17 @@ const DepartureMatrix = ({
           >
             <div>
               <p className="text-lg font-semibold text-foreground">
-                {[formatTourDate(departure.departureDate, locale), variant?.label].filter(Boolean).join(' • ')}
+                {[formatTourDate(departure.departureDate, locale), variant?.label]
+                  .filter(Boolean)
+                  .join(' • ')}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {[departure.departureCity, departure.airline].filter(Boolean).join(' • ')}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
-                  {departure.availabilityBadge || getAvailabilityLabel(departure.availabilityStatus, locale)}
+                  {departure.availabilityBadge ||
+                    getAvailabilityLabel(departure.availabilityStatus, locale)}
                 </span>
                 {departure.urgencyLabel ? (
                   <span className="rounded-full border border-[var(--site-accent)]/40 bg-[var(--site-accent)]/10 px-3 py-1 text-xs font-semibold text-foreground">
@@ -714,15 +859,21 @@ const DepartureMatrix = ({
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Khởi hành</p>
-              <p className="mt-2 text-base font-semibold">{formatTourDate(departure.departureDate, locale)}</p>
+              <p className="mt-2 text-base font-semibold">
+                {formatTourDate(departure.departureDate, locale)}
+              </p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Ngày về</p>
-              <p className="mt-2 text-base font-semibold">{formatTourDate(departure.returnDate, locale) || 'Theo lịch bay'}</p>
+              <p className="mt-2 text-base font-semibold">
+                {formatTourDate(departure.returnDate, locale) || 'Theo lịch bay'}
+              </p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Điểm đi</p>
-              <p className="mt-2 text-base font-semibold">{departure.departureCity || 'Theo đợt bán'}</p>
+              <p className="mt-2 text-base font-semibold">
+                {departure.departureCity || 'Theo đợt bán'}
+              </p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Giá từ</p>
@@ -735,7 +886,9 @@ const DepartureMatrix = ({
                 {departure.depositNote ? <p>{departure.depositNote}</p> : null}
                 {departure.holdNote ? <p>{departure.holdNote}</p> : null}
                 {departure.changePolicyNote ? <p>{departure.changePolicyNote}</p> : null}
-                {!departure.depositNote && !departure.holdNote && departure.note ? <p>{departure.note}</p> : null}
+                {!departure.depositNote && !departure.holdNote && departure.note ? (
+                  <p>{departure.note}</p>
+                ) : null}
               </div>
               <SiteLink
                 className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline"
@@ -768,7 +921,7 @@ const TourDepartureSection = ({
     <SectionHeading
       eyebrow="Khởi hành mở bán"
       title="Các đợt đang mở bán cho line tour này"
-      description="Mỗi đợt được hiển thị như một commerce row: ngày đi, ngày về, hãng bay, tình trạng chỗ, giá từ và ghi chú giữ chỗ."
+      description="Ngày khởi hành, hãng bay và giá từ được hiển thị theo từng đợt mở bán."
     />
     <DepartureMatrix departures={departures} locale={locale} />
   </Panel>
@@ -786,7 +939,10 @@ const TourFAQSection = ({ tour }: { tour: Record<string, any> }) => {
       <SectionHeading eyebrow="FAQ" title="Câu hỏi khách thường hỏi trước khi chốt" />
       <div className="space-y-4">
         {faqItems.map((item, index) => (
-          <div className="rounded-[24px] border border-border/60 bg-background p-5" key={`${item.question}-${index}`}>
+          <div
+            className="rounded-[24px] border border-border/60 bg-background p-5"
+            key={`${item.question}-${index}`}
+          >
             <h3 className="text-lg font-semibold text-foreground">{item.question}</h3>
             <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.answer}</p>
           </div>
@@ -797,7 +953,9 @@ const TourFAQSection = ({ tour }: { tour: Record<string, any> }) => {
 }
 
 const TourRelatedSection = ({ tour }: { tour: Record<string, any> }) => {
-  const relatedTours = asArray<Record<string, any>>(tour.relatedTours).filter((item) => typeof item === 'object')
+  const relatedTours = asArray<Record<string, any>>(tour.relatedTours).filter(
+    (item) => typeof item === 'object',
+  )
 
   if (relatedTours.length === 0) {
     return null
@@ -808,7 +966,7 @@ const TourRelatedSection = ({ tour }: { tour: Record<string, any> }) => {
       <SectionHeading
         eyebrow="Tour liên quan"
         title="Các line gần với nhu cầu này"
-        description="Giữ người xem ở lại trong cùng thị trường bằng các line có nhịp, ngân sách hoặc trải nghiệm gần nhau."
+        description="Gợi ý thêm các chương trình gần thị trường hoặc ngân sách để khách dễ so sánh."
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {relatedTours.map((item) => (
@@ -816,7 +974,10 @@ const TourRelatedSection = ({ tour }: { tour: Record<string, any> }) => {
             <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
             <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.summary}</p>
             {item.slug ? (
-              <SiteLink className="mt-4 inline-flex text-sm font-semibold no-underline" href={getTourPath(item.slug)}>
+              <SiteLink
+                className="mt-4 inline-flex text-sm font-semibold no-underline"
+                href={getTourPath(item.slug)}
+              >
                 Xem tour
               </SiteLink>
             ) : null}
@@ -827,15 +988,21 @@ const TourRelatedSection = ({ tour }: { tour: Record<string, any> }) => {
   )
 }
 
-const StickyBookingCTASection = ({ nextDeparture, tour }: { nextDeparture: Record<string, any> | null; tour: Record<string, any> }) => (
-  <div className="sticky bottom-3 z-20 max-w-full md:bottom-4">
-    <div className="overflow-hidden rounded-[28px] border border-border/70 bg-background/95 px-4 py-3 shadow-lg backdrop-blur sm:px-5 sm:py-4">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+const StickyBookingCTASection = ({
+  nextDeparture,
+  tour,
+}: {
+  nextDeparture: Record<string, any> | null
+  tour: Record<string, any>
+}) => (
+  <div className="sticky bottom-2 z-20 max-w-full md:bottom-4">
+    <div className="overflow-hidden rounded-[22px] border border-border/70 bg-background/95 px-3 py-2 shadow-lg backdrop-blur sm:rounded-[28px] sm:px-5 sm:py-4">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div className="min-w-0">
-          <p className="overflow-hidden text-ellipsis whitespace-nowrap text-base font-semibold text-foreground sm:text-sm">
+          <p className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold text-foreground sm:text-sm">
             {tour.title}
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
             {[
               formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency),
               formatTourDate(nextDeparture?.departureDate),
@@ -845,9 +1012,9 @@ const StickyBookingCTASection = ({ nextDeparture, tour }: { nextDeparture: Recor
               .join(' • ')}
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-3 md:flex md:flex-wrap">
+        <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:gap-3">
           <SiteLink
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline"
+            className="inline-flex min-h-10 items-center justify-center rounded-full bg-[var(--site-brand)] px-3 text-sm font-semibold text-white no-underline sm:min-h-11 sm:px-4"
             href={getTourInquiryPath({
               departureId: nextDeparture?.id,
               intent: tour.bcfg?.ctaStyle || 'hold-seat',
@@ -857,10 +1024,12 @@ const StickyBookingCTASection = ({ nextDeparture, tour }: { nextDeparture: Recor
             })}
           >
             <span className="sm:hidden">{nextDeparture?.ctaLabelOverride || 'Tư vấn'}</span>
-            <span className="hidden sm:inline">{nextDeparture?.ctaLabelOverride || 'Giữ chỗ ngay'}</span>
+            <span className="hidden sm:inline">
+              {nextDeparture?.ctaLabelOverride || 'Giữ chỗ ngay'}
+            </span>
           </SiteLink>
           <SiteLink
-            className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold no-underline"
+            className="inline-flex min-h-10 items-center justify-center rounded-full border border-border px-3 text-sm font-semibold no-underline sm:min-h-11 sm:px-4"
             href={getSchedulePath()}
           >
             <span className="sm:hidden">Các đợt đi</span>
@@ -881,10 +1050,19 @@ export const TourDetailPage = ({
 }) => {
   const tour = data.tour
   const visibleSections = new Set(data.sectionVisibility || defaultTourSectionVisibility)
-  const sectionOrder = (data.sectionOrder || defaultTourSectionOrder).filter((section) => visibleSections.has(section))
+  const sectionOrder = (data.sectionOrder || defaultTourSectionOrder).filter((section) =>
+    visibleSections.has(section),
+  )
 
   const sections: Record<TourSectionID, React.ReactNode> = {
-    hero: <TourDecisionHeader locale={locale} nextDeparture={data.nextDeparture} tour={tour} variants={data.variants} />,
+    hero: (
+      <TourDecisionHeader
+        locale={locale}
+        nextDeparture={data.nextDeparture}
+        tour={tour}
+        variants={data.variants}
+      />
+    ),
     facts: <TourFactGrid tour={tour} />,
     reviews: <TourReviewsProofSection tour={tour} />,
     'why-choose': <TourWhyChooseSection tour={tour} />,
@@ -914,11 +1092,14 @@ export const TourDetailPage = ({
     <div className="container space-y-8">
       {sections.hero}
 
-      <div className="sticky top-0 z-10 rounded-[28px] border border-border/70 bg-background/95 p-2 shadow-sm backdrop-blur sm:p-3">
-        <nav className="grid grid-cols-2 gap-2 text-xs font-semibold sm:grid-cols-3 sm:text-sm lg:flex lg:flex-wrap lg:items-center lg:gap-3">
+      <div className="sticky top-0 z-10 rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-3">
+        <nav
+          aria-label="Mục lục tour"
+          className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm lg:flex-wrap lg:items-center lg:gap-3 [&::-webkit-scrollbar]:hidden"
+        >
           {navSections.map((section) => (
             <a
-              className="flex min-h-10 items-center justify-center rounded-full px-3 py-2 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:min-h-11"
+              className="flex min-h-8 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:min-h-11 sm:px-4 sm:py-2"
               href={`#${section}`}
               key={section}
             >
@@ -971,14 +1152,17 @@ const DepartureStrip = ({
                 <p className="text-sm font-semibold text-foreground">{product?.title || 'Tour'}</p>
               )}
               <p className="mt-1 text-sm text-muted-foreground">
-                {[formatTourDate(departure.departureDate, locale), departure.airline].filter(Boolean).join(' • ')}
+                {[formatTourDate(departure.departureDate, locale), departure.airline]
+                  .filter(Boolean)
+                  .join(' • ')}
               </p>
               <p className="mt-4 text-2xl font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
                 {formatTourPrice(departure.priceFrom, departure.currency) || 'Liên hệ'}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
-                  {departure.availabilityBadge || getAvailabilityLabel(departure.availabilityStatus, locale)}
+                  {departure.availabilityBadge ||
+                    getAvailabilityLabel(departure.availabilityStatus, locale)}
                 </span>
                 {departure.promoLabel ? (
                   <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground">
@@ -1032,12 +1216,12 @@ export const TourMarketPage = ({
   return (
     <div className="container space-y-8">
       <Panel>
-      <SectionHeading
-        eyebrow="Thị trường outbound"
-        level="h1"
-        title={market?.heading || 'Tour outbound'}
-        description="Các line tour được tổ chức theo thị trường để khách so sánh route, mức giá và nhịp khởi hành trước khi đi vào từng tour detail."
-      />
+        <SectionHeading
+          eyebrow="Thị trường outbound"
+          level="h1"
+          title={market?.heading || 'Tour outbound'}
+          description="Các line tour được tổ chức theo thị trường để khách so sánh route, mức giá và nhịp khởi hành trước khi đi vào từng tour detail."
+        />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {tours.map((tour) => {
             const tourBadges = getMarketTourBadges(tour)
@@ -1101,12 +1285,17 @@ export const TourMarketPage = ({
                   {tour.nextDeparture ? (
                     <div className="mt-3 rounded-[18px] border border-border/60 bg-muted/25 px-4 py-3 transition-colors duration-200 group-hover:border-[var(--site-brand)]/18 group-hover:bg-[var(--site-brand)]/4">
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        {tour.hasFutureDepartures === false ? 'Đang cập nhật đợt mới' : 'Đợt gần nhất'}
+                        {tour.hasFutureDepartures === false
+                          ? 'Đang cập nhật đợt mới'
+                          : 'Đợt gần nhất'}
                       </p>
                       <p className="mt-1 text-sm font-semibold text-foreground">
                         {tour.hasFutureDepartures === false
                           ? 'Liên hệ để nhận lịch khởi hành sắp mở'
-                          : [formatTourDate(tour.nextDeparture.departureDate, locale), tour.nextDeparture.airline]
+                          : [
+                              formatTourDate(tour.nextDeparture.departureDate, locale),
+                              tour.nextDeparture.airline,
+                            ]
                               .filter(Boolean)
                               .join(' • ')}
                       </p>
@@ -1122,7 +1311,11 @@ export const TourMarketPage = ({
                       </SiteLink>
                       <SiteLink
                         className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_color-mix(in_oklch,var(--site-brand)_18%,transparent)]"
-                        href={tour.nextDeparture ? `${getTourPath(tour.slug)}#departures` : getTourPath(tour.slug)}
+                        href={
+                          tour.nextDeparture
+                            ? `${getTourPath(tour.slug)}#departures`
+                            : getTourPath(tour.slug)
+                        }
                       >
                         {tour.nextDeparture ? 'Xem lịch đi gần nhất' : 'Xem đợt đi'}
                       </SiteLink>
@@ -1159,9 +1352,15 @@ export const TourCampaignPage = ({
     <Panel className="overflow-hidden p-0">
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="p-6">
-          <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">Campaign theo mùa</p>
-          <h1 className="mt-2 text-3xl font-semibold leading-tight md:text-4xl">{campaign.title}</h1>
-          <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">{campaign.summary}</p>
+          <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
+            Campaign theo mùa
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold leading-tight md:text-4xl">
+            {campaign.title}
+          </h1>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
+            {campaign.summary}
+          </p>
         </div>
         <div className="relative min-h-72 bg-muted">
           <Media
@@ -1184,11 +1383,7 @@ export const TourCampaignPage = ({
   </div>
 )
 
-export const TourSchedulePage = ({
-  schedule,
-}: {
-  schedule: SchedulePageViewModel
-}) => (
+export const TourSchedulePage = ({ schedule }: { schedule: SchedulePageViewModel }) => (
   <div className="container space-y-8">
     <Panel>
       <SectionHeading
@@ -1199,11 +1394,16 @@ export const TourSchedulePage = ({
       />
       <div className="grid gap-4 lg:grid-cols-[1.2fr_repeat(3,minmax(0,1fr))]">
         <div className="rounded-[24px] border border-border/60 bg-background p-5">
-          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Toàn cảnh mở bán</p>
-          <p className="mt-2 text-3xl font-semibold text-foreground">
-            {schedule.heroStats.openCount} đợt • giá từ {formatTourPrice(schedule.heroStats.lowestPrice) || 'Liên hệ'}
+          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+            Toàn cảnh mở bán
           </p>
-          <p className="mt-2 text-sm text-muted-foreground">Hàn Quốc, Nhật Bản, Trung Quốc với lịch đi rõ và CTA giữ chỗ ngay.</p>
+          <p className="mt-2 text-3xl font-semibold text-foreground">
+            {schedule.heroStats.openCount} đợt • giá từ{' '}
+            {formatTourPrice(schedule.heroStats.lowestPrice) || 'Liên hệ'}
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Hàn Quốc, Nhật Bản, Trung Quốc với lịch đi rõ và CTA giữ chỗ ngay.
+          </p>
         </div>
         <div className="rounded-[24px] bg-muted/35 p-5">
           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Đợt gần nhất</p>
@@ -1264,7 +1464,8 @@ export const TourSchedulePage = ({
       <div className="mt-6 rounded-[24px] border border-border/60 bg-muted/20 p-5">
         <p className="text-lg font-semibold text-foreground">Chưa chọn được đợt phù hợp?</p>
         <p className="mt-2 text-sm leading-7 text-muted-foreground">
-          Gửi nhu cầu ngày đi, số khách và thị trường quan tâm để đội sales gợi ý đúng line, đúng đợt và đúng nhịp ngân sách.
+          Gửi nhu cầu ngày đi, số khách và thị trường quan tâm để đội sales gợi ý đúng line, đúng
+          đợt và đúng nhịp ngân sách.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <SiteLink

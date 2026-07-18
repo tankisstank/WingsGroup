@@ -75,16 +75,24 @@ describe('hero presentation components', () => {
       />,
     )
 
+    expect(screen.getByRole('heading', { level: 1, name: 'First journey' })).toBeTruthy()
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
     expect(screen.getByLabelText('Slide 1 of 2').getAttribute('data-active')).toBe('true')
     fireEvent.click(screen.getByLabelText('Next slide'))
     expect(screen.getByLabelText('Slide 2 of 2').getAttribute('data-active')).toBe('true')
 
-    fireEvent.click(screen.getByLabelText('Pause carousel'))
+    // Manual navigation intentionally pauses autoplay so the selected content
+    // is not replaced immediately after a user interaction.
+    expect(screen.getByLabelText('Play carousel')).toBeTruthy()
     act(() => vi.advanceTimersByTime(6000))
     expect(screen.getByLabelText('Slide 2 of 2').getAttribute('data-active')).toBe('true')
 
     fireEvent.click(screen.getByLabelText('Play carousel'))
     act(() => vi.advanceTimersByTime(3000))
+    expect(screen.getByLabelText('Slide 1 of 2').getAttribute('data-active')).toBe('true')
+
+    fireEvent.click(screen.getByLabelText('Pause carousel'))
+    act(() => vi.advanceTimersByTime(6000))
     expect(screen.getByLabelText('Slide 1 of 2').getAttribute('data-active')).toBe('true')
   })
 

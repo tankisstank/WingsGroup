@@ -5,6 +5,7 @@ import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import { getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
 import { generateMeta } from '@/utilities/generateMeta'
+import { getCopyLocale } from '@/utilities/locales'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
@@ -12,18 +13,18 @@ import PageClient from './page.client'
 
 export const dynamic = 'force-dynamic'
 
-type Args = {
-  searchParams?: Promise<{
-    locale?: string
-    site?: string
-  }>
-}
-
-export default async function Page({ searchParams }: Args) {
+export default async function Page() {
   const payload = await getPayload({ config: configPromise })
-  const resolvedSearchParams = searchParams ? await searchParams : undefined
-  const locale = await getCurrentLocale(resolvedSearchParams?.locale)
-  const site = await getCurrentSite(resolvedSearchParams?.site)
+  const locale = await getCurrentLocale()
+  const site = await getCurrentSite()
+  const copy = {
+    en: {
+      title: 'Posts',
+    },
+    vi: {
+      title: 'Bài viết',
+    },
+  }[getCopyLocale(locale)]
 
   const posts = await payload.find({
     collection: 'posts',
@@ -53,7 +54,7 @@ export default async function Page({ searchParams }: Args) {
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>{locale === 'en' ? 'Posts' : 'Bài viết'}</h1>
+          <h1>{copy.title}</h1>
           {site ? <p>{site.name}</p> : null}
         </div>
       </div>
@@ -78,23 +79,30 @@ export default async function Page({ searchParams }: Args) {
   )
 }
 
-export async function generateMetadata({ searchParams }: Args): Promise<Metadata> {
-  const resolvedSearchParams = searchParams ? await searchParams : undefined
-  const locale = await getCurrentLocale(resolvedSearchParams?.locale)
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getCurrentLocale()
+  const copy = {
+    en: {
+      description:
+        'Read WingsGroup articles about tour planning, departure schedules, campaign guidance, and service updates across the travel ecosystem.',
+      title: 'Posts',
+    },
+    vi: {
+      description:
+        'Đọc bài viết WingsGroup về kinh nghiệm chọn tour, lịch khởi hành, campaign du lịch và cập nhật dịch vụ trong hệ sinh thái.',
+      title: 'Bài viết',
+    },
+  }[getCopyLocale(locale)]
 
   return generateMeta({
     doc: {
       meta: {
-        title: locale === 'en' ? 'Posts' : 'Bài viết',
-        description:
-          locale === 'en'
-            ? 'Read WingsGroup articles about tour planning, departure schedules, campaign guidance, and service updates across the travel ecosystem.'
-            : 'Đọc bài viết WingsGroup về kinh nghiệm chọn tour, lịch khởi hành, campaign du lịch và cập nhật dịch vụ trong hệ sinh thái.',
+        title: copy.title,
+        description: copy.description,
       },
       slug: 'posts',
     },
     locale,
     path: '/posts',
-    siteCode: resolvedSearchParams?.site,
   })
 }

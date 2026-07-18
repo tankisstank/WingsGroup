@@ -22,6 +22,7 @@ export type LayoutPresetDefinition = {
     | 'service-detail'
     | 'social-proof'
     | 'tour-conversion'
+    | 'wingsside-inbound-homepage'
   label: string
   preview: {
     accent: string
@@ -50,6 +51,25 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     preview: {
       accent: 'service',
       sections: ['Hero split', 'Bento services', 'Stats', 'Testimonials', 'CTA'],
+    },
+  },
+  {
+    category: 'core',
+    description:
+      'Trang chủ inbound Vietnam thiên về trust proof, destination cards, sample itinerary và inquiry CTA.',
+    key: 'wingsside-inbound-homepage',
+    label: 'WingsSide inbound homepage',
+    preview: {
+      accent: 'inbound',
+      sections: [
+        'Hero cinematic',
+        'Value props',
+        'Destinations',
+        'Sample itineraries',
+        'Stats',
+        'Testimonials',
+        'CTA',
+      ],
     },
   },
   {
@@ -162,6 +182,8 @@ export const isLayoutPresetKey = (value: unknown): value is LayoutPresetKey =>
 export const getLayoutPresetDefinition = (key: unknown) =>
   layoutPresetDefinitions.find((preset) => preset.key === key) || layoutPresetDefinitions[0]
 
+const blockID = () => Math.random().toString(36).slice(2)
+
 const richText = (heading: string, body?: string) => ({
   root: {
     type: 'root',
@@ -228,6 +250,7 @@ const content = (
   ...sections: Array<[string, string]>
 ) => ({
   blockType: 'content',
+  id: blockID(),
   presentation,
   columns: sections.map(([heading, body], index) => ({
     size: presentation === 'sidebar-toc' && index === 0 ? 'oneThird' : 'full',
@@ -249,6 +272,7 @@ const features = (
   items: string[],
 ) => ({
   blockType: 'featureGrid',
+  id: blockID(),
   columns: '3',
   presentation,
   title,
@@ -258,6 +282,20 @@ const features = (
     eyebrow: `0${index + 1}`,
     title: item,
   })),
+})
+
+const infoStrip = (
+  title: string,
+  description: string,
+  items: Array<{ description: string; label: string; value?: string }>,
+  eyebrow?: string,
+) => ({
+  blockType: 'infoStrip',
+  id: blockID(),
+  description,
+  eyebrow,
+  items,
+  title,
 })
 
 const stats = (
@@ -272,6 +310,7 @@ const stats = (
   title: string,
 ) => ({
   blockType: 'stats',
+  id: blockID(),
   presentation,
   title,
   items: [
@@ -295,25 +334,23 @@ const testimonials = (
   title = 'Khách hàng nói gì',
 ) => ({
   blockType: 'testimonial',
+  id: blockID(),
   presentation,
   title,
   items: [
     {
       name: 'Khách hàng doanh nghiệp',
       quote: 'Quy trình rõ ràng, phản hồi nhanh và luôn có phương án dự phòng.',
-      rating: 5,
       role: 'Đoàn công tác quốc tế',
     },
     {
       name: 'Gia đình khách hàng',
       quote: 'Lịch trình vừa sức, thông tin minh bạch và hỗ trợ xuyên suốt chuyến đi.',
-      rating: 5,
       role: 'Tour gia đình',
     },
     {
       name: 'Đối tác thị trường',
       quote: 'Đội ngũ am hiểu điểm đến và phối hợp rất chủ động.',
-      rating: 5,
       role: 'Đối tác vận hành',
     },
   ],
@@ -323,6 +360,7 @@ const faq = (
   presentation: 'categorized' | 'chat-bubbles' | 'searchable' | 'single-column' | 'two-column',
 ) => ({
   blockType: 'faq',
+  id: blockID(),
   presentation,
   title: 'Câu hỏi thường gặp',
   items: [
@@ -357,6 +395,7 @@ const cta = (
   heading = 'Sẵn sàng lên kế hoạch?',
 ) => ({
   blockType: 'cta',
+  id: blockID(),
   presentation,
   richText: richText(heading, 'Trao đổi với đội ngũ WingsGroup để nhận phương án phù hợp.'),
   links: [
@@ -375,6 +414,7 @@ const form = (formID: number | string | undefined, presentation = 'split-contact
   formID
     ? {
         blockType: 'formBlock',
+        id: blockID(),
         enableIntro: true,
         form: formID,
         introContent: richText('Gửi yêu cầu tư vấn', 'Điền thông tin để đội ngũ liên hệ lại.'),
@@ -384,6 +424,7 @@ const form = (formID: number | string | undefined, presentation = 'split-contact
 
 const pricing = (presentation: string) => ({
   blockType: 'pricingTable',
+  id: blockID(),
   presentation,
   title: 'Các phương án tham khảo',
   items: [
@@ -411,6 +452,7 @@ const pricing = (presentation: string) => ({
 
 const comparison = () => ({
   blockType: 'comparison',
+  id: blockID(),
   presentation: 'matrix',
   title: 'So sánh phương án',
   options: [
@@ -436,6 +478,7 @@ const comparison = () => ({
 
 const archive = (presentation: 'card-grid' | 'compact-list' | 'magazine') => ({
   blockType: 'archive',
+  id: blockID(),
   introContent: richText('Nội dung mới nhất', 'Bài viết và hướng dẫn được cập nhật theo site.'),
   limit: 7,
   populateBy: 'collection',
@@ -454,7 +497,11 @@ export const createLayoutPresetData = (
       return {
         hero: hero(title, lead, 'centered-visual'),
         layout: [
-          content('editorial-split', ['Câu chuyện thương hiệu', lead], ['Cam kết phục vụ', 'Nêu điểm khác biệt và nguyên tắc vận hành.']),
+          content(
+            'editorial-split',
+            ['Câu chuyện thương hiệu', lead],
+            ['Cam kết phục vụ', 'Nêu điểm khác biệt và nguyên tắc vận hành.'],
+          ),
           stats('editorial', 'Năng lực được chứng minh'),
           testimonials('featured', 'Một hành trình đáng nhớ bắt đầu từ sự tin cậy'),
           archive('magazine'),
@@ -465,18 +512,79 @@ export const createLayoutPresetData = (
       return {
         hero: hero(title, lead, 'split-visual'),
         layout: [
-          features('bento', 'Khám phá dịch vụ', ['Tour trọn gói', 'Vé và lưu trú', 'Visa', 'Bảo hiểm', 'Dịch vụ doanh nghiệp']),
+          features('bento', 'Khám phá dịch vụ', [
+            'Tour trọn gói',
+            'Vé và lưu trú',
+            'Visa',
+            'Bảo hiểm',
+            'Dịch vụ doanh nghiệp',
+          ]),
           stats('inline-bar', 'WingsGroup trong những con số'),
           testimonials('carousel'),
           cta('split-card'),
+        ],
+      }
+    case 'wingsside-inbound-homepage':
+      return {
+        hero: hero(title, lead, 'split-visual'),
+        layout: [
+          infoStrip(
+            'Travel planning signals',
+            'Bốn điểm nhấn giúp khách inbound hiểu ngay cách WingsSide hỗ trợ một hành trình riêng tại Việt Nam.',
+            [
+              {
+                label: 'Destination-led',
+                value: 'Vietnam first',
+                description:
+                  'Bắt đầu từ điểm đến, mùa đi và nhịp di chuyển thay vì bán gói cố định.',
+              },
+              {
+                label: 'Tailor-made',
+                value: 'Private brief',
+                description: 'Form tư vấn thu thập nhu cầu đủ ngắn để khách gửi yêu cầu nhanh.',
+              },
+              {
+                label: 'Local design',
+                value: 'On-ground logic',
+                description: 'Nội dung nhấn vào pacing, route logic và trải nghiệm thực tế.',
+              },
+              {
+                label: 'Ad-ready',
+                value: 'EN / IT / ES / PT',
+                description: 'Cấu trúc đủ rõ để chạy paid traffic vào các locale launch.',
+              },
+            ],
+            'Inbound value props',
+          ),
+          features('bento', 'Explore Vietnam by intent', [
+            'Destinations',
+            'Travel styles',
+            'Sample itineraries',
+            'Planning process',
+          ]),
+          stats('logo-proof', 'Trust proof for inbound planning'),
+          features('alternating', 'Sample itinerary cards', [
+            'Vietnam highlights',
+            'Northern Vietnam',
+            'Central heritage',
+          ]),
+          testimonials('carousel', 'Traveler notes and planning signals'),
+          cta('full-bleed', 'Start a Vietnam planning brief'),
         ],
       }
     case 'destination-showcase':
       return {
         hero: hero(title, lead, 'layered-visuals'),
         layout: [
-          features('alternating', 'Trải nghiệm nổi bật', ['Điểm đến biểu tượng', 'Ẩm thực địa phương', 'Mùa đẹp nhất']),
-          content('reading', ['Thông tin cần biết', 'Thời tiết, di chuyển, visa và ngân sách tham khảo.']),
+          features('alternating', 'Trải nghiệm nổi bật', [
+            'Điểm đến biểu tượng',
+            'Ẩm thực địa phương',
+            'Mùa đẹp nhất',
+          ]),
+          content('reading', [
+            'Thông tin cần biết',
+            'Thời tiết, di chuyển, visa và ngân sách tham khảo.',
+          ]),
           faq('two-column'),
           cta('patterned', 'Thiết kế hành trình đến điểm đến này'),
         ],
@@ -485,7 +593,11 @@ export const createLayoutPresetData = (
       return {
         hero: hero(title, lead, 'split-visual'),
         layout: [
-          features('icon-grid', 'Điểm nổi bật của hành trình', ['Lịch trình tối ưu', 'Khách sạn phù hợp', 'Hướng dẫn tận tâm']),
+          features('icon-grid', 'Điểm nổi bật của hành trình', [
+            'Lịch trình tối ưu',
+            'Khách sạn phù hợp',
+            'Hướng dẫn tận tâm',
+          ]),
           pricing('tier-cards'),
           testimonials('quote-grid'),
           faq('categorized'),
@@ -496,7 +608,12 @@ export const createLayoutPresetData = (
       return {
         hero: hero(title, lead, 'split-visual'),
         layout: [
-          features('sticky-reveal', 'Quy trình dịch vụ', ['Tiếp nhận nhu cầu', 'Đề xuất phương án', 'Xác nhận và triển khai', 'Hỗ trợ sau dịch vụ']),
+          features('sticky-reveal', 'Quy trình dịch vụ', [
+            'Tiếp nhận nhu cầu',
+            'Đề xuất phương án',
+            'Xác nhận và triển khai',
+            'Hỗ trợ sau dịch vụ',
+          ]),
           comparison(),
           faq('searchable'),
           form(formID, 'split-contact'),
@@ -506,7 +623,12 @@ export const createLayoutPresetData = (
       return {
         hero: hero(title, lead, 'gradient-mesh'),
         layout: [
-          features('bento', 'Lợi ích chiến dịch', ['Ưu đãi nổi bật', 'Thời gian giới hạn', 'Hỗ trợ nhanh', 'Điều kiện minh bạch']),
+          features('bento', 'Lợi ích chiến dịch', [
+            'Ưu đãi nổi bật',
+            'Thời gian giới hạn',
+            'Hỗ trợ nhanh',
+            'Điều kiện minh bạch',
+          ]),
           stats('floating', 'Kết quả nổi bật'),
           testimonials('social-wall'),
           form(formID, 'centered-card'),
@@ -517,7 +639,11 @@ export const createLayoutPresetData = (
       return {
         hero: hero(title, lead, 'centered-visual'),
         layout: [
-          features('icon-grid', 'Bạn sẽ nhận được gì', ['Checklist chuẩn bị', 'Dự toán tham khảo', 'Tư vấn chuyên gia']),
+          features('icon-grid', 'Bạn sẽ nhận được gì', [
+            'Checklist chuẩn bị',
+            'Dự toán tham khảo',
+            'Tư vấn chuyên gia',
+          ]),
           stats('card-grid', 'Thông tin đáng tin cậy'),
           form(formID, 'centered-card'),
           faq('single-column'),
@@ -527,7 +653,12 @@ export const createLayoutPresetData = (
       return {
         hero: hero(title, lead, 'centered-visual'),
         layout: [
-          features('icon-wall', 'Kênh hỗ trợ', ['Điện thoại', 'Email', 'Chat trực tuyến', 'Văn phòng']),
+          features('icon-wall', 'Kênh hỗ trợ', [
+            'Điện thoại',
+            'Email',
+            'Chat trực tuyến',
+            'Văn phòng',
+          ]),
           form(formID, 'support-channels'),
           faq('chat-bubbles'),
         ],
@@ -550,8 +681,17 @@ export const createLayoutPresetData = (
       return {
         hero: hero(title, lead, 'centered-visual'),
         layout: [
-          content('sidebar-toc', ['Trong hướng dẫn này', 'Tổng quan, chuẩn bị, lịch trình và lưu ý.'], ['Nội dung hướng dẫn', lead]),
-          features('accordion', 'Các bước thực hiện', ['Chuẩn bị giấy tờ', 'Lập ngân sách', 'Chọn hành trình', 'Kiểm tra trước chuyến đi']),
+          content(
+            'sidebar-toc',
+            ['Trong hướng dẫn này', 'Tổng quan, chuẩn bị, lịch trình và lưu ý.'],
+            ['Nội dung hướng dẫn', lead],
+          ),
+          features('accordion', 'Các bước thực hiện', [
+            'Chuẩn bị giấy tờ',
+            'Lập ngân sách',
+            'Chọn hành trình',
+            'Kiểm tra trước chuyến đi',
+          ]),
           faq('single-column'),
           cta('card', 'Cần tư vấn cho trường hợp cụ thể?'),
         ],
@@ -569,4 +709,3 @@ export const createLayoutPresetData = (
       }
   }
 }
-

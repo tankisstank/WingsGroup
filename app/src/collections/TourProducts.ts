@@ -79,6 +79,13 @@ export const TourProducts: CollectionConfig = {
         { label: 'Hàn Quốc', value: 'korea' },
         { label: 'Nhật Bản', value: 'japan' },
         { label: 'Trung Quốc', value: 'china' },
+        { label: 'Việt Nam', value: 'vietnam' },
+        { label: 'Thái Lan', value: 'thailand' },
+        { label: 'Campuchia', value: 'cambodia' },
+        { label: 'Lào', value: 'laos' },
+        { label: 'Myanmar', value: 'myanmar' },
+        { label: 'Đông Dương', value: 'indochina' },
+        { label: 'Thị trường khác', value: 'other' },
       ],
       admin: {
         position: 'sidebar',
@@ -91,6 +98,31 @@ export const TourProducts: CollectionConfig = {
       admin: {
         position: 'sidebar',
       },
+    },
+    {
+      name: 'sourceProvenance',
+      label: 'Nguồn import / đối soát',
+      type: 'json',
+      admin: {
+        description:
+          'Dữ liệu máy đọc để truy vết source system, source ID/URL/hash, batch import và bảng giá gốc.',
+        position: 'sidebar',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'priceFrom',
+      label: 'Giá từ',
+      min: 0,
+      type: 'number',
+      admin: { position: 'sidebar' },
+    },
+    {
+      name: 'currency',
+      label: 'Tiền tệ giá từ',
+      type: 'text',
+      defaultValue: 'USD',
+      admin: { position: 'sidebar' },
     },
     {
       name: 'durationDays',
@@ -385,7 +417,8 @@ export const TourProducts: CollectionConfig = {
                   type: 'array',
                   maxRows: 3,
                   admin: {
-                    description: 'Tối đa 3 badge, ví dụ: Phù hợp người mới đi, Giá tốt, Line bán chạy.',
+                    description:
+                      'Tối đa 3 badge, ví dụ: Phù hợp người mới đi, Giá tốt, Line bán chạy.',
                   },
                   fields: [
                     {
@@ -622,7 +655,7 @@ export const TourProducts: CollectionConfig = {
                   type: 'textarea',
                 },
                 {
-                  name: 'importantNotes',
+                  name: 'notes',
                   label: 'Lưu ý quan trọng',
                   type: 'array',
                   fields: [
@@ -658,14 +691,14 @@ export const TourProducts: CollectionConfig = {
                 },
               ],
             },
-                {
-                  name: 'relatedTours',
-                  label: 'Tour liên quan',
-                  type: 'relationship',
-                  relationTo: 'tour-products' as any,
-                  hasMany: true,
-                  filterOptions: sameSiteFilterOptions,
-                },
+            {
+              name: 'relatedTours',
+              label: 'Tour liên quan',
+              type: 'relationship',
+              relationTo: 'tour-products' as any,
+              hasMany: true,
+              filterOptions: sameSiteFilterOptions,
+            },
           ],
         },
         {
@@ -747,7 +780,7 @@ export const TourProducts: CollectionConfig = {
                 'why-choose',
                 'route',
                 'itinerary',
-                'includes',
+                'services',
                 'departures',
                 'faq',
                 'related',
@@ -758,12 +791,11 @@ export const TourProducts: CollectionConfig = {
                 { label: 'Why choose', value: 'why-choose' },
                 { label: 'Route', value: 'route' },
                 { label: 'Itinerary', value: 'itinerary' },
-                { label: 'Includes', value: 'includes' },
+                { label: 'Services', value: 'services' },
                 { label: 'Departures', value: 'departures' },
                 { label: 'FAQ', value: 'faq' },
                 { label: 'Related', value: 'related' },
                 { label: 'Reviews proof', value: 'reviews' },
-                { label: 'Services', value: 'services' },
                 { label: 'Sticky CTA', value: 'sticky-cta' },
               ],
             },

@@ -28,12 +28,45 @@ export const siteCodeToAliasMap = Object.fromEntries(
 ) as Record<string, SiteAlias>
 
 export const knownSiteAliases = Object.keys(allSiteAliasToCodeMap) as SiteRouteAlias[]
-export const supportedLocaleCodes = ['vi', 'en'] as const
 
-export type SupportedLocaleCode = (typeof supportedLocaleCodes)[number]
+export {
+  cmsEnabledLocaleCodes as supportedLocaleCodes,
+  isPublicLocale,
+  isSupportedLocale,
+  publicLocaleCodes,
+  type SupportedLocaleCode,
+} from './locales'
 
-export const isSupportedLocale = (value?: null | string): value is SupportedLocaleCode =>
-  Boolean(value && supportedLocaleCodes.includes(value as SupportedLocaleCode))
+import { isSupportedLocale, type SupportedLocaleCode } from './locales'
+
+const nonSiteAwareHrefPatterns = [
+  /^https?:\/\//i,
+  /^mailto:/i,
+  /^tel:/i,
+  /^javascript:/i,
+  /^#/,
+] as const
+
+const isNonSiteAwareHref = (value: string) =>
+  nonSiteAwareHrefPatterns.some((pattern) => pattern.test(value))
+
+const splitPathSuffix = (value: string) => {
+  const queryIndex = value.indexOf('?')
+  const hashIndex = value.indexOf('#')
+  const suffixIndexCandidates = [queryIndex, hashIndex].filter((index) => index >= 0)
+  const suffixIndex =
+    suffixIndexCandidates.length > 0 ? Math.min(...suffixIndexCandidates) : -1
+
+  return suffixIndex >= 0
+    ? {
+        pathname: value.slice(0, suffixIndex) || '/',
+        suffix: value.slice(suffixIndex),
+      }
+    : {
+        pathname: value,
+        suffix: '',
+      }
+}
 
 export const getSiteAliasFromPathname = (pathname: string): SiteRouteAlias | null => {
   const [firstSegment] = pathname.split('/').filter(Boolean)
@@ -61,7 +94,7 @@ export const normalizeSiteAwarePath = (path: string): string => {
     return '/'
   }
 
-  if (/^https?:\/\//.test(path)) {
+  if (isNonSiteAwareHref(path)) {
     return path
   }
 
@@ -75,14 +108,16 @@ export const prefixPathWithSite = (
 ): string => {
   const normalizedPath = normalizeSiteAwarePath(path)
 
-  if (/^https?:\/\//.test(normalizedPath)) {
+  if (isNonSiteAwareHref(normalizedPath)) {
     return normalizedPath
   }
 
+  const { pathname, suffix } = splitPathSuffix(normalizedPath)
+
   if (
-    normalizedPath.startsWith('/admin') ||
-    normalizedPath.startsWith('/api') ||
-    normalizedPath.startsWith('/next')
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/next')
   ) {
     return normalizedPath
   }
@@ -95,12 +130,42 @@ export const prefixPathWithSite = (
   }
 
   if (
-    normalizedPath === sitePrefix ||
-    normalizedPath.startsWith(`${sitePrefix}/`) ||
-    (siteAlias && normalizedPath.startsWith(`/${siteAlias}`))
+    pathname === sitePrefix ||
+    pathname.startsWith(`${sitePrefix}/`) ||
+    (siteAlias && pathname.startsWith(`/${siteAlias}`))
   ) {
     return normalizedPath
   }
 
-  return `${sitePrefix}${normalizedPath === '/' ? '' : normalizedPath}`
+  const normalizedSegments = pathname.split('/').filter(Boolean)
+  const leadingLocale = normalizedSegments[0]
+
+  if (siteAlias && isSupportedLocale(leadingLocale)) {
+    return `/${siteAlias}${pathname}`.replace(/\/+/g, '/') + suffix
+  }
+
+  return `${sitePrefix}${pathname === '/' ? '' : pathname}` + suffix
+}
+
+export const buildLocaleSwitchHref = (
+  pathname: string,
+  targetLocale: SupportedLocaleCode,
+): string => {
+  const { pathname: rawPathname, suffix } = splitPathSuffix(pathname)
+  const normalizedPathname = normalizeSiteAwarePath(rawPathname)
+
+  if (isNonSiteAwareHref(normalizedPathname)) {
+    return normalizedPathname
+  }
+
+  const siteAlias = getSiteAliasFromPathname(normalizedPathname)
+  const currentLocale = getLocaleFromPathname(normalizedPathname)
+  const segments = normalizedPathname.split('/').filter(Boolean)
+  const restSegments = siteAlias ? segments.slice(1) : segments
+  const pathWithoutLocale =
+    currentLocale && restSegments[0] === currentLocale ? restSegments.slice(1) : restSegments
+  const sitePrefix = siteAlias ? `/${siteAlias}` : ''
+  const restPath = pathWithoutLocale.length > 0 ? `/${pathWithoutLocale.join('/')}` : ''
+
+  return `${sitePrefix}/${targetLocale}${restPath}`.replace(/\/+/g, '/') + suffix
 }

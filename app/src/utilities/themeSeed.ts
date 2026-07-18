@@ -2,9 +2,11 @@ import type { Payload, PayloadRequest } from 'payload'
 
 import { defaultThemePresetByKey, type ThemePresetKey, type ThemePresetTokens } from './themeTokens'
 
+export const wingsSideInboundThemePresetKey = 'wings-side-editorial-inbound-v2' as const
+
 export type SiteThemeAssignment = {
   heroVariant: 'planner' | 'retail-departures' | 'standard' | 'utility'
-  themePreset: ThemePresetKey
+  themePreset: ThemePresetKey | typeof wingsSideInboundThemePresetKey | 'wings-side-classic' | 'wings-side-editorial'
 }
 
 export const siteThemeAssignments: Record<string, SiteThemeAssignment> = {
@@ -12,7 +14,7 @@ export const siteThemeAssignments: Record<string, SiteThemeAssignment> = {
   'wings-go': { heroVariant: 'retail-departures', themePreset: 'retail' },
   'wings-pass': { heroVariant: 'utility', themePreset: 'utility' },
   'wings-plus': { heroVariant: 'standard', themePreset: 'premium' },
-  'wings-side': { heroVariant: 'planner', themePreset: 'premium' },
+  'wings-side': { heroVariant: 'planner', themePreset: wingsSideInboundThemePresetKey },
   'wings-group': { heroVariant: 'standard', themePreset: 'corporate' },
 }
 
@@ -98,6 +100,26 @@ const customThemePresetSeedCatalog: Array<{
       radius: 'lg',
       surfaceColor: '#F6F2E8',
       surfaceStrongColor: '#E8DECB',
+    },
+  },
+  {
+    description:
+      'Inbound editorial launch preset for WingsSide: warm paper surfaces, Deep Teal identity, Mustard Gold CTA, and Terracotta editorial accents.',
+    isActive: true,
+    key: wingsSideInboundThemePresetKey,
+    name: 'WingsSide Editorial Inbound v2',
+    tokens: {
+      ...defaultThemePresetByKey.premium,
+      accentColor: '#C9A75C',
+      backgroundStyle: 'editorial',
+      brandColor: '#0F3D3E',
+      buttonStyle: 'pill',
+      fontPreset: 'editorial',
+      layoutStyle: 'editorial',
+      radius: 'lg',
+      spacingScale: 'airy',
+      surfaceColor: '#F8F5EE',
+      surfaceStrongColor: '#E9E1D0',
     },
   },
 ]

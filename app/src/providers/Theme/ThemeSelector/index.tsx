@@ -10,11 +10,14 @@ import {
 import React, { useState } from 'react'
 
 import type { Theme } from './types'
+import type { PublicChromeCopy } from '@/i18n/publicCopy'
 
 import { useTheme } from '..'
 import { themeLocalStorageKey } from './types'
 
-export const ThemeSelector: React.FC = () => {
+type ThemeSelectorCopy = PublicChromeCopy['themeSelector']
+
+export const ThemeSelector: React.FC<{ copy: ThemeSelectorCopy }> = ({ copy }) => {
   const { setTheme } = useTheme()
   const [value, setValue] = useState('')
 
@@ -36,15 +39,15 @@ export const ThemeSelector: React.FC = () => {
   return (
     <Select onValueChange={onThemeChange} value={value}>
       <SelectTrigger
-        aria-label="Select a theme"
+        aria-label={copy.ariaLabel}
         className="w-auto bg-transparent gap-2 pl-0 md:pl-3 border-none"
       >
-        <SelectValue placeholder="Theme" />
+        <SelectValue placeholder={copy.placeholder} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="auto">Auto</SelectItem>
-        <SelectItem value="light">Light</SelectItem>
-        <SelectItem value="dark">Dark</SelectItem>
+        <SelectItem value="auto">{copy.auto}</SelectItem>
+        <SelectItem value="light">{copy.light}</SelectItem>
+        <SelectItem value="dark">{copy.dark}</SelectItem>
       </SelectContent>
     </Select>
   )

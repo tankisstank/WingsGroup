@@ -3,6 +3,11 @@ import type { CollectionConfig } from 'payload'
 import { adminAccess, hideFromNonSuperAdmins, superAdminOnly } from '@/access/roles'
 import { siteScopedAccess } from '@/access/siteScope'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
+import { localeSelectOptions } from '@/utilities/locales'
+import {
+  invalidateSitesAfterChange,
+  invalidateSitesAfterDelete,
+} from '@/collections/hooks/invalidateTenantCache'
 
 export const Sites: CollectionConfig = {
   slug: 'sites',
@@ -66,16 +71,7 @@ export const Sites: CollectionConfig = {
       hasMany: true,
       required: true,
       defaultValue: ['vi', 'en'],
-      options: [
-        {
-          label: 'Tiếng Việt',
-          value: 'vi',
-        },
-        {
-          label: 'English',
-          value: 'en',
-        },
-      ],
+      options: localeSelectOptions,
     },
     {
       name: 'defaultLocale',
@@ -83,16 +79,7 @@ export const Sites: CollectionConfig = {
       type: 'select',
       required: true,
       defaultValue: 'vi',
-      options: [
-        {
-          label: 'Tiếng Việt',
-          value: 'vi',
-        },
-        {
-          label: 'English',
-          value: 'en',
-        },
-      ],
+      options: localeSelectOptions,
     },
     {
       name: 'isActive',
@@ -101,6 +88,10 @@ export const Sites: CollectionConfig = {
       defaultValue: true,
     },
   ],
+  hooks: {
+    afterChange: [invalidateSitesAfterChange],
+    afterDelete: [invalidateSitesAfterDelete],
+  },
   timestamps: true,
   labels: {
     plural: adminLabel('Site', 'Sites'),

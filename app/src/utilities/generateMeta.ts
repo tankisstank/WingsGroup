@@ -1,32 +1,33 @@
 import type { Metadata } from 'next'
 
 import type { Media, Page, Post, Config } from '../payload-types'
+import type { SupportedLocaleCode } from './sitePaths'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 import {
-  getAbsoluteMediaURL,
-  getCanonicalURL,
+  buildConfiguredAbsoluteMediaURL,
   getPageCanonicalPath,
-  normalizeCanonicalDomain,
 } from './siteURLs'
 import { getCurrentSiteSettings } from './getSiteSettings'
+import { getCurrentSite } from './siteContext'
+import { getCanonicalSiteOrigin, getSiteSitemapLocales, getSiteSitemapURL } from './siteSEO'
 
 const getImageURL = ({
   image,
   settings,
 }: {
   image?: Media | Config['db']['defaultIDType'] | null
-  settings?: Parameters<typeof getAbsoluteMediaURL>[0]['settings']
-}) => getAbsoluteMediaURL({ media: image, settings })
+  settings?: Parameters<typeof buildConfiguredAbsoluteMediaURL>[0]['settings']
+}) => buildConfiguredAbsoluteMediaURL({ media: image, settings })
 
 export const generateMeta = async (args: {
   doc: Partial<Page> | Partial<Post> | null
   locale?: null | string
   path?: null | string
-  siteCode?: null | string
 }): Promise<Metadata> => {
-  const { doc, locale, path, siteCode } = args
-  const settings = await getCurrentSiteSettings(siteCode)
+  const { doc, locale, path } = args
+  const site = await getCurrentSite()
+  const settings = await getCurrentSiteSettings()
 
   const ogImage = getImageURL({
     image: doc?.meta?.image || settings?.seo?.defaultImage,
@@ -43,14 +44,30 @@ export const generateMeta = async (args: {
       ? (doc as { pathname?: null | string; slug?: null | string })
       : undefined
   const canonicalPath = path || getPageCanonicalPath(pageLikeDoc || doc?.slug || '')
-  const canonicalURL = getCanonicalURL({ locale, path: canonicalPath, settings })
+  const canonicalOrigin = getCanonicalSiteOrigin({
+    settings,
+    site,
+  })
+  const canonicalURL = getSiteSitemapURL({
+    locale: (locale as SupportedLocaleCode | null | undefined) || undefined,
+    origin: canonicalOrigin,
+    path: canonicalPath,
+  })
+  const siteLocales = getSiteSitemapLocales(site)
+  const languages = Object.fromEntries(
+    siteLocales.map((publicLocale) => [
+      publicLocale,
+      getSiteSitemapURL({ locale: publicLocale, origin: canonicalOrigin, path: canonicalPath }),
+    ]),
+  )
 
   return {
     alternates: {
       canonical: canonicalURL,
+      languages,
     },
     description,
-    metadataBase: new URL(normalizeCanonicalDomain(settings?.seo?.canonicalDomain)),
+    metadataBase: new URL(canonicalOrigin),
     openGraph: mergeOpenGraph({
       description: description || '',
       images: ogImage

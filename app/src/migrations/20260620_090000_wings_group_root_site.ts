@@ -1,9 +1,17 @@
+import { commitTransaction, initTransaction } from 'payload'
 import { MigrateDownArgs, MigrateUpArgs, sql } from '@payloadcms/db-postgres'
 
-export async function up({ db }: MigrateUpArgs): Promise<void> {
+export async function up({ db, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
     ALTER TYPE "public"."enum_site_settings_branding_theme_key" ADD VALUE IF NOT EXISTS 'wings-group';
+  `)
 
+  // PostgreSQL does not allow using a newly added enum value in the same
+  // transaction that introduced it, so commit the enum change first.
+  await commitTransaction(req)
+  await initTransaction(req)
+
+  await db.execute(sql`
     UPDATE "sites"
     SET
       "code" = 'wings-group',

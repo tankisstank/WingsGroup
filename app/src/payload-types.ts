@@ -122,16 +122,23 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('vi' | 'en') | ('vi' | 'en')[];
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de')
+    | ('vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de')[];
   globals: {
     header: Header;
     footer: Footer;
+    'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
-  locale: 'vi' | 'en';
+  locale: 'vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de';
   widgets: {
     'wings-group-metrics': WingsGroupMetricsWidget;
     collections: CollectionsWidget;
@@ -139,6 +146,8 @@ export interface Config {
   user: User;
   jobs: {
     tasks: {
+      sendLeadNotification: TaskSendLeadNotification;
+      reconcileLeadNotificationQueueFailures: TaskReconcileLeadNotificationQueueFailures;
       createCollectionExport: TaskCreateCollectionExport;
       createCollectionImport: TaskCreateCollectionImport;
       schedulePublish: TaskSchedulePublish;
@@ -186,8 +195,8 @@ export interface Site {
         id?: string | null;
       }[]
     | null;
-  supportedLocales: ('vi' | 'en')[];
-  defaultLocale: 'vi' | 'en';
+  supportedLocales: ('vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de')[];
+  defaultLocale: 'vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de';
   isActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -1094,6 +1103,8 @@ export interface TestimonialBlock {
         quote: string;
         name: string;
         role?: string | null;
+        country?: string | null;
+        noteDate?: string | null;
         avatar?: (number | null) | Media;
         logo?: (number | null) | Media;
         videoURL?: string | null;
@@ -1428,8 +1439,32 @@ export interface TourProduct {
   id: number;
   title: string;
   site: number | Site;
-  market: 'korea' | 'japan' | 'china';
+  market:
+    | 'korea'
+    | 'japan'
+    | 'china'
+    | 'vietnam'
+    | 'thailand'
+    | 'cambodia'
+    | 'laos'
+    | 'myanmar'
+    | 'indochina'
+    | 'other';
   tourCode?: string | null;
+  /**
+   * Dữ liệu máy đọc để truy vết source system, source ID/URL/hash, batch import và bảng giá gốc.
+   */
+  sourceProvenance?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  priceFrom?: number | null;
+  currency?: string | null;
   durationDays: number;
   durationNights: number;
   wrapperPage?: (number | null) | Page;
@@ -1550,7 +1585,7 @@ export interface TourProduct {
     mealsSummary?: string | null;
     transportSummary?: string | null;
     operatorNotes?: string | null;
-    importantNotes?:
+    notes?:
       | {
           label: string;
           id?: string | null;
@@ -1580,12 +1615,11 @@ export interface TourProduct {
         | 'why-choose'
         | 'route'
         | 'itinerary'
-        | 'includes'
+        | 'services'
         | 'departures'
         | 'faq'
         | 'related'
         | 'reviews'
-        | 'services'
         | 'sticky-cta'
       )[]
     | null;
@@ -1678,7 +1712,6 @@ export interface DepartureVariant {
   activeDepartures?: (number | TourDeparture)[] | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * Lịch khởi hành và giá bán công khai. Mỗi record là một đợt đi để dùng lại trên tour detail, market, campaign và trang lịch.
@@ -1697,7 +1730,7 @@ export interface TourDeparture {
   returnDate?: string | null;
   airline?: string | null;
   priceFrom: number;
-  currency: 'VND';
+  currency: 'VND' | 'USD';
   promoLabel?: string | null;
   urgencyLabel?: string | null;
   availabilityBadge?: string | null;
@@ -1786,6 +1819,12 @@ export interface Redirect {
 export interface FormSubmission {
   id: number;
   site?: (number | null) | Site;
+  /**
+   * Private operational state for notification delivery and reconciliation.
+   */
+  deliveryStatus: 'pending' | 'queued' | 'delivered' | 'queue_failed' | 'delivery_failed';
+  deliveryUpdatedAt?: string | null;
+  deliveryErrorCode?: string | null;
   form: number | Form;
   submissionData?:
     | {
@@ -1809,7 +1848,7 @@ export interface Export {
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'vi' | 'en') | null;
+  locale?: ('all' | 'vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -1972,7 +2011,13 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'createCollectionExport' | 'createCollectionImport' | 'schedulePublish';
+        taskSlug:
+          | 'inline'
+          | 'sendLeadNotification'
+          | 'reconcileLeadNotificationQueueFailures'
+          | 'createCollectionExport'
+          | 'createCollectionImport'
+          | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -2005,10 +2050,28 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'createCollectionExport' | 'createCollectionImport' | 'schedulePublish') | null;
+  taskSlug?:
+    | (
+        | 'inline'
+        | 'sendLeadNotification'
+        | 'reconcileLeadNotificationQueueFailures'
+        | 'createCollectionExport'
+        | 'createCollectionImport'
+        | 'schedulePublish'
+      )
+    | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2589,6 +2652,8 @@ export interface TestimonialBlockSelect<T extends boolean = true> {
         quote?: T;
         name?: T;
         role?: T;
+        country?: T;
+        noteDate?: T;
         avatar?: T;
         logo?: T;
         videoURL?: T;
@@ -2734,6 +2799,9 @@ export interface TourProductsSelect<T extends boolean = true> {
   site?: T;
   market?: T;
   tourCode?: T;
+  sourceProvenance?: T;
+  priceFrom?: T;
+  currency?: T;
   durationDays?: T;
   durationNights?: T;
   wrapperPage?: T;
@@ -2862,7 +2930,7 @@ export interface TourProductsSelect<T extends boolean = true> {
         mealsSummary?: T;
         transportSummary?: T;
         operatorNotes?: T;
-        importantNotes?:
+        notes?:
           | T
           | {
               label?: T;
@@ -2960,7 +3028,6 @@ export interface DepartureVariantsSelect<T extends boolean = true> {
   activeDepartures?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3323,6 +3390,9 @@ export interface FormsSelect<T extends boolean = true> {
  */
 export interface FormSubmissionsSelect<T extends boolean = true> {
   site?: T;
+  deliveryStatus?: T;
+  deliveryUpdatedAt?: T;
+  deliveryErrorCode?: T;
   form?: T;
   submissionData?:
     | T
@@ -3456,6 +3526,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processing?: T;
+  meta?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3551,6 +3622,24 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: number;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -3597,6 +3686,16 @@ export interface FooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "wings-group-metrics_widget".
  */
 export interface WingsGroupMetricsWidget {
@@ -3614,6 +3713,34 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSendLeadNotification".
+ */
+export interface TaskSendLeadNotification {
+  input: {
+    submissionId: string;
+    siteCode: string;
+    formTitle: string;
+    fields: {
+      label: string;
+      value: string;
+    }[];
+  };
+  output: {
+    delivered: boolean;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskReconcileLeadNotificationQueueFailures".
+ */
+export interface TaskReconcileLeadNotificationQueueFailures {
+  input?: unknown;
+  output: {
+    requeued: number;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3703,10 +3830,6 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'tour-products';
           value: number | TourProduct;
-        } | null)
-      | ({
-          relationTo: 'departure-variants';
-          value: number | DepartureVariant;
         } | null)
       | ({
           relationTo: 'tour-departures';

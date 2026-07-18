@@ -18,6 +18,8 @@ const freezeHeroMotion = async (page: import('@playwright/test').Page) => {
 
 test.describe('Hero visual regression', () => {
   test.beforeAll(async () => {
+    if (process.env.PLAYWRIGHT_SKIP_PHASE1_SEED === 'true') return
+
     await seedPhase1LaunchSmoke()
   })
 
@@ -47,9 +49,15 @@ test.describe('Hero visual regression', () => {
       await page.goto(`${e2eBaseURL}${target.path}`)
       await freezeHeroMotion(page)
 
-      const pause = page.getByRole('button', { name: 'Pause carousel' })
-      if (await pause.isVisible().catch(() => false)) {
-        await pause.click()
+      const firstSlide = page.getByRole('button', { name: 'Go to slide 1' })
+      if (await firstSlide.isVisible().catch(() => false)) {
+        await expect(page.locator('[aria-roledescription="carousel"][data-client-ready]')).toHaveAttribute(
+          'data-client-ready',
+          'true',
+        )
+        // Selecting a slide also pauses autoplay and gives every run the same
+        // visual state regardless of seed/server timing.
+        await firstSlide.click()
       }
 
       await expect(page.locator('[data-hero-presentation]')).toHaveScreenshot(

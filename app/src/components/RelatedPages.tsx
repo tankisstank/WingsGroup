@@ -4,6 +4,8 @@ import React from 'react'
 
 import { SiteLink } from '@/components/SiteLink'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
+import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { ArrowRightIcon, CompassIcon } from 'lucide-react'
 
 type RelatedPage = Pick<Page, 'slug' | 'title'> & {
@@ -13,24 +15,32 @@ type RelatedPage = Pick<Page, 'slug' | 'title'> & {
   pathname?: null | string
 }
 
+const compactDescription = (value?: null | string) => {
+  const text = String(value || '')
+    .replace(/\s+/g, ' ')
+    .replace(/\b(?:bay\s+)?(?:vna|vj|vn)\b/giu, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+
+  if (!text) return null
+
+  const beforeOperationalDetails = text
+    .split(/\b(?:Thời gian|Hàng không|Khởi hành)\s*:/iu)[0]
+    ?.trim()
+  const summary = beforeOperationalDetails || text
+
+  return summary.length > 160 ? `${summary.slice(0, 157).replace(/\s+\S*$/, '')}...` : summary
+}
+
 export const RelatedPages = ({
   locale = 'vi',
   pages,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   pages?: Array<number | RelatedPage> | null
 }) => {
   const relatedPages = pages?.filter((page): page is RelatedPage => typeof page === 'object') || []
-  const copy =
-    locale === 'en'
-      ? {
-          heading: 'Related pages',
-          kicker: 'Continue exploring',
-        }
-      : {
-          heading: 'Trang liên quan',
-          kicker: 'Tiếp tục khám phá',
-        }
+  const copy = getRuntimeLocaleCopy(publicChromeCopy, locale)
 
   if (relatedPages.length === 0) {
     return null
@@ -45,23 +55,30 @@ export const RelatedPages = ({
           </div>
           <div>
             <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
-              {copy.kicker}
+              {copy.relatedPagesKicker}
             </p>
             <h2 className="text-xl font-semibold" id="related-pages-heading">
-              {copy.heading}
+              {copy.relatedPagesHeading}
             </h2>
           </div>
         </div>
         <ul className="grid gap-4 md:grid-cols-2">
           {relatedPages.map((page) => (
             <li className="site-related-pages__item" key={page.pathname || page.slug}>
-              <SiteLink className="inline-flex items-center gap-2 font-semibold no-underline" href={getPageCanonicalPath(page)}>
-                {page.title}
-                <ArrowRightIcon aria-hidden="true" className="h-4 w-4" />
+              <SiteLink
+                className="site-related-pages__link block h-full no-underline"
+                href={getPageCanonicalPath(page)}
+              >
+                <span className="inline-flex items-center gap-2 font-semibold">
+                  {page.title}
+                  <ArrowRightIcon aria-hidden="true" className="h-4 w-4" />
+                </span>
+                {compactDescription(page.meta?.description) ? (
+                  <span className="mt-1 block text-sm text-muted-foreground">
+                    {compactDescription(page.meta?.description)}
+                  </span>
+                ) : null}
               </SiteLink>
-              {page.meta?.description ? (
-                <p className="mt-1 text-sm text-muted-foreground">{page.meta.description}</p>
-              ) : null}
             </li>
           ))}
         </ul>

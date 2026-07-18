@@ -1,6 +1,14 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+import { de } from 'payload/i18n/de'
 import { en } from 'payload/i18n/en'
+import { es } from 'payload/i18n/es'
+import { fr } from 'payload/i18n/fr'
+import { it } from 'payload/i18n/it'
+import { ja } from 'payload/i18n/ja'
+import { ko } from 'payload/i18n/ko'
+import { pt } from 'payload/i18n/pt'
 import { vi } from 'payload/i18n/vi'
 import sharp from 'sharp'
 import path from 'path'
@@ -25,8 +33,10 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { cmsEnabledLocaleCodes } from './utilities/locales'
 import { resolveLocalDatabaseURL } from './utilities/localDatabase'
 import { repairLocalSQLiteSchema } from './utilities/repairLocalSQLiteSchema'
+import { reconcileLeadNotificationTask, sendLeadNotificationTask } from './lead-capture/job'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -34,6 +44,13 @@ const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL)
 const isPostgresURL =
   databaseURL.startsWith('postgres://') || databaseURL.startsWith('postgresql://')
 const shouldPushDatabaseSchema = process.env.PAYLOAD_DB_PUSH === 'true'
+const smtpPort = Number.parseInt(process.env.SMTP_PORT || '587', 10)
+const smtpConfigured = Boolean(
+  process.env.SMTP_HOST &&
+    process.env.SMTP_USER &&
+    process.env.SMTP_PASSWORD &&
+    process.env.SMTP_FROM_EMAIL,
+)
 
 if (!isPostgresURL) {
   await repairLocalSQLiteSchema(databaseURL)
@@ -117,10 +134,29 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
+  email: smtpConfigured
+    ? await nodemailerAdapter({
+        defaultFromAddress: process.env.SMTP_FROM_EMAIL!,
+        defaultFromName: process.env.SMTP_FROM_NAME || 'WingsTravel Website',
+        transportOptions: {
+          auth: { pass: process.env.SMTP_PASSWORD!, user: process.env.SMTP_USER! },
+          host: process.env.SMTP_HOST!,
+          port: smtpPort,
+          secure: process.env.SMTP_SECURE === 'true',
+        },
+      })
+    : undefined,
   i18n: {
     fallbackLanguage: 'vi',
     supportedLanguages: {
+      de,
       en,
+      es,
+      fr,
+      it,
+      ja,
+      ko,
+      pt,
       vi,
     },
   },
@@ -153,21 +189,20 @@ export default buildConfig({
     Users,
   ],
   localization: {
-    locales: [
-      {
-        code: 'vi',
-        label: 'Tiếng Việt',
-      },
-      {
-        code: 'en',
-        label: 'English',
-      },
-    ],
+    locales: [...cmsEnabledLocaleCodes],
     defaultLocale: 'vi',
     fallback: true,
   },
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
+  graphQL: {
+    // No production consumer is registered. Keep the development API available
+    // for schema work while removing the public production attack surface.
+    disable: process.env.NODE_ENV === 'production',
+    disableIntrospectionInProduction: true,
+    disablePlaygroundInProduction: true,
+    maxComplexity: 1000,
+  },
   plugins,
   secret: process.env.PAYLOAD_SECRET,
   sharp,
@@ -177,8 +212,7 @@ export default buildConfig({
   jobs: {
     access: {
       run: ({ req }: { req: PayloadRequest }): boolean => {
-        // Allow logged in users to execute this endpoint (default)
-        if (req.user) return true
+        if (req.user?.role === 'super-admin') return true
 
         const secret = process.env.CRON_SECRET
         if (!secret) return false
@@ -190,6 +224,6 @@ export default buildConfig({
         return authHeader === `Bearer ${secret}`
       },
     },
-    tasks: [],
+    tasks: [sendLeadNotificationTask, reconcileLeadNotificationTask],
   },
 })

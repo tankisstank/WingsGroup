@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '@/access/roles'
-import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/access/siteScope'
+import { enforceSiteAccess, siteScopedAccess, siteScopedOrAnyone } from '@/access/siteScope'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 
@@ -15,7 +15,7 @@ export const DepartureVariants: CollectionConfig = {
   access: {
     create: contentCreateAccess,
     delete: contentDeleteAccess,
-    read: siteScopedOrPublished(),
+    read: siteScopedOrAnyone(),
     update: siteScopedAccess(),
   },
   admin: {
@@ -302,14 +302,5 @@ export const DepartureVariants: CollectionConfig = {
     afterChange: [revalidateTourVariant],
     afterDelete: [revalidateTourVariantDelete],
     beforeChange: [enforceSiteAccess, preventEditorPublish],
-  },
-  versions: {
-    drafts: {
-      autosave: {
-        interval: 100,
-      },
-      schedulePublish: true,
-    },
-    maxPerDoc: 50,
   },
 }

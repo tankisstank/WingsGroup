@@ -17,6 +17,7 @@ import { getSiteThemeTokens } from '@/utilities/siteTheme'
 import {
   backgroundStyleOptions,
   buttonStyleOptions,
+  defaultThemeKey,
   defaultThemePresetByKey,
   fontPresetOptions,
   layoutStyleOptions,
@@ -169,7 +170,7 @@ const defaultFormState = (siteName = 'WingsGroup'): ThemeFormState => ({
   spacingScale: defaultThemePresetByKey.corporate.spacingScale,
   surfaceColor: defaultThemePresetByKey.corporate.surfaceColor,
   surfaceStrongColor: defaultThemePresetByKey.corporate.surfaceStrongColor,
-  themeKey: 'wings-group',
+  themeKey: defaultThemeKey,
   themePreset: '',
 })
 
@@ -308,7 +309,7 @@ export default function ThemeManagerView() {
         presets.find((preset) => String(preset.id) === String(themePresetDoc?.id)) ||
         presets.find((preset) => preset.key === themePresetKey) ||
         presets[0]
-      const resolvedPreset = resolveThemePresetTokens(settings.branding?.themeKey || 'wings-group', {
+      const resolvedPreset = resolveThemePresetTokens(settings.branding?.themeKey || defaultThemeKey, {
         key: matchedPreset?.key || themePresetKey,
         tokens: themePresetDoc?.tokens || matchedPreset?.tokens || defaultThemePresetByKey.corporate,
       })
@@ -325,7 +326,7 @@ export default function ThemeManagerView() {
         spacingScale: settings.branding?.spacingScale || resolvedPreset.spacingScale,
         surfaceColor: settings.branding?.surfaceColor || resolvedPreset.surfaceColor,
         surfaceStrongColor: settings.branding?.surfaceStrongColor || resolvedPreset.surfaceStrongColor,
-        themeKey: settings.branding?.themeKey || 'wings-group',
+        themeKey: settings.branding?.themeKey || defaultThemeKey,
         themePreset: String(matchedPreset?.id || ''),
       }
 

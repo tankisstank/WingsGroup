@@ -3,7 +3,7 @@ import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'paylo
 import { revalidatePath, revalidateTag } from 'next/cache.js'
 
 import type { Post } from '../../../payload-types'
-import { supportedLocaleCodes } from '@/utilities/sitePaths'
+import { publicLocaleCodes } from '@/utilities/sitePaths'
 import { getPostCanonicalPath } from '@/utilities/siteURLs'
 
 const revalidatePostPaths = (slug?: null | string) => {
@@ -11,7 +11,7 @@ const revalidatePostPaths = (slug?: null | string) => {
 
   revalidatePath(path)
 
-  for (const locale of supportedLocaleCodes) {
+  for (const locale of publicLocaleCodes) {
     revalidatePath(getPostCanonicalPath(slug, locale))
   }
 

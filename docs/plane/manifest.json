@@ -1,0 +1,341 @@
+{
+  "externalSource": "wingstravel-plane-import",
+  "initiative": {
+    "name": "WingsGroup CMS Platform",
+    "description": "Chuong trinh CMS da site cho WingsGroup, bao gom nen tang dung chung va cac site con phuc vu phase 1."
+  },
+  "projects": [
+    {
+      "key": "core",
+      "name": "WingsGroup Core Platform",
+      "identifier": "WGCORE",
+      "description": "Nen tang dung chung cho CMS da site, localization, page builder, admin UX, theme, SEO va infrastructure."
+    },
+    {
+      "key": "wingstravel",
+      "name": "WingsTravel",
+      "identifier": "WTRAVEL",
+      "description": "Site umbrella WingsTravel va cac deliverable site-specific cho phase 1."
+    },
+    {
+      "key": "wingsgo",
+      "name": "WingsGo",
+      "identifier": "WGO",
+      "description": "Site WingsGo voi content, campaign, tour va cac deliverable public phase 1."
+    },
+    {
+      "key": "wingsside",
+      "name": "WingsSide",
+      "identifier": "WSIDE",
+      "description": "Site WingsSide trong he sinh thai WingsGroup."
+    },
+    {
+      "key": "wingsplus",
+      "name": "WingsPlus",
+      "identifier": "WPLUS",
+      "description": "Site WingsPlus trong he sinh thai WingsGroup."
+    },
+    {
+      "key": "wingscare",
+      "name": "WingsCare",
+      "identifier": "WCARE",
+      "description": "Site WingsCare trong he sinh thai WingsGroup."
+    },
+    {
+      "key": "wingspass",
+      "name": "WingsPass",
+      "identifier": "WPASS",
+      "description": "Site WingsPass trong he sinh thai WingsGroup."
+    }
+  ],
+  "modules": [
+    "Multisite Core",
+    "Sites & Site Settings",
+    "Pages & Landing Pages",
+    "Posts & Content",
+    "Tours & Services",
+    "Media",
+    "Localization",
+    "SEO & Metadata",
+    "CMS Admin UX",
+    "Access Control",
+    "Theme & Branding",
+    "Go-live Review",
+    "Infrastructure"
+  ],
+  "epics": [
+    {
+      "key": "E01",
+      "projectKey": "core",
+      "name": "E01 - Lớp vận hành Harness",
+      "description": "Nhóm mục tiêu xây lớp Harness và CLI bền vững để lưu intake, story, proof, trace và backlog cho agent/human workflow.",
+      "source": "docs/stories/epics/E01-durable-layer/US-002-rust-harness-cli/overview.md"
+    },
+    {
+      "key": "E02",
+      "projectKey": "core",
+      "name": "E02 - Nền tảng multisite giai đoạn 1",
+      "description": "Nhóm mục tiêu dựng nền CMS đa site, site settings, phân quyền, console quản trị, review site, go-live review và migration gate.",
+      "source": "docs/stories/epics/E02-phase-1-multisite-platform/US-003-site-registry-and-settings.md"
+    },
+    {
+      "key": "E03",
+      "projectKey": "core",
+      "name": "E03 - SEO, metadata và theme nền tảng",
+      "description": "Nhóm mục tiêu SEO technical, structured data, breadcrumb, internal linking và theme foundation cho multisite.",
+      "source": "docs/stories/epics/E03-ai-agent-seo-and-theme/US-008-metadata-canonical-and-sitemap-baseline.md"
+    },
+    {
+      "key": "E04",
+      "projectKey": "core",
+      "name": "E04 - Kế hoạch giám sát agent",
+      "description": "Nhóm mục tiêu ghi lại supervision plan cho các story cần phối hợp agent/reviewer và kiểm soát proof.",
+      "source": "docs/stories/epics/E04-supervision-plans/US-003-011-009-supervisor-plan.md",
+      "startDate": "2026-05-26",
+      "targetDate": "2026-05-26"
+    },
+    {
+      "key": "E05",
+      "projectKey": "core",
+      "name": "E05 - Quản trị theme và hero trong CMS",
+      "description": "Nhóm mục tiêu CMS-managed theme, modular hero presentation, hero platform, decision UX và backend theme shell.",
+      "source": "docs/stories/epics/E05-cms-theme-management/US-014-cms-theme-management/overview.md"
+    },
+    {
+      "key": "E06",
+      "projectKey": "core",
+      "name": "E06 - Thư viện layout preset",
+      "description": "Nhóm mục tiêu xây thư viện layout preset code-owned cho Page Wizard và Page Composer.",
+      "source": "docs/stories/epics/E06-layout-preset-library/overview.md"
+    },
+    {
+      "key": "E07",
+      "projectKey": "wingsgo",
+      "name": "E07 - Nền tảng sản phẩm tour WingsGo",
+      "description": "Nhóm mục tiêu xây structured tour product model, tour detail builder, departure variants, UX lịch khởi hành và tài liệu import mapping.",
+      "source": "docs/stories/epics/E07-tour-product-platform/US-023-tour-product-model.md"
+    },
+    {
+      "key": "E08",
+      "projectKey": "wingsside",
+      "name": "E08 - Nâng cấp inbound WingsSide",
+      "description": "Nhóm mục tiêu nâng cấp WingsSide inbound về giao diện, hero/search, motion, page composer, locale, navigation, content và readiness proof.",
+      "source": "docs/stories/epics/E08-wingsside-inbound-upgrade/overview.md"
+    }
+  ],
+  "milestones": [
+    {
+      "title": "Foundation Ready",
+      "targetDate": "2026-05-31"
+    },
+    {
+      "title": "CMS Internal Review",
+      "targetDate": "2026-06-15"
+    },
+    {
+      "title": "Client UAT",
+      "targetDate": "2026-06-30"
+    },
+    {
+      "title": "First Site Go-live",
+      "targetDate": "2026-07-15"
+    },
+    {
+      "title": "Post-launch Stabilization",
+      "targetDate": "2026-07-31"
+    }
+  ],
+  "states": [
+    {
+      "name": "Intake",
+      "color": "#7C3AED",
+      "group": "triage"
+    },
+    {
+      "name": "Planned",
+      "color": "#2563EB",
+      "group": "backlog"
+    },
+    {
+      "name": "In Progress",
+      "color": "#F59E0B",
+      "group": "started"
+    },
+    {
+      "name": "In Review",
+      "color": "#DB2777",
+      "group": "started"
+    },
+    {
+      "name": "Validation Pending",
+      "color": "#EA580C",
+      "group": "started"
+    },
+    {
+      "name": "Blocked",
+      "color": "#DC2626",
+      "group": "started"
+    },
+    {
+      "name": "Done",
+      "color": "#16A34A",
+      "group": "completed"
+    },
+    {
+      "name": "Delivered",
+      "color": "#0F766E",
+      "group": "completed"
+    }
+  ],
+  "customProperties": [
+    {
+      "name": "Story ID",
+      "propertyType": "TEXT",
+      "description": "Ma story noi bo trong repo."
+    },
+    {
+      "name": "Epic",
+      "propertyType": "TEXT",
+      "description": "Epic hoac initiative chua story."
+    },
+    {
+      "name": "Site",
+      "propertyType": "OPTION",
+      "description": "Phan loai theo site hoac Core.",
+      "options": [
+        "Core",
+        "WingsTravel",
+        "WingsGo",
+        "WingsSide",
+        "WingsPlus",
+        "WingsCare",
+        "WingsPass"
+      ]
+    },
+    {
+      "name": "Phase",
+      "propertyType": "OPTION",
+      "description": "Phase delivery.",
+      "options": [
+        "Phase 1",
+        "Phase 2"
+      ]
+    },
+    {
+      "name": "Workstream",
+      "propertyType": "OPTION",
+      "description": "Nhom cong viec chinh.",
+      "options": [
+        "CMS",
+        "SEO",
+        "Tours",
+        "Platform",
+        "Content",
+        "Docs"
+      ]
+    },
+    {
+      "name": "Proof Status",
+      "propertyType": "OPTION",
+      "description": "Trang thai proof hien tai.",
+      "options": [
+        "Full",
+        "Partial",
+        "Pending"
+      ]
+    },
+    {
+      "name": "Source Link",
+      "propertyType": "TEXT",
+      "description": "Duong dan docs noi bo trong repo."
+    },
+    {
+      "name": "Customer Visible",
+      "propertyType": "OPTION",
+      "description": "Danh dau item co hien cho khach hang hay khong.",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "01. Tong quan du an WingsGroup CMS",
+      "source": "docs/plane/pages/01-tong-quan-du-an-wingsgroup-cms.md"
+    },
+    {
+      "name": "02. Pham vi Phase 1",
+      "source": "docs/plane/pages/02-pham-vi-phase-1.md"
+    },
+    {
+      "name": "03. Tien do va moc ban giao",
+      "source": "docs/plane/pages/03-tien-do-va-moc-ban-giao.md"
+    },
+    {
+      "name": "04. Huong dan su dung CMS",
+      "source": "docs/plane/pages/04-huong-dan-su-dung-cms.md"
+    },
+    {
+      "name": "05. Quy trinh cap nhat noi dung",
+      "source": "docs/plane/pages/05-quy-trinh-cap-nhat-noi-dung.md"
+    },
+    {
+      "name": "06. Quy trinh review preview publish",
+      "source": "docs/plane/pages/06-quy-trinh-review-preview-publish.md"
+    },
+    {
+      "name": "07. Cach gui yeu cau thay doi",
+      "source": "docs/plane/pages/07-cach-gui-yeu-cau-thay-doi.md"
+    },
+    {
+      "name": "08. FAQ",
+      "source": "docs/plane/pages/08-faq.md"
+    }
+  ],
+  "storyMappings": {
+    "US-002": { "projectKey": "core", "module": "E01 - Lớp vận hành Harness", "epicKey": "E01", "site": "Core", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "No" },
+    "US-003": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-004": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-005": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-006": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-007": { "projectKey": "wingstravel", "module": "Go-live Review", "site": "WingsTravel", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "Yes" },
+    "US-008": { "projectKey": "core", "module": "E03 - SEO, metadata và theme nền tảng", "epicKey": "E03", "site": "Core", "phase": "Phase 1", "workstream": "SEO", "customerVisible": "Yes" },
+    "US-009": { "projectKey": "core", "module": "E03 - SEO, metadata và theme nền tảng", "epicKey": "E03", "site": "Core", "phase": "Phase 1", "workstream": "SEO", "customerVisible": "Yes" },
+    "US-010": { "projectKey": "core", "module": "E03 - SEO, metadata và theme nền tảng", "epicKey": "E03", "site": "Core", "phase": "Phase 1", "workstream": "SEO", "customerVisible": "Yes" },
+    "US-011": { "projectKey": "core", "module": "E03 - SEO, metadata và theme nền tảng", "epicKey": "E03", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-012": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-013": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-014": { "projectKey": "core", "module": "E05 - Quản trị theme và hero trong CMS", "epicKey": "E05", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-015": { "projectKey": "core", "module": "E05 - Quản trị theme và hero trong CMS", "epicKey": "E05", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-016": { "projectKey": "core", "module": "E06 - Thư viện layout preset", "epicKey": "E06", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-017": { "projectKey": "core", "module": "E05 - Quản trị theme và hero trong CMS", "epicKey": "E05", "site": "Core", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "Yes" },
+    "US-018": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-019": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "Go-live review pipeline has unit N/A; eslint, browser E2E run, JSON/Markdown reports and screenshots satisfy AC." },
+    "US-020": { "projectKey": "core", "module": "E05 - Quản trị theme và hero trong CMS", "epicKey": "E05", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-021": { "projectKey": "core", "module": "E05 - Quản trị theme và hero trong CMS", "epicKey": "E05", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-022": { "projectKey": "core", "module": "E05 - Quản trị theme và hero trong CMS", "epicKey": "E05", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "CMS backend shell story has unit N/A; importmap/typecheck/lint/admin E2E/build proof satisfy AC." },
+    "US-023": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
+    "US-024": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
+    "US-025": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "PostgreSQL migration smoke gate has unit N/A; db:migrate:smoke on PostgreSQL 16.14 plus migration/status evidence satisfy AC." },
+    "US-026": { "projectKey": "wingsside", "module": "E08 - Nâng cấp inbound WingsSide", "epicKey": "E08", "site": "WingsSide", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "Docs/audit story: unit và E2E là N/A; integration/platform audit proof đã đủ AC." },
+    "US-027": { "projectKey": "wingsside", "module": "E08 - Nâng cấp inbound WingsSide", "epicKey": "E08", "site": "WingsSide", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "Theme story không thêm unit helper riêng; integration, E2E, screenshots và contrast proof đã đủ AC." },
+    "US-028": { "projectKey": "wingsside", "module": "E08 - Nâng cấp inbound WingsSide", "epicKey": "E08", "site": "WingsSide", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "Motion primitive story không cần schema integration hay standalone E2E; component tests và platform proof đã đủ AC." },
+    "US-029": { "projectKey": "wingsside", "module": "E08 - Nâng cấp inbound WingsSide", "epicKey": "E08", "site": "WingsSide", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-030": { "projectKey": "wingsside", "module": "E08 - Nâng cấp inbound WingsSide", "epicKey": "E08", "site": "WingsSide", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-031": { "projectKey": "wingsside", "module": "E08 - Nâng cấp inbound WingsSide", "epicKey": "E08", "site": "WingsSide", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "Yes" },
+    "US-032": { "projectKey": "wingsside", "module": "E08 - Nâng cấp inbound WingsSide", "epicKey": "E08", "site": "WingsSide", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "Header story không thêm unit helper riêng; targeted E2E now covers mega menu, language switcher, no-leak and hydration-stable locale links." },
+    "US-033": { "projectKey": "wingsside", "module": "E08 - Nâng cấp inbound WingsSide", "epicKey": "E08", "site": "WingsSide", "phase": "Phase 1", "workstream": "Content", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "Content/media seed story has unit N/A; content map, seed proof, copy guard, E2E and go-live artifacts satisfy AC." },
+    "US-034": { "projectKey": "wingsside", "module": "E08 - Nâng cấp inbound WingsSide", "epicKey": "E08", "site": "WingsSide", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "Launch proof story has unit N/A; typecheck/lint/integration/component/build/E2E/go-live/screenshots/SEO proof satisfy AC. Full local E2E prepare-db SQLite_BUSY is documented." },
+    "US-035": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
+    "US-036": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "Payload admin authoring config story has standalone E2E N/A; typed collection config plus integration/platform proof satisfy AC." },
+    "US-037": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
+    "US-038": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
+    "US-039": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Docs", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "Documentation/import-mapping story has unit and E2E N/A; product docs and platform proof satisfy AC." },
+    "US-040": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "Comprehensive audit deliverable is complete with source review, test/build/SCA results, browser evidence, production probes, prioritized findings and re-audit gates. Product remediation remains separate follow-up work." },
+    "US-041": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "Yes", "proofStatusOverride": "Partial", "proofStatusNote": "P0 remediation, current test gates, encrypted backups, production migrations, and post-cutover health/metrics smoke pass. WingsSide routing release wingsside-routing-20260713-113000 supersedes the locale release: backfill is idempotent, validator passes 105/105, public locale continuity passes live, and unsupported /ja plus production /wingsside aliases now return 404. Five-locale editorial sign-off remains open. Turnstile is configured. SMTP is intentionally disabled: lead submissions return explicit 503 until credentials and a live delivery test are completed. External metrics acknowledgement remains open; WingsSide is healthy at wingside.vn." },
+    "US-042": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "UAT", "customerVisible": "Yes", "proofStatusNote": "Independent production re-test of Phụ lục 01 UAT M1-M3 across six domains. SMTP/email delivery is explicitly outside scope; item 6 is Tạm hoãn/Chưa đánh giá until delivery is configured. The task contains the 12-item checklist, result states, browser/API instructions, evidence rules and cleanup protocol." },
+    "US-043": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
+    "US-045": { "projectKey": "wingsside", "module": "E08 - Nâng cấp inbound WingsSide", "epicKey": "E08", "site": "WingsSide", "phase": "Phase 1", "workstream": "Content", "customerVisible": "Yes", "proofStatusOverride": "Full", "proofStatusNote": "BestPrice 22 local import is complete: 22 published contact-mode WingSide tours, 22 wrapper pages, no duplicate tour codes, sample data demoted to draft. Production sync remains a separate deployment step." }
+  }
+}

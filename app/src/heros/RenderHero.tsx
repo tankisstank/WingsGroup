@@ -6,6 +6,7 @@ import { HighImpactHero } from '@/heros/HighImpact'
 import { LowImpactHero } from '@/heros/LowImpact'
 import { MediumImpactHero } from '@/heros/MediumImpact'
 import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
+import type { SupportedLocaleCode } from '@/utilities/locales'
 
 const heroes = {
   highImpact: HighImpactHero,
@@ -14,7 +15,10 @@ const heroes = {
 }
 
 export const RenderHero: React.FC<
-  Page['hero'] & { siteHeroDefaults?: SiteHeroDefaultsLike | null }
+  Page['hero'] & {
+    resolvedLocale?: SupportedLocaleCode
+    siteHeroDefaults?: SiteHeroDefaultsLike | null
+  }
 > = (props) => {
   const { type } = props || {}
 

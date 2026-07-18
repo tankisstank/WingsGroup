@@ -4,6 +4,26 @@ import config from '../../src/payload.config.js'
 
 const password = 'test'
 
+const retrySQLiteBusy = async <T>(operation: () => Promise<T>): Promise<T> => {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      return await operation()
+    } catch (error) {
+      lastError = error
+
+      if (!String(error).includes('SQLITE_BUSY') || attempt === 4) {
+        break
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)))
+    }
+  }
+
+  throw lastError
+}
+
 export const scopedUsers = {
   siteManager: {
     email: 'phase1-site-manager@example.com',
@@ -78,12 +98,14 @@ export async function seedRoleScopedUsers(): Promise<RoleScopeSeed> {
 export async function cleanupRoleScopedUsers(): Promise<void> {
   const payload = await getPayload({ config })
 
-  await payload.delete({
-    collection: 'users',
-    where: {
-      email: {
-        in: [scopedUsers.siteManager.email, scopedUsers.editor.email],
+  await retrySQLiteBusy(() =>
+    payload.delete({
+      collection: 'users',
+      where: {
+        email: {
+          in: [scopedUsers.siteManager.email, scopedUsers.editor.email],
+        },
       },
-    },
-  })
+    }),
+  )
 }

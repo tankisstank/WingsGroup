@@ -61,58 +61,67 @@ const findSiteForm = async (
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const payload = await getPayload({ config })
-  const requestHeaders = await headers()
-  const { user } = await payload.auth({ headers: requestHeaders })
+  try {
+    const payload = await getPayload({ config })
+    const requestHeaders = await headers()
+    const { user } = await payload.auth({ headers: requestHeaders })
 
-  if (!user) {
-    return Response.json({ message: 'Bạn cần đăng nhập để tạo trang.' }, { status: 401 })
-  }
+    if (!user) {
+      return Response.json({ message: 'Bạn cần đăng nhập để tạo trang.' }, { status: 401 })
+    }
 
-  const body = (await request.json()) as PageWizardPayload
-  const title = body.title?.trim()
-  const slug = slugify(body.slug || title || '')
-  const preset = isLayoutPresetKey(body.preset)
-    ? body.preset
-    : getLayoutPresetDefinition(undefined).key
-  const siteID =
-    typeof body.site === 'string' && /^\d+$/.test(body.site) ? Number(body.site) : body.site
+    const body = (await request.json()) as PageWizardPayload
+    const title = body.title?.trim()
+    const slug = slugify(body.slug || title || '')
+    const preset = isLayoutPresetKey(body.preset)
+      ? body.preset
+      : getLayoutPresetDefinition(undefined).key
+    const siteID =
+      typeof body.site === 'string' && /^\d+$/.test(body.site) ? Number(body.site) : body.site
 
-  if (!siteID || !title || !slug) {
+    if (!siteID || !title || !slug) {
+      return Response.json(
+        { message: 'Thiếu site, tiêu đề hoặc đường dẫn.' },
+        { status: 400 },
+      )
+    }
+
+    const payloadReq = await createLocalReq({ user }, payload)
+    const formID = await findSiteForm(payload, payloadReq, siteID)
+    const presetData = createLayoutPresetData(preset, {
+      formID,
+      summary: body.summary?.trim(),
+      title,
+    })
+
+    const createdPage = await payload.create({
+      collection: 'pages',
+      data: {
+        _status: 'draft',
+        layoutPresetKey: preset,
+        meta: {
+          description: body.summary,
+          title,
+        },
+        site: siteID as number,
+        slug,
+        title,
+        ...presetData,
+      } as never,
+      overrideAccess: false,
+      req: payloadReq,
+    })
+
+    return Response.json({
+      id: createdPage.id,
+      preset,
+    })
+  } catch (error) {
     return Response.json(
-      { message: 'Thiếu site, tiêu đề hoặc đường dẫn.' },
-      { status: 400 },
+      {
+        message: error instanceof Error ? error.message : 'Không tạo được trang nháp.',
+      },
+      { status: 500 },
     )
   }
-
-  const payloadReq = await createLocalReq({ user }, payload)
-  const formID = await findSiteForm(payload, payloadReq, siteID)
-  const presetData = createLayoutPresetData(preset, {
-    formID,
-    summary: body.summary?.trim(),
-    title,
-  })
-
-  const createdPage = await payload.create({
-    collection: 'pages',
-    data: {
-      _status: 'draft',
-      layoutPresetKey: preset,
-      meta: {
-        description: body.summary,
-        title,
-      },
-      site: siteID as number,
-      slug,
-      title,
-      ...presetData,
-    } as never,
-    overrideAccess: false,
-    req: payloadReq,
-  })
-
-  return Response.json({
-    id: createdPage.id,
-    preset,
-  })
 }

@@ -5,17 +5,22 @@ import type { CallToActionBlock as CTABlockProps } from '@/payload-types'
 import RichText from '@/components/RichText'
 import { CMSLink } from '@/components/Link'
 
-export const CallToActionBlock: React.FC<CTABlockProps> = ({
+type CallToActionBlockProps = CTABlockProps & {
+  ariaLabel?: string
+}
+
+export const CallToActionBlock = ({
+  ariaLabel = 'Call to action',
   eyebrow,
   links,
   presentation = 'card',
   richText,
   supportingQuote,
-}) => {
+}: CallToActionBlockProps) => {
   return (
     <section
       className={`container theme-section--compact layout-block layout-block--cta layout-block--${presentation}`}
-      aria-label="Call to action"
+      aria-label={ariaLabel}
       data-block-presentation={presentation}
     >
       <div className="layout-cta theme-card border p-6 lg:p-8 flex flex-col gap-8 md:flex-row md:justify-between md:items-center">

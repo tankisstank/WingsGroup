@@ -44,6 +44,28 @@ lane.
 Do not create or extend a monolithic spec by default after intake. Use product
 docs, stories, decisions, and initiative notes as the living surface.
 
+## Plane Creation Rules
+
+When intake produces or updates a Plane work item:
+
+1. Draft a title under 80 characters using `verb + object`.
+2. Put acceptance criteria, reproduction steps, context, and evidence in the
+   description rather than appending them to the title.
+3. Preserve `US-xxx`/`UAT-xx` references in the title only when they improve
+   traceability; otherwise use the description or the `Mã story` property.
+4. Set exactly one owner when known. Default to `c0508g` in this workspace;
+   leave reviewer and dependency blank unless the request supplies them.
+5. Select the applicable standard labels: `bug`, `feature`, `content`, `infra`,
+   `uat`, or `blocked`.
+   Use `uat` for testing, `infra` for operations/hosting/data/security,
+   `content` for content/media/seed work, `bug` for defects/remediation, and
+   `feature` for ordinary product capability. Use `blocked` only for an
+   explicit external blocker or the `Tắc nghẽn` state.
+6. Choose the state from the state table in `docs/HARNESS.md`, based on actual
+   work evidence rather than the desired appearance of progress.
+7. Use Module for technical grouping and Epic for strategic, time-bound goals;
+   do not create both as same-named containers.
+
 ## Lanes
 
 ### Tiny

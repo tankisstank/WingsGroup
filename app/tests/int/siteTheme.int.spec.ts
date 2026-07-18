@@ -1,4 +1,5 @@
 import { getSiteThemeTokens } from '@/utilities/siteTheme'
+import { wingsSideInboundThemePresetKey } from '@/utilities/themeSeed'
 import { defaultThemePresetByKey, type ThemePresetTokens } from '@/utilities/themeTokens'
 import { describe, expect, it } from 'vitest'
 
@@ -59,8 +60,8 @@ describe('site theme tokens', () => {
         '--site-brand': '#1D4ED8',
         '--site-brand-contrast': '#ffffff',
         '--site-button-style': 'solid',
-        '--site-font-body': 'var(--font-wingsgo-body), var(--font-geist-sans)',
-        '--site-font-heading': 'var(--font-wingsgo-heading), var(--font-geist-sans)',
+        '--site-font-body': 'var(--font-retail-body), var(--font-geist-sans)',
+        '--site-font-heading': 'var(--font-retail-heading), var(--font-geist-sans)',
         '--site-layout': 'retail',
         '--site-radius': '0.875rem',
         '--site-shadow': '0 24px 80px color-mix(in oklch, #1D4ED8 16%, transparent)',
@@ -112,8 +113,8 @@ describe('site theme tokens', () => {
         '--site-brand': '#104030',
         '--site-brand-contrast': '#ffffff',
         '--site-button-style': 'pill',
-        '--site-font-body': 'var(--font-wingsside-body), var(--font-geist-sans)',
-        '--site-font-heading': 'var(--font-wingsside-heading), Georgia, serif',
+        '--site-font-body': 'var(--font-editorial-body), var(--font-geist-sans)',
+        '--site-font-heading': 'var(--font-editorial-heading), Georgia, serif',
         '--site-layout': 'editorial',
         '--site-radius': '1.25rem',
         '--site-shadow': '0 24px 80px color-mix(in oklch, #104030 16%, transparent)',
@@ -125,6 +126,57 @@ describe('site theme tokens', () => {
       themeKey: 'wings-side',
       themeName: 'WingsSide',
       themePreset: 'wings-side-editorial',
+    })
+  })
+
+  it('resolves the WingsSide inbound v2 editorial launch palette', () => {
+    const inboundTokens: ThemePresetTokens = {
+      ...defaultThemePresetByKey.premium,
+      accentColor: '#C9A75C',
+      backgroundStyle: 'editorial',
+      brandColor: '#0F3D3E',
+      buttonStyle: 'pill',
+      fontPreset: 'editorial',
+      layoutStyle: 'editorial',
+      radius: 'lg',
+      spacingScale: 'airy',
+      surfaceColor: '#F8F5EE',
+      surfaceStrongColor: '#E9E1D0',
+    }
+
+    const settings = {
+      branding: {
+        themeKey: 'wings-side',
+        themePreset: {
+          key: wingsSideInboundThemePresetKey,
+          tokens: inboundTokens,
+        },
+      },
+      siteName: 'WingsSide',
+    }
+
+    expect(getSiteThemeTokens(settings)).toMatchObject({
+      accentColor: '#C9A75C',
+      brandColor: '#0F3D3E',
+      buttonStyle: 'pill',
+      layoutStyle: 'editorial',
+      style: {
+        '--section-space': 'clamp(4.5rem, 9vw, 8rem)',
+        '--section-space-sm': 'clamp(2.5rem, 5vw, 4.5rem)',
+        '--site-accent': '#C9A75C',
+        '--site-background-style': 'editorial',
+        '--site-border': 'color-mix(in oklch, #C9A75C 24%, var(--border))',
+        '--site-brand': '#0F3D3E',
+        '--site-font-body': 'var(--font-editorial-body), var(--font-geist-sans)',
+        '--site-font-heading': 'var(--font-editorial-heading), Georgia, serif',
+        '--site-radius': '1.25rem',
+        '--site-surface': '#F8F5EE',
+        '--site-surface-strong': '#E9E1D0',
+        '--site-theme-preset': wingsSideInboundThemePresetKey,
+      },
+      themeKey: 'wings-side',
+      themeName: 'WingsSide',
+      themePreset: wingsSideInboundThemePresetKey,
     })
   })
 })

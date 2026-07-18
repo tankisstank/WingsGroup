@@ -3,7 +3,7 @@ import React, { Fragment } from 'react'
 import type { Page } from '@/payload-types'
 
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
-import { CallToActionBlock } from '@/blocks/CallToAction/Component'
+import { LocalizedCallToActionBlock } from '@/blocks/CallToAction/Component.server'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FAQBlock } from '@/blocks/FAQ/Component'
 import { FeatureGridBlock } from '@/blocks/FeatureGrid/Component'
@@ -19,7 +19,7 @@ const blockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
   comparison: ComparisonBlock,
-  cta: CallToActionBlock,
+  cta: LocalizedCallToActionBlock,
   faq: FAQBlock,
   featureGrid: FeatureGridBlock,
   formBlock: FormBlock,
