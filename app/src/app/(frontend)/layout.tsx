@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { cn } from '@/utilities/ui'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
-import { Inter, Nunito_Sans, Playfair_Display, Rubik } from 'next/font/google'
+import { Inter, Nunito_Sans, Playfair_Display, Plus_Jakarta_Sans, Rubik } from 'next/font/google'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
@@ -19,6 +19,7 @@ import './globals.css'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getCurrentLocale, getCurrentPublicPathname } from '@/utilities/siteContext'
 import { getSiteThemeTokens } from '@/utilities/siteTheme'
+import { shouldRenderWingsSideSpecials } from '@/utilities/wingsSideSpecials'
 import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { buildOrganizationJSONLD, buildWebSiteJSONLD } from '@/utilities/structuredData'
 import {
@@ -27,6 +28,7 @@ import {
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { getCurrentSite } from '@/utilities/siteContext'
 import { getCanonicalSiteOrigin, getSiteSitemapURL } from '@/utilities/siteSEO'
+import { WingsSideSpecialsPromo } from '@/components/WingsSideSpecialsPromo'
 
 const getSiteFaviconURL = (settings: Awaited<ReturnType<typeof getCurrentSiteSettings>>) => {
   const favicon = settings?.branding?.faviconImage
@@ -62,6 +64,12 @@ const wingsSideBody = Inter({
   variable: '--font-editorial-body',
 })
 
+const wingsSideHiFi = Plus_Jakarta_Sans({
+  display: 'swap',
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-wingsside-hifi',
+})
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
   const site = await getCurrentSite()
@@ -82,6 +90,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         wingsGoBody.variable,
         wingsSideHeading.variable,
         wingsSideBody.variable,
+        wingsSideHiFi.variable,
       )}
       lang={locale}
       suppressHydrationWarning
@@ -106,6 +115,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         data-site-layout={siteTheme.layoutStyle}
         data-site-preset={siteTheme.themePreset}
         data-site-theme={siteTheme.themeKey}
+        data-theme-key={siteTheme.themeKey}
+        data-public-pathname={publicPathname}
         data-site-button-style={siteTheme.buttonStyle}
         style={siteTheme.style}
       >
@@ -132,6 +143,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <main id="main-content" tabIndex={-1}>
             {children}
           </main>
+          {shouldRenderWingsSideSpecials(site.code, publicPathname) ? (
+            <WingsSideSpecialsPromo href="/packages" locale={locale} />
+          ) : null}
           <Footer />
         </Providers>
       </body>

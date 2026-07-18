@@ -3920,3 +3920,305 @@ html[data-theme='dark'],
 html[data-theme='light'] {
   opacity: initial;
 }
+
+/* WingSide Open Design bridge — site-specific so shared premium sites keep their own system. */
+body[data-theme-key='wings-side'] {
+  --background: var(--site-background);
+  --card: var(--site-surface);
+  --foreground: var(--site-foreground);
+  --muted-foreground: var(--site-muted);
+  --primary: var(--site-brand);
+  --ring: var(--site-gold);
+  color: var(--site-foreground);
+  font-family: var(--font-wingsside-hifi), var(--font-editorial-body), sans-serif;
+  background:
+    radial-gradient(
+      70rem 34rem at 82% -8%,
+      color-mix(in oklch, var(--site-gold) 9%, transparent),
+      transparent 62%
+    ),
+    var(--site-background);
+}
+
+body[data-theme-key='wings-side'] h1,
+body[data-theme-key='wings-side'] h2,
+body[data-theme-key='wings-side'] h3,
+body[data-theme-key='wings-side'] h4,
+body[data-theme-key='wings-side'] h5,
+body[data-theme-key='wings-side'] h6 {
+  font-family: var(--font-wingsside-hifi), var(--font-editorial-heading), sans-serif;
+  letter-spacing: -0.03em;
+}
+
+body[data-theme-key='wings-side'] .site-header.container {
+  width: 100%;
+  max-width: none;
+  padding-inline: 0;
+}
+
+body[data-theme-key='wings-side'] .site-header__bar {
+  min-height: 72px;
+  border-radius: 0;
+  border-color: color-mix(in oklch, var(--site-border) 84%, transparent);
+  padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+  background: color-mix(in oklch, var(--site-surface) 88%, transparent);
+  box-shadow: 0 10px 36px color-mix(in oklch, var(--site-brand) 8%, transparent);
+}
+
+body[data-theme-key='wings-side'] .site-header-cta,
+body[data-theme-key='wings-side'] .site-panel-cta {
+  border-color: color-mix(in oklch, var(--site-gold) 72%, var(--site-border));
+  color: color-mix(in oklch, var(--site-foreground) 90%, black);
+  background: var(--site-gold);
+  box-shadow: 0 10px 24px color-mix(in oklch, var(--site-gold) 24%, transparent);
+}
+
+body[data-theme-key='wings-side'] .site-header-cta:hover,
+body[data-theme-key='wings-side'] .site-header-cta:focus-visible,
+body[data-theme-key='wings-side'] .site-panel-cta:hover,
+body[data-theme-key='wings-side'] .site-panel-cta:focus-visible {
+  color: color-mix(in oklch, var(--site-foreground) 94%, black);
+  background: color-mix(in oklch, var(--site-gold) 86%, white);
+}
+
+body[data-theme-key='wings-side'] .theme-nav-link {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/'] #main-content > article,
+body[data-theme-key='wings-side'][data-public-pathname='/packages'] #main-content > article {
+  padding-bottom: clamp(4rem, 7vw, 7rem);
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/'] #main-content > article {
+  padding-top: 0;
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/'] #main-content > article > nav[aria-label='Breadcrumb'] {
+  position: absolute;
+  visibility: hidden;
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/'] .site-hero {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/'] .theme-section,
+body[data-theme-key='wings-side'][data-public-pathname='/packages'] .theme-section {
+  padding-block: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/'] .layout-block--features,
+body[data-theme-key='wings-side'][data-public-pathname='/packages'] .layout-block--features {
+  border-top: 1px solid color-mix(in oklch, var(--site-border) 78%, transparent);
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/'] .site-feature-card,
+body[data-theme-key='wings-side'][data-public-pathname='/packages'] .site-feature-card {
+  border-color: color-mix(in oklch, var(--site-border) 84%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in oklch, var(--site-surface) 92%, transparent);
+  box-shadow: 0 14px 34px color-mix(in oklch, var(--site-foreground) 6%, transparent);
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/'] .site-feature-card::after,
+body[data-theme-key='wings-side'][data-public-pathname='/packages'] .site-feature-card::after {
+  display: none;
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/'] .site-feature-card:hover,
+body[data-theme-key='wings-side'][data-public-pathname='/packages'] .site-feature-card:hover {
+  border-color: color-mix(in oklch, var(--site-brand) 30%, var(--site-border));
+  box-shadow: 0 18px 40px color-mix(in oklch, var(--site-foreground) 10%, transparent);
+  transform: translateY(-3px);
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/'] .site-feature-card img,
+body[data-theme-key='wings-side'][data-public-pathname='/packages'] .site-feature-card img {
+  filter: saturate(0.92) contrast(1.03);
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/packages'] .layout-media--contained {
+  width: min(82rem, calc(100% - 2.5rem));
+  max-width: none;
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/packages'] .layout-media--contained img {
+  width: 100%;
+  max-height: 34rem;
+  border-color: var(--site-border);
+  border-radius: 1.25rem;
+  object-fit: cover;
+  box-shadow: 0 24px 60px color-mix(in oklch, var(--site-foreground) 12%, transparent);
+}
+
+/* Compact Home-only Specials navigation. It is mounted server-side only on WingSide `/`. */
+body[data-theme-key='wings-side'][data-public-pathname='/'] .wingsside-specials {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  display: flex;
+  width: min(268px, calc(100vw - 40px));
+  flex-direction: column;
+  gap: 10px;
+  border: 2px solid var(--site-promo-red);
+  padding: 12px 14px 14px;
+  color: #fff;
+  background-color: var(--site-promo-ink);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0,
+    transparent 7px,
+    color-mix(in oklch, var(--site-promo-red) 42%, transparent) 7px,
+    color-mix(in oklch, var(--site-promo-red) 42%, transparent) 8.5px
+  );
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--site-promo-ink) 55%, transparent);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+body[data-theme-key='wings-side'][data-public-pathname='/'] .wingsside-specials:hover {
+  box-shadow:
+    0 12px 28px color-mix(in oklch, var(--site-promo-red) 28%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--site-promo-red) 50%, transparent);
+  transform: translateY(-2px);
+}
+
+.wingsside-specials__badge {
+  align-self: flex-start;
+  padding: 4px 8px;
+  color: #fff;
+  background: #000;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: pre;
+}
+
+.wingsside-specials__close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1;
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  color: #fff;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.wingsside-specials__close:hover,
+.wingsside-specials__close:focus-visible {
+  background: rgb(255 255 255 / 12%);
+}
+
+.wingsside-specials__main {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wingsside-specials__copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.wingsside-specials__copy h2 {
+  margin: 0 0 6px;
+  color: #fff;
+  font-family: var(--font-wingsside-hifi), sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+.wingsside-specials__copy ul {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  gap: 1px;
+  list-style: none;
+}
+
+.wingsside-specials__copy li {
+  color: rgb(255 255 255 / 90%);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.wingsside-specials__copy li::before {
+  color: #fff;
+  content: '· ';
+}
+
+.wingsside-specials__cta {
+  display: inline-flex;
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  color: var(--site-promo-red);
+  background: #fff;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  text-decoration: none;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.wingsside-specials__cta span {
+  letter-spacing: -0.06em;
+}
+
+.wingsside-specials__cta:hover,
+.wingsside-specials__cta:focus-visible {
+  color: color-mix(in oklch, var(--site-promo-red) 82%, black);
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.wingsside-specials__cta:focus-visible,
+.wingsside-specials__close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  .wingsside-specials {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wingsside-specials,
+  .wingsside-specials:hover,
+  .wingsside-specials__cta,
+  .wingsside-specials__cta:hover {
+    transition: none !important;
+    transform: none !important;
+  }
+}
