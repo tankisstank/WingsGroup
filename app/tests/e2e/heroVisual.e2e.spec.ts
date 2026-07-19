@@ -14,6 +14,18 @@ const freezeHeroMotion = async (page: import('@playwright/test').Page) => {
       }
     `,
   })
+
+  await page.locator('video').evaluateAll((videos) => {
+    for (const video of videos) {
+      const media = video as HTMLVideoElement
+      media.pause()
+      try {
+        media.currentTime = 0
+      } catch {
+        // A poster-only or not-yet-ready video is already deterministic.
+      }
+    }
+  })
 }
 
 test.describe('Hero visual regression', () => {
@@ -47,6 +59,28 @@ test.describe('Hero visual regression', () => {
     test(`matches ${target.name}`, async ({ page }) => {
       await page.setViewportSize({ height: target.height, width: target.width })
       await page.goto(`${e2eBaseURL}${target.path}`)
+      await expect(page.locator('html')).toHaveAttribute('data-theme', /^(?:dark|light)$/)
+      if (target.name === 'video-desktop') {
+        const posterImage = page.locator('.hero-presentation__video-poster img')
+        await expect(posterImage).toBeVisible()
+        await expect
+          .poll(() =>
+            posterImage.evaluate((image) => {
+              const poster = image as HTMLImageElement
+              return poster.complete && poster.naturalWidth > 0
+            }),
+          )
+          .toBe(true)
+        await expect(
+          page.getByRole('heading', {
+            name: 'WingsGroup - hệ sinh thái du lịch nhiều line business dưới một lớp tin cậy chung',
+          }),
+        ).toBeVisible()
+        await expect(page.getByRole('link', { name: 'Liên hệ tư vấn' })).toBeVisible()
+        await page.addStyleTag({
+          content: '.hero-presentation__video-media { visibility: hidden !important; }',
+        })
+      }
       await freezeHeroMotion(page)
 
       const firstSlide = page.getByRole('button', { name: 'Go to slide 1' })
@@ -60,7 +94,12 @@ test.describe('Hero visual regression', () => {
         await firstSlide.click()
       }
 
-      await expect(page.locator('[data-hero-presentation]')).toHaveScreenshot(
+      const visualSurface =
+        target.name === 'video-desktop'
+          ? page.locator('.hero-presentation--video')
+          : page.locator('[data-hero-presentation]')
+
+      await expect(visualSurface).toHaveScreenshot(
         `${target.name}.png`,
         {
           animations: 'disabled',

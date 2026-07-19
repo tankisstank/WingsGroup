@@ -4,12 +4,13 @@ import type { Page } from '@playwright/test'
 import { e2eBaseURL } from '../helpers/baseURL'
 import { heroPresentationFixturePaths, seedPhase1LaunchSmoke } from '../helpers/seedPhase1Launch'
 import { heroPresentationDefinitions } from '../../src/heros/presentations/registry'
+import { isSupportedLocale } from '../../src/utilities/locales'
 
 const phase1Routes = [
   {
     path: '/',
     title: /WingsGroup/,
-    heading: 'WingsGroup - hệ sinh thái du lịch nhiều line business dưới một lớp trust chung',
+    heading: 'WingsGroup - hệ sinh thái du lịch nhiều line business dưới một lớp tin cậy chung',
   },
   {
     path: '/en',
@@ -34,7 +35,7 @@ const phase1Routes = [
   { path: '/wingsgo', title: /WingsGo/, heading: 'WingsGo' },
   { path: '/wingsgo/thi-truong/han-quoc', title: /Tour Hàn Quốc/, heading: 'Tour Hàn Quốc' },
   { path: '/wingsside', title: /WingsSide/, heading: 'Tailor-made Vietnam journeys' },
-  { path: '/wingsside/destinations/ha-noi', title: /Ha Noi/, heading: 'Ha Noi' },
+  { path: '/wingsside/destinations/ha-noi', title: /Hanoi/, heading: 'Hanoi' },
   { path: '/wingsplus', title: /WingsPlus/ },
   { path: '/wingscare', title: /WingsCare/ },
   { path: '/wingspass', title: /WingsPass/ },
@@ -78,7 +79,7 @@ const wingsSideCorePages = [
   {
     heading: 'Travel styles help users self-qualify their journey',
     path: '/wingsside/styles',
-    title: /Travel Styles/,
+    title: /Travel styles/,
   },
   {
     heading: 'Sample itineraries show possibility, not hard-sell retail grids',
@@ -144,6 +145,56 @@ const countPrimaryNavRows = (page: Page) =>
 
       return topSpread <= 8 ? 1 : new Set(visibleTops.map((top) => Math.round(top))).size
     })
+
+const getHeroControlOverlaps = (page: Page) =>
+  page.locator('[data-hero-presentation="cinematic-carousel"]').evaluate((hero) => {
+    const controlButtons = Array.from(
+      hero.querySelectorAll<HTMLElement>('.hero-presentation__carousel-controls button'),
+    )
+    const primaryCallsToAction = Array.from(
+      hero.querySelectorAll<HTMLElement>(
+        '.hero-presentation__slide[data-active="true"] a, .site-hero__planner-submit',
+      ),
+    ).filter((element) => {
+      const style = getComputedStyle(element)
+      return style.display !== 'none' && style.visibility !== 'hidden'
+    })
+
+    return controlButtons.flatMap((control) => {
+      const controlBox = control.getBoundingClientRect()
+
+      return primaryCallsToAction
+        .filter((cta) => {
+          const ctaBox = cta.getBoundingClientRect()
+          return !(
+            controlBox.right <= ctaBox.left ||
+            controlBox.left >= ctaBox.right ||
+            controlBox.bottom <= ctaBox.top ||
+            controlBox.top >= ctaBox.bottom
+          )
+        })
+        .map((cta) => ({ control: control.getAttribute('aria-label'), cta: cta.textContent?.trim() }))
+    })
+  })
+
+const getContrastAgainstWhiteText = (page: Page, selector: string) =>
+  page.locator(selector).evaluate((element) => {
+    const match = getComputedStyle(element).backgroundColor.match(/[\d.]+/g)?.map(Number)
+    if (!match || match.length < 3) return 0
+
+    const alpha = match[3] ?? 1
+    const composited = match.slice(0, 3).map((channel) => channel * alpha + 255 * (1 - alpha))
+    const luminance = composited
+      .map((channel) => {
+        const normalized = channel / 255
+        return normalized <= 0.04045
+          ? normalized / 12.92
+          : Math.pow((normalized + 0.055) / 1.055, 2.4)
+      })
+      .reduce((total, channel, index) => total + channel * [0.2126, 0.7152, 0.0722][index], 0)
+
+    return 1.05 / (luminance + 0.05)
+  })
 
 const extractInternalLinks = (html: string, fromPath: string) =>
   Array.from(html.matchAll(/<a\s+(?:[^>]*?\s+)?href=(['"])(.*?)\1/gi))
@@ -213,7 +264,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     await expect(page.locator('body')).toHaveAttribute('style', /--site-accent:\s*#C9A75C/i)
   })
 
-  test('serves WingsSide public ad locales with English chrome fallback', async ({ page }) => {
+  test('serves WingsSide public ad locales with governed localized chrome', async ({ page }) => {
     await page.setViewportSize({ height: 900, width: 1440 })
 
     const searchLabelByLocale = {
@@ -222,6 +273,12 @@ test.describe('Phase 1 public frontend smoke', () => {
       it: 'Cerca',
       pt: 'Pesquisar',
     } as const
+    const searchHeadingByLocale = {
+      en: 'Search tours, destinations, and campaigns quickly',
+      es: 'Busca con rapidez tours, destinos y campañas',
+      it: 'Cerca rapidamente tour, destinazioni e campagne',
+      pt: 'Pesquise rapidamente tours, destinos e campanhas',
+    } as const
 
     for (const locale of wingsSidePublicAdLocales) {
       await page.goto(`${e2eBaseURL}/wingsside/${locale}/search`)
@@ -229,7 +286,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(page.locator('html')).toHaveAttribute('lang', locale)
       await expect(
         page.getByRole('heading', {
-          name: 'Search tours, destinations, and campaigns quickly',
+          name: searchHeadingByLocale[locale],
         }),
       ).toBeVisible()
       await expect(page.getByText('Tìm nhanh tour, điểm đến và chiến dịch')).toHaveCount(0)
@@ -253,6 +310,17 @@ test.describe('Phase 1 public frontend smoke', () => {
       hero.locator('.hero-presentation__slide-media[data-ken-burns="active"]').first(),
     ).toBeVisible()
 
+    for (const width of [1440, 1280]) {
+      await page.setViewportSize({ height: 900, width })
+      await expect(hero.locator('.hero-presentation__carousel-controls button').first()).toBeVisible()
+      for (const control of await hero.locator('.hero-presentation__carousel-controls button').all()) {
+        const box = await control.boundingBox()
+        expect(box?.height).toBeGreaterThanOrEqual(44)
+        expect(box?.width).toBeGreaterThanOrEqual(44)
+      }
+      expect(await getHeroControlOverlaps(page)).toEqual([])
+    }
+
     const planner = page.getByRole('complementary', { name: 'Trip planning starter' })
     await expect(planner.getByLabel('Destination')).toBeVisible()
     await expect(planner.getByLabel('Duration')).toBeVisible()
@@ -266,6 +334,34 @@ test.describe('Phase 1 public frontend smoke', () => {
 
     await page.setViewportSize({ height: 844, width: 390 })
     await page.goto(`${e2eBaseURL}/wingsside`)
+    const mobileHero = page.locator('[data-hero-presentation="cinematic-carousel"]')
+    await expect(mobileHero.locator('[aria-roledescription="carousel"]')).toHaveAttribute(
+      'data-client-ready',
+      'true',
+    )
+    await mobileHero.getByRole('button', { name: 'Go to slide 1' }).click()
+    await expect(
+      mobileHero
+        .locator('.hero-presentation__slide[data-active="true"]')
+        .getByRole('heading', { name: 'Tailor-made Vietnam journeys' }),
+    ).toBeVisible()
+    await expect(
+      mobileHero.getByText(
+        'Private, flexible, locally designed experiences built through destination discovery, travel style guidance, and consultative planning.',
+      ),
+    ).toBeVisible()
+    await expect(
+      page.getByRole('complementary', { name: 'Trip planning starter' }),
+    ).toBeHidden()
+
+    await mobileHero.getByRole('button', { name: 'Go to slide 2' }).click()
+    const mobilePlanner = page.getByRole('complementary', { name: 'Trip planning starter' })
+    await expect(mobilePlanner.getByLabel('Destination')).toBeVisible()
+    await expect(mobilePlanner.getByLabel('Duration')).toBeVisible()
+    await expect(mobilePlanner.getByRole('button', { name: 'Plan your trip' })).toBeVisible()
+    await expect(mobileHero.getByRole('button', { name: 'Previous slide' })).toBeVisible()
+    await expect(mobileHero.getByRole('button', { name: 'Next slide' })).toBeVisible()
+    expect(await getHeroControlOverlaps(page)).toEqual([])
     const overflowX = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
     )
@@ -486,7 +582,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       es: {
         ctaSection: '¿Listo para dar forma a tu viaje a Vietnam?',
         cta: 'Planifica tu viaje',
-        destinations: 'Hub de destinos',
+        destinations: 'Guía de destinos',
         plannerAria: 'Inicio de planificación de viaje',
         plannerDestination: 'Destino',
         plannerDuration: 'Duración',
@@ -500,7 +596,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       it: {
         ctaSection: 'Pronto a dare forma al tuo viaggio in Vietnam?',
         cta: 'Pianifica il viaggio',
-        destinations: 'Hub destinazioni',
+        destinations: 'Guida alle destinazioni',
         plannerAria: 'Inizio pianificazione viaggio',
         plannerDestination: 'Destinazione',
         plannerDuration: 'Durata',
@@ -514,7 +610,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       pt: {
         ctaSection: 'Pronto para dar forma à sua viagem ao Vietname?',
         cta: 'Planear a viagem',
-        destinations: 'Hub de destinos',
+        destinations: 'Guia de destinos',
         plannerAria: 'Início do planeamento da viagem',
         plannerDestination: 'Destino',
         plannerDuration: 'Duração',
@@ -582,7 +678,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     const scenarios = [
       {
         forbidden: 'Inbound Vietnam needs trust, not retail noise',
-        heading: 'Inbound Vietnam cần niềm tin, không cần tiếng ồn retail',
+        heading: 'Khách quốc tế cần niềm tin, không cần những lời chào bán ồn ào',
         locale: 'vi',
         path: '/wingsside/vi/about-us',
       },
@@ -667,19 +763,24 @@ test.describe('Phase 1 public frontend smoke', () => {
       expect(response.ok()).toBe(true)
 
       const xml = await response.text()
+      const sitemapURLs = Array.from(xml.matchAll(/<loc>(.*?)<\/loc>/g)).map(
+        (match) => new URL(match[1]),
+      )
       const localeSegments = new Set(
-        Array.from(xml.matchAll(/<loc>(.*?)<\/loc>/g))
-          .map((match) => {
-            const pathname = new URL(match[1]).pathname
-
-            return pathname.split('/').filter(Boolean)[0]
-          })
-          .filter(Boolean),
+        sitemapURLs
+          .map((url) => url.pathname.split('/').filter(Boolean)[0])
+          .filter((segment): segment is string => isSupportedLocale(segment)),
       )
 
       expect(Array.from(localeSegments)).toEqual(
-        expect.arrayContaining(['vi', ...wingsSidePublicAdLocales]),
+        expect.arrayContaining([...wingsSidePublicAdLocales]),
       )
+      expect(
+        sitemapURLs.some((url) => {
+          const firstSegment = url.pathname.split('/').filter(Boolean)[0]
+          return !firstSegment || !isSupportedLocale(firstSegment)
+        }),
+      ).toBe(true)
 
       for (const locale of cmsOnlyLocales) {
         expect(localeSegments.has(locale)).toBe(false)
@@ -721,6 +822,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     test(`renders hero presentation ${definition.value} across desktop and mobile`, async ({
       page,
     }, testInfo) => {
+      test.setTimeout(90_000)
       const path = heroPresentationFixturePaths[definition.value]
 
       await page.setViewportSize({ height: 900, width: 1440 })
@@ -740,9 +842,21 @@ test.describe('Phase 1 public frontend smoke', () => {
       } else {
         await expect(
           page.getByRole('heading', {
-            name: 'WingsGroup - hệ sinh thái du lịch nhiều line business dưới một lớp trust chung',
+            name: 'WingsGroup - hệ sinh thái du lịch nhiều line business dưới một lớp tin cậy chung',
           }),
         ).toBeVisible()
+      }
+
+      if (definition.value === 'video-background') {
+        const secondaryCTA = hero.getByRole('link', { name: 'Liên hệ tư vấn' })
+        await expect(secondaryCTA).toBeVisible()
+        await expect(secondaryCTA).toHaveCSS('color', 'rgb(255, 255, 255)')
+        expect(
+          await getContrastAgainstWhiteText(
+            page,
+            '[data-hero-presentation="video-background"] .site-hero__actions li:nth-child(2) a',
+          ),
+        ).toBeGreaterThanOrEqual(4.5)
       }
 
       const primaryCTA = page.getByRole('link', { name: 'Khám phá hệ sinh thái' }).first()
@@ -864,13 +978,13 @@ test.describe('Phase 1 public frontend smoke', () => {
     expect(rootHTML).toContain('WingsGroup - hệ sinh thái du lịch nhiều line business')
     expect(careHTML).toContain('WingsCare | Care And Support')
     expect(careHTML).toContain('Travel care rõ quyền lợi, rõ hỗ trợ')
-    expect(sideHTML).toContain('WingsSide | Inbound Vietnam')
+    expect(sideHTML).toContain('WingsSide | Tailor-made Vietnam journeys')
     expect(sideHTML).toContain('data-site-theme="wings-side"')
     expect(sideHTML).toContain('https://wingside.vn')
     expect(passHTML).toContain('WingsPass')
     expect(passHTML).toContain('data-site-theme="wings-pass"')
     expect(passHTML).toContain('https://wingspass.wingsgroup.vn')
-    expect(forwardedSideHTML).not.toContain('WingsSide | Inbound Vietnam')
+    expect(forwardedSideHTML).not.toContain('WingsSide | Tailor-made Vietnam journeys')
     expect(forwardedSideHTML).not.toContain('data-site-theme="wings-side"')
   })
 

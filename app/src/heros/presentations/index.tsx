@@ -277,6 +277,7 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
       aria-roledescription="carousel"
       className="hero-presentation hero-presentation--carousel"
       data-business-panel={businessPanel ? 'true' : 'false'}
+      data-active-index={activeIndex}
       data-client-ready={clientReady ? 'true' : 'false'}
       data-transition={behavior.transition}
       onMouseEnter={() => behavior.pauseOnHover && setPaused(true)}

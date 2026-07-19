@@ -1378,9 +1378,10 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
   }
 
   .hero-presentation__video-content .site-hero__actions li:nth-child(n + 2) a {
-    background: rgb(0 0 0 / 38%);
-    border-color: rgb(255 255 255 / 55%);
-    color: #fff;
+    background: rgb(5 40 41 / 94%) !important;
+    border-color: rgb(255 255 255 / 72%) !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff;
   }
 
   .hero-presentation__slide-content h2 {
@@ -1417,6 +1418,13 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
     transform: translateX(-50%);
     width: 100%;
     z-index: 4;
+  }
+
+  @media (width >= 40rem) {
+    .hero-presentation--carousel[data-business-panel='true']
+      .hero-presentation__carousel-controls {
+      justify-content: flex-end;
+    }
   }
 
   .hero-presentation__carousel-business-panel {
@@ -1473,15 +1481,42 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
   }
 
   .hero-presentation__carousel-dots button {
-    height: 10px;
-    min-width: 10px;
+    background: transparent;
+    border-color: transparent;
+    height: 44px;
+    min-width: 44px;
     padding: 0;
+    position: relative;
+    width: 44px;
+  }
+
+  .hero-presentation__carousel-dots button::before {
+    background: color-mix(in oklch, #fff 28%, transparent);
+    border: 1px solid color-mix(in oklch, #fff 48%, transparent);
+    border-radius: 999px;
+    content: '';
+    height: 10px;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 180ms ease, background 180ms ease;
     width: 10px;
   }
 
   .hero-presentation__carousel-dots button[aria-pressed='true'] {
+    background: transparent;
+    width: 44px;
+  }
+
+  .hero-presentation__carousel-dots button[aria-pressed='true']::before {
     background: #fff;
     width: 28px;
+  }
+
+  .hero-presentation__carousel-dots button:hover,
+  .hero-presentation__carousel-dots button:focus-visible {
+    background: color-mix(in oklch, #fff 10%, transparent);
   }
 
   .hero-presentation__video-media {
@@ -3042,6 +3077,10 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
       font-size: clamp(2.6rem, 15vw, 4rem);
     }
 
+    .hero-presentation__slide-content {
+      padding-bottom: 7.5rem;
+    }
+
     .hero-presentation__carousel-controls {
       align-items: flex-end;
     }
@@ -3054,7 +3093,13 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
       width: auto;
     }
 
-    .hero-presentation--carousel[data-business-panel='true'] .hero-presentation__slide-content {
+    .hero-presentation--carousel[data-business-panel='true'][data-active-index='0']
+      .hero-presentation__carousel-business-panel {
+      display: none;
+    }
+
+    .hero-presentation--carousel[data-business-panel='true']:not([data-active-index='0'])
+      .hero-presentation__slide-content {
       visibility: hidden;
     }
 
