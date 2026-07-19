@@ -77,24 +77,24 @@ const wingsSideCorePages = [
     title: /Destinations/,
   },
   {
-    heading: 'Travel styles help users self-qualify their journey',
+    heading: 'Travel styles help guests self-qualify the right route',
     path: '/wingsside/styles',
     title: /Travel styles/,
   },
   {
-    heading: 'Sample itineraries show possibility, not hard-sell retail grids',
+    heading: 'Sample itineraries show possibility, not rigid product grids',
     path: '/wingsside/packages',
-    title: /Vietnam Packages/,
+    title: /Vietnam packages/,
   },
   {
-    heading: 'Plan your Vietnam trip with a local team',
+    heading: 'Plan your Vietnam journey with a local team',
     path: '/wingsside/plan-your-trip',
-    title: /Plan Your Trip/,
+    title: /Plan your trip/,
   },
   {
     heading: 'Tell us what kind of Vietnam journey you want to build',
     path: '/wingsside/contact-us',
-    title: /Contact Us/,
+    title: /Contact/,
   },
 ] as const
 
@@ -429,9 +429,13 @@ test.describe('Phase 1 public frontend smoke', () => {
       ).toHaveCount(0)
 
       if (route.path === '/wingsside/plan-your-trip' || route.path === '/wingsside/contact-us') {
-        await expect(
-          page.getByRole('heading', { name: 'Send a request, receive the right consultation' }),
-        ).toBeVisible()
+        if (route.path === '/wingsside/plan-your-trip') {
+          await expect(page.getByRole('heading', { name: 'Share your travel brief' })).toBeVisible()
+        } else {
+          const contactHeadings = page.getByRole('heading', { name: route.heading })
+          await expect(contactHeadings).toHaveCount(2)
+          await expect(contactHeadings.last()).toBeVisible()
+        }
         await expect(page.getByText('Gửi yêu cầu, nhận tư vấn đúng nhu cầu')).toHaveCount(0)
       }
 
