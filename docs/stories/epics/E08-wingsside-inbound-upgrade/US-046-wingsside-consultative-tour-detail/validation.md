@@ -87,8 +87,40 @@ Completed locally through 2026-07-19:
 - The corrective release-candidate worktree was clean after the full suite and
   build. No E2E container remained.
 
-Pending:
+Final adaptive release evidence:
 
-- Deploy the clean corrective code release without applying cleanup a second time.
-- Repeat live/ready, Home desktop/mobile promo/session checks, the 22-URL tour
-  smoke, WingsGo/WingsPlus regressions and the production duplicate audit.
+- Commit `a083127` passed TypeScript in 65.7 seconds; lint in 127.4 seconds;
+  unit 28 files/193 tests; component 7 files/24 tests; integration 21 files plus
+  2 skipped with 108 passed/3 skipped; full isolated PostgreSQL E2E 75/75; and
+  optimized build in 157.2 seconds with 16/16 static pages. Remote Docker build
+  also passed and produced image digest
+  `sha256:38b16e8749d714d91be83ff777129b1c5d818350bda7c5d7b3e506a69837f2c2`.
+- Exact-source archive SHA-256 matches locally and remotely:
+  `708fb9abc65f1677123b5710a6bb10c425ce7da963ec7cf696f44e066e595f7a`.
+  Production serves `us046-adaptive-a083127-20260719T121049Z`; public live and
+  ready endpoints both return 200. Cleanup was not re-applied.
+- Home agent-browser proof passed at 768, 1024, 1280 and 1440 pixels; mobile 767
+  hides the promo. CTA keyboard navigation reaches `/packages`; session dismiss
+  survives refresh and resets in a new session; reduced motion disables hover
+  transition/transform. All checked views have zero broken image, overflow and
+  browser page errors.
+- Public SSR smoke passed 22/22 tour URLs. The required four tours passed real
+  browser QA at 1280 and 375 pixels with three exact contextual `/contact-us`
+  links, contact state, canonical URL, no Offer schema, no departure table, no
+  technical/retail copy, no broken image/missing alt/overflow/page error.
+- WingsGo tour detail, departure schedule and `/thi-truong/han-quoc` passed with
+  no WingSide leakage. WingsPlus correctly returns no tour detail for the same
+  WingsGo slug. An initial `/thi-truong/korea` probe correctly returned 404 and
+  was replaced with the database-backed valid market path.
+- Final production database verification ran in a read-only transaction: 22
+  published batch products, 22 distinct same-site published wrappers, zero
+  future departure, zero duplicate product code/slug/page path/media filename,
+  714 distinct referenced media and zero technical importer sentence. There are
+  no related-page relations in the live 22-wrapper dataset; omission of the
+  empty block is expected, while positive rendering is covered by automated
+  component/E2E fixtures.
+- The complete production checksum manifest is preserved with SHA-256
+  `95f87379b559a3f3f9e121b7bcc45bbae6c0b24987148812d707f32520427d1a`.
+  Two PowerShell-driven agent-browser loops for all 22 URLs stalled at the local
+  runner layer without product or data mutation; deterministic 22/22 HTTP proof
+  plus browser proof for the four named tours provides the final coverage.

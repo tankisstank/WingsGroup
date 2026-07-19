@@ -29,7 +29,7 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-033 | normal | implemented | Content and media seed |
 | US-034 | normal | implemented | Launch readiness proof |
 | US-045 | high-risk | implemented locally | BestPrice 22 import and publish preparation |
-| US-046 | high-risk | in review | WingSide consultative tour detail and hi-fi adoption |
+| US-046 | high-risk | implemented | WingSide consultative tour detail and hi-fi adoption |
 
 ## Current evidence
 
@@ -76,11 +76,12 @@ architecture and avoids building a parallel site, CMS, or page builder.
   writer tries to push the test schema.
 - US-046 isolates WingSide structured tour detail from WingsGo retail
   capabilities, adopts the approved hi-fi Home/Specials posture, and adds an
-  atomic batch-scoped cleanup for the 22 imported tours. Local targeted,
-  adapter and full release-candidate gates are complete: unit 150/150,
-  component 24/24, integration 107 passed/3 skipped, isolated PostgreSQL E2E
-  74/74 and production build passed. The 22-URL live browser smoke and
-  production backup/apply/deploy/health evidence remain pending.
+  atomic batch-scoped cleanup for the 22 imported tours. Adaptive commit
+  `a083127` passed the full ladder (193 unit, 24 component, 108 integration,
+  75 isolated PostgreSQL E2E and build), is live in production, and passed Home
+  responsive/interaction QA, 22/22 public tour smoke, four named desktop/mobile
+  browser checks, WingsGo/WingsPlus regression and a zero-duplicate read-only
+  database audit.
 
 ## Current constraints
 

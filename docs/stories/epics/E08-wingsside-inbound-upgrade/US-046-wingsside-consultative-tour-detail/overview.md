@@ -2,7 +2,7 @@
 
 ## Status
 
-in review
+implemented
 
 ## Current Behavior
 
@@ -93,8 +93,28 @@ Local implementation evidence through 2026-07-19:
 - The final E2E report is preserved outside the worktree with SHA-256
   `71BD4944930F54F92DD9867B1FE016C081B3F545F4724B039966800D7169C5F9`.
 
-Pending evidence:
-
-- Deploy the clean corrective release without re-running the data cleanup.
-- Re-check live/ready health, Home desktop/mobile promo behavior, all 22 tour URLs,
-  WingsGo/WingsPlus regressions and the production duplicate audit.
+- Adaptive corrective commit `a083127` then passed the complete clean ladder:
+  TypeScript, lint, 193/193 unit, 24/24 component, 108 passed/3 skipped
+  integration, 75/75 isolated PostgreSQL E2E, optimized build and remote Docker
+  build. The exact `app` archive SHA-256 is
+  `708fb9abc65f1677123b5710a6bb10c425ce7da963ec7cf696f44e066e595f7a`.
+- Production now serves release
+  `us046-adaptive-a083127-20260719T121049Z`; public live/ready are 200. Home
+  browser QA passed at 768/1024/1280/1440, the widget is absent below 768,
+  keyboard routing, session dismissal and reduced motion pass, and no broken
+  image, overflow or page error was found.
+- All 22 tour URLs passed the deterministic public SSR smoke. The four required
+  tours additionally passed desktop/mobile browser QA with valid canonical,
+  exact consultative CTA, no Offer/departure table/forbidden copy, product-owned
+  gallery and no image/alt/console/overflow failures. WingsGo detail, schedule
+  and valid market plus WingsPlus no-tour regressions passed.
+- Final read-only production audit confirms 22 published products, 22 distinct
+  same-site wrappers, 714 distinct referenced media, zero future departures,
+  zero duplicate code/slug/page-path/media filename and zero public technical
+  sentence. The 22 wrappers currently have no `Page.relatedPages` relations, so
+  the live renderer correctly omits that empty section; positive related-page
+  rendering remains covered by component and full E2E proof.
+- Evidence and screenshots are preserved outside the worktree under
+  `WingsTravel-evidence/us046-production-20260719/us046-adaptive-a083127-20260719T121049Z`;
+  its checksum manifest SHA-256 is
+  `95f87379b559a3f3f9e121b7bcc45bbae6c0b24987148812d707f32520427d1a`.
