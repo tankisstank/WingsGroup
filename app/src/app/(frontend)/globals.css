@@ -4107,7 +4107,7 @@ body[data-site-code='wings-side'][data-public-route='/packages'] .layout-media--
 /* Compact Home-only Specials navigation. It is mounted server-side only on WingSide `/`. */
 body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials {
   position: fixed;
-  top: 128px;
+  top: 168px;
   right: 20px;
   bottom: auto;
   z-index: 40;
@@ -4130,6 +4130,19 @@ body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials {
   transition:
     transform 180ms ease,
     box-shadow 180ms ease;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials {
+    top: auto;
+    bottom: 20px;
+  }
+}
+
+body[data-site-code='wings-side'][data-public-route='/']:has(.hero-presentation--carousel)
+  .wingsside-specials {
+  top: 128px;
+  bottom: auto;
 }
 
 body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials:hover {

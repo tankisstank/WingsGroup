@@ -378,7 +378,7 @@ test.describe('Phase 1 public frontend smoke', () => {
   test('styles the WingSide Specials chip across normalized Home routes and breakpoints', async ({
     page,
   }) => {
-    test.setTimeout(120_000)
+    test.setTimeout(180_000)
     for (const path of ['/wingsside', '/wingsside/en', '/wingsside/it']) {
       await page.setViewportSize({ height: 900, width: 768 })
       await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
@@ -403,7 +403,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(promo).not.toHaveCSS('background-image', 'none')
     }
 
-    for (const width of [768, 1280, 1440]) {
+    for (const width of [768, 1024, 1280, 1440]) {
       await page.setViewportSize({ height: 900, width })
       await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
 
@@ -445,7 +445,19 @@ test.describe('Phase 1 public frontend smoke', () => {
         )
       const heroCopyBoxes = await page
         .locator(
-          '.hero-presentation__slide[data-active="true"] h2:visible, .hero-presentation__slide[data-active="true"] p:visible, .hero-presentation__slide[data-active="true"] a:visible',
+          [
+            '.hero-presentation__slide[data-active="true"] h2:visible',
+            '.hero-presentation__slide[data-active="true"] p:visible',
+            '.hero-presentation__slide[data-active="true"] a:visible',
+            '.site-hero__badge:visible',
+            '.site-hero__richtext h1:visible',
+            '.site-hero__richtext h2:visible',
+            '.site-hero__richtext p:visible',
+            '.site-hero__actions a:visible',
+            '.site-hero__actions button:visible',
+            '.site-hero__postcards a:visible',
+            '.site-hero__postcards button:visible',
+          ].join(', '),
         )
         .evaluateAll((elements) =>
           elements.map((element) => {
@@ -487,6 +499,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       expect(promoBox?.y).toBeGreaterThanOrEqual(
         (bannerBox?.y ?? 0) + (bannerBox?.height ?? 0) + 16,
       )
+      expect(promoBox?.y).toBeCloseTo(128, 0)
       expect(controlBoxes.every((box) => box.right - box.left >= 44)).toBe(true)
       expect(controlBoxes.filter(overlapsPromo)).toEqual([])
       expect(plannerInteractiveBoxes.filter(overlapsPromo)).toEqual([])
@@ -527,6 +540,74 @@ test.describe('Phase 1 public frontend smoke', () => {
       )
       await expect(autoplay).toBeFocused()
     }
+
+    for (const width of [768, 1024, 1280, 1440]) {
+      await page.setViewportSize({ height: 900, width })
+      await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+      await page.locator('.hero-presentation--carousel').evaluate((carousel) => {
+        carousel.classList.remove('hero-presentation--carousel')
+      })
+
+      const promoBox = await page.getByTestId('wingsside-specials').boundingBox()
+      const bannerBox = await page.getByRole('banner').boundingBox()
+      const genericHeroCopyBoxes = await page
+        .locator(
+          [
+            '.hero-presentation h2:visible',
+            '.hero-presentation p:visible',
+            '.hero-presentation a:visible',
+            '.site-hero__badge:visible',
+            '.site-hero__richtext h1:visible',
+            '.site-hero__richtext h2:visible',
+            '.site-hero__richtext p:visible',
+            '.site-hero__actions a:visible',
+            '.site-hero__actions button:visible',
+            '.site-hero__postcards a:visible',
+            '.site-hero__postcards button:visible',
+          ].join(', '),
+        )
+        .evaluateAll((elements) =>
+          elements.map((element) => {
+            const box = element.getBoundingClientRect()
+            return { bottom: box.bottom, left: box.left, right: box.right, top: box.top }
+          }),
+        )
+      const overlapsPromo = (box: { bottom: number; left: number; right: number; top: number }) =>
+        Boolean(
+          promoBox &&
+          box.right > promoBox.x &&
+          box.left < promoBox.x + promoBox.width &&
+          box.bottom > promoBox.y &&
+          box.top < promoBox.y + promoBox.height,
+        )
+      expect(promoBox).not.toBeNull()
+      expect(bannerBox).not.toBeNull()
+      expect(promoBox?.y).toBeGreaterThanOrEqual(
+        (bannerBox?.y ?? 0) + (bannerBox?.height ?? 0) + 16,
+      )
+      if (width < 1024) {
+        expect((promoBox?.y ?? 0) + (promoBox?.height ?? 0)).toBeCloseTo(880, 0)
+      } else {
+        expect(promoBox?.y).toBeCloseTo(168, 0)
+      }
+      expect(genericHeroCopyBoxes.filter(overlapsPromo)).toEqual([])
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        ),
+      ).toBe(false)
+      await test.info().attach(`wingsside-specials-generic-branch-${width}`, {
+        body: await page.screenshot({ fullPage: false }),
+        contentType: 'image/png',
+      })
+      await test.info().attach(`wingsside-specials-generic-layout-${width}`, {
+        body: JSON.stringify({ bannerBox, genericHeroCopyBoxes, promoBox }, null, 2),
+        contentType: 'application/json',
+      })
+    }
+
+    await page.setViewportSize({ height: 900, width: 1440 })
+    await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
 
     const promoCTA = page.getByRole('link', { name: 'Go to hot tours and packages' })
     const promoCTABox = await promoCTA.boundingBox()
