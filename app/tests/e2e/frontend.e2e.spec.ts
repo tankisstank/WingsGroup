@@ -378,7 +378,7 @@ test.describe('Phase 1 public frontend smoke', () => {
   test('styles the WingSide Specials chip across normalized Home routes and breakpoints', async ({
     page,
   }) => {
-    test.setTimeout(60_000)
+    test.setTimeout(120_000)
     for (const path of ['/wingsside', '/wingsside/en', '/wingsside/it']) {
       await page.setViewportSize({ height: 900, width: 768 })
       await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
@@ -402,6 +402,141 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(promo).toHaveCSS('background-color', 'rgb(10, 10, 10)')
       await expect(promo).not.toHaveCSS('background-image', 'none')
     }
+
+    for (const width of [768, 1280, 1440]) {
+      await page.setViewportSize({ height: 900, width })
+      await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+
+      const promo = page.getByTestId('wingsside-specials')
+      const controls = page.locator('.hero-presentation__carousel-controls button:visible')
+      const promoBox = await promo.boundingBox()
+      const controlBoxes = await controls.evaluateAll((buttons) =>
+        buttons.map((button) => {
+          const box = button.getBoundingClientRect()
+          return {
+            bottom: box.bottom,
+            left: box.left,
+            right: box.right,
+            top: box.top,
+          }
+        }),
+      )
+      const plannerBox = await page
+        .getByRole('complementary', { name: 'Trip planning starter' })
+        .boundingBox()
+      const bannerBox = await page.getByRole('banner').boundingBox()
+      const plannerInteractiveBoxes = await page
+        .getByRole('complementary', { name: 'Trip planning starter' })
+        .locator('a:visible, button:visible, input:visible, select:visible, textarea:visible')
+        .evaluateAll((elements) =>
+          elements.map((element) => {
+            const box = element.getBoundingClientRect()
+            return { bottom: box.bottom, left: box.left, right: box.right, top: box.top }
+          }),
+        )
+      const headerInteractiveBoxes = await page
+        .getByRole('banner')
+        .locator('a:visible, button:visible, input:visible, select:visible, textarea:visible')
+        .evaluateAll((elements) =>
+          elements.map((element) => {
+            const box = element.getBoundingClientRect()
+            return { bottom: box.bottom, left: box.left, right: box.right, top: box.top }
+          }),
+        )
+      const heroCopyBoxes = await page
+        .locator(
+          '.hero-presentation__slide[data-active="true"] h2:visible, .hero-presentation__slide[data-active="true"] p:visible, .hero-presentation__slide[data-active="true"] a:visible',
+        )
+        .evaluateAll((elements) =>
+          elements.map((element) => {
+            const box = element.getBoundingClientRect()
+            return { bottom: box.bottom, left: box.left, right: box.right, top: box.top }
+          }),
+        )
+      const overlapsPromo = (box: { bottom: number; left: number; right: number; top: number }) =>
+        Boolean(
+          promoBox &&
+          box.right > promoBox.x &&
+          box.left < promoBox.x + promoBox.width &&
+          box.bottom > promoBox.y &&
+          box.top < promoBox.y + promoBox.height,
+        )
+
+      await test.info().attach(`wingsside-specials-layout-${width}`, {
+        body: JSON.stringify(
+          {
+            bannerBox,
+            controlBoxes,
+            headerInteractiveBoxes,
+            heroCopyBoxes,
+            plannerBox,
+            plannerInteractiveBoxes,
+            promoBox,
+          },
+          null,
+          2,
+        ),
+        contentType: 'application/json',
+      })
+      await test.info().attach(`wingsside-specials-home-${width}`, {
+        body: await page.screenshot({ fullPage: false }),
+        contentType: 'image/png',
+      })
+      expect(bannerBox).not.toBeNull()
+      expect(promoBox).not.toBeNull()
+      expect(promoBox?.y).toBeGreaterThanOrEqual(
+        (bannerBox?.y ?? 0) + (bannerBox?.height ?? 0) + 16,
+      )
+      expect(controlBoxes.every((box) => box.right - box.left >= 44)).toBe(true)
+      expect(controlBoxes.filter(overlapsPromo)).toEqual([])
+      expect(plannerInteractiveBoxes.filter(overlapsPromo)).toEqual([])
+      expect(headerInteractiveBoxes.filter(overlapsPromo)).toEqual([])
+      expect(heroCopyBoxes.filter(overlapsPromo)).toEqual([])
+      expect(
+        controlBoxes.filter(
+          (control) =>
+            plannerBox &&
+            control.right > plannerBox.x &&
+            control.left < plannerBox.x + plannerBox.width &&
+            control.bottom > plannerBox.y &&
+            control.top < plannerBox.y + plannerBox.height,
+        ),
+      ).toEqual([])
+      expect(await getHeroControlOverlaps(page)).toEqual([])
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        ),
+      ).toBe(false)
+
+      const next = page.getByRole('button', { name: 'Next slide' })
+      await next.click()
+      await expect(page.locator('.hero-presentation--carousel')).toHaveAttribute(
+        'data-active-index',
+        '1',
+      )
+
+      const autoplay = page.locator('.hero-presentation__carousel-controls > button').last()
+      const autoplayLabel = await autoplay.getAttribute('aria-label')
+      await autoplay.focus()
+      await expect(autoplay).toBeFocused()
+      await page.keyboard.press('Enter')
+      await expect(autoplay).toHaveAttribute(
+        'aria-label',
+        autoplayLabel === 'Play carousel' ? 'Pause carousel' : 'Play carousel',
+      )
+      await expect(autoplay).toBeFocused()
+    }
+
+    const promoCTA = page.getByRole('link', { name: 'Go to hot tours and packages' })
+    const promoCTABox = await promoCTA.boundingBox()
+    expect(promoCTABox?.height).toBeGreaterThanOrEqual(44)
+    expect(promoCTABox?.width).toBeGreaterThanOrEqual(44)
+    const promoClose = page.getByRole('button', { name: 'Dismiss specials' })
+    await promoClose.focus()
+    await promoClose.press('Tab')
+    await expect(promoCTA).toBeFocused()
+    await Promise.all([page.waitForURL(/\/wingsside\/en\/packages$/), promoCTA.press('Enter')])
 
     await page.setViewportSize({ height: 900, width: 767 })
     await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })

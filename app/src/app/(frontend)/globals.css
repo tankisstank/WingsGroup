@@ -4107,8 +4107,9 @@ body[data-site-code='wings-side'][data-public-route='/packages'] .layout-media--
 /* Compact Home-only Specials navigation. It is mounted server-side only on WingSide `/`. */
 body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials {
   position: fixed;
+  top: 128px;
   right: 20px;
-  bottom: 20px;
+  bottom: auto;
   z-index: 40;
   display: flex;
   width: min(268px, calc(100vw - 40px));

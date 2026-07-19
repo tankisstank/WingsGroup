@@ -91,7 +91,13 @@ test.describe('Hero visual regression', () => {
         )
         // Selecting a slide also pauses autoplay and gives every run the same
         // visual state regardless of seed/server timing.
-        await firstSlide.click()
+        await firstSlide.focus()
+        await firstSlide.press('Enter')
+        await expect(page.getByRole('button', { name: 'Play carousel' })).toHaveAttribute(
+          'aria-label',
+          'Play carousel',
+        )
+        await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
       }
 
       const visualSurface =
