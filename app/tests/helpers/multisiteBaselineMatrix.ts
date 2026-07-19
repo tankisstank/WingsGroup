@@ -36,14 +36,7 @@ export const loadMultisiteBaselineMatrix = (): BaselineMatrixRow[] => {
     return cachedRows
   }
 
-  const file = join(
-    process.cwd(),
-    '..',
-    'artifacts',
-    'audits',
-    'multisite-remediation-2026-07-13',
-    'baseline-matrix.csv',
-  )
+  const file = join(process.cwd(), 'tests', 'fixtures', 'multisite-baseline-matrix.csv')
   const [headerLine, ...rowLines] = readFileSync(file, 'utf8')
     .split(/\r?\n/)
     .filter(Boolean)

@@ -146,6 +146,7 @@ try {
     E2E_ALLOW_DATABASE_RESET: managedPostgres ? 'true' : process.env.E2E_ALLOW_DATABASE_RESET,
     NODE_OPTIONS: '--no-deprecation --import=tsx/esm',
     PAYLOAD_DB_PUSH: 'false',
+    PAYLOAD_SECRET: 'test-only-secret-not-for-production',
   }
 
   const prepareResult = runPnpm(['run', 'test:e2e:prepare-db'], sharedEnv)
