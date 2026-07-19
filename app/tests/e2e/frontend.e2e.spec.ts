@@ -2,11 +2,7 @@ import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
 import { e2eBaseURL } from '../helpers/baseURL'
-import {
-  heroPresentationFixturePaths,
-  seedPhase1LaunchSmoke,
-  setWingsSideThemeKeyForE2E,
-} from '../helpers/seedPhase1Launch'
+import { heroPresentationFixturePaths, seedPhase1LaunchSmoke } from '../helpers/seedPhase1Launch'
 import { heroPresentationDefinitions } from '../../src/heros/presentations/registry'
 import { isSupportedLocale } from '../../src/utilities/locales'
 
@@ -263,7 +259,7 @@ test.describe('Phase 1 public frontend smoke', () => {
 
     await page.goto(`${e2eBaseURL}/wingsside`)
 
-    await expect(page.locator('body')).toHaveAttribute('data-site-theme', 'wings-side')
+    await expect(page.locator('body')).toHaveAttribute('data-site-theme', 'custom')
     await expect(page.locator('body')).toHaveAttribute(
       'data-site-preset',
       'wings-side-editorial-inbound-v2',
@@ -383,52 +379,46 @@ test.describe('Phase 1 public frontend smoke', () => {
     page,
   }) => {
     test.setTimeout(60_000)
-    const originalThemeKey = await setWingsSideThemeKeyForE2E('custom')
+    for (const path of ['/wingsside', '/wingsside/en', '/wingsside/it']) {
+      await page.setViewportSize({ height: 900, width: 768 })
+      await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
 
-    try {
-      for (const path of ['/wingsside', '/wingsside/en', '/wingsside/it']) {
-        await page.setViewportSize({ height: 900, width: 768 })
-        await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
+      const body = page.locator('body')
+      await expect(body).toHaveAttribute('data-site-code', 'wings-side')
+      await expect(body).toHaveAttribute('data-theme-key', 'custom')
+      await expect(body).toHaveAttribute('data-public-route', '/')
+      await expect(page.locator('.site-header-cta').first()).toHaveAttribute(
+        'href',
+        /\/wingsside\/(?:en\/|it\/)?plan-your-trip$/,
+      )
+      await expect(page.locator('a[href*="lien-he"]')).toHaveCount(0)
 
-        const body = page.locator('body')
-        await expect(body).toHaveAttribute('data-site-code', 'wings-side')
-        await expect(body).toHaveAttribute('data-theme-key', 'custom')
-        await expect(body).toHaveAttribute('data-public-route', '/')
-        await expect(page.locator('.site-header-cta').first()).toHaveAttribute(
-          'href',
-          /\/wingsside\/(?:en\/|it\/)?plan-your-trip$/,
-        )
-        await expect(page.locator('a[href*="lien-he"]')).toHaveCount(0)
+      const promo = page.getByTestId('wingsside-specials')
+      await expect(promo).toBeVisible()
+      await expect(promo).toHaveCSS('position', 'fixed')
+      await expect(promo).toHaveCSS('width', '268px')
+      await expect(promo).toHaveCSS('border-top-width', '2px')
+      await expect(promo).toHaveCSS('border-top-color', 'rgb(214, 45, 45)')
+      await expect(promo).toHaveCSS('background-color', 'rgb(10, 10, 10)')
+      await expect(promo).not.toHaveCSS('background-image', 'none')
+    }
 
-        const promo = page.getByTestId('wingsside-specials')
-        await expect(promo).toBeVisible()
-        await expect(promo).toHaveCSS('position', 'fixed')
-        await expect(promo).toHaveCSS('width', '268px')
-        await expect(promo).toHaveCSS('border-top-width', '2px')
-        await expect(promo).toHaveCSS('border-top-color', 'rgb(214, 45, 45)')
-        await expect(promo).toHaveCSS('background-color', 'rgb(10, 10, 10)')
-        await expect(promo).not.toHaveCSS('background-image', 'none')
-      }
+    await page.setViewportSize({ height: 900, width: 767 })
+    await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+    await expect(page.getByTestId('wingsside-specials')).toBeHidden()
 
-      await page.setViewportSize({ height: 900, width: 767 })
-      await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
-      await expect(page.getByTestId('wingsside-specials')).toBeHidden()
-
-      for (const path of [
-        '/wingsside/packages',
-        '/wingsside/en/packages',
-        '/wingsside/it/packages',
-      ]) {
-        await page.setViewportSize({ height: 900, width: 1280 })
-        await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
-        await expect(page.locator('body')).toHaveAttribute('data-site-code', 'wings-side')
-        await expect(page.locator('body')).toHaveAttribute('data-theme-key', 'custom')
-        await expect(page.locator('body')).toHaveAttribute('data-public-route', '/packages')
-        await expect(page.getByTestId('wingsside-specials')).toHaveCount(0)
-        await expect(page.locator('.layout-media--contained').first()).toHaveCSS('width', '1240px')
-      }
-    } finally {
-      await setWingsSideThemeKeyForE2E(originalThemeKey)
+    for (const path of [
+      '/wingsside/packages',
+      '/wingsside/en/packages',
+      '/wingsside/it/packages',
+    ]) {
+      await page.setViewportSize({ height: 900, width: 1280 })
+      await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
+      await expect(page.locator('body')).toHaveAttribute('data-site-code', 'wings-side')
+      await expect(page.locator('body')).toHaveAttribute('data-theme-key', 'custom')
+      await expect(page.locator('body')).toHaveAttribute('data-public-route', '/packages')
+      await expect(page.getByTestId('wingsside-specials')).toHaveCount(0)
+      await expect(page.locator('.layout-media--contained').first()).toHaveCSS('width', '1240px')
     }
   })
 
@@ -1047,13 +1037,13 @@ test.describe('Phase 1 public frontend smoke', () => {
     expect(careHTML).toContain('WingsCare | Care And Support')
     expect(careHTML).toContain('Travel care rõ quyền lợi, rõ hỗ trợ')
     expect(sideHTML).toContain('WingsSide | Tailor-made Vietnam journeys')
-    expect(sideHTML).toContain('data-site-theme="wings-side"')
+    expect(sideHTML).toContain('data-site-theme="custom"')
     expect(sideHTML).toContain('https://wingside.vn')
     expect(passHTML).toContain('WingsPass')
     expect(passHTML).toContain('data-site-theme="wings-pass"')
     expect(passHTML).toContain('https://wingspass.wingsgroup.vn')
     expect(forwardedSideHTML).not.toContain('WingsSide | Tailor-made Vietnam journeys')
-    expect(forwardedSideHTML).not.toContain('data-site-theme="wings-side"')
+    expect(forwardedSideHTML).not.toContain('data-site-theme="custom"')
   })
 
   test('WingsSide inherits its governed site hero presentation', async ({ page }) => {

@@ -197,7 +197,9 @@ async function ensureSiteThemeMetadata({
       data: {
         branding: {
           ...existingSettings.branding,
-          themeKey: siteCode as SiteSetting['branding']['themeKey'],
+          themeKey: (siteCode === 'wings-side'
+            ? 'custom'
+            : siteCode) as SiteSetting['branding']['themeKey'],
           themePreset: presetIDs[assignment.themePreset],
         },
         heroDefaults: {
@@ -666,49 +668,4 @@ export async function seedPhase1LaunchSmoke(): Promise<void> {
   await ensureWingsPlusNavigationLocales({ payload, req })
   await ensureNavigationCorrections({ payload, req })
   await ensureHeroPresentationFixtures({ payload, req })
-}
-
-export async function setWingsSideThemeKeyForE2E(
-  themeKey: SiteSetting['branding']['themeKey'],
-): Promise<SiteSetting['branding']['themeKey']> {
-  const { payload, req } = await getAdminRequestContext()
-  const sites = await payload.find({
-    collection: 'sites',
-    depth: 0,
-    limit: 1,
-    pagination: false,
-    req,
-    where: { code: { equals: 'wings-side' } },
-  })
-  const site = sites.docs[0]
-
-  if (!site) throw new Error('Missing WingSide site for theme identity E2E fixture')
-
-  const settings = await payload.find({
-    collection: 'site-settings',
-    depth: 0,
-    limit: 1,
-    pagination: false,
-    req,
-    where: { site: { equals: site.id } },
-  })
-  const current = settings.docs[0] as SiteSetting | undefined
-
-  if (!current) throw new Error('Missing WingSide settings for theme identity E2E fixture')
-
-  const originalThemeKey = current.branding.themeKey
-
-  await payload.update({
-    collection: 'site-settings',
-    data: {
-      branding: {
-        ...current.branding,
-        themeKey,
-      },
-    },
-    id: current.id,
-    req,
-  })
-
-  return originalThemeKey
 }
