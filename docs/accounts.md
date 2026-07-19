@@ -33,10 +33,21 @@ C:\Users\VIETD\Downloads\ssh-key-2026-06-04.key
 Connect from PowerShell:
 
 ```powershell
-ssh -i "C:\Users\VIETD\Downloads\ssh-key-2026-06-04.key" ubuntu@168.110.212.116
+ssh -p 22 `
+  -i "C:\Users\VIETD\Downloads\ssh-key-2026-06-04.key" `
+  -o IdentitiesOnly=yes `
+  ubuntu@168.110.212.116
 ```
 
-The private key file itself must not be copied into this repository.
+Important access rule:
+
+- Always select the documented key explicitly with `-i` and
+  `IdentitiesOnly=yes`. The default workstation identity does not authenticate
+  to this VPS and returns `Permission denied (publickey)`.
+- The expected hostname is `instance-20260604-2317`. Keep strict host-key
+  verification enabled for non-interactive operations.
+- Never open, print, copy, upload, or commit the private key. Agents may verify
+  only its path/existence and filesystem permissions when troubleshooting.
 
 ## aaPanel
 
