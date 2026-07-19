@@ -55,23 +55,40 @@ Completed locally through 2026-07-19:
   the loopback port.
 - Mobile browser proof passed at IT 320px and PT 375px with localized CTA URLs,
   zero overflow, clean console and footer safe padding.
-- Clean release-candidate ladder passed without reusing production data:
-  - `pnpm exec tsc --noEmit`: PASS.
-  - `pnpm run lint`: PASS with 0 errors and 134 pre-existing warnings.
-  - `pnpm run test:unit`: PASS, 150/150 tests.
-  - `pnpm run test:component`: PASS, 24/24 tests.
-  - `pnpm run test:int`: PASS, 107 tests passed and 3 intentionally skipped.
-  - Governed-copy core E2E on a fresh PostgreSQL database: PASS, 1/1 in 197 seconds.
-  - `pnpm run test:e2e`: PASS, 74/74 on an isolated PostgreSQL database in
-    1,047.9 seconds; migrations and deterministic fixture seed passed and the
-    temporary container was removed.
-  - `pnpm run build`: PASS in 143.5 seconds; compilation took 29.9 seconds,
-    TypeScript took 85 seconds, 16/16 static pages generated, and standalone
+- Corrective release-candidate ladder passed from clean commit `05055019` without
+  reusing production data:
+  - `pnpm exec tsc --noEmit`: PASS in 10.4 seconds.
+  - `pnpm run lint`: PASS in 130.2 seconds with 0 errors and 134 pre-existing warnings.
+  - `pnpm run test:unit`: PASS, 28 files and 193/193 tests in 54.1 seconds.
+  - `pnpm run test:component`: PASS, 7 files and 24/24 tests in 18.9 seconds.
+  - `pnpm run test:int`: PASS, 21 files plus 2 skipped; 108 tests passed and 3
+    intentionally skipped in 46.5 seconds.
+  - `pnpm run test:e2e`: PASS, 75/75 on an isolated PostgreSQL database in
+    1,366.2 seconds (Playwright 19.7 minutes). The final report SHA-256 is
+    `71BD4944930F54F92DD9867B1FE016C081B3F545F4724B039966800D7169C5F9` and
+    `.last-run.json` SHA-256 is
+    `91D1C43004802CD49950D78EB11C8FA7D05DA8FFFFE219A8B13B2F561BC00903`.
+  - `pnpm run build`: PASS in 258.2 seconds; compilation took 64 seconds,
+    TypeScript took 107 seconds, 16/16 static pages generated and standalone
     assets were prepared.
-- Release-candidate worktree was clean after the full suite and build. No E2E
-  container remained.
+- One earlier full run passed 74/75 and saw a transient development-server 500
+  only on `/wingsside/plan-your-trip`; an exact fresh-database targeted rerun
+  passed 1/1, and the subsequent full run passed 75/75. An earlier 15-minute
+  outer timeout was invalid because the established full suite takes longer;
+  neither event is treated as product proof or hidden from the evidence trail.
+- The first controlled production release completed the encrypted backup,
+  22-record cleanup dry-run/apply, deployment, live/ready checks, four named tour
+  checks, 22/22 URL smoke and duplicate audit. The tour-detail/data gates passed.
+- Production acceptance was stopped because the custom WingSide theme did not
+  carry the hi-fi site marker, leaving Specials unstyled and full-width on Home.
+  Corrective commits `61a64c1`, `37bd1eb` and `05055019` passed the full ladder;
+  approved 768/1280/1440 screenshots show the fixed 268px widget 19-23px below
+  the site header/banner with no header or active-hero overlap.
+- The corrective release-candidate worktree was clean after the full suite and
+  build. No E2E container remained.
 
 Pending:
 
-- The four named live tours and all 22-URL browser smoke.
-- Production backup, cleanup dry-run/apply, deploy, health, smoke and duplicate audit.
+- Deploy the clean corrective code release without applying cleanup a second time.
+- Repeat live/ready, Home desktop/mobile promo/session checks, the 22-URL tour
+  smoke, WingsGo/WingsPlus regressions and the production duplicate audit.

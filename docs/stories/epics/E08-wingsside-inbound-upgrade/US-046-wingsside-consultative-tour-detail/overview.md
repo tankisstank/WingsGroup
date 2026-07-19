@@ -74,15 +74,27 @@ Local implementation evidence through 2026-07-19:
 - Local mobile browser evidence for IT at 320px and PT at 375px confirms localized
   CTA context, zero horizontal overflow, keyboard focusability, clean console and
   the 112px footer safe zone.
-- The release-candidate validation ladder passed from the clean isolated worktree:
-  TypeScript passed; lint completed with zero errors and 134 existing warnings;
-  unit passed 150/150; component passed 24/24; integration passed 107 with 3
-  intentional skips; the isolated PostgreSQL full E2E run passed 74/74 in
-  1,047.9 seconds; and the production build passed in 143.5 seconds, including
-  16/16 generated static pages. A fresh governed-copy core E2E check also passed
-  1/1 in 197 seconds before the full run.
+- The corrective release-candidate validation ladder passed from clean commit
+  `05055019`: TypeScript passed in 10.4 seconds; lint passed in 130.2 seconds
+  with zero errors and 134 existing warnings; unit passed 193/193; component
+  passed 24/24; integration passed 108 with 3 intentional skips; full isolated
+  PostgreSQL E2E passed 75/75 in 1,366.2 seconds; and the production build passed
+  in 258.2 seconds with 16/16 generated static pages and standalone assets.
+- The first controlled production release created an encrypted PostgreSQL backup,
+  verified and applied the exact 22-record cleanup, deployed structured detail,
+  passed health checks, passed the 22/22 live tour smoke and found no duplicate
+  records. Production acceptance was stopped when adversarial Home review found
+  the Specials widget unstyled and full-width under the WingSide custom theme.
+- Corrective commits `61a64c1`, `37bd1eb` and `05055019` scope the hi-fi system by
+  real site identity, seed that identity in browser fixtures and keep the 268px
+  Specials widget clear of header/hero controls. Approved 768/1280/1440 evidence
+  records a 19-23px clearance below the site header/banner; desktop and mobile
+  visual baselines are stable.
+- The final E2E report is preserved outside the worktree with SHA-256
+  `71BD4944930F54F92DD9867B1FE016C081B3F545F4724B039966800D7169C5F9`.
 
 Pending evidence:
 
-- Browser verification of the four named production tours and smoke of all 22 URLs.
-- Production dry-run/apply, backup, deployment, health checks and duplicate audit.
+- Deploy the clean corrective release without re-running the data cleanup.
+- Re-check live/ready health, Home desktop/mobile promo behavior, all 22 tour URLs,
+  WingsGo/WingsPlus regressions and the production duplicate audit.
