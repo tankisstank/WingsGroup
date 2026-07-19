@@ -60,7 +60,7 @@ Specials navigation are adopted without changing CMS or auth behavior.
 
 ## Current Evidence
 
-Local implementation evidence on 2026-07-18:
+Local implementation evidence through 2026-07-19:
 
 - Commits `e2ca098`, `4ddec93`, `b91b728`, `9e6a735`, `4ba44b6` and `d9a9bee`
   cover trusted tenant resolution, hi-fi tokens/assets/Home/Specials, locale-safe
@@ -74,10 +74,15 @@ Local implementation evidence on 2026-07-18:
 - Local mobile browser evidence for IT at 320px and PT at 375px confirms localized
   CTA context, zero horizontal overflow, keyboard focusability, clean console and
   the 112px footer safe zone.
+- The release-candidate validation ladder passed from the clean isolated worktree:
+  TypeScript passed; lint completed with zero errors and 134 existing warnings;
+  unit passed 150/150; component passed 24/24; integration passed 107 with 3
+  intentional skips; the isolated PostgreSQL full E2E run passed 74/74 in
+  1,047.9 seconds; and the production build passed in 143.5 seconds, including
+  16/16 generated static pages. A fresh governed-copy core E2E check also passed
+  1/1 in 197 seconds before the full run.
 
 Pending evidence:
 
-- Full repository validation ladder.
 - Browser verification of the four named production tours and smoke of all 22 URLs.
 - Production dry-run/apply, backup, deployment, health checks and duplicate audit.
-

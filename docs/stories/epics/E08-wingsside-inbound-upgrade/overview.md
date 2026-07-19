@@ -76,9 +76,11 @@ architecture and avoids building a parallel site, CMS, or page builder.
   writer tries to push the test schema.
 - US-046 isolates WingSide structured tour detail from WingsGo retail
   capabilities, adopts the approved hi-fi Home/Specials posture, and adds an
-  atomic batch-scoped cleanup for the 22 imported tours. Local targeted and
-  adapter proof is complete; full gates, 22-URL browser smoke and production
-  release evidence remain pending.
+  atomic batch-scoped cleanup for the 22 imported tours. Local targeted,
+  adapter and full release-candidate gates are complete: unit 150/150,
+  component 24/24, integration 107 passed/3 skipped, isolated PostgreSQL E2E
+  74/74 and production build passed. The 22-URL live browser smoke and
+  production backup/apply/deploy/health evidence remain pending.
 
 ## Current constraints
 

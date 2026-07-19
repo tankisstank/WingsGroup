@@ -41,7 +41,7 @@ pnpm run cleanup:tours:bestprice22 -- --dry-run --output <report>
 
 ## Acceptance Evidence
 
-Completed locally on 2026-07-18:
+Completed locally through 2026-07-19:
 
 - Targeted implementation suites, typecheck and optimized build passed before
   Phase 3 approval.
@@ -55,10 +55,23 @@ Completed locally on 2026-07-18:
   the loopback port.
 - Mobile browser proof passed at IT 320px and PT 375px with localized CTA URLs,
   zero overflow, clean console and footer safe padding.
+- Clean release-candidate ladder passed without reusing production data:
+  - `pnpm exec tsc --noEmit`: PASS.
+  - `pnpm run lint`: PASS with 0 errors and 134 pre-existing warnings.
+  - `pnpm run test:unit`: PASS, 150/150 tests.
+  - `pnpm run test:component`: PASS, 24/24 tests.
+  - `pnpm run test:int`: PASS, 107 tests passed and 3 intentionally skipped.
+  - Governed-copy core E2E on a fresh PostgreSQL database: PASS, 1/1 in 197 seconds.
+  - `pnpm run test:e2e`: PASS, 74/74 on an isolated PostgreSQL database in
+    1,047.9 seconds; migrations and deterministic fixture seed passed and the
+    temporary container was removed.
+  - `pnpm run build`: PASS in 143.5 seconds; compilation took 29.9 seconds,
+    TypeScript took 85 seconds, 16/16 static pages generated, and standalone
+    assets were prepared.
+- Release-candidate worktree was clean after the full suite and build. No E2E
+  container remained.
 
 Pending:
 
-- Full commands above as one release candidate.
 - The four named live tours and all 22-URL browser smoke.
 - Production backup, cleanup dry-run/apply, deploy, health, smoke and duplicate audit.
-
