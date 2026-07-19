@@ -1,8 +1,4 @@
-import {
-  getLocaleFromPathname,
-  getSiteAliasFromPathname,
-  type SupportedLocaleCode,
-} from './sitePaths'
+import { getPublicRoutePathname, type SupportedLocaleCode } from './sitePaths'
 
 export const WINGSSIDE_SPECIALS_DISMISSED_KEY = 'wingside-promo-dismissed'
 
@@ -10,14 +6,7 @@ export const shouldRenderWingsSideSpecials = (siteCode: string, publicPathname: 
   siteCode === 'wings-side' && isWingsSideSpecialsHomePathname(publicPathname)
 
 export const isWingsSideSpecialsHomePathname = (pathname: string): boolean => {
-  const segments = pathname.split('/').filter(Boolean)
-  const siteAlias = getSiteAliasFromPathname(pathname)
-  const locale = getLocaleFromPathname(pathname)
-  const contentSegments = segments.slice(siteAlias ? 1 : 0)
-
-  if (locale && contentSegments[0] === locale) contentSegments.shift()
-
-  return contentSegments.length === 0
+  return getPublicRoutePathname(pathname) === '/'
 }
 
 export type WingsSideSpecialsCopy = {
@@ -72,9 +61,7 @@ const copyByLocale = {
   },
 } as const satisfies Partial<Record<SupportedLocaleCode, WingsSideSpecialsCopy>>
 
-export const getWingsSideSpecialsCopy = (
-  locale?: null | string,
-): WingsSideSpecialsCopy =>
+export const getWingsSideSpecialsCopy = (locale?: null | string): WingsSideSpecialsCopy =>
   locale && locale in copyByLocale
     ? copyByLocale[locale as keyof typeof copyByLocale]
     : copyByLocale.en

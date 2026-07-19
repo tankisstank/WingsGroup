@@ -397,8 +397,9 @@ export const HeaderNav: React.FC<{
   }
   publicPathname?: string
   resolvedLocale?: SupportedLocaleCode
+  siteCode?: string
   themeKey?: string
-}> = ({ data, primaryAction, publicPathname, resolvedLocale = 'vi', themeKey }) => {
+}> = ({ data, primaryAction, publicPathname, resolvedLocale = 'vi', siteCode, themeKey }) => {
   const navItems = data?.navItems || []
   const [isOpen, setIsOpen] = useState(false)
   const [isMegaOpen, setIsMegaOpen] = useState(false)
@@ -409,7 +410,7 @@ export const HeaderNav: React.FC<{
   const pathname = useSitePublicPathname()
   const searchParams = useSearchParams()
   const localeSwitchPathname = pathname || publicPathname || '/'
-  const isWingsSide = themeKey === 'wings-side'
+  const isWingsSide = siteCode ? siteCode === 'wings-side' : themeKey === 'wings-side'
   const shouldRenderPrimaryAction =
     primaryAction &&
     !navItems.some(({ link }) => {

@@ -2,7 +2,11 @@ import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
 import { e2eBaseURL } from '../helpers/baseURL'
-import { heroPresentationFixturePaths, seedPhase1LaunchSmoke } from '../helpers/seedPhase1Launch'
+import {
+  heroPresentationFixturePaths,
+  seedPhase1LaunchSmoke,
+  setWingsSideThemeKeyForE2E,
+} from '../helpers/seedPhase1Launch'
 import { heroPresentationDefinitions } from '../../src/heros/presentations/registry'
 import { isSupportedLocale } from '../../src/utilities/locales'
 
@@ -173,13 +177,18 @@ const getHeroControlOverlaps = (page: Page) =>
             controlBox.top >= ctaBox.bottom
           )
         })
-        .map((cta) => ({ control: control.getAttribute('aria-label'), cta: cta.textContent?.trim() }))
+        .map((cta) => ({
+          control: control.getAttribute('aria-label'),
+          cta: cta.textContent?.trim(),
+        }))
     })
   })
 
 const getContrastAgainstWhiteText = (page: Page, selector: string) =>
   page.locator(selector).evaluate((element) => {
-    const match = getComputedStyle(element).backgroundColor.match(/[\d.]+/g)?.map(Number)
+    const match = getComputedStyle(element)
+      .backgroundColor.match(/[\d.]+/g)
+      ?.map(Number)
     if (!match || match.length < 3) return 0
 
     const alpha = match[3] ?? 1
@@ -312,8 +321,12 @@ test.describe('Phase 1 public frontend smoke', () => {
 
     for (const width of [1440, 1280]) {
       await page.setViewportSize({ height: 900, width })
-      await expect(hero.locator('.hero-presentation__carousel-controls button').first()).toBeVisible()
-      for (const control of await hero.locator('.hero-presentation__carousel-controls button').all()) {
+      await expect(
+        hero.locator('.hero-presentation__carousel-controls button').first(),
+      ).toBeVisible()
+      for (const control of await hero
+        .locator('.hero-presentation__carousel-controls button')
+        .all()) {
         const box = await control.boundingBox()
         expect(box?.height).toBeGreaterThanOrEqual(44)
         expect(box?.width).toBeGreaterThanOrEqual(44)
@@ -350,9 +363,7 @@ test.describe('Phase 1 public frontend smoke', () => {
         'Private, flexible, locally designed experiences built through destination discovery, travel style guidance, and consultative planning.',
       ),
     ).toBeVisible()
-    await expect(
-      page.getByRole('complementary', { name: 'Trip planning starter' }),
-    ).toBeHidden()
+    await expect(page.getByRole('complementary', { name: 'Trip planning starter' })).toBeHidden()
 
     await mobileHero.getByRole('button', { name: 'Go to slide 2' }).click()
     const mobilePlanner = page.getByRole('complementary', { name: 'Trip planning starter' })
@@ -366,6 +377,59 @@ test.describe('Phase 1 public frontend smoke', () => {
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
     )
     expect(overflowX).toBe(false)
+  })
+
+  test('styles the WingSide Specials chip across normalized Home routes and breakpoints', async ({
+    page,
+  }) => {
+    test.setTimeout(60_000)
+    const originalThemeKey = await setWingsSideThemeKeyForE2E('custom')
+
+    try {
+      for (const path of ['/wingsside', '/wingsside/en', '/wingsside/it']) {
+        await page.setViewportSize({ height: 900, width: 768 })
+        await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
+
+        const body = page.locator('body')
+        await expect(body).toHaveAttribute('data-site-code', 'wings-side')
+        await expect(body).toHaveAttribute('data-theme-key', 'custom')
+        await expect(body).toHaveAttribute('data-public-route', '/')
+        await expect(page.locator('.site-header-cta').first()).toHaveAttribute(
+          'href',
+          /\/wingsside\/(?:en\/|it\/)?plan-your-trip$/,
+        )
+        await expect(page.locator('a[href*="lien-he"]')).toHaveCount(0)
+
+        const promo = page.getByTestId('wingsside-specials')
+        await expect(promo).toBeVisible()
+        await expect(promo).toHaveCSS('position', 'fixed')
+        await expect(promo).toHaveCSS('width', '268px')
+        await expect(promo).toHaveCSS('border-top-width', '2px')
+        await expect(promo).toHaveCSS('border-top-color', 'rgb(214, 45, 45)')
+        await expect(promo).toHaveCSS('background-color', 'rgb(10, 10, 10)')
+        await expect(promo).not.toHaveCSS('background-image', 'none')
+      }
+
+      await page.setViewportSize({ height: 900, width: 767 })
+      await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+      await expect(page.getByTestId('wingsside-specials')).toBeHidden()
+
+      for (const path of [
+        '/wingsside/packages',
+        '/wingsside/en/packages',
+        '/wingsside/it/packages',
+      ]) {
+        await page.setViewportSize({ height: 900, width: 1280 })
+        await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
+        await expect(page.locator('body')).toHaveAttribute('data-site-code', 'wings-side')
+        await expect(page.locator('body')).toHaveAttribute('data-theme-key', 'custom')
+        await expect(page.locator('body')).toHaveAttribute('data-public-route', '/packages')
+        await expect(page.getByTestId('wingsside-specials')).toHaveCount(0)
+        await expect(page.locator('.layout-media--contained').first()).toHaveCSS('width', '1240px')
+      }
+    } finally {
+      await setWingsSideThemeKeyForE2E(originalThemeKey)
+    }
   })
 
   test('renders WingsSide governed inbound composer blocks', async ({ page }) => {

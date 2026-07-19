@@ -54,8 +54,7 @@ const splitPathSuffix = (value: string) => {
   const queryIndex = value.indexOf('?')
   const hashIndex = value.indexOf('#')
   const suffixIndexCandidates = [queryIndex, hashIndex].filter((index) => index >= 0)
-  const suffixIndex =
-    suffixIndexCandidates.length > 0 ? Math.min(...suffixIndexCandidates) : -1
+  const suffixIndex = suffixIndexCandidates.length > 0 ? Math.min(...suffixIndexCandidates) : -1
 
   return suffixIndex >= 0
     ? {
@@ -87,6 +86,28 @@ export const getLocaleFromPathname = (pathname: string): SupportedLocaleCode | n
     : segments[0]
 
   return isSupportedLocale(localeCandidate) ? localeCandidate : null
+}
+
+/**
+ * Returns the route inside a site's public content tree.
+ *
+ * Middleware-facing pathnames can contain a local site alias and/or a locale
+ * prefix. UI styling should not have to repeat those routing permutations, so
+ * layouts expose this normalized identity once through `data-public-route`.
+ */
+export const getPublicRoutePathname = (pathname: string): string => {
+  const { pathname: pathnameWithoutSuffix } = splitPathSuffix(normalizeSiteAwarePath(pathname))
+  const segments = pathnameWithoutSuffix.split('/').filter(Boolean)
+
+  if (knownSiteAliases.includes(segments[0] as SiteRouteAlias)) {
+    segments.shift()
+  }
+
+  if (isSupportedLocale(segments[0])) {
+    segments.shift()
+  }
+
+  return segments.length > 0 ? `/${segments.join('/')}` : '/'
 }
 
 export const normalizeSiteAwarePath = (path: string): string => {

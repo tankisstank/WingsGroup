@@ -9,20 +9,47 @@ import {
 import { describe, expect, it, vi } from 'vitest'
 
 describe('WingSide Specials helpers', () => {
-  it.each(['/', '/it', '/wingsside', '/wingsside/pt'])(
-    'recognizes Home pathname %s',
-    (pathname) => expect(isWingsSideSpecialsHomePathname(pathname)).toBe(true),
+  it.each([
+    '/',
+    '/en',
+    '/it',
+    '/es',
+    '/pt',
+    '/vi',
+    '/wingsside',
+    '/wingsside/en/',
+    '/wingsside/it',
+    '/wingsside/es',
+    '/wingsside/pt',
+    '/wingsside/vi',
+  ])('recognizes Home pathname %s', (pathname) =>
+    expect(isWingsSideSpecialsHomePathname(pathname)).toBe(true),
   )
 
-  it.each(['/packages', '/it/packages', '/wingsside/es/packages'])(
-    'rejects non-Home pathname %s',
-    (pathname) => expect(isWingsSideSpecialsHomePathname(pathname)).toBe(false),
+  it.each([
+    '/packages',
+    '/en/packages',
+    '/it/packages',
+    '/es/packages',
+    '/pt/packages',
+    '/vi/packages',
+    '/wingsside/en/packages',
+    '/wingsside/it/packages',
+    '/wingsside/es/packages',
+    '/wingsside/pt/packages',
+    '/wingsside/vi/packages',
+  ])('rejects non-Home pathname %s', (pathname) =>
+    expect(isWingsSideSpecialsHomePathname(pathname)).toBe(false),
   )
 
   it('falls back to English for unknown and missing locales', () => {
     expect(getWingsSideSpecialsCopy('fr')).toEqual(getWingsSideSpecialsCopy('en'))
     expect(getWingsSideSpecialsCopy()).toEqual(getWingsSideSpecialsCopy('en'))
-    expect(getWingsSideSpecialsCopy('vi').items).toEqual(['Ưu đãi', 'Tour nổi bật', 'Gói độc quyền'])
+    expect(getWingsSideSpecialsCopy('vi').items).toEqual([
+      'Ưu đãi',
+      'Tour nổi bật',
+      'Gói độc quyền',
+    ])
   })
 
   it('keeps the approved visible badge and title exact in all five supported promo locales', () => {
@@ -36,11 +63,12 @@ describe('WingSide Specials helpers', () => {
 
   it('renders only on the exact WingSide Home pathname', () => {
     expect(shouldRenderWingsSideSpecials('wings-side', '/')).toBe(true)
+    expect(shouldRenderWingsSideSpecials('wings-side', '/en')).toBe(true)
     expect(shouldRenderWingsSideSpecials('wings-side', '/it')).toBe(true)
     expect(shouldRenderWingsSideSpecials('wings-side', '/wingsside/pt')).toBe(true)
     expect(shouldRenderWingsSideSpecials('wings-side', '/packages')).toBe(false)
     expect(shouldRenderWingsSideSpecials('wings-go', '/')).toBe(false)
-    expect(shouldRenderWingsSideSpecials('wings-side', '/?campaign=hot')).toBe(false)
+    expect(shouldRenderWingsSideSpecials('wings-side', '/?campaign=hot')).toBe(true)
   })
 
   it('persists and reads session dismissal without throwing when storage is unavailable', () => {

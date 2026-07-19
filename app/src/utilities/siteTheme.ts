@@ -82,16 +82,28 @@ export type SiteThemeTokens = {
   themePreset: string
 }
 
-export const getSiteThemeTokens = (settings?: null | ThemeSettingsLike): SiteThemeTokens => {
+type SiteThemeContext = {
+  siteCode?: null | string
+}
+
+export const getSiteThemeTokens = (
+  settings?: null | ThemeSettingsLike,
+  context: SiteThemeContext = {},
+): SiteThemeTokens => {
   const themeKey = normalizeThemeKey(settings?.branding?.themeKey || defaultThemeKey)
   const themePresetKey = normalizeThemePresetKey(themeKey)
   const presetTokens = resolveThemePresetTokens(themeKey, settings?.branding?.themePreset)
   const brandColor =
-    settings?.branding?.brandColor || presetTokens.brandColor || defaultThemePresetByKey[themePresetKey].brandColor
+    settings?.branding?.brandColor ||
+    presetTokens.brandColor ||
+    defaultThemePresetByKey[themePresetKey].brandColor
   const accentColor =
-    settings?.branding?.accentColor || presetTokens.accentColor || defaultThemePresetByKey[themePresetKey].accentColor
+    settings?.branding?.accentColor ||
+    presetTokens.accentColor ||
+    defaultThemePresetByKey[themePresetKey].accentColor
   const surfaceColor = settings?.branding?.surfaceColor || presetTokens.surfaceColor
-  const surfaceStrongColor = settings?.branding?.surfaceStrongColor || presetTokens.surfaceStrongColor
+  const surfaceStrongColor =
+    settings?.branding?.surfaceStrongColor || presetTokens.surfaceStrongColor
   const backgroundStyle = settings?.branding?.backgroundStyle || presetTokens.backgroundStyle
   const radius = settings?.branding?.radius || presetTokens.radius
   const spacingScale = settings?.branding?.spacingScale || presetTokens.spacingScale
@@ -102,24 +114,28 @@ export const getSiteThemeTokens = (settings?: null | ThemeSettingsLike): SiteThe
   const radiusValue = radiusMap[radius] || radiusMap.lg
   const spacingTokens = spacingMap[spacingScale] || spacingMap.standard
   const resolvedPresetKey =
-    settings?.branding?.themePreset && typeof settings.branding.themePreset === 'object' && 'key' in settings.branding.themePreset
+    settings?.branding?.themePreset &&
+    typeof settings.branding.themePreset === 'object' &&
+    'key' in settings.branding.themePreset
       ? String(settings.branding.themePreset.key || themePresetKey)
       : themePresetKey
-  const wingsSideSemanticTokens =
-    themeKey === 'wings-side'
-      ? {
-          '--site-background': wingsSideHiFiTokens.background,
-          '--site-border': wingsSideHiFiTokens.border,
-          '--site-foreground': wingsSideHiFiTokens.foreground,
-          '--site-gold': wingsSideHiFiTokens.gold,
-          '--site-muted': wingsSideHiFiTokens.muted,
-          '--site-promo-ink': wingsSideHiFiTokens.promoInk,
-          '--site-promo-red': wingsSideHiFiTokens.promoRed,
-          '--site-surface': wingsSideHiFiTokens.surface,
-          '--site-surface-strong': wingsSideHiFiTokens.surfaceStrong,
-          '--site-wine': wingsSideHiFiTokens.wine,
-        }
-      : {}
+  const isWingsSide = context.siteCode
+    ? context.siteCode === 'wings-side'
+    : themeKey === 'wings-side'
+  const wingsSideSemanticTokens = isWingsSide
+    ? {
+        '--site-background': wingsSideHiFiTokens.background,
+        '--site-border': wingsSideHiFiTokens.border,
+        '--site-foreground': wingsSideHiFiTokens.foreground,
+        '--site-gold': wingsSideHiFiTokens.gold,
+        '--site-muted': wingsSideHiFiTokens.muted,
+        '--site-promo-ink': wingsSideHiFiTokens.promoInk,
+        '--site-promo-red': wingsSideHiFiTokens.promoRed,
+        '--site-surface': wingsSideHiFiTokens.surface,
+        '--site-surface-strong': wingsSideHiFiTokens.surfaceStrong,
+        '--site-wine': wingsSideHiFiTokens.wine,
+      }
+    : {}
 
   return {
     accentColor,

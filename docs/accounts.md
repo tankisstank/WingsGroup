@@ -1,6 +1,6 @@
 # WingsGroup VPS Access And Operations
 
-Last verified: 2026-06-14 (Asia/Bangkok)
+Last verified: 2026-07-19 (Asia/Bangkok)
 
 This document records access endpoints and operational paths. It must not
 contain passwords, private key contents, Tailscale auth keys, API tokens, or
@@ -37,6 +37,18 @@ ssh -p 22 `
   -i "C:\Users\VIETD\Downloads\ssh-key-2026-06-04.key" `
   -o IdentitiesOnly=yes `
   ubuntu@168.110.212.116
+```
+
+Non-interactive automation template (replace only `<remote-command>`):
+
+```powershell
+ssh -p 22 `
+  -i "C:\Users\VIETD\Downloads\ssh-key-2026-06-04.key" `
+  -o BatchMode=yes `
+  -o IdentitiesOnly=yes `
+  -o StrictHostKeyChecking=yes `
+  ubuntu@168.110.212.116 `
+  "<remote-command>"
 ```
 
 Important access rule:
@@ -79,6 +91,10 @@ accepting a browser certificate warning.
 Operational note: aaPanel is intended to be accessed through Tailscale during
 normal operations. Do not expose the panel publicly unless that decision is
 explicitly made and documented.
+
+The documented Tailscale address above is verified for aaPanel access. It is
+not an asserted SSH route; use the public SSH endpoint unless a Tailscale SSH
+path has been separately tested and recorded.
 
 Useful checks:
 

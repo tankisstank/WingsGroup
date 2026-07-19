@@ -22,13 +22,12 @@ import { getSiteThemeTokens } from '@/utilities/siteTheme'
 import { shouldRenderWingsSideSpecials } from '@/utilities/wingsSideSpecials'
 import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { buildOrganizationJSONLD, buildWebSiteJSONLD } from '@/utilities/structuredData'
-import {
-  buildConfiguredAbsoluteMediaURL,
-} from '@/utilities/siteURLs'
+import { buildConfiguredAbsoluteMediaURL } from '@/utilities/siteURLs'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { getCurrentSite } from '@/utilities/siteContext'
 import { getCanonicalSiteOrigin, getSiteSitemapURL } from '@/utilities/siteSEO'
 import { WingsSideSpecialsPromo } from '@/components/WingsSideSpecialsPromo'
+import { getPublicRoutePathname } from '@/utilities/sitePaths'
 
 const getSiteFaviconURL = (settings: Awaited<ReturnType<typeof getCurrentSiteSettings>>) => {
   const favicon = settings?.branding?.faviconImage
@@ -76,8 +75,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const settings = await getCurrentSiteSettings()
   const locale = await getCurrentLocale()
   const publicPathname = await getCurrentPublicPathname()
+  const publicRoute = getPublicRoutePathname(publicPathname)
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
-  const siteTheme = getSiteThemeTokens(settings)
+  const siteTheme = getSiteThemeTokens(settings, { siteCode: site.code })
   const faviconURL = getSiteFaviconURL(settings)
   const chromeCopy = getRuntimeLocaleCopy(publicChromeCopy, locale)
 
@@ -116,7 +116,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         data-site-preset={siteTheme.themePreset}
         data-site-theme={siteTheme.themeKey}
         data-theme-key={siteTheme.themeKey}
+        data-site-code={site.code}
         data-public-pathname={publicPathname}
+        data-public-route={publicRoute}
         data-site-button-style={siteTheme.buttonStyle}
         style={siteTheme.style}
       >

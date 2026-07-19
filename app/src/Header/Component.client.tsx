@@ -25,6 +25,7 @@ interface HeaderClientProps {
   publicPathname?: string
   resolvedLocale?: SupportedLocaleCode
   siteName?: null | string
+  siteCode?: string
   tagline?: null | string
   themeKey?: string
 }
@@ -39,6 +40,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   publicPathname,
   resolvedLocale,
   siteName,
+  siteCode,
   tagline,
   themeKey,
 }) => {
@@ -85,6 +87,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
           primaryAction={primaryAction}
           publicPathname={publicPathname}
           resolvedLocale={resolvedLocale}
+          siteCode={siteCode}
           themeKey={themeKey}
         />
       </div>

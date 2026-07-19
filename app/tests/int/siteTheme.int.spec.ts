@@ -4,6 +4,36 @@ import { defaultThemePresetByKey, type ThemePresetTokens } from '@/utilities/the
 import { describe, expect, it } from 'vitest'
 
 describe('site theme tokens', () => {
+  it('bridges WingSide semantic tokens by site identity even when its CMS theme is custom', () => {
+    const customThemeSettings = {
+      branding: {
+        accentColor: '#AA8844',
+        brandColor: '#123F3E',
+        themeKey: 'custom',
+      },
+      siteName: 'WingSide custom theme',
+    }
+
+    expect(getSiteThemeTokens(customThemeSettings, { siteCode: 'wings-side' }).style).toMatchObject(
+      {
+        '--site-background': '#F8F5EE',
+        '--site-border': '#D8D2C4',
+        '--site-foreground': '#162523',
+        '--site-gold': '#C9A75C',
+        '--site-muted': '#5D6B67',
+        '--site-promo-ink': '#0A0A0A',
+        '--site-promo-red': '#D62D2D',
+        '--site-surface': '#FFFDF8',
+        '--site-surface-strong': '#EFE8DA',
+        '--site-wine': '#7F1D3B',
+      },
+    )
+
+    expect(
+      getSiteThemeTokens(customThemeSettings, { siteCode: 'wings-plus' }).style,
+    ).not.toHaveProperty('--site-promo-red')
+  })
+
   it('falls back to WingsGroup defaults when no site settings exist', () => {
     expect(getSiteThemeTokens()).toEqual({
       accentColor: '#F59E0B',

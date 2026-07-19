@@ -3958,7 +3958,7 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .hero-presentation__sli
 }
 
 /* Reserve a safe footer landing zone for the WingSide tour consultation bar. */
-body[data-theme-key='wings-side'][data-public-pathname*='/tour/'] .site-footer {
+body[data-site-code='wings-side'][data-public-route*='/tour/'] .site-footer {
   padding-bottom: 7rem;
 }
 
@@ -3972,7 +3972,7 @@ html[data-theme='light'] {
 }
 
 /* WingSide Open Design bridge — site-specific so shared premium sites keep their own system. */
-body[data-theme-key='wings-side'] {
+body[data-site-code='wings-side'] {
   --background: var(--site-background);
   --card: var(--site-surface);
   --foreground: var(--site-foreground);
@@ -3990,23 +3990,23 @@ body[data-theme-key='wings-side'] {
     var(--site-background);
 }
 
-body[data-theme-key='wings-side'] h1,
-body[data-theme-key='wings-side'] h2,
-body[data-theme-key='wings-side'] h3,
-body[data-theme-key='wings-side'] h4,
-body[data-theme-key='wings-side'] h5,
-body[data-theme-key='wings-side'] h6 {
+body[data-site-code='wings-side'] h1,
+body[data-site-code='wings-side'] h2,
+body[data-site-code='wings-side'] h3,
+body[data-site-code='wings-side'] h4,
+body[data-site-code='wings-side'] h5,
+body[data-site-code='wings-side'] h6 {
   font-family: var(--font-wingsside-hifi), var(--font-editorial-heading), sans-serif;
   letter-spacing: -0.03em;
 }
 
-body[data-theme-key='wings-side'] .site-header.container {
+body[data-site-code='wings-side'] .site-header.container {
   width: 100%;
   max-width: none;
   padding-inline: 0;
 }
 
-body[data-theme-key='wings-side'] .site-header__bar {
+body[data-site-code='wings-side'] .site-header__bar {
   min-height: 72px;
   border-radius: 0;
   border-color: color-mix(in oklch, var(--site-border) 84%, transparent);
@@ -4015,87 +4015,87 @@ body[data-theme-key='wings-side'] .site-header__bar {
   box-shadow: 0 10px 36px color-mix(in oklch, var(--site-brand) 8%, transparent);
 }
 
-body[data-theme-key='wings-side'] .site-header-cta,
-body[data-theme-key='wings-side'] .site-panel-cta {
+body[data-site-code='wings-side'] .site-header-cta,
+body[data-site-code='wings-side'] .site-panel-cta {
   border-color: color-mix(in oklch, var(--site-gold) 72%, var(--site-border));
   color: color-mix(in oklch, var(--site-foreground) 90%, black);
   background: var(--site-gold);
   box-shadow: 0 10px 24px color-mix(in oklch, var(--site-gold) 24%, transparent);
 }
 
-body[data-theme-key='wings-side'] .site-header-cta:hover,
-body[data-theme-key='wings-side'] .site-header-cta:focus-visible,
-body[data-theme-key='wings-side'] .site-panel-cta:hover,
-body[data-theme-key='wings-side'] .site-panel-cta:focus-visible {
+body[data-site-code='wings-side'] .site-header-cta:hover,
+body[data-site-code='wings-side'] .site-header-cta:focus-visible,
+body[data-site-code='wings-side'] .site-panel-cta:hover,
+body[data-site-code='wings-side'] .site-panel-cta:focus-visible {
   color: color-mix(in oklch, var(--site-foreground) 94%, black);
   background: color-mix(in oklch, var(--site-gold) 86%, white);
 }
 
-body[data-theme-key='wings-side'] .theme-nav-link {
+body[data-site-code='wings-side'] .theme-nav-link {
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/'] #main-content > article,
-body[data-theme-key='wings-side'][data-public-pathname='/packages'] #main-content > article {
+body[data-site-code='wings-side'][data-public-route='/'] #main-content > article,
+body[data-site-code='wings-side'][data-public-route='/packages'] #main-content > article {
   padding-bottom: clamp(4rem, 7vw, 7rem);
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/'] #main-content > article {
+body[data-site-code='wings-side'][data-public-route='/'] #main-content > article {
   padding-top: 0;
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/'] #main-content > article > nav[aria-label='Breadcrumb'] {
+body[data-site-code='wings-side'][data-public-route='/'] #main-content > article > nav[aria-label='Breadcrumb'] {
   position: absolute;
   visibility: hidden;
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/'] .site-hero {
+body[data-site-code='wings-side'][data-public-route='/'] .site-hero {
   margin-top: 0;
   padding-top: 0;
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/'] .theme-section,
-body[data-theme-key='wings-side'][data-public-pathname='/packages'] .theme-section {
+body[data-site-code='wings-side'][data-public-route='/'] .theme-section,
+body[data-site-code='wings-side'][data-public-route='/packages'] .theme-section {
   padding-block: clamp(2.5rem, 5vw, 4.5rem);
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/'] .layout-block--features,
-body[data-theme-key='wings-side'][data-public-pathname='/packages'] .layout-block--features {
+body[data-site-code='wings-side'][data-public-route='/'] .layout-block--features,
+body[data-site-code='wings-side'][data-public-route='/packages'] .layout-block--features {
   border-top: 1px solid color-mix(in oklch, var(--site-border) 78%, transparent);
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/'] .site-feature-card,
-body[data-theme-key='wings-side'][data-public-pathname='/packages'] .site-feature-card {
+body[data-site-code='wings-side'][data-public-route='/'] .site-feature-card,
+body[data-site-code='wings-side'][data-public-route='/packages'] .site-feature-card {
   border-color: color-mix(in oklch, var(--site-border) 84%, transparent);
   border-radius: 1rem;
   background: color-mix(in oklch, var(--site-surface) 92%, transparent);
   box-shadow: 0 14px 34px color-mix(in oklch, var(--site-foreground) 6%, transparent);
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/'] .site-feature-card::after,
-body[data-theme-key='wings-side'][data-public-pathname='/packages'] .site-feature-card::after {
+body[data-site-code='wings-side'][data-public-route='/'] .site-feature-card::after,
+body[data-site-code='wings-side'][data-public-route='/packages'] .site-feature-card::after {
   display: none;
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/'] .site-feature-card:hover,
-body[data-theme-key='wings-side'][data-public-pathname='/packages'] .site-feature-card:hover {
+body[data-site-code='wings-side'][data-public-route='/'] .site-feature-card:hover,
+body[data-site-code='wings-side'][data-public-route='/packages'] .site-feature-card:hover {
   border-color: color-mix(in oklch, var(--site-brand) 30%, var(--site-border));
   box-shadow: 0 18px 40px color-mix(in oklch, var(--site-foreground) 10%, transparent);
   transform: translateY(-3px);
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/'] .site-feature-card img,
-body[data-theme-key='wings-side'][data-public-pathname='/packages'] .site-feature-card img {
+body[data-site-code='wings-side'][data-public-route='/'] .site-feature-card img,
+body[data-site-code='wings-side'][data-public-route='/packages'] .site-feature-card img {
   filter: saturate(0.92) contrast(1.03);
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/packages'] .layout-media--contained {
+body[data-site-code='wings-side'][data-public-route='/packages'] .layout-media--contained {
   width: min(82rem, calc(100% - 2.5rem));
   max-width: none;
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/packages'] .layout-media--contained img {
+body[data-site-code='wings-side'][data-public-route='/packages'] .layout-media--contained img {
   width: 100%;
   max-height: 34rem;
   border-color: var(--site-border);
@@ -4105,7 +4105,7 @@ body[data-theme-key='wings-side'][data-public-pathname='/packages'] .layout-medi
 }
 
 /* Compact Home-only Specials navigation. It is mounted server-side only on WingSide `/`. */
-body[data-theme-key='wings-side'][data-public-pathname='/'] .wingsside-specials {
+body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials {
   position: fixed;
   right: 20px;
   bottom: 20px;
@@ -4131,7 +4131,7 @@ body[data-theme-key='wings-side'][data-public-pathname='/'] .wingsside-specials 
     box-shadow 180ms ease;
 }
 
-body[data-theme-key='wings-side'][data-public-pathname='/'] .wingsside-specials:hover {
+body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials:hover {
   box-shadow:
     0 12px 28px color-mix(in oklch, var(--site-promo-red) 28%, transparent),
     0 0 0 1px color-mix(in oklch, var(--site-promo-red) 50%, transparent);
