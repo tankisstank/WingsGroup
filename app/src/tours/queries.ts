@@ -3,8 +3,17 @@ import { getPayload } from 'payload'
 
 import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+import {
+  isConsultativeTourSiteCode,
+  isRetailTourEnabledSiteCode,
+  isStructuredTourDetailSiteCode,
+} from '@/utilities/siteCapabilities'
 
-import { defaultTourSectionOrder, defaultTourSectionVisibility, normalizeSectionIDs } from './sectionRegistry'
+import {
+  defaultTourSectionOrder,
+  defaultTourSectionVisibility,
+  normalizeSectionIDs,
+} from './sectionRegistry'
 import type {
   DepartureCardViewModel,
   MarketPageViewModel,
@@ -12,7 +21,13 @@ import type {
   TourCardViewModel,
   TourResolvedData,
 } from './types'
-import { getFutureDepartures, getLowestPrice, getNextDeparture, groupDeparturesByMonth, marketRouteSlugToKey } from './utils'
+import {
+  getFutureDepartures,
+  getLowestPrice,
+  getNextDeparture,
+  groupDeparturesByMonth,
+  marketRouteSlugToKey,
+} from './utils'
 
 const tourProductsCollection = 'tour-products' as never
 const tourDeparturesCollection = 'tour-departures' as never
@@ -21,8 +36,12 @@ const departureVariantsCollection = 'departure-variants' as never
 
 const sortDepartures = <T extends { departureDate?: null | string }>(departures: T[] = []) =>
   [...departures].sort((left, right) => {
-    const leftTime = left.departureDate ? new Date(left.departureDate).getTime() : Number.MAX_SAFE_INTEGER
-    const rightTime = right.departureDate ? new Date(right.departureDate).getTime() : Number.MAX_SAFE_INTEGER
+    const leftTime = left.departureDate
+      ? new Date(left.departureDate).getTime()
+      : Number.MAX_SAFE_INTEGER
+    const rightTime = right.departureDate
+      ? new Date(right.departureDate).getTime()
+      : Number.MAX_SAFE_INTEGER
 
     return leftTime - rightTime
   })
@@ -33,7 +52,6 @@ const queryCollection = async ({
   draft,
   limit = 20,
   locale,
-  siteCode,
   where,
 }: {
   collection: never
@@ -41,11 +59,10 @@ const queryCollection = async ({
   draft: boolean
   limit?: number
   locale?: SupportedLocaleCode
-  siteCode?: string
   where: Record<string, unknown>
 }): Promise<any> => {
   const payload = await getPayload({ config: configPromise })
-  const scopedWhere = await appendSiteWhere(where as never, siteCode)
+  const scopedWhere = await appendSiteWhere(where as never)
 
   return payload.find({
     collection,
@@ -62,7 +79,9 @@ const queryCollection = async ({
 const asDoc = <T extends object>(value: T | number | string | null | undefined): T | null =>
   value && typeof value === 'object' ? value : null
 
-const normalizeTourProductCard = (tour: Record<string, any> | number | string | null | undefined) => {
+const normalizeTourProductCard = (
+  tour: Record<string, any> | number | string | null | undefined,
+) => {
   const doc = asDoc<Record<string, any>>(tour)
 
   if (!doc) {
@@ -82,7 +101,9 @@ const normalizeTourProductCard = (tour: Record<string, any> | number | string | 
   }
 }
 
-const normalizeVariantCard = (variant: Record<string, any> | number | string | null | undefined) => {
+const normalizeVariantCard = (
+  variant: Record<string, any> | number | string | null | undefined,
+) => {
   const doc = asDoc<Record<string, any>>(variant)
 
   if (!doc) {
@@ -128,21 +149,31 @@ const mergeTourVariant = ({
     return {
       builderConfig: tour.bcfg || null,
       sectionOrder: normalizeSectionIDs(tour.sectionOrder || defaultTourSectionOrder),
-      sectionVisibility: normalizeSectionIDs(tour.sectionVisibility || defaultTourSectionVisibility),
+      sectionVisibility: normalizeSectionIDs(
+        tour.sectionVisibility || defaultTourSectionVisibility,
+      ),
       tour,
     }
   }
 
   const itineraryDays = Array.isArray(tour.itineraryDays) ? [...tour.itineraryDays] : []
-  const overrides = Array.isArray(variant.itineraryDayOverrides) ? variant.itineraryDayOverrides : []
+  const overrides = Array.isArray(variant.itineraryDayOverrides)
+    ? variant.itineraryDayOverrides
+    : []
 
   for (const override of overrides) {
-    const index = itineraryDays.findIndex((day) => String(day.dayNumber) === String(override.dayNumber))
+    const index = itineraryDays.findIndex(
+      (day) => String(day.dayNumber) === String(override.dayNumber),
+    )
 
     if (index >= 0) {
       itineraryDays[index] = {
         ...itineraryDays[index],
-        ...Object.fromEntries(Object.entries(override).filter(([, value]) => value !== null && value !== undefined && value !== '')),
+        ...Object.fromEntries(
+          Object.entries(override).filter(
+            ([, value]) => value !== null && value !== undefined && value !== '',
+          ),
+        ),
       }
     }
   }
@@ -181,12 +212,10 @@ const mergeTourVariant = ({
 export const getTourProductBySlug = async ({
   draft,
   locale,
-  siteCode,
   slug,
 }: {
   draft: boolean
   locale?: SupportedLocaleCode
-  siteCode?: string
   slug: string
 }): Promise<any> => {
   const result = await queryCollection({
@@ -195,7 +224,6 @@ export const getTourProductBySlug = async ({
     draft,
     limit: 1,
     locale,
-    siteCode,
     where: {
       slug: {
         equals: slug,
@@ -209,12 +237,10 @@ export const getTourProductBySlug = async ({
 export const getTourDeparturesForProduct = async ({
   draft,
   locale,
-  siteCode,
   tourProductId,
 }: {
   draft: boolean
   locale?: SupportedLocaleCode
-  siteCode?: string
   tourProductId: number | string
 }): Promise<any[]> => {
   const result = await queryCollection({
@@ -223,7 +249,6 @@ export const getTourDeparturesForProduct = async ({
     draft,
     limit: 50,
     locale,
-    siteCode,
     where: {
       tourProduct: {
         equals: tourProductId,
@@ -237,12 +262,10 @@ export const getTourDeparturesForProduct = async ({
 export const getDepartureVariantsForProduct = async ({
   draft,
   locale,
-  siteCode,
   tourProductId,
 }: {
   draft: boolean
   locale?: SupportedLocaleCode
-  siteCode?: string
   tourProductId: number | string
 }) => {
   const result = await queryCollection({
@@ -251,7 +274,6 @@ export const getDepartureVariantsForProduct = async ({
     draft,
     limit: 20,
     locale,
-    siteCode,
     where: {
       tourProduct: {
         equals: tourProductId,
@@ -267,18 +289,15 @@ export const getDepartureVariantsForProduct = async ({
 export const getResolvedTourDetailBySlug = async ({
   draft,
   locale,
-  siteCode,
   slug,
 }: {
   draft: boolean
   locale?: SupportedLocaleCode
-  siteCode?: string
   slug: string
 }): Promise<TourResolvedData | null> => {
   const tour = await getTourProductBySlug({
     draft,
     locale,
-    siteCode,
     slug,
   })
 
@@ -289,14 +308,12 @@ export const getResolvedTourDetailBySlug = async ({
   const departures = await getTourDeparturesForProduct({
     draft,
     locale,
-    siteCode,
     tourProductId: tour.id,
   })
 
   const variants = await getDepartureVariantsForProduct({
     draft,
     locale,
-    siteCode,
     tourProductId: tour.id,
   })
 
@@ -312,14 +329,23 @@ export const getResolvedTourDetailBySlug = async ({
   })
 
   const featuredDepartures = getFutureDepartures(
-    departures.filter((departure) => departure.isFeatured || departure.availabilityStatus === 'open'),
+    departures.filter(
+      (departure) => departure.isFeatured || departure.availabilityStatus === 'open',
+    ),
   )
 
   return {
     builderConfig: resolved.builderConfig,
     departures,
-    featuredDepartures: featuredDepartures.length > 0 ? featuredDepartures : getFutureDepartures(departures).slice(0, 4),
-    nextDeparture: getNextDeparture(departures),
+    featuredDepartures:
+      featuredDepartures.length > 0
+        ? featuredDepartures
+        : getFutureDepartures(departures).slice(0, 4),
+    nextDeparture:
+      getNextDeparture(departures) ||
+      (typeof tour.priceFrom === 'number'
+        ? { priceFrom: tour.priceFrom, currency: tour.currency || 'USD' }
+        : null),
     sectionOrder: resolved.sectionOrder,
     sectionVisibility: resolved.sectionVisibility,
     tour: resolved.tour,
@@ -331,12 +357,10 @@ export const getToursByMarketRoute = async ({
   draft,
   locale,
   marketRouteSlug,
-  siteCode,
 }: {
   draft: boolean
   locale?: SupportedLocaleCode
   marketRouteSlug: string
-  siteCode?: string
 }): Promise<MarketPageViewModel | null> => {
   const marketKey = marketRouteSlugToKey[marketRouteSlug]
 
@@ -350,7 +374,6 @@ export const getToursByMarketRoute = async ({
     draft,
     limit: 20,
     locale,
-    siteCode,
     where: {
       market: {
         equals: marketKey,
@@ -364,7 +387,6 @@ export const getToursByMarketRoute = async ({
     draft,
     limit: 100,
     locale,
-    siteCode,
     where: {
       tourProduct: {
         in: (toursResult.docs as any[]).map((tour) => tour.id),
@@ -382,7 +404,9 @@ export const getToursByMarketRoute = async ({
     tours: (toursResult.docs as any[]).map((tour): TourCardViewModel => {
       const linkedAll = allDepartures.filter((departure) => {
         const relation =
-          typeof departure.tourProduct === 'object' ? departure.tourProduct?.id : departure.tourProduct
+          typeof departure.tourProduct === 'object'
+            ? departure.tourProduct?.id
+            : departure.tourProduct
 
         return String(relation) === String(tour.id)
       })
@@ -404,12 +428,10 @@ export const getToursByMarketRoute = async ({
 export const getTourCampaignBySlug = async ({
   draft,
   locale,
-  siteCode,
   slug,
 }: {
   draft: boolean
   locale?: SupportedLocaleCode
-  siteCode?: string
   slug: string
 }): Promise<any> => {
   const result = await queryCollection({
@@ -418,7 +440,6 @@ export const getTourCampaignBySlug = async ({
     draft,
     limit: 1,
     locale,
-    siteCode,
     where: {
       slug: {
         equals: slug,
@@ -445,7 +466,6 @@ export const getTourCampaignBySlug = async ({
     draft,
     limit: 100,
     locale,
-    siteCode,
     where: {
       tourProduct: {
         in: linkedTourIDs,
@@ -462,11 +482,9 @@ export const getTourCampaignBySlug = async ({
 export const getResolvedScheduleData = async ({
   draft,
   locale,
-  siteCode,
 }: {
   draft: boolean
   locale?: SupportedLocaleCode
-  siteCode?: string
 }): Promise<SchedulePageViewModel> => {
   const result = await queryCollection({
     collection: tourDeparturesCollection,
@@ -474,14 +492,15 @@ export const getResolvedScheduleData = async ({
     draft,
     limit: 200,
     locale,
-    siteCode,
     where: {},
   })
 
   const departures = sortDepartures(result.docs as any[]).map(normalizeDepartureCard)
   const futureDepartures = getFutureDepartures(departures)
   const visibleDepartures = futureDepartures.length > 0 ? futureDepartures : departures
-  const featuredDepartures = visibleDepartures.filter((departure) => departure.isFeatured).slice(0, 6)
+  const featuredDepartures = visibleDepartures
+    .filter((departure) => departure.isFeatured)
+    .slice(0, 6)
   const markets = new Set(
     visibleDepartures
       .map((departure) => {
@@ -492,7 +511,9 @@ export const getResolvedScheduleData = async ({
       .filter((value): value is string => Boolean(value)),
   )
   const airlines = new Set(
-    visibleDepartures.map((departure) => departure.airline).filter((value): value is string => Boolean(value)),
+    visibleDepartures
+      .map((departure) => departure.airline)
+      .filter((value): value is string => Boolean(value)),
   )
   const statuses = new Set(
     visibleDepartures
@@ -502,7 +523,8 @@ export const getResolvedScheduleData = async ({
 
   return {
     departures: visibleDepartures,
-    featuredDepartures: featuredDepartures.length > 0 ? featuredDepartures : visibleDepartures.slice(0, 6),
+    featuredDepartures:
+      featuredDepartures.length > 0 ? featuredDepartures : visibleDepartures.slice(0, 6),
     filtersSeed: {
       airlines: Array.from(airlines),
       markets: Array.from(markets),
@@ -526,23 +548,34 @@ export const getResolvedScheduleData = async ({
 export const getSiteScheduleData = async ({
   draft,
   locale,
-  siteCode,
 }: {
   draft: boolean
   locale?: SupportedLocaleCode
-  siteCode?: string
 }): Promise<any[]> => {
   const schedule = await getResolvedScheduleData({
     draft,
     locale,
-    siteCode,
   })
 
   return schedule.departures
 }
 
-export const isWingsGoSite = async (siteCode?: string) => {
-  const site = await getCurrentSite(siteCode)
+export const isWingsGoSite = async () => {
+  const site = await getCurrentSite()
 
-  return site?.code === 'wings-go'
+  return isRetailTourEnabledSiteCode(site?.code)
+}
+
+/** True when the current tenant may render structured tour detail pages. */
+export const isStructuredTourDetailSite = async () => {
+  const site = await getCurrentSite()
+
+  return isStructuredTourDetailSiteCode(site?.code)
+}
+
+/** True for Wingside-style private/consultative tour UX (not retail hold-seat). */
+export const isConsultativeTourSite = async () => {
+  const site = await getCurrentSite()
+
+  return isConsultativeTourSiteCode(site?.code)
 }

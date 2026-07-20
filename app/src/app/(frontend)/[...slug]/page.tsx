@@ -10,7 +10,12 @@ import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { generateMeta } from '@/utilities/generateMeta'
-import { appendSiteWhere, getCurrentLocale, getCurrentSitePrefix } from '@/utilities/siteContext'
+import {
+  appendSiteWhere,
+  getCurrentLocale,
+  getCurrentSite,
+  getCurrentSitePrefix,
+} from '@/utilities/siteContext'
 import { JsonLd } from '@/components/JsonLd'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
@@ -19,12 +24,16 @@ import { buildBreadcrumbListJSONLD, buildWebPageJSONLD } from '@/utilities/struc
 import { buildPageBreadcrumbItems, type BreadcrumbPage } from '@/utilities/breadcrumbs'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
-import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+import { getCopyLocale } from '@/utilities/locales'
+import { isSupportedLocale, type SupportedLocaleCode } from '@/utilities/sitePaths'
+import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 import {
   getResolvedScheduleData,
   getResolvedTourDetailBySlug,
   getTourCampaignBySlug,
   getToursByMarketRoute,
+  isConsultativeTourSite,
+  isStructuredTourDetailSite,
   isWingsGoSite,
 } from '@/tours/queries'
 import {
@@ -38,33 +47,31 @@ type Args = {
   params: Promise<{
     slug?: string[]
   }>
-  searchParams?: Promise<{
-    site?: string
-    siteAlias?: string
-    locale?: SupportedLocaleCode
-  }>
 }
 
-export default async function Page({ params: paramsPromise, searchParams }: Args) {
+export default async function Page({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
   const { slug = [] } = await paramsPromise
-  const resolvedSearchParams = searchParams ? await searchParams : undefined
-  const locale = await getCurrentLocale(resolvedSearchParams?.locale)
-  const sitePrefix = await getCurrentSitePrefix(resolvedSearchParams?.siteAlias)
+  const locale = await getCurrentLocale()
+  const sitePrefix = await getCurrentSitePrefix()
   const decodedSegments = slug.map((segment) => decodeURIComponent(segment))
-  const requestedPath = decodedSegments.length > 0 ? `/${decodedSegments.join('/')}` : '/'
+  const contentSegments = isSupportedLocale(decodedSegments[0])
+    ? decodedSegments.slice(1)
+    : decodedSegments
+  const requestedPath = contentSegments.length > 0 ? `/${contentSegments.join('/')}` : '/'
   const url = `${sitePrefix}${requestedPath === '/' ? '' : requestedPath}`.replace(/\/+/g, '/')
   const page = await queryPageByPath({
     locale,
     requestedPath,
-    siteCode: resolvedSearchParams?.site,
   })
 
   if (!page) {
     return <PayloadRedirects url={url} />
   }
 
-  const settings = await getCurrentSiteSettings(resolvedSearchParams?.site)
+  const settings = await getCurrentSiteSettings()
+  const site = await getCurrentSite()
+  const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
   const canonicalPath = getPageCanonicalPath(page, locale)
   const breadcrumbItems = buildPageBreadcrumbItems({
     locale,
@@ -76,14 +83,18 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
   const structuredPage = await resolveStructuredTourPage({
     locale,
     requestedPath,
-    siteCode: resolvedSearchParams?.site,
   })
 
+  // Structured tour detail: tighter vertical rhythm so breadcrumb + hero
+  // don't float as two distant top/bottom bands under the fixed header.
+  const isStructuredTour = Boolean(structuredPage)
+
   return (
-    <article className="pt-16 pb-24">
+    <article className={isStructuredTour ? 'pt-16 pb-16 md:pb-20' : 'pt-16 pb-24'}>
       <JsonLd
         data={[
           buildWebPageJSONLD({
+            canonicalOrigin,
             description: page.meta?.description,
             path: canonicalPath,
             settings,
@@ -92,6 +103,7 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
           buildBreadcrumbListJSONLD(
             breadcrumbItems.map((item) => ({ name: item.label, path: item.path })),
             settings,
+            { canonicalOrigin },
           ),
         ]}
       />
@@ -100,12 +112,26 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
 
       {draft && <LivePreviewListener />}
 
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs
+        className={
+          isStructuredTour
+            ? 'container pb-2 pt-3 text-sm text-muted-foreground md:pt-4'
+            : undefined
+        }
+        items={breadcrumbItems}
+      />
       {structuredPage ? (
-        structuredPage
+        <>
+          {structuredPage}
+          <RelatedPages locale={locale} pages={relatedPages} />
+        </>
       ) : (
         <>
-          <RenderHero {...page.hero} siteHeroDefaults={settings?.heroDefaults} />
+          <RenderHero
+            {...page.hero}
+            resolvedLocale={locale}
+            siteHeroDefaults={settings?.heroDefaults}
+          />
           <RenderBlocks blocks={page.layout} />
           <RelatedPages locale={locale} pages={relatedPages} />
         </>
@@ -114,96 +140,138 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
   )
 }
 
-export async function generateMetadata({
-  params: paramsPromise,
-  searchParams,
-}: Args): Promise<Metadata> {
+export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug = [] } = await paramsPromise
-  const resolvedSearchParams = searchParams ? await searchParams : undefined
-  const locale = await getCurrentLocale(resolvedSearchParams?.locale)
+  const locale = await getCurrentLocale()
   const decodedSegments = slug.map((segment) => decodeURIComponent(segment))
-  const requestedPath = decodedSegments.length > 0 ? `/${decodedSegments.join('/')}` : '/'
+  const contentSegments = isSupportedLocale(decodedSegments[0])
+    ? decodedSegments.slice(1)
+    : decodedSegments
+  const requestedPath = contentSegments.length > 0 ? `/${contentSegments.join('/')}` : '/'
   const page = await queryPageByPath({
     locale,
     requestedPath,
-    siteCode: resolvedSearchParams?.site,
   })
 
   return generateMeta({
     doc: page,
     locale,
     path: requestedPath,
-    siteCode: resolvedSearchParams?.site,
   })
 }
 
 const queryPageByPath = async ({
   locale,
   requestedPath,
-  siteCode,
 }: {
   locale?: SupportedLocaleCode
   requestedPath: string
-  siteCode?: string
 }) => {
   const { isEnabled: draft } = await draftMode()
   const payload = await getPayload({ config: configPromise })
   const segments = requestedPath.split('/').filter(Boolean)
   const candidateSlug = segments[segments.length - 1] || 'home'
-  const candidateSlugs = siteCode ? [candidateSlug, `${siteCode}-${candidateSlug}`] : [candidateSlug]
-  const where = await appendSiteWhere(
-    {
-      or: [
-        {
-          pathname: {
-            equals: requestedPath,
-          },
+  const site = await getCurrentSite()
+  const candidateSlugs = [candidateSlug, `${site.code}-${candidateSlug}`]
+  const where = await appendSiteWhere({
+    or: [
+      {
+        pathname: {
+          equals: requestedPath,
         },
-        {
-          slug: {
-            in: candidateSlugs,
-          },
+      },
+      {
+        slug: {
+          in: candidateSlugs,
         },
-      ],
-    },
-    siteCode,
-  )
-
-  const result = await payload.find({
-    collection: 'pages',
-    draft,
-    locale,
-    depth: 3,
-    limit: 1,
-    pagination: false,
-    overrideAccess: draft,
-    where,
+      },
+    ],
   })
 
-  return result.docs?.[0] || null
+  const findPage = async (
+    requestedLocale?: SupportedLocaleCode,
+    options?: { strictLocale?: boolean },
+  ) => {
+    const result = await payload.find({
+      collection: 'pages',
+      draft,
+      fallbackLocale: options?.strictLocale === false ? undefined : false,
+      locale: requestedLocale,
+      depth: 3,
+      limit: 1,
+      pagination: false,
+      overrideAccess: draft,
+      where,
+    })
+
+    return result.docs?.[0] || null
+  }
+
+  const hasRenderableLocalizedContent = (page: Awaited<ReturnType<typeof findPage>>) => {
+    const placeholderTitles = new Set(['page', 'pagina', 'página', 'trang'])
+
+    if (!page) {
+      return false
+    }
+
+    if (Array.isArray(page.layout) && page.layout.length > 0) {
+      return true
+    }
+
+    if (page.hero?.richText) {
+      return true
+    }
+
+    return (
+      typeof page.title === 'string' &&
+      page.title.trim().length > 0 &&
+      !placeholderTitles.has(page.title.trim().toLowerCase())
+    )
+  }
+
+  const localizedPage = await findPage(locale, { strictLocale: true })
+
+  if (hasRenderableLocalizedContent(localizedPage)) {
+    return localizedPage
+  }
+
+  const fallbackLocale =
+    site.defaultLocale && isSupportedLocale(site.defaultLocale) ? site.defaultLocale : null
+
+  if (!fallbackLocale || fallbackLocale === locale) {
+    return localizedPage
+  }
+
+  const fallbackPage = await findPage(fallbackLocale, { strictLocale: false })
+
+  return hasRenderableLocalizedContent(fallbackPage) ? fallbackPage : localizedPage
 }
 
 const resolveStructuredTourPage = async ({
   locale,
   requestedPath,
-  siteCode,
 }: {
   locale: SupportedLocaleCode
   requestedPath: string
-  siteCode?: string
 }) => {
-  if (!(await isWingsGoSite(siteCode))) {
+  const copyLocale = getCopyLocale(locale)
+
+  if (!(await isStructuredTourDetailSite())) {
     return null
   }
 
   const { isEnabled: draft } = await draftMode()
   const segments = requestedPath.split('/').filter(Boolean)
+  const isRetail = await isWingsGoSite()
+  const isConsultative = await isConsultativeTourSite()
+  const presentation = isConsultative ? 'consultative' : 'retail'
+  const site = await getCurrentSite()
 
+  // Tour detail: WingsGo (retail) + Wingside (consultative private).
   if (segments[0] === 'tour' && segments[1]) {
     const tourData = await getResolvedTourDetailBySlug({
       draft,
       locale,
-      siteCode,
       slug: segments[1],
     })
 
@@ -211,14 +279,25 @@ const resolveStructuredTourPage = async ({
       return null
     }
 
-    return <TourDetailPage data={tourData} locale={locale} />
+    return (
+      <TourDetailPage
+        data={tourData}
+        locale={copyLocale}
+        presentation={presentation}
+        siteCode={site?.code}
+      />
+    )
+  }
+
+  // Dense retail schedule / market / campaign remain WingsGo-only.
+  if (!isRetail) {
+    return null
   }
 
   if (segments[0] === 'lich-khoi-hanh') {
     const schedule = await getResolvedScheduleData({
       draft,
       locale,
-      siteCode,
     })
 
     return <TourSchedulePage schedule={schedule} />
@@ -229,7 +308,6 @@ const resolveStructuredTourPage = async ({
       draft,
       locale,
       marketRouteSlug: segments[1],
-      siteCode,
     })
 
     if (!marketData) {
@@ -239,7 +317,7 @@ const resolveStructuredTourPage = async ({
     return (
       <TourMarketPage
         departures={marketData.departures}
-        locale={locale}
+        locale={copyLocale}
         marketKey={marketData.marketKey}
         tours={marketData.tours}
       />
@@ -250,7 +328,6 @@ const resolveStructuredTourPage = async ({
     const campaignData = await getTourCampaignBySlug({
       draft,
       locale,
-      siteCode,
       slug: segments[1],
     })
 
@@ -262,7 +339,7 @@ const resolveStructuredTourPage = async ({
       <TourCampaignPage
         campaign={campaignData.campaign}
         departures={campaignData.departures}
-        locale={locale}
+        locale={copyLocale}
       />
     )
   }

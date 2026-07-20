@@ -3,13 +3,24 @@ import React from 'react'
 import { SiteLink } from '@/components/SiteLink'
 import type { BreadcrumbItem } from '@/utilities/breadcrumbs'
 
-export const Breadcrumbs = ({ items }: { items: BreadcrumbItem[] }) => {
+export const Breadcrumbs = ({
+  className,
+  items,
+}: {
+  className?: string
+  items: BreadcrumbItem[]
+}) => {
   if (items.length < 2) {
     return null
   }
 
   return (
-    <nav aria-label="Breadcrumb" className="container pt-8 text-sm text-muted-foreground">
+    <nav
+      aria-label="Breadcrumb"
+      className={
+        className || 'container pt-8 text-sm text-muted-foreground'
+      }
+    >
       <ol className="flex flex-wrap items-center gap-2">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
