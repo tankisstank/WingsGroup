@@ -90,8 +90,11 @@ export default async function Page({ params: paramsPromise }: Args) {
     wrapperPageID: page.id,
   })
 
+  // Structured tour detail: tighter vertical rhythm under fixed header.
+  const isStructuredTour = Boolean(structuredPage)
+
   return (
-    <article className="pt-16 pb-24">
+    <article className={isStructuredTour ? 'pt-16 pb-16 md:pb-20' : 'pt-16 pb-24'}>
       <JsonLd
         data={[
           buildWebPageJSONLD({
@@ -113,7 +116,14 @@ export default async function Page({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs
+        className={
+          isStructuredTour
+            ? 'container pb-2 pt-3 text-sm text-muted-foreground md:pt-4'
+            : undefined
+        }
+        items={breadcrumbItems}
+      />
       {structuredPage ? (
         <>
           {structuredPage}
@@ -273,7 +283,14 @@ const resolveStructuredTourPage = async ({
       return <WingSideTourDetailPage data={tourData} locale={locale} />
     }
 
-    return <TourDetailPage data={tourData} locale={getCopyLocale(locale)} />
+    return (
+      <TourDetailPage
+        data={tourData}
+        locale={getCopyLocale(locale)}
+        presentation="retail"
+        siteCode={site?.code}
+      />
+    )
   }
 
   if (!isRetailTourEnabledSiteCode(site.code)) return null

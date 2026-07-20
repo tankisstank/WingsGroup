@@ -3,7 +3,11 @@ import { getPayload } from 'payload'
 
 import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
-import { isRetailTourEnabledSiteCode } from '@/utilities/siteCapabilities'
+import {
+  isConsultativeTourSiteCode,
+  isRetailTourEnabledSiteCode,
+  isStructuredTourDetailSiteCode,
+} from '@/utilities/siteCapabilities'
 
 import {
   defaultTourSectionOrder,
@@ -550,10 +554,10 @@ export const getResolvedScheduleData = async ({
       openCount: visibleDepartures.length,
     },
     trustSignals: [
-      'Giá công khai theo từng đợt mở bán',
-      'Giữ chỗ sau khi sales xác nhận tồn chỗ',
-      'Hỗ trợ visa, hồ sơ và điều phối trước ngày đi',
-      'Điều hành gọi xác nhận trước khi chốt booking',
+      'Gi├í c├┤ng khai theo tß╗½ng ─æß╗út mß╗ƒ b├ín',
+      'Giß╗» chß╗ù sau khi sales x├íc nhß║¡n tß╗ôn chß╗ù',
+      'Hß╗ù trß╗ú visa, hß╗ô s╞í v├á ─æiß╗üu phß╗æi tr╞░ß╗¢c ng├áy ─æi',
+      '─Éiß╗üu h├ánh gß╗ìi x├íc nhß║¡n tr╞░ß╗¢c khi chß╗æt booking',
     ],
   }
 }
@@ -577,4 +581,18 @@ export const isWingsGoSite = async () => {
   const site = await getCurrentSite()
 
   return isRetailTourEnabledSiteCode(site?.code)
+}
+
+/** True when the current tenant may render structured tour detail pages. */
+export const isStructuredTourDetailSite = async () => {
+  const site = await getCurrentSite()
+
+  return isStructuredTourDetailSiteCode(site?.code)
+}
+
+/** True for Wingside-style private/consultative tour UX (not retail hold-seat). */
+export const isConsultativeTourSite = async () => {
+  const site = await getCurrentSite()
+
+  return isConsultativeTourSiteCode(site?.code)
 }

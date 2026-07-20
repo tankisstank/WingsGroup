@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  isConsultativeTourSiteCode,
   isRetailTourEnabledSiteCode,
-  isStructuredTourDetailEnabledSiteCode,
+  isStructuredTourDetailSiteCode,
   retailTourEnabledSiteCodes,
-  structuredTourDetailEnabledSiteCodes,
+  structuredTourDetailSiteCodes,
 } from '@/utilities/siteCapabilities'
 
 describe('site capability registry', () => {
@@ -15,11 +16,12 @@ describe('site capability registry', () => {
     expect(isRetailTourEnabledSiteCode('wings-side')).toBe(false)
   })
 
-  it('separates structured detail from the WingsGo-only retail capability', () => {
-    expect(structuredTourDetailEnabledSiteCodes).toEqual(['wings-go', 'wings-side'])
-    expect(isStructuredTourDetailEnabledSiteCode('wings-go')).toBe(true)
-    expect(isStructuredTourDetailEnabledSiteCode('wings-side')).toBe(true)
-    expect(isStructuredTourDetailEnabledSiteCode('wings-plus')).toBe(false)
-    expect(isRetailTourEnabledSiteCode('wings-side')).toBe(false)
+  it('enables structured tour detail for WingsGo retail and Wingside consultative', () => {
+    expect(structuredTourDetailSiteCodes).toEqual(['wings-go', 'wings-side'])
+    expect(isStructuredTourDetailSiteCode('wings-go')).toBe(true)
+    expect(isStructuredTourDetailSiteCode('wings-side')).toBe(true)
+    expect(isStructuredTourDetailSiteCode('wings-group')).toBe(false)
+    expect(isConsultativeTourSiteCode('wings-side')).toBe(true)
+    expect(isConsultativeTourSiteCode('wings-go')).toBe(false)
   })
 })

@@ -1,4 +1,5 @@
 import { getCopyLocale, type CopyLocaleCode } from '@/utilities/locales'
+import { resolveSiteInquiryContactPath } from '@/utilities/siteContactPaths'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 const marketConfig = {
@@ -73,9 +74,23 @@ export const formatTourDate = (
   }).format(date)
 }
 
-export const getDurationLabel = (days?: null | number, nights?: null | number) => {
+export const getDurationLabel = (
+  days?: null | number,
+  nights?: null | number,
+  locale: CopyLocaleCode | SupportedLocaleCode = 'vi',
+) => {
   if (!days && !nights) {
     return null
+  }
+
+  if (getCopyLocale(locale) === 'en') {
+    if (days && nights !== null && nights !== undefined) {
+      return `${days} days / ${nights} nights`
+    }
+
+    return [days ? `${days} days` : null, nights ? `${nights} nights` : null]
+      .filter(Boolean)
+      .join(' / ')
   }
 
   if (days && nights !== null && nights !== undefined) {
@@ -108,24 +123,30 @@ export const getAvailabilityLabel = (
 }
 
 export const getSchedulePath = () => '/lich-khoi-hanh'
-export const getContactPath = () => '/lien-he'
+
+/** Site-aware inquiry/contact path. Defaults to WingsGo `/lien-he`. */
+export const getContactPath = (siteCode?: null | string) =>
+  resolveSiteInquiryContactPath(siteCode)
 
 export type TourInquiryIntent = 'hold-seat' | 'inquiry' | 'request-quote' | 'contact'
 
 export const getTourInquiryPath = ({
   departureId,
   intent = 'inquiry',
+  siteCode,
   source,
   tourId,
   tourSlug,
 }: {
   departureId?: null | number | string
   intent?: TourInquiryIntent
+  siteCode?: null | string
   source?: null | string
   tourId?: null | number | string
   tourSlug?: null | string
 }) => {
   const params = new URLSearchParams()
+  const contactPath = getContactPath(siteCode)
 
   params.set('intent', intent)
 
@@ -147,7 +168,145 @@ export const getTourInquiryPath = ({
 
   const query = params.toString()
 
-  return query ? `${getContactPath()}?${query}` : getContactPath()
+  return query ? `${contactPath}?${query}` : contactPath
+}
+
+/** Parse free-text meal notes into B/L/D chip flags (EN + VI keywords). */
+export const getMealChipFlags = (meals?: null | string) => {
+  const text = String(meals || '').toLowerCase()
+  const comparable = text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
+  if (!comparable.trim()) {
+    return { breakfast: false, dinner: false, lunch: false }
+  }
+
+  const breakfast =
+    /\b(b|bf|breakfast)\b/.test(comparable) ||
+    comparable.includes('an sang') ||
+    comparable.includes('bua sang') ||
+    /(^|[^a-z])sang([^a-z]|$)/.test(comparable)
+  const lunch =
+    /\b(l|lunch)\b/.test(comparable) ||
+    comparable.includes('an trua') ||
+    comparable.includes('bua trua') ||
+    /(^|[^a-z])trua([^a-z]|$)/.test(comparable)
+  const dinner =
+    /\b(d|dinner|supper)\b/.test(comparable) ||
+    comparable.includes('an toi') ||
+    comparable.includes('bua toi') ||
+    /(^|[^a-z])toi([^a-z]|$)/.test(comparable)
+
+  // Compact "B/L/D" or "B · L · D" style
+  if (!breakfast && !lunch && !dinner) {
+    const tokens = comparable.split(/[^a-z]+/).filter(Boolean)
+    return {
+      breakfast: tokens.includes('b'),
+      dinner: tokens.includes('d'),
+      lunch: tokens.includes('l'),
+    }
+  }
+
+  return { breakfast, dinner, lunch }
+}
+
+/** Short route chips for hero (max 5). Prefer structured stops over day titles. */
+export const getTourRouteChips = (tour: {
+  destinations?: null | Array<{ label?: null | string } | string>
+  factSummary?: { routeSummary?: null | string } | null
+  routeViz?: { stops?: null | Array<{ label?: null | string }> } | null
+}): string[] => {
+  const fromStops = (tour.routeViz?.stops || [])
+    .map((stop) => String(stop?.label || '').trim())
+    .filter(Boolean)
+
+  if (fromStops.length > 0) {
+    return Array.from(new Set(fromStops)).slice(0, 5)
+  }
+
+  const fromDestinations = (tour.destinations || [])
+    .map((item) => (typeof item === 'string' ? item : String(item?.label || '')).trim())
+    .filter(Boolean)
+
+  if (fromDestinations.length > 0) {
+    return Array.from(new Set(fromDestinations)).slice(0, 5)
+  }
+
+  const summary = String(tour.factSummary?.routeSummary || '').trim()
+  if (!summary) {
+    return []
+  }
+
+  return Array.from(
+    new Set(
+      summary
+        .split(/\s*[·•|,/→\-–—]\s*/)
+        .map((part) => part.trim())
+        .filter((part) => part.length > 0 && part.length <= 28),
+    ),
+  ).slice(0, 5)
+}
+
+/**
+ * Consultative primary CTA href policy:
+ * - honor external / tel / mailto CMS targets
+ * - honor same-origin paths that already include consultative intent
+ * - otherwise rebuild via site-aware inquiry path (no bare /lien-he leak)
+ */
+export const resolveConsultativeCtaHref = ({
+  cmsHref,
+  fallbackPath,
+}: {
+  cmsHref?: null | string
+  fallbackPath: string
+}) => {
+  const href = String(cmsHref || '').trim()
+
+  if (!href) {
+    return fallbackPath
+  }
+
+  if (/^(https?:|mailto:|tel:)/i.test(href)) {
+    return href
+  }
+
+  if (/[?&]intent=(inquiry|request-quote|contact)\b/i.test(href)) {
+    return href
+  }
+
+  return fallbackPath
+}
+
+export const getTourPricePosture = ({
+  currency,
+  locale = 'en',
+  priceFrom,
+}: {
+  currency?: null | string
+  locale?: CopyLocaleCode | SupportedLocaleCode
+  priceFrom?: null | number
+}): { honesty: string; label: string; value: string } => {
+  const isEn = getCopyLocale(locale) === 'en'
+  const formatted = formatTourPrice(priceFrom, currency)
+
+  if (formatted) {
+    return {
+      honesty: isEn
+        ? 'Sales confirms final price before any hold.'
+        : 'Sales xác nhận lại giá trước khi giữ chỗ.',
+      label: isEn ? 'From' : 'Giá từ',
+      value: formatted,
+    }
+  }
+
+  return {
+    honesty: isEn
+      ? 'Sales confirms final price before any hold.'
+      : 'Sales xác nhận lại giá trước khi giữ chỗ.',
+    label: isEn ? 'Price on request' : 'Giá theo yêu cầu',
+    value: isEn ? 'On request · reply within 24h' : 'Theo yêu cầu · phản hồi trong 24h',
+  }
 }
 
 export const getMarketPath = (market?: null | string) => {
@@ -188,10 +347,10 @@ const toDateOnly = (value?: null | string) => {
 
 export const getFutureDepartures = <T extends { departureDate?: null | string }>(
   departures?: T[] | null,
-  now = new Date(),
 ) => {
+  const today = new Date()
   const threshold = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
   )
 
   return (departures || []).filter((departure) => {
@@ -203,8 +362,7 @@ export const getFutureDepartures = <T extends { departureDate?: null | string }>
 
 export const getNextDeparture = <T extends { departureDate?: null | string }>(
   departures?: T[] | null,
-  now = new Date(),
-) => getFutureDepartures(departures, now)[0] || (departures?.[0] ?? null)
+) => getFutureDepartures(departures)[0] || (departures?.[0] ?? null)
 
 export const groupDeparturesByMonth = <T extends { departureDate?: null | string }>(
   departures?: T[] | null,
