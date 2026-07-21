@@ -2,6 +2,7 @@ import React from 'react'
 
 import { Media } from '@/components/Media'
 import { SiteLink } from '@/components/SiteLink'
+import type { Media as MediaType } from '@/payload-types'
 
 import { defaultTourSectionOrder, defaultTourSectionVisibility } from './sectionRegistry'
 import { ScheduleInteractiveDepartures } from './ScheduleInteractiveDepartures'
@@ -773,24 +774,66 @@ const TourWhyChooseSection = ({
   )
 }
 
-const TourRouteVisualSection = ({ tour }: { tour: Record<string, any> }) => {
+const TourJourneyGallerySection = ({ locale, tour }: { locale: 'en' | 'vi'; tour: Record<string, any> }) => {
+  const gallery = asArray<Record<string, any>>(tour.gallery).filter((item) => typeof item === 'object').slice(0, 5)
+  if (gallery.length === 0) return null
+
+  return (
+    <Panel id="gallery">
+      <SectionHeading
+        eyebrow={locale === 'en' ? 'Journey gallery' : 'Thư viện hành trình'}
+        title={locale === 'en' ? "Places you'll move through" : 'Những nơi bạn sẽ đi qua'}
+        description={locale === 'en' ? 'A visual read of the route before the day-by-day detail.' : 'Hình ảnh thực tế của tuyến trước phần lịch trình từng ngày.'}
+      />
+      <div className="grid auto-rows-[9rem] grid-cols-2 gap-3 sm:auto-rows-[11rem] md:grid-cols-4">
+        {gallery.map((media, index) => (
+          <div className={`relative overflow-hidden rounded-[18px] bg-muted ${index === 0 ? 'row-span-2 md:col-span-2' : ''}`} key={media.id || media.url || index}>
+            <Media fill imgClassName="object-cover" pictureClassName="absolute inset-0" resource={media as MediaType} />
+          </div>
+        ))}
+      </div>
+    </Panel>
+  )
+}
+
+const TourConsultationSection = ({ locale, siteCode, tour }: { locale: 'en' | 'vi'; siteCode?: null | string; tour: Record<string, any> }) => {
+  const href = getTourInquiryPath({ intent: 'inquiry', siteCode: resolveTourSiteCode(siteCode, 'consultative'), source: 'tour-detail-enquiry', tourId: tour.id, tourSlug: tour.slug })
+  return (
+    <Panel id="enquire">
+      <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
+        <SectionHeading
+          eyebrow={locale === 'en' ? 'Next step' : 'Bước tiếp theo'}
+          title={locale === 'en' ? 'Request consultation' : 'Yêu cầu tư vấn'}
+          description={locale === 'en' ? 'Tell us dates and party size. A local planner replies with the first direction within one business day (GMT+7).' : 'Gửi ngày đi và số khách. Planner địa phương phản hồi hướng đầu tiên trong một ngày làm việc (GMT+7).'}
+        />
+        <div className="flex flex-wrap gap-3">
+          <SiteLink className={`${TourPrimaryCtaClass} tour-cta-primary--pulse`} href={href}>{locale === 'en' ? 'Start your enquiry' : 'Bắt đầu yêu cầu'}</SiteLink>
+          <SiteLink className={TourGhostCtaClass} href="/contact-us">{locale === 'en' ? 'Contact us' : 'Liên hệ'}</SiteLink>
+        </div>
+      </div>
+    </Panel>
+  )
+}
+
+const TourRouteVisualSection = ({ locale = 'vi', presentation = 'retail', tour }: { locale?: 'en' | 'vi'; presentation?: TourDetailPresentation; tour: Record<string, any> }) => {
   const routeStops = asArray<Record<string, any>>(tour.routeViz?.stops)
   const travelLegs = asArray<Record<string, any>>(tour.routeViz?.travelLegs)
   const mapImage = tour.routeViz?.mapImage
   const summaryParagraphs = splitSummaryParagraphs(tour.summary)
+  const isEn = presentation === 'consultative' && locale === 'en'
 
   return (
     <Panel id="route">
       <SectionHeading
-        eyebrow="Hành trình trực quan"
-        title="Nhịp hành trình và route thực tế"
+        eyebrow={isEn ? 'Journey overview' : 'Hành trình trực quan'}
+        title={isEn ? (/north/i.test(String(tour.title || tour.market || '')) ? 'Four legs, one North story' : 'One private route, shaped around your pace') : 'Nhịp hành trình và route thực tế'}
         description={isUsableText(tour.routeViz?.routeCaption) ? tour.routeViz.routeCaption : null}
       />
       <div className="grid gap-6 lg:grid-cols-[1fr_0.95fr]">
         <div className="space-y-4">
           <div className="rounded-[24px] border border-border/60 bg-muted/20 p-5">
             <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              Tóm tắt route
+              {isEn ? 'Route summary' : 'Tóm tắt route'}
             </p>
             <p className="mt-2 text-lg font-semibold text-foreground">
               {tour.factSummary?.routeSummary || tour.title}
@@ -811,11 +854,11 @@ const TourRouteVisualSection = ({ tour }: { tour: Record<string, any> }) => {
                       key={`${stop.label}-${index}`}
                     >
                       <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                        Bước {String(index + 1).padStart(2, '0')}
+                        {isEn ? 'Leg' : 'Bước'} {String(index + 1).padStart(2, '0')}
                       </p>
                       <p className="mt-2 text-base font-semibold text-foreground">{stop.label}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {stop.type || 'Điểm trong chương trình'}
+                        {stop.type || (isEn ? 'Journey stop' : 'Điểm trong chương trình')}
                       </p>
                     </div>
                   ))}
@@ -824,7 +867,7 @@ const TourRouteVisualSection = ({ tour }: { tour: Record<string, any> }) => {
             {travelLegs.length > 0 ? (
               <div className="rounded-[24px] border border-border/60 bg-background p-5">
                 <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                  Chặng di chuyển
+                  {isEn ? 'Travel legs' : 'Chặng di chuyển'}
                 </p>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   {travelLegs.map((leg, index) => (
@@ -836,7 +879,7 @@ const TourRouteVisualSection = ({ tour }: { tour: Record<string, any> }) => {
                         {leg.from} → {leg.to}
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {leg.mode || 'Theo tuyến'}
+                        {leg.mode || (isEn ? 'Private transfer' : 'Theo tuyến')}
                       </p>
                     </div>
                   ))}
@@ -856,7 +899,7 @@ const TourRouteVisualSection = ({ tour }: { tour: Record<string, any> }) => {
           ) : (
             <div className="flex h-full flex-col justify-center gap-4 p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Các điểm chính
+                {isEn ? 'Key places' : 'Các điểm chính'}
               </p>
               <div className="flex flex-wrap gap-3">
                 {routeStops.length > 0
@@ -1699,9 +1742,19 @@ const TourRelatedSection = ({
   )
   const isEn = presentation === 'consultative' && locale === 'en'
 
-  if (relatedTours.length === 0) {
-    return null
-  }
+  const fallback = [
+    { href: '/packages', summary: isEn ? 'Compare private journey shapes and pacing.' : 'So sánh các khung hành trình private.', title: isEn ? 'Sample journeys' : 'Hành trình mẫu' },
+    { href: '/destinations', summary: isEn ? 'Choose the regions that belong in your brief.' : 'Chọn vùng muốn đưa vào brief.', title: isEn ? 'Explore destinations' : 'Khám phá điểm đến' },
+    { href: '/styles', summary: isEn ? 'Match pace, stays, and travel priorities.' : 'Ghép nhịp, lưu trú và ưu tiên chuyến đi.', title: isEn ? 'Match travel style' : 'Ghép phong cách' },
+  ]
+  const items = relatedTours.length
+    ? relatedTours.map((item) => ({
+        href: item.slug ? getTourPath(item.slug) : '/packages',
+        id: item.id || item.slug,
+        summary: item.summary,
+        title: item.title,
+      }))
+    : fallback.map((item, index) => ({ ...item, id: `fallback-${index}` }))
 
   return (
     <Panel id="related">
@@ -1715,16 +1768,16 @@ const TourRelatedSection = ({
         }
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {relatedTours.map((item) => (
+        {items.map((item) => (
           <div className="rounded-[24px] border border-border/60 bg-background p-5" key={item.id}>
             <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
             <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.summary}</p>
-            {item.slug ? (
+            {item.href ? (
               <SiteLink
                 className="mt-4 inline-flex text-sm font-semibold no-underline"
-                href={getTourPath(item.slug)}
+                href={item.href}
               >
-                {isEn ? 'View journey' : 'Xem tour'}
+                {isEn ? 'Explore ->' : 'Khám phá ->'}
               </SiteLink>
             ) : null}
           </div>
@@ -1878,6 +1931,7 @@ export const TourDetailPage = ({
       }
       return true
     })
+    sectionOrder = ['hero', 'facts', 'route', 'itinerary', 'services', 'departures', 'related', 'sticky-cta']
   }
 
   const sections: Record<TourSectionID, React.ReactNode> = {
@@ -1898,7 +1952,7 @@ export const TourDetailPage = ({
     'why-choose': (
       <TourWhyChooseSection locale={locale} presentation={resolvedPresentation} tour={tour} />
     ),
-    route: <TourRouteVisualSection tour={tour} />,
+    route: <TourRouteVisualSection locale={locale} presentation={resolvedPresentation} tour={tour} />,
     itinerary: (
       <TourItinerarySection locale={locale} presentation={resolvedPresentation} tour={tour} />
     ),
@@ -1969,14 +2023,17 @@ export const TourDetailPage = ({
           className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm lg:flex-wrap lg:items-center lg:gap-3 [&::-webkit-scrollbar]:hidden"
         >
           {navSections.map((section) => (
+            <React.Fragment key={section}>
             <a
               className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
               href={`#${section}`}
-              key={section}
             >
               <span className="sm:hidden">{navLabels[section]?.short || section}</span>
               <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
             </a>
+            {isConsultative && section === 'facts' ? <a className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2" href="#gallery">{isEn ? 'Gallery' : 'Hình ảnh'}</a> : null}
+            {isConsultative && section === 'departures' ? <a className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2" href="#enquire">{isEn ? 'Enquire' : 'Tư vấn'}</a> : null}
+            </React.Fragment>
           ))}
         </nav>
       </div>
@@ -1985,7 +2042,11 @@ export const TourDetailPage = ({
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0 space-y-8">
             {bodySections.map((section) => (
-              <React.Fragment key={section}>{sections[section]}</React.Fragment>
+              <React.Fragment key={section}>
+                {sections[section]}
+                {section === 'facts' ? <TourJourneyGallerySection locale={locale} tour={tour} /> : null}
+                {section === 'departures' ? <TourConsultationSection locale={locale} siteCode={siteCode} tour={tour} /> : null}
+              </React.Fragment>
             ))}
           </div>
           <TourDecisionRail
