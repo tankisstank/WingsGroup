@@ -9,7 +9,7 @@ import {
   WINGSSIDE_HIFI_B1_ROUTES,
 } from '@/utilities/wingsSideHiFiDispatch'
 
-describe('WingSide hi-fi B1 dispatch', () => {
+describe('WingSide hi-fi official route dispatch', () => {
   const originalFallback = process.env.WINGSSIDE_HIFI_COPY_FALLBACK
 
   afterEach(() => {
@@ -18,14 +18,24 @@ describe('WingSide hi-fi B1 dispatch', () => {
     vi.unstubAllEnvs()
   })
 
-  it('locks B1 to Home and Plan only', () => {
-    expect(WINGSSIDE_HIFI_B1_ROUTES).toEqual(['/', '/plan-your-trip'])
+  it('wires all eight official hub routes', () => {
+    expect(WINGSSIDE_HIFI_B1_ROUTES).toEqual([
+      '/',
+      '/plan-your-trip',
+      '/destinations',
+      '/styles',
+      '/packages',
+      '/travel-guide',
+      '/about-us',
+      '/contact-us',
+    ])
     expect(isWingsSideHiFiB1Route('/')).toBe(true)
     expect(isWingsSideHiFiB1Route('/plan-your-trip')).toBe(true)
-    expect(isWingsSideHiFiB1Route('/packages')).toBe(false)
+    expect(isWingsSideHiFiB1Route('/packages')).toBe(true)
+    expect(isWingsSideHiFiB1Route('/tour/example')).toBe(false)
   })
 
-  it('only renders hi-fi body for wings-side + B1 route + model', () => {
+  it('only renders hi-fi body for wings-side + official route + model', () => {
     const model = resolveWingsSideHiFiPageBodyModel({
       locale: 'en',
       page: {
@@ -67,13 +77,8 @@ describe('WingSide hi-fi B1 dispatch', () => {
         siteCode: 'wings-go',
       }),
     ).toBe(false)
-    expect(
-      shouldRenderWingsSideHiFiPageBody({
-        model,
-        publicPathname: '/packages',
-        siteCode: 'wings-side',
-      }),
-    ).toBe(false)
+    expect(shouldRenderWingsSideHiFiPageBody({ model, publicPathname: '/packages', siteCode: 'wings-side' })).toBe(true)
+    expect(shouldRenderWingsSideHiFiPageBody({ model, publicPathname: '/tour/example', siteCode: 'wings-side' })).toBe(false)
   })
 
   it('never lets Copy.ts fallback override CMS-enabled documents', () => {

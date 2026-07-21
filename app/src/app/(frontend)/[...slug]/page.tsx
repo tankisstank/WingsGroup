@@ -107,14 +107,25 @@ export default async function Page({ params: paramsPromise, searchParams: search
     publicPathname: requestedPath,
   })
 
-  // Populate plan.form relationship when only an id is stored.
+  // Populate conversion form relationship when only an id is stored.
+  const hiFiFormVariant =
+    hiFiModel?.routeVariant === 'plan' || hiFiModel?.routeVariant === 'contact'
+      ? hiFiModel.routeVariant
+      : null
   if (
-    hiFiModel?.routeVariant === 'plan' &&
+    hiFiModel &&
+    hiFiFormVariant &&
     hiFiModel.routeContent &&
     typeof (hiFiModel.routeContent as { form?: unknown }).form !== 'object'
   ) {
-    const formRef = (page as { wingsSideHiFi?: { plan?: { form?: number | string | null } } })
-      .wingsSideHiFi?.plan?.form
+    const formRef = (
+      page as {
+        wingsSideHiFi?: {
+          contact?: { form?: number | string | null }
+          plan?: { form?: number | string | null }
+        }
+      }
+    ).wingsSideHiFi?.[hiFiFormVariant]?.form
     if (formRef != null) {
       try {
         const payload = await getPayload({ config: configPromise })
@@ -132,13 +143,13 @@ export default async function Page({ params: paramsPromise, searchParams: search
           },
         }
       } catch {
-        // leave unpopulated; Plan page shows linked-id message
+        // Leave unpopulated; the conversion page shows a linked-form warning.
       }
     }
   }
 
-  // Also accept formBlock on layout for plan when hi-fi form empty
-  if (hiFiModel?.routeVariant === 'plan' && hiFiModel.routeContent) {
+  // Also accept an existing layout formBlock when the hi-fi relationship is empty.
+  if (hiFiModel && hiFiFormVariant && hiFiModel.routeContent) {
     const content = hiFiModel.routeContent as { form?: unknown }
     if (!content.form && Array.isArray(page.layout)) {
       const formBlock = page.layout.find((block) => {

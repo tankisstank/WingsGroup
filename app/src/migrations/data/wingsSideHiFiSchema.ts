@@ -76,6 +76,7 @@ export const WINGSSIDE_HIFI_PAGES_LOCALE_COLUMNS: ReadonlyArray<readonly [string
   ['wings_side_hi_fi_home_close_cta', 'text'],
   ['wings_side_hi_fi_home_close_cta_secondary', 'text'],
   ['wings_side_hi_fi_plan_steps_kicker', 'text'],
+  ['wings_side_hi_fi_plan_hero_lede', 'text'],
   ['wings_side_hi_fi_plan_steps_title', 'text'],
   ['wings_side_hi_fi_plan_steps_lede', 'text'],
   ['wings_side_hi_fi_plan_faq_title', 'text'],
@@ -139,6 +140,7 @@ export const WINGSSIDE_HIFI_ARRAY_TABLES: readonly ArrayTableSpec[] = [
     kindEnum: 'credentials',
   },
   { name: 'plan_steps', localeColumns: ['label', 'title', 'body'] },
+  { name: 'plan_faq', localeColumns: ['question', 'answer'] },
   { name: 'plan_explore', extraColumns: [['href', 'text']], localeColumns: ['title', 'body'] },
   {
     name: 'destinations_routes',

@@ -10,9 +10,22 @@ import {
 } from '@/utilities/wingsSideHiFiPageModel'
 import { getPublicRoutePathname } from '@/utilities/sitePaths'
 import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
+import {
+  getWingsSideSecondaryHeroCopy,
+  type WingsSideSecondaryRoute,
+} from '@/components/WingsSideHiFi/secondaryCopy'
 
-/** Routes owned by Tranche B1 dedicated hi-fi page bodies. */
-export const WINGSSIDE_HIFI_B1_ROUTES = ['/', '/plan-your-trip'] as const
+/** Official eight-page WingSide hi-fi route contract. */
+export const WINGSSIDE_HIFI_B1_ROUTES = [
+  '/',
+  '/plan-your-trip',
+  '/destinations',
+  '/styles',
+  '/packages',
+  '/travel-guide',
+  '/about-us',
+  '/contact-us',
+] as const
 
 export type WingsSideHiFiB1Route = (typeof WINGSSIDE_HIFI_B1_ROUTES)[number]
 
@@ -21,7 +34,7 @@ export const isWingsSideHiFiB1Route = (route: string): route is WingsSideHiFiB1R
 
 /**
  * When true, catch-all must render hi-fi body and suppress legacy hero/blocks/related.
- * Requires wings-side site + B1 route + valid/enabled model (or explicit dev fallback).
+ * Requires wings-side site + official route + valid/enabled model (or explicit dev fallback).
  */
 export const shouldRenderWingsSideHiFiPageBody = (args: {
   model: WingsSideHiFiPageModel | null
@@ -85,6 +98,26 @@ export const buildWingsSideHiFiFallbackSource = (
           explore: copy.plan.explore,
           form: null,
         },
+      },
+    }
+  }
+
+  if (variant !== 'home') {
+    const routeCopy = copy[variant]
+    const secondaryHero = getWingsSideSecondaryHeroCopy(locale, route as WingsSideSecondaryRoute)
+    return {
+      title: secondaryHero.title,
+      wingsSideHiFi: {
+        enabled: true,
+        routeVariant: variant,
+        hero: {
+          eyebrow: secondaryHero.eyebrow,
+          lede: secondaryHero.lede,
+          primaryCta: { label: secondaryHero.primary, href: '/plan-your-trip' },
+          secondaryCta: { label: secondaryHero.secondary, href: '/plan-your-trip' },
+          title: secondaryHero.title,
+        },
+        [variant]: routeCopy,
       },
     }
   }

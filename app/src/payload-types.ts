@@ -805,6 +805,7 @@ export interface Page {
         | null;
     };
     plan?: {
+      heroLede?: string | null;
       stepsKicker?: string | null;
       stepsTitle?: string | null;
       stepsLede?: string | null;
@@ -817,6 +818,13 @@ export interface Page {
           }[]
         | null;
       faqTitle?: string | null;
+      faq?:
+        | {
+            question?: string | null;
+            answer?: string | null;
+            id?: string | null;
+          }[]
+        | null;
       exploreTitle?: string | null;
       explore?:
         | {
@@ -2850,6 +2858,7 @@ export interface PagesSelect<T extends boolean = true> {
         plan?:
           | T
           | {
+              heroLede?: T;
               stepsKicker?: T;
               stepsTitle?: T;
               stepsLede?: T;
@@ -2862,6 +2871,13 @@ export interface PagesSelect<T extends boolean = true> {
                     id?: T;
                   };
               faqTitle?: T;
+              faq?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
               exploreTitle?: T;
               explore?:
                 | T

@@ -1,6 +1,10 @@
 import type { Where } from 'payload'
 
 import { getWingsSideHiFiCopy } from '../../src/components/WingsSideHiFi/copy'
+import {
+  getWingsSideSecondaryHeroCopy,
+  type WingsSideSecondaryRoute,
+} from '../../src/components/WingsSideHiFi/secondaryCopy'
 import type { WingsSideHiFiRouteVariant } from '../../src/fields/wingsSideHiFi'
 import {
   WINGSSIDE_HIFI_PATH_TO_VARIANT,
@@ -101,6 +105,25 @@ const buildPayloadFromCopy = (
     routeVariant,
   }
 
+  const secondaryHero = (route: WingsSideSecondaryRoute) => {
+    const hero = getWingsSideSecondaryHeroCopy(locale, route)
+    const primaryHref: Record<WingsSideSecondaryRoute, string> = {
+      '/about-us': '/plan-your-trip',
+      '/contact-us': '#contact-form',
+      '/destinations': '#dest-grid',
+      '/packages': '#pkg-grid',
+      '/styles': '#style-grid',
+      '/travel-guide': '#guide-list',
+    }
+    return {
+      eyebrow: hero.eyebrow,
+      lede: hero.lede,
+      primaryCta: { href: primaryHref[route], label: hero.primary },
+      secondaryCta: { href: '/plan-your-trip', label: hero.secondary },
+      title: hero.title,
+    }
+  }
+
   switch (routeVariant) {
     case 'home':
       return {
@@ -176,10 +199,7 @@ const buildPayloadFromCopy = (
     case 'destinations':
       return {
         ...common,
-        hero: {
-          primaryCta: { href: '/plan-your-trip', label: copy.home.planTripCta },
-          title: copy.destinations.deeperTitle,
-        },
+        hero: secondaryHero('/destinations'),
         destinations: {
           closingLinks: [
             { body: copy.plan.explore[0]?.body, href: '/plan-your-trip', title: copy.home.planTripCta },
@@ -196,10 +216,7 @@ const buildPayloadFromCopy = (
     case 'styles':
       return {
         ...common,
-        hero: {
-          primaryCta: { href: '/plan-your-trip', label: copy.home.planTripCta },
-          title: copy.styles.introTitle,
-        },
+        hero: secondaryHero('/styles'),
         styles: {
           closingLinks: [
             { body: 'Carry style into the full brief.', href: '/plan-your-trip', title: copy.home.planTripCta },
@@ -235,11 +252,7 @@ const buildPayloadFromCopy = (
       }
       return {
         ...common,
-        hero: {
-          primaryCta: { href: '/plan-your-trip', label: copy.home.planTripCta },
-          secondaryCta: { href: '/contact-us', label: copy.home.closeCtaSecondary },
-          title: copy.packages.gridTitle,
-        },
+        hero: secondaryHero('/packages'),
         packages: {
           cards,
           closingLinks: [
@@ -257,10 +270,7 @@ const buildPayloadFromCopy = (
     case 'guide':
       return {
         ...common,
-        hero: {
-          primaryCta: { href: '/plan-your-trip', label: copy.home.planTripCta },
-          title: copy.guide.listTitle,
-        },
+        hero: secondaryHero('/travel-guide'),
         guide: {
           closingCta: copy.guide.cta,
           closingHref: '/plan-your-trip',
@@ -272,10 +282,7 @@ const buildPayloadFromCopy = (
     case 'about':
       return {
         ...common,
-        hero: {
-          primaryCta: { href: '/plan-your-trip', label: copy.home.planTripCta },
-          title: copy.about.storyTitle,
-        },
+        hero: secondaryHero('/about-us'),
         about: {
           closingLinks: [
             { body: 'Start with a short brief.', href: '/plan-your-trip', title: copy.home.planTripCta },
@@ -293,10 +300,7 @@ const buildPayloadFromCopy = (
     case 'contact':
       return {
         ...common,
-        hero: {
-          primaryCta: { href: '/plan-your-trip', label: copy.home.planTripCta },
-          title: copy.contact.channelsTitle,
-        },
+        hero: secondaryHero('/contact-us'),
         contact: {
           channels: copy.contact.channels,
           channelsTitle: copy.contact.channelsTitle,
@@ -563,20 +567,22 @@ export const resolveWingsSideHiFiPlanForm = async (args: {
   }
 }
 
-/** Attach resolved plan.form id into a desired wingsSideHiFi payload (plan routes only). */
+/** Attach the stable planner form to both conversion routes. */
 export const attachResolvedPlanForm = (
   desired: Record<string, unknown>,
   formId: number | string | null,
 ): Record<string, unknown> => {
-  if (desired.routeVariant !== 'plan') return desired
-  const plan = (desired.plan && typeof desired.plan === 'object' ? desired.plan : {}) as Record<
+  const variant = desired.routeVariant
+  if (variant !== 'plan' && variant !== 'contact') return desired
+  const key = variant === 'plan' ? 'plan' : 'contact'
+  const content = (desired[key] && typeof desired[key] === 'object' ? desired[key] : {}) as Record<
     string,
     unknown
   >
   return {
     ...desired,
-    plan: {
-      ...plan,
+    [key]: {
+      ...content,
       form: formId,
     },
   }
@@ -805,11 +811,11 @@ export const buildWingsSideHiFiContentSeedDbDryRun = async (args: {
     for (const target of targets) {
       const page = localePages.find((doc) => matchPage(doc, target)) || null
       let desired = buildPayloadFromCopy(locale, target.routeVariant)
-      if (target.routeVariant === 'plan') {
+      if (target.routeVariant === 'plan' || target.routeVariant === 'contact') {
         desired = attachResolvedPlanForm(desired, resolvedFormId)
       }
       const row = reportPageRow({ desired, locale, page, target })
-      if (target.routeVariant === 'plan' && planFormIssue) {
+      if ((target.routeVariant === 'plan' || target.routeVariant === 'contact') && planFormIssue) {
         row.validationIssues = [...row.validationIssues, planFormIssue]
         row.hasContractGap = true
       }
@@ -1035,7 +1041,7 @@ export const applyWingsSideHiFiContentSeed = async (args: {
     for (const target of targets) {
       const page = localePages.find((doc) => matchPage(doc, target)) || null
       let desired = buildPayloadFromCopy(locale, target.routeVariant)
-      if (target.routeVariant === 'plan') {
+      if (target.routeVariant === 'plan' || target.routeVariant === 'contact') {
         desired = attachResolvedPlanForm(desired, resolvedFormId)
       }
       const currentGroup = (page?.wingsSideHiFi || null) as Record<string, unknown> | null
@@ -1045,7 +1051,7 @@ export const applyWingsSideHiFiContentSeed = async (args: {
       >
 
       const row = reportPageRow({ desired, locale, page, target })
-      if (target.routeVariant === 'plan' && planFormIssue) {
+      if ((target.routeVariant === 'plan' || target.routeVariant === 'contact') && planFormIssue) {
         row.validationIssues = [...row.validationIssues, planFormIssue]
         row.hasContractGap = true
       }
@@ -1055,8 +1061,8 @@ export const applyWingsSideHiFiContentSeed = async (args: {
         continue
       }
 
-      // Fail closed for plan: never write a null form when resolution failed.
-      if (target.routeVariant === 'plan' && !planForm.ok) {
+      // Fail closed for conversion routes: never write a null form when resolution failed.
+      if ((target.routeVariant === 'plan' || target.routeVariant === 'contact') && !planForm.ok) {
         pages.push({
           ...row,
           status: 'would_update',

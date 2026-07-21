@@ -206,6 +206,7 @@ export const wingsSideHiFiFields = (): Field[] => [
       condition: whenVariant('plan'),
     },
     fields: [
+      textarea('heroLede', 'Plan hero lede'),
       text('stepsKicker', 'Steps kicker'),
       text('stepsTitle', 'Steps title'),
       textarea('stepsLede', 'Steps lede'),
@@ -215,6 +216,10 @@ export const wingsSideHiFiFields = (): Field[] => [
         textarea('body', 'Nội dung'),
       ]),
       text('faqTitle', 'FAQ title'),
+      cardArray('faq', 'Planning FAQ', [
+        text('question', 'Câu hỏi'),
+        textarea('answer', 'Trả lời'),
+      ]),
       text('exploreTitle', 'Explore title'),
       cardArray('explore', 'Explore cards', [
         text('title', 'Tiêu đề'),
