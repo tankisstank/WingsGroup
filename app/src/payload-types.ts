@@ -703,6 +703,290 @@ export interface Page {
     breadcrumbLabel?: string | null;
   };
   /**
+   * Hợp đồng nội dung typed cho 8 route hub WingsSide. Không dùng JSON editor. Media/form qua relationship Payload.
+   */
+  wingsSideHiFi?: {
+    /**
+     * Khi bật, resolver hi-fi đọc các trường dưới đây thay vì chỉ dựa copy tĩnh. Giữ drafts/versions/live preview của Pages.
+     */
+    enabled?: boolean | null;
+    /**
+     * Phải khớp pathname hub WingsSide tương ứng.
+     */
+    routeVariant?: ('home' | 'plan' | 'destinations' | 'styles' | 'packages' | 'guide' | 'about' | 'contact') | null;
+    hero?: {
+      eyebrow?: string | null;
+      title?: string | null;
+      lede?: string | null;
+      media?: (number | null) | Media;
+      primaryCta?: {
+        label?: string | null;
+        href?: string | null;
+      };
+      secondaryCta?: {
+        label?: string | null;
+        href?: string | null;
+      };
+    };
+    home?: {
+      pillarsKicker?: string | null;
+      pillarsTitle?: string | null;
+      pillarsLede?: string | null;
+      pillars?:
+        | {
+            label?: string | null;
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      whyKicker?: string | null;
+      whyTitle?: string | null;
+      whyFeaturedBadge?: string | null;
+      whyFeaturedTitle?: string | null;
+      whyFeaturedBody?: string | null;
+      whyFeaturedCta?: string | null;
+      whyFeaturedHref?: string | null;
+      whyCards?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            cta?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      destKicker?: string | null;
+      destTitle?: string | null;
+      destLede?: string | null;
+      stylesKicker?: string | null;
+      stylesTitle?: string | null;
+      journeysKicker?: string | null;
+      journeysTitle?: string | null;
+      journeysLede?: string | null;
+      notesKicker?: string | null;
+      notesTitle?: string | null;
+      notes?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      trust?:
+        | {
+            kind?: ('sla' | 'proof' | 'planner') | null;
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      closeTitle?: string | null;
+      closeLede?: string | null;
+      closeCta?: string | null;
+      closeCtaSecondary?: string | null;
+      related?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      credentials?:
+        | {
+            kind?: ('cert' | 'award' | 'member' | 'iso') | null;
+            mark?: string | null;
+            micro?: string | null;
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    plan?: {
+      stepsKicker?: string | null;
+      stepsTitle?: string | null;
+      stepsLede?: string | null;
+      steps?:
+        | {
+            label?: string | null;
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      faqTitle?: string | null;
+      exploreTitle?: string | null;
+      explore?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      /**
+       * Form inquiry đầy đủ cho plan-your-trip. Giữ honeypot/validation hiện có.
+       */
+      form?: (number | null) | Form;
+    };
+    destinations?: {
+      routesTitle?: string | null;
+      deeperTitle?: string | null;
+      routes?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      places?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            region?: string | null;
+            href?: string | null;
+            media?: (number | null) | Media;
+            id?: string | null;
+          }[]
+        | null;
+      closingTitle?: string | null;
+      closingLinks?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    styles?: {
+      introTitle?: string | null;
+      styles?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            media?: (number | null) | Media;
+            id?: string | null;
+          }[]
+        | null;
+      closingTitle?: string | null;
+      closingLinks?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    packages?: {
+      gridTitle?: string | null;
+      gridLede?: string | null;
+      cards?:
+        | {
+            badge?: string | null;
+            micro?: string | null;
+            title?: string | null;
+            body?: string | null;
+            priceFrom?: string | null;
+            priceUnit?: string | null;
+            note?: string | null;
+            href?: string | null;
+            viewLabel?: string | null;
+            customizeLabel?: string | null;
+            media?: (number | null) | Media;
+            id?: string | null;
+          }[]
+        | null;
+      closingTitle?: string | null;
+      closingNote?: string | null;
+      closingLinks?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    guide?: {
+      listTitle?: string | null;
+      notes?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      closingTitle?: string | null;
+      closingCta?: string | null;
+      closingHref?: string | null;
+    };
+    about?: {
+      storyTitle?: string | null;
+      storyBody?: string | null;
+      stepsTitle?: string | null;
+      promisesTitle?: string | null;
+      promises?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      teamTitle?: string | null;
+      teamLede?: string | null;
+      closingTitle?: string | null;
+      closingLinks?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    contact?: {
+      channelsTitle?: string | null;
+      channels?:
+        | {
+            label?: string | null;
+            value?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      nextTitle?: string | null;
+      nextSteps?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      /**
+       * Form Send a message — bắt buộc cho contact hi-fi.
+       */
+      form?: (number | null) | Form;
+      closingTitle?: string | null;
+      closingCta?: string | null;
+      closingHref?: string | null;
+      closingLinks?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+  };
+  /**
    * Các trang cùng site được hiển thị bên dưới nội dung để tăng liên kết nội bộ.
    */
   relatedPages?: (number | Page)[] | null;
@@ -2459,6 +2743,299 @@ export interface PagesSelect<T extends boolean = true> {
         image?: T;
         description?: T;
         breadcrumbLabel?: T;
+      };
+  wingsSideHiFi?:
+    | T
+    | {
+        enabled?: T;
+        routeVariant?: T;
+        hero?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              lede?: T;
+              media?: T;
+              primaryCta?:
+                | T
+                | {
+                    label?: T;
+                    href?: T;
+                  };
+              secondaryCta?:
+                | T
+                | {
+                    label?: T;
+                    href?: T;
+                  };
+            };
+        home?:
+          | T
+          | {
+              pillarsKicker?: T;
+              pillarsTitle?: T;
+              pillarsLede?: T;
+              pillars?:
+                | T
+                | {
+                    label?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              whyKicker?: T;
+              whyTitle?: T;
+              whyFeaturedBadge?: T;
+              whyFeaturedTitle?: T;
+              whyFeaturedBody?: T;
+              whyFeaturedCta?: T;
+              whyFeaturedHref?: T;
+              whyCards?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    cta?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              destKicker?: T;
+              destTitle?: T;
+              destLede?: T;
+              stylesKicker?: T;
+              stylesTitle?: T;
+              journeysKicker?: T;
+              journeysTitle?: T;
+              journeysLede?: T;
+              notesKicker?: T;
+              notesTitle?: T;
+              notes?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              trust?:
+                | T
+                | {
+                    kind?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              closeTitle?: T;
+              closeLede?: T;
+              closeCta?: T;
+              closeCtaSecondary?: T;
+              related?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              credentials?:
+                | T
+                | {
+                    kind?: T;
+                    mark?: T;
+                    micro?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+            };
+        plan?:
+          | T
+          | {
+              stepsKicker?: T;
+              stepsTitle?: T;
+              stepsLede?: T;
+              steps?:
+                | T
+                | {
+                    label?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              faqTitle?: T;
+              exploreTitle?: T;
+              explore?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              form?: T;
+            };
+        destinations?:
+          | T
+          | {
+              routesTitle?: T;
+              deeperTitle?: T;
+              routes?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              places?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    region?: T;
+                    href?: T;
+                    media?: T;
+                    id?: T;
+                  };
+              closingTitle?: T;
+              closingLinks?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+            };
+        styles?:
+          | T
+          | {
+              introTitle?: T;
+              styles?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    media?: T;
+                    id?: T;
+                  };
+              closingTitle?: T;
+              closingLinks?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+            };
+        packages?:
+          | T
+          | {
+              gridTitle?: T;
+              gridLede?: T;
+              cards?:
+                | T
+                | {
+                    badge?: T;
+                    micro?: T;
+                    title?: T;
+                    body?: T;
+                    priceFrom?: T;
+                    priceUnit?: T;
+                    note?: T;
+                    href?: T;
+                    viewLabel?: T;
+                    customizeLabel?: T;
+                    media?: T;
+                    id?: T;
+                  };
+              closingTitle?: T;
+              closingNote?: T;
+              closingLinks?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+            };
+        guide?:
+          | T
+          | {
+              listTitle?: T;
+              notes?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              closingTitle?: T;
+              closingCta?: T;
+              closingHref?: T;
+            };
+        about?:
+          | T
+          | {
+              storyTitle?: T;
+              storyBody?: T;
+              stepsTitle?: T;
+              promisesTitle?: T;
+              promises?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              teamTitle?: T;
+              teamLede?: T;
+              closingTitle?: T;
+              closingLinks?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+            };
+        contact?:
+          | T
+          | {
+              channelsTitle?: T;
+              channels?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              nextTitle?: T;
+              nextSteps?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              form?: T;
+              closingTitle?: T;
+              closingCta?: T;
+              closingHref?: T;
+              closingLinks?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+            };
       };
   relatedPages?: T;
   publishedAt?: T;

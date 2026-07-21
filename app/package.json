@@ -29,6 +29,8 @@
     "import:tours:bestprice22": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-bestprice-22.ts",
     "cleanup:tours:bestprice22": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/cleanup-wingsside-bestprice-22.ts",
     "sync:wingsside:hifi-assets": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/sync-wingsside-hifi-assets.ts",
+    "seed:wingsside:hifi-content": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/seed-wingsside-hifi-content.ts",
+    "smoke:wingsside:hifi-pg-crud": "cross-env NODE_OPTIONS=--no-deprecation node scripts/wings-side-hifi-pg-crud-smoke.mjs",
     "rollback:tours:doicanhviet": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/rollback-doicanhviet-batch.ts",
     "parse:tours:snapshots": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/parse-tour-snapshots.ts",
     "import:tours:snapshots": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-doicanhviet.ts",

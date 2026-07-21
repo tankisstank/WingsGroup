@@ -1,5 +1,11 @@
 # US-046 Validation
 
+> **2026-07-21 corrective status:** Independent 8-page hi-fi review is **NO-GO**.
+> Tour-detail and Home/Specials evidence below remains historical. Hub fidelity
+> is **not** accepted. See US-046A and
+> `artifacts/reviews/wingsside-hifi-independent-review.md`.
+
+
 ## Proof Strategy
 
 Targeted proof protects each boundary first. The story remains incomplete until

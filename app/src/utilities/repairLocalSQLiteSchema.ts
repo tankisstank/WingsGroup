@@ -2,6 +2,20 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 
+import {
+  getWingsSideHiFiSQLiteCreateTableStatements,
+  getWingsSideHiFiSQLiteIndexStatements,
+  WINGSSIDE_HIFI_PAGES_COLUMNS,
+  WINGSSIDE_HIFI_PAGES_LOCALE_COLUMNS,
+} from '@/migrations/data/wingsSideHiFiSchema'
+
+/**
+ * Local SQLite bootstrap only (decision 0007).
+ * Production/staging schema changes go through PostgreSQL migrations in
+ * `src/migrations` and must pass `pnpm run db:migrate:smoke`.
+ * This utility must never replace or register as a production migration.
+ */
+
 const localSQLiteRelationColumns = [
   'tour_products_id',
   'tour_departures_id',
@@ -119,6 +133,44 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
           db.exec(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${type};`)
         }
       }
+    }
+
+    // Supplemental local SQLite bootstrap for Pages.wingsSideHiFi (US-046A).
+    // Production applies the same shape via migration
+    // 20260721_180000_wings_side_hifi_page_contract on PostgreSQL.
+    const ensureColumns = (table: string, columns: ReadonlyArray<readonly [string, string]>) => {
+      const present = db
+        .prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?')
+        .get('table', table) as { name?: string } | undefined
+      if (!present?.name) return
+
+      const tableInfo = db.prepare(`PRAGMA table_info("${table}")`).all() as Array<{
+        name?: string
+      }>
+      const existing = new Set(tableInfo.map((column) => column.name).filter(Boolean))
+      for (const [column, type] of columns) {
+        if (!existing.has(column)) {
+          db.exec(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${type.toUpperCase()};`)
+        }
+      }
+    }
+
+    ensureColumns('pages', WINGSSIDE_HIFI_PAGES_COLUMNS)
+    ensureColumns('pages_locales', WINGSSIDE_HIFI_PAGES_LOCALE_COLUMNS)
+    ensureColumns(
+      '_pages_v',
+      WINGSSIDE_HIFI_PAGES_COLUMNS.map(([name, type]) => [`version_${name}`, type] as const),
+    )
+    ensureColumns(
+      '_pages_v_locales',
+      WINGSSIDE_HIFI_PAGES_LOCALE_COLUMNS.map(([name, type]) => [`version_${name}`, type] as const),
+    )
+
+    for (const statement of getWingsSideHiFiSQLiteCreateTableStatements()) {
+      db.exec(`${statement};`)
+    }
+    for (const statement of getWingsSideHiFiSQLiteIndexStatements()) {
+      db.exec(`${statement};`)
     }
 
     const tableRow = db

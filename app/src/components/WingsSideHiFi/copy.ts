@@ -17,6 +17,9 @@ type CredsCopy = {
 }
 
 export type SectionCopy = {
+  /** Public hub hero H1 (localized). */
+  heroTitle: string
+  heroLede?: string
   plan: {
     stepsKicker: string
     stepsTitle: string
@@ -106,6 +109,8 @@ export type SectionCopy = {
 }
 
 const en: SectionCopy = {
+  heroTitle: 'Tailor-made Vietnam journeys',
+  heroLede: 'Private routes designed with a local planning desk — not a retail tour grid.',
   home: {
     pillarsKicker: 'How WingsSide works',
     pillarsTitle: 'Four steps from brief to private route',
@@ -382,43 +387,17 @@ const en: SectionCopy = {
     ariaLabel: 'Certificates and awards',
     kicker: 'Certificates & awards',
     title: 'Trusted standards when held',
-    lede: 'Licenses, standards, and awards we can verify — only published marks appear here.',
+    lede: 'Licenses, standards, and awards we can verify appear here when published.',
     prev: 'Previous credential',
     next: 'Next credential',
-    slides: [
-      {
-        kind: 'cert',
-        mark: 'Cert',
-        micro: 'Certificates · slots ready',
-        title: 'Travel license · accreditation · quality',
-        body: 'Only ship real badges. Placeholder until the license scan is confirmed — never invent seals.',
-      },
-      {
-        kind: 'iso',
-        mark: 'ISO',
-        micro: 'Standards · field',
-        title: 'Quality & operating standards',
-        body: 'Leave hidden until documentation is on file. No invented standards marks.',
-      },
-      {
-        kind: 'award',
-        mark: 'Award',
-        micro: 'Awards · field',
-        title: 'Logo slots ready',
-        body: 'Hidden until verified assets land. Never invent awards — swap this slide for a real mark when approved.',
-      },
-      {
-        kind: 'member',
-        mark: 'Member',
-        micro: 'Memberships · optional',
-        title: 'Industry memberships',
-        body: 'Only list affiliations that stay current year to year.',
-      },
-    ],
+    // Unverified marks omitted from public surface (no editor placeholders).
+    slides: [],
   },
 }
 
 const vi: SectionCopy = {
+  heroTitle: 'Hành trình Việt Nam may đo',
+  heroLede: 'Tuyến riêng với bàn lập kế hoạch địa phương — không lưới tour bán lẻ.',
   home: {
     pillarsKicker: 'Cách WingsSide làm việc',
     pillarsTitle: 'Bốn bước từ brief đến hành trình riêng',
@@ -695,43 +674,16 @@ const vi: SectionCopy = {
     ariaLabel: 'Chứng nhận và giải thưởng',
     kicker: 'Chứng nhận & giải thưởng',
     title: 'Chuẩn tin cậy khi đã có',
-    lede: 'Giấy phép, tiêu chuẩn và giải thưởng có thể xác minh — chỉ hiển thị dấu đã công bố.',
+    lede: 'Giấy phép, tiêu chuẩn và giải thưởng đã xác minh sẽ hiện khi được công bố.',
     prev: 'Chứng nhận trước',
     next: 'Chứng nhận sau',
-    slides: [
-      {
-        kind: 'cert',
-        mark: 'Cert',
-        micro: 'Chứng nhận · chỗ sẵn',
-        title: 'Giấy phép du lịch · kiểm định · chất lượng',
-        body: 'Chỉ đăng huy hiệu thật. Placeholder đến khi quét giấy phép được xác nhận — không bịa dấu.',
-      },
-      {
-        kind: 'iso',
-        mark: 'ISO',
-        micro: 'Tiêu chuẩn · trường',
-        title: 'Tiêu chuẩn chất lượng & vận hành',
-        body: 'Ẩn đến khi hồ sơ có trên file. Không bịa dấu tiêu chuẩn.',
-      },
-      {
-        kind: 'award',
-        mark: 'Award',
-        micro: 'Giải thưởng · trường',
-        title: 'Chỗ logo sẵn',
-        body: 'Ẩn đến khi có asset đã xác minh. Không bịa giải — thay slide khi được duyệt.',
-      },
-      {
-        kind: 'member',
-        mark: 'Member',
-        micro: 'Hội viên · tùy chọn',
-        title: 'Thành viên ngành',
-        body: 'Chỉ liệt kê liên kết còn hiệu lực qua từng năm.',
-      },
-    ],
+    slides: [],
   },
 }
 
 const it: SectionCopy = {
+  heroTitle: 'Viaggi su misura in Vietnam',
+  heroLede: 'Percorsi privati con un desk locale — non una griglia tour retail.',
   home: {
     pillarsKicker: 'Come funziona WingsSide',
     pillarsTitle: 'Quattro passi dal brief al percorso privato',
@@ -1011,40 +963,13 @@ const it: SectionCopy = {
     lede: 'Licenze, standard e premi verificabili — solo marchi pubblicati.',
     prev: 'Credenziale precedente',
     next: 'Credenziale successiva',
-    slides: [
-      {
-        kind: 'cert',
-        mark: 'Cert',
-        micro: 'Certificati · slot pronti',
-        title: 'Licenza viaggio · accreditamento · qualità',
-        body: 'Solo badge reali. Placeholder finché la scansione non è confermata — mai inventare sigilli.',
-      },
-      {
-        kind: 'iso',
-        mark: 'ISO',
-        micro: 'Standard · campo',
-        title: 'Standard di qualità e operativi',
-        body: 'Nascosto finché la documentazione è in archivio. Nessun marchio inventato.',
-      },
-      {
-        kind: 'award',
-        mark: 'Award',
-        micro: 'Premi · campo',
-        title: 'Slot logo pronti',
-        body: 'Nascosto finché arrivano asset verificati. Mai inventare premi.',
-      },
-      {
-        kind: 'member',
-        mark: 'Member',
-        micro: 'Membership · opzionale',
-        title: 'Membership di settore',
-        body: 'Solo affiliazioni ancora attuali anno dopo anno.',
-      },
-    ],
+    slides: [],
   },
 }
 
 const es: SectionCopy = {
+  heroTitle: 'Viajes a medida por Vietnam',
+  heroLede: 'Rutas privadas con un equipo local — no una rejilla de tours retail.',
   home: {
     pillarsKicker: 'Cómo funciona WingsSide',
     pillarsTitle: 'Cuatro pasos del brief a la ruta privada',
@@ -1324,40 +1249,13 @@ const es: SectionCopy = {
     lede: 'Licencias, estándares y premios verificables — solo marcas publicadas.',
     prev: 'Credencial anterior',
     next: 'Credencial siguiente',
-    slides: [
-      {
-        kind: 'cert',
-        mark: 'Cert',
-        micro: 'Certificados · huecos listos',
-        title: 'Licencia de viaje · acreditación · calidad',
-        body: 'Solo insignias reales. Placeholder hasta confirmar el escaneo — nunca inventar sellos.',
-      },
-      {
-        kind: 'iso',
-        mark: 'ISO',
-        micro: 'Estándares · campo',
-        title: 'Estándares de calidad y operación',
-        body: 'Oculto hasta tener documentación en archivo. Sin sellos inventados.',
-      },
-      {
-        kind: 'award',
-        mark: 'Award',
-        micro: 'Premios · campo',
-        title: 'Huecos de logo listos',
-        body: 'Oculto hasta activos verificados. Nunca inventar premios.',
-      },
-      {
-        kind: 'member',
-        mark: 'Member',
-        micro: 'Membresías · opcional',
-        title: 'Membresías del sector',
-        body: 'Solo afiliaciones vigentes año tras año.',
-      },
-    ],
+    slides: [],
   },
 }
 
 const pt: SectionCopy = {
+  heroTitle: 'Viagens sob medida no Vietname',
+  heroLede: 'Rotas privadas com uma equipa local — não uma grelha de tours retail.',
   home: {
     pillarsKicker: 'Como a WingsSide funciona',
     pillarsTitle: 'Quatro passos do brief ao percurso privado',
@@ -1637,36 +1535,7 @@ const pt: SectionCopy = {
     lede: 'Licenças, padrões e prémios verificáveis — só marcas publicadas.',
     prev: 'Credencial anterior',
     next: 'Credencial seguinte',
-    slides: [
-      {
-        kind: 'cert',
-        mark: 'Cert',
-        micro: 'Certificados · slots prontos',
-        title: 'Licença de viagem · acreditação · qualidade',
-        body: 'Só distintivos reais. Placeholder até confirmar o scan — nunca inventar selos.',
-      },
-      {
-        kind: 'iso',
-        mark: 'ISO',
-        micro: 'Padrões · campo',
-        title: 'Padrões de qualidade e operação',
-        body: 'Oculto até documentação em arquivo. Sem selos inventados.',
-      },
-      {
-        kind: 'award',
-        mark: 'Award',
-        micro: 'Prémios · campo',
-        title: 'Slots de logo prontos',
-        body: 'Oculto até ativos verificados. Nunca inventar prémios.',
-      },
-      {
-        kind: 'member',
-        mark: 'Member',
-        micro: 'Associações · opcional',
-        title: 'Associações do setor',
-        body: 'Só afiliações ainda atuais ano após ano.',
-      },
-    ],
+    slides: [],
   },
 }
 

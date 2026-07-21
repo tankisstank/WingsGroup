@@ -29,7 +29,8 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-033 | normal | implemented | Content and media seed |
 | US-034 | normal | implemented | Launch readiness proof |
 | US-045 | high-risk | implemented locally | BestPrice 22 import and publish preparation |
-| US-046 | high-risk | implemented | WingSide consultative tour detail and hi-fi adoption |
+| US-046 | high-risk | in_progress | WingSide consultative tour detail — corrective (NO-GO hub fidelity) |
+| US-046A | high-risk | in_progress | WingSide 8-page hi-fi funnel remediation (tranche A+) |
 
 ## Current evidence
 
@@ -77,11 +78,10 @@ architecture and avoids building a parallel site, CMS, or page builder.
 - US-046 isolates WingSide structured tour detail from WingsGo retail
   capabilities, adopts the approved hi-fi Home/Specials posture, and adds an
   atomic batch-scoped cleanup for the 22 imported tours. Adaptive commit
-  `a083127` passed the full ladder (193 unit, 24 component, 108 integration,
-  75 isolated PostgreSQL E2E and build), is live in production, and passed Home
-  responsive/interaction QA, 22/22 public tour smoke, four named desktop/mobile
-  browser checks, WingsGo/WingsPlus regression and a zero-duplicate read-only
-  database audit.
+  `a083127` passed the full ladder and production tour smoke. **However**, the
+  2026-07-21 independent 8-page hi-fi review is **NO-GO** (6 P1 / 6 P2). US-046
+  is therefore **in_progress / corrective**, not fidelity-complete. US-046A
+  tracks hub funnel remediation (content contract, chrome, page bodies).
 
 ## Current constraints
 

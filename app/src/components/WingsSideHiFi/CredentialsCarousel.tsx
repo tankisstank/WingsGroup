@@ -24,6 +24,9 @@ export const WingsSideCredentialsCarousel = ({ locale }: { locale?: null | strin
     return () => window.clearInterval(timer)
   }, [paused, slides.length])
 
+  // Unverified credential slots are omitted from public copy — hide section entirely.
+  if (!slides.length) return null
+
   return (
     <section
       aria-label={copy.creds.ariaLabel}

@@ -9,7 +9,11 @@ import { CMSLink } from '@/components/Link'
 import { SiteLink } from '@/components/SiteLink'
 import { useSitePublicPathname } from '@/providers/SitePath'
 import { getCopyLocale, publicLocaleMetadata } from '@/utilities/locales'
-import { buildLocaleSwitchHref, type SupportedLocaleCode } from '@/utilities/sitePaths'
+import {
+  buildLocaleSwitchHref,
+  getPublicRoutePathname,
+  type SupportedLocaleCode,
+} from '@/utilities/sitePaths'
 import {
   getWingsSideHiFiCta,
   getWingsSideHiFiNavItems,
@@ -196,15 +200,22 @@ export const HeaderNav: React.FC<{
     <div className="site-header__nav" data-hifi-nav={isWingsSide ? 'true' : 'false'} ref={headerNavRef}>
       <nav aria-label="Primary navigation" className="hidden items-center gap-3 xl:flex">
         {wingsSideHiFiNav
-          ? wingsSideHiFiNav.map((item) => (
-              <SiteLink
-                className="theme-nav-link site-header__primary-link"
-                href={item.href}
-                key={item.href}
-              >
-                {item.label}
-              </SiteLink>
-            ))
+          ? wingsSideHiFiNav.map((item) => {
+              const itemPath = item.href.replace(/\/+$/, '') || '/'
+              const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
+              const isActive = itemPath === currentPath
+              return (
+                <SiteLink
+                  aria-current={isActive ? 'page' : undefined}
+                  className="theme-nav-link site-header__primary-link"
+                  data-active={isActive ? 'true' : 'false'}
+                  href={item.href}
+                  key={item.href}
+                >
+                  {item.label}
+                </SiteLink>
+              )
+            })
           : navItems.map(({ link }, i) => {
               return (
                 <CMSLink
@@ -267,16 +278,23 @@ export const HeaderNav: React.FC<{
           id="mobile-primary-navigation"
         >
           {wingsSideHiFiNav
-            ? wingsSideHiFiNav.map((item) => (
-                <SiteLink
-                  className="site-mobile-nav__link"
-                  href={item.href}
-                  key={item.href}
-                  onClick={navigateAndCloseMobile}
-                >
-                  {item.label}
-                </SiteLink>
-              ))
+            ? wingsSideHiFiNav.map((item) => {
+                const itemPath = item.href.replace(/\/+$/, '') || '/'
+                const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
+                const isActive = itemPath === currentPath
+                return (
+                  <SiteLink
+                    aria-current={isActive ? 'page' : undefined}
+                    className="site-mobile-nav__link"
+                    data-active={isActive ? 'true' : 'false'}
+                    href={item.href}
+                    key={item.href}
+                    onClick={navigateAndCloseMobile}
+                  >
+                    {item.label}
+                  </SiteLink>
+                )
+              })
             : navItems.map(({ link }, i) => {
                 return (
                   <CMSLink

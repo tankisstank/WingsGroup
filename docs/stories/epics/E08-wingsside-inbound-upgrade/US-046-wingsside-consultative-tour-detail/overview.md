@@ -2,7 +2,18 @@
 
 ## Status
 
-implemented
+in_progress
+
+## Corrective note (2026-07-21)
+
+**Not fidelity-complete for the 8-page hi-fi funnel.** Independent black-box
+review returned **NO-GO**
+(`artifacts/reviews/wingsside-hifi-independent-review.md`).
+Tour-detail consultative surface, batch cleanup, and Home/Specials tokens remain
+valuable evidence, but shared chrome, inquiry funnel, truncated secondary
+templates, and hero composition still fail acceptance. Remediation continues
+under **US-046A** (and remaining US-046 corrective work). Do not mark Full /
+implemented for hub fidelity until a post-remediation 8×2 re-review passes.
 
 ## Current Behavior
 
