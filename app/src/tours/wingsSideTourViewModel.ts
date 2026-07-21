@@ -43,8 +43,9 @@ const copyByLocale = {
     accommodation: 'Accommodation',
     availableDepartures: 'Available departures',
     contact: 'Contact us',
-    contactDetail: 'Price and departure timing are confirmed around your preferred travel dates.',
-    contactEyebrow: 'Flexible departure',
+    contactDetail:
+      'Price on request · reply within 24h. Sales confirms final price before any hold.',
+    contactEyebrow: 'Price on request',
     departure: 'Departure',
     destination: 'Destination',
     dayLabel: 'Day',
@@ -58,6 +59,7 @@ const copyByLocale = {
     meals: 'Meals',
     overview: 'Journey overview',
     price: 'From',
+    priceOnRequestShort: 'On request · reply within 24h',
     request: 'Request consultation',
     route: 'Route',
   },
@@ -65,8 +67,9 @@ const copyByLocale = {
     accommodation: 'Alojamiento',
     availableDepartures: 'Salidas disponibles',
     contact: 'Contáctanos',
-    contactDetail: 'Confirmamos el precio y la salida según tus fechas preferidas.',
-    contactEyebrow: 'Salida flexible',
+    contactDetail:
+      'Precio bajo consulta · respuesta en 24h. Sales confirma el precio final antes de cualquier reserva.',
+    contactEyebrow: 'Precio bajo consulta',
     departure: 'Salida',
     destination: 'Destino',
     dayLabel: 'Día',
@@ -80,6 +83,7 @@ const copyByLocale = {
     meals: 'Comidas',
     overview: 'Resumen del viaje',
     price: 'Desde',
+    priceOnRequestShort: 'Bajo consulta · respuesta en 24h',
     request: 'Solicitar asesoría',
     route: 'Ruta',
   },
@@ -87,8 +91,9 @@ const copyByLocale = {
     accommodation: 'Sistemazione',
     availableDepartures: 'Partenze disponibili',
     contact: 'Contattaci',
-    contactDetail: 'Prezzo e partenza vengono confermati in base alle date preferite.',
-    contactEyebrow: 'Partenza flessibile',
+    contactDetail:
+      'Prezzo su richiesta · risposta entro 24h. Sales conferma il prezzo finale prima di qualsiasi blocco.',
+    contactEyebrow: 'Prezzo su richiesta',
     departure: 'Partenza',
     destination: 'Destinazione',
     dayLabel: 'Giorno',
@@ -102,6 +107,7 @@ const copyByLocale = {
     meals: 'Pasti',
     overview: 'Panoramica del viaggio',
     price: 'Da',
+    priceOnRequestShort: 'Su richiesta · risposta entro 24h',
     request: 'Richiedi una consulenza',
     route: 'Itinerario',
   },
@@ -109,8 +115,9 @@ const copyByLocale = {
     accommodation: 'Hospedagem',
     availableDepartures: 'Partidas disponíveis',
     contact: 'Fale conosco',
-    contactDetail: 'O preço e a partida são confirmados de acordo com as datas desejadas.',
-    contactEyebrow: 'Partida flexível',
+    contactDetail:
+      'Preço sob consulta · resposta em 24h. Sales confirma o preço final antes de qualquer reserva.',
+    contactEyebrow: 'Preço sob consulta',
     departure: 'Partida',
     destination: 'Destino',
     dayLabel: 'Dia',
@@ -124,6 +131,7 @@ const copyByLocale = {
     meals: 'Refeições',
     overview: 'Visão geral da viagem',
     price: 'A partir de',
+    priceOnRequestShort: 'Sob consulta · resposta em 24h',
     request: 'Solicitar consultoria',
     route: 'Rota',
   },
@@ -131,8 +139,9 @@ const copyByLocale = {
     accommodation: 'Lưu trú',
     availableDepartures: 'Ngày khởi hành phù hợp',
     contact: 'Liên hệ',
-    contactDetail: 'Giá và thời điểm khởi hành được xác nhận theo ngày đi mong muốn của bạn.',
-    contactEyebrow: 'Khởi hành linh hoạt',
+    contactDetail:
+      'Giá theo yêu cầu · phản hồi trong 24h. Sales xác nhận giá cuối trước khi giữ chỗ.',
+    contactEyebrow: 'Giá theo yêu cầu',
     departure: 'Khởi hành',
     destination: 'Điểm đến',
     dayLabel: 'Ngày',
@@ -146,6 +155,7 @@ const copyByLocale = {
     meals: 'Bữa ăn',
     overview: 'Tổng quan hành trình',
     price: 'Từ',
+    priceOnRequestShort: 'Theo yêu cầu · phản hồi trong 24h',
     request: 'Yêu cầu tư vấn',
     route: 'Tuyến điểm',
   },
@@ -233,11 +243,19 @@ export const isFutureWingSideDeparture = (value?: null | string, now = new Date(
   return !Number.isNaN(date.getTime()) && startOfUTCDate(date) >= startOfUTCDate(now)
 }
 
-export const buildWingSideTourCTA = (slug: string, id: number | string) => {
+export type WingSideTourCTAIntent = 'contact' | 'inquiry'
+
+export const buildWingSideTourCTA = (
+  slug: string,
+  id: number | string,
+  intent: WingSideTourCTAIntent = 'inquiry',
+  source = intent === 'contact' ? 'tour-detail-contact' : 'tour-detail',
+) => {
   const params = new URLSearchParams({
+    intent,
+    source,
     tour: slug,
     tourId: String(id),
-    source: 'tour-detail',
   })
   return `/contact-us?${params.toString()}`
 }
@@ -338,8 +356,9 @@ export const buildWingSideTourViewModel = ({
   if (id === null || !slug) throw new Error('WingSide tour detail requires a TourProduct ID and slug')
 
   return {
+    contactHref: buildWingSideTourCTA(slug, id, 'contact'),
     copy,
-    ctaHref: buildWingSideTourCTA(slug, id),
+    ctaHref: buildWingSideTourCTA(slug, id, 'inquiry'),
     duration,
     excludes: publicList(tour.excludes),
     gallery,

@@ -25,6 +25,21 @@ all pass. Local implementation proof must not be used to imply production succes
 - Local mobile tour fixture deleted after browser verification.
 - Production data is not a test fixture and is only touched after backup/gates.
 
+### Local BestPrice 22 re-apply (worktree, 2026-07-20)
+
+- Sources: manifest `WingsTravel/output/doc/tour-source-match-20260717.csv` (22 full
+  bestprice rows) + crawler `E:\repo\tour-crawlers\bestprice_tours.json` + images under
+  `storage/images/bestprice/`.
+- Command: `pnpm run import:tours:bestprice22 -- --apply --admin-email local-admin@wingsgroup.test …`
+- Result: **22/22** products+pages updated; publishEligible 22; mediaReused 714;
+  demoted sample records 1125 (506 sample products).
+- Artifacts: `artifacts/imports/bestprice-22/import-result.json`,
+  `LOCAL-TEST-README.md` (slug list + re-run commands).
+- Live smoke: first 5 `/wingsside/tour/<slug>` → 200 + title in HTML.
+- Media gap: DB reused 714 `bpt-*` rows without files in `public/media` (API 500).
+  Fixed via `scripts/repair-bestprice-media-files.ts` → 714 files restored; media API 200.
+  Importer now recreates media when on-disk file is missing.
+
 ## Commands
 
 ```powershell
@@ -38,6 +53,187 @@ pnpm run test:e2e
 pnpm run build
 pnpm run cleanup:tours:bestprice22 -- --dry-run --output <report>
 ```
+
+## Hi-fi 8-page product bridge (local, pending root review)
+
+Completed locally on 2026-07-19 in worktree `WingsTravel-us046-hifi` branch
+`feature/us-046-wingsside-hifi-tour-detail`:
+
+- Mapping: `hifi-8page-mapping.md` (hi-fi page IDs → live routes → files).
+- Token bridge aligned to locked hi-fi HTML: cool paper `#F3F6F9`, brand blue
+  `#005090`, wing accent `#104030`, book-gold CTA `#B87A14` + white label,
+  wine urgency, shell max / nav-h / tighter section cadence.
+- Global shell: compact full-bleed header, pill nav, circular language chips,
+  solid book-gold primary CTAs (not gold-wash), Plus Jakarta display weight.
+- Home: cinematic carousel remapped to hi-fi **editorial split**
+  (`hero-presentation--carousel-hifi-split`: copy left + media card right +
+  planner band below). Component + CSS in `presentations/index.tsx` / `globals.css`.
+- Route CSS for Packages, Destinations, Styles, Plan, Guide, About, Contact.
+- Specials widget: Home-only, desktop ≥768, compact 268px, bottom-right,
+  stripe identity, session dismiss key, reduced-motion safe.
+- Auto compare vs `wingside-hifi-fix-8pages.html` (1440×900): structural posture
+  **15/15 Home**, **10/10** remaining pages; mobile Specials hidden.
+  Artifacts: `artifacts/tmp/hifi-compare/`.
+- Targeted proof: siteTheme int 6/6; hero component 5/5 (incl. hifi-split case);
+  specials component; e2e expectations updated for brand `#005090` / accent `#104030`.
+- **No production deploy** until root agent adversarial review and explicit approve.
+
+## Bar B follow-up (8-page composition + nav IA + media)
+
+Local implementation after independent Codex FAIL on composition:
+
+- Nav IA locked to hi-fi 7 links: Home / Destinations / Styles / Packages / Guide /
+  About / Contact; CTA `Plan trip`; mega menu + search removed for WingSide.
+- **Single composition owner (hướng A):** hub routes suppress CMS layout except
+  `formBlock`/`form` via `wingsSideHiFiComposer` + `[...slug]/page.tsx`
+  (`data-hifi-composer=true`).
+- Home credentials/awards carousel: honest placeholders only.
+- Section inventory with **licensed media thumbs** from `/wingsside-hifi/*`
+  (Open Design assets copied to `public/` + `assets/`).
+- Card bindings: dest×6, styles×6, packages×3 (`wingsSideHiFiMedia.ts`).
+- Dual CTA fallback on Home hi-fi split (Explore destinations when CMS has one link).
+- Planner denser 2-col CSS for hifi business panel.
+
+## Home hi-fi fidelity (Codex P1 backlog, 2026-07-20)
+
+Local worktree implementation after Codex independent FAIL (~66% structure):
+
+- **WP1** Traveler notes (`home-notes`) + trust strip (`home-sla`) under Why.
+- **WP2** Sample journey cards with badge, duration·region micro, From $… / person,
+  indicative note (EN: $2,190 / $1,480 / $1,620).
+- **WP3** Why assets `sapa/family/culture/luxury` + card actions; dest/styles
+  kickers, region tags, Match → affordances.
+- **WP4** Credentials full-bleed band + progress strip (honest placeholders).
+- **WP5** Hero primary CTA `href="#home-planner"`; denser panel `id="home-planner"`;
+  close band dual Plan + Contact.
+- **WP6** Logo fallback `/wingsside-hifi/logo.png` when CMS logo empty; WingSide-only
+  footer shortcuts `data-testid="wingsside-hifi-footer"`.
+- **WP7** Unit copy coverage for notes/trust/journeys; e2e Home inventory checks extended.
+- **No production deploy** without root approve.
+- If product later requires primary hero CTA always `/plan-your-trip` (not hash scroll),
+  document as intentional ADR deviation in this file.
+
+## Codex re-audit (2026-07-20, gpt-5.6-sol medium, read-only)
+
+### Round 1 — FAIL
+
+Artifact: `app/artifacts/tmp/hifi-p1-capture/codex-reaudit-home-p1.md`
+
+| Field | Result |
+| --- | --- |
+| Verdict | **FAIL** (confidence 90%) |
+| Structure | ~82% (was ~66%) |
+| Closed P1 | Why media/actions; Hero CTA → `#home-planner` |
+| Open P1 | notes/trust/journeys CSS not served; planner 2-col mobile; creds radius; footer double IA |
+
+### User-reported visual bug (screenshot, same root cause)
+
+Trust strip without layout CSS: Reply SLA/Proof plain text; planner portrait full-bleed instead of ~52px circle.
+
+### Round 2 residual fix + re-audit — PASS-WITH-ISSUES
+
+Artifact: `app/artifacts/tmp/hifi-p1-capture/codex-reaudit-home-p1-r2.md`
+
+| Field | Result |
+| --- | --- |
+| Verdict | **PASS-WITH-ISSUES** (confidence 94%) |
+| Structure | ~96% |
+| P0 / residual P1 | none |
+| User avatar bug | **CLOSED** (52×52 circle after lazy load) |
+| P2 residual | blank captures (regenerated after audit); Specials overlap planner; h1 semantics; close CTA `/plan-your-trip` vs hash; `100vw` gutter; duplicated CSS ownership |
+
+Fixes applied before r2:
+- `hifi-sections.css` co-located import (bypass Turbopack globals truncation)
+- Avatar hard-cap 52px + grids `!important`
+- Creds full-bleed cascade win; planner stack `@900px !important`
+- WingSide footer suppresses CMS nav double IA
+- Dev restart + `.next` clear
+- Unit: composer 6, assets 5, nav 3 pass. Live smoke: Home/Packages/Dest/Styles
+  composer+inventory+media=True; Contact inventory without grid media.
+
+### P2 polish (post r2)
+
+- Specials self-hides while `#home-planner` ≥28% visible (IntersectionObserver); z-index 28.
+- Hi-fi hero visible title is real `h1` (no dual sr-only h1).
+- Close-band primary CTA → `#home-planner` (secondary Contact unchanged).
+- Creds full-bleed scrollbar-safe: no element `100vw` width; `::before` band (live overflow=0).
+- Layout CSS ownership: trust/notes/journey/avatar/footer-links in `hifi-sections.css` only.
+- Proof: component hero 5/5; live titleTag=H1, closeHref=#home-planner, specialsWhilePlanner=false,
+  specialsAfterScrollAway=true, overflow=0.
+- Targeted e2e (Postgres isolated, 2026-07-20): Specials chip + governed inventory **2/2 passed**
+  after e2e helper `revealSpecialsPastPlanner` (Specials intentionally hidden while planner intersects).
+- Unit hi-fi: copy/composer/nav **13/13**; component hero+specials **9/9**.
+- Live smoke P1/P2: notes/sla/composer true; trust 3-col; avatar 52; journey 3-col/img 168;
+  H1; hero+close `#home-planner`; creds radius 0; overflow 0; footer true; mobile planner 1-col.
+- **No production deploy** until root approve.
+
+## Bar B completion pass (i18n + Payload media sync) — 2026-07-20
+
+Local-only completion of remaining non-prod items on branch
+`feature/us-046-wingsside-hifi-tour-detail` (worktree `WingsTravel-us046-hifi`):
+
+### WP6 — Inventory i18n (en/vi/it/es/pt)
+
+- Full section copy in `app/src/components/WingsSideHiFi/copy.ts` for all five
+  public ad locales (home, plan, destinations, styles, packages, guide, about,
+  contact, credentials carousel, dual-CTA `exploreDestinations`).
+- `SectionInventory` / `CredentialsCarousel` consume `getWingsSideHiFiCopy(locale)`.
+- Dual-CTA fallback no longer hardcodes EN: `CinematicCarouselHero` uses
+  `resolvedLocale` → localized `home.exploreDestinations` (wired from
+  `HighImpactHero`).
+- Unit: `wingsSideHiFiCopy.unit.spec.ts` **3/3** (incl. dual-CTA labels).
+- Live smoke locale path `/wingsside/{vi,it,es,pt}`: inventory markers present
+  (e.g. VI: `Lên kế hoạch`, `Khám phá điểm đến`, `Chứng nhận`, `Bốn bước`;
+  IT: `Pianifica`, `Esplora le destinazioni`).
+
+### Payload media sync (hướng A apply)
+
+- Dry-run then apply: `pnpm run sync:wingsside:hifi-assets -- --apply --report
+  output/us046/wingsside-hifi-assets.json`
+- Result: **15 media created**, pages `/` and `/packages` **updated**
+  (`hero.media` / slides / meta → `heroHalong` media id `6798` on local SQLite).
+- Report path: `app/output/us046/wingsside-hifi-assets.json` (rollback via
+  script `--rollback-report` if needed).
+- Live EN Home/Packages HTML includes synced hi-fi hero filenames under
+  `/media/wingsside-hifi-*` plus inventory thumbs `/wingsside-hifi/*`.
+
+### Targeted verification (this pass)
+
+| Layer | Result |
+| --- | --- |
+| Unit (composer, nav, assets, copy, header) | **22/22** pass |
+| Component (`heroPresentations`) | **5/5** pass |
+| Int (`siteTheme`) | **6/6** pass |
+| Live HTTP smoke (composer/inv/media) | Home, Packages, Destinations, Plan **200** + markers |
+| Live i18n smoke | `/wingsside/vi|it|es|pt` **200** + localized inventory strings |
+| Full e2e ladder (isolated PostgreSQL) | **75/75** pass — see below |
+| Production deploy | **Not done** — requires root approve |
+
+### Full e2e ladder — 2026-07-20 (Bar B worktree)
+
+- Command: `pnpm run test:e2e` (`E2E_DATABASE_ENGINE=postgres`, disposable Docker
+  `postgres:16-alpine`, port **3100** webServer).
+- Result: **75/75 passed** in **13.8 minutes**.
+- `.last-run.json` status `passed`, SHA-256
+  `91D1C43004802CD49950D78EB11C8FA7D05DA8FFFFE219A8B13B2F561BC00903`.
+- Playwright report SHA-256
+  `888FCBFDC75056941D1673511CD435653F03FE5F9CC5EAF82210AE862CD13566`.
+- Log: `artifacts/tmp/e2e-ladder/full-e2e-final2.log`.
+- E2E expectations aligned to Bar B: hi-fi inventory (no CMS bento), nav without
+  Search primacy, dual-CTA / locale copy, hub-safe card hrefs (sapa/wellness/
+  business → parent hubs), planner visible on mobile hifi-split, Specials
+  clearance, updated wingsside-planner desktop/mobile visual snapshots.
+- Product fixes for ladder: carousel major controls **44px** hit target; mobile
+  hifi planner band no longer `display:none` on slide 0.
+
+### Residual (out of this agent scope / explicit gates)
+
+1. Root adversarial review + explicit production deploy approve.
+2. Optional: bind CMS heroes for additional hub locales if Payload locale
+   variants lag default-locale media IDs (EN Home already shows synced hero).
+3. Optional: resolve React hydration className noise on hifi-split (SSR vs client
+   class order) — e2e still green; polish only.
+4. Plane remote sync still blocked (403 Initiatives plan).
 
 ## Acceptance Evidence
 

@@ -278,9 +278,18 @@ const resolveStructuredTourPage = async ({
       return null
     }
 
+    // Wingside: consultative hi-fi TourDetailPage (Open Design lock).
+    // Keep wrapper-page gate so only linked TourProduct pages resolve.
     if (site.code === 'wings-side') {
       if (!hasMatchingWingSideTourWrapper(tourData.tour, wrapperPageID)) notFound()
-      return <WingSideTourDetailPage data={tourData} locale={locale} />
+      return (
+        <TourDetailPage
+          data={tourData}
+          locale={getCopyLocale(locale)}
+          presentation="consultative"
+          siteCode={site.code}
+        />
+      )
     }
 
     return (

@@ -71,6 +71,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
               logoImage={logoImage}
               logoText={logoText}
               priority="high"
+              siteCode={siteCode}
             />
           </SiteLink>
           {siteName ? (

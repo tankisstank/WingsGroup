@@ -696,7 +696,7 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
   }
 
   .site-header-cta--mobile {
-    min-height: 2.5rem;
+    min-height: 2.75rem; /* 44px touch target */
     max-width: 7rem;
     padding-inline: 0.85rem;
     overflow: hidden;
@@ -3893,14 +3893,14 @@ body[data-site-theme='wings-side'] .site-language-switcher__link {
 
   .site-header__nav > nav .theme-nav-link,
   .site-header__nav > nav .site-header-cta {
-    min-height: 2.5rem;
+    min-height: 2.75rem; /* 44px touch target (AA / product lock) */
     padding-inline: 0.55rem;
     font-size: 0.78rem;
   }
 
   .site-header__nav > nav .site-icon-button {
-    min-height: 2.5rem;
-    min-width: 2.5rem;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
   }
 
   .site-header__nav > nav .site-language-switcher {
@@ -4290,7 +4290,12 @@ body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials:hov
 /* Wingside consultative tour detail — Book gold primary CTA */
 body[data-site-theme='wings-side'] .tour-cta-primary,
 body[data-site-preset='wings-side-editorial-inbound-v2'] .tour-cta-primary,
-body[data-site-preset='wings-side-editorial'] .tour-cta-primary {
+body[data-site-preset='wings-side-editorial'] .tour-cta-primary,
+.tour-detail--consultative .tour-cta-primary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
   border: 1px solid color-mix(in oklch, #b87a14 55%, transparent);
   background: #b87a14;
   color: #ffffff;

@@ -23,11 +23,16 @@ describe('WingSide hi-fi asset binding plan', () => {
     )
   })
 
-  it('targets only the approved WingSide Home and Packages page fields', () => {
+  it('targets approved WingSide hub page hero/meta bindings across the 8-page funnel', () => {
     const paths = new Set(wingsSidePageMediaBindings.map(({ pagePath }) => pagePath))
     const targets = wingsSidePageMediaBindings.map(({ fieldPath, pagePath }) => `${pagePath}:${fieldPath}`)
 
-    expect(paths).toEqual(new Set(['/', '/packages']))
+    expect(paths.has('/')).toBe(true)
+    expect(paths.has('/packages')).toBe(true)
+    expect(paths.has('/destinations')).toBe(true)
+    expect(paths.has('/styles')).toBe(true)
+    expect(paths.has('/plan-your-trip')).toBe(true)
+    expect(paths.has('/contact-us')).toBe(true)
     expect(new Set(targets).size).toBe(targets.length)
     expect(wingsSidePageMediaBindings.every(({ asset }) => asset in wingsSideHiFiAssets)).toBe(true)
   })

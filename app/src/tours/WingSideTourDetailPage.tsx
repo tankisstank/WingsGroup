@@ -116,14 +116,20 @@ const WingSideTourHero = ({ vm }: { vm: WingSideTourViewModel }) => (
             </div>
           ) : null}
         </dl>
-        <div className="mt-7 flex flex-wrap items-center gap-4">
-          <SiteLink className="site-header-cta inline-flex min-h-12 items-center gap-2 px-6 no-underline" href={vm.ctaHref}>
+        <div className="mt-7 flex flex-wrap items-center gap-3">
+          <SiteLink
+            className="site-header-cta tour-cta-primary tour-cta-primary--pulse inline-flex min-h-12 items-center gap-2 px-6 no-underline"
+            href={vm.ctaHref}
+          >
             {vm.copy.request}
             <ArrowRightIcon aria-hidden="true" className="h-4 w-4" />
           </SiteLink>
-          {vm.priceState.kind === 'contact' ? (
-            <span className="font-semibold text-[var(--site-wine)]">{vm.copy.contact}</span>
-          ) : null}
+          <SiteLink
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[var(--site-border)] bg-[var(--site-surface)] px-6 text-sm font-bold text-foreground no-underline hover:bg-muted/40"
+            href={vm.contactHref}
+          >
+            {vm.copy.contact}
+          </SiteLink>
         </div>
       </div>
     </div>
@@ -264,15 +270,29 @@ export const WingSideTourDetailPage = ({
 
       <section className="container py-16 md:py-20">
         {vm.priceState.kind === 'contact' ? (
-          <div className="rounded-[28px] bg-[var(--site-foreground)] p-8 text-[var(--site-background)] md:flex md:items-center md:justify-between md:p-12">
+          <div className="rounded-[28px] bg-[var(--site-foreground)] p-8 text-[var(--site-background)] md:flex md:items-center md:justify-between md:gap-8 md:p-12">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--site-gold)]">{vm.copy.contactEyebrow}</p>
-              <h2 className="mt-3 text-3xl font-semibold">{vm.copy.contact}</h2>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--site-gold)]">
+                {vm.copy.contactEyebrow}
+              </p>
+              <h2 className="mt-3 text-3xl font-semibold">{vm.copy.priceOnRequestShort}</h2>
               <p className="mt-3 max-w-2xl text-[var(--site-background)]/75">{vm.copy.contactDetail}</p>
             </div>
-            <SiteLink className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--site-gold)] px-6 font-bold text-[var(--site-foreground)] no-underline md:mt-0" href={vm.ctaHref}>
-              {vm.copy.request}<ArrowRightIcon aria-hidden="true" className="h-4 w-4" />
-            </SiteLink>
+            <div className="mt-6 flex flex-wrap gap-3 md:mt-0 md:shrink-0">
+              <SiteLink
+                className="tour-cta-primary tour-cta-primary--pulse inline-flex min-h-12 items-center gap-2 rounded-full px-6 font-bold no-underline"
+                href={vm.ctaHref}
+              >
+                {vm.copy.request}
+                <ArrowRightIcon aria-hidden="true" className="h-4 w-4" />
+              </SiteLink>
+              <SiteLink
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-[var(--site-background)]/35 bg-transparent px-6 font-bold text-[var(--site-background)] no-underline hover:bg-[var(--site-background)]/10"
+                href={vm.contactHref}
+              >
+                {vm.copy.contact}
+              </SiteLink>
+            </div>
           </div>
         ) : (
           <div>
@@ -290,14 +310,30 @@ export const WingSideTourDetailPage = ({
         )}
       </section>
 
-      <aside className="fixed bottom-4 left-1/2 z-30 flex w-[min(54rem,calc(100%-2rem))] -translate-x-1/2 items-center justify-center gap-4 rounded-full border border-[var(--site-border)] bg-[var(--site-surface)]/95 px-4 py-3 shadow-xl backdrop-blur sm:justify-between sm:px-5">
+      <aside className="fixed bottom-4 left-1/2 z-30 flex w-[min(54rem,calc(100%-2rem))] -translate-x-1/2 items-center justify-center gap-3 rounded-full border border-[var(--site-border)] bg-[var(--site-surface)]/95 px-3 py-3 shadow-xl backdrop-blur sm:justify-between sm:gap-4 sm:px-5">
         <div className="hidden min-w-0 sm:block">
           <p className="truncate text-sm font-semibold">{vm.title}</p>
-          <p className="text-xs text-muted-foreground">{vm.priceState.kind === 'contact' ? vm.copy.contact : `${vm.copy.price} ${formatPrice(vm.priceState.price, vm.priceState.currency, locale)}`}</p>
+          <p className="text-xs text-muted-foreground">
+            {vm.priceState.kind === 'contact'
+              ? vm.copy.priceOnRequestShort
+              : `${vm.copy.price} ${formatPrice(vm.priceState.price, vm.priceState.currency, locale)}`}
+          </p>
         </div>
-        <SiteLink className="inline-flex max-w-full shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--site-gold)] px-5 py-3 text-center text-sm font-bold text-[var(--site-foreground)] no-underline" href={vm.ctaHref}>
-          {vm.copy.request}<ArrowRightIcon aria-hidden="true" className="h-4 w-4" />
-        </SiteLink>
+        <div className="flex max-w-full shrink-0 items-center gap-2">
+          <SiteLink
+            className="hidden min-h-11 items-center justify-center rounded-full border border-[var(--site-border)] bg-background px-4 text-sm font-bold text-foreground no-underline sm:inline-flex"
+            href={vm.contactHref}
+          >
+            {vm.copy.contact}
+          </SiteLink>
+          <SiteLink
+            className="tour-cta-primary tour-cta-primary--pulse inline-flex max-w-full min-h-11 items-center justify-center gap-2 rounded-full px-5 py-3 text-center text-sm font-bold no-underline"
+            href={vm.ctaHref}
+          >
+            {vm.copy.request}
+            <ArrowRightIcon aria-hidden="true" className="h-4 w-4" />
+          </SiteLink>
+        </div>
       </aside>
     </div>
   )

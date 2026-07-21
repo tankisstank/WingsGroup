@@ -171,6 +171,17 @@ const imageFile = async (image: BestPriceImage, filename: string): Promise<File>
   return { name: filename, data, mimetype, size: data.byteLength }
 }
 
+const mediaStaticDir = path.resolve(process.cwd(), 'public', 'media')
+
+const mediaFileExistsOnDisk = async (filename: string) => {
+  try {
+    await fs.access(path.join(mediaStaticDir, filename))
+    return true
+  } catch {
+    return false
+  }
+}
+
 const resolveOrCreateMedia = async ({
   image,
   imageIndex,
@@ -196,7 +207,20 @@ const resolveOrCreateMedia = async ({
     req,
     where: whereAnd({ site: { equals: siteId } }, { filename: { equals: filename } }),
   })
-  if (existing.docs[0]) return { doc: existing.docs[0] as any, created: false }
+  if (existing.docs[0]) {
+    // Local DBs often retain media rows from prior imports while public/media files are absent
+    // (e.g. after DB copy without media folder). Reuse only when the binary is on disk.
+    if (await mediaFileExistsOnDisk(filename)) {
+      return { doc: existing.docs[0] as any, created: false }
+    }
+    await payload.delete({
+      collection: 'media',
+      id: existing.docs[0].id,
+      overrideAccess: true,
+      req,
+      context,
+    })
+  }
 
   const doc = await payload.create({
     collection: 'media',

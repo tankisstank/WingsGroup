@@ -4,6 +4,36 @@ import { defaultThemePresetByKey, type ThemePresetTokens } from '@/utilities/the
 import { describe, expect, it } from 'vitest'
 
 describe('site theme tokens', () => {
+  it('exposes the full WingSide hi-fi semantic token bridge used by the 8-page product CSS', () => {
+    const style = getSiteThemeTokens(
+      { branding: { themeKey: 'wings-side' }, siteName: 'WingsSide' },
+      { siteCode: 'wings-side' },
+    ).style as Record<string, string>
+
+    for (const key of [
+      '--site-background',
+      '--site-surface',
+      '--site-foreground',
+      '--site-muted',
+      '--site-border',
+      '--site-gold',
+      '--site-cta',
+      '--site-cta-fg',
+      '--site-wine',
+      '--site-brand-soft',
+      '--site-max',
+      '--site-nav-h',
+      '--site-promo-ink',
+      '--site-promo-red',
+    ]) {
+      expect(style[key]).toBeTruthy()
+    }
+
+    // Gold/brown is for CTA moments; spacing is tightened to hi-fi section cadence.
+    expect(style['--site-cta']).toBe(style['--site-gold'])
+    expect(style['--section-space']).toContain('1.65rem')
+  })
+
   it('bridges WingSide semantic tokens by site identity even when its CMS theme is custom', () => {
     const customThemeSettings = {
       branding: {
@@ -14,20 +44,32 @@ describe('site theme tokens', () => {
       siteName: 'WingSide custom theme',
     }
 
-    expect(getSiteThemeTokens(customThemeSettings, { siteCode: 'wings-side' }).style).toMatchObject(
-      {
-        '--site-background': '#F8F5EE',
-        '--site-border': '#D8D2C4',
-        '--site-foreground': '#162523',
-        '--site-gold': '#C9A75C',
-        '--site-muted': '#5D6B67',
-        '--site-promo-ink': '#0A0A0A',
-        '--site-promo-red': '#D62D2D',
-        '--site-surface': '#FFFDF8',
-        '--site-surface-strong': '#EFE8DA',
-        '--site-wine': '#7F1D3B',
-      },
-    )
+    const wingsside = getSiteThemeTokens(customThemeSettings, { siteCode: 'wings-side' })
+    expect(wingsside.brandColor).toBe('#005090')
+    expect(wingsside.accentColor).toBe('#104030')
+    expect(wingsside.style).toMatchObject({
+      '--section-space': 'clamp(1.65rem, 3.8vw, 2.75rem)',
+      '--section-space-sm': 'clamp(1.1rem, 2.8vw, 1.75rem)',
+      '--site-accent': '#104030',
+      '--site-background': '#F3F6F9',
+      '--site-border': '#E2E6ED',
+      '--site-brand': '#005090',
+      '--site-brand-soft': '#E8F1F8',
+      '--site-cta': '#B87A14',
+      '--site-cta-fg': '#FFFFFF',
+      '--site-foreground': '#1B2430',
+      '--site-gold': '#B87A14',
+      '--site-max': '70rem',
+      '--site-muted': '#667085',
+      '--site-nav-h': '72px',
+      '--site-promo-ink': '#0A0A0A',
+      '--site-promo-red': '#D62D2D',
+      '--site-radius': '1.25rem',
+      '--site-radius-sm': '0.75rem',
+      '--site-surface': '#FFFFFF',
+      '--site-surface-strong': '#EEF2F6',
+      '--site-wine': '#8B2E28',
+    })
 
     expect(
       getSiteThemeTokens(customThemeSettings, { siteCode: 'wings-plus' }).style,
@@ -129,36 +171,42 @@ describe('site theme tokens', () => {
       siteName: 'WingsSide',
     }
 
-    expect(getSiteThemeTokens(settings)).toEqual({
-      accentColor: '#C09030',
-      brandColor: '#104030',
+    // Hi-fi token bridge wins for brand/surface/CTA even when CMS preset is editorial teal.
+    expect(getSiteThemeTokens(settings)).toMatchObject({
+      accentColor: '#104030',
+      brandColor: '#005090',
       buttonStyle: 'pill',
       layoutStyle: 'editorial',
       style: {
-        '--section-space': 'clamp(4.5rem, 9vw, 8rem)',
-        '--section-space-sm': 'clamp(2.5rem, 5vw, 4.5rem)',
-        '--site-accent': '#C09030',
-        '--site-background': '#F8F5EE',
+        '--section-space': 'clamp(1.65rem, 3.8vw, 2.75rem)',
+        '--section-space-sm': 'clamp(1.1rem, 2.8vw, 1.75rem)',
+        '--site-accent': '#104030',
+        '--site-background': '#F3F6F9',
         '--site-background-style': 'editorial',
-        '--site-border': '#D8D2C4',
-        '--site-brand': '#104030',
+        '--site-border': '#E2E6ED',
+        '--site-brand': '#005090',
         '--site-brand-contrast': '#ffffff',
+        '--site-brand-soft': '#E8F1F8',
         '--site-button-style': 'pill',
+        '--site-cta': '#B87A14',
+        '--site-cta-fg': '#FFFFFF',
         '--site-font-body': 'var(--font-editorial-body), var(--font-geist-sans)',
         '--site-font-heading': 'var(--font-editorial-heading), Georgia, serif',
-        '--site-foreground': '#162523',
-        '--site-gold': '#C9A75C',
+        '--site-foreground': '#1B2430',
+        '--site-gold': '#B87A14',
         '--site-layout': 'editorial',
-        '--site-muted': '#5D6B67',
+        '--site-max': '70rem',
+        '--site-muted': '#667085',
+        '--site-nav-h': '72px',
         '--site-promo-ink': '#0A0A0A',
         '--site-promo-red': '#D62D2D',
         '--site-radius': '1.25rem',
-        '--site-shadow': '0 24px 80px color-mix(in oklch, #104030 16%, transparent)',
-        '--site-surface': '#FFFDF8',
-        '--site-surface-strong': '#EFE8DA',
+        '--site-radius-sm': '0.75rem',
+        '--site-surface': '#FFFFFF',
+        '--site-surface-strong': '#EEF2F6',
         '--site-theme-key': 'wings-side',
         '--site-theme-preset': 'wings-side-editorial',
-        '--site-wine': '#7F1D3B',
+        '--site-wine': '#8B2E28',
       },
       themeKey: 'wings-side',
       themeName: 'WingsSide',
@@ -193,22 +241,28 @@ describe('site theme tokens', () => {
     }
 
     expect(getSiteThemeTokens(settings)).toMatchObject({
-      accentColor: '#C9A75C',
-      brandColor: '#0F3D3E',
+      accentColor: '#104030',
+      brandColor: '#005090',
       buttonStyle: 'pill',
       layoutStyle: 'editorial',
       style: {
-        '--section-space': 'clamp(4.5rem, 9vw, 8rem)',
-        '--section-space-sm': 'clamp(2.5rem, 5vw, 4.5rem)',
-        '--site-accent': '#C9A75C',
+        '--section-space': 'clamp(1.65rem, 3.8vw, 2.75rem)',
+        '--section-space-sm': 'clamp(1.1rem, 2.8vw, 1.75rem)',
+        '--site-accent': '#104030',
+        '--site-background': '#F3F6F9',
         '--site-background-style': 'editorial',
-        '--site-border': '#D8D2C4',
-        '--site-brand': '#0F3D3E',
+        '--site-border': '#E2E6ED',
+        '--site-brand': '#005090',
+        '--site-cta': '#B87A14',
+        '--site-cta-fg': '#FFFFFF',
         '--site-font-body': 'var(--font-editorial-body), var(--font-geist-sans)',
         '--site-font-heading': 'var(--font-editorial-heading), Georgia, serif',
+        '--site-gold': '#B87A14',
+        '--site-max': '70rem',
+        '--site-nav-h': '72px',
         '--site-radius': '1.25rem',
-        '--site-surface': '#FFFDF8',
-        '--site-surface-strong': '#EFE8DA',
+        '--site-surface': '#FFFFFF',
+        '--site-surface-strong': '#EEF2F6',
         '--site-theme-preset': wingsSideInboundThemePresetKey,
       },
       themeKey: 'wings-side',

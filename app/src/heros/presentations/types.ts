@@ -79,6 +79,8 @@ export type HeroPresentationProps = {
   media?: MediaDocument | number | null
   postcards: readonly string[]
   preset?: HeroPresetLike | null
+  /** Locale for hi-fi dual-CTA fallback labels (Explore destinations). */
+  resolvedLocale?: string | null
   richText?: Page['hero']['richText']
   slides?: HeroSlide[] | null
   supportingMedia?: (MediaDocument | number)[] | null

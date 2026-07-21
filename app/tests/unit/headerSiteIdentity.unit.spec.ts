@@ -36,7 +36,7 @@ describe('Header site identity', () => {
     const header = await Header()
 
     expect(header.props).toMatchObject({
-      primaryAction: { label: 'Plan your trip', url: '/plan-your-trip' },
+      primaryAction: { label: 'Plan trip', url: '/plan-your-trip' },
       siteCode: 'wings-side',
       themeKey: 'custom',
     })

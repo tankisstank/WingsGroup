@@ -122,8 +122,11 @@ describe('production SEO perimeter', () => {
 describe('application and edge security headers', () => {
   it('exposes the required application header baseline', () => {
     const headers = new Map(applicationSecurityHeaders.map(({ key, value }) => [key, value]))
+    const cspReportOnly = headers.get('Content-Security-Policy-Report-Only') || ''
 
-    expect(headers.get('Content-Security-Policy-Report-Only')).toContain("frame-ancestors 'self'")
+    expect(cspReportOnly).toContain("frame-ancestors 'self'")
+    // Report-Only must not ship upgrade-insecure-requests (browsers log console errors).
+    expect(cspReportOnly).not.toContain('upgrade-insecure-requests')
     expect(headers.get('Cross-Origin-Opener-Policy')).toBe('same-origin-allow-popups')
     expect(headers.get('Cross-Origin-Resource-Policy')).toBe('same-site')
     expect(headers.get('Permissions-Policy')).toContain('camera=()')

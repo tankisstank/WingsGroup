@@ -255,9 +255,9 @@ const MealChips = ({ meals }: { meals?: null | string }) => {
 }
 
 const TourPrimaryCtaClass =
-  'tour-cta-primary inline-flex min-h-11 items-center justify-center rounded-full px-5 text-sm font-semibold no-underline'
+  'tour-cta-primary inline-flex min-h-11 min-h-[44px] items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold no-underline'
 const TourGhostCtaClass =
-  'inline-flex min-h-11 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-semibold text-foreground no-underline hover:bg-muted/40'
+  'inline-flex min-h-11 min-h-[44px] items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground no-underline hover:bg-muted/40'
 
 const isRetailOrBareContactLabel = (value?: null | string) => {
   const label = String(value || '').trim()

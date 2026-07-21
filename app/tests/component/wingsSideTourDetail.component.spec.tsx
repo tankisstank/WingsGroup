@@ -60,10 +60,26 @@ describe('WingSideTourDetailPage', () => {
     expect(screen.getByRole('heading', { name: 'Day-by-day itinerary' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Included' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Not included' })).toBeTruthy()
-    expect(screen.getByRole('heading', { name: 'Contact us' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: /on request · reply within 24h/i })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Related journeys' })).toBeTruthy()
     const consultationLinks = screen.getAllByRole('link', { name: /request consultation/i })
-    expect(consultationLinks.every((link) => link.getAttribute('href') === '/contact-us?tour=romantic-getaway&tourId=498&source=tour-detail')).toBe(true)
+    expect(
+      consultationLinks.every(
+        (link) =>
+          link.getAttribute('href') ===
+          '/contact-us?intent=inquiry&source=tour-detail&tour=romantic-getaway&tourId=498',
+      ),
+    ).toBe(true)
+    const contactLinks = screen.getAllByRole('link', { name: /^contact us$/i })
+    expect(contactLinks.length).toBeGreaterThanOrEqual(2)
+    expect(
+      contactLinks.every(
+        (link) =>
+          link.getAttribute('href') ===
+          '/contact-us?intent=contact&source=tour-detail-contact&tour=romantic-getaway&tourId=498',
+      ),
+    ).toBe(true)
+    expect(screen.getAllByText(/price on request/i).length).toBeGreaterThanOrEqual(1)
     expect(screen.queryByText(/Imported from BestPrice|Sales must confirm/i)).toBeNull()
     expect(screen.queryByText(/Giữ chỗ|Tour outbound|Xem lịch khởi hành/i)).toBeNull()
     expect(screen.getByText('Vietnam')).toBeTruthy()
@@ -81,7 +97,7 @@ describe('WingSideTourDetailPage', () => {
     expect(screen.queryByRole('heading', { name: 'Journey overview' })).toBeNull()
     expect(screen.queryByRole('heading', { name: 'Day-by-day itinerary' })).toBeNull()
     expect(screen.queryByRole('heading', { name: 'Included' })).toBeNull()
-    expect(screen.getByRole('heading', { name: 'Contact us' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: /on request · reply within 24h/i })).toBeTruthy()
     expect(screen.queryByText('Duration')).toBeNull()
     expect(document.querySelector('.wingsside-tour-hero > div')?.className).not.toContain(
       'lg:grid-cols-[1.08fr_0.92fr]',

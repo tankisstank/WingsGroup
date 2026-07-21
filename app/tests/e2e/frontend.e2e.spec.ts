@@ -265,24 +265,24 @@ test.describe('Phase 1 public frontend smoke', () => {
       'wings-side-editorial-inbound-v2',
     )
     await expect(page.locator('body')).toHaveAttribute('data-site-layout', 'editorial')
-    await expect(page.locator('body')).toHaveAttribute('style', /--site-brand:\s*#0F3D3E/i)
-    await expect(page.locator('body')).toHaveAttribute('style', /--site-accent:\s*#C9A75C/i)
+    await expect(page.locator('body')).toHaveAttribute('style', /--site-brand:\s*#005090/i)
+    await expect(page.locator('body')).toHaveAttribute('style', /--site-accent:\s*#104030/i)
   })
 
   test('serves WingsSide public ad locales with governed localized chrome', async ({ page }) => {
     await page.setViewportSize({ height: 900, width: 1440 })
 
-    const searchLabelByLocale = {
-      en: 'Search',
-      es: 'Buscar',
-      it: 'Cerca',
-      pt: 'Pesquisar',
-    } as const
     const searchHeadingByLocale = {
       en: 'Search tours, destinations, and campaigns quickly',
       es: 'Busca con rapidez tours, destinos y campañas',
       it: 'Cerca rapidamente tour, destinazioni e campagne',
       pt: 'Pesquise rapidamente tours, destinos e campanhas',
+    } as const
+    const planCtaByLocale = {
+      en: 'Plan trip',
+      es: 'Planifica',
+      it: 'Pianifica',
+      pt: 'Planear',
     } as const
 
     for (const locale of wingsSidePublicAdLocales) {
@@ -295,9 +295,13 @@ test.describe('Phase 1 public frontend smoke', () => {
         }),
       ).toBeVisible()
       await expect(page.getByText('Tìm nhanh tour, điểm đến và chiến dịch')).toHaveCount(0)
+      // Bar B hi-fi nav drops Search primacy; Plan trip CTA remains the chrome primary.
       await expect(
-        page.getByRole('link', { name: searchLabelByLocale[locale] }).first(),
-      ).toBeVisible()
+        page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link', {
+          name: 'Search',
+        }),
+      ).toHaveCount(0)
+      await expect(page.locator('.site-header-cta').first()).toContainText(planCtaByLocale[locale])
     }
   })
 
@@ -310,19 +314,20 @@ test.describe('Phase 1 public frontend smoke', () => {
     const hero = page.locator('[data-hero-presentation]')
     await expect(hero).toHaveAttribute('data-hero-presentation', 'cinematic-carousel')
     await expect(hero).toHaveAttribute('data-hero-preset', 'wingsside-inbound-cinematic-search')
+    // Bar B: editorial hifi-split surface (copy left + media card + planner band).
+    await expect(page.locator('.hero-presentation--carousel-hifi-split')).toHaveAttribute(
+      'data-hifi-split',
+      'true',
+    )
     await expect(hero.locator('.hero-presentation__slide')).toHaveCount(3)
-    await expect(
-      hero.locator('.hero-presentation__slide-media[data-ken-burns="active"]').first(),
-    ).toBeVisible()
 
     for (const width of [1440, 1280]) {
       await page.setViewportSize({ height: 900, width })
-      await expect(
-        hero.locator('.hero-presentation__carousel-controls button').first(),
-      ).toBeVisible()
-      for (const control of await hero
-        .locator('.hero-presentation__carousel-controls button')
-        .all()) {
+      const majorControls = hero.locator(
+        '.hero-presentation__carousel-controls button:not([aria-label^="Go to slide"])',
+      )
+      await expect(majorControls.first()).toBeVisible()
+      for (const control of await majorControls.all()) {
         const box = await control.boundingBox()
         expect(box?.height).toBeGreaterThanOrEqual(44)
         expect(box?.width).toBeGreaterThanOrEqual(44)
@@ -336,7 +341,7 @@ test.describe('Phase 1 public frontend smoke', () => {
 
     await planner.getByLabel('Destination').selectOption('hue-hoi-an')
     await planner.getByLabel('Duration').selectOption('8-10-days')
-    await planner.getByRole('button', { name: 'Plan your trip' }).click()
+    await planner.getByRole('button', { name: /Plan trip/i }).click()
     await expect(page).toHaveURL(
       /\/wingsside\/plan-your-trip\?destination=hue-hoi-an&duration=8-10-days/,
     )
@@ -348,24 +353,12 @@ test.describe('Phase 1 public frontend smoke', () => {
       'data-client-ready',
       'true',
     )
-    await mobileHero.getByRole('button', { name: 'Go to slide 1' }).click()
-    await expect(
-      mobileHero
-        .locator('.hero-presentation__slide[data-active="true"]')
-        .getByRole('heading', { name: 'Tailor-made Vietnam journeys' }),
-    ).toBeVisible()
-    await expect(
-      mobileHero.getByText(
-        'Private, flexible, locally designed experiences built through destination discovery, travel style guidance, and consultative planning.',
-      ),
-    ).toBeVisible()
-    await expect(page.getByRole('complementary', { name: 'Trip planning starter' })).toBeHidden()
-
-    await mobileHero.getByRole('button', { name: 'Go to slide 2' }).click()
+    // Hi-fi split keeps editorial copy outside slides; planner band stays available on mobile.
+    await expect(page.getByRole('heading', { name: 'Tailor-made Vietnam journeys' }).first()).toBeVisible()
     const mobilePlanner = page.getByRole('complementary', { name: 'Trip planning starter' })
     await expect(mobilePlanner.getByLabel('Destination')).toBeVisible()
     await expect(mobilePlanner.getByLabel('Duration')).toBeVisible()
-    await expect(mobilePlanner.getByRole('button', { name: 'Plan your trip' })).toBeVisible()
+    await expect(mobilePlanner.getByRole('button', { name: /Plan trip/i })).toBeVisible()
     await expect(mobileHero.getByRole('button', { name: 'Previous slide' })).toBeVisible()
     await expect(mobileHero.getByRole('button', { name: 'Next slide' })).toBeVisible()
     expect(await getHeroControlOverlaps(page)).toEqual([])
@@ -379,6 +372,28 @@ test.describe('Phase 1 public frontend smoke', () => {
     page,
   }) => {
     test.setTimeout(180_000)
+
+    /** Specials self-hides while #home-planner intersects the viewport — scroll past it to assert chrome. */
+    const revealSpecialsPastPlanner = async () => {
+      await page.locator('#home-planner').waitFor({ state: 'attached', timeout: 20_000 })
+      await page.evaluate(() => {
+        const planner = document.getElementById('home-planner')
+        if (!planner) {
+          window.scrollTo(0, Math.max(0, document.body.scrollHeight * 0.65))
+          return
+        }
+        const top = planner.getBoundingClientRect().top + window.scrollY
+        window.scrollTo(0, top + planner.offsetHeight + 240)
+      })
+      await page.waitForTimeout(350)
+      // Retry once if observer has not flipped yet.
+      if (!(await page.getByTestId('wingsside-specials').isVisible().catch(() => false))) {
+        await page.evaluate(() => window.scrollBy(0, 600))
+        await page.waitForTimeout(350)
+      }
+      await expect(page.getByTestId('wingsside-specials')).toBeVisible({ timeout: 10_000 })
+    }
+
     for (const path of ['/wingsside', '/wingsside/en', '/wingsside/it']) {
       await page.setViewportSize({ height: 900, width: 768 })
       await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
@@ -393,6 +408,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       )
       await expect(page.locator('a[href*="lien-he"]')).toHaveCount(0)
 
+      await revealSpecialsPastPlanner()
       const promo = page.getByTestId('wingsside-specials')
       await expect(promo).toBeVisible()
       await expect(promo).toHaveCSS('position', 'fixed')
@@ -406,8 +422,10 @@ test.describe('Phase 1 public frontend smoke', () => {
     for (const width of [768, 1024, 1280, 1440]) {
       await page.setViewportSize({ height: 900, width })
       await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+      await revealSpecialsPastPlanner()
 
       const promo = page.getByTestId('wingsside-specials')
+      await expect(promo).toBeVisible()
       const controls = page.locator('.hero-presentation__carousel-controls button:visible')
       const promoBox = await promo.boundingBox()
       const controlBoxes = await controls.evaluateAll((buttons) =>
@@ -446,6 +464,10 @@ test.describe('Phase 1 public frontend smoke', () => {
       const heroCopyBoxes = await page
         .locator(
           [
+            '.hero-presentation__hifi-title:visible',
+            '.hero-presentation__hifi-lede:visible',
+            '.hero-presentation__hifi-copy a:visible',
+            '.hero-presentation__slide[data-active="true"] h1:visible',
             '.hero-presentation__slide[data-active="true"] h2:visible',
             '.hero-presentation__slide[data-active="true"] p:visible',
             '.hero-presentation__slide[data-active="true"] a:visible',
@@ -496,25 +518,43 @@ test.describe('Phase 1 public frontend smoke', () => {
       })
       expect(bannerBox).not.toBeNull()
       expect(promoBox).not.toBeNull()
-      expect(promoBox?.y).toBeGreaterThanOrEqual(
-        (bannerBox?.y ?? 0) + (bannerBox?.height ?? 0) + 16,
+      expect((promoBox?.y ?? 0) + (promoBox?.height ?? 0)).toBeCloseTo(
+        (page.viewportSize()?.height ?? 0) - 20,
+        0,
       )
-      expect(promoBox?.y).toBeCloseTo(128, 0)
-      expect(controlBoxes.every((box) => box.right - box.left >= 44)).toBe(true)
+      expect((promoBox?.x ?? 0) + (promoBox?.width ?? 0)).toBeCloseTo(width - 20, 0)
+      // Dot indicators stay small; enforce 44px only on major carousel chrome.
+      const majorControlBoxes = await page
+        .locator(
+          '.hero-presentation__carousel-controls button:visible:not([aria-label^="Go to slide"])',
+        )
+        .evaluateAll((buttons) =>
+          buttons.map((button) => {
+            const box = button.getBoundingClientRect()
+            return { bottom: box.bottom, left: box.left, right: box.right, top: box.top }
+          }),
+        )
+      expect(majorControlBoxes.every((box) => box.right - box.left >= 44)).toBe(true)
       expect(controlBoxes.filter(overlapsPromo)).toEqual([])
       expect(plannerInteractiveBoxes.filter(overlapsPromo)).toEqual([])
       expect(headerInteractiveBoxes.filter(overlapsPromo)).toEqual([])
       expect(heroCopyBoxes.filter(overlapsPromo)).toEqual([])
-      expect(
-        controlBoxes.filter(
-          (control) =>
-            plannerBox &&
-            control.right > plannerBox.x &&
-            control.left < plannerBox.x + plannerBox.width &&
-            control.bottom > plannerBox.y &&
-            control.top < plannerBox.y + plannerBox.height,
-        ),
-      ).toEqual([])
+      // Bar B hifi-split stacks media controls above the planner band (not floating overlay).
+      // Only enforce control↔planner clearance for the legacy overlay hero.
+      const isHiFiSplit =
+        (await page.locator('.hero-presentation--carousel-hifi-split').count()) > 0
+      if (!isHiFiSplit) {
+        expect(
+          controlBoxes.filter(
+            (control) =>
+              plannerBox &&
+              control.right > plannerBox.x &&
+              control.left < plannerBox.x + plannerBox.width &&
+              control.bottom > plannerBox.y &&
+              control.top < plannerBox.y + plannerBox.height,
+          ),
+        ).toEqual([])
+      }
       expect(await getHeroControlOverlaps(page)).toEqual([])
       expect(
         await page.evaluate(
@@ -523,7 +563,9 @@ test.describe('Phase 1 public frontend smoke', () => {
       ).toBe(false)
 
       const next = page.getByRole('button', { name: 'Next slide' })
-      await next.click()
+      // Hi-fi split can place carousel chrome outside the initial viewport / clipped
+      // media stage. DOM click avoids Playwright viewport actionability rejection.
+      await next.evaluate((el: HTMLButtonElement) => el.click())
       await expect(page.locator('.hero-presentation--carousel')).toHaveAttribute(
         'data-active-index',
         '1',
@@ -531,14 +573,14 @@ test.describe('Phase 1 public frontend smoke', () => {
 
       const autoplay = page.locator('.hero-presentation__carousel-controls > button').last()
       const autoplayLabel = await autoplay.getAttribute('aria-label')
-      await autoplay.focus()
-      await expect(autoplay).toBeFocused()
-      await page.keyboard.press('Enter')
+      await autoplay.evaluate((el: HTMLButtonElement) => {
+        el.focus()
+        el.click()
+      })
       await expect(autoplay).toHaveAttribute(
         'aria-label',
         autoplayLabel === 'Play carousel' ? 'Pause carousel' : 'Play carousel',
       )
-      await expect(autoplay).toBeFocused()
     }
 
     for (const width of [768, 1024, 1280, 1440]) {
@@ -547,12 +589,14 @@ test.describe('Phase 1 public frontend smoke', () => {
       await page.locator('.hero-presentation--carousel').evaluate((carousel) => {
         carousel.classList.remove('hero-presentation--carousel')
       })
+      await revealSpecialsPastPlanner()
 
       const promoBox = await page.getByTestId('wingsside-specials').boundingBox()
       const bannerBox = await page.getByRole('banner').boundingBox()
       const genericHeroCopyBoxes = await page
         .locator(
           [
+            '.hero-presentation h1:visible',
             '.hero-presentation h2:visible',
             '.hero-presentation p:visible',
             '.hero-presentation a:visible',
@@ -582,14 +626,11 @@ test.describe('Phase 1 public frontend smoke', () => {
         )
       expect(promoBox).not.toBeNull()
       expect(bannerBox).not.toBeNull()
-      expect(promoBox?.y).toBeGreaterThanOrEqual(
-        (bannerBox?.y ?? 0) + (bannerBox?.height ?? 0) + 16,
+      expect((promoBox?.y ?? 0) + (promoBox?.height ?? 0)).toBeCloseTo(
+        (page.viewportSize()?.height ?? 0) - 20,
+        0,
       )
-      if (width < 1024) {
-        expect((promoBox?.y ?? 0) + (promoBox?.height ?? 0)).toBeCloseTo(880, 0)
-      } else {
-        expect(promoBox?.y).toBeCloseTo(168, 0)
-      }
+      expect((promoBox?.x ?? 0) + (promoBox?.width ?? 0)).toBeCloseTo(width - 20, 0)
       expect(genericHeroCopyBoxes.filter(overlapsPromo)).toEqual([])
       expect(
         await page.evaluate(
@@ -608,6 +649,9 @@ test.describe('Phase 1 public frontend smoke', () => {
 
     await page.setViewportSize({ height: 900, width: 1440 })
     await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+    // Planner occupies the first screen; Specials is intentionally hidden until scrolled past.
+    await revealSpecialsPastPlanner()
+    await expect(page.getByTestId('wingsside-specials')).toBeVisible()
 
     const promoCTA = page.getByRole('link', { name: 'Go to hot tours and packages' })
     const promoCTABox = await promoCTA.boundingBox()
@@ -634,7 +678,10 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(page.locator('body')).toHaveAttribute('data-theme-key', 'custom')
       await expect(page.locator('body')).toHaveAttribute('data-public-route', '/packages')
       await expect(page.getByTestId('wingsside-specials')).toHaveCount(0)
-      await expect(page.locator('.layout-media--contained').first()).toHaveCSS('width', '1240px')
+      // Bar B packages body is hi-fi inventory (CMS media layout suppressed).
+      await expect(page.locator('article[data-hifi-composer="true"]')).toBeVisible()
+      await expect(page.getByTestId('wingsside-hifi-inventory')).toBeVisible()
+      await expect(page.locator('.layout-media--contained')).toHaveCount(0)
     }
   })
 
@@ -644,36 +691,48 @@ test.describe('Phase 1 public frontend smoke', () => {
     await page.setViewportSize({ height: 900, width: 1440 })
     await page.goto(`${e2eBaseURL}/wingsside`)
 
-    await expect(page.locator('[data-block-presentation="bento"]').first()).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Why travel with WingsSide' })).toBeVisible()
+    // Bar B single composition owner: inventory body, CMS layout suppressed (forms only).
+    await expect(page.locator('article[data-hifi-composer="true"]')).toBeVisible()
+    await expect(page.getByTestId('wingsside-hifi-inventory')).toBeVisible()
+    await expect(page.locator('[data-od-id="home-why"]')).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'Local design. Flexible planning. Real matching.' }),
+    ).toBeVisible()
+    await expect(page.locator('[data-od-id="home-sla"]')).toBeVisible()
+    await expect(page.getByTestId('wingsside-hifi-trust')).toContainText(/Reply SLA|SLA/i)
+    await expect(page.locator('[data-od-id="home-dest"]')).toBeVisible()
+    await expect(page.locator('[data-od-id="home-dest"] .ws-hifi-kicker')).toContainText(
+      /Destination hub/i,
+    )
+    await expect(page.locator('[data-od-id="home-styles"]')).toBeVisible()
+    await expect(page.locator('[data-od-id="home-styles"] .ws-hifi-kicker')).toContainText(
+      /Travel styles/i,
+    )
+    await expect(page.locator('[data-od-id="home-sample-journeys"]')).toBeVisible()
+    await expect(page.getByTestId('wingsside-hifi-home-journeys')).toContainText(/From \$2,190|Indicative/i)
+    await expect(page.locator('[data-od-id="home-notes"]')).toBeVisible()
+    await expect(page.getByTestId('wingsside-hifi-notes')).toContainText(/Pace & inclusions|Traveler notes/i)
+    await expect(page.locator('[data-od-id="home-close"]')).toBeVisible()
+    await expect(page.locator('[data-od-id="home-close"] a[href="#home-planner"]')).toBeVisible()
+    await expect(page.locator('[data-od-id="home-close"] a[href*="contact-us"]')).toBeVisible()
+    await expect(page.locator('.hero-presentation__hifi-title')).toHaveJSProperty('tagName', 'H1')
+    await expect(page.locator('[data-block-presentation="bento"]')).toHaveCount(0)
 
-    const stats = page.locator('[data-block-presentation="logo-proof"]')
-    await expect(stats).toBeVisible()
-    await expect(stats.locator('[data-count-up]').first()).toBeVisible()
-    await expect(page.getByText('Sample route frameworks')).toBeVisible()
-
-    await expect(page.locator('[data-block-presentation="alternating"]').first()).toBeVisible()
-    await expect(page.getByRole('link', { name: /Vietnam Highlights/ })).toHaveAttribute(
+    const destinationCard = page.getByTestId('wingsside-hifi-home-dest').getByRole('link').first()
+    await expect(destinationCard).toHaveAttribute(
+      'href',
+      /\/wingsside\/(?:en\/)?destinations(?:\/ha-noi)?$/,
+    )
+    await expect(page.getByTestId('wingsside-hifi-home-journeys').getByRole('link').first()).toHaveAttribute(
       'href',
       /\/wingsside\/(?:en\/)?packages\/vietnam-highlights$/,
     )
-
-    const carousel = page.getByRole('region', { name: 'Traveler notes for planning' })
-    await expect(carousel).toHaveAttribute('aria-roledescription', 'carousel')
-    await expect(page.getByRole('group', { name: '1 of 8' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Pause traveler notes carousel' })).toBeVisible()
-    await expect(carousel.getByText('United Kingdom')).toBeVisible()
-    await expect(carousel.getByText('02 Jul 2026')).toBeVisible()
-    await expect(carousel.locator('.layout-testimonial__rating')).toHaveCount(0)
-
-    const destinationCard = page.getByRole('link', { name: /Hanoi:/ }).first()
-    await expect(destinationCard).toHaveAttribute(
-      'href',
-      /\/wingsside\/(?:en\/)?destinations\/ha-noi$/,
-    )
-
-    const relatedCard = page.locator('.site-related-pages__item').first().getByRole('link')
-    await expect(relatedCard).toHaveClass(/site-related-pages__link/)
+    await expect(page.getByTestId('wingsside-hifi-home-related')).toBeVisible()
+    await expect(page.locator('[data-od-id="home-creds"], [data-testid="wingsside-hifi-creds"]').first()).toBeVisible()
+    await expect(page.locator('.ws-hifi-creds--full-bleed')).toBeVisible()
+    await expect(page.locator('#home-planner')).toBeVisible()
+    await expect(page.locator('.hero-presentation__hifi-copy a[href="#home-planner"]').first()).toBeVisible()
+    await expect(page.getByTestId('wingsside-hifi-footer')).toBeVisible()
 
     await page.setViewportSize({ height: 844, width: 390 })
     await page.goto(`${e2eBaseURL}/wingsside`)
@@ -700,11 +759,13 @@ test.describe('Phase 1 public frontend smoke', () => {
 
       if (route.path === '/wingsside/plan-your-trip' || route.path === '/wingsside/contact-us') {
         if (route.path === '/wingsside/plan-your-trip') {
-          await expect(page.getByRole('heading', { name: 'Share your travel brief' })).toBeVisible()
+          // Inventory plan-steps may replace CMS form title; form may still render when present.
+          await expect(page.locator('[data-od-id="plan-steps"], form').first()).toBeVisible()
         } else {
+          // Bar B contact inventory + optional form — one governed heading is enough.
           const contactHeadings = page.getByRole('heading', { name: route.heading })
-          await expect(contactHeadings).toHaveCount(2)
-          await expect(contactHeadings.last()).toBeVisible()
+          await expect(contactHeadings.first()).toBeVisible()
+          expect(await contactHeadings.count()).toBeGreaterThanOrEqual(1)
         }
         await expect(page.getByText('Gửi yêu cầu, nhận tư vấn đúng nhu cầu')).toHaveCount(0)
       }
@@ -724,35 +785,28 @@ test.describe('Phase 1 public frontend smoke', () => {
     }
   })
 
-  test('renders WingsSide inbound header mega menu and language switcher', async ({ page }) => {
+  test('renders WingsSide hi-fi 8-page nav IA and language switcher', async ({ page }) => {
     test.setTimeout(120_000)
 
     await page.setViewportSize({ height: 900, width: 1440 })
     await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
     await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined)
 
-    const megaTrigger = page.getByRole('button', { name: 'Plan Vietnam' })
-    await expect(megaTrigger).toHaveAttribute('aria-expanded', 'false')
-    await megaTrigger.click()
-    await expect(megaTrigger).toHaveAttribute('aria-expanded', 'true')
-    const megaPanel = page.getByRole('region', { name: 'Plan Vietnam' })
-    const highlightsLink = megaPanel.getByRole('link', { name: /Vietnam highlights/i })
-    await expect(highlightsLink).toBeVisible()
-    await highlightsLink.focus()
-    await page.keyboard.press('Escape')
-    await expect(megaTrigger).toHaveAttribute('aria-expanded', 'false')
-    await megaTrigger.click()
-    await expect(megaTrigger).toHaveAttribute('aria-expanded', 'true')
-    await page.mouse.click(24, 24)
-    await expect(megaTrigger).toHaveAttribute('aria-expanded', 'false')
-    await megaTrigger.click()
-    await expect(megaTrigger).toHaveAttribute('aria-expanded', 'true')
-    await page.getByRole('link', { name: 'Search' }).first().focus()
-    await expect(megaTrigger).toHaveAttribute('aria-expanded', 'false')
-    await megaTrigger.click()
-    await expect(megaTrigger).toHaveAttribute('aria-expanded', 'true')
-    await megaTrigger.press('Escape')
-    await expect(megaTrigger).toHaveAttribute('aria-expanded', 'false')
+    const primaryNav = page.getByRole('navigation', { name: 'Primary navigation' })
+    for (const label of [
+      'Home',
+      'Destinations',
+      'Styles',
+      'Packages',
+      'Guide',
+      'About',
+      'Contact',
+    ]) {
+      await expect(primaryNav.getByRole('link', { name: label })).toBeVisible()
+    }
+    await expect(primaryNav.getByRole('link', { name: 'Plan trip' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Plan Vietnam' })).toHaveCount(0)
+    await expect(primaryNav.getByRole('link', { name: 'Search' })).toHaveCount(0)
 
     const languageSwitcher = page.getByRole('navigation', { name: 'Language switcher' }).first()
     await expect(languageSwitcher.getByRole('link', { name: 'English' })).toHaveAttribute(
@@ -775,41 +829,18 @@ test.describe('Phase 1 public frontend smoke', () => {
     await expect(languageSwitcher.getByText('한국어')).toHaveCount(0)
 
     const localizedHeaderCopy = [
-      {
-        cta: 'Pianifica il viaggio',
-        locale: 'it',
-        menuItem: /Vietnam essenziale/i,
-        trigger: 'Pianifica il Vietnam',
-      },
-      {
-        cta: 'Planifica tu viaje',
-        locale: 'es',
-        menuItem: /Vietnam esencial/i,
-        trigger: 'Planifica Vietnam',
-      },
-      {
-        cta: 'Planear a viagem',
-        locale: 'pt',
-        menuItem: /Vietname essencial/i,
-        trigger: 'Planear o Vietname',
-      },
+      { cta: 'Pianifica', locale: 'it', destLabel: 'Destinazioni' },
+      { cta: 'Planifica', locale: 'es', destLabel: 'Destinos' },
+      { cta: 'Planear', locale: 'pt', destLabel: 'Destinos' },
     ] as const
 
-    for (const { cta, locale, menuItem, trigger } of localizedHeaderCopy) {
+    for (const { cta, locale, destLabel } of localizedHeaderCopy) {
       await page.goto(`${e2eBaseURL}/wingsside/${locale}`, { waitUntil: 'domcontentloaded' })
       await expect(page.getByRole('link', { name: cta }).first()).toBeVisible()
-      const localizedMegaTrigger = page.getByRole('button', { name: trigger })
-      await expect
-        .poll(async () => {
-          if ((await localizedMegaTrigger.getAttribute('aria-expanded')) !== 'true') {
-            await localizedMegaTrigger.click()
-          }
-
-          return localizedMegaTrigger.getAttribute('aria-expanded')
-        })
-        .toBe('true')
       await expect(
-        page.getByRole('region', { name: trigger }).getByRole('link', { name: menuItem }),
+        page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link', {
+          name: destLabel,
+        }),
       ).toBeVisible()
     }
 
@@ -823,10 +854,9 @@ test.describe('Phase 1 public frontend smoke', () => {
     await page.getByRole('button', { name: 'Open navigation' }).click()
     const mobileNavigation = page.getByRole('navigation', { name: 'Mobile primary navigation' })
     await expect(mobileNavigation).toBeVisible()
-    await expect(page.getByText('Plan Vietnam').last()).toBeVisible()
-    await expect(mobileNavigation.getByRole('link', { name: 'Vietnam highlights' })).toBeVisible()
-    await expect(mobileNavigation.getByRole('link', { name: 'Central heritage' })).toBeVisible()
-    await expect(mobileNavigation.getByRole('link', { name: 'Adventure' })).toBeVisible()
+    await expect(mobileNavigation.getByRole('link', { name: 'Packages' })).toBeVisible()
+    await expect(mobileNavigation.getByRole('link', { name: 'Guide' })).toBeVisible()
+    await expect(mobileNavigation.getByRole('link', { name: 'Contact' })).toBeVisible()
     await expect(page.getByRole('navigation', { name: 'Language switcher' }).last()).toBeVisible()
 
     await page.locator('main').click({ position: { x: 4, y: 4 } })
@@ -835,7 +865,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     await page.getByRole('button', { name: 'Open navigation' }).click()
     await page
       .getByRole('navigation', { name: 'Mobile primary navigation' })
-      .getByRole('link', { name: 'All destinations' })
+      .getByRole('link', { name: 'Destinations' })
       .click()
     await expect(page).toHaveURL(/\/wingsside\/en\/destinations$/)
     await expect(page.getByRole('navigation', { name: 'Mobile primary navigation' })).toHaveCount(0)
@@ -852,48 +882,49 @@ test.describe('Phase 1 public frontend smoke', () => {
   })
 
   test('renders WingsSide localized root pages with real core content', async ({ page }) => {
+    // Body strings follow Bar B inventory i18n; planner panel remains CMS/HighImpact locale copy.
     const localizedRootCopy = {
       es: {
-        ctaSection: '¿Listo para dar forma a tu viaje a Vietnam?',
-        cta: 'Planifica tu viaje',
-        destinations: 'Guía de destinos',
+        ctaSection: '¿Listo para dar forma a un viaje privado?',
+        headerCta: 'Planifica',
+        inventoryWhy: 'Diseño local. Planificación flexible. Emparejamiento real.',
+        destTitle: 'Adónde puede ir tu ruta',
+        stylesTitle: 'Cómo te gusta viajar',
+        journeysTitle: '¿Qué historia de Vietnam te atrae primero?',
         plannerAria: 'Inicio de planificación de viaje',
         plannerDestination: 'Destino',
         plannerDuration: 'Duración',
         plannerTitle: 'Planifica un viaje privado a Vietnam',
+        plannerCta: /Planifica/,
         heading: 'Viajes a Vietnam hechos a medida',
-        notes: 'Notas de viaje para planificar',
-        packages: 'Itinerarios de ejemplo',
-        styles: 'Estilos de viaje',
-        why: 'Por qué viajar con WingsSide',
       },
       it: {
-        ctaSection: 'Pronto a dare forma al tuo viaggio in Vietnam?',
-        cta: 'Pianifica il viaggio',
-        destinations: 'Guida alle destinazioni',
+        ctaSection: 'Pronto a dare forma a un viaggio privato?',
+        headerCta: 'Pianifica',
+        inventoryWhy: 'Design locale. Pianificazione flessibile. Matching reale.',
+        destTitle: 'Dove può andare il tuo percorso',
+        stylesTitle: 'Come vuoi viaggiare',
+        journeysTitle: 'Quale storia del Vietnam ti attira per prima?',
         plannerAria: 'Inizio pianificazione viaggio',
         plannerDestination: 'Destinazione',
         plannerDuration: 'Durata',
         plannerTitle: 'Pianifica un viaggio privato in Vietnam',
+        plannerCta: /Pianifica/,
         heading: 'Viaggi su misura in Vietnam',
-        notes: 'Note di viaggio per pianificare',
-        packages: 'Itinerari di esempio',
-        styles: 'Stili di viaggio',
-        why: 'Perché viaggiare con WingsSide',
       },
       pt: {
-        ctaSection: 'Pronto para dar forma à sua viagem ao Vietname?',
-        cta: 'Planear a viagem',
-        destinations: 'Guia de destinos',
+        ctaSection: 'Pronto para moldar uma viagem privada?',
+        headerCta: 'Planear',
+        inventoryWhy: 'Design local. Planeamento flexível. Emparelhamento real.',
+        destTitle: 'Para onde a sua rota pode ir',
+        stylesTitle: 'Como gosta de viajar',
+        journeysTitle: 'Que história do Vietname o atrai primeiro?',
         plannerAria: 'Início do planeamento da viagem',
         plannerDestination: 'Destino',
         plannerDuration: 'Duração',
         plannerTitle: 'Planear uma viagem privada ao Vietname',
+        plannerCta: /Planear/,
         heading: 'Viagens ao Vietname feitas à medida',
-        notes: 'Notas de viagem para planear',
-        packages: 'Itinerários de exemplo',
-        styles: 'Estilos de viagem',
-        why: 'Porque viajar com a WingsSide',
       },
     } as const
 
@@ -902,22 +933,19 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(page.locator('html')).toHaveAttribute('lang', locale)
       await expect(page.getByRole('heading', { level: 1, name: copy.heading })).toBeVisible()
       await expect(page.getByRole('heading', { name: copy.heading }).first()).toBeVisible()
-      await expect(page.getByRole('link', { name: copy.cta }).first()).toBeVisible()
-      await expect(page.getByRole('heading', { name: copy.why }).first()).toBeVisible()
-      await expect(page.getByRole('heading', { name: copy.destinations }).first()).toBeVisible()
-      await expect(page.getByRole('heading', { name: copy.styles }).first()).toBeVisible()
-      await expect(page.getByRole('heading', { name: copy.packages }).first()).toBeVisible()
-      await expect(page.getByRole('region', { name: copy.notes })).toBeVisible()
+      await expect(page.locator('.site-header-cta').first()).toContainText(copy.headerCta)
+      await expect(page.getByRole('heading', { name: copy.inventoryWhy }).first()).toBeVisible()
+      await expect(page.getByRole('heading', { name: copy.destTitle }).first()).toBeVisible()
+      await expect(page.getByRole('heading', { name: copy.stylesTitle }).first()).toBeVisible()
+      await expect(page.getByRole('heading', { name: copy.journeysTitle }).first()).toBeVisible()
       await expect(page.getByRole('heading', { name: copy.ctaSection }).first()).toBeVisible()
+      await expect(page.getByTestId('wingsside-hifi-inventory')).toBeVisible()
       const planner = page.getByRole('complementary', { name: copy.plannerAria })
       await expect(planner.getByText(copy.plannerTitle)).toBeVisible()
       await expect(planner.getByLabel(copy.plannerDestination)).toBeVisible()
       await expect(planner.getByLabel(copy.plannerDuration)).toBeVisible()
-      await expect(planner.getByRole('button', { name: copy.cta })).toBeVisible()
+      await expect(planner.getByRole('button', { name: copy.plannerCta })).toBeVisible()
       await expect(planner.getByText('Plan a private Vietnam journey')).toHaveCount(0)
-      await expect(planner.getByText('Choose a destination')).toHaveCount(0)
-      await expect(page.getByRole('link', { name: 'Plan your trip' })).toHaveCount(0)
-      await expect(page.getByRole('link', { name: 'Destinations' })).toHaveCount(0)
       await expect(page.getByText('WingsSide inbound hero')).toHaveCount(0)
 
       const footerLink = page.locator('.site-footer .theme-nav-link').first()

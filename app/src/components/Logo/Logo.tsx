@@ -14,7 +14,10 @@ interface Props {
   logoImage?: Media | null
   logoText?: null | string
   priority?: 'auto' | 'high' | 'low'
+  siteCode?: null | string
 }
+
+const WINGSSIDE_LOGO_FALLBACK = '/wingsside-hifi/logo.png'
 
 export const Logo = (props: Props) => {
   const {
@@ -25,6 +28,7 @@ export const Logo = (props: Props) => {
     className,
     logoImage,
     logoText,
+    siteCode,
   } = props
 
   const loading = loadingFromProps || 'lazy'
@@ -33,25 +37,27 @@ export const Logo = (props: Props) => {
   const label = logoText || logoImage?.alt || 'Site logo'
   const isPriorityImage = priority === 'high'
   const resolvedLogoImage = logoImageUrl && logoImage ? logoImage : null
+  const wingsSideFallback = !resolvedLogoImage && siteCode === 'wings-side'
 
-  if (resolvedLogoImage) {
+  if (resolvedLogoImage || wingsSideFallback) {
     return (
       <span
         aria-label={label}
         className={clsx('inline-flex items-center', className)}
         data-fetch-priority={priority}
         data-loading={loading}
+        data-logo-source={wingsSideFallback ? 'wingsside-hifi' : 'cms'}
       >
         <NextImage
           alt=""
           aria-hidden="true"
           className="site-logo-image h-12 w-auto max-w-[160px] object-contain"
-          height={resolvedLogoImage.height || 96}
+          height={resolvedLogoImage?.height || 96}
           loading={isPriorityImage ? undefined : loading}
           priority={isPriorityImage}
-          src={logoImageUrl}
+          src={wingsSideFallback ? WINGSSIDE_LOGO_FALLBACK : logoImageUrl}
           unoptimized
-          width={resolvedLogoImage.width || 320}
+          width={resolvedLogoImage?.width || 320}
         />
       </span>
     )

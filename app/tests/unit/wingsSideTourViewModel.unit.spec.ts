@@ -73,9 +73,12 @@ describe('WingSide tour view model', () => {
     ])
   })
 
-  it('builds the approved consultation URL with tour context', () => {
+  it('builds the approved consultation URL with tour context and intent', () => {
     expect(buildWingSideTourCTA('romantic-getaway', 498)).toBe(
-      '/contact-us?tour=romantic-getaway&tourId=498&source=tour-detail',
+      '/contact-us?intent=inquiry&source=tour-detail&tour=romantic-getaway&tourId=498',
+    )
+    expect(buildWingSideTourCTA('romantic-getaway', 498, 'contact')).toBe(
+      '/contact-us?intent=contact&source=tour-detail-contact&tour=romantic-getaway&tourId=498',
     )
   })
 

@@ -15,7 +15,6 @@ import {
   BadgeCheckIcon,
   CalendarDaysIcon,
   CameraIcon,
-  CompassIcon,
   MapPinnedIcon,
   PlaneIcon,
   UsersIcon,
@@ -65,19 +64,56 @@ type PlannerPanelCopy = {
   destinations: readonly { label: string; value: string }[]
   durationLabel: string
   durations: readonly { label: string; value: string }[]
+  formTitle: string
+  fullBriefLink: string
+  fullBriefPrefix: string
   highlights: readonly {
     icon: (typeof plannerHighlightIcons)[keyof typeof plannerHighlightIcons]
     label: string
   }[]
   miniLabel: string
+  /** Full accessible month field name (base + hint). */
+  monthLabel: string
+  monthLabelBase: string
+  monthLabelHint: string
+  months: readonly { label: string; value: string }[]
+  points: readonly string[]
+  sameTeamNote: string
+  styleLabel: string
+  styles: readonly { label: string; value: string }[]
   title: string
 }
+
+const plannerMonths = [
+  { label: 'Month', value: '' },
+  { label: 'Jan', value: '01' },
+  { label: 'Feb', value: '02' },
+  { label: 'Mar', value: '03' },
+  { label: 'Apr', value: '04' },
+  { label: 'May', value: '05' },
+  { label: 'Jun', value: '06' },
+  { label: 'Jul', value: '07' },
+  { label: 'Aug', value: '08' },
+  { label: 'Sep', value: '09' },
+  { label: 'Oct', value: '10' },
+  { label: 'Nov', value: '11' },
+  { label: 'Dec', value: '12' },
+] as const
+
+const plannerStyles = [
+  { label: 'Family', value: 'family' },
+  { label: 'Luxury', value: 'luxury' },
+  { label: 'Culture', value: 'culture' },
+  { label: 'Adventure', value: 'adventure' },
+  { label: 'Wellness', value: 'wellness' },
+  { label: 'Business', value: 'business' },
+] as const
 
 const plannerPanelCopyByLocale = {
   en: {
     ariaLabel: 'Trip planning starter',
     cuesAriaLabel: 'WingsSide planning cues',
-    ctaLabel: 'Plan your trip',
+    ctaLabel: 'Plan trip →',
     description: 'Choose a starting direction and send it into the trip planning flow.',
     destinationLabel: 'Destination',
     destinations: [
@@ -95,18 +131,33 @@ const plannerPanelCopyByLocale = {
       { label: '11-14 days', value: '11-14-days' },
       { label: '15+ days', value: '15-plus-days' },
     ],
+    formTitle: 'Start here',
+    fullBriefLink: 'full brief on Plan your trip',
+    fullBriefPrefix: 'Or open the',
     highlights: [
       { icon: plannerHighlightIcons.routeDesign, label: 'Route design' },
       { icon: plannerHighlightIcons.localMoments, label: 'Local moments' },
       { icon: plannerHighlightIcons.privateGroups, label: 'Private groups' },
     ],
-    miniLabel: 'Start with',
+    miniLabel: 'Quick path · Home',
+    monthLabel: 'Travel month (recommended)',
+    monthLabelBase: 'Travel month',
+    monthLabelHint: '(recommended)',
+    months: plannerMonths,
+    points: [
+      'Typical reply: 1 business day (GMT+7)',
+      'Destination + duration + style → first direction',
+      'Need more fields? Open the full planning brief',
+    ],
+    sameTeamNote: 'same team',
+    styleLabel: 'Travel style',
+    styles: plannerStyles,
     title: 'Plan a private Vietnam journey',
   },
   es: {
     ariaLabel: 'Inicio de planificación de viaje',
     cuesAriaLabel: 'Señales de planificación WingsSide',
-    ctaLabel: 'Planifica tu viaje',
+    ctaLabel: 'Planifica →',
     description: 'Elige una dirección inicial y envíala al flujo de planificación.',
     destinationLabel: 'Destino',
     destinations: [
@@ -124,18 +175,33 @@ const plannerPanelCopyByLocale = {
       { label: '11-14 días', value: '11-14-days' },
       { label: '15+ días', value: '15-plus-days' },
     ],
+    formTitle: 'Empieza aquí',
+    fullBriefLink: 'brief completo en Planifica tu viaje',
+    fullBriefPrefix: 'O abre el',
     highlights: [
       { icon: plannerHighlightIcons.routeDesign, label: 'Diseño de ruta' },
       { icon: plannerHighlightIcons.localMoments, label: 'Momentos locales' },
       { icon: plannerHighlightIcons.privateGroups, label: 'Grupos privados' },
     ],
-    miniLabel: 'Empieza con',
+    miniLabel: 'Ruta rápida · Inicio',
+    monthLabel: 'Mes de viaje (recomendado)',
+    monthLabelBase: 'Mes de viaje',
+    monthLabelHint: '(recomendado)',
+    months: plannerMonths,
+    points: [
+      'Respuesta típica: 1 día laborable (GMT+7)',
+      'Destino + duración + estilo → primera dirección',
+      '¿Más campos? Abre el brief completo',
+    ],
+    sameTeamNote: 'mismo equipo',
+    styleLabel: 'Estilo de viaje',
+    styles: plannerStyles,
     title: 'Planifica un viaje privado a Vietnam',
   },
   it: {
     ariaLabel: 'Inizio pianificazione viaggio',
     cuesAriaLabel: 'Segnali di pianificazione WingsSide',
-    ctaLabel: 'Pianifica il viaggio',
+    ctaLabel: 'Pianifica →',
     description: 'Scegli una direzione iniziale e inviala al flusso di pianificazione.',
     destinationLabel: 'Destinazione',
     destinations: [
@@ -153,18 +219,33 @@ const plannerPanelCopyByLocale = {
       { label: '11-14 giorni', value: '11-14-days' },
       { label: '15+ giorni', value: '15-plus-days' },
     ],
+    formTitle: 'Inizia qui',
+    fullBriefLink: 'brief completo su Pianifica il viaggio',
+    fullBriefPrefix: 'Oppure apri il',
     highlights: [
       { icon: plannerHighlightIcons.routeDesign, label: 'Disegno della rotta' },
       { icon: plannerHighlightIcons.localMoments, label: 'Momenti locali' },
       { icon: plannerHighlightIcons.privateGroups, label: 'Gruppi privati' },
     ],
-    miniLabel: 'Inizia con',
+    miniLabel: 'Percorso rapido · Home',
+    monthLabel: 'Mese di viaggio (consigliato)',
+    monthLabelBase: 'Mese di viaggio',
+    monthLabelHint: '(consigliato)',
+    months: plannerMonths,
+    points: [
+      'Risposta tipica: 1 giorno lavorativo (GMT+7)',
+      'Destinazione + durata + stile → prima direzione',
+      'Servono più campi? Apri il brief completo',
+    ],
+    sameTeamNote: 'stesso team',
+    styleLabel: 'Stile di viaggio',
+    styles: plannerStyles,
     title: 'Pianifica un viaggio privato in Vietnam',
   },
   pt: {
     ariaLabel: 'Início do planeamento da viagem',
     cuesAriaLabel: 'Sinais de planeamento WingsSide',
-    ctaLabel: 'Planear a viagem',
+    ctaLabel: 'Planear →',
     description: 'Escolha uma direção inicial e envie-a para o fluxo de planeamento.',
     destinationLabel: 'Destino',
     destinations: [
@@ -182,18 +263,33 @@ const plannerPanelCopyByLocale = {
       { label: '11-14 dias', value: '11-14-days' },
       { label: '15+ dias', value: '15-plus-days' },
     ],
+    formTitle: 'Comece aqui',
+    fullBriefLink: 'brief completo em Planear a viagem',
+    fullBriefPrefix: 'Ou abra o',
     highlights: [
       { icon: plannerHighlightIcons.routeDesign, label: 'Desenho de rota' },
       { icon: plannerHighlightIcons.localMoments, label: 'Momentos locais' },
       { icon: plannerHighlightIcons.privateGroups, label: 'Grupos privados' },
     ],
-    miniLabel: 'Comece por',
+    miniLabel: 'Caminho rápido · Home',
+    monthLabel: 'Mês de viagem (recomendado)',
+    monthLabelBase: 'Mês de viagem',
+    monthLabelHint: '(recomendado)',
+    months: plannerMonths,
+    points: [
+      'Resposta típica: 1 dia útil (GMT+7)',
+      'Destino + duração + estilo → primeira direção',
+      'Precisa de mais campos? Abra o brief completo',
+    ],
+    sameTeamNote: 'mesma equipa',
+    styleLabel: 'Estilo de viagem',
+    styles: plannerStyles,
     title: 'Planear uma viagem privada ao Vietname',
   },
   vi: {
     ariaLabel: 'Khởi tạo kế hoạch chuyến đi',
     cuesAriaLabel: 'Gợi ý lập kế hoạch WingsSide',
-    ctaLabel: 'Lên kế hoạch',
+    ctaLabel: 'Lên kế hoạch →',
     description: 'Chọn hướng đi ban đầu và gửi vào luồng lập kế hoạch.',
     destinationLabel: 'Điểm đến',
     destinations: [
@@ -211,12 +307,27 @@ const plannerPanelCopyByLocale = {
       { label: '11-14 ngày', value: '11-14-days' },
       { label: '15+ ngày', value: '15-plus-days' },
     ],
+    formTitle: 'Bắt đầu tại đây',
+    fullBriefLink: 'brief đầy đủ tại Lên kế hoạch',
+    fullBriefPrefix: 'Hoặc mở',
     highlights: [
       { icon: plannerHighlightIcons.routeDesign, label: 'Thiết kế tuyến' },
       { icon: plannerHighlightIcons.localMoments, label: 'Khoảnh khắc địa phương' },
       { icon: plannerHighlightIcons.privateGroups, label: 'Nhóm riêng' },
     ],
-    miniLabel: 'Bắt đầu với',
+    miniLabel: 'Lối tắt · Home',
+    monthLabel: 'Tháng đi (khuyến nghị)',
+    monthLabelBase: 'Tháng đi',
+    monthLabelHint: '(khuyến nghị)',
+    months: plannerMonths,
+    points: [
+      'Phản hồi điển hình: 1 ngày làm việc (GMT+7)',
+      'Điểm đến + thời lượng + phong cách → hướng đi đầu',
+      'Cần thêm trường? Mở brief đầy đủ',
+    ],
+    sameTeamNote: 'cùng team',
+    styleLabel: 'Phong cách đi',
+    styles: plannerStyles,
     title: 'Lên kế hoạch chuyến Việt Nam riêng',
   },
 } as const satisfies Record<PublicPlannerLocale, PlannerPanelCopy>
@@ -316,47 +427,104 @@ export const HighImpactHero: React.FC<
       />
     </aside>
   ) : isPlanner ? (
-    <aside aria-label={plannerCopy.ariaLabel} className="site-hero__planner-panel">
+    <aside
+      aria-label={plannerCopy.ariaLabel}
+      className="site-hero__planner-panel site-hero__planner-panel--hifi-dense"
+      data-planner-variant="hifi-dense"
+      id="home-planner"
+    >
       <div className="site-hero__planner-intro">
-        <div className="site-panel-icon">
-          <CompassIcon aria-hidden="true" className="h-5 w-5" />
-        </div>
         <p className="site-mini-label">{plannerCopy.miniLabel}</p>
-        <strong>{plannerCopy.title}</strong>
-        <span>{plannerCopy.description}</span>
+        <h2 className="site-hero__planner-title">{plannerCopy.title}</h2>
+        <ul className="site-hero__planner-points">
+          {plannerCopy.points.map((point, index) => (
+            <li key={point}>
+              {index === 0 ? <strong>{point}</strong> : point}
+            </li>
+          ))}
+        </ul>
       </div>
-      <form action={toSitePath('/plan-your-trip')} className="site-hero__planner-form" method="get">
-        <label className="site-hero__planner-field">
-          <span>{plannerCopy.destinationLabel}</span>
-          <select aria-label={plannerCopy.destinationLabel} name="destination">
-            {plannerCopy.destinations.map((option) => (
-              <option key={option.value || 'destination-placeholder'} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="site-hero__planner-field">
-          <span>{plannerCopy.durationLabel}</span>
-          <select aria-label={plannerCopy.durationLabel} name="duration">
-            {plannerCopy.durations.map((option) => (
-              <option key={option.value || 'duration-placeholder'} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button className="site-panel-cta site-hero__planner-submit" type="submit">
-          {plannerCopy.ctaLabel}
-        </button>
-      </form>
-      <div className="site-trust-row site-trust-row--wide" aria-label={plannerCopy.cuesAriaLabel}>
-        {plannerCopy.highlights.map(({ icon: Icon, label }) => (
-          <span key={label}>
-            <Icon aria-hidden="true" className="h-4 w-4" />
-            {label}
-          </span>
-        ))}
+      <div className="site-hero__planner-form-wrap">
+        <h3 className="site-hero__planner-form-title">{plannerCopy.formTitle}</h3>
+        <form action={toSitePath('/plan-your-trip')} className="site-hero__planner-form" method="get">
+          <label className="site-hero__planner-field">
+            <span>{plannerCopy.destinationLabel}</span>
+            <select
+              aria-label={plannerCopy.destinationLabel}
+              className="site-hero__planner-input"
+              name="destination"
+            >
+              {plannerCopy.destinations.map((option) => (
+                <option key={option.value || 'destination-placeholder'} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="site-hero__planner-field">
+            <span>{plannerCopy.durationLabel}</span>
+            <select
+              aria-label={plannerCopy.durationLabel}
+              className="site-hero__planner-input"
+              name="duration"
+            >
+              {plannerCopy.durations.map((option) => (
+                <option key={option.value || 'duration-placeholder'} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="site-hero__planner-field">
+            <span className="site-hero__planner-field-label">
+              {plannerCopy.monthLabelBase}
+              {'\u00A0'}
+              <span className="site-hero__planner-field-hint">{plannerCopy.monthLabelHint}</span>
+            </span>
+            <select
+              aria-label={plannerCopy.monthLabel}
+              className="site-hero__planner-input"
+              name="month"
+            >
+              {plannerCopy.months.map((option) => (
+                <option key={option.value || 'month-placeholder'} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <fieldset className="site-hero__planner-styles">
+            <legend>{plannerCopy.styleLabel}</legend>
+            <div className="site-hero__planner-style-chips" role="group" aria-label={plannerCopy.styleLabel}>
+              {plannerCopy.styles.map((style, index) => (
+                <label className="site-hero__planner-style-chip" key={style.value}>
+                  <input
+                    defaultChecked={index === 0}
+                    name="style"
+                    type="radio"
+                    value={style.value}
+                  />
+                  <span>{style.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <button className="site-hero__planner-submit" type="submit">
+            {plannerCopy.ctaLabel}
+          </button>
+        </form>
+        <p className="site-hero__planner-footnote">
+          {plannerCopy.fullBriefPrefix}{' '}
+          <CMSLink
+            appearance="inline"
+            className="site-hero__planner-footnote-link"
+            label={plannerCopy.fullBriefLink}
+            type="custom"
+            url="/plan-your-trip"
+          />
+          <span className="site-hero__planner-footnote-sep"> · </span>
+          <span className="site-hero__planner-footnote-note">{plannerCopy.sameTeamNote}</span>
+        </p>
       </div>
     </aside>
   ) : null
@@ -378,7 +546,11 @@ export const HighImpactHero: React.FC<
         links={links}
         media={media}
         postcards={resolved.preset?.slots?.showPostcards === false ? [] : copy.postcards}
-        preset={resolved.preset}
+        preset={{
+          ...(resolved.preset || {}),
+          key: resolved.preset?.key || resolved.presetKey,
+        }}
+        resolvedLocale={props.resolvedLocale}
         richText={richText}
         slides={(props as HighImpactHeroData & { slides?: HeroPresentationProps['slides'] }).slides}
         supportingMedia={supportingMedia}

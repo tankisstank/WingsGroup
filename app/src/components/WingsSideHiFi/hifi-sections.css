@@ -1,0 +1,289 @@
+/* WingSide Home inventory layout — co-located so Turbopack always ships with SectionInventory. */
+
+body[data-site-code='wings-side'] .ws-hifi-trust {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0.9rem;
+  margin-top: 1.25rem;
+  align-items: stretch;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-trust__item {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  min-width: 0;
+  border: 1px solid color-mix(in oklch, var(--site-border) 88%, white);
+  border-radius: calc(var(--site-radius, 1.25rem) + 0.1rem);
+  padding: 0.95rem 1rem;
+  background: color-mix(in oklch, var(--site-surface) 94%, white);
+}
+
+body[data-site-code='wings-side'] .ws-hifi-trust__item[data-kind='sla'],
+body[data-site-code='wings-side'] .ws-hifi-trust__item[data-kind='proof'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+body[data-site-code='wings-side'] .ws-hifi-trust__item[data-kind='planner'] {
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+}
+
+body[data-site-code='wings-side'] .ws-hifi-trust__item strong {
+  display: block;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-trust__item p {
+  margin: 0.25rem 0 0;
+  color: var(--site-muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-trust__meta {
+  font-size: 0.8rem !important;
+}
+
+/* Screenshot bug: unstyled img became full-bleed portrait — hard-cap avatar. */
+body[data-site-code='wings-side'] .ws-hifi-trust__avatar {
+  display: block !important;
+  flex-shrink: 0;
+  width: 3.25rem !important;
+  height: 3.25rem !important;
+  max-width: 3.25rem !important;
+  max-height: 3.25rem !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in oklch, var(--site-brand) 18%, var(--site-border));
+  background: var(--site-surface);
+}
+
+body[data-site-code='wings-side'] .ws-hifi-trust__avatar img {
+  display: block !important;
+  width: 3.25rem !important;
+  height: 3.25rem !important;
+  max-width: 3.25rem !important;
+  max-height: 3.25rem !important;
+  object-fit: cover !important;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-notes {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0.9rem;
+  margin-top: 0.85rem;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-notes__card {
+  border: 1px solid color-mix(in oklch, var(--site-border) 88%, white);
+  border-radius: calc(var(--site-radius, 1.25rem) + 0.1rem);
+  padding: 1rem 1.05rem 1.15rem;
+  background: var(--site-surface);
+}
+
+body[data-site-code='wings-side'] .ws-hifi-notes__card strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 1.02rem;
+  letter-spacing: -0.02em;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-notes__card p {
+  margin: 0;
+  color: var(--site-muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0.95rem;
+  margin-top: 0.85rem;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey {
+  display: grid !important;
+  grid-template-rows: 10.5rem auto;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--site-border) 88%, white);
+  border-radius: calc(var(--site-radius, 1.25rem) + 0.15rem);
+  background: var(--site-surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey .ws-hifi-card__media {
+  display: block;
+  width: 100%;
+  height: 10.5rem !important;
+  max-height: 10.5rem !important;
+  overflow: hidden;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey .ws-hifi-card__img {
+  width: 100%;
+  height: 10.5rem !important;
+  max-height: 10.5rem !important;
+  object-fit: cover;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey__body {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.95rem 1.05rem 1.15rem;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey__micro {
+  color: var(--site-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey__body strong {
+  font-size: 1.02rem;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey__copy {
+  color: var(--site-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey__price-from {
+  color: var(--site-brand);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey__price-unit,
+body[data-site-code='wings-side'] .ws-hifi-journey__note {
+  color: var(--site-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey__note {
+  font-size: 0.78rem;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-card__region {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 0.15rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--site-brand) 10%, white);
+  color: var(--site-brand);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-card__index {
+  color: var(--site-accent);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-card__action {
+  margin-top: 0.25rem;
+  color: var(--site-brand);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-why__action {
+  margin-top: 0.35rem;
+  color: var(--site-brand);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-why__action:hover {
+  text-decoration: underline;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-footer-links a:hover {
+  text-decoration: underline;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-journey:hover {
+  border-color: color-mix(in oklch, var(--site-brand) 30%, var(--site-border));
+  box-shadow: 0 10px 28px color-mix(in oklch, var(--site-brand) 10%, transparent);
+  transform: translateY(-1px);
+}
+
+body[data-site-code='wings-side'] .ws-hifi-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.9rem;
+  margin-top: 0.65rem;
+}
+
+body[data-site-code='wings-side'] .ws-hifi-footer-links a {
+  color: var(--site-brand);
+  font-size: 0.86rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+/* Authoritative full-bleed for inventory-bundled CSS (scrollbar-safe). */
+body[data-site-code='wings-side'] .ws-hifi-creds.ws-hifi-creds--full-bleed {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  border-radius: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  padding-left: max(1.25rem, var(--container-gutter, 1.25rem));
+  padding-right: max(1.25rem, var(--container-gutter, 1.25rem));
+}
+
+body[data-site-code='wings-side'] .ws-hifi-creds.ws-hifi-creds--full-bleed::before {
+  content: '';
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  border-top: 1px solid color-mix(in oklch, var(--site-brand) 16%, var(--site-border));
+  border-bottom: 1px solid color-mix(in oklch, var(--site-brand) 16%, var(--site-border));
+  background:
+    radial-gradient(40rem 18rem at 90% 0%, color-mix(in oklch, var(--site-brand) 10%, transparent), transparent 60%),
+    var(--site-surface);
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  body[data-site-code='wings-side'] .ws-hifi-trust,
+  body[data-site-code='wings-side'] .ws-hifi-notes,
+  body[data-site-code='wings-side'] .ws-hifi-journey-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

@@ -19,11 +19,11 @@ describe('header primary action registry', () => {
 
   it('resolves locale-specific CTAs with copy-locale fallback', () => {
     expect(resolveHeaderPrimaryAction('wings-side', 'it')).toEqual({
-      label: 'Pianifica il viaggio',
+      label: 'Pianifica',
       url: '/plan-your-trip',
     })
     expect(resolveHeaderPrimaryAction('wings-side', 'ja')).toEqual({
-      label: 'Plan your trip',
+      label: 'Plan trip',
       url: '/plan-your-trip',
     })
     expect(resolveHeaderPrimaryAction('wings-go', 'en')).toEqual({

@@ -3,6 +3,8 @@ type SecurityHeader = {
   value: string
 }
 
+// Report-Only CSP must NOT include `upgrade-insecure-requests` — browsers ignore
+// that directive in report-only mode and emit a console error that fails QA gates.
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -17,7 +19,6 @@ const contentSecurityPolicy = [
   "connect-src 'self' https: wss:",
   "worker-src 'self' blob:",
   "frame-src 'self' https:",
-  'upgrade-insecure-requests',
   'report-uri /api/security/csp-report',
 ].join('; ')
 

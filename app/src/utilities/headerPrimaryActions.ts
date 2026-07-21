@@ -32,10 +32,10 @@ export const headerPrimaryActionsByThemeKey: Record<string, HeaderPrimaryActionM
     vi: { label: 'Gửi yêu cầu', url: '/request-proposal' },
   },
   'wings-side': {
-    en: { label: 'Plan your trip', url: '/plan-your-trip' },
-    es: { label: 'Planifica tu viaje', url: '/plan-your-trip' },
-    it: { label: 'Pianifica il viaggio', url: '/plan-your-trip' },
-    pt: { label: 'Planear a viagem', url: '/plan-your-trip' },
+    en: { label: 'Plan trip', url: '/plan-your-trip' },
+    es: { label: 'Planifica', url: '/plan-your-trip' },
+    it: { label: 'Pianifica', url: '/plan-your-trip' },
+    pt: { label: 'Planear', url: '/plan-your-trip' },
     vi: { label: 'Lên kế hoạch', url: '/plan-your-trip' },
   },
 }
