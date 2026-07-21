@@ -2,7 +2,7 @@
 
 ## Status
 
-in_progress
+implemented
 
 ## Lane
 
@@ -21,6 +21,11 @@ fidelity-complete** for the 8-page hub.
 **Tranche A accepted (2026-07-21)** after independent leader rerun of migration,
 PG CRUD, unit, and runtime chrome proofs. Full hub fidelity and page-body
 rebuild remain open for Tranche B+.
+
+**Tranche B accepted locally (2026-07-22).** The 8-page desktop/mobile
+re-review closed the corrective P1 findings. The remediation story is complete
+in the isolated branch; production integration and VPS acceptance remain under
+US-046 and the deploy freeze.
 
 ## Relevant Product Docs
 
@@ -59,6 +64,8 @@ rebuild remain open for Tranche B+.
 ## Evidence
 
 See `validation.md` for Tranche A proof commands and results.
+
+Final local audit: `docs/AUDIT-US046-HIFI-LOCAL-2026-07-22.md`.
 
 ## Tranche B entry (known)
 

@@ -5,6 +5,26 @@
 > is **not** accepted. See US-046A and
 > `artifacts/reviews/wingsside-hifi-independent-review.md`.
 
+> **2026-07-22 update:** the corrective worktree passed the post-remediation
+> local audit for 8 hubs plus Tour Detail. Production remains frozen and is not
+> covered by this verdict. Full evidence and retained findings are in
+> `docs/AUDIT-US046-HIFI-LOCAL-2026-07-22.md`.
+
+## Corrective worktree proof - 2026-07-22
+
+- Commits: `3f6a535`, `2a5b064`, `5ee0073`, `f1b0770`.
+- Browser: desktop 1440 and mobile 390; one H1 and zero horizontal overflow on
+  every corrective B2 route and Tour Detail; Contact real form and Guide filter
+  behavior verified.
+- TypeScript passed; unit 251/251; component 29/29; integration 109 passed with
+  3 intentional skips.
+- PostgreSQL 16 empty-to-head migration plus Payload EN/VI CRUD passed.
+- Optimized Next.js build passed with 16/16 static pages.
+- Tracked-source lint passed with 0 errors and 143 existing warnings. Full lint
+  also scans untracked debug artifacts and stops on
+  `app/artifacts/tmp/check-sqlite.cjs`; no artifact was deleted or committed.
+- No production deployment or mutation was performed.
+
 
 ## Proof Strategy
 

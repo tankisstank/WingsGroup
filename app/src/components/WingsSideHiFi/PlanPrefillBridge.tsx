@@ -106,7 +106,6 @@ export const PlanPrefillBridge = ({
   // Keep hosts attached across FormBlock controlled rerenders.
   useEffect(() => {
     let observer: MutationObserver | null = null
-    let poll: number | undefined
 
     const sync = () => {
       const hosts = ensureHosts()
@@ -116,7 +115,7 @@ export const PlanPrefillBridge = ({
     }
 
     sync()
-    poll = window.setInterval(() => {
+    const poll = window.setInterval(() => {
       const hosts = ensureHosts()
       if (!hosts) return
       if (!hosts.mid.isConnected || !hosts.consent.isConnected) sync()

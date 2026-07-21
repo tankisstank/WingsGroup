@@ -16,7 +16,7 @@ Source artifact (locked):
 | 02 | Plan | `/plan-your-trip` | Hero + form | plan-steps, plan-explore | explore cards |
 | 03 | Destinations | `/destinations` | Hero | dest-routes, dest-grid | hanoi…sapa |
 | 04 | Styles | `/styles` | Hero | styles-intro, style-grid | luxury…business |
-| 05 | Packages | `/packages` | Hero | pkg-grid | heroHalong, sapa, hoian |
+| 05 | Packages | `/packages` | Hero | pkg-grid | heroHalong, sapa, hoian, hue, family |
 | 06 | Guide | `/travel-guide` | Hero | guide-list | sapa, hue, planner |
 | 07 | About | `/about-us` | Hero | about-story, about-steps, about-promises, about-team | — |
 | 08 | Contact | `/contact-us` | Hero + form | contact-split, contact-after | — |
@@ -55,4 +55,16 @@ Desktop ≥768, bottom-right, stripe widget, `wingside-promo-dismissed`.
 - [x] Residual P1 fix (hifi-sections.css, avatar cap, planner stack, creds, footer)
 - [x] Codex re-audit r2 → **PASS-WITH-ISSUES** (~96%; `codex-reaudit-home-p1-r2.md`)
 - [x] P2 polish: Specials vs planner, visible h1, close `#home-planner`, scrollbar-safe creds, CSS ownership
-- [ ] Root review / no prod deploy until approve
+- [x] Root adversarial local review: LOCAL GO (2026-07-22)
+- [ ] Production deploy and VPS re-audit; deploy remains frozen
+
+## Tour detail bridge
+
+| Hi-fi source | Live route pattern | Contract |
+| --- | --- | --- |
+| `wingside-tour-detail-hifi.html` | `/tour/:slug` | Hero, sticky section nav, facts, real TourProduct gallery, route, itinerary accordion, included/excluded, pricing posture, enquiry, related fallback and sticky CTA |
+
+The Tour Detail renderer is isolated to the WingSide consultative presentation;
+WingsGo keeps its retail presentation. Imported media remains CMS-owned and may
+require a separate editorial curation pass to match the locked prototype image
+selection.

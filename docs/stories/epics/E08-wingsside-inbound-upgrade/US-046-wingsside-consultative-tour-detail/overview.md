@@ -15,6 +15,14 @@ templates, and hero composition still fail acceptance. Remediation continues
 under **US-046A** (and remaining US-046 corrective work). Do not mark Full /
 implemented for hub fidelity until a post-remediation 8×2 re-review passes.
 
+## Local corrective result (2026-07-22)
+
+The post-remediation local review now returns **LOCAL GO / PRODUCTION HOLD** for
+the eight official hub routes plus Tour Detail. See
+`docs/AUDIT-US046-HIFI-LOCAL-2026-07-22.md`. Deployment remains frozen, so the
+story stays `in_progress` until the approved branch is integrated and the VPS
+is re-audited against the same matrix.
+
 ## Current Behavior
 
 WingSide `/tour/:slug` resolves a published Page wrapper but previously falls

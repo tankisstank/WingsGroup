@@ -2,9 +2,25 @@
 
 ## Status
 
-Tranche A **accepted** 2026-07-21 after independent leader rerun. Story remains
-`in_progress` for Tranche B+ (page bodies, dual-composer suppression, fidelity
-re-review).
+Tranche A **accepted** 2026-07-21. Tranche B **accepted locally** 2026-07-22
+after page-body implementation, adversarial desktop/mobile browser review,
+schema/test/migration proof and production build. Story status is `implemented`;
+production integration remains frozen under US-046.
+
+## Tranche B proof
+
+| Layer | Result |
+| --- | --- |
+| Eight hubs | Dedicated Home, Plan and six secondary compositions wired |
+| Forms | Plan and Contact use the governed Payload form; Contact width regression closed |
+| Interaction | Guide filters and Plan synchronization verified in browser |
+| Responsive | Desktop 1440 and mobile 390; one H1 and zero horizontal overflow |
+| Unit | 251/251 pass |
+| Component | 29/29 pass |
+| Integration | 109 pass, 3 intentional skips |
+| PostgreSQL | Empty-to-head migration and EN/VI nested CRUD pass |
+| Build | Optimized Next.js build pass; 16/16 static pages |
+| Deployment | Not performed; freeze remains active |
 
 ## Tranche A deliverables
 

@@ -6,6 +6,7 @@ import { TourDetailPage } from '@/tours/StructuredPages'
 import type { TourResolvedData } from '@/tours/types'
 
 vi.mock('@/components/Media', () => ({
+  // eslint-disable-next-line @next/next/no-img-element
   Media: () => <img alt="Journey media" />,
 }))
 
