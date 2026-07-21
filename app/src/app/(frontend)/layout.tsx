@@ -27,7 +27,6 @@ import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { getCurrentSite } from '@/utilities/siteContext'
 import { getCanonicalSiteOrigin, getSiteSitemapURL } from '@/utilities/siteSEO'
 import { WingsSideSpecialsPromo } from '@/components/WingsSideSpecialsPromo'
-import { WingsSideHiFiSectionInventory } from '@/components/WingsSideHiFi/SectionInventory'
 import { getPublicRoutePathname } from '@/utilities/sitePaths'
 
 const getSiteFaviconURL = (settings: Awaited<ReturnType<typeof getCurrentSiteSettings>>) => {
@@ -145,9 +144,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Header />
           <main id="main-content" tabIndex={-1}>
             {children}
-            {site.code === 'wings-side' ? (
-              <WingsSideHiFiSectionInventory locale={locale} publicPathname={publicPathname} />
-            ) : null}
           </main>
           {shouldRenderWingsSideSpecials(site.code, publicPathname) ? (
             <WingsSideSpecialsPromo href="/packages" locale={locale} />

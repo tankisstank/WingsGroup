@@ -9,6 +9,7 @@ import {
 } from '@/utilities/wingsSideHiFiComposer'
 import {
   getWingsSideHiFiPublicUrl,
+  WINGSSIDE_HIFI_HOME_JOURNEY_COUNT,
   wingsSideHiFiAssets,
   wingsSideHiFiCardBindings,
 } from '@/utilities/wingsSideHiFiMedia'
@@ -52,7 +53,13 @@ describe('WingSide HiFi media bindings', () => {
   it('binds destination/style/package grids to licensed assets', () => {
     expect(wingsSideHiFiCardBindings.destinations).toHaveLength(6)
     expect(wingsSideHiFiCardBindings.styles).toHaveLength(6)
-    expect(wingsSideHiFiCardBindings.packages).toHaveLength(3)
+    expect(wingsSideHiFiCardBindings.packages).toHaveLength(5)
+    // Home shows 3 sample journeys; packages route still seeds 5.
+    expect(WINGSSIDE_HIFI_HOME_JOURNEY_COUNT).toBe(3)
+    expect(wingsSideHiFiCardBindings.styles.map((c) => c.href)).toEqual(
+      expect.arrayContaining(['/styles/luxury', '/styles#wellness', '/styles#business']),
+    )
+    expect(new Set(wingsSideHiFiCardBindings.styles.map((c) => c.href)).size).toBe(6)
     expect(wingsSideHiFiCardBindings.destinations.every((card) => card.asset in wingsSideHiFiAssets)).toBe(
       true,
     )

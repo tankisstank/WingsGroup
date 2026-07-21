@@ -92,6 +92,20 @@ export const wingsSideHiFiCardBindings = {
       href: '/packages/central-heritage',
       title: 'Ready for citadel days and lantern nights?',
     },
+    {
+      asset: 'mekong' as const,
+      badge: 'COASTAL',
+      body: 'Heritage towns with beach recovery days.',
+      href: '/packages/coastal-heritage',
+      title: 'How soft can a Vietnam coastal week feel?',
+    },
+    {
+      asset: 'family' as const,
+      badge: 'FAMILY',
+      body: 'Family pacing with fewer transitions.',
+      href: '/packages/family-vietnam',
+      title: 'Can mixed ages share one private Vietnam route?',
+    },
   ],
   routes: [
     {
@@ -141,18 +155,27 @@ export const wingsSideHiFiCardBindings = {
     {
       asset: 'wellness' as const,
       body: 'Softer days and recovery space.',
-      // No dedicated wellness/business child pages yet — keep hub-safe.
-      href: '/styles',
+      // Hub-safe until dedicated child pages exist — unique path for React keys.
+      href: '/styles#wellness',
       title: 'Wellness',
     },
     {
       asset: 'business' as const,
       body: 'Meetings with cultural contrast.',
-      href: '/styles',
+      href: '/styles#business',
       title: 'Business',
     },
   ],
+  /** Why side cards (after featured Sapa) — image order matches Open Design Home. */
+  whyCards: [
+    { asset: 'family' as const, href: '/destinations', title: 'Flexible planning' },
+    { asset: 'culture' as const, href: '/styles', title: 'Style matching' },
+    { asset: 'luxury' as const, href: '/about-us', title: 'Collaborative care' },
+  ],
 } as const
+
+/** Home sample journeys: target shows 3; Packages seed still uses all 5. */
+export const WINGSSIDE_HIFI_HOME_JOURNEY_COUNT = 3
 
 export const getWingsSideHiFiPublicUrl = (asset: WingsSideHiFiAssetKey): string =>
   `${WINGSSIDE_HIFI_PUBLIC_PREFIX}/${wingsSideHiFiAssets[asset].file}`

@@ -44,18 +44,25 @@ import {
   TourMarketPage,
   TourSchedulePage,
 } from '@/tours/StructuredPages'
-import { WingSideTourDetailPage } from '@/tours/WingSideTourDetailPage'
 import { hasMatchingWingSideTourWrapper } from '@/tours/wingsSideTourViewModel'
+import { WingsSideHiFiPageBody } from '@/components/WingsSideHiFi/WingsSideHiFiPageBody'
+import {
+  resolveWingsSideHiFiPageBodyModel,
+  shouldRenderWingsSideHiFiPageBody,
+} from '@/utilities/wingsSideHiFiDispatch'
+import type { WingsSideHiFiPageSource } from '@/utilities/wingsSideHiFiPageModel'
 
 type Args = {
   params: Promise<{
     slug?: string[]
   }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function Page({ params: paramsPromise }: Args) {
+export default async function Page({ params: paramsPromise, searchParams: searchParamsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
   const { slug = [] } = await paramsPromise
+  const searchParams = searchParamsPromise ? await searchParamsPromise : {}
   const locale = await getCurrentLocale()
   const sitePrefix = await getCurrentSitePrefix()
   const decodedSegments = slug.map((segment) => decodeURIComponent(segment))
@@ -93,8 +100,84 @@ export default async function Page({ params: paramsPromise }: Args) {
   // Structured tour detail: tighter vertical rhythm under fixed header.
   const isStructuredTour = Boolean(structuredPage)
 
+  // Tranche B1: dedicated hi-fi Home/Plan body replaces legacy hero/blocks/related.
+  let hiFiModel = resolveWingsSideHiFiPageBodyModel({
+    locale,
+    page: page as WingsSideHiFiPageSource,
+    publicPathname: requestedPath,
+  })
+
+  // Populate plan.form relationship when only an id is stored.
+  if (
+    hiFiModel?.routeVariant === 'plan' &&
+    hiFiModel.routeContent &&
+    typeof (hiFiModel.routeContent as { form?: unknown }).form !== 'object'
+  ) {
+    const formRef = (page as { wingsSideHiFi?: { plan?: { form?: number | string | null } } })
+      .wingsSideHiFi?.plan?.form
+    if (formRef != null) {
+      try {
+        const payload = await getPayload({ config: configPromise })
+        const formDoc = await payload.findByID({
+          collection: 'forms',
+          depth: 2,
+          id: formRef,
+          overrideAccess: draft,
+        })
+        hiFiModel = {
+          ...hiFiModel,
+          routeContent: {
+            ...(hiFiModel.routeContent || {}),
+            form: formDoc,
+          },
+        }
+      } catch {
+        // leave unpopulated; Plan page shows linked-id message
+      }
+    }
+  }
+
+  // Also accept formBlock on layout for plan when hi-fi form empty
+  if (hiFiModel?.routeVariant === 'plan' && hiFiModel.routeContent) {
+    const content = hiFiModel.routeContent as { form?: unknown }
+    if (!content.form && Array.isArray(page.layout)) {
+      const formBlock = page.layout.find((block) => {
+        if (!block || typeof block !== 'object' || !('blockType' in block) || !('form' in block)) {
+          return false
+        }
+        const blockType = String((block as { blockType?: unknown }).blockType || '')
+        return (
+          (blockType === 'formBlock' || blockType === 'form') &&
+          (block as { form?: unknown }).form &&
+          typeof (block as { form?: unknown }).form === 'object'
+        )
+      }) as { form?: unknown } | undefined
+      if (formBlock?.form) {
+        hiFiModel = {
+          ...hiFiModel,
+          routeContent: { ...content, form: formBlock.form },
+        }
+      }
+    }
+  }
+
+  const useHiFiBody = shouldRenderWingsSideHiFiPageBody({
+    model: hiFiModel,
+    publicPathname: requestedPath,
+    siteCode: site.code,
+  })
+
   return (
-    <article className={isStructuredTour ? 'pt-16 pb-16 md:pb-20' : 'pt-16 pb-24'}>
+    <article
+      className={
+        useHiFiBody
+          ? 'pb-16 md:pb-20'
+          : isStructuredTour
+            ? 'pt-16 pb-16 md:pb-20'
+            : 'pt-16 pb-24'
+      }
+      data-hifi-body={useHiFiBody ? 'true' : 'false'}
+    >
       <JsonLd
         data={[
           buildWebPageJSONLD({
@@ -116,19 +199,29 @@ export default async function Page({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <Breadcrumbs
-        className={
-          isStructuredTour
-            ? 'container pb-2 pt-3 text-sm text-muted-foreground md:pt-4'
-            : undefined
-        }
-        items={breadcrumbItems}
-      />
+      {!useHiFiBody ? (
+        <Breadcrumbs
+          className={
+            isStructuredTour
+              ? 'container pb-2 pt-3 text-sm text-muted-foreground md:pt-4'
+              : undefined
+          }
+          items={breadcrumbItems}
+        />
+      ) : null}
+
       {structuredPage ? (
         <>
           {structuredPage}
           <RelatedPages locale={locale} pages={relatedPages} />
         </>
+      ) : useHiFiBody && hiFiModel ? (
+        <WingsSideHiFiPageBody
+          locale={locale}
+          model={hiFiModel}
+          publicPathname={requestedPath}
+          searchParams={searchParams}
+        />
       ) : (
         <>
           <RenderHero

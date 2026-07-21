@@ -52,7 +52,7 @@ export const WingsSideCredentialsCarousel = ({ locale }: { locale?: null | strin
                 className="ws-hifi-creds__slide"
                 data-active={isActive ? 'true' : 'false'}
                 data-kind={slide.kind}
-                key={slide.title}
+                key={`creds-slide-${index}-${slide.kind}-${slide.mark}`}
               >
                 <div aria-hidden="true" className="ws-hifi-creds__mark" data-kind={slide.kind}>
                   {slide.mark}
@@ -89,7 +89,7 @@ export const WingsSideCredentialsCarousel = ({ locale }: { locale?: null | strin
                 aria-selected={index === active}
                 className="ws-hifi-creds__dot"
                 data-active={index === active ? 'true' : 'false'}
-                key={slide.title}
+                key={`creds-dot-${index}-${slide.kind}`}
                 onClick={() => setActive(index)}
                 role="tab"
                 type="button"

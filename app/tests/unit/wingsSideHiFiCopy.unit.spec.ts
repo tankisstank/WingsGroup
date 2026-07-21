@@ -18,7 +18,7 @@ describe('WingSide HiFi inventory copy i18n', () => {
 
     expect(vi.creds.kicker).toMatch(/Chứng nhận/)
     expect(it.creds.title).not.toEqual(en.creds.title)
-    expect(es.packages.cards).toHaveLength(3)
+    expect(es.packages.cards).toHaveLength(5)
     expect(pt.styles.styles).toHaveLength(6)
   })
 
@@ -44,7 +44,7 @@ describe('WingSide HiFi inventory copy i18n', () => {
       expect(copy.home.notes).toHaveLength(3)
       expect(copy.home.trust).toHaveLength(3)
       expect(copy.home.trust.some((item) => item.kind === 'sla')).toBe(true)
-      expect(copy.packages.cards).toHaveLength(3)
+      expect(copy.packages.cards).toHaveLength(5)
       for (const card of copy.packages.cards) {
         expect(card.micro.length).toBeGreaterThan(0)
         expect(card.priceFrom.length).toBeGreaterThan(0)

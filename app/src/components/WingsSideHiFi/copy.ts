@@ -21,13 +21,34 @@ export type SectionCopy = {
   heroTitle: string
   heroLede?: string
   plan: {
+    /** Dedicated plan-route hero (not steps title). */
+    heroKicker: string
+    heroTitle: string
+    heroLede: string
+    primaryCtaLabel: string
+    breadcrumbCurrent: string
+    mediaCap: string
     stepsKicker: string
     stepsTitle: string
     stepsLede: string
     steps: Array<{ label: string; title: string; body: string }>
+    briefKicker: string
+    briefTitle: string
+    formTitle: string
+    promises: string[]
+    guestNote: string
+    faqKicker: string
     faqTitle: string
+    faq: Array<{ question: string; answer: string }>
     exploreTitle: string
     explore: Array<{ title: string; body: string; href: string }>
+    destChips: string[]
+    styleChips: string[]
+    budgetChips: string[]
+    destChipsLabel: string
+    styleChipsLabel: string
+    budgetChipsLabel: string
+    consentLabel: string
   }
   destinations: {
     routesTitle: string
@@ -204,15 +225,22 @@ const en: SectionCopy = {
     ],
   },
   plan: {
+    heroKicker: 'Conversion · full brief',
+    heroTitle: 'Plan your Vietnam journey with a local team',
+    heroLede:
+      'Custom routes, hotels, and pacing. Share month, group, destinations, and style — reply within 1 business day (GMT+7).',
+    primaryCtaLabel: 'Share your brief',
+    breadcrumbCurrent: 'Plan your trip',
+    mediaCap: 'Ha Long · cruise rhythm',
     stepsKicker: 'How WingsSide works',
     stepsTitle: 'Four steps from brief to private route',
     stepsLede:
-      'One local planning desk. You send the essentials — we design the journey and reply within 1 business day (GMT+7).',
+      'Same desk as Home. You send the essentials — we design and reply within 1 business day (GMT+7).',
     steps: [
       {
         label: 'Step 1 · Brief',
         title: 'Tell us the essentials',
-        body: 'Destination (or region), travel month, group size, and how you like to travel — via the home planner or full brief.',
+        body: 'Month, group size, destinations (or region), and how you like to travel — use the form below.',
       },
       {
         label: 'Step 2 · Match',
@@ -227,16 +255,65 @@ const en: SectionCopy = {
       {
         label: 'Step 4 · Lock',
         title: 'Refine, then lock',
-        body: 'Swap days, hotels, or inclusions together until it fits — then we lock logistics and confirm on the ground.',
+        body: 'Swap days, hotels, or inclusions together until it fits — then we lock logistics on the ground.',
       },
     ],
+    briefKicker: 'Brief · primary conversion',
+    briefTitle: 'Share your travel brief',
+    formTitle: 'Your brief',
+    promises: [
+      'Typical reply: within 1 business day',
+      'Advice based on real timing and budget',
+      'Private route — not a retail grid only',
+    ],
+    guestNote: 'We care about fewer transitions and hotels that match the rhythm.',
+    faqKicker: 'Planning questions',
     faqTitle: 'Inbound FAQ',
+    faq: [
+      {
+        question: 'Do I need a full itinerary before contacting you?',
+        answer:
+          'No. A month, group size, style, and a few must-sees are enough for a first direction.',
+      },
+      {
+        question: 'How far ahead should we plan?',
+        answer:
+          'For peak months (Mar–Apr, Oct–Nov), 3–6 months helps with preferred hotels and guides.',
+      },
+      {
+        question: 'Private guide languages?',
+        answer:
+          'English is standard; Italian, Spanish, Portuguese, and French can be arranged on request.',
+      },
+      {
+        question: 'Best months for north vs south?',
+        answer:
+          'North shines in spring/autumn; south is more year-round with wet-season planning for Mekong days.',
+      },
+      {
+        question: 'Visa basics for short stays?',
+        answer:
+          'Rules change by nationality. We share a practical checklist once your dates are clear — not legal advice.',
+      },
+      {
+        question: 'Can we add airport fast track later?',
+        answer:
+          'Yes. Logistics like fast track, private transfers, and hotel swaps can be added after the first direction.',
+      },
+    ],
     exploreTitle: 'Explore before you brief',
     explore: [
-      { title: 'Destinations →', body: 'Mark places first.', href: '/destinations' },
-      { title: 'Travel styles →', body: 'Pick pace before places.', href: '/styles' },
-      { title: 'Sample packages →', body: 'Frames to react to.', href: '/packages' },
+      { title: 'Destinations →', body: 'See where routes go — mark them in your brief.', href: '/destinations' },
+      { title: 'Travel styles →', body: 'Match a style before dates.', href: '/styles' },
+      { title: 'Sample packages →', body: 'Real trip shapes to react to.', href: '/packages' },
     ],
+    destChips: ['Ha Long', 'Hoi An', 'Sapa', 'Hue', 'Mekong'],
+    styleChips: ['Heritage', 'Food', 'Beach', 'Family'],
+    budgetChips: ['$', '$$', '$$$'],
+    destChipsLabel: 'Destinations',
+    styleChipsLabel: 'Travel style',
+    budgetChipsLabel: 'Budget / person',
+    consentLabel: 'I agree to the privacy policy. We only use this to reply (GDPR markets).',
   },
   destinations: {
     routesTitle: 'Sample multi-city routes',
@@ -292,8 +369,8 @@ const en: SectionCopy = {
       { title: 'Family', body: 'Balanced days for mixed ages.', href: '/styles/family' },
       { title: 'Culture', body: 'Stories, context, food, heritage.', href: '/styles/culture' },
       { title: 'Adventure', body: 'A more active route rhythm.', href: '/styles/adventure' },
-      { title: 'Wellness', body: 'Softer days and recovery space.', href: '/styles' },
-      { title: 'Business', body: 'Meetings with cultural contrast.', href: '/styles' },
+      { title: 'Wellness', body: 'Softer days and recovery space.', href: '/styles#wellness' },
+      { title: 'Business', body: 'Meetings with cultural contrast.', href: '/styles#business' },
     ],
     cta: 'Style chosen? Carry it into your brief',
   },
@@ -331,6 +408,26 @@ const en: SectionCopy = {
         priceUnit: '/ person',
         note: 'Indicative · customize',
         href: '/packages/central-heritage',
+      },
+      {
+        badge: 'COASTAL',
+        micro: '9–11 days · Central + coast',
+        title: 'How soft can a Vietnam coastal week feel?',
+        body: 'Heritage towns with beach recovery days.',
+        priceFrom: 'From $1,790',
+        priceUnit: '/ person',
+        note: 'Indicative · customize',
+        href: '/packages/coastal-heritage',
+      },
+      {
+        badge: 'FAMILY',
+        micro: '10–12 days · multi-region',
+        title: 'Can mixed ages share one private Vietnam route?',
+        body: 'Family pacing with fewer transitions.',
+        priceFrom: 'From $1,980',
+        priceUnit: '/ person',
+        note: 'Indicative · customize',
+        href: '/packages/family-vietnam',
       },
     ],
   },
@@ -387,11 +484,40 @@ const en: SectionCopy = {
     ariaLabel: 'Certificates and awards',
     kicker: 'Certificates & awards',
     title: 'Trusted standards when held',
-    lede: 'Licenses, standards, and awards we can verify appear here when published.',
+    lede: 'Licenses, standards, and awards we can verify — only published marks appear here.',
     prev: 'Previous credential',
     next: 'Next credential',
-    // Unverified marks omitted from public surface (no editor placeholders).
-    slides: [],
+    // Prototype Home band structure (honest “when held” framing; no fake licenses).
+    slides: [
+      {
+        kind: 'cert',
+        mark: 'Cert',
+        micro: 'Certificates',
+        title: 'Travel license · accreditation · quality',
+        body: 'Authority and year are listed only after documentation is confirmed and kept current.',
+      },
+      {
+        kind: 'iso',
+        mark: 'ISO',
+        micro: 'Standards',
+        title: 'Quality and operating standards',
+        body: 'Standard body and scope appear only when certificates remain on file for this market.',
+      },
+      {
+        kind: 'award',
+        mark: 'Award',
+        micro: 'Awards',
+        title: 'Recognition marks',
+        body: 'Award marks ship only with verified assets and active year coverage.',
+      },
+      {
+        kind: 'member',
+        mark: 'Member',
+        micro: 'Memberships',
+        title: 'Industry memberships',
+        body: 'Associations are listed only while membership stays active year to year.',
+      },
+    ],
   },
 }
 
@@ -491,15 +617,22 @@ const vi: SectionCopy = {
     ],
   },
   plan: {
+    heroKicker: 'Chuyển đổi · brief đầy đủ',
+    heroTitle: 'Lên kế hoạch hành trình Việt Nam với đội địa phương',
+    heroLede:
+      'Tuyến, khách sạn và nhịp riêng. Gửi tháng, đoàn, điểm đến và phong cách — phản hồi trong 1 ngày làm việc (GMT+7).',
+    primaryCtaLabel: 'Gửi brief của bạn',
+    breadcrumbCurrent: 'Lên kế hoạch',
+    mediaCap: 'Hạ Long · nhịp du thuyền',
     stepsKicker: 'Cách WingsSide làm việc',
     stepsTitle: 'Bốn bước từ brief đến hành trình riêng',
     stepsLede:
-      'Một bàn lập kế hoạch địa phương. Bạn gửi thông tin cốt lõi — chúng tôi thiết kế hành trình và trả lời trong 1 ngày làm việc (GMT+7).',
+      'Cùng bàn với trang chủ. Bạn gửi thông tin cốt lõi — chúng tôi thiết kế và trả lời trong 1 ngày làm việc (GMT+7).',
     steps: [
       {
         label: 'Bước 1 · Brief',
         title: 'Nói điều cần thiết',
-        body: 'Điểm đến (hoặc vùng), tháng đi, quy mô đoàn và cách bạn muốn đi — qua planner Home hoặc brief đầy đủ.',
+        body: 'Tháng đi, quy mô đoàn, điểm đến (hoặc vùng) và cách bạn muốn đi — dùng form bên dưới.',
       },
       {
         label: 'Bước 2 · Ghép',
@@ -514,16 +647,65 @@ const vi: SectionCopy = {
       {
         label: 'Bước 4 · Chốt',
         title: 'Chỉnh rồi chốt',
-        body: 'Đổi ngày, khách sạn hoặc dịch vụ cùng nhau cho đến khi vừa — rồi chốt logistics và xác nhận trên mặt đất.',
+        body: 'Đổi ngày, khách sạn hoặc dịch vụ cùng nhau cho đến khi vừa — rồi chốt logistics trên mặt đất.',
       },
     ],
+    briefKicker: 'Brief · chuyển đổi chính',
+    briefTitle: 'Gửi brief du lịch của bạn',
+    formTitle: 'Brief của bạn',
+    promises: [
+      'Phản hồi thường: trong 1 ngày làm việc',
+      'Tư vấn theo thời điểm và ngân sách thực',
+      'Hành trình riêng — không chỉ lưới bán lẻ',
+    ],
+    guestNote: 'Chúng tôi ưu tiên ít điểm chuyển và khách sạn khớp nhịp chuyến.',
+    faqKicker: 'Câu hỏi lập kế hoạch',
     faqTitle: 'Câu hỏi thường gặp',
+    faq: [
+      {
+        question: 'Tôi có cần lịch trình đầy đủ trước khi liên hệ?',
+        answer:
+          'Không. Tháng đi, quy mô đoàn, phong cách và vài điểm muốn thấy là đủ cho hướng đi đầu.',
+      },
+      {
+        question: 'Nên lên kế hoạch trước bao lâu?',
+        answer:
+          'Tháng cao điểm (3–4, 10–11), 3–6 tháng giúp giữ khách sạn và hướng dẫn viên ưa thích.',
+      },
+      {
+        question: 'Ngôn ngữ hướng dẫn riêng?',
+        answer:
+          'Tiếng Anh là chuẩn; Ý, Tây Ban Nha, Bồ Đào Nha và Pháp có thể sắp xếp theo yêu cầu.',
+      },
+      {
+        question: 'Tháng nào tốt cho Bắc vs Nam?',
+        answer:
+          'Miền Bắc đẹp mùa xuân/thu; miền Nam quanh năm hơn, cần tính mùa mưa cho ngày Mekong.',
+      },
+      {
+        question: 'Visa cho lưu trú ngắn?',
+        answer:
+          'Quy định thay đổi theo quốc tịch. Chúng tôi gửi checklist thực dụng khi có ngày — không phải tư vấn pháp lý.',
+      },
+      {
+        question: 'Có thể thêm fast track sân bay sau?',
+        answer:
+          'Có. Fast track, transfer riêng và đổi khách sạn có thể bổ sung sau hướng đi đầu.',
+      },
+    ],
     exploreTitle: 'Khám phá trước khi gửi brief',
     explore: [
-      { title: 'Điểm đến →', body: 'Chọn nơi trước.', href: '/destinations' },
-      { title: 'Phong cách →', body: 'Chọn nhịp trước nơi.', href: '/styles' },
-      { title: 'Gói mẫu →', body: 'Khung để phản ứng.', href: '/packages' },
+      { title: 'Điểm đến →', body: 'Xem tuyến đi đâu — đánh dấu trong brief.', href: '/destinations' },
+      { title: 'Phong cách →', body: 'Ghép phong cách trước ngày.', href: '/styles' },
+      { title: 'Gói mẫu →', body: 'Hình dạng chuyến để phản ứng.', href: '/packages' },
     ],
+    destChips: ['Hạ Long', 'Hội An', 'Sapa', 'Huế', 'Mekong'],
+    styleChips: ['Di sản', 'Ẩm thực', 'Biển', 'Gia đình'],
+    budgetChips: ['$', '$$', '$$$'],
+    destChipsLabel: 'Điểm đến',
+    styleChipsLabel: 'Phong cách',
+    budgetChipsLabel: 'Ngân sách / người',
+    consentLabel: 'Tôi đồng ý với chính sách quyền riêng tư. Chỉ dùng để phản hồi (thị trường GDPR).',
   },
   destinations: {
     routesTitle: 'Tuyến nhiều điểm mẫu',
@@ -579,8 +761,8 @@ const vi: SectionCopy = {
       { title: 'Gia đình', body: 'Ngày cân bằng cho nhiều độ tuổi.', href: '/styles/family' },
       { title: 'Văn hóa', body: 'Câu chuyện, bối cảnh, ẩm thực, di sản.', href: '/styles/culture' },
       { title: 'Phiêu lưu', body: 'Nhịp tuyến năng động hơn.', href: '/styles/adventure' },
-      { title: 'Chăm sóc sức khỏe', body: 'Ngày nhẹ và không gian phục hồi.', href: '/styles' },
-      { title: 'Công tác', body: 'Họp kết hợp trải nghiệm văn hóa.', href: '/styles' },
+      { title: 'Chăm sóc sức khỏe', body: 'Ngày nhẹ và không gian phục hồi.', href: '/styles#wellness' },
+      { title: 'Công tác', body: 'Họp kết hợp trải nghiệm văn hóa.', href: '/styles#business' },
     ],
     cta: 'Đã chọn phong cách? Đưa vào brief',
   },
@@ -618,6 +800,26 @@ const vi: SectionCopy = {
         priceUnit: '/ người',
         note: 'Tham khảo · tùy chỉnh',
         href: '/packages/central-heritage',
+      },
+      {
+        badge: 'COASTAL',
+        micro: '9–11 ngày · Trung + biển',
+        title: 'Tuần ven biển Việt Nam có thể êm đến mức nào?',
+        body: 'Thị trấn di sản kèm ngày phục hồi biển.',
+        priceFrom: 'Từ $1,790',
+        priceUnit: '/ người',
+        note: 'Tham khảo · tùy chỉnh',
+        href: '/packages/coastal-heritage',
+      },
+      {
+        badge: 'FAMILY',
+        micro: '10–12 ngày · nhiều vùng',
+        title: 'Nhiều độ tuổi có chung một hành trình riêng không?',
+        body: 'Nhịp gia đình với ít điểm chuyển hơn.',
+        priceFrom: 'Từ $1,980',
+        priceUnit: '/ người',
+        note: 'Tham khảo · tùy chỉnh',
+        href: '/packages/family-vietnam',
       },
     ],
   },
@@ -674,10 +876,39 @@ const vi: SectionCopy = {
     ariaLabel: 'Chứng nhận và giải thưởng',
     kicker: 'Chứng nhận & giải thưởng',
     title: 'Chuẩn tin cậy khi đã có',
-    lede: 'Giấy phép, tiêu chuẩn và giải thưởng đã xác minh sẽ hiện khi được công bố.',
+    lede: 'Giấy phép, tiêu chuẩn và giải thưởng đã xác minh — chỉ dấu đã công bố mới hiện.',
     prev: 'Chứng nhận trước',
     next: 'Chứng nhận sau',
-    slides: [],
+    slides: [
+      {
+        kind: 'cert',
+        mark: 'Cert',
+        micro: 'Chứng nhận',
+        title: 'Giấy phép du lịch · kiểm định · chất lượng',
+        body: 'Cơ quan và năm chỉ liệt kê sau khi hồ sơ được xác nhận và còn hiệu lực.',
+      },
+      {
+        kind: 'iso',
+        mark: 'ISO',
+        micro: 'Tiêu chuẩn',
+        title: 'Tiêu chuẩn chất lượng và vận hành',
+        body: 'Tổ chức và phạm vi chỉ hiện khi chứng chỉ còn trong hồ sơ cho thị trường này.',
+      },
+      {
+        kind: 'award',
+        mark: 'Award',
+        micro: 'Giải thưởng',
+        title: 'Dấu hiệu ghi nhận',
+        body: 'Dấu giải thưởng chỉ đăng khi có tài sản đã xác minh và còn trong năm hiệu lực.',
+      },
+      {
+        kind: 'member',
+        mark: 'Member',
+        micro: 'Hội viên',
+        title: 'Thành viên ngành',
+        body: 'Hiệp hội chỉ liệt kê khi tư cách hội viên còn hiệu lực qua từng năm.',
+      },
+    ],
   },
 }
 
@@ -777,15 +1008,22 @@ const it: SectionCopy = {
     ],
   },
   plan: {
+    heroKicker: 'Conversione · brief completo',
+    heroTitle: 'Pianifica il tuo Vietnam con un team locale',
+    heroLede:
+      'Percorsi, hotel e ritmo su misura. Condividi mese, gruppo, destinazioni e stile — risposta entro 1 giorno lavorativo (GMT+7).',
+    primaryCtaLabel: 'Condividi il brief',
+    breadcrumbCurrent: 'Pianifica il viaggio',
+    mediaCap: 'Ha Long · ritmo crociera',
     stepsKicker: 'Come funziona WingsSide',
     stepsTitle: 'Quattro passi dal brief al percorso privato',
     stepsLede:
-      'Un desk di pianificazione locale. Inviate l’essenziale — progettiamo il viaggio e rispondiamo entro 1 giorno lavorativo (GMT+7).',
+      'Lo stesso desk della Home. Inviate l’essenziale — progettiamo e rispondiamo entro 1 giorno lavorativo (GMT+7).',
     steps: [
       {
         label: 'Passo 1 · Brief',
         title: 'Dicci l’essenziale',
-        body: 'Destinazione (o regione), mese, gruppo e come viaggiare — dal planner home o brief completo.',
+        body: 'Mese, gruppo, destinazioni (o regione) e come viaggiare — usate il modulo sotto.',
       },
       {
         label: 'Passo 2 · Match',
@@ -803,13 +1041,56 @@ const it: SectionCopy = {
         body: 'Scambiate giorni, hotel o inclusioni fino a che non calza — poi chiudiamo logistica sul posto.',
       },
     ],
+    briefKicker: 'Brief · conversione primaria',
+    briefTitle: 'Condividi il brief di viaggio',
+    formTitle: 'Il tuo brief',
+    promises: [
+      'Risposta tipica: entro 1 giorno lavorativo',
+      'Consulenza su tempi e budget reali',
+      'Percorso privato — non solo griglia retail',
+    ],
+    guestNote: 'Preferiamo meno trasferimenti e hotel allineati al ritmo.',
+    faqKicker: 'Domande di pianificazione',
     faqTitle: 'FAQ inbound',
+    faq: [
+      {
+        question: 'Serve un itinerario completo prima di contattarci?',
+        answer: 'No. Mese, gruppo, stile e alcuni must-see bastano per una prima direzione.',
+      },
+      {
+        question: 'Con quanto anticipo pianificare?',
+        answer: 'Nei mesi di punta (mar–apr, ott–nov), 3–6 mesi aiutano hotel e guide preferiti.',
+      },
+      {
+        question: 'Lingue della guida privata?',
+        answer: 'L’inglese è standard; italiano, spagnolo, portoghese e francese su richiesta.',
+      },
+      {
+        question: 'Migliori mesi nord vs sud?',
+        answer: 'Il nord brilla in primavera/autunno; il sud è più annuale con pioggia sul Mekong.',
+      },
+      {
+        question: 'Visto per soggiorni brevi?',
+        answer: 'Le regole cambiano per nazionalità. Condividiamo una checklist pratica, non consulenza legale.',
+      },
+      {
+        question: 'Possiamo aggiungere fast track aeroporto dopo?',
+        answer: 'Sì. Fast track, transfer e cambi hotel si possono aggiungere dopo la prima direzione.',
+      },
+    ],
     exploreTitle: 'Esplora prima del brief',
     explore: [
-      { title: 'Destinazioni →', body: 'Scegli i luoghi prima.', href: '/destinations' },
-      { title: 'Stili di viaggio →', body: 'Scegli il ritmo prima dei luoghi.', href: '/styles' },
-      { title: 'Pacchetti di esempio →', body: 'Cornici da reagire.', href: '/packages' },
+      { title: 'Destinazioni →', body: 'Vedi dove vanno i percorsi.', href: '/destinations' },
+      { title: 'Stili di viaggio →', body: 'Abbina uno stile prima delle date.', href: '/styles' },
+      { title: 'Pacchetti di esempio →', body: 'Forme di viaggio a cui reagire.', href: '/packages' },
     ],
+    destChips: ['Ha Long', 'Hoi An', 'Sapa', 'Hue', 'Mekong'],
+    styleChips: ['Patrimonio', 'Cibo', 'Mare', 'Famiglia'],
+    budgetChips: ['$', '$$', '$$$'],
+    destChipsLabel: 'Destinazioni',
+    styleChipsLabel: 'Stile di viaggio',
+    budgetChipsLabel: 'Budget / persona',
+    consentLabel: 'Accetto l’informativa privacy. Usiamo i dati solo per rispondere (mercati GDPR).',
   },
   destinations: {
     routesTitle: 'Percorsi multi-città di esempio',
@@ -865,8 +1146,8 @@ const it: SectionCopy = {
       { title: 'Famiglia', body: 'Giornate equilibrate per età miste.', href: '/styles/family' },
       { title: 'Cultura', body: 'Storie, contesto, cibo, patrimonio.', href: '/styles/culture' },
       { title: 'Avventura', body: 'Un ritmo di percorso più attivo.', href: '/styles/adventure' },
-      { title: 'Wellness', body: 'Giorni più soft e recupero.', href: '/styles' },
-      { title: 'Business', body: 'Meeting con contrasto culturale.', href: '/styles' },
+      { title: 'Wellness', body: 'Giorni più soft e recupero.', href: '/styles#wellness' },
+      { title: 'Business', body: 'Meeting con contrasto culturale.', href: '/styles#business' },
     ],
     cta: 'Stile scelto? Portalo nel brief',
   },
@@ -904,6 +1185,26 @@ const it: SectionCopy = {
         priceUnit: '/ persona',
         note: 'Indicativo · personalizza',
         href: '/packages/central-heritage',
+      },
+      {
+        badge: 'COASTAL',
+        micro: '9–11 giorni · Centro + costa',
+        title: 'Quanto può essere soft una settimana costiera?',
+        body: 'Città patrimonio con giorni di recupero in spiaggia.',
+        priceFrom: 'Da $1,790',
+        priceUnit: '/ persona',
+        note: 'Indicativo · personalizza',
+        href: '/packages/coastal-heritage',
+      },
+      {
+        badge: 'FAMILY',
+        micro: '10–12 giorni · multi-regione',
+        title: 'Età diverse possono condividere una rotta privata?',
+        body: 'Ritmo famiglia con meno trasferimenti.',
+        priceFrom: 'Da $1,980',
+        priceUnit: '/ persona',
+        note: 'Indicativo · personalizza',
+        href: '/packages/family-vietnam',
       },
     ],
   },
@@ -963,7 +1264,36 @@ const it: SectionCopy = {
     lede: 'Licenze, standard e premi verificabili — solo marchi pubblicati.',
     prev: 'Credenziale precedente',
     next: 'Credenziale successiva',
-    slides: [],
+    slides: [
+      {
+        kind: 'cert',
+        mark: 'Cert',
+        micro: 'Certificati',
+        title: 'Licenza di viaggio · accreditamento · qualità',
+        body: 'Autorità e anno compaiono solo dopo conferma documentale e validità corrente.',
+      },
+      {
+        kind: 'iso',
+        mark: 'ISO',
+        micro: 'Standard',
+        title: 'Standard di qualità e operativi',
+        body: 'Ente e ambito compaiono solo con certificati in archivio per questo mercato.',
+      },
+      {
+        kind: 'award',
+        mark: 'Award',
+        micro: 'Premi',
+        title: 'Riconoscimenti',
+        body: 'I marchi di premio si pubblicano solo con asset verificati e copertura annuale attiva.',
+      },
+      {
+        kind: 'member',
+        mark: 'Member',
+        micro: 'Membership',
+        title: 'Associazioni di settore',
+        body: 'Le associazioni compaiono solo mentre l’iscrizione resta attiva anno su anno.',
+      },
+    ],
   },
 }
 
@@ -1063,15 +1393,22 @@ const es: SectionCopy = {
     ],
   },
   plan: {
+    heroKicker: 'Conversión · brief completo',
+    heroTitle: 'Planifica tu viaje a Vietnam con un equipo local',
+    heroLede:
+      'Rutas, hoteles y ritmo a medida. Comparte mes, grupo, destinos y estilo — respuesta en 1 día laborable (GMT+7).',
+    primaryCtaLabel: 'Comparte tu brief',
+    breadcrumbCurrent: 'Planifica tu viaje',
+    mediaCap: 'Ha Long · ritmo de crucero',
     stepsKicker: 'Cómo funciona WingsSide',
     stepsTitle: 'Cuatro pasos del brief a la ruta privada',
     stepsLede:
-      'Un escritorio de planificación local. Envías lo esencial — diseñamos el viaje y respondemos en 1 día laborable (GMT+7).',
+      'El mismo escritorio que en Inicio. Envías lo esencial — diseñamos y respondemos en 1 día laborable (GMT+7).',
     steps: [
       {
         label: 'Paso 1 · Brief',
         title: 'Cuéntanos lo esencial',
-        body: 'Destino (o región), mes, tamaño del grupo y cómo te gusta viajar — vía planner de inicio o brief completo.',
+        body: 'Mes, tamaño del grupo, destinos (o región) y cómo te gusta viajar — usa el formulario abajo.',
       },
       {
         label: 'Paso 2 · Match',
@@ -1089,13 +1426,56 @@ const es: SectionCopy = {
         body: 'Cambia días, hoteles o inclusiones juntos hasta que encaje — luego cerramos logística en el terreno.',
       },
     ],
+    briefKicker: 'Brief · conversión principal',
+    briefTitle: 'Comparte tu brief de viaje',
+    formTitle: 'Tu brief',
+    promises: [
+      'Respuesta típica: en 1 día laborable',
+      'Consejo según fechas y presupuesto reales',
+      'Ruta privada — no solo una parrilla retail',
+    ],
+    guestNote: 'Priorizamos menos traslados y hoteles alineados al ritmo.',
+    faqKicker: 'Preguntas de planificación',
     faqTitle: 'FAQ inbound',
+    faq: [
+      {
+        question: '¿Necesito un itinerario completo antes de contactar?',
+        answer: 'No. Mes, grupo, estilo y algunos imprescindibles bastan para una primera dirección.',
+      },
+      {
+        question: '¿Con cuánta antelación planificar?',
+        answer: 'En meses pico (mar–abr, oct–nov), 3–6 meses ayudan con hoteles y guías preferidos.',
+      },
+      {
+        question: '¿Idiomas de guía privada?',
+        answer: 'El inglés es estándar; italiano, español, portugués y francés bajo petición.',
+      },
+      {
+        question: '¿Mejores meses norte vs sur?',
+        answer: 'El norte brilla en primavera/otoño; el sur es más anual, con lluvia en el Mekong.',
+      },
+      {
+        question: '¿Visa para estancias cortas?',
+        answer: 'Las reglas cambian por nacionalidad. Compartimos una checklist práctica, no consejo legal.',
+      },
+      {
+        question: '¿Podemos añadir fast track de aeropuerto después?',
+        answer: 'Sí. Fast track, transfers y cambios de hotel se pueden añadir tras la primera dirección.',
+      },
+    ],
     exploreTitle: 'Explora antes del brief',
     explore: [
-      { title: 'Destinos →', body: 'Elige lugares primero.', href: '/destinations' },
-      { title: 'Estilos de viaje →', body: 'Elige el ritmo antes que los lugares.', href: '/styles' },
-      { title: 'Paquetes de muestra →', body: 'Marcos para reaccionar.', href: '/packages' },
+      { title: 'Destinos →', body: 'Mira a dónde van las rutas.', href: '/destinations' },
+      { title: 'Estilos de viaje →', body: 'Empareja un estilo antes de las fechas.', href: '/styles' },
+      { title: 'Paquetes de muestra →', body: 'Formas de viaje para reaccionar.', href: '/packages' },
     ],
+    destChips: ['Ha Long', 'Hoi An', 'Sapa', 'Hue', 'Mekong'],
+    styleChips: ['Patrimonio', 'Comida', 'Playa', 'Familia'],
+    budgetChips: ['$', '$$', '$$$'],
+    destChipsLabel: 'Destinos',
+    styleChipsLabel: 'Estilo de viaje',
+    budgetChipsLabel: 'Presupuesto / persona',
+    consentLabel: 'Acepto la política de privacidad. Solo usamos esto para responder (mercados GDPR).',
   },
   destinations: {
     routesTitle: 'Rutas multi-ciudad de muestra',
@@ -1151,8 +1531,8 @@ const es: SectionCopy = {
       { title: 'Familia', body: 'Días equilibrados para distintas edades.', href: '/styles/family' },
       { title: 'Cultura', body: 'Historias, contexto, comida, patrimonio.', href: '/styles/culture' },
       { title: 'Aventura', body: 'Un ritmo de ruta más activo.', href: '/styles/adventure' },
-      { title: 'Bienestar', body: 'Días más suaves y recuperación.', href: '/styles' },
-      { title: 'Negocios', body: 'Reuniones con contraste cultural.', href: '/styles' },
+      { title: 'Bienestar', body: 'Días más suaves y recuperación.', href: '/styles#wellness' },
+      { title: 'Negocios', body: 'Reuniones con contraste cultural.', href: '/styles#business' },
     ],
     cta: '¿Estilo elegido? Llévalo al brief',
   },
@@ -1190,6 +1570,26 @@ const es: SectionCopy = {
         priceUnit: '/ persona',
         note: 'Indicativo · personalizar',
         href: '/packages/central-heritage',
+      },
+      {
+        badge: 'COASTAL',
+        micro: '9–11 días · Centro + costa',
+        title: '¿Qué tan suave puede ser una semana costera?',
+        body: 'Pueblos patrimoniales con días de playa para recuperar.',
+        priceFrom: 'Desde $1,790',
+        priceUnit: '/ persona',
+        note: 'Indicativo · personalizar',
+        href: '/packages/coastal-heritage',
+      },
+      {
+        badge: 'FAMILY',
+        micro: '10–12 días · multi-región',
+        title: '¿Edades mixtas pueden compartir una ruta privada?',
+        body: 'Ritmo familiar con menos traslados.',
+        priceFrom: 'Desde $1,980',
+        priceUnit: '/ persona',
+        note: 'Indicativo · personalizar',
+        href: '/packages/family-vietnam',
       },
     ],
   },
@@ -1249,7 +1649,36 @@ const es: SectionCopy = {
     lede: 'Licencias, estándares y premios verificables — solo marcas publicadas.',
     prev: 'Credencial anterior',
     next: 'Credencial siguiente',
-    slides: [],
+    slides: [
+      {
+        kind: 'cert',
+        mark: 'Cert',
+        micro: 'Certificados',
+        title: 'Licencia de viaje · acreditación · calidad',
+        body: 'Autoridad y año se listan solo tras confirmar documentación y vigencia.',
+      },
+      {
+        kind: 'iso',
+        mark: 'ISO',
+        micro: 'Estándares',
+        title: 'Estándares de calidad y operación',
+        body: 'Organismo y alcance aparecen solo con certificados en archivo para este mercado.',
+      },
+      {
+        kind: 'award',
+        mark: 'Award',
+        micro: 'Premios',
+        title: 'Reconocimientos',
+        body: 'Las marcas de premio se publican solo con activos verificados y cobertura anual activa.',
+      },
+      {
+        kind: 'member',
+        mark: 'Member',
+        micro: 'Membresías',
+        title: 'Membresías del sector',
+        body: 'Las asociaciones se listan solo mientras la membresía se mantenga activa año a año.',
+      },
+    ],
   },
 }
 
@@ -1349,15 +1778,22 @@ const pt: SectionCopy = {
     ],
   },
   plan: {
+    heroKicker: 'Conversão · brief completo',
+    heroTitle: 'Planeie a sua viagem ao Vietname com uma equipa local',
+    heroLede:
+      'Rotas, hotéis e ritmo à medida. Partilhe mês, grupo, destinos e estilo — resposta em 1 dia útil (GMT+7).',
+    primaryCtaLabel: 'Partilhe o seu brief',
+    breadcrumbCurrent: 'Planear a viagem',
+    mediaCap: 'Ha Long · ritmo de cruzeiro',
     stepsKicker: 'Como a WingsSide funciona',
     stepsTitle: 'Quatro passos do brief ao percurso privado',
     stepsLede:
-      'Uma mesa de planeamento local. Envia o essencial — desenhamos a viagem e respondemos em 1 dia útil (GMT+7).',
+      'A mesma mesa da Home. Envia o essencial — desenhamos e respondemos em 1 dia útil (GMT+7).',
     steps: [
       {
         label: 'Passo 1 · Brief',
         title: 'Diga o essencial',
-        body: 'Destino (ou região), mês, tamanho do grupo e como gosta de viajar — via planner da home ou brief completo.',
+        body: 'Mês, tamanho do grupo, destinos (ou região) e como gosta de viajar — use o formulário abaixo.',
       },
       {
         label: 'Passo 2 · Match',
@@ -1375,13 +1811,56 @@ const pt: SectionCopy = {
         body: 'Troque dias, hotéis ou inclusões juntos até encaixar — depois fechamos logística no terreno.',
       },
     ],
+    briefKicker: 'Brief · conversão principal',
+    briefTitle: 'Partilhe o seu brief de viagem',
+    formTitle: 'O seu brief',
+    promises: [
+      'Resposta típica: em 1 dia útil',
+      'Conselho com base em tempos e orçamento reais',
+      'Rota privada — não só uma grelha retail',
+    ],
+    guestNote: 'Priorizamos menos transferências e hotéis alinhados ao ritmo.',
+    faqKicker: 'Perguntas de planeamento',
     faqTitle: 'FAQ inbound',
+    faq: [
+      {
+        question: 'Preciso de um itinerário completo antes de contactar?',
+        answer: 'Não. Mês, grupo, estilo e alguns must-sees bastam para uma primeira direção.',
+      },
+      {
+        question: 'Com quanta antecedência planear?',
+        answer: 'Nos meses de pico (mar–abr, out–nov), 3–6 meses ajudam com hotéis e guias preferidos.',
+      },
+      {
+        question: 'Idiomas de guia privada?',
+        answer: 'Inglês é padrão; italiano, espanhol, português e francês sob pedido.',
+      },
+      {
+        question: 'Melhores meses norte vs sul?',
+        answer: 'O norte brilha na primavera/outono; o sul é mais anual com chuva no Mekong.',
+      },
+      {
+        question: 'Visto para estadias curtas?',
+        answer: 'As regras mudam por nacionalidade. Partilhamos uma checklist prática, não aconselhamento jurídico.',
+      },
+      {
+        question: 'Podemos adicionar fast track no aeroporto depois?',
+        answer: 'Sim. Fast track, transfers e mudanças de hotel podem ser adicionados após a primeira direção.',
+      },
+    ],
     exploreTitle: 'Explore antes do brief',
     explore: [
-      { title: 'Destinos →', body: 'Escolha lugares primeiro.', href: '/destinations' },
-      { title: 'Estilos de viagem →', body: 'Escolha o ritmo antes dos lugares.', href: '/styles' },
-      { title: 'Pacotes de exemplo →', body: 'Molduras para reagir.', href: '/packages' },
+      { title: 'Destinos →', body: 'Veja para onde as rotas vão.', href: '/destinations' },
+      { title: 'Estilos de viagem →', body: 'Emparelhe um estilo antes das datas.', href: '/styles' },
+      { title: 'Pacotes de exemplo →', body: 'Formas de viagem para reagir.', href: '/packages' },
     ],
+    destChips: ['Ha Long', 'Hoi An', 'Sapa', 'Hue', 'Mekong'],
+    styleChips: ['Património', 'Comida', 'Praia', 'Família'],
+    budgetChips: ['$', '$$', '$$$'],
+    destChipsLabel: 'Destinos',
+    styleChipsLabel: 'Estilo de viagem',
+    budgetChipsLabel: 'Orçamento / pessoa',
+    consentLabel: 'Aceito a política de privacidade. Só usamos isto para responder (mercados GDPR).',
   },
   destinations: {
     routesTitle: 'Rotas multi-cidade de exemplo',
@@ -1437,8 +1916,8 @@ const pt: SectionCopy = {
       { title: 'Família', body: 'Dias equilibrados para várias idades.', href: '/styles/family' },
       { title: 'Cultura', body: 'Histórias, contexto, comida, património.', href: '/styles/culture' },
       { title: 'Aventura', body: 'Um ritmo de rota mais ativo.', href: '/styles/adventure' },
-      { title: 'Bem-estar', body: 'Dias mais suaves e recuperação.', href: '/styles' },
-      { title: 'Negócios', body: 'Reuniões com contraste cultural.', href: '/styles' },
+      { title: 'Bem-estar', body: 'Dias mais suaves e recuperação.', href: '/styles#wellness' },
+      { title: 'Negócios', body: 'Reuniões com contraste cultural.', href: '/styles#business' },
     ],
     cta: 'Estilo escolhido? Leve-o para o brief',
   },
@@ -1476,6 +1955,26 @@ const pt: SectionCopy = {
         priceUnit: '/ pessoa',
         note: 'Indicativo · personalizar',
         href: '/packages/central-heritage',
+      },
+      {
+        badge: 'COASTAL',
+        micro: '9–11 dias · Centro + costa',
+        title: 'Quão suave pode ser uma semana costeira?',
+        body: 'Vilas patrimoniais com dias de praia para recuperar.',
+        priceFrom: 'Desde $1,790',
+        priceUnit: '/ pessoa',
+        note: 'Indicativo · personalizar',
+        href: '/packages/coastal-heritage',
+      },
+      {
+        badge: 'FAMILY',
+        micro: '10–12 dias · multi-região',
+        title: 'Idades mistas podem partilhar uma rota privada?',
+        body: 'Ritmo familiar com menos transferências.',
+        priceFrom: 'Desde $1,980',
+        priceUnit: '/ pessoa',
+        note: 'Indicativo · personalizar',
+        href: '/packages/family-vietnam',
       },
     ],
   },
@@ -1535,7 +2034,36 @@ const pt: SectionCopy = {
     lede: 'Licenças, padrões e prémios verificáveis — só marcas publicadas.',
     prev: 'Credencial anterior',
     next: 'Credencial seguinte',
-    slides: [],
+    slides: [
+      {
+        kind: 'cert',
+        mark: 'Cert',
+        micro: 'Certificados',
+        title: 'Licença de viagem · acreditação · qualidade',
+        body: 'Autoridade e ano só aparecem após documentação confirmada e validade atual.',
+      },
+      {
+        kind: 'iso',
+        mark: 'ISO',
+        micro: 'Padrões',
+        title: 'Padrões de qualidade e operação',
+        body: 'Entidade e âmbito só aparecem com certificados em arquivo para este mercado.',
+      },
+      {
+        kind: 'award',
+        mark: 'Award',
+        micro: 'Prémios',
+        title: 'Reconhecimentos',
+        body: 'Marcas de prémio só com ativos verificados e cobertura anual ativa.',
+      },
+      {
+        kind: 'member',
+        mark: 'Member',
+        micro: 'Associações',
+        title: 'Associações do setor',
+        body: 'Associações só enquanto a filiação se mantém ativa de ano para ano.',
+      },
+    ],
   },
 }
 
