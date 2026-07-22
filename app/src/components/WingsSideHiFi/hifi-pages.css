@@ -1159,6 +1159,7 @@ body[data-site-code='wings-side'] .ws-hifi-sample-journeys {
   margin-top: 2rem;
 }
 
+body[data-site-code='wings-side'] .ws-hifi-page--home .ws-hifi-shell,
 body[data-site-code='wings-side'] .ws-hifi-page--secondary .ws-hifi-shell {
   padding-top: 1rem;
 }
