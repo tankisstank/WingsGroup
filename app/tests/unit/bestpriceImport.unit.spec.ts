@@ -23,9 +23,7 @@ beforeAll(async () => {
   manifestPath = path.join(fixtureRoot, 'tour-source-match.csv')
   rawPath = path.join(crawlerRoot, 'bestprice_tours.json')
 
-  const manifestRows = [
-    'status,candidate_source,document,candidate_url,tour_title',
-  ]
+  const manifestRows = ['status,candidate_source,document,candidate_url,tour_title']
   const records = []
 
   for (let index = 1; index <= 22; index += 1) {
@@ -41,14 +39,7 @@ beforeAll(async () => {
       isIndochina ? 'indochina-tours' : 'vietnam-tours'
     }/codex-fixture-${suffix}.html`
     const imageRelativePath = `images\\bestprice\\${sourceId}\\01.jpg`
-    const imagePath = path.join(
-      crawlerRoot,
-      'storage',
-      'images',
-      'bestprice',
-      sourceId,
-      '01.jpg',
-    )
+    const imagePath = path.join(crawlerRoot, 'storage', 'images', 'bestprice', sourceId, '01.jpg')
 
     await fs.mkdir(path.dirname(imagePath), { recursive: true })
     await fs.writeFile(imagePath, Buffer.from(`synthetic-image-${suffix}`, 'utf8'))
@@ -166,5 +157,38 @@ describe('BestPrice 22 tour import parser', () => {
     expect(mapBestPriceMarket('indochina-tours', 'Best of Vietnam and Cambodia 15 days')).toBe(
       'indochina',
     )
+  })
+
+  it('separates BestPrice Included activities from the sibling Excluded list', async () => {
+    const tour = await normalizeBestPriceRecord({
+      crawlerRoot,
+      sourceFile: rawPath,
+      manifestRow: {
+        document: 'fixture.docx',
+        sourceUrl: 'https://www.bestpricetravel.com/vietnam-tours/example.html',
+        title: 'Vietnam Example 1 day',
+      },
+      record: {
+        url: 'https://www.bestpricetravel.com/vietnam-tours/example.html',
+        tour_id: 'vietnam-tours--example',
+        category: 'vietnam-tours',
+        meta: { description: 'Example summary' },
+        content: {
+          heading: 'Vietnam Example 1 day',
+          price: '99 USD',
+          body_html:
+            '<h2 id="h_tour_inclusion">Inclusions</h2>' +
+            '<div><label>Included activities</label><ul><li>Local guide</li><li>Domestic flight</li></ul></div>' +
+            '<div><label>Excluded</label><ul><li>International flights</li><li>Travel Insurance</li></ul></div>' +
+            '<h2 id="h_tour_rate">Rates &amp; Availability</h2>' +
+            '<div class="itinerary-box"><span class="iti-day-title">Day 1 Hanoi</span><div class="itinerary-content"><p>Explore Hanoi.</p></div></div>',
+          body_text: 'Duration :\n1 day',
+        },
+        images: [],
+      },
+    })
+
+    expect(tour.includes).toEqual(['Local guide', 'Domestic flight'])
+    expect(tour.excludes).toEqual(['International flights', 'Travel Insurance'])
   })
 })

@@ -1304,6 +1304,23 @@ body[data-site-code='wings-side'] .ws-secondary-contact form {
   margin-top: 1.25rem;
 }
 
+body[data-site-code='wings-side'] .ws-secondary-contact__tour-context {
+  display: grid;
+  gap: 0.35rem;
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--site-border);
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--site-brand, #005090) 6%, white);
+}
+
+body[data-site-code='wings-side'] .ws-secondary-contact__tour-context span {
+  color: var(--site-muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 body[data-site-code='wings-side'] .ws-secondary-contact__form .layout-block--form {
   width: 100%;
   max-width: none;

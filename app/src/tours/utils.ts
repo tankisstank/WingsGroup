@@ -125,8 +125,7 @@ export const getAvailabilityLabel = (
 export const getSchedulePath = () => '/lich-khoi-hanh'
 
 /** Site-aware inquiry/contact path. Defaults to WingsGo `/lien-he`. */
-export const getContactPath = (siteCode?: null | string) =>
-  resolveSiteInquiryContactPath(siteCode)
+export const getContactPath = (siteCode?: null | string) => resolveSiteInquiryContactPath(siteCode)
 
 export type TourInquiryIntent = 'hold-seat' | 'inquiry' | 'request-quote' | 'contact'
 
@@ -137,6 +136,7 @@ export const getTourInquiryPath = ({
   source,
   tourId,
   tourSlug,
+  tourTitle,
 }: {
   departureId?: null | number | string
   intent?: TourInquiryIntent
@@ -144,6 +144,7 @@ export const getTourInquiryPath = ({
   source?: null | string
   tourId?: null | number | string
   tourSlug?: null | string
+  tourTitle?: null | string
 }) => {
   const params = new URLSearchParams()
   const contactPath = getContactPath(siteCode)
@@ -156,6 +157,10 @@ export const getTourInquiryPath = ({
 
   if (tourId !== null && tourId !== undefined && tourId !== '') {
     params.set('tourId', String(tourId))
+  }
+
+  if (tourTitle) {
+    params.set('tourTitle', String(tourTitle))
   }
 
   if (departureId !== null && departureId !== undefined && departureId !== '') {
@@ -174,9 +179,7 @@ export const getTourInquiryPath = ({
 /** Parse free-text meal notes into B/L/D chip flags (EN + VI keywords). */
 export const getMealChipFlags = (meals?: null | string) => {
   const text = String(meals || '').toLowerCase()
-  const comparable = text
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+  const comparable = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
   if (!comparable.trim()) {
     return { breakfast: false, dinner: false, lunch: false }

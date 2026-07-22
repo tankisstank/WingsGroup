@@ -203,7 +203,9 @@ const extractSummary = (record: RawBestPriceRecord, title: string) => {
     .split(/\n+/u)
     .map(cleanBestPriceText)
     .filter((line) => line && line.toLowerCase() !== title.toLowerCase())
-    .filter((line) => !/^(from|us|\/pax|book now|overview|itinerary|inclusion|price|q&as)$/iu.test(line))
+    .filter(
+      (line) => !/^(from|us|\/pax|book now|overview|itinerary|inclusion|price|q&as)$/iu.test(line),
+    )
   return lines.slice(0, 4).join(' ').slice(0, 1200) || title
 }
 
@@ -216,11 +218,17 @@ const extractBetween = (value: string, startPattern: RegExp, endPattern: RegExp)
 }
 
 const parseListSection = (html: string, heading: string) => {
-  const section = extractBetween(
+  const inclusionSection = extractBetween(
     html,
-    new RegExp(`<h2[^>]*>\\s*${heading}\\s*<\\/h2>`, 'iu'),
+    /<h2[^>]*>\s*Inclusions\s*<\/h2>/iu,
     /<h2|<div class="margin-bottom-60 tailor_make|<div class="tour_detail__header/iu,
   )
+  const excludedMarker = /<label[^>]*>\s*Excluded\s*<\/label>/iu
+  const includedMarker = /<label[^>]*>\s*Included activities\s*<\/label>/iu
+  const section = /^Exclusions$/iu.test(heading)
+    ? extractBetween(inclusionSection, excludedMarker, /$^/u)
+    : extractBetween(inclusionSection, includedMarker, excludedMarker)
+
   return Array.from(section.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/giu), (match) =>
     htmlToText(match[1]),
   ).filter(Boolean)
@@ -232,16 +240,22 @@ const normalizeDayTitle = (title: string, fallbackDay: number) =>
 const parseItineraryFromHtml = (html: string) => {
   const days: BestPriceItineraryDay[] = []
   const boxes = Array.from(
-    html.matchAll(/<div[^>]+class=["'][^"']*itinerary-box[^"']*["'][^>]*>([\s\S]*?)(?=<div[^>]+class=["'][^"']*itinerary-box|<label[^>]+class=["'][^"']*lbl_note|<div[^>]+class=["'][^"']*itinerary-button|<div[^>]+class=["'][^"']*tailor_make|$)/giu),
+    html.matchAll(
+      /<div[^>]+class=["'][^"']*itinerary-box[^"']*["'][^>]*>([\s\S]*?)(?=<div[^>]+class=["'][^"']*itinerary-box|<label[^>]+class=["'][^"']*lbl_note|<div[^>]+class=["'][^"']*itinerary-button|<div[^>]+class=["'][^"']*tailor_make|$)/giu,
+    ),
   )
 
   for (const [index, match] of boxes.entries()) {
     const chunk = match[1]
-    const titleMatch = chunk.match(/<span[^>]+class=["'][^"']*iti-day-title[^"']*["'][^>]*>([\s\S]*?)<\/span>/iu)
+    const titleMatch = chunk.match(
+      /<span[^>]+class=["'][^"']*iti-day-title[^"']*["'][^>]*>([\s\S]*?)<\/span>/iu,
+    )
     const rawTitle = htmlToText(titleMatch?.[1] || '')
     const dayMatch = rawTitle.match(/\bday\s*(\d+)/iu)
     const dayNumber = dayMatch ? Number(dayMatch[1]) : index + 1
-    const contentMatch = chunk.match(/<div[^>]+class=["'][^"']*itinerary-content[^"']*["'][^>]*>([\s\S]*?)<\/div>/iu)
+    const contentMatch = chunk.match(
+      /<div[^>]+class=["'][^"']*itinerary-content[^"']*["'][^>]*>([\s\S]*?)<\/div>/iu,
+    )
     const content = htmlToText(contentMatch?.[1] || chunk)
     const meals = content.match(/Meals:\s*([^\n]+)/iu)?.[1]
     const accommodation = content.match(/Accommodation:\s*([^\n]+)/iu)?.[1]
@@ -251,9 +265,7 @@ const parseItineraryFromHtml = (html: string) => {
       title: normalizeDayTitle(rawTitle, dayNumber),
       route: normalizeDayTitle(rawTitle, dayNumber),
       summary: cleanBestPriceText(
-        content
-          .replace(/Meals:\s*[^\n]+/iu, '')
-          .replace(/Accommodation:\s*[^\n]+/iu, ''),
+        content.replace(/Meals:\s*[^\n]+/iu, '').replace(/Accommodation:\s*[^\n]+/iu, ''),
       ).slice(0, 8000),
       meals: meals ? cleanBestPriceText(meals) : undefined,
       accommodation: accommodation ? cleanBestPriceText(accommodation) : undefined,
@@ -307,7 +319,11 @@ const loadImages = async ({
   const rawImages = Array.isArray(record.images) ? record.images : []
 
   for (const [index, image] of rawImages.entries()) {
-    const localPath = resolveBestPriceImagePath(crawlerRoot, sourceId, String(image.local_path || ''))
+    const localPath = resolveBestPriceImagePath(
+      crawlerRoot,
+      sourceId,
+      String(image.local_path || ''),
+    )
     if (!localPath) {
       warnings.push(`INVALID_IMAGE_PATH:${String(image.local_path || '')}`)
       continue
@@ -326,7 +342,9 @@ const loadImages = async ({
   return images
 }
 
-const sectionVisibilityFor = (tour: Pick<BestPriceNormalizedTour, 'images' | 'itineraryDays' | 'priceFrom'>) => {
+const sectionVisibilityFor = (
+  tour: Pick<BestPriceNormalizedTour, 'images' | 'itineraryDays' | 'priceFrom'>,
+) => {
   const sections = ['facts', 'itinerary', 'services', 'related', 'sticky-cta']
   if (tour.images.length) sections.unshift('hero')
   if (tour.itineraryDays.length > 1) sections.push('route')
@@ -346,7 +364,9 @@ export const normalizeBestPriceRecord = async ({
   sourceFile: string
 }): Promise<BestPriceNormalizedTour> => {
   const sourceId = cleanBestPriceText(record.tour_id)
-  const title = cleanBestPriceText(record.content?.heading || manifestRow.title || record.meta?.title)
+  const title = cleanBestPriceText(
+    record.content?.heading || manifestRow.title || record.meta?.title,
+  )
   const sourceUrl = cleanBestPriceText(record.url || manifestRow.sourceUrl)
   const category = cleanBestPriceText(record.category)
   const warnings: string[] = []
@@ -354,7 +374,8 @@ export const normalizeBestPriceRecord = async ({
 
   if (!sourceId) blockingErrors.push('MISSING_SOURCE_ID')
   if (!title) blockingErrors.push('MISSING_TITLE')
-  if (!/^https:\/\/www\.bestpricetravel\.com\//iu.test(sourceUrl)) blockingErrors.push('INVALID_SOURCE_HOST')
+  if (!/^https:\/\/www\.bestpricetravel\.com\//iu.test(sourceUrl))
+    blockingErrors.push('INVALID_SOURCE_HOST')
   if (sourceUrl !== manifestRow.sourceUrl) blockingErrors.push('MANIFEST_URL_MISMATCH')
 
   const market = mapBestPriceMarket(category, title)
@@ -402,10 +423,10 @@ export const normalizeBestPriceRecord = async ({
   normalized.sectionVisibility = sectionVisibilityFor(normalized)
   normalized.publishEligible = Boolean(
     !normalized.blockingErrors.length &&
-      normalized.market !== 'other' &&
-      normalized.summary &&
-      normalized.itineraryDays.length &&
-      normalized.images.length,
+    normalized.market !== 'other' &&
+    normalized.summary &&
+    normalized.itineraryDays.length &&
+    normalized.images.length,
   )
   if (!normalized.publishEligible) warnings.push('DRAFT_ONLY')
 

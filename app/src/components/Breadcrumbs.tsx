@@ -6,9 +6,11 @@ import type { BreadcrumbItem } from '@/utilities/breadcrumbs'
 export const Breadcrumbs = ({
   className,
   items,
+  linkClassName = 'theme-nav-link',
 }: {
   className?: string
   items: BreadcrumbItem[]
+  linkClassName?: string
 }) => {
   if (items.length < 2) {
     return null
@@ -17,9 +19,7 @@ export const Breadcrumbs = ({
   return (
     <nav
       aria-label="Breadcrumb"
-      className={
-        className || 'container pt-8 text-sm text-muted-foreground'
-      }
+      className={className || 'container pt-8 text-sm text-muted-foreground'}
     >
       <ol className="flex flex-wrap items-center gap-2">
         {items.map((item, index) => {
@@ -33,7 +33,7 @@ export const Breadcrumbs = ({
                   {item.label}
                 </span>
               ) : (
-                <SiteLink className="theme-nav-link" href={item.path}>
+                <SiteLink className={linkClassName} href={item.path}>
                   {item.label}
                 </SiteLink>
               )}

@@ -38,7 +38,12 @@ export const WingsSideHiFiPageBody = ({
 
   return (
     <>
-      <SecondaryHiFiPage locale={locale} model={model} publicPathname={publicPathname} />
+      <SecondaryHiFiPage
+        locale={locale}
+        model={model}
+        publicPathname={publicPathname}
+        searchParams={searchParams}
+      />
       <RenderBlocks blocks={reusableBlocks || []} />
     </>
   )

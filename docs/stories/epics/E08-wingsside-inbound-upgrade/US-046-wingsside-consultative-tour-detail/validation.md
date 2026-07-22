@@ -1,5 +1,42 @@
 # US-046 Validation
 
+> **2026-07-22 tour-detail remediation re-audit:** **substantially complete;
+> strict parity still needs fix**. The sales-content P0 defects are closed:
+> route is Hanoi / Ninh Binh / Sapa / Fansipan / Halong, Included and Excluded
+> are separated, peak surcharge is separate, and importer provenance is not
+> public. The target page has one enquiry form, no duplicate IDs, 45/45 unique
+> `data-od-id` markers, three real related tours, and a fixed mobile consult bar
+> visible at scroll-top. Production remains on hold because CMS editorial
+> media/copy still differs from the prototype and the full go-live review is
+> blocked by tenant/SEO/security probes. The development-server 91-page sweep
+> also saturated after the first tour; the optimized standalone artifact passed
+> the independent 22/22 tour HTTP matrix.
+
+## Tour-detail remediation proof - 2026-07-22
+
+- Runtime: `E:\repo\WingsTravel-us046-hifi`, branch
+  `feature/us-046-wingsside-hifi-tour-detail`, port `3011`.
+- Focused browser at 1440x900 and 390x844: HTTP 200, one form, no duplicate
+  IDs, 45 unique markers, zero horizontal overflow, six itinerary days and
+  three real related-tour cards.
+- Mobile conversion: `tour-mobile-consult` is `position: fixed`, visible at
+  `scrollY=0`, 62px high and contained within the 390px viewport.
+- Content safety: excluded international flights, visa, insurance and tips no
+  longer appear under Included; internal BestPrice provenance is suppressed.
+- TypeScript passed; focused unit 20/20 and component 3/3 passed; optimized
+  production build passed. The full historical 253-test claim was not reused.
+- Production artifact smoke passed all 22 imported tour routes. The local
+  `go-live:review` completed 91/91 checks but exited blocked: tenant identity,
+  canonical/sitemap/security-header gates remain, and the overloaded dev
+  runtime returned late 500/unknown results that do not reproduce in the
+  standalone artifact.
+- Final screenshots:
+  `app/artifacts/reviews/us046-tour-detail-reaudit/tour-detail-desktop-1440x900.png`
+  and `tour-detail-mobile-390x844.png`.
+- Remaining acceptance gaps: editorial hero/caption and imported summary copy
+  are not pixel/content-identical to the prototype; deployment-time importer
+  repair must be applied and verified against PostgreSQL before release.
+
 > **2026-07-21 corrective status:** Independent 8-page hi-fi review is **NO-GO**.
 > Tour-detail and Home/Specials evidence below remains historical. Hub fidelity
 > is **not** accepted. See US-046A and

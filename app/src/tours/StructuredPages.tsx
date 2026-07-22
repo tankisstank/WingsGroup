@@ -1,8 +1,10 @@
 import React from 'react'
 
+import { FormBlock } from '@/blocks/Form/Component'
 import { Media } from '@/components/Media'
 import { SiteLink } from '@/components/SiteLink'
 import type { Media as MediaType } from '@/payload-types'
+import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 
 import { defaultTourSectionOrder, defaultTourSectionVisibility } from './sectionRegistry'
 import { ScheduleInteractiveDepartures } from './ScheduleInteractiveDepartures'
@@ -33,6 +35,8 @@ import {
   type TourInquiryIntent,
 } from './utils'
 import { isConsultativeTourSiteCode } from '@/utilities/siteCapabilities'
+import { TourEnquiryContextBridge } from './TourEnquiryContextBridge'
+import { normalizeWingSideConsultativeTour } from './wingsSideTourViewModel'
 
 /** Retail = WingsGo dense conversion. Consultative = Wingside private inbound. */
 export type TourDetailPresentation = 'consultative' | 'retail'
@@ -282,14 +286,13 @@ const getConsultativePrimaryLabel = ({
   locale: 'en' | 'vi'
   override?: null | string
 }) => {
-  const fallback =
-    compact
-      ? locale === 'en'
-        ? 'Consult'
-        : 'Tư vấn'
-      : locale === 'en'
-        ? 'Request consultation'
-        : 'Yêu cầu tư vấn'
+  const fallback = compact
+    ? locale === 'en'
+      ? 'Consult'
+      : 'Tư vấn'
+    : locale === 'en'
+      ? 'Request consultation'
+      : 'Yêu cầu tư vấn'
 
   // Sanitize override the same way as CMS CTA labels (do not trust retail hold-seat copy).
   if (isUsableText(override) && !isRetailOrBareContactLabel(override)) {
@@ -338,22 +341,29 @@ const TourDecisionHeader = ({
   const retailCtaIntent: TourInquiryIntent = cta.mode || tour.bcfg?.ctaStyle || 'hold-seat'
   const consultativeCtaIntent = getConsultativePrimaryIntent(cta.mode || tour.bcfg?.ctaStyle)
   const routeChips = getTourRouteChips(tour)
-  const pricePosture = getTourPricePosture({
-    currency: nextDeparture?.currency || tour.currency,
-    locale,
-    priceFrom:
-      typeof nextDeparture?.priceFrom === 'number'
-        ? nextDeparture.priceFrom
-        : typeof tour.priceFrom === 'number'
-          ? tour.priceFrom
-          : null,
-  })
+  const displayTitle = isConsultative
+    ? String(tour.title || '').replace(
+        new RegExp(`\\s+${Number(tour.durationDays) || ''}\\s+days?$`, 'i'),
+        '',
+      )
+    : tour.title
+  const heroMedia = tour.heroMedia || asArray(tour.gallery)[0] || null
+  const heroCaption =
+    heroMedia &&
+    typeof heroMedia === 'object' &&
+    isUsableText(heroMedia.alt) &&
+    !/^img[- ]?video$/i.test(String(heroMedia.alt))
+      ? heroMedia.alt
+      : routeChips.length > 0
+        ? `${routeChips[routeChips.length - 1]} · private journey`
+        : null
   const consultPrimaryFallback = getTourInquiryPath({
     intent: consultativeCtaIntent,
     siteCode,
     source: 'tour-detail-hero',
     tourId: tour.id,
     tourSlug: tour.slug,
+    tourTitle: tour.title,
   })
   const consultPrimaryHref = resolveConsultativeCtaHref({
     cmsHref: cta.href,
@@ -365,6 +375,7 @@ const TourDecisionHeader = ({
     source: 'tour-detail-hero-contact',
     tourId: tour.id,
     tourSlug: tour.slug,
+    tourTitle: tour.title,
   })
   const consultPrimaryLabel = getConsultativePrimaryLabel({
     ctaLabel: cta.label,
@@ -372,83 +383,132 @@ const TourDecisionHeader = ({
     override: nextDeparture?.ctaLabelOverride,
   })
   const consultSecondaryLabel = locale === 'en' ? 'Contact us' : 'Liên hệ'
+  const heroEyebrow = [
+    isUsableText(tour.market) ? String(tour.market).toUpperCase() : null,
+    locale === 'en' ? 'TAILOR-MADE' : 'THIẾT KẾ RIÊNG',
+    durationLabel ? durationLabel.toUpperCase() : null,
+  ]
+    .filter(Boolean)
+    .join(' · ')
 
   if (isConsultative) {
     // Single split surface (image | body) — no dual-panel gap on wide screens.
     return (
       <div
-        className="overflow-hidden rounded-[28px] border border-border/70 bg-card/95 shadow-sm lg:grid lg:grid-cols-2 lg:items-stretch"
+        className="lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-8"
+        data-od-id="tour-hero"
         data-tour-presentation="consultative"
       >
-        <div className="relative aspect-[16/10] min-h-[16rem] bg-muted sm:min-h-[18rem] lg:aspect-auto lg:min-h-[26rem]">
+        <div
+          className="relative aspect-[3/2] overflow-hidden rounded-[24px] bg-muted sm:aspect-[16/10] sm:min-h-[18rem] lg:aspect-auto lg:min-h-[38rem]"
+          data-od-id="tour-hero-media"
+        >
           <Media
             fill
             imgClassName="object-cover"
             pictureClassName="absolute inset-0"
             priority
-            resource={tour.heroMedia || asArray(tour.gallery)[0] || null}
+            resource={heroMedia}
           />
+          {heroCaption ? (
+            <span className="absolute bottom-4 left-4 max-w-[calc(100%-2rem)] rounded-full bg-white/90 px-3 py-2 text-xs font-medium text-foreground shadow-sm backdrop-blur">
+              {heroCaption}
+            </span>
+          ) : null}
         </div>
-        <div className="flex flex-col justify-center gap-4 p-5 sm:p-6 md:p-7 lg:p-8">
-          <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
-            {locale === 'en' ? 'Private journey' : 'Hành trình riêng'}
+        <div className="flex flex-col justify-center gap-4 py-6 sm:py-7 lg:py-8">
+          <p
+            className="site-brand-kicker break-words text-xs font-semibold uppercase tracking-[0.18em]"
+            data-od-id="tour-eyebrow"
+            style={{ whiteSpace: 'normal' }}
+          >
+            {heroEyebrow}
           </p>
-          <h1 className="text-3xl font-semibold leading-tight md:text-[2.15rem] md:leading-[1.15]">
-            {tour.title}
+          <h1
+            className="text-3xl font-semibold leading-tight md:text-[2.15rem] md:leading-[1.15]"
+            data-od-id="tour-title"
+          >
+            {displayTitle}
           </h1>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            {durationLabel ? (
-              <span className="rounded-full border border-border/70 bg-muted/30 px-3 py-1 font-medium text-foreground">
-                {durationLabel}
-              </span>
-            ) : null}
-            {isUsableText(tour.destinationLabel) ? (
-              <span className="rounded-full border border-border/70 bg-muted/30 px-3 py-1 font-medium text-foreground">
-                {tour.destinationLabel}
-              </span>
-            ) : isUsableText(tour.market) ? (
-              <span className="rounded-full border border-border/70 bg-muted/30 px-3 py-1 font-medium capitalize text-foreground">
-                {tour.market}
-              </span>
-            ) : null}
-          </div>
           {summaryParagraphs[0] ? (
-            <p className="text-sm leading-7 text-muted-foreground md:text-base">
+            <p
+              className="text-sm leading-7 text-muted-foreground md:text-base"
+              data-od-id="tour-summary"
+            >
               {summaryParagraphs[0]}
             </p>
           ) : null}
-          {routeChips.length > 0 ? (
-            <div
-              className="flex flex-wrap gap-2"
-              aria-label={locale === 'en' ? 'Route' : 'Lộ trình'}
-            >
-              {routeChips.map((chip) => (
-                <span
-                  className="rounded-full border border-[color:var(--site-brand)]/20 bg-[color:var(--site-brand)]/8 px-3 py-1.5 text-xs font-semibold text-[var(--site-brand)]"
-                  key={chip}
-                >
-                  {chip}
+          <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
+            {durationLabel ? (
+              <div
+                className="rounded-[12px] border border-border/70 bg-background p-4"
+                data-od-id="tour-duration"
+              >
+                <span className="block text-xs font-semibold uppercase text-muted-foreground">
+                  {locale === 'en' ? 'Duration' : 'Thời lượng'}
                 </span>
-              ))}
+                <strong className="mt-1 block text-sm text-foreground">{durationLabel}</strong>
+              </div>
+            ) : null}
+            {isUsableText(tour.destinationLabel) ? (
+              <div
+                className="rounded-[12px] border border-border/70 bg-background p-4"
+                data-od-id="tour-destination"
+              >
+                <span className="block text-xs font-semibold uppercase text-muted-foreground">
+                  {locale === 'en' ? 'Destination' : 'Điểm đến'}
+                </span>
+                <strong className="mt-1 block text-sm text-foreground">
+                  {tour.destinationLabel}
+                </strong>
+              </div>
+            ) : isUsableText(tour.market) ? (
+              <div
+                className="rounded-[12px] border border-border/70 bg-background p-4"
+                data-od-id="tour-destination"
+              >
+                <span className="block text-xs font-semibold uppercase text-muted-foreground">
+                  {locale === 'en' ? 'Destination' : 'Điểm đến'}
+                </span>
+                <strong className="mt-1 block text-sm capitalize text-foreground">
+                  {tour.market}
+                </strong>
+              </div>
+            ) : null}
+          </div>
+          {routeChips.length > 0 ? (
+            <div data-od-id="tour-route">
+              <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
+                {locale === 'en' ? 'Route' : 'Lộ trình'}
+              </p>
+              <div
+                className="flex flex-wrap gap-2"
+                aria-label={locale === 'en' ? 'Route' : 'Lộ trình'}
+              >
+                {routeChips.map((chip) => (
+                  <span
+                    className="rounded-full border border-[color:var(--site-brand)]/20 bg-[color:var(--site-brand)]/8 px-3 py-1.5 text-xs font-semibold text-[var(--site-brand)]"
+                    key={chip}
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
             </div>
           ) : null}
-          <div className="rounded-[20px] border border-border/60 bg-muted/25 p-4">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              {pricePosture.label}
-            </p>
-            <p className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">
-              {pricePosture.value}
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">{pricePosture.honesty}</p>
-          </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3" data-od-id="tour-hero-actions">
             <SiteLink
               className={`${TourPrimaryCtaClass} tour-cta-primary--pulse`}
+              data-od-id="tour-primary-cta"
               href={consultPrimaryHref}
             >
               {consultPrimaryLabel}
             </SiteLink>
-            <SiteLink className={TourGhostCtaClass} href={consultSecondaryHref}>
+            <SiteLink
+              className={TourGhostCtaClass}
+              data-od-id="tour-secondary-cta"
+              href={consultSecondaryHref}
+            >
               {consultSecondaryLabel}
             </SiteLink>
           </div>
@@ -649,7 +709,7 @@ const TourFactGrid = ({
         }
 
   return (
-    <Panel id="facts">
+    <Panel data-od-id="tour-facts" id="facts">
       <SectionHeading
         eyebrow={labels.eyebrow}
         title={labels.title}
@@ -663,9 +723,22 @@ const TourFactGrid = ({
           [labels.group, tour.factSummary?.groupSizeSummary],
           [labels.operator, tour.factSummary?.operatorNote],
           [labels.hotel, tour.factSummary?.hotelSummary || tour.servicesSummary?.hotelSummary],
-        ].map(([label, value]) =>
+        ].map(([label, value], index) =>
           isUsableText(value) ? (
-            <div className="rounded-[24px] border border-border/60 bg-muted/35 p-5" key={label}>
+            <div
+              className="rounded-[24px] border border-border/60 bg-muted/35 p-5"
+              data-od-id={
+                [
+                  'tour-fact-duration',
+                  'tour-fact-route',
+                  'tour-fact-meals',
+                  'tour-fact-group',
+                  'tour-fact-operations',
+                  'tour-fact-lodging',
+                ][index]
+              }
+              key={label}
+            >
               <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
               <p className="mt-2 text-sm font-medium leading-7 text-foreground">{value}</p>
             </div>
@@ -774,21 +847,42 @@ const TourWhyChooseSection = ({
   )
 }
 
-const TourJourneyGallerySection = ({ locale, tour }: { locale: 'en' | 'vi'; tour: Record<string, any> }) => {
-  const gallery = asArray<Record<string, any>>(tour.gallery).filter((item) => typeof item === 'object').slice(0, 5)
+const TourJourneyGallerySection = ({
+  locale,
+  tour,
+}: {
+  locale: 'en' | 'vi'
+  tour: Record<string, any>
+}) => {
+  const gallery = asArray<Record<string, any>>(tour.gallery)
+    .filter((item) => typeof item === 'object')
+    .slice(0, 5)
   if (gallery.length === 0) return null
 
   return (
-    <Panel id="gallery">
+    <Panel data-od-id="tour-gallery" id="gallery">
       <SectionHeading
         eyebrow={locale === 'en' ? 'Journey gallery' : 'Thư viện hành trình'}
         title={locale === 'en' ? "Places you'll move through" : 'Những nơi bạn sẽ đi qua'}
-        description={locale === 'en' ? 'A visual read of the route before the day-by-day detail.' : 'Hình ảnh thực tế của tuyến trước phần lịch trình từng ngày.'}
+        description={
+          locale === 'en'
+            ? 'A visual read of the route before the day-by-day detail.'
+            : 'Hình ảnh thực tế của tuyến trước phần lịch trình từng ngày.'
+        }
       />
       <div className="grid auto-rows-[9rem] grid-cols-2 gap-3 sm:auto-rows-[11rem] md:grid-cols-4">
         {gallery.map((media, index) => (
-          <div className={`relative overflow-hidden rounded-[18px] bg-muted ${index === 0 ? 'row-span-2 md:col-span-2' : ''}`} key={media.id || media.url || index}>
-            <Media fill imgClassName="object-cover" pictureClassName="absolute inset-0" resource={media as MediaType} />
+          <div
+            className={`relative overflow-hidden rounded-[18px] bg-muted ${index === 0 ? 'row-span-2 md:col-span-2' : ''}`}
+            data-od-id={`tour-gallery-${index + 1}`}
+            key={media.id || media.url || index}
+          >
+            <Media
+              fill
+              imgClassName="object-cover"
+              pictureClassName="absolute inset-0"
+              resource={media as MediaType}
+            />
           </div>
         ))}
       </div>
@@ -796,26 +890,85 @@ const TourJourneyGallerySection = ({ locale, tour }: { locale: 'en' | 'vi'; tour
   )
 }
 
-const TourConsultationSection = ({ locale, siteCode, tour }: { locale: 'en' | 'vi'; siteCode?: null | string; tour: Record<string, any> }) => {
-  const href = getTourInquiryPath({ intent: 'inquiry', siteCode: resolveTourSiteCode(siteCode, 'consultative'), source: 'tour-detail-enquiry', tourId: tour.id, tourSlug: tour.slug })
+const TourConsultationSection = ({
+  enquiryForm,
+  locale,
+  siteCode,
+  tour,
+}: {
+  enquiryForm?: FormType | null
+  locale: 'en' | 'vi'
+  siteCode?: null | string
+  tour: Record<string, any>
+}) => {
+  const href = getTourInquiryPath({
+    intent: 'inquiry',
+    siteCode: resolveTourSiteCode(siteCode, 'consultative'),
+    source: 'tour-detail-enquiry',
+    tourId: tour.id,
+    tourSlug: tour.slug,
+    tourTitle: tour.title,
+  })
+  const context = {
+    source: 'tour-detail-enquiry',
+    tourId: tour.id,
+    tourSlug: tour.slug,
+    tourTitle: tour.title,
+  }
   return (
     <Panel id="enquire">
-      <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
+      <div data-od-id="tour-enquiry">
         <SectionHeading
           eyebrow={locale === 'en' ? 'Next step' : 'Bước tiếp theo'}
           title={locale === 'en' ? 'Request consultation' : 'Yêu cầu tư vấn'}
-          description={locale === 'en' ? 'Tell us dates and party size. A local planner replies with the first direction within one business day (GMT+7).' : 'Gửi ngày đi và số khách. Planner địa phương phản hồi hướng đầu tiên trong một ngày làm việc (GMT+7).'}
+          description={
+            locale === 'en'
+              ? 'Tell us dates and party size. A local planner replies with the first direction within one business day (GMT+7).'
+              : 'Gửi ngày đi và số khách. Planner địa phương phản hồi hướng đầu tiên trong một ngày làm việc (GMT+7).'
+          }
         />
-        <div className="flex flex-wrap gap-3">
-          <SiteLink className={`${TourPrimaryCtaClass} tour-cta-primary--pulse`} href={href}>{locale === 'en' ? 'Start your enquiry' : 'Bắt đầu yêu cầu'}</SiteLink>
-          <SiteLink className={TourGhostCtaClass} href="/contact-us">{locale === 'en' ? 'Contact us' : 'Liên hệ'}</SiteLink>
+        <div className="mt-5 rounded-[20px] border border-border/70 bg-muted/20 p-4">
+          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+            {locale === 'en' ? 'Journey context' : 'Ngữ cảnh hành trình'}
+          </p>
+          <p className="mt-2 font-semibold text-foreground">{tour.title}</p>
         </div>
+        {enquiryForm ? (
+          <div className="tour-enquiry-form mt-6">
+            <FormBlock
+              anchorId={null}
+              enableIntro={false}
+              form={enquiryForm}
+              formOdId="tour-enquiry-form"
+              presentation="minimal"
+              submitOdId="tour-enquiry-submit"
+            />
+            <TourEnquiryContextBridge context={context} rootSelector=".tour-enquiry-form" />
+          </div>
+        ) : (
+          <div className="mt-6 flex flex-wrap gap-3">
+            <SiteLink className={`${TourPrimaryCtaClass} tour-cta-primary--pulse`} href={href}>
+              {locale === 'en' ? 'Start your enquiry' : 'Bắt đầu yêu cầu'}
+            </SiteLink>
+          </div>
+        )}
+        <SiteLink className={`${TourGhostCtaClass} mt-4`} href={href}>
+          {locale === 'en' ? 'Continue on Contact' : 'Tiếp tục tại trang Liên hệ'}
+        </SiteLink>
       </div>
     </Panel>
   )
 }
 
-const TourRouteVisualSection = ({ locale = 'vi', presentation = 'retail', tour }: { locale?: 'en' | 'vi'; presentation?: TourDetailPresentation; tour: Record<string, any> }) => {
+const TourRouteVisualSection = ({
+  locale = 'vi',
+  presentation = 'retail',
+  tour,
+}: {
+  locale?: 'en' | 'vi'
+  presentation?: TourDetailPresentation
+  tour: Record<string, any>
+}) => {
   const routeStops = asArray<Record<string, any>>(tour.routeViz?.stops)
   const travelLegs = asArray<Record<string, any>>(tour.routeViz?.travelLegs)
   const mapImage = tour.routeViz?.mapImage
@@ -823,10 +976,16 @@ const TourRouteVisualSection = ({ locale = 'vi', presentation = 'retail', tour }
   const isEn = presentation === 'consultative' && locale === 'en'
 
   return (
-    <Panel id="route">
+    <Panel data-od-id="tour-overview" id="route">
       <SectionHeading
         eyebrow={isEn ? 'Journey overview' : 'Hành trình trực quan'}
-        title={isEn ? (/north/i.test(String(tour.title || tour.market || '')) ? 'Four legs, one North story' : 'One private route, shaped around your pace') : 'Nhịp hành trình và route thực tế'}
+        title={
+          isEn
+            ? /north/i.test(String(tour.title || tour.market || ''))
+              ? 'Four legs, one North story'
+              : 'One private route, shaped around your pace'
+            : 'Nhịp hành trình và route thực tế'
+        }
         description={isUsableText(tour.routeViz?.routeCaption) ? tour.routeViz.routeCaption : null}
       />
       <div className="grid gap-6 lg:grid-cols-[1fr_0.95fr]">
@@ -954,7 +1113,7 @@ const TourItinerarySection = ({
 
   if (isConsultative) {
     return (
-      <Panel className="scroll-mt-28 md:scroll-mt-24" id="itinerary">
+      <Panel className="scroll-mt-28 md:scroll-mt-24" data-od-id="tour-itinerary" id="itinerary">
         <SectionHeading eyebrow={heading.eyebrow} title={heading.title} description={null} />
         <div className="tour-itinerary-accordion space-y-2 sm:space-y-3">
           {itineraryDays.map((day, index) => {
@@ -977,6 +1136,7 @@ const TourItinerarySection = ({
                 <summary
                   aria-controls={panelId}
                   className="flex cursor-pointer list-none items-start gap-3 rounded-[22px] px-3 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--site-accent)] sm:gap-4 sm:px-5 sm:py-4 [&::-webkit-details-marker]:hidden"
+                  data-od-id={dayId}
                   id={dayId}
                 >
                   <div className="shrink-0 rounded-[16px] bg-muted/50 px-3 py-2 text-center sm:rounded-[20px] sm:px-4 sm:py-3">
@@ -1025,14 +1185,18 @@ const TourItinerarySection = ({
                         <p className="mt-1 text-sm font-medium text-foreground">{day.route}</p>
                       ) : null}
                       {isUsableText(day.summary) ? (
-                        <p className="mt-3 text-sm leading-7 text-muted-foreground">{day.summary}</p>
+                        <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                          {day.summary}
+                        </p>
                       ) : null}
                       {day.dayHighlight ? (
                         <div className="mt-4 rounded-[20px] border border-border/60 bg-background p-4">
                           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
                             {isEn ? 'Highlight' : 'Điểm nhấn'}
                           </p>
-                          <p className="mt-2 text-sm leading-7 text-foreground">{day.dayHighlight}</p>
+                          <p className="mt-2 text-sm leading-7 text-foreground">
+                            {day.dayHighlight}
+                          </p>
                         </div>
                       ) : null}
                       {infoItems.length > 0 ? (
@@ -1228,36 +1392,38 @@ const TourServicesSection = ({
 
   if (isConsultative) {
     return (
-      <Panel id="services">
+      <Panel data-od-id="tour-services" id="services">
         <SectionHeading
           eyebrow={isEn ? 'Included & excluded' : 'Dịch vụ'}
           title={isEn ? 'What is included — and what is not' : 'Giá đã gồm gì và chi phí tự túc'}
           description={null}
         />
         <div className="grid gap-5 md:grid-cols-2">
-          <div className="rounded-[24px] border border-border/60 bg-muted/20 p-5">
+          <div
+            className="rounded-[24px] border border-border/60 bg-muted/20 p-5"
+            data-od-id="tour-included"
+          >
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--site-brand)]">
               {isEn ? 'Included' : 'Đã gồm'}
             </p>
             <ul className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
               {includes.length > 0 ? (
-                includes.map((item, index) => (
-                  <li key={`${item.label}-${index}`}>{item.label}</li>
-                ))
+                includes.map((item, index) => <li key={`${item.label}-${index}`}>{item.label}</li>)
               ) : (
                 <li>{isEn ? 'Confirmed on consultation.' : 'Xác nhận khi tư vấn.'}</li>
               )}
             </ul>
           </div>
-          <div className="rounded-[24px] border border-border/60 bg-muted/20 p-5">
+          <div
+            className="rounded-[24px] border border-border/60 bg-muted/20 p-5"
+            data-od-id="tour-excluded"
+          >
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {isEn ? 'Not included' : 'Chưa gồm'}
             </p>
             <ul className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
               {excludes.length > 0 ? (
-                excludes.map((item, index) => (
-                  <li key={`${item.label}-${index}`}>{item.label}</li>
-                ))
+                excludes.map((item, index) => <li key={`${item.label}-${index}`}>{item.label}</li>)
               ) : (
                 <li>{isEn ? 'Confirmed on consultation.' : 'Xác nhận khi tư vấn.'}</li>
               )}
@@ -1265,7 +1431,10 @@ const TourServicesSection = ({
           </div>
         </div>
         {isUsableText(peakNote) ? (
-          <div className="mt-5 rounded-[22px] border border-border/60 bg-background p-4">
+          <div
+            className="mt-5 rounded-[22px] border border-border/60 bg-background p-4"
+            data-od-id="tour-surcharge"
+          >
             <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
               {isEn ? 'Peak / surcharge note' : 'Lưu ý mùa cao điểm'}
             </p>
@@ -1428,7 +1597,7 @@ const TourPricePostureSection = ({
   ].filter((value) => isUsableText(value)) as string[]
 
   return (
-    <Panel id="departures">
+    <Panel data-od-id="tour-price" id="departures">
       <SectionHeading
         eyebrow={isEn ? 'Dates & price' : 'Thời điểm & giá'}
         title={isEn ? 'Private pricing posture' : 'Cách định giá private'}
@@ -1522,6 +1691,7 @@ const TourDecisionRail = ({
     source: 'tour-detail-rail',
     tourId: tour.id,
     tourSlug: tour.slug,
+    tourTitle: tour.title,
   })
   const primaryHref = resolveConsultativeCtaHref({
     cmsHref: cta.href,
@@ -1529,7 +1699,11 @@ const TourDecisionRail = ({
   })
 
   return (
-    <aside className="tour-decision-rail hidden lg:block" aria-label={isEn ? 'Plan this journey' : 'Lên kế hoạch'}>
+    <aside
+      className="tour-decision-rail hidden lg:block"
+      aria-label={isEn ? 'Plan this journey' : 'Lên kế hoạch'}
+      data-od-id="tour-decision-rail"
+    >
       <div className="sticky top-24 space-y-4 rounded-[28px] border border-border/70 bg-card/95 p-5 shadow-sm">
         <div>
           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
@@ -1556,6 +1730,7 @@ const TourDecisionRail = ({
               source: 'tour-detail-rail-contact',
               tourId: tour.id,
               tourSlug: tour.slug,
+              tourTitle: tour.title,
             })}
           >
             {isEn ? 'Contact us' : 'Liên hệ'}
@@ -1710,7 +1885,9 @@ const TourFAQSection = ({
       <SectionHeading
         eyebrow="FAQ"
         title={
-          isEn ? 'Questions guests usually ask before booking' : 'Câu hỏi khách thường hỏi trước khi chốt'
+          isEn
+            ? 'Questions guests usually ask before booking'
+            : 'Câu hỏi khách thường hỏi trước khi chốt'
         }
       />
       <div className="space-y-4">
@@ -1743,21 +1920,50 @@ const TourRelatedSection = ({
   const isEn = presentation === 'consultative' && locale === 'en'
 
   const fallback = [
-    { href: '/packages', summary: isEn ? 'Compare private journey shapes and pacing.' : 'So sánh các khung hành trình private.', title: isEn ? 'Sample journeys' : 'Hành trình mẫu' },
-    { href: '/destinations', summary: isEn ? 'Choose the regions that belong in your brief.' : 'Chọn vùng muốn đưa vào brief.', title: isEn ? 'Explore destinations' : 'Khám phá điểm đến' },
-    { href: '/styles', summary: isEn ? 'Match pace, stays, and travel priorities.' : 'Ghép nhịp, lưu trú và ưu tiên chuyến đi.', title: isEn ? 'Match travel style' : 'Ghép phong cách' },
+    {
+      href: '/packages',
+      summary: isEn
+        ? 'Compare private journey shapes and pacing.'
+        : 'So sánh các khung hành trình private.',
+      title: isEn ? 'Sample journeys' : 'Hành trình mẫu',
+    },
+    {
+      href: '/destinations',
+      summary: isEn
+        ? 'Choose the regions that belong in your brief.'
+        : 'Chọn vùng muốn đưa vào brief.',
+      title: isEn ? 'Explore destinations' : 'Khám phá điểm đến',
+    },
+    {
+      href: '/styles',
+      summary: isEn
+        ? 'Match pace, stays, and travel priorities.'
+        : 'Ghép nhịp, lưu trú và ưu tiên chuyến đi.',
+      title: isEn ? 'Match travel style' : 'Ghép phong cách',
+    },
   ]
   const items = relatedTours.length
     ? relatedTours.map((item) => ({
         href: item.slug ? getTourPath(item.slug) : '/packages',
         id: item.id || item.slug,
+        media: item.heroMedia,
+        slug: item.slug,
         summary: item.summary,
         title: item.title,
       }))
-    : fallback.map((item, index) => ({ ...item, id: `fallback-${index}` }))
+    : presentation === 'consultative'
+      ? []
+      : fallback.map((item, index) => ({
+          ...item,
+          id: `fallback-${index}`,
+          media: null,
+          slug: null,
+        }))
+
+  if (items.length === 0 && presentation === 'consultative') return null
 
   return (
-    <Panel id="related">
+    <Panel data-od-id="tour-related" id="related">
       <SectionHeading
         eyebrow={isEn ? 'Related journeys' : 'Tour liên quan'}
         title={isEn ? 'Other itineraries near this need' : 'Các line gần với nhu cầu này'}
@@ -1769,18 +1975,34 @@ const TourRelatedSection = ({
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
-          <div className="rounded-[24px] border border-border/60 bg-background p-5" key={item.id}>
-            <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.summary}</p>
-            {item.href ? (
-              <SiteLink
-                className="mt-4 inline-flex text-sm font-semibold no-underline"
-                href={item.href}
-              >
-                {isEn ? 'Explore ->' : 'Khám phá ->'}
-              </SiteLink>
+          <article
+            className="overflow-hidden rounded-[24px] border border-border/60 bg-background"
+            data-od-id={item.slug ? `related-tour-${item.slug}` : undefined}
+            key={item.id}
+          >
+            {item.media ? (
+              <div className="relative aspect-[16/10] bg-muted">
+                <Media
+                  fill
+                  imgClassName="object-cover"
+                  pictureClassName="absolute inset-0"
+                  resource={item.media as MediaType}
+                />
+              </div>
             ) : null}
-          </div>
+            <div className="p-5">
+              <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.summary}</p>
+              {item.href ? (
+                <SiteLink
+                  className="mt-4 inline-flex text-sm font-semibold no-underline"
+                  href={item.href}
+                >
+                  {isEn ? 'Explore ->' : 'Khám phá ->'}
+                </SiteLink>
+              ) : null}
+            </div>
+          </article>
         ))}
       </div>
     </Panel>
@@ -1801,7 +2023,6 @@ const StickyBookingCTASection = ({
   tour: Record<string, any>
 }) => {
   const isConsultative = presentation === 'consultative'
-  const isEn = locale === 'en'
   const siteCode = isConsultative ? resolveTourSiteCode(siteCodeProp, presentation) : undefined
   const pricePosture = getTourPricePosture({
     currency: nextDeparture?.currency || tour.currency,
@@ -1816,7 +2037,10 @@ const StickyBookingCTASection = ({
 
   if (isConsultative) {
     return (
-      <div className="sticky bottom-2 z-20 max-w-full pb-[env(safe-area-inset-bottom)] md:bottom-4">
+      <div
+        className="fixed inset-x-3 bottom-3 z-40 max-w-full pb-[env(safe-area-inset-bottom)] lg:hidden"
+        data-od-id="tour-mobile-consult"
+      >
         <div className="overflow-hidden rounded-[22px] border border-border/70 bg-background/95 px-3 py-2 shadow-lg backdrop-blur sm:rounded-[28px] sm:px-5 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
@@ -1830,13 +2054,12 @@ const StickyBookingCTASection = ({
             <SiteLink
               className={`${TourPrimaryCtaClass} tour-cta-primary--pulse shrink-0 px-4`}
               href={getTourInquiryPath({
-                intent: getConsultativePrimaryIntent(
-                  tour.primaryCTA?.mode || tour.bcfg?.ctaStyle,
-                ),
+                intent: getConsultativePrimaryIntent(tour.primaryCTA?.mode || tour.bcfg?.ctaStyle),
                 siteCode,
                 source: 'tour-detail-sticky',
                 tourId: tour.id,
                 tourSlug: tour.slug,
+                tourTitle: tour.title,
               })}
             >
               {getConsultativePrimaryLabel({
@@ -1902,19 +2125,20 @@ const StickyBookingCTASection = ({
 
 export const TourDetailPage = ({
   data,
+  enquiryForm,
   locale,
   presentation = 'retail',
   siteCode: siteCodeProp,
 }: {
   data: TourResolvedData
+  enquiryForm?: FormType | null
   locale: 'en' | 'vi'
   presentation?: TourDetailPresentation
   siteCode?: null | string
 }) => {
-  const tour = data.tour
-  const isConsultative =
-    presentation === 'consultative' || isConsultativeTourSiteCode(siteCodeProp)
+  const isConsultative = presentation === 'consultative' || isConsultativeTourSiteCode(siteCodeProp)
   const resolvedPresentation: TourDetailPresentation = isConsultative ? 'consultative' : 'retail'
+  const tour = isConsultative ? normalizeWingSideConsultativeTour(data.tour) : data.tour
   const siteCode = resolveTourSiteCode(siteCodeProp, resolvedPresentation)
   const isEn = locale === 'en'
   const visibleSections = new Set(data.sectionVisibility || defaultTourSectionVisibility)
@@ -1931,7 +2155,16 @@ export const TourDetailPage = ({
       }
       return true
     })
-    sectionOrder = ['hero', 'facts', 'route', 'itinerary', 'services', 'departures', 'related', 'sticky-cta']
+    sectionOrder = [
+      'hero',
+      'facts',
+      'route',
+      'itinerary',
+      'services',
+      'departures',
+      'related',
+      'sticky-cta',
+    ]
   }
 
   const sections: Record<TourSectionID, React.ReactNode> = {
@@ -1952,7 +2185,9 @@ export const TourDetailPage = ({
     'why-choose': (
       <TourWhyChooseSection locale={locale} presentation={resolvedPresentation} tour={tour} />
     ),
-    route: <TourRouteVisualSection locale={locale} presentation={resolvedPresentation} tour={tour} />,
+    route: (
+      <TourRouteVisualSection locale={locale} presentation={resolvedPresentation} tour={tour} />
+    ),
     itinerary: (
       <TourItinerarySection locale={locale} presentation={resolvedPresentation} tour={tour} />
     ),
@@ -1978,29 +2213,30 @@ export const TourDetailPage = ({
   }
 
   const navSections = sectionOrder.filter((section) => !['hero', 'sticky-cta'].includes(section))
-  const navLabels: Record<string, { long: string; short: string }> = isConsultative && isEn
-    ? {
-        departures: { long: 'Dates & price', short: 'Dates' },
-        facts: { long: 'Facts', short: 'Facts' },
-        faq: { long: 'FAQ', short: 'FAQ' },
-        itinerary: { long: 'Itinerary', short: 'Days' },
-        related: { long: 'Related', short: 'Related' },
-        reviews: { long: 'Reviews', short: 'Reviews' },
-        route: { long: 'Overview', short: 'Route' },
-        services: { long: 'Included', short: 'Include' },
-        'why-choose': { long: 'Highlights', short: 'Why' },
-      }
-    : {
-        departures: { long: 'Lịch khởi hành', short: 'Khởi hành' },
-        facts: { long: 'Thông tin tour', short: 'Thông tin' },
-        faq: { long: 'FAQ', short: 'FAQ' },
-        itinerary: { long: 'Lịch trình', short: 'Lịch trình' },
-        related: { long: 'Tour liên quan', short: 'Liên quan' },
-        reviews: { long: 'Đánh giá', short: 'Đánh giá' },
-        route: { long: 'Hành trình', short: 'Hành trình' },
-        services: { long: 'Dịch vụ & lưu trú', short: 'Dịch vụ' },
-        'why-choose': { long: 'Điểm nổi bật', short: 'Nổi bật' },
-      }
+  const navLabels: Record<string, { long: string; short: string }> =
+    isConsultative && isEn
+      ? {
+          departures: { long: 'Dates & price', short: 'Dates' },
+          facts: { long: 'Facts', short: 'Facts' },
+          faq: { long: 'FAQ', short: 'FAQ' },
+          itinerary: { long: 'Itinerary', short: 'Days' },
+          related: { long: 'Related', short: 'Related' },
+          reviews: { long: 'Reviews', short: 'Reviews' },
+          route: { long: 'Overview', short: 'Route' },
+          services: { long: 'Included', short: 'Include' },
+          'why-choose': { long: 'Highlights', short: 'Why' },
+        }
+      : {
+          departures: { long: 'Lịch khởi hành', short: 'Khởi hành' },
+          facts: { long: 'Thông tin tour', short: 'Thông tin' },
+          faq: { long: 'FAQ', short: 'FAQ' },
+          itinerary: { long: 'Lịch trình', short: 'Lịch trình' },
+          related: { long: 'Tour liên quan', short: 'Liên quan' },
+          reviews: { long: 'Đánh giá', short: 'Đánh giá' },
+          route: { long: 'Hành trình', short: 'Hành trình' },
+          services: { long: 'Dịch vụ & lưu trú', short: 'Dịch vụ' },
+          'why-choose': { long: 'Điểm nổi bật', short: 'Nổi bật' },
+        }
 
   const bodySections = sectionOrder.filter(
     (section) => section !== 'hero' && section !== 'sticky-cta',
@@ -2010,29 +2246,47 @@ export const TourDetailPage = ({
     <div
       className={
         isConsultative
-          ? 'container tour-detail--consultative space-y-5 pb-20 md:space-y-6 lg:pb-8'
+          ? 'container tour-detail--consultative max-w-[1120px] space-y-5 pb-28 md:space-y-6 lg:pb-8'
           : 'container space-y-8'
       }
       data-tour-presentation={resolvedPresentation}
+      data-od-id={isConsultative ? 'tour-root' : undefined}
     >
       {sections.hero}
 
-      <div className="sticky top-0 z-10 rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-3">
+      <div
+        className="sticky top-0 z-10 rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-3"
+        data-od-id={isConsultative ? 'tour-jump-nav' : undefined}
+      >
         <nav
           aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
           className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm lg:flex-wrap lg:items-center lg:gap-3 [&::-webkit-scrollbar]:hidden"
         >
           {navSections.map((section) => (
             <React.Fragment key={section}>
-            <a
-              className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
-              href={`#${section}`}
-            >
-              <span className="sm:hidden">{navLabels[section]?.short || section}</span>
-              <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
-            </a>
-            {isConsultative && section === 'facts' ? <a className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2" href="#gallery">{isEn ? 'Gallery' : 'Hình ảnh'}</a> : null}
-            {isConsultative && section === 'departures' ? <a className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2" href="#enquire">{isEn ? 'Enquire' : 'Tư vấn'}</a> : null}
+              <a
+                className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
+                href={`#${section}`}
+              >
+                <span className="sm:hidden">{navLabels[section]?.short || section}</span>
+                <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
+              </a>
+              {isConsultative && section === 'facts' ? (
+                <a
+                  className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
+                  href="#gallery"
+                >
+                  {isEn ? 'Gallery' : 'Hình ảnh'}
+                </a>
+              ) : null}
+              {isConsultative && section === 'departures' ? (
+                <a
+                  className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
+                  href="#enquire"
+                >
+                  {isEn ? 'Enquire' : 'Tư vấn'}
+                </a>
+              ) : null}
             </React.Fragment>
           ))}
         </nav>
@@ -2044,8 +2298,17 @@ export const TourDetailPage = ({
             {bodySections.map((section) => (
               <React.Fragment key={section}>
                 {sections[section]}
-                {section === 'facts' ? <TourJourneyGallerySection locale={locale} tour={tour} /> : null}
-                {section === 'departures' ? <TourConsultationSection locale={locale} siteCode={siteCode} tour={tour} /> : null}
+                {section === 'facts' ? (
+                  <TourJourneyGallerySection locale={locale} tour={tour} />
+                ) : null}
+                {section === 'departures' ? (
+                  <TourConsultationSection
+                    enquiryForm={enquiryForm}
+                    locale={locale}
+                    siteCode={siteCode}
+                    tour={tour}
+                  />
+                ) : null}
               </React.Fragment>
             ))}
           </div>

@@ -23,6 +23,15 @@ the eight official hub routes plus Tour Detail. See
 story stays `in_progress` until the approved branch is integrated and the VPS
 is re-audited against the same matrix.
 
+The later focused Tour Detail re-audit narrows that statement: implementation
+is substantially complete, but strict prototype parity and release readiness
+remain `needs_fix`. All tour-detail P0 data-mapping defects are closed locally;
+the remaining blockers are CMS editorial media/copy, deployment-time data
+repair verification, and site-wide tenant/SEO/security go-live gates. A
+91-page development-server review is not accepted as runtime evidence for the
+late tour failures because the same optimized standalone artifact passed all
+22 imported tour URLs.
+
 ## Current Behavior
 
 WingSide `/tour/:slug` resolves a published Page wrapper but previously falls

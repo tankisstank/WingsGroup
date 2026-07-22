@@ -44,7 +44,10 @@ import {
   TourMarketPage,
   TourSchedulePage,
 } from '@/tours/StructuredPages'
-import { hasMatchingWingSideTourWrapper } from '@/tours/wingsSideTourViewModel'
+import {
+  hasMatchingWingSideTourWrapper,
+  sanitizeWingSidePublicText,
+} from '@/tours/wingsSideTourViewModel'
 import { WingsSideHiFiPageBody } from '@/components/WingsSideHiFi/WingsSideHiFiPageBody'
 import {
   resolveWingsSideHiFiPageBodyModel,
@@ -52,6 +55,8 @@ import {
 } from '@/utilities/wingsSideHiFiDispatch'
 import type { WingsSideHiFiPageSource } from '@/utilities/wingsSideHiFiPageModel'
 import { filterCmsLayoutBlocksForHiFiComposer } from '@/utilities/wingsSideHiFiComposer'
+import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
+import type { Form as PayloadForm } from '@/payload-types'
 
 type Args = {
   params: Promise<{
@@ -103,6 +108,19 @@ export default async function Page({
 
   // Structured tour detail: tighter vertical rhythm under fixed header.
   const isStructuredTour = Boolean(structuredPage)
+  const renderedBreadcrumbItems =
+    isStructuredTour && site.code === 'wings-side'
+      ? [
+          breadcrumbItems[0] || { label: 'WingsSide', path: '/' },
+          { label: locale === 'vi' ? 'Hành trình mẫu' : 'Packages', path: '/packages' },
+          {
+            label: String(page.title || '')
+              .replace(/:.*/, '')
+              .replace(/\s+\d+\s+days?$/i, ''),
+            path: canonicalPath,
+          },
+        ]
+      : breadcrumbItems
 
   // Tranche B1: dedicated hi-fi Home/Plan body replaces legacy hero/blocks/related.
   let hiFiModel = resolveWingsSideHiFiPageBodyModel({
@@ -190,7 +208,7 @@ export default async function Page({
   return (
     <article
       className={
-        useHiFiBody ? 'pb-16 md:pb-20' : isStructuredTour ? 'pt-16 pb-16 md:pb-20' : 'pt-16 pb-24'
+        useHiFiBody ? 'pb-16 md:pb-20' : isStructuredTour ? 'pb-16 md:pb-20' : 'pt-16 pb-24'
       }
       data-hifi-body={useHiFiBody ? 'true' : 'false'}
     >
@@ -204,7 +222,7 @@ export default async function Page({
             title: page.meta?.title || page.title,
           }),
           buildBreadcrumbListJSONLD(
-            breadcrumbItems.map((item) => ({ name: item.label, path: item.path })),
+            renderedBreadcrumbItems.map((item) => ({ name: item.label, path: item.path })),
             settings,
             { canonicalOrigin },
           ),
@@ -222,7 +240,10 @@ export default async function Page({
               ? 'container pb-2 pt-3 text-sm text-muted-foreground md:pt-4'
               : undefined
           }
-          items={breadcrumbItems}
+          items={renderedBreadcrumbItems}
+          linkClassName={
+            isStructuredTour ? 'font-medium text-[var(--site-brand)] no-underline' : undefined
+          }
         />
       ) : null}
 
@@ -267,6 +288,29 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     requestedPath,
   })
 
+  const site = await getCurrentSite()
+  if (page && site.code === 'wings-side' && requestedPath.startsWith('/tour/')) {
+    const cleanTitle = sanitizeWingSidePublicText(String(page.title || '')).replace(
+      /\s+\d+\s+days?$/i,
+      '',
+    )
+    const cleanDescription = sanitizeWingSidePublicText(String(page.meta?.description || ''))
+    const boundedDescription =
+      cleanDescription.length > 160
+        ? `${cleanDescription.slice(0, 157).replace(/\s+\S*$/, '')}...`
+        : cleanDescription
+
+    return generateMeta({
+      doc: {
+        ...page,
+        meta: { ...page.meta, description: boundedDescription },
+        title: `${cleanTitle} | WingsSide`,
+      },
+      locale,
+      path: requestedPath,
+    })
+  }
+
   return generateMeta({
     doc: page,
     locale,
@@ -275,9 +319,11 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 }
 
 const queryPageByPath = async ({
+  depth = 3,
   locale,
   requestedPath,
 }: {
+  depth?: number
   locale?: SupportedLocaleCode
   requestedPath: string
 }) => {
@@ -311,7 +357,7 @@ const queryPageByPath = async ({
       draft,
       fallbackLocale: options?.strictLocale === false ? undefined : false,
       locale: requestedLocale,
-      depth: 3,
+      depth,
       limit: 1,
       pagination: false,
       overrideAccess: draft,
@@ -392,9 +438,33 @@ const resolveStructuredTourPage = async ({
     // Keep wrapper-page gate so only linked TourProduct pages resolve.
     if (site.code === 'wings-side') {
       if (!hasMatchingWingSideTourWrapper(tourData.tour, wrapperPageID)) notFound()
+      const contactPage = await queryPageByPath({
+        depth: 0,
+        locale,
+        requestedPath: '/contact-us',
+      })
+      let enquiryForm = (
+        contactPage as {
+          wingsSideHiFi?: { contact?: { form?: PayloadForm | number | string | null } }
+        } | null
+      )?.wingsSideHiFi?.contact?.form
+      if (enquiryForm != null && typeof enquiryForm !== 'object') {
+        const payload = await getPayload({ config: configPromise })
+        enquiryForm = await payload.findByID({
+          collection: 'forms',
+          depth: 2,
+          id: enquiryForm,
+          overrideAccess: draft,
+        })
+      }
       return (
         <TourDetailPage
           data={tourData}
+          enquiryForm={
+            enquiryForm && typeof enquiryForm === 'object'
+              ? (enquiryForm as unknown as FormType)
+              : null
+          }
           locale={getCopyLocale(locale)}
           presentation="consultative"
           siteCode={site.code}

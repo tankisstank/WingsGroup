@@ -6,6 +6,7 @@ import type { WingsSideHiFiPageModel } from '@/utilities/wingsSideHiFiPageModel'
 import { getWingsSideHiFiAlt, getWingsSideHiFiPublicUrl } from '@/utilities/wingsSideHiFiMedia'
 import { getPublicRoutePathname, type SupportedLocaleCode } from '@/utilities/sitePaths'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
+import { TourEnquiryContextBridge } from '@/tours/TourEnquiryContextBridge'
 
 import { getWingsSideHiFiCopy } from './copy'
 import { WingsSideHiFiSectionInventory } from './SectionInventory'
@@ -52,15 +53,28 @@ const routeSecondary: Record<WingsSideSecondaryRoute, string> = {
 const ContactBody = ({
   locale,
   model,
+  searchParams,
 }: {
   locale?: null | string
   model: WingsSideHiFiPageModel
+  searchParams?: Record<string, string | string[] | undefined>
 }) => {
   const copy = getWingsSideHiFiCopy(locale)
   const content = model.routeContent || {}
   const channels = asArray<{ label?: string; value?: string; href?: string }>(content.channels)
   const nextSteps = asArray<{ title?: string; body?: string } | string>(content.nextSteps)
   const form = resolveForm(content.form)
+  const firstParam = (name: string) => {
+    const value = searchParams?.[name]
+    return Array.isArray(value) ? value[0] : value
+  }
+  const tourContext = {
+    source: firstParam('source'),
+    tourId: firstParam('tourId'),
+    tourSlug: firstParam('tour'),
+    tourTitle: firstParam('tourTitle'),
+  }
+  const hasTourContext = Boolean(tourContext.tourSlug || tourContext.tourTitle)
 
   return (
     <>
@@ -76,15 +90,29 @@ const ContactBody = ({
                 : 'Enough for high-intent visitors. For full qualification, open Plan your trip.',
             )}
           </p>
+          {hasTourContext ? (
+            <div className="ws-secondary-contact__tour-context" data-od-id="contact-tour-context">
+              <span>{locale === 'vi' ? 'Tour đang quan tâm' : 'Journey in context'}</span>
+              <strong>{tourContext.tourTitle || tourContext.tourSlug}</strong>
+            </div>
+          ) : null}
           {form ? (
-            <FormBlock
-              anchorId={null}
-              enableIntro={false}
-              form={form}
-              formOdId="contact-form"
-              presentation="minimal"
-              submitOdId="contact-submit"
-            />
+            <>
+              <FormBlock
+                anchorId={null}
+                enableIntro={false}
+                form={form}
+                formOdId="contact-form"
+                presentation="minimal"
+                submitOdId="contact-submit"
+              />
+              {hasTourContext ? (
+                <TourEnquiryContextBridge
+                  context={tourContext}
+                  rootSelector=".ws-secondary-contact__form"
+                />
+              ) : null}
+            </>
           ) : (
             <p className="lede" data-testid="contact-form-missing">
               {locale === 'vi'
@@ -167,10 +195,12 @@ export const SecondaryHiFiPage = ({
   locale,
   model,
   publicPathname,
+  searchParams,
 }: {
   locale?: null | string
   model: WingsSideHiFiPageModel
   publicPathname: string
+  searchParams?: Record<string, string | string[] | undefined>
 }) => {
   const route = getPublicRoutePathname(publicPathname) as WingsSideSecondaryRoute
   const heroCopy = getWingsSideSecondaryHeroCopy(locale, route)
@@ -226,7 +256,7 @@ export const SecondaryHiFiPage = ({
         </section>
 
         {route === '/contact-us' ? (
-          <ContactBody locale={locale} model={model} />
+          <ContactBody locale={locale} model={model} searchParams={searchParams} />
         ) : (
           <WingsSideHiFiSectionInventory
             locale={(locale || 'en') as SupportedLocaleCode}

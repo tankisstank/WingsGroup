@@ -345,6 +345,31 @@ export const getResolvedTourDetailBySlug = async ({
     variant: featuredVariant,
   })
 
+  const resolvedTour = resolved.tour as Record<string, any>
+  const configuredRelated = Array.isArray(resolvedTour.relatedTours)
+    ? resolvedTour.relatedTours.filter((item: unknown) => item && typeof item === 'object')
+    : []
+  const relatedResult = configuredRelated.length
+    ? null
+    : await queryCollection({
+        collection: tourProductsCollection,
+        depth: 2,
+        draft,
+        fallbackLocale,
+        limit: 3,
+        locale,
+        where: {
+          and: [
+            { id: { not_equals: tour.id } },
+            { market: { equals: tour.market } },
+            { wrapperPage: { exists: true } },
+          ],
+        },
+      })
+  const relatedTours = configuredRelated.length
+    ? configuredRelated.slice(0, 3)
+    : (relatedResult?.docs || []).map(normalizeTourProductCard).filter(Boolean).slice(0, 3)
+
   const featuredDepartures = getFutureDepartures(
     departures.filter(
       (departure) => departure.isFeatured || departure.availabilityStatus === 'open',
@@ -365,7 +390,10 @@ export const getResolvedTourDetailBySlug = async ({
         : null),
     sectionOrder: resolved.sectionOrder,
     sectionVisibility: resolved.sectionVisibility,
-    tour: resolved.tour,
+    tour: {
+      ...resolvedTour,
+      relatedTours,
+    },
     variants,
   }
 }
