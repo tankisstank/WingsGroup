@@ -42,6 +42,11 @@ as dedicated domain objects instead of generic pages.
 
 ## Product Principles
 
+For WingsSide destination/style classification and Home discovery curation, see
+[`wingsside-tour-discovery-and-taxonomy.md`](wingsside-tour-discovery-and-taxonomy.md).
+That contract extends `TourProduct` discovery metadata without changing the
+core product truth defined here.
+
 ### Structured before flexible
 
 The platform must store repeatable tour facts as structured fields before

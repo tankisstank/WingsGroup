@@ -33,6 +33,8 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-046A | high-risk | in_progress | WingSide 8-page hi-fi funnel remediation (tranche A+) |
 | US-047 | normal | implemented locally | Reusable credentials and awards carousel block |
 | US-048 | high-risk | implemented locally | Eight-page hi-fi parity remediation and DOM review contract |
+| US-049 | high-risk | planned | WingsSide tour taxonomy and BestPrice 22 classification |
+| US-050 | high-risk | planned | Real-tour Home discovery and BUG-WS-001 remediation |
 
 ## Current evidence
 
@@ -94,6 +96,10 @@ architecture and avoids building a parallel site, CMS, or page builder.
   desktop/mobile screenshots. The UI/build gates pass; production release remains
   frozen because the go-live review still detects pre-existing tenant canonical,
   robots/sitemap, title, and alt-metadata blockers.
+- US-049 and US-050 capture the post-parity product-data Change Request. US-049
+  adds controlled destination/style taxonomy and a reviewed backfill for the 22
+  imported tours. US-050 uses those real records for Home discovery and closes
+  BUG-WS-001, where Sample Journeys currently presents static product facts.
 
 ## Current constraints
 
