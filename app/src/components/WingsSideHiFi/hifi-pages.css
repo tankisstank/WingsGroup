@@ -1070,6 +1070,18 @@ body[data-site-code='wings-side'] .ws-hifi-creds__mark[data-kind='award'] {
   color: var(--site-accent, #104030);
 }
 
+body[data-site-code='wings-side'] .ws-hifi-creds__mark--media {
+  padding: 0;
+  background: var(--site-surface, #fff);
+}
+
+body[data-site-code='wings-side'] .ws-hifi-creds__mark-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0.65rem;
+}
+
 body[data-site-code='wings-side'] .ws-hifi-creds__micro {
   margin-bottom: 8px;
   font-size: 11px;

@@ -28,14 +28,19 @@ describe('WingSide HiFi composer (Bar B)', () => {
     expect(shouldUseWingsSideHiFiComposer('wings-side', '/wingsside/en/tour/x')).toBe(false)
   })
 
-  it('keeps only form blocks when filtering CMS layout', () => {
+  it('keeps forms and reusable credentials blocks when filtering CMS layout', () => {
     const filtered = filterCmsLayoutBlocksForHiFiComposer([
       { blockType: 'featureGrid' },
       { blockType: 'formBlock' },
       { blockType: 'mediaBlock' },
       { blockType: 'form' },
+      { blockType: 'credentialsCarousel' },
     ] as never)
-    expect(filtered.map((block) => block.blockType)).toEqual(['formBlock', 'form'])
+    expect(filtered.map((block) => block.blockType)).toEqual([
+      'formBlock',
+      'form',
+      'credentialsCarousel',
+    ])
   })
 
   it('requires home credentials od-id in inventory contract', () => {
@@ -60,8 +65,8 @@ describe('WingSide HiFi media bindings', () => {
       expect.arrayContaining(['/styles/luxury', '/styles#wellness', '/styles#business']),
     )
     expect(new Set(wingsSideHiFiCardBindings.styles.map((c) => c.href)).size).toBe(6)
-    expect(wingsSideHiFiCardBindings.destinations.every((card) => card.asset in wingsSideHiFiAssets)).toBe(
-      true,
-    )
+    expect(
+      wingsSideHiFiCardBindings.destinations.every((card) => card.asset in wingsSideHiFiAssets),
+    ).toBe(true)
   })
 })

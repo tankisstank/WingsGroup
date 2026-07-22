@@ -685,6 +685,7 @@ export interface Page {
     | StatsBlock
     | TestimonialBlock
     | ComparisonBlock
+    | CredentialsCarouselBlock
     | FAQBlock
     | MediaBlock
     | ArchiveBlock
@@ -1451,6 +1452,37 @@ export interface ComparisonBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'comparison';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CredentialsCarouselBlock".
+ */
+export interface CredentialsCarouselBlock {
+  fullBleed?: boolean | null;
+  eyebrow: string;
+  title: string;
+  description?: string | null;
+  /**
+   * Mặc định dùng tiêu đề nếu để trống.
+   */
+  ariaLabel?: string | null;
+  autoplay?: boolean | null;
+  intervalMs?: number | null;
+  items: {
+    kind: 'cert' | 'award' | 'member' | 'iso';
+    /**
+     * Dùng ảnh hoặc logo đã quản lý trong Media Library.
+     */
+    image?: (number | null) | Media;
+    mark: string;
+    label: string;
+    title: string;
+    description: string;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'credentialsCarousel';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2739,6 +2771,7 @@ export interface PagesSelect<T extends boolean = true> {
         stats?: T | StatsBlockSelect<T>;
         testimonial?: T | TestimonialBlockSelect<T>;
         comparison?: T | ComparisonBlockSelect<T>;
+        credentialsCarousel?: T | CredentialsCarouselBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
@@ -3288,6 +3321,32 @@ export interface ComparisonBlockSelect<T extends boolean = true> {
               url?: T;
               label?: T;
             };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CredentialsCarouselBlock_select".
+ */
+export interface CredentialsCarouselBlockSelect<T extends boolean = true> {
+  fullBleed?: T;
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  ariaLabel?: T;
+  autoplay?: T;
+  intervalMs?: T;
+  items?:
+    | T
+    | {
+        kind?: T;
+        image?: T;
+        mark?: T;
+        label?: T;
+        title?: T;
+        description?: T;
         id?: T;
       };
   id?: T;

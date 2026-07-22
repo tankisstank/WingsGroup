@@ -31,6 +31,7 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-045 | high-risk | implemented locally | BestPrice 22 import and publish preparation |
 | US-046 | high-risk | in_progress | WingSide consultative tour detail — corrective (NO-GO hub fidelity) |
 | US-046A | high-risk | in_progress | WingSide 8-page hi-fi funnel remediation (tranche A+) |
+| US-047 | normal | implemented locally | Reusable credentials and awards carousel block |
 
 ## Current evidence
 
@@ -82,6 +83,10 @@ architecture and avoids building a parallel site, CMS, or page builder.
   2026-07-21 independent 8-page hi-fi review is **NO-GO** (6 P1 / 6 P2). US-046
   is therefore **in_progress / corrective**, not fidelity-complete. US-046A
   tracks hub funnel remediation (content contract, chrome, page bodies).
+- US-047 turns the hi-fi credentials/awards carousel into a governed Payload
+  Page Composer block. Editors can reuse it across pages and replace its image,
+  copy, ordering, autoplay, and timing without a frontend code change; Home
+  preserves its locked carousel position and legacy fallback until configured.
 
 ## Current constraints
 

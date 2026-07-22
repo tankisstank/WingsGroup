@@ -83,6 +83,56 @@ const localSQLiteColumnRepairs = [
   },
 ] as const
 
+const credentialsCarouselSQLiteStatements = [
+  `CREATE TABLE IF NOT EXISTS "pages_blocks_credentials_carousel" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_path" TEXT NOT NULL,
+    "_locale" TEXT NOT NULL, "id" TEXT PRIMARY KEY NOT NULL, "full_bleed" INTEGER DEFAULT 1,
+    "eyebrow" TEXT, "title" TEXT, "description" TEXT, "aria_label" TEXT,
+    "autoplay" INTEGER DEFAULT 1, "interval_ms" NUMERIC DEFAULT 5500, "block_name" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "pages_blocks_credentials_carousel_items" (
+    "_order" INTEGER NOT NULL, "_parent_id" TEXT NOT NULL, "_locale" TEXT NOT NULL,
+    "id" TEXT PRIMARY KEY NOT NULL, "kind" TEXT DEFAULT 'cert', "image_id" INTEGER,
+    "mark" TEXT, "label" TEXT, "title" TEXT, "description" TEXT,
+    FOREIGN KEY ("image_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages_blocks_credentials_carousel"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_pages_v_blocks_credentials_carousel" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_path" TEXT NOT NULL,
+    "_locale" TEXT NOT NULL, "id" INTEGER PRIMARY KEY NOT NULL, "full_bleed" INTEGER DEFAULT 1,
+    "eyebrow" TEXT, "title" TEXT, "description" TEXT, "aria_label" TEXT,
+    "autoplay" INTEGER DEFAULT 1, "interval_ms" NUMERIC DEFAULT 5500, "_uuid" TEXT,
+    "block_name" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_pages_v_blocks_credentials_carousel_items" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_locale" TEXT NOT NULL,
+    "id" INTEGER PRIMARY KEY NOT NULL, "kind" TEXT DEFAULT 'cert', "image_id" INTEGER,
+    "mark" TEXT, "label" TEXT, "title" TEXT, "description" TEXT, "_uuid" TEXT,
+    FOREIGN KEY ("image_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v_blocks_credentials_carousel"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  ...[
+    'pages_blocks_credentials_carousel_order_idx ON pages_blocks_credentials_carousel (_order)',
+    'pages_blocks_credentials_carousel_parent_id_idx ON pages_blocks_credentials_carousel (_parent_id)',
+    'pages_blocks_credentials_carousel_path_idx ON pages_blocks_credentials_carousel (_path)',
+    'pages_blocks_credentials_carousel_locale_idx ON pages_blocks_credentials_carousel (_locale)',
+    'pages_blocks_credentials_carousel_items_order_idx ON pages_blocks_credentials_carousel_items (_order)',
+    'pages_blocks_credentials_carousel_items_parent_id_idx ON pages_blocks_credentials_carousel_items (_parent_id)',
+    'pages_blocks_credentials_carousel_items_locale_idx ON pages_blocks_credentials_carousel_items (_locale)',
+    'pages_blocks_credentials_carousel_items_image_idx ON pages_blocks_credentials_carousel_items (image_id)',
+    '_pages_v_blocks_credentials_carousel_order_idx ON _pages_v_blocks_credentials_carousel (_order)',
+    '_pages_v_blocks_credentials_carousel_parent_id_idx ON _pages_v_blocks_credentials_carousel (_parent_id)',
+    '_pages_v_blocks_credentials_carousel_path_idx ON _pages_v_blocks_credentials_carousel (_path)',
+    '_pages_v_blocks_credentials_carousel_locale_idx ON _pages_v_blocks_credentials_carousel (_locale)',
+    '_pages_v_blocks_credentials_carousel_items_order_idx ON _pages_v_blocks_credentials_carousel_items (_order)',
+    '_pages_v_blocks_credentials_carousel_items_parent_id_idx ON _pages_v_blocks_credentials_carousel_items (_parent_id)',
+    '_pages_v_blocks_credentials_carousel_items_locale_idx ON _pages_v_blocks_credentials_carousel_items (_locale)',
+    '_pages_v_blocks_credentials_carousel_items_image_idx ON _pages_v_blocks_credentials_carousel_items (image_id)',
+  ].map((definition) => `CREATE INDEX IF NOT EXISTS ${definition}`),
+] as const
+
 const toSQLitePath = (databaseURL: string) => {
   if (!databaseURL.startsWith('file:')) {
     return null
@@ -170,6 +220,9 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
       db.exec(`${statement};`)
     }
     for (const statement of getWingsSideHiFiSQLiteIndexStatements()) {
+      db.exec(`${statement};`)
+    }
+    for (const statement of credentialsCarouselSQLiteStatements) {
       db.exec(`${statement};`)
     }
 

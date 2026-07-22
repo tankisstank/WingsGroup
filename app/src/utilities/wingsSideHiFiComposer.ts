@@ -17,7 +17,11 @@ export const WINGSSIDE_HIFI_COMPOSER_ROUTES = [
 export type WingsSideHiFiComposerRoute = (typeof WINGSSIDE_HIFI_COMPOSER_ROUTES)[number]
 
 /** CMS layout block types kept when HiFi composer owns the body. */
-export const WINGSSIDE_HIFI_ALLOWED_CMS_BLOCKS = new Set(['formBlock', 'form'])
+export const WINGSSIDE_HIFI_ALLOWED_CMS_BLOCKS = new Set([
+  'credentialsCarousel',
+  'formBlock',
+  'form',
+])
 
 export const isWingsSideHiFiComposerRoute = (route: string): route is WingsSideHiFiComposerRoute =>
   (WINGSSIDE_HIFI_COMPOSER_ROUTES as readonly string[]).includes(route)

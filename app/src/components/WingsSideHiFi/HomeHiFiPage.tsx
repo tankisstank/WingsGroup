@@ -1,5 +1,7 @@
 import React from 'react'
 
+import type { Page } from '@/payload-types'
+import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { SiteLink } from '@/components/SiteLink'
 import {
   getWingsSideHiFiAlt,
@@ -26,9 +28,11 @@ const WHY_CARD_ASSETS = ['family', 'culture', 'luxury'] as const
 export const HomeHiFiPage = ({
   locale,
   model,
+  reusableBlocks,
 }: {
   locale?: null | string
   model: WingsSideHiFiPageModel
+  reusableBlocks?: Page['layout']
 }) => {
   const copy = getWingsSideHiFiCopy(locale)
   const home = (model.routeContent || {}) as Record<string, unknown>
@@ -52,6 +56,12 @@ export const HomeHiFiPage = ({
   const related = asArray<{ title?: string; body?: string; href?: string }>(home.related)
   const trust = asArray<{ kind?: string; title?: string; body?: string }>(home.trust)
   const trustItems = trust.length ? trust : copy.home.trust
+  const credentialsBlocks = reusableBlocks?.filter(
+    (block) => block.blockType === 'credentialsCarousel',
+  )
+  const otherReusableBlocks = reusableBlocks?.filter(
+    (block) => block.blockType !== 'credentialsCarousel',
+  )
 
   const journeySource = copy.packages.cards.slice(0, WINGSSIDE_HIFI_HOME_JOURNEY_COUNT)
   const journeyBindings = wingsSideHiFiCardBindings.packages.slice(
@@ -182,7 +192,10 @@ export const HomeHiFiPage = ({
               {title}
             </h1>
             {lede ? (
-              <p className="lede" dangerouslySetInnerHTML={{ __html: lede.replace(/\n/g, '<br />') }} />
+              <p
+                className="lede"
+                dangerouslySetInnerHTML={{ __html: lede.replace(/\n/g, '<br />') }}
+              />
             ) : null}
             <div className="cta-row">
               <a className="btn btn-primary" data-od-id="home-cta-plan" href="#home-planner">
@@ -218,7 +231,11 @@ export const HomeHiFiPage = ({
           </div>
         </section>
 
-        <section className="ws-hifi-section section" data-od-id="home-why" style={{ paddingTop: 0 }}>
+        <section
+          className="ws-hifi-section section"
+          data-od-id="home-why"
+          style={{ paddingTop: 0 }}
+        >
           <p className="kicker">{asText(home.whyKicker, copy.home.whyKicker)}</p>
           <h2 className="h2">{asText(home.whyTitle, copy.home.whyTitle)}</h2>
           <div className="ws-hifi-why">
@@ -236,7 +253,9 @@ export const HomeHiFiPage = ({
                 />
               </span>
               <div className="ws-hifi-why__featured-copy">
-                <p className="micro">{asText(home.whyFeaturedBadge, copy.home.whyFeatured.badge)}</p>
+                <p className="micro">
+                  {asText(home.whyFeaturedBadge, copy.home.whyFeatured.badge)}
+                </p>
                 <h3>{asText(home.whyFeaturedTitle, copy.home.whyFeatured.title)}</h3>
                 <p>{asText(home.whyFeaturedBody, copy.home.whyFeatured.body)}</p>
                 <SiteLink
@@ -330,7 +349,11 @@ export const HomeHiFiPage = ({
           </div>
         </section>
 
-        <section className="ws-hifi-section section" data-od-id="home-dest" style={{ paddingTop: 0 }}>
+        <section
+          className="ws-hifi-section section"
+          data-od-id="home-dest"
+          style={{ paddingTop: 0 }}
+        >
           <p className="kicker">{asText(home.destKicker, copy.home.destKicker)}</p>
           <h2 className="h2">{asText(home.destTitle, copy.home.destTitle)}</h2>
           <p className="lede">{asText(home.destLede, copy.home.destLede)}</p>
@@ -363,7 +386,11 @@ export const HomeHiFiPage = ({
           </div>
         </section>
 
-        <section className="ws-hifi-section section" data-od-id="home-styles" style={{ paddingTop: 0 }}>
+        <section
+          className="ws-hifi-section section"
+          data-od-id="home-styles"
+          style={{ paddingTop: 0 }}
+        >
           <p className="kicker">{asText(home.stylesKicker, copy.home.stylesKicker)}</p>
           <h2 className="h2">{asText(home.stylesTitle, copy.home.stylesTitle)}</h2>
           <div className="ws-hifi-grid" data-testid="home-styles-grid">
@@ -386,9 +413,7 @@ export const HomeHiFiPage = ({
                   />
                 </span>
                 <span className="ws-hifi-card__body">
-                  <span className="ws-hifi-card__region">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
+                  <span className="ws-hifi-card__region">{String(index + 1).padStart(2, '0')}</span>
                   <strong>{card.title}</strong>
                   <span className="ws-hifi-card__action">{copy.home.stylesMatch}</span>
                 </span>
@@ -444,15 +469,17 @@ export const HomeHiFiPage = ({
           </div>
         </section>
 
-        <section className="ws-hifi-section section" data-od-id="home-close" style={{ paddingTop: 0 }}>
+        <section
+          className="ws-hifi-section section"
+          data-od-id="home-close"
+          style={{ paddingTop: 0 }}
+        >
           <p className="kicker">{asText(home.notesKicker, copy.home.notesKicker)}</p>
           <h2 className="h2">{asText(home.notesTitle, copy.home.notesTitle)}</h2>
           <div className="ws-hifi-notes">
             {(notes.length ? notes : copy.home.notes).map((note, index) => (
               <article className="ws-hifi-notes__card" key={`note-${index}-${note.title}`}>
-                <div className="micro">
-                  {String(index + 1).padStart(2, '0')} · Note
-                </div>
+                <div className="micro">{String(index + 1).padStart(2, '0')} · Note</div>
                 <strong>{asText(note.title)}</strong>
                 <p>{asText(note.body)}</p>
               </article>
@@ -474,7 +501,12 @@ export const HomeHiFiPage = ({
             </div>
           </div>
 
-          <WingsSideCredentialsCarousel locale={locale} />
+          {credentialsBlocks?.length ? (
+            <RenderBlocks blocks={credentialsBlocks} />
+          ) : (
+            <WingsSideCredentialsCarousel locale={locale} />
+          )}
+          <RenderBlocks blocks={otherReusableBlocks || []} />
 
           <p className="kicker" style={{ marginTop: '2.25rem' }}>
             {copy.home.continueKicker}

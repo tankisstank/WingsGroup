@@ -51,6 +51,7 @@ import {
   shouldRenderWingsSideHiFiPageBody,
 } from '@/utilities/wingsSideHiFiDispatch'
 import type { WingsSideHiFiPageSource } from '@/utilities/wingsSideHiFiPageModel'
+import { filterCmsLayoutBlocksForHiFiComposer } from '@/utilities/wingsSideHiFiComposer'
 
 type Args = {
   params: Promise<{
@@ -59,7 +60,10 @@ type Args = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function Page({ params: paramsPromise, searchParams: searchParamsPromise }: Args) {
+export default async function Page({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}: Args) {
   const { isEnabled: draft } = await draftMode()
   const { slug = [] } = await paramsPromise
   const searchParams = searchParamsPromise ? await searchParamsPromise : {}
@@ -177,15 +181,12 @@ export default async function Page({ params: paramsPromise, searchParams: search
     publicPathname: requestedPath,
     siteCode: site.code,
   })
+  const hiFiReusableBlocks = filterCmsLayoutBlocksForHiFiComposer(page.layout)
 
   return (
     <article
       className={
-        useHiFiBody
-          ? 'pb-16 md:pb-20'
-          : isStructuredTour
-            ? 'pt-16 pb-16 md:pb-20'
-            : 'pt-16 pb-24'
+        useHiFiBody ? 'pb-16 md:pb-20' : isStructuredTour ? 'pt-16 pb-16 md:pb-20' : 'pt-16 pb-24'
       }
       data-hifi-body={useHiFiBody ? 'true' : 'false'}
     >
@@ -231,6 +232,7 @@ export default async function Page({ params: paramsPromise, searchParams: search
           locale={locale}
           model={hiFiModel}
           publicPathname={requestedPath}
+          reusableBlocks={hiFiReusableBlocks}
           searchParams={searchParams}
         />
       ) : (

@@ -11,6 +11,7 @@ import * as migration_20260714_120000_testimonial_note_metadata from './20260714
 import * as migration_20260717_150000_tour_import_provenance from './20260717_150000_tour_import_provenance'
 import * as migration_20260721_180000_wings_side_hifi_page_contract from './20260721_180000_wings_side_hifi_page_contract'
 import * as migration_20260722_010000_wings_side_plan_content_completion from './20260722_010000_wings_side_plan_content_completion'
+import * as migration_20260722_020046_credentials_carousel_block from './20260722_020046_credentials_carousel_block'
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20260722_010000_wings_side_plan_content_completion.up,
     down: migration_20260722_010000_wings_side_plan_content_completion.down,
     name: '20260722_010000_wings_side_plan_content_completion',
+  },
+  {
+    up: migration_20260722_020046_credentials_carousel_block.up,
+    down: migration_20260722_020046_credentials_carousel_block.down,
+    name: '20260722_020046_credentials_carousel_block',
   },
 ]

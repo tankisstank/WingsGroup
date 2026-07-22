@@ -12,6 +12,7 @@ import { InfoStripBlock } from '@/blocks/InfoStrip/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { PricingTableBlock } from '@/blocks/PricingTable/Component'
 import { ComparisonBlock } from '@/blocks/Comparison/Component'
+import { CredentialsCarouselBlock } from '@/blocks/CredentialsCarousel/Component'
 import { StatsBlock } from '@/blocks/Stats/Component'
 import { TestimonialBlock } from '@/blocks/Testimonial/Component'
 
@@ -19,6 +20,7 @@ const blockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
   comparison: ComparisonBlock,
+  credentialsCarousel: CredentialsCarouselBlock,
   cta: LocalizedCallToActionBlock,
   faq: FAQBlock,
   featureGrid: FeatureGridBlock,

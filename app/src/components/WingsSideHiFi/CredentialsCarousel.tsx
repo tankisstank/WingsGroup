@@ -3,13 +3,43 @@
 import React, { useEffect, useState } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 
+import type { CredentialsCarouselBlock, Media as MediaDocument } from '@/payload-types'
+import { Media } from '@/components/Media'
+
 import { getWingsSideHiFiCopy } from './copy'
 
-export const WingsSideCredentialsCarousel = ({ locale }: { locale?: null | string }) => {
+type CredentialSlide = {
+  body: string
+  image?: MediaDocument | null
+  kind: 'award' | 'cert' | 'iso' | 'member'
+  mark: string
+  micro: string
+  title: string
+}
+
+export const WingsSideCredentialsCarousel = ({
+  content,
+  locale,
+}: {
+  content?: CredentialsCarouselBlock | null
+  locale?: null | string
+}) => {
   const copy = getWingsSideHiFiCopy(locale)
-  const slides = copy.creds.slides
+  const slides: CredentialSlide[] = content?.items?.length
+    ? content.items.map((item) => ({
+        body: item.description,
+        image: typeof item.image === 'object' ? item.image : null,
+        kind: item.kind,
+        mark: item.mark,
+        micro: item.label,
+        title: item.title,
+      }))
+    : copy.creds.slides
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
+  const autoplay = content?.autoplay !== false
+  const intervalMs = Math.min(15000, Math.max(3000, content?.intervalMs || 5500))
+  const ariaLabel = content?.ariaLabel || content?.title || copy.creds.ariaLabel
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -17,30 +47,36 @@ export const WingsSideCredentialsCarousel = ({ locale }: { locale?: null | strin
   }, [])
 
   useEffect(() => {
-    if (paused || slides.length < 2) return
+    if (!autoplay || paused || slides.length < 2) return
     const timer = window.setInterval(() => {
       setActive((current) => (current + 1) % slides.length)
-    }, 5500)
+    }, intervalMs)
     return () => window.clearInterval(timer)
-  }, [paused, slides.length])
+  }, [autoplay, intervalMs, paused, slides.length])
+
+  useEffect(() => {
+    if (active >= slides.length) setActive(0)
+  }, [active, slides.length])
 
   // Unverified credential slots are omitted from public copy — hide section entirely.
   if (!slides.length) return null
 
   return (
     <section
-      aria-label={copy.creds.ariaLabel}
+      aria-label={ariaLabel}
       aria-roledescription="carousel"
-      className="ws-hifi-creds ws-hifi-creds--full-bleed"
+      className={`ws-hifi-creds${content?.fullBleed === false ? '' : ' ws-hifi-creds--full-bleed'}`}
       data-od-id="home-creds"
       data-testid="wingsside-hifi-creds"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       <div className="ws-hifi-creds__inner">
-        <p className="ws-hifi-creds__kicker">{copy.creds.kicker}</p>
-        <h2 className="ws-hifi-creds__title">{copy.creds.title}</h2>
-        <p className="ws-hifi-creds__lede">{copy.creds.lede}</p>
+        <p className="ws-hifi-creds__kicker">{content?.eyebrow || copy.creds.kicker}</p>
+        <h2 className="ws-hifi-creds__title">{content?.title || copy.creds.title}</h2>
+        {content?.description || copy.creds.lede ? (
+          <p className="ws-hifi-creds__lede">{content?.description || copy.creds.lede}</p>
+        ) : null}
 
         <div className="ws-hifi-creds__viewport">
           {slides.map((slide, index) => {
@@ -54,9 +90,17 @@ export const WingsSideCredentialsCarousel = ({ locale }: { locale?: null | strin
                 data-kind={slide.kind}
                 key={`creds-slide-${index}-${slide.kind}-${slide.mark}`}
               >
-                <div aria-hidden="true" className="ws-hifi-creds__mark" data-kind={slide.kind}>
-                  {slide.mark}
-                </div>
+                {slide.image ? (
+                  <Media
+                    className="ws-hifi-creds__mark ws-hifi-creds__mark--media"
+                    imgClassName="ws-hifi-creds__mark-image"
+                    resource={slide.image}
+                  />
+                ) : (
+                  <div aria-hidden="true" className="ws-hifi-creds__mark" data-kind={slide.kind}>
+                    {slide.mark}
+                  </div>
+                )}
                 <div>
                   <div className="ws-hifi-creds__micro">{slide.micro}</div>
                   <h3>{slide.title}</h3>
@@ -82,7 +126,7 @@ export const WingsSideCredentialsCarousel = ({ locale }: { locale?: null | strin
           >
             <ChevronLeftIcon aria-hidden="true" className="h-4 w-4" />
           </button>
-          <div aria-label={copy.creds.ariaLabel} className="ws-hifi-creds__dots" role="tablist">
+          <div aria-label={ariaLabel} className="ws-hifi-creds__dots" role="tablist">
             {slides.map((slide, index) => (
               <button
                 aria-label={`${index + 1} of ${slides.length}`}
