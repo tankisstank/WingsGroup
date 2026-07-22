@@ -37,10 +37,21 @@ describe('WingsSideSpecialsPromo', () => {
     expect(screen.getByText('Deals')).toBeTruthy()
     expect(screen.getByText('Hot tours')).toBeTruthy()
     expect(screen.getByText('Exclusive packs')).toBeTruthy()
-    expect(screen.getByRole('link', { name: 'Go to hot tours and packages' }).getAttribute('href')).toBe(
-      '/packages',
-    )
+    expect(
+      screen.getByRole('link', { name: 'Go to hot tours and packages' }).getAttribute('href'),
+    ).toBe('/packages')
     expect(promo.querySelector('img')).toBeNull()
+  })
+
+  it('remains visible when the Home planner is present', async () => {
+    const planner = document.createElement('section')
+    planner.id = 'home-planner'
+    document.body.appendChild(planner)
+
+    render(<WingsSideSpecialsPromo locale="en" />)
+
+    expect(await screen.findByTestId('wingsside-specials')).toBeTruthy()
+    planner.remove()
   })
 
   it('appears after hydrating the server-empty client island', async () => {

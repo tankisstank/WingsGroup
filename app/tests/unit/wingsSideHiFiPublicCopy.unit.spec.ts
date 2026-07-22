@@ -42,6 +42,13 @@ const collectStrings = (value: unknown, out: string[] = []): string[] => {
 }
 
 describe('WingSide hi-fi public copy locale integrity', () => {
+  it('keeps the prototype Wingside spelling in uppercase kickers', () => {
+    const copy = getWingsSideHiFiCopy('en')
+
+    expect(copy.home.pillarsKicker.toUpperCase()).toBe('HOW WINGSIDE WORKS')
+    expect(copy.plan.stepsKicker.toUpperCase()).toBe('HOW WINGSIDE WORKS')
+  })
+
   it('localizes hero titles for all five public locales in seed payload', () => {
     const titles = Object.fromEntries(
       WINGSSIDE_HIFI_SEED_LOCALES.map((locale) => {

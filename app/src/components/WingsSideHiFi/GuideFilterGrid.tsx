@@ -11,7 +11,7 @@ import {
 
 type GuideNote = { body: string; href: string; title: string }
 
-const categories = ['All', 'Seasons', 'Routes', 'Pacing'] as const
+const categories = ['All', 'North', 'Central', 'Logistics'] as const
 
 export const GuideFilterGrid = ({ notes }: { notes: GuideNote[] }) => {
   const [active, setActive] = useState<(typeof categories)[number]>('All')
@@ -20,8 +20,8 @@ export const GuideFilterGrid = ({ notes }: { notes: GuideNote[] }) => {
       notes.map((note, index) => ({
         ...note,
         asset: (['sapa', 'hue', 'planner'] as WingsSideHiFiAssetKey[])[index] || 'sapa',
-        category: (['Seasons', 'Routes', 'Pacing'] as const)[index] || 'Routes',
-        readTime: `${5 + index} min read`,
+        category: (['North', 'Central', 'Logistics'] as const)[index] || 'Logistics',
+        readTime: `${[6, 5, 4][index] || 4} min read`,
       })),
     [notes],
   )

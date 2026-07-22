@@ -6,14 +6,14 @@ Combine targeted unit/component/integration tests with real-browser DOM assertio
 
 ## Test Plan
 
-| Layer | Cases |
-| --- | --- |
-| Unit | Form block consumption, allowed reusable block filtering, stable marker mapping. |
+| Layer       | Cases                                                                                         |
+| ----------- | --------------------------------------------------------------------------------------------- |
+| Unit        | Form block consumption, allowed reusable block filtering, stable marker mapping.              |
 | Integration | Payload/seed inventory has 6 destinations, 6 styles, 5 packages, 3 guide notes, and WhatsApp. |
-| E2E | Eight routes load, required markers exist, Plan/Contact have one form, no duplicate IDs. |
-| Platform | 1440x900 and 390x844 screenshots; overflow checks at 360/390/430/768/1024/1440. |
-| Performance | Production build and go-live review complete without page errors. |
-| Logs/Audit | No browser console errors; audit report records before/after and residual findings. |
+| E2E         | Eight routes load, required markers exist, Plan/Contact have one form, no duplicate IDs.      |
+| Platform    | 1440x900 and 390x844 screenshots; overflow checks at 360/390/430/768/1024/1440.               |
+| Performance | Production build and go-live review complete without page errors.                             |
+| Logs/Audit  | No browser console errors; audit report records before/after and residual findings.           |
 
 ## Fixtures
 
@@ -54,15 +54,41 @@ Completed locally on 2026-07-22 against the runtime served from
 
 - `pnpm exec tsc --noEmit`: pass.
 - Targeted ESLint: pass.
-- `pnpm run test:unit`: 37 files, 253 tests passed.
-- `pnpm run test:component`: 10 files, 31 tests passed.
-- Targeted WingsSide integration: 2 files, 7 tests passed.
+- `pnpm run test:unit`: 37 files, 254 tests passed on Node 22.20.0,
+  pnpm 10.28.0, and Vitest 4.1.6 with an empty inherited `NODE_OPTIONS`.
+- `pnpm run test:component`: 10 files, 32 tests passed.
+- `pnpm run test:int`: 23 files and 112 tests passed; 2 files and 3 tests were
+  intentionally skipped by the integration configuration.
 - `pnpm run build`: pass.
 - `pnpm run go-live:review -- --site wingsside --base-url http://127.0.0.1:3011`:
   completed 91/91 checks and included `/wingsside/travel-guide`; rendering was OK
   on desktop/mobile. The release gate remains blocked by pre-existing tenant SEO
   configuration (canonical, robots, sitemap, title/alt metadata), which is outside
   this UI parity tranche.
+
+### Independent re-audit follow-up
+
+The independent re-audit initially classified strict parity as `needs_fix`. Its
+five residuals were addressed and re-verified on 2026-07-22:
+
+- Plan now renders `HOW WINGSIDE WORKS`; a unit assertion protects the exact
+  prototype spelling.
+- Home Specials remains visible on desktop after clearing the dismissal key,
+  even while the planner is in the viewport; a component regression test covers
+  planner presence.
+- Guide filters are `All`, `North`, `Central`, and `Logistics`; destination card
+  copy is seeded from the approved prototype rather than hardcoded at render time.
+- The seed dry-run is idempotent: 0 mutations, 40 unchanged records, 0 missing
+  pages, and 0 validation gaps.
+- All 16 remediated screenshots were recaptured from scroll-top at 1440x900 and
+  390x844. Home used a clean promo session and carousel slide 4.
+- A fresh 8-route by 6-breakpoint browser matrix found zero horizontal overflow;
+  the browser error log was empty.
+
+The fresh go-live output is
+`output/go-live-review/2026-07-22T12-45-26-982Z/`: all 91 checks completed and
+Travel Guide was reviewed on desktop/mobile. Exit code 2 records the expected
+tenant SEO/platform `blocked` decision, not an incomplete run.
 
 ### Visual evidence
 

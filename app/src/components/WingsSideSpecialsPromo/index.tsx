@@ -19,8 +19,6 @@ export const WingsSideSpecialsPromo = ({
   locale: SupportedLocaleCode
 }) => {
   const [visible, setVisible] = useState(false)
-  /** Hide while denser planner occupies the viewport so the widget does not cover CTAs. */
-  const [plannerOccluding, setPlannerOccluding] = useState(false)
   const copy = getWingsSideSpecialsCopy(locale)
   const pathname = usePathname()
 
@@ -28,29 +26,7 @@ export const WingsSideSpecialsPromo = ({
     setVisible(!isWingsSideSpecialsDismissed(window.sessionStorage))
   }, [])
 
-  useEffect(() => {
-    if (!visible || !isWingsSideSpecialsHomePathname(pathname)) {
-      setPlannerOccluding(false)
-      return
-    }
-
-    const planner = document.getElementById('home-planner')
-    if (!planner || typeof IntersectionObserver === 'undefined') {
-      setPlannerOccluding(false)
-      return
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setPlannerOccluding(Boolean(entry?.isIntersecting && entry.intersectionRatio >= 0.28))
-      },
-      { threshold: [0, 0.28, 0.5, 0.75, 1] },
-    )
-    observer.observe(planner)
-    return () => observer.disconnect()
-  }, [pathname, visible])
-
-  if (!visible || !isWingsSideSpecialsHomePathname(pathname) || plannerOccluding) return null
+  if (!visible || !isWingsSideSpecialsHomePathname(pathname)) return null
 
   return (
     <aside
@@ -80,11 +56,7 @@ export const WingsSideSpecialsPromo = ({
             ))}
           </ul>
         </div>
-        <SiteLink
-          aria-label={copy.ctaLabel}
-          className="wingsside-specials__cta"
-          href={href}
-        >
+        <SiteLink aria-label={copy.ctaLabel} className="wingsside-specials__cta" href={href}>
           <span aria-hidden="true">&gt;&gt;&gt;</span>
           <strong>GO</strong>
         </SiteLink>
