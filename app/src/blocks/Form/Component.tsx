@@ -166,10 +166,22 @@ const getFieldName = (field: FormFieldBlock) =>
 
 export const FormBlock: React.FC<
   {
+    anchorId?: null | string
+    formOdId?: string
     id?: string
+    submitOdId?: string
   } & FormBlockType
 > = (props) => {
-  const { enableIntro, form: formFromProps, introContent, presentation = 'split-contact' } = props
+  const {
+    anchorId,
+    enableIntro,
+    form: formFromProps,
+    formOdId,
+    introContent,
+    presentation = 'split-contact',
+    submitOdId,
+  } = props
+  const resolvedAnchorId = anchorId === undefined ? 'contact-form' : anchorId || undefined
   const {
     id: formID,
     confirmationMessage,
@@ -310,7 +322,7 @@ export const FormBlock: React.FC<
     return (
       <section
         className="container theme-section layout-block layout-block--form"
-        id="contact-form"
+        id={resolvedAnchorId}
       >
         <div className="site-lead-form-card theme-card--quiet border p-4 lg:p-6" role="alert">
           <h2>{copy.asideTitle}</h2>
@@ -327,7 +339,7 @@ export const FormBlock: React.FC<
     <section
       className={`container theme-section layout-block layout-block--form layout-block--${presentation}`}
       data-block-presentation={presentation}
-      id="contact-form"
+      id={resolvedAnchorId}
     >
       <div className="site-lead-form-shell layout-form">
         <aside className="site-lead-form-aside" aria-label={copy.asideLabel}>
@@ -390,7 +402,12 @@ export const FormBlock: React.FC<
               </div>
             )}
             {!hasSubmitted && (
-              <form aria-busy={isLoading} id={formID} onSubmit={handleSubmit(onSubmit)}>
+              <form
+                aria-busy={isLoading}
+                data-od-id={formOdId}
+                id={formID}
+                onSubmit={handleSubmit(onSubmit)}
+              >
                 <div aria-hidden="true" className="absolute left-[-10000px]" tabIndex={-1}>
                   <label htmlFor={`${formID}-website`}>Website</label>
                   <input
@@ -434,6 +451,7 @@ export const FormBlock: React.FC<
 
                 <Button
                   className="site-form-submit"
+                  data-od-id={submitOdId}
                   disabled={isLoading}
                   form={formID}
                   type="submit"

@@ -36,12 +36,30 @@ export const shouldUseWingsSideHiFiComposer = (
 
 export const filterCmsLayoutBlocksForHiFiComposer = (
   blocks: Page['layout'] | null | undefined,
+  consumedForm?: unknown,
 ): Page['layout'][0][] => {
   if (!Array.isArray(blocks)) return []
+
+  const consumedFormId = getRelationshipId(consumedForm)
+
   return blocks.filter((block) => {
-    const type = block?.blockType
-    return typeof type === 'string' && WINGSSIDE_HIFI_ALLOWED_CMS_BLOCKS.has(type)
+    const type = String(block?.blockType || '')
+    if (!WINGSSIDE_HIFI_ALLOWED_CMS_BLOCKS.has(type)) return false
+
+    if ((type === 'formBlock' || type === 'form') && consumedFormId != null) {
+      const blockForm = 'form' in block ? block.form : null
+      return getRelationshipId(blockForm) !== consumedFormId
+    }
+
+    return true
   })
+}
+
+const getRelationshipId = (value: unknown): null | string => {
+  if (typeof value === 'number' || typeof value === 'string') return String(value)
+  if (!value || typeof value !== 'object' || !('id' in value)) return null
+  const id = (value as { id?: unknown }).id
+  return typeof id === 'number' || typeof id === 'string' ? String(id) : null
 }
 
 /** Required data-od-id markers per route for inventory proof. */
@@ -55,12 +73,74 @@ export const wingsSideHiFiRequiredOdIds: Record<WingsSideHiFiComposerRoute, read
     'home-close',
     'home-creds',
     'home-related',
+    'pillar-plan',
+    'pillar-match',
+    'pillar-trade',
+    'pillar-notes',
+    'dest-hanoi',
+    'dest-halong',
+    'dest-hoian',
+    'dest-hue',
+    'dest-mekong',
+    'dest-sapa',
+    'sample-highlights',
+    'sample-north',
+    'sample-central',
   ],
-  '/plan-your-trip': ['plan-steps', 'plan-explore'],
-  '/destinations': ['dest-routes', 'dest-grid'],
-  '/styles': ['styles-intro', 'style-grid'],
-  '/packages': ['pkg-grid'],
-  '/travel-guide': ['guide-list'],
+  '/plan-your-trip': [
+    'plan-steps',
+    'plan-form',
+    'plan-submit',
+    'plan-step-1',
+    'plan-step-2',
+    'plan-step-3',
+    'plan-step-4',
+    'plan-explore',
+    'plan-explore-1',
+    'plan-explore-2',
+    'plan-explore-3',
+  ],
+  '/destinations': [
+    'dest-routes',
+    'dest-grid',
+    'card-hanoi',
+    'card-halong',
+    'card-hoian',
+    'card-hue',
+    'card-mekong',
+    'card-sapa',
+    'dest-mid-cta',
+  ],
+  '/styles': [
+    'styles-intro',
+    'style-grid',
+    'style-luxury',
+    'style-family',
+    'style-culture',
+    'style-adventure',
+    'style-wellness',
+    'style-business',
+    'style-cta-luxury',
+  ],
+  '/packages': [
+    'pkg-grid',
+    'pkg-highlights',
+    'pkg-north',
+    'pkg-central',
+    'pkg-family',
+    'pkg-south',
+    'pkg-mid-cta',
+  ],
+  '/travel-guide': ['guide-list', 'note-1', 'note-2', 'note-3', 'guide-empty-rule'],
   '/about-us': ['about-story', 'about-promises', 'about-team'],
-  '/contact-us': ['contact-split', 'contact-after'],
+  '/contact-us': [
+    'contact-split',
+    'contact-form',
+    'contact-submit',
+    'channel-email',
+    'channel-phone',
+    'channel-wa',
+    'contact-after',
+    'contact-bridge',
+  ],
 }

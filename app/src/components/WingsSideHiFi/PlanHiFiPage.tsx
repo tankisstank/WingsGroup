@@ -77,9 +77,7 @@ export const PlanHiFiPage = ({
 
   // Dedicated Plan hero: do not accept arbitrary model.hero.lede (legacy steps bleed).
   const title =
-    hero.title &&
-    hero.title !== copy.plan.stepsTitle &&
-    hero.title !== copy.heroTitle
+    hero.title && hero.title !== copy.plan.stepsTitle && hero.title !== copy.heroTitle
       ? hero.title
       : copy.plan.heroTitle
   const lede = asText(plan.heroLede, copy.plan.heroLede)
@@ -154,7 +152,11 @@ export const PlanHiFiPage = ({
           <p className="lede">{asText(plan.stepsLede, copy.plan.stepsLede)}</p>
           <div className="grid-4">
             {(steps.length ? steps : copy.plan.steps).map((step, index) => (
-              <article className="card" key={`plan-step-${index}-${step.title}`}>
+              <article
+                className="card"
+                data-od-id={`plan-step-${index + 1}`}
+                key={`plan-step-${index}-${step.title}`}
+              >
                 <div className="num">{String(index + 1).padStart(2, '0')}</div>
                 <div className="micro">{asText(step.label)}</div>
                 <h3>{asText(step.title)}</h3>
@@ -180,9 +182,7 @@ export const PlanHiFiPage = ({
                 <article className="ws-hifi-trust__item" data-kind="sla">
                   <div>
                     <strong>{copy.home.trust[0]?.title}</strong>
-                    <p className="ws-hifi-trust__big">
-                      {localeKey === 'vi' ? '1 ngày' : '1 day'}
-                    </p>
+                    <p className="ws-hifi-trust__big">{localeKey === 'vi' ? '1 ngày' : '1 day'}</p>
                   </div>
                 </article>
                 <article className="ws-hifi-trust__item" data-kind="planner">
@@ -210,12 +210,19 @@ export const PlanHiFiPage = ({
                 </article>
               </div>
             </div>
-            <div className="planner-form ws-hifi-plan-form" data-od-id="plan-form">
+            <div className="planner-form ws-hifi-plan-form">
               <h3 className="form-title">{copy.plan.formTitle}</h3>
               {form ? (
                 <>
                   {/* FormBlock first so chrome can portal into the real <form>. */}
-                  <FormBlock enableIntro={false} form={form} presentation="minimal" />
+                  <FormBlock
+                    anchorId={null}
+                    enableIntro={false}
+                    form={form}
+                    formOdId="plan-form"
+                    presentation="minimal"
+                    submitOdId="plan-submit"
+                  />
                   <PlanPrefillBridge
                     budgetLabel={copy.plan.budgetChipsLabel}
                     budgetOptions={copy.plan.budgetChips}
@@ -244,7 +251,11 @@ export const PlanHiFiPage = ({
           </div>
         </section>
 
-        <section className="ws-hifi-section section" data-od-id="plan-faq" style={{ paddingTop: 0 }}>
+        <section
+          className="ws-hifi-section section"
+          data-od-id="plan-faq"
+          style={{ paddingTop: 0 }}
+        >
           <p className="kicker">{copy.plan.faqKicker}</p>
           <h2 className="h2">{asText(plan.faqTitle, copy.plan.faqTitle)}</h2>
           <div className="ws-hifi-faq">
@@ -257,13 +268,18 @@ export const PlanHiFiPage = ({
           </div>
         </section>
 
-        <section className="ws-hifi-section section" data-od-id="plan-explore" style={{ paddingTop: 0 }}>
+        <section
+          className="ws-hifi-section section"
+          data-od-id="plan-explore"
+          style={{ paddingTop: 0 }}
+        >
           <p className="kicker">{copy.home.continueKicker}</p>
           <h2 className="h2">{asText(plan.exploreTitle, copy.plan.exploreTitle)}</h2>
           <div className="ws-hifi-grid">
             {(explore.length ? explore : copy.plan.explore).map((item, index) => (
               <SiteLink
                 className="ws-hifi-card"
+                data-od-id={`plan-explore-${index + 1}`}
                 href={asText(item.href, '/')}
                 key={`plan-explore-${index}-${item.href}`}
               >

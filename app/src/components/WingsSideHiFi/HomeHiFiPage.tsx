@@ -24,6 +24,15 @@ const asText = (value: unknown, fallback = ''): string =>
 const asArray = <T,>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : [])
 
 const WHY_CARD_ASSETS = ['family', 'culture', 'luxury'] as const
+const HOME_HERO_SLIDES = [
+  { asset: 'heroHalong', caption: 'Ha Long Bay · golden hour' },
+  { asset: 'hanoi', caption: 'Hanoi · Old Quarter' },
+  { asset: 'hoian', caption: 'Hoi An · lantern streets' },
+  { asset: 'sapa', caption: 'Sapa · highland terraces' },
+  { asset: 'mekong', caption: 'Mekong Delta · river life' },
+] as const
+const HOME_PILLAR_OD_IDS = ['pillar-plan', 'pillar-match', 'pillar-trade', 'pillar-notes'] as const
+const HOME_SAMPLE_OD_IDS = ['sample-highlights', 'sample-north', 'sample-central'] as const
 
 export const HomeHiFiPage = ({
   locale,
@@ -42,10 +51,10 @@ export const HomeHiFiPage = ({
   const primaryLabel = hero.primaryCta?.label || copy.home.planTripCta
   const secondaryLabel = hero.secondaryCta?.label || copy.home.exploreDestinations
 
-  const slides = wingsSideHiFiCardBindings.destinations.slice(0, 5).map((card) => ({
-    alt: getWingsSideHiFiAlt(card.asset),
-    caption: card.title,
-    src: getWingsSideHiFiPublicUrl(card.asset),
+  const slides = HOME_HERO_SLIDES.map((slide) => ({
+    alt: getWingsSideHiFiAlt(slide.asset),
+    caption: slide.caption,
+    src: getWingsSideHiFiPublicUrl(slide.asset),
   }))
 
   const pillars = asArray<{ label?: string; title?: string; body?: string }>(home.pillars)
@@ -221,7 +230,11 @@ export const HomeHiFiPage = ({
           <p className="lede">{asText(home.pillarsLede, copy.home.pillarsLede)}</p>
           <div className="grid-4">
             {(pillars.length ? pillars : copy.plan.steps).map((step, index) => (
-              <article className="card" key={`pillar-${index}-${step.title}`}>
+              <article
+                className="card"
+                data-od-id={HOME_PILLAR_OD_IDS[index]}
+                key={`pillar-${index}-${step.title}`}
+              >
                 <div className="num">{String(index + 1).padStart(2, '0')}</div>
                 <div className="micro">{asText(step.label)}</div>
                 <h3>{asText(step.title)}</h3>
@@ -361,6 +374,7 @@ export const HomeHiFiPage = ({
             {wingsSideHiFiCardBindings.destinations.map((card) => (
               <SiteLink
                 className="ws-hifi-card ws-hifi-card--media"
+                data-od-id={`dest-${card.asset}`}
                 href={card.href}
                 key={`dest-${card.asset}-${card.href}`}
               >
@@ -432,6 +446,7 @@ export const HomeHiFiPage = ({
                 return (
                   <SiteLink
                     className="ws-hifi-journey"
+                    data-od-id={HOME_SAMPLE_OD_IDS[index]}
                     href={card.href}
                     key={`journey-${card.href}-${index}-${asset}`}
                   >

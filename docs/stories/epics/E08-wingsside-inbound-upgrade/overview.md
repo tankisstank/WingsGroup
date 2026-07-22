@@ -32,6 +32,7 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-046 | high-risk | in_progress | WingSide consultative tour detail — corrective (NO-GO hub fidelity) |
 | US-046A | high-risk | in_progress | WingSide 8-page hi-fi funnel remediation (tranche A+) |
 | US-047 | normal | implemented locally | Reusable credentials and awards carousel block |
+| US-048 | high-risk | implemented locally | Eight-page hi-fi parity remediation and DOM review contract |
 
 ## Current evidence
 
@@ -87,6 +88,12 @@ architecture and avoids building a parallel site, CMS, or page builder.
   Page Composer block. Editors can reuse it across pages and replace its image,
   copy, ordering, autoplay, and timing without a frontend code change; Home
   preserves its locked carousel position and legacy fallback until configured.
+- US-048 closes the audited eight-page UI defects locally: single-owner Plan and
+  Contact forms, complete CMS-backed package/channel inventories, corrected hero
+  media and responsive controls, stable card-level review markers, and 16 final
+  desktop/mobile screenshots. The UI/build gates pass; production release remains
+  frozen because the go-live review still detects pre-existing tenant canonical,
+  robots/sitemap, title, and alt-metadata blockers.
 
 ## Current constraints
 

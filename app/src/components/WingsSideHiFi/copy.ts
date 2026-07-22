@@ -220,8 +220,16 @@ const en: SectionCopy = {
     planTripCta: 'Plan trip',
     related: [
       { title: 'Destinations →', body: 'Mark places before the brief.', href: '/destinations' },
-      { title: 'Sample journeys →', body: 'Frames to react to — not fixed groups.', href: '/packages' },
-      { title: 'Plan your trip →', body: 'Full brief when you know month & group.', href: '/plan-your-trip' },
+      {
+        title: 'Sample journeys →',
+        body: 'Frames to react to — not fixed groups.',
+        href: '/packages',
+      },
+      {
+        title: 'Plan your trip →',
+        body: 'Full brief when you know month & group.',
+        href: '/plan-your-trip',
+      },
     ],
   },
   plan: {
@@ -303,7 +311,11 @@ const en: SectionCopy = {
     ],
     exploreTitle: 'Explore before you brief',
     explore: [
-      { title: 'Destinations →', body: 'See where routes go — mark them in your brief.', href: '/destinations' },
+      {
+        title: 'Destinations →',
+        body: 'See where routes go — mark them in your brief.',
+        href: '/destinations',
+      },
       { title: 'Travel styles →', body: 'Match a style before dates.', href: '/styles' },
       { title: 'Sample packages →', body: 'Real trip shapes to react to.', href: '/packages' },
     ],
@@ -319,9 +331,21 @@ const en: SectionCopy = {
     routesTitle: 'Sample multi-city routes',
     deeperTitle: 'Pick a place to go deeper',
     routes: [
-      { title: 'North gateway', body: 'Hanoi · Ha Long · highland contrast.', href: '/destinations/ha-noi' },
-      { title: 'Central heritage', body: 'Hue and Hoi An without hotel fatigue.', href: '/destinations/hue' },
-      { title: 'Delta rhythm', body: 'Mekong days with softer pacing.', href: '/destinations/mekong' },
+      {
+        title: 'North gateway',
+        body: 'Hanoi · Ha Long · highland contrast.',
+        href: '/destinations/ha-noi',
+      },
+      {
+        title: 'Central heritage',
+        body: 'Hue and Hoi An without hotel fatigue.',
+        href: '/destinations/hue',
+      },
+      {
+        title: 'Delta rhythm',
+        body: 'Mekong days with softer pacing.',
+        href: '/destinations/mekong',
+      },
     ],
     places: [
       {
@@ -410,24 +434,24 @@ const en: SectionCopy = {
         href: '/packages/central-heritage',
       },
       {
-        badge: 'COASTAL',
-        micro: '9–11 days · Central + coast',
-        title: 'How soft can a Vietnam coastal week feel?',
-        body: 'Heritage towns with beach recovery days.',
-        priceFrom: 'From $1,790',
+        badge: 'FAMILY FAVORITE',
+        micro: '10 days · Mixed ages',
+        title: 'Can grandparents and kids share one route?',
+        body: 'Fewer hotel changes and culture moments designed for every age.',
+        priceFrom: 'From $1,890',
         priceUnit: '/ person',
-        note: 'Indicative · customize',
-        href: '/packages/coastal-heritage',
+        note: 'Indicative · private family · customize freely',
+        href: '/packages/family-vietnam',
       },
       {
-        badge: 'FAMILY',
-        micro: '10–12 days · multi-region',
-        title: 'Can mixed ages share one private Vietnam route?',
-        body: 'Family pacing with fewer transitions.',
-        priceFrom: 'From $1,980',
+        badge: 'SOFT FINISH',
+        micro: '8 days · South finish',
+        title: 'What if the last days felt slower, not smaller?',
+        body: 'Hoi An glow into Mekong orchards and river lodges for a softer finish.',
+        priceFrom: 'From $1,540',
         priceUnit: '/ person',
-        note: 'Indicative · customize',
-        href: '/packages/family-vietnam',
+        note: 'Indicative · private pair · customize freely',
+        href: '/packages#south',
       },
     ],
   },
@@ -437,17 +461,17 @@ const en: SectionCopy = {
       {
         title: 'When to visit North Vietnam',
         body: 'Season, weather, and pacing trade-offs for the gateway north.',
-        href: '/travel-guide',
+        href: '/travel-guide#north-seasons',
       },
       {
         title: 'Hue and Hoi An without hotel fatigue',
         body: 'How to pair heritage days without over-moving.',
-        href: '/travel-guide',
+        href: '/travel-guide#central-routes',
       },
       {
         title: 'Transfers that protect your pacing',
         body: 'When a longer transfer is worth the day it protects.',
-        href: '/travel-guide',
+        href: '/travel-guide#protect-pacing',
       },
     ],
     cta: 'Notes done — ready to brief?',
@@ -457,9 +481,15 @@ const en: SectionCopy = {
     stepsTitle: 'Four steps from brief to private route',
     promisesTitle: 'Four promises. No jargon.',
     promises: [
-      { title: 'Private by default', body: 'Routes are shaped for your group — not fixed coach seats.' },
+      {
+        title: 'Private by default',
+        body: 'Routes are shaped for your group — not fixed coach seats.',
+      },
       { title: 'Local design', body: 'Planners based in Vietnam own the first direction.' },
-      { title: 'Clear first reply', body: 'Expect a direction email within 1 business day (GMT+7).' },
+      {
+        title: 'Clear first reply',
+        body: 'Expect a direction email within 1 business day (GMT+7).',
+      },
       { title: 'Honest proof', body: 'Only published licenses and awards appear on this site.' },
     ],
     teamTitle: 'People behind the brief',
@@ -478,6 +508,7 @@ const en: SectionCopy = {
     channels: [
       { label: 'Email', value: 'hello@wingside.vn', href: 'mailto:hello@wingside.vn' },
       { label: 'Phone', value: '+84 903 000 222', href: 'tel:+84903000222' },
+      { label: 'WhatsApp', value: '+84 903 000 222', href: 'https://wa.me/84903000222' },
     ],
   },
   creds: {
@@ -612,8 +643,16 @@ const vi: SectionCopy = {
     planTripCta: 'Lên kế hoạch',
     related: [
       { title: 'Điểm đến →', body: 'Chọn nơi trước khi gửi brief.', href: '/destinations' },
-      { title: 'Hành trình mẫu →', body: 'Khung để phản ứng — không tour cố định.', href: '/packages' },
-      { title: 'Lên kế hoạch →', body: 'Brief đầy đủ khi đã có tháng & đoàn.', href: '/plan-your-trip' },
+      {
+        title: 'Hành trình mẫu →',
+        body: 'Khung để phản ứng — không tour cố định.',
+        href: '/packages',
+      },
+      {
+        title: 'Lên kế hoạch →',
+        body: 'Brief đầy đủ khi đã có tháng & đoàn.',
+        href: '/plan-your-trip',
+      },
     ],
   },
   plan: {
@@ -689,13 +728,16 @@ const vi: SectionCopy = {
       },
       {
         question: 'Có thể thêm fast track sân bay sau?',
-        answer:
-          'Có. Fast track, transfer riêng và đổi khách sạn có thể bổ sung sau hướng đi đầu.',
+        answer: 'Có. Fast track, transfer riêng và đổi khách sạn có thể bổ sung sau hướng đi đầu.',
       },
     ],
     exploreTitle: 'Khám phá trước khi gửi brief',
     explore: [
-      { title: 'Điểm đến →', body: 'Xem tuyến đi đâu — đánh dấu trong brief.', href: '/destinations' },
+      {
+        title: 'Điểm đến →',
+        body: 'Xem tuyến đi đâu — đánh dấu trong brief.',
+        href: '/destinations',
+      },
       { title: 'Phong cách →', body: 'Ghép phong cách trước ngày.', href: '/styles' },
       { title: 'Gói mẫu →', body: 'Hình dạng chuyến để phản ứng.', href: '/packages' },
     ],
@@ -705,14 +747,23 @@ const vi: SectionCopy = {
     destChipsLabel: 'Điểm đến',
     styleChipsLabel: 'Phong cách',
     budgetChipsLabel: 'Ngân sách / người',
-    consentLabel: 'Tôi đồng ý với chính sách quyền riêng tư. Chỉ dùng để phản hồi (thị trường GDPR).',
+    consentLabel:
+      'Tôi đồng ý với chính sách quyền riêng tư. Chỉ dùng để phản hồi (thị trường GDPR).',
   },
   destinations: {
     routesTitle: 'Tuyến nhiều điểm mẫu',
     deeperTitle: 'Chọn nơi để đi sâu hơn',
     routes: [
-      { title: 'Cửa ngõ miền Bắc', body: 'Hà Nội · Hạ Long · cao nguyên.', href: '/destinations/ha-noi' },
-      { title: 'Di sản miền Trung', body: 'Huế và Hội An không mệt khách sạn.', href: '/destinations/hue' },
+      {
+        title: 'Cửa ngõ miền Bắc',
+        body: 'Hà Nội · Hạ Long · cao nguyên.',
+        href: '/destinations/ha-noi',
+      },
+      {
+        title: 'Di sản miền Trung',
+        body: 'Huế và Hội An không mệt khách sạn.',
+        href: '/destinations/hue',
+      },
       { title: 'Nhịp đồng bằng', body: 'Ngày Mekong nhịp nhẹ hơn.', href: '/destinations/mekong' },
     ],
     places: [
@@ -761,7 +812,11 @@ const vi: SectionCopy = {
       { title: 'Gia đình', body: 'Ngày cân bằng cho nhiều độ tuổi.', href: '/styles/family' },
       { title: 'Văn hóa', body: 'Câu chuyện, bối cảnh, ẩm thực, di sản.', href: '/styles/culture' },
       { title: 'Phiêu lưu', body: 'Nhịp tuyến năng động hơn.', href: '/styles/adventure' },
-      { title: 'Chăm sóc sức khỏe', body: 'Ngày nhẹ và không gian phục hồi.', href: '/styles#wellness' },
+      {
+        title: 'Chăm sóc sức khỏe',
+        body: 'Ngày nhẹ và không gian phục hồi.',
+        href: '/styles#wellness',
+      },
       { title: 'Công tác', body: 'Họp kết hợp trải nghiệm văn hóa.', href: '/styles#business' },
     ],
     cta: 'Đã chọn phong cách? Đưa vào brief',
@@ -802,24 +857,24 @@ const vi: SectionCopy = {
         href: '/packages/central-heritage',
       },
       {
-        badge: 'COASTAL',
-        micro: '9–11 ngày · Trung + biển',
-        title: 'Tuần ven biển Việt Nam có thể êm đến mức nào?',
-        body: 'Thị trấn di sản kèm ngày phục hồi biển.',
-        priceFrom: 'Từ $1,790',
+        badge: 'GIA ĐÌNH YÊU THÍCH',
+        micro: '10 ngày · nhiều độ tuổi',
+        title: 'Ông bà và trẻ nhỏ có thể chung một tuyến?',
+        body: 'Ít đổi khách sạn và trải nghiệm văn hóa phù hợp cho mọi độ tuổi.',
+        priceFrom: 'Từ $1,890',
         priceUnit: '/ người',
-        note: 'Tham khảo · tùy chỉnh',
-        href: '/packages/coastal-heritage',
+        note: 'Tham khảo · gia đình riêng · tùy chỉnh',
+        href: '/packages/family-vietnam',
       },
       {
-        badge: 'FAMILY',
-        micro: '10–12 ngày · nhiều vùng',
-        title: 'Nhiều độ tuổi có chung một hành trình riêng không?',
-        body: 'Nhịp gia đình với ít điểm chuyển hơn.',
-        priceFrom: 'Từ $1,980',
+        badge: 'KẾT THÚC ÊM',
+        micro: '8 ngày · kết thúc miền Nam',
+        title: 'Nếu những ngày cuối chậm hơn mà không kém sâu?',
+        body: 'Ánh đèn Hội An nối vườn cây và nhà nghỉ ven sông Mekong.',
+        priceFrom: 'Từ $1,540',
         priceUnit: '/ người',
-        note: 'Tham khảo · tùy chỉnh',
-        href: '/packages/family-vietnam',
+        note: 'Tham khảo · cặp riêng · tùy chỉnh',
+        href: '/packages#south',
       },
     ],
   },
@@ -829,17 +884,17 @@ const vi: SectionCopy = {
       {
         title: 'Khi nào nên đi miền Bắc',
         body: 'Mùa, thời tiết và đánh đổi nhịp độ cho cửa ngõ phía Bắc.',
-        href: '/travel-guide',
+        href: '/travel-guide#north-seasons',
       },
       {
         title: 'Huế và Hội An không mệt khách sạn',
         body: 'Cách ghép ngày di sản mà không di chuyển quá nhiều.',
-        href: '/travel-guide',
+        href: '/travel-guide#central-routes',
       },
       {
         title: 'Chuyển chặng bảo vệ nhịp ngày',
         body: 'Khi nào quãng đường dài hơn vẫn đáng.',
-        href: '/travel-guide',
+        href: '/travel-guide#protect-pacing',
       },
     ],
     cta: 'Đã đọc ghi chú — sẵn sàng brief?',
@@ -870,6 +925,7 @@ const vi: SectionCopy = {
     channels: [
       { label: 'Email', value: 'hello@wingside.vn', href: 'mailto:hello@wingside.vn' },
       { label: 'Điện thoại', value: '+84 903 000 222', href: 'tel:+84903000222' },
+      { label: 'WhatsApp', value: '+84 903 000 222', href: 'https://wa.me/84903000222' },
     ],
   },
   creds: {
@@ -951,7 +1007,8 @@ const it: SectionCopy = {
     ],
     destKicker: 'Hub destinazioni',
     destTitle: 'Dove può andare il tuo percorso',
-    destLede: 'Segna i luoghi prima — icone del Nord, patrimonio centrale o ritmo del Sud più soft.',
+    destLede:
+      'Segna i luoghi prima — icone del Nord, patrimonio centrale o ritmo del Sud più soft.',
     destExplore: 'Esplora →',
     stylesKicker: 'Stili di viaggio',
     stylesTitle: 'Come vuoi viaggiare',
@@ -1003,8 +1060,16 @@ const it: SectionCopy = {
     planTripCta: 'Pianifica',
     related: [
       { title: 'Destinazioni →', body: 'Segna i luoghi prima del brief.', href: '/destinations' },
-      { title: 'Itinerari di esempio →', body: 'Cornici da reagire — non gruppi fissi.', href: '/packages' },
-      { title: 'Pianifica il viaggio →', body: 'Brief completo con mese e gruppo.', href: '/plan-your-trip' },
+      {
+        title: 'Itinerari di esempio →',
+        body: 'Cornici da reagire — non gruppi fissi.',
+        href: '/packages',
+      },
+      {
+        title: 'Pianifica il viaggio →',
+        body: 'Brief completo con mese e gruppo.',
+        href: '/plan-your-trip',
+      },
     ],
   },
   plan: {
@@ -1071,18 +1136,24 @@ const it: SectionCopy = {
       },
       {
         question: 'Visto per soggiorni brevi?',
-        answer: 'Le regole cambiano per nazionalità. Condividiamo una checklist pratica, non consulenza legale.',
+        answer:
+          'Le regole cambiano per nazionalità. Condividiamo una checklist pratica, non consulenza legale.',
       },
       {
         question: 'Possiamo aggiungere fast track aeroporto dopo?',
-        answer: 'Sì. Fast track, transfer e cambi hotel si possono aggiungere dopo la prima direzione.',
+        answer:
+          'Sì. Fast track, transfer e cambi hotel si possono aggiungere dopo la prima direzione.',
       },
     ],
     exploreTitle: 'Esplora prima del brief',
     explore: [
       { title: 'Destinazioni →', body: 'Vedi dove vanno i percorsi.', href: '/destinations' },
       { title: 'Stili di viaggio →', body: 'Abbina uno stile prima delle date.', href: '/styles' },
-      { title: 'Pacchetti di esempio →', body: 'Forme di viaggio a cui reagire.', href: '/packages' },
+      {
+        title: 'Pacchetti di esempio →',
+        body: 'Forme di viaggio a cui reagire.',
+        href: '/packages',
+      },
     ],
     destChips: ['Ha Long', 'Hoi An', 'Sapa', 'Hue', 'Mekong'],
     styleChips: ['Patrimonio', 'Cibo', 'Mare', 'Famiglia'],
@@ -1090,15 +1161,28 @@ const it: SectionCopy = {
     destChipsLabel: 'Destinazioni',
     styleChipsLabel: 'Stile di viaggio',
     budgetChipsLabel: 'Budget / persona',
-    consentLabel: 'Accetto l’informativa privacy. Usiamo i dati solo per rispondere (mercati GDPR).',
+    consentLabel:
+      'Accetto l’informativa privacy. Usiamo i dati solo per rispondere (mercati GDPR).',
   },
   destinations: {
     routesTitle: 'Percorsi multi-città di esempio',
     deeperTitle: 'Scegli un luogo per approfondire',
     routes: [
-      { title: 'Porta del Nord', body: 'Hanoi · Ha Long · altopiani.', href: '/destinations/ha-noi' },
-      { title: 'Patrimonio centrale', body: 'Hue e Hoi An senza fatica hotel.', href: '/destinations/hue' },
-      { title: 'Ritmo del delta', body: 'Giorni Mekong più morbidi.', href: '/destinations/mekong' },
+      {
+        title: 'Porta del Nord',
+        body: 'Hanoi · Ha Long · altopiani.',
+        href: '/destinations/ha-noi',
+      },
+      {
+        title: 'Patrimonio centrale',
+        body: 'Hue e Hoi An senza fatica hotel.',
+        href: '/destinations/hue',
+      },
+      {
+        title: 'Ritmo del delta',
+        body: 'Giorni Mekong più morbidi.',
+        href: '/destinations/mekong',
+      },
     ],
     places: [
       {
@@ -1187,24 +1271,24 @@ const it: SectionCopy = {
         href: '/packages/central-heritage',
       },
       {
-        badge: 'COASTAL',
-        micro: '9–11 giorni · Centro + costa',
-        title: 'Quanto può essere soft una settimana costiera?',
-        body: 'Città patrimonio con giorni di recupero in spiaggia.',
-        priceFrom: 'Da $1,790',
+        badge: 'FAMILY FAVORITE',
+        micro: '10 giorni · età miste',
+        title: 'Nonni e bambini possono condividere una rotta?',
+        body: 'Meno cambi hotel e momenti culturali adatti a ogni età.',
+        priceFrom: 'Da $1,890',
         priceUnit: '/ persona',
-        note: 'Indicativo · personalizza',
-        href: '/packages/coastal-heritage',
+        note: 'Indicativo · famiglia privata · personalizza',
+        href: '/packages/family-vietnam',
       },
       {
-        badge: 'FAMILY',
-        micro: '10–12 giorni · multi-regione',
-        title: 'Età diverse possono condividere una rotta privata?',
-        body: 'Ritmo famiglia con meno trasferimenti.',
-        priceFrom: 'Da $1,980',
+        badge: 'SOFT FINISH',
+        micro: '8 giorni · finale Sud',
+        title: 'E se gli ultimi giorni fossero più lenti, non più piccoli?',
+        body: 'La luce di Hoi An verso frutteti e lodge sul Mekong.',
+        priceFrom: 'Da $1,540',
         priceUnit: '/ persona',
-        note: 'Indicativo · personalizza',
-        href: '/packages/family-vietnam',
+        note: 'Indicativo · coppia privata · personalizza',
+        href: '/packages#south',
       },
     ],
   },
@@ -1214,17 +1298,17 @@ const it: SectionCopy = {
       {
         title: 'Quando visitare il Nord Vietnam',
         body: 'Stagione, clima e compromessi di ritmo per la porta nord.',
-        href: '/travel-guide',
+        href: '/travel-guide#north-seasons',
       },
       {
         title: 'Hue e Hoi An senza fatica hotel',
         body: 'Come abbinare giorni di patrimonio senza muoversi troppo.',
-        href: '/travel-guide',
+        href: '/travel-guide#central-routes',
       },
       {
         title: 'Transfer che proteggono il ritmo',
         body: 'Quando un transfer più lungo vale la giornata che protegge.',
-        href: '/travel-guide',
+        href: '/travel-guide#protect-pacing',
       },
     ],
     cta: 'Note fatte — pronto per il brief?',
@@ -1234,9 +1318,15 @@ const it: SectionCopy = {
     stepsTitle: 'Quattro passi dal brief al percorso privato',
     promisesTitle: 'Quattro promesse. Niente gergo.',
     promises: [
-      { title: 'Privato di default', body: 'Percorsi per il tuo gruppo — non posti pullman fissi.' },
+      {
+        title: 'Privato di default',
+        body: 'Percorsi per il tuo gruppo — non posti pullman fissi.',
+      },
       { title: 'Design locale', body: 'Planner in Vietnam guidano la prima direzione.' },
-      { title: 'Prima risposta chiara', body: 'Email di direzione entro 1 giorno lavorativo (GMT+7).' },
+      {
+        title: 'Prima risposta chiara',
+        body: 'Email di direzione entro 1 giorno lavorativo (GMT+7).',
+      },
       { title: 'Prove oneste', body: 'Solo licenze e premi pubblicati.' },
     ],
     teamTitle: 'Le persone dietro il brief',
@@ -1255,6 +1345,7 @@ const it: SectionCopy = {
     channels: [
       { label: 'Email', value: 'hello@wingside.vn', href: 'mailto:hello@wingside.vn' },
       { label: 'Telefono', value: '+84 903 000 222', href: 'tel:+84903000222' },
+      { label: 'WhatsApp', value: '+84 903 000 222', href: 'https://wa.me/84903000222' },
     ],
   },
   creds: {
@@ -1336,7 +1427,8 @@ const es: SectionCopy = {
     ],
     destKicker: 'Hub de destinos',
     destTitle: 'Adónde puede ir tu ruta',
-    destLede: 'Marca lugares primero — iconos del Norte, patrimonio central o ritmo del Sur más suave.',
+    destLede:
+      'Marca lugares primero — iconos del Norte, patrimonio central o ritmo del Sur más suave.',
     destExplore: 'Explorar →',
     stylesKicker: 'Estilos de viaje',
     stylesTitle: 'Cómo te gusta viajar',
@@ -1388,8 +1480,16 @@ const es: SectionCopy = {
     planTripCta: 'Planifica',
     related: [
       { title: 'Destinos →', body: 'Marca lugares antes del brief.', href: '/destinations' },
-      { title: 'Viajes de muestra →', body: 'Marcos para reaccionar — no grupos fijos.', href: '/packages' },
-      { title: 'Planifica tu viaje →', body: 'Brief completo con mes y grupo.', href: '/plan-your-trip' },
+      {
+        title: 'Viajes de muestra →',
+        body: 'Marcos para reaccionar — no grupos fijos.',
+        href: '/packages',
+      },
+      {
+        title: 'Planifica tu viaje →',
+        body: 'Brief completo con mes y grupo.',
+        href: '/plan-your-trip',
+      },
     ],
   },
   plan: {
@@ -1440,11 +1540,13 @@ const es: SectionCopy = {
     faq: [
       {
         question: '¿Necesito un itinerario completo antes de contactar?',
-        answer: 'No. Mes, grupo, estilo y algunos imprescindibles bastan para una primera dirección.',
+        answer:
+          'No. Mes, grupo, estilo y algunos imprescindibles bastan para una primera dirección.',
       },
       {
         question: '¿Con cuánta antelación planificar?',
-        answer: 'En meses pico (mar–abr, oct–nov), 3–6 meses ayudan con hoteles y guías preferidos.',
+        answer:
+          'En meses pico (mar–abr, oct–nov), 3–6 meses ayudan con hoteles y guías preferidos.',
       },
       {
         question: '¿Idiomas de guía privada?',
@@ -1456,18 +1558,28 @@ const es: SectionCopy = {
       },
       {
         question: '¿Visa para estancias cortas?',
-        answer: 'Las reglas cambian por nacionalidad. Compartimos una checklist práctica, no consejo legal.',
+        answer:
+          'Las reglas cambian por nacionalidad. Compartimos una checklist práctica, no consejo legal.',
       },
       {
         question: '¿Podemos añadir fast track de aeropuerto después?',
-        answer: 'Sí. Fast track, transfers y cambios de hotel se pueden añadir tras la primera dirección.',
+        answer:
+          'Sí. Fast track, transfers y cambios de hotel se pueden añadir tras la primera dirección.',
       },
     ],
     exploreTitle: 'Explora antes del brief',
     explore: [
       { title: 'Destinos →', body: 'Mira a dónde van las rutas.', href: '/destinations' },
-      { title: 'Estilos de viaje →', body: 'Empareja un estilo antes de las fechas.', href: '/styles' },
-      { title: 'Paquetes de muestra →', body: 'Formas de viaje para reaccionar.', href: '/packages' },
+      {
+        title: 'Estilos de viaje →',
+        body: 'Empareja un estilo antes de las fechas.',
+        href: '/styles',
+      },
+      {
+        title: 'Paquetes de muestra →',
+        body: 'Formas de viaje para reaccionar.',
+        href: '/packages',
+      },
     ],
     destChips: ['Ha Long', 'Hoi An', 'Sapa', 'Hue', 'Mekong'],
     styleChips: ['Patrimonio', 'Comida', 'Playa', 'Familia'],
@@ -1475,15 +1587,28 @@ const es: SectionCopy = {
     destChipsLabel: 'Destinos',
     styleChipsLabel: 'Estilo de viaje',
     budgetChipsLabel: 'Presupuesto / persona',
-    consentLabel: 'Acepto la política de privacidad. Solo usamos esto para responder (mercados GDPR).',
+    consentLabel:
+      'Acepto la política de privacidad. Solo usamos esto para responder (mercados GDPR).',
   },
   destinations: {
     routesTitle: 'Rutas multi-ciudad de muestra',
     deeperTitle: 'Elige un lugar para profundizar',
     routes: [
-      { title: 'Puerta del Norte', body: 'Hanói · Ha Long · altiplano.', href: '/destinations/ha-noi' },
-      { title: 'Patrimonio central', body: 'Hue y Hoi An sin fatiga de hoteles.', href: '/destinations/hue' },
-      { title: 'Ritmo del delta', body: 'Días en el Mekong con ritmo más suave.', href: '/destinations/mekong' },
+      {
+        title: 'Puerta del Norte',
+        body: 'Hanói · Ha Long · altiplano.',
+        href: '/destinations/ha-noi',
+      },
+      {
+        title: 'Patrimonio central',
+        body: 'Hue y Hoi An sin fatiga de hoteles.',
+        href: '/destinations/hue',
+      },
+      {
+        title: 'Ritmo del delta',
+        body: 'Días en el Mekong con ritmo más suave.',
+        href: '/destinations/mekong',
+      },
     ],
     places: [
       {
@@ -1528,8 +1653,16 @@ const es: SectionCopy = {
     introTitle: 'Elige el ritmo antes que los lugares',
     styles: [
       { title: 'Lujo', body: 'Ritmo cuidado, hoteles, anfitrionía.', href: '/styles/luxury' },
-      { title: 'Familia', body: 'Días equilibrados para distintas edades.', href: '/styles/family' },
-      { title: 'Cultura', body: 'Historias, contexto, comida, patrimonio.', href: '/styles/culture' },
+      {
+        title: 'Familia',
+        body: 'Días equilibrados para distintas edades.',
+        href: '/styles/family',
+      },
+      {
+        title: 'Cultura',
+        body: 'Historias, contexto, comida, patrimonio.',
+        href: '/styles/culture',
+      },
       { title: 'Aventura', body: 'Un ritmo de ruta más activo.', href: '/styles/adventure' },
       { title: 'Bienestar', body: 'Días más suaves y recuperación.', href: '/styles#wellness' },
       { title: 'Negocios', body: 'Reuniones con contraste cultural.', href: '/styles#business' },
@@ -1572,24 +1705,24 @@ const es: SectionCopy = {
         href: '/packages/central-heritage',
       },
       {
-        badge: 'COASTAL',
-        micro: '9–11 días · Centro + costa',
-        title: '¿Qué tan suave puede ser una semana costera?',
-        body: 'Pueblos patrimoniales con días de playa para recuperar.',
-        priceFrom: 'Desde $1,790',
+        badge: 'FAVORITO FAMILIAR',
+        micro: '10 días · edades mixtas',
+        title: '¿Abuelos y niños pueden compartir una ruta?',
+        body: 'Menos cambios de hotel y cultura diseñada para todas las edades.',
+        priceFrom: 'Desde $1,890',
         priceUnit: '/ persona',
-        note: 'Indicativo · personalizar',
-        href: '/packages/coastal-heritage',
+        note: 'Indicativo · familia privada · personalizar',
+        href: '/packages/family-vietnam',
       },
       {
-        badge: 'FAMILY',
-        micro: '10–12 días · multi-región',
-        title: '¿Edades mixtas pueden compartir una ruta privada?',
-        body: 'Ritmo familiar con menos traslados.',
-        priceFrom: 'Desde $1,980',
+        badge: 'FINAL SUAVE',
+        micro: '8 días · final Sur',
+        title: '¿Y si los últimos días fueran más lentos, no menores?',
+        body: 'La luz de Hoi An hacia huertos y alojamientos del Mekong.',
+        priceFrom: 'Desde $1,540',
         priceUnit: '/ persona',
-        note: 'Indicativo · personalizar',
-        href: '/packages/family-vietnam',
+        note: 'Indicativo · pareja privada · personalizar',
+        href: '/packages#south',
       },
     ],
   },
@@ -1599,17 +1732,17 @@ const es: SectionCopy = {
       {
         title: 'Cuándo visitar el Norte de Vietnam',
         body: 'Temporada, clima y ritmo para la puerta norte.',
-        href: '/travel-guide',
+        href: '/travel-guide#north-seasons',
       },
       {
         title: 'Hue y Hoi An sin fatiga de hoteles',
         body: 'Cómo combinar días de patrimonio sin moverse de más.',
-        href: '/travel-guide',
+        href: '/travel-guide#central-routes',
       },
       {
         title: 'Traslados que protegen el ritmo',
         body: 'Cuándo un traslado más largo vale el día que protege.',
-        href: '/travel-guide',
+        href: '/travel-guide#protect-pacing',
       },
     ],
     cta: '¿Notas listas — brief?',
@@ -1640,6 +1773,7 @@ const es: SectionCopy = {
     channels: [
       { label: 'Email', value: 'hello@wingside.vn', href: 'mailto:hello@wingside.vn' },
       { label: 'Teléfono', value: '+84 903 000 222', href: 'tel:+84903000222' },
+      { label: 'WhatsApp', value: '+84 903 000 222', href: 'https://wa.me/84903000222' },
     ],
   },
   creds: {
@@ -1721,7 +1855,8 @@ const pt: SectionCopy = {
     ],
     destKicker: 'Hub de destinos',
     destTitle: 'Para onde a sua rota pode ir',
-    destLede: 'Marque lugares primeiro — ícones do Norte, património central ou ritmo do Sul mais suave.',
+    destLede:
+      'Marque lugares primeiro — ícones do Norte, património central ou ritmo do Sul mais suave.',
     destExplore: 'Explorar →',
     stylesKicker: 'Estilos de viagem',
     stylesTitle: 'Como gosta de viajar',
@@ -1773,8 +1908,16 @@ const pt: SectionCopy = {
     planTripCta: 'Planear',
     related: [
       { title: 'Destinos →', body: 'Marque lugares antes do brief.', href: '/destinations' },
-      { title: 'Itinerários de exemplo →', body: 'Molduras para reagir — não grupos fixos.', href: '/packages' },
-      { title: 'Planear a viagem →', body: 'Brief completo com mês e grupo.', href: '/plan-your-trip' },
+      {
+        title: 'Itinerários de exemplo →',
+        body: 'Molduras para reagir — não grupos fixos.',
+        href: '/packages',
+      },
+      {
+        title: 'Planear a viagem →',
+        body: 'Brief completo com mês e grupo.',
+        href: '/plan-your-trip',
+      },
     ],
   },
   plan: {
@@ -1829,7 +1972,8 @@ const pt: SectionCopy = {
       },
       {
         question: 'Com quanta antecedência planear?',
-        answer: 'Nos meses de pico (mar–abr, out–nov), 3–6 meses ajudam com hotéis e guias preferidos.',
+        answer:
+          'Nos meses de pico (mar–abr, out–nov), 3–6 meses ajudam com hotéis e guias preferidos.',
       },
       {
         question: 'Idiomas de guia privada?',
@@ -1841,17 +1985,23 @@ const pt: SectionCopy = {
       },
       {
         question: 'Visto para estadias curtas?',
-        answer: 'As regras mudam por nacionalidade. Partilhamos uma checklist prática, não aconselhamento jurídico.',
+        answer:
+          'As regras mudam por nacionalidade. Partilhamos uma checklist prática, não aconselhamento jurídico.',
       },
       {
         question: 'Podemos adicionar fast track no aeroporto depois?',
-        answer: 'Sim. Fast track, transfers e mudanças de hotel podem ser adicionados após a primeira direção.',
+        answer:
+          'Sim. Fast track, transfers e mudanças de hotel podem ser adicionados após a primeira direção.',
       },
     ],
     exploreTitle: 'Explore antes do brief',
     explore: [
       { title: 'Destinos →', body: 'Veja para onde as rotas vão.', href: '/destinations' },
-      { title: 'Estilos de viagem →', body: 'Emparelhe um estilo antes das datas.', href: '/styles' },
+      {
+        title: 'Estilos de viagem →',
+        body: 'Emparelhe um estilo antes das datas.',
+        href: '/styles',
+      },
       { title: 'Pacotes de exemplo →', body: 'Formas de viagem para reagir.', href: '/packages' },
     ],
     destChips: ['Ha Long', 'Hoi An', 'Sapa', 'Hue', 'Mekong'],
@@ -1860,15 +2010,28 @@ const pt: SectionCopy = {
     destChipsLabel: 'Destinos',
     styleChipsLabel: 'Estilo de viagem',
     budgetChipsLabel: 'Orçamento / pessoa',
-    consentLabel: 'Aceito a política de privacidade. Só usamos isto para responder (mercados GDPR).',
+    consentLabel:
+      'Aceito a política de privacidade. Só usamos isto para responder (mercados GDPR).',
   },
   destinations: {
     routesTitle: 'Rotas multi-cidade de exemplo',
     deeperTitle: 'Escolha um lugar para aprofundar',
     routes: [
-      { title: 'Porta do Norte', body: 'Hanói · Ha Long · planalto.', href: '/destinations/ha-noi' },
-      { title: 'Património central', body: 'Hue e Hoi An sem fadiga de hotéis.', href: '/destinations/hue' },
-      { title: 'Ritmo do delta', body: 'Dias no Mekong com ritmo mais suave.', href: '/destinations/mekong' },
+      {
+        title: 'Porta do Norte',
+        body: 'Hanói · Ha Long · planalto.',
+        href: '/destinations/ha-noi',
+      },
+      {
+        title: 'Património central',
+        body: 'Hue e Hoi An sem fadiga de hotéis.',
+        href: '/destinations/hue',
+      },
+      {
+        title: 'Ritmo do delta',
+        body: 'Dias no Mekong com ritmo mais suave.',
+        href: '/destinations/mekong',
+      },
     ],
     places: [
       {
@@ -1914,7 +2077,11 @@ const pt: SectionCopy = {
     styles: [
       { title: 'Luxo', body: 'Ritmo cuidado, hotéis, acolhimento.', href: '/styles/luxury' },
       { title: 'Família', body: 'Dias equilibrados para várias idades.', href: '/styles/family' },
-      { title: 'Cultura', body: 'Histórias, contexto, comida, património.', href: '/styles/culture' },
+      {
+        title: 'Cultura',
+        body: 'Histórias, contexto, comida, património.',
+        href: '/styles/culture',
+      },
       { title: 'Aventura', body: 'Um ritmo de rota mais ativo.', href: '/styles/adventure' },
       { title: 'Bem-estar', body: 'Dias mais suaves e recuperação.', href: '/styles#wellness' },
       { title: 'Negócios', body: 'Reuniões com contraste cultural.', href: '/styles#business' },
@@ -1957,24 +2124,24 @@ const pt: SectionCopy = {
         href: '/packages/central-heritage',
       },
       {
-        badge: 'COASTAL',
-        micro: '9–11 dias · Centro + costa',
-        title: 'Quão suave pode ser uma semana costeira?',
-        body: 'Vilas patrimoniais com dias de praia para recuperar.',
-        priceFrom: 'Desde $1,790',
+        badge: 'FAVORITO FAMILIAR',
+        micro: '10 dias · idades mistas',
+        title: 'Avós e crianças podem partilhar uma rota?',
+        body: 'Menos mudanças de hotel e cultura pensada para todas as idades.',
+        priceFrom: 'Desde $1,890',
         priceUnit: '/ pessoa',
-        note: 'Indicativo · personalizar',
-        href: '/packages/coastal-heritage',
+        note: 'Indicativo · família privada · personalizar',
+        href: '/packages/family-vietnam',
       },
       {
-        badge: 'FAMILY',
-        micro: '10–12 dias · multi-região',
-        title: 'Idades mistas podem partilhar uma rota privada?',
-        body: 'Ritmo familiar com menos transferências.',
-        priceFrom: 'Desde $1,980',
+        badge: 'FINAL SUAVE',
+        micro: '8 dias · final Sul',
+        title: 'E se os últimos dias fossem mais lentos, não menores?',
+        body: 'A luz de Hoi An segue para pomares e lodges no Mekong.',
+        priceFrom: 'Desde $1,540',
         priceUnit: '/ pessoa',
-        note: 'Indicativo · personalizar',
-        href: '/packages/family-vietnam',
+        note: 'Indicativo · casal privado · personalizar',
+        href: '/packages#south',
       },
     ],
   },
@@ -1984,17 +2151,17 @@ const pt: SectionCopy = {
       {
         title: 'Quando visitar o Norte do Vietname',
         body: 'Estação, clima e ritmo para a porta norte.',
-        href: '/travel-guide',
+        href: '/travel-guide#north-seasons',
       },
       {
         title: 'Hue e Hoi An sem fadiga de hotéis',
         body: 'Como combinar dias de património sem se mover demais.',
-        href: '/travel-guide',
+        href: '/travel-guide#central-routes',
       },
       {
         title: 'Transfers que protegem o ritmo',
         body: 'Quando um transfer mais longo vale o dia que protege.',
-        href: '/travel-guide',
+        href: '/travel-guide#protect-pacing',
       },
     ],
     cta: 'Notas feitas — pronto para o brief?',
@@ -2004,14 +2171,16 @@ const pt: SectionCopy = {
     stepsTitle: 'Quatro passos do brief ao percurso privado',
     promisesTitle: 'Quatro promessas. Sem jargão.',
     promises: [
-      { title: 'Privado por predefinição', body: 'Rotas para o seu grupo — não lugares fixos de autocarro.' },
+      {
+        title: 'Privado por predefinição',
+        body: 'Rotas para o seu grupo — não lugares fixos de autocarro.',
+      },
       { title: 'Design local', body: 'Planners no Vietname guiam a primeira direção.' },
       { title: 'Primeira resposta clara', body: 'Email de direção em 1 dia útil (GMT+7).' },
       { title: 'Prova honesta', body: 'Apenas licenças e prémios publicados.' },
     ],
     teamTitle: 'Pessoas por trás do brief',
-    teamLede:
-      'Rostos de planners só saem com retratos aprovados — sem stock como equipa falsa.',
+    teamLede: 'Rostos de planners só saem com retratos aprovados — sem stock como equipa falsa.',
   },
   contact: {
     channelsTitle: 'Canais',
@@ -2025,6 +2194,7 @@ const pt: SectionCopy = {
     channels: [
       { label: 'Email', value: 'hello@wingside.vn', href: 'mailto:hello@wingside.vn' },
       { label: 'Telefone', value: '+84 903 000 222', href: 'tel:+84903000222' },
+      { label: 'WhatsApp', value: '+84 903 000 222', href: 'https://wa.me/84903000222' },
     ],
   },
   creds: {

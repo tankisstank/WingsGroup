@@ -181,7 +181,11 @@ export default async function Page({
     publicPathname: requestedPath,
     siteCode: site.code,
   })
-  const hiFiReusableBlocks = filterCmsLayoutBlocksForHiFiComposer(page.layout)
+  const consumedHiFiForm =
+    hiFiFormVariant && hiFiModel?.routeContent
+      ? (hiFiModel.routeContent as { form?: unknown }).form
+      : null
+  const hiFiReusableBlocks = filterCmsLayoutBlocksForHiFiComposer(page.layout, consumedHiFiForm)
 
   return (
     <article

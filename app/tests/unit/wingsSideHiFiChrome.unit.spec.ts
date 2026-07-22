@@ -46,11 +46,11 @@ describe('WingSide hi-fi chrome foundation contracts', () => {
     const desktopMedia = css.indexOf('@media (min-width: 1280px)')
     expect(desktopMedia).toBeGreaterThan(-1)
     const ruleMarker =
-      ".site-header__nav[data-hifi-nav='true'] > nav[aria-label='Primary navigation']"
-    const ruleIndex = css.indexOf(ruleMarker)
+      /\.site-header__nav\[data-hifi-nav='true'\]\s*>\s*nav\[aria-label='Primary navigation'\]/
+    const ruleIndex = css.search(ruleMarker)
     expect(ruleIndex).toBeGreaterThan(desktopMedia)
     // No earlier unscoped copy of the same selector before the media query.
     const beforeMedia = css.slice(0, desktopMedia)
-    expect(beforeMedia.includes(ruleMarker)).toBe(false)
+    expect(ruleMarker.test(beforeMedia)).toBe(false)
   })
 })

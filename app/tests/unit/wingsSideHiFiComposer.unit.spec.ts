@@ -43,8 +43,35 @@ describe('WingSide HiFi composer (Bar B)', () => {
     ])
   })
 
+  it('removes only the form consumed by a route conversion slot', () => {
+    const filtered = filterCmsLayoutBlocksForHiFiComposer(
+      [
+        { blockType: 'formBlock', form: { id: 20 } },
+        { blockType: 'formBlock', form: { id: 21 } },
+        { blockType: 'credentialsCarousel' },
+      ] as never,
+      { id: 20 },
+    )
+
+    expect(filtered).toHaveLength(2)
+    expect((filtered[0] as { form?: { id?: number } }).form?.id).toBe(21)
+    expect(filtered[1]?.blockType).toBe('credentialsCarousel')
+  })
+
   it('requires home credentials od-id in inventory contract', () => {
     expect(wingsSideHiFiRequiredOdIds['/']).toContain('home-creds')
+  })
+
+  it('publishes the card and conversion marker contract for all eight routes', () => {
+    expect(wingsSideHiFiRequiredOdIds['/packages']).toEqual(
+      expect.arrayContaining(['pkg-highlights', 'pkg-family', 'pkg-south', 'pkg-mid-cta']),
+    )
+    expect(wingsSideHiFiRequiredOdIds['/contact-us']).toEqual(
+      expect.arrayContaining(['contact-form', 'contact-submit', 'channel-wa', 'contact-bridge']),
+    )
+    expect(wingsSideHiFiRequiredOdIds['/travel-guide']).toEqual(
+      expect.arrayContaining(['note-1', 'note-2', 'note-3', 'guide-empty-rule']),
+    )
   })
 })
 

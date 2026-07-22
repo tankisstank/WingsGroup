@@ -9,10 +9,7 @@ import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 
 import { getWingsSideHiFiCopy } from './copy'
 import { WingsSideHiFiSectionInventory } from './SectionInventory'
-import {
-  getWingsSideSecondaryHeroCopy,
-  type WingsSideSecondaryRoute,
-} from './secondaryCopy'
+import { getWingsSideSecondaryHeroCopy, type WingsSideSecondaryRoute } from './secondaryCopy'
 import './hifi-pages.css'
 import './hifi-sections.css'
 
@@ -25,6 +22,14 @@ const resolveForm = (value: unknown): FormType | null =>
   value && typeof value === 'object' && 'id' in value && 'fields' in value
     ? (value as FormType)
     : null
+
+const getChannelOdId = (href: string | undefined): string | undefined => {
+  if (!href) return undefined
+  if (href.startsWith('mailto:')) return 'channel-email'
+  if (href.startsWith('tel:')) return 'channel-phone'
+  if (href.includes('wa.me') || href.includes('whatsapp')) return 'channel-wa'
+  return undefined
+}
 
 const routeAnchors: Record<WingsSideSecondaryRoute, string> = {
   '/about-us': '/plan-your-trip',
@@ -44,7 +49,13 @@ const routeSecondary: Record<WingsSideSecondaryRoute, string> = {
   '/travel-guide': '/plan-your-trip',
 }
 
-const ContactBody = ({ locale, model }: { locale?: null | string; model: WingsSideHiFiPageModel }) => {
+const ContactBody = ({
+  locale,
+  model,
+}: {
+  locale?: null | string
+  model: WingsSideHiFiPageModel
+}) => {
   const copy = getWingsSideHiFiCopy(locale)
   const content = model.routeContent || {}
   const channels = asArray<{ label?: string; value?: string; href?: string }>(content.channels)
@@ -66,7 +77,14 @@ const ContactBody = ({ locale, model }: { locale?: null | string; model: WingsSi
             )}
           </p>
           {form ? (
-            <FormBlock enableIntro={false} form={form} presentation="minimal" />
+            <FormBlock
+              anchorId={null}
+              enableIntro={false}
+              form={form}
+              formOdId="contact-form"
+              presentation="minimal"
+              submitOdId="contact-submit"
+            />
           ) : (
             <p className="lede" data-testid="contact-form-missing">
               {locale === 'vi'
@@ -76,19 +94,50 @@ const ContactBody = ({ locale, model }: { locale?: null | string; model: WingsSi
           )}
         </div>
         <div className="ws-secondary-contact__channels">
-          <p className="kicker">{locale === 'vi' ? 'Hoặc liên hệ trực tiếp' : 'Or reach us directly'}</p>
+          <p className="kicker">
+            {locale === 'vi' ? 'Hoặc liên hệ trực tiếp' : 'Or reach us directly'}
+          </p>
           <h2>{asText(content.channelsTitle, copy.contact.channelsTitle)}</h2>
           <ul className="promise-list">
-            <li><strong>{locale === 'vi' ? 'Phản hồi trong 1 ngày làm việc (GMT+7)' : 'Reply SLA: within 1 business day (GMT+7)'}</strong></li>
-            <li>{locale === 'vi' ? 'Giờ làm việc: Thứ 2-Thứ 6, 09:00-18:00' : 'Hours: Mon-Fri 09:00-18:00 - Vietnam time'}</li>
+            <li>
+              <strong>
+                {locale === 'vi'
+                  ? 'Phản hồi trong 1 ngày làm việc (GMT+7)'
+                  : 'Reply SLA: within 1 business day (GMT+7)'}
+              </strong>
+            </li>
+            <li>
+              {locale === 'vi'
+                ? 'Giờ làm việc: Thứ 2-Thứ 6, 09:00-18:00'
+                : 'Hours: Mon-Fri 09:00-18:00 - Vietnam time'}
+            </li>
           </ul>
           <div className="ws-secondary-channel-list">
-            {(channels.length ? channels : copy.contact.channels).map((channel, index) => (
-              <article key={`${channel.label}-${index}`}>
-                <span className="micro">{String(index + 1).padStart(2, '0')} - {asText(channel.label)}</span>
-                {channel.href ? <a href={channel.href}>{asText(channel.value)}</a> : <strong>{asText(channel.value)}</strong>}
-              </article>
-            ))}
+            {(channels.length ? channels : copy.contact.channels).map((channel, index) => {
+              const odId = getChannelOdId(channel.href)
+              const content = (
+                <>
+                  <span className="micro">
+                    {String(index + 1).padStart(2, '0')} - {asText(channel.label)}
+                  </span>
+                  <strong>{asText(channel.value)}</strong>
+                </>
+              )
+              return channel.href ? (
+                <a
+                  className="ws-secondary-channel"
+                  data-od-id={odId}
+                  href={channel.href}
+                  key={`${channel.label}-${index}`}
+                >
+                  {content}
+                </a>
+              ) : (
+                <article data-od-id={odId} key={`${channel.label}-${index}`}>
+                  {content}
+                </article>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -127,7 +176,9 @@ export const SecondaryHiFiPage = ({
   const heroCopy = getWingsSideSecondaryHeroCopy(locale, route)
   const content = model.routeContent || {}
   const hero = model.hero
-  const closingLinks = asArray<{ body?: string; href?: string; title?: string }>(content.closingLinks)
+  const closingLinks = asArray<{ body?: string; href?: string; title?: string }>(
+    content.closingLinks,
+  )
   const closingTitle = asText(content.closingTitle)
   const closingLede = asText(content.closingNote || content.closingLede)
 
@@ -135,26 +186,41 @@ export const SecondaryHiFiPage = ({
     <div className="ws-hifi-page ws-hifi-page--secondary" data-route={model.routeVariant}>
       <div className="ws-hifi-shell">
         <nav aria-label="Breadcrumb" className="ws-secondary-breadcrumb">
-          <SiteLink href="/">Wingside</SiteLink><span>/</span><span>{heroCopy.breadcrumb}</span>
+          <SiteLink href="/">Wingside</SiteLink>
+          <span>/</span>
+          <span>{heroCopy.breadcrumb}</span>
         </nav>
 
-        <section className="ws-hifi-home-hero hero ws-secondary-hero" data-od-id={`${model.routeVariant}-hero`}>
+        <section
+          className="ws-hifi-home-hero hero ws-secondary-hero"
+          data-od-id={`${model.routeVariant}-hero`}
+        >
           <div className="ws-hifi-home-hero__copy">
             <p className="eyebrow">{asText(hero.eyebrow, heroCopy.eyebrow)}</p>
             <h1 className="h1">{asText(hero.title, heroCopy.title)}</h1>
             <p className="lede">{asText(hero.lede, heroCopy.lede)}</p>
             <div className="cta-row">
-              <SiteLink className="btn btn-primary" href={hero.primaryCta?.href || routeAnchors[route]}>
+              <SiteLink
+                className="btn btn-primary"
+                href={hero.primaryCta?.href || routeAnchors[route]}
+              >
                 {hero.primaryCta?.label || heroCopy.primary}
               </SiteLink>
-              <SiteLink className="btn btn-ghost" href={hero.secondaryCta?.href || routeSecondary[route]}>
+              <SiteLink
+                className="btn btn-ghost"
+                href={hero.secondaryCta?.href || routeSecondary[route]}
+              >
                 {hero.secondaryCta?.label || heroCopy.secondary}
               </SiteLink>
             </div>
           </div>
           <div className="ws-hifi-home-hero__media hero-media">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt={getWingsSideHiFiAlt(heroCopy.media)} decoding="async" src={getWingsSideHiFiPublicUrl(heroCopy.media)} />
+            <img
+              alt={getWingsSideHiFiAlt(heroCopy.media)}
+              decoding="async"
+              src={getWingsSideHiFiPublicUrl(heroCopy.media)}
+            />
             <div className="media-cap">{heroCopy.mediaCap}</div>
           </div>
         </section>
@@ -170,18 +236,35 @@ export const SecondaryHiFiPage = ({
         )}
 
         {closingTitle || closingLinks.length ? (
-          <section className="ws-hifi-section section-sm" data-od-id={`${model.routeVariant}-close`}>
-            <div className="ws-hifi-cta-band">
-              <div><h2>{closingTitle}</h2>{closingLede ? <p>{closingLede}</p> : null}</div>
-              <SiteLink className="site-header-cta" href={asText(content.closingHref, '/plan-your-trip')}>
+          <section
+            className="ws-hifi-section section-sm"
+            data-od-id={`${model.routeVariant}-close`}
+          >
+            <div
+              className="ws-hifi-cta-band"
+              data-od-id={route === '/contact-us' ? 'contact-bridge' : undefined}
+            >
+              <div>
+                <h2>{closingTitle}</h2>
+                {closingLede ? <p>{closingLede}</p> : null}
+              </div>
+              <SiteLink
+                className="site-header-cta"
+                href={asText(content.closingHref, '/plan-your-trip')}
+              >
                 {asText(content.closingCta, heroCopy.secondary)}
               </SiteLink>
             </div>
             {closingLinks.length ? (
               <div className="ws-hifi-grid ws-secondary-related">
                 {closingLinks.map((link, index) => (
-                  <SiteLink className="ws-hifi-card" href={asText(link.href, '/')} key={`${link.href}-${index}`}>
-                    <strong>{asText(link.title)}</strong><span>{asText(link.body)}</span>
+                  <SiteLink
+                    className="ws-hifi-card"
+                    href={asText(link.href, '/')}
+                    key={`${link.href}-${index}`}
+                  >
+                    <strong>{asText(link.title)}</strong>
+                    <span>{asText(link.body)}</span>
                   </SiteLink>
                 ))}
               </div>

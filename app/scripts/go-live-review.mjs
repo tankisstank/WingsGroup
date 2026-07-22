@@ -93,6 +93,7 @@ const sites = [
     siteCode: 'wings-side',
     siteIds: [3],
     themeKey: 'wings-side',
+    requiredRoutes: [{ title: 'Travel Guide', pathname: '/travel-guide', type: 'editorial' }],
   },
   {
     key: 'wingsplus',
@@ -331,7 +332,7 @@ async function loadInventory() {
         })
 
       const seen = new Set(docs.map((doc) => doc.pathname))
-      for (const route of extraRoutes) {
+      for (const route of [...extraRoutes, ...(site.requiredRoutes || [])]) {
         if (!seen.has(route.pathname)) {
           docs.push({
             ...route,

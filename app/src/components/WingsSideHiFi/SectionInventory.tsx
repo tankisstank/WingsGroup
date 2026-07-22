@@ -22,6 +22,7 @@ type CardItem = {
   body: string
   href: string
   indexLabel?: string
+  odId?: string
   region?: string
   title: string
 }
@@ -52,17 +53,20 @@ const MediaThumb = ({ asset }: { asset: WingsSideHiFiAssetKey }) => (
   </span>
 )
 
-const CardGrid = ({
-  items,
-  testId,
-}: {
-  items: readonly CardItem[]
-  testId: string
-}) => (
+const packageOdIdByHref: Record<string, string> = {
+  '/packages/vietnam-highlights': 'pkg-highlights',
+  '/packages/northern-vietnam': 'pkg-north',
+  '/packages/central-heritage': 'pkg-central',
+  '/packages/family-vietnam': 'pkg-family',
+  '/packages#south': 'pkg-south',
+}
+
+const CardGrid = ({ items, testId }: { items: readonly CardItem[]; testId: string }) => (
   <div className="ws-hifi-grid" data-testid={testId}>
     {items.map((item) => (
       <SiteLink
         className={item.asset ? 'ws-hifi-card ws-hifi-card--media' : 'ws-hifi-card'}
+        data-od-id={item.odId}
         href={item.href}
         key={`${item.href}-${item.title}`}
       >
@@ -84,13 +88,7 @@ const CardGrid = ({
   </div>
 )
 
-const JourneyCards = ({
-  items,
-  testId,
-}: {
-  items: readonly JourneyItem[]
-  testId: string
-}) => (
+const JourneyCards = ({ items, testId }: { items: readonly JourneyItem[]; testId: string }) => (
   <div className="ws-hifi-journey-grid" data-testid={testId}>
     {items.map((item) => (
       <SiteLink className="ws-hifi-journey" href={item.href} key={`${item.href}-${item.title}`}>
@@ -271,9 +269,7 @@ export const WingsSideHiFiSectionInventory = ({
                 ) : null}
                 <div>
                   <strong>{item.title}</strong>
-                  <p>
-                    {item.kind === 'planner' ? copy.home.plannerNamePlaceholder : item.body}
-                  </p>
+                  <p>{item.kind === 'planner' ? copy.home.plannerNamePlaceholder : item.body}</p>
                   {item.kind === 'planner' ? (
                     <p className="ws-hifi-trust__meta">{item.body}</p>
                   ) : null}
@@ -405,24 +401,37 @@ export const WingsSideHiFiSectionInventory = ({
     const routes = rows('routes', copy.destinations.routes)
     const places = rows('places', copy.destinations.places)
     return (
-      <div className="ws-hifi-inventory" data-route="destinations" data-testid="wingsside-hifi-inventory">
+      <div
+        className="ws-hifi-inventory"
+        data-route="destinations"
+        data-testid="wingsside-hifi-inventory"
+      >
         <section className="ws-hifi-section" data-od-id="dest-routes" id="dest-routes">
           <div className="ws-dest-route-split">
             <div aria-label="Vietnam north to south route map" className="ws-dest-map" role="img">
               <span className="ws-dest-map__label">Vietnam - north to south</span>
-              {[18, 31, 47, 58, 72, 84].map((top, index) => <i key={top} style={{ left: `${48 + (index % 2 ? 5 : -3)}%`, top: `${top}%` }} />)}
+              {[18, 31, 47, 58, 72, 84].map((top, index) => (
+                <i key={top} style={{ left: `${48 + (index % 2 ? 5 : -3)}%`, top: `${top}%` }} />
+              ))}
             </div>
             <div className="ws-dest-routes">
               <p className="ws-hifi-kicker">How travelers combine regions</p>
               <h2>{text('routesTitle', copy.destinations.routesTitle)}</h2>
-              <p className="ws-hifi-lede">Proven shapes with indicative pricing - swap destinations in your brief.</p>
+              <p className="ws-hifi-lede">
+                Proven shapes with indicative pricing - swap destinations in your brief.
+              </p>
               {routes.map((item, index) => (
                 <article className="ws-dest-route" key={item.title}>
                   <span>{10 - index} days</span>
-                  <div><strong>{item.title}</strong><p>{item.body}</p></div>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.body}</p>
+                  </div>
                 </article>
               ))}
-              <SiteLink className="btn btn-ghost" href="/packages">See packages shaped like these</SiteLink>
+              <SiteLink className="btn btn-ghost" href="/packages">
+                See packages shaped like these
+              </SiteLink>
             </div>
           </div>
         </section>
@@ -434,11 +443,22 @@ export const WingsSideHiFiSectionInventory = ({
               ...card,
               action: `View ${places[index]?.title || card.title} ->`,
               body: places[index]?.body || card.body,
+              href: places[index]?.href || card.href,
+              odId: `card-${card.asset}`,
               region: places[index]?.region,
               title: places[index]?.title || card.title,
             }))}
             testId="wingsside-hifi-dest-grid"
           />
+          <div className="ws-hifi-cta-band ws-hifi-mid-cta" data-od-id="dest-mid-cta">
+            <div>
+              <h3>{text('closingTitle', 'Shortlist regions - then send one brief')}</h3>
+              <p>A planner replies within 1 business day with route and pacing direction.</p>
+            </div>
+            <SiteLink className="btn btn-primary" href="/plan-your-trip">
+              Plan your trip -&gt;
+            </SiteLink>
+          </div>
         </section>
       </div>
     )
@@ -451,19 +471,37 @@ export const WingsSideHiFiSectionInventory = ({
         <section className="ws-hifi-section ws-style-intro" data-od-id="styles-intro">
           <p className="ws-hifi-kicker">Before the map</p>
           <h2>{text('introTitle', copy.styles.introTitle)}</h2>
-          <p className="ws-hifi-lede">Luxury, family, culture, adventure, wellness, or business - each style changes hotels, day length, and how much free time you want.</p>
+          <p className="ws-hifi-lede">
+            Luxury, family, culture, adventure, wellness, or business - each style changes hotels,
+            day length, and how much free time you want.
+          </p>
         </section>
         <section className="ws-hifi-section" data-od-id="style-grid" id="style-grid">
           <div className="ws-style-grid" data-testid="wingsside-hifi-style-grid">
             {wingsSideHiFiCardBindings.styles.map((card, index) => (
-              <article className="ws-style-card" key={card.title}>
+              <article
+                className="ws-style-card"
+                data-od-id={`style-${card.asset}`}
+                key={card.title}
+              >
                 <MediaThumb asset={card.asset || 'luxury'} />
                 <div className="ws-style-card__body">
-                  <span className="micro">Pace - {['refined', 'balanced', 'deep', 'active', 'soft', 'efficient'][index]}</span>
+                  <span className="micro">
+                    Pace - {['refined', 'balanced', 'deep', 'active', 'soft', 'efficient'][index]}
+                  </span>
                   <h3>{styles[index]?.title || card.title}</h3>
                   <p>{styles[index]?.body || card.body}</p>
-                  <div className="ws-style-card__tags"><span>Stay: matched</span><span>From {6 + (index % 3)} days</span></div>
-                  <SiteLink className="btn btn-primary" href={styles[index]?.href || card.href}>Start with this style</SiteLink>
+                  <div className="ws-style-card__tags">
+                    <span>Stay: matched</span>
+                    <span>From {6 + (index % 3)} days</span>
+                  </div>
+                  <SiteLink
+                    className="btn btn-primary"
+                    data-od-id={index === 0 ? 'style-cta-luxury' : undefined}
+                    href={styles[index]?.href || card.href}
+                  >
+                    Start with this style
+                  </SiteLink>
                 </div>
               </article>
             ))}
@@ -476,24 +514,56 @@ export const WingsSideHiFiSectionInventory = ({
   if (route === '/packages') {
     const cards = rows('cards', copy.packages.cards)
     return (
-      <div className="ws-hifi-inventory" data-route="packages" data-testid="wingsside-hifi-inventory">
+      <div
+        className="ws-hifi-inventory"
+        data-route="packages"
+        data-testid="wingsside-hifi-inventory"
+      >
         <section className="ws-hifi-section" data-od-id="pkg-grid" id="pkg-grid">
           <h2>{text('gridTitle', copy.packages.gridTitle)}</h2>
           <p className="ws-hifi-lede">{text('gridLede', copy.packages.gridLede)}</p>
           <div className="ws-package-grid" data-testid="wingsside-hifi-pkg-grid">
             {cards.map((card, index) => {
-              const asset = (['heroHalong', 'sapa', 'hoian', 'hue', 'family'] as WingsSideHiFiAssetKey[])[index] || 'heroHalong'
-              return <article className="ws-package-card" key={card.title}>
-                <MediaThumb asset={asset} />
-                <div className="ws-package-card__body">
-                  <div className="ws-hifi-journey__top"><span className="ws-hifi-card__badge">{card.badge}</span><span className="ws-hifi-journey__micro">{card.micro}</span></div>
-                  <h3>{card.title}</h3><p>{card.body}</p>
-                  <strong className="ws-package-card__price">{card.priceFrom} <small>{card.priceUnit}</small></strong>
-                  <span className="ws-package-card__note">{card.note}</span>
-                  <div className="ws-package-card__actions"><SiteLink className="btn btn-ghost" href={card.href}>View itinerary</SiteLink><SiteLink className="btn btn-primary" href="/plan-your-trip">Customize</SiteLink></div>
-                </div>
-              </article>
+              const asset =
+                (['heroHalong', 'sapa', 'hoian', 'family', 'mekong'] as WingsSideHiFiAssetKey[])[
+                  index
+                ] || 'heroHalong'
+              const odId = packageOdIdByHref[card.href]
+              return (
+                <article className="ws-package-card" data-od-id={odId} key={card.href}>
+                  <MediaThumb asset={asset} />
+                  <div className="ws-package-card__body">
+                    <div className="ws-hifi-journey__top">
+                      <span className="ws-hifi-card__badge">{card.badge}</span>
+                      <span className="ws-hifi-journey__micro">{card.micro}</span>
+                    </div>
+                    <h3>{card.title}</h3>
+                    <p>{card.body}</p>
+                    <strong className="ws-package-card__price">
+                      {card.priceFrom} <small>{card.priceUnit}</small>
+                    </strong>
+                    <span className="ws-package-card__note">{card.note}</span>
+                    <div className="ws-package-card__actions">
+                      <SiteLink className="btn btn-ghost" href={card.href}>
+                        View itinerary
+                      </SiteLink>
+                      <SiteLink className="btn btn-primary" href="/plan-your-trip">
+                        Customize
+                      </SiteLink>
+                    </div>
+                  </div>
+                </article>
+              )
             })}
+          </div>
+          <div className="ws-hifi-cta-band ws-hifi-mid-cta" data-od-id="pkg-mid-cta">
+            <div>
+              <h3>Have dates already?</h3>
+              <p>Send month, group, and a sample you like - we will reshape it privately.</p>
+            </div>
+            <SiteLink className="btn btn-primary" href="/plan-your-trip">
+              Plan your trip -&gt;
+            </SiteLink>
           </div>
         </section>
       </div>
@@ -506,9 +576,17 @@ export const WingsSideHiFiSectionInventory = ({
       <div className="ws-hifi-inventory" data-route="guide" data-testid="wingsside-hifi-inventory">
         <section className="ws-hifi-section" data-od-id="guide-list" id="guide-list">
           <h2>{text('listTitle', copy.guide.listTitle)}</h2>
-          <p className="ws-hifi-lede">Practical notes from the planning desk - filter by the question you are solving.</p>
+          <p className="ws-hifi-lede">
+            Practical notes from the planning desk - filter by the question you are solving.
+          </p>
           <GuideFilterGrid notes={notes} />
-          <div className="ws-guide-archive"><strong>Planning archive</strong><span>New notes publish only when they add a useful decision, not to fill a content calendar.</span></div>
+          <div className="ws-guide-archive">
+            <strong>Planning archive</strong>
+            <span>
+              New notes publish only when they add a useful decision, not to fill a content
+              calendar.
+            </span>
+          </div>
           <p className="ws-hifi-inline-cta">
             <SiteLink className="site-header-cta" href="/plan-your-trip">
               {copy.guide.cta}
@@ -525,9 +603,18 @@ export const WingsSideHiFiSectionInventory = ({
       <div className="ws-hifi-inventory" data-route="about" data-testid="wingsside-hifi-inventory">
         <section className="ws-hifi-section" data-od-id="about-story">
           <h2>{text('storyTitle', copy.about.storyTitle)}</h2>
-          <p className="ws-hifi-lede">Wingside starts with a conversation, then turns destination, pace, dates, and group needs into one private route. The planning desk stays accountable from first direction to handover.</p>
+          <p className="ws-hifi-lede">
+            Wingside starts with a conversation, then turns destination, pace, dates, and group
+            needs into one private route. The planning desk stays accountable from first direction
+            to handover.
+          </p>
         </section>
-        <Steps odId="about-steps" steps={copy.plan.steps} title={text('stepsTitle', copy.about.stepsTitle)} variant="cards" />
+        <Steps
+          odId="about-steps"
+          steps={copy.plan.steps}
+          title={text('stepsTitle', copy.about.stepsTitle)}
+          variant="cards"
+        />
         <section className="ws-hifi-section" data-od-id="about-promises">
           <h2>{text('promisesTitle', copy.about.promisesTitle)}</h2>
           <div className="ws-hifi-grid ws-hifi-grid--4">
@@ -543,8 +630,16 @@ export const WingsSideHiFiSectionInventory = ({
           <h2>{text('teamTitle', copy.about.teamTitle)}</h2>
           <p className="ws-hifi-lede">{text('teamLede', copy.about.teamLede)}</p>
           <div className="ws-about-team">
-            {[['Planning desk', 'Route design and guest fit'], ['Operations', 'Hotels, guides, and ground logistics'], ['On-trip support', 'Local coordination when plans move']].map(([title, body], index) => (
-              <article key={title}><span>{String(index + 1).padStart(2, '0')}</span><h3>{title}</h3><p>{body}</p></article>
+            {[
+              ['Planning desk', 'Route design and guest fit'],
+              ['Operations', 'Hotels, guides, and ground logistics'],
+              ['On-trip support', 'Local coordination when plans move'],
+            ].map(([title, body], index) => (
+              <article key={title}>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </article>
             ))}
           </div>
         </section>
@@ -554,7 +649,11 @@ export const WingsSideHiFiSectionInventory = ({
 
   if (route === '/contact-us') {
     return (
-      <div className="ws-hifi-inventory" data-route="contact" data-testid="wingsside-hifi-inventory">
+      <div
+        className="ws-hifi-inventory"
+        data-route="contact"
+        data-testid="wingsside-hifi-inventory"
+      >
         <div className="ws-hifi-contact-split" data-od-id="contact-split">
           <section className="ws-hifi-section">
             <h2>{copy.contact.channelsTitle}</h2>

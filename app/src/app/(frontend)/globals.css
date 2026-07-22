@@ -498,6 +498,7 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
 
   body[data-site-preset='wings-side-editorial-inbound-v2'] .site-header__brand {
     min-width: 0;
+    gap: 0.5rem;
   }
 
   body[data-site-preset='wings-side-editorial-inbound-v2'] .site-logo-text {
@@ -1421,8 +1422,7 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
   }
 
   @media (width >= 40rem) {
-    .hero-presentation--carousel[data-business-panel='true']
-      .hero-presentation__carousel-controls {
+    .hero-presentation--carousel[data-business-panel='true'] .hero-presentation__carousel-controls {
       justify-content: flex-end;
     }
   }
@@ -1500,7 +1500,9 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
-    transition: width 180ms ease, background 180ms ease;
+    transition:
+      width 180ms ease,
+      background 180ms ease;
     width: 10px;
   }
 
@@ -2789,7 +2791,7 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
       max-width: none;
     }
 
-    .site-header__brand-copy {
+    body:not([data-site-code='wings-side']) .site-header__brand-copy {
       display: none !important;
     }
   }
@@ -3865,8 +3867,8 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-header__nav {
 }
 
 body[data-site-preset='wings-side-editorial-inbound-v2']
-    .site-header__nav
-    > nav[aria-label='Primary navigation'],
+  .site-header__nav
+  > nav[aria-label='Primary navigation'],
 body[data-site-theme='wings-side'] .site-header__nav > nav[aria-label='Primary navigation'] {
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -3934,32 +3936,72 @@ body[data-site-code='wings-side'] .site-header__bar {
   align-items: center;
 }
 
+@media (max-width: 30rem) {
+  body[data-site-code='wings-side'] .site-header__brand-copy {
+    display: block !important;
+  }
+
+  body[data-site-code='wings-side'] .site-brand-kicker {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+}
+
 /*
  * Desktop-only hifi nav flex override.
  * Must NOT force display:flex below Tailwind `xl` (1280px) — mobile keeps
  * `hidden xl:flex` on the primary nav and the hamburger control.
  */
 @media (min-width: 1280px) {
-  body[data-site-code='wings-side'] .site-header__nav[data-hifi-nav='true'] > nav[aria-label='Primary navigation'] {
+  body[data-site-code='wings-side']
+    .site-header__nav[data-hifi-nav='true']
+    > nav[aria-label='Primary navigation'] {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
     gap: 0.35rem;
   }
 
-  body[data-site-code='wings-side'] .site-header__nav[data-hifi-nav='true'] .site-header__primary-link {
+  body[data-site-code='wings-side']
+    .site-header__nav[data-hifi-nav='true']
+    .site-header__primary-link {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
     padding-inline: 0.55rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--site-muted);
     font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    transform: none;
     white-space: nowrap;
   }
 
-  body[data-site-code='wings-side'] .site-header__nav[data-hifi-nav='true'] .site-header__primary-link[data-active='true'],
-  body[data-site-code='wings-side'] .site-header__nav[data-hifi-nav='true'] .site-header__primary-link[aria-current='page'] {
+  body[data-site-code='wings-side']
+    .site-header__nav[data-hifi-nav='true']
+    .site-header__primary-link:hover {
+    border: 0;
+    background: color-mix(in oklch, var(--site-brand) 9%, white);
+    box-shadow: none;
     color: var(--site-brand);
-    box-shadow: inset 0 -2px 0 var(--site-gold);
+    transform: none;
+  }
+
+  body[data-site-code='wings-side']
+    .site-header__nav[data-hifi-nav='true']
+    .site-header__primary-link[data-active='true'],
+  body[data-site-code='wings-side']
+    .site-header__nav[data-hifi-nav='true']
+    .site-header__primary-link[aria-current='page'] {
+    color: var(--site-brand);
+    border: 1px solid color-mix(in oklch, var(--site-brand) 28%, var(--site-border));
+    background: color-mix(in oklch, var(--site-brand) 9%, white);
+    box-shadow: none;
+    font-weight: 600;
   }
 
   body[data-site-code='wings-side'] .site-header__nav[data-hifi-nav='true'] .site-header-cta {
@@ -4051,7 +4093,9 @@ body[data-site-code='wings-side'] .ws-hifi-footer-links__cta {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body[data-site-code='wings-side'] .site-header__nav[data-hifi-nav='true'] .site-header__primary-link,
+  body[data-site-code='wings-side']
+    .site-header__nav[data-hifi-nav='true']
+    .site-header__primary-link,
   body[data-site-code='wings-side'] .ws-hifi-footer-links a {
     transition: none;
   }
@@ -4157,7 +4201,7 @@ body[data-site-code='wings-side'] .site-panel-cta:focus-visible {
 
 body[data-site-code='wings-side'] .theme-nav-link {
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 }
 
 body[data-site-code='wings-side'][data-public-route='/'] #main-content > article,
@@ -4169,7 +4213,10 @@ body[data-site-code='wings-side'][data-public-route='/'] #main-content > article
   padding-top: 0;
 }
 
-body[data-site-code='wings-side'][data-public-route='/'] #main-content > article > nav[aria-label='Breadcrumb'] {
+body[data-site-code='wings-side'][data-public-route='/']
+  #main-content
+  > article
+  > nav[aria-label='Breadcrumb'] {
   position: absolute;
   visibility: hidden;
 }
@@ -4375,7 +4422,9 @@ body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials:hov
   letter-spacing: 0.04em;
   line-height: 1.05;
   text-decoration: none;
-  transition: color 160ms ease, transform 160ms ease;
+  transition:
+    color 160ms ease,
+    transform 160ms ease;
 }
 
 .wingsside-specials__cta span {
@@ -4461,12 +4510,21 @@ body[data-site-preset='wings-side-editorial'] .tour-cta-primary--pulse {
   scroll-margin-bottom: 5.5rem;
 }
 
-body[data-site-theme='wings-side'] article > nav[aria-label='Breadcrumb'] + .tour-detail--consultative,
-body[data-site-theme='wings-side'] article > nav[aria-label='Breadcrumb'] + * .tour-detail--consultative {
+body[data-site-theme='wings-side']
+  article
+  > nav[aria-label='Breadcrumb']
+  + .tour-detail--consultative,
+body[data-site-theme='wings-side']
+  article
+  > nav[aria-label='Breadcrumb']
+  + *
+  .tour-detail--consultative {
   margin-top: 0;
 }
 
-body[data-site-theme='wings-side'] article:has(.tour-detail--consultative) > nav[aria-label='Breadcrumb'] {
+body[data-site-theme='wings-side']
+  article:has(.tour-detail--consultative)
+  > nav[aria-label='Breadcrumb'] {
   padding-bottom: 0.35rem;
 }
 
