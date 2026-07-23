@@ -330,75 +330,75 @@ const productData = ({
   const shouldShowPrice = Boolean(tour.priceFrom && tour.futureDepartures.length)
 
   return {
-  _status: productStatus(tour),
-  site: siteId,
-  title: tour.title,
-  slug: tour.slug,
-  tourCode: bestPriceTourCode(tour.sourceId),
-  sourceProvenance: {
-    sourceSystem: bestPriceSourceSystem,
-    sourceId: tour.sourceId,
-    sourceUrl: tour.sourceUrl,
-    sourceHash: tour.sourceHash,
-    sourceFile: tour.sourceFile,
-    matchedDocument: tour.matchedDocument,
-    importBatchId: batchId,
-    warnings: tour.warnings,
-    blockingErrors: tour.blockingErrors,
-  },
-  market: tour.market,
-  durationDays: tour.durationDays,
-  durationNights: tour.durationNights,
-  wrapperPage: pageId,
-  summary: tour.summary,
-  priceFrom: shouldShowPrice ? tour.priceFrom : null,
-  currency: tour.currency,
-  heroMedia: heroMedia || undefined,
-  gallery,
-  highlights: [],
-  factSummary: {
-    routeSummary: tour.category,
-  },
-  primaryCTA: primaryCTAFor(tour),
-  itineraryDays: tour.itineraryDays.map((day) => ({
-    dayNumber: day.dayNumber,
-    title: day.title,
-    route: day.route,
-    summary: day.summary,
-    meals: day.meals,
-    accommodation: day.accommodation,
-  })),
-  includes: tour.includes.map((label) => ({ label })),
-  excludes: tour.excludes.map((label) => ({ label })),
-  servicesSummary: {
-    hotelSummary: tour.itineraryDays
-      .map((day) => day.accommodation)
-      .filter(Boolean)
-      .slice(0, 3)
-      .join('. '),
-    mealsSummary: tour.itineraryDays
-      .map((day) => day.meals)
-      .filter(Boolean)
-      .join('; '),
-  },
-  faqItems: [],
-  bcfg: {
-    template: 'dense-retail-default',
-    stickyCTAEnabled: tour.sectionVisibility.includes('sticky-cta'),
-    ctaStyle: tour.priceFrom && tour.futureDepartures.length ? 'request-quote' : 'inquiry',
-    routeMode: 'stop-timeline',
-    itinMode: 'timeline-cards',
-    depMode: 'cards',
-  },
-  sectionVisibility: tour.sectionVisibility,
-  sectionOrder,
-  variantStrategy: 'product-first',
-  meta: {
+    _status: productStatus(tour),
+    site: siteId,
     title: tour.title,
-    description: tour.summary,
-    image: heroMedia || undefined,
-    breadcrumbLabel: tour.title,
-  },
+    slug: tour.slug,
+    tourCode: bestPriceTourCode(tour.sourceId),
+    sourceProvenance: {
+      sourceSystem: bestPriceSourceSystem,
+      sourceId: tour.sourceId,
+      sourceUrl: tour.sourceUrl,
+      sourceHash: tour.sourceHash,
+      sourceFile: tour.sourceFile,
+      matchedDocument: tour.matchedDocument,
+      importBatchId: batchId,
+      warnings: tour.warnings,
+      blockingErrors: tour.blockingErrors,
+    },
+    market: tour.market,
+    durationDays: tour.durationDays,
+    durationNights: tour.durationNights,
+    wrapperPage: pageId,
+    summary: tour.summary,
+    priceFrom: shouldShowPrice ? tour.priceFrom : null,
+    currency: tour.currency,
+    heroMedia: heroMedia || undefined,
+    gallery,
+    highlights: [],
+    factSummary: {
+      routeSummary: tour.category,
+    },
+    primaryCTA: primaryCTAFor(tour),
+    itineraryDays: tour.itineraryDays.map((day) => ({
+      dayNumber: day.dayNumber,
+      title: day.title,
+      route: day.route,
+      summary: day.summary,
+      meals: day.meals,
+      accommodation: day.accommodation,
+    })),
+    includes: tour.includes.map((label) => ({ label })),
+    excludes: tour.excludes.map((label) => ({ label })),
+    servicesSummary: {
+      hotelSummary: tour.itineraryDays
+        .map((day) => day.accommodation)
+        .filter(Boolean)
+        .slice(0, 3)
+        .join('. '),
+      mealsSummary: tour.itineraryDays
+        .map((day) => day.meals)
+        .filter(Boolean)
+        .join('; '),
+    },
+    faqItems: [],
+    bcfg: {
+      template: 'dense-retail-default',
+      stickyCTAEnabled: tour.sectionVisibility.includes('sticky-cta'),
+      ctaStyle: tour.priceFrom && tour.futureDepartures.length ? 'request-quote' : 'inquiry',
+      routeMode: 'stop-timeline',
+      itinMode: 'timeline-cards',
+      depMode: 'cards',
+    },
+    sectionVisibility: tour.sectionVisibility,
+    sectionOrder,
+    variantStrategy: 'product-first',
+    meta: {
+      title: tour.title,
+      description: tour.summary,
+      image: heroMedia || undefined,
+      breadcrumbLabel: tour.title,
+    },
   }
 }
 
@@ -479,7 +479,8 @@ const demoteSampleRecords = async ({
       }
     }
 
-    const wrapperPageId = typeof product.wrapperPage === 'object' ? product.wrapperPage?.id : product.wrapperPage
+    const wrapperPageId =
+      typeof product.wrapperPage === 'object' ? product.wrapperPage?.id : product.wrapperPage
     if (wrapperPageId) {
       const page = (await payload.findByID({
         collection: 'pages',
@@ -581,7 +582,7 @@ const main = async () => {
     throw new Error('Choose exactly one of --dry-run, --apply, or --rollback')
   }
 
-  const siteCode = String(args['site-code'] || 'wings-side')
+  const siteCode = String(args['site-code'] || 'wing-side')
   const batchId = String(args['batch-id'] || defaultBatchId)
   const artifactDir = path.resolve(String(args['artifact-dir'] || defaultArtifactDir))
   const resultPath = path.resolve(String(args.file || path.join(artifactDir, 'import-result.json')))

@@ -69,19 +69,49 @@ const acceptedSourceSystem = 'bestpricetravel'
 const hashValue = (value: Uint8Array | string) =>
   crypto.createHash('sha256').update(value).digest('hex')
 
+const addMissingSentenceSpacing = (value: string) => {
+  const urlPattern = /https?:\/\/\S+/giu
+  const sentenceBoundaryPattern = /([\p{Ll}\d][.!?])(?=\p{Lu})/gu
+  let cursor = 0
+  let result = ''
+
+  for (const match of value.matchAll(urlPattern)) {
+    const index = match.index ?? cursor
+    result += value.slice(cursor, index).replace(sentenceBoundaryPattern, '$1 ')
+    result += match[0]
+    cursor = index + match[0].length
+  }
+
+  return result + value.slice(cursor).replace(sentenceBoundaryPattern, '$1 ')
+}
+
 export const cleanBestPriceText = (value: unknown) =>
-  String(value || '')
-    .replace(/\u00a0/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;|&apos;/gi, "'")
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
+  addMissingSentenceSpacing(
+    String(value || '')
+      .replace(/\u00a0/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&amp;/gi, '&')
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;|&apos;/gi, "'")
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>'),
+  )
     .replace(/[ \t]+/g, ' ')
     .replace(/\n[ \t]+/g, '\n')
     .replace(/[ \t]+\n/g, '\n')
     .trim()
+
+/** Crawl often emits generic tokens like `img-video` (case/space/hyphen variants) or blank alt. */
+const isGenericBestPriceMediaAlt = (alt: string) => {
+  const compact = alt.toLowerCase().replace(/[\s_-]+/gu, '')
+  return !compact || compact === 'imgvideo'
+}
+
+/** Prefer meaningful source alt; fall back to normalized tour title for generic/blank media alt. */
+export const resolveBestPriceMediaAlt = (rawAlt: unknown, title: string) => {
+  const alt = cleanBestPriceText(rawAlt)
+  return isGenericBestPriceMediaAlt(alt) ? title : alt
+}
 
 const htmlToText = (html: string) =>
   cleanBestPriceText(
@@ -331,7 +361,7 @@ const loadImages = async ({
     const bytes = await fs.readFile(localPath)
     const hash = hashValue(bytes)
     images.push({
-      alt: cleanBestPriceText(image.alt) || title,
+      alt: resolveBestPriceMediaAlt(image.alt, title),
       hash,
       localPath,
       sourceKey: `${acceptedSourceSystem}:${sourceId}:media:${index + 1}-${hash.slice(0, 8)}`,

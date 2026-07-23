@@ -7,9 +7,11 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {
   bestPriceSlug,
   buildBestPriceNormalizedTours,
+  cleanBestPriceText,
   mapBestPriceMarket,
   normalizeBestPriceRecord,
   readBestPriceManifest,
+  resolveBestPriceMediaAlt,
 } from '../../scripts/lib/bestprice22'
 
 let fixtureRoot = ''
@@ -190,5 +192,112 @@ describe('BestPrice 22 tour import parser', () => {
 
     expect(tour.includes).toEqual(['Local guide', 'Domestic flight'])
     expect(tour.excludes).toEqual(['International flights', 'Travel Insurance'])
+  })
+
+  it('should replace generic or blank media alt with the normalized tour title', async () => {
+    const title = 'Northern Vietnam Rice Terrace Journey 4 days'
+    const sourceId = 'vietnam-tours--rice-terrace-alt'
+    const imageRelativePath = `images\\bestprice\\${sourceId}\\01.jpg`
+    const imagePath = path.join(crawlerRoot, 'storage', 'images', 'bestprice', sourceId, '01.jpg')
+    await fs.mkdir(path.dirname(imagePath), { recursive: true })
+    await fs.writeFile(imagePath, Buffer.from('synthetic-hero-alt', 'utf8'))
+
+    const tour = await normalizeBestPriceRecord({
+      crawlerRoot,
+      sourceFile: rawPath,
+      manifestRow: {
+        document: 'fixture-alt.docx',
+        sourceUrl: 'https://www.bestpricetravel.com/vietnam-tours/rice-terrace-alt.html',
+        title,
+      },
+      record: {
+        url: 'https://www.bestpricetravel.com/vietnam-tours/rice-terrace-alt.html',
+        tour_id: sourceId,
+        category: 'vietnam-tours',
+        meta: { description: 'A memorable experience.Socialize with local hosts.' },
+        content: {
+          heading: title,
+          price: '199 USD',
+          body_html:
+            '<div class="itinerary-box"><span class="iti-day-title">Day 1 Sapa</span><div class="itinerary-content"><p>Explore rice terraces.</p></div></div>',
+          body_text: 'Duration :\n4 days',
+        },
+        images: [
+          {
+            alt: 'img-video',
+            local_path: imageRelativePath,
+            src_url: 'https://example.invalid/01.jpg',
+          },
+        ],
+      },
+    })
+
+    expect(resolveBestPriceMediaAlt('img-video', title)).toBe(title)
+    expect(resolveBestPriceMediaAlt('IMG Video', title)).toBe(title)
+    expect(resolveBestPriceMediaAlt('img_video', title)).toBe(title)
+    expect(resolveBestPriceMediaAlt('', title)).toBe(title)
+    expect(resolveBestPriceMediaAlt('  ', title)).toBe(title)
+    expect(tour.images).toHaveLength(1)
+    expect(tour.images[0].alt).toBe(title)
+    expect(tour.summary).toBe('A memorable experience. Socialize with local hosts.')
+  })
+
+  it('should preserve meaningful media alt from the crawl source', async () => {
+    const title = 'Vietnam Coastline Fixture 2 days'
+    const sourceId = 'vietnam-tours--meaningful-alt'
+    const imageRelativePath = `images\\bestprice\\${sourceId}\\01.jpg`
+    const imagePath = path.join(crawlerRoot, 'storage', 'images', 'bestprice', sourceId, '01.jpg')
+    await fs.mkdir(path.dirname(imagePath), { recursive: true })
+    await fs.writeFile(imagePath, Buffer.from('synthetic-meaningful-alt', 'utf8'))
+    const meaningfulAlt = 'Halong Bay limestone karsts at sunrise'
+
+    const tour = await normalizeBestPriceRecord({
+      crawlerRoot,
+      sourceFile: rawPath,
+      manifestRow: {
+        document: 'fixture-meaningful-alt.docx',
+        sourceUrl: 'https://www.bestpricetravel.com/vietnam-tours/meaningful-alt.html',
+        title,
+      },
+      record: {
+        url: 'https://www.bestpricetravel.com/vietnam-tours/meaningful-alt.html',
+        tour_id: sourceId,
+        category: 'vietnam-tours',
+        meta: { description: 'Coastal journey summary.' },
+        content: {
+          heading: title,
+          price: '149 USD',
+          body_html:
+            '<div class="itinerary-box"><span class="iti-day-title">Day 1 Halong</span><div class="itinerary-content"><p>Cruise the bay.</p></div></div>',
+          body_text: 'Duration :\n2 days',
+        },
+        images: [
+          {
+            alt: meaningfulAlt,
+            local_path: imageRelativePath,
+            src_url: 'https://example.invalid/01.jpg',
+          },
+        ],
+      },
+    })
+
+    expect(resolveBestPriceMediaAlt(meaningfulAlt, title)).toBe(meaningfulAlt)
+    expect(tour.images).toHaveLength(1)
+    expect(tour.images[0].alt).toBe(meaningfulAlt)
+    expect(tour.images[0].alt).not.toBe(title)
+  })
+
+  it('should insert one space after glued sentence punctuation without altering decimals or URLs', () => {
+    expect(cleanBestPriceText('experience.Socialize')).toBe('experience. Socialize')
+    expect(cleanBestPriceText('A memorable experience.Socialize with local hosts.')).toBe(
+      'A memorable experience. Socialize with local hosts.',
+    )
+    expect(cleanBestPriceText('Price is 99.50 USD')).toBe('Price is 99.50 USD')
+    expect(cleanBestPriceText('See https://www.bestpricetravel.com/tours')).toBe(
+      'See https://www.bestpricetravel.com/tours',
+    )
+    expect(cleanBestPriceText('See https://example.Travel/Path.WithCaps now')).toBe(
+      'See https://example.Travel/Path.WithCaps now',
+    )
   })
 })

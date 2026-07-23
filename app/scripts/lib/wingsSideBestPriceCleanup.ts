@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 
 export const wingsSideBestPriceCleanupBatchID = 'wingsside-bestprice-22-20260717'
-export const wingsSideBestPriceCleanupSiteCode = 'wings-side'
+export const wingsSideBestPriceCleanupSiteCode = 'wing-side'
 export const wingsSideBestPriceCleanupExpectedCount = 22
 
 export const wingsSideBestPriceTechnicalCopy = {
@@ -82,7 +82,9 @@ const stableValue = (value: unknown): unknown => {
 }
 
 export const cleanupChecksum = (value: unknown): string =>
-  createHash('sha256').update(JSON.stringify(stableValue(value)) ?? 'undefined').digest('hex')
+  createHash('sha256')
+    .update(JSON.stringify(stableValue(value)) ?? 'undefined')
+    .digest('hex')
 
 const cloneJSON = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
 
@@ -98,12 +100,13 @@ export const cleanupRelationID = (value: unknown): number | string | null => {
 const noteLabel = (value: unknown): unknown =>
   value && typeof value === 'object' ? (value as JSONRecord).label : undefined
 
-const fieldSnapshot = (parent: null | undefined | JSONRecord, key: string): CleanupFieldSnapshot => ({
+const fieldSnapshot = (
+  parent: null | undefined | JSONRecord,
+  key: string,
+): CleanupFieldSnapshot => ({
   present: Boolean(parent && Object.prototype.hasOwnProperty.call(parent, key)),
   value:
-    parent && Object.prototype.hasOwnProperty.call(parent, key)
-      ? cloneJSON(parent[key])
-      : null,
+    parent && Object.prototype.hasOwnProperty.call(parent, key) ? cloneJSON(parent[key]) : null,
 })
 
 export const extractCleanupTarget = (document: CleanupDocument): CleanupTargetSnapshot => ({
@@ -130,17 +133,17 @@ export const cleanCleanupTarget = (before: CleanupTargetSnapshot): CleanupTarget
   servicesSummaryOperatorNotes:
     before.servicesSummaryOperatorNotes.present &&
     before.servicesSummaryOperatorNotes.value ===
-    wingsSideBestPriceTechnicalCopy.servicesSummaryOperatorNotes
+      wingsSideBestPriceTechnicalCopy.servicesSummaryOperatorNotes
       ? { present: true, value: null }
       : before.servicesSummaryOperatorNotes,
 })
 
-const changedPathsFor = (
-  before: CleanupTargetSnapshot,
-  after: CleanupTargetSnapshot,
-): string[] => {
+const changedPathsFor = (before: CleanupTargetSnapshot, after: CleanupTargetSnapshot): string[] => {
   const paths: string[] = []
-  if (cleanupChecksum(before.factSummaryOperatorNote) !== cleanupChecksum(after.factSummaryOperatorNote)) {
+  if (
+    cleanupChecksum(before.factSummaryOperatorNote) !==
+    cleanupChecksum(after.factSummaryOperatorNote)
+  ) {
     paths.push('factSummary.operatorNote')
   }
   if (
@@ -149,7 +152,9 @@ const changedPathsFor = (
   ) {
     paths.push('servicesSummary.operatorNotes')
   }
-  if (cleanupChecksum(before.servicesSummaryNotes) !== cleanupChecksum(after.servicesSummaryNotes)) {
+  if (
+    cleanupChecksum(before.servicesSummaryNotes) !== cleanupChecksum(after.servicesSummaryNotes)
+  ) {
     paths.push('servicesSummary.notes')
   }
   return paths
@@ -222,7 +227,9 @@ export const assertCleanupScope = ({
     const wrapperPageID = cleanupRelationID(document.wrapperPage)
     if (wrapperPageID === null) throw new Error(`TourProduct ${document.id} has no wrapperPage`)
     if (String(wrapperSiteByID.get(String(wrapperPageID))) !== String(siteID)) {
-      throw new Error(`TourProduct ${document.id} wrapperPage is missing or belongs to another site`)
+      throw new Error(
+        `TourProduct ${document.id} wrapperPage is missing or belongs to another site`,
+      )
     }
   }
 
@@ -266,9 +273,7 @@ export const cleanupAggregateChecksum = (
   records: CleanupPlanRecord[],
   side: 'after' | 'before',
 ): string =>
-  cleanupChecksum(
-    records.map((record) => ({ id: record.id, checksum: record[`${side}Checksum`] })),
-  )
+  cleanupChecksum(records.map((record) => ({ id: record.id, checksum: record[`${side}Checksum`] })))
 
 export const assertCleanupPlanRecords = (
   records: CleanupPlanRecord[],
