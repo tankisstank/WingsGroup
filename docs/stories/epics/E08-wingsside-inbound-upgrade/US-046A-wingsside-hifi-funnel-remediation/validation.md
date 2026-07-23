@@ -4,8 +4,8 @@
 
 Tranche A **accepted** 2026-07-21. Tranche B **accepted locally** 2026-07-22
 after page-body implementation, adversarial desktop/mobile browser review,
-schema/test/migration proof and production build. Story status is `implemented`;
-production integration remains frozen under US-046.
+schema/test/migration proof and production build. WP5 production acceptance
+completed 2026-07-23. Story status is `implemented`.
 
 ## Tranche B proof
 
@@ -20,7 +20,19 @@ production integration remains frozen under US-046.
 | Integration | 109 pass, 3 intentional skips |
 | PostgreSQL | Empty-to-head migration and EN/VI nested CRUD pass |
 | Build | Optimized Next.js build pass; 16/16 static pages |
-| Deployment | Not performed; freeze remains active |
+| Deployment | WP5 live on `wingside.vn`; application SHA `a0761ec84a5029938ba5340effb40ebba021bcab` |
+
+## Production acceptance
+
+| Gate | Result |
+| --- | --- |
+| Hi-fi data | 40/40 page-locale entries applied and verified |
+| Eight hubs | 8/8 HTTP 200; Plan and Contact each have one form and no duplicate IDs |
+| Responsive | 54/54 checks, 0 failures, 18 screenshots |
+| Go-live | 91/91 complete; `pass_with_notes`; site probe 0 blockers/0 warnings |
+| SEO/security | Canonical, robots, sitemap and required security headers pass |
+| Isolation | WingsGo and WingsPlus retain their own theme/canonical; no WingsSide leakage |
+| Submission safety | No real form submission |
 
 ## Tranche A deliverables
 
@@ -45,7 +57,7 @@ production integration remains frozen under US-046.
 | Unit | focused unit suite | 24/24 |
 | Typecheck | `pnpm exec tsc --noEmit` | pass |
 | Runtime | browser `/wingsside` | HTTP 200; complete desktop nav |
-| Harness | matrix | US-046 `in_progress` (NO-GO / corrective evidence) |
+| Harness | trace | WP5 completion recorded by the leader; repo docs are tracking truth |
 | Locale/seed | offline seed EN–PT | independent `missingPages` / `validationGaps`; `packages_card_count` visible |
 | SQLite bootstrap | `sqlite-hifi-schema-smoke.mjs` | supplemental local tables recreate |
 
@@ -53,14 +65,15 @@ production integration remains frozen under US-046.
 
 | Step | Result |
 | --- | --- |
-| `pnpm run plane:preview` | Passed (45 stories / 147 children) |
+| `pnpm run plane:preview` | Passed (46 stories / 147 children) |
 | `pnpm run plane:sync:workitems` | **Blocked externally** — Plane API **403** `Payment required. Upgrade your plan to access Initiatives` |
 
-**Do not claim Plane work-item sync.** Repo docs + Harness remain source of truth until billing/plan access is restored. Manifest proof notes already mark US-046 / US-046A as Partial / corrective.
+**Do not claim Plane work-item sync.** Repo docs + Harness remain source of
+truth until billing/plan access is restored. The manifest now marks US-046 and
+US-046A Full, but the remote Plane update remains blocked by the account plan.
 
 ## Explicit non-claims
 
-- Visual fidelity / 8×2 viewport acceptance: **not claimed**
-- Seed apply / data mutation: **not performed**
-- Deploy / push / merge: **not performed**
+- Strict pixel identity beyond the accepted responsive audit:
+  **not claimed**
 - Plane work-item sync: **not performed** (403 payment/plan)

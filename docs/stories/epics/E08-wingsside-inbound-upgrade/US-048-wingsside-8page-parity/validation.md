@@ -1,5 +1,19 @@
 # Validation
 
+## Production acceptance
+
+Completed on 2026-07-23 against `https://wingside.vn` from immutable
+application commit `a0761ec84a5029938ba5340effb40ebba021bcab`.
+
+- Go-live review completed 91/91 checks with `pass_with_notes`.
+- Responsive browser audit passed 54/54 checks with 18 screenshots.
+- Eight hub routes and 22 tour routes returned HTTP 200.
+- Plan and Contact each had one form, zero duplicate IDs and their required
+  markers.
+- No horizontal overflow, console error or page error was found.
+- Canonical, robots, sitemap, security headers and tenant isolation passed.
+- No real form submission was sent.
+
 ## Proof Strategy
 
 Combine targeted unit/component/integration tests with real-browser DOM assertions and pixel evidence. Freeze Home carousel state and clear the promo dismissal state before comparisons. Never submit a live form.

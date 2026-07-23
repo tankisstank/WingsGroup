@@ -1,5 +1,19 @@
 # US-048: Remediate WingsSide 8-page hi-fi parity
 
+## Status
+
+implemented
+
+## Production closure (2026-07-23)
+
+WP5 deployed the eight-page remediation to `wingside.vn`. Production passed
+all 91 go-live checks and the 54/54 responsive browser matrix. Plan and Contact
+each render one governed form without duplicate IDs; inventories and marker
+contracts remain complete. Canonical, robots, sitemap, security headers and
+tenant-isolation probes pass. The final release decision is
+`pass_with_notes`, limited to non-blocking decorative/brand image alt text and
+intentionally disabled lead delivery.
+
 ## Current Behavior
 
 The eight WingsSide hub routes are live locally, but the independent visual audit records duplicated Plan forms, incomplete package content, secondary hero media gaps, responsive CTA and typography drift, desktop navigation drift, and missing card-level review markers.

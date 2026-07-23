@@ -24,8 +24,12 @@ rebuild remain open for Tranche B+.
 
 **Tranche B accepted locally (2026-07-22).** The 8-page desktop/mobile
 re-review closed the corrective P1 findings. The remediation story is complete
-in the isolated branch; production integration and VPS acceptance remain under
-US-046 and the deploy freeze.
+in the isolated branch.
+
+**Production accepted (2026-07-23).** WP5 deployed the immutable release,
+applied and verified 40 hi-fi page/locale entries, and passed all eight public
+hub routes at the locked desktop/mobile sizes plus the six-breakpoint
+responsive matrix. Production integration and VPS acceptance are complete.
 
 ## Relevant Product Docs
 
@@ -36,9 +40,8 @@ US-046 and the deploy freeze.
 
 ## Acceptance Criteria
 
-- Tracking truth: US-046 and US-046A remain corrective/in_progress until a
-  post-remediation 8×2 viewport re-review closes all P1 findings and shared
-  chrome/section-order alignment.
+- Post-remediation desktop/mobile review closes all P1 findings and verifies
+  shared chrome and section-order alignment.
 - Typed Payload `wingsSideHiFi` content contract exists for the 8 locked hub
   routes (no opaque JSON editor). Drafts, versions, live preview, and site
   scope are preserved on Pages.
@@ -59,7 +62,7 @@ US-046 and the deploy freeze.
   blocks; record the blocker accurately.
 - Do not apply seed mutations in tranche A.
 - Do not rebuild all page bodies in tranche A.
-- Do not alter WingsGo behavior or lift the deploy freeze.
+- Do not alter WingsGo behavior.
 
 ## Evidence
 

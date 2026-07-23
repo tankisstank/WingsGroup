@@ -2,9 +2,25 @@
 
 ## Status
 
-in_progress
+implemented
 
-## Corrective note (2026-07-21)
+## Production closure (2026-07-23)
+
+WP5 closed the corrective and production gates. Immutable application commit
+`a0761ec84a5029938ba5340effb40ebba021bcab` is live on `wingside.vn`. The
+guarded repair applied to exactly 22 BestPrice tours after a verified encrypted
+PostgreSQL backup; the post-apply dry-run returned `changed=0` and
+`unchanged=22`.
+
+Production passed 22/22 tour URL smoke. The locked target tour renders one
+enquiry form, 45 stable markers, three real related tours, correct
+Included/Excluded content, public-safe copy and the fixed mobile consultation
+bar. Tenant isolation, canonical/robots/sitemap, security headers and
+responsive browser gates also passed. The release verdict is
+`pass_with_notes`; remaining decorative image alt notes do not block this
+story.
+
+## Historical corrective note (2026-07-21)
 
 **Not fidelity-complete for the 8-page hi-fi funnel.** Independent black-box
 review returned **NO-GO**
@@ -15,13 +31,14 @@ templates, and hero composition still fail acceptance. Remediation continues
 under **US-046A** (and remaining US-046 corrective work). Do not mark Full /
 implemented for hub fidelity until a post-remediation 8×2 re-review passes.
 
-## Local corrective result (2026-07-22)
+## Historical local corrective result (2026-07-22)
 
 The post-remediation local review now returns **LOCAL GO / PRODUCTION HOLD** for
 the eight official hub routes plus Tour Detail. See
-`docs/AUDIT-US046-HIFI-LOCAL-2026-07-22.md`. Deployment remains frozen, so the
-story stays `in_progress` until the approved branch is integrated and the VPS
-is re-audited against the same matrix.
+`docs/AUDIT-US046-HIFI-LOCAL-2026-07-22.md`. At that checkpoint deployment
+remained frozen and the story stayed `in_progress` pending branch integration
+and VPS re-audit. The production closure above supersedes that temporary
+status.
 
 The later focused Tour Detail re-audit narrows that statement: implementation
 is substantially complete, but strict prototype parity and release readiness

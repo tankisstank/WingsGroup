@@ -35,10 +35,10 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-033  | normal    | implemented         | Content and media seed                                              |
 | US-034  | normal    | implemented         | Launch readiness proof                                              |
 | US-045  | high-risk | implemented locally | BestPrice 22 import and publish preparation                         |
-| US-046  | high-risk | in_progress         | WingSide consultative tour detail — corrective (NO-GO hub fidelity) |
-| US-046A | high-risk | in_progress         | WingSide 8-page hi-fi funnel remediation (tranche A+)               |
+| US-046  | high-risk | implemented         | WingSide consultative tour detail and production data repair        |
+| US-046A | high-risk | implemented         | WingSide 8-page hi-fi funnel remediation                            |
 | US-047  | normal    | implemented locally | Reusable credentials and awards carousel block                      |
-| US-048  | high-risk | implemented locally | Eight-page hi-fi parity remediation and DOM review contract         |
+| US-048  | high-risk | implemented         | Eight-page hi-fi parity remediation and DOM review contract         |
 | US-049  | high-risk | planned             | WingsSide tour taxonomy and BestPrice 22 classification             |
 | US-050  | high-risk | planned             | Real-tour Home discovery and BUG-WS-001 remediation                 |
 
@@ -86,22 +86,26 @@ architecture and avoids building a parallel site, CMS, or page builder.
   E2E prepare-db remains documented as SQLite `SQLITE_BUSY` when a second local
   writer tries to push the test schema.
 - US-046 isolates WingSide structured tour detail from WingsGo retail
-  capabilities, adopts the approved hi-fi Home/Specials posture, and adds an
-  atomic batch-scoped cleanup for the 22 imported tours. Adaptive commit
-  `a083127` passed the full ladder and production tour smoke. **However**, the
-  2026-07-21 independent 8-page hi-fi review is **NO-GO** (6 P1 / 6 P2). US-046
-  is therefore **in_progress / corrective**, not fidelity-complete. US-046A
-  tracks hub funnel remediation (content contract, chrome, page bodies).
+  capabilities and provides the guarded, reversible repair for the 22 imported
+  tours. The 2026-07-21 NO-GO remains historical audit evidence. WP5 deployed
+  commit `a0761ec84a5029938ba5340effb40ebba021bcab`, applied the exact 22-tour
+  repair, passed 22/22 production URL smoke, and verified the target tour with
+  one form, 45 markers and three real related tours. US-046 is implemented.
+- US-046A delivered the typed Payload hi-fi contract, validated route model,
+  governed Plan/Contact form ownership, eight complete hub compositions and
+  scoped WingsSide chrome. WP5 applied and verified 40 page/locale entries,
+  then production passed the 54/54 responsive matrix and eight-page browser
+  audit. US-046A is implemented.
 - US-047 turns the hi-fi credentials/awards carousel into a governed Payload
   Page Composer block. Editors can reuse it across pages and replace its image,
   copy, ordering, autoplay, and timing without a frontend code change; Home
   preserves its locked carousel position and legacy fallback until configured.
-- US-048 closes the audited eight-page UI defects locally: single-owner Plan and
-  Contact forms, complete CMS-backed package/channel inventories, corrected hero
-  media and responsive controls, stable card-level review markers, and 16 final
-  desktop/mobile screenshots. The UI/build gates pass; production release remains
-  frozen because the go-live review still detects pre-existing tenant canonical,
-  robots/sitemap, title, and alt-metadata blockers.
+- US-048 closes the audited eight-page UI defects: single-owner Plan and Contact
+  forms, complete CMS-backed package/channel inventories, corrected hero media
+  and responsive controls, stable card-level review markers, and desktop/mobile
+  evidence. WP5 production review completed 91/91 checks with tenant canonical,
+  robots, sitemap and security probes passing; the final decision is
+  `pass_with_notes`. US-048 is implemented.
 - US-049 and US-050 capture the post-parity product-data Change Request. US-049
   adds controlled destination/style taxonomy and a reviewed backfill for the 22
   imported tours. US-050 uses those real records for Home discovery and closes

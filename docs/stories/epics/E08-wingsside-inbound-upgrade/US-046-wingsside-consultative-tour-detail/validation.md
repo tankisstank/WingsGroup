@@ -1,5 +1,16 @@
 # US-046 Validation
 
+> **2026-07-23 production closure:** **PASS / implemented.** WP5 deployed
+> immutable commit `a0761ec84a5029938ba5340effb40ebba021bcab` after verifying
+> the encrypted PostgreSQL backup and rollback release. Eight committed
+> migrations and the guarded exact-scope repair were applied. The repair
+> affected exactly 22 tours; its post-apply dry-run returned `changed=0`,
+> `unchanged=22`. Production passed 22/22 tour URL smoke, and the target tour
+> passed with one form, 45 markers, three real related tours, no overflow and
+> no browser errors. Canonical, robots, sitemap, security headers and tenant
+> isolation passed. The overall release result is `pass_with_notes`; no real
+> form was submitted.
+
 > **2026-07-23 release-blocker orchestration:** WP1 local code gate passed
 > adversarial review: canonical identity is `wingside.vn` / `wing-side`,
 > PostgreSQL 16.14 empty-to-head migration passed, 35 focused identity/SEO/
