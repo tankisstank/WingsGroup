@@ -25,8 +25,11 @@ export const WingsSideCredentialsCarousel = ({
   locale?: null | string
 }) => {
   const copy = getWingsSideHiFiCopy(locale)
+  const verifiedItems = content?.items?.filter(
+    (item) => !item.reviewStatus || item.reviewStatus === 'verified',
+  )
   const slides: CredentialSlide[] = content?.items?.length
-    ? content.items.map((item) => ({
+    ? (verifiedItems ?? []).map((item) => ({
         body: item.description,
         image: typeof item.image === 'object' ? item.image : null,
         kind: item.kind,
@@ -94,6 +97,7 @@ export const WingsSideCredentialsCarousel = ({
                   <Media
                     className="ws-hifi-creds__mark ws-hifi-creds__mark--media"
                     imgClassName="ws-hifi-creds__mark-image"
+                    priority={isActive}
                     resource={slide.image}
                   />
                 ) : (
@@ -126,20 +130,26 @@ export const WingsSideCredentialsCarousel = ({
           >
             <ChevronLeftIcon aria-hidden="true" className="h-4 w-4" />
           </button>
-          <div aria-label={ariaLabel} className="ws-hifi-creds__dots" role="tablist">
-            {slides.map((slide, index) => (
-              <button
-                aria-label={`${index + 1} of ${slides.length}`}
-                aria-selected={index === active}
-                className="ws-hifi-creds__dot"
-                data-active={index === active ? 'true' : 'false'}
-                key={`creds-dot-${index}-${slide.kind}`}
-                onClick={() => setActive(index)}
-                role="tab"
-                type="button"
-              />
-            ))}
-          </div>
+          {slides.length <= 12 ? (
+            <div aria-label={ariaLabel} className="ws-hifi-creds__dots" role="tablist">
+              {slides.map((slide, index) => (
+                <button
+                  aria-label={`${index + 1} of ${slides.length}`}
+                  aria-selected={index === active}
+                  className="ws-hifi-creds__dot"
+                  data-active={index === active ? 'true' : 'false'}
+                  key={`creds-dot-${index}-${slide.kind}`}
+                  onClick={() => setActive(index)}
+                  role="tab"
+                  type="button"
+                />
+              ))}
+            </div>
+          ) : (
+            <output aria-live="polite" className="ws-hifi-creds__counter">
+              {String(active + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
+            </output>
+          )}
           <button
             aria-label={copy.creds.next}
             className="ws-hifi-creds__nav"

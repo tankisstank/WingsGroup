@@ -16,6 +16,7 @@ import * as migration_20260722_230000_wing_side_tenant_identity from './20260722
 import * as migration_20260723_170000_wing_side_release_identity from './20260723_170000_wing_side_release_identity'
 import * as migration_20260723_183000_wing_side_style_seo_copy from './20260723_183000_wing_side_style_seo_copy'
 import * as migration_20260723_190000_wing_side_public_contact_identity from './20260723_190000_wing_side_public_contact_identity'
+import * as migration_20260724_090000_credentials_catalog_metadata from './20260724_090000_credentials_catalog_metadata'
 
 export const migrations = [
   {
@@ -107,5 +108,10 @@ export const migrations = [
     up: migration_20260723_190000_wing_side_public_contact_identity.up,
     down: migration_20260723_190000_wing_side_public_contact_identity.down,
     name: '20260723_190000_wing_side_public_contact_identity',
+  },
+  {
+    up: migration_20260724_090000_credentials_catalog_metadata.up,
+    down: migration_20260724_090000_credentials_catalog_metadata.down,
+    name: '20260724_090000_credentials_catalog_metadata',
   },
 ]

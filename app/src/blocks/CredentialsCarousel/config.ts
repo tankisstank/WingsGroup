@@ -61,9 +61,24 @@ export const CredentialsCarousel: Block = {
       label: 'Chứng nhận / giải thưởng',
       type: 'array',
       minRows: 1,
-      maxRows: 12,
+      maxRows: 36,
       required: true,
+      admin: {
+        description:
+          'Mỗi mục là một hồ sơ có ảnh và metadata. Dùng trạng thái “Cần xác minh” khi ảnh chưa đủ thông tin; mục đó sẽ không xuất hiện public.',
+      },
       fields: [
+        {
+          name: 'reviewStatus',
+          label: 'Trạng thái xác minh',
+          type: 'select',
+          defaultValue: 'verified',
+          required: true,
+          options: [
+            { label: 'Đã xác minh từ ảnh gốc', value: 'verified' },
+            { label: 'Cần editor xác minh', value: 'needs-review' },
+          ],
+        },
         {
           name: 'kind',
           label: 'Loại',
@@ -84,6 +99,50 @@ export const CredentialsCarousel: Block = {
           relationTo: 'media',
           admin: {
             description: 'Dùng ảnh hoặc logo đã quản lý trong Media Library.',
+          },
+        },
+        {
+          name: 'issuer',
+          label: 'Đơn vị trao / cấp',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'recipient',
+          label: 'Đơn vị được trao / cấp',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'recognitionYear',
+          label: 'Năm ghi nhận',
+          type: 'number',
+          min: 1900,
+          max: 2100,
+        },
+        {
+          name: 'issuedOn',
+          label: 'Ngày cấp / trao',
+          type: 'date',
+          admin: {
+            date: {
+              displayFormat: 'dd/MM/yyyy',
+              pickerAppearance: 'dayOnly',
+            },
+          },
+        },
+        {
+          name: 'referenceCode',
+          label: 'Mã chứng nhận / đại lý',
+          type: 'text',
+        },
+        {
+          name: 'sourceFilename',
+          label: 'Tên file ảnh gốc',
+          type: 'text',
+          admin: {
+            description: 'Giữ tên file gốc để có thể truy vết và rà soát lại.',
+            readOnly: true,
           },
         },
         {

@@ -37,7 +37,7 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-045  | high-risk | implemented locally | BestPrice 22 import and publish preparation                         |
 | US-046  | high-risk | implemented         | WingSide consultative tour detail and production data repair        |
 | US-046A | high-risk | implemented         | WingSide 8-page hi-fi funnel remediation                            |
-| US-047  | normal    | implemented locally | Reusable credentials and awards carousel block                      |
+| US-047  | normal    | implemented locally | Governed 24-record credentials catalog and reusable CMS block       |
 | US-048  | high-risk | implemented         | Eight-page hi-fi parity remediation and DOM review contract         |
 | US-049  | high-risk | planned             | WingsSide tour taxonomy and BestPrice 22 classification             |
 | US-050  | high-risk | planned             | Real-tour Home discovery and BUG-WS-001 remediation                 |

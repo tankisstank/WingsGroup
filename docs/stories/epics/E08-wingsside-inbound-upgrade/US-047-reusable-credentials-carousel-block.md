@@ -2,7 +2,7 @@
 
 ## Status
 
-implemented locally
+implemented and locally content-ready
 
 ## Lane
 
@@ -19,9 +19,12 @@ Page, reorder its records, and replace images and content through the CMS.
 - `credentialsCarousel` is registered in `Pages.layout` and rendered through
   the shared `RenderBlocks` registry.
 - Editors control section copy, accessibility label, full-width mode, autoplay,
-  interval, and one to twelve ordered records.
-- Every record supports a governed Media upload plus a required textual fallback
-  mark, type, label, title, and description.
+  interval, and up to 36 ordered records.
+- Every record supports a governed Media upload plus review status, issuer,
+  recipient, recognition year, issue date, reference code, source filename,
+  textual fallback mark, type, label, title, and description.
+- Records marked `needs-review` remain available to editors but are not rendered
+  publicly until verified.
 - The WingsSide hi-fi Home route renders CMS data at the existing credentials
   slot; if no block is configured, the verified legacy fallback remains.
 - Other hi-fi and standard Pages can render the same block without duplicating
@@ -39,8 +42,13 @@ Page, reorder its records, and replace images and content through the CMS.
   it into its locked design position.
 - Data: Page `layout` remains localized; uploaded images reference the existing
   `media` collection.
+- Catalog: `app/assets/wingsside-credentials/manifest.json` preserves
+  traceability to all 24 source photographs and drives an idempotent local
+  importer for the five WingsSide locales.
 - Database: `20260722_020046_credentials_carousel_block` contains the live and
-  version block tables, image relations, enums, and indexes only.
+  version block tables, image relations, enums, and indexes. Migration
+  `20260724_090000_credentials_catalog_metadata` adds the governed catalog
+  metadata to both live and version tables.
 
 ## Validation
 
@@ -54,14 +62,28 @@ Page, reorder its records, and replace images and content through the CMS.
 
 ## Evidence
 
-Implemented locally on 2026-07-22. Production remains frozen.
+Catalog implementation completed locally on 2026-07-23. Production content and
+deployment were not changed.
+
+- Analyzed all 24 photographs in `assets/CHỨNG CHỈ` at original resolution and
+  preserved the originals unchanged.
+- Catalog contains 24 records from 11 issuers spanning 2001-2025: 21 are
+  `verified`; three incomplete/cropped records are explicitly `needs-review`.
+- Generated 24 web-ready JPEG derivatives (maximum 1600 px, quality 88) while
+  retaining each original filename in read-only CMS metadata.
+- Idempotent SQLite import completed for all five WingsSide locales. A repeated
+  apply remained at 24 Media documents, five carousel blocks, and 120 localized
+  items (105 verified and 15 needing review), with no duplicate Media or block.
+- Editors can add future awards directly in the reusable Page Composer block;
+  the expanded schema supports up to 36 ordered records and governed review
+  before public display.
 
 - `pnpm run generate:types` PASS; the generated `CredentialsCarouselBlock`
   contract includes section controls, Media relation, and ordered items.
 - `pnpm exec tsc --noEmit` PASS and targeted ESLint PASS with zero warnings.
 - Unit PASS 6/6 for the hi-fi composer allow-list, including form preservation.
-- Component PASS 2/2 for CMS copy, Media rendering, textual fallback, and next
-  navigation.
+- Component PASS 4/4 for CMS copy, Media rendering, textual fallback,
+  navigation, long-catalog counter, and strict suppression of unverified data.
 - Integration PASS 3/3 for Page registry/schema plus idempotent local SQLite
   bootstrap.
 - `pnpm run db:migrate:smoke` PASS on PostgreSQL 16.14 from empty database to

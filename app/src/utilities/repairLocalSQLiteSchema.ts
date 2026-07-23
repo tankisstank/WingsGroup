@@ -81,6 +81,30 @@ const localSQLiteColumnRepairs = [
       ['version_currency', "TEXT DEFAULT 'USD'"],
     ],
   },
+  {
+    table: 'pages_blocks_credentials_carousel_items',
+    columns: [
+      ['review_status', "TEXT DEFAULT 'verified'"],
+      ['issuer', 'TEXT'],
+      ['recipient', 'TEXT'],
+      ['recognition_year', 'NUMERIC'],
+      ['issued_on', 'TEXT'],
+      ['reference_code', 'TEXT'],
+      ['source_filename', 'TEXT'],
+    ],
+  },
+  {
+    table: '_pages_v_blocks_credentials_carousel_items',
+    columns: [
+      ['review_status', "TEXT DEFAULT 'verified'"],
+      ['issuer', 'TEXT'],
+      ['recipient', 'TEXT'],
+      ['recognition_year', 'NUMERIC'],
+      ['issued_on', 'TEXT'],
+      ['reference_code', 'TEXT'],
+      ['source_filename', 'TEXT'],
+    ],
+  },
 ] as const
 
 const credentialsCarouselSQLiteStatements = [
@@ -93,8 +117,10 @@ const credentialsCarouselSQLiteStatements = [
   )`,
   `CREATE TABLE IF NOT EXISTS "pages_blocks_credentials_carousel_items" (
     "_order" INTEGER NOT NULL, "_parent_id" TEXT NOT NULL, "_locale" TEXT NOT NULL,
-    "id" TEXT PRIMARY KEY NOT NULL, "kind" TEXT DEFAULT 'cert', "image_id" INTEGER,
-    "mark" TEXT, "label" TEXT, "title" TEXT, "description" TEXT,
+    "id" TEXT PRIMARY KEY NOT NULL, "review_status" TEXT DEFAULT 'verified',
+    "kind" TEXT DEFAULT 'cert', "image_id" INTEGER, "issuer" TEXT, "recipient" TEXT,
+    "recognition_year" NUMERIC, "issued_on" TEXT, "reference_code" TEXT,
+    "source_filename" TEXT, "mark" TEXT, "label" TEXT, "title" TEXT, "description" TEXT,
     FOREIGN KEY ("image_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
     FOREIGN KEY ("_parent_id") REFERENCES "pages_blocks_credentials_carousel"("id") ON UPDATE no action ON DELETE cascade
   )`,
@@ -108,8 +134,10 @@ const credentialsCarouselSQLiteStatements = [
   )`,
   `CREATE TABLE IF NOT EXISTS "_pages_v_blocks_credentials_carousel_items" (
     "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_locale" TEXT NOT NULL,
-    "id" INTEGER PRIMARY KEY NOT NULL, "kind" TEXT DEFAULT 'cert', "image_id" INTEGER,
-    "mark" TEXT, "label" TEXT, "title" TEXT, "description" TEXT, "_uuid" TEXT,
+    "id" INTEGER PRIMARY KEY NOT NULL, "review_status" TEXT DEFAULT 'verified',
+    "kind" TEXT DEFAULT 'cert', "image_id" INTEGER, "issuer" TEXT, "recipient" TEXT,
+    "recognition_year" NUMERIC, "issued_on" TEXT, "reference_code" TEXT,
+    "source_filename" TEXT, "mark" TEXT, "label" TEXT, "title" TEXT, "description" TEXT, "_uuid" TEXT,
     FOREIGN KEY ("image_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
     FOREIGN KEY ("_parent_id") REFERENCES "_pages_v_blocks_credentials_carousel"("id") ON UPDATE no action ON DELETE cascade
   )`,

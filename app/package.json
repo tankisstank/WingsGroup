@@ -25,6 +25,7 @@
     "go-live:review": "cross-env NODE_OPTIONS=--no-deprecation node scripts/go-live-review.mjs",
     "ii": "cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install",
     "import:brand-assets": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-brand-assets.ts",
+    "import:wingsside:credentials": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-wingsside-credentials.ts",
     "parse:tours:doicanhviet": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/parse-doicanhviet.ts",
     "import:tours:doicanhviet": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-doicanhviet.ts",
     "import:tours:bestprice22": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-bestprice-22.ts",

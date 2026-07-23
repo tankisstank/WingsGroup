@@ -1468,12 +1468,25 @@ export interface CredentialsCarouselBlock {
   ariaLabel?: string | null;
   autoplay?: boolean | null;
   intervalMs?: number | null;
+  /**
+   * Mỗi mục là một hồ sơ có ảnh và metadata. Dùng trạng thái “Cần xác minh” khi ảnh chưa đủ thông tin; mục đó sẽ không xuất hiện public.
+   */
   items: {
+    reviewStatus: 'verified' | 'needs-review';
     kind: 'cert' | 'award' | 'member' | 'iso';
     /**
      * Dùng ảnh hoặc logo đã quản lý trong Media Library.
      */
     image?: (number | null) | Media;
+    issuer: string;
+    recipient: string;
+    recognitionYear?: number | null;
+    issuedOn?: string | null;
+    referenceCode?: string | null;
+    /**
+     * Giữ tên file gốc để có thể truy vết và rà soát lại.
+     */
+    sourceFilename?: string | null;
     mark: string;
     label: string;
     title: string;
@@ -3341,8 +3354,15 @@ export interface CredentialsCarouselBlockSelect<T extends boolean = true> {
   items?:
     | T
     | {
+        reviewStatus?: T;
         kind?: T;
         image?: T;
+        issuer?: T;
+        recipient?: T;
+        recognitionYear?: T;
+        issuedOn?: T;
+        referenceCode?: T;
+        sourceFilename?: T;
         mark?: T;
         label?: T;
         title?: T;

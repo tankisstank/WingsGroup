@@ -1168,6 +1168,16 @@ body[data-site-code='wing-side'] .ws-hifi-creds__dot[data-active='true'] {
   background: var(--site-brand, #005090);
 }
 
+body[data-site-code='wing-side'] .ws-hifi-creds__counter {
+  flex: 1;
+  color: var(--site-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-align: center;
+}
+
 @media (max-width: 640px) {
   body[data-site-code='wing-side'] .ws-hifi-creds__slide[data-active='true'] {
     grid-template-columns: 1fr;
