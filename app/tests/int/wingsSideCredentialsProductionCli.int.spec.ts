@@ -8,22 +8,29 @@ import { afterAll, describe, expect, it } from 'vitest'
 import { createLocalReq, getPayload, type Payload, type PayloadRequest } from 'payload'
 
 import { loadWingsSideCredentialManifest } from '../../scripts/lib/wingsSideCredentials'
-import { wingsSideCredentialsProductionLocales } from '../../scripts/lib/wingsSideCredentialsProduction'
+import {
+  plannedCredentialUploadPaths,
+  wingsSideCredentialsProductionLocales,
+} from '../../scripts/lib/wingsSideCredentialsProduction'
 
 const execFileAsync = promisify(execFile)
 const runCliProof = process.env.RUN_CREDENTIALS_PRODUCTION_CLI_INT === 'true'
 const cliDescribe = runCliProof ? describe : describe.skip
 const releaseSha = '0123456789abcdef0123456789abcdef01234567'
 const adminEmail = `credentials-cli-proof-${process.pid}-${Date.now()}@internal.invalid`
+const mediaStaticDir = path.resolve(process.cwd(), 'public', 'media')
 
 type JsonLine = Record<string, unknown>
 
-const pnpmBin = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
+const pnpmEntrypoint = process.env.npm_execpath
 
 const runImporter = async (args: string[]) => {
+  if (!pnpmEntrypoint) {
+    throw new Error('RUN_CREDENTIALS_PRODUCTION_CLI_INT requires running tests through pnpm')
+  }
   const { stdout } = await execFileAsync(
-    pnpmBin,
-    ['exec', 'tsx', 'scripts/import-wingsside-credentials-production.ts', ...args],
+    process.execPath,
+    [pnpmEntrypoint, 'exec', 'tsx', 'scripts/import-wingsside-credentials-production.ts', ...args],
     {
       cwd: process.cwd(),
       env: {
@@ -60,22 +67,6 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
 
   const cleanup = async () => {
     const cleanupPayload = payload || (await getPayload({ config }))
-    const cleanupReq =
-      req ||
-      (await createLocalReq(
-        {
-          user: {
-            collection: 'users',
-            createdAt: new Date(0).toISOString(),
-            email: adminEmail,
-            id: 0,
-            role: 'super-admin',
-            sites: [],
-            updatedAt: new Date(0).toISOString(),
-          } as never,
-        },
-        cleanupPayload,
-      ))
     const manifest = await loadWingsSideCredentialManifest()
     const media = await cleanupPayload.find({
       collection: 'media',
@@ -83,7 +74,6 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
       limit: 100,
       overrideAccess: true,
       pagination: false,
-      req: cleanupReq,
       where: { filename: { in: manifest.items.map((item) => item.file) } },
     })
     for (const item of media.docs) {
@@ -92,8 +82,15 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
         context: { disableRevalidate: true },
         id: item.id,
         overrideAccess: true,
-        req: cleanupReq,
       })
+    }
+    for (const item of manifest.items) {
+      for (const file of await plannedCredentialUploadPaths({
+        file: item.file,
+        mediaRoot: mediaStaticDir,
+      })) {
+        await fs.rm(file, { force: true })
+      }
     }
     if (pageID) {
       await cleanupPayload.delete({
@@ -101,7 +98,6 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
         context: { disableRevalidate: true },
         id: pageID,
         overrideAccess: true,
-        req: cleanupReq,
       })
     }
     if (siteID) {
@@ -110,7 +106,6 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
         context: { disableRevalidate: true },
         id: siteID,
         overrideAccess: true,
-        req: cleanupReq,
       })
     }
     if (userID) {
@@ -119,7 +114,6 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
         context: { disableRevalidate: true },
         id: userID,
         overrideAccess: true,
-        req: cleanupReq,
       })
     }
     if (!payload) await cleanupPayload.destroy()
