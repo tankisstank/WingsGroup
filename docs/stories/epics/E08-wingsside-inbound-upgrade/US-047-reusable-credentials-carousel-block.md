@@ -2,7 +2,7 @@
 
 ## Status
 
-implemented and locally content-ready
+implemented and released to the local production runtime
 
 ## Lane
 
@@ -30,8 +30,8 @@ Page, reorder its records, and replace images and content through the CMS.
 - Other hi-fi and standard Pages can render the same block without duplicating
   the component.
 - PostgreSQL migration adds only the new block and version tables.
-- No production content, deployment, or VPS state is changed while the deploy
-  freeze is active.
+- Release packaging and the local production runtime can be updated without
+  changing the public VPS until a separately authorized public deployment.
 
 ## Implementation
 
@@ -62,8 +62,8 @@ Page, reorder its records, and replace images and content through the CMS.
 
 ## Evidence
 
-Catalog implementation completed locally on 2026-07-23. Production content and
-deployment were not changed.
+Catalog implementation and local production cutover completed on 2026-07-23 at
+release commit `f70ee48`. The public VPS was not changed.
 
 - Analyzed all 24 photographs in `assets/CHỨNG CHỈ` at original resolution and
   preserved the originals unchanged.
@@ -88,14 +88,24 @@ deployment were not changed.
   bootstrap.
 - `pnpm run db:migrate:smoke` PASS on PostgreSQL 16.14 from empty database to
   head with no pending migration.
-- `pnpm run build` PASS, including TypeScript and all 16 static pages.
-- Payload Admin browser audit PASS: the Page `Add Layout` drawer exposes
-  `Chứng nhận & giải thưởng`; expanded controls include full-width mode,
-  section copy, accessibility label, autoplay, 3000-15000 ms interval, and
-  ordered records. The temporary autosave was reverted to the published state.
-- Public browser audit PASS at `/wingsside/en`: exactly one credentials
-  carousel on desktop and mobile, `375px` mobile reports no horizontal overflow
-  (`scrollWidth === clientWidth`), and no browser runtime errors were observed.
+- The local production SQLite target contains 24 Media documents, five live
+  localized carousel blocks, and 120 localized items: 105 verified and 15
+  needing review. The public carousel therefore exposes exactly 21 verified
+  awards in each locale.
+- `pnpm run build` PASS for release commit `f70ee48`, including TypeScript and
+  all 16 static pages. The standalone release runs behind the local production
+  proxy on port 3000; `/api/health/live` and `/en` both return HTTP 200.
+- Payload Admin browser audit PASS on Page 298: the configured
+  `Chứng nhận & giải thưởng` block exposes 24 editor-managed rows and the
+  governed fields for review status, type, Media, issuer, recipient, year/date,
+  reference code, read-only source filename, fallback mark, label, title, and
+  description. Adding and removing a temporary row returned the editor to 24
+  rows; its exact autosave version was deleted after a database backup while
+  the published version and 120 live localized items remained unchanged.
+- Public browser audit PASS at `/en` through port 3000: desktop and 375px mobile
+  each render 21 slides, show `01 / 21`, suppress all `needs-review` records,
+  load the active image, and report no horizontal overflow. Desktop next-slide
+  navigation advanced to `02 / 21`.
 - Screenshots: `artifacts/us047-home-desktop.png`,
   `artifacts/us047-home-mobile.png`, and `artifacts/us047-admin-fields.png`
   remain local evidence and are not release payload files.

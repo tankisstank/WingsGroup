@@ -100,6 +100,10 @@ architecture and avoids building a parallel site, CMS, or page builder.
   Page Composer block. Editors can reuse it across pages and replace its image,
   copy, ordering, autoplay, and timing without a frontend code change; Home
   preserves its locked carousel position and legacy fallback until configured.
+  Release commit `f70ee48` is now built and running on the local production
+  port 3000 with 21 verified public awards and 24 CMS-managed catalog rows;
+  PostgreSQL 16 migration smoke and editor add/remove QA pass. The public VPS
+  remains unchanged.
 - US-048 closes the audited eight-page UI defects: single-owner Plan and Contact
   forms, complete CMS-backed package/channel inventories, corrected hero media
   and responsive controls, stable card-level review markers, and desktop/mobile
