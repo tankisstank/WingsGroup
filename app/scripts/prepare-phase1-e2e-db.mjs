@@ -8,7 +8,7 @@ const targetDatabaseURL = process.env.DATABASE_URL
 const requiredSiteCodes = [
   'wings-group',
   'wings-go',
-  'wings-side',
+  'wing-side',
   'wings-plus',
   'wings-care',
   'wings-pass',
@@ -16,7 +16,9 @@ const requiredSiteCodes = [
 const requiredWingsSidePaths = ['/', '/destinations', '/styles', '/packages', '/plan-your-trip']
 
 if (!targetDatabaseURL) {
-  console.error('[phase1-e2e-db] DATABASE_URL is required. Use pnpm test:e2e to provision PostgreSQL.')
+  console.error(
+    '[phase1-e2e-db] DATABASE_URL is required. Use pnpm test:e2e to provision PostgreSQL.',
+  )
   process.exit(2)
 }
 
@@ -74,7 +76,7 @@ const hasRequiredPhase1Sites = (sqlitePath) => {
   try {
     const rows = db.prepare('select code from sites order by code').all()
     const codes = new Set(rows.map((row) => row.code).filter(Boolean))
-    const wingsSideSite = db.prepare('select id from sites where code = ? limit 1').get('wings-side')
+    const wingsSideSite = db.prepare('select id from sites where code = ? limit 1').get('wing-side')
     const pathSet = new Set(
       wingsSideSite
         ? db
@@ -103,7 +105,9 @@ const removeSQLiteFiles = (sqlitePath) => {
 }
 
 if (isPostgres) {
-  console.log(`[phase1-e2e-db] Applying committed migrations to disposable PostgreSQL database ${databaseName}`)
+  console.log(
+    `[phase1-e2e-db] Applying committed migrations to disposable PostgreSQL database ${databaseName}`,
+  )
   if (runPnpm(['exec', 'payload', 'migrate']) !== 0) process.exit(1)
 
   console.log('[phase1-e2e-db] Seeding deterministic phase-1 fixtures')
@@ -125,4 +129,6 @@ if (isPostgres) {
 
 if (runPnpm(['exec', 'tsx', 'scripts/seed-phase1-e2e-smoke.ts']) !== 0) process.exit(1)
 
-console.log(`[phase1-e2e-db] PASS: ${isPostgres ? 'PostgreSQL' : 'SQLite bootstrap'} fixtures are ready`)
+console.log(
+  `[phase1-e2e-db] PASS: ${isPostgres ? 'PostgreSQL' : 'SQLite bootstrap'} fixtures are ready`,
+)

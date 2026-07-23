@@ -31,13 +31,13 @@ describe('Header site identity', () => {
   })
 
   it('keeps WingSide consultative behavior when its visual theme is custom', async () => {
-    mocks.getCurrentSite.mockResolvedValue({ code: 'wings-side' })
+    mocks.getCurrentSite.mockResolvedValue({ code: 'wing-side' })
 
     const header = await Header()
 
     expect(header.props).toMatchObject({
       primaryAction: { label: 'Plan trip', url: '/plan-your-trip' },
-      siteCode: 'wings-side',
+      siteCode: 'wing-side',
       themeKey: 'custom',
     })
     expect(header.props.primaryAction.url).not.toBe('/lien-he')

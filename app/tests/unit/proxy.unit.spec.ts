@@ -28,7 +28,7 @@ describe('tenant proxy rewrites', () => {
     const rewrittenHeaders = overriddenRequestHeaders(publicResponse)
 
     expect(publicResponse.headers.get('x-middleware-rewrite')).toBe('http://localhost:3100/')
-    expect(rewrittenHeaders.get('x-site-code')).toBe('wings-side')
+    expect(rewrittenHeaders.get('x-site-code')).toBe('wing-side')
     expect(rewrittenHeaders.get('x-public-path')).toBe('/wingsside')
 
     const internalResponse = proxy(
@@ -39,7 +39,7 @@ describe('tenant proxy rewrites', () => {
     const serverComponentHeaders = overriddenRequestHeaders(internalResponse)
 
     expect(internalResponse.headers.get('x-middleware-next')).toBe('1')
-    expect(serverComponentHeaders.get('x-site-code')).toBe('wings-side')
+    expect(serverComponentHeaders.get('x-site-code')).toBe('wing-side')
     expect(serverComponentHeaders.get('x-site-prefix')).toBe('/wingsside')
     expect(serverComponentHeaders.get('x-public-path')).toBe('/wingsside')
   })
@@ -50,7 +50,7 @@ describe('tenant proxy rewrites', () => {
         headers: {
           host: 'localhost:3100',
           'x-public-path': '/wingsside/not-the-current-route',
-          'x-site-code': 'wings-side',
+          'x-site-code': 'wing-side',
           'x-site-context-source': 'proxy',
           'x-site-host': 'localhost',
           'x-site-prefix': '/wingsside',
@@ -116,7 +116,7 @@ describe('tenant proxy rewrites', () => {
     )
     const serverComponentHeaders = overriddenRequestHeaders(internalResponse)
 
-    expect(serverComponentHeaders.get('x-site-code')).toBe('wings-side')
+    expect(serverComponentHeaders.get('x-site-code')).toBe('wing-side')
     expect(serverComponentHeaders.get('x-site-prefix')).toBe('/wingsside/en')
     expect(serverComponentHeaders.get('x-public-path')).toBe('/wingsside/en/destinations/ha-noi')
     expect(serverComponentHeaders.get('x-locale')).toBe('en')
@@ -131,7 +131,7 @@ describe('tenant proxy rewrites', () => {
         headers: {
           host: 'localhost:3100',
           'x-public-path': '/wingsside',
-          'x-site-code': 'wings-side',
+          'x-site-code': 'wing-side',
           'x-site-context-source': 'proxy',
           'x-site-host': 'localhost',
           'x-site-prefix': '/wingsside',
@@ -140,7 +140,7 @@ describe('tenant proxy rewrites', () => {
     )
     const headers = overriddenRequestHeaders(response)
 
-    expect(headers.get('x-site-code')).toBe('wings-side')
+    expect(headers.get('x-site-code')).toBe('wing-side')
     expect(headers.get('x-site-prefix')).toBe('/wingsside')
     expect(headers.get('x-site-host')).toBe('localhost')
   })
@@ -164,8 +164,7 @@ describe('tenant proxy rewrites', () => {
 
   it('returns 404 for CMS-only locales on every public host in the multisite inventory', () => {
     for (const site of multisiteInventory.sites) {
-      const nestedPath =
-        Object.values(site.nestedRouteSamples)[0] || '/'
+      const nestedPath = Object.values(site.nestedRouteSamples)[0] || '/'
 
       for (const host of site.hosts) {
         const response = proxy(
@@ -183,9 +182,7 @@ describe('tenant proxy rewrites', () => {
     for (const site of multisiteInventory.sites) {
       const sampleLocale = site.publicLocales[0] || site.defaultLocale
       const nestedPath =
-        site.nestedRouteSamples[sampleLocale] ||
-        Object.values(site.nestedRouteSamples)[0] ||
-        '/'
+        site.nestedRouteSamples[sampleLocale] || Object.values(site.nestedRouteSamples)[0] || '/'
 
       for (const host of site.hosts) {
         const aliasedPath = `/${site.localAlias}/${sampleLocale}${nestedPath === '/' ? '' : nestedPath}`
@@ -204,9 +201,7 @@ describe('tenant proxy rewrites', () => {
     for (const site of multisiteInventory.sites) {
       const sampleLocale = site.publicLocales[0] || site.defaultLocale
       const nestedPath =
-        site.nestedRouteSamples[sampleLocale] ||
-        Object.values(site.nestedRouteSamples)[0] ||
-        '/'
+        site.nestedRouteSamples[sampleLocale] || Object.values(site.nestedRouteSamples)[0] || '/'
       const publicPath = `/${site.localAlias}/${sampleLocale}${nestedPath === '/' ? '' : nestedPath}`
       const response = proxy(
         new NextRequest(`http://localhost:3100${publicPath}`, {

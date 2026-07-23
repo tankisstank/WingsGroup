@@ -42,7 +42,7 @@ const sites = [
   },
   {
     id: 3,
-    code: 'wings-side',
+    code: 'wing-side',
     defaultLocale: 'en',
     isActive: true,
     name: 'WingsSide',
@@ -97,7 +97,7 @@ describe('site context security', () => {
   it('resolves wingside.vn to the WingSide tenant', async () => {
     mocks.headers.mockResolvedValue(trustedHeaders({ 'x-site-host': 'wingside.vn' }))
 
-    await expect(getCurrentSite()).resolves.toMatchObject({ code: 'wings-side', id: 3 })
+    await expect(getCurrentSite()).resolves.toMatchObject({ code: 'wing-side', id: 3 })
   })
 
   it('fails closed for an unknown trusted host', async () => {
@@ -144,10 +144,7 @@ describe('site context security', () => {
         slug: { equals: 'shared-slug' },
       }),
     ).resolves.toEqual({
-      and: [
-        { site: { equals: 2 } },
-        { slug: { equals: 'shared-slug' } },
-      ],
+      and: [{ site: { equals: 2 } }, { slug: { equals: 'shared-slug' } }],
     })
   })
 
@@ -158,6 +155,8 @@ describe('site context security', () => {
 
     const source = readFileSync(join(process.cwd(), 'src', 'utilities', 'siteContext.ts'), 'utf8')
     expect(source.match(/overrideAccess:\s*true/g)).toHaveLength(2)
-    expect(source).not.toMatch(/collection:\s*['"](?:pages|tour-products|tour-departures)['"][\s\S]{0,180}overrideAccess:\s*true/)
+    expect(source).not.toMatch(
+      /collection:\s*['"](?:pages|tour-products|tour-departures)['"][\s\S]{0,180}overrideAccess:\s*true/,
+    )
   })
 })

@@ -6,7 +6,7 @@ export const siteInquiryContactPaths: Record<string, string> = {
   'wings-group': '/lien-he',
   'wings-pass': '/contact',
   'wings-plus': '/request-proposal',
-  'wings-side': '/contact-us',
+  'wing-side': '/contact-us',
 }
 
 export const resolveSiteInquiryContactPath = (siteCode?: null | string): string =>

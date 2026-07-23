@@ -1,4 +1,8 @@
-import { defaultTourSectionOrder, defaultTourSectionVisibility, normalizeSectionIDs } from '@/tours/sectionRegistry'
+import {
+  defaultTourSectionOrder,
+  defaultTourSectionVisibility,
+  normalizeSectionIDs,
+} from '@/tours/sectionRegistry'
 import {
   getFutureDepartures,
   getMealChipFlags,
@@ -68,13 +72,11 @@ describe('tour detail builder inquiry and departure utilities', () => {
     expect(
       getTourInquiryPath({
         intent: 'inquiry',
-        siteCode: 'wings-side',
+        siteCode: 'wing-side',
         source: 'tour-detail-hero',
         tourSlug: 'best-of-northern-vietnam',
       }),
-    ).toBe(
-      '/contact-us?intent=inquiry&tour=best-of-northern-vietnam&source=tour-detail-hero',
-    )
+    ).toBe('/contact-us?intent=inquiry&tour=best-of-northern-vietnam&source=tour-detail-hero')
   })
 
   it('parses meal chips and route chips without inventing content', () => {
@@ -146,9 +148,8 @@ describe('tour detail builder inquiry and departure utilities', () => {
 
     expect(getFutureDepartures(departures).map((item) => item.id)).toEqual(['next', 'later'])
     expect(getNextDeparture(departures)?.id).toBe('next')
-    expect(groupDeparturesByMonth(getFutureDepartures(departures)).map((group) => group.key)).toEqual([
-      monthKey(next),
-      monthKey(later),
-    ])
+    expect(
+      groupDeparturesByMonth(getFutureDepartures(departures)).map((group) => group.key),
+    ).toEqual([monthKey(next), monthKey(later)])
   })
 })

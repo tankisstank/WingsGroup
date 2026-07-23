@@ -21,11 +21,11 @@ describe('WingSide HiFi composer (Bar B)', () => {
     expect(isWingsSideHiFiComposerRoute('/tour/foo')).toBe(false)
   })
 
-  it('enables composer only for wings-side hub paths', () => {
-    expect(shouldUseWingsSideHiFiComposer('wings-side', '/wingsside/en/packages')).toBe(true)
-    expect(shouldUseWingsSideHiFiComposer('wings-side', '/wingsside')).toBe(true)
+  it('enables composer only for wing-side hub paths', () => {
+    expect(shouldUseWingsSideHiFiComposer('wing-side', '/wingsside/en/packages')).toBe(true)
+    expect(shouldUseWingsSideHiFiComposer('wing-side', '/wingsside')).toBe(true)
     expect(shouldUseWingsSideHiFiComposer('wings-go', '/wingsside/packages')).toBe(false)
-    expect(shouldUseWingsSideHiFiComposer('wings-side', '/wingsside/en/tour/x')).toBe(false)
+    expect(shouldUseWingsSideHiFiComposer('wing-side', '/wingsside/en/tour/x')).toBe(false)
   })
 
   it('keeps forms and reusable credentials blocks when filtering CMS layout', () => {

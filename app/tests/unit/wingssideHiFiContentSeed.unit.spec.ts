@@ -93,9 +93,7 @@ describe('WingSide hi-fi content seed (dry-run)', () => {
     expect(plan).toBeTruthy()
     expect(plan!.hasContractGap).toBe(true)
     expect(
-      plan!.validationIssues.some(
-        (msg) => msg.includes('plan-form') || msg.includes('form'),
-      ),
+      plan!.validationIssues.some((msg) => msg.includes('plan-form') || msg.includes('form')),
     ).toBe(true)
 
     const text = formatWingsSideHiFiSeedReport(report)
@@ -111,9 +109,7 @@ describe('WingSide hi-fi content seed (dry-run)', () => {
     expect(report.summary.missingPages).toBe(40)
     expect(report.pages.every((p) => p.missingPage && p.status === 'missing_page')).toBe(true)
     expect(report.summary.validationGaps).toBeGreaterThan(0)
-    expect(report.summary.validationGaps).toBe(
-      report.pages.filter((p) => p.hasContractGap).length,
-    )
+    expect(report.summary.validationGaps).toBe(report.pages.filter((p) => p.hasContractGap).length)
 
     // Packages: five cards — no card-count gap; plan form remains an offline gap.
     const packages = report.pages.filter((p) => p.routeVariant === 'packages')
@@ -134,7 +130,7 @@ describe('WingSide hi-fi content seed (dry-run)', () => {
       destroy: vi.fn(async () => undefined),
       find: vi.fn(async (args) => {
         if (args.collection === 'sites') {
-          return { docs: [{ id: 9, code: 'wings-side' }] }
+          return { docs: [{ id: 9, code: 'wing-side' }] }
         }
         if (args.collection === 'forms') {
           // Deterministic title+site match; ID is environment-local (not 20 on purpose).
@@ -223,10 +219,12 @@ describe('WingSide hi-fi content seed (dry-run)', () => {
 describe('WingSide hi-fi plan form ID portability', () => {
   const siteId = 3
 
-  const mockPayload = (forms: Array<{ id: number | string; title: string; site: number | string }>) => {
+  const mockPayload = (
+    forms: Array<{ id: number | string; title: string; site: number | string }>,
+  ) => {
     const find = vi.fn(async (args: { collection: string; where?: unknown }) => {
       if (args.collection === 'sites') {
-        return { docs: [{ id: siteId, code: 'wings-side' }] }
+        return { docs: [{ id: siteId, code: 'wing-side' }] }
       }
       if (args.collection === 'forms') {
         const where = args.where as {
@@ -296,9 +294,7 @@ describe('WingSide hi-fi plan form ID portability', () => {
 
   it('fails closed when form title exists but is not owned by the site', async () => {
     const result = await resolveWingsSideHiFiPlanForm({
-      payload: mockPayload([
-        { id: 55, title: WINGSSIDE_HIFI_PLAN_FORM_TITLE, site: 99 },
-      ]),
+      payload: mockPayload([{ id: 55, title: WINGSSIDE_HIFI_PLAN_FORM_TITLE, site: 99 }]),
     })
     expect(result.ok).toBe(false)
     if (!result.ok) {
@@ -325,7 +321,7 @@ describe('WingSide hi-fi plan form ID portability', () => {
   it('db dry-run surfaces plan_form_* validation gap when resolution fails', async () => {
     const payload: WingsSideHiFiSeedPayload = {
       find: vi.fn(async (args) => {
-        if (args.collection === 'sites') return { docs: [{ id: siteId, code: 'wings-side' }] }
+        if (args.collection === 'sites') return { docs: [{ id: siteId, code: 'wing-side' }] }
         if (args.collection === 'forms') return { docs: [] }
         return {
           docs: [
@@ -353,7 +349,7 @@ describe('WingSide hi-fi plan form ID portability', () => {
     const update = vi.fn(async () => ({}))
     const payload: WingsSideHiFiSeedPayload = {
       find: vi.fn(async (args) => {
-        if (args.collection === 'sites') return { docs: [{ id: siteId, code: 'wings-side' }] }
+        if (args.collection === 'sites') return { docs: [{ id: siteId, code: 'wing-side' }] }
         if (args.collection === 'forms') return { docs: [] }
         return {
           docs: [
@@ -373,7 +369,7 @@ describe('WingSide hi-fi plan form ID portability', () => {
       locale: 'en',
       payload,
       req: { user: { id: 1 } },
-      siteCode: 'wings-side',
+      siteCode: 'wing-side',
     })
 
     const plan = report.pages.find((p) => p.routeVariant === 'plan')
@@ -430,71 +426,67 @@ describe('WingSide hi-fi plan form ID portability', () => {
 })
 
 describe('WingSide hi-fi content seed CLI lifecycle', () => {
-  it(
-    'offline CLI child exits within bound (no open-handle hang after report)',
-    async () => {
-      const childTimeoutMs = 45_000
-      const started = Date.now()
-      const result = await new Promise<{
-        code: number | null
-        signal: NodeJS.Signals | null
-        stdout: string
-        stderr: string
-        timedOut: boolean
-      }>((resolve) => {
-        const child = spawn(
-          'pnpm',
-          ['exec', 'tsx', 'scripts/seed-wingsside-hifi-content.ts', '--offline', '--locale=en'],
-          {
-            cwd: appRoot,
-            env: { ...process.env, FORCE_COLOR: '0' },
-            shell: process.platform === 'win32',
-            stdio: ['ignore', 'pipe', 'pipe'],
-          },
-        )
-        let stdout = ''
-        let stderr = ''
-        let settled = false
-        const timer = setTimeout(() => {
-          if (settled) return
-          settled = true
-          child.kill('SIGKILL')
-          resolve({ code: null, signal: 'SIGKILL', stdout, stderr, timedOut: true })
-        }, childTimeoutMs)
+  it('offline CLI child exits within bound (no open-handle hang after report)', async () => {
+    const childTimeoutMs = 45_000
+    const started = Date.now()
+    const result = await new Promise<{
+      code: number | null
+      signal: NodeJS.Signals | null
+      stdout: string
+      stderr: string
+      timedOut: boolean
+    }>((resolve) => {
+      const child = spawn(
+        'pnpm',
+        ['exec', 'tsx', 'scripts/seed-wingsside-hifi-content.ts', '--offline', '--locale=en'],
+        {
+          cwd: appRoot,
+          env: { ...process.env, FORCE_COLOR: '0' },
+          shell: process.platform === 'win32',
+          stdio: ['ignore', 'pipe', 'pipe'],
+        },
+      )
+      let stdout = ''
+      let stderr = ''
+      let settled = false
+      const timer = setTimeout(() => {
+        if (settled) return
+        settled = true
+        child.kill('SIGKILL')
+        resolve({ code: null, signal: 'SIGKILL', stdout, stderr, timedOut: true })
+      }, childTimeoutMs)
 
-        child.stdout.on('data', (chunk) => {
-          stdout += String(chunk)
-        })
-        child.stderr.on('data', (chunk) => {
-          stderr += String(chunk)
-        })
-        child.on('error', (error) => {
-          if (settled) return
-          settled = true
-          clearTimeout(timer)
-          resolve({
-            code: 1,
-            signal: null,
-            stdout,
-            stderr: `${stderr}\n${error.message}`,
-            timedOut: false,
-          })
-        })
-        child.on('close', (code, signal) => {
-          if (settled) return
-          settled = true
-          clearTimeout(timer)
-          resolve({ code, signal, stdout, stderr, timedOut: false })
+      child.stdout.on('data', (chunk) => {
+        stdout += String(chunk)
+      })
+      child.stderr.on('data', (chunk) => {
+        stderr += String(chunk)
+      })
+      child.on('error', (error) => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        resolve({
+          code: 1,
+          signal: null,
+          stdout,
+          stderr: `${stderr}\n${error.message}`,
+          timedOut: false,
         })
       })
+      child.on('close', (code, signal) => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        resolve({ code, signal, stdout, stderr, timedOut: false })
+      })
+    })
 
-      const elapsedMs = Date.now() - started
-      expect(result.timedOut, `CLI hung after ${elapsedMs}ms; stderr=${result.stderr}`).toBe(false)
-      expect(elapsedMs).toBeLessThan(childTimeoutMs)
-      expect(result.code).toBe(0)
-      expect(result.stdout).toMatch(/DRY RUN/i)
-      expect(result.stdout).toMatch(/Mode: offline/)
-    },
-    60_000,
-  )
+    const elapsedMs = Date.now() - started
+    expect(result.timedOut, `CLI hung after ${elapsedMs}ms; stderr=${result.stderr}`).toBe(false)
+    expect(elapsedMs).toBeLessThan(childTimeoutMs)
+    expect(result.code).toBe(0)
+    expect(result.stdout).toMatch(/DRY RUN/i)
+    expect(result.stdout).toMatch(/Mode: offline/)
+  }, 60_000)
 })

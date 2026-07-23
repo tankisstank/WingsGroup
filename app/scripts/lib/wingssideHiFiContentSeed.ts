@@ -20,7 +20,7 @@ export type WingsSideHiFiSeedLocale = (typeof WINGSSIDE_HIFI_SEED_LOCALES)[numbe
 
 /** Stable catalog title — never hardcode numeric form IDs (they differ per environment). */
 export const WINGSSIDE_HIFI_PLAN_FORM_TITLE = 'WingsSide Trip Planner'
-export const WINGSSIDE_HIFI_SEED_SITE_CODE = 'wings-side'
+export const WINGSSIDE_HIFI_SEED_SITE_CODE = 'wing-side'
 
 export type WingsSideHiFiPlanFormResolveResult =
   | { ok: true; formId: number | string; title: string; siteId: number | string }
@@ -202,7 +202,11 @@ const buildPayloadFromCopy = (
         hero: secondaryHero('/destinations'),
         destinations: {
           closingLinks: [
-            { body: copy.plan.explore[0]?.body, href: '/plan-your-trip', title: copy.home.planTripCta },
+            {
+              body: copy.plan.explore[0]?.body,
+              href: '/plan-your-trip',
+              title: copy.home.planTripCta,
+            },
             { body: copy.plan.explore[1]?.body, href: '/styles', title: 'Styles' },
             { body: copy.plan.explore[2]?.body, href: '/packages', title: 'Packages' },
           ],
@@ -219,7 +223,11 @@ const buildPayloadFromCopy = (
         hero: secondaryHero('/styles'),
         styles: {
           closingLinks: [
-            { body: 'Carry style into the full brief.', href: '/plan-your-trip', title: copy.home.planTripCta },
+            {
+              body: 'Carry style into the full brief.',
+              href: '/plan-your-trip',
+              title: copy.home.planTripCta,
+            },
           ],
           closingTitle: copy.styles.cta,
           introTitle: copy.styles.introTitle,
@@ -256,7 +264,11 @@ const buildPayloadFromCopy = (
         packages: {
           cards,
           closingLinks: [
-            { body: 'Send month and group size.', href: '/plan-your-trip', title: copy.home.planTripCta },
+            {
+              body: 'Send month and group size.',
+              href: '/plan-your-trip',
+              title: copy.home.planTripCta,
+            },
             { body: 'Browse regions first.', href: '/destinations', title: 'Destinations' },
             { body: 'Match travel style.', href: '/styles', title: 'Styles' },
           ],
@@ -285,7 +297,11 @@ const buildPayloadFromCopy = (
         hero: secondaryHero('/about-us'),
         about: {
           closingLinks: [
-            { body: 'Start with a short brief.', href: '/plan-your-trip', title: copy.home.planTripCta },
+            {
+              body: 'Start with a short brief.',
+              href: '/plan-your-trip',
+              title: copy.home.planTripCta,
+            },
             { body: 'Message the desk.', href: '/contact-us', title: copy.home.closeCtaSecondary },
           ],
           closingTitle: 'Ready to plan with us?',
@@ -349,7 +365,12 @@ const valuesEquivalent = (from: unknown, to: unknown): boolean => {
   const fromObj = from as Record<string, unknown>
   const toObj = to as Record<string, unknown>
   // Relationship-shaped CMS object vs seed id already handled above for primitives.
-  if ('id' in toObj && Object.keys(toObj).length <= 2 && !('href' in toObj) && !('title' in toObj && 'body' in toObj)) {
+  if (
+    'id' in toObj &&
+    Object.keys(toObj).length <= 2 &&
+    !('href' in toObj) &&
+    !('title' in toObj && 'body' in toObj)
+  ) {
     return valuesEquivalent(fromObj.id ?? from, toObj.id)
   }
 
@@ -623,7 +644,7 @@ export const fetchWingsSideHiFiPagesForLocale = async (args: {
   targets?: WingsSideHiFiSeedPageTarget[]
 }): Promise<PageLike[]> => {
   const targets = args.targets || listWingsSideHiFiSeedTargets()
-  const siteCode = args.siteCode || 'wings-side'
+  const siteCode = args.siteCode || 'wing-side'
   const sites = await args.payload.find({
     collection: 'sites',
     depth: 0,
@@ -673,8 +694,9 @@ const summarizeSeedPages = (pages: WingsSideHiFiSeedPageReport[]) => ({
   totalTargets: pages.length,
   unchanged: pages.filter((p) => p.status === 'unchanged').length,
   validationGaps: pages.filter((p) => p.hasContractGap).length,
-  wouldMutate: pages.filter((p) => p.status === 'would_update' || p.status === 'would_create_fields')
-    .length,
+  wouldMutate: pages.filter(
+    (p) => p.status === 'would_update' || p.status === 'would_create_fields',
+  ).length,
 })
 
 const reportPageRow = (args: {
@@ -795,9 +817,7 @@ export const buildWingsSideHiFiContentSeedDbDryRun = async (args: {
     siteCode,
   })
   const resolvedFormId = planForm.ok ? planForm.formId : null
-  const planFormIssue = planForm.ok
-    ? null
-    : `plan_form_${planForm.reason}: ${planForm.detail}`
+  const planFormIssue = planForm.ok ? null : `plan_form_${planForm.reason}: ${planForm.detail}`
 
   for (const locale of locales) {
     const localePages = await fetchWingsSideHiFiPagesForLocale({
@@ -855,9 +875,7 @@ export const buildWingsSideHiFiContentSeedDryRun = async (args: {
     // pagesByLocale is absent (tests / pure contract without CMS state).
     const pagesByLocale =
       args.pagesByLocale ||
-      (args.pages
-        ? Object.fromEntries(locales.map((locale) => [locale, args.pages!]))
-        : undefined)
+      (args.pages ? Object.fromEntries(locales.map((locale) => [locale, args.pages!])) : undefined)
     return buildWingsSideHiFiContentSeedOfflineDryRun({
       locale: args.locale,
       pagesByLocale,
@@ -922,7 +940,9 @@ export const formatWingsSideHiFiSeedReport = (
 
   lines.push('')
   if (options?.applied) {
-    lines.push('Apply completed for the requested site only. Re-run dry-run to confirm idempotence.')
+    lines.push(
+      'Apply completed for the requested site only. Re-run dry-run to confirm idempotence.',
+    )
   } else {
     lines.push(
       'Apply requires --db --site-code=<code> --apply. Offline mode never mutates. Form IDs are resolved by title+site, never hardcoded.',
@@ -935,10 +955,7 @@ export const formatWingsSideHiFiSeedReport = (
  * Stamp stable array row IDs so EN/VI/IT/ES/PT localization updates the same rows.
  * Deterministic across environments (not random, not env-specific).
  */
-export const stampStableArrayRowIds = (
-  value: unknown,
-  path = 'root',
-): unknown => {
+export const stampStableArrayRowIds = (value: unknown, path = 'root'): unknown => {
   if (Array.isArray(value)) {
     return value.map((item, index) => {
       if (item && typeof item === 'object' && !Array.isArray(item)) {
@@ -984,7 +1001,7 @@ export type WingsSideHiFiSeedApplyReport = WingsSideHiFiSeedReport & {
 
 /**
  * Guarded idempotent apply for a single site.
- * - Requires explicit siteCode (wings-side for WingSide hi-fi)
+ * - Requires explicit siteCode (`wing-side` for the wingside.vn tenant)
  * - Resolves plan form by title+site before write
  * - Preserves stable array row IDs
  * - Skips missing pages (never invents pages)
@@ -1025,9 +1042,7 @@ export const applyWingsSideHiFiContentSeed = async (args: {
     siteCode,
   })
   const resolvedFormId = planForm.ok ? planForm.formId : null
-  const planFormIssue = planForm.ok
-    ? null
-    : `plan_form_${planForm.reason}: ${planForm.detail}`
+  const planFormIssue = planForm.ok ? null : `plan_form_${planForm.reason}: ${planForm.detail}`
 
   for (const locale of locales) {
     const localePages = await fetchWingsSideHiFiPagesForLocale({

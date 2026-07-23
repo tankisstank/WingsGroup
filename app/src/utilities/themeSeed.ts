@@ -6,7 +6,11 @@ export const wingsSideInboundThemePresetKey = 'wings-side-editorial-inbound-v2' 
 
 export type SiteThemeAssignment = {
   heroVariant: 'planner' | 'retail-departures' | 'standard' | 'utility'
-  themePreset: ThemePresetKey | typeof wingsSideInboundThemePresetKey | 'wings-side-classic' | 'wings-side-editorial'
+  themePreset:
+    | ThemePresetKey
+    | typeof wingsSideInboundThemePresetKey
+    | 'wings-side-classic'
+    | 'wings-side-editorial'
 }
 
 export const siteThemeAssignments: Record<string, SiteThemeAssignment> = {
@@ -14,7 +18,7 @@ export const siteThemeAssignments: Record<string, SiteThemeAssignment> = {
   'wings-go': { heroVariant: 'retail-departures', themePreset: 'retail' },
   'wings-pass': { heroVariant: 'utility', themePreset: 'utility' },
   'wings-plus': { heroVariant: 'standard', themePreset: 'premium' },
-  'wings-side': { heroVariant: 'planner', themePreset: wingsSideInboundThemePresetKey },
+  'wing-side': { heroVariant: 'planner', themePreset: wingsSideInboundThemePresetKey },
   'wings-group': { heroVariant: 'standard', themePreset: 'corporate' },
 }
 
@@ -58,7 +62,8 @@ export const themePresetSeedCatalog: Record<
     tokens: defaultThemePresetByKey.retail,
   },
   utility: {
-    description: 'Utility-first visual system for airport service, pricing, and quick booking flows.',
+    description:
+      'Utility-first visual system for airport service, pricing, and quick booking flows.',
     isActive: true,
     name: 'Utility',
     tokens: defaultThemePresetByKey.utility,
@@ -73,8 +78,7 @@ const customThemePresetSeedCatalog: Array<{
   tokens: ThemePresetTokens
 }> = [
   {
-    description:
-      'Current WingsSide premium look preserved as a rollback-safe preset.',
+    description: 'Current WingsSide premium look preserved as a rollback-safe preset.',
     isActive: true,
     key: 'wings-side-classic',
     name: 'WingsSide Classic',

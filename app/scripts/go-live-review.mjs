@@ -87,10 +87,10 @@ const sites = [
   },
   {
     key: 'wingsside',
-    label: 'WingsSide',
+    label: 'wingside.vn',
     pathPrefix: '/wingsside',
     publicHosts: ['wingsside.vn'],
-    siteCode: 'wings-side',
+    siteCode: 'wing-side',
     siteIds: [3],
     themeKey: 'wings-side',
     requiredRoutes: [{ title: 'Travel Guide', pathname: '/travel-guide', type: 'editorial' }],

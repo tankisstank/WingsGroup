@@ -45,7 +45,8 @@ describe('generateMeta multisite locale contract', () => {
       })
 
       const locale = site.publicLocales[0] || site.defaultLocale
-      const path = site.nestedRouteSamples[locale] || Object.values(site.nestedRouteSamples)[0] || '/'
+      const path =
+        site.nestedRouteSamples[locale] || Object.values(site.nestedRouteSamples)[0] || '/'
       const metadata = await generateMeta({
         doc: {
           slug: path === '/' ? 'home' : path.replace(/^\//, ''),
@@ -69,7 +70,7 @@ describe('generateMeta multisite locale contract', () => {
   })
 
   it('keeps locale alternates stable for non-default public locales', async () => {
-    const site = inventory.sites.find((entry) => entry.name === 'wings-side')!
+    const site = inventory.sites.find((entry) => entry.name === 'wing-side')!
 
     mocks.getCurrentSite.mockResolvedValue({
       additionalDomains: site.hosts

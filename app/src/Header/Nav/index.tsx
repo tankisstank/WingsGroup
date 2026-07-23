@@ -14,10 +14,7 @@ import {
   getPublicRoutePathname,
   type SupportedLocaleCode,
 } from '@/utilities/sitePaths'
-import {
-  getWingsSideHiFiCta,
-  getWingsSideHiFiNavItems,
-} from '@/utilities/wingsSideHiFiNav'
+import { getWingsSideHiFiCta, getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 import { Globe2Icon, MenuIcon, SearchIcon, XIcon } from 'lucide-react'
 
 export const HeaderNav: React.FC<{
@@ -39,7 +36,7 @@ export const HeaderNav: React.FC<{
   const pathname = useSitePublicPathname()
   const searchParams = useSearchParams()
   const localeSwitchPathname = pathname || publicPathname || '/'
-  const isWingsSide = siteCode ? siteCode === 'wings-side' : themeKey === 'wings-side'
+  const isWingsSide = siteCode ? siteCode === 'wing-side' : themeKey === 'wings-side'
   const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
   const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null
   const resolvedPrimaryAction = wingsSideHiFiCta || primaryAction
@@ -197,7 +194,11 @@ export const HeaderNav: React.FC<{
   )
 
   return (
-    <div className="site-header__nav" data-hifi-nav={isWingsSide ? 'true' : 'false'} ref={headerNavRef}>
+    <div
+      className="site-header__nav"
+      data-hifi-nav={isWingsSide ? 'true' : 'false'}
+      ref={headerNavRef}
+    >
       <nav aria-label="Primary navigation" className="hidden items-center gap-3 xl:flex">
         {wingsSideHiFiNav
           ? wingsSideHiFiNav.map((item) => {

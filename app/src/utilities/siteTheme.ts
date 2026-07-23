@@ -134,7 +134,7 @@ export const getSiteThemeTokens = (
       ? String(settings.branding.themePreset.key || themePresetKey)
       : themePresetKey
   const isWingsSide = context.siteCode
-    ? context.siteCode === 'wings-side'
+    ? context.siteCode === 'wing-side'
     : themeKey === 'wings-side'
   const resolvedBrandColor = isWingsSide ? wingsSideHiFiTokens.brand : brandColor
   const resolvedAccentColor = isWingsSide ? wingsSideHiFiTokens.accent : accentColor
@@ -187,9 +187,7 @@ export const getSiteThemeTokens = (
       '--site-radius': radiusValue,
       '--site-shadow': `0 24px 80px color-mix(in oklch, ${resolvedBrandColor} 16%, transparent)`,
       '--site-surface': isWingsSide ? wingsSideHiFiTokens.surface : surfaceColor,
-      '--site-surface-strong': isWingsSide
-        ? wingsSideHiFiTokens.surfaceStrong
-        : surfaceStrongColor,
+      '--site-surface-strong': isWingsSide ? wingsSideHiFiTokens.surfaceStrong : surfaceStrongColor,
       '--site-theme-key': themeKey,
       '--site-theme-preset': resolvedPresetKey,
       ...wingsSideSemanticTokens,

@@ -69,7 +69,7 @@ describe('consultative TourDetailPage contract', () => {
         enquiryForm={{ id: 20, fields: [], title: 'Tour enquiry' } as never}
         locale="en"
         presentation="consultative"
-        siteCode="wings-side"
+        siteCode="wing-side"
       />,
     )
 
@@ -80,7 +80,7 @@ describe('consultative TourDetailPage contract', () => {
 
   it('fills the official hi-fi sections even when legacy visibility omits them', () => {
     render(
-      <TourDetailPage data={data} locale="en" presentation="consultative" siteCode="wings-side" />,
+      <TourDetailPage data={data} locale="en" presentation="consultative" siteCode="wing-side" />,
     )
 
     expect(screen.getByRole('heading', { level: 1, name: 'Best of Northern Vietnam' })).toBeTruthy()
@@ -124,7 +124,7 @@ describe('consultative TourDetailPage contract', () => {
         data={polluted}
         locale="en"
         presentation="consultative"
-        siteCode="wings-side"
+        siteCode="wing-side"
       />,
     )
 

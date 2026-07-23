@@ -1,28 +1,28 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  headerPrimaryActionsByThemeKey,
+  headerPrimaryActionsBySiteCode,
   resolveHeaderPrimaryAction,
 } from '@/utilities/headerPrimaryActions'
 
 describe('header primary action registry', () => {
   it('keeps theme-specific CTA registries explicit', () => {
-    expect(Object.keys(headerPrimaryActionsByThemeKey).sort()).toEqual([
+    expect(Object.keys(headerPrimaryActionsBySiteCode).sort()).toEqual([
+      'wing-side',
       'wings-care',
       'wings-go',
       'wings-group',
       'wings-pass',
       'wings-plus',
-      'wings-side',
     ])
   })
 
   it('resolves locale-specific CTAs with copy-locale fallback', () => {
-    expect(resolveHeaderPrimaryAction('wings-side', 'it')).toEqual({
+    expect(resolveHeaderPrimaryAction('wing-side', 'it')).toEqual({
       label: 'Pianifica',
       url: '/plan-your-trip',
     })
-    expect(resolveHeaderPrimaryAction('wings-side', 'ja')).toEqual({
+    expect(resolveHeaderPrimaryAction('wing-side', 'ja')).toEqual({
       label: 'Plan trip',
       url: '/plan-your-trip',
     })
@@ -40,7 +40,7 @@ describe('header primary action registry', () => {
     })
   })
 
-  it('falls back to the default CTA registry for unknown theme keys', () => {
+  it('falls back to the default CTA registry for unknown site codes', () => {
     expect(resolveHeaderPrimaryAction('unknown-theme', 'vi')).toEqual({
       label: 'Liên hệ',
       url: '/lien-he',

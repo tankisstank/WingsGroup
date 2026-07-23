@@ -50,7 +50,7 @@ const uatAccountSeeds: UatAccountSeed[] = [
     email: 'uat.sitemanager.multi@wingsgroup.vn',
     name: 'UAT Site Manager (nhiều site)',
     role: 'site-manager',
-    siteCodes: ['wings-go', 'wings-side'],
+    siteCodes: ['wings-go', 'wing-side'],
   },
   {
     key: 'EDITOR_SINGLE',

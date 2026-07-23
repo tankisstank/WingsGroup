@@ -11,7 +11,7 @@ vi.mock('@/utilities/siteContext', () => ({
   appendSiteWhere: vi.fn(async (where?: Record<string, unknown>) => ({
     and: [{ site: { equals: mocks.siteID } }, where],
   })),
-  getCurrentSite: vi.fn(async () => ({ code: 'wings-side', id: mocks.siteID })),
+  getCurrentSite: vi.fn(async () => ({ code: 'wing-side', id: mocks.siteID })),
 }))
 
 import { getResolvedTourDetailBySlug } from '@/tours/queries'
@@ -54,7 +54,11 @@ describe('WingSide structured tour query perimeter', () => {
   })
 
   it('selects the same-slug TourProduct only from the current host tenant', async () => {
-    const result = await getResolvedTourDetailBySlug({ draft: false, locale: 'en', slug: 'shared-slug' })
+    const result = await getResolvedTourDetailBySlug({
+      draft: false,
+      locale: 'en',
+      slug: 'shared-slug',
+    })
     const calls = mocks.find.mock.calls as unknown as Array<[FindArgs]>
 
     expect(result?.tour).toMatchObject({ id: 498, site: 3, wrapperPage: 909 })
@@ -79,7 +83,9 @@ describe('WingSide structured tour query perimeter', () => {
       locale: 'it',
       slug: 'shared-slug',
     })
-    const calls = mocks.find.mock.calls as unknown as Array<[FindArgs & { fallbackLocale?: string }]>
+    const calls = mocks.find.mock.calls as unknown as Array<
+      [FindArgs & { fallbackLocale?: string }]
+    >
     expect(calls.every(([args]) => args.fallbackLocale === 'en')).toBe(true)
   })
 

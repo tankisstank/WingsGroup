@@ -7,7 +7,7 @@ describe('site theme tokens', () => {
   it('exposes the full WingSide hi-fi semantic token bridge used by the 8-page product CSS', () => {
     const style = getSiteThemeTokens(
       { branding: { themeKey: 'wings-side' }, siteName: 'WingsSide' },
-      { siteCode: 'wings-side' },
+      { siteCode: 'wing-side' },
     ).style as Record<string, string>
 
     for (const key of [
@@ -44,7 +44,7 @@ describe('site theme tokens', () => {
       siteName: 'WingSide custom theme',
     }
 
-    const wingsside = getSiteThemeTokens(customThemeSettings, { siteCode: 'wings-side' })
+    const wingsside = getSiteThemeTokens(customThemeSettings, { siteCode: 'wing-side' })
     expect(wingsside.brandColor).toBe('#005090')
     expect(wingsside.accentColor).toBe('#104030')
     expect(wingsside.style).toMatchObject({

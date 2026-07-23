@@ -13,7 +13,7 @@ describe('WingSide hi-fi chrome foundation contracts', () => {
     expect(wingsSideHiFiTokens.brand).toBe('#005090')
   })
 
-  it('owns only wings-side hub routes (not WingsGo)', () => {
+  it('owns only wing-side hub routes (not WingsGo)', () => {
     expect(WINGSSIDE_HIFI_COMPOSER_ROUTES).not.toContain('/tour/')
     for (const locale of ['en', 'vi', 'it', 'es', 'pt'] as const) {
       const nav = getWingsSideHiFiNavItems(locale)

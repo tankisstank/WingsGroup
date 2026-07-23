@@ -4,13 +4,13 @@
  * Default is offline/pure (Copy.ts contract) — never boots Payload, never hangs on DB.
  *
  * Guarded apply (local SQLite only):
- *   pnpm run seed:wingsside:hifi-content -- --db --site-code=wings-side --apply
+ *   pnpm run seed:wingsside:hifi-content -- --db --site-code=wing-side --apply
  *
  * Dry-run examples:
  *   pnpm run seed:wingsside:hifi-content
  *   pnpm run seed:wingsside:hifi-content -- --locale=en --json
  *   pnpm run seed:wingsside:hifi-content -- --offline --locale=en
- *   pnpm run seed:wingsside:hifi-content -- --db --site-code=wings-side
+ *   pnpm run seed:wingsside:hifi-content -- --db --site-code=wing-side
  */
 import 'dotenv/config'
 import fs from 'node:fs'
@@ -82,9 +82,7 @@ const backupLocalSqliteIfNeeded = (): string | null => {
   }
 
   const relative = databaseUrl.replace(/^file:/, '')
-  const dbPath = path.isAbsolute(relative)
-    ? relative
-    : path.resolve(process.cwd(), relative)
+  const dbPath = path.isAbsolute(relative) ? relative : path.resolve(process.cwd(), relative)
 
   if (!fs.existsSync(dbPath)) {
     throw new Error(`SQLite database not found at ${dbPath}`)
@@ -102,7 +100,9 @@ const main = async () => {
 
   if (args.apply) {
     if (args.mode !== 'db') {
-      console.error('Apply requires --db (and an explicit --site-code). Offline mode never mutates.')
+      console.error(
+        'Apply requires --db (and an explicit --site-code). Offline mode never mutates.',
+      )
       process.exitCode = 2
       return
     }
@@ -147,8 +147,9 @@ const main = async () => {
       const { ensureLocalAdminUser } = await import('../src/utilities/adminSeed')
       // Same SQLite-safe guards as locale backfill: version snapshots on pages
       // re-write huge localized block trees and frequently hit "database is locked".
-      const pagesCollection = (payload as { collections?: Record<string, { config?: { versions?: unknown } }> })
-        .collections?.pages
+      const pagesCollection = (
+        payload as { collections?: Record<string, { config?: { versions?: unknown } }> }
+      ).collections?.pages
       if (pagesCollection?.config?.versions) {
         pagesCollection.config.versions = false as never
       }

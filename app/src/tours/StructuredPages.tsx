@@ -47,7 +47,7 @@ const resolveTourSiteCode = (siteCode?: null | string, presentation?: TourDetail
   }
 
   // Fallback when caller omits siteCode — only used for consultative inquiry paths.
-  return presentation === 'consultative' ? 'wings-side' : undefined
+  return presentation === 'consultative' ? 'wing-side' : undefined
 }
 
 const asArray = <T,>(value?: T[] | null) => (Array.isArray(value) ? value : [])

@@ -35,7 +35,7 @@ describe('WingSide hi-fi official route dispatch', () => {
     expect(isWingsSideHiFiB1Route('/tour/example')).toBe(false)
   })
 
-  it('only renders hi-fi body for wings-side + official route + model', () => {
+  it('only renders hi-fi body for wing-side + official route + model', () => {
     const model = resolveWingsSideHiFiPageBodyModel({
       locale: 'en',
       page: {
@@ -67,7 +67,7 @@ describe('WingSide hi-fi official route dispatch', () => {
       shouldRenderWingsSideHiFiPageBody({
         model,
         publicPathname: '/',
-        siteCode: 'wings-side',
+        siteCode: 'wing-side',
       }),
     ).toBe(true)
     expect(
@@ -77,8 +77,20 @@ describe('WingSide hi-fi official route dispatch', () => {
         siteCode: 'wings-go',
       }),
     ).toBe(false)
-    expect(shouldRenderWingsSideHiFiPageBody({ model, publicPathname: '/packages', siteCode: 'wings-side' })).toBe(true)
-    expect(shouldRenderWingsSideHiFiPageBody({ model, publicPathname: '/tour/example', siteCode: 'wings-side' })).toBe(false)
+    expect(
+      shouldRenderWingsSideHiFiPageBody({
+        model,
+        publicPathname: '/packages',
+        siteCode: 'wing-side',
+      }),
+    ).toBe(true)
+    expect(
+      shouldRenderWingsSideHiFiPageBody({
+        model,
+        publicPathname: '/tour/example',
+        siteCode: 'wing-side',
+      }),
+    ).toBe(false)
   })
 
   it('never lets Copy.ts fallback override CMS-enabled documents', () => {
@@ -135,15 +147,15 @@ describe('WingSide hi-fi official route dispatch', () => {
   it('fail-closed Copy fallback only when explicitly allowed and CMS not enabled', () => {
     vi.stubEnv('NODE_ENV', 'development')
     process.env.WINGSSIDE_HIFI_COPY_FALLBACK = 'true'
-    expect(shouldUseWingsSideHiFiCopyFallback({ page: { wingsSideHiFi: { enabled: false } } })).toBe(
-      true,
-    )
+    expect(
+      shouldUseWingsSideHiFiCopyFallback({ page: { wingsSideHiFi: { enabled: false } } }),
+    ).toBe(true)
 
     vi.stubEnv('NODE_ENV', 'production')
     delete process.env.WINGSSIDE_HIFI_COPY_FALLBACK
-    expect(shouldUseWingsSideHiFiCopyFallback({ page: { wingsSideHiFi: { enabled: false } } })).toBe(
-      false,
-    )
+    expect(
+      shouldUseWingsSideHiFiCopyFallback({ page: { wingsSideHiFi: { enabled: false } } }),
+    ).toBe(false)
 
     const fallback = buildWingsSideHiFiFallbackSource('en', '/')
     expect(fallback.wingsSideHiFi?.enabled).toBe(true)

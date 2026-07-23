@@ -38,18 +38,26 @@ vi.mock('@/components/Link', () => ({
 import { HeaderNav } from '@/Header/Nav'
 
 describe('WingSide hi-fi header chrome (site isolation)', () => {
-  it('renders full 7-route nav + Plan trip CTA for wings-side only', () => {
+  it('renders full 7-route nav + Plan trip CTA for the wing-side tenant only', () => {
     render(
       <HeaderNav
         data={{ navItems: [] }}
         publicPathname="/packages"
         resolvedLocale="en"
-        siteCode="wings-side"
+        siteCode="wing-side"
       />,
     )
 
     expect(screen.getByRole('navigation', { name: 'Primary navigation' })).toBeTruthy()
-    for (const label of ['Home', 'Destinations', 'Styles', 'Packages', 'Guide', 'About', 'Contact']) {
+    for (const label of [
+      'Home',
+      'Destinations',
+      'Styles',
+      'Packages',
+      'Guide',
+      'About',
+      'Contact',
+    ]) {
       expect(screen.getAllByText(label).length).toBeGreaterThan(0)
     }
     expect(screen.getAllByText('Plan trip').length).toBeGreaterThan(0)
@@ -98,7 +106,7 @@ describe('WingSide hi-fi header chrome (site isolation)', () => {
         data={{ navItems: [] }}
         publicPathname="/packages"
         resolvedLocale="en"
-        siteCode="wings-side"
+        siteCode="wing-side"
       />,
     )
 
@@ -125,7 +133,7 @@ describe('WingSide hi-fi header chrome (site isolation)', () => {
 
     // Unscoped (viewport-wide) display:flex on hifi primary nav must not exist.
     const unscoped = css.match(
-      /body\[data-site-code='wings-side'\]\s+\.site-header__nav\[data-hifi-nav='true'\]\s*>\s*nav\[aria-label='Primary navigation'\]\s*\{\s*display:\s*flex;/,
+      /body\[data-site-code='wing-side'\]\s+\.site-header__nav\[data-hifi-nav='true'\]\s*>\s*nav\[aria-label='Primary navigation'\]\s*\{\s*display:\s*flex;/,
     )
     // If a match exists, it must be nested under the min-width media query captured above —
     // reject any earlier unscoped occurrence outside that media query.

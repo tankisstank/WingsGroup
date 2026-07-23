@@ -1,7 +1,7 @@
 export const siteAliasToCodeMap = {
   wingsgroup: 'wings-group',
   wingsgo: 'wings-go',
-  wingsside: 'wings-side',
+  wingsside: 'wing-side',
   wingspass: 'wings-pass',
   wingsplus: 'wings-plus',
   wingscare: 'wings-care',

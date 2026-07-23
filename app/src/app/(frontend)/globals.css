@@ -2791,7 +2791,7 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
       max-width: none;
     }
 
-    body:not([data-site-code='wings-side']) .site-header__brand-copy {
+    body:not([data-site-code='wing-side']) .site-header__brand-copy {
       display: none !important;
     }
   }
@@ -3928,7 +3928,7 @@ body[data-site-theme='wings-side'] .site-language-switcher__link {
 }
 
 /* Compact 72px WingSide chrome — scoped to site code only */
-body[data-site-code='wings-side'] .site-header__bar {
+body[data-site-code='wing-side'] .site-header__bar {
   height: 72px;
   min-height: 72px;
   max-height: 72px;
@@ -3937,11 +3937,11 @@ body[data-site-code='wings-side'] .site-header__bar {
 }
 
 @media (max-width: 30rem) {
-  body[data-site-code='wings-side'] .site-header__brand-copy {
+  body[data-site-code='wing-side'] .site-header__brand-copy {
     display: block !important;
   }
 
-  body[data-site-code='wings-side'] .site-brand-kicker {
+  body[data-site-code='wing-side'] .site-brand-kicker {
     font-size: 0.875rem;
     white-space: nowrap;
   }
@@ -3953,7 +3953,7 @@ body[data-site-code='wings-side'] .site-header__bar {
  * `hidden xl:flex` on the primary nav and the hamburger control.
  */
 @media (min-width: 1280px) {
-  body[data-site-code='wings-side']
+  body[data-site-code='wing-side']
     .site-header__nav[data-hifi-nav='true']
     > nav[aria-label='Primary navigation'] {
     display: flex;
@@ -3962,7 +3962,7 @@ body[data-site-code='wings-side'] .site-header__bar {
     gap: 0.35rem;
   }
 
-  body[data-site-code='wings-side']
+  body[data-site-code='wing-side']
     .site-header__nav[data-hifi-nav='true']
     .site-header__primary-link {
     display: inline-flex;
@@ -3981,7 +3981,7 @@ body[data-site-code='wings-side'] .site-header__bar {
     white-space: nowrap;
   }
 
-  body[data-site-code='wings-side']
+  body[data-site-code='wing-side']
     .site-header__nav[data-hifi-nav='true']
     .site-header__primary-link:hover {
     border: 0;
@@ -3991,10 +3991,10 @@ body[data-site-code='wings-side'] .site-header__bar {
     transform: none;
   }
 
-  body[data-site-code='wings-side']
+  body[data-site-code='wing-side']
     .site-header__nav[data-hifi-nav='true']
     .site-header__primary-link[data-active='true'],
-  body[data-site-code='wings-side']
+  body[data-site-code='wing-side']
     .site-header__nav[data-hifi-nav='true']
     .site-header__primary-link[aria-current='page'] {
     color: var(--site-brand);
@@ -4004,7 +4004,7 @@ body[data-site-code='wings-side'] .site-header__bar {
     font-weight: 600;
   }
 
-  body[data-site-code='wings-side'] .site-header__nav[data-hifi-nav='true'] .site-header-cta {
+  body[data-site-code='wing-side'] .site-header__nav[data-hifi-nav='true'] .site-header-cta {
     min-height: 44px;
     padding-inline: 0.9rem;
     font-size: 0.82rem;
@@ -4015,13 +4015,13 @@ body[data-site-code='wings-side'] .site-header__bar {
 }
 
 /* Compact white hi-fi footer — site isolated */
-body[data-site-code='wings-side'] .site-footer--wingsside-hifi {
+body[data-site-code='wing-side'] .site-footer--wingsside-hifi {
   background: var(--site-surface);
   color: var(--site-foreground);
   border-color: var(--site-border);
 }
 
-body[data-site-code='wings-side'] .ws-hifi-footer {
+body[data-site-code='wing-side'] .ws-hifi-footer {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -4030,21 +4030,21 @@ body[data-site-code='wings-side'] .ws-hifi-footer {
   padding-block: 1.25rem;
 }
 
-body[data-site-code='wings-side'] .ws-hifi-footer__brand {
+body[data-site-code='wing-side'] .ws-hifi-footer__brand {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
   max-width: 28rem;
 }
 
-body[data-site-code='wings-side'] .ws-hifi-footer__descriptor {
+body[data-site-code='wing-side'] .ws-hifi-footer__descriptor {
   margin: 0;
   font-size: 0.85rem;
   line-height: 1.45;
   color: var(--site-muted);
 }
 
-body[data-site-code='wings-side'] .ws-hifi-footer__contacts a {
+body[data-site-code='wing-side'] .ws-hifi-footer__contacts a {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -4053,12 +4053,12 @@ body[data-site-code='wings-side'] .ws-hifi-footer__contacts a {
   text-decoration: none;
 }
 
-body[data-site-code='wings-side'] .ws-hifi-footer__contacts a:hover,
-body[data-site-code='wings-side'] .ws-hifi-footer__contacts a:focus-visible {
+body[data-site-code='wing-side'] .ws-hifi-footer__contacts a:hover,
+body[data-site-code='wing-side'] .ws-hifi-footer__contacts a:focus-visible {
   color: var(--site-brand);
 }
 
-body[data-site-code='wings-side'] .ws-hifi-footer-links {
+body[data-site-code='wing-side'] .ws-hifi-footer-links {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -4066,7 +4066,7 @@ body[data-site-code='wings-side'] .ws-hifi-footer-links {
   gap: 0.45rem;
 }
 
-body[data-site-code='wings-side'] .ws-hifi-footer-links a {
+body[data-site-code='wing-side'] .ws-hifi-footer-links a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -4080,23 +4080,23 @@ body[data-site-code='wings-side'] .ws-hifi-footer-links a {
   background: color-mix(in oklch, var(--site-surface) 92%, var(--site-brand-soft));
 }
 
-body[data-site-code='wings-side'] .ws-hifi-footer-links a:hover,
-body[data-site-code='wings-side'] .ws-hifi-footer-links a:focus-visible {
+body[data-site-code='wing-side'] .ws-hifi-footer-links a:hover,
+body[data-site-code='wing-side'] .ws-hifi-footer-links a:focus-visible {
   border-color: color-mix(in oklch, var(--site-brand) 40%, var(--site-border));
   color: var(--site-brand);
 }
 
-body[data-site-code='wings-side'] .ws-hifi-footer-links__cta {
+body[data-site-code='wing-side'] .ws-hifi-footer-links__cta {
   border-color: color-mix(in oklch, var(--site-gold) 72%, var(--site-border)) !important;
   background: var(--site-gold) !important;
   color: var(--site-cta-fg) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body[data-site-code='wings-side']
+  body[data-site-code='wing-side']
     .site-header__nav[data-hifi-nav='true']
     .site-header__primary-link,
-  body[data-site-code='wings-side'] .ws-hifi-footer-links a {
+  body[data-site-code='wing-side'] .ws-hifi-footer-links a {
     transition: none;
   }
 }
@@ -4126,7 +4126,7 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .hero-presentation__sli
 }
 
 /* Reserve a safe footer landing zone for the WingSide tour consultation bar. */
-body[data-site-code='wings-side'][data-public-route*='/tour/'] .site-footer {
+body[data-site-code='wing-side'][data-public-route*='/tour/'] .site-footer {
   padding-bottom: 7rem;
 }
 
@@ -4140,7 +4140,7 @@ html[data-theme='light'] {
 }
 
 /* WingSide Open Design bridge — site-specific so shared premium sites keep their own system. */
-body[data-site-code='wings-side'] {
+body[data-site-code='wing-side'] {
   --background: var(--site-background);
   --card: var(--site-surface);
   --foreground: var(--site-foreground);
@@ -4158,23 +4158,23 @@ body[data-site-code='wings-side'] {
     var(--site-background);
 }
 
-body[data-site-code='wings-side'] h1,
-body[data-site-code='wings-side'] h2,
-body[data-site-code='wings-side'] h3,
-body[data-site-code='wings-side'] h4,
-body[data-site-code='wings-side'] h5,
-body[data-site-code='wings-side'] h6 {
+body[data-site-code='wing-side'] h1,
+body[data-site-code='wing-side'] h2,
+body[data-site-code='wing-side'] h3,
+body[data-site-code='wing-side'] h4,
+body[data-site-code='wing-side'] h5,
+body[data-site-code='wing-side'] h6 {
   font-family: var(--font-wingsside-hifi), var(--font-editorial-heading), sans-serif;
   letter-spacing: -0.03em;
 }
 
-body[data-site-code='wings-side'] .site-header.container {
+body[data-site-code='wing-side'] .site-header.container {
   width: 100%;
   max-width: none;
   padding-inline: 0;
 }
 
-body[data-site-code='wings-side'] .site-header__bar {
+body[data-site-code='wing-side'] .site-header__bar {
   min-height: 72px;
   border-radius: 0;
   border-color: color-mix(in oklch, var(--site-border) 84%, transparent);
@@ -4183,37 +4183,37 @@ body[data-site-code='wings-side'] .site-header__bar {
   box-shadow: 0 10px 36px color-mix(in oklch, var(--site-brand) 8%, transparent);
 }
 
-body[data-site-code='wings-side'] .site-header-cta,
-body[data-site-code='wings-side'] .site-panel-cta {
+body[data-site-code='wing-side'] .site-header-cta,
+body[data-site-code='wing-side'] .site-panel-cta {
   border-color: color-mix(in oklch, var(--site-gold) 72%, var(--site-border));
   color: color-mix(in oklch, var(--site-foreground) 90%, black);
   background: var(--site-gold);
   box-shadow: 0 10px 24px color-mix(in oklch, var(--site-gold) 24%, transparent);
 }
 
-body[data-site-code='wings-side'] .site-header-cta:hover,
-body[data-site-code='wings-side'] .site-header-cta:focus-visible,
-body[data-site-code='wings-side'] .site-panel-cta:hover,
-body[data-site-code='wings-side'] .site-panel-cta:focus-visible {
+body[data-site-code='wing-side'] .site-header-cta:hover,
+body[data-site-code='wing-side'] .site-header-cta:focus-visible,
+body[data-site-code='wing-side'] .site-panel-cta:hover,
+body[data-site-code='wing-side'] .site-panel-cta:focus-visible {
   color: color-mix(in oklch, var(--site-foreground) 94%, black);
   background: color-mix(in oklch, var(--site-gold) 86%, white);
 }
 
-body[data-site-code='wings-side'] .theme-nav-link {
+body[data-site-code='wing-side'] .theme-nav-link {
   font-weight: 700;
   letter-spacing: 0;
 }
 
-body[data-site-code='wings-side'][data-public-route='/'] #main-content > article,
-body[data-site-code='wings-side'][data-public-route='/packages'] #main-content > article {
+body[data-site-code='wing-side'][data-public-route='/'] #main-content > article,
+body[data-site-code='wing-side'][data-public-route='/packages'] #main-content > article {
   padding-bottom: clamp(4rem, 7vw, 7rem);
 }
 
-body[data-site-code='wings-side'][data-public-route='/'] #main-content > article {
+body[data-site-code='wing-side'][data-public-route='/'] #main-content > article {
   padding-top: 0;
 }
 
-body[data-site-code='wings-side'][data-public-route='/']
+body[data-site-code='wing-side'][data-public-route='/']
   #main-content
   > article
   > nav[aria-label='Breadcrumb'] {
@@ -4221,52 +4221,52 @@ body[data-site-code='wings-side'][data-public-route='/']
   visibility: hidden;
 }
 
-body[data-site-code='wings-side'][data-public-route='/'] .site-hero {
+body[data-site-code='wing-side'][data-public-route='/'] .site-hero {
   margin-top: 0;
   padding-top: 0;
 }
 
-body[data-site-code='wings-side'][data-public-route='/'] .theme-section,
-body[data-site-code='wings-side'][data-public-route='/packages'] .theme-section {
+body[data-site-code='wing-side'][data-public-route='/'] .theme-section,
+body[data-site-code='wing-side'][data-public-route='/packages'] .theme-section {
   padding-block: clamp(2.5rem, 5vw, 4.5rem);
 }
 
-body[data-site-code='wings-side'][data-public-route='/'] .layout-block--features,
-body[data-site-code='wings-side'][data-public-route='/packages'] .layout-block--features {
+body[data-site-code='wing-side'][data-public-route='/'] .layout-block--features,
+body[data-site-code='wing-side'][data-public-route='/packages'] .layout-block--features {
   border-top: 1px solid color-mix(in oklch, var(--site-border) 78%, transparent);
 }
 
-body[data-site-code='wings-side'][data-public-route='/'] .site-feature-card,
-body[data-site-code='wings-side'][data-public-route='/packages'] .site-feature-card {
+body[data-site-code='wing-side'][data-public-route='/'] .site-feature-card,
+body[data-site-code='wing-side'][data-public-route='/packages'] .site-feature-card {
   border-color: color-mix(in oklch, var(--site-border) 84%, transparent);
   border-radius: 1rem;
   background: color-mix(in oklch, var(--site-surface) 92%, transparent);
   box-shadow: 0 14px 34px color-mix(in oklch, var(--site-foreground) 6%, transparent);
 }
 
-body[data-site-code='wings-side'][data-public-route='/'] .site-feature-card::after,
-body[data-site-code='wings-side'][data-public-route='/packages'] .site-feature-card::after {
+body[data-site-code='wing-side'][data-public-route='/'] .site-feature-card::after,
+body[data-site-code='wing-side'][data-public-route='/packages'] .site-feature-card::after {
   display: none;
 }
 
-body[data-site-code='wings-side'][data-public-route='/'] .site-feature-card:hover,
-body[data-site-code='wings-side'][data-public-route='/packages'] .site-feature-card:hover {
+body[data-site-code='wing-side'][data-public-route='/'] .site-feature-card:hover,
+body[data-site-code='wing-side'][data-public-route='/packages'] .site-feature-card:hover {
   border-color: color-mix(in oklch, var(--site-brand) 30%, var(--site-border));
   box-shadow: 0 18px 40px color-mix(in oklch, var(--site-foreground) 10%, transparent);
   transform: translateY(-3px);
 }
 
-body[data-site-code='wings-side'][data-public-route='/'] .site-feature-card img,
-body[data-site-code='wings-side'][data-public-route='/packages'] .site-feature-card img {
+body[data-site-code='wing-side'][data-public-route='/'] .site-feature-card img,
+body[data-site-code='wing-side'][data-public-route='/packages'] .site-feature-card img {
   filter: saturate(0.92) contrast(1.03);
 }
 
-body[data-site-code='wings-side'][data-public-route='/packages'] .layout-media--contained {
+body[data-site-code='wing-side'][data-public-route='/packages'] .layout-media--contained {
   width: min(82rem, calc(100% - 2.5rem));
   max-width: none;
 }
 
-body[data-site-code='wings-side'][data-public-route='/packages'] .layout-media--contained img {
+body[data-site-code='wing-side'][data-public-route='/packages'] .layout-media--contained img {
   width: 100%;
   max-height: 34rem;
   border-color: var(--site-border);
@@ -4276,7 +4276,7 @@ body[data-site-code='wings-side'][data-public-route='/packages'] .layout-media--
 }
 
 /* Compact Home-only Specials navigation. It is mounted server-side only on WingSide `/`. */
-body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials {
+body[data-site-code='wing-side'][data-public-route='/'] .wingsside-specials {
   position: fixed;
   top: 168px;
   right: 20px;
@@ -4304,19 +4304,19 @@ body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials {
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
-  body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials {
+  body[data-site-code='wing-side'][data-public-route='/'] .wingsside-specials {
     top: auto;
     bottom: 20px;
   }
 }
 
-body[data-site-code='wings-side'][data-public-route='/']:has(.hero-presentation--carousel)
+body[data-site-code='wing-side'][data-public-route='/']:has(.hero-presentation--carousel)
   .wingsside-specials {
   top: 128px;
   bottom: auto;
 }
 
-body[data-site-code='wings-side'][data-public-route='/'] .wingsside-specials:hover {
+body[data-site-code='wing-side'][data-public-route='/'] .wingsside-specials:hover {
   box-shadow:
     0 12px 28px color-mix(in oklch, var(--site-promo-red) 28%, transparent),
     0 0 0 1px color-mix(in oklch, var(--site-promo-red) 50%, transparent);

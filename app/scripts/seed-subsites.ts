@@ -296,10 +296,10 @@ const siteSeeds: SiteSeed[] = [
     themePreset: 'retail',
   },
   {
-    code: 'wings-side',
+    code: 'wing-side',
     defaultLocale: 'en',
     domain: 'wingside.vn',
-    name: 'WingsSide',
+    name: 'wingside.vn',
     seoDescription:
       'Inbound Vietnam travel site focused on trust, destinations, travel styles, sample itineraries, and custom trip planning for international guests.',
     seoSuffix: 'Inbound Vietnam',
@@ -8481,7 +8481,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
   })
 
   const homePage = await createPage(payload, req, site.id, {
-    title: 'WingsSide',
+    title: 'wingside.vn',
     slug: 'home',
     hero: {
       type: 'highImpact',
@@ -8822,7 +8822,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       contactPage.id,
     ],
     meta: {
-      title: 'WingsSide',
+      title: 'wingside.vn',
       description: siteSeed.seoDescription,
       image: heroImage.id,
     },
@@ -8938,7 +8938,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
         'Gli stili aiutano l’utente a qualificare il viaggio prima di scegliere una forma di itinerario.',
       stylesEyebrow: 'Temi di viaggio',
       stylesTitle: 'Stili di viaggio',
-      title: 'WingsSide',
+      title: 'wingside.vn',
       trustDescription:
         'Ogni percorso apre una guida più completa per confrontare idee di rotta e preparare una richiesta utile.',
       trustEyebrow: 'Inizia a pianificare',
@@ -8990,7 +8990,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
         'Los estilos ayudan al usuario a cualificar su viaje antes de elegir una forma de itinerario.',
       stylesEyebrow: 'Temas de viaje',
       stylesTitle: 'Estilos de viaje',
-      title: 'WingsSide',
+      title: 'wingside.vn',
       trustDescription:
         'Cada ruta abre una guía más completa para comparar ideas y preparar una solicitud de viaje útil.',
       trustEyebrow: 'Empieza a planificar',
@@ -9042,7 +9042,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
         'Os estilos ajudam o utilizador a qualificar a viagem antes de escolher uma forma de itinerário.',
       stylesEyebrow: 'Temas de viagem',
       stylesTitle: 'Estilos de viagem',
-      title: 'WingsSide',
+      title: 'wingside.vn',
       trustDescription:
         'Cada percurso abre um guia mais completo para comparar ideias e preparar um pedido de viagem útil.',
       trustEyebrow: 'Comece a planear',
@@ -10104,7 +10104,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     seo: {
       defaultDescription:
         'WingsSide crea viaggi su misura in Vietnam con destinazioni curate, ritmo editoriale e consulenza locale.',
-      defaultTitle: 'WingsSide',
+      defaultTitle: 'wingside.vn',
       titleSuffix: 'Vietnam su misura',
     },
     tagline: 'Viaggi in Vietnam su misura con destinazioni, stili e consulenza.',
@@ -10131,7 +10131,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     seo: {
       defaultDescription:
         'WingsSide diseña viajes a Vietnam hechos a medida con destinos seleccionados, ritmo editorial y asesoría local.',
-      defaultTitle: 'WingsSide',
+      defaultTitle: 'wingside.vn',
       titleSuffix: 'Vietnam a medida',
     },
     tagline: 'Viajes a medida por Vietnam con destinos, estilos y asesoría.',
@@ -10158,7 +10158,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     seo: {
       defaultDescription:
         'A WingsSide desenha viagens ao Vietname feitas à medida com destinos selecionados, ritmo editorial e consultoria local.',
-      defaultTitle: 'WingsSide',
+      defaultTitle: 'wingside.vn',
       titleSuffix: 'Vietname sob medida',
     },
     tagline: 'Viagens à medida pelo Vietname com destinos, estilos e consultoria.',
@@ -12488,7 +12488,7 @@ async function main() {
 
   const wingsGroupSeed = siteSeeds.find((site) => site.code === 'wings-group')!
   const wingsGoSeed = siteSeeds.find((site) => site.code === 'wings-go')!
-  const wingsSideSeed = siteSeeds.find((site) => site.code === 'wings-side')!
+  const wingsSideSeed = siteSeeds.find((site) => site.code === 'wing-side')!
   const wingsPassSeed = siteSeeds.find((site) => site.code === 'wings-pass')!
   const wingsPlusSeed = siteSeeds.find((site) => site.code === 'wings-plus')!
   const wingsCareSeed = siteSeeds.find((site) => site.code === 'wings-care')!
@@ -12502,7 +12502,7 @@ async function main() {
       payload.logger.info('Seeding WingsGo production content...')
       await seedWingsGo(payload, req, wingsGoSeed)
     },
-    'wings-side': async () => {
+    'wing-side': async () => {
       payload.logger.info('Seeding WingsSide production content...')
       await seedWingsSide(payload, req, wingsSideSeed)
     },

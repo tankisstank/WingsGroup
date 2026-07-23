@@ -34,14 +34,14 @@ export const isWingsSideHiFiB1Route = (route: string): route is WingsSideHiFiB1R
 
 /**
  * When true, catch-all must render hi-fi body and suppress legacy hero/blocks/related.
- * Requires wings-side site + official route + valid/enabled model (or explicit dev fallback).
+ * Requires the `wing-side` tenant + official route + valid/enabled model (or explicit dev fallback).
  */
 export const shouldRenderWingsSideHiFiPageBody = (args: {
   model: WingsSideHiFiPageModel | null
   publicPathname: string
   siteCode?: null | string
 }): boolean => {
-  if (args.siteCode !== 'wings-side') return false
+  if (args.siteCode !== 'wing-side') return false
   const route = getPublicRoutePathname(args.publicPathname)
   if (!isWingsSideHiFiB1Route(route)) return false
   return Boolean(args.model)
@@ -56,10 +56,15 @@ export const shouldUseWingsSideHiFiCopyFallback = (args: {
 }): boolean => {
   if (args.page?.wingsSideHiFi?.enabled) return false
   if (process.env.WINGSSIDE_HIFI_COPY_FALLBACK === 'false') return false
-  if (process.env.NODE_ENV === 'production' && process.env.WINGSSIDE_HIFI_COPY_FALLBACK !== 'true') {
+  if (
+    process.env.NODE_ENV === 'production' &&
+    process.env.WINGSSIDE_HIFI_COPY_FALLBACK !== 'true'
+  ) {
     return false
   }
-  return process.env.WINGSSIDE_HIFI_COPY_FALLBACK === 'true' || process.env.NODE_ENV !== 'production'
+  return (
+    process.env.WINGSSIDE_HIFI_COPY_FALLBACK === 'true' || process.env.NODE_ENV !== 'production'
+  )
 }
 
 /** Build a synthetic enabled payload from Copy.ts for development fallback only. */

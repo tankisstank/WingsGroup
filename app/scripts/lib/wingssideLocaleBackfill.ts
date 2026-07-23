@@ -5916,7 +5916,7 @@ export async function backfillWingsSideLocales(
     req,
     where: {
       code: {
-        equals: 'wings-side',
+        equals: 'wing-side',
       },
     },
   })

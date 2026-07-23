@@ -16,7 +16,7 @@ export async function Footer() {
   const site = await getCurrentSite()
   const locale = await getCurrentLocale()
   const chromeCopy = getRuntimeLocaleCopy(publicChromeCopy, locale)
-  const isWingSide = site.code === 'wings-side'
+  const isWingSide = site.code === 'wing-side'
   const hiFiCopy = isWingSide ? getWingsSideHiFiCopy(locale) : null
   const wingSideNav = isWingSide ? getWingsSideHiFiNavItems(locale) : null
 
@@ -24,7 +24,11 @@ export async function Footer() {
 
   return (
     <footer
-      className={isWingSide ? 'site-footer site-footer--wingsside-hifi mt-auto border-t' : 'site-footer mt-auto border-t'}
+      className={
+        isWingSide
+          ? 'site-footer site-footer--wingsside-hifi mt-auto border-t'
+          : 'site-footer mt-auto border-t'
+      }
       data-site-code={site.code}
       data-testid={isWingSide ? 'wingsside-hifi-footer' : undefined}
     >
@@ -83,8 +87,12 @@ export async function Footer() {
                 siteCode={site.code}
               />
             </SiteLink>
-            {settings?.siteName ? <div className="text-sm font-semibold">{settings.siteName}</div> : null}
-            {settings?.tagline ? <div className="text-sm text-muted-foreground">{settings.tagline}</div> : null}
+            {settings?.siteName ? (
+              <div className="text-sm font-semibold">{settings.siteName}</div>
+            ) : null}
+            {settings?.tagline ? (
+              <div className="text-sm text-muted-foreground">{settings.tagline}</div>
+            ) : null}
             {settings?.footerNote ? (
               <div className="text-xs text-muted-foreground max-w-md">{settings.footerNote}</div>
             ) : null}

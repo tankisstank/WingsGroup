@@ -15,7 +15,7 @@ describe('site path utilities', () => {
   it('maps local path prefixes to durable site codes', () => {
     expect(siteAliasToCodeMap.wingsgroup).toBe('wings-group')
     expect(siteAliasToCodeMap.wingsgo).toBe('wings-go')
-    expect(siteAliasToCodeMap.wingsside).toBe('wings-side')
+    expect(siteAliasToCodeMap.wingsside).toBe('wing-side')
     expect(siteAliasToCodeMap.wingspass).toBe('wings-pass')
     expect(siteAliasToCodeMap.wingsplus).toBe('wings-plus')
     expect(siteAliasToCodeMap.wingscare).toBe('wings-care')

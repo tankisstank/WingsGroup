@@ -354,7 +354,9 @@ test.describe('Phase 1 public frontend smoke', () => {
       'true',
     )
     // Hi-fi split keeps editorial copy outside slides; planner band stays available on mobile.
-    await expect(page.getByRole('heading', { name: 'Tailor-made Vietnam journeys' }).first()).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'Tailor-made Vietnam journeys' }).first(),
+    ).toBeVisible()
     const mobilePlanner = page.getByRole('complementary', { name: 'Trip planning starter' })
     await expect(mobilePlanner.getByLabel('Destination')).toBeVisible()
     await expect(mobilePlanner.getByLabel('Duration')).toBeVisible()
@@ -387,7 +389,12 @@ test.describe('Phase 1 public frontend smoke', () => {
       })
       await page.waitForTimeout(350)
       // Retry once if observer has not flipped yet.
-      if (!(await page.getByTestId('wingsside-specials').isVisible().catch(() => false))) {
+      if (
+        !(await page
+          .getByTestId('wingsside-specials')
+          .isVisible()
+          .catch(() => false))
+      ) {
         await page.evaluate(() => window.scrollBy(0, 600))
         await page.waitForTimeout(350)
       }
@@ -399,7 +406,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
 
       const body = page.locator('body')
-      await expect(body).toHaveAttribute('data-site-code', 'wings-side')
+      await expect(body).toHaveAttribute('data-site-code', 'wing-side')
       await expect(body).toHaveAttribute('data-theme-key', 'custom')
       await expect(body).toHaveAttribute('data-public-route', '/')
       await expect(page.locator('.site-header-cta').first()).toHaveAttribute(
@@ -674,7 +681,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     ]) {
       await page.setViewportSize({ height: 900, width: 1280 })
       await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
-      await expect(page.locator('body')).toHaveAttribute('data-site-code', 'wings-side')
+      await expect(page.locator('body')).toHaveAttribute('data-site-code', 'wing-side')
       await expect(page.locator('body')).toHaveAttribute('data-theme-key', 'custom')
       await expect(page.locator('body')).toHaveAttribute('data-public-route', '/packages')
       await expect(page.getByTestId('wingsside-specials')).toHaveCount(0)
@@ -709,9 +716,13 @@ test.describe('Phase 1 public frontend smoke', () => {
       /Travel styles/i,
     )
     await expect(page.locator('[data-od-id="home-sample-journeys"]')).toBeVisible()
-    await expect(page.getByTestId('wingsside-hifi-home-journeys')).toContainText(/From \$2,190|Indicative/i)
+    await expect(page.getByTestId('wingsside-hifi-home-journeys')).toContainText(
+      /From \$2,190|Indicative/i,
+    )
     await expect(page.locator('[data-od-id="home-notes"]')).toBeVisible()
-    await expect(page.getByTestId('wingsside-hifi-notes')).toContainText(/Pace & inclusions|Traveler notes/i)
+    await expect(page.getByTestId('wingsside-hifi-notes')).toContainText(
+      /Pace & inclusions|Traveler notes/i,
+    )
     await expect(page.locator('[data-od-id="home-close"]')).toBeVisible()
     await expect(page.locator('[data-od-id="home-close"] a[href="#home-planner"]')).toBeVisible()
     await expect(page.locator('[data-od-id="home-close"] a[href*="contact-us"]')).toBeVisible()
@@ -723,15 +734,18 @@ test.describe('Phase 1 public frontend smoke', () => {
       'href',
       /\/wingsside\/(?:en\/)?destinations(?:\/ha-noi)?$/,
     )
-    await expect(page.getByTestId('wingsside-hifi-home-journeys').getByRole('link').first()).toHaveAttribute(
-      'href',
-      /\/wingsside\/(?:en\/)?packages\/vietnam-highlights$/,
-    )
+    await expect(
+      page.getByTestId('wingsside-hifi-home-journeys').getByRole('link').first(),
+    ).toHaveAttribute('href', /\/wingsside\/(?:en\/)?packages\/vietnam-highlights$/)
     await expect(page.getByTestId('wingsside-hifi-home-related')).toBeVisible()
-    await expect(page.locator('[data-od-id="home-creds"], [data-testid="wingsside-hifi-creds"]').first()).toBeVisible()
+    await expect(
+      page.locator('[data-od-id="home-creds"], [data-testid="wingsside-hifi-creds"]').first(),
+    ).toBeVisible()
     await expect(page.locator('.ws-hifi-creds--full-bleed')).toBeVisible()
     await expect(page.locator('#home-planner')).toBeVisible()
-    await expect(page.locator('.hero-presentation__hifi-copy a[href="#home-planner"]').first()).toBeVisible()
+    await expect(
+      page.locator('.hero-presentation__hifi-copy a[href="#home-planner"]').first(),
+    ).toBeVisible()
     await expect(page.getByTestId('wingsside-hifi-footer')).toBeVisible()
 
     await page.setViewportSize({ height: 844, width: 390 })

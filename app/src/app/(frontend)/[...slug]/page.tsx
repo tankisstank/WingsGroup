@@ -109,7 +109,7 @@ export default async function Page({
   // Structured tour detail: tighter vertical rhythm under fixed header.
   const isStructuredTour = Boolean(structuredPage)
   const renderedBreadcrumbItems =
-    isStructuredTour && site.code === 'wings-side'
+    isStructuredTour && site.code === 'wing-side'
       ? [
           breadcrumbItems[0] || { label: 'WingsSide', path: '/' },
           { label: locale === 'vi' ? 'Hành trình mẫu' : 'Packages', path: '/packages' },
@@ -289,7 +289,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   })
 
   const site = await getCurrentSite()
-  if (page && site.code === 'wings-side' && requestedPath.startsWith('/tour/')) {
+  if (page && site.code === 'wing-side' && requestedPath.startsWith('/tour/')) {
     const cleanTitle = sanitizeWingSidePublicText(String(page.title || '')).replace(
       /\s+\d+\s+days?$/i,
       '',
@@ -425,7 +425,7 @@ const resolveStructuredTourPage = async ({
 
     const tourData = await getResolvedTourDetailBySlug({
       draft,
-      fallbackLocale: site.code === 'wings-side' ? 'en' : undefined,
+      fallbackLocale: site.code === 'wing-side' ? 'en' : undefined,
       locale,
       slug: segments[1],
     })
@@ -436,7 +436,7 @@ const resolveStructuredTourPage = async ({
 
     // Wingside: consultative hi-fi TourDetailPage (Open Design lock).
     // Keep wrapper-page gate so only linked TourProduct pages resolve.
-    if (site.code === 'wings-side') {
+    if (site.code === 'wing-side') {
       if (!hasMatchingWingSideTourWrapper(tourData.tour, wrapperPageID)) notFound()
       const contactPage = await queryPageByPath({
         depth: 0,

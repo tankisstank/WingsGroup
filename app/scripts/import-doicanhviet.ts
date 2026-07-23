@@ -401,7 +401,7 @@ const main = async () => {
   const importLocale = String(args.locale || 'vi')
   if (importLocale !== 'vi' && importLocale !== 'en')
     throw new Error('Only --locale vi|en is supported')
-  const siteCode = String(args['site-code'] || 'wings-side').trim()
+  const siteCode = String(args['site-code'] || 'wing-side').trim()
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(siteCode)) throw new Error('Invalid --site-code')
   const batchId = String(
     args['batch-id'] || `dcv-${new Date().toISOString().replace(/[:.]/g, '-')}`,

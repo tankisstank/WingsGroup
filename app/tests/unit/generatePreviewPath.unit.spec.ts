@@ -34,7 +34,7 @@ describe('generatePreviewPath', () => {
         },
       } as never,
       site: {
-        code: 'wings-side',
+        code: 'wing-side',
         id: 3,
       } as never,
       slug: 'wings-side-home',

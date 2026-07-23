@@ -40,7 +40,7 @@ const siteResult = await payload.find({
   req,
   where: {
     code: {
-      equals: 'wings-side',
+      equals: 'wing-side',
     },
   },
 })

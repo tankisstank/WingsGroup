@@ -115,7 +115,7 @@ const navigationCorrectionsBySite = {
         'Pricing-first site cho dịch vụ Fast Track theo sân bay, add-on, điều kiện áp dụng và đặt dịch vụ.',
     },
   },
-  'wings-side': {
+  'wing-side': {
     en: {
       footerNote:
         'WingsSide focuses on inbound planning, destination storytelling, travel styles, and trip inquiry instead of a retail tour grid.',
@@ -154,7 +154,7 @@ const productionDomainBySite = {
   'wings-group': 'wingsgroup.vn',
   'wings-pass': 'wingspass.wingsgroup.vn',
   'wings-plus': 'wingsplus.vn',
-  'wings-side': 'wingside.vn',
+  'wing-side': 'wingside.vn',
 } as const
 
 async function ensureSiteThemeMetadata({
@@ -197,7 +197,7 @@ async function ensureSiteThemeMetadata({
       data: {
         branding: {
           ...existingSettings.branding,
-          themeKey: (siteCode === 'wings-side'
+          themeKey: (siteCode === 'wing-side'
             ? 'custom'
             : siteCode) as SiteSetting['branding']['themeKey'],
           themePreset: presetIDs[assignment.themePreset],
@@ -627,7 +627,7 @@ export async function seedHeroPresentationSmoke(): Promise<Record<HeroPresentati
 
 export async function seedPhase1LaunchSmoke(): Promise<void> {
   const { payload, req } = await getAdminRequestContext()
-  const requiredSiteCodes = ['wings-go', 'wings-side', 'wings-plus', 'wings-care', 'wings-pass']
+  const requiredSiteCodes = ['wings-go', 'wing-side', 'wings-plus', 'wings-care', 'wings-pass']
   const presetIDs = await ensureThemePresetSeeds(payload, req)
   const heroPresetIDs = await ensureHeroPresentationPresetSeeds(payload, req)
   const sites = await payload.find({

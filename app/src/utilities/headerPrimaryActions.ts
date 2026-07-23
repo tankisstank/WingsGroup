@@ -13,7 +13,7 @@ const defaultHeaderPrimaryActions: HeaderPrimaryActionMap = {
   vi: { label: 'Liên hệ', url: '/lien-he' },
 }
 
-export const headerPrimaryActionsByThemeKey: Record<string, HeaderPrimaryActionMap> = {
+export const headerPrimaryActionsBySiteCode: Record<string, HeaderPrimaryActionMap> = {
   'wings-care': {
     en: { label: 'Contact', url: '/contact' },
     vi: { label: 'Liên hệ', url: '/contact' },
@@ -31,7 +31,7 @@ export const headerPrimaryActionsByThemeKey: Record<string, HeaderPrimaryActionM
     en: { label: 'Request proposal', url: '/request-proposal' },
     vi: { label: 'Gửi yêu cầu', url: '/request-proposal' },
   },
-  'wings-side': {
+  'wing-side': {
     en: { label: 'Plan trip', url: '/plan-your-trip' },
     es: { label: 'Planifica', url: '/plan-your-trip' },
     it: { label: 'Pianifica', url: '/plan-your-trip' },
@@ -41,12 +41,12 @@ export const headerPrimaryActionsByThemeKey: Record<string, HeaderPrimaryActionM
 }
 
 export const resolveHeaderPrimaryAction = (
-  themeKey: null | string | undefined,
+  siteCode: null | string | undefined,
   locale?: null | string,
 ): HeaderPrimaryAction => {
   const resolvedCopyLocale = getCopyLocale(locale)
   const actionMap =
-    (themeKey && headerPrimaryActionsByThemeKey[themeKey]) || defaultHeaderPrimaryActions
+    (siteCode && headerPrimaryActionsBySiteCode[siteCode]) || defaultHeaderPrimaryActions
 
   return actionMap[locale as SupportedLocaleCode] || actionMap[resolvedCopyLocale]
 }

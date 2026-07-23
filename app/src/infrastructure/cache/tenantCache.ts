@@ -3,7 +3,7 @@ import { clearSharedMemoryCache, invalidateSharedCache } from './sharedCache'
 const SITE_CODES = [
   'wings-group',
   'wings-go',
-  'wings-side',
+  'wing-side',
   'wings-plus',
   'wings-care',
   'wings-pass',

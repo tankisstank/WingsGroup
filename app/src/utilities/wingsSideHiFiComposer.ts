@@ -30,7 +30,7 @@ export const shouldUseWingsSideHiFiComposer = (
   siteCode: null | string | undefined,
   publicPathname: string,
 ): boolean => {
-  if (siteCode !== 'wings-side') return false
+  if (siteCode !== 'wing-side') return false
   return isWingsSideHiFiComposerRoute(getPublicRoutePathname(publicPathname))
 }
 

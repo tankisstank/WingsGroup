@@ -136,7 +136,7 @@ export const siteHeroPresentationAssignments: Record<
   'wings-group': { presetKey: 'centered-classic', variant: 'standard' },
   'wings-pass': { presetKey: 'split-classic', variant: 'utility' },
   'wings-plus': { presetKey: 'centered-classic', variant: 'standard' },
-  'wings-side': { presetKey: 'wingsside-inbound-cinematic-search', variant: 'planner' },
+  'wing-side': { presetKey: 'wingsside-inbound-cinematic-search', variant: 'planner' },
 }
 
 export async function ensureHeroPresentationPresetSeeds(

@@ -3,7 +3,7 @@ import { getPublicRoutePathname, type SupportedLocaleCode } from './sitePaths'
 export const WINGSSIDE_SPECIALS_DISMISSED_KEY = 'wingside-promo-dismissed'
 
 export const shouldRenderWingsSideSpecials = (siteCode: string, publicPathname: string): boolean =>
-  siteCode === 'wings-side' && isWingsSideSpecialsHomePathname(publicPathname)
+  siteCode === 'wing-side' && isWingsSideSpecialsHomePathname(publicPathname)
 
 export const isWingsSideSpecialsHomePathname = (pathname: string): boolean => {
   return getPublicRoutePathname(pathname) === '/'

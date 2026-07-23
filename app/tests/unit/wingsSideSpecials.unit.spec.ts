@@ -62,13 +62,13 @@ describe('WingSide Specials helpers', () => {
   })
 
   it('renders only on the exact WingSide Home pathname', () => {
-    expect(shouldRenderWingsSideSpecials('wings-side', '/')).toBe(true)
-    expect(shouldRenderWingsSideSpecials('wings-side', '/en')).toBe(true)
-    expect(shouldRenderWingsSideSpecials('wings-side', '/it')).toBe(true)
-    expect(shouldRenderWingsSideSpecials('wings-side', '/wingsside/pt')).toBe(true)
-    expect(shouldRenderWingsSideSpecials('wings-side', '/packages')).toBe(false)
+    expect(shouldRenderWingsSideSpecials('wing-side', '/')).toBe(true)
+    expect(shouldRenderWingsSideSpecials('wing-side', '/en')).toBe(true)
+    expect(shouldRenderWingsSideSpecials('wing-side', '/it')).toBe(true)
+    expect(shouldRenderWingsSideSpecials('wing-side', '/wingsside/pt')).toBe(true)
+    expect(shouldRenderWingsSideSpecials('wing-side', '/packages')).toBe(false)
     expect(shouldRenderWingsSideSpecials('wings-go', '/')).toBe(false)
-    expect(shouldRenderWingsSideSpecials('wings-side', '/?campaign=hot')).toBe(true)
+    expect(shouldRenderWingsSideSpecials('wing-side', '/?campaign=hot')).toBe(true)
   })
 
   it('persists and reads session dismissal without throwing when storage is unavailable', () => {

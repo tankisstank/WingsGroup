@@ -6,7 +6,7 @@ import {
   type WingsSideHiFiAssetKey as RuntimeAssetKey,
 } from '../../src/utilities/wingsSideHiFiMedia'
 
-export const WINGSSIDE_HIFI_SITE_CODE = 'wings-side'
+export const WINGSSIDE_HIFI_SITE_CODE = 'wing-side'
 export const WINGSSIDE_HIFI_ROLLBACK_MEDIA_POLICY =
   'retain-report-created-media-for-payload-version-history' as const
 
@@ -105,11 +105,7 @@ export const writeRelationAtPath = (
   else (current as Record<string, unknown>)[last] = value
 }
 
-export const bindingSnapshotChecksum = (
-  snapshot: Record<string, number | string | null>,
-): string =>
+export const bindingSnapshotChecksum = (snapshot: Record<string, number | string | null>): string =>
   sha256(
-    JSON.stringify(
-      Object.entries(snapshot).sort(([left], [right]) => left.localeCompare(right)),
-    ),
+    JSON.stringify(Object.entries(snapshot).sort(([left], [right]) => left.localeCompare(right))),
   )

@@ -37,7 +37,7 @@ export const Logo = (props: Props) => {
   const label = logoText || logoImage?.alt || 'Site logo'
   const isPriorityImage = priority === 'high'
   const resolvedLogoImage = logoImageUrl && logoImage ? logoImage : null
-  const wingsSideFallback = !resolvedLogoImage && siteCode === 'wings-side'
+  const wingsSideFallback = !resolvedLogoImage && siteCode === 'wing-side'
 
   if (resolvedLogoImage || wingsSideFallback) {
     return (
@@ -73,10 +73,12 @@ export const Logo = (props: Props) => {
       <span
         aria-hidden="true"
         className="site-logo-mark flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold shadow-sm"
-        style={{
-          '--site-accent': accentColor || undefined,
-          '--site-brand': brandColor || undefined,
-        } as React.CSSProperties}
+        style={
+          {
+            '--site-accent': accentColor || undefined,
+            '--site-brand': brandColor || undefined,
+          } as React.CSSProperties
+        }
       >
         {(logoText || 'WT')
           .split(/\s+/)

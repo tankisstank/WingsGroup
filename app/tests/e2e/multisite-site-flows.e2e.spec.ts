@@ -39,7 +39,7 @@ test.describe('Multisite site-type business flows', () => {
   }) => {
     const site = requireSite('wings-group')
     const nestedPath = site.nestedRouteSamples[site.defaultLocale] || '/chinh-sach-bao-mat'
-    const primaryAction = resolveHeaderPrimaryAction(site.themeKey || 'wings-group', site.defaultLocale)
+    const primaryAction = resolveHeaderPrimaryAction(site.name || 'wings-group', site.defaultLocale)
 
     await page.goto(`${e2eBaseURL}/${site.localAlias}${nestedPath}`, {
       waitUntil: 'domcontentloaded',
@@ -71,7 +71,7 @@ test.describe('Multisite site-type business flows', () => {
     request,
   }) => {
     const site = requireSite('wings-go')
-    const primaryAction = resolveHeaderPrimaryAction(site.themeKey || 'wings-go', site.defaultLocale)
+    const primaryAction = resolveHeaderPrimaryAction(site.name || 'wings-go', site.defaultLocale)
     const tour = await getFirstTourProduct(request)
 
     await page.goto(`${e2eBaseURL}/${site.localAlias}/tour/${tour.slug}`, {
@@ -102,7 +102,7 @@ test.describe('Multisite site-type business flows', () => {
   }) => {
     const site = requireSite('wings-care')
     const nestedPath = site.nestedRouteSamples[site.defaultLocale] || '/claim-support'
-    const primaryAction = resolveHeaderPrimaryAction(site.themeKey || 'wings-care', site.defaultLocale)
+    const primaryAction = resolveHeaderPrimaryAction(site.name || 'wings-care', site.defaultLocale)
 
     await page.goto(`${e2eBaseURL}/${site.localAlias}${nestedPath}`, {
       waitUntil: 'domcontentloaded',
@@ -125,7 +125,7 @@ test.describe('Multisite site-type business flows', () => {
   }) => {
     const site = requireSite('wings-pass')
     const nestedPath = site.nestedRouteSamples[site.defaultLocale] || '/add-on'
-    const primaryAction = resolveHeaderPrimaryAction(site.themeKey || 'wings-pass', site.defaultLocale)
+    const primaryAction = resolveHeaderPrimaryAction(site.name || 'wings-pass', site.defaultLocale)
 
     await page.goto(`${e2eBaseURL}/${site.localAlias}${nestedPath}`, {
       waitUntil: 'domcontentloaded',
@@ -155,7 +155,7 @@ test.describe('Multisite site-type business flows', () => {
   }) => {
     const site = requireSite('wings-plus')
     const nestedPath = site.nestedRouteSamples[site.defaultLocale] || '/destinations'
-    const primaryAction = resolveHeaderPrimaryAction(site.themeKey || 'wings-plus', site.defaultLocale)
+    const primaryAction = resolveHeaderPrimaryAction(site.name || 'wings-plus', site.defaultLocale)
 
     await page.goto(`${e2eBaseURL}/${site.localAlias}${nestedPath}`, {
       waitUntil: 'domcontentloaded',
