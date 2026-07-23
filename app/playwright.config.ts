@@ -19,12 +19,10 @@ const productionLikeHosts = [
   'www.wingsplus.vn',
   'wingscare.wingsgroup.vn',
   'wingspass.wingsgroup.vn',
-  'wingsside.vn',
-  'www.wingsside.vn',
+  'wingside.vn',
+  'www.wingside.vn',
 ]
-const hostResolverRules = productionLikeHosts
-  .map((host) => `MAP ${host} 127.0.0.1`)
-  .join(',')
+const hostResolverRules = productionLikeHosts.map((host) => `MAP ${host} 127.0.0.1`).join(',')
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -53,9 +51,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         channel: 'chromium',
         launchOptions: {
-          args: [
-            `--host-resolver-rules=${hostResolverRules}`,
-          ],
+          args: [`--host-resolver-rules=${hostResolverRules}`],
         },
       },
     },

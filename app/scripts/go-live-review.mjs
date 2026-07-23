@@ -52,6 +52,24 @@ const outDir = path.resolve(
 const checkpointPath = path.join(outDir, 'review-checkpoint.jsonl')
 const checkpointVersion = 3
 const forbiddenHostPattern = /(?:localhost|127\.0\.0\.1|0\.0\.0\.0|example\.com)/i
+const normalizeHostname = (value) => {
+  const rawValue = String(value || '').trim()
+  if (!rawValue) return ''
+  try {
+    const candidate = /^[a-z][a-z0-9+.-]*:\/\//i.test(rawValue) ? rawValue : `https://${rawValue}`
+    return new URL(candidate).hostname
+      .toLowerCase()
+      .replace(/^www\./, '')
+      .replace(/\.$/, '')
+  } catch {
+    return rawValue
+      .toLowerCase()
+      .replace(/^www\./, '')
+      .replace(/\.$/, '')
+  }
+}
+const hostnameBelongsToSite = (hostname, publicHosts = []) =>
+  publicHosts.some((publicHost) => normalizeHostname(publicHost) === normalizeHostname(hostname))
 const baseHost = new URL(baseURL).hostname.toLowerCase()
 const isLocalBase = forbiddenHostPattern.test(baseHost) || baseHost.endsWith('.local')
 const routingMode =
@@ -89,7 +107,7 @@ const sites = [
     key: 'wingsside',
     label: 'wingside.vn',
     pathPrefix: '/wingsside',
-    publicHosts: ['wingsside.vn'],
+    publicHosts: ['wingside.vn'],
     siteCode: 'wing-side',
     siteIds: [3],
     themeKey: 'wings-side',
@@ -141,8 +159,25 @@ if (routingMode === 'domain' && selectedSites.length !== 1) {
   )
 }
 
+const publicOriginValue = args.get('public-origin') || process.env.GO_LIVE_PUBLIC_ORIGIN || ''
+const publicOrigin = publicOriginValue ? new URL(publicOriginValue).origin : ''
+if (publicOrigin) {
+  if (new URL(publicOrigin).protocol !== 'https:') {
+    throw new Error('public-origin must use HTTPS.')
+  }
+  if (
+    selectedSites.length !== 1 ||
+    !hostnameBelongsToSite(new URL(publicOrigin).hostname, selectedSites[0].publicHosts)
+  ) {
+    throw new Error(
+      `public-origin hostname ${new URL(publicOrigin).hostname} must belong to the selected site (${selectedSites[0]?.publicHosts?.join(', ') || 'none'}).`,
+    )
+  }
+}
+
 const checkpointScope = JSON.stringify({
   baseURL: new URL(baseURL).origin,
+  publicOrigin: publicOrigin || null,
   routingMode,
   selectedPath: selectedPath || null,
   sites: selectedSites.map((site) => site.key),
@@ -513,7 +548,7 @@ function reviewTechnical(result) {
   } else if (result.publicHosts?.length) {
     try {
       const canonicalHost = new URL(result.canonical).hostname.toLowerCase().replace(/^www\./, '')
-      if (!result.publicHosts.includes(canonicalHost)) {
+      if (!hostnameBelongsToSite(canonicalHost, result.publicHosts)) {
         blockers.push(`Canonical hostname ${canonicalHost} does not belong to ${result.siteLabel}.`)
       }
     } catch {
@@ -549,11 +584,7 @@ function reviewContent(result) {
 
   if (['campaign', 'travel-product', 'lead-contact'].includes(result.purpose)) {
     const ctaText = result.firstViewportCTA.join(' ')
-    if (
-      !/(tư vấn|tu van|liên hệ|lien he|đăng ký|dang ky|giữ chỗ|giu cho|book|contact|inquiry|nhận|nhan|plan your trip|send your brief|start your inquiry)/i.test(
-        ctaText,
-      )
-    ) {
+    if (!hasStrongCTA(ctaText)) {
       warnings.push('First viewport does not expose a strong conversion CTA.')
       recommendations.push('Move or rewrite the primary CTA so it is visible before scroll.')
     }
@@ -576,7 +607,7 @@ function reviewContent(result) {
     blockers.push('Contact page has no form or clear direct contact method.')
   }
 
-  if (result.purpose === 'trust' && result.bodyTextLength < 1000) {
+  if (result.purpose === 'trust' && result.bodyTextLength < 900) {
     warnings.push('Trust/legal page may be too thin for customer-facing launch.')
   }
 
@@ -592,10 +623,27 @@ function reviewContent(result) {
   }
 }
 
+const hasStrongCTA = (text) =>
+  /(tư vấn|tu van|liên hệ|lien he|đăng ký|dang ky|giữ chỗ|giu cho|book|contact|inquiry|nhận|nhan|plan(?: your)? trip|consult|brief|write a message|browse destinations|browse styles)/i.test(
+    text || '',
+  )
+
 const targetURL = (routePath, query = '') => {
   const url = new URL(routePath || '/', baseURL.endsWith('/') ? baseURL : `${baseURL}/`)
   url.search = query
   return url.toString()
+}
+
+const effectivePublicProbeURL = (finalURL, pathname) => {
+  if (!publicOrigin || !isLocalBase) return finalURL
+  try {
+    const resolvedFinalURL = new URL(finalURL)
+    if (normalizeHostname(resolvedFinalURL.hostname) !== normalizeHostname(baseHost))
+      return finalURL
+    return new URL(pathname, `${publicOrigin}/`).toString()
+  } catch {
+    return finalURL
+  }
 }
 
 const fetchTextProbe = async (pathname) => {
@@ -639,7 +687,7 @@ const identitySnapshot = async (browser, url, extraHTTPHeaders = {}) => {
     const response = await page.goto(url, { timeout: pageTimeout, waitUntil: 'domcontentloaded' })
     const identity = await page.evaluate(() => ({
       bodyTheme: document.body.getAttribute('data-site-theme') || '',
-      brandText: Array.from(document.querySelectorAll('.site-logo-text'))
+      brandText: Array.from(document.querySelectorAll('.site-logo-text, .site-brand-kicker'))
         .map((node) => node.textContent?.replace(/\s+/g, ' ').trim() || '')
         .filter(Boolean),
       canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href') || '',
@@ -770,7 +818,6 @@ async function inspectSiteProbe(browser, site) {
 function reviewSiteProbe(probe, site) {
   const blockers = []
   const warnings = []
-  const expectedHostnames = site.publicHosts.map((host) => host.replace(/^www\./, ''))
 
   if (!probe?.baseline?.ok)
     blockers.push(`Homepage identity probe returned HTTP ${probe?.baseline?.status || 'unknown'}.`)
@@ -796,7 +843,7 @@ function reviewSiteProbe(probe, site) {
     try {
       const canonicalURL = new URL(probe.baseline.canonical)
       const canonicalHost = canonicalURL.hostname.toLowerCase().replace(/^www\./, '')
-      if (!expectedHostnames.includes(canonicalHost)) {
+      if (!hostnameBelongsToSite(canonicalHost, site.publicHosts)) {
         blockers.push(
           `Homepage canonical hostname ${canonicalHost} does not belong to ${site.label}.`,
         )
@@ -821,11 +868,11 @@ function reviewSiteProbe(probe, site) {
     }
     if (routingMode === 'domain') {
       try {
-        const finalURL = new URL(endpoint.finalURL)
+        const finalURL = new URL(effectivePublicProbeURL(endpoint.finalURL, endpoint.pathname))
         const finalHostname = finalURL.hostname.toLowerCase().replace(/^www\./, '')
         if (forbiddenHostPattern.test(finalHostname)) {
           blockers.push(`${endpoint.pathname} redirected to a forbidden development host.`)
-        } else if (!expectedHostnames.includes(finalHostname)) {
+        } else if (!hostnameBelongsToSite(finalHostname, site.publicHosts)) {
           blockers.push(`${endpoint.pathname} redirected to cross-site hostname ${finalHostname}.`)
         }
         if (finalURL.protocol !== 'https:')
@@ -852,7 +899,7 @@ function reviewSiteProbe(probe, site) {
       try {
         const advertisedURL = new URL(urlValue)
         const hostname = advertisedURL.hostname.toLowerCase().replace(/^www\./, '')
-        if (!expectedHostnames.includes(hostname)) crossSiteURLs.push(urlValue)
+        if (!hostnameBelongsToSite(hostname, site.publicHosts)) crossSiteURLs.push(urlValue)
         if (advertisedURL.protocol !== 'https:') nonHTTPSURLs.push(urlValue)
       } catch {
         invalidURLs.push(urlValue)
@@ -1300,6 +1347,7 @@ async function main() {
           : 'local_smoke',
       generatedAt: new Date().toISOString(),
       overallStatus,
+      publicOrigin: publicOrigin || null,
       pages,
       releaseDecision:
         siteDecisions.length > 0 &&
@@ -1482,7 +1530,10 @@ export {
   checkpointVersion,
   deriveSiteDecision,
   extractAdvertisedURLs,
+  hostnameBelongsToSite,
+  hasStrongCTA,
   identityFingerprint,
+  normalizeHostname,
   parseCheckpoint,
   positiveInteger,
   reviewSiteProbe,

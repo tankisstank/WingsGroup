@@ -107,4 +107,33 @@ describe('generateMeta multisite locale contract', () => {
       vi: 'https://wingside.vn/about-us',
     })
   })
+
+  it('prioritizes the CMS SEO title and always identifies the current site', async () => {
+    mocks.getCurrentSite.mockResolvedValue({
+      defaultLocale: 'vi',
+      primaryDomain: 'wingside.vn',
+      supportedLocales: ['vi', 'en'],
+    })
+    mocks.getCurrentSiteSettings.mockResolvedValue({
+      seo: {
+        canonicalDomain: 'https://wingside.vn',
+        defaultDescription: 'Private Vietnam journeys planned by a local team.',
+        defaultTitle: 'wingside.vn',
+        titleSuffix: 'Tailor-made Vietnam journeys',
+      },
+      siteName: 'wingside.vn',
+    })
+
+    const metadata = await generateMeta({
+      doc: {
+        meta: { title: 'Vietnam destinations' },
+        pathname: '/destinations',
+        title: 'Destinations',
+      },
+      locale: 'en',
+      path: '/destinations',
+    })
+
+    expect(metadata.title).toBe('Vietnam destinations | Tailor-made Vietnam journeys | wingside.vn')
+  })
 })

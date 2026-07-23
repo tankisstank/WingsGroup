@@ -49,4 +49,37 @@ describe('Wingside tenant identity contract', () => {
       migration.indexOf('-- Reverse pages_locales before site code changes back'),
     ).toBeLessThan(migration.lastIndexOf('SET "code" = \'wings-side\''))
   })
+
+  it('locks the release tenant to the WingsSide theme and public SEO identity', () => {
+    const migration = appFile('src/migrations/20260723_170000_wing_side_release_identity.ts')
+
+    expect(migration).toContain('"branding_theme_key" = \'wings-side\'')
+    expect(migration).toContain('"seo_default_title" = \'wingside.vn\'')
+    expect(migration).toContain('s."code" = \'wing-side\'')
+    expect(migration).toContain('SET "branding_theme_key" = \'custom\'')
+    expect(migration).not.toContain('s."code" IN')
+  })
+
+  it('repairs thin style metadata in CMS with a tenant-scoped rollback', () => {
+    const migration = appFile('src/migrations/20260723_183000_wing_side_style_seo_copy.ts')
+
+    expect(migration).toContain('s."code" = \'wing-side\'')
+    expect(migration).toContain("'wings-side-adventure'")
+    expect(migration).toContain("'wings-side-luxury'")
+    expect(migration).toContain('length(trim(coalesce(pl."meta_description", \'\'))) < 50')
+    expect(migration).toContain('length(trim(pl."meta_description")) - length(suffixes.suffix)')
+  })
+
+  it('normalizes the public contact and cross-site links without broad replacement', () => {
+    const migration = appFile('src/migrations/20260723_190000_wing_side_public_contact_identity.ts')
+
+    expect(migration).toContain('"support_email" = \'hello@wingside.vn\'')
+    expect(migration).toContain('"support_email" = \'hello@wingsside.vn\'')
+    expect(migration).toContain('"title" = \'WingsSide\'')
+    expect(migration).toContain('"link_url" = \'https://wingsside.vn\'')
+    expect(migration).toContain('"link_url" = \'https://wingside.vn\'')
+    expect(migration).toContain(
+      'WHERE "site_id" = (SELECT "id" FROM "sites" WHERE "code" = \'wing-side\')',
+    )
+  })
 })

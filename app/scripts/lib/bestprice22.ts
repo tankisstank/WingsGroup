@@ -224,7 +224,14 @@ const parsePrice = (value: unknown) => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null
 }
 
-const extractSummary = (record: RawBestPriceRecord, title: string) => {
+const editorialSummaryBySourceId: Readonly<Record<string, string>> = {
+  'vietnam-tours--best-of-northern-vietnam-6-days':
+    'Explore Hanoi, Ninh Binh, Sapa, Fansipan and Ha Long on a private six-day Northern Vietnam journey with local planning and flexible pacing.',
+}
+
+const extractSummary = (record: RawBestPriceRecord, title: string, sourceId: string) => {
+  const editorialSummary = editorialSummaryBySourceId[sourceId]
+  if (editorialSummary) return editorialSummary
   const description = cleanBestPriceText(record.meta?.description)
   if (description) return description.slice(0, 1200)
 
@@ -436,7 +443,7 @@ export const normalizeBestPriceRecord = async ({
     category,
     durationDays: duration.days || 1,
     durationNights: duration.nights ?? 0,
-    summary: extractSummary(record, title),
+    summary: extractSummary(record, title, sourceId),
     priceFrom,
     currency: 'USD',
     futureDepartures: [],

@@ -45,8 +45,8 @@ const allowedDevOrigins = [
   'www.wingsplus.vn',
   'wingscare.wingsgroup.vn',
   'wingspass.wingsgroup.vn',
-  'wingsside.vn',
-  'www.wingsside.vn',
+  'wingside.vn',
+  'www.wingside.vn',
 ]
 
 const nextConfig: NextConfig = {

@@ -13,6 +13,9 @@ import * as migration_20260721_180000_wings_side_hifi_page_contract from './2026
 import * as migration_20260722_010000_wings_side_plan_content_completion from './20260722_010000_wings_side_plan_content_completion'
 import * as migration_20260722_020046_credentials_carousel_block from './20260722_020046_credentials_carousel_block'
 import * as migration_20260722_230000_wing_side_tenant_identity from './20260722_230000_wing_side_tenant_identity'
+import * as migration_20260723_170000_wing_side_release_identity from './20260723_170000_wing_side_release_identity'
+import * as migration_20260723_183000_wing_side_style_seo_copy from './20260723_183000_wing_side_style_seo_copy'
+import * as migration_20260723_190000_wing_side_public_contact_identity from './20260723_190000_wing_side_public_contact_identity'
 
 export const migrations = [
   {
@@ -89,5 +92,20 @@ export const migrations = [
     up: migration_20260722_230000_wing_side_tenant_identity.up,
     down: migration_20260722_230000_wing_side_tenant_identity.down,
     name: '20260722_230000_wing_side_tenant_identity',
+  },
+  {
+    up: migration_20260723_170000_wing_side_release_identity.up,
+    down: migration_20260723_170000_wing_side_release_identity.down,
+    name: '20260723_170000_wing_side_release_identity',
+  },
+  {
+    up: migration_20260723_183000_wing_side_style_seo_copy.up,
+    down: migration_20260723_183000_wing_side_style_seo_copy.down,
+    name: '20260723_183000_wing_side_style_seo_copy',
+  },
+  {
+    up: migration_20260723_190000_wing_side_public_contact_identity.up,
+    down: migration_20260723_190000_wing_side_public_contact_identity.down,
+    name: '20260723_190000_wing_side_public_contact_identity',
   },
 ]

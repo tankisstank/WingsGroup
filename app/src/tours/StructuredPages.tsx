@@ -1430,17 +1430,21 @@ const TourServicesSection = ({
             </ul>
           </div>
         </div>
-        {isUsableText(peakNote) ? (
-          <div
-            className="mt-5 rounded-[22px] border border-border/60 bg-background p-4"
-            data-od-id="tour-surcharge"
-          >
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              {isEn ? 'Peak / surcharge note' : 'Lưu ý mùa cao điểm'}
-            </p>
-            <p className="mt-2 text-sm leading-7 text-foreground">{peakNote}</p>
-          </div>
-        ) : null}
+        <div
+          aria-hidden={!isUsableText(peakNote)}
+          className="mt-5 rounded-[22px] border border-border/60 bg-background p-4"
+          data-od-id="tour-surcharge"
+          hidden={!isUsableText(peakNote)}
+        >
+          {isUsableText(peakNote) ? (
+            <>
+              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                {isEn ? 'Peak / surcharge note' : 'Lưu ý mùa cao điểm'}
+              </p>
+              <p className="mt-2 text-sm leading-7 text-foreground">{peakNote}</p>
+            </>
+          ) : null}
+        </div>
         {(servicesSummary.hotelSummary ||
           tour.factSummary?.hotelSummary ||
           servicesSummary.transportSummary ||

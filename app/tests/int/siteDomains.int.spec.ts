@@ -20,8 +20,8 @@ describe('site domain utilities', () => {
       expect.arrayContaining([
         'wingsside.local',
         'www.wingsside.local',
-        'wingsside.vn',
-        'www.wingsside.vn',
+        'wingside.vn',
+        'www.wingside.vn',
       ]),
     )
     expect(domainCandidates('wingspass.local')).toEqual(
@@ -35,11 +35,11 @@ describe('site domain utilities', () => {
   it('ignores an untrusted forwarded host', () => {
     const headers = new Headers({
       host: 'app:3000',
-      'x-forwarded-host': 'wingsside.vn',
+      'x-forwarded-host': 'wingside.vn',
     })
 
     expect(requestHostCandidates(headers)).toEqual(expect.arrayContaining(['app', 'www.app']))
-    expect(requestHostCandidates(headers)).not.toContain('wingsside.vn')
+    expect(requestHostCandidates(headers)).not.toContain('wingside.vn')
   })
 
   it('accepts the host normalized by trusted frontend proxy context', () => {
@@ -47,11 +47,11 @@ describe('site domain utilities', () => {
       host: 'app:3000',
       'x-forwarded-host': 'attacker.example',
       'x-site-context-source': 'proxy',
-      'x-site-host': 'wingsside.vn',
+      'x-site-host': 'wingside.vn',
     })
 
     expect(requestHostCandidates(headers)).toEqual(
-      expect.arrayContaining(['wingsside.vn', 'www.wingsside.vn', 'app', 'www.app']),
+      expect.arrayContaining(['wingside.vn', 'www.wingside.vn', 'app', 'www.app']),
     )
     expect(requestHostCandidates(headers)).not.toContain('attacker.example')
   })

@@ -91,6 +91,9 @@ describe('consultative TourDetailPage contract', () => {
     expect(screen.getByRole('link', { name: 'Start your enquiry' }).getAttribute('href')).toContain(
       'source=tour-detail-enquiry',
     )
+    const emptySurcharge = document.querySelector('[data-od-id="tour-surcharge"]')
+    expect(emptySurcharge).toBeTruthy()
+    expect(emptySurcharge?.hasAttribute('hidden')).toBe(true)
     expect(screen.queryByText(/Giữ chỗ|Tour outbound|Xem lịch khởi hành/i)).toBeNull()
   })
 

@@ -4,10 +4,7 @@ import type { Media, Page, Post, Config } from '../payload-types'
 import type { SupportedLocaleCode } from './sitePaths'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
-import {
-  buildConfiguredAbsoluteMediaURL,
-  getPageCanonicalPath,
-} from './siteURLs'
+import { buildConfiguredAbsoluteMediaURL, getPageCanonicalPath } from './siteURLs'
 import { getCurrentSiteSettings } from './getSiteSettings'
 import { getCurrentSite } from './siteContext'
 import { getCanonicalSiteOrigin, getSiteSitemapLocales, getSiteSitemapURL } from './siteSEO'
@@ -35,9 +32,20 @@ export const generateMeta = async (args: {
   })
   const seoDefaultTitle = settings?.seo?.defaultTitle || settings?.siteName || 'WingsGroup'
   const seoTitleSuffix = settings?.seo?.titleSuffix
-  const description = doc?.meta?.description || settings?.seo?.defaultDescription || settings?.tagline
-  const titleBase = doc?.title || doc?.meta?.title || seoDefaultTitle
-  const title = [titleBase, seoTitleSuffix].filter(Boolean).join(' | ')
+  const description =
+    doc?.meta?.description || settings?.seo?.defaultDescription || settings?.tagline
+  const titleBase = doc?.meta?.title || doc?.title || seoDefaultTitle
+  const titleParts = [titleBase, seoTitleSuffix].filter(Boolean)
+  const siteIdentity = settings?.siteName || seoDefaultTitle
+  const normalizedTitle = titleParts
+    .join(' ')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+  const normalizedIdentity = siteIdentity.toLowerCase().replace(/[^a-z0-9]/g, '')
+  if (normalizedIdentity && !normalizedTitle.includes(normalizedIdentity)) {
+    titleParts.push(siteIdentity)
+  }
+  const title = titleParts.join(' | ')
 
   const pageLikeDoc =
     doc && typeof doc === 'object' && ('pathname' in doc || 'slug' in doc)

@@ -242,6 +242,47 @@ describe('BestPrice 22 tour import parser', () => {
     expect(tour.summary).toBe('A memorable experience. Socialize with local hosts.')
   })
 
+  it('uses the approved public summary for the audited Northern Vietnam tour only', async () => {
+    const sourceId = 'vietnam-tours--best-of-northern-vietnam-6-days'
+    const title = 'Best of Northern Vietnam 6 days'
+    const imageRelativePath = `images\\bestprice\\${sourceId}\\01.jpg`
+    const imagePath = path.join(crawlerRoot, 'storage', 'images', 'bestprice', sourceId, '01.jpg')
+    await fs.mkdir(path.dirname(imagePath), { recursive: true })
+    await fs.writeFile(imagePath, Buffer.from('synthetic-northern-hero', 'utf8'))
+
+    const tour = await normalizeBestPriceRecord({
+      crawlerRoot,
+      sourceFile: rawPath,
+      manifestRow: {
+        document: 'best-of-northern-vietnam.docx',
+        sourceUrl:
+          'https://www.bestpricetravel.com/vietnam-tours/best-of-northern-vietnam-6-days.html',
+        title,
+      },
+      record: {
+        url: 'https://www.bestpricetravel.com/vietnam-tours/best-of-northern-vietnam-6-days.html',
+        tour_id: sourceId,
+        category: 'vietnam-tours',
+        meta: {
+          description: 'The Best of Northern Vietnam is a memorable experience.Socialize yourself.',
+        },
+        content: {
+          heading: title,
+          price: '999 USD',
+          body_html:
+            '<div class="itinerary-box"><span class="iti-day-title">Day 1 Hanoi</span><div class="itinerary-content"><p>Explore Hanoi.</p></div></div>',
+          body_text: 'Duration :\n6 days',
+        },
+        images: [{ local_path: imageRelativePath }],
+      },
+    })
+
+    expect(tour.summary).toBe(
+      'Explore Hanoi, Ninh Binh, Sapa, Fansipan and Ha Long on a private six-day Northern Vietnam journey with local planning and flexible pacing.',
+    )
+    expect(tour.summary).not.toContain('experience.Socialize')
+  })
+
   it('should preserve meaningful media alt from the crawl source', async () => {
     const title = 'Vietnam Coastline Fixture 2 days'
     const sourceId = 'vietnam-tours--meaningful-alt'

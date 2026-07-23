@@ -531,3 +531,173 @@ The release branch/worktree is created only after the documentation commit is
 accepted. WP4 must run from that clean release worktree and immutable HEAD.
 Merge to `master`, production migration/repair apply and deployment remain
 separate approval gates.
+
+### WP4 production-runtime release candidate - 2026-07-23
+
+WP4 was executed from release worktree
+`E:\repo\WingsTravel-release-wingsside-20260723`, branch
+`release/wingsside-go-live-20260723`, immutable application SHA
+`3226ccb8566889bb8797cc41fa251631a95f5408`. Production remained frozen.
+No production database write, SSH deployment, merge to `master`, traffic switch
+or real form submission was performed.
+
+The optimized standalone runtime used:
+
+- a disposable PostgreSQL 16 clone restored from the checksummed production
+  backup;
+- the five pending committed migrations;
+- the exact-scope 22-tour repair applied on that clone;
+- Redis 7.4.2;
+- domain routing through a loopback-only reverse proxy that supplied
+  `Host: wingside.vn`;
+- disabled lead delivery as the no-send RC policy.
+
+Accepted build and test evidence:
+
+```text
+TypeScript: PASS
+focused unit: 7 files, 66 tests passed
+component: 2 files, 6 tests passed
+PostgreSQL repair transaction integration: 1 file, 1 test passed
+lint: exit 0, 0 errors, 143 pre-existing warnings
+production build: PASS
+standalone packaging: PASS
+health/live: HTTP 200
+health/ready: HTTP 200, database up, Redis up, lead delivery disabled
+22/22 tour URLs: HTTP 200
+8/8 hub URLs: HTTP 200
+```
+
+Payload media is an external runtime volume and is not tracked in the immutable
+artifact. The fresh release worktree therefore started with an empty media
+directory. Browser QA mounted the existing local imported media directory by a
+temporary junction, without copying it into the artifact or commit. This
+restored the existing hub assets, but the 22-tour repair referenced legacy
+`dcv-` hero filenames that were absent from the available media volume. The
+target tour hero consequently returned HTTP 500 and Next Image returned HTTP
+400. A production maintenance plan must validate both media rows and physical
+files, not only database relationships.
+
+Independent browser QA found:
+
+- all eight hubs rendered without horizontal overflow or browser/page
+  exceptions at `1440x900` and `390x844`;
+- the target tour had no horizontal overflow at widths 320, 390, 430, 768,
+  1024 and 1440;
+- the target tour route was correct:
+  `Hanoi / Ninh Binh / Sapa / Fansipan / Halong`;
+- internal BestPrice provenance was not visible;
+- three related journeys resolved to real tour URLs;
+- the mobile consultation bar was fixed and visible from the first viewport at
+  widths 320, 390, 430 and 768.
+
+WP4 is nevertheless **blocked** by these release blockers:
+
+1. The production clone has all eight hub page rows, but
+   `wings_side_hi_fi_enabled`, `wings_side_hi_fi_route_variant`, hero/form
+   relationships and structured hi-fi content are null. Production mode
+   correctly disables the development copy fallback, so all eight pages render
+   the legacy CMS body. Each page has zero `data-od-id` markers and does not
+   match the approved hi-fi prototype.
+2. `/contact-us` has zero forms. `/plan-your-trip` has one legacy layout form,
+   but neither page has the required hi-fi form relationship.
+3. The target tour has zero enquiry forms and 42 markers instead of the locked
+   45-marker/one-form contract. The missing form relationship accounts for the
+   absent enquiry controls.
+4. The repaired target hero media row resolves to
+   `dcv-vietnam-tours-best-of-northern-vietnam-6-days-01-8d94b634.jpg`, but the
+   physical file is absent from the RC media volume.
+5. The target meta description still contains awkward public copy:
+   `experience. Socialize yourself...`.
+
+The domain-mode go-live review completed 91/91 checks and returned `blocked`.
+Its contact/form, console/media and legacy-theme findings are valid. Its
+canonical ownership, HTTPS final-URL and forbidden-development-host findings
+are loopback-proxy false positives: direct host-header probes independently
+confirmed the canonical, robots and sitemap URLs use `https://wingside.vn`.
+Security headers were present, with CSP intentionally in report-only mode.
+
+Grok `botstack-grok-4.5` was used as the WP4 worker, but its report was rejected
+as release evidence because it claimed browser/DOM pass without screenshots,
+listed the wrong eight-page inventory and reported one form/45 markers despite
+the independently observed zero forms/42 markers.
+
+WP5 is not authorized. Before WP4 can be rerun:
+
+1. add and rehearse an exact-scope release data migration/seed for the eight
+   WingsSide hi-fi hub records, including valid Plan and Contact form
+   relationships;
+2. extend the PostgreSQL/media repair gate to verify and stage the physical
+   `dcv-` media files referenced by the 22 repaired tours;
+3. repair the remaining target meta copy;
+4. rebuild/restart the same immutable application candidate against the
+   corrected clone and repeat the full WP4 browser and go-live gates.
+
+### WP4 remediation accepted on local RC - 2026-07-23
+
+The blocked WP4 candidate was remediated in the same release worktree and
+rehearsed only against PostgreSQL clone `wingstravel_wp4r`. Production remained
+frozen. No SSH, production database write, deployment, traffic switch, merge
+to `master` or form submission occurred.
+
+The accepted remediation adds guarded, durable plans for:
+
+- exactly eight `wing-side` hi-fi hub pages across five locales, with 40
+  before/after checksummed entries and one owner for the Plan/Contact forms;
+- exactly 22 BestPrice tours;
+- 732 physical media files: 714 files belonging to the 22-tour batch and 18
+  shared `wing-side` assets, while retaining exactly 22 hero entries;
+- tenant identity `wingside.vn`, technical code `wing-side`, theme
+  `wings-side` and local alias `/wingsside`;
+- localized style-page SEO copy and the public support email/link typo repair.
+
+Rollback rehearsal evidence:
+
+```text
+hub content: rollback 40/40, re-apply 40/40
+tour repair: post-apply dry-run changed=0, unchanged=22
+media: apply 732/732, rollback removed 732/732, re-apply 732/732
+style SEO: apply 20 rows at 114-127 chars, rollback to 35-42, re-apply
+public contact identity:
+  apply -> hello@wingside.vn, 0 current/0 version typo links
+  rollback -> hello@wingsside.vn, 2 current/10 version typo links
+  re-apply -> hello@wingside.vn, 0 current/0 version typo links
+```
+
+The final optimized standalone RC used PostgreSQL 16, Redis 7 and disabled lead
+delivery. The final accepted evidence is:
+
+```text
+production build and standalone packaging: PASS
+standalone media: 732 files
+browser matrix: 54/54, 0 failures, 18 screenshots
+breakpoints: 320, 390, 430, 768, 1024 and 1440
+22/22 tour URL smoke: HTTP 200
+target tour: 1 form, 45 markers, 3 real related tours
+go-live review: 91/91 complete
+site probe tenant/SEO/security: PASS, 0 blockers, 0 warnings
+overall/release decision: pass_with_notes
+wrong public domain/email occurrences in final evidence: 0/0
+```
+
+Final code verification:
+
+```text
+Node go-live reviewer tests: 14/14
+focused unit tests: 26/26
+focused component tests: 14/14
+site-domain integration tests: 6/6
+TypeScript: PASS
+targeted ESLint: 0 errors, 51 pre-existing warnings
+```
+
+Grok `botstack-grok-4.5` completed a read-only adversarial review and initially
+classified the legacy support email as non-blocking. The leader rejected that
+classification after direct JSON and PostgreSQL evidence showed
+`hello@wingsside.vn` repeated in public page bodies. The accepted RC is the
+subsequent build after the scoped contact/link identity migration and its
+apply/rollback/re-apply proof.
+
+`pass_with_notes` is not production deployment approval. Remaining notes are
+empty alt text on decorative/brand images that have adjacent visible brand
+text. WP5 deploy and VPS post-deploy audit remain separate approval gates.

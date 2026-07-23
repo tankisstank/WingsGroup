@@ -1,4 +1,5 @@
 import type { Where } from 'payload'
+import { createHash } from 'node:crypto'
 
 import { getWingsSideHiFiCopy } from '../../src/components/WingsSideHiFi/copy'
 import {
@@ -1136,3 +1137,247 @@ export const wingsSideHiFiSeedRoutePaths = () =>
     path: WINGSSIDE_HIFI_VARIANT_TO_PATH[variant],
     variant,
   }))
+
+const stableJsonValue = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(stableJsonValue)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, child]) => [key, stableJsonValue(child)]),
+    )
+  }
+  return value
+}
+
+export const checksumWingsSideHiFiValue = (value: unknown): string =>
+  createHash('sha256')
+    .update(JSON.stringify(stableJsonValue(value)))
+    .digest('hex')
+
+export type WingsSideHiFiReleasePlanEntry = {
+  after: Record<string, unknown>
+  afterChecksum: string
+  before: Record<string, unknown> | null
+  beforeChecksum: string
+  locale: WingsSideHiFiSeedLocale
+  pageId: number | string
+  pathname: string
+  routeVariant: WingsSideHiFiRouteVariant
+}
+
+export type WingsSideHiFiReleasePlan = {
+  createdAt: string
+  entries: WingsSideHiFiReleasePlanEntry[]
+  localeCount: number
+  pageCount: number
+  planForm: Extract<WingsSideHiFiPlanFormResolveResult, { ok: true }>
+  siteCode: typeof WINGSSIDE_HIFI_SEED_SITE_CODE
+  version: 1
+}
+
+const assertExactReleasePlanScope = (plan: WingsSideHiFiReleasePlan) => {
+  if (plan.version !== 1)
+    throw new Error(`Unsupported WingSide release plan version: ${plan.version}`)
+  if (plan.siteCode !== WINGSSIDE_HIFI_SEED_SITE_CODE) {
+    throw new Error(`Release plan site must be ${WINGSSIDE_HIFI_SEED_SITE_CODE}`)
+  }
+  const targets = listWingsSideHiFiSeedTargets()
+  const expectedKeys = new Set(
+    WINGSSIDE_HIFI_SEED_LOCALES.flatMap((locale) =>
+      targets.map((target) => `${locale}:${target.pathname}:${target.routeVariant}`),
+    ),
+  )
+  const actualKeys = plan.entries.map(
+    (entry) => `${entry.locale}:${entry.pathname}:${entry.routeVariant}`,
+  )
+  if (
+    plan.entries.length !== expectedKeys.size ||
+    new Set(actualKeys).size !== expectedKeys.size ||
+    actualKeys.some((key) => !expectedKeys.has(key))
+  ) {
+    throw new Error(
+      `Release plan scope mismatch: expected ${expectedKeys.size} exact locale/route entries, received ${plan.entries.length}`,
+    )
+  }
+  if (
+    plan.pageCount !== targets.length ||
+    plan.localeCount !== WINGSSIDE_HIFI_SEED_LOCALES.length
+  ) {
+    throw new Error('Release plan count metadata does not match the fixed WingSide scope')
+  }
+}
+
+export const buildWingsSideHiFiReleasePlan = async (args: {
+  payload: WingsSideHiFiSeedPayload
+  siteCode: string
+}): Promise<WingsSideHiFiReleasePlan> => {
+  if (args.siteCode !== WINGSSIDE_HIFI_SEED_SITE_CODE) {
+    throw new Error(`Release remediation is restricted to ${WINGSSIDE_HIFI_SEED_SITE_CODE}`)
+  }
+  const planForm = await resolveWingsSideHiFiPlanForm({
+    payload: args.payload,
+    siteCode: args.siteCode,
+  })
+  if (!planForm.ok) {
+    throw new Error(`Planner form resolution failed: ${planForm.reason}: ${planForm.detail}`)
+  }
+
+  const targets = listWingsSideHiFiSeedTargets()
+  const entries: WingsSideHiFiReleasePlanEntry[] = []
+  for (const locale of WINGSSIDE_HIFI_SEED_LOCALES) {
+    const pages = await fetchWingsSideHiFiPagesForLocale({
+      locale,
+      payload: args.payload,
+      siteCode: args.siteCode,
+      targets,
+    })
+    for (const target of targets) {
+      const matches = pages.filter((page) => matchPage(page, target))
+      if (matches.length !== 1) {
+        throw new Error(
+          `Expected exactly one ${locale} page for ${target.pathname}; found ${matches.length}`,
+        )
+      }
+      const page = matches[0]!
+      const before =
+        page.wingsSideHiFi && typeof page.wingsSideHiFi === 'object'
+          ? (page.wingsSideHiFi as Record<string, unknown>)
+          : null
+      let after = buildPayloadFromCopy(locale, target.routeVariant)
+      if (target.routeVariant === 'plan' || target.routeVariant === 'contact') {
+        after = attachResolvedPlanForm(after, planForm.formId)
+      }
+      after = mergeStableArrayRowIds(after, before, target.routeVariant) as Record<string, unknown>
+      entries.push({
+        after,
+        afterChecksum: checksumWingsSideHiFiValue(after),
+        before,
+        beforeChecksum: checksumWingsSideHiFiValue(before),
+        locale,
+        pageId: page.id,
+        pathname: target.pathname,
+        routeVariant: target.routeVariant,
+      })
+    }
+  }
+
+  const plan: WingsSideHiFiReleasePlan = {
+    createdAt: new Date().toISOString(),
+    entries,
+    localeCount: WINGSSIDE_HIFI_SEED_LOCALES.length,
+    pageCount: targets.length,
+    planForm,
+    siteCode: WINGSSIDE_HIFI_SEED_SITE_CODE,
+    version: 1,
+  }
+  assertExactReleasePlanScope(plan)
+  return plan
+}
+
+const readReleasePlanCurrentValues = async (args: {
+  payload: WingsSideHiFiSeedPayload
+  plan: WingsSideHiFiReleasePlan
+}) => {
+  const targets = listWingsSideHiFiSeedTargets()
+  const values = new Map<string, Record<string, unknown> | null>()
+  for (const locale of WINGSSIDE_HIFI_SEED_LOCALES) {
+    const pages = await fetchWingsSideHiFiPagesForLocale({
+      locale,
+      payload: args.payload,
+      siteCode: args.plan.siteCode,
+      targets,
+    })
+    for (const entry of args.plan.entries.filter((candidate) => candidate.locale === locale)) {
+      const matches = pages.filter((page) => String(page.id) === String(entry.pageId))
+      if (matches.length !== 1) {
+        throw new Error(`Page ${entry.pageId} (${locale}) is missing or ambiguous`)
+      }
+      const current = matches[0]!.wingsSideHiFi
+      values.set(
+        `${locale}:${entry.pageId}`,
+        current && typeof current === 'object' ? (current as Record<string, unknown>) : null,
+      )
+    }
+  }
+  return values
+}
+
+export const executeWingsSideHiFiReleasePlan = async (args: {
+  direction: 'apply' | 'rollback'
+  payload: WingsSideHiFiSeedPayload
+  plan: WingsSideHiFiReleasePlan
+  req?: unknown
+}): Promise<{ direction: 'apply' | 'rollback'; mutated: number; verified: number }> => {
+  if (typeof args.payload.update !== 'function')
+    throw new Error('Release execution requires update')
+  assertExactReleasePlanScope(args.plan)
+  const currentValues = await readReleasePlanCurrentValues(args)
+  const sourceKey = args.direction === 'apply' ? 'before' : 'after'
+  const sourceChecksumKey = args.direction === 'apply' ? 'beforeChecksum' : 'afterChecksum'
+  const targetKey = args.direction === 'apply' ? 'after' : 'before'
+  const targetChecksumKey = args.direction === 'apply' ? 'afterChecksum' : 'beforeChecksum'
+
+  for (const entry of args.plan.entries) {
+    const current = currentValues.get(`${entry.locale}:${entry.pageId}`) ?? null
+    const sourceMatches =
+      sourceKey === 'after'
+        ? valuesEquivalent(current, entry.after)
+        : checksumWingsSideHiFiValue(current) === entry[sourceChecksumKey]
+    if (!sourceMatches) {
+      throw new Error(
+        `Drift detected before ${args.direction}: ${entry.locale} ${entry.pathname} does not match plan ${sourceKey}`,
+      )
+    }
+  }
+
+  const completed: WingsSideHiFiReleasePlanEntry[] = []
+  try {
+    for (const entry of args.plan.entries) {
+      await args.payload.update({
+        collection: 'pages',
+        context: seedWriteContext,
+        data: { wingsSideHiFi: entry[targetKey] },
+        depth: 0,
+        id: entry.pageId,
+        locale: entry.locale,
+        overrideAccess: true,
+        req: args.req,
+      })
+      completed.push(entry)
+    }
+
+    const verifiedValues = await readReleasePlanCurrentValues(args)
+    for (const entry of args.plan.entries) {
+      const current = verifiedValues.get(`${entry.locale}:${entry.pageId}`) ?? null
+      const targetMatches =
+        targetKey === 'after'
+          ? valuesEquivalent(current, entry.after)
+          : checksumWingsSideHiFiValue(current) === entry[targetChecksumKey]
+      if (!targetMatches) {
+        throw new Error(
+          `Verification failed after ${args.direction}: ${entry.locale} ${entry.pathname}`,
+        )
+      }
+    }
+  } catch (error) {
+    for (const entry of completed.reverse()) {
+      await args.payload.update({
+        collection: 'pages',
+        context: seedWriteContext,
+        data: { wingsSideHiFi: entry[sourceKey] },
+        depth: 0,
+        id: entry.pageId,
+        locale: entry.locale,
+        overrideAccess: true,
+        req: args.req,
+      })
+    }
+    throw error
+  }
+  return {
+    direction: args.direction,
+    mutated: completed.length,
+    verified: args.plan.entries.length,
+  }
+}

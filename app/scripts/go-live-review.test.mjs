@@ -10,7 +10,10 @@ import {
   checkpointVersion,
   deriveSiteDecision,
   extractAdvertisedURLs,
+  hostnameBelongsToSite,
+  hasStrongCTA,
   identityFingerprint,
+  normalizeHostname,
   parseCheckpoint,
   positiveInteger,
   reviewSiteProbe,
@@ -119,6 +122,19 @@ test('SEO extraction ignores XML namespace declarations and reads only advertise
     ),
     ['https://wingsgroup.vn', 'https://wingsgroup.vn/sitemap.xml'],
   )
+})
+
+test('public hostname comparison normalizes URL, www, case, and trailing dot variants', () => {
+  assert.equal(normalizeHostname('HTTPS://WWW.WingSide.VN./en'), 'wingside.vn')
+  assert.equal(hostnameBelongsToSite('www.wingside.vn.', ['wingside.vn']), true)
+  assert.equal(hostnameBelongsToSite('wingsside.vn', ['wingside.vn']), false)
+})
+
+test('CTA review recognizes the real WingsSide conversion vocabulary', () => {
+  for (const label of ['Plan trip', 'Consult', 'Share your brief', 'Write a message']) {
+    assert.equal(hasStrongCTA(label), true, label)
+  }
+  assert.equal(hasStrongCTA('Explore our story'), false)
 })
 
 test('streaming JSONL appends remain parseable under concurrent completion', async () => {
