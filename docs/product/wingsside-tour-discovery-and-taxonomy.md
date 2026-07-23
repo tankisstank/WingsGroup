@@ -8,7 +8,8 @@ hi-fi composition.
 
 ## Source Of Truth
 
-- Product truth: `tour-products` scoped to site code `wings-side`.
+- Product truth: `tour-products` scoped to tenant code `wing-side`; the
+  intentionally separate theme key remains `wings-side`.
 - Imported baseline: batch `wingsside-bestprice-22-20260717`.
 - Route truth: the published `wrapperPage` belonging to the same site.
 - Home curation truth: explicit CMS relationships and order, not component

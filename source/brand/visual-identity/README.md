@@ -31,30 +31,31 @@ scripts; the markdown files are easier for human review.
 - `sites/wingscare.md`
 - `sites/wingsplus.md`
 
-| Runtime site code | Display title | Logo source | Required favicon | Tagline | Value line | Approx colors |
-| --- | --- | --- | --- | --- | --- | --- |
-| `wingsgroup` | WingsGroup | `pdf/WINGSGROUP.pdf` | required | Fly further. Together | n/a | `#005090`, `#FDB515` |
-| `wingsgo` | WingsGo | `pdf/WINGS GO.pdf` | required | Go More. Feel More. | GLOBAL MINDSET | `#005090`, `#0090E0` |
-| `wingspass` | WingsPass | `pdf/WINGS PASS.pdf` | required | Your Journey. Seamless. | EXCEPTIONAL EXPERIENCES | `#005090`, `#008070` |
-| `wingsside` | Wing Side | `pdf/WINGS SIDE.pdf` | required | See Vietnam Differently. | TRUST & CARE | `#005090`, `#104030`, `#C09030` |
-| `wingscare` | WingsCare | `pdf/WINGS CARE.pdf` | required | We Care. You Enjoy. | INNOVATION & AGILITY | `#005090`, `#F02020` |
-| `wingsplus` | WingsPlus | `pdf/WINGS PLUSS.pdf` | required | More Benefits. More Journeys. | TOGETHER WE GO FURTHER | `#005090`, `#6040A0` |
+| Runtime site code | Display title | Logo source           | Required favicon | Tagline                       | Value line              | Approx colors                   |
+| ----------------- | ------------- | --------------------- | ---------------- | ----------------------------- | ----------------------- | ------------------------------- |
+| `wingsgroup`      | WingsGroup    | `pdf/WINGSGROUP.pdf`  | required         | Fly further. Together         | n/a                     | `#005090`, `#FDB515`            |
+| `wingsgo`         | WingsGo       | `pdf/WINGS GO.pdf`    | required         | Go More. Feel More.           | GLOBAL MINDSET          | `#005090`, `#0090E0`            |
+| `wingspass`       | WingsPass     | `pdf/WINGS PASS.pdf`  | required         | Your Journey. Seamless.       | EXCEPTIONAL EXPERIENCES | `#005090`, `#008070`            |
+| `wing-side`       | wingside.vn   | `pdf/WINGS SIDE.pdf`  | required         | See Vietnam Differently.      | TRUST & CARE            | `#005090`, `#104030`, `#C09030` |
+| `wingscare`       | WingsCare     | `pdf/WINGS CARE.pdf`  | required         | We Care. You Enjoy.           | INNOVATION & AGILITY    | `#005090`, `#F02020`            |
+| `wingsplus`       | WingsPlus     | `pdf/WINGS PLUSS.pdf` | required         | More Benefits. More Journeys. | TOGETHER WE GO FURTHER  | `#005090`, `#6040A0`            |
 
-Note: the application architecture uses the runtime site code `wingsside`, while
-the supplied brand board displays the title as `Wing Side`.
+Note: the application uses tenant code `wing-side`, local alias `/wingsside`,
+and public name `wingside.vn`. The supplied brand board title `WING SIDE` is
+source-artifact provenance, not the current tenant or public naming contract.
 
 ## Files
 
-| File | Scope | Extracted signals |
-| --- | --- | --- |
+| File                  | Scope                            | Extracted signals                                                          |
+| --------------------- | -------------------------------- | -------------------------------------------------------------------------- |
 | `pdf/WINGS - ALL.pdf` | Full Wings ecosystem brand board | WingsCorp, WingsGroup, WingsGo, WingsPass, Wing Side, WingsCare, WingsPlus |
-| `pdf/WINGSCORP.pdf` | Corporate/master brand board | WingsCorp mark, "Fly further. Together" |
-| `pdf/WINGSGROUP.pdf` | WingsGroup umbrella brand board | WingsGroup mark, "Fly further. Together" |
-| `pdf/WINGS GO.pdf` | WingsGo site identity | "Go More. Feel More.", "GLOBAL MINDSET" |
-| `pdf/WINGS PASS.pdf` | WingsPass site identity | "Your Journey. Seamless.", "EXCEPTIONAL EXPERIENCES" |
-| `pdf/WINGS SIDE.pdf` | Wing Side site identity | "See Vietnam Differently.", "TRUST & CARE" |
-| `pdf/WINGS CARE.pdf` | WingsCare site identity | "We Care. You Enjoy.", "INNOVATION & AGILITY" |
-| `pdf/WINGS PLUSS.pdf` | WingsPlus site identity | "More Benefits. More Journeys.", "TOGETHER WE GO FURTHER" |
+| `pdf/WINGSCORP.pdf`   | Corporate/master brand board     | WingsCorp mark, "Fly further. Together"                                    |
+| `pdf/WINGSGROUP.pdf`  | WingsGroup umbrella brand board  | WingsGroup mark, "Fly further. Together"                                   |
+| `pdf/WINGS GO.pdf`    | WingsGo site identity            | "Go More. Feel More.", "GLOBAL MINDSET"                                    |
+| `pdf/WINGS PASS.pdf`  | WingsPass site identity          | "Your Journey. Seamless.", "EXCEPTIONAL EXPERIENCES"                       |
+| `pdf/WINGS SIDE.pdf`  | Wing Side site identity          | "See Vietnam Differently.", "TRUST & CARE"                                 |
+| `pdf/WINGS CARE.pdf`  | WingsCare site identity          | "We Care. You Enjoy.", "INNOVATION & AGILITY"                              |
+| `pdf/WINGS PLUSS.pdf` | WingsPlus site identity          | "More Benefits. More Journeys.", "TOGETHER WE GO FURTHER"                  |
 
 Note: `WINGS PLUSS.pdf` keeps the original filename from the supplied design
 package, including the double `S`.

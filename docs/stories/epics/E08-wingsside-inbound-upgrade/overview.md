@@ -1,5 +1,11 @@
 # E08 - WingsSide inbound upgrade
 
+> Current identity contract: public site name `wingside.vn`, technical tenant
+> code `wing-side`, local alias `/wingsside`, theme key `wings-side`. Historical
+> story wording may retain `WingsSide` when describing earlier evidence; new
+> implementation and launch decisions follow
+> `docs/product/wingside-identity-contract.md`.
+
 ## Status
 
 in progress
@@ -17,24 +23,24 @@ architecture and avoids building a parallel site, CMS, or page builder.
 
 ## Workstreams
 
-| Story | Lane | Status | Workstream |
-| --- | --- | --- | --- |
-| US-026 | normal | implemented | Audit and story setup |
-| US-027 | normal | implemented | Theme foundation |
-| US-028 | normal | implemented | Motion primitives |
-| US-029 | normal | implemented | Inbound hero and search preset |
-| US-030 | normal | implemented | Page Composer block upgrades |
-| US-031 | high-risk | implemented | Locale infrastructure expansion |
-| US-032 | normal | implemented | Header, mega menu, language switcher |
-| US-033 | normal | implemented | Content and media seed |
-| US-034 | normal | implemented | Launch readiness proof |
-| US-045 | high-risk | implemented locally | BestPrice 22 import and publish preparation |
-| US-046 | high-risk | in_progress | WingSide consultative tour detail — corrective (NO-GO hub fidelity) |
-| US-046A | high-risk | in_progress | WingSide 8-page hi-fi funnel remediation (tranche A+) |
-| US-047 | normal | implemented locally | Reusable credentials and awards carousel block |
-| US-048 | high-risk | implemented locally | Eight-page hi-fi parity remediation and DOM review contract |
-| US-049 | high-risk | planned | WingsSide tour taxonomy and BestPrice 22 classification |
-| US-050 | high-risk | planned | Real-tour Home discovery and BUG-WS-001 remediation |
+| Story   | Lane      | Status              | Workstream                                                          |
+| ------- | --------- | ------------------- | ------------------------------------------------------------------- |
+| US-026  | normal    | implemented         | Audit and story setup                                               |
+| US-027  | normal    | implemented         | Theme foundation                                                    |
+| US-028  | normal    | implemented         | Motion primitives                                                   |
+| US-029  | normal    | implemented         | Inbound hero and search preset                                      |
+| US-030  | normal    | implemented         | Page Composer block upgrades                                        |
+| US-031  | high-risk | implemented         | Locale infrastructure expansion                                     |
+| US-032  | normal    | implemented         | Header, mega menu, language switcher                                |
+| US-033  | normal    | implemented         | Content and media seed                                              |
+| US-034  | normal    | implemented         | Launch readiness proof                                              |
+| US-045  | high-risk | implemented locally | BestPrice 22 import and publish preparation                         |
+| US-046  | high-risk | in_progress         | WingSide consultative tour detail — corrective (NO-GO hub fidelity) |
+| US-046A | high-risk | in_progress         | WingSide 8-page hi-fi funnel remediation (tranche A+)               |
+| US-047  | normal    | implemented locally | Reusable credentials and awards carousel block                      |
+| US-048  | high-risk | implemented locally | Eight-page hi-fi parity remediation and DOM review contract         |
+| US-049  | high-risk | planned             | WingsSide tour taxonomy and BestPrice 22 classification             |
+| US-050  | high-risk | planned             | Real-tour Home discovery and BUG-WS-001 remediation                 |
 
 ## Current evidence
 

@@ -7,7 +7,7 @@ Từ transcript, website benchmark, Google Docs/Sheet và bộ ảnh tour, có t
 - Khách hàng không chỉ muốn một website công ty. Họ muốn một hệ nhiều site theo line business.
 - Các domain được gán vai trò khá cụ thể:
   - `wingsgroup.vn`: site tổng/hub hệ sinh thái.
-  - `wingsside.vn`: inbound.
+  - `wingside.vn`: inbound.
   - `wingsgo.vn`: outbound.
   - `wingsplus.vn`: MICE, private, thị trường khó, long-haul, high-value.
   - `wingspass`: fast track.
@@ -71,7 +71,7 @@ Những gì cần bổ sung so với mức hiện tại:
 Thứ tự hợp lý:
 
 1. `wingsgo.vn`
-2. `wingsside.vn`
+2. `wingside.vn`
 3. `wingspass`
 4. `wingsplus.vn`
 5. `wingscare` sau cùng nếu còn capacity

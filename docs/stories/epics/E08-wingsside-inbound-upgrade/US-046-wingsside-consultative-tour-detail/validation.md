@@ -1,5 +1,17 @@
 # US-046 Validation
 
+> **2026-07-23 release-blocker orchestration:** WP1 local code gate passed
+> adversarial review: canonical identity is `wingside.vn` / `wing-side`,
+> PostgreSQL 16.14 empty-to-head migration passed, 35 focused identity/SEO/
+> security/import tests passed, and host-header probes passed on public, Admin,
+> media and SEO routes. WP2 remains **blocked**: the exact-scope cleanup dry-run
+> proves 22 products and 22 wrappers with checksums, but the general importer
+> dry-run exceeds 15 minutes because it enumerates sample records outside the
+> target batch; its rollback also does not restore updated field values. The
+> importer is not approved for production apply. See
+> `../wingside-go-live-grok-orchestration.md` for worker sessions, independent
+> audit findings and the selected exact-scope repair-tool design.
+
 > **2026-07-22 tour-detail remediation re-audit:** **substantially complete;
 > strict parity still needs fix**. The sales-content P0 defects are closed:
 > route is Hanoi / Ninh Binh / Sapa / Fansipan / Halong, Included and Excluded
@@ -383,3 +395,67 @@ Final adaptive release evidence:
   Two PowerShell-driven agent-browser loops for all 22 URLs stalled at the local
   runner layer without product or data mutation; deterministic 22/22 HTTP proof
   plus browser proof for the four named tours provides the final coverage.
+
+## 2026-07-23 go-live repair gate
+
+Production deploy and data writes are frozen while the current hi-fi/tour-detail
+release is normalized.
+
+The exact-scope BestPrice release repair package now has:
+
+- a pure 22-record planner with exact before snapshots, portable source/scope
+  checksums and symmetric rollback payloads;
+- a bounded CLI that directly queries tenant `wing-side` plus batch
+  `wingsside-bestprice-22-20260717`;
+- one Payload/PostgreSQL transaction for TourProduct, wrapper Page and referenced
+  hero Media field updates;
+- refusal of count, tenant, relation, source, provenance, filename, mixed-state
+  and unknown-state drift;
+- explicit teardown after awaited `payload.destroy()`.
+
+Independent evidence:
+
+- TypeScript: pass.
+- Planner unit test: 19/19 pass.
+- SQLite fail-closed adapter test: 1/1 pass.
+- Disposable PostgreSQL 16 empty-to-head migrations: pass.
+- PostgreSQL transaction apply/injected-failure rollback/exact rollback test:
+  1/1 pass.
+- Local real-data dry-run: 22 records, 22 changed, zero writes, zero
+  create/delete, 12.01 seconds, exit 0.
+- Dry-run aggregate checksum before:
+  `1b74c19389f9714f10f2cb3c4546907b272116c8a47ebccdc143398dc5cd73d1`.
+- Dry-run aggregate checksum after:
+  `266a99c798d53b677d314b1ebd79c59db65d76b98c2fde3e0022e8cf81d6fd71`.
+
+This accepts the repair implementation, not production apply. The next required
+gate is a checksummed production PostgreSQL backup followed by dry-run,
+apply/verification and rollback rehearsal on a disposable PostgreSQL clone.
+Production maintenance still requires explicit owner approval.
+
+### Production backup clone rehearsal
+
+Owner approval was received for backup and clone rehearsal only.
+
+- Production PostgreSQL 16.14 custom-format backup completed.
+- Remote and local SHA-256 matched:
+  `75a9212976a8e08d1674d312afc93b03729494cc14896d77c8b279e76e74e824`.
+- Backup restored successfully to a disposable PostgreSQL 16 clone.
+- The clone reproduced the legacy production tenant code `wings-side`.
+- Five pending committed migrations passed on the clone after explicitly
+  accepting Payload's historical dynamic-push warning there only.
+- Tenant identity became `wingside.vn` / `wing-side`.
+- Exact-scope repair dry-run found 22/22 changed and zero writes.
+- Apply completed atomically; post-apply dry-run found 0 changed / 22 unchanged.
+- Inventory and content audit passed: 22 unique published products and
+  same-site published wrappers, 22 valid heroes/alts, no duplicate stable keys,
+  no internal provenance, no glued meta copy and no excluded-service labels
+  left in Included.
+- Rollback restored the exact aggregate before checksum
+  `daa0fe76afae820e6e52f45483de4c68b4f7b3638647ba15eb151d233fc5fc99`.
+- Repeated rollback was a zero-write no-op.
+- The disposable clone and all rehearsal processes were removed.
+
+The production backup is retained under the documented backup policy.
+Production migration, repair apply and deployment were not performed and still
+require a separate maintenance approval.

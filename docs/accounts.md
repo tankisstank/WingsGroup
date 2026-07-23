@@ -8,15 +8,15 @@ application secrets.
 
 ## VPS
 
-| Field | Value |
-| --- | --- |
-| Public IP | `168.110.212.116` |
-| Hostname | `instance-20260604-2317` |
-| OS | Ubuntu 24.04.4 LTS |
-| Architecture | ARM64 (`aarch64`) |
-| Resources | 2 vCPU, 11 GiB RAM, 45 GB disk |
-| SSH port | `22` |
-| SSH user | `ubuntu` |
+| Field        | Value                          |
+| ------------ | ------------------------------ |
+| Public IP    | `168.110.212.116`              |
+| Hostname     | `instance-20260604-2317`       |
+| OS           | Ubuntu 24.04.4 LTS             |
+| Architecture | ARM64 (`aarch64`)              |
+| Resources    | 2 vCPU, 11 GiB RAM, 45 GB disk |
+| SSH port     | `22`                           |
+| SSH user     | `ubuntu`                       |
 
 The VPS is hosted on Oracle Cloud infrastructure. Public access also depends
 on the Oracle Cloud Security List or Network Security Group, not only the
@@ -63,15 +63,15 @@ Important access rule:
 
 ## aaPanel
 
-| Field | Value |
-| --- | --- |
-| Installation directory | `/www/server/panel` |
-| Panel service | `btpanel.service` |
-| Panel port | `14199` |
-| Security path | `/929fd0c3` |
-| Nginx virtual hosts | `/www/server/panel/vhost/nginx/` |
+| Field                                     | Value                                               |
+| ----------------------------------------- | --------------------------------------------------- |
+| Installation directory                    | `/www/server/panel`                                 |
+| Panel service                             | `btpanel.service`                                   |
+| Panel port                                | `14199`                                             |
+| Security path                             | `/929fd0c3`                                         |
+| Nginx virtual hosts                       | `/www/server/panel/vhost/nginx/`                    |
 | Shared origin cert for WingsGroup domains | `/www/server/panel/vhost/cert/wings-travel-shared/` |
-| Cloudflare Origin Certificate files | `fullchain.pem`, `privkey.pem` |
+| Cloudflare Origin Certificate files       | `fullchain.pem`, `privkey.pem`                      |
 
 Preferred access through Tailscale:
 
@@ -106,13 +106,13 @@ sudo nginx -t
 
 ## Tailscale
 
-| Field | Value |
-| --- | --- |
-| Service | `tailscaled.service` |
-| Current node name | `qlv-sql-proxy-vps-2` |
-| Tailscale IPv4 | `100.105.131.116` |
-| MagicDNS name | `qlv-sql-proxy-vps-2.taild819fc.ts.net` |
-| Tailnet DNS suffix | `taild819fc.ts.net` |
+| Field              | Value                                   |
+| ------------------ | --------------------------------------- |
+| Service            | `tailscaled.service`                    |
+| Current node name  | `qlv-sql-proxy-vps-2`                   |
+| Tailscale IPv4     | `100.105.131.116`                       |
+| MagicDNS name      | `qlv-sql-proxy-vps-2.taild819fc.ts.net` |
+| Tailnet DNS suffix | `taild819fc.ts.net`                     |
 
 Useful checks:
 
@@ -126,23 +126,23 @@ sudo tailscale ping mdl-gold
 
 Known SQL nodes:
 
-| Node | Tailscale IPv4 | SQL port |
-| --- | --- | --- |
-| `mdl` | `100.92.172.107` | `1433` |
-| `mdl-gold` | `100.81.78.26` | `1433` |
+| Node       | Tailscale IPv4   | SQL port |
+| ---------- | ---------------- | -------- |
+| `mdl`      | `100.92.172.107` | `1433`   |
+| `mdl-gold` | `100.81.78.26`   | `1433`   |
 
 ## Tailscale SQL Proxy
 
 The previous QLV deployment remains active and is independent from
 WingsGroup.
 
-| Field | Value |
-| --- | --- |
+| Field                | Value                                  |
+| -------------------- | -------------------------------------- |
 | Deployment directory | `/home/ubuntu/tailscale-service-proxy` |
-| Docker container | `tailscale-service-proxy-tcp-proxy-1` |
-| Service name | `svc:qlv-sql` |
-| Listen port | `1433` |
-| Current backend | `100.81.78.26:1433` (`mdl-gold`) |
+| Docker container     | `tailscale-service-proxy-tcp-proxy-1`  |
+| Service name         | `svc:qlv-sql`                          |
+| Listen port          | `1433`                                 |
+| Current backend      | `100.81.78.26:1433` (`mdl-gold`)       |
 
 Check status:
 
@@ -172,27 +172,31 @@ SQL proxy, compared with approximately 2-10 ms when connecting directly to
 
 ## WingsGroup Deployment
 
-| Field | Value |
-| --- | --- |
-| Public brand/app identity | `WingsGroup` |
-| Base directory | `/home/ubuntu/wings-travel` |
-| Current release link | `/home/ubuntu/wings-travel/current` |
-| Runtime environment | `/home/ubuntu/wings-travel/shared/.env` |
-| Admin credential file | `/home/ubuntu/wings-travel/shared/admin.env` |
-| Media directory | `/home/ubuntu/wings-travel/shared/data/media` |
-| Backup directory | `/home/ubuntu/wings-travel/shared/backups` |
-| Docker project | `wingstravel` |
-| Application binding | `127.0.0.1:3000` |
-| aaPanel-managed domains | `wingsgroup.vn`, `wingsgo.vn`, `wingside.vn`, `wingsplus.vn`, `wingspass.wingsgroup.vn`, `wingscare.wingsgroup.vn` |
-| TLS mode target | `Cloudflare Full` now, `Full (strict)` after origin cert rotation if needed |
+| Field                     | Value                                                                                                              |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Public brand/app identity | `WingsGroup`                                                                                                       |
+| Base directory            | `/home/ubuntu/wings-travel`                                                                                        |
+| Current release link      | `/home/ubuntu/wings-travel/current`                                                                                |
+| Runtime environment       | `/home/ubuntu/wings-travel/shared/.env`                                                                            |
+| Admin credential file     | `/home/ubuntu/wings-travel/shared/admin.env`                                                                       |
+| Media directory           | `/home/ubuntu/wings-travel/shared/data/media`                                                                      |
+| Backup directory          | `/home/ubuntu/wings-travel/shared/backups`                                                                         |
+| Docker project            | `wingstravel`                                                                                                      |
+| Application binding       | `127.0.0.1:3000`                                                                                                   |
+| aaPanel-managed domains   | `wingsgroup.vn`, `wingsgo.vn`, `wingside.vn`, `wingsplus.vn`, `wingspass.wingsgroup.vn`, `wingscare.wingsgroup.vn` |
+| TLS mode target           | `Cloudflare Full` now, `Full (strict)` after origin cert rotation if needed                                        |
 
 Production domain note, 2026-06-24:
 
-- Use `wingside.vn`, not `wingsside.vn`, for customer-facing WingsSide links.
+- Use `wingside.vn` as the public site name and canonical domain. The technical
+  tenant code is `wing-side`; `/wingsside` is only the local path alias.
 - WingsPass and WingsCare run on `wingspass.wingsgroup.vn` and
   `wingscare.wingsgroup.vn`; no separate `wingspass.vn` or `wingscare.vn`
   DNS/domain ownership is assumed for this launch.
-- The shared child-site Nginx vhost must not force `X-Site-Code: wings-side`.
+- The shared child-site Nginx vhost must not force `X-Site-Code`. Site
+  resolution should use the preserved `Host` / `X-Forwarded-Host`; when a
+  trusted internal header is required, the canonical tenant value is
+  `X-Site-Code: wing-side`.
   Site resolution should use the preserved `Host` / `X-Forwarded-Host`.
 
 Current containers:
