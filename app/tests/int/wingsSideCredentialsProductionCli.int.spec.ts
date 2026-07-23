@@ -273,10 +273,6 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
         req,
       })
     }
-    await payload.destroy()
-    payload = undefined
-    req = undefined
-
     artifactRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'wings-credentials-cli-'))
     const planPath = path.join(artifactRoot, 'plan.json')
     const plan = await runImporter(['plan', '--output', planPath])
