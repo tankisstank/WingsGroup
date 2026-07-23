@@ -11,7 +11,7 @@ import {
   type WingsSideCredentialManifest,
 } from './wingsSideCredentials'
 
-export const wingsSideCredentialsProductionSiteCode = 'wings-side'
+export const wingsSideCredentialsProductionSiteCode = 'wing-side'
 export const wingsSideCredentialsProductionLocales = ['vi', 'en', 'it', 'es', 'pt'] as const
 export const wingsSideCredentialsProductionExpectedItemCount = 24
 export const wingsSideCredentialsProductionPlanSchemaVersion = 1
@@ -248,7 +248,9 @@ export const assertPlannedCredentialUploadsAbsent = async ({
 export const normalizeCredentialsBlock = (block: Record<string, unknown>) => {
   const items = Array.isArray(block.items) ? block.items : []
   const dateOnly = (value: unknown) =>
-    typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/u.test(value) ? value.slice(0, 10) : (value ?? null)
+    typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/u.test(value)
+      ? value.slice(0, 10)
+      : (value ?? null)
   return {
     ariaLabel: block.ariaLabel ?? null,
     autoplay: block.autoplay ?? null,

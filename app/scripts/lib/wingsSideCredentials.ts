@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 export const WINGSSIDE_CREDENTIAL_LOCALES = ['en', 'vi', 'it', 'es', 'pt'] as const
-export const WINGSSIDE_CREDENTIAL_SITE_CODE = 'wings-side'
+export const WINGSSIDE_CREDENTIAL_SITE_CODE = 'wing-side'
 
 export type WingsSideCredentialLocale = (typeof WINGSSIDE_CREDENTIAL_LOCALES)[number]
 export type WingsSideCredentialItem = {
