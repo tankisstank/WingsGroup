@@ -701,3 +701,83 @@ apply/rollback/re-apply proof.
 `pass_with_notes` is not production deployment approval. Remaining notes are
 empty alt text on decorative/brand images that have adjacent visible brand
 text. WP5 deploy and VPS post-deploy audit remain separate approval gates.
+
+### WP5 production deployment and VPS re-audit - 2026-07-23
+
+The project owner explicitly authorized WP5. The leader deployed immutable
+commit `a0761ec84a5029938ba5340effb40ebba021bcab` from
+`release/wingsside-go-live-20260723`. The production release path is:
+
+```text
+/home/ubuntu/wings-travel/releases/wingsside-wp5-a0761ec84a5029938ba5340effb40ebba021bcab
+```
+
+The `current` symlink points to that release. The active application image is
+`sha256:60066a7194d045468a6b79532cd562cb8b9e17cc99c4170f6ba049595f020b84`
+and carries the full release SHA. The previous release and its image remain
+available:
+
+```text
+/home/ubuntu/wings-travel/releases/us046-adaptive-a083127-20260719T121049Z
+wingstravel-app:rollback-us046-a083127
+```
+
+Before any production write, an encrypted PostgreSQL backup was created and
+verified through both `pg_restore -l` and a decrypted-stream restore listing:
+
+```text
+backup:
+  /home/ubuntu/wings-travel/shared/backups/wingsside-wp5-predeploy-20260723T124009Z.dump.age
+encrypted SHA-256:
+  2546c64413bc2a9f5aea5007c72a29d0fa65983d4518fbe1766007d42f131c18
+plain dump SHA-256:
+  e475d50f9c44b55167920756269cf209b9cff26297688232927d9f2dc81bbd4e
+```
+
+Eight pending committed Payload migrations were applied. The guarded hi-fi
+release plan mutated and verified exactly 40 entries: eight WingsSide pages
+across five locales. The tour repair changed exactly 22 BestPrice tours, then
+its post-apply dry-run reported `changed=0` and `unchanged=22`. The resulting
+inventory has 22 unique tour IDs, wrapper IDs, hero IDs, source IDs, slugs and
+tour codes. The accepted media manifest contained 732 files and production
+matched all 732 hashes, so no media overwrite was required.
+
+The hi-fi planner reports checksum differences when regenerated after apply
+because Payload assigns internal row IDs to structured fields. This does not
+change the accepted scope: the apply operation verified all 40 entries, and
+the production DOM/browser contracts passed. It remains a tooling idempotence
+note for a later planner normalization change.
+
+The release was first exercised as an isolated canary on internal port 3001.
+After canary health, database, Redis, eight-page, 22-tour and target-tour
+checks passed, the leader atomically switched the `current` symlink and
+recreated only the application container. PostgreSQL and Redis were preserved.
+The automatic rollback condition was armed and was not triggered.
+
+Production verification against `https://wingside.vn`:
+
+```text
+go-live review: 91/91 complete, pass_with_notes
+site probe: PASS, 0 blockers, 0 warnings
+responsive browser audit: 54/54, 0 failures, 18 screenshots
+hub pages: 8/8 HTTP 200
+tour URLs: 22/22 HTTP 200
+target tour: 1 form, 45 markers, 3 real related tours
+Plan: 1 form, 0 duplicate IDs
+Contact: 1 form, 0 duplicate IDs, WhatsApp marker present
+responsive widths: 320, 390, 430, 768, 1024 and 1440
+browser console/page errors: 0
+horizontal overflow: 0
+tenant isolation: wingsgo.vn and wingsplus.vn PASS
+```
+
+Canonical, robots, sitemap and the required security headers passed on the
+public hostname. Readiness remains intentionally `degraded` only because lead
+delivery is disabled; database and Redis are up. No real form submission was
+sent during deployment or audit. The retained release, rollback image and
+encrypted database backup provide the WP5 rollback path.
+
+WP5 deployment and the immediate VPS post-deploy audit are complete. The
+release decision is `pass_with_notes`; the remaining notes are non-blocking
+decorative/brand-image alt text and the intentionally disabled lead-delivery
+integration.
