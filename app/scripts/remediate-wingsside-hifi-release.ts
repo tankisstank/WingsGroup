@@ -18,6 +18,7 @@ import {
   type WingsSideHiFiReleasePlan,
   type WingsSideHiFiSeedPayload,
 } from './lib/wingssideHiFiContentSeed'
+import { assertWingsSideReleaseWriteGuard } from './lib/wingsSideReleaseWriteGuard'
 
 const parseArgs = (argv: string[]) => {
   const value = (name: string) =>
@@ -25,10 +26,16 @@ const parseArgs = (argv: string[]) => {
   return {
     adminEmail: value('admin-email'),
     apply: argv.includes('--apply'),
+    backupPath: value('backup'),
+    backupSha256: value('backup-sha256'),
     db: argv.includes('--db'),
     json: argv.includes('--json'),
     planPath: value('plan'),
+    production: argv.includes('--production'),
+    productionConfirm: value('confirm-production'),
+    releaseSha: value('release-sha'),
     rollback: argv.includes('--rollback'),
+    rollbackRelease: value('rollback-release'),
     siteCode: value('site-code'),
   }
 }
@@ -40,36 +47,6 @@ const assertCommonGuards = (args: ReturnType<typeof parseArgs>) => {
   }
   if (!args.planPath) throw new Error('Explicit --plan=<durable-json-path> is required')
   if (args.apply && args.rollback) throw new Error('Choose only one of --apply or --rollback')
-}
-
-const assertLocalCloneWriteGuard = () => {
-  if (process.env.WINGSSIDE_RELEASE_REMEDIATION_ALLOW !== 'local-clone') {
-    throw new Error(
-      'Write blocked: set WINGSSIDE_RELEASE_REMEDIATION_ALLOW=local-clone for an approved rehearsal clone',
-    )
-  }
-  const rawUrl = process.env.DATABASE_URL
-  if (!rawUrl) throw new Error('DATABASE_URL is required')
-  const databaseUrl = new URL(rawUrl)
-  if (databaseUrl.protocol !== 'postgresql:' && databaseUrl.protocol !== 'postgres:') {
-    throw new Error('Write blocked: release rehearsal requires PostgreSQL')
-  }
-  if (!['127.0.0.1', 'localhost', '::1'].includes(databaseUrl.hostname)) {
-    throw new Error(`Write blocked: database host ${databaseUrl.hostname} is not local`)
-  }
-  const databaseName = databaseUrl.pathname.replace(/^\//, '')
-  if (!/(clone|rehearsal|wp4|test)/i.test(databaseName)) {
-    throw new Error(
-      `Write blocked: local database "${databaseName}" is not explicitly named as a clone/rehearsal`,
-    )
-  }
-  if (
-    process.env.NODE_ENV === 'production' ||
-    process.env.VERCEL ||
-    process.env.RAILWAY_ENVIRONMENT
-  ) {
-    throw new Error('Write blocked: production environment marker detected')
-  }
 }
 
 const readPlan = (planPath: string): WingsSideHiFiReleasePlan => {
@@ -110,7 +87,14 @@ const main = async () => {
       return
     }
 
-    assertLocalCloneWriteGuard()
+    assertWingsSideReleaseWriteGuard({
+      backupPath: args.backupPath,
+      backupSha256: args.backupSha256,
+      production: args.production,
+      productionConfirm: args.productionConfirm,
+      releaseSha: args.releaseSha,
+      rollbackRelease: args.rollbackRelease,
+    })
     const plan = readPlan(planPath)
     if (!args.adminEmail) {
       throw new Error('Apply and rollback require --admin-email for an existing super-admin')
