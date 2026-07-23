@@ -234,11 +234,10 @@ const loadSnapshot = async ({
   req: PayloadRequest
   siteID: number | string
 }) => {
-  const homes = await Promise.all(
-    wingsSideCredentialsProductionLocales.map((locale) =>
-      findHomeForLocale(payload, req, siteID, locale),
-    ),
-  )
+  const homes: CredentialHomeSnapshot[] = []
+  for (const locale of wingsSideCredentialsProductionLocales) {
+    homes.push(await findHomeForLocale(payload, req, siteID, locale))
+  }
   const mediaResult = await payload.find({
     collection: 'media',
     depth: 0,

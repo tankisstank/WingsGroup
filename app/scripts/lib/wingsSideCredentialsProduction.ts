@@ -186,15 +186,20 @@ export const plannedCredentialUploadFilenames = async (file: string): Promise<st
   if (!metadata.width || !metadata.height)
     throw new Error(`Cannot inspect image dimensions: ${file}`)
   const source = { height: metadata.height, width: metadata.width }
-  const sizes: ImageDimensions[] = [
-    containedWidth(source, 300),
+  const sizeConfigs: Array<ImageDimensions & { widthOnly?: boolean }> = [
+    { ...containedWidth(source, 300), widthOnly: true },
     { height: 500, width: 500 },
-    containedWidth(source, 600),
-    containedWidth(source, 900),
-    containedWidth(source, 1400),
-    containedWidth(source, 1920),
+    { ...containedWidth(source, 600), widthOnly: true },
+    { ...containedWidth(source, 900), widthOnly: true },
+    { ...containedWidth(source, 1400), widthOnly: true },
+    { ...containedWidth(source, 1920), widthOnly: true },
     { height: 630, width: 1200 },
   ]
+  const sizes = sizeConfigs.filter((dimensions) =>
+    dimensions.widthOnly
+      ? source.width >= dimensions.width
+      : !(source.width < dimensions.width && source.height < dimensions.height),
+  )
   return [file, ...sizes.map((dimensions) => sizedFilename(file, dimensions))]
 }
 
@@ -242,6 +247,8 @@ export const assertPlannedCredentialUploadsAbsent = async ({
 
 export const normalizeCredentialsBlock = (block: Record<string, unknown>) => {
   const items = Array.isArray(block.items) ? block.items : []
+  const dateOnly = (value: unknown) =>
+    typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/u.test(value) ? value.slice(0, 10) : (value ?? null)
   return {
     ariaLabel: block.ariaLabel ?? null,
     autoplay: block.autoplay ?? null,
@@ -256,7 +263,7 @@ export const normalizeCredentialsBlock = (block: Record<string, unknown>) => {
       return {
         description: row.description ?? null,
         image: credentialRelationID(row.image as Relation),
-        issuedOn: row.issuedOn ?? null,
+        issuedOn: dateOnly(row.issuedOn),
         issuer: row.issuer ?? null,
         kind: row.kind ?? null,
         label: row.label ?? null,

@@ -43,6 +43,34 @@ type QuarantinedFile = {
   quarantinePath: string
 }
 
+const firstDifference = (
+  actual: unknown,
+  expected: unknown,
+  currentPath = '$',
+): { actual: unknown; expected: unknown; path: string } | null => {
+  if (Object.is(actual, expected)) return null
+  if (
+    actual === null ||
+    expected === null ||
+    typeof actual !== 'object' ||
+    typeof expected !== 'object'
+  ) {
+    return { actual, expected, path: currentPath }
+  }
+  const actualRecord = actual as Record<string, unknown>
+  const expectedRecord = expected as Record<string, unknown>
+  const keys = new Set([...Object.keys(actualRecord), ...Object.keys(expectedRecord)])
+  for (const key of keys) {
+    const difference = firstDifference(
+      actualRecord[key],
+      expectedRecord[key],
+      `${currentPath}.${key}`,
+    )
+    if (difference) return difference
+  }
+  return null
+}
+
 const cleanupCreatedMediaEffects = async (
   payload: Payload,
   req: PayloadRequest,
@@ -145,7 +173,43 @@ const verifyCurrentAfter = ({
     siteID: plan.siteID,
   })
   if (snapshot.state !== 'after') {
-    throw new Error(`Credentials import verification failed before commit: ${snapshot.state}`)
+    const mediaByFilename = new Map(
+      snapshot.media.map((mediaItem) => [String(mediaItem.filename), mediaItem.id]),
+    )
+    const mediaIDs = new Map(
+      manifest.items.flatMap((item) => {
+        const id = mediaByFilename.get(item.file)
+        return id === undefined ? [] : [[item.id, id] as const]
+      }),
+    )
+    const diagnosticHome = homes.find((home) => home.locale === 'vi')
+    const diagnosticBlock = diagnosticHome?.layout.find(
+      (candidate) =>
+        candidate &&
+        typeof candidate === 'object' &&
+        (candidate as Record<string, unknown>).blockType === 'credentialsCarousel',
+    ) as Record<string, unknown> | undefined
+    const diagnosticActual = diagnosticBlock ? normalizeCredentialsBlock(diagnosticBlock) : null
+    const diagnosticExpected = normalizeCredentialsBlock(
+      buildWingsSideCredentialsBlock({ locale: 'vi', manifest, mediaIDs }),
+    )
+    throw new Error(
+      `Credentials import verification failed before commit: ${snapshot.state}; ` +
+        `homes=${snapshot.homes.length}; media=${snapshot.media.length}; ` +
+        `blocks=${snapshot.blocks
+          .map(
+            (block) =>
+              `${block.locale}:${block.itemCount}:${block.reviewStatusTotals.verified}/${block.reviewStatusTotals.needsReview}:` +
+              `${block.checksum.slice(0, 10)}/${afterBlockChecksum({
+                locale: block.locale,
+                manifest,
+                mediaIDs,
+              }).slice(0, 10)}`,
+          )
+          .join(',')}; sample=${JSON.stringify({
+          difference: firstDifference(diagnosticActual, diagnosticExpected),
+        })}`,
+    )
   }
   return snapshot
 }

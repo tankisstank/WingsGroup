@@ -136,18 +136,19 @@ adapterDescribe('WingsSide credentials production PostgreSQL transaction proof',
   }, 120_000)
 
   const loadSnapshot = async () => {
-    const pages = await Promise.all(
-      pageIDs.map((id, index) =>
-        payload.findByID({
+    const pages = []
+    for (let index = 0; index < pageIDs.length; index += 1) {
+      pages.push(
+        await payload.findByID({
           collection: 'pages',
           depth: 0,
-          id,
+          id: pageIDs[index],
           locale: wingsSideCredentialsProductionLocales[index],
           overrideAccess: true,
           req,
         }),
-      ),
-    )
+      )
+    }
     const homes: CredentialHomeSnapshot[] = pages.map((page, index) => {
       const layout = Array.isArray(page.layout) ? (page.layout as unknown[]) : []
       return {
@@ -211,6 +212,7 @@ adapterDescribe('WingsSide credentials production PostgreSQL transaction proof',
     })
     const firstItem = manifest.items[0]
     const existingOriginal = path.resolve('public', 'media', firstItem.file)
+    await fs.mkdir(path.dirname(existingOriginal), { recursive: true })
     await fs.writeFile(existingOriginal, 'existing-original', 'utf8')
     await expect(
       applyWingsSideCredentialsProductionPlan({ loadSnapshot, manifest, payload, plan, req }),
