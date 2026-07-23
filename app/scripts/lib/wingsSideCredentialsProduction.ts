@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import sharp from 'sharp'
 
 import {
   buildWingsSideCredentialsBlock,
@@ -25,6 +26,7 @@ export type WingsSideCredentialsSourceIdentity = {
   expectedItemCount: number
   locales: WingsSideCredentialsProductionLocale[]
   manifestSha256: string
+  releaseSourceCommit: string
   reviewStatusTotals: { needsReview: number; verified: number }
   siteCode: string
 }
@@ -34,6 +36,7 @@ export type CredentialMediaSnapshot = {
   filename: null | string
   id: number | string
   siteID: null | number | string
+  uploadFiles?: string[]
 }
 
 export type CredentialHomeSnapshot = {
@@ -78,6 +81,7 @@ export type WingsSideCredentialsPlan = {
 }
 
 type Relation = null | number | string | { id?: number | string } | { value?: number | string }
+type ImageDimensions = { height: number; width: number }
 
 const cloneJSON = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
 
@@ -109,6 +113,16 @@ export const credentialFileSha256 = async (filePath: string) => {
   }
 }
 
+export const assertReleaseSourceCommit = (value: string | undefined): string => {
+  const commit = String(value || '').trim()
+  if (!/^[a-f0-9]{40}$/u.test(commit)) {
+    throw new Error(
+      'Credentials production importer requires WINGSTRAVEL_RELEASE_SHA as a 40-hex commit',
+    )
+  }
+  return commit
+}
+
 export const reviewStatusTotalsForItems = (items: WingsSideCredentialItem[]) => ({
   needsReview: items.filter((item) => item.reviewStatus === 'needs-review').length,
   verified: items.filter((item) => item.reviewStatus === 'verified').length,
@@ -124,7 +138,9 @@ export const aggregateReviewStatusTotals = (items: WingsSideCredentialItem[]) =>
 
 export const buildWingsSideCredentialsSourceIdentity = async (
   manifest: WingsSideCredentialManifest,
+  releaseSourceCommit: string,
 ): Promise<WingsSideCredentialsSourceIdentity> => {
+  const releaseCommit = assertReleaseSourceCommit(releaseSourceCommit)
   await validateWingsSideCredentialManifest(manifest)
   if (manifest.siteCode !== wingsSideCredentialsProductionSiteCode) {
     throw new Error(
@@ -148,9 +164,38 @@ export const buildWingsSideCredentialsSourceIdentity = async (
     expectedItemCount: wingsSideCredentialsProductionExpectedItemCount,
     locales: [...wingsSideCredentialsProductionLocales],
     manifestSha256: manifestFingerprint.sha256,
+    releaseSourceCommit: releaseCommit,
     reviewStatusTotals: reviewStatusTotalsForItems(manifest.items),
     siteCode: manifest.siteCode,
   }
+}
+
+const sizedFilename = (file: string, dimensions: ImageDimensions) => {
+  const extension = path.extname(file)
+  const stem = file.slice(0, -extension.length)
+  return `${stem}-${dimensions.width}x${dimensions.height}${extension}`
+}
+
+const containedWidth = (source: ImageDimensions, width: number): ImageDimensions => ({
+  height: Math.round((source.height * width) / source.width),
+  width,
+})
+
+export const plannedCredentialUploadFilenames = async (file: string): Promise<string[]> => {
+  const metadata = await sharp(path.join(wingsSideCredentialAssetRoot, file)).metadata()
+  if (!metadata.width || !metadata.height)
+    throw new Error(`Cannot inspect image dimensions: ${file}`)
+  const source = { height: metadata.height, width: metadata.width }
+  const sizes: ImageDimensions[] = [
+    containedWidth(source, 300),
+    { height: 500, width: 500 },
+    containedWidth(source, 600),
+    containedWidth(source, 900),
+    containedWidth(source, 1400),
+    containedWidth(source, 1920),
+    { height: 630, width: 1200 },
+  ]
+  return [file, ...sizes.map((dimensions) => sizedFilename(file, dimensions))]
 }
 
 export const normalizeCredentialsBlock = (block: Record<string, unknown>) => {
@@ -389,6 +434,60 @@ export const assertWingsSideCredentialsPlan = (plan: WingsSideCredentialsPlan) =
   }
 }
 
+export const assertWingsSideCredentialsPlanMatchesSource = ({
+  manifest,
+  plan,
+  sourceIdentity,
+}: {
+  manifest: WingsSideCredentialManifest
+  plan: WingsSideCredentialsPlan
+  sourceIdentity: WingsSideCredentialsSourceIdentity
+}) => {
+  assertWingsSideCredentialsPlan(plan)
+  assertSourceIdentityMatches(plan.sourceIdentity, sourceIdentity)
+  const manifestByID = new Map(manifest.items.map((item) => [item.id, item]))
+  const sourceAssetByFile = new Map(sourceIdentity.assets.map((asset) => [asset.file, asset]))
+  const operationIDs = new Set<string>()
+  const operationFiles = new Set<string>()
+  if (plan.mediaOperations.length !== manifest.items.length) {
+    throw new Error('Credentials plan media operation count does not match manifest')
+  }
+  for (let index = 0; index < manifest.items.length; index += 1) {
+    const item = manifest.items[index]
+    const operation = plan.mediaOperations[index]
+    if (!operation || operation.action !== 'create') {
+      throw new Error(`Credentials plan missing create operation for ${item.id}`)
+    }
+    if (operationIDs.has(operation.itemID) || operationFiles.has(operation.file)) {
+      throw new Error('Credentials plan contains duplicate media operation identity')
+    }
+    operationIDs.add(operation.itemID)
+    operationFiles.add(operation.file)
+    const manifestItem = manifestByID.get(operation.itemID)
+    const asset = sourceAssetByFile.get(operation.file)
+    if (
+      !manifestItem ||
+      manifestItem.file !== operation.file ||
+      !asset ||
+      asset.sha256 !== operation.sha256 ||
+      sourceIdentity.assets[index]?.file !== item.file ||
+      sourceIdentity.assets[index]?.sha256 !== operation.sha256
+    ) {
+      throw new Error(`Credentials plan media operation drifted from manifest/source: ${item.id}`)
+    }
+  }
+  if (
+    sourceIdentity.expectedItemCount !== manifest.items.length ||
+    sourceIdentity.siteCode !== manifest.siteCode ||
+    credentialsChecksum(sourceIdentity.locales) !==
+      credentialsChecksum(wingsSideCredentialsProductionLocales) ||
+    credentialsChecksum(sourceIdentity.reviewStatusTotals) !==
+      credentialsChecksum(reviewStatusTotalsForItems(manifest.items))
+  ) {
+    throw new Error('Credentials plan source identity does not match manifest')
+  }
+}
+
 export const assertSourceIdentityMatches = (
   expected: WingsSideCredentialsSourceIdentity,
   actual: WingsSideCredentialsSourceIdentity,
@@ -421,6 +520,28 @@ export const assertCredentialsProductionEnvironment = ({
   if (!payloadPackageName.includes('db-postgres')) {
     throw new Error(
       `Credentials production importer requires Payload PostgreSQL adapter; found ${payloadPackageName}`,
+    )
+  }
+}
+
+export const assertCredentialsSiteConfig = ({
+  defaultLocale,
+  supportedLocales,
+}: {
+  defaultLocale: unknown
+  supportedLocales: unknown[]
+}) => {
+  if (defaultLocale !== 'en') {
+    throw new Error(`Site ${wingsSideCredentialsProductionSiteCode} must have defaultLocale=en`)
+  }
+  const actual = [...supportedLocales].map(String).sort()
+  const expected = [...wingsSideCredentialsProductionLocales].sort()
+  if (
+    actual.length !== expected.length ||
+    actual.some((locale, index) => locale !== expected[index])
+  ) {
+    throw new Error(
+      `Site ${wingsSideCredentialsProductionSiteCode} must have exact locales ${wingsSideCredentialsProductionLocales.join(',')}`,
     )
   }
 }

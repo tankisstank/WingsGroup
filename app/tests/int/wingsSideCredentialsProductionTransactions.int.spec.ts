@@ -1,4 +1,6 @@
 import config from '@/payload.config'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createLocalReq, getPayload, type Payload, type PayloadRequest } from 'payload'
 
@@ -8,6 +10,7 @@ import {
   buildWingsSideCredentialsSourceIdentity,
   classifyWingsSideCredentialsState,
   layoutChecksum,
+  plannedCredentialUploadFilenames,
   wingsSideCredentialsProductionLocales,
   type CredentialHomeSnapshot,
   type CredentialMediaSnapshot,
@@ -19,6 +22,7 @@ import {
 
 const runAdapterProof = process.env.RUN_CREDENTIALS_PRODUCTION_ADAPTER_INT === 'true'
 const adapterDescribe = runAdapterProof ? describe : describe.skip
+const releaseSha = '0123456789abcdef0123456789abcdef01234567'
 
 adapterDescribe('WingsSide credentials production PostgreSQL transaction proof', () => {
   let payload: Payload
@@ -169,18 +173,34 @@ adapterDescribe('WingsSide credentials production PostgreSQL transaction proof',
         ],
       },
     })
-    const media: CredentialMediaSnapshot[] = mediaResult.docs.map((item) => ({
-      alt: item.alt ?? null,
-      filename: item.filename ?? null,
-      id: item.id,
-      siteID,
-    }))
+    const media: CredentialMediaSnapshot[] = mediaResult.docs.map((item) => {
+      const filenames = new Set<string>()
+      if (typeof item.filename === 'string') filenames.add(item.filename)
+      if (item.sizes && typeof item.sizes === 'object') {
+        for (const size of Object.values(item.sizes as Record<string, unknown>)) {
+          if (
+            size &&
+            typeof size === 'object' &&
+            typeof (size as Record<string, unknown>).filename === 'string'
+          ) {
+            filenames.add((size as Record<string, unknown>).filename as string)
+          }
+        }
+      }
+      return {
+        alt: item.alt ?? null,
+        filename: item.filename ?? null,
+        id: item.id,
+        siteID,
+        uploadFiles: [...filenames].map((filename) => path.resolve('public', 'media', filename)),
+      }
+    })
     return { homes, media }
   }
 
   it('rolls back injected failure, applies, no-ops, rolls back and reapplies', async () => {
     const manifest = await loadWingsSideCredentialManifest()
-    const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest)
+    const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest, releaseSha)
     const before = await loadSnapshot()
     const plan = await buildWingsSideCredentialsPlan({
       homes: before.homes,
@@ -189,6 +209,28 @@ adapterDescribe('WingsSide credentials production PostgreSQL transaction proof',
       siteID,
       sourceIdentity,
     })
+    const firstItem = manifest.items[0]
+
+    await expect(
+      applyWingsSideCredentialsProductionPlan({
+        failDuringCreateItemID: firstItem.id,
+        loadSnapshot,
+        manifest,
+        payload,
+        plan,
+        req,
+      }),
+    ).rejects.toThrow('early create failure')
+    for (const filename of await plannedCredentialUploadFilenames(firstItem.file)) {
+      await expect(fs.access(path.resolve('public', 'media', filename))).rejects.toThrow()
+    }
+    expect(
+      classifyWingsSideCredentialsState({
+        ...(await loadSnapshot()),
+        manifest,
+        siteID,
+      }).state,
+    ).toBe('before')
 
     await expect(
       applyWingsSideCredentialsProductionPlan({
@@ -212,6 +254,22 @@ adapterDescribe('WingsSide credentials production PostgreSQL transaction proof',
     expect(
       classifyWingsSideCredentialsState({ ...(await loadSnapshot()), manifest, siteID }).state,
     ).toBe('after')
+    await expect(
+      rollbackWingsSideCredentialsProductionPlan({
+        failAfterDeletes: 1,
+        loadSnapshot,
+        manifest,
+        payload,
+        plan,
+        req,
+      }),
+    ).rejects.toThrow('rollback failure after 1 media delete')
+    expect(
+      classifyWingsSideCredentialsState({ ...(await loadSnapshot()), manifest, siteID }).state,
+    ).toBe('after')
+    for (const filename of await plannedCredentialUploadFilenames(firstItem.file)) {
+      await fs.access(path.resolve('public', 'media', filename))
+    }
     await expect(
       applyWingsSideCredentialsProductionPlan({ loadSnapshot, manifest, payload, plan, req }),
     ).rejects.toThrow('expected before')

@@ -13,8 +13,11 @@ import {
 import {
   aggregateReviewStatusTotals,
   assertCredentialsProductionEnvironment,
+  assertCredentialsSiteConfig,
+  assertReleaseSourceCommit,
   assertSourceIdentityMatches,
   assertWingsSideCredentialsPlan,
+  assertWingsSideCredentialsPlanMatchesSource,
   buildWingsSideCredentialsPlan,
   buildWingsSideCredentialsSourceIdentity,
   classifyWingsSideCredentialsState,
@@ -97,6 +100,8 @@ const assertConfirmation = (phase: Phase) => {
 
 const planHash = (plan: WingsSideCredentialsPlan) => credentialsChecksum(plan)
 
+const releaseSourceCommit = () => assertReleaseSourceCommit(process.env.WINGSTRAVEL_RELEASE_SHA)
+
 const readPlan = async (filePath: string): Promise<WingsSideCredentialsPlan> => {
   const plan = JSON.parse(
     await readFile(path.resolve(filePath), 'utf8'),
@@ -152,14 +157,7 @@ const resolveSite = async (payload: Payload, req: PayloadRequest) => {
   }
   const site = result.docs[0]
   const supportedLocales = Array.isArray(site.supportedLocales) ? site.supportedLocales : []
-  if (
-    credentialsChecksum(supportedLocales) !==
-    credentialsChecksum(wingsSideCredentialsProductionLocales)
-  ) {
-    throw new Error(
-      `Site ${wingsSideCredentialsProductionSiteCode} must have exact locales ${wingsSideCredentialsProductionLocales.join(',')}`,
-    )
-  }
+  assertCredentialsSiteConfig({ defaultLocale: site.defaultLocale, supportedLocales })
   return site
 }
 
@@ -208,6 +206,23 @@ const findHomeForLocale = async (
   }
 }
 
+const mediaUploadFiles = (media: Record<string, unknown>) => {
+  const filenames = new Set<string>()
+  if (typeof media.filename === 'string') filenames.add(media.filename)
+  if (media.sizes && typeof media.sizes === 'object') {
+    for (const size of Object.values(media.sizes as Record<string, unknown>)) {
+      if (
+        size &&
+        typeof size === 'object' &&
+        typeof (size as Record<string, unknown>).filename === 'string'
+      ) {
+        filenames.add((size as Record<string, unknown>).filename as string)
+      }
+    }
+  }
+  return [...filenames].map((filename) => path.resolve('public', 'media', filename))
+}
+
 const loadSnapshot = async ({
   manifest,
   payload,
@@ -243,6 +258,7 @@ const loadSnapshot = async ({
     filename: item.filename ?? null,
     id: item.id,
     siteID: credentialRelationID(item.site as never),
+    uploadFiles: mediaUploadFiles(item as unknown as Record<string, unknown>),
   }))
   return { homes, media }
 }
@@ -260,6 +276,7 @@ const main = async () => {
     payloadDbPush: process.env.PAYLOAD_DB_PUSH,
     payloadPackageName: '@payloadcms/db-postgres',
   })
+  const releaseCommit = releaseSourceCommit()
 
   logJSON({ phase, step: 'payload:init:start' })
   const { default: config } = await import('../src/payload.config')
@@ -276,7 +293,7 @@ const main = async () => {
     const admin = await resolveAdmin(payload, phase)
     const req = await createLocalReq({ user: admin as never }, payload)
     const manifest = await loadWingsSideCredentialManifest()
-    const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest)
+    const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest, releaseCommit)
     const site = await resolveSite(payload, req)
     const current = await loadSnapshot({ manifest, payload, req, siteID: site.id })
     const snapshot = classifyWingsSideCredentialsState({
@@ -300,6 +317,7 @@ const main = async () => {
         sourceIdentity,
       })
       assertWingsSideCredentialsPlan(plan)
+      assertWingsSideCredentialsPlanMatchesSource({ manifest, plan, sourceIdentity })
       const outputPath = await atomicWriteJSON(
         argumentValue('--output') || defaultOutputPath(phase),
         plan,
@@ -322,6 +340,7 @@ const main = async () => {
     if (String(plan.siteID) !== String(site.id))
       throw new Error('Resolved site ID drifted from plan')
     assertSourceIdentityMatches(plan.sourceIdentity, sourceIdentity)
+    assertWingsSideCredentialsPlanMatchesSource({ manifest, plan, sourceIdentity })
     verifyPlanBeforeChecksums({
       homes: plan.pageOperations.map((operation) => ({
         id: operation.homePageID,
@@ -368,6 +387,7 @@ const main = async () => {
         )
       }
       const result = await applyWingsSideCredentialsProductionPlan({
+        failDuringCreateItemID: argumentValue('--fail-during-create-item-id'),
         failAfterCreates: argumentValue('--fail-after-creates')
           ? Number(argumentValue('--fail-after-creates'))
           : undefined,
@@ -390,6 +410,9 @@ const main = async () => {
       )
     }
     const result = await rollbackWingsSideCredentialsProductionPlan({
+      failAfterDeletes: argumentValue('--fail-after-deletes')
+        ? Number(argumentValue('--fail-after-deletes'))
+        : undefined,
       loadSnapshot: () => loadSnapshot({ manifest, payload, req, siteID: site.id }),
       manifest,
       payload,

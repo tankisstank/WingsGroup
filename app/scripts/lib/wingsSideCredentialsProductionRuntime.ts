@@ -20,6 +20,7 @@ import {
   credentialsChecksum,
   layoutChecksum,
   normalizeCredentialsBlock,
+  plannedCredentialUploadFilenames,
   type CredentialHomeSnapshot,
   type CredentialMediaSnapshot,
   type WingsSideCredentialsPlan,
@@ -34,34 +35,12 @@ const mediaStaticDir = path.resolve(import.meta.dirname, '../../public/media')
 
 type UploadFileEffect = {
   files: string[]
-  id: number | string
+  id?: number | string
 }
 
-const createdMediaFiles = (media: Record<string, unknown>) => {
-  const filenames = new Set<string>()
-  if (typeof media.filename === 'string') filenames.add(media.filename)
-  if (Array.isArray(media.sizes)) {
-    for (const size of media.sizes) {
-      if (
-        size &&
-        typeof size === 'object' &&
-        typeof (size as Record<string, unknown>).filename === 'string'
-      ) {
-        filenames.add((size as Record<string, unknown>).filename as string)
-      }
-    }
-  } else if (media.sizes && typeof media.sizes === 'object') {
-    for (const size of Object.values(media.sizes as Record<string, unknown>)) {
-      if (
-        size &&
-        typeof size === 'object' &&
-        typeof (size as Record<string, unknown>).filename === 'string'
-      ) {
-        filenames.add((size as Record<string, unknown>).filename as string)
-      }
-    }
-  }
-  return [...filenames].map((filename) => path.join(mediaStaticDir, filename))
+type QuarantinedFile = {
+  originalPath: string
+  quarantinePath: string
 }
 
 const cleanupCreatedMediaEffects = async (
@@ -70,19 +49,82 @@ const cleanupCreatedMediaEffects = async (
   effects: UploadFileEffect[],
 ) => {
   for (const effect of [...effects].reverse()) {
-    try {
-      await payload.delete({
-        collection: 'media',
-        context: productionContext,
-        id: effect.id,
-        overrideAccess: true,
-        req,
-      })
-    } catch {
-      // PostgreSQL rollback removes the row; this compensates only if a row leaked.
+    if (effect.id !== undefined) {
+      try {
+        await payload.delete({
+          collection: 'media',
+          context: productionContext,
+          id: effect.id,
+          overrideAccess: true,
+          req,
+        })
+      } catch {
+        // PostgreSQL rollback removes the row; this compensates only if a row leaked.
+      }
     }
     await Promise.all(effect.files.map((file: string) => fs.rm(file, { force: true })))
   }
+}
+
+const fileExists = async (file: string) => {
+  try {
+    await fs.access(file)
+    return true
+  } catch {
+    return false
+  }
+}
+
+const plannedUploadPathsForFile = async (file: string) =>
+  (await plannedCredentialUploadFilenames(file)).map((filename) =>
+    path.join(mediaStaticDir, filename),
+  )
+
+const plannedAbsentUploadPaths = async (file: string) => {
+  const paths = await plannedUploadPathsForFile(file)
+  const absent: string[] = []
+  for (const candidate of paths) {
+    if (!(await fileExists(candidate))) absent.push(candidate)
+  }
+  return absent
+}
+
+const uploadFilesForMedia = async (media: CredentialMediaSnapshot) => {
+  const fromSnapshot = Array.isArray(media.uploadFiles) ? media.uploadFiles : []
+  if (fromSnapshot.length) return fromSnapshot
+  return media.filename ? plannedUploadPathsForFile(media.filename) : []
+}
+
+const quarantineMediaFiles = async (
+  media: CredentialMediaSnapshot[],
+  runID: string,
+): Promise<QuarantinedFile[]> => {
+  const quarantineRoot = path.join(mediaStaticDir, `.wingsside-credentials-quarantine-${runID}`)
+  const quarantined: QuarantinedFile[] = []
+  for (const item of media) {
+    for (const originalPath of await uploadFilesForMedia(item)) {
+      if (!(await fileExists(originalPath))) continue
+      const quarantinePath = path.join(quarantineRoot, path.basename(originalPath))
+      await fs.mkdir(path.dirname(quarantinePath), { recursive: true })
+      await fs.copyFile(originalPath, quarantinePath)
+      quarantined.push({ originalPath, quarantinePath })
+    }
+  }
+  return quarantined
+}
+
+const restoreQuarantinedFiles = async (files: QuarantinedFile[]) => {
+  for (const file of files) {
+    if (await fileExists(file.quarantinePath)) {
+      await fs.mkdir(path.dirname(file.originalPath), { recursive: true })
+      await fs.copyFile(file.quarantinePath, file.originalPath)
+    }
+  }
+}
+
+const removeQuarantine = async (files: QuarantinedFile[]) => {
+  const roots = new Set(files.map((file) => path.dirname(file.quarantinePath)))
+  for (const root of roots) await fs.rm(root, { force: true, recursive: true })
 }
 
 const assertRequiredTransaction = async (req: PayloadRequest) => {
@@ -117,6 +159,7 @@ const verifyCurrentAfter = ({
 }
 
 export const applyWingsSideCredentialsProductionPlan = async ({
+  failDuringCreateItemID,
   failAfterCreates,
   failAfterPageUpdates,
   loadSnapshot,
@@ -125,6 +168,7 @@ export const applyWingsSideCredentialsProductionPlan = async ({
   plan,
   req,
 }: {
+  failDuringCreateItemID?: string
   failAfterCreates?: number
   failAfterPageUpdates?: number
   loadSnapshot: () => Promise<{ homes: CredentialHomeSnapshot[]; media: CredentialMediaSnapshot[] }>
@@ -164,6 +208,13 @@ export const applyWingsSideCredentialsProductionPlan = async ({
         throw new Error(`Credential asset checksum drifted before create: ${item.file}`)
       }
       const bytes = await fs.readFile(assetPath)
+      const plannedAbsentFiles = await plannedAbsentUploadPaths(item.file)
+      uploadEffects.push({ files: plannedAbsentFiles })
+      if (failDuringCreateItemID === item.id) {
+        await fs.mkdir(mediaStaticDir, { recursive: true })
+        await fs.writeFile(path.join(mediaStaticDir, item.file), bytes)
+        throw new Error(`Injected credentials import early create failure for ${item.id}`)
+      }
       const media = (await payload.create({
         collection: 'media',
         context: productionContext,
@@ -174,7 +225,10 @@ export const applyWingsSideCredentialsProductionPlan = async ({
         req,
       })) as unknown as Record<string, unknown> & { id: number | string }
       mediaIDs.set(item.id, media.id)
-      uploadEffects.push({ files: createdMediaFiles(media), id: media.id })
+      uploadEffects[uploadEffects.length - 1] = {
+        files: plannedAbsentFiles,
+        id: media.id,
+      }
       creates += 1
       if (failAfterCreates !== undefined && creates >= failAfterCreates) {
         throw new Error(`Injected credentials import failure after ${creates} media create(s)`)
@@ -183,7 +237,11 @@ export const applyWingsSideCredentialsProductionPlan = async ({
 
     for (const operation of plan.pageOperations) {
       const currentHome = initial.homes.find((home) => home.locale === operation.locale)
-      if (!currentHome || currentHome.layoutChecksum !== operation.beforeChecksum) {
+      if (
+        !currentHome ||
+        String(currentHome.id) !== String(operation.homePageID) ||
+        currentHome.layoutChecksum !== operation.beforeChecksum
+      ) {
         throw new Error(`Credentials apply refused page drift for locale ${operation.locale}`)
       }
       const layout = [
@@ -228,12 +286,14 @@ export const applyWingsSideCredentialsProductionPlan = async ({
 }
 
 export const rollbackWingsSideCredentialsProductionPlan = async ({
+  failAfterDeletes,
   loadSnapshot,
   manifest,
   payload,
   plan,
   req,
 }: {
+  failAfterDeletes?: number
   loadSnapshot: () => Promise<{ homes: CredentialHomeSnapshot[]; media: CredentialMediaSnapshot[] }>
   manifest: WingsSideCredentialManifest
   payload: Payload
@@ -244,6 +304,8 @@ export const rollbackWingsSideCredentialsProductionPlan = async ({
   let transactionStarted = false
   let deletedMedia = 0
   let restoredPages = 0
+  let quarantinedFiles: QuarantinedFile[] = []
+  let committed = false
 
   try {
     payload.collections.pages.config.versions = false as never
@@ -265,10 +327,16 @@ export const rollbackWingsSideCredentialsProductionPlan = async ({
         throw new Error(`Credentials rollback cannot resolve created media ${operation.file}`)
       return media.id
     })
+    const createdMedia = plan.mediaOperations.map(
+      (operation) => mediaByFilename.get(operation.file)!,
+    )
+    quarantinedFiles = await quarantineMediaFiles(createdMedia, plan.runID)
 
     for (const operation of plan.pageOperations) {
       const currentHome = initial.homes.find((home) => home.locale === operation.locale)
-      if (!currentHome) throw new Error(`Missing current Home page for ${operation.locale}`)
+      if (!currentHome || String(currentHome.id) !== String(operation.homePageID)) {
+        throw new Error(`Credentials rollback refused page ID drift for locale ${operation.locale}`)
+      }
       const expectedAfter = afterBlockChecksum({
         locale: operation.locale,
         manifest,
@@ -314,6 +382,11 @@ export const rollbackWingsSideCredentialsProductionPlan = async ({
         req,
       })
       deletedMedia += 1
+      if (failAfterDeletes !== undefined && deletedMedia >= failAfterDeletes) {
+        throw new Error(
+          `Injected credentials rollback failure after ${deletedMedia} media delete(s)`,
+        )
+      }
     }
 
     const verified = await loadSnapshot()
@@ -328,8 +401,20 @@ export const rollbackWingsSideCredentialsProductionPlan = async ({
     }
 
     await commitTransaction(req)
+    committed = true
+    try {
+      await removeQuarantine(quarantinedFiles)
+    } catch {
+      // A leftover quarantine copy is safer than restoring files after DB commit.
+    }
   } catch (error) {
     if (transactionStarted && req.transactionID) await killTransaction(req)
+    if (!committed) await restoreQuarantinedFiles(quarantinedFiles)
+    try {
+      await removeQuarantine(quarantinedFiles)
+    } catch {
+      // Keep the original rollback error; temp cleanup can be retried manually.
+    }
     throw error
   } finally {
     payload.collections.pages.config.versions = originalPageVersions

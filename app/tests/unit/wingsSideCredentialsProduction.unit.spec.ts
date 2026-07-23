@@ -7,13 +7,17 @@ import {
 import {
   aggregateReviewStatusTotals,
   assertCredentialsProductionEnvironment,
+  assertCredentialsSiteConfig,
+  assertReleaseSourceCommit,
   assertSourceIdentityMatches,
   assertWingsSideCredentialsPlan,
+  assertWingsSideCredentialsPlanMatchesSource,
   buildWingsSideCredentialsPlan,
   buildWingsSideCredentialsSourceIdentity,
   classifyWingsSideCredentialsState,
   credentialsChecksum,
   layoutChecksum,
+  plannedCredentialUploadFilenames,
   wingsSideCredentialsProductionExpectedItemCount,
   wingsSideCredentialsProductionLocales,
   wingsSideCredentialsProductionSiteCode,
@@ -22,6 +26,7 @@ import {
 } from '../../scripts/lib/wingsSideCredentialsProduction'
 
 const siteID = 47
+const releaseSha = '0123456789abcdef0123456789abcdef01234567'
 
 const homes = (): CredentialHomeSnapshot[] =>
   wingsSideCredentialsProductionLocales.map((locale) => {
@@ -38,9 +43,10 @@ const homes = (): CredentialHomeSnapshot[] =>
 describe('WingsSide credentials production plan contract', () => {
   it('pins source identity, exact locale order and aggregate review totals', async () => {
     const manifest = await loadWingsSideCredentialManifest()
-    const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest)
+    const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest, releaseSha)
 
     expect(sourceIdentity.siteCode).toBe(wingsSideCredentialsProductionSiteCode)
+    expect(sourceIdentity.releaseSourceCommit).toBe(releaseSha)
     expect(sourceIdentity.locales).toEqual(['vi', 'en', 'it', 'es', 'pt'])
     expect(sourceIdentity.assets).toHaveLength(wingsSideCredentialsProductionExpectedItemCount)
     expect(sourceIdentity.assets.every((asset) => /^[a-f0-9]{64}$/u.test(asset.sha256))).toBe(true)
@@ -97,7 +103,7 @@ describe('WingsSide credentials production plan contract', () => {
 
   it('builds a deterministic rollback-capable plan and rejects source drift', async () => {
     const manifest = await loadWingsSideCredentialManifest()
-    const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest)
+    const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest, releaseSha)
     const plan = await buildWingsSideCredentialsPlan({
       homes: homes(),
       manifest,
@@ -107,6 +113,7 @@ describe('WingsSide credentials production plan contract', () => {
     })
 
     assertWingsSideCredentialsPlan(plan)
+    assertWingsSideCredentialsPlanMatchesSource({ manifest, plan, sourceIdentity })
     expect(plan.siteCode).toBe(wingsSideCredentialsProductionSiteCode)
     expect(plan.mediaOperations).toHaveLength(24)
     expect(plan.pageOperations.map((operation) => operation.locale)).toEqual([
@@ -129,6 +136,19 @@ describe('WingsSide credentials production plan contract', () => {
     expect(() => assertSourceIdentityMatches(sourceIdentity, drifted)).toThrow(
       'Credentials source identity drifted from plan',
     )
+    expect(() =>
+      assertWingsSideCredentialsPlanMatchesSource({
+        manifest,
+        plan: {
+          ...plan,
+          mediaOperations: [
+            { ...plan.mediaOperations[0], sha256: '0'.repeat(64) },
+            ...plan.mediaOperations.slice(1),
+          ],
+        },
+        sourceIdentity,
+      }),
+    ).toThrow('drifted from manifest/source')
   })
 
   it('guards production writes to PostgreSQL with schema push disabled', () => {
@@ -156,5 +176,31 @@ describe('WingsSide credentials production plan contract', () => {
         payloadPackageName: '@payloadcms/db-postgres',
       }),
     ).toThrow('PAYLOAD_DB_PUSH=false')
+  })
+
+  it('requires release source SHA and exact locale set with defaultLocale=en', () => {
+    expect(assertReleaseSourceCommit(releaseSha)).toBe(releaseSha)
+    expect(() => assertReleaseSourceCommit('8bf1890')).toThrow('40-hex commit')
+    expect(() =>
+      assertCredentialsSiteConfig({
+        defaultLocale: 'en',
+        supportedLocales: ['pt', 'vi', 'es', 'it', 'en'],
+      }),
+    ).not.toThrow()
+    expect(() =>
+      assertCredentialsSiteConfig({
+        defaultLocale: 'vi',
+        supportedLocales: ['vi', 'en', 'it', 'es', 'pt'],
+      }),
+    ).toThrow('defaultLocale=en')
+  })
+
+  it('plans exact original and generated upload filenames before create', async () => {
+    const filenames = await plannedCredentialUploadFilenames('wingsside-credential-8355.jpg')
+
+    expect(filenames).toContain('wingsside-credential-8355.jpg')
+    expect(filenames).toContain('wingsside-credential-8355-300x408.jpg')
+    expect(filenames).toContain('wingsside-credential-8355-500x500.jpg')
+    expect(filenames).toContain('wingsside-credential-8355-1200x630.jpg')
   })
 })
