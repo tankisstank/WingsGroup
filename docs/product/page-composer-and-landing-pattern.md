@@ -12,7 +12,8 @@ The current composer surface is:
 
 - `hero`: editable hero type, rich text, media, and CTA links.
 - `layout`: ordered block list for content, media, CTA, form, archive, stats,
-  testimonials, comparison, FAQ, feature, pricing, and info-strip sections.
+  testimonials, comparison, FAQ, feature, pricing, info-strip, and reusable
+  credentials/awards carousel sections.
 - `layoutPresetKey`: provenance for pages generated from a code-owned preset.
 - `meta`: SEO title, description, image, and breadcrumb label.
 - `parentPage` and `relatedPages`: hierarchy and crawlable internal linking.
@@ -67,3 +68,21 @@ Adding a normal campaign variant should require CMS edits only:
 
 Frontend code changes are reserved for new block types or structural behavior,
 not routine campaign page creation.
+
+## Reusable Credentials And Awards
+
+The `credentialsCarousel` block is the governed module for certificates,
+awards, memberships, and standards. Editors can place it in the localized
+`layout` of any Page and control:
+
+- section eyebrow, title, description, and accessible label
+- full-width presentation, autoplay, and transition interval
+- one to twelve ordered records
+- record type, Media Library image/logo, fallback mark, label, title, and body
+
+Claims must only be published while their source record is verified and
+current. Removing an uploaded image falls back to the editor-provided mark; it
+does not replace or fabricate a credential. On the WingsSide hi-fi Home route,
+the first configured credentials block replaces the legacy fallback carousel
+at its locked design position. On other Page Composer routes, the block renders
+in the configured layout order.

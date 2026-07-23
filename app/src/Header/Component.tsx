@@ -1,41 +1,19 @@
 import { HeaderClient } from './Component.client'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
-import { getCurrentLocale } from '@/utilities/siteContext'
+import { resolveHeaderPrimaryAction } from '@/utilities/headerPrimaryActions'
+import { getCurrentLocale, getCurrentPublicPathname, getCurrentSite } from '@/utilities/siteContext'
+import { defaultThemeKey } from '@/utilities/themeTokens'
 import React from 'react'
 
 export async function Header() {
   const settings = await getCurrentSiteSettings()
+  const site = await getCurrentSite()
   const locale = await getCurrentLocale()
+  const publicPathname = await getCurrentPublicPathname()
   const siteName = settings?.siteName || ''
   const logoText = settings?.branding?.logoText || settings?.siteName
-  const themeKey = settings?.branding?.themeKey || 'wings-group'
-  const primaryActions: Record<string, Record<'en' | 'vi', { label: string; url: string }>> = {
-    'wings-care': {
-      en: { label: 'Contact', url: '/contact' },
-      vi: { label: 'Liên hệ', url: '/contact' },
-    },
-    'wings-go': {
-      en: { label: 'Reserve', url: '/lien-he' },
-      vi: { label: 'Giữ chỗ', url: '/lien-he' },
-    },
-    'wings-group': {
-      en: { label: 'Contact', url: '/lien-he' },
-      vi: { label: 'Liên hệ', url: '/lien-he' },
-    },
-    'wings-pass': {
-      en: { label: 'Book service', url: '/contact' },
-      vi: { label: 'Đặt dịch vụ', url: '/contact' },
-    },
-    'wings-plus': {
-      en: { label: 'Request proposal', url: '/request-proposal' },
-      vi: { label: 'Gửi yêu cầu', url: '/request-proposal' },
-    },
-    'wings-side': {
-      en: { label: 'Plan your trip', url: '/plan-your-trip' },
-      vi: { label: 'Lên kế hoạch', url: '/plan-your-trip' },
-    },
-  }
-  const primaryAction = primaryActions[themeKey]?.[locale] || primaryActions['wings-group'][locale]
+  const themeKey = settings?.branding?.themeKey || defaultThemeKey
+  const primaryAction = resolveHeaderPrimaryAction(site.code, locale)
 
   return (
     <HeaderClient
@@ -51,9 +29,12 @@ export async function Header() {
       }
       logoText={logoText}
       primaryAction={primaryAction}
+      publicPathname={publicPathname}
       resolvedLocale={locale}
       siteName={siteName}
+      siteCode={site.code}
       tagline={settings?.tagline}
+      themeKey={themeKey}
     />
   )
 }

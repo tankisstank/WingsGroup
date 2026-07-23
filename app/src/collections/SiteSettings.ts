@@ -8,6 +8,7 @@ import {
   backgroundStyleOptions,
   asSelectOptions,
   buttonStyleOptions,
+  defaultThemeKey,
   fontPresetOptions,
   layoutStyleOptions,
   radiusOptions,
@@ -16,6 +17,10 @@ import {
   validateHexColor,
 } from '@/utilities/themeTokens'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
+import {
+  invalidateSettingsAfterChange,
+  invalidateSettingsAfterDelete,
+} from '@/collections/hooks/invalidateTenantCache'
 
 export const SiteSettings: CollectionConfig = {
   slug: 'site-settings',
@@ -93,7 +98,7 @@ export const SiteSettings: CollectionConfig = {
           name: 'themeKey',
           label: 'Mã theme',
           type: 'select',
-          defaultValue: 'wings-group',
+          defaultValue: defaultThemeKey,
           options: asSelectOptions(themeKeyOptions),
           required: true,
           admin: {
@@ -301,6 +306,8 @@ export const SiteSettings: CollectionConfig = {
     },
   ],
   hooks: {
+    afterChange: [invalidateSettingsAfterChange],
+    afterDelete: [invalidateSettingsAfterDelete],
     beforeChange: [enforceSiteAccess],
   },
   labels: {

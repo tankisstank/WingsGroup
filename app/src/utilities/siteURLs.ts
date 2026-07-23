@@ -5,7 +5,7 @@ import { isSupportedLocale, type SupportedLocaleCode } from './sitePaths'
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '')
 
-export const normalizeCanonicalDomain = (domain?: null | string): string => {
+export const normalizeConfiguredCanonicalOrigin = (domain?: null | string): string => {
   const fallback = getServerSideURL()
   const rawDomain = domain || fallback
   const withProtocol = /^https?:\/\//.test(rawDomain) ? rawDomain : `https://${rawDomain}`
@@ -36,7 +36,7 @@ export const prefixCanonicalPathWithLocale = (
   return `/${locale}${normalizedPath === '/' ? '' : normalizedPath}`.replace(/\/+/g, '/')
 }
 
-export const getCanonicalURL = ({
+export const buildConfiguredCanonicalURL = ({
   locale,
   path,
   settings,
@@ -45,13 +45,13 @@ export const getCanonicalURL = ({
   path?: null | string
   settings?: null | Pick<SiteSetting, 'seo'>
 }) => {
-  const baseURL = normalizeCanonicalDomain(settings?.seo?.canonicalDomain)
+  const baseURL = normalizeConfiguredCanonicalOrigin(settings?.seo?.canonicalDomain)
   const normalizedPath = prefixCanonicalPathWithLocale(path, locale)
 
   return `${baseURL}${normalizedPath === '/' ? '' : normalizedPath}`
 }
 
-export const getAbsoluteMediaURL = ({
+export const buildConfiguredAbsoluteMediaURL = ({
   fallbackPath = '/website-template-OG.webp',
   media,
   settings,
@@ -60,7 +60,7 @@ export const getAbsoluteMediaURL = ({
   media?: Config['db']['defaultIDType'] | Media | null
   settings?: null | Pick<SiteSetting, 'seo'>
 }) => {
-  const baseURL = normalizeCanonicalDomain(settings?.seo?.canonicalDomain)
+  const baseURL = normalizeConfiguredCanonicalOrigin(settings?.seo?.canonicalDomain)
 
   if (media && typeof media === 'object' && 'url' in media && media.url) {
     const mediaPath = media.sizes?.og?.url || media.url
@@ -150,3 +150,23 @@ export const getSiteSettingForSite = <T extends Pick<SiteSetting, 'site'>>(
 
   return siteId ? settingsBySiteId?.get(siteId) || null : null
 }
+
+/**
+ * @deprecated Use normalizeConfiguredCanonicalOrigin() for helpers that are
+ * intentionally scoped to configured canonical settings only. For public SEO
+ * output, prefer getCanonicalSiteOrigin() from siteSEO.ts.
+ */
+export const normalizeCanonicalDomain = normalizeConfiguredCanonicalOrigin
+
+/**
+ * @deprecated Use buildConfiguredCanonicalURL() for helpers that intentionally
+ * derive from settings.seo.canonicalDomain. For public SEO output, prefer
+ * getSiteSitemapURL() with getCanonicalSiteOrigin().
+ */
+export const getCanonicalURL = buildConfiguredCanonicalURL
+
+/**
+ * @deprecated Use buildConfiguredAbsoluteMediaURL() for helpers that
+ * intentionally derive from settings.seo.canonicalDomain.
+ */
+export const getAbsoluteMediaURL = buildConfiguredAbsoluteMediaURL

@@ -25,7 +25,7 @@ const siteAliasByCode: Record<string, string> = {
   'wings-go': 'wingsgo',
   'wings-pass': 'wingspass',
   'wings-plus': 'wingsplus',
-  'wings-side': 'wingsside',
+  'wing-side': 'wingsside',
   'wings-group': '',
 }
 
@@ -68,19 +68,24 @@ const sitePath = (siteCode: string, pathValue?: null | string) => {
 }
 
 const getDatabaseURL = () => {
-  const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL || DEFAULT_LOCAL_DATABASE_URL)
+  const databaseURL = resolveLocalDatabaseURL(
+    process.env.DATABASE_URL || DEFAULT_LOCAL_DATABASE_URL,
+  )
 
   if (!databaseURL.startsWith('file:')) {
     throw new Error('generate-site-link-review currently supports local SQLite DATABASE_URL only.')
   }
 
   const filePath = databaseURL.replace(/^file:/, '')
-  const resolved = path.isAbsolute(filePath) ? filePath : path.resolve(import.meta.dirname, '..', filePath)
+  const resolved = path.isAbsolute(filePath)
+    ? filePath
+    : path.resolve(import.meta.dirname, '..', filePath)
 
   return `file:${resolved.replaceAll('\\', '/')}`
 }
 
-const indentByDepth = (pathValue: string) => Math.max(pathValue.split('/').filter(Boolean).length - 1, 0)
+const indentByDepth = (pathValue: string) =>
+  Math.max(pathValue.split('/').filter(Boolean).length - 1, 0)
 
 const escapeHTML = (value: string) =>
   value
@@ -526,7 +531,8 @@ const buildHTML = ({ generatedAt, sites }: { generatedAt: string; sites: SiteNod
 </html>`
 }
 
-const { createClient } = await import('../node_modules/.pnpm/@libsql+client@0.14.0/node_modules/@libsql/client/lib-esm/node.js')
+const { createClient } =
+  await import('../node_modules/.pnpm/@libsql+client@0.14.0/node_modules/@libsql/client/lib-esm/node.js')
 const client = createClient({ url: getDatabaseURL() })
 
 const [siteRows, pageRows, postRows] = await Promise.all([
@@ -597,17 +603,16 @@ const sites = (siteRows.rows as unknown as SiteRow[])
   .filter((site) => typeof site.code === 'string' && site.code in siteAliasByCode)
   .map<SiteNode>((site) => {
     const code = site.code
-    const pages = (pagesBySite.get(site.id) || [])
-      .map<TreeItem>((page) => {
-        const pathValue = sitePath(code, page.pathname)
+    const pages = (pagesBySite.get(site.id) || []).map<TreeItem>((page) => {
+      const pathValue = sitePath(code, page.pathname)
 
-        return {
-          depth: indentByDepth(page.pathname || '/'),
-          label: page.title || page.slug || pathValue,
-          path: pathValue,
-          type: 'page',
-        }
-      })
+      return {
+        depth: indentByDepth(page.pathname || '/'),
+        label: page.title || page.slug || pathValue,
+        path: pathValue,
+        type: 'page',
+      }
+    })
 
     const posts = (postsBySite.get(site.id) || [])
       .filter((post) => post.slug)

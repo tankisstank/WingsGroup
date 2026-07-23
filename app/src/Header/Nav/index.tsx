@@ -1,12 +1,21 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 import type { Header as HeaderType } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
 import { SiteLink } from '@/components/SiteLink'
-import { MenuIcon, SearchIcon, XIcon } from 'lucide-react'
+import { useSitePublicPathname } from '@/providers/SitePath'
+import { getCopyLocale, publicLocaleMetadata } from '@/utilities/locales'
+import {
+  buildLocaleSwitchHref,
+  getPublicRoutePathname,
+  type SupportedLocaleCode,
+} from '@/utilities/sitePaths'
+import { getWingsSideHiFiCta, getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
+import { Globe2Icon, MenuIcon, SearchIcon, XIcon } from 'lucide-react'
 
 export const HeaderNav: React.FC<{
   data: { navItems?: HeaderType['navItems'] }
@@ -14,61 +23,239 @@ export const HeaderNav: React.FC<{
     label: string
     url: string
   }
-  resolvedLocale?: 'en' | 'vi'
-}> = ({ data, primaryAction, resolvedLocale = 'vi' }) => {
+  publicPathname?: string
+  resolvedLocale?: SupportedLocaleCode
+  siteCode?: string
+  themeKey?: string
+}> = ({ data, primaryAction, publicPathname, resolvedLocale = 'vi', siteCode, themeKey }) => {
   const navItems = data?.navItems || []
   const [isOpen, setIsOpen] = useState(false)
-  const locale = resolvedLocale
+  const [clientReady, setClientReady] = useState(false)
+  const [locationSuffix, setLocationSuffix] = useState('')
+  const headerNavRef = useRef<HTMLDivElement>(null)
+  const pathname = useSitePublicPathname()
+  const searchParams = useSearchParams()
+  const localeSwitchPathname = pathname || publicPathname || '/'
+  const isWingsSide = siteCode ? siteCode === 'wing-side' : themeKey === 'wings-side'
+  const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
+  const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null
+  const resolvedPrimaryAction = wingsSideHiFiCta || primaryAction
   const shouldRenderPrimaryAction =
-    primaryAction &&
-    !navItems.some(({ link }) => {
-      const label = link?.label?.trim().toLowerCase()
-      const url = link?.url?.replace(/\/+$/, '') || '/'
-      const primaryLabel = primaryAction.label.trim().toLowerCase()
-      const primaryURL = primaryAction.url.replace(/\/+$/, '') || '/'
+    resolvedPrimaryAction &&
+    !(wingsSideHiFiNav
+      ? wingsSideHiFiNav.some(
+          (item) =>
+            item.label.trim().toLowerCase() === resolvedPrimaryAction.label.trim().toLowerCase() ||
+            (item.href.replace(/\/+$/, '') || '/') ===
+              (resolvedPrimaryAction.url.replace(/\/+$/, '') || '/'),
+        )
+      : navItems.some(({ link }) => {
+          const label = link?.label?.trim().toLowerCase()
+          const url = link?.url?.replace(/\/+$/, '') || '/'
+          const primaryLabel = resolvedPrimaryAction.label.trim().toLowerCase()
+          const primaryURL = resolvedPrimaryAction.url.replace(/\/+$/, '') || '/'
 
-      return label === primaryLabel || url === primaryURL
-    })
+          return label === primaryLabel || url === primaryURL
+        }))
+  const copyByLocale: Partial<
+    Record<
+      SupportedLocaleCode,
+      {
+        closeNavigation: string
+        languageSwitcher: string
+        openNavigation: string
+        search: string
+      }
+    >
+  > = {
+    en: {
+      closeNavigation: 'Close navigation',
+      languageSwitcher: 'Language switcher',
+      openNavigation: 'Open navigation',
+      search: 'Search',
+    },
+    vi: {
+      closeNavigation: 'Đóng điều hướng',
+      languageSwitcher: 'Chọn ngôn ngữ',
+      openNavigation: 'Mở điều hướng',
+      search: 'Tìm kiếm',
+    },
+    it: {
+      closeNavigation: 'Chiudi navigazione',
+      languageSwitcher: 'Selettore lingua',
+      openNavigation: 'Apri navigazione',
+      search: 'Cerca',
+    },
+    es: {
+      closeNavigation: 'Cerrar navegación',
+      languageSwitcher: 'Selector de idioma',
+      openNavigation: 'Abrir navegación',
+      search: 'Buscar',
+    },
+    pt: {
+      closeNavigation: 'Fechar navegação',
+      languageSwitcher: 'Seletor de idioma',
+      openNavigation: 'Abrir navegação',
+      search: 'Pesquisar',
+    },
+  }
   const copy =
-    locale === 'en'
-      ? {
-          closeNavigation: 'Close navigation',
-          openNavigation: 'Open navigation',
-          search: 'Search',
-        }
-      : {
-          closeNavigation: 'Đóng điều hướng',
-          openNavigation: 'Mở điều hướng',
-          search: 'Tìm kiếm',
-        }
+    copyByLocale[resolvedLocale] || copyByLocale[getCopyLocale(resolvedLocale)] || copyByLocale.en!
+  const navigateAndCloseMobile: React.MouseEventHandler<HTMLAnchorElement> = (event) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+      return
+
+    event.preventDefault()
+    setIsOpen(false)
+    window.location.assign(event.currentTarget.href)
+  }
+
+  useEffect(() => {
+    const syncSuffix = () => {
+      setLocationSuffix(`${window.location.search}${window.location.hash}`)
+    }
+
+    setClientReady(true)
+    syncSuffix()
+    window.addEventListener('hashchange', syncSuffix)
+    window.addEventListener('popstate', syncSuffix)
+
+    return () => {
+      window.removeEventListener('hashchange', syncSuffix)
+      window.removeEventListener('popstate', syncSuffix)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!clientReady) {
+      return
+    }
+
+    setLocationSuffix(`${window.location.search}${window.location.hash}`)
+  }, [clientReady, searchParams])
+
+  useEffect(() => {
+    setIsOpen(false)
+  }, [pathname])
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const closeMobileNavigation = (event: PointerEvent | FocusEvent) => {
+      const target = event.target
+
+      if (!(target instanceof Node) || headerNavRef.current?.contains(target)) return
+
+      setIsOpen(false)
+    }
+    const closeMobileNavigationOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false)
+    }
+
+    document.addEventListener('pointerdown', closeMobileNavigation)
+    document.addEventListener('focusin', closeMobileNavigation)
+    document.addEventListener('keydown', closeMobileNavigationOnEscape)
+
+    return () => {
+      document.removeEventListener('pointerdown', closeMobileNavigation)
+      document.removeEventListener('focusin', closeMobileNavigation)
+      document.removeEventListener('keydown', closeMobileNavigationOnEscape)
+    }
+  }, [isOpen])
+
+  const languageSwitcher = (
+    <nav
+      aria-label={copy.languageSwitcher}
+      className="site-language-switcher"
+      data-client-ready={clientReady ? 'true' : 'false'}
+    >
+      <Globe2Icon aria-hidden="true" className="h-4 w-4" />
+      {publicLocaleMetadata.map((metadata) => {
+        const href = buildLocaleSwitchHref(
+          `${localeSwitchPathname}${clientReady ? locationSuffix : ''}`,
+          metadata.code,
+        )
+
+        return (
+          <a
+            aria-current={metadata.code === resolvedLocale ? 'page' : undefined}
+            className="site-language-switcher__link"
+            data-locale-code={metadata.code}
+            href={href}
+            key={metadata.code}
+            onClick={navigateAndCloseMobile}
+            title={metadata.label}
+          >
+            {metadata.label}
+          </a>
+        )
+      })}
+    </nav>
+  )
 
   return (
-    <div className="site-header__nav">
+    <div
+      className="site-header__nav"
+      data-hifi-nav={isWingsSide ? 'true' : 'false'}
+      ref={headerNavRef}
+    >
       <nav aria-label="Primary navigation" className="hidden items-center gap-3 xl:flex">
-        {navItems.map(({ link }, i) => {
-          return <CMSLink className="theme-nav-link" key={i} {...link} appearance="link" />
-        })}
-        {shouldRenderPrimaryAction ? (
-          <SiteLink className="site-header-cta" href={primaryAction.url}>
-            {primaryAction.label}
+        {wingsSideHiFiNav
+          ? wingsSideHiFiNav.map((item) => {
+              const itemPath = item.href.replace(/\/+$/, '') || '/'
+              const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
+              const isActive = itemPath === currentPath
+              return (
+                <SiteLink
+                  aria-current={isActive ? 'page' : undefined}
+                  className="theme-nav-link site-header__primary-link"
+                  data-active={isActive ? 'true' : 'false'}
+                  href={item.href}
+                  key={item.href}
+                >
+                  {item.label}
+                </SiteLink>
+              )
+            })
+          : navItems.map(({ link }, i) => {
+              return (
+                <CMSLink
+                  className="theme-nav-link site-header__primary-link"
+                  key={i}
+                  {...link}
+                  appearance="link"
+                />
+              )
+            })}
+        {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
+          <SiteLink className="site-header-cta" href={resolvedPrimaryAction.url}>
+            {resolvedPrimaryAction.label}
           </SiteLink>
         ) : null}
-        <SiteLink className="site-icon-button" href="/search">
-          <span className="sr-only">{copy.search}</span>
-          <SearchIcon aria-hidden="true" className="h-5 w-5" />
-        </SiteLink>
+        {!isWingsSide ? (
+          <SiteLink className="site-icon-button" href="/search">
+            <span className="sr-only">{copy.search}</span>
+            <SearchIcon aria-hidden="true" className="h-5 w-5" />
+          </SiteLink>
+        ) : null}
+        {languageSwitcher}
       </nav>
 
       <div className="flex items-center gap-2 xl:hidden">
-        {shouldRenderPrimaryAction ? (
-          <SiteLink className="site-header-cta site-header-cta--mobile" href={primaryAction.url}>
-            {primaryAction.label}
+        {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
+          <SiteLink
+            className="site-header-cta site-header-cta--mobile"
+            href={resolvedPrimaryAction.url}
+          >
+            {resolvedPrimaryAction.label}
           </SiteLink>
         ) : null}
-        <SiteLink className="site-icon-button" href="/search">
-          <span className="sr-only">{copy.search}</span>
-          <SearchIcon aria-hidden="true" className="h-5 w-5" />
-        </SiteLink>
+        {!isWingsSide ? (
+          <SiteLink className="site-icon-button" href="/search">
+            <span className="sr-only">{copy.search}</span>
+            <SearchIcon aria-hidden="true" className="h-5 w-5" />
+          </SiteLink>
+        ) : null}
         <button
           aria-controls="mobile-primary-navigation"
           aria-expanded={isOpen}
@@ -91,16 +278,45 @@ export const HeaderNav: React.FC<{
           className="site-mobile-nav"
           id="mobile-primary-navigation"
         >
-          {navItems.map(({ link }, i) => {
-            return (
-              <CMSLink appearance="inline" className="site-mobile-nav__link" key={i} {...link} />
-            )
-          })}
-          {shouldRenderPrimaryAction ? (
-            <SiteLink className="site-mobile-nav__link site-mobile-nav__link--primary" href={primaryAction.url}>
-              {primaryAction.label}
+          {wingsSideHiFiNav
+            ? wingsSideHiFiNav.map((item) => {
+                const itemPath = item.href.replace(/\/+$/, '') || '/'
+                const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
+                const isActive = itemPath === currentPath
+                return (
+                  <SiteLink
+                    aria-current={isActive ? 'page' : undefined}
+                    className="site-mobile-nav__link"
+                    data-active={isActive ? 'true' : 'false'}
+                    href={item.href}
+                    key={item.href}
+                    onClick={navigateAndCloseMobile}
+                  >
+                    {item.label}
+                  </SiteLink>
+                )
+              })
+            : navItems.map(({ link }, i) => {
+                return (
+                  <CMSLink
+                    appearance="inline"
+                    className="site-mobile-nav__link"
+                    key={i}
+                    onClick={navigateAndCloseMobile}
+                    {...link}
+                  />
+                )
+              })}
+          {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
+            <SiteLink
+              className="site-mobile-nav__link site-mobile-nav__link--primary"
+              href={resolvedPrimaryAction.url}
+              onClick={navigateAndCloseMobile}
+            >
+              {resolvedPrimaryAction.label}
             </SiteLink>
           ) : null}
+          {languageSwitcher}
         </nav>
       ) : null}
     </div>

@@ -9,9 +9,10 @@ import {
 import { ensureThemePresetSeeds, siteThemeAssignments } from '../../src/utilities/themeSeed.js'
 import {
   ensureHeroPresentationPresetSeeds,
+  heroPresentationPresetSeeds,
   siteHeroPresentationAssignments,
 } from '../../src/utilities/heroPresentationSeed.js'
-import type { ThemePresetKey } from '../../src/utilities/themeTokens.js'
+import type { CopyLocaleCode } from '../../src/utilities/locales.js'
 
 type NavigationLocaleSeed = {
   footerNote: string
@@ -52,7 +53,7 @@ const wingsPlusNavigationByLocale = {
     ],
     tagline: 'Proposal private, MICE và special-market cho nhu cầu du lịch high-value.',
   },
-} satisfies Record<'en' | 'vi', NavigationLocaleSeed>
+} satisfies Record<CopyLocaleCode, NavigationLocaleSeed>
 
 const navigationCorrectionsBySite = {
   'wings-care': {
@@ -67,7 +68,8 @@ const navigationCorrectionsBySite = {
         { link: { label: 'FAQ', type: 'custom' as const, url: '/faq' } },
         { link: { label: 'Liên hệ', type: 'custom' as const, url: '/contact' } },
       ],
-      tagline: 'Site hỗ trợ và chăm sóc, để sẵn nền cho insurance và post-sales service trong hệ sinh thái.',
+      tagline:
+        'Site hỗ trợ và chăm sóc, để sẵn nền cho insurance và post-sales service trong hệ sinh thái.',
     },
   },
   'wings-go': {
@@ -113,7 +115,7 @@ const navigationCorrectionsBySite = {
         'Pricing-first site cho dịch vụ Fast Track theo sân bay, add-on, điều kiện áp dụng và đặt dịch vụ.',
     },
   },
-  'wings-side': {
+  'wing-side': {
     en: {
       footerNote:
         'WingsSide focuses on inbound planning, destination storytelling, travel styles, and trip inquiry instead of a retail tour grid.',
@@ -126,7 +128,8 @@ const navigationCorrectionsBySite = {
         { link: { label: 'About', type: 'custom' as const, url: '/about-us' } },
         { link: { label: 'Contact', type: 'custom' as const, url: '/contact-us' } },
       ],
-      tagline: 'Inbound Vietnam planning with destination-led discovery and consultative inquiry flow.',
+      tagline:
+        'Inbound Vietnam planning with destination-led discovery and consultative inquiry flow.',
     },
     vi: {
       footerNote:
@@ -143,7 +146,7 @@ const navigationCorrectionsBySite = {
       tagline: 'Lập kế hoạch inbound Vietnam với điểm đến, phong cách du lịch và luồng tư vấn.',
     },
   },
-} satisfies Record<string, Partial<Record<'en' | 'vi', NavigationLocaleSeed>>>
+} satisfies Record<string, Partial<Record<CopyLocaleCode, NavigationLocaleSeed>>>
 
 const productionDomainBySite = {
   'wings-care': 'wingscare.wingsgroup.vn',
@@ -151,7 +154,7 @@ const productionDomainBySite = {
   'wings-group': 'wingsgroup.vn',
   'wings-pass': 'wingspass.wingsgroup.vn',
   'wings-plus': 'wingsplus.vn',
-  'wings-side': 'wingside.vn',
+  'wing-side': 'wingside.vn',
 } as const
 
 async function ensureSiteThemeMetadata({
@@ -163,7 +166,7 @@ async function ensureSiteThemeMetadata({
   siteID,
 }: {
   payload: Awaited<ReturnType<typeof getPayload>>
-  presetIDs: Record<ThemePresetKey, number>
+  presetIDs: Record<string, number>
   heroPresetIDs: Record<string, number>
   req: Awaited<ReturnType<typeof createLocalReq>>
   siteCode: string
@@ -194,7 +197,9 @@ async function ensureSiteThemeMetadata({
       data: {
         branding: {
           ...existingSettings.branding,
-          themeKey: siteCode as SiteSetting['branding']['themeKey'],
+          themeKey: (siteCode === 'wing-side'
+            ? 'custom'
+            : siteCode) as SiteSetting['branding']['themeKey'],
           themePreset: presetIDs[assignment.themePreset],
         },
         heroDefaults: {
@@ -412,7 +417,7 @@ async function ensureNavigationCorrections({
         collection: 'site-settings',
         data: navigation,
         id: siteSettings.id,
-        locale: locale as 'en' | 'vi',
+        locale: locale as CopyLocaleCode,
         req,
       })
     }
@@ -430,6 +435,7 @@ export async function ensureHeroPresentationFixtures({
   payload: Awaited<ReturnType<typeof getPayload>>
   req: Awaited<ReturnType<typeof createLocalReq>>
 }): Promise<Record<HeroPresentationKey, number>> {
+  const heroPresetIDs = await ensureHeroPresentationPresetSeeds(payload, req)
   const rootSites = await payload.find({
     collection: 'sites',
     depth: 0,
@@ -444,7 +450,9 @@ export async function ensureHeroPresentationFixtures({
   const rootSite = rootSites.docs[0]
 
   if (!rootSite) {
-    throw new Error('The WingsGroup root site must exist before seeding hero presentation fixtures.')
+    throw new Error(
+      'The WingsGroup root site must exist before seeding hero presentation fixtures.',
+    )
   }
 
   const homePages = await payload.find({
@@ -490,6 +498,14 @@ export async function ensureHeroPresentationFixtures({
   const fixtureIDs = {} as Record<HeroPresentationKey, number>
 
   for (const definition of heroPresentationDefinitions) {
+    const presentationPreset = heroPresentationPresetSeeds.find(
+      (preset) => preset.baseTemplate === definition.value,
+    )
+
+    if (!presentationPreset) {
+      throw new Error(`Missing governed hero preset for fixture ${definition.value}.`)
+    }
+
     const slug = `hero-${definition.value}`
     const existingPages = await payload.find({
       collection: 'pages',
@@ -517,6 +533,8 @@ export async function ensureHeroPresentationFixtures({
         links: homePage.hero.links?.map(({ link }) => ({ link })),
         media: homePage.hero.media,
         presentation: definition.value,
+        presentationMode: 'override' as const,
+        presentationPreset: heroPresetIDs[presentationPreset.key],
         richText: homePage.hero.richText,
         slides:
           definition.value === 'cinematic-carousel'
@@ -527,8 +545,7 @@ export async function ensureHeroPresentationFixtures({
                 title: `Journey ${index + 1}`,
               }))
             : [],
-        supportingMedia:
-          definition.value === 'layered-visuals' ? supportingMedia : [],
+        supportingMedia: definition.value === 'layered-visuals' ? supportingMedia : [],
         type: 'highImpact' as const,
         variant: homePage.hero.variant,
         video:
@@ -602,9 +619,7 @@ async function getAdminRequestContext() {
   return { payload, req }
 }
 
-export async function seedHeroPresentationSmoke(): Promise<
-  Record<HeroPresentationKey, number>
-> {
+export async function seedHeroPresentationSmoke(): Promise<Record<HeroPresentationKey, number>> {
   const { payload, req } = await getAdminRequestContext()
 
   return ensureHeroPresentationFixtures({ payload, req })
@@ -612,7 +627,7 @@ export async function seedHeroPresentationSmoke(): Promise<
 
 export async function seedPhase1LaunchSmoke(): Promise<void> {
   const { payload, req } = await getAdminRequestContext()
-  const requiredSiteCodes = ['wings-go', 'wings-side', 'wings-plus', 'wings-care', 'wings-pass']
+  const requiredSiteCodes = ['wings-go', 'wing-side', 'wings-plus', 'wings-care', 'wings-pass']
   const presetIDs = await ensureThemePresetSeeds(payload, req)
   const heroPresetIDs = await ensureHeroPresentationPresetSeeds(payload, req)
   const sites = await payload.find({

@@ -58,7 +58,7 @@ export const Media: CollectionConfig = {
     staticDir: path.resolve(dirname, '../../public/media'),
     adminThumbnail: 'thumbnail',
     focalPoint: true,
-    imageSizes: [
+    imageSizes: process.env.PAYLOAD_IMPORT_ORIGINALS_ONLY === 'true' ? [] : [
       {
         name: 'thumbnail',
         width: 300,

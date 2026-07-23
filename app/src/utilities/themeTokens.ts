@@ -59,6 +59,7 @@ export type SpacingScale = (typeof spacingScaleOptions)[number]['value']
 export type FontPreset = (typeof fontPresetOptions)[number]['value']
 export type ButtonStyle = (typeof buttonStyleOptions)[number]['value']
 export type LayoutStyle = (typeof layoutStyleOptions)[number]['value']
+export const defaultThemeKey = 'wings-group' as const
 
 const hexColorPattern = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
 
@@ -221,7 +222,7 @@ export const normalizeThemePresetKey = (themeKey?: string | null): ThemePresetKe
 
 export const normalizeThemeKey = (themeKey?: string | null): ThemeKey => {
   if (!themeKey) {
-    return 'wings-group'
+    return defaultThemeKey
   }
 
   if (themeKeyOptions.some((option) => option.value === themeKey)) {

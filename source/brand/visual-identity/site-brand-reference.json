@@ -32,18 +32,8 @@
       "tagline": "Fly further. Together",
       "valueLine": null,
       "crops": {
-        "logoPrimary": [
-          0.04,
-          0.05,
-          0.68,
-          0.46
-        ],
-        "mark": [
-          0.09,
-          0.04,
-          0.55,
-          0.34
-        ]
+        "logoPrimary": [0.04, 0.05, 0.68, 0.46],
+        "mark": [0.09, 0.04, 0.55, 0.34]
       },
       "colors": {
         "primary": "#005090",
@@ -101,8 +91,8 @@
       }
     },
     {
-      "siteCode": "wingsside",
-      "displayTitle": "Wing Side",
+      "siteCode": "wing-side",
+      "displayTitle": "wingside.vn",
       "brandBoardTitle": "WING SIDE",
       "sourcePdf": "pdf/WINGS SIDE.pdf",
       "logo": {

@@ -84,7 +84,7 @@ Vai trò:
 - dịch vụ bao gồm/không bao gồm,
 - form giữ chỗ/tư vấn.
 
-## 4. Cấu trúc trang cho `wingsside.vn` (inbound)
+## 4. Cấu trúc trang cho `wingside.vn` (inbound)
 
 ### 4.1. Trang bắt buộc
 

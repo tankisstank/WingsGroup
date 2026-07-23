@@ -3,18 +3,55 @@ import type { NextConfig } from 'next'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { allSiteAliasToCodeMap, siteAliasToCodeMap } from './src/utilities/sitePaths'
+import {
+  applicationSecurityHeaders,
+  productionTransportSecurityHeader,
+} from './src/utilities/securityHeaders'
 
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 import { redirects } from './redirects'
 
-const NEXT_PUBLIC_SERVER_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+const configuredServerURL = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-  : process.env.__NEXT_PRIVATE_ORIGIN || 'http://localhost:3000'
+  : process.env.NEXT_PUBLIC_SERVER_URL || process.env.__NEXT_PRIVATE_ORIGIN
+
+const remoteImagePatterns = configuredServerURL
+  ? (() => {
+      const url = new URL(configuredServerURL)
+      const isLocalOrPlaceholder =
+        ['localhost', '127.0.0.1', 'example.com'].includes(url.hostname) ||
+        url.hostname.endsWith('.invalid')
+
+      if (process.env.NODE_ENV === 'production' && isLocalOrPlaceholder) {
+        return []
+      }
+
+      return [
+        {
+          hostname: url.hostname,
+          protocol: url.protocol.replace(':', '') as 'http' | 'https',
+        },
+      ]
+    })()
+  : []
+
+const allowedDevOrigins = [
+  'wingsgroup.vn',
+  'www.wingsgroup.vn',
+  'wingsgo.vn',
+  'www.wingsgo.vn',
+  'wingsplus.vn',
+  'www.wingsplus.vn',
+  'wingscare.wingsgroup.vn',
+  'wingspass.wingsgroup.vn',
+  'wingside.vn',
+  'www.wingside.vn',
+]
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  allowedDevOrigins,
   // Temporarily required on Windows until Next.js fixes Turbopack Sass resolution.
   // See: https://github.com/vercel/next.js/issues/86431
   sassOptions: {
@@ -26,17 +63,8 @@ const nextConfig: NextConfig = {
         pathname: '/api/media/file/**',
       },
     ],
-    qualities: [100],
-    remotePatterns: [
-      ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
-        const url = new URL(item)
-
-        return {
-          hostname: url.hostname,
-          protocol: url.protocol.replace(':', '') as 'http' | 'https',
-        }
-      }),
-    ],
+    qualities: [80],
+    remotePatterns: remoteImagePatterns,
   },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
@@ -49,40 +77,15 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: true,
   redirects,
-  async rewrites() {
-    const rootSiteCode = siteAliasToCodeMap.wingsgroup
-
+  async headers() {
     return [
-      ...['vi', 'en'].flatMap((locale) => [
-        {
-          source: `/${locale}`,
-          destination: `/?site=${rootSiteCode}&siteAlias=wingsgroup&locale=${locale}`,
-        },
-        {
-          source: `/${locale}/:slug*`,
-          destination: `/:slug*?site=${rootSiteCode}&siteAlias=wingsgroup&locale=${locale}`,
-        },
-      ]),
-      ...Object.entries(allSiteAliasToCodeMap).flatMap(([alias, code]) => [
-        ...['vi', 'en'].flatMap((locale) => [
-          {
-            source: `/${alias}/${locale}`,
-            destination: `/?site=${code}&siteAlias=${alias}&locale=${locale}`,
-          },
-          {
-            source: `/${alias}/${locale}/:slug*`,
-            destination: `/:slug*?site=${code}&siteAlias=${alias}&locale=${locale}`,
-          },
-        ]),
-        {
-          source: `/${alias}`,
-          destination: `/?site=${code}&siteAlias=${alias}`,
-        },
-        {
-          source: `/${alias}/:slug*`,
-          destination: `/:slug*?site=${code}&siteAlias=${alias}`,
-        },
-      ]),
+      {
+        source: '/:path*',
+        headers: [
+          ...applicationSecurityHeaders,
+          ...(process.env.NODE_ENV === 'production' ? [productionTransportSecurityHeader] : []),
+        ],
+      },
     ]
   },
   turbopack: {

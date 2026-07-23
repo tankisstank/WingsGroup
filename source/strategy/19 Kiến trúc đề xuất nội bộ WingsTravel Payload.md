@@ -67,7 +67,7 @@ Nó là một lớp render chung cho:
 
 - `WingsTravel`
 - `WingsGo`
-- `WingsSide`
+- `wingside.vn` (mã tenant kỹ thuật `wing-side`)
 - `WingsPlus`
 - `WingsCare`
 - `WingsPass`
@@ -121,7 +121,7 @@ flowchart TB
     subgraph Public["Public Layer"]
         DomainA["wingstravel.com"]
         DomainB["wingsgo.com"]
-        DomainC["wingsside.com"]
+        DomainC["wingside.vn"]
         DomainD["wingsplus.com"]
         DomainE["wingscare.com"]
         DomainF["wingspass.com"]
@@ -249,7 +249,7 @@ Nguyên tắc:
 - site paths: [sitePaths.ts](/E:/repo/WingsTravel/app/src/utilities/sitePaths.ts)
 - lấy settings theo site: [getSiteSettings.ts](/E:/repo/WingsTravel/app/src/utilities/getSiteSettings.ts)
 - metadata: [generateMeta.ts](/E:/repo/WingsTravel/app/src/utilities/generateMeta.ts)
-- frontend layout: [layout.tsx](/E:/repo/WingsTravel/app/src/app/(frontend)/layout.tsx)
+- frontend layout: [layout.tsx](</E:/repo/WingsTravel/app/src/app/(frontend)/layout.tsx>)
 - rewrite local multisite: [next.config.ts](/E:/repo/WingsTravel/app/next.config.ts)
 - seed multisite: [seed-subsites.ts](/E:/repo/WingsTravel/app/scripts/seed-subsites.ts)
 

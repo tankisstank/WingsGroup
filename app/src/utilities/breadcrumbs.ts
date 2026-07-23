@@ -1,5 +1,6 @@
 import type { SiteSetting } from '@/payload-types'
 
+import { getCopyLocale } from './locales'
 import { getPageCanonicalPath, getPostCanonicalPath } from './siteURLs'
 import type { SupportedLocaleCode } from './sitePaths'
 
@@ -26,8 +27,26 @@ export type BreadcrumbPost = {
   title?: null | string
 }
 
+const breadcrumbCopy = {
+  en: {
+    home: 'Home',
+    page: 'Page',
+    post: 'Post',
+    posts: 'Posts',
+  },
+  vi: {
+    home: 'Trang chủ',
+    page: 'Trang',
+    post: 'Bài viết',
+    posts: 'Bài viết',
+  },
+} as const
+
+const getBreadcrumbCopy = (locale?: SupportedLocaleCode) =>
+  breadcrumbCopy[getCopyLocale(locale ?? 'vi')]
+
 const getPageLabel = (page: BreadcrumbPage, locale?: SupportedLocaleCode) =>
-  page.meta?.breadcrumbLabel || page.title || (locale === 'en' ? 'Page' : 'Trang')
+  page.meta?.breadcrumbLabel || page.title || getBreadcrumbCopy(locale).page
 
 const pushAncestorBreadcrumbs = (
   items: BreadcrumbItem[],
@@ -59,9 +78,10 @@ export const buildPageBreadcrumbItems = ({
   page: BreadcrumbPage
   settings?: null | SiteSetting
 }): BreadcrumbItem[] => {
+  const copy = getBreadcrumbCopy(locale)
   const items: BreadcrumbItem[] = [
     {
-      label: settings?.siteName || (locale === 'en' ? 'Home' : 'Trang chủ'),
+      label: settings?.siteName || copy.home,
       path: getPageCanonicalPath('/', locale),
     },
   ]
@@ -88,17 +108,21 @@ export const buildPostBreadcrumbItems = ({
   locale?: SupportedLocaleCode
   post: BreadcrumbPost
   settings?: null | SiteSetting
-}): BreadcrumbItem[] => [
-  {
-    label: settings?.siteName || (locale === 'en' ? 'Home' : 'Trang chủ'),
-    path: getPageCanonicalPath('/', locale),
-  },
-  {
-    label: locale === 'en' ? 'Posts' : 'Bài viết',
-    path: getPostCanonicalPath(null, locale),
-  },
-  {
-    label: post.meta?.breadcrumbLabel || post.title || (locale === 'en' ? 'Post' : 'Bài viết'),
-    path: getPostCanonicalPath(post.slug, locale),
-  },
-]
+}): BreadcrumbItem[] => {
+  const copy = getBreadcrumbCopy(locale)
+
+  return [
+    {
+      label: settings?.siteName || copy.home,
+      path: getPageCanonicalPath('/', locale),
+    },
+    {
+      label: copy.posts,
+      path: getPostCanonicalPath(null, locale),
+    },
+    {
+      label: post.meta?.breadcrumbLabel || post.title || copy.post,
+      path: getPostCanonicalPath(post.slug, locale),
+    },
+  ]
+}

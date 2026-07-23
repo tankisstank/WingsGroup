@@ -122,16 +122,23 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('vi' | 'en') | ('vi' | 'en')[];
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de')
+    | ('vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de')[];
   globals: {
     header: Header;
     footer: Footer;
+    'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
-  locale: 'vi' | 'en';
+  locale: 'vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de';
   widgets: {
     'wings-group-metrics': WingsGroupMetricsWidget;
     collections: CollectionsWidget;
@@ -139,6 +146,8 @@ export interface Config {
   user: User;
   jobs: {
     tasks: {
+      sendLeadNotification: TaskSendLeadNotification;
+      reconcileLeadNotificationQueueFailures: TaskReconcileLeadNotificationQueueFailures;
       createCollectionExport: TaskCreateCollectionExport;
       createCollectionImport: TaskCreateCollectionImport;
       schedulePublish: TaskSchedulePublish;
@@ -186,8 +195,8 @@ export interface Site {
         id?: string | null;
       }[]
     | null;
-  supportedLocales: ('vi' | 'en')[];
-  defaultLocale: 'vi' | 'en';
+  supportedLocales: ('vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de')[];
+  defaultLocale: 'vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de';
   isActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -676,6 +685,7 @@ export interface Page {
     | StatsBlock
     | TestimonialBlock
     | ComparisonBlock
+    | CredentialsCarouselBlock
     | FAQBlock
     | MediaBlock
     | ArchiveBlock
@@ -692,6 +702,298 @@ export interface Page {
      * Tên ngắn hiển thị trong breadcrumb và schema BreadcrumbList.
      */
     breadcrumbLabel?: string | null;
+  };
+  /**
+   * Hợp đồng nội dung typed cho 8 route hub WingsSide. Không dùng JSON editor. Media/form qua relationship Payload.
+   */
+  wingsSideHiFi?: {
+    /**
+     * Khi bật, resolver hi-fi đọc các trường dưới đây thay vì chỉ dựa copy tĩnh. Giữ drafts/versions/live preview của Pages.
+     */
+    enabled?: boolean | null;
+    /**
+     * Phải khớp pathname hub WingsSide tương ứng.
+     */
+    routeVariant?: ('home' | 'plan' | 'destinations' | 'styles' | 'packages' | 'guide' | 'about' | 'contact') | null;
+    hero?: {
+      eyebrow?: string | null;
+      title?: string | null;
+      lede?: string | null;
+      media?: (number | null) | Media;
+      primaryCta?: {
+        label?: string | null;
+        href?: string | null;
+      };
+      secondaryCta?: {
+        label?: string | null;
+        href?: string | null;
+      };
+    };
+    home?: {
+      pillarsKicker?: string | null;
+      pillarsTitle?: string | null;
+      pillarsLede?: string | null;
+      pillars?:
+        | {
+            label?: string | null;
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      whyKicker?: string | null;
+      whyTitle?: string | null;
+      whyFeaturedBadge?: string | null;
+      whyFeaturedTitle?: string | null;
+      whyFeaturedBody?: string | null;
+      whyFeaturedCta?: string | null;
+      whyFeaturedHref?: string | null;
+      whyCards?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            cta?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      destKicker?: string | null;
+      destTitle?: string | null;
+      destLede?: string | null;
+      stylesKicker?: string | null;
+      stylesTitle?: string | null;
+      journeysKicker?: string | null;
+      journeysTitle?: string | null;
+      journeysLede?: string | null;
+      notesKicker?: string | null;
+      notesTitle?: string | null;
+      notes?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      trust?:
+        | {
+            kind?: ('sla' | 'proof' | 'planner') | null;
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      closeTitle?: string | null;
+      closeLede?: string | null;
+      closeCta?: string | null;
+      closeCtaSecondary?: string | null;
+      related?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      credentials?:
+        | {
+            kind?: ('cert' | 'award' | 'member' | 'iso') | null;
+            mark?: string | null;
+            micro?: string | null;
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    plan?: {
+      heroLede?: string | null;
+      stepsKicker?: string | null;
+      stepsTitle?: string | null;
+      stepsLede?: string | null;
+      steps?:
+        | {
+            label?: string | null;
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      faqTitle?: string | null;
+      faq?:
+        | {
+            question?: string | null;
+            answer?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      exploreTitle?: string | null;
+      explore?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      /**
+       * Form inquiry đầy đủ cho plan-your-trip. Giữ honeypot/validation hiện có.
+       */
+      form?: (number | null) | Form;
+    };
+    destinations?: {
+      routesTitle?: string | null;
+      deeperTitle?: string | null;
+      routes?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      places?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            region?: string | null;
+            href?: string | null;
+            media?: (number | null) | Media;
+            id?: string | null;
+          }[]
+        | null;
+      closingTitle?: string | null;
+      closingLinks?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    styles?: {
+      introTitle?: string | null;
+      styles?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            media?: (number | null) | Media;
+            id?: string | null;
+          }[]
+        | null;
+      closingTitle?: string | null;
+      closingLinks?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    packages?: {
+      gridTitle?: string | null;
+      gridLede?: string | null;
+      cards?:
+        | {
+            badge?: string | null;
+            micro?: string | null;
+            title?: string | null;
+            body?: string | null;
+            priceFrom?: string | null;
+            priceUnit?: string | null;
+            note?: string | null;
+            href?: string | null;
+            viewLabel?: string | null;
+            customizeLabel?: string | null;
+            media?: (number | null) | Media;
+            id?: string | null;
+          }[]
+        | null;
+      closingTitle?: string | null;
+      closingNote?: string | null;
+      closingLinks?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    guide?: {
+      listTitle?: string | null;
+      notes?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      closingTitle?: string | null;
+      closingCta?: string | null;
+      closingHref?: string | null;
+    };
+    about?: {
+      storyTitle?: string | null;
+      storyBody?: string | null;
+      stepsTitle?: string | null;
+      promisesTitle?: string | null;
+      promises?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      teamTitle?: string | null;
+      teamLede?: string | null;
+      closingTitle?: string | null;
+      closingLinks?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    contact?: {
+      channelsTitle?: string | null;
+      channels?:
+        | {
+            label?: string | null;
+            value?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      nextTitle?: string | null;
+      nextSteps?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+      /**
+       * Form Send a message — bắt buộc cho contact hi-fi.
+       */
+      form?: (number | null) | Form;
+      closingTitle?: string | null;
+      closingCta?: string | null;
+      closingHref?: string | null;
+      closingLinks?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
   };
   /**
    * Các trang cùng site được hiển thị bên dưới nội dung để tăng liên kết nội bộ.
@@ -1094,6 +1396,8 @@ export interface TestimonialBlock {
         quote: string;
         name: string;
         role?: string | null;
+        country?: string | null;
+        noteDate?: string | null;
         avatar?: (number | null) | Media;
         logo?: (number | null) | Media;
         videoURL?: string | null;
@@ -1148,6 +1452,50 @@ export interface ComparisonBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'comparison';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CredentialsCarouselBlock".
+ */
+export interface CredentialsCarouselBlock {
+  fullBleed?: boolean | null;
+  eyebrow: string;
+  title: string;
+  description?: string | null;
+  /**
+   * Mặc định dùng tiêu đề nếu để trống.
+   */
+  ariaLabel?: string | null;
+  autoplay?: boolean | null;
+  intervalMs?: number | null;
+  /**
+   * Mỗi mục là một hồ sơ có ảnh và metadata. Dùng trạng thái “Cần xác minh” khi ảnh chưa đủ thông tin; mục đó sẽ không xuất hiện public.
+   */
+  items: {
+    reviewStatus: 'verified' | 'needs-review';
+    kind: 'cert' | 'award' | 'member' | 'iso';
+    /**
+     * Dùng ảnh hoặc logo đã quản lý trong Media Library.
+     */
+    image?: (number | null) | Media;
+    issuer: string;
+    recipient: string;
+    recognitionYear?: number | null;
+    issuedOn?: string | null;
+    referenceCode?: string | null;
+    /**
+     * Giữ tên file gốc để có thể truy vết và rà soát lại.
+     */
+    sourceFilename?: string | null;
+    mark: string;
+    label: string;
+    title: string;
+    description: string;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'credentialsCarousel';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1428,8 +1776,32 @@ export interface TourProduct {
   id: number;
   title: string;
   site: number | Site;
-  market: 'korea' | 'japan' | 'china';
+  market:
+    | 'korea'
+    | 'japan'
+    | 'china'
+    | 'vietnam'
+    | 'thailand'
+    | 'cambodia'
+    | 'laos'
+    | 'myanmar'
+    | 'indochina'
+    | 'other';
   tourCode?: string | null;
+  /**
+   * Dữ liệu máy đọc để truy vết source system, source ID/URL/hash, batch import và bảng giá gốc.
+   */
+  sourceProvenance?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  priceFrom?: number | null;
+  currency?: string | null;
   durationDays: number;
   durationNights: number;
   wrapperPage?: (number | null) | Page;
@@ -1550,7 +1922,7 @@ export interface TourProduct {
     mealsSummary?: string | null;
     transportSummary?: string | null;
     operatorNotes?: string | null;
-    importantNotes?:
+    notes?:
       | {
           label: string;
           id?: string | null;
@@ -1580,12 +1952,11 @@ export interface TourProduct {
         | 'why-choose'
         | 'route'
         | 'itinerary'
-        | 'includes'
+        | 'services'
         | 'departures'
         | 'faq'
         | 'related'
         | 'reviews'
-        | 'services'
         | 'sticky-cta'
       )[]
     | null;
@@ -1678,7 +2049,6 @@ export interface DepartureVariant {
   activeDepartures?: (number | TourDeparture)[] | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * Lịch khởi hành và giá bán công khai. Mỗi record là một đợt đi để dùng lại trên tour detail, market, campaign và trang lịch.
@@ -1697,7 +2067,7 @@ export interface TourDeparture {
   returnDate?: string | null;
   airline?: string | null;
   priceFrom: number;
-  currency: 'VND';
+  currency: 'VND' | 'USD';
   promoLabel?: string | null;
   urgencyLabel?: string | null;
   availabilityBadge?: string | null;
@@ -1786,6 +2156,12 @@ export interface Redirect {
 export interface FormSubmission {
   id: number;
   site?: (number | null) | Site;
+  /**
+   * Private operational state for notification delivery and reconciliation.
+   */
+  deliveryStatus: 'pending' | 'queued' | 'delivered' | 'queue_failed' | 'delivery_failed';
+  deliveryUpdatedAt?: string | null;
+  deliveryErrorCode?: string | null;
   form: number | Form;
   submissionData?:
     | {
@@ -1809,7 +2185,7 @@ export interface Export {
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'vi' | 'en') | null;
+  locale?: ('all' | 'vi' | 'en' | 'it' | 'es' | 'pt' | 'ja' | 'ko' | 'fr' | 'de') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -1972,7 +2348,13 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'createCollectionExport' | 'createCollectionImport' | 'schedulePublish';
+        taskSlug:
+          | 'inline'
+          | 'sendLeadNotification'
+          | 'reconcileLeadNotificationQueueFailures'
+          | 'createCollectionExport'
+          | 'createCollectionImport'
+          | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -2005,10 +2387,28 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'createCollectionExport' | 'createCollectionImport' | 'schedulePublish') | null;
+  taskSlug?:
+    | (
+        | 'inline'
+        | 'sendLeadNotification'
+        | 'reconcileLeadNotificationQueueFailures'
+        | 'createCollectionExport'
+        | 'createCollectionImport'
+        | 'schedulePublish'
+      )
+    | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2384,6 +2784,7 @@ export interface PagesSelect<T extends boolean = true> {
         stats?: T | StatsBlockSelect<T>;
         testimonial?: T | TestimonialBlockSelect<T>;
         comparison?: T | ComparisonBlockSelect<T>;
+        credentialsCarousel?: T | CredentialsCarouselBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
@@ -2396,6 +2797,307 @@ export interface PagesSelect<T extends boolean = true> {
         image?: T;
         description?: T;
         breadcrumbLabel?: T;
+      };
+  wingsSideHiFi?:
+    | T
+    | {
+        enabled?: T;
+        routeVariant?: T;
+        hero?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              lede?: T;
+              media?: T;
+              primaryCta?:
+                | T
+                | {
+                    label?: T;
+                    href?: T;
+                  };
+              secondaryCta?:
+                | T
+                | {
+                    label?: T;
+                    href?: T;
+                  };
+            };
+        home?:
+          | T
+          | {
+              pillarsKicker?: T;
+              pillarsTitle?: T;
+              pillarsLede?: T;
+              pillars?:
+                | T
+                | {
+                    label?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              whyKicker?: T;
+              whyTitle?: T;
+              whyFeaturedBadge?: T;
+              whyFeaturedTitle?: T;
+              whyFeaturedBody?: T;
+              whyFeaturedCta?: T;
+              whyFeaturedHref?: T;
+              whyCards?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    cta?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              destKicker?: T;
+              destTitle?: T;
+              destLede?: T;
+              stylesKicker?: T;
+              stylesTitle?: T;
+              journeysKicker?: T;
+              journeysTitle?: T;
+              journeysLede?: T;
+              notesKicker?: T;
+              notesTitle?: T;
+              notes?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              trust?:
+                | T
+                | {
+                    kind?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              closeTitle?: T;
+              closeLede?: T;
+              closeCta?: T;
+              closeCtaSecondary?: T;
+              related?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              credentials?:
+                | T
+                | {
+                    kind?: T;
+                    mark?: T;
+                    micro?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+            };
+        plan?:
+          | T
+          | {
+              heroLede?: T;
+              stepsKicker?: T;
+              stepsTitle?: T;
+              stepsLede?: T;
+              steps?:
+                | T
+                | {
+                    label?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              faqTitle?: T;
+              faq?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              exploreTitle?: T;
+              explore?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              form?: T;
+            };
+        destinations?:
+          | T
+          | {
+              routesTitle?: T;
+              deeperTitle?: T;
+              routes?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              places?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    region?: T;
+                    href?: T;
+                    media?: T;
+                    id?: T;
+                  };
+              closingTitle?: T;
+              closingLinks?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+            };
+        styles?:
+          | T
+          | {
+              introTitle?: T;
+              styles?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    media?: T;
+                    id?: T;
+                  };
+              closingTitle?: T;
+              closingLinks?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+            };
+        packages?:
+          | T
+          | {
+              gridTitle?: T;
+              gridLede?: T;
+              cards?:
+                | T
+                | {
+                    badge?: T;
+                    micro?: T;
+                    title?: T;
+                    body?: T;
+                    priceFrom?: T;
+                    priceUnit?: T;
+                    note?: T;
+                    href?: T;
+                    viewLabel?: T;
+                    customizeLabel?: T;
+                    media?: T;
+                    id?: T;
+                  };
+              closingTitle?: T;
+              closingNote?: T;
+              closingLinks?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+            };
+        guide?:
+          | T
+          | {
+              listTitle?: T;
+              notes?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              closingTitle?: T;
+              closingCta?: T;
+              closingHref?: T;
+            };
+        about?:
+          | T
+          | {
+              storyTitle?: T;
+              storyBody?: T;
+              stepsTitle?: T;
+              promisesTitle?: T;
+              promises?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              teamTitle?: T;
+              teamLede?: T;
+              closingTitle?: T;
+              closingLinks?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+            };
+        contact?:
+          | T
+          | {
+              channelsTitle?: T;
+              channels?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              nextTitle?: T;
+              nextSteps?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              form?: T;
+              closingTitle?: T;
+              closingCta?: T;
+              closingHref?: T;
+              closingLinks?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    href?: T;
+                    id?: T;
+                  };
+            };
       };
   relatedPages?: T;
   publishedAt?: T;
@@ -2589,6 +3291,8 @@ export interface TestimonialBlockSelect<T extends boolean = true> {
         quote?: T;
         name?: T;
         role?: T;
+        country?: T;
+        noteDate?: T;
         avatar?: T;
         logo?: T;
         videoURL?: T;
@@ -2630,6 +3334,39 @@ export interface ComparisonBlockSelect<T extends boolean = true> {
               url?: T;
               label?: T;
             };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CredentialsCarouselBlock_select".
+ */
+export interface CredentialsCarouselBlockSelect<T extends boolean = true> {
+  fullBleed?: T;
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  ariaLabel?: T;
+  autoplay?: T;
+  intervalMs?: T;
+  items?:
+    | T
+    | {
+        reviewStatus?: T;
+        kind?: T;
+        image?: T;
+        issuer?: T;
+        recipient?: T;
+        recognitionYear?: T;
+        issuedOn?: T;
+        referenceCode?: T;
+        sourceFilename?: T;
+        mark?: T;
+        label?: T;
+        title?: T;
+        description?: T;
         id?: T;
       };
   id?: T;
@@ -2734,6 +3471,9 @@ export interface TourProductsSelect<T extends boolean = true> {
   site?: T;
   market?: T;
   tourCode?: T;
+  sourceProvenance?: T;
+  priceFrom?: T;
+  currency?: T;
   durationDays?: T;
   durationNights?: T;
   wrapperPage?: T;
@@ -2862,7 +3602,7 @@ export interface TourProductsSelect<T extends boolean = true> {
         mealsSummary?: T;
         transportSummary?: T;
         operatorNotes?: T;
-        importantNotes?:
+        notes?:
           | T
           | {
               label?: T;
@@ -2960,7 +3700,6 @@ export interface DepartureVariantsSelect<T extends boolean = true> {
   activeDepartures?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3323,6 +4062,9 @@ export interface FormsSelect<T extends boolean = true> {
  */
 export interface FormSubmissionsSelect<T extends boolean = true> {
   site?: T;
+  deliveryStatus?: T;
+  deliveryUpdatedAt?: T;
+  deliveryErrorCode?: T;
   form?: T;
   submissionData?:
     | T
@@ -3456,6 +4198,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processing?: T;
+  meta?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3551,6 +4294,24 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: number;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -3597,6 +4358,16 @@ export interface FooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "wings-group-metrics_widget".
  */
 export interface WingsGroupMetricsWidget {
@@ -3614,6 +4385,34 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSendLeadNotification".
+ */
+export interface TaskSendLeadNotification {
+  input: {
+    submissionId: string;
+    siteCode: string;
+    formTitle: string;
+    fields: {
+      label: string;
+      value: string;
+    }[];
+  };
+  output: {
+    delivered: boolean;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskReconcileLeadNotificationQueueFailures".
+ */
+export interface TaskReconcileLeadNotificationQueueFailures {
+  input?: unknown;
+  output: {
+    requeued: number;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3703,10 +4502,6 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'tour-products';
           value: number | TourProduct;
-        } | null)
-      | ({
-          relationTo: 'departure-variants';
-          value: number | DepartureVariant;
         } | null)
       | ({
           relationTo: 'tour-departures';

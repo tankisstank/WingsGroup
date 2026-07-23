@@ -2,13 +2,26 @@ import type { Site } from '@/payload-types'
 
 import configPromise from '@payload-config'
 import { headers } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { getPayload, type Where } from 'payload'
-import { domainCandidates, requestHostCandidates } from './siteDomains'
-import { defaultSiteCode, isSupportedLocale, type SupportedLocaleCode } from './sitePaths'
+import { domainCandidates } from './siteDomains'
+import {
+  getSharedCachedValue,
+} from '@/infrastructure/cache/sharedCache'
+import { invalidateSitesCache } from '@/infrastructure/cache/tenantCache'
+import {
+  allSiteAliasToCodeMap,
+  defaultSiteCode,
+  isSupportedLocale,
+  type SupportedLocaleCode,
+} from './sitePaths'
 
 type SiteCacheResult = null | Site
-const siteLookupCache = new Map<string, Promise<SiteCacheResult>>()
-const activeSitesCache = new Map<string, Promise<Site[]>>()
+const allowedRouteSiteCodes = new Set<string>(Object.values(allSiteAliasToCodeMap))
+
+export const invalidateSiteContextCache = (): Promise<void> => {
+  return invalidateSitesCache()
+}
 
 const getSiteByCode = async (code: string): Promise<SiteCacheResult> => {
   const payload = await getPayload({ config: configPromise })
@@ -16,6 +29,9 @@ const getSiteByCode = async (code: string): Promise<SiteCacheResult> => {
     collection: 'sites',
     depth: 0,
     limit: 1,
+    // Server-only tenant-directory lookup. The site code is restricted to the
+    // local registry before this call and never comes from an untrusted header.
+    overrideAccess: true,
     pagination: false,
     where: {
       and: [
@@ -42,6 +58,9 @@ const getActiveSites = async (): Promise<Site[]> => {
     collection: 'sites',
     depth: 0,
     limit: 100,
+    // Server-only host resolution must inspect active tenant domains while the
+    // Sites collection itself remains non-enumerable to anonymous callers.
+    overrideAccess: true,
     pagination: false,
     where: {
       isActive: {
@@ -54,36 +73,25 @@ const getActiveSites = async (): Promise<Site[]> => {
 }
 
 const getMemoizedSiteByCode = (code: string): Promise<SiteCacheResult> => {
-  const cached = siteLookupCache.get(code)
-
-  if (cached) {
-    return cached
+  if (!allowedRouteSiteCodes.has(code)) {
+    return Promise.resolve(null)
   }
 
-  const lookup = getSiteByCode(code).catch((error) => {
-    siteLookupCache.delete(code)
-    throw error
+  return getSharedCachedValue({
+    load: () => getSiteByCode(code),
+    namespace: 'sites',
+    tenant: code,
+    variant: 'active',
   })
-
-  siteLookupCache.set(code, lookup)
-  return lookup
 }
 
 const getMemoizedActiveSites = (): Promise<Site[]> => {
-  const cacheKey = 'active-sites'
-  const cached = activeSitesCache.get(cacheKey)
-
-  if (cached) {
-    return cached
-  }
-
-  const lookup = getActiveSites().catch((error) => {
-    activeSitesCache.delete(cacheKey)
-    throw error
+  return getSharedCachedValue({
+    load: getActiveSites,
+    namespace: 'sites',
+    tenant: 'directory',
+    variant: 'active',
   })
-
-  activeSitesCache.set(cacheKey, lookup)
-  return lookup
 }
 
 const getSiteByHosts = async (hosts: string[]): Promise<SiteCacheResult> => {
@@ -109,55 +117,64 @@ const getSiteByHosts = async (hosts: string[]): Promise<SiteCacheResult> => {
   )
 }
 
-export const getCurrentSite = async (
-  siteCodeFromArgs?: string | null,
-): Promise<SiteCacheResult> => {
+const isLocalBootstrapHost = (host?: null | string): boolean =>
+  !host || host === 'localhost' || host === '127.0.0.1' || host === '::1'
+
+export const getCurrentSite = async (): Promise<Site> => {
   const requestHeaders = await headers()
+  const hasTrustedProxyContext = requestHeaders.get('x-site-context-source') === 'proxy'
+  const routeSiteCode = hasTrustedProxyContext ? requestHeaders.get('x-site-code') : null
+  const requestHost = hasTrustedProxyContext ? requestHeaders.get('x-site-host') : null
+  const isLocalBootstrapRequest =
+    process.env.NODE_ENV !== 'production' && isLocalBootstrapHost(requestHost)
 
-  if (siteCodeFromArgs) {
-    return getMemoizedSiteByCode(siteCodeFromArgs)
+  // Path aliases are a local-development routing convenience only. On deployed
+  // hosts, the domain is authoritative and a mismatched alias must never switch
+  // tenants.
+  if (isLocalBootstrapRequest && routeSiteCode && allowedRouteSiteCodes.has(routeSiteCode)) {
+    const site = await getMemoizedSiteByCode(routeSiteCode)
+    if (site) return site
+    notFound()
   }
 
-  const trustedSiteCodeFromHeader =
-    requestHeaders.get('x-site-code-source') === 'nginx' ? requestHeaders.get('x-site-code') : null
-
-  if (trustedSiteCodeFromHeader) {
-    return getMemoizedSiteByCode(trustedSiteCodeFromHeader)
-  }
-
-  const siteFromHost = await getSiteByHosts(requestHostCandidates(requestHeaders))
+  const siteFromHost = requestHost ? await getSiteByHosts([requestHost]) : null
 
   if (siteFromHost) {
+    if (routeSiteCode && routeSiteCode !== siteFromHost.code) {
+      notFound()
+    }
+
     return siteFromHost
   }
 
-  const siteCodeFromHeader = requestHeaders.get('x-site-code')
-
-  if (siteCodeFromHeader) {
-    return getMemoizedSiteByCode(siteCodeFromHeader)
+  if (isLocalBootstrapRequest) {
+    const defaultSite = await getMemoizedSiteByCode(defaultSiteCode)
+    if (defaultSite) return defaultSite
   }
 
-  return getMemoizedSiteByCode(defaultSiteCode)
+  notFound()
 }
 
-export const getCurrentSitePrefix = async (siteAliasFromArgs?: string | null): Promise<string> => {
+export const getCurrentSitePrefix = async (): Promise<string> => {
   const requestHeaders = await headers()
-  if (siteAliasFromArgs) {
-    return `/${siteAliasFromArgs}`
-  }
 
-  return requestHeaders.get('x-site-prefix') || ''
+  return requestHeaders.get('x-site-context-source') === 'proxy'
+    ? requestHeaders.get('x-site-prefix') || ''
+    : ''
 }
 
-export const getCurrentLocale = async (
-  localeFromArgs?: string | null,
-): Promise<SupportedLocaleCode> => {
-  if (isSupportedLocale(localeFromArgs)) {
-    return localeFromArgs
-  }
-
+export const getCurrentPublicPathname = async (): Promise<string> => {
   const requestHeaders = await headers()
-  const headerLocale = requestHeaders.get('x-locale')
+
+  return requestHeaders.get('x-public-path') || '/'
+}
+
+export const getCurrentLocale = async (): Promise<SupportedLocaleCode> => {
+  const requestHeaders = await headers()
+  const headerLocale =
+    requestHeaders.get('x-site-context-source') === 'proxy'
+      ? requestHeaders.get('x-locale')
+      : null
 
   if (isSupportedLocale(headerLocale)) {
     return headerLocale
@@ -170,13 +187,8 @@ export const getCurrentLocale = async (
 
 export const appendSiteWhere = async (
   where?: Where,
-  siteCodeFromArgs?: string | null,
-): Promise<Where | undefined> => {
-  const site = await getCurrentSite(siteCodeFromArgs)
-
-  if (!site) {
-    return where
-  }
+): Promise<Where> => {
+  const site = await getCurrentSite()
 
   const siteConstraint: Where = {
     site: {

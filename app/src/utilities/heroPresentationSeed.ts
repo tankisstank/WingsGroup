@@ -86,6 +86,34 @@ export const heroPresentationPresetSeeds: readonly HeroPresentationPresetSeed[] 
     },
   },
   {
+    baseTemplate: 'cinematic-carousel',
+    behavior: {
+      autoplay: true,
+      intervalMs: 6500,
+      loop: true,
+      pauseOnHover: true,
+      showArrows: true,
+      showDots: true,
+      transition: 'crossfade',
+      transitionMs: 800,
+    },
+    description:
+      'WingsSide inbound homepage carousel with image-only atmosphere and planner search widget.',
+    key: 'wingsside-inbound-cinematic-search',
+    name: 'WingsSide Inbound Cinematic Search',
+    slots: {
+      showBadge: true,
+      showBusinessPanel: true,
+      showPostcards: false,
+    },
+    visual: {
+      contentAlign: 'left',
+      contentPosition: 'left',
+      mediaFit: 'cover',
+      overlayStrength: 'strong',
+    },
+  },
+  {
     baseTemplate: 'video-background',
     description: 'Muted background video with required poster and reduced-motion fallback.',
     key: 'cinematic-video',
@@ -108,7 +136,7 @@ export const siteHeroPresentationAssignments: Record<
   'wings-group': { presetKey: 'centered-classic', variant: 'standard' },
   'wings-pass': { presetKey: 'split-classic', variant: 'utility' },
   'wings-plus': { presetKey: 'centered-classic', variant: 'standard' },
-  'wings-side': { presetKey: 'travel-planner-split', variant: 'planner' },
+  'wing-side': { presetKey: 'wingsside-inbound-cinematic-search', variant: 'planner' },
 }
 
 export async function ensureHeroPresentationPresetSeeds(

@@ -11,6 +11,9 @@ import { post2 } from './post-2'
 import { post3 } from './post-3'
 import { ensureLocalAdminUser, localAdminCredentials } from '@/utilities/adminSeed'
 import { ensureThemePresetSeeds, siteThemeAssignments } from '@/utilities/themeSeed'
+import { assertDestructiveSeedAllowed } from './guard'
+
+export { assertDestructiveSeedAllowed } from './guard'
 
 const collections: CollectionSlug[] = [
   'form-submissions',
@@ -45,6 +48,7 @@ export const seed = async ({
   payload: Payload
   req: PayloadRequest
 }): Promise<void> => {
+  assertDestructiveSeedAllowed()
   payload.logger.info('Seeding database...')
 
   // we need to clear the media directory before seeding
@@ -58,9 +62,9 @@ export const seed = async ({
     globals.map((global) =>
       payload.updateGlobal({
         slug: global,
-        data: {
+        data: seedData({
           navItems: [],
-        },
+        }),
         depth: 0,
         context: seedContext,
         req,

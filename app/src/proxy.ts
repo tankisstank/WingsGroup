@@ -5,6 +5,8 @@ import {
   getLocaleFromPathname,
   getSiteAliasFromPathname,
 } from '@/utilities/sitePaths'
+import { isPublicLocale } from '@/utilities/locales'
+import { createTrustedSiteContextHeaders, normalizeHost } from '@/utilities/siteDomains'
 
 const stripLeadingSegments = (pathname: string, count: number) => {
   const segments = pathname.split('/').filter(Boolean)
@@ -13,43 +15,167 @@ const stripLeadingSegments = (pathname: string, count: number) => {
   return stripped ? `/${stripped}` : '/'
 }
 
+const localBootstrapHosts = new Set(['127.0.0.1', '::1', 'localhost'])
+
+const isLocalDevelopmentHost = (host: null | string) =>
+  Boolean(host && (localBootstrapHosts.has(host) || host.endsWith('.local')))
+
+const notFoundResponse = () =>
+  new NextResponse('Not Found', {
+    headers: {
+      'Cache-Control': 'no-store',
+      'Content-Type': 'text/plain; charset=utf-8',
+    },
+    status: 404,
+  })
+
+const resolveEffectiveHost = (request: NextRequest): string | null => {
+  const headerHost = normalizeHost(request.headers.get('host'))
+  const urlHost = normalizeHost(request.nextUrl.hostname)
+
+  if (headerHost && urlHost && headerHost !== urlHost) {
+    if (isLocalDevelopmentHost(headerHost) && !isLocalDevelopmentHost(urlHost)) {
+      return urlHost
+    }
+
+    if (isLocalDevelopmentHost(urlHost) && !isLocalDevelopmentHost(headerHost)) {
+      return headerHost
+    }
+  }
+
+  return headerHost || urlHost
+}
+
+const isEquivalentPreservedHost = (preservedHost: null | string, currentHost: null | string) => {
+  if (!preservedHost || !currentHost) {
+    return false
+  }
+
+  if (preservedHost === currentHost) {
+    return true
+  }
+
+  if (!isLocalDevelopmentHost(preservedHost) && isLocalDevelopmentHost(currentHost)) {
+    return true
+  }
+
+  return localBootstrapHosts.has(preservedHost) && localBootstrapHosts.has(currentHost)
+}
+
+const getPreservedRewriteContext = (request: NextRequest): Headers | null => {
+  if (request.headers.get('x-site-context-source') !== 'proxy') return null
+
+  const publicPath = request.headers.get('x-public-path')
+  const publicAlias = publicPath ? getSiteAliasFromPathname(publicPath) : null
+  const publicLocale = publicPath ? getLocaleFromPathname(publicPath) : null
+  const expectedSiteCode = publicAlias ? allSiteAliasToCodeMap[publicAlias] : null
+  const expectedPath = publicPath
+    ? stripLeadingSegments(publicPath, publicAlias ? (publicLocale ? 2 : 1) : 1)
+    : null
+  const currentHost = resolveEffectiveHost(request)
+
+  // Next invokes Proxy again for the internal rewrite destination. Preserve
+  // only a context that is self-consistent with the original public alias,
+  // the rewritten pathname and the effective host. A client-supplied header
+  // bundle on an ordinary request fails these checks and is rebuilt below.
+  if (
+    (!publicAlias && !publicLocale) ||
+    expectedPath !== request.nextUrl.pathname ||
+    !isEquivalentPreservedHost(request.headers.get('x-site-host'), currentHost) ||
+    (publicAlias
+      ? request.headers.get('x-site-code') !== expectedSiteCode
+      : request.headers.has('x-site-code') || request.headers.has('x-site-prefix')) ||
+    (publicLocale && request.headers.get('x-locale') !== publicLocale)
+  ) {
+    return null
+  }
+
+  return new Headers(request.headers)
+}
+
 export function proxy(request: NextRequest) {
+  const preservedRewriteContext = getPreservedRewriteContext(request)
+
+  if (preservedRewriteContext) {
+    const response = NextResponse.next({ request: { headers: preservedRewriteContext } })
+    const requestID = preservedRewriteContext.get('x-request-id')
+    if (requestID) response.headers.set('X-Request-ID', requestID)
+    return response
+  }
+
+  const requestID = crypto.randomUUID()
   const siteAlias = getSiteAliasFromPathname(request.nextUrl.pathname)
   const locale = getLocaleFromPathname(request.nextUrl.pathname)
+  const effectiveHost = resolveEffectiveHost(request)
+
+  // Site aliases are a local multisite development contract. They must not
+  // become alternate public production URLs (or tenant-selection inputs).
+  if (siteAlias && !isLocalDevelopmentHost(effectiveHost)) {
+    return notFoundResponse()
+  }
+
+  // CMS-enabled locales may exist in Payload, but only public-enabled locales
+  // are routable/indexable on the public surface. Fail closed before the
+  // locale is stripped and accidentally served as the default homepage.
+  if (locale && !isPublicLocale(locale)) {
+    return notFoundResponse()
+  }
+
+  const siteCode = siteAlias ? allSiteAliasToCodeMap[siteAlias] : null
+  const sitePrefix = siteAlias ? `/${siteAlias}${locale ? `/${locale}` : ''}` : null
+  const requestHeaders = createTrustedSiteContextHeaders(request.headers, {
+    // The deployment edge overwrites X-Real-IP with the connection address.
+    // createTrustedSiteContextHeaders removes any public X-Client-IP value
+    // before promoting this edge-owned value into internal request context.
+    clientIP: request.headers.get('x-real-ip'),
+    // Tenant selection is intentionally based on the effective HTTP Host. In
+    // local/E2E deployments Next's URL can retain the listener hostname even
+    // when the request Host targets a real tenant domain. Forwarded host is
+    // deliberately ignored here; the deployment edge must normalize Host.
+    host: effectiveHost || request.nextUrl.hostname,
+    locale,
+    publicPath: request.nextUrl.pathname,
+    requestID,
+    siteCode,
+    sitePrefix,
+  })
+  const withRequestID = (response: NextResponse) => {
+    response.headers.set('X-Request-ID', requestID)
+    return response
+  }
 
   if (!siteAlias) {
     if (!locale) {
-      return NextResponse.next()
+      return withRequestID(NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      }))
     }
 
-    const requestHeaders = new Headers(request.headers)
-    requestHeaders.set('x-locale', locale)
     const url = request.nextUrl.clone()
     url.pathname = stripLeadingSegments(request.nextUrl.pathname, 1)
 
-    return NextResponse.rewrite(url, {
+    return withRequestID(NextResponse.rewrite(url, {
       request: {
         headers: requestHeaders,
       },
-    })
+    }))
   }
 
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-site-code', allSiteAliasToCodeMap[siteAlias])
-  if (locale) {
-    requestHeaders.set('x-locale', locale)
-  }
-  requestHeaders.set('x-site-prefix', `/${siteAlias}${locale ? `/${locale}` : ''}`)
   const url = request.nextUrl.clone()
   url.pathname = stripLeadingSegments(request.nextUrl.pathname, locale ? 2 : 1)
 
-  return NextResponse.rewrite(url, {
+  return withRequestID(NextResponse.rewrite(url, {
     request: {
       headers: requestHeaders,
     },
-  })
+  }))
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|favicon.svg).*)'],
+  matcher: [
+    '/api/lead-submissions',
+    '/((?!api|_next/static|_next/image|favicon.ico|favicon.svg).*)',
+  ],
 }

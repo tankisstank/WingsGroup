@@ -2,7 +2,7 @@ import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'paylo
 
 import { revalidatePath } from 'next/cache.js'
 
-import { supportedLocaleCodes } from '@/utilities/sitePaths'
+import { publicLocaleCodes } from '@/utilities/sitePaths'
 
 const marketSlugByKey: Record<string, string> = {
   china: 'trung-quoc',
@@ -15,7 +15,7 @@ const basePaths = ['/tour', '/thi-truong', '/campaign', '/lich-khoi-hanh']
 const revalidateLocalizedPath = (path: string) => {
   revalidatePath(path)
 
-  for (const locale of supportedLocaleCodes) {
+  for (const locale of publicLocaleCodes) {
     revalidatePath(`/${locale}${path === '/' ? '' : path}`.replace(/\/+/g, '/'))
   }
 }

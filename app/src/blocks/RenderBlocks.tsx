@@ -3,7 +3,7 @@ import React, { Fragment } from 'react'
 import type { Page } from '@/payload-types'
 
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
-import { CallToActionBlock } from '@/blocks/CallToAction/Component'
+import { LocalizedCallToActionBlock } from '@/blocks/CallToAction/Component.server'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FAQBlock } from '@/blocks/FAQ/Component'
 import { FeatureGridBlock } from '@/blocks/FeatureGrid/Component'
@@ -12,6 +12,7 @@ import { InfoStripBlock } from '@/blocks/InfoStrip/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { PricingTableBlock } from '@/blocks/PricingTable/Component'
 import { ComparisonBlock } from '@/blocks/Comparison/Component'
+import { CredentialsCarouselBlock } from '@/blocks/CredentialsCarousel/Component'
 import { StatsBlock } from '@/blocks/Stats/Component'
 import { TestimonialBlock } from '@/blocks/Testimonial/Component'
 
@@ -19,7 +20,8 @@ const blockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
   comparison: ComparisonBlock,
-  cta: CallToActionBlock,
+  credentialsCarousel: CredentialsCarouselBlock,
+  cta: LocalizedCallToActionBlock,
   faq: FAQBlock,
   featureGrid: FeatureGridBlock,
   formBlock: FormBlock,

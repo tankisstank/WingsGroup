@@ -1,6 +1,11 @@
 import type { Media, Page, Post, SiteSetting } from '@/payload-types'
 
-import { getAbsoluteMediaURL, getCanonicalURL, getPageCanonicalPath } from './siteURLs'
+import {
+  buildConfiguredAbsoluteMediaURL,
+  buildConfiguredCanonicalURL,
+  getPageCanonicalPath,
+  normalizeCanonicalPath,
+} from './siteURLs'
 
 type JsonLdValue =
   | boolean
@@ -26,8 +31,22 @@ type BreadcrumbItem = {
   url?: string
 }
 
-export const buildCanonicalUrl = (settings: SiteSetting | null | undefined, path = '/') => {
-  return getCanonicalURL({ path, settings })
+const buildUrlFromOrigin = (origin: string, path = '/') => {
+  const normalizedPath = normalizeCanonicalPath(path).replace(/^\/vi(?=\/|$)/, '') || '/'
+
+  return `${origin}${normalizedPath === '/' ? '' : normalizedPath}`
+}
+
+export const buildCanonicalUrl = (
+  settings: SiteSetting | null | undefined,
+  path = '/',
+  options?: { canonicalOrigin?: null | string },
+) => {
+  const canonicalOrigin = options?.canonicalOrigin?.trim()
+
+  return canonicalOrigin
+    ? buildUrlFromOrigin(canonicalOrigin, path)
+    : buildConfiguredCanonicalURL({ path, settings })
 }
 
 const getMediaUrl = (media?: Media | number | null, settings?: SiteSetting | null) => {
@@ -35,7 +54,7 @@ const getMediaUrl = (media?: Media | number | null, settings?: SiteSetting | nul
     return null
   }
 
-  return getAbsoluteMediaURL({ media, settings })
+  return buildConfiguredAbsoluteMediaURL({ media, settings })
 }
 
 export const serializeJsonLd = (data: JsonLdNode | JsonLdNode[]) =>
@@ -50,9 +69,12 @@ export const serializeJsonLd = (data: JsonLdNode | JsonLdNode[]) =>
 
 export const stringifyJSONLD = serializeJsonLd
 
-export const buildOrganizationJSONLD = (settings?: SiteSetting | null): JsonLdNode => {
+export const buildOrganizationJSONLD = (
+  settings?: SiteSetting | null,
+  options?: { canonicalOrigin?: null | string },
+): JsonLdNode => {
   const siteName = settings?.siteName || settings?.seo?.defaultTitle || 'WingsGroup'
-  const siteUrl = buildCanonicalUrl(settings)
+  const siteUrl = buildCanonicalUrl(settings, '/', options)
   const logo = getMediaUrl(settings?.branding?.logoImage, settings)
 
   return {
@@ -76,9 +98,12 @@ export const buildOrganizationJSONLD = (settings?: SiteSetting | null): JsonLdNo
   }
 }
 
-export const buildWebSiteJSONLD = (settings?: SiteSetting | null): JsonLdNode => {
+export const buildWebSiteJSONLD = (
+  settings?: SiteSetting | null,
+  options?: { canonicalOrigin?: null | string },
+): JsonLdNode => {
   const siteName = settings?.siteName || settings?.seo?.defaultTitle || 'WingsGroup'
-  const siteUrl = buildCanonicalUrl(settings)
+  const siteUrl = buildCanonicalUrl(settings, '/', options)
 
   return {
     '@id': `${siteUrl}#website`,
@@ -91,23 +116,28 @@ export const buildWebSiteJSONLD = (settings?: SiteSetting | null): JsonLdNode =>
   }
 }
 
-export const buildSiteJsonLd = (settings?: SiteSetting | null): JsonLdNode[] => {
-  return [buildOrganizationJSONLD(settings), buildWebSiteJSONLD(settings)]
+export const buildSiteJsonLd = (
+  settings?: SiteSetting | null,
+  options?: { canonicalOrigin?: null | string },
+): JsonLdNode[] => {
+  return [buildOrganizationJSONLD(settings, options), buildWebSiteJSONLD(settings, options)]
 }
 
 export const buildWebPageJSONLD = ({
+  canonicalOrigin,
   description,
   path = '/',
   settings,
   title,
 }: {
+  canonicalOrigin?: null | string
   description?: null | string
   path?: null | string
   settings?: SiteSetting | null
   title: string
 }): JsonLdNode => {
-  const url = buildCanonicalUrl(settings, path || '/')
-  const siteUrl = buildCanonicalUrl(settings)
+  const url = buildCanonicalUrl(settings, path || '/', { canonicalOrigin })
+  const siteUrl = buildCanonicalUrl(settings, '/', { canonicalOrigin })
 
   return {
     '@id': `${url}#webpage`,
@@ -127,6 +157,7 @@ export const buildWebPageJSONLD = ({
 export const buildBreadcrumbListJSONLD = (
   items: BreadcrumbItem[],
   settings?: SiteSetting | null,
+  options?: { canonicalOrigin?: null | string },
 ): JsonLdNode | null => {
   if (items.length < 2) {
     return null
@@ -138,7 +169,7 @@ export const buildBreadcrumbListJSONLD = (
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      item: item.url || buildCanonicalUrl(settings, item.path || '/'),
+      item: item.url || buildCanonicalUrl(settings, item.path || '/', options),
     })),
   }
 }
@@ -146,10 +177,12 @@ export const buildBreadcrumbListJSONLD = (
 export const buildBreadcrumbListJsonLd = buildBreadcrumbListJSONLD
 
 export const buildPageJsonLd = ({
+  canonicalOrigin,
   page,
   path,
   settings,
 }: {
+  canonicalOrigin?: null | string
   page: Page
   path?: string
   settings?: SiteSetting | null
@@ -159,6 +192,7 @@ export const buildPageJsonLd = ({
   return [
     {
       ...buildWebPageJSONLD({
+        canonicalOrigin,
         description: page.meta?.description,
         path: path || getPageCanonicalPath(page),
         settings,
@@ -172,16 +206,18 @@ export const buildPageJsonLd = ({
 }
 
 export const buildArticleJSONLD = ({
+  canonicalOrigin,
   path,
   post,
   settings,
 }: {
+  canonicalOrigin?: null | string
   path?: string
   post: Post
   settings?: SiteSetting | null
 }): JsonLdNode => {
-  const url = buildCanonicalUrl(settings, path || `/posts/${post.slug}`)
-  const siteUrl = buildCanonicalUrl(settings)
+  const url = buildCanonicalUrl(settings, path || `/posts/${post.slug}`, { canonicalOrigin })
+  const siteUrl = buildCanonicalUrl(settings, '/', { canonicalOrigin })
   const image = getMediaUrl(post.meta?.image || post.heroImage, settings)
   const description = post.meta?.description || settings?.seo?.defaultDescription || settings?.tagline || undefined
   const name = post.meta?.title || post.title
@@ -213,16 +249,18 @@ export const buildArticleJSONLD = ({
 }
 
 export const buildPostJsonLd = ({
+  canonicalOrigin,
   post,
   path,
   settings,
 }: {
+  canonicalOrigin?: null | string
   post: Post
   path?: string
   settings?: SiteSetting | null
 }): JsonLdNode[] => {
-  const url = buildCanonicalUrl(settings, path || `/posts/${post.slug}`)
-  const siteUrl = buildCanonicalUrl(settings)
+  const url = buildCanonicalUrl(settings, path || `/posts/${post.slug}`, { canonicalOrigin })
+  const siteUrl = buildCanonicalUrl(settings, '/', { canonicalOrigin })
   const image = getMediaUrl(post.meta?.image || post.heroImage, settings)
   const description = post.meta?.description || settings?.seo?.defaultDescription || settings?.tagline || undefined
   const name = post.meta?.title || post.title
@@ -244,7 +282,7 @@ export const buildPostJsonLd = ({
     ...(post.updatedAt ? { dateModified: post.updatedAt } : {}),
   }
 
-  const article = buildArticleJSONLD({ path, post, settings })
+  const article = buildArticleJSONLD({ canonicalOrigin, path, post, settings })
 
   return [webPage, article]
 }

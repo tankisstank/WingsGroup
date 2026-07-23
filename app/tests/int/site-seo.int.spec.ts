@@ -1,13 +1,22 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildArticleJSONLD, buildBreadcrumbListJSONLD, stringifyJSONLD } from '@/utilities/structuredData'
 import {
-  getCanonicalURL,
+  buildArticleJSONLD,
+  buildBreadcrumbListJSONLD,
+  buildOrganizationJSONLD,
+  buildWebPageJSONLD,
+  buildWebSiteJSONLD,
+  stringifyJSONLD,
+} from '@/utilities/structuredData'
+import {
+  buildConfiguredCanonicalURL,
+  buildConfiguredAbsoluteMediaURL,
   getPageCanonicalPath,
   getPostCanonicalPath,
   getSiteSettingForSite,
-  normalizeCanonicalDomain,
+  normalizeConfiguredCanonicalOrigin,
 } from '@/utilities/siteURLs'
+import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 import type { Post } from '@/payload-types'
 
 const settings = {
@@ -29,23 +38,23 @@ const settings = {
 
 describe('site SEO utilities', () => {
   it('normalizes page and post canonical URLs', () => {
-    expect(getCanonicalURL({ path: getPageCanonicalPath('home'), settings })).toBe(
+    expect(buildConfiguredCanonicalURL({ path: getPageCanonicalPath('home'), settings })).toBe(
       'https://wingsgroup.com',
     )
-    expect(getCanonicalURL({ path: getPageCanonicalPath('about'), settings })).toBe(
+    expect(buildConfiguredCanonicalURL({ path: getPageCanonicalPath('about'), settings })).toBe(
       'https://wingsgroup.com/about',
     )
-    expect(getCanonicalURL({ path: getPageCanonicalPath('/destinations/ha-noi'), settings })).toBe(
+    expect(buildConfiguredCanonicalURL({ path: getPageCanonicalPath('/destinations/ha-noi'), settings })).toBe(
       'https://wingsgroup.com/destinations/ha-noi',
     )
-    expect(getCanonicalURL({ path: getPostCanonicalPath('launch'), settings })).toBe(
+    expect(buildConfiguredCanonicalURL({ path: getPostCanonicalPath('launch'), settings })).toBe(
       'https://wingsgroup.com/posts/launch',
     )
   })
 
   it('normalizes canonical domains before metadata and sitemap use', () => {
-    expect(normalizeCanonicalDomain('wingsgo.vn/')).toBe('https://wingsgo.vn')
-    expect(normalizeCanonicalDomain('https://wingscare.wingsgroup.vn///')).toBe(
+    expect(normalizeConfiguredCanonicalOrigin('wingsgo.vn/')).toBe('https://wingsgo.vn')
+    expect(normalizeConfiguredCanonicalOrigin('https://wingscare.wingsgroup.vn///')).toBe(
       'https://wingscare.wingsgroup.vn',
     )
   })
@@ -62,9 +71,97 @@ describe('site SEO utilities', () => {
       },
     } as const
 
-    expect(getCanonicalURL({ path: '/about', settings })).toBe('https://wingsgroup.com/about')
-    expect(getCanonicalURL({ path: '/about', settings: wingsGoSettings })).toBe(
+    expect(buildConfiguredCanonicalURL({ path: '/about', settings })).toBe('https://wingsgroup.com/about')
+    expect(buildConfiguredCanonicalURL({ path: '/about', settings: wingsGoSettings })).toBe(
       'https://wingsgo.vn/about',
+    )
+  })
+
+  it('keeps configured canonical helpers distinct from safe public canonical origin selection', () => {
+    const localConfiguredSettings = {
+      ...settings,
+      site: 2,
+      siteName: 'WingsGo',
+      seo: {
+        canonicalDomain: 'http://localhost:3000',
+        defaultDescription: 'WingsGo travel services',
+        defaultTitle: 'WingsGo',
+      },
+    } as const
+
+    expect(
+      buildConfiguredCanonicalURL({ path: '/about', settings: localConfiguredSettings }),
+    ).toBe('http://localhost:3000/about')
+
+    expect(
+      getCanonicalSiteOrigin({
+        settings: localConfiguredSettings,
+        site: {
+          additionalDomains: [{ domain: 'www.wingsgo.vn' }],
+          primaryDomain: 'wingsgo.vn',
+        },
+      }),
+    ).toBe('https://wingsgo.vn')
+  })
+
+  it('builds configured absolute media URLs from the configured origin only', () => {
+    expect(
+      buildConfiguredAbsoluteMediaURL({
+        media: {
+          id: 9,
+          url: '/media/plain.png',
+          sizes: {
+            og: {
+              url: '/media/plain-og.png',
+            },
+          },
+        } as never,
+        settings,
+      }),
+    ).toBe('https://wingsgroup.com/media/plain-og.png')
+  })
+
+  it('allows route-level SEO consumers to override canonical origin safely', () => {
+    expect(
+      buildWebPageJSONLD({
+        canonicalOrigin: 'https://wingsgo.vn',
+        path: '/en/about',
+        settings,
+        title: 'About',
+      }).url,
+    ).toBe('https://wingsgo.vn/en/about')
+
+    expect(
+      buildArticleJSONLD({
+        canonicalOrigin: 'https://wingsgo.vn',
+        path: '/en/posts/launch',
+        post: {
+          id: 1,
+          slug: 'launch',
+          content: {
+            root: {
+              type: 'root',
+              children: [],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          },
+          site: 1,
+          title: 'Launch',
+          updatedAt: '2026-05-27T00:00:00.000Z',
+          createdAt: '2026-05-27T00:00:00.000Z',
+        } as Post,
+        settings,
+      }).publisher,
+    ).toEqual({ '@id': 'https://wingsgo.vn#organization' })
+
+    expect(buildOrganizationJSONLD(settings, { canonicalOrigin: 'https://wingsgo.vn' }).url).toBe(
+      'https://wingsgo.vn',
+    )
+    expect(buildWebSiteJSONLD(settings, { canonicalOrigin: 'https://wingsgo.vn' }).url).toBe(
+      'https://wingsgo.vn',
     )
   })
 

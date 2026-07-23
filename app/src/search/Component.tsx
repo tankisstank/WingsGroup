@@ -2,37 +2,37 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SearchIcon } from 'lucide-react'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useDebounce } from '@/utilities/useDebounce'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useSitePath } from '@/utilities/useSitePath'
-import { getLocaleFromPathname } from '@/utilities/sitePaths'
+import { useSitePublicLocale } from '@/providers/SitePath'
+import { getSearchCopy, searchInputCopy } from '@/i18n/searchCopy'
 
 export const Search: React.FC = () => {
   const searchParams = useSearchParams()
-  const [value, setValue] = useState(searchParams.get('q') || '')
+  const query = searchParams.get('q') || ''
+  const [value, setValue] = useState(query)
+  const hasUserEdited = useRef(false)
   const router = useRouter()
   const getSitePath = useSitePath()
-  const pathname = usePathname()
-  const locale = getLocaleFromPathname(pathname) || 'vi'
-  const copy =
-    locale === 'en'
-      ? {
-          label: 'Search',
-          placeholder: 'Search tours, destinations, campaigns...',
-          submit: 'Submit search',
-        }
-      : {
-          label: 'Tìm kiếm',
-          placeholder: 'Tìm tour, điểm đến, chiến dịch...',
-          submit: 'Gửi tìm kiếm',
-        }
+  const locale = useSitePublicLocale()
+  const copy = getSearchCopy(searchInputCopy, locale)
 
   const debouncedValue = useDebounce(value)
 
   useEffect(() => {
-    router.push(getSitePath(`/search${debouncedValue ? `?q=${debouncedValue}` : ''}`))
-  }, [debouncedValue, getSitePath, router])
+    hasUserEdited.current = false
+    setValue(query)
+  }, [query])
+
+  useEffect(() => {
+    if (!hasUserEdited.current || debouncedValue === query) {
+      return
+    }
+
+    router.replace(getSitePath(`/search${debouncedValue ? `?q=${debouncedValue}` : ''}`))
+  }, [debouncedValue, getSitePath, query, router])
 
   return (
     <div className="site-search-box">
@@ -42,12 +42,15 @@ export const Search: React.FC = () => {
           e.preventDefault()
         }}
       >
-        <Label htmlFor="search" className="sr-only">{copy.label}</Label>
+        <Label htmlFor="search" className="sr-only">
+          {copy.label}
+        </Label>
         <SearchIcon aria-hidden="true" className="site-search-box__icon h-5 w-5" />
         <Input
           className="site-search-box__input"
           id="search"
           onChange={(event) => {
+            hasUserEdited.current = true
             setValue(event.target.value)
           }}
           placeholder={copy.placeholder}

@@ -1,6 +1,6 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   CinematicCarouselHero,
@@ -39,6 +39,11 @@ describe('hero presentation components', () => {
     vi.useRealTimers()
   })
 
+  afterEach(() => {
+    cleanup()
+    vi.useRealTimers()
+  })
+
   it('provides a render component for every registered template', () => {
     for (const definition of heroPresentationDefinitions) {
       expect(heroPresentationComponents[definition.value]).toBeTypeOf('function')
@@ -61,6 +66,39 @@ describe('hero presentation components', () => {
     expect(screen.getByText('Planner panel')).toBeTruthy()
   })
 
+  it('renders WingsSide hi-fi editorial split layout for the inbound cinematic preset', () => {
+    render(
+      <CinematicCarouselHero
+        badge="Journeys"
+        behavior={defaultHeroBehavior}
+        businessPanel={<aside>Planner panel</aside>}
+        postcards={[]}
+        preset={{ key: 'wingsside-inbound-cinematic-search' }}
+        slides={[
+          {
+            description: 'Private routes with a local planning team.',
+            id: 'one',
+            media: media(1, 'First'),
+            title: 'Tailor-made Vietnam journeys',
+          },
+        ]}
+      />,
+    )
+
+    const root = document.querySelector('.hero-presentation--carousel-hifi-split')
+    expect(root?.getAttribute('data-hifi-split')).toBe('true')
+    const hifiTitle = document.querySelector('.hero-presentation__hifi-title')
+    expect(hifiTitle?.textContent).toBe('Tailor-made Vietnam journeys')
+    expect(hifiTitle?.tagName).toBe('H1')
+    expect(hifiTitle?.classList.contains('sr-only')).toBe(false)
+    expect(document.querySelector('.hero-presentation__hifi-lede')?.textContent).toBe(
+      'Private routes with a local planning team.',
+    )
+    expect(screen.getByText('Planner panel')).toBeTruthy()
+    expect(document.querySelector('.hero-presentation__hifi-copy')).toBeTruthy()
+    expect(document.querySelector('.hero-presentation__carousel-overlay')).toBeNull()
+  })
+
   it('supports carousel controls, autoplay and pause', () => {
     vi.useFakeTimers()
     render(
@@ -75,16 +113,26 @@ describe('hero presentation components', () => {
       />,
     )
 
+    expect(screen.getByRole('heading', { level: 1, name: 'First journey' })).toBeTruthy()
+    expect(
+      screen.getAllByRole('heading', { level: 1 }).filter((node) => node.classList.contains('sr-only')),
+    ).toHaveLength(1)
     expect(screen.getByLabelText('Slide 1 of 2').getAttribute('data-active')).toBe('true')
     fireEvent.click(screen.getByLabelText('Next slide'))
     expect(screen.getByLabelText('Slide 2 of 2').getAttribute('data-active')).toBe('true')
 
-    fireEvent.click(screen.getByLabelText('Pause carousel'))
+    // Manual navigation intentionally pauses autoplay so the selected content
+    // is not replaced immediately after a user interaction.
+    expect(screen.getByLabelText('Play carousel')).toBeTruthy()
     act(() => vi.advanceTimersByTime(6000))
     expect(screen.getByLabelText('Slide 2 of 2').getAttribute('data-active')).toBe('true')
 
     fireEvent.click(screen.getByLabelText('Play carousel'))
     act(() => vi.advanceTimersByTime(3000))
+    expect(screen.getByLabelText('Slide 1 of 2').getAttribute('data-active')).toBe('true')
+
+    fireEvent.click(screen.getByLabelText('Pause carousel'))
+    act(() => vi.advanceTimersByTime(6000))
     expect(screen.getByLabelText('Slide 1 of 2').getAttribute('data-active')).toBe('true')
   })
 

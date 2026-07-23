@@ -97,8 +97,8 @@
 
 ### Production Domain State - 2026-06-24
 
-- `wingside.vn` is the correct WingsSide domain. Do not use the previous
-  typo `wingsside.vn` for new content, canonical URLs, or customer-facing
+- `wingside.vn` is the correct public domain and site name. Do not use the
+  legacy typo `wingsside.vn` for new content, canonical URLs, or customer-facing
   documentation.
 - `wingspass.vn` and `wingscare.vn` are not owned production domains for this
   launch. Use:
@@ -110,7 +110,7 @@
   site domains; this previously caused WingsPass and WingsCare to render as
   WingsSide.
 - Current public verification:
-  - `https://wingsside.vn/`
+  - `https://wingside.vn/`
   - `https://wingspass.wingsgroup.vn/`
   - `https://wingscare.wingsgroup.vn/`
   all return HTTP 200, correct `data-site-theme`, and host-specific canonical

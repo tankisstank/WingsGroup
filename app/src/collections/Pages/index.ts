@@ -13,9 +13,11 @@ import { InfoStrip } from '../../blocks/InfoStrip/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { PricingTable } from '../../blocks/PricingTable/config'
 import { Comparison } from '../../blocks/Comparison/config'
+import { CredentialsCarousel } from '../../blocks/CredentialsCarousel/config'
 import { Stats } from '../../blocks/Stats/config'
 import { Testimonial } from '../../blocks/Testimonial/config'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
+import { wingsSideHiFiTab } from '@/fields/wingsSideHiFi'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
@@ -144,6 +146,7 @@ export const Pages: CollectionConfig<'pages'> = {
                 Stats,
                 Testimonial,
                 Comparison,
+                CredentialsCarousel,
                 FAQ,
                 MediaBlock,
                 Archive,
@@ -194,6 +197,7 @@ export const Pages: CollectionConfig<'pages'> = {
             }),
           ],
         },
+        wingsSideHiFiTab(),
       ],
     },
     {

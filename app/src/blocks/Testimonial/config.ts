@@ -1,9 +1,6 @@
 import type { Block } from 'payload'
 
-import {
-  asSelectOptions,
-  testimonialPresentationDefinitions,
-} from '@/blocks/presentations'
+import { asSelectOptions, testimonialPresentationDefinitions } from '@/blocks/presentations'
 
 export const Testimonial: Block = {
   slug: 'testimonial',
@@ -34,6 +31,18 @@ export const Testimonial: Block = {
         { name: 'quote', label: 'Nội dung', type: 'textarea', required: true },
         { name: 'name', label: 'Tên khách hàng', type: 'text', required: true },
         { name: 'role', label: 'Vai trò / hành trình', type: 'text' },
+        { name: 'country', label: 'Quốc gia', type: 'text' },
+        {
+          name: 'noteDate',
+          label: 'Ngày ghi chú',
+          type: 'date',
+          admin: {
+            date: {
+              displayFormat: 'dd/MM/yyyy',
+              pickerAppearance: 'dayOnly',
+            },
+          },
+        },
         { name: 'avatar', label: 'Ảnh đại diện', type: 'upload', relationTo: 'media' },
         { name: 'logo', label: 'Logo', type: 'upload', relationTo: 'media' },
         { name: 'videoURL', label: 'Video URL', type: 'text' },
@@ -43,10 +52,8 @@ export const Testimonial: Block = {
           type: 'number',
           min: 1,
           max: 5,
-          defaultValue: 5,
         },
       ],
     },
   ],
 }
-

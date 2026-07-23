@@ -42,8 +42,12 @@ export const FeatureGridBlock: React.FC<FeatureGridBlockProps> = ({
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h2>
-        {description ? <p className="mt-3 text-base leading-7 text-muted-foreground">{description}</p> : null}
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+          {title}
+        </h2>
+        {description ? (
+          <p className="mt-3 text-base leading-7 text-muted-foreground">{description}</p>
+        ) : null}
       </div>
 
       <div
@@ -55,9 +59,10 @@ export const FeatureGridBlock: React.FC<FeatureGridBlockProps> = ({
         {items?.map((item, index) => {
           const Icon = featureIcons[index % featureIcons.length]
           const image = 'image' in item ? item.image : undefined
-
-          return (
-            <article className={cn(cardClassName, 'group site-feature-card overflow-hidden')} key={`${item.title}-${index}`}>
+          const card = (
+            <article
+              className={cn(cardClassName, 'group site-feature-card h-full overflow-hidden')}
+            >
               {image && typeof image !== 'string' && typeof image !== 'number' ? (
                 <div className="-mx-6 -mt-6 mb-6 overflow-hidden border-b border-[color:var(--site-border)]">
                   <Media
@@ -76,8 +81,14 @@ export const FeatureGridBlock: React.FC<FeatureGridBlockProps> = ({
                 </p>
               ) : null}
               <h3 className="text-xl font-semibold text-foreground">{item.title}</h3>
-              {item.meta ? <p className="mt-2 text-sm font-medium text-[color:var(--site-accent)]">{item.meta}</p> : null}
-              {item.description ? <p className="mt-3 text-sm leading-7 text-muted-foreground">{item.description}</p> : null}
+              {item.meta ? (
+                <p className="mt-2 text-sm font-medium text-[color:var(--site-accent)]">
+                  {item.meta}
+                </p>
+              ) : null}
+              {item.description ? (
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{item.description}</p>
+              ) : null}
               {presentation === 'accordion' || presentation === 'tabs' ? (
                 <details className="layout-feature__details">
                   <summary>Xem chi tiết</summary>
@@ -85,15 +96,26 @@ export const FeatureGridBlock: React.FC<FeatureGridBlockProps> = ({
                 </details>
               ) : null}
               {item.enableLink && item.link?.label ? (
-                <div className="mt-5">
-                  <CMSLink
-                    appearance="outline"
-                    {...item.link}
-                    className="rounded-full border-[color:var(--site-border)] px-4 py-2 text-sm"
-                  />
-                </div>
+                <span className="site-feature-card__link mt-5 inline-flex rounded-full border border-[color:var(--site-border)] px-4 py-2 text-sm font-semibold">
+                  {item.link.label}
+                </span>
               ) : null}
             </article>
+          )
+
+          return item.enableLink && item.link ? (
+            <CMSLink
+              {...item.link}
+              ariaLabel={`${item.title}: ${item.description || item.link.label}`}
+              appearance="inline"
+              className="site-feature-card__click-target block h-full no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--site-accent)]"
+              key={`${item.title}-${index}`}
+              label={undefined}
+            >
+              {card}
+            </CMSLink>
+          ) : (
+            <React.Fragment key={`${item.title}-${index}`}>{card}</React.Fragment>
           )
         })}
       </div>

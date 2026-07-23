@@ -5,6 +5,7 @@ import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import { getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
 import { generateMeta } from '@/utilities/generateMeta'
+import { getCopyLocale } from '@/utilities/locales'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
@@ -17,18 +18,21 @@ type Args = {
   params: Promise<{
     pageNumber: string
   }>
-  searchParams?: Promise<{
-    locale?: string
-    site?: string
-  }>
 }
 
-export default async function Page({ params: paramsPromise, searchParams }: Args) {
+export default async function Page({ params: paramsPromise }: Args) {
   const { pageNumber } = await paramsPromise
   const payload = await getPayload({ config: configPromise })
-  const resolvedSearchParams = searchParams ? await searchParams : undefined
-  const locale = await getCurrentLocale(resolvedSearchParams?.locale)
-  const site = await getCurrentSite(resolvedSearchParams?.site)
+  const locale = await getCurrentLocale()
+  const site = await getCurrentSite()
+  const copy = {
+    en: {
+      title: 'Posts',
+    },
+    vi: {
+      title: 'Bài viết',
+    },
+  }[getCopyLocale(locale)]
 
   const sanitizedPageNumber = Number(pageNumber)
 
@@ -57,7 +61,7 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>{locale === 'en' ? 'Posts' : 'Bài viết'}</h1>
+          <h1>{copy.title}</h1>
           {site ? <p>{site.name}</p> : null}
         </div>
       </div>
@@ -84,28 +88,29 @@ export default async function Page({ params: paramsPromise, searchParams }: Args
 
 export async function generateMetadata({
   params: paramsPromise,
-  searchParams,
 }: Args): Promise<Metadata> {
   const { pageNumber } = await paramsPromise
-  const resolvedSearchParams = searchParams ? await searchParams : undefined
-  const locale = await getCurrentLocale(resolvedSearchParams?.locale)
+  const locale = await getCurrentLocale()
+  const copy = {
+    en: {
+      description: 'Paginated travel articles and updates.',
+      title: `Posts Page ${pageNumber || ''}`,
+    },
+    vi: {
+      description: 'Danh sách bài viết và cập nhật theo trang.',
+      title: `Trang bài viết ${pageNumber || ''}`,
+    },
+  }[getCopyLocale(locale)]
 
   return generateMeta({
     doc: {
       meta: {
-        title:
-          locale === 'en'
-            ? `Posts Page ${pageNumber || ''}`
-            : `Trang bài viết ${pageNumber || ''}`,
-        description:
-          locale === 'en'
-            ? 'Paginated travel articles and updates.'
-            : 'Danh sách bài viết và cập nhật theo trang.',
+        title: copy.title,
+        description: copy.description,
       },
       slug: `posts/page/${pageNumber || ''}`,
     },
     locale,
     path: `/posts/page/${pageNumber || ''}`,
-    siteCode: resolvedSearchParams?.site,
   })
 }

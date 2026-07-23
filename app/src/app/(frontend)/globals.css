@@ -498,6 +498,7 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
 
   body[data-site-preset='wings-side-editorial-inbound-v2'] .site-header__brand {
     min-width: 0;
+    gap: 0.5rem;
   }
 
   body[data-site-preset='wings-side-editorial-inbound-v2'] .site-logo-text {
@@ -696,7 +697,7 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
   }
 
   .site-header-cta--mobile {
-    min-height: 2.5rem;
+    min-height: 2.75rem; /* 44px touch target */
     max-width: 7rem;
     padding-inline: 0.85rem;
     overflow: hidden;
@@ -1378,9 +1379,10 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
   }
 
   .hero-presentation__video-content .site-hero__actions li:nth-child(n + 2) a {
-    background: rgb(0 0 0 / 38%);
-    border-color: rgb(255 255 255 / 55%);
-    color: #fff;
+    background: rgb(5 40 41 / 94%) !important;
+    border-color: rgb(255 255 255 / 72%) !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff;
   }
 
   .hero-presentation__slide-content h2 {
@@ -1417,6 +1419,12 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
     transform: translateX(-50%);
     width: 100%;
     z-index: 4;
+  }
+
+  @media (width >= 40rem) {
+    .hero-presentation--carousel[data-business-panel='true'] .hero-presentation__carousel-controls {
+      justify-content: flex-end;
+    }
   }
 
   .hero-presentation__carousel-business-panel {
@@ -1473,15 +1481,44 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
   }
 
   .hero-presentation__carousel-dots button {
-    height: 10px;
-    min-width: 10px;
+    background: transparent;
+    border-color: transparent;
+    height: 44px;
+    min-width: 44px;
     padding: 0;
+    position: relative;
+    width: 44px;
+  }
+
+  .hero-presentation__carousel-dots button::before {
+    background: color-mix(in oklch, #fff 28%, transparent);
+    border: 1px solid color-mix(in oklch, #fff 48%, transparent);
+    border-radius: 999px;
+    content: '';
+    height: 10px;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transition:
+      width 180ms ease,
+      background 180ms ease;
     width: 10px;
   }
 
   .hero-presentation__carousel-dots button[aria-pressed='true'] {
+    background: transparent;
+    width: 44px;
+  }
+
+  .hero-presentation__carousel-dots button[aria-pressed='true']::before {
     background: #fff;
     width: 28px;
+  }
+
+  .hero-presentation__carousel-dots button:hover,
+  .hero-presentation__carousel-dots button:focus-visible {
+    background: color-mix(in oklch, #fff 10%, transparent);
   }
 
   .hero-presentation__video-media {
@@ -2754,7 +2791,7 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
       max-width: none;
     }
 
-    .site-header__brand-copy {
+    body:not([data-site-code='wing-side']) .site-header__brand-copy {
       display: none !important;
     }
   }
@@ -3042,6 +3079,10 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
       font-size: clamp(2.6rem, 15vw, 4rem);
     }
 
+    .hero-presentation__slide-content {
+      padding-bottom: 7.5rem;
+    }
+
     .hero-presentation__carousel-controls {
       align-items: flex-end;
     }
@@ -3054,7 +3095,13 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-footer__contacts 
       width: auto;
     }
 
-    .hero-presentation--carousel[data-business-panel='true'] .hero-presentation__slide-content {
+    .hero-presentation--carousel[data-business-panel='true'][data-active-index='0']
+      .hero-presentation__carousel-business-panel {
+      display: none;
+    }
+
+    .hero-presentation--carousel[data-business-panel='true']:not([data-active-index='0'])
+      .hero-presentation__slide-content {
       visibility: hidden;
     }
 
@@ -3820,8 +3867,8 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .site-header__nav {
 }
 
 body[data-site-preset='wings-side-editorial-inbound-v2']
-    .site-header__nav
-    > nav[aria-label='Primary navigation'],
+  .site-header__nav
+  > nav[aria-label='Primary navigation'],
 body[data-site-theme='wings-side'] .site-header__nav > nav[aria-label='Primary navigation'] {
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -3848,14 +3895,14 @@ body[data-site-theme='wings-side'] .site-language-switcher__link {
 
   .site-header__nav > nav .theme-nav-link,
   .site-header__nav > nav .site-header-cta {
-    min-height: 2.5rem;
+    min-height: 2.75rem; /* 44px touch target (AA / product lock) */
     padding-inline: 0.55rem;
     font-size: 0.78rem;
   }
 
   .site-header__nav > nav .site-icon-button {
-    min-height: 2.5rem;
-    min-width: 2.5rem;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
   }
 
   .site-header__nav > nav .site-language-switcher {
@@ -3876,15 +3923,181 @@ body[data-site-theme='wings-side'] .site-language-switcher__link {
     text-transform: uppercase;
   }
 
-  body[data-site-theme='wings-side']
-    .site-header__nav
-    > nav
-    .site-header__primary-link:nth-of-type(n + 4),
-  body[data-site-preset='wings-side-editorial-inbound-v2']
-    .site-header__nav
-    > nav
-    .site-header__primary-link:nth-of-type(n + 4) {
-    display: none;
+  /* Tranche A: keep full 7-route WingSide desktop nav visible (NO-GO WS-007).
+     Compact typography/spacing above handles overflow without hiding destinations. */
+}
+
+/* Compact 72px WingSide chrome — scoped to site code only */
+body[data-site-code='wing-side'] .site-header__bar {
+  height: 72px;
+  min-height: 72px;
+  max-height: 72px;
+  padding-block: 0;
+  align-items: center;
+}
+
+@media (max-width: 30rem) {
+  body[data-site-code='wing-side'] .site-header__brand-copy {
+    display: block !important;
+  }
+
+  body[data-site-code='wing-side'] .site-brand-kicker {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+}
+
+/*
+ * Desktop-only hifi nav flex override.
+ * Must NOT force display:flex below Tailwind `xl` (1280px) — mobile keeps
+ * `hidden xl:flex` on the primary nav and the hamburger control.
+ */
+@media (min-width: 1280px) {
+  body[data-site-code='wing-side']
+    .site-header__nav[data-hifi-nav='true']
+    > nav[aria-label='Primary navigation'] {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  body[data-site-code='wing-side']
+    .site-header__nav[data-hifi-nav='true']
+    .site-header__primary-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 0.55rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--site-muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    transform: none;
+    white-space: nowrap;
+  }
+
+  body[data-site-code='wing-side']
+    .site-header__nav[data-hifi-nav='true']
+    .site-header__primary-link:hover {
+    border: 0;
+    background: color-mix(in oklch, var(--site-brand) 9%, white);
+    box-shadow: none;
+    color: var(--site-brand);
+    transform: none;
+  }
+
+  body[data-site-code='wing-side']
+    .site-header__nav[data-hifi-nav='true']
+    .site-header__primary-link[data-active='true'],
+  body[data-site-code='wing-side']
+    .site-header__nav[data-hifi-nav='true']
+    .site-header__primary-link[aria-current='page'] {
+    color: var(--site-brand);
+    border: 1px solid color-mix(in oklch, var(--site-brand) 28%, var(--site-border));
+    background: color-mix(in oklch, var(--site-brand) 9%, white);
+    box-shadow: none;
+    font-weight: 600;
+  }
+
+  body[data-site-code='wing-side'] .site-header__nav[data-hifi-nav='true'] .site-header-cta {
+    min-height: 44px;
+    padding-inline: 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--site-cta-fg);
+    white-space: nowrap;
+  }
+}
+
+/* Compact white hi-fi footer — site isolated */
+body[data-site-code='wing-side'] .site-footer--wingsside-hifi {
+  background: var(--site-surface);
+  color: var(--site-foreground);
+  border-color: var(--site-border);
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  padding-block: 1.25rem;
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 28rem;
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer__descriptor {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--site-muted);
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer__contacts a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--site-muted);
+  text-decoration: none;
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer__contacts a:hover,
+body[data-site-code='wing-side'] .ws-hifi-footer__contacts a:focus-visible {
+  color: var(--site-brand);
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--site-border);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--site-foreground);
+  text-decoration: none;
+  background: color-mix(in oklch, var(--site-surface) 92%, var(--site-brand-soft));
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer-links a:hover,
+body[data-site-code='wing-side'] .ws-hifi-footer-links a:focus-visible {
+  border-color: color-mix(in oklch, var(--site-brand) 40%, var(--site-border));
+  color: var(--site-brand);
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer-links__cta {
+  border-color: color-mix(in oklch, var(--site-gold) 72%, var(--site-border)) !important;
+  background: var(--site-gold) !important;
+  color: var(--site-cta-fg) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-site-code='wing-side']
+    .site-header__nav[data-hifi-nav='true']
+    .site-header__primary-link,
+  body[data-site-code='wing-side'] .ws-hifi-footer-links a {
+    transition: none;
   }
 }
 
@@ -3897,10 +4110,365 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .hero-presentation__sli
   overflow: clip;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .hero-presentation__slide-media img {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Reserve a safe footer landing zone for the WingSide tour consultation bar. */
+body[data-site-code='wing-side'][data-public-route*='/tour/'] .site-footer {
+  padding-bottom: 7rem;
+}
+
+html {
+  opacity: 0;
+}
+
+html[data-theme='dark'],
+html[data-theme='light'] {
+  opacity: initial;
+}
+
+/* WingSide Open Design bridge — site-specific so shared premium sites keep their own system. */
+body[data-site-code='wing-side'] {
+  --background: var(--site-background);
+  --card: var(--site-surface);
+  --foreground: var(--site-foreground);
+  --muted-foreground: var(--site-muted);
+  --primary: var(--site-brand);
+  --ring: var(--site-gold);
+  color: var(--site-foreground);
+  font-family: var(--font-wingsside-hifi), var(--font-editorial-body), sans-serif;
+  background:
+    radial-gradient(
+      70rem 34rem at 82% -8%,
+      color-mix(in oklch, var(--site-gold) 9%, transparent),
+      transparent 62%
+    ),
+    var(--site-background);
+}
+
+body[data-site-code='wing-side'] h1,
+body[data-site-code='wing-side'] h2,
+body[data-site-code='wing-side'] h3,
+body[data-site-code='wing-side'] h4,
+body[data-site-code='wing-side'] h5,
+body[data-site-code='wing-side'] h6 {
+  font-family: var(--font-wingsside-hifi), var(--font-editorial-heading), sans-serif;
+  letter-spacing: -0.03em;
+}
+
+body[data-site-code='wing-side'] .site-header.container {
+  width: 100%;
+  max-width: none;
+  padding-inline: 0;
+}
+
+body[data-site-code='wing-side'] .site-header__bar {
+  min-height: 72px;
+  border-radius: 0;
+  border-color: color-mix(in oklch, var(--site-border) 84%, transparent);
+  padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+  background: color-mix(in oklch, var(--site-surface) 88%, transparent);
+  box-shadow: 0 10px 36px color-mix(in oklch, var(--site-brand) 8%, transparent);
+}
+
+body[data-site-code='wing-side'] .site-header-cta,
+body[data-site-code='wing-side'] .site-panel-cta {
+  border-color: color-mix(in oklch, var(--site-gold) 72%, var(--site-border));
+  color: color-mix(in oklch, var(--site-foreground) 90%, black);
+  background: var(--site-gold);
+  box-shadow: 0 10px 24px color-mix(in oklch, var(--site-gold) 24%, transparent);
+}
+
+body[data-site-code='wing-side'] .site-header-cta:hover,
+body[data-site-code='wing-side'] .site-header-cta:focus-visible,
+body[data-site-code='wing-side'] .site-panel-cta:hover,
+body[data-site-code='wing-side'] .site-panel-cta:focus-visible {
+  color: color-mix(in oklch, var(--site-foreground) 94%, black);
+  background: color-mix(in oklch, var(--site-gold) 86%, white);
+}
+
+body[data-site-code='wing-side'] .theme-nav-link {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+body[data-site-code='wing-side'][data-public-route='/'] #main-content > article,
+body[data-site-code='wing-side'][data-public-route='/packages'] #main-content > article {
+  padding-bottom: clamp(4rem, 7vw, 7rem);
+}
+
+body[data-site-code='wing-side'][data-public-route='/'] #main-content > article {
+  padding-top: 0;
+}
+
+body[data-site-code='wing-side'][data-public-route='/']
+  #main-content
+  > article
+  > nav[aria-label='Breadcrumb'] {
+  position: absolute;
+  visibility: hidden;
+}
+
+body[data-site-code='wing-side'][data-public-route='/'] .site-hero {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+body[data-site-code='wing-side'][data-public-route='/'] .theme-section,
+body[data-site-code='wing-side'][data-public-route='/packages'] .theme-section {
+  padding-block: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+body[data-site-code='wing-side'][data-public-route='/'] .layout-block--features,
+body[data-site-code='wing-side'][data-public-route='/packages'] .layout-block--features {
+  border-top: 1px solid color-mix(in oklch, var(--site-border) 78%, transparent);
+}
+
+body[data-site-code='wing-side'][data-public-route='/'] .site-feature-card,
+body[data-site-code='wing-side'][data-public-route='/packages'] .site-feature-card {
+  border-color: color-mix(in oklch, var(--site-border) 84%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in oklch, var(--site-surface) 92%, transparent);
+  box-shadow: 0 14px 34px color-mix(in oklch, var(--site-foreground) 6%, transparent);
+}
+
+body[data-site-code='wing-side'][data-public-route='/'] .site-feature-card::after,
+body[data-site-code='wing-side'][data-public-route='/packages'] .site-feature-card::after {
+  display: none;
+}
+
+body[data-site-code='wing-side'][data-public-route='/'] .site-feature-card:hover,
+body[data-site-code='wing-side'][data-public-route='/packages'] .site-feature-card:hover {
+  border-color: color-mix(in oklch, var(--site-brand) 30%, var(--site-border));
+  box-shadow: 0 18px 40px color-mix(in oklch, var(--site-foreground) 10%, transparent);
+  transform: translateY(-3px);
+}
+
+body[data-site-code='wing-side'][data-public-route='/'] .site-feature-card img,
+body[data-site-code='wing-side'][data-public-route='/packages'] .site-feature-card img {
+  filter: saturate(0.92) contrast(1.03);
+}
+
+body[data-site-code='wing-side'][data-public-route='/packages'] .layout-media--contained {
+  width: min(82rem, calc(100% - 2.5rem));
+  max-width: none;
+}
+
+body[data-site-code='wing-side'][data-public-route='/packages'] .layout-media--contained img {
+  width: 100%;
+  max-height: 34rem;
+  border-color: var(--site-border);
+  border-radius: 1.25rem;
+  object-fit: cover;
+  box-shadow: 0 24px 60px color-mix(in oklch, var(--site-foreground) 12%, transparent);
+}
+
+/* Compact Home-only Specials navigation. It is mounted server-side only on WingSide `/`. */
+body[data-site-code='wing-side'][data-public-route='/'] .wingsside-specials {
+  position: fixed;
+  top: 168px;
+  right: 20px;
+  bottom: auto;
+  z-index: 40;
+  display: flex;
+  width: min(268px, calc(100vw - 40px));
+  flex-direction: column;
+  gap: 10px;
+  border: 2px solid var(--site-promo-red);
+  padding: 12px 14px 14px;
+  color: #fff;
+  background-color: var(--site-promo-ink);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0,
+    transparent 7px,
+    color-mix(in oklch, var(--site-promo-red) 42%, transparent) 7px,
+    color-mix(in oklch, var(--site-promo-red) 42%, transparent) 8.5px
+  );
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--site-promo-ink) 55%, transparent);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  body[data-site-code='wing-side'][data-public-route='/'] .wingsside-specials {
+    top: auto;
+    bottom: 20px;
+  }
+}
+
+body[data-site-code='wing-side'][data-public-route='/']:has(.hero-presentation--carousel)
+  .wingsside-specials {
+  top: 128px;
+  bottom: auto;
+}
+
+body[data-site-code='wing-side'][data-public-route='/'] .wingsside-specials:hover {
+  box-shadow:
+    0 12px 28px color-mix(in oklch, var(--site-promo-red) 28%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--site-promo-red) 50%, transparent);
+  transform: translateY(-2px);
+}
+
+.wingsside-specials__badge {
+  align-self: flex-start;
+  padding: 4px 8px;
+  color: #fff;
+  background: #000;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: pre;
+}
+
+.wingsside-specials__close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1;
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  color: #fff;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.wingsside-specials__close:hover,
+.wingsside-specials__close:focus-visible {
+  background: rgb(255 255 255 / 12%);
+}
+
+.wingsside-specials__main {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wingsside-specials__copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.wingsside-specials__copy h2 {
+  margin: 0 0 6px;
+  color: #fff;
+  font-family: var(--font-wingsside-hifi), sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+.wingsside-specials__copy ul {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  gap: 1px;
+  list-style: none;
+}
+
+.wingsside-specials__copy li {
+  color: rgb(255 255 255 / 90%);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.wingsside-specials__copy li::before {
+  color: #fff;
+  content: '· ';
+}
+
+.wingsside-specials__cta {
+  display: inline-flex;
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  color: var(--site-promo-red);
+  background: #fff;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  text-decoration: none;
+  transition:
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.wingsside-specials__cta span {
+  letter-spacing: -0.06em;
+}
+
+.wingsside-specials__cta:hover,
+.wingsside-specials__cta:focus-visible {
+  color: color-mix(in oklch, var(--site-promo-red) 82%, black);
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.wingsside-specials__cta:focus-visible,
+.wingsside-specials__close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  .wingsside-specials {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wingsside-specials,
+  .wingsside-specials:hover,
+  .wingsside-specials__cta,
+  .wingsside-specials__cta:hover {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
 /* Wingside consultative tour detail — Book gold primary CTA */
 body[data-site-theme='wings-side'] .tour-cta-primary,
 body[data-site-preset='wings-side-editorial-inbound-v2'] .tour-cta-primary,
-body[data-site-preset='wings-side-editorial'] .tour-cta-primary {
+body[data-site-preset='wings-side-editorial'] .tour-cta-primary,
+.tour-detail--consultative .tour-cta-primary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
   border: 1px solid color-mix(in oklch, #b87a14 55%, transparent);
   background: #b87a14;
   color: #ffffff;
@@ -3942,13 +4510,21 @@ body[data-site-preset='wings-side-editorial'] .tour-cta-primary--pulse {
   scroll-margin-bottom: 5.5rem;
 }
 
-/* Pull structured tour stack closer under breadcrumb / fixed header */
-body[data-site-theme='wings-side'] article > nav[aria-label='Breadcrumb'] + .tour-detail--consultative,
-body[data-site-theme='wings-side'] article > nav[aria-label='Breadcrumb'] + * .tour-detail--consultative {
+body[data-site-theme='wings-side']
+  article
+  > nav[aria-label='Breadcrumb']
+  + .tour-detail--consultative,
+body[data-site-theme='wings-side']
+  article
+  > nav[aria-label='Breadcrumb']
+  + *
+  .tour-detail--consultative {
   margin-top: 0;
 }
 
-body[data-site-theme='wings-side'] article:has(.tour-detail--consultative) > nav[aria-label='Breadcrumb'] {
+body[data-site-theme='wings-side']
+  article:has(.tour-detail--consultative)
+  > nav[aria-label='Breadcrumb'] {
   padding-bottom: 0.35rem;
 }
 
@@ -3961,31 +4537,9 @@ body[data-site-theme='wings-side'] article:has(.tour-detail--consultative) > nav
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-presentation__slide-media img {
-    animation: none !important;
-  }
-
   body[data-site-theme='wings-side'] .tour-cta-primary--pulse,
   body[data-site-preset='wings-side-editorial-inbound-v2'] .tour-cta-primary--pulse,
   body[data-site-preset='wings-side-editorial'] .tour-cta-primary--pulse {
     animation: none !important;
   }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-html {
-  opacity: 0;
-}
-
-html[data-theme='dark'],
-html[data-theme='light'] {
-  opacity: initial;
 }

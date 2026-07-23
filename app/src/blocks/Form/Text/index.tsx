@@ -14,6 +14,15 @@ export const Text: React.FC<
     register: UseFormRegister<FieldValues>
   }
 > = ({ name, defaultValue, errors, label, register, required, width }) => {
+  const isPhoneField = /(^|[-_])phone$|^tel$/i.test(name)
+  const autoComplete = isPhoneField
+    ? 'tel'
+    : /full[-_]?name|^name$/i.test(name)
+      ? 'name'
+      : /company|organisation|organization/i.test(name)
+        ? 'organization'
+        : undefined
+
   return (
     <Width width={width}>
       <Label htmlFor={name}>
@@ -25,7 +34,16 @@ export const Text: React.FC<
           </span>
         )}
       </Label>
-      <Input defaultValue={defaultValue} id={name} type="text" {...register(name, { required })} />
+      <Input
+        aria-describedby={errors[name] ? `${name}-error` : undefined}
+        aria-invalid={Boolean(errors[name])}
+        autoComplete={autoComplete}
+        defaultValue={defaultValue}
+        id={name}
+        inputMode={isPhoneField ? 'tel' : undefined}
+        type={isPhoneField ? 'tel' : 'text'}
+        {...register(name, { required })}
+      />
       {errors[name] && <Error name={name} />}
     </Width>
   )

@@ -1,13 +1,17 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { useCallback } from 'react'
 
 import { getLocaleFromPathname, getSiteAliasFromPathname, prefixPathWithSite } from './sitePaths'
+import { useSitePublicPathname } from '@/providers/SitePath'
 
 export const useSitePath = () => {
-  const pathname = usePathname()
+  const pathname = useSitePublicPathname()
   const siteAlias = getSiteAliasFromPathname(pathname)
   const locale = getLocaleFromPathname(pathname)
 
-  return (path: string) => prefixPathWithSite(path, siteAlias, locale)
+  return useCallback(
+    (path: string) => prefixPathWithSite(path, siteAlias, locale),
+    [locale, siteAlias],
+  )
 }

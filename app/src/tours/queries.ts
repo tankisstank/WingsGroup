@@ -50,6 +50,7 @@ const queryCollection = async ({
   collection,
   depth = 2,
   draft,
+  fallbackLocale,
   limit = 20,
   locale,
   where,
@@ -57,6 +58,7 @@ const queryCollection = async ({
   collection: never
   depth?: number
   draft: boolean
+  fallbackLocale?: SupportedLocaleCode | false
   limit?: number
   locale?: SupportedLocaleCode
   where: Record<string, unknown>
@@ -68,6 +70,7 @@ const queryCollection = async ({
     collection,
     depth,
     draft,
+    fallbackLocale,
     limit,
     locale,
     overrideAccess: draft,
@@ -211,10 +214,12 @@ const mergeTourVariant = ({
 
 export const getTourProductBySlug = async ({
   draft,
+  fallbackLocale,
   locale,
   slug,
 }: {
   draft: boolean
+  fallbackLocale?: SupportedLocaleCode | false
   locale?: SupportedLocaleCode
   slug: string
 }): Promise<any> => {
@@ -222,6 +227,7 @@ export const getTourProductBySlug = async ({
     collection: tourProductsCollection,
     depth: 2,
     draft,
+    fallbackLocale,
     limit: 1,
     locale,
     where: {
@@ -236,10 +242,12 @@ export const getTourProductBySlug = async ({
 
 export const getTourDeparturesForProduct = async ({
   draft,
+  fallbackLocale,
   locale,
   tourProductId,
 }: {
   draft: boolean
+  fallbackLocale?: SupportedLocaleCode | false
   locale?: SupportedLocaleCode
   tourProductId: number | string
 }): Promise<any[]> => {
@@ -247,6 +255,7 @@ export const getTourDeparturesForProduct = async ({
     collection: tourDeparturesCollection,
     depth: 2,
     draft,
+    fallbackLocale,
     limit: 50,
     locale,
     where: {
@@ -261,10 +270,12 @@ export const getTourDeparturesForProduct = async ({
 
 export const getDepartureVariantsForProduct = async ({
   draft,
+  fallbackLocale,
   locale,
   tourProductId,
 }: {
   draft: boolean
+  fallbackLocale?: SupportedLocaleCode | false
   locale?: SupportedLocaleCode
   tourProductId: number | string
 }) => {
@@ -272,6 +283,7 @@ export const getDepartureVariantsForProduct = async ({
     collection: departureVariantsCollection,
     depth: 2,
     draft,
+    fallbackLocale,
     limit: 20,
     locale,
     where: {
@@ -288,15 +300,18 @@ export const getDepartureVariantsForProduct = async ({
 
 export const getResolvedTourDetailBySlug = async ({
   draft,
+  fallbackLocale,
   locale,
   slug,
 }: {
   draft: boolean
+  fallbackLocale?: SupportedLocaleCode | false
   locale?: SupportedLocaleCode
   slug: string
 }): Promise<TourResolvedData | null> => {
   const tour = await getTourProductBySlug({
     draft,
+    fallbackLocale,
     locale,
     slug,
   })
@@ -307,12 +322,14 @@ export const getResolvedTourDetailBySlug = async ({
 
   const departures = await getTourDeparturesForProduct({
     draft,
+    fallbackLocale,
     locale,
     tourProductId: tour.id,
   })
 
   const variants = await getDepartureVariantsForProduct({
     draft,
+    fallbackLocale,
     locale,
     tourProductId: tour.id,
   })
@@ -327,6 +344,31 @@ export const getResolvedTourDetailBySlug = async ({
     tour,
     variant: featuredVariant,
   })
+
+  const resolvedTour = resolved.tour as Record<string, any>
+  const configuredRelated = Array.isArray(resolvedTour.relatedTours)
+    ? resolvedTour.relatedTours.filter((item: unknown) => item && typeof item === 'object')
+    : []
+  const relatedResult = configuredRelated.length
+    ? null
+    : await queryCollection({
+        collection: tourProductsCollection,
+        depth: 2,
+        draft,
+        fallbackLocale,
+        limit: 3,
+        locale,
+        where: {
+          and: [
+            { id: { not_equals: tour.id } },
+            { market: { equals: tour.market } },
+            { wrapperPage: { exists: true } },
+          ],
+        },
+      })
+  const relatedTours = configuredRelated.length
+    ? configuredRelated.slice(0, 3)
+    : (relatedResult?.docs || []).map(normalizeTourProductCard).filter(Boolean).slice(0, 3)
 
   const featuredDepartures = getFutureDepartures(
     departures.filter(
@@ -348,7 +390,10 @@ export const getResolvedTourDetailBySlug = async ({
         : null),
     sectionOrder: resolved.sectionOrder,
     sectionVisibility: resolved.sectionVisibility,
-    tour: resolved.tour,
+    tour: {
+      ...resolvedTour,
+      relatedTours,
+    },
     variants,
   }
 }
@@ -537,10 +582,10 @@ export const getResolvedScheduleData = async ({
       openCount: visibleDepartures.length,
     },
     trustSignals: [
-      'Giá công khai theo từng đợt mở bán',
-      'Giữ chỗ sau khi sales xác nhận tồn chỗ',
-      'Hỗ trợ visa, hồ sơ và điều phối trước ngày đi',
-      'Điều hành gọi xác nhận trước khi chốt booking',
+      'Gi├í c├┤ng khai theo tß╗½ng ─æß╗út mß╗ƒ b├ín',
+      'Giß╗» chß╗ù sau khi sales x├íc nhß║¡n tß╗ôn chß╗ù',
+      'Hß╗ù trß╗ú visa, hß╗ô s╞í v├á ─æiß╗üu phß╗æi tr╞░ß╗¢c ng├áy ─æi',
+      '─Éiß╗üu h├ánh gß╗ìi x├íc nhß║¡n tr╞░ß╗¢c khi chß╗æt booking',
     ],
   }
 }

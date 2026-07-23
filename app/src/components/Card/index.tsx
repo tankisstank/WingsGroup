@@ -4,13 +4,13 @@ import useClickableCard from '@/utilities/useClickableCard'
 import { useSitePath } from '@/utilities/useSitePath'
 import { ArrowRightIcon, CameraIcon, MapPinnedIcon } from 'lucide-react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import React from 'react'
 
 import type { Post } from '@/payload-types'
 
 import { Media } from '@/components/Media'
-import { getLocaleFromPathname } from '@/utilities/sitePaths'
+import { getCopyLocale } from '@/utilities/locales'
+import { useSitePublicLocale } from '@/providers/SitePath'
 export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
 
 export const Card: React.FC<{
@@ -23,8 +23,7 @@ export const Card: React.FC<{
 }> = (props) => {
   const { card, link } = useClickableCard({})
   const toSitePath = useSitePath()
-  const pathname = usePathname()
-  const locale = getLocaleFromPathname(pathname) || 'vi'
+  const locale = useSitePublicLocale()
   const { className, doc, relationTo, showCategories, title: titleFromProps } = props
 
   const { slug, categories, meta, title } = doc || {}
@@ -34,6 +33,16 @@ export const Card: React.FC<{
   const titleToUse = titleFromProps || title
   const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
   const href = toSitePath(`/${relationTo}/${slug}`)
+  const copy = {
+    en: {
+      details: 'View details',
+      untitledCategory: 'Untitled category',
+    },
+    vi: {
+      details: 'Xem chi tiết',
+      untitledCategory: 'Danh mục chưa đặt tên',
+    },
+  }[getCopyLocale(locale)]
 
   return (
     <article
@@ -49,7 +58,9 @@ export const Card: React.FC<{
             <CameraIcon className="h-8 w-8" />
           </div>
         )}
-        {metaImage && typeof metaImage !== 'string' && <Media imgClassName="site-travel-card__image" resource={metaImage} size="33vw" />}
+        {metaImage && typeof metaImage !== 'string' && (
+          <Media imgClassName="site-travel-card__image" resource={metaImage} size="33vw" />
+        )}
       </div>
       <div className="p-4">
         {showCategories && hasCategories && (
@@ -58,8 +69,7 @@ export const Card: React.FC<{
               if (typeof category === 'object') {
                 const { title: titleFromCategory } = category
 
-                const categoryTitle =
-                  titleFromCategory || (locale === 'en' ? 'Untitled category' : 'Danh mục chưa đặt tên')
+                const categoryTitle = titleFromCategory || copy.untitledCategory
 
                 return (
                   <span className="site-travel-card__chip" key={index}>
@@ -84,7 +94,7 @@ export const Card: React.FC<{
         )}
         {description && <div className="mt-2">{description && <p>{sanitizedDescription}</p>}</div>}
         <div className="site-travel-card__cta">
-          <span>{locale === 'en' ? 'View details' : 'Xem chi tiết'}</span>
+          <span>{copy.details}</span>
           <ArrowRightIcon aria-hidden="true" className="h-4 w-4" />
         </div>
       </div>

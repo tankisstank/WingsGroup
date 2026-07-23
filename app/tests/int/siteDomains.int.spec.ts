@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { domainCandidates, normalizeHost, requestHostCandidates } from '@/utilities/siteDomains'
+import {
+  createTrustedSiteContextHeaders,
+  domainCandidates,
+  internalSiteContextHeaderNames,
+  normalizeHost,
+  requestHostCandidates,
+} from '@/utilities/siteDomains'
 
 describe('site domain utilities', () => {
   it('normalizes direct and forwarded hosts', () => {
@@ -26,14 +32,67 @@ describe('site domain utilities', () => {
     )
   })
 
-  it('prefers the forwarded public host while retaining host fallbacks', () => {
+  it('ignores an untrusted forwarded host', () => {
     const headers = new Headers({
       host: 'app:3000',
       'x-forwarded-host': 'wingside.vn',
     })
 
+    expect(requestHostCandidates(headers)).toEqual(expect.arrayContaining(['app', 'www.app']))
+    expect(requestHostCandidates(headers)).not.toContain('wingside.vn')
+  })
+
+  it('accepts the host normalized by trusted frontend proxy context', () => {
+    const headers = new Headers({
+      host: 'app:3000',
+      'x-forwarded-host': 'attacker.example',
+      'x-site-context-source': 'proxy',
+      'x-site-host': 'wingside.vn',
+    })
+
     expect(requestHostCandidates(headers)).toEqual(
       expect.arrayContaining(['wingside.vn', 'www.wingside.vn', 'app', 'www.app']),
     )
+    expect(requestHostCandidates(headers)).not.toContain('attacker.example')
+  })
+
+  it('strips spoofed tenant headers before creating trusted proxy context', () => {
+    const incoming = new Headers({
+      'x-locale': 'vi',
+      'x-public-path': '/spoofed',
+      'x-site-code': 'wings-care',
+      'x-site-context-source': 'proxy',
+      'x-site-host': 'wingscare.wingsgroup.vn',
+      'x-site-prefix': '/wingscare',
+    })
+
+    const trusted = createTrustedSiteContextHeaders(incoming, {
+      host: 'wingsgo.vn',
+      locale: 'en',
+      publicPath: '/wingsgo/en/tours',
+      siteCode: 'wings-go',
+      sitePrefix: '/wingsgo/en',
+    })
+
+    expect(trusted.get('x-site-context-source')).toBe('proxy')
+    expect(trusted.get('x-site-host')).toBe('wingsgo.vn')
+    expect(trusted.get('x-site-code')).toBe('wings-go')
+    expect(trusted.get('x-site-prefix')).toBe('/wingsgo/en')
+    expect(trusted.get('x-locale')).toBe('en')
+    expect(trusted.get('x-public-path')).toBe('/wingsgo/en/tours')
+    expect(internalSiteContextHeaderNames).toContain('x-site-code')
+  })
+
+  it('does not preserve optional spoofed values when the trusted context omits them', () => {
+    const trusted = createTrustedSiteContextHeaders(
+      new Headers({ 'x-site-code': 'wings-care', 'x-site-prefix': '/wingscare' }),
+      {
+        host: 'localhost',
+        publicPath: '/',
+      },
+    )
+
+    expect(trusted.get('x-site-code')).toBeNull()
+    expect(trusted.get('x-site-prefix')).toBeNull()
   })
 })

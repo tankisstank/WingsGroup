@@ -2,11 +2,163 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 
+import {
+  getWingsSideHiFiSQLiteCreateTableStatements,
+  getWingsSideHiFiSQLiteIndexStatements,
+  WINGSSIDE_HIFI_PAGES_COLUMNS,
+  WINGSSIDE_HIFI_PAGES_LOCALE_COLUMNS,
+} from '@/migrations/data/wingsSideHiFiSchema'
+
+/**
+ * Local SQLite bootstrap only (decision 0007).
+ * Production/staging schema changes go through PostgreSQL migrations in
+ * `src/migrations` and must pass `pnpm run db:migrate:smoke`.
+ * This utility must never replace or register as a production migration.
+ */
+
 const localSQLiteRelationColumns = [
   'tour_products_id',
   'tour_departures_id',
   'tour_campaigns_id',
   'departure_variants_id',
+] as const
+
+const localSQLiteTableRenames = [
+  {
+    from: 'tour_products_services_summary_important_notes',
+    to: 'tour_products_services_summary_notes',
+  },
+  {
+    from: 'tour_products_services_summary_important_notes_locales',
+    to: 'tour_products_services_summary_notes_locales',
+  },
+  {
+    from: '_tour_products_v_version_services_summary_important_notes',
+    to: '_tour_products_v_version_services_summary_notes',
+  },
+  {
+    from: '_tour_products_v_version_services_summary_important_notes_locales',
+    to: '_tour_products_v_version_services_summary_notes_locales',
+  },
+] as const
+
+const localSQLiteColumnRepairs = [
+  {
+    table: 'pages_blocks_testimonial_items',
+    columns: [
+      ['country', 'TEXT'],
+      ['note_date', 'TEXT'],
+    ],
+  },
+  {
+    table: '_pages_v_blocks_testimonial_items',
+    columns: [
+      ['country', 'TEXT'],
+      ['note_date', 'TEXT'],
+    ],
+  },
+  {
+    table: 'form_submissions',
+    columns: [
+      ['delivery_status', "TEXT NOT NULL DEFAULT 'pending'"],
+      ['delivery_updated_at', 'TEXT'],
+      ['delivery_error_code', 'TEXT'],
+    ],
+  },
+  {
+    table: 'tour_products',
+    columns: [
+      ['source_provenance', 'TEXT'],
+      ['price_from', 'NUMERIC'],
+      ['currency', "TEXT DEFAULT 'USD'"],
+    ],
+  },
+  {
+    table: '_tour_products_v',
+    columns: [
+      ['version_source_provenance', 'TEXT'],
+      ['version_price_from', 'NUMERIC'],
+      ['version_currency', "TEXT DEFAULT 'USD'"],
+    ],
+  },
+  {
+    table: 'pages_blocks_credentials_carousel_items',
+    columns: [
+      ['review_status', "TEXT DEFAULT 'verified'"],
+      ['issuer', 'TEXT'],
+      ['recipient', 'TEXT'],
+      ['recognition_year', 'NUMERIC'],
+      ['issued_on', 'TEXT'],
+      ['reference_code', 'TEXT'],
+      ['source_filename', 'TEXT'],
+    ],
+  },
+  {
+    table: '_pages_v_blocks_credentials_carousel_items',
+    columns: [
+      ['review_status', "TEXT DEFAULT 'verified'"],
+      ['issuer', 'TEXT'],
+      ['recipient', 'TEXT'],
+      ['recognition_year', 'NUMERIC'],
+      ['issued_on', 'TEXT'],
+      ['reference_code', 'TEXT'],
+      ['source_filename', 'TEXT'],
+    ],
+  },
+] as const
+
+const credentialsCarouselSQLiteStatements = [
+  `CREATE TABLE IF NOT EXISTS "pages_blocks_credentials_carousel" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_path" TEXT NOT NULL,
+    "_locale" TEXT NOT NULL, "id" TEXT PRIMARY KEY NOT NULL, "full_bleed" INTEGER DEFAULT 1,
+    "eyebrow" TEXT, "title" TEXT, "description" TEXT, "aria_label" TEXT,
+    "autoplay" INTEGER DEFAULT 1, "interval_ms" NUMERIC DEFAULT 5500, "block_name" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "pages_blocks_credentials_carousel_items" (
+    "_order" INTEGER NOT NULL, "_parent_id" TEXT NOT NULL, "_locale" TEXT NOT NULL,
+    "id" TEXT PRIMARY KEY NOT NULL, "review_status" TEXT DEFAULT 'verified',
+    "kind" TEXT DEFAULT 'cert', "image_id" INTEGER, "issuer" TEXT, "recipient" TEXT,
+    "recognition_year" NUMERIC, "issued_on" TEXT, "reference_code" TEXT,
+    "source_filename" TEXT, "mark" TEXT, "label" TEXT, "title" TEXT, "description" TEXT,
+    FOREIGN KEY ("image_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages_blocks_credentials_carousel"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_pages_v_blocks_credentials_carousel" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_path" TEXT NOT NULL,
+    "_locale" TEXT NOT NULL, "id" INTEGER PRIMARY KEY NOT NULL, "full_bleed" INTEGER DEFAULT 1,
+    "eyebrow" TEXT, "title" TEXT, "description" TEXT, "aria_label" TEXT,
+    "autoplay" INTEGER DEFAULT 1, "interval_ms" NUMERIC DEFAULT 5500, "_uuid" TEXT,
+    "block_name" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_pages_v_blocks_credentials_carousel_items" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_locale" TEXT NOT NULL,
+    "id" INTEGER PRIMARY KEY NOT NULL, "review_status" TEXT DEFAULT 'verified',
+    "kind" TEXT DEFAULT 'cert', "image_id" INTEGER, "issuer" TEXT, "recipient" TEXT,
+    "recognition_year" NUMERIC, "issued_on" TEXT, "reference_code" TEXT,
+    "source_filename" TEXT, "mark" TEXT, "label" TEXT, "title" TEXT, "description" TEXT, "_uuid" TEXT,
+    FOREIGN KEY ("image_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v_blocks_credentials_carousel"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  ...[
+    'pages_blocks_credentials_carousel_order_idx ON pages_blocks_credentials_carousel (_order)',
+    'pages_blocks_credentials_carousel_parent_id_idx ON pages_blocks_credentials_carousel (_parent_id)',
+    'pages_blocks_credentials_carousel_path_idx ON pages_blocks_credentials_carousel (_path)',
+    'pages_blocks_credentials_carousel_locale_idx ON pages_blocks_credentials_carousel (_locale)',
+    'pages_blocks_credentials_carousel_items_order_idx ON pages_blocks_credentials_carousel_items (_order)',
+    'pages_blocks_credentials_carousel_items_parent_id_idx ON pages_blocks_credentials_carousel_items (_parent_id)',
+    'pages_blocks_credentials_carousel_items_locale_idx ON pages_blocks_credentials_carousel_items (_locale)',
+    'pages_blocks_credentials_carousel_items_image_idx ON pages_blocks_credentials_carousel_items (image_id)',
+    '_pages_v_blocks_credentials_carousel_order_idx ON _pages_v_blocks_credentials_carousel (_order)',
+    '_pages_v_blocks_credentials_carousel_parent_id_idx ON _pages_v_blocks_credentials_carousel (_parent_id)',
+    '_pages_v_blocks_credentials_carousel_path_idx ON _pages_v_blocks_credentials_carousel (_path)',
+    '_pages_v_blocks_credentials_carousel_locale_idx ON _pages_v_blocks_credentials_carousel (_locale)',
+    '_pages_v_blocks_credentials_carousel_items_order_idx ON _pages_v_blocks_credentials_carousel_items (_order)',
+    '_pages_v_blocks_credentials_carousel_items_parent_id_idx ON _pages_v_blocks_credentials_carousel_items (_parent_id)',
+    '_pages_v_blocks_credentials_carousel_items_locale_idx ON _pages_v_blocks_credentials_carousel_items (_locale)',
+    '_pages_v_blocks_credentials_carousel_items_image_idx ON _pages_v_blocks_credentials_carousel_items (image_id)',
+  ].map((definition) => `CREATE INDEX IF NOT EXISTS ${definition}`),
 ] as const
 
 const toSQLitePath = (databaseURL: string) => {
@@ -29,6 +181,79 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
   const db = new DatabaseSync(sqlitePath)
 
   try {
+    for (const { from, to } of localSQLiteTableRenames) {
+      const fromTable = db
+        .prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?')
+        .get('table', from) as { name?: string } | undefined
+      const toTable = db
+        .prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?')
+        .get('table', to) as { name?: string } | undefined
+
+      if (fromTable?.name && !toTable?.name) {
+        db.exec(`ALTER TABLE "${from}" RENAME TO "${to}";`)
+      }
+    }
+
+    for (const { table, columns } of localSQLiteColumnRepairs) {
+      const tableRow = db
+        .prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?')
+        .get('table', table) as { name?: string } | undefined
+
+      if (!tableRow?.name) continue
+
+      const tableInfo = db.prepare(`PRAGMA table_info("${table}")`).all() as Array<{
+        name?: string
+      }>
+      const existingColumns = new Set(tableInfo.map((column) => column.name).filter(Boolean))
+
+      for (const [column, type] of columns) {
+        if (!existingColumns.has(column)) {
+          db.exec(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${type};`)
+        }
+      }
+    }
+
+    // Supplemental local SQLite bootstrap for Pages.wingsSideHiFi (US-046A).
+    // Production applies the same shape via migration
+    // 20260721_180000_wings_side_hifi_page_contract on PostgreSQL.
+    const ensureColumns = (table: string, columns: ReadonlyArray<readonly [string, string]>) => {
+      const present = db
+        .prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?')
+        .get('table', table) as { name?: string } | undefined
+      if (!present?.name) return
+
+      const tableInfo = db.prepare(`PRAGMA table_info("${table}")`).all() as Array<{
+        name?: string
+      }>
+      const existing = new Set(tableInfo.map((column) => column.name).filter(Boolean))
+      for (const [column, type] of columns) {
+        if (!existing.has(column)) {
+          db.exec(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${type.toUpperCase()};`)
+        }
+      }
+    }
+
+    ensureColumns('pages', WINGSSIDE_HIFI_PAGES_COLUMNS)
+    ensureColumns('pages_locales', WINGSSIDE_HIFI_PAGES_LOCALE_COLUMNS)
+    ensureColumns(
+      '_pages_v',
+      WINGSSIDE_HIFI_PAGES_COLUMNS.map(([name, type]) => [`version_${name}`, type] as const),
+    )
+    ensureColumns(
+      '_pages_v_locales',
+      WINGSSIDE_HIFI_PAGES_LOCALE_COLUMNS.map(([name, type]) => [`version_${name}`, type] as const),
+    )
+
+    for (const statement of getWingsSideHiFiSQLiteCreateTableStatements()) {
+      db.exec(`${statement};`)
+    }
+    for (const statement of getWingsSideHiFiSQLiteIndexStatements()) {
+      db.exec(`${statement};`)
+    }
+    for (const statement of credentialsCarouselSQLiteStatements) {
+      db.exec(`${statement};`)
+    }
+
     const tableRow = db
       .prepare(
         "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'payload_locked_documents_rels'",
@@ -39,7 +264,9 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
       return
     }
 
-    const tableInfo = db.prepare("PRAGMA table_info('payload_locked_documents_rels')").all() as Array<{
+    const tableInfo = db
+      .prepare("PRAGMA table_info('payload_locked_documents_rels')")
+      .all() as Array<{
       name?: string
     }>
     const existingColumns = new Set(tableInfo.map((column) => column.name).filter(Boolean))

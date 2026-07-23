@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon, PauseIcon, PlayIcon, SparklesIcon } from 'lucide-react'
 
 import type { HeroPresentationKey, HeroPresentationProps, HeroSlide } from './types'
+import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 
 export type { HeroPresentationProps } from './types'
@@ -48,7 +49,7 @@ const HeroVisual: React.FC<{
   </div>
 )
 
-const HeroPostcards: React.FC<Pick<HeroPresentationProps, 'postcards'>> = ({ postcards }) => (
+const HeroPostcards: React.FC<Pick<HeroPresentationProps, 'postcards'>> = ({ postcards }) =>
   postcards.length > 0 ? (
     <div className="hero-presentation__postcards">
       {postcards.map((label) => (
@@ -56,7 +57,6 @@ const HeroPostcards: React.FC<Pick<HeroPresentationProps, 'postcards'>> = ({ pos
       ))}
     </div>
   ) : null
-)
 
 const CenteredVisualHero: React.FC<HeroPresentationProps> = ({
   badge,
@@ -90,7 +90,9 @@ const SplitVisualHero: React.FC<HeroPresentationProps> = ({
       <HeroVisual media={media} priority />
       <HeroPostcards postcards={postcards} />
     </div>
-    {businessPanel ? <div className="hero-presentation__business-panel">{businessPanel}</div> : null}
+    {businessPanel ? (
+      <div className="hero-presentation__business-panel">{businessPanel}</div>
+    ) : null}
   </div>
 )
 
@@ -126,7 +128,9 @@ const LayeredVisualsHero: React.FC<HeroPresentationProps> = ({
       </div>
       <HeroCopy badge={badge} centered links={links} richText={richText} />
       <HeroPostcards postcards={postcards} />
-      {businessPanel ? <div className="hero-presentation__business-panel">{businessPanel}</div> : null}
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
     </div>
   )
 }
@@ -139,13 +143,24 @@ const GradientMeshHero: React.FC<HeroPresentationProps> = ({
   richText,
 }) => (
   <div className="hero-presentation hero-presentation--mesh">
-    <div className="hero-presentation__mesh-orb hero-presentation__mesh-orb--one" aria-hidden="true" />
-    <div className="hero-presentation__mesh-orb hero-presentation__mesh-orb--two" aria-hidden="true" />
-    <div className="hero-presentation__mesh-orb hero-presentation__mesh-orb--three" aria-hidden="true" />
+    <div
+      className="hero-presentation__mesh-orb hero-presentation__mesh-orb--one"
+      aria-hidden="true"
+    />
+    <div
+      className="hero-presentation__mesh-orb hero-presentation__mesh-orb--two"
+      aria-hidden="true"
+    />
+    <div
+      className="hero-presentation__mesh-orb hero-presentation__mesh-orb--three"
+      aria-hidden="true"
+    />
     <div className="container hero-presentation__mesh-content">
       <HeroCopy badge={badge} centered links={links} richText={richText} />
       <HeroPostcards postcards={postcards} />
-      {businessPanel ? <div className="hero-presentation__business-panel">{businessPanel}</div> : null}
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
     </div>
   </div>
 )
@@ -171,7 +186,9 @@ export const PlannerSplitHero: React.FC<HeroPresentationProps> = ({
         <HeroVisual media={media} priority />
         <HeroPostcards postcards={postcards} />
       </div>
-      {businessPanel ? <div className="hero-presentation__business-panel">{businessPanel}</div> : null}
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
     </div>
   </div>
 )
@@ -185,12 +202,15 @@ const getSlideMedia = (slide: HeroSlide, mobile = false) => {
 export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
   badge,
   behavior,
+  businessPanel,
   links,
   preset,
+  resolvedLocale,
   richText,
   slides,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [clientReady, setClientReady] = useState(false)
   const [paused, setPaused] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [documentVisible, setDocumentVisible] = useState(true)
@@ -198,6 +218,13 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
   const safeSlides = (slides || []).filter((slide) => getSlideMedia(slide))
   const canAutoplay =
     behavior.autoplay && !paused && isVisible && documentVisible && safeSlides.length > 1
+  const semanticHeading = safeSlides[0]?.title || null
+  // Restrict to explicit WingSide inbound cinematic preset only (no cross-site overlay trigger).
+  const isHiFiEditorialSplit =
+    preset?.key === 'wingsside-inbound-cinematic-search' ||
+    Boolean(preset?.key?.includes('wingsside') && preset?.key?.includes('cinematic'))
+
+  useEffect(() => setClientReady(true), [])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -239,6 +266,7 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
 
   const goTo = (index: number) => {
     if (safeSlides.length === 0) return
+    setPaused(true)
     setActiveIndex((index + safeSlides.length) % safeSlides.length)
   }
 
@@ -250,17 +278,139 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
     )
   }
 
+  const activeSlide = safeSlides[activeIndex]
+  const carouselControls = (
+    <div
+      className={
+        isHiFiEditorialSplit
+          ? 'hero-presentation__carousel-controls hero-presentation__carousel-controls--hifi'
+          : 'container hero-presentation__carousel-controls'
+      }
+    >
+      {behavior.showArrows ? (
+        <div>
+          <button aria-label="Previous slide" onClick={() => goTo(activeIndex - 1)} type="button">
+            <ChevronLeftIcon aria-hidden="true" />
+          </button>
+          <button aria-label="Next slide" onClick={() => goTo(activeIndex + 1)} type="button">
+            <ChevronRightIcon aria-hidden="true" />
+          </button>
+        </div>
+      ) : null}
+      {behavior.showDots ? (
+        <div aria-label="Choose slide" className="hero-presentation__carousel-dots" role="group">
+          {safeSlides.map((slide, index) => (
+            <button
+              aria-label={`Go to slide ${index + 1}`}
+              aria-pressed={index === activeIndex}
+              key={slide.id || index}
+              onClick={() => goTo(index)}
+              type="button"
+            />
+          ))}
+        </div>
+      ) : null}
+      {behavior.autoplay ? (
+        <button
+          aria-label={paused ? 'Play carousel' : 'Pause carousel'}
+          onClick={() => setPaused((current) => !current)}
+          type="button"
+        >
+          {paused ? <PlayIcon aria-hidden="true" /> : <PauseIcon aria-hidden="true" />}
+        </button>
+      ) : null}
+    </div>
+  )
+
   return (
     <div
       aria-roledescription="carousel"
-      className="hero-presentation hero-presentation--carousel"
+      className={
+        isHiFiEditorialSplit
+          ? 'container hero-presentation hero-presentation--carousel hero-presentation--carousel-hifi-split'
+          : 'hero-presentation hero-presentation--carousel'
+      }
+      data-business-panel={businessPanel ? 'true' : 'false'}
+      data-active-index={activeIndex}
+      data-client-ready={clientReady ? 'true' : 'false'}
+      data-hifi-split={isHiFiEditorialSplit ? 'true' : 'false'}
       data-transition={behavior.transition}
       onMouseEnter={() => behavior.pauseOnHover && setPaused(true)}
       onMouseLeave={() => behavior.pauseOnHover && setPaused(false)}
       ref={rootRef}
       role="region"
-      style={{ '--hero-transition-ms': `${behavior.transitionMs}ms` } as React.CSSProperties}
+      style={
+        {
+          '--hero-ken-burns-ms': `${behavior.intervalMs}ms`,
+          '--hero-transition-ms': `${behavior.transitionMs}ms`,
+        } as React.CSSProperties
+      }
     >
+      {/* Non-hifi keeps a screen-reader-only h1; hi-fi split uses the visible title as the real h1. */}
+      {!isHiFiEditorialSplit && semanticHeading ? (
+        <h1 className="sr-only">{semanticHeading}</h1>
+      ) : null}
+
+      {isHiFiEditorialSplit ? (
+        <div className="hero-presentation__hifi-copy">
+          {activeSlide?.eyebrow ? <p className="site-mini-label">{activeSlide.eyebrow}</p> : null}
+          {activeSlide?.title ? (
+            <h1 className="hero-presentation__hifi-title">{activeSlide.title}</h1>
+          ) : semanticHeading ? (
+            <h1 className="sr-only">{semanticHeading}</h1>
+          ) : null}
+          {activeSlide?.description ? (
+            <p className="hero-presentation__hifi-lede">{activeSlide.description}</p>
+          ) : null}
+          {(() => {
+            const homeCopy = getWingsSideHiFiCopy(resolvedLocale).home
+            const slideLinks = Array.isArray(activeSlide?.links) ? activeSlide.links : []
+            const heroLinks = Array.isArray(links) ? links : []
+            const combined =
+              slideLinks.length > 0 ? slideLinks : heroLinks.length > 0 ? heroLinks : []
+            const exploreLabel = homeCopy.exploreDestinations
+            const planLabel = homeCopy.planTripCta
+            // Hi-fi dual CTA: primary scrolls to denser planner; secondary explores destinations.
+            const dual = [
+              {
+                link: {
+                  appearance: 'default' as const,
+                  label:
+                    (combined[0]?.link && 'label' in combined[0].link && combined[0].link.label) ||
+                    planLabel,
+                  type: 'custom' as const,
+                  url: '#home-planner',
+                },
+              },
+              {
+                link: {
+                  appearance: 'outline' as const,
+                  label:
+                    (combined[1]?.link && 'label' in combined[1].link && combined[1].link.label) ||
+                    exploreLabel,
+                  type: 'custom' as const,
+                  url: '/destinations',
+                },
+              },
+            ]
+            return (
+              <ul className="site-hero__actions">
+                {dual.map(({ link }, index) => (
+                  <li key={index}>
+                    <CMSLink {...link} />
+                  </li>
+                ))}
+              </ul>
+            )
+          })()}
+          {!activeSlide?.title &&
+          !(Array.isArray(activeSlide?.links) && activeSlide.links.length) &&
+          !(Array.isArray(links) && links.length) ? (
+            <HeroCopy badge={badge} links={links} richText={richText} />
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="hero-presentation__carousel-stage">
         {safeSlides.map((slide, index) => {
           const desktopMedia = getSlideMedia(slide)
@@ -275,7 +425,10 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
               data-active={isActive}
               key={slide.id || `${slide.title}-${index}`}
             >
-              <div className="hero-presentation__slide-media hero-presentation__slide-media--desktop">
+              <div
+                className="hero-presentation__slide-media hero-presentation__slide-media--desktop"
+                data-ken-burns={isActive && !paused ? 'active' : 'idle'}
+              >
                 {desktopMedia ? (
                   <Media
                     fill
@@ -285,7 +438,10 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
                   />
                 ) : null}
               </div>
-              <div className="hero-presentation__slide-media hero-presentation__slide-media--mobile">
+              <div
+                className="hero-presentation__slide-media hero-presentation__slide-media--mobile"
+                data-ken-burns={isActive && !paused ? 'active' : 'idle'}
+              >
                 {mobileMedia ? (
                   <Media
                     fill
@@ -295,57 +451,46 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
                   />
                 ) : null}
               </div>
-              <div
-                className="hero-presentation__carousel-overlay"
-                data-strength={preset?.visual?.overlayStrength || 'soft'}
-              />
-              <div className="container hero-presentation__slide-content">
-                {slide.eyebrow ? <p className="site-mini-label">{slide.eyebrow}</p> : null}
-                {slide.title ? <h2>{slide.title}</h2> : null}
-                {slide.description ? <p>{slide.description}</p> : null}
-                {slide.links?.[0]?.link ? <CMSLink {...slide.links[0].link} /> : null}
-                {!slide.title && index === 0 ? (
-                  <HeroCopy badge={badge} links={links} richText={richText} />
-                ) : null}
-              </div>
+              {!isHiFiEditorialSplit ? (
+                <>
+                  <div
+                    className="hero-presentation__carousel-overlay"
+                    data-strength={preset?.visual?.overlayStrength || 'soft'}
+                  />
+                  <div className="container hero-presentation__slide-content">
+                    {slide.eyebrow ? <p className="site-mini-label">{slide.eyebrow}</p> : null}
+                    {slide.title ? <h2>{slide.title}</h2> : null}
+                    {slide.description ? <p>{slide.description}</p> : null}
+                    {slide.links?.[0]?.link ? <CMSLink {...slide.links[0].link} /> : null}
+                    {!slide.title && index === 0 ? (
+                      <HeroCopy badge={badge} links={links} richText={richText} />
+                    ) : null}
+                  </div>
+                </>
+              ) : slide.title ? (
+                <div className="hero-presentation__media-cap" aria-hidden={!isActive}>
+                  <span>{slide.title}</span>
+                </div>
+              ) : null}
             </article>
           )
         })}
+        {isHiFiEditorialSplit ? carouselControls : null}
       </div>
-      <div className="container hero-presentation__carousel-controls">
-        {behavior.showArrows ? (
-          <div>
-            <button aria-label="Previous slide" onClick={() => goTo(activeIndex - 1)} type="button">
-              <ChevronLeftIcon aria-hidden="true" />
-            </button>
-            <button aria-label="Next slide" onClick={() => goTo(activeIndex + 1)} type="button">
-              <ChevronRightIcon aria-hidden="true" />
-            </button>
-          </div>
-        ) : null}
-        {behavior.showDots ? (
-          <div aria-label="Choose slide" className="hero-presentation__carousel-dots" role="group">
-            {safeSlides.map((slide, index) => (
-              <button
-                aria-label={`Go to slide ${index + 1}`}
-                aria-pressed={index === activeIndex}
-                key={slide.id || index}
-                onClick={() => goTo(index)}
-                type="button"
-              />
-            ))}
-          </div>
-        ) : null}
-        {behavior.autoplay ? (
-          <button
-            aria-label={paused ? 'Play carousel' : 'Pause carousel'}
-            onClick={() => setPaused((current) => !current)}
-            type="button"
-          >
-            {paused ? <PlayIcon aria-hidden="true" /> : <PauseIcon aria-hidden="true" />}
-          </button>
-        ) : null}
-      </div>
+
+      {businessPanel ? (
+        <div
+          className={
+            isHiFiEditorialSplit
+              ? 'hero-presentation__carousel-business-panel hero-presentation__carousel-business-panel--hifi'
+              : 'container hero-presentation__carousel-business-panel'
+          }
+        >
+          {businessPanel}
+        </div>
+      ) : null}
+
+      {!isHiFiEditorialSplit ? carouselControls : null}
     </div>
   )
 }

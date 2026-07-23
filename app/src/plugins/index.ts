@@ -179,7 +179,9 @@ export const plugins: Plugin[] = [
     },
     formSubmissionOverrides: {
       access: {
-        create: () => true,
+        // Public writes must go through /api/lead-submissions, which validates
+        // tenant ownership and applies abuse controls before using Local API.
+        create: () => false,
         delete: () => false,
         read: siteScopedAccess(),
         update: () => false,
@@ -190,6 +192,47 @@ export const plugins: Plugin[] = [
           required: false,
         } as Field
 
+        const privateDeliveryFields: Field[] = [
+          {
+            name: 'deliveryStatus',
+            type: 'select',
+            access: {
+              read: ({ req }) => Boolean(req.user),
+            },
+            admin: {
+              description: 'Private operational state for notification delivery and reconciliation.',
+              position: 'sidebar',
+              readOnly: true,
+            },
+            defaultValue: 'pending',
+            options: [
+              { label: 'Pending queue', value: 'pending' },
+              { label: 'Queued', value: 'queued' },
+              { label: 'Delivered', value: 'delivered' },
+              { label: 'Queue failed', value: 'queue_failed' },
+              { label: 'Delivery failed', value: 'delivery_failed' },
+            ],
+            required: true,
+          },
+          {
+            name: 'deliveryUpdatedAt',
+            type: 'date',
+            access: {
+              read: ({ req }) => Boolean(req.user),
+            },
+            admin: { position: 'sidebar', readOnly: true },
+          },
+          {
+            name: 'deliveryErrorCode',
+            type: 'text',
+            access: {
+              read: ({ req }) => Boolean(req.user),
+            },
+            admin: { position: 'sidebar', readOnly: true },
+            maxLength: 64,
+          },
+        ]
+
         return [
           {
             ...submissionSiteField,
@@ -199,6 +242,7 @@ export const plugins: Plugin[] = [
               readOnly: true,
             },
           } as Field,
+          ...privateDeliveryFields,
           ...defaultFields,
         ]
       },

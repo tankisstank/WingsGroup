@@ -46,7 +46,7 @@ const runtimeSiteCodeByReferenceCode: Record<string, string> = {
   wingsgroup: 'wings-group',
   wingsgo: 'wings-go',
   wingspass: 'wings-pass',
-  wingsside: 'wings-side',
+  wingsside: 'wing-side',
   wingscare: 'wings-care',
   wingsplus: 'wings-plus',
 }
@@ -126,10 +126,7 @@ async function createBrandMedia({
     pagination: false,
     req,
     where: {
-      and: [
-        { filename: { equals: filename } },
-        { site: { equals: siteID } },
-      ],
+      and: [{ filename: { equals: filename } }, { site: { equals: siteID } }],
     },
   })
 
@@ -150,7 +147,9 @@ async function createBrandMedia({
 }
 
 async function main() {
-  const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL || DEFAULT_LOCAL_DATABASE_URL)
+  const databaseURL = resolveLocalDatabaseURL(
+    process.env.DATABASE_URL || DEFAULT_LOCAL_DATABASE_URL,
+  )
   const isPostgresURL =
     databaseURL.startsWith('postgres://') || databaseURL.startsWith('postgresql://')
 
@@ -244,7 +243,12 @@ async function main() {
       throw new Error(`Site settings not found for ${runtimeCode}`)
     }
 
-    const manifestPath = path.join(visualIdentityRoot, 'exports', brandSite.siteCode, 'manifest.json')
+    const manifestPath = path.join(
+      visualIdentityRoot,
+      'exports',
+      brandSite.siteCode,
+      'manifest.json',
+    )
     const manifest = await readJSON<AssetManifest>(manifestPath)
 
     const logo = await createBrandMedia({
@@ -303,9 +307,11 @@ async function main() {
   await payload.destroy()
 }
 
-main().catch((error) => {
-  console.error(error)
-  process.exit(1)
-}).then(() => {
-  process.exit(0)
-})
+main()
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })
+  .then(() => {
+    process.exit(0)
+  })

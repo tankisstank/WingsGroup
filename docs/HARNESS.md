@@ -133,6 +133,61 @@ docs/decisions/*
   why the contract changed
 ```
 
+## Plane Work-Item Contract
+
+Plane is the customer-facing tracking layer. Every new or updated work item
+must follow these rules:
+
+- Keep the title under 80 characters and use a concise verb + object form.
+- Put acceptance criteria, reproduction steps, context, evidence, and detailed
+  scope in the description.
+- Keep a reference such as `US-042` or `UAT-11` in the title when it improves
+  traceability; otherwise store it in the description or the `Mã story` custom
+  property.
+- Set one owner when ownership is known. For the current WingsGroup workspace,
+  use `c0508g` as the default owner unless the user specifies another person.
+  Leave reviewer and dependency unset unless explicitly provided.
+- Use the standard labels when applicable: `bug`, `feature`, `content`,
+  `infra`, `uat`, and `blocked`. These are project-scoped labels and should be
+  created in each relevant project.
+
+Label selection follows the work content: `uat` for UAT/testing/QA, `infra`
+for deployment, hosting, data, operations, or security, `content` for
+content/copy/media/seed work, `bug` for defects, fixes, or remediation, and
+`feature` for ordinary product capability work. Add `blocked` only when the
+item is in `Tắc nghẽn` or records an external blocker. During cleanup, replace
+stale labels instead of accumulating contradictory labels.
+
+### Module and Epic boundaries
+
+- Module is a technical/domain filter: SEO, localization, infrastructure, and
+  similar areas.
+- Epic is a strategic objective with scope, timeline, and progress tracking,
+  such as E01-E08.
+- Do not create a Module and Epic with the same name. Use the native Epic work
+  item as the primary container; keep a Module only for a distinct technical
+  domain or a necessary legacy fallback.
+
+### State decision table
+
+| State | Meaning |
+| --- | --- |
+| `Kế hoạch` | Idea without a concrete plan |
+| `Đã lên kế hoạch` | Planned with a timeline, not started |
+| `Tiếp nhận` | Assigned and being prepared |
+| `Đang thực hiện` | Active implementation |
+| `Đang rà soát` | Review or QA |
+| `Chờ xác nhận` | Waiting for stakeholder approval |
+| `Tắc nghẽn` | Blocked by a dependency or external issue |
+| `Đã bàn giao` | Delivered to client or staging |
+| `Hoàn tất` | Done and accepted |
+| `Đã hủy` | Cancelled |
+
+For overdue items, inspect proof and child items before changing state. Do not
+hide lateness by changing state without evidence. If no work has started and no
+approved replacement target exists, record the blocker and request a revised
+target date.
+
 Before implementation, product docs describe intent. After implementation,
 product docs plus executable tests become the living contract.
 

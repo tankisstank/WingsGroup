@@ -51,4 +51,4 @@ Phân cấp URL rất sạch: `destinations/<country-or-place>/`, `types/<travel
 
 ## Hàm ý cho WingsTravel
 
-Rất hợp để tham khảo cho `wingsside.vn`: dùng destination hub, style hub, CTA tư vấn, và kể thương hiệu bằng trust signals thay vì chỉ đẩy bảng giá.
+Rất hợp để tham khảo cho `wingside.vn`: dùng destination hub, style hub, CTA tư vấn, và kể thương hiệu bằng trust signals thay vì chỉ đẩy bảng giá.

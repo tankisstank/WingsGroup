@@ -31,10 +31,10 @@ const registeredBlockTypes = new Set([
 ])
 
 describe('layout preset registry', () => {
-  it('registers twelve unique code-owned presets', () => {
+  it('registers thirteen unique code-owned presets', () => {
     const keys = layoutPresetDefinitions.map(({ key }) => key)
 
-    expect(keys).toHaveLength(12)
+    expect(keys).toHaveLength(13)
     expect(new Set(keys).size).toBe(keys.length)
     expect(keys.every(isLayoutPresetKey)).toBe(true)
   })
@@ -49,14 +49,37 @@ describe('layout preset registry', () => {
 
       expect(data.hero).toBeTruthy()
       expect(data.layout.length).toBeGreaterThan(2)
-      expect(
-        data.layout.every((block) => registeredBlockTypes.has(String(block.blockType))),
-      ).toBe(true)
+      expect(data.layout.every((block) => registeredBlockTypes.has(String(block.blockType)))).toBe(
+        true,
+      )
     }
   })
 
   it('falls back to the first governed preset for unknown input', () => {
     expect(getLayoutPresetDefinition('unknown').key).toBe('homepage-editorial')
+  })
+
+  it('builds the WingsSide inbound homepage from governed composer blocks', () => {
+    const data = createLayoutPresetData('wingsside-inbound-homepage', {
+      summary: 'Inbound Vietnam planning',
+      title: 'WingsSide',
+    })
+    const blockTypes = data.layout.map((block) => block.blockType)
+    const presentations = data.layout.map((block) =>
+      'presentation' in block ? block.presentation : undefined,
+    )
+
+    expect(blockTypes).toEqual([
+      'infoStrip',
+      'featureGrid',
+      'stats',
+      'featureGrid',
+      'testimonial',
+      'cta',
+    ])
+    expect(presentations).toEqual(
+      expect.arrayContaining(['bento', 'logo-proof', 'alternating', 'carousel', 'full-bleed']),
+    )
   })
 })
 
@@ -76,4 +99,3 @@ describe('block presentation registry', () => {
     expect(new Set(values).size).toBe(values.length)
   })
 })
-

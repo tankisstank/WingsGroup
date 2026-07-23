@@ -4,6 +4,7 @@ import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
@@ -28,13 +29,14 @@ import { getCopyLocale } from '@/utilities/locales'
 import { isSupportedLocale, type SupportedLocaleCode } from '@/utilities/sitePaths'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 import {
+  isRetailTourEnabledSiteCode,
+  isStructuredTourDetailEnabledSiteCode,
+} from '@/utilities/siteCapabilities'
+import {
   getResolvedScheduleData,
   getResolvedTourDetailBySlug,
   getTourCampaignBySlug,
   getToursByMarketRoute,
-  isConsultativeTourSite,
-  isStructuredTourDetailSite,
-  isWingsGoSite,
 } from '@/tours/queries'
 import {
   TourCampaignPage,
@@ -42,16 +44,34 @@ import {
   TourMarketPage,
   TourSchedulePage,
 } from '@/tours/StructuredPages'
+import {
+  hasMatchingWingSideTourWrapper,
+  sanitizeWingSidePublicText,
+} from '@/tours/wingsSideTourViewModel'
+import { WingsSideHiFiPageBody } from '@/components/WingsSideHiFi/WingsSideHiFiPageBody'
+import {
+  resolveWingsSideHiFiPageBodyModel,
+  shouldRenderWingsSideHiFiPageBody,
+} from '@/utilities/wingsSideHiFiDispatch'
+import type { WingsSideHiFiPageSource } from '@/utilities/wingsSideHiFiPageModel'
+import { filterCmsLayoutBlocksForHiFiComposer } from '@/utilities/wingsSideHiFiComposer'
+import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
+import type { Form as PayloadForm } from '@/payload-types'
 
 type Args = {
   params: Promise<{
     slug?: string[]
   }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function Page({ params: paramsPromise }: Args) {
+export default async function Page({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}: Args) {
   const { isEnabled: draft } = await draftMode()
   const { slug = [] } = await paramsPromise
+  const searchParams = searchParamsPromise ? await searchParamsPromise : {}
   const locale = await getCurrentLocale()
   const sitePrefix = await getCurrentSitePrefix()
   const decodedSegments = slug.map((segment) => decodeURIComponent(segment))
@@ -83,14 +103,115 @@ export default async function Page({ params: paramsPromise }: Args) {
   const structuredPage = await resolveStructuredTourPage({
     locale,
     requestedPath,
+    wrapperPageID: page.id,
   })
 
-  // Structured tour detail: tighter vertical rhythm so breadcrumb + hero
-  // don't float as two distant top/bottom bands under the fixed header.
+  // Structured tour detail: tighter vertical rhythm under fixed header.
   const isStructuredTour = Boolean(structuredPage)
+  const renderedBreadcrumbItems =
+    isStructuredTour && site.code === 'wing-side'
+      ? [
+          breadcrumbItems[0] || { label: 'WingsSide', path: '/' },
+          { label: locale === 'vi' ? 'Hành trình mẫu' : 'Packages', path: '/packages' },
+          {
+            label: String(page.title || '')
+              .replace(/:.*/, '')
+              .replace(/\s+\d+\s+days?$/i, ''),
+            path: canonicalPath,
+          },
+        ]
+      : breadcrumbItems
+
+  // Tranche B1: dedicated hi-fi Home/Plan body replaces legacy hero/blocks/related.
+  let hiFiModel = resolveWingsSideHiFiPageBodyModel({
+    locale,
+    page: page as WingsSideHiFiPageSource,
+    publicPathname: requestedPath,
+  })
+
+  // Populate conversion form relationship when only an id is stored.
+  const hiFiFormVariant =
+    hiFiModel?.routeVariant === 'plan' || hiFiModel?.routeVariant === 'contact'
+      ? hiFiModel.routeVariant
+      : null
+  if (
+    hiFiModel &&
+    hiFiFormVariant &&
+    hiFiModel.routeContent &&
+    typeof (hiFiModel.routeContent as { form?: unknown }).form !== 'object'
+  ) {
+    const formRef = (
+      page as {
+        wingsSideHiFi?: {
+          contact?: { form?: number | string | null }
+          plan?: { form?: number | string | null }
+        }
+      }
+    ).wingsSideHiFi?.[hiFiFormVariant]?.form
+    if (formRef != null) {
+      try {
+        const payload = await getPayload({ config: configPromise })
+        const formDoc = await payload.findByID({
+          collection: 'forms',
+          depth: 2,
+          id: formRef,
+          overrideAccess: draft,
+        })
+        hiFiModel = {
+          ...hiFiModel,
+          routeContent: {
+            ...(hiFiModel.routeContent || {}),
+            form: formDoc,
+          },
+        }
+      } catch {
+        // Leave unpopulated; the conversion page shows a linked-form warning.
+      }
+    }
+  }
+
+  // Also accept an existing layout formBlock when the hi-fi relationship is empty.
+  if (hiFiModel && hiFiFormVariant && hiFiModel.routeContent) {
+    const content = hiFiModel.routeContent as { form?: unknown }
+    if (!content.form && Array.isArray(page.layout)) {
+      const formBlock = page.layout.find((block) => {
+        if (!block || typeof block !== 'object' || !('blockType' in block) || !('form' in block)) {
+          return false
+        }
+        const blockType = String((block as { blockType?: unknown }).blockType || '')
+        return (
+          (blockType === 'formBlock' || blockType === 'form') &&
+          (block as { form?: unknown }).form &&
+          typeof (block as { form?: unknown }).form === 'object'
+        )
+      }) as { form?: unknown } | undefined
+      if (formBlock?.form) {
+        hiFiModel = {
+          ...hiFiModel,
+          routeContent: { ...content, form: formBlock.form },
+        }
+      }
+    }
+  }
+
+  const useHiFiBody = shouldRenderWingsSideHiFiPageBody({
+    model: hiFiModel,
+    publicPathname: requestedPath,
+    siteCode: site.code,
+  })
+  const consumedHiFiForm =
+    hiFiFormVariant && hiFiModel?.routeContent
+      ? (hiFiModel.routeContent as { form?: unknown }).form
+      : null
+  const hiFiReusableBlocks = filterCmsLayoutBlocksForHiFiComposer(page.layout, consumedHiFiForm)
 
   return (
-    <article className={isStructuredTour ? 'pt-16 pb-16 md:pb-20' : 'pt-16 pb-24'}>
+    <article
+      className={
+        useHiFiBody ? 'pb-16 md:pb-20' : isStructuredTour ? 'pb-16 md:pb-20' : 'pt-16 pb-24'
+      }
+      data-hifi-body={useHiFiBody ? 'true' : 'false'}
+    >
       <JsonLd
         data={[
           buildWebPageJSONLD({
@@ -101,7 +222,7 @@ export default async function Page({ params: paramsPromise }: Args) {
             title: page.meta?.title || page.title,
           }),
           buildBreadcrumbListJSONLD(
-            breadcrumbItems.map((item) => ({ name: item.label, path: item.path })),
+            renderedBreadcrumbItems.map((item) => ({ name: item.label, path: item.path })),
             settings,
             { canonicalOrigin },
           ),
@@ -112,19 +233,33 @@ export default async function Page({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <Breadcrumbs
-        className={
-          isStructuredTour
-            ? 'container pb-2 pt-3 text-sm text-muted-foreground md:pt-4'
-            : undefined
-        }
-        items={breadcrumbItems}
-      />
+      {!useHiFiBody ? (
+        <Breadcrumbs
+          className={
+            isStructuredTour
+              ? 'container pb-2 pt-3 text-sm text-muted-foreground md:pt-4'
+              : undefined
+          }
+          items={renderedBreadcrumbItems}
+          linkClassName={
+            isStructuredTour ? 'font-medium text-[var(--site-brand)] no-underline' : undefined
+          }
+        />
+      ) : null}
+
       {structuredPage ? (
         <>
           {structuredPage}
           <RelatedPages locale={locale} pages={relatedPages} />
         </>
+      ) : useHiFiBody && hiFiModel ? (
+        <WingsSideHiFiPageBody
+          locale={locale}
+          model={hiFiModel}
+          publicPathname={requestedPath}
+          reusableBlocks={hiFiReusableBlocks}
+          searchParams={searchParams}
+        />
       ) : (
         <>
           <RenderHero
@@ -153,6 +288,29 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     requestedPath,
   })
 
+  const site = await getCurrentSite()
+  if (page && site.code === 'wing-side' && requestedPath.startsWith('/tour/')) {
+    const cleanTitle = sanitizeWingSidePublicText(String(page.title || '')).replace(
+      /\s+\d+\s+days?$/i,
+      '',
+    )
+    const cleanDescription = sanitizeWingSidePublicText(String(page.meta?.description || ''))
+    const boundedDescription =
+      cleanDescription.length > 160
+        ? `${cleanDescription.slice(0, 157).replace(/\s+\S*$/, '')}...`
+        : cleanDescription
+
+    return generateMeta({
+      doc: {
+        ...page,
+        meta: { ...page.meta, description: boundedDescription },
+        title: `${cleanTitle} | WingsSide`,
+      },
+      locale,
+      path: requestedPath,
+    })
+  }
+
   return generateMeta({
     doc: page,
     locale,
@@ -161,9 +319,11 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 }
 
 const queryPageByPath = async ({
+  depth = 3,
   locale,
   requestedPath,
 }: {
+  depth?: number
   locale?: SupportedLocaleCode
   requestedPath: string
 }) => {
@@ -197,7 +357,7 @@ const queryPageByPath = async ({
       draft,
       fallbackLocale: options?.strictLocale === false ? undefined : false,
       locale: requestedLocale,
-      depth: 3,
+      depth,
       limit: 1,
       pagination: false,
       overrideAccess: draft,
@@ -250,27 +410,22 @@ const queryPageByPath = async ({
 const resolveStructuredTourPage = async ({
   locale,
   requestedPath,
+  wrapperPageID,
 }: {
   locale: SupportedLocaleCode
   requestedPath: string
+  wrapperPageID: number | string
 }) => {
-  const copyLocale = getCopyLocale(locale)
-
-  if (!(await isStructuredTourDetailSite())) {
-    return null
-  }
-
   const { isEnabled: draft } = await draftMode()
   const segments = requestedPath.split('/').filter(Boolean)
-  const isRetail = await isWingsGoSite()
-  const isConsultative = await isConsultativeTourSite()
-  const presentation = isConsultative ? 'consultative' : 'retail'
   const site = await getCurrentSite()
 
-  // Tour detail: WingsGo (retail) + Wingside (consultative private).
-  if (segments[0] === 'tour' && segments[1]) {
+  if (segments.length === 2 && segments[0] === 'tour' && segments[1]) {
+    if (!isStructuredTourDetailEnabledSiteCode(site.code)) return null
+
     const tourData = await getResolvedTourDetailBySlug({
       draft,
+      fallbackLocale: site.code === 'wing-side' ? 'en' : undefined,
       locale,
       slug: segments[1],
     })
@@ -279,20 +434,57 @@ const resolveStructuredTourPage = async ({
       return null
     }
 
+    // Wingside: consultative hi-fi TourDetailPage (Open Design lock).
+    // Keep wrapper-page gate so only linked TourProduct pages resolve.
+    if (site.code === 'wing-side') {
+      if (!hasMatchingWingSideTourWrapper(tourData.tour, wrapperPageID)) notFound()
+      const contactPage = await queryPageByPath({
+        depth: 0,
+        locale,
+        requestedPath: '/contact-us',
+      })
+      let enquiryForm = (
+        contactPage as {
+          wingsSideHiFi?: { contact?: { form?: PayloadForm | number | string | null } }
+        } | null
+      )?.wingsSideHiFi?.contact?.form
+      if (enquiryForm != null && typeof enquiryForm !== 'object') {
+        const payload = await getPayload({ config: configPromise })
+        enquiryForm = await payload.findByID({
+          collection: 'forms',
+          depth: 2,
+          id: enquiryForm,
+          overrideAccess: draft,
+        })
+      }
+      return (
+        <TourDetailPage
+          data={tourData}
+          enquiryForm={
+            enquiryForm && typeof enquiryForm === 'object'
+              ? (enquiryForm as unknown as FormType)
+              : null
+          }
+          locale={getCopyLocale(locale)}
+          presentation="consultative"
+          siteCode={site.code}
+        />
+      )
+    }
+
     return (
       <TourDetailPage
         data={tourData}
-        locale={copyLocale}
-        presentation={presentation}
+        locale={getCopyLocale(locale)}
+        presentation="retail"
         siteCode={site?.code}
       />
     )
   }
 
-  // Dense retail schedule / market / campaign remain WingsGo-only.
-  if (!isRetail) {
-    return null
-  }
+  if (!isRetailTourEnabledSiteCode(site.code)) return null
+
+  const copyLocale = getCopyLocale(locale)
 
   if (segments[0] === 'lich-khoi-hanh') {
     const schedule = await getResolvedScheduleData({

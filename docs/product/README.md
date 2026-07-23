@@ -34,6 +34,10 @@ Current seed set:
 - `tour-variant-model.md`: bounded override model for departure variants
 - `tour-editorial-operations.md`: editor workflow for tours, departures, and variants
 - `tour-import-mapping.md`: mapping rules from sheets, docs, and poster assets into structured tour records
+- `wingsside-tour-discovery-and-taxonomy.md`: controlled destination/style
+  taxonomy, CMS curation, and real-tour projection for WingsSide discovery cards
+- `wingside-identity-contract.md`: canonical public name, tenant code, local
+  alias and intentionally separate theme identifiers for `wingside.vn`
 
 ## Local Admin Credential
 

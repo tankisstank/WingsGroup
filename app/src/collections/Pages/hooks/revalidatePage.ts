@@ -4,14 +4,14 @@ import { revalidatePath, revalidateTag } from 'next/cache.js'
 
 import type { Page } from '../../../payload-types'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
-import { supportedLocaleCodes } from '@/utilities/sitePaths'
+import { publicLocaleCodes } from '@/utilities/sitePaths'
 
 const revalidatePagePaths = (doc?: Page | null) => {
   const path = getPageCanonicalPath(doc)
 
   revalidatePath(path)
 
-  for (const locale of supportedLocaleCodes) {
+  for (const locale of publicLocaleCodes) {
     revalidatePath(getPageCanonicalPath(doc, locale))
   }
 
