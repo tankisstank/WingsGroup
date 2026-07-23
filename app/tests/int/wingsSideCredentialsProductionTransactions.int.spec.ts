@@ -26,6 +26,19 @@ import {
 const runAdapterProof = process.env.RUN_CREDENTIALS_PRODUCTION_ADAPTER_INT === 'true'
 const adapterDescribe = runAdapterProof ? describe : describe.skip
 const releaseSha = '0123456789abcdef0123456789abcdef01234567'
+const adminEmail = `credentials-production-proof-${process.pid}-${Date.now()}@internal.invalid`
+
+const assertDisposableDatabase = () => {
+  const databaseURL = process.env.DATABASE_URL
+  if (
+    !databaseURL ||
+    process.env.CREDENTIALS_PRODUCTION_INT_DISPOSABLE_DATABASE_URL !== databaseURL
+  ) {
+    throw new Error(
+      'Set CREDENTIALS_PRODUCTION_INT_DISPOSABLE_DATABASE_URL exactly equal to DATABASE_URL to run this destructive disposable PostgreSQL proof',
+    )
+  }
+}
 
 adapterDescribe('WingsSide credentials production PostgreSQL transaction proof', () => {
   let payload: Payload
@@ -33,23 +46,29 @@ adapterDescribe('WingsSide credentials production PostgreSQL transaction proof',
   let siteID: number | string
   let collisionSiteID: number | string | undefined
   let collisionMediaID: number | string | undefined
+  let userID: number | string | undefined
   const pageIDs: Array<number | string> = []
   const suffix = `${process.pid}-${Date.now()}`
 
   beforeAll(async () => {
+    assertDisposableDatabase()
     payload = await getPayload({ config })
     expect(payload.db.packageName).toContain('db-postgres')
+    const user = await payload.create({
+      collection: 'users',
+      context: { disableRevalidate: true },
+      data: {
+        email: adminEmail,
+        name: 'Credentials Transaction Proof',
+        password: 'test',
+        role: 'super-admin',
+      },
+      overrideAccess: true,
+    })
+    userID = user.id
     req = await createLocalReq(
       {
-        user: {
-          collection: 'users',
-          createdAt: new Date(0).toISOString(),
-          email: 'credentials-production-proof@internal.invalid',
-          id: 0,
-          role: 'super-admin',
-          sites: [],
-          updatedAt: new Date(0).toISOString(),
-        } as never,
+        user: { ...user, collection: 'users' } as never,
       },
       payload,
     )
@@ -151,6 +170,15 @@ adapterDescribe('WingsSide credentials production PostgreSQL transaction proof',
         collection: 'sites',
         context: { disableRevalidate: true },
         id: collisionSiteID,
+        overrideAccess: true,
+        req,
+      })
+    }
+    if (userID) {
+      await payload.delete({
+        collection: 'users',
+        context: { disableRevalidate: true },
+        id: userID,
         overrideAccess: true,
         req,
       })

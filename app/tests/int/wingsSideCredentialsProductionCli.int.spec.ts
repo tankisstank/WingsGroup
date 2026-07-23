@@ -22,27 +22,45 @@ const mediaStaticDir = path.resolve(process.cwd(), 'public', 'media')
 
 type JsonLine = Record<string, unknown>
 
-const pnpmEntrypoint = process.env.npm_execpath
+const assertDisposableDatabase = () => {
+  const databaseURL = process.env.DATABASE_URL
+  if (
+    !databaseURL ||
+    process.env.CREDENTIALS_PRODUCTION_INT_DISPOSABLE_DATABASE_URL !== databaseURL
+  ) {
+    throw new Error(
+      'Set CREDENTIALS_PRODUCTION_INT_DISPOSABLE_DATABASE_URL exactly equal to DATABASE_URL to run this destructive disposable PostgreSQL proof',
+    )
+  }
+}
 
 const runImporter = async (args: string[]) => {
-  if (!pnpmEntrypoint) {
-    throw new Error('RUN_CREDENTIALS_PRODUCTION_CLI_INT requires running tests through pnpm')
-  }
-  const { stdout } = await execFileAsync(
-    process.execPath,
-    [pnpmEntrypoint, 'exec', 'tsx', 'scripts/import-wingsside-credentials-production.ts', ...args],
-    {
-      cwd: process.cwd(),
-      env: {
-        ...process.env,
-        IMPORT_ADMIN_EMAIL: adminEmail,
-        NODE_ENV: 'production',
-        PAYLOAD_DB_PUSH: 'false',
-        WINGSTRAVEL_RELEASE_SHA: releaseSha,
-      },
-      maxBuffer: 1024 * 1024 * 8,
+  const importerArgs = [
+    'exec',
+    'tsx',
+    'scripts/import-wingsside-credentials-production.ts',
+    ...args,
+  ]
+  const command =
+    process.platform === 'win32' ? 'pnpm.cmd' : process.env.npm_execpath ? process.execPath : 'pnpm'
+  const commandArgs =
+    process.platform === 'win32'
+      ? importerArgs
+      : process.env.npm_execpath
+        ? [process.env.npm_execpath, ...importerArgs]
+        : importerArgs
+  const { stdout } = await execFileAsync(command, commandArgs, {
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      IMPORT_ADMIN_EMAIL: adminEmail,
+      NODE_ENV: 'production',
+      PAYLOAD_DB_PUSH: 'false',
+      WINGSTRAVEL_RELEASE_SHA: releaseSha,
     },
-  )
+    maxBuffer: 1024 * 1024 * 8,
+    shell: process.platform === 'win32',
+  })
   const lines = stdout
     .split(/\r?\n/u)
     .map((line) => line.trim())
@@ -63,10 +81,63 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
   let pageID: number | string | undefined
   let siteID: number | string | undefined
   let userID: number | string | undefined
+  let userForReq: Record<string, unknown> | undefined
   let artifactRoot: string | undefined
+
+  const proofReq = async (cleanupPayload: Payload) => {
+    if (req) return req
+    if (!userForReq) return undefined
+    return createLocalReq({ user: { ...userForReq, collection: 'users' } as never }, cleanupPayload)
+  }
+
+  const assertFreshDisposableState = async () => {
+    if (!payload || !req) throw new Error('Fresh-state check requires initialized Payload and req')
+    const manifest = await loadWingsSideCredentialManifest()
+    const media = await payload.find({
+      collection: 'media',
+      depth: 0,
+      limit: 1,
+      overrideAccess: true,
+      pagination: false,
+      req,
+      where: { filename: { in: manifest.items.map((item) => item.file) } },
+    })
+    expect(media.docs).toHaveLength(0)
+    const sites = await payload.find({
+      collection: 'sites',
+      depth: 0,
+      limit: 1,
+      overrideAccess: true,
+      pagination: false,
+      req,
+      where: { code: { equals: 'wings-side' } },
+    })
+    expect(sites.docs).toHaveLength(0)
+    const existingFiles: string[] = []
+    for (const item of manifest.items) {
+      for (const file of await plannedCredentialUploadPaths({
+        file: item.file,
+        mediaRoot: mediaStaticDir,
+      })) {
+        try {
+          await fs.access(file)
+          existingFiles.push(file)
+        } catch {
+          // Expected for a fresh disposable proof media directory.
+        }
+      }
+    }
+    expect(existingFiles).toHaveLength(0)
+  }
 
   const cleanup = async () => {
     const cleanupPayload = payload || (await getPayload({ config }))
+    const cleanupReq = await proofReq(cleanupPayload)
+    if (!cleanupReq) {
+      if (!payload) await cleanupPayload.destroy()
+      if (artifactRoot) await fs.rm(artifactRoot, { force: true, recursive: true })
+      return
+    }
     const manifest = await loadWingsSideCredentialManifest()
     const media = await cleanupPayload.find({
       collection: 'media',
@@ -74,6 +145,7 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
       limit: 100,
       overrideAccess: true,
       pagination: false,
+      req: cleanupReq,
       where: { filename: { in: manifest.items.map((item) => item.file) } },
     })
     for (const item of media.docs) {
@@ -82,6 +154,7 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
         context: { disableRevalidate: true },
         id: item.id,
         overrideAccess: true,
+        req: cleanupReq,
       })
     }
     for (const item of manifest.items) {
@@ -98,6 +171,7 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
         context: { disableRevalidate: true },
         id: pageID,
         overrideAccess: true,
+        req: cleanupReq,
       })
     }
     if (siteID) {
@@ -106,6 +180,7 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
         context: { disableRevalidate: true },
         id: siteID,
         overrideAccess: true,
+        req: cleanupReq,
       })
     }
     if (userID) {
@@ -114,6 +189,7 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
         context: { disableRevalidate: true },
         id: userID,
         overrideAccess: true,
+        req: cleanupReq,
       })
     }
     if (!payload) await cleanupPayload.destroy()
@@ -126,23 +202,29 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
   }, 120_000)
 
   it('runs plan, apply, verify, rollback, reapply, no-op and final rollback through the CLI', async () => {
+    assertDisposableDatabase()
     payload = await getPayload({ config })
     expect(payload.db.packageName).toContain('db-postgres')
+    const user = await payload.create({
+      collection: 'users',
+      context: { disableRevalidate: true },
+      data: {
+        email: adminEmail,
+        name: 'Credentials CLI Proof',
+        password: 'test',
+        role: 'super-admin',
+      },
+      overrideAccess: true,
+    })
+    userID = user.id
+    userForReq = user as unknown as Record<string, unknown>
     req = await createLocalReq(
       {
-        user: {
-          collection: 'users',
-          createdAt: new Date(0).toISOString(),
-          email: adminEmail,
-          id: 0,
-          role: 'super-admin',
-          sites: [],
-          updatedAt: new Date(0).toISOString(),
-        } as never,
+        user: { ...userForReq, collection: 'users' } as never,
       },
       payload,
     )
-    await cleanup()
+    await assertFreshDisposableState()
 
     const site = await payload.create({
       collection: 'sites',
@@ -191,19 +273,6 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
         req,
       })
     }
-    const user = await payload.create({
-      collection: 'users',
-      context: { disableRevalidate: true },
-      data: {
-        email: adminEmail,
-        name: 'Credentials CLI Proof',
-        password: 'test',
-        role: 'super-admin',
-      },
-      overrideAccess: true,
-      req,
-    })
-    userID = user.id
     await payload.destroy()
     payload = undefined
     req = undefined
