@@ -82,4 +82,17 @@ describe('Wingside tenant identity contract', () => {
       'WHERE "site_id" = (SELECT "id" FROM "sites" WHERE "code" = \'wing-side\')',
     )
   })
+
+  it('pins wing-side supported locales normalization as tenant-scoped and fail-closed', () => {
+    const migration = appFile('src/migrations/20260724_110000_wing_side_supported_locales.ts')
+
+    expect(migration).toContain('WHERE "code" = \'wing-side\'')
+    expect(migration).toContain("locale_signature = 'en@1,vi@2,it@3,es@4,pt@5'")
+    expect(migration).toContain("locale_signature <> 'en@1,vi@2'")
+    expect(migration).toContain("locale_signature <> 'en@1,vi@2,it@3,es@4,pt@5'")
+    expect(migration).toContain('expected default_locale=en')
+    expect(migration).not.toContain('UPDATE "sites"')
+    expect(migration).not.toContain('UPDATE "sites_supported_locales"')
+    expect(migration).not.toContain('DELETE FROM "sites"')
+  })
 })
