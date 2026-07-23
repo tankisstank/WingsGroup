@@ -49,6 +49,8 @@ describe('WingsSide credentials production plan contract', () => {
     const manifest = await loadWingsSideCredentialManifest()
     const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest, releaseSha)
 
+    expect(manifest.siteCode).toBe('wing-side')
+    expect(wingsSideCredentialsProductionSiteCode).toBe('wing-side')
     expect(sourceIdentity.siteCode).toBe(wingsSideCredentialsProductionSiteCode)
     expect(sourceIdentity.releaseSourceCommit).toBe(releaseSha)
     expect(sourceIdentity.locales).toEqual(['vi', 'en', 'it', 'es', 'pt'])

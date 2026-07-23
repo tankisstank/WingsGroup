@@ -8,7 +8,7 @@ Hard guards enforced by the CLI:
 - `NODE_ENV=production`
 - PostgreSQL `DATABASE_URL`
 - `PAYLOAD_DB_PUSH=false`
-- exact site code `wings-side`
+- exact site code `wing-side`
 - exact locale set `vi,en,it,es,pt` with `defaultLocale=en`
 - exactly one published Home page per locale
 - exact manifest and 24 asset SHA-256 fingerprints

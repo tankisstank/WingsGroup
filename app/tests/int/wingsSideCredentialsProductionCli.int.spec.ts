@@ -110,7 +110,7 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
       overrideAccess: true,
       pagination: false,
       req,
-      where: { code: { equals: 'wings-side' } },
+      where: { code: { equals: 'wing-side' } },
     })
     expect(sites.docs).toHaveLength(0)
     const existingFiles: string[] = []
@@ -230,7 +230,7 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
       collection: 'sites',
       context: { disableRevalidate: true },
       data: {
-        code: 'wings-side',
+        code: 'wing-side',
         defaultLocale: 'en',
         isActive: false,
         name: 'WingsSide CLI proof',

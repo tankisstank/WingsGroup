@@ -5,7 +5,7 @@
  *   pnpm run import:wingsside:credentials
  *
  * Local SQLite apply:
- *   pnpm run import:wingsside:credentials -- --apply --site-code=wings-side
+ *   pnpm run import:wingsside:credentials -- --apply --site-code=wing-side
  */
 import 'dotenv/config'
 
