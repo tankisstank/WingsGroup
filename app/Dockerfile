@@ -74,3 +74,11 @@ ENV PORT 3000
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
 CMD HOSTNAME="0.0.0.0" node server.js
+
+FROM builder AS tools
+WORKDIR /app
+
+ENV NODE_ENV production
+ENV PAYLOAD_DB_PUSH false
+
+CMD ["pnpm", "run", "import:wingsside:credentials:prod", "--", "plan"]

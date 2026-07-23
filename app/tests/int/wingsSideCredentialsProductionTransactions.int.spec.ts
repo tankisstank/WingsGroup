@@ -1,0 +1,227 @@
+import config from '@/payload.config'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { createLocalReq, getPayload, type Payload, type PayloadRequest } from 'payload'
+
+import { loadWingsSideCredentialManifest } from '../../scripts/lib/wingsSideCredentials'
+import {
+  buildWingsSideCredentialsPlan,
+  buildWingsSideCredentialsSourceIdentity,
+  classifyWingsSideCredentialsState,
+  layoutChecksum,
+  wingsSideCredentialsProductionLocales,
+  type CredentialHomeSnapshot,
+  type CredentialMediaSnapshot,
+} from '../../scripts/lib/wingsSideCredentialsProduction'
+import {
+  applyWingsSideCredentialsProductionPlan,
+  rollbackWingsSideCredentialsProductionPlan,
+} from '../../scripts/lib/wingsSideCredentialsProductionRuntime'
+
+const runAdapterProof = process.env.RUN_CREDENTIALS_PRODUCTION_ADAPTER_INT === 'true'
+const adapterDescribe = runAdapterProof ? describe : describe.skip
+
+adapterDescribe('WingsSide credentials production PostgreSQL transaction proof', () => {
+  let payload: Payload
+  let req: PayloadRequest
+  let siteID: number | string
+  const pageIDs: Array<number | string> = []
+  const suffix = `${process.pid}-${Date.now()}`
+
+  beforeAll(async () => {
+    payload = await getPayload({ config })
+    expect(payload.db.packageName).toContain('db-postgres')
+    req = await createLocalReq(
+      {
+        user: {
+          collection: 'users',
+          createdAt: new Date(0).toISOString(),
+          email: 'credentials-production-proof@internal.invalid',
+          id: 0,
+          role: 'super-admin',
+          sites: [],
+          updatedAt: new Date(0).toISOString(),
+        } as never,
+      },
+      payload,
+    )
+
+    const site = await payload.create({
+      collection: 'sites',
+      context: { disableRevalidate: true },
+      data: {
+        code: `credentials-proof-${suffix}`,
+        defaultLocale: 'vi',
+        isActive: false,
+        name: `Credentials proof ${suffix}`,
+        primaryDomain: `credentials-proof-${suffix}.invalid`,
+        supportedLocales: [...wingsSideCredentialsProductionLocales],
+      },
+      overrideAccess: true,
+      req,
+    })
+    siteID = site.id
+
+    for (const locale of wingsSideCredentialsProductionLocales) {
+      const page = await payload.create({
+        collection: 'pages',
+        context: { disableRevalidate: true },
+        data: {
+          _status: 'published',
+          hero: { type: 'none' },
+          layout: [{ blockType: 'content', columns: [] }] as never,
+          pathname: '/',
+          site: siteID,
+          slug: `home-${locale}-${suffix}`,
+          title: `Home ${locale}`,
+        },
+        locale,
+        overrideAccess: true,
+        req,
+      })
+      pageIDs.push(page.id)
+    }
+  }, 120_000)
+
+  afterAll(async () => {
+    if (!payload) return
+    const manifest = await loadWingsSideCredentialManifest()
+    const mediaResult = siteID
+      ? await payload.find({
+          collection: 'media',
+          depth: 0,
+          limit: 100,
+          overrideAccess: true,
+          pagination: false,
+          req,
+          where: {
+            and: [
+              { site: { equals: siteID } },
+              { filename: { in: manifest.items.map((item) => item.file) } },
+            ],
+          },
+        })
+      : { docs: [] }
+    for (const media of mediaResult.docs) {
+      await payload.delete({
+        collection: 'media',
+        context: { disableRevalidate: true },
+        id: media.id,
+        overrideAccess: true,
+        req,
+      })
+    }
+    for (const id of pageIDs) {
+      await payload.delete({
+        collection: 'pages',
+        context: { disableRevalidate: true },
+        id,
+        overrideAccess: true,
+        req,
+      })
+    }
+    if (siteID) {
+      await payload.delete({
+        collection: 'sites',
+        context: { disableRevalidate: true },
+        id: siteID,
+        overrideAccess: true,
+        req,
+      })
+    }
+    await payload.destroy()
+  }, 120_000)
+
+  const loadSnapshot = async () => {
+    const pages = await Promise.all(
+      pageIDs.map((id, index) =>
+        payload.findByID({
+          collection: 'pages',
+          depth: 0,
+          id,
+          locale: wingsSideCredentialsProductionLocales[index],
+          overrideAccess: true,
+          req,
+        }),
+      ),
+    )
+    const homes: CredentialHomeSnapshot[] = pages.map((page, index) => {
+      const layout = Array.isArray(page.layout) ? (page.layout as unknown[]) : []
+      return {
+        id: page.id,
+        layout,
+        layoutChecksum: layoutChecksum(layout),
+        locale: wingsSideCredentialsProductionLocales[index],
+        status: page._status ?? null,
+      }
+    })
+    const manifest = await loadWingsSideCredentialManifest()
+    const mediaResult = await payload.find({
+      collection: 'media',
+      depth: 0,
+      limit: 100,
+      overrideAccess: true,
+      pagination: false,
+      req,
+      where: {
+        and: [
+          { site: { equals: siteID } },
+          { filename: { in: manifest.items.map((item) => item.file) } },
+        ],
+      },
+    })
+    const media: CredentialMediaSnapshot[] = mediaResult.docs.map((item) => ({
+      alt: item.alt ?? null,
+      filename: item.filename ?? null,
+      id: item.id,
+      siteID,
+    }))
+    return { homes, media }
+  }
+
+  it('rolls back injected failure, applies, no-ops, rolls back and reapplies', async () => {
+    const manifest = await loadWingsSideCredentialManifest()
+    const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest)
+    const before = await loadSnapshot()
+    const plan = await buildWingsSideCredentialsPlan({
+      homes: before.homes,
+      manifest,
+      runID: 'adapter-proof',
+      siteID,
+      sourceIdentity,
+    })
+
+    await expect(
+      applyWingsSideCredentialsProductionPlan({
+        failAfterCreates: 2,
+        loadSnapshot,
+        manifest,
+        payload,
+        plan,
+        req,
+      }),
+    ).rejects.toThrow('Injected credentials import failure')
+    expect(
+      classifyWingsSideCredentialsState({
+        ...(await loadSnapshot()),
+        manifest,
+        siteID,
+      }).state,
+    ).toBe('before')
+
+    await applyWingsSideCredentialsProductionPlan({ loadSnapshot, manifest, payload, plan, req })
+    expect(
+      classifyWingsSideCredentialsState({ ...(await loadSnapshot()), manifest, siteID }).state,
+    ).toBe('after')
+    await expect(
+      applyWingsSideCredentialsProductionPlan({ loadSnapshot, manifest, payload, plan, req }),
+    ).rejects.toThrow('expected before')
+    await rollbackWingsSideCredentialsProductionPlan({ loadSnapshot, manifest, payload, plan, req })
+    expect(
+      classifyWingsSideCredentialsState({ ...(await loadSnapshot()), manifest, siteID }).state,
+    ).toBe('before')
+    await applyWingsSideCredentialsProductionPlan({ loadSnapshot, manifest, payload, plan, req })
+    expect(
+      classifyWingsSideCredentialsState({ ...(await loadSnapshot()), manifest, siteID }).state,
+    ).toBe('after')
+  }, 180_000)
+})
