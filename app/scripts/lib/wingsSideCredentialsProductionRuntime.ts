@@ -109,6 +109,47 @@ const uploadFilesForMedia = async (media: CredentialMediaSnapshot) => {
   return media.filename ? [path.join(mediaStaticDir, media.filename)] : []
 }
 
+const mediaUploadFilesFromReturnedMedia = (media: Record<string, unknown>) => {
+  const filenames = new Set<string>()
+  if (typeof media.filename === 'string') filenames.add(media.filename)
+  if (media.sizes && typeof media.sizes === 'object') {
+    for (const size of Object.values(media.sizes as Record<string, unknown>)) {
+      if (
+        size &&
+        typeof size === 'object' &&
+        typeof (size as Record<string, unknown>).filename === 'string'
+      ) {
+        filenames.add((size as Record<string, unknown>).filename as string)
+      }
+    }
+  }
+  return [...filenames].map((filename) => path.join(mediaStaticDir, filename))
+}
+
+const assertReturnedMediaFilenames = ({
+  actualUploadFiles,
+  expectedOriginal,
+  plannedUploadFiles,
+}: {
+  actualUploadFiles: string[]
+  expectedOriginal: string
+  plannedUploadFiles: string[]
+}) => {
+  const actualBasenames = actualUploadFiles.map((file) => path.basename(file)).sort()
+  const plannedBasenames = plannedUploadFiles.map((file) => path.basename(file)).sort()
+  if (!actualBasenames.includes(expectedOriginal)) {
+    throw new Error(`Payload returned unexpected credential filename for ${expectedOriginal}`)
+  }
+  if (
+    actualBasenames.length !== plannedBasenames.length ||
+    actualBasenames.some((filename, index) => filename !== plannedBasenames[index])
+  ) {
+    throw new Error(
+      `Payload returned credential upload filename set mismatch for ${expectedOriginal}`,
+    )
+  }
+}
+
 const quarantineMediaFiles = async (
   media: CredentialMediaSnapshot[],
   runID: string,
@@ -215,6 +256,7 @@ const verifyCurrentAfter = ({
 }
 
 export const applyWingsSideCredentialsProductionPlan = async ({
+  assertNoGlobalMediaFilenameCollisions,
   failDuringCreateItemID,
   failAfterCreates,
   failAfterPageUpdates,
@@ -224,6 +266,7 @@ export const applyWingsSideCredentialsProductionPlan = async ({
   plan,
   req,
 }: {
+  assertNoGlobalMediaFilenameCollisions?: () => Promise<void>
   failDuringCreateItemID?: string
   failAfterCreates?: number
   failAfterPageUpdates?: number
@@ -257,6 +300,7 @@ export const applyWingsSideCredentialsProductionPlan = async ({
       manifest,
       mediaRoot: mediaStaticDir,
     })
+    if (assertNoGlobalMediaFilenameCollisions) await assertNoGlobalMediaFilenameCollisions()
 
     const mediaIDs = new Map<string, number | string>()
     for (const operation of plan.mediaOperations) {
@@ -285,11 +329,17 @@ export const applyWingsSideCredentialsProductionPlan = async ({
         overrideAccess: true,
         req,
       })) as unknown as Record<string, unknown> & { id: number | string }
-      mediaIDs.set(item.id, media.id)
+      const actualUploadFiles = mediaUploadFilesFromReturnedMedia(media)
       uploadEffects[uploadEffects.length - 1] = {
-        files: plannedUploadFiles,
+        files: actualUploadFiles,
         id: media.id,
       }
+      assertReturnedMediaFilenames({
+        actualUploadFiles,
+        expectedOriginal: item.file,
+        plannedUploadFiles,
+      })
+      mediaIDs.set(item.id, media.id)
       creates += 1
       if (failAfterCreates !== undefined && creates >= failAfterCreates) {
         throw new Error(`Injected credentials import failure after ${creates} media create(s)`)

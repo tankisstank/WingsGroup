@@ -262,6 +262,34 @@ const loadSnapshot = async ({
   return { homes, media }
 }
 
+const assertNoGlobalMediaFilenameCollisions = async ({
+  manifest,
+  payload,
+  req,
+}: {
+  manifest: WingsSideCredentialManifest
+  payload: Payload
+  req: PayloadRequest
+}) => {
+  const filenames = manifest.items.map((item) => item.file)
+  const result = await payload.find({
+    collection: 'media',
+    depth: 0,
+    limit: filenames.length + 1,
+    overrideAccess: true,
+    pagination: false,
+    req,
+    where: { filename: { in: filenames } },
+  })
+  if (result.docs.length > 0) {
+    throw new Error(
+      `Credentials import refused global Media filename collision(s): ${result.docs
+        .map((doc) => `${doc.filename || 'missing-filename'}#${doc.id}`)
+        .join(', ')}`,
+    )
+  }
+}
+
 const logJSON = (value: Record<string, unknown>) => {
   console.log(JSON.stringify(value))
 }
@@ -308,6 +336,7 @@ const main = async () => {
           `Credentials plan refused: expected exact before, observed ${snapshot.state}`,
         )
       }
+      await assertNoGlobalMediaFilenameCollisions({ manifest, payload, req })
       const plan = await buildWingsSideCredentialsPlan({
         homes: current.homes,
         manifest,
@@ -386,6 +415,8 @@ const main = async () => {
         )
       }
       const result = await applyWingsSideCredentialsProductionPlan({
+        assertNoGlobalMediaFilenameCollisions: () =>
+          assertNoGlobalMediaFilenameCollisions({ manifest, payload, req }),
         failDuringCreateItemID: argumentValue('--fail-during-create-item-id'),
         failAfterCreates: argumentValue('--fail-after-creates')
           ? Number(argumentValue('--fail-after-creates'))

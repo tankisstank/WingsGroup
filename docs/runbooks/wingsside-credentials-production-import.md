@@ -20,12 +20,13 @@ source or build the dedicated tools target:
 
 ```powershell
 $releaseSha = "<40-hex-release-source-commit>"
-docker build --platform linux/arm64 --target tools --build-arg WINGSTRAVEL_RELEASE_SHA=$releaseSha -t wings-travel-tools:us047 .
+docker build --platform linux/arm64 --target tools --build-arg WINGSTRAVEL_RELEASE_SHA=$releaseSha -t wings-travel-tools:us047 -f app/Dockerfile app
 ```
 
-For the VPS compose deployment, run the tools image on the same compose network,
-with the same production env file and the same media volume mount used by the
-application container. Example shape:
+For the VPS compose deployment, use Docker project `wingstravel` and run the
+tools image on the `wingstravel_default` compose network, with the same
+production env file and the same media volume mount used by the application
+container. Example shape:
 
 ```powershell
 docker run --rm --platform linux/arm64 --network wingstravel_default --env-file /home/ubuntu/wings-travel/shared/.env -e WINGSTRAVEL_RELEASE_SHA=$releaseSha -v /home/ubuntu/wings-travel/shared/data/media:/app/public/media -v /home/ubuntu/wings-travel/shared/artifacts/wingsside-credentials:/app/artifacts/release/wingsside-credentials wings-travel-tools:us047 pnpm run import:wingsside:credentials:prod:plan -- --output artifacts/release/wingsside-credentials/plan.json
@@ -34,7 +35,7 @@ docker run --rm --platform linux/arm64 --network wingstravel_default --env-file 
 Phases:
 
 ```powershell
-pnpm run import:wingsside:credentials:prod:plan -- --output artifacts/release/wingsside-credentials/plan.json
+pnpm --dir app run import:wingsside:credentials:prod:plan -- --output artifacts/release/wingsside-credentials/plan.json
 ```
 
 Container:
@@ -46,7 +47,7 @@ docker run --rm --platform linux/arm64 --network wingstravel_default --env-file 
 Record the printed `planSha256`, then apply:
 
 ```powershell
-pnpm run import:wingsside:credentials:prod:apply -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256> --admin-email <super-admin-email> --confirm CONFIRM_WINGSSIDE_CREDENTIALS_PRODUCTION_WRITE
+pnpm --dir app run import:wingsside:credentials:prod:apply -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256> --admin-email <super-admin-email> --confirm CONFIRM_WINGSSIDE_CREDENTIALS_PRODUCTION_WRITE
 ```
 
 Container:
@@ -58,7 +59,7 @@ docker run --rm --platform linux/arm64 --network wingstravel_default --env-file 
 Verify:
 
 ```powershell
-pnpm run import:wingsside:credentials:prod:verify -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256>
+pnpm --dir app run import:wingsside:credentials:prod:verify -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256>
 ```
 
 Container:
@@ -70,7 +71,7 @@ docker run --rm --platform linux/arm64 --network wingstravel_default --env-file 
 Rollback, if required:
 
 ```powershell
-pnpm run import:wingsside:credentials:prod:rollback -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256> --admin-email <super-admin-email> --confirm CONFIRM_WINGSSIDE_CREDENTIALS_PRODUCTION_ROLLBACK
+pnpm --dir app run import:wingsside:credentials:prod:rollback -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256> --admin-email <super-admin-email> --confirm CONFIRM_WINGSSIDE_CREDENTIALS_PRODUCTION_ROLLBACK
 ```
 
 Container:
