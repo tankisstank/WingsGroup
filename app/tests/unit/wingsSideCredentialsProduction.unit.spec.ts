@@ -1,3 +1,6 @@
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -8,6 +11,7 @@ import {
   aggregateReviewStatusTotals,
   assertCredentialsProductionEnvironment,
   assertCredentialsSiteConfig,
+  assertPlannedCredentialUploadsAbsent,
   assertReleaseSourceCommit,
   assertSourceIdentityMatches,
   assertWingsSideCredentialsPlan,
@@ -202,5 +206,32 @@ describe('WingsSide credentials production plan contract', () => {
     expect(filenames).toContain('wingsside-credential-8355-300x408.jpg')
     expect(filenames).toContain('wingsside-credential-8355-500x500.jpg')
     expect(filenames).toContain('wingsside-credential-8355-1200x630.jpg')
+  })
+
+  it('blocks apply preflight on pre-existing original files without touching them', async () => {
+    const manifest = await loadWingsSideCredentialManifest()
+    const mediaRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'wings-credentials-original-'))
+    const existingPath = path.join(mediaRoot, manifest.items[0].file)
+    await fs.writeFile(existingPath, 'existing-original', 'utf8')
+
+    await expect(assertPlannedCredentialUploadsAbsent({ manifest, mediaRoot })).rejects.toThrow(
+      manifest.items[0].file,
+    )
+    await expect(fs.readFile(existingPath, 'utf8')).resolves.toBe('existing-original')
+    await fs.rm(mediaRoot, { force: true, recursive: true })
+  })
+
+  it('blocks apply preflight on pre-existing generated-size files without touching them', async () => {
+    const manifest = await loadWingsSideCredentialManifest()
+    const mediaRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'wings-credentials-size-'))
+    const generatedFilename = 'wingsside-credential-8355-300x408.jpg'
+    const existingPath = path.join(mediaRoot, generatedFilename)
+    await fs.writeFile(existingPath, 'existing-size', 'utf8')
+
+    await expect(assertPlannedCredentialUploadsAbsent({ manifest, mediaRoot })).rejects.toThrow(
+      generatedFilename,
+    )
+    await expect(fs.readFile(existingPath, 'utf8')).resolves.toBe('existing-size')
+    await fs.rm(mediaRoot, { force: true, recursive: true })
   })
 })

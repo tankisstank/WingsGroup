@@ -210,6 +210,39 @@ adapterDescribe('WingsSide credentials production PostgreSQL transaction proof',
       sourceIdentity,
     })
     const firstItem = manifest.items[0]
+    const existingOriginal = path.resolve('public', 'media', firstItem.file)
+    await fs.writeFile(existingOriginal, 'existing-original', 'utf8')
+    await expect(
+      applyWingsSideCredentialsProductionPlan({ loadSnapshot, manifest, payload, plan, req }),
+    ).rejects.toThrow(firstItem.file)
+    await expect(fs.readFile(existingOriginal, 'utf8')).resolves.toBe('existing-original')
+    await fs.rm(existingOriginal, { force: true })
+    expect(
+      classifyWingsSideCredentialsState({
+        ...(await loadSnapshot()),
+        manifest,
+        siteID,
+      }).state,
+    ).toBe('before')
+
+    const existingGenerated = path.resolve(
+      'public',
+      'media',
+      'wingsside-credential-8355-300x408.jpg',
+    )
+    await fs.writeFile(existingGenerated, 'existing-generated', 'utf8')
+    await expect(
+      applyWingsSideCredentialsProductionPlan({ loadSnapshot, manifest, payload, plan, req }),
+    ).rejects.toThrow('wingsside-credential-8355-300x408.jpg')
+    await expect(fs.readFile(existingGenerated, 'utf8')).resolves.toBe('existing-generated')
+    await fs.rm(existingGenerated, { force: true })
+    expect(
+      classifyWingsSideCredentialsState({
+        ...(await loadSnapshot()),
+        manifest,
+        siteID,
+      }).state,
+    ).toBe('before')
 
     await expect(
       applyWingsSideCredentialsProductionPlan({

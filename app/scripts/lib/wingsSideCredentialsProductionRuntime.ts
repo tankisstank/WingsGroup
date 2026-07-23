@@ -15,12 +15,12 @@ import {
 } from './wingsSideCredentials'
 import {
   afterBlockChecksum,
+  assertPlannedCredentialUploadsAbsent,
   classifyWingsSideCredentialsState,
   credentialFileSha256,
   credentialsChecksum,
   layoutChecksum,
   normalizeCredentialsBlock,
-  plannedCredentialUploadFilenames,
   type CredentialHomeSnapshot,
   type CredentialMediaSnapshot,
   type WingsSideCredentialsPlan,
@@ -75,24 +75,10 @@ const fileExists = async (file: string) => {
   }
 }
 
-const plannedUploadPathsForFile = async (file: string) =>
-  (await plannedCredentialUploadFilenames(file)).map((filename) =>
-    path.join(mediaStaticDir, filename),
-  )
-
-const plannedAbsentUploadPaths = async (file: string) => {
-  const paths = await plannedUploadPathsForFile(file)
-  const absent: string[] = []
-  for (const candidate of paths) {
-    if (!(await fileExists(candidate))) absent.push(candidate)
-  }
-  return absent
-}
-
 const uploadFilesForMedia = async (media: CredentialMediaSnapshot) => {
   const fromSnapshot = Array.isArray(media.uploadFiles) ? media.uploadFiles : []
   if (fromSnapshot.length) return fromSnapshot
-  return media.filename ? plannedUploadPathsForFile(media.filename) : []
+  return media.filename ? [path.join(mediaStaticDir, media.filename)] : []
 }
 
 const quarantineMediaFiles = async (
@@ -101,14 +87,20 @@ const quarantineMediaFiles = async (
 ): Promise<QuarantinedFile[]> => {
   const quarantineRoot = path.join(mediaStaticDir, `.wingsside-credentials-quarantine-${runID}`)
   const quarantined: QuarantinedFile[] = []
-  for (const item of media) {
-    for (const originalPath of await uploadFilesForMedia(item)) {
-      if (!(await fileExists(originalPath))) continue
-      const quarantinePath = path.join(quarantineRoot, path.basename(originalPath))
-      await fs.mkdir(path.dirname(quarantinePath), { recursive: true })
-      await fs.copyFile(originalPath, quarantinePath)
-      quarantined.push({ originalPath, quarantinePath })
+  try {
+    for (const item of media) {
+      for (const originalPath of await uploadFilesForMedia(item)) {
+        if (!(await fileExists(originalPath))) continue
+        const quarantinePath = path.join(quarantineRoot, path.basename(originalPath))
+        await fs.mkdir(path.dirname(quarantinePath), { recursive: true })
+        await fs.copyFile(originalPath, quarantinePath)
+        quarantined.push({ originalPath, quarantinePath })
+      }
     }
+  } catch (error) {
+    await restoreQuarantinedFiles(quarantined)
+    await fs.rm(quarantineRoot, { force: true, recursive: true })
+    throw error
   }
   return quarantined
 }
@@ -197,6 +189,10 @@ export const applyWingsSideCredentialsProductionPlan = async ({
     if (initialState !== 'before') {
       throw new Error(`Credentials apply refused: expected before, observed ${initialState}`)
     }
+    const plannedUploadPathsByItemID = await assertPlannedCredentialUploadsAbsent({
+      manifest,
+      mediaRoot: mediaStaticDir,
+    })
 
     const mediaIDs = new Map<string, number | string>()
     for (const operation of plan.mediaOperations) {
@@ -208,8 +204,9 @@ export const applyWingsSideCredentialsProductionPlan = async ({
         throw new Error(`Credential asset checksum drifted before create: ${item.file}`)
       }
       const bytes = await fs.readFile(assetPath)
-      const plannedAbsentFiles = await plannedAbsentUploadPaths(item.file)
-      uploadEffects.push({ files: plannedAbsentFiles })
+      const plannedUploadFiles = plannedUploadPathsByItemID.get(item.id)
+      if (!plannedUploadFiles) throw new Error(`Missing planned upload paths for ${item.id}`)
+      uploadEffects.push({ files: plannedUploadFiles })
       if (failDuringCreateItemID === item.id) {
         await fs.mkdir(mediaStaticDir, { recursive: true })
         await fs.writeFile(path.join(mediaStaticDir, item.file), bytes)
@@ -226,7 +223,7 @@ export const applyWingsSideCredentialsProductionPlan = async ({
       })) as unknown as Record<string, unknown> & { id: number | string }
       mediaIDs.set(item.id, media.id)
       uploadEffects[uploadEffects.length - 1] = {
-        files: plannedAbsentFiles,
+        files: plannedUploadFiles,
         id: media.id,
       }
       creates += 1

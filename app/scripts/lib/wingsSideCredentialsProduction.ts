@@ -198,6 +198,48 @@ export const plannedCredentialUploadFilenames = async (file: string): Promise<st
   return [file, ...sizes.map((dimensions) => sizedFilename(file, dimensions))]
 }
 
+export const plannedCredentialUploadPaths = async ({
+  file,
+  mediaRoot,
+}: {
+  file: string
+  mediaRoot: string
+}): Promise<string[]> =>
+  (await plannedCredentialUploadFilenames(file)).map((filename) => path.join(mediaRoot, filename))
+
+const fileExists = async (file: string) => {
+  try {
+    await fs.access(file)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export const assertPlannedCredentialUploadsAbsent = async ({
+  manifest,
+  mediaRoot,
+}: {
+  manifest: WingsSideCredentialManifest
+  mediaRoot: string
+}): Promise<Map<string, string[]>> => {
+  const plannedByItemID = new Map<string, string[]>()
+  const collisions: string[] = []
+  for (const item of manifest.items) {
+    const paths = await plannedCredentialUploadPaths({ file: item.file, mediaRoot })
+    plannedByItemID.set(item.id, paths)
+    for (const candidate of paths) {
+      if (await fileExists(candidate)) collisions.push(candidate)
+    }
+  }
+  if (collisions.length > 0) {
+    throw new Error(
+      `Credentials apply refused existing upload path(s): ${collisions.map((file) => path.basename(file)).join(', ')}`,
+    )
+  }
+  return plannedByItemID
+}
+
 export const normalizeCredentialsBlock = (block: Record<string, unknown>) => {
   const items = Array.isArray(block.items) ? block.items : []
   return {

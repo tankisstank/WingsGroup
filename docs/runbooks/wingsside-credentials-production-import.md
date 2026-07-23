@@ -28,7 +28,7 @@ with the same production env file and the same media volume mount used by the
 application container. Example shape:
 
 ```powershell
-docker run --rm --platform linux/arm64 --network wings-travel_default --env-file /home/ubuntu/wings-travel/shared/app.env -e WINGSTRAVEL_RELEASE_SHA=$releaseSha -v wings-travel_media:/app/public/media wings-travel-tools:us047 pnpm run import:wingsside:credentials:prod:plan -- --output artifacts/release/wingsside-credentials/plan.json
+docker run --rm --platform linux/arm64 --network wingstravel_default --env-file /home/ubuntu/wings-travel/shared/.env -e WINGSTRAVEL_RELEASE_SHA=$releaseSha -v /home/ubuntu/wings-travel/shared/data/media:/app/public/media -v /home/ubuntu/wings-travel/shared/artifacts/wingsside-credentials:/app/artifacts/release/wingsside-credentials wings-travel-tools:us047 pnpm run import:wingsside:credentials:prod:plan -- --output artifacts/release/wingsside-credentials/plan.json
 ```
 
 Phases:
@@ -37,10 +37,22 @@ Phases:
 pnpm run import:wingsside:credentials:prod:plan -- --output artifacts/release/wingsside-credentials/plan.json
 ```
 
+Container:
+
+```powershell
+docker run --rm --platform linux/arm64 --network wingstravel_default --env-file /home/ubuntu/wings-travel/shared/.env -e WINGSTRAVEL_RELEASE_SHA=$releaseSha -v /home/ubuntu/wings-travel/shared/data/media:/app/public/media -v /home/ubuntu/wings-travel/shared/artifacts/wingsside-credentials:/app/artifacts/release/wingsside-credentials wings-travel-tools:us047 pnpm run import:wingsside:credentials:prod:plan -- --output artifacts/release/wingsside-credentials/plan.json
+```
+
 Record the printed `planSha256`, then apply:
 
 ```powershell
 pnpm run import:wingsside:credentials:prod:apply -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256> --admin-email <super-admin-email> --confirm CONFIRM_WINGSSIDE_CREDENTIALS_PRODUCTION_WRITE
+```
+
+Container:
+
+```powershell
+docker run --rm --platform linux/arm64 --network wingstravel_default --env-file /home/ubuntu/wings-travel/shared/.env -e WINGSTRAVEL_RELEASE_SHA=$releaseSha -v /home/ubuntu/wings-travel/shared/data/media:/app/public/media -v /home/ubuntu/wings-travel/shared/artifacts/wingsside-credentials:/app/artifacts/release/wingsside-credentials wings-travel-tools:us047 pnpm run import:wingsside:credentials:prod:apply -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256> --admin-email <super-admin-email> --confirm CONFIRM_WINGSSIDE_CREDENTIALS_PRODUCTION_WRITE
 ```
 
 Verify:
@@ -49,10 +61,22 @@ Verify:
 pnpm run import:wingsside:credentials:prod:verify -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256>
 ```
 
+Container:
+
+```powershell
+docker run --rm --platform linux/arm64 --network wingstravel_default --env-file /home/ubuntu/wings-travel/shared/.env -e WINGSTRAVEL_RELEASE_SHA=$releaseSha -v /home/ubuntu/wings-travel/shared/data/media:/app/public/media -v /home/ubuntu/wings-travel/shared/artifacts/wingsside-credentials:/app/artifacts/release/wingsside-credentials wings-travel-tools:us047 pnpm run import:wingsside:credentials:prod:verify -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256>
+```
+
 Rollback, if required:
 
 ```powershell
 pnpm run import:wingsside:credentials:prod:rollback -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256> --admin-email <super-admin-email> --confirm CONFIRM_WINGSSIDE_CREDENTIALS_PRODUCTION_ROLLBACK
+```
+
+Container:
+
+```powershell
+docker run --rm --platform linux/arm64 --network wingstravel_default --env-file /home/ubuntu/wings-travel/shared/.env -e WINGSTRAVEL_RELEASE_SHA=$releaseSha -v /home/ubuntu/wings-travel/shared/data/media:/app/public/media -v /home/ubuntu/wings-travel/shared/artifacts/wingsside-credentials:/app/artifacts/release/wingsside-credentials wings-travel-tools:us047 pnpm run import:wingsside:credentials:prod:rollback -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256> --admin-email <super-admin-email> --confirm CONFIRM_WINGSSIDE_CREDENTIALS_PRODUCTION_ROLLBACK
 ```
 
 Expected exact before: no credentials carousel blocks on the five WingsSide Home
