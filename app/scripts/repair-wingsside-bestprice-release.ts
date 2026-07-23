@@ -14,7 +14,6 @@ import {
   buildReleaseRepairPlanRecords,
   buildReleaseRepairSourceDesired,
   classifyReleaseRepairState,
-  portableSourceChecksum,
   releaseRepairAggregateChecksum,
   releaseRepairChecksum,
   releaseRepairPlanRepresentsOnlyFieldUpdates,
