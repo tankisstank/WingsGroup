@@ -168,7 +168,6 @@ export const buildWingsSideHiFiFallbackSource = (
         closeCta: copy.home.closeCta,
         closeCtaSecondary: copy.home.closeCtaSecondary,
         related: copy.home.related,
-        credentials: copy.creds.slides,
       },
     },
   }

@@ -69,19 +69,19 @@ describe('WingSide hi-fi public copy locale integrity', () => {
     expect(titles.vi).not.toBe(titles.en)
   })
 
-  it('ships prototype certificates band slides without inventing authority names', () => {
+  it('keeps credentials copy limited to localized labels, not records', () => {
     for (const locale of WINGSSIDE_HIFI_SEED_LOCALES) {
       const copy = getWingsSideHiFiCopy(locale)
-      expect(copy.creds.slides).toHaveLength(4)
       expect(copy.creds.title.length).toBeGreaterThan(0)
+      expect(copy.creds.filterAll.length).toBeGreaterThan(0)
+      expect(copy.creds.filterAppointments.length).toBeGreaterThan(0)
+      expect(copy.creds.filterAwards.length).toBeGreaterThan(0)
+      expect(copy.creds.missingField.length).toBeGreaterThan(0)
+      expect(copy.creds.ctaPlanPrivateJourney.length).toBeGreaterThan(0)
       const payload = previewWingsSideHiFiSeedPayload(locale, 'home') as {
-        home?: { credentials?: Array<{ title?: string }> }
+        home?: { credentials?: unknown }
       }
-      // Seed mirrors public band (honest when-held structure for Home contract).
-      expect(payload.home?.credentials).toHaveLength(4)
-      for (const slide of copy.creds.slides) {
-        expect(slide.title).not.toMatch(/fake|invented/i)
-      }
+      expect(payload.home?.credentials).toBeUndefined()
     }
   })
 

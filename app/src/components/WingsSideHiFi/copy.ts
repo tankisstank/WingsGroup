@@ -1,19 +1,31 @@
 import { getCopyLocale, type SupportedLocaleCode } from '@/utilities/locales'
 
 type CredsCopy = {
+  appointmentType: string
   ariaLabel: string
+  awardedEntity: string
+  awardType: string
+  close: string
+  ctaPlanPrivateJourney: string
+  dialogLabel: string
+  filterAll: string
+  filterAppointments: string
+  filterAwards: string
+  filterGroupLabel: string
+  inspectOriginal: string
+  issuedBy: string
   kicker: string
   title: string
   lede: string
-  slides: Array<{
-    kind: 'cert' | 'award' | 'member' | 'iso'
-    mark: string
-    micro: string
-    title: string
-    body: string
-  }>
+  missingField: string
   next: string
   prev: string
+  proofType: string
+  recordsLabel: string
+  thumbnailRailLabel: string
+  verifiedArchiveLabel: string
+  viewDocument: string
+  year: string
 }
 
 export type SectionCopy = {
@@ -512,43 +524,31 @@ const en: SectionCopy = {
     ],
   },
   creds: {
+    appointmentType: 'Airline appointment',
     ariaLabel: 'Certificates and awards',
+    awardedEntity: 'Awarded entity',
+    awardType: 'Performance award',
+    close: 'Close',
+    ctaPlanPrivateJourney: 'Plan a private journey',
+    dialogLabel: 'Credential document preview',
+    filterAll: 'All proof',
+    filterAppointments: 'Airline appointments',
+    filterAwards: 'Performance awards',
+    filterGroupLabel: 'Filter credentials',
+    inspectOriginal: 'Inspect original',
+    issuedBy: 'Issued by',
     kicker: 'Certificates & awards',
-    title: 'Trusted standards when held',
-    lede: 'Licenses, standards, and awards we can verify — only published marks appear here.',
+    title: 'Proof you can inspect, not just claims',
+    lede: 'A documented record of airline appointments and performance recognition published from original certificates.',
+    missingField: 'Not stated on document',
     prev: 'Previous credential',
     next: 'Next credential',
-    // Prototype Home band structure (honest “when held” framing; no fake licenses).
-    slides: [
-      {
-        kind: 'cert',
-        mark: 'Cert',
-        micro: 'Certificates',
-        title: 'Travel license · accreditation · quality',
-        body: 'Authority and year are listed only after documentation is confirmed and kept current.',
-      },
-      {
-        kind: 'iso',
-        mark: 'ISO',
-        micro: 'Standards',
-        title: 'Quality and operating standards',
-        body: 'Standard body and scope appear only when certificates remain on file for this market.',
-      },
-      {
-        kind: 'award',
-        mark: 'Award',
-        micro: 'Awards',
-        title: 'Recognition marks',
-        body: 'Award marks ship only with verified assets and active year coverage.',
-      },
-      {
-        kind: 'member',
-        mark: 'Member',
-        micro: 'Memberships',
-        title: 'Industry memberships',
-        body: 'Associations are listed only while membership stays active year to year.',
-      },
-    ],
+    proofType: 'Proof type',
+    recordsLabel: 'records',
+    thumbnailRailLabel: 'Credential index',
+    verifiedArchiveLabel: 'Verified archive',
+    viewDocument: 'View document',
+    year: 'Year',
   },
 }
 
@@ -929,42 +929,31 @@ const vi: SectionCopy = {
     ],
   },
   creds: {
+    appointmentType: 'Bổ nhiệm hàng không',
     ariaLabel: 'Chứng nhận và giải thưởng',
+    awardedEntity: 'Đơn vị được ghi nhận',
+    awardType: 'Giải thưởng hiệu quả',
+    close: 'Đóng',
+    ctaPlanPrivateJourney: 'Lập kế hoạch hành trình riêng',
+    dialogLabel: 'Xem trước tài liệu chứng nhận',
+    filterAll: 'Tất cả bằng chứng',
+    filterAppointments: 'Bổ nhiệm hàng không',
+    filterAwards: 'Giải thưởng hiệu quả',
+    filterGroupLabel: 'Lọc chứng nhận',
+    inspectOriginal: 'Xem bản gốc',
+    issuedBy: 'Đơn vị cấp',
     kicker: 'Chứng nhận & giải thưởng',
-    title: 'Chuẩn tin cậy khi đã có',
-    lede: 'Giấy phép, tiêu chuẩn và giải thưởng đã xác minh — chỉ dấu đã công bố mới hiện.',
+    title: 'Bằng chứng có thể kiểm chứng, không chỉ là lời giới thiệu',
+    lede: 'Hồ sơ bổ nhiệm hàng không và ghi nhận hiệu quả được công bố từ chứng nhận gốc.',
+    missingField: 'Không nêu trên tài liệu',
     prev: 'Chứng nhận trước',
     next: 'Chứng nhận sau',
-    slides: [
-      {
-        kind: 'cert',
-        mark: 'Cert',
-        micro: 'Chứng nhận',
-        title: 'Giấy phép du lịch · kiểm định · chất lượng',
-        body: 'Cơ quan và năm chỉ liệt kê sau khi hồ sơ được xác nhận và còn hiệu lực.',
-      },
-      {
-        kind: 'iso',
-        mark: 'ISO',
-        micro: 'Tiêu chuẩn',
-        title: 'Tiêu chuẩn chất lượng và vận hành',
-        body: 'Tổ chức và phạm vi chỉ hiện khi chứng chỉ còn trong hồ sơ cho thị trường này.',
-      },
-      {
-        kind: 'award',
-        mark: 'Award',
-        micro: 'Giải thưởng',
-        title: 'Dấu hiệu ghi nhận',
-        body: 'Dấu giải thưởng chỉ đăng khi có tài sản đã xác minh và còn trong năm hiệu lực.',
-      },
-      {
-        kind: 'member',
-        mark: 'Member',
-        micro: 'Hội viên',
-        title: 'Thành viên ngành',
-        body: 'Hiệp hội chỉ liệt kê khi tư cách hội viên còn hiệu lực qua từng năm.',
-      },
-    ],
+    proofType: 'Loại bằng chứng',
+    recordsLabel: 'hồ sơ',
+    thumbnailRailLabel: 'Danh mục chứng nhận',
+    verifiedArchiveLabel: 'Hồ sơ đã xác minh',
+    viewDocument: 'Xem tài liệu',
+    year: 'Năm',
   },
 }
 
@@ -1349,42 +1338,31 @@ const it: SectionCopy = {
     ],
   },
   creds: {
+    appointmentType: 'Nomina aerea',
     ariaLabel: 'Certificati e premi',
+    awardedEntity: 'Soggetto premiato',
+    awardType: 'Premio di performance',
+    close: 'Chiudi',
+    ctaPlanPrivateJourney: 'Pianifica un viaggio privato',
+    dialogLabel: 'Anteprima documento credenziale',
+    filterAll: 'Tutte le prove',
+    filterAppointments: 'Nomine aeree',
+    filterAwards: 'Premi di performance',
+    filterGroupLabel: 'Filtra credenziali',
+    inspectOriginal: 'Ispeziona originale',
+    issuedBy: 'Emesso da',
     kicker: 'Certificati e premi',
-    title: 'Standard di fiducia quando ci sono',
-    lede: 'Licenze, standard e premi verificabili — solo marchi pubblicati.',
+    title: 'Prove ispezionabili, non solo affermazioni',
+    lede: 'Un archivio documentato di nomine aeree e riconoscimenti di performance pubblicati da certificati originali.',
+    missingField: 'Non indicato nel documento',
     prev: 'Credenziale precedente',
     next: 'Credenziale successiva',
-    slides: [
-      {
-        kind: 'cert',
-        mark: 'Cert',
-        micro: 'Certificati',
-        title: 'Licenza di viaggio · accreditamento · qualità',
-        body: 'Autorità e anno compaiono solo dopo conferma documentale e validità corrente.',
-      },
-      {
-        kind: 'iso',
-        mark: 'ISO',
-        micro: 'Standard',
-        title: 'Standard di qualità e operativi',
-        body: 'Ente e ambito compaiono solo con certificati in archivio per questo mercato.',
-      },
-      {
-        kind: 'award',
-        mark: 'Award',
-        micro: 'Premi',
-        title: 'Riconoscimenti',
-        body: 'I marchi di premio si pubblicano solo con asset verificati e copertura annuale attiva.',
-      },
-      {
-        kind: 'member',
-        mark: 'Member',
-        micro: 'Membership',
-        title: 'Associazioni di settore',
-        body: 'Le associazioni compaiono solo mentre l’iscrizione resta attiva anno su anno.',
-      },
-    ],
+    proofType: 'Tipo di prova',
+    recordsLabel: 'record',
+    thumbnailRailLabel: 'Indice credenziali',
+    verifiedArchiveLabel: 'Archivio verificato',
+    viewDocument: 'Visualizza documento',
+    year: 'Anno',
   },
 }
 
@@ -1777,42 +1755,31 @@ const es: SectionCopy = {
     ],
   },
   creds: {
+    appointmentType: 'Nombramiento aéreo',
     ariaLabel: 'Certificados y premios',
+    awardedEntity: 'Entidad reconocida',
+    awardType: 'Premio de rendimiento',
+    close: 'Cerrar',
+    ctaPlanPrivateJourney: 'Planificar un viaje privado',
+    dialogLabel: 'Vista previa del documento',
+    filterAll: 'Toda la prueba',
+    filterAppointments: 'Nombramientos aéreos',
+    filterAwards: 'Premios de rendimiento',
+    filterGroupLabel: 'Filtrar credenciales',
+    inspectOriginal: 'Inspeccionar original',
+    issuedBy: 'Emitido por',
     kicker: 'Certificados y premios',
-    title: 'Estándares de confianza cuando existen',
-    lede: 'Licencias, estándares y premios verificables — solo marcas publicadas.',
+    title: 'Prueba inspeccionable, no solo afirmaciones',
+    lede: 'Un archivo documentado de nombramientos aéreos y reconocimientos de rendimiento publicados desde certificados originales.',
+    missingField: 'No consta en el documento',
     prev: 'Credencial anterior',
     next: 'Credencial siguiente',
-    slides: [
-      {
-        kind: 'cert',
-        mark: 'Cert',
-        micro: 'Certificados',
-        title: 'Licencia de viaje · acreditación · calidad',
-        body: 'Autoridad y año se listan solo tras confirmar documentación y vigencia.',
-      },
-      {
-        kind: 'iso',
-        mark: 'ISO',
-        micro: 'Estándares',
-        title: 'Estándares de calidad y operación',
-        body: 'Organismo y alcance aparecen solo con certificados en archivo para este mercado.',
-      },
-      {
-        kind: 'award',
-        mark: 'Award',
-        micro: 'Premios',
-        title: 'Reconocimientos',
-        body: 'Las marcas de premio se publican solo con activos verificados y cobertura anual activa.',
-      },
-      {
-        kind: 'member',
-        mark: 'Member',
-        micro: 'Membresías',
-        title: 'Membresías del sector',
-        body: 'Las asociaciones se listan solo mientras la membresía se mantenga activa año a año.',
-      },
-    ],
+    proofType: 'Tipo de prueba',
+    recordsLabel: 'registros',
+    thumbnailRailLabel: 'Índice de credenciales',
+    verifiedArchiveLabel: 'Archivo verificado',
+    viewDocument: 'Ver documento',
+    year: 'Año',
   },
 }
 
@@ -2198,42 +2165,31 @@ const pt: SectionCopy = {
     ],
   },
   creds: {
+    appointmentType: 'Nomeação aérea',
     ariaLabel: 'Certificados e prémios',
+    awardedEntity: 'Entidade reconhecida',
+    awardType: 'Prémio de desempenho',
+    close: 'Fechar',
+    ctaPlanPrivateJourney: 'Planear uma viagem privada',
+    dialogLabel: 'Pré-visualização do documento',
+    filterAll: 'Toda a prova',
+    filterAppointments: 'Nomeações aéreas',
+    filterAwards: 'Prémios de desempenho',
+    filterGroupLabel: 'Filtrar credenciais',
+    inspectOriginal: 'Inspecionar original',
+    issuedBy: 'Emitido por',
     kicker: 'Certificados e prémios',
-    title: 'Padrões de confiança quando existem',
-    lede: 'Licenças, padrões e prémios verificáveis — só marcas publicadas.',
+    title: 'Prova que pode inspecionar, não apenas afirmações',
+    lede: 'Um arquivo documentado de nomeações aéreas e reconhecimento de desempenho publicado a partir de certificados originais.',
+    missingField: 'Não consta no documento',
     prev: 'Credencial anterior',
     next: 'Credencial seguinte',
-    slides: [
-      {
-        kind: 'cert',
-        mark: 'Cert',
-        micro: 'Certificados',
-        title: 'Licença de viagem · acreditação · qualidade',
-        body: 'Autoridade e ano só aparecem após documentação confirmada e validade atual.',
-      },
-      {
-        kind: 'iso',
-        mark: 'ISO',
-        micro: 'Padrões',
-        title: 'Padrões de qualidade e operação',
-        body: 'Entidade e âmbito só aparecem com certificados em arquivo para este mercado.',
-      },
-      {
-        kind: 'award',
-        mark: 'Award',
-        micro: 'Prémios',
-        title: 'Reconhecimentos',
-        body: 'Marcas de prémio só com ativos verificados e cobertura anual ativa.',
-      },
-      {
-        kind: 'member',
-        mark: 'Member',
-        micro: 'Associações',
-        title: 'Associações do setor',
-        body: 'Associações só enquanto a filiação se mantém ativa de ano para ano.',
-      },
-    ],
+    proofType: 'Tipo de prova',
+    recordsLabel: 'registos',
+    thumbnailRailLabel: 'Índice de credenciais',
+    verifiedArchiveLabel: 'Arquivo verificado',
+    viewDocument: 'Ver documento',
+    year: 'Ano',
   },
 }
 

@@ -1,0 +1,1892 @@
+[
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 1
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 2
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 3
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 4
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 5
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 6
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 7
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 8
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 9
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 10
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 11
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 12
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 13
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 14
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 15
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 16
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 17
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 18
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 19
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 20
+  },
+  {
+    "breakpoint": 360,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 21
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 1
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 2
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 3
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 4
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 5
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 6
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 7
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 8
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 9
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 10
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 11
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 12
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 13
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 14
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 15
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 16
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 17
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 18
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 19
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 20
+  },
+  {
+    "breakpoint": 390,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 21
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 1
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 2
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 3
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 4
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 5
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 6
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 7
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 8
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 9
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 10
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 11
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 12
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 13
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 14
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 15
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 16
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 17
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 18
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 19
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 20
+  },
+  {
+    "breakpoint": 430,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 21
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 1
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 2
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 3
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 4
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 5
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 6
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 7
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 8
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 9
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 10
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 11
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 12
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 13
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 14
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 15
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 16
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 17
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 18
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 19
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 20
+  },
+  {
+    "breakpoint": 600,
+    "expected": 990,
+    "heightAfterImage": 990,
+    "heightImmediate": 990,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 21
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 1
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 2
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 3
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 4
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 5
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 6
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 7
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 8
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 9
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 10
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 11
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 12
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 13
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 14
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 15
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 16
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 17
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 18
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 19
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 20
+  },
+  {
+    "breakpoint": 768,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 21
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 1
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 2
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 3
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 4
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 5
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 6
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 7
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 8
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 9
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 10
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 11
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 12
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 13
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 14
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 15
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 16
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 17
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 18
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 19
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 20
+  },
+  {
+    "breakpoint": 820,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 21
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 1
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 2
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 3
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 4
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 5
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 6
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 7
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 8
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 9
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 10
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 11
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 12
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 13
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 14
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 15
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 16
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 17
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 18
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 19
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 20
+  },
+  {
+    "breakpoint": 1024,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 21
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 1
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 2
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 3
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 4
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 5
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 6
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 7
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 8
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 9
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 10
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 11
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 12
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 13
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 14
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 15
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 16
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 17
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 18
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 19
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 20
+  },
+  {
+    "breakpoint": 1366,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 21
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 1
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 2
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 3
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 4
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 5
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 6
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 7
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 8
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 9
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 10
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 11
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 12
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 13
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 14
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 15
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 16
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 17
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 18
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 19
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 20
+  },
+  {
+    "breakpoint": 1440,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 21
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 1
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 2
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 3
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 4
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 5
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 6
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 7
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 8
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 9
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 10
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 11
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 12
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 13
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 14
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 15
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 16
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 17
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 18
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 19
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 20
+  },
+  {
+    "breakpoint": 1920,
+    "expected": 570,
+    "heightAfterImage": 570,
+    "heightImmediate": 570,
+    "objectFit": "contain",
+    "overflowX": 0,
+    "record": 21
+  }
+]

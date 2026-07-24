@@ -267,7 +267,7 @@ export default async function Page({
             resolvedLocale={locale}
             siteHeroDefaults={settings?.heroDefaults}
           />
-          <RenderBlocks blocks={page.layout} />
+          <RenderBlocks blocks={page.layout} locale={locale} />
           <RelatedPages locale={locale} pages={relatedPages} />
         </>
       )}

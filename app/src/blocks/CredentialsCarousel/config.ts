@@ -41,19 +41,24 @@ export const CredentialsCarousel: Block = {
     },
     {
       name: 'autoplay',
-      label: 'Tự chuyển slide',
+      label: 'Deprecated: tự chuyển slide',
       type: 'checkbox',
-      defaultValue: true,
+      defaultValue: false,
+      admin: {
+        hidden: true,
+        description: 'Giữ để tương thích dữ liệu cũ; public renderer luôn bỏ qua.',
+      },
     },
     {
       name: 'intervalMs',
-      label: 'Chu kỳ tự chuyển (ms)',
+      label: 'Deprecated: chu kỳ tự chuyển (ms)',
       type: 'number',
       defaultValue: 5500,
       min: 3000,
       max: 15000,
       admin: {
-        condition: (_, siblingData) => siblingData?.autoplay !== false,
+        hidden: true,
+        description: 'Giữ để tương thích dữ liệu cũ; public renderer luôn bỏ qua.',
       },
     },
     {
@@ -88,8 +93,6 @@ export const CredentialsCarousel: Block = {
           options: [
             { label: 'Chứng nhận', value: 'cert' },
             { label: 'Giải thưởng', value: 'award' },
-            { label: 'Thành viên hiệp hội', value: 'member' },
-            { label: 'Tiêu chuẩn / ISO', value: 'iso' },
           ],
         },
         {

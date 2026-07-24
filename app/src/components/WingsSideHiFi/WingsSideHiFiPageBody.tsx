@@ -28,7 +28,7 @@ export const WingsSideHiFiPageBody = ({
     return (
       <>
         <PlanHiFiPage locale={locale} model={model} searchParams={searchParams} />
-        <RenderBlocks blocks={reusableBlocks || []} />
+        <RenderBlocks blocks={reusableBlocks || []} locale={locale} />
       </>
     )
   }
@@ -44,7 +44,7 @@ export const WingsSideHiFiPageBody = ({
         publicPathname={publicPathname}
         searchParams={searchParams}
       />
-      <RenderBlocks blocks={reusableBlocks || []} />
+      <RenderBlocks blocks={reusableBlocks || []} locale={locale} />
     </>
   )
 }

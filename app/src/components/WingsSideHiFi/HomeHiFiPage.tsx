@@ -509,11 +509,11 @@ export const HomeHiFiPage = ({
           </div>
 
           {credentialsBlocks?.length ? (
-            <RenderBlocks blocks={credentialsBlocks} />
+            <RenderBlocks blocks={credentialsBlocks} locale={locale} />
           ) : (
             <WingsSideCredentialsCarousel locale={locale} />
           )}
-          <RenderBlocks blocks={otherReusableBlocks || []} />
+          <RenderBlocks blocks={otherReusableBlocks || []} locale={locale} />
 
           <p className="kicker" style={{ marginTop: '2.25rem' }}>
             {copy.home.continueKicker}

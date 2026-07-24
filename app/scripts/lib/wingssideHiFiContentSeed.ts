@@ -140,8 +140,6 @@ const buildPayloadFromCopy = (
           closeCtaSecondary: copy.home.closeCtaSecondary,
           closeLede: copy.home.closeLede,
           closeTitle: copy.home.closeTitle,
-          // Only verified public credentials; empty when none are approved.
-          credentials: copy.creds.slides,
           destKicker: copy.home.destKicker,
           destTitle: copy.home.destTitle,
           destLede: copy.home.destLede,
