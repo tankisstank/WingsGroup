@@ -1,0 +1,29 @@
+{
+  "source": "Local Payload SQLite copy of the US-047 CMS QA catalog",
+  "route": "http://127.0.0.1:3013/wingsside/en",
+  "recordsPerLocale": 24,
+  "publicVerifiedRecords": 21,
+  "filters": {
+    "all": 21,
+    "appointment": 4,
+    "award": 17
+  },
+  "interaction": {
+    "arrowNavigation": "pass",
+    "dialogEscapeClose": "pass",
+    "noAutoplay": "pass"
+  },
+  "measurements": [
+    { "width": 360, "records": 21, "height": 990, "overflow": 0, "imagesMissing": 0 },
+    { "width": 390, "records": 21, "height": 990, "overflow": 0, "imagesMissing": 0 },
+    { "width": 430, "records": 21, "height": 990, "overflow": 0, "imagesMissing": 0 },
+    { "width": 600, "records": 21, "height": 990, "overflow": 0, "imagesMissing": 0 },
+    { "width": 768, "records": 21, "height": 570, "overflow": 0, "imagesMissing": 0 },
+    { "width": 820, "records": 21, "height": 570, "overflow": 0, "imagesMissing": 0 },
+    { "width": 1024, "records": 21, "height": 570, "overflow": 0, "imagesMissing": 0 },
+    { "width": 1366, "records": 21, "height": 570, "overflow": 0, "imagesMissing": 0 },
+    { "width": 1440, "records": 21, "height": 570, "overflow": 0, "imagesMissing": 0 },
+    { "width": 1920, "records": 21, "height": 570, "overflow": 0, "imagesMissing": 0 }
+  ],
+  "consoleErrors": 0
+}

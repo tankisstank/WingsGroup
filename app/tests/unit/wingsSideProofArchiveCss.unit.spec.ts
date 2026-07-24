@@ -33,6 +33,7 @@ describe('WingsSide Proof Archive CSS contract', () => {
     expect(css).toContain('height: 100%')
     expect(css).toContain('min-width: 0')
     expect(css).toContain('min-height: 0')
+    expect(css).toContain('.ws-hifi-creds__media-picture')
     expect(css).toContain('object-fit: contain')
     expect(css).toContain('overflow-x: auto')
   })

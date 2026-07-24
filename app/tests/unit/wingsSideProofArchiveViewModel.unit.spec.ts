@@ -49,8 +49,8 @@ describe('WingsSide Proof Archive view model', () => {
         }),
       ),
       row('needs-review', { reviewStatus: 'needs-review' }),
-      row('member-row', { kind: 'member' }),
-      row('iso-row', { kind: 'iso' }),
+      row('member-row', { kind: 'member' as never }),
+      row('iso-row', { kind: 'iso' as never }),
     ]
     const block = { blockType: 'credentialsCarousel', items } as CredentialsCarouselBlock
 
@@ -70,8 +70,8 @@ describe('WingsSide Proof Archive view model', () => {
       items: [
         row('verified'),
         row('needs-review', { reviewStatus: 'needs-review' }),
-        row('member', { kind: 'member' }),
-        row('iso', { kind: 'iso' }),
+        row('member', { kind: 'member' as never }),
+        row('iso', { kind: 'iso' as never }),
         row('missing-image', { image: undefined }),
         row('', { title: 'No id' }),
       ],

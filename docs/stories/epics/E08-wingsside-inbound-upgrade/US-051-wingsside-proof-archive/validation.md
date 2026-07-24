@@ -59,10 +59,21 @@ pnpm exec playwright test tests/e2e/wingsside-proof-archive.e2e.spec.ts --config
 - Archived local CMS data was inspected read-only before QA: five localized
   credentials blocks contain 120 rows total (24 per locale), including the 21
   verified public records expected by the mapper.
-- A temporary standalone build on port 3102 could read the local Payload
-  database/API, but the WingsSide tenant page route returned HTTP 404. This is
-  an environment/routing blocker; screenshots below are therefore explicitly
-  controlled fixture evidence, not production or rendered-CMS screenshots.
+- The initial local 404 was traced to stale bootstrap data using site code
+  `wings-side`; the current route registry uses `wing-side`, and the correct
+  local alias is `/wingsside`. Normalizing only the disposable local SQLite copy
+  allowed the CMS-rendered page to pass browser QA on port 3013 without changing
+  production data.
+- Agent-browser verified the rendered local CMS page at all ten required
+  breakpoints. Each breakpoint activated all 21 public records: mobile remained
+  exactly 990px, desktop exactly 570px, horizontal overflow remained zero, and
+  every visible document/thumbnail image loaded with non-zero dimensions.
+- Real interaction checks passed for 21/4/17 all/appointment/award counts,
+  keyboard Arrow Right navigation, dialog Escape close, and no autoplay.
+- Browser QA exposed a shared Media `<picture>` wrapper with zero height. The
+  component now supplies a dedicated 100%-height picture class; the final
+  browser pass reports zero missing or zero-height visible images and zero
+  console errors.
 - `pnpm run plane:preview` PASS and mapped US-051 to WingsSide / E08 with no
   acceptance-criteria child task names. `pnpm run plane:sync:workitems` was
   blocked by Plane HTTP 403 because Initiatives requires a paid plan.
@@ -73,6 +84,10 @@ Evidence artifacts:
 - `evidence/us051-desktop-1440.png`
 - `evidence/us051-mobile-390.png`
 - `evidence/us051-dialog-390.png`
+- `evidence/us051-local-cms-browser-results.json`
+- `evidence/us051-local-cms-desktop-1440.png`
+- `evidence/us051-local-cms-mobile-390.png`
+- `evidence/us051-local-cms-dialog-390.png`
 
 Bounding-box summary across all 21 records per breakpoint:
 
@@ -89,8 +104,6 @@ Bounding-box summary across all 21 records per breakpoint:
 | 1440 | 570 | 570 | 570 | 0 | contain |
 | 1920 | 570 | 570 | 570 | 0 | contain |
 
-Note: the focused E2E uses the committed Proof Archive CSS selectors in a
-controlled 21-record fixture so it can run without touching port 3000. CMS
-mapping and renderer behavior are covered by the unit/component/integration
-tests above. Real browser QA against the rendered CMS route remains required
-before release approval.
+Note: the focused E2E remains a deterministic regression fixture. The additional
+`us051-local-cms-*` evidence is from the real Payload composer/media route using
+the archived 24-record CMS catalog. Port 3000 was not touched.

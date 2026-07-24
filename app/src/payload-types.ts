@@ -1466,14 +1466,20 @@ export interface CredentialsCarouselBlock {
    * Mặc định dùng tiêu đề nếu để trống.
    */
   ariaLabel?: string | null;
+  /**
+   * Giữ để tương thích dữ liệu cũ; public renderer luôn bỏ qua.
+   */
   autoplay?: boolean | null;
+  /**
+   * Giữ để tương thích dữ liệu cũ; public renderer luôn bỏ qua.
+   */
   intervalMs?: number | null;
   /**
    * Mỗi mục là một hồ sơ có ảnh và metadata. Dùng trạng thái “Cần xác minh” khi ảnh chưa đủ thông tin; mục đó sẽ không xuất hiện public.
    */
   items: {
     reviewStatus: 'verified' | 'needs-review';
-    kind: 'cert' | 'award' | 'member' | 'iso';
+    kind: 'cert' | 'award';
     /**
      * Dùng ảnh hoặc logo đã quản lý trong Media Library.
      */

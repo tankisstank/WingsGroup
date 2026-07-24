@@ -181,7 +181,7 @@ describe('CredentialsCarouselBlock Proof Archive', () => {
       ...content,
       items: [
         item({ id: 'needs-review', reviewStatus: 'needs-review', title: 'Private until reviewed' }),
-        item({ id: 'member', kind: 'member', title: 'Association member' }),
+        item({ id: 'member', kind: 'member' as never, title: 'Association member' }),
         item({ id: 'no-image', image: undefined, title: 'No image' }),
         item({ id: '', title: 'No stable id' }),
       ],

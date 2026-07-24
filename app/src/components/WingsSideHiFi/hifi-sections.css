@@ -448,6 +448,13 @@ body[data-site-code='wing-side'] .ws-hifi-creds__thumb-media {
   height: 100%;
 }
 
+body[data-site-code='wing-side'] .ws-hifi-creds__media-picture {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 body[data-site-code='wing-side'] .ws-hifi-creds__document-image,
 body[data-site-code='wing-side'] .ws-hifi-creds__dialog-image,
 body[data-site-code='wing-side'] .ws-hifi-creds__thumb-image {

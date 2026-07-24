@@ -211,6 +211,7 @@ export const WingsSideCredentialsCarousel = ({
                 className="ws-hifi-creds__document-media"
                 fill
                 imgClassName="ws-hifi-creds__document-image"
+                pictureClassName="ws-hifi-creds__media-picture"
                 priority
                 resource={activeRecord.image}
                 src={activeRecord.image as never}
@@ -294,6 +295,7 @@ export const WingsSideCredentialsCarousel = ({
                 className="ws-hifi-creds__thumb-media"
                 fill
                 imgClassName="ws-hifi-creds__thumb-image"
+                pictureClassName="ws-hifi-creds__media-picture"
                 resource={record.image}
                 src={record.image as never}
                 size="64px"
@@ -323,10 +325,11 @@ export const WingsSideCredentialsCarousel = ({
             className="ws-hifi-creds__dialog-media"
             fill
             imgClassName="ws-hifi-creds__dialog-image"
+            pictureClassName="ws-hifi-creds__media-picture"
             priority
             resource={activeRecord.image}
             src={activeRecord.image as never}
-            size="100vw"
+            size="(max-width: 920px) calc(100vw - 64px), 860px"
           />
           <button
             aria-label={labels.close}
