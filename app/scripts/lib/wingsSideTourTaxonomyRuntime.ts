@@ -30,6 +30,35 @@ const updateSnapshot = async ({
     req,
   })
 
+const describeStateMismatch = ({
+  documents,
+  records,
+}: {
+  documents: TourTaxonomyDocument[]
+  records: TourTaxonomyPlanRecord[]
+}) => {
+  const byID = new Map(documents.map((document) => [String(document.id), document]))
+  for (const record of records) {
+    const document = byID.get(String(record.id))
+    if (!document) return `record ${record.id} is missing`
+    if (document.sourceProvenance?.sourceId !== record.sourceID) {
+      return `record ${record.id} source ID changed`
+    }
+    if (
+      taxonomyChecksum(document.sourceProvenance ?? null) !== record.provenanceChecksum
+    ) {
+      return `record ${record.id} source provenance changed`
+    }
+    const currentChecksum = taxonomyChecksum(extractTourTaxonomySnapshot(document))
+    const beforeChecksum = taxonomyChecksum(record.before)
+    const afterChecksum = taxonomyChecksum(record.after)
+    if (currentChecksum !== beforeChecksum && currentChecksum !== afterChecksum) {
+      return `record ${record.id} taxonomy snapshot changed outside the signed states`
+    }
+  }
+  return 'scope contains a mixed before/after state'
+}
+
 export const transitionTourTaxonomy = async ({
   failAfterUpdates,
   loadDocuments,
@@ -83,13 +112,19 @@ export const transitionTourTaxonomy = async ({
       }
     }
 
+    const finalDocuments = await loadDocuments()
     const finalState = classifyTourTaxonomyState({
-      documents: await loadDocuments(),
+      documents: finalDocuments,
       records,
     })
     const expected = side === 'after' ? 'after' : 'before'
     if (finalState !== expected && finalState !== 'equivalent') {
-      throw new Error(`Taxonomy verification failed with state ${finalState}`)
+      throw new Error(
+        `Taxonomy verification failed with state ${finalState}: ${describeStateMismatch({
+          documents: finalDocuments,
+          records,
+        })}`,
+      )
     }
     return { resumed: false, state: finalState }
   } catch (error) {
