@@ -9,6 +9,7 @@ import {
   wingsSideTourTaxonomyBatchID,
   wingsSideTourTaxonomyExpectedCount,
   wingsSideTourTaxonomyMappings,
+  wingsSideTourTaxonomySiteCode,
   type TourTaxonomyDocument,
 } from '../../scripts/lib/wingsSideTourTaxonomy'
 import { transitionTourTaxonomy } from '../../scripts/lib/wingsSideTourTaxonomyRuntime'
@@ -48,6 +49,7 @@ const wrapperSites = () =>
 describe('WingSide tour taxonomy planner', () => {
   it('validates all 22 evidence-backed mappings and deterministic key order', () => {
     expect(() => validateTourTaxonomyMappings()).not.toThrow()
+    expect(wingsSideTourTaxonomySiteCode).toBe('wing-side')
     expect(wingsSideTourTaxonomyMappings).toHaveLength(22)
     expect(normalizeTourDestinationKeys(['hoian', 'hanoi'])).toEqual(['hanoi', 'hoian'])
     expect(normalizeTourTravelStyleKeys(['adventure', 'culture'])).toEqual(['culture', 'adventure'])

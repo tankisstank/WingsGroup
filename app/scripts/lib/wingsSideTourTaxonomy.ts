@@ -10,7 +10,7 @@ import {
 export const wingsSideTourTaxonomyBatchID = 'wingsside-bestprice-22-20260717'
 export const wingsSideTourTaxonomyExpectedCount = 22
 export const wingsSideTourTaxonomyMappingRevision = 'us-049-v1-20260724'
-export const wingsSideTourTaxonomySiteCode = 'wings-side'
+export const wingsSideTourTaxonomySiteCode = 'wing-side'
 
 type JSONRecord = Record<string, unknown>
 
