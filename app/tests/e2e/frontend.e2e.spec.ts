@@ -765,7 +765,7 @@ test.describe('Phase 1 public frontend smoke', () => {
 
       const board = page.getByTestId('wingside-home-process-board')
       const stage = page.getByTestId('wingside-home-process-stage')
-      const tabs = page.getByRole('tab')
+      const tabs = board.getByRole('tab')
       await expect(tabs).toHaveCount(4)
       await expect(page.locator('[data-od-id="home-pillars"]')).toBeVisible()
       await expect(page.locator('[data-od-id="home-process-cta"]')).toHaveAttribute(

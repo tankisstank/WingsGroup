@@ -2,7 +2,7 @@
 
 ## Status
 
-Đang rà soát
+Đã xác nhận đầy đủ
 
 ## Lane
 
@@ -45,24 +45,27 @@ cards treatment.
 
 | Layer | Expected proof |
 | --- | --- |
-| Unit | Existing unit suite passed: 44 files / 311 tests. |
+| Unit | Full unit suite passed: 46 files / 322 tests. |
 | Component | Full component suite passed: 11 files / 38 tests; new process-board tests cover rendering and keyboard interaction. |
-| E2E | Added homepage process-board test for four tabs, keyboard navigation, CTA, overflow, and bounding-box stability. Execution blocked during fixture preparation by existing theme seed validation (`site-settings.brand.themeCode`), after one transient SQLite lock failure. |
-| Platform | Build passed. Live visual QA was blocked because the available local database did not render `home-pillars`; route `/wingsside` returned 404 and root fixture rendered a different site composition. |
+| E2E | Homepage process-board test passed against the reviewed local runtime at desktop 1440px and mobile 390px. It verifies four scoped tabs, keyboard navigation, CTA, overflow, and fixed board/stage heights. |
+| Platform | TypeScript, lint with zero errors, production build, local runtime QA, and stakeholder visual review passed. |
 | Release | `pnpm run build` passed. |
 
 ## Harness Delta
 
 - Added a normal-lane story for the bounded homepage UI change.
 - Added executable component and E2E acceptance coverage.
-- Recorded fixture/seed blockers rather than weakening the required proof.
+- Scoped the E2E tab locator to the process board so the independent hero-carousel tabs do not create a false count.
+- Recorded the stakeholder visual acceptance and complete local release proof.
 
 ## Evidence
 
 - `pnpm exec eslint src/components/WingsSideHiFi/HomeProcessSteps.tsx src/components/WingsSideHiFi/HomeHiFiPage.tsx tests/component/homeProcessSteps.component.spec.tsx tests/e2e/frontend.e2e.spec.ts --no-warn-ignored` — pass.
 - `pnpm exec tsc --noEmit --pretty false` — pass.
 - `pnpm run test:component` — pass, 38/38.
-- `pnpm run test:unit` — pass, 311/311.
-- `pnpm run lint` — pass with 0 errors and 143 pre-existing warnings.
+- `pnpm run test:unit` — pass, 322/322.
+- `pnpm run test:int` — pass, 114 tests with 10 opt-in skips.
+- `pnpm run lint` — pass with 0 errors and 144 pre-existing warnings.
 - `pnpm run build` — pass.
-- `pnpm run test:e2e:sqlite -- tests/e2e/frontend.e2e.spec.ts -g "homepage WingSide process board"` — blocked in seed preparation; no process-board assertion executed.
+- Direct Playwright execution against the reviewed local runtime — pass, 1/1 at 1440px and 390px.
+- Stakeholder visual review — accepted on 2026-07-24.
