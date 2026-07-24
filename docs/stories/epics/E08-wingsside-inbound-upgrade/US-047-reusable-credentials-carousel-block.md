@@ -116,7 +116,9 @@ release commit `f70ee48`. The public VPS was not changed.
   [#1](https://github.com/tankisstank/WingsGroup/pull/1),
   [#2](https://github.com/tankisstank/WingsGroup/pull/2), and
   [#3](https://github.com/tankisstank/WingsGroup/pull/3) were merged. Production
-  runs master commit `0cc90d9276c5256e572af37ba223bfa357ae4b15`.
+  runs application release commit
+  `0cc90d9276c5256e572af37ba223bfa357ae4b15`; later documentation-only master
+  commits do not change the active runtime.
 - The immutable application image is
   `sha256:5c1911eea0350133c78a6f15757b6fe21911e93a99d2e7c00f5f359cb77dc0ee`.
   The active release symlink resolves to

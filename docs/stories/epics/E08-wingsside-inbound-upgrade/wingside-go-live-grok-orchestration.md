@@ -799,8 +799,9 @@ PRs
 [#1](https://github.com/tankisstank/WingsGroup/pull/1),
 [#2](https://github.com/tankisstank/WingsGroup/pull/2), and
 [#3](https://github.com/tankisstank/WingsGroup/pull/3) were then merged. The
-final master and deployed commit is
-`0cc90d9276c5256e572af37ba223bfa357ae4b15`.
+deployed application release commit is
+`0cc90d9276c5256e572af37ba223bfa357ae4b15`. Subsequent documentation-only
+master commits do not change the active runtime image.
 
 Production identity and rollback evidence:
 
