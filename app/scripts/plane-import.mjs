@@ -43,8 +43,8 @@ const PROJECT_TEXT = {
     description: 'Site WingsGo với nội dung, campaign, tour và các deliverable public của giai đoạn 1.',
   },
   WSIDE: {
-    name: 'WingsSide',
-    description: 'Site WingsSide trong hệ sinh thái WingsGroup.',
+    name: 'WingSide',
+    description: 'Site WingSide trong hệ sinh thái WingsGroup.',
   },
   WPLUS: {
     name: 'WingsPlus',
@@ -118,7 +118,7 @@ const PROPERTY_TEXT = {
       Core: 'Lõi',
       WingsTravel: 'WingsTravel',
       WingsGo: 'WingsGo',
-      WingsSide: 'WingsSide',
+      WingSide: 'WingSide',
       WingsPlus: 'WingsPlus',
       WingsCare: 'WingsCare',
       WingsPass: 'WingsPass',
@@ -208,15 +208,16 @@ const STORY_TITLE_MAP = {
   'US-037': 'Trải nghiệm chi tiết tour dày thông tin',
   'US-038': 'Lịch khởi hành hướng browse và chuyển đổi',
   'US-039': 'Tài liệu nền tảng tour và mapping import',
-  'US-026': 'Rà soát inbound WingsSide và thiết lập story',
-  'US-027': 'Nền tảng giao diện inbound WingsSide',
+  'US-026': 'Rà soát inbound WingSide và thiết lập story',
+  'US-027': 'Nền tảng giao diện inbound WingSide',
   'US-028': 'Các primitive chuyển động',
   'US-029': 'Hero inbound và preset tìm kiếm',
   'US-030': 'Block Page Composer cho inbound',
   'US-031': 'Mở rộng hạ tầng locale',
   'US-032': 'Header inbound, mega menu và chuyển ngôn ngữ',
-  'US-033': 'Seed nội dung và media WingsSide',
-  'US-034': 'Bằng chứng sẵn sàng phát hành WingsSide',
+  'US-033': 'Seed nội dung và media WingSide',
+  'US-034': 'Bằng chứng sẵn sàng phát hành WingSide',
+  'US-049': 'Phân loại taxonomy tour WingSide',
 }
 
 const CHILD_TASK_TEXT = {
@@ -735,11 +736,11 @@ const CHILD_TASK_TEXT = {
   'US-026': [
     {
       title: 'Đăng ký đầy đủ story set US-026 đến US-034',
-      description: 'Harness cần có đủ các story của E08 để tách việc nâng cấp WingsSide inbound thành các lát triển khai kiểm soát được.',
+      description: 'Harness cần có đủ các story của E08 để tách việc nâng cấp WingSide inbound thành các lát triển khai kiểm soát được.',
     },
     {
       title: 'Tạo folder epic E08 trong tài liệu story',
-      description: 'Epic folder là nơi gom overview, audit và story packet của initiative WingsSide inbound upgrade.',
+      description: 'Epic folder là nơi gom overview, audit và story packet của initiative WingSide inbound upgrade.',
     },
     {
       title: 'Tổng hợp audit hardcode locale theo file',
@@ -760,7 +761,7 @@ const CHILD_TASK_TEXT = {
   ],
   'US-027': [
     {
-      title: 'Thêm preset giao diện inbound v2 cho WingsSide',
+      title: 'Thêm preset giao diện inbound v2 cho WingSide',
       description: 'Preset wings-side-editorial-inbound-v2 định nghĩa token theme inbound mà không thay đổi các site khác.',
     },
     {
@@ -769,15 +770,15 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Giữ nguyên mapping font hiện có',
-      description: 'WingsSide tiếp tục dùng Playfair Display và Inter cho tới khi quyết định Fraunces được chốt riêng.',
+      description: 'WingSide tiếp tục dùng Playfair Display và Inter cho tới khi quyết định Fraunces được chốt riêng.',
     },
     {
       title: 'Kiểm tra render desktop và mobile của /wingsside',
-      description: 'Route public WingsSide phải hiển thị đúng theme trên desktop và mobile, không overflow nghiêm trọng.',
+      description: 'Route public WingSide phải hiển thị đúng theme trên desktop và mobile, không overflow nghiêm trọng.',
     },
     {
       title: 'Chứng minh theme không leak sang site khác',
-      description: 'WingsGo hoặc một site không phải WingsSide cần smoke để xác nhận CSS scoped không ảnh hưởng chéo.',
+      description: 'WingsGo hoặc một site không phải WingSide cần smoke để xác nhận CSS scoped không ảnh hưởng chéo.',
     },
   ],
   'US-028': [
@@ -871,7 +872,7 @@ const CHILD_TASK_TEXT = {
   'US-032': [
     {
       title: 'Dựng mega menu inbound trên desktop và mobile',
-      description: 'Navigation WingsSide cần hỗ trợ mega menu đúng layout desktop và mobile.',
+      description: 'Navigation WingSide cần hỗ trợ mega menu đúng layout desktop và mobile.',
     },
     {
       title: 'Đảm bảo keyboard navigation cho menu',
@@ -887,12 +888,12 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Smoke header của site khác',
-      description: 'Các header ngoài WingsSide vẫn phải pass smoke sau khi thêm navigation inbound.',
+      description: 'Các header ngoài WingSide vẫn phải pass smoke sau khi thêm navigation inbound.',
     },
   ],
   'US-033': [
     {
-      title: 'Hoàn thiện content map WingsSide inbound',
+      title: 'Hoàn thiện content map WingSide inbound',
       description: 'Content map cần bao gồm page map, claim register, asset provenance và guard chống copy competitor.',
     },
     {
@@ -919,7 +920,7 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Chạy go-live review hoặc ghi blocker',
-      description: 'Pipeline go-live:review cần được chạy cho WingsSide hoặc nêu rõ lý do chưa chạy được.',
+      description: 'Pipeline go-live:review cần được chạy cho WingSide hoặc nêu rõ lý do chưa chạy được.',
     },
     {
       title: 'Thu đủ screenshot cần thiết',
@@ -935,7 +936,7 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Hoàn tất checklist nội dung và pháp lý',
-      description: 'Content/legal checklist cần hoàn chỉnh trước khi coi WingsSide inbound là sẵn sàng phát hành.',
+      description: 'Content/legal checklist cần hoàn chỉnh trước khi coi WingSide inbound là sẵn sàng phát hành.',
     },
   ],
 }
@@ -1445,6 +1446,30 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
     let epicLinked = false
 
     try {
+      const existingEpicWorkItem = workItems.find((item) => item.external_id === `epic-workitem:${epicConfig.key}`)
+      if (existingEpicWorkItem) {
+        const updatedEpicWorkItem = await client.request(
+          'PATCH',
+          `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${existingEpicWorkItem.id}/`,
+          {
+            name: toPlaneItemName(epicConfig.name),
+            description_html: descriptionHtml,
+            priority: 'high',
+            start_date: epicDates.startDate,
+            target_date: epicDates.targetDate,
+          },
+        )
+        for (const parentId of parentIds) {
+          const item = workItems.find((candidate) => candidate.id === parentId)
+          if (item?.parent !== updatedEpicWorkItem.id) {
+            await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${parentId}/`, {
+              parent: updatedEpicWorkItem.id,
+            })
+          }
+        }
+        continue
+      }
+
       const types = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-item-types/`)
       const epicType = types.find((item) => item.name === EPIC_TYPE_NAME)
 
@@ -1454,7 +1479,7 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
           workItems.find((item) => item.name === epicConfig.name && item.type === epicType.id)
 
         const payload = {
-          name: epicConfig.name,
+          name: toPlaneItemName(epicConfig.name),
           description_html: descriptionHtml,
           priority: 'high',
           type: epicType.id,
@@ -1496,7 +1521,7 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
         epics.find((item) => item.name === epicConfig.name)
 
       const payload = {
-        name: epicConfig.name,
+        name: toPlaneItemName(epicConfig.name),
         description_html: descriptionHtml,
         priority: 'high',
         start_date: epicDates.startDate,
@@ -1534,7 +1559,7 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
 
       if (!moduleRecord) {
         moduleRecord = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/modules/`, {
-          name: epicConfig.name,
+          name: toPlaneItemName(epicConfig.name),
           description: epicConfig.description,
           external_id: `epic-module:${epicConfig.key}`,
           external_source: EXTERNAL_SOURCE,
@@ -1663,6 +1688,11 @@ function findByNames(items, names) {
   return items.find((item) => names.includes(item.name) || names.includes(item.display_name) || names.includes(item.title))
 }
 
+function toPlaneItemName(value) {
+  const name = String(value)
+  return name.length <= 255 ? name : `${name.slice(0, 252).trimEnd()}...`
+}
+
 async function cleanupDemoContent(client) {
   const workspaceSlug = client.config.workspaceSlug
   const pages = await client.list(`/api/v1/workspaces/${workspaceSlug}/pages/`)
@@ -1681,19 +1711,27 @@ async function cleanupDemoContent(client) {
 async function ensureWorkspacePrerequisites(client, manifest) {
   const workspaceSlug = client.config.workspaceSlug
 
-  const initiatives = await client.list(`/api/v1/workspaces/${workspaceSlug}/initiatives/`)
-  let initiative = initiatives.find((item) => [INITIATIVE_TEXT.currentName, INITIATIVE_TEXT.name].includes(item.name))
-  if (!initiative) {
-    initiative = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/initiatives/`, {
-      name: INITIATIVE_TEXT.name,
-      description: INITIATIVE_TEXT.description,
-      state: 'ACTIVE',
-    })
-  } else {
-    initiative = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/`, {
-      name: INITIATIVE_TEXT.name,
-      description: INITIATIVE_TEXT.description,
-    })
+  let initiative = null
+  try {
+    const initiatives = await client.list(`/api/v1/workspaces/${workspaceSlug}/initiatives/`)
+    initiative = initiatives.find((item) => [INITIATIVE_TEXT.currentName, INITIATIVE_TEXT.name].includes(item.name))
+    if (!initiative) {
+      initiative = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/initiatives/`, {
+        name: INITIATIVE_TEXT.name,
+        description: INITIATIVE_TEXT.description,
+        state: 'ACTIVE',
+      })
+    } else {
+      initiative = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/`, {
+        name: INITIATIVE_TEXT.name,
+        description: INITIATIVE_TEXT.description,
+      })
+    }
+  } catch (error) {
+    if (!error.message.includes('/initiatives/') || !error.message.includes('403') || !error.message.includes('Payment required')) {
+      throw error
+    }
+    console.warn('Plane plan hiện tại không hỗ trợ Initiatives; tiếp tục đồng bộ Project/Epic/US mà không liên kết Initiative.')
   }
 
   const projects = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/`)
@@ -1713,30 +1751,40 @@ async function ensureWorkspacePrerequisites(client, manifest) {
         external_source: EXTERNAL_SOURCE,
       })
     } else {
-      project = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/`, {
-        name: text.name,
-        description: text.description,
-        intake_view: true,
-        module_view: true,
-        page_view: true,
-        issue_views_view: true,
-        is_issue_type_enabled: true,
-      })
+      try {
+        project = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/`, {
+          name: text.name,
+          description: text.description,
+          intake_view: true,
+          module_view: true,
+          page_view: true,
+          issue_views_view: true,
+          is_issue_type_enabled: true,
+        })
+      } catch (error) {
+        if (!error.message.includes('400') || !error.message.includes('Archived project cannot be updated')) {
+          throw error
+        }
+        project = { ...project, skipHistorySync: true }
+        console.warn(`Project ${project.identifier || project.name} đã archive; giữ nguyên và bỏ qua đồng bộ lịch sử.`)
+      }
     }
 
     projectMap.set(projectConfig.key, project)
   }
 
-  const initiativeProjects = await client.list(`/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/projects/`)
-  const initiativeProjectIds = new Set(initiativeProjects.map((item) => item.id || item.project || item.project_id))
-  const missingProjectIds = [...projectMap.values()]
-    .map((project) => project.id)
-    .filter((projectId) => projectId && !initiativeProjectIds.has(projectId))
+  if (initiative) {
+    const initiativeProjects = await client.list(`/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/projects/`)
+    const initiativeProjectIds = new Set(initiativeProjects.map((item) => item.id || item.project || item.project_id))
+    const missingProjectIds = [...projectMap.values()]
+      .map((project) => project.id)
+      .filter((projectId) => projectId && !initiativeProjectIds.has(projectId))
 
-  if (missingProjectIds.length) {
-    await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/projects/`, {
-      project_ids: missingProjectIds,
-    })
+    if (missingProjectIds.length) {
+      await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/projects/`, {
+        project_ids: missingProjectIds,
+      })
+    }
   }
 
   return { initiative, projectMap }
@@ -1815,11 +1863,30 @@ async function ensureProjectSetup(client, manifest, project) {
     }
     moduleMap.set(originalName, updated)
     moduleMap.set(desiredName, updated)
+    if (moduleRecord.external_id) {
+      moduleMap.set(moduleRecord.external_id, updated)
+    }
   }
 
   for (const moduleName of manifest.modules) {
     const desiredName = translateModuleName(moduleName)
-    if (!moduleMap.has(desiredName)) {
+    const legacyExternalId = `module:${moduleName.replaceAll('WingSide', 'WingsSide')}`
+    let existingModule =
+      moduleMap.get(desiredName) ||
+      moduleMap.get(`module:${moduleName}`) ||
+      moduleMap.get(legacyExternalId)
+    if (existingModule && existingModule.name !== desiredName) {
+      existingModule = await client.request(
+        'PATCH',
+        `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/${existingModule.id}/`,
+        {
+          name: desiredName,
+          description: `Nhóm công việc: ${desiredName}`,
+        },
+      )
+      moduleMap.set(moduleName, existingModule)
+      moduleMap.set(desiredName, existingModule)
+    } else if (!existingModule) {
       const created = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/`, {
         name: desiredName,
         description: `Nhóm công việc: ${desiredName}`,
@@ -1834,7 +1901,19 @@ async function ensureProjectSetup(client, manifest, project) {
   const projectConfig = manifest.projects.find((item) => item.identifier === project.identifier)
   for (const epicConfig of (manifest.epics || []).filter((item) => item.projectKey === projectConfig?.key)) {
     const desiredName = epicConfig.name
-    if (!moduleMap.has(desiredName)) {
+    let existingModule = moduleMap.get(desiredName) || moduleMap.get(`epic-module:${epicConfig.key}`)
+    if (existingModule && existingModule.name !== desiredName) {
+      existingModule = await client.request(
+        'PATCH',
+        `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/${existingModule.id}/`,
+        {
+          name: desiredName,
+          description: epicConfig.description,
+        },
+      )
+      moduleMap.set(epicConfig.name, existingModule)
+      moduleMap.set(desiredName, existingModule)
+    } else if (!existingModule) {
       const created = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/`, {
         name: desiredName,
         description: epicConfig.description,
@@ -1876,7 +1955,22 @@ async function ensureProjectSetup(client, manifest, project) {
     }
   }
 
-  const types = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/work-item-types/`)
+  let types
+  try {
+    types = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/work-item-types/`)
+  } catch (error) {
+    if (!error.message.includes('/work-item-types/') || !error.message.includes('402') || !error.message.includes('Payment required')) {
+      throw error
+    }
+    console.warn(`Plane plan hiện tại không hỗ trợ work item types cho ${project.identifier || project.name}; bỏ qua custom properties.`)
+    return {
+      stateMap,
+      moduleMap,
+      milestoneMap,
+      propertyMap: new Map(),
+      propertyOptionMap: new Map(),
+    }
+  }
   const defaultType = types.find((item) => item.is_default) || types[0]
   if (!defaultType) {
     throw new Error(`No work item type found for project ${project.name}`)
@@ -2001,7 +2095,7 @@ async function ensureWorkspacePages(client, manifest) {
 }
 
 async function setPropertyValue(client, workspaceSlug, projectId, workItemId, propertyId, rawValue) {
-  if (rawValue == null || rawValue === '') {
+  if (!propertyId || rawValue == null || rawValue === '') {
     return
   }
 
@@ -2021,12 +2115,17 @@ async function setPropertyValue(client, workspaceSlug, projectId, workItemId, pr
 
 async function ensureHistory(client, manifest, projectMap) {
   const workspaceSlug = client.config.workspaceSlug
-  const storyRecords = buildStoryRecords(manifest)
+  const storyRecords = buildStoryRecords(manifest).filter(
+    (record) => !projectMap.get(record.mapping.projectKey)?.skipHistorySync,
+  )
   const projectWorkItems = new Map()
   const projectSetup = new Map()
 
   for (const projectConfig of manifest.projects) {
     const project = projectMap.get(projectConfig.key)
+    if (project.skipHistorySync) {
+      continue
+    }
     projectSetup.set(projectConfig.key, await ensureProjectSetup(client, manifest, project))
     projectWorkItems.set(
       projectConfig.key,
@@ -2047,7 +2146,7 @@ async function ensureHistory(client, manifest, projectMap) {
     const desiredStateId = setup.stateMap.get(toPlaneStateName(record.story, record.mapping))?.id
     const storyDates = deriveRecordDates(record.story, record.childTasks.length)
     const parentPayload = {
-      name: record.parentName,
+      name: toPlaneItemName(record.parentName),
       description_html: record.descriptionHtml,
       priority: record.story.risk_lane === 'high_risk' ? 'high' : 'medium',
       state: desiredStateId,
@@ -2124,7 +2223,7 @@ async function ensureHistory(client, manifest, projectMap) {
         workItems.find((item) => item.parent === parent.id && item.name === childTask.title)
 
       const childPayload = {
-        name: childTask.title,
+        name: toPlaneItemName(childTask.title),
         description_html: childTask.descriptionHtml,
         priority: record.story.risk_lane === 'high_risk' ? 'high' : 'medium',
         state: desiredStateId,
@@ -2226,7 +2325,7 @@ async function syncWingsGoItems(client, manifest, projectMap) {
     const parentDates = deriveRecordDates(record.story, record.childTasks.length)
 
     await patchItem(parent, {
-      name: record.parentName,
+      name: toPlaneItemName(record.parentName),
       description_html: record.descriptionHtml,
       start_date: parentDates.startDate,
       target_date: parentDates.targetDate,
@@ -2236,7 +2335,7 @@ async function syncWingsGoItems(client, manifest, projectMap) {
       const child = workItems.find((item) => item.external_id === `child:${childTask.externalId}`)
       const childDates = deriveChildDates(record.story, index, record.childTasks.length)
       await patchItem(child, {
-        name: childTask.title,
+        name: toPlaneItemName(childTask.title),
         description_html: childTask.descriptionHtml,
         start_date: childDates.startDate,
         target_date: childDates.targetDate,
@@ -2249,7 +2348,9 @@ async function syncWingsGoItems(client, manifest, projectMap) {
 
 async function syncImportedWorkItems(client, manifest, projectMap) {
   const workspaceSlug = client.config.workspaceSlug
-  const records = buildStoryRecords(manifest)
+  const records = buildStoryRecords(manifest).filter(
+    (record) => !projectMap.get(record.mapping.projectKey)?.skipHistorySync,
+  )
   const projectRecords = new Map()
   let patchedCount = 0
   let missingCount = 0
@@ -2284,7 +2385,7 @@ async function syncImportedWorkItems(client, manifest, projectMap) {
       const desiredStateId = stateMap.get(toPlaneStateName(record.story, record.mapping))
 
       await patchItem(project, parent, {
-        name: record.parentName,
+        name: toPlaneItemName(record.parentName),
         description_html: record.descriptionHtml,
         ...(desiredStateId ? { state: desiredStateId } : {}),
         start_date: parentDates.startDate,
@@ -2295,7 +2396,7 @@ async function syncImportedWorkItems(client, manifest, projectMap) {
         const child = workItems.find((item) => item.external_id === `child:${childTask.externalId}`)
         const childDates = deriveChildDates(record.story, index, record.childTasks.length)
         await patchItem(project, child, {
-          name: childTask.title,
+          name: toPlaneItemName(childTask.title),
           description_html: childTask.descriptionHtml,
           ...(desiredStateId ? { state: desiredStateId } : {}),
           start_date: childDates.startDate,
@@ -2357,7 +2458,10 @@ async function main() {
 
   if (action === 'import-structure') {
     for (const projectConfig of manifest.projects) {
-      await ensureProjectSetup(client, manifest, projectMap.get(projectConfig.key))
+      const project = projectMap.get(projectConfig.key)
+      if (!project.skipHistorySync) {
+        await ensureProjectSetup(client, manifest, project)
+      }
     }
     return
   }
@@ -2390,7 +2494,10 @@ async function main() {
   if (action === 'import-all') {
     await cleanupDemoContent(client)
     for (const projectConfig of manifest.projects) {
-      await ensureProjectSetup(client, manifest, projectMap.get(projectConfig.key))
+      const project = projectMap.get(projectConfig.key)
+      if (!project.skipHistorySync) {
+        await ensureProjectSetup(client, manifest, project)
+      }
     }
     await ensureHistory(client, manifest, projectMap)
     await ensureWorkspacePages(client, manifest)

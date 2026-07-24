@@ -200,7 +200,7 @@ Inquiry form
 Thứ tự khối:
 
 1. `Hero destination-led`
-2. `Why travel with WingsSide`
+2. `Why travel with WingSide`
 3. `Destination hub`
 4. `Travel styles`
 5. `Sample itineraries / packages`
@@ -232,7 +232,7 @@ Travel Style Row
 Sample Itineraries
   curated cards, không cần dồn giá ở đây
 
-Why WingsSide
+Why WingSide
   nội dung proof + process
 
 Testimonials

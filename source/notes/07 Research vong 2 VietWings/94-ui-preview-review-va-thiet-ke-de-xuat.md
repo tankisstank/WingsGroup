@@ -22,7 +22,7 @@ Ghi chú công cụ:
 
 - Đã dùng workflow `ui-preview` để mở local UI, chụp screenshot và đọc DOM/snapshot.
 - Đã dùng skill `ui-ux-pro-max` tại `C:\Users\VIETD\.codex\skills\ui-ux-pro-max\SKILL.md`.
-- Đã chạy `--design-system` riêng cho `WingsGo` và `WingsSide`, sau đó chạy domain search cho `product`, `ux`, `landing`, `color`, `typography`.
+- Đã chạy `--design-system` riêng cho `WingsGo` và `WingSide`, sau đó chạy domain search cho `product`, `ux`, `landing`, `color`, `typography`.
 
 ## 0. Kết quả áp dụng `ui-ux-pro-max`
 
@@ -54,12 +54,12 @@ Design system chốt cho `WingsGo`:
 - Typography: `Rubik` cho heading/card title, `Nunito Sans` cho body và bảng giá.
 - UI priority: price, departure, tour comparison, inquiry CTA.
 
-## 0.2. Kết quả cho `WingsSide`
+## 0.2. Kết quả cho `WingSide`
 
 Query design-system:
 
 ```powershell
-python C:\Users\VIETD\.codex\skills\ui-ux-pro-max\scripts\search.py "travel inbound luxury destination planning consultative service editorial" --design-system -f markdown -p "WingsSide"
+python C:\Users\VIETD\.codex\skills\ui-ux-pro-max\scripts\search.py "travel inbound luxury destination planning consultative service editorial" --design-system -f markdown -p "WingSide"
 ```
 
 Kết quả hữu ích:
@@ -72,10 +72,10 @@ Kết quả hữu ích:
 
 Phần cần loại bỏ khỏi kết quả tự động:
 
-- Palette soft pink/lavender không phù hợp với thương hiệu inbound Vietnam của WingsSide.
+- Palette soft pink/lavender không phù hợp với thương hiệu inbound Vietnam của WingSide.
 - Style `Gradient Mesh / Aurora` chỉ nên dùng rất tiết chế nếu có, không làm ngôn ngữ chính vì dễ lệch sang lifestyle/fashion và có rủi ro contrast.
 
-Design system chốt cho `WingsSide`:
+Design system chốt cho `WingSide`:
 
 - Style: editorial premium travel planning.
 - Palette: nền sáng/neutral, dark ink hoặc navy cho text, gold/olive/teal nhẹ cho accent, tránh tím/hồng.
@@ -333,7 +333,7 @@ Header compact
 Hero destination-led
   Full-width Vietnam image hoặc destination montage có crop sạch
   Text anchored left:
-    WingsSide
+    WingSide
     Tailor-made Vietnam journeys
     Private, flexible, locally designed trips
     CTA: Plan your trip

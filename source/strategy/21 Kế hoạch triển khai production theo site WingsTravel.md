@@ -613,7 +613,7 @@ Ra mắt site high-value đủ để:
 - UAT
 - deploy
 
-### Initiative D. WingsSide launch
+### Initiative D. WingSide launch
 
 - IA
 - UI

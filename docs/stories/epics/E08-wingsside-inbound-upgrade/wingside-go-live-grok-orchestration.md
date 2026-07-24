@@ -625,7 +625,7 @@ the independently observed zero forms/42 markers.
 WP5 is not authorized. Before WP4 can be rerun:
 
 1. add and rehearse an exact-scope release data migration/seed for the eight
-   WingsSide hi-fi hub records, including valid Plan and Contact form
+   WingSide hi-fi hub records, including valid Plan and Contact form
    relationships;
 2. extend the PostgreSQL/media repair gate to verify and stage the physical
    `dcv-` media files referenced by the 22 repaired tours;
@@ -735,7 +735,7 @@ plain dump SHA-256:
 ```
 
 Eight pending committed Payload migrations were applied. The guarded hi-fi
-release plan mutated and verified exactly 40 entries: eight WingsSide pages
+release plan mutated and verified exactly 40 entries: eight WingSide pages
 across five locales. The tour repair changed exactly 22 BestPrice tours, then
 its post-apply dry-run reported `changed=0` and `unchanged=22`. The resulting
 inventory has 22 unique tour IDs, wrapper IDs, hero IDs, source IDs, slugs and

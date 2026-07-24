@@ -604,7 +604,7 @@ export const WingsSideHiFiSectionInventory = ({
         <section className="ws-hifi-section" data-od-id="about-story">
           <h2>{text('storyTitle', copy.about.storyTitle)}</h2>
           <p className="ws-hifi-lede">
-            Wingside starts with a conversation, then turns destination, pace, dates, and group
+            WingSide starts with a conversation, then turns destination, pace, dates, and group
             needs into one private route. The planning desk stays accountable from first direction
             to handover.
           </p>

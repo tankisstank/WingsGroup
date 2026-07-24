@@ -299,7 +299,7 @@ const siteSeeds: SiteSeed[] = [
     code: 'wing-side',
     defaultLocale: 'en',
     domain: 'wingside.vn',
-    name: 'wingside.vn',
+    name: 'WingSide',
     seoDescription:
       'Inbound Vietnam travel site focused on trust, destinations, travel styles, sample itineraries, and custom trip planning for international guests.',
     seoSuffix: 'Inbound Vietnam',
@@ -7463,7 +7463,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     payload,
     req,
     site.id,
-    'WingsSide Trip Planner',
+    'WingSide Trip Planner',
     'Plan my trip',
     'Request received',
     'The inbound planning team will review the travel brief and reply with a tailored recommendation.',

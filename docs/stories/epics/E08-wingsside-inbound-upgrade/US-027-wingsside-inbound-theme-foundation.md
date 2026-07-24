@@ -1,4 +1,4 @@
-# US-027 WingsSide inbound theme foundation
+# US-027 WingSide inbound theme foundation
 
 ## Status
 
@@ -10,7 +10,7 @@ normal
 
 ## Product Contract
 
-WingsSide can render with an inbound editorial theme preset using governed theme
+WingSide can render with an inbound editorial theme preset using governed theme
 tokens, without leaking visual changes to other sites.
 
 ## Relevant Product Docs
@@ -22,7 +22,7 @@ tokens, without leaking visual changes to other sites.
 
 - Theme preset `wings-side-editorial-inbound-v2` exists.
 - Theme tokens match the inbound palette.
-- Font imports are unchanged; WingsSide continues using existing
+- Font imports are unchanged; WingSide continues using existing
   `Playfair_Display` + `Inter` mapping until the Fraunces decision is closed.
 - `/wingsside` desktop/mobile render with the theme.
 - WingsGo smoke proves the theme change does not leak to another site.
@@ -31,7 +31,7 @@ tokens, without leaking visual changes to other sites.
 
 - Added `wingsSideInboundThemePresetKey =
   'wings-side-editorial-inbound-v2'`.
-- WingsSide site theme assignment now uses the inbound v2 preset.
+- WingSide site theme assignment now uses the inbound v2 preset.
 - `seed-subsites.ts` now reuses `ensureThemePresetSeeds` so custom presets and
   core presets are seeded through one path.
 - CSS is scoped to
@@ -47,7 +47,7 @@ tokens, without leaking visual changes to other sites.
 | --- | --- |
 | Unit | Theme token resolver if touched |
 | Integration | `pnpm run test:int` |
-| E2E | Public route smoke for `/wingsside` and one non-WingsSide site |
+| E2E | Public route smoke for `/wingsside` and one non-WingSide site |
 | Platform | Desktop/mobile screenshots |
 | Release | Contrast and rollback note |
 
@@ -76,5 +76,5 @@ Update matrix evidence after implementation.
 - Full `pnpm run test:int` was run but is blocked by unrelated
   `tests/int/api.int.spec.ts` / `node:sqlite` Vite bundling issue. Other
   integration files reported 50 tests passed before that suite failure.
-- Rollback: switch WingsSide site setting back to `wings-side-editorial` or
+- Rollback: switch WingSide site setting back to `wings-side-editorial` or
   `premium`; the v2 CSS is inert unless the body preset is selected.

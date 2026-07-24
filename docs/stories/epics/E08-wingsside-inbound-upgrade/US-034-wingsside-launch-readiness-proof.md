@@ -1,4 +1,4 @@
-# US-034 WingsSide launch readiness proof
+# US-034 WingSide launch readiness proof
 
 ## Status
 
@@ -10,7 +10,7 @@ normal
 
 ## Product Contract
 
-WingsSide inbound launch is proven by code, SEO, accessibility, performance,
+WingSide inbound launch is proven by code, SEO, accessibility, performance,
 content/legal and staging data gates.
 
 ## Relevant Product Docs
@@ -31,7 +31,7 @@ content/legal and staging data gates.
 ## Design Notes
 
 - Commands: full release validation ladder from implementation plan.
-- UI surfaces: public WingsSide pages and CMS-governed content.
+- UI surfaces: public WingSide pages and CMS-governed content.
 
 ## Validation
 
@@ -59,7 +59,7 @@ Implemented on 2026-07-07.
 - Component: `pnpm run test:component -- tests/component/motionPrimitives.component.spec.tsx tests/component/inboundComposerBlocks.component.spec.tsx`
   passed 8/8.
 - Relevant E2E:
-  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingsSide inbound core content pages|WingsSide governed inbound composer blocks|WingsSide inbound header|WingsSide language switcher|CMS-only locales"`
+  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingSide inbound core content pages|WingSide governed inbound composer blocks|WingSide inbound header|WingSide language switcher|CMS-only locales"`
   passed 5/5.
 - Full local `pnpm run test:e2e -- ...` attempt was blocked during
   `test:e2e:prepare-db` by local SQLite `SQLITE_BUSY` while Payload pushed the
@@ -73,7 +73,7 @@ Implemented on 2026-07-07.
   exited 0 with overall `pass_with_notes`. Artifacts:
   `outputs/e08-us034-go-live-review-20260707-r2/review-report.md`,
   `outputs/e08-us034-go-live-review-20260707-r2/review-results.json`, and
-  desktop/mobile screenshots for WingsSide routes. Notes are non-blocking:
+  desktop/mobile screenshots for WingSide routes. Notes are non-blocking:
   homepage carousel reports 0 H1 because the carousel slide title is rendered as
   H2, and several style pages have thin meta descriptions.
 - Required screenshot artifacts exist in
@@ -100,9 +100,9 @@ Follow-up proof on 2026-07-08 after final review blockers:
 - PostgreSQL-backed runtime proof:
   `localhost:3000` was started against `wings_seed_proof`; `/wingsside/it`
   rendered `data-site-preset="wings-side-editorial-inbound-v2"` and browser
-  title `WingsSide | Vietnam su misura`.
+  title `WingSide | Vietnam su misura`.
 - Targeted E2E:
-  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingsSide inbound header|WingsSide localized root pages|WingsSide language switcher hrefs|WingsSide inbound core content pages"`
+  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingSide inbound header|WingSide localized root pages|WingSide language switcher hrefs|WingSide inbound core content pages"`
   passed 4/4.
 - Code validation after the fix: `pnpm exec tsc --noEmit` passed; targeted
   eslint passed with only the pre-existing `scripts/seed-subsites.ts`
@@ -116,7 +116,7 @@ Additional UI/UX follow-up proof on 2026-07-08:
 - Patched the three `agent-browser` findings from
   `artifacts/wingsside-ui-review/report.md`:
   - IT/ES/PT localized roots no longer mix English CTA/related labels or
-    `WingsSide inbound hero` placeholder text.
+    `WingSide inbound hero` placeholder text.
   - Core pages no longer expose seed-oriented labels such as `... image` or
     `Planning cue`.
   - `/wingsside/plan-your-trip` and `/wingsside/contact-us` no longer render
@@ -127,8 +127,8 @@ Additional UI/UX follow-up proof on 2026-07-08:
     `scripts/seed-subsites.ts` `no-explicit-any` warnings.
   - PostgreSQL `wings_seed_proof` reseed PASS.
   - Targeted E2E PASS 3/3:
-    `WingsSide inbound core content pages`, `WingsSide localized root pages`
-    and `WingsSide inbound header`.
+    `WingSide inbound core content pages`, `WingSide localized root pages`
+    and `WingSide inbound header`.
   - `agent-browser` screenshots stored in
     `artifacts/wingsside-ui-review-after-fix/screenshots/`.
 - Additional follow-up proof on 2026-07-09:
@@ -141,7 +141,7 @@ Additional UI/UX follow-up proof on 2026-07-08:
   - Data validation: PostgreSQL `wings_seed_proof` reseed PASS with
     `Production-oriented subsites seeded successfully.`
   - Targeted E2E:
-    `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingsSide inbound header mega menu and language switcher|WingsSide localized root pages with real core content|WingsSide inbound core content pages"`
+    `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingSide inbound header mega menu and language switcher|WingSide localized root pages with real core content|WingSide inbound core content pages"`
     PASS 3/3.
   - Runtime/browser smoke: one-click language switch from EN to IT rendered
     `/wingsside/it` with `Viaggi su misura in Vietnam`; footer button text
@@ -154,14 +154,14 @@ Additional UI/UX follow-up proof on 2026-07-08:
   - Locale switch preserves query string and hash on normal click navigation.
   - Validation: `pnpm exec tsc --noEmit` PASS; targeted eslint PASS; targeted
     Playwright PASS 3/3:
-    `WingsSide inbound header mega menu and language switcher`,
-    `WingsSide language switcher hrefs stable on localized nested routes` and
-    `WingsSide inbound core content pages`.
+    `WingSide inbound header mega menu and language switcher`,
+    `WingSide language switcher hrefs stable on localized nested routes` and
+    `WingSide inbound core content pages`.
   - Runtime smoke confirmed `aria-expanded=false` after Escape from focused
     panel link and URL
     `/wingsside/it/search?q=hanoi#results` after switching from EN.
 - Additional follow-up proof on 2026-07-09 for remaining review items:
-  - Mobile mega menu exposes the full WingsSide mega item set instead of only
+  - Mobile mega menu exposes the full WingSide mega item set instead of only
     the first two links per group.
   - Cinematic carousel now provides a single semantic H1 from the first slide
     title while keeping visible slide titles as H2, closing the go-live H1
@@ -171,20 +171,20 @@ Additional UI/UX follow-up proof on 2026-07-08:
     block assembly.
   - Validation: `pnpm exec tsc --noEmit` PASS; targeted eslint PASS with only
     existing seed `no-explicit-any` warnings; component hero presentations PASS
-    4/4; PostgreSQL reseed PASS; targeted Playwright PASS 3/3 for WingsSide
+    4/4; PostgreSQL reseed PASS; targeted Playwright PASS 3/3 for WingSide
     cinematic hero, header/mobile mega and localized root pages.
   - Attempted Browser plugin smoke on `http://localhost:3000/wingsside/en`, but
     the browser transport was closed. Playwright E2E/runtime validations above
     are the proof for this patch.
 - Additional follow-up proof on 2026-07-10 after ES homepage visual review:
-  - Fixed the remaining English copy inside the WingsSide hero planner panel on
+  - Fixed the remaining English copy inside the WingSide hero planner panel on
     `/wingsside/es`, `/wingsside/it` and `/wingsside/pt`.
   - The page route now passes the resolved locale into `RenderHero`; the
     `HighImpactHero` planner variant selects locale-specific panel copy for all
     public ad locales.
   - Validation: `pnpm exec tsc --noEmit` PASS; targeted eslint PASS; targeted
-    Playwright PASS 2/2 for `WingsSide cinematic planner hero` and
-    `WingsSide localized root pages with real core content`.
+    Playwright PASS 2/2 for `WingSide cinematic planner hero` and
+    `WingSide localized root pages with real core content`.
   - Attempted Browser plugin smoke on `http://localhost:3000/wingsside/es`, but
     the browser transport was closed. Playwright Chromium validation is the
     runtime proof for this patch.

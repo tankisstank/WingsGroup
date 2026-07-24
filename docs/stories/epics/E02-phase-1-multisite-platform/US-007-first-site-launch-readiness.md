@@ -99,5 +99,5 @@ Validation:
 
 2026-06-07 taxonomy update:
 
-- Current phase-1 launch inventory is `WingsTravel`, `WingsGo`, `WingsSide`,
+- Current phase-1 launch inventory is `WingsTravel`, `WingsGo`, `WingSide`,
   `WingsPlus`, `WingsCare`, and `WingsPass`.

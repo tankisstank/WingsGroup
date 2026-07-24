@@ -108,7 +108,7 @@
   allow the app to resolve the site from the Payload site registry. Do not set
   a fixed `X-Site-Code` for a shared server block that contains multiple child
   site domains; this previously caused WingsPass and WingsCare to render as
-  WingsSide.
+  WingSide.
 - Current public verification:
   - `https://wingside.vn/`
   - `https://wingspass.wingsgroup.vn/`

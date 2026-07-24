@@ -75,7 +75,7 @@ not committed. Key filenames include `b2-audit-*-1440-v2.png`,
 - Harness: `US-046A` is `implemented` with unit, integration and platform proof;
   E2E remains `no`. `US-046` stays `in_progress` until integration and VPS
   acceptance.
-- Plane preview resolved both stories under WingsSide Epic E08 as
+- Plane preview resolved both stories under WingSide Epic E08 as
   `Chờ xác nhận`.
 - Plane work-item sync was attempted but stopped before mutation with
   `403 Payment required` on the Initiatives API. Plane verification counts

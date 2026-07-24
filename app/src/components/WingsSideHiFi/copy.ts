@@ -133,11 +133,11 @@ const en: SectionCopy = {
   heroTitle: 'Tailor-made Vietnam journeys',
   heroLede: 'Private routes designed with a local planning desk — not a retail tour grid.',
   home: {
-    pillarsKicker: 'How Wingside works',
+    pillarsKicker: 'How WingSide works',
     pillarsTitle: 'Four steps from brief to private route',
     pillarsLede:
       'One local planning desk. You send the essentials — we design the journey and reply within 1 business day (GMT+7).',
-    whyKicker: 'Why travel with WingsSide',
+    whyKicker: 'Why travel with WingSide',
     whyTitle: 'Local design. Flexible planning. Real matching.',
     whyFeatured: {
       badge: 'Featured',
@@ -240,7 +240,7 @@ const en: SectionCopy = {
     primaryCtaLabel: 'Share your brief',
     breadcrumbCurrent: 'Plan your trip',
     mediaCap: 'Ha Long · cruise rhythm',
-    stepsKicker: 'How Wingside works',
+    stepsKicker: 'How WingSide works',
     stepsTitle: 'Four steps from brief to private route',
     stepsLede:
       'Same desk as Home. You send the essentials — we design and reply within 1 business day (GMT+7).',
@@ -556,11 +556,11 @@ const vi: SectionCopy = {
   heroTitle: 'Hành trình Việt Nam may đo',
   heroLede: 'Tuyến riêng với bàn lập kế hoạch địa phương — không lưới tour bán lẻ.',
   home: {
-    pillarsKicker: 'Cách WingsSide làm việc',
+    pillarsKicker: 'Cách WingSide làm việc',
     pillarsTitle: 'Bốn bước từ brief đến hành trình riêng',
     pillarsLede:
       'Một bàn lập kế hoạch địa phương. Bạn gửi thông tin cốt lõi — chúng tôi thiết kế hành trình và trả lời trong 1 ngày làm việc (GMT+7).',
-    whyKicker: 'Vì sao đi với WingsSide',
+    whyKicker: 'Vì sao đi với WingSide',
     whyTitle: 'Thiết kế địa phương. Lịch trình linh hoạt. Ghép đúng nhịp.',
     whyFeatured: {
       badge: 'Nổi bật',
@@ -663,7 +663,7 @@ const vi: SectionCopy = {
     primaryCtaLabel: 'Gửi brief của bạn',
     breadcrumbCurrent: 'Lên kế hoạch',
     mediaCap: 'Hạ Long · nhịp du thuyền',
-    stepsKicker: 'Cách WingsSide làm việc',
+    stepsKicker: 'Cách WingSide làm việc',
     stepsTitle: 'Bốn bước từ brief đến hành trình riêng',
     stepsLede:
       'Cùng bàn với trang chủ. Bạn gửi thông tin cốt lõi — chúng tôi thiết kế và trả lời trong 1 ngày làm việc (GMT+7).',
@@ -972,11 +972,11 @@ const it: SectionCopy = {
   heroTitle: 'Viaggi su misura in Vietnam',
   heroLede: 'Percorsi privati con un desk locale — non una griglia tour retail.',
   home: {
-    pillarsKicker: 'Come funziona WingsSide',
+    pillarsKicker: 'Come funziona WingSide',
     pillarsTitle: 'Quattro passi dal brief al percorso privato',
     pillarsLede:
       'Un desk di pianificazione locale. Inviate l’essenziale — progettiamo il viaggio e rispondiamo entro 1 giorno lavorativo (GMT+7).',
-    whyKicker: 'Perché viaggiare con WingsSide',
+    whyKicker: 'Perché viaggiare con WingSide',
     whyTitle: 'Design locale. Pianificazione flessibile. Matching reale.',
     whyFeatured: {
       badge: 'In evidenza',
@@ -1080,7 +1080,7 @@ const it: SectionCopy = {
     primaryCtaLabel: 'Condividi il brief',
     breadcrumbCurrent: 'Pianifica il viaggio',
     mediaCap: 'Ha Long · ritmo crociera',
-    stepsKicker: 'Come funziona WingsSide',
+    stepsKicker: 'Come funziona WingSide',
     stepsTitle: 'Quattro passi dal brief al percorso privato',
     stepsLede:
       'Lo stesso desk della Home. Inviate l’essenziale — progettiamo e rispondiamo entro 1 giorno lavorativo (GMT+7).',
@@ -1392,11 +1392,11 @@ const es: SectionCopy = {
   heroTitle: 'Viajes a medida por Vietnam',
   heroLede: 'Rutas privadas con un equipo local — no una rejilla de tours retail.',
   home: {
-    pillarsKicker: 'Cómo funciona WingsSide',
+    pillarsKicker: 'Cómo funciona WingSide',
     pillarsTitle: 'Cuatro pasos del brief a la ruta privada',
     pillarsLede:
       'Un escritorio de planificación local. Envías lo esencial — diseñamos el viaje y respondemos en 1 día laborable (GMT+7).',
-    whyKicker: 'Por qué viajar con WingsSide',
+    whyKicker: 'Por qué viajar con WingSide',
     whyTitle: 'Diseño local. Planificación flexible. Emparejamiento real.',
     whyFeatured: {
       badge: 'Destacado',
@@ -1500,7 +1500,7 @@ const es: SectionCopy = {
     primaryCtaLabel: 'Comparte tu brief',
     breadcrumbCurrent: 'Planifica tu viaje',
     mediaCap: 'Ha Long · ritmo de crucero',
-    stepsKicker: 'Cómo funciona WingsSide',
+    stepsKicker: 'Cómo funciona WingSide',
     stepsTitle: 'Cuatro pasos del brief a la ruta privada',
     stepsLede:
       'El mismo escritorio que en Inicio. Envías lo esencial — diseñamos y respondemos en 1 día laborable (GMT+7).',
@@ -1820,11 +1820,11 @@ const pt: SectionCopy = {
   heroTitle: 'Viagens sob medida no Vietname',
   heroLede: 'Rotas privadas com uma equipa local — não uma grelha de tours retail.',
   home: {
-    pillarsKicker: 'Como a WingsSide funciona',
+    pillarsKicker: 'Como a WingSide funciona',
     pillarsTitle: 'Quatro passos do brief ao percurso privado',
     pillarsLede:
       'Uma mesa de planeamento local. Envia o essencial — desenhamos a viagem e respondemos em 1 dia útil (GMT+7).',
-    whyKicker: 'Porque viajar com a WingsSide',
+    whyKicker: 'Porque viajar com a WingSide',
     whyTitle: 'Design local. Planeamento flexível. Emparelhamento real.',
     whyFeatured: {
       badge: 'Destaque',
@@ -1928,7 +1928,7 @@ const pt: SectionCopy = {
     primaryCtaLabel: 'Partilhe o seu brief',
     breadcrumbCurrent: 'Planear a viagem',
     mediaCap: 'Ha Long · ritmo de cruzeiro',
-    stepsKicker: 'Como a WingsSide funciona',
+    stepsKicker: 'Como a WingSide funciona',
     stepsTitle: 'Quatro passos do brief ao percurso privado',
     stepsLede:
       'A mesma mesa da Home. Envia o essencial — desenhamos e respondemos em 1 dia útil (GMT+7).',

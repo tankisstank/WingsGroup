@@ -28,6 +28,11 @@ import {
   groupDeparturesByMonth,
   marketRouteSlugToKey,
 } from './utils'
+import {
+  buildTourTaxonomyWhere,
+  type TourDestinationKey,
+  type TourTravelStyleKey,
+} from './taxonomy'
 
 const tourProductsCollection = 'tour-products' as never
 const tourDeparturesCollection = 'tour-departures' as never
@@ -238,6 +243,34 @@ export const getTourProductBySlug = async ({
   })
 
   return result.docs[0] || null
+}
+
+export const getTourProductsByTaxonomy = async ({
+  destination,
+  draft,
+  fallbackLocale,
+  limit = 20,
+  locale,
+  travelStyle,
+}: {
+  destination?: TourDestinationKey
+  draft: boolean
+  fallbackLocale?: SupportedLocaleCode | false
+  limit?: number
+  locale?: SupportedLocaleCode
+  travelStyle?: TourTravelStyleKey
+}) => {
+  const result = await queryCollection({
+    collection: tourProductsCollection,
+    depth: 2,
+    draft,
+    fallbackLocale,
+    limit,
+    locale,
+    where: buildTourTaxonomyWhere({ destination, travelStyle }),
+  })
+
+  return result.docs as any[]
 }
 
 export const getTourDeparturesForProduct = async ({

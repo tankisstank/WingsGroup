@@ -1,4 +1,4 @@
-# US-050: Wire WingsSide discovery sections to real tours
+# US-050: Wire WingSide discovery sections to real tours
 
 ## Current Behavior
 
@@ -15,7 +15,7 @@ CMS-selected `TourProduct` records.
 
 ## User Story
 
-As a WingsSide traveler, I want discovery cards to represent tours the operator
+As a WingSide traveler, I want discovery cards to represent tours the operator
 actually manages so that the destination, style, price and CTA I choose remain
 truthful through Tour Detail.
 
@@ -31,7 +31,7 @@ truthful through Tour Detail.
 8. Existing `data-od-id` marker contract remains stable.
 9. Desktop 1440x900 and mobile 390x844 remain visually aligned with the prototype.
 10. No overflow at 360, 390, 430, 768, 1024 and 1440 px.
-11. Destination/style filtering returns only matching published WingsSide tours.
+11. Destination/style filtering returns only matching published WingSide tours.
 12. `BUG-WS-001` is closed with automated proof that static sample-tour facts are unused.
 
 ## Dependencies

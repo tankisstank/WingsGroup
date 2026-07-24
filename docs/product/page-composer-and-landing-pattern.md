@@ -82,7 +82,7 @@ awards, memberships, and standards. Editors can place it in the localized
 
 Claims must only be published while their source record is verified and
 current. Removing an uploaded image falls back to the editor-provided mark; it
-does not replace or fabricate a credential. On the WingsSide hi-fi Home route,
+does not replace or fabricate a credential. On the WingSide hi-fi Home route,
 the first configured credentials block replaces the legacy fallback carousel
 at its locked design position. On other Page Composer routes, the block renders
 in the configured layout order.

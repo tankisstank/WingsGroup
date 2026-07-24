@@ -10,7 +10,7 @@ normal
 
 ## Product Contract
 
-WingsSide has an inbound navigation experience with mega menu, primary CTA and
+WingSide has an inbound navigation experience with mega menu, primary CTA and
 language switcher that respects public locale gating and does not regress other
 sites.
 
@@ -24,7 +24,7 @@ sites.
 - Keyboard navigation can open, traverse and close the menu.
 - Language switcher marks current locale with `aria-current`.
 - Public-disabled locales do not appear.
-- Non-WingsSide headers still pass smoke.
+- Non-WingSide headers still pass smoke.
 
 ## Design Notes
 
@@ -49,14 +49,14 @@ Update matrix evidence after implementation.
 
 Implemented 2026-07-07.
 
-- Added WingsSide-only desktop mega menu under `Plan Vietnam` / `Lên kế hoạch
+- Added WingSide-only desktop mega menu under `Plan Vietnam` / `Lên kế hoạch
   Việt Nam`, with destination, travel style and sample itinerary groups.
 - Added mobile mega links inside the existing mobile primary navigation.
 - Added language switcher using central `publicLocaleMetadata`, so only
   public-enabled locales render: `vi`, `en`, `it`, `es`, `pt`.
 - Language switcher marks the current locale with `aria-current="page"` and
   preserves the current site/path when switching locale.
-- Non-WingsSide headers do not render the WingsSide mega menu.
+- Non-WingSide headers do not render the WingSide mega menu.
 
 Validation:
 
@@ -69,7 +69,7 @@ Validation:
   public pathname passed from `proxy`/server headers and renders links directly
   instead of passing already site-aware locale paths back through `SiteLink`.
 - Targeted validation after the follow-up fix:
-  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingsSide inbound header|WingsSide language switcher"`
+  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingSide inbound header|WingSide language switcher"`
   PASS 2/2. Coverage includes `/wingsside/en/search` hrefs for EN/VI/IT and
   asserts no hydration mismatch console error.
 - Supporting validation after the follow-up fix: `pnpm exec tsc --noEmit` PASS;
@@ -86,21 +86,21 @@ Validation:
   - Desktop nav/language switcher CSS now wraps/constrains width to avoid the
     WingsGo header overflow observed during manual validation.
 - 2026-07-08 validation:
-  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingsSide inbound header|WingsSide localized root pages|WingsSide inbound core content pages"`
+  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingSide inbound header|WingSide localized root pages|WingSide inbound core content pages"`
   PASS 3/3. Targeted `pnpm exec tsc --noEmit` PASS. Targeted eslint PASS with
   existing `scripts/seed-subsites.ts` `no-explicit-any` warnings only.
 - Follow-up fix on 2026-07-08 after final external review:
-  - WingsSide header primary CTA now resolves by actual public locale, so
+  - WingSide header primary CTA now resolves by actual public locale, so
     IT/ES/PT render native labels instead of hardcoded English:
     `Pianifica il viaggio`, `Planifica tu viaje`, `Planear a viagem`.
-  - WingsSide mega-menu trigger and menu item copy now have native IT/ES/PT
+  - WingSide mega-menu trigger and menu item copy now have native IT/ES/PT
     variants instead of using EN fallback for paid-traffic locales.
   - Desktop language switcher links expose `data-locale-code` and collapse to
-    compact locale codes at <=1440px; WingsSide header hides lower-priority
+    compact locale codes at <=1440px; WingSide header hides lower-priority
     primary links after the first four at this breakpoint so 1280px laptop
     layouts remain one row.
   - E2E coverage now asserts focus-out close, outside click close, Escape close,
-    IT/ES/PT CTA + mega trigger labels, WingsSide one-row nav at 1280px, and
+    IT/ES/PT CTA + mega trigger labels, WingSide one-row nav at 1280px, and
     WingsGo one-row/no-leak at 1440px.
 - 2026-07-08 code validation for this follow-up:
   `pnpm exec tsc --noEmit` PASS; targeted eslint PASS with the existing
@@ -128,11 +128,11 @@ Validation:
   - Server was started against the PostgreSQL proof DB and verified
     `/wingsside/it` rendered
     `data-site-preset="wings-side-editorial-inbound-v2"` and title
-    `WingsSide | Vietnam su misura`.
+    `WingSide | Vietnam su misura`.
   - Final targeted E2E:
-    `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingsSide inbound header|WingsSide localized root pages|WingsSide language switcher hrefs|WingsSide inbound core content pages"`
+    `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingSide inbound header|WingSide localized root pages|WingSide language switcher hrefs|WingSide inbound core content pages"`
     PASS 4/4.
-  - Header responsive rule tightened at <=1440px: WingsSide keeps the first
+  - Header responsive rule tightened at <=1440px: WingSide keeps the first
     three primary links visible, then relies on mega/mobile/footer for the
     lower-priority links. This keeps 1280px laptop layout one-row for longer
     IT/ES/PT CTA strings.
@@ -146,14 +146,14 @@ Known validation note:
     EN/VI-only fallback, so paid-locale pages render `Percorsi correlati`,
     `Rutas relacionadas` and `Percursos relacionados`.
   - `FormBlock` now resolves actual public locale copy where available and
-    falls back to EN when the path has no locale, preventing WingsSide English
+    falls back to EN when the path has no locale, preventing WingSide English
     routes from rendering Vietnamese form support copy.
   - Targeted E2E after patch:
-    `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingsSide inbound core content pages|WingsSide localized root pages|WingsSide inbound header"`
+    `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingSide inbound core content pages|WingSide localized root pages|WingSide inbound header"`
     PASS 3/3.
   - `agent-browser` runtime smoke after patch confirmed `/wingsside/it` no
     longer contains English `Plan your trip`, `Destinations`, `Related pages`
-    or `WingsSide inbound hero` text.
+    or `WingSide inbound hero` text.
 - 2026-07-09 follow-up after manual validation:
   - Language switcher links now use document navigation (`<a href=...>`)
     instead of client-side `next/link`, so switching `/wingsside/en` to
@@ -163,7 +163,7 @@ Known validation note:
     `/wingsside/it`, and asserts the Italian H1
     `Viaggi su misura in Vietnam` is visible.
   - Validation: `pnpm exec tsc --noEmit` PASS; targeted eslint PASS with only
-    existing seed warnings; targeted Playwright PASS 3/3 for WingsSide header,
+    existing seed warnings; targeted Playwright PASS 3/3 for WingSide header,
     localized root pages and core content pages.
 - 2026-07-09 accessibility follow-up after audit:
   - Mega menu panel no longer uses ARIA `role="menu"` / `role="menuitem"`;
@@ -176,19 +176,19 @@ Known validation note:
     e.g. `/wingsside/en/search?q=hanoi#results` switches to
     `/wingsside/it/search?q=hanoi#results`.
   - Validation: `pnpm exec tsc --noEmit` PASS; targeted eslint PASS; targeted
-    Playwright PASS 3/3 for WingsSide header/language switcher/core pages.
+    Playwright PASS 3/3 for WingSide header/language switcher/core pages.
   - Runtime smoke confirmed Escape from focused `Vietnam highlights` link set
     `aria-expanded=false` and preserved `?q=hanoi#results` on EN -> IT locale
     switch.
 - 2026-07-09 mobile navigation follow-up:
-  - WingsSide mobile mega menu no longer truncates each group to the first two
+  - WingSide mobile mega menu no longer truncates each group to the first two
     links. The mobile drawer now exposes the full destination, travel style and
     sample itinerary item set, so links such as `Central heritage` and
     `Adventure` are discoverable on mobile.
   - Targeted E2E now asserts those deeper mobile mega links are visible after
     opening the mobile navigation at 390px.
   - Validation: `pnpm exec tsc --noEmit` PASS; targeted eslint PASS; targeted
-    Playwright PASS 3/3 for WingsSide cinematic hero, header/mobile mega and
+    Playwright PASS 3/3 for WingSide cinematic hero, header/mobile mega and
     localized root pages.
 - 2026-07-14 customer-feedback follow-up:
   - The mobile drawer closes on pointer/focus outside, Escape, route change and
@@ -196,7 +196,7 @@ Known validation note:
     transition so closing the drawer cannot cancel the requested destination.
   - The drawer is viewport-bounded and scrollable when the full mega-link set
     exceeds the available mobile height.
-  - PostgreSQL-backed targeted Playwright proof PASS 1/1 for the WingsSide
+  - PostgreSQL-backed targeted Playwright proof PASS 1/1 for the WingSide
     header, including outside-click close and link-click navigation/close.
   - `agent-browser` at 390x844 confirmed outside click returns the trigger to
     `aria-expanded=false` and selecting `All destinations` reaches
@@ -211,7 +211,7 @@ history.
 
 Observed during local `next dev` resource investigation:
 
-- React reported a hydration mismatch in the WingsSide header language switcher.
+- React reported a hydration mismatch in the WingSide header language switcher.
 - Server-rendered hrefs looked like `/wingsside/en/vi` and `/wingsside/en/en`.
 - Client-rendered hrefs looked like `/wingsside/vi/search` and
   `/wingsside/en/search`.

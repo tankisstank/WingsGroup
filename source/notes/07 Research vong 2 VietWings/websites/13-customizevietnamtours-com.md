@@ -49,4 +49,4 @@ Hierarchy tốt cho crawl: `tours/<category>/`, `vietnam-travel-guide/<topic>/`,
 
 ## Hàm ý cho WingsTravel
 
-Đây là nguồn tham khảo tốt cho WingsSide nếu muốn kết hợp tư vấn cá nhân với lớp category phục vụ SEO và pre-qualified leads.
+Đây là nguồn tham khảo tốt cho WingSide nếu muốn kết hợp tư vấn cá nhân với lớp category phục vụ SEO và pre-qualified leads.

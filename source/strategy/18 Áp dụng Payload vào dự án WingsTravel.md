@@ -51,7 +51,7 @@ Payload là nơi giữ cấu trúc để một hệ có thể phục vụ nhiề
 
 - `WingsTravel`
 - `WingsGo`
-- `WingsSide`
+- `WingSide`
 - `WingsPlus`
 - `WingsCare`
 - `WingsPass`
@@ -142,7 +142,7 @@ Nguyên tắc:
 
 - `WingsTravel`
 - `WingsGo`
-- `WingsSide`
+- `WingSide`
 - `WingsPlus`
 - `WingsCare`
 - `WingsPass`

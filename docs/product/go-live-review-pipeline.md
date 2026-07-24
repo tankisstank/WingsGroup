@@ -39,7 +39,7 @@ repo-approved local multisite path-prefix model:
 
 - WingsGroup: `/`
 - WingsGo: `/wingsgo`
-- WingsSide: `/wingsside`
+- WingSide: `/wingsside`
 - WingsPlus: `/wingsplus`
 - WingsCare: `/wingscare`
 - WingsPass: `/wingspass`

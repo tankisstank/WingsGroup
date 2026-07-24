@@ -7,7 +7,7 @@ The app has a working multisite theme foundation. Site settings expose
 values into `--site-brand` and `--site-accent`.
 
 Deeper theme behavior still requires code edits. CSS contains site-name-specific
-selectors for `WingsGo` and `WingsSide`, and the high-impact hero branches on
+selectors for `WingsGo` and `WingSide`, and the high-impact hero branches on
 pathnames for business-specific content.
 
 ## Target Behavior

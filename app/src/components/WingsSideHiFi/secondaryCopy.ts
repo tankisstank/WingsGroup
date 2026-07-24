@@ -67,7 +67,7 @@ const en: LocaleCopy = {
     breadcrumb: 'About',
     eyebrow: 'Trust',
     title: 'Local planners for private Vietnam journeys',
-    lede: 'Wingside designs inbound Vietnam trips with destination-led discovery and consultative planning - private groups, families, and business travelers.',
+    lede: 'WingSide designs inbound Vietnam trips with destination-led discovery and consultative planning - private groups, families, and business travelers.',
     primary: 'Plan your trip',
     secondary: 'Contact',
     media: 'adventure',
@@ -95,7 +95,7 @@ const vi = localize({
   '/styles': { breadcrumb: 'Phong cách du lịch', eyebrow: 'Chọn đúng nhịp', title: 'Bạn muốn đi Việt Nam theo cách nào?', lede: 'Chọn nhịp trước khi chọn nơi. Đưa lựa chọn đó vào brief lập kế hoạch.', primary: 'Xem phong cách', secondary: 'Bắt đầu brief' },
   '/packages': { breadcrumb: 'Hành trình mẫu', eyebrow: 'Mẫu tham khảo - không phải tour ghép', title: 'Câu chuyện Việt Nam nào thu hút bạn trước?', lede: 'Khung hành trình riêng với giá tham khảo - chúng tôi viết lại theo ngày của bạn.', primary: 'Xem hành trình mẫu', secondary: 'Đã có ngày? Gửi brief' },
   '/travel-guide': { breadcrumb: 'Cẩm nang', eyebrow: 'Ghi chú địa phương', title: 'Ghi chú du lịch Việt Nam từ đội lập kế hoạch địa phương', lede: 'Mùa vụ, logistics và bối cảnh điểm đến cho khách chuẩn bị hành trình riêng.', primary: 'Đọc ghi chú mới', secondary: 'Lên kế hoạch' },
-  '/about-us': { breadcrumb: 'Giới thiệu', eyebrow: 'Tin cậy', title: 'Đội lập kế hoạch địa phương cho hành trình Việt Nam riêng', lede: 'Wingside thiết kế chuyến Việt Nam theo điểm đến và tư vấn cho đoàn riêng, gia đình và khách công vụ.', primary: 'Lên kế hoạch', secondary: 'Liên hệ' },
+  '/about-us': { breadcrumb: 'Giới thiệu', eyebrow: 'Tin cậy', title: 'Đội lập kế hoạch địa phương cho hành trình Việt Nam riêng', lede: 'WingSide thiết kế chuyến Việt Nam theo điểm đến và tư vấn cho đoàn riêng, gia đình và khách công vụ.', primary: 'Lên kế hoạch', secondary: 'Liên hệ' },
   '/contact-us': { breadcrumb: 'Liên hệ', eyebrow: 'Trung tâm yêu cầu', title: 'Hãy kể về hành trình Việt Nam của bạn', lede: 'Chia sẻ ngày và ý tưởng - chúng tôi phản hồi trong 1 ngày làm việc (GMT+7).', primary: 'Gửi tin nhắn', secondary: 'Mở brief đầy đủ' },
 })
 

@@ -10,7 +10,7 @@ normal
 
 ## Product Contract
 
-The WingsSide “Credentials and awards” section is a reusable Payload Page
+The WingSide “Credentials and awards” section is a reusable Payload Page
 Composer block, not page-specific hard-coded copy. An editor can place it on a
 Page, reorder its records, and replace images and content through the CMS.
 
@@ -25,7 +25,7 @@ Page, reorder its records, and replace images and content through the CMS.
   textual fallback mark, type, label, title, and description.
 - Records marked `needs-review` remain available to editors but are not rendered
   publicly until verified.
-- The WingsSide hi-fi Home route renders CMS data at the existing credentials
+- The WingSide hi-fi Home route renders CMS data at the existing credentials
   slot; if no block is configured, the verified legacy fallback remains.
 - Other hi-fi and standard Pages can render the same block without duplicating
   the component.
@@ -44,7 +44,7 @@ Page, reorder its records, and replace images and content through the CMS.
   `media` collection.
 - Catalog: `app/assets/wingsside-credentials/manifest.json` preserves
   traceability to all 24 source photographs and drives an idempotent local
-  importer for the five WingsSide locales.
+  importer for the five WingSide locales.
 - Database: `20260722_020046_credentials_carousel_block` contains the live and
   version block tables, image relations, enums, and indexes. Migration
   `20260724_090000_credentials_catalog_metadata` adds the governed catalog
@@ -71,7 +71,7 @@ release commit `f70ee48`. The public VPS was not changed.
   `verified`; three incomplete/cropped records are explicitly `needs-review`.
 - Generated 24 web-ready JPEG derivatives (maximum 1600 px, quality 88) while
   retaining each original filename in read-only CMS metadata.
-- Idempotent SQLite import completed for all five WingsSide locales. A repeated
+- Idempotent SQLite import completed for all five WingSide locales. A repeated
   apply remained at 24 Media documents, five carousel blocks, and 120 localized
   items (105 verified and 15 needing review), with no duplicate Media or block.
 - Editors can add future awards directly in the reusable Page Composer block;

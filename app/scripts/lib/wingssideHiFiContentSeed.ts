@@ -20,7 +20,7 @@ export const WINGSSIDE_HIFI_SEED_LOCALES = ['en', 'vi', 'it', 'es', 'pt'] as con
 export type WingsSideHiFiSeedLocale = (typeof WINGSSIDE_HIFI_SEED_LOCALES)[number]
 
 /** Stable catalog title — never hardcode numeric form IDs (they differ per environment). */
-export const WINGSSIDE_HIFI_PLAN_FORM_TITLE = 'WingsSide Trip Planner'
+export const WINGSSIDE_HIFI_PLAN_FORM_TITLE = 'WingSide Trip Planner'
 export const WINGSSIDE_HIFI_SEED_SITE_CODE = 'wing-side'
 
 export type WingsSideHiFiPlanFormResolveResult =

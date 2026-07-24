@@ -216,7 +216,7 @@ export const SecondaryHiFiPage = ({
     <div className="ws-hifi-page ws-hifi-page--secondary" data-route={model.routeVariant}>
       <div className="ws-hifi-shell">
         <nav aria-label="Breadcrumb" className="ws-secondary-breadcrumb">
-          <SiteLink href="/">Wingside</SiteLink>
+          <SiteLink href="/">WingSide</SiteLink>
           <span>/</span>
           <span>{heroCopy.breadcrumb}</span>
         </nav>

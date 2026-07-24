@@ -19,7 +19,7 @@ gap; the false product facts in Sample Journeys are the release-blocking defect.
 
 ## Expected Behavior
 
-Each Sample Journey is an explicitly selected, published WingsSide TourProduct.
+Each Sample Journey is an explicitly selected, published WingSide TourProduct.
 Every displayed product fact and CTA resolves from Payload.
 
 ## Reproduction

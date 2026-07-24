@@ -113,7 +113,7 @@ Ví dụ:
 
 - ta không nên bê nguyên website cũ sang root site mới
 - chỉ nên lấy phần trust, company profile, năng lực và legal baseline
-- phần traffic / conversion theo tour nên phân rã cho `WingsGo`, `WingsSide`,
+- phần traffic / conversion theo tour nên phân rã cho `WingsGo`, `WingSide`,
   `WingsPass`, `WingsPlus`, `WingsCare`
 
 ## 4.3. Website cũ cho thấy công ty có 2 nhóm tín hiệu mạnh
@@ -185,7 +185,7 @@ Cho người dùng thấy:
 Điều hướng người dùng sang đúng site:
 
 - outbound retail -> `WingsGo`
-- inbound consultative -> `WingsSide`
+- inbound consultative -> `WingSide`
 - fast track / airport service -> `WingsPass`
 - private / MICE / premium -> `WingsPlus`
 - insurance / care / claim support -> `WingsCare`
@@ -234,7 +234,7 @@ sang team phù hợp.
    - CTA `Khám phá hệ sinh thái`
    - CTA `Liên hệ tư vấn`
 2. Khối 5 line business / 5 child site
-   - card cho `WingsGo`, `WingsSide`, `WingsPass`, `WingsPlus`, `WingsCare`
+   - card cho `WingsGo`, `WingSide`, `WingsPass`, `WingsPlus`, `WingsCare`
 3. Vì sao chọn WingsTravel
    - giấy phép
    - vận hành nhiều line business
@@ -454,7 +454,7 @@ Lý do:
 | Giới thiệu chung công ty | `WingsTravel` -> `/ve-wingstravel` |
 | Tầm nhìn / sứ mệnh / giá trị cốt lõi | `WingsTravel` -> `/ve-wingstravel` |
 | Tour outbound Hàn / Nhật / Trung | `WingsGo` |
-| Tour inbound / điểm đến Việt Nam | `WingsSide` |
+| Tour inbound / điểm đến Việt Nam | `WingSide` |
 | Fast track / sân bay / add-on | `WingsPass` |
 | MICE / private / market cao cấp | `WingsPlus` |
 | Insurance / care / claim guidance | `WingsCare` |
@@ -477,7 +477,7 @@ Lý do:
 ## Footer nav nhóm 1: hệ sinh thái
 
 - WingsGo
-- WingsSide
+- WingSide
 - WingsPass
 - WingsPlus
 - WingsCare

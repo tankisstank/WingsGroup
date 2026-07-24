@@ -25,7 +25,7 @@ same normalized tokens across multiple site identities.
 
 - `WingsTravel` root site with corporate/default preset.
 - `WingsGo` child site with retail preset.
-- `WingsSide` child site with premium/editorial preset.
+- `WingSide` child site with premium/editorial preset.
 - one test site using `custom` preset and CMS-entered overrides.
 - super-admin user.
 - site-manager assigned to one child site.

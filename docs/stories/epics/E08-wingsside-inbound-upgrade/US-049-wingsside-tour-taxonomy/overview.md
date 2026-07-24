@@ -1,8 +1,8 @@
-# US-049: Add WingsSide tour taxonomy and classify imported tours
+# US-049: Add WingSide tour taxonomy and classify imported tours
 
 ## Current Behavior
 
-The 22 published WingsSide BestPrice imports have structured tour detail data,
+The 22 published WingSide BestPrice imports have structured tour detail data,
 but `TourProducts` has only a broad `market` value for discovery grouping. It
 does not expose governed destination or travel-style taxonomy, so Home and hub
 pages cannot select real tours by Hanoi, Ha Long, Luxury, Family, or the other
@@ -10,13 +10,13 @@ approved categories.
 
 ## Target Behavior
 
-WingsSide tour products have controlled, site-aware destination and travel-style
+WingSide tour products have controlled, site-aware destination and travel-style
 classification. The imported 22-tour batch is backfilled through a reviewed,
 idempotent mapping and becomes queryable without parsing titles at runtime.
 
 ## User Story
 
-As a WingsSide content editor, I want every imported tour classified by its real
+As a WingSide content editor, I want every imported tour classified by its real
 destinations and travel styles so that I can filter, select, and feature tours
 consistently across Home and discovery pages.
 
@@ -31,13 +31,13 @@ consistently across Home and discovery pages.
 6. Dry-run reports planned changes, missing records, conflicts and exceptions.
 7. Apply is site- and batch-scoped, rollback-safe and idempotent.
 8. PostgreSQL migration/CRUD and multisite isolation tests pass.
-9. No WingsGo or non-WingsSide `TourProduct` changes.
+9. No WingsGo or non-WingSide `TourProduct` changes.
 10. Production is not mutated as part of story implementation without a separate
     approved deploy plan.
 
 ## Affected Users
 
-- WingsSide content editors and planners.
+- WingSide content editors and planners.
 - Developers wiring Home and hub discovery.
 - Reviewers validating the 22 imported tours.
 
@@ -53,3 +53,17 @@ consistently across Home and discovery pages.
 - Generic free-form tags.
 - AI classification at public request time.
 - Importing additional suppliers or tours.
+
+## Implementation Status
+
+Schema, generated types, tenant-scoped query helper, additive PostgreSQL
+migration, SQLite bootstrap parity, reviewed technical map, guarded
+dry-run/apply/rollback tooling and automated proof are implemented. The
+2026-07-24 dry-run against a copy of the 22-tour local database reports
+`changed=22`, `unchanged=0`, with zero missing mappings, missing records,
+conflicts or exceptions and no data mutation.
+
+Editorial and PM sign-off on mapping revision `us-049-v1-20260724` was
+received from the project owner on 2026-07-24. The approved plan was applied
+to the local WingSide database and verified at the expected `after` state.
+Production was not mutated.

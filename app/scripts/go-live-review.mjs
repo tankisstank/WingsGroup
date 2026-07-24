@@ -105,7 +105,8 @@ const sites = [
   },
   {
     key: 'wingsside',
-    label: 'wingside.vn',
+    identityTokens: ['WingSide', 'wingside.vn'],
+    label: 'WingSide',
     pathPrefix: '/wingsside',
     publicHosts: ['wingside.vn'],
     siteCode: 'wing-side',
@@ -519,9 +520,17 @@ function reviewTechnical(result) {
     warnings.push(`${result.missingAltImages} visible image(s) have empty alt text.`)
 
   const normalizeIdentity = (value) => (value || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-  const expectedIdentity = normalizeIdentity(result.siteLabel)
+  const expectedIdentities = (result.identityTokens?.length
+    ? result.identityTokens
+    : [result.siteLabel]
+  )
+    .map(normalizeIdentity)
+    .filter(Boolean)
   const titleIdentity = normalizeIdentity(result.title)
-  if (expectedIdentity && !titleIdentity.includes(expectedIdentity)) {
+  if (
+    expectedIdentities.length &&
+    !expectedIdentities.some((identity) => titleIdentity.includes(identity))
+  ) {
     blockers.push(`Document title does not identify expected site ${result.siteLabel}.`)
   }
 
@@ -532,9 +541,11 @@ function reviewTechnical(result) {
   }
 
   if (
-    expectedIdentity &&
+    expectedIdentities.length &&
     result.brandText?.length &&
-    !result.brandText.some((text) => normalizeIdentity(text).includes(expectedIdentity))
+    !result.brandText.some((text) =>
+      expectedIdentities.some((identity) => normalizeIdentity(text).includes(identity)),
+    )
   ) {
     blockers.push(`Visible brand mark does not identify expected site ${result.siteLabel}.`)
   }
@@ -827,14 +838,20 @@ function reviewSiteProbe(probe, site) {
     )
   }
 
-  const expectedIdentity = site.label.toLowerCase().replace(/[^a-z0-9]/g, '')
+  const expectedIdentities = (site.identityTokens?.length ? site.identityTokens : [site.label])
+    .map((value) => value.toLowerCase().replace(/[^a-z0-9]/g, ''))
+    .filter(Boolean)
   const titleIdentity = (probe?.baseline?.title || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-  if (!titleIdentity.includes(expectedIdentity))
+  if (!expectedIdentities.some((identity) => titleIdentity.includes(identity)))
     blockers.push(`Homepage title does not identify ${site.label}.`)
   const brandIdentities = (probe?.baseline?.brandText || []).map((value) =>
     value.toLowerCase().replace(/[^a-z0-9]/g, ''),
   )
-  if (!brandIdentities.some((value) => value.includes(expectedIdentity))) {
+  if (
+    !brandIdentities.some((value) =>
+      expectedIdentities.some((identity) => value.includes(identity)),
+    )
+  ) {
     blockers.push(`Homepage visible brand mark does not identify ${site.label}.`)
   }
   if (forbiddenHostPattern.test(probe?.baseline?.canonical || '')) {

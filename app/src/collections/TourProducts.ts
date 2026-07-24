@@ -20,6 +20,7 @@ import {
   revalidateTourProduct,
   revalidateTourProductDelete,
 } from './Tours/hooks/revalidateTourContent'
+import { tourDestinationOptions, tourTravelStyleOptions } from '@/tours/taxonomy'
 
 export const TourProducts: CollectionConfig = {
   slug: 'tour-products',
@@ -31,8 +32,8 @@ export const TourProducts: CollectionConfig = {
   },
   admin: {
     description:
-      'Tour gốc cho WingsGo. Dữ liệu này là nguồn thật để render trang tour, bảng khởi hành, campaign và market page.',
-    defaultColumns: ['title', 'site', 'market', 'durationDays', 'updatedAt'],
+      'Tour có cấu trúc dùng chung cho WingsGo và WingsSide. Dữ liệu này là nguồn thật để render trang tour và discovery theo site.',
+    defaultColumns: ['title', 'site', 'destinationTags', 'travelStyles', 'updatedAt'],
     group: adminGroups.content,
     livePreview: {
       url: ({ data, req }) =>
@@ -97,6 +98,40 @@ export const TourProducts: CollectionConfig = {
       type: 'text',
       admin: {
         position: 'sidebar',
+      },
+    },
+    {
+      name: 'destinationTags',
+      label: 'Điểm đến',
+      type: 'select',
+      hasMany: true,
+      index: true,
+      options: [...tourDestinationOptions],
+      admin: {
+        description: 'Key ổn định để lọc tour; nhãn hiển thị do CMS quản lý.',
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'travelStyles',
+      label: 'Phong cách du lịch',
+      type: 'select',
+      hasMany: true,
+      index: true,
+      options: [...tourTravelStyleOptions],
+      admin: {
+        description: 'Phân loại biên tập có kiểm soát; không suy đoán từ tiêu đề.',
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'taxonomyProvenance',
+      label: 'Đối soát taxonomy',
+      type: 'json',
+      admin: {
+        description: 'Revision, bằng chứng và thời điểm gán taxonomy gần nhất.',
+        position: 'sidebar',
+        readOnly: true,
       },
     },
     {

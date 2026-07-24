@@ -195,6 +195,37 @@ test('site probe accepts matching identity, scoped SEO URLs, and baseline header
   assert.deepEqual(review.blockers, [])
 })
 
+test('site probe accepts either the WingSide brand or its public domain identity', () => {
+  const wingSideSite = {
+    key: 'wingsside',
+    identityTokens: ['WingSide', 'wingside.vn'],
+    label: 'WingSide',
+    publicHosts: ['wingside.vn'],
+    themeKey: 'wings-side',
+  }
+  const probe = siteProbe()
+  probe.baseline.bodyTheme = 'wings-side'
+  probe.baseline.brandText = ['WingSide']
+  probe.baseline.canonical = 'https://wingside.vn/'
+  probe.baseline.title = 'WingSide | Tailor-made Vietnam journeys'
+  for (const key of [
+    'internalHeaderInjection',
+    'siteAliasQueryInjection',
+    'siteHeaderInjection',
+    'siteQueryInjection',
+  ]) {
+    probe[key] = structuredClone(probe.baseline)
+  }
+  probe.seoEndpoints = probe.seoEndpoints.map((endpoint) => ({
+    ...endpoint,
+    absoluteURLs: endpoint.absoluteURLs.map((url) => url.replaceAll('wingsgroup.vn', 'wingside.vn')),
+  }))
+
+  const review = reviewSiteProbe(probe, wingSideSite)
+  assert.deepEqual(review.blockers, [])
+  assert.equal(review.status, 'pass')
+})
+
 test('site probe blocks forbidden and cross-site URLs advertised by SEO endpoints', () => {
   const probe = siteProbe()
   probe.seoEndpoints[0].absoluteURLs = ['http://localhost:3000/sitemap.xml']

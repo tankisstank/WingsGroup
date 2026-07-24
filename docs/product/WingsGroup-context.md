@@ -21,7 +21,7 @@ The current product and architecture context lives first in:
 - one codebase serving multiple sites such as:
   - `WingsGroup`
   - `WingsGo`
-  - `WingsSide`
+  - `WingSide`
   - `WingsPlus`
   - `WingsCare`
   - `WingsPass`
