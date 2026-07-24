@@ -53,7 +53,9 @@ const describeStateMismatch = ({
     const beforeChecksum = taxonomyChecksum(record.before)
     const afterChecksum = taxonomyChecksum(record.after)
     if (currentChecksum !== beforeChecksum && currentChecksum !== afterChecksum) {
-      return `record ${record.id} taxonomy snapshot changed outside the signed states`
+      return `record ${record.id} taxonomy snapshot changed outside the signed states: ${JSON.stringify(
+        extractTourTaxonomySnapshot(document),
+      )}`
     }
   }
   return 'scope contains a mixed before/after state'
