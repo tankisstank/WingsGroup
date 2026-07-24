@@ -1,0 +1,393 @@
+body[data-site-code='wing-side'] .ws-home-process {
+  --ws-process-border: var(--site-border, #d8dee5);
+  --ws-process-muted: var(--site-muted, #64748b);
+  --ws-process-surface: var(--site-surface, #fffdf8);
+  --ws-process-navy: var(--site-brand, #082b49);
+  --ws-process-accent: var(--site-cta, #f59a00);
+}
+
+body[data-site-code='wing-side'] .ws-home-process__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.9fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: end;
+  margin-bottom: clamp(1.5rem, 4vw, 3rem);
+}
+
+body[data-site-code='wing-side'] .ws-home-process__intro .h2 {
+  max-width: 16ch;
+  margin-bottom: 0;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__intro .lede {
+  max-width: 42ch;
+  margin: 0;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__board {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.72fr) minmax(0, 1.28fr);
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--ws-process-border);
+  border-radius: var(--ws-radius, 1.75rem);
+  background: var(--ws-process-surface);
+  box-shadow: 0 1.5rem 3rem color-mix(in oklch, var(--ws-process-navy) 10%, transparent);
+}
+
+body[data-site-code='wing-side'] .ws-home-process__brief {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  padding: clamp(2rem, 5vw, 3.5rem);
+  isolation: isolate;
+  background: linear-gradient(145deg, var(--ws-process-navy), color-mix(in oklch, var(--ws-process-navy) 76%, #173e5e));
+  color: #fff;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__brief::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(circle at 90% 8%, rgb(255 255 255 / 10%), transparent 18rem);
+  content: '';
+}
+
+body[data-site-code='wing-side'] .ws-home-process__route-line {
+  position: absolute;
+  right: -2rem;
+  bottom: 7rem;
+  z-index: -1;
+  width: 15rem;
+  height: 20rem;
+  opacity: 0.42;
+  border: 2px dashed rgb(255 255 255 / 38%);
+  border-left-color: transparent;
+  border-radius: 55% 45% 42% 58%;
+  transform: rotate(-20deg);
+}
+
+body[data-site-code='wing-side'] .ws-home-process__brief-label,
+body[data-site-code='wing-side'] .ws-home-process__detail-kicker,
+body[data-site-code='wing-side'] .ws-home-process__handoff .micro {
+  margin: 0;
+  color: var(--ws-process-muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__brief-label {
+  color: rgb(255 255 255 / 72%);
+}
+
+body[data-site-code='wing-side'] .ws-home-process__brief h3 {
+  max-width: 10ch;
+  margin: 1.25rem 0 1rem;
+  color: #fff;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(2rem, 4vw, 3.15rem);
+  line-height: 1.05;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__brief-copy {
+  max-width: 31ch;
+  margin: 0;
+  color: rgb(255 255 255 / 72%);
+  line-height: 1.55;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__brief-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__brief-list li {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 7%);
+  color: rgb(255 255 255 / 88%);
+  font-size: 0.8rem;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__planner {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 3rem;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__planner img {
+  width: 3rem;
+  height: 3rem;
+  border: 2px solid rgb(255 255 255 / 68%);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__planner strong,
+body[data-site-code='wing-side'] .ws-home-process__planner span {
+  display: block;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__planner strong {
+  font-size: 0.9rem;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__planner span {
+  margin-top: 0.15rem;
+  color: rgb(255 255 255 / 68%);
+  font-size: 0.75rem;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__workflow {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: clamp(1.75rem, 4.5vw, 3.4rem);
+}
+
+body[data-site-code='wing-side'] .ws-home-process__tabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding-bottom: 2rem;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__tabs::before {
+  position: absolute;
+  right: 8%;
+  bottom: 0.95rem;
+  left: 8%;
+  height: 1px;
+  background: var(--ws-process-border);
+  content: '';
+}
+
+body[data-site-code='wing-side'] .ws-home-process__tab {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--ws-process-muted);
+  cursor: pointer;
+  place-items: center;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__tab::after {
+  position: absolute;
+  bottom: -0.25rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  border: 2px solid var(--ws-process-surface);
+  border-radius: 50%;
+  background: var(--ws-process-border);
+  box-shadow: 0 0 0 1px var(--ws-process-border);
+  content: '';
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__tab[data-active='true'] {
+  color: var(--ws-process-navy);
+}
+
+body[data-site-code='wing-side'] .ws-home-process__tab[data-active='true']::after {
+  background: var(--ws-process-accent);
+  box-shadow: 0 0 0 1px var(--ws-process-accent);
+  transform: scale(1.25);
+}
+
+body[data-site-code='wing-side'] .ws-home-process__tab:focus-visible,
+body[data-site-code='wing-side'] .ws-home-process__footer a:focus-visible {
+  outline: 3px solid color-mix(in oklch, var(--ws-process-accent) 74%, white);
+  outline-offset: 4px;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__tab-num {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__tab-label {
+  margin-top: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__stage {
+  position: relative;
+  height: 342px;
+  min-height: 342px;
+  margin-top: 1.75rem;
+  overflow: hidden;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__detail {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(11rem, 0.58fr);
+  gap: clamp(1.5rem, 5vw, 3.5rem);
+  align-items: start;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(0.6rem);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__detail[data-active='true'] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__detail h3 {
+  max-width: 15ch;
+  margin: 0.9rem 0 1rem;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.8rem, 3vw, 2.65rem);
+  line-height: 1.08;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__detail-copy > p:last-child {
+  max-width: 48ch;
+  margin: 0;
+  color: var(--ws-process-muted);
+  line-height: 1.55;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__handoff {
+  padding: 1.35rem;
+  border: 1px solid var(--ws-process-border);
+  border-radius: 1.25rem;
+  background: color-mix(in oklch, var(--site-surface-strong, #eef2f6) 56%, var(--ws-process-surface));
+}
+
+body[data-site-code='wing-side'] .ws-home-process__handoff strong {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__handoff > p:last-child {
+  margin: 0.5rem 0 0;
+  color: var(--ws-process-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__footer {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ws-process-border);
+}
+
+body[data-site-code='wing-side'] .ws-home-process__status {
+  display: grid;
+  grid-template-columns: 0.5rem minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: center;
+  color: var(--ws-process-muted);
+  font-size: 0.82rem;
+}
+
+body[data-site-code='wing-side'] .ws-home-process__status::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--ws-process-navy);
+  content: '';
+}
+
+@media (max-width: 820px) {
+  body[data-site-code='wing-side'] .ws-home-process__intro {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  body[data-site-code='wing-side'] .ws-home-process__board {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-site-code='wing-side'] .ws-home-process__brief {
+    min-height: 25rem;
+    padding: 2.1rem 1.75rem;
+  }
+
+  body[data-site-code='wing-side'] .ws-home-process__workflow {
+    padding: 1.8rem 1.35rem 1.6rem;
+  }
+
+  body[data-site-code='wing-side'] .ws-home-process__tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    padding-bottom: 0;
+  }
+
+  body[data-site-code='wing-side'] .ws-home-process__tabs::before,
+  body[data-site-code='wing-side'] .ws-home-process__tab::after {
+    display: none;
+  }
+
+  body[data-site-code='wing-side'] .ws-home-process__tab {
+    min-height: 3.25rem;
+    border: 1px solid var(--ws-process-border);
+    border-radius: 1rem;
+  }
+
+  body[data-site-code='wing-side'] .ws-home-process__tab[data-active='true'] {
+    border-color: var(--ws-process-accent);
+    background: color-mix(in oklch, var(--ws-process-accent) 10%, var(--ws-process-surface));
+  }
+
+  body[data-site-code='wing-side'] .ws-home-process__stage {
+    height: 468px;
+    min-height: 468px;
+    margin-top: 1.5rem;
+  }
+
+  body[data-site-code='wing-side'] .ws-home-process__detail {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  body[data-site-code='wing-side'] .ws-home-process__footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body[data-site-code='wing-side'] .ws-home-process__footer .btn {
+    justify-content: center;
+    min-height: 2.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-site-code='wing-side'] .ws-home-process__tab::after,
+  body[data-site-code='wing-side'] .ws-home-process__detail {
+    transition: none;
+  }
+}

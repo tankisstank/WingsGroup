@@ -756,6 +756,64 @@ test.describe('Phase 1 public frontend smoke', () => {
     expect(overflowX).toBe(false)
   })
 
+  test('runs the homepage WingSide process board without layout shift', async ({ page }) => {
+    test.setTimeout(60_000)
+
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ height: 900, width })
+      await page.goto(`${e2eBaseURL}/wingsside`, { waitUntil: 'domcontentloaded' })
+
+      const board = page.getByTestId('wingside-home-process-board')
+      const stage = page.getByTestId('wingside-home-process-stage')
+      const tabs = page.getByRole('tab')
+      await expect(tabs).toHaveCount(4)
+      await expect(page.locator('[data-od-id="home-pillars"]')).toBeVisible()
+      await expect(page.locator('[data-od-id="home-process-cta"]')).toHaveAttribute(
+        'href',
+        '#home-planner',
+      )
+
+      const initialHeights = await page.evaluate(() => {
+        const boardElement = document.querySelector('[data-testid="wingside-home-process-board"]')
+        const stageElement = document.querySelector('[data-testid="wingside-home-process-stage"]')
+        return {
+          board: boardElement?.getBoundingClientRect().height,
+          stage: stageElement?.getBoundingClientRect().height,
+        }
+      })
+
+      await tabs.nth(1).click()
+      await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true')
+      await expect(page.locator('[role="tabpanel"][data-active="true"]')).toContainText(
+        /place \+ pace|pace/i,
+      )
+
+      await tabs.nth(1).press('ArrowRight')
+      await expect(tabs.nth(2)).toHaveAttribute('aria-selected', 'true')
+      await tabs.nth(2).press('End')
+      await expect(tabs.nth(3)).toHaveAttribute('aria-selected', 'true')
+      await tabs.nth(3).press('Home')
+      await expect(tabs.nth(0)).toHaveAttribute('aria-selected', 'true')
+
+      const finalHeights = await page.evaluate(() => {
+        const boardElement = document.querySelector('[data-testid="wingside-home-process-board"]')
+        const stageElement = document.querySelector('[data-testid="wingside-home-process-stage"]')
+        return {
+          board: boardElement?.getBoundingClientRect().height,
+          stage: stageElement?.getBoundingClientRect().height,
+        }
+      })
+
+      expect(finalHeights.stage).toBe(initialHeights.stage)
+      expect(finalHeights.board).toBe(initialHeights.board)
+      expect(await board.boundingBox()).not.toBeNull()
+      expect(await stage.boundingBox()).not.toBeNull()
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth),
+      ).toBe(false)
+    }
+  })
+
   test('renders WingsSide inbound core content pages on desktop and mobile', async ({ page }) => {
     test.setTimeout(120_000)
 

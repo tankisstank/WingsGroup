@@ -15,6 +15,7 @@ import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
 import { WingsSideCredentialsCarousel } from './CredentialsCarousel'
 import { HomeHeroCarousel } from './HomeHeroCarousel'
 import { HomePlanner } from './HomePlanner'
+import { HomeProcessSteps } from './HomeProcessSteps'
 import './hifi-pages.css'
 import './hifi-sections.css'
 
@@ -31,7 +32,6 @@ const HOME_HERO_SLIDES = [
   { asset: 'sapa', caption: 'Sapa · highland terraces' },
   { asset: 'mekong', caption: 'Mekong Delta · river life' },
 ] as const
-const HOME_PILLAR_OD_IDS = ['pillar-plan', 'pillar-match', 'pillar-trade', 'pillar-notes'] as const
 const HOME_SAMPLE_OD_IDS = ['sample-highlights', 'sample-north', 'sample-central'] as const
 
 export const HomeHiFiPage = ({
@@ -224,25 +224,17 @@ export const HomeHiFiPage = ({
 
         <HomePlanner copy={plannerCopy} />
 
-        <section className="ws-hifi-section section" data-od-id="home-pillars">
-          <p className="kicker">{asText(home.pillarsKicker, copy.home.pillarsKicker)}</p>
-          <h2 className="h2">{asText(home.pillarsTitle, copy.home.pillarsTitle)}</h2>
-          <p className="lede">{asText(home.pillarsLede, copy.home.pillarsLede)}</p>
-          <div className="grid-4">
-            {(pillars.length ? pillars : copy.plan.steps).map((step, index) => (
-              <article
-                className="card"
-                data-od-id={HOME_PILLAR_OD_IDS[index]}
-                key={`pillar-${index}-${step.title}`}
-              >
-                <div className="num">{String(index + 1).padStart(2, '0')}</div>
-                <div className="micro">{asText(step.label)}</div>
-                <h3>{asText(step.title)}</h3>
-                <p>{asText(step.body)}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+        <HomeProcessSteps
+          ctaLabel={copy.home.planTripCta}
+          kicker={asText(home.pillarsKicker, copy.home.pillarsKicker)}
+          lede={asText(home.pillarsLede, copy.home.pillarsLede)}
+          steps={pillars.length ? pillars.map((step) => ({
+            body: asText(step.body),
+            label: asText(step.label),
+            title: asText(step.title),
+          })) : copy.plan.steps}
+          title={asText(home.pillarsTitle, copy.home.pillarsTitle)}
+        />
 
         <section
           className="ws-hifi-section section"
