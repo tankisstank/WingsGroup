@@ -146,16 +146,16 @@ release commit `f70ee48`. The public VPS was not changed.
   both up.
 - Production API/schema verification confirms that Page 142 contains one
   24-item `credentialsCarousel` block per locale with exact counts 21
-  `verified` and three `needs-review`. The Admin editor route is protected and
-  redirects unauthenticated requests to Payload login as expected.
+  `verified` and three `needs-review`. Authenticated production Admin QA then
+  opened Page 142 in the central CMS and confirmed the Published state, all 24
+  editor rows, all 24 Media relations and the governed review, type, issuer,
+  recipient, date, reference, source, mark and localized-copy fields. The same
+  24-row contract passed in `en`, `vi`, `it`, `es` and `pt`. No field was
+  changed, Save/Publish was not invoked, `Publish changes` remained disabled
+  and the browser reported no console errors or warnings.
 
 ### Residual review notes
 
-- Production Admin visual QA still requires an authenticated operator session.
-  No password was reset and no temporary privileged account was created for
-  this audit. The previously completed authenticated local Admin proof remains
-  valid for the editor field contract; production API/database proof validates
-  the imported row counts.
 - The public Page read API currently returns metadata for all 24 block items,
   including the three `needs-review` entries. The React renderer suppresses
   those three records from the public DOM exactly as the acceptance criterion

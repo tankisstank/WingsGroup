@@ -104,9 +104,12 @@ architecture and avoids building a parallel site, CMS, or page builder.
   `wingside.vn`. PostgreSQL migration and the checksummed production catalog
   plan passed with 24 Media records, five localized blocks and 120 placements.
   Public desktop/mobile QA renders exactly 21 verified awards per locale, while
-  production schema/API proof confirms 24 CMS-managed rows per locale. An
-  authenticated production Admin visual pass remains an explicit operator
-  follow-up; no privileged account was created for the release audit.
+  production schema/API proof confirms 24 CMS-managed rows per locale.
+  Authenticated production Admin QA also passed on Page 142: the Published
+  editor showed 24 rows (21 verified and three needs-review), 24 Media
+  relations and the complete governed field contract in all five locales. The
+  read-only audit made no content change, invoked neither Save nor Publish and
+  produced no browser console errors or warnings.
 - US-048 closes the audited eight-page UI defects: single-owner Plan and Contact
   forms, complete CMS-backed package/channel inventories, corrected hero media
   and responsive controls, stable card-level review markers, and desktop/mobile
