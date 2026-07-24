@@ -51,4 +51,4 @@ URL structure tập trung vào `package/vietnam-tours/<type>/`, thêm `tour`, `c
 
 ## Hàm ý cho WingsTravel
 
-Một hướng phù hợp cho WingsSide: có package hub để user tự duyệt, nhưng giữ funnel `create my trip` để chốt các yêu cầu riêng.
+Một hướng phù hợp cho WingSide: có package hub để user tự duyệt, nhưng giữ funnel `create my trip` để chốt các yêu cầu riêng.

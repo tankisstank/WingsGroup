@@ -79,5 +79,5 @@ Validation:
 2026-06-07 taxonomy update:
 
 - Current phase-1 site contract is `WingsTravel` as the umbrella site plus
-  `WingsGo`, `WingsSide`, `WingsPlus`, `WingsCare`, and `WingsPass` as child
+  `WingsGo`, `WingSide`, `WingsPlus`, `WingsCare`, and `WingsPass` as child
   sites developed in parallel.

@@ -45,7 +45,7 @@ Thao tác này chỉ ảnh hưởng page đang chọn `Kế thừa từ site`.
 - Đổi page về preset trước đó, hoặc chọn `Kế thừa từ site`.
 - Đổi site default trong Theme Manager.
 - Không xóa preset đang dùng. Deactivate preset để ngăn lựa chọn mới.
-- Theme WingsSide cũ vẫn được giữ bằng `wings-side-classic`.
+- Theme WingSide cũ vẫn được giữ bằng `wings-side-classic`.
 
 ## Checklist trước publish
 

@@ -93,7 +93,7 @@ Theme Manager should show:
 
 Public UI impact:
 
-- shared CSS moves away from `WingsGo` and `WingsSide` selectors
+- shared CSS moves away from `WingsGo` and `WingSide` selectors
 - components continue using `theme-section`, `theme-card`, `theme-media`, and
   `--site-*` variables
 - hero business behavior moves into structured hero variant fields

@@ -22,7 +22,7 @@ Theo định hướng này, hệ thống có thể phục vụ các site như:
 
 - `WingsTravel`
 - `WingsGo`
-- `WingsSide`
+- `WingSide`
 - `WingsPlus`
 - `WingsCare`
 - `WingsPass`
@@ -44,7 +44,7 @@ flowchart LR
     subgraph Sites["Các site trong hệ sinh thái"]
         A["WingsTravel"]
         B["WingsGo"]
-        C["WingsSide"]
+        C["WingSide"]
         D["WingsPlus"]
         E["WingsCare"]
         F["WingsPass"]

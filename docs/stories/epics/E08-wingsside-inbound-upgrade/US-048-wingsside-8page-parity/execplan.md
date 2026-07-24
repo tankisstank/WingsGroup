@@ -2,7 +2,7 @@
 
 ## Goal
 
-Close the P0 and P1 findings in the independent WingsSide eight-page audit with verified DOM, responsive, visual, build, and go-live evidence.
+Close the P0 and P1 findings in the independent WingSide eight-page audit with verified DOM, responsive, visual, build, and go-live evidence.
 
 ## Scope
 

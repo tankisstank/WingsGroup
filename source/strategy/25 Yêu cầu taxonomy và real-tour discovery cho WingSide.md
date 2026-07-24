@@ -1,8 +1,8 @@
-# Yêu cầu taxonomy và real-tour discovery cho WingsSide
+# Yêu cầu taxonomy và real-tour discovery cho WingSide
 
 ## 1. Bối cảnh
 
-WingsSide đã có 22 `TourProduct` thật được import từ BestPrice và một giao diện
+WingSide đã có 22 `TourProduct` thật được import từ BestPrice và một giao diện
 hi-fi cho Home, Destinations, Styles, Packages và Tour Detail. Tuy nhiên ba khối
 discovery trên Home vẫn đang dùng dữ liệu trình bày tĩnh:
 
@@ -28,11 +28,11 @@ US-048 tiếp tục là story visual parity. Change Request mới được chia 
 ### REQ-WS-DISC-001 — Real-tour discovery
 
 Mọi card có hình thức như một sản phẩm tour phải lấy title, ảnh, summary,
-duration, price/currency và URL từ một `TourProduct` WingsSide đã publish.
+duration, price/currency và URL từ một `TourProduct` WingSide đã publish.
 
 ### REQ-WS-TAX-002 — Controlled tour classification
 
-Mỗi tour WingsSide phải có cấu trúc phân loại rõ ràng:
+Mỗi tour WingSide phải có cấu trúc phân loại rõ ràng:
 
 - một hoặc nhiều destination tag;
 - một hoặc nhiều travel-style tag;

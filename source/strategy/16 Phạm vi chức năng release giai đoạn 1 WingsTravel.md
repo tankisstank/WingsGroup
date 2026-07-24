@@ -28,7 +28,7 @@ Giai đoạn 1 được hiểu là:
 - phát triển đồng thời trang tổng và các site cùng hệ:
   - `WingsTravel`
   - `WingsGo`
-  - `WingsSide`
+  - `WingSide`
   - `WingsPlus`
   - `WingsCare`
   - `WingsPass`
@@ -81,7 +81,7 @@ Với phạm vi đã chốt, `Payload` phù hợp vì có đúng những lớp c
 
 #### Cách hiểu thực tế với khách hàng
 
-- `WingsTravel`, `WingsGo`, `WingsSide`, `WingsPlus`, `WingsCare`, `WingsPass` có thể đi trên cùng một nền CMS
+- `WingsTravel`, `WingsGo`, `WingSide`, `WingsPlus`, `WingsCare`, `WingsPass` có thể đi trên cùng một nền CMS
 - nhưng vẫn tách được nội dung, domain và quyền quản lý
 
 #### Payload hỗ trợ phần này ở đâu

@@ -2,13 +2,13 @@
 
 ## Ownership
 
-`TourProduct` owns product facts and taxonomy. The WingsSide Home page owns
+`TourProduct` owns product facts and taxonomy. The WingSide Home page owns
 curation: selected IDs, slot keys and order. The component only projects the
 resolved model and never invents product facts.
 
 ## Selection Model
 
-Add governed Home discovery configuration to the existing WingsSide hi-fi page
+Add governed Home discovery configuration to the existing WingSide hi-fi page
 contract or an established site/page settings boundary:
 
 - six destination selections keyed by destination;
@@ -49,7 +49,7 @@ The client receives only fields required for cards. Avoid per-card requests.
 
 ## Cache And Revalidation
 
-Changing a selected TourProduct or Home curation must revalidate the WingsSide
+Changing a selected TourProduct or Home curation must revalidate the WingSide
 Home and relevant destination/style routes. Existing tour revalidation hooks
 must be extended without invalidating unrelated sites.
 

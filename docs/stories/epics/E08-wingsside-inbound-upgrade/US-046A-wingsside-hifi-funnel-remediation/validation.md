@@ -31,7 +31,7 @@ completed 2026-07-23. Story status is `implemented`.
 | Responsive | 54/54 checks, 0 failures, 18 screenshots |
 | Go-live | 91/91 complete; `pass_with_notes`; site probe 0 blockers/0 warnings |
 | SEO/security | Canonical, robots, sitemap and required security headers pass |
-| Isolation | WingsGo and WingsPlus retain their own theme/canonical; no WingsSide leakage |
+| Isolation | WingsGo and WingsPlus retain their own theme/canonical; no WingSide leakage |
 | Submission safety | No real form submission |
 
 ## Tranche A deliverables

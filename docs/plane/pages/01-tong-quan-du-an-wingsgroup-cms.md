@@ -16,7 +16,7 @@ Mục tiêu giai đoạn 1 là đưa site đầu tiên vào vận hành và gi�
 
 - WingsTravel
 - WingsGo
-- WingsSide
+- WingSide
 - WingsPlus
 - WingsCare
 - WingsPass

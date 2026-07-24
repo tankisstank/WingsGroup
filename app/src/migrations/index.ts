@@ -17,6 +17,7 @@ import * as migration_20260723_170000_wing_side_release_identity from './2026072
 import * as migration_20260723_183000_wing_side_style_seo_copy from './20260723_183000_wing_side_style_seo_copy'
 import * as migration_20260723_190000_wing_side_public_contact_identity from './20260723_190000_wing_side_public_contact_identity'
 import * as migration_20260724_090000_credentials_catalog_metadata from './20260724_090000_credentials_catalog_metadata'
+import * as migration_20260724_120000_tour_product_taxonomy from './20260724_120000_tour_product_taxonomy'
 
 export const migrations = [
   {
@@ -113,5 +114,10 @@ export const migrations = [
     up: migration_20260724_090000_credentials_catalog_metadata.up,
     down: migration_20260724_090000_credentials_catalog_metadata.down,
     name: '20260724_090000_credentials_catalog_metadata',
+  },
+  {
+    up: migration_20260724_120000_tour_product_taxonomy.up,
+    down: migration_20260724_120000_tour_product_taxonomy.down,
+    name: '20260724_120000_tour_product_taxonomy',
   },
 ]

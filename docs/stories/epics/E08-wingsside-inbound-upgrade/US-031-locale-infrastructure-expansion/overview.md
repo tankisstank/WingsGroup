@@ -28,7 +28,7 @@ hreflang, and ads surfaces until content QA enables them.
 
 ## Affected Users
 
-- Public WingsSide visitors from EN/IT/ES/PT routes.
+- Public WingSide visitors from EN/IT/ES/PT routes.
 - Editors managing localized CMS content.
 - Site managers reviewing public locale exposure.
 - Dev/ops applying Payload/PostgreSQL migrations.

@@ -35,7 +35,7 @@ Giai đoạn 1 chốt phát triển theo cấu trúc:
 
 - `WingsTravel`
 - `WingsGo`
-- `WingsSide`
+- `WingSide`
 - `WingsPlus`
 - `WingsCare`
 - `WingsPass`

@@ -60,7 +60,7 @@ The gap is that deeper theme behavior is still partly code-owned:
 
 - `data-site-theme` uses `siteName`, which is display content rather than a
   stable theme key.
-- `WingsGo` and `WingsSide` have CSS selectors with hardcoded site names.
+- `WingsGo` and `WingSide` have CSS selectors with hardcoded site names.
 - surface, radius, spacing, shadow, typography, button, and layout treatments
   are not editable from the CMS.
 - the `HighImpactHero` mixes site business behavior with theme behavior by
@@ -249,7 +249,7 @@ Avoid:
 
 ```css
 body[data-site-theme='WingsGo'] .site-hero { ... }
-body[data-site-theme='WingsSide'] .theme-card { ... }
+body[data-site-theme='WingSide'] .theme-card { ... }
 ```
 
 Site-specific visual identity should be expressed by preset and token values.
@@ -264,7 +264,7 @@ Recommended model:
 - add `hero.variant`: `standard`, `retail-departures`, `planner`, `utility`
 - add optional hero data groups only when the variant requires them
 - seed WingsGo with `retail-departures`
-- seed WingsSide with `planner`
+- seed WingSide with `planner`
 - keep visual style controlled by theme preset and tokens
 
 This keeps theme concerns separate from business behavior.
@@ -278,7 +278,7 @@ The implementation must prove:
   `layoutStyle` cannot be saved
 - default theme tokens remain stable when old `site-settings` records do not
   yet have new fields
-- WingsGo and WingsSide continue to render correctly after selectors move from
+- WingsGo and WingSide continue to render correctly after selectors move from
   site names to presets
 - a new custom site can get a distinct look by CMS settings only
 - the Theme Manager respects site-scoped access

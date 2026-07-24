@@ -65,7 +65,7 @@ Representative files:
 
 Current authoritative inventory:
 
-- WingsSide domain: `wingside.vn`
+- WingSide domain: `wingside.vn`
 - Local paths: `/wingsside`, `/wingsside/destinations`, `/wingsside/styles`,
   `/wingsside/packages`, `/wingsside/plan-your-trip`, `/wingsside/contact-us`
 - Production root paths: `/`, `/vi`, `/destinations`, `/styles`, `/packages`,

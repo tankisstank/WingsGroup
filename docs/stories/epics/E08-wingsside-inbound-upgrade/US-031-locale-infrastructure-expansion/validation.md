@@ -32,7 +32,7 @@ pnpm run test:unit -- tests/unit/locales.unit.spec.ts
 pnpm run test:int -- tests/int/site-seo.int.spec.ts tests/int/sitePaths.int.spec.ts
 pnpm run test:int -- tests/int/breadcrumbs.int.spec.ts tests/int/site-seo.int.spec.ts tests/int/sitePaths.int.spec.ts
 pnpm run test:int -- tests/int/breadcrumbs.int.spec.ts tests/int/site-seo.int.spec.ts tests/int/sitePaths.int.spec.ts tests/int/tourDetailBuilder.int.spec.ts
-pnpm run test:e2e -- tests/e2e/frontend.e2e.spec.ts -g "WingsSide public ad locales|CMS-only locales"
+pnpm run test:e2e -- tests/e2e/frontend.e2e.spec.ts -g "WingSide public ad locales|CMS-only locales"
 pnpm exec eslint src/utilities/locales.ts src/utilities/sitePaths.ts src/payload.config.ts src/collections/Sites.ts 'src/app/(frontend)/[...slug]/page.tsx' src/Header/Component.tsx src/Header/Component.client.tsx src/Header/Nav/index.tsx src/blocks/Form/Component.tsx src/components/RelatedPages.tsx
 pnpm exec eslint src/utilities/breadcrumbs.ts src/Header/Nav/index.tsx src/search/Component.tsx src/components/Card/index.tsx src/heros/PostHero/index.tsx 'src/app/(frontend)/search/page.tsx' 'src/app/(frontend)/posts/page.tsx' 'src/app/(frontend)/posts/page/[pageNumber]/page.tsx' src/tours/utils.ts scripts/seed-subsites.ts tests/helpers/seedPhase1Launch.ts
 pnpm exec prettier --check src/utilities/breadcrumbs.ts src/Header/Nav/index.tsx src/search/Component.tsx src/components/Card/index.tsx src/heros/PostHero/index.tsx 'src/app/(frontend)/search/page.tsx' 'src/app/(frontend)/posts/page.tsx' 'src/app/(frontend)/posts/page/[pageNumber]/page.tsx' src/tours/utils.ts scripts/seed-subsites.ts tests/helpers/seedPhase1Launch.ts
@@ -54,7 +54,7 @@ Evidence completed on 2026-07-07:
   passed after the second cleanup slice: 14 tests.
 - `pnpm run test:int -- tests/int/breadcrumbs.int.spec.ts tests/int/site-seo.int.spec.ts tests/int/sitePaths.int.spec.ts tests/int/tourDetailBuilder.int.spec.ts`
   passed: 16 tests.
-- `pnpm run test:e2e -- tests/e2e/frontend.e2e.spec.ts -g "WingsSide public ad locales|CMS-only locales"`
+- `pnpm run test:e2e -- tests/e2e/frontend.e2e.spec.ts -g "WingSide public ad locales|CMS-only locales"`
   passed: 2 tests.
 - Targeted eslint passed on the locale/config/header/form/page files touched by
   this slice.

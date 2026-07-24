@@ -71,6 +71,7 @@ const localSQLiteColumnRepairs = [
       ['source_provenance', 'TEXT'],
       ['price_from', 'NUMERIC'],
       ['currency', "TEXT DEFAULT 'USD'"],
+      ['taxonomy_provenance', 'TEXT'],
     ],
   },
   {
@@ -79,6 +80,7 @@ const localSQLiteColumnRepairs = [
       ['version_source_provenance', 'TEXT'],
       ['version_price_from', 'NUMERIC'],
       ['version_currency', "TEXT DEFAULT 'USD'"],
+      ['version_taxonomy_provenance', 'TEXT'],
     ],
   },
   {
@@ -105,6 +107,43 @@ const localSQLiteColumnRepairs = [
       ['source_filename', 'TEXT'],
     ],
   },
+] as const
+
+const tourTaxonomySQLiteStatements = [
+  `CREATE TABLE IF NOT EXISTS "tour_products_destination_tags" (
+    "order" INTEGER NOT NULL, "parent_id" INTEGER NOT NULL, "value" TEXT,
+    "id" INTEGER PRIMARY KEY NOT NULL,
+    FOREIGN KEY ("parent_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "tour_products_travel_styles" (
+    "order" INTEGER NOT NULL, "parent_id" INTEGER NOT NULL, "value" TEXT,
+    "id" INTEGER PRIMARY KEY NOT NULL,
+    FOREIGN KEY ("parent_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_tour_products_v_version_destination_tags" (
+    "order" INTEGER NOT NULL, "parent_id" INTEGER NOT NULL, "value" TEXT,
+    "id" INTEGER PRIMARY KEY NOT NULL,
+    FOREIGN KEY ("parent_id") REFERENCES "_tour_products_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_tour_products_v_version_travel_styles" (
+    "order" INTEGER NOT NULL, "parent_id" INTEGER NOT NULL, "value" TEXT,
+    "id" INTEGER PRIMARY KEY NOT NULL,
+    FOREIGN KEY ("parent_id") REFERENCES "_tour_products_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  ...[
+    'tour_products_destination_tags_order_idx ON tour_products_destination_tags ("order")',
+    'tour_products_destination_tags_parent_idx ON tour_products_destination_tags ("parent_id")',
+    'tour_products_destination_tags_value_idx ON tour_products_destination_tags ("value")',
+    'tour_products_travel_styles_order_idx ON tour_products_travel_styles ("order")',
+    'tour_products_travel_styles_parent_idx ON tour_products_travel_styles ("parent_id")',
+    'tour_products_travel_styles_value_idx ON tour_products_travel_styles ("value")',
+    '_tour_products_v_version_destination_tags_order_idx ON _tour_products_v_version_destination_tags ("order")',
+    '_tour_products_v_version_destination_tags_parent_idx ON _tour_products_v_version_destination_tags ("parent_id")',
+    '_tour_products_v_version_destination_tags_value_idx ON _tour_products_v_version_destination_tags ("value")',
+    '_tour_products_v_version_travel_styles_order_idx ON _tour_products_v_version_travel_styles ("order")',
+    '_tour_products_v_version_travel_styles_parent_idx ON _tour_products_v_version_travel_styles ("parent_id")',
+    '_tour_products_v_version_travel_styles_value_idx ON _tour_products_v_version_travel_styles ("value")',
+  ].map((definition) => `CREATE INDEX IF NOT EXISTS ${definition}`),
 ] as const
 
 const credentialsCarouselSQLiteStatements = [
@@ -251,6 +290,9 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
       db.exec(`${statement};`)
     }
     for (const statement of credentialsCarouselSQLiteStatements) {
+      db.exec(`${statement};`)
+    }
+    for (const statement of tourTaxonomySQLiteStatements) {
       db.exec(`${statement};`)
     }
 

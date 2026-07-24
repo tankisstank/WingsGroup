@@ -1,8 +1,8 @@
-# WingsSide Tour Discovery And Taxonomy
+# WingSide Tour Discovery And Taxonomy
 
 ## Purpose
 
-This document defines how real WingsSide `TourProduct` records power destination,
+This document defines how real WingSide `TourProduct` records power destination,
 travel-style, and featured-journey discovery without replacing the approved
 hi-fi composition.
 
@@ -19,7 +19,7 @@ hi-fi composition.
 
 ### Destination keys
 
-Wave 1 uses stable keys matching the approved six-card inventory:
+The six approved Home-card keys remain stable:
 
 - `hanoi`
 - `halong`
@@ -28,7 +28,19 @@ Wave 1 uses stable keys matching the approved six-card inventory:
 - `mekong`
 - `sapa`
 
+The imported inventory also needs governed keys for real destinations that do
+not belong to the six Home cards:
+
+- `ninh-binh`
+- `mai-chau`
+- `da-nang`
+- `ho-chi-minh-city`
+- `phu-quoc`
+- `ninh-thuan`
+- `siem-reap`
+
 One tour may carry multiple destination keys. Labels are localized separately.
+The extended keys make the 22-tour map truthful; they do not add Home cards.
 
 ### Travel-style keys
 
@@ -37,6 +49,7 @@ One tour may carry multiple destination keys. Labels are localized separately.
 - `culture`
 - `adventure`
 - `wellness`
+- `romance`
 - `business`
 
 These are governed multi-select values. They are not free-form tags and are not
@@ -46,9 +59,9 @@ derived from title text at render time.
 
 A tour is eligible for discovery only when all conditions hold:
 
-- site is WingsSide;
+- site is WingSide;
 - publication status is published;
-- `wrapperPage` exists and belongs to WingsSide;
+- `wrapperPage` exists and belongs to WingSide;
 - `heroMedia`, localized title and summary exist;
 - at least one destination and one travel style exist;
 - price/currency are present when a price is displayed.
@@ -113,11 +126,16 @@ The 22-tour mapping is maintained in the US-049 data map. The implementation
 must provide:
 
 - dry-run output before mutation;
-- deterministic update plan by `sourceProvenance.batchId` and tour ID;
+- deterministic update plan by `sourceProvenance.importBatchId` and tour ID;
 - transaction or equivalent rollback-safe apply;
 - idempotence proof after apply;
 - PostgreSQL migration and CRUD smoke;
 - no mutation of WingsGo or other site records.
+
+US-049 implements these values as controlled Payload `select` arrays on
+`TourProducts`, with a separate read-only `taxonomyProvenance` audit object.
+The query contract always combines the stable key with current-site and
+publication filtering.
 
 ## Observability And Review Markers
 

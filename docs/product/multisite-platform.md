@@ -16,7 +16,7 @@ This document defines the durable platform rules behind the current
 The platform is content-first. Public rendering, metadata, and admin behavior
 must all stay site-aware.
 
-For the Wingside tenant, the normative identity is defined in
+For the WingSide tenant, the normative identity is defined in
 `docs/product/wingside-identity-contract.md`: public name `wingside.vn`, tenant
 code `wing-side`, local alias `/wingsside`, and theme key `wings-side`.
 

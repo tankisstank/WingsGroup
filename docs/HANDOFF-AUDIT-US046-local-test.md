@@ -1,7 +1,7 @@
 # HANDOFF — Independent audit & full local QA
 
-**Date:** 2026-07-21  
-**Purpose:** Prompt dán vào **session / agent audit độc lập** để test toàn diện local + audit code/UX, **không** phụ thuộc agent implement.  
+**Date:** 2026-07-21
+**Purpose:** Prompt dán vào **session / agent audit độc lập** để test toàn diện local + audit code/UX, **không** phụ thuộc agent implement.
 **Mode:** Read-only audit + visual/browser QA. Chỉ đề xuất fix; không rewrite lớn trừ khi user yêu cầu.
 
 ---
@@ -23,7 +23,7 @@ Bạn là auditor độc lập (read-only trước, propose fix sau khi có evid
 - Wrong: /wingside/ → expect 404
 
 ## Must-test URLs (local)
-Wingside:
+WingSide:
 1. http://127.0.0.1:3010/wingsside/
 2. http://127.0.0.1:3010/wingsside/en  (and/or locale switcher EN)
 3. http://127.0.0.1:3010/wingsside/tour/best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days
@@ -34,26 +34,26 @@ WingsGo regression (must not break retail):
 6. Any /wingsgo/tour/<slug> if present (hold-seat, departures, price)
 
 ## Architecture truth (do not invent)
-Wingside tour route on THIS branch uses dedicated:
-  app/src/tours/WingSideTourDetailPage.tsx
+WingSide tour route on THIS branch uses dedicated:
+  app/src/tours/WingsSideTourDetailPage.tsx
   + wingsSideTourViewModel helpers
-  (page.tsx: site.code === 'wings-side' → WingSideTourDetailPage)
+  (page.tsx: site.code === 'wings-side' → WingsSideTourDetailPage)
 
 Master also shipped presentation-aware:
   app/src/tours/StructuredPages.tsx (presentation retail|consultative)
   Used for WingsGo retail and as shared infrastructure after merge.
 
 Merge kept BOTH:
-- Wingside → WingSideTourDetailPage (US-046 UI)
+- WingSide → WingsSideTourDetailPage (US-046 UI)
 - WingsGo → TourDetailPage presentation="retail"
 
-## Product locks (fail audit if violated on Wingside)
+## Product locks (fail audit if violated on WingSide)
 1. Dual CTA: Primary Consult / Request consultation (gold) + Secondary Contact (ghost)
 2. NO hold-seat primary; no seat scarcity / “only N left”
 3. Price honesty: missing price → on request / 24h; no invented USD
 4. No invented reviews/stars/stats
 5. URL prefix /wingsside/ (2 s)
-6. Brand string Wingside; Book gold CTA direction
+6. Brand string WingSide; Book gold CTA direction
 7. A11y: touch ≥44px on primary CTA; focus-visible; reduced-motion
 8. Do not regress WingsGo dense retail (US-037)
 
@@ -64,7 +64,7 @@ Merge kept BOTH:
 - Repo implement handoff: docs/HANDOFF-wingside-tour-detail-hifi-to-repo.md (also on master)
 
 ## Code surfaces to audit
-- app/src/tours/WingSideTourDetailPage.tsx  (PRIMARY wingside UI)
+- app/src/tours/WingsSideTourDetailPage.tsx  (PRIMARY wingside UI)
 - app/src/tours/wingsSideTourViewModel.ts
 - app/src/tours/StructuredPages.tsx
 - app/src/tours/TourItineraryDayDetails.tsx
@@ -78,7 +78,7 @@ Merge kept BOTH:
 ## Local QA checklist (browser: agent-browser preferred)
 Desktop + mobile (or responsive):
 [ ] Home wingsside loads; header Plan your trip gold; no layout break
-[ ] Tour detail 200; structured WingSideTourDetailPage (not CMS blocks-only dump)
+[ ] Tour detail 200; structured WingsSideTourDetailPage (not CMS blocks-only dump)
 [ ] Hero balanced (no huge empty gap between breadcrumb/header and first panel)
 [ ] Dual CTA gold + ghost; intents inquiry/contact; path /contact-us (not /lien-he)
 [ ] No hold-seat / Giữ chỗ as primary
@@ -141,25 +141,25 @@ http://127.0.0.1:3010/wingsside/
 ## 2. What was merged (audit context)
 
 1. Master `91eec0e` consultative tour infrastructure (StructuredPages presentation, utils, capabilities, gold CTA CSS, unit tests).
-2. US-046 branch already had dedicated `WingSideTourDetailPage` for wings-side.
+2. US-046 branch already had dedicated `WingsSideTourDetailPage` for wings-side.
 3. Merge resolution:
-   - Wingside continues to use **WingSideTourDetailPage**
+   - WingSide continues to use **WingsSideTourDetailPage**
    - WingsGo uses **TourDetailPage** retail
    - Shared capabilities aliases (`isStructuredTourDetailEnabledSiteCode` ↔ `isStructuredTourDetailSiteCode`)
-   - queries keep `fallbackLocale` for Wingside EN content
+   - queries keep `fallbackLocale` for WingSide EN content
    - globals: US-046 specials/chrome + Book gold tour CTA classes
 
 ---
 
 ## 3. Suggested audit order
 
-1. Confirm server health: `GET /wingsside/` → 200  
-2. Tour detail smoke + HTML markers  
-3. Console + network (contact-us intents)  
-4. Visual vs hi-fi HTML (Open Design)  
-5. Code path: page.tsx → WingSideTourDetailPage vs StructuredPages  
-6. WingsGo regression  
-7. Write verdict + issues with severity  
+1. Confirm server health: `GET /wingsside/` → 200
+2. Tour detail smoke + HTML markers
+3. Console + network (contact-us intents)
+4. Visual vs hi-fi HTML (Open Design)
+5. Code path: page.tsx → WingsSideTourDetailPage vs StructuredPages
+6. WingsGo regression
+7. Write verdict + issues with severity
 
 ---
 

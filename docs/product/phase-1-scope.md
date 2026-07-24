@@ -28,7 +28,7 @@ The shared platform is expected to support at least these site identities:
 
 - `WingsGroup`
 - `WingsGo`
-- `WingsSide`
+- `WingSide`
 - `WingsPlus`
 - `WingsCare`
 - `WingsPass`

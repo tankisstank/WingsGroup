@@ -48,12 +48,12 @@ source-artifact provenance, not the current tenant or public naming contract.
 
 | File                  | Scope                            | Extracted signals                                                          |
 | --------------------- | -------------------------------- | -------------------------------------------------------------------------- |
-| `pdf/WINGS - ALL.pdf` | Full Wings ecosystem brand board | WingsCorp, WingsGroup, WingsGo, WingsPass, Wing Side, WingsCare, WingsPlus |
+| `pdf/WINGS - ALL.pdf` | Full Wings ecosystem brand board | WingsCorp, WingsGroup, WingsGo, WingsPass, WingSide, WingsCare, WingsPlus |
 | `pdf/WINGSCORP.pdf`   | Corporate/master brand board     | WingsCorp mark, "Fly further. Together"                                    |
 | `pdf/WINGSGROUP.pdf`  | WingsGroup umbrella brand board  | WingsGroup mark, "Fly further. Together"                                   |
 | `pdf/WINGS GO.pdf`    | WingsGo site identity            | "Go More. Feel More.", "GLOBAL MINDSET"                                    |
 | `pdf/WINGS PASS.pdf`  | WingsPass site identity          | "Your Journey. Seamless.", "EXCEPTIONAL EXPERIENCES"                       |
-| `pdf/WINGS SIDE.pdf`  | Wing Side site identity          | "See Vietnam Differently.", "TRUST & CARE"                                 |
+| `pdf/WINGS SIDE.pdf`  | WingSide site identity          | "See Vietnam Differently.", "TRUST & CARE"                                 |
 | `pdf/WINGS CARE.pdf`  | WingsCare site identity          | "We Care. You Enjoy.", "INNOVATION & AGILITY"                              |
 | `pdf/WINGS PLUSS.pdf` | WingsPlus site identity          | "More Benefits. More Journeys.", "TOGETHER WE GO FURTHER"                  |
 
@@ -70,7 +70,7 @@ package, including the double `S`.
   - WingsCorp / WingsGroup: gold/yellow, approximately `#FDB515`.
   - WingsGo: bright blue/cyan, approximately `#0090E0`.
   - WingsPass: teal/green, approximately `#008070`.
-  - Wing Side: dark green with gold, approximately `#104030` and `#C09030`.
+  - WingSide: dark green with gold, approximately `#104030` and `#C09030`.
   - WingsCare: red, approximately `#F02020`.
   - WingsPlus: purple, approximately `#6040A0`.
 

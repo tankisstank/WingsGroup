@@ -1767,7 +1767,7 @@ export interface Form {
   createdAt: string;
 }
 /**
- * Tour gốc cho WingsGo. Dữ liệu này là nguồn thật để render trang tour, bảng khởi hành, campaign và market page.
+ * Tour có cấu trúc dùng chung cho WingsGo và WingsSide. Dữ liệu này là nguồn thật để render trang tour và discovery theo site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tour-products".
@@ -1788,6 +1788,42 @@ export interface TourProduct {
     | 'indochina'
     | 'other';
   tourCode?: string | null;
+  /**
+   * Key ổn định để lọc tour; nhãn hiển thị do CMS quản lý.
+   */
+  destinationTags?:
+    | (
+        | 'hanoi'
+        | 'halong'
+        | 'ninh-binh'
+        | 'sapa'
+        | 'mai-chau'
+        | 'hue'
+        | 'da-nang'
+        | 'hoian'
+        | 'ho-chi-minh-city'
+        | 'mekong'
+        | 'phu-quoc'
+        | 'ninh-thuan'
+        | 'siem-reap'
+      )[]
+    | null;
+  /**
+   * Phân loại biên tập có kiểm soát; không suy đoán từ tiêu đề.
+   */
+  travelStyles?: ('luxury' | 'family' | 'culture' | 'adventure' | 'wellness' | 'romance' | 'business')[] | null;
+  /**
+   * Revision, bằng chứng và thời điểm gán taxonomy gần nhất.
+   */
+  taxonomyProvenance?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   /**
    * Dữ liệu máy đọc để truy vết source system, source ID/URL/hash, batch import và bảng giá gốc.
    */
@@ -3471,6 +3507,9 @@ export interface TourProductsSelect<T extends boolean = true> {
   site?: T;
   market?: T;
   tourCode?: T;
+  destinationTags?: T;
+  travelStyles?: T;
+  taxonomyProvenance?: T;
   sourceProvenance?: T;
   priceFrom?: T;
   currency?: T;

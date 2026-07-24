@@ -10,7 +10,7 @@ normal
 
 ## Product Contract
 
-WingsSide inbound pages can be assembled from governed Page Composer blocks,
+WingSide inbound pages can be assembled from governed Page Composer blocks,
 reusing and extending existing blocks before creating new schemas.
 
 ## Relevant Product Docs
@@ -50,7 +50,7 @@ Update matrix evidence after implementation.
 
 Implemented 2026-07-07.
 
-- Value props: reused governed `InfoStrip` and `FeatureGrid`; WingsSide homepage
+- Value props: reused governed `InfoStrip` and `FeatureGrid`; WingSide homepage
   seed now renders `InfoStrip`, `FeatureGrid` `bento`, and `FeatureGrid`
   `alternating` blocks for inbound trust/value props, destination/style cards
   and sample itinerary cards.
@@ -62,7 +62,7 @@ Implemented 2026-07-07.
   carousel/snap presentation via the already registered `carousel`
   presentation. Removed default `5` rating from the rating field so CMS content
   does not create fake five-star reviews.
-- Itinerary grid decision: no new `ItineraryGrid` block in wave 1. WingsSide
+- Itinerary grid decision: no new `ItineraryGrid` block in wave 1. WingSide
   sample itineraries are static marketing cards, so they are implemented with
   `FeatureGrid` `alternating`; a separate structured itinerary/product model can
   be considered later if real operational itinerary data is required.
@@ -85,7 +85,7 @@ Validation:
 - PostgreSQL seed PASS against
   `postgresql://smoke:smoke@127.0.0.1:15432/wings_migrate_smoke`.
 - Direct Playwright E2E against `http://localhost:3000` with PostgreSQL data
-  PASS 3/3 for WingsSide cinematic hero, governed inbound composer blocks, and
+  PASS 3/3 for WingSide cinematic hero, governed inbound composer blocks, and
   governed hero presentation inheritance.
 
 Known validation note:

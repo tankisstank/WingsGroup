@@ -42,7 +42,7 @@ as dedicated domain objects instead of generic pages.
 
 ## Product Principles
 
-For WingsSide destination/style classification and Home discovery curation, see
+For WingSide destination/style classification and Home discovery curation, see
 [`wingsside-tour-discovery-and-taxonomy.md`](wingsside-tour-discovery-and-taxonomy.md).
 That contract extends `TourProduct` discovery metadata without changing the
 core product truth defined here.

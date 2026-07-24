@@ -1,8 +1,8 @@
-# E08 - WingsSide inbound upgrade
+# E08 - WingSide inbound upgrade
 
 > Current identity contract: public site name `wingside.vn`, technical tenant
 > code `wing-side`, local alias `/wingsside`, theme key `wings-side`. Historical
-> story wording may retain `WingsSide` when describing earlier evidence; new
+> story wording may retain `WingSide` when describing earlier evidence; new
 > implementation and launch decisions follow
 > `docs/product/wingside-identity-contract.md`.
 
@@ -17,7 +17,7 @@ in progress
 
 ## Objective
 
-Implement the WingsSide inbound visual, motion, content, and locale upgrade in
+Implement the WingSide inbound visual, motion, content, and locale upgrade in
 safe slices. The initiative keeps the existing Payload-first, multisite-ready
 architecture and avoids building a parallel site, CMS, or page builder.
 
@@ -39,7 +39,7 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-046A | high-risk | implemented         | WingSide 8-page hi-fi funnel remediation                            |
 | US-047  | normal    | implemented locally | Governed 24-record credentials catalog and reusable CMS block       |
 | US-048  | high-risk | implemented         | Eight-page hi-fi parity remediation and DOM review contract         |
-| US-049  | high-risk | planned             | WingsSide tour taxonomy and BestPrice 22 classification             |
+| US-049  | high-risk | validation pending  | WingSide tour taxonomy and BestPrice 22 classification             |
 | US-050  | high-risk | planned             | Real-tour Home discovery and BUG-WS-001 remediation                 |
 
 ## Current evidence
@@ -49,9 +49,9 @@ architecture and avoids building a parallel site, CMS, or page builder.
   updates.
 - US-026 captured locale, block, hero, and content source audit in
   `docs/stories/epics/E08-wingsside-inbound-upgrade/audit.md`.
-- US-027 added `wings-side-editorial-inbound-v2`, seeded WingsSide to use it,
+- US-027 added `wings-side-editorial-inbound-v2`, seeded WingSide to use it,
   scoped CSS for the inbound editorial look, integration/E2E proof, and
-  screenshots for WingsSide desktop/mobile plus WingsGo no-leak.
+  screenshots for WingSide desktop/mobile plus WingsGo no-leak.
 - US-028 added reusable `RevealOnScroll`, `CountUp`, `useScrollDirection`, and
   CSS motion utilities with reduced-motion behavior and component test proof.
 - US-031 completed the high-risk locale slice: central locale metadata now covers
@@ -59,27 +59,27 @@ architecture and avoids building a parallel site, CMS, or page builder.
   types were regenerated, hardcoded public chrome `locale === 'en'` branches
   were cleaned up into `getCopyLocale()` fallback maps, public locale E2E now
   passes, and PostgreSQL migration smoke passed on PostgreSQL 16.14.
-- US-029 added the WingsSide `wingsside-inbound-cinematic-search` preset,
+- US-029 added the WingSide `wingsside-inbound-cinematic-search` preset,
   image-only homepage carousel slides, Ken Burns marker/CSS, planner form
   overlay, site-aware `/plan-your-trip` submit, and targeted E2E proof.
-- US-030 extended governed Page Composer blocks for WingsSide inbound pages:
+- US-030 extended governed Page Composer blocks for WingSide inbound pages:
   `Stats` now uses CountUp progressive enhancement, `Testimonial` supports an
-  accessible carousel without default fake ratings, the WingsSide homepage seed
+  accessible carousel without default fake ratings, the WingSide homepage seed
   uses `InfoStrip`/`FeatureGrid`/`Stats`/`Testimonial`, and the itinerary grid
   decision is documented as `FeatureGrid` for wave-1 static marketing cards.
-- US-032 added the WingsSide-only inbound mega menu, mobile mega links and
+- US-032 added the WingSide-only inbound mega menu, mobile mega links and
   public-locale language switcher using central locale metadata; E2E covers
   desktop open/escape behavior, `aria-current`, public-disabled locale hiding,
   mobile menu rendering and WingsGo no-leak smoke. The 2026-07-08 manual-review
   follow-up added outside-click close, a visual connector between trigger and
   panel, locale-root route normalization, and header overflow protection for
   WingsGo.
-- US-033 added the WingsSide content/media control sheet with page map, claim
+- US-033 added the WingSide content/media control sheet with page map, claim
   register, asset provenance, competitor-copy guard and content/legal checklist;
   seed, copy guard and targeted E2E prove the six core EN pages and public
   EN/IT/ES/PT exposure without fake reviews/ratings/licence claims. The
   2026-07-08 manual-review follow-up deepened the six core child pages and added
-  native IT/ES/PT seed content plus localized WingsSide navigation/settings.
+  native IT/ES/PT seed content plus localized WingSide navigation/settings.
 - US-034 completed the launch readiness proof: typecheck, lint, integration,
   component, build, targeted E2E, go-live review, screenshot artifacts and
   canonical/hreflang/sitemap checks all have recorded evidence. Full local
@@ -93,7 +93,7 @@ architecture and avoids building a parallel site, CMS, or page builder.
   one form, 45 markers and three real related tours. US-046 is implemented.
 - US-046A delivered the typed Payload hi-fi contract, validated route model,
   governed Plan/Contact form ownership, eight complete hub compositions and
-  scoped WingsSide chrome. WP5 applied and verified 40 page/locale entries,
+  scoped WingSide chrome. WP5 applied and verified 40 page/locale entries,
   then production passed the 54/54 responsive matrix and eight-page browser
   audit. US-046A is implemented.
 - US-047 turns the hi-fi credentials/awards carousel into a governed Payload
@@ -114,6 +114,10 @@ architecture and avoids building a parallel site, CMS, or page builder.
   adds controlled destination/style taxonomy and a reviewed backfill for the 22
   imported tours. US-050 uses those real records for Home discovery and closes
   BUG-WS-001, where Sample Journeys currently presents static product facts.
+- US-049 schema, query contract, migration, guarded backfill and 22-record
+  technical map are implemented. The copied-database dry-run is clean and
+  non-mutating; editorial/PM approval of revision `us-049-v1-20260724` remains
+  the gate before local apply, and production remains frozen.
 
 ## Current constraints
 

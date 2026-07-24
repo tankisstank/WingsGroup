@@ -271,7 +271,7 @@ Cách làm:
 - vừa có planning funnel,
 - vừa có content support.
 
-Đây là hướng khá sát với cái WingsSide hoặc một phần WingsGo có thể dùng nếu muốn cân bằng giữa SEO, listing và lead-gen.
+Đây là hướng khá sát với cái WingSide hoặc một phần WingsGo có thể dùng nếu muốn cân bằng giữa SEO, listing và lead-gen.
 
 ## 7. Phân tích giao diện: điều đối thủ đang làm tốt và chưa tốt
 

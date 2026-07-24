@@ -18,7 +18,7 @@ workflow, and a role-aware CMS operator console.
 
 - WingsGroup
 - WingsGo
-- WingsSide
+- WingSide
 - WingsPlus
 - WingsCare
 - WingsPass

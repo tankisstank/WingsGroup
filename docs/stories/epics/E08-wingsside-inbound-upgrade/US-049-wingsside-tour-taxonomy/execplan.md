@@ -2,7 +2,7 @@
 
 ## Goal
 
-Create a governed taxonomy contract and classify the existing 22 WingsSide
+Create a governed taxonomy contract and classify the existing 22 WingSide
 BestPrice tours without changing public Home rendering yet.
 
 ## Risk Classification

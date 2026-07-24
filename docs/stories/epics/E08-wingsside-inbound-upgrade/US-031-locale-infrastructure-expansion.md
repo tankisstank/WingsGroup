@@ -97,7 +97,7 @@ Validation:
   passed: 11 tests.
 - `pnpm run test:int -- tests/int/breadcrumbs.int.spec.ts tests/int/site-seo.int.spec.ts tests/int/sitePaths.int.spec.ts tests/int/tourDetailBuilder.int.spec.ts`
   passed: 16 tests.
-- `pnpm run test:e2e -- tests/e2e/frontend.e2e.spec.ts -g "WingsSide public ad locales|CMS-only locales"`
+- `pnpm run test:e2e -- tests/e2e/frontend.e2e.spec.ts -g "WingSide public ad locales|CMS-only locales"`
   passed: 2 tests.
 - Targeted eslint passed for touched locale/config/header/form/page files.
 - Targeted eslint for the second cleanup slice passed with 0 errors. It still

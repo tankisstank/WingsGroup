@@ -158,7 +158,7 @@ fallback rendering, not as the primary editor decision path.
 | E2E | Page Hero form emphasizes relevant media inputs for carousel, video, layered, and split variants. |
 | E2E | Split save buttons and dirty states behave correctly. |
 | E2E | Role behavior is clear: site-manager can manage `/admin/theme`; editor uses page Hero controls and cannot manage site defaults. |
-| Platform | Existing WingsGo and WingsSide seeded hero behavior still renders after UX refactor. |
+| Platform | Existing WingsGo and WingSide seeded hero behavior still renders after UX refactor. |
 | Release | Typecheck, lint, integration, targeted admin E2E, full E2E, build. |
 
 ## Harness Delta

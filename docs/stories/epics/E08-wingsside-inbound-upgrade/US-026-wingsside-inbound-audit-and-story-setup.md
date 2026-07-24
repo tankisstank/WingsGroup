@@ -1,4 +1,4 @@
-# US-026 WingsSide inbound audit and story setup
+# US-026 WingSide inbound audit and story setup
 
 ## Status
 
@@ -10,7 +10,7 @@ normal
 
 ## Product Contract
 
-The WingsSide inbound initiative has a registered Harness story set, an epic
+The WingSide inbound initiative has a registered Harness story set, an epic
 folder, and an audit evidence file that identifies locale, block, hero, and
 content risks before implementation work starts.
 

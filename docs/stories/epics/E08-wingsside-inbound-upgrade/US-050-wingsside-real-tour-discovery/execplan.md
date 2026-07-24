@@ -28,7 +28,7 @@ queries, locale/site routing, cached rendering and three visible Home sections.
 - Fewer than three eligible featured tours are approved.
 - A relationship resolves across sites or to an unpublished record.
 - Real price/currency cannot be represented truthfully in the approved card.
-- Implementation would change non-WingsSide card behavior.
+- Implementation would change non-WingSide card behavior.
 
 ## Release Gate
 

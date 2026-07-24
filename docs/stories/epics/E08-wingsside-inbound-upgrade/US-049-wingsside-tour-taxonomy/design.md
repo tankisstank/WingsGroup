@@ -2,15 +2,20 @@
 
 ## Domain Model
 
-Extend `TourProducts` with controlled multi-value fields:
+Extend `TourProducts` with controlled multi-value `select` fields:
 
-- `destinationTags`: Hanoi, Ha Long, Hoi An, Hue, Mekong, Sapa;
-- `travelStyles`: Luxury, Family, Culture, Adventure, Wellness, Business.
+- `destinationTags`: the six Home keys plus governed extended keys required by
+  the actual 22-tour inventory;
+- `travelStyles`: Luxury, Family, Culture, Adventure, Wellness, Romance,
+  Business;
+- `taxonomyProvenance`: read-only mapping revision and evidence.
 
-Implementation may use select arrays for the locked wave-1 vocabulary or a
-site-scoped taxonomy collection if reuse/addition requirements justify it. The
-final schema decision must preserve stable keys, generated Payload types and
-same-site access control. A single generic free-form `tags` field is rejected.
+Select arrays are the chosen wave-1 design. The vocabulary is small and locked,
+so a separate taxonomy collection would add lifecycle and access complexity
+without a current editor requirement. The six Home-card keys remain `hanoi`,
+`halong`, `hoian`, `hue`, `mekong`, and `sapa`; extended keys describe real
+inventory without creating more Home cards. A generic free-form `tags` field is
+rejected.
 
 ## Provenance
 
@@ -30,8 +35,11 @@ Store taxonomy audit metadata separately if needed.
 2. Fill `data-map.md` with proposed taxonomy and evidence.
 3. Run validator; block unknown keys, duplicate IDs and cross-site records.
 4. Produce dry-run JSON/Markdown.
-5. Obtain editorial sign-off.
-6. Apply within the WingsSide site and BestPrice batch scope.
+5. Obtain editorial sign-off by approving mapping revision
+   `us-049-v1-20260724`.
+6. Apply within the WingSide site and BestPrice batch scope. The CLI refuses
+   apply/rollback without that exact approval revision and refuses PostgreSQL
+   or production execution in this implementation tranche.
 7. Re-run dry-run and require zero planned mutations.
 
 ## Migration

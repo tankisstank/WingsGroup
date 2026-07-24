@@ -1,4 +1,4 @@
-# US-033 WingsSide content and media seed
+# US-033 WingSide content and media seed
 
 ## Status
 
@@ -10,7 +10,7 @@ normal
 
 ## Product Contract
 
-WingsSide has EN/IT/ES/PT launch content and media seed data with provenance,
+WingSide has EN/IT/ES/PT launch content and media seed data with provenance,
 without copying competitor text, assets, testimonials, ratings or unsupported
 claims.
 
@@ -54,7 +54,7 @@ Implemented on 2026-07-07.
 - Created `docs/product/wingsside-inbound-content-map.md` with the required page
   map, claim register, asset provenance, competitor copy guard and
   content/legal checklist.
-- Confirmed six core WingsSide pages have EN launch content:
+- Confirmed six core WingSide pages have EN launch content:
   `/wingsside`, `/wingsside/destinations`, `/wingsside/styles`,
   `/wingsside/packages`, `/wingsside/plan-your-trip`, `/wingsside/contact-us`.
 - Documented IT/ES/PT as public technical routes with English fallback and
@@ -62,36 +62,36 @@ Implemented on 2026-07-07.
 - Seed proof: `pnpm exec tsx scripts/seed-subsites.ts` completed successfully
   against local SQLite.
 - E2E proof:
-  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingsSide inbound core content pages|WingsSide governed inbound composer blocks|WingsSide inbound header|WingsSide language switcher|CMS-only locales"`
+  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingSide inbound core content pages|WingSide governed inbound composer blocks|WingSide inbound header|WingSide language switcher|CMS-only locales"`
   passed 5/5.
 - Copy guard: `rg -n "Anvui|Easia|Autour|Tripadvisor|licensed DMC|best travel agency|number one|award-winning|4\.9 stars|1,200\+" app/scripts/seed-subsites.ts app/src docs/product/wingsside-inbound-content-map.md`
   found no public seed/app competitor-copy hits; the only hit is the
   content-map rule that disallows Tripadvisor/review claims without source.
-- No fake testimonial/rating proof: E2E asserts WingsSide homepage has zero
+- No fake testimonial/rating proof: E2E asserts WingSide homepage has zero
   `.layout-testimonial__rating` elements; content-map claim register disallows
   unsupported reviews, ratings, licence and award claims.
 
 Follow-up implementation on 2026-07-08 after manual review:
 
-- Added denser seed content to the six core WingsSide pages so child pages no
-  longer feel like placeholder grids. Hubs now reuse WingsSide media and add
+- Added denser seed content to the six core WingSide pages so child pages no
+  longer feel like placeholder grids. Hubs now reuse WingSide media and add
   explanatory content/media/info sections before conversion CTAs.
-- Added native IT/ES/PT localized seed data for the six core WingsSide pages
-  and localized WingsSide site settings/navigation for those public ad locales.
+- Added native IT/ES/PT localized seed data for the six core WingSide pages
+  and localized WingSide site settings/navigation for those public ad locales.
 - Selective local seed proof:
   `SEED_ONLY_SITE=wings-side pnpm exec tsx scripts/seed-subsites.ts` PASS after
   stopping the local Next dev server and running a SQLite checkpoint.
 - HTTP smoke after reseed: `/wingsside/it`, `/wingsside/destinations` and
   `/wingsgo` returned 200.
 - 2026-07-08 targeted E2E:
-  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingsSide inbound header|WingsSide localized root pages|WingsSide inbound core content pages"`
+  `PLAYWRIGHT_BASE_URL=http://localhost:3000 PLAYWRIGHT_REUSE_EXISTING_SERVER=true PLAYWRIGHT_SKIP_PHASE1_SEED=true pnpm exec playwright test --config=playwright.config.ts tests/e2e/frontend.e2e.spec.ts -g "WingSide inbound header|WingSide localized root pages|WingSide inbound core content pages"`
   PASS 3/3.
 - Follow-up fix on 2026-07-08 after final external review:
-  - IT/ES/PT WingsSide `site-settings.seo` seed now includes native
+  - IT/ES/PT WingSide `site-settings.seo` seed now includes native
     `defaultDescription`, `defaultTitle` and `titleSuffix` instead of inheriting
     the English `Inbound Vietnam` suffix.
   - Selective seed now always seeds/refreshes theme presets first, preventing
-    `SEED_ONLY_SITE=wings-side` from creating WingsSide settings with a null
+    `SEED_ONLY_SITE=wings-side` from creating WingSide settings with a null
     `branding.themePreset` relation and falling back to `premium`.
   - Seed runtime now disables version writes and Payload local transactions for
     seed operations to reduce SQLite writer contention during large local
@@ -100,7 +100,7 @@ Follow-up implementation on 2026-07-08 after manual review:
   `pnpm exec tsc --noEmit` PASS; targeted eslint PASS with the existing
   `scripts/seed-subsites.ts` `no-explicit-any` warnings only.
 - 2026-07-08 local data validation blocker:
-  SQLite/libsql still returns `SQLITE_BUSY` during large WingsSide/full DB seed
+  SQLite/libsql still returns `SQLITE_BUSY` during large WingSide/full DB seed
   attempts, including on a newly recreated `payload-tourplatform.db` while
   `PAYLOAD_DB_PUSH=true` was creating version block tables. This blocks a clean
   local reseed proof. The code path should be revalidated against PostgreSQL or
@@ -114,16 +114,16 @@ Follow-up implementation on 2026-07-08 after manual review:
     Result: PASS, `Production-oriented subsites seeded successfully.`
   - Verified `/wingsside/it` against the PostgreSQL-backed dev server:
     `data-site-preset="wings-side-editorial-inbound-v2"` and browser title
-    `WingsSide | Vietnam su misura`.
+    `WingSide | Vietnam su misura`.
   - Final targeted E2E against PostgreSQL-backed `localhost:3000` PASS 4/4 for
-    WingsSide header, localized root pages, language switcher hrefs and core
+    WingSide header, localized root pages, language switcher hrefs and core
     content pages.
   - Local SQLite remains a bootstrap-only friction item tracked in Harness
     backlog #5; it is no longer blocking E08 proof because PostgreSQL is the
     required production/staging proof path.
 - 2026-07-08 UI/UX content cleanup after `agent-browser` review:
-  - Replaced visible seed/proof labels in WingsSide media and core pages:
-    `WingsSide inbound hero`, `Vietnam destination cover`,
+  - Replaced visible seed/proof labels in WingSide media and core pages:
+    `WingSide inbound hero`, `Vietnam destination cover`,
     `Vietnam travel styles image`, `Vietnam sample itineraries image` and
     `Planning cue` are no longer emitted in seed/runtime UI.
   - Core page copy was tightened from implementation-facing labels to
@@ -132,7 +132,7 @@ Follow-up implementation on 2026-07-08 after manual review:
     `Sample itinerary structures`.
   - Localized IT/ES/PT root-page hero links and CTA links now use native labels
     instead of English fallback labels.
-  - FeatureGrid links for WingsSide English seed pages now use `Explore`
+  - FeatureGrid links for WingSide English seed pages now use `Explore`
     instead of the Vietnamese helper default `Xem thêm`.
   - PostgreSQL proof DB `wings_seed_proof` was reseeded successfully with the
     updated content, ending with `Production-oriented subsites seeded
@@ -141,12 +141,12 @@ Follow-up implementation on 2026-07-08 after manual review:
     seed-label regex hits and `/wingsside/plan-your-trip` renders the English
     form support heading instead of the Vietnamese heading.
 - 2026-07-09 follow-up after manual validation:
-  - IT/ES/PT WingsSide homepage seed now uses the same full inbound homepage
+  - IT/ES/PT WingSide homepage seed now uses the same full inbound homepage
     structure as EN/VI instead of the earlier abbreviated localized template:
-    inherited cinematic hero carousel, trust strip, why-WingsSide bento grid,
+    inherited cinematic hero carousel, trust strip, why-WingSide bento grid,
     stats, destination hub, travel styles, sample itineraries, planning-note
     carousel and final CTA.
-  - The localized homepage content reuses WingsSide media IDs and native
+  - The localized homepage content reuses WingSide media IDs and native
     IT/ES/PT copy for paid-traffic entry pages, while keeping planning notes
     explicitly framed as sample planning notes rather than real testimonials.
   - PostgreSQL proof DB `wings_seed_proof` was reseeded successfully with
@@ -157,9 +157,9 @@ Follow-up implementation on 2026-07-08 after manual review:
     `color: rgb(5, 40, 41)` on a light button background. Screenshot:
     `artifacts/wingsside-locale-footer-after-fix/wingsside-it-home-after-fix.png`.
 - 2026-07-09 seed maintainability follow-up:
-  - Refactored the IT/ES/PT WingsSide homepage seed away from repeated nested
+  - Refactored the IT/ES/PT WingSide homepage seed away from repeated nested
     locale ternaries by introducing `localizedHomeBlockCopy` lookup data for
-    trust-strip items, why-WingsSide cards, stats, travel styles, sample
+    trust-strip items, why-WingSide cards, stats, travel styles, sample
     packages and planning-note carousel entries.
   - The refactor keeps the reviewed native copy and page structure intact while
     making future paid-locale expansion a data-table change rather than a
@@ -169,7 +169,7 @@ Follow-up implementation on 2026-07-08 after manual review:
     ending with `Production-oriented subsites seeded successfully.`
   - Validation: `pnpm exec tsc --noEmit` PASS; targeted eslint PASS with only
     existing `scripts/seed-subsites.ts` `no-explicit-any` warnings; targeted
-    Playwright PASS 3/3 for WingsSide hero/header/localized root pages.
+    Playwright PASS 3/3 for WingSide hero/header/localized root pages.
 - 2026-07-14 customer-feedback follow-up:
   - Replaced the implementation-facing inbound planning strip with four
     production content cards linking to trip planning, destinations, about and
@@ -185,6 +185,6 @@ Follow-up implementation on 2026-07-08 after manual review:
   - Added additive PostgreSQL migration
     `20260714_120000_testimonial_note_metadata`; empty-to-head PostgreSQL 16.14
     migration smoke PASS with no pending migration.
-  - Full PostgreSQL WingsSide/all-site reseed PASS. Type generation and
+  - Full PostgreSQL WingSide/all-site reseed PASS. Type generation and
     TypeScript PASS; component test PASS 4/4; targeted composer Playwright PASS
     1/1; targeted eslint has 0 errors and the six existing seed warnings only.

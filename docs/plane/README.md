@@ -54,8 +54,8 @@ pnpm run plane:import:all
 ## Quy ước mapping
 
 - Workspace = `WingsGroup`.
-- Project = site hoặc phần lõi, ví dụ `WingsSide`, `WingsGo`, `Nền tảng lõi WingsGroup`.
-- Epic = nhóm mục tiêu như `E08 - Nâng cấp inbound WingsSide`.
+- Project = site hoặc phần lõi, ví dụ `WingSide`, `WingsGo`, `Nền tảng lõi WingsGroup`.
+- Epic = nhóm mục tiêu như `E08 - Nâng cấp inbound WingSide`.
 - `US-xxx` = work item parent.
 - Acceptance criteria hoặc checklist dưới từng US = sub-work item.
 - Cycle = sprint hoặc mốc thời gian.
@@ -84,7 +84,7 @@ pnpm run plane:import:all
 - Repo có trùng mã `US-026` đến `US-029` giữa E07 và E08; script ưu tiên folder epic theo `epicKey` để tránh lấy nhầm story file.
 - E07 đã được chuẩn hóa lại: các story tour cũ bị trùng `US-025..US-029` được
   đổi thành `US-035..US-039`. `US-025` hiện là PostgreSQL Migration Smoke Gate,
-  còn `US-026..US-034` thuộc E08 WingsSide.
+  còn `US-026..US-034` thuộc E08 WingSide.
 - Type thừa `Epics` trong project `Nền tảng lõi WingsGroup` đã được xóa vì
   chưa có work item nào sử dụng.
 - `created_at` trên Plane là metadata hệ thống của Plane, không backdate được qua API public.

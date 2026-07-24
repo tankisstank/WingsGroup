@@ -2,7 +2,7 @@
 
 ## Canonical identity
 
-The following values are normative for the Wingside tenant:
+The following values are normative for the WingSide tenant:
 
 | Concern               | Canonical value                   | Notes                                                                                 |
 | --------------------- | --------------------------------- | ------------------------------------------------------------------------------------- |
@@ -11,7 +11,7 @@ The following values are normative for the Wingside tenant:
 | Technical tenant code | `wing-side`                       | Stored in `sites.code`; used by routing, cache, capability, access and import scopes. |
 | Local path alias      | `/wingsside`                      | Development-only multisite simulation path; it is not the tenant code.                |
 | Theme key             | `wings-side`                      | Existing visual-theme identifier. It is intentionally distinct from the tenant code.  |
-| Theme preset          | `wings-side-editorial-inbound-v2` | Existing Wingside hi-fi token preset.                                                 |
+| Theme preset          | `wings-side-editorial-inbound-v2` | Existing WingSide hi-fi token preset.                                                 |
 | Source wordmark       | `WING SIDE`                       | Brand-source provenance only; not the current public site name or tenant code.        |
 
 ## Implementation rules

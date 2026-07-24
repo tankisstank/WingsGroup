@@ -49,4 +49,4 @@ Cấu trúc URL tập trung dưới nhánh `vietnam/` rồi tách tiếp thành 
 
 ## Hàm ý cho WingsTravel
 
-Đây là hướng tốt nếu muốn làm inbound “dịch vụ tư vấn cao” hơn là “catalog đóng gói”. Có thể tham khảo cho các page ask-for-quote của WingsSide/WingsPlus.
+Đây là hướng tốt nếu muốn làm inbound “dịch vụ tư vấn cao” hơn là “catalog đóng gói”. Có thể tham khảo cho các page ask-for-quote của WingSide/WingsPlus.
