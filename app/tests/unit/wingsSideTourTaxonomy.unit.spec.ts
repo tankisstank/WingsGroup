@@ -5,6 +5,7 @@ import {
   assertTourTaxonomyScope,
   buildTourTaxonomyPlanRecords,
   classifyTourTaxonomyState,
+  taxonomyChecksum,
   validateTourTaxonomyMappings,
   wingsSideTourTaxonomyBatchID,
   wingsSideTourTaxonomyExpectedCount,
@@ -70,6 +71,24 @@ describe('WingSide tour taxonomy planner', () => {
     ).toBe(true)
     expect(() => assertTourTaxonomyPlanRecords(plan)).not.toThrow()
     expect(classifyTourTaxonomyState({ documents: scoped, records: plan })).toBe('before')
+  })
+
+  it('keeps checksums stable when PostgreSQL JSONB reorders object keys', () => {
+    expect(
+      taxonomyChecksum({
+        evidence: 'reviewed',
+        mappingRevision: 'v1',
+        reviewStatus: 'mapped',
+        sourceID: 'source-1',
+      }),
+    ).toBe(
+      taxonomyChecksum({
+        evidence: 'reviewed',
+        sourceID: 'source-1',
+        reviewStatus: 'mapped',
+        mappingRevision: 'v1',
+      }),
+    )
   })
 
   it('fails closed on count, batch, site and mapping drift', () => {

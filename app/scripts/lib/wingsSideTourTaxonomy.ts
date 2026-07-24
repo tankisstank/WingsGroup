@@ -193,8 +193,23 @@ export const taxonomyRelationID = (
   return value?.id ?? null
 }
 
-export const taxonomyChecksum = (value: unknown) =>
-  createHash('sha256').update(JSON.stringify(value)).digest('hex')
+const canonicalizeTaxonomyValue = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(canonicalizeTaxonomyValue)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, entry]) => [key, canonicalizeTaxonomyValue(entry)]),
+    )
+  }
+  return value
+}
+
+export const taxonomyChecksum = (value: unknown) => {
+  const serialized = JSON.stringify(canonicalizeTaxonomyValue(value))
+  if (serialized === undefined) throw new Error('Taxonomy checksum value is not JSON-serializable')
+  return createHash('sha256').update(serialized).digest('hex')
+}
 
 export const extractTourTaxonomySnapshot = (
   document: TourTaxonomyDocument,
