@@ -81,9 +81,31 @@ pnpm exec playwright test tests/e2e/wingsside-proof-archive.e2e.spec.ts --config
   component now supplies a dedicated 100%-height picture class; the final
   browser pass reports zero missing or zero-height visible images and zero
   console errors.
-- `pnpm run plane:preview` PASS and mapped US-052 to WingSide / E08 with no
-  acceptance-criteria child task names. `pnpm run plane:sync:workitems` was
-  blocked by Plane HTTP 403 because Initiatives requires a paid plan.
+- Production release `f12077d92394f0e07aa21d05d6ef98ae762f4844` was built as
+  the Docker `runner` target and promoted after the isolated port-3001 canary
+  passed PostgreSQL, Redis, Proof Archive and Process Board checks.
+- The live app uses image
+  `sha256:295f58bf9dfa305bbf106eb19fb3925546cf21ff79b70ec5e010ddfa46c63b3f`.
+  Rollback image
+  `wingstravel-app:rollback-e451cb03a4ad5b961895470b854a97aa4c1381f6`
+  and the previous release source are retained.
+- Encrypted pre-deploy backup
+  `wingsside-us052-predeploy-20260724T182715Z.dump.age` passed the
+  `pg_restore --list` drill with SHA-256
+  `e2bdbb185c0e828744d91d37aa0c2cb0ed72d62579dba966939639c7656d9bc8`.
+- Production agent-browser verified 21/4/17 filtering, 21/21 original
+  documents, 570px desktop and 990px mobile stages, zero horizontal overflow,
+  dialog Escape/focus return and all four Process Board tabs. `wingside.vn`,
+  `wingsgo.vn`, `wingsplus.vn` and `wingsgroup.vn` returned HTTP 200; live
+  health returned `ok`, while readiness retained the pre-existing
+  `leadDelivery: disabled` degraded note with PostgreSQL and Redis both up.
+- Plane preview/import/sync completed for the scoped US-052 record.
+  `missingCount` is `0`; API verification confirms project `WSIDE` / `WingSide`,
+  parent `epic-workitem:E08`, state `Đã bàn giao`, start/target date
+  `2026-07-24`, no child tasks and no generic acceptance-criteria child names.
+  The current Plane plan does not support Initiative links or custom work-item
+  types, so those optional links were skipped without blocking Project/Epic/US
+  synchronization.
 
 Evidence artifacts:
 
@@ -97,6 +119,8 @@ Evidence artifacts:
 - `evidence/us052-local-cms-dialog-390.png`
 - `evidence/us052-local-final-desktop.png`
 - `evidence/us052-local-final-mobile.png`
+- `evidence/us052-production-desktop.png`
+- `evidence/us052-production-mobile.png`
 
 Bounding-box summary across all 21 records per breakpoint:
 
