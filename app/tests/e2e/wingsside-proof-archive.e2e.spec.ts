@@ -9,7 +9,7 @@ const repoRoot = path.resolve(__dirname, '../../..')
 const cssPath = path.join(repoRoot, 'app/src/components/WingsSideHiFi/hifi-sections.css')
 const evidenceDir = path.join(
   repoRoot,
-  'docs/stories/epics/E08-wingsside-inbound-upgrade/US-051-wingsside-proof-archive/evidence',
+  'docs/stories/epics/E08-wingsside-inbound-upgrade/US-052-wingsside-proof-archive/evidence',
 )
 const breakpoints = [360, 390, 430, 600, 768, 820, 1024, 1366, 1440, 1920]
 
@@ -18,13 +18,13 @@ const certificateSvg = (index: number) =>
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
   <rect width="900" height="1200" fill="#fffdfa"/>
   <rect x="80" y="80" width="740" height="1040" fill="none" stroke="#005090" stroke-width="10"/>
-  <text x="450" y="250" text-anchor="middle" font-family="Arial" font-size="58" font-weight="700" fill="#10233f">WingsSide Proof</text>
+  <text x="450" y="250" text-anchor="middle" font-family="Arial" font-size="58" font-weight="700" fill="#10233f">WingSide Proof</text>
   <text x="450" y="410" text-anchor="middle" font-family="Arial" font-size="44" fill="#10233f">Verified Record ${index}</text>
   <text x="450" y="530" text-anchor="middle" font-family="Arial" font-size="34" fill="#627086">Original document image</text>
   <circle cx="450" cy="760" r="120" fill="none" stroke="#b87a14" stroke-width="16"/>
 </svg>`)}`
 
-test.describe('WingsSide Proof Archive fixed-frame evidence', () => {
+test.describe('WingSide Proof Archive fixed-frame evidence', () => {
   test('keeps exact stage height for every record and breakpoint', async ({ page }) => {
     const css = await fs.readFile(cssPath, 'utf8')
     await fs.mkdir(evidenceDir, { recursive: true })
@@ -166,15 +166,15 @@ test.describe('WingsSide Proof Archive fixed-frame evidence', () => {
     }
 
     await fs.writeFile(
-      path.join(evidenceDir, 'us051-bounding-box-results.json'),
+      path.join(evidenceDir, 'us052-bounding-box-results.json'),
       `${JSON.stringify(results, null, 2)}\n`,
     )
 
     await page.setViewportSize({ height: 1000, width: 1440 })
-    await page.screenshot({ fullPage: true, path: path.join(evidenceDir, 'us051-desktop-1440.png') })
+    await page.screenshot({ fullPage: true, path: path.join(evidenceDir, 'us052-desktop-1440.png') })
     await page.setViewportSize({ height: 844, width: 390 })
-    await page.screenshot({ fullPage: true, path: path.join(evidenceDir, 'us051-mobile-390.png') })
+    await page.screenshot({ fullPage: true, path: path.join(evidenceDir, 'us052-mobile-390.png') })
     await page.locator('.ws-hifi-creds__document-button').click()
-    await page.screenshot({ fullPage: true, path: path.join(evidenceDir, 'us051-dialog-390.png') })
+    await page.screenshot({ fullPage: true, path: path.join(evidenceDir, 'us052-dialog-390.png') })
   })
 })

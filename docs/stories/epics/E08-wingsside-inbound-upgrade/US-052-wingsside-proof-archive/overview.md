@@ -1,8 +1,8 @@
-# US-051 - Redesign WingsSide credentials as Proof Archive
+# US-052 - Redesign WingSide credentials as Proof Archive
 
 ## Current Behavior
 
-The WingsSide home credentials section renders as a carousel-like band. The live
+The WingSide home credentials section renders as a carousel-like band. The live
 data path verified for this story is:
 
 `Payload Page 142 localized layout -> queryPageByPath(depth=3) -> filterCmsLayoutBlocksForHiFiComposer -> WingsSideHiFiPageBody -> HomeHiFiPage -> RenderBlocks -> CredentialsCarouselBlock -> CredentialsCarousel`.
@@ -17,7 +17,7 @@ records separate from the CMS block.
 The credentials section is a responsive Proof Archive backed only by CMS
 `credentialsCarousel.items`. It preserves `data-od-id="home-creds"`, semantic
 section rendering, locale routing, the depth-3 Payload Media relationship
-pipeline, and WingsSide hi-fi composer boundaries.
+pipeline, and WingSide hi-fi composer boundaries.
 
 Only verified `cert` and `award` records with stable row IDs and populated Media
 relationships render publicly. Unsupported `member` and `iso` rows remain
@@ -26,8 +26,8 @@ no runtime fallback to locale credential records, no autoplay, and no timer.
 
 ## Affected Users
 
-- Public WingsSide visitors inspecting airline appointments and awards.
-- CMS editors authoring WingsSide credentials and awards.
+- Public WingSide visitors inspecting airline appointments and awards.
+- CMS editors authoring WingSide credentials and awards.
 - QA/release reviewers verifying fixed-frame responsive behavior.
 
 ## Affected Product Docs
@@ -39,5 +39,5 @@ no runtime fallback to locale credential records, no autoplay, and no timer.
 
 - No destructive migration.
 - No production database access or production data mutation.
-- No changes outside the WingsSide credentials section and its mapping/tests.
+- No changes outside the WingSide credentials section and its mapping/tests.
 - No Plane API sync from this feature worker.

@@ -2,7 +2,7 @@
 
 ## Goal
 
-Replace the WingsSide Credentials & Awards carousel with a CMS-backed Proof
+Replace the WingSide Credentials & Awards carousel with a CMS-backed Proof
 Archive that makes original documents inspectable without layout shifts,
 autoplay, or locale-copy record fallback.
 
@@ -21,7 +21,7 @@ Out of scope:
 
 - Production services, production databases, migrations, deploys, Plane sync,
   merge, push, PR creation, and port 3000.
-- Other WingsSide sections.
+- Other WingSide sections.
 
 ## Risk Classification
 
@@ -59,12 +59,12 @@ Pause for human confirmation if:
 
 - A destructive migration is required.
 - Production data access is required.
-- A non-credentials WingsSide section must change.
+- A non-credentials WingSide section must change.
 - Required validation cannot run and no lower-risk substitute exists.
 
 ## Harness Notes
 
 The worker did not modify the external release Harness database. During root
-audit, intake `#104`, story `US-051`, and trace `#225` were recorded in the
+audit, intake `#104`, story `US-052`, and trace `#225` were recorded in the
 durable release database after the implementation and validation evidence had
 been reviewed.

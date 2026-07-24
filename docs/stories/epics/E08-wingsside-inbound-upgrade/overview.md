@@ -42,6 +42,7 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-049  | high-risk | production released | WingSide tour taxonomy and BestPrice 22 classification             |
 | US-050  | high-risk | planned             | Real-tour Home discovery and BUG-WS-001 remediation                 |
 | US-051  | normal    | production released | WingSide homepage process-board redesign                            |
+| US-052  | high-risk | implemented locally | WingSide credentials Proof Archive                                  |
 
 ## Current evidence
 
@@ -130,6 +131,11 @@ architecture and avoids building a parallel site, CMS, or page builder.
   four-step planning board. The stakeholder-approved desktop/mobile treatment,
   click and keyboard behavior, fixed stage and overflow contracts are live in
   production in release `e451cb03a4ad5b961895470b854a97aa4c1381f6`.
+- US-052 re-keys the previously colliding credentials feature and replaces the
+  autoplay carousel with a CMS-only Proof Archive. The integrated production
+  build passes 21/4/17 filtering, 21/21 document media, fixed desktop/mobile
+  frames, keyboard dialog behavior and US-051 Process Board regression checks
+  locally; production release proof remains pending.
 
 ## Current constraints
 
