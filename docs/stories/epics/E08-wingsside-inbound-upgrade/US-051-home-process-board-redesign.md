@@ -69,3 +69,10 @@ cards treatment.
 - `pnpm run build` — pass.
 - Direct Playwright execution against the reviewed local runtime — pass, 1/1 at 1440px and 390px.
 - Stakeholder visual review — accepted on 2026-07-24.
+- Production release `e451cb03a4ad5b961895470b854a97aa4c1381f6` — live on
+  `wingside.vn` on 2026-07-24.
+- Production `agent-browser` QA — four scoped tabs rendered; click and keyboard
+  navigation changed the active panel; mobile 390px had no horizontal overflow;
+  the process board and docked specials treatment rendered correctly.
+- Production health and tenant isolation smoke — `wingside.vn`, `wingsgo.vn`
+  and `wingsplus.vn` returned HTTP 200; app live, PostgreSQL and Redis checks passed.

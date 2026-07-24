@@ -58,12 +58,20 @@ consistently across Home and discovery pages.
 
 Schema, generated types, tenant-scoped query helper, additive PostgreSQL
 migration, SQLite bootstrap parity, reviewed technical map, guarded
-dry-run/apply/rollback tooling and automated proof are implemented. The
-2026-07-24 dry-run against a copy of the 22-tour local database reports
-`changed=22`, `unchanged=0`, with zero missing mappings, missing records,
-conflicts or exceptions and no data mutation.
+dry-run/apply/rollback tooling and automated proof are implemented and
+released to production.
 
 Editorial and PM sign-off on mapping revision `us-049-v1-20260724` was
 received from the project owner on 2026-07-24. The approved plan was applied
-to the local WingSide database and verified at the expected `after` state.
-Production was not mutated.
+to the local WingSide database and then to production through the separately
+approved deployment plan.
+
+Production release `e451cb03a4ad5b961895470b854a97aa4c1381f6` applied the
+additive taxonomy migrations and the signed 22-record plan on 2026-07-24.
+The apply report verified state `after`; the post-apply dry-run reports
+`changed=0`, `unchanged=22`, with zero missing mappings, missing records,
+conflicts or exceptions. Direct PostgreSQL proof confirms 22 distinct source
+records, 22 reviewed provenance entries, 58 destination relations, 35
+travel-style relations, no missing classification and no duplicate source ID.
+The encrypted pre-deploy backup, prior release and prior app image remain the
+rollback points.

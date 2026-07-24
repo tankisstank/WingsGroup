@@ -39,8 +39,9 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-046A | high-risk | implemented         | WingSide 8-page hi-fi funnel remediation                            |
 | US-047  | normal    | production released | Governed 24-record credentials catalog and reusable CMS block       |
 | US-048  | high-risk | implemented         | Eight-page hi-fi parity remediation and DOM review contract         |
-| US-049  | high-risk | validation pending  | WingSide tour taxonomy and BestPrice 22 classification             |
+| US-049  | high-risk | production released | WingSide tour taxonomy and BestPrice 22 classification             |
 | US-050  | high-risk | planned             | Real-tour Home discovery and BUG-WS-001 remediation                 |
+| US-051  | normal    | production released | WingSide homepage process-board redesign                            |
 
 ## Current evidence
 
@@ -121,9 +122,14 @@ architecture and avoids building a parallel site, CMS, or page builder.
   imported tours. US-050 uses those real records for Home discovery and closes
   BUG-WS-001, where Sample Journeys currently presents static product facts.
 - US-049 schema, query contract, migration, guarded backfill and 22-record
-  technical map are implemented. The copied-database dry-run is clean and
-  non-mutating; editorial/PM approval of revision `us-049-v1-20260724` remains
-  the gate before local apply, and production remains frozen.
+  technical map are implemented and live in production. Editorial/PM approval
+  of revision `us-049-v1-20260724` was recorded before apply. Release
+  `e451cb03a4ad5b961895470b854a97aa4c1381f6` verified all 22 products at the
+  signed `after` state; the post-apply dry-run is idempotent at 0 changes.
+- US-051 replaces the equal-weight homepage process cards with the accepted
+  four-step planning board. The stakeholder-approved desktop/mobile treatment,
+  click and keyboard behavior, fixed stage and overflow contracts are live in
+  production in release `e451cb03a4ad5b961895470b854a97aa4c1381f6`.
 
 ## Current constraints
 
