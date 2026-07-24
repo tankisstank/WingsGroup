@@ -4320,9 +4320,8 @@ body[data-site-code='wing-side'][data-public-route='/']:has(.hero-presentation--
   body[data-site-code='wing-side'][data-public-route='/'] .wingsside-specials,
   body[data-site-code='wing-side'][data-public-route='/']:has(.hero-presentation--carousel)
     .wingsside-specials {
-    /* Keep the promo alongside the hero content on wide screens instead of
-       snapping directly below the fixed header. */
-    top: clamp(180px, 22vh, 280px);
+    top: auto;
+    bottom: 20px;
   }
 }
 
