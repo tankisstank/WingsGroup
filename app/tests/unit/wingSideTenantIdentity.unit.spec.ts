@@ -30,7 +30,7 @@ describe('Wingside tenant identity contract', () => {
 
     expect(tenantSeedStart).toBeGreaterThanOrEqual(0)
     expect(tenantSeed).toContain("domain: 'wingside.vn'")
-    expect(tenantSeed).toContain("name: 'wingside.vn'")
+    expect(tenantSeed).toContain("name: 'WingSide'")
     expect(seed).not.toMatch(/code:\s*'wings-side'/)
     expect(seed).toContain("defaultTitle: 'wingside.vn'")
   })
@@ -58,6 +58,16 @@ describe('Wingside tenant identity contract', () => {
     expect(migration).toContain('s."code" = \'wing-side\'')
     expect(migration).toContain('SET "branding_theme_key" = \'custom\'')
     expect(migration).not.toContain('s."code" IN')
+  })
+
+  it('normalizes the final public display brand to WingSide', () => {
+    const migration = appFile('src/migrations/20260724_130000_wing_side_display_brand.ts')
+
+    expect(migration).toContain('"name" = \'WingSide\'')
+    expect(migration).toContain('"site_name" = \'WingSide\'')
+    expect(migration).toContain('"branding_logo_text" = \'WingSide\'')
+    expect(migration).toContain('"title" = \'WingSide Trip Planner\'')
+    expect(migration).toContain('s."code" = \'wing-side\'')
   })
 
   it('repairs thin style metadata in CMS with a tenant-scoped rollback', () => {
