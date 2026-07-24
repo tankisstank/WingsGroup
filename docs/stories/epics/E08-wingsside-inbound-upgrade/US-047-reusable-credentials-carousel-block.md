@@ -139,7 +139,9 @@ release commit `f70ee48`. The public VPS was not changed.
   console logs were empty.
 - All 21 rendered credential image URLs returned HTTP 200 with `image/jpeg`.
   The 8 hub routes, 22 published tour routes, five locale homes and both health
-  endpoints passed 37/37 HTTP probes.
+  endpoints returned HTTP 200 in 37/37 probes. Readiness reported `degraded`
+  because lead delivery is intentionally disabled; PostgreSQL and Redis were
+  both up.
 - Production API/schema verification confirms that Page 142 contains one
   24-item `credentialsCarousel` block per locale with exact counts 21
   `verified` and three `needs-review`. The Admin editor route is protected and
@@ -157,7 +159,10 @@ release commit `f70ee48`. The public VPS was not changed.
   those three records from the public DOM exactly as the acceptance criterion
   requires, but API-level suppression is a separate hardening decision that
   should be tracked explicitly.
-- Plane preview passed with 48 stories and 153 child tasks; US-046, US-046A,
-  US-047 and US-048 resolve under Epic E08. Remote work-item sync remains
-  externally blocked by Plane HTTP 403 (`Payment required` for Initiatives), so
-  this repository and Harness evidence are the current tracking truth.
+- Plane preview passed with 48 stories and 153 child tasks after explicitly
+  selecting the installed Harness binary and active durable database; US-046,
+  US-046A, US-047 and US-048 resolve under Epic E08. The clean release worktree
+  itself lacks its gitignored Harness binary/database, which is recorded as
+  Harness backlog item 7. Remote work-item sync remains externally blocked by
+  Plane HTTP 403 (`Payment required` for Initiatives), so this repository and
+  Harness evidence are the current tracking truth.
