@@ -781,3 +781,75 @@ WP5 deployment and the immediate VPS post-deploy audit are complete. The
 release decision is `pass_with_notes`; the remaining notes are non-blocking
 decorative/brand-image alt text and the intentionally disabled lead-delivery
 integration.
+
+### US-046/046A/047/048 consolidated production release - 2026-07-24
+
+The project owner approved merge, PostgreSQL migration, catalog import, build
+and traffic switch for US-046, US-046A, US-047 and US-048. Grok worker calls
+failed with provider HTTP 402, so the documented fallback was used: Codex
+workers on GPT-5.5 prepared the two scoped hotfixes and a separate reviewer
+returned `SHIP`. The leader independently reran PostgreSQL proofs, inspected
+the diffs and enforced two fail-closed stops before production writes:
+
+1. the first plan stopped because the tenant used canonical code `wing-side`
+   while the importer expected `wings-side`;
+2. the second plan stopped because production had only locales `en` and `vi`.
+
+PRs
+[#1](https://github.com/tankisstank/WingsGroup/pull/1),
+[#2](https://github.com/tankisstank/WingsGroup/pull/2), and
+[#3](https://github.com/tankisstank/WingsGroup/pull/3) were then merged. The
+final master and deployed commit is
+`0cc90d9276c5256e572af37ba223bfa357ae4b15`.
+
+Production identity and rollback evidence:
+
+```text
+release:
+  /home/ubuntu/wings-travel/releases/wingsside-us047-0cc90d9276c5256e572af37ba223bfa357ae4b15
+source archive SHA-256:
+  6aa244ac44e8251ed5ec54a8c2e3bcddc837b4da4ef20c1ac0600ccb49112eea
+application image:
+  sha256:5c1911eea0350133c78a6f15757b6fe21911e93a99d2e7c00f5f359cb77dc0ee
+tools manifest:
+  sha256:062ae4aaf265e9f7d45e971bf9e39d9e59f2711a49c2336b58a647320e9df38d
+pre-import encrypted backup SHA-256:
+  d617f88f517b0c53eb01ff6f6da6c1c5cb823cdce4e7ebd15e438f8fd8e7c4d6
+```
+
+The backup restore drill passed on PostgreSQL 16. Migration
+`20260724_110000_wing_side_supported_locales` applied after explicit Payload
+confirmation and left 21 migration rows. Tenant `wing-side` retains default
+locale `en` and ordered supported locales `en`, `vi`, `it`, `es`, `pt`.
+
+The US-047 catalog plan used canonical SHA-256
+`e2ea49443295a7079cbe4046f2074256fa4267242d9642da3f26c5fb7ca20a4b`.
+Apply created 24 Media records and updated five localized Home pages.
+Verification passed at 120 placements: 105 verified and 15 needing review.
+The repeated apply was an idempotent zero-write no-op.
+
+Post-switch production audit:
+
+```text
+8 hub routes: 8/8 HTTP 200
+22 tour routes: 22/22 HTTP 200
+locale homes: en/vi/it/es/pt 5/5 HTTP 200
+health endpoints: live/ready 2/2 HTTP 200
+credential DOM per locale: 21/21 public, 1 active, counter 01/21
+credential images: 21/21 HTTP 200 image/jpeg
+desktop and 390px mobile: PASS
+next/previous interaction: 01/21 -> 02/21 -> 01/21
+browser console/page errors: 0
+```
+
+Readiness is intentionally `degraded` only because lead delivery remains
+disabled; PostgreSQL and Redis are up. No live form was submitted. Existing
+rollback images and both encrypted predeployment backups remain retained.
+
+Two residuals are explicit rather than hidden:
+
+- production Admin visual QA is waiting for an authenticated operator session;
+  the audit did not reset a password or create a privileged user;
+- the public Page API exposes metadata for the three `needs-review` items even
+  though the renderer correctly omits them from the public DOM. API-level
+  suppression is a separate hardening decision.

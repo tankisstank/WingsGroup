@@ -37,7 +37,7 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-045  | high-risk | implemented locally | BestPrice 22 import and publish preparation                         |
 | US-046  | high-risk | implemented         | WingSide consultative tour detail and production data repair        |
 | US-046A | high-risk | implemented         | WingSide 8-page hi-fi funnel remediation                            |
-| US-047  | normal    | implemented locally | Governed 24-record credentials catalog and reusable CMS block       |
+| US-047  | normal    | production released | Governed 24-record credentials catalog and reusable CMS block       |
 | US-048  | high-risk | implemented         | Eight-page hi-fi parity remediation and DOM review contract         |
 | US-049  | high-risk | planned             | WingsSide tour taxonomy and BestPrice 22 classification             |
 | US-050  | high-risk | planned             | Real-tour Home discovery and BUG-WS-001 remediation                 |
@@ -100,10 +100,13 @@ architecture and avoids building a parallel site, CMS, or page builder.
   Page Composer block. Editors can reuse it across pages and replace its image,
   copy, ordering, autoplay, and timing without a frontend code change; Home
   preserves its locked carousel position and legacy fallback until configured.
-  Release commit `f70ee48` is now built and running on the local production
-  port 3000 with 21 verified public awards and 24 CMS-managed catalog rows;
-  PostgreSQL 16 migration smoke and editor add/remove QA pass. The public VPS
-  remains unchanged.
+  Master commit `0cc90d9276c5256e572af37ba223bfa357ae4b15` is now live on
+  `wingside.vn`. PostgreSQL migration and the checksummed production catalog
+  plan passed with 24 Media records, five localized blocks and 120 placements.
+  Public desktop/mobile QA renders exactly 21 verified awards per locale, while
+  production schema/API proof confirms 24 CMS-managed rows per locale. An
+  authenticated production Admin visual pass remains an explicit operator
+  follow-up; no privileged account was created for the release audit.
 - US-048 closes the audited eight-page UI defects: single-owner Plan and Contact
   forms, complete CMS-backed package/channel inventories, corrected hero media
   and responsive controls, stable card-level review markers, and desktop/mobile
