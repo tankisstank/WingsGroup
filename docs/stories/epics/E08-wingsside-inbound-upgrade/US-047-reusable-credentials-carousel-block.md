@@ -2,7 +2,7 @@
 
 ## Status
 
-implemented and released to the local production runtime
+implemented, merged and released to production on 2026-07-24
 
 ## Lane
 
@@ -109,3 +109,55 @@ release commit `f70ee48`. The public VPS was not changed.
 - Screenshots: `artifacts/us047-home-desktop.png`,
   `artifacts/us047-home-mobile.png`, and `artifacts/us047-admin-fields.png`
   remain local evidence and are not release payload files.
+
+## Production release evidence - 2026-07-24
+
+- PRs
+  [#1](https://github.com/tankisstank/WingsGroup/pull/1),
+  [#2](https://github.com/tankisstank/WingsGroup/pull/2), and
+  [#3](https://github.com/tankisstank/WingsGroup/pull/3) were merged. Production
+  runs master commit `0cc90d9276c5256e572af37ba223bfa357ae4b15`.
+- The immutable application image is
+  `sha256:5c1911eea0350133c78a6f15757b6fe21911e93a99d2e7c00f5f359cb77dc0ee`.
+  The active release symlink resolves to
+  `/home/ubuntu/wings-travel/releases/wingsside-us047-0cc90d9276c5256e572af37ba223bfa357ae4b15`.
+- The encrypted pre-import PostgreSQL backup has SHA-256
+  `d617f88f517b0c53eb01ff6f6da6c1c5cb823cdce4e7ebd15e438f8fd8e7c4d6`.
+  Its PostgreSQL 16 restore drill passed before the catalog write.
+- Production migrations are at 21 rows. The latest migration is
+  `20260724_110000_wing_side_supported_locales`; the canonical tenant keeps
+  default locale `en` and ordered supported locales `en`, `vi`, `it`, `es`,
+  `pt`.
+- The checksummed catalog plan applied exactly 24 Media records and five
+  localized Home blocks. Verification reports 120 placements: 105
+  `verified` and 15 `needs-review`. Re-applying the same plan produced zero
+  writes.
+- Production browser QA passed on `/`, `/vi`, `/it`, `/es`, and `/pt`: every
+  locale renders exactly 21 public slides, one active slide and the `01 / 21`
+  counter. Next/previous navigation changed `01 / 21` to `02 / 21` and back.
+  Desktop and 390 px mobile screenshots were captured; browser error and
+  console logs were empty.
+- All 21 rendered credential image URLs returned HTTP 200 with `image/jpeg`.
+  The 8 hub routes, 22 published tour routes, five locale homes and both health
+  endpoints passed 37/37 HTTP probes.
+- Production API/schema verification confirms that Page 142 contains one
+  24-item `credentialsCarousel` block per locale with exact counts 21
+  `verified` and three `needs-review`. The Admin editor route is protected and
+  redirects unauthenticated requests to Payload login as expected.
+
+### Residual review notes
+
+- Production Admin visual QA still requires an authenticated operator session.
+  No password was reset and no temporary privileged account was created for
+  this audit. The previously completed authenticated local Admin proof remains
+  valid for the editor field contract; production API/database proof validates
+  the imported row counts.
+- The public Page read API currently returns metadata for all 24 block items,
+  including the three `needs-review` entries. The React renderer suppresses
+  those three records from the public DOM exactly as the acceptance criterion
+  requires, but API-level suppression is a separate hardening decision that
+  should be tracked explicitly.
+- Plane preview passed with 48 stories and 153 child tasks; US-046, US-046A,
+  US-047 and US-048 resolve under Epic E08. Remote work-item sync remains
+  externally blocked by Plane HTTP 403 (`Payment required` for Initiatives), so
+  this repository and Harness evidence are the current tracking truth.
