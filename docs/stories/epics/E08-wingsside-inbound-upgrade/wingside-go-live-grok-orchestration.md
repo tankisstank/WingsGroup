@@ -847,10 +847,14 @@ Readiness is intentionally `degraded` only because lead delivery remains
 disabled; PostgreSQL and Redis are up. No live form was submitted. Existing
 rollback images and both encrypted predeployment backups remain retained.
 
-Two residuals are explicit rather than hidden:
+Authenticated production Admin QA subsequently passed on central CMS Page 142.
+The Published editor exposed 24 rows (21 verified and three needs-review), 24
+Media relations and the full governed field contract in `en`, `vi`, `it`, `es`
+and `pt`. The audit was read-only: no field changed, Save/Publish was not
+invoked, `Publish changes` remained disabled and browser errors/warnings were
+empty.
 
-- production Admin visual QA is waiting for an authenticated operator session;
-  the audit did not reset a password or create a privileged user;
-- the public Page API exposes metadata for the three `needs-review` items even
-  though the renderer correctly omits them from the public DOM. API-level
-  suppression is a separate hardening decision.
+One residual remains explicit rather than hidden: the public Page API exposes
+metadata for the three `needs-review` items even though the renderer correctly
+omits them from the public DOM. API-level suppression is a separate hardening
+decision.
