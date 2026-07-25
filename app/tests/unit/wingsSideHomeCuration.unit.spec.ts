@@ -2,7 +2,9 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
   auditWingsSideHomeCuration,
+  resolveWingsSideHomeCuration,
   wingsSideHomeCuration,
+  wingsSideHomeCurationSourceIDs,
   wingsSideHomeDestinationSelections,
   wingsSideHomeFeaturedSelections,
   wingsSideHomeStyleSelections,
@@ -36,6 +38,24 @@ const eligibleTours = new Map(selectedTourIDs.map((id) => [
 ]))
 
 describe('WingSide Home curation audit', () => {
+  it('resolves approved source identities to environment-specific relation IDs', () => {
+    const remapped = resolveWingsSideHomeCuration(
+      new Map(wingsSideHomeCurationSourceIDs.map((sourceID, index) => [sourceID, index + 60])),
+    )
+
+    expect(remapped.destinationTourSelections.map(({ tour }) => tour)).toEqual([
+      60, 61, 62, 63, 64, 65,
+    ])
+    expect(remapped.styleTourSelections.map(({ tour }) => tour)).toEqual([
+      66, 67, 68, 69, 70, 71,
+    ])
+    expect(remapped.featuredJourneySelections.map(({ tour }) => tour)).toEqual([68, 60, 63])
+  })
+
+  it('fails closed when an approved source identity is absent', () => {
+    expect(() => resolveWingsSideHomeCuration(new Map())).toThrow(/source .* is missing/)
+  })
+
   it('accepts the approved exact curation and all eligible selections', () => {
     const result = auditWingsSideHomeCuration({
       actual: wingsSideHomeCuration,

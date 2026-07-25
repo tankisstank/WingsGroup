@@ -10,7 +10,8 @@ import {
 import {
   auditWingsSideHomeCuration,
   relationID,
-  wingsSideHomeCuration,
+  resolveWingsSideHomeCuration,
+  wingsSideHomeCurationSourceIDs,
   wingsSideHomeCurationSiteCode,
 } from './lib/wingsSideHomeCuration'
 import {
@@ -108,16 +109,36 @@ const main = async () => {
       )
     }
     let homePage = homePages.docs[0]
-    const selectedTourIDs = [...new Set([
-      ...wingsSideHomeCuration.destinationTourSelections.map(({ tour }) => tour),
-      ...wingsSideHomeCuration.styleTourSelections.map(({ tour }) => tour),
-      ...wingsSideHomeCuration.featuredJourneySelections.map(({ tour }) => tour),
-    ])]
     const toursResult = await payload.find({
-      collection: 'tour-products', depth: 0, limit: selectedTourIDs.length, overrideAccess: true,
-      pagination: false, req, locale: 'en', fallbackLocale: false,
-      where: { id: { in: selectedTourIDs } },
+      collection: 'tour-products',
+      depth: 0,
+      limit: wingsSideHomeCurationSourceIDs.length + 1,
+      overrideAccess: true,
+      pagination: false,
+      req,
+      locale: 'en',
+      fallbackLocale: false,
+      where: {
+        and: [
+          { site: { equals: site.id } },
+          { 'sourceProvenance.sourceId': { in: wingsSideHomeCurationSourceIDs } },
+        ],
+      },
     })
+    const sourceIDToTourID = new Map<string, number | string>()
+    for (const tour of toursResult.docs) {
+      const provenance = tour.sourceProvenance as { sourceId?: unknown } | null | undefined
+      if (typeof provenance?.sourceId === 'string') sourceIDToTourID.set(provenance.sourceId, tour.id)
+    }
+    if (
+      toursResult.docs.length !== wingsSideHomeCurationSourceIDs.length ||
+      sourceIDToTourID.size !== wingsSideHomeCurationSourceIDs.length
+    ) {
+      throw new Error(
+        `Expected exactly ${wingsSideHomeCurationSourceIDs.length} unique approved WingSide tour sources, found ${toursResult.docs.length}.`,
+      )
+    }
+    const approvedCuration = resolveWingsSideHomeCuration(sourceIDToTourID)
     const tours = new Map(toursResult.docs.map((tour) => [String(tour.id), tour]))
     const wrapperIDs = toursResult.docs.map((tour) => relationID(tour.wrapperPage)).filter((id): id is number | string => id !== null)
     const heroIDs = toursResult.docs.map((tour) => relationID(tour.heroMedia)).filter((id): id is number | string => id !== null)
@@ -127,6 +148,7 @@ const main = async () => {
     ])
     let audit = auditWingsSideHomeCuration({
       actual: (homePage.wingsSideHiFi as { home?: unknown } | undefined)?.home as never,
+      approved: approvedCuration,
       homePage,
       mediaIDs: new Set(media.docs.map(({ id }) => String(id))),
       siteID: site.id,
@@ -147,7 +169,7 @@ const main = async () => {
         data: {
           wingsSideHiFi: {
             ...(homePage.wingsSideHiFi || {}),
-            home: wingsSideHomeCuration,
+            home: approvedCuration,
           },
         },
         overrideAccess: true,
@@ -162,6 +184,7 @@ const main = async () => {
       })
       audit = auditWingsSideHomeCuration({
         actual: (homePage.wingsSideHiFi as { home?: unknown } | undefined)?.home as never,
+        approved: approvedCuration,
         homePage,
         mediaIDs: new Set(media.docs.map(({ id }) => String(id))),
         siteID: site.id,
@@ -180,7 +203,7 @@ const main = async () => {
     const homeForProjection =
       audit.matchesApprovedSelections
         ? (homePage.wingsSideHiFi as { home?: unknown } | undefined)?.home
-        : wingsSideHomeCuration
+        : approvedCuration
     const localeProjections = Object.fromEntries(
       await Promise.all(
         (['en', 'vi', 'it', 'es', 'pt'] as const).map(async (locale) => {
