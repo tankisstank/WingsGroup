@@ -40,7 +40,7 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-047  | normal    | production released | Governed 24-record credentials catalog and reusable CMS block       |
 | US-048  | high-risk | implemented         | Eight-page hi-fi parity remediation and DOM review contract         |
 | US-049  | high-risk | production released | WingSide tour taxonomy and BestPrice 22 classification             |
-| US-050  | high-risk | planned             | Real-tour Home discovery and BUG-WS-001 remediation                 |
+| US-050  | high-risk | implemented locally | Real-tour Home discovery and BUG-WS-001 remediation                 |
 | US-051  | normal    | production released | WingSide homepage process-board redesign                            |
 | US-052  | high-risk | production released | WingSide credentials Proof Archive                                  |
 
@@ -120,8 +120,8 @@ architecture and avoids building a parallel site, CMS, or page builder.
   `pass_with_notes`. US-048 is implemented.
 - US-049 and US-050 capture the post-parity product-data Change Request. US-049
   adds controlled destination/style taxonomy and a reviewed backfill for the 22
-  imported tours. US-050 uses those real records for Home discovery and closes
-  BUG-WS-001, where Sample Journeys currently presents static product facts.
+  imported tours. US-050 now uses governed real records for Home and filtered
+  hub discovery, fails closed on invalid curation, and closes BUG-WS-001.
 - US-049 schema, query contract, migration, guarded backfill and 22-record
   technical map are implemented and live in production. Editorial/PM approval
   of revision `us-049-v1-20260724` was recorded before apply. Release

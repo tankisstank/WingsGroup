@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { useSitePath } from '@/utilities/useSitePath'
 
@@ -30,8 +29,8 @@ const slugify = (value: string) =>
     .replace(/^-|-$/g, '')
 
 export const HomePlanner = ({ copy }: { copy: HomePlannerCopy }) => {
-  const router = useRouter()
   const toSitePath = useSitePath()
+  const [clientReady, setClientReady] = useState(false)
   const [destination, setDestination] = useState('')
   const [duration, setDuration] = useState('')
   const [month, setMonth] = useState('')
@@ -39,20 +38,12 @@ export const HomePlanner = ({ copy }: { copy: HomePlannerCopy }) => {
 
   const styleValue = useMemo(() => slugify(style || ''), [style])
 
-  const submit = (event: React.FormEvent) => {
-    event.preventDefault()
-    const params = new URLSearchParams()
-    if (destination) params.set('destination', destination)
-    if (duration) params.set('duration', duration)
-    if (month) params.set('month', month)
-    if (styleValue) params.set('style', styleValue)
-    const query = params.toString()
-    router.push(toSitePath(`/plan-your-trip${query ? `?${query}` : ''}`))
-  }
+  useEffect(() => setClientReady(true), [])
 
   return (
     <section
       className="ws-hifi-planner-section section-sm"
+      data-client-ready={clientReady ? 'true' : 'false'}
       data-od-id="home-planner"
       data-testid="wingsside-hifi-home-planner"
       id="home-planner"
@@ -69,7 +60,12 @@ export const HomePlanner = ({ copy }: { copy: HomePlannerCopy }) => {
             ))}
           </ul>
         </div>
-        <form className="planner-form" data-od-id="home-plan-form" onSubmit={submit}>
+        <form
+          action={toSitePath('/plan-your-trip')}
+          className="planner-form"
+          data-od-id="home-plan-form"
+          method="get"
+        >
           <h3 className="form-title">{copy.formTitle}</h3>
           <div className="field">
             <label htmlFor="ws-home-destination">{copy.destinationLabel}</label>
@@ -146,7 +142,12 @@ export const HomePlanner = ({ copy }: { copy: HomePlannerCopy }) => {
               ))}
             </div>
           </div>
-          <button className="btn btn-primary" data-od-id="home-plan-submit" type="submit">
+          <input name="style" type="hidden" value={styleValue} />
+          <button
+            className="btn btn-primary"
+            data-od-id="home-plan-submit"
+            type="submit"
+          >
             {copy.submitLabel}
           </button>
           <p className="planner-footnote">

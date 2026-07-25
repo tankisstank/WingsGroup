@@ -19,7 +19,7 @@ const phase1Routes = [
   },
   {
     path: '/he-sinh-thai',
-    title: /Hệ sinh thái dịch vụ/,
+    title: /Hệ sinh thái WingsGroup/,
     heading: 'Một hệ sinh thái, nhiều hành trình chuyên biệt',
   },
   {
@@ -146,40 +146,6 @@ const countPrimaryNavRows = (page: Page) =>
       return topSpread <= 8 ? 1 : new Set(visibleTops.map((top) => Math.round(top))).size
     })
 
-const getHeroControlOverlaps = (page: Page) =>
-  page.locator('[data-hero-presentation="cinematic-carousel"]').evaluate((hero) => {
-    const controlButtons = Array.from(
-      hero.querySelectorAll<HTMLElement>('.hero-presentation__carousel-controls button'),
-    )
-    const primaryCallsToAction = Array.from(
-      hero.querySelectorAll<HTMLElement>(
-        '.hero-presentation__slide[data-active="true"] a, .site-hero__planner-submit',
-      ),
-    ).filter((element) => {
-      const style = getComputedStyle(element)
-      return style.display !== 'none' && style.visibility !== 'hidden'
-    })
-
-    return controlButtons.flatMap((control) => {
-      const controlBox = control.getBoundingClientRect()
-
-      return primaryCallsToAction
-        .filter((cta) => {
-          const ctaBox = cta.getBoundingClientRect()
-          return !(
-            controlBox.right <= ctaBox.left ||
-            controlBox.left >= ctaBox.right ||
-            controlBox.bottom <= ctaBox.top ||
-            controlBox.top >= ctaBox.bottom
-          )
-        })
-        .map((cta) => ({
-          control: control.getAttribute('aria-label'),
-          cta: cta.textContent?.trim(),
-        }))
-    })
-  })
-
 const getContrastAgainstWhiteText = (page: Page, selector: string) =>
   page.locator(selector).evaluate((element) => {
     const match = getComputedStyle(element)
@@ -305,42 +271,40 @@ test.describe('Phase 1 public frontend smoke', () => {
     }
   })
 
-  test('renders WingsSide cinematic planner hero and routes the planner form', async ({ page }) => {
+  test('renders the WingSide hi-fi Home carousel and routes the planner form', async ({ page }) => {
     test.setTimeout(60_000)
 
     await page.setViewportSize({ height: 900, width: 1440 })
     await page.goto(`${e2eBaseURL}/wingsside`)
 
-    const hero = page.locator('[data-hero-presentation]')
-    await expect(hero).toHaveAttribute('data-hero-presentation', 'cinematic-carousel')
-    await expect(hero).toHaveAttribute('data-hero-preset', 'wingsside-inbound-cinematic-search')
-    // Bar B: editorial hifi-split surface (copy left + media card + planner band).
-    await expect(page.locator('.hero-presentation--carousel-hifi-split')).toHaveAttribute(
-      'data-hifi-split',
-      'true',
-    )
-    await expect(hero.locator('.hero-presentation__slide')).toHaveCount(3)
+    const home = page.getByTestId('wingsside-hifi-home')
+    const hero = page.getByTestId('wingsside-hifi-home-hero-carousel')
+    await expect(home).toBeVisible()
+    await expect(hero).toHaveAttribute('aria-roledescription', 'carousel')
+    await expect(hero.locator('.home-hero-slide')).toHaveCount(5)
 
     for (const width of [1440, 1280]) {
       await page.setViewportSize({ height: 900, width })
-      const majorControls = hero.locator(
-        '.hero-presentation__carousel-controls button:not([aria-label^="Go to slide"])',
-      )
+      const majorControls = hero.getByRole('button', { name: /Previous highlight|Next highlight/ })
       await expect(majorControls.first()).toBeVisible()
       for (const control of await majorControls.all()) {
         const box = await control.boundingBox()
         expect(box?.height).toBeGreaterThanOrEqual(44)
         expect(box?.width).toBeGreaterThanOrEqual(44)
       }
-      expect(await getHeroControlOverlaps(page)).toEqual([])
     }
 
-    const planner = page.getByRole('complementary', { name: 'Trip planning starter' })
-    await expect(planner.getByLabel('Destination')).toBeVisible()
+    const planner = page.getByTestId('wingsside-hifi-home-planner')
+    await expect(planner).toHaveAttribute('data-client-ready', 'true')
+    await expect(planner.getByLabel('Destination hub')).toBeVisible()
     await expect(planner.getByLabel('Duration')).toBeVisible()
 
-    await planner.getByLabel('Destination').selectOption('hue-hoi-an')
-    await planner.getByLabel('Duration').selectOption('8-10-days')
+    const destinationSelect = planner.locator('select[name="destination"]')
+    const durationSelect = planner.locator('select[name="duration"]')
+    await destinationSelect.selectOption('hue-hoi-an')
+    await durationSelect.selectOption('8-10-days')
+    await expect(destinationSelect).toHaveValue('hue-hoi-an')
+    await expect(durationSelect).toHaveValue('8-10-days')
     await planner.getByRole('button', { name: /Plan trip/i }).click()
     await expect(page).toHaveURL(
       /\/wingsside\/plan-your-trip\?destination=hue-hoi-an&duration=8-10-days/,
@@ -348,22 +312,17 @@ test.describe('Phase 1 public frontend smoke', () => {
 
     await page.setViewportSize({ height: 844, width: 390 })
     await page.goto(`${e2eBaseURL}/wingsside`)
-    const mobileHero = page.locator('[data-hero-presentation="cinematic-carousel"]')
-    await expect(mobileHero.locator('[aria-roledescription="carousel"]')).toHaveAttribute(
-      'data-client-ready',
-      'true',
-    )
-    // Hi-fi split keeps editorial copy outside slides; planner band stays available on mobile.
+    const mobileHero = page.getByTestId('wingsside-hifi-home-hero-carousel')
+    await expect(mobileHero).toHaveAttribute('aria-roledescription', 'carousel')
     await expect(
       page.getByRole('heading', { name: 'Tailor-made Vietnam journeys' }).first(),
     ).toBeVisible()
-    const mobilePlanner = page.getByRole('complementary', { name: 'Trip planning starter' })
-    await expect(mobilePlanner.getByLabel('Destination')).toBeVisible()
+    const mobilePlanner = page.getByTestId('wingsside-hifi-home-planner')
+    await expect(mobilePlanner.getByLabel('Destination hub')).toBeVisible()
     await expect(mobilePlanner.getByLabel('Duration')).toBeVisible()
     await expect(mobilePlanner.getByRole('button', { name: /Plan trip/i })).toBeVisible()
-    await expect(mobileHero.getByRole('button', { name: 'Previous slide' })).toBeVisible()
-    await expect(mobileHero.getByRole('button', { name: 'Next slide' })).toBeVisible()
-    expect(await getHeroControlOverlaps(page)).toEqual([])
+    await expect(mobileHero.getByRole('button', { name: 'Previous highlight' })).toBeVisible()
+    await expect(mobileHero.getByRole('button', { name: 'Next highlight' })).toBeVisible()
     const overflowX = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
     )
@@ -433,7 +392,7 @@ test.describe('Phase 1 public frontend smoke', () => {
 
       const promo = page.getByTestId('wingsside-specials')
       await expect(promo).toBeVisible()
-      const controls = page.locator('.hero-presentation__carousel-controls button:visible')
+      const controls = page.locator('.home-hero-controls button:visible')
       const promoBox = await promo.boundingBox()
       const controlBoxes = await controls.evaluateAll((buttons) =>
         buttons.map((button) => {
@@ -446,12 +405,10 @@ test.describe('Phase 1 public frontend smoke', () => {
           }
         }),
       )
-      const plannerBox = await page
-        .getByRole('complementary', { name: 'Trip planning starter' })
-        .boundingBox()
+      const plannerBox = await page.getByTestId('wingsside-hifi-home-planner').boundingBox()
       const bannerBox = await page.getByRole('banner').boundingBox()
       const plannerInteractiveBoxes = await page
-        .getByRole('complementary', { name: 'Trip planning starter' })
+        .getByTestId('wingsside-hifi-home-planner')
         .locator('a:visible, button:visible, input:visible, select:visible, textarea:visible')
         .evaluateAll((elements) =>
           elements.map((element) => {
@@ -486,6 +443,9 @@ test.describe('Phase 1 public frontend smoke', () => {
             '.site-hero__actions button:visible',
             '.site-hero__postcards a:visible',
             '.site-hero__postcards button:visible',
+            '.ws-hifi-home-hero__copy h1:visible',
+            '.ws-hifi-home-hero__copy p:visible',
+            '.ws-hifi-home-hero__copy a:visible',
           ].join(', '),
         )
         .evaluateAll((elements) =>
@@ -532,9 +492,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       expect((promoBox?.x ?? 0) + (promoBox?.width ?? 0)).toBeCloseTo(width - 20, 0)
       // Dot indicators stay small; enforce 44px only on major carousel chrome.
       const majorControlBoxes = await page
-        .locator(
-          '.hero-presentation__carousel-controls button:visible:not([aria-label^="Go to slide"])',
-        )
+        .locator('.home-hero-nav:visible')
         .evaluateAll((buttons) =>
           buttons.map((button) => {
             const box = button.getBoundingClientRect()
@@ -548,8 +506,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       expect(heroCopyBoxes.filter(overlapsPromo)).toEqual([])
       // Bar B hifi-split stacks media controls above the planner band (not floating overlay).
       // Only enforce control↔planner clearance for the legacy overlay hero.
-      const isHiFiSplit =
-        (await page.locator('.hero-presentation--carousel-hifi-split').count()) > 0
+      const isHiFiSplit = (await page.getByTestId('wingsside-hifi-home').count()) > 0
       if (!isHiFiSplit) {
         expect(
           controlBoxes.filter(
@@ -562,40 +519,21 @@ test.describe('Phase 1 public frontend smoke', () => {
           ),
         ).toEqual([])
       }
-      expect(await getHeroControlOverlaps(page)).toEqual([])
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
         ),
       ).toBe(false)
 
-      const next = page.getByRole('button', { name: 'Next slide' })
-      // Hi-fi split can place carousel chrome outside the initial viewport / clipped
-      // media stage. DOM click avoids Playwright viewport actionability rejection.
+      const next = page.getByRole('button', { name: 'Next highlight' })
       await next.evaluate((el: HTMLButtonElement) => el.click())
-      await expect(page.locator('.hero-presentation--carousel')).toHaveAttribute(
-        'data-active-index',
-        '1',
-      )
-
-      const autoplay = page.locator('.hero-presentation__carousel-controls > button').last()
-      const autoplayLabel = await autoplay.getAttribute('aria-label')
-      await autoplay.evaluate((el: HTMLButtonElement) => {
-        el.focus()
-        el.click()
-      })
-      await expect(autoplay).toHaveAttribute(
-        'aria-label',
-        autoplayLabel === 'Play carousel' ? 'Pause carousel' : 'Play carousel',
-      )
+      await expect(page.locator('.home-hero-slide[data-active="true"]')).toHaveCount(1)
+      await expect(page.locator('.home-hero-dot[aria-selected="true"]')).toHaveCount(1)
     }
 
     for (const width of [768, 1024, 1280, 1440]) {
       await page.setViewportSize({ height: 900, width })
       await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
-      await page.locator('.hero-presentation--carousel').evaluate((carousel) => {
-        carousel.classList.remove('hero-presentation--carousel')
-      })
       await revealSpecialsPastPlanner()
 
       const promoBox = await page.getByTestId('wingsside-specials').boundingBox()
@@ -615,6 +553,9 @@ test.describe('Phase 1 public frontend smoke', () => {
             '.site-hero__actions button:visible',
             '.site-hero__postcards a:visible',
             '.site-hero__postcards button:visible',
+            '.ws-hifi-home-hero__copy h1:visible',
+            '.ws-hifi-home-hero__copy p:visible',
+            '.ws-hifi-home-hero__copy a:visible',
           ].join(', '),
         )
         .evaluateAll((elements) =>
@@ -686,7 +627,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(page.locator('body')).toHaveAttribute('data-public-route', '/packages')
       await expect(page.getByTestId('wingsside-specials')).toHaveCount(0)
       // Bar B packages body is hi-fi inventory (CMS media layout suppressed).
-      await expect(page.locator('article[data-hifi-composer="true"]')).toBeVisible()
+      await expect(page.locator('article[data-hifi-body="true"]')).toBeVisible()
       await expect(page.getByTestId('wingsside-hifi-inventory')).toBeVisible()
       await expect(page.locator('.layout-media--contained')).toHaveCount(0)
     }

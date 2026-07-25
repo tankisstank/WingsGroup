@@ -9,6 +9,7 @@ import {
 } from '@/utilities/wingsSideHiFiMedia'
 import { getPublicRoutePathname, type SupportedLocaleCode } from '@/utilities/sitePaths'
 import type { WingsSideHiFiPageModel } from '@/utilities/wingsSideHiFiPageModel'
+import type { WingsSideHomeKeyedTourCard } from '@/tours/homeCuration'
 
 import { WingsSideCredentialsCarousel } from './CredentialsCarousel'
 import { getWingsSideHiFiCopy } from './copy'
@@ -82,6 +83,51 @@ const CardGrid = ({ items, testId }: { items: readonly CardItem[]; testId: strin
           <strong>{item.title}</strong>
           <span>{item.body}</span>
           {item.action ? <span className="ws-hifi-card__action">{item.action}</span> : null}
+        </span>
+      </SiteLink>
+    ))}
+  </div>
+)
+
+const TourDiscoveryGrid = ({
+  items,
+  locale,
+  testId,
+}: {
+  items: ReadonlyArray<WingsSideHomeKeyedTourCard>
+  locale: SupportedLocaleCode
+  testId: string
+}) => (
+  <div className="ws-hifi-grid" data-testid={testId}>
+    {items.map((card) => (
+      <SiteLink
+        className="ws-hifi-card ws-hifi-card--media"
+        href={card.href}
+        key={`${card.key}-${card.id}`}
+      >
+        <span className="ws-hifi-card__media">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            alt={card.hero.alt}
+            className="ws-hifi-card__img"
+            decoding="async"
+            loading="lazy"
+            src={card.hero.url}
+          />
+        </span>
+        <span className="ws-hifi-card__body">
+          <span className="ws-hifi-card__region">{card.key}</span>
+          <strong>{card.title}</strong>
+          <span>{card.summary}</span>
+          <span className="ws-hifi-card__action">
+            {card.duration.days} {locale === 'vi' ? 'ngày' : 'days'} ·{' '}
+            {card.price.kind === 'on-request'
+              ? card.price.label
+              : new Intl.NumberFormat(locale === 'vi' ? 'vi-VN' : 'en-US', {
+                  currency: card.price.currency,
+                  style: 'currency',
+                }).format(card.price.value)}
+          </span>
         </span>
       </SiteLink>
     ))}
@@ -169,10 +215,12 @@ export const WingsSideHiFiSectionInventory = ({
   locale,
   model,
   publicPathname,
+  searchParams,
 }: {
   locale: SupportedLocaleCode
   model?: WingsSideHiFiPageModel
   publicPathname: string
+  searchParams?: Record<string, string | string[] | undefined>
 }) => {
   const route = getPublicRoutePathname(publicPathname)
   const copy = getWingsSideHiFiCopy(locale)
@@ -181,6 +229,10 @@ export const WingsSideHiFiSectionInventory = ({
     typeof content[key] === 'string' && content[key].trim() ? content[key] : fallback
   const rows = <T,>(key: string, fallback: T[]): T[] =>
     Array.isArray(content[key]) && content[key].length ? (content[key] as T[]) : fallback
+  const queryValue = (key: string) => {
+    const value = searchParams?.[key]
+    return typeof value === 'string' ? value.toLowerCase() : undefined
+  }
 
   if (route === '/') {
     const whyAssets = ['sapa', 'family', 'culture', 'luxury'] as const
@@ -400,6 +452,29 @@ export const WingsSideHiFiSectionInventory = ({
   if (route === '/destinations') {
     const routes = rows('routes', copy.destinations.routes)
     const places = rows('places', copy.destinations.places)
+    const requestedDestination = queryValue('destination')
+    const selectedDestination = wingsSideHiFiCardBindings.destinations.some(
+      (card) => card.asset === requestedDestination,
+    )
+      ? requestedDestination
+      : undefined
+    const destinationItems = wingsSideHiFiCardBindings.destinations
+      .map((card, index) => ({
+        ...card,
+        action: `View ${places[index]?.title || card.title} ->`,
+        body: places[index]?.body || card.body,
+        href: places[index]?.href || card.href,
+        odId: `card-${card.asset}`,
+        region: places[index]?.region,
+        title: places[index]?.title || card.title,
+      }))
+      .filter((card) => !selectedDestination || card.asset === selectedDestination)
+    const destinationTours =
+      model?.homeCuration?.state === 'ready'
+        ? model.homeCuration.destinationTours.filter(
+            (tour) => !selectedDestination || tour.key === selectedDestination,
+          )
+        : []
     return (
       <div
         className="ws-hifi-inventory"
@@ -438,18 +513,22 @@ export const WingsSideHiFiSectionInventory = ({
         <section className="ws-hifi-section" data-od-id="dest-grid" id="dest-grid">
           <p className="ws-hifi-kicker">Key places</p>
           <h2>{text('deeperTitle', copy.destinations.deeperTitle)}</h2>
-          <CardGrid
-            items={wingsSideHiFiCardBindings.destinations.map((card, index) => ({
-              ...card,
-              action: `View ${places[index]?.title || card.title} ->`,
-              body: places[index]?.body || card.body,
-              href: places[index]?.href || card.href,
-              odId: `card-${card.asset}`,
-              region: places[index]?.region,
-              title: places[index]?.title || card.title,
-            }))}
-            testId="wingsside-hifi-dest-grid"
-          />
+          {selectedDestination && destinationItems.length ? (
+            <p aria-live="polite" className="ws-hifi-lede" data-testid="destination-filter-status">
+              Showing the selected destination: {destinationItems[0]?.title}.
+            </p>
+          ) : null}
+          {model?.homeCuration?.state === 'ready' ? (
+            <TourDiscoveryGrid
+              items={destinationTours}
+              locale={locale}
+              testId="wingsside-hifi-dest-grid"
+            />
+          ) : (
+            <p className="ws-hifi-lede" data-testid="wingsside-hifi-destinations-empty">
+              Curated destination tours are temporarily unavailable.
+            </p>
+          )}
           <div className="ws-hifi-cta-band ws-hifi-mid-cta" data-od-id="dest-mid-cta">
             <div>
               <h3>{text('closingTitle', 'Shortlist regions - then send one brief')}</h3>
@@ -465,47 +544,52 @@ export const WingsSideHiFiSectionInventory = ({
   }
 
   if (route === '/styles') {
-    const styles = rows('styles', copy.styles.styles)
+    const configuredStyles = rows('styles', copy.styles.styles)
+    const styles = configuredStyles.map((style, index) =>
+      index === wingsSideHiFiCardBindings.styles.length - 1
+        ? copy.styles.styles[index] || style
+        : style,
+    )
+    const requestedStyle = queryValue('style')
+    const selectedStyle = wingsSideHiFiCardBindings.styles.some((card) =>
+      card.href.endsWith(`style=${requestedStyle}`),
+    )
+      ? requestedStyle
+      : undefined
+    const styleItems = wingsSideHiFiCardBindings.styles
+      .map((card, index) => ({ card, index }))
+      .filter(({ card }) => !selectedStyle || card.href.endsWith(`style=${selectedStyle}`))
+    const styleTours =
+      model?.homeCuration?.state === 'ready'
+        ? model.homeCuration.styleTours.filter((tour) => !selectedStyle || tour.key === selectedStyle)
+        : []
     return (
       <div className="ws-hifi-inventory" data-route="styles" data-testid="wingsside-hifi-inventory">
         <section className="ws-hifi-section ws-style-intro" data-od-id="styles-intro">
           <p className="ws-hifi-kicker">Before the map</p>
           <h2>{text('introTitle', copy.styles.introTitle)}</h2>
           <p className="ws-hifi-lede">
-            Luxury, family, culture, adventure, wellness, or business - each style changes hotels,
+            Luxury, family, culture, adventure, wellness, or romance - each style changes hotels,
             day length, and how much free time you want.
           </p>
         </section>
         <section className="ws-hifi-section" data-od-id="style-grid" id="style-grid">
-          <div className="ws-style-grid" data-testid="wingsside-hifi-style-grid">
-            {wingsSideHiFiCardBindings.styles.map((card, index) => (
-              <article
-                className="ws-style-card"
-                data-od-id={`style-${card.asset}`}
-                key={card.title}
-              >
-                <MediaThumb asset={card.asset || 'luxury'} />
-                <div className="ws-style-card__body">
-                  <span className="micro">
-                    Pace - {['refined', 'balanced', 'deep', 'active', 'soft', 'efficient'][index]}
-                  </span>
-                  <h3>{styles[index]?.title || card.title}</h3>
-                  <p>{styles[index]?.body || card.body}</p>
-                  <div className="ws-style-card__tags">
-                    <span>Stay: matched</span>
-                    <span>From {6 + (index % 3)} days</span>
-                  </div>
-                  <SiteLink
-                    className="btn btn-primary"
-                    data-od-id={index === 0 ? 'style-cta-luxury' : undefined}
-                    href={styles[index]?.href || card.href}
-                  >
-                    Start with this style
-                  </SiteLink>
-                </div>
-              </article>
-            ))}
-          </div>
+          {selectedStyle && styleItems.length ? (
+            <p aria-live="polite" className="ws-hifi-lede" data-testid="style-filter-status">
+              Showing the selected travel style: {styles[styleItems[0]!.index]?.title}.
+            </p>
+          ) : null}
+          {model?.homeCuration?.state === 'ready' ? (
+            <TourDiscoveryGrid
+              items={styleTours}
+              locale={locale}
+              testId="wingsside-hifi-style-grid"
+            />
+          ) : (
+            <p className="ws-hifi-lede" data-testid="wingsside-hifi-styles-empty">
+              Curated travel-style tours are temporarily unavailable.
+            </p>
+          )}
         </section>
       </div>
     )

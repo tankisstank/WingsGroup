@@ -10,6 +10,7 @@ import {
   wingsSideHiFiCardBindings,
 } from '@/utilities/wingsSideHiFiMedia'
 import type { WingsSideHiFiPageModel } from '@/utilities/wingsSideHiFiPageModel'
+import type { WingsSideHomeTourCard } from '@/tours/homeCuration'
 import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
 
 import { WingsSideCredentialsCarousel } from './CredentialsCarousel'
@@ -33,6 +34,25 @@ const HOME_HERO_SLIDES = [
   { asset: 'mekong', caption: 'Mekong Delta · river life' },
 ] as const
 const HOME_SAMPLE_OD_IDS = ['sample-highlights', 'sample-north', 'sample-central'] as const
+
+const formatTourPrice = (card: WingsSideHomeTourCard, locale?: null | string): string => {
+  if (card.price.kind === 'on-request') return card.price.label
+
+  try {
+    return new Intl.NumberFormat(locale === 'vi' ? 'vi-VN' : 'en-US', {
+      currency: card.price.currency,
+      style: 'currency',
+    }).format(card.price.value)
+  } catch {
+    return `${card.price.currency} ${card.price.value}`
+  }
+}
+
+const CurationEmptyState = ({ surface }: { surface: 'destinations' | 'journeys' | 'styles' }) => (
+  <p className="ws-hifi-curation-empty" data-testid={`home-${surface}-curation-empty`}>
+    Curated journeys are not currently available.
+  </p>
+)
 
 export const HomeHiFiPage = ({
   locale,
@@ -77,6 +97,9 @@ export const HomeHiFiPage = ({
     0,
     WINGSSIDE_HIFI_HOME_JOURNEY_COUNT,
   )
+  const homeCurationState = model.homeCuration?.state || 'invalid'
+  const hasReadyCuration = homeCurationState === 'ready'
+  const hasInvalidCuration = homeCurationState !== 'ready'
 
   const plannerByLocale: Record<
     string,
@@ -196,7 +219,7 @@ export const HomeHiFiPage = ({
           data-testid="wingsside-hifi-home-hero"
         >
           <div className="ws-hifi-home-hero__copy">
-            <p className="eyebrow">Private · Family · Business · Vietnam</p>
+            <p className="eyebrow">Private · Family · Romance · Vietnam</p>
             <h1 className="h1" data-od-id="home-h1">
               {title}
             </h1>
@@ -228,11 +251,15 @@ export const HomeHiFiPage = ({
           ctaLabel={copy.home.planTripCta}
           kicker={asText(home.pillarsKicker, copy.home.pillarsKicker)}
           lede={asText(home.pillarsLede, copy.home.pillarsLede)}
-          steps={pillars.length ? pillars.map((step) => ({
-            body: asText(step.body),
-            label: asText(step.label),
-            title: asText(step.title),
-          })) : copy.plan.steps}
+          steps={
+            pillars.length
+              ? pillars.map((step) => ({
+                  body: asText(step.body),
+                  label: asText(step.label),
+                  title: asText(step.title),
+                }))
+              : copy.plan.steps
+          }
           title={asText(home.pillarsTitle, copy.home.pillarsTitle)}
         />
 
@@ -363,32 +390,62 @@ export const HomeHiFiPage = ({
           <h2 className="h2">{asText(home.destTitle, copy.home.destTitle)}</h2>
           <p className="lede">{asText(home.destLede, copy.home.destLede)}</p>
           <div className="ws-hifi-grid" data-testid="home-dest-grid">
-            {wingsSideHiFiCardBindings.destinations.map((card) => (
-              <SiteLink
-                className="ws-hifi-card ws-hifi-card--media"
-                data-od-id={`dest-${card.asset}`}
-                href={card.href}
-                key={`dest-${card.asset}-${card.href}`}
-              >
-                <span className="ws-hifi-card__media">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    alt={getWingsSideHiFiAlt(card.asset)}
-                    className="ws-hifi-card__img"
-                    decoding="async"
-                    height={220}
-                    loading="lazy"
-                    src={getWingsSideHiFiPublicUrl(card.asset)}
-                    width={320}
-                  />
-                </span>
-                <span className="ws-hifi-card__body">
-                  <strong>{card.title}</strong>
-                  <span>{card.body}</span>
-                  <span className="ws-hifi-card__action">{copy.home.destExplore}</span>
-                </span>
-              </SiteLink>
-            ))}
+            {hasInvalidCuration ? <CurationEmptyState surface="destinations" /> : null}
+            {hasReadyCuration
+              ? model.homeCuration!.destinationTours.map((card) => (
+                  <SiteLink
+                    className="ws-hifi-card ws-hifi-card--media"
+                    data-od-id={`dest-${card.key}`}
+                    href={`/destinations?destination=${encodeURIComponent(card.key)}`}
+                    key={`destination-${card.key}-${card.id}`}
+                  >
+                    <span className="ws-hifi-card__media">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        alt={card.hero.alt}
+                        className="ws-hifi-card__img"
+                        decoding="async"
+                        height={220}
+                        loading="lazy"
+                        src={card.hero.url}
+                        width={320}
+                      />
+                    </span>
+                    <span className="ws-hifi-card__body">
+                      <strong>{card.title}</strong>
+                      <span>{card.summary}</span>
+                      <span className="ws-hifi-card__action">{copy.home.destExplore}</span>
+                    </span>
+                  </SiteLink>
+                ))
+              : !hasInvalidCuration
+                ? wingsSideHiFiCardBindings.destinations.map((card) => (
+                    <SiteLink
+                      className="ws-hifi-card ws-hifi-card--media"
+                      data-od-id={`dest-${card.asset}`}
+                      href={card.href}
+                      key={`dest-${card.asset}-${card.href}`}
+                    >
+                      <span className="ws-hifi-card__media">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          alt={getWingsSideHiFiAlt(card.asset)}
+                          className="ws-hifi-card__img"
+                          decoding="async"
+                          height={220}
+                          loading="lazy"
+                          src={getWingsSideHiFiPublicUrl(card.asset)}
+                          width={320}
+                        />
+                      </span>
+                      <span className="ws-hifi-card__body">
+                        <strong>{card.title}</strong>
+                        <span>{card.body}</span>
+                        <span className="ws-hifi-card__action">{copy.home.destExplore}</span>
+                      </span>
+                    </SiteLink>
+                  ))
+                : null}
           </div>
         </section>
 
@@ -400,31 +457,65 @@ export const HomeHiFiPage = ({
           <p className="kicker">{asText(home.stylesKicker, copy.home.stylesKicker)}</p>
           <h2 className="h2">{asText(home.stylesTitle, copy.home.stylesTitle)}</h2>
           <div className="ws-hifi-grid" data-testid="home-styles-grid">
-            {wingsSideHiFiCardBindings.styles.map((card, index) => (
-              <SiteLink
-                className="ws-hifi-card ws-hifi-card--media"
-                href={card.href}
-                key={`style-${card.asset}-${index}`}
-              >
-                <span className="ws-hifi-card__media">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    alt={getWingsSideHiFiAlt(card.asset)}
-                    className="ws-hifi-card__img"
-                    decoding="async"
-                    height={220}
-                    loading="lazy"
-                    src={getWingsSideHiFiPublicUrl(card.asset)}
-                    width={320}
-                  />
-                </span>
-                <span className="ws-hifi-card__body">
-                  <span className="ws-hifi-card__region">{String(index + 1).padStart(2, '0')}</span>
-                  <strong>{card.title}</strong>
-                  <span className="ws-hifi-card__action">{copy.home.stylesMatch}</span>
-                </span>
-              </SiteLink>
-            ))}
+            {hasInvalidCuration ? <CurationEmptyState surface="styles" /> : null}
+            {hasReadyCuration
+              ? model.homeCuration!.styleTours.map((card, index) => (
+                  <SiteLink
+                    className="ws-hifi-card ws-hifi-card--media"
+                    href={`/styles?style=${encodeURIComponent(card.key)}`}
+                    key={`style-${card.key}-${card.id}`}
+                  >
+                    <span className="ws-hifi-card__media">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        alt={card.hero.alt}
+                        className="ws-hifi-card__img"
+                        decoding="async"
+                        height={220}
+                        loading="lazy"
+                        src={card.hero.url}
+                        width={320}
+                      />
+                    </span>
+                    <span className="ws-hifi-card__body">
+                      <span className="ws-hifi-card__region">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                      <strong>{card.title}</strong>
+                      <span>{card.summary}</span>
+                      <span className="ws-hifi-card__action">{copy.home.stylesMatch}</span>
+                    </span>
+                  </SiteLink>
+                ))
+              : !hasInvalidCuration
+                ? wingsSideHiFiCardBindings.styles.map((card, index) => (
+                    <SiteLink
+                      className="ws-hifi-card ws-hifi-card--media"
+                      href={card.href}
+                      key={`style-${card.asset}-${index}`}
+                    >
+                      <span className="ws-hifi-card__media">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          alt={getWingsSideHiFiAlt(card.asset)}
+                          className="ws-hifi-card__img"
+                          decoding="async"
+                          height={220}
+                          loading="lazy"
+                          src={getWingsSideHiFiPublicUrl(card.asset)}
+                          width={320}
+                        />
+                      </span>
+                      <span className="ws-hifi-card__body">
+                        <span className="ws-hifi-card__region">
+                          {String(index + 1).padStart(2, '0')}
+                        </span>
+                        <strong>{card.title}</strong>
+                        <span className="ws-hifi-card__action">{copy.home.stylesMatch}</span>
+                      </span>
+                    </SiteLink>
+                  ))
+                : null}
           </div>
 
           <div className="ws-hifi-sample-journeys" data-od-id="home-sample-journeys">
@@ -432,46 +523,84 @@ export const HomeHiFiPage = ({
             <h2 className="h2">{asText(home.journeysTitle, copy.home.journeysTitle)}</h2>
             <p className="lede">{asText(home.journeysLede, copy.home.journeysLede)}</p>
             <div className="ws-hifi-journey-grid">
-              {journeySource.map((card, index) => {
-                const binding = journeyBindings[index]
-                const asset = binding?.asset || 'heroHalong'
-                return (
-                  <SiteLink
-                    className="ws-hifi-journey"
-                    data-od-id={HOME_SAMPLE_OD_IDS[index]}
-                    href={card.href}
-                    key={`journey-${card.href}-${index}-${asset}`}
-                  >
-                    <span className="ws-hifi-card__media">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        alt={getWingsSideHiFiAlt(asset)}
-                        className="ws-hifi-card__img"
-                        decoding="async"
-                        height={220}
-                        loading="lazy"
-                        src={getWingsSideHiFiPublicUrl(asset)}
-                        width={320}
-                      />
-                    </span>
-                    <span className="ws-hifi-journey__body">
-                      <span className="ws-hifi-journey__top">
-                        {card.badge ? (
-                          <span className="ws-hifi-card__badge">{card.badge}</span>
-                        ) : null}
-                        <span className="ws-hifi-journey__micro">{card.micro}</span>
+              {hasInvalidCuration ? <CurationEmptyState surface="journeys" /> : null}
+              {hasReadyCuration
+                ? model.homeCuration!.featuredJourneys.map((card, index) => (
+                    <SiteLink
+                      className="ws-hifi-journey"
+                      data-od-id={HOME_SAMPLE_OD_IDS[index]}
+                      href={card.href}
+                      key={`journey-${card.id}`}
+                    >
+                      <span className="ws-hifi-card__media">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          alt={card.hero.alt}
+                          className="ws-hifi-card__img"
+                          decoding="async"
+                          height={220}
+                          loading="lazy"
+                          src={card.hero.url}
+                          width={320}
+                        />
                       </span>
-                      <strong>{card.title}</strong>
-                      <span className="ws-hifi-journey__copy">{card.body}</span>
-                      <span className="ws-hifi-journey__price">
-                        <span className="ws-hifi-journey__price-from">{card.priceFrom}</span>
-                        <span className="ws-hifi-journey__price-unit">{card.priceUnit}</span>
+                      <span className="ws-hifi-journey__body">
+                        <span className="ws-hifi-journey__micro">
+                          {card.duration.days} days
+                          {card.duration.nights == null ? '' : ` · ${card.duration.nights} nights`}
+                        </span>
+                        <strong>{card.title}</strong>
+                        <span className="ws-hifi-journey__copy">{card.summary}</span>
+                        <span className="ws-hifi-journey__price">
+                          <span className="ws-hifi-journey__price-from">
+                            {formatTourPrice(card, locale)}
+                          </span>
+                        </span>
                       </span>
-                      <span className="ws-hifi-journey__note">{card.note}</span>
-                    </span>
-                  </SiteLink>
-                )
-              })}
+                    </SiteLink>
+                  ))
+                : !hasInvalidCuration
+                  ? journeySource.map((card, index) => {
+                      const binding = journeyBindings[index]
+                      const asset = binding?.asset || 'heroHalong'
+                      return (
+                        <SiteLink
+                          className="ws-hifi-journey"
+                          data-od-id={HOME_SAMPLE_OD_IDS[index]}
+                          href={card.href}
+                          key={`journey-${card.href}-${index}-${asset}`}
+                        >
+                          <span className="ws-hifi-card__media">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              alt={getWingsSideHiFiAlt(asset)}
+                              className="ws-hifi-card__img"
+                              decoding="async"
+                              height={220}
+                              loading="lazy"
+                              src={getWingsSideHiFiPublicUrl(asset)}
+                              width={320}
+                            />
+                          </span>
+                          <span className="ws-hifi-journey__body">
+                            <span className="ws-hifi-journey__top">
+                              {card.badge ? (
+                                <span className="ws-hifi-card__badge">{card.badge}</span>
+                              ) : null}
+                              <span className="ws-hifi-journey__micro">{card.micro}</span>
+                            </span>
+                            <strong>{card.title}</strong>
+                            <span className="ws-hifi-journey__copy">{card.body}</span>
+                            <span className="ws-hifi-journey__price">
+                              <span className="ws-hifi-journey__price-from">{card.priceFrom}</span>
+                              <span className="ws-hifi-journey__price-unit">{card.priceUnit}</span>
+                            </span>
+                            <span className="ws-hifi-journey__note">{card.note}</span>
+                          </span>
+                        </SiteLink>
+                      )
+                    })
+                  : null}
             </div>
           </div>
         </section>

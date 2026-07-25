@@ -1,6 +1,29 @@
-import type { Field, Tab } from 'payload'
+import type { Field, FilterOptionsProps, Tab, Where } from 'payload'
 
 import { sameSiteFilterOptions } from '@/fields/site'
+import { normalizeRelationID } from '@/access/roles'
+
+export const WINGSSIDE_HOME_DESTINATION_SELECTION_KEYS = [
+  'hanoi',
+  'halong',
+  'hoian',
+  'hue',
+  'mekong',
+  'sapa',
+] as const
+
+export const WINGSSIDE_HOME_STYLE_SELECTION_KEYS = [
+  'luxury',
+  'family',
+  'culture',
+  'adventure',
+  'wellness',
+  'romance',
+] as const
+
+export type WingsSideHomeDestinationSelectionKey =
+  (typeof WINGSSIDE_HOME_DESTINATION_SELECTION_KEYS)[number]
+export type WingsSideHomeStyleSelectionKey = (typeof WINGSSIDE_HOME_STYLE_SELECTION_KEYS)[number]
 
 /** Locked hub route variants for the 8-page WingSide hi-fi funnel. */
 export const WINGSSIDE_HIFI_ROUTE_VARIANTS = [
@@ -49,12 +72,14 @@ const cardArray = (
   label: string,
   fields: Field[],
   maxRows?: number,
+  dbName?: string,
 ): Field => ({
   name,
   label,
   type: 'array',
   labels: { plural: label, singular: 'Mục' },
   maxRows,
+  dbName,
   admin: {
     initCollapsed: true,
   },
@@ -65,6 +90,53 @@ const whenVariant =
   (...variants: WingsSideHiFiRouteVariant[]) =>
   (_: unknown, siblingData: { routeVariant?: string } | null) =>
     Boolean(siblingData?.routeVariant && variants.includes(siblingData.routeVariant as WingsSideHiFiRouteVariant))
+
+/**
+ * Array rows do not inherit the Page `site` as siblingData. Filter against the
+ * document being edited so a curation relationship cannot select another tenant's tour.
+ */
+const samePageSiteTourFilter = ({ data }: FilterOptionsProps): boolean | Where => {
+  const siteID = normalizeRelationID((data as { site?: unknown } | undefined)?.site as never)
+
+  return siteID
+    ? {
+        site: {
+          equals: siteID,
+        },
+      }
+    : true
+}
+
+const tourSelectionFields = <T extends string>(
+  name: string,
+  label: string,
+  keys: readonly T[],
+  maxRows: number,
+  dbName: string,
+): Field =>
+  cardArray(
+    name,
+    label,
+    [
+      {
+        name: 'key',
+        label: 'Khoá taxonomy',
+        type: 'select',
+        required: true,
+        options: keys.map((key) => ({ label: key, value: key })),
+      },
+      {
+        name: 'tour',
+        label: 'Tour product',
+        type: 'relationship',
+        relationTo: 'tour-products',
+        required: true,
+        filterOptions: samePageSiteTourFilter,
+      },
+    ],
+    maxRows,
+    dbName,
+  )
 
 /**
  * Optional structured WingSide hi-fi content group for Pages.
@@ -150,6 +222,36 @@ export const wingsSideHiFiFields = (): Field[] => [
       text('journeysKicker', 'Journeys kicker'),
       text('journeysTitle', 'Journeys title'),
       textarea('journeysLede', 'Journeys lede'),
+      tourSelectionFields(
+        'destinationTourSelections',
+        'Destination tour selections (6 khoá bắt buộc)',
+        WINGSSIDE_HOME_DESTINATION_SELECTION_KEYS,
+        6,
+        'home_dest_tours',
+      ),
+      tourSelectionFields(
+        'styleTourSelections',
+        'Style tour selections (6 khoá bắt buộc)',
+        WINGSSIDE_HOME_STYLE_SELECTION_KEYS,
+        6,
+        'home_style_tours',
+      ),
+      cardArray(
+        'featuredJourneySelections',
+        'Featured journey selections (3 tour, theo thứ tự)',
+        [
+          {
+            name: 'tour',
+            label: 'Tour product',
+            type: 'relationship',
+            relationTo: 'tour-products',
+            required: true,
+            filterOptions: samePageSiteTourFilter,
+          },
+        ],
+        3,
+        'home_featured_tours',
+      ),
       text('notesKicker', 'Notes kicker'),
       text('notesTitle', 'Notes title'),
       cardArray('notes', 'Traveler notes', [

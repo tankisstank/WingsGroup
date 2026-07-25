@@ -765,6 +765,26 @@ export interface Page {
       journeysKicker?: string | null;
       journeysTitle?: string | null;
       journeysLede?: string | null;
+      destinationTourSelections?:
+        | {
+            key: 'hanoi' | 'halong' | 'hoian' | 'hue' | 'mekong' | 'sapa';
+            tour: number | TourProduct;
+            id?: string | null;
+          }[]
+        | null;
+      styleTourSelections?:
+        | {
+            key: 'luxury' | 'family' | 'culture' | 'adventure' | 'wellness' | 'romance';
+            tour: number | TourProduct;
+            id?: string | null;
+          }[]
+        | null;
+      featuredJourneySelections?:
+        | {
+            tour: number | TourProduct;
+            id?: string | null;
+          }[]
+        | null;
       notesKicker?: string | null;
       notesTitle?: string | null;
       notes?:
@@ -2903,6 +2923,26 @@ export interface PagesSelect<T extends boolean = true> {
               journeysKicker?: T;
               journeysTitle?: T;
               journeysLede?: T;
+              destinationTourSelections?:
+                | T
+                | {
+                    key?: T;
+                    tour?: T;
+                    id?: T;
+                  };
+              styleTourSelections?:
+                | T
+                | {
+                    key?: T;
+                    tour?: T;
+                    id?: T;
+                  };
+              featuredJourneySelections?:
+                | T
+                | {
+                    tour?: T;
+                    id?: T;
+                  };
               notesKicker?: T;
               notesTitle?: T;
               notes?:

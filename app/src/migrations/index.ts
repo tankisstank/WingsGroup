@@ -20,6 +20,7 @@ import * as migration_20260724_090000_credentials_catalog_metadata from './20260
 import * as migration_20260724_110000_wing_side_supported_locales from './20260724_110000_wing_side_supported_locales'
 import * as migration_20260724_120000_tour_product_taxonomy from './20260724_120000_tour_product_taxonomy'
 import * as migration_20260724_130000_wing_side_display_brand from './20260724_130000_wing_side_display_brand'
+import * as migration_20260725_090000_wings_side_home_tour_curation from './20260725_090000_wings_side_home_tour_curation'
 
 export const migrations = [
   {
@@ -131,5 +132,10 @@ export const migrations = [
     up: migration_20260724_130000_wing_side_display_brand.up,
     down: migration_20260724_130000_wing_side_display_brand.down,
     name: '20260724_130000_wing_side_display_brand',
+  },
+  {
+    up: migration_20260725_090000_wings_side_home_tour_curation.up,
+    down: migration_20260725_090000_wings_side_home_tour_curation.down,
+    name: '20260725_090000_wings_side_home_tour_curation',
   },
 ]

@@ -25,6 +25,7 @@ import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 import { syncPagePathname } from './hooks/syncPagePathname'
+import { validateWingsSideHomeCuration } from './hooks/validateWingsSideHomeCuration'
 
 import {
   MetaDescriptionField,
@@ -255,7 +256,13 @@ export const Pages: CollectionConfig<'pages'> = {
   },
   hooks: {
     afterChange: [revalidatePage],
-    beforeChange: [enforceSiteAccess, syncPagePathname, preventEditorPublish, populatePublishedAt],
+    beforeChange: [
+      enforceSiteAccess,
+      syncPagePathname,
+      validateWingsSideHomeCuration,
+      preventEditorPublish,
+      populatePublishedAt,
+    ],
     afterDelete: [revalidateDelete],
   },
   versions: {

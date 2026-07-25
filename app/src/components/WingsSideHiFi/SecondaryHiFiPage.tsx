@@ -262,6 +262,7 @@ export const SecondaryHiFiPage = ({
             locale={(locale || 'en') as SupportedLocaleCode}
             model={model}
             publicPathname={publicPathname}
+            searchParams={searchParams}
           />
         )}
 

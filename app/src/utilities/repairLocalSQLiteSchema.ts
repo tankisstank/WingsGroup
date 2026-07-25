@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
+import { fileURLToPath } from 'node:url'
 
 import {
   getWingsSideHiFiSQLiteCreateTableStatements,
@@ -21,6 +22,57 @@ const localSQLiteRelationColumns = [
   'tour_departures_id',
   'tour_campaigns_id',
   'departure_variants_id',
+] as const
+
+const wingsSideHomeCurationSQLiteStatements = [
+  `CREATE TABLE IF NOT EXISTS "home_dest_tours" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "id" TEXT PRIMARY KEY NOT NULL,
+    "key" TEXT, "tour_id" INTEGER,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages"("id") ON UPDATE no action ON DELETE cascade,
+    FOREIGN KEY ("tour_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE set null
+  )`,
+  `CREATE TABLE IF NOT EXISTS "home_style_tours" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "id" TEXT PRIMARY KEY NOT NULL,
+    "key" TEXT, "tour_id" INTEGER,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages"("id") ON UPDATE no action ON DELETE cascade,
+    FOREIGN KEY ("tour_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE set null
+  )`,
+  `CREATE TABLE IF NOT EXISTS "home_featured_tours" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "id" TEXT PRIMARY KEY NOT NULL,
+    "tour_id" INTEGER,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages"("id") ON UPDATE no action ON DELETE cascade,
+    FOREIGN KEY ("tour_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE set null
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_home_dest_tours_v" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "id" INTEGER PRIMARY KEY NOT NULL,
+    "_uuid" TEXT, "key" TEXT, "tour_id" INTEGER,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v"("id") ON UPDATE no action ON DELETE cascade,
+    FOREIGN KEY ("tour_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE set null
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_home_style_tours_v" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "id" INTEGER PRIMARY KEY NOT NULL,
+    "_uuid" TEXT, "key" TEXT, "tour_id" INTEGER,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v"("id") ON UPDATE no action ON DELETE cascade,
+    FOREIGN KEY ("tour_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE set null
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_home_featured_tours_v" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "id" INTEGER PRIMARY KEY NOT NULL,
+    "_uuid" TEXT, "tour_id" INTEGER,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v"("id") ON UPDATE no action ON DELETE cascade,
+    FOREIGN KEY ("tour_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE set null
+  )`,
+  ...[
+    'home_dest_tours',
+    'home_style_tours',
+    'home_featured_tours',
+    '_home_dest_tours_v',
+    '_home_style_tours_v',
+    '_home_featured_tours_v',
+  ].flatMap((table) => [
+    `CREATE INDEX IF NOT EXISTS "${table}_order_idx" ON "${table}" ("_order")`,
+    `CREATE INDEX IF NOT EXISTS "${table}_parent_id_idx" ON "${table}" ("_parent_id")`,
+    `CREATE INDEX IF NOT EXISTS "${table}_tour_idx" ON "${table}" ("tour_id")`,
+  ]),
 ] as const
 
 const localSQLiteTableRenames = [
@@ -205,6 +257,10 @@ const toSQLitePath = (databaseURL: string) => {
     return null
   }
 
+  if (databaseURL.startsWith('file://')) {
+    return fileURLToPath(databaseURL)
+  }
+
   const rawPath = databaseURL.replace(/^file:/, '')
 
   return path.resolve(process.cwd(), rawPath)
@@ -220,6 +276,11 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
   const db = new DatabaseSync(sqlitePath)
 
   try {
+    // Next.js production builds initialize Payload concurrently in multiple
+    // workers. Let idempotent bootstrap statements wait for the current schema
+    // writer instead of failing immediately with SQLITE_BUSY.
+    db.exec('PRAGMA busy_timeout = 30000;')
+
     for (const { from, to } of localSQLiteTableRenames) {
       const fromTable = db
         .prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?')
@@ -294,6 +355,26 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
     }
     for (const statement of tourTaxonomySQLiteStatements) {
       db.exec(`${statement};`)
+    }
+    for (const statement of wingsSideHomeCurationSQLiteStatements) {
+      db.exec(`${statement};`)
+    }
+    // Earlier US-050 bootstrap drafts created the short dbName tables with a
+    // `tag` column. CREATE TABLE IF NOT EXISTS cannot repair that shape, so
+    // upgrade those local-only tables in place and preserve any draft values.
+    for (const table of [
+      'home_dest_tours',
+      'home_style_tours',
+      '_home_dest_tours_v',
+      '_home_style_tours_v',
+    ]) {
+      ensureColumns(table, [['key', 'TEXT']])
+      const columns = db.prepare(`PRAGMA table_info("${table}")`).all() as Array<{
+        name?: string
+      }>
+      if (columns.some(({ name }) => name === 'tag')) {
+        db.exec(`UPDATE "${table}" SET "key" = "tag" WHERE "key" IS NULL;`)
+      }
     }
 
     const tableRow = db

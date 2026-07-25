@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
 
 import {
   FixedToolbarFeature,
@@ -12,9 +12,32 @@ import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrAnyone } from '@/access/siteScope'
 import { siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
+import {
+  revalidateWingSideDiscovery,
+  revalidateWingSideDiscoveryForTourDependency,
+} from '@/collections/Tours/hooks/revalidateTourContent'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const revalidateCuratedTourMedia: CollectionAfterChangeHook = async ({
+  doc,
+  req: { context, payload },
+}) => {
+  if (!context.disableRevalidate) {
+    await revalidateWingSideDiscoveryForTourDependency({
+      field: 'heroMedia',
+      payload,
+      value: doc.id,
+    })
+  }
+  return doc
+}
+
+const revalidateDeletedTourMedia: CollectionAfterDeleteHook = ({ doc, req: { context } }) => {
+  if (!context.disableRevalidate) revalidateWingSideDiscovery()
+  return doc
+}
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -93,6 +116,8 @@ export const Media: CollectionConfig = {
     ],
   },
   hooks: {
+    afterChange: [revalidateCuratedTourMedia],
+    afterDelete: [revalidateDeletedTourMedia],
     beforeChange: [enforceSiteAccess],
   },
 }

@@ -55,6 +55,10 @@ import {
 } from '@/utilities/wingsSideHiFiDispatch'
 import type { WingsSideHiFiPageSource } from '@/utilities/wingsSideHiFiPageModel'
 import { filterCmsLayoutBlocksForHiFiComposer } from '@/utilities/wingsSideHiFiComposer'
+import {
+  hydrateWingsSideHomeCuration,
+  projectWingsSideHomeCuration,
+} from '@/tours/homeCuration'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import type { Form as PayloadForm } from '@/payload-types'
 
@@ -128,6 +132,53 @@ export default async function Page({
     page: page as WingsSideHiFiPageSource,
     publicPathname: requestedPath,
   })
+
+  if (
+    hiFiModel &&
+    ['home', 'destinations', 'styles'].includes(hiFiModel.routeVariant)
+  ) {
+    const payload = await getPayload({ config: configPromise })
+    let homeSource = hiFiModel.routeVariant === 'home' ? hiFiModel.routeContent : undefined
+    if (!homeSource) {
+      const siteID =
+        typeof page.site === 'object' && page.site ? page.site.id : page.site
+      const homePages = await payload.find({
+        collection: 'pages',
+        depth: 3,
+        fallbackLocale: 'en',
+        limit: 2,
+        locale,
+        overrideAccess: true,
+        pagination: false,
+        where: {
+          and: [
+            { site: { equals: siteID } },
+            { 'wingsSideHiFi.enabled': { equals: true } },
+            { 'wingsSideHiFi.routeVariant': { equals: 'home' } },
+          ],
+        },
+      })
+      homeSource =
+        homePages.docs.length === 1
+          ? ((homePages.docs[0].wingsSideHiFi as { home?: Record<string, unknown> } | undefined)
+              ?.home ?? undefined)
+          : undefined
+    }
+    const hydratedHome = await hydrateWingsSideHomeCuration({
+      home: homeSource,
+      locale,
+      pageSite: page.site,
+      payload,
+    })
+    hiFiModel = {
+      ...hiFiModel,
+      homeCuration: projectWingsSideHomeCuration({
+        home: hydratedHome,
+        locale,
+        pageSite: page.site,
+      }),
+    }
+  }
 
   // Populate conversion form relationship when only an id is stored.
   const hiFiFormVariant =

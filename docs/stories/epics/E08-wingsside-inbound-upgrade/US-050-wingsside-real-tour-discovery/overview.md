@@ -1,11 +1,16 @@
 # US-050: Wire WingSide discovery sections to real tours
 
+## Status
+
+Locally accepted on 2026-07-25. Production deployment remains outside this
+story and is still governed by the release gates in the Harness.
+
 ## Current Behavior
 
-Home destination and travel-style cards are rendered from static
-`wingsSideHiFiCardBindings`. Sample Journeys are rendered from
-`copy.packages.cards`, including static images, titles, prices and URLs. The
-cards therefore do not prove or expose the real 22-tour inventory.
+The former implementation rendered product-like facts from static bindings.
+US-050 now stores governed Page-to-TourProduct curation and projects real,
+published, same-site records at the server boundary. Any incomplete or invalid
+configuration fails closed.
 
 ## Target Behavior
 
@@ -46,3 +51,9 @@ truthful through Tour Detail.
 - Importing new inventory.
 - Real-time pricing or availability.
 - Changing the approved Home visual hierarchy.
+
+## Accepted Selection
+
+- Destinations: Hanoi 491, Ha Long 226, Hoi An 506, Hue 486, Mekong 326, Sapa 442.
+- Styles: Luxury 533, Family 517, Culture 504, Adventure 518, Wellness 498, Romance 534.
+- Featured journeys: 504, 491, 486.

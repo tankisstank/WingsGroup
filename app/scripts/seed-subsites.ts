@@ -1292,7 +1292,10 @@ async function createSiteSettings(
         ...(siteSeed.accentColor ? { accentColor: siteSeed.accentColor } : {}),
         logoImage: overrides.logoImageID === undefined ? null : overrides.logoImageID,
         faviconImage: overrides.faviconImageID || heroImageID,
-        themeKey: siteSeed.code,
+        // Tenant identity is `wing-side`, while the established visual theme
+        // option is `wings-side`. Keep those separate instead of submitting an
+        // invalid select value during deterministic fixture seeding.
+        themeKey: siteSeed.code === 'wing-side' ? 'wings-side' : siteSeed.code,
         themePreset: themePresetIDsByKey[siteSeed.themePreset],
       },
       heroDefaults: {

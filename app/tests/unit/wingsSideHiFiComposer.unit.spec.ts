@@ -88,9 +88,14 @@ describe('WingSide HiFi media bindings', () => {
     expect(wingsSideHiFiCardBindings.packages).toHaveLength(5)
     // Home shows 3 sample journeys; packages route still seeds 5.
     expect(WINGSSIDE_HIFI_HOME_JOURNEY_COUNT).toBe(3)
-    expect(wingsSideHiFiCardBindings.styles.map((c) => c.href)).toEqual(
-      expect.arrayContaining(['/styles/luxury', '/styles#wellness', '/styles#business']),
-    )
+    expect(wingsSideHiFiCardBindings.styles.map((c) => c.href)).toEqual([
+      '/styles?style=luxury',
+      '/styles?style=family',
+      '/styles?style=culture',
+      '/styles?style=adventure',
+      '/styles?style=wellness',
+      '/styles?style=romance',
+    ])
     expect(new Set(wingsSideHiFiCardBindings.styles.map((c) => c.href)).size).toBe(6)
     expect(
       wingsSideHiFiCardBindings.destinations.every((card) => card.asset in wingsSideHiFiAssets),

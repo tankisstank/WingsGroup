@@ -1,6 +1,7 @@
 import type { WingsSideHiFiRouteVariant } from '@/fields/wingsSideHiFi'
 import { localeCodes, type SupportedLocaleCode } from '@/utilities/locales'
 import { getPublicRoutePathname } from '@/utilities/sitePaths'
+import type { WingsSideHomeCurationProjection } from '@/tours/homeCuration'
 import {
   isWingsSideHiFiComposerRoute,
   type WingsSideHiFiComposerRoute,
@@ -76,6 +77,8 @@ export type WingsSideHiFiPageModel = {
   routeVariant: WingsSideHiFiRouteVariant
   /** Route-specific payload (raw structured group for the variant). */
   routeContent: Record<string, unknown> | null
+  /** Server-projected Home tour curation. UI rendering is intentionally separate. */
+  homeCuration?: WingsSideHomeCurationProjection
   issues: WingsSideHiFiValidationIssue[]
   isValid: boolean
 }
