@@ -40,7 +40,7 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-047  | normal    | production released | Governed 24-record credentials catalog and reusable CMS block       |
 | US-048  | high-risk | implemented         | Eight-page hi-fi parity remediation and DOM review contract         |
 | US-049  | high-risk | production released | WingSide tour taxonomy and BestPrice 22 classification             |
-| US-050  | high-risk | implemented locally | Real-tour Home discovery and BUG-WS-001 remediation                 |
+| US-050  | high-risk | production released | Real-tour Home discovery and BUG-WS-001 remediation                 |
 | US-051  | normal    | production released | WingSide homepage process-board redesign                            |
 | US-052  | high-risk | production released | WingSide credentials Proof Archive                                  |
 
@@ -137,6 +137,11 @@ architecture and avoids building a parallel site, CMS, or page builder.
   frames, keyboard dialog behavior and US-051 Process Board regression checks.
   Release `f12077d92394f0e07aa21d05d6ef98ae762f4844` is live on `wingside.vn`;
   all four smoke-tested tenant domains return HTTP 200.
+- US-050 production release
+  `d35825129aae198aad6f2377feafb5960c37df03` resolves the approved Home
+  curation by stable tour source identity, applies the PostgreSQL relation
+  migration, and renders real 6/6/3 discovery cards. Guarded apply, independent
+  audit, canary, public browser filters and responsive captures all passed.
 
 ## Current constraints
 

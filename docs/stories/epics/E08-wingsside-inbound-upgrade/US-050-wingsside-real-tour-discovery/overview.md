@@ -2,8 +2,8 @@
 
 ## Status
 
-Locally accepted on 2026-07-25. Production deployment remains outside this
-story and is still governed by the release gates in the Harness.
+Production released on 2026-07-25 in immutable release
+`d35825129aae198aad6f2377feafb5960c37df03`.
 
 ## Current Behavior
 
@@ -54,6 +54,10 @@ truthful through Tour Detail.
 
 ## Accepted Selection
 
-- Destinations: Hanoi 491, Ha Long 226, Hoi An 506, Hue 486, Mekong 326, Sapa 442.
-- Styles: Luxury 533, Family 517, Culture 504, Adventure 518, Wellness 498, Romance 534.
-- Featured journeys: 504, 491, 486.
+Selections are bound to stable `sourceProvenance.sourceId` values and resolved
+to environment-specific relation IDs inside the WingSide tenant. Production
+resolved the approved set to:
+
+- Destinations: Hanoi 63, Ha Long 68, Hoi An 70, Hue 62, Mekong 71, Sapa 79.
+- Styles: Luxury 81, Family 76, Culture 69, Adventure 77, Wellness 78, Romance 82.
+- Featured journeys: 69, 63, 62.

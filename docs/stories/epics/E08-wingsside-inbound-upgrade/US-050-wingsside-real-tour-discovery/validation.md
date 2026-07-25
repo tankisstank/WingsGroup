@@ -2,7 +2,7 @@
 
 ## Result
 
-Local acceptance: **PASS** on 2026-07-25.
+Local and production acceptance: **PASS** on 2026-07-25.
 
 ## Automated Proof
 
@@ -72,7 +72,20 @@ SEO, SMTP, migration or VPS blockers explicitly.
   `artifacts/us050-runtime/home-desktop.png` (1440x1000) and
   `artifacts/us050-runtime/home-mobile.png` (390x844).
 
-## Release Boundary
+## Production Validation
 
-Local data was updated and audited. No production deployment, production
-migration, SMTP change or VPS action was performed.
+- Immutable archive SHA-256:
+  `dfae36453fdf0f315cf0dcb18feba5613c9b27fad741360fcf817fb79a44b0bb`.
+- Release: `d35825129aae198aad6f2377feafb5960c37df03`.
+- Migration status: US-050 `Yes`, batch 12.
+- Dry-run: `would-update`, zero findings, 12 unique production tour IDs.
+- Apply: `update`, post-apply audit `ok=true` and exact approved selections.
+- Read-only audit: `unchanged`, zero findings, all five locale projections ready.
+- Canary: live 200, Home 200, database up, Redis up.
+- Switched production: live 200, readiness 200 (`degraded` only for the
+  pre-existing disabled lead-delivery dependency), Home 200.
+- Browser: Home contains six destination and six style cards plus three real
+  featured journeys; Hanoi and Romance filters each return the approved
+  canonical Tour Detail link; no browser page errors.
+- Rollback retained:
+  `/home/ubuntu/wings-travel/releases/wingsside-us052-f12077d`.

@@ -29,4 +29,27 @@ Primary proof:
 - browser: desktop/mobile visuals, canonical tour CTA, filtered Hanoi and
   Romance hubs, zero runtime page errors.
 
-Production go-live is intentionally not asserted by this proof.
+## Production release
+
+Production go-live completed on 2026-07-25:
+
+- release SHA: `d35825129aae198aad6f2377feafb5960c37df03`;
+- runtime image:
+  `sha256:84a7e0cbee2ee64c8f71ba7f12dc9463b9aad7d0dff88d7508d2d9be83017a93`;
+- PostgreSQL migration
+  `20260725_090000_wings_side_home_tour_curation` ran as batch 12;
+- encrypted pre-write backup checksum:
+  `2f57164e030a6125ae5324ae898582e0db5dbd25c4f2385bf652074dd8c51a9a`;
+- guarded apply returned `action=update`, zero findings and exact 6/6/3 ready
+  projections for EN/VI/IT/ES/PT;
+- independent post-apply audit returned `action=unchanged`,
+  `matchesApprovedSelections=true`;
+- canary and switched runtime passed live, database, Redis and Home probes;
+  readiness remains intentionally `degraded` only because lead delivery is
+  disabled, matching the preceding release;
+- public browser QA passed Home, Hanoi destination filter, Romance style
+  filter, canonical detail links and zero page errors.
+
+Production captures are stored in `evidence/production-home-desktop.png`,
+`evidence/production-home-mobile.png` and
+`evidence/production-destination-cards.png`.

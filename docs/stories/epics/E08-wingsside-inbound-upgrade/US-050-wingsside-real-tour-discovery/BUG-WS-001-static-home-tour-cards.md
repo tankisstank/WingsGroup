@@ -2,7 +2,8 @@
 
 ## Resolution
 
-Closed locally on 2026-07-25 by US-050.
+Closed in production on 2026-07-25 by US-050 release
+`d35825129aae198aad6f2377feafb5960c37df03`.
 
 Sample Journeys now render only a ready real-tour projection. Missing,
 unpublished, cross-site, incomplete or unconfigured curation produces the
@@ -50,5 +51,4 @@ Every displayed product fact and CTA resolves from Payload.
 - Implemented by US-050 after US-049 taxonomy readiness.
 - Remove product-like static fallback.
 - Add tests proving values match selected Payload records.
-- Local data, DOM and browser evidence passed; production release remains a
-  separate go-live decision.
+- Local and production data, DOM and browser evidence passed.
