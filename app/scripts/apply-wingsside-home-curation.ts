@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-import { createLocalReq, getPayload, type Payload } from 'payload'
+import { createLocalReq, getPayload } from 'payload'
 
 import config from '../src/payload.config'
 import {
@@ -13,6 +13,11 @@ import {
   wingsSideHomeCuration,
   wingsSideHomeCurationSiteCode,
 } from './lib/wingsSideHomeCuration'
+import {
+  assertHomeCurationWriteGate,
+  homeCurationDatabaseName,
+  parseHomeCurationCLIArgs,
+} from './lib/wingsSideHomeCurationWriteGate'
 
 type Mode = 'apply' | 'audit' | 'dry-run'
 
@@ -22,21 +27,27 @@ const mode = (): Mode => {
   return selected[0] === '--apply' ? 'apply' : selected[0] === '--audit' ? 'audit' : 'dry-run'
 }
 
-const assertLocalWriteGate = (payload: Payload, selectedMode: Mode) => {
-  if (selectedMode !== 'apply') return
-  if (process.argv.includes('--confirm') === false || !process.argv.includes('--environment=local')) {
-    throw new Error('Apply requires --confirm and --environment=local.')
-  }
-  if (process.env.NODE_ENV === 'production' || payload.db.name !== 'sqlite') {
-    throw new Error('WingSide Home curation apply is restricted to the local SQLite bootstrap only.')
-  }
-}
-
 const main = async () => {
   const selectedMode = mode()
+  const cliArgs = parseHomeCurationCLIArgs(process.argv.slice(2))
+  const preflightGate = assertHomeCurationWriteGate({
+    args: cliArgs,
+    databaseName: homeCurationDatabaseName(process.env.DATABASE_URL),
+    mode: selectedMode,
+  })
   const payload = await getPayload({ config })
   try {
-    assertLocalWriteGate(payload, selectedMode)
+    const writeGate = assertHomeCurationWriteGate({
+      args: cliArgs,
+      databaseName: payload.db.name,
+      mode: selectedMode,
+    })
+    if (
+      preflightGate.environment !== writeGate.environment ||
+      preflightGate.productionMutation !== writeGate.productionMutation
+    ) {
+      throw new Error('Write blocked: Home curation database changed after preflight.')
+    }
     const siteResult = await payload.find({
       collection: 'sites',
       depth: 0,
@@ -47,12 +58,34 @@ const main = async () => {
     })
     if (siteResult.docs.length !== 1) throw new Error('Expected exactly one WingSide site.')
     const site = siteResult.docs[0]
-    const adminResult = await payload.find({
-      collection: 'users', depth: 0, limit: 2, overrideAccess: true, pagination: false,
-      where: { email: { equals: process.env.IMPORT_ADMIN_EMAIL || 'local-admin@wingsgroup.test' } },
-    })
-    const admin = adminResult.docs[0]
-    if (!admin) throw new Error('Local curation audit requires the local bootstrap administrator.')
+    const operatorEmail =
+      cliArgs.adminEmail ||
+      process.env.IMPORT_ADMIN_EMAIL ||
+      'local-admin@wingsgroup.test'
+    const admin = writeGate.productionMutation
+      ? (
+          await payload.login({
+            collection: 'users',
+            data: {
+              email: operatorEmail,
+              password: process.env.ADMIN_PASSWORD || '',
+            },
+          })
+        ).user
+      : (
+          await payload.find({
+            collection: 'users',
+            depth: 0,
+            limit: 2,
+            overrideAccess: true,
+            pagination: false,
+            where: { email: { equals: operatorEmail } },
+          })
+        ).docs[0]
+    if (!admin) throw new Error('Curation operation requires an authenticated administrator.')
+    if (writeGate.productionMutation && admin.role !== 'super-admin') {
+      throw new Error('Production curation operator must authenticate as a super-admin.')
+    }
     const req = await createLocalReq({ user: admin }, payload)
     const homePages = await payload.find({
       collection: 'pages',
