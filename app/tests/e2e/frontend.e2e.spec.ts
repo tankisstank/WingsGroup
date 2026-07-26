@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { Page } from '@playwright/test'
+import type { APIRequestContext, Page, TestInfo } from '@playwright/test'
 
 import { e2eBaseURL } from '../helpers/baseURL'
 import { heroPresentationFixturePaths, seedPhase1LaunchSmoke } from '../helpers/seedPhase1Launch'
@@ -51,6 +51,10 @@ const linkAuditRoutes = [
   '/wingsgo/posts',
   '/wingsgo/search',
   '/wingsside',
+  '/wingsside/en',
+  '/wingsside/it',
+  '/wingsside/es',
+  '/wingsside/pt',
   '/wingsside/posts',
   '/wingsside/search',
   '/wingspass',
@@ -171,6 +175,72 @@ const extractInternalLinks = (html: string, fromPath: string) =>
   Array.from(html.matchAll(/<a\s+(?:[^>]*?\s+)?href=(['"])(.*?)\1/gi))
     .map((match) => normalizeInternalHref(match[2].replaceAll('&amp;', '&'), fromPath))
     .filter((href): href is string => Boolean(href))
+
+const getRouteTenantAlias = (path: string) => path.split('/').filter(Boolean)[0] || ''
+
+const getRouteLocale = (path: string) => {
+  const segments = path.split('/').filter(Boolean)
+  const offset = segments[0] === 'wingsside' ? 1 : 0
+  const candidate = segments[offset]
+
+  return ['vi', 'en', 'it', 'es', 'pt'].includes(candidate || '') ? candidate : 'vi'
+}
+
+const localizeWingsSideRoute = (pathname: string, locale: 'en' | 'es' | 'it' | 'pt' | 'vi') => {
+  const normalizedPathname = pathname.startsWith('/') ? pathname : `/${pathname}`
+  const prefix = locale === 'vi' ? '/wingsside' : `/wingsside/${locale}`
+
+  return `${prefix}${normalizedPathname === '/' ? '' : normalizedPathname}`.replace(/\/+/g, '/')
+}
+
+const loadWingSideTourDetailAuditRoutes = async (
+  request: APIRequestContext,
+  testInfo: TestInfo,
+): Promise<string[]> => {
+  const response = await request.get('/api/tour-products?limit=100&depth=1')
+  if (!response.ok()) {
+    await testInfo.attach('wingsside-tour-detail-inventory-unavailable', {
+      body: `GET /api/tour-products failed with ${response.status()}`,
+      contentType: 'text/plain',
+    })
+    return []
+  }
+
+  const payload = (await response.json()) as {
+    docs?: Array<{
+      _status?: string
+      site?: { code?: string } | number | string
+      slug?: string
+      wrapperPage?: { pathname?: string; site?: { code?: string } | number | string } | null
+    }>
+  }
+  const tourPaths = new Set<string>()
+
+  for (const doc of payload.docs || []) {
+    const siteCode =
+      typeof doc.site === 'object'
+        ? doc.site?.code
+        : typeof doc.wrapperPage?.site === 'object'
+          ? doc.wrapperPage.site?.code
+          : undefined
+    if (siteCode !== 'wing-side' || doc._status === 'draft') continue
+
+    const pathname = doc.wrapperPage?.pathname || (doc.slug ? `/tour/${doc.slug}` : null)
+    if (!pathname?.startsWith('/tour/')) continue
+
+    for (const locale of ['vi', 'en', 'it', 'es', 'pt'] as const) {
+      tourPaths.add(localizeWingsSideRoute(pathname, locale))
+    }
+  }
+
+  const routes = [...tourPaths].sort().slice(0, 22 * 5)
+  await testInfo.attach('wingsside-tour-detail-inventory-routes', {
+    body: JSON.stringify({ routeCount: routes.length, routes }, null, 2),
+    contentType: 'application/json',
+  })
+
+  return routes
+}
 
 test.describe('Phase 1 public frontend smoke', () => {
   test.beforeAll(async () => {
@@ -1358,10 +1428,14 @@ test.describe('Phase 1 public frontend smoke', () => {
     await expect(page.getByRole('link', { name: /Tin tức/i }).first()).toBeVisible()
   })
 
-  test('does not render broken internal links across public sites', async ({ request }) => {
+  test('does not render broken internal links across public sites', async ({ request }, testInfo) => {
     test.setTimeout(600_000)
 
-    const queue: Array<{ depth: number; path: string }> = linkAuditRoutes.map((path) => ({
+    const tourDetailRoutes = await loadWingSideTourDetailAuditRoutes(request, testInfo)
+    const queue: Array<{ depth: number; path: string }> = [
+      ...linkAuditRoutes,
+      ...tourDetailRoutes,
+    ].map((path) => ({
       depth: 0,
       path,
     }))
@@ -1378,6 +1452,8 @@ test.describe('Phase 1 public frontend smoke', () => {
       const results = await Promise.all(
         batch.map(async ({ depth, path }) => {
           const response = await request.get(path)
+          const finalURL = new URL(response.url())
+          const expectedURL = new URL(path, e2eBaseURL)
           const html = await response.text()
           const title =
             html
@@ -1385,11 +1461,29 @@ test.describe('Phase 1 public frontend smoke', () => {
               ?.replace(/\s+/g, ' ')
               .trim() || ''
 
-          return { depth, html, path, response, title }
+          return { depth, expectedURL, finalURL, html, path, response, title }
         }),
       )
 
-      for (const { depth, html, path, response, title } of results) {
+      for (const { depth, expectedURL, finalURL, html, path, response, title } of results) {
+        if (finalURL.origin !== expectedURL.origin) {
+          failures.push(`${path} -> redirected off-origin to ${finalURL.href}`)
+          continue
+        }
+
+        if (getRouteTenantAlias(finalURL.pathname) !== getRouteTenantAlias(path)) {
+          failures.push(`${path} -> tenant drift to ${finalURL.pathname}`)
+          continue
+        }
+
+        if (
+          getRouteTenantAlias(path) === 'wingsside' &&
+          getRouteLocale(finalURL.pathname) !== getRouteLocale(path)
+        ) {
+          failures.push(`${path} -> locale drift to ${finalURL.pathname}`)
+          continue
+        }
+
         if (!response.ok() || /404|This page could not be found|Không tìm thấy/i.test(title)) {
           failures.push(`${path} -> ${response.status()} ${title}`)
           continue

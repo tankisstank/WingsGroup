@@ -20,9 +20,42 @@ const form = {
   title: 'Lead form',
 }
 
+const mixedForm = {
+  confirmationMessage: null,
+  confirmationType: 'message',
+  fields: [
+    { blockType: 'text', label: 'Full name', name: 'full-name', required: true },
+    { blockType: 'email', label: 'Email', name: 'email', required: true },
+    { blockType: 'number', label: 'Group size', name: 'group-size', required: true },
+    {
+      blockType: 'select',
+      label: 'Travel style',
+      name: 'style',
+      options: [
+        { label: 'Family', value: 'family' },
+        { label: 'Culture', value: 'culture' },
+      ],
+      required: true,
+    },
+    { blockType: 'textarea', label: 'Message', name: 'message', required: true },
+    { blockType: 'checkbox', label: 'I agree', name: 'consent', required: true },
+  ],
+  id: 'planner-form',
+  submitButtonLabel: 'Send',
+  title: 'Planner form',
+}
+
 describe('lead form hardened submission', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    vi.stubGlobal(
+      'ResizeObserver',
+      class ResizeObserver {
+        disconnect() {}
+        observe() {}
+        unobserve() {}
+      },
+    )
     window.history.replaceState({}, '', '/en')
   })
 
@@ -68,5 +101,60 @@ describe('lead form hardened submission', () => {
 
     expect((await screen.findByRole('alert')).textContent).toContain('security verification')
     expect(screen.getByLabelText('Security verification')).toBeTruthy()
+  })
+
+  it('localizes Vietnamese form labels and first-invalid focus without submitting', async () => {
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    window.history.replaceState({}, '', '/wingsside/vi/plan-your-trip')
+    document.documentElement.lang = 'vi'
+
+    render(<FormBlock enableIntro={false} form={mixedForm as never} />)
+
+    const fullName = await screen.findByLabelText(/Họ và tên/)
+    expect(fullName.getAttribute('id')).toBe('planner-form-full-name')
+    expect(screen.getByRole('button', { name: 'Gửi yêu cầu' })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Gửi yêu cầu' }))
+
+    await waitFor(() => expect(document.activeElement).toBe(fullName))
+    expect(fullName.getAttribute('aria-invalid')).toBe('true')
+    expect(fullName.getAttribute('aria-describedby')).toBe('planner-form-full-name-error')
+    expect(screen.getAllByText('Vui lòng điền thông tin này').length).toBeGreaterThan(0)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('uses stable unique ids and describedby associations for every field type', async () => {
+    window.history.replaceState({}, '', '/wingsside/en/contact-us')
+    document.documentElement.lang = 'en'
+
+    render(
+      <>
+        <FormBlock enableIntro={false} form={mixedForm as never} />
+        <FormBlock enableIntro={false} form={{ ...mixedForm, id: 'contact-form' } as never} />
+      </>,
+    )
+
+    const fullNameFields = screen.getAllByLabelText(/Full name/)
+    expect(fullNameFields[0]?.getAttribute('id')).toBe('planner-form-full-name')
+    expect(fullNameFields[1]?.getAttribute('id')).toBe('contact-form-full-name')
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Send brief' })[0])
+
+    await screen.findAllByText('This field is required')
+    for (const id of [
+      'planner-form-full-name',
+      'planner-form-email',
+      'planner-form-group-size',
+      'planner-form-style',
+      'planner-form-message',
+      'planner-form-consent',
+    ]) {
+      const control = document.getElementById(id)
+      expect(control, id).toBeTruthy()
+      expect(control?.getAttribute('aria-invalid'), id).toBe('true')
+      expect(control?.getAttribute('aria-describedby'), id).toBe(`${id}-error`)
+      expect(document.getElementById(`${id}-error`), `${id}-error`).toBeTruthy()
+    }
   })
 })

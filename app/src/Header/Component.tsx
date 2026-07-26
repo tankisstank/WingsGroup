@@ -33,6 +33,7 @@ export async function Header() {
       resolvedLocale={locale}
       siteName={siteName}
       siteCode={site.code}
+      supportedLocales={site.supportedLocales}
       tagline={settings?.tagline}
       themeKey={themeKey}
     />

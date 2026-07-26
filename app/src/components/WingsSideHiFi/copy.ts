@@ -453,7 +453,7 @@ const en: SectionCopy = {
         priceFrom: 'From $1,890',
         priceUnit: '/ person',
         note: 'Indicative · private family · customize freely',
-        href: '/packages/family-vietnam',
+        href: '/packages/vietnam-highlights#family',
       },
       {
         badge: 'SOFT FINISH',
@@ -864,7 +864,7 @@ const vi: SectionCopy = {
         priceFrom: 'Từ $1,890',
         priceUnit: '/ người',
         note: 'Tham khảo · gia đình riêng · tùy chỉnh',
-        href: '/packages/family-vietnam',
+        href: '/packages/vietnam-highlights#family',
       },
       {
         badge: 'KẾT THÚC ÊM',
@@ -1267,7 +1267,7 @@ const it: SectionCopy = {
         priceFrom: 'Da $1,890',
         priceUnit: '/ persona',
         note: 'Indicativo · famiglia privata · personalizza',
-        href: '/packages/family-vietnam',
+        href: '/packages/vietnam-highlights#family',
       },
       {
         badge: 'SOFT FINISH',
@@ -1690,7 +1690,7 @@ const es: SectionCopy = {
         priceFrom: 'Desde $1,890',
         priceUnit: '/ persona',
         note: 'Indicativo · familia privada · personalizar',
-        href: '/packages/family-vietnam',
+        href: '/packages/vietnam-highlights#family',
       },
       {
         badge: 'FINAL SUAVE',
@@ -2098,7 +2098,7 @@ const pt: SectionCopy = {
         priceFrom: 'Desde $1,890',
         priceUnit: '/ pessoa',
         note: 'Indicativo · família privada · personalizar',
-        href: '/packages/family-vietnam',
+        href: '/packages/vietnam-highlights#family',
       },
       {
         badge: 'FINAL SUAVE',

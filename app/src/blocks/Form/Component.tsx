@@ -15,6 +15,7 @@ import { useSitePublicLocale } from '@/providers/SitePath'
 import { useSitePath } from '@/utilities/useSitePath'
 import { getCopyLocale } from '@/utilities/locales'
 import { TurnstileWidget } from './TurnstileWidget'
+import type { LocalizedCopy } from '@/i18n/publicCopy'
 
 export type FormBlockType = {
   blockName?: string
@@ -23,6 +24,20 @@ export type FormBlockType = {
   form: FormType | null
   introContent?: DefaultTypedEditorState
   presentation?: 'centered-card' | 'minimal' | 'split-contact' | 'support-channels'
+}
+
+type FormLocalizedCopy = {
+  asideDescription: string
+  asideLabel: string
+  asideTitle: string
+  bullets: readonly [string, string, string]
+  fieldLabels: Record<string, string>
+  loading: string
+  required: string
+  requiredMessage: string
+  submit: string
+  successDescription: string
+  successTitle: string
 }
 
 const formCopy = {
@@ -48,6 +63,8 @@ const formCopy = {
       'policy-code': 'Tour / contract / policy code if available',
       'service-date': 'Service date',
     } as Record<string, string>,
+    required: 'required',
+    requiredMessage: 'This field is required',
     loading: 'Sending your request, please wait...',
     submit: 'Send brief',
     successDescription:
@@ -76,6 +93,8 @@ const formCopy = {
       'policy-code': 'Código de tour / contrato / póliza si aplica',
       'service-date': 'Fecha del servicio',
     } as Record<string, string>,
+    required: 'obligatorio',
+    requiredMessage: 'Este campo es obligatorio',
     loading: 'Enviando tu solicitud, por favor espera...',
     submit: 'Enviar solicitud',
     successDescription:
@@ -104,6 +123,8 @@ const formCopy = {
       'policy-code': 'Codice tour / contratto / polizza se disponibile',
       'service-date': 'Data del servizio',
     } as Record<string, string>,
+    required: 'obbligatorio',
+    requiredMessage: 'Questo campo è obbligatorio',
     loading: 'Invio della richiesta in corso...',
     submit: 'Invia richiesta',
     successDescription:
@@ -132,6 +153,8 @@ const formCopy = {
       'policy-code': 'Código de tour / contrato / apólice se disponível',
       'service-date': 'Data do serviço',
     } as Record<string, string>,
+    required: 'obrigatório',
+    requiredMessage: 'Este campo é obrigatório',
     loading: 'A enviar o seu pedido...',
     submit: 'Enviar pedido',
     successDescription:
@@ -142,19 +165,33 @@ const formCopy = {
     asideLabel: 'Thông tin hỗ trợ tư vấn',
     asideTitle: 'Gửi yêu cầu, nhận tư vấn đúng nhu cầu',
     asideDescription:
-      'Team WingsGroup sẽ kiểm tra lịch, ngân sách, điểm đến và phản hồi phương án phù hợp để khách không phải tự lọc quá nhiều thông tin.',
+      'Đội ngũ WingsGroup sẽ kiểm tra lịch, ngân sách, điểm đến và phản hồi phương án phù hợp để khách không phải tự lọc quá nhiều thông tin.',
     bullets: [
       'Phản hồi theo giờ làm việc',
       'Tư vấn theo lịch và ngân sách thật',
-      'Có thể chuyển tiếp cho sales/content manager',
+      'Chuyển đúng người phụ trách tư vấn hoặc nội dung',
     ],
-    fieldLabels: {} as Record<string, string>,
+    fieldLabels: {
+      airport: 'Sân bay',
+      brief: 'Nhu cầu / ngân sách / thời gian',
+      company: 'Công ty / nhóm khách',
+      email: 'Email',
+      'full-name': 'Họ và tên',
+      'group-size': 'Số khách dự kiến',
+      message: 'Lời nhắn',
+      phone: 'Số điện thoại',
+      'policy-code': 'Mã tour / hợp đồng / hồ sơ nếu có',
+      'service-date': 'Ngày sử dụng dịch vụ',
+    } as Record<string, string>,
     loading: 'Đang gửi yêu cầu, vui lòng chờ...',
-    submit: '',
-    successDescription: '',
-    successTitle: '',
+    required: 'bắt buộc',
+    requiredMessage: 'Vui lòng điền thông tin này',
+    submit: 'Gửi yêu cầu',
+    successDescription:
+      'Đội ngũ tư vấn sẽ đọc nội dung và phản hồi với hướng đề xuất phù hợp.',
+    successTitle: 'Đã nhận yêu cầu',
   },
-} as const
+} as const satisfies LocalizedCopy<FormLocalizedCopy>
 
 type FormCopyLocale = keyof typeof formCopy
 
@@ -163,6 +200,15 @@ const getFormCopyLocale = (locale?: null | string): FormCopyLocale =>
 
 const getFieldName = (field: FormFieldBlock) =>
   'name' in field && typeof field.name === 'string' ? field.name : null
+
+const sanitizeFormControlSegment = (value?: null | string) =>
+  String(value || 'field')
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'field'
+
+const getFieldControlID = (formID: string | number, fieldName: string) =>
+  `${sanitizeFormControlSegment(String(formID))}-${sanitizeFormControlSegment(fieldName)}`
 
 export const FormBlock: React.FC<
   {
@@ -227,6 +273,7 @@ export const FormBlock: React.FC<
   const [turnstileToken, setTurnstileToken] = useState('')
   const [honeypot, setHoneypot] = useState('')
   const errorRef = useRef<HTMLDivElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
   const submittingRef = useRef(false)
   const idempotencyKeyRef = useRef<string | null>(null)
   const router = useRouter()
@@ -318,6 +365,20 @@ export const FormBlock: React.FC<
     [router, formID, redirect, confirmationType, copyLocale, honeypot, toSitePath, turnstileToken],
   )
 
+  const onInvalid = useCallback(
+    (formErrors: typeof errors) => {
+      const [firstInvalidName] = Object.keys(formErrors)
+
+      if (!firstInvalidName || !formID) return
+
+      const target = formRef.current?.querySelector<HTMLElement>(
+        `#${getFieldControlID(formID, firstInvalidName)}`,
+      )
+      target?.focus()
+    },
+    [formID],
+  )
+
   if (!formFromProps || !formID) {
     return (
       <section
@@ -405,8 +466,9 @@ export const FormBlock: React.FC<
               <form
                 aria-busy={isLoading}
                 data-od-id={formOdId}
+                ref={formRef}
                 id={formID}
-                onSubmit={handleSubmit(onSubmit)}
+                onSubmit={handleSubmit(onSubmit, onInvalid)}
               >
                 <div aria-hidden="true" className="absolute left-[-10000px]" tabIndex={-1}>
                   <label htmlFor={`${formID}-website`}>Website</label>
@@ -434,7 +496,10 @@ export const FormBlock: React.FC<
                               {...formMethods}
                               control={control}
                               errors={errors}
+                              formID={formID}
                               register={register}
+                              requiredLabel={copy.required}
+                              requiredMessage={copy.requiredMessage}
                             />
                           </div>
                         )

@@ -6,6 +6,7 @@ import {
   getCopyLocale,
   cmsEnabledLocaleCodes,
   getLocaleFallback,
+  getPublicLocaleMetadataForSite,
   isCopyLocale,
   isPublicLocale,
   localeMetadataByCode,
@@ -26,6 +27,20 @@ describe('locale metadata contract', () => {
     expect(isPublicLocale('ko')).toBe(false)
     expect(isPublicLocale('fr')).toBe(false)
     expect(isPublicLocale('de')).toBe(false)
+  })
+
+  it('scopes public locale switcher options to the current site', () => {
+    expect(getPublicLocaleMetadataForSite(undefined).map((locale) => locale.code)).toEqual([])
+    expect(getPublicLocaleMetadataForSite([]).map((locale) => locale.code)).toEqual([])
+    expect(getPublicLocaleMetadataForSite(['vi', 'en']).map((locale) => locale.code)).toEqual([
+      'vi',
+      'en',
+    ])
+    expect(
+      getPublicLocaleMetadataForSite(['en', 'vi', 'it', 'es', 'pt']).map(
+        (locale) => locale.code,
+      ),
+    ).toEqual(['vi', 'en', 'it', 'es', 'pt'])
   })
 
   it('falls European and wave-two locales back to English copy', () => {

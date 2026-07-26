@@ -71,7 +71,7 @@ export const hydrateWingsSideHomeCuration = async ({
   const result = await payload.find({
     collection: 'tour-products',
     depth: 2,
-    fallbackLocale: 'en',
+    fallbackLocale: false,
     limit: tourIDs.length,
     locale: payloadLocale,
     overrideAccess: true,
@@ -113,7 +113,7 @@ export const hydrateWingsSideHomeCuration = async ({
     payload.find({
       collection: 'media',
       depth: 0,
-      fallbackLocale: 'en',
+      fallbackLocale: false,
       limit: Math.max(mediaIDs.length, 1),
       locale: payloadLocale,
       overrideAccess: true,

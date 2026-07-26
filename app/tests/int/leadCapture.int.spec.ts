@@ -1,6 +1,6 @@
 import config from '@/payload.config'
 import { getPayload, type Payload } from 'payload'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 let payload: Payload
 
@@ -8,6 +8,10 @@ describe('lead capture security integration', () => {
   beforeAll(async () => {
     const payloadConfig = await config
     payload = await getPayload({ config: payloadConfig })
+  })
+
+  afterAll(async () => {
+    await payload?.destroy()
   })
 
   it('denies direct anonymous creates to the form-submissions collection', async () => {

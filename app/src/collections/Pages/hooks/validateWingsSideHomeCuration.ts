@@ -1,6 +1,7 @@
 import type { CollectionBeforeChangeHook } from 'payload'
 
 import { normalizeRelationID } from '@/access/roles'
+import { hasWingsSideLocalizationBackfillContext } from '@/utilities/wingsSideLocalizationBackfillContext'
 import {
   WINGSSIDE_HOME_DESTINATION_SELECTION_KEYS,
   WINGSSIDE_HOME_STYLE_SELECTION_KEYS,
@@ -176,6 +177,10 @@ export const validateWingsSideHomeCuration: CollectionBeforeChangeHook = async (
   originalDoc,
   req,
 }) => {
+  if (hasWingsSideLocalizationBackfillContext(req.context)) {
+    return data
+  }
+
   const next = data as PageWithHomeCuration
   const original = originalDoc as PageWithHomeCuration | undefined
   const enabled = next.wingsSideHiFi?.enabled ?? original?.wingsSideHiFi?.enabled

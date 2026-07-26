@@ -26,6 +26,7 @@ interface HeaderClientProps {
   resolvedLocale?: SupportedLocaleCode
   siteName?: null | string
   siteCode?: string
+  supportedLocales?: SupportedLocaleCode[]
   tagline?: null | string
   themeKey?: string
 }
@@ -41,6 +42,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   resolvedLocale,
   siteName,
   siteCode,
+  supportedLocales,
   tagline,
   themeKey,
 }) => {
@@ -89,6 +91,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
           publicPathname={publicPathname}
           resolvedLocale={resolvedLocale}
           siteCode={siteCode}
+          supportedLocales={supportedLocales}
           themeKey={themeKey}
         />
       </div>

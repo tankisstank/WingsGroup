@@ -19,15 +19,37 @@ export const Select: React.FC<
   SelectField & {
     control: Control
     errors: Partial<FieldErrorsImpl>
+    formID?: number | string
+    requiredLabel?: string
+    requiredMessage?: string
   }
-> = ({ name, control, errors, label, options, required, width, defaultValue }) => {
+> = ({
+  name,
+  control,
+  errors,
+  formID,
+  label,
+  options,
+  required,
+  requiredLabel = 'required',
+  requiredMessage = 'This field is required',
+  width,
+  defaultValue,
+}) => {
+  const fieldID = formID
+    ? `${String(formID).toLowerCase().replace(/[^a-z0-9_-]+/g, '-')}-${name
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, '-')}`
+    : name
+  const errorID = `${fieldID}-error`
+
   return (
     <Width width={width}>
-      <Label htmlFor={name}>
+      <Label htmlFor={fieldID}>
         {label}
         {required && (
           <span className="required">
-            * <span className="sr-only">(required)</span>
+            * <span className="sr-only">({requiredLabel})</span>
           </span>
         )}
       </Label>
@@ -40,7 +62,12 @@ export const Select: React.FC<
 
           return (
             <SelectComponent onValueChange={(val) => onChange(val)} value={controlledValue?.value ?? ''}>
-              <SelectTrigger className="w-full" id={name}>
+              <SelectTrigger
+                aria-describedby={errors[name] ? errorID : undefined}
+                aria-invalid={Boolean(errors[name])}
+                className="w-full"
+                id={fieldID}
+              >
                 <SelectValue placeholder={label} />
               </SelectTrigger>
               <SelectContent>
@@ -55,9 +82,9 @@ export const Select: React.FC<
             </SelectComponent>
           )
         }}
-        rules={{ required }}
+        rules={{ required: required ? requiredMessage : false }}
       />
-      {errors[name] && <Error name={name} />}
+      {errors[name] && <Error id={errorID} name={name} />}
     </Width>
   )
 }

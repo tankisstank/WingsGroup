@@ -76,17 +76,17 @@ describe('WingSide structured tour query perimeter', () => {
     expect(calls.every(([args]) => args.overrideAccess === false)).toBe(true)
   })
 
-  it('requests an explicit English content fallback only when the WingSide route asks for it', async () => {
+  it('can explicitly disable locale fallback for WingSide public detail routes', async () => {
     await getResolvedTourDetailBySlug({
       draft: false,
-      fallbackLocale: 'en',
+      fallbackLocale: false,
       locale: 'it',
       slug: 'shared-slug',
     })
     const calls = mocks.find.mock.calls as unknown as Array<
-      [FindArgs & { fallbackLocale?: string }]
+      [FindArgs & { fallbackLocale?: boolean | string }]
     >
-    expect(calls.every(([args]) => args.fallbackLocale === 'en')).toBe(true)
+    expect(calls.every(([args]) => args.fallbackLocale === false)).toBe(true)
   })
 
   it('keeps Page and Tour public queries site-scoped and wrapper-gated in the route source', () => {
@@ -95,6 +95,7 @@ describe('WingSide structured tour query perimeter', () => {
       'utf8',
     )
     expect(source).toContain('const where = await appendSiteWhere')
+    expect(source).toContain('fallbackLocale: false')
     expect(source).toContain('overrideAccess: draft')
     expect(source).toContain('hasMatchingWingSideTourWrapper(tourData.tour, wrapperPageID)')
     expect(source).toContain('notFound()')

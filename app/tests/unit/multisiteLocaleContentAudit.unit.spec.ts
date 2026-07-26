@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { classifyLocaleDocument } from '../../scripts/lib/multisiteLocaleContentAudit'
+import {
+  classifyLocaleDocument,
+  getLocaleContentBlockerCount,
+  summarizeLocaleAuditRows,
+  type LocaleContentAuditRow,
+} from '../../scripts/lib/multisiteLocaleContentAudit'
 
 const buildDoc = (title: string, description: string) => ({
   title,
@@ -30,6 +35,15 @@ const buildDoc = (title: string, description: string) => ({
       ],
     },
   ],
+})
+
+const row = (status: LocaleContentAuditRow['status']): LocaleContentAuditRow => ({
+  locale: 'vi',
+  notes: [],
+  path: '/',
+  site: 'wing-side',
+  source: 'page',
+  status,
 })
 
 describe('multisite locale-content classifier', () => {
@@ -136,5 +150,31 @@ describe('multisite locale-content classifier', () => {
       notes: ['Generic English travel/editorial markers still visible in non-English locale.'],
       status: 'mixed-language',
     })
+  })
+})
+
+describe('multisite locale content audit blocker count', () => {
+  it('keeps fallback-approved rows non-blocking for inventory-only gaps', () => {
+    const summary = summarizeLocaleAuditRows([row('translated'), row('fallback-approved')])
+
+    expect(getLocaleContentBlockerCount(summary)).toBe(0)
+  })
+
+  it('counts missing, placeholder, mixed-language and editorial-review rows as blockers', () => {
+    const summary = summarizeLocaleAuditRows([
+      row('missing'),
+      row('placeholder'),
+      row('mixed-language'),
+      row('needs-editorial-review'),
+      row('fallback-approved'),
+    ])
+
+    expect(getLocaleContentBlockerCount(summary)).toBe(4)
+  })
+
+  it('is nonzero for strict-mode negative audit summaries', () => {
+    const summary = summarizeLocaleAuditRows([row('translated'), row('needs-editorial-review')])
+
+    expect(getLocaleContentBlockerCount(summary)).toBeGreaterThan(0)
   })
 })

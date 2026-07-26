@@ -7,7 +7,8 @@ import { mergeOpenGraph } from './mergeOpenGraph'
 import { buildConfiguredAbsoluteMediaURL, getPageCanonicalPath } from './siteURLs'
 import { getCurrentSiteSettings } from './getSiteSettings'
 import { getCurrentSite } from './siteContext'
-import { getCanonicalSiteOrigin, getSiteSitemapLocales, getSiteSitemapURL } from './siteSEO'
+import { getCanonicalSiteOrigin, getSiteSitemapURL } from './siteSEO'
+import { isPublicLocale } from './sitePaths'
 
 const getImageURL = ({
   image,
@@ -18,11 +19,12 @@ const getImageURL = ({
 }) => buildConfiguredAbsoluteMediaURL({ media: image, settings })
 
 export const generateMeta = async (args: {
+  alternateLocales?: SupportedLocaleCode[]
   doc: Partial<Page> | Partial<Post> | null
   locale?: null | string
   path?: null | string
 }): Promise<Metadata> => {
-  const { doc, locale, path } = args
+  const { alternateLocales, doc, locale, path } = args
   const site = await getCurrentSite()
   const settings = await getCurrentSiteSettings()
 
@@ -61,7 +63,8 @@ export const generateMeta = async (args: {
     origin: canonicalOrigin,
     path: canonicalPath,
   })
-  const siteLocales = getSiteSitemapLocales(site)
+  const siteLocales =
+    alternateLocales || (isPublicLocale(locale) ? [locale as SupportedLocaleCode] : [])
   const languages = Object.fromEntries(
     siteLocales.map((publicLocale) => [
       publicLocale,

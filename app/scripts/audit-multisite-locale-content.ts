@@ -10,6 +10,7 @@ import { getPayload } from 'payload'
 import { isPublicLocale, type SupportedLocaleCode } from '../src/utilities/locales'
 import {
   classifyLocaleDocument,
+  getLocaleContentBlockerCount,
   summarizeLocaleAuditRows,
   toPagePathMap,
   type LocaleContentAuditRow,
@@ -28,10 +29,14 @@ const getArgumentValue = (name: string): string | undefined => {
   return undefined
 }
 
+const hasArgument = (name: string): boolean =>
+  process.argv.includes(name) || process.argv.some((argument) => argument.startsWith(`${name}=`))
+
 const outputDir = resolve(
   process.cwd(),
   getArgumentValue('--output-dir') || `../artifacts/audits/multisite-remediation-${dateStamp}`,
 )
+const strict = getArgumentValue('--strict') !== 'false' && !hasArgument('--allow-findings')
 
 const normalizePathname = (value?: null | string) => {
   if (!value || value === '/') return '/'
@@ -174,6 +179,7 @@ const main = async () => {
   }
 
   const summary = summarizeLocaleAuditRows(rows)
+  const blockerCount = getLocaleContentBlockerCount(summary)
   const markdownLines = [
     '# Multisite locale content audit',
     '',
@@ -240,15 +246,21 @@ const main = async () => {
   console.log(
     JSON.stringify(
       {
+        blockerCount,
         outputDir,
         rows: rows.length,
         sites: Object.keys(summary.bySite).length,
+        strict,
         totals: summary.totals,
       },
       null,
       2,
     ),
   )
+
+  if (strict && blockerCount > 0) {
+    process.exitCode = 1
+  }
 }
 
 main().catch((error) => {

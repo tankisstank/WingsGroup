@@ -95,7 +95,7 @@ export const wingsSideHiFiCardBindings = {
       asset: 'family' as const,
       badge: 'FAMILY FAVORITE',
       body: 'Fewer hotel changes and culture moments designed for every age.',
-      href: '/packages/family-vietnam',
+      href: '/packages/vietnam-highlights#family',
       title: 'Can grandparents and kids share one route?',
     },
     {

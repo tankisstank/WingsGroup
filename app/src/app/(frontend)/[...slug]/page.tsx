@@ -28,6 +28,7 @@ import { getPageCanonicalPath } from '@/utilities/siteURLs'
 import { getCopyLocale } from '@/utilities/locales'
 import { isSupportedLocale, type SupportedLocaleCode } from '@/utilities/sitePaths'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
+import { queryPublishedPageLocalesByExactPath } from '@/utilities/pageLocaleInventory'
 import {
   isRetailTourEnabledSiteCode,
   isStructuredTourDetailEnabledSiteCode,
@@ -145,7 +146,7 @@ export default async function Page({
       const homePages = await payload.find({
         collection: 'pages',
         depth: 3,
-        fallbackLocale: 'en',
+        fallbackLocale: false,
         limit: 2,
         locale,
         overrideAccess: true,
@@ -338,6 +339,11 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     locale,
     requestedPath,
   })
+  const alternateLocales = page
+    ? await queryPublishedPageLocalesByExactPath({
+        requestedPath,
+      })
+    : []
 
   const site = await getCurrentSite()
   if (page && site.code === 'wing-side' && requestedPath.startsWith('/tour/')) {
@@ -352,6 +358,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
         : cleanDescription
 
     return generateMeta({
+      alternateLocales,
       doc: {
         ...page,
         meta: { ...page.meta, description: boundedDescription },
@@ -363,6 +370,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   }
 
   return generateMeta({
+    alternateLocales,
     doc: page,
     locale,
     path: requestedPath,
@@ -399,20 +407,30 @@ const queryPageByPath = async ({
     ],
   })
 
-  const findPage = async (
-    requestedLocale?: SupportedLocaleCode,
-    options?: { strictLocale?: boolean },
-  ) => {
+  const findPage = async (requestedLocale?: SupportedLocaleCode) => {
+    const scopedWhere = draft
+      ? where
+      : {
+          and: [
+            where,
+            {
+              _status: {
+                equals: 'published',
+              },
+            },
+          ],
+        }
+
     const result = await payload.find({
       collection: 'pages',
       draft,
-      fallbackLocale: options?.strictLocale === false ? undefined : false,
+      fallbackLocale: false,
       locale: requestedLocale,
       depth,
       limit: 1,
       pagination: false,
       overrideAccess: draft,
-      where,
+      where: scopedWhere,
     })
 
     return result.docs?.[0] || null
@@ -440,22 +458,9 @@ const queryPageByPath = async ({
     )
   }
 
-  const localizedPage = await findPage(locale, { strictLocale: true })
+  const localizedPage = await findPage(locale)
 
-  if (hasRenderableLocalizedContent(localizedPage)) {
-    return localizedPage
-  }
-
-  const fallbackLocale =
-    site.defaultLocale && isSupportedLocale(site.defaultLocale) ? site.defaultLocale : null
-
-  if (!fallbackLocale || fallbackLocale === locale) {
-    return localizedPage
-  }
-
-  const fallbackPage = await findPage(fallbackLocale, { strictLocale: false })
-
-  return hasRenderableLocalizedContent(fallbackPage) ? fallbackPage : localizedPage
+  return hasRenderableLocalizedContent(localizedPage) ? localizedPage : null
 }
 
 const resolveStructuredTourPage = async ({
@@ -476,7 +481,7 @@ const resolveStructuredTourPage = async ({
 
     const tourData = await getResolvedTourDetailBySlug({
       draft,
-      fallbackLocale: site.code === 'wing-side' ? 'en' : undefined,
+      fallbackLocale: site.code === 'wing-side' ? false : undefined,
       locale,
       slug: segments[1],
     })

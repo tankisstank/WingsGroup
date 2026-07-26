@@ -62,7 +62,8 @@ for (const locale of publicLocales) {
     // Validate only fields owned by the localized page. Expanded relations can contain
     // captions and metadata from shared documents that this backfill does not own.
     depth: 0,
-    limit: 100,
+    fallbackLocale: false,
+    limit: 1000,
     locale,
     pagination: false,
     overrideAccess: true,
@@ -77,6 +78,7 @@ for (const locale of publicLocales) {
   const settings = await payload.find({
     collection: 'site-settings',
     depth: 0,
+    fallbackLocale: false,
     limit: 1,
     locale,
     pagination: false,

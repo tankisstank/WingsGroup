@@ -15,6 +15,8 @@ import {
 } from '../../src/utilities/wingsSideHiFiPageModel'
 import { WINGSSIDE_HIFI_COMPOSER_ROUTES } from '../../src/utilities/wingsSideHiFiComposer'
 import { wingsSideHiFiCardBindings } from '../../src/utilities/wingsSideHiFiMedia'
+import { wingsSideLocalizationBackfillContext } from '../../src/utilities/wingsSideLocalizationBackfillContext'
+import { applyWingsSideEditorialTerminology } from './wingssideEditorialTerminology'
 
 export const WINGSSIDE_HIFI_SEED_LOCALES = ['en', 'vi', 'it', 'es', 'pt'] as const
 export type WingsSideHiFiSeedLocale = (typeof WINGSSIDE_HIFI_SEED_LOCALES)[number]
@@ -95,7 +97,7 @@ export const listWingsSideHiFiSeedTargets = (): WingsSideHiFiSeedPageTarget[] =>
     slug: pathnameToSlug(pathname),
   }))
 
-const buildPayloadFromCopy = (
+const buildRawPayloadFromCopy = (
   locale: WingsSideHiFiSeedLocale,
   routeVariant: WingsSideHiFiRouteVariant,
 ): Record<string, unknown> => {
@@ -336,6 +338,12 @@ const buildPayloadFromCopy = (
       return common
   }
 }
+
+const buildPayloadFromCopy = (
+  locale: WingsSideHiFiSeedLocale,
+  routeVariant: WingsSideHiFiRouteVariant,
+): Record<string, unknown> =>
+  applyWingsSideEditorialTerminology(buildRawPayloadFromCopy(locale, routeVariant), locale)
 
 /**
  * Seed desired ⊆ CMS current is enough for idempotency.
@@ -1006,7 +1014,7 @@ export type WingsSideHiFiSeedApplyReport = WingsSideHiFiSeedReport & {
  * - Skips missing pages (never invents pages)
  * Caller is responsible for SQLite backup + Payload lifecycle.
  */
-const seedWriteContext = { disableRevalidate: true, seed: true }
+const seedWriteContext = wingsSideLocalizationBackfillContext
 
 export const applyWingsSideHiFiContentSeed = async (args: {
   locale?: WingsSideHiFiSeedLocale | 'all'

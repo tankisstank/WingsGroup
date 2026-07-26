@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
+import { wingsSideHiFiCardBindings } from '@/utilities/wingsSideHiFiMedia'
 import {
   previewWingsSideHiFiSeedPayload,
   WINGSSIDE_HIFI_SEED_LOCALES,
@@ -107,6 +108,34 @@ describe('WingSide hi-fi public copy locale integrity', () => {
           expect(text, `${locale}: "${text}"`).not.toMatch(marker)
         }
       }
+    }
+  })
+
+  it('does not expose the removed family-vietnam internal route in any locale copy', () => {
+    const bindingStrings = collectStrings(wingsSideHiFiCardBindings)
+
+    expect(bindingStrings.join('\n')).not.toContain('/packages/family-vietnam')
+    expect(bindingStrings.join('\n')).toContain('/packages/vietnam-highlights#family')
+
+    for (const locale of WINGSSIDE_HIFI_SEED_LOCALES) {
+      const copy = getWingsSideHiFiCopy(locale)
+      const strings = collectStrings(copy)
+
+      for (const route of [
+        'home',
+        'plan',
+        'destinations',
+        'styles',
+        'packages',
+        'guide',
+        'about',
+        'contact',
+      ] as const) {
+        strings.push(...collectStrings(previewWingsSideHiFiSeedPayload(locale, route)))
+      }
+
+      expect(strings.join('\n')).not.toContain('/packages/family-vietnam')
+      expect(strings.join('\n')).toContain('/packages/vietnam-highlights#family')
     }
   })
 

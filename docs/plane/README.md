@@ -41,6 +41,18 @@ pnpm run plane:sync:workitems
 pnpm run plane:import:all
 ```
 
+Khi chỉ cần import hoặc sync một số story, đặt `PLANE_STORY_IDS` bằng danh
+sách mã phân cách bởi dấu phẩy. Bộ lọc này giúp tránh duyệt lại toàn bộ lịch sử
+và không thay đổi hành vi mặc định khi biến không được đặt:
+
+```powershell
+$env:PLANE_STORY_IDS='US-053'
+pnpm run plane:preview
+pnpm run plane:import:history
+pnpm run plane:sync:workitems
+Remove-Item Env:PLANE_STORY_IDS
+```
+
 ## Trinh tu de xuat
 
 1. `plane:preview`

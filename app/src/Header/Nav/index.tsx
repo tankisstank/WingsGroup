@@ -8,7 +8,7 @@ import type { Header as HeaderType } from '@/payload-types'
 import { CMSLink } from '@/components/Link'
 import { SiteLink } from '@/components/SiteLink'
 import { useSitePublicPathname } from '@/providers/SitePath'
-import { getCopyLocale, publicLocaleMetadata } from '@/utilities/locales'
+import { getCopyLocale, getPublicLocaleMetadataForSite } from '@/utilities/locales'
 import {
   buildLocaleSwitchHref,
   getPublicRoutePathname,
@@ -26,8 +26,17 @@ export const HeaderNav: React.FC<{
   publicPathname?: string
   resolvedLocale?: SupportedLocaleCode
   siteCode?: string
+  supportedLocales?: SupportedLocaleCode[]
   themeKey?: string
-}> = ({ data, primaryAction, publicPathname, resolvedLocale = 'vi', siteCode, themeKey }) => {
+}> = ({
+  data,
+  primaryAction,
+  publicPathname,
+  resolvedLocale = 'vi',
+  siteCode,
+  supportedLocales,
+  themeKey,
+}) => {
   const navItems = data?.navItems || []
   const [isOpen, setIsOpen] = useState(false)
   const [clientReady, setClientReady] = useState(false)
@@ -36,6 +45,7 @@ export const HeaderNav: React.FC<{
   const pathname = useSitePublicPathname()
   const searchParams = useSearchParams()
   const localeSwitchPathname = pathname || publicPathname || '/'
+  const switcherLocales = getPublicLocaleMetadataForSite(supportedLocales)
   const isWingsSide = siteCode ? siteCode === 'wing-side' : themeKey === 'wings-side'
   const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
   const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null
@@ -170,7 +180,7 @@ export const HeaderNav: React.FC<{
       data-client-ready={clientReady ? 'true' : 'false'}
     >
       <Globe2Icon aria-hidden="true" className="h-4 w-4" />
-      {publicLocaleMetadata.map((metadata) => {
+      {switcherLocales.map((metadata) => {
         const href = buildLocaleSwitchHref(
           `${localeSwitchPathname}${clientReady ? locationSuffix : ''}`,
           metadata.code,
