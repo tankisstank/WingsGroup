@@ -174,7 +174,7 @@ describe('WingSide Home runtime curation loader', () => {
     expect(find).toHaveBeenCalledTimes(3)
     expect(projection).toMatchObject({
       destinationTours: expect.arrayContaining([
-        expect.objectContaining({ href: '/en/tour/tour-491', key: 'hanoi' }),
+        expect.objectContaining({ href: '/tour/tour-491', key: 'hanoi' }),
       ]),
       featuredJourneys: expect.arrayContaining([
         expect.objectContaining({ id: 504, price: { kind: 'on-request', label: 'On request' } }),

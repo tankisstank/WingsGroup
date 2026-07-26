@@ -104,23 +104,23 @@ describe('lead form hardened submission', () => {
     expect(screen.getByLabelText('Security verification')).toBeTruthy()
   })
 
-  it('localizes Vietnamese form labels and first-invalid focus without submitting', async () => {
+  it('localizes Vietnamese form labels and focuses the first invalid numeric-id control', async () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
     window.history.replaceState({}, '', '/wingsside/vi/plan-your-trip')
     document.documentElement.lang = 'vi'
 
-    render(<FormBlock enableIntro={false} form={mixedForm as never} />)
+    render(<FormBlock enableIntro={false} form={{ ...mixedForm, id: 9 } as never} />)
 
     const fullName = await screen.findByLabelText(/Họ và tên/)
-    expect(fullName.getAttribute('id')).toBe('planner-form-full-name')
+    expect(fullName.getAttribute('id')).toBe('9-full-name')
     expect(screen.getByRole('button', { name: 'Gửi yêu cầu' })).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Gửi yêu cầu' }))
 
     await waitFor(() => expect(document.activeElement).toBe(fullName))
     expect(fullName.getAttribute('aria-invalid')).toBe('true')
-    expect(fullName.getAttribute('aria-describedby')).toBe('planner-form-full-name-error')
+    expect(fullName.getAttribute('aria-describedby')).toBe('9-full-name-error')
     expect(screen.getAllByText('Vui lòng điền thông tin này').length).toBeGreaterThan(0)
     expect(fetchMock).not.toHaveBeenCalled()
   })

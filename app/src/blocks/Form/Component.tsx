@@ -376,10 +376,14 @@ export const FormBlock: React.FC<
 
       if (!firstInvalidName || !formID) return
 
-      const target = formRef.current?.querySelector<HTMLElement>(
-        `#${getFieldControlID(formID, firstInvalidName)}`,
+      const form = formRef.current
+      const target = form?.ownerDocument.getElementById(
+        getFieldControlID(formID, firstInvalidName),
       )
-      target?.focus()
+
+      if (form && target && form.contains(target)) {
+        target.focus()
+      }
     },
     [formID],
   )
