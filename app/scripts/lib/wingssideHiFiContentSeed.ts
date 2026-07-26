@@ -1161,6 +1161,79 @@ export const checksumWingsSideHiFiValue = (value: unknown): string =>
     .update(JSON.stringify(stableJsonValue(value)))
     .digest('hex')
 
+const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value && typeof value === 'object' && !Array.isArray(value))
+
+const projectValueToShape = (current: unknown, shape: unknown): unknown => {
+  if (shape == null) return null
+  if (Array.isArray(shape)) {
+    if (!Array.isArray(current)) return current
+    return shape.map((item, index) => projectValueToShape(current[index], item))
+  }
+  if (!isPlainRecord(shape)) {
+    return valuesEquivalent(current, shape) ? shape : current
+  }
+  if (!isPlainRecord(current)) return current
+  const projected: Record<string, unknown> = {}
+  for (const [key, childShape] of Object.entries(shape)) {
+    projected[key] = projectValueToShape(current[key], childShape)
+  }
+  return projected
+}
+
+const hasProjectedValue = (value: unknown): boolean => {
+  if (value === undefined) return false
+  if (Array.isArray(value)) return value.some(hasProjectedValue)
+  if (isPlainRecord(value)) return Object.values(value).some(hasProjectedValue)
+  return true
+}
+
+const projectCurrentForPlanChecksum = (
+  current: Record<string, unknown> | null,
+  expected: Record<string, unknown> | null,
+  targetShape: Record<string, unknown>,
+): Record<string, unknown> | null => {
+  if (expected) return projectValueToShape(current, expected) as Record<string, unknown>
+  const projectedTarget = projectValueToShape(current, targetShape)
+  return hasProjectedValue(projectedTarget) ? (projectedTarget as Record<string, unknown>) : null
+}
+
+const mergeValuePreservingExtras = (current: unknown, next: unknown): unknown => {
+  if (Array.isArray(next)) return next
+  if (!isPlainRecord(next)) return next
+  const out: Record<string, unknown> = isPlainRecord(current) ? { ...current } : {}
+  for (const [key, value] of Object.entries(next)) {
+    out[key] = mergeValuePreservingExtras(out[key], value)
+  }
+  return out
+}
+
+const removeShapeFromValue = (current: unknown, shape: unknown): unknown => {
+  if (!isPlainRecord(current) || !isPlainRecord(shape)) return current
+  const out: Record<string, unknown> = { ...current }
+  for (const [key, childShape] of Object.entries(shape)) {
+    if (!Object.prototype.hasOwnProperty.call(out, key)) continue
+    if (isPlainRecord(out[key]) && isPlainRecord(childShape)) {
+      const child = removeShapeFromValue(out[key], childShape)
+      if (isPlainRecord(child) && Object.keys(child).length === 0) delete out[key]
+      else out[key] = child
+    } else {
+      delete out[key]
+    }
+  }
+  return out
+}
+
+const buildReleasePlanWriteValue = (args: {
+  current: Record<string, unknown> | null
+  previousShape: Record<string, unknown>
+  target: Record<string, unknown> | null
+}): Record<string, unknown> | null => {
+  const preserved = removeShapeFromValue(args.current, args.previousShape)
+  const merged = args.target ? mergeValuePreservingExtras(preserved, args.target) : preserved
+  return isPlainRecord(merged) && Object.keys(merged).length > 0 ? merged : null
+}
+
 export type WingsSideHiFiReleasePlanEntry = {
   after: Record<string, unknown>
   afterChecksum: string
@@ -1198,12 +1271,12 @@ const assertExactReleasePlanScope = (plan: WingsSideHiFiReleasePlan) => {
     (entry) => `${entry.locale}:${entry.pathname}:${entry.routeVariant}`,
   )
   if (
-    plan.entries.length !== expectedKeys.size ||
-    new Set(actualKeys).size !== expectedKeys.size ||
+    plan.entries.length > expectedKeys.size ||
+    new Set(actualKeys).size !== actualKeys.length ||
     actualKeys.some((key) => !expectedKeys.has(key))
   ) {
     throw new Error(
-      `Release plan scope mismatch: expected ${expectedKeys.size} exact locale/route entries, received ${plan.entries.length}`,
+      `Release plan scope mismatch: expected at most ${expectedKeys.size} exact locale/route entries, received ${plan.entries.length}`,
     )
   }
   if (
@@ -1246,7 +1319,7 @@ export const buildWingsSideHiFiReleasePlan = async (args: {
         )
       }
       const page = matches[0]!
-      const before =
+      const current =
         page.wingsSideHiFi && typeof page.wingsSideHiFi === 'object'
           ? (page.wingsSideHiFi as Record<string, unknown>)
           : null
@@ -1254,7 +1327,9 @@ export const buildWingsSideHiFiReleasePlan = async (args: {
       if (target.routeVariant === 'plan' || target.routeVariant === 'contact') {
         after = attachResolvedPlanForm(after, planForm.formId)
       }
-      after = mergeStableArrayRowIds(after, before, target.routeVariant) as Record<string, unknown>
+      after = mergeStableArrayRowIds(after, current, target.routeVariant) as Record<string, unknown>
+      const before = projectCurrentForPlanChecksum(current, null, after)
+      if (checksumWingsSideHiFiValue(before) === checksumWingsSideHiFiValue(after)) continue
       entries.push({
         after,
         afterChecksum: checksumWingsSideHiFiValue(after),
@@ -1326,10 +1401,10 @@ export const executeWingsSideHiFiReleasePlan = async (args: {
 
   for (const entry of args.plan.entries) {
     const current = currentValues.get(`${entry.locale}:${entry.pageId}`) ?? null
-    const sourceMatches =
-      sourceKey === 'after'
-        ? valuesEquivalent(current, entry.after)
-        : checksumWingsSideHiFiValue(current) === entry[sourceChecksumKey]
+    const sourceShape = entry[sourceKey]
+    const targetShape = entry[targetKey] || entry.after
+    const projectedCurrent = projectCurrentForPlanChecksum(current, sourceShape, targetShape)
+    const sourceMatches = checksumWingsSideHiFiValue(projectedCurrent) === entry[sourceChecksumKey]
     if (!sourceMatches) {
       throw new Error(
         `Drift detected before ${args.direction}: ${entry.locale} ${entry.pathname} does not match plan ${sourceKey}`,
@@ -1340,10 +1415,16 @@ export const executeWingsSideHiFiReleasePlan = async (args: {
   const completed: WingsSideHiFiReleasePlanEntry[] = []
   try {
     for (const entry of args.plan.entries) {
+      const current = currentValues.get(`${entry.locale}:${entry.pageId}`) ?? null
+      const next = buildReleasePlanWriteValue({
+        current,
+        previousShape: args.direction === 'apply' ? entry.before || entry.after : entry.after,
+        target: entry[targetKey],
+      })
       await args.payload.update({
         collection: 'pages',
         context: seedWriteContext,
-        data: { wingsSideHiFi: entry[targetKey] },
+        data: { wingsSideHiFi: next },
         depth: 0,
         id: entry.pageId,
         locale: entry.locale,
@@ -1356,10 +1437,8 @@ export const executeWingsSideHiFiReleasePlan = async (args: {
     const verifiedValues = await readReleasePlanCurrentValues(args)
     for (const entry of args.plan.entries) {
       const current = verifiedValues.get(`${entry.locale}:${entry.pageId}`) ?? null
-      const targetMatches =
-        targetKey === 'after'
-          ? valuesEquivalent(current, entry.after)
-          : checksumWingsSideHiFiValue(current) === entry[targetChecksumKey]
+      const projectedCurrent = projectCurrentForPlanChecksum(current, entry[targetKey], entry.after)
+      const targetMatches = checksumWingsSideHiFiValue(projectedCurrent) === entry[targetChecksumKey]
       if (!targetMatches) {
         throw new Error(
           `Verification failed after ${args.direction}: ${entry.locale} ${entry.pathname}`,
@@ -1368,10 +1447,16 @@ export const executeWingsSideHiFiReleasePlan = async (args: {
     }
   } catch (error) {
     for (const entry of completed.reverse()) {
+      const current = currentValues.get(`${entry.locale}:${entry.pageId}`) ?? null
+      const next = buildReleasePlanWriteValue({
+        current,
+        previousShape: args.direction === 'apply' ? entry.after : entry.before || entry.after,
+        target: entry[sourceKey],
+      })
       await args.payload.update({
         collection: 'pages',
         context: seedWriteContext,
-        data: { wingsSideHiFi: entry[sourceKey] },
+        data: { wingsSideHiFi: next },
         depth: 0,
         id: entry.pageId,
         locale: entry.locale,
