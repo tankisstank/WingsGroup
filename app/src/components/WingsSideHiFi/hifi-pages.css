@@ -364,7 +364,7 @@ body[data-site-code='wing-side'] .chip {
   font-weight: 600;
   cursor: pointer;
   color: var(--site-muted);
-  min-height: 40px;
+  min-height: 44px;
 }
 
 body[data-site-code='wing-side'] .chip.is-on {

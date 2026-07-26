@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({
   draftMode: vi.fn(),
   getCurrentSite: vi.fn(),
+  getResolvedTourDetailBySlug: vi.fn(),
+  hasMatchingWingSideTourWrapper: vi.fn(),
 }))
 
 vi.mock('next/headers', () => ({
@@ -16,11 +18,21 @@ vi.mock('@/utilities/siteContext', () => ({
   getCurrentSite: mocks.getCurrentSite,
 }))
 
+vi.mock('@/tours/queries', () => ({
+  getResolvedTourDetailBySlug: mocks.getResolvedTourDetailBySlug,
+}))
+
+vi.mock('@/tours/wingsSideTourViewModel', () => ({
+  hasMatchingWingSideTourWrapper: mocks.hasMatchingWingSideTourWrapper,
+}))
+
 import { queryPublishedPageLocalesByExactPath } from '@/utilities/pageLocaleInventory'
 
 type TestPage = {
   _status?: 'draft' | 'published'
+  id: number
   locale: string
+  title: string
   pathname: string
   site: number
   slug: string
@@ -28,10 +40,12 @@ type TestPage = {
 
 const page = (overrides: Partial<TestPage>): TestPage => ({
   _status: 'published',
+  id: 1,
   locale: 'en',
   pathname: '/contact-us',
   site: 22,
   slug: 'contact-us',
+  title: 'Contact',
   ...overrides,
 })
 
@@ -67,10 +81,15 @@ describe('page locale inventory', () => {
   beforeEach(() => {
     mocks.draftMode.mockResolvedValue({ isEnabled: false })
     mocks.getCurrentSite.mockResolvedValue({
+      code: 'wing-side',
       defaultLocale: 'vi',
       id: 22,
       supportedLocales: ['vi', 'en', 'it', 'es', 'pt'],
     })
+    mocks.getResolvedTourDetailBySlug.mockReset()
+    mocks.getResolvedTourDetailBySlug.mockResolvedValue(null)
+    mocks.hasMatchingWingSideTourWrapper.mockReset()
+    mocks.hasMatchingWingSideTourWrapper.mockReturnValue(false)
   })
 
   it('keeps only exact published same-tenant path locales', async () => {
@@ -164,5 +183,35 @@ describe('page locale inventory', () => {
       )
       expect(args.where?.and).toContainEqual({ _status: { equals: 'published' } })
     }
+  })
+
+  it('narrows WingSide tour hreflang to locales with matching runtime tour data', async () => {
+    const payload = buildPayload([
+      page({ id: 101, locale: 'vi', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
+      page({ id: 101, locale: 'en', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
+      page({ id: 101, locale: 'it', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
+      page({ id: 101, locale: 'es', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
+      page({ id: 101, locale: 'pt', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
+    ])
+    mocks.getResolvedTourDetailBySlug.mockImplementation(async ({ locale }) =>
+      locale === 'en' || locale === 'vi' ? { tour: { id: `tour-${locale}` } } : null,
+    )
+    mocks.hasMatchingWingSideTourWrapper.mockReturnValue(true)
+
+    await expect(
+      queryPublishedPageLocalesByExactPath({
+        payload: payload as never,
+        requestedPath: '/tour/private-hanoi',
+      }),
+    ).resolves.toEqual(['vi', 'en'])
+
+    expect(mocks.getResolvedTourDetailBySlug).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draft: false,
+        fallbackLocale: false,
+        locale: 'it',
+        slug: 'private-hanoi',
+      }),
+    )
   })
 })

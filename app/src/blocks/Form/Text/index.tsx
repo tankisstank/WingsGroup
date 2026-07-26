@@ -57,6 +57,7 @@ export const Text: React.FC<
       <Input
         aria-describedby={errors[name] ? errorID : undefined}
         aria-invalid={Boolean(errors[name])}
+        aria-required={required || undefined}
         autoComplete={autoComplete}
         defaultValue={defaultValue}
         id={fieldID}

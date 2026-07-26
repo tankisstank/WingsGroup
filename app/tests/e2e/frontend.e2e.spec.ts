@@ -1151,13 +1151,14 @@ test.describe('Phase 1 public frontend smoke', () => {
       const sitemapURLs = Array.from(xml.matchAll(/<loc>(.*?)<\/loc>/g)).map(
         (match) => new URL(match[1]),
       )
-      const localeSegments = new Set(
-        sitemapURLs
-          .map((url) => url.pathname.split('/').filter(Boolean)[0])
-          .filter((segment): segment is string => isSupportedLocale(segment)),
+      const sitemapLocales = new Set(
+        sitemapURLs.map((url) => {
+          const firstSegment = url.pathname.split('/').filter(Boolean)[0]
+          return firstSegment && isSupportedLocale(firstSegment) ? firstSegment : 'en'
+        }),
       )
 
-      expect(Array.from(localeSegments)).toEqual(
+      expect(Array.from(sitemapLocales)).toEqual(
         expect.arrayContaining([...wingsSidePublicAdLocales]),
       )
       expect(
@@ -1168,7 +1169,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       ).toBe(true)
 
       for (const locale of cmsOnlyLocales) {
-        expect(localeSegments.has(locale)).toBe(false)
+        expect(sitemapLocales.has(locale)).toBe(false)
       }
     }
   })
@@ -1432,9 +1433,29 @@ test.describe('Phase 1 public frontend smoke', () => {
     test.setTimeout(600_000)
 
     const tourDetailRoutes = await loadWingSideTourDetailAuditRoutes(request, testInfo)
+    const pagesSitemapResponse = await request.get(`${e2eBaseURL}/pages-sitemap.xml`, {
+      headers: { host: 'wingside.vn' },
+    })
+    expect(pagesSitemapResponse.ok()).toBe(true)
+    const pagesSitemapXML = await pagesSitemapResponse.text()
+    const pagesSitemapRoutes = Array.from(pagesSitemapXML.matchAll(/<loc>(.*?)<\/loc>/g))
+      .flatMap(([, loc]) => {
+        if (!loc) return []
+        const url = new URL(loc)
+        if (!url.pathname.includes('/tour/')) return []
+        const segments = url.pathname.split('/').filter(Boolean)
+        const firstSegment = segments[0]
+        const isLocaleRoute = firstSegment && isSupportedLocale(firstSegment)
+        const localPath = isLocaleRoute
+          ? `/wingsside/${segments.join('/')}`
+          : `/wingsside${url.pathname === '/' ? '' : url.pathname}`
+
+        return [localPath]
+      })
     const queue: Array<{ depth: number; path: string }> = [
       ...linkAuditRoutes,
       ...tourDetailRoutes,
+      ...pagesSitemapRoutes,
     ].map((path) => ({
       depth: 0,
       path,

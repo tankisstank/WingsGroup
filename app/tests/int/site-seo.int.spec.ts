@@ -50,6 +50,12 @@ describe('site SEO utilities', () => {
     expect(buildConfiguredCanonicalURL({ path: getPostCanonicalPath('launch'), settings })).toBe(
       'https://wingsgroup.com/posts/launch',
     )
+    expect(buildConfiguredCanonicalURL({ locale: 'en', path: '/', settings })).toBe(
+      'https://wingsgroup.com',
+    )
+    expect(buildConfiguredCanonicalURL({ locale: 'vi', path: '/', settings })).toBe(
+      'https://wingsgroup.com/vi',
+    )
   })
 
   it('normalizes canonical domains before metadata and sitemap use', () => {

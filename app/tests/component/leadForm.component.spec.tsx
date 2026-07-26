@@ -3,6 +3,7 @@ import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { FormBlock } from '@/blocks/Form/Component'
+import { PlanPrefillBridge } from '@/components/WingsSideHiFi/PlanPrefillBridge'
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/en',
@@ -156,5 +157,66 @@ describe('lead form hardened submission', () => {
       expect(control?.getAttribute('aria-describedby'), id).toBe(`${id}-error`)
       expect(document.getElementById(`${id}-error`), `${id}-error`).toBeTruthy()
     }
+  })
+
+  it('keeps required controls script-validated without native required interception', async () => {
+    window.history.replaceState({}, '', '/wingsside/en/plan-your-trip')
+
+    render(<FormBlock enableIntro={false} form={mixedForm as never} />)
+
+    const fullName = await screen.findByLabelText(/Full name/)
+    expect(fullName).toHaveProperty('required', false)
+    expect(fullName.getAttribute('aria-required')).toBe('true')
+    expect(document.querySelector('form')?.hasAttribute('novalidate')).toBe(true)
+  })
+
+  it('labels hidden real plan fields and exposes deterministic consent focus/errors', async () => {
+    const css = await import('node:fs').then(({ readFileSync }) =>
+      readFileSync('src/components/WingsSideHiFi/hifi-pages.css', 'utf8'),
+    )
+    document.body.innerHTML = `
+      <div class="ws-hifi-plan-form">
+        <form>
+          <div class="mb-4">
+            <div class="mb-6"><input id="9-country" name="country" /></div>
+            <div class="mb-6"><input id="9-travel-month" name="travel-month" /></div>
+            <div class="mb-6"><input id="9-group-size" name="group-size" /></div>
+          </div>
+        </form>
+      </div>
+    `
+
+    render(
+      <PlanPrefillBridge
+        budgetLabel="Budget"
+        budgetOptions={['Under $1k']}
+        consentLabel="I agree to be contacted"
+        destLabel="Destination"
+        destOptions={['Vietnam']}
+        groupLabel="Group size"
+        groupOptions={[{ label: '2 travelers', value: '2' }]}
+        monthLabel="Travel month"
+        monthOptions={[{ label: 'March', value: '3' }]}
+        styleLabel="Style"
+        styleOptions={['Culture']}
+      />,
+    )
+
+    await waitFor(() => expect(document.querySelector('.ws-plan-chrome-host-mid')).toBeTruthy())
+    expect(document.getElementById('9-country')?.getAttribute('aria-label')).toBe('Destination')
+    expect(document.getElementById('9-travel-month')?.getAttribute('aria-label')).toBe(
+      'Travel month',
+    )
+    expect(css).toMatch(/\.chip\s*\{[\s\S]*min-height:\s*44px;/)
+
+    const formNode = document.querySelector('form')!
+    const validateEvent = new Event('ws-plan-validate', { bubbles: true, cancelable: true })
+    expect(formNode.dispatchEvent(validateEvent)).toBe(false)
+
+    const consent = await screen.findByRole('checkbox', { name: 'I agree to be contacted' })
+    await waitFor(() => expect(document.activeElement).toBe(consent))
+    expect(consent.getAttribute('aria-invalid')).toBe('true')
+    expect(consent.getAttribute('aria-describedby')).toBe('ws-plan-consent-error')
+    expect(screen.getByRole('alert').id).toBe('ws-plan-consent-error')
   })
 })

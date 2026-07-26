@@ -45,6 +45,7 @@ export async function GET(request: Request) {
       overrideAccess: false,
       draft: false,
       depth: 0,
+      fallbackLocale: false,
       limit: 1000,
       locale,
       pagination: false,

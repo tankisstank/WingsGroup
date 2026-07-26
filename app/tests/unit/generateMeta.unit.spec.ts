@@ -58,7 +58,7 @@ describe('generateMeta multisite locale contract', () => {
       })
 
       expect(metadata.alternates?.canonical, `${site.name} canonical`).toBe(
-        `${site.canonicalDomain}${locale === 'vi' ? `${path === '/' ? '' : path}` : `/${locale}${path === '/' ? '' : path}`}`.replace(
+        `${site.canonicalDomain}${locale === 'en' ? `${path === '/' ? '' : path}` : `/${locale}${path === '/' ? '' : path}`}`.replace(
           /(?<!:)\/{2,}/g,
           '/',
         ),
@@ -102,11 +102,11 @@ describe('generateMeta multisite locale contract', () => {
 
     expect(metadata.alternates?.canonical).toBe('https://wingside.vn/it/about-us')
     expect(metadata.alternates?.languages).toMatchObject({
-      en: 'https://wingside.vn/en/about-us',
+      en: 'https://wingside.vn/about-us',
       es: 'https://wingside.vn/es/about-us',
       it: 'https://wingside.vn/it/about-us',
       pt: 'https://wingside.vn/pt/about-us',
-      vi: 'https://wingside.vn/about-us',
+      vi: 'https://wingside.vn/vi/about-us',
     })
   })
 
@@ -140,10 +140,10 @@ describe('generateMeta multisite locale contract', () => {
       path: '/contact-us',
     })
 
-    expect(metadata.alternates?.canonical).toBe('https://wingside.vn/contact-us')
+    expect(metadata.alternates?.canonical).toBe('https://wingside.vn/vi/contact-us')
     expect(metadata.alternates?.languages).toEqual({
-      en: 'https://wingside.vn/en/contact-us',
-      vi: 'https://wingside.vn/contact-us',
+      en: 'https://wingside.vn/contact-us',
+      vi: 'https://wingside.vn/vi/contact-us',
     })
     expect(metadata.alternates?.languages).not.toHaveProperty('x-default')
     expect(metadata.alternates?.languages).not.toHaveProperty('it')
@@ -216,5 +216,45 @@ describe('generateMeta multisite locale contract', () => {
     })
 
     expect(metadata.title).toBe('Vietnam destinations | Tailor-made Vietnam journeys | wingside.vn')
+  })
+
+  it('makes unprefixed root English and /vi Vietnamese self-canonical without x-default', async () => {
+    const site = inventory.sites.find((entry) => entry.name === 'wing-side')!
+
+    mocks.getCurrentSite.mockResolvedValue({
+      additionalDomains: [],
+      defaultLocale: 'vi',
+      primaryDomain: site.primaryDomain,
+      supportedLocales: site.supportedLocales,
+    })
+    mocks.getCurrentSiteSettings.mockResolvedValue({
+      seo: {
+        canonicalDomain: site.canonicalDomain,
+        defaultDescription: `${site.name} description`,
+        defaultTitle: site.name,
+      },
+      siteName: site.name,
+    })
+
+    const enRoot = await generateMeta({
+      alternateLocales: ['en', 'vi'],
+      doc: { pathname: '/', title: 'Home' },
+      locale: 'en',
+      path: '/',
+    })
+    const viRoot = await generateMeta({
+      alternateLocales: ['en', 'vi'],
+      doc: { pathname: '/', title: 'Trang chủ' },
+      locale: 'vi',
+      path: '/',
+    })
+
+    expect(enRoot.alternates?.canonical).toBe('https://wingside.vn')
+    expect(viRoot.alternates?.canonical).toBe('https://wingside.vn/vi')
+    expect(enRoot.alternates?.languages).toEqual({
+      en: 'https://wingside.vn',
+      vi: 'https://wingside.vn/vi',
+    })
+    expect(enRoot.alternates?.languages).not.toHaveProperty('x-default')
   })
 })

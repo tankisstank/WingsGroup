@@ -293,19 +293,42 @@ export const applyWingsSideCredentialsProductionPlan = async ({
       media: initial.media,
       siteID: plan.siteID,
     }).state
-    if (initialState !== 'before') {
-      throw new Error(`Credentials apply refused: expected before, observed ${initialState}`)
+    const planReusesMedia = plan.mediaOperations.every(
+      (operation) => operation.action === 'reuse',
+    )
+    const expectedInitialState = planReusesMedia ? 'media-only' : 'before'
+    if (initialState !== expectedInitialState) {
+      throw new Error(
+        `Credentials apply refused: expected ${expectedInitialState}, observed ${initialState}`,
+      )
     }
-    const plannedUploadPathsByItemID = await assertPlannedCredentialUploadsAbsent({
-      manifest,
-      mediaRoot: mediaStaticDir,
-    })
-    if (assertNoGlobalMediaFilenameCollisions) await assertNoGlobalMediaFilenameCollisions()
+    const plannedUploadPathsByItemID = planReusesMedia
+      ? new Map<string, string[]>()
+      : await assertPlannedCredentialUploadsAbsent({
+          manifest,
+          mediaRoot: mediaStaticDir,
+        })
+    if (!planReusesMedia && assertNoGlobalMediaFilenameCollisions) {
+      await assertNoGlobalMediaFilenameCollisions()
+    }
 
     const mediaIDs = new Map<string, number | string>()
     for (const operation of plan.mediaOperations) {
       const item = manifest.items.find((candidate) => candidate.id === operation.itemID)
       if (!item) throw new Error(`Missing manifest item ${operation.itemID}`)
+      if (operation.action === 'reuse') {
+        const existing = initial.media.find(
+          (candidate) =>
+            String(candidate.id) === String(operation.mediaID) &&
+            candidate.filename === operation.file &&
+            String(candidate.siteID) === String(plan.siteID),
+        )
+        if (!existing) {
+          throw new Error(`Credentials apply refused reused Media drift for ${operation.file}`)
+        }
+        mediaIDs.set(item.id, existing.id)
+        continue
+      }
       const assetPath = path.join(wingsSideCredentialAssetRoot, item.file)
       const fingerprint = await credentialFileSha256(assetPath)
       if (fingerprint.sha256 !== operation.sha256) {
@@ -432,13 +455,16 @@ export const rollbackWingsSideCredentialsProductionPlan = async ({
     const mediaByFilename = new Map(
       initialSnapshot.media.map((media) => [String(media.filename), media]),
     )
-    const createdMediaIDs = plan.mediaOperations.map((operation) => {
+    const createdOperations = plan.mediaOperations.filter(
+      (operation) => operation.action === 'create',
+    )
+    const createdMediaIDs = createdOperations.map((operation) => {
       const media = mediaByFilename.get(operation.file)
       if (!media)
         throw new Error(`Credentials rollback cannot resolve created media ${operation.file}`)
       return media.id
     })
-    const createdMedia = plan.mediaOperations.map(
+    const createdMedia = createdOperations.map(
       (operation) => mediaByFilename.get(operation.file)!,
     )
     quarantinedFiles = await quarantineMediaFiles(createdMedia, plan.runID)

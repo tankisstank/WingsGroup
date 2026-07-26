@@ -288,6 +288,11 @@ export const FormBlock: React.FC<
   const onSubmit = useCallback(
     (data: FormFieldBlock[]) => {
       if (submittingRef.current) return
+      const externalValidation = formRef.current?.dispatchEvent(
+        new CustomEvent('ws-plan-validate', { bubbles: true, cancelable: true }),
+      )
+      if (externalValidation === false) return
+
       submittingRef.current = true
       idempotencyKeyRef.current ||= crypto.randomUUID()
 
@@ -468,6 +473,7 @@ export const FormBlock: React.FC<
                 data-od-id={formOdId}
                 ref={formRef}
                 id={formID}
+                noValidate
                 onSubmit={handleSubmit(onSubmit, onInvalid)}
               >
                 <div aria-hidden="true" className="absolute left-[-10000px]" tabIndex={-1}>

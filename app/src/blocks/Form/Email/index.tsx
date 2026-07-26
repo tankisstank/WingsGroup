@@ -49,6 +49,7 @@ export const Email: React.FC<
       <Input
         aria-describedby={errors[name] ? errorID : undefined}
         aria-invalid={Boolean(errors[name])}
+        aria-required={required || undefined}
         autoComplete="email"
         defaultValue={defaultValue}
         id={fieldID}

@@ -182,6 +182,14 @@ export const getCurrentLocale = async (): Promise<SupportedLocaleCode> => {
 
   const site = await getCurrentSite()
 
+  if (
+    site?.code === 'wing-side' &&
+    requestHeaders.get('x-site-context-source') === 'proxy' &&
+    isSupportedLocale('en')
+  ) {
+    return 'en'
+  }
+
   return site?.defaultLocale || 'vi'
 }
 

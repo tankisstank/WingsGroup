@@ -48,6 +48,7 @@ export const Checkbox: React.FC<
             <CheckboxUi
               aria-describedby={errors[name] ? errorID : undefined}
               aria-invalid={Boolean(errors[name])}
+              aria-required={required || undefined}
               checked={Boolean(value)}
               id={fieldID}
               name={name}

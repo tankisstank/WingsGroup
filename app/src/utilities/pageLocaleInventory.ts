@@ -2,8 +2,11 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import { getCurrentSite } from './siteContext'
+import { isRuntimeResolvablePage } from './pageRuntimeResolvable'
 import { getSiteSitemapLocales } from './siteSEO'
 import type { SupportedLocaleCode } from './sitePaths'
+import { getResolvedTourDetailBySlug } from '@/tours/queries'
+import { hasMatchingWingSideTourWrapper } from '@/tours/wingsSideTourViewModel'
 
 type PayloadLike = Pick<Awaited<ReturnType<typeof getPayload>>, 'find'>
 
@@ -36,6 +39,11 @@ export const queryPublishedPageLocalesByExactPath = async ({
       locale: candidateLocale,
       overrideAccess: false,
       pagination: false,
+      select: {
+        hero: true,
+        layout: true,
+        title: true,
+      },
       where: {
         and: [
           {
@@ -57,7 +65,16 @@ export const queryPublishedPageLocalesByExactPath = async ({
       },
     })
 
-    if (result.docs?.[0]) {
+    if (
+      await isRuntimeResolvablePage({
+        getResolvedTourDetailBySlug,
+        hasMatchingWingSideTourWrapper,
+        locale: candidateLocale,
+        page: result.docs?.[0],
+        pathname: normalizedPathname,
+        siteCode: typeof site === 'object' ? site.code : undefined,
+      })
+    ) {
       publishedLocales.push(candidateLocale)
     }
   }

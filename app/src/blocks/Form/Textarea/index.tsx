@@ -52,6 +52,7 @@ export const Textarea: React.FC<
       <TextAreaComponent
         aria-describedby={errors[name] ? errorID : undefined}
         aria-invalid={Boolean(errors[name])}
+        aria-required={required || undefined}
         defaultValue={defaultValue}
         id={fieldID}
         rows={rows}

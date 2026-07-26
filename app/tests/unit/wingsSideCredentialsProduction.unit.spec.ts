@@ -157,6 +157,45 @@ describe('WingsSide credentials production plan contract', () => {
     ).toThrow('drifted from manifest/source')
   })
 
+  it('plans a media-only recovery without creating duplicate Media records', async () => {
+    const manifest = await loadWingsSideCredentialManifest()
+    const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest, releaseSha)
+    const media = manifest.items.map((item, index) => ({
+      alt: item.alt,
+      filename: item.file,
+      id: 8000 + index,
+      siteID,
+    }))
+
+    expect(
+      classifyWingsSideCredentialsState({
+        homes: homes(),
+        manifest,
+        media,
+        siteID,
+      }).state,
+    ).toBe('media-only')
+
+    const plan = await buildWingsSideCredentialsPlan({
+      homes: homes(),
+      manifest,
+      media,
+      runID: 'media-only-recovery',
+      siteID,
+      sourceIdentity,
+    })
+
+    assertWingsSideCredentialsPlan(plan)
+    assertWingsSideCredentialsPlanMatchesSource({ manifest, plan, sourceIdentity })
+    expect(plan.mediaOperations).toHaveLength(24)
+    expect(plan.mediaOperations.every((operation) => operation.action === 'reuse')).toBe(true)
+    expect(
+      plan.mediaOperations.map((operation) =>
+        operation.action === 'reuse' ? operation.mediaID : null,
+      ),
+    ).toEqual(media.map((item) => item.id))
+  })
+
   it('guards production writes to PostgreSQL with schema push disabled', () => {
     expect(() =>
       assertCredentialsProductionEnvironment({

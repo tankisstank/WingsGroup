@@ -53,6 +53,7 @@ export const PlanPrefillBridge = ({
   const [budget, setBudget] = useState('')
   const [consent, setConsent] = useState(false)
   const [consentError, setConsentError] = useState(false)
+  const consentInputRef = React.useRef<HTMLInputElement>(null)
 
   const readParam = useMemo(
     () => (key: string) => {
@@ -68,9 +69,16 @@ export const PlanPrefillBridge = ({
   }
 
   const hideRawFields = (root: Element) => {
-    for (const name of ['country', 'travel-month', 'group-size']) {
-      const wrap = root
-        .querySelector(`[name="${name}"]`)
+    const labelsByName: Record<string, string> = {
+      country: destLabel,
+      'group-size': groupLabel,
+      'travel-month': monthLabel,
+    }
+
+    for (const [name, label] of Object.entries(labelsByName)) {
+      const control = root.querySelector<HTMLElement>(`[name="${name}"]`)
+      control?.setAttribute('aria-label', label)
+      const wrap = control
         ?.closest('.mb-6, .mb-4') as HTMLElement | null
       if (wrap) wrap.setAttribute('data-ws-plan-hide', 'true')
     }
@@ -247,16 +255,17 @@ export const PlanPrefillBridge = ({
     const form = document.querySelector('.ws-hifi-plan-form form') as HTMLFormElement | null
     if (!form) return
 
-    const onSubmit = (event: Event) => {
+    const onValidate = (event: Event) => {
       if (!consent) {
         event.preventDefault()
         event.stopPropagation()
         setConsentError(true)
+        window.requestAnimationFrame(() => consentInputRef.current?.focus())
       }
     }
 
-    form.addEventListener('submit', onSubmit, true)
-    return () => form.removeEventListener('submit', onSubmit, true)
+    form.addEventListener('ws-plan-validate', onValidate)
+    return () => form.removeEventListener('ws-plan-validate', onValidate)
   }, [consent, consentHost])
 
   const groups: ChipGroup[] = [
@@ -359,18 +368,20 @@ export const PlanPrefillBridge = ({
     <>
       <label className="ws-plan-consent" data-invalid={consentError ? 'true' : 'false'}>
         <input
+          aria-describedby={consentError ? 'ws-plan-consent-error' : undefined}
+          aria-invalid={consentError || undefined}
           checked={consent}
           onChange={(event) => {
             setConsent(event.target.checked)
             if (event.target.checked) setConsentError(false)
           }}
-          required
+          ref={consentInputRef}
           type="checkbox"
         />
         <span>{consentLabel}</span>
       </label>
       {consentError ? (
-        <p className="ws-plan-consent-error" role="alert">
+        <p className="ws-plan-consent-error" id="ws-plan-consent-error" role="alert">
           {consentLabel}
         </p>
       ) : null}

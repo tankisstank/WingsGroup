@@ -51,7 +51,10 @@ describe('production SEO perimeter', () => {
     expect(getSiteSitemapLocales(site)).toEqual(['vi', 'en'])
     expect(
       getSiteSitemapURL({ locale: 'en', origin: 'https://wingsgo.vn', path: '/posts/launch' }),
-    ).toBe('https://wingsgo.vn/en/posts/launch')
+    ).toBe('https://wingsgo.vn/posts/launch')
+    expect(
+      getSiteSitemapURL({ locale: 'vi', origin: 'https://wingsgo.vn', path: '/posts/launch' }),
+    ).toBe('https://wingsgo.vn/vi/posts/launch')
   })
 
   it('keeps canonical origins and sitemap locales aligned with the multisite inventory', () => {
@@ -81,7 +84,7 @@ describe('production SEO perimeter', () => {
           Object.values(site.nestedRouteSamples)[0] ||
           '/'
         const expectedPath =
-          locale === 'vi'
+          locale === 'en'
             ? nestedPath
             : `/${locale}${nestedPath === '/' ? '' : nestedPath}`
 
@@ -113,6 +116,7 @@ describe('production SEO perimeter', () => {
       const source = readProjectFile(path)
 
       expect(source).toContain('equals: site.id')
+      expect(source).toContain('fallbackLocale: false')
       expect(source).toContain("export const dynamic = 'force-dynamic'")
       expect(source).not.toContain('unstable_cache')
     }

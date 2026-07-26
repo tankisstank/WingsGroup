@@ -4,11 +4,14 @@ import { getPayload } from 'payload'
 
 import { getCurrentSite } from '@/utilities/siteContext'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
+import { isRuntimeResolvablePage } from '@/utilities/pageRuntimeResolvable'
 import {
   getCanonicalSiteOrigin,
   getSiteSitemapLocales,
   getSiteSitemapURL,
 } from '@/utilities/siteSEO'
+import { getResolvedTourDetailBySlug } from '@/tours/queries'
+import { hasMatchingWingSideTourWrapper } from '@/tours/wingsSideTourViewModel'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,6 +53,7 @@ export async function GET(request: Request) {
       overrideAccess: false,
       draft: false,
       depth: 0,
+      fallbackLocale: false,
       limit: 1000,
       locale,
       pagination: false,
@@ -68,14 +72,34 @@ export async function GET(request: Request) {
         ],
       },
       select: {
+        hero: true,
+        layout: true,
         slug: true,
         pathname: true,
+        title: true,
         updatedAt: true,
       },
     })
 
+    const resolvablePages = []
+    for (const page of results.docs) {
+      const path = getPageCanonicalPath(page)
+      if (
+        await isRuntimeResolvablePage({
+          getResolvedTourDetailBySlug,
+          hasMatchingWingSideTourWrapper,
+          locale,
+          page,
+          pathname: path,
+          siteCode: site.code,
+        })
+      ) {
+        resolvablePages.push(page)
+      }
+    }
+
     sitemap.push(
-      ...results.docs
+      ...resolvablePages
         .filter((page) => Boolean(page?.pathname || page?.slug))
         .map((page) => ({
           loc: getSiteSitemapURL({

@@ -33,6 +33,10 @@ export const prefixCanonicalPathWithLocale = (
     return normalizedPath
   }
 
+  if (locale === 'en') {
+    return normalizedPath
+  }
+
   return `/${locale}${normalizedPath === '/' ? '' : normalizedPath}`.replace(/\/+/g, '/')
 }
 
