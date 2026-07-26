@@ -25,9 +25,10 @@ import {
   type CredentialMediaSnapshot,
   type WingsSideCredentialsPlan,
 } from './wingsSideCredentialsProduction'
+import { wingsSideLocalizationBackfillContext } from '../../src/utilities/wingsSideLocalizationBackfillContext'
 
 const productionContext = {
-  disableRevalidate: true,
+  ...wingsSideLocalizationBackfillContext,
   releaseOperation: 'wingsside-credentials-production-import',
 }
 
