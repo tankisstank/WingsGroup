@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { TourProduct } from '../../src/payload-types'
+import type { Page, TourProduct } from '../../src/payload-types'
 import {
   editorialSourceChecksum,
   type EditorialTourContent,
@@ -9,9 +9,9 @@ import {
 import {
   assertEditorialPlanShape,
   buildEditorialWriteData,
+  buildEditorialWrapperWriteData,
   buildWingsSideTourEditorialPlan,
   editorialChecksum,
-  snapshotEditorialOwnedFields,
 } from '../../scripts/lib/wingsSideTourEditorialProduction'
 
 const content = (index: number, locale: string): EditorialTourContent => ({
@@ -81,6 +81,21 @@ const sourceTour = (index: number): TourProduct =>
     wrapperPage: 100 + index,
   }) as TourProduct
 
+const sourceWrapper = (index: number): Page =>
+  ({
+    _status: 'published',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    hero: { type: 'none' },
+    id: 100 + index,
+    layout: [{ blockType: 'content', columns: [] }],
+    meta: { image: 700 + index, title: `English wrapper meta ${index}` },
+    pathname: `/tour/tour-${index}`,
+    site: 7,
+    slug: `wing-side-tour-${index}`,
+    title: `English wrapper ${index}`,
+    updatedAt: '2026-01-01T00:00:00.000Z',
+  }) as Page
+
 const catalogAndSources = () => {
   const sources = Array.from({ length: 22 }, (_, index) => sourceTour(index + 1))
   const catalog: WingsSideTourEditorialCatalog = {
@@ -121,14 +136,31 @@ describe('WingSide tour editorial production plan', () => {
       notes: [{ id: 'service-1', label: 'Keep non-localized service note' }],
       operatorNotes: 'pt notes',
     })
+    expect(
+      buildEditorialWrapperWriteData({
+        content: content(1, 'pt'),
+        source: sourceWrapper(1),
+      }),
+    ).toMatchObject({
+      layout: [{ blockType: 'content', columns: [] }],
+      meta: { image: 701, title: 'pt meta 1' },
+      title: 'pt tour 1',
+    })
   })
 
   it('builds an exact 22 by 4 drift-checked plan', () => {
     const { catalog, sources } = catalogAndSources()
     const beforeByKey = new Map<string, TourProduct>()
+    const wrapperBeforeByKey = new Map<string, Page>()
     for (const source of sources) {
       for (const locale of ['vi', 'it', 'es', 'pt']) {
         beforeByKey.set(`${locale}:${source.slug}`, source)
+        wrapperBeforeByKey.set(`${locale}:${source.slug}`, {
+          ...sourceWrapper(source.id as number),
+          layout: null,
+          meta: null,
+          title: null,
+        } as unknown as Page)
       }
     }
     const plan = buildWingsSideTourEditorialPlan({
@@ -139,23 +171,34 @@ describe('WingSide tour editorial production plan', () => {
       runID: 'test-run',
       siteID: 7,
       sourceTours: sources,
+      sourceWrappers: new Map(
+        sources.map((source) => [source.slug, sourceWrapper(source.id as number)]),
+      ),
+      wrapperBeforeByKey,
       wrapperPageIDs: new Map(sources.map((source) => [source.slug, source.wrapperPage as number])),
     })
 
     expect(plan.entries).toHaveLength(88)
     expect(new Set(plan.entries.map(({ locale, slug }) => `${locale}:${slug}`)).size).toBe(88)
     expect(() => assertEditorialPlanShape(plan)).not.toThrow()
-    expect(plan.entries.every(({ afterChecksum, after }) => afterChecksum === editorialChecksum(after))).toBe(
-      true,
-    )
+    expect(
+      plan.entries.every(
+        ({ afterChecksum, after, wrapperAfter }) =>
+          afterChecksum === editorialChecksum({ tour: after, wrapper: wrapperAfter }),
+      ),
+    ).toBe(true)
+    expect(plan.entries[0]!.wrapperBefore.title).toBeNull()
+    expect(plan.entries[0]!.wrapperAfter.title).toBe('vi tour 0')
   })
 
   it('rejects aggregate plan tampering', () => {
     const { catalog, sources } = catalogAndSources()
     const beforeByKey = new Map<string, TourProduct>()
+    const wrapperBeforeByKey = new Map<string, Page>()
     for (const source of sources) {
       for (const locale of ['vi', 'it', 'es', 'pt']) {
         beforeByKey.set(`${locale}:${source.slug}`, source)
+        wrapperBeforeByKey.set(`${locale}:${source.slug}`, sourceWrapper(source.id as number))
       }
     }
     const plan = buildWingsSideTourEditorialPlan({
@@ -166,9 +209,13 @@ describe('WingSide tour editorial production plan', () => {
       runID: 'test-run',
       siteID: 7,
       sourceTours: sources,
+      sourceWrappers: new Map(
+        sources.map((source) => [source.slug, sourceWrapper(source.id as number)]),
+      ),
+      wrapperBeforeByKey,
       wrapperPageIDs: new Map(sources.map((source) => [source.slug, source.wrapperPage as number])),
     })
-    plan.entries[0]!.afterChecksum = editorialChecksum(snapshotEditorialOwnedFields(sourceTour(1)))
+    plan.entries[0]!.wrapperAfter.title = 'tampered wrapper'
 
     expect(() => assertEditorialPlanShape(plan)).toThrow('entry checksum mismatch')
   })

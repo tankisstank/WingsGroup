@@ -6,7 +6,7 @@ import {
   type PayloadRequest,
 } from 'payload'
 
-import type { TourProduct } from '../../src/payload-types'
+import type { Page, TourProduct } from '../../src/payload-types'
 import { wingsSideLocalizationBackfillContext } from '../../src/utilities/wingsSideLocalizationBackfillContext'
 import {
   assertWingsSideTourEditorialCatalog,
@@ -17,11 +17,14 @@ import {
 import {
   assertEditorialPlanShape,
   buildEditorialRestoreData,
+  buildEditorialWrapperRestoreData,
+  buildEditorialWrapperWriteData,
   buildEditorialWriteData,
   buildWingsSideTourEditorialPlan,
   editorialChecksum,
   editorialRelationID,
   snapshotEditorialOwnedFields,
+  snapshotEditorialWrapperFields,
   wingsSideTourEditorialExpectedTourCount,
   type WingsSideTourEditorialPlan,
 } from './wingsSideTourEditorialProduction'
@@ -35,7 +38,44 @@ type ProductionInventory = {
   beforeByKey: Map<string, TourProduct>
   siteID: number | string
   sourceTours: TourProduct[]
+  sourceWrappers: Map<string, Page>
+  wrapperBeforeByKey: Map<string, Page>
   wrapperPageIDs: Map<string, number | string>
+}
+
+type MutableField = {
+  fields?: MutableField[]
+  localized?: boolean
+  name?: string
+  required?: boolean
+  tabs?: Array<{ fields?: MutableField[] }>
+}
+
+const relaxLocalizedWrapperRequirements = (payload: Payload) => {
+  const restored: Array<() => void> = []
+  const visit = (fields: MutableField[]) => {
+    for (const field of fields) {
+      if (
+        field.localized &&
+        (field.name === 'title' || field.name === 'layout') &&
+        field.required
+      ) {
+        const required = field.required
+        field.required = false
+        restored.push(() => {
+          field.required = required
+        })
+      }
+      if (field.fields) visit(field.fields)
+      for (const tab of field.tabs || []) {
+        if (tab.fields) visit(tab.fields)
+      }
+    }
+  }
+  visit(payload.collections.pages.config.fields as MutableField[])
+  return () => {
+    for (const restore of restored.reverse()) restore()
+  }
 }
 
 const findSiteID = async (payload: Payload, req: PayloadRequest) => {
@@ -82,7 +122,7 @@ const findTours = async ({
   return result.docs as TourProduct[]
 }
 
-const assertLocalizedWrapper = async ({
+const findWrapper = async ({
   locale,
   payload,
   req,
@@ -92,7 +132,7 @@ const assertLocalizedWrapper = async ({
   payload: Payload
   req: PayloadRequest
   wrapperPageID: number | string
-}) => {
+}): Promise<Page> => {
   const page = await payload.findByID({
     collection: 'pages',
     depth: 0,
@@ -103,14 +143,10 @@ const assertLocalizedWrapper = async ({
     overrideAccess: true,
     req,
   })
-  if (
-    !page ||
-    page._status !== 'published' ||
-    typeof page.title !== 'string' ||
-    !page.title.trim()
-  ) {
-    throw new Error(`Missing published ${locale} wrapper page ${wrapperPageID}`)
+  if (!page || String(page.id) !== String(wrapperPageID)) {
+    throw new Error(`Missing ${locale} wrapper page ${wrapperPageID}`)
   }
+  return page
 }
 
 export const loadWingsSideTourEditorialProductionInventory = async ({
@@ -131,13 +167,30 @@ export const loadWingsSideTourEditorialProductionInventory = async ({
   }
 
   const wrapperPageIDs = new Map<string, number | string>()
+  const sourceWrappers = new Map<string, Page>()
   for (const source of sourceTours) {
     const wrapperPageID = editorialRelationID(source.wrapperPage)
     if (wrapperPageID === null) throw new Error(`English tour has no wrapper page: ${source.slug}`)
     wrapperPageIDs.set(source.slug, wrapperPageID)
+    const wrapper = await findWrapper({
+      locale: 'en' as WingsSideTourEditorialLocale,
+      payload,
+      req,
+      wrapperPageID,
+    })
+    if (
+      wrapper._status !== 'published' ||
+      typeof wrapper.title !== 'string' ||
+      !wrapper.title.trim() ||
+      !Array.isArray(wrapper.layout)
+    ) {
+      throw new Error(`Invalid published English wrapper page ${wrapperPageID}`)
+    }
+    sourceWrappers.set(source.slug, wrapper)
   }
 
   const beforeByKey = new Map<string, TourProduct>()
+  const wrapperBeforeByKey = new Map<string, Page>()
   for (const locale of wingsSideTourEditorialLocales) {
     const localizedTours = await findTours({ locale, payload, req, siteID })
     const localizedBySlug = new Map(localizedTours.map((tour) => [tour.slug, tour]))
@@ -160,11 +213,19 @@ export const loadWingsSideTourEditorialProductionInventory = async ({
       if (String(editorialRelationID(localized.wrapperPage)) !== String(wrapperPageID)) {
         throw new Error(`Localized wrapper relation drift for ${locale}:${source.slug}`)
       }
-      await assertLocalizedWrapper({ locale, payload, req, wrapperPageID })
+      const wrapper = await findWrapper({ locale, payload, req, wrapperPageID })
       beforeByKey.set(`${locale}:${source.slug}`, localized)
+      wrapperBeforeByKey.set(`${locale}:${source.slug}`, wrapper)
     }
   }
-  return { beforeByKey, siteID, sourceTours, wrapperPageIDs }
+  return {
+    beforeByKey,
+    siteID,
+    sourceTours,
+    sourceWrappers,
+    wrapperBeforeByKey,
+    wrapperPageIDs,
+  }
 }
 
 export const createWingsSideTourEditorialProductionPlan = async ({
@@ -195,6 +256,8 @@ export const createWingsSideTourEditorialProductionPlan = async ({
     runID,
     siteID: inventory.siteID,
     sourceTours: inventory.sourceTours,
+    sourceWrappers: inventory.sourceWrappers,
+    wrapperBeforeByKey: inventory.wrapperBeforeByKey,
     wrapperPageIDs: inventory.wrapperPageIDs,
   })
 }
@@ -238,7 +301,11 @@ export const verifyWingsSideTourEditorialProductionPlan = async ({
   const mismatches: string[] = []
   for (const entry of plan.entries) {
     const current = inventory.beforeByKey.get(`${entry.locale}:${entry.slug}`)!
-    const actual = editorialChecksum(snapshotEditorialOwnedFields(current))
+    const currentWrapper = inventory.wrapperBeforeByKey.get(`${entry.locale}:${entry.slug}`)!
+    const actual = editorialChecksum({
+      tour: snapshotEditorialOwnedFields(current),
+      wrapper: snapshotEditorialWrapperFields(currentWrapper),
+    })
     const expected = expectedState === 'after' ? entry.afterChecksum : entry.beforeChecksum
     if (actual !== expected) mismatches.push(`${entry.locale}:${entry.slug}`)
   }
@@ -266,11 +333,17 @@ const mutatePlan = async ({
   req: PayloadRequest
 }) => {
   const originalVersions = payload.collections['tour-products'].config.versions
+  const originalPageVersions = payload.collections.pages.config.versions
+  let restoreWrapperRequirements = () => {}
   let transactionStarted = false
   let updated = 0
   let unchanged = 0
   try {
     payload.collections['tour-products'].config.versions = false as never
+    payload.collections.pages.config.versions = false as never
+    if (direction === 'rollback') {
+      restoreWrapperRequirements = relaxLocalizedWrapperRequirements(payload)
+    }
     transactionStarted = await initTransaction(req)
     if (!transactionStarted || !req.transactionID) {
       throw new Error('Database adapter did not start the required tour editorial transaction')
@@ -282,7 +355,11 @@ const mutatePlan = async ({
 
     for (const entry of plan.entries) {
       const current = inventory.beforeByKey.get(`${entry.locale}:${entry.slug}`)!
-      const currentChecksum = editorialChecksum(snapshotEditorialOwnedFields(current))
+      const currentWrapper = inventory.wrapperBeforeByKey.get(`${entry.locale}:${entry.slug}`)!
+      const currentChecksum = editorialChecksum({
+        tour: snapshotEditorialOwnedFields(current),
+        wrapper: snapshotEditorialWrapperFields(currentWrapper),
+      })
       const fromChecksum = direction === 'apply' ? entry.beforeChecksum : entry.afterChecksum
       const toChecksum = direction === 'apply' ? entry.afterChecksum : entry.beforeChecksum
       if (currentChecksum === toChecksum) {
@@ -293,13 +370,31 @@ const mutatePlan = async ({
         throw new Error(`Editorial ${direction} refused drift for ${entry.locale}:${entry.slug}`)
       }
       const source = inventory.sourceTours.find(({ slug }) => slug === entry.slug)!
+      const sourceWrapper = inventory.sourceWrappers.get(entry.slug)!
+      const content = catalogBySlug.get(entry.slug)!.locales[entry.locale]
       const data =
         direction === 'apply'
           ? buildEditorialWriteData({
-              content: catalogBySlug.get(entry.slug)!.locales[entry.locale],
+              content,
               source,
             })
           : buildEditorialRestoreData({ before: entry.before, source })
+      const wrapperData =
+        direction === 'apply'
+          ? buildEditorialWrapperWriteData({ content, source: sourceWrapper })
+          : buildEditorialWrapperRestoreData({
+              before: entry.wrapperBefore,
+              source: sourceWrapper,
+            })
+      await payload.update({
+        collection: 'pages',
+        context: productionContext,
+        data: wrapperData as never,
+        id: entry.wrapperPageID,
+        locale: entry.locale,
+        overrideAccess: true,
+        req,
+      })
       await payload.update({
         collection: 'tour-products',
         context: productionContext,
@@ -328,6 +423,8 @@ const mutatePlan = async ({
     throw error
   } finally {
     payload.collections['tour-products'].config.versions = originalVersions
+    payload.collections.pages.config.versions = originalPageVersions
+    restoreWrapperRequirements()
   }
 }
 

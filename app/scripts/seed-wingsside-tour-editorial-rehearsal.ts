@@ -141,7 +141,6 @@ const main = async () => {
 
     for (const source of sourceTours) {
       const slug = String(source.slug)
-      const catalogEntry = catalog.tours.find((entry) => entry.slug === slug)!
       const page = await payload.create({
         collection: 'pages',
         context,
@@ -163,26 +162,6 @@ const main = async () => {
         overrideAccess: true,
         req,
       })
-      for (const locale of wingsSideTourEditorialLocales) {
-        const content = catalogEntry.locales[locale]
-        await payload.update({
-          collection: 'pages',
-          context,
-          data: {
-            _status: 'published',
-            layout: wrapperLayout,
-            meta: content.meta,
-            pathname: `/tour/${slug}`,
-            slug: `wing-side-${slug}`,
-            title: content.title,
-          },
-          id: page.id,
-          locale,
-          overrideAccess: true,
-          req,
-        })
-      }
-
       const product = await payload.create({
         collection: 'tour-products',
         context,

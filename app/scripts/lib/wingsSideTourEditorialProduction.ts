@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
 
-import type { TourProduct } from '../../src/payload-types'
+import type { Page, TourProduct } from '../../src/payload-types'
 import {
   editorialSourceChecksum,
   wingsSideTourEditorialLocales,
@@ -11,7 +11,7 @@ import {
 
 export const wingsSideTourEditorialSiteCode = 'wing-side'
 export const wingsSideTourEditorialExpectedTourCount = 22
-export const wingsSideTourEditorialPlanVersion = 1
+export const wingsSideTourEditorialPlanVersion = 2
 
 export type EditorialOwnedSnapshot = {
   excludes: unknown
@@ -34,6 +34,16 @@ export type EditorialOwnedSnapshot = {
   title: unknown
 }
 
+export type EditorialWrapperSnapshot = {
+  layout: unknown
+  meta: {
+    breadcrumbLabel: unknown
+    description: unknown
+    title: unknown
+  }
+  title: unknown
+}
+
 export type WingsSideTourEditorialPlanEntry = {
   after: EditorialOwnedSnapshot
   afterChecksum: string
@@ -42,6 +52,8 @@ export type WingsSideTourEditorialPlanEntry = {
   locale: WingsSideTourEditorialLocale
   sourceChecksum: string
   tourID: number | string
+  wrapperAfter: EditorialWrapperSnapshot
+  wrapperBefore: EditorialWrapperSnapshot
   wrapperPageID: number | string
   slug: string
 }
@@ -52,7 +64,7 @@ export type WingsSideTourEditorialPlan = {
   expectedLocales: WingsSideTourEditorialLocale[]
   expectedTourCount: 22
   mode: 'plan'
-  planVersion: 1
+  planVersion: 2
   releaseSourceCommit: string
   runID: string
   siteCode: 'wing-side'
@@ -94,6 +106,17 @@ const record = (value: unknown): Record<string, unknown> =>
 const array = (value: unknown): Record<string, unknown>[] =>
   Array.isArray(value) ? value.map(record) : []
 
+const sanitizeWrapperLayout = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(sanitizeWrapperLayout)
+  if (!value || typeof value !== 'object') return value
+  const source = value as Record<string, unknown>
+  return Object.fromEntries(
+    Object.entries(source)
+      .filter(([key]) => key !== 'id' || typeof source.blockType !== 'string')
+      .map(([key, child]) => [key, sanitizeWrapperLayout(child)]),
+  )
+}
+
 export const snapshotEditorialOwnedFields = (
   tour: Partial<TourProduct> | Record<string, unknown>,
 ): EditorialOwnedSnapshot => {
@@ -121,6 +144,58 @@ export const snapshotEditorialOwnedFields = (
     },
     summary: value.summary ?? null,
     title: value.title ?? null,
+  }
+}
+
+export const snapshotEditorialWrapperFields = (
+  page: Partial<Page> | Record<string, unknown>,
+): EditorialWrapperSnapshot => {
+  const value = page as Record<string, unknown>
+  const meta = record(value.meta)
+  return {
+    layout: cloneJSON(sanitizeWrapperLayout(value.layout ?? null)),
+    meta: {
+      breadcrumbLabel: meta.breadcrumbLabel ?? null,
+      description: meta.description ?? null,
+      title: meta.title ?? null,
+    },
+    title: value.title ?? null,
+  }
+}
+
+export const buildEditorialWrapperWriteData = ({
+  content,
+  source,
+}: {
+  content: EditorialTourContent
+  source: Page | Record<string, unknown>
+}): Record<string, unknown> => {
+  const value = source as Record<string, unknown>
+  return {
+    layout: cloneJSON(sanitizeWrapperLayout(value.layout ?? [])),
+    meta: {
+      ...cloneJSON(record(value.meta)),
+      ...content.meta,
+    },
+    title: content.title,
+  }
+}
+
+export const buildEditorialWrapperRestoreData = ({
+  before,
+  source,
+}: {
+  before: EditorialWrapperSnapshot
+  source: Page | Record<string, unknown>
+}): Record<string, unknown> => {
+  const value = source as Record<string, unknown>
+  return {
+    layout: cloneJSON(sanitizeWrapperLayout(before.layout)),
+    meta: {
+      ...cloneJSON(record(value.meta)),
+      ...before.meta,
+    },
+    title: before.title,
   }
 }
 
@@ -228,8 +303,10 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
   }
   for (const entry of plan.entries) {
     if (
-      editorialChecksum(entry.before) !== entry.beforeChecksum ||
-      editorialChecksum(entry.after) !== entry.afterChecksum
+      editorialChecksum({ tour: entry.before, wrapper: entry.wrapperBefore }) !==
+        entry.beforeChecksum ||
+      editorialChecksum({ tour: entry.after, wrapper: entry.wrapperAfter }) !==
+        entry.afterChecksum
     ) {
       throw new Error(`WingSide tour editorial plan entry checksum mismatch: ${entry.locale}:${entry.slug}`)
     }
@@ -267,6 +344,8 @@ export const buildWingsSideTourEditorialPlan = ({
   runID,
   siteID,
   sourceTours,
+  sourceWrappers,
+  wrapperBeforeByKey,
   wrapperPageIDs,
 }: {
   beforeByKey: Map<string, TourProduct | Record<string, unknown>>
@@ -276,6 +355,8 @@ export const buildWingsSideTourEditorialPlan = ({
   runID: string
   siteID: number | string
   sourceTours: TourProduct[]
+  sourceWrappers: Map<string, Page | Record<string, unknown>>
+  wrapperBeforeByKey: Map<string, Page | Record<string, unknown>>
   wrapperPageIDs: Map<string, number | string>
 }): WingsSideTourEditorialPlan => {
   if (sourceTours.length !== wingsSideTourEditorialExpectedTourCount) {
@@ -284,8 +365,9 @@ export const buildWingsSideTourEditorialPlan = ({
   const sourceBySlug = new Map(sourceTours.map((tour) => [tour.slug, tour]))
   const entries = catalog.tours.flatMap((entry) => {
     const source = sourceBySlug.get(entry.slug)
+    const sourceWrapper = sourceWrappers.get(entry.slug)
     const wrapperPageID = wrapperPageIDs.get(entry.slug)
-    if (!source || wrapperPageID === undefined) {
+    if (!source || !sourceWrapper || wrapperPageID === undefined) {
       throw new Error(`Missing production source or wrapper for ${entry.slug}`)
     }
     if (editorialSourceChecksum(source) !== entry.sourceChecksum) {
@@ -293,7 +375,9 @@ export const buildWingsSideTourEditorialPlan = ({
     }
     return wingsSideTourEditorialLocales.map((locale) => {
       const beforeTour = beforeByKey.get(`${locale}:${entry.slug}`)
+      const beforeWrapper = wrapperBeforeByKey.get(`${locale}:${entry.slug}`)
       if (!beforeTour) throw new Error(`Missing ${locale} tour snapshot for ${entry.slug}`)
+      if (!beforeWrapper) throw new Error(`Missing ${locale} wrapper snapshot for ${entry.slug}`)
       if (String(beforeTour.id) !== String(source.id)) {
         throw new Error(`Localized tour ID drift for ${locale}:${entry.slug}`)
       }
@@ -301,14 +385,23 @@ export const buildWingsSideTourEditorialPlan = ({
       const after = snapshotEditorialOwnedFields(
         buildEditorialWriteData({ content: entry.locales[locale], source }),
       )
+      const wrapperBefore = snapshotEditorialWrapperFields(beforeWrapper)
+      const wrapperAfter = snapshotEditorialWrapperFields(
+        buildEditorialWrapperWriteData({
+          content: entry.locales[locale],
+          source: sourceWrapper,
+        }),
+      )
       return {
         after,
-        afterChecksum: editorialChecksum(after),
+        afterChecksum: editorialChecksum({ tour: after, wrapper: wrapperAfter }),
         before,
-        beforeChecksum: editorialChecksum(before),
+        beforeChecksum: editorialChecksum({ tour: before, wrapper: wrapperBefore }),
         locale,
         sourceChecksum: entry.sourceChecksum,
         tourID: source.id,
+        wrapperAfter,
+        wrapperBefore,
         wrapperPageID,
         slug: entry.slug,
       }
@@ -324,7 +417,7 @@ export const buildWingsSideTourEditorialPlan = ({
     expectedLocales: [...wingsSideTourEditorialLocales],
     expectedTourCount: 22,
     mode: 'plan',
-    planVersion: 1,
+    planVersion: 2,
     releaseSourceCommit,
     runID,
     siteCode: 'wing-side',
