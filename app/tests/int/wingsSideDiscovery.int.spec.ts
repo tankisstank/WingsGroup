@@ -2,11 +2,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   find: vi.fn(),
+  loggerInfo: vi.fn(),
   site: { code: 'wing-side' as string, id: 3 },
 }))
 
 vi.mock('@payload-config', () => ({ default: {} }))
-vi.mock('payload', () => ({ getPayload: vi.fn(async () => ({ find: mocks.find })) }))
+vi.mock('payload', () => ({
+  getPayload: vi.fn(async () => ({ find: mocks.find, logger: { info: mocks.loggerInfo } })),
+}))
 vi.mock('@/utilities/siteContext', () => ({
   appendSiteWhere: vi.fn(async (where?: Record<string, unknown>) => ({
     and: [{ site: { equals: mocks.site.id } }, where],
@@ -153,10 +156,17 @@ const collectionCalls = (collection: string) =>
     .map(([args]) => args as FindArgs)
     .filter((args) => args.collection === collection)
 
+const discoveryLogs = () =>
+  mocks.loggerInfo.mock.calls.map(([fields, message]) => ({
+    fields: fields as Record<string, unknown>,
+    message,
+  }))
+
 describe('WingSide discovery server query contract', () => {
   beforeEach(() => {
     mocks.site = { code: 'wing-side', id: 3 }
     mocks.find.mockReset()
+    mocks.loggerInfo.mockReset()
   })
 
   it('verifies access-stripped wrappers in one batched pages query and projects stable public results', async () => {
@@ -189,6 +199,23 @@ describe('WingSide discovery server query contract', () => {
     expect(context.result.items[0]).not.toHaveProperty('_status')
     expect(context.result.items[0]).not.toHaveProperty('wrapperPage')
     expect(context.result.relaxed).toBeNull()
+    expect(discoveryLogs()).toHaveLength(1)
+    expect(discoveryLogs()[0]).toMatchObject({
+      fields: {
+        action: 'wingsside_discovery_completed',
+        destination_code: 'hanoi',
+        duration_code: '1-7',
+        invalid_filter_count: 0,
+        relaxed: null,
+        result_count: 2,
+        source: 'journeys',
+        style_code: 'culture',
+        tenant_code: 'wing-side',
+        tenant_outcome: 'accepted',
+      },
+      message: 'wingsside_discovery_completed',
+    })
+    expect(discoveryLogs()[0].fields.duration_ms).toEqual(expect.any(Number))
 
     const tourArgs = collectionCalls('tour-products')[0]
     expect(tourArgs).toMatchObject({
@@ -257,6 +284,16 @@ describe('WingSide discovery server query contract', () => {
       removed: 'duration',
       query: { destination: 'hanoi', style: 'luxury' },
     })
+    expect(discoveryLogs()).toHaveLength(1)
+    expect(discoveryLogs()[0].fields).toMatchObject({
+      destination_code: 'hanoi',
+      duration_code: '8-14',
+      invalid_filter_count: 0,
+      relaxed: 'duration',
+      result_count: 1,
+      style_code: 'luxury',
+      tenant_outcome: 'accepted',
+    })
     expect(collectionCalls('tour-products')).toHaveLength(2)
     expect(collectionCalls('pages')).toHaveLength(1)
     expect(clauses(collectionCalls('tour-products')[0])).toContainEqual({
@@ -310,6 +347,18 @@ describe('WingSide discovery server query contract', () => {
     expect(context.seo).toEqual({ canonicalPath: '/journeys', robots: 'index,follow' })
     expect(context.result.items).toEqual([])
     expect(context.result.total).toBe(0)
+    expect(discoveryLogs()).toHaveLength(1)
+    expect(discoveryLogs()[0].fields).toMatchObject({
+      invalid_filter_count: 0,
+      relaxed: null,
+      result_count: 0,
+      source: 'journeys',
+      tenant_code: 'wing-side',
+      tenant_outcome: 'accepted',
+    })
+    expect(discoveryLogs()[0].fields).not.toHaveProperty('destination_code')
+    expect(discoveryLogs()[0].fields).not.toHaveProperty('duration_code')
+    expect(discoveryLogs()[0].fields).not.toHaveProperty('style_code')
     expect(collectionCalls('tour-products')).toHaveLength(1)
     expect(collectionCalls('pages')).toHaveLength(1)
   })
@@ -331,6 +380,23 @@ describe('WingSide discovery server query contract', () => {
     expect(context.result.appliedQuery).toEqual({})
     expect(context.result.unknownValueCount).toBe(3)
     expect(context.seo).toEqual({ canonicalPath: '/journeys', robots: 'noindex,follow' })
+    expect(discoveryLogs()).toHaveLength(1)
+    expect(discoveryLogs()[0].fields).toMatchObject({
+      invalid_filter_count: 3,
+      relaxed: null,
+      result_count: 0,
+      source: 'journeys',
+      tenant_code: 'wing-side',
+      tenant_outcome: 'accepted',
+    })
+    const serializedLog = JSON.stringify(discoveryLogs()[0])
+    expect(serializedLog).not.toContain('raw-secret')
+    expect(serializedLog).not.toContain('bogus-destination')
+    expect(serializedLog).not.toContain('unknown')
+    expect(serializedLog).not.toContain('99')
+    expect(discoveryLogs()[0].fields).not.toHaveProperty('destination_code')
+    expect(discoveryLogs()[0].fields).not.toHaveProperty('duration_code')
+    expect(discoveryLogs()[0].fields).not.toHaveProperty('style_code')
     expect(collectionCalls('tour-products')).toHaveLength(1)
     expect(collectionCalls('pages')).toHaveLength(0)
     expect(clauses(collectionCalls('tour-products')[0])).toEqual([
@@ -341,6 +407,7 @@ describe('WingSide discovery server query contract', () => {
 
   it('returns no results for non-WingSide tenants without querying tour-products', async () => {
     mocks.site = { code: 'wings-go', id: 4 }
+    const consoleInfo = vi.spyOn(console, 'info').mockImplementation(() => undefined)
 
     const context = await getWingSideDiscoveryContext({
       input: { destination: 'hanoi' },
@@ -350,5 +417,20 @@ describe('WingSide discovery server query contract', () => {
     expect(context.result.items).toEqual([])
     expect(context.seo).toEqual({ canonicalPath: '/journeys', robots: 'noindex,follow' })
     expect(mocks.find).not.toHaveBeenCalled()
+    expect(discoveryLogs()).toHaveLength(0)
+    expect(consoleInfo).toHaveBeenCalledTimes(1)
+    const record = JSON.parse(String(consoleInfo.mock.calls[0]?.[0]))
+    expect(record).toMatchObject({
+      action: 'wingsside_discovery_completed',
+      destination_code: 'hanoi',
+      invalid_filter_count: 0,
+      relaxed: null,
+      result_count: 0,
+      source: 'journeys',
+      tenant_code: 'wings-go',
+      tenant_outcome: 'rejected',
+    })
+    expect(record.duration_ms).toEqual(expect.any(Number))
+    consoleInfo.mockRestore()
   })
 })

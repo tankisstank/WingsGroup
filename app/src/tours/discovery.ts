@@ -1,9 +1,10 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import type { Where } from 'payload'
+import type { Payload, Where } from 'payload'
 
 import type { Site } from '@/payload-types'
-import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
+import { logOperationalEvent } from '@/observability'
+import { getCurrentSite } from '@/utilities/siteContext'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 import {
@@ -31,6 +32,7 @@ const tourProductsCollection = 'tour-products' as never
 const wingSideSiteCode = 'wing-side'
 
 type VerifiedWrapperPage = DiscoveryPage & { _status: 'published'; site: Site }
+type DiscoveryLogger = Pick<Payload['logger'], 'info'>
 
 const getRelationID = (
   value: DiscoveryTourDoc['wrapperPage'] | DiscoveryPage | null | undefined,
@@ -107,16 +109,26 @@ const withVerifiedWrapperPages = (
 const queryDiscoveryCards = async ({
   locale,
   limit,
+  payload,
   query,
   site,
 }: {
   locale?: SupportedLocaleCode
   limit: number
+  payload: Payload
   query: Omit<DiscoveryQuery, 'unknownValueCount'>
   site: Site
 }): Promise<DiscoveryTourCard[]> => {
-  const payload = await getPayload({ config: configPromise })
-  const scopedWhere = await appendSiteWhere(buildDiscoveryWhere(query) as Where)
+  const scopedWhere: Where = {
+    and: [
+      {
+        site: {
+          equals: site.id,
+        },
+      },
+      buildDiscoveryWhere(query) as Where,
+    ],
+  }
   const result = await payload.find({
     collection: tourProductsCollection,
     depth: 2,
@@ -146,6 +158,43 @@ const queryDiscoveryCards = async ({
   )
 }
 
+const logDiscoveryCompleted = ({
+  durationMs,
+  logger,
+  query,
+  result,
+  tenantCode,
+  tenantOutcome,
+}: {
+  durationMs: number
+  logger?: DiscoveryLogger
+  query: DiscoveryQuery
+  result: DiscoveryContext['result']
+  tenantCode: string
+  tenantOutcome: 'accepted' | 'rejected'
+}): void => {
+  const fields = {
+    action: 'wingsside_discovery_completed',
+    ...(query.destination ? { destination_code: query.destination } : {}),
+    ...(query.duration ? { duration_code: query.duration } : {}),
+    duration_ms: durationMs,
+    invalid_filter_count: query.unknownValueCount,
+    relaxed: result.relaxed ? result.relaxed.removed : null,
+    result_count: result.total,
+    source: 'journeys',
+    ...(query.style ? { style_code: query.style } : {}),
+    tenant_code: tenantCode,
+    tenant_outcome: tenantOutcome,
+  }
+
+  if (logger) {
+    logger.info(fields, 'wingsside_discovery_completed')
+    return
+  }
+
+  logOperationalEvent('info', 'wingsside_discovery_completed', fields)
+}
+
 export const getWingSideDiscoveryContext = async ({
   input,
   limit = 60,
@@ -155,13 +204,14 @@ export const getWingSideDiscoveryContext = async ({
   limit?: number
   locale?: SupportedLocaleCode
 } = {}): Promise<DiscoveryContext> => {
+  const startedAt = performance.now()
   const site = await getCurrentSite()
   const query = normalizeDiscoveryQuery(input)
   const safeQuery = stripDiscoveryQueryMeta(query)
   const seo = getDiscoverySEOPolicy(query)
 
   if (site.code !== wingSideSiteCode) {
-    return {
+    const context = {
       query,
       result: {
         appliedQuery: safeQuery,
@@ -172,11 +222,20 @@ export const getWingSideDiscoveryContext = async ({
       },
       seo,
     }
+    logDiscoveryCompleted({
+      durationMs: Math.round(performance.now() - startedAt),
+      query,
+      result: context.result,
+      tenantCode: site.code,
+      tenantOutcome: 'rejected',
+    })
+    return context
   }
 
-  const exactItems = await queryDiscoveryCards({ locale, limit, query: safeQuery, site })
+  const payload = await getPayload({ config: configPromise })
+  const exactItems = await queryDiscoveryCards({ locale, limit, payload, query: safeQuery, site })
   if (exactItems.length > 0 || serializeDiscoveryQuery(safeQuery) === '') {
-    return {
+    const context = {
       query,
       result: {
         appliedQuery: safeQuery,
@@ -187,12 +246,21 @@ export const getWingSideDiscoveryContext = async ({
       },
       seo,
     }
+    logDiscoveryCompleted({
+      durationMs: Math.round(performance.now() - startedAt),
+      logger: payload.logger,
+      query,
+      result: context.result,
+      tenantCode: site.code,
+      tenantOutcome: 'accepted',
+    })
+    return context
   }
 
   for (const relaxed of buildDiscoveryRelaxationPlan(query)) {
-    const items = await queryDiscoveryCards({ locale, limit, query: relaxed.query, site })
+    const items = await queryDiscoveryCards({ locale, limit, payload, query: relaxed.query, site })
     if (items.length === 0) continue
-    return {
+    const context = {
       query,
       result: {
         appliedQuery: relaxed.query,
@@ -203,9 +271,18 @@ export const getWingSideDiscoveryContext = async ({
       },
       seo,
     }
+    logDiscoveryCompleted({
+      durationMs: Math.round(performance.now() - startedAt),
+      logger: payload.logger,
+      query,
+      result: context.result,
+      tenantCode: site.code,
+      tenantOutcome: 'accepted',
+    })
+    return context
   }
 
-  return {
+  const context = {
     query,
     result: {
       appliedQuery: safeQuery,
@@ -216,4 +293,13 @@ export const getWingSideDiscoveryContext = async ({
     },
     seo,
   }
+  logDiscoveryCompleted({
+    durationMs: Math.round(performance.now() - startedAt),
+    logger: payload.logger,
+    query,
+    result: context.result,
+    tenantCode: site.code,
+    tenantOutcome: 'accepted',
+  })
+  return context
 }
