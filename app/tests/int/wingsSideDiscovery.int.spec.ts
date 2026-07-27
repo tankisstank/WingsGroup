@@ -31,7 +31,16 @@ type FindArgs = {
   where?: { and?: Array<Record<string, unknown>> }
 }
 
-type CandidateWrapper = number | string | { id?: number | string | null; pathname?: string | null }
+type CandidateWrapper =
+  | number
+  | string
+  | {
+      _status?: string
+      id?: number | string | null
+      pathname?: string | null
+      site?: number
+      slug?: string
+    }
 type PageDoc = {
   _status: string
   id: number | string
@@ -255,7 +264,21 @@ describe('WingSide discovery server query contract', () => {
   })
 
   it('drops wrappers not returned by the constrained verification query', async () => {
-    mockDiscoveryFind([product({ id: 99, wrapperPage: publicWrapper(999, '/tour/missing') })], [])
+    mockDiscoveryFind(
+      [
+        product({
+          id: 99,
+          wrapperPage: {
+            _status: 'published',
+            id: 999,
+            pathname: '/tour/missing',
+            site: 3,
+            slug: 'missing',
+          },
+        }),
+      ],
+      [],
+    )
 
     const context = await getWingSideDiscoveryContext({ input: {}, locale: 'en' })
 

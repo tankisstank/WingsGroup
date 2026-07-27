@@ -101,9 +101,10 @@ const withVerifiedWrapperPages = (
 ): DiscoveryTourDoc[] =>
   tours.map((tour) => {
     const wrapperID = getRelationID(tour.wrapperPage)
-    const verifiedWrapper = wrapperID == null ? null : verifiedWrappers.get(String(wrapperID))
+    if (wrapperID == null) return { ...tour, wrapperPage: null }
 
-    return verifiedWrapper ? { ...tour, wrapperPage: verifiedWrapper } : tour
+    const verifiedWrapper = verifiedWrappers.get(String(wrapperID))
+    return { ...tour, wrapperPage: verifiedWrapper ?? null }
   })
 
 const queryDiscoveryCards = async ({
