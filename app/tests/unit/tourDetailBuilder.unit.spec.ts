@@ -104,6 +104,7 @@ describe('tour detail builder inquiry and departure utilities', () => {
     )
     expect(formatTourPrice(1200, 'USD')).toBeTruthy()
     expect(formatTourPrice(30_900_000, 'VND')).toBeTruthy()
+    expect(formatTourPrice(1200, null)).toBeNull()
     expect(formatTourPrice(1200, 'ABC')).toBeNull()
     expect(formatTourPrice(1200, 'XXX')).toBeNull()
     expect(formatTourPrice(1200, 'EUR')).toBeNull()

@@ -97,6 +97,54 @@ describe('consultative TourDetailPage contract', () => {
     expect(screen.queryByText(/Giữ chỗ|Tour outbound|Xem lịch khởi hành/i)).toBeNull()
   })
 
+  it.each([
+    ['missing currency', { currency: null, priceFrom: 1200 }],
+    ['unsupported currency', { currency: 'ABC', priceFrom: 1200 }],
+    ['pseudo currency', { currency: 'XXX', priceFrom: 1200 }],
+    ['EUR currency', { currency: 'EUR', priceFrom: 1200 }],
+    ['GBP currency', { currency: 'GBP', priceFrom: 1200 }],
+    ['zero price', { currency: 'USD', priceFrom: 0 }],
+    ['negative price', { currency: 'USD', priceFrom: -1 }],
+    ['nonfinite price', { currency: 'USD', priceFrom: Number.POSITIVE_INFINITY }],
+  ])('fails closed for %s in routed consultative detail', (_label, nextDeparture) => {
+    render(
+      <TourDetailPage
+        data={{
+          ...data,
+          nextDeparture,
+          tour: {
+            ...data.tour,
+            currency: 'VND',
+            priceFrom: null,
+          },
+        }}
+        locale="en"
+        presentation="consultative"
+        siteCode="wing-side"
+      />,
+    )
+
+    expect(screen.getAllByText('Price on request').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('On request · reply within 24h').length).toBeGreaterThan(0)
+  })
+
+  it('renders governed prices from the routed consultative detail', () => {
+    render(
+      <TourDetailPage
+        data={{
+          ...data,
+          nextDeparture: { currency: 'USD', priceFrom: 1200 },
+        }}
+        locale="en"
+        presentation="consultative"
+        siteCode="wing-side"
+      />,
+    )
+
+    expect(screen.getAllByText('From').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Price on request')).toBeNull()
+  })
+
   it('renders sanitized route and service truth without exposing import provenance', () => {
     const polluted: TourResolvedData = {
       ...data,

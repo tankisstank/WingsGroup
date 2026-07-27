@@ -9,6 +9,7 @@ import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import { defaultTourSectionOrder, defaultTourSectionVisibility } from './sectionRegistry'
 import { ScheduleInteractiveDepartures } from './ScheduleInteractiveDepartures'
 import { TourItineraryDayDetails } from './TourItineraryDayDetails'
+import { normalizeGovernedTourPrice } from './currency'
 import type {
   DepartureCardViewModel,
   SchedulePageViewModel,
@@ -53,6 +54,30 @@ const asArray = <T,>(value?: T[] | null) => (Array.isArray(value) ? value : [])
 
 const asDoc = <T extends object>(value: T | number | string | null | undefined): T | null =>
   value && typeof value === 'object' ? value : null
+
+const getGovernedPricePostureInput = ({
+  nextDeparture,
+  tour,
+}: {
+  nextDeparture?: null | { currency?: unknown; priceFrom?: unknown }
+  tour: { currency?: unknown; priceFrom?: unknown }
+}) => {
+  const departurePrice = normalizeGovernedTourPrice({
+    currency: nextDeparture?.currency,
+    value: nextDeparture?.priceFrom,
+  })
+
+  if (departurePrice) {
+    return { currency: departurePrice.currency, priceFrom: departurePrice.value }
+  }
+
+  const tourPrice = normalizeGovernedTourPrice({
+    currency: tour.currency,
+    value: tour.priceFrom,
+  })
+
+  return tourPrice ? { currency: tourPrice.currency, priceFrom: tourPrice.value } : {}
+}
 
 const splitSummaryParagraphs = (summary?: null | string) =>
   String(summary || '')
@@ -1590,14 +1615,8 @@ const TourPricePostureSection = ({
 }) => {
   const isEn = locale === 'en'
   const pricePosture = getTourPricePosture({
-    currency: nextDeparture?.currency || tour.currency,
     locale,
-    priceFrom:
-      typeof nextDeparture?.priceFrom === 'number'
-        ? nextDeparture.priceFrom
-        : typeof tour.priceFrom === 'number'
-          ? tour.priceFrom
-          : null,
+    ...getGovernedPricePostureInput({ nextDeparture, tour }),
   })
   const seasonNotes = [
     tour.factSummary?.seasonNote,
@@ -1679,14 +1698,8 @@ const TourDecisionRail = ({
   const intent = getConsultativePrimaryIntent(cta.mode || tour.bcfg?.ctaStyle)
   const siteCode = resolveTourSiteCode(siteCodeProp, 'consultative')
   const pricePosture = getTourPricePosture({
-    currency: nextDeparture?.currency || tour.currency,
     locale,
-    priceFrom:
-      typeof nextDeparture?.priceFrom === 'number'
-        ? nextDeparture.priceFrom
-        : typeof tour.priceFrom === 'number'
-          ? tour.priceFrom
-          : null,
+    ...getGovernedPricePostureInput({ nextDeparture, tour }),
   })
   const durationLabel = getDurationLabel(tour.durationDays, tour.durationNights, locale)
   const primaryLabel = getConsultativePrimaryLabel({
@@ -2036,14 +2049,8 @@ const StickyBookingCTASection = ({
   const isConsultative = presentation === 'consultative'
   const siteCode = isConsultative ? resolveTourSiteCode(siteCodeProp, presentation) : undefined
   const pricePosture = getTourPricePosture({
-    currency: nextDeparture?.currency || tour.currency,
     locale,
-    priceFrom:
-      typeof nextDeparture?.priceFrom === 'number'
-        ? nextDeparture.priceFrom
-        : typeof tour.priceFrom === 'number'
-          ? tour.priceFrom
-          : null,
+    ...getGovernedPricePostureInput({ nextDeparture, tour }),
   })
 
   if (isConsultative) {
