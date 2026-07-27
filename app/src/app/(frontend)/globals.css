@@ -4537,6 +4537,35 @@ body[data-site-theme='wings-side']
   padding-bottom: 0.35rem;
 }
 
+body[data-site-code='wing-side'] .wingsside-tour-breadcrumb {
+  color: var(--site-muted);
+  font-size: 0.82rem;
+}
+
+body[data-site-code='wing-side'] .wingsside-tour-breadcrumb ol {
+  width: fit-content;
+  gap: 0.45rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--site-border);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--site-surface, #fff) 88%, transparent);
+}
+
+body[data-site-code='wing-side'] .wingsside-tour-breadcrumb li {
+  gap: 0.45rem;
+}
+
+body[data-site-code='wing-side'] .wingsside-tour-breadcrumb__link {
+  color: var(--site-text);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+body[data-site-code='wing-side'] .wingsside-tour-breadcrumb [aria-current='page'] {
+  color: var(--site-foreground);
+  font-weight: 500;
+}
+
 .tour-itinerary-day summary {
   min-height: 48px;
 }

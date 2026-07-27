@@ -275,12 +275,12 @@ export async function renderCmsPageByPath({
         <Breadcrumbs
           className={
             isStructuredTour
-              ? 'container pb-2 pt-3 text-sm text-muted-foreground md:pt-4'
+              ? 'wingsside-tour-breadcrumb container pb-3 pt-4 md:pt-5'
               : undefined
           }
           items={renderedBreadcrumbItems}
           linkClassName={
-            isStructuredTour ? 'font-medium text-[var(--site-brand)] no-underline' : undefined
+            isStructuredTour ? 'wingsside-tour-breadcrumb__link' : undefined
           }
         />
       ) : null}
