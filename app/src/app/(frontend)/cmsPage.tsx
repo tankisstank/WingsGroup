@@ -46,6 +46,7 @@ import {
   TourSchedulePage,
 } from '@/tours/StructuredPages'
 import { readSafeTourEnquiryContext } from '@/tours/enquiryContext'
+import { buildStructuredTourBreadcrumbItems } from '@/tours/structuredTourBreadcrumbs'
 import {
   hasMatchingWingSideTourWrapper,
   sanitizeWingSidePublicText,
@@ -105,17 +106,15 @@ export async function renderCmsPageByPath({
   // Structured tour detail: tighter vertical rhythm under fixed header.
   const isStructuredTour = Boolean(structuredPage)
   const renderedBreadcrumbItems =
-    isStructuredTour && site.code === 'wing-side'
-      ? [
-          breadcrumbItems[0] || { label: 'WingsSide', path: '/' },
-          { label: locale === 'vi' ? 'Hành trình mẫu' : 'Packages', path: '/packages' },
-          {
-            label: String(page.title || '')
-              .replace(/:.*/, '')
-              .replace(/\s+\d+\s+days?$/i, ''),
-            path: canonicalPath,
-          },
-        ]
+    isStructuredTour
+      ? buildStructuredTourBreadcrumbItems({
+          baseItems: breadcrumbItems,
+          canonicalPath,
+          locale,
+          pageTitle: page.title,
+          searchParams,
+          siteCode: site.code,
+        })
       : breadcrumbItems
 
   // Tranche B1: dedicated hi-fi Home/Plan body replaces legacy hero/blocks/related.
