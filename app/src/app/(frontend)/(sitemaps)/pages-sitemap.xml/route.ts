@@ -10,7 +10,6 @@ import {
   getSiteSitemapLocales,
   getSiteSitemapURL,
 } from '@/utilities/siteSEO'
-import { getResolvedTourDetailBySlug } from '@/tours/queries'
 import { hasMatchingWingSideTourWrapper } from '@/tours/wingsSideTourViewModel'
 
 export const dynamic = 'force-dynamic'
@@ -80,13 +79,44 @@ export async function GET(request: Request) {
         updatedAt: true,
       },
     })
+    const tourResults =
+      site.code === 'wing-side'
+        ? await payload.find({
+            collection: 'tour-products',
+            overrideAccess: false,
+            draft: false,
+            depth: 0,
+            fallbackLocale: false,
+            limit: 1000,
+            locale,
+            pagination: false,
+            where: {
+              and: [
+                { site: { equals: site.id } },
+                { _status: { equals: 'published' } },
+              ],
+            },
+            select: {
+              slug: true,
+              wrapperPage: true,
+            },
+          })
+        : null
+    const toursBySlug = new Map(
+      (tourResults?.docs || []).flatMap((tour) =>
+        typeof tour.slug === 'string' && tour.slug ? ([[tour.slug, tour]] as const) : [],
+      ),
+    )
 
     const resolvablePages = []
     for (const page of results.docs) {
       const path = getPageCanonicalPath(page)
       if (
         await isRuntimeResolvablePage({
-          getResolvedTourDetailBySlug,
+          getResolvedTourDetailBySlug: async ({ slug }) => {
+            const tour = toursBySlug.get(slug)
+            return tour ? { tour } : null
+          },
           hasMatchingWingSideTourWrapper,
           locale,
           page,
