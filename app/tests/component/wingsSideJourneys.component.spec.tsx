@@ -53,6 +53,9 @@ afterEach(() => {
 
 beforeEach(() => {
   router.replace.mockReset()
+  router.replace.mockImplementation((href: string) => {
+    window.history.replaceState(null, '', href)
+  })
   router.refresh.mockReset()
   params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14&utm_source=pm')
   window.history.replaceState(null, '', '/wingsside/journeys?destination=hanoi&style=culture&duration=8-14&utm_source=pm')
@@ -97,18 +100,15 @@ describe('WingSideJourneysClient', () => {
     expect(notice).not.toContain('raw-secret')
   })
 
-  it('updates shareable public URL state without scroll or history spam', () => {
+  it('uses App Router replace for shareable public URL state without scroll', () => {
     render(<WingSideJourneysClient context={context()} locale="en" />)
-    const replaceState = vi.spyOn(window.history, 'replaceState')
     screen.getByLabelText('Duration').focus()
 
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '1-7' } })
 
     const href = '/wingsside/journeys?destination=hanoi&style=culture&duration=1-7'
-    expect(replaceState).toHaveBeenCalledWith(window.history.state, '', href)
-    expect(`${window.location.pathname}${window.location.search}`).toBe(href)
-    expect(router.refresh).toHaveBeenCalledTimes(1)
-    expect(router.replace).not.toHaveBeenCalled()
+    expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
+    expect(router.refresh).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(screen.getByLabelText('Duration'))
   })
 
@@ -117,16 +117,13 @@ describe('WingSideJourneysClient', () => {
     params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14')
 
     render(<WingSideJourneysClient context={context()} locale="vi" />)
-    const replaceState = vi.spyOn(window.history, 'replaceState')
     screen.getByLabelText('Điểm đến').focus()
 
     fireEvent.change(screen.getByLabelText('Điểm đến'), { target: { value: 'hue' } })
 
     const href = '/wingsside/vi/journeys?destination=hue&style=culture&duration=8-14'
-    expect(replaceState).toHaveBeenCalledWith(window.history.state, '', href)
-    expect(`${window.location.pathname}${window.location.search}`).toBe(href)
-    expect(router.refresh).toHaveBeenCalledTimes(1)
-    expect(router.replace).not.toHaveBeenCalled()
+    expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
+    expect(router.refresh).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(screen.getByLabelText('Điểm đến'))
   })
 
@@ -152,10 +149,19 @@ describe('WingSideJourneysClient', () => {
     fireEvent.change(screen.getByLabelText('Style'), { target: { value: 'family' } })
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '15-plus' } })
 
-    expect(`${window.location.pathname}${window.location.search}`).toBe(
-      '/wingsside/journeys?destination=hanoi&style=family&duration=15-plus',
+    expect(router.replace).toHaveBeenNthCalledWith(1, '/wingsside/journeys?destination=hanoi', {
+      scroll: false,
+    })
+    expect(router.replace).toHaveBeenNthCalledWith(
+      2,
+      '/wingsside/journeys?destination=hanoi&style=family',
+      { scroll: false },
     )
-    expect(router.refresh).toHaveBeenCalledTimes(3)
-    expect(router.replace).not.toHaveBeenCalled()
+    expect(router.replace).toHaveBeenNthCalledWith(
+      3,
+      '/wingsside/journeys?destination=hanoi&style=family&duration=15-plus',
+      { scroll: false },
+    )
+    expect(router.refresh).not.toHaveBeenCalled()
   })
 })
