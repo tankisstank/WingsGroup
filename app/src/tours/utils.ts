@@ -1,6 +1,7 @@
 import { getCopyLocale, type CopyLocaleCode } from '@/utilities/locales'
 import { resolveSiteInquiryContactPath } from '@/utilities/siteContactPaths'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+import { normalizeGovernedTourPrice } from './currency'
 import { appendTourEnquiryContextParams, type TourEnquiryContext } from './enquiryContext'
 
 const marketConfig = {
@@ -43,15 +44,17 @@ export const getMarketConfig = (key?: null | string) => {
 }
 
 export const formatTourPrice = (value?: null | number, currency?: null | string) => {
-  if (typeof value !== 'number') {
+  const governedPrice = normalizeGovernedTourPrice({ currency, value })
+
+  if (!governedPrice) {
     return null
   }
 
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
-    currency: currency || 'VND',
+    currency: governedPrice.currency,
     maximumFractionDigits: 0,
-  }).format(value)
+  }).format(governedPrice.value)
 }
 
 export const formatTourDate = (

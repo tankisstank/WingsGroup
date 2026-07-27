@@ -28,6 +28,7 @@ import {
   groupDeparturesByMonth,
   marketRouteSlugToKey,
 } from './utils'
+import { normalizeGovernedTourPrice } from './currency'
 import {
   buildTourTaxonomyWhere,
   type TourDestinationKey,
@@ -408,6 +409,10 @@ export const getResolvedTourDetailBySlug = async ({
       (departure) => departure.isFeatured || departure.availabilityStatus === 'open',
     ),
   )
+  const fallbackPrice = normalizeGovernedTourPrice({
+    currency: tour.currency,
+    value: tour.priceFrom,
+  })
 
   return {
     builderConfig: resolved.builderConfig,
@@ -418,8 +423,8 @@ export const getResolvedTourDetailBySlug = async ({
         : getFutureDepartures(departures).slice(0, 4),
     nextDeparture:
       getNextDeparture(departures) ||
-      (typeof tour.priceFrom === 'number'
-        ? { priceFrom: tour.priceFrom, currency: tour.currency || 'USD' }
+      (fallbackPrice
+        ? { priceFrom: fallbackPrice.value, currency: fallbackPrice.currency }
         : null),
     sectionOrder: resolved.sectionOrder,
     sectionVisibility: resolved.sectionVisibility,
