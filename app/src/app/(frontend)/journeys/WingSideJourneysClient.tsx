@@ -1,8 +1,8 @@
 'use client'
 
 import { ArrowRightIcon } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
+import React, { useEffect, useMemo } from 'react'
 
 import { SiteLink } from '@/components/SiteLink'
 import type { DiscoveryContext } from '@/tours/discoveryCore'
@@ -16,11 +16,16 @@ import {
   type WingSideJourneyLocale,
 } from '@/tours/journeysCopy'
 import { tourDestinationOptions, tourTravelStyleOptions } from '@/tours/taxonomy'
+import { replaceDocumentLocation } from '@/utilities/fullDocumentNavigation'
 import { useSitePath } from '@/utilities/useSitePath'
 
 import './journeys.css'
 
 const fieldOrder = ['destination', 'style', 'duration'] as const
+
+const journeysNavigationRestoreKey = 'wingsside:journeys:navigation-restore'
+
+type JourneyFilterName = (typeof fieldOrder)[number]
 
 type Props = {
   context: DiscoveryContext
@@ -29,7 +34,6 @@ type Props = {
 
 export const WingSideJourneysClient = ({ context, locale }: Props) => {
   const copy = getWingSideJourneysCopy(locale)
-  const router = useRouter()
   const toSitePath = useSitePath()
   const searchParams = useSearchParams()
   const current = context.query
@@ -46,7 +50,37 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
     intent: 'contact',
   })
 
-  const replaceQuery = (key: (typeof fieldOrder)[number], value: string) => {
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    let rawMarker: string | null = null
+    try {
+      rawMarker = window.sessionStorage.getItem(journeysNavigationRestoreKey)
+      window.sessionStorage.removeItem(journeysNavigationRestoreKey)
+    } catch {
+      return
+    }
+    if (!rawMarker) return
+
+    try {
+      const marker = JSON.parse(rawMarker) as { focusName?: string; href?: string; scrollY?: number }
+      const currentHref = `${window.location.pathname}${window.location.search}`
+      if (marker.href !== currentHref) return
+
+      const focusName = marker.focusName as JourneyFilterName
+      if (fieldOrder.includes(focusName)) {
+        document.querySelector<HTMLSelectElement>(`select[name="${focusName}"]`)?.focus()
+      }
+
+      if (typeof marker.scrollY === 'number') {
+        window.scrollTo(0, marker.scrollY)
+      }
+    } catch {
+      // Ignore stale or malformed restore markers from older sessions.
+    }
+  }, [])
+
+  const replaceQuery = (key: JourneyFilterName, value: string) => {
     const next = new URLSearchParams(
       typeof window !== 'undefined' ? window.location.search : searchParams?.toString(),
     )
@@ -60,7 +94,17 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
     const pathname = toSitePath('/journeys')
     const query = ordered.toString()
     const href = query ? `${pathname}?${query}` : pathname
-    router.replace(href, { scroll: false })
+    if (typeof window !== 'undefined') {
+      try {
+        window.sessionStorage.setItem(
+          journeysNavigationRestoreKey,
+          JSON.stringify({ focusName: key, href, scrollY: window.scrollY }),
+        )
+      } catch {
+        // Navigation correctness must not depend on restore marker storage.
+      }
+      replaceDocumentLocation(href)
+    }
   }
 
   const status = useMemo(() => {

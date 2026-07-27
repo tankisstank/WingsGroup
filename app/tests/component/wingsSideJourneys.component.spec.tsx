@@ -2,6 +2,13 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+const navigation = vi.hoisted(() => ({
+  replaceDocumentLocation: vi.fn((href: string) => {
+    window.history.replaceState(null, '', href)
+  }),
+}))
+
+const restoreKey = 'wingsside:journeys:navigation-restore'
 const router = { refresh: vi.fn(), replace: vi.fn() }
 let params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14&utm_source=pm')
 
@@ -10,6 +17,7 @@ vi.mock('next/navigation', () => ({
   useRouter: () => router,
   useSearchParams: () => params,
 }))
+vi.mock('@/utilities/fullDocumentNavigation', () => navigation)
 vi.mock('@/components/SiteLink', () => ({
   SiteLink: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={String(href)} {...props}>
@@ -53,10 +61,14 @@ afterEach(() => {
 
 beforeEach(() => {
   router.replace.mockReset()
-  router.replace.mockImplementation((href: string) => {
+  router.refresh.mockReset()
+  navigation.replaceDocumentLocation.mockReset()
+  navigation.replaceDocumentLocation.mockImplementation((href: string) => {
     window.history.replaceState(null, '', href)
   })
-  router.refresh.mockReset()
+  window.sessionStorage.clear()
+  vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
+  Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 })
   params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14&utm_source=pm')
   window.history.replaceState(null, '', '/wingsside/journeys?destination=hanoi&style=culture&duration=8-14&utm_source=pm')
 })
@@ -100,15 +112,22 @@ describe('WingSideJourneysClient', () => {
     expect(notice).not.toContain('raw-secret')
   })
 
-  it('uses App Router replace for shareable public URL state without scroll', () => {
+  it('uses full-document replace for shareable public URL state', () => {
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 128 })
     render(<WingSideJourneysClient context={context()} locale="en" />)
     screen.getByLabelText('Duration').focus()
 
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '1-7' } })
 
     const href = '/wingsside/journeys?destination=hanoi&style=culture&duration=1-7'
-    expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
+    expect(navigation.replaceDocumentLocation).toHaveBeenCalledWith(href)
+    expect(router.replace).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
+    expect(JSON.parse(window.sessionStorage.getItem(restoreKey) || '{}')).toEqual({
+      focusName: 'duration',
+      href,
+      scrollY: 128,
+    })
     expect(document.activeElement).toBe(screen.getByLabelText('Duration'))
   })
 
@@ -122,7 +141,8 @@ describe('WingSideJourneysClient', () => {
     fireEvent.change(screen.getByLabelText('Điểm đến'), { target: { value: 'hue' } })
 
     const href = '/wingsside/vi/journeys?destination=hue&style=culture&duration=8-14'
-    expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
+    expect(navigation.replaceDocumentLocation).toHaveBeenCalledWith(href)
+    expect(router.replace).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(screen.getByLabelText('Điểm đến'))
   })
@@ -149,19 +169,35 @@ describe('WingSideJourneysClient', () => {
     fireEvent.change(screen.getByLabelText('Style'), { target: { value: 'family' } })
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '15-plus' } })
 
-    expect(router.replace).toHaveBeenNthCalledWith(1, '/wingsside/journeys?destination=hanoi', {
-      scroll: false,
-    })
-    expect(router.replace).toHaveBeenNthCalledWith(
+    expect(navigation.replaceDocumentLocation).toHaveBeenNthCalledWith(
+      1,
+      '/wingsside/journeys?destination=hanoi',
+    )
+    expect(navigation.replaceDocumentLocation).toHaveBeenNthCalledWith(
       2,
       '/wingsside/journeys?destination=hanoi&style=family',
-      { scroll: false },
     )
-    expect(router.replace).toHaveBeenNthCalledWith(
+    expect(navigation.replaceDocumentLocation).toHaveBeenNthCalledWith(
       3,
       '/wingsside/journeys?destination=hanoi&style=family&duration=15-plus',
-      { scroll: false },
     )
+    expect(router.replace).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
+  })
+
+  it('restores the changed filter focus and scroll after document navigation', () => {
+    const href = '/wingsside/journeys?destination=hanoi&style=family&duration=15-plus'
+    window.history.replaceState(null, '', href)
+    window.sessionStorage.setItem(
+      restoreKey,
+      JSON.stringify({ focusName: 'style', href, scrollY: 246 }),
+    )
+
+    render(<WingSideJourneysClient context={context()} locale="en" />)
+
+    expect(document.activeElement).toBe(screen.getByLabelText('Style'))
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 246)
+    expect(window.sessionStorage.getItem(restoreKey)).toBeNull()
+    expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
   })
 })
