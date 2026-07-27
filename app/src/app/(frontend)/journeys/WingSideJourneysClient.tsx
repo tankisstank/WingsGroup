@@ -55,7 +55,10 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
     }
     const pathname = toSitePath('/journeys')
     const href = next.toString() ? `${pathname}?${next.toString()}` : pathname
-    router.replace(href, { scroll: false })
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(window.history.state, '', href)
+    }
+    router.refresh()
   }
 
   const status = useMemo(() => {

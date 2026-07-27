@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const router = { replace: vi.fn() }
+const router = { refresh: vi.fn(), replace: vi.fn() }
 let params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14&utm_source=pm')
 
 vi.mock('next/navigation', () => ({
@@ -46,9 +46,14 @@ const context = (overrides: Partial<DiscoveryContext> = {}): DiscoveryContext =>
   ...overrides,
 })
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.restoreAllMocks()
+})
+
 beforeEach(() => {
   router.replace.mockReset()
+  router.refresh.mockReset()
   params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14&utm_source=pm')
   window.history.replaceState(null, '', '/wingsside/journeys?destination=hanoi&style=culture&duration=8-14&utm_source=pm')
 })
@@ -92,27 +97,36 @@ describe('WingSideJourneysClient', () => {
     expect(notice).not.toContain('raw-secret')
   })
 
-  it('updates shareable public URL state without requesting scroll reset', () => {
+  it('updates shareable public URL state without scroll or history spam', () => {
     render(<WingSideJourneysClient context={context()} locale="en" />)
+    const replaceState = vi.spyOn(window.history, 'replaceState')
     screen.getByLabelText('Duration').focus()
+
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '1-7' } })
 
-    expect(router.replace).toHaveBeenCalledWith(
-      '/wingsside/journeys?destination=hanoi&style=culture&duration=1-7',
-      { scroll: false },
-    )
+    const href = '/wingsside/journeys?destination=hanoi&style=culture&duration=1-7'
+    expect(replaceState).toHaveBeenCalledWith(window.history.state, '', href)
+    expect(`${window.location.pathname}${window.location.search}`).toBe(href)
+    expect(router.refresh).toHaveBeenCalledTimes(1)
+    expect(router.replace).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(screen.getByLabelText('Duration'))
   })
+
   it('updates locale-aware public URL state from the rewritten internal pathname', () => {
     window.history.replaceState(null, '', '/wingsside/vi/journeys?destination=hanoi&style=culture&duration=8-14')
     params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14')
 
     render(<WingSideJourneysClient context={context()} locale="vi" />)
+    const replaceState = vi.spyOn(window.history, 'replaceState')
+    screen.getByLabelText('Điểm đến').focus()
+
     fireEvent.change(screen.getByLabelText('Điểm đến'), { target: { value: 'hue' } })
 
-    expect(router.replace).toHaveBeenCalledWith(
-      '/wingsside/vi/journeys?destination=hue&style=culture&duration=8-14',
-      { scroll: false },
-    )
+    const href = '/wingsside/vi/journeys?destination=hue&style=culture&duration=8-14'
+    expect(replaceState).toHaveBeenCalledWith(window.history.state, '', href)
+    expect(`${window.location.pathname}${window.location.search}`).toBe(href)
+    expect(router.refresh).toHaveBeenCalledTimes(1)
+    expect(router.replace).not.toHaveBeenCalled()
+    expect(document.activeElement).toBe(screen.getByLabelText('Điểm đến'))
   })
 })
