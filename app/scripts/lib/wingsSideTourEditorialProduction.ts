@@ -112,7 +112,12 @@ const sanitizeWrapperLayout = (value: unknown): unknown => {
   const source = value as Record<string, unknown>
   return Object.fromEntries(
     Object.entries(source)
-      .filter(([key]) => key !== 'id' || typeof source.blockType !== 'string')
+      .filter(
+        ([key]) =>
+          key !== 'id' ||
+          typeof source.id !== 'string' ||
+          !/^[a-f0-9]{24}$/iu.test(source.id),
+      )
       .map(([key, child]) => [key, sanitizeWrapperLayout(child)]),
   )
 }

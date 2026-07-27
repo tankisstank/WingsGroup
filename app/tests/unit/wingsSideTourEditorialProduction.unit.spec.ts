@@ -87,7 +87,20 @@ const sourceWrapper = (index: number): Page =>
     createdAt: '2026-01-01T00:00:00.000Z',
     hero: { type: 'none' },
     id: 100 + index,
-    layout: [{ blockType: 'content', columns: [] }],
+    layout: [
+      {
+        blockType: 'content',
+        columns: [
+          {
+            enableLink: false,
+            id: '6a5b1b8bb69251003de23bce',
+            richText: null,
+            size: 'full',
+          },
+        ],
+        id: '6a66ef81de75205341949cd3',
+      },
+    ],
     meta: { image: 700 + index, title: `English wrapper meta ${index}` },
     pathname: `/tour/tour-${index}`,
     site: 7,
@@ -142,7 +155,12 @@ describe('WingSide tour editorial production plan', () => {
         source: sourceWrapper(1),
       }),
     ).toMatchObject({
-      layout: [{ blockType: 'content', columns: [] }],
+      layout: [
+        {
+          blockType: 'content',
+          columns: [{ enableLink: false, richText: null, size: 'full' }],
+        },
+      ],
       meta: { image: 701, title: 'pt meta 1' },
       title: 'pt tour 1',
     })
