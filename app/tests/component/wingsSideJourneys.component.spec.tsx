@@ -3,7 +3,7 @@ import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const router = { replace: vi.fn() }
-let params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14')
+let params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14&utm_source=pm')
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/journeys',
@@ -49,7 +49,8 @@ const context = (overrides: Partial<DiscoveryContext> = {}): DiscoveryContext =>
 afterEach(cleanup)
 beforeEach(() => {
   router.replace.mockReset()
-  params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14')
+  params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14&utm_source=pm')
+  window.history.replaceState(null, '', '/wingsside/journeys?destination=hanoi&style=culture&duration=8-14&utm_source=pm')
 })
 
 describe('WingSideJourneysClient', () => {
@@ -91,15 +92,27 @@ describe('WingSideJourneysClient', () => {
     expect(notice).not.toContain('raw-secret')
   })
 
-  it('updates shareable URL state without requesting scroll reset', () => {
+  it('updates shareable public URL state without requesting scroll reset', () => {
     render(<WingSideJourneysClient context={context()} locale="en" />)
     screen.getByLabelText('Duration').focus()
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '1-7' } })
 
     expect(router.replace).toHaveBeenCalledWith(
-      '/journeys?destination=hanoi&style=culture&duration=1-7',
+      '/wingsside/journeys?destination=hanoi&style=culture&duration=1-7',
       { scroll: false },
     )
     expect(document.activeElement).toBe(screen.getByLabelText('Duration'))
+  })
+  it('updates locale-aware public URL state from the rewritten internal pathname', () => {
+    window.history.replaceState(null, '', '/wingsside/vi/journeys?destination=hanoi&style=culture&duration=8-14')
+    params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14')
+
+    render(<WingSideJourneysClient context={context()} locale="vi" />)
+    fireEvent.change(screen.getByLabelText('Điểm đến'), { target: { value: 'hue' } })
+
+    expect(router.replace).toHaveBeenCalledWith(
+      '/wingsside/vi/journeys?destination=hue&style=culture&duration=8-14',
+      { scroll: false },
+    )
   })
 })

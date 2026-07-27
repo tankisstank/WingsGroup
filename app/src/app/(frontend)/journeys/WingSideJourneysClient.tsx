@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowRightIcon } from 'lucide-react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useMemo } from 'react'
 
 import { SiteLink } from '@/components/SiteLink'
@@ -16,6 +16,7 @@ import {
   type WingSideJourneyLocale,
 } from '@/tours/journeysCopy'
 import { tourDestinationOptions, tourTravelStyleOptions } from '@/tours/taxonomy'
+import { useSitePath } from '@/utilities/useSitePath'
 
 import './journeys.css'
 
@@ -29,7 +30,7 @@ type Props = {
 export const WingSideJourneysClient = ({ context, locale }: Props) => {
   const copy = getWingSideJourneysCopy(locale)
   const router = useRouter()
-  const pathname = usePathname()
+  const toSitePath = useSitePath()
   const searchParams = useSearchParams()
   const current = context.query
   const normalizedQuery = stripDiscoveryQueryMeta(current)
@@ -52,6 +53,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
     for (const paramKey of Array.from(next.keys())) {
       if (!fieldOrder.includes(paramKey as (typeof fieldOrder)[number])) next.delete(paramKey)
     }
+    const pathname = toSitePath('/journeys')
     const href = next.toString() ? `${pathname}?${next.toString()}` : pathname
     router.replace(href, { scroll: false })
   }
