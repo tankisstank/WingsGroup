@@ -1,0 +1,779 @@
+{
+  "version": 1,
+  "locale": "it",
+  "voice": "calm-specific-consultative",
+  "tours": [
+    {
+      "slug": "a-glimpse-of-central-vietnam-5-days",
+      "title": "Vietnam centrale in 5 giorni",
+      "summary": "Un itinerario privato tra Da Nang, Hue e Hoi An per scoprire il patrimonio del Vietnam centrale con un ritmo equilibrato. Cinque giorni tra architettura imperiale, vita della città antica, santuario di My Son e tempo libero da modellare sui propri interessi.",
+      "routeSummary": "Da Nang - Hue - Hoi An - My Son - Da Nang",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Arrivo a Da Nang e trasferimento a Hue",
+          "route": "Aeroporto di Da Nang - Hue",
+          "summary": "Accoglienza all'aeroporto internazionale di Da Nang e trasferimento via terra a Hue. Dopo il check-in, tempo libero per riposare o iniziare a esplorare la città. Il check-in standard è alle 14:00; l'accesso anticipato dipende dalla disponibilità e può comportare un supplemento.",
+          "meals": "Pasti non inclusi",
+          "transport": "Trasferimento privato dall'aeroporto e tratta Da Nang - Hue"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Mezza giornata nella Hue imperiale",
+          "route": "Fiume dei Profumi - pagoda Thien Mu - Cittadella - mercato Dong Ba",
+          "summary": "Partenza intorno alle 08:00 per una visita in piccolo gruppo. Si naviga sul Fiume dei Profumi fino alla pagoda Thien Mu, quindi si entra nella Cittadella imperiale e si conclude al mercato Dong Ba. Pomeriggio libero, con possibilità di aggiungere un'esperienza gastronomica serale.",
+          "meals": "Colazione"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Da Hue a Hoi An",
+          "route": "Hue - Hoi An",
+          "summary": "Dopo la colazione e il check-out, trasferimento a Hoi An. Sistemazione in hotel e tempo libero tra case color ocra, lanterne e rive del fiume. Su richiesta si possono aggiungere una passeggiata guidata, un tour gastronomico in moto o una lezione di cucina.",
+          "meals": "Colazione",
+          "transport": "Trasferimento via terra Hue - Hoi An"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Santuario di My Son e cultura Cham",
+          "route": "Hoi An - My Son - fiume Thu Bon - Hoi An",
+          "summary": "Si sceglie tra la partenza mattutina e quella al tramonto per visitare il santuario UNESCO di My Son. La guida racconta la civiltà Champa tra torri in mattoni e una breve esibizione tradizionale. Seguono una dimostrazione di carta di riso, un pasto locale e il rientro in barca lungo il fiume Thu Bon; l'opzione al tramonto prevede uno spuntino leggero.",
+          "meals": "Colazione e pranzo; spuntino leggero con l'opzione tramonto",
+          "transport": "Veicolo e barca sul fiume Thu Bon"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Partenza da Hoi An",
+          "route": "Hoi An - aeroporto di Da Nang",
+          "summary": "Colazione, tempo per preparare i bagagli e check-out. Trasferimento privato da Hoi An all'aeroporto di Da Nang in base all'orario del volo successivo.",
+          "meals": "Colazione",
+          "transport": "Trasferimento privato Hoi An - aeroporto di Da Nang"
+        }
+      ],
+      "includes": [
+        "Sistemazione in camera doppia o matrimoniale secondo il programma",
+        "Trasporti in Vietnam, inclusi i trasferimenti aeroportuali, come da itinerario",
+        "Guide locali in lingua inglese durante le visite previste",
+        "Ingressi alle attrazioni indicate nel programma",
+        "Pasti espressamente indicati nell'itinerario"
+      ],
+      "excludes": [
+        "Check-in anticipato e check-out posticipato",
+        "Trasporti per raggiungere o lasciare il Vietnam",
+        "Tasse internazionali o di partenza",
+        "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
+        "Spese per il passaporto",
+        "Assicurazione di viaggio durante il soggiorno in Vietnam",
+        "Mance, lavanderia e spese personali",
+        "Pasti non indicati e acqua in bottiglia",
+        "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Pernottamenti a Hue e Hoi An in camera doppia o matrimoniale, nella categoria confermata.",
+        "mealsSummary": "Colazione dal giorno 2 al giorno 5; pranzo o spuntino a My Son in base alla partenza scelta.",
+        "transportSummary": "Trasferimenti aeroportuali, tratte Da Nang - Hue - Hoi An e barca sul fiume Thu Bon.",
+        "operatorNotes": "My Son è disponibile al mattino o al tramonto. Check-in anticipato ed escursioni facoltative richiedono una conferma separata."
+      },
+      "meta": {
+        "title": "Vietnam centrale in 5 giorni | WingSide",
+        "description": "Un viaggio privato di 5 giorni tra Da Nang, Hue, Hoi An e My Son, con un buon equilibrio tra patrimonio e tempo libero.",
+        "breadcrumbLabel": "Vietnam centrale in 5 giorni"
+      }
+    },
+    {
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+      "title": "Il meglio del Nord: Hanoi, Sapa e Ha Long in 6 giorni",
+      "summary": "Sei giorni tra Hanoi, Sapa, Fansipan e la baia di Ha Long, con sapori della città vecchia, trekking nei villaggi, paesaggi d'alta quota e una notte in crociera. Il ritmo può essere adattato alla preparazione fisica e agli interessi del gruppo.",
+      "routeSummary": "Hanoi - Sapa - Fansipan - Hanoi - baia di Ha Long - Hanoi",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Arrivo a Hanoi e sapori della città vecchia",
+          "route": "Aeroporto di Noi Bai - Hanoi",
+          "summary": "Accoglienza in aeroporto e trasferimento in hotel. Alle 17:30 circa, incontro nei pressi del lago Hoan Kiem per una passeggiata gastronomica nel Quartiere Vecchio. Le proposte cambiano ogni giorno e possono includere pho, involtini di riso, banh mi e caffè all'uovo; allergie e regimi alimentari vanno segnalati in anticipo.",
+          "meals": "Cena",
+          "transport": "Trasferimento privato dall'aeroporto"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Visita di Hanoi e trasferimento a Sapa",
+          "route": "Tempio della Letteratura - Ba Dinh - lago Occidentale - Sapa",
+          "summary": "Al mattino visita del Tempio della Letteratura, dell'esterno del Mausoleo di Ho Chi Minh, della Pagoda a Pilastro Unico, del lago Occidentale e della pagoda Tran Quoc. Il mausoleo è visitabile solo dall'esterno tra giugno e agosto; sono richieste spalle e ginocchia coperte. Dopo pranzo, partenza intorno alle 14:30 per Sapa.",
+          "meals": "Colazione e pranzo",
+          "transport": "Veicolo per le visite e navetta di categoria superiore Hanoi - Sapa"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Trekking tra Y Linh Ho, Lao Chai e Ta Van",
+          "route": "Sapa - Y Linh Ho - Lao Chai - Ta Van - Sapa",
+          "summary": "Trekking di circa 13 km, in prevalenza in discesa, con una guida locale. Il percorso attraversa Y Linh Ho lungo il torrente Muong Hoa, Lao Chai della comunità H'Mong Nera e Ta Van della comunità Giay. Il livello è considerato facile, ma servono calzature adatte e abitudine a camminare per più ore.",
+          "meals": "Colazione e pranzo",
+          "transport": "Trekking e veicolo di supporto"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Fansipan e ritorno a Hanoi",
+          "route": "Sapa - Fansipan - Hanoi",
+          "summary": "Trasferimento alla funivia del Fansipan e salita con vista sulla catena Hoang Lien Son. Dalla stazione superiore restano circa 600 gradini per raggiungere la vetta a 3.143 m, un percorso di circa un'ora e mezza da modulare in base a meteo e forma fisica. Discesa in funivia e rientro a Hanoi nel pomeriggio.",
+          "meals": "Colazione",
+          "transport": "Veicolo, funivia del Fansipan e trasferimento Sapa - Hanoi"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Da Hanoi alla crociera nella baia di Ha Long",
+          "route": "Hanoi - baia di Ha Long",
+          "summary": "Partenza dall'hotel tra le 08:00 e le 08:30. Imbarco verso mezzogiorno, drink di benvenuto e pranzo mentre la nave entra nella baia. Nel pomeriggio sono previste visite in grotta, kayak o nuoto secondo il programma della compagnia. Cena e pernottamento a bordo.",
+          "meals": "Colazione, pranzo e cena",
+          "transport": "Navetta Hanoi - Ha Long e crociera",
+          "accommodation": "Pernottamento in crociera nella baia di Ha Long"
+        },
+        {
+          "dayNumber": 6,
+          "title": "Mattina nella baia e ritorno a Hanoi",
+          "route": "Baia di Ha Long - Hanoi",
+          "summary": "La giornata può iniziare con Tai Chi sul ponte. Dopo la colazione, ultima escursione in una grotta o laguna, scelta in base alla rotta della nave. Check-out dalla cabina, brunch durante il rientro al porto, sbarco intorno alle 11:30 e trasferimento a Hanoi.",
+          "meals": "Colazione e brunch",
+          "transport": "Crociera e navetta Ha Long - Hanoi"
+        }
+      ],
+      "includes": [
+        "Camera doppia o matrimoniale in hotel, escluse eventuali notti in treno o homestay",
+        "Trasporti in Vietnam come da programma, esclusi i trasferimenti aeroportuali",
+        "Guide locali in lingua inglese durante le visite",
+        "Navetta condivisa di categoria limousine Hanoi - Sapa - Hanoi",
+        "Navetta Hanoi - baia di Ha Long - Hanoi",
+        "Ingressi indicati nell'itinerario",
+        "Pasti espressamente indicati nel programma"
+      ],
+      "excludes": [
+        "Check-in anticipato e check-out posticipato",
+        "Voli internazionali da o per il Vietnam e relative tasse",
+        "Trasferimenti aeroportuali",
+        "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
+        "Assicurazione di viaggio",
+        "Mance, lavanderia e spese personali",
+        "Pasti non indicati e acqua durante i pasti",
+        "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Hotel a Hanoi e Sapa; una notte in crociera nella baia di Ha Long.",
+        "mealsSummary": "Pasti indicati giorno per giorno, dalla cena gastronomica di Hanoi al brunch in crociera.",
+        "transportSummary": "Navette Hanoi - Sapa e Ha Long, funivia del Fansipan e crociera.",
+        "operatorNotes": "Il trekking copre circa 13 km. Fansipan e attività nella baia dipendono da meteo, condizioni fisiche e rotta della nave."
+      },
+      "meta": {
+        "title": "Hanoi, Sapa e Ha Long in 6 giorni | WingSide",
+        "description": "Sei giorni tra Hanoi, Sapa, Fansipan e la baia di Ha Long, con gastronomia, trekking e una notte in crociera.",
+        "breadcrumbLabel": "Il meglio del Nord in 6 giorni"
+      }
+    },
+    {
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days",
+      "title": "Il meglio del Sud: Saigon, Cu Chi e Delta del Mekong in 5 giorni",
+      "summary": "Cinque giorni tra l'energia di Ho Chi Minh City, la memoria storica dei tunnel di Cu Chi e le vie d'acqua di My Tho e Can Tho. Un itinerario adatto a una prima visita nel Sud, con qualche spazio libero per vivere la città in autonomia.",
+      "routeSummary": "Ho Chi Minh City - tunnel di Cu Chi - My Tho - Can Tho - Ho Chi Minh City",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Arrivo a Ho Chi Minh City",
+          "route": "Aeroporto di Tan Son Nhat - centro di Ho Chi Minh City",
+          "summary": "Accoglienza in aeroporto e trasferimento in hotel. Il check-in standard è alle 14:00; l'accesso anticipato richiede conferma e può comportare un supplemento. Serata libera, con possibilità di aggiungere uno spettacolo, una cena in crociera sul fiume Saigon o un tour in moto.",
+          "meals": "Pasti non inclusi",
+          "transport": "Trasferimento privato dall'aeroporto"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Tunnel di Cu Chi e luoghi storici di Saigon",
+          "route": "Ho Chi Minh City - Cu Chi - Ho Chi Minh City",
+          "summary": "Partenza intorno alle 08:00 per Cu Chi, dove si esplorano tunnel, ingressi nascosti, rifugi e testimonianze della vita in guerra. Il poligono è facoltativo e a pagamento. Dopo un pranzo leggero, visita del Palazzo della Riunificazione, della Cattedrale di Notre-Dame in restauro, dell'Ufficio Postale Centrale, del Museo dei Residuati Bellici e del mercato Ben Thanh.",
+          "meals": "Colazione e pranzo",
+          "transport": "Veicolo per le visite"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Da Saigon alle vie d'acqua di Can Tho",
+          "route": "Ho Chi Minh City - My Tho - Can Tho",
+          "summary": "Dopo colazione e check-out, partenza per My Tho e visita della pagoda Vinh Trang. Si prosegue in sampan tra canali e palme d'acqua, con soste in un frutteto e in un laboratorio di caramelle al cocco. Giro in xe loi, frutta e miele prima del pranzo sul fiume, quindi trasferimento a Can Tho.",
+          "meals": "Colazione e pranzo",
+          "transport": "Veicolo, barca a motore, sampan e xe loi"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Mercato galleggiante di Cai Rang all'alba",
+          "route": "Can Tho - mercato di Cai Rang - Ho Chi Minh City",
+          "summary": "Partenza presto per raggiungere in barca il mercato galleggiante di Cai Rang. Si osserva la vita sul fiume, con una sosta in un piccolo laboratorio di noodles e frutta tropicale durante il rientro. Dopo il check-out, pranzo lungo il tragitto e ritorno a Ho Chi Minh City.",
+          "meals": "Colazione e pranzo",
+          "transport": "Barca e trasferimento Can Tho - Ho Chi Minh City"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Partenza da Ho Chi Minh City",
+          "route": "Hotel - aeroporto di Tan Son Nhat",
+          "summary": "Colazione e tempo libero fino al check-out. Se l'orario del volo lo consente, si può aggiungere un'uscita mattutina in città. Trasferimento privato all'aeroporto per il proseguimento del viaggio.",
+          "meals": "Colazione",
+          "transport": "Trasferimento privato in aeroporto"
+        }
+      ],
+      "includes": [
+        "Camera doppia o matrimoniale secondo il programma, escluse eventuali notti in homestay o in treno",
+        "Veicoli climatizzati e trasferimenti, inclusi quelli aeroportuali, come da itinerario",
+        "Guide locali in lingua inglese durante le visite",
+        "Ingressi indicati nel programma",
+        "Pasti espressamente indicati nell'itinerario"
+      ],
+      "excludes": [
+        "Check-in anticipato e check-out posticipato",
+        "Voli internazionali da o per il Vietnam e relative tasse",
+        "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
+        "Assicurazione di viaggio",
+        "Mance, lavanderia e spese personali",
+        "Pasti non indicati e acqua durante i pasti",
+        "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Hotel a Ho Chi Minh City e Can Tho nella categoria confermata.",
+        "mealsSummary": "Colazione dal giorno 2 e pranzi nelle giornate di Cu Chi e del Delta.",
+        "transportSummary": "Trasferimenti aeroportuali, veicoli per le visite e imbarcazioni nel Delta del Mekong.",
+        "operatorNotes": "La visita al mercato galleggiante parte presto. Il poligono di Cu Chi e le esperienze serali sono facoltativi e a pagamento."
+      },
+      "meta": {
+        "title": "Saigon, Cu Chi e Delta del Mekong in 5 giorni | WingSide",
+        "description": "Cinque giorni tra Ho Chi Minh City, i tunnel di Cu Chi, My Tho, Can Tho e il mercato galleggiante di Cai Rang.",
+        "breadcrumbLabel": "Il meglio del Sud in 5 giorni"
+      }
+    },
+    {
+      "slug": "best-of-vietnam-and-cambodia-15-days",
+      "title": "Il meglio di Vietnam e Cambogia in 15 giorni",
+      "summary": "Un viaggio completo dal Nord al Sud del Vietnam, con conclusione tra i templi di Angkor. In quindici giorni si alternano Hanoi, Ha Long, Hoi An, Ho Chi Minh City, il Delta del Mekong e Siem Reap, mantenendo alcuni spazi liberi per personalizzare l'esperienza.",
+      "routeSummary": "Hanoi - Ha Long - Da Nang - Hoi An - Ho Chi Minh City - Can Tho - Siem Reap",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber": 1, "title": "Arrivo a Hanoi", "route": "Aeroporto di Noi Bai - Hanoi", "summary": "Accoglienza in aeroporto e trasferimento in hotel. Tempo libero per riposare o aggiungere una lezione di cucina o una passeggiata gastronomica serale.", "meals": "Pasti non inclusi", "transport": "Trasferimento privato dall'aeroporto"},
+        {"dayNumber": 2, "title": "Mezza giornata a Hanoi", "route": "Tempio della Letteratura - Ba Dinh - lago Occidentale - Quartiere Vecchio", "summary": "Visita guidata dei principali luoghi storici della capitale, tra cui il Tempio della Letteratura, l'area di Ba Dinh, la Pagoda a Pilastro Unico e la pagoda Tran Quoc. Pomeriggio libero nel Quartiere Vecchio.", "meals": "Colazione e pranzo", "transport": "Veicolo per le visite"},
+        {"dayNumber": 3, "title": "Crociera nella baia di Ha Long", "route": "Hanoi - baia di Ha Long", "summary": "Trasferimento mattutino e imbarco verso mezzogiorno. Pranzo in navigazione, attività in grotta, kayak o nuoto secondo rotta e meteo, quindi cena e pernottamento a bordo.", "meals": "Colazione, pranzo e cena", "transport": "Navetta e crociera", "accommodation": "Pernottamento in crociera"},
+        {"dayNumber": 4, "title": "Da Ha Long a Da Nang", "route": "Baia di Ha Long - Hanoi - Da Nang - Hoi An", "summary": "Attività mattutina prevista dalla nave, check-out e brunch. Rientro a Hanoi, volo per Da Nang e trasferimento a Hoi An.", "meals": "Colazione e brunch", "transport": "Crociera, veicolo e volo Hanoi - Da Nang"},
+        {"dayNumber": 5, "title": "Passeggiata nella Hoi An antica", "route": "Città antica di Hoi An", "summary": "Passeggiata guidata tra sale delle congregazioni, dimore storiche, Ponte Giapponese e vie sul fiume. Tempo libero per sartorie, artigianato e cucina locale.", "meals": "Colazione", "transport": "A piedi"},
+        {"dayNumber": 6, "title": "Giornata libera a Hoi An", "route": "Hoi An", "summary": "Giornata a disposizione. Su richiesta si possono aggiungere My Son, una fattoria con lezione di cucina, uno spettacolo o un tour gastronomico in scooter.", "meals": "Colazione"},
+        {"dayNumber": 7, "title": "Volo per Ho Chi Minh City", "route": "Hoi An - Da Nang - Ho Chi Minh City", "summary": "Trasferimento all'aeroporto di Da Nang e volo per Ho Chi Minh City. Accoglienza, sistemazione in hotel e serata libera.", "meals": "Colazione", "transport": "Veicolo e volo Da Nang - Ho Chi Minh City"},
+        {"dayNumber": 8, "title": "Mezza giornata a Ho Chi Minh City", "route": "Palazzo della Riunificazione - Ufficio Postale - museo - mercato Ben Thanh", "summary": "Visita dei luoghi che raccontano la storia della città. La Cattedrale di Notre-Dame può essere osservata solo dall'esterno durante i lavori di restauro.", "meals": "Colazione", "transport": "Veicolo per le visite"},
+        {"dayNumber": 9, "title": "My Tho e la campagna del Delta", "route": "Ho Chi Minh City - My Tho - Can Tho", "summary": "Visita della pagoda Vinh Trang, navigazione tra canali, frutteti e laboratori di caramelle al cocco. Pranzo sul fiume e proseguimento per Can Tho.", "meals": "Colazione e pranzo", "transport": "Veicolo, barca e sampan"},
+        {"dayNumber": 10, "title": "Mercato galleggiante di Cai Rang", "route": "Can Tho - Cai Rang - Ho Chi Minh City", "summary": "Uscita mattutina in barca al mercato, con sosta in un laboratorio di noodles. Dopo il check-out e il pranzo lungo il percorso, rientro a Ho Chi Minh City.", "meals": "Colazione e pranzo", "transport": "Barca e veicolo"},
+        {"dayNumber": 11, "title": "Volo per Siem Reap", "route": "Ho Chi Minh City - Siem Reap", "summary": "Trasferimento in aeroporto e volo per la Cambogia. Accoglienza a Siem Reap e sistemazione in hotel.", "meals": "Colazione", "transport": "Veicolo e volo Ho Chi Minh City - Siem Reap"},
+        {"dayNumber": 12, "title": "Angkor Wat e Angkor Thom", "route": "Angkor Thom - Bayon - Ta Prohm - Angkor Wat", "summary": "Intera giornata tra i volti di pietra del Bayon, le radici che avvolgono Ta Prohm e l'architettura monumentale di Angkor Wat.", "meals": "Colazione e pranzo", "transport": "Veicolo per le visite"},
+        {"dayNumber": 13, "title": "Banteay Srei e villaggio di Pradark", "route": "Siem Reap - Banteay Srei - Pradark", "summary": "Escursione nella campagna per ammirare i raffinati rilievi in arenaria rosa di Banteay Srei e conoscere la vita e l'artigianato del villaggio di Pradark.", "meals": "Colazione e pranzo", "transport": "Veicolo per le visite"},
+        {"dayNumber": 14, "title": "Siem Reap in libertà", "route": "Siem Reap", "summary": "Giornata libera, con possibilità di visitare il villaggio galleggiante di Kampong Khleang, provare una zipline o osservare l'alba ad Angkor in tuk-tuk. Le attività richiedono conferma separata.", "meals": "Colazione"},
+        {"dayNumber": 15, "title": "Partenza da Siem Reap", "route": "Hotel - aeroporto di Siem Reap", "summary": "Colazione, tempo libero fino al check-out e trasferimento in aeroporto per il volo successivo.", "meals": "Colazione", "transport": "Trasferimento privato in aeroporto"}
+      ],
+      "includes": [
+        "Camera doppia o matrimoniale secondo il programma",
+        "Trasporti in Vietnam e Cambogia, inclusi i trasferimenti aeroportuali",
+        "Voli interni Hanoi - Da Nang e Da Nang - Ho Chi Minh City",
+        "Volo Ho Chi Minh City - Siem Reap",
+        "Pasti espressamente indicati nel programma",
+        "Guide locali in lingua inglese durante le visite",
+        "Ingressi indicati nell'itinerario"
+      ],
+      "excludes": [
+        "Check-in anticipato e check-out posticipato",
+        "Voli internazionali e relative tasse, salvo le tratte indicate come incluse",
+        "Visti per Vietnam e Cambogia e spese per il passaporto",
+        "Assicurazione di viaggio",
+        "Mance, lavanderia e spese personali",
+        "Pasti non indicati e acqua durante i pasti"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Hotel a Hanoi, Hoi An, Ho Chi Minh City, Can Tho e Siem Reap; una notte in crociera nella baia di Ha Long.",
+        "mealsSummary": "Colazioni dopo il giorno di arrivo, pranzi e cene come da programma e brunch in crociera.",
+        "transportSummary": "Veicoli, crociera, imbarcazioni nel Delta e tre voli regionali.",
+        "operatorNotes": "La rotta nella baia dipende da meteo e compagnia. Le attività nei giorni liberi a Hoi An e Siem Reap non sono comprese nel prezzo base."
+      },
+      "meta": {
+        "title": "Vietnam e Cambogia in 15 giorni | WingSide",
+        "description": "Quindici giorni da Hanoi, Ha Long, Hoi An e il Delta del Mekong ai templi di Angkor.",
+        "breadcrumbLabel": "Il meglio di Vietnam e Cambogia"
+      }
+    },
+    {
+      "slug": "central-vietnam-adventure-4-days",
+      "title": "Avventura nel Vietnam centrale in 4 giorni",
+      "summary": "Quattro giornate attive da Hue a Hoi An, tra zipline, percorso sospeso, passo di Hai Van in moto e vita rurale a Cam Thanh. L'itinerario è pensato per chi ama muoversi e può essere calibrato sulla forma fisica.",
+      "routeSummary": "Hue - Thanh Tan - Lang Co - passo di Hai Van - Hoi An - Cam Thanh - Da Nang",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber": 1, "title": "Zipline e percorso sospeso a Thanh Tan", "route": "Hue - sorgenti di Thanh Tan - Hue", "summary": "Trasferimento a Thanh Tan per zipline e prove sospese di diversa difficoltà, precedute da briefing e dotazione di sicurezza. Si applicano limiti di salute, altezza e peso; patologie cardiache, pressione alta o mobilità ridotta vanno segnalate prima della prenotazione.", "meals": "Pranzo", "transport": "Trasferimento Hue - Thanh Tan"},
+        {"dayNumber": 2, "title": "Da Hue a Hoi An lungo la costa in moto", "route": "Hue - Suoi Voi - Lang Co - passo di Hai Van - Hoi An", "summary": "Viaggio in moto attraverso la campagna, con soste a Suoi Voi e alla laguna di Lap An e pranzo al sacco vicino a Lang Co. Si supera il passo di Hai Van prima di scendere verso Da Nang e Hoi An. Guida autonoma o passeggero con conducente dipendono da patente ed esperienza.", "meals": "Colazione e pranzo", "transport": "Moto con conducente o guida autonoma secondo conferma"},
+        {"dayNumber": 3, "title": "Bicicletta e vita agricola a Cam Thanh", "route": "Hoi An - Cam Thanh - Hoi An", "summary": "Pedalata nella campagna di Cam Thanh, incontro con agricoltori e attività legate alla coltivazione del riso. Si provano il bufalo d'acqua e tecniche di pesca, poi pranzo e giro in barca a cesto tra le palme d'acqua.", "meals": "Colazione e pranzo", "transport": "Bicicletta e barca a cesto"},
+        {"dayNumber": 4, "title": "Partenza da Hoi An", "route": "Hoi An - aeroporto di Da Nang", "summary": "Colazione e tempo libero fino al check-out standard delle 12:00. Trasferimento privato all'aeroporto di Da Nang.", "meals": "Colazione", "transport": "Trasferimento privato in aeroporto"}
+      ],
+      "includes": [
+        "Camera doppia o matrimoniale secondo il programma",
+        "Trasporti previsti, inclusi i trasferimenti aeroportuali",
+        "Guide locali in lingua inglese durante le attività",
+        "Ingressi e attrezzatura per le attività indicate",
+        "Pasti espressamente indicati nel programma"
+      ],
+      "excludes": [
+        "Check-in anticipato e check-out posticipato",
+        "Voli internazionali da o per il Vietnam e relative tasse",
+        "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
+        "Assicurazione che copra le attività d'avventura",
+        "Mance, lavanderia e spese personali",
+        "Pasti non indicati e acqua durante i pasti",
+        "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Hotel a Hue e Hoi An nella categoria confermata.",
+        "mealsSummary": "Pasti come da programma, con pranzo nelle tre giornate di attività.",
+        "transportSummary": "Veicoli, moto sulla tratta Hue - Hoi An, biciclette e barche a cesto.",
+        "operatorNotes": "Zipline, percorso sospeso e moto richiedono la verifica preventiva di salute, peso, patente e copertura assicurativa."
+      },
+      "meta": {
+        "title": "Avventura nel Vietnam centrale in 4 giorni | WingSide",
+        "description": "Quattro giorni da Hue a Hoi An con zipline, moto sul passo di Hai Van, bicicletta e barca a cesto.",
+        "breadcrumbLabel": "Avventura nel Vietnam centrale"
+      }
+    },
+    {
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days",
+      "title": "Da Nang, Hoi An e Ba Na Hills in 5 giorni",
+      "summary": "Cinque giorni dedicati ai luoghi più rappresentativi del Vietnam centrale: cucina di Da Nang, Ponte d'Oro, patrimonio imperiale di Hue, penisola di Son Tra, Montagne di Marmo e Hoi An.",
+      "routeSummary": "Da Nang - Ba Na Hills - Hue - Son Tra - Montagne di Marmo - Hoi An",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber": 1, "title": "Arrivo a Da Nang e passeggiata gastronomica", "route": "Aeroporto di Da Nang - centro città", "summary": "Accoglienza in aeroporto e check-in. Alle 17:00 circa inizia una passeggiata gastronomica di 2,5 ore e circa 3 km, con assaggi scelti in base al giorno. Allergie e regimi alimentari vanno comunicati in anticipo.", "meals": "Cena", "transport": "Trasferimento privato e percorso a piedi"},
+        {"dayNumber": 2, "title": "Ba Na Hills e Ponte d'Oro", "route": "Da Nang - Ba Na Hills - Da Nang", "summary": "Salita in funivia per visitare il Ponte d'Oro, i giardini Le Jardin d'Amour e le aree ricreative disponibili. La cantina Debay è facoltativa e può richiedere un biglietto separato.", "meals": "Colazione e pranzo", "transport": "Veicolo e funivia"},
+        {"dayNumber": 3, "title": "Giornata nella Hue imperiale", "route": "Da Nang o Hoi An - Hue - Da Nang o Hoi An", "summary": "Partenza presto per Hue, visita della tomba di Khai Dinh, pranzo e proseguimento nella Cittadella imperiale. Le soste possono cambiare in base a traffico e orari di apertura.", "meals": "Colazione e pranzo", "transport": "Veicolo per l'escursione a Hue"},
+        {"dayNumber": 4, "title": "Son Tra, Montagne di Marmo e Hoi An", "route": "Son Tra - pagoda Linh Ung - Montagne di Marmo - Cam Thanh - Hoi An", "summary": "Visita della penisola di Son Tra e della statua della Dama Buddha alta 67 m, quindi grotte e pagode delle Montagne di Marmo. Nel pomeriggio esperienza nella foresta di cocco di Cam Thanh, passeggiata nella Hoi An antica e cena.", "meals": "Colazione, pranzo e cena", "transport": "Veicolo e barca a cesto"},
+        {"dayNumber": 5, "title": "Partenza da Da Nang", "route": "Hotel - aeroporto di Da Nang", "summary": "Colazione, tempo libero fino al check-out e trasferimento all'aeroporto di Da Nang.", "meals": "Colazione", "transport": "Trasferimento privato in aeroporto"}
+      ],
+      "includes": [
+        "Camera doppia o matrimoniale secondo il programma",
+        "Trasporti previsti, inclusi i trasferimenti aeroportuali",
+        "Guide locali in lingua inglese durante le visite",
+        "Ingressi indicati nell'itinerario",
+        "Biglietto della funivia di Ba Na Hills",
+        "Pasti espressamente indicati nel programma"
+      ],
+      "excludes": [
+        "Check-in anticipato e check-out posticipato",
+        "Voli internazionali da o per il Vietnam e relative tasse",
+        "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
+        "Assicurazione di viaggio",
+        "Mance, lavanderia e spese personali",
+        "Pasti non indicati e acqua durante i pasti",
+        "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Hotel a Da Nang o Hoi An nella categoria confermata.",
+        "mealsSummary": "Colazioni dal giorno 2 e pranzi o cene secondo le visite.",
+        "transportSummary": "Trasferimenti aeroportuali, veicoli, funivia di Ba Na Hills e barca a cesto.",
+        "operatorNotes": "Ba Na Hills e Hue dipendono da meteo, traffico e orari. La cantina Debay può richiedere un ingresso separato."
+      },
+      "meta": {
+        "title": "Da Nang, Hoi An e Ba Na Hills in 5 giorni | WingSide",
+        "description": "Cinque giorni tra cucina di Da Nang, Ponte d'Oro, Hue, Son Tra, Montagne di Marmo e Hoi An.",
+        "breadcrumbLabel": "Da Nang, Hoi An e Ba Na Hills"
+      }
+    },
+    {
+      "slug": "discover-halong-bay-ninh-binh-package-2-days",
+      "title": "Baia di Ha Long e Ninh Binh in 2 giorni",
+      "summary": "Due giornate intense tra le formazioni calcaree della baia di Ha Long e quelle di Ninh Binh. Il programma comprende una crociera giornaliera, la grotta Sung Sot, kayak o sampan, Tam Coc e l'antica capitale Hoa Lu.",
+      "routeSummary": "Hanoi - baia di Ha Long - Ninh Binh - Tam Coc - Hoa Lu - Hanoi",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber": 1, "title": "Crociera a Ha Long e trasferimento a Ninh Binh", "route": "Hanoi - baia di Ha Long - Ninh Binh", "summary": "Partenza da Hanoi tra le 08:00 e le 08:30 e arrivo a Ha Long in circa 2,5 ore. Pranzo in crociera, kayak o sampan alla grotta Luon e visita della grotta Sung Sot. Nel tardo pomeriggio trasferimento a Ninh Binh e sistemazione in bungalow.", "meals": "Pranzo e cena", "transport": "Veicolo, crociera e kayak o sampan", "accommodation": "Bungalow a Ninh Binh"},
+        {"dayNumber": 2, "title": "Tam Coc e antica capitale Hoa Lu", "route": "Tam Coc - Hoa Lu - Hanoi", "summary": "Dopo colazione, navigazione di circa due ore sul fiume Ngo Dong tra grotte e risaie di Tam Coc. Visita di Hoa Lu e dei luoghi legati alle dinastie Dinh e Le, pranzo e rientro a Hanoi.", "meals": "Colazione e pranzo", "transport": "Sampan, bicicletta secondo programma e veicolo per Hanoi"}
+      ],
+      "includes": [
+        "Trasferimento dal Quartiere Vecchio di Hanoi a Ha Long",
+        "Trasferimenti Ha Long - Ninh Binh e Ninh Binh - Hanoi",
+        "Una notte in bungalow, camera doppia o matrimoniale, a Ninh Binh",
+        "Guida in lingua inglese",
+        "Bicicletta e barca a Ninh Binh",
+        "Ingressi e crociera previsti",
+        "Acqua e salviette secondo il servizio dell'operatore",
+        "Pasti espressamente indicati nel programma"
+      ],
+      "excludes": [
+        "Bevande e pasti non indicati",
+        "Assicurazione di viaggio",
+        "Spese personali",
+        "Mance per guida e autista",
+        "Servizi non espressamente inclusi",
+        "Visto per il Vietnam"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Una notte in bungalow a Ninh Binh, in camera doppia o matrimoniale.",
+        "mealsSummary": "Pranzo e cena il giorno 1; colazione e pranzo il giorno 2.",
+        "transportSummary": "Veicoli da e per Hanoi, crociera, sampan, kayak e bicicletta.",
+        "operatorNotes": "Il punto di raccolta è nel Quartiere Vecchio di Hanoi. Le attività nella baia dipendono da meteo e disposizioni del porto."
+      },
+      "meta": {
+        "title": "Ha Long e Ninh Binh in 2 giorni | WingSide",
+        "description": "Due giorni da Hanoi alla baia di Ha Long, alla grotta Sung Sot, a Tam Coc e all'antica Hoa Lu.",
+        "breadcrumbLabel": "Ha Long e Ninh Binh in 2 giorni"
+      }
+    },
+    {
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+      "title": "Vietnam da Nord a Sud in 12 giorni",
+      "summary": "Un itinerario di dodici giorni da Hanoi e Ha Long fino a Hoi An, Hue, Ho Chi Minh City, Cu Chi e al Delta del Mekong. Una panoramica equilibrata di paesaggi, storia e vita locale.",
+      "routeSummary": "Hanoi - Ha Long - Hoi An - Hue - Ho Chi Minh City - Cu Chi - Ben Tre",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Arrivo a Hanoi","route":"Aeroporto di Noi Bai - Hanoi","summary":"Accoglienza presso il pilastro 10 fuori dal terminal e trasferimento in hotel. Check-in dalle 14:00; accesso anticipato a pagamento. Tempo libero o passeggiata gastronomica facoltativa.","meals":"Pasti non inclusi","transport":"Trasferimento privato dall'aeroporto"},
+        {"dayNumber":2,"title":"Mezza giornata a Hanoi","route":"Tempio della Letteratura - Pagoda a Pilastro Unico - Ba Dinh - Tran Quoc","summary":"Partenza tra le 08:00 e le 08:30 per i principali luoghi storici e pranzo locale. Il Mausoleo è chiuso lunedì, venerdì e da giugno ad agosto; la partenza può essere spostata alle 13:00.","meals":"Colazione e pranzo","transport":"Veicolo condiviso"},
+        {"dayNumber":3,"title":"Notte in crociera a Ha Long","route":"Hanoi - baia di Ha Long","summary":"Trasferimento alle 08:00, imbarco verso mezzogiorno e pranzo in navigazione. Nuoto, kayak o grotte secondo rotta, lezione di cucina, cena e notte a bordo con equipaggio anglofono.","meals":"Colazione, pranzo e cena","transport":"Veicolo e crociera","accommodation":"Pernottamento in crociera"},
+        {"dayNumber":4,"title":"Mattina nella baia e ritorno a Hanoi","route":"Baia di Ha Long - Hanoi","summary":"Tai Chi facoltativo, colazione e ultima visita prevista dalla nave. Check-out alle 10:00 circa, brunch, sbarco a mezzogiorno e rientro nel Quartiere Vecchio.","meals":"Colazione e brunch","transport":"Crociera e veicolo"},
+        {"dayNumber":5,"title":"Volo per Da Nang e trasferimento a Hoi An","route":"Hanoi - Da Nang - Hoi An","summary":"Trasferimento a Noi Bai, volo per Da Nang e accoglienza all'arrivo. Sistemazione a Hoi An e tempo libero.","meals":"Colazione","transport":"Veicolo e volo Hanoi - Da Nang"},
+        {"dayNumber":6,"title":"Passeggiata nella Hoi An antica","route":"Mercato - sala Phuc Kien - dimore storiche - Ponte Giapponese","summary":"Visita a piedi del mercato, della sala Phuc Kien, delle case Phung Hung e Tan Ky, del Museo della Cultura Popolare e del Ponte Giapponese, con soste tra botteghe e vicoli.","meals":"Colazione","transport":"A piedi"},
+        {"dayNumber":7,"title":"Da Hoi An a Hue","route":"Hoi An - Hue","summary":"Mattinata libera e trasferimento di circa due ore a Hue. Check-in e serata a disposizione, con esperienze gastronomiche prenotabili separatamente.","meals":"Colazione","transport":"Veicolo Hoi An - Hue"},
+        {"dayNumber":8,"title":"Mezza giornata nella Hue imperiale","route":"Pagoda Thien Mu - Cittadella - mercato Dong Ba","summary":"Partenza tra le 08:00 e le 08:30 per la pagoda Thien Mu, la Cittadella e il mercato Dong Ba. Pomeriggio libero.","meals":"Colazione","transport":"Veicolo condiviso"},
+        {"dayNumber":9,"title":"Volo per Ho Chi Minh City","route":"Hue - aeroporto di Phu Bai - Ho Chi Minh City","summary":"Volo di circa un'ora e mezza, accoglienza e trasferimento in hotel. Pomeriggio libero; crociera con cena, spettacolo e tour in moto sono facoltativi.","meals":"Colazione","transport":"Veicolo e volo Hue - Ho Chi Minh City"},
+        {"dayNumber":10,"title":"Cu Chi e centro storico di Saigon","route":"Ho Chi Minh City - Cu Chi - Ho Chi Minh City","summary":"Visita del sistema sotterraneo di Cu Chi; il poligono è facoltativo. Dopo un pranzo leggero si prosegue con Palazzo della Riunificazione, Notre-Dame in restauro, Ufficio Postale e Museo dei Residuati Bellici.","meals":"Colazione e pranzo","transport":"Veicolo condiviso"},
+        {"dayNumber":11,"title":"Giornata nel Delta del Mekong","route":"Ho Chi Minh City - Ben Tre - Ho Chi Minh City","summary":"Partenza alle 08:00 per Ben Tre, navigazione sul fiume Ham Luong, laboratori del cocco e delle stuoie, passeggiata nel villaggio, xe loi e pranzo. Rientro dopo un tratto in sampan.","meals":"Colazione e pranzo","transport":"Veicolo, barca, sampan e xe loi"},
+        {"dayNumber":12,"title":"Partenza da Ho Chi Minh City","route":"Hotel - aeroporto di Tan Son Nhat","summary":"Colazione, tempo libero e trasferimento in aeroporto. Check-out standard alle 12:00; il posticipo è soggetto a disponibilità e supplemento.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
+      ],
+      "includes": [
+        "Camera doppia o matrimoniale climatizzata in hotel",
+        "Trasporti climatizzati come da programma, inclusi i trasferimenti aeroportuali",
+        "Guide locali in lingua inglese durante le visite",
+        "Pasti espressamente indicati nel programma",
+        "Ingressi indicati nell'itinerario",
+        "Voli interni Hanoi - Da Nang e Hue - Ho Chi Minh City"
+      ],
+      "excludes": [
+        "Check-in anticipato e check-out posticipato",
+        "Voli internazionali da o per il Vietnam e relative tasse",
+        "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
+        "Spese per il passaporto",
+        "Assicurazione di viaggio",
+        "Mance, lavanderia e spese personali",
+        "Pasti non indicati e acqua durante i pasti",
+        "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Hotel a Hanoi, Hoi An, Hue e Ho Chi Minh City; una notte in crociera.",
+        "mealsSummary": "Colazioni, pranzi previsti e pensione completa a bordo.",
+        "transportSummary": "Veicoli, crociera, barche nel Delta e due voli interni.",
+        "operatorNotes": "La rotta di Ha Long dipende dal meteo. Mausoleo di Ho Chi Minh e Cattedrale di Notre-Dame hanno limitazioni temporanee."
+      },
+      "meta": {
+        "title": "Vietnam da Nord a Sud in 12 giorni | WingSide",
+        "description": "Dodici giorni tra Hanoi, Ha Long, Hoi An, Hue, Ho Chi Minh City, Cu Chi e Ben Tre.",
+        "breadcrumbLabel": "Vietnam da Nord a Sud"
+      }
+    },
+    {
+      "slug": "hoi-an-surrounding-and-beach-break-7-days",
+      "title": "Hoi An, dintorni e mare in 7 giorni",
+      "summary": "Una settimana dal ritmo disteso tra la campagna di Tra Que, la cucina di Hoi An, il santuario di My Son, Ba Na Hills e giornate libere. La fonte contiene sei giornate numerate 1, 2, 3, 4, 5 e 7; lo spazio restante è destinato al mare o a esperienze su misura.",
+      "routeSummary": "Da Nang - Hoi An - Tra Que - My Son - Ba Na Hills - Da Nang",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Arrivo a Hoi An","route":"Aeroporto di Da Nang - Hoi An","summary":"Accoglienza all'aeroporto internazionale di Da Nang e trasferimento in hotel. Serata libera nella città antica, con spettacolo, tour gastronomico in bicicletta o laboratorio di lanterne prenotabili separatamente.","meals":"Pasti non inclusi","transport":"Trasferimento privato dall'aeroporto"},
+        {"dayNumber":2,"title":"Vita contadina a Tra Que e sapori di Hoi An","route":"Hoi An - villaggio di Tra Que - città antica","summary":"Pedalata tra le risaie fino all'orto biologico di Tra Que, attività con la famiglia ospitante e pranzo locale. La sera, passeggiata gastronomica con una selezione variabile di specialità; allergie e regimi alimentari vanno comunicati prima.","meals":"Colazione, pranzo e cena","transport":"Bicicletta e percorso a piedi"},
+        {"dayNumber":3,"title":"Santuario di My Son","route":"Hoi An - My Son - fiume Thu Bon - Hoi An","summary":"Visita mattutina o al tramonto tra le torri Cham e una breve esibizione tradizionale. Seguono una dimostrazione di carta di riso, un pasto in casa locale e il rientro in barca; l'opzione tramonto prevede uno spuntino leggero.","meals":"Colazione","transport":"Veicolo e barca"},
+        {"dayNumber":4,"title":"Giornata a Ba Na Hills","route":"Hoi An - Ba Na Hills - Hoi An","summary":"Partenza tra le 07:45 e le 08:00, salita in funivia e visita del Ponte d'Oro, dei giardini Le Jardin d'Amour e della pagoda Linh Ung. Dopo il buffet, tempo a Fantasy Park e salita alla vetta a 1.487 m se il meteo lo consente.","meals":"Colazione e pranzo","transport":"Veicolo e funivia"},
+        {"dayNumber":5,"title":"Giornata libera a Hoi An","route":"Hoi An","summary":"Tempo libero tra città antica e spiaggia. Su richiesta si possono aggiungere Cam Thanh e un laboratorio di lanterne, una lezione di cucina, le isole Cham o lo spettacolo Hoi An Memories.","meals":"Colazione"},
+        {"dayNumber":7,"title":"Partenza da Hoi An","route":"Hoi An - aeroporto di Da Nang","summary":"Colazione, check-out e tempo libero fino al trasferimento all'aeroporto di Da Nang, organizzato in base al volo confermato.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
+      ],
+      "includes": [
+        "Camera doppia o matrimoniale secondo il programma",
+        "Trasporti in Vietnam, inclusi i trasferimenti aeroportuali",
+        "Guide locali in lingua inglese durante le visite",
+        "Ingressi indicati nell'itinerario",
+        "Pasti espressamente indicati nel programma"
+      ],
+      "excludes": [
+        "Check-in anticipato e check-out posticipato",
+        "Voli internazionali da o per il Vietnam e relative tasse",
+        "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
+        "Assicurazione di viaggio",
+        "Mance, lavanderia e spese personali",
+        "Pasti non indicati e acqua durante i pasti",
+        "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Hotel a Hoi An nella categoria confermata.",
+        "mealsSummary": "Colazioni dal giorno 2, pranzo a Tra Que e Ba Na Hills, tour gastronomico serale.",
+        "transportSummary": "Trasferimenti aeroportuali, bicicletta, barca sul Thu Bon e funivia.",
+        "operatorNotes": "La fonte contiene sei giornate in un pacchetto di sette; la giornata restante va esplicitata nella conferma finale."
+      },
+      "meta": {"title":"Hoi An e mare in 7 giorni | WingSide","description":"Una settimana tra Tra Que, cucina di Hoi An, My Son, Ba Na Hills e tempo libero al mare.","breadcrumbLabel":"Hoi An e mare in 7 giorni"}
+    },
+    {
+      "slug": "luxury-mekong-delta-speedboat-tour-full-day",
+      "title": "Delta del Mekong in motoscafo, intera giornata",
+      "summary": "Un'escursione privata da Ho Chi Minh City verso i canali verdi del Delta in motoscafo. Mercati sul fiume, villaggi, cucina regionale e luoghi di culto compongono una giornata intensa ma ben scandita.",
+      "routeSummary": "Ho Chi Minh City - basso Mekong - Ho Chi Minh City",
+      "primaryCTALabel": "Progetta la tua escursione",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Vita autentica lungo il fiume","route":"Ho Chi Minh City - basso Mekong - Ho Chi Minh City","summary":"Incontro alle 08:00 e partenza in motoscafo alle 08:15, con colazione leggera a bordo. Si attraversano canali, la pagoda Tuong Van, un mercato sul fiume, frutteti e villaggi nell'area di Thu Thua. In base alle condizioni si visita una casa o un produttore locale. Pranzo alle 12:30, possibili soste presso un centro gestito da monaci e un tempio Cao Dai, spesso visibile solo dall'esterno. Rientro in città verso le 16:00.","meals":"Colazione leggera e pranzo","transport":"Veicolo e motoscafo"}
+      ],
+      "includes": [
+        "Prelievo e rientro in hotel",
+        "Colazione leggera",
+        "Pranzo",
+        "Bevande analcoliche e frutta locale secondo il servizio a bordo",
+        "Guida in lingua inglese",
+        "Ingressi previsti"
+      ],
+      "excludes": ["Spese personali","Mance","Servizi non espressamente inclusi"],
+      "servicesSummary": {
+        "hotelSummary": "Pernottamento non incluso.",
+        "mealsSummary": "Colazione leggera a bordo e pranzo del Delta.",
+        "transportSummary": "Trasferimento tra hotel e molo e motoscafo andata e ritorno.",
+        "operatorNotes": "Le soste nei villaggi sono flessibili e possono cambiare in base a livello dell'acqua, meteo e condizioni locali."
+      },
+      "meta": {"title":"Delta del Mekong in motoscafo | WingSide","description":"Una giornata da Ho Chi Minh City tra canali, mercati, villaggi e cucina del Delta in motoscafo.","breadcrumbLabel":"Mekong in motoscafo"}
+    },
+    {
+      "slug": "mekong-delta-gateway-3-days",
+      "title": "Porta del Delta del Mekong in 3 giorni",
+      "summary": "Tre giorni tra Cai Be, l'isola Tan Phong, Sa Dec e Can Tho, con frutteti, mestieri tradizionali, incontri culturali e mercato galleggiante di Cai Rang.",
+      "routeSummary": "Ho Chi Minh City - Cai Be - Tan Phong - Sa Dec - Can Tho - Ho Chi Minh City",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Cai Be e isola Tan Phong","route":"Cai Be - Tan Phong","summary":"Navigazione al mercato fluviale di Cai Be, visita a un laboratorio di dolci di riso e a un apiario. A Tan Phong si assaggiano frutta e tè, si ascolta musica tradizionale, si percorrono piccoli canali in sampan e si partecipa a una lezione di cucina con pranzo. Rientro al molo verso le 13:00.","meals":"Pranzo","transport":"Barca a motore e sampan"},
+        {"dayNumber":2,"title":"Sa Dec, fornaci e memoria de L'Amante","route":"Sa Dec - Vinh Long - Can Tho","summary":"Visita del villaggio dei fiori, della casa comunitaria Tan Hoa, delle fornaci di Xeo Vat e del mercato di Sa Dec. Nel pomeriggio si esplorano la casa Huynh Thuy Le, la pagoda Kien An Cung e la scuola Trung Vuong; la casa storica può essere temporaneamente chiusa. Proseguimento per Can Tho.","meals":"Colazione e pranzo","transport":"Veicolo"},
+        {"dayNumber":3,"title":"Mercato di Cai Rang e ritorno a Saigon","route":"Can Tho - Cai Rang - Ho Chi Minh City","summary":"Uscita al mercato galleggiante per osservare il commercio sul fiume e pranzo locale. Sosta in un laboratorio di noodles di riso prima del rientro a Ho Chi Minh City.","meals":"Colazione e pranzo","transport":"Barca e veicolo"}
+      ],
+      "includes": [
+        "Trasferimenti andata e ritorno da Ho Chi Minh City",
+        "Escursioni in barca sul Mekong",
+        "Tre pranzi e due colazioni",
+        "Due notti in hotel a Can Tho secondo la fonte",
+        "Guida in lingua inglese",
+        "Ingressi previsti"
+      ],
+      "excludes": ["Bevande","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi"],
+      "servicesSummary": {
+        "hotelSummary": "Due notti a Can Tho secondo le condizioni della fonte; la località della prima notte va riconfermata.",
+        "mealsSummary": "Tre pranzi e due colazioni.",
+        "transportSummary": "Veicoli da Ho Chi Minh City, barche a motore e sampan.",
+        "operatorNotes": "La casa Huynh Thuy Le può essere chiusa. La descrizione della prima notte non è del tutto coerente e va verificata."
+      },
+      "meta": {"title":"Delta del Mekong in 3 giorni | WingSide","description":"Cai Be, Tan Phong, Sa Dec, Can Tho e mercato di Cai Rang in tre giorni.","breadcrumbLabel":"Porta del Mekong"}
+    },
+    {
+      "slug": "mekong-delta-with-floating-market-2-days",
+      "title": "Delta del Mekong e mercato galleggiante in 2 giorni",
+      "summary": "Due giorni da Ho Chi Minh City a Ben Tre e Can Tho, tra caramelle al cocco, canali ombreggiati e il mercato di Cai Rang al mattino presto.",
+      "routeSummary": "Città di Ho Chi Minh - Ben Tre - Can Tho - Cai Rang - Città di Ho Chi Minh",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Ben Tre e i canali tra le palme d'acqua","route":"Città di Ho Chi Minh - Ben Tre - Can Tho","summary":"Trasferimento a Ben Tre, navigazione fino al laboratorio di caramelle al cocco Lan Thanh e possibilità di osservare o provare la lavorazione. Seguono xe loi, pranzo e un breve tratto in sampan sotto le palme d'acqua. Trasferimento a Can Tho nel pomeriggio.","meals":"Pranzo","transport":"Veicolo privato, barca, xe loi e sampan"},
+        {"dayNumber":2,"title":"Mercato di Cai Rang e rientro","route":"Can Tho - Cai Rang - Ho Chi Minh City","summary":"Trasferimento di circa 15 minuti al molo e navigazione al mercato galleggiante. Sosta in un laboratorio di noodles e assaggio di frutta tropicale. Dopo il check-out, pranzo lungo il percorso e ritorno in città.","meals":"Colazione e pranzo","transport":"Barca e veicolo privato"}
+      ],
+      "includes": [
+        "Veicolo privato da e per l'hotel a Ho Chi Minh City",
+        "Escursioni in barca",
+        "Ingressi e permessi previsti",
+        "Una notte in hotel a Can Tho",
+        "Guida in lingua inglese",
+        "Pasti indicati nel programma",
+        "Acqua fresca e salviette secondo il servizio dell'operatore"
+      ],
+      "excludes": ["Bevande","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi"],
+      "servicesSummary": {
+        "hotelSummary": "Una notte in hotel a Can Tho.",
+        "mealsSummary": "Pranzo il giorno 1; colazione e pranzo il giorno 2.",
+        "transportSummary": "Veicolo privato, barca a motore, sampan e xe loi.",
+        "operatorNotes": "Il mercato inizia presto e la sua attività varia con stagione, giorno della settimana e commercio locale."
+      },
+      "meta": {"title":"Mekong e mercato galleggiante in 2 giorni | WingSide","description":"Ben Tre e Can Tho tra lavorazione del cocco, canali e mercato galleggiante di Cai Rang.","breadcrumbLabel":"Mekong e mercato galleggiante"}
+    },
+    {
+      "slug": "ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi",
+      "title": "Tour privato a Ninh Binh: Tam Coc e Mua Cave",
+      "summary": "Una giornata privata da Hanoi con panorama dalla cima di Mua Cave, bicicletta nella campagna e navigazione nelle tre grotte di Tam Coc. I quasi 500 gradini richiedono una buona capacità di camminare.",
+      "routeSummary": "Hanoi - Mua Cave - Tam Coc - Hanoi",
+      "primaryCTALabel": "Progetta la tua escursione",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Mua Cave e Tam Coc in giornata","route":"Hanoi - Ninh Binh - Mua Cave - Tam Coc - Hanoi","summary":"Partenza alle 08:00, salita di quasi 500 gradini al punto panoramico di Mua Cave e pedalata tra le risaie. Dopo il pranzo, navigazione in sampan attraverso Hang Ca, Hang Hai e Hang Ba. Rientro a Hanoi verso le 18:00.","meals":"Pranzo","transport":"Veicolo privato, bicicletta e sampan"}
+      ],
+      "includes": ["Prelievo e rientro in auto o minivan","Guida in lingua inglese","Bicicletta","Ingressi e navigazione","Acqua minerale e salvietta","Pasto indicato nel programma"],
+      "excludes": ["Bevande e pasti non indicati","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi"],
+      "servicesSummary": {"hotelSummary":"Pernottamento non incluso.","mealsSummary":"Un pranzo in ristorante locale.","transportSummary":"Veicolo privato, bicicletta e sampan.","operatorNotes":"La salita conta quasi 500 gradini ripidi e può essere scivolosa con la pioggia; servono scarpe adatte."},
+      "meta": {"title":"Tour privato Tam Coc e Mua Cave | WingSide","description":"Una giornata da Hanoi con salita a Mua Cave, bicicletta e navigazione nelle grotte di Tam Coc.","breadcrumbLabel":"Tam Coc e Mua Cave"}
+    },
+    {
+      "slug": "ninh-binh-hoa-lu-trang-an-full-day-private-tour-from-hanoi",
+      "title": "Tour privato Hoa Lu e Trang An da Hanoi",
+      "summary": "Una giornata privata tra l'antica capitale Hoa Lu e il paesaggio UNESCO di Trang An, unendo la storia delle dinastie Dinh e Le a una lunga navigazione tra grotte e pareti calcaree.",
+      "routeSummary": "Hanoi - Hoa Lu - Trang An - Hanoi",
+      "primaryCTALabel": "Progetta la tua escursione",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Hoa Lu e Trang An in giornata","route":"Hanoi - Hoa Lu - Trang An - Hanoi","summary":"Partenza alle 08:00 per Hoa Lu e visita dei templi dei re Dinh e Le. Dopo il pranzo, non compreso nel prezzo base, navigazione a remi tra fiumi, grotte e montagne di Trang An. Rientro a Hanoi verso le 16:00.","meals":"Pranzo non incluso","transport":"Veicolo privato e barca a remi"}
+      ],
+      "includes": ["Veicolo privato climatizzato con prelievo e rientro in hotel","Guida in lingua inglese","Ingressi e navigazione","Acqua minerale e salvietta"],
+      "excludes": ["Bevande e pasti non indicati","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi","Pranzo in ristorante locale"],
+      "servicesSummary": {"hotelSummary":"Pernottamento non incluso.","mealsSummary":"Il pranzo locale non è compreso nel prezzo base.","transportSummary":"Veicolo privato e barca a remi a Trang An.","operatorNotes":"Percorso e durata della navigazione possono cambiare in base a gestione del molo, livello dell'acqua e meteo."},
+      "meta": {"title":"Tour privato Hoa Lu e Trang An | WingSide","description":"Antica capitale Hoa Lu e paesaggi di Trang An in una giornata privata da Hanoi.","breadcrumbLabel":"Hoa Lu e Trang An"}
+    },
+    {
+      "slug": "northern-vietnam-highlights-for-family-6-days",
+      "title": "Il meglio del Nord per famiglie in 6 giorni",
+      "summary": "Sei giorni pensati per le famiglie tra il patrimonio di Hanoi, la ceramica di Bat Trang, la cultura del tè di Tan Cuong e una notte in crociera nella baia di Ha Long.",
+      "routeSummary": "Hanoi - Bat Trang - Tan Cuong - baia di Ha Long - Hanoi",
+      "primaryCTALabel": "Progetta il viaggio in famiglia",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Arrivo della famiglia a Hanoi","route":"Aeroporto di Noi Bai - Hanoi","summary":"Accoglienza e trasferimento in hotel. Check-in dalle 14:00; accesso anticipato su conferma e a pagamento. Resto della giornata libero.","meals":"Pasti non inclusi","transport":"Trasferimento privato dall'aeroporto"},
+        {"dayNumber":2,"title":"Hanoi e laboratorio di ceramica a Bat Trang","route":"Tempio della Letteratura - Ba Dinh - Tran Quoc - Bat Trang","summary":"Visita mattutina dei luoghi principali di Hanoi e pranzo vietnamita. Nel pomeriggio passeggiata nel villaggio di Bat Trang e laboratorio di ceramica adatto alla famiglia.","meals":"Colazione e pranzo","transport":"Veicolo"},
+        {"dayNumber":3,"title":"Regione del tè di Tan Cuong","route":"Hanoi - Tan Cuong - Phuc Triu - Hanoi","summary":"Visita del lago Nui Coc, della chiesa di Tan Cuong e della pagoda Y Na; nei giorni di mercato, sosta al mercato del tè. Pranzo in farmstay, raccolta delle foglie e dimostrazione della tostatura tradizionale.","meals":"Colazione e pranzo","transport":"Veicolo"},
+        {"dayNumber":4,"title":"Crociera familiare a Ha Long","route":"Hanoi - baia di Ha Long","summary":"Partenza tra le 08:00 e le 08:30 e imbarco a mezzogiorno. Dopo pranzo, nuoto, grotte, kayak o sampan secondo rotta, poi lezione di cucina, cena e attività serali. A bordo assiste l'equipaggio anglofono.","meals":"Colazione, pranzo e cena","transport":"Veicolo e crociera","accommodation":"Pernottamento in crociera"},
+        {"dayNumber":5,"title":"Mattina nella baia e ritorno a Hanoi","route":"Baia di Ha Long - Hanoi","summary":"Tai Chi facoltativo, colazione leggera e ultima visita prevista dalla nave. Brunch durante il rientro al porto e trasferimento a Hanoi; pomeriggio libero.","meals":"Colazione e brunch","transport":"Crociera e veicolo"},
+        {"dayNumber":6,"title":"Partenza da Hanoi","route":"Hotel - aeroporto di Noi Bai","summary":"Colazione, check-out e trasferimento in aeroporto. Il check-out standard è alle 12:00; il posticipo va prenotato.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
+      ],
+      "includes": ["Camera doppia o matrimoniale climatizzata","Trasporti climatizzati, inclusi i trasferimenti aeroportuali","Guide locali in lingua inglese","Pasti indicati nel programma","Ingressi previsti"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "servicesSummary": {"hotelSummary":"Hotel a Hanoi e una notte in crociera.","mealsSummary":"Colazioni, pranzi previsti, cena e brunch in crociera.","transportSummary":"Trasferimenti aeroportuali, veicoli per Hanoi e Thai Nguyen, crociera.","operatorNotes":"La rotta della crociera dipende dal meteo. Ceramica, tè e attività in baia vanno scelte in base all'età dei bambini."},
+      "meta": {"title":"Vietnam del Nord per famiglie in 6 giorni | WingSide","description":"Hanoi, Bat Trang, regione del tè di Tan Cuong e baia di Ha Long in un viaggio per famiglie.","breadcrumbLabel":"Nord per famiglie"}
+    },
+    {
+      "slug": "northern-vietnam-soft-adventure-8-days",
+      "title": "Avventura dolce nel Nord del Vietnam in 8 giorni",
+      "summary": "Otto giorni da Hanoi a Ky Son, Mai Chau, Tam Coc e Ha Long, con homestay, bicicletta, cucina, sampan e due notti in crociera. Un viaggio attivo senza ritmi estremi.",
+      "routeSummary": "Hanoi - Ky Son - Mai Chau - Ninh Binh - baia di Ha Long - Hanoi",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Arrivo a Hanoi","route":"Aeroporto di Noi Bai - Hanoi","summary":"Accoglienza, trasferimento e check-in dalle 14:00. Tempo libero o esperienza gastronomica facoltativa.","meals":"Pasti non inclusi","transport":"Trasferimento privato dall'aeroporto"},
+        {"dayNumber":2,"title":"Ky Son e campagna in bicicletta","route":"Hanoi - Ky Son - Tam Son - Van Minh - Cham","summary":"Partenza alle 08:00 per un homestay tra risaie e monte Ba Vi. Tè di benvenuto, visita della casa in legno, lezione di cucina e pranzo. Nel pomeriggio trattamento alle mani, pedalata nei villaggi, cena e pediluvio alle erbe.","meals":"Colazione, pranzo e cena","transport":"Minibus e bicicletta","accommodation":"Homestay a Ky Son"},
+        {"dayNumber":3,"title":"Da Ky Son alla valle di Mai Chau","route":"Ky Son - Mai Chau","summary":"Partenza alle 10:00 e viaggio di circa 2,5 ore. Pranzo con opzione vegetariana e pomeriggio libero tra passeggiate, artigianato e bicicletta facoltativa a pagamento.","meals":"Colazione, pranzo e cena","transport":"Minibus; bicicletta facoltativa"},
+        {"dayNumber":4,"title":"Mai Chau, Tam Coc e Bich Dong","route":"Mai Chau - Ninh Binh - Tam Coc - Bich Dong","summary":"Partenza alle 08:00. Bicicletta o carro trainato da bufalo tra villaggi e risaie, pranzo, quindi sampan nelle tre grotte di Tam Coc e visita della pagoda Bich Dong.","meals":"Colazione e pranzo","transport":"Veicolo, bicicletta o carro e sampan"},
+        {"dayNumber":5,"title":"Da Ninh Binh alla crociera di Ha Long","route":"Ninh Binh - baia di Ha Long","summary":"Trasferimento tra le 08:00 e le 08:30 e imbarco a mezzogiorno. Pranzo, kayak, spiaggia o grotta secondo rotta, tramonto, cena e pernottamento a bordo.","meals":"Colazione, pranzo e cena","transport":"Veicolo e crociera","accommodation":"Prima notte in crociera"},
+        {"dayNumber":6,"title":"Giornata completa nella baia","route":"Baia di Ha Long","summary":"Tai Chi, yoga o Vovinam secondo nave, quindi escursione in barca diurna con kayak, nuoto, grotte o bicicletta. Rientro alla nave principale per pranzo, cena e seconda notte.","meals":"Colazione, pranzo e cena","transport":"Crociera e barca diurna","accommodation":"Seconda notte in crociera"},
+        {"dayNumber":7,"title":"Rientro a Hanoi e tour gastronomico in moto","route":"Baia di Ha Long - Hanoi","summary":"Colazione, check-out e brunch, poi rientro a Hanoi verso le 15:00-15:30. Alle 18:00, giro in moto con conducente tra Quartiere Vecchio, caffè, spuntini, cena e dessert.","meals":"Colazione, brunch e cena","transport":"Crociera, veicolo e moto con conducente"},
+        {"dayNumber":8,"title":"Partenza da Hanoi","route":"Hotel - aeroporto di Noi Bai","summary":"Mattinata libera, colazione e check-out entro le 12:00. Trasferimento in aeroporto; il posticipo va confermato.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
+      ],
+      "includes": ["Camera doppia o matrimoniale in hotel, escluso l'eventuale homestay","Trasporti in Vietnam, inclusi i trasferimenti aeroportuali","Guide locali in lingua inglese","Ingressi indicati","Pasti previsti"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "servicesSummary": {"hotelSummary":"Hotel a Hanoi, Mai Chau e Ninh Binh; homestay a Ky Son; due notti in crociera.","mealsSummary":"Pasti in homestay, Mai Chau, Ninh Binh, crociera e tour gastronomico.","transportSummary":"Minibus, biciclette, carro, sampan, crociera e moto con conducente.","operatorNotes":"La bicicletta a Mai Chau può avere un costo extra. Le attività in baia dipendono da nave e meteo."},
+      "meta": {"title":"Avventura dolce nel Nord in 8 giorni | WingSide","description":"Ky Son, Mai Chau, Ninh Binh e due notti nella baia di Ha Long in otto giorni.","breadcrumbLabel":"Avventura dolce nel Nord"}
+    },
+    {
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
+      "title": "Fuga romantica a Phu Quoc in 5 giorni",
+      "summary": "Un soggiorno per due che inizia con una cena in crociera sul fiume Saigon e prosegue con giornate private a Phu Quoc. La fonte presenta quattro voci in un pacchetto di cinque giorni; il tempo tra i giorni 3 e 5 è libero sull'isola.",
+      "routeSummary": "Ho Chi Minh City - Phu Quoc - Ho Chi Minh City",
+      "primaryCTALabel": "Progetta il viaggio di coppia",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Arrivo a Saigon e cena in crociera","route":"Aeroporto di Tan Son Nhat - fiume Saigon","summary":"Accoglienza e check-in dalle 14:00. Tra le 18:00 e le 18:30 trasferimento al molo, navigazione serale, cena dalle 19:00 e spettacolo. Rientro in hotel dopo lo sbarco alle 21:00.","meals":"Cena","transport":"Veicolo privato e crociera"},
+        {"dayNumber":2,"title":"Volo per Phu Quoc e cena romantica","route":"Ho Chi Minh City - Phu Quoc","summary":"Colazione, volo per Phu Quoc e trasferimento in hotel. Tempo libero in spiaggia e cena per due con pesce fresco e cucina locale.","meals":"Colazione e cena","transport":"Veicolo e volo Ho Chi Minh City - Phu Quoc"},
+        {"dayNumber":3,"title":"Giornate libere a Phu Quoc","route":"Phu Quoc","summary":"Tempo per mare, nuoto, ristoranti e mercato notturno. A pagamento si possono aggiungere Hon Thom, snorkeling tra tre isole, Rach Vem o una serata privata in barca.","meals":"Colazione"},
+        {"dayNumber":5,"title":"Partenza da Phu Quoc","route":"Phu Quoc - Ho Chi Minh City","summary":"Colazione, tempo libero fino al check-out e trasferimento all'aeroporto per il volo di rientro. Check-out standard alle 12:00.","meals":"Colazione","transport":"Veicolo e volo Phu Quoc - Ho Chi Minh City"}
+      ],
+      "includes": ["Camera doppia climatizzata","Trasporti climatizzati, inclusi i trasferimenti aeroportuali","Guide locali in lingua inglese ove previste","Pasti indicati","Ingressi previsti","Voli Ho Chi Minh City - Phu Quoc andata e ritorno"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "servicesSummary": {"hotelSummary":"Hotel a Ho Chi Minh City e resort a Phu Quoc.","mealsSummary":"Cena in crociera, cena romantica e colazioni previste.","transportSummary":"Trasferimenti, crociera sul Saigon e due voli interni.","operatorNotes":"La fonte elenca quattro giornate per un pacchetto di cinque; il tempo non descritto va indicato come libero nella conferma."},
+      "meta": {"title":"Fuga romantica a Phu Quoc in 5 giorni | WingSide","description":"Cena sul fiume Saigon e soggiorno di coppia sulle spiagge di Phu Quoc.","breadcrumbLabel":"Phu Quoc romantica"}
+    },
+    {
+      "slug": "sapa-trekking-ethnic-market-3-days",
+      "title": "Trekking a Sapa e mercato etnico in 3 giorni",
+      "summary": "Tre giorni a piedi tra Cat Cat, la valle Muong Hoa e il mercato di Bac Ha, per incontrare comunità H'Mong, Giay, Dao e Nung e osservare da vicino le risaie terrazzate.",
+      "routeSummary": "Sapa - Cat Cat - Y Linh Ho - Lao Chai - Ta Van - Bac Ha - Lao Cai - Hanoi",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Trekking al villaggio Cat Cat","route":"Sapa - Cat Cat - Sapa","summary":"Passeggiata di circa 2,5 km tra il villaggio, la valle e la centrale idroelettrica costruita dai francesi nel 1925. Rientro in autobus, cena e serata libera a Sapa.","meals":"Pasti non inclusi secondo la fonte","transport":"A piedi e autobus locale"},
+        {"dayNumber":2,"title":"Y Linh Ho, Lao Chai e Ta Van","route":"Sapa - Y Linh Ho - Lao Chai - Ta Van - Sapa","summary":"Trekking di circa 5 km nella valle Muong Hoa, attraversando villaggi H'Mong Neri e Giay e risaie terrazzate. Pranzo e rientro in veicolo dal ponte Ta Van.","meals":"Colazione e pranzo","transport":"A piedi e veicolo di supporto"},
+        {"dayNumber":3,"title":"Mercato di Bac Ha e palazzo Hoang A Tuong","route":"Sapa - Bac Ha - Ban Pho - Lao Cai - Hanoi","summary":"Visita del mercato di Bac Ha, pranzo e cammino di circa 4 km tra il palazzo Hoang A Tuong e il villaggio H'Mong Fiori di Ban Pho. Trasferimento a Lao Cai e proseguimento per Hanoi.","meals":"Colazione e pranzo","transport":"Veicolo e percorso a piedi"}
+      ],
+      "includes": ["Camera doppia o matrimoniale","Trasporti indicati","Guida in lingua inglese","Ingressi previsti","Due colazioni e due pranzi"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Autobus o treno Hanoi - Sapa","Lettera di approvazione del visto a ingresso singolo","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto e spese per il passaporto","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia"],
+      "servicesSummary": {"hotelSummary":"Hotel a Sapa.","mealsSummary":"Due colazioni e due pranzi secondo la fonte.","transportSummary":"Veicoli a Sapa, Bac Ha e Lao Cai; tratta Hanoi - Sapa esclusa.","operatorNotes":"Il mercato di Bac Ha segue giorni prestabiliti. Le distanze indicate sono 2,5 km, 5 km e 4 km."},
+      "meta": {"title":"Trekking a Sapa e mercato di Bac Ha | WingSide","description":"Cat Cat, valle Muong Hoa e mercato di Bac Ha in tre giorni di trekking.","breadcrumbLabel":"Sapa e mercato etnico"}
+    },
+    {
+      "slug": "southern-beauty-beach-relaxation-8-days",
+      "title": "Sud del Vietnam e mare a Ninh Thuan in 8 giorni",
+      "summary": "Otto giorni tra Ho Chi Minh City, Cu Chi, Ben Tre e una pausa sul mare di Ninh Thuan. La fonte raccoglie sei voci e riserva tre giorni consecutivi al soggiorno libero sulla costa.",
+      "routeSummary": "Ho Chi Minh City - Cu Chi - Ben Tre - Ninh Thuan - Ho Chi Minh City",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Arrivo a Ho Chi Minh City","route":"Aeroporto di Tan Son Nhat - centro città","summary":"Accoglienza, trasferimento e check-in dalle 14:00. Tempo libero o esperienza serale facoltativa.","meals":"Pasti non inclusi","transport":"Trasferimento privato dall'aeroporto"},
+        {"dayNumber":2,"title":"Cu Chi e architettura del centro","route":"Ho Chi Minh City - Cu Chi - Ho Chi Minh City","summary":"Partenza alle 08:00 per tunnel, documentario e assaggio di tè e manioca; poligono facoltativo. Dopo pranzo, Teatro dell'Opera, Municipio dall'esterno, Notre-Dame in restauro, Ufficio Postale e mercato Ben Thanh.","meals":"Colazione e pranzo","transport":"Veicolo"},
+        {"dayNumber":3,"title":"Giornata a Ben Tre","route":"Ho Chi Minh City - Ben Tre - Ho Chi Minh City","summary":"Partenza tra le 07:00 e le 07:30, navigazione sul fiume Ham Luong, laboratorio del cocco, tessitura di stuoie, frutta e tè. Xe loi o bicicletta, pranzo, sampan e rientro verso le 17:00.","meals":"Colazione e pranzo","transport":"Veicolo, barca, sampan e xe loi o bicicletta"},
+        {"dayNumber":4,"title":"Da Ho Chi Minh City a Ninh Thuan","route":"Ho Chi Minh City - Ninh Thuan","summary":"Colazione e viaggio in autobus verso la costa di Ninh Thuan. Check-in e resto della giornata libero in spiaggia.","meals":"Colazione","transport":"Autobus a lunga percorrenza"},
+        {"dayNumber":5,"title":"Giornate libere a Ninh Thuan","route":"Ninh Thuan","summary":"Dal giorno 5 al giorno 7, colazione e tempo libero tra spiaggia e piscina, con attività da scegliere in base al meteo.","meals":"Colazione"},
+        {"dayNumber":8,"title":"Rientro a Ho Chi Minh City","route":"Ninh Thuan - Ho Chi Minh City","summary":"Colazione, check-out alle 12:00 e viaggio di ritorno in autobus.","meals":"Colazione","transport":"Autobus a lunga percorrenza"}
+      ],
+      "includes": ["Camera doppia o matrimoniale, escluse eventuali notti in treno o homestay","Trasporti e trasferimenti aeroportuali","Biglietto ferroviario diurno in posto morbido, se utilizzato","Pasti indicati","Guide locali in lingua inglese","Ingressi previsti"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "servicesSummary": {"hotelSummary":"Hotel a Ho Chi Minh City e resort a Ninh Thuan.","mealsSummary":"Colazioni e pranzi nelle giornate Cu Chi e Ben Tre.","transportSummary":"Trasferimento aeroportuale, veicoli e autobus per Ninh Thuan.","operatorNotes":"La fonte raggruppa i giorni 5-7. Le condizioni citano il treno, mentre il programma descrive l'autobus: il mezzo va confermato."},
+      "meta": {"title":"Sud del Vietnam e Ninh Thuan in 8 giorni | WingSide","description":"Saigon, Cu Chi, Ben Tre e una pausa sul mare di Ninh Thuan.","breadcrumbLabel":"Sud e mare a Ninh Thuan"}
+    },
+    {
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days",
+      "title": "Ritiro benessere in Vietnam in 8 giorni",
+      "summary": "Otto giorni lenti tra Hanoi, la valle di Mai Chau e un resort a Hoi An, con bicicletta, trekking nei villaggi Thai, trattamenti spa e attività per ritrovare equilibrio.",
+      "routeSummary": "Hanoi - Mai Chau - Hanoi - Da Nang - Hoi An",
+      "primaryCTALabel": "Progetta il tuo ritiro benessere",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Arrivo a Hanoi","route":"Aeroporto di Noi Bai - Hanoi","summary":"Accoglienza e trasferimento in hotel di categoria superiore. Check-in dalle 14:00 e resto della giornata libero.","meals":"Pasti non inclusi","transport":"Trasferimento privato dall'aeroporto"},
+        {"dayNumber":2,"title":"Valle di Mai Chau","route":"Hanoi - passo Thung Khe - Mai Chau","summary":"Partenza tra le 07:00 e le 07:30, sosta panoramica al passo e pranzo con opzione vegetariana. Pomeriggio libero o bicicletta guidata a pagamento; cena Thai e, per gruppi oltre cinque persone, danza tradizionale e ruou can.","meals":"Colazione e pranzo","transport":"Veicolo; bicicletta facoltativa"},
+        {"dayNumber":3,"title":"Bicicletta e trekking nei villaggi remoti","route":"Mai Chau - Na Meo - Na Mo - Xam Pa - Hanoi","summary":"Pedalata di 2 km e trekking guidato nei villaggi Thai tra risaie terrazzate. Pranzo di commiato e partenza verso le 15:30 per Hanoi.","meals":"Colazione e pranzo","transport":"Bicicletta, percorso a piedi e veicolo"},
+        {"dayNumber":4,"title":"Volo per Da Nang e Hoi An","route":"Hanoi - Da Nang - Hoi An","summary":"Colazione, volo per Da Nang e trasferimento al resort di Hoi An. Resto della giornata libero.","meals":"Colazione","transport":"Veicolo e volo Hanoi - Da Nang"},
+        {"dayNumber":5,"title":"Tre giorni per rigenerarsi a Hoi An","route":"Hoi An","summary":"Dal giorno 5 al giorno 7, trattamenti spa o massaggi e attività del resort: Tai Chi, bicicletta, cucina, lingua, caffè, pittura o cura delle carpe koi. Alcune proposte richiedono prenotazione e supplemento.","meals":"Colazione"},
+        {"dayNumber":8,"title":"Partenza da Da Nang","route":"Hoi An - aeroporto di Da Nang","summary":"Colazione, preparazione dei bagagli e trasferimento all'aeroporto internazionale.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
+      ],
+      "includes": ["Camera doppia o matrimoniale","Trasporti e trasferimenti aeroportuali","Guide locali in lingua inglese","Pacchetto spa o massaggio all'Almanity Hoi An","Volo Hanoi - Da Nang","Ingressi previsti","Pasti indicati"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Spese per il passaporto","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "servicesSummary": {"hotelSummary":"Hotel a Hanoi, soggiorno a Mai Chau e resort Almanity a Hoi An.","mealsSummary":"Colazioni e pranzi a Mai Chau.","transportSummary":"Veicoli, biciclette e volo Hanoi - Da Nang.","operatorNotes":"I giorni 5-7 sono raggruppati. Spa e corsi dipendono dal programma aggiornato del resort."},
+      "meta": {"title":"Ritiro benessere in Vietnam in 8 giorni | WingSide","description":"Hanoi, Mai Chau e un soggiorno spa a Hoi An per ritrovare energia.","breadcrumbLabel":"Ritiro benessere in Vietnam"}
+    },
+    {
+      "slug": "vietnam-memorable-honeymoon-trip-8-days",
+      "title": "Luna di miele in Vietnam in 8 giorni",
+      "summary": "Otto giorni per due tra Hanoi, Ninh Binh, Ha Long e Hoi An, con cena a lume di candela, notte in crociera e cena al tramonto sul fiume.",
+      "routeSummary": "Hanoi - Hoa Lu - Tam Coc - baia di Ha Long - Da Nang - Hoi An",
+      "primaryCTALabel": "Progetta la luna di miele",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Arrivo a Hanoi e cena a lume di candela","route":"Aeroporto di Noi Bai - Hanoi","summary":"Accoglienza, trasferimento e check-in dalle 14:00. Cena privata a lume di candela in un ristorante locale.","meals":"Cena","transport":"Trasferimento privato dall'aeroporto"},
+        {"dayNumber":2,"title":"Hanoi per due","route":"Tempio della Letteratura - Pagoda a Pilastro Unico - Ba Dinh - lago Occidentale","summary":"Visita mattutina o pomeridiana, pranzo locale e resto della giornata libero. Il Mausoleo è visibile dall'esterno e chiude lunedì, venerdì e da giugno ad agosto.","meals":"Colazione e pranzo","transport":"Veicolo"},
+        {"dayNumber":3,"title":"Hoa Lu e Tam Coc","route":"Hanoi - Tam Coc - Hoa Lu - Hanoi","summary":"Partenza tra le 08:00 e le 08:30, navigazione di due ore sul Ngo Dong attraverso tre grotte, pranzo e visita dei templi Dinh e Le. Rientro verso le 18:30-19:00.","meals":"Colazione e pranzo","transport":"Veicolo e sampan"},
+        {"dayNumber":4,"title":"Notte romantica nella baia","route":"Hanoi - baia di Ha Long","summary":"Trasferimento, imbarco a mezzogiorno, pranzo, kayak, nuoto o grotta secondo rotta. Tramonto, cena tra le 19:00 e le 19:30 e notte a bordo.","meals":"Colazione, pranzo e cena","transport":"Veicolo e crociera","accommodation":"Pernottamento in crociera"},
+        {"dayNumber":5,"title":"Da Ha Long a Da Nang","route":"Baia di Ha Long - Hanoi - Da Nang - Hoi An","summary":"Tai Chi o alba, colazione alle 07:00, ultima visita e check-out alle 10:00. Brunch, sbarco verso le 11:30, volo da Hanoi a Da Nang e trasferimento di 45 minuti a Hoi An.","meals":"Colazione e brunch","transport":"Crociera, veicolo e volo Hanoi - Da Nang"},
+        {"dayNumber":6,"title":"La magia della Hoi An antica","route":"Mercato - sala Phuc Kien - dimore storiche - Ponte Giapponese","summary":"Passeggiata tra mercato, sala Phuc Kien, case Phung Hung o Tan Ky, Museo della Cultura Popolare, Ponte Giapponese e botteghe.","meals":"Colazione","transport":"A piedi"},
+        {"dayNumber":7,"title":"Giornata libera e cena al tramonto","route":"Hoi An - fiumi Thu Bon e Hoai","summary":"Tempo libero o attività facoltative. Imbarco alle 16:45, partenza alle 17:00 e cena privata mentre Hoi An si illumina; rientro in hotel in veicolo.","meals":"Colazione e cena","transport":"Crociera con cena e veicolo"},
+        {"dayNumber":8,"title":"Partenza da Hoi An","route":"Hoi An - aeroporto di Da Nang","summary":"Colazione, check-out entro le 12:00 e trasferimento in aeroporto. Il posticipo dipende dalla disponibilità.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
+      ],
+      "includes": ["Camera doppia climatizzata","Trasporti e trasferimenti aeroportuali","Guide locali in lingua inglese","Pasti indicati","Ingressi previsti","Volo Hanoi - Da Nang"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "servicesSummary": {"hotelSummary":"Hotel a Hanoi e Hoi An; una notte in crociera.","mealsSummary":"Cena a lume di candela, pasti in crociera, cena al tramonto e pasti indicati.","transportSummary":"Veicoli, sampan, crociera e volo Hanoi - Da Nang.","operatorNotes":"La rotta di Ha Long dipende dal meteo. Le cene private e le attività facoltative vanno confermate."},
+      "meta": {"title":"Luna di miele in Vietnam in 8 giorni | WingSide","description":"Hanoi, Tam Coc, Ha Long e Hoi An con tre esperienze romantiche private.","breadcrumbLabel":"Luna di miele in Vietnam"}
+    },
+    {
+      "slug": "vietnam-at-a-glance-7-days",
+      "title": "Il Vietnam in una settimana",
+      "summary": "Sette giorni da Hanoi e Ha Long fino a Ho Chi Minh City, Cu Chi e Ben Tre. Una sintesi di paesaggi, storia e vita locale per chi dispone di tempo limitato.",
+      "routeSummary": "Hanoi - baia di Ha Long - Ho Chi Minh City - Cu Chi - Ben Tre",
+      "primaryCTALabel": "Progetta il tuo viaggio",
+      "itineraryDays": [
+        {"dayNumber":1,"title":"Benvenuti a Hanoi","route":"Aeroporto di Noi Bai - Hanoi","summary":"Incontro in aeroporto, breve introduzione e trasferimento in hotel. Tempo libero; se l'aeroporto è affollato, utilizzare il numero di assistenza indicato nella conferma.","meals":"Pasti non inclusi","transport":"Trasferimento privato dall'aeroporto"},
+        {"dayNumber":2,"title":"Storia di Hanoi","route":"Tempio della Letteratura - Pagoda a Pilastro Unico - Ba Dinh - lago Occidentale","summary":"Partenza alle 08:00 circa per i luoghi principali e pranzo vietnamita. Il tour può svolgersi al pomeriggio; il Mausoleo è chiuso lunedì, venerdì e da giugno ad agosto.","meals":"Colazione e pranzo","transport":"Veicolo"},
+        {"dayNumber":3,"title":"Crociera nella baia di Ha Long","route":"Hanoi - baia di Ha Long","summary":"Partenza tra le 08:00 e le 08:30, imbarco, pranzo e attività come grotta, kayak o nuoto. Cena e notte a bordo con equipaggio anglofono.","meals":"Colazione, pranzo e cena","transport":"Veicolo e crociera","accommodation":"Pernottamento in crociera"},
+        {"dayNumber":4,"title":"Da Ha Long a Ho Chi Minh City","route":"Baia di Ha Long - Hanoi - Ho Chi Minh City","summary":"Tai Chi o alba, colazione, ultima visita, check-out e brunch. Sbarco prima di mezzogiorno, volo per Ho Chi Minh City e trasferimento in hotel.","meals":"Colazione e brunch","transport":"Crociera, veicolo e volo Hanoi - Ho Chi Minh City"},
+        {"dayNumber":5,"title":"Cu Chi e luoghi storici di Saigon","route":"Ho Chi Minh City - Cu Chi - Ho Chi Minh City","summary":"Partenza alle 08:00 per Cu Chi; poligono facoltativo. Dopo pranzo, Palazzo della Riunificazione, Museo dei Residuati Bellici, Notre-Dame in restauro, Ufficio Postale e mercato locale.","meals":"Colazione e pranzo","transport":"Veicolo"},
+        {"dayNumber":6,"title":"Scoperta di Ben Tre","route":"Ho Chi Minh City - Ben Tre - Ho Chi Minh City","summary":"Navigazione sul fiume Ham Luong, laboratorio del cocco o tessitura, passeggiata, xe loi, frutta e pranzo. Alle 13:30 circa, sampan nei canali e rientro verso le 17:00.","meals":"Colazione e pranzo","transport":"Veicolo, barca, sampan e xe loi"},
+        {"dayNumber":7,"title":"Partenza da Ho Chi Minh City","route":"Hotel - aeroporto di Tan Son Nhat","summary":"Colazione, tempo libero e trasferimento in aeroporto. Check-out standard alle 12:00; il posticipo è soggetto a disponibilità e supplemento.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
+      ],
+      "includes": ["Camera doppia o matrimoniale, escluse eventuali notti in treno o homestay","Trasporti e trasferimenti aeroportuali","Guide locali in lingua inglese","Ingressi previsti","Volo Hanoi - Ho Chi Minh City","Pasti indicati"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "servicesSummary": {"hotelSummary":"Hotel a Hanoi e Ho Chi Minh City; una notte in crociera.","mealsSummary":"Colazioni, pranzi previsti e pensione completa in crociera.","transportSummary":"Veicoli, crociera, barche a Ben Tre e volo interno.","operatorNotes":"Ha Long dipende dal meteo. Mausoleo di Ho Chi Minh e Notre-Dame hanno limitazioni temporanee."},
+      "meta": {"title":"Il Vietnam in 7 giorni | WingSide","description":"Una settimana tra Hanoi, Ha Long, Ho Chi Minh City, Cu Chi e Ben Tre.","breadcrumbLabel":"Il Vietnam in una settimana"}
+    }
+  ]
+}

@@ -197,43 +197,46 @@ const loadWingSideTourDetailAuditRoutes = async (
   request: APIRequestContext,
   testInfo: TestInfo,
 ): Promise<string[]> => {
-  const response = await request.get('/api/tour-products?limit=100&depth=1')
-  if (!response.ok()) {
-    await testInfo.attach('wingsside-tour-detail-inventory-unavailable', {
-      body: `GET /api/tour-products failed with ${response.status()}`,
-      contentType: 'text/plain',
-    })
-    return []
-  }
-
-  const payload = (await response.json()) as {
-    docs?: Array<{
-      _status?: string
-      site?: { code?: string } | number | string
-      slug?: string
-      wrapperPage?: { pathname?: string; site?: { code?: string } | number | string } | null
-    }>
-  }
   const tourPaths = new Set<string>()
-
-  for (const doc of payload.docs || []) {
-    const siteCode =
-      typeof doc.site === 'object'
-        ? doc.site?.code
-        : typeof doc.wrapperPage?.site === 'object'
-          ? doc.wrapperPage.site?.code
-          : undefined
-    if (siteCode !== 'wing-side' || doc._status === 'draft') continue
-
-    const pathname = doc.wrapperPage?.pathname || (doc.slug ? `/tour/${doc.slug}` : null)
-    if (!pathname?.startsWith('/tour/')) continue
-
-    for (const locale of ['vi', 'en', 'it', 'es', 'pt'] as const) {
+  const unavailable: Array<{ locale: string; status: number }> = []
+  for (const locale of ['vi', 'en', 'it', 'es', 'pt'] as const) {
+    const response = await request.get(
+      `/api/tour-products?limit=100&depth=1&locale=${locale}&fallback-locale=false`,
+    )
+    if (!response.ok()) {
+      unavailable.push({ locale, status: response.status() })
+      continue
+    }
+    const payload = (await response.json()) as {
+      docs?: Array<{
+        _status?: string
+        site?: { code?: string } | number | string
+        slug?: string
+        title?: string | null
+        wrapperPage?: { pathname?: string; site?: { code?: string } | number | string } | null
+      }>
+    }
+    for (const doc of payload.docs || []) {
+      const siteCode =
+        typeof doc.site === 'object'
+          ? doc.site?.code
+          : typeof doc.wrapperPage?.site === 'object'
+            ? doc.wrapperPage.site?.code
+            : undefined
+      if (siteCode !== 'wing-side' || doc._status === 'draft' || !doc.title?.trim()) continue
+      const pathname = doc.wrapperPage?.pathname || (doc.slug ? `/tour/${doc.slug}` : null)
+      if (!pathname?.startsWith('/tour/')) continue
       tourPaths.add(localizeWingsSideRoute(pathname, locale))
     }
   }
 
-  const routes = [...tourPaths].sort().slice(0, 22 * 5)
+  if (unavailable.length) {
+    await testInfo.attach('wingsside-tour-detail-inventory-unavailable', {
+      body: JSON.stringify(unavailable, null, 2),
+      contentType: 'application/json',
+    })
+  }
+  const routes = [...tourPaths].sort()
   await testInfo.attach('wingsside-tour-detail-inventory-routes', {
     body: JSON.stringify({ routeCount: routes.length, routes }, null, 2),
     contentType: 'application/json',
