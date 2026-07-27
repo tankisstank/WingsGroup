@@ -72,7 +72,7 @@ describe('HomeHiFiPage curated tours', () => {
       within(destinations)
         .getByRole('link', { name: /sapa curated tour/i })
         .getAttribute('href'),
-    ).toBe('/destinations?destination=sapa')
+    ).toBe('/journeys?destination=sapa')
     expect(within(destinations).getByText('Sapa curated tour summary')).toBeTruthy()
 
     const styles = screen.getByTestId('home-styles-grid')
@@ -80,7 +80,7 @@ describe('HomeHiFiPage curated tours', () => {
       within(styles)
         .getByRole('link', { name: /romance curated tour/i })
         .getAttribute('href'),
-    ).toBe('/styles?style=romance')
+    ).toBe('/journeys?style=romance')
 
     expect(screen.getByText('Featured on request')).toBeTruthy()
     expect(screen.getByText('On request')).toBeTruthy()
