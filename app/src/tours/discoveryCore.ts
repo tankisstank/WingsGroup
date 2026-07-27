@@ -57,6 +57,7 @@ export type RelationID = number | string
 export type Relation = RelationID | { id?: RelationID | null } | null | undefined
 export type DiscoveryPage = {
   _status?: null | string
+  id?: RelationID | null
   pathname?: null | string
   site?: Relation
   slug?: null | string
