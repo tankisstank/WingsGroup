@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { getWingSideDiscoveryContext } from '@/tours/discovery'
@@ -12,6 +11,11 @@ import {
   getSiteSitemapLocales,
   getSiteSitemapURL,
 } from '@/utilities/siteSEO'
+
+import {
+  generateCmsPageMetadataByPath,
+  renderCmsPageByPath,
+} from '@/app/(frontend)/[...slug]/page'
 
 import { WingSideJourneysClient } from './WingSideJourneysClient'
 
@@ -26,7 +30,12 @@ export default async function JourneysPage({ searchParams: searchParamsPromise }
   const locale = await getCurrentLocale()
   const searchParams = searchParamsPromise ? await searchParamsPromise : {}
 
-  if (site.code !== 'wing-side' || !isWingSideJourneyLocale(locale)) notFound()
+  if (site.code !== 'wing-side' || !isWingSideJourneyLocale(locale)) {
+    return renderCmsPageByPath({
+      requestedPath: routePath,
+      searchParams: searchParamsPromise,
+    })
+  }
 
   const context = await getWingSideDiscoveryContext({ input: searchParams, locale })
 
@@ -41,7 +50,7 @@ export async function generateMetadata({
   const settings = await getCurrentSiteSettings()
 
   if (site.code !== 'wing-side' || !isWingSideJourneyLocale(locale)) {
-    return { robots: { follow: false, index: false }, title: 'Not found' }
+    return generateCmsPageMetadataByPath({ requestedPath: routePath })
   }
 
   const searchParams = searchParamsPromise ? await searchParamsPromise : {}

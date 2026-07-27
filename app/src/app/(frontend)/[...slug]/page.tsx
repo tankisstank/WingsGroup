@@ -68,20 +68,29 @@ type Args = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
+type CmsPathArgs = {
+  requestedPath: string
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}
+
 export default async function Page({
   params: paramsPromise,
   searchParams: searchParamsPromise,
 }: Args) {
-  const { isEnabled: draft } = await draftMode()
   const { slug = [] } = await paramsPromise
+  const requestedPath = getRequestedPathFromSlug(slug)
+
+  return renderCmsPageByPath({ requestedPath, searchParams: searchParamsPromise })
+}
+
+export async function renderCmsPageByPath({
+  requestedPath,
+  searchParams: searchParamsPromise,
+}: CmsPathArgs) {
+  const { isEnabled: draft } = await draftMode()
   const searchParams = searchParamsPromise ? await searchParamsPromise : {}
   const locale = await getCurrentLocale()
   const sitePrefix = await getCurrentSitePrefix()
-  const decodedSegments = slug.map((segment) => decodeURIComponent(segment))
-  const contentSegments = isSupportedLocale(decodedSegments[0])
-    ? decodedSegments.slice(1)
-    : decodedSegments
-  const requestedPath = contentSegments.length > 0 ? `/${contentSegments.join('/')}` : '/'
   const url = `${sitePrefix}${requestedPath === '/' ? '' : requestedPath}`.replace(/\/+/g, '/')
   const page = await queryPageByPath({
     locale,
@@ -324,12 +333,17 @@ export default async function Page({
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug = [] } = await paramsPromise
+  const requestedPath = getRequestedPathFromSlug(slug)
+
+  return generateCmsPageMetadataByPath({ requestedPath })
+}
+
+export async function generateCmsPageMetadataByPath({
+  requestedPath,
+}: {
+  requestedPath: string
+}): Promise<Metadata> {
   const locale = await getCurrentLocale()
-  const decodedSegments = slug.map((segment) => decodeURIComponent(segment))
-  const contentSegments = isSupportedLocale(decodedSegments[0])
-    ? decodedSegments.slice(1)
-    : decodedSegments
-  const requestedPath = contentSegments.length > 0 ? `/${contentSegments.join('/')}` : '/'
   const page = await queryPageByPath({
     locale,
     requestedPath,
@@ -370,6 +384,15 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     locale,
     path: requestedPath,
   })
+}
+
+const getRequestedPathFromSlug = (slug: string[]) => {
+  const decodedSegments = slug.map((segment) => decodeURIComponent(segment))
+  const contentSegments = isSupportedLocale(decodedSegments[0])
+    ? decodedSegments.slice(1)
+    : decodedSegments
+
+  return contentSegments.length > 0 ? `/${contentSegments.join('/')}` : '/'
 }
 
 const queryPageByPath = async ({
