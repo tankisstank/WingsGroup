@@ -181,6 +181,20 @@ body[data-site-code='wing-side'] .ws-journeys-card__chips {
   gap: 0.4rem;
 }
 
+body[data-site-code='wing-side'] .ws-journeys-card__price {
+  display: grid;
+  gap: 0.2rem;
+  color: var(--site-brand);
+  font-weight: 800;
+}
+
+body[data-site-code='wing-side'] .ws-journeys-card__price small {
+  color: color-mix(in oklch, var(--site-foreground) 72%, white);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
 body[data-site-code='wing-side'] .ws-journeys-card__chips i {
   border: 1px solid var(--site-border);
   padding: 0.3rem 0.55rem;

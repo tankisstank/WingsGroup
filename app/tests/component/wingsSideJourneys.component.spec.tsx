@@ -35,11 +35,14 @@ const context = (overrides: Partial<DiscoveryContext> = {}): DiscoveryContext =>
     appliedQuery: { destination: 'hanoi', style: 'culture' },
     items: [
       {
+        currency: 'USD',
         destinationTags: ['hanoi'],
         duration: { days: 6, nights: 5 },
         hero: { alt: 'Hanoi hero', url: '/media/hanoi.jpg' },
         href: '/tour/private-hanoi',
         id: 10,
+        price: { currency: 'USD', kind: 'from', value: 1290 },
+        priceFrom: 1290,
         slug: 'private-hanoi',
         summary: 'A real published journey.',
         title: 'Private Hanoi',
@@ -89,6 +92,35 @@ describe('WingSideJourneysClient', () => {
     )
     expect(within(card).getByRole('img').getAttribute('src')).toBe('/media/hanoi.jpg')
     expect(within(card).getByText('6 days / 5 nights')).toBeTruthy()
+    expect(within(card).getByText('From $1,290')).toBeTruthy()
+    expect(within(card).getByText('Final price is confirmed before any hold.')).toBeTruthy()
+    expect(card.textContent).not.toMatch(/book now|available seats|instant booking/i)
+  })
+
+  it('renders localized honest on-request price state without availability claims', () => {
+    render(
+      <WingSideJourneysClient
+        context={context({
+          result: {
+            ...context().result,
+            items: [
+              {
+                ...context().result.items[0]!,
+                currency: null,
+                price: { kind: 'on-request' },
+                priceFrom: null,
+              },
+            ],
+          },
+        })}
+        locale="es"
+      />,
+    )
+
+    const card = screen.getByRole('link', { name: /private hanoi/i })
+    expect(within(card).getByText('Precio bajo solicitud')).toBeTruthy()
+    expect(within(card).getByText('El precio final se confirma antes de cualquier reserva.')).toBeTruthy()
+    expect(card.textContent).not.toMatch(/book now|available seats|instant booking/i)
   })
 
   it('announces invalid and relaxed states without raw values', () => {

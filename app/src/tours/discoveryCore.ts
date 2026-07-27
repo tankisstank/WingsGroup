@@ -25,16 +25,23 @@ export type DiscoverySEO = {
 }
 
 export type DiscoveryTourCard = {
+  currency: string | null
   destinationTags: TourDestinationKey[]
   duration: { days: number; nights: number | null }
   hero: { alt: string; url: string }
   href: string
   id: number | string
+  price: DiscoveryTourPriceState
+  priceFrom: number | null
   slug: string
   summary: string
   title: string
   travelStyles: TourTravelStyleKey[]
 }
+
+export type DiscoveryTourPriceState =
+  | { currency: string; kind: 'from'; value: number }
+  | { kind: 'on-request' }
 
 export type DiscoveryResult = {
   appliedQuery: Omit<DiscoveryQuery, 'unknownValueCount'>
@@ -74,6 +81,8 @@ export type DiscoveryTourDoc = {
   durationNights?: null | number
   heroMedia?: DiscoveryMedia | Relation
   id?: RelationID
+  currency?: null | string
+  priceFrom?: null | number
   site?: Relation
   slug?: null | string
   summary?: null | string
@@ -103,6 +112,19 @@ const sameRelation = (left: Relation, right: Relation): boolean => {
 
 const nonEmpty = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
+
+const projectPriceState = (tour: DiscoveryTourDoc): DiscoveryTourPriceState => {
+  if (
+    typeof tour.priceFrom === 'number' &&
+    Number.isFinite(tour.priceFrom) &&
+    tour.priceFrom >= 0 &&
+    nonEmpty(tour.currency)
+  ) {
+    return { currency: tour.currency.trim(), kind: 'from', value: tour.priceFrom }
+  }
+
+  return { kind: 'on-request' }
+}
 
 const asPage = (value: DiscoveryTourDoc['wrapperPage']): DiscoveryPage | null =>
   value && typeof value === 'object' && ('pathname' in value || 'slug' in value) ? value : null
@@ -367,6 +389,7 @@ export const projectDiscoveryTour = ({
     return null
 
   return {
+    currency: nonEmpty(tour.currency) ? tour.currency.trim() : null,
     destinationTags: normalizeTourDestinationKeys(destinationTags),
     duration: {
       days: tour.durationDays,
@@ -383,6 +406,11 @@ export const projectDiscoveryTour = ({
     },
     href: getPageCanonicalPath(wrapperPage, locale),
     id,
+    price: projectPriceState(tour),
+    priceFrom:
+      typeof tour.priceFrom === 'number' && Number.isFinite(tour.priceFrom)
+        ? tour.priceFrom
+        : null,
     slug: tour.slug.trim(),
     summary: tour.summary.trim(),
     title: tour.title.trim(),

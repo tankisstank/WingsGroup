@@ -244,6 +244,10 @@ test.describe('WingSide guided journey discovery', () => {
         ).toBeAttached()
         await expect(page.getByRole('link', { name: copy.plan }).first()).toBeVisible()
         await expect(page.getByRole('link', { name: copy.contact }).first()).toBeVisible()
+        const firstPriceState = page.locator('.ws-journeys-card__price').first()
+        if ((await firstPriceState.count()) > 0) {
+          await expect(firstPriceState).toBeVisible()
+        }
         await expect(page.locator('body')).not.toContainText(bannedBookingClaims)
       }
     }
@@ -281,6 +285,9 @@ test.describe('WingSide guided journey discovery', () => {
     await expect(page.locator('[data-testid="journeys-notice"]')).toHaveCount(0)
 
     const firstCard = page.locator('.ws-journeys-card').first()
+    await expect(firstCard.locator('.ws-journeys-card__price')).toContainText(
+      /from|price on request|final price/i,
+    )
     await expect(firstCard).toHaveAttribute(
       'href',
       new RegExp(

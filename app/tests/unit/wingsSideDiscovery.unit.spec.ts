@@ -16,11 +16,13 @@ const site = { code: 'wing-side', id: 3 }
 
 const tour = (overrides: Record<string, unknown> = {}) => ({
   _status: 'published',
+  currency: 'USD',
   destinationTags: ['hanoi'],
   durationDays: 7,
   durationNights: 6,
   heroMedia: { alt: 'Hanoi hero', site: 3, url: '/media/hanoi.jpg' },
   id: 12,
+  priceFrom: 1290,
   site: 3,
   slug: 'hanoi-private-tour',
   summary: 'Private Hanoi discovery.',
@@ -128,15 +130,30 @@ describe('WingSide discovery pure contract', () => {
 
   it('projects only safe public fields and fails closed for invalid records', () => {
     expect(projectDiscoveryTour({ locale: 'en', site, tour: tour() })).toEqual({
+      currency: 'USD',
       destinationTags: ['hanoi'],
       duration: { days: 7, nights: 6 },
       hero: { alt: 'Hanoi hero', url: '/media/hanoi.jpg' },
       href: '/tour/hanoi-private-tour',
       id: 12,
+      price: { currency: 'USD', kind: 'from', value: 1290 },
+      priceFrom: 1290,
       slug: 'hanoi-private-tour',
       summary: 'Private Hanoi discovery.',
       title: 'Hanoi Private Tour',
       travelStyles: ['culture'],
+    })
+
+    expect(
+      projectDiscoveryTour({
+        locale: 'en',
+        site,
+        tour: tour({ currency: null, priceFrom: null }),
+      }),
+    ).toMatchObject({
+      currency: null,
+      price: { kind: 'on-request' },
+      priceFrom: null,
     })
 
     expect(projectDiscoveryTour({ site, tour: tour({ _status: 'draft' }) })).toBeNull()

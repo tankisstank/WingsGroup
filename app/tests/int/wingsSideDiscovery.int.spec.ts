@@ -60,11 +60,13 @@ const publicWrapper = (id = 101, pathname = '/tour/private-hanoi') => ({ id, pat
 const media = (id = 3) => ({ alt: 'Hero', site: id, url: '/media/hero.jpg' })
 type ProductDoc = {
   _status: string
+  currency: string | null
   destinationTags: string[]
   durationDays: number
   durationNights: number
   heroMedia: null | ReturnType<typeof media>
   id: number | string
+  priceFrom: number | null
   site: number
   slug: string
   summary: string
@@ -75,11 +77,13 @@ type ProductDoc = {
 
 const product = (overrides: Partial<ProductDoc> = {}): ProductDoc => ({
   _status: 'published',
+  currency: 'USD',
   destinationTags: ['hanoi'],
   durationDays: 6,
   durationNights: 5,
   heroMedia: media(),
   id: 10,
+  priceFrom: 1290,
   site: 3,
   slug: 'private-hanoi',
   summary: 'A private Hanoi journey.',
@@ -201,8 +205,11 @@ describe('WingSide discovery server query contract', () => {
     expect(context.result.items.map(({ id }) => id)).toEqual([2, 20])
     expect(context.result.total).toBe(2)
     expect(context.result.items[0]).toMatchObject({
+      currency: 'USD',
       hero: { url: '/media/hero.jpg' },
       href: '/tour/private-hanoi-2',
+      price: { currency: 'USD', kind: 'from', value: 1290 },
+      priceFrom: 1290,
       title: 'Private Hanoi',
     })
     expect(context.result.items[0]).not.toHaveProperty('_status')

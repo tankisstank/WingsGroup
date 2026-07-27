@@ -202,6 +202,10 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                   </span>
                   <strong>{item.title}</strong>
                   <span>{item.summary}</span>
+                  <span className="ws-journeys-card__price">
+                    <span>{formatJourneyPrice(item.price, locale)}</span>
+                    <small>{priceHonestyCopy[locale] || priceHonestyCopy.en}</small>
+                  </span>
                   <span className="ws-journeys-card__chips">
                     {item.destinationTags.slice(0, 2).map((tag) => (
                       <i key={tag}>{destinationLabels[locale][tag]}</i>
@@ -292,4 +296,48 @@ const formatJourneyDuration = (
   return duration.nights == null
     ? `${duration.days} ${units.days}`
     : `${duration.days} ${units.days} / ${duration.nights} ${units.nights}`
+}
+
+const priceCopy = {
+  en: { from: 'From', onRequest: 'Price on request' },
+  es: { from: 'Desde', onRequest: 'Precio bajo solicitud' },
+  it: { from: 'Da', onRequest: 'Prezzo su richiesta' },
+  pt: { from: 'Desde', onRequest: 'Preco sob consulta' },
+  vi: { from: 'Gia tu', onRequest: 'Gia theo yeu cau' },
+} as const
+
+const priceHonestyCopy = {
+  en: 'Final price is confirmed before any hold.',
+  es: 'El precio final se confirma antes de cualquier reserva.',
+  it: 'Il prezzo finale viene confermato prima di qualsiasi opzione.',
+  pt: 'O preco final e confirmado antes de qualquer bloqueio.',
+  vi: 'Gia cuoi cung duoc xac nhan truoc khi giu cho.',
+} as const
+
+const localeNumberFormat = {
+  en: 'en-US',
+  es: 'es-ES',
+  it: 'it-IT',
+  pt: 'pt-PT',
+  vi: 'vi-VN',
+} as const
+
+const formatJourneyPrice = (
+  price: DiscoveryContext['result']['items'][number]['price'],
+  locale: WingSideJourneyLocale,
+) => {
+  const copy = priceCopy[locale] || priceCopy.en
+  if (price.kind === 'on-request') return copy.onRequest
+
+  try {
+    const value = new Intl.NumberFormat(localeNumberFormat[locale] || localeNumberFormat.en, {
+      currency: price.currency,
+      maximumFractionDigits: 0,
+      style: 'currency',
+    }).format(price.value)
+
+    return `${copy.from} ${value}`
+  } catch {
+    return `${copy.from} ${price.currency} ${price.value}`
+  }
 }
