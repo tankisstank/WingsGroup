@@ -129,4 +129,33 @@ describe('WingSideJourneysClient', () => {
     expect(router.replace).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(screen.getByLabelText('Điểm đến'))
   })
+
+  it('keeps prior filters when destination, style and duration change sequentially', () => {
+    window.history.replaceState(null, '', '/wingsside/journeys?utm_source=pm')
+    params = new URLSearchParams('utm_source=pm')
+
+    render(
+      <WingSideJourneysClient
+        context={context({
+          query: { unknownValueCount: 1 },
+          result: {
+            ...context().result,
+            appliedQuery: {},
+            unknownValueCount: 1,
+          },
+        })}
+        locale="en"
+      />,
+    )
+
+    fireEvent.change(screen.getByLabelText('Destination'), { target: { value: 'hanoi' } })
+    fireEvent.change(screen.getByLabelText('Style'), { target: { value: 'family' } })
+    fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '15-plus' } })
+
+    expect(`${window.location.pathname}${window.location.search}`).toBe(
+      '/wingsside/journeys?destination=hanoi&style=family&duration=15-plus',
+    )
+    expect(router.refresh).toHaveBeenCalledTimes(3)
+    expect(router.replace).not.toHaveBeenCalled()
+  })
 })

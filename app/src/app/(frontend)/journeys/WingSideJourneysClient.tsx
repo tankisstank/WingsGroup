@@ -47,14 +47,19 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
   })
 
   const replaceQuery = (key: (typeof fieldOrder)[number], value: string) => {
-    const next = new URLSearchParams(searchParams?.toString())
+    const next = new URLSearchParams(
+      typeof window !== 'undefined' ? window.location.search : searchParams?.toString(),
+    )
     if (value) next.set(key, value)
     else next.delete(key)
-    for (const paramKey of Array.from(next.keys())) {
-      if (!fieldOrder.includes(paramKey as (typeof fieldOrder)[number])) next.delete(paramKey)
+    const ordered = new URLSearchParams()
+    for (const paramKey of fieldOrder) {
+      const paramValue = next.get(paramKey)
+      if (paramValue) ordered.set(paramKey, paramValue)
     }
     const pathname = toSitePath('/journeys')
-    const href = next.toString() ? `${pathname}?${next.toString()}` : pathname
+    const query = ordered.toString()
+    const href = query ? `${pathname}?${query}` : pathname
     if (typeof window !== 'undefined') {
       window.history.replaceState(window.history.state, '', href)
     }
