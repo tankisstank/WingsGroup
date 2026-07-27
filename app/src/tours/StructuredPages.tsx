@@ -11,7 +11,6 @@ import { ScheduleInteractiveDepartures } from './ScheduleInteractiveDepartures'
 import { TourItineraryDayDetails } from './TourItineraryDayDetails'
 import type {
   DepartureCardViewModel,
-  MarketPageViewModel,
   SchedulePageViewModel,
   TourCardViewModel,
   TourResolvedData,
@@ -23,7 +22,6 @@ import {
   getAvailabilityLabel,
   getContactPath,
   getDurationLabel,
-  getLowestPrice,
   getMarketConfig,
   getMealChipFlags,
   getSchedulePath,
@@ -36,6 +34,7 @@ import {
 } from './utils'
 import { isConsultativeTourSiteCode } from '@/utilities/siteCapabilities'
 import { TourEnquiryContextBridge } from './TourEnquiryContextBridge'
+import type { TourEnquiryContext } from './enquiryContext'
 import { normalizeWingSideConsultativeTour } from './wingsSideTourViewModel'
 
 /** Retail = WingsGo dense conversion. Consultative = Wingside private inbound. */
@@ -364,6 +363,7 @@ const TourDecisionHeader = ({
     tourId: tour.id,
     tourSlug: tour.slug,
     tourTitle: tour.title,
+    discoveryContext: tour.discoveryContext,
   })
   const consultPrimaryHref = resolveConsultativeCtaHref({
     cmsHref: cta.href,
@@ -376,6 +376,7 @@ const TourDecisionHeader = ({
     tourId: tour.id,
     tourSlug: tour.slug,
     tourTitle: tour.title,
+    discoveryContext: tour.discoveryContext,
   })
   const consultPrimaryLabel = getConsultativePrimaryLabel({
     ctaLabel: cta.label,
@@ -621,6 +622,7 @@ const TourDecisionHeader = ({
                   source: 'tour-detail-hero',
                   tourId: tour.id,
                   tourSlug: tour.slug,
+                  discoveryContext: tour.discoveryContext,
                 })
               }
             >
@@ -640,6 +642,7 @@ const TourDecisionHeader = ({
                 source: 'tour-detail-hero',
                 tourId: tour.id,
                 tourSlug: tour.slug,
+                discoveryContext: tour.discoveryContext,
               })}
             >
               Nhận tư vấn nhanh
@@ -908,8 +911,10 @@ const TourConsultationSection = ({
     tourId: tour.id,
     tourSlug: tour.slug,
     tourTitle: tour.title,
+    discoveryContext: tour.discoveryContext,
   })
   const context = {
+    discovery: tour.discoveryContext?.discovery,
     source: 'tour-detail-enquiry',
     tourId: tour.id,
     tourSlug: tour.slug,
@@ -1696,6 +1701,7 @@ const TourDecisionRail = ({
     tourId: tour.id,
     tourSlug: tour.slug,
     tourTitle: tour.title,
+    discoveryContext: tour.discoveryContext,
   })
   const primaryHref = resolveConsultativeCtaHref({
     cmsHref: cta.href,
@@ -1735,6 +1741,7 @@ const TourDecisionRail = ({
               tourId: tour.id,
               tourSlug: tour.slug,
               tourTitle: tour.title,
+              discoveryContext: tour.discoveryContext,
             })}
           >
             {isEn ? 'Contact us' : 'Liên hệ'}
@@ -2064,6 +2071,7 @@ const StickyBookingCTASection = ({
                 tourId: tour.id,
                 tourSlug: tour.slug,
                 tourTitle: tour.title,
+                discoveryContext: tour.discoveryContext,
               })}
             >
               {getConsultativePrimaryLabel({
@@ -2106,6 +2114,7 @@ const StickyBookingCTASection = ({
                 source: 'tour-detail-sticky',
                 tourId: tour.id,
                 tourSlug: tour.slug,
+                discoveryContext: tour.discoveryContext,
               })}
             >
               <span className="sm:hidden">{nextDeparture?.ctaLabelOverride || 'Tư vấn'}</span>
@@ -2129,12 +2138,14 @@ const StickyBookingCTASection = ({
 
 export const TourDetailPage = ({
   data,
+  discoveryContext,
   enquiryForm,
   locale,
   presentation = 'retail',
   siteCode: siteCodeProp,
 }: {
   data: TourResolvedData
+  discoveryContext?: Omit<TourEnquiryContext, 'source' | 'tourId' | 'tourSlug' | 'tourTitle'>
   enquiryForm?: FormType | null
   locale: 'en' | 'vi'
   presentation?: TourDetailPresentation
@@ -2142,7 +2153,10 @@ export const TourDetailPage = ({
 }) => {
   const isConsultative = presentation === 'consultative' || isConsultativeTourSiteCode(siteCodeProp)
   const resolvedPresentation: TourDetailPresentation = isConsultative ? 'consultative' : 'retail'
-  const tour = isConsultative ? normalizeWingSideConsultativeTour(data.tour) : data.tour
+  const baseTour: TourResolvedData['tour'] = isConsultative
+    ? normalizeWingSideConsultativeTour(data.tour)
+    : data.tour
+  const tour: TourResolvedData['tour'] = { ...baseTour, discoveryContext }
   const siteCode = resolveTourSiteCode(siteCodeProp, resolvedPresentation)
   const isEn = locale === 'en'
   const visibleSections = new Set(data.sectionVisibility || defaultTourSectionVisibility)

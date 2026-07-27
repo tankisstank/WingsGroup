@@ -47,6 +47,13 @@ export async function GET(request: Request) {
       lastmod: settings.docs[0]?.updatedAt || dateFallback,
     })
 
+    if (site.code === 'wing-side') {
+      sitemap.push({
+        loc: getSiteSitemapURL({ locale, origin, path: '/journeys' }),
+        lastmod: settings.docs[0]?.updatedAt || dateFallback,
+      })
+    }
+
     const results = await payload.find({
       collection: 'pages',
       overrideAccess: false,
@@ -91,10 +98,7 @@ export async function GET(request: Request) {
             locale,
             pagination: false,
             where: {
-              and: [
-                { site: { equals: site.id } },
-                { _status: { equals: 'published' } },
-              ],
+              and: [{ site: { equals: site.id } }, { _status: { equals: 'published' } }],
             },
             select: {
               slug: true,

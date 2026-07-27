@@ -1,6 +1,7 @@
 import { getCopyLocale, type CopyLocaleCode } from '@/utilities/locales'
 import { resolveSiteInquiryContactPath } from '@/utilities/siteContactPaths'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+import { appendTourEnquiryContextParams, type TourEnquiryContext } from './enquiryContext'
 
 const marketConfig = {
   china: {
@@ -137,8 +138,10 @@ export const getTourInquiryPath = ({
   tourId,
   tourSlug,
   tourTitle,
+  discoveryContext,
 }: {
   departureId?: null | number | string
+  discoveryContext?: Omit<TourEnquiryContext, 'source' | 'tourId' | 'tourSlug' | 'tourTitle'>
   intent?: TourInquiryIntent
   siteCode?: null | string
   source?: null | string
@@ -170,6 +173,8 @@ export const getTourInquiryPath = ({
   if (source) {
     params.set('source', source)
   }
+
+  appendTourEnquiryContextParams(params, { discovery: discoveryContext?.discovery })
 
   const query = params.toString()
 

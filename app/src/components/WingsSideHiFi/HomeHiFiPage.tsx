@@ -396,7 +396,7 @@ export const HomeHiFiPage = ({
                   <SiteLink
                     className="ws-hifi-card ws-hifi-card--media"
                     data-od-id={`dest-${card.key}`}
-                    href={`/destinations?destination=${encodeURIComponent(card.key)}`}
+                    href={`/journeys?destination=${encodeURIComponent(card.key)}`}
                     key={`destination-${card.key}-${card.id}`}
                   >
                     <span className="ws-hifi-card__media">
@@ -462,7 +462,7 @@ export const HomeHiFiPage = ({
               ? model.homeCuration!.styleTours.map((card, index) => (
                   <SiteLink
                     className="ws-hifi-card ws-hifi-card--media"
-                    href={`/styles?style=${encodeURIComponent(card.key)}`}
+                    href={`/journeys?style=${encodeURIComponent(card.key)}`}
                     key={`style-${card.key}-${card.id}`}
                   >
                     <span className="ws-hifi-card__media">

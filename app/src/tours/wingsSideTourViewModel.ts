@@ -2,6 +2,7 @@ import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import type { Media } from '@/payload-types'
 
 import type { TourResolvedData } from './types'
+import { buildTourEnquiryHref, type TourEnquiryContext } from './enquiryContext'
 
 type LooseRecord = Record<string, unknown>
 type WingSideDepartureDisplay = LooseRecord & {
@@ -458,15 +459,18 @@ export const buildWingSideTourCTA = (
   id: number | string,
   intent: WingSideTourCTAIntent = 'inquiry',
   source = intent === 'contact' ? 'tour-detail-contact' : 'tour-detail',
-) => {
-  const params = new URLSearchParams({
+  discoveryContext?: Omit<TourEnquiryContext, 'source' | 'tourId' | 'tourSlug'>,
+) =>
+  buildTourEnquiryHref({
+    basePath: '/contact-us',
+    context: {
+      ...discoveryContext,
+      source,
+      tourId: id,
+      tourSlug: slug,
+    },
     intent,
-    source,
-    tour: slug,
-    tourId: String(id),
   })
-  return `/contact-us?${params.toString()}`
-}
 
 const publicList = (value: unknown) =>
   (Array.isArray(value) ? value : [])
@@ -492,10 +496,12 @@ export type WingSideTourViewModel = ReturnType<typeof buildWingSideTourViewModel
 
 export const buildWingSideTourViewModel = ({
   data,
+  discoveryContext,
   locale,
   now = new Date(),
 }: {
   data: TourResolvedData
+  discoveryContext?: Omit<TourEnquiryContext, 'source' | 'tourId' | 'tourSlug'>
   locale: SupportedLocaleCode | string
   now?: Date
 }) => {
@@ -576,9 +582,9 @@ export const buildWingSideTourViewModel = ({
     throw new Error('WingSide tour detail requires a TourProduct ID and slug')
 
   return {
-    contactHref: buildWingSideTourCTA(slug, id, 'contact'),
+    contactHref: buildWingSideTourCTA(slug, id, 'contact', undefined, discoveryContext),
     copy,
-    ctaHref: buildWingSideTourCTA(slug, id, 'inquiry'),
+    ctaHref: buildWingSideTourCTA(slug, id, 'inquiry', undefined, discoveryContext),
     duration,
     excludes: publicList(tour.excludes),
     gallery,

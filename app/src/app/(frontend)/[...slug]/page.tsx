@@ -45,6 +45,7 @@ import {
   TourMarketPage,
   TourSchedulePage,
 } from '@/tours/StructuredPages'
+import { readSafeTourEnquiryContext } from '@/tours/enquiryContext'
 import {
   hasMatchingWingSideTourWrapper,
   sanitizeWingSidePublicText,
@@ -56,10 +57,7 @@ import {
 } from '@/utilities/wingsSideHiFiDispatch'
 import type { WingsSideHiFiPageSource } from '@/utilities/wingsSideHiFiPageModel'
 import { filterCmsLayoutBlocksForHiFiComposer } from '@/utilities/wingsSideHiFiComposer'
-import {
-  hydrateWingsSideHomeCuration,
-  projectWingsSideHomeCuration,
-} from '@/tours/homeCuration'
+import { hydrateWingsSideHomeCuration, projectWingsSideHomeCuration } from '@/tours/homeCuration'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import type { Form as PayloadForm } from '@/payload-types'
 
@@ -108,6 +106,7 @@ export default async function Page({
   const structuredPage = await resolveStructuredTourPage({
     locale,
     requestedPath,
+    searchParams,
     wrapperPageID: page.id,
   })
 
@@ -134,15 +133,11 @@ export default async function Page({
     publicPathname: requestedPath,
   })
 
-  if (
-    hiFiModel &&
-    ['home', 'destinations', 'styles'].includes(hiFiModel.routeVariant)
-  ) {
+  if (hiFiModel && ['home', 'destinations', 'styles'].includes(hiFiModel.routeVariant)) {
     const payload = await getPayload({ config: configPromise })
     let homeSource = hiFiModel.routeVariant === 'home' ? hiFiModel.routeContent : undefined
     if (!homeSource) {
-      const siteID =
-        typeof page.site === 'object' && page.site ? page.site.id : page.site
+      const siteID = typeof page.site === 'object' && page.site ? page.site.id : page.site
       const homePages = await payload.find({
         collection: 'pages',
         depth: 3,
@@ -466,10 +461,12 @@ const queryPageByPath = async ({
 const resolveStructuredTourPage = async ({
   locale,
   requestedPath,
+  searchParams,
   wrapperPageID,
 }: {
   locale: SupportedLocaleCode
   requestedPath: string
+  searchParams?: Record<string, string | string[] | undefined>
   wrapperPageID: number | string
 }) => {
   const { isEnabled: draft } = await draftMode()
@@ -494,6 +491,7 @@ const resolveStructuredTourPage = async ({
     // Keep wrapper-page gate so only linked TourProduct pages resolve.
     if (site.code === 'wing-side') {
       if (!hasMatchingWingSideTourWrapper(tourData.tour, wrapperPageID)) notFound()
+      const enquiryContext = readSafeTourEnquiryContext(searchParams)
       const contactPage = await queryPageByPath({
         depth: 0,
         locale,
@@ -516,6 +514,9 @@ const resolveStructuredTourPage = async ({
       return (
         <TourDetailPage
           data={tourData}
+          discoveryContext={
+            enquiryContext.discovery ? { discovery: enquiryContext.discovery } : undefined
+          }
           enquiryForm={
             enquiryForm && typeof enquiryForm === 'object'
               ? (enquiryForm as unknown as FormType)

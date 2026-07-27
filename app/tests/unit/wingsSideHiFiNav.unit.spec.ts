@@ -3,12 +3,13 @@ import { describe, expect, it } from 'vitest'
 import { getWingsSideHiFiCta, getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 
 describe('WingSide hi-fi nav IA (Bar B)', () => {
-  it('exposes the locked 7-link primary nav without Search', () => {
+  it('exposes the locked 8-link primary nav without Search', () => {
     const items = getWingsSideHiFiNavItems('en')
     expect(items.map((item) => item.label)).toEqual([
       'Home',
       'Destinations',
       'Styles',
+      'Journeys',
       'Packages',
       'Guide',
       'About',
@@ -18,6 +19,7 @@ describe('WingSide hi-fi nav IA (Bar B)', () => {
       '/',
       '/destinations',
       '/styles',
+      '/journeys',
       '/packages',
       '/travel-guide',
       '/about-us',

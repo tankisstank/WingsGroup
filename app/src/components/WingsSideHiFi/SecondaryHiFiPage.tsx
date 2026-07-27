@@ -7,6 +7,7 @@ import { getWingsSideHiFiAlt, getWingsSideHiFiPublicUrl } from '@/utilities/wing
 import { getPublicRoutePathname, type SupportedLocaleCode } from '@/utilities/sitePaths'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import { TourEnquiryContextBridge } from '@/tours/TourEnquiryContextBridge'
+import { readSafeTourEnquiryContext } from '@/tours/enquiryContext'
 
 import { getWingsSideHiFiCopy } from './copy'
 import { WingsSideHiFiSectionInventory } from './SectionInventory'
@@ -64,17 +65,16 @@ const ContactBody = ({
   const channels = asArray<{ label?: string; value?: string; href?: string }>(content.channels)
   const nextSteps = asArray<{ title?: string; body?: string } | string>(content.nextSteps)
   const form = resolveForm(content.form)
-  const firstParam = (name: string) => {
-    const value = searchParams?.[name]
-    return Array.isArray(value) ? value[0] : value
-  }
-  const tourContext = {
-    source: firstParam('source'),
-    tourId: firstParam('tourId'),
-    tourSlug: firstParam('tour'),
-    tourTitle: firstParam('tourTitle'),
-  }
-  const hasTourContext = Boolean(tourContext.tourSlug || tourContext.tourTitle)
+  const tourContext = readSafeTourEnquiryContext(searchParams)
+  const contextLabel = [
+    tourContext.tourTitle || tourContext.tourSlug,
+    tourContext.discovery?.destination,
+    tourContext.discovery?.style,
+    tourContext.discovery?.duration,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+  const hasTourContext = Boolean(contextLabel)
 
   return (
     <>
@@ -93,7 +93,7 @@ const ContactBody = ({
           {hasTourContext ? (
             <div className="ws-secondary-contact__tour-context" data-od-id="contact-tour-context">
               <span>{locale === 'vi' ? 'Tour đang quan tâm' : 'Journey in context'}</span>
-              <strong>{tourContext.tourTitle || tourContext.tourSlug}</strong>
+              <strong>{contextLabel}</strong>
             </div>
           ) : null}
           {form ? (
