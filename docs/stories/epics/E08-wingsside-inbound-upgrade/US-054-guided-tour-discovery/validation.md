@@ -163,3 +163,26 @@ The production compose file now mounts
 `/app/public/media` so immutable application releases keep using the shared
 media catalog. Recreate only the app container after applying this correction;
 PostgreSQL and Redis are not affected.
+
+## Production Breadcrumb Context Correction
+
+On 2026-07-28, visual review of a Tour Detail opened from `/journeys` found the
+structured detail breadcrumb still using the legacy `Packages` parent:
+`WingSide / Packages / <tour>`. The underlying Tour Detail style belongs to the
+US-046 detail surface, but the incorrect parent only appears in the US-054
+journey-discovery transition because the URL carries `source=journeys`.
+
+Release `d393c1ea2503e4065074060f7efb07dbf275dd45` updates structured
+WingSide Tour Detail breadcrumbs so `source=journeys` renders
+`WingSide / Journeys / <tour>` and links the parent back to `/journeys` with
+only normalized valid discovery filters. Direct detail visits without
+`source=journeys` keep the existing `Packages` parent. Unit coverage verifies
+Journeys parent selection, safe invalid-query stripping and Packages fallback.
+
+Production verification:
+
+- `https://wingside.vn/tour/ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi?source=journeys`
+  renders breadcrumb `WingSide / Journeys / Ninh Binh - Tam Coc & Mua Cave
+  Private Tour from Hanoi`.
+- Breadcrumb hrefs are `/` and `/journeys`.
+- Live and readiness health endpoints return HTTP 200.
