@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/access/siteScope'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
+import { supportedTourCurrencyOptions } from '@/tours/currency'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 
 import {
@@ -114,10 +115,7 @@ export const TourDepartures: CollectionConfig = {
       required: true,
       type: 'select',
       defaultValue: 'VND',
-      options: [
-        { label: 'VND', value: 'VND' },
-        { label: 'USD', value: 'USD' },
-      ],
+      options: supportedTourCurrencyOptions,
     },
     {
       name: 'promoLabel',

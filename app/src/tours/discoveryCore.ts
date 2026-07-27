@@ -6,6 +6,7 @@ import {
   type TourDestinationKey,
   type TourTravelStyleKey,
 } from './taxonomy'
+import { normalizeSupportedTourCurrency, type SupportedTourCurrencyCode } from './currency'
 
 export const discoveryDurationCodes = ['1-7', '8-14', '15-plus'] as const
 export type DiscoveryDurationCode = (typeof discoveryDurationCodes)[number]
@@ -40,7 +41,7 @@ export type DiscoveryTourCard = {
 }
 
 export type DiscoveryTourPriceState =
-  | { currency: string; kind: 'from'; value: number }
+  | { currency: SupportedTourCurrencyCode; kind: 'from'; value: number }
   | { kind: 'on-request' }
 
 export type DiscoveryResult = {
@@ -113,20 +114,8 @@ const sameRelation = (left: Relation, right: Relation): boolean => {
 const nonEmpty = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
 
-const normalizeCurrency = (value: unknown): string | null => {
-  if (!nonEmpty(value)) return null
-
-  const currency = value.trim()
-  try {
-    new Intl.NumberFormat('en-US', { currency, style: 'currency' }).format(1)
-    return currency
-  } catch {
-    return null
-  }
-}
-
 const projectPriceState = (tour: DiscoveryTourDoc): DiscoveryTourPriceState => {
-  const currency = normalizeCurrency(tour.currency)
+  const currency = normalizeSupportedTourCurrency(tour.currency)
   if (
     typeof tour.priceFrom === 'number' &&
     Number.isFinite(tour.priceFrom) &&
@@ -404,7 +393,7 @@ export const projectDiscoveryTour = ({
   const price = projectPriceState(tour)
 
   return {
-    currency: normalizeCurrency(tour.currency),
+    currency: normalizeSupportedTourCurrency(tour.currency),
     destinationTags: normalizeTourDestinationKeys(destinationTags),
     duration: {
       days: tour.durationDays,

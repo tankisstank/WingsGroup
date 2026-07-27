@@ -270,6 +270,63 @@ describe('WingSide discovery server query contract', () => {
     })
   })
 
+  it('uses only the supported tour currency allowlist for discovery price projection', async () => {
+    mockDiscoveryFind(
+      [
+        product({
+          currency: 'USD',
+          id: 1,
+          priceFrom: 1290,
+          slug: 'supported-usd',
+          wrapperPage: publicWrapper(201, '/tour/supported-usd'),
+        }),
+        product({
+          currency: 'VND',
+          id: 2,
+          priceFrom: 30900000,
+          slug: 'supported-vnd',
+          wrapperPage: publicWrapper(202, '/tour/supported-vnd'),
+        }),
+        product({
+          currency: 'ABC',
+          id: 3,
+          priceFrom: 999,
+          slug: 'unsupported-abc',
+          wrapperPage: publicWrapper(203, '/tour/unsupported-abc'),
+        }),
+        product({
+          currency: 'XXX',
+          id: 4,
+          priceFrom: 999,
+          slug: 'unsupported-xxx',
+          wrapperPage: publicWrapper(204, '/tour/unsupported-xxx'),
+        }),
+      ],
+      [
+        page({ id: 201, pathname: '/tour/supported-usd', slug: 'supported-usd' }),
+        page({ id: 202, pathname: '/tour/supported-vnd', slug: 'supported-vnd' }),
+        page({ id: 203, pathname: '/tour/unsupported-abc', slug: 'unsupported-abc' }),
+        page({ id: 204, pathname: '/tour/unsupported-xxx', slug: 'unsupported-xxx' }),
+      ],
+    )
+
+    const context = await getWingSideDiscoveryContext({ input: {}, locale: 'en' })
+    const pricesBySlug = new Map(context.result.items.map((item) => [item.slug, item.price]))
+
+    expect(pricesBySlug.get('supported-usd')).toEqual({
+      currency: 'USD',
+      kind: 'from',
+      value: 1290,
+    })
+    expect(pricesBySlug.get('supported-vnd')).toEqual({
+      currency: 'VND',
+      kind: 'from',
+      value: 30900000,
+    })
+    expect(pricesBySlug.get('unsupported-abc')).toEqual({ kind: 'on-request' })
+    expect(pricesBySlug.get('unsupported-xxx')).toEqual({ kind: 'on-request' })
+  })
+
   it('drops wrappers not returned by the constrained verification query', async () => {
     mockDiscoveryFind(
       [

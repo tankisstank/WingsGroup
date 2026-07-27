@@ -202,6 +202,8 @@ describe('WingSide discovery pure contract', () => {
       { expectedCurrency: null, overrides: { currency: null, priceFrom: 1290 } },
       { expectedCurrency: null, overrides: { currency: '', priceFrom: 1290 } },
       { expectedCurrency: null, overrides: { currency: 'not-valid', priceFrom: 1290 } },
+      { expectedCurrency: null, overrides: { currency: 'ABC', priceFrom: 1290 } },
+      { expectedCurrency: null, overrides: { currency: 'XXX', priceFrom: 1290 } },
     ]
 
     for (const { expectedCurrency, overrides } of cases) {
@@ -213,5 +215,18 @@ describe('WingSide discovery pure contract', () => {
         priceFrom: null,
       })
     }
+  })
+
+  it.each([
+    ['USD', 1290],
+    ['VND', 30_900_000],
+  ])('projects supported %s prices from the governed allowlist', (currency, priceFrom) => {
+    expect(
+      projectDiscoveryTour({ locale: 'en', site, tour: tour({ currency, priceFrom }) }),
+    ).toMatchObject({
+      currency,
+      price: { currency, kind: 'from', value: priceFrom },
+      priceFrom,
+    })
   })
 })
