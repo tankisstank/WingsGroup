@@ -186,3 +186,26 @@ Production verification:
   Private Tour from Hanoi`.
 - Breadcrumb hrefs are `/` and `/journeys`.
 - Live and readiness health endpoints return HTTP 200.
+
+## Production Breadcrumb Style Correction
+
+On 2026-07-28, visual review found that the structured Tour Detail breadcrumb
+used the correct `Journeys` parent but still looked different from the WingSide
+secondary-page breadcrumb treatment. Release
+`fadd22c68de26d0c1fdd281d77bac58b25f12625` scopes the structured Tour Detail
+breadcrumb to the same WingSide pill treatment: compact type, full-radius
+border, surface background, semibold no-underline parent links and muted
+separators. The change is limited to `body[data-site-code='wing-side']` and
+structured Tour Detail pages.
+
+Production verification:
+
+- The live breadcrumb nav has class
+  `wingsside-tour-breadcrumb container pb-3 pt-4 md:pt-5`.
+- The live breadcrumb text remains
+  `WingSide / Journeys / Ninh Binh - Tam Coc & Mua Cave Private Tour from Hanoi`.
+- Live and readiness health endpoints return HTTP 200.
+
+Evidence:
+
+- `evidence/us054-production-breadcrumb-style.png`
