@@ -17,11 +17,12 @@ describe('WingSide hi-fi chrome foundation contracts', () => {
     expect(WINGSSIDE_HIFI_COMPOSER_ROUTES).not.toContain('/tour/')
     for (const locale of ['en', 'vi', 'it', 'es', 'pt'] as const) {
       const nav = getWingsSideHiFiNavItems(locale)
-      expect(nav).toHaveLength(7)
+      expect(nav).toHaveLength(8)
       expect(nav.map((item) => item.href)).toEqual([
         '/',
         '/destinations',
         '/styles',
+        '/journeys',
         '/packages',
         '/travel-guide',
         '/about-us',
