@@ -52,6 +52,7 @@ separate and requires the repository's production push re-check.
 | Deterministic recovery | Cumulative relaxation removes duration, then style, then destination. Browser proof verifies the broader-results notice, stable result count and consultation actions. |
 | Detail and consultation context | E2E proves discovery context through Tour Detail, Plan and Contact, including Back restoration. No real lead was submitted. |
 | SEO, tenant, accessibility and responsive gates | Base discovery is self-canonical/indexable; filtered and invalid URLs are `noindex,follow` and canonicalize to the base. Sitemap includes only base locale URLs. Non-WingSide access is rejected. Interactive browser QA found no page or console errors at desktop and mobile widths. |
+| Governed public price state | Discovery cards, WingSide Home curation, standalone Tour Detail and routed CMS/StructuredPages detail all use the governed tour-price helper. Public price claims require a finite positive value and supported `VND` or `USD`; unsupported currencies (`ABC`, `XXX`, `EUR`, `GBP`), missing currency, zero, negative and non-finite prices fail closed to on-request/contact copy. |
 | Observability and performance | One structured completion event records normalized filter codes, result count, invalid-filter count, relaxation, tenant outcome and `duration_ms` without raw invalid values. Production-like SQLite probes returned 22 base cards and measured approximately `1.55s` cold/`1.03s` warm for base, `0.32s`/`0.30s` exact, `0.59s`/`0.60s` relaxed and `0.60s`/`0.52s` invalid queries. |
 
 ## Executed Proof
@@ -61,6 +62,9 @@ separate and requires the repository's production push re-check.
 - `pnpm run test:int -- tests/int/wingsSideDiscovery.int.spec.ts`: `7/7`
   tests passed, including fail-closed public wrapper verification and safe
   structured logging.
+- Final post-remediation focused gate on `cbc9fdf`: unit `38/38`,
+  component `27/27`, integration `8/8`, `pnpm exec tsc --noEmit` PASS, and
+  `pnpm exec next build --webpack` PASS.
 - `tests/e2e/wingsside-journeys-discovery.e2e.spec.ts`: all five scenarios
   passed against production-like SQLite data. The scenarios cover tenant and
   sitemap routing, five locales at desktop/mobile, exact filtering and
@@ -101,8 +105,14 @@ separate and requires the repository's production push re-check.
   delegate to the existing generic CMS renderer and metadata path; focused
   regression coverage preserves WingSide discovery and absent-page
   fail-closed behavior.
-- Fresh post-fix independent review and acceptance audit are required on the
-  final HEAD before Harness proof is marked complete.
+- Subsequent independent review and audit cycles found invalid App Router
+  exports, missing governed discovery price state, non-positive price claims,
+  unsupported currency claims, and routed CMS detail price bypasses. These were
+  remediated through scoped worker/PM commits up to `cbc9fdf`; PM verification
+  on that HEAD passed unit, component, integration, TypeScript and webpack
+  gates. The last GPT-5.5 audit wrapper did not return a final acceptance
+  verdict before being interrupted, so Harness is marked implemented from PM
+  acceptance with production still pending.
 - No staging, canary or production deployment was performed. The production
   push requires re-confirming the host, release path, compose project, domains,
   TLS, environment/secret paths, running containers and rollback point.
