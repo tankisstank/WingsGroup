@@ -41,8 +41,8 @@ Add a targeted discovery E2E command/spec with the implementation.
 
 ## Acceptance Evidence
 
-PM acceptance was completed locally on 2026-07-27. Production release remains
-separate and requires the repository's production push re-check.
+PM acceptance was completed locally on 2026-07-27. Production release was
+completed later on 2026-07-27 after explicit owner re-confirmation.
 
 | Acceptance criterion | Evidence |
 | --- | --- |
@@ -111,8 +111,40 @@ separate and requires the repository's production push re-check.
   remediated through scoped worker/PM commits up to `cbc9fdf`; PM verification
   on that HEAD passed unit, component, integration, TypeScript and webpack
   gates. The last GPT-5.5 audit wrapper did not return a final acceptance
-  verdict before being interrupted, so Harness is marked implemented from PM
-  acceptance with production still pending.
-- No staging, canary or production deployment was performed. The production
-  push requires re-confirming the host, release path, compose project, domains,
-  TLS, environment/secret paths, running containers and rollback point.
+  verdict before being interrupted, so local Harness acceptance was marked from
+  PM acceptance and the clean final code review.
+
+## Production Release
+
+Production go-live completed on 2026-07-27:
+
+- Release source SHA:
+  `8d5a1e3b46157481d60856137ff92118eb686500`.
+- Immutable release path:
+  `/home/ubuntu/wings-travel/releases/wingsside-us054-8d5a1e3`.
+- Previous release retained:
+  `/home/ubuntu/wings-travel/releases/wingsside-us053-e6c44df`.
+- Active runtime image:
+  `sha256:24c59085f37855640ae9fbf920fd72ff3074d4c2354c8333279748d6e4791867`.
+- Rollback image tag retained:
+  `wingstravel-app:rollback-us054-pre-20260727T160329Z`.
+- Canary on `127.0.0.1:3001` passed live health, database, Redis,
+  `/journeys` and filtered `/journeys?destination=hanoi&style=romance&duration=8-14`
+  probes before production switch. Readiness remained `degraded` only because
+  lead delivery is disabled, matching the preceding production release.
+- Production switch updated the `current` symlink and recreated only the app
+  container. PostgreSQL and Redis containers were preserved.
+- Public HTTPS probes passed:
+  `/api/health/live`, `/api/health/ready`, `/journeys`, the filtered Hanoi +
+  Romance + 8-14 day query and an invalid-query recovery URL all returned HTTP
+  200.
+- Agent-browser live QA confirmed base `/journeys` renders `22` same-site
+  journeys, the filtered Hanoi + Romance + 8-14 query renders exactly `1`
+  journey, and Plan, Contact and Tour Detail links preserve the valid discovery
+  context. Invalid query UI resets to `All` filters, drops raw invalid params
+  from Plan/Contact/card links, remains `noindex`, and canonicalizes to the
+  base `/journeys` URL. No real lead was submitted.
+
+Production evidence:
+
+- `evidence/us054-production-filtered-journeys.png`
