@@ -15,7 +15,9 @@ vi.mock('@/components/Media', () => ({
 
 vi.mock('@/components/SiteLink', () => ({
   SiteLink: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a href={String(href)} {...props}>{children}</a>
+    <a href={String(href)} {...props}>
+      {children}
+    </a>
   ),
 }))
 
@@ -34,9 +36,19 @@ const tourData: TourResolvedData = {
     heroMedia: media(1, 'Phu Quoc private journey'),
     id: 498,
     includes: [{ label: 'Private local guide' }],
-    itineraryDays: [{ accommodation: 'Boutique resort', dayNumber: 1, meals: 'Breakfast', route: 'Ho Chi Minh City → Phu Quoc', summary: 'Arrive and settle in.', title: 'Island arrival' }],
+    itineraryDays: [
+      {
+        accommodation: 'Boutique resort',
+        dayNumber: 1,
+        meals: 'Breakfast',
+        route: 'Ho Chi Minh City → Phu Quoc',
+        summary: 'Arrive and settle in.',
+        title: 'Island arrival',
+      },
+    ],
     slug: 'romantic-getaway',
-    summary: 'A private island journey. Sales must confirm final price and departure availability before publishing.',
+    summary:
+      'A private island journey. Sales must confirm final price and departure availability before publishing.',
     title: 'Romantic Getaway',
     market: 'vietnam',
   },
@@ -50,7 +62,10 @@ describe('WingSideTourDetailPage', () => {
     render(
       <>
         <WingSideTourDetailPage data={tourData} locale="en" />
-        <RelatedPages locale="en" pages={[{ pathname: '/destinations', slug: 'destinations', title: 'Destinations' }]} />
+        <RelatedPages
+          locale="en"
+          pages={[{ pathname: '/destinations', slug: 'destinations', title: 'Destinations' }]}
+        />
       </>,
     )
 
@@ -86,11 +101,28 @@ describe('WingSideTourDetailPage', () => {
     for (const section of document.querySelectorAll('section[aria-labelledby]')) {
       expect(document.getElementById(section.getAttribute('aria-labelledby')!)).toBeTruthy()
     }
-    expect(within(screen.getByRole('heading', { name: 'Journey gallery' }).closest('section')!).getAllByRole('img')).toHaveLength(2)
+    expect(
+      within(
+        screen.getByRole('heading', { name: 'Journey gallery' }).closest('section')!,
+      ).getAllByRole('img'),
+    ).toHaveLength(2)
   })
 
   it('does not render empty gallery, route, itinerary, or service blocks', () => {
-    const sparse = { ...tourData, tour: { ...tourData.tour, durationDays: 0, durationNights: 0, excludes: [], gallery: [], heroMedia: null, includes: [], itineraryDays: [], routeViz: null } }
+    const sparse = {
+      ...tourData,
+      tour: {
+        ...tourData.tour,
+        durationDays: 0,
+        durationNights: 0,
+        excludes: [],
+        gallery: [],
+        heroMedia: null,
+        includes: [],
+        itineraryDays: [],
+        routeViz: null,
+      },
+    }
     render(<WingSideTourDetailPage data={sparse} locale="en" />)
 
     expect(screen.queryByRole('heading', { name: 'Journey gallery' })).toBeNull()
@@ -104,7 +136,7 @@ describe('WingSideTourDetailPage', () => {
     )
   })
 
-  it('renders mixed currencies only on departures with an honest price source', () => {
+  it('rejects unsupported departure currencies instead of rendering raw prices', () => {
     const available = {
       ...tourData,
       departures: [
@@ -117,9 +149,10 @@ describe('WingSideTourDetailPage', () => {
     render(<WingSideTourDetailPage data={available} locale="en" />)
 
     expect(screen.queryByText(/1 August 2026/)).toBeNull()
-    expect(screen.getByText(/2 August 2026/)).toBeTruthy()
-    expect(screen.getByText(/3 August 2026/)).toBeTruthy()
-    expect(screen.getAllByText('€1,200').length).toBeGreaterThan(0)
-    expect(screen.getByText('£1,300')).toBeTruthy()
+    expect(screen.queryByText(/2 August 2026/)).toBeNull()
+    expect(screen.queryByText(/3 August 2026/)).toBeNull()
+    expect(screen.queryByText(/€1,200/)).toBeNull()
+    expect(screen.queryByText(/£1,300/)).toBeNull()
+    expect(screen.getByRole('heading', { name: /on request · reply within 24h/i })).toBeTruthy()
   })
 })

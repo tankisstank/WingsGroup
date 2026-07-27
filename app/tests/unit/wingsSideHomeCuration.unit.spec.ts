@@ -15,27 +15,35 @@ import {
 } from '../../src/tours/homeCuration'
 
 const siteID = 9
-const selectedTourIDs = [...new Set([
-  ...wingsSideHomeDestinationSelections.map(({ tour }) => tour),
-  ...wingsSideHomeStyleSelections.map(({ tour }) => tour),
-  ...wingsSideHomeFeaturedSelections.map(({ tour }) => tour),
-])]
+const selectedTourIDs = [
+  ...new Set([
+    ...wingsSideHomeDestinationSelections.map(({ tour }) => tour),
+    ...wingsSideHomeStyleSelections.map(({ tour }) => tour),
+    ...wingsSideHomeFeaturedSelections.map(({ tour }) => tour),
+  ]),
+]
 
-const eligibleTours = new Map(selectedTourIDs.map((id) => [
-  String(id),
-  {
-    _status: 'published' as const,
-    destinationTags: wingsSideHomeDestinationSelections.filter((selection) => selection.tour === id).map(({ key }) => key),
-    durationDays: 6,
-    heroMedia: id + 1000,
-    id,
-    site: siteID,
-    summary: `Summary ${id}`,
-    title: `Tour ${id}`,
-    travelStyles: wingsSideHomeStyleSelections.filter((selection) => selection.tour === id).map(({ key }) => key),
-    wrapperPage: id + 2000,
-  },
-]))
+const eligibleTours = new Map(
+  selectedTourIDs.map((id) => [
+    String(id),
+    {
+      _status: 'published' as const,
+      destinationTags: wingsSideHomeDestinationSelections
+        .filter((selection) => selection.tour === id)
+        .map(({ key }) => key),
+      durationDays: 6,
+      heroMedia: id + 1000,
+      id,
+      site: siteID,
+      summary: `Summary ${id}`,
+      title: `Tour ${id}`,
+      travelStyles: wingsSideHomeStyleSelections
+        .filter((selection) => selection.tour === id)
+        .map(({ key }) => key),
+      wrapperPage: id + 2000,
+    },
+  ]),
+)
 
 describe('WingSide Home curation audit', () => {
   it('resolves approved source identities to environment-specific relation IDs', () => {
@@ -46,9 +54,7 @@ describe('WingSide Home curation audit', () => {
     expect(remapped.destinationTourSelections.map(({ tour }) => tour)).toEqual([
       60, 61, 62, 63, 64, 65,
     ])
-    expect(remapped.styleTourSelections.map(({ tour }) => tour)).toEqual([
-      66, 67, 68, 69, 70, 71,
-    ])
+    expect(remapped.styleTourSelections.map(({ tour }) => tour)).toEqual([66, 67, 68, 69, 70, 71])
     expect(remapped.featuredJourneySelections.map(({ tour }) => tour)).toEqual([68, 60, 63])
   })
 
@@ -89,16 +95,20 @@ describe('WingSide Home curation audit', () => {
 
   it('treats Payload row ids and populated relationship values as the same approved selection', () => {
     const actual = {
-      destinationTourSelections: wingsSideHomeCuration.destinationTourSelections.map((selection, index) => ({
-        ...selection,
-        id: `destination-${index}`,
-        tour: { id: selection.tour },
-      })),
-      featuredJourneySelections: wingsSideHomeCuration.featuredJourneySelections.map((selection, index) => ({
-        ...selection,
-        id: `featured-${index}`,
-        tour: { id: selection.tour },
-      })),
+      destinationTourSelections: wingsSideHomeCuration.destinationTourSelections.map(
+        (selection, index) => ({
+          ...selection,
+          id: `destination-${index}`,
+          tour: { id: selection.tour },
+        }),
+      ),
+      featuredJourneySelections: wingsSideHomeCuration.featuredJourneySelections.map(
+        (selection, index) => ({
+          ...selection,
+          id: `featured-${index}`,
+          tour: { id: selection.tour },
+        }),
+      ),
       styleTourSelections: wingsSideHomeCuration.styleTourSelections.map((selection, index) => ({
         ...selection,
         id: `style-${index}`,
@@ -117,16 +127,20 @@ describe('WingSide Home curation audit', () => {
     expect(result.matchesApprovedSelections).toBe(true)
   })
 })
-
 describe('WingSide Home runtime curation loader', () => {
   it('hydrates explicitly queried tour, wrapper, and media relations into a ready projection', async () => {
-    const priceByTourID = new Map<number, { currency: string; priceFrom: number }>([
+    const priceByTourID = new Map<number, { currency?: string; priceFrom?: number }>([
       [491, { currency: 'USD', priceFrom: 1200 }],
       [226, { currency: 'VND', priceFrom: 30_900_000 }],
       [506, { currency: 'ABC', priceFrom: 999 }],
       [486, { currency: 'XXX', priceFrom: 999 }],
       [326, { currency: 'USD', priceFrom: 0 }],
       [442, { currency: 'USD', priceFrom: -1 }],
+      [533, { currency: 'USD', priceFrom: Number.POSITIVE_INFINITY }],
+      [517, { currency: 'USD', priceFrom: Number.NaN }],
+      [504, { currency: ' ', priceFrom: 999 }],
+      [518, { priceFrom: 999 }],
+      [534, { currency: 'usd', priceFrom: 2450 }],
     ])
     const tours = selectedTourIDs.map((id) => ({
       _status: 'published',
@@ -203,7 +217,11 @@ describe('WingSide Home runtime curation loader', () => {
       issues: [],
       state: 'ready',
       styleTours: expect.arrayContaining([
-        expect.objectContaining({ key: 'romance', title: 'Tour 534' }),
+        expect.objectContaining({
+          key: 'romance',
+          price: { currency: 'USD', kind: 'from', value: 2450 },
+          title: 'Tour 534',
+        }),
       ]),
     })
   })

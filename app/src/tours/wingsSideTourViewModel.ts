@@ -4,6 +4,7 @@ import type { Media } from '@/payload-types'
 import type { TourResolvedData } from './types'
 import { buildTourEnquiryHref, type TourEnquiryContext } from './enquiryContext'
 import {
+  normalizeGovernedTourPrice,
   normalizeSupportedTourCurrency,
   type SupportedTourCurrencyCode,
 } from './currency'
@@ -15,7 +16,6 @@ type WingSideDepartureDisplay = LooseRecord & {
   id?: number | string
   price: number
 }
-
 const asRecord = (value: unknown): LooseRecord =>
   value && typeof value === 'object' ? (value as LooseRecord) : {}
 const asText = (value: unknown): string => (typeof value === 'string' ? value : '')
@@ -515,34 +515,25 @@ export const buildWingSideTourViewModel = ({
   const futureDepartures = (data.departures || [])
     .filter((departure) => isFutureWingSideDeparture(departure.departureDate, now))
     .sort((left, right) => String(left.departureDate).localeCompare(String(right.departureDate)))
-  const productCurrency = normalizeSupportedTourCurrency(tour.currency)
-  const productPrice =
-    typeof tour.priceFrom === 'number' &&
-    Number.isFinite(tour.priceFrom) &&
-    tour.priceFrom > 0 &&
-    productCurrency
-      ? tour.priceFrom
-      : null
+  const productPrice = normalizeGovernedTourPrice({
+    currency: tour.currency,
+    value: tour.priceFrom,
+  })
   const displayDepartures = futureDepartures.flatMap<WingSideDepartureDisplay>((departure) => {
     const departureCurrency = normalizeSupportedTourCurrency(departure.currency)
-    const departurePrice =
-      typeof departure.priceFrom === 'number' &&
-      Number.isFinite(departure.priceFrom) &&
-      departure.priceFrom > 0 &&
-      departureCurrency
-        ? departure.priceFrom
-        : null
-    const price = departurePrice ?? productPrice
-    const currency = departurePrice ? departureCurrency : productCurrency
-    if (!currency) return []
-    if (price === null) return []
+    const departurePrice = normalizeGovernedTourPrice({
+      currency: departure.currency,
+      value: departure.priceFrom,
+    })
+    const governedPrice = departurePrice ?? (departureCurrency ? productPrice : null)
+    if (!governedPrice) return []
     return [
       {
         ...departure,
-        currency,
+        currency: governedPrice.currency,
         departureDate: asText(departure.departureDate),
         id: relationID(departure.id) ?? undefined,
-        price,
+        price: governedPrice.value,
       },
     ]
   })
