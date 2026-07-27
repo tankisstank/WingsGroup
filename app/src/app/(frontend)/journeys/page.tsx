@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { getWingSideDiscoveryContext } from '@/tours/discovery'
+import { getDiscoverySEOPolicy, normalizeDiscoveryQuery } from '@/tours/discoveryCore'
 import { getWingSideJourneysCopy, isWingSideJourneyLocale } from '@/tours/journeysCopy'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
@@ -44,7 +45,7 @@ export async function generateMetadata({
   }
 
   const searchParams = searchParamsPromise ? await searchParamsPromise : {}
-  const context = await getWingSideDiscoveryContext({ input: searchParams, locale })
+  const seo = getDiscoverySEOPolicy(normalizeDiscoveryQuery(searchParams))
   const copy = getWingSideJourneysCopy(locale)
   const origin = getCanonicalSiteOrigin({ settings, site })
   const canonical = getSiteSitemapURL({ locale, origin, path: routePath })
@@ -68,7 +69,7 @@ export async function generateMetadata({
       url: canonical,
     },
     robots:
-      context.seo.robots === 'index,follow'
+      seo.robots === 'index,follow'
         ? { follow: true, index: true }
         : { follow: true, index: false },
     title,

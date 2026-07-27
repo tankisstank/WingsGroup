@@ -17,9 +17,11 @@ vi.mock('@/utilities/siteContext', () => ({
 import { getWingSideDiscoveryContext } from '@/tours/discovery'
 
 type FindArgs = {
+  depth?: number
   fallbackLocale?: false | string
   locale?: string
   overrideAccess?: boolean
+  select?: Record<string, unknown>
   where?: { and?: Array<Record<string, unknown>> }
 }
 
@@ -128,11 +130,25 @@ describe('WingSide discovery server query contract', () => {
 
     const args = mocks.find.mock.calls[0][0] as FindArgs
     expect(args).toMatchObject({
+      depth: 1,
       draft: false,
       fallbackLocale: false,
       locale: 'en',
       overrideAccess: false,
       pagination: false,
+      select: {
+        _status: true,
+        destinationTags: true,
+        durationDays: true,
+        durationNights: true,
+        heroMedia: { alt: true, site: true, url: true },
+        site: true,
+        slug: true,
+        summary: true,
+        title: true,
+        travelStyles: true,
+        wrapperPage: { _status: true, pathname: true, site: true, slug: true },
+      },
       sort: ['durationDays', 'id'],
     })
     expect(clauseValue(args, 'destinationTags')).toEqual({ in: ['hanoi'] })

@@ -27,6 +27,28 @@ export * from './discoveryCore'
 const tourProductsCollection = 'tour-products' as never
 const wingSideSiteCode = 'wing-side'
 
+const discoveryTourSelect = {
+  _status: true,
+  destinationTags: true,
+  durationDays: true,
+  durationNights: true,
+  heroMedia: {
+    alt: true,
+    site: true,
+    url: true,
+  },
+  site: true,
+  slug: true,
+  summary: true,
+  title: true,
+  travelStyles: true,
+  wrapperPage: {
+    _status: true,
+    pathname: true,
+    site: true,
+    slug: true,
+  },
+}
 const queryDiscoveryCards = async ({
   locale,
   limit,
@@ -42,13 +64,14 @@ const queryDiscoveryCards = async ({
   const scopedWhere = await appendSiteWhere(buildDiscoveryWhere(query) as Where)
   const result = await payload.find({
     collection: tourProductsCollection,
-    depth: 2,
+    depth: 1,
     draft: false,
     fallbackLocale: false,
     limit,
     locale,
     overrideAccess: false,
     pagination: false,
+    select: discoveryTourSelect as never,
     sort: ['durationDays', 'id'] as never,
     where: scopedWhere,
   })
