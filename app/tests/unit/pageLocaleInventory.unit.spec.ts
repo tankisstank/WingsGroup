@@ -3,8 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({
   draftMode: vi.fn(),
   getCurrentSite: vi.fn(),
-  getResolvedTourDetailBySlug: vi.fn(),
-  hasMatchingWingSideTourWrapper: vi.fn(),
 }))
 
 vi.mock('next/headers', () => ({
@@ -16,14 +14,6 @@ vi.mock('payload', () => ({ getPayload: vi.fn() }))
 
 vi.mock('@/utilities/siteContext', () => ({
   getCurrentSite: mocks.getCurrentSite,
-}))
-
-vi.mock('@/tours/queries', () => ({
-  getResolvedTourDetailBySlug: mocks.getResolvedTourDetailBySlug,
-}))
-
-vi.mock('@/tours/wingsSideTourViewModel', () => ({
-  hasMatchingWingSideTourWrapper: mocks.hasMatchingWingSideTourWrapper,
 }))
 
 import { queryPublishedPageLocalesByExactPath } from '@/utilities/pageLocaleInventory'
@@ -38,6 +28,14 @@ type TestPage = {
   slug: string
 }
 
+type TestTour = {
+  _status?: 'draft' | 'published'
+  locale: string
+  site: number
+  slug: string
+  wrapperPage: number
+}
+
 const page = (overrides: Partial<TestPage>): TestPage => ({
   _status: 'published',
   id: 1,
@@ -49,8 +47,12 @@ const page = (overrides: Partial<TestPage>): TestPage => ({
   ...overrides,
 })
 
-const buildPayload = (pages: TestPage[]) => ({
-  find: vi.fn(async (args: { locale?: string; where?: { and?: unknown[] } }) => {
+const buildPayload = (pages: TestPage[], tours: TestTour[] = []) => ({
+  find: vi.fn(async (args: {
+    collection: 'pages' | 'tour-products'
+    locale?: string
+    where?: { and?: unknown[] }
+  }) => {
     const clauses = args.where?.and || []
     const siteClause = clauses.find(
       (clause): clause is { site: { equals: number } } =>
@@ -64,6 +66,22 @@ const buildPayload = (pages: TestPage[]) => ({
       (clause): clause is { _status: { equals: string } } =>
         Boolean(clause && typeof clause === 'object' && '_status' in clause),
     )
+    const slugClause = clauses.find(
+      (clause): clause is { slug: { equals: string } } =>
+        Boolean(clause && typeof clause === 'object' && 'slug' in clause),
+    )
+
+    if (args.collection === 'tour-products') {
+      return {
+        docs: tours.filter(
+          (entry) =>
+            entry.locale === args.locale &&
+            entry.site === siteClause?.site.equals &&
+            entry.slug === slugClause?.slug.equals &&
+            (!statusClause || (entry._status || 'published') === statusClause._status.equals),
+        ),
+      }
+    }
 
     return {
       docs: pages.filter(
@@ -86,10 +104,6 @@ describe('page locale inventory', () => {
       id: 22,
       supportedLocales: ['vi', 'en', 'it', 'es', 'pt'],
     })
-    mocks.getResolvedTourDetailBySlug.mockReset()
-    mocks.getResolvedTourDetailBySlug.mockResolvedValue(null)
-    mocks.hasMatchingWingSideTourWrapper.mockReset()
-    mocks.hasMatchingWingSideTourWrapper.mockReturnValue(false)
   })
 
   it('keeps only exact published same-tenant path locales', async () => {
@@ -186,17 +200,28 @@ describe('page locale inventory', () => {
   })
 
   it('narrows WingSide tour hreflang to locales with matching runtime tour data', async () => {
-    const payload = buildPayload([
-      page({ id: 101, locale: 'vi', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
-      page({ id: 101, locale: 'en', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
-      page({ id: 101, locale: 'it', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
-      page({ id: 101, locale: 'es', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
-      page({ id: 101, locale: 'pt', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
-    ])
-    mocks.getResolvedTourDetailBySlug.mockImplementation(async ({ locale }) =>
-      locale === 'en' || locale === 'vi' ? { tour: { id: `tour-${locale}` } } : null,
+    const payload = buildPayload(
+      [
+        page({ id: 101, locale: 'vi', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
+        page({ id: 101, locale: 'en', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
+        page({ id: 101, locale: 'it', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
+        page({ id: 101, locale: 'es', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
+        page({ id: 101, locale: 'pt', pathname: '/tour/private-hanoi', slug: 'private-hanoi' }),
+      ],
+      [
+        { locale: 'vi', site: 22, slug: 'private-hanoi', wrapperPage: 101 },
+        { locale: 'en', site: 22, slug: 'private-hanoi', wrapperPage: 101 },
+        { locale: 'it', site: 22, slug: 'private-hanoi', wrapperPage: 999 },
+        {
+          _status: 'draft',
+          locale: 'es',
+          site: 22,
+          slug: 'private-hanoi',
+          wrapperPage: 101,
+        },
+        { locale: 'pt', site: 99, slug: 'private-hanoi', wrapperPage: 101 },
+      ],
     )
-    mocks.hasMatchingWingSideTourWrapper.mockReturnValue(true)
 
     await expect(
       queryPublishedPageLocalesByExactPath({
@@ -205,13 +230,27 @@ describe('page locale inventory', () => {
       }),
     ).resolves.toEqual(['vi', 'en'])
 
-    expect(mocks.getResolvedTourDetailBySlug).toHaveBeenCalledWith(
+    expect(payload.find).toHaveBeenCalledTimes(10)
+    expect(payload.find).toHaveBeenCalledWith(
       expect.objectContaining({
+        collection: 'tour-products',
+        depth: 0,
         draft: false,
         fallbackLocale: false,
         locale: 'it',
-        slug: 'private-hanoi',
+        overrideAccess: false,
+        select: { wrapperPage: true },
+        where: expect.objectContaining({
+          and: expect.arrayContaining([
+            { site: { equals: 22 } },
+            { slug: { equals: 'private-hanoi' } },
+            { _status: { equals: 'published' } },
+          ]),
+        }),
       }),
     )
+    const queriedCollections = payload.find.mock.calls.map(([args]) => args.collection)
+    expect(queriedCollections).not.toContain('tour-departures')
+    expect(queriedCollections).not.toContain('departure-variants')
   })
 })

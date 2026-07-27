@@ -5,7 +5,6 @@ import { getCurrentSite } from './siteContext'
 import { isRuntimeResolvablePage } from './pageRuntimeResolvable'
 import { getSiteSitemapLocales } from './siteSEO'
 import type { SupportedLocaleCode } from './sitePaths'
-import { getResolvedTourDetailBySlug } from '@/tours/queries'
 import { hasMatchingWingSideTourWrapper } from '@/tours/wingsSideTourViewModel'
 
 type PayloadLike = Pick<Awaited<ReturnType<typeof getPayload>>, 'find'>
@@ -67,7 +66,31 @@ export const queryPublishedPageLocalesByExactPath = async ({
 
     if (
       await isRuntimeResolvablePage({
-        getResolvedTourDetailBySlug,
+        getResolvedTourDetailBySlug: async ({ locale, slug }) => {
+          const tourResult = await payload.find({
+            collection: 'tour-products',
+            depth: 0,
+            draft: false,
+            fallbackLocale: false,
+            limit: 1,
+            locale,
+            overrideAccess: false,
+            pagination: false,
+            select: {
+              wrapperPage: true,
+            },
+            where: {
+              and: [
+                { site: { equals: siteID } },
+                { slug: { equals: slug } },
+                { _status: { equals: 'published' } },
+              ],
+            },
+          })
+          const tour = tourResult.docs?.[0]
+
+          return tour ? { tour } : null
+        },
         hasMatchingWingSideTourWrapper,
         locale: candidateLocale,
         page: result.docs?.[0],
