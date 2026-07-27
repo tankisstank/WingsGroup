@@ -38,7 +38,7 @@ const card = (id: number, title: string) => ({
   hero: { alt: `${title} image`, url: `/media/${id}.jpg` },
   href: `/tours/${id}`,
   id,
-  price: { currency: 'USD', kind: 'from' as const, value: 2450 },
+  price: { currency: 'USD' as const, kind: 'from' as const, value: 2450 },
   summary: `${title} summary`,
   title,
 })

@@ -3,10 +3,14 @@ import type { Media } from '@/payload-types'
 
 import type { TourResolvedData } from './types'
 import { buildTourEnquiryHref, type TourEnquiryContext } from './enquiryContext'
+import {
+  normalizeSupportedTourCurrency,
+  type SupportedTourCurrencyCode,
+} from './currency'
 
 type LooseRecord = Record<string, unknown>
 type WingSideDepartureDisplay = LooseRecord & {
-  currency: string
+  currency: SupportedTourCurrencyCode
   departureDate: string
   id?: number | string
   price: number
@@ -511,20 +515,31 @@ export const buildWingSideTourViewModel = ({
   const futureDepartures = (data.departures || [])
     .filter((departure) => isFutureWingSideDeparture(departure.departureDate, now))
     .sort((left, right) => String(left.departureDate).localeCompare(String(right.departureDate)))
+  const productCurrency = normalizeSupportedTourCurrency(tour.currency)
   const productPrice =
-    typeof tour.priceFrom === 'number' && tour.priceFrom > 0 ? tour.priceFrom : null
-  const productCurrency = asText(tour.currency) || 'USD'
+    typeof tour.priceFrom === 'number' &&
+    Number.isFinite(tour.priceFrom) &&
+    tour.priceFrom > 0 &&
+    productCurrency
+      ? tour.priceFrom
+      : null
   const displayDepartures = futureDepartures.flatMap<WingSideDepartureDisplay>((departure) => {
+    const departureCurrency = normalizeSupportedTourCurrency(departure.currency)
     const departurePrice =
-      typeof departure.priceFrom === 'number' && departure.priceFrom > 0
+      typeof departure.priceFrom === 'number' &&
+      Number.isFinite(departure.priceFrom) &&
+      departure.priceFrom > 0 &&
+      departureCurrency
         ? departure.priceFrom
         : null
     const price = departurePrice ?? productPrice
+    const currency = departurePrice ? departureCurrency : productCurrency
+    if (!currency) return []
     if (price === null) return []
     return [
       {
         ...departure,
-        currency: departurePrice ? asText(departure.currency) || productCurrency : productCurrency,
+        currency,
         departureDate: asText(departure.departureDate),
         id: relationID(departure.id) ?? undefined,
         price,

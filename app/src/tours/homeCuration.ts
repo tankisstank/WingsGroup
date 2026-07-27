@@ -6,6 +6,11 @@ import {
   WINGSSIDE_HOME_STYLE_SELECTION_KEYS,
 } from '@/fields/wingsSideHiFi'
 
+import {
+  normalizeGovernedTourPrice,
+  type SupportedTourCurrencyCode,
+} from './currency'
+
 type RelationID = number | string
 type Relation = RelationID | { id?: RelationID | null } | null | undefined
 type PayloadLocale = Site['defaultLocale']
@@ -162,7 +167,7 @@ export const hydrateWingsSideHomeCuration = async ({
 }
 
 export type WingsSideHomeTourPrice =
-  | { kind: 'from'; value: number; currency: string }
+  | { kind: 'from'; value: number; currency: SupportedTourCurrencyCode }
   | { kind: 'on-request'; label: 'On request' }
 
 export type WingsSideHomeTourCard = {
@@ -253,9 +258,13 @@ const projectTour = ({
     return { issue: `Tour ${tour.id} does not match ${taxonomyField} ${expectedKey}.` }
   }
 
+  const governedPrice = normalizeGovernedTourPrice({
+    currency: tour.currency,
+    value: tour.priceFrom,
+  })
   const price: WingsSideHomeTourPrice =
-    typeof tour.priceFrom === 'number' && Number.isFinite(tour.priceFrom) && nonEmpty(tour.currency)
-      ? { kind: 'from', value: tour.priceFrom, currency: tour.currency.trim() }
+    governedPrice
+      ? { kind: 'from', value: governedPrice.value, currency: governedPrice.currency }
       : { kind: 'on-request', label: 'On request' }
   return {
     card: {
@@ -371,3 +380,4 @@ export const projectWingsSideHomeCuration = ({ home, locale, pageSite }: {
     styleTours: invalid ? [] : styles.cards,
   }
 }
+

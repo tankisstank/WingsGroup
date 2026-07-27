@@ -91,10 +91,26 @@ describe('WingSide tour view model', () => {
       locale: 'en',
       now: new Date('2026-07-18'),
     })
-    expect(vm.priceState.kind).toBe('available')
+    expect(vm.priceState).toEqual({ departures: [], kind: 'contact' })
+  })
+
+  it('uses only governed currencies for departure and product prices', () => {
+    const input = data({ currency: 'ABC', priceFrom: 1400 })
+    input.departures = [
+      { currency: 'USD', departureDate: '2026-08-01', id: 1, priceFrom: 1250 },
+      { currency: 'VND', departureDate: '2026-08-02', id: 2, priceFrom: 30_900_000 },
+      { currency: 'XXX', departureDate: '2026-08-03', id: 3, priceFrom: 999 },
+      { currency: 'USD', departureDate: '2026-08-04', id: 4, priceFrom: 0 },
+    ]
+    const vm = buildWingSideTourViewModel({
+      data: input,
+      locale: 'en',
+      now: new Date('2026-07-18'),
+    })
+    expect(vm.priceState).toMatchObject({ kind: 'available', price: 1250 })
     expect(vm.priceState.departures).toEqual([
-      expect.objectContaining({ currency: 'EUR', id: 2, price: 1200 }),
-      expect.objectContaining({ currency: 'GBP', id: 3, price: 1300 }),
+      expect.objectContaining({ currency: 'USD', id: 1, price: 1250 }),
+      expect.objectContaining({ currency: 'VND', id: 2, price: 30_900_000 }),
     ])
   })
 

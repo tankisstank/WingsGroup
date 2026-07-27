@@ -120,8 +120,17 @@ describe('WingSide Home curation audit', () => {
 
 describe('WingSide Home runtime curation loader', () => {
   it('hydrates explicitly queried tour, wrapper, and media relations into a ready projection', async () => {
+    const priceByTourID = new Map<number, { currency: string; priceFrom: number }>([
+      [491, { currency: 'USD', priceFrom: 1200 }],
+      [226, { currency: 'VND', priceFrom: 30_900_000 }],
+      [506, { currency: 'ABC', priceFrom: 999 }],
+      [486, { currency: 'XXX', priceFrom: 999 }],
+      [326, { currency: 'USD', priceFrom: 0 }],
+      [442, { currency: 'USD', priceFrom: -1 }],
+    ])
     const tours = selectedTourIDs.map((id) => ({
       _status: 'published',
+      ...priceByTourID.get(id),
       destinationTags: wingsSideHomeDestinationSelections
         .filter((selection) => selection.tour === id)
         .map(({ key }) => key),
@@ -174,7 +183,19 @@ describe('WingSide Home runtime curation loader', () => {
     expect(find).toHaveBeenCalledTimes(3)
     expect(projection).toMatchObject({
       destinationTours: expect.arrayContaining([
-        expect.objectContaining({ href: '/tour/tour-491', key: 'hanoi' }),
+        expect.objectContaining({
+          href: '/tour/tour-491',
+          key: 'hanoi',
+          price: { currency: 'USD', kind: 'from', value: 1200 },
+        }),
+        expect.objectContaining({
+          id: 226,
+          price: { currency: 'VND', kind: 'from', value: 30_900_000 },
+        }),
+        expect.objectContaining({ id: 506, price: { kind: 'on-request', label: 'On request' } }),
+        expect.objectContaining({ id: 486, price: { kind: 'on-request', label: 'On request' } }),
+        expect.objectContaining({ id: 326, price: { kind: 'on-request', label: 'On request' } }),
+        expect.objectContaining({ id: 442, price: { kind: 'on-request', label: 'On request' } }),
       ]),
       featuredJourneys: expect.arrayContaining([
         expect.objectContaining({ id: 504, price: { kind: 'on-request', label: 'On request' } }),

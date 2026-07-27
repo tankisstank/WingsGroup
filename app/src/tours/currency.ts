@@ -17,3 +17,24 @@ export const normalizeSupportedTourCurrency = (
     ? (currency as SupportedTourCurrencyCode)
     : null
 }
+export type GovernedTourPrice = {
+  currency: SupportedTourCurrencyCode
+  value: number
+}
+
+export const normalizeGovernedTourPrice = ({
+  currency,
+  value,
+}: {
+  currency: unknown
+  value: unknown
+}): GovernedTourPrice | null => {
+  const normalizedCurrency = normalizeSupportedTourCurrency(currency)
+
+  return typeof value === 'number' &&
+    Number.isFinite(value) &&
+    value > 0 &&
+    normalizedCurrency
+    ? { currency: normalizedCurrency, value }
+    : null
+}
