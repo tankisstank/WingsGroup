@@ -113,14 +113,27 @@ const sameRelation = (left: Relation, right: Relation): boolean => {
 const nonEmpty = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
 
+const normalizeCurrency = (value: unknown): string | null => {
+  if (!nonEmpty(value)) return null
+
+  const currency = value.trim()
+  try {
+    new Intl.NumberFormat('en-US', { currency, style: 'currency' }).format(1)
+    return currency
+  } catch {
+    return null
+  }
+}
+
 const projectPriceState = (tour: DiscoveryTourDoc): DiscoveryTourPriceState => {
+  const currency = normalizeCurrency(tour.currency)
   if (
     typeof tour.priceFrom === 'number' &&
     Number.isFinite(tour.priceFrom) &&
-    tour.priceFrom >= 0 &&
-    nonEmpty(tour.currency)
+    tour.priceFrom > 0 &&
+    currency
   ) {
-    return { currency: tour.currency.trim(), kind: 'from', value: tour.priceFrom }
+    return { currency, kind: 'from', value: tour.priceFrom }
   }
 
   return { kind: 'on-request' }
@@ -388,8 +401,10 @@ export const projectDiscoveryTour = ({
   if (relationID(heroMedia.site as Relation) != null && !sameRelation(heroMedia.site, site))
     return null
 
+  const price = projectPriceState(tour)
+
   return {
-    currency: nonEmpty(tour.currency) ? tour.currency.trim() : null,
+    currency: normalizeCurrency(tour.currency),
     destinationTags: normalizeTourDestinationKeys(destinationTags),
     duration: {
       days: tour.durationDays,
@@ -406,11 +421,8 @@ export const projectDiscoveryTour = ({
     },
     href: getPageCanonicalPath(wrapperPage, locale),
     id,
-    price: projectPriceState(tour),
-    priceFrom:
-      typeof tour.priceFrom === 'number' && Number.isFinite(tour.priceFrom)
-        ? tour.priceFrom
-        : null,
+    price,
+    priceFrom: price.kind === 'from' ? price.value : null,
     slug: tour.slug.trim(),
     summary: tour.summary.trim(),
     title: tour.title.trim(),

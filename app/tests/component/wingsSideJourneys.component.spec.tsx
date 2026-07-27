@@ -73,7 +73,11 @@ beforeEach(() => {
   vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
   Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 })
   params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14&utm_source=pm')
-  window.history.replaceState(null, '', '/wingsside/journeys?destination=hanoi&style=culture&duration=8-14&utm_source=pm')
+  window.history.replaceState(
+    null,
+    '',
+    '/wingsside/journeys?destination=hanoi&style=culture&duration=8-14&utm_source=pm',
+  )
 })
 
 describe('WingSideJourneysClient', () => {
@@ -108,7 +112,7 @@ describe('WingSideJourneysClient', () => {
                 ...context().result.items[0]!,
                 currency: null,
                 price: { kind: 'on-request' },
-                priceFrom: null,
+                priceFrom: 0,
               },
             ],
           },
@@ -119,7 +123,10 @@ describe('WingSideJourneysClient', () => {
 
     const card = screen.getByRole('link', { name: /private hanoi/i })
     expect(within(card).getByText('Precio bajo solicitud')).toBeTruthy()
-    expect(within(card).getByText('El precio final se confirma antes de cualquier reserva.')).toBeTruthy()
+    expect(
+      within(card).getByText('El precio final se confirma antes de cualquier reserva.'),
+    ).toBeTruthy()
+    expect(card.textContent).not.toMatch(/\$0|USD 0|Desde\s+0/)
     expect(card.textContent).not.toMatch(/book now|available seats|instant booking/i)
   })
 
@@ -164,7 +171,11 @@ describe('WingSideJourneysClient', () => {
   })
 
   it('updates locale-aware public URL state from the rewritten internal pathname', () => {
-    window.history.replaceState(null, '', '/wingsside/vi/journeys?destination=hanoi&style=culture&duration=8-14')
+    window.history.replaceState(
+      null,
+      '',
+      '/wingsside/vi/journeys?destination=hanoi&style=culture&duration=8-14',
+    )
     params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14')
 
     render(<WingSideJourneysClient context={context()} locale="vi" />)

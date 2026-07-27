@@ -190,4 +190,28 @@ describe('WingSide discovery pure contract', () => {
     expect(projectDiscoveryTour({ site, tour: tour({ travelStyles: [] }) })).toBeNull()
     expect(projectDiscoveryTour({ site, tour: tour({ durationDays: 0 }) })).toBeNull()
   })
+  it('keeps zero and invalid price inputs on request without public priceFrom', () => {
+    const cases = [
+      { expectedCurrency: 'USD', overrides: { currency: 'USD', priceFrom: 0 } },
+      { expectedCurrency: 'USD', overrides: { currency: 'USD', priceFrom: -1 } },
+      { expectedCurrency: 'USD', overrides: { currency: 'USD', priceFrom: Number.NaN } },
+      {
+        expectedCurrency: 'USD',
+        overrides: { currency: 'USD', priceFrom: Number.POSITIVE_INFINITY },
+      },
+      { expectedCurrency: null, overrides: { currency: null, priceFrom: 1290 } },
+      { expectedCurrency: null, overrides: { currency: '', priceFrom: 1290 } },
+      { expectedCurrency: null, overrides: { currency: 'not-valid', priceFrom: 1290 } },
+    ]
+
+    for (const { expectedCurrency, overrides } of cases) {
+      const projected = projectDiscoveryTour({ locale: 'en', site, tour: tour(overrides) })
+
+      expect(projected).toMatchObject({
+        currency: expectedCurrency,
+        price: { kind: 'on-request' },
+        priceFrom: null,
+      })
+    }
+  })
 })
