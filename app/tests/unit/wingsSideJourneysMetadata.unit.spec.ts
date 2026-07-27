@@ -14,7 +14,7 @@ vi.mock('@/tours/discovery', () => ({
   getWingSideDiscoveryContext: mocks.getWingSideDiscoveryContext,
 }))
 
-vi.mock('@/app/(frontend)/[...slug]/page', () => ({
+vi.mock('@/app/(frontend)/cmsPage', () => ({
   generateCmsPageMetadataByPath: mocks.generateCmsPageMetadataByPath,
   renderCmsPageByPath: mocks.renderCmsPageByPath,
 }))

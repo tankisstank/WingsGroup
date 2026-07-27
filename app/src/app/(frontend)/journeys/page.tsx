@@ -15,7 +15,7 @@ import {
 import {
   generateCmsPageMetadataByPath,
   renderCmsPageByPath,
-} from '@/app/(frontend)/[...slug]/page'
+} from '@/app/(frontend)/cmsPage'
 
 import { WingSideJourneysClient } from './WingSideJourneysClient'
 
