@@ -148,3 +148,18 @@ Production go-live completed on 2026-07-27:
 Production evidence:
 
 - `evidence/us054-production-filtered-journeys.png`
+
+## Production Media Mount Correction
+
+On 2026-07-28, post-release visual review found that several `/journeys` cards
+rendered broken image placeholders. The public image URLs were correct, but the
+production app container had mounted release-local `./data/media` into
+`/app/public/media`; that release-local directory was empty. The production
+media catalog exists at the documented shared path
+`/home/ubuntu/wings-travel/shared/data/media`.
+
+The production compose file now mounts
+`${WINGSTRAVEL_MEDIA_DIR:-/home/ubuntu/wings-travel/shared/data/media}` to
+`/app/public/media` so immutable application releases keep using the shared
+media catalog. Recreate only the app container after applying this correction;
+PostgreSQL and Redis are not affected.
