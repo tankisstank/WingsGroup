@@ -2,7 +2,7 @@
 
 ## Status
 
-planned — fast-track approved
+implemented — production release re-confirmation pending
 
 ## Lane
 
@@ -49,7 +49,7 @@ criteria without starting again.
 - `docs/product/tour-product-platform.md`
 - `docs/product/wingside-identity-contract.md`
 - `source/strategy/25 Yêu cầu taxonomy và real-tour discovery cho WingSide.md`
-- `docs/stories/epics/E08-wingsside-inbound-upgrade/navigation-flow-proposal-2026-07-25.md`
+- `docs/product/wingsside-tour-discovery-and-taxonomy.md`
 
 ## Dependencies
 
@@ -63,4 +63,3 @@ criteria without starting again.
 - Guest-count pricing, capacity or budget filtering.
 - Save, compare, login, personalization or complex ranking.
 - Re-importing or duplicating the 22 BestPrice tours.
-

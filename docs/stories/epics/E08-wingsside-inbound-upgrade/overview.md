@@ -44,7 +44,7 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-051  | normal    | production released | WingSide homepage process-board redesign                            |
 | US-052  | high-risk | production released | WingSide credentials Proof Archive                                  |
 | US-053  | high-risk | planned             | Multilingual public-acquisition blocker remediation                 |
-| US-054  | high-risk | planned, fast-track | Guided Tour Discovery MVP                                           |
+| US-054  | high-risk | implemented, release pending | Guided Tour Discovery MVP                                  |
 
 ## Current evidence
 
