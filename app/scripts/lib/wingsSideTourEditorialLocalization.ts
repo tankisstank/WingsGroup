@@ -125,7 +125,7 @@ export const editorialSourceChecksum = (tour: EditorialSourceTour) =>
     .digest('hex')
 
 const sourceBrandPattern = /\b(?:best\s*price(?:\s+travel)?|bestpricetravel)\b/iu
-const rawMealPattern = /(?:^|[;,]\s*)(?:n\/?a|none)(?:\s*[;,]|$)/iu
+const rawMealPattern = /(?:^|[;,]\s*)(?:n\/?a|none)(?=\s*[;,]|$)/iu
 
 const requiredText = ({
   findings,
@@ -230,6 +230,7 @@ export const validateWingsSideTourEditorialCatalog = ({
       })
     }
 
+    let localizedServiceShape: null | string = null
     for (const locale of wingsSideTourEditorialLocales) {
       const content = entry.locales?.[locale]
       if (!content) {
@@ -325,14 +326,10 @@ export const validateWingsSideTourEditorialCatalog = ({
             slug: source.slug,
             source: sourceValue,
           })
-          if (
-            field === 'meals' &&
-            (rawMealPattern.test(normalizeText(day[field])) ||
-              normalizeText(day[field]).includes(';'))
-          ) {
+          if (field === 'meals' && rawMealPattern.test(normalizeText(day[field]))) {
             findings.push({
               locale,
-              message: 'Meals must be authored per day without raw NA or semicolon serialization',
+              message: 'Meals must be authored per day without raw NA/None markers',
               path,
               slug: source.slug,
             })
@@ -342,19 +339,25 @@ export const validateWingsSideTourEditorialCatalog = ({
 
       const sourceIncludes = source.includes || []
       const sourceExcludes = source.excludes || []
-      if (content.includes.length !== sourceIncludes.length) {
+      if (
+        sourceIncludes.length + sourceExcludes.length > 0 &&
+        content.includes.length + content.excludes.length === 0
+      ) {
         findings.push({
           locale,
-          message: 'Inclusion count changed',
-          path: 'includes',
+          message: 'Localized service inventory is empty',
+          path: 'includes/excludes',
           slug: source.slug,
         })
       }
-      if (content.excludes.length !== sourceExcludes.length) {
+      const serviceShape = `${content.includes.length}/${content.excludes.length}`
+      if (localizedServiceShape === null) {
+        localizedServiceShape = serviceShape
+      } else if (serviceShape !== localizedServiceShape) {
         findings.push({
           locale,
-          message: 'Exclusion count changed',
-          path: 'excludes',
+          message: 'Localized service classification cardinality differs between locales',
+          path: 'includes/excludes',
           slug: source.slug,
         })
       }

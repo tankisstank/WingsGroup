@@ -429,6 +429,8 @@ export const deriveWingSideRoute = (tour: LooseRecord): string[] =>
   deriveWingSideRouteEntities(tour).map(({ label }) => label)
 
 const missingMealPattern = /^(?:n\/?a|none|no meals?|not included|không có)$/iu
+const serializedMealSegmentPattern =
+  /^(?:n\/?a|none|no meals?|(?:breakfast|lunch|dinner)(?:\s*,\s*(?:breakfast|lunch|dinner))*)$/iu
 
 export const normalizeWingSideDayMeal = ({
   dayIndex,
@@ -443,13 +445,18 @@ export const normalizeWingSideDayMeal = ({
 }): string => {
   const raw = sanitizeWingSidePublicText(asText(value))
   const segments = raw.split(/\s*;\s*/u)
+  if (
+    segments.length > 1 &&
+    segments.length !== totalDays &&
+    segments.every((segment) => serializedMealSegmentPattern.test(segment.trim()))
+  ) {
+    return ''
+  }
   const selected = segments.length === totalDays ? segments[dayIndex] || '' : raw
   if (!selected) return ''
   if (missingMealPattern.test(selected.trim())) {
     return getWingSideTourCopy(locale).noMeals
   }
-  // A serialized multi-day source value is never safe to expose as one day's meals.
-  if (selected.includes(';')) return ''
   return selected.trim()
 }
 

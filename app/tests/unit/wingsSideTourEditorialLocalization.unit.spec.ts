@@ -111,7 +111,7 @@ describe('WingSide tour editorial localization contract', () => {
     ).toEqual([])
   })
 
-  it('rejects source drift, missing list items, verbatim fallback and source-brand leakage', () => {
+  it('rejects source drift, locale service-shape drift, verbatim fallback and source-brand leakage', () => {
     const invalid = catalog()
     invalid.tours[0]!.sourceChecksum = 'stale'
     invalid.tours[0]!.locales.it.summary = source.summary
@@ -128,11 +128,36 @@ describe('WingSide tour editorial localization contract', () => {
       expect.arrayContaining([
         'English source content changed after editorial localization',
         'Verbatim English fallback is not allowed',
-        'Inclusion count changed',
+        'Localized service classification cardinality differs between locales',
         'Source-brand language is not allowed',
-        'Meals must be authored per day without raw NA or semicolon serialization',
+        'Meals must be authored per day without raw NA/None markers',
       ]),
     )
+  })
+
+  it('allows semantic reclassification of raw imported services and editorial semicolons', () => {
+    const reclassifiedSource = {
+      ...source,
+      excludes: [],
+      includes: [
+        ...(source.includes || []),
+        ...(source.excludes || []),
+        { label: 'Raw source row classified by editorial policy' },
+      ],
+    }
+    const valid = catalog()
+    valid.tours[0]!.sourceChecksum = editorialSourceChecksum(reclassifiedSource)
+    for (const locale of ['vi', 'it', 'es', 'pt'] as const) {
+      valid.tours[0]!.locales[locale].itineraryDays[0]!.meals =
+        `${valid.tours[0]!.locales[locale].itineraryDays[0]!.meals}; light snack if selected`
+    }
+
+    expect(
+      validateWingsSideTourEditorialCatalog({
+        catalog: valid,
+        sourceTours: [reclassifiedSource],
+      }),
+    ).toEqual([])
   })
 
   it('rejects missing and extra tour slugs', () => {

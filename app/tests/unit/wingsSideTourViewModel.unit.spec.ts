@@ -205,6 +205,14 @@ describe('WingSide tour view model', () => {
     expect(normalizeWingSideDayMeal({ dayIndex: 0, locale: 'vi', totalDays: 1, value: 'NA' })).toBe(
       'Không bao gồm bữa ăn',
     )
+    expect(
+      normalizeWingSideDayMeal({
+        dayIndex: 3,
+        locale: 'vi',
+        totalDays: 5,
+        value: 'Bữa sáng và bữa trưa; phương án hoàng hôn dùng bữa nhẹ',
+      }),
+    ).toBe('Bữa sáng và bữa trưa; phương án hoàng hôn dùng bữa nhẹ')
   })
 
   it('merges slug and itinerary places into the real Northern route order', () => {
