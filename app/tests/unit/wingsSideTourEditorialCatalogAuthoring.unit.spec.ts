@@ -1,39 +1,54 @@
-import { describe, expect, it } from 'vitest'
+import { createHash } from 'node:crypto'
 
+import { describe, expect, it, vi } from 'vitest'
+
+import {
+  assertCatalogAuthoringCLITrustBoundary,
+  resolveProtectedCatalogAuthoringValue,
+} from '../../scripts/generate-wingsside-tour-editorial-catalog-v2'
 import {
   buildWingsSideCatalogAuthoringDraft,
   catalogAuthoringChecksum,
+  parseCatalogAuthoringReviewArtifact,
+  readFrozenCatalogAuthoringArtifact,
   reconcileWingsSideCatalogAuthoringReview,
   type CatalogAuthoringReviewArtifact,
+  type CatalogAuthoringSourceManifest,
+  type CatalogAuthoringSourceTour,
   type ReviewedCatalogRowDecision,
 } from '../../scripts/lib/wingsSideTourEditorialCatalogAuthoring'
 import {
   editorialPricingApprovalChecksum,
+  editorialServiceLabelChecksum,
   editorialSourceChecksum,
   wingsSideTourEditorialLocales,
-  type EditorialSourceTour,
   type WingsSideTourEditorialCatalog,
   type WingsSideTourEditorialLocaleFile,
-  type WingsSideTourEditorialSourceManifest,
 } from '../../scripts/lib/wingsSideTourEditorialLocalization'
 
-const slug = 'review-fixture-tour'
+const sha256 = (value: string | Buffer) => createHash('sha256').update(value).digest('hex')
+const slugs = Array.from({ length: 22 }, (_, index) => `review-fixture-tour-${index + 1}`)
 
-const source = (): EditorialSourceTour => ({
-  excludes: [],
-  includes: Array.from({ length: 38 }, (_, index) => ({
-    id: `row-${index + 1}`,
-    label: `Peak season surcharge ${index + 1}`,
-  })),
-  itineraryDays: [],
-  slug,
-  summary: 'Frozen English source summary for the review fixture.',
-  title: 'Frozen English review fixture',
-})
+const sourceTours = (): CatalogAuthoringSourceTour[] =>
+  slugs.map((slug, tourIndex) => ({
+    excludes: [],
+    includes:
+      tourIndex === 0
+        ? Array.from({ length: 38 }, (_, index) => ({
+            id: `row-${index + 1}`,
+            label: `Peak season surcharge ${index + 1}`,
+          }))
+        : [],
+    itineraryDays: [],
+    slug,
+    summary: `Frozen English source summary for ${slug}.`,
+    title: `Frozen English ${slug}`,
+    tourID: tourIndex + 1,
+  }))
 
-const localizedContent = (locale: string) => ({
+const localizedContent = (locale: string, slug: string, rowCount: number) => ({
   excludes: [],
-  includes: Array.from({ length: 38 }, (_, index) => `${locale} label ${index + 1}`),
+  includes: Array.from({ length: rowCount }, (_, index) => `${locale} label ${index + 1}`),
   itineraryDays: [],
   meta: {
     breadcrumbLabel: `${locale} breadcrumb`,
@@ -56,41 +71,67 @@ const localizedContent = (locale: string) => ({
 const localeFiles = (): WingsSideTourEditorialLocaleFile[] =>
   wingsSideTourEditorialLocales.map((locale) => ({
     locale,
-    tours: [localizedContent(locale)],
+    tours: slugs.map((slug, index) => localizedContent(locale, slug, index === 0 ? 38 : 0)),
     version: 1,
     voice: 'calm-specific-consultative',
   }))
 
-const manifest = (tour = source()): WingsSideTourEditorialSourceManifest => ({
+const manifest = (tours = sourceTours()): CatalogAuthoringSourceManifest => ({
+  expectedGovernedDisclosureCount: 38,
+  expectedTourCount: 22,
   generatedFrom: 'wing-side-published-en-tour-products',
+  siteCode: 'wing-side',
   sourceLocale: 'en',
-  tours: [{ checksum: editorialSourceChecksum(tour), slug }],
-  version: 1,
+  tours: tours.map((tour) => ({
+    checksum: editorialSourceChecksum(tour),
+    governedRows: [...(tour.includes ?? []), ...(tour.excludes ?? [])]
+      .filter(({ label }) => /\b(?:peak|high) season\b|\bfuel surcharge\b|\bcompulsory dinner\b/iu.test(label ?? ''))
+      .map((row) => ({
+        sourceBucket: 'includes' as const,
+        sourceLabelChecksum: editorialServiceLabelChecksum(String(row.label)),
+        sourceRowID: String(row.id),
+      })),
+    slug: tour.slug,
+    tourID: tour.tourID,
+  })),
+  version: 2,
 })
 
-const decisions = (): ReviewedCatalogRowDecision[] =>
-  Array.from({ length: 38 }, (_, index) => ({
-    labels: Object.fromEntries(
-      wingsSideTourEditorialLocales.map((locale) => [locale, `${locale} approved ${index + 1}`]),
-    ) as ReviewedCatalogRowDecision['labels'],
-    positionalMappingReviewed: true,
-    rationale: `Approved governed disclosure ${index + 1}`,
-    slug,
-    sourceLabelChecksum: catalogAuthoringDraft().tours[0]!.rows[index]!.sourceLabelChecksum,
-    sourceRowID: `row-${index + 1}`,
-    targetBucket: 'includes',
-  }))
+const manifestDigest = (value = manifest()) => catalogAuthoringChecksum(value)
 
-const catalogAuthoringDraft = () =>
-  buildWingsSideCatalogAuthoringDraft({
+const draft = () => {
+  const sourceManifest = manifest()
+  const digest = manifestDigest(sourceManifest)
+  return buildWingsSideCatalogAuthoringDraft({
+    expectedSourceManifestSha256: digest,
     localeFiles: localeFiles(),
-    sourceManifest: manifest(),
-    sourceTours: [source()],
+    sourceManifest,
+    sourceManifestArtifactSha256: digest,
+    sourceTours: sourceTours(),
   })
+}
+
+const decisions = (packet = draft()): ReviewedCatalogRowDecision[] =>
+  packet.tours.flatMap(({ rows, slug }) =>
+    rows.map((row, index) => ({
+      labels: Object.fromEntries(
+        wingsSideTourEditorialLocales.map((locale) => [
+          locale,
+          `${locale} approved ${index + 1}`,
+        ]),
+      ) as ReviewedCatalogRowDecision['labels'],
+      positionalMappingReviewed: true,
+      rationale: `Approved governed disclosure ${index + 1}`,
+      slug,
+      sourceLabelChecksum: row.sourceLabelChecksum,
+      sourceRowID: row.sourceRowID,
+      targetBucket: row.sourceBucket,
+    })),
+  )
 
 const review = (): CatalogAuthoringReviewArtifact => {
-  const draft = catalogAuthoringDraft()
-  const rowDecisions = decisions()
+  const packet = draft()
+  const rowDecisions = decisions(packet)
   const approvalManifest = {
     approvalArtifactID: 'external-review-artifact-1',
     approvedAt: '2026-07-28T00:00:00.000Z',
@@ -102,199 +143,271 @@ const review = (): CatalogAuthoringReviewArtifact => {
   }
   const candidate: WingsSideTourEditorialCatalog = {
     approvalManifest,
-    pricingDispositions: draft.tours[0]!.rows.map((row, index) => ({
-      approvalArtifactID: approvalManifest.approvalArtifactID,
-      approvedAt: approvalManifest.approvedAt,
-      approvedBy: approvalManifest.approvedBy,
-      approvedTargetBucket: 'includes',
-      rationale: rowDecisions[index]!.rationale,
-      slug,
-      sourceBucket: 'includes',
-      sourceLabel: row.sourceLabel,
-      sourceLabelChecksum: row.sourceLabelChecksum,
-      sourceRowID: row.sourceRowID,
-    })),
+    pricingDispositions: packet.tours.flatMap(({ rows, slug }) =>
+      rows.map((row) => {
+        const decision = rowDecisions.find(
+          (entry) => entry.slug === slug && entry.sourceRowID === row.sourceRowID,
+        )!
+        return {
+          approvalArtifactID: approvalManifest.approvalArtifactID,
+          approvedAt: approvalManifest.approvedAt,
+          approvedBy: approvalManifest.approvedBy,
+          approvedTargetBucket: decision.targetBucket,
+          rationale: decision.rationale,
+          slug,
+          sourceBucket: row.sourceBucket,
+          sourceLabel: row.sourceLabel,
+          sourceLabelChecksum: row.sourceLabelChecksum,
+          sourceRowID: row.sourceRowID,
+        }
+      }),
+    ),
     sourceLocale: 'en',
     targetLocales: [...wingsSideTourEditorialLocales],
-    tours: [
-      {
-        locales: Object.fromEntries(
-          wingsSideTourEditorialLocales.map((locale) => [
+    tours: packet.tours.map(({ rows, slug, sourceChecksum }) => ({
+      locales: Object.fromEntries(
+        wingsSideTourEditorialLocales.map((locale) => {
+          const content = localizedContent(locale, slug, rows.length)
+          const localizedRows = rows.map((row) => {
+            const decision = rowDecisions.find(
+              (entry) => entry.slug === slug && entry.sourceRowID === row.sourceRowID,
+            )!
+            return {
+              label: decision.labels[locale],
+              sourceRowID: row.sourceRowID,
+              targetBucket: decision.targetBucket,
+            }
+          })
+          return [
             locale,
             {
-              ...localizedContent(locale),
-              excludes: [],
-              includes: rowDecisions.map((decision) => ({
-                label: decision.labels[locale],
-                sourceRowID: decision.sourceRowID,
-                targetBucket: 'includes',
-              })),
+              ...content,
+              excludes: localizedRows.filter(({ targetBucket }) => targetBucket === 'excludes'),
+              includes: localizedRows.filter(({ targetBucket }) => targetBucket === 'includes'),
             },
-          ]),
-        ) as unknown as WingsSideTourEditorialCatalog['tours'][number]['locales'],
-        slug,
-        sourceChecksum: editorialSourceChecksum(source()),
-      },
-    ],
+          ]
+        }),
+      ) as unknown as WingsSideTourEditorialCatalog['tours'][number]['locales'],
+      slug,
+      sourceChecksum,
+    })),
     version: 2,
   }
   approvalManifest.checksum = editorialPricingApprovalChecksum(candidate)
   return {
     approvalManifest,
     decisions: rowDecisions,
-    draftPacketChecksum: draft.packetChecksum,
+    draftPacketChecksum: packet.packetChecksum,
     version: 1,
   }
 }
 
-describe('WingSide catalog-v2 authoring and reconciliation', () => {
-  it('builds a deterministic draft with 38 governed rows and unresolved positional flags', () => {
-    const first = catalogAuthoringDraft()
-    const second = catalogAuthoringDraft()
-    expect(first).toEqual(second)
-    expect(first.status).toBe('DRAFT_REVIEW_REQUIRED')
+const reconcile = (artifact = review(), policyApprovers = ['trusted-reviewer']) => {
+  const sourceManifest = manifest()
+  const sourceDigest = manifestDigest(sourceManifest)
+  const reviewDigest = catalogAuthoringChecksum(artifact)
+  return reconcileWingsSideCatalogAuthoringReview({
+    approvalPolicy: { reviewArtifactSha256: reviewDigest, trustedApprovers: policyApprovers },
+    draft: draft(),
+    expectedSourceManifestSha256: sourceDigest,
+    localeFiles: localeFiles(),
+    review: artifact,
+    reviewArtifactSha256: reviewDigest,
+    sourceManifest,
+    sourceManifestArtifactSha256: sourceDigest,
+    sourceTours: sourceTours(),
+  })
+}
+
+describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
+  it('builds a deterministic exact-22 draft with 38 governed row identities', () => {
+    const first = draft()
+    expect(first).toEqual(draft())
+    expect(first.tours).toHaveLength(22)
     expect(first.governedDisclosureCount).toBe(38)
-    expect(first.tours[0]!.rows).toHaveLength(38)
-    expect(first.tours[0]!.rows.every(({ missingDisposition }) => missingDisposition)).toBe(true)
-    expect(first.blockingFlags).toContain(
-      'positional-mapping-review-required:review-fixture-tour:row-1',
-    )
-    expect(first.packetChecksum).toMatch(/^[a-f0-9]{64}$/u)
+    expect(first.tours.flatMap(({ rows }) => rows)).toHaveLength(38)
+    expect(first.sourceManifestArtifactSha256).toBe(manifestDigest())
   })
 
-  it('surfaces missing legacy labels without inventing replacements', () => {
-    const files = localeFiles()
-    files[0]!.tours[0]!.includes[0] = ''
-    const draft = buildWingsSideCatalogAuthoringDraft({
-      localeFiles: files,
-      sourceManifest: manifest(),
-      sourceTours: [source()],
-    })
-    expect(draft.tours[0]!.rows[0]!.legacySuggestions.vi.label).toBeNull()
-    expect(draft.blockingFlags).toContain('missing-legacy-label:vi:review-fixture-tour:row-1')
-  })
-
-  it('fails closed on source drift and duplicate stable row IDs', () => {
-    const drifted = source()
-    drifted.title = 'Changed after manifest'
+  it('rejects the previous one-tour/38-row self-consistent false pass', () => {
+    const tours = sourceTours().slice(0, 1)
+    const sourceManifest = manifest(tours)
+    const digest = manifestDigest(sourceManifest)
     expect(() =>
       buildWingsSideCatalogAuthoringDraft({
+        expectedSourceManifestSha256: digest,
+        localeFiles: localeFiles().map((file) => ({ ...file, tours: file.tours.slice(0, 1) })),
+        sourceManifest,
+        sourceManifestArtifactSha256: digest,
+        sourceTours: tours,
+      }),
+    ).toThrow('exactly 22 tours')
+  })
+
+  it('rejects swapped governed row identities even when labels remain valid', () => {
+    const sourceManifest = manifest()
+    const firstRows = sourceManifest.tours[0]!.governedRows
+    ;[firstRows[0]!.sourceRowID, firstRows[1]!.sourceRowID] = [
+      firstRows[1]!.sourceRowID,
+      firstRows[0]!.sourceRowID,
+    ]
+    const digest = manifestDigest(sourceManifest)
+    expect(() =>
+      buildWingsSideCatalogAuthoringDraft({
+        expectedSourceManifestSha256: digest,
         localeFiles: localeFiles(),
-        sourceManifest: manifest(),
-        sourceTours: [drifted],
+        sourceManifest,
+        sourceManifestArtifactSha256: digest,
+        sourceTours: sourceTours(),
       }),
     ).toThrow('source inventory drifted')
+  })
 
-    const duplicate = source()
-    duplicate.includes![1]!.id = duplicate.includes![0]!.id
+  it('rejects a supplied manifest that does not match the protected digest', () => {
+    const sourceManifest = manifest()
     expect(() =>
       buildWingsSideCatalogAuthoringDraft({
+        expectedSourceManifestSha256: 'f'.repeat(64),
         localeFiles: localeFiles(),
-        sourceManifest: manifest(duplicate),
-        sourceTours: [duplicate],
+        sourceManifest,
+        sourceManifestArtifactSha256: manifestDigest(sourceManifest),
+        sourceTours: sourceTours(),
       }),
-    ).toThrow('Duplicate sourceRowID')
+    ).toThrow('protected release policy')
   })
 
-  it('reconciles only complete externally approved row decisions', () => {
-    const draft = catalogAuthoringDraft()
-    const artifact = review()
-    const result = reconcileWingsSideCatalogAuthoringReview({
-      draft,
-      localeFiles: localeFiles(),
-      review: artifact,
-      sourceManifest: manifest(),
-      sourceTours: [source()],
-      trustedApprovers: ['trusted-reviewer'],
-    })
-    expect(result.candidate.version).toBe(2)
+  it('reconciles complete externally governed evidence', () => {
+    const result = reconcile()
+    expect(result.candidate.tours).toHaveLength(22)
     expect(result.candidate.pricingDispositions).toHaveLength(38)
-    expect(result.summary).toEqual({
-      bucketMoves: 0,
-      governedDispositions: 38,
-      labelChangesFromLegacySuggestion: 152,
-      reviewedRows: 38,
-    })
-    expect(result.candidateChecksum).toBe(catalogAuthoringChecksum(result.candidate))
+    expect(result.summary.governedDispositions).toBe(38)
   })
 
-  it('rejects ambiguity, missing labels, stale approval and untrusted approvers', () => {
-    const draft = catalogAuthoringDraft()
+  it('rejects a self-authorized reviewer absent from protected approvers', () => {
+    expect(() => reconcile(review(), ['release-manager'])).toThrow(
+      'external trusted approver policy',
+    )
+  })
 
-    const staleDraft = structuredClone(draft)
-    staleDraft.tours[0]!.rows[0]!.sourceLabel = 'Changed after draft checksum'
+  it('rejects review bytes outside protected digest and a tampered reconcile draft', () => {
+    const artifact = review()
+    const sourceManifest = manifest()
+    const sourceDigest = manifestDigest(sourceManifest)
+    const reviewDigest = catalogAuthoringChecksum(artifact)
+    const tamperedDraft = structuredClone(draft())
+    tamperedDraft.tours[0]!.rows[0]!.sourceLabel = 'tampered after draft'
+
     expect(() =>
       reconcileWingsSideCatalogAuthoringReview({
-        draft: staleDraft,
+        approvalPolicy: {
+          reviewArtifactSha256: 'f'.repeat(64),
+          trustedApprovers: ['trusted-reviewer'],
+        },
+        draft: draft(),
+        expectedSourceManifestSha256: sourceDigest,
         localeFiles: localeFiles(),
-        review: review(),
-        sourceManifest: manifest(),
-        sourceTours: [source()],
-        trustedApprovers: ['trusted-reviewer'],
+        review: artifact,
+        reviewArtifactSha256: reviewDigest,
+        sourceManifest,
+        sourceManifestArtifactSha256: sourceDigest,
+        sourceTours: sourceTours(),
+      }),
+    ).toThrow('protected release policy')
+
+    expect(() =>
+      reconcileWingsSideCatalogAuthoringReview({
+        approvalPolicy: {
+          reviewArtifactSha256: reviewDigest,
+          trustedApprovers: ['trusted-reviewer'],
+        },
+        draft: tamperedDraft,
+        expectedSourceManifestSha256: sourceDigest,
+        localeFiles: localeFiles(),
+        review: artifact,
+        reviewArtifactSha256: reviewDigest,
+        sourceManifest,
+        sourceManifestArtifactSha256: sourceDigest,
+        sourceTours: sourceTours(),
       }),
     ).toThrow('stale or tampered')
+  })
 
-    const ambiguous = review()
-    ambiguous.decisions[0]!.positionalMappingReviewed = false as true
+  it('requires protected environment trust and accepts only identical CLI echoes', () => {
     expect(() =>
-      reconcileWingsSideCatalogAuthoringReview({
-        draft,
-        localeFiles: localeFiles(),
-        review: ambiguous,
-        sourceManifest: manifest(),
-        sourceTours: [source()],
-        trustedApprovers: ['trusted-reviewer'],
+      resolveProtectedCatalogAuthoringValue({
+        cliName: '--manifest-sha256',
+        cliValue: 'a'.repeat(64),
+        envName: 'WINGSSIDE_CATALOG_SOURCE_MANIFEST_SHA256',
       }),
-    ).toThrow('Incomplete or ambiguous')
+    ).toThrow('Protected environment')
+    expect(() =>
+      resolveProtectedCatalogAuthoringValue({
+        cliName: '--manifest-sha256',
+        cliValue: 'b'.repeat(64),
+        envName: 'WINGSSIDE_CATALOG_SOURCE_MANIFEST_SHA256',
+        envValue: 'a'.repeat(64),
+      }),
+    ).toThrow('CLI/environment conflict')
+    expect(
+      resolveProtectedCatalogAuthoringValue({
+        cliName: '--manifest-sha256',
+        cliValue: 'a'.repeat(64),
+        envName: 'WINGSSIDE_CATALOG_SOURCE_MANIFEST_SHA256',
+        envValue: 'a'.repeat(64),
+      }),
+    ).toBe('a'.repeat(64))
+  })
 
-    const duplicated = review()
-    duplicated.decisions[37] = { ...duplicated.decisions[0]! }
+  it('forces draft rebuild and rejects CLI-supplied approver trust', () => {
+    expect(() => assertCatalogAuthoringCLITrustBoundary('draft', ['--draft'])).toThrow(
+      'always rebuilds',
+    )
     expect(() =>
-      reconcileWingsSideCatalogAuthoringReview({
-        draft,
-        localeFiles: localeFiles(),
-        review: duplicated,
-        sourceManifest: manifest(),
-        sourceTours: [source()],
-        trustedApprovers: ['trusted-reviewer'],
-      }),
-    ).toThrow('every source row exactly once')
+      assertCatalogAuthoringCLITrustBoundary('reconcile', [
+        '--trusted-approvers=attacker@example.com',
+      ]),
+    ).toThrow('protected environment')
+  })
 
-    const missing = review()
-    missing.decisions[0]!.labels.pt = ''
-    expect(() =>
-      reconcileWingsSideCatalogAuthoringReview({
-        draft,
-        localeFiles: localeFiles(),
-        review: missing,
-        sourceManifest: manifest(),
-        sourceTours: [source()],
-        trustedApprovers: ['trusted-reviewer'],
-      }),
-    ).toThrow('Incomplete or ambiguous')
+  it('rejects non-string decision labels and rationale without coercion', () => {
+    const nonStringLabel = review() as unknown as {
+      decisions: Array<{ labels: Record<string, unknown> }>
+    }
+    nonStringLabel.decisions[0]!.labels.vi = 123
+    expect(() => parseCatalogAuthoringReviewArtifact(nonStringLabel)).toThrow(
+      'Decision vi label 0 must be a string',
+    )
 
-    const stale = review()
-    stale.approvalManifest.checksum = '0'.repeat(64)
-    expect(() =>
-      reconcileWingsSideCatalogAuthoringReview({
-        draft,
-        localeFiles: localeFiles(),
-        review: stale,
-        sourceManifest: manifest(),
-        sourceTours: [source()],
-        trustedApprovers: ['trusted-reviewer'],
-      }),
-    ).toThrow('approval checksum')
+    const nonStringRationale = review() as unknown as {
+      decisions: Array<{ rationale: unknown }>
+    }
+    nonStringRationale.decisions[0]!.rationale = { text: 'approved' }
+    expect(() => parseCatalogAuthoringReviewArtifact(nonStringRationale)).toThrow(
+      'Decision rationale 0 must be a string',
+    )
+  })
 
+  it('single-reads, byte-hashes, validates, and freezes governance artifacts', () => {
+    const value = manifest()
+    const bytes = Buffer.from(JSON.stringify(value))
+    const readFileSync = vi.fn(() => bytes)
+    const artifact = readFrozenCatalogAuthoringArtifact({
+      expectedSha256: sha256(bytes),
+      filePath: 'manifest.json',
+      io: { readFileSync: readFileSync as never },
+      validate: (parsed) => parsed as CatalogAuthoringSourceManifest,
+    })
+    bytes.fill(0)
+    expect(readFileSync).toHaveBeenCalledOnce()
+    expect(Object.isFrozen(artifact.value)).toBe(true)
+    expect(Object.isFrozen(artifact.value.tours)).toBe(true)
     expect(() =>
-      reconcileWingsSideCatalogAuthoringReview({
-        draft,
-        localeFiles: localeFiles(),
-        review: review(),
-        sourceManifest: manifest(),
-        sourceTours: [source()],
-        trustedApprovers: ['different-reviewer'],
+      readFrozenCatalogAuthoringArtifact({
+        expectedSha256: 'f'.repeat(64),
+        filePath: 'manifest.json',
+        io: { readFileSync: (() => Buffer.from(JSON.stringify(value))) as never },
+        validate: (parsed) => parsed,
       }),
-    ).toThrow('external trusted approver policy')
+    ).toThrow('checksum mismatch')
   })
 })

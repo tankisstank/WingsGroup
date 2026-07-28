@@ -4,15 +4,17 @@ import { fileURLToPath } from 'node:url'
 
 import {
   buildWingsSideCatalogAuthoringDraft,
+  parseCatalogAuthoringDraftPacket,
+  parseCatalogAuthoringReviewArtifact,
+  parseCatalogAuthoringSourceManifest,
+  readFrozenCatalogAuthoringArtifact,
   reconcileWingsSideCatalogAuthoringReview,
-  type CatalogAuthoringDraftPacket,
-  type CatalogAuthoringReviewArtifact,
+  type CatalogAuthoringSourceManifest,
+  type CatalogAuthoringSourceTour,
 } from './lib/wingsSideTourEditorialCatalogAuthoring'
 import {
   wingsSideTourEditorialLocales,
-  type EditorialSourceTour,
   type WingsSideTourEditorialLocaleFile,
-  type WingsSideTourEditorialSourceManifest,
 } from './lib/wingsSideTourEditorialLocalization'
 
 const argument = (name: string) => {
@@ -20,6 +22,19 @@ const argument = (name: string) => {
   if (inline) return inline.slice(name.length + 1)
   const index = process.argv.indexOf(name)
   return index >= 0 ? process.argv[index + 1] : undefined
+}
+export const assertCatalogAuthoringCLITrustBoundary = (
+  mode: 'draft' | 'reconcile',
+  argv: string[],
+) => {
+  const present = (name: string) =>
+    argv.some((value) => value === name || value.startsWith(`${name}=`))
+  if (mode === 'draft' && present('--draft')) {
+    throw new Error('Draft mode always rebuilds and rejects --draft')
+  }
+  if (present('--trusted-approvers')) {
+    throw new Error('Trusted approvers must come from protected environment, not CLI')
+  }
 }
 
 const required = (name: string) => {
@@ -31,15 +46,50 @@ const required = (name: string) => {
 const readJSON = async <T>(filePath: string): Promise<T> =>
   JSON.parse(await readFile(filePath, 'utf8')) as T
 
+export const resolveProtectedCatalogAuthoringValue = ({
+  cliName,
+  cliValue,
+  envName,
+  envValue,
+}: {
+  cliName: string
+  cliValue?: string
+  envName: string
+  envValue?: string
+}) => {
+  const expected = envValue?.trim()
+  if (!expected) throw new Error(`Protected environment ${envName} is required`)
+  if (cliValue && cliValue !== expected) {
+    throw new Error(`Protected catalog CLI/environment conflict: ${cliName}`)
+  }
+  return expected
+}
+
+const protectedExpected = (envName: string, cliName: string) =>
+  resolveProtectedCatalogAuthoringValue({
+    cliName,
+    cliValue: argument(cliName),
+    envName,
+    envValue: process.env[envName],
+  })
+
 export const runWingsSideCatalogAuthoring = async () => {
   const mode = argument('--mode')
   if (mode !== 'draft' && mode !== 'reconcile') {
     throw new Error('Choose --mode=draft or --mode=reconcile')
   }
-  const sourceTours = await readJSON<EditorialSourceTour[]>(required('--source'))
-  const sourceManifest = await readJSON<WingsSideTourEditorialSourceManifest>(
-    required('--manifest'),
+  assertCatalogAuthoringCLITrustBoundary(mode, process.argv)
+  const expectedSourceManifestSha256 = protectedExpected(
+    'WINGSSIDE_CATALOG_SOURCE_MANIFEST_SHA256',
+    '--manifest-sha256',
   )
+  const sourceTours = await readJSON<CatalogAuthoringSourceTour[]>(required('--source'))
+  const manifestArtifact = readFrozenCatalogAuthoringArtifact<CatalogAuthoringSourceManifest>({
+    expectedSha256: expectedSourceManifestSha256,
+    filePath: required('--manifest'),
+    validate: parseCatalogAuthoringSourceManifest,
+  })
+  const sourceManifest = manifestArtifact.value
   const legacyDirectory = required('--legacy-dir')
   const localeFiles = await Promise.all(
     wingsSideTourEditorialLocales.map((locale) =>
@@ -47,23 +97,55 @@ export const runWingsSideCatalogAuthoring = async () => {
     ),
   )
   const outputPath = required('--output')
-  const draft = argument('--draft')
-    ? await readJSON<CatalogAuthoringDraftPacket>(required('--draft'))
-    : buildWingsSideCatalogAuthoringDraft({ localeFiles, sourceManifest, sourceTours })
+  const draft =
+    mode === 'reconcile'
+      ? parseCatalogAuthoringDraftPacket(
+          await readJSON<unknown>(required('--draft')),
+        )
+      : buildWingsSideCatalogAuthoringDraft({
+          expectedSourceManifestSha256,
+          localeFiles,
+          sourceManifest,
+          sourceManifestArtifactSha256: manifestArtifact.sha256,
+          sourceTours,
+        })
   const output =
     mode === 'draft'
       ? draft
-      : reconcileWingsSideCatalogAuthoringReview({
-          draft,
-          localeFiles,
-          review: await readJSON<CatalogAuthoringReviewArtifact>(required('--review')),
-          sourceManifest,
-          sourceTours,
-          trustedApprovers: String(argument('--trusted-approvers') || '')
+      : (() => {
+          const expectedReviewArtifactSha256 = protectedExpected(
+            'WINGSSIDE_CATALOG_REVIEW_ARTIFACT_SHA256',
+            '--review-sha256',
+          )
+          const reviewArtifact = readFrozenCatalogAuthoringArtifact({
+            expectedSha256: expectedReviewArtifactSha256,
+            filePath: required('--review'),
+            validate: parseCatalogAuthoringReviewArtifact,
+          })
+          const trustedApprovers = String(
+            process.env.WINGSSIDE_CATALOG_TRUSTED_APPROVERS || '',
+          )
             .split(',')
             .map((value) => value.trim())
-            .filter(Boolean),
-        })
+            .filter(Boolean)
+          if (trustedApprovers.length === 0) {
+            throw new Error('Protected environment WINGSSIDE_CATALOG_TRUSTED_APPROVERS is required')
+          }
+          return reconcileWingsSideCatalogAuthoringReview({
+            approvalPolicy: {
+              reviewArtifactSha256: expectedReviewArtifactSha256,
+              trustedApprovers,
+            },
+            draft,
+            expectedSourceManifestSha256,
+            localeFiles,
+            review: reviewArtifact.value,
+            reviewArtifactSha256: reviewArtifact.sha256,
+            sourceManifest,
+            sourceManifestArtifactSha256: manifestArtifact.sha256,
+            sourceTours,
+          })
+        })()
   await writeFile(outputPath, `${JSON.stringify(output, null, 2)}\n`, {
     encoding: 'utf8',
     flag: 'wx',
