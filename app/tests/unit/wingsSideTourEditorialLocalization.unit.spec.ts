@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
 
 import {
   buildWingsSideTourEditorialCatalog,
   editorialServiceLabelChecksum,
+  editorialPricingApprovalChecksum,
   editorialSourceChecksum,
   loadWingsSideTourEditorialCatalog,
   validateWingsSideTourEditorialCatalog,
@@ -91,30 +95,148 @@ const localized = (locale: 'es' | 'it' | 'pt' | 'vi') => {
   }
 }
 
-const catalog = (): WingsSideTourEditorialCatalog => ({
-  pricingDispositions: [],
-  sourceLocale: 'en',
-  targetLocales: ['vi', 'it', 'es', 'pt'],
-  tours: [
-    {
-      locales: {
-        es: localized('es'),
-        it: localized('it'),
-        pt: localized('pt'),
-        vi: localized('vi'),
-      },
-      slug: source.slug,
-      sourceChecksum: editorialSourceChecksum(source),
+const catalog = (): WingsSideTourEditorialCatalog => {
+  const value: WingsSideTourEditorialCatalog = {
+    approvalManifest: {
+      approvalArtifactID: 'review-fixture-1',
+      approvedAt: '2026-07-28T00:00:00.000Z',
+      approvedBy: 'content-owner',
+      checksum: '',
+      expectedPricingDisclosureCount: 0,
+      trustedApprovers: ['content-owner'],
+      version: 1,
     },
-  ],
-  version: 2,
-})
+    pricingDispositions: [],
+    sourceLocale: 'en',
+    targetLocales: ['vi', 'it', 'es', 'pt'],
+    tours: [
+      {
+        locales: {
+          es: localized('es'),
+          it: localized('it'),
+          pt: localized('pt'),
+          vi: localized('vi'),
+        },
+        slug: source.slug,
+        sourceChecksum: editorialSourceChecksum(source),
+      },
+    ],
+    version: 2,
+  }
+  value.approvalManifest.checksum = editorialPricingApprovalChecksum(value)
+  return value
+}
+
+const sealCatalogApproval = (value: WingsSideTourEditorialCatalog) => {
+  value.approvalManifest.expectedPricingDisclosureCount = value.pricingDispositions.length
+  value.approvalManifest.checksum = editorialPricingApprovalChecksum(value)
+  return value
+}
+
+const governedCatalog = () => {
+  const value = catalog()
+  value.pricingDispositions.push({
+    approvalArtifactID: 'review-fixture-1',
+    approvedAt: '2026-07-28T00:00:00.000Z',
+    approvedBy: 'content-owner',
+    approvedTargetBucket: 'includes',
+    rationale: 'Fixture approval proving the governed parser contract.',
+    slug: source.slug,
+    sourceBucket: 'includes',
+    sourceLabel: 'Private airport transfer',
+    sourceLabelChecksum: editorialServiceLabelChecksum('Private airport transfer'),
+    sourceRowID: 'include-1',
+  })
+  return sealCatalogApproval(value)
+}
 
 describe('WingSide tour editorial localization contract', () => {
   it('accepts complete transcreated content while preserving source cardinality', () => {
     expect(
       validateWingsSideTourEditorialCatalog({ catalog: catalog(), sourceTours: [source] }),
     ).toEqual([])
+  })
+
+  it('loads and validates a reviewed consolidated catalog v2 fixture', async () => {
+    const directory = await mkdtemp(path.join(os.tmpdir(), 'wingsside-catalog-v2-'))
+    const catalogPath = path.join(directory, 'catalog-v2.json')
+    try {
+      await writeFile(catalogPath, JSON.stringify(governedCatalog()), 'utf8')
+      const actual = await loadWingsSideTourEditorialCatalog({
+        catalogPath,
+        expectedPricingDisclosureCount: 1,
+        sourceTours: [source],
+      })
+      expect(actual.version).toBe(2)
+      expect(actual.pricingDispositions).toHaveLength(1)
+      expect(actual.approvalManifest.checksum).toBe(editorialPricingApprovalChecksum(actual))
+    } finally {
+      await rm(directory, { force: true, recursive: true })
+    }
+  })
+
+  it('rejects wrong approval count, missing governed label, malformed time, and checksum tamper', async () => {
+    const wrongCount = governedCatalog()
+    const directory = await mkdtemp(path.join(os.tmpdir(), 'wingsside-catalog-invalid-'))
+    const catalogPath = path.join(directory, 'catalog-v2.json')
+    try {
+      await writeFile(catalogPath, JSON.stringify(wrongCount), 'utf8')
+      await expect(
+        loadWingsSideTourEditorialCatalog({
+          catalogPath,
+          expectedPricingDisclosureCount: 2,
+        }),
+      ).rejects.toThrow('requires exactly 2 approvals')
+
+      const missingLabel = governedCatalog()
+      missingLabel.tours[0]!.locales.pt.includes[0]!.label = ''
+      missingLabel.approvalManifest.checksum = editorialPricingApprovalChecksum(missingLabel)
+      await writeFile(catalogPath, JSON.stringify(missingLabel), 'utf8')
+      await expect(
+        loadWingsSideTourEditorialCatalog({
+          catalogPath,
+          expectedPricingDisclosureCount: 1,
+        }),
+      ).rejects.toThrow('lacks four locale labels')
+
+      const malformed = governedCatalog()
+      malformed.approvalManifest.approvedAt = '2026-07-28'
+      malformed.approvalManifest.checksum = editorialPricingApprovalChecksum(malformed)
+      await writeFile(catalogPath, JSON.stringify(malformed), 'utf8')
+      await expect(
+        loadWingsSideTourEditorialCatalog({
+          catalogPath,
+          expectedPricingDisclosureCount: 1,
+        }),
+      ).rejects.toThrow('invalid approval evidence')
+
+      const tampered = governedCatalog()
+      tampered.pricingDispositions[0]!.rationale = 'Tampered after approval'
+      await writeFile(catalogPath, JSON.stringify(tampered), 'utf8')
+      await expect(
+        loadWingsSideTourEditorialCatalog({
+          catalogPath,
+          expectedPricingDisclosureCount: 1,
+        }),
+      ).rejects.toThrow('approval checksum mismatch')
+    } finally {
+      await rm(directory, { force: true, recursive: true })
+    }
+  })
+
+  it('rejects a governed pricing source row without disposition', () => {
+    const pricingSource = {
+      ...source,
+      includes: [{ id: 'include-1', label: 'Peak season surcharge applies' }],
+    }
+    const invalid = catalog()
+    invalid.tours[0]!.sourceChecksum = editorialSourceChecksum(pricingSource)
+    expect(
+      validateWingsSideTourEditorialCatalog({
+        catalog: invalid,
+        sourceTours: [pricingSource],
+      }).map(({ message }) => message),
+    ).toContain('Service row requires a complete approved pricing disposition')
   })
 
   it('rejects source drift, locale service-shape drift, verbatim fallback and source-brand leakage', () => {
@@ -154,6 +276,7 @@ describe('WingSide tour editorial localization contract', () => {
     const valid = catalog()
     valid.tours[0]!.sourceChecksum = editorialSourceChecksum(reclassifiedSource)
     valid.pricingDispositions.push({
+      approvalArtifactID: 'review-fixture-1',
       approvedAt: '2026-07-28T00:00:00.000Z',
       approvedBy: 'content-owner',
       approvedTargetBucket: 'excludes',
@@ -165,6 +288,7 @@ describe('WingSide tour editorial localization contract', () => {
       sourceRowID: 'exclude-1',
     })
     valid.pricingDispositions.push({
+      approvalArtifactID: 'review-fixture-1',
       approvedAt: '2026-07-28T00:00:00.000Z',
       approvedBy: 'content-owner',
       approvedTargetBucket: 'excludes',
@@ -187,6 +311,7 @@ describe('WingSide tour editorial localization contract', () => {
         `${valid.tours[0]!.locales[locale].itineraryDays[0]!.meals}; light snack if selected`
     }
 
+    sealCatalogApproval(valid)
     expect(
       validateWingsSideTourEditorialCatalog({
         catalog: valid,
@@ -218,6 +343,7 @@ describe('WingSide tour editorial localization contract', () => {
       ...invalid.tours[0]!.locales.vi.includes[0]!,
     })
     invalid.pricingDispositions.push({
+      approvalArtifactID: 'review-fixture-1',
       approvedAt: '2026-07-28T00:00:00.000Z',
       approvedBy: 'content-owner',
       approvedTargetBucket: 'includes',
@@ -235,6 +361,7 @@ describe('WingSide tour editorial localization contract', () => {
       targetBucket: 'excludes',
     })
     invalid.pricingDispositions.push({
+      approvalArtifactID: 'review-fixture-1',
       approvedAt: '2026-07-28T00:00:00.000Z',
       approvedBy: 'content-owner',
       approvedTargetBucket: 'excludes',

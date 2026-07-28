@@ -24,6 +24,7 @@ export type LocalizedServiceRow = {
 }
 
 export type PricingDisposition = {
+  approvalArtifactID: string
   approvedAt: string
   approvedBy: string
   approvedTargetBucket: EditorialServiceBucket
@@ -33,6 +34,28 @@ export type PricingDisposition = {
   sourceLabel: string
   sourceLabelChecksum: string
   sourceRowID: string
+}
+
+export type PricingApprovalManifest = {
+  approvalArtifactID: string
+  approvedAt: string
+  approvedBy: string
+  checksum: string
+  expectedPricingDisclosureCount: number
+  trustedApprovers: string[]
+  version: 1
+}
+
+export type GovernedPricingLocaleLabels = {
+  labels: Record<WingsSideTourEditorialLocale, string>
+  slug: string
+  sourceRowID: string
+}
+
+export type PricingApprovalSnapshot = {
+  governedLocaleLabels: GovernedPricingLocaleLabels[]
+  manifest: Omit<PricingApprovalManifest, 'checksum'>
+  pricingDispositions: PricingDisposition[]
 }
 
 export type EditorialTourContent = {
@@ -63,12 +86,15 @@ export type EditorialTourEntry = {
 }
 
 export type WingsSideTourEditorialCatalog = {
+  approvalManifest: PricingApprovalManifest
   pricingDispositions: PricingDisposition[]
   sourceLocale: 'en'
   targetLocales: WingsSideTourEditorialLocale[]
   tours: EditorialTourEntry[]
   version: 2
 }
+
+export const wingsSideCanonicalPricingDisclosureCount = 38
 
 type LegacyEditorialTourContent = Omit<EditorialTourContent, 'excludes' | 'includes'> & {
   excludes: string[]
@@ -121,6 +147,27 @@ const normalizeText = (value: unknown) =>
     .replace(/\s+/gu, ' ')
     .trim()
 
+const stableJSONStringify = (value: unknown): string => {
+  if (value === undefined) return '"__undefined__"'
+  if (value === null || typeof value !== 'object') return JSON.stringify(value)
+  if (Array.isArray(value)) return `[${value.map(stableJSONStringify).join(',')}]`
+  const object = value as Record<string, unknown>
+  return `{${Object.keys(object)
+    .sort()
+    .map((key) => `${JSON.stringify(key)}:${stableJSONStringify(object[key])}`)
+    .join(',')}}`
+}
+
+const sha256 = (value: unknown) =>
+  crypto.createHash('sha256').update(stableJSONStringify(value)).digest('hex')
+
+const validISOTimestamp = (value: unknown) => {
+  const normalized = normalizeText(value)
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(normalized)) return false
+  const date = new Date(normalized)
+  return !Number.isNaN(date.valueOf()) && date.toISOString() === normalized
+}
+
 const comparableText = (value: unknown) =>
   normalizeText(value)
     .toLocaleLowerCase('en')
@@ -158,6 +205,55 @@ export const editorialSourceChecksum = (tour: EditorialSourceTour) =>
 
 export const editorialServiceLabelChecksum = (label: unknown) =>
   crypto.createHash('sha256').update(normalizeText(label)).digest('hex')
+
+const governedLocaleLabels = (
+  catalog: Pick<WingsSideTourEditorialCatalog, 'pricingDispositions' | 'tours'>,
+): GovernedPricingLocaleLabels[] =>
+  [...catalog.pricingDispositions]
+    .sort((left, right) =>
+      `${left.slug}:${left.sourceRowID}`.localeCompare(`${right.slug}:${right.sourceRowID}`),
+    )
+    .map(({ slug, sourceRowID }) => {
+      const tour = catalog.tours.find((entry) => entry.slug === slug)
+      return {
+        labels: Object.fromEntries(
+          wingsSideTourEditorialLocales.map((locale) => {
+            const content = tour?.locales?.[locale]
+            const row = [...(content?.includes || []), ...(content?.excludes || [])].find(
+              (candidate) => candidate.sourceRowID === sourceRowID,
+            )
+            return [locale, normalizeText(row?.label)]
+          }),
+        ) as Record<WingsSideTourEditorialLocale, string>,
+        slug,
+        sourceRowID,
+      }
+    })
+
+export const buildEditorialPricingApprovalSnapshot = (
+  catalog: Pick<WingsSideTourEditorialCatalog, 'approvalManifest' | 'pricingDispositions' | 'tours'>,
+): PricingApprovalSnapshot => ({
+    manifest: {
+      approvalArtifactID: catalog.approvalManifest.approvalArtifactID,
+      approvedAt: catalog.approvalManifest.approvedAt,
+      approvedBy: catalog.approvalManifest.approvedBy,
+      expectedPricingDisclosureCount:
+        catalog.approvalManifest.expectedPricingDisclosureCount,
+      trustedApprovers: [...catalog.approvalManifest.trustedApprovers].sort(),
+      version: catalog.approvalManifest.version,
+    },
+    pricingDispositions: [...catalog.pricingDispositions].sort((left, right) =>
+      `${left.slug}:${left.sourceRowID}`.localeCompare(`${right.slug}:${right.sourceRowID}`),
+    ),
+    governedLocaleLabels: governedLocaleLabels(catalog),
+  })
+
+export const editorialPricingApprovalSnapshotChecksum = (snapshot: PricingApprovalSnapshot) =>
+  sha256(snapshot)
+
+export const editorialPricingApprovalChecksum = (
+  catalog: Pick<WingsSideTourEditorialCatalog, 'approvalManifest' | 'pricingDispositions' | 'tours'>,
+) => editorialPricingApprovalSnapshotChecksum(buildEditorialPricingApprovalSnapshot(catalog))
 
 const sourceBrandPattern = /\b(?:best\s*price(?:\s+travel)?|bestpricetravel)\b/iu
 const rawMealPattern = /(?:^|[;,]\s*)(?:n\/?a|none)(?=\s*[;,]|$)/iu
@@ -222,11 +318,40 @@ export const validateWingsSideTourEditorialCatalog = ({
   const findings: EditorialCatalogFinding[] = []
   const sourceBySlug = new Map(sourceTours.map((tour) => [tour.slug, tour]))
   const catalogBySlug = new Map<string, EditorialTourEntry>()
+  const approvalManifest = catalog.approvalManifest as Partial<PricingApprovalManifest> | undefined
+  const trustedApprovers = new Set(
+    Array.isArray(approvalManifest?.trustedApprovers)
+      ? approvalManifest.trustedApprovers.map(normalizeText).filter(Boolean)
+      : [],
+  )
 
   if (catalog.version !== 2 || catalog.sourceLocale !== 'en') {
     findings.push({
       message: 'Catalog version/source locale contract is invalid',
       path: '$',
+    })
+  }
+  if (
+    approvalManifest?.version !== 1 ||
+    !normalizeText(approvalManifest.approvalArtifactID) ||
+    !normalizeText(approvalManifest.approvedBy) ||
+    !validISOTimestamp(approvalManifest.approvedAt) ||
+    trustedApprovers.size === 0 ||
+    !trustedApprovers.has(normalizeText(approvalManifest.approvedBy))
+  ) {
+    findings.push({
+      message: 'Pricing approval manifest identity, timestamp, or trusted approver is invalid',
+      path: '$.approvalManifest',
+    })
+  }
+  if (
+    !Number.isSafeInteger(approvalManifest?.expectedPricingDisclosureCount) ||
+    approvalManifest!.expectedPricingDisclosureCount! < 0 ||
+    approvalManifest?.expectedPricingDisclosureCount !== catalog.pricingDispositions?.length
+  ) {
+    findings.push({
+      message: 'Pricing disclosure count does not match the approval manifest',
+      path: '$.approvalManifest.expectedPricingDisclosureCount',
     })
   }
   const dispositionByKey = new Map<string, PricingDisposition>()
@@ -241,6 +366,18 @@ export const validateWingsSideTourEditorialCatalog = ({
       continue
     }
     dispositionByKey.set(key, disposition)
+    if (
+      !normalizeText(disposition.approvalArtifactID) ||
+      disposition.approvalArtifactID !== approvalManifest?.approvalArtifactID ||
+      !validISOTimestamp(disposition.approvedAt) ||
+      !trustedApprovers.has(normalizeText(disposition.approvedBy))
+    ) {
+      findings.push({
+        message: 'Pricing disposition approval evidence is invalid or untrusted',
+        path: '$.pricingDispositions',
+        slug: disposition.slug,
+      })
+    }
   }
   if (JSON.stringify(catalog.targetLocales) !== JSON.stringify(wingsSideTourEditorialLocales)) {
     findings.push({
@@ -555,6 +692,31 @@ export const validateWingsSideTourEditorialCatalog = ({
         })
       }
     }
+    const tour = catalogBySlug.get(disposition.slug)
+    const missingLocale = wingsSideTourEditorialLocales.find((locale) => {
+      const content = tour?.locales?.[locale]
+      const rows = [...(content?.includes || []), ...(content?.excludes || [])]
+      const localized = rows.find(({ sourceRowID }) => sourceRowID === disposition.sourceRowID)
+      return !localized || !normalizeText(localized.label)
+    })
+    if (missingLocale) {
+      findings.push({
+        locale: missingLocale,
+        message: 'Governed pricing row requires an approved label in every target locale',
+        path: '$.pricingDispositions',
+        slug: disposition.slug,
+      })
+    }
+  }
+
+  if (
+    approvalManifest &&
+    approvalManifest.checksum !== editorialPricingApprovalChecksum(catalog)
+  ) {
+    findings.push({
+      message: 'Pricing approval manifest checksum mismatch',
+      path: '$.approvalManifest.checksum',
+    })
   }
 
   return findings
@@ -575,6 +737,75 @@ const parseLocaleFile = (
   }
   return file as WingsSideTourEditorialLocaleFile
 }
+
+export const parseWingsSideTourEditorialCatalogV2 = (
+  value: unknown,
+  {
+    expectedPricingDisclosureCount,
+  }: {
+    expectedPricingDisclosureCount?: number
+  } = {},
+): WingsSideTourEditorialCatalog => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('Invalid WingSide editorial catalog v2')
+  }
+  const catalog = value as WingsSideTourEditorialCatalog
+  if (
+    catalog.version !== 2 ||
+    catalog.sourceLocale !== 'en' ||
+    !Array.isArray(catalog.targetLocales) ||
+    JSON.stringify(catalog.targetLocales) !== JSON.stringify(wingsSideTourEditorialLocales) ||
+    !Array.isArray(catalog.tours) ||
+    !Array.isArray(catalog.pricingDispositions) ||
+    !catalog.approvalManifest ||
+    catalog.approvalManifest.version !== 1 ||
+    !Array.isArray(catalog.approvalManifest.trustedApprovers)
+  ) {
+    throw new Error('Invalid WingSide editorial catalog v2')
+  }
+  const requiredCount =
+    expectedPricingDisclosureCount ?? catalog.approvalManifest.expectedPricingDisclosureCount
+  if (
+    !Number.isSafeInteger(requiredCount) ||
+    requiredCount < 0 ||
+    catalog.approvalManifest.expectedPricingDisclosureCount !== requiredCount ||
+    catalog.pricingDispositions.length !== requiredCount
+  ) {
+    throw new Error(`WingSide editorial catalog v2 requires exactly ${requiredCount} approvals`)
+  }
+  const trustedApprovers = new Set(
+    catalog.approvalManifest.trustedApprovers.map(normalizeText).filter(Boolean),
+  )
+  if (
+    !normalizeText(catalog.approvalManifest.approvalArtifactID) ||
+    !validISOTimestamp(catalog.approvalManifest.approvedAt) ||
+    !trustedApprovers.has(normalizeText(catalog.approvalManifest.approvedBy)) ||
+    catalog.pricingDispositions.some(
+      (disposition) =>
+        !normalizeText(disposition.approvalArtifactID) ||
+        disposition.approvalArtifactID !== catalog.approvalManifest.approvalArtifactID ||
+        !validISOTimestamp(disposition.approvedAt) ||
+        !trustedApprovers.has(normalizeText(disposition.approvedBy)),
+    )
+  ) {
+    throw new Error('WingSide editorial catalog v2 contains invalid approval evidence')
+  }
+  const incompleteGovernedRow = governedLocaleLabels(catalog).find(({ labels }) =>
+    wingsSideTourEditorialLocales.some((locale) => !normalizeText(labels[locale])),
+  )
+  if (incompleteGovernedRow) {
+    throw new Error(
+      `WingSide editorial catalog v2 governed row lacks four locale labels: ${incompleteGovernedRow.slug}:${incompleteGovernedRow.sourceRowID}`,
+    )
+  }
+  if (catalog.approvalManifest.checksum !== editorialPricingApprovalChecksum(catalog)) {
+    throw new Error('WingSide editorial catalog v2 approval checksum mismatch')
+  }
+  return catalog
+}
+
+export const buildWingsSideTourEditorialCatalogV2 =
+  parseWingsSideTourEditorialCatalogV2
 
 export const buildWingsSideTourEditorialCatalog = ({
   localeFiles,
@@ -623,10 +854,24 @@ export const buildWingsSideTourEditorialCatalog = ({
 }
 
 export const loadWingsSideTourEditorialCatalog = async ({
+  catalogPath,
   dataDirectory = path.resolve(import.meta.dirname, '..', 'data', 'wingsside-tour-editorial'),
+  expectedPricingDisclosureCount = wingsSideCanonicalPricingDisclosureCount,
+  sourceTours,
 }: {
+  catalogPath?: string
   dataDirectory?: string
+  expectedPricingDisclosureCount?: number
+  sourceTours?: EditorialSourceTour[]
 } = {}): Promise<WingsSideTourEditorialCatalog> => {
+  if (catalogPath) {
+    const catalog = parseWingsSideTourEditorialCatalogV2(
+      JSON.parse(await fs.readFile(path.resolve(catalogPath), 'utf8')),
+      { expectedPricingDisclosureCount },
+    )
+    if (sourceTours) assertWingsSideTourEditorialCatalog({ catalog, sourceTours })
+    return catalog
+  }
   const [manifestRaw, ...localeRaw] = await Promise.all([
     fs.readFile(path.join(dataDirectory, 'source-manifest.json'), 'utf8'),
     ...wingsSideTourEditorialLocales.map((locale) =>

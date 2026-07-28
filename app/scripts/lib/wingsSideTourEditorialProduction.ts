@@ -2,12 +2,16 @@ import crypto from 'node:crypto'
 
 import type { Page, TourProduct } from '../../src/payload-types'
 import {
+  buildEditorialPricingApprovalSnapshot,
+  editorialPricingApprovalSnapshotChecksum,
   editorialServiceLabelChecksum,
   editorialSourceChecksum,
+  parseWingsSideTourEditorialCatalogV2,
   wingsSideTourEditorialLocales,
   type EditorialTourContent,
   type LocalizedServiceRow,
   type PricingDisposition,
+  type PricingApprovalSnapshot,
   type WingsSideTourEditorialCatalog,
   type WingsSideTourEditorialLocale,
 } from './wingsSideTourEditorialLocalization'
@@ -148,10 +152,13 @@ export type WingsSideTourEditorialServiceRowLedgerEntry = {
     sourceRowID: string
   }>
   slug: string
+  tourID: number | string
 }
 
 export type WingsSideTourEditorialPlan = {
   aggregateChecksums: { after: string; before: string }
+  approvalSnapshot: PricingApprovalSnapshot
+  approvalSnapshotChecksum: string
   createdAt: string
   expectedLocales: WingsSideTourEditorialLocale[]
   expectedTourCount: 22
@@ -165,6 +172,7 @@ export type WingsSideTourEditorialPlan = {
   entries: WingsSideTourEditorialPlanEntry[]
   sharedServiceEntries: WingsSideTourEditorialSharedServiceEntry[]
   serviceRowLedger: WingsSideTourEditorialServiceRowLedgerEntry[]
+  serviceRowLedgerChecksum: string
 }
 
 type Relation = null | number | string | undefined | { id?: number | string }
@@ -227,6 +235,41 @@ export const editorialServiceRowIdentity = (value: EditorialSharedServiceSnapsho
     excludes: project(value.excludes),
     includes: project(value.includes),
   })
+}
+
+const buildCanonicalServiceRowLedger = (
+  entry: WingsSideTourEditorialSharedServiceEntry,
+): WingsSideTourEditorialServiceRowLedgerEntry => {
+  const beforeRows = [...array(entry.before.includes), ...array(entry.before.excludes)]
+  const afterRows = [...array(entry.after.includes), ...array(entry.after.excludes)]
+  const beforeRowIDs = beforeRows.map((row) => String(serviceRowID(row)))
+  const afterRowIDs = afterRows.map((row) => String(serviceRowID(row)))
+  const beforeByID = new Map(beforeRows.map((row) => [String(serviceRowID(row)), row]))
+  const afterByID = new Map(afterRows.map((row) => [String(serviceRowID(row)), row]))
+  const beforeSorted = [...beforeRowIDs].sort()
+  const afterSorted = [...afterRowIDs].sort()
+  if (
+    beforeByID.size !== beforeRows.length ||
+    afterByID.size !== afterRows.length ||
+    editorialStableJSONStringify(beforeSorted) !== editorialStableJSONStringify(afterSorted)
+  ) {
+    throw new Error(`Shared service row inventory drift for ${entry.slug}`)
+  }
+  return {
+    afterChecksum: editorialChecksum(afterRowIDs),
+    afterCount: afterRowIDs.length,
+    afterRowIDs,
+    beforeChecksum: editorialChecksum(beforeRowIDs),
+    beforeCount: beforeRowIDs.length,
+    beforeRowIDs,
+    rowChecksums: beforeRowIDs.map((sourceRowID) => ({
+      after: editorialChecksum(afterByID.get(sourceRowID)),
+      before: editorialChecksum(beforeByID.get(sourceRowID)),
+      sourceRowID,
+    })),
+    slug: entry.slug,
+    tourID: entry.tourID,
+  }
 }
 
 export const normalizeEditorialSharedServices = ({
@@ -547,31 +590,33 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
       throw new Error(`WingSide shared service plan checksum mismatch: ${entry.slug}`)
     }
   }
+  if (
+    editorialPricingApprovalSnapshotChecksum(plan.approvalSnapshot) !==
+      plan.approvalSnapshotChecksum ||
+    plan.approvalSnapshot.manifest.expectedPricingDisclosureCount !==
+      plan.approvalSnapshot.pricingDispositions.length
+  ) {
+    throw new Error('WingSide pricing approval snapshot checksum mismatch')
+  }
   const ledgerSlugs = plan.serviceRowLedger.map(({ slug }) => slug)
   if (new Set(ledgerSlugs).size !== ledgerSlugs.length) {
     throw new Error('WingSide tour editorial plan contains duplicate service row ledgers')
   }
   for (const ledger of plan.serviceRowLedger) {
-    const beforeSorted = [...ledger.beforeRowIDs].sort()
-    const afterSorted = [...ledger.afterRowIDs].sort()
+    const shared = plan.sharedServiceEntries.find(
+      (entry) =>
+        entry.slug === ledger.slug && String(entry.tourID) === String(ledger.tourID),
+    )
     if (
-      ledger.beforeCount !== ledger.beforeRowIDs.length ||
-      ledger.afterCount !== ledger.afterRowIDs.length ||
-      ledger.beforeCount !== ledger.afterCount ||
-      new Set(ledger.beforeRowIDs).size !== ledger.beforeRowIDs.length ||
-      new Set(ledger.afterRowIDs).size !== ledger.afterRowIDs.length ||
-      editorialStableJSONStringify(beforeSorted) !== editorialStableJSONStringify(afterSorted) ||
-      editorialChecksum(ledger.beforeRowIDs) !== ledger.beforeChecksum ||
-      editorialChecksum(ledger.afterRowIDs) !== ledger.afterChecksum ||
-      ledger.rowChecksums.length !== ledger.beforeCount
+      !shared ||
+      editorialStableJSONStringify(buildCanonicalServiceRowLedger(shared)) !==
+        editorialStableJSONStringify(ledger)
     ) {
       throw new Error(`WingSide service row preservation ledger mismatch: ${ledger.slug}`)
     }
-    for (const row of ledger.rowChecksums) {
-      if (row.before !== row.after || !ledger.beforeRowIDs.includes(row.sourceRowID)) {
-        throw new Error(`WingSide service row metadata drift: ${ledger.slug}:${row.sourceRowID}`)
-      }
-    }
+  }
+  if (editorialChecksum(plan.serviceRowLedger) !== plan.serviceRowLedgerChecksum) {
+    throw new Error('WingSide service row ledger aggregate checksum mismatch')
   }
   const sourceManifest = new Map<string, string>()
   for (const { slug, sourceChecksum } of plan.entries) {
@@ -588,14 +633,18 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
   ) {
     throw new Error('WingSide tour editorial source manifest checksum mismatch')
   }
-  const before = editorialChecksum([
-    ...plan.sharedServiceEntries.map(({ beforeChecksum }) => beforeChecksum),
-    ...plan.entries.map(({ beforeChecksum }) => beforeChecksum),
-  ])
-  const after = editorialChecksum([
-    ...plan.sharedServiceEntries.map(({ afterChecksum }) => afterChecksum),
-    ...plan.entries.map(({ afterChecksum }) => afterChecksum),
-  ])
+  const before = editorialChecksum({
+    approvalSnapshotChecksum: plan.approvalSnapshotChecksum,
+    localizedEntries: plan.entries.map(({ beforeChecksum }) => beforeChecksum),
+    serviceRowLedgerChecksum: plan.serviceRowLedgerChecksum,
+    sharedServiceEntries: plan.sharedServiceEntries.map(({ beforeChecksum }) => beforeChecksum),
+  })
+  const after = editorialChecksum({
+    approvalSnapshotChecksum: plan.approvalSnapshotChecksum,
+    localizedEntries: plan.entries.map(({ afterChecksum }) => afterChecksum),
+    serviceRowLedgerChecksum: plan.serviceRowLedgerChecksum,
+    sharedServiceEntries: plan.sharedServiceEntries.map(({ afterChecksum }) => afterChecksum),
+  })
   if (before !== plan.aggregateChecksums.before || after !== plan.aggregateChecksums.after) {
     throw new Error('WingSide tour editorial production plan aggregate checksum mismatch')
   }
@@ -624,6 +673,10 @@ export const buildWingsSideTourEditorialPlan = ({
   wrapperBeforeByKey: Map<string, Page | Record<string, unknown>>
   wrapperPageIDs: Map<string, number | string>
 }): WingsSideTourEditorialPlan => {
+  parseWingsSideTourEditorialCatalogV2(catalog, {
+    expectedPricingDisclosureCount:
+      catalog.approvalManifest.expectedPricingDisclosureCount,
+  })
   if (sourceTours.length !== wingsSideTourEditorialExpectedTourCount) {
     throw new Error(`Expected exactly 22 WingSide English tours, found ${sourceTours.length}`)
   }
@@ -658,34 +711,7 @@ export const buildWingsSideTourEditorialPlan = ({
         throw new Error(`Localized service classification drift for ${locale}:${entry.slug}`)
       }
     }
-    const beforeRows = [...array(sharedBefore.includes), ...array(sharedBefore.excludes)]
-    const afterRows = [...array(sharedAfter.includes), ...array(sharedAfter.excludes)]
-    const beforeRowIDs = beforeRows.map((row) => String(serviceRowID(row)))
-    const afterRowIDs = afterRows.map((row) => String(serviceRowID(row)))
-    const beforeByID = new Map(beforeRows.map((row) => [String(serviceRowID(row)), row]))
-    const afterByID = new Map(afterRows.map((row) => [String(serviceRowID(row)), row]))
-    serviceRowLedger.push({
-      afterChecksum: editorialChecksum(afterRowIDs),
-      afterCount: afterRowIDs.length,
-      afterRowIDs,
-      beforeChecksum: editorialChecksum(beforeRowIDs),
-      beforeCount: beforeRowIDs.length,
-      beforeRowIDs,
-      rowChecksums: beforeRowIDs.map((sourceRowID) => {
-        const beforeRow = beforeByID.get(sourceRowID)
-        const afterRow = afterByID.get(sourceRowID)
-        if (!beforeRow || !afterRow) {
-          throw new Error(`Service row lost while planning ${entry.slug}:${sourceRowID}`)
-        }
-        return {
-          after: editorialChecksum(afterRow),
-          before: editorialChecksum(beforeRow),
-          sourceRowID,
-        }
-      }),
-      slug: entry.slug,
-    })
-    sharedServiceEntries.push({
+    const sharedServiceEntry: WingsSideTourEditorialSharedServiceEntry = {
       after: sharedAfter,
       afterChecksum: editorialChecksum(sharedAfter),
       before: sharedBefore,
@@ -693,7 +719,9 @@ export const buildWingsSideTourEditorialPlan = ({
       slug: entry.slug,
       sourceChecksum: entry.sourceChecksum,
       tourID: source.id,
-    })
+    }
+    sharedServiceEntries.push(sharedServiceEntry)
+    serviceRowLedger.push(buildCanonicalServiceRowLedger(sharedServiceEntry))
     const normalizedSource = {
       ...(source as TourProduct),
       excludes: cloneJSON(sharedAfter.excludes) as TourProduct['excludes'],
@@ -736,17 +764,26 @@ export const buildWingsSideTourEditorialPlan = ({
       }
     })
   })
+  const approvalSnapshot = buildEditorialPricingApprovalSnapshot(catalog)
+  const approvalSnapshotChecksum = editorialPricingApprovalSnapshotChecksum(approvalSnapshot)
+  const serviceRowLedgerChecksum = editorialChecksum(serviceRowLedger)
   const plan: WingsSideTourEditorialPlan = {
     aggregateChecksums: {
-      after: editorialChecksum([
-        ...sharedServiceEntries.map(({ afterChecksum }) => afterChecksum),
-        ...entries.map(({ afterChecksum }) => afterChecksum),
-      ]),
-      before: editorialChecksum([
-        ...sharedServiceEntries.map(({ beforeChecksum }) => beforeChecksum),
-        ...entries.map(({ beforeChecksum }) => beforeChecksum),
-      ]),
+      after: editorialChecksum({
+        approvalSnapshotChecksum,
+        localizedEntries: entries.map(({ afterChecksum }) => afterChecksum),
+        serviceRowLedgerChecksum,
+        sharedServiceEntries: sharedServiceEntries.map(({ afterChecksum }) => afterChecksum),
+      }),
+      before: editorialChecksum({
+        approvalSnapshotChecksum,
+        localizedEntries: entries.map(({ beforeChecksum }) => beforeChecksum),
+        serviceRowLedgerChecksum,
+        sharedServiceEntries: sharedServiceEntries.map(({ beforeChecksum }) => beforeChecksum),
+      }),
     },
+    approvalSnapshot,
+    approvalSnapshotChecksum,
     createdAt,
     entries,
     expectedLocales: [...wingsSideTourEditorialLocales],
@@ -762,6 +799,7 @@ export const buildWingsSideTourEditorialPlan = ({
     ),
     sharedServiceEntries,
     serviceRowLedger,
+    serviceRowLedgerChecksum,
   }
   assertEditorialPlanShape(plan)
   return plan

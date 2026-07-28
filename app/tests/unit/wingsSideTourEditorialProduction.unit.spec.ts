@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { Page, TourProduct } from '../../src/payload-types'
 import {
+  editorialPricingApprovalChecksum,
   editorialSourceChecksum,
   editorialServiceLabelChecksum,
   type EditorialTourContent,
@@ -131,7 +132,17 @@ const sourceWrapper = (index: number): Page =>
 const catalogAndSources = () => {
   const sources = Array.from({ length: 22 }, (_, index) => sourceTour(index + 1))
   const catalog: WingsSideTourEditorialCatalog = {
+    approvalManifest: {
+      approvalArtifactID: 'production-plan-fixture',
+      approvedAt: '2026-07-28T00:00:00.000Z',
+      approvedBy: 'content-owner',
+      checksum: '',
+      expectedPricingDisclosureCount: 22,
+      trustedApprovers: ['content-owner'],
+      version: 1,
+    },
     pricingDispositions: sources.map((source) => ({
+      approvalArtifactID: 'production-plan-fixture',
       approvedAt: '2026-07-28T00:00:00.000Z',
       approvedBy: 'content-owner',
       approvedTargetBucket: 'excludes',
@@ -156,6 +167,7 @@ const catalogAndSources = () => {
     })),
     version: 2,
   }
+  catalog.approvalManifest.checksum = editorialPricingApprovalChecksum(catalog)
   return { catalog, sources }
 }
 
@@ -294,6 +306,10 @@ describe('WingSide tour editorial production plan', () => {
     ).toBe(true)
     expect(plan.entries[0]!.wrapperBefore.title).toBeNull()
     expect(plan.entries[0]!.wrapperAfter.title).toBe('vi tour 1')
+    plan.approvalSnapshot.pricingDispositions[0]!.approvedBy = 'tampered-approver'
+    expect(() => assertEditorialPlanShape(plan)).toThrow(
+      'pricing approval snapshot checksum mismatch',
+    )
   })
 
   it('rejects aggregate plan tampering', () => {
@@ -323,6 +339,55 @@ describe('WingSide tour editorial production plan', () => {
     plan.entries[0]!.wrapperAfter.title = 'tampered wrapper'
 
     expect(() => assertEditorialPlanShape(plan)).toThrow('entry checksum mismatch')
+  })
+
+  it('reconstructs the canonical ledger and rejects duplicated or arbitrary row proofs', () => {
+    const { catalog, sources } = catalogAndSources()
+    const beforeByKey = new Map<string, TourProduct>()
+    const wrapperBeforeByKey = new Map<string, Page>()
+    for (const source of sources) {
+      for (const locale of ['vi', 'it', 'es', 'pt']) {
+        beforeByKey.set(`${locale}:${source.slug}`, source)
+        wrapperBeforeByKey.set(`${locale}:${source.slug}`, sourceWrapper(source.id as number))
+      }
+    }
+    const plan = buildWingsSideTourEditorialPlan({
+      beforeByKey,
+      catalog,
+      createdAt: '2026-07-26T00:00:00.000Z',
+      releaseSourceCommit: 'a'.repeat(40),
+      runID: 'ledger-attack',
+      siteID: 7,
+      sourceTours: sources,
+      sourceWrappers: new Map(
+        sources.map((source) => [source.slug, sourceWrapper(source.id as number)]),
+      ),
+      wrapperBeforeByKey,
+      wrapperPageIDs: new Map(sources.map((source) => [source.slug, source.wrapperPage as number])),
+    })
+    const ledger = plan.serviceRowLedger[0]!
+    ledger.rowChecksums[1] = {
+      ...ledger.rowChecksums[0]!,
+      after: 'a'.repeat(64),
+      before: 'a'.repeat(64),
+    }
+    plan.serviceRowLedgerChecksum = editorialChecksum(plan.serviceRowLedger)
+    plan.aggregateChecksums.before = editorialChecksum({
+      approvalSnapshotChecksum: plan.approvalSnapshotChecksum,
+      localizedEntries: plan.entries.map(({ beforeChecksum }) => beforeChecksum),
+      serviceRowLedgerChecksum: plan.serviceRowLedgerChecksum,
+      sharedServiceEntries: plan.sharedServiceEntries.map(({ beforeChecksum }) => beforeChecksum),
+    })
+    plan.aggregateChecksums.after = editorialChecksum({
+      approvalSnapshotChecksum: plan.approvalSnapshotChecksum,
+      localizedEntries: plan.entries.map(({ afterChecksum }) => afterChecksum),
+      serviceRowLedgerChecksum: plan.serviceRowLedgerChecksum,
+      sharedServiceEntries: plan.sharedServiceEntries.map(({ afterChecksum }) => afterChecksum),
+    })
+
+    expect(() => assertEditorialPlanShape(plan)).toThrow(
+      'service row preservation ledger mismatch',
+    )
   })
 
   it('fails closed on locale service-shape and row-identity drift', () => {
