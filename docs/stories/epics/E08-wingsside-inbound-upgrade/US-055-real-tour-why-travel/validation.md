@@ -110,3 +110,30 @@ The project owner accepted the current Sa Pa/Lào Cai route, destination and
 trekking facts under `D3-A`; that external content decision is no longer a
 release blocker. The complete accepted package is recorded in
 `release-decisions-2026-07-28.md`.
+
+## S3 execution update — run r2
+
+The implementation and independent corrective review results are recorded in
+`s3-execution-2026-07-28-r2.md`.
+
+Completed and independently accepted:
+
+- `D1-A`: exact 38-row five-locale pricing-disclosure candidate artifact;
+- `D2-A`: exact 22-tour governed English candidate artifact;
+- `D6-C`: named/versioned development-team approval policy and guarded
+  application-owned Payload/PostgreSQL adapter;
+- combined unit `69/614`, component `14/74`, focused integration `3/11`,
+  TypeScript, lint with zero errors and Webpack production build.
+
+Accepted as truthful blocker evidence, not as completed D4-C:
+
+- exact 22-tour media inventory with 714 references, 714 media IDs, 586 unique
+  hashes and zero missing source files;
+- hardened junction/symlink/path and runtime-schema validation; and
+- zero accepted watermark-removal outputs after the first image edit changed
+  subject/framing and RapidOCR produced a known false negative.
+
+Production remains held. The candidate content has not been reconciled into a
+signed catalog-v2 or applied to a database; D4-C media outputs, protected
+signing material, PostgreSQL rehearsal, five-locale browser evidence and an
+explicit production approval are still missing.

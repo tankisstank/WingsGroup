@@ -214,3 +214,33 @@ trekking decision facts under `D3-A`; this is no longer an open approval
 condition.
 
 No production deployment or production data write was performed in this run.
+
+## US-055 S3 execution run r2
+
+The approved remaining-work plan was executed with three isolated native Codex
+workers and independent corrective reviews. The canonical run report is
+`US-055-real-tour-why-travel/s3-execution-2026-07-28-r2.md`.
+
+Accepted implementation:
+
+- exact 22-tour English candidates;
+- exact 38 pricing-disclosure rows with EN/VI/IT/ES/PT labels;
+- sealed source-row validators and adversarial probes;
+- explicit D6-C development-team approval policy; and
+- guarded application-owned Payload/PostgreSQL runtime adapter.
+
+Media outcome:
+
+- inventory tooling and evidence were accepted;
+- exact inventory is 22 tours, 714 references/media IDs and 586 unique hashes;
+- known watermark-positive files remain;
+- the attempted generated edit changed subject/framing and was rejected;
+- accepted processed outputs remain zero; and
+- D4-C therefore remains a production blocker.
+
+Leader combined verification passed 69 files/614 unit tests, 14 files/74
+component tests, 3 files/11 focused integration tests, TypeScript, lint with
+zero errors and the Webpack production build. Production remains on HOLD
+because signed catalog-v2 reconciliation, D4-C output media, protected keys,
+PostgreSQL rehearsal, five-locale browser evidence and explicit deployment/data
+write approval are still outstanding.
