@@ -12,6 +12,7 @@ import {
 } from './lib/wingsSideTourEnglishEditorialRuntime'
 import { assertWingsSideEditorialProductionWriteGuard } from './lib/wingsSideReleaseWriteGuard'
 import type { WingsSideEditorialProductionWriteGuardArgs } from './lib/wingsSideReleaseWriteGuard'
+import { createWingsSideTourEnglishEditorialPayloadAdapterFactory } from './lib/wingsSideTourEnglishEditorialPayloadAdapter'
 
 type Phase = 'apply' | 'rollback' | 'verify'
 type ReleaseEnvironment = Partial<Record<string, string | undefined>>
@@ -333,8 +334,14 @@ const invokedDirectly =
   Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]!).href
 
 if (invokedDirectly) {
-  console.error(
-    'English editorial production requires an application-owned transactional adapter; no write was attempted.',
+  void runWingsSideEnglishEditorialProductionCLI({
+    adapterFactory: createWingsSideTourEnglishEditorialPayloadAdapterFactory(),
+    argv: process.argv.slice(2),
+  }).then(
+    (result) => console.log(JSON.stringify(result)),
+    (error) => {
+      console.error(error instanceof Error ? error.message : error)
+      process.exitCode = 1
+    },
   )
-  process.exitCode = 1
 }

@@ -15,6 +15,7 @@ import {
   parseWingsSideTourEditorialCatalogV2,
   wingsSideCanonicalPricingDisclosureCount,
 } from './lib/wingsSideTourEditorialLocalization'
+import { assertWingsSideCatalogDevelopmentTeamApprovalAudit } from './lib/wingsSideTourEditorialCatalogAuthoring'
 import {
   assertEditorialPlanShape,
   editorialChecksum,
@@ -90,6 +91,7 @@ export const preflightWingsSideEditorialCatalogArtifact = async ({
   const catalog = parseWingsSideTourEditorialCatalogV2(parsed, {
     expectedPricingDisclosureCount,
   })
+  assertWingsSideCatalogDevelopmentTeamApprovalAudit(catalog)
   const freeze = (value: unknown): unknown => {
     if (value && typeof value === 'object' && !Object.isFrozen(value)) {
       Object.freeze(value)

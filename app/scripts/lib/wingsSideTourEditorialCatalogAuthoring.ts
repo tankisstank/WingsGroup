@@ -94,10 +94,11 @@ export type ReviewedCatalogRowDecision = {
 }
 
 export type CatalogAuthoringReviewArtifact = {
-  approvalManifest: PricingApprovalManifest
+  approvalManifest: PricingApprovalManifest & CatalogDevelopmentTeamApprovalAudit
   decisions: ReviewedCatalogRowDecision[]
   draftPacketChecksum: string
   fullCandidateChecksum: string
+  signature: CatalogDevelopmentTeamApprovalSignature
   version: 1
 }
 
@@ -108,9 +109,35 @@ export type CatalogAuthoringLocaleArtifact = {
   value: Readonly<WingsSideTourEditorialLocaleFile>
 }
 
-export type CatalogAuthoringApprovalPolicy = {
+export const wingsSideCatalogDevelopmentTeamApprovalPolicy = Object.freeze({
+  artifactPurpose: 'wingsside-tour-editorial-catalog-v2-review',
+  decision: 'D6-C',
+  policyID: 'wingsside-development-team-catalog-approval',
+  policyVersion: 1,
+  signerRole: 'development-team-release-approver',
+} as const)
+
+export type CatalogDevelopmentTeamApprovalAudit = {
+  artifactPurpose: typeof wingsSideCatalogDevelopmentTeamApprovalPolicy.artifactPurpose
+  decision: typeof wingsSideCatalogDevelopmentTeamApprovalPolicy.decision
+  policyID: typeof wingsSideCatalogDevelopmentTeamApprovalPolicy.policyID
+  policyVersion: typeof wingsSideCatalogDevelopmentTeamApprovalPolicy.policyVersion
+  signerRole: typeof wingsSideCatalogDevelopmentTeamApprovalPolicy.signerRole
+}
+
+export type CatalogDevelopmentTeamApprovalSignature = {
+  algorithm: 'ed25519'
+  keyID: string
+  signedAt: string
+  signerID: string
+  valueBase64: string
+}
+
+export type CatalogAuthoringApprovalPolicy = CatalogDevelopmentTeamApprovalAudit & {
+  keyID: string
+  publicKeySpkiBase64: string
   reviewArtifactSha256: string
-  trustedApprovers: string[]
+  trustedSignerIDs: string[]
 }
 
 export type CatalogAuthoringReconciliation = {
@@ -160,6 +187,43 @@ const stableJSONStringify = (value: unknown): string => {
 
 export const catalogAuthoringChecksum = (value: unknown) =>
   crypto.createHash('sha256').update(stableJSONStringify(value)).digest('hex')
+
+const withoutReviewSignature = (review: CatalogAuthoringReviewArtifact) => {
+  const { signature: _signature, ...signedPayload } = review
+  return signedPayload
+}
+
+export const catalogAuthoringReviewSigningDigest = (
+  review: CatalogAuthoringReviewArtifact,
+) => catalogAuthoringChecksum({
+  payload: withoutReviewSignature(review),
+  signaturePurpose: wingsSideCatalogDevelopmentTeamApprovalPolicy.artifactPurpose,
+  signatureSchemaVersion: 1,
+})
+
+const assertDevelopmentTeamApprovalAudit = (
+  manifest: PricingApprovalManifest & Partial<CatalogDevelopmentTeamApprovalAudit>,
+) => {
+  const expected = wingsSideCatalogDevelopmentTeamApprovalPolicy
+  if (
+    manifest.artifactPurpose !== expected.artifactPurpose ||
+    manifest.decision !== expected.decision ||
+    manifest.policyID !== expected.policyID ||
+    manifest.policyVersion !== expected.policyVersion ||
+    manifest.signerRole !== expected.signerRole
+  ) {
+    throw new Error('Catalog approval manifest does not implement protected D6-C policy')
+  }
+}
+
+export const assertWingsSideCatalogDevelopmentTeamApprovalAudit = (
+  catalog: WingsSideTourEditorialCatalog,
+) => {
+  assertDevelopmentTeamApprovalAudit(
+    catalog.approvalManifest as PricingApprovalManifest &
+      Partial<CatalogDevelopmentTeamApprovalAudit>,
+  )
+}
 
 const deepFreeze = <T>(value: T): Readonly<T> => {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {
@@ -279,6 +343,17 @@ export const parseCatalogAuthoringReviewArtifact = (
   normalizeString(review.approvalManifest.approvedAt, 'Approval timestamp')
   normalizeString(review.approvalManifest.approvedBy, 'Approval reviewer')
   assertSha256(review.approvalManifest.checksum, 'Approval checksum')
+  assertDevelopmentTeamApprovalAudit(review.approvalManifest)
+  if (
+    !isRecord(review.signature) ||
+    review.signature.algorithm !== 'ed25519' ||
+    !normalizeString(review.signature.keyID, 'Approval signature key ID') ||
+    !normalizeString(review.signature.signerID, 'Approval signature signer ID') ||
+    !normalizeString(review.signature.signedAt, 'Approval signature timestamp') ||
+    !normalizeString(review.signature.valueBase64, 'Approval signature value')
+  ) {
+    throw new Error('Invalid catalog development-team approval signature')
+  }
   for (const [index, approver] of review.approvalManifest.trustedApprovers.entries()) {
     normalizeString(approver, `Approval trusted approver ${index}`)
   }
@@ -653,6 +728,16 @@ export const reconcileWingsSideCatalogAuthoringReview = ({
   parseCatalogAuthoringReviewArtifact(review)
   assertSha256(reviewArtifactSha256, 'Review artifact checksum')
   assertSha256(approvalPolicy.reviewArtifactSha256, 'Protected review artifact checksum')
+  const protectedPolicy = wingsSideCatalogDevelopmentTeamApprovalPolicy
+  if (
+    approvalPolicy.artifactPurpose !== protectedPolicy.artifactPurpose ||
+    approvalPolicy.decision !== protectedPolicy.decision ||
+    approvalPolicy.policyID !== protectedPolicy.policyID ||
+    approvalPolicy.policyVersion !== protectedPolicy.policyVersion ||
+    approvalPolicy.signerRole !== protectedPolicy.signerRole
+  ) {
+    throw new Error('Catalog approval policy substitution is forbidden')
+  }
   if (reviewArtifactSha256 !== approvalPolicy.reviewArtifactSha256) {
     throw new Error('Review artifact checksum does not match protected release policy')
   }
@@ -683,7 +768,7 @@ export const reconcileWingsSideCatalogAuthoringReview = ({
   }
   const trusted = [
     ...new Set(
-      approvalPolicy.trustedApprovers
+      approvalPolicy.trustedSignerIDs
         .map((value, index) => normalizeString(value, `Protected trusted approver ${index}`))
         .filter(Boolean),
     ),
@@ -698,7 +783,37 @@ export const reconcileWingsSideCatalogAuthoringReview = ({
       JSON.stringify(trusted) ||
     !trusted.includes(normalizeString(review.approvalManifest.approvedBy, 'Approved reviewer'))
   ) {
-    throw new Error('Approval manifest is not bound to the external trusted approver policy')
+    throw new Error('Approval manifest is not bound to the protected development-team signer policy')
+  }
+  if (
+    review.signature.algorithm !== 'ed25519' ||
+    review.signature.keyID !== normalizeString(approvalPolicy.keyID, 'Protected approval key ID') ||
+    review.signature.signerID !== review.approvalManifest.approvedBy ||
+    review.signature.signedAt !== review.approvalManifest.approvedAt ||
+    !trusted.includes(review.signature.signerID)
+  ) {
+    throw new Error('Catalog approval signature identity is not bound to protected D6-C policy')
+  }
+  let approvalPublicKey: ReturnType<typeof crypto.createPublicKey>
+  try {
+    approvalPublicKey = crypto.createPublicKey({
+      format: 'der',
+      key: Buffer.from(approvalPolicy.publicKeySpkiBase64, 'base64'),
+      type: 'spki',
+    })
+  } catch {
+    throw new Error('Protected catalog approval public key is invalid')
+  }
+  if (
+    approvalPublicKey.asymmetricKeyType !== 'ed25519' ||
+    !crypto.verify(
+      null,
+      Buffer.from(catalogAuthoringReviewSigningDigest(review), 'utf8'),
+      approvalPublicKey,
+      Buffer.from(review.signature.valueBase64, 'base64'),
+    )
+  ) {
+    throw new Error('Catalog development-team approval signature is invalid')
   }
   const draftRows = draft.tours.flatMap(({ rows, slug }) =>
     rows.map((row) => ({ ...row, slug })),

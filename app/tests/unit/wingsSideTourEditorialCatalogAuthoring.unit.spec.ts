@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto'
+import { createHash, generateKeyPairSync, sign } from 'node:crypto'
 import { resolve } from 'node:path'
 
 import { describe, expect, it, vi } from 'vitest'
@@ -11,9 +11,11 @@ import {
 import {
   buildWingsSideCatalogAuthoringDraft,
   catalogAuthoringChecksum,
+  catalogAuthoringReviewSigningDigest,
   parseCatalogAuthoringReviewArtifact,
   readFrozenCatalogAuthoringArtifact,
   reconcileWingsSideCatalogAuthoringReview,
+  wingsSideCatalogDevelopmentTeamApprovalPolicy,
   type CatalogAuthoringReviewArtifact,
   type CatalogAuthoringLocaleArtifact,
   type CatalogAuthoringSourceManifest,
@@ -31,6 +33,20 @@ import {
 
 const sha256 = (value: string | Buffer) => createHash('sha256').update(value).digest('hex')
 const slugs = Array.from({ length: 22 }, (_, index) => `review-fixture-tour-${index + 1}`)
+const approvalKeys = generateKeyPairSync('ed25519')
+const approvalKeyID = 'development-team-catalog-key-01'
+const approvalPublicKeySpkiBase64 = approvalKeys.publicKey
+  .export({ format: 'der', type: 'spki' })
+  .toString('base64')
+
+const signReviewArtifact = (artifact: CatalogAuthoringReviewArtifact) => {
+  artifact.signature.valueBase64 = sign(
+    null,
+    Buffer.from(catalogAuthoringReviewSigningDigest(artifact), 'utf8'),
+    approvalKeys.privateKey,
+  ).toString('base64')
+  return artifact
+}
 
 const sourceTours = (): CatalogAuthoringSourceTour[] =>
   slugs.map((slug, tourIndex) => ({
@@ -157,6 +173,7 @@ const review = (): CatalogAuthoringReviewArtifact => {
   const packet = draft()
   const rowDecisions = decisions(packet)
   const approvalManifest = {
+    ...wingsSideCatalogDevelopmentTeamApprovalPolicy,
     approvalArtifactID: 'external-review-artifact-1',
     approvedAt: '2026-07-28T00:00:00.000Z',
     approvedBy: 'trusted-reviewer',
@@ -218,13 +235,21 @@ const review = (): CatalogAuthoringReviewArtifact => {
     version: 2,
   }
   approvalManifest.checksum = editorialPricingApprovalChecksum(candidate)
-  return {
+  const artifact: CatalogAuthoringReviewArtifact = {
     approvalManifest,
     decisions: rowDecisions,
     draftPacketChecksum: packet.packetChecksum,
     fullCandidateChecksum: catalogAuthoringChecksum(candidate),
+    signature: {
+      algorithm: 'ed25519',
+      keyID: approvalKeyID,
+      signedAt: approvalManifest.approvedAt,
+      signerID: approvalManifest.approvedBy,
+      valueBase64: '',
+    },
     version: 1,
   }
+  return signReviewArtifact(artifact)
 }
 
 const reconcile = (artifact = review(), policyApprovers = ['trusted-reviewer']) => {
@@ -232,7 +257,13 @@ const reconcile = (artifact = review(), policyApprovers = ['trusted-reviewer']) 
   const sourceDigest = manifestDigest(sourceManifest)
   const reviewDigest = catalogAuthoringChecksum(artifact)
   return reconcileWingsSideCatalogAuthoringReview({
-    approvalPolicy: { reviewArtifactSha256: reviewDigest, trustedApprovers: policyApprovers },
+    approvalPolicy: {
+      ...wingsSideCatalogDevelopmentTeamApprovalPolicy,
+      keyID: approvalKeyID,
+      publicKeySpkiBase64: approvalPublicKeySpkiBase64,
+      reviewArtifactSha256: reviewDigest,
+      trustedSignerIDs: policyApprovers,
+    },
     draft: draft(),
     expectedSourceManifestSha256: sourceDigest,
     localeArtifacts: localeArtifacts(),
@@ -318,14 +349,45 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
   it('requires the protected review to attest the full candidate checksum', () => {
     const artifact = review()
     artifact.fullCandidateChecksum = 'f'.repeat(64)
-    expect(() => reconcile(artifact)).toThrow(
+    expect(() => reconcile(signReviewArtifact(artifact))).toThrow(
       'Review full candidate checksum does not match the candidate catalog',
     )
   })
 
+  it('rejects D6-C policy substitution and fabricated approval signatures', () => {
+    const substituted = review()
+    const sourceManifest = manifest()
+    const sourceDigest = manifestDigest(sourceManifest)
+    const reviewDigest = catalogAuthoringChecksum(substituted)
+    expect(() =>
+      reconcileWingsSideCatalogAuthoringReview({
+        approvalPolicy: {
+          ...wingsSideCatalogDevelopmentTeamApprovalPolicy,
+          keyID: approvalKeyID,
+          policyID: 'self-authored-policy' as never,
+          publicKeySpkiBase64: approvalPublicKeySpkiBase64,
+          reviewArtifactSha256: reviewDigest,
+          trustedSignerIDs: ['trusted-reviewer'],
+        },
+        draft: draft(),
+        expectedSourceManifestSha256: sourceDigest,
+        localeArtifacts: localeArtifacts(),
+        review: substituted,
+        reviewArtifactSha256: reviewDigest,
+        sourceManifest,
+        sourceManifestArtifactSha256: sourceDigest,
+        sourceTours: sourceTours(),
+      }),
+    ).toThrow('policy substitution')
+
+    const forged = review()
+    forged.signature.valueBase64 = Buffer.from('fabricated').toString('base64')
+    expect(() => reconcile(forged)).toThrow('approval signature is invalid')
+  })
+
   it('rejects a self-authorized reviewer absent from protected approvers', () => {
     expect(() => reconcile(review(), ['release-manager'])).toThrow(
-      'external trusted approver policy',
+      'protected development-team signer policy',
     )
   })
 
@@ -340,8 +402,11 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
     expect(() =>
       reconcileWingsSideCatalogAuthoringReview({
         approvalPolicy: {
+          ...wingsSideCatalogDevelopmentTeamApprovalPolicy,
+          keyID: approvalKeyID,
+          publicKeySpkiBase64: approvalPublicKeySpkiBase64,
           reviewArtifactSha256: 'f'.repeat(64),
-          trustedApprovers: ['trusted-reviewer'],
+          trustedSignerIDs: ['trusted-reviewer'],
         },
         draft: draft(),
         expectedSourceManifestSha256: sourceDigest,
@@ -357,8 +422,11 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
     expect(() =>
       reconcileWingsSideCatalogAuthoringReview({
         approvalPolicy: {
+          ...wingsSideCatalogDevelopmentTeamApprovalPolicy,
+          keyID: approvalKeyID,
+          publicKeySpkiBase64: approvalPublicKeySpkiBase64,
           reviewArtifactSha256: reviewDigest,
-          trustedApprovers: ['trusted-reviewer'],
+          trustedSignerIDs: ['trusted-reviewer'],
         },
         draft: tamperedDraft,
         expectedSourceManifestSha256: sourceDigest,
@@ -402,8 +470,11 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
       expect(() =>
         reconcileWingsSideCatalogAuthoringReview({
           approvalPolicy: {
+            ...wingsSideCatalogDevelopmentTeamApprovalPolicy,
+            keyID: approvalKeyID,
+            publicKeySpkiBase64: approvalPublicKeySpkiBase64,
             reviewArtifactSha256: reviewDigest,
-            trustedApprovers: ['trusted-reviewer'],
+            trustedSignerIDs: ['trusted-reviewer'],
           },
           draft: draft(),
           expectedSourceManifestSha256: sourceDigest,
@@ -452,7 +523,12 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
       assertCatalogAuthoringCLITrustBoundary('reconcile', [
         '--trusted-approvers=attacker@example.com',
       ]),
-    ).toThrow('protected environment')
+    ).toThrow('protected configuration')
+    expect(() =>
+      assertCatalogAuthoringCLITrustBoundary('reconcile', [
+        '--approval-public-key-spki-base64=attacker',
+      ]),
+    ).toThrow('protected configuration')
     expect(() =>
       assertCatalogAuthoringCLITrustBoundary('draft', ['--legacy-dir=unprotected']),
     ).toThrow('forbidden')

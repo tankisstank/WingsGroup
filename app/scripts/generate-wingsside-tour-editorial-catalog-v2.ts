@@ -10,6 +10,7 @@ import {
   parseCatalogAuthoringSourceManifest,
   readFrozenCatalogAuthoringArtifact,
   reconcileWingsSideCatalogAuthoringReview,
+  wingsSideCatalogDevelopmentTeamApprovalPolicy,
   type CatalogAuthoringSourceManifest,
   type CatalogAuthoringSourceTour,
 } from './lib/wingsSideTourEditorialCatalogAuthoring'
@@ -30,8 +31,15 @@ export const assertCatalogAuthoringCLITrustBoundary = (
   if (mode === 'draft' && present('--draft')) {
     throw new Error('Draft mode always rebuilds and rejects --draft')
   }
-  if (present('--trusted-approvers')) {
-    throw new Error('Trusted approvers must come from protected environment, not CLI')
+  if (
+    present('--trusted-approvers') ||
+    present('--approval-key-id') ||
+    present('--approval-public-key-spki-base64') ||
+    present('--approval-policy-id') ||
+    present('--approval-policy-version') ||
+    present('--approval-signer-role')
+  ) {
+    throw new Error('Approval policy, key, and trusted signers must come from protected configuration, not CLI')
   }
   if (present('--legacy-dir')) {
     throw new Error('Unprotected --legacy-dir locale discovery is forbidden')
@@ -173,10 +181,22 @@ export const runWingsSideCatalogAuthoring = async () => {
           if (trustedApprovers.length === 0) {
             throw new Error('Protected environment WINGSSIDE_CATALOG_TRUSTED_APPROVERS is required')
           }
+          const approvalKeyID = String(
+            process.env.WINGSSIDE_CATALOG_APPROVAL_KEY_ID || '',
+          ).trim()
+          const approvalPublicKeySpkiBase64 = String(
+            process.env.WINGSSIDE_CATALOG_APPROVAL_PUBLIC_KEY_SPKI_BASE64 || '',
+          ).trim()
+          if (!approvalKeyID || !approvalPublicKeySpkiBase64) {
+            throw new Error('Protected catalog approval Ed25519 key configuration is required')
+          }
           return reconcileWingsSideCatalogAuthoringReview({
             approvalPolicy: {
+              ...wingsSideCatalogDevelopmentTeamApprovalPolicy,
+              keyID: approvalKeyID,
+              publicKeySpkiBase64: approvalPublicKeySpkiBase64,
               reviewArtifactSha256: expectedReviewArtifactSha256,
-              trustedApprovers,
+              trustedSignerIDs: trustedApprovers,
             },
             draft,
             expectedSourceManifestSha256,

@@ -14,6 +14,7 @@ import {
   editorialPricingApprovalChecksum,
   type WingsSideTourEditorialCatalog,
 } from '../../scripts/lib/wingsSideTourEditorialLocalization'
+import { wingsSideCatalogDevelopmentTeamApprovalPolicy } from '../../scripts/lib/wingsSideTourEditorialCatalogAuthoring'
 
 const importer = fs.readFileSync(
   path.resolve(process.cwd(), 'scripts', 'import-wingsside-tour-editorial-production.ts'),
@@ -26,6 +27,7 @@ describe('WingSide tour editorial production importer release guard ordering', (
     const catalogPath = path.join(directory, 'reviewed-catalog-v2.json')
     const catalog: WingsSideTourEditorialCatalog = {
       approvalManifest: {
+        ...wingsSideCatalogDevelopmentTeamApprovalPolicy,
         approvalArtifactID: 'unit-review',
         approvedAt: '2026-07-28T00:00:00.000Z',
         approvedBy: 'unit-reviewer',
