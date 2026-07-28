@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
   preflightWingsSideEnglishEditorialProductionCLI,
+  resolveWingsSideEnglishEditorialProtectedInputs,
+  runWingsSideEnglishEditorialProductionCLI,
 } from '../../scripts/import-wingsside-tour-english-editorial-production'
 import {
   assertWingsSideTourEnglishEditorialGovernance,
@@ -18,6 +20,7 @@ import {
   readFrozenWingsSideEnglishEditorialArtifact,
   transitionWingsSideTourEnglishEditorialRuntime,
   verifyWingsSideTourEnglishEditorialRuntime,
+  WingsSideEnglishEditorialAmbiguousCommitError,
   type WingsSideTourEnglishEditorialRuntimeAdapter,
   type WingsSideTourEnglishEditorialRuntimeRow,
 } from '../../scripts/lib/wingsSideTourEnglishEditorialRuntime'
@@ -85,6 +88,7 @@ const fixture = () => {
 const adapterFixture = (
   initial: WingsSideTourEnglishEditorialRuntimeRow[],
   failAtWrite?: number,
+  failures: { commit?: Error; kill?: Error } = {},
 ) => {
   let state = clone(initial)
   let snapshot: typeof state | null = null
@@ -94,30 +98,44 @@ const adapterFixture = (
     commit: vi.fn(),
     kill: vi.fn(),
   }
+  const transactionTokens: {
+    commits: Array<{ id: string }>
+    kills: Array<{ id: string }>
+    reads: Array<{ id: string }>
+    writes: Array<{ id: string }>
+  } = { commits: [], kills: [], reads: [], writes: [] }
   const adapter: WingsSideTourEnglishEditorialRuntimeAdapter<{ id: string }> = {
     beginTransaction: async () => {
       calls.begin()
       snapshot = clone(state)
       return { id: 'transaction' }
     },
-    commitTransaction: async () => {
+    commitTransaction: async (transaction) => {
       calls.commit()
+      transactionTokens.commits.push(transaction)
+      if (failures.commit) throw failures.commit
       snapshot = null
     },
-    killTransaction: async () => {
+    killTransaction: async (transaction) => {
       calls.kill()
+      transactionTokens.kills.push(transaction)
+      if (failures.kill) throw failures.kill
       state = clone(snapshot!)
       snapshot = null
     },
-    readTours: async () => clone(state),
-    writeTour: async ({ document, tourID }) => {
+    readTours: async (transaction) => {
+      transactionTokens.reads.push(transaction)
+      return clone(state)
+    },
+    writeTour: async ({ document, tourID, transaction }) => {
+      transactionTokens.writes.push(transaction)
       writes += 1
       if (failAtWrite === writes) throw new Error('injected partial write')
       const index = state.findIndex((row) => String(row.tourID) === String(tourID))
       state[index] = { ...state[index]!, document: clone(document) }
     },
   }
-  return { adapter, calls, state: () => state }
+  return { adapter, calls, state: () => state, transactionTokens }
 }
 
 describe('WingSide English editorial canonical runtime', () => {
@@ -133,6 +151,11 @@ describe('WingSide English editorial canonical runtime', () => {
         plan: value.plan,
       }),
     ).resolves.toEqual({ state: 'after', unchanged: 0, updated: 22 })
+    const applyToken = runtime.transactionTokens.commits[0]
+    expect(runtime.transactionTokens.reads.slice(0, 2)).toEqual([applyToken, applyToken])
+    expect(runtime.transactionTokens.writes.slice(0, 22).every((token) => token === applyToken)).toBe(
+      true,
+    )
     await expect(
       verifyWingsSideTourEnglishEditorialRuntime({
         adapter: runtime.adapter,
@@ -186,6 +209,45 @@ describe('WingSide English editorial canonical runtime', () => {
     expect(runtime.calls.commit).not.toHaveBeenCalled()
     expect(runtime.calls.kill).toHaveBeenCalledOnce()
     expect(runtime.state()).toEqual(value.rows)
+  })
+
+  it('reports commit failure as ambiguous and never attempts kill after commit begins', async () => {
+    const value = fixture()
+    const commitFailure = new Error('connection lost during commit')
+    const runtime = adapterFixture(value.rows, undefined, { commit: commitFailure })
+    const result = transitionWingsSideTourEnglishEditorialRuntime({
+      adapter: runtime.adapter,
+      config: value.config,
+      direction: 'apply',
+      manifest: value.manifest,
+      plan: value.plan,
+    })
+    await expect(result).rejects.toBeInstanceOf(WingsSideEnglishEditorialAmbiguousCommitError)
+    await expect(result).rejects.toMatchObject({
+      cause: commitFailure,
+      code: 'WINGSSIDE_EN_EDITORIAL_AMBIGUOUS_COMMIT',
+      requiresVerify: true,
+    })
+    expect(runtime.calls.kill).not.toHaveBeenCalled()
+  })
+
+  it('preserves both primary mutation and cleanup failures', async () => {
+    const value = fixture()
+    const primary = new Error('primary write failure')
+    const cleanup = new Error('kill failed')
+    const runtime = adapterFixture(value.rows, 1, { kill: cleanup })
+    runtime.adapter.writeTour = async () => {
+      throw primary
+    }
+    const result = transitionWingsSideTourEnglishEditorialRuntime({
+      adapter: runtime.adapter,
+      config: value.config,
+      direction: 'apply',
+      manifest: value.manifest,
+      plan: value.plan,
+    })
+    await expect(result).rejects.toBeInstanceOf(AggregateError)
+    await expect(result).rejects.toMatchObject({ cause: primary, errors: [primary, cleanup] })
   })
 
   it.each([
@@ -284,9 +346,12 @@ describe('WingSide English editorial guarded CLI preflight', () => {
       plan: JSON.stringify(value.plan),
     }
     const env = {
-      IMPORT_ADMIN_EMAIL: 'admin@wingside.vn',
+      ADMIN_EMAIL: 'admin@wingside.vn',
+      WINGSSIDE_EN_EDITORIAL_CONFIG_PATH: 'config',
       WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256: sha256(files.config),
+      WINGSSIDE_EN_EDITORIAL_MANIFEST_PATH: 'manifest',
       WINGSSIDE_EN_EDITORIAL_MANIFEST_SHA256: sha256(files.manifest),
+      WINGSSIDE_EN_EDITORIAL_PLAN_PATH: 'plan',
       WINGSSIDE_EN_EDITORIAL_SITE_CODE: 'wing-side',
       WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256: sha256(files.plan),
       WINGSTRAVEL_RELEASE_SHA: releaseSha,
@@ -318,50 +383,91 @@ describe('WingSide English editorial guarded CLI preflight', () => {
     expect(readFileSync).not.toHaveBeenCalled()
   })
 
-  it('keeps verify read-only and invokes the release guard for apply', () => {
+  it.each([
+    ['ADMIN_EMAIL', '--admin-email'],
+    ['WINGSSIDE_EN_EDITORIAL_CONFIG_PATH', '--config'],
+    ['WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256', '--config-sha256'],
+    ['WINGSSIDE_EN_EDITORIAL_MANIFEST_PATH', '--manifest'],
+    ['WINGSSIDE_EN_EDITORIAL_MANIFEST_SHA256', '--manifest-sha256'],
+    ['WINGSSIDE_EN_EDITORIAL_PLAN_PATH', '--plan'],
+    ['WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256', '--plan-sha256'],
+    ['WINGSTRAVEL_RELEASE_SHA', '--release-sha'],
+    ['WINGSSIDE_EN_EDITORIAL_SITE_CODE', '--site-code'],
+  ])('requires protected environment %s even for verify', (envName, cliName) => {
     const value = cliFixture()
-    const releaseGuard = vi.fn()
+    const missing = { ...value.env, [envName]: undefined }
+    expect(() =>
+      resolveWingsSideEnglishEditorialProtectedInputs({
+        argv: ['verify', `${cliName}=attacker-value`],
+        env: missing,
+      }),
+    ).toThrow(/environment value is required/)
+  })
+
+  it.each([
+    ['ADMIN_EMAIL', '--admin-email'],
+    ['WINGSSIDE_EN_EDITORIAL_CONFIG_PATH', '--config'],
+    ['WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256', '--config-sha256'],
+    ['WINGSSIDE_EN_EDITORIAL_MANIFEST_PATH', '--manifest'],
+    ['WINGSSIDE_EN_EDITORIAL_MANIFEST_SHA256', '--manifest-sha256'],
+    ['WINGSSIDE_EN_EDITORIAL_PLAN_PATH', '--plan'],
+    ['WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256', '--plan-sha256'],
+    ['WINGSTRAVEL_RELEASE_SHA', '--release-sha'],
+    ['WINGSSIDE_EN_EDITORIAL_SITE_CODE', '--site-code'],
+  ])('rejects optional CLI echo conflict for protected %s', (_envName, cliName) => {
+    const value = cliFixture()
+    expect(() =>
+      resolveWingsSideEnglishEditorialProtectedInputs({
+        argv: ['verify', `${cliName}=attacker-value`],
+        env: value.env,
+      }),
+    ).toThrow(/CLI\/environment conflict/)
+  })
+
+  it('keeps verify preflight read-only', () => {
+    const value = cliFixture()
     expect(
       preflightWingsSideEnglishEditorialProductionCLI({
         argv: ['verify', ...value.base],
         env: value.env,
         io: value.io,
-        releaseGuard,
       }).phase,
     ).toBe('verify')
-    expect(releaseGuard).not.toHaveBeenCalled()
-
-    expect(
-      preflightWingsSideEnglishEditorialProductionCLI({
-        argv: [
-          'apply',
-          ...value.base,
-          '--confirm=CONFIRM_WINGSSIDE_ENGLISH_EDITORIAL_PRODUCTION_WRITE',
-        ],
-        env: value.env,
-        io: value.io,
-        releaseGuard,
-      }).phase,
-    ).toBe('apply')
-    expect(releaseGuard).toHaveBeenCalledOnce()
   })
 
-  it('rejects a protected admin CLI/environment conflict before the release guard', () => {
+  it('cannot bypass the real release guard with an injected authorization function', () => {
     const value = cliFixture()
-    const releaseGuard = vi.fn()
+    const fakeAuthorization = vi.fn()
     expect(() =>
       preflightWingsSideEnglishEditorialProductionCLI({
         argv: [
           'apply',
           ...value.base,
-          '--admin-email=other@wingside.vn',
           '--confirm=CONFIRM_WINGSSIDE_ENGLISH_EDITORIAL_PRODUCTION_WRITE',
         ],
         env: value.env,
         io: value.io,
-        releaseGuard,
+        releaseGuard: fakeAuthorization,
+      } as never),
+    ).toThrow(/DATABASE_URL is required/)
+    expect(fakeAuthorization).not.toHaveBeenCalled()
+  })
+
+  it('does not construct an adapter before apply passes the real release guard', async () => {
+    const value = cliFixture()
+    const adapterFactory = vi.fn()
+    await expect(
+      runWingsSideEnglishEditorialProductionCLI({
+        adapterFactory,
+        argv: [
+          'apply',
+          ...value.base,
+          '--confirm=CONFIRM_WINGSSIDE_ENGLISH_EDITORIAL_PRODUCTION_WRITE',
+        ],
+        env: value.env,
+        io: value.io,
       }),
-    ).toThrow(/CLI\/environment conflict/)
-    expect(releaseGuard).not.toHaveBeenCalled()
+    ).rejects.toThrow(/DATABASE_URL is required/)
+    expect(adapterFactory).not.toHaveBeenCalled()
   })
 })

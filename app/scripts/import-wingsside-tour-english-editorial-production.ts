@@ -9,10 +9,8 @@ import {
   loadFrozenWingsSideEnglishEditorialArtifacts,
   type WingsSideTourEnglishEditorialRuntimeAdapter,
 } from './lib/wingsSideTourEnglishEditorialRuntime'
-import {
-  assertWingsSideEditorialProductionWriteGuard,
-  type WingsSideEditorialProductionWriteGuardArgs,
-} from './lib/wingsSideReleaseWriteGuard'
+import { assertWingsSideEditorialProductionWriteGuard } from './lib/wingsSideReleaseWriteGuard'
+import type { WingsSideEditorialProductionWriteGuardArgs } from './lib/wingsSideReleaseWriteGuard'
 
 type Phase = 'apply' | 'rollback' | 'verify'
 type ReleaseEnvironment = Partial<Record<string, string | undefined>>
@@ -38,10 +36,13 @@ const protectedValue = ({
   name: string
 }) => {
   const cliValue = argumentValue(argv, name)
-  if (cliValue && envValue && cliValue !== envValue) {
+  if (!envValue) {
+    throw new Error(`Protected English editorial environment value is required: ${name}`)
+  }
+  if (cliValue && cliValue !== envValue) {
     throw new Error(`Protected English editorial CLI/environment conflict: ${name}`)
   }
-  return cliValue || envValue
+  return envValue
 }
 
 const phaseFrom = (argv: string[]): Phase => {
@@ -52,126 +53,152 @@ const phaseFrom = (argv: string[]): Phase => {
   return phase as Phase
 }
 
-const required = (value: string | undefined, label: string) => {
-  if (!value) throw new Error(`English editorial production requires ${label}`)
-  return value
-}
+export const resolveWingsSideEnglishEditorialProtectedInputs = ({
+  argv,
+  env = process.env,
+}: {
+  argv: string[]
+  env?: ReleaseEnvironment
+}) => ({
+  adminEmail: protectedValue({
+    argv,
+    envValue: env.ADMIN_EMAIL,
+    name: '--admin-email',
+  }),
+  configPath: protectedValue({
+    argv,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_CONFIG_PATH,
+    name: '--config',
+  }),
+  configSha256: protectedValue({
+    argv,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256,
+    name: '--config-sha256',
+  }),
+  manifestPath: protectedValue({
+    argv,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_MANIFEST_PATH,
+    name: '--manifest',
+  }),
+  manifestSha256: protectedValue({
+    argv,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_MANIFEST_SHA256,
+    name: '--manifest-sha256',
+  }),
+  planPath: protectedValue({
+    argv,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_PLAN_PATH,
+    name: '--plan',
+  }),
+  planSha256: protectedValue({
+    argv,
+    envValue: env.WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256,
+    name: '--plan-sha256',
+  }),
+  releaseSha: protectedValue({
+    argv,
+    envValue: env.WINGSTRAVEL_RELEASE_SHA,
+    name: '--release-sha',
+  }),
+  siteCode: protectedValue({
+    argv,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_SITE_CODE,
+    name: '--site-code',
+  }),
+})
 
 export const preflightWingsSideEnglishEditorialProductionCLI = ({
   argv,
   env = process.env,
   io = fs,
-  releaseGuard = assertWingsSideEditorialProductionWriteGuard,
 }: {
   argv: string[]
   env?: ReleaseEnvironment
   io?: ArtifactIO
-  releaseGuard?: (
-    args: WingsSideEditorialProductionWriteGuardArgs,
-    env: ReleaseEnvironment,
-  ) => unknown
 }) => {
   const phase = phaseFrom(argv)
-  const siteCode = protectedValue({
-    argv,
-    envValue: env.WINGSSIDE_EN_EDITORIAL_SITE_CODE,
-    name: '--site-code',
-  })
+  const protectedInputs = resolveWingsSideEnglishEditorialProtectedInputs({ argv, env })
+  const {
+    adminEmail,
+    configPath,
+    configSha256,
+    manifestPath,
+    manifestSha256,
+    planPath,
+    planSha256,
+    releaseSha,
+    siteCode,
+  } = protectedInputs
   if (siteCode !== 'wing-side') {
     throw new Error('English editorial production requires protected site code wing-side')
   }
-  const releaseSha = protectedValue({
-    argv,
-    envValue: env.WINGSTRAVEL_RELEASE_SHA,
-    name: '--release-sha',
-  })
-  const configSha256 = protectedValue({
-    argv,
-    envValue: env.WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256,
-    name: '--config-sha256',
-  })
-  const manifestSha256 = protectedValue({
-    argv,
-    envValue: env.WINGSSIDE_EN_EDITORIAL_MANIFEST_SHA256,
-    name: '--manifest-sha256',
-  })
-  const planSha256 = protectedValue({
-    argv,
-    envValue: env.WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256,
-    name: '--plan-sha256',
-  })
   const artifacts = loadFrozenWingsSideEnglishEditorialArtifacts({
     config: {
-      path: required(argumentValue(argv, '--config'), '--config'),
-      sha256: required(configSha256, '--config-sha256'),
+      path: configPath,
+      sha256: configSha256,
     },
     io,
     manifest: {
-      path: required(argumentValue(argv, '--manifest'), '--manifest'),
-      sha256: required(manifestSha256, '--manifest-sha256'),
+      path: manifestPath,
+      sha256: manifestSha256,
     },
     plan: {
-      path: required(argumentValue(argv, '--plan'), '--plan'),
-      sha256: required(planSha256, '--plan-sha256'),
+      path: planPath,
+      sha256: planSha256,
     },
   })
   if (artifacts.plan.releaseSha !== releaseSha || artifacts.manifest.releaseSha !== releaseSha) {
     throw new Error('English editorial artifact release SHA does not match protected release')
   }
 
+  let mutationGuardArgs: null | WingsSideEditorialProductionWriteGuardArgs = null
   if (phase === 'apply' || phase === 'rollback') {
     const expectedConfirmation =
       phase === 'apply' ? applyConfirmation : rollbackConfirmation
     if (argumentValue(argv, '--confirm') !== expectedConfirmation) {
       throw new Error(`${phase} requires --confirm=${expectedConfirmation}`)
     }
-    const adminEmail = protectedValue({
-      argv,
-      envValue: env.IMPORT_ADMIN_EMAIL,
-      name: '--admin-email',
-    })
-    releaseGuard(
-      {
-        adminEmail,
-        backupPath: argumentValue(argv, '--backup'),
-        backupSha256: argumentValue(argv, '--backup-sha256'),
-        planSha256: artifacts.planArtifactSha256,
-        production: true,
-        productionConfirm: argumentValue(argv, '--confirm-production'),
-        releaseSha,
-        releaseSourceSha: artifacts.plan.releaseSha,
-        restoreEvidencePath: argumentValue(argv, '--restore-evidence'),
-        restoreEvidenceSha256: argumentValue(argv, '--restore-evidence-sha256'),
-        rollbackRelease: argumentValue(argv, '--rollback-release'),
-      },
-      env,
-    )
+    mutationGuardArgs = {
+      adminEmail,
+      backupPath: argumentValue(argv, '--backup'),
+      backupSha256: argumentValue(argv, '--backup-sha256'),
+      planSha256: artifacts.planArtifactSha256,
+      production: true,
+      productionConfirm: argumentValue(argv, '--confirm-production'),
+      releaseSha,
+      releaseSourceSha: artifacts.plan.releaseSha,
+      restoreEvidencePath: argumentValue(argv, '--restore-evidence'),
+      restoreEvidenceSha256: argumentValue(argv, '--restore-evidence-sha256'),
+      rollbackRelease: argumentValue(argv, '--rollback-release'),
+    }
+    assertWingsSideEditorialProductionWriteGuard(mutationGuardArgs, env)
   }
-  return { artifacts, phase }
+  return { artifacts, mutationGuardArgs, phase }
 }
 
 export const runWingsSideEnglishEditorialProductionCLI = async <Transaction>({
-  adapter,
+  adapterFactory,
   argv,
   env = process.env,
   io = fs,
-  releaseGuard = assertWingsSideEditorialProductionWriteGuard,
 }: {
-  adapter: WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
+  adapterFactory: (args: {
+    artifacts: ReturnType<typeof loadFrozenWingsSideEnglishEditorialArtifacts>
+    phase: Phase
+  }) =>
+    | Promise<WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>>
+    | WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
   argv: string[]
   env?: ReleaseEnvironment
   io?: ArtifactIO
-  releaseGuard?: (
-    args: WingsSideEditorialProductionWriteGuardArgs,
-    env: ReleaseEnvironment,
-  ) => unknown
 }) => {
-  const { artifacts, phase } = preflightWingsSideEnglishEditorialProductionCLI({
+  const { artifacts, mutationGuardArgs, phase } =
+    preflightWingsSideEnglishEditorialProductionCLI({
     argv,
     env,
     io,
-    releaseGuard,
   })
+  const adapter = await adapterFactory({ artifacts, phase })
   if (phase === 'verify') {
     return verifyWingsSideTourEnglishEditorialRuntime({
       adapter,
@@ -181,6 +208,7 @@ export const runWingsSideEnglishEditorialProductionCLI = async <Transaction>({
       plan: artifacts.plan,
     })
   }
+  assertWingsSideEditorialProductionWriteGuard(mutationGuardArgs!, env)
   return transitionWingsSideTourEnglishEditorialRuntime({
     adapter,
     config: artifacts.config,

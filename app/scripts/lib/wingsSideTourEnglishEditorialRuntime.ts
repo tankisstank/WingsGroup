@@ -28,12 +28,44 @@ export type WingsSideTourEnglishEditorialRuntimeAdapter<Transaction> = {
   beginTransaction: () => Promise<null | Transaction>
   commitTransaction: (transaction: Transaction) => Promise<void>
   killTransaction: (transaction: Transaction) => Promise<void>
-  readTours: (transaction?: Transaction) => Promise<WingsSideTourEnglishEditorialRuntimeRow[]>
+  readTours: (transaction: Transaction) => Promise<WingsSideTourEnglishEditorialRuntimeRow[]>
   writeTour: (args: {
     document: WingsSideTourEnglishEditorialDocument
     tourID: number | string
     transaction: Transaction
   }) => Promise<void>
+}
+
+export class WingsSideEnglishEditorialAmbiguousCommitError extends Error {
+  readonly code = 'WINGSSIDE_EN_EDITORIAL_AMBIGUOUS_COMMIT'
+  readonly requiresVerify = true
+
+  constructor(cause: unknown) {
+    super('English editorial commit outcome is ambiguous; run guarded verify before retrying', {
+      cause,
+    })
+    this.name = 'WingsSideEnglishEditorialAmbiguousCommitError'
+  }
+}
+
+const killPreservingPrimary = async <Transaction>({
+  adapter,
+  primary,
+  transaction,
+}: {
+  adapter: WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
+  primary: unknown
+  transaction: Transaction
+}) => {
+  try {
+    await adapter.killTransaction(transaction)
+  } catch (killError) {
+    throw new AggregateError(
+      [primary, killError],
+      'English editorial mutation failed and transaction cleanup also failed',
+      { cause: primary },
+    )
+  }
 }
 
 type ArtifactIO = Pick<typeof fs, 'readFileSync'>
@@ -193,14 +225,26 @@ export const verifyWingsSideTourEnglishEditorialRuntime = async <Transaction>({
   plan: WingsSideTourEnglishEditorialPlan
 }) => {
   assertWingsSideTourEnglishEditorialGovernance({ config, manifest, plan })
-  const rows = await adapter.readTours()
-  assertRuntimeInventory(rows, plan)
-  verifyWingsSideTourEnglishEditorialPlan(
-    plan,
-    rows.map(({ document }) => document),
-    expectedState === 'after' ? 'applied' : 'rolled-back',
-  )
-  return { checked: rows.length, state: expectedState }
+  const transaction = await adapter.beginTransaction()
+  if (transaction === null || transaction === undefined) {
+    throw new Error('English editorial verification could not start required transaction')
+  }
+  let checked = 0
+  try {
+    const rows = await adapter.readTours(transaction)
+    assertRuntimeInventory(rows, plan)
+    verifyWingsSideTourEnglishEditorialPlan(
+      plan,
+      rows.map(({ document }) => document),
+      expectedState === 'after' ? 'applied' : 'rolled-back',
+    )
+    checked = rows.length
+  } catch (error) {
+    await killPreservingPrimary({ adapter, primary: error, transaction })
+    throw error
+  }
+  await adapter.killTransaction(transaction)
+  return { checked, state: expectedState }
 }
 
 export const transitionWingsSideTourEnglishEditorialRuntime = async <Transaction>({
@@ -218,6 +262,7 @@ export const transitionWingsSideTourEnglishEditorialRuntime = async <Transaction
 }) => {
   assertWingsSideTourEnglishEditorialGovernance({ config, manifest, plan })
   let transaction: null | Transaction = null
+  let commitStarted = false
   try {
     transaction = await adapter.beginTransaction()
     if (transaction === null || transaction === undefined) {
@@ -228,6 +273,7 @@ export const transitionWingsSideTourEnglishEditorialRuntime = async <Transaction
     const currentState = stateOf(rows, plan)
     const targetState = direction === 'apply' ? 'after' : 'before'
     if (currentState === targetState) {
+      commitStarted = true
       await adapter.commitTransaction(transaction)
       transaction = null
       return { state: targetState, unchanged: 22, updated: 0 }
@@ -254,12 +300,14 @@ export const transitionWingsSideTourEnglishEditorialRuntime = async <Transaction
     if (stateOf(afterRows, plan) !== targetState) {
       throw new Error('English editorial runtime post-write verification failed')
     }
+    commitStarted = true
     await adapter.commitTransaction(transaction)
     transaction = null
     return { state: targetState, unchanged: 0, updated: 22 }
   } catch (error) {
     if (transaction !== null && transaction !== undefined) {
-      await adapter.killTransaction(transaction)
+      if (commitStarted) throw new WingsSideEnglishEditorialAmbiguousCommitError(error)
+      await killPreservingPrimary({ adapter, primary: error, transaction })
     }
     throw error
   }
