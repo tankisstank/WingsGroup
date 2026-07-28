@@ -3,9 +3,11 @@ import { describe, expect, it } from 'vitest'
 import {
   applyWingsSideTourEnglishEditorialPlan,
   assertWingsSideTourEnglishEditorialPlan,
+  buildWingsSideTourEnglishEditorialManifest,
   buildWingsSideTourEnglishEditorialPlan,
   rollbackWingsSideTourEnglishEditorialPlan,
   verifyWingsSideTourEnglishEditorialPlan,
+  wingsSideTourEnglishEditorialChecksum,
   type WingsSideTourEnglishEditorialConfig,
   type WingsSideTourEnglishEditorialDocument,
   type WingsSideTourEnglishEditorialPlan,
@@ -67,18 +69,36 @@ const config: WingsSideTourEnglishEditorialConfig = {
   vendorBrands: ['BestPrice', 'SourceCo'],
 }
 
+const manifestFor = (
+  source: WingsSideTourEnglishEditorialDocument[],
+  governedConfig: WingsSideTourEnglishEditorialConfig = config,
+) =>
+  buildWingsSideTourEnglishEditorialManifest({
+    config: governedConfig,
+    releaseSha: 'a'.repeat(40),
+    tours: source.map((item, index) => ({
+      slug: item.slug,
+      sourceChecksum: wingsSideTourEnglishEditorialChecksum(item),
+      tourID: index + 1,
+    })),
+  })
+
 const buildPlan = (
   source = sourceTours(),
   proposal = proposedTours(),
 ): WingsSideTourEnglishEditorialPlan =>
-  buildWingsSideTourEnglishEditorialPlan({
-    config,
-    createdAt: '2026-07-28T00:00:00.000Z',
-    expectedSlugs: slugs,
-    proposedTours: proposal,
-    runID: 'unit-run',
-    sourceTours: source,
-  })
+  (() => {
+    const manifest = manifestFor(source)
+    return buildWingsSideTourEnglishEditorialPlan({
+      config,
+      createdAt: '2026-07-28T00:00:00.000Z',
+      expectedSlugs: slugs,
+      manifest,
+      proposedTours: proposal,
+      runID: 'unit-run',
+      sourceTours: source,
+    })
+  })()
 
 describe('WingSide English editorial lint', () => {
   it.each([
@@ -143,7 +163,9 @@ describe('WingSide governed English editorial plan', () => {
   })
 
   it('fails closed when one of 22 tours is missing', () => {
-    expect(() => buildPlan(sourceTours().slice(0, -1))).toThrow('exactly 22 unique tours')
+    expect(() => buildPlan(sourceTours().slice(0, -1))).toThrow(
+      /Invalid WingSide English editorial manifest|exactly 22 unique tours/,
+    )
   })
 
   it('fails closed when an extra slug replaces a governed slug', () => {
@@ -169,17 +191,20 @@ describe('WingSide governed English editorial plan', () => {
   it('permits an explicitly approved factual-field modification', () => {
     const proposal = proposedTours()
     proposal[0] = { ...proposal[0]!, durationDays: 9 }
+    const approvedConfig = {
+      ...config,
+      approvedFactualPaths: ['durationDays'],
+    }
+    const source = sourceTours()
     expect(() =>
       buildWingsSideTourEnglishEditorialPlan({
-        config: {
-          ...config,
-          approvedFactualPaths: ['durationDays'],
-        },
+        config: approvedConfig,
         createdAt: '2026-07-28T00:00:00.000Z',
         expectedSlugs: slugs,
+        manifest: manifestFor(source, approvedConfig),
         proposedTours: proposal,
         runID: 'approved-fact-unit-run',
-        sourceTours: sourceTours(),
+        sourceTours: source,
       }),
     ).not.toThrow()
   })

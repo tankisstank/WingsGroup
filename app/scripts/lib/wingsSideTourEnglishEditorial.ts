@@ -6,7 +6,9 @@ import {
 } from './wingsSideTourEnglishEditorialValidator'
 
 export const wingsSideTourEnglishEditorialExpectedCount = 22
-export const wingsSideTourEnglishEditorialPlanVersion = 1
+export const wingsSideTourEnglishEditorialPlanVersion = 2
+export const wingsSideTourEnglishEditorialGovernanceVersion = 1
+export const wingsSideTourEnglishEditorialSiteCode = 'wing-side'
 
 export type WingsSideTourEnglishEditorialDocument = {
   slug: string
@@ -34,18 +36,40 @@ export type WingsSideTourEnglishEditorialPlanEntry = {
   fieldChanges: WingsSideTourEnglishEditorialFieldChange[]
   slug: string
   sourceChecksum: string
+  tourID: number | string
 }
 
 export type WingsSideTourEnglishEditorialPlan = {
   aggregateChecksum: string
+  configChecksum: string
   createdAt: string
   entries: WingsSideTourEnglishEditorialPlanEntry[]
   expectedSlugs: string[]
   expectedTourCount: 22
+  manifestChecksum: string
   mode: 'plan'
   planChecksum: string
-  planVersion: 1
+  planVersion: 2
+  releaseSha: string
   runID: string
+  siteCode: 'wing-side'
+  tourIdentities: Array<{ slug: string; tourID: number | string }>
+}
+
+export type WingsSideTourEnglishEditorialManifest = {
+  checksum: string
+  configChecksum: string
+  releaseSha: string
+  siteCode: 'wing-side'
+  tours: Array<{ slug: string; sourceChecksum: string; tourID: number | string }>
+  version: 1
+}
+
+export type WingsSideTourEnglishEditorialConfigArtifact = {
+  checksum: string
+  config: WingsSideTourEnglishEditorialConfig
+  siteCode: 'wing-side'
+  version: 1
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -75,6 +99,100 @@ export const wingsSideTourEnglishEditorialChecksum = (value: unknown): string =>
     .createHash('sha256')
     .update(wingsSideTourEnglishEditorialStableStringify(value))
     .digest('hex')
+
+export const wingsSideTourEnglishEditorialConfigChecksum = (
+  config: WingsSideTourEnglishEditorialConfig,
+) =>
+  wingsSideTourEnglishEditorialChecksum({
+    config,
+    siteCode: wingsSideTourEnglishEditorialSiteCode,
+    version: wingsSideTourEnglishEditorialGovernanceVersion,
+  })
+
+export const buildWingsSideTourEnglishEditorialConfigArtifact = (
+  config: WingsSideTourEnglishEditorialConfig,
+): WingsSideTourEnglishEditorialConfigArtifact => {
+  const artifact = {
+    checksum: wingsSideTourEnglishEditorialConfigChecksum(config),
+    config: clone(config),
+    siteCode: 'wing-side' as const,
+    version: 1 as const,
+  }
+  assertWingsSideTourEnglishEditorialConfigArtifact(artifact)
+  return artifact
+}
+
+export const assertWingsSideTourEnglishEditorialConfigArtifact = (
+  artifact: WingsSideTourEnglishEditorialConfigArtifact,
+) => {
+  if (
+    artifact.version !== wingsSideTourEnglishEditorialGovernanceVersion ||
+    artifact.siteCode !== wingsSideTourEnglishEditorialSiteCode ||
+    !artifact.config ||
+    artifact.checksum !== wingsSideTourEnglishEditorialConfigChecksum(artifact.config)
+  ) {
+    throw new Error('Invalid WingSide English editorial config artifact')
+  }
+}
+
+const manifestPayload = (
+  manifest: Omit<WingsSideTourEnglishEditorialManifest, 'checksum'>,
+) => manifest
+
+export const buildWingsSideTourEnglishEditorialManifest = ({
+  config,
+  releaseSha,
+  tours,
+}: {
+  config: WingsSideTourEnglishEditorialConfig
+  releaseSha: string
+  tours: Array<{ slug: string; sourceChecksum: string; tourID: number | string }>
+}): WingsSideTourEnglishEditorialManifest => {
+  const base = {
+    configChecksum: wingsSideTourEnglishEditorialConfigChecksum(config),
+    releaseSha,
+    siteCode: 'wing-side' as const,
+    tours: clone(tours),
+    version: wingsSideTourEnglishEditorialGovernanceVersion,
+  } as const
+  const manifest = { ...base, checksum: wingsSideTourEnglishEditorialChecksum(base) }
+  assertWingsSideTourEnglishEditorialManifest(manifest)
+  return manifest
+}
+
+export const assertWingsSideTourEnglishEditorialManifest = (
+  manifest: WingsSideTourEnglishEditorialManifest,
+) => {
+  if (
+    manifest.version !== wingsSideTourEnglishEditorialGovernanceVersion ||
+    manifest.siteCode !== wingsSideTourEnglishEditorialSiteCode ||
+    !/^[0-9a-f]{40}$/u.test(manifest.releaseSha) ||
+    !/^[0-9a-f]{64}$/u.test(manifest.configChecksum) ||
+    manifest.tours.length !== wingsSideTourEnglishEditorialExpectedCount
+  ) {
+    throw new Error('Invalid WingSide English editorial manifest')
+  }
+  const slugs = manifest.tours.map(({ slug }) => slug)
+  const ids = manifest.tours.map(({ tourID }) => String(tourID))
+  if (
+    new Set(slugs).size !== wingsSideTourEnglishEditorialExpectedCount ||
+    new Set(ids).size !== wingsSideTourEnglishEditorialExpectedCount ||
+    manifest.tours.some(
+      ({ slug, sourceChecksum, tourID }) =>
+        !slug ||
+        (typeof tourID !== 'number' && (typeof tourID !== 'string' || !tourID.trim())) ||
+        !/^[0-9a-f]{64}$/u.test(sourceChecksum),
+    )
+  ) {
+    throw new Error('WingSide English editorial manifest tour identities are invalid')
+  }
+  const { checksum: _checksum, ...payload } = manifest
+  if (
+    wingsSideTourEnglishEditorialChecksum(manifestPayload(payload)) !== manifest.checksum
+  ) {
+    throw new Error('WingSide English editorial manifest checksum mismatch')
+  }
+}
 
 const getAtPath = (source: unknown, path: string): unknown => {
   let cursor = source
@@ -211,7 +329,11 @@ export const assertWingsSideTourEnglishEditorialPlan = (
   if (
     plan.planVersion !== wingsSideTourEnglishEditorialPlanVersion ||
     plan.mode !== 'plan' ||
-    plan.expectedTourCount !== wingsSideTourEnglishEditorialExpectedCount
+    plan.expectedTourCount !== wingsSideTourEnglishEditorialExpectedCount ||
+    plan.siteCode !== wingsSideTourEnglishEditorialSiteCode ||
+    !/^[0-9a-f]{40}$/u.test(plan.releaseSha) ||
+    !/^[0-9a-f]{64}$/u.test(plan.configChecksum) ||
+    !/^[0-9a-f]{64}$/u.test(plan.manifestChecksum)
   ) {
     throw new Error('Invalid WingSide English editorial plan shape')
   }
@@ -224,6 +346,8 @@ export const assertWingsSideTourEnglishEditorialPlan = (
     if (
       entry.slug !== entry.before.slug ||
       entry.slug !== entry.after.slug ||
+      (typeof entry.tourID !== 'number' &&
+        (typeof entry.tourID !== 'string' || !entry.tourID.trim())) ||
       entry.sourceChecksum !== wingsSideTourEnglishEditorialChecksum(entry.before) ||
       entry.afterChecksum !== wingsSideTourEnglishEditorialChecksum(entry.after) ||
       wingsSideTourEnglishEditorialStableStringify(entry.fieldChanges) !==
@@ -231,6 +355,18 @@ export const assertWingsSideTourEnglishEditorialPlan = (
     ) {
       throw new Error(`English editorial plan entry checksum or summary mismatch: ${entry.slug}`)
     }
+  }
+  if (
+    wingsSideTourEnglishEditorialStableStringify(plan.expectedSlugs) !==
+      wingsSideTourEnglishEditorialStableStringify(plan.entries.map(({ slug }) => slug)) ||
+    wingsSideTourEnglishEditorialStableStringify(plan.tourIdentities) !==
+    wingsSideTourEnglishEditorialStableStringify(
+      plan.entries.map(({ slug, tourID }) => ({ slug, tourID })),
+    ) ||
+    new Set(plan.tourIdentities.map(({ tourID }) => String(tourID))).size !==
+      wingsSideTourEnglishEditorialExpectedCount
+  ) {
+    throw new Error('English editorial plan tour identity mismatch')
   }
   const aggregate = wingsSideTourEnglishEditorialChecksum(
     plan.entries.map(({ afterChecksum, slug, sourceChecksum }) => ({
@@ -252,6 +388,7 @@ export const buildWingsSideTourEnglishEditorialPlan = ({
   config,
   createdAt,
   expectedSlugs,
+  manifest,
   proposedTours,
   runID,
   sourceTours,
@@ -259,17 +396,33 @@ export const buildWingsSideTourEnglishEditorialPlan = ({
   config: WingsSideTourEnglishEditorialConfig
   createdAt: string
   expectedSlugs: string[]
+  manifest: WingsSideTourEnglishEditorialManifest
   proposedTours: WingsSideTourEnglishEditorialDocument[]
   runID: string
   sourceTours: WingsSideTourEnglishEditorialDocument[]
 }): WingsSideTourEnglishEditorialPlan => {
+  assertWingsSideTourEnglishEditorialManifest(manifest)
+  if (wingsSideTourEnglishEditorialConfigChecksum(config) !== manifest.configChecksum) {
+    throw new Error('English editorial config does not match the governed manifest')
+  }
+  if (
+    wingsSideTourEnglishEditorialStableStringify(expectedSlugs) !==
+    wingsSideTourEnglishEditorialStableStringify(manifest.tours.map(({ slug }) => slug))
+  ) {
+    throw new Error('English editorial expected slugs do not match the governed manifest')
+  }
   assertExactInventory(sourceTours, expectedSlugs, 'English editorial source')
   assertExactInventory(proposedTours, expectedSlugs, 'English editorial proposal')
   const sourceBySlug = new Map(sourceTours.map((tour) => [tour.slug, tour]))
   const proposedBySlug = new Map(proposedTours.map((tour) => [tour.slug, tour]))
+  const manifestBySlug = new Map(manifest.tours.map((tour) => [tour.slug, tour]))
   const entries = expectedSlugs.map((slug): WingsSideTourEnglishEditorialPlanEntry => {
     const before = clone(sourceBySlug.get(slug)!)
     const after = clone(proposedBySlug.get(slug)!)
+    const identity = manifestBySlug.get(slug)!
+    if (wingsSideTourEnglishEditorialChecksum(before) !== identity.sourceChecksum) {
+      throw new Error(`English editorial manifest source checksum drift: ${slug}`)
+    }
     const fieldChanges = assertDocumentContract({ after, before, config })
     return {
       after,
@@ -278,6 +431,7 @@ export const buildWingsSideTourEnglishEditorialPlan = ({
       fieldChanges,
       slug,
       sourceChecksum: wingsSideTourEnglishEditorialChecksum(before),
+      tourID: identity.tourID,
     }
   })
   const base = {
@@ -288,13 +442,18 @@ export const buildWingsSideTourEnglishEditorialPlan = ({
         sourceChecksum,
       })),
     ),
+    configChecksum: manifest.configChecksum,
     createdAt,
     entries,
     expectedSlugs: [...expectedSlugs],
     expectedTourCount: 22 as const,
+    manifestChecksum: manifest.checksum,
     mode: 'plan' as const,
-    planVersion: 1 as const,
+    planVersion: 2 as const,
+    releaseSha: manifest.releaseSha,
     runID,
+    siteCode: 'wing-side' as const,
+    tourIdentities: entries.map(({ slug, tourID }) => ({ slug, tourID })),
   }
   const plan = {
     ...base,
@@ -302,6 +461,32 @@ export const buildWingsSideTourEnglishEditorialPlan = ({
   }
   assertWingsSideTourEnglishEditorialPlan(plan)
   return plan
+}
+
+export const assertWingsSideTourEnglishEditorialGovernance = ({
+  config,
+  manifest,
+  plan,
+}: {
+  config: WingsSideTourEnglishEditorialConfig
+  manifest: WingsSideTourEnglishEditorialManifest
+  plan: WingsSideTourEnglishEditorialPlan
+}) => {
+  assertWingsSideTourEnglishEditorialManifest(manifest)
+  assertWingsSideTourEnglishEditorialPlan(plan)
+  if (
+    wingsSideTourEnglishEditorialConfigChecksum(config) !== manifest.configChecksum ||
+    plan.configChecksum !== manifest.configChecksum ||
+    plan.manifestChecksum !== manifest.checksum ||
+    plan.releaseSha !== manifest.releaseSha ||
+    plan.siteCode !== manifest.siteCode ||
+    wingsSideTourEnglishEditorialStableStringify(plan.tourIdentities) !==
+      wingsSideTourEnglishEditorialStableStringify(
+        manifest.tours.map(({ slug, tourID }) => ({ slug, tourID })),
+      )
+  ) {
+    throw new Error('WingSide English editorial governance binding mismatch')
+  }
 }
 
 const transition = ({
