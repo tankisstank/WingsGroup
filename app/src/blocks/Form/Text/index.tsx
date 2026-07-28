@@ -62,6 +62,7 @@ export const Text: React.FC<
         defaultValue={defaultValue}
         id={fieldID}
         inputMode={isPhoneField ? 'tel' : undefined}
+        required={Boolean(required)}
         type={isPhoneField ? 'tel' : 'text'}
         {...register(name, { required: required ? requiredMessage : false })}
       />

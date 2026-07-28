@@ -51,6 +51,7 @@ export const Number: React.FC<
         aria-required={required || undefined}
         defaultValue={defaultValue}
         id={fieldID}
+        required={Boolean(required)}
         type="number"
         {...register(name, { required: required ? requiredMessage : false })}
       />

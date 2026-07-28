@@ -673,7 +673,7 @@ body[data-site-code='wing-side'] .ws-hifi-creds__dialog-close {
 
 body[data-site-code='wing-side'] .ws-hifi-creds button:focus-visible,
 body[data-site-code='wing-side'] .ws-hifi-creds a:focus-visible {
-  outline: 3px solid color-mix(in oklch, var(--site-gold, #b87a14) 72%, white);
+  outline: 3px solid var(--site-cta-fg, #111827);
   outline-offset: 3px;
 }
 

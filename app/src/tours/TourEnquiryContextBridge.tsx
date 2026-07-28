@@ -2,9 +2,24 @@
 
 import { useEffect } from 'react'
 
-import { setNativeInputValue } from '@/components/WingsSideHiFi/planFormNative'
+import type { LeadSubmissionContext } from '@/lead-capture/types'
+import type { TourEnquiryContext } from './enquiryContext'
 
-import { getTourEnquiryContextMessage, type TourEnquiryContext } from './enquiryContext'
+const toSubmissionContext = (context: TourEnquiryContext): LeadSubmissionContext => ({
+  discovery: context.discovery
+    ? {
+        destination: context.discovery.destination,
+        duration: context.discovery.duration,
+        style: context.discovery.style,
+      }
+    : undefined,
+  source: context.source || undefined,
+  tourId:
+    context.tourId !== null && context.tourId !== undefined && context.tourId !== ''
+      ? String(context.tourId)
+      : undefined,
+  tourSlug: context.tourSlug || undefined,
+})
 
 export const TourEnquiryContextBridge = ({
   context,
@@ -16,13 +31,12 @@ export const TourEnquiryContextBridge = ({
   useEffect(() => {
     const root = document.querySelector(rootSelector)
     if (!root) return
-    const message = root.querySelector('[name="message"]') as HTMLTextAreaElement | null
-    const prefix = getTourEnquiryContextMessage(context)
-    if (!message || !prefix) return
+    const form = root.matches('form')
+      ? (root as HTMLFormElement)
+      : root.querySelector<HTMLFormElement>('form')
+    if (!form) return
 
-    const existing = message.value.trim()
-    if (existing.includes(prefix)) return
-    setNativeInputValue(message, [prefix, existing].filter(Boolean).join('\n\n'))
+    form.dataset.wsEnquiryContext = JSON.stringify(toSubmissionContext(context))
   }, [context, rootSelector])
 
   return null

@@ -55,6 +55,7 @@ export const Textarea: React.FC<
         aria-required={required || undefined}
         defaultValue={defaultValue}
         id={fieldID}
+        required={Boolean(required)}
         rows={rows}
         {...register(name, { required: required ? requiredMessage : false })}
       />

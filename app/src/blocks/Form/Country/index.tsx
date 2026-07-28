@@ -61,7 +61,11 @@ export const Country: React.FC<
           const controlledValue = countryOptions.find((t) => t.value === value)
 
           return (
-            <Select onValueChange={(val) => onChange(val)} value={controlledValue?.value ?? ''}>
+            <Select
+              onValueChange={(val) => onChange(val)}
+              required={Boolean(required)}
+              value={controlledValue?.value ?? ''}
+            >
               <SelectTrigger
                 aria-describedby={errors[name] ? errorID : undefined}
                 aria-invalid={Boolean(errors[name])}

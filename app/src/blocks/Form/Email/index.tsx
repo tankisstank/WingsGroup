@@ -54,6 +54,7 @@ export const Email: React.FC<
         defaultValue={defaultValue}
         id={fieldID}
         inputMode="email"
+        required={Boolean(required)}
         type="email"
         {...register(name, { pattern: /^\S[^\s@]*@\S+$/, required: required ? requiredMessage : false })}
       />

@@ -61,7 +61,11 @@ export const Select: React.FC<
           const controlledValue = options.find((t) => t.value === value)
 
           return (
-            <SelectComponent onValueChange={(val) => onChange(val)} value={controlledValue?.value ?? ''}>
+            <SelectComponent
+              onValueChange={(val) => onChange(val)}
+              required={Boolean(required)}
+              value={controlledValue?.value ?? ''}
+            >
               <SelectTrigger
                 aria-describedby={errors[name] ? errorID : undefined}
                 aria-invalid={Boolean(errors[name])}

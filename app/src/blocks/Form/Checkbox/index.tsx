@@ -54,6 +54,7 @@ export const Checkbox: React.FC<
               name={name}
               onBlur={onBlur}
               onCheckedChange={(checked) => onChange(checked === true)}
+              required={Boolean(required)}
             />
           )}
           rules={{

@@ -1,11 +1,20 @@
 import type { Form } from '@/payload-types'
 
-import type { LeadSubmissionField, LeadSubmissionRequest } from './types'
+import type {
+  LeadDiscoveryContext,
+  LeadSubmissionContext,
+  LeadSubmissionField,
+  LeadSubmissionRequest,
+} from './types'
 
 export const MAX_LEAD_BODY_BYTES = 32 * 1024
 const MAX_FIELD_VALUE_LENGTH = 4096
 const MAX_FIELDS = 50
 const IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9_-]{16,128}$/
+const CONTEXT_CODE_PATTERN = /^[a-z0-9][a-z0-9-]{0,63}$/
+const CONTEXT_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/
+const CONTEXT_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,95}$/
+const CONTEXT_SOURCE_PATTERN = /^[A-Za-z0-9-]{1,48}$/
 
 export class LeadValidationError extends Error {}
 
@@ -17,6 +26,92 @@ const normalizeValue = (value: unknown): string => {
   if (typeof value === 'number' && Number.isFinite(value)) return String(value)
   if (typeof value === 'boolean') return value ? 'true' : 'false'
   throw new LeadValidationError('Unsupported field value.')
+}
+
+const assertPlainObject = (value: unknown, message: string): Record<string, unknown> => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new LeadValidationError(message)
+  }
+  return value as Record<string, unknown>
+}
+
+const assertOnlyKeys = (
+  value: Record<string, unknown>,
+  keys: readonly string[],
+  message: string,
+) => {
+  const allowed = new Set(keys)
+  if (Object.keys(value).some((key) => !allowed.has(key))) {
+    throw new LeadValidationError(message)
+  }
+}
+
+const optionalContextValue = (
+  value: unknown,
+  pattern: RegExp,
+  message: string,
+): string | undefined => {
+  if (value === undefined || value === null || value === '') return undefined
+  if (typeof value !== 'string' || !pattern.test(value)) {
+    throw new LeadValidationError(message)
+  }
+  return value
+}
+
+export const parseLeadContext = (input: unknown): LeadSubmissionContext | undefined => {
+  if (input === undefined || input === null) return undefined
+
+  const context = assertPlainObject(input, 'Submission context is invalid.')
+  assertOnlyKeys(
+    context,
+    ['discovery', 'source', 'tourId', 'tourSlug'],
+    'Submission context is invalid.',
+  )
+
+  let discovery: LeadDiscoveryContext | undefined
+  if (context.discovery !== undefined && context.discovery !== null) {
+    const candidate = assertPlainObject(context.discovery, 'Discovery context is invalid.')
+    assertOnlyKeys(
+      candidate,
+      ['destination', 'duration', 'style'],
+      'Discovery context is invalid.',
+    )
+    discovery = {
+      destination: optionalContextValue(
+        candidate.destination,
+        CONTEXT_CODE_PATTERN,
+        'Discovery destination is invalid.',
+      ),
+      duration: optionalContextValue(
+        candidate.duration,
+        CONTEXT_CODE_PATTERN,
+        'Discovery duration is invalid.',
+      ),
+      style: optionalContextValue(
+        candidate.style,
+        CONTEXT_CODE_PATTERN,
+        'Discovery style is invalid.',
+      ),
+    }
+    if (!Object.values(discovery).some(Boolean)) discovery = undefined
+  }
+
+  const parsed: LeadSubmissionContext = {
+    discovery,
+    source: optionalContextValue(
+      context.source,
+      CONTEXT_SOURCE_PATTERN,
+      'Submission source is invalid.',
+    ),
+    tourId: optionalContextValue(context.tourId, CONTEXT_ID_PATTERN, 'Tour identifier is invalid.'),
+    tourSlug: optionalContextValue(
+      context.tourSlug,
+      CONTEXT_SLUG_PATTERN,
+      'Tour slug is invalid.',
+    ),
+  }
+
+  return Object.values(parsed).some(Boolean) ? parsed : undefined
 }
 
 export const parseLeadRequest = (rawBody: string): LeadSubmissionRequest => {
@@ -69,6 +164,7 @@ export const parseLeadRequest = (rawBody: string): LeadSubmissionRequest => {
   })
 
   return {
+    context: parseLeadContext(body.context),
     formId: formId as number | string,
     honeypot: typeof body.honeypot === 'string' ? body.honeypot : undefined,
     idempotencyKey,

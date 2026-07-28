@@ -16,6 +16,7 @@ import { useSitePath } from '@/utilities/useSitePath'
 import { getCopyLocale } from '@/utilities/locales'
 import { TurnstileWidget } from './TurnstileWidget'
 import type { LocalizedCopy } from '@/i18n/publicCopy'
+import type { LeadSubmissionContext } from '@/lead-capture/types'
 
 export type FormBlockType = {
   blockName?: string
@@ -55,6 +56,7 @@ const formCopy = {
       airport: 'Airport',
       brief: 'Needs / budget / timing',
       company: 'Company / traveler group',
+      country: 'Country of residence',
       email: 'Email',
       'full-name': 'Full name',
       'group-size': 'Estimated group size',
@@ -62,6 +64,7 @@ const formCopy = {
       phone: 'Phone number',
       'policy-code': 'Tour / contract / policy code if available',
       'service-date': 'Service date',
+      'travel-month': 'Preferred travel month/date window',
     } as Record<string, string>,
     required: 'required',
     requiredMessage: 'This field is required',
@@ -85,6 +88,7 @@ const formCopy = {
       airport: 'Aeropuerto',
       brief: 'Necesidades / presupuesto / fechas',
       company: 'Empresa / grupo de viajeros',
+      country: 'País de residencia',
       email: 'Email',
       'full-name': 'Nombre completo',
       'group-size': 'Tamaño estimado del grupo',
@@ -92,6 +96,7 @@ const formCopy = {
       phone: 'Teléfono',
       'policy-code': 'Código de tour / contrato / póliza si aplica',
       'service-date': 'Fecha del servicio',
+      'travel-month': 'Mes o intervalo de fechas preferido',
     } as Record<string, string>,
     required: 'obligatorio',
     requiredMessage: 'Este campo es obligatorio',
@@ -115,6 +120,7 @@ const formCopy = {
       airport: 'Aeroporto',
       brief: 'Esigenze / budget / periodo',
       company: 'Azienda / gruppo di viaggiatori',
+      country: 'Paese di residenza',
       email: 'Email',
       'full-name': 'Nome completo',
       'group-size': 'Dimensione stimata del gruppo',
@@ -122,6 +128,7 @@ const formCopy = {
       phone: 'Telefono',
       'policy-code': 'Codice tour / contratto / polizza se disponibile',
       'service-date': 'Data del servizio',
+      'travel-month': 'Mese o intervallo di date preferito',
     } as Record<string, string>,
     required: 'obbligatorio',
     requiredMessage: 'Questo campo è obbligatorio',
@@ -145,6 +152,7 @@ const formCopy = {
       airport: 'Aeroporto',
       brief: 'Necessidades / orçamento / datas',
       company: 'Empresa / grupo de viajantes',
+      country: 'País de residência',
       email: 'Email',
       'full-name': 'Nome completo',
       'group-size': 'Dimensão estimada do grupo',
@@ -152,6 +160,7 @@ const formCopy = {
       phone: 'Telefone',
       'policy-code': 'Código de tour / contrato / apólice se disponível',
       'service-date': 'Data do serviço',
+      'travel-month': 'Mês ou intervalo de datas preferido',
     } as Record<string, string>,
     required: 'obrigatório',
     requiredMessage: 'Este campo é obrigatório',
@@ -175,6 +184,7 @@ const formCopy = {
       airport: 'Sân bay',
       brief: 'Nhu cầu / ngân sách / thời gian',
       company: 'Công ty / nhóm khách',
+      country: 'Quốc gia cư trú',
       email: 'Email',
       'full-name': 'Họ và tên',
       'group-size': 'Số khách dự kiến',
@@ -182,6 +192,7 @@ const formCopy = {
       phone: 'Số điện thoại',
       'policy-code': 'Mã tour / hợp đồng / hồ sơ nếu có',
       'service-date': 'Ngày sử dụng dịch vụ',
+      'travel-month': 'Khoảng tháng/ngày dự kiến',
     } as Record<string, string>,
     loading: 'Đang gửi yêu cầu, vui lòng chờ...',
     required: 'bắt buộc',
@@ -209,6 +220,20 @@ const sanitizeFormControlSegment = (value?: null | string) =>
 
 const getFieldControlID = (formID: string | number, fieldName: string) =>
   `${sanitizeFormControlSegment(String(formID))}-${sanitizeFormControlSegment(fieldName)}`
+
+const readLeadSubmissionContext = (form: HTMLFormElement | null): LeadSubmissionContext | undefined => {
+  const serialized = form?.dataset.wsEnquiryContext
+  if (!serialized) return undefined
+
+  try {
+    const context = JSON.parse(serialized) as unknown
+    return context && typeof context === 'object' && !Array.isArray(context)
+      ? (context as LeadSubmissionContext)
+      : undefined
+  } catch {
+    return undefined
+  }
+}
 
 export const FormBlock: React.FC<
   {
@@ -274,6 +299,7 @@ export const FormBlock: React.FC<
   const [honeypot, setHoneypot] = useState('')
   const errorRef = useRef<HTMLDivElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const handlingNativeInvalidRef = useRef(false)
   const submittingRef = useRef(false)
   const idempotencyKeyRef = useRef<string | null>(null)
   const router = useRouter()
@@ -307,6 +333,7 @@ export const FormBlock: React.FC<
         try {
           const req = await fetch(`${getClientSideURL()}/api/lead-submissions`, {
             body: JSON.stringify({
+              context: readLeadSubmissionContext(formRef.current),
               formId: formID,
               honeypot,
               idempotencyKey: idempotencyKeyRef.current,
@@ -386,6 +413,20 @@ export const FormBlock: React.FC<
       }
     },
     [formID],
+  )
+
+  const onNativeInvalid = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      if (handlingNativeInvalidRef.current) return
+
+      handlingNativeInvalidRef.current = true
+      void handleSubmit(onSubmit, onInvalid)()
+      queueMicrotask(() => {
+        handlingNativeInvalidRef.current = false
+      })
+    },
+    [handleSubmit, onInvalid, onSubmit],
   )
 
   if (!formFromProps || !formID) {
@@ -477,14 +518,16 @@ export const FormBlock: React.FC<
                 data-od-id={formOdId}
                 ref={formRef}
                 id={formID}
-                noValidate
+                onInvalidCapture={onNativeInvalid}
                 onSubmit={handleSubmit(onSubmit, onInvalid)}
               >
                 <div aria-hidden="true" className="absolute left-[-10000px]" tabIndex={-1}>
-                  <label htmlFor={`${formID}-website`}>Website</label>
                   <input
+                    aria-hidden="true"
                     autoComplete="off"
                     id={`${formID}-website`}
+                    name="_website"
+                    role="presentation"
                     tabIndex={-1}
                     type="text"
                     onChange={(event) => setHoneypot(event.target.value)}

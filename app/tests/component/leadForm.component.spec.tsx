@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { FormBlock } from '@/blocks/Form/Component'
 import { PlanPrefillBridge } from '@/components/WingsSideHiFi/PlanPrefillBridge'
+import { TourEnquiryContextBridge } from '@/tours/TourEnquiryContextBridge'
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/en',
@@ -159,15 +160,15 @@ describe('lead form hardened submission', () => {
     }
   })
 
-  it('keeps required controls script-validated without native required interception', async () => {
+  it('aligns native required, aria-required and script validation semantics', async () => {
     window.history.replaceState({}, '', '/wingsside/en/plan-your-trip')
 
     render(<FormBlock enableIntro={false} form={mixedForm as never} />)
 
     const fullName = await screen.findByLabelText(/Full name/)
-    expect(fullName).toHaveProperty('required', false)
+    expect(fullName).toHaveProperty('required', true)
     expect(fullName.getAttribute('aria-required')).toBe('true')
-    expect(document.querySelector('form')?.hasAttribute('novalidate')).toBe(true)
+    expect(document.querySelector('form')?.hasAttribute('novalidate')).toBe(false)
   })
 
   it('labels hidden real plan fields and exposes deterministic consent focus/errors', async () => {
@@ -203,9 +204,11 @@ describe('lead form hardened submission', () => {
     )
 
     await waitFor(() => expect(document.querySelector('.ws-plan-chrome-host-mid')).toBeTruthy())
-    expect(document.getElementById('9-country')?.getAttribute('aria-label')).toBe('Destination')
+    expect(document.getElementById('9-country')?.getAttribute('aria-label')).toBe(
+      'Country of residence',
+    )
     expect(document.getElementById('9-travel-month')?.getAttribute('aria-label')).toBe(
-      'Travel month',
+      'Preferred travel month/date window',
     )
     expect(css).toMatch(/\.chip\s*\{[\s\S]*min-height:\s*44px;/)
 
@@ -218,5 +221,55 @@ describe('lead form hardened submission', () => {
     expect(consent.getAttribute('aria-invalid')).toBe('true')
     expect(consent.getAttribute('aria-describedby')).toBe('ws-plan-consent-error')
     expect(screen.getByRole('alert').id).toBe('ws-plan-consent-error')
+  })
+
+  it('keeps customer message clean and submits validated tour context separately', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ status: 'accepted' }), { status: 202 }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    const enquiryForm = {
+      ...form,
+      fields: [
+        { blockType: 'text', label: 'Name', name: 'name', required: true },
+        { blockType: 'textarea', label: 'Message', name: 'message', required: true },
+      ],
+    }
+
+    render(
+      <>
+        <FormBlock enableIntro={false} form={enquiryForm as never} />
+        <TourEnquiryContextBridge
+          context={{
+            discovery: { destination: 'sapa', duration: '8-14', style: 'culture' },
+            source: 'journeys',
+            tourId: 42,
+            tourSlug: 'sapa-trek-and-market',
+          }}
+          rootSelector="#contact-form"
+        />
+      </>,
+    )
+
+    fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'Alice' } })
+    fireEvent.change(screen.getByLabelText(/Message/), {
+      target: { value: 'Please share availability.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Send brief' }))
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+    const body = JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body))
+    expect(body.context).toEqual({
+      discovery: { destination: 'sapa', duration: '8-14', style: 'culture' },
+      source: 'journeys',
+      tourId: '42',
+      tourSlug: 'sapa-trek-and-market',
+    })
+    expect(body.submissionData).toContainEqual({
+      field: 'message',
+      value: 'Please share availability.',
+    })
+    expect(body.submissionData.find(({ field }: { field: string }) => field === 'message').value)
+      .not.toMatch(/Tour slug|Tour ID|Source|Discovery/)
   })
 })

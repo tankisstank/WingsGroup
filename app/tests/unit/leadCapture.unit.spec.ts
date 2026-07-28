@@ -51,6 +51,55 @@ describe('lead capture validation', () => {
   it('rejects request bodies over 32 KiB', () => {
     expect(() => parseLeadRequest(`{"padding":"${'x'.repeat(33 * 1024)}"}`)).toThrow(LeadValidationError)
   })
+
+  it('parses normalized enquiry context separately from customer fields', () => {
+    const request = parseLeadRequest(JSON.stringify({
+      context: {
+        discovery: {
+          destination: 'sapa',
+          duration: 'multi-day',
+          style: 'culture',
+        },
+        source: 'journeys',
+        tourId: '42',
+        tourSlug: 'sapa-trek-and-market',
+      },
+      formId: 7,
+      idempotencyKey: '4cb68f3f-6dc9-4b3f-918b-74153f271abc',
+      submissionData: [
+        { field: 'name', value: 'Alice' },
+        { field: 'email', value: 'alice@example.com' },
+      ],
+    }))
+
+    expect(request.context).toEqual({
+      discovery: {
+        destination: 'sapa',
+        duration: 'multi-day',
+        style: 'culture',
+      },
+      source: 'journeys',
+      tourId: '42',
+      tourSlug: 'sapa-trek-and-market',
+    })
+    expect(request.submissionData).not.toContainEqual(
+      expect.objectContaining({ field: 'tourSlug' }),
+    )
+  })
+
+  it.each([
+    { context: { admin: true }, reason: 'unknown top-level context field' },
+    { context: { discovery: { destination: 'Sa Pa!' } }, reason: 'unnormalized discovery code' },
+    { context: { tourId: 42 }, reason: 'non-string tour identifier' },
+    { context: { tourSlug: '../private' }, reason: 'unsafe tour slug' },
+  ])('rejects $reason', ({ context }) => {
+    expect(() => parseLeadRequest(JSON.stringify({
+      context,
+      formId: 7,
+      idempotencyKey: '4cb68f3f-6dc9-4b3f-918b-74153f271abc',
+      submissionData: [],
+    }))).toThrow(LeadValidationError)
+  })
 })
 
 describe('lead notification retry abstraction', () => {

@@ -60,10 +60,15 @@ export const State: React.FC<
           const controlledValue = stateOptions.find((t) => t.value === value)
 
           return (
-            <Select onValueChange={(val) => onChange(val)} value={controlledValue?.value ?? ''}>
+            <Select
+              onValueChange={(val) => onChange(val)}
+              required={Boolean(required)}
+              value={controlledValue?.value ?? ''}
+            >
               <SelectTrigger
                 aria-describedby={errors[name] ? errorID : undefined}
                 aria-invalid={Boolean(errors[name])}
+                aria-required={required || undefined}
                 className="w-full"
                 id={fieldID}
               >

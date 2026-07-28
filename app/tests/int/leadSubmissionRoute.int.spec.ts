@@ -158,6 +158,41 @@ describe('lead submission endpoint integration', () => {
     }))
   })
 
+  it('accepts normalized enquiry context without mixing it into customer submission fields', async () => {
+    const response = await POST(request({
+      bodyOverrides: {
+        context: {
+          discovery: { destination: 'sapa', duration: 'multi-day', style: 'culture' },
+          source: 'journeys',
+          tourId: '42',
+          tourSlug: 'sapa-trek-and-market',
+        },
+      },
+    }))
+
+    expect(response.status).toBe(202)
+    expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        submissionData: [{ field: 'name', value: 'Alice' }],
+      }),
+    }))
+  })
+
+  it('rejects malformed or extended enquiry context before resolving a site', async () => {
+    const response = await POST(request({
+      bodyOverrides: {
+        context: {
+          discovery: { destination: 'Sa Pa!' },
+          privileged: true,
+        },
+      },
+    }))
+
+    expect(response.status).toBe(400)
+    expect(mocks.getCurrentSite).not.toHaveBeenCalled()
+    expect(mocks.create).not.toHaveBeenCalled()
+  })
+
   it('returns the generic accepted response for a duplicate idempotency key without creating twice', async () => {
     mocks.reserveIdempotency.mockResolvedValue(false)
 
