@@ -36,6 +36,28 @@ export type WingsSideTourEnglishEditorialRuntimeAdapter<Transaction> = {
   }) => Promise<void>
 }
 
+export type WingsSideEnglishEditorialEnvironmentKind = 'production'
+export type WingsSideEnglishEditorialSourceKind = 'database-snapshot' | 'source-inventory'
+
+export type WingsSideEnglishEditorialRuntimeTargetAttestation = Readonly<{
+  databaseIdentitySha256: string
+  environmentKind: WingsSideEnglishEditorialEnvironmentKind
+  governanceChecksum: string
+  releaseSha: string
+  siteCode: 'wing-side'
+  sourceKind: WingsSideEnglishEditorialSourceKind
+  sourceSha256: string
+}>
+
+export type WingsSideEnglishEditorialExpectedRuntimeTarget = Readonly<
+  Omit<WingsSideEnglishEditorialRuntimeTargetAttestation, 'governanceChecksum'>
+>
+
+export type WingsSideEnglishEditorialAttestedRuntimeAdapter<Transaction> = Readonly<{
+  adapter: WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
+  attestation: WingsSideEnglishEditorialRuntimeTargetAttestation
+}>
+
 export class WingsSideEnglishEditorialAmbiguousCommitError extends Error {
   readonly code = 'WINGSSIDE_EN_EDITORIAL_AMBIGUOUS_COMMIT'
   readonly requiresVerify = true
@@ -167,6 +189,88 @@ export const loadFrozenWingsSideEnglishEditorialArtifacts = ({
     plan: planArtifact.value,
     planArtifactSha256: planArtifact.sha256,
   })
+}
+
+type LoadedEnglishEditorialArtifacts = ReturnType<
+  typeof loadFrozenWingsSideEnglishEditorialArtifacts
+>
+
+const sha256Pattern = /^[a-f0-9]{64}$/u
+const releaseShaPattern = /^[a-f0-9]{40}$/u
+
+export const wingsSideEnglishEditorialRuntimeGovernanceChecksum = (
+  artifacts: LoadedEnglishEditorialArtifacts,
+) =>
+  wingsSideTourEnglishEditorialChecksum({
+    configArtifactSha256: artifacts.configArtifactSha256,
+    manifestArtifactSha256: artifacts.manifestArtifactSha256,
+    planArtifactSha256: artifacts.planArtifactSha256,
+    releaseSha: artifacts.plan.releaseSha,
+    siteCode: artifacts.plan.siteCode,
+    sourceInventory: artifacts.manifest.tours.map(
+      ({ slug, sourceChecksum, tourID }) => ({
+        slug,
+        sourceChecksum,
+        tourID,
+      }),
+    ),
+  })
+
+const assertRuntimeTargetShape = (
+  target: WingsSideEnglishEditorialExpectedRuntimeTarget,
+): void => {
+  if (
+    !sha256Pattern.test(target.databaseIdentitySha256) ||
+    target.environmentKind !== 'production' ||
+    !releaseShaPattern.test(target.releaseSha) ||
+    target.siteCode !== 'wing-side' ||
+    !['database-snapshot', 'source-inventory'].includes(target.sourceKind) ||
+    !sha256Pattern.test(target.sourceSha256)
+  ) {
+    throw new Error('English editorial runtime target attestation shape is invalid')
+  }
+}
+
+export const createWingsSideEnglishEditorialRuntimeTargetAttestation = (
+  value: WingsSideEnglishEditorialRuntimeTargetAttestation,
+): WingsSideEnglishEditorialRuntimeTargetAttestation => {
+  assertRuntimeTargetShape(value)
+  if (!sha256Pattern.test(value.governanceChecksum)) {
+    throw new Error('English editorial runtime target governance checksum is invalid')
+  }
+  return deepFreeze({ ...value })
+}
+
+export const assertWingsSideEnglishEditorialRuntimeTarget = ({
+  artifacts,
+  attestation,
+  expected,
+}: {
+  artifacts: LoadedEnglishEditorialArtifacts
+  attestation: WingsSideEnglishEditorialRuntimeTargetAttestation
+  expected: WingsSideEnglishEditorialExpectedRuntimeTarget
+}): void => {
+  assertRuntimeTargetShape(expected)
+  assertRuntimeTargetShape(attestation)
+  if (!Object.isFrozen(attestation)) {
+    throw new Error('English editorial runtime target attestation must be immutable')
+  }
+  const governanceChecksum = wingsSideEnglishEditorialRuntimeGovernanceChecksum(artifacts)
+  if (
+    attestation.governanceChecksum !== governanceChecksum ||
+    attestation.databaseIdentitySha256 !== expected.databaseIdentitySha256 ||
+    attestation.environmentKind !== expected.environmentKind ||
+    attestation.releaseSha !== expected.releaseSha ||
+    attestation.releaseSha !== artifacts.plan.releaseSha ||
+    attestation.releaseSha !== artifacts.manifest.releaseSha ||
+    attestation.siteCode !== expected.siteCode ||
+    attestation.siteCode !== artifacts.plan.siteCode ||
+    attestation.siteCode !== artifacts.manifest.siteCode ||
+    attestation.sourceKind !== expected.sourceKind ||
+    attestation.sourceSha256 !== expected.sourceSha256
+  ) {
+    throw new Error('English editorial runtime adapter target attestation mismatch')
+  }
 }
 
 const assertRuntimeInventory = (

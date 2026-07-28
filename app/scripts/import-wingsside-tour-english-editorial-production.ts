@@ -4,10 +4,12 @@ import fs from 'node:fs'
 import { pathToFileURL } from 'node:url'
 
 import {
+  assertWingsSideEnglishEditorialRuntimeTarget,
   transitionWingsSideTourEnglishEditorialRuntime,
   verifyWingsSideTourEnglishEditorialRuntime,
   loadFrozenWingsSideEnglishEditorialArtifacts,
-  type WingsSideTourEnglishEditorialRuntimeAdapter,
+  type WingsSideEnglishEditorialAttestedRuntimeAdapter,
+  type WingsSideEnglishEditorialExpectedRuntimeTarget,
 } from './lib/wingsSideTourEnglishEditorialRuntime'
 import { assertWingsSideEditorialProductionWriteGuard } from './lib/wingsSideReleaseWriteGuard'
 import type { WingsSideEditorialProductionWriteGuardArgs } from './lib/wingsSideReleaseWriteGuard'
@@ -75,6 +77,16 @@ export const resolveWingsSideEnglishEditorialProtectedInputs = ({
     envValue: env.WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256,
     name: '--config-sha256',
   }),
+  databaseIdentitySha256: protectedValue({
+    argv,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256,
+    name: '--database-identity-sha256',
+  }),
+  environmentKind: protectedValue({
+    argv,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_ENVIRONMENT_KIND,
+    name: '--environment-kind',
+  }),
   manifestPath: protectedValue({
     argv,
     envValue: env.WINGSSIDE_EN_EDITORIAL_MANIFEST_PATH,
@@ -105,6 +117,16 @@ export const resolveWingsSideEnglishEditorialProtectedInputs = ({
     envValue: env.WINGSSIDE_EN_EDITORIAL_SITE_CODE,
     name: '--site-code',
   }),
+  sourceKind: protectedValue({
+    argv,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_SOURCE_KIND,
+    name: '--source-kind',
+  }),
+  sourceSha256: protectedValue({
+    argv,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_SOURCE_SHA256,
+    name: '--source-sha256',
+  }),
 })
 
 export const preflightWingsSideEnglishEditorialProductionCLI = ({
@@ -122,15 +144,27 @@ export const preflightWingsSideEnglishEditorialProductionCLI = ({
     adminEmail,
     configPath,
     configSha256,
+    databaseIdentitySha256,
+    environmentKind,
     manifestPath,
     manifestSha256,
     planPath,
     planSha256,
     releaseSha,
     siteCode,
+    sourceKind,
+    sourceSha256,
   } = protectedInputs
   if (siteCode !== 'wing-side') {
     throw new Error('English editorial production requires protected site code wing-side')
+  }
+  if (
+    !/^[a-f0-9]{64}$/u.test(databaseIdentitySha256) ||
+    environmentKind !== 'production' ||
+    !['database-snapshot', 'source-inventory'].includes(sourceKind) ||
+    !/^[a-f0-9]{64}$/u.test(sourceSha256)
+  ) {
+    throw new Error('English editorial protected runtime target identity is invalid')
   }
   const artifacts = loadFrozenWingsSideEnglishEditorialArtifacts({
     config: {
@@ -173,7 +207,15 @@ export const preflightWingsSideEnglishEditorialProductionCLI = ({
     }
     assertWingsSideEditorialProductionWriteGuard(mutationGuardArgs, env)
   }
-  return { artifacts, mutationGuardArgs, phase }
+  const expectedTarget: WingsSideEnglishEditorialExpectedRuntimeTarget = Object.freeze({
+    databaseIdentitySha256,
+    environmentKind,
+    releaseSha,
+    siteCode,
+    sourceKind: sourceKind as WingsSideEnglishEditorialExpectedRuntimeTarget['sourceKind'],
+    sourceSha256,
+  })
+  return { artifacts, expectedTarget, mutationGuardArgs, phase }
 }
 
 export const runWingsSideEnglishEditorialProductionCLI = async <Transaction>({
@@ -186,19 +228,29 @@ export const runWingsSideEnglishEditorialProductionCLI = async <Transaction>({
     artifacts: ReturnType<typeof loadFrozenWingsSideEnglishEditorialArtifacts>
     phase: Phase
   }) =>
-    | Promise<WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>>
-    | WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
+    | Promise<WingsSideEnglishEditorialAttestedRuntimeAdapter<Transaction>>
+    | WingsSideEnglishEditorialAttestedRuntimeAdapter<Transaction>
   argv: string[]
   env?: ReleaseEnvironment
   io?: ArtifactIO
 }) => {
-  const { artifacts, mutationGuardArgs, phase } =
+  const { artifacts, expectedTarget, mutationGuardArgs, phase } =
     preflightWingsSideEnglishEditorialProductionCLI({
     argv,
     env,
     io,
   })
-  const adapter = await adapterFactory({ artifacts, phase })
+  const bundle = await adapterFactory({ artifacts, phase })
+  const adapter = bundle?.adapter
+  const attestation = bundle?.attestation
+  if (!adapter || !attestation) {
+    throw new Error('English editorial adapter factory must return an attested adapter bundle')
+  }
+  assertWingsSideEnglishEditorialRuntimeTarget({
+    artifacts,
+    attestation,
+    expected: expectedTarget,
+  })
   if (phase === 'verify') {
     return verifyWingsSideTourEnglishEditorialRuntime({
       adapter,
@@ -209,6 +261,11 @@ export const runWingsSideEnglishEditorialProductionCLI = async <Transaction>({
     })
   }
   assertWingsSideEditorialProductionWriteGuard(mutationGuardArgs!, env)
+  assertWingsSideEnglishEditorialRuntimeTarget({
+    artifacts,
+    attestation,
+    expected: expectedTarget,
+  })
   return transitionWingsSideTourEnglishEditorialRuntime({
     adapter,
     config: artifacts.config,

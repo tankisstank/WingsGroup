@@ -17,10 +17,12 @@ import {
   type WingsSideTourEnglishEditorialDocument,
 } from '../../scripts/lib/wingsSideTourEnglishEditorial'
 import {
+  createWingsSideEnglishEditorialRuntimeTargetAttestation,
   readFrozenWingsSideEnglishEditorialArtifact,
   transitionWingsSideTourEnglishEditorialRuntime,
   verifyWingsSideTourEnglishEditorialRuntime,
   WingsSideEnglishEditorialAmbiguousCommitError,
+  wingsSideEnglishEditorialRuntimeGovernanceChecksum,
   type WingsSideTourEnglishEditorialRuntimeAdapter,
   type WingsSideTourEnglishEditorialRuntimeRow,
 } from '../../scripts/lib/wingsSideTourEnglishEditorialRuntime'
@@ -29,6 +31,8 @@ const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
 const sha256 = (value: string | Buffer) => createHash('sha256').update(value).digest('hex')
 const slugs = Array.from({ length: 22 }, (_, index) => `tour-${index + 1}`)
 const releaseSha = 'a'.repeat(40)
+const databaseIdentitySha256 = 'd'.repeat(64)
+const sourceSnapshotSha256 = 'e'.repeat(64)
 
 const config: WingsSideTourEnglishEditorialConfig = {
   allCapsAllowlist: ['UNESCO', 'IATA'],
@@ -347,12 +351,16 @@ describe('WingSide English editorial guarded CLI preflight', () => {
     }
     const env = {
       ADMIN_EMAIL: 'admin@wingside.vn',
+      WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256: databaseIdentitySha256,
+      WINGSSIDE_EN_EDITORIAL_ENVIRONMENT_KIND: 'production',
       WINGSSIDE_EN_EDITORIAL_CONFIG_PATH: 'config',
       WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256: sha256(files.config),
       WINGSSIDE_EN_EDITORIAL_MANIFEST_PATH: 'manifest',
       WINGSSIDE_EN_EDITORIAL_MANIFEST_SHA256: sha256(files.manifest),
       WINGSSIDE_EN_EDITORIAL_PLAN_PATH: 'plan',
       WINGSSIDE_EN_EDITORIAL_SITE_CODE: 'wing-side',
+      WINGSSIDE_EN_EDITORIAL_SOURCE_KIND: 'database-snapshot',
+      WINGSSIDE_EN_EDITORIAL_SOURCE_SHA256: sourceSnapshotSha256,
       WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256: sha256(files.plan),
       WINGSTRAVEL_RELEASE_SHA: releaseSha,
     }
@@ -367,7 +375,7 @@ describe('WingSide English editorial guarded CLI preflight', () => {
       '--site-code=wing-side',
       `--release-sha=${releaseSha}`,
     ]
-    return { base, env, io }
+    return { base, env, io, value }
   }
 
   it('rejects protected CLI/environment conflicts before artifact reads', () => {
@@ -385,6 +393,8 @@ describe('WingSide English editorial guarded CLI preflight', () => {
 
   it.each([
     ['ADMIN_EMAIL', '--admin-email'],
+    ['WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256', '--database-identity-sha256'],
+    ['WINGSSIDE_EN_EDITORIAL_ENVIRONMENT_KIND', '--environment-kind'],
     ['WINGSSIDE_EN_EDITORIAL_CONFIG_PATH', '--config'],
     ['WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256', '--config-sha256'],
     ['WINGSSIDE_EN_EDITORIAL_MANIFEST_PATH', '--manifest'],
@@ -393,6 +403,8 @@ describe('WingSide English editorial guarded CLI preflight', () => {
     ['WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256', '--plan-sha256'],
     ['WINGSTRAVEL_RELEASE_SHA', '--release-sha'],
     ['WINGSSIDE_EN_EDITORIAL_SITE_CODE', '--site-code'],
+    ['WINGSSIDE_EN_EDITORIAL_SOURCE_KIND', '--source-kind'],
+    ['WINGSSIDE_EN_EDITORIAL_SOURCE_SHA256', '--source-sha256'],
   ])('requires protected environment %s even for verify', (envName, cliName) => {
     const value = cliFixture()
     const missing = { ...value.env, [envName]: undefined }
@@ -406,6 +418,8 @@ describe('WingSide English editorial guarded CLI preflight', () => {
 
   it.each([
     ['ADMIN_EMAIL', '--admin-email'],
+    ['WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256', '--database-identity-sha256'],
+    ['WINGSSIDE_EN_EDITORIAL_ENVIRONMENT_KIND', '--environment-kind'],
     ['WINGSSIDE_EN_EDITORIAL_CONFIG_PATH', '--config'],
     ['WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256', '--config-sha256'],
     ['WINGSSIDE_EN_EDITORIAL_MANIFEST_PATH', '--manifest'],
@@ -414,6 +428,8 @@ describe('WingSide English editorial guarded CLI preflight', () => {
     ['WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256', '--plan-sha256'],
     ['WINGSTRAVEL_RELEASE_SHA', '--release-sha'],
     ['WINGSSIDE_EN_EDITORIAL_SITE_CODE', '--site-code'],
+    ['WINGSSIDE_EN_EDITORIAL_SOURCE_KIND', '--source-kind'],
+    ['WINGSSIDE_EN_EDITORIAL_SOURCE_SHA256', '--source-sha256'],
   ])('rejects optional CLI echo conflict for protected %s', (_envName, cliName) => {
     const value = cliFixture()
     expect(() =>
@@ -469,5 +485,111 @@ describe('WingSide English editorial guarded CLI preflight', () => {
       }),
     ).rejects.toThrow(/DATABASE_URL is required/)
     expect(adapterFactory).not.toHaveBeenCalled()
+  })
+
+  it('rejects an unattested reused adapter even when its 22 rows are exact after-state', async () => {
+    const value = cliFixture()
+    const afterRows = value.value.rows.map((row, index) => ({
+      ...row,
+      document: clone(value.value.plan.entries[index]!.after),
+    }))
+    const runtime = adapterFixture(afterRows)
+    await expect(
+      runWingsSideEnglishEditorialProductionCLI({
+        adapterFactory: async () => runtime.adapter as never,
+        argv: ['verify', ...value.base],
+        env: value.env,
+        io: value.io,
+      }),
+    ).rejects.toThrow('attested adapter bundle')
+    expect(runtime.calls.begin).not.toHaveBeenCalled()
+  })
+
+  it('enforces production target attestation for verify and accepts the valid bound adapter', async () => {
+    const value = cliFixture()
+    const afterRows = value.value.rows.map((row, index) => ({
+      ...row,
+      document: clone(value.value.plan.entries[index]!.after),
+    }))
+    const rejected = adapterFixture(afterRows)
+    await expect(
+      runWingsSideEnglishEditorialProductionCLI({
+        adapterFactory: async ({ artifacts }) => ({
+          adapter: rejected.adapter,
+          attestation: Object.freeze({
+            databaseIdentitySha256,
+            environmentKind: 'staging',
+            governanceChecksum: wingsSideEnglishEditorialRuntimeGovernanceChecksum(artifacts),
+            releaseSha,
+            siteCode: 'wing-side',
+            sourceKind: 'database-snapshot',
+            sourceSha256: sourceSnapshotSha256,
+          }) as never,
+        }),
+        argv: ['verify', ...value.base],
+        env: value.env,
+        io: value.io,
+      }),
+    ).rejects.toThrow('target attestation shape is invalid')
+    expect(rejected.calls.begin).not.toHaveBeenCalled()
+
+    const accepted = adapterFixture(afterRows)
+    await expect(
+      runWingsSideEnglishEditorialProductionCLI({
+        adapterFactory: async ({ artifacts }) => ({
+          adapter: accepted.adapter,
+          attestation: createWingsSideEnglishEditorialRuntimeTargetAttestation({
+            databaseIdentitySha256,
+            environmentKind: 'production',
+            governanceChecksum: wingsSideEnglishEditorialRuntimeGovernanceChecksum(artifacts),
+            releaseSha,
+            siteCode: 'wing-side',
+            sourceKind: 'database-snapshot',
+            sourceSha256: sourceSnapshotSha256,
+          }),
+        }),
+        argv: ['verify', ...value.base],
+        env: value.env,
+        io: value.io,
+      }),
+    ).resolves.toEqual({ checked: 22, state: 'after' })
+    expect(accepted.calls.begin).toHaveBeenCalledOnce()
+    expect(accepted.calls.kill).toHaveBeenCalledOnce()
+  })
+
+  it.each([
+    ['database', { databaseIdentitySha256: 'f'.repeat(64) }],
+    ['artifact governance', { governanceChecksum: 'f'.repeat(64) }],
+    ['source', { sourceSha256: 'f'.repeat(64) }],
+    ['release', { releaseSha: 'b'.repeat(40) }],
+    ['site', { siteCode: 'other' }],
+  ])('rejects wrong attested %s identity before verify reads', async (_label, override) => {
+    const value = cliFixture()
+    const afterRows = value.value.rows.map((row, index) => ({
+      ...row,
+      document: clone(value.value.plan.entries[index]!.after),
+    }))
+    const runtime = adapterFixture(afterRows)
+    await expect(
+      runWingsSideEnglishEditorialProductionCLI({
+        adapterFactory: async ({ artifacts }) => ({
+          adapter: runtime.adapter,
+          attestation: Object.freeze({
+            databaseIdentitySha256,
+            environmentKind: 'production',
+            governanceChecksum: wingsSideEnglishEditorialRuntimeGovernanceChecksum(artifacts),
+            releaseSha,
+            siteCode: 'wing-side',
+            sourceKind: 'database-snapshot',
+            sourceSha256: sourceSnapshotSha256,
+            ...override,
+          }) as never,
+        }),
+        argv: ['verify', ...value.base],
+        env: value.env,
+        io: value.io,
+      }),
+    ).rejects.toThrow(/target attestation/)
+    expect(runtime.calls.begin).not.toHaveBeenCalled()
   })
 })
