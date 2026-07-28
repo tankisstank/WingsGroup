@@ -1,0 +1,354 @@
+{
+  "expectedGovernedDisclosureCount": 38,
+  "expectedTourCount": 22,
+  "generatedFrom": "wing-side-published-en-tour-products",
+  "siteCode": "wing-side",
+  "sourceLocale": "en",
+  "tours": [
+    {
+      "checksum": "d5d19fdd0b307851182d23864abf3108201aec99b964343c53dca8271cf7ad0b",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+          "sourceRowID": "6a5a42d0e9a62d80e46ba98f"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42d0e9a62d80e46ba999"
+        }
+      ],
+      "slug": "a-glimpse-of-central-vietnam-5-days",
+      "tourID": 486
+    },
+    {
+      "checksum": "d8bade96c8dc2e6f10d7d7a758421e649b268e59f57ed4a650ca7b7da4a57a10",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+          "sourceRowID": "6a5a42d2e9a62d80e46ba9ab"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42d2e9a62d80e46ba9b4"
+        }
+      ],
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+      "tourID": 491
+    },
+    {
+      "checksum": "dba4322328a34a4f57d7f1ba52596304fbe7cf94eb063f5fdc3213d9f41f527d",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+          "sourceRowID": "6a5a42d3e9a62d80e46ba9c3"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42d3e9a62d80e46ba9cb"
+        }
+      ],
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days",
+      "tourID": 492
+    },
+    {
+      "checksum": "077bdee949817444d716f6ba219e2059efc9501056ecba6bfde934f6a710ff34",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "82c40ea972bd24981ae98d371ec206155fce2fc56036e4d83d08ec85df7268b2",
+          "sourceRowID": "6a5a42d5e9a62d80e46ba9e6"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42d5e9a62d80e46ba9ec"
+        }
+      ],
+      "slug": "best-of-vietnam-and-cambodia-15-days",
+      "tourID": 251
+    },
+    {
+      "checksum": "f09672026d6b18ec87aa8539e5c83d9531c1979a1827a6368fddba0c7b46770d",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+          "sourceRowID": "6a5a42d7e9a62d80e46ba9fa"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42d7e9a62d80e46baa02"
+        }
+      ],
+      "slug": "central-vietnam-adventure-4-days",
+      "tourID": 495
+    },
+    {
+      "checksum": "3ab314c97837d8567ebc8c5218c64595f1b89927f1d416ce8fa0a20ba24f52fe",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+          "sourceRowID": "6a5a42d8e9a62d80e46baa12"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42d8e9a62d80e46baa1a"
+        }
+      ],
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days",
+      "tourID": 497
+    },
+    {
+      "checksum": "6ccc7afe246ca3930efc61728dfb9418ae0f4a3c3e13c31c44e9b4eb463f2836",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42dae9a62d80e46baa2e"
+        }
+      ],
+      "slug": "discover-halong-bay-ninh-binh-package-2-days",
+      "tourID": 226
+    },
+    {
+      "checksum": "645d4f2857f7723ff387cb516e4ac936e4ed1fe0a6ad948b8876a063a3bc1c6e",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+          "sourceRowID": "6a5a42dbe9a62d80e46baa45"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42dbe9a62d80e46baa4e"
+        }
+      ],
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+      "tourID": 504
+    },
+    {
+      "checksum": "8c6c8d98ec18b473c64316b184276b26d7c94d9d3c94b6bcd778880aeaa0979e",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+          "sourceRowID": "6a5a42dce9a62d80e46baa5e"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42dce9a62d80e46baa66"
+        }
+      ],
+      "slug": "hoi-an-surrounding-and-beach-break-7-days",
+      "tourID": 506
+    },
+    {
+      "checksum": "01ddcf1a4f83ae7a2ac86315c1273b1bdc22e5b54ea47ecfa486297b100b5c32",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42dee9a62d80e46baa74"
+        }
+      ],
+      "slug": "luxury-mekong-delta-speedboat-tour-full-day",
+      "tourID": 326
+    },
+    {
+      "checksum": "0b6b1a664a09c8b7dcec555af58d3a5eb9c84f010607f4f89a9c4c3935204ef8",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42dfe9a62d80e46baa86"
+        }
+      ],
+      "slug": "mekong-delta-gateway-3-days",
+      "tourID": 328
+    },
+    {
+      "checksum": "f65b29ff0fddb8145d0da41c484d28333567f607e22881149cffbd2d2577db0b",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42e0e9a62d80e46baa98"
+        }
+      ],
+      "slug": "mekong-delta-with-floating-market-2-days",
+      "tourID": 330
+    },
+    {
+      "checksum": "186345043392ad2fb07c03d75798a5eba48d5a49a7878cb91a92577db8d0d5f7",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42e2e9a62d80e46baab7"
+        }
+      ],
+      "slug": "ninh-binh-hoa-lu-trang-an-full-day-private-tour-from-hanoi",
+      "tourID": 405
+    },
+    {
+      "checksum": "0a2657ac4fa39c4010937747e39aab39d9d927a35d1a1a6af4b9de026fa66ae3",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42e1e9a62d80e46baaa8"
+        }
+      ],
+      "slug": "ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi",
+      "tourID": 407
+    },
+    {
+      "checksum": "5b524f158d96abe578e8eea959eaf453fad9895daa97b53ff1a62b9fda7aea35",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+          "sourceRowID": "6a5a42e2e9a62d80e46baac7"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42e2e9a62d80e46baacf"
+        }
+      ],
+      "slug": "northern-vietnam-highlights-for-family-6-days",
+      "tourID": 517
+    },
+    {
+      "checksum": "859fc5e70aa936e1f58ba48fa72d99f7b0400ef05f4cabc82b03931d2b8dfab3",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+          "sourceRowID": "6a5a42e4e9a62d80e46baae1"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42e4e9a62d80e46baaea"
+        }
+      ],
+      "slug": "northern-vietnam-soft-adventure-8-days",
+      "tourID": 518
+    },
+    {
+      "checksum": "b02e8dc1127755c9ead616fa59eee21fb2c0b14b38b2662e6f3b4967bf357cf8",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+          "sourceRowID": "6a5a42e5e9a62d80e46baaf9"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42e5e9a62d80e46bab01"
+        }
+      ],
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
+      "tourID": 498
+    },
+    {
+      "checksum": "ce0bb480fe3046a61ec37435ea33338b1e3b4daa4436019290b9620cbe868b94",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+          "sourceRowID": "6a5a42e6e9a62d80e46bab10"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42e6e9a62d80e46bab17"
+        }
+      ],
+      "slug": "sapa-trekking-ethnic-market-3-days",
+      "tourID": 442
+    },
+    {
+      "checksum": "68bac86f07a6a25d9a229eaa7521ddbe61f0d301d2bb192efc0799a33e40adf1",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+          "sourceRowID": "6a5a42e8e9a62d80e46bab28"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42e8e9a62d80e46bab31"
+        }
+      ],
+      "slug": "southern-beauty-beach-relaxation-8-days",
+      "tourID": 524
+    },
+    {
+      "checksum": "43bf5c68a3c286b3bef65a07071c7be8e945ccd0fe18b6383ab652263449c421",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+          "sourceRowID": "6a5a42ece9a62d80e46bab79"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42ece9a62d80e46bab81"
+        }
+      ],
+      "slug": "vietnam-at-a-glance-7-days",
+      "tourID": 526
+    },
+    {
+      "checksum": "910b1d8145275d7afbba66598c026c13f247df17455258465d8db3dc29dd159f",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+          "sourceRowID": "6a5a42e9e9a62d80e46bab43"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42e9e9a62d80e46bab4c"
+        }
+      ],
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days",
+      "tourID": 533
+    },
+    {
+      "checksum": "250b54cf9fd0e1d03ccf3c0ed921aeabdba34dcd662cbc73adb3ea5130e69c6f",
+      "governedRows": [
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+          "sourceRowID": "6a5a42eae9a62d80e46bab5f"
+        },
+        {
+          "sourceBucket": "includes",
+          "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+          "sourceRowID": "6a5a42eae9a62d80e46bab67"
+        }
+      ],
+      "slug": "vietnam-memorable-honeymoon-trip-8-days",
+      "tourID": 534
+    }
+  ],
+  "version": 2
+}

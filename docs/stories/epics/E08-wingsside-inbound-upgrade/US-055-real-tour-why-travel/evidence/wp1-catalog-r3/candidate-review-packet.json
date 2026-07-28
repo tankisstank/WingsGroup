@@ -1,0 +1,22 @@
+{
+  "candidateChecksum": "79dfd59a8b734d51c7771d2f02d7a8934ee35216d99e7e6c3d917316dde7c30a",
+  "expectedGovernedDisclosureCount": 38,
+  "expectedTourCount": 22,
+  "policy": {
+    "artifactPurpose": "wingsside-tour-editorial-catalog-v2-review",
+    "decision": "D6-C",
+    "policyID": "wingsside-development-team-catalog-approval",
+    "policyVersion": 1,
+    "signerRole": "development-team-release-approver"
+  },
+  "sourceSnapshotChecksum": "76cc78beabc2a399aa2ed2d2a51cb4f632fa5714833c3e39090e14691cb83b50",
+  "status": "LOCAL_REHEARSAL_REVIEW_REQUIRED",
+  "supportedLocales": [
+    "en",
+    "vi",
+    "it",
+    "es",
+    "pt"
+  ],
+  "version": 1
+}
