@@ -288,8 +288,23 @@ const main = async () => {
     let homeSeedReport:
       | Awaited<ReturnType<typeof applyWingsSideHiFiContentSeed>>
       | undefined
+    let homeIdempotenceReport:
+      | Awaited<ReturnType<typeof applyWingsSideHiFiContentSeed>>
+      | undefined
     if (reuseSeededHome) {
+      const whyTourSlots = us055WhyTravelRoleSlugs.map(({ key, slug }) => {
+        const rehearsalTourID = slugToRehearsalTourID.get(slug)
+        if (rehearsalTourID === undefined) {
+          throw new Error(`Approved Why Travel tour ${slug} is absent from the frozen source`)
+        }
+        return {
+          key,
+          selectionMode: 'manual' as const,
+          tour: rehearsalTourID,
+        }
+      })
       homeSeedReport = await applyWingsSideHiFiContentSeed({
+        homeWhyTourSlots: whyTourSlots,
         locale: 'all',
         payload: payload as unknown as WingsSideHiFiSeedPayload,
         req,
@@ -298,10 +313,45 @@ const main = async () => {
       if (
         homeSeedReport.summary.missingPages !== 0 ||
         homeSeedReport.summary.validationGaps !== 0 ||
-        homeSeedReport.localesFetched?.length !== WINGSSIDE_HIFI_SEED_LOCALES.length
+        homeSeedReport.summary.totalTargets !== 40 ||
+        homeSeedReport.mutatedPages !== 40 ||
+        homeSeedReport.localesFetched?.length !== WINGSSIDE_HIFI_SEED_LOCALES.length ||
+        !homeSeedReport.planForm.ok
+      ) {
+        const gaps = homeSeedReport.pages
+          .filter((page) => page.hasContractGap)
+          .map(({ locale, pathname, validationIssues }) => ({
+            locale,
+            pathname,
+            validationIssues,
+          }))
+        throw new Error(
+          `WingSide hi-fi fixture seed is incomplete: ${JSON.stringify({
+            gaps,
+            planForm: homeSeedReport.planForm,
+            summary: homeSeedReport.summary,
+          })}`,
+        )
+      }
+      homeIdempotenceReport = await applyWingsSideHiFiContentSeed({
+        homeWhyTourSlots: whyTourSlots,
+        locale: 'all',
+        payload: payload as unknown as WingsSideHiFiSeedPayload,
+        req,
+        siteCode: 'wing-side',
+      })
+      if (
+        homeIdempotenceReport.mutatedPages !== 0 ||
+        homeIdempotenceReport.summary.missingPages !== 0 ||
+        homeIdempotenceReport.summary.validationGaps !== 0 ||
+        homeIdempotenceReport.summary.unchanged !== 40 ||
+        homeIdempotenceReport.summary.wouldMutate !== 0 ||
+        !homeIdempotenceReport.planForm.ok
       ) {
         throw new Error(
-          `WingSide hi-fi fixture seed is incomplete: ${JSON.stringify(homeSeedReport.summary)}`,
+          `WingSide hi-fi fixture seed is not idempotent: ${JSON.stringify(
+            homeIdempotenceReport.summary,
+          )}`,
         )
       }
       const homePages = await payload.find({
@@ -324,44 +374,13 @@ const main = async () => {
       if (homePages.docs.length !== 1) {
         throw new Error(`Expected one seeded WingSide Home page, found ${homePages.docs.length}`)
       }
-      const whyTourSlots = us055WhyTravelRoleSlugs.map(({ key, slug }) => {
-        const rehearsalTourID = slugToRehearsalTourID.get(slug)
-        if (rehearsalTourID === undefined) {
-          throw new Error(`Approved Why Travel tour ${slug} is absent from the frozen source`)
-        }
-        return {
-          key,
-          selectionMode: 'manual' as const,
-          tour: rehearsalTourID,
-        }
-      })
-      const currentHiFi =
-        (homePages.docs[0]!.wingsSideHiFi as Record<string, unknown> | null) || {}
-      const currentHome =
-        (currentHiFi.home as Record<string, unknown> | null) || {}
-      await payload.update({
-        collection: 'pages',
-        context,
-        data: {
-          wingsSideHiFi: {
-            ...currentHiFi,
-            home: {
-              ...currentHome,
-              whyTourSlots,
-            },
-          },
-        } as never,
-        id: homePages.docs[0]!.id,
-        locale: 'en',
-        overrideAccess: true,
-        req,
-      })
     }
     console.log(
       JSON.stringify({
         adminEmail,
         adapter: payload.db.packageName,
         homeHiFiLocales: homeSeedReport?.localesFetched?.length || 0,
+        homeHiFiSecondPassUnchanged: homeIdempotenceReport?.summary.unchanged || 0,
         homeWhyTravelRoles: reuseSeededHome ? us055WhyTravelRoleSlugs.length : 0,
         locales: 5,
         siteID: site.id,
