@@ -24,6 +24,7 @@ export type NormalizedMediaAuditInput = {
   id?: null | number | string
   kind?: MediaKind
   manualReview?: null | {
+    artifactSha256?: null | string
     reason?: null | string
     reviewedAt?: null | string
     reviewerID?: null | string
@@ -36,6 +37,15 @@ export type NormalizedMediaAuditInput = {
     runAt?: null | string
     state: OcrState
     text?: null | string
+  }
+  provenance?: null | {
+    approvedAt?: null | string
+    approvedBy?: null | string
+    licenseReference?: null | string
+    licenseType?: null | 'licensed' | 'owned'
+    owner?: null | string
+    publicUseApproved?: null | boolean
+    sourceReference?: null | string
   }
   url?: null | string
   videoSamples?: null | VideoSampleInput[]
@@ -78,6 +88,7 @@ export type MediaAuditFindingCode =
   | 'missing-checksum'
   | 'missing-evidence-metadata'
   | 'missing-id'
+  | 'missing-provenance-or-license'
   | 'missing-source'
   | 'missing-tour'
   | 'no-media-references'
@@ -104,6 +115,7 @@ export type MediaAuditObservation = {
   filename: null | string
   kind: MediaKind
   manualReview: {
+    artifactSha256: null | string
     reason: null | string
     reviewedAt: null | string
     reviewerID: null | string
@@ -116,6 +128,15 @@ export type MediaAuditObservation = {
     runAt: null | string
     state: OcrState
     text: null | string
+  }
+  provenance: {
+    approvedAt: null | string
+    approvedBy: null | string
+    licenseReference: null | string
+    licenseType: null | 'licensed' | 'owned'
+    owner: null | string
+    publicUseApproved: boolean
+    sourceReference: null | string
   }
   reference: MediaAuditReference
   source: null | string
@@ -283,6 +304,7 @@ const normalizeObservation = (
   filename: text(media.filename),
   kind: media.kind ?? 'image',
   manualReview: {
+    artifactSha256: text(media.manualReview?.artifactSha256),
     reason: text(media.manualReview?.reason),
     reviewedAt: text(media.manualReview?.reviewedAt),
     reviewerID: text(media.manualReview?.reviewerID),
@@ -295,6 +317,15 @@ const normalizeObservation = (
     runAt: text(media.ocr?.runAt),
     state: media.ocr?.state ?? 'unknown',
     text: text(media.ocr?.text),
+  },
+  provenance: {
+    approvedAt: text(media.provenance?.approvedAt),
+    approvedBy: text(media.provenance?.approvedBy),
+    licenseReference: text(media.provenance?.licenseReference),
+    licenseType: media.provenance?.licenseType ?? null,
+    owner: text(media.provenance?.owner),
+    publicUseApproved: media.provenance?.publicUseApproved === true,
+    sourceReference: text(media.provenance?.sourceReference),
   },
   reference,
   source: text(media.filename) ?? text(media.url),
@@ -310,6 +341,7 @@ const evidenceSignature = (observation: MediaAuditObservation): string =>
     kind: observation.kind,
     manualReview: observation.manualReview,
     ocr: observation.ocr,
+    provenance: observation.provenance,
     source: observation.source,
     url: observation.url,
     videoSamples: observation.videoSamples,
@@ -540,13 +572,35 @@ const observationFindings = (
   }
 
   const reviewMetadataComplete =
-    observation.manualReview.reviewerID && isValidTimestamp(observation.manualReview.reviewedAt)
+    observation.manualReview.reviewerID &&
+    isValidTimestamp(observation.manualReview.reviewedAt) &&
+    observation.manualReview.artifactSha256 &&
+    sha256Pattern.test(observation.manualReview.artifactSha256)
   if (!reviewMetadataComplete) {
     findings.push(
       finding(
         asset.identity,
         'missing-evidence-metadata',
-        'Manual review requires reviewer ID and UTC review time.',
+        'Manual review requires reviewer ID, UTC review time, and evidence artifact checksum.',
+        refs,
+      ),
+    )
+  }
+  const provenanceComplete =
+    observation.provenance.owner &&
+    observation.provenance.sourceReference &&
+    observation.provenance.licenseReference &&
+    observation.provenance.approvedBy &&
+    isValidTimestamp(observation.provenance.approvedAt) &&
+    (observation.provenance.licenseType === 'licensed' ||
+      observation.provenance.licenseType === 'owned') &&
+    observation.provenance.publicUseApproved
+  if (!provenanceComplete) {
+    findings.push(
+      finding(
+        asset.identity,
+        'missing-provenance-or-license',
+        'Asset provenance, public-use approval, and owned or licensed usage evidence are required.',
         refs,
       ),
     )

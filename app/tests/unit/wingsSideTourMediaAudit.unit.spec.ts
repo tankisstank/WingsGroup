@@ -19,6 +19,7 @@ const cleanMedia = (id: string, overrides: Partial<NormalizedMediaAuditInput> = 
   id,
   kind: 'image' as const,
   manualReview: {
+    artifactSha256: hash('e'),
     reviewedAt,
     reviewerID: 'reviewer-01',
     state: 'passed' as const,
@@ -30,6 +31,15 @@ const cleanMedia = (id: string, overrides: Partial<NormalizedMediaAuditInput> = 
     runAt: reviewedAt,
     state: 'pass' as const,
     text: 'mountains and river',
+  },
+  provenance: {
+    approvedAt: reviewedAt,
+    approvedBy: 'rights-reviewer-01',
+    licenseReference: 'rights-ledger:fixture',
+    licenseType: 'owned' as const,
+    owner: 'WingsGroup',
+    publicUseApproved: true,
+    sourceReference: 'asset-library:fixture',
   },
   ...overrides,
 })
