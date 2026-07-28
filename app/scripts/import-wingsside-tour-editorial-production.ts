@@ -11,7 +11,10 @@ import {
   assertCredentialsProductionEnvironment,
   assertReleaseSourceCommit,
 } from './lib/wingsSideCredentialsProduction'
-import { loadWingsSideTourEditorialCatalog } from './lib/wingsSideTourEditorialLocalization'
+import {
+  parseWingsSideTourEditorialCatalogV2,
+  wingsSideCanonicalPricingDisclosureCount,
+} from './lib/wingsSideTourEditorialLocalization'
 import {
   assertEditorialPlanShape,
   editorialChecksum,
@@ -43,11 +46,15 @@ const argumentValue = (name: string): string | undefined => {
 export const preflightWingsSideEditorialCatalogArtifact = async ({
   catalogPath,
   cwd = process.cwd(),
+  expectedPricingDisclosureCount = wingsSideCanonicalPricingDisclosureCount,
   expectedSha256,
+  protectedSha256,
 }: {
   catalogPath?: string
   cwd?: string
+  expectedPricingDisclosureCount?: number
   expectedSha256?: string
+  protectedSha256?: string
 }) => {
   const suppliedPath = String(catalogPath || '').trim()
   if (!suppliedPath) {
@@ -55,9 +62,13 @@ export const preflightWingsSideEditorialCatalogArtifact = async ({
       'All tour editorial production phases require --catalog=<reviewed-catalog-v2-path>',
     )
   }
-  const expected = String(expectedSha256 || '').trim()
-  if (!/^[a-f0-9]{64}$/u.test(expected)) {
-    throw new Error('Catalog v2 requires a trusted lowercase SHA-256')
+  const protectedExpected = String(protectedSha256 || '').trim()
+  const cliExpected = String(expectedSha256 || '').trim()
+  if (!/^[a-f0-9]{64}$/u.test(protectedExpected)) {
+    throw new Error('Catalog v2 requires a protected lowercase SHA-256')
+  }
+  if (cliExpected && cliExpected !== protectedExpected) {
+    throw new Error('CLI catalog SHA-256 conflicts with the protected release value')
   }
   const resolvedCatalogPath = path.resolve(cwd, suppliedPath)
   let bytes: Buffer
@@ -67,12 +78,42 @@ export const preflightWingsSideEditorialCatalogArtifact = async ({
     throw new Error(`Catalog v2 artifact is missing or unreadable: ${resolvedCatalogPath}`)
   }
   const actualSha256 = createHash('sha256').update(bytes).digest('hex')
-  if (actualSha256 !== expected) {
+  if (actualSha256 !== protectedExpected) {
     throw new Error('Catalog v2 artifact SHA-256 does not match the trusted release value')
   }
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(bytes.toString('utf8'))
+  } catch {
+    throw new Error('Catalog v2 artifact is not valid JSON')
+  }
+  const catalog = parseWingsSideTourEditorialCatalogV2(parsed, {
+    expectedPricingDisclosureCount,
+  })
+  const freeze = (value: unknown): unknown => {
+    if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+      Object.freeze(value)
+      for (const child of Object.values(value)) freeze(child)
+    }
+    return value
+  }
+  freeze(catalog)
   return {
+    catalog,
     catalogPath: resolvedCatalogPath,
     catalogSha256: actualSha256,
+  }
+}
+
+export const assertWingsSideEditorialCatalogArtifactBinding = ({
+  catalogSha256,
+  protectedSha256,
+}: {
+  catalogSha256: string
+  protectedSha256?: string
+}) => {
+  if (String(protectedSha256 || '').trim() !== catalogSha256) {
+    throw new Error('Catalog v2 immutable hash no longer matches protected release configuration')
   }
 }
 
@@ -190,8 +231,8 @@ const main = async () => {
     catalogPath:
       argumentValue('--catalog') || process.env.WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_PATH,
     expectedSha256:
-      argumentValue('--catalog-sha256') ||
-      process.env.WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_SHA256,
+      argumentValue('--catalog-sha256'),
+    protectedSha256: process.env.WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_SHA256,
   })
   const preparedPlan = phase === 'plan' ? null : await readPlan()
   if (preparedPlan && preparedPlan.plan.releaseSourceCommit !== releaseSourceCommit) {
@@ -222,9 +263,7 @@ const main = async () => {
     })
     const admin = await resolveAdmin(payload, phase)
     const req = await createLocalReq({ user: admin as never }, payload)
-    const catalog = await loadWingsSideTourEditorialCatalog({
-      catalogPath: catalogArtifact.catalogPath,
-    })
+    const catalog = catalogArtifact.catalog
     if (
       preparedPlan &&
       preparedPlan.plan.approvalSnapshotChecksum !== catalog.approvalManifest.checksum
@@ -258,6 +297,10 @@ const main = async () => {
 
     const { plan, planPath, planSha256 } = preparedPlan!
     if (phase === 'verify') {
+      assertWingsSideEditorialCatalogArtifactBinding({
+        catalogSha256: catalogArtifact.catalogSha256,
+        protectedSha256: process.env.WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_SHA256,
+      })
       const result = await verifyWingsSideTourEditorialProductionPlan({
         expectedState: 'after',
         payload,
@@ -272,6 +315,10 @@ const main = async () => {
       : undefined
     // Re-check immediately before the transactional mutation so evidence cannot
     // be changed between process initialization and apply/rollback.
+    assertWingsSideEditorialCatalogArtifactBinding({
+      catalogSha256: catalogArtifact.catalogSha256,
+      protectedSha256: process.env.WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_SHA256,
+    })
     assertMutationReleaseGuard({ planSha256, releaseSourceCommit })
     const result =
       phase === 'apply'

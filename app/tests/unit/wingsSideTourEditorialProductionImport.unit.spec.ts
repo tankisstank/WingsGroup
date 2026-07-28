@@ -6,7 +6,14 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { preflightWingsSideEditorialCatalogArtifact } from '../../scripts/import-wingsside-tour-editorial-production'
+import {
+  assertWingsSideEditorialCatalogArtifactBinding,
+  preflightWingsSideEditorialCatalogArtifact,
+} from '../../scripts/import-wingsside-tour-editorial-production'
+import {
+  editorialPricingApprovalChecksum,
+  type WingsSideTourEditorialCatalog,
+} from '../../scripts/lib/wingsSideTourEditorialLocalization'
 
 const importer = fs.readFileSync(
   path.resolve(process.cwd(), 'scripts', 'import-wingsside-tour-editorial-production.ts'),
@@ -17,13 +24,31 @@ describe('WingSide tour editorial production importer release guard ordering', (
   it('requires and hashes an immutable catalog v2 artifact before use', async () => {
     const directory = await mkdtemp(path.join(os.tmpdir(), 'wingsside-catalog-cli-'))
     const catalogPath = path.join(directory, 'reviewed-catalog-v2.json')
-    const bytes = Buffer.from('{"version":2}\n', 'utf8')
+    const catalog: WingsSideTourEditorialCatalog = {
+      approvalManifest: {
+        approvalArtifactID: 'unit-review',
+        approvedAt: '2026-07-28T00:00:00.000Z',
+        approvedBy: 'unit-reviewer',
+        checksum: '',
+        expectedPricingDisclosureCount: 0,
+        trustedApprovers: ['unit-reviewer'],
+        version: 1,
+      },
+      pricingDispositions: [],
+      sourceLocale: 'en',
+      targetLocales: ['vi', 'it', 'es', 'pt'],
+      tours: [],
+      version: 2,
+    }
+    catalog.approvalManifest.checksum = editorialPricingApprovalChecksum(catalog)
+    const bytes = Buffer.from(`${JSON.stringify(catalog)}\n`, 'utf8')
     const checksum = createHash('sha256').update(bytes).digest('hex')
     try {
       await expect(
         preflightWingsSideEditorialCatalogArtifact({
           cwd: directory,
           expectedSha256: checksum,
+          protectedSha256: checksum,
         }),
       ).rejects.toThrow('require --catalog')
       await expect(
@@ -31,31 +56,63 @@ describe('WingSide tour editorial production importer release guard ordering', (
           catalogPath: 'missing.json',
           cwd: directory,
           expectedSha256: checksum,
+          protectedSha256: checksum,
         }),
       ).rejects.toThrow('missing or unreadable')
       await writeFile(catalogPath, bytes)
       await expect(
         preflightWingsSideEditorialCatalogArtifact({
           catalogPath,
+          expectedPricingDisclosureCount: 0,
           expectedSha256: checksum.toUpperCase(),
+          protectedSha256: checksum,
         }),
-      ).rejects.toThrow('lowercase SHA-256')
+      ).rejects.toThrow('conflicts with the protected release value')
       await expect(
         preflightWingsSideEditorialCatalogArtifact({
           catalogPath,
-          expectedSha256: '0'.repeat(64),
+          expectedPricingDisclosureCount: 0,
+          protectedSha256: checksum.toUpperCase(),
         }),
-      ).rejects.toThrow('does not match')
+      ).rejects.toThrow('protected lowercase SHA-256')
       await expect(
         preflightWingsSideEditorialCatalogArtifact({
-          catalogPath: 'reviewed-catalog-v2.json',
-          cwd: directory,
-          expectedSha256: checksum,
+          catalogPath,
+          expectedPricingDisclosureCount: 0,
+          expectedSha256: '0'.repeat(64),
+          protectedSha256: checksum,
         }),
-      ).resolves.toEqual({
+      ).rejects.toThrow('conflicts with the protected release value')
+      await expect(
+        preflightWingsSideEditorialCatalogArtifact({
+          catalogPath,
+          expectedPricingDisclosureCount: 0,
+          expectedSha256: '0'.repeat(64),
+          protectedSha256: '0'.repeat(64),
+        }),
+      ).rejects.toThrow('does not match the trusted release value')
+      const artifact = await preflightWingsSideEditorialCatalogArtifact({
+        catalogPath: 'reviewed-catalog-v2.json',
+        cwd: directory,
+        expectedPricingDisclosureCount: 0,
+        expectedSha256: checksum,
+        protectedSha256: checksum,
+      })
+      expect(artifact).toMatchObject({
         catalogPath: path.resolve(catalogPath),
         catalogSha256: checksum,
       })
+      expect(artifact.catalog.version).toBe(2)
+      expect(Object.isFrozen(artifact.catalog)).toBe(true)
+      await writeFile(catalogPath, '{"version":1}\n', 'utf8')
+      expect(artifact.catalog.version).toBe(2)
+      expect(artifact.catalog.approvalManifest.approvalArtifactID).toBe('unit-review')
+      expect(() =>
+        assertWingsSideEditorialCatalogArtifactBinding({
+          catalogSha256: artifact.catalogSha256,
+          protectedSha256: '0'.repeat(64),
+        }),
+      ).toThrow('no longer matches protected release configuration')
     } finally {
       await rm(directory, { force: true, recursive: true })
     }
@@ -68,7 +125,8 @@ describe('WingSide tour editorial production importer release guard ordering', (
     const payloadInitialization = importer.indexOf("await import('../src/payload.config')")
     expect(catalogPreflight).toBeGreaterThan(-1)
     expect(payloadInitialization).toBeGreaterThan(catalogPreflight)
-    expect(importer).toContain('catalogPath: catalogArtifact.catalogPath')
+    expect(importer).toContain('const catalog = catalogArtifact.catalog')
+    expect(importer).not.toContain('loadWingsSideTourEditorialCatalog({')
     expect(importer).toContain(
       'preparedPlan.plan.approvalSnapshotChecksum !== catalog.approvalManifest.checksum',
     )
