@@ -6,7 +6,9 @@ import { describe, expect, it } from 'vitest'
 import {
   buildWingsSideCatalogCandidateOverlay,
   buildWingsSideCatalogCandidateReviewPacket,
+  readProtectedWingsSideCatalogCandidateOverlay,
   signWingsSideCatalogCandidateRehearsal,
+  validateWingsSideCatalogCandidateOverlay,
   verifyWingsSideCatalogCandidateSignedEvidence,
 } from '../../scripts/lib/wingsSideCatalogCandidateOverlay'
 import type { WingsSideCatalogSourceSnapshot } from '../../scripts/lib/wingsSideCatalogSourceSnapshot'
@@ -93,6 +95,72 @@ describe('WingSide source candidate overlay and D6-C rehearsal evidence', () => 
     )
   })
 
+  it('rejects the stale-checksum substituted VI label attack before consumption', () => {
+    const snapshot = inputs().snapshot
+    const candidate = build()
+    candidate.pricingDisclosures[0]!.labels.vi = 'ATTACK-SUBSTITUTED-PRICE-LABEL'
+    expect(() => validateWingsSideCatalogCandidateOverlay(candidate, snapshot)).toThrow(
+      'Full candidate checksum drift',
+    )
+  })
+
+  it('rejects row, source, target, locale, English-tour, and duplicate substitutions', () => {
+    const snapshot = inputs().snapshot
+    const cases: Array<() => ReturnType<typeof build>> = [
+      () => {
+        const candidate = build()
+        candidate.pricingDisclosures[0]!.sourceRowID = 'substituted-row'
+        return candidate
+      },
+      () => {
+        const candidate = build()
+        candidate.pricingDisclosures[0]!.sourceLabel = 'substituted source label'
+        return candidate
+      },
+      () => {
+        const candidate = build()
+        candidate.pricingDisclosures[0]!.targetBucket = 'includes'
+        return candidate
+      },
+      () => {
+        const candidate = build()
+        delete (candidate.pricingDisclosures[0]!.labels as Record<string, string>).pt
+        return candidate
+      },
+      () => {
+        const candidate = build()
+        candidate.englishTours[0]!.sourceChecksum = 'f'.repeat(64)
+        return candidate
+      },
+      () => {
+        const candidate = build()
+        candidate.pricingDisclosures[1] = structuredClone(candidate.pricingDisclosures[0]!)
+        return candidate
+      },
+    ]
+    for (const attack of cases) {
+      expect(() => validateWingsSideCatalogCandidateOverlay(attack(), snapshot)).toThrow()
+    }
+  })
+
+  it('requires a protected external raw overlay hash binding', () => {
+    const fixture = fs.mkdtempSync(path.join(appRoot, '.candidate-overlay-test-'))
+    const candidatePath = path.join(fixture, 'candidate.json')
+    const candidate = build()
+    fs.writeFileSync(candidatePath, `${JSON.stringify(candidate, null, 2)}\n`)
+    try {
+      expect(() =>
+        readProtectedWingsSideCatalogCandidateOverlay({
+          expectedRawSha256: '0'.repeat(64),
+          filePath: candidatePath,
+          snapshot: inputs().snapshot,
+        }),
+      ).toThrow('artifact SHA-256 mismatch')
+    } finally {
+      fs.rmSync(fixture, { force: true, recursive: true })
+    }
+  })
+
   it('verifies ephemeral Ed25519 evidence and rejects signature, policy, and replay', () => {
     const candidate = build()
     const evidence = signWingsSideCatalogCandidateRehearsal({
@@ -111,6 +179,11 @@ describe('WingSide source candidate overlay and D6-C rehearsal evidence', () => 
         expectedRunID: 'unit-rehearsal-1',
       }),
     ).toThrow('replay detected')
+    expect(() =>
+      verifyWingsSideCatalogCandidateSignedEvidence(evidence, candidate, {
+        expectedRunID: 'stale-replayed-run',
+      }),
+    ).toThrow('policy or packet substitution')
 
     const forged = structuredClone(evidence)
     forged.signature.valueBase64 = Buffer.from('forged').toString('base64')

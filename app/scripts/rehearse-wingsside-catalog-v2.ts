@@ -16,7 +16,7 @@ import {
   type CatalogAuthoringSourceManifest,
   type ReviewedCatalogRowDecision,
 } from './lib/wingsSideTourEditorialCatalogAuthoring'
-import type { WingsSideCatalogCandidateOverlay } from './lib/wingsSideCatalogCandidateOverlay'
+import { readProtectedWingsSideCatalogCandidateOverlay } from './lib/wingsSideCatalogCandidateOverlay'
 import type { WingsSideCatalogSourceSnapshot } from './lib/wingsSideCatalogSourceSnapshot'
 import {
   editorialPricingApprovalChecksum,
@@ -47,16 +47,11 @@ export const runWingsSideCatalogV2Rehearsal = async () => {
   const sourceManifest = await readJSON<CatalogAuthoringSourceManifest>(
     requiredPath('--manifest'),
   )
-  const candidateOverlay = await readJSON<WingsSideCatalogCandidateOverlay>(
-    requiredPath('--candidate-overlay'),
-  )
-  if (
-    candidateOverlay.sourceSnapshotChecksum !== snapshot.snapshotChecksum ||
-    candidateOverlay.englishTours.length !== 22 ||
-    candidateOverlay.pricingDisclosures.length !== 38
-  ) {
-    throw new Error('Catalog-v2 rehearsal candidate overlay is stale or incomplete')
-  }
+  const candidateOverlay = readProtectedWingsSideCatalogCandidateOverlay({
+    expectedRawSha256: required('--candidate-overlay-sha256'),
+    filePath: requiredPath('--candidate-overlay'),
+    snapshot,
+  })
   const manifestPath = requiredPath('--manifest')
   const manifestBytes = await fs.readFile(manifestPath)
   const localeArtifacts = wingsSideTourEditorialLocales.map((locale) => {

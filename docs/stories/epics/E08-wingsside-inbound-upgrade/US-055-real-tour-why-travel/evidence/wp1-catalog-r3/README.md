@@ -75,3 +75,24 @@ authorization.
 
 Tests explicitly reject checksum drift, row loss, locale substitution, policy
 substitution, forged signatures, stale run IDs, and signed-evidence replay.
+
+## Corrective integrity gate
+
+Independent review reproduced a stale-checksum attack in which a VI pricing
+label was changed after the overlay was built. The rehearsal boundary now
+requires `--candidate-overlay-sha256 <protected raw SHA-256>` and, before any
+decision or output is created:
+
+- checks the external raw artifact hash;
+- recomputes the frozen snapshot checksum and exact `22 / 116 / 331` inventory;
+- strictly validates the complete overlay and nested schemas;
+- binds all 22 unique English tours to the frozen source tours;
+- binds all 38 unique disclosure rows to source row ID, source label, checksum,
+  source bucket, target bucket, and exactly `en,vi,it,es,pt`; and
+- recomputes the canonical candidate checksum.
+
+The exact reviewer attack now exits non-zero with `Full candidate checksum
+drift` and creates zero output files. A valid rehearsal using protected overlay
+hash `94c902672a7e7e63f47c686240f122eca4d0e7fd0def02de0ee6fe1488311a2a`
+continues to produce exactly 22 tours, 331 reviewed rows, and 38 governed
+dispositions.
