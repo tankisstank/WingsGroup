@@ -83,9 +83,10 @@ The corrective S3 wave closed them:
 
 The production importer also now requires an explicit reviewed catalog-v2
 artifact and lowercase SHA-256 for every phase. It hashes the actual file
-before Payload initialization, passes the selected path to the v2 loader, and
-checks the catalog approval snapshot against the approved plan for non-plan
-phases.
+before Payload initialization, parses and freezes the same verified bytes
+without re-reading the path, rejects a CLI hash that conflicts with protected
+release configuration, and checks the catalog approval snapshot against the
+approved plan for non-plan phases.
 
 The corrective re-review found no remaining P0 code false-pass in these areas.
 Production remains on `HOLD`: the repository does not yet contain the reviewed
