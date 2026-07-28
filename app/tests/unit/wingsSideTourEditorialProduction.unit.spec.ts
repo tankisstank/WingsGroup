@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { Page, TourProduct } from '../../src/payload-types'
 import {
   editorialSourceChecksum,
+  editorialServiceLabelChecksum,
   type EditorialTourContent,
   type WingsSideTourEditorialCatalog,
 } from '../../scripts/lib/wingsSideTourEditorialLocalization'
@@ -18,8 +19,20 @@ import {
 } from '../../scripts/lib/wingsSideTourEditorialProduction'
 
 const content = (index: number, locale: string): EditorialTourContent => ({
-  excludes: [`${locale} exclusion ${index}`],
-  includes: [`${locale} inclusion ${index}`],
+  excludes: [
+    {
+      label: `${locale} exclusion ${index}`,
+      sourceRowID: `exclude-${index}`,
+      targetBucket: 'excludes',
+    },
+  ],
+  includes: [
+    {
+      label: `${locale} inclusion ${index}`,
+      sourceRowID: `include-${index}`,
+      targetBucket: 'includes',
+    },
+  ],
   itineraryDays: [
     {
       accommodation: `${locale} hotel`,
@@ -118,19 +131,30 @@ const sourceWrapper = (index: number): Page =>
 const catalogAndSources = () => {
   const sources = Array.from({ length: 22 }, (_, index) => sourceTour(index + 1))
   const catalog: WingsSideTourEditorialCatalog = {
+    pricingDispositions: sources.map((source) => ({
+      approvedAt: '2026-07-28T00:00:00.000Z',
+      approvedBy: 'content-owner',
+      approvedTargetBucket: 'excludes',
+      rationale: 'Travel insurance is excluded.',
+      slug: source.slug,
+      sourceBucket: 'includes',
+      sourceLabel: `Travel Insurance ${source.id}`,
+      sourceLabelChecksum: editorialServiceLabelChecksum(`Travel Insurance ${source.id}`),
+      sourceRowID: `exclude-${source.id}`,
+    })),
     sourceLocale: 'en',
     targetLocales: ['vi', 'it', 'es', 'pt'],
     tours: sources.map((source, index) => ({
       locales: {
-        es: content(index, 'es'),
-        it: content(index, 'it'),
-        pt: content(index, 'pt'),
-        vi: content(index, 'vi'),
+        es: content(index + 1, 'es'),
+        it: content(index + 1, 'it'),
+        pt: content(index + 1, 'pt'),
+        vi: content(index + 1, 'vi'),
       },
       slug: source.slug,
       sourceChecksum: editorialSourceChecksum(source),
     })),
-    version: 1,
+    version: 2,
   }
   return { catalog, sources }
 }
@@ -139,8 +163,9 @@ describe('WingSide tour editorial production plan', () => {
   it('preserves array IDs and non-localized operational fields in write data', () => {
     const source = sourceTour(1)
     const normalizedServices = normalizeEditorialSharedServices({
-      expectedExcludes: 1,
-      expectedIncludes: 1,
+      content: content(1, 'pt'),
+      dispositions: catalogAndSources().catalog.pricingDispositions,
+      slug: source.slug,
       source,
     })
     const data = buildEditorialWriteData({
@@ -193,11 +218,18 @@ describe('WingSide tour editorial production plan', () => {
       includes: Array<{ id: string; label: string }>
     }
     source.includes.push({ id: 'pricing-disclosure-1', label })
+    const localized = content(1, 'vi')
+    localized.includes.push({
+      label: 'Khoản phụ phí',
+      sourceRowID: 'pricing-disclosure-1',
+      targetBucket: 'includes',
+    })
 
     expect(() =>
       normalizeEditorialSharedServices({
-        expectedExcludes: 1,
-        expectedIncludes: 1,
+        content: localized,
+        dispositions: [],
+        slug: source.slug,
         source,
       }),
     ).toThrow(/requires approved localized disposition/u)
@@ -235,6 +267,15 @@ describe('WingSide tour editorial production plan', () => {
 
     expect(plan.entries).toHaveLength(88)
     expect(plan.sharedServiceEntries).toHaveLength(22)
+    expect(plan.serviceRowLedger).toHaveLength(22)
+    expect(plan.serviceRowLedger[0]).toMatchObject({
+      afterCount: 2,
+      beforeCount: 2,
+      beforeRowIDs: ['include-1', 'exclude-1'],
+    })
+    expect([...plan.serviceRowLedger[0]!.afterRowIDs].sort()).toEqual(
+      [...plan.serviceRowLedger[0]!.beforeRowIDs].sort(),
+    )
     expect(plan.sharedServiceEntries[0]!.before).toMatchObject({
       excludes: [],
       includes: expect.any(Array),
@@ -252,7 +293,7 @@ describe('WingSide tour editorial production plan', () => {
       ),
     ).toBe(true)
     expect(plan.entries[0]!.wrapperBefore.title).toBeNull()
-    expect(plan.entries[0]!.wrapperAfter.title).toBe('vi tour 0')
+    expect(plan.entries[0]!.wrapperAfter.title).toBe('vi tour 1')
   })
 
   it('rejects aggregate plan tampering', () => {
@@ -324,8 +365,14 @@ describe('WingSide tour editorial production plan', () => {
     }
 
     const shapeFixture = catalogAndSources()
-    shapeFixture.catalog.tours[0]!.locales.pt.excludes.push('pt extra exclusion')
-    expect(() => build(shapeFixture)).toThrow('Localized service classification shape drift')
+    shapeFixture.catalog.tours[0]!.locales.pt.excludes.push({
+      label: 'pt extra exclusion',
+      sourceRowID: 'unknown-row',
+      targetBucket: 'excludes',
+    })
+    expect(() => build(shapeFixture)).toThrow(
+      'does not preserve exact source row IDs',
+    )
 
     const identityFixture = catalogAndSources()
     expect(() =>
@@ -343,6 +390,9 @@ describe('WingSide tour editorial production plan', () => {
 
     const missingIDFixture = catalogAndSources()
     delete (missingIDFixture.sources[0]!.includes?.[0] as { id?: unknown }).id
+    missingIDFixture.catalog.tours[0]!.sourceChecksum = editorialSourceChecksum(
+      missingIDFixture.sources[0]!,
+    )
     expect(() => build(missingIDFixture)).toThrow('service row is missing a stable ID')
   })
 

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Page, TourProduct } from '../../src/payload-types'
 import {
+  editorialServiceLabelChecksum,
   editorialSourceChecksum,
   type EditorialTourContent,
   type WingsSideTourEditorialCatalog,
@@ -29,8 +30,20 @@ import {
 const locales = ['vi', 'it', 'es', 'pt'] as const
 
 const localizedContent = (index: number, locale: string): EditorialTourContent => ({
-  excludes: [`${locale} excluded ${index}`],
-  includes: [`${locale} included ${index}`],
+  excludes: [
+    {
+      label: `${locale} excluded ${index}`,
+      sourceRowID: `exclude-${index}`,
+      targetBucket: 'excludes',
+    },
+  ],
+  includes: [
+    {
+      label: `${locale} included ${index}`,
+      sourceRowID: `include-${index}`,
+      targetBucket: 'includes',
+    },
+  ],
   itineraryDays: [
     {
       dayNumber: 1,
@@ -109,6 +122,17 @@ const fixture = () => {
   const sources = Array.from({ length: 22 }, (_, index) => sourceTour(index + 1))
   const sourceWrappers = Array.from({ length: 22 }, (_, index) => sourceWrapper(index + 1))
   const catalog: WingsSideTourEditorialCatalog = {
+    pricingDispositions: sources.map((source) => ({
+      approvedAt: '2026-07-28T00:00:00.000Z',
+      approvedBy: 'content-owner',
+      approvedTargetBucket: 'excludes',
+      rationale: 'Travel insurance is excluded.',
+      slug: source.slug,
+      sourceBucket: 'includes',
+      sourceLabel: `Travel Insurance ${source.id}`,
+      sourceLabelChecksum: editorialServiceLabelChecksum(`Travel Insurance ${source.id}`),
+      sourceRowID: `exclude-${source.id}`,
+    })),
     sourceLocale: 'en',
     targetLocales: [...locales],
     tours: sources.map((source, index) => ({
@@ -118,7 +142,7 @@ const fixture = () => {
       slug: source.slug,
       sourceChecksum: editorialSourceChecksum(source),
     })),
-    version: 1,
+    version: 2,
   }
   let state = Object.fromEntries([
     ['en', sources],
@@ -351,5 +375,58 @@ describe('WingSide tour editorial production transaction runtime', () => {
     })
     expect(payload.collections.pages.config.fields[0]!.required).toBe(true)
     expect(payload.collections.pages.config.fields[1]!.tabs?.[0]?.fields?.[0]?.required).toBe(true)
+  })
+
+  it('refuses unavailable transactions before any write', async () => {
+    const { catalog, payload, req, state } = fixture()
+    const plan = await createWingsSideTourEditorialProductionPlan({
+      catalog,
+      payload: payload as never,
+      releaseSourceCommit: 'a'.repeat(40),
+      req: req as never,
+      runID: 'transaction-unavailable',
+    })
+    const before = clone(state())
+    transactions.init.mockResolvedValueOnce(false)
+
+    await expect(
+      applyWingsSideTourEditorialProductionPlan({
+        catalog,
+        payload: payload as never,
+        plan,
+        req: req as never,
+      }),
+    ).rejects.toThrow('did not start the required tour editorial transaction')
+    expect(state()).toEqual(before)
+    expect(payload.update).not.toHaveBeenCalled()
+  })
+
+  it('refuses mixed shared-service state', async () => {
+    const { catalog, payload, req } = fixture()
+    const plan = await createWingsSideTourEditorialProductionPlan({
+      catalog,
+      payload: payload as never,
+      releaseSourceCommit: 'a'.repeat(40),
+      req: req as never,
+      runID: 'mixed-state',
+    })
+    const first = plan.sharedServiceEntries[0]!
+    await (
+      payload.update as unknown as (args: Record<string, unknown>) => Promise<unknown>
+    )({
+      collection: 'tour-products',
+      data: first.after as never,
+      id: first.tourID,
+      locale: 'en',
+    })
+
+    await expect(
+      applyWingsSideTourEditorialProductionPlan({
+        catalog,
+        payload: payload as never,
+        plan,
+        req: req as never,
+      }),
+    ).rejects.toThrow('refused mixed shared service state')
   })
 })

@@ -15,9 +15,29 @@ export type EditorialItineraryDay = {
   transport?: string
 }
 
+export type EditorialServiceBucket = 'excludes' | 'includes'
+
+export type LocalizedServiceRow = {
+  label: string
+  sourceRowID: string
+  targetBucket: EditorialServiceBucket
+}
+
+export type PricingDisposition = {
+  approvedAt: string
+  approvedBy: string
+  approvedTargetBucket: EditorialServiceBucket
+  rationale: string
+  slug: string
+  sourceBucket: EditorialServiceBucket
+  sourceLabel: string
+  sourceLabelChecksum: string
+  sourceRowID: string
+}
+
 export type EditorialTourContent = {
-  excludes: string[]
-  includes: string[]
+  excludes: LocalizedServiceRow[]
+  includes: LocalizedServiceRow[]
   itineraryDays: EditorialItineraryDay[]
   meta: {
     breadcrumbLabel: string
@@ -43,15 +63,21 @@ export type EditorialTourEntry = {
 }
 
 export type WingsSideTourEditorialCatalog = {
+  pricingDispositions: PricingDisposition[]
   sourceLocale: 'en'
   targetLocales: WingsSideTourEditorialLocale[]
   tours: EditorialTourEntry[]
-  version: 1
+  version: 2
+}
+
+type LegacyEditorialTourContent = Omit<EditorialTourContent, 'excludes' | 'includes'> & {
+  excludes: string[]
+  includes: string[]
 }
 
 export type WingsSideTourEditorialLocaleFile = {
   locale: WingsSideTourEditorialLocale
-  tours: Array<EditorialTourContent & { slug: string }>
+  tours: Array<LegacyEditorialTourContent & { slug: string }>
   version: 1
   voice: 'calm-specific-consultative'
 }
@@ -74,8 +100,8 @@ export type EditorialSourceDay = {
 }
 
 export type EditorialSourceTour = {
-  excludes?: Array<{ label?: null | string }> | null
-  includes?: Array<{ label?: null | string }> | null
+  excludes?: Array<{ id?: null | number | string; label?: null | string }> | null
+  includes?: Array<{ id?: null | number | string; label?: null | string }> | null
   itineraryDays?: EditorialSourceDay[] | null
   slug: string
   summary: string
@@ -102,8 +128,14 @@ const comparableText = (value: unknown) =>
     .trim()
 
 const sourceProjection = (tour: EditorialSourceTour) => ({
-  excludes: (tour.excludes || []).map(({ label }) => normalizeText(label)),
-  includes: (tour.includes || []).map(({ label }) => normalizeText(label)),
+  excludes: (tour.excludes || []).map(({ id, label }) => ({
+    id: normalizeText(id),
+    label: normalizeText(label),
+  })),
+  includes: (tour.includes || []).map(({ id, label }) => ({
+    id: normalizeText(id),
+    label: normalizeText(label),
+  })),
   itineraryDays: (tour.itineraryDays || []).map((day) => ({
     accommodation: normalizeText(day.accommodation),
     dayNumber: day.dayNumber,
@@ -124,8 +156,12 @@ export const editorialSourceChecksum = (tour: EditorialSourceTour) =>
     .update(JSON.stringify(sourceProjection(tour)))
     .digest('hex')
 
+export const editorialServiceLabelChecksum = (label: unknown) =>
+  crypto.createHash('sha256').update(normalizeText(label)).digest('hex')
+
 const sourceBrandPattern = /\b(?:best\s*price(?:\s+travel)?|bestpricetravel)\b/iu
 const rawMealPattern = /(?:^|[;,]\s*)(?:n\/?a|none)(?=\s*[;,]|$)/iu
+const peakServicePattern = /\b(?:peak|high) season\b|\bfuel surcharge\b|\bcompulsory dinner\b/iu
 
 const requiredText = ({
   findings,
@@ -187,11 +223,24 @@ export const validateWingsSideTourEditorialCatalog = ({
   const sourceBySlug = new Map(sourceTours.map((tour) => [tour.slug, tour]))
   const catalogBySlug = new Map<string, EditorialTourEntry>()
 
-  if (catalog.version !== 1 || catalog.sourceLocale !== 'en') {
+  if (catalog.version !== 2 || catalog.sourceLocale !== 'en') {
     findings.push({
       message: 'Catalog version/source locale contract is invalid',
       path: '$',
     })
+  }
+  const dispositionByKey = new Map<string, PricingDisposition>()
+  for (const disposition of catalog.pricingDispositions || []) {
+    const key = `${disposition.slug}:${disposition.sourceRowID}`
+    if (dispositionByKey.has(key)) {
+      findings.push({
+        message: 'Duplicate pricing disposition',
+        path: '$.pricingDispositions',
+        slug: disposition.slug,
+      })
+      continue
+    }
+    dispositionByKey.set(key, disposition)
   }
   if (JSON.stringify(catalog.targetLocales) !== JSON.stringify(wingsSideTourEditorialLocales)) {
     findings.push({
@@ -229,8 +278,35 @@ export const validateWingsSideTourEditorialCatalog = ({
         slug: source.slug,
       })
     }
+    const sourceRows = [
+      ...(source.includes || []).map((row) => ({
+        bucket: 'includes' as const,
+        id: normalizeText(row.id),
+        label: normalizeText(row.label),
+      })),
+      ...(source.excludes || []).map((row) => ({
+        bucket: 'excludes' as const,
+        id: normalizeText(row.id),
+        label: normalizeText(row.label),
+      })),
+    ]
+    const sourceIDs = sourceRows.map(({ id }) => id)
+    if (sourceIDs.some((id) => !id)) {
+      findings.push({
+        message: 'Source service row is missing a stable ID',
+        path: 'includes/excludes',
+        slug: source.slug,
+      })
+    }
+    if (new Set(sourceIDs).size !== sourceIDs.length) {
+      findings.push({
+        message: 'Source service row IDs must be unique',
+        path: 'includes/excludes',
+        slug: source.slug,
+      })
+    }
 
-    let localizedServiceShape: null | string = null
+    let localizedServiceDisposition: null | string = null
     for (const locale of wingsSideTourEditorialLocales) {
       const content = entry.locales?.[locale]
       if (!content) {
@@ -337,48 +413,92 @@ export const validateWingsSideTourEditorialCatalog = ({
         }
       })
 
-      const sourceIncludes = source.includes || []
-      const sourceExcludes = source.excludes || []
+      const localizedRows = [
+        ...(content.includes || []).map((row) => ({
+          ...row,
+          actualBucket: 'includes' as const,
+        })),
+        ...(content.excludes || []).map((row) => ({
+          ...row,
+          actualBucket: 'excludes' as const,
+        })),
+      ]
+      const localizedIDs = localizedRows.map(({ sourceRowID }) => normalizeText(sourceRowID))
       if (
-        sourceIncludes.length + sourceExcludes.length > 0 &&
-        content.includes.length + content.excludes.length === 0
+        localizedIDs.length !== sourceIDs.length ||
+        new Set(localizedIDs).size !== localizedIDs.length ||
+        sourceIDs.some((id) => !localizedIDs.includes(id)) ||
+        localizedIDs.some((id) => !sourceIDs.includes(id))
       ) {
         findings.push({
           locale,
-          message: 'Localized service inventory is empty',
+          message: 'Localized service rows must contain every unique source row ID exactly once',
           path: 'includes/excludes',
           slug: source.slug,
         })
       }
-      const serviceShape = `${content.includes.length}/${content.excludes.length}`
-      if (localizedServiceShape === null) {
-        localizedServiceShape = serviceShape
-      } else if (serviceShape !== localizedServiceShape) {
+      for (const [index, row] of localizedRows.entries()) {
+        requiredText({
+          findings,
+          locale,
+          path: `${row.actualBucket}.${index}.label`,
+          slug: source.slug,
+          value: row.label,
+        })
+        if (row.targetBucket !== row.actualBucket) {
+          findings.push({
+            locale,
+            message: 'Localized service targetBucket must match its containing bucket',
+            path: `${row.actualBucket}.${index}.targetBucket`,
+            slug: source.slug,
+          })
+        }
+        const sourceRow = sourceRows.find(({ id }) => id === normalizeText(row.sourceRowID))
+        if (!sourceRow) continue
+        const disposition = dispositionByKey.get(`${source.slug}:${sourceRow.id}`)
+        const requiresDisposition =
+          sourceRow.bucket !== row.targetBucket || peakServicePattern.test(sourceRow.label)
+        if (!requiresDisposition) continue
+        if (
+          !disposition ||
+          disposition.sourceBucket !== sourceRow.bucket ||
+          normalizeText(disposition.sourceLabel) !== sourceRow.label ||
+          disposition.sourceLabelChecksum !== editorialServiceLabelChecksum(sourceRow.label) ||
+          disposition.approvedTargetBucket !== row.targetBucket ||
+          !normalizeText(disposition.rationale) ||
+          !normalizeText(disposition.approvedBy) ||
+          !normalizeText(disposition.approvedAt)
+        ) {
+          findings.push({
+            locale,
+            message: 'Service row requires a complete approved pricing disposition',
+            path: `${row.actualBucket}.${index}`,
+            slug: source.slug,
+          })
+        }
+      }
+      const serviceDisposition = editorialSourceChecksum({
+        itineraryDays: [],
+        slug: source.slug,
+        summary: '',
+        title: '',
+        includes: localizedRows
+          .filter(({ targetBucket }) => targetBucket === 'includes')
+          .map(({ sourceRowID }) => ({ id: sourceRowID, label: '' })),
+        excludes: localizedRows
+          .filter(({ targetBucket }) => targetBucket === 'excludes')
+          .map(({ sourceRowID }) => ({ id: sourceRowID, label: '' })),
+      })
+      if (localizedServiceDisposition === null) {
+        localizedServiceDisposition = serviceDisposition
+      } else if (serviceDisposition !== localizedServiceDisposition) {
         findings.push({
           locale,
-          message: 'Localized service classification cardinality differs between locales',
+          message: 'Localized service classification differs between locales',
           path: 'includes/excludes',
           slug: source.slug,
         })
       }
-      content.includes.forEach((value, index) =>
-        requiredText({
-          findings,
-          locale,
-          path: `includes.${index}`,
-          slug: source.slug,
-          value,
-        }),
-      )
-      content.excludes.forEach((value, index) =>
-        requiredText({
-          findings,
-          locale,
-          path: `excludes.${index}`,
-          slug: source.slug,
-          value,
-        }),
-      )
       for (const field of [
         'hotelSummary',
         'mealsSummary',
@@ -403,6 +523,37 @@ export const validateWingsSideTourEditorialCatalog = ({
         path: '$.tours',
         slug: entry.slug,
       })
+    }
+  }
+
+  for (const disposition of catalog.pricingDispositions || []) {
+    const source = sourceBySlug.get(disposition.slug)
+    const sourceRows = source
+      ? [
+          ...(source.includes || []).map((row) => ({ bucket: 'includes' as const, row })),
+          ...(source.excludes || []).map((row) => ({ bucket: 'excludes' as const, row })),
+        ]
+      : []
+    const match = sourceRows.find(({ row }) => normalizeText(row.id) === disposition.sourceRowID)
+    if (!match) {
+      findings.push({
+        message: 'Pricing disposition references an unknown source row ID',
+        path: '$.pricingDispositions',
+        slug: disposition.slug,
+      })
+    } else {
+      const sourceLabel = normalizeText(match.row.label)
+      if (
+        match.bucket !== disposition.sourceBucket ||
+        sourceLabel !== normalizeText(disposition.sourceLabel) ||
+        editorialServiceLabelChecksum(sourceLabel) !== disposition.sourceLabelChecksum
+      ) {
+        findings.push({
+          message: 'Pricing disposition source label or checksum drifted',
+          path: '$.pricingDispositions',
+          slug: disposition.slug,
+        })
+      }
     }
   }
 
@@ -431,7 +582,7 @@ export const buildWingsSideTourEditorialCatalog = ({
 }: {
   localeFiles: WingsSideTourEditorialLocaleFile[]
   manifest: WingsSideTourEditorialSourceManifest
-}): WingsSideTourEditorialCatalog => {
+}): never => {
   if (
     manifest.version !== 1 ||
     manifest.sourceLocale !== 'en' ||
@@ -453,37 +604,22 @@ export const buildWingsSideTourEditorialCatalog = ({
     throw new Error('WingSide editorial source manifest contains duplicate slugs')
   }
 
-  const localeTourMaps = new Map(
-    wingsSideTourEditorialLocales.map((locale) => {
-      const file = fileByLocale.get(locale)!
-      const tourMap = new Map(file.tours.map((tour) => [tour.slug, tour]))
-      if (tourMap.size !== file.tours.length) {
-        throw new Error(`WingSide editorial ${locale} file contains duplicate slugs`)
-      }
-      const fileSlugs = [...tourMap.keys()].sort()
-      const expectedSlugs = [...manifestSlugs].sort()
-      if (JSON.stringify(fileSlugs) !== JSON.stringify(expectedSlugs)) {
-        throw new Error(`WingSide editorial ${locale} slug inventory does not match source`)
-      }
-      return [locale, tourMap] as const
-    }),
-  )
-
-  return {
-    sourceLocale: 'en',
-    targetLocales: [...wingsSideTourEditorialLocales],
-    tours: manifest.tours.map(({ checksum, slug }) => ({
-      locales: Object.fromEntries(
-        wingsSideTourEditorialLocales.map((locale) => {
-          const { slug: _slug, ...content } = localeTourMaps.get(locale)!.get(slug)!
-          return [locale, content]
-        }),
-      ) as Record<WingsSideTourEditorialLocale, EditorialTourContent>,
-      slug,
-      sourceChecksum: checksum,
-    })),
-    version: 1,
+  for (const locale of wingsSideTourEditorialLocales) {
+    const file = fileByLocale.get(locale)!
+    const tourMap = new Map(file.tours.map((tour) => [tour.slug, tour]))
+    if (tourMap.size !== file.tours.length) {
+      throw new Error(`WingSide editorial ${locale} file contains duplicate slugs`)
+    }
+    const fileSlugs = [...tourMap.keys()].sort()
+    const expectedSlugs = [...manifestSlugs].sort()
+    if (JSON.stringify(fileSlugs) !== JSON.stringify(expectedSlugs)) {
+      throw new Error(`WingSide editorial ${locale} slug inventory does not match source`)
+    }
   }
+
+  throw new Error(
+    'Unsafe v1 positional locale files cannot build catalog v2; migrate rows to stable sourceRowID and approved dispositions',
+  )
 }
 
 export const loadWingsSideTourEditorialCatalog = async ({
