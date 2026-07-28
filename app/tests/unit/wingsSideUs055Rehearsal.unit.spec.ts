@@ -55,6 +55,9 @@ describe('US-055 disposable rehearsal guards', () => {
     expect(editorialSeed).toContain('us055WhyTravelRoleSlugs.map')
     expect(editorialSeed).toContain('slugToRehearsalTourID.get(slug)')
     expect(editorialSeed).toContain('homeWhyTourSlots: whyTourSlots')
+    expect(editorialSeed).toContain('loadWingsSideCredentialManifest()')
+    expect(editorialSeed).toContain('buildVerifiedWingsSideHiFiHomeCredentials')
+    expect(editorialSeed).toContain('homeCredentials,')
     expect(editorialSeed).toContain('homeIdempotenceReport.summary.unchanged !== 40')
   })
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  buildVerifiedWingsSideHiFiHomeCredentials,
   buildWingsSideCredentialsBlock,
   loadWingsSideCredentialManifest,
   summarizeWingsSideCredentials,
@@ -30,5 +31,23 @@ describe('WingSide photographed credential catalog', () => {
     expect(block.items).toHaveLength(24)
     expect(block.items.every((item) => item.image && item.issuer && item.recipient)).toBe(true)
     expect(block.items.map((item) => item.sourceFilename)).toContain('IMG_8399.JPG')
+  })
+
+  it('maps only reviewed facts into the smaller Home HiFi credential schema', async () => {
+    const manifest = await loadWingsSideCredentialManifest()
+    const cards = buildVerifiedWingsSideHiFiHomeCredentials(manifest)
+    const verified = manifest.items.filter((item) => item.reviewStatus === 'verified')
+
+    expect(cards).toHaveLength(21)
+    expect(cards).toEqual(
+      verified.map((item) => ({
+        body: item.description,
+        kind: item.kind,
+        mark: item.mark,
+        micro: item.label,
+        title: item.title,
+      })),
+    )
+    expect(cards.some((card) => card.title === 'Top travel agent recognition')).toBe(false)
   })
 })

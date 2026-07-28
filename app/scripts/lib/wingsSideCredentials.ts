@@ -165,3 +165,27 @@ export const summarizeWingsSideCredentials = (manifest: WingsSideCredentialManif
     ...manifest.items.flatMap((item) => (item.recognitionYear ? [item.recognitionYear] : [])),
   ),
 })
+
+/**
+ * Projects only reviewed source records into the smaller Home HiFi credential-card schema.
+ *
+ * The manifest metadata is intentionally preserved verbatim for every locale, matching the
+ * existing credentials-carousel import contract: factual issuer, recognition and reference
+ * data must not be machine-translated or editorially inferred during a rehearsal.
+ */
+export const buildVerifiedWingsSideHiFiHomeCredentials = (
+  manifest: WingsSideCredentialManifest,
+) => {
+  const verified = manifest.items.filter((item) => item.reviewStatus === 'verified')
+  if (verified.length === 0) {
+    throw new Error('Credential manifest has no verified records for the Home HiFi fixture')
+  }
+
+  return verified.map((item) => ({
+    body: item.description,
+    kind: item.kind,
+    mark: item.mark,
+    micro: item.label,
+    title: item.title,
+  }))
+}

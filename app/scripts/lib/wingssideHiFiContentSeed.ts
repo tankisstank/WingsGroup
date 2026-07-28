@@ -1017,6 +1017,7 @@ export type WingsSideHiFiSeedApplyReport = WingsSideHiFiSeedReport & {
 const seedWriteContext = wingsSideLocalizationBackfillContext
 
 export const applyWingsSideHiFiContentSeed = async (args: {
+  homeCredentials?: Array<Record<string, unknown>>
   homeWhyTourSlots?: Array<Record<string, unknown>>
   locale?: WingsSideHiFiSeedLocale | 'all'
   payload: WingsSideHiFiSeedPayload
@@ -1064,12 +1065,16 @@ export const applyWingsSideHiFiContentSeed = async (args: {
     for (const target of targets) {
       const page = localePages.find((doc) => matchPage(doc, target)) || null
       let desired = buildPayloadFromCopy(locale, target.routeVariant)
-      if (target.routeVariant === 'home' && args.homeWhyTourSlots) {
+      if (
+        target.routeVariant === 'home' &&
+        (args.homeCredentials || args.homeWhyTourSlots)
+      ) {
         desired = {
           ...desired,
           home: {
             ...((desired.home as Record<string, unknown> | undefined) || {}),
-            whyTourSlots: args.homeWhyTourSlots,
+            ...(args.homeCredentials ? { credentials: args.homeCredentials } : {}),
+            ...(args.homeWhyTourSlots ? { whyTourSlots: args.homeWhyTourSlots } : {}),
           },
         }
       }

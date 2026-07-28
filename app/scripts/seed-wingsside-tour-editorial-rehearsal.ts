@@ -18,6 +18,10 @@ import {
   WINGSSIDE_HIFI_SEED_LOCALES,
   type WingsSideHiFiSeedPayload,
 } from './lib/wingssideHiFiContentSeed'
+import {
+  buildVerifiedWingsSideHiFiHomeCredentials,
+  loadWingsSideCredentialManifest,
+} from './lib/wingsSideCredentials'
 import { us055WhyTravelRoleSlugs } from './lib/wingsSideUs055HomeFixture'
 
 const requiredConfirmation = 'disposable-postgres'
@@ -292,6 +296,9 @@ const main = async () => {
       | Awaited<ReturnType<typeof applyWingsSideHiFiContentSeed>>
       | undefined
     if (reuseSeededHome) {
+      const homeCredentials = buildVerifiedWingsSideHiFiHomeCredentials(
+        await loadWingsSideCredentialManifest(),
+      )
       const whyTourSlots = us055WhyTravelRoleSlugs.map(({ key, slug }) => {
         const rehearsalTourID = slugToRehearsalTourID.get(slug)
         if (rehearsalTourID === undefined) {
@@ -304,6 +311,7 @@ const main = async () => {
         }
       })
       homeSeedReport = await applyWingsSideHiFiContentSeed({
+        homeCredentials,
         homeWhyTourSlots: whyTourSlots,
         locale: 'all',
         payload: payload as unknown as WingsSideHiFiSeedPayload,
@@ -334,6 +342,7 @@ const main = async () => {
         )
       }
       homeIdempotenceReport = await applyWingsSideHiFiContentSeed({
+        homeCredentials,
         homeWhyTourSlots: whyTourSlots,
         locale: 'all',
         payload: payload as unknown as WingsSideHiFiSeedPayload,
