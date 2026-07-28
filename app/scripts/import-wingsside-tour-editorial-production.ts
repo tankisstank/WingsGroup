@@ -1,8 +1,9 @@
 import 'dotenv/config'
 
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { createLocalReq, getPayload, type Payload } from 'payload'
 
@@ -37,6 +38,42 @@ const argumentValue = (name: string): string | undefined => {
   if (inline) return inline.slice(name.length + 1)
   const index = process.argv.indexOf(name)
   return index >= 0 ? process.argv[index + 1] : undefined
+}
+
+export const preflightWingsSideEditorialCatalogArtifact = async ({
+  catalogPath,
+  cwd = process.cwd(),
+  expectedSha256,
+}: {
+  catalogPath?: string
+  cwd?: string
+  expectedSha256?: string
+}) => {
+  const suppliedPath = String(catalogPath || '').trim()
+  if (!suppliedPath) {
+    throw new Error(
+      'All tour editorial production phases require --catalog=<reviewed-catalog-v2-path>',
+    )
+  }
+  const expected = String(expectedSha256 || '').trim()
+  if (!/^[a-f0-9]{64}$/u.test(expected)) {
+    throw new Error('Catalog v2 requires a trusted lowercase SHA-256')
+  }
+  const resolvedCatalogPath = path.resolve(cwd, suppliedPath)
+  let bytes: Buffer
+  try {
+    bytes = await readFile(resolvedCatalogPath)
+  } catch {
+    throw new Error(`Catalog v2 artifact is missing or unreadable: ${resolvedCatalogPath}`)
+  }
+  const actualSha256 = createHash('sha256').update(bytes).digest('hex')
+  if (actualSha256 !== expected) {
+    throw new Error('Catalog v2 artifact SHA-256 does not match the trusted release value')
+  }
+  return {
+    catalogPath: resolvedCatalogPath,
+    catalogSha256: actualSha256,
+  }
 }
 
 const selectedPhase = (): Phase => {
@@ -149,6 +186,13 @@ const main = async () => {
     payloadDbPush: process.env.PAYLOAD_DB_PUSH,
     payloadPackageName: '@payloadcms/db-postgres',
   })
+  const catalogArtifact = await preflightWingsSideEditorialCatalogArtifact({
+    catalogPath:
+      argumentValue('--catalog') || process.env.WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_PATH,
+    expectedSha256:
+      argumentValue('--catalog-sha256') ||
+      process.env.WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_SHA256,
+  })
   const preparedPlan = phase === 'plan' ? null : await readPlan()
   if (preparedPlan && preparedPlan.plan.releaseSourceCommit !== releaseSourceCommit) {
     throw new Error('Release source commit does not match the editorial plan')
@@ -178,7 +222,15 @@ const main = async () => {
     })
     const admin = await resolveAdmin(payload, phase)
     const req = await createLocalReq({ user: admin as never }, payload)
-    const catalog = await loadWingsSideTourEditorialCatalog()
+    const catalog = await loadWingsSideTourEditorialCatalog({
+      catalogPath: catalogArtifact.catalogPath,
+    })
+    if (
+      preparedPlan &&
+      preparedPlan.plan.approvalSnapshotChecksum !== catalog.approvalManifest.checksum
+    ) {
+      throw new Error('Catalog v2 approval snapshot does not match the supplied production plan')
+    }
 
     if (phase === 'plan') {
       const plan = await createWingsSideTourEditorialProductionPlan({
@@ -198,6 +250,7 @@ const main = async () => {
         outputPath,
         phase,
         planSha256: editorialChecksum(plan),
+        catalogSha256: catalogArtifact.catalogSha256,
         tours: plan.expectedTourCount,
       })
       return
@@ -248,10 +301,16 @@ const main = async () => {
   }
 }
 
-void main().then(
-  () => process.exit(0),
-  (error) => {
-    console.error(error instanceof Error ? error.message : error)
-    process.exit(1)
-  },
-)
+const isDirectExecution =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))
+
+if (isDirectExecution) {
+  void main().then(
+    () => process.exit(0),
+    (error) => {
+      console.error(error instanceof Error ? error.message : error)
+      process.exit(1)
+    },
+  )
+}
