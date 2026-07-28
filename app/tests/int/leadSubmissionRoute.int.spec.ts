@@ -173,6 +173,12 @@ describe('lead submission endpoint integration', () => {
     expect(response.status).toBe(202)
     expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({
+        enquiryContext: {
+          discovery: { destination: 'sapa', duration: 'multi-day', style: 'culture' },
+          source: 'journeys',
+          tourId: '42',
+          tourSlug: 'sapa-trek-and-market',
+        },
         submissionData: [{ field: 'name', value: 'Alice' }],
       }),
     }))

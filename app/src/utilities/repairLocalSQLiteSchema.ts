@@ -143,6 +143,12 @@ const localSQLiteColumnRepairs = [
   {
     table: 'form_submissions',
     columns: [
+      ['enquiry_context_source', 'TEXT'],
+      ['enquiry_context_tour_id', 'TEXT'],
+      ['enquiry_context_tour_slug', 'TEXT'],
+      ['enquiry_context_discovery_destination', 'TEXT'],
+      ['enquiry_context_discovery_duration', 'TEXT'],
+      ['enquiry_context_discovery_style', 'TEXT'],
       ['delivery_status', "TEXT NOT NULL DEFAULT 'pending'"],
       ['delivery_updated_at', 'TEXT'],
       ['delivery_error_code', 'TEXT'],

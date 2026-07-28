@@ -161,6 +161,7 @@ export async function POST(request: Request): Promise<Response> {
       data: {
         deliveryStatus: 'pending',
         deliveryUpdatedAt: new Date().toISOString(),
+        enquiryContext: input.context,
         form: form.id,
         site: site.id,
         submissionData: normalizedFields.map(({ field, value }) => ({ field, value })),

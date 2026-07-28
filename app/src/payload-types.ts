@@ -2241,6 +2241,19 @@ export interface FormSubmission {
   id: number;
   site?: (number | null) | Site;
   /**
+   * Private journey and discovery metadata. Kept separate from customer-authored form fields.
+   */
+  enquiryContext?: {
+    source?: string | null;
+    tourId?: string | null;
+    tourSlug?: string | null;
+    discovery?: {
+      destination?: string | null;
+      duration?: string | null;
+      style?: string | null;
+    };
+  };
+  /**
    * Private operational state for notification delivery and reconciliation.
    */
   deliveryStatus: 'pending' | 'queued' | 'delivered' | 'queue_failed' | 'delivery_failed';
@@ -4195,6 +4208,20 @@ export interface FormsSelect<T extends boolean = true> {
  */
 export interface FormSubmissionsSelect<T extends boolean = true> {
   site?: T;
+  enquiryContext?:
+    | T
+    | {
+        source?: T;
+        tourId?: T;
+        tourSlug?: T;
+        discovery?:
+          | T
+          | {
+              destination?: T;
+              duration?: T;
+              style?: T;
+            };
+      };
   deliveryStatus?: T;
   deliveryUpdatedAt?: T;
   deliveryErrorCode?: T;
