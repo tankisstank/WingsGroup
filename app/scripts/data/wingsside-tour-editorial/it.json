@@ -6,7 +6,7 @@
     {
       "slug": "a-glimpse-of-central-vietnam-5-days",
       "title": "Vietnam centrale in 5 giorni",
-      "summary": "Un itinerario privato tra Da Nang, Hue e Hoi An per scoprire il patrimonio del Vietnam centrale con un ritmo equilibrato. Cinque giorni tra architettura imperiale, vita della città antica, santuario di My Son e tempo libero da modellare sui propri interessi.",
+      "summary": "Un itinerario privato tra Da Nang, Hue e Hoi An per scoprire il patrimonio del Vietnam centrale con un ritmo equilibrato. Cinque giorni tra architettura imperiale, vita del centro storico, santuario di My Son e tempo libero da modellare sui propri interessi.",
       "routeSummary": "Da Nang - Hue - Hoi An - My Son - Da Nang",
       "primaryCTALabel": "Progetta il tuo viaggio",
       "itineraryDays": [
@@ -477,7 +477,7 @@
     {
       "slug": "hoi-an-surrounding-and-beach-break-7-days",
       "title": "Hoi An, dintorni e mare in 7 giorni",
-      "summary": "Una settimana dal ritmo disteso tra la campagna di Tra Que, la cucina di Hoi An, il santuario di My Son, Ba Na Hills e giornate libere. La fonte contiene sei giornate numerate 1, 2, 3, 4, 5 e 7; lo spazio restante è destinato al mare o a esperienze su misura.",
+      "summary": "Una settimana dal ritmo disteso tra la campagna di Tra Que, la cucina di Hoi An, il santuario di My Son, Ba Na Hills e giornate libere. Le attività sono distribuite nei giorni 1-5 e 7; il giorno 6 resta libero per il mare o per un'esperienza su misura.",
       "routeSummary": "Da Nang - Hoi An - Tra Que - My Son - Ba Na Hills - Da Nang",
       "primaryCTALabel": "Progetta il tuo viaggio",
       "itineraryDays": [
@@ -509,7 +509,7 @@
         "hotelSummary": "Hotel a Hoi An nella categoria confermata.",
         "mealsSummary": "Colazioni dal giorno 2, pranzo a Tra Que e Ba Na Hills, tour gastronomico serale.",
         "transportSummary": "Trasferimenti aeroportuali, bicicletta, barca sul Thu Bon e funivia.",
-        "operatorNotes": "La fonte contiene sei giornate in un pacchetto di sette; la giornata restante va esplicitata nella conferma finale."
+        "operatorNotes": "Il giorno 6 è libero. La conferma finale indicherà l'eventuale giornata al mare o l'esperienza su misura richiesta."
       },
       "meta": {"title":"Hoi An e mare in 7 giorni | WingSide","description":"Una settimana tra Tra Que, cucina di Hoi An, My Son, Ba Na Hills e tempo libero al mare.","breadcrumbLabel":"Hoi An e mare in 7 giorni"}
     },
@@ -554,16 +554,16 @@
         "Trasferimenti andata e ritorno da Ho Chi Minh City",
         "Escursioni in barca sul Mekong",
         "Tre pranzi e due colazioni",
-        "Due notti in hotel a Can Tho secondo la fonte",
+        "Due pernottamenti nella categoria confermata",
         "Guida in lingua inglese",
         "Ingressi previsti"
       ],
       "excludes": ["Bevande","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi"],
       "servicesSummary": {
-        "hotelSummary": "Due notti a Can Tho secondo le condizioni della fonte; la località della prima notte va riconfermata.",
+        "hotelSummary": "Due pernottamenti nella categoria confermata; la località della prima notte sarà definita con l'itinerario finale.",
         "mealsSummary": "Tre pranzi e due colazioni.",
         "transportSummary": "Veicoli da Ho Chi Minh City, barche a motore e sampan.",
-        "operatorNotes": "La casa Huynh Thuy Le può essere chiusa. La descrizione della prima notte non è del tutto coerente e va verificata."
+        "operatorNotes": "La casa Huynh Thuy Le può essere chiusa. La località della prima notte sarà confermata prima della prenotazione dei servizi."
       },
       "meta": {"title":"Delta del Mekong in 3 giorni | WingSide","description":"Cai Be, Tan Phong, Sa Dec, Can Tho e mercato di Cai Rang in tre giorni.","breadcrumbLabel":"Porta del Mekong"}
     },
@@ -644,7 +644,7 @@
     },
     {
       "slug": "northern-vietnam-soft-adventure-8-days",
-      "title": "Avventura dolce nel Nord del Vietnam in 8 giorni",
+      "title": "Avventura a ritmo moderato nel Nord del Vietnam in 8 giorni",
       "summary": "Otto giorni da Hanoi a Ky Son, Mai Chau, Tam Coc e Ha Long, con homestay, bicicletta, cucina, sampan e due notti in crociera. Un viaggio attivo senza ritmi estremi.",
       "routeSummary": "Hanoi - Ky Son - Mai Chau - Ninh Binh - baia di Ha Long - Hanoi",
       "primaryCTALabel": "Progetta il tuo viaggio",
@@ -661,12 +661,12 @@
       "includes": ["Camera doppia o matrimoniale in hotel, escluso l'eventuale homestay","Trasporti in Vietnam, inclusi i trasferimenti aeroportuali","Guide locali in lingua inglese","Ingressi indicati","Pasti previsti"],
       "excludes": ["Check-in anticipato e check-out posticipato","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
       "servicesSummary": {"hotelSummary":"Hotel a Hanoi, Mai Chau e Ninh Binh; homestay a Ky Son; due notti in crociera.","mealsSummary":"Pasti in homestay, Mai Chau, Ninh Binh, crociera e tour gastronomico.","transportSummary":"Minibus, biciclette, carro, sampan, crociera e moto con conducente.","operatorNotes":"La bicicletta a Mai Chau può avere un costo extra. Le attività in baia dipendono da nave e meteo."},
-      "meta": {"title":"Avventura dolce nel Nord in 8 giorni | WingSide","description":"Ky Son, Mai Chau, Ninh Binh e due notti nella baia di Ha Long in otto giorni.","breadcrumbLabel":"Avventura dolce nel Nord"}
+      "meta": {"title":"Avventura a ritmo moderato nel Nord in 8 giorni | WingSide","description":"Ky Son, Mai Chau, Ninh Binh e due notti nella baia di Ha Long in otto giorni.","breadcrumbLabel":"Avventura a ritmo moderato nel Nord"}
     },
     {
       "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
       "title": "Fuga romantica a Phu Quoc in 5 giorni",
-      "summary": "Un soggiorno per due che inizia con una cena in crociera sul fiume Saigon e prosegue con giornate private a Phu Quoc. La fonte presenta quattro voci in un pacchetto di cinque giorni; il tempo tra i giorni 3 e 5 è libero sull'isola.",
+      "summary": "Un soggiorno per due che inizia con una cena in crociera sul fiume Saigon e prosegue con giornate da vivere in coppia a Phu Quoc. Il giorno 4 resta libero per il mare o per esperienze scelte insieme.",
       "routeSummary": "Ho Chi Minh City - Phu Quoc - Ho Chi Minh City",
       "primaryCTALabel": "Progetta il viaggio di coppia",
       "itineraryDays": [
@@ -677,7 +677,7 @@
       ],
       "includes": ["Camera doppia climatizzata","Trasporti climatizzati, inclusi i trasferimenti aeroportuali","Guide locali in lingua inglese ove previste","Pasti indicati","Ingressi previsti","Voli Ho Chi Minh City - Phu Quoc andata e ritorno"],
       "excludes": ["Check-in anticipato e check-out posticipato","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
-      "servicesSummary": {"hotelSummary":"Hotel a Ho Chi Minh City e resort a Phu Quoc.","mealsSummary":"Cena in crociera, cena romantica e colazioni previste.","transportSummary":"Trasferimenti, crociera sul Saigon e due voli interni.","operatorNotes":"La fonte elenca quattro giornate per un pacchetto di cinque; il tempo non descritto va indicato come libero nella conferma."},
+      "servicesSummary": {"hotelSummary":"Hotel a Ho Chi Minh City e resort a Phu Quoc.","mealsSummary":"Cena in crociera, cena romantica e colazioni previste.","transportSummary":"Trasferimenti, crociera sul Saigon e due voli interni.","operatorNotes":"Il giorno 4 è libero sull'isola e sarà indicato chiaramente nella conferma finale."},
       "meta": {"title":"Fuga romantica a Phu Quoc in 5 giorni | WingSide","description":"Cena sul fiume Saigon e soggiorno di coppia sulle spiagge di Phu Quoc.","breadcrumbLabel":"Phu Quoc romantica"}
     },
     {
@@ -687,19 +687,19 @@
       "routeSummary": "Sapa - Cat Cat - Y Linh Ho - Lao Chai - Ta Van - Bac Ha - Lao Cai - Hanoi",
       "primaryCTALabel": "Progetta il tuo viaggio",
       "itineraryDays": [
-        {"dayNumber":1,"title":"Trekking al villaggio Cat Cat","route":"Sapa - Cat Cat - Sapa","summary":"Passeggiata di circa 2,5 km tra il villaggio, la valle e la centrale idroelettrica costruita dai francesi nel 1925. Rientro in autobus, cena e serata libera a Sapa.","meals":"Pasti non inclusi secondo la fonte","transport":"A piedi e autobus locale"},
+        {"dayNumber":1,"title":"Trekking al villaggio Cat Cat","route":"Sapa - Cat Cat - Sapa","summary":"Passeggiata di circa 2,5 km tra il villaggio, la valle e la centrale idroelettrica costruita dai francesi nel 1925. Rientro in autobus, cena e serata libera a Sapa.","meals":"Pasti non inclusi","transport":"A piedi e autobus locale"},
         {"dayNumber":2,"title":"Y Linh Ho, Lao Chai e Ta Van","route":"Sapa - Y Linh Ho - Lao Chai - Ta Van - Sapa","summary":"Trekking di circa 5 km nella valle Muong Hoa, attraversando villaggi H'Mong Neri e Giay e risaie terrazzate. Pranzo e rientro in veicolo dal ponte Ta Van.","meals":"Colazione e pranzo","transport":"A piedi e veicolo di supporto"},
         {"dayNumber":3,"title":"Mercato di Bac Ha e palazzo Hoang A Tuong","route":"Sapa - Bac Ha - Ban Pho - Lao Cai - Hanoi","summary":"Visita del mercato di Bac Ha, pranzo e cammino di circa 4 km tra il palazzo Hoang A Tuong e il villaggio H'Mong Fiori di Ban Pho. Trasferimento a Lao Cai e proseguimento per Hanoi.","meals":"Colazione e pranzo","transport":"Veicolo e percorso a piedi"}
       ],
       "includes": ["Camera doppia o matrimoniale","Trasporti indicati","Guida in lingua inglese","Ingressi previsti","Due colazioni e due pranzi"],
       "excludes": ["Check-in anticipato e check-out posticipato","Autobus o treno Hanoi - Sapa","Lettera di approvazione del visto a ingresso singolo","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto e spese per il passaporto","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia"],
-      "servicesSummary": {"hotelSummary":"Hotel a Sapa.","mealsSummary":"Due colazioni e due pranzi secondo la fonte.","transportSummary":"Veicoli a Sapa, Bac Ha e Lao Cai; tratta Hanoi - Sapa esclusa.","operatorNotes":"Il mercato di Bac Ha segue giorni prestabiliti. Le distanze indicate sono 2,5 km, 5 km e 4 km."},
+      "servicesSummary": {"hotelSummary":"Hotel a Sapa.","mealsSummary":"Due colazioni e due pranzi come indicato nell'itinerario confermato.","transportSummary":"Veicoli a Sapa, Bac Ha e Lao Cai; tratta Hanoi - Sapa esclusa.","operatorNotes":"Il mercato di Bac Ha segue giorni prestabiliti. Le distanze indicate sono 2,5 km, 5 km e 4 km."},
       "meta": {"title":"Trekking a Sapa e mercato di Bac Ha | WingSide","description":"Cat Cat, valle Muong Hoa e mercato di Bac Ha in tre giorni di trekking.","breadcrumbLabel":"Sapa e mercato etnico"}
     },
     {
       "slug": "southern-beauty-beach-relaxation-8-days",
       "title": "Sud del Vietnam e mare a Ninh Thuan in 8 giorni",
-      "summary": "Otto giorni tra Ho Chi Minh City, Cu Chi, Ben Tre e una pausa sul mare di Ninh Thuan. La fonte raccoglie sei voci e riserva tre giorni consecutivi al soggiorno libero sulla costa.",
+      "summary": "Otto giorni tra Ho Chi Minh City, Cu Chi, Ben Tre e una pausa sul mare di Ninh Thuan. Tre giorni consecutivi sono dedicati al soggiorno libero sulla costa.",
       "routeSummary": "Ho Chi Minh City - Cu Chi - Ben Tre - Ninh Thuan - Ho Chi Minh City",
       "primaryCTALabel": "Progetta il tuo viaggio",
       "itineraryDays": [
@@ -712,7 +712,7 @@
       ],
       "includes": ["Camera doppia o matrimoniale, escluse eventuali notti in treno o homestay","Trasporti e trasferimenti aeroportuali","Biglietto ferroviario diurno in posto morbido, se utilizzato","Pasti indicati","Guide locali in lingua inglese","Ingressi previsti"],
       "excludes": ["Check-in anticipato e check-out posticipato","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
-      "servicesSummary": {"hotelSummary":"Hotel a Ho Chi Minh City e resort a Ninh Thuan.","mealsSummary":"Colazioni e pranzi nelle giornate Cu Chi e Ben Tre.","transportSummary":"Trasferimento aeroportuale, veicoli e autobus per Ninh Thuan.","operatorNotes":"La fonte raggruppa i giorni 5-7. Le condizioni citano il treno, mentre il programma descrive l'autobus: il mezzo va confermato."},
+      "servicesSummary": {"hotelSummary":"Hotel a Ho Chi Minh City e resort a Ninh Thuan.","mealsSummary":"Colazioni e pranzi nelle giornate Cu Chi e Ben Tre.","transportSummary":"Trasferimento aeroportuale, veicoli e autobus per Ninh Thuan.","operatorNotes":"I giorni 5-7 sono liberi. Il trasferimento verso Ninh Thuan può avvenire in treno o autobus; il mezzo sarà confermato prima della prenotazione."},
       "meta": {"title":"Sud del Vietnam e Ninh Thuan in 8 giorni | WingSide","description":"Saigon, Cu Chi, Ben Tre e una pausa sul mare di Ninh Thuan.","breadcrumbLabel":"Sud e mare a Ninh Thuan"}
     },
     {

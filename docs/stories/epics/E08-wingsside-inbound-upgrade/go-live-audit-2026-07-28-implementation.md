@@ -116,10 +116,12 @@ unsigned review/OCR evidence, structural result forgery and non-JSON checksum
 evasion. Final verdict: no remaining P0 or P1 code false-pass in these Wave 2
 boundaries.
 
-Production remains on `HOLD`: the repository still does not contain the
-customer-reviewed 38-disclosure/four-locale content, a genuine application-owned
-Payload adapter and protected target-proof key material, approved signed media
-assets/review/OCR evidence, or a production-like PostgreSQL rehearsal.
+Production remains on `HOLD`: an independent editorial redline now exists for
+the complete 22-tour `vi`/`it`/`es`/`pt` candidate, but it is not customer or
+native-language approval and the repository still does not contain approved
+38-disclosure decisions. A genuine application-owned Payload adapter and
+protected target-proof key material, approved signed media assets/review/OCR
+evidence, and a production-like PostgreSQL rehearsal are also still missing.
 
 ## Verification
 
@@ -153,16 +155,17 @@ External reviewer execution:
   the attacks against the corrected branch and found no remaining P0
   false-pass. Open P1/P2 items are recorded below as next-wave boundaries.
 
-Open technical boundaries:
+Open delivery boundaries:
 
-- English rewrite governance still needs a canonical versioned 22-tour
-  manifest/config and guarded transactional Payload runtime.
-- Media tooling verifies a normalized evidence manifest; actual byte hashing,
-  OCR execution, provenance validation and authenticated manual review belong
-  to the evidence-producing package.
-- Approver authorization and the canonical media-manifest checksum must be
-  supplied by trusted release configuration independent from the artifacts
-  being approved.
+- The guarded transactional English runtime is implemented, but the approved
+  22-tour English candidate, genuine Payload adapter and protected target-proof
+  key material remain external release inputs.
+- The media producer and authenticated release gate are implemented, but
+  approved media bytes, rights/provenance, OCR/frame evidence and authenticated
+  manual review remain external release inputs.
+- Catalog and media approver authorization is protected from self-authorization
+  in code; trusted identities, signatures and canonical approved artifacts must
+  still be supplied by release operations.
 
 ## Browser evidence
 

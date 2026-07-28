@@ -744,7 +744,7 @@
     {
       "slug": "hoi-an-surrounding-and-beach-break-7-days",
       "title": "Hội An, vùng phụ cận và kỳ nghỉ biển 7 ngày",
-      "summary": "Một tuần thư thả tại Hội An kết hợp đời sống làng quê Trà Quế, ẩm thực phố cổ, thánh địa Mỹ Sơn, Bà Nà Hills và thời gian nghỉ tự do. Lịch nguồn hiện có sáu ngày hoạt động được đánh số 1, 2, 3, 4, 5 và 7; ngày trống được giữ để khách nghỉ biển hoặc cá nhân hóa.",
+      "summary": "Một tuần thư thả tại Hội An kết hợp đời sống làng quê Trà Quế, ẩm thực phố cổ, thánh địa Mỹ Sơn, Bà Nà Hills và thời gian nghỉ tự do. Sáu ngày có hoạt động được sắp xếp vào ngày 1-5 và ngày 7; ngày 6 dành cho nghỉ biển hoặc trải nghiệm riêng theo sở thích.",
       "routeSummary": "Đà Nẵng - Hội An - Trà Quế - Mỹ Sơn - Bà Nà Hills - Đà Nẵng",
       "primaryCTALabel": "Thiết kế hành trình riêng",
       "itineraryDays": [
@@ -817,7 +817,7 @@
         "hotelSummary": "Khách sạn tại Hội An theo hạng đã xác nhận.",
         "mealsSummary": "Bữa sáng từ ngày 2, bữa trưa tại Trà Quế và Bà Nà, tour ẩm thực buổi tối.",
         "transportSummary": "Xe đón tiễn sân bay, xe đạp, thuyền sông Thu Bồn và cáp treo Bà Nà Hills.",
-        "operatorNotes": "Nguồn có sáu ngày nội dung trong gói 7 ngày; ngày còn lại là thời gian nghỉ tự do và cần được xác nhận khi chốt chương trình."
+        "operatorNotes": "Ngày 6 dành cho thời gian nghỉ tự do. Lịch xác nhận cuối cùng sẽ nêu rõ lựa chọn nghỉ biển hoặc trải nghiệm riêng nếu khách yêu cầu."
       },
       "meta": {
         "title": "Hội An và nghỉ biển 7 ngày | WingSide",
@@ -902,7 +902,7 @@
         "Xe khứ hồi từ TP. Hồ Chí Minh",
         "Các chuyến thuyền trên sông Mekong",
         "Ba bữa trưa và hai bữa sáng",
-        "Hai đêm khách sạn tại Cần Thơ theo dữ liệu nguồn",
+        "Hai đêm lưu trú theo hạng đã xác nhận",
         "Hướng dẫn viên nói tiếng Anh",
         "Vé vào cửa theo lịch trình"
       ],
@@ -914,10 +914,10 @@
         "Dịch vụ không được nêu trong phần bao gồm"
       ],
       "servicesSummary": {
-        "hotelSummary": "Hai đêm khách sạn tại Cần Thơ theo điều khoản nguồn; cần xác nhận lại điểm nghỉ đêm ngày 1.",
+        "hotelSummary": "Hai đêm lưu trú theo hạng đã xác nhận; địa điểm nghỉ đêm đầu tiên sẽ được chốt cùng lịch trình cuối cùng.",
         "mealsSummary": "Ba bữa trưa và hai bữa sáng.",
         "transportSummary": "Xe khứ hồi từ TP. Hồ Chí Minh cùng thuyền máy và xuồng tại miền Tây.",
-        "operatorNotes": "Nhà cổ Huỳnh Thủy Lê có thể tạm đóng. Điểm lưu trú ngày 1 cần được xác nhận vì mô tả nguồn chưa hoàn toàn thống nhất."
+        "operatorNotes": "Nhà cổ Huỳnh Thủy Lê có thể tạm đóng. Điểm lưu trú đêm đầu tiên sẽ được xác nhận trước khi đặt dịch vụ."
       },
       "meta": {
         "title": "Đồng bằng sông Cửu Long 3 ngày | WingSide",
@@ -1256,7 +1256,7 @@
     {
       "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
       "title": "Kỳ nghỉ lãng mạn tại Phú Quốc trong 5 ngày",
-      "summary": "Chuyến nghỉ dưỡng dành cho hai người, bắt đầu bằng du thuyền ăn tối trên sông Sài Gòn rồi tiếp nối bằng những ngày riêng tư tại Phú Quốc. Lịch nguồn có bốn mục ngày cho gói 5 ngày; khoảng trống giữa ngày 3 và 5 là thời gian nghỉ tự do trên đảo.",
+      "summary": "Chuyến nghỉ dưỡng dành cho hai người, bắt đầu bằng du thuyền ăn tối trên sông Sài Gòn rồi tiếp nối bằng những ngày riêng tư tại Phú Quốc. Ngày 4 dành trọn cho thời gian tự do trên đảo, để hai người chọn nghỉ biển hoặc trải nghiệm theo sở thích.",
       "routeSummary": "TP. Hồ Chí Minh - Phú Quốc - TP. Hồ Chí Minh",
       "primaryCTALabel": "Thiết kế kỳ nghỉ đôi",
       "itineraryDays": [
@@ -1314,7 +1314,7 @@
         "hotelSummary": "Khách sạn tại TP. Hồ Chí Minh và khu nghỉ dưỡng tại Phú Quốc theo hạng đã xác nhận.",
         "mealsSummary": "Bữa tối du thuyền ngày 1, bữa tối đôi ngày 2 và bữa sáng theo chương trình.",
         "transportSummary": "Xe đón tiễn sân bay, du thuyền sông Sài Gòn và hai chuyến bay nội địa.",
-        "operatorNotes": "Nguồn có bốn mục ngày trong gói 5 ngày; thời gian không liệt kê là ngày nghỉ tự do và cần được thể hiện rõ trong bản xác nhận."
+        "operatorNotes": "Ngày 4 là thời gian tự do trên đảo và sẽ được thể hiện rõ trong lịch xác nhận cuối cùng."
       },
       "meta": {
         "title": "Kỳ nghỉ lãng mạn Phú Quốc 5 ngày | WingSide",
@@ -1334,7 +1334,7 @@
           "title": "Đi bộ bản Cát Cát",
           "route": "Sa Pa - bản Cát Cát - Sa Pa",
           "summary": "Đi bộ khoảng 2,5 km qua bản Cát Cát, quan sát đời sống cộng đồng, thung lũng và nhà máy thủy điện do người Pháp xây từ năm 1925. Trở lại thị trấn bằng xe buýt, dùng bữa tối và tự do khám phá Sa Pa về đêm.",
-          "meals": "Không bao gồm theo dữ liệu nguồn",
+          "meals": "Không bao gồm",
           "transport": "Đi bộ và xe buýt địa phương"
         },
         {
@@ -1374,7 +1374,7 @@
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Sa Pa theo hạng đã xác nhận.",
-        "mealsSummary": "Hai bữa sáng và hai bữa trưa theo phần bao gồm của nguồn.",
+        "mealsSummary": "Hai bữa sáng và hai bữa trưa theo lịch trình đã xác nhận.",
         "transportSummary": "Xe tại Sa Pa, Bắc Hà và Lào Cai; chưa gồm chặng Hà Nội - Sa Pa.",
         "operatorNotes": "Chợ Bắc Hà hoạt động theo phiên. Tổng quãng trekking được nêu là 2,5 km ngày 1, 5 km ngày 2 và 4 km ngày 3."
       },
@@ -1387,7 +1387,7 @@
     {
       "slug": "southern-beauty-beach-relaxation-8-days",
       "title": "Sắc màu miền Nam và nghỉ biển Ninh Thuận trong 8 ngày",
-      "summary": "Tám ngày kết hợp TP. Hồ Chí Minh, địa đạo Củ Chi, Bến Tre và khoảng nghỉ chậm bên biển Ninh Thuận. Lịch nguồn có sáu mục ngày, dành ba ngày liên tiếp cho nghỉ dưỡng tự do tại vùng duyên hải.",
+      "summary": "Tám ngày kết hợp TP. Hồ Chí Minh, địa đạo Củ Chi, Bến Tre và khoảng nghỉ chậm bên biển Ninh Thuận. Ba ngày liên tiếp được dành cho nghỉ dưỡng tự do tại vùng duyên hải.",
       "routeSummary": "TP. Hồ Chí Minh - Củ Chi - Bến Tre - Ninh Thuận - TP. Hồ Chí Minh",
       "primaryCTALabel": "Thiết kế hành trình riêng",
       "itineraryDays": [
@@ -1462,7 +1462,7 @@
         "hotelSummary": "Khách sạn tại TP. Hồ Chí Minh và khu nghỉ dưỡng biển Ninh Thuận.",
         "mealsSummary": "Bữa sáng theo chương trình cùng bữa trưa trong các ngày Củ Chi và Bến Tre.",
         "transportSummary": "Xe đón sân bay, xe tham quan và xe buýt đường dài TP. Hồ Chí Minh - Ninh Thuận khứ hồi.",
-        "operatorNotes": "Nguồn gộp ngày 5-7 thành thời gian nghỉ tự do. Điều khoản có nhắc vé tàu nếu dùng nhưng lịch mô tả xe buýt; phương tiện cần xác nhận khi chốt."
+        "operatorNotes": "Ngày 5-7 là thời gian nghỉ tự do. Chặng đến Ninh Thuận có thể đi tàu hoặc xe buýt; phương án cuối cùng sẽ được xác nhận trước khi đặt dịch vụ."
       },
       "meta": {
         "title": "Miền Nam và nghỉ biển Ninh Thuận 8 ngày | WingSide",
@@ -1549,7 +1549,7 @@
         "hotelSummary": "Khách sạn hạng sang tại Hà Nội, homestay hoặc lưu trú Mai Châu và khu nghỉ dưỡng Almanity Hội An.",
         "mealsSummary": "Bữa sáng theo chương trình cùng các bữa trưa tại Mai Châu.",
         "transportSummary": "Xe đường bộ, xe đạp và chuyến bay Hà Nội - Đà Nẵng.",
-        "operatorNotes": "Nguồn gộp ngày 5-7 thành kỳ nghỉ tại Hội An. Nội dung spa và lịch lớp học phụ thuộc chương trình hiện hành của khu nghỉ dưỡng."
+        "operatorNotes": "Ngày 5-7 dành cho kỳ nghỉ tại Hội An. Nội dung spa và lịch lớp học phụ thuộc chương trình hiện hành của khu nghỉ dưỡng."
       },
       "meta": {
         "title": "Kỳ nghỉ wellness Việt Nam 8 ngày | WingSide",
