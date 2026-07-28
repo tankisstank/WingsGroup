@@ -16,6 +16,10 @@ import {
   postgresReadinessProbeArgs,
   redactDatabaseURL,
 } from '../../scripts/lib/wingsSideUs055Rehearsal.mjs'
+import {
+  us055HomeFixtureLocales,
+  us055WhyTravelRoleSlugs,
+} from '../../scripts/lib/wingsSideUs055HomeFixture'
 
 describe('US-055 disposable rehearsal guards', () => {
   it('seeds the governed WingSide Home before the exact tour fixture and binds four roles', () => {
@@ -34,9 +38,34 @@ describe('US-055 disposable rehearsal guards', () => {
       "'local-design,flexible-planning,style-matching,collaborative-care'",
     )
     expect(runner).toContain('selectiveSeedMediaPaths')
+    expect(runner).toContain('selectiveSeedMediaBaseline')
+    expect(runner).toContain('captureUs055HomeFixtureProof')
+    expect(runner).toContain('finalHomeProof.checksum !== homeBaselineProof.checksum')
     expect(editorialSeed).toContain('applyWingsSideHiFiContentSeed')
-    expect(editorialSeed).toContain('wingsSideWhyTravelSelections.map')
-    expect(editorialSeed).toContain('sourceTourIDToRehearsalID.get(tour)')
+    expect(editorialSeed).toContain('us055WhyTravelRoleSlugs.map')
+    expect(editorialSeed).toContain('slugToRehearsalTourID.get(slug)')
+  })
+
+  it('seals the five-locale Home fixture and approved four role-to-slug mapping', () => {
+    expect(us055HomeFixtureLocales).toEqual(['en', 'vi', 'it', 'es', 'pt'])
+    expect(us055WhyTravelRoleSlugs).toEqual([
+      {
+        key: 'local-design',
+        slug: 'best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days',
+      },
+      {
+        key: 'flexible-planning',
+        slug: 'northern-vietnam-highlights-for-family-6-days',
+      },
+      {
+        key: 'style-matching',
+        slug: 'vietnam-luxury-wellness-retreat-escape-8-days',
+      },
+      {
+        key: 'collaborative-care',
+        slug: 'highlights-of-vietnam-from-north-to-south-12-days',
+      },
+    ])
   })
 
   it('accepts only an explicit loopback PostgreSQL rehearsal target', () => {

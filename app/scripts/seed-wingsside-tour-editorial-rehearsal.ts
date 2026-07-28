@@ -18,7 +18,7 @@ import {
   WINGSSIDE_HIFI_SEED_LOCALES,
   type WingsSideHiFiSeedPayload,
 } from './lib/wingssideHiFiContentSeed'
-import { wingsSideWhyTravelSelections } from './lib/wingsSideHomeCuration'
+import { us055WhyTravelRoleSlugs } from './lib/wingsSideUs055HomeFixture'
 
 const requiredConfirmation = 'disposable-postgres'
 const adminEmail = 'wingsside-tour-editorial-rehearsal@internal.invalid'
@@ -181,7 +181,7 @@ const main = async () => {
     if (reuseSeededHome && fixtureMedia.docs.length !== 1) {
       throw new Error('Selectively seeded WingSide fixture requires resolvable media')
     }
-    const sourceTourIDToRehearsalID = new Map<number, number | string>()
+    const slugToRehearsalTourID = new Map<string, number | string>()
 
     for (const source of sourceTours) {
       const slug = String(source.slug)
@@ -269,11 +269,10 @@ const main = async () => {
         overrideAccess: true,
         req,
       })) as unknown as Record<string, unknown>
-      const sourceTourID = Number(source.tourID)
-      if (!Number.isInteger(sourceTourID) || sourceTourIDToRehearsalID.has(sourceTourID)) {
-        throw new Error(`Frozen source has an invalid or duplicate tourID: ${String(source.tourID)}`)
+      if (slugToRehearsalTourID.has(slug)) {
+        throw new Error(`Frozen source has a duplicate slug: ${slug}`)
       }
-      sourceTourIDToRehearsalID.set(sourceTourID, product.id)
+      slugToRehearsalTourID.set(slug, product.id)
       for (const locale of wingsSideTourEditorialLocales) {
         await payload.update({
           collection: 'tour-products',
@@ -325,10 +324,10 @@ const main = async () => {
       if (homePages.docs.length !== 1) {
         throw new Error(`Expected one seeded WingSide Home page, found ${homePages.docs.length}`)
       }
-      const whyTourSlots = wingsSideWhyTravelSelections.map(({ key, tour }) => {
-        const rehearsalTourID = sourceTourIDToRehearsalID.get(tour)
+      const whyTourSlots = us055WhyTravelRoleSlugs.map(({ key, slug }) => {
+        const rehearsalTourID = slugToRehearsalTourID.get(slug)
         if (rehearsalTourID === undefined) {
-          throw new Error(`Approved Why Travel tour ${tour} is absent from the frozen source`)
+          throw new Error(`Approved Why Travel tour ${slug} is absent from the frozen source`)
         }
         return {
           key,
@@ -363,7 +362,7 @@ const main = async () => {
         adminEmail,
         adapter: payload.db.packageName,
         homeHiFiLocales: homeSeedReport?.localesFetched?.length || 0,
-        homeWhyTravelRoles: reuseSeededHome ? wingsSideWhyTravelSelections.length : 0,
+        homeWhyTravelRoles: reuseSeededHome ? us055WhyTravelRoleSlugs.length : 0,
         locales: 5,
         siteID: site.id,
         tours: sourceTours.length,

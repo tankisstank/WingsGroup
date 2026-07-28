@@ -1,5 +1,14 @@
 import { generateKeyPairSync, randomBytes, randomUUID } from 'node:crypto'
-import { access, appendFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import {
+  access,
+  appendFile,
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  writeFile,
+} from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -24,17 +33,30 @@ import {
   publicKeyFingerprint,
 } from './lib/wingsSideUs055CatalogLifecycle.ts'
 import { runUs055AppliedStateE2EGate } from './lib/wingsSideUs055AppliedStateE2E.mjs'
+import { captureUs055HomeFixtureProof } from './lib/wingsSideUs055HomeFixture.ts'
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const repoRoot = path.dirname(appRoot)
 const payloadTypesPath = path.join(appRoot, 'src', 'payload-types.ts')
 const payloadTypesOriginal = await readFile(payloadTypesPath)
+const selectiveSeedMediaDirectory = path.join(appRoot, 'public', 'media')
 const selectiveSeedMediaPaths = [
   'wingsside-vietnam-journey-hero.png',
   'wingsside-destination-hub.png',
   'wingsside-travel-styles.png',
   'wingsside-sample-itineraries.png',
-].map((filename) => path.join(appRoot, 'public', 'media', filename))
+].map((filename) => path.join(selectiveSeedMediaDirectory, filename))
+const listSelectiveSeedMediaFiles = async () => {
+  try {
+    return (await readdir(selectiveSeedMediaDirectory)).sort()
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+      return []
+    }
+    throw error
+  }
+}
+const selectiveSeedMediaBaseline = await listSelectiveSeedMediaFiles()
 const runToken = randomUUID().replaceAll('-', '').slice(0, 12)
 const containerName = `wingsside-us055-rehearsal-${runToken}`
 const database = `wingsside_us055_rehearsal_${runToken}`
@@ -69,6 +91,7 @@ let cleanupVerification = 'not-attempted'
 let databaseURL
 let imageReference
 let catalogLifecycleSession
+let homeBaselineProof
 let payloadTypesRestored = false
 let selectiveSeedMediaOwned = false
 let selectiveSeedMediaCleanupVerified = true
@@ -551,6 +574,10 @@ try {
         releaseSourceCommit: lifecycleReleaseCommit,
         runID: runToken,
       })
+      homeBaselineProof = await captureUs055HomeFixtureProof({
+        payload: catalogLifecycleSession.payload,
+        req: catalogLifecycleSession.req,
+      })
     } finally {
       for (const [key, value] of Object.entries(previousEnvironment)) {
         if (value === undefined) delete process.env[key]
@@ -562,6 +589,11 @@ try {
       pathScope: 'external-temporary-directory',
       planCanonicalSha256: catalogLifecycleSession.artifacts.planCanonicalSha256,
       planRawSha256: catalogLifecycleSession.artifacts.planRawSha256,
+    })
+    record('home-baseline-proof', {
+      checksum: homeBaselineProof.checksum,
+      localeCount: homeBaselineProof.localeCount,
+      roleCount: homeBaselineProof.roleCount,
     })
     await journal('catalog-plan-prepare', 'after', {
       planCanonicalSha256: catalogLifecycleSession.artifacts.planCanonicalSha256,
@@ -633,8 +665,28 @@ try {
     const baselineProof = sourceProof
     const lifecycle = await executeUs055CatalogLifecycle({
       artifacts,
-      captureAppliedProof: () => captureFrozenSource(database),
-      captureFinalProof: () => verifyFrozenSource(database, baselineProof),
+      captureAppliedProof: async () => ({
+        frozenSource: captureFrozenSource(database),
+        home: await captureUs055HomeFixtureProof({
+          payload: catalogLifecycleSession.payload,
+          req: catalogLifecycleSession.req,
+        }),
+      }),
+      captureFinalProof: async () => {
+        const finalHomeProof = await captureUs055HomeFixtureProof({
+          payload: catalogLifecycleSession.payload,
+          req: catalogLifecycleSession.req,
+        })
+        if (finalHomeProof.checksum !== homeBaselineProof.checksum) {
+          throw new Error(
+            `US-055 Home fixture rollback checksum mismatch: ${finalHomeProof.checksum}`,
+          )
+        }
+        return {
+          frozenSource: verifyFrozenSource(database, baselineProof),
+          home: finalHomeProof,
+        }
+      },
       ledgerPath: path.join(temporaryDirectory, 'catalog-lifecycle-replay-ledger.json'),
       onAppliedStateGate: (state, details) =>
         journal('catalog-lifecycle:applied-state-e2e-110', state, details || {}),
@@ -762,7 +814,11 @@ try {
         }
       }
     }
-    selectiveSeedMediaCleanupVerified = remainingMedia.length === 0
+    const finalMediaFiles = await listSelectiveSeedMediaFiles().catch(() => null)
+    selectiveSeedMediaCleanupVerified =
+      remainingMedia.length === 0 &&
+      finalMediaFiles !== null &&
+      JSON.stringify(finalMediaFiles) === JSON.stringify(selectiveSeedMediaBaseline)
   }
   checks.push({
     attempts: cleanupAttempts,
