@@ -22,6 +22,10 @@ import {
   rollbackWingsSideTourEditorialProductionPlan,
   verifyWingsSideTourEditorialProductionPlan,
 } from './lib/wingsSideTourEditorialProductionRuntime'
+import {
+  assertWingsSideEditorialProductionWriteGuard,
+  initializeWingsSideEditorialProductionWriter,
+} from './lib/wingsSideReleaseWriteGuard'
 
 type Phase = 'apply' | 'plan' | 'rollback' | 'verify'
 
@@ -110,6 +114,31 @@ const readPlan = async () => {
 
 const log = (value: Record<string, unknown>) => console.log(JSON.stringify(value))
 
+const mutationReleaseGuardArgs = ({
+  planSha256,
+  releaseSourceCommit,
+}: {
+  planSha256: string
+  releaseSourceCommit: string
+}) => ({
+    adminEmail: argumentValue('--admin-email') || process.env.IMPORT_ADMIN_EMAIL,
+    backupPath: argumentValue('--backup'),
+    backupSha256: argumentValue('--backup-sha256'),
+    planSha256,
+    production: true,
+    productionConfirm: argumentValue('--confirm-production'),
+    releaseSha: argumentValue('--release-sha'),
+    releaseSourceSha: releaseSourceCommit,
+    restoreEvidencePath: argumentValue('--restore-evidence'),
+    restoreEvidenceSha256: argumentValue('--restore-evidence-sha256'),
+    rollbackRelease: argumentValue('--rollback-release'),
+  })
+
+const assertMutationReleaseGuard = (values: {
+  planSha256: string
+  releaseSourceCommit: string
+}) => assertWingsSideEditorialProductionWriteGuard(mutationReleaseGuardArgs(values))
+
 const main = async () => {
   const phase = selectedPhase()
   assertConfirmation(phase)
@@ -120,9 +149,26 @@ const main = async () => {
     payloadDbPush: process.env.PAYLOAD_DB_PUSH,
     payloadPackageName: '@payloadcms/db-postgres',
   })
-
-  const { default: config } = await import('../src/payload.config')
-  const payload = await getPayload({ config })
+  const preparedPlan = phase === 'plan' ? null : await readPlan()
+  if (preparedPlan && preparedPlan.plan.releaseSourceCommit !== releaseSourceCommit) {
+    throw new Error('Release source commit does not match the editorial plan')
+  }
+  const payload =
+    preparedPlan && (phase === 'apply' || phase === 'rollback')
+      ? await initializeWingsSideEditorialProductionWriter({
+          args: mutationReleaseGuardArgs({
+            planSha256: preparedPlan.planSha256,
+            releaseSourceCommit,
+          }),
+          initialize: async () => {
+            const { default: config } = await import('../src/payload.config')
+            return getPayload({ config })
+          },
+        })
+      : await (async () => {
+          const { default: config } = await import('../src/payload.config')
+          return getPayload({ config })
+        })()
   try {
     assertCredentialsProductionEnvironment({
       databaseURL: String(process.env.DATABASE_URL || ''),
@@ -157,10 +203,7 @@ const main = async () => {
       return
     }
 
-    const { plan, planPath, planSha256 } = await readPlan()
-    if (plan.releaseSourceCommit !== releaseSourceCommit) {
-      throw new Error('Release source commit does not match the editorial plan')
-    }
+    const { plan, planPath, planSha256 } = preparedPlan!
     if (phase === 'verify') {
       const result = await verifyWingsSideTourEditorialProductionPlan({
         expectedState: 'after',
@@ -174,6 +217,9 @@ const main = async () => {
     const failAfterUpdates = argumentValue('--fail-after-updates')
       ? Number(argumentValue('--fail-after-updates'))
       : undefined
+    // Re-check immediately before the transactional mutation so evidence cannot
+    // be changed between process initialization and apply/rollback.
+    assertMutationReleaseGuard({ planSha256, releaseSourceCommit })
     const result =
       phase === 'apply'
         ? await applyWingsSideTourEditorialProductionPlan({

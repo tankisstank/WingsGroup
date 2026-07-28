@@ -7,6 +7,7 @@ import {
   type EditorialTourContent,
   type WingsSideTourEditorialCatalog,
 } from '../../scripts/lib/wingsSideTourEditorialLocalization'
+import { editorialChecksum } from '../../scripts/lib/wingsSideTourEditorialProduction'
 
 const transactions = vi.hoisted(() => ({
   commit: vi.fn(),
@@ -121,8 +122,35 @@ const sourceWrapper = (index: number): Page =>
 const fixture = () => {
   const sources = Array.from({ length: 22 }, (_, index) => sourceTour(index + 1))
   const sourceWrappers = Array.from({ length: 22 }, (_, index) => sourceWrapper(index + 1))
-  const catalog: WingsSideTourEditorialCatalog = {
+  const approvalArtifactID = 'transaction-runtime-fixture'
+  type ApprovalCompatibleCatalog = WingsSideTourEditorialCatalog & {
+    approvalManifest: {
+      approvalArtifactID: string
+      approvedAt: string
+      approvedBy: string
+      checksum: string
+      expectedPricingDisclosureCount: number
+      trustedApprovers: string[]
+      version: 1
+    }
+    pricingDispositions: Array<
+      WingsSideTourEditorialCatalog['pricingDispositions'][number] & {
+        approvalArtifactID: string
+      }
+    >
+  }
+  const catalog = {
+    approvalManifest: {
+      approvalArtifactID,
+      approvedAt: '2026-07-28T00:00:00.000Z',
+      approvedBy: 'content-owner',
+      checksum: '',
+      expectedPricingDisclosureCount: sources.length,
+      trustedApprovers: ['content-owner'],
+      version: 1,
+    },
     pricingDispositions: sources.map((source) => ({
+      approvalArtifactID,
       approvedAt: '2026-07-28T00:00:00.000Z',
       approvedBy: 'content-owner',
       approvedTargetBucket: 'excludes',
@@ -143,7 +171,41 @@ const fixture = () => {
       sourceChecksum: editorialSourceChecksum(source),
     })),
     version: 2,
-  }
+  } as ApprovalCompatibleCatalog
+  catalog.approvalManifest.checksum = editorialChecksum({
+    governedLocaleLabels: catalog.pricingDispositions
+      .map(({ slug, sourceRowID }) => {
+        const catalogTour = catalog.tours.find((entry) => entry.slug === slug)!
+        return {
+          labels: Object.fromEntries(
+            locales.map((locale) => {
+              const content = catalogTour.locales[locale]
+              const row = [...content.includes, ...content.excludes].find(
+                (candidate) => candidate.sourceRowID === sourceRowID,
+              )
+              return [locale, row?.label || '']
+            }),
+          ),
+          slug,
+          sourceRowID,
+        }
+      })
+      .sort((left, right) =>
+        `${left.slug}:${left.sourceRowID}`.localeCompare(`${right.slug}:${right.sourceRowID}`),
+      ),
+    manifest: {
+      approvalArtifactID: catalog.approvalManifest.approvalArtifactID,
+      approvedAt: catalog.approvalManifest.approvedAt,
+      approvedBy: catalog.approvalManifest.approvedBy,
+      expectedPricingDisclosureCount:
+        catalog.approvalManifest.expectedPricingDisclosureCount,
+      trustedApprovers: [...catalog.approvalManifest.trustedApprovers].sort(),
+      version: catalog.approvalManifest.version,
+    },
+    pricingDispositions: [...catalog.pricingDispositions].sort((left, right) =>
+      `${left.slug}:${left.sourceRowID}`.localeCompare(`${right.slug}:${right.sourceRowID}`),
+    ),
+  })
   let state = Object.fromEntries([
     ['en', sources],
     ...locales.map((locale) => [locale, clone(sources)]),
