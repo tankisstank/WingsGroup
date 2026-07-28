@@ -19,7 +19,7 @@ import {
   type WingsSideHiFiSeedPayload,
 } from './lib/wingssideHiFiContentSeed'
 import {
-  buildVerifiedWingsSideHiFiHomeCredentials,
+  buildUs055RehearsalHomeCredentials,
   loadWingsSideCredentialManifest,
 } from './lib/wingsSideCredentials'
 import { us055WhyTravelRoleSlugs } from './lib/wingsSideUs055HomeFixture'
@@ -296,7 +296,7 @@ const main = async () => {
       | Awaited<ReturnType<typeof applyWingsSideHiFiContentSeed>>
       | undefined
     if (reuseSeededHome) {
-      const homeCredentials = buildVerifiedWingsSideHiFiHomeCredentials(
+      const homeCredentials = buildUs055RehearsalHomeCredentials(
         await loadWingsSideCredentialManifest(),
       )
       const whyTourSlots = us055WhyTravelRoleSlugs.map(({ key, slug }) => {

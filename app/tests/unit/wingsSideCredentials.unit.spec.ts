@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  buildVerifiedWingsSideHiFiHomeCredentials,
+  buildUs055RehearsalHomeCredentials,
   buildWingsSideCredentialsBlock,
   loadWingsSideCredentialManifest,
   summarizeWingsSideCredentials,
+  US055_REHEARSAL_HOME_CREDENTIAL_SOURCE_IDS,
 } from '../../scripts/lib/wingsSideCredentials'
 
 describe('WingSide photographed credential catalog', () => {
@@ -33,14 +34,45 @@ describe('WingSide photographed credential catalog', () => {
     expect(block.items.map((item) => item.sourceFilename)).toContain('IMG_8399.JPG')
   })
 
-  it('maps only reviewed facts into the smaller Home HiFi credential schema', async () => {
+  it('maps only the two identity-safe historical Vietwings sources into the local fixture', async () => {
     const manifest = await loadWingsSideCredentialManifest()
-    const cards = buildVerifiedWingsSideHiFiHomeCredentials(manifest)
-    const verified = manifest.items.filter((item) => item.reviewStatus === 'verified')
+    const cards = buildUs055RehearsalHomeCredentials(manifest)
+    const selected = US055_REHEARSAL_HOME_CREDENTIAL_SOURCE_IDS.map((id) => {
+      const item = manifest.items.find((candidate) => candidate.id === id)
+      expect(item, `missing fixture source ${id}`).toBeDefined()
+      return item!
+    })
 
-    expect(cards).toHaveLength(21)
+    expect(US055_REHEARSAL_HOME_CREDENTIAL_SOURCE_IDS).toEqual([
+      'vietjet-vietwings-authorized-agent-2022',
+      'air-china-outstanding-contribution-2025',
+    ])
+    expect(
+      selected.map(({ id, issuer, recognitionYear, recipient, referenceCode }) => ({
+        id,
+        issuer,
+        recognitionYear,
+        recipient,
+        referenceCode,
+      })),
+    ).toEqual([
+      {
+        id: 'vietjet-vietwings-authorized-agent-2022',
+        issuer: 'VietJet Air',
+        recognitionYear: 2022,
+        recipient: 'Vietwings Travel JSC',
+        referenceCode: 'VJC 37410015',
+      },
+      {
+        id: 'air-china-outstanding-contribution-2025',
+        issuer: 'Air China',
+        recognitionYear: 2025,
+        recipient: 'Vietwings',
+        referenceCode: undefined,
+      },
+    ])
     expect(cards).toEqual(
-      verified.map((item) => ({
+      selected.map((item) => ({
         body: item.description,
         kind: item.kind,
         mark: item.mark,
@@ -48,6 +80,31 @@ describe('WingSide photographed credential catalog', () => {
         title: item.title,
       })),
     )
-    expect(cards.some((card) => card.title === 'Top travel agent recognition')).toBe(false)
+    expect(cards).toHaveLength(2)
+  })
+
+  it('fails closed on review or identity drift and never selects ambiguous recipients', async () => {
+    const manifest = await loadWingsSideCredentialManifest()
+    const clone = () => structuredClone(manifest)
+    const vietJetIndex = manifest.items.findIndex(
+      (item) => item.id === 'vietjet-vietwings-authorized-agent-2022',
+    )
+
+    const unreviewed = clone()
+    unreviewed.items[vietJetIndex]!.reviewStatus = 'needs-review'
+    expect(() => buildUs055RehearsalHomeCredentials(unreviewed)).toThrow('is not verified')
+
+    const recipientDrift = clone()
+    recipientDrift.items[vietJetIndex]!.recipient = 'Golden Flight'
+    expect(() => buildUs055RehearsalHomeCredentials(recipientDrift)).toThrow(
+      'identity facts drifted',
+    )
+
+    expect(US055_REHEARSAL_HOME_CREDENTIAL_SOURCE_IDS).not.toContain(
+      'bamboo-vietwings-authorized-agent',
+    )
+    expect(
+      US055_REHEARSAL_HOME_CREDENTIAL_SOURCE_IDS.some((id) => id.includes('golden-flight')),
+    ).toBe(false)
   })
 })

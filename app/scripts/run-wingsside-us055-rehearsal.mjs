@@ -616,14 +616,39 @@ try {
         'data-od-id="why-style"',
         'data-od-id="why-care"',
       ]
+      const markerPresence = Object.fromEntries(
+        requiredMarkers.map((marker) => [marker, response?.body.includes(marker) || false]),
+      )
+      const canonicalMatch =
+        response?.body.match(
+          /<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["'][^>]*>/i,
+        ) ||
+        response?.body.match(
+          /<link[^>]*href=["']([^"']+)["'][^>]*rel=["']canonical["'][^>]*>/i,
+        )
+      const firstMarkerIndex = response?.body.indexOf('data-od-id=') ?? -1
+      const snippetStart = Math.max(0, firstMarkerIndex)
+      const diagnostics = {
+        bodyBytes: Buffer.byteLength(response?.body || '', 'utf8'),
+        canonicalHref: canonicalMatch?.[1] || null,
+        htmlLangEn: /<html[^>]*lang=["']en["'][^>]*>/i.test(response?.body || ''),
+        markerPresence,
+        responseSha256: sha256(Buffer.from(response?.body || '', 'utf8')),
+        routeMode: 'local-tenant-alias',
+        snippet: (response?.body || '')
+          .slice(snippetStart, snippetStart + 360)
+          .replace(/\s+/g, ' '),
+        status: response?.status || 0,
+      }
       if (
         response?.status !== 200 ||
-        !requiredMarkers.every((marker) => response.body.includes(marker)) ||
-        !response.body.includes('<html lang="en"') ||
-        !response.body.includes('href="https://wingside.vn"')
+        !Object.values(markerPresence).every(Boolean) ||
+        !diagnostics.htmlLangEn ||
+        diagnostics.canonicalHref !== 'https://wingside.vn'
       ) {
+        await journal('home-route-diagnostic', 'failed', diagnostics)
         throw new Error(
-          `US-055 Home route diagnostic failed: status=${response?.status || 0}`,
+          `US-055 Home route diagnostic failed: ${JSON.stringify(diagnostics)}`,
         )
       }
       const homeRouteProof = {

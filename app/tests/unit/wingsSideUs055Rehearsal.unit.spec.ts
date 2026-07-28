@@ -45,6 +45,10 @@ describe('US-055 disposable rehearsal guards', () => {
     expect(runner).toContain("process.env.US055_REHEARSAL_HOME_DIAGNOSTIC === 'true'")
     expect(runner).toContain("path: '/wingsside'")
     expect(runner).toContain("markerCount: 4")
+    expect(runner).toContain('markerPresence')
+    expect(runner).toContain("routeMode: 'local-tenant-alias'")
+    expect(runner).toContain('responseSha256')
+    expect(runner).toContain("journal('home-route-diagnostic', 'failed', diagnostics)")
     expect(runner).toContain("WINGSSIDE_REHEARSAL_EXIT_AFTER_SEED: 'true'")
     expect(selectiveSeedScript).toContain(
       "process.env.WINGSSIDE_REHEARSAL_EXIT_AFTER_SEED === 'true'",
@@ -56,7 +60,7 @@ describe('US-055 disposable rehearsal guards', () => {
     expect(editorialSeed).toContain('slugToRehearsalTourID.get(slug)')
     expect(editorialSeed).toContain('homeWhyTourSlots: whyTourSlots')
     expect(editorialSeed).toContain('loadWingsSideCredentialManifest()')
-    expect(editorialSeed).toContain('buildVerifiedWingsSideHiFiHomeCredentials')
+    expect(editorialSeed).toContain('buildUs055RehearsalHomeCredentials')
     expect(editorialSeed).toContain('homeCredentials,')
     expect(editorialSeed).toContain('homeIdempotenceReport.summary.unchanged !== 40')
   })

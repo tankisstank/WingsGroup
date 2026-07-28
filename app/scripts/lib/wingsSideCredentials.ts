@@ -166,22 +166,56 @@ export const summarizeWingsSideCredentials = (manifest: WingsSideCredentialManif
   ),
 })
 
+export const US055_REHEARSAL_HOME_CREDENTIAL_SOURCE_IDS = [
+  'vietjet-vietwings-authorized-agent-2022',
+  'air-china-outstanding-contribution-2025',
+] as const
+
+const us055RehearsalCredentialIdentity = {
+  'air-china-outstanding-contribution-2025': {
+    issuer: 'Air China',
+    recognitionYear: 2025,
+    recipient: 'Vietwings',
+    referenceCode: undefined,
+  },
+  'vietjet-vietwings-authorized-agent-2022': {
+    issuer: 'VietJet Air',
+    recognitionYear: 2022,
+    recipient: 'Vietwings Travel JSC',
+    referenceCode: 'VJC 37410015',
+  },
+} as const
+
 /**
- * Projects only reviewed source records into the smaller Home HiFi credential-card schema.
+ * Builds a local-only US-055 validation fixture from two historical Vietwings documents.
  *
- * The manifest metadata is intentionally preserved verbatim for every locale, matching the
- * existing credentials-carousel import contract: factual issuer, recognition and reference
- * data must not be machine-translated or editorially inferred during a rehearsal.
+ * This is not production publication approval. The single-language manifest metadata remains
+ * verbatim across rehearsal locales: no unsupported localization, current partnership, or
+ * WingsSide legal-identity claim is inferred.
  */
-export const buildVerifiedWingsSideHiFiHomeCredentials = (
+export const buildUs055RehearsalHomeCredentials = (
   manifest: WingsSideCredentialManifest,
 ) => {
-  const verified = manifest.items.filter((item) => item.reviewStatus === 'verified')
-  if (verified.length === 0) {
-    throw new Error('Credential manifest has no verified records for the Home HiFi fixture')
-  }
+  const byID = new Map(manifest.items.map((item) => [item.id, item]))
+  const selected = US055_REHEARSAL_HOME_CREDENTIAL_SOURCE_IDS.map((id) => {
+    const item = byID.get(id)
+    if (!item) throw new Error(`US-055 credential fixture is missing source ${id}`)
+    if (item.reviewStatus !== 'verified') {
+      throw new Error(`US-055 credential fixture source ${id} is not verified`)
+    }
+    const expected = us055RehearsalCredentialIdentity[id]
+    if (
+      item.issuer !== expected.issuer ||
+      item.recipient !== expected.recipient ||
+      item.recognitionYear !== expected.recognitionYear ||
+      item.referenceCode !== expected.referenceCode
+    ) {
+      throw new Error(`US-055 credential fixture source ${id} identity facts drifted`)
+    }
+    return item
+  })
 
-  return verified.map((item) => ({
+  return selected.map((item) => ({
     body: item.description,
     kind: item.kind,
     mark: item.mark,
