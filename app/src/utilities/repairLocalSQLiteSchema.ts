@@ -86,7 +86,7 @@ const wingsSideHomeCurationSQLiteStatements = [
     FOREIGN KEY ("_parent_id") REFERENCES "_pages_v"("id") ON UPDATE no action ON DELETE cascade
   )`,
   `CREATE TABLE IF NOT EXISTS "_home_why_tour_slots_v_locales" (
-    "version_presentation_badge" TEXT, "version_presentation_body" TEXT, "version_presentation_cta_label" TEXT,
+    "presentation_badge" TEXT, "presentation_body" TEXT, "presentation_cta_label" TEXT,
     "id" INTEGER PRIMARY KEY NOT NULL, "_locale" TEXT NOT NULL, "_parent_id" INTEGER NOT NULL,
     FOREIGN KEY ("_parent_id") REFERENCES "_home_why_tour_slots_v"("id") ON UPDATE no action ON DELETE cascade
   )`,

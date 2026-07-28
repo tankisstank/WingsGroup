@@ -71,9 +71,9 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "presentation_media_id" integer
     );
     CREATE TABLE IF NOT EXISTS "_home_why_tour_slots_v_locales" (
-      "version_presentation_badge" varchar,
-      "version_presentation_body" varchar,
-      "version_presentation_cta_label" varchar,
+      "presentation_badge" varchar,
+      "presentation_body" varchar,
+      "presentation_cta_label" varchar,
       "id" serial PRIMARY KEY NOT NULL,
       "_locale" "_locales" NOT NULL,
       "_parent_id" integer NOT NULL
