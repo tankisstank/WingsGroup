@@ -91,6 +91,8 @@ export type Us055CatalogLifecycleSession = {
   target: Us055TargetIdentity
 }
 
+export type Us055AppliedStateGateJournalState = 'after' | 'before' | 'failure'
+
 type ClosablePayload = Pick<Payload, 'destroy'> & {
   db?: {
     pool?: {
@@ -495,12 +497,48 @@ export const authorizeUs055TargetProof = async ({
   return { nonce: payload.nonce, proofDigest, stage }
 }
 
+export const executeUs055AppliedStateWindow = async <
+  TAppliedWindow,
+  TRollbackWindow,
+>({
+  executeAppliedWindow,
+  executeRollbackWindow,
+}: {
+  executeAppliedWindow: () => Promise<TAppliedWindow>
+  executeRollbackWindow: () => Promise<TRollbackWindow>
+}) => {
+  let appliedWindow: TAppliedWindow | undefined
+  let appliedWindowError: unknown
+  try {
+    appliedWindow = await executeAppliedWindow()
+  } catch (error) {
+    appliedWindowError = error
+  }
+
+  let rollbackWindow: TRollbackWindow
+  try {
+    rollbackWindow = await executeRollbackWindow()
+  } catch (rollbackError) {
+    if (appliedWindowError) {
+      throw new AggregateError(
+        [appliedWindowError, rollbackError],
+        'US-055 applied-state gate failed and rollback verification also failed',
+      )
+    }
+    throw rollbackError
+  }
+  if (appliedWindowError) throw appliedWindowError
+  return { appliedWindow: appliedWindow!, rollbackWindow }
+}
+
 export const executeUs055CatalogLifecycle = async ({
   artifacts,
   captureAppliedProof,
   captureFinalProof,
   ledgerPath,
+  onAppliedStateGate = async () => {},
   onStage = async () => {},
+  runAppliedStateGate,
   session,
   signProof,
   trust,
@@ -509,11 +547,16 @@ export const executeUs055CatalogLifecycle = async ({
   captureAppliedProof: () => Promise<unknown> | unknown
   captureFinalProof: () => Promise<unknown> | unknown
   ledgerPath: string
+  onAppliedStateGate?: (
+    state: Us055AppliedStateGateJournalState,
+    details?: unknown,
+  ) => Promise<void>
   onStage?: (
     stage: Us055RehearsalStage,
     state: 'before' | 'after',
     details?: unknown,
   ) => Promise<void>
+  runAppliedStateGate: () => Promise<unknown>
   session: Us055CatalogLifecycleSession
   signProof: (stage: Us055RehearsalStage) => Promise<Us055TargetProof> | Us055TargetProof
   trust: Us055TargetProofTrust
@@ -554,43 +597,62 @@ export const executeUs055CatalogLifecycle = async ({
     req: session.req,
   })
   await onStage('apply', 'after', apply)
-  await onStage('verify-after', 'before')
-  stageProofs.push(await authorize('verify-after'))
-  const verifyAfter = await verifyWingsSideTourEditorialProductionPlan({
-    expectedState: 'after',
-    payload: session.payload,
-    plan: session.plan,
-    req: session.req,
+  const { appliedWindow, rollbackWindow } = await executeUs055AppliedStateWindow({
+    executeAppliedWindow: async () => {
+      await onStage('verify-after', 'before')
+      stageProofs.push(await authorize('verify-after'))
+      const verifyAfter = await verifyWingsSideTourEditorialProductionPlan({
+        expectedState: 'after',
+        payload: session.payload,
+        plan: session.plan,
+        req: session.req,
+      })
+      const appliedProof = await captureAppliedProof()
+      await onStage('verify-after', 'after', verifyAfter)
+      await onAppliedStateGate('before')
+      try {
+        const appliedStateGate = await runAppliedStateGate()
+        await onAppliedStateGate('after', appliedStateGate)
+        return { appliedProof, appliedStateGate, verifyAfter }
+      } catch (error) {
+        await onAppliedStateGate('failure', {
+          message: String(error instanceof Error ? error.message : error),
+        }).catch(() => {})
+        throw error
+      }
+    },
+    executeRollbackWindow: async () => {
+      await onStage('rollback', 'before')
+      stageProofs.push(await authorize('rollback'))
+      const rollback = await rollbackWingsSideTourEditorialProductionPlan({
+        catalog: session.catalog,
+        payload: session.payload,
+        plan: session.plan,
+        req: session.req,
+      })
+      await onStage('rollback', 'after', rollback)
+      await onStage('verify-before', 'before')
+      stageProofs.push(await authorize('verify-before'))
+      const verifyBefore = await verifyWingsSideTourEditorialProductionPlan({
+        expectedState: 'before',
+        payload: session.payload,
+        plan: session.plan,
+        req: session.req,
+      })
+      const finalProof = await captureFinalProof()
+      await onStage('verify-before', 'after', verifyBefore)
+      return { finalProof, rollback, verifyBefore }
+    },
   })
-  const appliedProof = await captureAppliedProof()
-  await onStage('verify-after', 'after', verifyAfter)
-  await onStage('rollback', 'before')
-  stageProofs.push(await authorize('rollback'))
-  const rollback = await rollbackWingsSideTourEditorialProductionPlan({
-    catalog: session.catalog,
-    payload: session.payload,
-    plan: session.plan,
-    req: session.req,
-  })
-  await onStage('rollback', 'after', rollback)
-  await onStage('verify-before', 'before')
-  stageProofs.push(await authorize('verify-before'))
-  const verifyBefore = await verifyWingsSideTourEditorialProductionPlan({
-    expectedState: 'before',
-    payload: session.payload,
-    plan: session.plan,
-    req: session.req,
-  })
-  const finalProof = await captureFinalProof()
-  await onStage('verify-before', 'after', verifyBefore)
   return {
-    appliedProof,
+    appliedProof: appliedWindow.appliedProof,
+    appliedStateGate: appliedWindow.appliedStateGate,
     apply,
-    finalProof,
-    rollback,
+    finalProof: rollbackWindow.finalProof,
+    rollback: rollbackWindow.rollback,
     stageProofs,
-    verifyAfter,
-    verifyBefore,
+    verifyAfter: appliedWindow.verifyAfter,
+    verifyBefore: rollbackWindow.verifyBefore,
   }
 }
 

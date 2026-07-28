@@ -10,6 +10,7 @@ import {
   authorizeUs055TargetProof,
   createBoundPayloadCloser,
   createUs055TargetProof,
+  executeUs055AppliedStateWindow,
   publicKeyFingerprint,
   type Us055ArtifactBinding,
   type Us055TargetIdentity,
@@ -259,5 +260,57 @@ describe('US-055 bounded Payload/PostgreSQL close ownership', () => {
     expect(observed.map(({ message }) => message)).toEqual([
       'intentional close event',
     ])
+  })
+})
+
+describe('US-055 applied-state gate rollback ownership', () => {
+  it('runs rollback after a successful applied-state gate', async () => {
+    const order: string[] = []
+    await expect(
+      executeUs055AppliedStateWindow({
+        executeAppliedWindow: async () => {
+          order.push('gate')
+          return 'gate-proof'
+        },
+        executeRollbackWindow: async () => {
+          order.push('rollback')
+          return 'rollback-proof'
+        },
+      }),
+    ).resolves.toEqual({
+      appliedWindow: 'gate-proof',
+      rollbackWindow: 'rollback-proof',
+    })
+    expect(order).toEqual(['gate', 'rollback'])
+  })
+
+  it('still runs rollback and preserves the gate failure', async () => {
+    const order: string[] = []
+    await expect(
+      executeUs055AppliedStateWindow({
+        executeAppliedWindow: async () => {
+          order.push('gate')
+          throw new Error('e2e failed')
+        },
+        executeRollbackWindow: async () => {
+          order.push('rollback')
+          return 'rollback-proof'
+        },
+      }),
+    ).rejects.toThrow('e2e failed')
+    expect(order).toEqual(['gate', 'rollback'])
+  })
+
+  it('reports both failures when rollback verification also fails', async () => {
+    await expect(
+      executeUs055AppliedStateWindow({
+        executeAppliedWindow: async () => {
+          throw new Error('e2e failed')
+        },
+        executeRollbackWindow: async () => {
+          throw new Error('rollback failed')
+        },
+      }),
+    ).rejects.toThrow('applied-state gate failed and rollback verification also failed')
   })
 })

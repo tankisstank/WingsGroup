@@ -23,6 +23,7 @@ import {
   prepareUs055CatalogLifecycle,
   publicKeyFingerprint,
 } from './lib/wingsSideUs055CatalogLifecycle.ts'
+import { runUs055AppliedStateE2EGate } from './lib/wingsSideUs055AppliedStateE2E.mjs'
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const repoRoot = path.dirname(appRoot)
@@ -551,8 +552,18 @@ try {
       captureAppliedProof: () => captureFrozenSource(database),
       captureFinalProof: () => verifyFrozenSource(database, baselineProof),
       ledgerPath: path.join(temporaryDirectory, 'catalog-lifecycle-replay-ledger.json'),
+      onAppliedStateGate: (state, details) =>
+        journal('catalog-lifecycle:applied-state-e2e-110', state, details || {}),
       onStage: (stage, state, details) =>
         journal(`catalog-lifecycle:${stage}`, state, details || {}),
+      runAppliedStateGate: () =>
+        runUs055AppliedStateE2EGate({
+          appRoot,
+          databaseURL,
+          environment: guardedEnv,
+          outputDirectory: temporaryDirectory,
+          payloadSecret,
+        }),
       session: catalogLifecycleSession,
       signProof: (stage) =>
         createUs055TargetProof({
@@ -568,6 +579,7 @@ try {
     checks.push({
       appliedArtifactChecksum: lifecycle.appliedProof.artifactChecksum,
       appliedProof: lifecycle.appliedProof,
+      appliedStateE2E: lifecycle.appliedStateGate,
       backupSha256,
       baselineProof,
       finalProof: lifecycle.finalProof,
