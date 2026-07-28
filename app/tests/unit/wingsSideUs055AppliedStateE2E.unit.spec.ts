@@ -1,9 +1,17 @@
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 
 import {
   assertUs055AppliedStateE2EReport,
+  assertUs055HomeSpecContract,
   us055ReadinessRequestOptions,
 } from '../../scripts/lib/wingsSideUs055AppliedStateE2E.mjs'
+
+const homeSpecSource = readFileSync(
+  resolve(process.cwd(), 'tests/e2e/wingsside-why-travel-real-tour-matrix.e2e.spec.ts'),
+  'utf8',
+)
 
 const passingReport = () => ({
   errors: [],
@@ -86,6 +94,28 @@ describe('US-055 applied-state 110 URL E2E evidence', () => {
         },
       ],
     })
+  })
+
+  it('binds the browser matrix to the local WingSide alias and all four exact roles', () => {
+    expect(() => assertUs055HomeSpecContract(homeSpecSource)).not.toThrow()
+  })
+
+  it.each([
+    ['local Home alias', "const localAliasPrefix = '/wingsside'", "const localAliasPrefix = '/'"],
+    [
+      'public Host request',
+      "headers: { host: 'wingside.vn' }",
+      "headers: { host: '127.0.0.1' }",
+    ],
+    [
+      'collaborative-care role',
+      "{ marker: 'why-care', role: 'collaborative-care' }",
+      "{ marker: 'why-care', role: 'care' }",
+    ],
+  ])('fails closed when the Home spec drifts from the %s contract', (_label, exact, drift) => {
+    expect(() => assertUs055HomeSpecContract(homeSpecSource.replace(exact, drift))).toThrow(
+      'committed spec contract drifted',
+    )
   })
 
   it.each([

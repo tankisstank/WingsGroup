@@ -270,9 +270,10 @@ const assertRouteSpecContract = (source) => {
   }
 }
 
-const assertHomeSpecContract = (source) => {
+export const assertUs055HomeSpecContract = (source) => {
   for (const contract of [
     "const locales = ['en', 'vi', 'it', 'es', 'pt'] as const",
+    "const localAliasPrefix = '/wingsside'",
     'const viewportWidths = [390, 1440] as const',
     "{ marker: 'why-featured', role: 'local-design' }",
     "{ marker: 'why-flexible', role: 'flexible-planning' }",
@@ -280,6 +281,8 @@ const assertHomeSpecContract = (source) => {
     "{ marker: 'why-care', role: 'collaborative-care' }",
     'expect(eligibleTourPaths.size).toBe(110)',
     'expect(new Set(rolePaths.values()).size).toBe(4)',
+    'baseURL: e2eBaseURL',
+    'publicPathFromLocalAlias(localURL.pathname)',
     "headers: { host: 'wingside.vn' }",
   ]) {
     if (!source.includes(contract)) {
@@ -308,7 +311,7 @@ export const runUs055AppliedStateE2EGate = async ({
     expectedSpecs.map(async ({ path: specPath, title }, index) => {
       const specBytes = await readFile(path.join(appRoot, specPath))
       if (index === 0) assertRouteSpecContract(specBytes.toString('utf8'))
-      else assertHomeSpecContract(specBytes.toString('utf8'))
+      else assertUs055HomeSpecContract(specBytes.toString('utf8'))
       return { path: specPath, sha256: sha256(specBytes), title }
     }),
   )

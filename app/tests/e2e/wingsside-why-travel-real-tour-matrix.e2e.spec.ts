@@ -4,6 +4,7 @@ import { e2eBaseURL } from '../helpers/baseURL'
 
 const enabled = process.env.WINGSSIDE_FULL_TOUR_LOCALE_GATE === 'true'
 const publicOrigin = 'https://wingside.vn'
+const localAliasPrefix = '/wingsside'
 const locales = ['en', 'vi', 'it', 'es', 'pt'] as const
 const viewportWidths = [390, 1440] as const
 const stableRoles = [
@@ -14,20 +15,20 @@ const stableRoles = [
 ] as const
 
 const homePath = (locale: (typeof locales)[number]) =>
-  locale === 'en' ? '/' : `/${locale}`
+  locale === 'en' ? localAliasPrefix : `${localAliasPrefix}/${locale}`
 
 const expectedTourPathPattern = (locale: (typeof locales)[number]) =>
   locale === 'en'
     ? /^\/tour\/[^/]+$/u
     : new RegExp(`^/${locale}/tour/[^/]+$`, 'u')
 
-const localWingSideOrigin = () => {
-  const target = new URL(e2eBaseURL)
-  expect(target.protocol).toBe('http:')
-  expect(target.hostname).toBe('127.0.0.1')
-  expect(target.port).not.toBe('')
-  return `http://wingside.vn:${target.port}`
-}
+const expectedLocalTourPathPattern = (locale: (typeof locales)[number]) =>
+  locale === 'en'
+    ? /^\/wingsside\/tour\/[^/]+$/u
+    : new RegExp(`^/wingsside/${locale}/tour/[^/]+$`, 'u')
+
+const publicPathFromLocalAlias = (pathname: string) =>
+  pathname.slice(localAliasPrefix.length) || '/'
 
 test.describe('WingSide Why Travel real-tour locale matrix', () => {
   test.skip(!enabled, 'Enable only inside the reviewed applied catalog lifecycle window')
@@ -54,7 +55,7 @@ test.describe('WingSide Why Travel real-tour locale matrix', () => {
     for (const width of viewportWidths) {
       for (const locale of locales) {
         const context = await browser.newContext({
-          baseURL: localWingSideOrigin(),
+          baseURL: e2eBaseURL,
           viewport: { height: 1000, width },
         })
         const page = await context.newPage()
@@ -76,30 +77,37 @@ test.describe('WingSide Why Travel real-tour locale matrix', () => {
           await expect(roleLink, `${locale} ${width}px ${role} link`).toHaveCount(1)
           const href = await roleLink.getAttribute('href')
           expect(href, `${locale} ${width}px ${role} href`).toBeTruthy()
-          const publicURL = new URL(href!, publicOrigin)
-          expect(publicURL.origin, `${locale} ${width}px ${role} origin`).toBe(
-            publicOrigin,
+          const localURL = new URL(href!, e2eBaseURL)
+          expect(localURL.origin, `${locale} ${width}px ${role} local origin`).toBe(
+            new URL(e2eBaseURL).origin,
           )
           expect(
-            publicURL.pathname,
+            localURL.pathname,
+            `${locale} ${width}px ${role} local alias path`,
+          ).toMatch(expectedLocalTourPathPattern(locale))
+          const publicPath = publicPathFromLocalAlias(localURL.pathname)
+          expect(
+            publicPath,
             `${locale} ${width}px ${role} locale path`,
           ).toMatch(expectedTourPathPattern(locale))
           expect(
-            eligibleTourPaths.has(publicURL.pathname),
+            eligibleTourPaths.has(publicPath),
             `${locale} ${width}px ${role} eligible sitemap tour`,
           ).toBe(true)
-          rolePaths.set(role, publicURL.pathname)
+          rolePaths.set(role, localURL.pathname)
         }
 
         expect(rolePaths.size).toBe(4)
         expect(new Set(rolePaths.values()).size).toBe(4)
         expect(
-          [...rolePaths.values()].some(
-            (pathname) =>
-              pathname === '/' ||
-              pathname.includes('/tours/') ||
-              !pathname.includes('/tour/'),
-          ),
+          [...rolePaths.values()].some((localPathname) => {
+            const publicPathname = publicPathFromLocalAlias(localPathname)
+            return (
+              publicPathname === '/' ||
+              publicPathname.includes('/tours/') ||
+              !publicPathname.includes('/tour/')
+            )
+          }),
         ).toBe(false)
         expect(
           await page.evaluate(
@@ -108,9 +116,10 @@ test.describe('WingSide Why Travel real-tour locale matrix', () => {
           `${locale} ${width}px Home horizontal overflow`,
         ).toBe(true)
 
-        for (const [role, pathname] of rolePaths) {
+        for (const [role, localPathname] of rolePaths) {
+          const publicPathname = publicPathFromLocalAlias(localPathname)
           const detailPage = await context.newPage()
-          const detailResponse = await detailPage.goto(pathname, {
+          const detailResponse = await detailPage.goto(localPathname, {
             waitUntil: 'domcontentloaded',
           })
           expect(detailResponse?.status(), `${locale} ${width}px ${role} detail`).toBe(
@@ -119,7 +128,7 @@ test.describe('WingSide Why Travel real-tour locale matrix', () => {
           await expect(detailPage.locator('html')).toHaveAttribute('lang', locale)
           await expect(detailPage.locator('link[rel="canonical"]')).toHaveAttribute(
             'href',
-            `${publicOrigin}${pathname}`,
+            `${publicOrigin}${publicPathname}`,
           )
           await detailPage.close()
         }

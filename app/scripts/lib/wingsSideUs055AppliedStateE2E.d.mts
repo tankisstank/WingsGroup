@@ -38,6 +38,8 @@ export function assertUs055AppliedStateE2EReport(input: {
   | 'serverReadinessAttempts'
 >
 
+export function assertUs055HomeSpecContract(source: string): void
+
 export function runUs055AppliedStateE2EGate(input: {
   appRoot: string
   databaseURL: string
