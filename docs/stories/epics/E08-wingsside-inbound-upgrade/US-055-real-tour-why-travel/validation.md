@@ -84,17 +84,29 @@ Implementation evidence:
 
 Release remains intentionally held until:
 
-- the pricing-disclosure localization blocker recorded in
-  `../go-live-audit-2026-07-28-implementation.md` is resolved;
+- the `D1-A` exact 38-row EN/VI/IT/ES/PT pricing-disclosure wording is
+  authored and incorporated without losing or silently collapsing any governed
+  service row;
+- the `D2-A` governed English rewrites are complete for the exact 22-tour
+  inventory;
 - the approved four-locale artifact bytes are incorporated into the protected
   catalog-v2 review and reconciliation flow without checksum drift;
+- the catalog and media approval policy is explicitly updated and tested for
+  the project-owner-selected `D6-C` development-team approval model rather than
+  bypassing the existing fail-closed signature contract;
 - the genuine application-owned Payload adapter, protected target-proof key
   material and production-like rehearsal are completed for the governed
   22-tour English runtime;
-- approved media bytes, provenance, OCR/frame evidence and authenticated
-  manual review are available;
+- the `D4-C` source-media watermark-removal outputs, exact inventory, hashes,
+  OCR/frame evidence and visual review are available;
 - the approved PostgreSQL localization and Home curation plans are applied and
   audited;
 - exact 22/22 inventory and Home → Tour Detail behavior pass for EN, VI, IT, ES
   and PT; and
-- production deployment/data-write approval is explicit.
+- the `D7-A` canary package passes and production deployment/data-write
+  approval is explicit.
+
+The project owner accepted the current Sa Pa/Lào Cai route, destination and
+trekking facts under `D3-A`; that external content decision is no longer a
+release blocker. The complete accepted package is recorded in
+`release-decisions-2026-07-28.md`.

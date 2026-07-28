@@ -118,11 +118,15 @@ boundaries.
 
 Production remains on `HOLD`: the project owner approved the checksum-bound
 22-tour `vi`/`it`/`es`/`pt` content and the `pt-PT` audience profile on
-2026-07-28. The repository still does not contain approved 38-disclosure
-decisions or a signed catalog-v2 review artifact. A genuine application-owned
-Payload adapter and protected target-proof key material, approved signed media
-assets/review/OCR evidence, and a production-like PostgreSQL rehearsal are also
-still missing.
+2026-07-28. The project owner subsequently selected `D1-A`, `D2-A`, `D3-A`,
+`D4-C`, `D5-A`, `D6-C` and `D7-A`; the decision package is recorded in
+`US-055-real-tour-why-travel/release-decisions-2026-07-28.md`. The repository
+still does not contain the authored 38-disclosure five-locale wording, completed
+22-tour English candidate or reconciled catalog-v2 artifact. A genuine
+application-owned Payload adapter and protected target-proof key material,
+watermark-removal media outputs/review/OCR evidence, the explicit `D6-C`
+approval-policy implementation, and a production-like PostgreSQL rehearsal are
+also still missing.
 
 ## Verification
 
@@ -162,11 +166,13 @@ Open delivery boundaries:
   22-tour English candidate, genuine Payload adapter and protected target-proof
   key material remain external release inputs.
 - The media producer and authenticated release gate are implemented, but
-  approved media bytes, rights/provenance, OCR/frame evidence and authenticated
-  manual review remain external release inputs.
+  the `D4-C` watermark-removal outputs, OCR/frame evidence and visual review
+  remain delivery inputs.
 - Catalog and media approver authorization is protected from self-authorization
-  in code; trusted identities, signatures and canonical approved artifacts must
-  still be supplied by release operations.
+  in the current code. The project owner selected `D6-C`, so this governance
+  contract must be changed explicitly, reviewed and tested before it can
+  produce a valid release artifact; existing checks must not be bypassed or
+  represented as already satisfied.
 
 ## Browser evidence
 
@@ -182,21 +188,29 @@ therefore these captures do not satisfy the watermark/provenance gate.
 
 ## Conditions to lift HOLD
 
-1. Product/Content approves the disposition and EN/VI/IT/ES/PT wording for all
-   peak-season, fuel-surcharge and compulsory-dinner disclosures.
+1. Author and checksum-bind the `D1-A` EN/VI/IT/ES/PT wording for all
+   peak-season, fuel-surcharge and compulsory-dinner disclosures while
+   preserving every governed source row.
 2. Regenerate the PostgreSQL plan; prove no service row ID is lost; run
    apply → verify → rollback → verify on a production-like full clone.
 3. Apply the approved localization plan and pass exact 22 listing plus 22 detail
    routes for every public locale with fallback disabled.
-4. Complete governed EN rewrites for all 22 tours; content lint must reject
-   vendor terms and shouting/SEO-import phrasing.
-5. Replace all vendor-watermarked media with approved assets carrying
-   ownership/license/provenance; run visual/OCR QA.
-6. Approve Sa Pa/Lào Cai route, destination and trekking decision facts.
-7. Provide verified trust proof and run production-like enquiry submission
-   smoke.
+4. Complete the `D2-A` governed EN rewrites for all 22 tours; content lint must
+   reject vendor terms and shouting/SEO-import phrasing.
+5. Produce the `D4-C` watermark-removal outputs for the selected source-media
+   set; bind the output hashes and pass exact-inventory, visual and OCR/frame
+   QA.
+6. Implement and test the `D6-C` development-team approval policy as an
+   explicit replacement for the current independent-approver contract.
+7. Provide valid trust proof under that approved policy and run production-like
+   enquiry submission smoke.
 8. Apply and audit US-055 home curation, then capture the five-locale
    Home → Tour Detail matrix.
-9. Obtain explicit production deployment and data-write approval.
+9. Pass the `D7-A` canary workflow and obtain explicit production deployment
+   and data-write approval.
+
+The project owner approved the current Sa Pa/Lào Cai route, destination and
+trekking decision facts under `D3-A`; this is no longer an open approval
+condition.
 
 No production deployment or production data write was performed in this run.
