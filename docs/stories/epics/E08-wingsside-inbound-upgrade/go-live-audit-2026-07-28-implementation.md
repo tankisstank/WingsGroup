@@ -88,21 +88,49 @@ without re-reading the path, rejects a CLI hash that conflicts with protected
 release configuration, and checks the catalog approval snapshot against the
 approved plan for non-plan phases.
 
-The corrective re-review found no remaining P0 code false-pass in these areas.
-Production remains on `HOLD`: the repository does not yet contain the reviewed
-38-disclosure catalog-v2 content, the English tooling does not yet have its
-canonical transactional Payload runtime, and approved media bytes/OCR/
-provenance/manual-review evidence has not been supplied.
+Wave 2 then closed the remaining repository-side trust boundaries:
+
+- the English editorial runtime now binds the exact 22-tour plan, config,
+  manifest, release, source and database target. Apply, rollback and verify
+  require a phase-locked capability plus fresh Ed25519 target proofs measured
+  inside the same transaction after begin and immediately before commit or
+  verify close. Raw mutation entry points are not exported, commit ambiguity is
+  explicit, and the direct CLI fails closed until an application-owned Payload
+  adapter and protected signing policy are supplied;
+- catalog-v2 authoring now produces a review-only draft from an exact ordered
+  22-tour/38-row governance manifest. Source, review and all four `vi`/`it`/
+  `es`/`pt` locale artifacts are single-read, SHA-256 bound and frozen.
+  Reconciliation requires protected approver policy, exact row decisions and a
+  checksum of the complete candidate, including title, summary, metadata,
+  itinerary and service summaries; and
+- media evidence production now hashes bytes from a sealed local root and
+  requires a protected release-policy artifact with purpose-separated Ed25519
+  signers for rights, manual review, OCR/frame extraction and the release
+  envelope. The only release gate consumes an authenticated, canonical,
+  deeply-frozen result registered by the producer; report-only or structurally
+  forged results cannot act as release authority.
+
+Three independent corrective review rounds exercised guard injection,
+self-authored trust policy, wrong-database verification, artifact substitution,
+unsigned review/OCR evidence, structural result forgery and non-JSON checksum
+evasion. Final verdict: no remaining P0 or P1 code false-pass in these Wave 2
+boundaries.
+
+Production remains on `HOLD`: the repository still does not contain the
+customer-reviewed 38-disclosure/four-locale content, a genuine application-owned
+Payload adapter and protected target-proof key material, approved signed media
+assets/review/OCR evidence, or a production-like PostgreSQL rehearsal.
 
 ## Verification
 
 Passed on the integrated branch:
 
-- Unit after S3 corrective integration: 64 files, 514 tests.
-- Component: 14 files, 74 tests.
-- Independent corrective re-review: 7 files, 94 targeted tests.
+- Unit after Wave 2 integration: 67 files, 597 tests.
+- Component from the preceding integrated gate: 14 files, 74 tests.
+- Independent review: all three Wave 2 workstreams reached zero remaining P0/P1
+  findings after corrective re-review.
 - TypeScript: `pnpm exec tsc --noEmit`.
-- ESLint on all touched audit paths.
+- Full ESLint: 0 errors; 149 pre-existing warnings outside the Wave 2 paths.
 - Production Webpack build: passed, including 17 static pages and all dynamic
   routes.
 - Migration smoke through the enquiry-context migration.
