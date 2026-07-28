@@ -63,3 +63,38 @@ be interpreted as a release `SHIP` decision. Evidence files created before the
 full-content corrective round are retained as history but are superseded by runs
 that contain `frozen-source-artifact`, `seed-full-frozen-source`,
 `postgres-final-server-readiness`, and full-content `restore-drill` checks.
+
+## R4 applied lifecycle contract
+
+The root-level R3 JSON files remain immutable historical baseline evidence.
+R4 executes the protected catalog in disposable PostgreSQL 16 only, bound to
+IPv4 loopback, an unprivileged port, a rehearsal database name and the exact
+worktree HEAD.
+
+The accepted integration run is:
+
+- terminal evidence: `r4/r4-ce5a67620250.json`;
+- evidence SHA-256:
+  `2151bcdaa470288b333e1390b73b42c0fe98f7ab27a98f74305450f32a622706`;
+- journal: `r4/us055-rehearsal-ce5a67620250.journal.jsonl`;
+- journal SHA-256:
+  `eb3393ed189a256cf1630e8fd1fe098ad4d58391a04d5bcf7340a4eac93ac0e5`;
+- release HEAD: `ef729d768e6d6f01049374f04f20491fb3ea0b76`; and
+- terminal state: `catalog-lifecycle-complete`.
+
+Independent exact-integration reviews:
+
+- `r4/final-integration-lifecycle-review-report.json`, SHA-256
+  `6231d4067da097631014c44b773cf0c9711375206c0d87a9c34f11e4c64779ec`;
+- `r4/final-integration-home-review-report.json`, SHA-256
+  `ae491c10984908b0023246a891e6dd4c79d26a8328e8e8c0ac674f90e8cf4c5e`;
+- verdict: local technical `ACCEPT`.
+
+The lifecycle is plan → apply → verify-after → exact two-spec applied-state
+Playwright → rollback → verify-before. The artifact binds the exact
+22/116/331/38/5 catalog, nested applied frozen-source checksum, four-role
+five-locale Home proof, baseline/final Home checksum equality, backup/restore,
+spec/report hashes and cleanup. It passes 18/18 checks, 110/110 verification on
+both sides, Home 40 cases, and confirms the Docker container and selective
+seed media are absent. A catalog contract without terminal execution remains
+pending and is not lifecycle proof.

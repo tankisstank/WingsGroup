@@ -382,3 +382,21 @@ Pause for human confirmation if:
   frozen before processing.
 - D6-C can only be implemented by disabling a signature/checksum/target check
   instead of defining an explicit auditable approval policy.
+
+## R4 closure appendix
+
+WP0–WP5 are locally integrated through immutable HEAD
+`ef729d768e6d6f01049374f04f20491fb3ea0b76`. The protected 22/116/331/38/5
+catalog, disposable PostgreSQL lifecycle, backup/restore drill, applied-state
+110-route gate, governed 40-case Home matrix, rollback and cleanup are
+technically accepted. Final evidence SHA-256 is
+`2151bcdaa470288b333e1390b73b42c0fe98f7ab27a98f74305450f32a622706`;
+journal SHA-256 is
+`eb3393ed189a256cf1630e8fd1fe098ad4d58391a04d5bcf7340a4eac93ac0e5`.
+
+WP2 evidence is accepted as an exact audit, but D4-C is not complete: 220
+hashes remain positive, 366 are clean, 29 were reclassified, four candidates
+were rejected and zero faithful replacements were accepted. WP6 has not issued
+a combined release `SHIP`. WP7 remains approval-gated and was not executed.
+The media-completion, production-authority and canary definitions of done
+therefore remain unmet; the story stays in progress / HOLD.

@@ -39,8 +39,8 @@ pnpm run build
 ```
 
 Targeted component coverage and a real PostgreSQL migration/CRUD smoke now
-exist. The five-locale Home → Tour Detail browser matrix remains a release
-gate after approved curation data is applied.
+exist. R4 closes the local five-locale Home → Tour Detail browser gate. The
+production canary and media-remediation gates remain open.
 
 ## Acceptance Evidence
 
@@ -168,3 +168,44 @@ Operational release remains held:
   rehearsal container; and
 - protected external release values and explicit production write/deploy
   authority remain absent.
+
+## S3 execution update — run r4
+
+The canonical record is `s3-execution-2026-07-29-r4.md`.
+
+R4 preserves the exact governed inventory of 22 tours, 116 itinerary days, 331
+service rows, 38 pricing-disclosure rows and five locales. The final
+integration-bound disposable PostgreSQL lifecycle executes:
+
+`plan → apply → verify-after → applied-state E2E → rollback → verify-before`
+
+Final run `ce5a67620250` is bound to integration HEAD
+`ef729d768e6d6f01049374f04f20491fb3ea0b76` and passes all 18 terminal checks.
+It applies 88 localized rows and 22 shared rows, verifies 110/110 after apply,
+runs exactly two Playwright specs, rolls back 88 + 22 rows and verifies 110/110
+before state. The browser proof covers:
+
+- 110 exact Tour Detail URLs for 22 tours across EN/VI/IT/ES/PT;
+- four exact approved Why Travel role-to-slug mappings;
+- 40 Home cases across five locales and 390px/1440px;
+- correct locale path, HTTP 200 Tour Detail, `html[lang]`, canonical metadata
+  and no horizontal overflow; and
+- Playwright expected `2`, skipped `0`, unexpected `0`.
+
+Durable terminal evidence is
+`evidence/rehearsal/r4/r4-ce5a67620250.json` with SHA-256
+`2151bcdaa470288b333e1390b73b42c0fe98f7ab27a98f74305450f32a622706`.
+Its journal is
+`evidence/rehearsal/r4/us055-rehearsal-ce5a67620250.journal.jsonl` with SHA-256
+`eb3393ed189a256cf1630e8fd1fe098ad4d58391a04d5bcf7340a4eac93ac0e5`.
+Home baseline and final checksums both equal
+`5c284c9e16973b64b7ebb02fd9a57ade38ee0cb95b2d6942042b3bb99548fd42`;
+the container and owned seed media are absent after cleanup.
+
+The integration review returns local technical `ACCEPT`. This does not
+authorize release. The superseding R4 media audit classifies 220
+watermark-positive and 366 clean hashes, including 29 reclassified false
+negatives; all four near-duplicate candidates were rejected and zero faithful
+replacements were accepted. D4-C, rights/publication evidence, combined
+`SHIP`, production approval and D7-A remain blocked. Overall status stays
+in progress / HOLD.

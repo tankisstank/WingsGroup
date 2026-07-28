@@ -1,0 +1,114 @@
+{
+  "status": "ready-for-review",
+  "verdict": "ACCEPT",
+  "summary": "ACCEPT exact integration HEAD ef729d768e6d6f01049374f04f20491fb3ea0b76 based on terminal run ce5a67620250. The integration tree is byte-identical to independently accepted corrective tree e2e81d7, and the new run binds the exact integration HEAD to two exact Playwright passes, 40 Home role-locale-viewport cases, the exact 110-URL and 22-tour matrix, exact Home and frozen-artifact rollback, credential-safe minimized evidence, Payload close, container and seed-media cleanup, clean worktree, and zero matching runtime residue.",
+  "project": {
+    "root": "E:\\repo\\WingsTravel",
+    "worktree": "E:\\repo\\WingsTravel-audit-r1-20260728",
+    "base_sha": "ea37a07f1cceee3d68ecbeabd2c528d71edfe7c8",
+    "head_sha": "ef729d768e6d6f01049374f04f20491fb3ea0b76"
+  },
+  "files_changed": [],
+  "commands_run": [
+    {
+      "command": "Independent SHA-256 verification of integration terminal evidence and journal",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "command": "Independent structured audit of evidence checks, exact Home matrices, checksums, report/spec bindings, and journal chronology",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "command": "Independent sensitive-value and credential-copy scan of terminal evidence and journal",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "command": "git diff --quiet e2e81d7 ef729d7 and immutable tree comparison",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "command": "Independent Docker, runtime-process, selective-media, worktree, HEAD, and payload-types audit",
+      "exit_code": 0,
+      "result": "pass"
+    }
+  ],
+  "checks": {
+    "passed": [
+      "Terminal evidence SHA-256 independently equals 2151bcdaa470288b333e1390b73b42c0fe98f7ab27a98f74305450f32a622706.",
+      "Terminal journal SHA-256 independently equals eb3393ed189a256cf1630e8fd1fe098ad4d58391a04d5bcf7340a4eac93ac0e5.",
+      "Evidence and all 33 journal rows bind the single run ID ce5a67620250.",
+      "The release-head-binding journal row names exact integration HEAD ef729d768e6d6f01049374f04f20491fb3ea0b76.",
+      "The current integration worktree is clean at exact HEAD ef729d768e6d6f01049374f04f20491fb3ea0b76.",
+      "Integration HEAD ef729d7 and previously accepted corrective commit e2e81d7 have the identical Git tree 2fa87a416c334ea8c063c9ffa7695e615cb8c7ed.",
+      "Terminal evidence status is catalog-lifecycle-complete with 18 checks and zero failed checks.",
+      "Journal timestamps are monotonic, contain no failure state, and order plan, apply, verify-after, applied-state E2E, rollback, verify-before, cleanup and terminal evidence.",
+      "Playwright reports exactly expected=2, skipped=0 and unexpected=0.",
+      "The Home gate records exactly 40 cases: four roles, five locales and two viewport widths.",
+      "The route gate records exactly 110 URLs, 22 tours and five locales.",
+      "The integration Home spec bytes independently hash to c45edf88bdee8ee27af8d4825f9bd08832a700fa3007d8c61b8e67eb707df8c4 and terminal evidence binds the same hash.",
+      "The locale-route spec bytes independently hash to b70803377369de9586fe782f00e81255d6d7c0cf77978c75a39eb724a356e525 and terminal evidence binds the same hash.",
+      "The parsed Playwright report is bound to SHA-256 437ee7eec1c47e00fb5e9721ccc88ca0c91ffa6d2c49256db7a7ef635531c76c.",
+      "Both applied and final Home proofs contain exact ordered EN, VI, IT, ES and PT records.",
+      "Every applied and final locale contains four unique tour IDs and exact approved role, source slug and locale-aware href mappings.",
+      "The minimized proof retains valid Home HiFi and hero checksums without embedding the credential fixture copy.",
+      "The Home baseline checksum is 5c284c9e16973b64b7ebb02fd9a57ade38ee0cb95b2d6942042b3bb99548fd42.",
+      "The applied Home checksum is d43ae0bd09114006d35b5f70d9575e4fe1960401767c48e4c666cfc38ccaf45d.",
+      "The final Home checksum exactly returns to baseline 5c284c9e16973b64b7ebb02fd9a57ade38ee0cb95b2d6942042b3bb99548fd42.",
+      "The frozen-source baseline checksum is d2373c00d761e958498db7f6f79e896201f3651e6e5eb6659736e09b956a232b.",
+      "The top-level and nested applied frozen-source checksums both equal d5ac0360443534739e94f9f0de048644e3b9bc6b35e5dec1eaee2ddb9b012497.",
+      "The final frozen-source checksum exactly returns to baseline d2373c00d761e958498db7f6f79e896201f3651e6e5eb6659736e09b956a232b.",
+      "Verify-after and verify-before each check exactly 110 records in after and before state.",
+      "Signed stage proofs are ordered exactly plan, apply, verify-after, rollback and verify-before.",
+      "Evidence declares evidenceContainsCredentials=false.",
+      "Neither evidence nor journal contains a PostgreSQL URL, Payload secret, private key, rehearsal password, credential recipient copy, agency code, or selected credential title/description.",
+      "Occurrences of password-like text are limited to names of production capabilities explicitly recorded as blanked, not secret values.",
+      "Payload lifecycle close is recorded as pass.",
+      "Disposable container cleanup passes with verification=absent.",
+      "Selective Home seed media cleanup is absent and all four governed temporary filenames are absent from the worktree.",
+      "Tracked app/src/payload-types.ts exactly matches immutable integration HEAD.",
+      "No labeled US-055 rehearsal container remains.",
+      "No matching Node, Docker, Playwright, Chrome or Edge runtime process remains."
+    ],
+    "failed": []
+  },
+  "data_impact": "Read-only independent local technical review. The reviewed run used a disposable local PostgreSQL 16 container on loopback without a persistent volume, restored the Home fixture and frozen tour artifact, removed its container and selective seed media, and restored generated payload types. This reviewer did not access or mutate staging, production, source media, deployment, merge, push, tracker, or external systems.",
+  "evidence": [
+    {
+      "type": "reviewed immutable integration commit",
+      "path_or_reference": "ef729d768e6d6f01049374f04f20491fb3ea0b76",
+      "sha256": ""
+    },
+    {
+      "type": "terminal integration lifecycle evidence",
+      "path_or_reference": "E:\\TEMP\\us055-r4-final-integration-ef729d7\\evidence\\r3-ce5a67620250.json",
+      "sha256": "2151bcdaa470288b333e1390b73b42c0fe98f7ab27a98f74305450f32a622706"
+    },
+    {
+      "type": "terminal integration lifecycle journal",
+      "path_or_reference": "E:\\TEMP\\us055-r4-final-integration-ef729d7\\journals\\us055-rehearsal-ce5a67620250.journal.jsonl",
+      "sha256": "eb3393ed189a256cf1630e8fd1fe098ad4d58391a04d5bcf7340a4eac93ac0e5"
+    },
+    {
+      "type": "integration Home E2E spec",
+      "path_or_reference": "E:\\repo\\WingsTravel-audit-r1-20260728\\app\\tests\\e2e\\wingsside-why-travel-real-tour-matrix.e2e.spec.ts",
+      "sha256": "c45edf88bdee8ee27af8d4825f9bd08832a700fa3007d8c61b8e67eb707df8c4"
+    },
+    {
+      "type": "integration locale-route E2E spec",
+      "path_or_reference": "E:\\repo\\WingsTravel-audit-r1-20260728\\app\\tests\\e2e\\wingsside-tour-locale-matrix.e2e.spec.ts",
+      "sha256": "b70803377369de9586fe782f00e81255d6d7c0cf77978c75a39eb724a356e525"
+    }
+  ],
+  "residual_risks": [
+    "The credential rows remain a local rehearsal fixture. Acceptance does not establish WingSide legal identity, current airline authorization, production publication approval, media rights, or localized marketing approval.",
+    "This local technical gate does not authorize production data writes, deployment, traffic switching, publication, merge, push, or tracker changes.",
+    "D4-C media remediation remains separately blocked where faithful governed watermark-free replacements do not exist."
+  ],
+  "uncertainties": [],
+  "stop_condition_triggered": null,
+  "commit_sha": null
+}

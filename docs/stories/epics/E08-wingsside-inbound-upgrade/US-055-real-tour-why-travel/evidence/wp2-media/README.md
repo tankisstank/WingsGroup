@@ -79,3 +79,17 @@ Before D4-C can pass:
 5. complete an independent visual contact-sheet review; and
 6. provide the protected rights, reviewer and OCR artifacts required by the
    authenticated release evidence producer.
+
+## R4 superseding outcome
+
+The canonical R4 package is `r4/README.md`. It verifies all 586 unique source
+hashes and 233,893,714 bytes without source mutation. R3 remains immutable
+historical evidence at 191 positive / 395 clean. R4 re-audited all 395
+previously clean hashes, reclassified 29 false negatives and supersedes the
+technical disposition with 220 watermark-positive / 366 clean.
+
+Four near-duplicate candidates were manually reviewed and all four were
+rejected because visible BestPrice Travel branding remained. Faithful governed
+mappings and accepted replacements are both zero. The package is accepted as
+an exact audit and empty no-write contract, not as D4-C completion. All 220
+positive hashes, rights evidence and publication approval remain blocked.

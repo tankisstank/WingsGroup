@@ -1,0 +1,125 @@
+{
+  "status": "ready-for-review",
+  "verdict": "ACCEPT",
+  "summary": "ACCEPT exact integration HEAD ef729d768e6d6f01049374f04f20491fb3ea0b76 as the final local technical Home and catalog-lifecycle package. Full run ce5a67620250 is bound to that exact integration HEAD and is terminal-green: catalog-lifecycle-complete, 18 of 18 checks pass, zero failed checks or journal failure states, exact five-locale four-role governed Home proof, 110 records verified after apply and 110 after rollback, exactly two applied-state Playwright passes with 40 Home cases and 110 route URLs, current integration spec hashes matching the recorded hashes, baseline Home checksum restored exactly after rollback, nested applied frozen-source checksum exposed correctly, Payload close passed, exact container absent, selective media absent, no residual rehearsal process, and clean integration worktree. This verdict is local technical acceptance only; it is not production release approval.",
+  "project": {
+    "root": "E:\\repo\\WingsTravel",
+    "worktree": "E:\\repo\\WingsTravel-audit-r1-20260728",
+    "base_sha": "1a0b5a193cc378c9191b1a8bdf6f57ea2444d183",
+    "head_sha": "ef729d768e6d6f01049374f04f20491fb3ea0b76"
+  },
+  "files_changed": [],
+  "commands_run": [
+    {
+      "command": "Get-FileHash -Algorithm SHA256 E:\\TEMP\\us055-r4-final-integration-ef729d7\\evidence\\r3-ce5a67620250.json E:\\TEMP\\us055-r4-final-integration-ef729d7\\journals\\us055-rehearsal-ce5a67620250.journal.jsonl",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "command": "git rev-parse HEAD; git status --short",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "command": "Independent JSON audit of terminal status, all lifecycle checks, Home proofs, nested applied checksum, verify-after/before, E2E counters, spec bindings, stage proofs, Payload close and cleanup",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "command": "Independent JSONL audit of exact release HEAD, lifecycle chronology, failure states, E2E summary, cleanup and terminal record",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "command": "Get-FileHash -Algorithm SHA256 app\\tests\\e2e\\wingsside-why-travel-real-tour-matrix.e2e.spec.ts app\\tests\\e2e\\wingsside-tour-locale-matrix.e2e.spec.ts",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "command": "docker inspect wingsside-us055-rehearsal-ce5a67620250",
+      "exit_code": 1,
+      "result": "pass"
+    },
+    {
+      "command": "Independent process inventory for run-wingsside-us055-rehearsal or run ID ce5a67620250",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check HEAD^ HEAD",
+      "exit_code": 0,
+      "result": "pass"
+    }
+  ],
+  "checks": {
+    "passed": [
+      "Evidence SHA-256 is 2151bcdaa470288b333e1390b73b42c0fe98f7ab27a98f74305450f32a622706 and exactly matches the supplied immutable reference.",
+      "Journal SHA-256 is eb3393ed189a256cf1630e8fd1fe098ad4d58391a04d5bcf7340a4eac93ac0e5 and exactly matches the supplied immutable reference.",
+      "The reviewed integration worktree HEAD is ef729d768e6d6f01049374f04f20491fb3ea0b76 and the worktree is clean.",
+      "Journal release-head-binding records ef729d768e6d6f01049374f04f20491fb3ea0b76, exactly matching the reviewed integration HEAD.",
+      "Terminal evidence status is catalog-lifecycle-complete with 18 checks, all passing and zero failed checks.",
+      "The journal contains 33 records, zero failed or failure states, and ends with terminal-evidence written for catalog-lifecycle-complete.",
+      "The frozen baseline proves exactly 22 tours, 116 itinerary days and 331 stable service rows.",
+      "The governed Home seed proves one published Home, one WingSide site, four selective media records, zero tours before exact tour seeding, four distinct approved Why Travel tours and the exact role sequence local-design, flexible-planning, style-matching, collaborative-care.",
+      "Home baseline proof contains five locales and four roles with checksum 5c284c9e16973b64b7ebb02fd9a57ade38ee0cb95b2d6942042b3bb99548fd42.",
+      "Applied Home checksum d43ae0bd09114006d35b5f70d9575e4fe1960401767c48e4c666cfc38ccaf45d differs from baseline while the governed catalog is applied.",
+      "Final Home checksum is 5c284c9e16973b64b7ebb02fd9a57ade38ee0cb95b2d6942042b3bb99548fd42, exactly equal to baseline after rollback.",
+      "Nested applied frozen-source checksum d5ac0360443534739e94f9f0de048644e3b9bc6b35e5dec1eaee2ddb9b012497 exactly equals the exposed appliedArtifactChecksum.",
+      "Verify-after reports state after and checked 110; verify-before reports state before and checked 110.",
+      "All five signed stages are present in order: plan, apply, verify-after, rollback and verify-before, with five unique proof digests.",
+      "Applied-state Playwright reports expected 2, skipped 0 and unexpected 0 with exactly two bound specs.",
+      "Applied-state evidence records 40 Home role-locale-viewport cases, four roles, five locales, two viewport widths, 22 tours and 110 URLs.",
+      "Recorded Home spec SHA-256 c45edf88bdee8ee27af8d4825f9bd08832a700fa3007d8c61b8e67eb707df8c4 exactly matches the current integration file bytes.",
+      "Recorded route spec SHA-256 b70803377369de9586fe782f00e81255d6d7c0cf77978c75a39eb724a356e525 exactly matches the current integration file bytes.",
+      "Applied-state Playwright report SHA-256 is 437ee7eec1c47e00fb5e9721ccc88ca0c91ffa6d2c49256db7a7ef635531c76c and its server binding is ephemeral IPv4 loopback with WingSide Host and Webpack.",
+      "Payload close is explicitly recorded as pass.",
+      "Cleanup passes in one attempt with exact container verification absent and selective seed media absent.",
+      "Independent Docker inspection confirms the exact run container absent and process inventory finds zero residual lifecycle process.",
+      "The integration commit passes git diff --check and the final worktree remains clean.",
+      "The run uses a uniquely named disposable loopback PostgreSQL database and no-volume container, an allowlisted child environment, PAYLOAD_DB_PUSH=false and explicit production-capability blanking; no production write or deployment capability is introduced."
+    ],
+    "failed": []
+  },
+  "data_impact": "Read-only independent integration review. The supplied full run used only a uniquely named disposable local PostgreSQL 16 container without a persistent volume, applied the catalog inside that rehearsal target, verified the applied state, rolled governed data back to the exact baseline, closed Payload, removed selective media and temporary artifacts, and verified the exact container absent. This reviewer did not edit repository files, access production or staging, deploy, push, merge, send external messages, or authorize release.",
+  "evidence": [
+    {
+      "type": "reviewed exact integration commit",
+      "path_or_reference": "ef729d768e6d6f01049374f04f20491fb3ea0b76",
+      "sha256": ""
+    },
+    {
+      "type": "terminal exact-integration lifecycle evidence",
+      "path_or_reference": "E:\\TEMP\\us055-r4-final-integration-ef729d7\\evidence\\r3-ce5a67620250.json",
+      "sha256": "2151bcdaa470288b333e1390b73b42c0fe98f7ab27a98f74305450f32a622706"
+    },
+    {
+      "type": "durable exact-integration lifecycle journal",
+      "path_or_reference": "E:\\TEMP\\us055-r4-final-integration-ef729d7\\journals\\us055-rehearsal-ce5a67620250.journal.jsonl",
+      "sha256": "eb3393ed189a256cf1630e8fd1fe098ad4d58391a04d5bcf7340a4eac93ac0e5"
+    },
+    {
+      "type": "applied-state Playwright JSON report hash recorded in terminal evidence",
+      "path_or_reference": "run ce5a67620250 appliedStateE2E.reportSha256",
+      "sha256": "437ee7eec1c47e00fb5e9721ccc88ca0c91ffa6d2c49256db7a7ef635531c76c"
+    },
+    {
+      "type": "current integration Home spec",
+      "path_or_reference": "E:\\repo\\WingsTravel-audit-r1-20260728\\app\\tests\\e2e\\wingsside-why-travel-real-tour-matrix.e2e.spec.ts",
+      "sha256": "c45edf88bdee8ee27af8d4825f9bd08832a700fa3007d8c61b8e67eb707df8c4"
+    },
+    {
+      "type": "current integration route spec",
+      "path_or_reference": "E:\\repo\\WingsTravel-audit-r1-20260728\\app\\tests\\e2e\\wingsside-tour-locale-matrix.e2e.spec.ts",
+      "sha256": "b70803377369de9586fe782f00e81255d6d7c0cf77978c75a39eb724a356e525"
+    }
+  ],
+  "residual_risks": [
+    "This ACCEPT applies only to exact integration HEAD ef729d768e6d6f01049374f04f20491fb3ea0b76 and immutable local run ce5a67620250. Any later code change requires proportionate revalidation, and any later release SHA used as lifecycle evidence must be bound by a fresh exact-HEAD run.",
+    "D4-C remains incomplete outside this technical package: 220 assets remain watermark-positive, 366 are clean, 29 r3 false negatives were reclassified, four candidates were rejected and zero faithful replacements were accepted.",
+    "This run does not provide ownership, license or publication evidence, a combined WP6 SHIP verdict, protected production target values, explicit production write/deploy authority, or D7-A canary/promotion/rollback evidence.",
+    "The raw PostgreSQL dump and Playwright JSON report are transient and cleaned with the temporary directory. Durable review relies on the byte hashes, structured terminal evidence and journal; the terminal evidence and journal should be copied unchanged into the repository evidence package."
+  ],
+  "uncertainties": [],
+  "stop_condition_triggered": null,
+  "commit_sha": null
+}
