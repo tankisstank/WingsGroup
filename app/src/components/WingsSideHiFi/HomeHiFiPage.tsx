@@ -212,6 +212,7 @@ export const HomeHiFiPage = ({
   const hasReadyWhyTravel = whyTravel?.state === 'ready'
   const whyTravelCards = hasReadyWhyTravel ? whyTravel.cards : []
   const featuredWhyTravel = whyTravelCards[0]
+  const shouldRenderWhyTravel = whyTravel?.state !== 'invalid'
 
   return (
     <div className="ws-hifi-page ws-hifi-page--home" data-testid="wingsside-hifi-home">
@@ -267,7 +268,7 @@ export const HomeHiFiPage = ({
           title={asText(home.pillarsTitle, copy.home.pillarsTitle)}
         />
 
-        <section
+        {shouldRenderWhyTravel ? <section
           className="ws-hifi-section section"
           data-od-id="home-why"
           style={{ paddingTop: 0 }}
@@ -306,6 +307,7 @@ export const HomeHiFiPage = ({
               {(hasReadyWhyTravel ? whyTravelCards.slice(1) : whyRows).map((card, index) => {
                 const asset = WHY_CARD_ASSETS[index] || 'planner'
                 const tourCard = hasReadyWhyTravel ? whyTravelCards[index + 1] : undefined
+                const editorialCard = whyRows[index]
                 return (
                   <SiteLink
                     className="ws-hifi-card ws-hifi-card--media"
@@ -332,9 +334,13 @@ export const HomeHiFiPage = ({
                         {String(index + 2).padStart(2, '0')}
                       </span>
                       <strong>{tourCard?.title || asText(card.title)}</strong>
-                      <span>{tourCard?.body || asText(card.body)}</span>
+                      <span>{tourCard?.body || asText(editorialCard?.body || card.body)}</span>
                       <span className="ws-hifi-card__action">
-                        {tourCard?.ctaLabel || asText((card as { cta?: string }).cta, copy.home.destExplore)}
+                        {tourCard?.ctaLabel ||
+                          asText(
+                            editorialCard?.cta || (card as { cta?: string }).cta,
+                            copy.home.destExplore,
+                          )}
                       </span>
                     </span>
                   </SiteLink>
@@ -384,7 +390,7 @@ export const HomeHiFiPage = ({
               </article>
             ))}
           </div>
-        </section>
+        </section> : null}
 
         <section
           className="ws-hifi-section section"

@@ -155,10 +155,16 @@ const sameCuration = (
   const featuredJourneySelections = (actual?.featuredJourneySelections || []).map(({ tour }) => ({
     tour: relationID(tour),
   }))
+  const whyTourSlots = (actual?.whyTourSlots || []).map(({ key, selectionMode, tour }) => ({
+    key,
+    selectionMode,
+    tour: relationID(tour),
+  }))
   return (
     JSON.stringify(destinationTourSelections) === JSON.stringify(approved.destinationTourSelections) &&
     JSON.stringify(styleTourSelections) === JSON.stringify(approved.styleTourSelections) &&
-    JSON.stringify(featuredJourneySelections) === JSON.stringify(approved.featuredJourneySelections)
+    JSON.stringify(featuredJourneySelections) === JSON.stringify(approved.featuredJourneySelections) &&
+    JSON.stringify(whyTourSlots) === JSON.stringify(approved.whyTourSlots)
   )
 }
 
@@ -207,6 +213,7 @@ export const auditWingsSideHomeCuration = ({
     assertTour(selection.tour, 'travelStyles', selection.key)
   }
   for (const selection of approved.featuredJourneySelections) assertTour(selection.tour)
+  for (const selection of approved.whyTourSlots) assertTour(selection.tour)
 
   return {
     findings,
@@ -217,6 +224,7 @@ export const auditWingsSideHomeCuration = ({
       ...approved.destinationTourSelections.map(({ tour }) => tour),
       ...approved.styleTourSelections.map(({ tour }) => tour),
       ...approved.featuredJourneySelections.map(({ tour }) => tour),
+      ...approved.whyTourSlots.map(({ tour }) => tour),
     ])],
   }
 }

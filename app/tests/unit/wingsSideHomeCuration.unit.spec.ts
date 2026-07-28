@@ -8,6 +8,7 @@ import {
   wingsSideHomeDestinationSelections,
   wingsSideHomeFeaturedSelections,
   wingsSideHomeStyleSelections,
+  wingsSideWhyTravelSelections,
 } from '../../scripts/lib/wingsSideHomeCuration'
 import {
   hydrateWingsSideHomeCuration,
@@ -20,6 +21,7 @@ const selectedTourIDs = [
     ...wingsSideHomeDestinationSelections.map(({ tour }) => tour),
     ...wingsSideHomeStyleSelections.map(({ tour }) => tour),
     ...wingsSideHomeFeaturedSelections.map(({ tour }) => tour),
+    ...wingsSideWhyTravelSelections.map(({ tour }) => tour),
   ]),
 ]
 
@@ -56,6 +58,7 @@ describe('WingSide Home curation audit', () => {
     ])
     expect(remapped.styleTourSelections.map(({ tour }) => tour)).toEqual([66, 67, 68, 69, 70, 71])
     expect(remapped.featuredJourneySelections.map(({ tour }) => tour)).toEqual([68, 60, 63])
+    expect(remapped.whyTourSlots.map(({ tour }) => tour)).toEqual([60, 67, 66, 68])
   })
 
   it('fails closed when an approved source identity is absent', () => {
@@ -114,6 +117,11 @@ describe('WingSide Home curation audit', () => {
         id: `style-${index}`,
         tour: { id: selection.tour },
       })),
+      whyTourSlots: wingsSideHomeCuration.whyTourSlots.map((selection, index) => ({
+        ...selection,
+        id: `why-${index}`,
+        tour: { id: selection.tour },
+      })),
     }
     const result = auditWingsSideHomeCuration({
       actual: actual as never,
@@ -125,6 +133,73 @@ describe('WingSide Home curation audit', () => {
     })
 
     expect(result.matchesApprovedSelections).toBe(true)
+  })
+
+  it('uses stable source identity instead of localized title for rule selection', async () => {
+    const home = {
+      whyTourSlots: [
+        {
+          key: 'local-design',
+          rule: { travelStyle: 'culture' },
+          selectionMode: 'rule',
+        },
+      ],
+    }
+    const find = vi.fn(async ({ collection }: { collection: string }) => {
+      if (collection === 'tour-products') {
+        return {
+          docs: [
+            {
+              _status: 'published',
+              durationDays: 3,
+              heroMedia: 1002,
+              id: 2,
+              site: siteID,
+              sourceProvenance: { sourceId: 'source-z' },
+              summary: 'Résumé localisé A',
+              title: 'A localized title',
+              travelStyles: ['culture'],
+              wrapperPage: 2002,
+            },
+            {
+              _status: 'published',
+              durationDays: 3,
+              heroMedia: 1001,
+              id: 1,
+              site: siteID,
+              sourceProvenance: { sourceId: 'source-a' },
+              summary: 'Résumé localisé Z',
+              title: 'Z localized title',
+              travelStyles: ['culture'],
+              wrapperPage: 2001,
+            },
+          ],
+        }
+      }
+      if (collection === 'pages') {
+        return {
+          docs: [
+            { id: 2001, pathname: '/tour/source-a', site: siteID, slug: 'source-a' },
+            { id: 2002, pathname: '/tour/source-z', site: siteID, slug: 'source-z' },
+          ],
+        }
+      }
+      return {
+        docs: [
+          { alt: 'A', id: 1001, site: siteID, url: '/media/a.jpg' },
+          { alt: 'Z', id: 1002, site: siteID, url: '/media/z.jpg' },
+        ],
+      }
+    })
+
+    const hydrated = await hydrateWingsSideHomeCuration({
+      home,
+      locale: 'it',
+      pageSite: siteID,
+      payload: { find } as never,
+    })
+
+    expect((hydrated?.whyTourSlots?.[0]?.tour as { id?: number })?.id).toBe(1)
   })
 })
 describe('WingSide Home runtime curation loader', () => {

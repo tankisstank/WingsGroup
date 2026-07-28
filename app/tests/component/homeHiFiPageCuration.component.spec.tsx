@@ -111,4 +111,25 @@ describe('HomeHiFiPage curated tours', () => {
     expect(screen.getAllByText('Curated journeys are not currently available.')).toHaveLength(3)
     expect(screen.queryByText('Can one trip cover the icons — without the rush?')).toBeNull()
   })
+
+  it('omits Why Travel instead of falling back to static product-like cards when configured slots are invalid', () => {
+    const model = baseModel()
+    model.homeCuration = {
+      destinationTours: [],
+      featuredJourneys: [],
+      issues: [],
+      state: 'ready',
+      styleTours: [],
+      whyTravel: {
+        cards: [],
+        issues: ['Selected representative tour is unpublished.'],
+        state: 'invalid',
+      },
+    }
+
+    render(<HomeHiFiPage model={model} />)
+
+    expect(document.querySelector('[data-od-id="home-why"]')).toBeNull()
+    expect(document.querySelector('[data-od-id="why-featured"]')).toBeNull()
+  })
 })

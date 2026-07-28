@@ -30,6 +30,7 @@ type CurationTour = {
   id?: RelationID
   priceFrom?: null | number
   site?: Relation
+  sourceProvenance?: { sourceId?: null | string } | null
   summary?: null | string
   title?: null | string
   travelStyles?: null | string[]
@@ -180,7 +181,12 @@ export const hydrateWingsSideHomeCuration = async ({
         if (typeof rule?.minDurationDays === 'number' && (tour.durationDays || 0) < rule.minDurationDays) return false
         if (typeof rule?.maxDurationDays === 'number' && (tour.durationDays || 0) > rule.maxDurationDays) return false
         return true
-      }).sort((left, right) => String(left.title || '').localeCompare(String(right.title || '')) || String(left.id).localeCompare(String(right.id)))
+      }).sort(
+        (left, right) =>
+          stableTourSourceID(left as CurationTour).localeCompare(
+            stableTourSourceID(right as CurationTour),
+          ) || String(left.id).localeCompare(String(right.id)),
+      )
       const presentationMediaID = relationID(slot.presentation?.media as Relation)
       return {
         ...slot,
@@ -222,7 +228,12 @@ export type WingsSideHomeCurationProjection = {
   whyTravel?: { cards: ReadonlyArray<WingsSideWhyTravelCard>; issues: ReadonlyArray<string>; state: 'invalid' | 'ready' | 'unconfigured' }
 }
 
-export type WingsSideWhyTravelCard = WingsSideHomeTourCard & { badge: string; body: string; ctaLabel: string; key: string }
+export type WingsSideWhyTravelCard = WingsSideHomeTourCard & {
+  badge?: string
+  body?: string
+  ctaLabel?: string
+  key: string
+}
 
 const relationID = (value: Relation): RelationID | null => {
   if (typeof value === 'number' || typeof value === 'string') return value
@@ -241,6 +252,11 @@ const asMedia = (value: CurationTour['heroMedia']): CurationMedia | null =>
 
 const nonEmpty = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
+
+const stableTourSourceID = (tour: CurationTour): string =>
+  nonEmpty(tour.sourceProvenance?.sourceId)
+    ? tour.sourceProvenance.sourceId.trim()
+    : String(tour.id ?? '')
 
 const sameRelation = (left: Relation, right: Relation): boolean => {
   const leftID = relationID(left)
@@ -422,9 +438,18 @@ const projectWhyTravelSlots = ({ home, locale, pageSite }: { home?: HomeCuration
     const overrideMedia = override ? asMedia(slot.presentation?.media) : null
     cards.push({
       ...card,
-      badge: override && nonEmpty(slot.presentation?.badge) ? slot.presentation.badge.trim() : 'Representative journey',
-      body: override && nonEmpty(slot.presentation?.body) ? slot.presentation.body.trim() : card.summary,
-      ctaLabel: override && nonEmpty(slot.presentation?.ctaLabel) ? slot.presentation.ctaLabel.trim() : 'View journey',
+      badge:
+        override && nonEmpty(slot.presentation?.badge)
+          ? slot.presentation.badge.trim()
+          : undefined,
+      body:
+        override && nonEmpty(slot.presentation?.body)
+          ? slot.presentation.body.trim()
+          : undefined,
+      ctaLabel:
+        override && nonEmpty(slot.presentation?.ctaLabel)
+          ? slot.presentation.ctaLabel.trim()
+          : undefined,
       hero: overrideMedia && nonEmpty(overrideMedia.url) ? { alt: overrideMedia.alt?.trim() || card.title, url: overrideMedia.url.trim() } : card.hero,
       key: slot.key!,
     })
