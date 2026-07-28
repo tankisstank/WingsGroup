@@ -1,6 +1,5 @@
 import 'dotenv/config'
 
-import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import config from '../src/payload.config'
@@ -12,6 +11,10 @@ import {
   wingsSideTourEditorialLocales,
   type EditorialSourceTour,
 } from './lib/wingsSideTourEditorialLocalization'
+import {
+  assertDisposablePostgresTarget,
+  loadBaselineSource,
+} from './lib/wingsSideUs055Rehearsal.mjs'
 
 const requiredConfirmation = 'disposable-postgres'
 const adminEmail = 'wingsside-tour-editorial-rehearsal@internal.invalid'
@@ -31,13 +34,10 @@ const assertDisposableDatabase = () => {
       `Rehearsal seed requires WINGSSIDE_TOUR_EDITORIAL_REHEARSAL_ALLOW=${requiredConfirmation}`,
     )
   }
-  const databaseURL = new URL(String(process.env.DATABASE_URL || ''))
-  if (
-    !['127.0.0.1', 'localhost', '::1'].includes(databaseURL.hostname) ||
-    !databaseURL.pathname.toLowerCase().includes('rehearsal')
-  ) {
-    throw new Error('Rehearsal seed accepts only a loopback database named *rehearsal*')
+  if (process.env.PAYLOAD_DB_PUSH !== 'false') {
+    throw new Error('Rehearsal seed requires PAYLOAD_DB_PUSH=false')
   }
+  assertDisposablePostgresTarget(String(process.env.DATABASE_URL || ''))
 }
 
 const localizedBeforeData = (source: Record<string, unknown>, locale: string) => ({
@@ -91,11 +91,16 @@ const main = async () => {
   assertDisposableDatabase()
   const sourcePath = argumentValue('--source')
   if (!sourcePath) throw new Error('Rehearsal seed requires --source <22-tour-json>')
-  const sourceTours = JSON.parse(
-    await readFile(path.resolve(sourcePath), 'utf8'),
-  ) as Array<EditorialSourceTour & Record<string, unknown>>
-  const catalog = await loadWingsSideTourEditorialCatalog()
-  assertWingsSideTourEditorialCatalog({ catalog, sourceTours })
+  const manifestPath =
+    argumentValue('--source-manifest') ||
+    path.resolve('scripts', 'data', 'wingsside-tour-editorial', 'source-manifest.json')
+  const { tours } = await loadBaselineSource(sourcePath, manifestPath)
+  const sourceTours = tours as Array<EditorialSourceTour & Record<string, unknown>>
+  const catalogPath = argumentValue('--catalog')
+  if (catalogPath) {
+    const catalog = await loadWingsSideTourEditorialCatalog({ catalogPath, sourceTours })
+    assertWingsSideTourEditorialCatalog({ catalog, sourceTours })
+  }
 
   const payload = await getPayload({ config })
   try {
@@ -177,7 +182,18 @@ const main = async () => {
             ),
           },
           includes: (source.includes || []).map((item) => ({ label: item.label })),
-          itineraryDays: (source.itineraryDays || []).map((day) => ({
+          itineraryDays: (
+            source.itineraryDays?.length
+              ? source.itineraryDays
+              : [
+                  {
+                    dayNumber: 1,
+                    route: String(source.routeSummary || 'Rehearsal route'),
+                    summary: '[BEFORE en] Sealed source inventory rehearsal placeholder',
+                    title: '[BEFORE en] Source itinerary',
+                  },
+                ]
+          ).map((day) => ({
             accommodation: day.accommodation,
             dayNumber: day.dayNumber,
             meals: day.meals,

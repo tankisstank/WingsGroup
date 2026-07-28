@@ -49,6 +49,7 @@
     "seed:wingsside:hifi-content": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/seed-wingsside-hifi-content.ts",
     "seed:wingsside:home-curation": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/apply-wingsside-home-curation.ts",
     "seed:wingsside:tour-editorial:rehearsal": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/seed-wingsside-tour-editorial-rehearsal.ts",
+    "rehearsal:wingsside:us055": "cross-env NODE_OPTIONS=--no-deprecation node scripts/run-wingsside-us055-rehearsal.mjs",
     "remediate:wingsside:hifi-release": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/remediate-wingsside-hifi-release.ts",
     "remediate:wingsside:hero-media": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/remediate-wingsside-hero-media.ts",
     "smoke:wingsside:hifi-pg-crud": "cross-env NODE_OPTIONS=--no-deprecation node scripts/wings-side-hifi-pg-crud-smoke.mjs",

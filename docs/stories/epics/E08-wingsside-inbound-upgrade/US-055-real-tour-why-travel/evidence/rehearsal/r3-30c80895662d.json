@@ -1,0 +1,67 @@
+{
+  "artifactContractVersion": 1,
+  "checks": [
+    {
+      "name": "container-started",
+      "status": "pass",
+      "image": "postgres:16",
+      "persistentVolume": false
+    },
+    {
+      "name": "target-identity",
+      "status": "pass",
+      "database": "wingsside_us055_rehearsal_30c80895662d",
+      "host": "127.0.0.1",
+      "port": 64706
+    },
+    {
+      "name": "payload-migrations",
+      "status": "pass",
+      "payloadDbPush": false
+    },
+    {
+      "name": "seed-source-inventory",
+      "status": "pass",
+      "sourceInventorySha256": "3a54105348367bff40bacb403fffa40157b649aa8d9f993a1f8ea15c99cc60f7",
+      "tours": 22
+    },
+    {
+      "name": "postgres-crud",
+      "status": "pass",
+      "create": true,
+      "delete": true,
+      "insert": true,
+      "update": true
+    },
+    {
+      "name": "backup",
+      "status": "pass",
+      "bytes": 1447054,
+      "format": "postgres-custom",
+      "sha256": "40336e98b1a7897fb52929a846b9416eb7c3b5f9ef853a62cc4ccc8f05bfac47"
+    },
+    {
+      "name": "restore-drill",
+      "status": "pass",
+      "database": "wingsside_us055_rehearsal_30c80895662d_restore_rehearsal",
+      "inventorySha256": "3a54105348367bff40bacb403fffa40157b649aa8d9f993a1f8ea15c99cc60f7",
+      "tours": 22
+    },
+    {
+      "name": "catalog-plan-apply-verify-rollback-verify",
+      "status": "pending",
+      "reason": "catalog-r3-not-supplied"
+    },
+    {
+      "name": "cleanup",
+      "status": "pass"
+    }
+  ],
+  "completedAt": "2026-07-28T11:39:30.025Z",
+  "durationSeconds": 94,
+  "evidenceContainsCredentials": false,
+  "image": "postgres:16",
+  "mode": "disposable-local-rehearsal",
+  "runID": "30c80895662d",
+  "status": "baseline-ready-catalog-pending"
+}
