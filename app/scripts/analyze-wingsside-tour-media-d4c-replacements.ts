@@ -14,7 +14,12 @@ import {
   buildWingsSideD4CPerceptualFingerprint,
   isWingsSideD4CReviewCandidate,
   rankWingsSideD4CReplacementCandidates,
+  validateWingsSideD4CReplacementMapping,
+  validateWingsSideD4CZoomIndexCoverage,
+  type WingsSideD4CDisposition,
   type WingsSideD4CPerceptualFingerprint,
+  type WingsSideD4CReplacementMapping,
+  type WingsSideD4CZoomIndex,
 } from './lib/wingsSideTourMediaD4CReplacements'
 
 const args = process.argv.slice(2)
@@ -254,6 +259,12 @@ const supersedingDispositionDocument = {
   statement:
     'R4 supersedes R3 technical watermark dispositions while preserving R3 as immutable history. This is a visual technical classification, not an ownership or license claim.',
 }
+const supersedingDispositionByHash = new Map<string, WingsSideD4CDisposition>(
+  supersedingDispositionDocument.assets.map(({ disposition: value, sourceSha256 }) => [
+    sourceSha256,
+    value as WingsSideD4CDisposition,
+  ]),
+)
 
 const ranking = supersedingPositives.map((source) => {
   const candidates = rankWingsSideD4CReplacementCandidates({
@@ -304,7 +315,8 @@ const rankingDocument = {
   ranking,
   schemaVersion: 1,
   sourceBinding: {
-    approvedRootRealPath: mediaRoot,
+    approvedRootContract:
+      'Runtime --media-root resolved and constrained by resolveWingsSideD4CApprovedRoot; no machine-specific path is persisted.',
     noWrite: true,
     sourceSnapshotSha256: inventory.sourceSnapshotSha256,
   },
@@ -326,25 +338,13 @@ if (mode === 'verify') {
   }
   const zoomIndex = JSON.parse(
     await readFile(path.join(evidenceRoot, 'clean-zoom-index.json'), 'utf8'),
-  ) as {
-    assets?: Array<{ sourceSha256?: string }>
-    priorCleanHashCount?: number
-    sheets?: Array<{ byteLength?: number; path?: string; sha256?: string }>
-    sourceSnapshotSha256?: string
-  }
-  if (
-    zoomIndex.sourceSnapshotSha256 !== inventory.sourceSnapshotSha256 ||
-    zoomIndex.priorCleanHashCount !== clean.length ||
-    zoomIndex.assets?.length !== clean.length ||
-    !Array.isArray(zoomIndex.sheets) ||
-    zoomIndex.sheets.length !== 25 ||
-    zoomIndex.assets.some(
-      ({ sourceSha256 }) => !clean.some((asset) => asset.sha256 === sourceSha256),
-    )
-  ) {
-    throw new Error('D4-C R4 clean zoom index coverage is invalid')
-  }
-  for (const sheet of zoomIndex.sheets) {
+  ) as WingsSideD4CZoomIndex
+  validateWingsSideD4CZoomIndexCoverage({
+    expectedHashes: new Set(clean.map(({ sha256: hash }) => hash)),
+    sourceSnapshotSha256: inventory.sourceSnapshotSha256,
+    zoomIndex,
+  })
+  for (const sheet of zoomIndex.sheets!) {
     if (
       typeof sheet.path !== 'string' ||
       typeof sheet.byteLength !== 'number' ||
@@ -357,47 +357,16 @@ if (mode === 'verify') {
       throw new Error(`D4-C R4 clean zoom sheet integrity failed: ${sheet.path}`)
     }
   }
-  const mapping = JSON.parse(await readFile(mappingPath, 'utf8')) as {
-    applyContract?: { mode?: string; preserveSourceMediaIDs?: boolean; sourceMediaWrite?: boolean }
-    candidates?: Array<{
-      candidateMediaIDs?: number[]
-      candidateSha256?: string
-      sourceMediaIDs?: number[]
-      sourceSha256?: string
-    }>
-    coverage?: { acceptedCandidateCount?: number; blockedPositiveCount?: number }
-    sourceSnapshotSha256?: string
-  }
-  if (
-    mapping.sourceSnapshotSha256 !== inventory.sourceSnapshotSha256 ||
-    mapping.applyContract?.mode !== 'no-write-candidate-map' ||
-    mapping.applyContract.sourceMediaWrite !== false ||
-    mapping.applyContract.preserveSourceMediaIDs !== true ||
-    !Array.isArray(mapping.candidates)
-  ) {
-    throw new Error('D4-C replacement mapping contract is invalid')
-  }
-  for (const candidate of mapping.candidates) {
-    const source = assetByHash.get(String(candidate.sourceSha256))
-    const replacement = assetByHash.get(String(candidate.candidateSha256))
-    if (
-      !source ||
-      !replacement ||
-      dispositionByHash.get(source.sha256) !== 'watermark-positive' ||
-      dispositionByHash.get(replacement.sha256) !== 'clean' ||
-      candidate.sourceMediaIDs?.join(',') !== source.mediaIDs.join(',') ||
-      candidate.candidateMediaIDs?.join(',') !== replacement.mediaIDs.join(',')
-    ) {
-      throw new Error('D4-C replacement mapping contains an unbound candidate')
-    }
-  }
-  if (
-    mapping.coverage?.acceptedCandidateCount !== mapping.candidates.length ||
-    mapping.coverage?.blockedPositiveCount !==
-      supersedingPositives.length - mapping.candidates.length
-  ) {
-    throw new Error('D4-C replacement mapping coverage is invalid')
-  }
+  const mapping = JSON.parse(
+    await readFile(mappingPath, 'utf8'),
+  ) as WingsSideD4CReplacementMapping
+  validateWingsSideD4CReplacementMapping({
+    assetsByHash: assetByHash,
+    mapping,
+    reclassifiedFalseNegativeCount: auditDecisions.positiveHashes.length,
+    sourceSnapshotSha256: inventory.sourceSnapshotSha256,
+    supersedingDispositionByHash,
+  })
   process.stdout.write(
     `${JSON.stringify({ coverage: mapping.coverage, mode, sourceSnapshotSha256: inventory.sourceSnapshotSha256 })}\n`,
   )

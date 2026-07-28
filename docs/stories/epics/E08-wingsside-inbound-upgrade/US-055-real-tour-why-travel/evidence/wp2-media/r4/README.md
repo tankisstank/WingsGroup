@@ -40,13 +40,13 @@ reclassification.
 From `app/`:
 
 ```powershell
-$env:TEMP = 'E:\temp\us055-r4-media'
-$env:TMP = $env:TEMP
+$approvedMediaRoot = '<APP_PUBLIC_MEDIA_APPROVED_ROOT>'
+$evidenceRoot = '../docs/stories/epics/E08-wingsside-inbound-upgrade/US-055-real-tour-why-travel/evidence/wp2-media/r4'
 pnpm exec tsx scripts/analyze-wingsside-tour-media-d4c-replacements.ts verify `
   --inventory scripts/data/wingsside-tour-media-d4c/source-inventory.json `
   --disposition ../docs/stories/epics/E08-wingsside-inbound-upgrade/US-055-real-tour-why-travel/evidence/wp2-media/r3/disposition-manifest.json `
-  --media-root E:\repo\WingsTravel\app\public\media `
-  --evidence-root ../docs/stories/epics/E08-wingsside-inbound-upgrade/US-055-real-tour-why-travel/evidence/wp2-media/r4
+  --media-root $approvedMediaRoot `
+  --evidence-root $evidenceRoot
 ```
 
 The verifier re-reads the approved media root through the guarded path/file

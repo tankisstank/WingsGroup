@@ -12035,7 +12035,7 @@
   ],
   "schemaVersion": 1,
   "sourceBinding": {
-    "approvedRootRealPath": "E:\\repo\\WingsTravel\\app\\public\\media",
+    "approvedRootContract": "Runtime --media-root resolved and constrained by resolveWingsSideD4CApprovedRoot; no machine-specific path is persisted.",
     "noWrite": true,
     "sourceSnapshotSha256": "707a1acc8655663937c043143c24b062ee478d28d888ee029a2858da331fa446"
   }
