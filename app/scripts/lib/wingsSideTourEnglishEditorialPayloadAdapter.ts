@@ -246,11 +246,8 @@ const defaultDependencies = (): PayloadAdapterDependencies => ({
  * The only returned writes are transaction-bound adapter methods; no standalone
  * mutation function is exported.
  */
-const createWingsSideTourEnglishEditorialPayloadAdapterFactory = (
-  overrides: Partial<PayloadAdapterDependencies> = {},
-) => {
-  const defaults = defaultDependencies()
-  const dependencies = { ...defaults, ...overrides }
+const createWingsSideTourEnglishEditorialPayloadAdapterFactory = () => {
+  const dependencies = defaultDependencies()
   return async ({
     artifacts,
   }: {
@@ -445,21 +442,15 @@ const createWingsSideTourEnglishEditorialPayloadAdapterFactory = (
 
 export const executeWingsSideTourEnglishEditorialWithPayloadAdapter = async ({
   capability,
-  dependencies = {},
   phase,
 }: {
   capability: WingsSideEnglishEditorialGuardedCapability
-  dependencies?: Partial<PayloadAdapterDependencies>
   phase: 'apply' | 'rollback' | 'verify'
 }) => {
-  const resolvedEnvironment = dependencies.env ?? process.env
-  assertPreInitializationEnvironment(resolvedEnvironment)
+  assertPreInitializationEnvironment(process.env)
   return executeWingsSideEnglishEditorialGuardedRuntimeWithAdapterFactory({
     adapterFactory: async (artifacts) => {
-      const factory = createWingsSideTourEnglishEditorialPayloadAdapterFactory({
-        ...dependencies,
-        env: resolvedEnvironment,
-      })
+      const factory = createWingsSideTourEnglishEditorialPayloadAdapterFactory()
       return factory({ artifacts, phase })
     },
     capability,

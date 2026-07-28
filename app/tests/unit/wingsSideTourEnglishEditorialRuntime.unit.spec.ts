@@ -45,6 +45,7 @@ import {
   type WingsSideTourEnglishEditorialRuntimeAdapter,
   type WingsSideTourEnglishEditorialRuntimeRow,
 } from '../../scripts/lib/wingsSideTourEnglishEditorialRuntime'
+import { executeWingsSideTourEnglishEditorialWithPayloadAdapter } from '../../scripts/lib/wingsSideTourEnglishEditorialPayloadAdapter'
 
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
 const sha256 = (value: string | Buffer) => createHash('sha256').update(value).digest('hex')
@@ -439,6 +440,34 @@ describe('WingSide English editorial canonical runtime', () => {
     expect(adapterFactory).toHaveBeenCalledOnce()
     expect(adapterFactory).toHaveBeenCalledWith(value.artifacts)
     expect(Object.isFrozen(adapterFactory.mock.calls[0]![0])).toBe(true)
+  })
+
+  it('cannot mask unsafe real PAYLOAD_DB_PUSH with injected safe env or initializer', async () => {
+    const value = fixture()
+    const capability = issueCapabilityForPlan(value.plan, 'verify')
+    vi.stubEnv('DATABASE_URL', 'postgresql://release:protected@example.invalid/wingstravel')
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('PAYLOAD_DB_PUSH', 'true')
+    const substitutedInitialize = vi.fn()
+    const attemptedBypass = {
+      capability,
+      dependencies: {
+        env: {
+          DATABASE_URL: 'postgresql://release:protected@example.invalid/wingstravel',
+          NODE_ENV: 'production',
+          PAYLOAD_DB_PUSH: 'false',
+        },
+        initialize: substitutedInitialize,
+      },
+      phase: 'verify',
+    } as unknown as Parameters<
+      typeof executeWingsSideTourEnglishEditorialWithPayloadAdapter
+    >[0]
+
+    await expect(
+      executeWingsSideTourEnglishEditorialWithPayloadAdapter(attemptedBypass),
+    ).rejects.toThrow('PAYLOAD_DB_PUSH=false')
+    expect(substitutedInitialize).not.toHaveBeenCalled()
   })
 
   it('reports commit failure as ambiguous and never attempts kill after commit begins', async () => {
