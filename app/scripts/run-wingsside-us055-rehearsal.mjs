@@ -1,5 +1,5 @@
-import { randomBytes, randomUUID } from 'node:crypto'
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { generateKeyPairSync, randomBytes, randomUUID } from 'node:crypto'
+import { appendFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -10,15 +10,24 @@ import {
   assertDisposablePostgresTarget,
   buildSanitizedChildEnvironment,
   buildFrozenSourceProof,
+  canonicalChecksum,
   classifyDockerInspectResult,
   loadFrozenSourceSnapshot,
   parseLoopbackDockerPort,
   postgresReadinessProbeArgs,
   sha256,
 } from './lib/wingsSideUs055Rehearsal.mjs'
+import {
+  createUs055TargetProof,
+  executeUs055CatalogLifecycle,
+  prepareUs055CatalogLifecycle,
+  publicKeyFingerprint,
+} from './lib/wingsSideUs055CatalogLifecycle.ts'
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const repoRoot = path.dirname(appRoot)
+const payloadTypesPath = path.join(appRoot, 'src', 'payload-types.ts')
+const payloadTypesOriginal = await readFile(payloadTypesPath)
 const runToken = randomUUID().replaceAll('-', '').slice(0, 12)
 const containerName = `wingsside-us055-rehearsal-${runToken}`
 const database = `wingsside_us055_rehearsal_${runToken}`
@@ -38,6 +47,10 @@ const evidenceRoot = path.resolve(
     ),
 )
 const evidencePath = path.join(evidenceRoot, `r3-${runToken}.json`)
+const journalRoot = path.resolve(
+  process.env.US055_REHEARSAL_JOURNAL_DIR || path.join(evidenceRoot, 'journals'),
+)
+const journalPath = path.join(journalRoot, `us055-rehearsal-${runToken}.journal.jsonl`)
 const dumpPath = path.join(os.tmpdir(), `us055-rehearsal-${runToken}.dump`)
 const temporaryDirectory = await mkdtemp(path.join(os.tmpdir(), 'us055-rehearsal-'))
 const envFile = path.join(temporaryDirectory, 'postgres.env')
@@ -48,6 +61,40 @@ let cleanupAttempts = 0
 let cleanupVerification = 'not-attempted'
 let databaseURL
 let imageReference
+let catalogLifecycleSession
+let payloadTypesRestored = false
+const lifecycleCatalogPath = String(process.env.US055_REHEARSAL_CATALOG_PATH || '').trim()
+const lifecycleCatalogSha256 = String(
+  process.env.US055_REHEARSAL_CATALOG_SHA256 || '',
+).trim()
+const lifecycleReleaseCommit = String(
+  process.env.US055_REHEARSAL_RELEASE_SHA || '',
+).trim()
+const lifecycleRequested =
+  process.env.US055_REHEARSAL_EXECUTE_CATALOG_LIFECYCLE === 'true'
+
+const journal = async (stage, state, details = {}) => {
+  await mkdir(journalRoot, { recursive: true })
+  await appendFile(
+    journalPath,
+    `${JSON.stringify({
+      at: new Date().toISOString(),
+      details,
+      runID: runToken,
+      stage,
+      state,
+    })}\n`,
+    { encoding: 'utf8', mode: 0o600 },
+  )
+}
+
+const restoreGeneratedPayloadTypes = async () => {
+  const payloadTypesCurrent = await readFile(payloadTypesPath)
+  if (!payloadTypesCurrent.equals(payloadTypesOriginal)) {
+    await writeFile(payloadTypesPath, payloadTypesOriginal)
+    payloadTypesRestored = true
+  }
+}
 
 const run = (command, args, { capture = true, cwd = appRoot, env = process.env } = {}) => {
   const result = spawnSync(command, args, {
@@ -85,6 +132,24 @@ const dockerSQL = (targetDatabase, sql) =>
   ])
 
 const record = (name, details = {}) => checks.push({ name, status: 'pass', ...details })
+
+const writeEvidence = async (status) => {
+  const result = {
+    artifactContractVersion: 1,
+    checks,
+    completedAt: new Date().toISOString(),
+    durationSeconds: Math.round((Date.now() - startedAt.getTime()) / 1000),
+    evidenceContainsCredentials: false,
+    image: imageReference || 'postgres:16-unresolved',
+    journalPath,
+    mode: 'disposable-local-rehearsal',
+    runID: runToken,
+    status,
+  }
+  await mkdir(evidenceRoot, { recursive: true })
+  await writeFile(evidencePath, `${JSON.stringify(result, null, 2)}\n`, 'utf8')
+  return result
+}
 
 const databaseTours = (targetDatabase) => {
   const tours = JSON.parse(
@@ -174,6 +239,9 @@ const verifyFrozenSource = (targetDatabase, expectedProof) => {
   return actualProof
 }
 
+const captureFrozenSource = (targetDatabase) =>
+  buildFrozenSourceProof(databaseTours(targetDatabase))
+
 const readInputContract = async () => {
   const contractPath = process.env.US055_REHEARSAL_ARTIFACT_CONTRACT
   if (!contractPath) return assertArtifactInputContract({})
@@ -196,11 +264,18 @@ const readInputContract = async () => {
 }
 
 try {
+  await journal('release-head-binding', 'before')
+  const worktreeHead = run('git', ['rev-parse', 'HEAD'], { cwd: repoRoot })
+  if (lifecycleRequested && lifecycleReleaseCommit !== worktreeHead) {
+    throw new Error(`US-055 rehearsal release SHA must equal worktree HEAD ${worktreeHead}`)
+  }
+  await journal('release-head-binding', 'after', { worktreeHead })
   await writeFile(
     envFile,
     `POSTGRES_DB=${database}\nPOSTGRES_USER=${user}\nPOSTGRES_PASSWORD=${password}\n`,
     { encoding: 'utf8', mode: 0o600 },
   )
+  await journal('frozen-source-artifact', 'before')
   const frozenSource = await loadFrozenSourceSnapshot(frozenSourceSnapshotPath)
   record('frozen-source-artifact', {
     artifactChecksum: frozenSource.proof.artifactChecksum,
@@ -210,7 +285,9 @@ try {
     snapshotChecksum: frozenSource.snapshot.snapshotChecksum,
     tours: frozenSource.proof.tours,
   })
+  await journal('frozen-source-artifact', 'after')
 
+  await journal('container-start', 'before')
   run('docker', ['pull', 'postgres:16'])
   imageReference = run('docker', [
     'image',
@@ -241,6 +318,7 @@ try {
     imageReference,
     persistentVolume: false,
   })
+  await journal('container-start', 'after', { containerName })
 
   let ready = false
   let readinessAttempts = 0
@@ -282,7 +360,7 @@ try {
     CRON_SECRET: '',
     DATABASE_URL: databaseURL,
     IMPORT_ADMIN_EMAIL: '',
-    NODE_ENV: 'production',
+    NODE_ENV: 'test',
     NODE_OPTIONS: '',
     PAYLOAD_DB_PUSH: 'false',
     PAYLOAD_SECRET: payloadSecret,
@@ -312,9 +390,24 @@ try {
     ],
   })
   if (guardedEnv.PAYLOAD_DB_PUSH !== 'false') throw new Error('PAYLOAD_DB_PUSH guard drifted')
-  run('pnpm', ['exec', 'payload', 'migrate'], { env: guardedEnv })
+  await journal('payload-migrations', 'before')
+  try {
+    run('pnpm', ['exec', 'payload', 'migrate'], { env: guardedEnv })
+  } finally {
+    // Payload migration may regenerate this tracked source file. Restore it
+    // immediately, before seed/Payload initialization can wait on PostgreSQL.
+    await restoreGeneratedPayloadTypes()
+  }
   record('payload-migrations', { payloadDbPush: false })
+  if (payloadTypesRestored) {
+    record('generated-payload-types-restored', {
+      path: 'app/src/payload-types.ts',
+      timing: 'immediately-after-migration',
+    })
+  }
+  await journal('payload-migrations', 'after')
 
+  await journal('rehearsal-seed', 'before')
   run(
     'pnpm',
     [
@@ -328,6 +421,7 @@ try {
   )
   const sourceProof = verifyFrozenSource(database, frozenSource.proof)
   record('seed-full-frozen-source', sourceProof)
+  await journal('rehearsal-seed', 'after', sourceProof)
 
   dockerSQL(
     database,
@@ -343,6 +437,53 @@ try {
   }
   record('postgres-crud', { create: true, delete: true, insert: true, update: true })
 
+  if (
+    lifecycleRequested &&
+    (!lifecycleCatalogPath || !lifecycleCatalogSha256 || !lifecycleReleaseCommit)
+  ) {
+    throw new Error(
+      'US-055 catalog lifecycle requires catalog path, trusted catalog SHA-256, and release SHA',
+    )
+  }
+  if (lifecycleRequested) {
+    await journal('catalog-plan-prepare', 'before')
+    const previousEnvironment = {
+      DATABASE_URL: process.env.DATABASE_URL,
+      NODE_ENV: process.env.NODE_ENV,
+      PAYLOAD_DB_PUSH: process.env.PAYLOAD_DB_PUSH,
+      PAYLOAD_SECRET: process.env.PAYLOAD_SECRET,
+      WINGSSIDE_TOUR_EDITORIAL_REHEARSAL_ALLOW:
+        process.env.WINGSSIDE_TOUR_EDITORIAL_REHEARSAL_ALLOW,
+    }
+    Object.assign(process.env, guardedEnv)
+    try {
+      catalogLifecycleSession = await prepareUs055CatalogLifecycle({
+        catalogPath: lifecycleCatalogPath,
+        catalogRawSha256: lifecycleCatalogSha256,
+        databaseURL,
+        environment: guardedEnv,
+        outputDirectory: temporaryDirectory,
+        releaseSourceCommit: lifecycleReleaseCommit,
+        runID: runToken,
+      })
+    } finally {
+      for (const [key, value] of Object.entries(previousEnvironment)) {
+        if (value === undefined) delete process.env[key]
+        else process.env[key] = value
+      }
+    }
+    record('catalog-plan', {
+      catalogRawSha256: catalogLifecycleSession.artifacts.catalogRawSha256,
+      pathScope: 'external-temporary-directory',
+      planCanonicalSha256: catalogLifecycleSession.artifacts.planCanonicalSha256,
+      planRawSha256: catalogLifecycleSession.artifacts.planRawSha256,
+    })
+    await journal('catalog-plan-prepare', 'after', {
+      planCanonicalSha256: catalogLifecycleSession.artifacts.planCanonicalSha256,
+    })
+  }
+
+  await journal('backup', 'before')
   run('docker', [
     'exec',
     containerName,
@@ -360,7 +501,9 @@ try {
   const dumpBytes = await readFile(dumpPath)
   const backupSha256 = sha256(dumpBytes)
   record('backup', { bytes: dumpBytes.length, format: 'postgres-custom', sha256: backupSha256 })
+  await journal('backup', 'after', { backupSha256, bytes: dumpBytes.length })
 
+  await journal('restore-drill', 'before')
   run('docker', ['exec', containerName, 'createdb', '--username', user, restoreDatabase])
   run('docker', [
     'exec',
@@ -376,6 +519,12 @@ try {
     '/tmp/us055-rehearsal.dump',
   ])
   const restoredProof = verifyFrozenSource(restoreDatabase, frozenSource.proof)
+  const restoreEvidenceSha256 = canonicalChecksum({
+    artifactChecksum: restoredProof.artifactChecksum,
+    database: restoreDatabase,
+    itineraryChecksum: restoredProof.itineraryChecksum,
+    serviceChecksum: restoredProof.serviceChecksum,
+  })
   record('restore-drill', {
     artifactChecksum: restoredProof.artifactChecksum,
     database: restoreDatabase,
@@ -385,22 +534,100 @@ try {
     serviceRows: restoredProof.serviceRows,
     tours: restoredProof.tours,
   })
+  await journal('restore-drill', 'after', { restoreEvidenceSha256 })
 
-  const artifactPhases = await readInputContract()
-  checks.push({
-    name: 'catalog-plan-apply-verify-rollback-verify',
-    ...artifactPhases,
-  })
+  if (catalogLifecycleSession) {
+    const { privateKey, publicKey } = generateKeyPairSync('ed25519')
+    const fingerprint = publicKeyFingerprint(publicKey)
+    const keyID = `us055-rehearsal-${fingerprint.slice(0, 16)}`
+    const artifacts = {
+      ...catalogLifecycleSession.artifacts,
+      backupSha256,
+      restoreEvidenceSha256,
+    }
+    const baselineProof = sourceProof
+    const lifecycle = await executeUs055CatalogLifecycle({
+      artifacts,
+      captureAppliedProof: () => captureFrozenSource(database),
+      captureFinalProof: () => verifyFrozenSource(database, baselineProof),
+      ledgerPath: path.join(temporaryDirectory, 'catalog-lifecycle-replay-ledger.json'),
+      onStage: (stage, state, details) =>
+        journal(`catalog-lifecycle:${stage}`, state, details || {}),
+      session: catalogLifecycleSession,
+      signProof: (stage) =>
+        createUs055TargetProof({
+          artifacts,
+          keyID,
+          privateKey,
+          runID: runToken,
+          stage,
+          target: catalogLifecycleSession.target,
+        }),
+      trust: { fingerprint, keyID, publicKey },
+    })
+    checks.push({
+      appliedArtifactChecksum: lifecycle.appliedProof.artifactChecksum,
+      appliedProof: lifecycle.appliedProof,
+      backupSha256,
+      baselineProof,
+      finalProof: lifecycle.finalProof,
+      keyFingerprint: fingerprint,
+      keyID,
+      name: 'catalog-plan-apply-verify-rollback-verify',
+      planCanonicalSha256: artifacts.planCanonicalSha256,
+      planRawSha256: artifacts.planRawSha256,
+      replayLedgerScope: 'external-temporary-directory',
+      restoreEvidenceSha256,
+      stageProofs: lifecycle.stageProofs,
+      status: 'pass',
+      verifyAfter: lifecycle.verifyAfter,
+      verifyBefore: lifecycle.verifyBefore,
+    })
+  } else {
+    const artifactPhases = await readInputContract()
+    checks.push({
+      name: 'catalog-plan-apply-verify-rollback-verify',
+      ...artifactPhases,
+    })
+  }
 } catch (error) {
+  const message = String(error instanceof Error ? error.message : error).replaceAll(
+    password,
+    '[REDACTED]',
+  )
   checks.push({
     name: 'run',
     status: 'fail',
-    message: String(error instanceof Error ? error.message : error).replaceAll(
-      password,
-      '[REDACTED]',
-    ),
+    message,
   })
+  await journal('run', 'failed', { message }).catch(() => {})
 } finally {
+  const preCleanupFailed = checks.some(({ status }) => status === 'fail')
+  await writeEvidence(preCleanupFailed ? 'failed-cleanup-pending' : 'cleanup-pending')
+  await journal('cleanup', 'before').catch(() => {})
+
+  try {
+    await restoreGeneratedPayloadTypes()
+  } catch (error) {
+    checks.push({
+      name: 'generated-payload-types-restored',
+      status: 'fail',
+      message: String(error instanceof Error ? error.message : error),
+    })
+  }
+
+  if (catalogLifecycleSession) {
+    try {
+      await catalogLifecycleSession.close(5_000)
+      record('catalog-lifecycle-payload-close')
+    } catch (error) {
+      checks.push({
+        name: 'catalog-lifecycle-payload-close',
+        status: 'fail',
+        message: String(error instanceof Error ? error.message : error),
+      })
+    }
+  }
   for (let attempt = 0; attempt < 3 && !cleanupVerified; attempt += 1) {
     cleanupAttempts = attempt + 1
     spawnSync('docker', ['rm', '--force', containerName], {
@@ -419,30 +646,27 @@ try {
     cleanupVerified = cleanupVerification === 'absent'
     if (!cleanupVerified) await new Promise((resolve) => setTimeout(resolve, 500))
   }
-  await rm(temporaryDirectory, { force: true, recursive: true })
-  await rm(dumpPath, { force: true })
+  await rm(temporaryDirectory, { force: true, recursive: true }).catch(() => {})
+  await rm(dumpPath, { force: true }).catch(() => {})
+  checks.push({
+    attempts: cleanupAttempts,
+    containerName,
+    name: 'cleanup',
+    status: cleanupVerified ? 'pass' : 'fail',
+    verification: cleanupVerification,
+  })
+  await journal('cleanup', 'after', {
+    attempts: cleanupAttempts,
+    verification: cleanupVerification,
+  }).catch(() => {})
+  const failed = checks.some(({ status }) => status === 'fail')
+  const terminalStatus = failed
+    ? 'failed'
+    : catalogLifecycleSession
+      ? 'catalog-lifecycle-complete'
+      : 'baseline-ready-catalog-pending'
+  const result = await writeEvidence(terminalStatus)
+  await journal('terminal-evidence', 'written', { status: terminalStatus }).catch(() => {})
+  console.log(JSON.stringify({ evidencePath, journalPath, status: result.status }))
+  process.exit(failed ? 1 : 0)
 }
-
-checks.push({
-  attempts: cleanupAttempts,
-  containerName,
-  name: 'cleanup',
-  status: cleanupVerified ? 'pass' : 'fail',
-  verification: cleanupVerification,
-})
-const failed = checks.some(({ status }) => status === 'fail')
-const result = {
-  artifactContractVersion: 1,
-  checks,
-  completedAt: new Date().toISOString(),
-  durationSeconds: Math.round((Date.now() - startedAt.getTime()) / 1000),
-  evidenceContainsCredentials: false,
-  image: imageReference || 'postgres:16-unresolved',
-  mode: 'disposable-local-rehearsal',
-  runID: runToken,
-  status: failed ? 'failed' : 'baseline-ready-catalog-pending',
-}
-await mkdir(evidenceRoot, { recursive: true })
-await writeFile(evidencePath, `${JSON.stringify(result, null, 2)}\n`, 'utf8')
-console.log(JSON.stringify({ evidencePath, status: result.status }))
-if (failed) process.exitCode = 1
