@@ -1,17 +1,18 @@
-import { createHash } from 'node:crypto'
-import { createReadStream } from 'node:fs'
-import { readFile, stat, writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 
 import {
   assertWingsSideTourMediaD4CManifestEqual,
   buildWingsSideTourMediaD4CManifest,
+  parseWingsSideD4CEditorialManifest,
+  parseWingsSideTourMediaD4CManifest,
+  readWingsSideD4CVerifiedFile,
+  resolveWingsSideD4CApprovedRoot,
   wingsSideD4CSha256,
   type WingsSideD4CMediaRow,
   type WingsSideD4CRelationRow,
   type WingsSideD4CTourRow,
-  type WingsSideTourMediaD4CManifest,
 } from './lib/wingsSideTourMediaD4C'
 
 const args = process.argv.slice(2)
@@ -32,30 +33,27 @@ const databasePath = path.resolve(value('--database'))
 const mediaRoot = path.resolve(value('--media-root'))
 const editorialManifestPath = path.resolve(value('--editorial-manifest'))
 const inventoryPath = path.resolve(value('--inventory'))
-if (!(await stat(databasePath)).isFile()) throw new Error('D4-C database input must be a file')
-if (!(await stat(mediaRoot)).isDirectory()) throw new Error('D4-C media root must be a directory')
 
-const hashFile = async (file: string): Promise<string> => {
-  const hash = await new Promise<string>((resolve, reject) => {
-    const digest = createHash('sha256')
-    createReadStream(file)
-      .on('data', (chunk) => digest.update(chunk))
-      .on('error', reject)
-      .on('end', () => resolve(digest.digest('hex')))
-  })
-  return hash
-}
+const mediaRootRealPath = await resolveWingsSideD4CApprovedRoot(mediaRoot)
+const databaseRootRealPath = await resolveWingsSideD4CApprovedRoot(path.dirname(databasePath))
+const databaseInput = await readWingsSideD4CVerifiedFile({
+  approvedRootRealPath: databaseRootRealPath,
+  relativePath: path.basename(databasePath),
+})
+const editorialRootRealPath = await resolveWingsSideD4CApprovedRoot(
+  path.dirname(editorialManifestPath),
+)
+const editorialInput = await readWingsSideD4CVerifiedFile({
+  approvedRootRealPath: editorialRootRealPath,
+  relativePath: path.basename(editorialManifestPath),
+})
+const editorial = parseWingsSideD4CEditorialManifest(
+  JSON.parse(editorialInput.bytes.toString('utf8')) as unknown,
+)
+const slugs = editorial.tours.map(({ slug }) => slug)
 
-const editorialBytes = await readFile(editorialManifestPath)
-const editorial = JSON.parse(editorialBytes.toString('utf8')) as {
-  tours?: Array<{ slug?: string }>
-}
-const slugs = editorial.tours?.map(({ slug }) => slug?.trim() ?? '') ?? []
-if (slugs.length !== 22 || slugs.some((slug) => !slug) || new Set(slugs).size !== 22) {
-  throw new Error('D4-C editorial source manifest must contain exact unique 22-tour slugs')
-}
-
-const database = new DatabaseSync(databasePath, { readOnly: true })
+const database = new DatabaseSync(databaseInput.realPath, { readOnly: true })
+let databaseClosed = false
 try {
   const placeholders = slugs.map(() => '?').join(',')
   const tourRows = database
@@ -94,23 +92,30 @@ try {
 
   const sourceBytes = new Map<string, Buffer>()
   for (const row of mediaRows) {
-    const lexical = path.resolve(mediaRoot, row.filename)
-    const prefix = mediaRoot.endsWith(path.sep) ? mediaRoot : `${mediaRoot}${path.sep}`
-    if (
-      process.platform === 'win32'
-        ? !lexical.toLowerCase().startsWith(prefix.toLowerCase())
-        : !lexical.startsWith(prefix)
-    ) {
-      throw new Error(`D4-C media ${row.mediaID} escapes media root`)
-    }
-    const bytes = await readFile(lexical)
-    sourceBytes.set(row.filename, bytes)
+    const source = await readWingsSideD4CVerifiedFile({
+      approvedRootRealPath: mediaRootRealPath,
+      relativePath: row.filename,
+    })
+    sourceBytes.set(row.filename, source.bytes)
   }
 
+  database.close()
+  databaseClosed = true
+  const databaseAfter = await readWingsSideD4CVerifiedFile({
+    approvedRootRealPath: databaseRootRealPath,
+    relativePath: path.basename(databasePath),
+  })
+  if (
+    databaseAfter.realPath !== databaseInput.realPath ||
+    databaseAfter.sha256 !== databaseInput.sha256 ||
+    databaseAfter.bytes.byteLength !== databaseInput.bytes.byteLength
+  ) {
+    throw new Error('D4-C database snapshot changed while inventory was collected')
+  }
   const manifest = buildWingsSideTourMediaD4CManifest({
     databaseFilename: path.basename(databasePath),
-    databaseSha256: await hashFile(databasePath),
-    editorialSourceManifestSha256: wingsSideD4CSha256(editorialBytes),
+    databaseSha256: databaseInput.sha256,
+    editorialSourceManifestSha256: wingsSideD4CSha256(editorialInput.bytes),
     loadAsset: (filename) => {
       const bytes = sourceBytes.get(filename)
       if (!bytes) throw new Error(`D4-C source bytes missing for ${filename}`)
@@ -128,7 +133,9 @@ try {
       flag: 'wx',
     })
   } else {
-    const sealed = JSON.parse(await readFile(inventoryPath, 'utf8')) as WingsSideTourMediaD4CManifest
+    const sealed = parseWingsSideTourMediaD4CManifest(
+      JSON.parse(await readFile(inventoryPath, 'utf8')) as unknown,
+    )
     assertWingsSideTourMediaD4CManifestEqual(sealed, manifest)
   }
   process.stdout.write(
@@ -139,5 +146,5 @@ try {
     })}\n`,
   )
 } finally {
-  database.close()
+  if (!databaseClosed) database.close()
 }

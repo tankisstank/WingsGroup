@@ -1,8 +1,16 @@
+import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import {
   assertWingsSideTourMediaD4CManifestEqual,
   buildWingsSideTourMediaD4CManifest,
+  parseWingsSideD4CEditorialManifest,
+  parseWingsSideTourMediaD4CManifest,
+  readWingsSideD4CVerifiedFile,
+  resolveWingsSideD4CApprovedRoot,
   wingsSideD4CSha256,
 } from '../../scripts/lib/wingsSideTourMediaD4C'
 
@@ -13,6 +21,25 @@ const tours = Array.from({ length: 22 }, (_, index) => ({
   tourID: index + 101,
   tourSlug: `tour-${String(index + 1).padStart(2, '0')}`,
 }))
+
+const buildManifest = (bytes: Buffer) =>
+  buildWingsSideTourMediaD4CManifest({
+    databaseFilename: 'snapshot.db',
+    databaseSha256: 'a'.repeat(64),
+    editorialSourceManifestSha256: 'b'.repeat(64),
+    loadAsset: () => ({ byteLength: bytes.byteLength, sha256: wingsSideD4CSha256(bytes) }),
+    mediaRootReference: 'test',
+    mediaRows: tours.map(({ heroMediaID }, index) => ({
+      filename: `image-${index + 1}.jpg`,
+      height: 450,
+      mediaID: heroMediaID!,
+      mimeType: 'image/jpeg',
+      recordedByteLength: bytes.byteLength,
+      width: 800,
+    })),
+    relationRows: [],
+    tourRows: tours,
+  })
 
 describe('WingSide D4-C canonical source inventory', () => {
   it('preserves references while deduplicating identical content hashes', () => {
@@ -49,27 +76,120 @@ describe('WingSide D4-C canonical source inventory', () => {
   })
 
   it('detects source snapshot drift', () => {
-    const build = (bytes: Buffer) =>
-      buildWingsSideTourMediaD4CManifest({
-        databaseFilename: 'snapshot.db',
-        databaseSha256: 'a'.repeat(64),
-        editorialSourceManifestSha256: 'b'.repeat(64),
-        loadAsset: () => ({ byteLength: bytes.byteLength, sha256: wingsSideD4CSha256(bytes) }),
-        mediaRootReference: 'test',
-        mediaRows: tours.map(({ heroMediaID }, index) => ({
-          filename: `image-${index + 1}.jpg`,
-          height: 450,
-          mediaID: heroMediaID!,
-          mimeType: 'image/jpeg',
-          recordedByteLength: bytes.byteLength,
-          width: 800,
-        })),
-        relationRows: [],
-        tourRows: tours,
-      })
-
     expect(() =>
-      assertWingsSideTourMediaD4CManifestEqual(build(Buffer.from('before')), build(Buffer.from('after'))),
+      assertWingsSideTourMediaD4CManifestEqual(
+        buildManifest(Buffer.from('before')),
+        buildManifest(Buffer.from('after')),
+      ),
     ).toThrow('source snapshot checksum mismatch')
+  })
+
+  it('rejects a junction or symlink component that escapes the approved root', async () => {
+    const fixture = await mkdtemp(path.join(tmpdir(), 'wingsside-d4c-path-'))
+    const root = path.join(fixture, 'root')
+    const outside = path.join(fixture, 'outside')
+    await Promise.all([mkdir(root), mkdir(outside)])
+    await writeFile(path.join(outside, 'shared.bin'), 'outside')
+    await symlink(outside, path.join(root, 'link'), process.platform === 'win32' ? 'junction' : 'dir')
+    try {
+      const approvedRootRealPath = await resolveWingsSideD4CApprovedRoot(root)
+      await expect(
+        readWingsSideD4CVerifiedFile({
+          approvedRootRealPath,
+          relativePath: path.join('link', 'shared.bin'),
+        }),
+      ).rejects.toThrow('symlink or junction')
+    } finally {
+      await rm(fixture, { force: true, recursive: true })
+    }
+  })
+
+  it('rejects absolute and parent traversal paths', async () => {
+    const fixture = await mkdtemp(path.join(tmpdir(), 'wingsside-d4c-traversal-'))
+    try {
+      const approvedRootRealPath = await resolveWingsSideD4CApprovedRoot(fixture)
+      await expect(
+        readWingsSideD4CVerifiedFile({
+          approvedRootRealPath,
+          relativePath: path.join('..', 'outside.bin'),
+        }),
+      ).rejects.toThrow('safe relative path')
+      await expect(
+        readWingsSideD4CVerifiedFile({
+          approvedRootRealPath,
+          relativePath: path.resolve(fixture, 'inside.bin'),
+        }),
+      ).rejects.toThrow('safe relative path')
+    } finally {
+      await rm(fixture, { force: true, recursive: true })
+    }
+  })
+
+  it('reads an ordinary regular file through a stable verified handle', async () => {
+    const fixture = await mkdtemp(path.join(tmpdir(), 'wingsside-d4c-regular-'))
+    const bytes = Buffer.from('verified bytes')
+    await writeFile(path.join(fixture, 'asset.bin'), bytes)
+    try {
+      const result = await readWingsSideD4CVerifiedFile({
+        approvedRootRealPath: await resolveWingsSideD4CApprovedRoot(fixture),
+        relativePath: 'asset.bin',
+      })
+      expect(result.bytes).toEqual(bytes)
+      expect(result.sha256).toBe(wingsSideD4CSha256(bytes))
+    } finally {
+      await rm(fixture, { force: true, recursive: true })
+    }
+  })
+
+  it('strictly parses editorial and canonical JSON schemas', () => {
+    const editorial = {
+      generatedFrom: 'fixture',
+      sourceLocale: 'en',
+      tours: tours.map(({ tourSlug }) => ({ checksum: 'c'.repeat(64), slug: tourSlug })),
+      version: 1,
+    }
+    expect(parseWingsSideD4CEditorialManifest(editorial).tours).toHaveLength(22)
+    expect(() =>
+      parseWingsSideD4CEditorialManifest({ ...editorial, unexpected: true }),
+    ).toThrow('missing or unknown fields')
+
+    const manifest = buildManifest(Buffer.from('schema fixture'))
+    expect(parseWingsSideTourMediaD4CManifest(manifest)).toEqual(manifest)
+    expect(() =>
+      parseWingsSideTourMediaD4CManifest({ ...manifest, schemaVersion: 2 }),
+    ).toThrow('schemaVersion')
+    expect(() =>
+      parseWingsSideTourMediaD4CManifest({ ...manifest, sourceSnapshotSha256: 'invalid' }),
+    ).toThrow('lowercase SHA-256')
+    expect(() =>
+      parseWingsSideTourMediaD4CManifest({
+        ...manifest,
+        coverage: { ...manifest.coverage, tourCount: 21 },
+      }),
+    ).toThrow('coverage does not match content')
+    expect(() =>
+      parseWingsSideTourMediaD4CManifest({
+        ...manifest,
+        assets: [{ ...manifest.assets[0], unexpected: true }, ...manifest.assets.slice(1)],
+      }),
+    ).toThrow('missing or unknown fields')
+    expect(() =>
+      parseWingsSideTourMediaD4CManifest({
+        ...manifest,
+        assets: [{ ...manifest.assets[0], mediaIDs: ['1'] }, ...manifest.assets.slice(1)],
+      }),
+    ).toThrow('must be an integer')
+    expect(() =>
+      parseWingsSideTourMediaD4CManifest({
+        ...manifest,
+        assets: [
+          {
+            ...manifest.assets[0],
+            references: [{ ...manifest.assets[0]!.references[0], fieldPath: 7 }],
+          },
+          ...manifest.assets.slice(1),
+        ],
+      }),
+    ).toThrow('must be a non-empty string')
   })
 })
