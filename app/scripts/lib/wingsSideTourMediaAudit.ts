@@ -165,6 +165,14 @@ export type WingsSideTourMediaAuditReport = {
   evidenceContract: 'manifest-verification-only'
   findings: MediaAuditFinding[]
   manifestChecksum: string
+  releaseEvidenceBinding: null | {
+    bundleAggregateChecksum: string
+    envelopeSha256: string
+    releaseArtifactSha256: string
+    releaseCommitSha: string
+    siteCode: string
+    sourceArtifactSha256: string
+  }
   releaseGate: { blockingFindingCount: number; passed: boolean }
   schemaVersion: 2
 }
@@ -635,10 +643,12 @@ const observationFindings = (
 
 export const buildWingsSideTourMediaAuditReport = ({
   manifest,
+  releaseEvidenceBinding = null,
   sourceBrandPatterns = defaultSourceBrandPatterns,
   tours,
 }: {
   manifest: WingsSideTourMediaManifest
+  releaseEvidenceBinding?: WingsSideTourMediaAuditReport['releaseEvidenceBinding']
   sourceBrandPatterns?: RegExp[]
   tours: NormalizedTourMediaAuditInput[]
 }): WingsSideTourMediaAuditReport => {
@@ -730,6 +740,7 @@ export const buildWingsSideTourMediaAuditReport = ({
     evidenceContract: 'manifest-verification-only' as const,
     findings: uniqueFindings,
     manifestChecksum: wingsSideTourMediaManifestChecksum(manifest),
+    releaseEvidenceBinding,
     releaseGate: {
       blockingFindingCount: uniqueFindings.length,
       passed: uniqueFindings.length === 0,
@@ -745,6 +756,7 @@ export const buildWingsSideTourMediaAuditReport = ({
 export const assertWingsSideTourMediaReleaseGate = (
   report: WingsSideTourMediaAuditReport,
   manifest: WingsSideTourMediaManifest,
+  expectedBinding?: NonNullable<WingsSideTourMediaAuditReport['releaseEvidenceBinding']>,
 ): void => {
   const { aggregateChecksum: _checksum, ...reportWithoutChecksum } = report
   if (wingsSideTourMediaAuditChecksum(reportWithoutChecksum) !== report.aggregateChecksum) {
@@ -752,6 +764,24 @@ export const assertWingsSideTourMediaReleaseGate = (
   }
   if (wingsSideTourMediaManifestChecksum(manifest) !== report.manifestChecksum) {
     throw new Error('WingSide media audit canonical manifest checksum mismatch')
+  }
+  if (
+    !expectedBinding ||
+    !report.releaseEvidenceBinding ||
+    wingsSideTourMediaAuditChecksum(expectedBinding) !==
+      wingsSideTourMediaAuditChecksum(report.releaseEvidenceBinding)
+  ) {
+    throw new Error(
+      'WingSide media audit release gate requires the protected combined evidence binding',
+    )
+  }
+  for (const [label, value] of Object.entries(expectedBinding)) {
+    if (
+      (label.endsWith('Sha256') || label === 'bundleAggregateChecksum') &&
+      !sha256Pattern.test(value)
+    ) {
+      throw new Error(`WingSide media audit release binding ${label} must be lowercase SHA-256`)
+    }
   }
   const manifestIDs = manifest.tours.map(({ tourID }) => String(tourID).trim())
   const manifestSlugs = manifest.tours.map(({ tourSlug }) => tourSlug.trim())
