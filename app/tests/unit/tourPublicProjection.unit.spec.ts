@@ -95,6 +95,9 @@ describe('public tour projection', () => {
         durationDays: 3,
         market: 'vietnam',
         slug: 'algorithmic-best',
+        summary:
+          'A calm mountain journey. Book this BestPrice Travel package now. Meet your local planner.',
+        title: 'Sa Pa private journey',
         travelStyles: ['adventure'],
       },
     ]
@@ -111,6 +114,35 @@ describe('public tour projection', () => {
         },
       }),
     ).toEqual(configured)
+  })
+
+  it('removes source-brand sentences from fallback related cards', () => {
+    const [card] = selectRelatedTourCards({
+      candidates: [
+        {
+          destinationTags: ['sapa'],
+          durationDays: 3,
+          market: 'vietnam',
+          slug: 'sapa-private',
+          summary:
+            'A calm mountain journey. Book this BestPrice Travel package now. Meet your local planner.',
+          title: 'Sa Pa private journey',
+          travelStyles: ['adventure'],
+        },
+      ],
+      configured: [],
+      source: {
+        destinationTags: ['sapa'],
+        durationDays: 3,
+        market: 'vietnam',
+        travelStyles: ['adventure'],
+      },
+    })
+
+    expect(card).toMatchObject({
+      summary: 'A calm mountain journey. Meet your local planner.',
+      title: 'Sa Pa private journey',
+    })
   })
 
   it.each([

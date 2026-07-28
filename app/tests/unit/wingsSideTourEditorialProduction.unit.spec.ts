@@ -184,6 +184,25 @@ describe('WingSide tour editorial production plan', () => {
     })
   })
 
+  it.each([
+    'Peak season surcharge applies',
+    'A fuel surcharge will be applied if fuel prices rise',
+    'Compulsory dinner at the hotel',
+  ])('fails plan normalization closed for unlocalized pricing disclosure: %s', (label) => {
+    const source = sourceTour(1) as TourProduct & {
+      includes: Array<{ id: string; label: string }>
+    }
+    source.includes.push({ id: 'pricing-disclosure-1', label })
+
+    expect(() =>
+      normalizeEditorialSharedServices({
+        expectedExcludes: 1,
+        expectedIncludes: 1,
+        source,
+      }),
+    ).toThrow(/requires approved localized disposition/u)
+  })
+
   it('builds an exact 22 by 4 drift-checked plan', () => {
     const { catalog, sources } = catalogAndSources()
     const beforeByKey = new Map<string, TourProduct>()

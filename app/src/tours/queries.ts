@@ -35,6 +35,7 @@ import {
   type TourDestinationKey,
   type TourTravelStyleKey,
 } from './taxonomy'
+import { sanitizeWingSidePublicText } from './wingsSideTourViewModel'
 
 const tourProductsCollection = 'tour-products' as never
 const tourDeparturesCollection = 'tour-departures' as never
@@ -106,8 +107,8 @@ const normalizeTourProductCard = (
     market: doc.market,
     marketCard: doc.marketCard || null,
     slug: doc.slug,
-    summary: normalizeTourPublicText(doc.summary),
-    title: normalizeTourPublicText(doc.title),
+    summary: normalizeTourPublicText(sanitizeWingSidePublicText(doc.summary)),
+    title: normalizeTourPublicText(sanitizeWingSidePublicText(doc.title)),
   }
 }
 

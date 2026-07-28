@@ -190,6 +190,32 @@ describe('WingSide discovery pure contract', () => {
     expect(projectDiscoveryTour({ site, tour: tour({ travelStyles: [] }) })).toBeNull()
     expect(projectDiscoveryTour({ site, tour: tour({ durationDays: 0 }) })).toBeNull()
   })
+
+  it('removes source-brand sentences from public discovery copy and fails closed if none remains', () => {
+    expect(
+      projectDiscoveryTour({
+        locale: 'en',
+        site,
+        tour: tour({
+          summary:
+            'A flexible private journey. Book this BestPrice Travel package now. Keep the pace unhurried.',
+          title: 'Hanoi Private Tour',
+        }),
+      }),
+    ).toMatchObject({
+      summary: 'A flexible private journey. Keep the pace unhurried.',
+      title: 'Hanoi Private Tour',
+    })
+
+    expect(
+      projectDiscoveryTour({
+        locale: 'en',
+        site,
+        tour: tour({ summary: 'Book this BestPrice Travel package now.' }),
+      }),
+    ).toBeNull()
+  })
+
   it('keeps zero and invalid price inputs on request without public priceFrom', () => {
     const cases = [
       { expectedCurrency: 'USD', overrides: { currency: 'USD', priceFrom: 0 } },

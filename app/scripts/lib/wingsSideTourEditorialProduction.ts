@@ -237,7 +237,12 @@ export const normalizeEditorialSharedServices = ({
   for (const { row, source: rowSource } of rows) {
     const label = String(row.label || '').trim()
     if (!label) throw new Error(`Editorial service row label is empty for ${String(value.slug)}`)
-    if (peakServicePattern.test(label)) continue
+    if (peakServicePattern.test(label)) {
+      throw new Error(
+        `Editorial shared service pricing disclosure requires approved localized disposition for ` +
+          `${String(value.slug)} row ${String(serviceRowID(row))}: ${label}`,
+      )
+    }
     if (rowSource === 'excludes' || excludedServicePattern.test(label)) {
       excludes.push(cloneJSON(row))
     } else {

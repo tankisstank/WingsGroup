@@ -7,6 +7,7 @@ import {
   type TourTravelStyleKey,
 } from './taxonomy'
 import { normalizeSupportedTourCurrency, type SupportedTourCurrencyCode } from './currency'
+import { sanitizeWingSidePublicText } from './wingsSideTourViewModel'
 
 export const discoveryDurationCodes = ['1-7', '8-14', '15-plus'] as const
 export type DiscoveryDurationCode = (typeof discoveryDurationCodes)[number]
@@ -399,6 +400,9 @@ export const projectDiscoveryTour = ({
     return null
 
   const price = projectPriceState(tour)
+  const publicSummary = sanitizeWingSidePublicText(tour.summary)
+  const publicTitle = sanitizeWingSidePublicText(tour.title)
+  if (!publicSummary || !publicTitle) return null
 
   return {
     currency: normalizeSupportedTourCurrency(tour.currency),
@@ -421,8 +425,8 @@ export const projectDiscoveryTour = ({
     price,
     priceFrom: price.kind === 'from' ? price.value : null,
     slug: tour.slug.trim(),
-    summary: tour.summary.trim(),
-    title: tour.title.trim(),
+    summary: publicSummary,
+    title: publicTitle,
     travelStyles: normalizeTourTravelStyleKeys(travelStyles),
   }
 }
