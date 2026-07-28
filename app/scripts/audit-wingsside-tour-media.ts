@@ -6,7 +6,6 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import {
-  assertWingsSideTourMediaReleaseGate,
   buildWingsSideTourMediaAuditReport,
   type NormalizedTourMediaAuditInput,
   type WingsSideTourMediaManifest,
@@ -14,11 +13,15 @@ import {
 
 const args = process.argv.slice(2)
 const inputPath = args.find((arg) => !arg.startsWith('--'))
-const releaseGate = args.includes('--release-gate')
 
 if (!inputPath) {
   throw new Error(
-    'Usage: tsx scripts/audit-wingsside-tour-media.ts <normalized-evidence.json> [--release-gate]',
+    'Usage: tsx scripts/audit-wingsside-tour-media.ts <normalized-evidence.json>',
+  )
+}
+if (args.some((arg) => arg.startsWith('--'))) {
+  throw new Error(
+    'Normalized media audit is report-only; use the authenticated evidence producer for release authority',
   )
 }
 
@@ -34,5 +37,4 @@ const report = buildWingsSideTourMediaAuditReport({
   manifest: parsed.manifest,
   tours: parsed.tours,
 })
-if (releaseGate) assertWingsSideTourMediaReleaseGate(report, parsed.manifest)
 process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)

@@ -5,7 +5,6 @@
  * success requires a protected signed envelope, actual source/release bytes,
  * signed review/rights/OCR artifacts, and a protected verifier key set.
  */
-import { createPublicKey, verify } from 'node:crypto'
 import { open, realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -15,7 +14,6 @@ import {
   produceWingsSideTourMediaEvidence,
   resolveProtectedWingsSideEnvelopeSha,
   resolveProtectedWingsSideManifestSha,
-  type EvidenceSignatureVerifier,
   type LocalTourMediaEvidenceSource,
   type WingsSideTourMediaReleaseBinding,
   type WingsSideTourMediaReleaseEnvelope,
@@ -130,49 +128,11 @@ if (!['database-snapshot', 'source-inventory'].includes(trusted.source.kind)) {
   )
 }
 
-let publicKeys: Record<string, string>
-try {
-  publicKeys = JSON.parse(requiredEnvironment('WINGSSIDE_EVIDENCE_PUBLIC_KEYS_JSON')) as Record<
-    string,
-    string
-  >
-} catch {
-  throw new Error('Protected WINGSSIDE_EVIDENCE_PUBLIC_KEYS_JSON must be valid JSON')
-}
-const signatureVerifier: EvidenceSignatureVerifier = {
-  verify: async ({ digest, signature }) => {
-    const encodedKey = publicKeys[signature.signerID]
-    if (!encodedKey) return false
-    try {
-      const key = createPublicKey({
-        format: 'der',
-        key: Buffer.from(encodedKey, 'base64'),
-        type: 'spki',
-      })
-      return verify(
-        null,
-        Buffer.from(digest, 'utf8'),
-        key,
-        Buffer.from(signature.valueBase64, 'base64'),
-      )
-    } catch {
-      return false
-    }
-  },
-}
-
 const result = await produceWingsSideTourMediaEvidence({
   approvedRoot: root,
-  frameExtractionVerifier: {
-    verify: async ({ assetSha256, attestation, frames, mediaID }) =>
-      attestation.mediaID === mediaID &&
-      attestation.assetSha256 === assetSha256 &&
-      frames.every(({ sha256 }) => attestation.frameHashes.includes(sha256)),
-  },
   manifest: parsed.manifest,
   releaseBinding: parsed.releaseBinding,
   releaseEnvelope: parsed.releaseEnvelope,
-  signatureVerifier,
   tours: parsed.tours,
   trusted,
 })

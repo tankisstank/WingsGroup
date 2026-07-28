@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  assertWingsSideTourMediaReleaseGate,
+  assertWingsSideTourMediaAuditConsistency,
   buildWingsSideTourMediaAuditReport,
   collectWingsSideTourMediaReferences,
   wingsSideTourMediaAuditChecksum,
@@ -106,7 +106,7 @@ describe('WingSide tour media audit corrective gate', () => {
     expect(report.releaseGate.passed).toBe(false)
     expect(report.coverage).toMatchObject({ matchedTourCount: 0, missingTourCount: 22 })
     expect(() =>
-      assertWingsSideTourMediaReleaseGate(report, manifest(), releaseEvidenceBinding),
+      assertWingsSideTourMediaAuditConsistency(report, manifest(), releaseEvidenceBinding),
     ).toThrow(
       'coverage mismatch',
     )
@@ -207,9 +207,9 @@ describe('WingSide tour media audit corrective gate', () => {
     )
     expect(report.findings).toEqual([])
     expect(() =>
-      assertWingsSideTourMediaReleaseGate(report, manifest(), releaseEvidenceBinding),
+      assertWingsSideTourMediaAuditConsistency(report, manifest(), releaseEvidenceBinding),
     ).not.toThrow()
-    expect(() => assertWingsSideTourMediaReleaseGate(report, manifest())).toThrow(
+    expect(() => assertWingsSideTourMediaAuditConsistency(report, manifest())).toThrow(
       'requires the protected combined evidence binding',
     )
   })
@@ -301,7 +301,7 @@ describe('WingSide tour media audit corrective gate', () => {
     const report = build()
     report.assets[0]!.observations[0]!.filename = 'tampered.jpg'
     expect(() =>
-      assertWingsSideTourMediaReleaseGate(report, manifest(), releaseEvidenceBinding),
+      assertWingsSideTourMediaAuditConsistency(report, manifest(), releaseEvidenceBinding),
     ).toThrow(
       'integrity checksum mismatch',
     )
@@ -310,7 +310,7 @@ describe('WingSide tour media audit corrective gate', () => {
     const substituted = manifest()
     substituted.tours[0] = { tourID: 1, tourSlug: 'substituted' }
     expect(() =>
-      assertWingsSideTourMediaReleaseGate(cleanReport, substituted, releaseEvidenceBinding),
+      assertWingsSideTourMediaAuditConsistency(cleanReport, substituted, releaseEvidenceBinding),
     ).toThrow(
       'manifest checksum mismatch',
     )
@@ -321,7 +321,7 @@ describe('WingSide tour media audit corrective gate', () => {
     duplicate.tours[1] = { ...duplicate.tours[1]!, tourID: 1 }
     const duplicateReport = build(cleanTours(), duplicate)
     expect(() =>
-      assertWingsSideTourMediaReleaseGate(
+      assertWingsSideTourMediaAuditConsistency(
         duplicateReport,
         duplicate,
         releaseEvidenceBinding,
@@ -335,7 +335,7 @@ describe('WingSide tour media audit corrective gate', () => {
     const { aggregateChecksum: _checksum, ...body } = forged
     forged.aggregateChecksum = wingsSideTourMediaAuditChecksum(body)
     expect(() =>
-      assertWingsSideTourMediaReleaseGate(forged, manifest(), releaseEvidenceBinding),
+      assertWingsSideTourMediaAuditConsistency(forged, manifest(), releaseEvidenceBinding),
     ).toThrow(
       'release-gate summary mismatch',
     )

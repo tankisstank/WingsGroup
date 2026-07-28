@@ -1,4 +1,9 @@
-import { createHash } from 'node:crypto'
+import {
+  createHash,
+  generateKeyPairSync,
+  sign as signDigest,
+  type KeyObject,
+} from 'node:crypto'
 import { mkdtemp, rm, unlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -14,8 +19,9 @@ import {
   wingsSideTourMediaEnvelopeShaEnv,
   wingsSideTourMediaEvidenceSigningDigest,
   wingsSideTourMediaManifestShaEnv,
+  wingsSideTourMediaPublicKeysJsonEnv,
+  wingsSideTourMediaPublicKeysShaEnv,
   wingsSideTourMediaSourceInventoryChecksum,
-  type EvidenceSignatureVerifier,
   type LocalMediaEvidenceSource,
   type LocalTourMediaEvidenceSource,
   type ManualReviewArtifactPayload,
@@ -42,6 +48,14 @@ const manifest = (): WingsSideTourMediaManifest => ({
   })),
 })
 
+const signerIDs = [
+  'release-root-01',
+  'reviewer-01',
+  'rights-reviewer-01',
+  'ocr-attester-01',
+] as const
+let privateKeys = new Map<string, KeyObject>()
+
 const signed = <
   Kind extends 'manual-review' | 'ocr-attestation' | 'release-envelope' | 'rights-approval',
   Payload,
@@ -56,17 +70,13 @@ const signed = <
   signature: {
     algorithm: 'ed25519',
     signerID,
-    valueBase64: Buffer.from(
-      `${signerID}:${wingsSideTourMediaEvidenceSigningDigest(artifactType, payload)}`,
+    valueBase64: signDigest(
+      null,
+      Buffer.from(wingsSideTourMediaEvidenceSigningDigest(artifactType, payload), 'utf8'),
+      privateKeys.get(signerID)!,
     ).toString('base64'),
   },
 })
-
-const verifier: EvidenceSignatureVerifier = {
-  verify: async ({ digest, signature }) =>
-    Buffer.from(signature.valueBase64, 'base64').toString('utf8') ===
-    `${signature.signerID}:${digest}`,
-}
 
 let root = ''
 let assetSha = ''
@@ -78,6 +88,8 @@ let releaseSha = ''
 let releaseBinding: WingsSideTourMediaReleaseBinding
 let releaseEnvelope: WingsSideTourMediaReleaseEnvelope
 let trusted: Parameters<typeof produceWingsSideTourMediaEvidence>[0]['trusted']
+let priorPublicKeysJson: string | undefined
+let priorPublicKeysSha: string | undefined
 
 const writeJson = async (relativePath: string, value: unknown): Promise<string> => {
   const bytes = Buffer.from(JSON.stringify(value))
@@ -156,17 +168,27 @@ const produce = (
 ) =>
   produceWingsSideTourMediaEvidence({
     approvedRoot: root,
-    frameExtractionVerifier: { verify: async () => true },
     manifest: manifest(),
     releaseBinding,
     releaseEnvelope,
-    signatureVerifier: verifier,
     tours: tours(),
     trusted,
     ...overrides,
   })
 
 beforeEach(async () => {
+  priorPublicKeysJson = process.env[wingsSideTourMediaPublicKeysJsonEnv]
+  priorPublicKeysSha = process.env[wingsSideTourMediaPublicKeysShaEnv]
+  privateKeys = new Map()
+  const publicKeys: Record<string, string> = {}
+  for (const signerID of signerIDs) {
+    const { privateKey, publicKey } = generateKeyPairSync('ed25519')
+    privateKeys.set(signerID, privateKey)
+    publicKeys[signerID] = publicKey.export({ format: 'der', type: 'spki' }).toString('base64')
+  }
+  const publicKeysJson = JSON.stringify(publicKeys)
+  process.env[wingsSideTourMediaPublicKeysJsonEnv] = publicKeysJson
+  process.env[wingsSideTourMediaPublicKeysShaEnv] = sha256(publicKeysJson)
   root = await mkdtemp(path.join(tmpdir(), 'wingsside-media-evidence-'))
   const assetBytes = Buffer.from('trusted-local-asset')
   await writeFile(path.join(root, 'asset.jpg'), assetBytes)
@@ -233,6 +255,16 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await rm(root, { force: true, recursive: true })
+  if (priorPublicKeysJson === undefined) {
+    delete process.env[wingsSideTourMediaPublicKeysJsonEnv]
+  } else {
+    process.env[wingsSideTourMediaPublicKeysJsonEnv] = priorPublicKeysJson
+  }
+  if (priorPublicKeysSha === undefined) {
+    delete process.env[wingsSideTourMediaPublicKeysShaEnv]
+  } else {
+    process.env[wingsSideTourMediaPublicKeysShaEnv] = priorPublicKeysSha
+  }
 })
 
 describe('WingSide authenticated local media evidence producer', () => {
@@ -262,7 +294,32 @@ describe('WingSide authenticated local media evidence producer', () => {
     artifact.signature.valueBase64 = Buffer.from('forged-signature-value').toString('base64')
     reviewSha = await writeJson('review.json', artifact)
     rebuildEnvelope()
-    await expect(produce({ tours: tours(media()) })).rejects.toThrow('signature verification failed')
+    const obsoleteVerifierInjection = {
+      frameExtractionVerifier: { verify: async () => true },
+      signatureVerifier: { verify: async () => true },
+      tours: tours(media()),
+    } as unknown as Partial<Parameters<typeof produceWingsSideTourMediaEvidence>[0]>
+    await expect(produce(obsoleteVerifierInjection)).rejects.toThrow(
+      'signature verification failed',
+    )
+  })
+
+  it('rejects a fabricated structural clone even when the envelope hash is known', async () => {
+    const authenticated = await produce()
+    const fabricated = structuredClone(
+      authenticated,
+    ) as unknown as Parameters<typeof assertWingsSideTourMediaEvidenceReleaseGate>[0]
+    expect(() =>
+      assertWingsSideTourMediaEvidenceReleaseGate(fabricated, trusted.envelopeSha256),
+    ).toThrow('not created by the authenticated producer')
+  })
+
+  it('rechecks the protected public-key policy at the release gate', async () => {
+    const authenticated = await produce()
+    process.env[wingsSideTourMediaPublicKeysShaEnv] = 'f'.repeat(64)
+    expect(() =>
+      assertWingsSideTourMediaEvidenceReleaseGate(authenticated, trusted.envelopeSha256),
+    ).toThrow('public-key policy checksum mismatch')
   })
 
   it('rejects source snapshot and release descriptor byte substitution', async () => {
@@ -272,6 +329,84 @@ describe('WingSide authenticated local media evidence producer', () => {
     await writeFile(path.join(root, 'source-snapshot.json'), '{"snapshot":"canonical-22"}')
     await writeFile(path.join(root, 'release.json'), '{"releaseCommitSha":"bad","siteCode":"wing-side"}')
     await expect(produce()).rejects.toThrow('release artifact actual byte checksum mismatch')
+  })
+
+  it('accepts cryptographically signed frame-extraction proof bound to local video bytes', async () => {
+    const videoBytes = Buffer.from('trusted-video')
+    const frameBytes = Buffer.from('trusted-middle-frame')
+    await writeFile(path.join(root, 'video.mp4'), videoBytes)
+    await writeFile(path.join(root, 'frame.jpg'), frameBytes)
+    assetSha = sha256(videoBytes)
+    const frameSha = sha256(frameBytes)
+    reviewSha = await writeJson(
+      'review.json',
+      signed(
+        'manual-review',
+        {
+          assetSha256: assetSha,
+          mediaID: 'shared-media',
+          reviewedAt: timestamp,
+          reviewerID: 'reviewer-01',
+          state: 'passed',
+        } satisfies ManualReviewArtifactPayload,
+        'reviewer-01',
+      ),
+    )
+    rightsSha = await writeJson(
+      'rights.json',
+      signed(
+        'rights-approval',
+        {
+          approvedAt: timestamp,
+          approvedBy: 'rights-reviewer-01',
+          assetSha256: assetSha,
+          licenseReference: 'rights-ledger:asset-01',
+          licenseType: 'owned',
+          mediaID: 'shared-media',
+          owner: 'WingsGroup',
+          publicUseApproved: true,
+          sourceReference: 'asset-library:asset-01',
+        } satisfies RightsApprovalArtifactPayload,
+        'rights-reviewer-01',
+      ),
+    )
+    ocrSha = await writeJson(
+      'ocr.json',
+      signed(
+        'ocr-attestation',
+        {
+          assetSha256: assetSha,
+          attesterID: 'ocr-attester-01',
+          engine: 'trusted-ocr',
+          engineVersion: '2.0.0',
+          frameExtractions: [
+            {
+              frameSha256: frameSha,
+              label: 'middle',
+              position: 'middle',
+              sourceAssetSha256: assetSha,
+            },
+          ],
+          frameHashes: [frameSha],
+          kind: 'video',
+          mediaID: 'shared-media',
+          runAt: timestamp,
+          state: 'pass',
+        } satisfies OcrAttestation,
+        'ocr-attester-01',
+      ),
+    )
+    const video = media({
+      kind: 'video',
+      relativePath: 'video.mp4',
+      videoFrames: [{ label: 'middle', position: 'middle', relativePath: 'frame.jpg' }],
+    })
+    const inventory = tours(video)
+    rebuildEnvelope(inventory)
+    const result = await produce({ tours: inventory })
+    expect(() =>
+      assertWingsSideTourMediaEvidenceReleaseGate(result, trusted.envelopeSha256),
+    ).not.toThrow()
   })
 
   it('rejects video attestation replay when old frames are paired with substituted video bytes', async () => {
@@ -367,7 +502,7 @@ describe('WingSide authenticated local media evidence producer', () => {
     const result = await produce()
     expect(() =>
       assertWingsSideTourMediaEvidenceReleaseGate(result, 'f'.repeat(64)),
-    ).toThrow(/bundle or protected envelope/)
+    ).toThrow(/authenticated trust policy binding/)
     result.report.releaseEvidenceBinding!.siteCode = 'other-site'
     expect(() =>
       assertWingsSideTourMediaEvidenceReleaseGate(result, trusted.envelopeSha256),

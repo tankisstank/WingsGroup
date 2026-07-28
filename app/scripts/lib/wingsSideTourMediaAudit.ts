@@ -753,7 +753,12 @@ export const buildWingsSideTourMediaAuditReport = ({
   }
 }
 
-export const assertWingsSideTourMediaReleaseGate = (
+/**
+ * Pure structural consistency check for an already-authenticated evidence report.
+ * This is not release authority; only the authenticated evidence producer can
+ * create a result accepted by the public release gate.
+ */
+export const assertWingsSideTourMediaAuditConsistency = (
   report: WingsSideTourMediaAuditReport,
   manifest: WingsSideTourMediaManifest,
   expectedBinding?: NonNullable<WingsSideTourMediaAuditReport['releaseEvidenceBinding']>,

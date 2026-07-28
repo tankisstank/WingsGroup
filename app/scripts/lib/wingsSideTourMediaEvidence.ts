@@ -1,9 +1,9 @@
-import { createHash } from 'node:crypto'
+import { createHash, createPublicKey, verify, type KeyObject } from 'node:crypto'
 import { open, realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 
 import {
-  assertWingsSideTourMediaReleaseGate,
+  assertWingsSideTourMediaAuditConsistency,
   buildWingsSideTourMediaAuditReport,
   wingsSideTourMediaAuditChecksum,
   wingsSideTourMediaExpectedTourCount,
@@ -21,6 +21,10 @@ export const wingsSideTourMediaManifestShaEnv =
   'WINGSSIDE_TOUR_MEDIA_EXPECTED_MANIFEST_SHA256'
 export const wingsSideTourMediaEnvelopeShaEnv =
   'WINGSSIDE_TOUR_MEDIA_EXPECTED_ENVELOPE_SHA256'
+export const wingsSideTourMediaPublicKeysJsonEnv =
+  'WINGSSIDE_EVIDENCE_PUBLIC_KEYS_JSON'
+export const wingsSideTourMediaPublicKeysShaEnv =
+  'WINGSSIDE_EVIDENCE_PUBLIC_KEYS_SHA256'
 
 const sha256Pattern = /^[a-f0-9]{64}$/
 const releaseShaPattern = /^[a-f0-9]{40}$/
@@ -176,31 +180,6 @@ export type WingsSideTourMediaReleaseEnvelope = SignedEvidenceArtifact<
   WingsSideTourMediaReleaseEnvelopePayload
 >
 
-export type EvidenceSignatureVerifier = {
-  verify(input: {
-    digest: string
-    purpose: SignedEvidenceArtifact<
-      'manual-review' | 'ocr-attestation' | 'release-envelope' | 'rights-approval',
-      unknown
-    >['artifactType']
-    signature: EvidenceArtifactSignature
-  }): Promise<boolean>
-}
-
-export type VideoFrameExtractionVerifier = {
-  verify(input: {
-    assetSha256: string
-    attestation: OcrAttestation
-    frames: Array<{
-      label: string
-      position: LocalVideoFrameSource['position']
-      sha256: string
-      timestampSeconds?: number
-    }>
-    mediaID: string
-  }): Promise<boolean>
-}
-
 export type WingsSideTourMediaEvidenceBundle = {
   aggregateChecksum: string
   evidenceContract: 'local-byte-evidence-producer'
@@ -213,11 +192,44 @@ export type WingsSideTourMediaEvidenceBundle = {
   tours: NormalizedTourMediaAuditInput[]
 }
 
+const verifiedEvidenceBrand: unique symbol = Symbol('verifiedWingSideTourMediaEvidence')
+
 export type WingsSideTourMediaEvidenceResult = {
+  readonly [verifiedEvidenceBrand]: true
   bundle: WingsSideTourMediaEvidenceBundle
   releaseEvidenceChecksum: string
   report: WingsSideTourMediaAuditReport
 }
+
+type EvidenceArtifactKind = SignedEvidenceArtifact<
+  'manual-review' | 'ocr-attestation' | 'release-envelope' | 'rights-approval',
+  unknown
+>['artifactType']
+
+type ProtectedEvidenceKeyPolicy = {
+  keys: ReadonlyMap<string, KeyObject>
+  sha256: string
+}
+
+type VerifiedSignatureRecord = {
+  digest: string
+  purpose: EvidenceArtifactKind
+  signature: EvidenceArtifactSignature
+}
+
+type AuthenticatedEvidenceRecord = {
+  envelopeSha256: string
+  keyPolicySha256: string
+  releaseArtifactSha256: string
+  releaseEvidenceChecksum: string
+  signatures: readonly VerifiedSignatureRecord[]
+  sourceArtifactSha256: string
+}
+
+const authenticatedEvidenceResults = new WeakMap<
+  WingsSideTourMediaEvidenceResult,
+  AuthenticatedEvidenceRecord
+>()
 
 const hashBytes = (bytes: Uint8Array): string =>
   createHash('sha256').update(bytes).digest('hex')
@@ -372,6 +384,62 @@ const assertExactKeys = (value: object, expected: string[], label: string): void
   }
 }
 
+const loadProtectedEvidenceKeyPolicy = (): ProtectedEvidenceKeyPolicy => {
+  const rawJson = process.env[wingsSideTourMediaPublicKeysJsonEnv]
+  const protectedSha = process.env[wingsSideTourMediaPublicKeysShaEnv]?.trim()
+  if (!rawJson) {
+    throw new Error(`Protected environment ${wingsSideTourMediaPublicKeysJsonEnv} is required`)
+  }
+  if (!protectedSha) {
+    throw new Error(`Protected environment ${wingsSideTourMediaPublicKeysShaEnv} is required`)
+  }
+  assertSha256(protectedSha, 'protected evidence public-key policy checksum')
+  if (hashBytes(Buffer.from(rawJson, 'utf8')) !== protectedSha) {
+    throw new Error('WingSide media evidence protected public-key policy checksum mismatch')
+  }
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(rawJson)
+  } catch {
+    throw new Error('WingSide media evidence protected public-key policy must be valid JSON')
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('WingSide media evidence protected public-key policy must be an object')
+  }
+  const entries = Object.entries(parsed)
+  if (entries.length === 0) {
+    throw new Error('WingSide media evidence protected public-key policy cannot be empty')
+  }
+  const keys = new Map<string, KeyObject>()
+  for (const [rawSignerID, encodedKey] of entries) {
+    const signerID = requiredText(rawSignerID, 'public-key signer ID')
+    if (
+      signerID !== rawSignerID ||
+      typeof encodedKey !== 'string' ||
+      !/^[A-Za-z0-9+/]+={0,2}$/.test(encodedKey) ||
+      encodedKey.length < 16
+    ) {
+      throw new Error('WingSide media evidence protected public-key policy entry is invalid')
+    }
+    try {
+      const key = createPublicKey({
+        format: 'der',
+        key: Buffer.from(encodedKey, 'base64'),
+        type: 'spki',
+      })
+      if (key.asymmetricKeyType !== 'ed25519') {
+        throw new Error('not Ed25519')
+      }
+      keys.set(signerID, key)
+    } catch {
+      throw new Error(
+        `WingSide media evidence protected public key for ${signerID} is not valid Ed25519 SPKI`,
+      )
+    }
+  }
+  return { keys, sha256: protectedSha }
+}
+
 export const wingsSideTourMediaEvidenceSigningDigest = (
   artifactType: SignedEvidenceArtifact<
     'manual-review' | 'ocr-attestation' | 'release-envelope' | 'rights-approval',
@@ -396,22 +464,21 @@ export const wingsSideTourMediaSourceInventoryChecksum = (
     ),
   )
 
-const assertSignature = async ({
+const assertSignature = ({
   artifactType,
   expectedSignerID,
+  keyPolicy,
   payload,
+  records,
   signature,
-  verifier,
 }: {
-  artifactType: SignedEvidenceArtifact<
-    'manual-review' | 'ocr-attestation' | 'release-envelope' | 'rights-approval',
-    unknown
-  >['artifactType']
+  artifactType: EvidenceArtifactKind
   expectedSignerID: string
+  keyPolicy: ProtectedEvidenceKeyPolicy
   payload: unknown
+  records: VerifiedSignatureRecord[]
   signature: EvidenceArtifactSignature
-  verifier: EvidenceSignatureVerifier
-}): Promise<void> => {
+}): void => {
   assertExactKeys(signature, ['algorithm', 'signerID', 'valueBase64'], `${artifactType} signature`)
   if (
     signature.algorithm !== 'ed25519' ||
@@ -421,14 +488,29 @@ const assertSignature = async ({
   ) {
     throw new Error(`WingSide media evidence ${artifactType} signature policy mismatch`)
   }
-  const valid = await verifier.verify({
-    digest: wingsSideTourMediaEvidenceSigningDigest(artifactType, payload),
-    purpose: artifactType,
-    signature,
-  })
+  const digest = wingsSideTourMediaEvidenceSigningDigest(artifactType, payload)
+  const key = keyPolicy.keys.get(signature.signerID)
+  let valid = false
+  try {
+    valid =
+      key !== undefined &&
+      verify(
+        null,
+        Buffer.from(digest, 'utf8'),
+        key,
+        Buffer.from(signature.valueBase64, 'base64'),
+      )
+  } catch {
+    valid = false
+  }
   if (!valid) {
     throw new Error(`WingSide media evidence ${artifactType} signature verification failed`)
   }
+  records.push({
+    digest,
+    purpose: artifactType,
+    signature: { ...signature },
+  })
 }
 
 const parseSignedArtifact = <
@@ -494,8 +576,8 @@ const produceMedia = async (
   source: LocalMediaEvidenceSource,
   approvedRoot: string,
   policy: ReleaseEnvelopeMediaPolicy,
-  signatureVerifier: EvidenceSignatureVerifier,
-  frameExtractionVerifier: VideoFrameExtractionVerifier,
+  keyPolicy: ProtectedEvidenceKeyPolicy,
+  signatureRecords: VerifiedSignatureRecord[],
   hooks?: ApprovedReadHooks,
 ): Promise<NormalizedMediaAuditInput> => {
   assertProvenance(source.provenance)
@@ -549,12 +631,13 @@ const produceMedia = async (
     throw new Error('WingSide media evidence manual review is not bound to the protected asset')
   }
   assertTimestamp(signedReview.payload.reviewedAt, 'signed manual review time')
-  await assertSignature({
+  assertSignature({
     artifactType: 'manual-review',
     expectedSignerID: policy.reviewerID,
+    keyPolicy,
     payload: signedReview.payload,
+    records: signatureRecords,
     signature: signedReview.signature,
-    verifier: signatureVerifier,
   })
 
   const rightsArtifact = await readApprovedFile(
@@ -605,12 +688,13 @@ const produceMedia = async (
   ) {
     throw new Error('WingSide media evidence rights approval is not bound to the protected asset')
   }
-  await assertSignature({
+  assertSignature({
     artifactType: 'rights-approval',
     expectedSignerID: policy.rightsApproverID,
+    keyPolicy,
     payload: signedRights.payload,
+    records: signatureRecords,
     signature: signedRights.signature,
-    verifier: signatureVerifier,
   })
 
   const kind = source.kind ?? 'image'
@@ -739,23 +823,18 @@ const produceMedia = async (
       ))
     if (
       wingsSideTourMediaAuditChecksum(expectedExtractions) !==
-        wingsSideTourMediaAuditChecksum(actualExtractions) ||
-      !(await frameExtractionVerifier.verify({
-        assetSha256: asset.sha256,
-        attestation: ocr,
-        frames: frames.map(({ bytes: _bytes, ...frame }) => frame),
-        mediaID,
-      }))
+      wingsSideTourMediaAuditChecksum(actualExtractions)
     ) {
       throw new Error('WingSide media evidence video frames are not bound to the source video')
     }
   }
-  await assertSignature({
+  assertSignature({
     artifactType: 'ocr-attestation',
     expectedSignerID: policy.ocrAttesterID,
+    keyPolicy,
     payload: ocr,
+    records: signatureRecords,
     signature: signedOcr.signature,
-    verifier: signatureVerifier,
   })
 
   return {
@@ -915,13 +994,15 @@ const verifyReleaseEnvelope = async ({
   approvedRoot,
   envelope,
   hooks,
-  signatureVerifier,
+  keyPolicy,
+  signatureRecords,
   trusted,
 }: {
   approvedRoot: string
   envelope: WingsSideTourMediaReleaseEnvelope
   hooks?: ApprovedReadHooks
-  signatureVerifier: EvidenceSignatureVerifier
+  keyPolicy: ProtectedEvidenceKeyPolicy
+  signatureRecords: VerifiedSignatureRecord[]
   trusted: WingsSideTourMediaTrustedExpectation
 }): Promise<{
   policies: Map<string, ReleaseEnvelopeMediaPolicy>
@@ -969,12 +1050,13 @@ const verifyReleaseEnvelope = async ({
   if (envelope.signature.signerID !== trusted.envelopeSignerID) {
     throw new Error('WingSide media evidence release envelope signer mismatch')
   }
-  await assertSignature({
+  assertSignature({
     artifactType: 'release-envelope',
     expectedSignerID: trusted.envelopeSignerID,
+    keyPolicy,
     payload: envelope.payload,
+    records: signatureRecords,
     signature: envelope.signature,
-    verifier: signatureVerifier,
   })
   if (envelope.payload.manifestSha256 !== trusted.manifestSha256) {
     throw new Error('WingSide media evidence envelope manifest binding mismatch')
@@ -1075,25 +1157,23 @@ const verifyReleaseEnvelope = async ({
 
 export const produceWingsSideTourMediaEvidence = async ({
   approvedRoot,
-  frameExtractionVerifier,
   manifest,
   readHooks,
   releaseEnvelope,
   releaseBinding,
-  signatureVerifier,
   tours,
   trusted,
 }: {
   approvedRoot: string
-  frameExtractionVerifier: VideoFrameExtractionVerifier
   manifest: WingsSideTourMediaManifest
   readHooks?: ApprovedReadHooks
   releaseEnvelope: WingsSideTourMediaReleaseEnvelope
   releaseBinding: WingsSideTourMediaReleaseBinding
-  signatureVerifier: EvidenceSignatureVerifier
   tours: LocalTourMediaEvidenceSource[]
   trusted: WingsSideTourMediaTrustedExpectation
 }): Promise<WingsSideTourMediaEvidenceResult> => {
+  const keyPolicy = loadProtectedEvidenceKeyPolicy()
+  const signatureRecords: VerifiedSignatureRecord[] = []
   const root = await realpath(path.resolve(approvedRoot))
   const rootBefore = await stat(root, { bigint: true })
   if (!rootBefore.isDirectory()) {
@@ -1111,7 +1191,8 @@ export const produceWingsSideTourMediaEvidence = async ({
     approvedRoot: root,
     envelope: releaseEnvelope,
     hooks: readHooks,
-    signatureVerifier,
+    keyPolicy,
+    signatureRecords,
     trusted,
   })
   const producedMedia = new Map<string, Promise<NormalizedMediaAuditInput>>()
@@ -1127,8 +1208,8 @@ export const produceWingsSideTourMediaEvidence = async ({
       media,
       root,
       policy,
-      signatureVerifier,
-      frameExtractionVerifier,
+      keyPolicy,
+      signatureRecords,
       readHooks,
     )
     producedMedia.set(key, pending)
@@ -1187,24 +1268,77 @@ export const produceWingsSideTourMediaEvidence = async ({
   if (verifiedEnvelope.policies.size !== report.assets.length) {
     throw new Error('WingSide media evidence protected media policy coverage mismatch')
   }
-  return {
+  const releaseEvidenceChecksum = wingsSideTourMediaAuditChecksum({
+    bundleAggregateChecksum: bundle.aggregateChecksum,
+    envelopeSha256: trusted.envelopeSha256,
+    reportAggregateChecksum: report.aggregateChecksum,
+    releaseArtifactSha256: verifiedEnvelope.releaseArtifactSha256,
+    sourceArtifactSha256: verifiedEnvelope.sourceArtifactSha256,
+  })
+  const result = {
     bundle,
-    releaseEvidenceChecksum: wingsSideTourMediaAuditChecksum({
-      bundleAggregateChecksum: bundle.aggregateChecksum,
-      envelopeSha256: trusted.envelopeSha256,
-      reportAggregateChecksum: report.aggregateChecksum,
-      releaseArtifactSha256: verifiedEnvelope.releaseArtifactSha256,
-      sourceArtifactSha256: verifiedEnvelope.sourceArtifactSha256,
-    }),
+    releaseEvidenceChecksum,
     report,
-  }
+  } as WingsSideTourMediaEvidenceResult
+  Object.defineProperty(result, verifiedEvidenceBrand, {
+    configurable: false,
+    enumerable: false,
+    value: true,
+    writable: false,
+  })
+  authenticatedEvidenceResults.set(result, {
+    envelopeSha256: trusted.envelopeSha256,
+    keyPolicySha256: keyPolicy.sha256,
+    releaseArtifactSha256: verifiedEnvelope.releaseArtifactSha256,
+    releaseEvidenceChecksum,
+    signatures: signatureRecords.map((record) => ({
+      ...record,
+      signature: { ...record.signature },
+    })),
+    sourceArtifactSha256: verifiedEnvelope.sourceArtifactSha256,
+  })
+  return result
 }
 
 export const assertWingsSideTourMediaEvidenceReleaseGate = (
   result: WingsSideTourMediaEvidenceResult,
   expectedEnvelopeSha256: string,
 ): void => {
+  const authenticated = authenticatedEvidenceResults.get(result)
+  if (!authenticated) {
+    throw new Error(
+      'WingSide media evidence release result was not created by the authenticated producer',
+    )
+  }
   assertSha256(expectedEnvelopeSha256, 'expected release envelope checksum')
+  const keyPolicy = loadProtectedEvidenceKeyPolicy()
+  if (
+    keyPolicy.sha256 !== authenticated.keyPolicySha256 ||
+    expectedEnvelopeSha256 !== authenticated.envelopeSha256
+  ) {
+    throw new Error('WingSide media evidence authenticated trust policy binding mismatch')
+  }
+  if (
+    authenticated.signatures.length !== 1 + result.report.assets.length * 3 ||
+    authenticated.signatures.some(({ digest, signature }) => {
+      const key = keyPolicy.keys.get(signature.signerID)
+      try {
+        return (
+          key === undefined ||
+          !verify(
+            null,
+            Buffer.from(digest, 'utf8'),
+            key,
+            Buffer.from(signature.valueBase64, 'base64'),
+          )
+        )
+      } catch {
+        return true
+      }
+    })
+  ) {
+    throw new Error('WingSide media evidence authenticated signature proof mismatch')
+  }
   const { aggregateChecksum: _bundleChecksum, ...bundleBody } = result.bundle
   if (
     wingsSideTourMediaAuditChecksum(bundleBody) !== result.bundle.aggregateChecksum ||
@@ -1221,11 +1355,13 @@ export const assertWingsSideTourMediaEvidenceReleaseGate = (
     binding.releaseCommitSha !== result.bundle.releaseBinding.releaseCommitSha ||
     binding.siteCode !== result.bundle.releaseBinding.siteCode ||
     binding.sourceArtifactSha256 !== result.bundle.releaseEnvelope.payload.sourceArtifact.sha256 ||
-    binding.releaseArtifactSha256 !== result.bundle.releaseEnvelope.payload.releaseArtifact.sha256
+    binding.sourceArtifactSha256 !== authenticated.sourceArtifactSha256 ||
+    binding.releaseArtifactSha256 !== result.bundle.releaseEnvelope.payload.releaseArtifact.sha256 ||
+    binding.releaseArtifactSha256 !== authenticated.releaseArtifactSha256
   ) {
     throw new Error('WingSide media evidence combined release binding mismatch')
   }
-  assertWingsSideTourMediaReleaseGate(result.report, result.bundle.manifest, binding)
+  assertWingsSideTourMediaAuditConsistency(result.report, result.bundle.manifest, binding)
   const expectedCombinedChecksum = wingsSideTourMediaAuditChecksum({
     bundleAggregateChecksum: result.bundle.aggregateChecksum,
     envelopeSha256: expectedEnvelopeSha256,
@@ -1233,7 +1369,10 @@ export const assertWingsSideTourMediaEvidenceReleaseGate = (
     releaseArtifactSha256: binding.releaseArtifactSha256,
     sourceArtifactSha256: binding.sourceArtifactSha256,
   })
-  if (result.releaseEvidenceChecksum !== expectedCombinedChecksum) {
+  if (
+    result.releaseEvidenceChecksum !== expectedCombinedChecksum ||
+    result.releaseEvidenceChecksum !== authenticated.releaseEvidenceChecksum
+  ) {
     throw new Error('WingSide media evidence combined release checksum mismatch')
   }
 }
