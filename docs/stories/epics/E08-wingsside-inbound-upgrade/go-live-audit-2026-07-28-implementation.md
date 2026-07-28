@@ -53,11 +53,13 @@ remains rollback-capable, but must not be applied.
 
 Passed on the integrated branch:
 
-- Unit: 60 files, 428 tests.
+- Unit: 60 files, 433 tests.
 - Component: 14 files, 74 tests.
 - Focused post-review safety suite: 3 files, 34 tests.
 - TypeScript: `pnpm exec tsc --noEmit`.
 - ESLint on all touched audit paths.
+- Production Webpack build: passed, including 17 static pages and all dynamic
+  routes.
 - Migration smoke through the enquiry-context migration.
 - Real PostgreSQL migration and Payload CRUD for US-055 EN and VI.
 - Browser QA: strict zero result, mobile/desktop Journeys, Sapa anchors, form

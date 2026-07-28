@@ -55,7 +55,7 @@ Implementation evidence:
 - The governed four-slot projection fails closed for invalid, unpublished,
   cross-site or non-display-ready candidates.
 - `pnpm exec tsc --noEmit` passes.
-- Full unit suite: 60 files and 428 tests pass.
+- Full unit suite: 60 files and 433 tests pass.
 - Full component suite: 14 files and 74 tests pass.
 - Empty-to-head PostgreSQL migration plus real Payload CRUD passed for EN and
   VI after correcting the localized version-column migration contract.
