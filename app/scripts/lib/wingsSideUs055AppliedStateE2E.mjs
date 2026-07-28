@@ -5,9 +5,21 @@ import { createServer } from 'node:net'
 import path from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
 
-const expectedTestTitle =
+const routeTestTitle =
   'serves the exact 110 URL sitemap matrix with reciprocal locale metadata'
-const expectedSpec = 'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts'
+const homeTestTitle =
+  'connects all four Why Travel roles to eligible real tours across five locales and two widths'
+const expectedSpecs = [
+  {
+    path: 'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts',
+    title: routeTestTitle,
+  },
+  {
+    path: 'tests/e2e/wingsside-why-travel-real-tour-matrix.e2e.spec.ts',
+    title: homeTestTitle,
+  },
+]
+const sha256Pattern = /^[a-f0-9]{64}$/u
 
 const sha256 = (value) => createHash('sha256').update(value).digest('hex')
 
@@ -193,39 +205,59 @@ const testResults = (suite) => [
 
 export const assertUs055AppliedStateE2EReport = ({
   report,
-  specSha256,
+  specSha256ByPath,
 }) => {
   const tests = (report.suites || []).flatMap(testResults)
+  const actualTests = new Map(
+    tests.map((result) => [
+      `${String(result.file).replaceAll('\\', '/')}:${result.title}`,
+      result,
+    ]),
+  )
   if (
-    tests.length !== 1 ||
-    tests[0].title !== expectedTestTitle ||
-    !tests[0].ok ||
-    tests[0].status !== 'expected' ||
-    tests[0].results.length !== 1 ||
-    tests[0].results[0].status !== 'passed' ||
-    report.stats?.expected !== 1 ||
+    tests.length !== expectedSpecs.length ||
+    actualTests.size !== expectedSpecs.length ||
+    expectedSpecs.some(
+      ({ path: specPath }) => !sha256Pattern.test(specSha256ByPath[specPath] || ''),
+    ) ||
+    expectedSpecs.some(({ path: specPath, title }) => {
+      const result = actualTests.get(`${specPath}:${title}`)
+      return (
+        !result ||
+        !result.ok ||
+        result.status !== 'expected' ||
+        result.results.length !== 1 ||
+        result.results[0].status !== 'passed'
+      )
+    }) ||
+    report.stats?.expected !== expectedSpecs.length ||
     report.stats?.unexpected !== 0 ||
     report.stats?.skipped !== 0 ||
     report.errors?.length
   ) {
-    throw new Error('US-055 applied-state Playwright JSON report is not one exact pass')
+    throw new Error('US-055 applied-state Playwright JSON report is not two exact passes')
   }
   return {
+    expectedHomeMatrixCaseCount: 40,
+    expectedHomeRoleCount: 4,
     expectedLocaleCount: 5,
     expectedTourCount: 22,
     expectedURLCount: 110,
+    expectedViewportCount: 2,
     playwright: {
       expected: report.stats.expected,
       skipped: report.stats.skipped,
       unexpected: report.stats.unexpected,
     },
-    spec: expectedSpec,
-    specSha256,
-    testTitle: expectedTestTitle,
+    specs: expectedSpecs.map(({ path: specPath, title }) => ({
+      path: specPath,
+      sha256: specSha256ByPath[specPath],
+      testTitle: title,
+    })),
   }
 }
 
-const assertSpecContract = (source) => {
+const assertRouteSpecContract = (source) => {
   for (const contract of [
     "const locales = ['en', 'vi', 'it', 'es', 'pt'] as const",
     'expect(tourURLs).toHaveLength(110)',
@@ -234,6 +266,24 @@ const assertSpecContract = (source) => {
   ]) {
     if (!source.includes(contract)) {
       throw new Error(`US-055 E2E committed spec contract drifted: ${contract}`)
+    }
+  }
+}
+
+const assertHomeSpecContract = (source) => {
+  for (const contract of [
+    "const locales = ['en', 'vi', 'it', 'es', 'pt'] as const",
+    'const viewportWidths = [390, 1440] as const',
+    "{ marker: 'why-featured', role: 'local-design' }",
+    "{ marker: 'why-flexible', role: 'flexible-planning' }",
+    "{ marker: 'why-style', role: 'style-matching' }",
+    "{ marker: 'why-care', role: 'collaborative-care' }",
+    'expect(eligibleTourPaths.size).toBe(110)',
+    'expect(new Set(rolePaths.values()).size).toBe(4)',
+    "headers: { host: 'wingside.vn' }",
+  ]) {
+    if (!source.includes(contract)) {
+      throw new Error(`US-055 Why Travel E2E committed spec contract drifted: ${contract}`)
     }
   }
 }
@@ -254,10 +304,17 @@ export const runUs055AppliedStateE2EGate = async ({
   ) {
     throw new Error('US-055 E2E gate environment does not match the lifecycle target')
   }
-  const specPath = path.join(appRoot, expectedSpec)
-  const specBytes = await readFile(specPath)
-  assertSpecContract(specBytes.toString('utf8'))
-  const specSha256 = sha256(specBytes)
+  const specEntries = await Promise.all(
+    expectedSpecs.map(async ({ path: specPath, title }, index) => {
+      const specBytes = await readFile(path.join(appRoot, specPath))
+      if (index === 0) assertRouteSpecContract(specBytes.toString('utf8'))
+      else assertHomeSpecContract(specBytes.toString('utf8'))
+      return { path: specPath, sha256: sha256(specBytes), title }
+    }),
+  )
+  const specSha256ByPath = Object.fromEntries(
+    specEntries.map(({ path: specPath, sha256: specSha }) => [specPath, specSha]),
+  )
   const port = await listenOnEphemeralPort()
   const baseURL = `http://127.0.0.1:${port}`
   const reportPath = path.join(outputDirectory, 'applied-state-e2e-report.json')
@@ -311,7 +368,7 @@ export const runUs055AppliedStateE2EGate = async ({
         'exec',
         'playwright',
         'test',
-        expectedSpec,
+        ...expectedSpecs.map(({ path: specPath }) => specPath),
         '--config=playwright.config.ts',
         '--reporter=json',
       ],
@@ -337,7 +394,7 @@ export const runUs055AppliedStateE2EGate = async ({
     const reportBytes = await readFile(reportPath)
     const outcome = assertUs055AppliedStateE2EReport({
       report: JSON.parse(reportBytes.toString('utf8')),
-      specSha256,
+      specSha256ByPath,
     })
     return {
       ...outcome,

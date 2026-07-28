@@ -8,7 +8,7 @@ import {
 const passingReport = () => ({
   errors: [],
   stats: {
-    expected: 1,
+    expected: 2,
     skipped: 0,
     unexpected: 0,
   },
@@ -25,6 +25,18 @@ const passingReport = () => ({
             },
           ],
           title: 'serves the exact 110 URL sitemap matrix with reciprocal locale metadata',
+        },
+        {
+          file: 'tests/e2e/wingsside-why-travel-real-tour-matrix.e2e.spec.ts',
+          ok: true,
+          tests: [
+            {
+              results: [{ status: 'passed' }],
+              status: 'expected',
+            },
+          ],
+          title:
+            'connects all four Why Travel roles to eligible real tours across five locales and two widths',
         },
       ],
     },
@@ -45,24 +57,40 @@ describe('US-055 applied-state 110 URL E2E evidence', () => {
     ).toThrow('IPv4 loopback')
   })
 
-  it('binds one exact pass to the committed 22 by 5 contract', () => {
+  it('binds two exact passes to the route and Home interaction contracts', () => {
     expect(
       assertUs055AppliedStateE2EReport({
         report: passingReport(),
-        specSha256: 'a'.repeat(64),
+        specSha256ByPath: {
+          'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts': 'a'.repeat(64),
+          'tests/e2e/wingsside-why-travel-real-tour-matrix.e2e.spec.ts':
+            'b'.repeat(64),
+        },
       }),
     ).toMatchObject({
+      expectedHomeMatrixCaseCount: 40,
+      expectedHomeRoleCount: 4,
       expectedLocaleCount: 5,
       expectedTourCount: 22,
       expectedURLCount: 110,
-      playwright: { expected: 1, skipped: 0, unexpected: 0 },
-      specSha256: 'a'.repeat(64),
+      expectedViewportCount: 2,
+      playwright: { expected: 2, skipped: 0, unexpected: 0 },
+      specs: [
+        {
+          path: 'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts',
+          sha256: 'a'.repeat(64),
+        },
+        {
+          path: 'tests/e2e/wingsside-why-travel-real-tour-matrix.e2e.spec.ts',
+          sha256: 'b'.repeat(64),
+        },
+      ],
     })
   })
 
   it.each([
-    ['unexpected result', { stats: { expected: 0, skipped: 0, unexpected: 1 } }],
-    ['skipped result', { stats: { expected: 0, skipped: 1, unexpected: 0 } }],
+    ['unexpected result', { stats: { expected: 1, skipped: 0, unexpected: 1 } }],
+    ['skipped result', { stats: { expected: 1, skipped: 1, unexpected: 0 } }],
     ['top-level error', { errors: [{ message: 'boom' }] }],
     [
       'wrong test count',
@@ -77,8 +105,44 @@ describe('US-055 applied-state 110 URL E2E evidence', () => {
     expect(() =>
       assertUs055AppliedStateE2EReport({
         report: { ...passingReport(), ...override },
-        specSha256: 'a'.repeat(64),
+        specSha256ByPath: {
+          'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts': 'a'.repeat(64),
+          'tests/e2e/wingsside-why-travel-real-tour-matrix.e2e.spec.ts':
+            'b'.repeat(64),
+        },
       }),
-    ).toThrow('not one exact pass')
+    ).toThrow('not two exact passes')
+  })
+
+  it('fails closed when either committed spec hash is missing', () => {
+    expect(() =>
+      assertUs055AppliedStateE2EReport({
+        report: passingReport(),
+        specSha256ByPath: {
+          'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts': 'a'.repeat(64),
+        },
+      }),
+    ).toThrow('not two exact passes')
+  })
+
+  it.each([
+    ['wrong file', { file: 'tests/e2e/substituted.e2e.spec.ts' }],
+    ['wrong title', { title: 'substituted title' }],
+  ])('fails closed for a %s substitution', (_label, substitution) => {
+    const report = passingReport()
+    report.suites[0]!.specs[1] = {
+      ...report.suites[0]!.specs[1]!,
+      ...substitution,
+    }
+    expect(() =>
+      assertUs055AppliedStateE2EReport({
+        report,
+        specSha256ByPath: {
+          'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts': 'a'.repeat(64),
+          'tests/e2e/wingsside-why-travel-real-tour-matrix.e2e.spec.ts':
+            'b'.repeat(64),
+        },
+      }),
+    ).toThrow('not two exact passes')
   })
 })
