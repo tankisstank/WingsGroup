@@ -11,12 +11,12 @@ const homeTestTitle =
   'connects all four Why Travel roles to eligible real tours across five locales and two widths'
 const expectedSpecs = [
   {
-    path: 'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts',
-    title: routeTestTitle,
-  },
-  {
     path: 'tests/e2e/wingsside-why-travel-real-tour-matrix.e2e.spec.ts',
     title: homeTestTitle,
+  },
+  {
+    path: 'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts',
+    title: routeTestTitle,
   },
 ]
 const sha256Pattern = /^[a-f0-9]{64}$/u
@@ -308,10 +308,13 @@ export const runUs055AppliedStateE2EGate = async ({
     throw new Error('US-055 E2E gate environment does not match the lifecycle target')
   }
   const specEntries = await Promise.all(
-    expectedSpecs.map(async ({ path: specPath, title }, index) => {
+    expectedSpecs.map(async ({ path: specPath, title }) => {
       const specBytes = await readFile(path.join(appRoot, specPath))
-      if (index === 0) assertRouteSpecContract(specBytes.toString('utf8'))
-      else assertUs055HomeSpecContract(specBytes.toString('utf8'))
+      if (specPath.includes('why-travel')) {
+        assertUs055HomeSpecContract(specBytes.toString('utf8'))
+      } else {
+        assertRouteSpecContract(specBytes.toString('utf8'))
+      }
       return { path: specPath, sha256: sha256(specBytes), title }
     }),
   )

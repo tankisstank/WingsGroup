@@ -85,12 +85,12 @@ describe('US-055 applied-state 110 URL E2E evidence', () => {
       playwright: { expected: 2, skipped: 0, unexpected: 0 },
       specs: [
         {
-          path: 'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts',
-          sha256: 'a'.repeat(64),
-        },
-        {
           path: 'tests/e2e/wingsside-why-travel-real-tour-matrix.e2e.spec.ts',
           sha256: 'b'.repeat(64),
+        },
+        {
+          path: 'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts',
+          sha256: 'a'.repeat(64),
         },
       ],
     })

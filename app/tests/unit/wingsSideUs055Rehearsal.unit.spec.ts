@@ -18,6 +18,27 @@ import {
 } from '../../scripts/lib/wingsSideUs055Rehearsal.mjs'
 
 describe('US-055 disposable rehearsal guards', () => {
+  it('seeds the governed WingSide Home before the exact tour fixture and binds four roles', () => {
+    const runner = fs.readFileSync('scripts/run-wingsside-us055-rehearsal.mjs', 'utf8')
+    const editorialSeed = fs.readFileSync(
+      'scripts/seed-wingsside-tour-editorial-rehearsal.ts',
+      'utf8',
+    )
+    const selectiveSeed = runner.indexOf("SEED_ONLY_SITE: 'wing-side'")
+    const exactTourSeed = runner.indexOf("'scripts/seed-wingsside-tour-editorial-rehearsal.ts'")
+
+    expect(selectiveSeed).toBeGreaterThan(-1)
+    expect(exactTourSeed).toBeGreaterThan(selectiveSeed)
+    expect(runner).toContain("'--reuse-seeded-home'")
+    expect(runner).toContain(
+      "'local-design,flexible-planning,style-matching,collaborative-care'",
+    )
+    expect(runner).toContain('selectiveSeedMediaPaths')
+    expect(editorialSeed).toContain('applyWingsSideHiFiContentSeed')
+    expect(editorialSeed).toContain('wingsSideWhyTravelSelections.map')
+    expect(editorialSeed).toContain('sourceTourIDToRehearsalID.get(tour)')
+  })
+
   it('accepts only an explicit loopback PostgreSQL rehearsal target', () => {
     expect(
       assertDisposablePostgresTarget(

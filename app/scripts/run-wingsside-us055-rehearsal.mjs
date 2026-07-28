@@ -1,5 +1,5 @@
 import { generateKeyPairSync, randomBytes, randomUUID } from 'node:crypto'
-import { appendFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { access, appendFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -29,6 +29,12 @@ const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const repoRoot = path.dirname(appRoot)
 const payloadTypesPath = path.join(appRoot, 'src', 'payload-types.ts')
 const payloadTypesOriginal = await readFile(payloadTypesPath)
+const selectiveSeedMediaPaths = [
+  'wingsside-vietnam-journey-hero.png',
+  'wingsside-destination-hub.png',
+  'wingsside-travel-styles.png',
+  'wingsside-sample-itineraries.png',
+].map((filename) => path.join(appRoot, 'public', 'media', filename))
 const runToken = randomUUID().replaceAll('-', '').slice(0, 12)
 const containerName = `wingsside-us055-rehearsal-${runToken}`
 const database = `wingsside_us055_rehearsal_${runToken}`
@@ -64,6 +70,8 @@ let databaseURL
 let imageReference
 let catalogLifecycleSession
 let payloadTypesRestored = false
+let selectiveSeedMediaOwned = false
+let selectiveSeedMediaCleanupVerified = true
 const lifecycleCatalogPath = String(process.env.US055_REHEARSAL_CATALOG_PATH || '').trim()
 const lifecycleCatalogSha256 = String(
   process.env.US055_REHEARSAL_CATALOG_SHA256 || '',
@@ -271,6 +279,18 @@ try {
     throw new Error(`US-055 rehearsal release SHA must equal worktree HEAD ${worktreeHead}`)
   }
   await journal('release-head-binding', 'after', { worktreeHead })
+  for (const mediaPath of selectiveSeedMediaPaths) {
+    try {
+      await access(mediaPath)
+      throw new Error(`US-055 rehearsal refuses to overwrite pre-existing seed media: ${mediaPath}`)
+    } catch (error) {
+      if (
+        !(error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT')
+      ) {
+        throw error
+      }
+    }
+  }
   await writeFile(
     envFile,
     `POSTGRES_DB=${database}\nPOSTGRES_USER=${user}\nPOSTGRES_PASSWORD=${password}\n`,
@@ -408,6 +428,47 @@ try {
   }
   await journal('payload-migrations', 'after')
 
+  await journal('wingsside-home-seed', 'before')
+  selectiveSeedMediaOwned = true
+  run('pnpm', ['exec', 'tsx', 'scripts/seed-subsites.ts'], {
+    env: {
+      ...guardedEnv,
+      PAYLOAD_IMPORT_ORIGINALS_ONLY: 'true',
+      SEED_ONLY_SITE: 'wing-side',
+    },
+  })
+  const homeSeedProof = {
+    homePages: Number(
+      dockerSQL(
+        database,
+        "select count(*) from pages where site_id = (select id from sites where code = 'wing-side') and pathname = '/' and _status = 'published';",
+      ),
+    ),
+    media: Number(
+      dockerSQL(
+        database,
+        "select count(*) from media where site_id = (select id from sites where code = 'wing-side');",
+      ),
+    ),
+    sites: Number(dockerSQL(database, "select count(*) from sites where code = 'wing-side';")),
+    tourProducts: Number(
+      dockerSQL(
+        database,
+        "select count(*) from tour_products where site_id = (select id from sites where code = 'wing-side');",
+      ),
+    ),
+  }
+  if (
+    homeSeedProof.homePages !== 1 ||
+    homeSeedProof.media !== 4 ||
+    homeSeedProof.sites !== 1 ||
+    homeSeedProof.tourProducts !== 0
+  ) {
+    throw new Error(`WingSide selective Home seed proof drifted: ${JSON.stringify(homeSeedProof)}`)
+  }
+  record('wingsside-home-seed', homeSeedProof)
+  await journal('wingsside-home-seed', 'after', homeSeedProof)
+
   await journal('rehearsal-seed', 'before')
   run(
     'pnpm',
@@ -417,12 +478,35 @@ try {
       'scripts/seed-wingsside-tour-editorial-rehearsal.ts',
       '--source-snapshot',
       frozenSourceSnapshotPath,
+      '--reuse-seeded-home',
     ],
     { env: guardedEnv },
   )
   const sourceProof = verifyFrozenSource(database, frozenSource.proof)
+  const homeWhyTravelProof = {
+    distinctTours: Number(
+      dockerSQL(
+        database,
+        "select count(distinct tour_id) from home_why_tour_slots where _parent_id = (select id from pages where site_id = (select id from sites where code = 'wing-side') and pathname = '/' limit 1);",
+      ),
+    ),
+    roles: dockerSQL(
+      database,
+      "select string_agg(key::text, ',' order by _order) from home_why_tour_slots where _parent_id = (select id from pages where site_id = (select id from sites where code = 'wing-side') and pathname = '/' limit 1);",
+    ),
+  }
+  if (
+    homeWhyTravelProof.distinctTours !== 4 ||
+    homeWhyTravelProof.roles !==
+      'local-design,flexible-planning,style-matching,collaborative-care'
+  ) {
+    throw new Error(
+      `WingSide rehearsal Why Travel fixture proof drifted: ${JSON.stringify(homeWhyTravelProof)}`,
+    )
+  }
   record('seed-full-frozen-source', sourceProof)
-  await journal('rehearsal-seed', 'after', sourceProof)
+  record('seed-home-why-travel', homeWhyTravelProof)
+  await journal('rehearsal-seed', 'after', { ...sourceProof, homeWhyTravelProof })
 
   dockerSQL(
     database,
@@ -660,15 +744,37 @@ try {
   }
   await rm(temporaryDirectory, { force: true, recursive: true }).catch(() => {})
   await rm(dumpPath, { force: true }).catch(() => {})
+  if (selectiveSeedMediaOwned) {
+    selectiveSeedMediaCleanupVerified = false
+    for (const mediaPath of selectiveSeedMediaPaths) {
+      await rm(mediaPath, { force: true }).catch(() => {})
+    }
+    const remainingMedia = []
+    for (const mediaPath of selectiveSeedMediaPaths) {
+      try {
+        await access(mediaPath)
+        remainingMedia.push(mediaPath)
+      } catch (error) {
+        if (
+          !(error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT')
+        ) {
+          remainingMedia.push(mediaPath)
+        }
+      }
+    }
+    selectiveSeedMediaCleanupVerified = remainingMedia.length === 0
+  }
   checks.push({
     attempts: cleanupAttempts,
     containerName,
     name: 'cleanup',
-    status: cleanupVerified ? 'pass' : 'fail',
+    selectiveSeedMedia: selectiveSeedMediaCleanupVerified ? 'absent' : 'unverified',
+    status: cleanupVerified && selectiveSeedMediaCleanupVerified ? 'pass' : 'fail',
     verification: cleanupVerification,
   })
   await journal('cleanup', 'after', {
     attempts: cleanupAttempts,
+    selectiveSeedMedia: selectiveSeedMediaCleanupVerified ? 'absent' : 'unverified',
     verification: cleanupVerification,
   }).catch(() => {})
   const failed = checks.some(({ status }) => status === 'fail')
