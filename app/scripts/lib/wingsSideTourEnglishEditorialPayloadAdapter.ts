@@ -14,7 +14,9 @@ import {
 } from 'payload'
 
 import {
+  executeWingsSideEnglishEditorialGuardedRuntimeWithAdapterFactory,
   wingsSideEnglishEditorialTargetProofSigningDigest,
+  type WingsSideEnglishEditorialGuardedCapability,
   type WingsSideEnglishEditorialRuntimeTargetAttestation,
   type WingsSideEnglishEditorialSignedTargetProof,
   type WingsSideTourEnglishEditorialRuntimeAdapter,
@@ -54,6 +56,25 @@ const requiredProtectedValue = (env: ProtectedEnvironment, name: string) => {
     throw new Error(`English editorial Payload adapter requires protected environment ${name}`)
   }
   return value
+}
+
+const assertPreInitializationEnvironment = (env: ProtectedEnvironment) => {
+  if (env.PAYLOAD_DB_PUSH !== 'false') {
+    throw new Error('English editorial Payload adapter requires PAYLOAD_DB_PUSH=false')
+  }
+  if (env.NODE_ENV !== 'production') {
+    throw new Error('English editorial Payload adapter requires NODE_ENV=production')
+  }
+  const databaseURL = requiredProtectedValue(env, 'DATABASE_URL')
+  let parsed: URL
+  try {
+    parsed = new URL(databaseURL)
+  } catch {
+    throw new Error('English editorial Payload adapter requires a valid PostgreSQL DATABASE_URL')
+  }
+  if (!['postgres:', 'postgresql:'].includes(parsed.protocol)) {
+    throw new Error('English editorial Payload adapter requires PostgreSQL before initialization')
+  }
 }
 
 const clone = <T>(value: T): T =>
@@ -198,13 +219,11 @@ const defaultDependencies = (): PayloadAdapterDependencies => ({
   createRequest: async (payload, user) => createLocalReq({ user: user as never }, payload),
   env: process.env,
   initialize: async () => {
+    assertPreInitializationEnvironment(process.env)
     const config = (await import('../../src/payload.config')).default
     const payload = await getPayload({ config })
     if (payload.db.packageName !== '@payloadcms/db-postgres') {
       throw new Error('English editorial Payload adapter requires @payloadcms/db-postgres')
-    }
-    if (process.env.PAYLOAD_DB_PUSH !== 'false') {
-      throw new Error('English editorial Payload adapter requires PAYLOAD_DB_PUSH=false')
     }
     const adminEmail = requiredProtectedValue(process.env, 'ADMIN_EMAIL')
     const result = await payload.find({
@@ -227,7 +246,7 @@ const defaultDependencies = (): PayloadAdapterDependencies => ({
  * The only returned writes are transaction-bound adapter methods; no standalone
  * mutation function is exported.
  */
-export const createWingsSideTourEnglishEditorialPayloadAdapterFactory = (
+const createWingsSideTourEnglishEditorialPayloadAdapterFactory = (
   overrides: Partial<PayloadAdapterDependencies> = {},
 ) => {
   const defaults = defaultDependencies()
@@ -422,4 +441,28 @@ export const createWingsSideTourEnglishEditorialPayloadAdapterFactory = (
     }
     return adapter
   }
+}
+
+export const executeWingsSideTourEnglishEditorialWithPayloadAdapter = async ({
+  capability,
+  dependencies = {},
+  phase,
+}: {
+  capability: WingsSideEnglishEditorialGuardedCapability
+  dependencies?: Partial<PayloadAdapterDependencies>
+  phase: 'apply' | 'rollback' | 'verify'
+}) => {
+  const resolvedEnvironment = dependencies.env ?? process.env
+  assertPreInitializationEnvironment(resolvedEnvironment)
+  return executeWingsSideEnglishEditorialGuardedRuntimeWithAdapterFactory({
+    adapterFactory: async (artifacts) => {
+      const factory = createWingsSideTourEnglishEditorialPayloadAdapterFactory({
+        ...dependencies,
+        env: resolvedEnvironment,
+      })
+      return factory({ artifacts, phase })
+    },
+    capability,
+    phase,
+  })
 }

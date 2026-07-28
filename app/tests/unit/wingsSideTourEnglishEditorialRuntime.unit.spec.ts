@@ -33,6 +33,7 @@ import {
 } from '../../scripts/lib/wingsSideTourEnglishEditorial'
 import {
   executeWingsSideEnglishEditorialGuardedRuntime,
+  executeWingsSideEnglishEditorialGuardedRuntimeWithAdapterFactory,
   issueWingsSideEnglishEditorialGuardedCapabilityFromProtectedEnvironment,
   loadFrozenWingsSideEnglishEditorialArtifacts,
   readFrozenWingsSideEnglishEditorialArtifact,
@@ -421,6 +422,23 @@ describe('WingSide English editorial canonical runtime', () => {
       }),
     ).rejects.toThrow('issued guarded capability')
     expect(runtime.calls.begin).not.toHaveBeenCalled()
+  })
+
+  it('supplies only capability-bound immutable artifacts to a guarded adapter factory', async () => {
+    const value = fixture()
+    const runtime = adapterFixture(value.rows)
+    const adapterFactory = vi.fn((_boundArtifacts: unknown) => runtime.adapter)
+    const capability = issueCapabilityForPlan(value.plan, 'apply')
+    await expect(
+      executeWingsSideEnglishEditorialGuardedRuntimeWithAdapterFactory({
+        adapterFactory,
+        capability,
+        phase: 'apply',
+      }),
+    ).resolves.toEqual({ state: 'after', unchanged: 0, updated: 22 })
+    expect(adapterFactory).toHaveBeenCalledOnce()
+    expect(adapterFactory).toHaveBeenCalledWith(value.artifacts)
+    expect(Object.isFrozen(adapterFactory.mock.calls[0]![0])).toBe(true)
   })
 
   it('reports commit failure as ambiguous and never attempts kill after commit begins', async () => {

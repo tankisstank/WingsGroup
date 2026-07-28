@@ -664,3 +664,33 @@ export const executeWingsSideEnglishEditorialGuardedRuntime = async <Transaction
         direction: phase,
       })
 }
+
+export const executeWingsSideEnglishEditorialGuardedRuntimeWithAdapterFactory = async <
+  Transaction,
+>({
+  adapterFactory,
+  capability,
+  phase,
+}: {
+  adapterFactory: (artifacts: LoadedEnglishEditorialArtifacts) =>
+    | Promise<WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>>
+    | WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
+  capability: WingsSideEnglishEditorialGuardedCapability
+  phase: 'apply' | 'rollback' | 'verify'
+}) => {
+  const details = capabilityDetails.get(capability)
+  if (!details) throw new Error('English editorial runtime requires an issued guarded capability')
+  if (details.phase !== phase) {
+    throw new Error('English editorial guarded capability phase mismatch')
+  }
+  if (phase !== 'verify') {
+    assertWingsSideEditorialProductionWriteGuard(details.mutationGuardArgs!, process.env)
+  }
+  const adapter = await adapterFactory(details.artifacts)
+  if (!adapter) throw new Error('English editorial guarded adapter factory returned no adapter')
+  return executeWingsSideEnglishEditorialGuardedRuntime({
+    adapter,
+    capability,
+    phase,
+  })
+}

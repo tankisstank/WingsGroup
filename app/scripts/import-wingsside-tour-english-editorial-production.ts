@@ -7,12 +7,13 @@ import {
   executeWingsSideEnglishEditorialGuardedRuntime,
   issueWingsSideEnglishEditorialGuardedCapabilityFromProtectedEnvironment,
   loadFrozenWingsSideEnglishEditorialArtifacts,
+  type WingsSideEnglishEditorialGuardedCapability,
   type WingsSideEnglishEditorialExpectedRuntimeTarget,
   type WingsSideTourEnglishEditorialRuntimeAdapter,
 } from './lib/wingsSideTourEnglishEditorialRuntime'
 import { assertWingsSideEditorialProductionWriteGuard } from './lib/wingsSideReleaseWriteGuard'
 import type { WingsSideEditorialProductionWriteGuardArgs } from './lib/wingsSideReleaseWriteGuard'
-import { createWingsSideTourEnglishEditorialPayloadAdapterFactory } from './lib/wingsSideTourEnglishEditorialPayloadAdapter'
+import { executeWingsSideTourEnglishEditorialWithPayloadAdapter } from './lib/wingsSideTourEnglishEditorialPayloadAdapter'
 
 type Phase = 'apply' | 'rollback' | 'verify'
 type ReleaseEnvironment = Partial<Record<string, string | undefined>>
@@ -293,9 +294,10 @@ export const runWingsSideEnglishEditorialProductionCLI = async <Transaction>({
   adapterFactory,
   argv,
   env = process.env,
+  guardedExecutor,
   io = fs,
 }: {
-  adapterFactory: (args: {
+  adapterFactory?: (args: {
     artifacts: ReturnType<typeof loadFrozenWingsSideEnglishEditorialArtifacts>
     phase: Phase
   }) =>
@@ -303,10 +305,18 @@ export const runWingsSideEnglishEditorialProductionCLI = async <Transaction>({
     | WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
   argv: string[]
   env?: ReleaseEnvironment
+  guardedExecutor?: (args: {
+    artifacts: ReturnType<typeof loadFrozenWingsSideEnglishEditorialArtifacts>
+    capability: WingsSideEnglishEditorialGuardedCapability
+    phase: Phase
+  }) => Promise<unknown>
   io?: ArtifactIO
 }) => {
   if (env !== process.env) {
     throw new Error('English editorial production verifier environment is non-injectable')
+  }
+  if (Boolean(adapterFactory) === Boolean(guardedExecutor)) {
+    throw new Error('English editorial production requires exactly one guarded runtime provider')
   }
   const { artifacts, expectedTarget, mutationGuardArgs, phase } =
     preflightWingsSideEnglishEditorialProductionCLI({
@@ -320,7 +330,10 @@ export const runWingsSideEnglishEditorialProductionCLI = async <Transaction>({
     mutationGuardArgs,
     phase,
   })
-  const adapter = await adapterFactory({ artifacts, phase })
+  if (guardedExecutor) {
+    return guardedExecutor({ artifacts, capability, phase })
+  }
+  const adapter = await adapterFactory!({ artifacts, phase })
   if (!adapter) throw new Error('English editorial adapter factory must return an adapter')
   if (phase !== 'verify') assertWingsSideEditorialProductionWriteGuard(mutationGuardArgs!, env)
   return executeWingsSideEnglishEditorialGuardedRuntime({
@@ -335,8 +348,9 @@ const invokedDirectly =
 
 if (invokedDirectly) {
   void runWingsSideEnglishEditorialProductionCLI({
-    adapterFactory: createWingsSideTourEnglishEditorialPayloadAdapterFactory(),
     argv: process.argv.slice(2),
+    guardedExecutor: ({ capability, phase }) =>
+      executeWingsSideTourEnglishEditorialWithPayloadAdapter({ capability, phase }),
   }).then(
     (result) => console.log(JSON.stringify(result)),
     (error) => {

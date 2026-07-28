@@ -1,225 +1,105 @@
-import { generateKeyPairSync, verify } from 'node:crypto'
-
 import { describe, expect, it, vi } from 'vitest'
 
+import * as payloadAdapterModule from '../../scripts/lib/wingsSideTourEnglishEditorialPayloadAdapter'
 import {
-  createWingsSideTourEnglishEditorialPayloadAdapterFactory,
+  executeWingsSideTourEnglishEditorialWithPayloadAdapter,
   wingsSideEnglishEditorialDatabaseIdentityChecksum,
 } from '../../scripts/lib/wingsSideTourEnglishEditorialPayloadAdapter'
-import {
-  wingsSideEnglishEditorialTargetProofSigningDigest,
-  type WingsSideEnglishEditorialTargetChallenge,
-} from '../../scripts/lib/wingsSideTourEnglishEditorialRuntime'
-import type { WingsSideTourEnglishEditorialPlan } from '../../scripts/lib/wingsSideTourEnglishEditorial'
-
-const keys = generateKeyPairSync('ed25519')
-const publicKeySpkiBase64 = keys.publicKey
-  .export({ format: 'der', type: 'spki' })
-  .toString('base64')
-const privateKeyPkcs8Base64 = keys.privateKey
-  .export({ format: 'der', type: 'pkcs8' })
-  .toString('base64')
-
-const measurement = {
-  backendPID: '4123',
-  currentDatabase: 'wingstravel',
-  currentUser: 'wingstravel_release',
-  serverAddress: '10.0.0.8',
-  serverPort: '5432',
-  transactionMarker: '9001',
-}
-
-const protectedEnvironment = () => ({
-  WINGSSIDE_EN_EDITORIAL_CURRENT_DATABASE: measurement.currentDatabase,
-  WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256:
-    wingsSideEnglishEditorialDatabaseIdentityChecksum(measurement),
-  WINGSSIDE_EN_EDITORIAL_SOURCE_KIND: 'database-snapshot',
-  WINGSSIDE_EN_EDITORIAL_SOURCE_SHA256: 'b'.repeat(64),
-  WINGSSIDE_EN_EDITORIAL_TARGET_KEY_ID: 'target-key-01',
-  WINGSSIDE_EN_EDITORIAL_TARGET_PRIVATE_KEY_PKCS8_BASE64:
-    privateKeyPkcs8Base64,
-  WINGSSIDE_EN_EDITORIAL_TARGET_PUBLIC_KEY_SPKI_BASE64:
-    publicKeySpkiBase64,
-  WINGSTRAVEL_RELEASE_SHA: 'a'.repeat(40),
+const safeEnvironment = () => ({
+  DATABASE_URL: 'postgresql://release:protected@example.invalid/wingstravel',
+  NODE_ENV: 'production',
+  PAYLOAD_DB_PUSH: 'false',
 })
 
-const plan = {
-  entries: [
-    {
-      after: { slug: 'tour-one', title: 'After title' },
-      before: { slug: 'tour-one', title: 'Before title' },
-      fieldChanges: [{ after: 'After title', before: 'Before title', path: 'title' }],
-      slug: 'tour-one',
-      tourID: 101,
-    },
-  ],
-  tourIdentities: [{ slug: 'tour-one', tourID: 101 }],
-} as unknown as WingsSideTourEnglishEditorialPlan
+describe('WingSide English editorial guarded Payload adapter boundary', () => {
+  it('exports no raw adapter factory or transaction mutation method', () => {
+    expect(Object.keys(payloadAdapterModule).sort()).toEqual([
+      'executeWingsSideTourEnglishEditorialWithPayloadAdapter',
+      'wingsSideEnglishEditorialDatabaseIdentityChecksum',
+    ])
+    expect(payloadAdapterModule).not.toHaveProperty(
+      'createWingsSideTourEnglishEditorialPayloadAdapterFactory',
+    )
+    expect(payloadAdapterModule).not.toHaveProperty('writeTour')
+  })
 
-const fixture = (target = measurement) => {
-  let document = { id: 101, site: 7, slug: 'tour-one', title: 'Before title' }
-  let transactionSequence = 0
-  const sessions: Record<string, { db: object }> = {}
-  const payload = {
-    db: {
-      beginTransaction: vi.fn(async () => {
-        transactionSequence += 1
-        const id = `transaction-${transactionSequence}`
-        sessions[id] = { db: { id } }
-        return id
+  it('rejects a forged capability before Payload initialization or any write surface is reachable', async () => {
+    const initialize = vi.fn()
+    await expect(
+      executeWingsSideTourEnglishEditorialWithPayloadAdapter({
+        capability: {} as never,
+        dependencies: {
+          createRequest: vi.fn() as never,
+          env: safeEnvironment(),
+          initialize,
+        },
+        phase: 'apply',
       }),
-      commitTransaction: vi.fn(async (id: string) => {
-        delete sessions[id]
-      }),
-      execute: vi.fn(async () => ({
-        rows: [
-          {
-            ...target,
-            transactionMarker: String(Number(target.transactionMarker) + transactionSequence),
+    ).rejects.toThrow('requires an issued guarded capability')
+    expect(initialize).not.toHaveBeenCalled()
+  })
+
+  it.each(['true', '1', '', undefined])(
+    'blocks unsafe PAYLOAD_DB_PUSH=%s before config import or getPayload initialization',
+    async (payloadDbPush) => {
+      const initialize = vi.fn()
+      await expect(
+        executeWingsSideTourEnglishEditorialWithPayloadAdapter({
+          capability: {} as never,
+          dependencies: {
+            createRequest: vi.fn() as never,
+            env: {
+              ...safeEnvironment(),
+              PAYLOAD_DB_PUSH: payloadDbPush,
+            },
+            initialize,
           },
-        ],
-      })),
-      packageName: '@payloadcms/db-postgres',
-      rollbackTransaction: vi.fn(async (id: string) => {
-        delete sessions[id]
-      }),
-      sessions,
+          phase: 'verify',
+        }),
+      ).rejects.toThrow('PAYLOAD_DB_PUSH=false')
+      expect(initialize).not.toHaveBeenCalled()
     },
-    find: vi.fn(async () => ({ docs: [{ code: 'wing-side', id: 7 }] })),
-    findByID: vi.fn(async () => structuredClone(document)),
-    update: vi.fn(async ({ data }: { data: Record<string, unknown> }) => {
-      document = { ...document, ...structuredClone(data) }
-      return structuredClone(document)
-    }),
-  }
-  const requests: Array<{ transactionID?: number | string }> = []
-  const factory = createWingsSideTourEnglishEditorialPayloadAdapterFactory({
-    createRequest: async () => {
-      const req = {}
-      requests.push(req)
-      return req as never
-    },
-    env: protectedEnvironment(),
-    initialize: async () => ({ payload: payload as never, user: { id: 1 } }),
-  })
-  return { factory, payload, requests }
-}
+  )
 
-const challenge = (
-  stage: WingsSideEnglishEditorialTargetChallenge['stage'],
-): WingsSideEnglishEditorialTargetChallenge => ({
-  governanceChecksum: 'c'.repeat(64),
-  nonce: 'd'.repeat(64),
-  planArtifactSha256: 'e'.repeat(64),
-  stage,
-})
-
-describe('WingSide English editorial Payload/PostgreSQL adapter', () => {
-  it('measures and signs a fresh target inside the same transaction as reads and writes', async () => {
-    const value = fixture()
-    const adapter = await value.factory({
-      artifacts: { plan, planArtifactSha256: 'e'.repeat(64) },
-      phase: 'apply',
-    })
-    const transaction = await adapter.beginTransaction()
-    expect(transaction).not.toBeNull()
-
-    const proof = await adapter.attestTarget({
-      challenge: challenge('after-begin'),
-      transaction: transaction!,
-    })
-    expect(proof.payload).toMatchObject({
-      currentDatabase: 'wingstravel',
-      databaseIdentitySha256:
-        protectedEnvironment().WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256,
-      transactionNonce: 'd'.repeat(64),
-    })
-    expect(
-      verify(
-        null,
-        Buffer.from(wingsSideEnglishEditorialTargetProofSigningDigest(proof.payload), 'utf8'),
-        keys.publicKey,
-        Buffer.from(proof.signature.valueBase64, 'base64'),
-      ),
-    ).toBe(true)
-
-    await expect(adapter.readTours(transaction!)).resolves.toEqual([
-      {
-        document: { slug: 'tour-one', title: 'Before title' },
-        locale: 'en',
-        siteCode: 'wing-side',
-        tourID: 101,
-      },
-    ])
-    await adapter.writeTour({
-      document: { slug: 'tour-one', title: 'After title' },
-      tourID: 101,
-      transaction: transaction!,
-    })
-    await expect(adapter.readTours(transaction!)).resolves.toEqual([
-      expect.objectContaining({
-        document: { slug: 'tour-one', title: 'After title' },
-      }),
-    ])
-    expect(value.payload.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: { title: 'After title' },
-        locale: 'en',
-        overrideAccess: false,
-        req: value.requests[0],
-      }),
-    )
-    await adapter.commitTransaction(transaction!)
-    await expect(adapter.readTours(transaction!)).rejects.toThrow('closed or substituted')
-
-    const next = await adapter.beginTransaction()
-    const nextProof = await adapter.attestTarget({
-      challenge: challenge('after-begin'),
-      transaction: next!,
-    })
-    expect(nextProof.payload.transactionSessionID).not.toBe(
-      proof.payload.transactionSessionID,
-    )
-    await adapter.killTransaction(next!)
-  })
-
-  it('refuses a wrong database measurement before returning a signed proof', async () => {
-    const value = fixture({ ...measurement, currentDatabase: 'attacker_database' })
-    const adapter = await value.factory({
-      artifacts: { plan, planArtifactSha256: 'e'.repeat(64) },
-      phase: 'verify',
-    })
-    const transaction = await adapter.beginTransaction()
+  it('rejects non-production and non-PostgreSQL prerequisites before initialization', async () => {
+    const initialize = vi.fn()
     await expect(
-      adapter.attestTarget({
-        challenge: challenge('after-begin'),
-        transaction: transaction!,
-      }),
-    ).rejects.toThrow('wrong PostgreSQL target')
-    await adapter.killTransaction(transaction!)
-    expect(value.payload.findByID).not.toHaveBeenCalled()
-  })
-
-  it('refuses protected target private/public key substitution', async () => {
-    const otherKeys = generateKeyPairSync('ed25519')
-    const value = fixture()
-    const factory = createWingsSideTourEnglishEditorialPayloadAdapterFactory({
-      createRequest: async () => ({}) as never,
-      env: {
-        ...protectedEnvironment(),
-        WINGSSIDE_EN_EDITORIAL_TARGET_PUBLIC_KEY_SPKI_BASE64:
-          otherKeys.publicKey.export({ format: 'der', type: 'spki' }).toString('base64'),
-      },
-      initialize: async () => ({
-        payload: value.payload as never,
-        user: { id: 1 },
-      }),
-    })
-    await expect(
-      factory({
-        artifacts: { plan, planArtifactSha256: 'e'.repeat(64) },
+      executeWingsSideTourEnglishEditorialWithPayloadAdapter({
+        capability: {} as never,
+        dependencies: {
+          createRequest: vi.fn() as never,
+          env: { ...safeEnvironment(), NODE_ENV: 'development' },
+          initialize,
+        },
         phase: 'verify',
       }),
-    ).rejects.toThrow('private/public target keys do not match')
+    ).rejects.toThrow('NODE_ENV=production')
+    await expect(
+      executeWingsSideTourEnglishEditorialWithPayloadAdapter({
+        capability: {} as never,
+        dependencies: {
+          createRequest: vi.fn() as never,
+          env: { ...safeEnvironment(), DATABASE_URL: 'file:./payload.db' },
+          initialize,
+        },
+        phase: 'verify',
+      }),
+    ).rejects.toThrow('requires PostgreSQL before initialization')
+    expect(initialize).not.toHaveBeenCalled()
+  })
+
+  it('derives a stable non-secret database identity from measured target fields', () => {
+    const measurement = {
+      currentDatabase: 'wingstravel',
+      currentUser: 'release_operator',
+      serverAddress: '10.0.0.8',
+      serverPort: '5432',
+    }
+    expect(wingsSideEnglishEditorialDatabaseIdentityChecksum(measurement)).toBe(
+      wingsSideEnglishEditorialDatabaseIdentityChecksum({ ...measurement }),
+    )
+    expect(wingsSideEnglishEditorialDatabaseIdentityChecksum(measurement)).toMatch(
+      /^[a-f0-9]{64}$/u,
+    )
   })
 })
