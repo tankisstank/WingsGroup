@@ -194,10 +194,7 @@ export type WingsSideTourMediaEvidenceBundle = {
   tours: NormalizedTourMediaAuditInput[]
 }
 
-const verifiedEvidenceBrand: unique symbol = Symbol('verifiedWingSideTourMediaEvidence')
-
 export type WingsSideTourMediaEvidenceResult = {
-  readonly [verifiedEvidenceBrand]: true
   bundle: WingsSideTourMediaEvidenceBundle
   releaseEvidenceChecksum: string
   report: WingsSideTourMediaAuditReport
@@ -285,10 +282,6 @@ const isWithinRoot = (root: string, candidate: string): boolean => {
   return candidate.startsWith(canonicalRootPrefix(root))
 }
 
-type ApprovedReadHooks = {
-  afterInitialRealpath?: (lexicalPath: string) => Promise<void>
-}
-
 const sameFileIdentity = (
   left: { dev: bigint; ino: bigint },
   right: { dev: bigint; ino: bigint },
@@ -297,7 +290,6 @@ const sameFileIdentity = (
 const readApprovedFile = async (
   approvedRoot: string,
   relativePath: string,
-  hooks?: ApprovedReadHooks,
 ): Promise<{ absolutePath: string; bytes: Uint8Array; sha256: string }> => {
   const requested = requiredText(relativePath, 'relative asset path')
   if (path.isAbsolute(requested)) {
@@ -315,7 +307,6 @@ const readApprovedFile = async (
   if (!initialStat.isFile()) {
     throw new Error('WingSide media evidence source must be a regular file')
   }
-  await hooks?.afterInitialRealpath?.(lexicalPath)
   const handle = await open(initialRealpath, 'r')
   try {
     const openedStat = await handle.stat({ bigint: true })
@@ -404,30 +395,64 @@ const assertExactKeys = (value: object, expected: string[], label: string): void
   }
 }
 
-const assertPlainData = (
+const assertJsonPlainData = (
   value: unknown,
   label: string,
   seen = new Set<object>(),
 ): void => {
-  if (!value || typeof value !== 'object') return
+  if (
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'boolean' ||
+    (typeof value === 'number' && Number.isFinite(value))
+  ) {
+    return
+  }
+  if (typeof value !== 'object') {
+    throw new Error(
+      `WingSide media evidence ${label} must contain JSON-compatible primitive values only`,
+    )
+  }
   if (seen.has(value)) throw new Error(`WingSide media evidence ${label} cannot contain cycles`)
   seen.add(value)
   const prototype = Object.getPrototypeOf(value)
   if (prototype !== Object.prototype && prototype !== Array.prototype && prototype !== null) {
     throw new Error(`WingSide media evidence ${label} must contain plain data only`)
   }
-  for (const key of Reflect.ownKeys(value)) {
+  const ownKeys = Reflect.ownKeys(value)
+  if (ownKeys.some((key) => typeof key === 'symbol')) {
+    throw new Error(`WingSide media evidence ${label} cannot contain symbol keys`)
+  }
+  if (Array.isArray(value)) {
+    const expectedKeys = new Set([
+      ...Array.from({ length: value.length }, (_, index) => String(index)),
+      'length',
+    ])
+    if (
+      ownKeys.length !== expectedKeys.size ||
+      ownKeys.some((key) => typeof key !== 'string' || !expectedKeys.has(key))
+    ) {
+      throw new Error(
+        `WingSide media evidence ${label} arrays cannot contain holes or extra properties`,
+      )
+    }
+  }
+  for (const key of ownKeys) {
     const descriptor = Object.getOwnPropertyDescriptor(value, key)
     if (!descriptor || descriptor.get || descriptor.set || !Object.hasOwn(descriptor, 'value')) {
       throw new Error(`WingSide media evidence ${label} cannot contain accessors`)
     }
-    assertPlainData(descriptor.value, label, seen)
+    if (Array.isArray(value) && key === 'length') continue
+    if (!descriptor.enumerable) {
+      throw new Error(`WingSide media evidence ${label} cannot contain non-enumerable data`)
+    }
+    assertJsonPlainData(descriptor.value, `${label}.${String(key)}`, seen)
   }
   seen.delete(value)
 }
 
 const deepFreeze = <T>(value: T, seen = new Set<object>()): Readonly<T> => {
-  if (!value || typeof value !== 'object' || seen.has(value)) return value
+  if (value === null || typeof value !== 'object' || seen.has(value)) return value
   seen.add(value)
   for (const key of Reflect.ownKeys(value)) {
     const descriptor = Object.getOwnPropertyDescriptor(value, key)
@@ -439,12 +464,24 @@ const deepFreeze = <T>(value: T, seen = new Set<object>()): Readonly<T> => {
   return value
 }
 
-const assertDeepFrozenPlainData = (
+const assertDeepFrozenJsonData = (
   value: unknown,
   label: string,
   seen = new Set<object>(),
 ): void => {
-  if (!value || typeof value !== 'object') return
+  if (
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'boolean' ||
+    (typeof value === 'number' && Number.isFinite(value))
+  ) {
+    return
+  }
+  if (typeof value !== 'object') {
+    throw new Error(
+      `WingSide media evidence ${label} must contain JSON-compatible primitive values only`,
+    )
+  }
   if (seen.has(value)) return
   seen.add(value)
   if (!Object.isFrozen(value)) {
@@ -454,12 +491,279 @@ const assertDeepFrozenPlainData = (
   if (prototype !== Object.prototype && prototype !== Array.prototype && prototype !== null) {
     throw new Error(`WingSide media evidence ${label} must contain plain data only`)
   }
-  for (const key of Reflect.ownKeys(value)) {
+  const ownKeys = Reflect.ownKeys(value)
+  if (ownKeys.some((key) => typeof key === 'symbol')) {
+    throw new Error(`WingSide media evidence ${label} cannot contain symbol keys`)
+  }
+  if (Array.isArray(value)) {
+    const expectedKeys = new Set([
+      ...Array.from({ length: value.length }, (_, index) => String(index)),
+      'length',
+    ])
+    if (
+      ownKeys.length !== expectedKeys.size ||
+      ownKeys.some((key) => typeof key !== 'string' || !expectedKeys.has(key))
+    ) {
+      throw new Error(
+        `WingSide media evidence ${label} arrays cannot contain holes or extra properties`,
+      )
+    }
+  }
+  for (const key of ownKeys) {
     const descriptor = Object.getOwnPropertyDescriptor(value, key)
     if (!descriptor || descriptor.get || descriptor.set || !Object.hasOwn(descriptor, 'value')) {
       throw new Error(`WingSide media evidence ${label} cannot contain accessors`)
     }
-    assertDeepFrozenPlainData(descriptor.value, label, seen)
+    if (Array.isArray(value) && key === 'length') continue
+    if (!descriptor.enumerable) {
+      throw new Error(`WingSide media evidence ${label} cannot contain non-enumerable data`)
+    }
+    assertDeepFrozenJsonData(descriptor.value, `${label}.${String(key)}`, seen)
+  }
+}
+
+const requireObject = (value: unknown, label: string): Record<string, unknown> => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`WingSide media evidence ${label} must be an object`)
+  }
+  return value as Record<string, unknown>
+}
+
+const requireArray = (value: unknown, label: string): unknown[] => {
+  if (!Array.isArray(value)) {
+    throw new Error(`WingSide media evidence ${label} must be an array`)
+  }
+  return value
+}
+
+const keysWithOptional = (
+  value: object,
+  required: string[],
+  optional: string[],
+): string[] => [
+  ...required,
+  ...optional.filter((key) => Object.hasOwn(value, key)),
+]
+
+const assertReleaseBindingSchema = (
+  value: unknown,
+  label: string,
+): WingsSideTourMediaReleaseBinding => {
+  const binding = requireObject(value, label)
+  assertExactKeys(binding, ['releaseCommitSha', 'siteCode', 'source'], label)
+  const source = requireObject(binding.source, `${label} source`)
+  assertExactKeys(source, ['kind', 'sha256'], `${label} source`)
+  return binding as WingsSideTourMediaReleaseBinding
+}
+
+const assertMediaSourceSchema = (value: unknown, label: string): void => {
+  const media = requireObject(value, label)
+  assertExactKeys(
+    media,
+    keysWithOptional(
+      media,
+      [
+        'id',
+        'manualReview',
+        'ocrArtifactRelativePath',
+        'ocrArtifactSha256',
+        'provenance',
+        'relativePath',
+      ],
+      ['dimensions', 'kind', 'videoFrames'],
+    ),
+    label,
+  )
+  const manualReview = requireObject(media.manualReview, `${label} manual review`)
+  assertExactKeys(
+    manualReview,
+    keysWithOptional(
+      manualReview,
+      ['artifactRelativePath', 'artifactSha256', 'reviewedAt', 'reviewerID', 'state'],
+      ['reason'],
+    ),
+    `${label} manual review`,
+  )
+  const provenance = requireObject(media.provenance, `${label} provenance`)
+  assertExactKeys(
+    provenance,
+    [
+      'approvedAt',
+      'approvedBy',
+      'artifactRelativePath',
+      'artifactSha256',
+      'licenseReference',
+      'licenseType',
+      'owner',
+      'publicUseApproved',
+      'sourceReference',
+    ],
+    `${label} provenance`,
+  )
+  if (Object.hasOwn(media, 'dimensions') && media.dimensions !== null) {
+    const dimensions = requireObject(media.dimensions, `${label} dimensions`)
+    assertExactKeys(dimensions, ['height', 'width'], `${label} dimensions`)
+  }
+  if (Object.hasOwn(media, 'videoFrames') && media.videoFrames !== null) {
+    for (const [index, entry] of requireArray(
+      media.videoFrames,
+      `${label} video frames`,
+    ).entries()) {
+      const frame = requireObject(entry, `${label} video frame ${index}`)
+      assertExactKeys(
+        frame,
+        keysWithOptional(frame, ['position', 'relativePath'], ['label', 'timestampSeconds']),
+        `${label} video frame ${index}`,
+      )
+    }
+  }
+}
+
+const assertTourSourceSchema = (value: unknown, index: number): void => {
+  const label = `tour source ${index}`
+  const tour = requireObject(value, label)
+  assertExactKeys(
+    tour,
+    keysWithOptional(
+      tour,
+      ['tourID', 'tourSlug'],
+      [
+        'gallery',
+        'heroMedia',
+        'itineraryDays',
+        'marketCard',
+        'meta',
+        'relatedCardMedia',
+        'routeViz',
+      ],
+    ),
+    label,
+  )
+  const assertMediaArray = (candidate: unknown, fieldLabel: string): void => {
+    if (candidate === null) return
+    for (const [mediaIndex, media] of requireArray(candidate, fieldLabel).entries()) {
+      assertMediaSourceSchema(media, `${fieldLabel} ${mediaIndex}`)
+    }
+  }
+  if (Object.hasOwn(tour, 'heroMedia') && tour.heroMedia !== null) {
+    assertMediaSourceSchema(tour.heroMedia, `${label} hero media`)
+  }
+  if (Object.hasOwn(tour, 'gallery')) assertMediaArray(tour.gallery, `${label} gallery`)
+  if (Object.hasOwn(tour, 'relatedCardMedia')) {
+    assertMediaArray(tour.relatedCardMedia, `${label} related card media`)
+  }
+  if (Object.hasOwn(tour, 'itineraryDays') && tour.itineraryDays !== null) {
+    for (const [dayIndex, entry] of requireArray(
+      tour.itineraryDays,
+      `${label} itinerary days`,
+    ).entries()) {
+      const day = requireObject(entry, `${label} itinerary day ${dayIndex}`)
+      assertExactKeys(
+        day,
+        keysWithOptional(day, [], ['gallery', 'media']),
+        `${label} itinerary day ${dayIndex}`,
+      )
+      if (Object.hasOwn(day, 'media') && day.media !== null) {
+        assertMediaSourceSchema(day.media, `${label} itinerary day ${dayIndex} media`)
+      }
+      if (Object.hasOwn(day, 'gallery')) {
+        assertMediaArray(day.gallery, `${label} itinerary day ${dayIndex} gallery`)
+      }
+    }
+  }
+  for (const [field, childField] of [
+    ['marketCard', 'thumbnailOverride'],
+    ['meta', 'image'],
+    ['routeViz', 'mapImage'],
+  ] as const) {
+    if (!Object.hasOwn(tour, field) || tour[field] === null) continue
+    const container = requireObject(tour[field], `${label} ${field}`)
+    assertExactKeys(
+      container,
+      keysWithOptional(container, [], [childField]),
+      `${label} ${field}`,
+    )
+    if (Object.hasOwn(container, childField) && container[childField] !== null) {
+      assertMediaSourceSchema(container[childField], `${label} ${field} ${childField}`)
+    }
+  }
+}
+
+const assertReleaseEnvelopeSchema = (value: unknown): WingsSideTourMediaReleaseEnvelope => {
+  const envelope = requireObject(value, 'release envelope')
+  assertExactKeys(
+    envelope,
+    ['artifactType', 'payload', 'schemaVersion', 'signature'],
+    'release envelope',
+  )
+  const signature = requireObject(envelope.signature, 'release envelope signature')
+  assertExactKeys(
+    signature,
+    ['algorithm', 'signerID', 'valueBase64'],
+    'release envelope signature',
+  )
+  const payload = requireObject(envelope.payload, 'release envelope payload')
+  assertExactKeys(
+    payload,
+    [
+      'manifestSha256',
+      'mediaPolicies',
+      'releaseArtifact',
+      'releaseBinding',
+      'sourceArtifact',
+      'tourInventorySha256',
+    ],
+    'release envelope payload',
+  )
+  assertReleaseBindingSchema(payload.releaseBinding, 'release envelope binding')
+  for (const field of ['releaseArtifact', 'sourceArtifact'] as const) {
+    const artifact = requireObject(payload[field], `release envelope ${field}`)
+    assertExactKeys(artifact, ['relativePath', 'sha256'], `release envelope ${field}`)
+  }
+  for (const [index, entry] of requireArray(
+    payload.mediaPolicies,
+    'release envelope media policies',
+  ).entries()) {
+    const mediaPolicy = requireObject(entry, `release envelope media policy ${index}`)
+    assertExactKeys(
+      mediaPolicy,
+      [
+        'assetSha256',
+        'manualReviewArtifactSha256',
+        'mediaID',
+        'ocrArtifactSha256',
+        'ocrAttesterID',
+        'ocrEngine',
+        'ocrEngineVersion',
+        'reviewerID',
+        'rightsApproverID',
+        'rightsArtifactSha256',
+      ],
+      `release envelope media policy ${index}`,
+    )
+  }
+  return envelope as WingsSideTourMediaReleaseEnvelope
+}
+
+const assertProducerInputSchema = (input: unknown): void => {
+  assertJsonPlainData(input, 'producer input')
+  const source = requireObject(input, 'producer input')
+  assertExactKeys(
+    source,
+    ['approvedRoot', 'manifest', 'releaseBinding', 'releaseEnvelope', 'tours'],
+    'producer input',
+  )
+  requiredText(source.approvedRoot, 'approved root')
+  const manifest = requireObject(source.manifest, 'canonical manifest')
+  assertExactKeys(manifest, ['schemaVersion', 'tours'], 'canonical manifest')
+  for (const [index, entry] of requireArray(manifest.tours, 'canonical manifest tours').entries()) {
+    const tour = requireObject(entry, `canonical manifest tour ${index}`)
+    assertExactKeys(tour, ['tourID', 'tourSlug'], `canonical manifest tour ${index}`)
+  }
+  assertReleaseBindingSchema(source.releaseBinding, 'release binding')
+  assertReleaseEnvelopeSchema(source.releaseEnvelope)
+  for (const [index, tour] of requireArray(source.tours, 'tour sources').entries()) {
+    assertTourSourceSchema(tour, index)
   }
 }
 
@@ -507,7 +811,7 @@ const loadProtectedEvidencePolicy = (): ProtectedEvidencePolicy => {
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
     throw new Error('WingSide media evidence protected release policy must be an object')
   }
-  assertPlainData(parsed, 'protected release policy')
+  assertJsonPlainData(parsed, 'protected release policy')
   assertExactKeys(parsed, ['publicKeys', 'release', 'schemaVersion', 'signerACL'], 'release policy')
   const artifact = parsed as ProtectedEvidencePolicyArtifact
   if (
@@ -740,7 +1044,6 @@ const produceMedia = async (
   policy: ReleaseEnvelopeMediaPolicy,
   protectedPolicy: ProtectedEvidencePolicy,
   signatureRecords: VerifiedSignatureRecord[],
-  hooks?: ApprovedReadHooks,
 ): Promise<NormalizedMediaAuditInput> => {
   assertProvenance(source.provenance)
   assertManualReview(source.manualReview)
@@ -750,14 +1053,13 @@ const produceMedia = async (
   if (policy.mediaID !== mediaID) {
     throw new Error('WingSide media evidence media policy identity mismatch')
   }
-  const asset = await readApprovedFile(approvedRoot, source.relativePath, hooks)
+  const asset = await readApprovedFile(approvedRoot, source.relativePath)
   if (asset.sha256 !== policy.assetSha256) {
     throw new Error('WingSide media evidence asset bytes do not match protected envelope')
   }
   const reviewArtifact = await readApprovedFile(
     approvedRoot,
     source.manualReview.artifactRelativePath,
-    hooks,
   )
   if (
     source.manualReview.artifactSha256 !== reviewArtifact.sha256 ||
@@ -805,7 +1107,6 @@ const produceMedia = async (
   const rightsArtifact = await readApprovedFile(
     approvedRoot,
     source.provenance.artifactRelativePath,
-    hooks,
   )
   if (
     source.provenance.artifactSha256 !== rightsArtifact.sha256 ||
@@ -877,7 +1178,7 @@ const produceMedia = async (
       ) {
         throw new Error('WingSide media evidence video frame position or timestamp is invalid')
       }
-      const file = await readApprovedFile(approvedRoot, frame.relativePath, hooks)
+      const file = await readApprovedFile(approvedRoot, frame.relativePath)
       return {
         bytes: file.bytes,
         label: requiredText(frame.label ?? `scene-${index + 1}`, 'video frame label'),
@@ -892,7 +1193,6 @@ const produceMedia = async (
   const ocrArtifactFile = await readApprovedFile(
     approvedRoot,
     source.ocrArtifactRelativePath,
-    hooks,
   )
   if (
     source.ocrArtifactSha256 !== ocrArtifactFile.sha256 ||
@@ -1001,13 +1301,15 @@ const produceMedia = async (
 
   return {
     checksum: asset.sha256,
-    dimensions: source.dimensions,
+    ...(source.dimensions === undefined ? {} : { dimensions: source.dimensions }),
     filename: path.basename(asset.absolutePath),
     id: source.id,
     kind,
     manualReview: {
       artifactSha256: reviewArtifact.sha256,
-      reason: signedReview.payload.reason,
+      ...(signedReview.payload.reason === undefined
+        ? {}
+        : { reason: signedReview.payload.reason }),
       reviewedAt: signedReview.payload.reviewedAt,
       reviewerID: signedReview.payload.reviewerID,
       state: signedReview.payload.state,
@@ -1113,13 +1415,11 @@ export const parseWingsSideTourMediaEvidenceCliArguments = (
 const verifyReleaseEnvelope = async ({
   approvedRoot,
   envelope,
-  hooks,
   policy,
   signatureRecords,
 }: {
   approvedRoot: string
   envelope: WingsSideTourMediaReleaseEnvelope
-  hooks?: ApprovedReadHooks
   policy: ProtectedEvidencePolicy
   signatureRecords: VerifiedSignatureRecord[]
 }): Promise<{
@@ -1237,12 +1537,10 @@ const verifyReleaseEnvelope = async ({
   const sourceArtifact = await readApprovedFile(
     approvedRoot,
     envelope.payload.sourceArtifact.relativePath,
-    hooks,
   )
   const releaseArtifact = await readApprovedFile(
     approvedRoot,
     envelope.payload.releaseArtifact.relativePath,
-    hooks,
   )
   if (sourceArtifact.sha256 !== envelope.payload.sourceArtifact.sha256) {
     throw new Error('WingSide media evidence source snapshot actual byte checksum mismatch')
@@ -1285,28 +1583,15 @@ export const produceWingsSideTourMediaEvidence = async (
   input: {
   approvedRoot: string
   manifest: WingsSideTourMediaManifest
-  readHooks?: ApprovedReadHooks
   releaseEnvelope: WingsSideTourMediaReleaseEnvelope
   releaseBinding: WingsSideTourMediaReleaseBinding
   tours: LocalTourMediaEvidenceSource[]
   },
 ): Promise<WingsSideTourMediaEvidenceResult> => {
-  assertExactKeys(
-    input,
-    [
-      'approvedRoot',
-      'manifest',
-      ...(Object.hasOwn(input, 'readHooks') ? ['readHooks'] : []),
-      'releaseBinding',
-      'releaseEnvelope',
-      'tours',
-    ],
-    'producer input',
-  )
+  assertProducerInputSchema(input)
   const {
     approvedRoot,
     manifest,
-    readHooks,
     releaseEnvelope,
     releaseBinding,
     tours,
@@ -1330,7 +1615,6 @@ export const produceWingsSideTourMediaEvidence = async (
   const verifiedEnvelope = await verifyReleaseEnvelope({
     approvedRoot: root,
     envelope: releaseEnvelope,
-    hooks: readHooks,
     policy: protectedPolicy,
     signatureRecords,
   })
@@ -1349,7 +1633,6 @@ export const produceWingsSideTourMediaEvidence = async (
       policy,
       protectedPolicy,
       signatureRecords,
-      readHooks,
     )
     producedMedia.set(key, pending)
     return pending
@@ -1419,15 +1702,9 @@ export const produceWingsSideTourMediaEvidence = async (
     releaseEvidenceChecksum,
     report,
   } as WingsSideTourMediaEvidenceResult
-  Object.defineProperty(result, verifiedEvidenceBrand, {
-    configurable: false,
-    enumerable: false,
-    value: true,
-    writable: false,
-  })
-  assertPlainData(result, 'authenticated result')
+  assertJsonPlainData(result, 'authenticated result')
   deepFreeze(result)
-  assertDeepFrozenPlainData(result, 'authenticated result')
+  assertDeepFrozenJsonData(result, 'authenticated result')
   const resultChecksum = wingsSideTourMediaAuditChecksum({
     bundle: result.bundle,
     releaseEvidenceChecksum: result.releaseEvidenceChecksum,
@@ -1445,9 +1722,9 @@ export const produceWingsSideTourMediaEvidence = async (
     })),
     sourceArtifactSha256: verifiedEnvelope.sourceArtifactSha256,
   }
-  assertPlainData(authenticatedRecord, 'authenticated proof')
+  assertJsonPlainData(authenticatedRecord, 'authenticated proof')
   deepFreeze(authenticatedRecord)
-  assertDeepFrozenPlainData(authenticatedRecord, 'authenticated proof')
+  assertDeepFrozenJsonData(authenticatedRecord, 'authenticated proof')
   authenticatedEvidenceResults.set(result, authenticatedRecord)
   return result
 }
@@ -1461,7 +1738,7 @@ export const assertWingsSideTourMediaEvidenceReleaseGate = (
       'WingSide media evidence release result was not created by the authenticated producer',
     )
   }
-  assertDeepFrozenPlainData(result, 'authenticated result')
+  assertDeepFrozenJsonData(result, 'authenticated result')
   const protectedPolicy = loadProtectedEvidencePolicy()
   const trusted = protectedPolicy.artifact.release
   const currentResultChecksum = wingsSideTourMediaAuditChecksum({

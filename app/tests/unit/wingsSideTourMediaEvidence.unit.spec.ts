@@ -5,7 +5,7 @@ import {
   type KeyObject,
 } from 'node:crypto'
 import { writeFileSync } from 'node:fs'
-import { mkdtemp, rm, unlink, writeFile } from 'node:fs/promises'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -312,7 +312,7 @@ describe('WingSide authenticated local media evidence producer', () => {
       tours: tours(media()),
     } as unknown as Partial<Parameters<typeof produceWingsSideTourMediaEvidence>[0]>
     await expect(produce(obsoleteVerifierInjection)).rejects.toThrow(
-      'producer input schema contains missing or unknown fields',
+      /producer input.*JSON-compatible primitive values|schema contains missing or unknown fields/,
     )
   })
 
@@ -541,21 +541,74 @@ describe('WingSide authenticated local media evidence producer', () => {
     await expect(produce({ tours: tours(video) })).rejects.toThrow('asset binding mismatch')
   })
 
-  it('rejects a path swap after initial realpath instead of reading through it', async () => {
-    let swapped = false
+  it('rejects executable read-hook injection at the producer boundary', async () => {
     await expect(
       produce({
         readHooks: {
-          afterInitialRealpath: async (lexicalPath) => {
-            if (!swapped && lexicalPath.endsWith(`${path.sep}asset.jpg`)) {
-              swapped = true
-              await unlink(lexicalPath)
-              await writeFile(lexicalPath, 'replacement-file')
-            }
-          },
+          afterInitialRealpath: async () => undefined,
         },
-      }),
-    ).rejects.toThrow(/path changed|identity changed/)
+      } as unknown as Partial<Parameters<typeof produceWingsSideTourMediaEvidence>[0]>),
+    ).rejects.toThrow(/JSON-compatible primitive|schema contains missing or unknown fields/)
+  })
+
+  it('rejects every non-JSON or non-canonical release-binding shape before authentication', async () => {
+    const binding = (): WingsSideTourMediaReleaseBinding & Record<PropertyKey, unknown> => ({
+      ...releaseBinding,
+      source: { ...releaseBinding.source },
+    })
+    const candidates: Array<{
+      name: string
+      value: WingsSideTourMediaReleaseBinding & Record<PropertyKey, unknown>
+    }> = []
+
+    const enumerableFunction = binding()
+    enumerableFunction.executable = () => 'not canonical'
+    candidates.push({ name: 'enumerable function', value: enumerableFunction })
+
+    const nonEnumerableFunction = binding()
+    Object.defineProperty(nonEnumerableFunction, 'hiddenExecutable', {
+      configurable: true,
+      value: () => 'not canonical',
+    })
+    candidates.push({ name: 'non-enumerable function', value: nonEnumerableFunction })
+
+    const undefinedLeaf = binding()
+    ;(undefinedLeaf.source as Record<string, unknown>).extra = undefined
+    candidates.push({ name: 'undefined', value: undefinedLeaf })
+
+    const bigintLeaf = binding()
+    ;(bigintLeaf.source as Record<string, unknown>).extra = 1n
+    candidates.push({ name: 'bigint', value: bigintLeaf })
+
+    const symbolKey = binding()
+    symbolKey[Symbol('hidden-authority')] = true
+    candidates.push({ name: 'symbol key', value: symbolKey })
+
+    const symbolValue = binding()
+    ;(symbolValue.source as Record<string, unknown>).extra = Symbol('hidden-value')
+    candidates.push({ name: 'symbol value', value: symbolValue })
+
+    let accessorCalls = 0
+    const accessor = binding()
+    Object.defineProperty(accessor.source, 'sha256', {
+      configurable: true,
+      enumerable: true,
+      get: () => {
+        accessorCalls += 1
+        return sourceSha
+      },
+    })
+    candidates.push({ name: 'accessor', value: accessor })
+
+    for (const candidate of candidates) {
+      await expect(
+        produce({ releaseBinding: candidate.value }),
+        candidate.name,
+      ).rejects.toThrow(
+        /JSON-compatible primitive|accessors|non-enumerable|symbol keys|schema contains missing or unknown fields/,
+      )
+    }
+    expect(accessorCalls).toBe(0)
   })
 
   it('rejects protected-policy substitution at the combined gate', async () => {
