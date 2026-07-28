@@ -1,0 +1,86 @@
+body[data-site-code='wing-side'] .tour-detail--consultative {
+  --tour-sticky-nav-offset: 7.75rem;
+  --tour-sticky-cta-space: 6.5rem;
+}
+
+body[data-site-code='wing-side']
+  .tour-detail--consultative
+  :is(
+    #route,
+    #why-choose,
+    #facts,
+    #gallery,
+    #reviews,
+    #itinerary,
+    #services,
+    #departures,
+    #enquire,
+    #faq,
+    #related
+  ) {
+  scroll-margin-top: var(--tour-sticky-nav-offset);
+}
+
+body[data-site-code='wing-side'] .tour-detail--consultative .tour-enquiry-form,
+body[data-site-code='wing-side'] .tour-detail--consultative #enquire {
+  min-width: 0;
+  padding-bottom: var(--tour-sticky-cta-space);
+}
+
+body[data-site-code='wing-side']
+  .tour-detail--consultative
+  .tour-enquiry-form
+  :is(input, select, textarea, [role='alert']) {
+  scroll-margin-block: var(--tour-sticky-nav-offset) var(--tour-sticky-cta-space);
+}
+
+body[data-site-code='wing-side']
+  .tour-detail--consultative
+  .tour-enquiry-form
+  :is(.layout-block--form, .site-lead-form-shell, .site-lead-form-card) {
+  width: 100%;
+  max-width: none;
+}
+
+body[data-site-code='wing-side']
+  .tour-detail--consultative
+  .tour-enquiry-form
+  .site-lead-form-shell {
+  display: block;
+}
+
+body[data-site-code='wing-side']
+  .tour-detail--consultative
+  .tour-enquiry-form
+  .site-lead-form-aside {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  body[data-site-code='wing-side'] .tour-detail--consultative .tour-enquiry-form .site-form-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 1rem;
+  }
+
+  body[data-site-code='wing-side']
+    .tour-detail--consultative
+    .tour-enquiry-form
+    .site-form-field[data-form-field-type='textarea'],
+  body[data-site-code='wing-side']
+    .tour-detail--consultative
+    .tour-enquiry-form
+    .site-form-field[data-form-field-type='checkbox'] {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1023px) {
+  body[data-site-code='wing-side'] .tour-detail--consultative {
+    padding-bottom: calc(var(--tour-sticky-cta-space) + env(safe-area-inset-bottom));
+  }
+
+  body[data-site-code='wing-side'] .tour-detail--consultative #enquire {
+    padding-bottom: calc(var(--tour-sticky-cta-space) + env(safe-area-inset-bottom));
+  }
+}

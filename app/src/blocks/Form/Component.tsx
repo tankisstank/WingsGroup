@@ -18,6 +18,8 @@ import { TurnstileWidget } from './TurnstileWidget'
 import type { LocalizedCopy } from '@/i18n/publicCopy'
 import type { LeadSubmissionContext } from '@/lead-capture/types'
 
+import './form-layout.css'
+
 export type FormBlockType = {
   blockName?: string
   blockType?: 'formBlock'
@@ -198,8 +200,7 @@ const formCopy = {
     required: 'bắt buộc',
     requiredMessage: 'Vui lòng điền thông tin này',
     submit: 'Gửi yêu cầu',
-    successDescription:
-      'Đội ngũ tư vấn sẽ đọc nội dung và phản hồi với hướng đề xuất phù hợp.',
+    successDescription: 'Đội ngũ tư vấn sẽ đọc nội dung và phản hồi với hướng đề xuất phù hợp.',
     successTitle: 'Đã nhận yêu cầu',
   },
 } as const satisfies LocalizedCopy<FormLocalizedCopy>
@@ -221,7 +222,9 @@ const sanitizeFormControlSegment = (value?: null | string) =>
 const getFieldControlID = (formID: string | number, fieldName: string) =>
   `${sanitizeFormControlSegment(String(formID))}-${sanitizeFormControlSegment(fieldName)}`
 
-const readLeadSubmissionContext = (form: HTMLFormElement | null): LeadSubmissionContext | undefined => {
+const readLeadSubmissionContext = (
+  form: HTMLFormElement | null,
+): LeadSubmissionContext | undefined => {
   const serialized = form?.dataset.wsEnquiryContext
   if (!serialized) return undefined
 
@@ -404,9 +407,7 @@ export const FormBlock: React.FC<
       if (!firstInvalidName || !formID) return
 
       const form = formRef.current
-      const target = form?.ownerDocument.getElementById(
-        getFieldControlID(formID, firstInvalidName),
-      )
+      const target = form?.ownerDocument.getElementById(getFieldControlID(formID, firstInvalidName))
 
       if (form && target && form.contains(target)) {
         target.focus()
@@ -534,7 +535,7 @@ export const FormBlock: React.FC<
                     value={honeypot}
                   />
                 </div>
-                <div className="mb-4 last:mb-0">
+                <div className="site-form-fields mb-4 last:mb-0">
                   {localizedForm &&
                     localizedForm.fields &&
                     localizedForm.fields?.map((field, index) => {
@@ -542,7 +543,11 @@ export const FormBlock: React.FC<
                       const Field: React.FC<any> = fields?.[field.blockType as keyof typeof fields]
                       if (Field) {
                         return (
-                          <div className="mb-6 last:mb-0" key={index}>
+                          <div
+                            className="site-form-field mb-6 last:mb-0"
+                            data-form-field-type={field.blockType}
+                            key={index}
+                          >
                             <Field
                               form={localizedForm}
                               {...field}

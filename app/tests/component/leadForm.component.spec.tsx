@@ -68,8 +68,11 @@ describe('lead form hardened submission', () => {
 
   it('uses the bounded endpoint and prevents a second submit while pending', async () => {
     let resolveFetch: ((value: Response) => void) | undefined
-    const fetchMock = vi.fn((_input: RequestInfo | URL, _init?: RequestInit) =>
-      new Promise<Response>((resolve) => { resolveFetch = resolve }),
+    const fetchMock = vi.fn(
+      (_input: RequestInfo | URL, _init?: RequestInit) =>
+        new Promise<Response>((resolve) => {
+          resolveFetch = resolve
+        }),
     )
     vi.stubGlobal('fetch', fetchMock)
 
@@ -93,9 +96,16 @@ describe('lead form hardened submission', () => {
   })
 
   it('shows the Turnstile path only when the server requests a challenge', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ challengeRequired: true, siteKey: 'test-site-key' }), { status: 403 }),
-    ))
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(JSON.stringify({ challengeRequired: true, siteKey: 'test-site-key' }), {
+            status: 403,
+          }),
+        ),
+    )
 
     render(<FormBlock enableIntro={false} form={form as never} />)
     fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'Alice' } })
@@ -140,6 +150,14 @@ describe('lead form hardened submission', () => {
     const fullNameFields = screen.getAllByLabelText(/Full name/)
     expect(fullNameFields[0]?.getAttribute('id')).toBe('planner-form-full-name')
     expect(fullNameFields[1]?.getAttribute('id')).toBe('contact-form-full-name')
+    expect(document.querySelectorAll('.site-form-fields')).toHaveLength(2)
+    expect(fullNameFields[0]?.closest<HTMLElement>('.site-form-field')?.dataset.formFieldType).toBe(
+      'text',
+    )
+    expect(
+      screen.getAllByLabelText(/Message/)[0]?.closest<HTMLElement>('.site-form-field')?.dataset
+        .formFieldType,
+    ).toBe('textarea')
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Send brief' })[0])
 
@@ -224,9 +242,9 @@ describe('lead form hardened submission', () => {
   })
 
   it('keeps customer message clean and submits validated tour context separately', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ status: 'accepted' }), { status: 202 }),
-    )
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify({ status: 'accepted' }), { status: 202 }))
     vi.stubGlobal('fetch', fetchMock)
     const enquiryForm = {
       ...form,
@@ -269,7 +287,8 @@ describe('lead form hardened submission', () => {
       field: 'message',
       value: 'Please share availability.',
     })
-    expect(body.submissionData.find(({ field }: { field: string }) => field === 'message').value)
-      .not.toMatch(/Tour slug|Tour ID|Source|Discovery/)
+    expect(
+      body.submissionData.find(({ field }: { field: string }) => field === 'message').value,
+    ).not.toMatch(/Tour slug|Tour ID|Source|Discovery/)
   })
 })

@@ -180,9 +180,9 @@ describe('WingSideJourneysClient', () => {
     expect(within(empty).getByRole('link', { name: 'Share this brief' }).getAttribute('href')).toBe(
       '/plan-your-trip?intent=inquiry&source=journeys&destination=sapa&style=business&duration=8-14',
     )
-    expect(
-      within(empty).getByRole('link', { name: 'Remove Business' }).getAttribute('href'),
-    ).toBe('/journeys?destination=sapa&duration=8-14')
+    expect(within(empty).getByRole('link', { name: 'Remove Business' }).getAttribute('href')).toBe(
+      '/journeys?destination=sapa&duration=8-14',
+    )
     expect(
       within(empty).getByRole('link', { name: 'View all journeys' }).getAttribute('href'),
     ).toBe('/journeys')
@@ -192,7 +192,7 @@ describe('WingSideJourneysClient', () => {
     expect(screen.queryByRole('link', { name: /private hanoi/i })).toBeNull()
   })
 
-  it('uses full-document replace for shareable public URL state', () => {
+  it('uses an in-app transition for shareable public URL state and retains focus', () => {
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 128 })
     render(<WingSideJourneysClient context={context()} locale="en" />)
     screen.getByLabelText('Duration').focus()
@@ -200,14 +200,10 @@ describe('WingSideJourneysClient', () => {
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '1-7' } })
 
     const href = '/wingsside/journeys?destination=hanoi&style=culture&duration=1-7'
-    expect(navigation.replaceDocumentLocation).toHaveBeenCalledWith(href)
-    expect(router.replace).not.toHaveBeenCalled()
+    expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
+    expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
-    expect(JSON.parse(window.sessionStorage.getItem(restoreKey) || '{}')).toEqual({
-      focusName: 'duration',
-      href,
-      scrollY: 128,
-    })
+    expect(window.sessionStorage.getItem(restoreKey)).toBeNull()
     expect(document.activeElement).toBe(screen.getByLabelText('Duration'))
   })
 
@@ -225,8 +221,8 @@ describe('WingSideJourneysClient', () => {
     fireEvent.change(screen.getByLabelText('Điểm đến'), { target: { value: 'hue' } })
 
     const href = '/wingsside/vi/journeys?destination=hue&style=culture&duration=8-14'
-    expect(navigation.replaceDocumentLocation).toHaveBeenCalledWith(href)
-    expect(router.replace).not.toHaveBeenCalled()
+    expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
+    expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(screen.getByLabelText('Điểm đến'))
   })
@@ -253,20 +249,89 @@ describe('WingSideJourneysClient', () => {
     fireEvent.change(screen.getByLabelText('Style'), { target: { value: 'family' } })
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '15-plus' } })
 
-    expect(navigation.replaceDocumentLocation).toHaveBeenNthCalledWith(
-      1,
-      '/wingsside/journeys?destination=hanoi',
-    )
-    expect(navigation.replaceDocumentLocation).toHaveBeenNthCalledWith(
+    expect(router.replace).toHaveBeenNthCalledWith(1, '/wingsside/journeys?destination=hanoi', {
+      scroll: false,
+    })
+    expect(router.replace).toHaveBeenNthCalledWith(
       2,
       '/wingsside/journeys?destination=hanoi&style=family',
+      { scroll: false },
     )
-    expect(navigation.replaceDocumentLocation).toHaveBeenNthCalledWith(
+    expect(router.replace).toHaveBeenNthCalledWith(
       3,
       '/wingsside/journeys?destination=hanoi&style=family&duration=15-plus',
+      { scroll: false },
     )
-    expect(router.replace).not.toHaveBeenCalled()
+    expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
+  })
+
+  it('shows eight recommended cards first, supports search and loads more without changing filters', () => {
+    const items = Array.from({ length: 10 }, (_, index) => ({
+      ...context().result.items[0]!,
+      duration: { days: 10 - index, nights: 9 - index },
+      href: `/tour/journey-${index + 1}`,
+      id: index + 1,
+      slug: `journey-${index + 1}`,
+      summary: index === 9 ? 'A quiet Mekong route.' : `Published journey ${index + 1}.`,
+      title: index === 9 ? 'Mekong Slow Days' : `Journey ${index + 1}`,
+    }))
+
+    render(
+      <WingSideJourneysClient
+        context={context({ result: { ...context().result, items, total: items.length } })}
+        locale="en"
+      />,
+    )
+
+    expect(screen.getAllByRole('link', { name: /journey|mekong/i })).toHaveLength(8)
+    expect(
+      screen.getByRole('heading', { name: /10 journeys for Hanoi · Culture · 8-14 days/ }),
+    ).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Load more journeys' }))
+    expect(screen.getAllByRole('link', { name: /journey|mekong/i })).toHaveLength(10)
+
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search journeys' }), {
+      target: { value: 'Mekong' },
+    })
+    expect(screen.getAllByRole('link', { name: /mekong/i })).toHaveLength(1)
+    expect(
+      screen.getByRole('heading', { name: /1 journey for Hanoi · Culture · 8-14 days/ }),
+    ).toBeTruthy()
+    expect(router.replace).not.toHaveBeenCalled()
+  })
+
+  it('sorts the current strict result set by duration without changing query state', () => {
+    const items = [
+      {
+        ...context().result.items[0]!,
+        duration: { days: 9, nights: 8 },
+        id: 1,
+        title: 'Long route',
+      },
+      {
+        ...context().result.items[0]!,
+        duration: { days: 3, nights: 2 },
+        id: 2,
+        title: 'Short route',
+      },
+    ]
+    render(
+      <WingSideJourneysClient
+        context={context({ result: { ...context().result, items, total: items.length } })}
+        locale="en"
+      />,
+    )
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Sort' }), {
+      target: { value: 'duration' },
+    })
+
+    const cards = screen.getAllByRole('link', { name: /route/i })
+    expect(cards[0]?.textContent).toContain('Short route')
+    expect(cards[1]?.textContent).toContain('Long route')
+    expect(router.replace).not.toHaveBeenCalled()
   })
 
   it('restores the changed filter focus and scroll after document navigation', () => {
