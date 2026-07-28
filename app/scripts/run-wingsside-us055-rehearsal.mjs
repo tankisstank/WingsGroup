@@ -9,9 +9,11 @@ import {
   rm,
   writeFile,
 } from 'node:fs/promises'
+import { request } from 'node:http'
+import { createServer } from 'node:net'
 import os from 'node:os'
 import path from 'node:path'
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 import {
@@ -32,7 +34,10 @@ import {
   prepareUs055CatalogLifecycle,
   publicKeyFingerprint,
 } from './lib/wingsSideUs055CatalogLifecycle.ts'
-import { runUs055AppliedStateE2EGate } from './lib/wingsSideUs055AppliedStateE2E.mjs'
+import {
+  runUs055AppliedStateE2EGate,
+  terminateUs055E2EProcessTree,
+} from './lib/wingsSideUs055AppliedStateE2E.mjs'
 import { captureUs055HomeFixtureProof } from './lib/wingsSideUs055HomeFixture.ts'
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -104,6 +109,49 @@ const lifecycleReleaseCommit = String(
 ).trim()
 const lifecycleRequested =
   process.env.US055_REHEARSAL_EXECUTE_CATALOG_LIFECYCLE === 'true'
+const homeDiagnosticRequested =
+  process.env.US055_REHEARSAL_HOME_DIAGNOSTIC === 'true'
+
+const ephemeralLoopbackPort = () =>
+  new Promise((resolve, reject) => {
+    const server = createServer()
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address()
+      if (!address || typeof address === 'string') {
+        server.close()
+        reject(new Error('US-055 Home diagnostic could not allocate a loopback port'))
+        return
+      }
+      server.close((error) => (error ? reject(error) : resolve(address.port)))
+    })
+  })
+
+const requestLocalHome = (port) =>
+  new Promise((resolve, reject) => {
+    const req = request(
+      {
+        hostname: '127.0.0.1',
+        method: 'GET',
+        path: '/wingsside',
+        port,
+      },
+      (response) => {
+        const chunks = []
+        response.on('data', (chunk) => chunks.push(Buffer.from(chunk)))
+        response.once('error', reject)
+        response.once('end', () =>
+          resolve({
+            body: Buffer.concat(chunks).toString('utf8'),
+            status: response.statusCode || 0,
+          }),
+        )
+      },
+    )
+    req.setTimeout(30_000, () => req.destroy(new Error('Home diagnostic request timed out')))
+    req.once('error', reject)
+    req.end()
+  })
 
 const journal = async (stage, state, details = {}) => {
   await mkdir(journalRoot, { recursive: true })
@@ -530,6 +578,66 @@ try {
   record('seed-full-frozen-source', sourceProof)
   record('seed-home-why-travel', homeWhyTravelProof)
   await journal('rehearsal-seed', 'after', { ...sourceProof, homeWhyTravelProof })
+
+  if (homeDiagnosticRequested) {
+    await journal('home-route-diagnostic', 'before')
+    const port = await ephemeralLoopbackPort()
+    const server = spawn(
+      'pnpm',
+      ['exec', 'next', 'dev', '--webpack', '--hostname', '127.0.0.1', '--port', String(port)],
+      {
+        cwd: appRoot,
+        detached: process.platform !== 'win32',
+        env: guardedEnv,
+        shell: process.platform === 'win32',
+        stdio: 'ignore',
+        windowsHide: true,
+      },
+    )
+    try {
+      let response
+      for (let attempt = 0; attempt < 180; attempt += 1) {
+        if (server.exitCode !== null || server.signalCode !== null) {
+          throw new Error('US-055 Home diagnostic Next server exited before readiness')
+        }
+        try {
+          response = await requestLocalHome(port)
+          if (response.status === 200) break
+        } catch {
+          // Expected while the isolated Next server compiles.
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1_000))
+      }
+      const requiredMarkers = [
+        'data-od-id="home-why"',
+        'data-od-id="why-featured"',
+        'data-od-id="why-flexible"',
+        'data-od-id="why-style"',
+        'data-od-id="why-care"',
+      ]
+      if (
+        response?.status !== 200 ||
+        !requiredMarkers.every((marker) => response.body.includes(marker)) ||
+        !response.body.includes('<html lang="en"') ||
+        !response.body.includes('href="https://wingside.vn"')
+      ) {
+        throw new Error(
+          `US-055 Home route diagnostic failed: status=${response?.status || 0}`,
+        )
+      }
+      const homeRouteProof = {
+        canonical: 'https://wingside.vn',
+        locale: 'en',
+        markerCount: 4,
+        path: '/wingsside',
+        status: 200,
+      }
+      record('home-route-diagnostic', homeRouteProof)
+      await journal('home-route-diagnostic', 'after', homeRouteProof)
+    } finally {
+      await terminateUs055E2EProcessTree(server)
+    }
+  }
 
   dockerSQL(
     database,
