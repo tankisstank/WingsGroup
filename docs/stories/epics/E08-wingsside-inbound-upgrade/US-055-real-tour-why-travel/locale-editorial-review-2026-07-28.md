@@ -1,8 +1,33 @@
 # US-055 Four-locale Editorial Review
 
-Review date: 2026-07-28  
-Reviewer: independent Codex editorial review  
-Decision: **candidate ready for Product/Content review; not approved for production**
+- Review date: 2026-07-28
+- Reviewer: independent Codex editorial review
+- Content approval date: 2026-07-28
+- Content approver: project owner through the active Codex session
+- Decision: **approved for the four-locale tour-content scope; not approved for production**
+
+## Approval record
+
+The project owner explicitly accepted the reviewed content with the instruction
+`chấp nhận nội dung đó`. The approval is bound to commit
+`d7e69400872d40596bdc94b6c2bb9ec9633e9672` and the four artifact SHA-256
+values below.
+
+Approval includes:
+
+- the complete 22-tour `vi`, `it`, `es` and `pt` files;
+- the independent editorial redlines recorded in this document;
+- the audience profiles listed below; and
+- European Portuguese (`pt-PT`) as the intended profile for repository locale
+  key `pt`.
+
+The project owner accepted this content without requiring a separate
+native-language approval gate. Any later byte change invalidates this approval
+and requires a new checksum-bound review.
+
+Approval does not include the 38 governed pricing-disclosure decisions, a
+catalog-v2 review artifact or signature, English source rewrites, media,
+production plans, database writes or deployment.
 
 ## Scope
 
@@ -14,12 +39,11 @@ WingSide tour products:
 | `vi` | Vietnamese for Vietnam (`vi-VN`) | 22 | `51a34eff906548413eaf774f0c840547395eff9228ca0a2eb18880f496970725` |
 | `it` | Italian for Italy (`it-IT`) | 22 | `e0aefa38b7ec57d45856cca449a94a20fc435412c6a5fc022ad23fdf6877eff8` |
 | `es` | International Spanish, suitable for a broad European/inbound audience | 22 | `d7e000a482f31ffb039defeb7753452fca9be4fc38418b0928817e6bb46eb741` |
-| `pt` | European Portuguese candidate (`pt-PT`) | 22 | `f796d35566ab2225afea7900b82430759981567d9f0c87557e9e0c968b6a2653` |
+| `pt` | European Portuguese (`pt-PT`) | 22 | `f796d35566ab2225afea7900b82430759981567d9f0c87557e9e0c968b6a2653` |
 
-The repository locale key remains `pt`. Product/Content must confirm the
-`pt-PT` audience before any broad orthography normalization. The current copy
-already uses European Portuguese vocabulary such as `Vietname`,
-`pequeno-almoço`, `autocarro` and `planeie`.
+The repository locale key remains `pt`; the approved audience profile is
+`pt-PT`. The current copy uses European Portuguese vocabulary such as
+`Vietname`, `pequeno-almoço`, `autocarro` and `planeie`.
 
 ## Independent findings and redlines
 
@@ -76,23 +100,20 @@ current disposable SQLite database has not been migrated and contains no
 locale-content finding. It must be rerun against the production-like
 PostgreSQL clone required by the release plan.
 
-## Remaining approval gates
+## Remaining release gates
 
-This review does **not** represent customer, Product or native-language
-approval. Production remains on HOLD until:
+The project-owner content approval is complete for the four hashed locale
+files. Production remains on HOLD until:
 
-1. Product/Content confirms the four audience profiles, especially `pt-PT`.
-2. A native or market-qualified reviewer accepts the complete four files, not
-   only the redlined excerpts.
-3. Product/Content approves the exact disposition and all four localized labels
+1. Product/Content approves the exact disposition and all four localized labels
    for the 38 governed pricing disclosures.
-4. The canonical version-2 source manifest and frozen source inventory are
+2. The canonical version-2 source manifest and frozen source inventory are
    supplied. They are not currently present as review artifacts in the
    repository.
-5. The protected catalog-v2 draft is generated from these exact artifact bytes.
-6. A trusted approver signs the complete review artifact, including every row
+3. The protected catalog-v2 draft is generated from these exact artifact bytes.
+4. A trusted approver signs the complete review artifact, including every row
    decision and `fullCandidateChecksum`.
-7. Reconciliation produces a valid catalog-v2 and the production-like
+5. Reconciliation produces a valid catalog-v2 and the production-like
    PostgreSQL apply/verify/rollback rehearsal passes.
 
 No approval artifact, signature, production plan, deployment or production

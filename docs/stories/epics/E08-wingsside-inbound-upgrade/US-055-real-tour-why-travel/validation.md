@@ -53,8 +53,9 @@ Implementation evidence:
 - The editorial catalog contains authored `vi`, `it`, `es`, and `pt` records
   for all 22 governed tours. An independent editorial redline removed
   customer-visible source-analysis language and corrected selected Italian,
-  Spanish and Portuguese calques. The exact candidate hashes, review scope and
-  remaining native/Product approval gates are recorded in
+  Spanish and Portuguese calques. On 2026-07-28, the project owner approved the
+  complete checksum-bound four-locale content and the `pt-PT` audience profile.
+  The exact hashes, approval scope and remaining release gates are recorded in
   `locale-editorial-review-2026-07-28.md`.
 - The governed four-slot projection fails closed for invalid, unpublished,
   cross-site or non-display-ready candidates.
@@ -85,9 +86,8 @@ Release remains intentionally held until:
 
 - the pricing-disclosure localization blocker recorded in
   `../go-live-audit-2026-07-28-implementation.md` is resolved;
-- Product/Content confirms the four audience profiles and approves the complete
-  redlined locale artifacts; the current independent review is a candidate
-  quality gate, not customer approval;
+- the approved four-locale artifact bytes are incorporated into the protected
+  catalog-v2 review and reconciliation flow without checksum drift;
 - the genuine application-owned Payload adapter, protected target-proof key
   material and production-like rehearsal are completed for the governed
   22-tour English runtime;

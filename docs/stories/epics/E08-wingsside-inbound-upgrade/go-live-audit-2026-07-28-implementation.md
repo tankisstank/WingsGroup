@@ -116,12 +116,13 @@ unsigned review/OCR evidence, structural result forgery and non-JSON checksum
 evasion. Final verdict: no remaining P0 or P1 code false-pass in these Wave 2
 boundaries.
 
-Production remains on `HOLD`: an independent editorial redline now exists for
-the complete 22-tour `vi`/`it`/`es`/`pt` candidate, but it is not customer or
-native-language approval and the repository still does not contain approved
-38-disclosure decisions. A genuine application-owned Payload adapter and
-protected target-proof key material, approved signed media assets/review/OCR
-evidence, and a production-like PostgreSQL rehearsal are also still missing.
+Production remains on `HOLD`: the project owner approved the checksum-bound
+22-tour `vi`/`it`/`es`/`pt` content and the `pt-PT` audience profile on
+2026-07-28. The repository still does not contain approved 38-disclosure
+decisions or a signed catalog-v2 review artifact. A genuine application-owned
+Payload adapter and protected target-proof key material, approved signed media
+assets/review/OCR evidence, and a production-like PostgreSQL rehearsal are also
+still missing.
 
 ## Verification
 
