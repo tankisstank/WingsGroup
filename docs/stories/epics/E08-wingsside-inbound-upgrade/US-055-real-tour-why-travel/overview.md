@@ -2,7 +2,7 @@
 
 ## Status
 
-in progress — mapping approved on 2026-07-28
+in progress — r3 catalog accepted; media and operational release gates blocked
 
 ## Lane
 

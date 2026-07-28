@@ -133,7 +133,38 @@ Accepted as truthful blocker evidence, not as completed D4-C:
 - zero accepted watermark-removal outputs after the first image edit changed
   subject/framing and RapidOCR produced a known false negative.
 
-Production remains held. The candidate content has not been reconciled into a
-signed catalog-v2 or applied to a database; D4-C media outputs, protected
-signing material, PostgreSQL rehearsal, five-locale browser evidence and an
-explicit production approval are still missing.
+At the end of run r2, production remained held because candidate content had
+not yet been reconciled into catalog-v2 or applied to a database; D4-C media
+outputs, protected signing material, PostgreSQL rehearsal, five-locale browser
+evidence and explicit production approval were still missing. Run r3 below
+supersedes the catalog-artifact and rehearsal-code portions of that status,
+while the protected production lifecycle and release gates remain open.
+
+## S3 execution update — run r3
+
+The corrective execution and independent review record is
+`s3-execution-2026-07-28-r3.md`.
+
+Completed and independently accepted:
+
+- protected catalog-v2 reconciliation for the exact `22 / 116 / 331 / 38 / 5`
+  inventory;
+- fail-closed validation that rejects `10/10` overlay-integrity attacks without
+  producing outputs;
+- deterministic D4-C disposition evidence for `586/586` source hashes; and
+- hardened disposable PostgreSQL rehearsal code with final-server readiness,
+  sanitized child environment and full-content backup/restore checks.
+
+Combined integration validation passes `71/631` unit, `14/74` component,
+TypeScript, lint with zero errors and the Webpack production build.
+
+Operational release remains held:
+
+- D4-C has `191` watermark-positive assets and `0` accepted edits;
+- the five-locale E2E gate reaches the application but finds only `22/110`
+  expected tour URLs because catalog-v2 is not applied to runtime data;
+- `C:` has no free space and Docker/WSL cannot complete the required three
+  consecutive PostgreSQL rehearsals or confirm cleanup of the last exact
+  rehearsal container; and
+- protected external release values and explicit production write/deploy
+  authority remain absent.
