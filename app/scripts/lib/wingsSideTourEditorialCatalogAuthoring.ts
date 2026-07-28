@@ -64,6 +64,13 @@ export type CatalogAuthoringDraftPacket = {
   expectedGovernedDisclosureCount: number
   generatedFrom: 'frozen-en-inventory-and-legacy-locales'
   governedDisclosureCount: number
+  localeArtifacts: Record<
+    WingsSideTourEditorialLocale,
+    {
+      artifactSha256: string
+      contentChecksum: string
+    }
+  >
   packetChecksum: string
   sourceManifestChecksum: string
   sourceManifestArtifactSha256: string
@@ -90,7 +97,15 @@ export type CatalogAuthoringReviewArtifact = {
   approvalManifest: PricingApprovalManifest
   decisions: ReviewedCatalogRowDecision[]
   draftPacketChecksum: string
+  fullCandidateChecksum: string
   version: 1
+}
+
+export type CatalogAuthoringLocaleArtifact = {
+  contentChecksum: string
+  locale: WingsSideTourEditorialLocale
+  sha256: string
+  value: Readonly<WingsSideTourEditorialLocaleFile>
 }
 
 export type CatalogAuthoringApprovalPolicy = {
@@ -164,7 +179,7 @@ export const readFrozenCatalogAuthoringArtifact = <T>({
   filePath: string
   io?: Pick<typeof fs, 'readFileSync'>
   validate: (value: unknown) => T
-}): { sha256: string; value: Readonly<T> } => {
+}): { contentChecksum: string; sha256: string; value: Readonly<T> } => {
   assertSha256(expectedSha256, 'Protected artifact checksum')
   const bytes = io.readFileSync(filePath)
   const sha256 = crypto.createHash('sha256').update(bytes).digest('hex')
@@ -175,7 +190,8 @@ export const readFrozenCatalogAuthoringArtifact = <T>({
   } catch {
     throw new Error(`Catalog artifact is invalid JSON: ${filePath}`)
   }
-  return { sha256, value: deepFreeze(validate(parsed)) }
+  const value = deepFreeze(validate(parsed))
+  return { contentChecksum: catalogAuthoringChecksum(value), sha256, value }
 }
 
 const withoutPacketChecksum = (packet: CatalogAuthoringDraftPacket) => {
@@ -258,6 +274,7 @@ export const parseCatalogAuthoringReviewArtifact = (
     throw new Error('Invalid catalog review artifact')
   }
   assertSha256(review.draftPacketChecksum, 'Review draft packet checksum')
+  assertSha256(review.fullCandidateChecksum, 'Review full candidate checksum')
   normalizeString(review.approvalManifest.approvalArtifactID, 'Approval artifact ID')
   normalizeString(review.approvalManifest.approvedAt, 'Approval timestamp')
   normalizeString(review.approvalManifest.approvedBy, 'Approval reviewer')
@@ -307,7 +324,72 @@ export const parseCatalogAuthoringDraftPacket = (value: unknown): CatalogAuthori
   assertSha256(draft.packetChecksum, 'Draft packet checksum')
   assertSha256(draft.sourceManifestChecksum, 'Draft source manifest checksum')
   assertSha256(draft.sourceManifestArtifactSha256, 'Draft source manifest artifact checksum')
+  if (
+    !isRecord(draft.localeArtifacts) ||
+    stableJSONStringify(Object.keys(draft.localeArtifacts).sort()) !==
+      stableJSONStringify([...wingsSideTourEditorialLocales].sort())
+  ) {
+    throw new Error('Draft locale artifacts must contain exactly vi,it,es,pt')
+  }
+  for (const locale of wingsSideTourEditorialLocales) {
+    const artifact = draft.localeArtifacts[locale]
+    if (!isRecord(artifact)) throw new Error(`Invalid draft ${locale} locale artifact`)
+    assertSha256(artifact.artifactSha256, `Draft ${locale} locale artifact checksum`)
+    assertSha256(artifact.contentChecksum, `Draft ${locale} locale content checksum`)
+  }
   return draft
+}
+
+export const parseCatalogAuthoringLocaleFile = (
+  value: unknown,
+  expectedLocale: WingsSideTourEditorialLocale,
+): WingsSideTourEditorialLocaleFile => {
+  if (!isRecord(value) || !Array.isArray(value.tours)) {
+    throw new Error(`Invalid ${expectedLocale} catalog locale artifact`)
+  }
+  const file = value as unknown as WingsSideTourEditorialLocaleFile
+  if (
+    file.version !== 1 ||
+    file.locale !== expectedLocale ||
+    file.voice !== 'calm-specific-consultative'
+  ) {
+    throw new Error(`Invalid ${expectedLocale} catalog locale artifact`)
+  }
+  return file
+}
+
+const verifiedLocaleFiles = (
+  localeArtifacts: readonly CatalogAuthoringLocaleArtifact[],
+): {
+  localeArtifacts: CatalogAuthoringDraftPacket['localeArtifacts']
+  localeFiles: WingsSideTourEditorialLocaleFile[]
+} => {
+  const artifactsByLocale = new Map(localeArtifacts.map((artifact) => [artifact.locale, artifact]))
+  if (
+    artifactsByLocale.size !== wingsSideTourEditorialLocales.length ||
+    wingsSideTourEditorialLocales.some((locale) => !artifactsByLocale.has(locale))
+  ) {
+    throw new Error('Exactly vi,it,es,pt protected locale artifacts are required')
+  }
+  const bindings = {} as CatalogAuthoringDraftPacket['localeArtifacts']
+  const localeFiles = wingsSideTourEditorialLocales.map((locale) => {
+    const artifact = artifactsByLocale.get(locale)!
+    assertSha256(artifact.sha256, `Protected ${locale} locale artifact checksum`)
+    assertSha256(artifact.contentChecksum, `Protected ${locale} locale content checksum`)
+    if (
+      artifact.value.locale !== locale ||
+      artifact.contentChecksum !== catalogAuthoringChecksum(artifact.value) ||
+      !Object.isFrozen(artifact.value)
+    ) {
+      throw new Error(`Protected ${locale} locale artifact is not immutable or content-verified`)
+    }
+    bindings[locale] = {
+      artifactSha256: artifact.sha256,
+      contentChecksum: artifact.contentChecksum,
+    }
+    return artifact.value as WingsSideTourEditorialLocaleFile
+  })
+  return { localeArtifacts: bindings, localeFiles }
 }
 
 const assertExactInventory = ({
@@ -445,14 +527,14 @@ const sourceRows = (tour: EditorialSourceTour): SourceServiceRow[] => {
 export const buildWingsSideCatalogAuthoringDraft = ({
   expectedGovernedDisclosureCount = wingsSideCanonicalPricingDisclosureCount,
   expectedSourceManifestSha256,
-  localeFiles,
+  localeArtifacts,
   sourceManifestArtifactSha256,
   sourceManifest,
   sourceTours,
 }: {
   expectedGovernedDisclosureCount?: number
   expectedSourceManifestSha256: string
-  localeFiles: WingsSideTourEditorialLocaleFile[]
+  localeArtifacts: readonly CatalogAuthoringLocaleArtifact[]
   sourceManifest: CatalogAuthoringSourceManifest
   sourceManifestArtifactSha256: string
   sourceTours: CatalogAuthoringSourceTour[]
@@ -462,7 +544,12 @@ export const buildWingsSideCatalogAuthoringDraft = ({
   if (sourceManifestArtifactSha256 !== expectedSourceManifestSha256) {
     throw new Error('Source manifest checksum does not match protected release policy')
   }
-  const { fileByLocale } = assertExactInventory({ localeFiles, sourceManifest, sourceTours })
+  const verifiedLocales = verifiedLocaleFiles(localeArtifacts)
+  const { fileByLocale } = assertExactInventory({
+    localeFiles: verifiedLocales.localeFiles,
+    sourceManifest,
+    sourceTours,
+  })
   const tours = [...sourceTours]
     .sort((left, right) => left.slug.localeCompare(right.slug))
     .map((tour) => {
@@ -529,6 +616,7 @@ export const buildWingsSideCatalogAuthoringDraft = ({
     expectedGovernedDisclosureCount,
     generatedFrom: 'frozen-en-inventory-and-legacy-locales' as const,
     governedDisclosureCount,
+    localeArtifacts: verifiedLocales.localeArtifacts,
     packetChecksum: '',
     sourceManifestChecksum: catalogAuthoringChecksum(sourceManifest),
     sourceManifestArtifactSha256,
@@ -543,7 +631,7 @@ export const buildWingsSideCatalogAuthoringDraft = ({
 export const reconcileWingsSideCatalogAuthoringReview = ({
   approvalPolicy,
   draft,
-  localeFiles,
+  localeArtifacts,
   review,
   reviewArtifactSha256,
   expectedSourceManifestSha256,
@@ -553,7 +641,7 @@ export const reconcileWingsSideCatalogAuthoringReview = ({
 }: {
   approvalPolicy: CatalogAuthoringApprovalPolicy
   draft: CatalogAuthoringDraftPacket
-  localeFiles: WingsSideTourEditorialLocaleFile[]
+  localeArtifacts: readonly CatalogAuthoringLocaleArtifact[]
   review: CatalogAuthoringReviewArtifact
   reviewArtifactSha256: string
   expectedSourceManifestSha256: string
@@ -571,7 +659,7 @@ export const reconcileWingsSideCatalogAuthoringReview = ({
   const rebuilt = buildWingsSideCatalogAuthoringDraft({
     expectedGovernedDisclosureCount: draft.expectedGovernedDisclosureCount,
     expectedSourceManifestSha256,
-    localeFiles,
+    localeArtifacts,
     sourceManifestArtifactSha256,
     sourceManifest,
     sourceTours,
@@ -581,7 +669,9 @@ export const reconcileWingsSideCatalogAuthoringReview = ({
     draft.packetChecksum !== catalogAuthoringChecksum(withoutPacketChecksum(draft)) ||
     review.draftPacketChecksum !== draft.packetChecksum ||
     rebuilt.packetChecksum !== draft.packetChecksum ||
-    draft.sourceManifestArtifactSha256 !== sourceManifestArtifactSha256
+    draft.sourceManifestArtifactSha256 !== sourceManifestArtifactSha256 ||
+    stableJSONStringify(draft.localeArtifacts) !==
+      stableJSONStringify(rebuilt.localeArtifacts)
   ) {
     throw new Error('Draft/review artifact is stale or tampered')
   }
@@ -638,8 +728,9 @@ export const reconcileWingsSideCatalogAuthoringReview = ({
       throw new Error(`Incomplete or ambiguous reviewed row: ${row.slug}:${row.sourceRowID}`)
     }
   }
+  const verifiedLocales = verifiedLocaleFiles(localeArtifacts)
   const legacyByLocale = new Map(
-    localeFiles.map((file) => [
+    verifiedLocales.localeFiles.map((file) => [
       file.locale,
       new Map(file.tours.map((tour) => [tour.slug, tour])),
     ]),
@@ -695,6 +786,10 @@ export const reconcileWingsSideCatalogAuthoringReview = ({
   if (catalog.approvalManifest.checksum !== editorialPricingApprovalChecksum(catalog)) {
     throw new Error('Externally supplied approval checksum does not match the candidate catalog')
   }
+  const fullCandidateChecksum = catalogAuthoringChecksum(catalog)
+  if (review.fullCandidateChecksum !== fullCandidateChecksum) {
+    throw new Error('Review full candidate checksum does not match the candidate catalog')
+  }
   parseWingsSideTourEditorialCatalogV2(catalog, {
     expectedPricingDisclosureCount: wingsSideCanonicalPricingDisclosureCount,
   })
@@ -713,7 +808,7 @@ export const reconcileWingsSideCatalogAuthoringReview = ({
   }
   return {
     candidate: catalog,
-    candidateChecksum: catalogAuthoringChecksum(catalog),
+    candidateChecksum: fullCandidateChecksum,
     summary: {
       bucketMoves: draftRows.filter(
         (row) =>

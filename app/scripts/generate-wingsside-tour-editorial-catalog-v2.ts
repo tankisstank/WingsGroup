@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import {
   buildWingsSideCatalogAuthoringDraft,
   parseCatalogAuthoringDraftPacket,
+  parseCatalogAuthoringLocaleFile,
   parseCatalogAuthoringReviewArtifact,
   parseCatalogAuthoringSourceManifest,
   readFrozenCatalogAuthoringArtifact,
@@ -12,10 +13,7 @@ import {
   type CatalogAuthoringSourceManifest,
   type CatalogAuthoringSourceTour,
 } from './lib/wingsSideTourEditorialCatalogAuthoring'
-import {
-  wingsSideTourEditorialLocales,
-  type WingsSideTourEditorialLocaleFile,
-} from './lib/wingsSideTourEditorialLocalization'
+import { wingsSideTourEditorialLocales } from './lib/wingsSideTourEditorialLocalization'
 
 const argument = (name: string) => {
   const inline = process.argv.find((value) => value.startsWith(`${name}=`))
@@ -34,6 +32,9 @@ export const assertCatalogAuthoringCLITrustBoundary = (
   }
   if (present('--trusted-approvers')) {
     throw new Error('Trusted approvers must come from protected environment, not CLI')
+  }
+  if (present('--legacy-dir')) {
+    throw new Error('Unprotected --legacy-dir locale discovery is forbidden')
   }
 }
 
@@ -65,6 +66,28 @@ export const resolveProtectedCatalogAuthoringValue = ({
   return expected
 }
 
+export const resolveProtectedCatalogAuthoringPath = ({
+  cliName,
+  cliValue,
+  envName,
+  envValue,
+}: {
+  cliName: string
+  cliValue?: string
+  envName: string
+  envValue?: string
+}) => {
+  if (!cliValue?.trim()) throw new Error(`Missing required ${cliName}`)
+  const protectedValue = envValue?.trim()
+  if (!protectedValue) throw new Error(`Protected environment ${envName} is required`)
+  const cliPath = path.resolve(cliValue)
+  const protectedPath = path.resolve(protectedValue)
+  if (cliPath !== protectedPath) {
+    throw new Error(`Protected catalog CLI/environment conflict: ${cliName}`)
+  }
+  return protectedPath
+}
+
 const protectedExpected = (envName: string, cliName: string) =>
   resolveProtectedCatalogAuthoringValue({
     cliName,
@@ -90,12 +113,31 @@ export const runWingsSideCatalogAuthoring = async () => {
     validate: parseCatalogAuthoringSourceManifest,
   })
   const sourceManifest = manifestArtifact.value
-  const legacyDirectory = required('--legacy-dir')
-  const localeFiles = await Promise.all(
-    wingsSideTourEditorialLocales.map((locale) =>
-      readJSON<WingsSideTourEditorialLocaleFile>(path.join(legacyDirectory, `${locale}.json`)),
-    ),
-  )
+  const localeArtifacts = wingsSideTourEditorialLocales.map((locale) => {
+    const cliPathName = `--locale-${locale}`
+    const cliShaName = `--locale-${locale}-sha256`
+    const envPrefix = `WINGSSIDE_CATALOG_LOCALE_${locale.toUpperCase()}`
+    const filePath = resolveProtectedCatalogAuthoringPath({
+      cliName: cliPathName,
+      cliValue: argument(cliPathName),
+      envName: `${envPrefix}_PATH`,
+      envValue: process.env[`${envPrefix}_PATH`],
+    })
+    const cliSha = argument(cliShaName)
+    if (!cliSha) throw new Error(`Missing required ${cliShaName}`)
+    const expectedSha256 = resolveProtectedCatalogAuthoringValue({
+      cliName: cliShaName,
+      cliValue: cliSha,
+      envName: `${envPrefix}_SHA256`,
+      envValue: process.env[`${envPrefix}_SHA256`],
+    })
+    const artifact = readFrozenCatalogAuthoringArtifact({
+      expectedSha256,
+      filePath,
+      validate: (value) => parseCatalogAuthoringLocaleFile(value, locale),
+    })
+    return { locale, ...artifact }
+  })
   const outputPath = required('--output')
   const draft =
     mode === 'reconcile'
@@ -104,7 +146,7 @@ export const runWingsSideCatalogAuthoring = async () => {
         )
       : buildWingsSideCatalogAuthoringDraft({
           expectedSourceManifestSha256,
-          localeFiles,
+          localeArtifacts,
           sourceManifest,
           sourceManifestArtifactSha256: manifestArtifact.sha256,
           sourceTours,
@@ -138,7 +180,7 @@ export const runWingsSideCatalogAuthoring = async () => {
             },
             draft,
             expectedSourceManifestSha256,
-            localeFiles,
+            localeArtifacts,
             review: reviewArtifact.value,
             reviewArtifactSha256: reviewArtifact.sha256,
             sourceManifest,

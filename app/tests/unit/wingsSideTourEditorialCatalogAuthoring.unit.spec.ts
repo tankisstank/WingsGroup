@@ -1,9 +1,11 @@
 import { createHash } from 'node:crypto'
+import { resolve } from 'node:path'
 
 import { describe, expect, it, vi } from 'vitest'
 
 import {
   assertCatalogAuthoringCLITrustBoundary,
+  resolveProtectedCatalogAuthoringPath,
   resolveProtectedCatalogAuthoringValue,
 } from '../../scripts/generate-wingsside-tour-editorial-catalog-v2'
 import {
@@ -13,6 +15,7 @@ import {
   readFrozenCatalogAuthoringArtifact,
   reconcileWingsSideCatalogAuthoringReview,
   type CatalogAuthoringReviewArtifact,
+  type CatalogAuthoringLocaleArtifact,
   type CatalogAuthoringSourceManifest,
   type CatalogAuthoringSourceTour,
   type ReviewedCatalogRowDecision,
@@ -76,6 +79,27 @@ const localeFiles = (): WingsSideTourEditorialLocaleFile[] =>
     voice: 'calm-specific-consultative',
   }))
 
+const freeze = <T>(value: T): Readonly<T> => {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.freeze(value)
+    for (const child of Object.values(value as Record<string, unknown>)) freeze(child)
+  }
+  return value
+}
+
+const localeArtifacts = (
+  files = localeFiles(),
+): CatalogAuthoringLocaleArtifact[] =>
+  files.map((file) => {
+    const value = freeze(structuredClone(file))
+    return {
+      contentChecksum: catalogAuthoringChecksum(value),
+      locale: file.locale,
+      sha256: sha256(Buffer.from(JSON.stringify(file))),
+      value,
+    }
+  })
+
 const manifest = (tours = sourceTours()): CatalogAuthoringSourceManifest => ({
   expectedGovernedDisclosureCount: 38,
   expectedTourCount: 22,
@@ -104,7 +128,7 @@ const draft = () => {
   const digest = manifestDigest(sourceManifest)
   return buildWingsSideCatalogAuthoringDraft({
     expectedSourceManifestSha256: digest,
-    localeFiles: localeFiles(),
+    localeArtifacts: localeArtifacts(),
     sourceManifest,
     sourceManifestArtifactSha256: digest,
     sourceTours: sourceTours(),
@@ -198,6 +222,7 @@ const review = (): CatalogAuthoringReviewArtifact => {
     approvalManifest,
     decisions: rowDecisions,
     draftPacketChecksum: packet.packetChecksum,
+    fullCandidateChecksum: catalogAuthoringChecksum(candidate),
     version: 1,
   }
 }
@@ -210,7 +235,7 @@ const reconcile = (artifact = review(), policyApprovers = ['trusted-reviewer']) 
     approvalPolicy: { reviewArtifactSha256: reviewDigest, trustedApprovers: policyApprovers },
     draft: draft(),
     expectedSourceManifestSha256: sourceDigest,
-    localeFiles: localeFiles(),
+    localeArtifacts: localeArtifacts(),
     review: artifact,
     reviewArtifactSha256: reviewDigest,
     sourceManifest,
@@ -227,6 +252,11 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
     expect(first.governedDisclosureCount).toBe(38)
     expect(first.tours.flatMap(({ rows }) => rows)).toHaveLength(38)
     expect(first.sourceManifestArtifactSha256).toBe(manifestDigest())
+    expect(Object.keys(first.localeArtifacts).sort()).toEqual(['es', 'it', 'pt', 'vi'])
+    for (const artifact of Object.values(first.localeArtifacts)) {
+      expect(artifact.artifactSha256).toMatch(/^[a-f0-9]{64}$/u)
+      expect(artifact.contentChecksum).toMatch(/^[a-f0-9]{64}$/u)
+    }
   })
 
   it('rejects the previous one-tour/38-row self-consistent false pass', () => {
@@ -236,7 +266,9 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
     expect(() =>
       buildWingsSideCatalogAuthoringDraft({
         expectedSourceManifestSha256: digest,
-        localeFiles: localeFiles().map((file) => ({ ...file, tours: file.tours.slice(0, 1) })),
+        localeArtifacts: localeArtifacts(
+          localeFiles().map((file) => ({ ...file, tours: file.tours.slice(0, 1) })),
+        ),
         sourceManifest,
         sourceManifestArtifactSha256: digest,
         sourceTours: tours,
@@ -255,7 +287,7 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
     expect(() =>
       buildWingsSideCatalogAuthoringDraft({
         expectedSourceManifestSha256: digest,
-        localeFiles: localeFiles(),
+        localeArtifacts: localeArtifacts(),
         sourceManifest,
         sourceManifestArtifactSha256: digest,
         sourceTours: sourceTours(),
@@ -268,7 +300,7 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
     expect(() =>
       buildWingsSideCatalogAuthoringDraft({
         expectedSourceManifestSha256: 'f'.repeat(64),
-        localeFiles: localeFiles(),
+        localeArtifacts: localeArtifacts(),
         sourceManifest,
         sourceManifestArtifactSha256: manifestDigest(sourceManifest),
         sourceTours: sourceTours(),
@@ -281,6 +313,14 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
     expect(result.candidate.tours).toHaveLength(22)
     expect(result.candidate.pricingDispositions).toHaveLength(38)
     expect(result.summary.governedDispositions).toBe(38)
+  })
+
+  it('requires the protected review to attest the full candidate checksum', () => {
+    const artifact = review()
+    artifact.fullCandidateChecksum = 'f'.repeat(64)
+    expect(() => reconcile(artifact)).toThrow(
+      'Review full candidate checksum does not match the candidate catalog',
+    )
   })
 
   it('rejects a self-authorized reviewer absent from protected approvers', () => {
@@ -305,7 +345,7 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
         },
         draft: draft(),
         expectedSourceManifestSha256: sourceDigest,
-        localeFiles: localeFiles(),
+        localeArtifacts: localeArtifacts(),
         review: artifact,
         reviewArtifactSha256: reviewDigest,
         sourceManifest,
@@ -322,7 +362,7 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
         },
         draft: tamperedDraft,
         expectedSourceManifestSha256: sourceDigest,
-        localeFiles: localeFiles(),
+        localeArtifacts: localeArtifacts(),
         review: artifact,
         reviewArtifactSha256: reviewDigest,
         sourceManifest,
@@ -330,6 +370,52 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
         sourceTours: sourceTours(),
       }),
     ).toThrow('stale or tampered')
+  })
+
+  it('rejects post-review locale content tampering with unchanged service rows', () => {
+    const artifact = review()
+    const sourceManifest = manifest()
+    const sourceDigest = manifestDigest(sourceManifest)
+    const reviewDigest = catalogAuthoringChecksum(artifact)
+    const fields = ['title', 'summary', 'itinerary', 'meta', 'servicesSummary'] as const
+
+    for (const field of fields) {
+      const tamperedFiles = localeFiles()
+      const content = tamperedFiles[0]!.tours[0]!
+      if (field === 'title') content.title = 'Tampered title after review'
+      if (field === 'summary') content.summary = 'Tampered summary after review'
+      if (field === 'itinerary') {
+        content.itineraryDays = [
+          {
+            dayNumber: 1,
+            route: 'Tampered route',
+            summary: 'Tampered itinerary summary',
+            title: 'Tampered itinerary title',
+          },
+        ]
+      }
+      if (field === 'meta') content.meta.description = 'Tampered meta after review'
+      if (field === 'servicesSummary') {
+        content.servicesSummary.operatorNotes = 'Tampered services summary after review'
+      }
+
+      expect(() =>
+        reconcileWingsSideCatalogAuthoringReview({
+          approvalPolicy: {
+            reviewArtifactSha256: reviewDigest,
+            trustedApprovers: ['trusted-reviewer'],
+          },
+          draft: draft(),
+          expectedSourceManifestSha256: sourceDigest,
+          localeArtifacts: localeArtifacts(tamperedFiles),
+          review: artifact,
+          reviewArtifactSha256: reviewDigest,
+          sourceManifest,
+          sourceManifestArtifactSha256: sourceDigest,
+          sourceTours: sourceTours(),
+        }),
+      ).toThrow('stale or tampered')
+    }
   })
 
   it('requires protected environment trust and accepts only identical CLI echoes', () => {
@@ -367,6 +453,35 @@ describe('WingSide catalog-v2 canonical authoring and reconciliation', () => {
         '--trusted-approvers=attacker@example.com',
       ]),
     ).toThrow('protected environment')
+    expect(() =>
+      assertCatalogAuthoringCLITrustBoundary('draft', ['--legacy-dir=unprotected']),
+    ).toThrow('forbidden')
+  })
+
+  it('requires protected locale paths and accepts only identical resolved CLI echoes', () => {
+    expect(() =>
+      resolveProtectedCatalogAuthoringPath({
+        cliName: '--locale-vi',
+        envName: 'WINGSSIDE_CATALOG_LOCALE_VI_PATH',
+        envValue: 'protected/vi.json',
+      }),
+    ).toThrow('Missing required')
+    expect(() =>
+      resolveProtectedCatalogAuthoringPath({
+        cliName: '--locale-vi',
+        cliValue: 'untrusted/vi.json',
+        envName: 'WINGSSIDE_CATALOG_LOCALE_VI_PATH',
+        envValue: 'protected/vi.json',
+      }),
+    ).toThrow('CLI/environment conflict')
+    expect(
+      resolveProtectedCatalogAuthoringPath({
+        cliName: '--locale-vi',
+        cliValue: 'protected/vi.json',
+        envName: 'WINGSSIDE_CATALOG_LOCALE_VI_PATH',
+        envValue: 'protected/vi.json',
+      }),
+    ).toBe(resolve('protected/vi.json'))
   })
 
   it('rejects non-string decision labels and rationale without coercion', () => {
