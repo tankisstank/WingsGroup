@@ -5,6 +5,7 @@ import { hasWingsSideLocalizationBackfillContext } from '@/utilities/wingsSideLo
 import {
   WINGSSIDE_HOME_DESTINATION_SELECTION_KEYS,
   WINGSSIDE_HOME_STYLE_SELECTION_KEYS,
+  WINGSSIDE_WHY_TRAVEL_SLOT_KEYS,
 } from '@/fields/wingsSideHiFi'
 
 type Relation = number | string | { id?: number | string } | null | undefined
@@ -18,10 +19,19 @@ type FeaturedSelection = {
   tour?: Relation
 }
 
+type WhyTravelSlot = {
+  fallbackTour?: Relation
+  key?: string | null
+  rule?: { destinationTag?: string | null; maxDurationDays?: number | null; minDurationDays?: number | null; travelStyle?: string | null }
+  selectionMode?: string | null
+  tour?: Relation
+}
+
 type HomeCuration = {
   destinationTourSelections?: Selection[] | null
   featuredJourneySelections?: FeaturedSelection[] | null
   styleTourSelections?: Selection[] | null
+  whyTourSlots?: WhyTravelSlot[] | null
 }
 
 type PageWithHomeCuration = {
@@ -62,7 +72,8 @@ const hasAnyCurationSelection = (home: HomeCuration | undefined): boolean =>
   Boolean(
     home?.destinationTourSelections?.length ||
       home?.styleTourSelections?.length ||
-      home?.featuredJourneySelections?.length,
+      home?.featuredJourneySelections?.length ||
+      home?.whyTourSlots?.length,
   )
 
 const assertExactKeyedSelections = ({
@@ -104,6 +115,38 @@ const assertFeaturedSelections = (selections: FeaturedSelection[] | null | undef
   }
   if (new Set(tourIDs.map(String)).size !== tourIDs.length) {
     throw new Error('Featured journey selections must not repeat a TourProduct.')
+  }
+}
+
+const assertWhyTravelSlots = (selections: WhyTravelSlot[] | null | undefined) => {
+  if (!Array.isArray(selections) || selections.length !== WINGSSIDE_WHY_TRAVEL_SLOT_KEYS.length) {
+    throw new Error('Why Travel must contain exactly 4 stable slots.')
+  }
+  const keys = selections.map((selection) => selection?.key)
+  if (
+    keys.some((key) => typeof key !== 'string' || !WINGSSIDE_WHY_TRAVEL_SLOT_KEYS.includes(key as never)) ||
+    new Set(keys).size !== keys.length
+  ) {
+    throw new Error('Why Travel slots must use each approved role exactly once.')
+  }
+  for (const selection of selections) {
+    if (selection.selectionMode === 'rule') {
+      const rule = selection.rule
+      if (!rule || (!rule.destinationTag && !rule.travelStyle && !rule.minDurationDays && !rule.maxDurationDays)) {
+        throw new Error(`Why Travel slot ${selection.key} requires a governed rule.`)
+      }
+      if (rule.destinationTag && !WINGSSIDE_HOME_DESTINATION_SELECTION_KEYS.includes(rule.destinationTag as never)) {
+        throw new Error(`Why Travel slot ${selection.key} has an unknown destination tag.`)
+      }
+      if (rule.travelStyle && !WINGSSIDE_HOME_STYLE_SELECTION_KEYS.includes(rule.travelStyle as never)) {
+        throw new Error(`Why Travel slot ${selection.key} has an unknown travel style.`)
+      }
+      if (rule.minDurationDays && rule.maxDurationDays && rule.minDurationDays > rule.maxDurationDays) {
+        throw new Error(`Why Travel slot ${selection.key} has an invalid duration range.`)
+      }
+    } else if (!relationID(selection.tour)) {
+      throw new Error(`Why Travel slot ${selection.key} requires a manual TourProduct.`)
+    }
   }
 }
 
@@ -207,6 +250,7 @@ export const validateWingsSideHomeCuration: CollectionBeforeChangeHook = async (
     selections: home?.styleTourSelections,
   })
   assertFeaturedSelections(home?.featuredJourneySelections)
+  if (home?.whyTourSlots?.length) assertWhyTravelSlots(home.whyTourSlots)
 
   await Promise.all([
     ...(home?.destinationTourSelections || []).map((selection) =>
@@ -234,6 +278,13 @@ export const validateWingsSideHomeCuration: CollectionBeforeChangeHook = async (
         tourID: relationID(selection.tour)!,
       }),
     ),
+    ...(home?.whyTourSlots || []).flatMap((selection) => {
+      if (selection.selectionMode === 'rule') {
+        const fallbackTourID = relationID(selection.fallbackTour)
+        return fallbackTourID ? [assertEligibleTour({ pageSiteID, req, tourID: fallbackTourID })] : []
+      }
+      return [assertEligibleTour({ pageSiteID, req, tourID: relationID(selection.tour)! })]
+    }),
   ])
 
   return data

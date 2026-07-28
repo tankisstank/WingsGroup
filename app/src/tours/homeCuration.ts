@@ -4,6 +4,7 @@ import type { Payload } from 'payload'
 import {
   WINGSSIDE_HOME_DESTINATION_SELECTION_KEYS,
   WINGSSIDE_HOME_STYLE_SELECTION_KEYS,
+  WINGSSIDE_WHY_TRAVEL_SLOT_KEYS,
 } from '@/fields/wingsSideHiFi'
 
 import { normalizeGovernedTourPrice, type SupportedTourCurrencyCode } from './currency'
@@ -36,10 +37,19 @@ type CurationTour = {
 }
 type KeyedSelection = { key?: null | string; tour?: CurationTour | Relation }
 type FeaturedSelection = { tour?: CurationTour | Relation }
+type WhyTravelSlot = {
+  fallbackTour?: CurationTour | Relation
+  key?: null | string
+  presentation?: { badge?: null | string; body?: null | string; ctaLabel?: null | string; media?: CurationMedia | Relation; mode?: null | string }
+  rule?: { destinationTag?: null | string; maxDurationDays?: null | number; minDurationDays?: null | number; travelStyle?: null | string }
+  selectionMode?: null | string
+  tour?: CurationTour | Relation
+}
 export type HomeCurationSource = {
   destinationTourSelections?: KeyedSelection[] | null
   featuredJourneySelections?: FeaturedSelection[] | null
   styleTourSelections?: KeyedSelection[] | null
+  whyTourSlots?: WhyTravelSlot[] | null
 }
 export const hydrateWingsSideHomeCuration = async ({
   home,
@@ -58,28 +68,30 @@ export const hydrateWingsSideHomeCuration = async ({
     ...(home?.destinationTourSelections || []),
     ...(home?.styleTourSelections || []),
     ...(home?.featuredJourneySelections || []),
+    ...(home?.whyTourSlots || []),
   ]
   const tourIDs = [
     ...new Set(
       selections
-        .map((selection) => relationID(selection.tour as Relation))
+        .flatMap((selection) => [relationID(selection.tour as Relation), relationID((selection as WhyTravelSlot).fallbackTour as Relation)])
         .filter((id): id is RelationID => id != null),
     ),
   ]
 
-  if (!siteID || tourIDs.length === 0) return home
+  if (!siteID) return home
+  const hasRuleSlots = Boolean(home?.whyTourSlots?.some((slot) => slot.selectionMode === 'rule'))
 
   const result = await payload.find({
     collection: 'tour-products',
     depth: 2,
     fallbackLocale: false,
-    limit: tourIDs.length,
+    limit: hasRuleSlots ? 100 : Math.max(tourIDs.length, 1),
     locale: payloadLocale,
     overrideAccess: true,
     pagination: false,
     where: {
       and: [
-        { id: { in: tourIDs } },
+        ...(hasRuleSlots ? [] : [{ id: { in: tourIDs } }]),
         { site: { equals: siteID } },
         { _status: { equals: 'published' } },
       ],
@@ -96,6 +108,7 @@ export const hydrateWingsSideHomeCuration = async ({
     ...new Set(
       result.docs
         .map((tour) => relationID(tour.heroMedia as Relation))
+        .concat((home?.whyTourSlots || []).map((slot) => relationID(slot.presentation?.media as Relation)))
         .filter((id): id is RelationID => id != null),
     ),
   ]
@@ -158,6 +171,26 @@ export const hydrateWingsSideHomeCuration = async ({
       ...selection,
       tour: hydrateTour(selection.tour),
     })),
+    whyTourSlots: home?.whyTourSlots?.map((slot) => {
+      const rule = slot.rule
+      const candidates = result.docs.filter((tour) => {
+        if (slot.selectionMode !== 'rule') return false
+        if (rule?.destinationTag && !(tour.destinationTags as readonly string[] | undefined)?.includes(rule.destinationTag)) return false
+        if (rule?.travelStyle && !(tour.travelStyles as readonly string[] | undefined)?.includes(rule.travelStyle)) return false
+        if (typeof rule?.minDurationDays === 'number' && (tour.durationDays || 0) < rule.minDurationDays) return false
+        if (typeof rule?.maxDurationDays === 'number' && (tour.durationDays || 0) > rule.maxDurationDays) return false
+        return true
+      }).sort((left, right) => String(left.title || '').localeCompare(String(right.title || '')) || String(left.id).localeCompare(String(right.id)))
+      const presentationMediaID = relationID(slot.presentation?.media as Relation)
+      return {
+        ...slot,
+        presentation: slot.presentation
+          ? { ...slot.presentation, media: presentationMediaID == null ? slot.presentation.media : mediaByID.get(String(presentationMediaID)) }
+          : undefined,
+        tour: slot.selectionMode === 'rule' ? (candidates[0] || hydrateTour(slot.fallbackTour)) : hydrateTour(slot.tour),
+        fallbackTour: hydrateTour(slot.fallbackTour),
+      }
+    }),
   }
 }
 
@@ -186,7 +219,10 @@ export type WingsSideHomeCurationProjection = {
   issues: ReadonlyArray<string>
   state: 'invalid' | 'ready' | 'unconfigured'
   styleTours: ReadonlyArray<WingsSideHomeKeyedTourCard>
+  whyTravel?: { cards: ReadonlyArray<WingsSideWhyTravelCard>; issues: ReadonlyArray<string>; state: 'invalid' | 'ready' | 'unconfigured' }
 }
+
+export type WingsSideWhyTravelCard = WingsSideHomeTourCard & { badge: string; body: string; ctaLabel: string; key: string }
 
 const relationID = (value: Relation): RelationID | null => {
   if (typeof value === 'number' || typeof value === 'string') return value
@@ -371,6 +407,32 @@ const projectFeaturedSelections = ({
   return { cards: issues.length ? [] : cards, issues, isConfigured: true }
 }
 
+const projectWhyTravelSlots = ({ home, locale, pageSite }: { home?: HomeCurationSource | null; locale?: null | string; pageSite: Relation }) => {
+  const selections = home?.whyTourSlots
+  if (!Array.isArray(selections) || selections.length === 0) return { cards: [] as WingsSideWhyTravelCard[], issues: [] as string[], state: 'unconfigured' as const }
+  const keys = selections.map((slot) => slot?.key)
+  if (selections.length !== WINGSSIDE_WHY_TRAVEL_SLOT_KEYS.length || keys.some((key) => !nonEmpty(key) || !WINGSSIDE_WHY_TRAVEL_SLOT_KEYS.includes(key as never)) || new Set(keys).size !== keys.length) return { cards: [], issues: ['Why Travel slots are incomplete, duplicated, or contain an unknown role.'], state: 'invalid' as const }
+  const cards: WingsSideWhyTravelCard[] = []
+  const issues: string[] = []
+  for (const slot of selections) {
+    const projected = projectTour({ locale, pageSite, value: slot.tour })
+    if (projected.issue) { issues.push(`${slot.key || 'unknown'}: ${projected.issue}`); continue }
+    const card = projected.card!
+    const override = slot.presentation?.mode === 'override'
+    const overrideMedia = override ? asMedia(slot.presentation?.media) : null
+    cards.push({
+      ...card,
+      badge: override && nonEmpty(slot.presentation?.badge) ? slot.presentation.badge.trim() : 'Representative journey',
+      body: override && nonEmpty(slot.presentation?.body) ? slot.presentation.body.trim() : card.summary,
+      ctaLabel: override && nonEmpty(slot.presentation?.ctaLabel) ? slot.presentation.ctaLabel.trim() : 'View journey',
+      hero: overrideMedia && nonEmpty(overrideMedia.url) ? { alt: overrideMedia.alt?.trim() || card.title, url: overrideMedia.url.trim() } : card.hero,
+      key: slot.key!,
+    })
+  }
+  if (new Set(cards.map((card) => String(card.id))).size !== cards.length) issues.push('Why Travel slots must resolve to unique TourProducts.')
+  return { cards: issues.length ? [] : cards, issues, state: issues.length ? 'invalid' as const : 'ready' as const }
+}
+
 /**
  * Converts populated Payload Home curation relationships into the rendering contract.
  * Any incomplete or cross-tenant selection fails closed; callers must never substitute
@@ -404,6 +466,7 @@ export const projectWingsSideHomeCuration = ({
     pageSite,
     selections: home?.featuredJourneySelections,
   })
+  const whyTravel = projectWhyTravelSlots({ home, locale, pageSite })
   const issues = [...destinations.issues, ...styles.issues, ...featured.issues]
   if (!destinations.isConfigured || !styles.isConfigured || !featured.isConfigured) {
     issues.push('WingSide Home curation is not fully configured.')
@@ -415,5 +478,6 @@ export const projectWingsSideHomeCuration = ({
     issues,
     state: invalid ? 'invalid' : 'ready',
     styleTours: invalid ? [] : styles.cards,
+    whyTravel,
   }
 }

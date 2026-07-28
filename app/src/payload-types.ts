@@ -757,6 +757,28 @@ export interface Page {
             id?: string | null;
           }[]
         | null;
+      whyTourSlots?:
+        | {
+            key: 'local-design' | 'flexible-planning' | 'style-matching' | 'collaborative-care';
+            selectionMode: 'manual' | 'rule';
+            tour?: (number | null) | TourProduct;
+            rule?: {
+              destinationTag?: ('hanoi' | 'halong' | 'hoian' | 'hue' | 'mekong' | 'sapa') | null;
+              travelStyle?: ('luxury' | 'family' | 'culture' | 'adventure' | 'wellness' | 'romance') | null;
+              minDurationDays?: number | null;
+              maxDurationDays?: number | null;
+            };
+            fallbackTour?: (number | null) | TourProduct;
+            presentation?: {
+              mode?: ('inherit' | 'override') | null;
+              badge?: string | null;
+              body?: string | null;
+              ctaLabel?: string | null;
+              media?: (number | null) | Media;
+            };
+            id?: string | null;
+          }[]
+        | null;
       destKicker?: string | null;
       destTitle?: string | null;
       destLede?: string | null;
@@ -2913,6 +2935,32 @@ export interface PagesSelect<T extends boolean = true> {
                     body?: T;
                     cta?: T;
                     href?: T;
+                    id?: T;
+                  };
+              whyTourSlots?:
+                | T
+                | {
+                    key?: T;
+                    selectionMode?: T;
+                    tour?: T;
+                    rule?:
+                      | T
+                      | {
+                          destinationTag?: T;
+                          travelStyle?: T;
+                          minDurationDays?: T;
+                          maxDurationDays?: T;
+                        };
+                    fallbackTour?: T;
+                    presentation?:
+                      | T
+                      | {
+                          mode?: T;
+                          badge?: T;
+                          body?: T;
+                          ctaLabel?: T;
+                          media?: T;
+                        };
                     id?: T;
                   };
               destKicker?: T;

@@ -21,6 +21,13 @@ export const WINGSSIDE_HOME_STYLE_SELECTION_KEYS = [
   'romance',
 ] as const
 
+export const WINGSSIDE_WHY_TRAVEL_SLOT_KEYS = [
+  'local-design',
+  'flexible-planning',
+  'style-matching',
+  'collaborative-care',
+] as const
+
 export type WingsSideHomeDestinationSelectionKey =
   (typeof WINGSSIDE_HOME_DESTINATION_SELECTION_KEYS)[number]
 export type WingsSideHomeStyleSelectionKey = (typeof WINGSSIDE_HOME_STYLE_SELECTION_KEYS)[number]
@@ -214,6 +221,29 @@ export const wingsSideHiFiFields = (): Field[] => [
         text('cta', 'CTA'),
         text('href', 'Href', { localized: false }),
       ]),
+      cardArray(
+        'whyTourSlots',
+        'Why Travel: representative journeys (4 roles bắt buộc khi kích hoạt)',
+        [
+          { name: 'key', label: 'Vai trò cố định', type: 'select', required: true, options: WINGSSIDE_WHY_TRAVEL_SLOT_KEYS.map((key) => ({ label: key, value: key })) },
+          { name: 'selectionMode', label: 'Cách chọn tour', type: 'select', defaultValue: 'manual', required: true, options: [{ label: 'Chọn thủ công', value: 'manual' }, { label: 'Theo quy tắc taxonomy', value: 'rule' }] },
+          { name: 'tour', label: 'Tour thủ công', type: 'relationship', relationTo: 'tour-products', filterOptions: samePageSiteTourFilter, admin: { condition: (_, siblingData) => siblingData?.selectionMode !== 'rule' } },
+          { name: 'rule', label: 'Quy tắc được phép', type: 'group', admin: { condition: (_, siblingData) => siblingData?.selectionMode === 'rule' }, fields: [
+            { name: 'destinationTag', label: 'Destination tag', type: 'select', options: WINGSSIDE_HOME_DESTINATION_SELECTION_KEYS.map((key) => ({ label: key, value: key })) },
+            { name: 'travelStyle', label: 'Travel style', type: 'select', options: WINGSSIDE_HOME_STYLE_SELECTION_KEYS.map((key) => ({ label: key, value: key })) },
+            { name: 'minDurationDays', label: 'Số ngày tối thiểu', type: 'number', min: 1 },
+            { name: 'maxDurationDays', label: 'Số ngày tối đa', type: 'number', min: 1 },
+          ] },
+          { name: 'fallbackTour', label: 'Tour dự phòng (chỉ khi dùng quy tắc)', type: 'relationship', relationTo: 'tour-products', filterOptions: samePageSiteTourFilter, admin: { condition: (_, siblingData) => siblingData?.selectionMode === 'rule' } },
+          { name: 'presentation', label: 'Trình bày biên tập', type: 'group', fields: [
+            { name: 'mode', label: 'Chính sách', type: 'select', defaultValue: 'inherit', options: [{ label: 'Kế thừa từ tour', value: 'inherit' }, { label: 'Ghi đè biên tập', value: 'override' }] },
+            text('badge', 'Nhãn vai trò'), textarea('body', 'Lý do đại diện'), text('ctaLabel', 'Nhãn CTA'),
+            { name: 'media', label: 'Ảnh ghi đè', type: 'upload', relationTo: 'media', filterOptions: sameSiteFilterOptions },
+          ] },
+        ],
+        4,
+        'home_why_tour_slots',
+      ),
       text('destKicker', 'Destinations kicker'),
       text('destTitle', 'Destinations title'),
       textarea('destLede', 'Destinations lede'),

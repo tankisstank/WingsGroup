@@ -208,6 +208,10 @@ export const HomeHiFiPage = ({
   }
 
   const whyRows = (whyCards.length ? whyCards : copy.home.whyCards).slice(0, 3)
+  const whyTravel = model.homeCuration?.whyTravel
+  const hasReadyWhyTravel = whyTravel?.state === 'ready'
+  const whyTravelCards = hasReadyWhyTravel ? whyTravel.cards : []
+  const featuredWhyTravel = whyTravelCards[0]
 
   return (
     <div className="ws-hifi-page ws-hifi-page--home" data-testid="wingsside-hifi-home">
@@ -275,50 +279,51 @@ export const HomeHiFiPage = ({
               <span className="ws-hifi-why__media">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  alt={getWingsSideHiFiAlt('sapa')}
+                  alt={featuredWhyTravel?.hero.alt || getWingsSideHiFiAlt('sapa')}
                   className="ws-hifi-why__img"
                   decoding="async"
                   height={480}
                   loading="lazy"
-                  src={getWingsSideHiFiPublicUrl('sapa')}
+                  src={featuredWhyTravel?.hero.url || getWingsSideHiFiPublicUrl('sapa')}
                   width={640}
                 />
               </span>
               <div className="ws-hifi-why__featured-copy">
                 <p className="micro">
-                  {asText(home.whyFeaturedBadge, copy.home.whyFeatured.badge)}
+                  {featuredWhyTravel?.badge || asText(home.whyFeaturedBadge, copy.home.whyFeatured.badge)}
                 </p>
-                <h3>{asText(home.whyFeaturedTitle, copy.home.whyFeatured.title)}</h3>
-                <p>{asText(home.whyFeaturedBody, copy.home.whyFeatured.body)}</p>
+                <h3>{featuredWhyTravel?.title || asText(home.whyFeaturedTitle, copy.home.whyFeatured.title)}</h3>
+                <p>{featuredWhyTravel?.body || asText(home.whyFeaturedBody, copy.home.whyFeatured.body)}</p>
                 <SiteLink
                   className="ws-hifi-card__action"
-                  href={asText(home.whyFeaturedHref, copy.home.whyFeatured.href)}
+                  href={featuredWhyTravel?.href || asText(home.whyFeaturedHref, copy.home.whyFeatured.href)}
                 >
-                  {asText(home.whyFeaturedCta, copy.home.whyFeatured.cta)}
+                  {featuredWhyTravel?.ctaLabel || asText(home.whyFeaturedCta, copy.home.whyFeatured.cta)}
                 </SiteLink>
               </div>
             </article>
             <div className="ws-hifi-why__grid">
-              {whyRows.map((card, index) => {
+              {(hasReadyWhyTravel ? whyTravelCards.slice(1) : whyRows).map((card, index) => {
                 const asset = WHY_CARD_ASSETS[index] || 'planner'
+                const tourCard = hasReadyWhyTravel ? whyTravelCards[index + 1] : undefined
                 return (
                   <SiteLink
                     className="ws-hifi-card ws-hifi-card--media"
                     data-od-id={
                       index === 0 ? 'why-flexible' : index === 1 ? 'why-style' : 'why-care'
                     }
-                    href={asText(card.href, '/')}
+                    href={tourCard?.href || asText(card.href, '/')}
                     key={`why-card-${index}-${card.title}`}
                   >
                     <span className="ws-hifi-card__media">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        alt={getWingsSideHiFiAlt(asset)}
+                        alt={tourCard?.hero.alt || getWingsSideHiFiAlt(asset)}
                         className="ws-hifi-card__img"
                         decoding="async"
                         height={220}
                         loading="lazy"
-                        src={getWingsSideHiFiPublicUrl(asset)}
+                        src={tourCard?.hero.url || getWingsSideHiFiPublicUrl(asset)}
                         width={320}
                       />
                     </span>
@@ -326,10 +331,10 @@ export const HomeHiFiPage = ({
                       <span className="ws-hifi-card__region">
                         {String(index + 2).padStart(2, '0')}
                       </span>
-                      <strong>{asText(card.title)}</strong>
-                      <span>{asText(card.body)}</span>
+                      <strong>{tourCard?.title || asText(card.title)}</strong>
+                      <span>{tourCard?.body || asText(card.body)}</span>
                       <span className="ws-hifi-card__action">
-                        {asText(card.cta, copy.home.destExplore)}
+                        {tourCard?.ctaLabel || asText((card as { cta?: string }).cta, copy.home.destExplore)}
                       </span>
                     </span>
                   </SiteLink>
