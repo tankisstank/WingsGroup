@@ -11,7 +11,7 @@ import {
 
 export const wingsSideTourEditorialSiteCode = 'wing-side'
 export const wingsSideTourEditorialExpectedTourCount = 22
-export const wingsSideTourEditorialPlanVersion = 2
+export const wingsSideTourEditorialPlanVersion = 3
 export const wingsSideTourPublicLocales = ['en', ...wingsSideTourEditorialLocales] as const
 export type WingsSideTourPublicLocale = (typeof wingsSideTourPublicLocales)[number]
 
@@ -117,19 +117,35 @@ export type WingsSideTourEditorialPlanEntry = {
   slug: string
 }
 
+export type EditorialSharedServiceSnapshot = {
+  excludes: unknown
+  includes: unknown
+}
+
+export type WingsSideTourEditorialSharedServiceEntry = {
+  after: EditorialSharedServiceSnapshot
+  afterChecksum: string
+  before: EditorialSharedServiceSnapshot
+  beforeChecksum: string
+  slug: string
+  sourceChecksum: string
+  tourID: number | string
+}
+
 export type WingsSideTourEditorialPlan = {
   aggregateChecksums: { after: string; before: string }
   createdAt: string
   expectedLocales: WingsSideTourEditorialLocale[]
   expectedTourCount: 22
   mode: 'plan'
-  planVersion: 2
+  planVersion: 3
   releaseSourceCommit: string
   runID: string
   siteCode: 'wing-side'
   siteID: number | string
   sourceManifestChecksum: string
   entries: WingsSideTourEditorialPlanEntry[]
+  sharedServiceEntries: WingsSideTourEditorialSharedServiceEntry[]
 }
 
 type Relation = null | number | string | undefined | { id?: number | string }
@@ -164,6 +180,78 @@ const record = (value: unknown): Record<string, unknown> =>
 
 const array = (value: unknown): Record<string, unknown>[] =>
   Array.isArray(value) ? value.map(record) : []
+
+const serviceRowID = (value: Record<string, unknown>): number | string => {
+  const id = value.id
+  if (typeof id !== 'number' && (typeof id !== 'string' || !id.trim())) {
+    throw new Error('Editorial service row is missing a stable ID')
+  }
+  return id
+}
+
+const peakServicePattern = /\b(?:peak|high) season\b|\bfuel surcharge\b|\bcompulsory dinner\b/iu
+const excludedServicePattern =
+  /\bearly check[ -]?in\b|\blate check[ -]?out\b|\btransport to or from vietnam\b|\binternational (?:flights?|or departure taxes)\b|\btransfer from and to airport\b|\b(?:visa|passport)\b|\binsurance\b|\btips?\b|\btipping\b|\bgratuities\b|\blaundry\b|\bmeals? not (?:marked|included)\b|\bother meals? (?:do not|not) indicate\b|\bbeverages?\b|\bdrinks?\b|\bpersonal expenses?\b|\b(?:services?|things?) (?:are |is )?not mention(?:ed)?\b|\blunch at local restaurant\b|\btransfer by bus\/train hanoi\s*-\s*sapa\b/iu
+
+export const snapshotEditorialSharedServices = (
+  tour: Partial<TourProduct> | Record<string, unknown>,
+): EditorialSharedServiceSnapshot => {
+  const value = tour as Record<string, unknown>
+  return {
+    excludes: cloneJSON(value.excludes ?? []),
+    includes: cloneJSON(value.includes ?? []),
+  }
+}
+
+export const editorialServiceRowIdentity = (value: EditorialSharedServiceSnapshot): string => {
+  const project = (rows: unknown) => array(rows).map((row) => String(serviceRowID(row)))
+  return editorialStableJSONStringify({
+    excludes: project(value.excludes),
+    includes: project(value.includes),
+  })
+}
+
+export const normalizeEditorialSharedServices = ({
+  expectedExcludes,
+  expectedIncludes,
+  source,
+}: {
+  expectedExcludes: number
+  expectedIncludes: number
+  source: TourProduct | Record<string, unknown>
+}): EditorialSharedServiceSnapshot => {
+  const value = source as Record<string, unknown>
+  const sourceIncludes = array(value.includes)
+  const sourceExcludes = array(value.excludes)
+  const rows = [
+    ...sourceIncludes.map((row) => ({ row, source: 'includes' as const })),
+    ...sourceExcludes.map((row) => ({ row, source: 'excludes' as const })),
+  ]
+  const ids = rows.map(({ row }) => String(serviceRowID(row)))
+  if (new Set(ids).size !== ids.length) {
+    throw new Error(`Editorial service row IDs are not unique for ${String(value.slug)}`)
+  }
+
+  const includes: Record<string, unknown>[] = []
+  const excludes: Record<string, unknown>[] = []
+  for (const { row, source: rowSource } of rows) {
+    const label = String(row.label || '').trim()
+    if (!label) throw new Error(`Editorial service row label is empty for ${String(value.slug)}`)
+    if (peakServicePattern.test(label)) continue
+    if (rowSource === 'excludes' || excludedServicePattern.test(label)) {
+      excludes.push(cloneJSON(row))
+    } else {
+      includes.push(cloneJSON(row))
+    }
+  }
+  if (includes.length !== expectedIncludes || excludes.length !== expectedExcludes) {
+    throw new Error(
+      `Editorial shared service classification cannot reconcile ${String(value.slug)}: ` +
+        `${includes.length}/${excludes.length} != ${expectedIncludes}/${expectedExcludes}`,
+    )
+  }
+  return { excludes, includes }
+}
 
 const sanitizeWrapperLayout = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(sanitizeWrapperLayout)
@@ -355,7 +443,8 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
     plan.expectedTourCount !== wingsSideTourEditorialExpectedTourCount ||
     JSON.stringify(plan.expectedLocales) !== JSON.stringify(wingsSideTourEditorialLocales) ||
     plan.entries.length !==
-      wingsSideTourEditorialExpectedTourCount * wingsSideTourEditorialLocales.length
+      wingsSideTourEditorialExpectedTourCount * wingsSideTourEditorialLocales.length ||
+    plan.sharedServiceEntries.length !== wingsSideTourEditorialExpectedTourCount
   ) {
     throw new Error('Invalid WingSide tour editorial production plan')
   }
@@ -374,6 +463,18 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
       )
     }
   }
+  const sharedKeys = plan.sharedServiceEntries.map(({ slug }) => slug)
+  if (new Set(sharedKeys).size !== sharedKeys.length) {
+    throw new Error('WingSide tour editorial plan contains duplicate shared service entries')
+  }
+  for (const entry of plan.sharedServiceEntries) {
+    if (
+      editorialChecksum(entry.before) !== entry.beforeChecksum ||
+      editorialChecksum(entry.after) !== entry.afterChecksum
+    ) {
+      throw new Error(`WingSide shared service plan checksum mismatch: ${entry.slug}`)
+    }
+  }
   const sourceManifest = new Map<string, string>()
   for (const { slug, sourceChecksum } of plan.entries) {
     const existing = sourceManifest.get(slug)
@@ -389,8 +490,14 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
   ) {
     throw new Error('WingSide tour editorial source manifest checksum mismatch')
   }
-  const before = editorialChecksum(plan.entries.map(({ beforeChecksum }) => beforeChecksum))
-  const after = editorialChecksum(plan.entries.map(({ afterChecksum }) => afterChecksum))
+  const before = editorialChecksum([
+    ...plan.sharedServiceEntries.map(({ beforeChecksum }) => beforeChecksum),
+    ...plan.entries.map(({ beforeChecksum }) => beforeChecksum),
+  ])
+  const after = editorialChecksum([
+    ...plan.sharedServiceEntries.map(({ afterChecksum }) => afterChecksum),
+    ...plan.entries.map(({ afterChecksum }) => afterChecksum),
+  ])
   if (before !== plan.aggregateChecksums.before || after !== plan.aggregateChecksums.after) {
     throw new Error('WingSide tour editorial production plan aggregate checksum mismatch')
   }
@@ -423,6 +530,7 @@ export const buildWingsSideTourEditorialPlan = ({
     throw new Error(`Expected exactly 22 WingSide English tours, found ${sourceTours.length}`)
   }
   const sourceBySlug = new Map(sourceTours.map((tour) => [tour.slug, tour]))
+  const sharedServiceEntries: WingsSideTourEditorialSharedServiceEntry[] = []
   const entries = catalog.tours.flatMap((entry) => {
     const source = sourceBySlug.get(entry.slug)
     const sourceWrapper = sourceWrappers.get(entry.slug)
@@ -433,6 +541,39 @@ export const buildWingsSideTourEditorialPlan = ({
     if (editorialSourceChecksum(source) !== entry.sourceChecksum) {
       throw new Error(`English source checksum drift for ${entry.slug}`)
     }
+    const serviceShapes = wingsSideTourEditorialLocales.map((locale) => ({
+      excludes: entry.locales[locale].excludes.length,
+      includes: entry.locales[locale].includes.length,
+    }))
+    const expectedShape = serviceShapes[0]!
+    if (
+      serviceShapes.some(
+        ({ excludes, includes }) =>
+          excludes !== expectedShape.excludes || includes !== expectedShape.includes,
+      )
+    ) {
+      throw new Error(`Localized service classification shape drift for ${entry.slug}`)
+    }
+    const sharedBefore = snapshotEditorialSharedServices(source)
+    const sharedAfter = normalizeEditorialSharedServices({
+      expectedExcludes: expectedShape.excludes,
+      expectedIncludes: expectedShape.includes,
+      source,
+    })
+    sharedServiceEntries.push({
+      after: sharedAfter,
+      afterChecksum: editorialChecksum(sharedAfter),
+      before: sharedBefore,
+      beforeChecksum: editorialChecksum(sharedBefore),
+      slug: entry.slug,
+      sourceChecksum: entry.sourceChecksum,
+      tourID: source.id,
+    })
+    const normalizedSource = {
+      ...(source as TourProduct),
+      excludes: cloneJSON(sharedAfter.excludes) as TourProduct['excludes'],
+      includes: cloneJSON(sharedAfter.includes) as TourProduct['includes'],
+    }
     return wingsSideTourEditorialLocales.map((locale) => {
       const beforeTour = beforeByKey.get(`${locale}:${entry.slug}`)
       const beforeWrapper = wrapperBeforeByKey.get(`${locale}:${entry.slug}`)
@@ -442,8 +583,11 @@ export const buildWingsSideTourEditorialPlan = ({
         throw new Error(`Localized tour ID drift for ${locale}:${entry.slug}`)
       }
       const before = snapshotEditorialOwnedFields(beforeTour)
+      if (editorialServiceRowIdentity(before) !== editorialServiceRowIdentity(sharedBefore)) {
+        throw new Error(`Localized service row identity drift for ${locale}:${entry.slug}`)
+      }
       const after = snapshotEditorialOwnedFields(
-        buildEditorialWriteData({ content: entry.locales[locale], source }),
+        buildEditorialWriteData({ content: entry.locales[locale], source: normalizedSource }),
       )
       const wrapperBefore = snapshotEditorialWrapperFields(beforeWrapper)
       const wrapperAfter = snapshotEditorialWrapperFields(
@@ -469,15 +613,21 @@ export const buildWingsSideTourEditorialPlan = ({
   })
   const plan: WingsSideTourEditorialPlan = {
     aggregateChecksums: {
-      after: editorialChecksum(entries.map(({ afterChecksum }) => afterChecksum)),
-      before: editorialChecksum(entries.map(({ beforeChecksum }) => beforeChecksum)),
+      after: editorialChecksum([
+        ...sharedServiceEntries.map(({ afterChecksum }) => afterChecksum),
+        ...entries.map(({ afterChecksum }) => afterChecksum),
+      ]),
+      before: editorialChecksum([
+        ...sharedServiceEntries.map(({ beforeChecksum }) => beforeChecksum),
+        ...entries.map(({ beforeChecksum }) => beforeChecksum),
+      ]),
     },
     createdAt,
     entries,
     expectedLocales: [...wingsSideTourEditorialLocales],
     expectedTourCount: 22,
     mode: 'plan',
-    planVersion: 2,
+    planVersion: 3,
     releaseSourceCommit,
     runID,
     siteCode: 'wing-side',
@@ -485,6 +635,7 @@ export const buildWingsSideTourEditorialPlan = ({
     sourceManifestChecksum: editorialChecksum(
       catalog.tours.map(({ slug, sourceChecksum }) => ({ slug, sourceChecksum })),
     ),
+    sharedServiceEntries,
   }
   assertEditorialPlanShape(plan)
   return plan

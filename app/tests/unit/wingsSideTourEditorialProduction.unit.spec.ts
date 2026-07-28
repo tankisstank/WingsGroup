@@ -12,6 +12,7 @@ import {
   buildEditorialWrapperWriteData,
   buildWingsSideTourEditorialPlan,
   editorialChecksum,
+  normalizeEditorialSharedServices,
   validateWingsSideTourPublicInventory,
   wingsSideTourPublicLocales,
 } from '../../scripts/lib/wingsSideTourEditorialProduction'
@@ -54,10 +55,13 @@ const sourceTour = (index: number): TourProduct =>
     createdAt: '2026-01-01T00:00:00.000Z',
     durationDays: 1,
     durationNights: 0,
-    excludes: [{ id: `exclude-${index}`, label: `English exclusion ${index}` }],
+    excludes: [],
     factSummary: { groupSizeSummary: 'Private', routeSummary: `English route ${index}` },
     id: index,
-    includes: [{ id: `include-${index}`, label: `English inclusion ${index}` }],
+    includes: [
+      { id: `include-${index}`, label: `English inclusion ${index}` },
+      { id: `exclude-${index}`, label: `Travel Insurance ${index}` },
+    ],
     itineraryDays: [
       {
         dayNumber: 1,
@@ -134,7 +138,19 @@ const catalogAndSources = () => {
 describe('WingSide tour editorial production plan', () => {
   it('preserves array IDs and non-localized operational fields in write data', () => {
     const source = sourceTour(1)
-    const data = buildEditorialWriteData({ content: content(1, 'pt'), source })
+    const normalizedServices = normalizeEditorialSharedServices({
+      expectedExcludes: 1,
+      expectedIncludes: 1,
+      source,
+    })
+    const data = buildEditorialWriteData({
+      content: content(1, 'pt'),
+      source: {
+        ...source,
+        excludes: normalizedServices.excludes,
+        includes: normalizedServices.includes,
+      },
+    })
     const day = (data.itineraryDays as Array<Record<string, unknown>>)[0]!
 
     expect(day).toMatchObject({
@@ -199,6 +215,15 @@ describe('WingSide tour editorial production plan', () => {
     })
 
     expect(plan.entries).toHaveLength(88)
+    expect(plan.sharedServiceEntries).toHaveLength(22)
+    expect(plan.sharedServiceEntries[0]!.before).toMatchObject({
+      excludes: [],
+      includes: expect.any(Array),
+    })
+    expect(plan.sharedServiceEntries[0]!.after).toMatchObject({
+      excludes: [expect.objectContaining({ id: 'exclude-1' })],
+      includes: [expect.objectContaining({ id: 'include-1' })],
+    })
     expect(new Set(plan.entries.map(({ locale, slug }) => `${locale}:${slug}`)).size).toBe(88)
     expect(() => assertEditorialPlanShape(plan)).not.toThrow()
     expect(
@@ -238,6 +263,68 @@ describe('WingSide tour editorial production plan', () => {
     plan.entries[0]!.wrapperAfter.title = 'tampered wrapper'
 
     expect(() => assertEditorialPlanShape(plan)).toThrow('entry checksum mismatch')
+  })
+
+  it('fails closed on locale service-shape and row-identity drift', () => {
+    const build = ({
+      catalog,
+      sources,
+      mutateBefore,
+    }: {
+      catalog: WingsSideTourEditorialCatalog
+      sources: TourProduct[]
+      mutateBefore?: (before: TourProduct, locale: string, slug: string) => TourProduct
+    }) => {
+      const beforeByKey = new Map<string, TourProduct>()
+      const wrapperBeforeByKey = new Map<string, Page>()
+      for (const source of sources) {
+        for (const locale of ['vi', 'it', 'es', 'pt']) {
+          beforeByKey.set(
+            `${locale}:${source.slug}`,
+            mutateBefore ? mutateBefore(source, locale, source.slug) : source,
+          )
+          wrapperBeforeByKey.set(`${locale}:${source.slug}`, sourceWrapper(source.id as number))
+        }
+      }
+      return buildWingsSideTourEditorialPlan({
+        beforeByKey,
+        catalog,
+        createdAt: '2026-07-26T00:00:00.000Z',
+        releaseSourceCommit: 'a'.repeat(40),
+        runID: 'guard-test',
+        siteID: 7,
+        sourceTours: sources,
+        sourceWrappers: new Map(
+          sources.map((source) => [source.slug, sourceWrapper(source.id as number)]),
+        ),
+        wrapperBeforeByKey,
+        wrapperPageIDs: new Map(
+          sources.map((source) => [source.slug, source.wrapperPage as number]),
+        ),
+      })
+    }
+
+    const shapeFixture = catalogAndSources()
+    shapeFixture.catalog.tours[0]!.locales.pt.excludes.push('pt extra exclusion')
+    expect(() => build(shapeFixture)).toThrow('Localized service classification shape drift')
+
+    const identityFixture = catalogAndSources()
+    expect(() =>
+      build({
+        ...identityFixture,
+        mutateBefore: (before, locale, slug) =>
+          locale === 'vi' && slug === 'tour-1'
+            ? ({
+                ...before,
+                includes: [{ id: 'unexpected-row', label: 'Unexpected' }],
+              } as TourProduct)
+            : before,
+      }),
+    ).toThrow('Localized service row identity drift')
+
+    const missingIDFixture = catalogAndSources()
+    delete (missingIDFixture.sources[0]!.includes?.[0] as { id?: unknown }).id
+    expect(() => build(missingIDFixture)).toThrow('service row is missing a stable ID')
   })
 
   it('requires the same 22 public listing and detail slugs in every locale', () => {

@@ -63,9 +63,12 @@ const sourceTour = (index: number): TourProduct =>
     createdAt: '2026-01-01T00:00:00.000Z',
     durationDays: 1,
     durationNights: 0,
-    excludes: [{ id: `exclude-${index}`, label: `English excluded ${index}` }],
+    excludes: [],
     id: index,
-    includes: [{ id: `include-${index}`, label: `English included ${index}` }],
+    includes: [
+      { id: `include-${index}`, label: `English included ${index}` },
+      { id: `exclude-${index}`, label: `Travel Insurance ${index}` },
+    ],
     itineraryDays: [
       {
         dayNumber: 1,
@@ -177,13 +180,8 @@ const fixture = () => {
       throw new Error(`Unexpected collection ${args.collection}`)
     }),
     findByID: vi.fn(
-      async (args: {
-        id: number | string
-        locale: 'en' | (typeof locales)[number]
-      }) =>
-        clone(
-          wrappers[args.locale].find((page) => String(page.id) === String(args.id))!,
-        ),
+      async (args: { id: number | string; locale: 'en' | (typeof locales)[number] }) =>
+        clone(wrappers[args.locale].find((page) => String(page.id) === String(args.id))!),
     ),
     update: vi.fn(
       async (args: {
@@ -251,7 +249,7 @@ describe('WingSide tour editorial production transaction runtime', () => {
         plan,
         req: req as never,
       }),
-    ).resolves.toEqual({ checked: 88, state: 'before' })
+    ).resolves.toEqual({ checked: 110, state: 'before' })
     expect(state().pt[0]!.primaryCTA.mode).toBe('inquiry')
     expect(state()).toEqual(before)
     expect(wrappers().pt[0]!.title).toBeNull()
@@ -263,7 +261,12 @@ describe('WingSide tour editorial production transaction runtime', () => {
         plan,
         req: req as never,
       }),
-    ).resolves.toEqual({ unchanged: 0, updated: 88 })
+    ).resolves.toEqual({
+      sharedUnchanged: 0,
+      sharedUpdated: 22,
+      unchanged: 0,
+      updated: 88,
+    })
     await expect(
       verifyWingsSideTourEditorialProductionPlan({
         expectedState: 'after',
@@ -271,12 +274,18 @@ describe('WingSide tour editorial production transaction runtime', () => {
         plan,
         req: req as never,
       }),
-    ).resolves.toEqual({ checked: 88, state: 'after' })
+    ).resolves.toEqual({ checked: 110, state: 'after' })
     expect(wrappers().pt[0]).toMatchObject({
       layout: [{ blockType: 'content', columns: [] }],
       meta: { image: 901, title: 'pt meta title 1' },
       title: 'pt editorial tour title 1',
     })
+    for (const locale of ['en', ...locales] as const) {
+      expect(state()[locale][0]!.includes).toEqual([expect.objectContaining({ id: 'include-1' })])
+      expect(state()[locale][0]!.excludes).toEqual([expect.objectContaining({ id: 'exclude-1' })])
+    }
+    expect(state().pt[0]!.includes?.[0]?.label).toBe('pt included 1')
+    expect(state().pt[0]!.excludes?.[0]?.label).toBe('pt excluded 1')
     await expect(
       applyWingsSideTourEditorialProductionPlan({
         catalog,
@@ -284,7 +293,12 @@ describe('WingSide tour editorial production transaction runtime', () => {
         plan,
         req: req as never,
       }),
-    ).resolves.toEqual({ unchanged: 88, updated: 0 })
+    ).resolves.toEqual({
+      sharedUnchanged: 22,
+      sharedUpdated: 0,
+      unchanged: 88,
+      updated: 0,
+    })
 
     await expect(
       rollbackWingsSideTourEditorialProductionPlan({
@@ -293,7 +307,12 @@ describe('WingSide tour editorial production transaction runtime', () => {
         plan,
         req: req as never,
       }),
-    ).resolves.toEqual({ unchanged: 0, updated: 88 })
+    ).resolves.toEqual({
+      sharedUnchanged: 0,
+      sharedUpdated: 22,
+      unchanged: 0,
+      updated: 88,
+    })
     await expect(
       verifyWingsSideTourEditorialProductionPlan({
         expectedState: 'before',
@@ -301,8 +320,12 @@ describe('WingSide tour editorial production transaction runtime', () => {
         plan,
         req: req as never,
       }),
-    ).resolves.toEqual({ checked: 88, state: 'before' })
+    ).resolves.toEqual({ checked: 110, state: 'before' })
     expect(state().pt[0]!.primaryCTA.mode).toBe('inquiry')
+    for (const locale of ['en', ...locales] as const) {
+      expect(state()[locale][0]!.includes?.map(({ id }) => id)).toEqual(['include-1', 'exclude-1'])
+      expect(state()[locale][0]!.excludes).toEqual([])
+    }
     expect(wrappers().pt[0]).toMatchObject({
       layout: null,
       meta: {
@@ -320,10 +343,13 @@ describe('WingSide tour editorial production transaction runtime', () => {
         plan,
         req: req as never,
       }),
-    ).resolves.toEqual({ unchanged: 88, updated: 0 })
+    ).resolves.toEqual({
+      sharedUnchanged: 22,
+      sharedUpdated: 0,
+      unchanged: 88,
+      updated: 0,
+    })
     expect(payload.collections.pages.config.fields[0]!.required).toBe(true)
-    expect(
-      payload.collections.pages.config.fields[1]!.tabs?.[0]?.fields?.[0]?.required,
-    ).toBe(true)
+    expect(payload.collections.pages.config.fields[1]!.tabs?.[0]?.fields?.[0]?.required).toBe(true)
   })
 })

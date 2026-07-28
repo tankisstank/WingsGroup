@@ -19,11 +19,11 @@ import {
   buildEditorialRestoreData,
   buildEditorialWrapperRestoreData,
   buildEditorialWrapperWriteData,
-  buildEditorialWriteData,
   buildWingsSideTourEditorialPlan,
   editorialChecksum,
   editorialRelationID,
   snapshotEditorialOwnedFields,
+  snapshotEditorialSharedServices,
   snapshotEditorialWrapperFields,
   wingsSideTourEditorialExpectedTourCount,
   type WingsSideTourEditorialPlan,
@@ -159,7 +159,9 @@ export const loadWingsSideTourEditorialProductionInventory = async ({
   const siteID = await findSiteID(payload, req)
   const sourceTours = await findTours({ locale: 'en', payload, req, siteID })
   if (sourceTours.length !== wingsSideTourEditorialExpectedTourCount) {
-    throw new Error(`Expected exactly 22 published WingSide English tours, found ${sourceTours.length}`)
+    throw new Error(
+      `Expected exactly 22 published WingSide English tours, found ${sourceTours.length}`,
+    )
   }
   const sourceSlugs = sourceTours.map(({ slug }) => slug).sort()
   if (new Set(sourceSlugs).size !== sourceSlugs.length) {
@@ -199,7 +201,9 @@ export const loadWingsSideTourEditorialProductionInventory = async ({
       localizedTours.some((tour) => !sourceSlugs.includes(tour.slug)) ||
       sourceTours.some((source) => !localizedBySlug.has(source.slug))
     ) {
-      throw new Error(`Published ${locale} tour inventory does not match the 22 English source tours`)
+      throw new Error(
+        `Published ${locale} tour inventory does not match the 22 English source tours`,
+      )
     }
     for (const source of sourceTours) {
       const localized = localizedBySlug.get(source.slug)!
@@ -283,6 +287,12 @@ const assertPlanMatchesInventory = ({
       throw new Error(`Production identity drift for ${entry.locale}:${entry.slug}`)
     }
   }
+  for (const entry of plan.sharedServiceEntries) {
+    const source = inventory.sourceTours.find(({ slug }) => slug === entry.slug)
+    if (!source || String(source.id) !== String(entry.tourID)) {
+      throw new Error(`Production shared service identity drift for ${entry.slug}`)
+    }
+  }
 }
 
 export const verifyWingsSideTourEditorialProductionPlan = async ({
@@ -299,6 +309,12 @@ export const verifyWingsSideTourEditorialProductionPlan = async ({
   const inventory = await loadWingsSideTourEditorialProductionInventory({ payload, req })
   assertPlanMatchesInventory({ inventory, plan })
   const mismatches: string[] = []
+  for (const entry of plan.sharedServiceEntries) {
+    const current = inventory.sourceTours.find(({ slug }) => slug === entry.slug)!
+    const actual = editorialChecksum(snapshotEditorialSharedServices(current))
+    const expected = expectedState === 'after' ? entry.afterChecksum : entry.beforeChecksum
+    if (actual !== expected) mismatches.push(`en:${entry.slug}:shared-services`)
+  }
   for (const entry of plan.entries) {
     const current = inventory.beforeByKey.get(`${entry.locale}:${entry.slug}`)!
     const currentWrapper = inventory.wrapperBeforeByKey.get(`${entry.locale}:${entry.slug}`)!
@@ -314,7 +330,10 @@ export const verifyWingsSideTourEditorialProductionPlan = async ({
       `Editorial ${expectedState} verification failed for ${mismatches.length} entries: ${mismatches.join(', ')}`,
     )
   }
-  return { checked: plan.entries.length, state: expectedState }
+  return {
+    checked: plan.entries.length + plan.sharedServiceEntries.length,
+    state: expectedState,
+  }
 }
 
 const mutatePlan = async ({
@@ -336,6 +355,8 @@ const mutatePlan = async ({
   const originalPageVersions = payload.collections.pages.config.versions
   let restoreWrapperRequirements = () => {}
   let transactionStarted = false
+  let sharedUnchanged = 0
+  let sharedUpdated = 0
   let updated = 0
   let unchanged = 0
   try {
@@ -350,65 +371,109 @@ const mutatePlan = async ({
     }
     const inventory = await loadWingsSideTourEditorialProductionInventory({ payload, req })
     assertPlanMatchesInventory({ inventory, plan })
-    assertWingsSideTourEditorialCatalog({ catalog, sourceTours: inventory.sourceTours })
+    const sharedStates = new Set(
+      plan.sharedServiceEntries.map((entry) => {
+        const current = inventory.sourceTours.find(({ slug }) => slug === entry.slug)!
+        const checksum = editorialChecksum(snapshotEditorialSharedServices(current))
+        if (checksum === entry.beforeChecksum) return 'before'
+        if (checksum === entry.afterChecksum) return 'after'
+        throw new Error(`Editorial ${direction} refused shared service drift for ${entry.slug}`)
+      }),
+    )
+    if (sharedStates.size !== 1) {
+      throw new Error(`Editorial ${direction} refused mixed shared service state`)
+    }
+    if (direction === 'apply' && sharedStates.has('before')) {
+      assertWingsSideTourEditorialCatalog({ catalog, sourceTours: inventory.sourceTours })
+    }
     const catalogBySlug = new Map(catalog.tours.map((entry) => [entry.slug, entry]))
 
-    for (const entry of plan.entries) {
-      const current = inventory.beforeByKey.get(`${entry.locale}:${entry.slug}`)!
-      const currentWrapper = inventory.wrapperBeforeByKey.get(`${entry.locale}:${entry.slug}`)!
-      const currentChecksum = editorialChecksum({
-        tour: snapshotEditorialOwnedFields(current),
-        wrapper: snapshotEditorialWrapperFields(currentWrapper),
-      })
-      const fromChecksum = direction === 'apply' ? entry.beforeChecksum : entry.afterChecksum
-      const toChecksum = direction === 'apply' ? entry.afterChecksum : entry.beforeChecksum
-      if (currentChecksum === toChecksum) {
-        unchanged += 1
-        continue
-      }
-      if (currentChecksum !== fromChecksum) {
-        throw new Error(`Editorial ${direction} refused drift for ${entry.locale}:${entry.slug}`)
-      }
-      const source = inventory.sourceTours.find(({ slug }) => slug === entry.slug)!
-      const sourceWrapper = inventory.sourceWrappers.get(entry.slug)!
-      const content = catalogBySlug.get(entry.slug)!.locales[entry.locale]
-      const data =
-        direction === 'apply'
-          ? buildEditorialWriteData({
-              content,
-              source,
-            })
-          : buildEditorialRestoreData({ before: entry.before, source })
-      const wrapperData =
-        direction === 'apply'
-          ? buildEditorialWrapperWriteData({ content, source: sourceWrapper })
-          : buildEditorialWrapperRestoreData({
-              before: entry.wrapperBefore,
-              source: sourceWrapper,
-            })
-      await payload.update({
-        collection: 'pages',
-        context: productionContext,
-        data: wrapperData as never,
-        id: entry.wrapperPageID,
-        locale: entry.locale,
-        overrideAccess: true,
-        req,
-      })
-      await payload.update({
-        collection: 'tour-products',
-        context: productionContext,
-        data: data as never,
-        id: entry.tourID,
-        locale: entry.locale,
-        overrideAccess: true,
-        req,
-      })
-      updated += 1
-      if (failAfterUpdates !== undefined && updated >= failAfterUpdates) {
-        throw new Error(`Injected tour editorial failure after ${updated} update(s)`)
+    const mutateSharedServices = async () => {
+      for (const entry of plan.sharedServiceEntries) {
+        const current = inventory.sourceTours.find(({ slug }) => slug === entry.slug)!
+        const currentChecksum = editorialChecksum(snapshotEditorialSharedServices(current))
+        const fromChecksum = direction === 'apply' ? entry.beforeChecksum : entry.afterChecksum
+        const toChecksum = direction === 'apply' ? entry.afterChecksum : entry.beforeChecksum
+        if (currentChecksum === toChecksum) {
+          sharedUnchanged += 1
+          continue
+        }
+        if (currentChecksum !== fromChecksum) {
+          throw new Error(`Editorial ${direction} refused shared service drift for ${entry.slug}`)
+        }
+        const target = direction === 'apply' ? entry.after : entry.before
+        await payload.update({
+          collection: 'tour-products',
+          context: productionContext,
+          data: {
+            excludes: target.excludes,
+            includes: target.includes,
+          } as never,
+          id: entry.tourID,
+          locale: 'en',
+          overrideAccess: true,
+          req,
+        })
+        sharedUpdated += 1
       }
     }
+
+    const mutateLocalizedEntries = async () => {
+      for (const entry of plan.entries) {
+        const current = inventory.beforeByKey.get(`${entry.locale}:${entry.slug}`)!
+        const currentWrapper = inventory.wrapperBeforeByKey.get(`${entry.locale}:${entry.slug}`)!
+        const currentChecksum = editorialChecksum({
+          tour: snapshotEditorialOwnedFields(current),
+          wrapper: snapshotEditorialWrapperFields(currentWrapper),
+        })
+        const fromChecksum = direction === 'apply' ? entry.beforeChecksum : entry.afterChecksum
+        const toChecksum = direction === 'apply' ? entry.afterChecksum : entry.beforeChecksum
+        if (currentChecksum === toChecksum) {
+          unchanged += 1
+          continue
+        }
+        if (currentChecksum !== fromChecksum) {
+          throw new Error(`Editorial ${direction} refused drift for ${entry.locale}:${entry.slug}`)
+        }
+        const sourceWrapper = inventory.sourceWrappers.get(entry.slug)!
+        const content = catalogBySlug.get(entry.slug)!.locales[entry.locale]
+        const target = direction === 'apply' ? entry.after : entry.before
+        const data = buildEditorialRestoreData({ before: target, source: current })
+        const wrapperData =
+          direction === 'apply'
+            ? buildEditorialWrapperWriteData({ content, source: sourceWrapper })
+            : buildEditorialWrapperRestoreData({
+                before: entry.wrapperBefore,
+                source: sourceWrapper,
+              })
+        await payload.update({
+          collection: 'pages',
+          context: productionContext,
+          data: wrapperData as never,
+          id: entry.wrapperPageID,
+          locale: entry.locale,
+          overrideAccess: true,
+          req,
+        })
+        await payload.update({
+          collection: 'tour-products',
+          context: productionContext,
+          data: data as never,
+          id: entry.tourID,
+          locale: entry.locale,
+          overrideAccess: true,
+          req,
+        })
+        updated += 1
+        if (failAfterUpdates !== undefined && updated >= failAfterUpdates) {
+          throw new Error(`Injected tour editorial failure after ${updated} update(s)`)
+        }
+      }
+    }
+
+    if (direction === 'apply') await mutateSharedServices()
+    await mutateLocalizedEntries()
+    if (direction === 'rollback') await mutateSharedServices()
 
     await verifyWingsSideTourEditorialProductionPlan({
       expectedState: direction === 'apply' ? 'after' : 'before',
@@ -417,7 +482,7 @@ const mutatePlan = async ({
       req,
     })
     await commitTransaction(req)
-    return { unchanged, updated }
+    return { sharedUnchanged, sharedUpdated, unchanged, updated }
   } catch (error) {
     if (transactionStarted && req.transactionID) await killTransaction(req)
     throw error
