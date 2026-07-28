@@ -49,13 +49,57 @@ This is intentional. Production data cannot be changed until the pricing
 disclosures have approved destinations and translations. The previous v3 plan
 remains rollback-capable, but must not be applied.
 
+## S3 foundation implementation
+
+The approved `S3` execution model was used with one integration leader and no
+more than three concurrent workers. Every implementation package used an
+isolated worktree from an immutable base, returned a structured JSON report,
+and was independently checked before integration.
+
+Wave 1 delivered three tooling foundations:
+
+- locale catalog v2 and production plan v4 now use stable `sourceRowID`
+  mappings, approval-bound pricing dispositions, four-locale governed labels,
+  and a service-row ledger reconstructed from the before/after snapshots;
+- governed English editorial tooling now provides exact-22 inventory checks,
+  recursive copy lint, factual/service-row guards, and checksummed in-memory
+  plan/apply/verify/rollback transitions; and
+- media audit tooling now inventories all governed tour media locations,
+  requires an exact 22-tour manifest, preserves every observation for reused
+  media IDs, and fails closed on incomplete OCR/manual-review evidence.
+
+The first independent review found four code-level false-pass or safety gaps.
+The corrective S3 wave closed them:
+
+1. empty or partial media inventories no longer pass;
+2. adverse OCR/manual-review evidence on a reused media ID cannot be hidden by
+   an earlier clean observation;
+3. the row ledger is recomputed from the shared-service snapshots and bound
+   into the plan aggregate checksums; and
+4. production apply/rollback is blocked before Payload initialization unless
+   plan, release, database, encrypted backup, restore drill, operator and
+   rollback-release evidence all match trusted values. The guard is checked
+   again immediately before the transaction runtime.
+
+The production importer also now requires an explicit reviewed catalog-v2
+artifact and lowercase SHA-256 for every phase. It hashes the actual file
+before Payload initialization, passes the selected path to the v2 loader, and
+checks the catalog approval snapshot against the approved plan for non-plan
+phases.
+
+The corrective re-review found no remaining P0 code false-pass in these areas.
+Production remains on `HOLD`: the repository does not yet contain the reviewed
+38-disclosure catalog-v2 content, the English tooling does not yet have its
+canonical transactional Payload runtime, and approved media bytes/OCR/
+provenance/manual-review evidence has not been supplied.
+
 ## Verification
 
 Passed on the integrated branch:
 
-- Unit: 60 files, 433 tests.
+- Unit after S3 corrective integration: 64 files, 514 tests.
 - Component: 14 files, 74 tests.
-- Focused post-review safety suite: 3 files, 34 tests.
+- Independent corrective re-review: 7 files, 94 targeted tests.
 - TypeScript: `pnpm exec tsc --noEmit`.
 - ESLint on all touched audit paths.
 - Production Webpack build: passed, including 17 static pages and all dynamic
@@ -75,9 +119,21 @@ External reviewer execution:
 
 - Claude CLI could not authenticate because its OAuth session had expired.
 - Grok CLI did not produce a transcript before timeout.
-- A separate read-only Codex reviewer completed the review and found the two
-  release-blocking gaps described above. Both code paths were corrected:
-  source-brand projection is guarded, and pricing-disclosure loss is fail-closed.
+- A separate read-only Codex reviewer completed the S3 review and corrective
+  re-review. The first pass found four P0 code gaps; the second pass reproduced
+  the attacks against the corrected branch and found no remaining P0
+  false-pass. Open P1/P2 items are recorded below as next-wave boundaries.
+
+Open technical boundaries:
+
+- English rewrite governance still needs a canonical versioned 22-tour
+  manifest/config and guarded transactional Payload runtime.
+- Media tooling verifies a normalized evidence manifest; actual byte hashing,
+  OCR execution, provenance validation and authenticated manual review belong
+  to the evidence-producing package.
+- Approver authorization and the canonical media-manifest checksum must be
+  supplied by trusted release configuration independent from the artifacts
+  being approved.
 
 ## Browser evidence
 

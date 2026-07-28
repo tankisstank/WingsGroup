@@ -55,15 +55,26 @@ Implementation evidence:
 - The governed four-slot projection fails closed for invalid, unpublished,
   cross-site or non-display-ready candidates.
 - `pnpm exec tsc --noEmit` passes.
-- Full unit suite: 60 files and 433 tests pass.
+- Full unit suite after the S3 corrective integration: 64 files and 514 tests
+  pass.
 - Full component suite: 14 files and 74 tests pass.
 - Empty-to-head PostgreSQL migration plus real Payload CRUD passed for EN and
   VI after correcting the localized version-column migration contract.
+- Independent S3 corrective re-review ran 94 targeted tests and reproduced the
+  prior empty-media, conflicting-evidence, forged-ledger and missing-release-
+  evidence attacks. No remaining P0 code false-pass was found.
+- Production editorial apply/rollback now requires the reviewed catalog-v2
+  artifact and checksum plus plan, release, backup, restore-drill, database,
+  operator and rollback-release evidence before Payload initialization.
 
 Release remains intentionally held until:
 
 - the pricing-disclosure localization blocker recorded in
   `../go-live-audit-2026-07-28-implementation.md` is resolved;
+- the canonical transactional runtime for the governed 22-tour English
+  rewrite plan is implemented and rehearsed;
+- approved media bytes, provenance, OCR/frame evidence and authenticated
+  manual review are available;
 - the approved PostgreSQL localization and Home curation plans are applied and
   audited;
 - exact 22/22 inventory and Home → Tour Detail behavior pass for EN, VI, IT, ES
