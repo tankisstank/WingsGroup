@@ -87,21 +87,52 @@ export const getDurationLabel = (
     return null
   }
 
-  if (getCopyLocale(locale) === 'en') {
-    if (days && nights !== null && nights !== undefined) {
-      return `${days} days / ${nights} nights`
-    }
+  const durationUnits = {
+    en: {
+      day: (value: number) => `${value} ${value === 1 ? 'day' : 'days'}`,
+      night: (value: number) => `${value} ${value === 1 ? 'night' : 'nights'}`,
+    },
+    es: {
+      day: (value: number) => `${value} ${value === 1 ? 'día' : 'días'}`,
+      night: (value: number) => `${value} ${value === 1 ? 'noche' : 'noches'}`,
+    },
+    it: {
+      day: (value: number) => `${value} ${value === 1 ? 'giorno' : 'giorni'}`,
+      night: (value: number) => `${value} ${value === 1 ? 'notte' : 'notti'}`,
+    },
+    pt: {
+      day: (value: number) => `${value} ${value === 1 ? 'dia' : 'dias'}`,
+      night: (value: number) => `${value} ${value === 1 ? 'noite' : 'noites'}`,
+    },
+    vi: {
+      day: (value: number) => `${value} ngày`,
+      night: (value: number) => `${value} đêm`,
+    },
+  } as const
+  const publicLocale = locale in durationUnits ? (locale as keyof typeof durationUnits) : 'en'
+  const units = durationUnits[publicLocale]
+  const parts = [
+    days ? units.day(days) : null,
+    nights !== null && nights !== undefined ? units.night(nights) : null,
+  ].filter(Boolean)
 
-    return [days ? `${days} days` : null, nights ? `${nights} nights` : null]
-      .filter(Boolean)
-      .join(' / ')
-  }
+  return parts.length > 0 ? parts.join(' / ') : null
+}
 
-  if (days && nights !== null && nights !== undefined) {
-    return `${days}N${nights}Đ`
-  }
-
-  return [days ? `${days} ngày` : null, nights ? `${nights} đêm` : null].filter(Boolean).join(' / ')
+/**
+ * Applies conservative public-facing editorial cleanup without translating or
+ * changing factual content. Place names follow the canonical public taxonomy.
+ */
+export const normalizeTourPublicText = (value?: null | string): string => {
+  return String(value || '')
+    .normalize('NFKC')
+    .replace(/\bSa\s*Pa\b/giu, 'Sa Pa')
+    .replace(/\bHa\s*Long\b/giu, 'Ha Long')
+    .replace(/\s+([,.;:!?])/gu, '$1')
+    .replace(/([,;:])(?=\p{L})/gu, '$1 ')
+    .replace(/([.!?])(?=\p{Lu})/gu, '$1 ')
+    .replace(/\s+/gu, ' ')
+    .trim()
 }
 
 export const getAvailabilityLabel = (
@@ -298,25 +329,55 @@ export const getTourPricePosture = ({
   locale?: CopyLocaleCode | SupportedLocaleCode
   priceFrom?: null | number
 }): { honesty: string; label: string; value: string } => {
-  const isEn = getCopyLocale(locale) === 'en'
+  const publicLocale = ['en', 'es', 'it', 'pt', 'vi'].includes(locale)
+    ? (locale as 'en' | 'es' | 'it' | 'pt' | 'vi')
+    : 'en'
+  const copy = {
+    en: {
+      honesty: 'We confirm your tailored quote before any deposit.',
+      label: 'From',
+      onRequest: 'On request · reply within 24h',
+      priceOnRequest: 'Price on request',
+    },
+    es: {
+      honesty: 'Confirmamos tu propuesta personalizada antes de cualquier depósito.',
+      label: 'Desde',
+      onRequest: 'Bajo consulta · respuesta en 24 h',
+      priceOnRequest: 'Precio bajo consulta',
+    },
+    it: {
+      honesty: 'Confermiamo il preventivo personalizzato prima di qualsiasi acconto.',
+      label: 'Da',
+      onRequest: 'Su richiesta · risposta entro 24 ore',
+      priceOnRequest: 'Prezzo su richiesta',
+    },
+    pt: {
+      honesty: 'Confirmamos sua proposta personalizada antes de qualquer depósito.',
+      label: 'A partir de',
+      onRequest: 'Sob consulta · resposta em 24 h',
+      priceOnRequest: 'Preço sob consulta',
+    },
+    vi: {
+      honesty: 'Chúng tôi xác nhận báo giá thiết kế riêng trước khi bạn đặt cọc.',
+      label: 'Giá từ',
+      onRequest: 'Theo yêu cầu · phản hồi trong 24 giờ',
+      priceOnRequest: 'Giá theo yêu cầu',
+    },
+  }[publicLocale]
   const formatted = formatTourPrice(priceFrom, currency)
 
   if (formatted) {
     return {
-      honesty: isEn
-        ? 'Sales confirms final price before any hold.'
-        : 'Sales xác nhận lại giá trước khi giữ chỗ.',
-      label: isEn ? 'From' : 'Giá từ',
+      honesty: copy.honesty,
+      label: copy.label,
       value: formatted,
     }
   }
 
   return {
-    honesty: isEn
-      ? 'Sales confirms final price before any hold.'
-      : 'Sales xác nhận lại giá trước khi giữ chỗ.',
-    label: isEn ? 'Price on request' : 'Giá theo yêu cầu',
-    value: isEn ? 'On request · reply within 24h' : 'Theo yêu cầu · phản hồi trong 24h',
+    honesty: copy.honesty,
+    label: copy.priceOnRequest,
+    value: copy.onRequest,
   }
 }
 

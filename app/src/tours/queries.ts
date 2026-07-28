@@ -27,6 +27,7 @@ import {
   getNextDeparture,
   groupDeparturesByMonth,
   marketRouteSlugToKey,
+  normalizeTourPublicText,
 } from './utils'
 import { normalizeGovernedTourPrice } from './currency'
 import {
@@ -105,10 +106,101 @@ const normalizeTourProductCard = (
     market: doc.market,
     marketCard: doc.marketCard || null,
     slug: doc.slug,
-    summary: doc.summary,
-    title: doc.title,
+    summary: normalizeTourPublicText(doc.summary),
+    title: normalizeTourPublicText(doc.title),
   }
 }
+
+const stringSet = (value: unknown): Set<string> =>
+  new Set(
+    (Array.isArray(value) ? value : [])
+      .filter((item): item is string => typeof item === 'string')
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean),
+  )
+
+const overlapCount = (left: Set<string>, right: Set<string>) => {
+  let count = 0
+  for (const value of left) {
+    if (right.has(value)) count += 1
+  }
+  return count
+}
+
+/**
+ * Deterministic fallback ranking for related journeys. Explicit CMS relations
+ * bypass this function and always retain their configured order.
+ */
+export const rankRelatedTourFallbacks = (
+  source: Record<string, any>,
+  candidates: Record<string, any>[],
+): Record<string, any>[] => {
+  const sourceDestinations = stringSet(source.destinationTags)
+  const sourceStyles = stringSet(source.travelStyles)
+  const sourceDuration =
+    typeof source.durationDays === 'number' && source.durationDays > 0 ? source.durationDays : null
+  const sourceMarket = String(source.market || '')
+    .trim()
+    .toLowerCase()
+
+  return [...candidates].sort((left, right) => {
+    const destinationDelta =
+      overlapCount(sourceDestinations, stringSet(right.destinationTags)) -
+      overlapCount(sourceDestinations, stringSet(left.destinationTags))
+    if (destinationDelta !== 0) return destinationDelta
+
+    const regionDelta =
+      Number(
+        Boolean(sourceMarket) &&
+          String(right.market || '')
+            .trim()
+            .toLowerCase() === sourceMarket,
+      ) -
+      Number(
+        Boolean(sourceMarket) &&
+          String(left.market || '')
+            .trim()
+            .toLowerCase() === sourceMarket,
+      )
+    if (regionDelta !== 0) return regionDelta
+
+    const styleDelta =
+      overlapCount(sourceStyles, stringSet(right.travelStyles)) -
+      overlapCount(sourceStyles, stringSet(left.travelStyles))
+    if (styleDelta !== 0) return styleDelta
+
+    const durationDistance = (candidate: Record<string, any>) =>
+      sourceDuration !== null &&
+      typeof candidate.durationDays === 'number' &&
+      candidate.durationDays > 0
+        ? Math.abs(sourceDuration - candidate.durationDays)
+        : Number.MAX_SAFE_INTEGER
+    const durationDelta = durationDistance(left) - durationDistance(right)
+    if (durationDelta !== 0) return durationDelta
+
+    const stableKey = (candidate: Record<string, any>) =>
+      String(candidate.slug || candidate.id || '')
+        .trim()
+        .toLowerCase()
+    return stableKey(left).localeCompare(stableKey(right), 'en')
+  })
+}
+
+export const selectRelatedTourCards = ({
+  candidates,
+  configured,
+  source,
+}: {
+  candidates: Record<string, any>[]
+  configured: Record<string, any>[]
+  source: Record<string, any>
+}) =>
+  configured.length > 0
+    ? configured.slice(0, 3)
+    : rankRelatedTourFallbacks(source, candidates)
+        .map(normalizeTourProductCard)
+        .filter(Boolean)
+        .slice(0, 3)
 
 const normalizeVariantCard = (
   variant: Record<string, any> | number | string | null | undefined,
@@ -390,19 +482,17 @@ export const getResolvedTourDetailBySlug = async ({
         depth: 2,
         draft,
         fallbackLocale,
-        limit: 3,
+        limit: 100,
         locale,
         where: {
-          and: [
-            { id: { not_equals: tour.id } },
-            { market: { equals: tour.market } },
-            { wrapperPage: { exists: true } },
-          ],
+          and: [{ id: { not_equals: tour.id } }, { wrapperPage: { exists: true } }],
         },
       })
-  const relatedTours = configuredRelated.length
-    ? configuredRelated.slice(0, 3)
-    : (relatedResult?.docs || []).map(normalizeTourProductCard).filter(Boolean).slice(0, 3)
+  const relatedTours = selectRelatedTourCards({
+    candidates: relatedResult?.docs || [],
+    configured: configuredRelated,
+    source: resolvedTour,
+  })
 
   const featuredDepartures = getFutureDepartures(
     departures.filter(
@@ -423,9 +513,7 @@ export const getResolvedTourDetailBySlug = async ({
         : getFutureDepartures(departures).slice(0, 4),
     nextDeparture:
       getNextDeparture(departures) ||
-      (fallbackPrice
-        ? { priceFrom: fallbackPrice.value, currency: fallbackPrice.currency }
-        : null),
+      (fallbackPrice ? { priceFrom: fallbackPrice.value, currency: fallbackPrice.currency } : null),
     sectionOrder: resolved.sectionOrder,
     sectionVisibility: resolved.sectionVisibility,
     tour: {

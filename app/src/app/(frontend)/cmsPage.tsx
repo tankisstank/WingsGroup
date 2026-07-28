@@ -511,7 +511,7 @@ const resolveStructuredTourPage = async ({
               ? (enquiryForm as unknown as FormType)
               : null
           }
-          locale={getCopyLocale(locale)}
+          locale={locale}
           presentation="consultative"
           siteCode={site.code}
         />
