@@ -20,6 +20,12 @@ const expectedSpecs = [
   },
 ]
 const sha256Pattern = /^[a-f0-9]{64}$/u
+const expectedSpecPathByReporterPath = new Map(
+  expectedSpecs.flatMap(({ path: specPath }) => [
+    [specPath, specPath],
+    [path.posix.basename(specPath), specPath],
+  ]),
+)
 
 const sha256 = (value) => createHash('sha256').update(value).digest('hex')
 
@@ -203,6 +209,11 @@ const testResults = (suite) => [
   ...(suite.suites || []).flatMap(testResults),
 ]
 
+const normalizeExpectedReporterSpecPath = (value) => {
+  const normalized = String(value || '').replaceAll('\\', '/')
+  return expectedSpecPathByReporterPath.get(normalized) || normalized
+}
+
 export const assertUs055AppliedStateE2EReport = ({
   report,
   specSha256ByPath,
@@ -210,7 +221,7 @@ export const assertUs055AppliedStateE2EReport = ({
   const tests = (report.suites || []).flatMap(testResults)
   const actualTests = new Map(
     tests.map((result) => [
-      `${String(result.file).replaceAll('\\', '/')}:${result.title}`,
+      `${normalizeExpectedReporterSpecPath(result.file)}:${result.title}`,
       result,
     ]),
   )
@@ -275,10 +286,20 @@ export const assertUs055HomeSpecContract = (source) => {
     "const locales = ['en', 'vi', 'it', 'es', 'pt'] as const",
     "const localAliasPrefix = '/wingsside'",
     'const viewportWidths = [390, 1440] as const',
-    "{ marker: 'why-featured', role: 'local-design' }",
-    "{ marker: 'why-flexible', role: 'flexible-planning' }",
-    "{ marker: 'why-style', role: 'style-matching' }",
-    "{ marker: 'why-care', role: 'collaborative-care' }",
+    "marker: 'why-featured'",
+    "role: 'local-design'",
+    "slug: 'best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days'",
+    "marker: 'why-flexible'",
+    "role: 'flexible-planning'",
+    "slug: 'northern-vietnam-highlights-for-family-6-days'",
+    "marker: 'why-style'",
+    "role: 'style-matching'",
+    "slug: 'vietnam-luxury-wellness-retreat-escape-8-days'",
+    "marker: 'why-care'",
+    "role: 'collaborative-care'",
+    "slug: 'highlights-of-vietnam-from-north-to-south-12-days'",
+    'expectedRolePublicPath(locale, slug)',
+    '.toBe(`${localAliasPrefix}${expectedRolePublicPath(locale, slug)}`)',
     'expect(eligibleTourPaths.size).toBe(110)',
     'expect(new Set(rolePaths.values()).size).toBe(4)',
     'baseURL: e2eBaseURL',

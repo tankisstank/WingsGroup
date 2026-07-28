@@ -5,6 +5,7 @@ import {
   buildWingsSideCredentialsBlock,
   loadWingsSideCredentialManifest,
   summarizeWingsSideCredentials,
+  US055_REHEARSAL_HOME_CREDENTIAL_SOURCE_CHECKSUM,
   US055_REHEARSAL_HOME_CREDENTIAL_SOURCE_IDS,
 } from '../../scripts/lib/wingsSideCredentials'
 
@@ -47,6 +48,9 @@ describe('WingSide photographed credential catalog', () => {
       'vietjet-vietwings-authorized-agent-2022',
       'air-china-outstanding-contribution-2025',
     ])
+    expect(US055_REHEARSAL_HOME_CREDENTIAL_SOURCE_CHECKSUM).toBe(
+      '5dd835e0887b5a5c7a723a89b64be4e218c8862381fe664fbc4d64907b495466',
+    )
     expect(
       selected.map(({ id, issuer, recognitionYear, recipient, referenceCode }) => ({
         id,
@@ -83,22 +87,38 @@ describe('WingSide photographed credential catalog', () => {
     expect(cards).toHaveLength(2)
   })
 
-  it('fails closed on review or identity drift and never selects ambiguous recipients', async () => {
+  it.each([
+    ['title', 'Drifted title'],
+    ['description', 'Drifted description'],
+    ['kind', 'award'],
+    ['mark', 'DRIFT'],
+    ['label', 'Drifted label'],
+    ['issuedOn', '2022-10-02'],
+    ['sourceFilename', 'DRIFT.JPG'],
+    ['recipient', 'Golden Flight'],
+    ['issuer', 'Drifted issuer'],
+    ['recognitionYear', 2023],
+    ['referenceCode', 'DRIFT'],
+    ['reviewStatus', 'needs-review'],
+  ] as const)('fails closed when approved source field %s drifts', async (field, value) => {
     const manifest = await loadWingsSideCredentialManifest()
-    const clone = () => structuredClone(manifest)
     const vietJetIndex = manifest.items.findIndex(
       (item) => item.id === 'vietjet-vietwings-authorized-agent-2022',
     )
-
-    const unreviewed = clone()
-    unreviewed.items[vietJetIndex]!.reviewStatus = 'needs-review'
-    expect(() => buildUs055RehearsalHomeCredentials(unreviewed)).toThrow('is not verified')
-
-    const recipientDrift = clone()
-    recipientDrift.items[vietJetIndex]!.recipient = 'Golden Flight'
-    expect(() => buildUs055RehearsalHomeCredentials(recipientDrift)).toThrow(
-      'identity facts drifted',
+    const drifted = structuredClone(manifest)
+    Object.assign(drifted.items[vietJetIndex]!, { [field]: value })
+    expect(() => buildUs055RehearsalHomeCredentials(drifted)).toThrow(
+      'approved source fields drifted',
     )
+  })
+
+  it('rejects source ID drift and never selects ambiguous recipients', async () => {
+    const manifest = await loadWingsSideCredentialManifest()
+    const drifted = structuredClone(manifest)
+    drifted.items.find(
+      (item) => item.id === 'vietjet-vietwings-authorized-agent-2022',
+    )!.id = 'drifted-source-id'
+    expect(() => buildUs055RehearsalHomeCredentials(drifted)).toThrow('missing source')
 
     expect(US055_REHEARSAL_HOME_CREDENTIAL_SOURCE_IDS).not.toContain(
       'bamboo-vietwings-authorized-agent',

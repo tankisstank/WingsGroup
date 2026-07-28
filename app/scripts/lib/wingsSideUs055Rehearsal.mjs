@@ -19,6 +19,14 @@ export const stableJSONStringify = (value) => {
 
 export const canonicalChecksum = (value) => sha256(stableJSONStringify(value))
 
+export const extractUs055AppliedArtifactChecksum = (appliedProof) => {
+  const checksum = appliedProof?.frozenSource?.artifactChecksum
+  if (!/^[a-f0-9]{64}$/u.test(String(checksum || ''))) {
+    throw new Error('US-055 applied proof is missing nested frozen-source artifact checksum')
+  }
+  return checksum
+}
+
 export const assertDisposablePostgresTarget = (rawURL) => {
   let target
   try {

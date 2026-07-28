@@ -8,10 +8,26 @@ const localAliasPrefix = '/wingsside'
 const locales = ['en', 'vi', 'it', 'es', 'pt'] as const
 const viewportWidths = [390, 1440] as const
 const stableRoles = [
-  { marker: 'why-featured', role: 'local-design' },
-  { marker: 'why-flexible', role: 'flexible-planning' },
-  { marker: 'why-style', role: 'style-matching' },
-  { marker: 'why-care', role: 'collaborative-care' },
+  {
+    marker: 'why-featured',
+    role: 'local-design',
+    slug: 'best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days',
+  },
+  {
+    marker: 'why-flexible',
+    role: 'flexible-planning',
+    slug: 'northern-vietnam-highlights-for-family-6-days',
+  },
+  {
+    marker: 'why-style',
+    role: 'style-matching',
+    slug: 'vietnam-luxury-wellness-retreat-escape-8-days',
+  },
+  {
+    marker: 'why-care',
+    role: 'collaborative-care',
+    slug: 'highlights-of-vietnam-from-north-to-south-12-days',
+  },
 ] as const
 
 const homePath = (locale: (typeof locales)[number]) =>
@@ -22,13 +38,13 @@ const expectedTourPathPattern = (locale: (typeof locales)[number]) =>
     ? /^\/tour\/[^/]+$/u
     : new RegExp(`^/${locale}/tour/[^/]+$`, 'u')
 
-const expectedLocalTourPathPattern = (locale: (typeof locales)[number]) =>
-  locale === 'en'
-    ? /^\/wingsside\/tour\/[^/]+$/u
-    : new RegExp(`^/wingsside/${locale}/tour/[^/]+$`, 'u')
-
 const publicPathFromLocalAlias = (pathname: string) =>
   pathname.slice(localAliasPrefix.length) || '/'
+
+const expectedRolePublicPath = (
+  locale: (typeof locales)[number],
+  slug: (typeof stableRoles)[number]['slug'],
+) => `${locale === 'en' ? '' : `/${locale}`}/tour/${slug}`
 
 test.describe('WingSide Why Travel real-tour locale matrix', () => {
   test.skip(!enabled, 'Enable only inside the reviewed applied catalog lifecycle window')
@@ -67,7 +83,7 @@ test.describe('WingSide Why Travel real-tour locale matrix', () => {
         await expect(page.locator('[data-od-id^="why-"]')).toHaveCount(4)
 
         const rolePaths = new Map<string, string>()
-        for (const { marker, role } of stableRoles) {
+        for (const { marker, role, slug } of stableRoles) {
           const roleRoot = page.locator(`[data-od-id="${marker}"]`)
           await expect(roleRoot, `${locale} ${width}px ${role}`).toHaveCount(1)
           await expect(roleRoot, `${locale} ${width}px ${role}`).toBeVisible()
@@ -83,13 +99,16 @@ test.describe('WingSide Why Travel real-tour locale matrix', () => {
           )
           expect(
             localURL.pathname,
-            `${locale} ${width}px ${role} local alias path`,
-          ).toMatch(expectedLocalTourPathPattern(locale))
+            `${locale} ${width}px ${role} approved local alias path`,
+          ).toBe(`${localAliasPrefix}${expectedRolePublicPath(locale, slug)}`)
           const publicPath = publicPathFromLocalAlias(localURL.pathname)
           expect(
             publicPath,
             `${locale} ${width}px ${role} locale path`,
           ).toMatch(expectedTourPathPattern(locale))
+          expect(publicPath, `${locale} ${width}px ${role} approved public path`).toBe(
+            expectedRolePublicPath(locale, slug),
+          )
           expect(
             eligibleTourPaths.has(publicPath),
             `${locale} ${width}px ${role} eligible sitemap tour`,

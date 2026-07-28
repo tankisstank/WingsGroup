@@ -121,10 +121,11 @@ export const captureUs055HomeFixtureProof = async ({
         )
       }
       return {
-        hero: card.hero,
+        heroChecksum: canonicalChecksum(card.hero),
         href: card.href,
         id: card.id,
         key: card.key,
+        sourceSlug: expected.slug,
       }
     })
     if (new Set(cards.map(({ id }) => String(id))).size !== cards.length) {
@@ -132,7 +133,7 @@ export const captureUs055HomeFixtureProof = async ({
     }
     localeProofs.push({
       cards,
-      homeHiFi: page.wingsSideHiFi,
+      homeHiFiChecksum: canonicalChecksum(page.wingsSideHiFi),
       homePageID: page.id,
       locale,
       siteID: relationID(page.site),

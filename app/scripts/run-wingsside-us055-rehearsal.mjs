@@ -26,6 +26,7 @@ import {
   loadFrozenSourceSnapshot,
   parseLoopbackDockerPort,
   postgresReadinessProbeArgs,
+  extractUs055AppliedArtifactChecksum,
   sha256,
 } from './lib/wingsSideUs055Rehearsal.mjs'
 import {
@@ -847,7 +848,9 @@ try {
       trust: { fingerprint, keyID, publicKey },
     })
     checks.push({
-      appliedArtifactChecksum: lifecycle.appliedProof.artifactChecksum,
+      appliedArtifactChecksum: extractUs055AppliedArtifactChecksum(
+        lifecycle.appliedProof,
+      ),
       appliedProof: lifecycle.appliedProof,
       appliedStateE2E: lifecycle.appliedStateGate,
       backupSha256,

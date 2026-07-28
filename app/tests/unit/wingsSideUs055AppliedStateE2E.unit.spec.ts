@@ -96,6 +96,23 @@ describe('US-055 applied-state 110 URL E2E evidence', () => {
     })
   })
 
+  it('accepts only the two exact Playwright testDir basenames from the real report shape', () => {
+    const report = passingReport()
+    report.suites[0]!.specs[0]!.file = 'wingsside-tour-locale-matrix.e2e.spec.ts'
+    report.suites[0]!.specs[1]!.file =
+      'wingsside-why-travel-real-tour-matrix.e2e.spec.ts'
+    expect(
+      assertUs055AppliedStateE2EReport({
+        report,
+        specSha256ByPath: {
+          'tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts': 'a'.repeat(64),
+          'tests/e2e/wingsside-why-travel-real-tour-matrix.e2e.spec.ts':
+            'b'.repeat(64),
+        },
+      }),
+    ).toMatchObject({ playwright: { expected: 2, skipped: 0, unexpected: 0 } })
+  })
+
   it('binds the browser matrix to the local WingSide alias and all four exact roles', () => {
     expect(() => assertUs055HomeSpecContract(homeSpecSource)).not.toThrow()
   })
@@ -109,8 +126,13 @@ describe('US-055 applied-state 110 URL E2E evidence', () => {
     ],
     [
       'collaborative-care role',
-      "{ marker: 'why-care', role: 'collaborative-care' }",
-      "{ marker: 'why-care', role: 'care' }",
+      "role: 'collaborative-care'",
+      "role: 'care'",
+    ],
+    [
+      'local-design approved slug',
+      "slug: 'best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days'",
+      "slug: 'substituted-tour'",
     ],
   ])('fails closed when the Home spec drifts from the %s contract', (_label, exact, drift) => {
     expect(() => assertUs055HomeSpecContract(homeSpecSource.replace(exact, drift))).toThrow(
@@ -157,6 +179,11 @@ describe('US-055 applied-state 110 URL E2E evidence', () => {
 
   it.each([
     ['wrong file', { file: 'tests/e2e/substituted.e2e.spec.ts' }],
+    ['unknown basename', { file: 'substituted.e2e.spec.ts' }],
+    [
+      'ambiguous directory basename',
+      { file: 'other/wingsside-why-travel-real-tour-matrix.e2e.spec.ts' },
+    ],
     ['wrong title', { title: 'substituted title' }],
   ])('fails closed for a %s substitution', (_label, substitution) => {
     const report = passingReport()

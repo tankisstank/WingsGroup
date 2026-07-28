@@ -15,6 +15,7 @@ export type RehearsalArtifactInput = {
 export function sha256(value: string | Buffer): string
 export function stableJSONStringify(value: unknown): string
 export function canonicalChecksum(value: unknown): string
+export function extractUs055AppliedArtifactChecksum(appliedProof: unknown): string
 export function assertDisposablePostgresTarget(rawURL: string): RehearsalTargetIdentity
 export function redactDatabaseURL(rawURL: string): string
 export function parseLoopbackDockerPort(value: string): number

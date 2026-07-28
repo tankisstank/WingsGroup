@@ -10,6 +10,7 @@ import {
   buildFrozenSourceProof,
   buildSanitizedChildEnvironment,
   classifyDockerInspectResult,
+  extractUs055AppliedArtifactChecksum,
   loadBaselineSource,
   loadFrozenSourceSnapshot,
   parseLoopbackDockerPort,
@@ -64,6 +65,25 @@ describe('US-055 disposable rehearsal guards', () => {
     expect(editorialSeed).toContain('buildUs055RehearsalHomeCredentials')
     expect(editorialSeed).toContain('homeCredentials,')
     expect(editorialSeed).toContain('homeIdempotenceReport.summary.unchanged !== 40')
+    expect(runner).toContain('extractUs055AppliedArtifactChecksum(')
+  })
+
+  it('binds lifecycle evidence to the nested frozen-source proof checksum', () => {
+    const checksum = 'a'.repeat(64)
+    expect(
+      extractUs055AppliedArtifactChecksum({
+        frozenSource: { artifactChecksum: checksum },
+        home: { checksum: 'b'.repeat(64) },
+      }),
+    ).toBe(checksum)
+    expect(() =>
+      extractUs055AppliedArtifactChecksum({ artifactChecksum: checksum }),
+    ).toThrow('missing nested frozen-source')
+    expect(() =>
+      extractUs055AppliedArtifactChecksum({
+        frozenSource: { artifactChecksum: 'not-a-sha' },
+      }),
+    ).toThrow('missing nested frozen-source')
   })
 
   it('seals the five-locale Home fixture and approved four role-to-slug mapping', () => {
