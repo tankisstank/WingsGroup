@@ -94,6 +94,26 @@ for (const tour of english.tours) {
     fail(`Unsupported service/customization claim at ${tour.slug}:${claim}`)
   }
 }
+const governedScheduleSentences = new Map([
+  [
+    'hoi-an-surrounding-and-beach-break-7-days',
+    'Activities are arranged on days 1-4 and day 7, leaving days 5 and 6 free.',
+  ],
+  ['romantic-getaway-in-phu-quoc-5-days-of-love-paradise', 'Day 4 is intentionally free.'],
+  ['southern-beauty-beach-relaxation-8-days', 'Days 5-7 are left free.'],
+])
+const compressedSchedulePattern =
+  /\b(?:day|days)\s+\d+(?:\s*[-–]\s*\d+)?|\b\d+\s+consecutive days are left free\b/iu
+for (const tour of english.tours) {
+  const governedSentence = governedScheduleSentences.get(tour.slug)
+  if (governedSentence) {
+    if (!tour.summary.includes(governedSentence)) {
+      fail(`Governed free-day schedule drift at ${tour.slug}`)
+    }
+  } else if (compressedSchedulePattern.test(tour.summary)) {
+    fail(`Unbound compressed day-range claim at ${tour.slug}`)
+  }
+}
 
 if (
   disclosures.version !== 1 ||

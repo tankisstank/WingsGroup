@@ -81,6 +81,18 @@ const probes = [
     disclosures.rows[0].labels.en =
       'The peak-season surcharge and any compulsory dinner, if applicable, are not included.'
   }),
+  runProbe('hoi-an-free-day-range', ({ english }) => {
+    const tour = english.tours.find(
+      ({ slug }) => slug === 'hoi-an-surrounding-and-beach-break-7-days',
+    )
+    tour.summary = tour.summary.replace(
+      'days 1-4 and day 7, leaving days 5 and 6 free',
+      'days 1-5 and day 7, leaving day 6 free',
+    )
+  }),
+  runProbe('unbound-compressed-day-range', ({ english }) => {
+    english.tours[0].summary += ' Days 2-4 are left free.'
+  }),
 ]
 
 console.log(JSON.stringify({ probes, status: 'pass' }))

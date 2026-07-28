@@ -10,14 +10,14 @@
 
 | Artifact | Inventory | SHA-256 in this worker worktree |
 | --- | ---: | --- |
-| `app/scripts/data/wingsside-tour-content-candidates/en.json` | 22 unique English tour candidates | `ba70b2f64823808a2e94c0b8d9043d13291579a4294809d53bb5841efc326059` |
+| `app/scripts/data/wingsside-tour-content-candidates/en.json` | 22 unique English tour candidates | `c3194a76d687003e4352a4c06e22956fc202edddc43d04315f4c5e62809c10c1` |
 | `app/scripts/data/wingsside-tour-content-candidates/pricing-disclosures.json` | 38 unique source-row decisions; 5 labels per row | `bdf4e8653aae2b052e81235e78012c722b9494e8527f4baa96b292fa2ff85ee4` |
 | `app/scripts/data/wingsside-tour-content-candidates/governed-source-rows.json` | sealed 38-row canonical identity/checksum snapshot | `5abd48991ec965f76e71e02a19f2d34b14094144a525caa3e8144ada5756dceb` |
-| `app/scripts/data/wingsside-tour-content-candidates/validate.mjs` | deterministic schema, inventory, checksum and copy lint | `992cfdae89f6a501ea08e5bbddc08d46c4de13e6ac39613175d6266496909596` |
-| `app/scripts/data/wingsside-tour-content-candidates/validate-adversarial.mjs` | eight false-pass probes | `9a4f14435b976260f1af5242f17bfc60504bd20628f62609ba7e313ed3fc286b` |
+| `app/scripts/data/wingsside-tour-content-candidates/validate.mjs` | deterministic schema, inventory, checksum and copy lint | `8b0890a2c472c99365534e0c8215b681162ba8ead4ec7bc3c58856ea5373f9ef` |
+| `app/scripts/data/wingsside-tour-content-candidates/validate-adversarial.mjs` | ten false-pass probes | `d2aeef203d12c06900dd90702404b74514e281be5a66c94a7446fde106188d28` |
 
 The EOL-independent canonical content checksums are
-`39bf048e50502756a46662e2cd6274b15920e131081fa307c83ace4dc1fdb09f`
+`58140cc91e61e8b9dd87ed3ff70554cacf25e69baede2a008a7e11fe8c12acc7`
 for the English candidate and
 `4538cb5e7df76c8d1e7f25a3d4f98cee55f5be7cd0a0aa7620b15d955ec22f06`
 for the disclosure artifact.
@@ -89,10 +89,30 @@ commit closes each one:
    says `(if any)`, and fuel rows preserve the source 15% condition.
 3. The validator is bound to a sealed 38-row snapshot containing exact
    slug/row-ID/source-bucket/source-label-checksum/eligibility tuples. The
-   snapshot has a hard-coded EOL-independent checksum. Eight adversarial probes
+   snapshot has a hard-coded EOL-independent checksum. Ten adversarial probes
    prove rejection of unknown IDs, swapped slug/ID pairs, self-rehashed labels,
    missing rows, extra rows, snapshot tampering, unsupported private claims and
-   softened unconditional-dinner wording.
+   softened unconditional-dinner wording, as well as Hoi An free-day range and
+   unbound compressed-range changes.
+
+## Corrective review round 2
+
+The Hoi An summary now reflects the canonical combined day-5/day-6 free block:
+activities run on days 1-4 and day 7, while days 5 and 6 are free. The earlier
+wording incorrectly treated day 5 as an activity day.
+
+All compressed free-day claims were audited:
+
+- Hoi An: days 5 and 6 free;
+- Phu Quoc: day 4 free;
+- Ninh Thuan coastal stay: days 5-7 free; and
+- the 15-day Vietnam/Cambodia summary remains conservative and does not publish
+  an unbound numeric range.
+
+The validator now binds the three explicit schedules to exact governed
+sentences and rejects any compressed numeric day range on other candidates.
+Dedicated probes reproduce the prior Hoi An off-by-one error and an unbound
+range on another tour; both fail closed.
 
 ## Approved-locale immutability
 
@@ -122,7 +142,7 @@ Passed:
 - targeted editorial/localization/catalog unit suites: 3 files, 43 tests;
 - JSON parsing and stable source-label SHA-256 validation;
 - forbidden vendor/SEO/shouting/machine-marker lint; and
-- eight adversarial false-pass probes;
+- ten adversarial false-pass probes;
 - `git diff --check`.
 
 The Harness executable is absent from the isolated worker worktree. No Harness
