@@ -1,10 +1,18 @@
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import {
   assertArtifactInputContract,
   assertDisposablePostgresTarget,
+  buildFrozenSourceProof,
+  buildSanitizedChildEnvironment,
   loadBaselineSource,
+  loadFrozenSourceSnapshot,
   parseLoopbackDockerPort,
+  postgresReadinessProbeArgs,
   redactDatabaseURL,
 } from '../../scripts/lib/wingsSideUs055Rehearsal.mjs'
 
@@ -61,7 +69,11 @@ describe('US-055 disposable rehearsal guards', () => {
         planPath: 'plan.json',
         planSha256: 'b'.repeat(64),
       }),
-    ).toEqual({ status: 'supplied' })
+    ).toEqual({
+      reason: 'frozen-artifacts-supplied-lifecycle-not-executed',
+      status: 'pending',
+      validatedArtifacts: true,
+    })
   })
 
   it('binds the baseline to the sealed exact 22-tour identity inventory', async () => {
@@ -71,5 +83,59 @@ describe('US-055 disposable rehearsal guards', () => {
     )
     expect(baseline.tours).toHaveLength(22)
     expect(new Set(baseline.tours.map(({ slug }) => slug)).size).toBe(22)
+  })
+
+  it('uses final TCP readiness rather than the init temporary Unix-socket server', () => {
+    const args = postgresReadinessProbeArgs({
+      containerName: 'us055-rehearsal',
+      database: 'us055_rehearsal',
+      user: 'rehearsal_operator',
+    })
+    expect(args).toContain('--host')
+    expect(args[args.indexOf('--host') + 1]).toBe('127.0.0.1')
+    expect(args).toContain('--port')
+    expect(args[args.indexOf('--port') + 1]).toBe('5432')
+  })
+
+  it('does not inherit SMTP, Redis, release, or production mutation capabilities', () => {
+    const result = buildSanitizedChildEnvironment(
+      {
+        PATH: 'safe-path',
+        REDIS_URL: 'redis://production',
+        SMTP_PASSWORD: 'production-secret',
+        WINGSTRAVEL_RELEASE_SHA: 'production-release',
+      },
+      { DATABASE_URL: 'postgresql://explicit-rehearsal' },
+    )
+    expect(result).toEqual({
+      DATABASE_URL: 'postgresql://explicit-rehearsal',
+      PATH: 'safe-path',
+    })
+  })
+
+  it('binds full 22/116/331 source content and rejects frozen artifact drift', async () => {
+    const snapshotPath = path.resolve(
+      '..',
+      'docs/stories/epics/E08-wingsside-inbound-upgrade/US-055-real-tour-why-travel/evidence/rehearsal/frozen-source-snapshot.json',
+    )
+    const frozen = await loadFrozenSourceSnapshot(snapshotPath)
+    expect(frozen.proof).toMatchObject({ itineraryDays: 116, serviceRows: 331, tours: 22 })
+
+    const rowLoss = structuredClone(frozen.snapshot.tours)
+    rowLoss[0].includes.pop()
+    expect(() => buildFrozenSourceProof(rowLoss)).toThrow('exact 22 tours, 116 days, and 331')
+
+    const temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'us055-frozen-negative-'))
+    try {
+      const drifted = structuredClone(frozen.snapshot)
+      drifted.tours[0].itineraryDays[0].summary = 'substituted after snapshot checksum'
+      const driftedPath = path.join(temporaryDirectory, 'snapshot.json')
+      fs.writeFileSync(driftedPath, JSON.stringify(drifted))
+      await expect(loadFrozenSourceSnapshot(driftedPath)).rejects.toThrow(
+        'snapshot checksum or identity is invalid',
+      )
+    } finally {
+      fs.rmSync(temporaryDirectory, { force: true, recursive: true })
+    }
   })
 })

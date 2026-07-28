@@ -1,7 +1,5 @@
 import 'dotenv/config'
 
-import path from 'node:path'
-
 import config from '../src/payload.config'
 import { createLocalReq, getPayload } from 'payload'
 
@@ -13,7 +11,7 @@ import {
 } from './lib/wingsSideTourEditorialLocalization'
 import {
   assertDisposablePostgresTarget,
-  loadBaselineSource,
+  loadFrozenSourceSnapshot,
 } from './lib/wingsSideUs055Rehearsal.mjs'
 
 const requiredConfirmation = 'disposable-postgres'
@@ -89,13 +87,14 @@ const localizedBeforeData = (source: Record<string, unknown>, locale: string) =>
 
 const main = async () => {
   assertDisposableDatabase()
-  const sourcePath = argumentValue('--source')
-  if (!sourcePath) throw new Error('Rehearsal seed requires --source <22-tour-json>')
-  const manifestPath =
-    argumentValue('--source-manifest') ||
-    path.resolve('scripts', 'data', 'wingsside-tour-editorial', 'source-manifest.json')
-  const { tours } = await loadBaselineSource(sourcePath, manifestPath)
-  const sourceTours = tours as Array<EditorialSourceTour & Record<string, unknown>>
+  const sourceSnapshotPath = argumentValue('--source-snapshot')
+  if (!sourceSnapshotPath) {
+    throw new Error('Rehearsal seed requires --source-snapshot <frozen-source-snapshot-json>')
+  }
+  const frozenSource = await loadFrozenSourceSnapshot(sourceSnapshotPath)
+  const sourceTours = frozenSource.snapshot.tours as Array<
+    EditorialSourceTour & Record<string, unknown>
+  >
   const catalogPath = argumentValue('--catalog')
   if (catalogPath) {
     const catalog = await loadWingsSideTourEditorialCatalog({ catalogPath, sourceTours })
@@ -173,15 +172,15 @@ const main = async () => {
         data: {
           _status: 'published',
           bcfg: source.bcfg || { template: 'dense-retail-default' },
-          durationDays: Number(source.durationDays || source.itineraryDays?.length || 1),
-          durationNights: Number(source.durationNights || 0),
-          excludes: (source.excludes || []).map((item) => ({ label: item.label })),
+          durationDays: Number(source.itineraryDays?.length || 1),
+          durationNights: Math.max(0, Number(source.itineraryDays?.length || 1) - 1),
+          excludes: (source.excludes || []).map((item) => ({ id: item.id, label: item.label })),
           factSummary: {
             routeSummary: String(
               (source.factSummary as Record<string, unknown> | undefined)?.routeSummary || '',
             ),
           },
-          includes: (source.includes || []).map((item) => ({ label: item.label })),
+          includes: (source.includes || []).map((item) => ({ id: item.id, label: item.label })),
           itineraryDays: (
             source.itineraryDays?.length
               ? source.itineraryDays

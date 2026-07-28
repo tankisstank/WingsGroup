@@ -8,8 +8,11 @@ import { fileURLToPath } from 'node:url'
 import {
   assertArtifactInputContract,
   assertDisposablePostgresTarget,
-  loadBaselineSource,
+  buildSanitizedChildEnvironment,
+  buildFrozenSourceProof,
+  loadFrozenSourceSnapshot,
   parseLoopbackDockerPort,
+  postgresReadinessProbeArgs,
   sha256,
 } from './lib/wingsSideUs055Rehearsal.mjs'
 
@@ -22,13 +25,9 @@ const restoreDatabase = `${database}_restore_rehearsal`
 const user = 'rehearsal_operator'
 const password = randomBytes(32).toString('base64url')
 const payloadSecret = randomBytes(32).toString('base64url')
-const sourcePath = path.resolve(
-  appRoot,
-  'scripts/data/wingsside-tour-content-candidates/en.json',
-)
-const manifestPath = path.resolve(
-  appRoot,
-  'scripts/data/wingsside-tour-editorial/source-manifest.json',
+const frozenSourceSnapshotPath = path.resolve(
+  repoRoot,
+  'docs/stories/epics/E08-wingsside-inbound-upgrade/US-055-real-tour-why-travel/evidence/rehearsal/frozen-source-snapshot.json',
 )
 const evidenceRoot = path.resolve(
   process.env.US055_REHEARSAL_EVIDENCE_DIR ||
@@ -44,7 +43,9 @@ const envFile = path.join(temporaryDirectory, 'postgres.env')
 const startedAt = new Date()
 const checks = []
 let cleanupVerified = false
+let cleanupAttempts = 0
 let databaseURL
+let imageReference
 
 const run = (command, args, { capture = true, cwd = appRoot, env = process.env } = {}) => {
   const result = spawnSync(command, args, {
@@ -83,20 +84,92 @@ const dockerSQL = (targetDatabase, sql) =>
 
 const record = (name, details = {}) => checks.push({ name, status: 'pass', ...details })
 
-const verifyInventory = async (targetDatabase) => {
-  const expected = (await loadBaselineSource(sourcePath, manifestPath)).tours
-    .map(({ slug }) => String(slug))
-    .sort()
-  const actual = JSON.parse(
+const databaseTours = (targetDatabase) => {
+  const tours = JSON.parse(
     dockerSQL(
       targetDatabase,
-      "select coalesce(json_agg(slug order by slug), '[]'::json) from tour_products;",
+      `select coalesce(json_agg(json_build_object(
+         'id', q.id, 'slug', q.slug, 'summary', q.summary, 'title', q.title
+       ) order by q.slug), '[]'::json)
+       from (
+         select t.id, t.slug, l.summary, l.title
+         from tour_products t
+         join tour_products_locales l on l._parent_id = t.id and l._locale = 'en'
+       ) q;`,
     ),
   )
-  if (actual.length !== 22 || JSON.stringify(actual) !== JSON.stringify(expected)) {
-    throw new Error(`Rehearsal ${targetDatabase} does not contain the sealed 22-tour inventory`)
+  const services = JSON.parse(
+    dockerSQL(
+      targetDatabase,
+      `select coalesce(json_agg(json_build_object(
+         'slug', q.slug, 'bucket', q.bucket, 'id', q.id, 'label', q.label
+       ) order by q.slug, q.bucket, q.row_order, q.id), '[]'::json)
+       from (
+         select t.slug, 'includes' as bucket, r.id, l.label, r._order as row_order
+         from tour_products t
+         join tour_products_includes r on r._parent_id = t.id
+         join tour_products_includes_locales l on l._parent_id = r.id and l._locale = 'en'
+         union all
+         select t.slug, 'excludes' as bucket, r.id, l.label, r._order as row_order
+         from tour_products t
+         join tour_products_excludes r on r._parent_id = t.id
+         join tour_products_excludes_locales l on l._parent_id = r.id and l._locale = 'en'
+       ) q;`,
+    ),
+  )
+  const days = JSON.parse(
+    dockerSQL(
+      targetDatabase,
+      `select coalesce(json_agg(json_build_object(
+         'slug', q.slug, 'accommodation', q.accommodation, 'dayNumber', q.day_number,
+         'meals', q.meals, 'route', q.route, 'summary', q.summary, 'title', q.title,
+         'transport', q.transport
+       ) order by q.slug, q.row_order, q.id), '[]'::json)
+       from (
+         select t.slug, r.id, r._order as row_order, r.day_number,
+                l.accommodation, l.meals, l.route, l.summary, l.title, l.transport
+         from tour_products t
+         join tour_products_itinerary_days r on r._parent_id = t.id
+         join tour_products_itinerary_days_locales l
+           on l._parent_id = r.id and l._locale = 'en'
+       ) q;`,
+    ),
+  )
+  const bySlug = new Map(
+    tours.map((tour) => [
+      tour.slug,
+      {
+        excludes: [],
+        includes: [],
+        itineraryDays: [],
+        slug: tour.slug,
+        summary: tour.summary,
+        title: tour.title,
+      },
+    ]),
+  )
+  for (const row of services) {
+    const tour = bySlug.get(row.slug)
+    if (!tour || !['includes', 'excludes'].includes(row.bucket)) {
+      throw new Error('Rehearsal database contains an unscoped service row')
+    }
+    tour[row.bucket].push({ id: String(row.id), label: row.label })
   }
-  return sha256(JSON.stringify(actual))
+  for (const day of days) {
+    const tour = bySlug.get(day.slug)
+    if (!tour) throw new Error('Rehearsal database contains an unscoped itinerary row')
+    const { slug: _slug, ...content } = day
+    tour.itineraryDays.push(content)
+  }
+  return [...bySlug.values()]
+}
+
+const verifyFrozenSource = (targetDatabase, expectedProof) => {
+  const actualProof = buildFrozenSourceProof(databaseTours(targetDatabase))
+  if (JSON.stringify(actualProof) !== JSON.stringify(expectedProof)) {
+    throw new Error(`Rehearsal ${targetDatabase} full frozen source proof mismatch`)
+  }
+  return actualProof
 }
 
 const readInputContract = async () => {
@@ -116,7 +189,7 @@ const readInputContract = async () => {
   return {
     ...status,
     reason:
-      'frozen artifacts validated; guarded production-semantic phases require the leader-supplied signer and release evidence',
+      'frozen artifacts validated only; lifecycle plan/apply/verify/rollback/verify was not executed',
   }
 }
 
@@ -126,7 +199,27 @@ try {
     `POSTGRES_DB=${database}\nPOSTGRES_USER=${user}\nPOSTGRES_PASSWORD=${password}\n`,
     { encoding: 'utf8', mode: 0o600 },
   )
+  const frozenSource = await loadFrozenSourceSnapshot(frozenSourceSnapshotPath)
+  record('frozen-source-artifact', {
+    artifactChecksum: frozenSource.proof.artifactChecksum,
+    artifactRawSha256: frozenSource.artifactRawSha256,
+    itineraryDays: frozenSource.proof.itineraryDays,
+    serviceRows: frozenSource.proof.serviceRows,
+    snapshotChecksum: frozenSource.snapshot.snapshotChecksum,
+    tours: frozenSource.proof.tours,
+  })
+
   run('docker', ['pull', 'postgres:16'])
+  imageReference = run('docker', [
+    'image',
+    'inspect',
+    'postgres:16',
+    '--format',
+    '{{index .RepoDigests 0}}',
+  ])
+  if (!/^postgres@sha256:[a-f0-9]{64}$/u.test(imageReference)) {
+    throw new Error('PostgreSQL image did not resolve to an immutable official digest')
+  }
   run('docker', [
     'run',
     '--detach',
@@ -139,15 +232,21 @@ try {
     envFile,
     '--publish',
     '127.0.0.1::5432',
-    'postgres:16',
+    imageReference,
   ])
-  record('container-started', { image: 'postgres:16', persistentVolume: false })
+  record('container-started', {
+    image: 'postgres:16',
+    imageReference,
+    persistentVolume: false,
+  })
 
   let ready = false
+  let readinessAttempts = 0
   for (let attempt = 0; attempt < 60; attempt += 1) {
+    readinessAttempts = attempt + 1
     const probe = spawnSync(
       'docker',
-      ['exec', containerName, 'pg_isready', '--username', user, '--dbname', database],
+      postgresReadinessProbeArgs({ containerName, database, user }),
       { encoding: 'utf8', windowsHide: true },
     )
     if (probe.status === 0) {
@@ -157,6 +256,12 @@ try {
     await new Promise((resolve) => setTimeout(resolve, 500))
   }
   if (!ready) throw new Error('Disposable PostgreSQL did not become ready')
+  record('postgres-final-server-readiness', {
+    attempts: readinessAttempts,
+    host: '127.0.0.1',
+    port: 5432,
+    transport: 'tcp',
+  })
   const port = parseLoopbackDockerPort(run('docker', ['port', containerName, '5432/tcp']))
   databaseURL = `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@127.0.0.1:${port}/${database}`
   const identity = assertDisposablePostgresTarget(databaseURL)
@@ -171,14 +276,38 @@ try {
   }
   record('postgres-version', { major: 16, serverVersion: postgresVersion })
 
-  const guardedEnv = {
-    ...process.env,
+  const guardedEnv = buildSanitizedChildEnvironment(process.env, {
+    CRON_SECRET: '',
     DATABASE_URL: databaseURL,
+    IMPORT_ADMIN_EMAIL: '',
     NODE_ENV: 'production',
     PAYLOAD_DB_PUSH: 'false',
     PAYLOAD_SECRET: payloadSecret,
+    REDIS_URL: '',
+    SMTP_FROM_EMAIL: '',
+    SMTP_HOST: '',
+    SMTP_PASSWORD: '',
+    SMTP_USER: '',
+    WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_PATH: '',
+    WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_SHA256: '',
     WINGSSIDE_TOUR_EDITORIAL_REHEARSAL_ALLOW: 'disposable-postgres',
-  }
+    WINGSTRAVEL_RELEASE_SHA: '',
+  })
+  record('child-environment-sanitized', {
+    inheritedKeys: Object.keys(buildSanitizedChildEnvironment(process.env, {})).sort(),
+    productionCapabilitiesBlanked: [
+      'CRON_SECRET',
+      'IMPORT_ADMIN_EMAIL',
+      'REDIS_URL',
+      'SMTP_FROM_EMAIL',
+      'SMTP_HOST',
+      'SMTP_PASSWORD',
+      'SMTP_USER',
+      'WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_PATH',
+      'WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_SHA256',
+      'WINGSTRAVEL_RELEASE_SHA',
+    ],
+  })
   if (guardedEnv.PAYLOAD_DB_PUSH !== 'false') throw new Error('PAYLOAD_DB_PUSH guard drifted')
   run('pnpm', ['exec', 'payload', 'migrate'], { env: guardedEnv })
   record('payload-migrations', { payloadDbPush: false })
@@ -189,15 +318,13 @@ try {
       'exec',
       'tsx',
       'scripts/seed-wingsside-tour-editorial-rehearsal.ts',
-      '--source',
-      sourcePath,
-      '--source-manifest',
-      manifestPath,
+      '--source-snapshot',
+      frozenSourceSnapshotPath,
     ],
     { env: guardedEnv },
   )
-  const sourceInventorySha256 = await verifyInventory(database)
-  record('seed-source-inventory', { sourceInventorySha256, tours: 22 })
+  const sourceProof = verifyFrozenSource(database, frozenSource.proof)
+  record('seed-full-frozen-source', sourceProof)
 
   dockerSQL(
     database,
@@ -245,14 +372,15 @@ try {
     '--no-acl',
     '/tmp/us055-rehearsal.dump',
   ])
-  const restoredInventorySha256 = await verifyInventory(restoreDatabase)
-  if (restoredInventorySha256 !== sourceInventorySha256) {
-    throw new Error('Restored inventory checksum does not match the source database')
-  }
+  const restoredProof = verifyFrozenSource(restoreDatabase, frozenSource.proof)
   record('restore-drill', {
+    artifactChecksum: restoredProof.artifactChecksum,
     database: restoreDatabase,
-    inventorySha256: restoredInventorySha256,
-    tours: 22,
+    itineraryChecksum: restoredProof.itineraryChecksum,
+    itineraryDays: restoredProof.itineraryDays,
+    serviceChecksum: restoredProof.serviceChecksum,
+    serviceRows: restoredProof.serviceRows,
+    tours: restoredProof.tours,
   })
 
   const artifactPhases = await readInputContract()
@@ -270,22 +398,33 @@ try {
     ),
   })
 } finally {
-  spawnSync('docker', ['rm', '--force', containerName], {
-    encoding: 'utf8',
-    stdio: 'pipe',
-    windowsHide: true,
-  })
-  const inspect = spawnSync('docker', ['inspect', containerName], {
-    encoding: 'utf8',
-    stdio: 'pipe',
-    windowsHide: true,
-  })
-  cleanupVerified = inspect.status !== 0
+  for (let attempt = 0; attempt < 3 && !cleanupVerified; attempt += 1) {
+    cleanupAttempts = attempt + 1
+    spawnSync('docker', ['rm', '--force', containerName], {
+      encoding: 'utf8',
+      stdio: 'pipe',
+      timeout: 15_000,
+      windowsHide: true,
+    })
+    const inspect = spawnSync('docker', ['inspect', containerName], {
+      encoding: 'utf8',
+      stdio: 'pipe',
+      timeout: 5_000,
+      windowsHide: true,
+    })
+    cleanupVerified = inspect.status !== null && inspect.status !== 0
+    if (!cleanupVerified) await new Promise((resolve) => setTimeout(resolve, 500))
+  }
   await rm(temporaryDirectory, { force: true, recursive: true })
   await rm(dumpPath, { force: true })
 }
 
-checks.push({ name: 'cleanup', status: cleanupVerified ? 'pass' : 'fail' })
+checks.push({
+  attempts: cleanupAttempts,
+  containerName,
+  name: 'cleanup',
+  status: cleanupVerified ? 'pass' : 'fail',
+})
 const failed = checks.some(({ status }) => status === 'fail')
 const result = {
   artifactContractVersion: 1,
@@ -293,7 +432,7 @@ const result = {
   completedAt: new Date().toISOString(),
   durationSeconds: Math.round((Date.now() - startedAt.getTime()) / 1000),
   evidenceContainsCredentials: false,
-  image: 'postgres:16',
+  image: imageReference || 'postgres:16-unresolved',
   mode: 'disposable-local-rehearsal',
   runID: runToken,
   status: failed ? 'failed' : 'baseline-ready-catalog-pending',
