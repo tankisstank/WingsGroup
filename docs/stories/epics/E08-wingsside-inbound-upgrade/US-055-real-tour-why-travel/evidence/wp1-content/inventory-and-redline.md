@@ -10,14 +10,16 @@
 
 | Artifact | Inventory | SHA-256 in this worker worktree |
 | --- | ---: | --- |
-| `app/scripts/data/wingsside-tour-content-candidates/en.json` | 22 unique English tour candidates | `1b9187bd5a73a1142a66a00031d10238b2c7a179174d1db606ef6f88346bf6e4` |
-| `app/scripts/data/wingsside-tour-content-candidates/pricing-disclosures.json` | 38 unique source-row decisions; 5 labels per row | `b1b5888988b8c108cbc20cd82410e430fb236582db9c03d7650a19c021a06e07` |
-| `app/scripts/data/wingsside-tour-content-candidates/validate.mjs` | deterministic schema, inventory, checksum and copy lint | `efcdae7fd9e370c511c5024a2be4dd542f277735c081366385b822dd69b930a9` |
+| `app/scripts/data/wingsside-tour-content-candidates/en.json` | 22 unique English tour candidates | `ba70b2f64823808a2e94c0b8d9043d13291579a4294809d53bb5841efc326059` |
+| `app/scripts/data/wingsside-tour-content-candidates/pricing-disclosures.json` | 38 unique source-row decisions; 5 labels per row | `bdf4e8653aae2b052e81235e78012c722b9494e8527f4baa96b292fa2ff85ee4` |
+| `app/scripts/data/wingsside-tour-content-candidates/governed-source-rows.json` | sealed 38-row canonical identity/checksum snapshot | `5abd48991ec965f76e71e02a19f2d34b14094144a525caa3e8144ada5756dceb` |
+| `app/scripts/data/wingsside-tour-content-candidates/validate.mjs` | deterministic schema, inventory, checksum and copy lint | `992cfdae89f6a501ea08e5bbddc08d46c4de13e6ac39613175d6266496909596` |
+| `app/scripts/data/wingsside-tour-content-candidates/validate-adversarial.mjs` | eight false-pass probes | `9a4f14435b976260f1af5242f17bfc60504bd20628f62609ba7e313ed3fc286b` |
 
 The EOL-independent canonical content checksums are
-`505ff594e2a73fdc51b5f6b40125b8a098ab04f11295b436d93bc6ba0bfd4fbe`
+`39bf048e50502756a46662e2cd6274b15920e131081fa307c83ace4dc1fdb09f`
 for the English candidate and
-`5cbff18c51f4d641dcfbe3bcf4c657fe09cfab14450aac4a7809bd2616961e89`
+`4538cb5e7df76c8d1e7f25a3d4f98cee55f5be7cd0a0aa7620b15d955ec22f06`
 for the disclosure artifact.
 
 The English candidate is an additive overlay. It changes only title, summary,
@@ -36,10 +38,10 @@ The audited local source inventory contains exactly 38 governed rows:
 - all 38 have a stable `sourceRowID`.
 
 The additive decision artifact preserves every row identity and source label.
-It moves each row to `excludes`, because the source wording describes a
-conditional amount outside the base package price. The customer wording makes
-the treatment explicit and commits to confirming an applicable amount before
-booking.
+It moves each row to `excludes`, because the source wording describes an amount
+outside the base package price. The customer wording preserves the source
+condition, 15% threshold and singular charge scope without adding a booking
+promise.
 
 Each decision contains complete, directly stored wording for:
 
@@ -70,6 +72,28 @@ The candidate contains no `BestPrice`, `Best Price`, `book your tour NOW`,
 `let your hair down`, `rat race`, `young people`, machine-translation marker
 or unapproved shouting token.
 
+## Corrective review round 1
+
+Independent review found three P1 false-pass/content risks. The corrective
+commit closes each one:
+
+1. Unsupported `private`, adaptable and customization language was removed
+   from all tours except the two Ninh Binh products whose canonical slugs
+   explicitly bind private operation. Group/SIC inventory now uses neutral
+   journey wording and non-customization CTAs.
+2. The four unconditional compulsory-dinner rows
+   `6a5a42d0e9a62d80e46ba98f`, `6a5a42e4e9a62d80e46baae1`,
+   `6a5a42e6e9a62d80e46bab10` and `6a5a42e8e9a62d80e46bab28`
+   now remain unconditional in all five locales. All peak-season wording uses
+   a singular surcharge. Conditional language appears only where the source
+   says `(if any)`, and fuel rows preserve the source 15% condition.
+3. The validator is bound to a sealed 38-row snapshot containing exact
+   slug/row-ID/source-bucket/source-label-checksum/eligibility tuples. The
+   snapshot has a hard-coded EOL-independent checksum. Eight adversarial probes
+   prove rejection of unknown IDs, swapped slug/ID pairs, self-rehashed labels,
+   missing rows, extra rows, snapshot tampering, unsupported private claims and
+   softened unconditional-dinner wording.
+
 ## Approved-locale immutability
 
 The approved `vi`, `it`, `es` and `pt` files have zero Git diff in this
@@ -98,6 +122,7 @@ Passed:
 - targeted editorial/localization/catalog unit suites: 3 files, 43 tests;
 - JSON parsing and stable source-label SHA-256 validation;
 - forbidden vendor/SEO/shouting/machine-marker lint; and
+- eight adversarial false-pass probes;
 - `git diff --check`.
 
 The Harness executable is absent from the isolated worker worktree. No Harness

@@ -3,11 +3,16 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const directory = path.dirname(fileURLToPath(import.meta.url))
+const moduleDirectory = path.dirname(fileURLToPath(import.meta.url))
+const directory = process.argv[2] ? path.resolve(process.argv[2]) : moduleDirectory
+const sourceManifestPath = process.argv[3]
+  ? path.resolve(process.argv[3])
+  : path.join(moduleDirectory, '..', 'wingsside-tour-editorial', 'source-manifest.json')
 const readJSON = (name) => JSON.parse(fs.readFileSync(path.join(directory, name), 'utf8'))
-const sourceManifest = readJSON('../wingsside-tour-editorial/source-manifest.json')
+const sourceManifest = JSON.parse(fs.readFileSync(sourceManifestPath, 'utf8'))
 const english = readJSON('en.json')
 const disclosures = readJSON('pricing-disclosures.json')
+const governedSourceRows = readJSON('governed-source-rows.json')
 const sha256 = (value) => crypto.createHash('sha256').update(value).digest('hex')
 const stableStringify = (value) => {
   if (value === undefined) return '"__undefined__"'
@@ -19,6 +24,7 @@ const stableStringify = (value) => {
     .join(',')}}`
 }
 const contentChecksum = (value) => sha256(stableStringify(value))
+const governedRowsChecksum = 'b3680c1371189235668e70b927386fe7ba3493b87c4b876e7c4621851e714ea4'
 const fail = (message) => {
   throw new Error(message)
 }
@@ -80,6 +86,14 @@ for (const text of textLeaves(english.tours)) {
     fail(`Unapproved all-caps token in English candidate: ${match}`)
   }
 }
+const unsupportedServiceClaim =
+  /\b(?:private|custom(?:ize|ized|ization)?|tailor(?:ed|ing)?|adapt(?:ed|able)?|adjust(?:ed|able)?)\b/iu
+for (const tour of english.tours) {
+  const claim = textLeaves(tour).join(' ').match(unsupportedServiceClaim)?.[0]
+  if (claim && !tour.slug.includes('private-tour')) {
+    fail(`Unsupported service/customization claim at ${tour.slug}:${claim}`)
+  }
+}
 
 if (
   disclosures.version !== 1 ||
@@ -88,26 +102,128 @@ if (
 ) {
   fail('Pricing disclosure artifact must contain exactly 38 rows')
 }
+if (
+  governedSourceRows.version !== 1 ||
+  governedSourceRows.expectedRowCount !== 38 ||
+  !Array.isArray(governedSourceRows.rows) ||
+  governedSourceRows.rows.length !== 38 ||
+  governedSourceRows.rowsChecksum !== governedRowsChecksum ||
+  contentChecksum(governedSourceRows.rows) !== governedRowsChecksum
+) {
+  fail('Governed source-row snapshot is missing, stale, or tampered')
+}
+const governedByKey = new Map(
+  governedSourceRows.rows.map((row) => {
+    if (
+      !Array.isArray(row) ||
+      row.length !== 5 ||
+      row[2] !== 'includes' ||
+      !/^[a-f0-9]{64}$/u.test(row[3]) ||
+      row[4] !== 'pricing-disclosure'
+    ) {
+      fail('Governed source-row snapshot contains an invalid tuple')
+    }
+    return [`${row[0]}\0${row[1]}`, row]
+  }),
+)
+if (governedByKey.size !== 38) fail('Governed source-row snapshot has duplicate identities')
+const expectedLabelsBySourceLabel = new Map([
+  [
+    'Peak season surcharge & compulsory dinner in the accommodation.',
+    {
+      en: 'The peak-season surcharge and compulsory dinner at the accommodation are not included.',
+      vi: 'Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.',
+      it: 'Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.',
+      es: 'El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.',
+      pt: 'O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos.',
+    },
+  ],
+  [
+    'Peak season surcharge & compulsory dinner at the hotel (if any)',
+    {
+      en: 'The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.',
+      vi: 'Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.',
+      it: "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+      es: 'El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.',
+      pt: 'O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos.',
+    },
+  ],
+  [
+    'Peak season surcharge & compulsory dinner at the accommodation (if any)',
+    {
+      en: 'The peak-season surcharge and any compulsory dinner at the accommodation, if applicable, are not included.',
+      vi: 'Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú, nếu áp dụng.',
+      it: "Il supplemento di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi.",
+      es: 'El suplemento de temporada alta y, si corresponde, la cena obligatoria en el alojamiento no están incluidos.',
+      pt: 'O suplemento de época alta e, quando aplicável, o jantar obrigatório no alojamento não estão incluídos.',
+    },
+  ],
+  [
+    'A fuel surcharge will be applied if fuel prices rise above 15%',
+    {
+      en: 'A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.',
+      vi: 'Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.',
+      it: 'Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.',
+      es: 'El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.',
+      pt: 'O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%.',
+    },
+  ],
+])
 const rowKeys = disclosures.rows.map(({ slug, sourceRowID }) => `${slug}\0${sourceRowID}`)
 if (new Set(rowKeys).size !== 38) fail('Pricing disclosure artifact has duplicate row identities')
 for (const [index, row] of disclosures.rows.entries()) {
+  const governed = governedByKey.get(`${row.slug}\0${row.sourceRowID}`)
   if (!sourceBySlug.has(row.slug)) fail(`Unknown pricing disclosure slug at ${index}`)
+  const expectedLabels = expectedLabelsBySourceLabel.get(row.sourceLabel)
   if (
+    !governed ||
+    !expectedLabels ||
     !row.sourceRowID ||
-    row.sourceBucket !== 'includes' ||
+    row.sourceBucket !== governed[2] ||
     row.targetBucket !== 'excludes' ||
-    sha256(row.sourceLabel.normalize('NFKC').replace(/\s+/gu, ' ').trim()) !==
-      row.sourceLabelChecksum
+    row.sourceLabelChecksum !== governed[3] ||
+    sha256(row.sourceLabel.normalize('NFKC').replace(/\s+/gu, ' ').trim()) !== governed[3]
   ) {
     fail(`Invalid source binding or disposition at ${row.slug}:${row.sourceRowID}`)
   }
   if (!exactKeys(row.labels, ['en', 'vi', 'it', 'es', 'pt'])) {
     fail(`Incomplete locale labels at ${row.slug}:${row.sourceRowID}`)
   }
+  if (stableStringify(row.labels) !== stableStringify(expectedLabels)) {
+    fail(`Pricing disclosure meaning or modality drift at ${row.slug}:${row.sourceRowID}`)
+  }
   for (const [locale, label] of Object.entries(row.labels)) {
     if (typeof label !== 'string' || label.trim().length < 40) {
       fail(`Incomplete ${locale} wording at ${row.slug}:${row.sourceRowID}`)
     }
+  }
+}
+if (rowKeys.some((key) => !governedByKey.has(key))) {
+  fail('Pricing disclosure artifact contains a non-governed source-row identity')
+}
+if ([...governedByKey.keys()].some((key) => !rowKeys.includes(key))) {
+  fail('Pricing disclosure artifact is missing a governed source-row identity')
+}
+const unconditionalDinnerIDs = new Set([
+  '6a5a42d0e9a62d80e46ba98f',
+  '6a5a42e4e9a62d80e46baae1',
+  '6a5a42e6e9a62d80e46bab10',
+  '6a5a42e8e9a62d80e46bab28',
+])
+for (const row of disclosures.rows.filter(({ sourceRowID }) =>
+  unconditionalDinnerIDs.has(sourceRowID),
+)) {
+  if (
+    Object.values(row.labels).some((label) =>
+      /\b(?:any|if applicable|eventuale|si corresponde|quando aplicável|nếu áp dụng)\b/iu.test(
+        label,
+      ),
+    ) ||
+    Object.values(row.labels).some((label) =>
+      /\b(?:supplements|supplementi|suplementos)\b/iu.test(label),
+    )
+  ) {
+    fail(`Unconditional compulsory-dinner meaning was softened: ${row.sourceRowID}`)
   }
 }
 for (const text of textLeaves(disclosures.rows.map(({ labels }) => labels))) {

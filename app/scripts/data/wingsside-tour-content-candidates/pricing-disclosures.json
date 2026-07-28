@@ -6,7 +6,7 @@
   "expectedRowCount": 38,
   "policy": {
     "disposition": "preserve-as-explicit-exclusion",
-    "rationale": "Each source row represents a possible amount outside the base package price. The row is retained under its stable ID and presented as an exclusion with a pre-booking confirmation commitment.",
+    "rationale": "Each source row represents an amount outside the base package price. The row is retained under its stable ID and presented as an exclusion without changing its condition, threshold, or singular charge scope.",
     "ptProfile": "pt-PT"
   },
   "rows": [
@@ -18,11 +18,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
       "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
       "labels": {
-        "en": "Peak-season supplements and any compulsory dinner at the accommodation are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú; mức phí áp dụng sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y la cena obligatoria en el alojamiento, si corresponde, no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e o jantar obrigatório no alojamento, quando aplicável, não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and compulsory dinner at the accommodation are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
       }
     },
     {
@@ -33,11 +33,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -48,11 +48,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
       "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
       "labels": {
-        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
       }
     },
     {
@@ -63,11 +63,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -78,11 +78,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
       "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
       "labels": {
-        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
       }
     },
     {
@@ -93,11 +93,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -108,11 +108,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the accommodation (if any)",
       "sourceLabelChecksum": "82c40ea972bd24981ae98d371ec206155fce2fc56036e4d83d08ec85df7268b2",
       "labels": {
-        "en": "Peak-season supplements and any compulsory dinner at the accommodation are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el alojamiento no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no alojamento não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory dinner at the accommodation, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no alojamento não estão incluídos."
       }
     },
     {
@@ -123,11 +123,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -138,11 +138,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
       "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
       "labels": {
-        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
       }
     },
     {
@@ -153,11 +153,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -168,11 +168,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
       "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
       "labels": {
-        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
       }
     },
     {
@@ -183,11 +183,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -198,11 +198,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -213,11 +213,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
       "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
       "labels": {
-        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
       }
     },
     {
@@ -228,11 +228,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -243,11 +243,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
       "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
       "labels": {
-        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
       }
     },
     {
@@ -258,11 +258,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -273,11 +273,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -288,11 +288,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -303,11 +303,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -318,11 +318,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -333,11 +333,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -348,11 +348,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
       "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
       "labels": {
-        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
       }
     },
     {
@@ -363,11 +363,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -378,11 +378,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
       "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
       "labels": {
-        "en": "Peak-season supplements and any compulsory dinner at the accommodation are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú; mức phí áp dụng sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y la cena obligatoria en el alojamiento, si corresponde, no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e o jantar obrigatório no alojamento, quando aplicável, não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and compulsory dinner at the accommodation are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
       }
     },
     {
@@ -393,11 +393,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -408,11 +408,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
       "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
       "labels": {
-        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
       }
     },
     {
@@ -423,11 +423,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -438,11 +438,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
       "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
       "labels": {
-        "en": "Peak-season supplements and any compulsory dinner at the accommodation are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú; mức phí áp dụng sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y la cena obligatoria en el alojamiento, si corresponde, no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e o jantar obrigatório no alojamento, quando aplicável, não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and compulsory dinner at the accommodation are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
       }
     },
     {
@@ -453,11 +453,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -468,11 +468,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
       "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
       "labels": {
-        "en": "Peak-season supplements and any compulsory dinner at the accommodation are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú; mức phí áp dụng sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y la cena obligatoria en el alojamiento, si corresponde, no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e o jantar obrigatório no alojamento, quando aplicável, não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and compulsory dinner at the accommodation are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
       }
     },
     {
@@ -483,11 +483,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -498,11 +498,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
       "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
       "labels": {
-        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
       }
     },
     {
@@ -513,11 +513,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -528,11 +528,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
       "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
       "labels": {
-        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
       }
     },
     {
@@ -543,11 +543,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     },
     {
@@ -558,11 +558,11 @@
       "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
       "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
       "labels": {
-        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
-        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
-        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
-        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
       }
     },
     {
@@ -573,11 +573,11 @@
       "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
       "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
       "labels": {
-        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
-        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
-        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
-        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
-        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
       }
     }
   ]
