@@ -45,6 +45,7 @@ describe('US-055 disposable rehearsal guards', () => {
     expect(runner).toContain("process.env.US055_REHEARSAL_HOME_DIAGNOSTIC === 'true'")
     expect(runner).toContain("path: '/wingsside'")
     expect(runner).toContain("markerCount: 4")
+    expect(runner).toContain('httpStatus: 200')
     expect(runner).toContain('markerPresence')
     expect(runner).toContain("routeMode: 'local-tenant-alias'")
     expect(runner).toContain('responseSha256')

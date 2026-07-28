@@ -653,10 +653,10 @@ try {
       }
       const homeRouteProof = {
         canonical: 'https://wingside.vn',
+        httpStatus: 200,
         locale: 'en',
         markerCount: 4,
         path: '/wingsside',
-        status: 200,
       }
       record('home-route-diagnostic', homeRouteProof)
       await journal('home-route-diagnostic', 'after', homeRouteProof)
