@@ -34,9 +34,10 @@ import {
   type TourInquiryIntent,
 } from './utils'
 import { isConsultativeTourSiteCode } from '@/utilities/siteCapabilities'
+import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { TourEnquiryContextBridge } from './TourEnquiryContextBridge'
 import type { TourEnquiryContext } from './enquiryContext'
-import { normalizeWingSideConsultativeTour } from './wingsSideTourViewModel'
+import { getWingSideTourCopy, normalizeWingSideConsultativeTour } from './wingsSideTourViewModel'
 
 /** Retail = WingsGo dense conversion. Consultative = Wingside private inbound. */
 export type TourDetailPresentation = 'consultative' | 'retail'
@@ -995,7 +996,7 @@ const TourRouteVisualSection = ({
   presentation = 'retail',
   tour,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   presentation?: TourDetailPresentation
   tour: Record<string, any>
 }) => {
@@ -1004,6 +1005,7 @@ const TourRouteVisualSection = ({
   const mapImage = tour.routeViz?.mapImage
   const summaryParagraphs = splitSummaryParagraphs(tour.summary)
   const isEn = presentation === 'consultative' && locale === 'en'
+  const wingSideCopy = getWingSideTourCopy(locale)
 
   return (
     <Panel data-od-id="tour-overview" id="route">
@@ -1043,11 +1045,13 @@ const TourRouteVisualSection = ({
                       key={`${stop.label}-${index}`}
                     >
                       <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                        {isEn ? 'Leg' : 'Bước'} {String(index + 1).padStart(2, '0')}
+                        {wingSideCopy.leg} {String(index + 1).padStart(2, '0')}
                       </p>
                       <p className="mt-2 text-base font-semibold text-foreground">{stop.label}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {stop.type || (isEn ? 'Journey stop' : 'Điểm trong chương trình')}
+                        {stop.type && stop.type !== 'sightseeing'
+                          ? stop.type
+                          : wingSideCopy.journeyStop}
                       </p>
                     </div>
                   ))}
@@ -1121,7 +1125,7 @@ const TourItinerarySection = ({
   presentation = 'retail',
   tour,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   presentation?: TourDetailPresentation
   tour: Record<string, any>
 }) => {
@@ -1129,8 +1133,10 @@ const TourItinerarySection = ({
   const itineraryDays = asArray<Record<string, any>>(tour.itineraryDays)
   const groupedThemeCount = new Set(itineraryDays.map((day) => day.route).filter(Boolean)).size
   const isEn = locale === 'en'
-  const heading =
-    isConsultative && isEn
+  const wingSideCopy = getWingSideTourCopy(locale)
+  const heading = isConsultative
+    ? { eyebrow: wingSideCopy.itinerary, title: wingSideCopy.itinerary }
+    : isEn
       ? { eyebrow: 'Itinerary', title: 'Day-by-day journey' }
       : { eyebrow: 'Lịch trình', title: 'Lịch trình theo ngày' }
 
@@ -1151,10 +1157,10 @@ const TourItinerarySection = ({
             const dayId = `itinerary-day-${day.dayNumber || index + 1}`
             const panelId = `${dayId}-panel`
             const infoItems = compactInfoItems([
-              [isEn ? 'Meals' : 'Bữa ăn', day.meals],
-              [isEn ? 'Transport' : 'Di chuyển', day.transport],
-              [isEn ? 'Stay' : 'Lưu trú', day.accommodation],
-              [isEn ? 'Sleep standard' : 'Tiêu chuẩn nghỉ', day.sleepingStandard],
+              [wingSideCopy.meals, day.meals],
+              [wingSideCopy.transport, day.transport],
+              [wingSideCopy.accommodation, day.accommodation],
+              [wingSideCopy.sleepStandard, day.sleepingStandard],
             ])
 
             return (
@@ -1171,7 +1177,7 @@ const TourItinerarySection = ({
                 >
                   <div className="shrink-0 rounded-[16px] bg-muted/50 px-3 py-2 text-center sm:rounded-[20px] sm:px-4 sm:py-3">
                     <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                      Day
+                      {wingSideCopy.dayLabel}
                     </p>
                     <p className="text-xl font-semibold sm:text-2xl">
                       {String(day.dayNumber || index + 1).padStart(2, '0')}
@@ -2161,7 +2167,7 @@ export const TourDetailPage = ({
   const isConsultative = presentation === 'consultative' || isConsultativeTourSiteCode(siteCodeProp)
   const resolvedPresentation: TourDetailPresentation = isConsultative ? 'consultative' : 'retail'
   const baseTour: TourResolvedData['tour'] = isConsultative
-    ? normalizeWingSideConsultativeTour(data.tour)
+    ? normalizeWingSideConsultativeTour(data.tour, locale)
     : data.tour
   const tour: TourResolvedData['tour'] = { ...baseTour, discoveryContext }
   const siteCode = resolveTourSiteCode(siteCodeProp, resolvedPresentation)

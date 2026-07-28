@@ -106,9 +106,9 @@ const catalog = (): WingsSideTourEditorialCatalog => ({
 
 describe('WingSide tour editorial localization contract', () => {
   it('accepts complete transcreated content while preserving source cardinality', () => {
-    expect(validateWingsSideTourEditorialCatalog({ catalog: catalog(), sourceTours: [source] })).toEqual(
-      [],
-    )
+    expect(
+      validateWingsSideTourEditorialCatalog({ catalog: catalog(), sourceTours: [source] }),
+    ).toEqual([])
   })
 
   it('rejects source drift, missing list items, verbatim fallback and source-brand leakage', () => {
@@ -117,6 +117,7 @@ describe('WingSide tour editorial localization contract', () => {
     invalid.tours[0]!.locales.it.summary = source.summary
     invalid.tours[0]!.locales.es.includes = []
     invalid.tours[0]!.locales.pt.itineraryDays[0]!.summary = 'BestPrice Travel package'
+    invalid.tours[0]!.locales.vi.itineraryDays[0]!.meals = 'NA; Bữa sáng, bữa trưa'
 
     const findings = validateWingsSideTourEditorialCatalog({
       catalog: invalid,
@@ -129,6 +130,7 @@ describe('WingSide tour editorial localization contract', () => {
         'Verbatim English fallback is not allowed',
         'Inclusion count changed',
         'Source-brand language is not allowed',
+        'Meals must be authored per day without raw NA or semicolon serialization',
       ]),
     )
   })

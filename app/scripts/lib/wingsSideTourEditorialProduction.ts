@@ -12,6 +12,65 @@ import {
 export const wingsSideTourEditorialSiteCode = 'wing-side'
 export const wingsSideTourEditorialExpectedTourCount = 22
 export const wingsSideTourEditorialPlanVersion = 2
+export const wingsSideTourPublicLocales = ['en', ...wingsSideTourEditorialLocales] as const
+export type WingsSideTourPublicLocale = (typeof wingsSideTourPublicLocales)[number]
+
+export type WingsSideTourPublicInventoryFinding = {
+  locale: WingsSideTourPublicLocale
+  message: string
+  slugs: string[]
+}
+
+export const validateWingsSideTourPublicInventory = ({
+  detailSlugsByLocale,
+  expectedSlugs,
+  listingSlugsByLocale,
+}: {
+  detailSlugsByLocale: Record<WingsSideTourPublicLocale, string[]>
+  expectedSlugs: string[]
+  listingSlugsByLocale: Record<WingsSideTourPublicLocale, string[]>
+}): WingsSideTourPublicInventoryFinding[] => {
+  const findings: WingsSideTourPublicInventoryFinding[] = []
+  const expected = [...new Set(expectedSlugs)].sort()
+  if (
+    expected.length !== wingsSideTourEditorialExpectedTourCount ||
+    expected.length !== expectedSlugs.length
+  ) {
+    throw new Error('Public tour inventory validator requires exactly 22 unique source slugs')
+  }
+
+  for (const locale of wingsSideTourPublicLocales) {
+    const listing = [...new Set(listingSlugsByLocale[locale])].sort()
+    const details = [...new Set(detailSlugsByLocale[locale])].sort()
+    const missingListing = expected.filter((slug) => !listing.includes(slug))
+    const unexpectedListing = listing.filter((slug) => !expected.includes(slug))
+    const missingDetails = expected.filter((slug) => !details.includes(slug))
+    const detailAbsentFromListing = details.filter((slug) => !listing.includes(slug))
+
+    if (missingListing.length || unexpectedListing.length) {
+      findings.push({
+        locale,
+        message: `Public listing inventory must match all ${wingsSideTourEditorialExpectedTourCount} source tours`,
+        slugs: [...missingListing, ...unexpectedListing],
+      })
+    }
+    if (missingDetails.length) {
+      findings.push({
+        locale,
+        message: 'Published source tour is missing a same-locale public detail',
+        slugs: missingDetails,
+      })
+    }
+    if (detailAbsentFromListing.length) {
+      findings.push({
+        locale,
+        message: 'Public detail exists but is absent from the same-locale listing',
+        slugs: detailAbsentFromListing,
+      })
+    }
+  }
+  return findings
+}
 
 export type EditorialOwnedSnapshot = {
   excludes: unknown
@@ -114,9 +173,7 @@ const sanitizeWrapperLayout = (value: unknown): unknown => {
     Object.entries(source)
       .filter(
         ([key]) =>
-          key !== 'id' ||
-          typeof source.id !== 'string' ||
-          !/^[a-f0-9]{24}$/iu.test(source.id),
+          key !== 'id' || typeof source.id !== 'string' || !/^[a-f0-9]{24}$/iu.test(source.id),
       )
       .map(([key, child]) => [key, sanitizeWrapperLayout(child)]),
   )
@@ -310,10 +367,11 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
     if (
       editorialChecksum({ tour: entry.before, wrapper: entry.wrapperBefore }) !==
         entry.beforeChecksum ||
-      editorialChecksum({ tour: entry.after, wrapper: entry.wrapperAfter }) !==
-        entry.afterChecksum
+      editorialChecksum({ tour: entry.after, wrapper: entry.wrapperAfter }) !== entry.afterChecksum
     ) {
-      throw new Error(`WingSide tour editorial plan entry checksum mismatch: ${entry.locale}:${entry.slug}`)
+      throw new Error(
+        `WingSide tour editorial plan entry checksum mismatch: ${entry.locale}:${entry.slug}`,
+      )
     }
   }
   const sourceManifest = new Map<string, string>()
@@ -333,10 +391,7 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
   }
   const before = editorialChecksum(plan.entries.map(({ beforeChecksum }) => beforeChecksum))
   const after = editorialChecksum(plan.entries.map(({ afterChecksum }) => afterChecksum))
-  if (
-    before !== plan.aggregateChecksums.before ||
-    after !== plan.aggregateChecksums.after
-  ) {
+  if (before !== plan.aggregateChecksums.before || after !== plan.aggregateChecksums.after) {
     throw new Error('WingSide tour editorial production plan aggregate checksum mismatch')
   }
 }

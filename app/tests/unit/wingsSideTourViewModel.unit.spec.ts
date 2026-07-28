@@ -6,10 +6,12 @@ import {
   buildWingSideTourViewModel,
   classifyWingSideServices,
   deriveWingSideRoute,
+  deriveWingSideRouteEntities,
   getWingSideTourCopy,
   hasMatchingWingSideTourWrapper,
   mapWingSideGallery,
   normalizeWingSideConsultativeTour,
+  normalizeWingSideDayMeal,
   sanitizeWingSidePublicText,
 } from '@/tours/wingsSideTourViewModel'
 
@@ -133,7 +135,12 @@ describe('WingSide tour view model', () => {
   it('falls back unsupported locale copy to English, never Vietnamese', () => {
     expect(getWingSideTourCopy('fr')).toBe(getWingSideTourCopy('en'))
     expect(getWingSideTourCopy('fr').request).toBe('Request consultation')
-    expect(getWingSideTourCopy('it')).toMatchObject({ dayLabel: 'Giorno', durationLabel: 'Durata' })
+    expect(getWingSideTourCopy('it')).toMatchObject({
+      dayLabel: 'Giorno',
+      durationLabel: 'Durata',
+      journeyStop: 'Tappa del viaggio',
+      meals: 'Pasti',
+    })
   })
 
   it('uses configured stops first and otherwise derives a deduplicated itinerary route', () => {
@@ -148,6 +155,56 @@ describe('WingSide tour view model', () => {
       'Phu Quoc',
       'Southern island',
     ])
+  })
+
+  it('keeps normalized Sapa route entity order invariant across locales', () => {
+    const en = deriveWingSideRouteEntities({
+      itineraryDays: [
+        { route: 'Sapa - Cat Cat - Sapa', title: 'Cat Cat village' },
+        { route: 'Sapa - Y Linh Ho - Lao Chai - Ta Van - Sapa', title: 'Valley trek' },
+        { route: 'Sapa - Bac Ha - Ban Pho - Lao Cai - Hanoi', title: 'Market day' },
+      ],
+      slug: 'sapa-trekking-ethnic-market-3-days',
+      title: 'Sapa Trekking & Ethnic Market 3 days',
+    })
+    const vi = deriveWingSideRouteEntities({
+      itineraryDays: [
+        { route: 'Sa Pa - bản Cát Cát - Sa Pa', title: 'Đi bộ bản Cát Cát' },
+        { route: 'Sa Pa - Ý Linh Hồ - Lao Chải - Tả Van - Sa Pa', title: 'Trekking thung lũng' },
+        { route: 'Sa Pa - Bắc Hà - Bản Phố - Lào Cai - Hà Nội', title: 'Chợ phiên' },
+      ],
+      slug: 'sapa-trekking-ethnic-market-3-days',
+      title: 'Trekking Sa Pa và chợ phiên vùng cao',
+    })
+
+    expect(vi.map(({ key }) => key)).toEqual(en.map(({ key }) => key))
+    expect(en.map(({ key }) => key)).toEqual([
+      'sapa',
+      'cat-cat',
+      'y-linh-ho',
+      'lao-chai',
+      'ta-van',
+      'bac-ha',
+      'ban-pho',
+      'lao-cai',
+      'ha-noi',
+    ])
+  })
+
+  it('maps serialized source meals to each day and localizes the no-meal state', () => {
+    expect(
+      [0, 1, 2].map((dayIndex) =>
+        normalizeWingSideDayMeal({
+          dayIndex,
+          locale: 'en',
+          totalDays: 3,
+          value: 'NA; Breakfast, Lunch; Breakfast, Lunch',
+        }),
+      ),
+    ).toEqual(['No meals', 'Breakfast, Lunch', 'Breakfast, Lunch'])
+    expect(normalizeWingSideDayMeal({ dayIndex: 0, locale: 'vi', totalDays: 1, value: 'NA' })).toBe(
+      'Không bao gồm bữa ăn',
+    )
   })
 
   it('merges slug and itinerary places into the real Northern route order', () => {
@@ -228,6 +285,11 @@ describe('WingSide tour view model', () => {
     expect(sanitizeWingSidePublicText('A memorable experience.Socialize with local hosts.')).toBe(
       'A memorable experience. Socialize with local hosts.',
     )
+    expect(
+      sanitizeWingSidePublicText(
+        'A quiet private journey. Book this BestPrice Travel package now. Keep the pace flexible.',
+      ),
+    ).toBe('A quiet private journey. Keep the pace flexible.')
   })
 
   it('builds a sanitized consultative projection while leaving the source object untouched', () => {

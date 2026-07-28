@@ -119,9 +119,13 @@ const sourceProjection = (tour: EditorialSourceTour) => ({
 })
 
 export const editorialSourceChecksum = (tour: EditorialSourceTour) =>
-  crypto.createHash('sha256').update(JSON.stringify(sourceProjection(tour))).digest('hex')
+  crypto
+    .createHash('sha256')
+    .update(JSON.stringify(sourceProjection(tour)))
+    .digest('hex')
 
 const sourceBrandPattern = /\b(?:best\s*price(?:\s+travel)?|bestpricetravel)\b/iu
+const rawMealPattern = /(?:^|[;,]\s*)(?:n\/?a|none)(?:\s*[;,]|$)/iu
 
 const requiredText = ({
   findings,
@@ -189,9 +193,7 @@ export const validateWingsSideTourEditorialCatalog = ({
       path: '$',
     })
   }
-  if (
-    JSON.stringify(catalog.targetLocales) !== JSON.stringify(wingsSideTourEditorialLocales)
-  ) {
+  if (JSON.stringify(catalog.targetLocales) !== JSON.stringify(wingsSideTourEditorialLocales)) {
     findings.push({
       message: 'Catalog target locale order must be vi,it,es,pt',
       path: '$.targetLocales',
@@ -323,6 +325,18 @@ export const validateWingsSideTourEditorialCatalog = ({
             slug: source.slug,
             source: sourceValue,
           })
+          if (
+            field === 'meals' &&
+            (rawMealPattern.test(normalizeText(day[field])) ||
+              normalizeText(day[field]).includes(';'))
+          ) {
+            findings.push({
+              locale,
+              message: 'Meals must be authored per day without raw NA or semicolon serialization',
+              path,
+              slug: source.slug,
+            })
+          }
         }
       })
 
@@ -470,12 +484,7 @@ export const buildWingsSideTourEditorialCatalog = ({
 }
 
 export const loadWingsSideTourEditorialCatalog = async ({
-  dataDirectory = path.resolve(
-    import.meta.dirname,
-    '..',
-    'data',
-    'wingsside-tour-editorial',
-  ),
+  dataDirectory = path.resolve(import.meta.dirname, '..', 'data', 'wingsside-tour-editorial'),
 }: {
   dataDirectory?: string
 } = {}): Promise<WingsSideTourEditorialCatalog> => {

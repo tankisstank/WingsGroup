@@ -12,6 +12,8 @@ import {
   buildEditorialWrapperWriteData,
   buildWingsSideTourEditorialPlan,
   editorialChecksum,
+  validateWingsSideTourPublicInventory,
+  wingsSideTourPublicLocales,
 } from '../../scripts/lib/wingsSideTourEditorialProduction'
 
 const content = (index: number, locale: string): EditorialTourContent => ({
@@ -236,5 +238,39 @@ describe('WingSide tour editorial production plan', () => {
     plan.entries[0]!.wrapperAfter.title = 'tampered wrapper'
 
     expect(() => assertEditorialPlanShape(plan)).toThrow('entry checksum mismatch')
+  })
+
+  it('requires the same 22 public listing and detail slugs in every locale', () => {
+    const slugs = Array.from({ length: 22 }, (_, index) => `tour-${index + 1}`)
+    const listingSlugsByLocale = Object.fromEntries(
+      wingsSideTourPublicLocales.map((locale) => [locale, [...slugs]]),
+    ) as Record<(typeof wingsSideTourPublicLocales)[number], string[]>
+    const detailSlugsByLocale = Object.fromEntries(
+      wingsSideTourPublicLocales.map((locale) => [locale, [...slugs]]),
+    ) as Record<(typeof wingsSideTourPublicLocales)[number], string[]>
+
+    expect(
+      validateWingsSideTourPublicInventory({
+        detailSlugsByLocale,
+        expectedSlugs: slugs,
+        listingSlugsByLocale,
+      }),
+    ).toEqual([])
+
+    listingSlugsByLocale.vi = slugs.slice(1)
+    const findings = validateWingsSideTourPublicInventory({
+      detailSlugsByLocale,
+      expectedSlugs: slugs,
+      listingSlugsByLocale,
+    })
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          locale: 'vi',
+          message: 'Public detail exists but is absent from the same-locale listing',
+          slugs: ['tour-1'],
+        }),
+      ]),
+    )
   })
 })
