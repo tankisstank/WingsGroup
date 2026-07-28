@@ -47,3 +47,11 @@ export function terminateUs055E2EProcessTree(
     spawnSyncImplementation?: typeof import('node:child_process').spawnSync
   },
 ): Promise<void>
+
+export function us055ReadinessRequestOptions(baseURL: string): {
+  headers: { Host: 'wingside.vn' }
+  hostname: '127.0.0.1'
+  method: 'GET'
+  path: '/pages-sitemap.xml'
+  port: number
+}

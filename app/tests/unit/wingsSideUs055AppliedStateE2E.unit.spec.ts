@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { assertUs055AppliedStateE2EReport } from '../../scripts/lib/wingsSideUs055AppliedStateE2E.mjs'
+import {
+  assertUs055AppliedStateE2EReport,
+  us055ReadinessRequestOptions,
+} from '../../scripts/lib/wingsSideUs055AppliedStateE2E.mjs'
 
 const passingReport = () => ({
   errors: [],
@@ -29,6 +32,19 @@ const passingReport = () => ({
 })
 
 describe('US-055 applied-state 110 URL E2E evidence', () => {
+  it('uses node:http with an explicit WingSide Host on loopback readiness', () => {
+    expect(us055ReadinessRequestOptions('http://127.0.0.1:41234')).toEqual({
+      headers: { Host: 'wingside.vn' },
+      hostname: '127.0.0.1',
+      method: 'GET',
+      path: '/pages-sitemap.xml',
+      port: 41234,
+    })
+    expect(() =>
+      us055ReadinessRequestOptions('http://example.test:41234'),
+    ).toThrow('IPv4 loopback')
+  })
+
   it('binds one exact pass to the committed 22 by 5 contract', () => {
     expect(
       assertUs055AppliedStateE2EReport({

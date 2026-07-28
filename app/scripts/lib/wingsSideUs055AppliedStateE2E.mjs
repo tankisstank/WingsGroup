@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
+import { request } from 'node:http'
 import { createServer } from 'node:net'
 import path from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
@@ -132,6 +133,31 @@ const runBoundedChild = async ({
   }
 }
 
+export const us055ReadinessRequestOptions = (baseURL) => {
+  const target = new URL(baseURL)
+  if (target.protocol !== 'http:' || target.hostname !== '127.0.0.1' || !target.port) {
+    throw new Error('US-055 E2E readiness requires an explicit IPv4 loopback HTTP origin')
+  }
+  return {
+    headers: { Host: 'wingside.vn' },
+    hostname: '127.0.0.1',
+    method: 'GET',
+    path: '/pages-sitemap.xml',
+    port: Number(target.port),
+  }
+}
+
+const readinessStatus = (baseURL) =>
+  new Promise((resolve, reject) => {
+    const probe = request(us055ReadinessRequestOptions(baseURL), (response) => {
+      response.resume()
+      response.once('end', () => resolve(response.statusCode || 0))
+    })
+    probe.setTimeout(5_000, () => probe.destroy(new Error('readiness timeout')))
+    probe.once('error', reject)
+    probe.end()
+  })
+
 const waitForNext = async ({ baseURL, child, timeoutMilliseconds }) => {
   const deadline = Date.now() + timeoutMilliseconds
   let attempts = 0
@@ -141,11 +167,7 @@ const waitForNext = async ({ baseURL, child, timeoutMilliseconds }) => {
       throw new Error('US-055 E2E Next server exited before readiness')
     }
     try {
-      const response = await fetch(`${baseURL}/pages-sitemap.xml`, {
-        headers: { host: 'wingside.vn' },
-        signal: AbortSignal.timeout(5_000),
-      })
-      if (response.status === 200) return attempts
+      if ((await readinessStatus(baseURL)) === 200) return attempts
     } catch {
       // Bounded readiness polling is expected while Next compiles.
     }
