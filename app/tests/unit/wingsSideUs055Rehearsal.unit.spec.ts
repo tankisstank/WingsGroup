@@ -28,6 +28,7 @@ describe('US-055 disposable rehearsal guards', () => {
       'scripts/seed-wingsside-tour-editorial-rehearsal.ts',
       'utf8',
     )
+    const selectiveSeedScript = fs.readFileSync('scripts/seed-subsites.ts', 'utf8')
     const selectiveSeed = runner.indexOf("SEED_ONLY_SITE: 'wing-side'")
     const exactTourSeed = runner.indexOf("'scripts/seed-wingsside-tour-editorial-rehearsal.ts'")
 
@@ -44,6 +45,12 @@ describe('US-055 disposable rehearsal guards', () => {
     expect(runner).toContain("process.env.US055_REHEARSAL_HOME_DIAGNOSTIC === 'true'")
     expect(runner).toContain("path: '/wingsside'")
     expect(runner).toContain("markerCount: 4")
+    expect(runner).toContain("WINGSSIDE_REHEARSAL_EXIT_AFTER_SEED: 'true'")
+    expect(selectiveSeedScript).toContain(
+      "process.env.WINGSSIDE_REHEARSAL_EXIT_AFTER_SEED === 'true'",
+    )
+    expect(selectiveSeedScript).toContain('process.exit(0)')
+    expect(selectiveSeedScript).toContain('process.exit(1)')
     expect(editorialSeed).toContain('applyWingsSideHiFiContentSeed')
     expect(editorialSeed).toContain('us055WhyTravelRoleSlugs.map')
     expect(editorialSeed).toContain('slugToRehearsalTourID.get(slug)')

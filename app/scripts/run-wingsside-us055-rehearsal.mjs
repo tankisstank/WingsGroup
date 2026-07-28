@@ -506,6 +506,7 @@ try {
       ...guardedEnv,
       PAYLOAD_IMPORT_ORIGINALS_ONLY: 'true',
       SEED_ONLY_SITE: 'wing-side',
+      WINGSSIDE_REHEARSAL_EXIT_AFTER_SEED: 'true',
     },
   })
   const homeSeedProof = {

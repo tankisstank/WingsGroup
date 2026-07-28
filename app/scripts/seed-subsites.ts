@@ -12606,7 +12606,14 @@ async function main() {
 
 try {
   await main()
+  if (process.env.WINGSSIDE_REHEARSAL_EXIT_AFTER_SEED === 'true') {
+    process.exit(0)
+  }
 } catch (error) {
   console.error(error)
-  process.exitCode = 1
+  if (process.env.WINGSSIDE_REHEARSAL_EXIT_AFTER_SEED === 'true') {
+    process.exit(1)
+  } else {
+    process.exitCode = 1
+  }
 }
