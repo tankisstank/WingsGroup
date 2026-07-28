@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto'
+
 import type {
   WingsSideD4CReference,
   WingsSideD4CSourceAsset,
@@ -29,6 +31,16 @@ export type WingsSideD4CZoomIndex = {
   sourceSnapshotSha256?: string
 }
 
+export type WingsSideD4CRejectedNearDuplicate = {
+  candidateMediaIDs?: number[]
+  candidateSha256?: string
+  confidence?: 'rejected'
+  matchType?: 'near-duplicate'
+  reason?: string
+  sourceMediaIDs?: number[]
+  sourceSha256?: string
+}
+
 export type WingsSideD4CReplacementMapping = {
   applyContract?: {
     mode?: string
@@ -52,14 +64,8 @@ export type WingsSideD4CReplacementMapping = {
     reclassifiedFalseNegativeCount?: number
     revalidatedCleanCount?: number
   }
-  rejectedNearDuplicates?: Array<{
-    candidateMediaIDs?: number[]
-    candidateSha256?: string
-    confidence?: string
-    reason?: string
-    sourceMediaIDs?: number[]
-    sourceSha256?: string
-  }>
+  rejectedNearDuplicateDecisionSha256?: string
+  rejectedNearDuplicates?: WingsSideD4CRejectedNearDuplicate[]
   sourceSnapshotSha256?: string
 }
 
@@ -70,6 +76,26 @@ const equalNumbers = (left: number[] | undefined, right: number[]): boolean =>
   Array.isArray(left) &&
   left.length === right.length &&
   left.every((value, index) => value === right[index])
+
+const canonicalRejectedNearDuplicate = (
+  pair: WingsSideD4CRejectedNearDuplicate,
+): string =>
+  JSON.stringify({
+    candidateMediaIDs: pair.candidateMediaIDs,
+    candidateSha256: pair.candidateSha256,
+    confidence: pair.confidence,
+    matchType: pair.matchType,
+    reason: pair.reason,
+    sourceMediaIDs: pair.sourceMediaIDs,
+    sourceSha256: pair.sourceSha256,
+  })
+
+export const sealWingsSideD4CRejectedNearDuplicates = (
+  pairs: WingsSideD4CRejectedNearDuplicate[],
+): string =>
+  createHash('sha256')
+    .update([...pairs].map(canonicalRejectedNearDuplicate).sort().join('\n'))
+    .digest('hex')
 
 export const validateWingsSideD4CZoomIndexCoverage = ({
   expectedHashes,
@@ -101,12 +127,14 @@ export const validateWingsSideD4CZoomIndexCoverage = ({
 
 export const validateWingsSideD4CReplacementMapping = ({
   assetsByHash,
+  expectedRejectedNearDuplicates,
   mapping,
   reclassifiedFalseNegativeCount,
   sourceSnapshotSha256,
   supersedingDispositionByHash,
 }: {
   assetsByHash: ReadonlyMap<string, WingsSideD4CSourceAsset>
+  expectedRejectedNearDuplicates: WingsSideD4CRejectedNearDuplicate[]
   mapping: WingsSideD4CReplacementMapping
   reclassifiedFalseNegativeCount: number
   sourceSnapshotSha256: string
@@ -167,7 +195,11 @@ export const validateWingsSideD4CReplacementMapping = ({
 
   rejected.forEach((pair) => {
     validateBoundPair(pair, 'watermark-positive')
-    if (pair.confidence !== 'rejected' || !pair.reason?.trim()) {
+    if (
+      pair.matchType !== 'near-duplicate' ||
+      pair.confidence !== 'rejected' ||
+      !pair.reason?.trim()
+    ) {
       throw new Error('D4-C rejected near-duplicate record is invalid')
     }
   })
@@ -176,6 +208,24 @@ export const validateWingsSideD4CReplacementMapping = ({
   )
   if (rejectedPairs.size !== rejected.length) {
     throw new Error('D4-C rejected near-duplicate records contain duplicates')
+  }
+  const rejectedDecisionSeal = sealWingsSideD4CRejectedNearDuplicates(rejected)
+  const expectedRejectedDecisionSeal = sealWingsSideD4CRejectedNearDuplicates(
+    expectedRejectedNearDuplicates,
+  )
+  const rejectedDecisions = new Set(rejected.map(canonicalRejectedNearDuplicate))
+  const expectedRejectedDecisions = new Set(
+    expectedRejectedNearDuplicates.map(canonicalRejectedNearDuplicate),
+  )
+  if (
+    expectedRejectedDecisions.size !== expectedRejectedNearDuplicates.length ||
+    rejectedDecisions.size !== rejected.length ||
+    rejectedDecisions.size !== expectedRejectedDecisions.size ||
+    [...rejectedDecisions].some((decision) => !expectedRejectedDecisions.has(decision)) ||
+    mapping.rejectedNearDuplicateDecisionSha256 !== expectedRejectedDecisionSeal ||
+    rejectedDecisionSeal !== expectedRejectedDecisionSeal
+  ) {
+    throw new Error('D4-C rejected near-duplicate decisions do not match the sealed exact set')
   }
 
   if (

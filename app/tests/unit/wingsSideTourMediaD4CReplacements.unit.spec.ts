@@ -8,6 +8,7 @@ import {
   isWingsSideD4CReviewCandidate,
   normalizedDHashDistance,
   rankWingsSideD4CReplacementCandidates,
+  sealWingsSideD4CRejectedNearDuplicates,
   validateWingsSideD4CReplacementMapping,
   validateWingsSideD4CZoomIndexCoverage,
   type WingsSideD4CReplacementMapping,
@@ -159,16 +160,24 @@ describe('WingSide D4-C governed replacement analysis', () => {
           candidateMediaIDs: rejectedCandidate.mediaIDs,
           candidateSha256: rejectedCandidate.sha256,
           confidence: 'rejected',
+          matchType: 'near-duplicate',
           reason: 'Visible watermark.',
           sourceMediaIDs: source.mediaIDs,
           sourceSha256: source.sha256,
         },
       ],
+      rejectedNearDuplicateDecisionSha256: '',
       sourceSnapshotSha256: 'd'.repeat(64),
     }
+    mapping.rejectedNearDuplicateDecisionSha256 =
+      sealWingsSideD4CRejectedNearDuplicates(mapping.rejectedNearDuplicates!)
+    const expectedRejectedNearDuplicates = structuredClone(
+      mapping.rejectedNearDuplicates!,
+    )
     const validate = (candidate: WingsSideD4CReplacementMapping) =>
       validateWingsSideD4CReplacementMapping({
         assetsByHash,
+        expectedRejectedNearDuplicates,
         mapping: candidate,
         reclassifiedFalseNegativeCount: 1,
         sourceSnapshotSha256: 'd'.repeat(64),
@@ -202,6 +211,65 @@ describe('WingSide D4-C governed replacement analysis', () => {
         coverage: { ...mapping.coverage, manuallyRejectedNearDuplicateCount: 0 },
       }),
     ).toThrow('coverage is invalid')
+    const substitutedPair = {
+      ...mapping.rejectedNearDuplicates![0]!,
+      candidateMediaIDs: source.mediaIDs,
+      candidateSha256: source.sha256,
+      sourceMediaIDs: rejectedCandidate.mediaIDs,
+      sourceSha256: rejectedCandidate.sha256,
+    }
+    expect(() =>
+      validate({
+        ...mapping,
+        rejectedNearDuplicateDecisionSha256:
+          sealWingsSideD4CRejectedNearDuplicates([substitutedPair]),
+        rejectedNearDuplicates: [substitutedPair],
+      }),
+    ).toThrow('sealed exact set')
+    expect(() =>
+      validate({
+        ...mapping,
+        rejectedNearDuplicateDecisionSha256:
+          sealWingsSideD4CRejectedNearDuplicates([]),
+        rejectedNearDuplicates: [],
+      }),
+    ).toThrow('sealed exact set')
+    expect(() =>
+      validate({
+        ...mapping,
+        rejectedNearDuplicateDecisionSha256:
+          sealWingsSideD4CRejectedNearDuplicates([
+            ...mapping.rejectedNearDuplicates!,
+            substitutedPair,
+          ]),
+        rejectedNearDuplicates: [
+          ...mapping.rejectedNearDuplicates!,
+          substitutedPair,
+        ],
+      }),
+    ).toThrow('sealed exact set')
+    expect(() =>
+      validate({
+        ...mapping,
+        rejectedNearDuplicates: [
+          {
+            ...mapping.rejectedNearDuplicates![0]!,
+            reason: 'Tampered reason.',
+          },
+        ],
+      }),
+    ).toThrow('sealed exact set')
+    expect(() =>
+      validate({
+        ...mapping,
+        rejectedNearDuplicates: [
+          {
+            ...mapping.rejectedNearDuplicates![0]!,
+            confidence: undefined,
+          },
+        ],
+      }),
+    ).toThrow('record is invalid')
   })
 
   it('does not persist a machine-specific absolute source path in R4 evidence', () => {

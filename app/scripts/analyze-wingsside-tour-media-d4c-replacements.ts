@@ -18,9 +18,53 @@ import {
   validateWingsSideD4CZoomIndexCoverage,
   type WingsSideD4CDisposition,
   type WingsSideD4CPerceptualFingerprint,
+  type WingsSideD4CRejectedNearDuplicate,
   type WingsSideD4CReplacementMapping,
   type WingsSideD4CZoomIndex,
 } from './lib/wingsSideTourMediaD4CReplacements'
+
+const expectedRejectedNearDuplicates: WingsSideD4CRejectedNearDuplicate[] = [
+  {
+    candidateMediaIDs: [2721],
+    candidateSha256: '0b4977613ebd884cfe70b854772b6980fd644dc2536cb71b1048151182d7f2d5',
+    confidence: 'rejected',
+    matchType: 'near-duplicate',
+    reason:
+      'Near-identical cave frame, but the proposed candidate visibly retains the BestPrice Travel wordmark in the upper-right region and was reclassified watermark-positive by R4.',
+    sourceMediaIDs: [2730],
+    sourceSha256: '4b450b90b82d8bcba8c9c6321ae14872935451782ef9d5e0ffa07a313a8b4b6c',
+  },
+  {
+    candidateMediaIDs: [6647],
+    candidateSha256: '77809644dd4e2dca09b5e9d4345a9df62176b4137c56e57b7a62a6648b75d857',
+    confidence: 'rejected',
+    matchType: 'near-duplicate',
+    reason:
+      'Near-identical cave frame, but the proposed candidate visibly retains the BestPrice Travel wordmark in the lower-left region and was reclassified watermark-positive by R4.',
+    sourceMediaIDs: [6659],
+    sourceSha256: '627e96721a0d0f9469a7e8aac7be8b540d6f1af5d4c51f50b1b2f55fba30dcc8',
+  },
+  {
+    candidateMediaIDs: [6579],
+    candidateSha256: 'bbe612e8ab9dd832b762bd7f4d1fac721dfd8a419198e2bde1853f8c6b3c7439',
+    confidence: 'rejected',
+    matchType: 'near-duplicate',
+    reason:
+      'Near-identical Hoi An portrait frame, but the proposed candidate visibly retains the BestPrice Travel wordmark in the lower-left region and was reclassified watermark-positive by R4.',
+    sourceMediaIDs: [5872],
+    sourceSha256: '95ea117d6b31d3161816ec03956eb50904e27467c027b42556db64c3794d6988',
+  },
+  {
+    candidateMediaIDs: [6442],
+    candidateSha256: '714a471fccfe62a7723704802440d49f311310212c6ad41c827aa397d69e510a',
+    confidence: 'rejected',
+    matchType: 'near-duplicate',
+    reason:
+      'Near-identical post-office group frame, but the proposed candidate visibly retains the BestPrice Travel wordmark in the lower-right region and was reclassified watermark-positive by R4.',
+    sourceMediaIDs: [6421],
+    sourceSha256: 'b6111ae17dba8a37cd0731f26fe0f85c6536fd9ab4b759d59f96e0dccda93cfe',
+  },
+]
 
 const args = process.argv.slice(2)
 const mode = args[0]
@@ -362,6 +406,7 @@ if (mode === 'verify') {
   ) as WingsSideD4CReplacementMapping
   validateWingsSideD4CReplacementMapping({
     assetsByHash: assetByHash,
+    expectedRejectedNearDuplicates,
     mapping,
     reclassifiedFalseNegativeCount: auditDecisions.positiveHashes.length,
     sourceSnapshotSha256: inventory.sourceSnapshotSha256,

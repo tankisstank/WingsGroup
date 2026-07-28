@@ -37,6 +37,12 @@ aspect compatibility, same-tour preference, semantic role and gallery-slot
 distance. No pair passes the governed review threshold after superseding
 reclassification.
 
+`candidate-mapping.json` also seals the exact set of four manually rejected
+near-duplicate decisions, including source/candidate hashes and media IDs,
+match type, confidence, and reason. The verifier rejects substitution, removal,
+addition, or field tampering even when a substituted pair is otherwise a valid
+watermark-positive-to-watermark-positive pair.
+
 From `app/`:
 
 ```powershell
