@@ -84,7 +84,6 @@ const allowedChildEnvironmentKeys = new Set([
   'COMSPEC',
   'LANG',
   'LOCALAPPDATA',
-  'NODE_OPTIONS',
   'Path',
   'PATH',
   'PATHEXT',
@@ -104,6 +103,28 @@ export const buildSanitizedChildEnvironment = (source, overrides) => ({
   ),
   ...overrides,
 })
+
+const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+export const classifyDockerInspectResult = (result, containerName) => {
+  if (result?.error || result?.signal || result?.status === null || result?.status === undefined) {
+    return 'unverified'
+  }
+  if (result.status === 0) return 'present'
+  if (result.status !== 1) return 'unverified'
+
+  const escapedContainerName = escapeRegExp(containerName)
+  const stderr = String(result.stderr || '').trim()
+  const confirmedAbsentPatterns = [
+    new RegExp(`^Error: No such object: ${escapedContainerName}$`, 'i'),
+    new RegExp(`^Error: No such container: ${escapedContainerName}$`, 'i'),
+    new RegExp(
+      `^Error response from daemon: No such container: ${escapedContainerName}$`,
+      'i',
+    ),
+  ]
+  return confirmedAbsentPatterns.some((pattern) => pattern.test(stderr)) ? 'absent' : 'unverified'
+}
 
 export const loadBaselineSource = async (sourcePath, manifestPath) => {
   const [sourceRaw, manifestRaw] = await Promise.all([

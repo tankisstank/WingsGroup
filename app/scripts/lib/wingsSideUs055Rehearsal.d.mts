@@ -27,6 +27,15 @@ export function buildSanitizedChildEnvironment(
   source: Record<string, string | undefined>,
   overrides: Record<string, string | undefined>,
 ): Record<string, string | undefined>
+export function classifyDockerInspectResult(
+  result: {
+    error?: unknown
+    signal?: NodeJS.Signals | null
+    status?: number | null
+    stderr?: string | Buffer | null
+  },
+  containerName: string,
+): 'absent' | 'present' | 'unverified'
 export function loadBaselineSource(
   sourcePath: string,
   manifestPath: string,

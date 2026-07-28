@@ -9,6 +9,7 @@ import {
   assertDisposablePostgresTarget,
   buildFrozenSourceProof,
   buildSanitizedChildEnvironment,
+  classifyDockerInspectResult,
   loadBaselineSource,
   loadFrozenSourceSnapshot,
   parseLoopbackDockerPort,
@@ -100,6 +101,7 @@ describe('US-055 disposable rehearsal guards', () => {
   it('does not inherit SMTP, Redis, release, or production mutation capabilities', () => {
     const result = buildSanitizedChildEnvironment(
       {
+        NODE_OPTIONS: '--require C:\\host\\inject.js',
         PATH: 'safe-path',
         REDIS_URL: 'redis://production',
         SMTP_PASSWORD: 'production-secret',
@@ -111,6 +113,59 @@ describe('US-055 disposable rehearsal guards', () => {
       DATABASE_URL: 'postgresql://explicit-rehearsal',
       PATH: 'safe-path',
     })
+  })
+
+  it('allows only an explicit child NODE_OPTIONS value instead of inheriting the host value', () => {
+    expect(
+      buildSanitizedChildEnvironment(
+        { NODE_OPTIONS: '--require /host/inject.js', PATH: 'safe-path' },
+        { NODE_OPTIONS: '' },
+      ),
+    ).toEqual({ NODE_OPTIONS: '', PATH: 'safe-path' })
+  })
+
+  it('confirms cleanup only for the exact Docker no-such-container response', () => {
+    const containerName = 'wingsside-us055-rehearsal-safe'
+    expect(
+      classifyDockerInspectResult(
+        { status: 1, stderr: `Error: No such object: ${containerName}` },
+        containerName,
+      ),
+    ).toBe('absent')
+    expect(
+      classifyDockerInspectResult(
+        {
+          status: 1,
+          stderr: `Error response from daemon: No such container: ${containerName}`,
+        },
+        containerName,
+      ),
+    ).toBe('absent')
+    expect(
+      classifyDockerInspectResult(
+        { status: 1, stderr: 'error during connect: Docker daemon is unavailable' },
+        containerName,
+      ),
+    ).toBe('unverified')
+    expect(
+      classifyDockerInspectResult(
+        { status: 1, stderr: 'permission denied while trying to connect' },
+        containerName,
+      ),
+    ).toBe('unverified')
+    expect(
+      classifyDockerInspectResult(
+        { status: 1, stderr: 'Error: No such object: another-container' },
+        containerName,
+      ),
+    ).toBe('unverified')
+    expect(classifyDockerInspectResult({ status: 0, stderr: '' }, containerName)).toBe('present')
+    expect(
+      classifyDockerInspectResult(
+        { status: null, signal: 'SIGTERM', error: new Error('timed out') },
+        containerName,
+      ),
+    ).toBe('unverified')
   })
 
   it('binds full 22/116/331 source content and rejects frozen artifact drift', async () => {

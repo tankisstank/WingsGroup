@@ -10,6 +10,7 @@ import {
   assertDisposablePostgresTarget,
   buildSanitizedChildEnvironment,
   buildFrozenSourceProof,
+  classifyDockerInspectResult,
   loadFrozenSourceSnapshot,
   parseLoopbackDockerPort,
   postgresReadinessProbeArgs,
@@ -44,6 +45,7 @@ const startedAt = new Date()
 const checks = []
 let cleanupVerified = false
 let cleanupAttempts = 0
+let cleanupVerification = 'not-attempted'
 let databaseURL
 let imageReference
 
@@ -281,6 +283,7 @@ try {
     DATABASE_URL: databaseURL,
     IMPORT_ADMIN_EMAIL: '',
     NODE_ENV: 'production',
+    NODE_OPTIONS: '',
     PAYLOAD_DB_PUSH: 'false',
     PAYLOAD_SECRET: payloadSecret,
     REDIS_URL: '',
@@ -412,7 +415,8 @@ try {
       timeout: 5_000,
       windowsHide: true,
     })
-    cleanupVerified = inspect.status !== null && inspect.status !== 0
+    cleanupVerification = classifyDockerInspectResult(inspect, containerName)
+    cleanupVerified = cleanupVerification === 'absent'
     if (!cleanupVerified) await new Promise((resolve) => setTimeout(resolve, 500))
   }
   await rm(temporaryDirectory, { force: true, recursive: true })
@@ -424,6 +428,7 @@ checks.push({
   containerName,
   name: 'cleanup',
   status: cleanupVerified ? 'pass' : 'fail',
+  verification: cleanupVerification,
 })
 const failed = checks.some(({ status }) => status === 'fail')
 const result = {
