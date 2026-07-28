@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "tool": "built-in image generation edit",
+  "policy": "Each source was loaded at original resolution and edited with an invariant-locking precise-object-edit prompt. Candidates are evidence only and were never accepted or copied into a processed release path.",
+  "attempts": [
+    {
+      "mediaID": 5626,
+      "source": {
+        "filename": "bpt-vietnam-tours-a-glimpse-of-the-central-vietnam-5-days-01-91f5e1fe.jpg",
+        "sha256": "91f5e1fef354a8dfe257df5cdf223b6ea8702b6ad7204606d970530b8c83ef37",
+        "width": 800,
+        "height": 450
+      },
+      "candidate": {
+        "filename": "rejected-candidates/media-5626-imagegen-rejected.png",
+        "sha256": "c823f0a01a3b8e2795174c3982c6a60e44539627266fe3fdacf154eabffbbd0e",
+        "width": 1672,
+        "height": 941
+      },
+      "status": "rejected",
+      "reason": "The model regenerated protected people and scene detail and changed dimensions/aspect instead of limiting the edit to the watermark region."
+    },
+    {
+      "mediaID": 5698,
+      "source": {
+        "filename": "bpt-vietnam-tours-best-of-south-vietnam-5-days-01-64b08ff6.jpg",
+        "sha256": "64b08ff6ed11c598a50ff115aacd93a00235271844184f11ccff2f6e8b128e77",
+        "width": 800,
+        "height": 450
+      },
+      "candidate": {
+        "filename": "rejected-candidates/media-5698-imagegen-rejected.png",
+        "sha256": "fef7bbc875a07f362d8406ec9a6bf33151aadc0b448f7fdea172307d1f64d3f6",
+        "width": 1672,
+        "height": 941
+      },
+      "status": "rejected",
+      "reason": "The model regenerated protected people and scene detail and changed dimensions/aspect instead of limiting the edit to the watermark region."
+    },
+    {
+      "mediaID": 6202,
+      "source": {
+        "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-01-b50ad507.jpg",
+        "sha256": "b50ad5077bb47e6be75bb73ee20a4a302f37132b5102eb8d779c5b7e0a07ef73",
+        "width": 800,
+        "height": 450
+      },
+      "candidate": {
+        "filename": "rejected-candidates/media-6202-imagegen-rejected.png",
+        "sha256": "86b44340fe2ee0e6b3c5c1009ee4230cad914490651b7536885457e1d1f3d087",
+        "width": 1672,
+        "height": 941
+      },
+      "status": "rejected",
+      "reason": "The model regenerated protected people and scene detail and changed dimensions/aspect instead of limiting the edit to the watermark region."
+    }
+  ],
+  "acceptedOutputCount": 0
+}

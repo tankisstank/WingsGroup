@@ -13,6 +13,11 @@ import {
   resolveWingsSideD4CApprovedRoot,
   wingsSideD4CSha256,
 } from '../../scripts/lib/wingsSideTourMediaD4C'
+import {
+  buildWingsSideD4CReviewDraft,
+  parseWingsSideD4CReviewManifest,
+  summarizeWingsSideD4CReview,
+} from '../../scripts/lib/wingsSideTourMediaD4CReview'
 
 const tours = Array.from({ length: 22 }, (_, index) => ({
   heroMediaID: index + 1,
@@ -191,5 +196,57 @@ describe('WingSide D4-C canonical source inventory', () => {
         ],
       }),
     ).toThrow('must be a non-empty string')
+  })
+})
+
+describe('WingSide D4-C visual disposition manifest', () => {
+  it('creates deterministic 100% hash coverage and validates exact inventory binding', () => {
+    const inventory = buildManifest(Buffer.from('review fixture'))
+    const draft = buildWingsSideD4CReviewDraft({ inventory })
+    expect(draft.assets).toHaveLength(inventory.assets.length)
+    expect(draft.coverage).toEqual({
+      acceptedOutputCount: 0,
+      cleanCount: 0,
+      rejectedCount: 0,
+      reviewedCount: 0,
+      uncertainCount: inventory.assets.length,
+      uniqueContentHashCount: inventory.assets.length,
+      watermarkPositiveCount: 0,
+    })
+    expect(parseWingsSideD4CReviewManifest(draft, inventory)).toEqual(draft)
+  })
+
+  it('rejects false coverage and substitution of a source hash', () => {
+    const inventory = buildManifest(Buffer.from('review fixture'))
+    const draft = buildWingsSideD4CReviewDraft({ inventory })
+    expect(() =>
+      parseWingsSideD4CReviewManifest(
+        {
+          ...draft,
+          coverage: { ...draft.coverage, reviewedCount: 1 },
+        },
+        inventory,
+      ),
+    ).toThrow('does not match assets')
+    expect(() =>
+      parseWingsSideD4CReviewManifest(
+        {
+          ...draft,
+          assets: [
+            {
+              ...draft.assets[0],
+              source: { ...draft.assets[0]!.source, sha256: 'f'.repeat(64) },
+            },
+          ],
+          coverage: summarizeWingsSideD4CReview([
+            {
+              ...draft.assets[0]!,
+              source: { ...draft.assets[0]!.source, sha256: 'f'.repeat(64) },
+            },
+          ]),
+        },
+        inventory,
+      ),
+    ).toThrow('differs from canonical inventory')
   })
 })

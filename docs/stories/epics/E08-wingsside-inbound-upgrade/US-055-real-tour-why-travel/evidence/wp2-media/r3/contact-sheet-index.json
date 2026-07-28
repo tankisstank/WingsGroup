@@ -1,0 +1,128 @@
+{
+  "contactSheetCount": 24,
+  "dispositionManifest": "disposition-manifest.json",
+  "schemaVersion": 1,
+  "sheets": [
+    {
+      "byteLength": 628742,
+      "path": "contact-sheets/sheet-01.jpg",
+      "sha256": "55f3d0fad7f124389a8a4d1a3504c4a87ae6c55a847986dfae4f0125e91a2b21"
+    },
+    {
+      "byteLength": 615534,
+      "path": "contact-sheets/sheet-02.jpg",
+      "sha256": "8b184a23309ed4913877c9823fba66ee73b2fb85dbc57036d221cd468fe011d3"
+    },
+    {
+      "byteLength": 571589,
+      "path": "contact-sheets/sheet-03.jpg",
+      "sha256": "8eacc61103abc35ec3e187d90b2668cd5680f85fbaf0090798af954bff6a1f7a"
+    },
+    {
+      "byteLength": 621576,
+      "path": "contact-sheets/sheet-04.jpg",
+      "sha256": "20e9de8f362b8efb43de7f77d4c32afb54a0cb5cd617c56d7aa17c1ec32d6640"
+    },
+    {
+      "byteLength": 548101,
+      "path": "contact-sheets/sheet-05.jpg",
+      "sha256": "e9edb59e2fba66767d36f21bd56a36451d78b390be537dda755c50f0225929a6"
+    },
+    {
+      "byteLength": 635063,
+      "path": "contact-sheets/sheet-06.jpg",
+      "sha256": "0694edf5e180a5367413fc9544f98396248f092189e1de48f8c44c7ac9b6b8ed"
+    },
+    {
+      "byteLength": 602071,
+      "path": "contact-sheets/sheet-07.jpg",
+      "sha256": "c12ddf9365b7b2f85f36411b5d2449b51e6bd0a9168c6cb4f7541cb4f3bf0fea"
+    },
+    {
+      "byteLength": 609591,
+      "path": "contact-sheets/sheet-08.jpg",
+      "sha256": "1e6caaa0f0b568ea3204beb319829c6fd4b512be7436cdce5ba475cee687013a"
+    },
+    {
+      "byteLength": 639520,
+      "path": "contact-sheets/sheet-09.jpg",
+      "sha256": "f082f2c0bef1d04c188a20a0b39840919061f75637c2f7d5c64fe86eb8d2d836"
+    },
+    {
+      "byteLength": 674373,
+      "path": "contact-sheets/sheet-10.jpg",
+      "sha256": "7817a8c8e55380be307e7f8d5190fd1f105ba3ee8ae1fb873fae66db3f2dfa66"
+    },
+    {
+      "byteLength": 679063,
+      "path": "contact-sheets/sheet-11.jpg",
+      "sha256": "49e05e5a3fdd140f8cb8ff53d0f2b5e1cc8484bbda2c761e59c3eec68a10e5ee"
+    },
+    {
+      "byteLength": 637848,
+      "path": "contact-sheets/sheet-12.jpg",
+      "sha256": "1d4e4fc7a241a6958522e7a7ad06a6397283ec3f01aa220d4029c5b5b89f4280"
+    },
+    {
+      "byteLength": 640809,
+      "path": "contact-sheets/sheet-13.jpg",
+      "sha256": "4e081aaa43bdaee37401206b09094c6c39851dccfe163205b27cad35b4d4306a"
+    },
+    {
+      "byteLength": 514459,
+      "path": "contact-sheets/sheet-14.jpg",
+      "sha256": "4929058a18df0608c6b7e5e6648a3265470c2c5fbce8d4f717af05ad7da48d06"
+    },
+    {
+      "byteLength": 623763,
+      "path": "contact-sheets/sheet-15.jpg",
+      "sha256": "87e4046eba77e70ddd5610fecc17a19852c13a88714ba16e4e9e47e61e101dc9"
+    },
+    {
+      "byteLength": 609297,
+      "path": "contact-sheets/sheet-16.jpg",
+      "sha256": "b9144bf8695612436129a7f9513ffeb21d79419cd14c729f096696e7586d3804"
+    },
+    {
+      "byteLength": 651376,
+      "path": "contact-sheets/sheet-17.jpg",
+      "sha256": "46418ea2ba7ccf846f669f297f027f466ff262f62ef694c7279cd3f4be64812e"
+    },
+    {
+      "byteLength": 635741,
+      "path": "contact-sheets/sheet-18.jpg",
+      "sha256": "ec22e18be641b7a0ac37590d3fc49566788a5055aa5148dd4805a9eda9bbce5e"
+    },
+    {
+      "byteLength": 595592,
+      "path": "contact-sheets/sheet-19.jpg",
+      "sha256": "4174ab42c83b25330ea0c34b4d6000638376c52baf858f72c810eb792958bc28"
+    },
+    {
+      "byteLength": 598742,
+      "path": "contact-sheets/sheet-20.jpg",
+      "sha256": "bb52067f55417e863765c2aa4733ac5996bc8e787425f24aa6fc443893c9824c"
+    },
+    {
+      "byteLength": 593029,
+      "path": "contact-sheets/sheet-21.jpg",
+      "sha256": "bff4814b7323a1fde7a94fe06e04b8aa265b5bfbd537130f64b186b27a4709c2"
+    },
+    {
+      "byteLength": 571176,
+      "path": "contact-sheets/sheet-22.jpg",
+      "sha256": "0b16340e28e7b49d050e5b971cb692c7f1cd53c1adefb50018cdc57189986778"
+    },
+    {
+      "byteLength": 612373,
+      "path": "contact-sheets/sheet-23.jpg",
+      "sha256": "0dc1969ad071924a6244e7bcc113140ac73179ae435c79a2f81ee864e2a311ed"
+    },
+    {
+      "byteLength": 265136,
+      "path": "contact-sheets/sheet-24.jpg",
+      "sha256": "4faa22b699d8f10d0d7b19116058a3a273d70ad69bbbc053580269e00f3cbdb5"
+    }
+  ],
+  "sourceSnapshotSha256": "707a1acc8655663937c043143c24b062ee478d28d888ee029a2858da331fa446"
+}
