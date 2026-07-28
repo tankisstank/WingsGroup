@@ -38,12 +38,13 @@ pnpm run validate:wingsside:locales
 pnpm run build
 ```
 
-Add a targeted US-055 browser command and PostgreSQL migration/CRUD smoke when
-implementation exists.
+Targeted component coverage and a real PostgreSQL migration/CRUD smoke now
+exist. The five-locale Home → Tour Detail browser matrix remains a release
+gate after approved curation data is applied.
 
 ## Acceptance Evidence
 
-Implementation evidence in progress:
+Implementation evidence:
 
 - Payload schema exposes the four fixed roles, manual selection, governed rule
   selection, fallback, and localized presentation overrides.
@@ -51,8 +52,20 @@ Implementation evidence in progress:
   not treated as a production contract.
 - The editorial catalog already contains authored `vi`, `it`, `es`, and `pt`
   records for the four selected tours.
-- `pnpm exec tsc --noEmit`, unit tests (378) and component tests (50) pass.
+- The governed four-slot projection fails closed for invalid, unpublished,
+  cross-site or non-display-ready candidates.
+- `pnpm exec tsc --noEmit` passes.
+- Full unit suite: 60 files and 428 tests pass.
+- Full component suite: 14 files and 74 tests pass.
+- Empty-to-head PostgreSQL migration plus real Payload CRUD passed for EN and
+  VI after correcting the localized version-column migration contract.
 
-Release is intentionally held until the guarded PostgreSQL editorial rehearsal
-imports the four locale records and the Home curation apply/audit proves all
-five locale projections. The rehearsal refuses local SQLite by design.
+Release remains intentionally held until:
+
+- the pricing-disclosure localization blocker recorded in
+  `../go-live-audit-2026-07-28-implementation.md` is resolved;
+- the approved PostgreSQL localization and Home curation plans are applied and
+  audited;
+- exact 22/22 inventory and Home → Tour Detail behavior pass for EN, VI, IT, ES
+  and PT; and
+- production deployment/data-write approval is explicit.
