@@ -4,6 +4,7 @@ import {
   sign as signDigest,
   type KeyObject,
 } from 'node:crypto'
+import { writeFileSync } from 'node:fs'
 import { mkdtemp, rm, unlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -14,13 +15,9 @@ import {
   assertWingsSideTourMediaEvidenceReleaseGate,
   parseWingsSideTourMediaEvidenceCliArguments,
   produceWingsSideTourMediaEvidence,
-  resolveProtectedWingsSideEnvelopeSha,
-  resolveProtectedWingsSideManifestSha,
-  wingsSideTourMediaEnvelopeShaEnv,
   wingsSideTourMediaEvidenceSigningDigest,
-  wingsSideTourMediaManifestShaEnv,
-  wingsSideTourMediaPublicKeysJsonEnv,
-  wingsSideTourMediaPublicKeysShaEnv,
+  wingsSideTourMediaPolicyPathEnv,
+  wingsSideTourMediaPolicyShaEnv,
   wingsSideTourMediaSourceInventoryChecksum,
   type LocalMediaEvidenceSource,
   type LocalTourMediaEvidenceSource,
@@ -87,9 +84,13 @@ let sourceSha = ''
 let releaseSha = ''
 let releaseBinding: WingsSideTourMediaReleaseBinding
 let releaseEnvelope: WingsSideTourMediaReleaseEnvelope
-let trusted: Parameters<typeof produceWingsSideTourMediaEvidence>[0]['trusted']
-let priorPublicKeysJson: string | undefined
-let priorPublicKeysSha: string | undefined
+let trusted: WingsSideTourMediaReleaseBinding & {
+  envelopeSha256: string
+  manifestSha256: string
+}
+let publicKeys: Record<string, string> = {}
+let priorPolicyPath: string | undefined
+let priorPolicySha: string | undefined
 
 const writeJson = async (relativePath: string, value: unknown): Promise<string> => {
   const bytes = Buffer.from(JSON.stringify(value))
@@ -158,9 +159,24 @@ const rebuildEnvelope = (inventory: LocalTourMediaEvidenceSource[] = tours()): v
   trusted = {
     ...releaseBinding,
     envelopeSha256: wingsSideTourMediaAuditChecksum(releaseEnvelope),
-    envelopeSignerID: 'release-root-01',
     manifestSha256: wingsSideTourMediaManifestChecksum(canonical),
   }
+  const policy = {
+    publicKeys,
+    release: trusted,
+    schemaVersion: 1,
+    signerACL: {
+      'manual-review': ['reviewer-01'],
+      'ocr-attestation': ['ocr-attester-01'],
+      'release-envelope': ['release-root-01'],
+      'rights-approval': ['rights-reviewer-01'],
+    },
+  }
+  const policyBytes = Buffer.from(JSON.stringify(policy))
+  const policyPath = path.join(root, 'release-policy.json')
+  writeFileSync(policyPath, policyBytes)
+  process.env[wingsSideTourMediaPolicyPathEnv] = policyPath
+  process.env[wingsSideTourMediaPolicyShaEnv] = sha256(policyBytes)
 }
 
 const produce = (
@@ -172,23 +188,19 @@ const produce = (
     releaseBinding,
     releaseEnvelope,
     tours: tours(),
-    trusted,
     ...overrides,
   })
 
 beforeEach(async () => {
-  priorPublicKeysJson = process.env[wingsSideTourMediaPublicKeysJsonEnv]
-  priorPublicKeysSha = process.env[wingsSideTourMediaPublicKeysShaEnv]
+  priorPolicyPath = process.env[wingsSideTourMediaPolicyPathEnv]
+  priorPolicySha = process.env[wingsSideTourMediaPolicyShaEnv]
   privateKeys = new Map()
-  const publicKeys: Record<string, string> = {}
+  publicKeys = {}
   for (const signerID of signerIDs) {
     const { privateKey, publicKey } = generateKeyPairSync('ed25519')
     privateKeys.set(signerID, privateKey)
     publicKeys[signerID] = publicKey.export({ format: 'der', type: 'spki' }).toString('base64')
   }
-  const publicKeysJson = JSON.stringify(publicKeys)
-  process.env[wingsSideTourMediaPublicKeysJsonEnv] = publicKeysJson
-  process.env[wingsSideTourMediaPublicKeysShaEnv] = sha256(publicKeysJson)
   root = await mkdtemp(path.join(tmpdir(), 'wingsside-media-evidence-'))
   const assetBytes = Buffer.from('trusted-local-asset')
   await writeFile(path.join(root, 'asset.jpg'), assetBytes)
@@ -255,15 +267,15 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await rm(root, { force: true, recursive: true })
-  if (priorPublicKeysJson === undefined) {
-    delete process.env[wingsSideTourMediaPublicKeysJsonEnv]
+  if (priorPolicyPath === undefined) {
+    delete process.env[wingsSideTourMediaPolicyPathEnv]
   } else {
-    process.env[wingsSideTourMediaPublicKeysJsonEnv] = priorPublicKeysJson
+    process.env[wingsSideTourMediaPolicyPathEnv] = priorPolicyPath
   }
-  if (priorPublicKeysSha === undefined) {
-    delete process.env[wingsSideTourMediaPublicKeysShaEnv]
+  if (priorPolicySha === undefined) {
+    delete process.env[wingsSideTourMediaPolicyShaEnv]
   } else {
-    process.env[wingsSideTourMediaPublicKeysShaEnv] = priorPublicKeysSha
+    process.env[wingsSideTourMediaPolicyShaEnv] = priorPolicySha
   }
 })
 
@@ -277,7 +289,7 @@ describe('WingSide authenticated local media evidence producer', () => {
       first.bundle.aggregateChecksum,
     )
     expect(() =>
-      assertWingsSideTourMediaEvidenceReleaseGate(first, trusted.envelopeSha256),
+      assertWingsSideTourMediaEvidenceReleaseGate(first),
     ).not.toThrow()
   })
 
@@ -300,7 +312,7 @@ describe('WingSide authenticated local media evidence producer', () => {
       tours: tours(media()),
     } as unknown as Partial<Parameters<typeof produceWingsSideTourMediaEvidence>[0]>
     await expect(produce(obsoleteVerifierInjection)).rejects.toThrow(
-      'signature verification failed',
+      'producer input schema contains missing or unknown fields',
     )
   })
 
@@ -310,16 +322,64 @@ describe('WingSide authenticated local media evidence producer', () => {
       authenticated,
     ) as unknown as Parameters<typeof assertWingsSideTourMediaEvidenceReleaseGate>[0]
     expect(() =>
-      assertWingsSideTourMediaEvidenceReleaseGate(fabricated, trusted.envelopeSha256),
+      assertWingsSideTourMediaEvidenceReleaseGate(fabricated),
     ).toThrow('not created by the authenticated producer')
   })
 
-  it('rechecks the protected public-key policy at the release gate', async () => {
+  it('rechecks the protected release policy at the release gate', async () => {
     const authenticated = await produce()
-    process.env[wingsSideTourMediaPublicKeysShaEnv] = 'f'.repeat(64)
+    process.env[wingsSideTourMediaPolicyShaEnv] = 'f'.repeat(64)
     expect(() =>
-      assertWingsSideTourMediaEvidenceReleaseGate(authenticated, trusted.envelopeSha256),
-    ).toThrow('public-key policy checksum mismatch')
+      assertWingsSideTourMediaEvidenceReleaseGate(authenticated),
+    ).toThrow('release-policy checksum mismatch')
+  })
+
+  it('rejects direct trusted-policy injection and exposes no envelope authority argument', async () => {
+    expect(assertWingsSideTourMediaEvidenceReleaseGate.length).toBe(1)
+    await expect(
+      produce({
+        trusted: {
+          ...trusted,
+          envelopeSha256: 'f'.repeat(64),
+        },
+      } as unknown as Partial<Parameters<typeof produceWingsSideTourMediaEvidence>[0]>),
+    ).rejects.toThrow('producer input schema contains missing or unknown fields')
+  })
+
+  it('rejects one key assigned to every signer purpose', async () => {
+    const policyPath = process.env[wingsSideTourMediaPolicyPathEnv]!
+    const policy = JSON.parse(
+      await (await import('node:fs/promises')).readFile(policyPath, 'utf8'),
+    ) as {
+      signerACL: Record<string, string[]>
+    }
+    for (const purpose of Object.keys(policy.signerACL)) {
+      policy.signerACL[purpose] = ['release-root-01']
+    }
+    const bytes = Buffer.from(JSON.stringify(policy))
+    await writeFile(policyPath, bytes)
+    process.env[wingsSideTourMediaPolicyShaEnv] = sha256(bytes)
+    await expect(produce()).rejects.toThrow('distinct authorized role keys')
+  })
+
+  it('deep-freezes authenticated output and prevents accessor or post-gate mutation', async () => {
+    const authenticated = await produce()
+    expect(Object.isFrozen(authenticated)).toBe(true)
+    expect(Object.isFrozen(authenticated.bundle)).toBe(true)
+    expect(Object.isFrozen(authenticated.bundle.releaseEnvelope)).toBe(true)
+    expect(Object.isFrozen(authenticated.report)).toBe(true)
+    expect(() =>
+      Object.defineProperty(authenticated, 'report', {
+        get: () => authenticated.report,
+      }),
+    ).toThrow()
+    expect(() => {
+      authenticated.report.releaseEvidenceBinding!.siteCode = 'mutated-after-authentication'
+    }).toThrow()
+    expect(() => assertWingsSideTourMediaEvidenceReleaseGate(authenticated)).not.toThrow()
+    expect(() => {
+      authenticated.bundle.releaseBinding.siteCode = 'mutated-after-gate'
+    }).toThrow()
   })
 
   it('rejects source snapshot and release descriptor byte substitution', async () => {
@@ -405,7 +465,7 @@ describe('WingSide authenticated local media evidence producer', () => {
     rebuildEnvelope(inventory)
     const result = await produce({ tours: inventory })
     expect(() =>
-      assertWingsSideTourMediaEvidenceReleaseGate(result, trusted.envelopeSha256),
+      assertWingsSideTourMediaEvidenceReleaseGate(result),
     ).not.toThrow()
   })
 
@@ -498,15 +558,12 @@ describe('WingSide authenticated local media evidence producer', () => {
     ).rejects.toThrow(/path changed|identity changed/)
   })
 
-  it('rejects report replay or envelope substitution at the combined gate', async () => {
+  it('rejects protected-policy substitution at the combined gate', async () => {
     const result = await produce()
-    expect(() =>
-      assertWingsSideTourMediaEvidenceReleaseGate(result, 'f'.repeat(64)),
-    ).toThrow(/authenticated trust policy binding/)
-    result.report.releaseEvidenceBinding!.siteCode = 'other-site'
-    expect(() =>
-      assertWingsSideTourMediaEvidenceReleaseGate(result, trusted.envelopeSha256),
-    ).toThrow(/combined release binding|integrity checksum/)
+    process.env[wingsSideTourMediaPolicyShaEnv] = 'f'.repeat(64)
+    expect(() => assertWingsSideTourMediaEvidenceReleaseGate(result)).toThrow(
+      /release-policy checksum mismatch/,
+    )
   })
 
   it('rejects a reordered media-to-tour field mapping not covered by the signed inventory', async () => {
@@ -521,19 +578,12 @@ describe('WingSide authenticated local media evidence producer', () => {
     )
   })
 
-  it('requires protected manifest/envelope SHA and rejects explicit conflicts', () => {
-    expect(() => resolveProtectedWingsSideManifestSha({})).toThrow(
-      wingsSideTourMediaManifestShaEnv,
-    )
-    expect(() => resolveProtectedWingsSideEnvelopeSha({})).toThrow(
-      wingsSideTourMediaEnvelopeShaEnv,
-    )
-    expect(() =>
-      resolveProtectedWingsSideEnvelopeSha(
-        { [wingsSideTourMediaEnvelopeShaEnv]: 'a'.repeat(64) },
-        'b'.repeat(64),
-      ),
-    ).toThrow('protected release envelope checksum conflict')
+  it('requires the protected release-policy path and byte checksum', async () => {
+    delete process.env[wingsSideTourMediaPolicyPathEnv]
+    await expect(produce()).rejects.toThrow(wingsSideTourMediaPolicyPathEnv)
+    rebuildEnvelope()
+    process.env[wingsSideTourMediaPolicyShaEnv] = 'f'.repeat(64)
+    await expect(produce()).rejects.toThrow('release-policy checksum mismatch')
   })
 
   it('rejects duplicate, unknown, malformed, and absolute CLI inputs', () => {
@@ -544,6 +594,13 @@ describe('WingSide authenticated local media evidence producer', () => {
         '--approved-root=two',
       ]),
     ).toThrow('Duplicate CLI flag')
+    expect(() =>
+      parseWingsSideTourMediaEvidenceCliArguments([
+        'source.json',
+        '--approved-root=one',
+        '--envelope-sha256=' + 'a'.repeat(64),
+      ]),
+    ).toThrow('Unknown or malformed CLI flag')
     expect(() =>
       parseWingsSideTourMediaEvidenceCliArguments([
         'source.json',

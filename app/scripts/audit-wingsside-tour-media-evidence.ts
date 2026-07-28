@@ -12,12 +12,9 @@ import {
   assertWingsSideTourMediaEvidenceReleaseGate,
   parseWingsSideTourMediaEvidenceCliArguments,
   produceWingsSideTourMediaEvidence,
-  resolveProtectedWingsSideEnvelopeSha,
-  resolveProtectedWingsSideManifestSha,
   type LocalTourMediaEvidenceSource,
   type WingsSideTourMediaReleaseBinding,
   type WingsSideTourMediaReleaseEnvelope,
-  type WingsSideTourMediaTrustedExpectation,
 } from './lib/wingsSideTourMediaEvidence'
 import type { WingsSideTourMediaManifest } from './lib/wingsSideTourMediaAudit'
 
@@ -25,15 +22,7 @@ const {
   approvedRoot,
   inputRelativePath,
   releaseGate,
-  requestedEnvelopeSha,
-  requestedManifestSha,
 } = parseWingsSideTourMediaEvidenceCliArguments(process.argv.slice(2))
-
-const requiredEnvironment = (name: string): string => {
-  const value = process.env[name]?.trim()
-  if (!value) throw new Error(`Protected environment ${name} is required`)
-  return value
-}
 
 const root = await realpath(path.resolve(approvedRoot))
 if (!(await stat(root)).isDirectory()) {
@@ -103,41 +92,15 @@ if (
   )
 }
 
-const trusted: WingsSideTourMediaTrustedExpectation = {
-  envelopeSha256: resolveProtectedWingsSideEnvelopeSha(
-    process.env,
-    requestedEnvelopeSha,
-  ),
-  envelopeSignerID: requiredEnvironment('WINGSSIDE_EVIDENCE_ENVELOPE_SIGNER_ID'),
-  manifestSha256: resolveProtectedWingsSideManifestSha(
-    process.env,
-    requestedManifestSha,
-  ),
-  releaseCommitSha: requiredEnvironment('WINGSTRAVEL_EXPECTED_RELEASE_SHA'),
-  siteCode: requiredEnvironment('WINGSSIDE_EXPECTED_SITE_CODE'),
-  source: {
-    kind: requiredEnvironment('WINGSSIDE_EXPECTED_SOURCE_KIND') as
-      | 'database-snapshot'
-      | 'source-inventory',
-    sha256: requiredEnvironment('WINGSSIDE_EXPECTED_SOURCE_SHA256'),
-  },
-}
-if (!['database-snapshot', 'source-inventory'].includes(trusted.source.kind)) {
-  throw new Error(
-    'Protected environment WINGSSIDE_EXPECTED_SOURCE_KIND must be database-snapshot or source-inventory',
-  )
-}
-
 const result = await produceWingsSideTourMediaEvidence({
   approvedRoot: root,
   manifest: parsed.manifest,
   releaseBinding: parsed.releaseBinding,
   releaseEnvelope: parsed.releaseEnvelope,
   tours: parsed.tours,
-  trusted,
 })
 if (releaseGate) {
-  assertWingsSideTourMediaEvidenceReleaseGate(result, trusted.envelopeSha256)
+  assertWingsSideTourMediaEvidenceReleaseGate(result)
 }
 
 process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
