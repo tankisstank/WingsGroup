@@ -1,0 +1,584 @@
+{
+  "version": 1,
+  "decision": "D1-A",
+  "sourceLocale": "en",
+  "locales": ["en", "vi", "it", "es", "pt"],
+  "expectedRowCount": 38,
+  "policy": {
+    "disposition": "preserve-as-explicit-exclusion",
+    "rationale": "Each source row represents a possible amount outside the base package price. The row is retained under its stable ID and presented as an exclusion with a pre-booking confirmation commitment.",
+    "ptProfile": "pt-PT"
+  },
+  "rows": [
+    {
+      "slug": "a-glimpse-of-central-vietnam-5-days",
+      "sourceRowID": "6a5a42d0e9a62d80e46ba98f",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory dinner at the accommodation are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú; mức phí áp dụng sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y la cena obligatoria en el alojamiento, si corresponde, no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e o jantar obrigatório no alojamento, quando aplicável, não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "a-glimpse-of-central-vietnam-5-days",
+      "sourceRowID": "6a5a42d0e9a62d80e46ba999",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+      "sourceRowID": "6a5a42d2e9a62d80e46ba9ab",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+      "sourceRowID": "6a5a42d2e9a62d80e46ba9b4",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days",
+      "sourceRowID": "6a5a42d3e9a62d80e46ba9c3",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days",
+      "sourceRowID": "6a5a42d3e9a62d80e46ba9cb",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "best-of-vietnam-and-cambodia-15-days",
+      "sourceRowID": "6a5a42d5e9a62d80e46ba9e6",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the accommodation (if any)",
+      "sourceLabelChecksum": "82c40ea972bd24981ae98d371ec206155fce2fc56036e4d83d08ec85df7268b2",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory dinner at the accommodation are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el alojamiento no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no alojamento não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "best-of-vietnam-and-cambodia-15-days",
+      "sourceRowID": "6a5a42d5e9a62d80e46ba9ec",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "central-vietnam-adventure-4-days",
+      "sourceRowID": "6a5a42d7e9a62d80e46ba9fa",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "central-vietnam-adventure-4-days",
+      "sourceRowID": "6a5a42d7e9a62d80e46baa02",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days",
+      "sourceRowID": "6a5a42d8e9a62d80e46baa12",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days",
+      "sourceRowID": "6a5a42d8e9a62d80e46baa1a",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "discover-halong-bay-ninh-binh-package-2-days",
+      "sourceRowID": "6a5a42dae9a62d80e46baa2e",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+      "sourceRowID": "6a5a42dbe9a62d80e46baa45",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+      "sourceRowID": "6a5a42dbe9a62d80e46baa4e",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "hoi-an-surrounding-and-beach-break-7-days",
+      "sourceRowID": "6a5a42dce9a62d80e46baa5e",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "hoi-an-surrounding-and-beach-break-7-days",
+      "sourceRowID": "6a5a42dce9a62d80e46baa66",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "luxury-mekong-delta-speedboat-tour-full-day",
+      "sourceRowID": "6a5a42dee9a62d80e46baa74",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "mekong-delta-gateway-3-days",
+      "sourceRowID": "6a5a42dfe9a62d80e46baa86",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "mekong-delta-with-floating-market-2-days",
+      "sourceRowID": "6a5a42e0e9a62d80e46baa98",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "ninh-binh-hoa-lu-trang-an-full-day-private-tour-from-hanoi",
+      "sourceRowID": "6a5a42e2e9a62d80e46baab7",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi",
+      "sourceRowID": "6a5a42e1e9a62d80e46baaa8",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "northern-vietnam-highlights-for-family-6-days",
+      "sourceRowID": "6a5a42e2e9a62d80e46baac7",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "northern-vietnam-highlights-for-family-6-days",
+      "sourceRowID": "6a5a42e2e9a62d80e46baacf",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "northern-vietnam-soft-adventure-8-days",
+      "sourceRowID": "6a5a42e4e9a62d80e46baae1",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory dinner at the accommodation are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú; mức phí áp dụng sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y la cena obligatoria en el alojamiento, si corresponde, no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e o jantar obrigatório no alojamento, quando aplicável, não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "northern-vietnam-soft-adventure-8-days",
+      "sourceRowID": "6a5a42e4e9a62d80e46baaea",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
+      "sourceRowID": "6a5a42e5e9a62d80e46baaf9",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
+      "sourceRowID": "6a5a42e5e9a62d80e46bab01",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "sapa-trekking-ethnic-market-3-days",
+      "sourceRowID": "6a5a42e6e9a62d80e46bab10",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory dinner at the accommodation are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú; mức phí áp dụng sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y la cena obligatoria en el alojamiento, si corresponde, no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e o jantar obrigatório no alojamento, quando aplicável, não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "sapa-trekking-ethnic-market-3-days",
+      "sourceRowID": "6a5a42e6e9a62d80e46bab17",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "southern-beauty-beach-relaxation-8-days",
+      "sourceRowID": "6a5a42e8e9a62d80e46bab28",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory dinner at the accommodation are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú; mức phí áp dụng sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y la cena obligatoria en el alojamiento, si corresponde, no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e o jantar obrigatório no alojamento, quando aplicável, não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "southern-beauty-beach-relaxation-8-days",
+      "sourceRowID": "6a5a42e8e9a62d80e46bab31",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "vietnam-at-a-glance-7-days",
+      "sourceRowID": "6a5a42ece9a62d80e46bab79",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "vietnam-at-a-glance-7-days",
+      "sourceRowID": "6a5a42ece9a62d80e46bab81",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days",
+      "sourceRowID": "6a5a42e9e9a62d80e46bab43",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days",
+      "sourceRowID": "6a5a42e9e9a62d80e46bab4c",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "vietnam-memorable-honeymoon-trip-8-days",
+      "sourceRowID": "6a5a42eae9a62d80e46bab5f",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "Peak-season supplements and any compulsory hotel dinner are not included; we will confirm any applicable amount before booking.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng; mức phí sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "I supplementi di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi; ogni importo applicabile sarà confermato prima della prenotazione.",
+        "es": "Los suplementos de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos; confirmaremos cualquier importe antes de la reserva.",
+        "pt": "Os suplementos de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos; qualquer valor será confirmado antes da reserva."
+      }
+    },
+    {
+      "slug": "vietnam-memorable-honeymoon-trip-8-days",
+      "sourceRowID": "6a5a42eae9a62d80e46bab67",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply only if the reference fuel price rises by more than 15%; we will confirm any adjustment before booking.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này chỉ áp dụng khi giá nhiên liệu tham chiếu tăng trên 15% và sẽ được xác nhận trước khi đặt dịch vụ.",
+        "it": "L'eventuale supplemento carburante non è incluso e si applica solo se il prezzo di riferimento aumenta di oltre il 15%; l'adeguamento sarà confermato prima della prenotazione.",
+        "es": "El suplemento de combustible no está incluido y solo se aplicará si el precio de referencia aumenta más de un 15 %; confirmaremos cualquier ajuste antes de la reserva.",
+        "pt": "O suplemento de combustível não está incluído e só será aplicado se o preço de referência aumentar mais de 15%; qualquer ajuste será confirmado antes da reserva."
+      }
+    }
+  ]
+}
