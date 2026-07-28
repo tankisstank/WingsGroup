@@ -4,12 +4,11 @@ import fs from 'node:fs'
 import { pathToFileURL } from 'node:url'
 
 import {
-  assertWingsSideEnglishEditorialRuntimeTarget,
-  transitionWingsSideTourEnglishEditorialRuntime,
-  verifyWingsSideTourEnglishEditorialRuntime,
+  executeWingsSideEnglishEditorialGuardedRuntime,
+  issueWingsSideEnglishEditorialGuardedCapabilityFromProtectedEnvironment,
   loadFrozenWingsSideEnglishEditorialArtifacts,
-  type WingsSideEnglishEditorialAttestedRuntimeAdapter,
   type WingsSideEnglishEditorialExpectedRuntimeTarget,
+  type WingsSideTourEnglishEditorialRuntimeAdapter,
 } from './lib/wingsSideTourEnglishEditorialRuntime'
 import { assertWingsSideEditorialProductionWriteGuard } from './lib/wingsSideReleaseWriteGuard'
 import type { WingsSideEditorialProductionWriteGuardArgs } from './lib/wingsSideReleaseWriteGuard'
@@ -21,23 +20,77 @@ type ArtifactIO = Pick<typeof fs, 'readFileSync'>
 const applyConfirmation = 'CONFIRM_WINGSSIDE_ENGLISH_EDITORIAL_PRODUCTION_WRITE'
 const rollbackConfirmation = 'CONFIRM_WINGSSIDE_ENGLISH_EDITORIAL_PRODUCTION_ROLLBACK'
 
-const argumentValue = (argv: string[], name: string): string | undefined => {
-  const inline = argv.find((argument) => argument.startsWith(`${name}=`))
-  if (inline) return inline.slice(name.length + 1)
-  const index = argv.indexOf(name)
-  return index >= 0 ? argv[index + 1] : undefined
+const allowedFlags = new Set([
+  '--admin-email',
+  '--backup',
+  '--backup-sha256',
+  '--config',
+  '--config-sha256',
+  '--confirm',
+  '--confirm-production',
+  '--current-database',
+  '--database-identity-sha256',
+  '--environment-kind',
+  '--manifest',
+  '--manifest-sha256',
+  '--phase',
+  '--plan',
+  '--plan-sha256',
+  '--release-sha',
+  '--restore-evidence',
+  '--restore-evidence-sha256',
+  '--rollback-release',
+  '--site-code',
+  '--source-kind',
+  '--source-sha256',
+  '--target-key-id',
+  '--target-public-key-spki-base64',
+])
+
+export const parseWingsSideEnglishEditorialProductionArguments = (argv: string[]) => {
+  const values = new Map<string, string>()
+  const phases: Phase[] = []
+  for (const argument of argv) {
+    if (!argument.startsWith('--')) {
+      if (!(['apply', 'rollback', 'verify'] as const).includes(argument as Phase)) {
+        throw new Error(`Unknown English editorial CLI argument: ${argument}`)
+      }
+      phases.push(argument as Phase)
+      continue
+    }
+    const separator = argument.indexOf('=')
+    const name = separator === -1 ? argument : argument.slice(0, separator)
+    if (!allowedFlags.has(name) || separator === -1) {
+      throw new Error(`Unknown or malformed English editorial CLI flag: ${argument}`)
+    }
+    if (values.has(name)) throw new Error(`Duplicate English editorial CLI flag: ${name}`)
+    const value = argument.slice(separator + 1).trim()
+    if (!value) throw new Error(`English editorial CLI flag ${name} requires a value`)
+    values.set(name, value)
+  }
+  const inlinePhase = values.get('--phase')
+  if (inlinePhase) {
+    if (!(['apply', 'rollback', 'verify'] as const).includes(inlinePhase as Phase)) {
+      throw new Error('Choose one English editorial phase: apply, rollback, or verify')
+    }
+    phases.push(inlinePhase as Phase)
+  }
+  if (phases.length !== 1) {
+    throw new Error('Choose exactly one English editorial phase: apply, rollback, or verify')
+  }
+  return { phase: phases[0]!, values }
 }
 
 const protectedValue = ({
-  argv,
+  values,
   envValue,
   name,
 }: {
-  argv: string[]
+  values: ReadonlyMap<string, string>
   envValue: string | undefined
   name: string
 }) => {
-  const cliValue = argumentValue(argv, name)
+  const cliValue = values.get(name)
   if (!envValue) {
     throw new Error(`Protected English editorial environment value is required: ${name}`)
   }
@@ -47,87 +100,97 @@ const protectedValue = ({
   return envValue
 }
 
-const phaseFrom = (argv: string[]): Phase => {
-  const phase = argumentValue(argv, '--phase') || argv.find((value) => !value.startsWith('--'))
-  if (!phase || !(['apply', 'rollback', 'verify'] as const).includes(phase as Phase)) {
-    throw new Error('Choose one English editorial phase: apply, rollback, or verify')
-  }
-  return phase as Phase
-}
-
 export const resolveWingsSideEnglishEditorialProtectedInputs = ({
   argv,
   env = process.env,
 }: {
   argv: string[]
   env?: ReleaseEnvironment
-}) => ({
+}) => {
+  const { values } = parseWingsSideEnglishEditorialProductionArguments(argv)
+  return {
   adminEmail: protectedValue({
-    argv,
+    values,
     envValue: env.ADMIN_EMAIL,
     name: '--admin-email',
   }),
   configPath: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSSIDE_EN_EDITORIAL_CONFIG_PATH,
     name: '--config',
   }),
   configSha256: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256,
     name: '--config-sha256',
   }),
+  currentDatabase: protectedValue({
+    values,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_CURRENT_DATABASE,
+    name: '--current-database',
+  }),
   databaseIdentitySha256: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256,
     name: '--database-identity-sha256',
   }),
   environmentKind: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSSIDE_EN_EDITORIAL_ENVIRONMENT_KIND,
     name: '--environment-kind',
   }),
   manifestPath: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSSIDE_EN_EDITORIAL_MANIFEST_PATH,
     name: '--manifest',
   }),
   manifestSha256: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSSIDE_EN_EDITORIAL_MANIFEST_SHA256,
     name: '--manifest-sha256',
   }),
   planPath: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSSIDE_EN_EDITORIAL_PLAN_PATH,
     name: '--plan',
   }),
   planSha256: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256,
     name: '--plan-sha256',
   }),
   releaseSha: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSTRAVEL_RELEASE_SHA,
     name: '--release-sha',
   }),
   siteCode: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSSIDE_EN_EDITORIAL_SITE_CODE,
     name: '--site-code',
   }),
   sourceKind: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSSIDE_EN_EDITORIAL_SOURCE_KIND,
     name: '--source-kind',
   }),
   sourceSha256: protectedValue({
-    argv,
+    values,
     envValue: env.WINGSSIDE_EN_EDITORIAL_SOURCE_SHA256,
     name: '--source-sha256',
   }),
-})
+  targetKeyID: protectedValue({
+    values,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_TARGET_KEY_ID,
+    name: '--target-key-id',
+  }),
+  targetPublicKeySpkiBase64: protectedValue({
+    values,
+    envValue: env.WINGSSIDE_EN_EDITORIAL_TARGET_PUBLIC_KEY_SPKI_BASE64,
+    name: '--target-public-key-spki-base64',
+  }),
+  }
+}
 
 export const preflightWingsSideEnglishEditorialProductionCLI = ({
   argv,
@@ -138,12 +201,15 @@ export const preflightWingsSideEnglishEditorialProductionCLI = ({
   env?: ReleaseEnvironment
   io?: ArtifactIO
 }) => {
-  const phase = phaseFrom(argv)
+  const parsedArguments = parseWingsSideEnglishEditorialProductionArguments(argv)
+  const phase = parsedArguments.phase
+  const { values } = parsedArguments
   const protectedInputs = resolveWingsSideEnglishEditorialProtectedInputs({ argv, env })
   const {
     adminEmail,
     configPath,
     configSha256,
+    currentDatabase,
     databaseIdentitySha256,
     environmentKind,
     manifestPath,
@@ -154,11 +220,14 @@ export const preflightWingsSideEnglishEditorialProductionCLI = ({
     siteCode,
     sourceKind,
     sourceSha256,
+    targetKeyID: _targetKeyID,
+    targetPublicKeySpkiBase64: _targetPublicKeySpkiBase64,
   } = protectedInputs
   if (siteCode !== 'wing-side') {
     throw new Error('English editorial production requires protected site code wing-side')
   }
   if (
+    !/^[A-Za-z0-9_-]+$/u.test(currentDatabase) ||
     !/^[a-f0-9]{64}$/u.test(databaseIdentitySha256) ||
     environmentKind !== 'production' ||
     !['database-snapshot', 'source-inventory'].includes(sourceKind) ||
@@ -189,25 +258,26 @@ export const preflightWingsSideEnglishEditorialProductionCLI = ({
   if (phase === 'apply' || phase === 'rollback') {
     const expectedConfirmation =
       phase === 'apply' ? applyConfirmation : rollbackConfirmation
-    if (argumentValue(argv, '--confirm') !== expectedConfirmation) {
+    if (values.get('--confirm') !== expectedConfirmation) {
       throw new Error(`${phase} requires --confirm=${expectedConfirmation}`)
     }
     mutationGuardArgs = {
       adminEmail,
-      backupPath: argumentValue(argv, '--backup'),
-      backupSha256: argumentValue(argv, '--backup-sha256'),
+      backupPath: values.get('--backup'),
+      backupSha256: values.get('--backup-sha256'),
       planSha256: artifacts.planArtifactSha256,
       production: true,
-      productionConfirm: argumentValue(argv, '--confirm-production'),
+      productionConfirm: values.get('--confirm-production'),
       releaseSha,
       releaseSourceSha: artifacts.plan.releaseSha,
-      restoreEvidencePath: argumentValue(argv, '--restore-evidence'),
-      restoreEvidenceSha256: argumentValue(argv, '--restore-evidence-sha256'),
-      rollbackRelease: argumentValue(argv, '--rollback-release'),
+      restoreEvidencePath: values.get('--restore-evidence'),
+      restoreEvidenceSha256: values.get('--restore-evidence-sha256'),
+      rollbackRelease: values.get('--rollback-release'),
     }
     assertWingsSideEditorialProductionWriteGuard(mutationGuardArgs, env)
   }
   const expectedTarget: WingsSideEnglishEditorialExpectedRuntimeTarget = Object.freeze({
+    currentDatabase,
     databaseIdentitySha256,
     environmentKind,
     releaseSha,
@@ -228,50 +298,34 @@ export const runWingsSideEnglishEditorialProductionCLI = async <Transaction>({
     artifacts: ReturnType<typeof loadFrozenWingsSideEnglishEditorialArtifacts>
     phase: Phase
   }) =>
-    | Promise<WingsSideEnglishEditorialAttestedRuntimeAdapter<Transaction>>
-    | WingsSideEnglishEditorialAttestedRuntimeAdapter<Transaction>
+    | Promise<WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>>
+    | WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
   argv: string[]
   env?: ReleaseEnvironment
   io?: ArtifactIO
 }) => {
+  if (env !== process.env) {
+    throw new Error('English editorial production verifier environment is non-injectable')
+  }
   const { artifacts, expectedTarget, mutationGuardArgs, phase } =
     preflightWingsSideEnglishEditorialProductionCLI({
     argv,
     env,
     io,
   })
-  const bundle = await adapterFactory({ artifacts, phase })
-  const adapter = bundle?.adapter
-  const attestation = bundle?.attestation
-  if (!adapter || !attestation) {
-    throw new Error('English editorial adapter factory must return an attested adapter bundle')
-  }
-  assertWingsSideEnglishEditorialRuntimeTarget({
+  const capability = issueWingsSideEnglishEditorialGuardedCapabilityFromProtectedEnvironment({
     artifacts,
-    attestation,
     expected: expectedTarget,
+    mutationGuardArgs,
+    phase,
   })
-  if (phase === 'verify') {
-    return verifyWingsSideTourEnglishEditorialRuntime({
-      adapter,
-      config: artifacts.config,
-      expectedState: 'after',
-      manifest: artifacts.manifest,
-      plan: artifacts.plan,
-    })
-  }
-  assertWingsSideEditorialProductionWriteGuard(mutationGuardArgs!, env)
-  assertWingsSideEnglishEditorialRuntimeTarget({
-    artifacts,
-    attestation,
-    expected: expectedTarget,
-  })
-  return transitionWingsSideTourEnglishEditorialRuntime({
+  const adapter = await adapterFactory({ artifacts, phase })
+  if (!adapter) throw new Error('English editorial adapter factory must return an adapter')
+  if (phase !== 'verify') assertWingsSideEditorialProductionWriteGuard(mutationGuardArgs!, env)
+  return executeWingsSideEnglishEditorialGuardedRuntime({
     adapter,
-    config: artifacts.config,
-    direction: phase,
-    manifest: artifacts.manifest,
-    plan: artifacts.plan,
+    capability,
+    phase,
   })
 }
 

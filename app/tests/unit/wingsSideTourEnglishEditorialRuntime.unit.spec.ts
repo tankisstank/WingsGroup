@@ -1,8 +1,23 @@
-import { createHash } from 'node:crypto'
+import { createHash, generateKeyPairSync, sign } from 'node:crypto'
 
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+
+vi.mock('../../scripts/lib/wingsSideReleaseWriteGuard', async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import('../../scripts/lib/wingsSideReleaseWriteGuard')>()
+  return {
+    ...original,
+    assertWingsSideEditorialProductionWriteGuard: (...args: Parameters<
+      typeof original.assertWingsSideEditorialProductionWriteGuard
+    >) => {
+      if (process.env.WINGSSIDE_EN_EDITORIAL_TEST_GUARD === 'true') return
+      return original.assertWingsSideEditorialProductionWriteGuard(...args)
+    },
+  }
+})
 
 import {
+  parseWingsSideEnglishEditorialProductionArguments,
   preflightWingsSideEnglishEditorialProductionCLI,
   resolveWingsSideEnglishEditorialProtectedInputs,
   runWingsSideEnglishEditorialProductionCLI,
@@ -17,12 +32,15 @@ import {
   type WingsSideTourEnglishEditorialDocument,
 } from '../../scripts/lib/wingsSideTourEnglishEditorial'
 import {
-  createWingsSideEnglishEditorialRuntimeTargetAttestation,
+  executeWingsSideEnglishEditorialGuardedRuntime,
+  issueWingsSideEnglishEditorialGuardedCapabilityFromProtectedEnvironment,
+  loadFrozenWingsSideEnglishEditorialArtifacts,
   readFrozenWingsSideEnglishEditorialArtifact,
-  transitionWingsSideTourEnglishEditorialRuntime,
-  verifyWingsSideTourEnglishEditorialRuntime,
   WingsSideEnglishEditorialAmbiguousCommitError,
-  wingsSideEnglishEditorialRuntimeGovernanceChecksum,
+  wingsSideEnglishEditorialTargetProofSigningDigest,
+  type WingsSideEnglishEditorialSignedTargetProof,
+  type WingsSideEnglishEditorialTargetChallenge,
+  type WingsSideEnglishEditorialRuntimeTargetAttestation,
   type WingsSideTourEnglishEditorialRuntimeAdapter,
   type WingsSideTourEnglishEditorialRuntimeRow,
 } from '../../scripts/lib/wingsSideTourEnglishEditorialRuntime'
@@ -33,6 +51,32 @@ const slugs = Array.from({ length: 22 }, (_, index) => `tour-${index + 1}`)
 const releaseSha = 'a'.repeat(40)
 const databaseIdentitySha256 = 'd'.repeat(64)
 const sourceSnapshotSha256 = 'e'.repeat(64)
+const currentDatabase = 'wings_travel'
+const targetKeyID = 'runtime-target-key-01'
+const targetKeys = generateKeyPairSync('ed25519')
+const targetPublicKeySpkiBase64 = targetKeys.publicKey
+  .export({ format: 'der', type: 'spki' })
+  .toString('base64')
+const transactionSessionID = 'postgres-session-0001'
+
+const signTargetProof = (
+  payload: WingsSideEnglishEditorialRuntimeTargetAttestation,
+): WingsSideEnglishEditorialSignedTargetProof => ({
+  payload,
+  signature: {
+    algorithm: 'ed25519',
+    keyID: targetKeyID,
+    valueBase64: sign(
+      null,
+      Buffer.from(wingsSideEnglishEditorialTargetProofSigningDigest(payload), 'utf8'),
+      targetKeys.privateKey,
+    ).toString('base64'),
+  },
+})
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+})
 
 const config: WingsSideTourEnglishEditorialConfig = {
   allCapsAllowlist: ['UNESCO', 'IATA'],
@@ -54,6 +98,104 @@ const source = (slug: string): WingsSideTourEnglishEditorialDocument => ({
   summary: `Original summary for ${slug}.`,
   title: `Original ${slug}`,
 })
+
+const artifactsByPlan = new WeakMap<object, ReturnType<typeof loadArtifactsFixture>>()
+
+function loadArtifactsFixture({
+  manifest,
+  plan,
+}: {
+  manifest: ReturnType<typeof buildWingsSideTourEnglishEditorialManifest>
+  plan: ReturnType<typeof buildWingsSideTourEnglishEditorialPlan>
+}) {
+  const configGovernance = buildWingsSideTourEnglishEditorialConfigArtifact(config)
+  const files = {
+    config: JSON.stringify(configGovernance),
+    manifest: JSON.stringify(manifest),
+    plan: JSON.stringify(plan),
+  }
+  return loadFrozenWingsSideEnglishEditorialArtifacts({
+    config: { path: 'config', sha256: sha256(files.config) },
+    io: {
+      readFileSync: ((filePath: string) =>
+        Buffer.from(files[filePath as keyof typeof files])) as typeof import('node:fs').readFileSync,
+    },
+    manifest: { path: 'manifest', sha256: sha256(files.manifest) },
+    plan: { path: 'plan', sha256: sha256(files.plan) },
+  })
+}
+
+const stubProtectedTargetEnvironment = (artifacts: ReturnType<typeof loadArtifactsFixture>) => {
+  vi.stubEnv('WINGSSIDE_EN_EDITORIAL_CURRENT_DATABASE', currentDatabase)
+  vi.stubEnv('WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256', databaseIdentitySha256)
+  vi.stubEnv('WINGSSIDE_EN_EDITORIAL_ENVIRONMENT_KIND', 'production')
+  vi.stubEnv('WINGSSIDE_EN_EDITORIAL_SITE_CODE', 'wing-side')
+  vi.stubEnv('WINGSSIDE_EN_EDITORIAL_SOURCE_KIND', 'database-snapshot')
+  vi.stubEnv('WINGSSIDE_EN_EDITORIAL_SOURCE_SHA256', sourceSnapshotSha256)
+  vi.stubEnv('WINGSSIDE_EN_EDITORIAL_TARGET_KEY_ID', targetKeyID)
+  vi.stubEnv('WINGSSIDE_EN_EDITORIAL_TARGET_PUBLIC_KEY_SPKI_BASE64', targetPublicKeySpkiBase64)
+  vi.stubEnv('WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256', artifacts.configArtifactSha256)
+  vi.stubEnv('WINGSSIDE_EN_EDITORIAL_MANIFEST_SHA256', artifacts.manifestArtifactSha256)
+  vi.stubEnv('WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256', artifacts.planArtifactSha256)
+  vi.stubEnv('WINGSTRAVEL_RELEASE_SHA', releaseSha)
+}
+
+const issueCapabilityForPlan = (
+  plan: object,
+  phase: 'apply' | 'rollback' | 'verify',
+) => {
+  const artifacts = artifactsByPlan.get(plan)
+  if (!artifacts) throw new Error('missing fixture artifacts')
+  stubProtectedTargetEnvironment(artifacts)
+  if (phase !== 'verify') vi.stubEnv('WINGSSIDE_EN_EDITORIAL_TEST_GUARD', 'true')
+  return issueWingsSideEnglishEditorialGuardedCapabilityFromProtectedEnvironment({
+    artifacts,
+    expected: {
+      currentDatabase,
+      databaseIdentitySha256,
+      environmentKind: 'production',
+      releaseSha,
+      siteCode: 'wing-side',
+      sourceKind: 'database-snapshot',
+      sourceSha256: sourceSnapshotSha256,
+    },
+    mutationGuardArgs: phase === 'verify' ? null : ({} as never),
+    phase,
+  })
+}
+
+const transitionWingsSideTourEnglishEditorialRuntime = <Transaction>({
+  adapter,
+  direction,
+  plan,
+}: {
+  adapter: WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
+  config: unknown
+  direction: 'apply' | 'rollback'
+  manifest: unknown
+  plan: object
+}) =>
+  executeWingsSideEnglishEditorialGuardedRuntime({
+    adapter,
+    capability: issueCapabilityForPlan(plan, direction),
+    phase: direction,
+  })
+
+const verifyWingsSideTourEnglishEditorialRuntime = <Transaction>({
+  adapter,
+  plan,
+}: {
+  adapter: WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
+  config: unknown
+  expectedState: 'after' | 'before'
+  manifest: unknown
+  plan: object
+}) =>
+  executeWingsSideEnglishEditorialGuardedRuntime({
+    adapter,
+    capability: issueCapabilityForPlan(plan, 'verify'),
+    phase: 'verify',
+  })
 
 const fixture = () => {
   const sourceTours = slugs.map(source)
@@ -86,18 +228,25 @@ const fixture = () => {
     siteCode: 'wing-side',
     tourID: index + 1,
   }))
-  return { config, manifest, plan, rows }
+  const artifacts = loadArtifactsFixture({ manifest, plan })
+  artifactsByPlan.set(plan, artifacts)
+  return { artifacts, config, manifest, plan, rows }
 }
 
 const adapterFixture = (
   initial: WingsSideTourEnglishEditorialRuntimeRow[],
   failAtWrite?: number,
   failures: { commit?: Error; kill?: Error } = {},
+  mutateProof?: (
+    proof: WingsSideEnglishEditorialSignedTargetProof,
+    challenge: WingsSideEnglishEditorialTargetChallenge,
+  ) => WingsSideEnglishEditorialSignedTargetProof,
 ) => {
   let state = clone(initial)
   let snapshot: typeof state | null = null
   let writes = 0
   const calls = {
+    attest: vi.fn(),
     begin: vi.fn(),
     commit: vi.fn(),
     kill: vi.fn(),
@@ -109,6 +258,25 @@ const adapterFixture = (
     writes: Array<{ id: string }>
   } = { commits: [], kills: [], reads: [], writes: [] }
   const adapter: WingsSideTourEnglishEditorialRuntimeAdapter<{ id: string }> = {
+    attestTarget: async ({ challenge }) => {
+      calls.attest(challenge)
+      const payload = {
+        currentDatabase,
+        databaseIdentitySha256,
+        environmentKind: 'production' as const,
+        governanceChecksum: challenge.governanceChecksum,
+        planArtifactSha256: challenge.planArtifactSha256,
+        releaseSha,
+        siteCode: 'wing-side' as const,
+        sourceKind: 'database-snapshot' as const,
+        sourceSha256: sourceSnapshotSha256,
+        stage: challenge.stage,
+        transactionNonce: challenge.nonce,
+        transactionSessionID,
+      }
+      const proof = signTargetProof(payload)
+      return mutateProof?.(proof, challenge) ?? proof
+    },
     beginTransaction: async () => {
       calls.begin()
       snapshot = clone(state)
@@ -155,6 +323,9 @@ describe('WingSide English editorial canonical runtime', () => {
         plan: value.plan,
       }),
     ).resolves.toEqual({ state: 'after', unchanged: 0, updated: 22 })
+    expect(runtime.calls.attest.mock.calls.slice(0, 2).map(([challenge]) => challenge.stage)).toEqual(
+      ['after-begin', 'before-commit'],
+    )
     const applyToken = runtime.transactionTokens.commits[0]
     expect(runtime.transactionTokens.reads.slice(0, 2)).toEqual([applyToken, applyToken])
     expect(runtime.transactionTokens.writes.slice(0, 22).every((token) => token === applyToken)).toBe(
@@ -213,6 +384,43 @@ describe('WingSide English editorial canonical runtime', () => {
     expect(runtime.calls.commit).not.toHaveBeenCalled()
     expect(runtime.calls.kill).toHaveBeenCalledOnce()
     expect(runtime.state()).toEqual(value.rows)
+  })
+
+  it('rechecks the signed transaction target immediately before commit and blocks a switch', async () => {
+    const value = fixture()
+    const runtime = adapterFixture(value.rows, undefined, {}, (proof, challenge) =>
+      challenge.stage === 'before-commit'
+        ? signTargetProof({
+            ...proof.payload,
+            transactionSessionID: 'postgres-session-switched',
+          })
+        : proof,
+    )
+    await expect(
+      transitionWingsSideTourEnglishEditorialRuntime({
+        adapter: runtime.adapter,
+        config: value.config,
+        direction: 'apply',
+        manifest: value.manifest,
+        plan: value.plan,
+      }),
+    ).rejects.toThrow('signed target proof mismatch')
+    expect(runtime.calls.commit).not.toHaveBeenCalled()
+    expect(runtime.calls.kill).toHaveBeenCalledOnce()
+    expect(runtime.state()).toEqual(value.rows)
+  })
+
+  it('does not accept a caller-forged opaque guarded capability', async () => {
+    const value = fixture()
+    const runtime = adapterFixture(value.rows)
+    await expect(
+      executeWingsSideEnglishEditorialGuardedRuntime({
+        adapter: runtime.adapter,
+        capability: Object.freeze({}) as never,
+        phase: 'apply',
+      }),
+    ).rejects.toThrow('issued guarded capability')
+    expect(runtime.calls.begin).not.toHaveBeenCalled()
   })
 
   it('reports commit failure as ambiguous and never attempts kill after commit begins', async () => {
@@ -351,6 +559,7 @@ describe('WingSide English editorial guarded CLI preflight', () => {
     }
     const env = {
       ADMIN_EMAIL: 'admin@wingside.vn',
+      WINGSSIDE_EN_EDITORIAL_CURRENT_DATABASE: currentDatabase,
       WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256: databaseIdentitySha256,
       WINGSSIDE_EN_EDITORIAL_ENVIRONMENT_KIND: 'production',
       WINGSSIDE_EN_EDITORIAL_CONFIG_PATH: 'config',
@@ -361,6 +570,8 @@ describe('WingSide English editorial guarded CLI preflight', () => {
       WINGSSIDE_EN_EDITORIAL_SITE_CODE: 'wing-side',
       WINGSSIDE_EN_EDITORIAL_SOURCE_KIND: 'database-snapshot',
       WINGSSIDE_EN_EDITORIAL_SOURCE_SHA256: sourceSnapshotSha256,
+      WINGSSIDE_EN_EDITORIAL_TARGET_KEY_ID: targetKeyID,
+      WINGSSIDE_EN_EDITORIAL_TARGET_PUBLIC_KEY_SPKI_BASE64: targetPublicKeySpkiBase64,
       WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256: sha256(files.plan),
       WINGSTRAVEL_RELEASE_SHA: releaseSha,
     }
@@ -393,6 +604,7 @@ describe('WingSide English editorial guarded CLI preflight', () => {
 
   it.each([
     ['ADMIN_EMAIL', '--admin-email'],
+    ['WINGSSIDE_EN_EDITORIAL_CURRENT_DATABASE', '--current-database'],
     ['WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256', '--database-identity-sha256'],
     ['WINGSSIDE_EN_EDITORIAL_ENVIRONMENT_KIND', '--environment-kind'],
     ['WINGSSIDE_EN_EDITORIAL_CONFIG_PATH', '--config'],
@@ -405,6 +617,8 @@ describe('WingSide English editorial guarded CLI preflight', () => {
     ['WINGSSIDE_EN_EDITORIAL_SITE_CODE', '--site-code'],
     ['WINGSSIDE_EN_EDITORIAL_SOURCE_KIND', '--source-kind'],
     ['WINGSSIDE_EN_EDITORIAL_SOURCE_SHA256', '--source-sha256'],
+    ['WINGSSIDE_EN_EDITORIAL_TARGET_KEY_ID', '--target-key-id'],
+    ['WINGSSIDE_EN_EDITORIAL_TARGET_PUBLIC_KEY_SPKI_BASE64', '--target-public-key-spki-base64'],
   ])('requires protected environment %s even for verify', (envName, cliName) => {
     const value = cliFixture()
     const missing = { ...value.env, [envName]: undefined }
@@ -418,6 +632,7 @@ describe('WingSide English editorial guarded CLI preflight', () => {
 
   it.each([
     ['ADMIN_EMAIL', '--admin-email'],
+    ['WINGSSIDE_EN_EDITORIAL_CURRENT_DATABASE', '--current-database'],
     ['WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256', '--database-identity-sha256'],
     ['WINGSSIDE_EN_EDITORIAL_ENVIRONMENT_KIND', '--environment-kind'],
     ['WINGSSIDE_EN_EDITORIAL_CONFIG_PATH', '--config'],
@@ -430,6 +645,8 @@ describe('WingSide English editorial guarded CLI preflight', () => {
     ['WINGSSIDE_EN_EDITORIAL_SITE_CODE', '--site-code'],
     ['WINGSSIDE_EN_EDITORIAL_SOURCE_KIND', '--source-kind'],
     ['WINGSSIDE_EN_EDITORIAL_SOURCE_SHA256', '--source-sha256'],
+    ['WINGSSIDE_EN_EDITORIAL_TARGET_KEY_ID', '--target-key-id'],
+    ['WINGSSIDE_EN_EDITORIAL_TARGET_PUBLIC_KEY_SPKI_BASE64', '--target-public-key-spki-base64'],
   ])('rejects optional CLI echo conflict for protected %s', (_envName, cliName) => {
     const value = cliFixture()
     expect(() =>
@@ -469,7 +686,7 @@ describe('WingSide English editorial guarded CLI preflight', () => {
     expect(fakeAuthorization).not.toHaveBeenCalled()
   })
 
-  it('does not construct an adapter before apply passes the real release guard', async () => {
+  it('rejects an injectable environment in the production runner', async () => {
     const value = cliFixture()
     const adapterFactory = vi.fn()
     await expect(
@@ -483,12 +700,17 @@ describe('WingSide English editorial guarded CLI preflight', () => {
         env: value.env,
         io: value.io,
       }),
-    ).rejects.toThrow(/DATABASE_URL is required/)
+    ).rejects.toThrow(/environment is non-injectable/)
     expect(adapterFactory).not.toHaveBeenCalled()
   })
 
-  it('rejects an unattested reused adapter even when its 22 rows are exact after-state', async () => {
+  const stubCLIEnvironment = (env: Record<string, string>) => {
+    for (const [name, entry] of Object.entries(env)) vi.stubEnv(name, entry)
+  }
+
+  it('requires fresh valid Ed25519 target proofs for guarded verify', async () => {
     const value = cliFixture()
+    stubCLIEnvironment(value.env)
     const afterRows = value.value.rows.map((row, index) => ({
       ...row,
       document: clone(value.value.plan.entries[index]!.after),
@@ -496,100 +718,105 @@ describe('WingSide English editorial guarded CLI preflight', () => {
     const runtime = adapterFixture(afterRows)
     await expect(
       runWingsSideEnglishEditorialProductionCLI({
-        adapterFactory: async () => runtime.adapter as never,
+        adapterFactory: async () => runtime.adapter,
         argv: ['verify', ...value.base],
-        env: value.env,
-        io: value.io,
-      }),
-    ).rejects.toThrow('attested adapter bundle')
-    expect(runtime.calls.begin).not.toHaveBeenCalled()
-  })
-
-  it('enforces production target attestation for verify and accepts the valid bound adapter', async () => {
-    const value = cliFixture()
-    const afterRows = value.value.rows.map((row, index) => ({
-      ...row,
-      document: clone(value.value.plan.entries[index]!.after),
-    }))
-    const rejected = adapterFixture(afterRows)
-    await expect(
-      runWingsSideEnglishEditorialProductionCLI({
-        adapterFactory: async ({ artifacts }) => ({
-          adapter: rejected.adapter,
-          attestation: Object.freeze({
-            databaseIdentitySha256,
-            environmentKind: 'staging',
-            governanceChecksum: wingsSideEnglishEditorialRuntimeGovernanceChecksum(artifacts),
-            releaseSha,
-            siteCode: 'wing-side',
-            sourceKind: 'database-snapshot',
-            sourceSha256: sourceSnapshotSha256,
-          }) as never,
-        }),
-        argv: ['verify', ...value.base],
-        env: value.env,
-        io: value.io,
-      }),
-    ).rejects.toThrow('target attestation shape is invalid')
-    expect(rejected.calls.begin).not.toHaveBeenCalled()
-
-    const accepted = adapterFixture(afterRows)
-    await expect(
-      runWingsSideEnglishEditorialProductionCLI({
-        adapterFactory: async ({ artifacts }) => ({
-          adapter: accepted.adapter,
-          attestation: createWingsSideEnglishEditorialRuntimeTargetAttestation({
-            databaseIdentitySha256,
-            environmentKind: 'production',
-            governanceChecksum: wingsSideEnglishEditorialRuntimeGovernanceChecksum(artifacts),
-            releaseSha,
-            siteCode: 'wing-side',
-            sourceKind: 'database-snapshot',
-            sourceSha256: sourceSnapshotSha256,
-          }),
-        }),
-        argv: ['verify', ...value.base],
-        env: value.env,
         io: value.io,
       }),
     ).resolves.toEqual({ checked: 22, state: 'after' })
-    expect(accepted.calls.begin).toHaveBeenCalledOnce()
-    expect(accepted.calls.kill).toHaveBeenCalledOnce()
+    expect(runtime.calls.attest).toHaveBeenCalledTimes(2)
+    expect(runtime.calls.attest.mock.calls.map(([challenge]) => challenge.stage)).toEqual([
+      'after-begin',
+      'before-verify-close',
+    ])
   })
 
-  it.each([
-    ['database', { databaseIdentitySha256: 'f'.repeat(64) }],
-    ['artifact governance', { governanceChecksum: 'f'.repeat(64) }],
-    ['source', { sourceSha256: 'f'.repeat(64) }],
-    ['release', { releaseSha: 'b'.repeat(40) }],
-    ['site', { siteCode: 'other' }],
-  ])('rejects wrong attested %s identity before verify reads', async (_label, override) => {
+  it('rejects a proof forged by the adapter caller before reading rows', async () => {
     const value = cliFixture()
+    stubCLIEnvironment(value.env)
     const afterRows = value.value.rows.map((row, index) => ({
       ...row,
       document: clone(value.value.plan.entries[index]!.after),
     }))
-    const runtime = adapterFixture(afterRows)
+    const runtime = adapterFixture(afterRows, undefined, {}, (proof) => ({
+      ...proof,
+      signature: { ...proof.signature, valueBase64: Buffer.from('forged').toString('base64') },
+    }))
     await expect(
       runWingsSideEnglishEditorialProductionCLI({
-        adapterFactory: async ({ artifacts }) => ({
-          adapter: runtime.adapter,
-          attestation: Object.freeze({
-            databaseIdentitySha256,
-            environmentKind: 'production',
-            governanceChecksum: wingsSideEnglishEditorialRuntimeGovernanceChecksum(artifacts),
-            releaseSha,
-            siteCode: 'wing-side',
-            sourceKind: 'database-snapshot',
-            sourceSha256: sourceSnapshotSha256,
-            ...override,
-          }) as never,
-        }),
+        adapterFactory: async () => runtime.adapter,
         argv: ['verify', ...value.base],
-        env: value.env,
         io: value.io,
       }),
-    ).rejects.toThrow(/target attestation/)
-    expect(runtime.calls.begin).not.toHaveBeenCalled()
+    ).rejects.toThrow('target proof signature is invalid')
+    expect(runtime.transactionTokens.reads).toHaveLength(0)
+    expect(runtime.calls.kill).toHaveBeenCalledOnce()
+  })
+
+  it('rejects a signed transaction-session switch at the second verify proof', async () => {
+    const value = cliFixture()
+    stubCLIEnvironment(value.env)
+    const afterRows = value.value.rows.map((row, index) => ({
+      ...row,
+      document: clone(value.value.plan.entries[index]!.after),
+    }))
+    const runtime = adapterFixture(afterRows, undefined, {}, (proof, challenge) =>
+      challenge.stage === 'before-verify-close'
+        ? signTargetProof({
+            ...proof.payload,
+            transactionSessionID: 'postgres-session-switched',
+          })
+        : proof,
+    )
+    await expect(
+      runWingsSideEnglishEditorialProductionCLI({
+        adapterFactory: async () => runtime.adapter,
+        argv: ['verify', ...value.base],
+        io: value.io,
+      }),
+    ).rejects.toThrow('signed target proof mismatch')
+    expect(runtime.calls.kill).toHaveBeenCalledOnce()
+  })
+
+  it('rejects replay of the after-begin proof as the final proof', async () => {
+    const value = cliFixture()
+    stubCLIEnvironment(value.env)
+    const afterRows = value.value.rows.map((row, index) => ({
+      ...row,
+      document: clone(value.value.plan.entries[index]!.after),
+    }))
+    let first: WingsSideEnglishEditorialSignedTargetProof | undefined
+    const runtime = adapterFixture(afterRows, undefined, {}, (proof) => {
+      if (!first) {
+        first = proof
+        return proof
+      }
+      return first
+    })
+    await expect(
+      runWingsSideEnglishEditorialProductionCLI({
+        adapterFactory: async () => runtime.adapter,
+        argv: ['verify', ...value.base],
+        io: value.io,
+      }),
+    ).rejects.toThrow('signed target proof mismatch')
+  })
+
+  it('strictly rejects duplicates, unknown flags, missing values, and multiple phases', () => {
+    expect(() =>
+      parseWingsSideEnglishEditorialProductionArguments([
+        'verify',
+        '--config=one',
+        '--config=two',
+      ]),
+    ).toThrow('Duplicate')
+    expect(() =>
+      parseWingsSideEnglishEditorialProductionArguments(['verify', '--unknown=value']),
+    ).toThrow('Unknown')
+    expect(() =>
+      parseWingsSideEnglishEditorialProductionArguments(['verify', '--config']),
+    ).toThrow('malformed')
+    expect(() =>
+      parseWingsSideEnglishEditorialProductionArguments(['verify', '--phase=apply']),
+    ).toThrow('exactly one')
   })
 })

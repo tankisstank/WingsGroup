@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto'
+import { createHash, createPublicKey, randomBytes, verify } from 'node:crypto'
 import fs from 'node:fs'
 
 import {
@@ -10,12 +10,13 @@ import {
   rollbackWingsSideTourEnglishEditorialPlan,
   verifyWingsSideTourEnglishEditorialPlan,
   wingsSideTourEnglishEditorialChecksum,
-  type WingsSideTourEnglishEditorialConfig,
   type WingsSideTourEnglishEditorialConfigArtifact,
   type WingsSideTourEnglishEditorialDocument,
   type WingsSideTourEnglishEditorialManifest,
   type WingsSideTourEnglishEditorialPlan,
 } from './wingsSideTourEnglishEditorial'
+import { assertWingsSideEditorialProductionWriteGuard } from './wingsSideReleaseWriteGuard'
+import type { WingsSideEditorialProductionWriteGuardArgs } from './wingsSideReleaseWriteGuard'
 
 export type WingsSideTourEnglishEditorialRuntimeRow = {
   document: WingsSideTourEnglishEditorialDocument
@@ -25,6 +26,10 @@ export type WingsSideTourEnglishEditorialRuntimeRow = {
 }
 
 export type WingsSideTourEnglishEditorialRuntimeAdapter<Transaction> = {
+  attestTarget: (args: {
+    challenge: WingsSideEnglishEditorialTargetChallenge
+    transaction: Transaction
+  }) => Promise<WingsSideEnglishEditorialSignedTargetProof>
   beginTransaction: () => Promise<null | Transaction>
   commitTransaction: (transaction: Transaction) => Promise<void>
   killTransaction: (transaction: Transaction) => Promise<void>
@@ -40,6 +45,7 @@ export type WingsSideEnglishEditorialEnvironmentKind = 'production'
 export type WingsSideEnglishEditorialSourceKind = 'database-snapshot' | 'source-inventory'
 
 export type WingsSideEnglishEditorialRuntimeTargetAttestation = Readonly<{
+  currentDatabase: string
   databaseIdentitySha256: string
   environmentKind: WingsSideEnglishEditorialEnvironmentKind
   governanceChecksum: string
@@ -47,15 +53,52 @@ export type WingsSideEnglishEditorialRuntimeTargetAttestation = Readonly<{
   siteCode: 'wing-side'
   sourceKind: WingsSideEnglishEditorialSourceKind
   sourceSha256: string
+  transactionNonce: string
+  transactionSessionID: string
+  stage: WingsSideEnglishEditorialTargetProofStage
+  planArtifactSha256: string
 }>
 
 export type WingsSideEnglishEditorialExpectedRuntimeTarget = Readonly<
-  Omit<WingsSideEnglishEditorialRuntimeTargetAttestation, 'governanceChecksum'>
+  Omit<
+    WingsSideEnglishEditorialRuntimeTargetAttestation,
+    | 'governanceChecksum'
+    | 'planArtifactSha256'
+    | 'stage'
+    | 'transactionNonce'
+    | 'transactionSessionID'
+  >
 >
 
-export type WingsSideEnglishEditorialAttestedRuntimeAdapter<Transaction> = Readonly<{
-  adapter: WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
-  attestation: WingsSideEnglishEditorialRuntimeTargetAttestation
+export type WingsSideEnglishEditorialTargetProofStage =
+  | 'after-begin'
+  | 'before-commit'
+  | 'before-verify-close'
+
+export type WingsSideEnglishEditorialTargetChallenge = Readonly<{
+  governanceChecksum: string
+  nonce: string
+  planArtifactSha256: string
+  stage: WingsSideEnglishEditorialTargetProofStage
+}>
+
+export type WingsSideEnglishEditorialSignedTargetProof = Readonly<{
+  payload: WingsSideEnglishEditorialRuntimeTargetAttestation
+  signature: Readonly<{
+    algorithm: 'ed25519'
+    keyID: string
+    valueBase64: string
+  }>
+}>
+
+export type WingsSideEnglishEditorialProtectedCryptoPolicy = Readonly<{
+  keyID: string
+  publicKeySpkiBase64: string
+}>
+
+declare const guardedCapabilityBrand: unique symbol
+export type WingsSideEnglishEditorialGuardedCapability = Readonly<{
+  [guardedCapabilityBrand]: true
 }>
 
 export class WingsSideEnglishEditorialAmbiguousCommitError extends Error {
@@ -91,6 +134,7 @@ const killPreservingPrimary = async <Transaction>({
 }
 
 type ArtifactIO = Pick<typeof fs, 'readFileSync'>
+const loadedArtifactSets = new WeakSet<object>()
 
 const deepFreeze = <T>(value: T): T => {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {
@@ -180,7 +224,7 @@ export const loadFrozenWingsSideEnglishEditorialArtifacts = ({
     manifest: manifestArtifact.value,
     plan: planArtifact.value,
   })
-  return deepFreeze({
+  const loaded = deepFreeze({
     config: configArtifact.value.config,
     configGovernance: configArtifact.value,
     configArtifactSha256: configArtifact.sha256,
@@ -189,6 +233,8 @@ export const loadFrozenWingsSideEnglishEditorialArtifacts = ({
     plan: planArtifact.value,
     planArtifactSha256: planArtifact.sha256,
   })
+  loadedArtifactSets.add(loaded)
+  return loaded
 }
 
 type LoadedEnglishEditorialArtifacts = ReturnType<
@@ -220,6 +266,8 @@ const assertRuntimeTargetShape = (
   target: WingsSideEnglishEditorialExpectedRuntimeTarget,
 ): void => {
   if (
+    !target.currentDatabase ||
+    !/^[A-Za-z0-9_-]+$/u.test(target.currentDatabase) ||
     !sha256Pattern.test(target.databaseIdentitySha256) ||
     target.environmentKind !== 'production' ||
     !releaseShaPattern.test(target.releaseSha) ||
@@ -231,46 +279,171 @@ const assertRuntimeTargetShape = (
   }
 }
 
-export const createWingsSideEnglishEditorialRuntimeTargetAttestation = (
-  value: WingsSideEnglishEditorialRuntimeTargetAttestation,
-): WingsSideEnglishEditorialRuntimeTargetAttestation => {
-  assertRuntimeTargetShape(value)
-  if (!sha256Pattern.test(value.governanceChecksum)) {
-    throw new Error('English editorial runtime target governance checksum is invalid')
-  }
-  return deepFreeze({ ...value })
+type CapabilityDetails = {
+  artifacts: LoadedEnglishEditorialArtifacts
+  expected: WingsSideEnglishEditorialExpectedRuntimeTarget
+  keyID: string
+  mutationGuardArgs: null | WingsSideEditorialProductionWriteGuardArgs
+  phase: 'apply' | 'rollback' | 'verify'
+  publicKey: ReturnType<typeof createPublicKey>
 }
 
-export const assertWingsSideEnglishEditorialRuntimeTarget = ({
+const capabilityDetails = new WeakMap<object, CapabilityDetails>()
+
+const requiredProtectedEnvironment = (name: string): string => {
+  const value = process.env[name]?.trim()
+  if (!value) throw new Error(`English editorial protected runtime environment is required: ${name}`)
+  return value
+}
+
+export const issueWingsSideEnglishEditorialGuardedCapabilityFromProtectedEnvironment = ({
   artifacts,
-  attestation,
   expected,
+  mutationGuardArgs,
+  phase,
 }: {
   artifacts: LoadedEnglishEditorialArtifacts
-  attestation: WingsSideEnglishEditorialRuntimeTargetAttestation
   expected: WingsSideEnglishEditorialExpectedRuntimeTarget
-}): void => {
+  mutationGuardArgs: null | WingsSideEditorialProductionWriteGuardArgs
+  phase: 'apply' | 'rollback' | 'verify'
+}): WingsSideEnglishEditorialGuardedCapability => {
+  if (!loadedArtifactSets.has(artifacts)) {
+    throw new Error('English editorial guarded capability requires loader-authenticated artifacts')
+  }
   assertRuntimeTargetShape(expected)
-  assertRuntimeTargetShape(attestation)
-  if (!Object.isFrozen(attestation)) {
-    throw new Error('English editorial runtime target attestation must be immutable')
+  const protectedExpected = {
+    currentDatabase: requiredProtectedEnvironment('WINGSSIDE_EN_EDITORIAL_CURRENT_DATABASE'),
+    databaseIdentitySha256: requiredProtectedEnvironment(
+      'WINGSSIDE_EN_EDITORIAL_DATABASE_IDENTITY_SHA256',
+    ),
+    environmentKind: requiredProtectedEnvironment('WINGSSIDE_EN_EDITORIAL_ENVIRONMENT_KIND'),
+    releaseSha: requiredProtectedEnvironment('WINGSTRAVEL_RELEASE_SHA'),
+    siteCode: requiredProtectedEnvironment('WINGSSIDE_EN_EDITORIAL_SITE_CODE'),
+    sourceKind: requiredProtectedEnvironment('WINGSSIDE_EN_EDITORIAL_SOURCE_KIND'),
+    sourceSha256: requiredProtectedEnvironment('WINGSSIDE_EN_EDITORIAL_SOURCE_SHA256'),
   }
-  const governanceChecksum = wingsSideEnglishEditorialRuntimeGovernanceChecksum(artifacts)
   if (
-    attestation.governanceChecksum !== governanceChecksum ||
-    attestation.databaseIdentitySha256 !== expected.databaseIdentitySha256 ||
-    attestation.environmentKind !== expected.environmentKind ||
-    attestation.releaseSha !== expected.releaseSha ||
-    attestation.releaseSha !== artifacts.plan.releaseSha ||
-    attestation.releaseSha !== artifacts.manifest.releaseSha ||
-    attestation.siteCode !== expected.siteCode ||
-    attestation.siteCode !== artifacts.plan.siteCode ||
-    attestation.siteCode !== artifacts.manifest.siteCode ||
-    attestation.sourceKind !== expected.sourceKind ||
-    attestation.sourceSha256 !== expected.sourceSha256
+    wingsSideTourEnglishEditorialChecksum(expected) !==
+    wingsSideTourEnglishEditorialChecksum(protectedExpected)
   ) {
-    throw new Error('English editorial runtime adapter target attestation mismatch')
+    throw new Error('English editorial guarded capability does not match protected environment')
   }
+  if (
+    artifacts.plan.releaseSha !== expected.releaseSha ||
+    artifacts.manifest.releaseSha !== expected.releaseSha ||
+    artifacts.plan.siteCode !== expected.siteCode ||
+    artifacts.manifest.siteCode !== expected.siteCode
+  ) {
+    throw new Error('English editorial guarded capability artifact target mismatch')
+  }
+  if (
+    artifacts.configArtifactSha256 !==
+      requiredProtectedEnvironment('WINGSSIDE_EN_EDITORIAL_CONFIG_SHA256') ||
+    artifacts.manifestArtifactSha256 !==
+      requiredProtectedEnvironment('WINGSSIDE_EN_EDITORIAL_MANIFEST_SHA256') ||
+    artifacts.planArtifactSha256 !==
+      requiredProtectedEnvironment('WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256')
+  ) {
+    throw new Error('English editorial guarded capability artifact checksum mismatch')
+  }
+  if (phase === 'apply' || phase === 'rollback') {
+    if (!mutationGuardArgs) {
+      throw new Error('English editorial guarded mutation capability requires release guard inputs')
+    }
+    assertWingsSideEditorialProductionWriteGuard(mutationGuardArgs, process.env)
+  } else if (mutationGuardArgs !== null) {
+    throw new Error('English editorial verify capability cannot carry mutation authorization')
+  }
+  const keyID = requiredProtectedEnvironment('WINGSSIDE_EN_EDITORIAL_TARGET_KEY_ID')
+  const publicKeySpkiBase64 = requiredProtectedEnvironment(
+    'WINGSSIDE_EN_EDITORIAL_TARGET_PUBLIC_KEY_SPKI_BASE64',
+  )
+  let publicKey: ReturnType<typeof createPublicKey>
+  try {
+    publicKey = createPublicKey({
+      format: 'der',
+      key: Buffer.from(publicKeySpkiBase64, 'base64'),
+      type: 'spki',
+    })
+  } catch {
+    throw new Error('English editorial protected target public key is invalid')
+  }
+  if (publicKey.asymmetricKeyType !== 'ed25519') {
+    throw new Error('English editorial protected target key must be Ed25519')
+  }
+  const capability = deepFreeze({}) as WingsSideEnglishEditorialGuardedCapability
+  capabilityDetails.set(capability, {
+    artifacts,
+    expected,
+    keyID,
+    mutationGuardArgs,
+    phase,
+    publicKey,
+  })
+  return capability
+}
+
+export const wingsSideEnglishEditorialTargetProofSigningDigest = (
+  payload: WingsSideEnglishEditorialRuntimeTargetAttestation,
+): string => wingsSideTourEnglishEditorialChecksum({ payload, schemaVersion: 1 })
+
+const assertSignedRuntimeTargetProof = ({
+  capability,
+  challenge,
+  proof,
+  priorSessionID,
+}: {
+  capability: WingsSideEnglishEditorialGuardedCapability
+  challenge: WingsSideEnglishEditorialTargetChallenge
+  proof: WingsSideEnglishEditorialSignedTargetProof
+  priorSessionID?: string
+}): string => {
+  const details = capabilityDetails.get(capability)
+  if (!details) throw new Error('English editorial runtime requires an issued guarded capability')
+  const { artifacts, expected, keyID, publicKey } = details
+  const payload = proof?.payload
+  const signature = proof?.signature
+  if (!payload || !signature) throw new Error('English editorial runtime target proof is required')
+  assertRuntimeTargetShape(payload)
+  if (
+    !sha256Pattern.test(payload.governanceChecksum) ||
+    !sha256Pattern.test(payload.planArtifactSha256) ||
+    !/^[a-f0-9]{64}$/u.test(payload.transactionNonce) ||
+    !payload.transactionSessionID ||
+    payload.transactionSessionID.length < 16 ||
+    payload.stage !== challenge.stage ||
+    payload.transactionNonce !== challenge.nonce ||
+    payload.planArtifactSha256 !== challenge.planArtifactSha256 ||
+    payload.governanceChecksum !== challenge.governanceChecksum ||
+    payload.currentDatabase !== expected.currentDatabase ||
+    payload.databaseIdentitySha256 !== expected.databaseIdentitySha256 ||
+    payload.environmentKind !== expected.environmentKind ||
+    payload.releaseSha !== expected.releaseSha ||
+    payload.releaseSha !== artifacts.plan.releaseSha ||
+    payload.releaseSha !== artifacts.manifest.releaseSha ||
+    payload.siteCode !== expected.siteCode ||
+    payload.siteCode !== artifacts.plan.siteCode ||
+    payload.siteCode !== artifacts.manifest.siteCode ||
+    payload.sourceKind !== expected.sourceKind ||
+    payload.sourceSha256 !== expected.sourceSha256 ||
+    (priorSessionID !== undefined && payload.transactionSessionID !== priorSessionID)
+  ) {
+    throw new Error('English editorial runtime signed target proof mismatch')
+  }
+  if (
+    signature.algorithm !== 'ed25519' ||
+    signature.keyID !== keyID ||
+    !signature.valueBase64 ||
+    !verify(
+      null,
+      Buffer.from(wingsSideEnglishEditorialTargetProofSigningDigest(payload), 'utf8'),
+      publicKey,
+      Buffer.from(signature.valueBase64, 'base64'),
+    )
+  ) {
+    throw new Error('English editorial runtime target proof signature is invalid')
+  }
+  return payload.transactionSessionID
 }
 
 const assertRuntimeInventory = (
@@ -315,26 +488,44 @@ const stateOf = (
   throw new Error('English editorial runtime refused partial/mixed state')
 }
 
-export const verifyWingsSideTourEnglishEditorialRuntime = async <Transaction>({
+const challengeFor = (
+  details: CapabilityDetails,
+  nonce: string,
+  stage: WingsSideEnglishEditorialTargetProofStage,
+): WingsSideEnglishEditorialTargetChallenge =>
+  deepFreeze({
+    governanceChecksum: wingsSideEnglishEditorialRuntimeGovernanceChecksum(details.artifacts),
+    nonce,
+    planArtifactSha256: details.artifacts.planArtifactSha256,
+    stage,
+  })
+
+const verifyWingsSideTourEnglishEditorialRuntime = async <Transaction>({
   adapter,
-  config,
+  capability,
   expectedState,
-  manifest,
-  plan,
 }: {
   adapter: WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
-  config: WingsSideTourEnglishEditorialConfig
+  capability: WingsSideEnglishEditorialGuardedCapability
   expectedState: 'after' | 'before'
-  manifest: WingsSideTourEnglishEditorialManifest
-  plan: WingsSideTourEnglishEditorialPlan
 }) => {
+  const details = capabilityDetails.get(capability)
+  if (!details) throw new Error('English editorial runtime requires an issued guarded capability')
+  const { config, manifest, plan } = details.artifacts
   assertWingsSideTourEnglishEditorialGovernance({ config, manifest, plan })
+  const nonce = randomBytes(32).toString('hex')
   const transaction = await adapter.beginTransaction()
   if (transaction === null || transaction === undefined) {
     throw new Error('English editorial verification could not start required transaction')
   }
   let checked = 0
   try {
+    const firstChallenge = challengeFor(details, nonce, 'after-begin')
+    const sessionID = assertSignedRuntimeTargetProof({
+      capability,
+      challenge: firstChallenge,
+      proof: await adapter.attestTarget({ challenge: firstChallenge, transaction }),
+    })
     const rows = await adapter.readTours(transaction)
     assertRuntimeInventory(rows, plan)
     verifyWingsSideTourEnglishEditorialPlan(
@@ -343,6 +534,13 @@ export const verifyWingsSideTourEnglishEditorialRuntime = async <Transaction>({
       expectedState === 'after' ? 'applied' : 'rolled-back',
     )
     checked = rows.length
+    const finalChallenge = challengeFor(details, nonce, 'before-verify-close')
+    assertSignedRuntimeTargetProof({
+      capability,
+      challenge: finalChallenge,
+      priorSessionID: sessionID,
+      proof: await adapter.attestTarget({ challenge: finalChallenge, transaction }),
+    })
   } catch (error) {
     await killPreservingPrimary({ adapter, primary: error, transaction })
     throw error
@@ -351,32 +549,45 @@ export const verifyWingsSideTourEnglishEditorialRuntime = async <Transaction>({
   return { checked, state: expectedState }
 }
 
-export const transitionWingsSideTourEnglishEditorialRuntime = async <Transaction>({
+const transitionWingsSideTourEnglishEditorialRuntime = async <Transaction>({
   adapter,
-  config,
+  capability,
   direction,
-  manifest,
-  plan,
 }: {
   adapter: WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
-  config: WingsSideTourEnglishEditorialConfig
+  capability: WingsSideEnglishEditorialGuardedCapability
   direction: 'apply' | 'rollback'
-  manifest: WingsSideTourEnglishEditorialManifest
-  plan: WingsSideTourEnglishEditorialPlan
 }) => {
+  const details = capabilityDetails.get(capability)
+  if (!details) throw new Error('English editorial runtime requires an issued guarded capability')
+  const { config, manifest, plan } = details.artifacts
   assertWingsSideTourEnglishEditorialGovernance({ config, manifest, plan })
   let transaction: null | Transaction = null
   let commitStarted = false
+  const nonce = randomBytes(32).toString('hex')
   try {
     transaction = await adapter.beginTransaction()
     if (transaction === null || transaction === undefined) {
       throw new Error('English editorial runtime could not start required transaction')
     }
+    const firstChallenge = challengeFor(details, nonce, 'after-begin')
+    const sessionID = assertSignedRuntimeTargetProof({
+      capability,
+      challenge: firstChallenge,
+      proof: await adapter.attestTarget({ challenge: firstChallenge, transaction }),
+    })
     const rows = await adapter.readTours(transaction)
     assertRuntimeInventory(rows, plan)
     const currentState = stateOf(rows, plan)
     const targetState = direction === 'apply' ? 'after' : 'before'
     if (currentState === targetState) {
+      const commitChallenge = challengeFor(details, nonce, 'before-commit')
+      assertSignedRuntimeTargetProof({
+        capability,
+        challenge: commitChallenge,
+        priorSessionID: sessionID,
+        proof: await adapter.attestTarget({ challenge: commitChallenge, transaction }),
+      })
       commitStarted = true
       await adapter.commitTransaction(transaction)
       transaction = null
@@ -404,6 +615,13 @@ export const transitionWingsSideTourEnglishEditorialRuntime = async <Transaction
     if (stateOf(afterRows, plan) !== targetState) {
       throw new Error('English editorial runtime post-write verification failed')
     }
+    const commitChallenge = challengeFor(details, nonce, 'before-commit')
+    assertSignedRuntimeTargetProof({
+      capability,
+      challenge: commitChallenge,
+      priorSessionID: sessionID,
+      proof: await adapter.attestTarget({ challenge: commitChallenge, transaction }),
+    })
     commitStarted = true
     await adapter.commitTransaction(transaction)
     transaction = null
@@ -415,4 +633,34 @@ export const transitionWingsSideTourEnglishEditorialRuntime = async <Transaction
     }
     throw error
   }
+}
+
+export const executeWingsSideEnglishEditorialGuardedRuntime = async <Transaction>({
+  adapter,
+  capability,
+  phase,
+}: {
+  adapter: WingsSideTourEnglishEditorialRuntimeAdapter<Transaction>
+  capability: WingsSideEnglishEditorialGuardedCapability
+  phase: 'apply' | 'rollback' | 'verify'
+}) => {
+  const details = capabilityDetails.get(capability)
+  if (!details) throw new Error('English editorial runtime requires an issued guarded capability')
+  if (details.phase !== phase) {
+    throw new Error('English editorial guarded capability phase mismatch')
+  }
+  if (phase !== 'verify') {
+    assertWingsSideEditorialProductionWriteGuard(details.mutationGuardArgs!, process.env)
+  }
+  return phase === 'verify'
+    ? verifyWingsSideTourEnglishEditorialRuntime({
+        adapter,
+        capability,
+        expectedState: 'after',
+      })
+    : transitionWingsSideTourEnglishEditorialRuntime({
+        adapter,
+        capability,
+        direction: phase,
+      })
 }
