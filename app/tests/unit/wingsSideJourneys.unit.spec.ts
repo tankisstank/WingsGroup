@@ -5,6 +5,7 @@ import {
   buildTourEnquiryHref,
   readSafeTourEnquiryContext,
 } from '@/tours/enquiryContext'
+import { isDiscoveryCardMatch, type DiscoveryTourCard } from '@/tours/discoveryCore'
 import {
   getWingSideJourneysCopy,
   isWingSideJourneyLocale,
@@ -12,6 +13,43 @@ import {
 } from '@/tours/journeysCopy'
 
 describe('WingSide journeys copy and context utilities', () => {
+  it('requires every active discovery criterion to match the same card', () => {
+    const card = {
+      destinationTags: ['sapa'],
+      duration: { days: 4, nights: 3 },
+      travelStyles: ['culture', 'adventure'],
+    } as DiscoveryTourCard
+
+    expect(
+      isDiscoveryCardMatch(card, {
+        destination: 'sapa',
+        duration: '1-7',
+        style: 'culture',
+      }),
+    ).toBe(true)
+    expect(
+      isDiscoveryCardMatch(card, {
+        destination: 'sapa',
+        duration: '1-7',
+        style: 'business',
+      }),
+    ).toBe(false)
+    expect(
+      isDiscoveryCardMatch(card, {
+        destination: 'hanoi',
+        duration: '1-7',
+        style: 'culture',
+      }),
+    ).toBe(false)
+    expect(
+      isDiscoveryCardMatch(card, {
+        destination: 'sapa',
+        duration: '8-14',
+        style: 'culture',
+      }),
+    ).toBe(false)
+  })
+
   it('has exact public journey locales without English fallback lookup', () => {
     expect(wingSideJourneyLocales).toEqual(['en', 'vi', 'it', 'es', 'pt'])
     expect(isWingSideJourneyLocale('fr')).toBe(false)

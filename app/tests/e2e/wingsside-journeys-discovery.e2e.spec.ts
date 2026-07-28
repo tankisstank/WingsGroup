@@ -155,7 +155,7 @@ const findExactQuery = (tours: TourAPIRecord[]): QueryTriple => {
   )
 }
 
-const findCumulativeRelaxQuery = (tours: TourAPIRecord[]): QueryTriple => {
+const findZeroResultQuery = (tours: TourAPIRecord[]): QueryTriple => {
   const byDestination = new Map<TourDestinationKey, Set<TourTravelStyleKey>>()
   for (const tour of tours) {
     for (const destination of (tour.destinationTags || []).filter(knownDestination)) {
@@ -173,7 +173,7 @@ const findCumulativeRelaxQuery = (tours: TourAPIRecord[]): QueryTriple => {
   }
 
   throw new Error(
-    'US-054 E2E fixture blocker: seeded WingSide sitemap tours do not expose a destination with a missing style for cumulative recovery.',
+    'US-054 E2E fixture blocker: seeded WingSide sitemap tours do not expose a destination with a missing style for zero-result recovery.',
   )
 }
 
@@ -339,8 +339,8 @@ test.describe('WingSide guided journey discovery', () => {
   }) => {
     test.setTimeout(180_000)
 
-    const relaxed = findCumulativeRelaxQuery(await fetchWingSideTours(request))
-    const invalidURL = `${localPath('en', '/journeys')}?debug=${rawLeak}&destination=${rawLeak}&destination=${relaxed.destination}&style=${rawLeak}&duration=99`
+    const zeroResult = findZeroResultQuery(await fetchWingSideTours(request))
+    const invalidURL = `${localPath('en', '/journeys')}?debug=${rawLeak}&destination=${rawLeak}&destination=${zeroResult.destination}&style=${rawLeak}&duration=99`
 
     await page.goto(invalidURL, { waitUntil: 'domcontentloaded' })
     await expectCanonical(page, canonicalFor('en'))
@@ -348,7 +348,7 @@ test.describe('WingSide guided journey discovery', () => {
     await expect(page.getByTestId('journeys-notice')).toContainText(
       getWingSideJourneysCopy('en').invalidNotice,
     )
-    await expect(page.getByLabel('Destination')).toHaveValue(relaxed.destination)
+    await expect(page.getByLabel('Destination')).toHaveValue(zeroResult.destination)
     await expect(page.getByLabel('Style')).toHaveValue('')
     await expect(page.getByLabel('Duration')).toHaveValue('')
     await expect(page.locator('body')).not.toContainText(rawLeak)
@@ -362,47 +362,43 @@ test.describe('WingSide guided journey discovery', () => {
     }
   })
 
-  test('shows deterministic cumulative broader recovery and consultation actions', async ({
+  test('shows a true zero result and transparent recovery actions', async ({
     page,
     request,
   }) => {
     test.setTimeout(180_000)
 
-    const relaxed = findCumulativeRelaxQuery(await fetchWingSideTours(request))
+    const zeroResult = findZeroResultQuery(await fetchWingSideTours(request))
     await page.setViewportSize({ height: 844, width: 390 })
-    await page.goto(`${localPath('en', '/journeys')}?${orderedParams(relaxed)}`, {
+    await page.goto(`${localPath('en', '/journeys')}?${orderedParams(zeroResult)}`, {
       waitUntil: 'domcontentloaded',
     })
 
-    await expect(page.getByTestId('journeys-notice')).toContainText(
-      'No exact match. Showing broader results after removing travel style.',
+    expect(await parseCount(page), 'strict AND result count').toBe(0)
+    await expect(page.getByTestId('journeys-empty')).toContainText(
+      'No exact match yet — but we can design it.',
     )
-    expect(
-      await parseCount(page),
-      'broader result count after cumulative relaxation',
-    ).toBeGreaterThan(0)
-    await expect(page.getByRole('link', { name: 'Reset filters' })).toHaveAttribute(
+
+    const planHref = `${localHref('en', '/plan-your-trip')}?intent=inquiry&source=journeys&${orderedParams(zeroResult)}`
+    const removeStyleHref = `${localHref('en', '/journeys')}?destination=${zeroResult.destination}&duration=${zeroResult.duration}`
+    const journeys = page.getByTestId('wingsside-journeys')
+    await expect(journeys.getByRole('link', { name: 'Share this brief' })).toHaveAttribute(
+      'href',
+      planHref,
+    )
+    await expect(
+      journeys.getByRole('link', { name: `Remove ${styleLabels.en[zeroResult.style]}` }),
+    ).toHaveAttribute('href', removeStyleHref)
+    await expect(journeys.getByRole('link', { name: 'View all journeys' })).toHaveAttribute(
       'href',
       localHref('en', '/journeys'),
     )
 
-    const planHref = `${localHref('en', '/plan-your-trip')}?intent=inquiry&source=journeys&${orderedParams(relaxed)}`
-    const contactHref = `${localHref('en', '/contact-us')}?intent=contact&source=journeys&${orderedParams(relaxed)}`
-    const journeys = page.getByTestId('wingsside-journeys')
-    await expect(journeys.getByRole('link', { name: 'Plan trip' }).first()).toHaveAttribute(
-      'href',
-      planHref,
-    )
-    await expect(journeys.getByRole('link', { name: 'Contact us' }).first()).toHaveAttribute(
-      'href',
-      contactHref,
-    )
-
-    await journeys.getByRole('link', { name: 'Plan trip' }).first().click()
+    await journeys.getByRole('link', { name: 'Share this brief' }).click()
     await expect(page).toHaveURL(`${origin}${planHref}`, { timeout: 60_000 })
     const message = page.locator('textarea[name="message"]')
-    await expect(message).toHaveValue(new RegExp(`Destination: ${relaxed.destination}`))
-    await expect(message).toHaveValue(new RegExp(`Duration: ${relaxed.duration}`))
-    await expect(message).toHaveValue(new RegExp(`Style: ${relaxed.style}`))
+    await expect(message).toHaveValue(new RegExp(`Destination: ${zeroResult.destination}`))
+    await expect(message).toHaveValue(new RegExp(`Duration: ${zeroResult.duration}`))
+    await expect(message).toHaveValue(new RegExp(`Style: ${zeroResult.style}`))
   })
 })

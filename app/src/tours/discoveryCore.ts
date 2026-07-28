@@ -260,6 +260,14 @@ export const isDurationMatch = (
   return durationDays >= 15
 }
 
+export const isDiscoveryCardMatch = (
+  card: Pick<DiscoveryTourCard, 'destinationTags' | 'duration' | 'travelStyles'>,
+  query: Omit<DiscoveryQuery, 'unknownValueCount'>,
+): boolean =>
+  (!query.destination || card.destinationTags.includes(query.destination)) &&
+  (!query.style || card.travelStyles.includes(query.style)) &&
+  isDurationMatch(card.duration.days, query.duration)
+
 export const buildDiscoveryRelaxationPlan = (
   query: DiscoveryQuery,
 ): Array<{ query: Omit<DiscoveryQuery, 'unknownValueCount'>; removed: DiscoveryFilterKey }> => {

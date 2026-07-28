@@ -8,10 +8,9 @@ import { getCurrentSite } from '@/utilities/siteContext'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 import {
-  buildDiscoveryRelaxationPlan,
   buildDiscoveryWhere,
   getDiscoverySEOPolicy,
-  isDurationMatch,
+  isDiscoveryCardMatch,
   normalizeDiscoveryQuery,
   projectDiscoveryTour,
   serializeDiscoveryQuery,
@@ -155,7 +154,10 @@ const queryDiscoveryCards = async ({
     withVerifiedWrapperPages(candidateTours, verifiedWrappers)
       .map((tour) => projectDiscoveryTour({ locale, site, tour }))
       .filter((card): card is DiscoveryTourCard => Boolean(card))
-      .filter((card) => isDurationMatch(card.duration.days, query.duration)),
+      // Payload should enforce the same AND query. Keep a projection-level
+      // contract guard so an adapter or array-query regression cannot broaden
+      // the public result set.
+      .filter((card) => isDiscoveryCardMatch(card, query)),
   )
 }
 
@@ -243,31 +245,6 @@ export const getWingSideDiscoveryContext = async ({
         items: exactItems,
         relaxed: null,
         total: exactItems.length,
-        unknownValueCount: query.unknownValueCount,
-      },
-      seo,
-    }
-    logDiscoveryCompleted({
-      durationMs: Math.round(performance.now() - startedAt),
-      logger: payload.logger,
-      query,
-      result: context.result,
-      tenantCode: site.code,
-      tenantOutcome: 'accepted',
-    })
-    return context
-  }
-
-  for (const relaxed of buildDiscoveryRelaxationPlan(query)) {
-    const items = await queryDiscoveryCards({ locale, limit, payload, query: relaxed.query, site })
-    if (items.length === 0) continue
-    const context = {
-      query,
-      result: {
-        appliedQuery: relaxed.query,
-        items,
-        relaxed,
-        total: items.length,
         unknownValueCount: query.unknownValueCount,
       },
       seo,

@@ -6,7 +6,11 @@ import React, { useEffect, useMemo } from 'react'
 
 import { SiteLink } from '@/components/SiteLink'
 import type { DiscoveryContext } from '@/tours/discoveryCore'
-import { discoveryDurationCodes, stripDiscoveryQueryMeta } from '@/tours/discoveryCore'
+import {
+  buildDiscoveryHref,
+  discoveryDurationCodes,
+  stripDiscoveryQueryMeta,
+} from '@/tours/discoveryCore'
 import { buildTourDetailDiscoveryHref, buildTourEnquiryHref } from '@/tours/enquiryContext'
 import {
   destinationLabels,
@@ -49,6 +53,19 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
     context: { discovery: normalizedQuery, source: 'journeys' },
     intent: 'contact',
   })
+  const removeStyleHref = normalizedQuery.style
+    ? buildDiscoveryHref({
+        ...(normalizedQuery.destination ? { destination: normalizedQuery.destination } : {}),
+        ...(normalizedQuery.duration ? { duration: normalizedQuery.duration } : {}),
+      })
+    : null
+  const activeFilters = [
+    normalizedQuery.destination
+      ? destinationLabels[locale][normalizedQuery.destination]
+      : null,
+    normalizedQuery.style ? styleLabels[locale][normalizedQuery.style] : null,
+    normalizedQuery.duration ? durationLabels[locale][normalizedQuery.duration] : null,
+  ].filter((label): label is string => Boolean(label))
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -110,11 +127,8 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
   const status = useMemo(() => {
     const notices = []
     if (current.unknownValueCount > 0) notices.push(copy.invalidNotice)
-    if (context.result.relaxed) {
-      notices.push(`${copy.relaxedPrefix} ${copy.relaxed[context.result.relaxed.removed]}.`)
-    }
     return notices.length > 0 ? notices.join(' ') : null
-  }, [context.result.relaxed, copy, current.unknownValueCount])
+  }, [copy, current.unknownValueCount])
 
   return (
     <div className="ws-journeys" data-testid="wingsside-journeys">
@@ -179,6 +193,18 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
         </p>
       ) : null}
 
+      {activeFilters.length > 0 ? (
+        <div
+          aria-label={copy.activeFilters}
+          className="ws-journeys__active-filters"
+          data-testid="journeys-active-filters"
+        >
+          {activeFilters.map((label) => (
+            <span key={label}>{label}</span>
+          ))}
+        </div>
+      ) : null}
+
       <section className="ws-journeys__results" aria-labelledby="journeys-results-title">
         <div className="ws-journeys__results-head">
           <p className="kicker">{copy.results}</p>
@@ -228,10 +254,15 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
             <p>{copy.emptyBody}</p>
             <div className="ws-journeys__actions">
               <SiteLink className="btn btn-primary" href={planHref}>
-                {copy.plan}
+                {copy.shareBrief}
               </SiteLink>
-              <SiteLink className="btn btn-ghost" href={contactHref}>
-                {copy.contact}
+              {removeStyleHref && normalizedQuery.style ? (
+                <SiteLink className="btn btn-ghost" href={removeStyleHref}>
+                  {copy.removeStyle} {styleLabels[locale][normalizedQuery.style]}
+                </SiteLink>
+              ) : null}
+              <SiteLink className="btn btn-ghost" href="/journeys">
+                {copy.clearAll}
               </SiteLink>
             </div>
           </div>

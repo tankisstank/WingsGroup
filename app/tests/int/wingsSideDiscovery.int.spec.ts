@@ -353,7 +353,7 @@ describe('WingSide discovery server query contract', () => {
     expect(collectionCalls('pages')[0].where?.and).toContainEqual({ id: { in: [999] } })
   })
 
-  it('uses AND semantics and relaxes duration first, then stops on the first non-empty set', async () => {
+  it('uses strict AND semantics and never broadens an exact zero result', async () => {
     const tours = [
       product({ destinationTags: ['hanoi'], durationDays: 20, id: 30, travelStyles: ['luxury'] }),
       product({ destinationTags: ['hanoi'], durationDays: 9, id: 31, travelStyles: ['culture'] }),
@@ -366,32 +366,31 @@ describe('WingSide discovery server query contract', () => {
       locale: 'en',
     })
 
-    expect(context.result.items.map(({ id }) => id)).toEqual([30])
-    expect(context.result.relaxed).toEqual({
-      removed: 'duration',
-      query: { destination: 'hanoi', style: 'luxury' },
+    expect(context.result.items).toEqual([])
+    expect(context.result.appliedQuery).toEqual({
+      destination: 'hanoi',
+      duration: '8-14',
+      style: 'luxury',
     })
+    expect(context.result.relaxed).toBeNull()
     expect(discoveryLogs()).toHaveLength(1)
     expect(discoveryLogs()[0].fields).toMatchObject({
       destination_code: 'hanoi',
       duration_code: '8-14',
       invalid_filter_count: 0,
-      relaxed: 'duration',
-      result_count: 1,
+      relaxed: null,
+      result_count: 0,
       style_code: 'luxury',
       tenant_outcome: 'accepted',
     })
-    expect(collectionCalls('tour-products')).toHaveLength(2)
-    expect(collectionCalls('pages')).toHaveLength(1)
+    expect(collectionCalls('tour-products')).toHaveLength(1)
+    expect(collectionCalls('pages')).toHaveLength(0)
     expect(clauses(collectionCalls('tour-products')[0])).toContainEqual({
       durationDays: { greater_than_equal: 8 },
     })
-    expect(
-      clauses(collectionCalls('tour-products')[1]).some((clause) => 'durationDays' in clause),
-    ).toBe(false)
   })
 
-  it('continues zero-result relaxation cumulatively after duration is removed', async () => {
+  it('returns a broader set only after the user explicitly removes style', async () => {
     const tours = [
       product({ destinationTags: ['hanoi'], durationDays: 20, id: 40, travelStyles: ['luxury'] }),
       product({ destinationTags: ['hanoi'], durationDays: 9, id: 41, travelStyles: ['family'] }),
@@ -399,28 +398,39 @@ describe('WingSide discovery server query contract', () => {
     ]
     mockDiscoveryFind(tours, [page()])
 
-    const context = await getWingSideDiscoveryContext({
+    const exactContext = await getWingSideDiscoveryContext({
       input: { destination: 'hanoi', duration: '8-14', style: 'culture' },
       locale: 'en',
     })
 
-    expect(context.result.items.map(({ id }) => id)).toEqual([41, 40])
-    expect(context.result.relaxed).toEqual({
-      removed: 'style',
-      query: { destination: 'hanoi' },
+    expect(exactContext.result.items).toEqual([])
+    expect(exactContext.result.relaxed).toBeNull()
+    expect(collectionCalls('tour-products')).toHaveLength(1)
+    expect(collectionCalls('pages')).toHaveLength(0)
+
+    const userRelaxedContext = await getWingSideDiscoveryContext({
+      input: { destination: 'hanoi', duration: '8-14' },
+      locale: 'en',
     })
-    expect(collectionCalls('tour-products')).toHaveLength(3)
+
+    expect(userRelaxedContext.result.items.map(({ id }) => id)).toEqual([41])
+    expect(userRelaxedContext.result.appliedQuery).toEqual({
+      destination: 'hanoi',
+      duration: '8-14',
+    })
+    expect(userRelaxedContext.result.relaxed).toBeNull()
+    expect(collectionCalls('tour-products')).toHaveLength(2)
     expect(collectionCalls('pages')).toHaveLength(1)
 
-    const firstRelaxedClauses = clauses(collectionCalls('tour-products')[1])
-    expect(firstRelaxedClauses).toContainEqual({ destinationTags: { in: ['hanoi'] } })
-    expect(firstRelaxedClauses).toContainEqual({ travelStyles: { in: ['culture'] } })
-    expect(firstRelaxedClauses.some((clause) => 'durationDays' in clause)).toBe(false)
+    const exactClauses = clauses(collectionCalls('tour-products')[0])
+    expect(exactClauses).toContainEqual({ destinationTags: { in: ['hanoi'] } })
+    expect(exactClauses).toContainEqual({ travelStyles: { in: ['culture'] } })
 
-    const secondRelaxedClauses = clauses(collectionCalls('tour-products')[2])
-    expect(secondRelaxedClauses).toContainEqual({ destinationTags: { in: ['hanoi'] } })
-    expect(secondRelaxedClauses.some((clause) => 'travelStyles' in clause)).toBe(false)
-    expect(secondRelaxedClauses.some((clause) => 'durationDays' in clause)).toBe(false)
+    const userRelaxedClauses = clauses(collectionCalls('tour-products')[1])
+    expect(userRelaxedClauses).toContainEqual({ destinationTags: { in: ['hanoi'] } })
+    expect(userRelaxedClauses.some((clause) => 'travelStyles' in clause)).toBe(false)
+    expect(userRelaxedClauses).toContainEqual({ durationDays: { greater_than_equal: 8 } })
+    expect(userRelaxedClauses).toContainEqual({ durationDays: { less_than_equal: 14 } })
   })
 
   it('supports unfiltered base listing and never supplies static fallback cards', async () => {

@@ -32,7 +32,7 @@ import type { DiscoveryContext } from '@/tours/discoveryCore'
 const context = (overrides: Partial<DiscoveryContext> = {}): DiscoveryContext => ({
   query: { destination: 'hanoi', duration: '8-14', style: 'culture', unknownValueCount: 0 },
   result: {
-    appliedQuery: { destination: 'hanoi', style: 'culture' },
+    appliedQuery: { destination: 'hanoi', duration: '8-14', style: 'culture' },
     items: [
       {
         currency: 'USD',
@@ -130,14 +130,15 @@ describe('WingSideJourneysClient', () => {
     expect(card.textContent).not.toMatch(/book now|available seats|instant booking/i)
   })
 
-  it('announces invalid and relaxed states without raw values', () => {
+  it('announces invalid values without raw values', () => {
     render(
       <WingSideJourneysClient
         context={context({
           query: { destination: 'hanoi', unknownValueCount: 2 },
           result: {
             ...context().result,
-            relaxed: { removed: 'duration', query: { destination: 'hanoi', style: 'culture' } },
+            appliedQuery: { destination: 'hanoi' },
+            relaxed: null,
             unknownValueCount: 2,
           },
         })}
@@ -147,8 +148,48 @@ describe('WingSideJourneysClient', () => {
 
     const notice = screen.getByTestId('journeys-notice').textContent || ''
     expect(notice).toContain('Một số giá trị lọc')
-    expect(notice).toContain('thời lượng')
     expect(notice).not.toContain('raw-secret')
+  })
+
+  it('renders a true zero-result state with transparent recovery choices', () => {
+    render(
+      <WingSideJourneysClient
+        context={context({
+          query: {
+            destination: 'sapa',
+            duration: '8-14',
+            style: 'business',
+            unknownValueCount: 0,
+          },
+          result: {
+            appliedQuery: { destination: 'sapa', duration: '8-14', style: 'business' },
+            items: [],
+            relaxed: null,
+            total: 0,
+            unknownValueCount: 0,
+          },
+        })}
+        locale="en"
+      />,
+    )
+
+    const empty = screen.getByTestId('journeys-empty')
+    expect(within(empty).getByRole('heading').textContent).toBe(
+      'No exact match yet — but we can design it.',
+    )
+    expect(within(empty).getByRole('link', { name: 'Share this brief' }).getAttribute('href')).toBe(
+      '/plan-your-trip?intent=inquiry&source=journeys&destination=sapa&style=business&duration=8-14',
+    )
+    expect(
+      within(empty).getByRole('link', { name: 'Remove Business' }).getAttribute('href'),
+    ).toBe('/journeys?destination=sapa&duration=8-14')
+    expect(
+      within(empty).getByRole('link', { name: 'View all journeys' }).getAttribute('href'),
+    ).toBe('/journeys')
+    expect(screen.getByTestId('journeys-active-filters').textContent).toContain('Business')
+    expect(screen.getByTestId('journeys-active-filters').textContent).toContain('Sa Pa')
+    expect(screen.getByTestId('journeys-active-filters').textContent).toContain('8-14 days')
+    expect(screen.queryByRole('link', { name: /private hanoi/i })).toBeNull()
   })
 
   it('uses full-document replace for shareable public URL state', () => {

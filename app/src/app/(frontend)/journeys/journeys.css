@@ -86,6 +86,7 @@ body[data-site-code='wing-side'] .ws-journeys__reset {
 }
 
 body[data-site-code='wing-side'] .ws-journeys__notice,
+body[data-site-code='wing-side'] .ws-journeys__active-filters,
 body[data-site-code='wing-side'] .ws-journeys__results {
   width: min(72rem, calc(100% - 2rem));
   margin-left: auto;
@@ -98,6 +99,23 @@ body[data-site-code='wing-side'] .ws-journeys__notice {
   background: color-mix(in oklch, var(--site-gold) 12%, transparent);
   padding: 0.85rem 1rem;
   font-weight: 650;
+}
+
+body[data-site-code='wing-side'] .ws-journeys__active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+body[data-site-code='wing-side'] .ws-journeys__active-filters span {
+  border: 1px solid var(--site-border);
+  border-radius: 999px;
+  background: var(--site-surface);
+  padding: 0.35rem 0.65rem;
+  color: var(--site-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 body[data-site-code='wing-side'] .ws-journeys__results {

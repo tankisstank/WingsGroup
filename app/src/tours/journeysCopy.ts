@@ -5,7 +5,9 @@ export const wingSideJourneyLocales = ['en', 'vi', 'it', 'es', 'pt'] as const
 export type WingSideJourneyLocale = (typeof wingSideJourneyLocales)[number]
 
 type JourneyCopy = {
+  activeFilters: string
   all: string
+  clearAll: string
   contact: string
   destination: string
   duration: string
@@ -17,10 +19,12 @@ type JourneyCopy = {
   metaDescription: string
   metaTitle: string
   plan: string
+  removeStyle: string
   relaxed: Record<DiscoveryFilterKey, string>
   relaxedPrefix: string
   reset: string
   results: string
+  shareBrief: string
   style: string
   title: string
   view: string
@@ -168,12 +172,14 @@ export const durationLabels: Record<
 
 const copy: Record<WingSideJourneyLocale, JourneyCopy> = {
   en: {
+    activeFilters: 'Active preferences',
     all: 'All',
+    clearAll: 'View all journeys',
     contact: 'Contact us',
     destination: 'Destination',
     duration: 'Duration',
-    emptyBody: 'Share your trip preferences and our planning team will shape suitable options.',
-    emptyTitle: 'No published journey matches yet',
+    emptyBody: 'Keep your current preferences and send them to a local planner.',
+    emptyTitle: 'No exact match yet — but we can design it.',
     filters: 'Filters',
     invalidNotice: 'Some filter values were removed because they are not available.',
     journey: 'Private journey',
@@ -181,95 +187,112 @@ const copy: Record<WingSideJourneyLocale, JourneyCopy> = {
       'Explore published WingSide private journeys by destination, travel style, and duration.',
     metaTitle: 'Journeys',
     plan: 'Plan trip',
+    removeStyle: 'Remove',
     relaxed: { destination: 'destination', duration: 'duration', style: 'travel style' },
     relaxedPrefix: 'No exact match. Showing broader results after removing',
     reset: 'Reset filters',
     results: 'Results',
+    shareBrief: 'Share this brief',
     style: 'Style',
     title: 'Find a private Vietnam journey',
     view: 'View journey',
   },
   vi: {
+    activeFilters: 'Tiêu chí đang chọn',
     all: 'Tất cả',
+    clearAll: 'Xem tất cả hành trình',
     contact: 'Liên hệ',
     destination: 'Điểm đến',
     duration: 'Thời lượng',
-    emptyBody: 'Gửi thông tin chuyến đi để đội ngũ tư vấn đề xuất lựa chọn phù hợp.',
-    emptyTitle: 'Chưa có hành trình đã xuất bản phù hợp',
+    emptyBody: 'Giữ nguyên các tiêu chí này và gửi cho chuyên gia địa phương của chúng tôi.',
+    emptyTitle: 'Chưa có hành trình khớp hoàn toàn — nhưng chúng tôi có thể thiết kế riêng.',
     filters: 'Bộ lọc',
     invalidNotice: 'Một số giá trị lọc đã được bỏ vì không khả dụng.',
     journey: 'Hành trình riêng',
     metaDescription: 'Khám phá hành trình riêng WingSide theo điểm đến, phong cách và thời lượng.',
     metaTitle: 'Hành trình',
     plan: 'Lên kế hoạch',
+    removeStyle: 'Bỏ',
     relaxed: { destination: 'điểm đến', duration: 'thời lượng', style: 'phong cách' },
     relaxedPrefix: 'Chưa có kết quả khớp đủ. Đang hiển thị rộng hơn sau khi bỏ',
     reset: 'Xóa bộ lọc',
     results: 'Kết quả',
+    shareBrief: 'Gửi yêu cầu này',
     style: 'Phong cách',
     title: 'Tìm hành trình Việt Nam riêng',
     view: 'Xem hành trình',
   },
   it: {
+    activeFilters: 'Preferenze attive',
     all: 'Tutti',
+    clearAll: 'Vedi tutti i viaggi',
     contact: 'Contattaci',
     destination: 'Destinazione',
     duration: 'Durata',
-    emptyBody: 'Invia la tua richiesta e il nostro team creerà proposte adatte al viaggio.',
-    emptyTitle: 'Nessun viaggio pubblicato corrisponde ancora',
+    emptyBody: 'Mantieni queste preferenze e condividile con un esperto locale.',
+    emptyTitle: 'Nessuna corrispondenza esatta — ma possiamo crearla insieme.',
     filters: 'Filtri',
     invalidNotice: 'Alcuni valori filtro sono stati rimossi perché non disponibili.',
     journey: 'Viaggio privato',
     metaDescription: 'Esplora viaggi privati WingSide per destinazione, stile e durata.',
     metaTitle: 'Viaggi',
     plan: 'Pianifica',
+    removeStyle: 'Rimuovi',
     relaxed: { destination: 'destinazione', duration: 'durata', style: 'stile di viaggio' },
     relaxedPrefix: 'Nessuna corrispondenza esatta. Risultati più ampi dopo aver rimosso',
     reset: 'Reimposta filtri',
     results: 'Risultati',
+    shareBrief: 'Condividi la richiesta',
     style: 'Stile',
     title: 'Trova un viaggio privato in Vietnam',
     view: 'Vedi viaggio',
   },
   es: {
+    activeFilters: 'Preferencias activas',
     all: 'Todos',
+    clearAll: 'Ver todos los viajes',
     contact: 'Contáctanos',
     destination: 'Destino',
     duration: 'Duración',
-    emptyBody:
-      'Envía tus preferencias y el equipo de planificación preparará opciones adecuadas.',
-    emptyTitle: 'Aún no hay viajes publicados que coincidan',
+    emptyBody: 'Conserva estas preferencias y compártelas con un experto local.',
+    emptyTitle: 'Aún no hay una coincidencia exacta, pero podemos diseñarla.',
     filters: 'Filtros',
     invalidNotice: 'Se eliminaron algunos valores de filtro porque no están disponibles.',
     journey: 'Viaje privado',
     metaDescription: 'Explora viajes privados WingSide por destino, estilo y duración.',
     metaTitle: 'Viajes',
     plan: 'Planifica',
+    removeStyle: 'Quitar',
     relaxed: { destination: 'destino', duration: 'duración', style: 'estilo de viaje' },
     relaxedPrefix: 'No hay coincidencia exacta. Mostrando resultados más amplios tras quitar',
     reset: 'Restablecer filtros',
     results: 'Resultados',
+    shareBrief: 'Compartir esta solicitud',
     style: 'Estilo',
     title: 'Encuentra un viaje privado por Vietnam',
     view: 'Ver viaje',
   },
   pt: {
+    activeFilters: 'Preferências ativas',
     all: 'Todos',
+    clearAll: 'Ver todas as viagens',
     contact: 'Fale conosco',
     destination: 'Destino',
     duration: 'Duração',
-    emptyBody: 'Envie as suas preferências e a equipa de planeamento criará opções adequadas.',
-    emptyTitle: 'Ainda não há viagens publicadas correspondentes',
+    emptyBody: 'Mantenha estas preferências e partilhe-as com um especialista local.',
+    emptyTitle: 'Ainda não há uma correspondência exata, mas podemos criá-la consigo.',
     filters: 'Filtros',
     invalidNotice: 'Alguns valores de filtro foram removidos por não estarem disponíveis.',
     journey: 'Viagem privada',
     metaDescription: 'Explore viagens privadas WingSide por destino, estilo e duração.',
     metaTitle: 'Viagens',
     plan: 'Planear',
+    removeStyle: 'Remover',
     relaxed: { destination: 'destino', duration: 'duração', style: 'estilo de viagem' },
     relaxedPrefix: 'Sem correspondência exata. A mostrar resultados mais amplos após remover',
     reset: 'Repor filtros',
     results: 'Resultados',
+    shareBrief: 'Partilhar este pedido',
     style: 'Estilo',
     title: 'Encontre uma viagem privada no Vietname',
     view: 'Ver viagem',
