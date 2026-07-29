@@ -52,6 +52,14 @@ export const assertTourEditorialProductionEvidence = ({
   if (!['postgres:', 'postgresql:'].includes(database.protocol)) {
     throw new Error('Tour editorial production write requires PostgreSQL DATABASE_URL')
   }
+  if (database.hostname !== 'postgres') {
+    throw new Error(
+      `Tour editorial production write requires the trusted postgres target, got ${database.hostname}`,
+    )
+  }
+  if (env.WINGSSIDE_RELEASE_REMEDIATION_ALLOW !== 'production') {
+    throw new Error('Tour editorial production write requires the trusted production target marker')
+  }
 
   const backupPath = args.backupPath || env.WINGSSIDE_RELEASE_BACKUP_PATH
   const backupSha256 = args.backupSha256 || env.WINGSSIDE_RELEASE_BACKUP_SHA256

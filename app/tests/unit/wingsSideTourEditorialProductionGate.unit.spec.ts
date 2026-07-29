@@ -43,6 +43,7 @@ const fixture = () => {
       DATABASE_URL: 'postgresql://user:secret@postgres:5432/wingstravel',
       NODE_ENV: 'production',
       PAYLOAD_DB_PUSH: 'false',
+      WINGSSIDE_RELEASE_REMEDIATION_ALLOW: 'production',
       WINGSSIDE_RELEASE_BACKUP_MANIFEST_SHA256: digest(manifest),
       WINGSSIDE_RELEASE_BACKUP_SHA256: backupSha256,
     },

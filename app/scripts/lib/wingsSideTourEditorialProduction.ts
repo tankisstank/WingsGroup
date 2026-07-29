@@ -719,6 +719,23 @@ export const deriveWingsSideTourEditorialCanaryPlan = ({
     },
     entries,
     runID: `${plan.runID}${editorialCanaryMarker}${normalizedSlug}`,
+    ...(plan.englishNormalization
+      ? {
+          englishNormalization: {
+            aggregateChecksums: {
+              before: plan.englishNormalization.aggregateChecksums.before,
+              after: editorialChecksum(
+                plan.englishNormalization.entries.map(({ beforeChecksum }) => beforeChecksum),
+              ),
+            },
+            entries: plan.englishNormalization.entries.map((entry) => ({
+              ...cloneJSON(entry),
+              after: cloneJSON(entry.before),
+              afterChecksum: entry.beforeChecksum,
+            })),
+          },
+        }
+      : {}),
   }
   assertWingsSideTourEditorialCanaryPlan({ plan: canaryPlan, slug: normalizedSlug })
   return canaryPlan
@@ -751,6 +768,13 @@ export const assertWingsSideTourEditorialCanaryPlan = ({
     )
   ) {
     throw new Error('WingSide tour editorial canary contains a write outside its selected slug')
+  }
+  if (
+    plan.englishNormalization?.entries.some(
+      ({ afterChecksum, beforeChecksum }) => afterChecksum !== beforeChecksum,
+    )
+  ) {
+    throw new Error('WingSide tour editorial canary must not normalize the English baseline')
   }
 }
 
