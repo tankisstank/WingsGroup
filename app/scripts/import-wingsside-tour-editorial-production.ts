@@ -34,6 +34,7 @@ import {
   assertWingsSideEditorialProductionWriteGuard,
   initializeWingsSideEditorialProductionWriter,
 } from './lib/wingsSideReleaseWriteGuard'
+import { assertTourEditorialProductionEvidence } from './lib/wingsSideTourEditorialProductionGate'
 
 type Phase = 'apply' | 'plan' | 'rollback' | 'verify'
 
@@ -233,6 +234,16 @@ const assertMutationReleaseGuard = (values: {
 const main = async () => {
   const phase = selectedPhase()
   assertConfirmation(phase)
+  assertTourEditorialProductionEvidence({
+    args: {
+      backupManifestSha256: argumentValue('--backup-manifest-sha256'),
+      backupPath: argumentValue('--backup'),
+      backupSha256: argumentValue('--backup-sha256'),
+      restoreDrillEvidencePath: argumentValue('--restore-drill-evidence'),
+    },
+    databaseURL: String(process.env.DATABASE_URL || ''),
+    phase,
+  })
   const releaseSourceCommit = assertReleaseSourceCommit(process.env.WINGSTRAVEL_RELEASE_SHA)
   assertCredentialsProductionEnvironment({
     databaseURL: String(process.env.DATABASE_URL || ''),

@@ -57,12 +57,13 @@ const checksum = (filePath) =>
 const startedAt = Date.now()
 const temporaryDump = path.join(os.tmpdir(), `wingstravel-restore-${process.pid}-${Date.now()}.dump`)
 let dumpPath = backupFile
+const backupChecksumSha256 = await checksum(backupFile)
 
 try {
   const manifestPath = `${backupFile}.json`
   if (fs.existsSync(manifestPath)) {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
-    if (manifest.checksumSha256 !== await checksum(backupFile)) throw new Error('Backup checksum mismatch.')
+    if (manifest.checksumSha256 !== backupChecksumSha256) throw new Error('Backup checksum mismatch.')
   }
 
   if (backupFile.endsWith('.age')) {
@@ -94,8 +95,10 @@ try {
 
   console.log(JSON.stringify({
     activeSites,
+    backupChecksumSha256,
     durationSeconds: Math.round((Date.now() - startedAt) / 1000),
     homepages,
+    verifiedAt: new Date().toISOString(),
     status: 'ok',
     targetDatabase: databaseName,
   }))
