@@ -59,6 +59,7 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú",
         "Phương tiện đến hoặc rời Việt Nam",
         "Thuế quốc tế hoặc thuế khởi hành",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
@@ -67,7 +68,8 @@
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước đóng chai",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Lưu trú phòng đôi hoặc hai giường đơn tại Huế và Hội An theo hạng đã xác nhận.",
@@ -149,6 +151,7 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu có",
         "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
         "Đón và tiễn sân bay",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
@@ -156,7 +159,8 @@
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Hà Nội và Sa Pa; một đêm trên du thuyền Hạ Long theo hạng đã xác nhận.",
@@ -227,13 +231,15 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu có",
         "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
         "Bảo hiểm du lịch",
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại TP. Hồ Chí Minh và Cần Thơ theo hạng đã xác nhận.",
@@ -385,11 +391,13 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú, nếu có",
         "Vé máy bay quốc tế và các loại thuế liên quan, ngoài các chặng đã ghi là bao gồm",
         "Thị thực Việt Nam và Campuchia cùng lệ phí hộ chiếu",
         "Bảo hiểm du lịch",
         "Tiền tip, giặt là và các khoản chi cá nhân",
-        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn"
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Hà Nội, Hội An, TP. Hồ Chí Minh, Cần Thơ và Siem Reap; một đêm du thuyền Hạ Long.",
@@ -452,13 +460,15 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu có",
         "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
         "Bảo hiểm du lịch có bảo hiểm cho hoạt động mạo hiểm",
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Huế và Hội An theo hạng đã xác nhận.",
@@ -530,13 +540,15 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu có",
         "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Lệ phí hộ chiếu",
         "Bảo hiểm du lịch",
         "Tiền tip, giặt là và các khoản chi cá nhân",
-        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Đà Nẵng hoặc Hội An theo hạng đã xác nhận.",
@@ -591,7 +603,8 @@
         "Các khoản chi cá nhân",
         "Tiền tip cho hướng dẫn viên và tài xế",
         "Dịch vụ không được nêu trong phần bao gồm",
-        "Thị thực Việt Nam"
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Một đêm bungalow phòng đôi hoặc hai giường đơn tại Ninh Bình.",
@@ -720,6 +733,7 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu có",
         "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
         "Lệ phí hộ chiếu",
@@ -727,7 +741,8 @@
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Hà Nội, Hội An, Huế và TP. Hồ Chí Minh; một đêm du thuyền Hạ Long.",
@@ -805,13 +820,15 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu có",
         "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
         "Bảo hiểm du lịch",
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Hội An theo hạng đã xác nhận.",
@@ -852,7 +869,8 @@
       "excludes": [
         "Các khoản chi cá nhân",
         "Tiền tip",
-        "Dịch vụ không được nêu trong phần bao gồm"
+        "Dịch vụ không được nêu trong phần bao gồm",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Không bao gồm lưu trú.",
@@ -911,7 +929,8 @@
         "Bảo hiểm du lịch",
         "Các khoản chi cá nhân",
         "Tiền tip",
-        "Dịch vụ không được nêu trong phần bao gồm"
+        "Dịch vụ không được nêu trong phần bao gồm",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Hai đêm lưu trú theo hạng đã xác nhận; địa điểm nghỉ đêm đầu tiên sẽ được chốt cùng lịch trình cuối cùng.",
@@ -963,7 +982,8 @@
         "Bảo hiểm du lịch",
         "Các khoản chi cá nhân",
         "Tiền tip",
-        "Dịch vụ không được nêu trong phần bao gồm"
+        "Dịch vụ không được nêu trong phần bao gồm",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Một đêm khách sạn tại Cần Thơ.",
@@ -1006,7 +1026,8 @@
         "Bảo hiểm du lịch",
         "Các khoản chi cá nhân",
         "Tiền tip",
-        "Dịch vụ không được nêu trong phần bao gồm"
+        "Dịch vụ không được nêu trong phần bao gồm",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Không bao gồm lưu trú.",
@@ -1048,7 +1069,8 @@
         "Các khoản chi cá nhân",
         "Tiền tip",
         "Dịch vụ không được nêu trong phần bao gồm",
-        "Bữa trưa tại nhà hàng địa phương"
+        "Bữa trưa tại nhà hàng địa phương",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Không bao gồm lưu trú.",
@@ -1128,13 +1150,15 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu có",
         "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
         "Bảo hiểm du lịch",
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Hà Nội và một đêm du thuyền Hạ Long theo hạng đã xác nhận.",
@@ -1232,6 +1256,7 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú",
         "Phương tiện đến hoặc rời Việt Nam",
         "Thuế quốc tế hoặc thuế khởi hành",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
@@ -1239,7 +1264,8 @@
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước đóng chai",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Hà Nội, Mai Châu và Ninh Bình; homestay Kỳ Sơn; hai đêm du thuyền Hạ Long.",
@@ -1302,13 +1328,15 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu có",
         "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
         "Bảo hiểm du lịch",
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại TP. Hồ Chí Minh và khu nghỉ dưỡng tại Phú Quốc theo hạng đã xác nhận.",
@@ -1365,12 +1393,14 @@
         "Nhận phòng sớm và trả phòng muộn",
         "Xe buýt hoặc tàu Hà Nội - Sa Pa",
         "Thư chấp thuận thị thực Việt Nam một lần",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú",
         "Phương tiện đến hoặc rời Việt Nam",
         "Thuế quốc tế hoặc thuế khởi hành",
         "Thị thực Việt Nam và lệ phí hộ chiếu",
         "Bảo hiểm du lịch trong thời gian ở Việt Nam",
         "Tiền tip, giặt là và các khoản chi cá nhân",
-        "Các bữa không ghi trong lịch trình và nước đóng chai"
+        "Các bữa không ghi trong lịch trình và nước đóng chai",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Sa Pa theo hạng đã xác nhận.",
@@ -1449,6 +1479,7 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú",
         "Phương tiện đến hoặc rời Việt Nam",
         "Thuế quốc tế hoặc thuế khởi hành",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
@@ -1456,7 +1487,8 @@
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước đóng chai",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại TP. Hồ Chí Minh và khu nghỉ dưỡng biển Ninh Thuận.",
@@ -1536,6 +1568,7 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu có",
         "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
         "Lệ phí hộ chiếu",
@@ -1543,7 +1576,8 @@
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn hạng sang tại Hà Nội, homestay hoặc lưu trú Mai Châu và khu nghỉ dưỡng Almanity Hội An.",
@@ -1640,13 +1674,15 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu có",
         "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
         "Bảo hiểm du lịch",
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Hà Nội và Hội An; một đêm du thuyền Hạ Long.",
@@ -1735,13 +1771,15 @@
       ],
       "excludes": [
         "Nhận phòng sớm và trả phòng muộn",
+        "Phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu có",
         "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
         "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
         "Bảo hiểm du lịch",
         "Tiền tip, giặt là và các khoản chi cá nhân",
         "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
         "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
-        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế",
+        "Phụ thu nhiên liệu sẽ được áp dụng nếu giá nhiên liệu tăng trên 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Khách sạn tại Hà Nội và TP. Hồ Chí Minh; một đêm du thuyền Hạ Long.",
