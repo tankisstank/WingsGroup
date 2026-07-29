@@ -21,6 +21,7 @@ const fixture = () => {
   const backupSha256 = digest(backup)
   const manifest = JSON.stringify({
     checksumSha256: backupSha256,
+    database: 'wingstravel',
     encrypted: true,
     file: 'production.dump.age',
     format: 'postgres-custom',
@@ -92,5 +93,24 @@ describe('WingSide tour editorial production backup gate', () => {
     expect(
       assertTourEditorialProductionEvidence({ args: {}, databaseURL: '', phase: 'plan' }),
     ).toEqual({ environment: 'read-only' })
+  })
+
+  it('rejects a backup manifest for a different database', () => {
+    const value = fixture()
+    const manifestPath = `${value.args.backupPath}.json`
+    const mismatched = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+    mismatched.database = 'another_database'
+    fs.writeFileSync(manifestPath, JSON.stringify(mismatched))
+    value.env.WINGSSIDE_RELEASE_BACKUP_MANIFEST_SHA256 = digest(
+      JSON.stringify(mismatched),
+    )
+    expect(() =>
+      assertTourEditorialProductionEvidence({
+        ...value,
+        databaseURL: value.env.DATABASE_URL,
+        env: value.env,
+        phase: 'apply',
+      }),
+    ).toThrow(/does not match/)
   })
 })

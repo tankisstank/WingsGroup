@@ -89,7 +89,7 @@ Prepared locally and on disposable PostgreSQL:
 - Focused automated suite: 4 files, 19 tests passed.
 - Fresh migration and schema assertion: 4 tables, 10 enums, 10 foreign keys, 2 unique locale indexes.
 - Rehearsal seed: 22 tours, 22 wrappers, 5 locales.
-- Canary apply: 4 updated, 84 unchanged; strict verify checked 88.
+- Canary apply: 4 updated, 106 unchanged; strict verify checked 88.
 - Full apply after canary: 84 updated, 26 unchanged; strict verify checked 88.
 - Idempotent re-apply: 0 updated, 110 unchanged (22 English + 88 locale entries).
 - Rollback: 88 locale entries updated back to the signed before state; 22 English entries unchanged.

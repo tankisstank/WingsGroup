@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import fs from 'node:fs'
+import path from 'node:path'
 
 export type TourEditorialProductionGateArgs = {
   backupPath?: string
@@ -96,9 +97,11 @@ export const assertTourEditorialProductionEvidence = ({
   if (
     manifest.encrypted !== true ||
     manifest.checksumSha256 !== backupSha256 ||
-    manifest.format !== 'postgres-custom'
+    manifest.format !== 'postgres-custom' ||
+    manifest.database !== database.pathname.replace(/^\//, '') ||
+    manifest.file !== path.basename(backupPath)
   ) {
-    throw new Error('Tour editorial production backup manifest is not a valid encrypted PostgreSQL backup')
+    throw new Error('Tour editorial backup manifest does not match the trusted production target')
   }
 
   if (!restorePath || !io.existsSync(restorePath)) {

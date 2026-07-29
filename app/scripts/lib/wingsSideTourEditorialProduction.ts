@@ -184,8 +184,8 @@ export type WingsSideTourEditorialPlan = {
   serviceRowLedgerChecksum: string
   /** SHA-256 of the complete pre-canary plan when this is a canary plan. */
   parentPlanSha256?: string
-  /** Signed English production repair. Optional for backwards-compatible plans. */
-  englishNormalization?: {
+  /** Signed English production repair required for every current release plan. */
+  englishNormalization: {
     aggregateChecksums: { after: string; before: string }
     entries: WingsSideEnglishCommercialNormalizationEntry[]
   }
@@ -695,7 +695,7 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
   if (before !== plan.aggregateChecksums.before || after !== plan.aggregateChecksums.after) {
     throw new Error('WingSide tour editorial production plan aggregate checksum mismatch')
   }
-  if (plan.englishNormalization) {
+  {
     const english = plan.englishNormalization
     if (english.entries.length !== wingsSideTourEditorialExpectedTourCount) {
       throw new Error('English normalization must contain exactly 22 entries')
@@ -1025,10 +1025,9 @@ export const buildWingsSideTourEditorialPlan = ({
     serviceRowLedgerChecksum,
   }
   }
-  if (englishBeforeBySlug) {
+  {
     const englishEntries = sourceTours.map((source) => {
-      const beforeSource = englishBeforeBySlug.get(source.slug)
-      if (!beforeSource) throw new Error(`Missing English normalization snapshot: ${source.slug}`)
+      const beforeSource = englishBeforeBySlug?.get(source.slug) ?? source
       const before = {
         excludes: cloneJSON((beforeSource as Record<string, unknown>).excludes ?? []),
         includes: cloneJSON((beforeSource as Record<string, unknown>).includes ?? []),
