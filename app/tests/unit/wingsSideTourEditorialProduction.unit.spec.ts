@@ -494,4 +494,32 @@ describe('WingSide tour editorial production plan', () => {
       ]),
     )
   })
+
+  it('rejects a plan with an imbalanced locale inventory', () => {
+    const { catalog, sources } = catalogAndSources()
+    const beforeByKey = new Map<string, TourProduct>()
+    const wrapperBeforeByKey = new Map<string, Page>()
+    for (const source of sources) {
+      for (const locale of ['vi', 'it', 'es', 'pt']) {
+        beforeByKey.set(`${locale}:${source.slug}`, source)
+        wrapperBeforeByKey.set(`${locale}:${source.slug}`, sourceWrapper(source.id as number))
+      }
+    }
+    const plan = buildWingsSideTourEditorialPlan({
+      beforeByKey,
+      catalog,
+      createdAt: '2026-07-26T00:00:00.000Z',
+      releaseSourceCommit: 'a'.repeat(40),
+      runID: 'test-run',
+      siteID: 7,
+      sourceTours: sources,
+      sourceWrappers: new Map(
+        sources.map((source) => [source.slug, sourceWrapper(source.id as number)]),
+      ),
+      wrapperBeforeByKey,
+      wrapperPageIDs: new Map(sources.map((source) => [source.slug, source.wrapperPage as number])),
+    })
+    plan.entries[0]!.locale = 'it'
+    expect(() => assertEditorialPlanShape(plan)).toThrow('duplicate entries')
+  })
 })

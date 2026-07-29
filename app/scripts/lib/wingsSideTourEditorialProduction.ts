@@ -567,6 +567,31 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
   if (new Set(keys).size !== keys.length) {
     throw new Error('WingSide tour editorial production plan contains duplicate entries')
   }
+  // A valid plan must contain one entry for every target locale and every
+  // source slug.  Checking only the aggregate length would allow a malformed
+  // plan (for example 23 VI entries and 21 PT entries) to pass the gate.
+  const entriesByLocale = new Map<WingsSideTourEditorialLocale, number>()
+  const entriesBySlug = new Map<string, number>()
+  for (const entry of plan.entries) {
+    entriesByLocale.set(entry.locale, (entriesByLocale.get(entry.locale) || 0) + 1)
+    entriesBySlug.set(entry.slug, (entriesBySlug.get(entry.slug) || 0) + 1)
+    if (!entry.slug.trim() || !entry.sourceChecksum.trim()) {
+      throw new Error(`WingSide tour editorial plan entry is missing identity/checksum: ${entry.locale}:${entry.slug}`)
+    }
+    if (!entry.beforeChecksum.trim() || !entry.afterChecksum.trim()) {
+      throw new Error(`WingSide tour editorial plan entry is missing before/after checksum: ${entry.locale}:${entry.slug}`)
+    }
+  }
+  for (const locale of wingsSideTourEditorialLocales) {
+    if (entriesByLocale.get(locale) !== wingsSideTourEditorialExpectedTourCount) {
+      throw new Error(`WingSide tour editorial plan must contain exactly 22 ${locale} entries`)
+    }
+  }
+  for (const [slug, count] of entriesBySlug) {
+    if (count !== wingsSideTourEditorialLocales.length) {
+      throw new Error(`WingSide tour editorial plan must contain exactly 4 locale entries for ${slug}`)
+    }
+  }
   for (const entry of plan.entries) {
     if (
       editorialChecksum({ tour: entry.before, wrapper: entry.wrapperBefore }) !==
