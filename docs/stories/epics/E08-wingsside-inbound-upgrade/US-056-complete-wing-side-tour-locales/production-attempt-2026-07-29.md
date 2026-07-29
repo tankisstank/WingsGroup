@@ -2,9 +2,9 @@
 
 ## Result
 
-Production promotion was stopped by the canary safety gate and restored from
-the pre-apply backup. The live application remains on the previous release;
-no US-056 full promotion was made.
+The first production attempt was stopped by the canary safety gate and
+restored from the pre-apply backup. After the write-path fix, the guarded
+rehearsal and production run completed successfully.
 
 ## Completed safely
 
@@ -41,6 +41,18 @@ proceed to full promotion.
 - The production app was started again and returned to service.
 - Public `https://wingside.vn/vi/journeys` returned HTTP 200 after recovery.
 
+## Successful retry
+
+- Runtime fix committed as `d3fd70b8792e5a0a57f0b635586252433e350247`.
+- Canary plan `us056-canary-plan-d3fd70b.json` passed apply (`updated=4`,
+  `unchanged=106`) and verify (`checked=88`). The canary was then reverted by
+  restoring the verified encrypted backup before the full write.
+- Full plan companion `us056-canary-plan-d3fd70b.json.full.json` passed apply
+  (`updated=110`, `unchanged=0`) and verify (`checked=88`).
+- A second full apply was idempotent (`updated=0`, `unchanged=110`).
+- Public QA returned HTTP 200 for journeys and the Central Vietnam tour detail
+  in `en`, `vi`, `it`, `es`, and `pt`.
+
 ## Required before retry
 
 1. Fix the write path so locale nested-array updates never mutate English
@@ -50,5 +62,6 @@ proceed to full promotion.
    fixture, not only an already-normalized fixture.
 3. Rebuild the release and repeat backup → canary → full apply → verify.
 
-No production content should be changed again until these three conditions
-pass.
+The US-056 production data gates are now complete. The importer/tools image is
+an operational release artifact; the public app image was not rebuilt because
+the change is data/import runtime only.
