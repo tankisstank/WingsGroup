@@ -59,6 +59,7 @@
       ],
       "excludes": [
         "Check-in anticipato e check-out posticipato",
+        "Supplemento per l'alta stagione e cena obbligatoria presso la struttura",
         "Trasporti per raggiungere o lasciare il Vietnam",
         "Tasse internazionali o di partenza",
         "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
@@ -67,7 +68,8 @@
         "Mance, lavanderia e spese personali",
         "Pasti non indicati e acqua in bottiglia",
         "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
-        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio",
+        "Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Pernottamenti a Hue e Hoi An in camera doppia o matrimoniale, nella categoria confermata.",
@@ -149,6 +151,7 @@
       ],
       "excludes": [
         "Check-in anticipato e check-out posticipato",
+        "Supplemento per l'alta stagione ed eventuale cena obbligatoria in hotel",
         "Voli internazionali da o per il Vietnam e relative tasse",
         "Trasferimenti aeroportuali",
         "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
@@ -156,7 +159,8 @@
         "Mance, lavanderia e spese personali",
         "Pasti non indicati e acqua durante i pasti",
         "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
-        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio",
+        "Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Hotel a Hanoi e Sapa; una notte in crociera nella baia di Ha Long.",
@@ -227,13 +231,15 @@
       ],
       "excludes": [
         "Check-in anticipato e check-out posticipato",
+        "Supplemento per l'alta stagione ed eventuale cena obbligatoria in hotel",
         "Voli internazionali da o per il Vietnam e relative tasse",
         "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
         "Assicurazione di viaggio",
         "Mance, lavanderia e spese personali",
         "Pasti non indicati e acqua durante i pasti",
         "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
-        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio",
+        "Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Hotel a Ho Chi Minh City e Can Tho nella categoria confermata.",
@@ -281,11 +287,13 @@
       ],
       "excludes": [
         "Check-in anticipato e check-out posticipato",
+        "Supplemento per l'alta stagione ed eventuale cena obbligatoria presso la struttura",
         "Voli internazionali e relative tasse, salvo le tratte indicate come incluse",
         "Visti per Vietnam e Cambogia e spese per il passaporto",
         "Assicurazione di viaggio",
         "Mance, lavanderia e spese personali",
-        "Pasti non indicati e acqua durante i pasti"
+        "Pasti non indicati e acqua durante i pasti",
+        "Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Hotel a Hanoi, Hoi An, Ho Chi Minh City, Can Tho e Siem Reap; una notte in crociera nella baia di Ha Long.",
@@ -315,18 +323,20 @@
         "Camera doppia o matrimoniale secondo il programma",
         "Trasporti previsti, inclusi i trasferimenti aeroportuali",
         "Guide locali in lingua inglese durante le attività",
-        "Ingressi e attrezzatura per le attività indicate",
+        "Ingressi indicati nell'itinerario",
         "Pasti espressamente indicati nel programma"
       ],
       "excludes": [
         "Check-in anticipato e check-out posticipato",
+        "Supplemento per l'alta stagione ed eventuale cena obbligatoria in hotel",
         "Voli internazionali da o per il Vietnam e relative tasse",
         "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
-        "Assicurazione che copra le attività d'avventura",
+        "Assicurazione di viaggio",
         "Mance, lavanderia e spese personali",
         "Pasti non indicati e acqua durante i pasti",
         "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
-        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio",
+        "Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Hotel a Hue e Hoi An nella categoria confermata.",
@@ -354,22 +364,24 @@
         {"dayNumber": 5, "title": "Partenza da Da Nang", "route": "Hotel - aeroporto di Da Nang", "summary": "Colazione, tempo libero fino al check-out e trasferimento all'aeroporto di Da Nang.", "meals": "Colazione", "transport": "Trasferimento privato in aeroporto"}
       ],
       "includes": [
-        "Camera doppia o matrimoniale secondo il programma",
+        "Camera doppia o matrimoniale secondo il programma, escluse eventuali notti in homestay o in treno",
         "Trasporti previsti, inclusi i trasferimenti aeroportuali",
         "Guide locali in lingua inglese durante le visite",
         "Ingressi indicati nell'itinerario",
-        "Biglietto della funivia di Ba Na Hills",
-        "Pasti espressamente indicati nel programma"
+        "Pasti espressamente indicati nel programma",
+        "Biglietto della funivia di Ba Na Hills"
       ],
       "excludes": [
         "Check-in anticipato e check-out posticipato",
+        "Supplemento per l'alta stagione ed eventuale cena obbligatoria in hotel",
         "Voli internazionali da o per il Vietnam e relative tasse",
         "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
+        "Spese per il passaporto",
         "Assicurazione di viaggio",
         "Mance, lavanderia e spese personali",
-        "Pasti non indicati e acqua durante i pasti",
         "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
-        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio",
+        "Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Hotel a Da Nang o Hoi An nella categoria confermata.",
@@ -394,8 +406,8 @@
         {"dayNumber": 2, "title": "Tam Coc e antica capitale Hoa Lu", "route": "Tam Coc - Hoa Lu - Hanoi", "summary": "Dopo colazione, navigazione di circa due ore sul fiume Ngo Dong tra grotte e risaie di Tam Coc. Visita di Hoa Lu e dei luoghi legati alle dinastie Dinh e Le, pranzo e rientro a Hanoi.", "meals": "Colazione e pranzo", "transport": "Sampan, bicicletta secondo programma e veicolo per Hanoi"}
       ],
       "includes": [
-        "Trasferimento dal Quartiere Vecchio di Hanoi a Ha Long",
-        "Trasferimenti Ha Long - Ninh Binh e Ninh Binh - Hanoi",
+        "Crociera giornaliera nella baia di Ha Long con trasferimento da Hanoi incluso",
+        "Trasferimento dalla baia di Ha Long a Ninh Binh in autobus o auto",
         "Una notte in bungalow, camera doppia o matrimoniale, a Ninh Binh",
         "Guida in lingua inglese",
         "Bicicletta e barca a Ninh Binh",
@@ -409,7 +421,8 @@
         "Spese personali",
         "Mance per guida e autista",
         "Servizi non espressamente inclusi",
-        "Visto per il Vietnam"
+        "Visto per il Vietnam",
+        "Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Una notte in bungalow a Ninh Binh, in camera doppia o matrimoniale.",
@@ -453,6 +466,7 @@
       ],
       "excludes": [
         "Check-in anticipato e check-out posticipato",
+        "Supplemento per l'alta stagione ed eventuale cena obbligatoria in hotel",
         "Voli internazionali da o per il Vietnam e relative tasse",
         "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
         "Spese per il passaporto",
@@ -460,7 +474,8 @@
         "Mance, lavanderia e spese personali",
         "Pasti non indicati e acqua durante i pasti",
         "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
-        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio",
+        "Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Hotel a Hanoi, Hoi An, Hue e Ho Chi Minh City; una notte in crociera.",
@@ -497,13 +512,15 @@
       ],
       "excludes": [
         "Check-in anticipato e check-out posticipato",
+        "Supplemento per l'alta stagione ed eventuale cena obbligatoria in hotel",
         "Voli internazionali da o per il Vietnam e relative tasse",
         "Visto per il Vietnam; il passaporto deve avere oltre 6 mesi di validità e almeno 3 pagine libere",
         "Assicurazione di viaggio",
         "Mance, lavanderia e spese personali",
         "Pasti non indicati e acqua durante i pasti",
         "Mance per guida e autista, consigliate nella misura di 3-5 USD per persona al giorno",
-        "Le mance sono facoltative e vanno commisurate alla qualità del servizio"
+        "Le mance sono facoltative e vanno commisurate alla qualità del servizio",
+        "Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"
       ],
       "servicesSummary": {
         "hotelSummary": "Hotel a Hoi An nella categoria confermata.",
@@ -524,13 +541,13 @@
       ],
       "includes": [
         "Prelievo e rientro in hotel",
-        "Colazione leggera",
+        "Colazione",
         "Pranzo",
-        "Bevande analcoliche e frutta locale secondo il servizio a bordo",
+        "Bevande e frutta locale a volontà",
         "Guida in lingua inglese",
         "Ingressi previsti"
       ],
-      "excludes": ["Spese personali","Mance","Servizi non espressamente inclusi"],
+      "excludes": ["Spese personali","Mance","Servizi non espressamente inclusi","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
       "servicesSummary": {
         "hotelSummary": "Pernottamento non incluso.",
         "mealsSummary": "Colazione leggera a bordo e pranzo del Delta.",
@@ -554,11 +571,11 @@
         "Trasferimenti andata e ritorno da Ho Chi Minh City",
         "Escursioni in barca sul Mekong",
         "Tre pranzi e due colazioni",
-        "Due pernottamenti nella categoria confermata",
+        "Due notti in hotel a Can Tho",
         "Guida in lingua inglese",
         "Ingressi previsti"
       ],
-      "excludes": ["Bevande","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi"],
+      "excludes": ["Bevande","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
       "servicesSummary": {
         "hotelSummary": "Due pernottamenti nella categoria confermata; la località della prima notte sarà definita con l'itinerario finale.",
         "mealsSummary": "Tre pranzi e due colazioni.",
@@ -586,7 +603,7 @@
         "Pasti indicati nel programma",
         "Acqua fresca e salviette secondo il servizio dell'operatore"
       ],
-      "excludes": ["Bevande","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi"],
+      "excludes": ["Bevande","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
       "servicesSummary": {
         "hotelSummary": "Una notte in hotel a Can Tho.",
         "mealsSummary": "Pranzo il giorno 1; colazione e pranzo il giorno 2.",
@@ -605,7 +622,7 @@
         {"dayNumber":1,"title":"Mua Cave e Tam Coc in giornata","route":"Hanoi - Ninh Binh - Mua Cave - Tam Coc - Hanoi","summary":"Partenza alle 08:00, salita di quasi 500 gradini al punto panoramico di Mua Cave e pedalata tra le risaie. Dopo il pranzo, navigazione in sampan attraverso Hang Ca, Hang Hai e Hang Ba. Rientro a Hanoi verso le 18:00.","meals":"Pranzo","transport":"Veicolo privato, bicicletta e sampan"}
       ],
       "includes": ["Prelievo e rientro in auto o minivan","Guida in lingua inglese","Bicicletta","Ingressi e navigazione","Acqua minerale e salvietta","Pasto indicato nel programma"],
-      "excludes": ["Bevande e pasti non indicati","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi"],
+      "excludes": ["Bevande e pasti non indicati","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
       "servicesSummary": {"hotelSummary":"Pernottamento non incluso.","mealsSummary":"Un pranzo in ristorante locale.","transportSummary":"Veicolo privato, bicicletta e sampan.","operatorNotes":"La salita conta quasi 500 gradini ripidi e può essere scivolosa con la pioggia; servono scarpe adatte."},
       "meta": {"title":"Tour privato Tam Coc e Mua Cave | WingSide","description":"Una giornata da Hanoi con salita a Mua Cave, bicicletta e navigazione nelle grotte di Tam Coc.","breadcrumbLabel":"Tam Coc e Mua Cave"}
     },
@@ -619,7 +636,7 @@
         {"dayNumber":1,"title":"Hoa Lu e Trang An in giornata","route":"Hanoi - Hoa Lu - Trang An - Hanoi","summary":"Partenza alle 08:00 per Hoa Lu e visita dei templi dei re Dinh e Le. Dopo il pranzo, non compreso nel prezzo base, navigazione a remi tra fiumi, grotte e montagne di Trang An. Rientro a Hanoi verso le 16:00.","meals":"Pranzo non incluso","transport":"Veicolo privato e barca a remi"}
       ],
       "includes": ["Veicolo privato climatizzato con prelievo e rientro in hotel","Guida in lingua inglese","Ingressi e navigazione","Acqua minerale e salvietta"],
-      "excludes": ["Bevande e pasti non indicati","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi","Pranzo in ristorante locale"],
+      "excludes": ["Bevande e pasti non indicati","Assicurazione di viaggio","Spese personali","Mance","Servizi non espressamente inclusi","Pranzo in ristorante locale","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
       "servicesSummary": {"hotelSummary":"Pernottamento non incluso.","mealsSummary":"Il pranzo locale non è compreso nel prezzo base.","transportSummary":"Veicolo privato e barca a remi a Trang An.","operatorNotes":"Percorso e durata della navigazione possono cambiare in base a gestione del molo, livello dell'acqua e meteo."},
       "meta": {"title":"Tour privato Hoa Lu e Trang An | WingSide","description":"Antica capitale Hoa Lu e paesaggi di Trang An in una giornata privata da Hanoi.","breadcrumbLabel":"Hoa Lu e Trang An"}
     },
@@ -638,7 +655,7 @@
         {"dayNumber":6,"title":"Partenza da Hanoi","route":"Hotel - aeroporto di Noi Bai","summary":"Colazione, check-out e trasferimento in aeroporto. Il check-out standard è alle 12:00; il posticipo va prenotato.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
       ],
       "includes": ["Camera doppia o matrimoniale climatizzata","Trasporti climatizzati, inclusi i trasferimenti aeroportuali","Guide locali in lingua inglese","Pasti indicati nel programma","Ingressi previsti"],
-      "excludes": ["Check-in anticipato e check-out posticipato","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Supplemento per l'alta stagione ed eventuale cena obbligatoria in hotel","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
       "servicesSummary": {"hotelSummary":"Hotel a Hanoi e una notte in crociera.","mealsSummary":"Colazioni, pranzi previsti, cena e brunch in crociera.","transportSummary":"Trasferimenti aeroportuali, veicoli per Hanoi e Thai Nguyen, crociera.","operatorNotes":"La rotta della crociera dipende dal meteo. Ceramica, tè e attività in baia vanno scelte in base all'età dei bambini."},
       "meta": {"title":"Vietnam del Nord per famiglie in 6 giorni | WingSide","description":"Hanoi, Bat Trang, regione del tè di Tan Cuong e baia di Ha Long in un viaggio per famiglie.","breadcrumbLabel":"Nord per famiglie"}
     },
@@ -659,7 +676,7 @@
         {"dayNumber":8,"title":"Partenza da Hanoi","route":"Hotel - aeroporto di Noi Bai","summary":"Mattinata libera, colazione e check-out entro le 12:00. Trasferimento in aeroporto; il posticipo va confermato.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
       ],
       "includes": ["Camera doppia o matrimoniale in hotel, escluso l'eventuale homestay","Trasporti in Vietnam, inclusi i trasferimenti aeroportuali","Guide locali in lingua inglese","Ingressi indicati","Pasti previsti"],
-      "excludes": ["Check-in anticipato e check-out posticipato","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Supplemento per l'alta stagione e cena obbligatoria presso la struttura","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
       "servicesSummary": {"hotelSummary":"Hotel a Hanoi, Mai Chau e Ninh Binh; homestay a Ky Son; due notti in crociera.","mealsSummary":"Pasti in homestay, Mai Chau, Ninh Binh, crociera e tour gastronomico.","transportSummary":"Minibus, biciclette, carro, sampan, crociera e moto con conducente.","operatorNotes":"La bicicletta a Mai Chau può avere un costo extra. Le attività in baia dipendono da nave e meteo."},
       "meta": {"title":"Avventura a ritmo moderato nel Nord in 8 giorni | WingSide","description":"Ky Son, Mai Chau, Ninh Binh e due notti nella baia di Ha Long in otto giorni.","breadcrumbLabel":"Avventura a ritmo moderato nel Nord"}
     },
@@ -676,8 +693,8 @@
         {"dayNumber":5,"title":"Partenza da Phu Quoc","route":"Phu Quoc - Ho Chi Minh City","summary":"Colazione, tempo libero fino al check-out e trasferimento all'aeroporto per il volo di rientro. Check-out standard alle 12:00.","meals":"Colazione","transport":"Veicolo e volo Phu Quoc - Ho Chi Minh City"}
       ],
       "includes": ["Camera doppia climatizzata","Trasporti climatizzati, inclusi i trasferimenti aeroportuali","Guide locali in lingua inglese ove previste","Pasti indicati","Ingressi previsti","Voli Ho Chi Minh City - Phu Quoc andata e ritorno"],
-      "excludes": ["Check-in anticipato e check-out posticipato","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
-      "servicesSummary": {"hotelSummary":"Hotel a Ho Chi Minh City e resort a Phu Quoc.","mealsSummary":"Cena in crociera, cena romantica e colazioni previste.","transportSummary":"Trasferimenti, crociera sul Saigon e due voli interni.","operatorNotes":"Il giorno 4 è libero sull'isola e sarà indicato chiaramente nella conferma finale."},
+      "excludes": ["Check-in anticipato e check-out posticipato","Supplemento per l'alta stagione ed eventuale cena obbligatoria in hotel","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
+      "servicesSummary": {"hotelSummary":"Hotel a Ho Chi Minh City e resort a Phu Quoc.","mealsSummary":"Cena in crociera, cena romantica e colazioni previste.","transportSummary":"Trasferimenti, crociera sul Saigon e due voli interni.","operatorNotes":"La fonte elenca quattro giornate per un pacchetto di cinque; il tempo non descritto va indicato come libero nella conferma."},
       "meta": {"title":"Fuga romantica a Phu Quoc in 5 giorni | WingSide","description":"Cena sul fiume Saigon e soggiorno di coppia sulle spiagge di Phu Quoc.","breadcrumbLabel":"Phu Quoc romantica"}
     },
     {
@@ -692,8 +709,8 @@
         {"dayNumber":3,"title":"Mercato di Bac Ha e palazzo Hoang A Tuong","route":"Sapa - Bac Ha - Ban Pho - Lao Cai - Hanoi","summary":"Visita del mercato di Bac Ha, pranzo e cammino di circa 4 km tra il palazzo Hoang A Tuong e il villaggio H'Mong Fiori di Ban Pho. Trasferimento a Lao Cai e proseguimento per Hanoi.","meals":"Colazione e pranzo","transport":"Veicolo e percorso a piedi"}
       ],
       "includes": ["Camera doppia o matrimoniale","Trasporti indicati","Guida in lingua inglese","Ingressi previsti","Due colazioni e due pranzi"],
-      "excludes": ["Check-in anticipato e check-out posticipato","Autobus o treno Hanoi - Sapa","Lettera di approvazione del visto a ingresso singolo","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto e spese per il passaporto","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia"],
-      "servicesSummary": {"hotelSummary":"Hotel a Sapa.","mealsSummary":"Due colazioni e due pranzi come indicato nell'itinerario confermato.","transportSummary":"Veicoli a Sapa, Bac Ha e Lao Cai; tratta Hanoi - Sapa esclusa.","operatorNotes":"Il mercato di Bac Ha segue giorni prestabiliti. Le distanze indicate sono 2,5 km, 5 km e 4 km."},
+      "excludes": ["Check-in anticipato e check-out posticipato","Autobus o treno Hanoi - Sapa","Lettera di approvazione del visto a ingresso singolo","Supplemento per l'alta stagione e cena obbligatoria presso la struttura","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto e spese per il passaporto","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
+      "servicesSummary": {"hotelSummary":"Hotel a Sapa.","mealsSummary":"Due colazioni e due pranzi secondo la fonte.","transportSummary":"Veicoli a Sapa, Bac Ha e Lao Cai; tratta Hanoi - Sapa esclusa.","operatorNotes":"Il mercato di Bac Ha segue giorni prestabiliti. Le distanze indicate sono 2,5 km, 5 km e 4 km."},
       "meta": {"title":"Trekking a Sapa e mercato di Bac Ha | WingSide","description":"Cat Cat, valle Muong Hoa e mercato di Bac Ha in tre giorni di trekking.","breadcrumbLabel":"Sapa e mercato etnico"}
     },
     {
@@ -711,8 +728,8 @@
         {"dayNumber":8,"title":"Rientro a Ho Chi Minh City","route":"Ninh Thuan - Ho Chi Minh City","summary":"Colazione, check-out alle 12:00 e viaggio di ritorno in autobus.","meals":"Colazione","transport":"Autobus a lunga percorrenza"}
       ],
       "includes": ["Camera doppia o matrimoniale, escluse eventuali notti in treno o homestay","Trasporti e trasferimenti aeroportuali","Biglietto ferroviario diurno in posto morbido, se utilizzato","Pasti indicati","Guide locali in lingua inglese","Ingressi previsti"],
-      "excludes": ["Check-in anticipato e check-out posticipato","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
-      "servicesSummary": {"hotelSummary":"Hotel a Ho Chi Minh City e resort a Ninh Thuan.","mealsSummary":"Colazioni e pranzi nelle giornate Cu Chi e Ben Tre.","transportSummary":"Trasferimento aeroportuale, veicoli e autobus per Ninh Thuan.","operatorNotes":"I giorni 5-7 sono liberi. Il trasferimento verso Ninh Thuan può avvenire in treno o autobus; il mezzo sarà confermato prima della prenotazione."},
+      "excludes": ["Check-in anticipato e check-out posticipato","Supplemento per l'alta stagione e cena obbligatoria presso la struttura","Trasporti per raggiungere o lasciare il Vietnam","Tasse internazionali o di partenza","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua in bottiglia","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
+      "servicesSummary": {"hotelSummary":"Hotel a Ho Chi Minh City e resort a Ninh Thuan.","mealsSummary":"Colazioni e pranzi nelle giornate Cu Chi e Ben Tre.","transportSummary":"Trasferimento aeroportuale, veicoli e autobus per Ninh Thuan.","operatorNotes":"La fonte raggruppa i giorni 5-7. Le condizioni citano il treno, mentre il programma descrive l'autobus: il mezzo va confermato."},
       "meta": {"title":"Sud del Vietnam e Ninh Thuan in 8 giorni | WingSide","description":"Saigon, Cu Chi, Ben Tre e una pausa sul mare di Ninh Thuan.","breadcrumbLabel":"Sud e mare a Ninh Thuan"}
     },
     {
@@ -730,7 +747,7 @@
         {"dayNumber":8,"title":"Partenza da Da Nang","route":"Hoi An - aeroporto di Da Nang","summary":"Colazione, preparazione dei bagagli e trasferimento all'aeroporto internazionale.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
       ],
       "includes": ["Camera doppia o matrimoniale","Trasporti e trasferimenti aeroportuali","Guide locali in lingua inglese","Pacchetto spa o massaggio all'Almanity Hoi An","Volo Hanoi - Da Nang","Ingressi previsti","Pasti indicati"],
-      "excludes": ["Check-in anticipato e check-out posticipato","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Spese per il passaporto","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Supplemento per l'alta stagione ed eventuale cena obbligatoria in hotel","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Spese per il passaporto","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
       "servicesSummary": {"hotelSummary":"Hotel a Hanoi, soggiorno a Mai Chau e resort Almanity a Hoi An.","mealsSummary":"Colazioni e pranzi a Mai Chau.","transportSummary":"Veicoli, biciclette e volo Hanoi - Da Nang.","operatorNotes":"I giorni 5-7 sono raggruppati. Spa e corsi dipendono dal programma aggiornato del resort."},
       "meta": {"title":"Ritiro benessere in Vietnam in 8 giorni | WingSide","description":"Hanoi, Mai Chau e un soggiorno spa a Hoi An per ritrovare energia.","breadcrumbLabel":"Ritiro benessere in Vietnam"}
     },
@@ -751,7 +768,7 @@
         {"dayNumber":8,"title":"Partenza da Hoi An","route":"Hoi An - aeroporto di Da Nang","summary":"Colazione, check-out entro le 12:00 e trasferimento in aeroporto. Il posticipo dipende dalla disponibilità.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
       ],
       "includes": ["Camera doppia climatizzata","Trasporti e trasferimenti aeroportuali","Guide locali in lingua inglese","Pasti indicati","Ingressi previsti","Volo Hanoi - Da Nang"],
-      "excludes": ["Check-in anticipato e check-out posticipato","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Supplemento per l'alta stagione ed eventuale cena obbligatoria in hotel","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
       "servicesSummary": {"hotelSummary":"Hotel a Hanoi e Hoi An; una notte in crociera.","mealsSummary":"Cena a lume di candela, pasti in crociera, cena al tramonto e pasti indicati.","transportSummary":"Veicoli, sampan, crociera e volo Hanoi - Da Nang.","operatorNotes":"La rotta di Ha Long dipende dal meteo. Le cene private e le attività facoltative vanno confermate."},
       "meta": {"title":"Luna di miele in Vietnam in 8 giorni | WingSide","description":"Hanoi, Tam Coc, Ha Long e Hoi An con tre esperienze romantiche private.","breadcrumbLabel":"Luna di miele in Vietnam"}
     },
@@ -771,7 +788,7 @@
         {"dayNumber":7,"title":"Partenza da Ho Chi Minh City","route":"Hotel - aeroporto di Tan Son Nhat","summary":"Colazione, tempo libero e trasferimento in aeroporto. Check-out standard alle 12:00; il posticipo è soggetto a disponibilità e supplemento.","meals":"Colazione","transport":"Trasferimento privato in aeroporto"}
       ],
       "includes": ["Camera doppia o matrimoniale, escluse eventuali notti in treno o homestay","Trasporti e trasferimenti aeroportuali","Guide locali in lingua inglese","Ingressi previsti","Volo Hanoi - Ho Chi Minh City","Pasti indicati"],
-      "excludes": ["Check-in anticipato e check-out posticipato","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio"],
+      "excludes": ["Check-in anticipato e check-out posticipato","Supplemento per l'alta stagione ed eventuale cena obbligatoria in hotel","Voli internazionali e tasse","Visto per il Vietnam; passaporto valido oltre 6 mesi e con 3 pagine libere","Assicurazione di viaggio","Mance, lavanderia e spese personali","Pasti non indicati e acqua durante i pasti","Mance consigliate di 3-5 USD per persona al giorno","Mance facoltative secondo la qualità del servizio","Supplemento carburante applicabile se il prezzo del carburante aumenta di oltre il 15%"],
       "servicesSummary": {"hotelSummary":"Hotel a Hanoi e Ho Chi Minh City; una notte in crociera.","mealsSummary":"Colazioni, pranzi previsti e pensione completa in crociera.","transportSummary":"Veicoli, crociera, barche a Ben Tre e volo interno.","operatorNotes":"Ha Long dipende dal meteo. Mausoleo di Ho Chi Minh e Notre-Dame hanno limitazioni temporanee."},
       "meta": {"title":"Il Vietnam in 7 giorni | WingSide","description":"Una settimana tra Hanoi, Ha Long, Ho Chi Minh City, Cu Chi e Ben Tre.","breadcrumbLabel":"Il Vietnam in una settimana"}
     }
