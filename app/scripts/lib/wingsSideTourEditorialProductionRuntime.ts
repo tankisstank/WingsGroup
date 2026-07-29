@@ -458,13 +458,19 @@ const mutatePlan = async ({
           for (const item of includes) {
             if (item.id === undefined || typeof item.label !== 'string') continue
             await transaction.execute(
-              sql`INSERT INTO "tour_products_includes_locales" ("label", "_locale", "_parent_id") VALUES (${item.label}, 'en', ${item.id}) ON CONFLICT ("_locale", "_parent_id") DO UPDATE SET "label" = EXCLUDED."label"`,
+              sql`UPDATE "tour_products_includes_locales" SET "label" = ${item.label} WHERE "_locale" = 'en' AND "_parent_id" = ${item.id}`,
+          )
+          await transaction.execute(
+            sql`INSERT INTO "tour_products_includes_locales" ("label", "_locale", "_parent_id") SELECT ${item.label}, 'en', ${item.id} WHERE NOT EXISTS (SELECT 1 FROM "tour_products_includes_locales" WHERE "_locale" = 'en' AND "_parent_id" = ${item.id})`,
             )
           }
           for (const item of excludes) {
             if (item.id === undefined || typeof item.label !== 'string') continue
             await transaction.execute(
-              sql`INSERT INTO "tour_products_excludes_locales" ("label", "_locale", "_parent_id") VALUES (${item.label}, 'en', ${item.id}) ON CONFLICT ("_locale", "_parent_id") DO UPDATE SET "label" = EXCLUDED."label"`,
+              sql`UPDATE "tour_products_excludes_locales" SET "label" = ${item.label} WHERE "_locale" = 'en' AND "_parent_id" = ${item.id}`,
+          )
+          await transaction.execute(
+            sql`INSERT INTO "tour_products_excludes_locales" ("label", "_locale", "_parent_id") SELECT ${item.label}, 'en', ${item.id} WHERE NOT EXISTS (SELECT 1 FROM "tour_products_excludes_locales" WHERE "_locale" = 'en' AND "_parent_id" = ${item.id})`,
             )
           }
         } else {
