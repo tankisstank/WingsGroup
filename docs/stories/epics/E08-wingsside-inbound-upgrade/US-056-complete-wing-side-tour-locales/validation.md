@@ -96,3 +96,10 @@ Prepared locally and on disposable PostgreSQL:
 
 Production backup, production mutation, public strict API audit and browser E2E
 remain pending explicit production approval.
+
+Independent review also requires the following before production:
+
+- signed English commercial-array mutation with verify and rollback;
+- enforced encrypted backup/checksum/restore-drill evidence in the write CLI;
+- a parent full-plan checksum embedded in the canary plan and required during
+  promotion/rollback.

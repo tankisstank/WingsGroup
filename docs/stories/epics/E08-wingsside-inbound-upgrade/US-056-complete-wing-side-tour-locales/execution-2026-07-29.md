@@ -62,10 +62,18 @@ VI, IT, ES and PT.
 
 ## Remaining release gates
 
-1. Create and verify the production PostgreSQL backup/restore artifact.
-2. Obtain explicit approval for production database mutation and deployment.
-3. Apply the missing migration, then execute the signed one-tour canary and strict production readback.
-4. Apply and verify the remaining 84 tour-locale pairs.
-5. Run strict API audit and browser QA for 22 Journeys cards and 110 detail routes in `en/vi/es/it/pt`.
+Independent final review keeps production promotion blocked until:
+
+1. English production receives its own signed before/after mutation,
+   transaction, strict verify and rollback. In-memory normalization makes
+   locale planning deterministic but does not repair the English database row.
+2. The production CLI requires an encrypted backup manifest/checksum and a
+   passed restore-drill artifact, not only an operator confirmation string.
+3. The saved canary plan is cryptographically linked to the original full plan
+   so promotion and rollback cannot be performed from a newly generated
+   post-canary before-state.
+4. Explicit approval is obtained for production migration, data mutation and deployment.
+5. The linked full plan is applied and strict API/browser QA covers 22 Journeys
+   cards and 110 detail routes in `en/vi/es/it/pt`.
 
 No production database, credentials, or deployment were modified by this execution.
