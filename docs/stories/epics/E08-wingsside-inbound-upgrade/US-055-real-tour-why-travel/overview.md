@@ -2,13 +2,12 @@
 
 ## Status
 
-in progress / HOLD — R4 local catalog, PostgreSQL lifecycle, exact 110-route
-matrix and governed Home → Tour Detail matrix are technically accepted on
-integration HEAD `ef729d768e6d6f01049374f04f20491fb3ea0b76`. Delivery is not
-complete: D4-C still has 220 watermark-positive assets and zero accepted
-faithful replacements; rights/publication evidence, combined `SHIP`, explicit
-production authority and D7-A canary/promotion proof remain open. No production
-change was performed.
+in progress / HOLD — production authority was granted on 2026-07-29, but the
+independent R5 combined WP6 review returned `HOLD`, not `SHIP`. D4-C still has
+220 watermark-positive assets and zero accepted faithful replacements;
+rights/publication evidence and the exact production backup/restore/signed
+plan/rollback package remain absent. D7-A therefore stopped before any
+production apply, deployment, canary, traffic switch or promotion.
 
 ## Lane
 

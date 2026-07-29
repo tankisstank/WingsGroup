@@ -209,3 +209,30 @@ negatives; all four near-duplicate candidates were rejected and zero faithful
 replacements were accepted. D4-C, rights/publication evidence, combined
 `SHIP`, production approval and D7-A remain blocked. Overall status stays
 in progress / HOLD.
+
+## S3 production-gate update — run r5
+
+The project owner granted production authority on 2026-07-29. The independent
+combined WP6 review then reproduced the required adverse release attacks using
+12 focused files / 145 tests, all passing, and verified the immutable R4
+lifecycle evidence.
+
+The release verdict is `HOLD` because three P0 gates remain:
+
+- D4-C has 220 watermark-positive hashes and zero accepted replacements;
+- protected ownership/license/publication evidence is absent; and
+- the exact production-target backup, restore drill, signed apply/rollback
+  package and protected target proof are absent.
+
+An independent media review also passes 3 files / 31 tests and confirms 221
+positive references across 21/22 tours, including five hero references. The
+current candidate mapping is explicitly no-write. Excluding the positive
+assets would break the accepted exact media contract and requires a new plan
+and rehearsal.
+
+Production preflight found the current live release at
+`fadd22c68de26d0c1fdd281d77bac58b25f12625`; the candidate
+`ef729d768e6d6f01049374f04f20491fb3ea0b76` is not published to `origin`, and
+the required US-055 protected production bindings are not configured. D7-A
+therefore stopped before every mutation. No production data, code, canary or
+traffic change occurred.

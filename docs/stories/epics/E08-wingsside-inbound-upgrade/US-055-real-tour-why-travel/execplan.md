@@ -400,3 +400,26 @@ were rejected and zero faithful replacements were accepted. WP6 has not issued
 a combined release `SHIP`. WP7 remains approval-gated and was not executed.
 The media-completion, production-authority and canary definitions of done
 therefore remain unmet; the story stays in progress / HOLD.
+
+## R5 production-gate appendix
+
+The owner granted Gate C production authority on 2026-07-29. The independent
+combined WP6 review executed next and returned `HOLD` after 145/145 focused
+adverse-release tests passed. This is not a `SHIP` decision:
+
+- D4-C remains 220 positive / zero accepted replacements;
+- protected rights/publication evidence is absent; and
+- no exact production-target backup, restore drill, signed apply/rollback or
+  protected target-proof package exists.
+
+The separate media gate confirms 221 affected references on 21/22 tours,
+including five hero references, and no production-safe media manifest.
+Production preflight identified the current release as
+`fadd22c68de26d0c1fdd281d77bac58b25f12625`, while the candidate
+`ef729d768e6d6f01049374f04f20491fb3ea0b76` is not published to `origin` and
+its protected release bindings are absent.
+
+Because WP7 depends on WP6 `SHIP`, D7-A stopped before plan apply, database
+write, deploy, canary, traffic switch and promotion. Production authority
+remains recorded; the failed dependency must be resolved and WP6 must return
+`SHIP` before that authority can be exercised.
