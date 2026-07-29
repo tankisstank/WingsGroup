@@ -576,10 +576,14 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
     entriesByLocale.set(entry.locale, (entriesByLocale.get(entry.locale) || 0) + 1)
     entriesBySlug.set(entry.slug, (entriesBySlug.get(entry.slug) || 0) + 1)
     if (!entry.slug.trim() || !entry.sourceChecksum.trim()) {
-      throw new Error(`WingSide tour editorial plan entry is missing identity/checksum: ${entry.locale}:${entry.slug}`)
+      throw new Error(
+        `WingSide tour editorial plan entry is missing identity/checksum: ${entry.locale}:${entry.slug}`,
+      )
     }
     if (!entry.beforeChecksum.trim() || !entry.afterChecksum.trim()) {
-      throw new Error(`WingSide tour editorial plan entry is missing before/after checksum: ${entry.locale}:${entry.slug}`)
+      throw new Error(
+        `WingSide tour editorial plan entry is missing before/after checksum: ${entry.locale}:${entry.slug}`,
+      )
     }
   }
   for (const locale of wingsSideTourEditorialLocales) {
@@ -589,7 +593,9 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
   }
   for (const [slug, count] of entriesBySlug) {
     if (count !== wingsSideTourEditorialLocales.length) {
-      throw new Error(`WingSide tour editorial plan must contain exactly 4 locale entries for ${slug}`)
+      throw new Error(
+        `WingSide tour editorial plan must contain exactly 4 locale entries for ${slug}`,
+      )
     }
   }
   for (const entry of plan.entries) {
@@ -674,6 +680,113 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
     throw new Error('WingSide tour editorial production plan aggregate checksum mismatch')
   }
 }
+
+const editorialCanaryMarker = ':canary:'
+
+export const deriveWingsSideTourEditorialCanaryPlan = ({
+  plan,
+  slug,
+}: {
+  plan: WingsSideTourEditorialPlan
+  slug: string
+}): WingsSideTourEditorialPlan => {
+  assertEditorialPlanShape(plan)
+  const normalizedSlug = slug.trim()
+  const canaryEntries = plan.entries.filter((entry) => entry.slug === normalizedSlug)
+  if (
+    !normalizedSlug ||
+    canaryEntries.length !== wingsSideTourEditorialLocales.length ||
+    new Set(canaryEntries.map(({ locale }) => locale)).size !== wingsSideTourEditorialLocales.length
+  ) {
+    throw new Error(`WingSide tour editorial canary slug is not in the exact inventory: ${slug}`)
+  }
+
+  const entries = plan.entries.map((entry) =>
+    entry.slug === normalizedSlug
+      ? cloneJSON(entry)
+      : {
+          ...cloneJSON(entry),
+          after: cloneJSON(entry.before),
+          afterChecksum: entry.beforeChecksum,
+          wrapperAfter: cloneJSON(entry.wrapperBefore),
+        },
+  )
+  const canaryPlan: WingsSideTourEditorialPlan = {
+    ...cloneJSON(plan),
+    aggregateChecksums: {
+      before: plan.aggregateChecksums.before,
+      after: editorialChecksum(entries.map(({ afterChecksum }) => afterChecksum)),
+    },
+    entries,
+    runID: `${plan.runID}${editorialCanaryMarker}${normalizedSlug}`,
+  }
+  assertWingsSideTourEditorialCanaryPlan({ plan: canaryPlan, slug: normalizedSlug })
+  return canaryPlan
+}
+
+export const assertWingsSideTourEditorialCanaryPlan = ({
+  plan,
+  slug,
+}: {
+  plan: WingsSideTourEditorialPlan
+  slug: string
+}) => {
+  assertEditorialPlanShape(plan)
+  const normalizedSlug = slug.trim()
+  if (!normalizedSlug || !plan.runID.endsWith(`${editorialCanaryMarker}${normalizedSlug}`)) {
+    throw new Error('WingSide tour editorial canary marker does not match --canary-slug')
+  }
+  const targeted = plan.entries.filter((entry) => entry.slug === normalizedSlug)
+  if (
+    targeted.length !== wingsSideTourEditorialLocales.length ||
+    new Set(targeted.map(({ locale }) => locale)).size !== wingsSideTourEditorialLocales.length
+  ) {
+    throw new Error(
+      'WingSide tour editorial canary must target exactly one tour across vi,it,es,pt',
+    )
+  }
+  if (
+    plan.entries.some(
+      (entry) => entry.slug !== normalizedSlug && entry.afterChecksum !== entry.beforeChecksum,
+    )
+  ) {
+    throw new Error('WingSide tour editorial canary contains a write outside its selected slug')
+  }
+}
+
+export const isWingsSideTourEditorialCanaryPlan = (plan: WingsSideTourEditorialPlan) =>
+  plan.runID.includes(editorialCanaryMarker)
+
+export const normalizeWingsSideEnglishCommercialArrays = ({
+  cardinalities,
+  sourceTours,
+}: {
+  cardinalities: Map<string, { excludes: number; includes: number }>
+  sourceTours: TourProduct[]
+}): TourProduct[] =>
+  sourceTours.map((source) => {
+    const expected = cardinalities.get(source.slug)
+    if (!expected) {
+      throw new Error(`Missing approved commercial cardinality for English tour: ${source.slug}`)
+    }
+    const includes = Array.isArray(source.includes) ? source.includes : []
+    const excludes = Array.isArray(source.excludes) ? source.excludes : []
+    if (includes.length === expected.includes && excludes.length === expected.excludes) {
+      return source
+    }
+    if (excludes.length === 0 && includes.length === expected.includes + expected.excludes) {
+      return {
+        ...source,
+        excludes: cloneJSON(includes.slice(expected.includes)),
+        includes: cloneJSON(includes.slice(0, expected.includes)),
+      }
+    }
+    throw new Error(
+      `English commercial array drift for ${source.slug}: ` +
+        `includes=${includes.length}, excludes=${excludes.length}, ` +
+        `expected=${expected.includes}/${expected.excludes}`,
+    )
+  })
 
 export const buildWingsSideTourEditorialPlan = ({
   beforeByKey,

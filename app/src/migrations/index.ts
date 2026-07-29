@@ -23,6 +23,7 @@ import * as migration_20260724_130000_wing_side_display_brand from './20260724_1
 import * as migration_20260725_090000_wings_side_home_tour_curation from './20260725_090000_wings_side_home_tour_curation'
 import * as migration_20260728_090000_wings_side_why_travel_tours from './20260728_090000_wings_side_why_travel_tours'
 import * as migration_20260728_100000_lead_enquiry_context from './20260728_100000_lead_enquiry_context'
+import * as migration_20260729_150000_wings_side_home_why_tour_slots from './20260729_150000_wings_side_home_why_tour_slots'
 
 export const migrations = [
   {
@@ -149,5 +150,10 @@ export const migrations = [
     up: migration_20260728_100000_lead_enquiry_context.up,
     down: migration_20260728_100000_lead_enquiry_context.down,
     name: '20260728_100000_lead_enquiry_context',
+  },
+  {
+    up: migration_20260729_150000_wings_side_home_why_tour_slots.up,
+    down: migration_20260729_150000_wings_side_home_why_tour_slots.down,
+    name: '20260729_150000_wings_side_home_why_tour_slots',
   },
 ]

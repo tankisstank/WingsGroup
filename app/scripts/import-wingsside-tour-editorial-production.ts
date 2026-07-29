@@ -18,7 +18,10 @@ import {
 import { assertWingsSideCatalogDevelopmentTeamApprovalAudit } from './lib/wingsSideTourEditorialCatalogAuthoring'
 import {
   assertEditorialPlanShape,
+  assertWingsSideTourEditorialCanaryPlan,
+  deriveWingsSideTourEditorialCanaryPlan,
   editorialChecksum,
+  isWingsSideTourEditorialCanaryPlan,
   type WingsSideTourEditorialPlan,
 } from './lib/wingsSideTourEditorialProduction'
 import {
@@ -149,7 +152,9 @@ const resolveAdmin = async (payload: Payload, phase: Phase) => {
       updatedAt: new Date(0).toISOString(),
     }
   }
-  const email = String(argumentValue('--admin-email') || process.env.IMPORT_ADMIN_EMAIL || '').trim()
+  const email = String(
+    argumentValue('--admin-email') || process.env.IMPORT_ADMIN_EMAIL || '',
+  ).trim()
   if (!email) throw new Error(`${phase} requires --admin-email or IMPORT_ADMIN_EMAIL`)
   const result = await payload.find({
     collection: 'users',
@@ -188,6 +193,12 @@ const readPlan = async () => {
   const planSha256 = editorialChecksum(plan)
   if (argumentValue('--plan-sha256') !== planSha256) {
     throw new Error('Supplied plan SHA-256 does not match canonical plan')
+  }
+  const canarySlug = String(argumentValue('--canary-slug') || '').trim()
+  if (canarySlug) {
+    assertWingsSideTourEditorialCanaryPlan({ plan, slug: canarySlug })
+  } else if (isWingsSideTourEditorialCanaryPlan(plan)) {
+    throw new Error('A canary plan requires the matching --canary-slug')
   }
   return { plan, planPath: resolved, planSha256 }
 }
@@ -274,20 +285,30 @@ const main = async () => {
     }
 
     if (phase === 'plan') {
-      const plan = await createWingsSideTourEditorialProductionPlan({
+      const fullPlan = await createWingsSideTourEditorialProductionPlan({
         catalog,
         payload,
         releaseSourceCommit,
         req,
         runID: randomUUID(),
       })
+      const canarySlug = String(argumentValue('--canary-slug') || '').trim()
+      const plan = canarySlug
+        ? deriveWingsSideTourEditorialCanaryPlan({ plan: fullPlan, slug: canarySlug })
+        : fullPlan
       const outputPath = await atomicWriteJSON(
         argumentValue('--output') ||
-          path.resolve('artifacts', 'release', 'wingsside-tour-editorial', `plan-${Date.now()}.json`),
+          path.resolve(
+            'artifacts',
+            'release',
+            'wingsside-tour-editorial',
+            `plan-${Date.now()}.json`,
+          ),
         plan,
       )
       log({
         entries: plan.entries.length,
+        ...(canarySlug ? { canarySlug } : {}),
         outputPath,
         phase,
         planSha256: editorialChecksum(plan),
@@ -304,6 +325,7 @@ const main = async () => {
         protectedSha256: process.env.WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_SHA256,
       })
       const result = await verifyWingsSideTourEditorialProductionPlan({
+        catalog,
         expectedState: 'after',
         payload,
         plan,

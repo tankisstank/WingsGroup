@@ -22,6 +22,7 @@ import {
   buildWingsSideTourEditorialPlan,
   editorialChecksum,
   editorialRelationID,
+  normalizeWingsSideEnglishCommercialArrays,
   snapshotEditorialOwnedFields,
   snapshotEditorialSharedServices,
   snapshotEditorialWrapperFields,
@@ -33,6 +34,23 @@ const productionContext = {
   ...wingsSideLocalizationBackfillContext,
   releaseOperation: 'wingsside-tour-editorial-production-import',
 }
+
+const commercialCardinalitiesFromCatalog = (catalog: WingsSideTourEditorialCatalog) =>
+  new Map(
+    catalog.tours.map((tour) => {
+      const approved = tour.locales.vi
+      for (const locale of wingsSideTourEditorialLocales) {
+        const candidate = tour.locales[locale]
+        if (
+          candidate.includes.length !== approved.includes.length ||
+          candidate.excludes.length !== approved.excludes.length
+        ) {
+          throw new Error(`Approved commercial cardinality conflict for ${tour.slug}`)
+        }
+      }
+      return [tour.slug, { excludes: approved.excludes.length, includes: approved.includes.length }]
+    }),
+  )
 
 type ProductionInventory = {
   beforeByKey: Map<string, TourProduct>
@@ -150,14 +168,19 @@ const findWrapper = async ({
 }
 
 export const loadWingsSideTourEditorialProductionInventory = async ({
+  commercialCardinalities,
   payload,
   req,
 }: {
+  commercialCardinalities: Map<string, { excludes: number; includes: number }>
   payload: Payload
   req: PayloadRequest
 }): Promise<ProductionInventory> => {
   const siteID = await findSiteID(payload, req)
-  const sourceTours = await findTours({ locale: 'en', payload, req, siteID })
+  const sourceTours = normalizeWingsSideEnglishCommercialArrays({
+    cardinalities: commercialCardinalities,
+    sourceTours: await findTours({ locale: 'en', payload, req, siteID }),
+  })
   if (sourceTours.length !== wingsSideTourEditorialExpectedTourCount) {
     throw new Error(
       `Expected exactly 22 published WingSide English tours, found ${sourceTours.length}`,
@@ -247,7 +270,11 @@ export const createWingsSideTourEditorialProductionPlan = async ({
   req: PayloadRequest
   runID: string
 }) => {
-  const inventory = await loadWingsSideTourEditorialProductionInventory({ payload, req })
+  const inventory = await loadWingsSideTourEditorialProductionInventory({
+    commercialCardinalities: commercialCardinalitiesFromCatalog(catalog),
+    payload,
+    req,
+  })
   assertWingsSideTourEditorialCatalog({
     catalog,
     sourceTours: inventory.sourceTours,
@@ -296,17 +323,23 @@ const assertPlanMatchesInventory = ({
 }
 
 export const verifyWingsSideTourEditorialProductionPlan = async ({
+  catalog,
   expectedState,
   payload,
   plan,
   req,
 }: {
+  catalog: WingsSideTourEditorialCatalog
   expectedState: 'after' | 'before'
   payload: Payload
   plan: WingsSideTourEditorialPlan
   req: PayloadRequest
 }) => {
-  const inventory = await loadWingsSideTourEditorialProductionInventory({ payload, req })
+  const inventory = await loadWingsSideTourEditorialProductionInventory({
+    commercialCardinalities: commercialCardinalitiesFromCatalog(catalog),
+    payload,
+    req,
+  })
   assertPlanMatchesInventory({ inventory, plan })
   const mismatches: string[] = []
   for (const entry of plan.sharedServiceEntries) {
@@ -369,7 +402,11 @@ const mutatePlan = async ({
     if (!transactionStarted || !req.transactionID) {
       throw new Error('Database adapter did not start the required tour editorial transaction')
     }
-    const inventory = await loadWingsSideTourEditorialProductionInventory({ payload, req })
+    const inventory = await loadWingsSideTourEditorialProductionInventory({
+      commercialCardinalities: commercialCardinalitiesFromCatalog(catalog),
+      payload,
+      req,
+    })
     assertPlanMatchesInventory({ inventory, plan })
     const sharedStates = new Set(
       plan.sharedServiceEntries.map((entry) => {
@@ -476,6 +513,7 @@ const mutatePlan = async ({
     if (direction === 'rollback') await mutateSharedServices()
 
     await verifyWingsSideTourEditorialProductionPlan({
+      catalog,
       expectedState: direction === 'apply' ? 'after' : 'before',
       payload,
       plan,
