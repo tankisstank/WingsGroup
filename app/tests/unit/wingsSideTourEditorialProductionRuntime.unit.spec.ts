@@ -119,7 +119,7 @@ const sourceWrapper = (index: number): Page =>
     updatedAt: '2026-01-01T00:00:00.000Z',
   }) as Page
 
-const fixture = () => {
+const fixture = ({ mutateEnglishOnLocalizedArrayWrite = false } = {}) => {
   const sources = Array.from({ length: 22 }, (_, index) => sourceTour(index + 1))
   const sourceWrappers = Array.from({ length: 22 }, (_, index) => sourceWrapper(index + 1))
   const approvalArtifactID = 'transaction-runtime-fixture'
@@ -291,6 +291,18 @@ const fixture = () => {
           ...state[args.locale][index]!,
           ...clone(args.data),
         } as TourProduct
+        if (
+          mutateEnglishOnLocalizedArrayWrite &&
+          args.locale !== 'en' &&
+          ('includes' in args.data || 'excludes' in args.data)
+        ) {
+          const englishIndex = state.en.findIndex((tour) => String(tour.id) === String(args.id))
+          state.en[englishIndex] = {
+            ...state.en[englishIndex]!,
+            ...(args.data.includes ? { includes: clone(args.data.includes) } : {}),
+            ...(args.data.excludes ? { excludes: clone(args.data.excludes) } : {}),
+          } as TourProduct
+        }
         return clone(state[args.locale][index])
       },
     ),
@@ -490,5 +502,36 @@ describe('WingSide tour editorial production transaction runtime', () => {
         req: req as never,
       }),
     ).rejects.toThrow('refused mixed shared service state')
+  })
+
+  it('repairs English commercial arrays when a localized array write leaks into the English row', async () => {
+    const { catalog, payload, req, state } = fixture({ mutateEnglishOnLocalizedArrayWrite: true })
+    const plan = await createWingsSideTourEditorialProductionPlan({
+      catalog,
+      createdAt: '2026-07-26T00:00:00.000Z',
+      payload: payload as never,
+      releaseSourceCommit: 'a'.repeat(40),
+      req: req as never,
+      runID: 'localized-array-leak-proof',
+    })
+
+    await expect(
+      applyWingsSideTourEditorialProductionPlan({
+        catalog,
+        payload: payload as never,
+        plan,
+        req: req as never,
+      }),
+    ).resolves.toEqual({ unchanged: 22, updated: 110 })
+    await expect(
+      verifyWingsSideTourEditorialProductionPlan({
+        catalog,
+        expectedState: 'after',
+        payload: payload as never,
+        plan,
+        req: req as never,
+      }),
+    ).resolves.toEqual({ checked: 88, state: 'after' })
+    expect(state().en[0]!.includes).toEqual([{ id: 'include-1', label: 'English included 1' }])
   })
 })
