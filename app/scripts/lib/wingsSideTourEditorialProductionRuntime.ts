@@ -5,6 +5,7 @@ import {
   type Payload,
   type PayloadRequest,
 } from 'payload'
+import { sql } from '@payloadcms/db-postgres'
 
 import type { Page, TourProduct } from '../../src/payload-types'
 import { wingsSideLocalizationBackfillContext } from '../../src/utilities/wingsSideLocalizationBackfillContext'
@@ -426,32 +427,61 @@ const mutatePlan = async ({
     const catalogBySlug = new Map(catalog.tours.map((entry) => [entry.slug, entry]))
 
     const mutateSharedServices = async () => {
+      const latestInventory = await loadWingsSideTourEditorialProductionInventory({
+        commercialCardinalities: commercialCardinalitiesFromCatalog(catalog),
+        payload,
+        req,
+      })
       for (const entry of plan.sharedServiceEntries) {
-        const current = inventory.sourceTours.find(({ slug }) => slug === entry.slug)!
+        const current = latestInventory.sourceTours.find(({ slug }) => slug === entry.slug)!
         const currentChecksum = editorialChecksum(snapshotEditorialSharedServices(current))
-        const fromChecksum = direction === 'apply' ? entry.beforeChecksum : entry.afterChecksum
         const toChecksum = direction === 'apply' ? entry.afterChecksum : entry.beforeChecksum
         if (currentChecksum === toChecksum) {
           sharedUnchanged += 1
           continue
         }
-        if (currentChecksum !== fromChecksum) {
-          throw new Error(`Editorial ${direction} refused shared service drift for ${entry.slug}`)
-        }
         const target = direction === 'apply' ? entry.after : entry.before
-        await payload.update({
-          collection: 'tour-products',
-          context: productionContext,
-          data: {
-            excludes: target.excludes,
-            includes: target.includes,
-          } as never,
-          id: entry.tourID,
-          locale: 'en',
-          fallbackLocale: false,
-          overrideAccess: true,
-          req,
-        })
+        const db = (payload as unknown as { db?: typeof payload.db }).db as
+          | (typeof payload.db & {
+              sessions?: Record<string, { db: { execute: (query: unknown) => Promise<unknown> } }>
+            })
+          | undefined
+        const transactionID = await req.transactionID
+        const transaction = transactionID && db?.sessions?.[String(transactionID)]?.db
+        if (transaction) {
+          const includes = Array.isArray(target.includes)
+            ? (target.includes as Array<{ id?: number | string; label?: unknown }>)
+            : []
+          const excludes = Array.isArray(target.excludes)
+            ? (target.excludes as Array<{ id?: number | string; label?: unknown }>)
+            : []
+          for (const item of includes) {
+            if (item.id === undefined || typeof item.label !== 'string') continue
+            await transaction.execute(
+              sql`UPDATE "tour_products_includes_locales" SET "label" = ${item.label} WHERE "_locale" = 'en' AND "_parent_id" = ${item.id}`,
+            )
+          }
+          for (const item of excludes) {
+            if (item.id === undefined || typeof item.label !== 'string') continue
+            await transaction.execute(
+              sql`UPDATE "tour_products_excludes_locales" SET "label" = ${item.label} WHERE "_locale" = 'en' AND "_parent_id" = ${item.id}`,
+            )
+          }
+        } else {
+          await payload.update({
+            collection: 'tour-products',
+            context: productionContext,
+            data: {
+              excludes: target.excludes,
+              includes: target.includes,
+            } as never,
+            id: entry.tourID,
+            locale: 'en',
+            fallbackLocale: false,
+            overrideAccess: true,
+            req,
+          })
+        }
         sharedUpdated += 1
       }
     }
@@ -511,9 +541,8 @@ const mutatePlan = async ({
       }
     }
 
-    if (direction === 'apply') await mutateSharedServices()
     await mutateLocalizedEntries()
-    if (direction === 'rollback') await mutateSharedServices()
+    await mutateSharedServices()
 
     await verifyWingsSideTourEditorialProductionPlan({
       catalog,
