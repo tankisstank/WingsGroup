@@ -90,16 +90,14 @@ Prepared locally and on disposable PostgreSQL:
 - Fresh migration and schema assertion: 4 tables, 10 enums, 10 foreign keys, 2 unique locale indexes.
 - Rehearsal seed: 22 tours, 22 wrappers, 5 locales.
 - Canary apply: 4 updated, 84 unchanged; strict verify checked 88.
-- Full apply after canary: 84 updated, 4 unchanged; strict verify checked 88.
-- Idempotent re-apply: 0 updated, 88 unchanged.
-- Rollback: 88 updated back to the signed before state.
+- Full apply after canary: 84 updated, 26 unchanged; strict verify checked 88.
+- Idempotent re-apply: 0 updated, 110 unchanged (22 English + 88 locale entries).
+- Rollback: 88 locale entries updated back to the signed before state; 22 English entries unchanged.
 
 Production backup, production mutation, public strict API audit and browser E2E
 remain pending explicit production approval.
 
-Independent review also requires the following before production:
-
-- signed English commercial-array mutation with verify and rollback;
-- enforced encrypted backup/checksum/restore-drill evidence in the write CLI;
-- a parent full-plan checksum embedded in the canary plan and required during
-  promotion/rollback.
+The three independent-review blockers are implemented and covered by the
+rehearsal: signed English commercial-array mutation, enforced encrypted
+backup/checksum/restore-drill evidence in the write CLI, and a parent full-plan
+checksum embedded in the canary plan and required during promotion/rollback.

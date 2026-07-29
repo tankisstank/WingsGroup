@@ -204,6 +204,39 @@ const readPlan = async () => {
   return { plan, planPath: resolved, planSha256 }
 }
 
+const readPlanAt = async (planPath: string) => {
+  const plan = JSON.parse(
+    await readFile(path.resolve(planPath), 'utf8'),
+  ) as WingsSideTourEditorialPlan
+  assertEditorialPlanShape(plan)
+  return { plan, planSha256: editorialChecksum(plan) }
+}
+
+const assertCanaryParent = async ({
+  canaryPlan,
+  canaryPlanSha256,
+  fullPlanSha256,
+  slug,
+}: {
+  canaryPlan?: WingsSideTourEditorialPlan
+  canaryPlanSha256?: string
+  fullPlanSha256: string
+  slug?: string
+}) => {
+  if (canaryPlan) {
+    if (!isWingsSideTourEditorialCanaryPlan(canaryPlan)) {
+      throw new Error('The supplied canary plan is not marked as a canary plan')
+    }
+    if (canaryPlan.parentPlanSha256 !== fullPlanSha256) {
+      throw new Error('Canary plan is not linked to this original full plan')
+    }
+    if (!canaryPlanSha256 || editorialChecksum(canaryPlan) !== canaryPlanSha256) {
+      throw new Error('Supplied canary plan SHA-256 does not match its canonical plan')
+    }
+    if (slug) assertWingsSideTourEditorialCanaryPlan({ plan: canaryPlan, slug })
+  }
+}
+
 const log = (value: Record<string, unknown>) => console.log(JSON.stringify(value))
 
 const mutationReleaseGuardArgs = ({
@@ -304,10 +337,7 @@ const main = async () => {
         runID: randomUUID(),
       })
       const canarySlug = String(argumentValue('--canary-slug') || '').trim()
-      const plan = canarySlug
-        ? deriveWingsSideTourEditorialCanaryPlan({ plan: fullPlan, slug: canarySlug })
-        : fullPlan
-      const outputPath = await atomicWriteJSON(
+      const outputPath = path.resolve(
         argumentValue('--output') ||
           path.resolve(
             'artifacts',
@@ -315,12 +345,22 @@ const main = async () => {
             'wingsside-tour-editorial',
             `plan-${Date.now()}.json`,
           ),
-        plan,
       )
+      const plan = canarySlug
+        ? deriveWingsSideTourEditorialCanaryPlan({ plan: fullPlan, slug: canarySlug })
+        : fullPlan
+      const fullOutputPath = canarySlug
+        ? path.resolve(argumentValue('--full-plan-output') || `${outputPath}.full.json`)
+        : undefined
+      if (fullOutputPath) await atomicWriteJSON(fullOutputPath, fullPlan)
+      const writtenOutputPath = await atomicWriteJSON(outputPath, plan)
       log({
         entries: plan.entries.length,
         ...(canarySlug ? { canarySlug } : {}),
-        outputPath,
+        ...(fullOutputPath
+          ? { fullPlanPath: fullOutputPath, fullPlanSha256: editorialChecksum(fullPlan) }
+          : {}),
+        outputPath: writtenOutputPath,
         phase,
         planSha256: editorialChecksum(plan),
         catalogSha256: catalogArtifact.catalogSha256,
@@ -330,6 +370,40 @@ const main = async () => {
     }
 
     const { plan, planPath, planSha256 } = preparedPlan!
+    const canarySlug = String(argumentValue('--canary-slug') || '').trim()
+    if (isWingsSideTourEditorialCanaryPlan(plan)) {
+      const parentPath = argumentValue('--parent-plan')
+      if (!parentPath || !canarySlug) {
+        throw new Error('Canary phases require --canary-slug and --parent-plan')
+      }
+      const { plan: parentPlan, planSha256: parentPlanSha256 } = await readPlanAt(parentPath)
+      if (parentPlanSha256 !== plan.parentPlanSha256) {
+        throw new Error('Canary parent plan checksum does not match the saved full plan')
+      }
+      await assertCanaryParent({
+        canaryPlan: plan,
+        canaryPlanSha256: planSha256,
+        fullPlanSha256: parentPlanSha256,
+        slug: canarySlug,
+      })
+    } else if (phase === 'apply' || phase === 'rollback') {
+      const canaryPath = argumentValue('--canary-plan')
+      const canarySha256 = argumentValue('--canary-plan-sha256')
+      if (!canaryPath) {
+        throw new Error(
+          'Full promotion/rollback requires --canary-plan linked to the original full plan',
+        )
+      }
+      const { plan: canaryPlan } = await readPlanAt(canaryPath)
+      await assertCanaryParent({
+        canaryPlan,
+        canaryPlanSha256: canarySha256,
+        fullPlanSha256: planSha256,
+      })
+    }
+    if (plan.releaseSourceCommit !== releaseSourceCommit) {
+      throw new Error('Release source commit does not match the editorial plan')
+    }
     if (phase === 'verify') {
       assertWingsSideEditorialCatalogArtifactBinding({
         catalogSha256: catalogArtifact.catalogSha256,

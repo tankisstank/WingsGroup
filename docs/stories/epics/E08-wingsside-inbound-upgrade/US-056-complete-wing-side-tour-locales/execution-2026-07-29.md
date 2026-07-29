@@ -46,14 +46,15 @@ Pages and 5 locales** successfully.
 
 ## Rehearsal and canary evidence
 
-- Focused suite: **4 files, 19 tests passed**.
+- Focused suite: **3 implementation files, 12 tests passed** (plus the existing localization suite).
 - Full signed plan: **88 entries / 22 tours / 4 target locales**.
-- Canary plan for `central-vietnam-adventure-4-days`: **4 updated, 84 unchanged**.
+- Signed English normalization: **22 before/after entries**, with aggregate and per-tour checksums.
+- Canary plan for `central-vietnam-adventure-4-days`: **4 updated, 106 unchanged** (88 locale entries plus 22 English entries are retained in the signed plan).
 - Canary strict readback: **88/88 checksums verified after apply**.
-- Full apply after canary: **84 updated, 4 unchanged**.
+- Full apply after canary: **84 updated, 26 unchanged** (English entries are included in the mutation count).
 - Full strict readback: **88/88 checksums verified**.
-- Idempotent full re-apply: **0 updated, 88 unchanged**.
-- Transactional rollback: **88 restored**, with before-state verification performed inside the rollback transaction.
+- Idempotent full re-apply: **0 updated, 110 unchanged**.
+- Transactional rollback: **88 locale entries restored and 22 English entries unchanged**, with before-state verification performed inside the rollback transaction.
 
 The canary plan retains all 88 signed entries; 84 non-target entries become
 checksum-verified no-ops. This preserves the exact inventory, source,
@@ -62,18 +63,14 @@ VI, IT, ES and PT.
 
 ## Remaining release gates
 
-Independent final review keeps production promotion blocked until:
+The three implementation blockers from independent review are now closed in code
+and disposable PostgreSQL rehearsal. Production promotion remains blocked only
+by operational approval and live-environment evidence:
 
-1. English production receives its own signed before/after mutation,
-   transaction, strict verify and rollback. In-memory normalization makes
-   locale planning deterministic but does not repair the English database row.
-2. The production CLI requires an encrypted backup manifest/checksum and a
-   passed restore-drill artifact, not only an operator confirmation string.
-3. The saved canary plan is cryptographically linked to the original full plan
-   so promotion and rollback cannot be performed from a newly generated
-   post-canary before-state.
-4. Explicit approval is obtained for production migration, data mutation and deployment.
-5. The linked full plan is applied and strict API/browser QA covers 22 Journeys
+1. Generate and retain the real encrypted production backup, checksum manifest
+   and successful restore-drill evidence.
+2. Obtain explicit approval for production migration, data mutation and deployment.
+3. Apply the linked full plan and run strict API/browser QA across 22 Journeys
    cards and 110 detail routes in `en/vi/es/it/pt`.
 
 No production database, credentials, or deployment were modified by this execution.

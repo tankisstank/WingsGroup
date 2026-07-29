@@ -155,6 +155,15 @@ export type WingsSideTourEditorialServiceRowLedgerEntry = {
   tourID: number | string
 }
 
+export type WingsSideEnglishCommercialNormalizationEntry = {
+  after: { excludes: unknown; includes: unknown }
+  afterChecksum: string
+  before: { excludes: unknown; includes: unknown }
+  beforeChecksum: string
+  slug: string
+  tourID: number | string
+}
+
 export type WingsSideTourEditorialPlan = {
   aggregateChecksums: { after: string; before: string }
   approvalSnapshot: PricingApprovalSnapshot
@@ -173,6 +182,13 @@ export type WingsSideTourEditorialPlan = {
   sharedServiceEntries: WingsSideTourEditorialSharedServiceEntry[]
   serviceRowLedger: WingsSideTourEditorialServiceRowLedgerEntry[]
   serviceRowLedgerChecksum: string
+  /** SHA-256 of the complete pre-canary plan when this is a canary plan. */
+  parentPlanSha256?: string
+  /** Signed English production repair. Optional for backwards-compatible plans. */
+  englishNormalization?: {
+    aggregateChecksums: { after: string; before: string }
+    entries: WingsSideEnglishCommercialNormalizationEntry[]
+  }
 }
 
 type Relation = null | number | string | undefined | { id?: number | string }
@@ -679,6 +695,36 @@ export const assertEditorialPlanShape = (plan: WingsSideTourEditorialPlan) => {
   if (before !== plan.aggregateChecksums.before || after !== plan.aggregateChecksums.after) {
     throw new Error('WingSide tour editorial production plan aggregate checksum mismatch')
   }
+  if (plan.englishNormalization) {
+    const english = plan.englishNormalization
+    if (english.entries.length !== wingsSideTourEditorialExpectedTourCount) {
+      throw new Error('English normalization must contain exactly 22 entries')
+    }
+    const slugs = english.entries.map((entry) => entry.slug)
+    if (new Set(slugs).size !== slugs.length || slugs.some((slug) => !slug.trim())) {
+      throw new Error('English normalization contains duplicate or empty slugs')
+    }
+    for (const entry of english.entries) {
+      if (
+        editorialChecksum(entry.before) !== entry.beforeChecksum ||
+        editorialChecksum(entry.after) !== entry.afterChecksum
+      ) {
+        throw new Error(`English normalization checksum mismatch: ${entry.slug}`)
+      }
+    }
+    const englishBefore = editorialChecksum(
+      english.entries.map(({ beforeChecksum }) => beforeChecksum),
+    )
+    const englishAfter = editorialChecksum(
+      english.entries.map(({ afterChecksum }) => afterChecksum),
+    )
+    if (
+      englishBefore !== english.aggregateChecksums.before ||
+      englishAfter !== english.aggregateChecksums.after
+    ) {
+      throw new Error('English normalization aggregate checksum mismatch')
+    }
+  }
 }
 
 const editorialCanaryMarker = ':canary:'
@@ -711,14 +757,26 @@ export const deriveWingsSideTourEditorialCanaryPlan = ({
           wrapperAfter: cloneJSON(entry.wrapperBefore),
         },
   )
+  const sharedServiceEntries = plan.sharedServiceEntries.map((entry) => ({
+    ...cloneJSON(entry),
+    after: cloneJSON(entry.before),
+    afterChecksum: entry.beforeChecksum,
+  }))
   const canaryPlan: WingsSideTourEditorialPlan = {
     ...cloneJSON(plan),
     aggregateChecksums: {
       before: plan.aggregateChecksums.before,
-      after: editorialChecksum(entries.map(({ afterChecksum }) => afterChecksum)),
+      after: editorialChecksum({
+        approvalSnapshotChecksum: plan.approvalSnapshotChecksum,
+        localizedEntries: entries.map(({ afterChecksum }) => afterChecksum),
+        serviceRowLedgerChecksum: plan.serviceRowLedgerChecksum,
+        sharedServiceEntries: sharedServiceEntries.map(({ afterChecksum }) => afterChecksum),
+      }),
     },
     entries,
+    parentPlanSha256: editorialChecksum(plan),
     runID: `${plan.runID}${editorialCanaryMarker}${normalizedSlug}`,
+    sharedServiceEntries,
     ...(plan.englishNormalization
       ? {
           englishNormalization: {
@@ -752,6 +810,9 @@ export const assertWingsSideTourEditorialCanaryPlan = ({
   const normalizedSlug = slug.trim()
   if (!normalizedSlug || !plan.runID.endsWith(`${editorialCanaryMarker}${normalizedSlug}`)) {
     throw new Error('WingSide tour editorial canary marker does not match --canary-slug')
+  }
+  if (!plan.parentPlanSha256 || !/^[0-9a-f]{64}$/u.test(plan.parentPlanSha256)) {
+    throw new Error('WingSide tour editorial canary is missing its parent full-plan checksum')
   }
   const targeted = plan.entries.filter((entry) => entry.slug === normalizedSlug)
   if (
@@ -962,6 +1023,36 @@ export const buildWingsSideTourEditorialPlan = ({
     sharedServiceEntries,
     serviceRowLedger,
     serviceRowLedgerChecksum,
+  }
+  }
+  if (englishBeforeBySlug) {
+    const englishEntries = sourceTours.map((source) => {
+      const beforeSource = englishBeforeBySlug.get(source.slug)
+      if (!beforeSource) throw new Error(`Missing English normalization snapshot: ${source.slug}`)
+      const before = {
+        excludes: cloneJSON((beforeSource as Record<string, unknown>).excludes ?? []),
+        includes: cloneJSON((beforeSource as Record<string, unknown>).includes ?? []),
+      }
+      const after = {
+        excludes: cloneJSON(source.excludes ?? []),
+        includes: cloneJSON(source.includes ?? []),
+      }
+      return {
+        after,
+        afterChecksum: editorialChecksum(after),
+        before,
+        beforeChecksum: editorialChecksum(before),
+        slug: source.slug,
+        tourID: source.id,
+      }
+    })
+    plan.englishNormalization = {
+      aggregateChecksums: {
+        after: editorialChecksum(englishEntries.map(({ afterChecksum }) => afterChecksum)),
+        before: editorialChecksum(englishEntries.map(({ beforeChecksum }) => beforeChecksum)),
+      },
+      entries: englishEntries,
+    }
   }
   assertEditorialPlanShape(plan)
   return plan
