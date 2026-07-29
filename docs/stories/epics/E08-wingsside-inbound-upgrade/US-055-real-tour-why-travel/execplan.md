@@ -423,3 +423,16 @@ Because WP7 depends on WP6 `SHIP`, D7-A stopped before plan apply, database
 write, deploy, canary, traffic switch and promotion. Production authority
 remains recorded; the failed dependency must be resolved and WP6 must return
 `SHIP` before that authority can be exercised.
+
+## R6 media acceptance appendix
+
+The owner subsequently accepted the current media set on 2026-07-29 and
+instructed the release to continue. That decision reclassifies the R5 D4-C
+media finding from a mandatory replacement/removal blocker into an accepted
+publication risk for this release. The factual media counts from R5 remain
+unchanged and must stay visible in the release record.
+
+D7-A still requires the remaining production-safety package before mutation:
+immutable release source, exact production-target backup, restore drill, signed
+catalog/plan binding, rollback release binding, canary validation and live
+post-release QA.

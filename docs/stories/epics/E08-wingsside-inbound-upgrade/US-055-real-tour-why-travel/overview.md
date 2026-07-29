@@ -2,12 +2,12 @@
 
 ## Status
 
-in progress / HOLD — production authority was granted on 2026-07-29, but the
-independent R5 combined WP6 review returned `HOLD`, not `SHIP`. D4-C still has
-220 watermark-positive assets and zero accepted faithful replacements;
-rights/publication evidence and the exact production backup/restore/signed
-plan/rollback package remain absent. D7-A therefore stopped before any
-production apply, deployment, canary, traffic switch or promotion.
+in progress / production continuation — production authority was granted on
+2026-07-29, and the owner subsequently accepted the current media set for this
+release. The R5 media audit remains canonical evidence, but D4-C is no longer a
+mandatory replacement/removal blocker. D7-A still requires immutable release
+source, exact production backup/restore, signed catalog/plan binding, rollback
+release binding, canary validation and live post-release QA before completion.
 
 ## Lane
 

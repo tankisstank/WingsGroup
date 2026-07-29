@@ -236,3 +236,15 @@ Production preflight found the current live release at
 the required US-055 protected production bindings are not configured. D7-A
 therefore stopped before every mutation. No production data, code, canary or
 traffic change occurred.
+
+## S3 production continuation — run r6
+
+On 2026-07-29, the project owner accepted the current US-055 media set and
+instructed the release to continue. The R5 media audit counts remain the
+canonical asset-state evidence, but D4-C is no longer a mandatory
+replacement/removal blocker for this release.
+
+The remaining release blockers are production-safety and execution gates:
+immutable release source, exact production backup, restore drill, signed
+catalog/plan binding, rollback release binding, canary validation and live
+post-release QA.
