@@ -448,6 +448,7 @@ const mutatePlan = async ({
           } as never,
           id: entry.tourID,
           locale: 'en',
+          fallbackLocale: false,
           overrideAccess: true,
           req,
         })
@@ -489,6 +490,7 @@ const mutatePlan = async ({
           data: wrapperData as never,
           id: entry.wrapperPageID,
           locale: entry.locale,
+          fallbackLocale: false,
           overrideAccess: true,
           req,
         })
@@ -498,6 +500,7 @@ const mutatePlan = async ({
           data: data as never,
           id: entry.tourID,
           locale: entry.locale,
+          fallbackLocale: false,
           overrideAccess: true,
           req,
         })
