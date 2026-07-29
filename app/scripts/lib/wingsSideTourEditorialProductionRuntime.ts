@@ -548,7 +548,11 @@ const mutatePlan = async ({
     }
 
     await mutateLocalizedEntries()
-    await mutateSharedServices()
+    if (direction === 'apply' && isWingsSideTourEditorialCanaryPlan(plan)) {
+      sharedUnchanged += plan.sharedServiceEntries.length
+    } else {
+      await mutateSharedServices()
+    }
 
     await verifyWingsSideTourEditorialProductionPlan({
       catalog,
