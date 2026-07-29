@@ -248,3 +248,17 @@ The remaining release blockers are production-safety and execution gates:
 immutable release source, exact production backup, restore drill, signed
 catalog/plan binding, rollback release binding, canary validation and live
 post-release QA.
+
+## S3 production continuation — run r7
+
+After schema migration, production catalog planning was attempted against the
+approved `catalog-v2.json` and failed because the current production English
+source inventory no longer matches the approved source snapshot. The current
+production source has `0/38` governed pricing-disclosure rows and `0/22` source
+checksums matching the approved catalog. The approved source snapshot still
+matches the catalog for `22/22` tours.
+
+Validation consequence: D7-A cannot continue to data apply or canary promotion
+until the exact 22-tour English source baseline is restored or a new catalog is
+generated and approved under a revised D1 policy. The selected resolution is to
+restore the approved source snapshot first, then rerun catalog plan/apply/verify.

@@ -1,0 +1,1461 @@
+{
+  "version": 1,
+  "generatedAt": "2026-07-29T02:14:11.875Z",
+  "operation": "restore-production-english-source-to-approved-us055-catalog-baseline",
+  "status": "DRAFT_NOT_APPLIED",
+  "rationale": "Current production source has 0/38 governed pricing rows and 0/22 source checksums matching approved catalog-v2. Restore exact approved source snapshot before D7-A locale apply.",
+  "artifacts": {
+    "approvedSourceSnapshot": "evidence/wp1-catalog-r3/source-snapshot.json",
+    "approvedSourceSnapshotSha256": "ab96c5edfdc4810d1ce6e594d20fb224a097facc26544079ce3dfe641ce83001",
+    "approvedCatalogV2": "evidence/wp1-catalog-r3/catalog-v2.json",
+    "approvedCatalogV2Sha256": "c21225e7a4abe5aec70da80f56afd6ceaf499a028dab2ee643338590598973ad",
+    "currentProductionSourceExportSha256": "0ec03c04574fce8d0cd28f212b35ea88914d75fd3f10f07ce0b7c856ad04a69d"
+  },
+  "summary": {
+    "tourCount": 22,
+    "currentChecksumMatches": 0,
+    "restoredChecksumWouldMatch": 22,
+    "currentGovernedRows": 0,
+    "approvedGovernedRows": 38,
+    "totalFieldDeltaCount": 1,
+    "toursWithDayDeltas": 0
+  },
+  "tours": [
+    {
+      "slug": "a-glimpse-of-central-vietnam-5-days",
+      "tourID": 62,
+      "currentChecksum": "5e2867b4b594804e259a77609ec762b918d417d4e14fcc5451354d0bf5cf60af",
+      "approvedChecksum": "d5d19fdd0b307851182d23864abf3108201aec99b964343c53dca8271cf7ad0b",
+      "catalogChecksum": "d5d19fdd0b307851182d23864abf3108201aec99b964343c53dca8271cf7ad0b",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 5,
+        "approvedCount": 17,
+        "currentIDs": [
+          "6a62106f474b5f00225ed5ab",
+          "6a62106f474b5f00225ed5ac",
+          "6a62106f474b5f00225ed5ad",
+          "6a62106f474b5f00225ed5ae",
+          "6a62106f474b5f00225ed5af"
+        ],
+        "approvedIDs": [
+          "6a5a42d0e9a62d80e46ba989",
+          "6a5a42d0e9a62d80e46ba98a",
+          "6a5a42d0e9a62d80e46ba98b",
+          "6a5a42d0e9a62d80e46ba98c",
+          "6a5a42d0e9a62d80e46ba98d",
+          "6a5a42d0e9a62d80e46ba98e",
+          "6a5a42d0e9a62d80e46ba98f",
+          "6a5a42d0e9a62d80e46ba990",
+          "6a5a42d0e9a62d80e46ba991",
+          "6a5a42d0e9a62d80e46ba992",
+          "6a5a42d0e9a62d80e46ba993",
+          "6a5a42d0e9a62d80e46ba994",
+          "6a5a42d0e9a62d80e46ba995",
+          "6a5a42d0e9a62d80e46ba996",
+          "6a5a42d0e9a62d80e46ba997",
+          "6a5a42d0e9a62d80e46ba998",
+          "6a5a42d0e9a62d80e46ba999"
+        ]
+      },
+      "excludes": {
+        "currentCount": 10,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a62106f474b5f00225ed5b0",
+          "6a62106f474b5f00225ed5b1",
+          "6a62106f474b5f00225ed5b2",
+          "6a62106f474b5f00225ed5b3",
+          "6a62106f474b5f00225ed5b4",
+          "6a62106f474b5f00225ed5b5",
+          "6a62106f474b5f00225ed5b6",
+          "6a62106f474b5f00225ed5b7",
+          "6a62106f474b5f00225ed5b8",
+          "6a62106f474b5f00225ed5b9"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42d0e9a62d80e46ba98f",
+          "label": "Peak season surcharge & compulsory dinner in the accommodation."
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42d0e9a62d80e46ba999",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+      "tourID": 63,
+      "currentChecksum": "46f922a082d61d995122aca8056f728377d3a96af8028a46f2c5a0d58ba691f5",
+      "approvedChecksum": "d8bade96c8dc2e6f10d7d7a758421e649b268e59f57ed4a650ca7b7da4a57a10",
+      "catalogChecksum": "d8bade96c8dc2e6f10d7d7a758421e649b268e59f57ed4a650ca7b7da4a57a10",
+      "willMatchCatalog": true,
+      "fieldDeltas": [
+        {
+          "field": "summary",
+          "current": "Explore Hanoi, Ninh Binh, Sapa, Fansipan and Ha Long on a private six-day Northern Vietnam journey with local planning and flexible pacing.",
+          "approved": "The Best of Northern Vietnam with our 6-day tour package is designed to provide authentic value and diversity for a memorable experience.Socialize yourself in the diverse cultures "
+        }
+      ],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 7,
+        "approvedCount": 18,
+        "currentIDs": [
+          "6a62106f474b5f00225ed5ba",
+          "6a62106f474b5f00225ed5bb",
+          "6a62106f474b5f00225ed5bc",
+          "6a62106f474b5f00225ed5bd",
+          "6a62106f474b5f00225ed5be",
+          "6a62106f474b5f00225ed5bf",
+          "6a62106f474b5f00225ed5c0"
+        ],
+        "approvedIDs": [
+          "6a5a42d2e9a62d80e46ba9a3",
+          "6a5a42d2e9a62d80e46ba9a4",
+          "6a5a42d2e9a62d80e46ba9a5",
+          "6a5a42d2e9a62d80e46ba9a6",
+          "6a5a42d2e9a62d80e46ba9a7",
+          "6a5a42d2e9a62d80e46ba9a8",
+          "6a5a42d2e9a62d80e46ba9a9",
+          "6a5a42d2e9a62d80e46ba9aa",
+          "6a5a42d2e9a62d80e46ba9ab",
+          "6a5a42d2e9a62d80e46ba9ac",
+          "6a5a42d2e9a62d80e46ba9ad",
+          "6a5a42d2e9a62d80e46ba9ae",
+          "6a5a42d2e9a62d80e46ba9af",
+          "6a5a42d2e9a62d80e46ba9b0",
+          "6a5a42d2e9a62d80e46ba9b1",
+          "6a5a42d2e9a62d80e46ba9b2",
+          "6a5a42d2e9a62d80e46ba9b3",
+          "6a5a42d2e9a62d80e46ba9b4"
+        ]
+      },
+      "excludes": {
+        "currentCount": 9,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a62106f474b5f00225ed5c1",
+          "6a62106f474b5f00225ed5c2",
+          "6a62106f474b5f00225ed5c3",
+          "6a62106f474b5f00225ed5c4",
+          "6a62106f474b5f00225ed5c5",
+          "6a62106f474b5f00225ed5c6",
+          "6a62106f474b5f00225ed5c7",
+          "6a62106f474b5f00225ed5c8",
+          "6a62106f474b5f00225ed5c9"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42d2e9a62d80e46ba9ab",
+          "label": "Peak season surcharge & compulsory dinner at the hotel (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42d2e9a62d80e46ba9b4",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days",
+      "tourID": 64,
+      "currentChecksum": "cc788852c4c01e37de5efa930c142cd1ec33dd01de43cc17e651617bafe82139",
+      "approvedChecksum": "dba4322328a34a4f57d7f1ba52596304fbe7cf94eb063f5fdc3213d9f41f527d",
+      "catalogChecksum": "dba4322328a34a4f57d7f1ba52596304fbe7cf94eb063f5fdc3213d9f41f527d",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 5,
+        "approvedCount": 15,
+        "currentIDs": [
+          "6a621070474b5f00225ed5ca",
+          "6a621070474b5f00225ed5cb",
+          "6a621070474b5f00225ed5cc",
+          "6a621070474b5f00225ed5cd",
+          "6a621070474b5f00225ed5ce"
+        ],
+        "approvedIDs": [
+          "6a5a42d3e9a62d80e46ba9bd",
+          "6a5a42d3e9a62d80e46ba9be",
+          "6a5a42d3e9a62d80e46ba9bf",
+          "6a5a42d3e9a62d80e46ba9c0",
+          "6a5a42d3e9a62d80e46ba9c1",
+          "6a5a42d3e9a62d80e46ba9c2",
+          "6a5a42d3e9a62d80e46ba9c3",
+          "6a5a42d3e9a62d80e46ba9c4",
+          "6a5a42d3e9a62d80e46ba9c5",
+          "6a5a42d3e9a62d80e46ba9c6",
+          "6a5a42d3e9a62d80e46ba9c7",
+          "6a5a42d3e9a62d80e46ba9c8",
+          "6a5a42d3e9a62d80e46ba9c9",
+          "6a5a42d3e9a62d80e46ba9ca",
+          "6a5a42d3e9a62d80e46ba9cb"
+        ]
+      },
+      "excludes": {
+        "currentCount": 8,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621070474b5f00225ed5cf",
+          "6a621070474b5f00225ed5d0",
+          "6a621070474b5f00225ed5d1",
+          "6a621070474b5f00225ed5d2",
+          "6a621070474b5f00225ed5d3",
+          "6a621070474b5f00225ed5d4",
+          "6a621070474b5f00225ed5d5",
+          "6a621070474b5f00225ed5d6"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42d3e9a62d80e46ba9c3",
+          "label": "Peak season surcharge & compulsory dinner at the hotel (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42d3e9a62d80e46ba9cb",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "best-of-vietnam-and-cambodia-15-days",
+      "tourID": 65,
+      "currentChecksum": "9d6dafe6d41531274788107ec584c8f85a1b592e14e6c5222dc273ce09342381",
+      "approvedChecksum": "077bdee949817444d716f6ba219e2059efc9501056ecba6bfde934f6a710ff34",
+      "catalogChecksum": "077bdee949817444d716f6ba219e2059efc9501056ecba6bfde934f6a710ff34",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 7,
+        "approvedCount": 15,
+        "currentIDs": [
+          "6a621070474b5f00225ed5d7",
+          "6a621070474b5f00225ed5d8",
+          "6a621070474b5f00225ed5d9",
+          "6a621070474b5f00225ed5da",
+          "6a621070474b5f00225ed5db",
+          "6a621070474b5f00225ed5dc",
+          "6a621070474b5f00225ed5dd"
+        ],
+        "approvedIDs": [
+          "6a5a42d5e9a62d80e46ba9de",
+          "6a5a42d5e9a62d80e46ba9df",
+          "6a5a42d5e9a62d80e46ba9e0",
+          "6a5a42d5e9a62d80e46ba9e1",
+          "6a5a42d5e9a62d80e46ba9e2",
+          "6a5a42d5e9a62d80e46ba9e3",
+          "6a5a42d5e9a62d80e46ba9e4",
+          "6a5a42d5e9a62d80e46ba9e5",
+          "6a5a42d5e9a62d80e46ba9e6",
+          "6a5a42d5e9a62d80e46ba9e7",
+          "6a5a42d5e9a62d80e46ba9e8",
+          "6a5a42d5e9a62d80e46ba9e9",
+          "6a5a42d5e9a62d80e46ba9ea",
+          "6a5a42d5e9a62d80e46ba9eb",
+          "6a5a42d5e9a62d80e46ba9ec"
+        ]
+      },
+      "excludes": {
+        "currentCount": 6,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621070474b5f00225ed5de",
+          "6a621070474b5f00225ed5df",
+          "6a621070474b5f00225ed5e0",
+          "6a621070474b5f00225ed5e1",
+          "6a621070474b5f00225ed5e2",
+          "6a621070474b5f00225ed5e3"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42d5e9a62d80e46ba9e6",
+          "label": "Peak season surcharge & compulsory dinner at the accommodation (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42d5e9a62d80e46ba9ec",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "central-vietnam-adventure-4-days",
+      "tourID": 66,
+      "currentChecksum": "9b423274c56e0df134b3c79ea181224060f70f4a0b951e36838d3813c12b0cd1",
+      "approvedChecksum": "f09672026d6b18ec87aa8539e5c83d9531c1979a1827a6368fddba0c7b46770d",
+      "catalogChecksum": "f09672026d6b18ec87aa8539e5c83d9531c1979a1827a6368fddba0c7b46770d",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 5,
+        "approvedCount": 15,
+        "currentIDs": [
+          "6a621070474b5f00225ed5e4",
+          "6a621070474b5f00225ed5e5",
+          "6a621070474b5f00225ed5e6",
+          "6a621070474b5f00225ed5e7",
+          "6a621070474b5f00225ed5e8"
+        ],
+        "approvedIDs": [
+          "6a5a42d7e9a62d80e46ba9f4",
+          "6a5a42d7e9a62d80e46ba9f5",
+          "6a5a42d7e9a62d80e46ba9f6",
+          "6a5a42d7e9a62d80e46ba9f7",
+          "6a5a42d7e9a62d80e46ba9f8",
+          "6a5a42d7e9a62d80e46ba9f9",
+          "6a5a42d7e9a62d80e46ba9fa",
+          "6a5a42d7e9a62d80e46ba9fb",
+          "6a5a42d7e9a62d80e46ba9fc",
+          "6a5a42d7e9a62d80e46ba9fd",
+          "6a5a42d7e9a62d80e46ba9fe",
+          "6a5a42d7e9a62d80e46ba9ff",
+          "6a5a42d7e9a62d80e46baa00",
+          "6a5a42d7e9a62d80e46baa01",
+          "6a5a42d7e9a62d80e46baa02"
+        ]
+      },
+      "excludes": {
+        "currentCount": 8,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621070474b5f00225ed5e9",
+          "6a621070474b5f00225ed5ea",
+          "6a621070474b5f00225ed5eb",
+          "6a621070474b5f00225ed5ec",
+          "6a621070474b5f00225ed5ed",
+          "6a621070474b5f00225ed5ee",
+          "6a621070474b5f00225ed5ef",
+          "6a621070474b5f00225ed5f0"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42d7e9a62d80e46ba9fa",
+          "label": "Peak season surcharge & compulsory dinner at the hotel (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42d7e9a62d80e46baa02",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days",
+      "tourID": 67,
+      "currentChecksum": "1b43df513094b19f1663e27801826b56b27f3376ded8e2799ba9c951407d1520",
+      "approvedChecksum": "3ab314c97837d8567ebc8c5218c64595f1b89927f1d416ce8fa0a20ba24f52fe",
+      "catalogChecksum": "3ab314c97837d8567ebc8c5218c64595f1b89927f1d416ce8fa0a20ba24f52fe",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 6,
+        "approvedCount": 16,
+        "currentIDs": [
+          "6a621070474b5f00225ed5f1",
+          "6a621070474b5f00225ed5f2",
+          "6a621070474b5f00225ed5f3",
+          "6a621070474b5f00225ed5f4",
+          "6a621070474b5f00225ed5f5",
+          "6a621070474b5f00225ed5f6"
+        ],
+        "approvedIDs": [
+          "6a5a42d8e9a62d80e46baa0b",
+          "6a5a42d8e9a62d80e46baa0c",
+          "6a5a42d8e9a62d80e46baa0d",
+          "6a5a42d8e9a62d80e46baa0e",
+          "6a5a42d8e9a62d80e46baa0f",
+          "6a5a42d8e9a62d80e46baa10",
+          "6a5a42d8e9a62d80e46baa11",
+          "6a5a42d8e9a62d80e46baa12",
+          "6a5a42d8e9a62d80e46baa13",
+          "6a5a42d8e9a62d80e46baa14",
+          "6a5a42d8e9a62d80e46baa15",
+          "6a5a42d8e9a62d80e46baa16",
+          "6a5a42d8e9a62d80e46baa17",
+          "6a5a42d8e9a62d80e46baa18",
+          "6a5a42d8e9a62d80e46baa19",
+          "6a5a42d8e9a62d80e46baa1a"
+        ]
+      },
+      "excludes": {
+        "currentCount": 8,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621070474b5f00225ed5f7",
+          "6a621070474b5f00225ed5f8",
+          "6a621070474b5f00225ed5f9",
+          "6a621070474b5f00225ed5fa",
+          "6a621070474b5f00225ed5fb",
+          "6a621070474b5f00225ed5fc",
+          "6a621070474b5f00225ed5fd",
+          "6a621070474b5f00225ed5fe"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42d8e9a62d80e46baa12",
+          "label": "Peak season surcharge & compulsory dinner at the hotel (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42d8e9a62d80e46baa1a",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "discover-halong-bay-ninh-binh-package-2-days",
+      "tourID": 68,
+      "currentChecksum": "f09943a3a10d890722de1f4eb5a8f765924086076f631a8f71cd56cdddeb149a",
+      "approvedChecksum": "6ccc7afe246ca3930efc61728dfb9418ae0f4a3c3e13c31c44e9b4eb463f2836",
+      "catalogChecksum": "6ccc7afe246ca3930efc61728dfb9418ae0f4a3c3e13c31c44e9b4eb463f2836",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 8,
+        "approvedCount": 15,
+        "currentIDs": [
+          "6a621070474b5f00225ed5ff",
+          "6a621070474b5f00225ed600",
+          "6a621070474b5f00225ed601",
+          "6a621070474b5f00225ed602",
+          "6a621070474b5f00225ed603",
+          "6a621070474b5f00225ed604",
+          "6a621070474b5f00225ed605",
+          "6a621070474b5f00225ed606"
+        ],
+        "approvedIDs": [
+          "6a5a42dae9a62d80e46baa20",
+          "6a5a42dae9a62d80e46baa21",
+          "6a5a42dae9a62d80e46baa22",
+          "6a5a42dae9a62d80e46baa23",
+          "6a5a42dae9a62d80e46baa24",
+          "6a5a42dae9a62d80e46baa25",
+          "6a5a42dae9a62d80e46baa26",
+          "6a5a42dae9a62d80e46baa27",
+          "6a5a42dae9a62d80e46baa28",
+          "6a5a42dae9a62d80e46baa29",
+          "6a5a42dae9a62d80e46baa2a",
+          "6a5a42dae9a62d80e46baa2b",
+          "6a5a42dae9a62d80e46baa2c",
+          "6a5a42dae9a62d80e46baa2d",
+          "6a5a42dae9a62d80e46baa2e"
+        ]
+      },
+      "excludes": {
+        "currentCount": 6,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621070474b5f00225ed607",
+          "6a621070474b5f00225ed608",
+          "6a621070474b5f00225ed609",
+          "6a621070474b5f00225ed60a",
+          "6a621070474b5f00225ed60b",
+          "6a621070474b5f00225ed60c"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42dae9a62d80e46baa2e",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+      "tourID": 69,
+      "currentChecksum": "15c0190b7e38916abda677284e7848ed1671ad0d0cf5965f8f38574a2813cfc0",
+      "approvedChecksum": "645d4f2857f7723ff387cb516e4ac936e4ed1fe0a6ad948b8876a063a3bc1c6e",
+      "catalogChecksum": "645d4f2857f7723ff387cb516e4ac936e4ed1fe0a6ad948b8876a063a3bc1c6e",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 6,
+        "approvedCount": 17,
+        "currentIDs": [
+          "6a621070474b5f00225ed60d",
+          "6a621070474b5f00225ed60e",
+          "6a621070474b5f00225ed60f",
+          "6a621070474b5f00225ed610",
+          "6a621070474b5f00225ed611",
+          "6a621070474b5f00225ed612"
+        ],
+        "approvedIDs": [
+          "6a5a42dbe9a62d80e46baa3e",
+          "6a5a42dbe9a62d80e46baa3f",
+          "6a5a42dbe9a62d80e46baa40",
+          "6a5a42dbe9a62d80e46baa41",
+          "6a5a42dbe9a62d80e46baa42",
+          "6a5a42dbe9a62d80e46baa43",
+          "6a5a42dbe9a62d80e46baa44",
+          "6a5a42dbe9a62d80e46baa45",
+          "6a5a42dbe9a62d80e46baa46",
+          "6a5a42dbe9a62d80e46baa47",
+          "6a5a42dbe9a62d80e46baa48",
+          "6a5a42dbe9a62d80e46baa49",
+          "6a5a42dbe9a62d80e46baa4a",
+          "6a5a42dbe9a62d80e46baa4b",
+          "6a5a42dbe9a62d80e46baa4c",
+          "6a5a42dbe9a62d80e46baa4d",
+          "6a5a42dbe9a62d80e46baa4e"
+        ]
+      },
+      "excludes": {
+        "currentCount": 9,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621070474b5f00225ed613",
+          "6a621070474b5f00225ed614",
+          "6a621070474b5f00225ed615",
+          "6a621070474b5f00225ed616",
+          "6a621070474b5f00225ed617",
+          "6a621070474b5f00225ed618",
+          "6a621070474b5f00225ed619",
+          "6a621070474b5f00225ed61a",
+          "6a621070474b5f00225ed61b"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42dbe9a62d80e46baa45",
+          "label": "Peak season surcharge & compulsory dinner at the hotel (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42dbe9a62d80e46baa4e",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "hoi-an-surrounding-and-beach-break-7-days",
+      "tourID": 70,
+      "currentChecksum": "2593147a8c62df447faa54a1affead9ea5fa0b632073b4f48c8a13f0a3e8cb2b",
+      "approvedChecksum": "8c6c8d98ec18b473c64316b184276b26d7c94d9d3c94b6bcd778880aeaa0979e",
+      "catalogChecksum": "8c6c8d98ec18b473c64316b184276b26d7c94d9d3c94b6bcd778880aeaa0979e",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 5,
+        "approvedCount": 15,
+        "currentIDs": [
+          "6a621071474b5f00225ed61c",
+          "6a621071474b5f00225ed61d",
+          "6a621071474b5f00225ed61e",
+          "6a621071474b5f00225ed61f",
+          "6a621071474b5f00225ed620"
+        ],
+        "approvedIDs": [
+          "6a5a42dce9a62d80e46baa58",
+          "6a5a42dce9a62d80e46baa59",
+          "6a5a42dce9a62d80e46baa5a",
+          "6a5a42dce9a62d80e46baa5b",
+          "6a5a42dce9a62d80e46baa5c",
+          "6a5a42dce9a62d80e46baa5d",
+          "6a5a42dce9a62d80e46baa5e",
+          "6a5a42dce9a62d80e46baa5f",
+          "6a5a42dce9a62d80e46baa60",
+          "6a5a42dce9a62d80e46baa61",
+          "6a5a42dce9a62d80e46baa62",
+          "6a5a42dce9a62d80e46baa63",
+          "6a5a42dce9a62d80e46baa64",
+          "6a5a42dce9a62d80e46baa65",
+          "6a5a42dce9a62d80e46baa66"
+        ]
+      },
+      "excludes": {
+        "currentCount": 8,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621071474b5f00225ed621",
+          "6a621071474b5f00225ed622",
+          "6a621071474b5f00225ed623",
+          "6a621071474b5f00225ed624",
+          "6a621071474b5f00225ed625",
+          "6a621071474b5f00225ed626",
+          "6a621071474b5f00225ed627",
+          "6a621071474b5f00225ed628"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42dce9a62d80e46baa5e",
+          "label": "Peak season surcharge & compulsory dinner at the hotel (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42dce9a62d80e46baa66",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "luxury-mekong-delta-speedboat-tour-full-day",
+      "tourID": 71,
+      "currentChecksum": "28cdb4bfc910a4555eb869e8c6b6861f210e9d558b6ee14c9f1f940d68b86b2d",
+      "approvedChecksum": "01ddcf1a4f83ae7a2ac86315c1273b1bdc22e5b54ea47ecfa486297b100b5c32",
+      "catalogChecksum": "01ddcf1a4f83ae7a2ac86315c1273b1bdc22e5b54ea47ecfa486297b100b5c32",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 6,
+        "approvedCount": 10,
+        "currentIDs": [
+          "6a621071474b5f00225ed629",
+          "6a621071474b5f00225ed62a",
+          "6a621071474b5f00225ed62b",
+          "6a621071474b5f00225ed62c",
+          "6a621071474b5f00225ed62d",
+          "6a621071474b5f00225ed62e"
+        ],
+        "approvedIDs": [
+          "6a5a42dee9a62d80e46baa6b",
+          "6a5a42dee9a62d80e46baa6c",
+          "6a5a42dee9a62d80e46baa6d",
+          "6a5a42dee9a62d80e46baa6e",
+          "6a5a42dee9a62d80e46baa6f",
+          "6a5a42dee9a62d80e46baa70",
+          "6a5a42dee9a62d80e46baa71",
+          "6a5a42dee9a62d80e46baa72",
+          "6a5a42dee9a62d80e46baa73",
+          "6a5a42dee9a62d80e46baa74"
+        ]
+      },
+      "excludes": {
+        "currentCount": 3,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621071474b5f00225ed62f",
+          "6a621071474b5f00225ed630",
+          "6a621071474b5f00225ed631"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42dee9a62d80e46baa74",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "mekong-delta-gateway-3-days",
+      "tourID": 72,
+      "currentChecksum": "dbb156d236866c4358165d2f6c26907097be16a5084449e5d08bfd7f3721ff45",
+      "approvedChecksum": "0b6b1a664a09c8b7dcec555af58d3a5eb9c84f010607f4f89a9c4c3935204ef8",
+      "catalogChecksum": "0b6b1a664a09c8b7dcec555af58d3a5eb9c84f010607f4f89a9c4c3935204ef8",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 6,
+        "approvedCount": 12,
+        "currentIDs": [
+          "6a621071474b5f00225ed632",
+          "6a621071474b5f00225ed633",
+          "6a621071474b5f00225ed634",
+          "6a621071474b5f00225ed635",
+          "6a621071474b5f00225ed636",
+          "6a621071474b5f00225ed637"
+        ],
+        "approvedIDs": [
+          "6a5a42dfe9a62d80e46baa7b",
+          "6a5a42dfe9a62d80e46baa7c",
+          "6a5a42dfe9a62d80e46baa7d",
+          "6a5a42dfe9a62d80e46baa7e",
+          "6a5a42dfe9a62d80e46baa7f",
+          "6a5a42dfe9a62d80e46baa80",
+          "6a5a42dfe9a62d80e46baa81",
+          "6a5a42dfe9a62d80e46baa82",
+          "6a5a42dfe9a62d80e46baa83",
+          "6a5a42dfe9a62d80e46baa84",
+          "6a5a42dfe9a62d80e46baa85",
+          "6a5a42dfe9a62d80e46baa86"
+        ]
+      },
+      "excludes": {
+        "currentCount": 5,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621071474b5f00225ed638",
+          "6a621071474b5f00225ed639",
+          "6a621071474b5f00225ed63a",
+          "6a621071474b5f00225ed63b",
+          "6a621071474b5f00225ed63c"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42dfe9a62d80e46baa86",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "mekong-delta-with-floating-market-2-days",
+      "tourID": 73,
+      "currentChecksum": "7c3e9a433d84a7984a74d15fb38809de1dd6ffb16fc912a1171c9c18f68748be",
+      "approvedChecksum": "f65b29ff0fddb8145d0da41c484d28333567f607e22881149cffbd2d2577db0b",
+      "catalogChecksum": "f65b29ff0fddb8145d0da41c484d28333567f607e22881149cffbd2d2577db0b",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 7,
+        "approvedCount": 13,
+        "currentIDs": [
+          "6a621071474b5f00225ed63d",
+          "6a621071474b5f00225ed63e",
+          "6a621071474b5f00225ed63f",
+          "6a621071474b5f00225ed640",
+          "6a621071474b5f00225ed641",
+          "6a621071474b5f00225ed642",
+          "6a621071474b5f00225ed643"
+        ],
+        "approvedIDs": [
+          "6a5a42e0e9a62d80e46baa8c",
+          "6a5a42e0e9a62d80e46baa8d",
+          "6a5a42e0e9a62d80e46baa8e",
+          "6a5a42e0e9a62d80e46baa8f",
+          "6a5a42e0e9a62d80e46baa90",
+          "6a5a42e0e9a62d80e46baa91",
+          "6a5a42e0e9a62d80e46baa92",
+          "6a5a42e0e9a62d80e46baa93",
+          "6a5a42e0e9a62d80e46baa94",
+          "6a5a42e0e9a62d80e46baa95",
+          "6a5a42e0e9a62d80e46baa96",
+          "6a5a42e0e9a62d80e46baa97",
+          "6a5a42e0e9a62d80e46baa98"
+        ]
+      },
+      "excludes": {
+        "currentCount": 5,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621071474b5f00225ed644",
+          "6a621071474b5f00225ed645",
+          "6a621071474b5f00225ed646",
+          "6a621071474b5f00225ed647",
+          "6a621071474b5f00225ed648"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42e0e9a62d80e46baa98",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "ninh-binh-hoa-lu-trang-an-full-day-private-tour-from-hanoi",
+      "tourID": 75,
+      "currentChecksum": "0eb59ae76a2c85b4bd374123548d125d18bce9b7c2be6cc57819f0f10a42caa1",
+      "approvedChecksum": "186345043392ad2fb07c03d75798a5eba48d5a49a7878cb91a92577db8d0d5f7",
+      "catalogChecksum": "186345043392ad2fb07c03d75798a5eba48d5a49a7878cb91a92577db8d0d5f7",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 4,
+        "approvedCount": 11,
+        "currentIDs": [
+          "6a621071474b5f00225ed654",
+          "6a621071474b5f00225ed655",
+          "6a621071474b5f00225ed656",
+          "6a621071474b5f00225ed657"
+        ],
+        "approvedIDs": [
+          "6a5a42e2e9a62d80e46baaad",
+          "6a5a42e2e9a62d80e46baaae",
+          "6a5a42e2e9a62d80e46baaaf",
+          "6a5a42e2e9a62d80e46baab0",
+          "6a5a42e2e9a62d80e46baab1",
+          "6a5a42e2e9a62d80e46baab2",
+          "6a5a42e2e9a62d80e46baab3",
+          "6a5a42e2e9a62d80e46baab4",
+          "6a5a42e2e9a62d80e46baab5",
+          "6a5a42e2e9a62d80e46baab6",
+          "6a5a42e2e9a62d80e46baab7"
+        ]
+      },
+      "excludes": {
+        "currentCount": 6,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621071474b5f00225ed658",
+          "6a621071474b5f00225ed659",
+          "6a621071474b5f00225ed65a",
+          "6a621071474b5f00225ed65b",
+          "6a621071474b5f00225ed65c",
+          "6a621071474b5f00225ed65d"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42e2e9a62d80e46baab7",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi",
+      "tourID": 74,
+      "currentChecksum": "ea9967847f65ff37969b3f7e143dd905945cb96b250267aaaad4178b3da16a3f",
+      "approvedChecksum": "0a2657ac4fa39c4010937747e39aab39d9d927a35d1a1a6af4b9de026fa66ae3",
+      "catalogChecksum": "0a2657ac4fa39c4010937747e39aab39d9d927a35d1a1a6af4b9de026fa66ae3",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 6,
+        "approvedCount": 12,
+        "currentIDs": [
+          "6a621071474b5f00225ed649",
+          "6a621071474b5f00225ed64a",
+          "6a621071474b5f00225ed64b",
+          "6a621071474b5f00225ed64c",
+          "6a621071474b5f00225ed64d",
+          "6a621071474b5f00225ed64e"
+        ],
+        "approvedIDs": [
+          "6a5a42e1e9a62d80e46baa9d",
+          "6a5a42e1e9a62d80e46baa9e",
+          "6a5a42e1e9a62d80e46baa9f",
+          "6a5a42e1e9a62d80e46baaa0",
+          "6a5a42e1e9a62d80e46baaa1",
+          "6a5a42e1e9a62d80e46baaa2",
+          "6a5a42e1e9a62d80e46baaa3",
+          "6a5a42e1e9a62d80e46baaa4",
+          "6a5a42e1e9a62d80e46baaa5",
+          "6a5a42e1e9a62d80e46baaa6",
+          "6a5a42e1e9a62d80e46baaa7",
+          "6a5a42e1e9a62d80e46baaa8"
+        ]
+      },
+      "excludes": {
+        "currentCount": 5,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621071474b5f00225ed64f",
+          "6a621071474b5f00225ed650",
+          "6a621071474b5f00225ed651",
+          "6a621071474b5f00225ed652",
+          "6a621071474b5f00225ed653"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42e1e9a62d80e46baaa8",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "northern-vietnam-highlights-for-family-6-days",
+      "tourID": 76,
+      "currentChecksum": "24466674ec0797724ab9e269c7ea72982d77a066c421963e0f8f09dbb8ecdfbe",
+      "approvedChecksum": "5b524f158d96abe578e8eea959eaf453fad9895daa97b53ff1a62b9fda7aea35",
+      "catalogChecksum": "5b524f158d96abe578e8eea959eaf453fad9895daa97b53ff1a62b9fda7aea35",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 5,
+        "approvedCount": 15,
+        "currentIDs": [
+          "6a621071474b5f00225ed65e",
+          "6a621071474b5f00225ed65f",
+          "6a621071474b5f00225ed660",
+          "6a621071474b5f00225ed661",
+          "6a621071474b5f00225ed662"
+        ],
+        "approvedIDs": [
+          "6a5a42e2e9a62d80e46baac1",
+          "6a5a42e2e9a62d80e46baac2",
+          "6a5a42e2e9a62d80e46baac3",
+          "6a5a42e2e9a62d80e46baac4",
+          "6a5a42e2e9a62d80e46baac5",
+          "6a5a42e2e9a62d80e46baac6",
+          "6a5a42e2e9a62d80e46baac7",
+          "6a5a42e2e9a62d80e46baac8",
+          "6a5a42e2e9a62d80e46baac9",
+          "6a5a42e2e9a62d80e46baaca",
+          "6a5a42e2e9a62d80e46baacb",
+          "6a5a42e2e9a62d80e46baacc",
+          "6a5a42e2e9a62d80e46baacd",
+          "6a5a42e2e9a62d80e46baace",
+          "6a5a42e2e9a62d80e46baacf"
+        ]
+      },
+      "excludes": {
+        "currentCount": 8,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621071474b5f00225ed663",
+          "6a621071474b5f00225ed664",
+          "6a621071474b5f00225ed665",
+          "6a621071474b5f00225ed666",
+          "6a621071474b5f00225ed667",
+          "6a621071474b5f00225ed668",
+          "6a621071474b5f00225ed669",
+          "6a621071474b5f00225ed66a"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42e2e9a62d80e46baac7",
+          "label": "Peak season surcharge & compulsory dinner at the hotel (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42e2e9a62d80e46baacf",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "northern-vietnam-soft-adventure-8-days",
+      "tourID": 77,
+      "currentChecksum": "ac35853830686ff84ce52d3899c5f04e78864835f99a32b300fcaa6b04da2396",
+      "approvedChecksum": "859fc5e70aa936e1f58ba48fa72d99f7b0400ef05f4cabc82b03931d2b8dfab3",
+      "catalogChecksum": "859fc5e70aa936e1f58ba48fa72d99f7b0400ef05f4cabc82b03931d2b8dfab3",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 5,
+        "approvedCount": 16,
+        "currentIDs": [
+          "6a621072474b5f00225ed66b",
+          "6a621072474b5f00225ed66c",
+          "6a621072474b5f00225ed66d",
+          "6a621072474b5f00225ed66e",
+          "6a621072474b5f00225ed66f"
+        ],
+        "approvedIDs": [
+          "6a5a42e4e9a62d80e46baadb",
+          "6a5a42e4e9a62d80e46baadc",
+          "6a5a42e4e9a62d80e46baadd",
+          "6a5a42e4e9a62d80e46baade",
+          "6a5a42e4e9a62d80e46baadf",
+          "6a5a42e4e9a62d80e46baae0",
+          "6a5a42e4e9a62d80e46baae1",
+          "6a5a42e4e9a62d80e46baae2",
+          "6a5a42e4e9a62d80e46baae3",
+          "6a5a42e4e9a62d80e46baae4",
+          "6a5a42e4e9a62d80e46baae5",
+          "6a5a42e4e9a62d80e46baae6",
+          "6a5a42e4e9a62d80e46baae7",
+          "6a5a42e4e9a62d80e46baae8",
+          "6a5a42e4e9a62d80e46baae9",
+          "6a5a42e4e9a62d80e46baaea"
+        ]
+      },
+      "excludes": {
+        "currentCount": 9,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621072474b5f00225ed670",
+          "6a621072474b5f00225ed671",
+          "6a621072474b5f00225ed672",
+          "6a621072474b5f00225ed673",
+          "6a621072474b5f00225ed674",
+          "6a621072474b5f00225ed675",
+          "6a621072474b5f00225ed676",
+          "6a621072474b5f00225ed677",
+          "6a621072474b5f00225ed678"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42e4e9a62d80e46baae1",
+          "label": "Peak season surcharge & compulsory dinner in the accommodation."
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42e4e9a62d80e46baaea",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
+      "tourID": 78,
+      "currentChecksum": "743cd6045686339166ea523fa1ec6b1d96aa6d4f9121e3ac35319088c9877ab9",
+      "approvedChecksum": "b02e8dc1127755c9ead616fa59eee21fb2c0b14b38b2662e6f3b4967bf357cf8",
+      "catalogChecksum": "b02e8dc1127755c9ead616fa59eee21fb2c0b14b38b2662e6f3b4967bf357cf8",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 6,
+        "approvedCount": 16,
+        "currentIDs": [
+          "6a621072474b5f00225ed679",
+          "6a621072474b5f00225ed67a",
+          "6a621072474b5f00225ed67b",
+          "6a621072474b5f00225ed67c",
+          "6a621072474b5f00225ed67d",
+          "6a621072474b5f00225ed67e"
+        ],
+        "approvedIDs": [
+          "6a5a42e5e9a62d80e46baaf2",
+          "6a5a42e5e9a62d80e46baaf3",
+          "6a5a42e5e9a62d80e46baaf4",
+          "6a5a42e5e9a62d80e46baaf5",
+          "6a5a42e5e9a62d80e46baaf6",
+          "6a5a42e5e9a62d80e46baaf7",
+          "6a5a42e5e9a62d80e46baaf8",
+          "6a5a42e5e9a62d80e46baaf9",
+          "6a5a42e5e9a62d80e46baafa",
+          "6a5a42e5e9a62d80e46baafb",
+          "6a5a42e5e9a62d80e46baafc",
+          "6a5a42e5e9a62d80e46baafd",
+          "6a5a42e5e9a62d80e46baafe",
+          "6a5a42e5e9a62d80e46baaff",
+          "6a5a42e5e9a62d80e46bab00",
+          "6a5a42e5e9a62d80e46bab01"
+        ]
+      },
+      "excludes": {
+        "currentCount": 8,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621072474b5f00225ed67f",
+          "6a621072474b5f00225ed680",
+          "6a621072474b5f00225ed681",
+          "6a621072474b5f00225ed682",
+          "6a621072474b5f00225ed683",
+          "6a621072474b5f00225ed684",
+          "6a621072474b5f00225ed685",
+          "6a621072474b5f00225ed686"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42e5e9a62d80e46baaf9",
+          "label": "Peak season surcharge & compulsory dinner at the hotel (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42e5e9a62d80e46bab01",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "sapa-trekking-ethnic-market-3-days",
+      "tourID": 79,
+      "currentChecksum": "b360556efddf6089fe6746f0f0e95931cd5cb8a6322f0251d588629940528c83",
+      "approvedChecksum": "ce0bb480fe3046a61ec37435ea33338b1e3b4daa4436019290b9620cbe868b94",
+      "catalogChecksum": "ce0bb480fe3046a61ec37435ea33338b1e3b4daa4436019290b9620cbe868b94",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 5,
+        "approvedCount": 16,
+        "currentIDs": [
+          "6a621072474b5f00225ed687",
+          "6a621072474b5f00225ed688",
+          "6a621072474b5f00225ed689",
+          "6a621072474b5f00225ed68a",
+          "6a621072474b5f00225ed68b"
+        ],
+        "approvedIDs": [
+          "6a5a42e6e9a62d80e46bab08",
+          "6a5a42e6e9a62d80e46bab09",
+          "6a5a42e6e9a62d80e46bab0a",
+          "6a5a42e6e9a62d80e46bab0b",
+          "6a5a42e6e9a62d80e46bab0c",
+          "6a5a42e6e9a62d80e46bab0d",
+          "6a5a42e6e9a62d80e46bab0e",
+          "6a5a42e6e9a62d80e46bab0f",
+          "6a5a42e6e9a62d80e46bab10",
+          "6a5a42e6e9a62d80e46bab11",
+          "6a5a42e6e9a62d80e46bab12",
+          "6a5a42e6e9a62d80e46bab13",
+          "6a5a42e6e9a62d80e46bab14",
+          "6a5a42e6e9a62d80e46bab15",
+          "6a5a42e6e9a62d80e46bab16",
+          "6a5a42e6e9a62d80e46bab17"
+        ]
+      },
+      "excludes": {
+        "currentCount": 9,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621072474b5f00225ed68c",
+          "6a621072474b5f00225ed68d",
+          "6a621072474b5f00225ed68e",
+          "6a621072474b5f00225ed68f",
+          "6a621072474b5f00225ed690",
+          "6a621072474b5f00225ed691",
+          "6a621072474b5f00225ed692",
+          "6a621072474b5f00225ed693",
+          "6a621072474b5f00225ed694"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42e6e9a62d80e46bab10",
+          "label": "Peak season surcharge & compulsory dinner in the accommodation."
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42e6e9a62d80e46bab17",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "southern-beauty-beach-relaxation-8-days",
+      "tourID": 80,
+      "currentChecksum": "3a6e4c5965e5b08ef08f707cee286d22bc9cf95a8af4adb745159bd7cd4cf829",
+      "approvedChecksum": "68bac86f07a6a25d9a229eaa7521ddbe61f0d301d2bb192efc0799a33e40adf1",
+      "catalogChecksum": "68bac86f07a6a25d9a229eaa7521ddbe61f0d301d2bb192efc0799a33e40adf1",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 6,
+        "approvedCount": 17,
+        "currentIDs": [
+          "6a621072474b5f00225ed695",
+          "6a621072474b5f00225ed696",
+          "6a621072474b5f00225ed697",
+          "6a621072474b5f00225ed698",
+          "6a621072474b5f00225ed699",
+          "6a621072474b5f00225ed69a"
+        ],
+        "approvedIDs": [
+          "6a5a42e8e9a62d80e46bab21",
+          "6a5a42e8e9a62d80e46bab22",
+          "6a5a42e8e9a62d80e46bab23",
+          "6a5a42e8e9a62d80e46bab24",
+          "6a5a42e8e9a62d80e46bab25",
+          "6a5a42e8e9a62d80e46bab26",
+          "6a5a42e8e9a62d80e46bab27",
+          "6a5a42e8e9a62d80e46bab28",
+          "6a5a42e8e9a62d80e46bab29",
+          "6a5a42e8e9a62d80e46bab2a",
+          "6a5a42e8e9a62d80e46bab2b",
+          "6a5a42e8e9a62d80e46bab2c",
+          "6a5a42e8e9a62d80e46bab2d",
+          "6a5a42e8e9a62d80e46bab2e",
+          "6a5a42e8e9a62d80e46bab2f",
+          "6a5a42e8e9a62d80e46bab30",
+          "6a5a42e8e9a62d80e46bab31"
+        ]
+      },
+      "excludes": {
+        "currentCount": 9,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621072474b5f00225ed69b",
+          "6a621072474b5f00225ed69c",
+          "6a621072474b5f00225ed69d",
+          "6a621072474b5f00225ed69e",
+          "6a621072474b5f00225ed69f",
+          "6a621072474b5f00225ed6a0",
+          "6a621072474b5f00225ed6a1",
+          "6a621072474b5f00225ed6a2",
+          "6a621072474b5f00225ed6a3"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42e8e9a62d80e46bab28",
+          "label": "Peak season surcharge & compulsory dinner in the accommodation."
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42e8e9a62d80e46bab31",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "vietnam-at-a-glance-7-days",
+      "tourID": 83,
+      "currentChecksum": "4a056488fdadd685244f6d6ab6479fd1e327a1a7b1638bc946adbc088b71f12a",
+      "approvedChecksum": "43bf5c68a3c286b3bef65a07071c7be8e945ccd0fe18b6383ab652263449c421",
+      "catalogChecksum": "43bf5c68a3c286b3bef65a07071c7be8e945ccd0fe18b6383ab652263449c421",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 6,
+        "approvedCount": 16,
+        "currentIDs": [
+          "6a621072474b5f00225ed6c2",
+          "6a621072474b5f00225ed6c3",
+          "6a621072474b5f00225ed6c4",
+          "6a621072474b5f00225ed6c5",
+          "6a621072474b5f00225ed6c6",
+          "6a621072474b5f00225ed6c7"
+        ],
+        "approvedIDs": [
+          "6a5a42ece9a62d80e46bab72",
+          "6a5a42ece9a62d80e46bab73",
+          "6a5a42ece9a62d80e46bab74",
+          "6a5a42ece9a62d80e46bab75",
+          "6a5a42ece9a62d80e46bab76",
+          "6a5a42ece9a62d80e46bab77",
+          "6a5a42ece9a62d80e46bab78",
+          "6a5a42ece9a62d80e46bab79",
+          "6a5a42ece9a62d80e46bab7a",
+          "6a5a42ece9a62d80e46bab7b",
+          "6a5a42ece9a62d80e46bab7c",
+          "6a5a42ece9a62d80e46bab7d",
+          "6a5a42ece9a62d80e46bab7e",
+          "6a5a42ece9a62d80e46bab7f",
+          "6a5a42ece9a62d80e46bab80",
+          "6a5a42ece9a62d80e46bab81"
+        ]
+      },
+      "excludes": {
+        "currentCount": 8,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621072474b5f00225ed6c8",
+          "6a621072474b5f00225ed6c9",
+          "6a621072474b5f00225ed6ca",
+          "6a621072474b5f00225ed6cb",
+          "6a621072474b5f00225ed6cc",
+          "6a621072474b5f00225ed6cd",
+          "6a621072474b5f00225ed6ce",
+          "6a621072474b5f00225ed6cf"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42ece9a62d80e46bab79",
+          "label": "Peak season surcharge & compulsory dinner at the hotel (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42ece9a62d80e46bab81",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days",
+      "tourID": 81,
+      "currentChecksum": "79d15a5cbbc2d163d1b08a9f495afa62b8fe4cf3d8081862611be78fc6d72687",
+      "approvedChecksum": "910b1d8145275d7afbba66598c026c13f247df17455258465d8db3dc29dd159f",
+      "catalogChecksum": "910b1d8145275d7afbba66598c026c13f247df17455258465d8db3dc29dd159f",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 7,
+        "approvedCount": 18,
+        "currentIDs": [
+          "6a621072474b5f00225ed6a4",
+          "6a621072474b5f00225ed6a5",
+          "6a621072474b5f00225ed6a6",
+          "6a621072474b5f00225ed6a7",
+          "6a621072474b5f00225ed6a8",
+          "6a621072474b5f00225ed6a9",
+          "6a621072474b5f00225ed6aa"
+        ],
+        "approvedIDs": [
+          "6a5a42e9e9a62d80e46bab3b",
+          "6a5a42e9e9a62d80e46bab3c",
+          "6a5a42e9e9a62d80e46bab3d",
+          "6a5a42e9e9a62d80e46bab3e",
+          "6a5a42e9e9a62d80e46bab3f",
+          "6a5a42e9e9a62d80e46bab40",
+          "6a5a42e9e9a62d80e46bab41",
+          "6a5a42e9e9a62d80e46bab42",
+          "6a5a42e9e9a62d80e46bab43",
+          "6a5a42e9e9a62d80e46bab44",
+          "6a5a42e9e9a62d80e46bab45",
+          "6a5a42e9e9a62d80e46bab46",
+          "6a5a42e9e9a62d80e46bab47",
+          "6a5a42e9e9a62d80e46bab48",
+          "6a5a42e9e9a62d80e46bab49",
+          "6a5a42e9e9a62d80e46bab4a",
+          "6a5a42e9e9a62d80e46bab4b",
+          "6a5a42e9e9a62d80e46bab4c"
+        ]
+      },
+      "excludes": {
+        "currentCount": 9,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621072474b5f00225ed6ab",
+          "6a621072474b5f00225ed6ac",
+          "6a621072474b5f00225ed6ad",
+          "6a621072474b5f00225ed6ae",
+          "6a621072474b5f00225ed6af",
+          "6a621072474b5f00225ed6b0",
+          "6a621072474b5f00225ed6b1",
+          "6a621072474b5f00225ed6b2",
+          "6a621072474b5f00225ed6b3"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42e9e9a62d80e46bab43",
+          "label": "Peak season surcharge & compulsory dinner at the hotel (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42e9e9a62d80e46bab4c",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    },
+    {
+      "slug": "vietnam-memorable-honeymoon-trip-8-days",
+      "tourID": 82,
+      "currentChecksum": "895427a0945b1174430a134ee42009f28e79fef132d9065797ac3a3338d09e57",
+      "approvedChecksum": "250b54cf9fd0e1d03ccf3c0ed921aeabdba34dcd662cbc73adb3ea5130e69c6f",
+      "catalogChecksum": "250b54cf9fd0e1d03ccf3c0ed921aeabdba34dcd662cbc73adb3ea5130e69c6f",
+      "willMatchCatalog": true,
+      "fieldDeltas": [],
+      "dayDeltaCount": 0,
+      "dayDeltas": [],
+      "includes": {
+        "currentCount": 6,
+        "approvedCount": 16,
+        "currentIDs": [
+          "6a621072474b5f00225ed6b4",
+          "6a621072474b5f00225ed6b5",
+          "6a621072474b5f00225ed6b6",
+          "6a621072474b5f00225ed6b7",
+          "6a621072474b5f00225ed6b8",
+          "6a621072474b5f00225ed6b9"
+        ],
+        "approvedIDs": [
+          "6a5a42eae9a62d80e46bab58",
+          "6a5a42eae9a62d80e46bab59",
+          "6a5a42eae9a62d80e46bab5a",
+          "6a5a42eae9a62d80e46bab5b",
+          "6a5a42eae9a62d80e46bab5c",
+          "6a5a42eae9a62d80e46bab5d",
+          "6a5a42eae9a62d80e46bab5e",
+          "6a5a42eae9a62d80e46bab5f",
+          "6a5a42eae9a62d80e46bab60",
+          "6a5a42eae9a62d80e46bab61",
+          "6a5a42eae9a62d80e46bab62",
+          "6a5a42eae9a62d80e46bab63",
+          "6a5a42eae9a62d80e46bab64",
+          "6a5a42eae9a62d80e46bab65",
+          "6a5a42eae9a62d80e46bab66",
+          "6a5a42eae9a62d80e46bab67"
+        ]
+      },
+      "excludes": {
+        "currentCount": 8,
+        "approvedCount": 0,
+        "currentIDs": [
+          "6a621072474b5f00225ed6ba",
+          "6a621072474b5f00225ed6bb",
+          "6a621072474b5f00225ed6bc",
+          "6a621072474b5f00225ed6bd",
+          "6a621072474b5f00225ed6be",
+          "6a621072474b5f00225ed6bf",
+          "6a621072474b5f00225ed6c0",
+          "6a621072474b5f00225ed6c1"
+        ],
+        "approvedIDs": []
+      },
+      "approvedGovernedRows": [
+        {
+          "bucket": "includes",
+          "id": "6a5a42eae9a62d80e46bab5f",
+          "label": "Peak season surcharge & compulsory dinner at the hotel (if any)"
+        },
+        {
+          "bucket": "includes",
+          "id": "6a5a42eae9a62d80e46bab67",
+          "label": "A fuel surcharge will be applied if fuel prices rise above 15%"
+        }
+      ]
+    }
+  ]
+}

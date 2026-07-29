@@ -1,0 +1,740 @@
+{
+  "generatedAt": "2026-07-29T02:12:59.252Z",
+  "basis": "US-055 D1-A repair draft from approved catalog-v2 and current production SQL export",
+  "currentProductionSourceSha256": "0ec03c04574fce8d0cd28f212b35ea88914d75fd3f10f07ce0b7c856ad04a69d",
+  "catalogV2Sha256": "c21225e7a4abe5aec70da80f56afd6ceaf499a028dab2ee643338590598973ad",
+  "expectedGovernedRows": 38,
+  "governedRowsInCurrentProduction": 0,
+  "rows": [
+    {
+      "slug": "a-glimpse-of-central-vietnam-5-days",
+      "oldSourceRowID": "6a5a42d0e9a62d80e46ba98f",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
+      }
+    },
+    {
+      "slug": "a-glimpse-of-central-vietnam-5-days",
+      "oldSourceRowID": "6a5a42d0e9a62d80e46ba999",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+      "oldSourceRowID": "6a5a42d2e9a62d80e46ba9ab",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+      "oldSourceRowID": "6a5a42d2e9a62d80e46ba9b4",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days",
+      "oldSourceRowID": "6a5a42d3e9a62d80e46ba9c3",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days",
+      "oldSourceRowID": "6a5a42d3e9a62d80e46ba9cb",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "best-of-vietnam-and-cambodia-15-days",
+      "oldSourceRowID": "6a5a42d5e9a62d80e46ba9e6",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the accommodation (if any)",
+      "sourceLabelChecksum": "82c40ea972bd24981ae98d371ec206155fce2fc56036e4d83d08ec85df7268b2",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no alojamento não estão incluídos."
+      }
+    },
+    {
+      "slug": "best-of-vietnam-and-cambodia-15-days",
+      "oldSourceRowID": "6a5a42d5e9a62d80e46ba9ec",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "central-vietnam-adventure-4-days",
+      "oldSourceRowID": "6a5a42d7e9a62d80e46ba9fa",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "central-vietnam-adventure-4-days",
+      "oldSourceRowID": "6a5a42d7e9a62d80e46baa02",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days",
+      "oldSourceRowID": "6a5a42d8e9a62d80e46baa12",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days",
+      "oldSourceRowID": "6a5a42d8e9a62d80e46baa1a",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "discover-halong-bay-ninh-binh-package-2-days",
+      "oldSourceRowID": "6a5a42dae9a62d80e46baa2e",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+      "oldSourceRowID": "6a5a42dbe9a62d80e46baa45",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+      "oldSourceRowID": "6a5a42dbe9a62d80e46baa4e",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "hoi-an-surrounding-and-beach-break-7-days",
+      "oldSourceRowID": "6a5a42dce9a62d80e46baa5e",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "hoi-an-surrounding-and-beach-break-7-days",
+      "oldSourceRowID": "6a5a42dce9a62d80e46baa66",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "luxury-mekong-delta-speedboat-tour-full-day",
+      "oldSourceRowID": "6a5a42dee9a62d80e46baa74",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "mekong-delta-gateway-3-days",
+      "oldSourceRowID": "6a5a42dfe9a62d80e46baa86",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "mekong-delta-with-floating-market-2-days",
+      "oldSourceRowID": "6a5a42e0e9a62d80e46baa98",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "ninh-binh-hoa-lu-trang-an-full-day-private-tour-from-hanoi",
+      "oldSourceRowID": "6a5a42e2e9a62d80e46baab7",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi",
+      "oldSourceRowID": "6a5a42e1e9a62d80e46baaa8",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "northern-vietnam-highlights-for-family-6-days",
+      "oldSourceRowID": "6a5a42e2e9a62d80e46baac7",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "northern-vietnam-highlights-for-family-6-days",
+      "oldSourceRowID": "6a5a42e2e9a62d80e46baacf",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "northern-vietnam-soft-adventure-8-days",
+      "oldSourceRowID": "6a5a42e4e9a62d80e46baae1",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
+      }
+    },
+    {
+      "slug": "northern-vietnam-soft-adventure-8-days",
+      "oldSourceRowID": "6a5a42e4e9a62d80e46baaea",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
+      "oldSourceRowID": "6a5a42e5e9a62d80e46baaf9",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
+      "oldSourceRowID": "6a5a42e5e9a62d80e46bab01",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "sapa-trekking-ethnic-market-3-days",
+      "oldSourceRowID": "6a5a42e6e9a62d80e46bab10",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
+      }
+    },
+    {
+      "slug": "sapa-trekking-ethnic-market-3-days",
+      "oldSourceRowID": "6a5a42e6e9a62d80e46bab17",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "southern-beauty-beach-relaxation-8-days",
+      "oldSourceRowID": "6a5a42e8e9a62d80e46bab28",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
+      }
+    },
+    {
+      "slug": "southern-beauty-beach-relaxation-8-days",
+      "oldSourceRowID": "6a5a42e8e9a62d80e46bab31",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "vietnam-at-a-glance-7-days",
+      "oldSourceRowID": "6a5a42ece9a62d80e46bab79",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "vietnam-at-a-glance-7-days",
+      "oldSourceRowID": "6a5a42ece9a62d80e46bab81",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days",
+      "oldSourceRowID": "6a5a42e9e9a62d80e46bab43",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days",
+      "oldSourceRowID": "6a5a42e9e9a62d80e46bab4c",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "vietnam-memorable-honeymoon-trip-8-days",
+      "oldSourceRowID": "6a5a42eae9a62d80e46bab5f",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "vietnam-memorable-honeymoon-trip-8-days",
+      "oldSourceRowID": "6a5a42eae9a62d80e46bab67",
+      "oldSourceBucket": "includes",
+      "approvedTargetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "rationale": "D6-C development-team review: pricing disclosure moved to excludes.",
+      "currentExactExists": false,
+      "currentSameLabelMatches": [],
+      "oldRowExists": true,
+      "isGovernedByPattern": true,
+      "localeLabels": {
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    }
+  ],
+  "summary": {
+    "total": 38,
+    "exactStillPresent": 0,
+    "sameLabelStillPresent": 0,
+    "missingFromCurrent": 38,
+    "oldRowsFound": 38,
+    "patternGoverned": 38
+  }
+}

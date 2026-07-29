@@ -436,3 +436,20 @@ D7-A still requires the remaining production-safety package before mutation:
 immutable release source, exact production-target backup, restore drill, signed
 catalog/plan binding, rollback release binding, canary validation and live
 post-release QA.
+
+## R7 source restoration appendix
+
+D7-A planning exposed a source-inventory drift before locale data apply. The
+current production English source has zero governed pricing-disclosure rows and
+does not match the approved `catalog-v2` source checksums. Because `D1-A`
+requires preserving every governed pricing disclosure, the release cannot be
+fixed by rebasing locale IDs against the current production source.
+
+The next execution step is a source restoration package:
+
+1. backup the current post-migration production database;
+2. restore the 22 WingSide English tour source rows to the approved
+   `source-snapshot.json` baseline;
+3. verify `22/22` source checksums against `catalog-v2`;
+4. produce and apply the locale editorial production plan;
+5. resume D7-A canary verification and controlled promotion.
