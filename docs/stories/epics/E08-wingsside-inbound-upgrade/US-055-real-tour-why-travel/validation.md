@@ -262,3 +262,54 @@ Validation consequence: D7-A cannot continue to data apply or canary promotion
 until the exact 22-tour English source baseline is restored or a new catalog is
 generated and approved under a revised D1 policy. The selected resolution is to
 restore the approved source snapshot first, then rerun catalog plan/apply/verify.
+
+## S3 production ship — run r8
+
+On 2026-07-29, D7-A completed production promotion for release
+`f39707afe28723dcfe10e78225222b7469e08a9d`.
+
+Production data gates completed:
+
+- schema migrations applied for `home_why_tour_slots`,
+  `form_submissions.enquiry_context_*` and US-055 migration records;
+- the 22-tour English source inventory was restored and verified at
+  `22/22` approved source checksums;
+- locale editorial apply/verify completed for 88 locale entries plus 22 shared
+  service updates, with verify `checked=110,state=after`;
+- English editorial overlay r13 applied text-governed EN fields for 22 tours,
+  output `{"state":"after","unchanged":0,"updated":22}`;
+- English editorial r13 verification returned `{"checked":22,"state":"after"}`.
+
+Protected production evidence:
+
+- release path: `/home/ubuntu/wings-travel/releases/wingsside-us055-f39707a`;
+- rollback release: `/home/ubuntu/wings-travel/releases/wingsside-us054-fadd22c`;
+- English source snapshot after locale apply:
+  `/home/ubuntu/wings-travel/shared/artifacts/wingsside-us055/current-english-source-after-locale-apply-full.json`,
+  SHA-256 `679055b0d4c4cc867168a78c4203afc2af110d78f4e29bfcfe149d60aa7a346e`;
+- English r13 artifacts:
+  config `d4ca171a7c738e8f7e0c5fa898955fbdf3fdecbbe0e62e90ff0363efb7e5aee3`,
+  manifest `f0f6ff31f9ce7cf85c760c1104a41b7640935a1518ecbd3eaa3b673f2d4a1aa3`,
+  plan `ddf85412a0eb55c978d180af22e765c702715906f95ed59a3314f51f40e5a2e6`;
+- r13 backup alias:
+  `/home/ubuntu/wings-travel/shared/backups/wingsside-us055-preenglishapply-r13-20260729T040211Z.dump.age`,
+  backup SHA-256 `e06cc802c23b413ac8a1ca56ef8a49cdf0f4e06498c7fce593527789bfe66241`,
+  manifest SHA-256 `4f5de9aa81594e3cc2548e3caef3219e18c957f3d8365a769e3b6dfc30e8b47d`,
+  restore evidence SHA-256
+  `8c8ff56b874d9bd05d30c13efa46955763fedfae822e4f342c5eafc742640514`.
+
+Canary and production smoke passed on:
+
+- `/`
+- `/journeys`
+- `/tour/a-glimpse-of-central-vietnam-5-days`
+- `/vi/tour/a-glimpse-of-central-vietnam-5-days`
+- `/it/tour/a-glimpse-of-central-vietnam-5-days`
+- `/es/tour/a-glimpse-of-central-vietnam-5-days`
+- `/pt/tour/a-glimpse-of-central-vietnam-5-days`
+
+Production now has `current` pointing to
+`/home/ubuntu/wings-travel/releases/wingsside-us055-f39707a`; the live app
+container runs runner image
+`sha256:c1024955a02cf48d26695e3ed44742c64dddc0686963290ad83ab491d39a5aa7`.
+US-055 is production-shipped with the media acceptance decision recorded in R6.

@@ -453,3 +453,43 @@ The next execution step is a source restoration package:
 3. verify `22/22` source checksums against `catalog-v2`;
 4. produce and apply the locale editorial production plan;
 5. resume D7-A canary verification and controlled promotion.
+
+## R8 production ship appendix
+
+D7-A is complete for production release
+`f39707afe28723dcfe10e78225222b7469e08a9d`.
+
+Execution summary:
+
+1. applied production schema migrations;
+2. restored the approved 22-tour English source baseline;
+3. applied and verified the 4 missing locale overlays plus shared service rows;
+4. generated and applied English editorial overlay r13 as a text-governed
+   production package;
+5. verified English r13 as `checked=22,state=after`;
+6. built the correct runner image for US-055 after detecting the earlier
+   `wingstravel-app:us055-f39707a` tag pointed at the tools target;
+7. canaried the runner on `127.0.0.1:3001`;
+8. promoted production by moving `current` to
+   `/home/ubuntu/wings-travel/releases/wingsside-us055-f39707a` and recreating
+   `wingstravel-app-1`;
+9. smoke-tested Home, Journeys and EN/VI/IT/ES/PT Tour Detail routes with HTTP
+   200.
+
+Live runtime:
+
+- app image:
+  `sha256:c1024955a02cf48d26695e3ed44742c64dddc0686963290ad83ab491d39a5aa7`;
+- rollback release:
+  `/home/ubuntu/wings-travel/releases/wingsside-us054-fadd22c`;
+- production app container: `wingstravel-app-1`;
+- production symlink:
+  `/home/ubuntu/wings-travel/current -> /home/ubuntu/wings-travel/releases/wingsside-us055-f39707a`.
+
+Implementation note: English editorial r13 intentionally governs text fields
+only (`title`, `summary`, `factSummary.routeSummary`, `primaryCTA.label`,
+`meta.*`). Service row labels and row identities were already covered by the
+locale/catalog production gates; Payload returned inconsistent localized array
+shape for service arrays in the standalone production importer, so those arrays
+were excluded from the English overlay to avoid a false blocker without
+weakening the already-passed locale service-row gate.

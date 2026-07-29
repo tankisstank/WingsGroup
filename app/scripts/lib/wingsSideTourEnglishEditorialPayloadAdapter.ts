@@ -92,14 +92,35 @@ const relationshipID = (value: unknown): null | number | string => {
 const projectToGovernedShape = (
   source: unknown,
   governedShape: unknown,
+  path = '$',
 ): unknown => {
   if (Array.isArray(governedShape)) {
     if (!Array.isArray(source)) return source
+    const governedIDs = governedShape.map((entry) => relationshipID(entry))
+    if (governedIDs.every((id) => id !== null)) {
+      const sourceByID = new Map(
+        source
+          .map((entry) => [relationshipID(entry), entry] as const)
+          .filter(([id]) => id !== null),
+      )
+      return governedShape.map((entry, index) => {
+        const id = governedIDs[index]
+        const sourceEntry = sourceByID.get(id)
+        if (!sourceEntry) {
+          throw new Error(
+            `English editorial Payload adapter detected governed array identity drift at ${path}.${index}: missing=${String(id)}`,
+          )
+        }
+        return projectToGovernedShape(sourceEntry, entry, `${path}.${index}`)
+      })
+    }
     if (source.length !== governedShape.length) {
-      throw new Error('English editorial Payload adapter detected governed array cardinality drift')
+      throw new Error(
+        `English editorial Payload adapter detected governed array cardinality drift at ${path}: source=${source.length}; governed=${governedShape.length}`,
+      )
     }
     return governedShape.map((entry, index) =>
-      projectToGovernedShape(source[index], entry),
+      projectToGovernedShape(source[index], entry, `${path}.${index}`),
     )
   }
   if (
@@ -111,7 +132,7 @@ const projectToGovernedShape = (
     return Object.fromEntries(
       Object.entries(governedShape as Record<string, unknown>).map(([key, value]) => [
         key,
-        projectToGovernedShape((source as Record<string, unknown>)[key], value),
+        projectToGovernedShape((source as Record<string, unknown>)[key], value, `${path}.${key}`),
       ]),
     )
   }
@@ -216,7 +237,14 @@ const measureTarget = async (
 }
 
 const defaultDependencies = (): PayloadAdapterDependencies => ({
-  createRequest: async (payload, user) => createLocalReq({ user: user as never }, payload),
+  createRequest: async (payload, user) =>
+    createLocalReq(
+      {
+        context: { disableRevalidate: true, releaseRemediation: true },
+        user: user as never,
+      },
+      payload,
+    ),
   env: process.env,
   initialize: async () => {
     assertPreInitializationEnvironment(process.env)
@@ -396,11 +424,13 @@ const createWingsSideTourEnglishEditorialPayloadAdapterFactory = () => {
           ) {
             throw new Error(`English editorial Payload adapter tour target mismatch: ${identity.slug}`)
           }
+          const projected = projectToGovernedShape(
+            document,
+            entry.before,
+            `tour-products.${identity.slug}`,
+          ) as WingsSideTourEnglishEditorialDocument
           rows.push({
-            document: projectToGovernedShape(
-              document,
-              entry.before,
-            ) as WingsSideTourEnglishEditorialDocument,
+            document: projected,
             locale: 'en' as const,
             siteCode: 'wing-side' as const,
             tourID: identity.tourID,
@@ -428,6 +458,7 @@ const createWingsSideTourEnglishEditorialPayloadAdapterFactory = () => {
         )
         await payload.update({
           collection: 'tour-products',
+          context: { disableRevalidate: true, releaseRemediation: true },
           data: data as never,
           id: tourID as never,
           locale: 'en',

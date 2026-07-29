@@ -351,7 +351,7 @@ export const assertWingsSideTourEnglishEditorialPlan = (
       entry.sourceChecksum !== wingsSideTourEnglishEditorialChecksum(entry.before) ||
       entry.afterChecksum !== wingsSideTourEnglishEditorialChecksum(entry.after) ||
       wingsSideTourEnglishEditorialStableStringify(entry.fieldChanges) !==
-        wingsSideTourEnglishEditorialStableStringify(diff(entry.before, entry.after))
+        wingsSideTourEnglishEditorialStableStringify(clone(diff(entry.before, entry.after)))
     ) {
       throw new Error(`English editorial plan entry checksum or summary mismatch: ${entry.slug}`)
     }
@@ -423,7 +423,7 @@ export const buildWingsSideTourEnglishEditorialPlan = ({
     if (wingsSideTourEnglishEditorialChecksum(before) !== identity.sourceChecksum) {
       throw new Error(`English editorial manifest source checksum drift: ${slug}`)
     }
-    const fieldChanges = assertDocumentContract({ after, before, config })
+    const fieldChanges = clone(assertDocumentContract({ after, before, config }))
     return {
       after,
       afterChecksum: wingsSideTourEnglishEditorialChecksum(after),

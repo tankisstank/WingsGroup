@@ -125,9 +125,11 @@ const killPreservingPrimary = async <Transaction>({
   try {
     await adapter.killTransaction(transaction)
   } catch (killError) {
+    const primaryMessage = primary instanceof Error ? primary.message : String(primary)
+    const cleanupMessage = killError instanceof Error ? killError.message : String(killError)
     throw new AggregateError(
       [primary, killError],
-      'English editorial mutation failed and transaction cleanup also failed',
+      `English editorial mutation failed and transaction cleanup also failed; primary=${primaryMessage}; cleanup=${cleanupMessage}`,
       { cause: primary },
     )
   }
