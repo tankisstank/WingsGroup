@@ -15,6 +15,7 @@ const CONTEXT_CODE_PATTERN = /^[a-z0-9][a-z0-9-]{0,63}$/
 const CONTEXT_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/
 const CONTEXT_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,95}$/
 const CONTEXT_SOURCE_PATTERN = /^[A-Za-z0-9-]{1,48}$/
+const CONTEXT_SEARCH_PATTERN = /^.{1,80}$/u
 
 export class LeadValidationError extends Error {}
 
@@ -73,7 +74,7 @@ export const parseLeadContext = (input: unknown): LeadSubmissionContext | undefi
     const candidate = assertPlainObject(context.discovery, 'Discovery context is invalid.')
     assertOnlyKeys(
       candidate,
-      ['destination', 'duration', 'style'],
+      ['destination', 'duration', 'q', 'style', 'type'],
       'Discovery context is invalid.',
     )
     discovery = {
@@ -87,11 +88,13 @@ export const parseLeadContext = (input: unknown): LeadSubmissionContext | undefi
         CONTEXT_CODE_PATTERN,
         'Discovery duration is invalid.',
       ),
+      q: optionalContextValue(candidate.q, CONTEXT_SEARCH_PATTERN, 'Discovery search is invalid.'),
       style: optionalContextValue(
         candidate.style,
         CONTEXT_CODE_PATTERN,
         'Discovery style is invalid.',
       ),
+      type: optionalContextValue(candidate.type, CONTEXT_CODE_PATTERN, 'Discovery type is invalid.'),
     }
     if (!Object.values(discovery).some(Boolean)) discovery = undefined
   }

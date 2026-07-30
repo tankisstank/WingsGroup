@@ -41,6 +41,8 @@ export type DiscoveryTourCard = {
   price: DiscoveryTourPriceState
   priceFrom: number | null
   routeLabel?: string | null
+  /** Locale-resolved searchable text; never displayed directly. */
+  searchText?: string
   slug: string
   summary: string
   title: string
@@ -327,11 +329,11 @@ export const isDurationMatch = (
 }
 
 export const isDiscoveryCardMatch = (
-  card: Pick<DiscoveryTourCard, 'destinationTags' | 'duration' | 'summary' | 'title' | 'tourType' | 'travelStyles'>,
+  card: Pick<DiscoveryTourCard, 'destinationTags' | 'duration' | 'summary' | 'title' | 'tourType' | 'travelStyles'> & { routeLabel?: string | null; searchText?: string },
   query: Omit<DiscoveryQuery, 'unknownValueCount'>,
 ): boolean =>
   (!query.type || (card.tourType || 'private') === query.type) &&
-  (!query.q || `${card.title} ${card.summary} ${card.destinationTags.join(' ')} ${card.travelStyles.join(' ')}`.normalize('NFKC').toLocaleLowerCase().includes(query.q.toLocaleLowerCase())) &&
+  (!query.q || `${card.title} ${card.summary} ${card.routeLabel || ''} ${card.searchText || ''} ${card.destinationTags.join(' ')} ${card.travelStyles.join(' ')}`.normalize('NFKC').toLocaleLowerCase().includes(query.q.toLocaleLowerCase())) &&
   (!query.destination || card.destinationTags.includes(query.destination)) &&
   (!query.style || card.travelStyles.includes(query.style)) &&
   isDurationMatch(card.duration.days, query.duration)

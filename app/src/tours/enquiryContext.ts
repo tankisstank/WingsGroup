@@ -132,9 +132,10 @@ export const getTourEnquiryContextMessage = ({
 }: TourEnquiryContext) =>
   [
     tourTitle ? `Tour: ${tourTitle}` : null,
-    tourSlug ? `Tour slug: ${tourSlug}` : null,
-    tourId !== null && tourId !== undefined && tourId !== '' ? `Tour ID: ${tourId}` : null,
-    source ? `Source: ${source}` : null,
+    // Identifiers and source are structured context only; never prefill a
+    // visitor's free-text message with internal metadata.
+    discovery?.q ? `Discovery search: ${discovery.q}` : null,
+    discovery?.type ? `Tour type: ${discovery.type}` : null,
     discovery?.destination ? `Discovery destination: ${discovery.destination}` : null,
     discovery?.style ? `Discovery style: ${discovery.style}` : null,
     discovery?.duration ? `Discovery duration: ${discovery.duration}` : null,

@@ -8,7 +8,9 @@ export type LeadSubmissionField = {
 export type LeadDiscoveryContext = {
   destination?: string
   duration?: string
+  q?: string
   style?: string
+  type?: string
 }
 
 export type LeadSubmissionContext = {

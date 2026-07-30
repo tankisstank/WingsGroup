@@ -4030,6 +4030,46 @@ body[data-site-code='wing-side'] .ws-hifi-footer {
   padding-block: 1.25rem;
 }
 
+body[data-site-code='wing-side'] .site-footer--wingsside-hifi {
+  background: var(--site-foreground);
+  border: 0;
+  color: var(--site-background);
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer-columns {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer-columns section {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer-columns h2 {
+  color: var(--site-background);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  margin: 0 0 .25rem;
+  text-transform: uppercase;
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer-columns a {
+  color: color-mix(in oklch, var(--site-background) 80%, transparent);
+  font-size: .9rem;
+  text-decoration: none;
+}
+
+body[data-site-code='wing-side'] .ws-hifi-footer-columns a:hover,
+body[data-site-code='wing-side'] .ws-hifi-footer-columns a:focus-visible { color: var(--site-gold); }
+
+@media (max-width: 720px) {
+  body[data-site-code='wing-side'] .ws-hifi-footer-columns { grid-template-columns: 1fr; }
+}
+
 body[data-site-code='wing-side'] .ws-hifi-footer__brand {
   display: flex;
   flex-direction: column;

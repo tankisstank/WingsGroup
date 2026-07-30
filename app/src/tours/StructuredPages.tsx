@@ -199,9 +199,17 @@ const getGovernedPricePostureInput = ({
   nextDeparture,
   tour,
 }: {
-  nextDeparture?: null | { currency?: unknown; priceFrom?: unknown }
-  tour: { currency?: unknown; priceFrom?: unknown }
+  nextDeparture?: null | { availabilityStatus?: unknown; currency?: unknown; priceBasis?: unknown; priceFrom?: unknown }
+  tour: { tourType?: unknown }
 }) => {
+  // WingSide never turns a product-level price into a per-person claim.
+  // Commerce is reserved for a group product with an explicit verified
+  // departure capability; every other posture remains consultative.
+  if (
+    tour.tourType !== 'group' ||
+    nextDeparture?.priceBasis !== 'per-person' ||
+    !['open', 'limited'].includes(String(nextDeparture?.availabilityStatus || ''))
+  ) return {}
   const departurePrice = normalizeGovernedTourPrice({
     currency: nextDeparture?.currency,
     value: nextDeparture?.priceFrom,
@@ -210,13 +218,7 @@ const getGovernedPricePostureInput = ({
   if (departurePrice) {
     return { currency: departurePrice.currency, priceFrom: departurePrice.value }
   }
-
-  const tourPrice = normalizeGovernedTourPrice({
-    currency: tour.currency,
-    value: tour.priceFrom,
-  })
-
-  return tourPrice ? { currency: tourPrice.currency, priceFrom: tourPrice.value } : {}
+  return {}
 }
 
 const splitSummaryParagraphs = (summary?: null | string) =>

@@ -40,6 +40,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
   const copy = getWingSideJourneysCopy(locale)
   const uxCopy = journeyUxCopy[locale]
   const v2 = journeyV2Copy[locale]
+  const tourTypeCopy = journeyTourTypeCopy[locale]
   const router = useRouter()
   const toSitePath = useSitePath()
   const searchParams = useSearchParams()
@@ -68,7 +69,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
     : null
   const activeFilters = [
     normalizedQuery.q ? `“${normalizedQuery.q}”` : null,
-    normalizedQuery.type ? (normalizedQuery.type === 'group' ? 'Small group' : 'Private') : null,
+    normalizedQuery.type ? (normalizedQuery.type === 'group' ? tourTypeCopy.group : tourTypeCopy.private) : null,
     normalizedQuery.destination ? destinationLabels[locale][normalizedQuery.destination] : null,
     normalizedQuery.style ? styleLabels[locale][normalizedQuery.style] : null,
     normalizedQuery.duration ? durationLabels[locale][normalizedQuery.duration] : null,
@@ -190,13 +191,13 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
           />
         </label>
         <FilterSelect
-          allLabel="All tours"
-          label="Tour type"
+          allLabel={tourTypeCopy.all}
+          label={tourTypeCopy.label}
           name="type"
           onChange={replaceQuery}
           options={[
-            { label: 'Small group', value: 'group' },
-            { label: 'Private', value: 'private' },
+            { label: tourTypeCopy.group, value: 'group' },
+            { label: tourTypeCopy.private, value: 'private' },
           ]}
           value={normalizedQuery.type || ''}
         />
@@ -299,7 +300,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img alt={item.hero.alt} decoding="async" loading="lazy" src={item.hero.url} />
                     <i className={`ws-journeys-card__type ws-journeys-card__type--${item.tourType || 'private'}`}>
-                      {item.tourType === 'group' ? 'Small group' : 'Private'}
+                      {item.tourType === 'group' ? tourTypeCopy.group : tourTypeCopy.private}
                     </i>
                   </span>
                   <span className="ws-journeys-card__body">
@@ -447,6 +448,16 @@ const journeyUxCopy = {
     sort: 'Ordenar',
     updating: 'A atualizar os resultados…',
   },
+} as const
+
+// Five-locale contract for the type filter and card anatomy. Keeping this
+// adjacent to the other Journeys contracts prevents public English leakage.
+const journeyTourTypeCopy = {
+  en: { all: 'All tours', group: 'Small group', label: 'Tour type', private: 'Private' },
+  vi: { all: 'Tất cả tour', group: 'Nhóm nhỏ', label: 'Loại tour', private: 'Riêng tư' },
+  it: { all: 'Tutti i tour', group: 'Piccolo gruppo', label: 'Tipo di tour', private: 'Privato' },
+  es: { all: 'Todos los tours', group: 'Grupo pequeño', label: 'Tipo de tour', private: 'Privado' },
+  pt: { all: 'Todos os tours', group: 'Grupo pequeno', label: 'Tipo de tour', private: 'Privado' },
 } as const
 
 const buildResultSummary = (

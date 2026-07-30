@@ -5,11 +5,13 @@ import {
   buildDiscoveryRelaxationPlan,
   buildDiscoveryWhere,
   getDiscoverySEOPolicy,
+  isDiscoveryCardMatch,
   isDurationMatch,
   normalizeDiscoveryQuery,
   projectDiscoveryTour,
   serializeDiscoveryQuery,
   stripDiscoveryQueryMeta,
+  type DiscoveryTourCard,
 } from '@/tours/discoveryCore'
 
 const site = { code: 'wing-side', id: 3 }
@@ -33,6 +35,12 @@ const tour = (overrides: Record<string, unknown> = {}) => ({
 })
 
 describe('WingSide discovery pure contract', () => {
+  it('keeps q/type/destination/style/duration as a strict localized AND query', () => {
+    const query = stripDiscoveryQueryMeta(normalizeDiscoveryQuery({ q: 'Hà Nội', type: 'group', destination: 'hanoi', style: 'culture', duration: '8-14' }))
+    const matchingCard: Pick<DiscoveryTourCard, 'destinationTags' | 'duration' | 'summary' | 'title' | 'tourType' | 'travelStyles'> & { routeLabel: string; searchText: string } = { destinationTags: ['hanoi'], duration: { days: 9, nights: 8 }, routeLabel: 'Hà Nội → Hạ Long', searchText: 'Hà Nội Văn hóa', summary: 'Published route', title: 'Northern journey', tourType: 'group', travelStyles: ['culture'] }
+    expect(isDiscoveryCardMatch(matchingCard, query)).toBe(true)
+    expect(isDiscoveryCardMatch({ ...matchingCard, duration: { days: 6, nights: 5 } }, query)).toBe(false)
+  })
   it('normalizes scalar params and counts dropped unknown values without retaining raw input', () => {
     const params = new URLSearchParams()
     params.append('destination', 'bogus-destination')

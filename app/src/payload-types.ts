@@ -2255,7 +2255,9 @@ export interface FormSubmission {
     discovery?: {
       destination?: string | null;
       duration?: string | null;
+      q?: string | null;
       style?: string | null;
+      type?: string | null;
     };
   };
   /**
@@ -4226,7 +4228,9 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
           | {
               destination?: T;
               duration?: T;
+              q?: T;
               style?: T;
+              type?: T;
             };
       };
   deliveryStatus?: T;

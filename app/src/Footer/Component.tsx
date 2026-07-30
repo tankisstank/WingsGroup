@@ -19,6 +19,7 @@ export async function Footer() {
   const isWingSide = site.code === 'wing-side'
   const hiFiCopy = isWingSide ? getWingsSideHiFiCopy(locale) : null
   const wingSideNav = isWingSide ? getWingsSideHiFiNavItems(locale) : null
+  const wingSideFooterCopy = isWingSide ? getWingSideFooterCopy(locale) : null
 
   const navItems = settings?.footerNavItems || []
 
@@ -33,7 +34,7 @@ export async function Footer() {
       data-testid={isWingSide ? 'wingsside-hifi-footer' : undefined}
     >
       {isWingSide ? (
-        <div className="container ws-hifi-footer">
+        <div className="container ws-hifi-footer" data-testid="wingside-footer-columns">
           <div className="ws-hifi-footer__brand">
             <SiteLink className="flex items-center" href="/">
               <Logo
@@ -65,15 +66,22 @@ export async function Footer() {
               </div>
             ) : null}
           </div>
-          <nav aria-label={chromeCopy.footerNavigation} className="ws-hifi-footer-links">
-            {(wingSideNav || []).slice(1).map((item) => (
-              <SiteLink href={item.href} key={item.href}>
-                {item.label}
-              </SiteLink>
-            ))}
-            <SiteLink className="ws-hifi-footer-links__cta" href="/plan-your-trip">
-              {hiFiCopy?.home.planTripCta || 'Plan trip'}
-            </SiteLink>
+          <nav aria-label={chromeCopy.footerNavigation} className="ws-hifi-footer-columns">
+            <section>
+              <h2>{wingSideFooterCopy!.explore}</h2>
+              {(wingSideNav || []).slice(1, 4).map((item) => <SiteLink href={item.href} key={item.href}>{item.label}</SiteLink>)}
+            </section>
+            <section>
+              <h2>{wingSideFooterCopy!.travel}</h2>
+              {navItems.map(({ link }, index) => <CMSLink className="ws-hifi-footer-link" key={index} {...link} />)}
+              <SiteLink href="/plan-your-trip">{hiFiCopy?.home.planTripCta || wingSideFooterCopy!.plan}</SiteLink>
+            </section>
+            <section>
+              <h2>{wingSideFooterCopy!.help}</h2>
+              <SiteLink href="/contact-us">{wingSideFooterCopy!.contact}</SiteLink>
+              {settings?.supportEmail ? <a href={`mailto:${settings.supportEmail}`}>{settings.supportEmail}</a> : null}
+              {settings?.supportPhone ? <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>{settings.supportPhone}</a> : null}
+            </section>
           </nav>
         </div>
       ) : (
@@ -130,3 +138,11 @@ export async function Footer() {
     </footer>
   )
 }
+
+const getWingSideFooterCopy = (locale: string) => ({
+  en: { contact: 'Contact us', explore: 'Explore', help: 'Need a hand?', plan: 'Plan trip', travel: 'Travel with us' },
+  vi: { contact: 'Liên hệ', explore: 'Khám phá', help: 'Cần hỗ trợ?', plan: 'Lên kế hoạch', travel: 'Đi cùng chúng tôi' },
+  it: { contact: 'Contattaci', explore: 'Esplora', help: 'Serve aiuto?', plan: 'Pianifica', travel: 'Viaggia con noi' },
+  es: { contact: 'Contáctanos', explore: 'Explora', help: '¿Necesitas ayuda?', plan: 'Planifica', travel: 'Viaja con nosotros' },
+  pt: { contact: 'Contacte-nos', explore: 'Explorar', help: 'Precisa de ajuda?', plan: 'Planear', travel: 'Viaje connosco' },
+}[locale] || { contact: 'Contact us', explore: 'Explore', help: 'Need a hand?', plan: 'Plan trip', travel: 'Travel with us' })

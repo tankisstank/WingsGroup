@@ -23,6 +23,7 @@ import {
   type DiscoveryTourDoc,
   type RelationID,
 } from './discoveryCore'
+import { destinationLabels, styleLabels, type WingSideJourneyLocale } from './journeysCopy'
 
 export * from './discoveryCore'
 
@@ -135,7 +136,10 @@ const queryDiscoveryCards = async ({
     depth: 2,
     draft: false,
     fallbackLocale: 'en',
-    limit,
+    // q can match localized taxonomy labels, which Payload cannot express as a
+    // portable relation predicate. Fetch the bounded public corpus first, then
+    // apply the same strict predicate before the caller's display limit.
+    limit: query.q ? 1000 : limit,
     locale,
     overrideAccess: false,
     pagination: false,
@@ -181,11 +185,22 @@ const queryDiscoveryCards = async ({
     withVerifiedWrapperPages(withDepartures, verifiedWrappers)
       .map((tour) => projectDiscoveryTour({ locale, site, tour }))
       .filter((card): card is DiscoveryTourCard => Boolean(card))
+      .map((card): DiscoveryTourCard => {
+        const copyLocale: WingSideJourneyLocale =
+          locale && ['en', 'vi', 'it', 'es', 'pt'].includes(locale) ? (locale as WingSideJourneyLocale) : 'en'
+        return {
+          ...card,
+          searchText: [
+            ...card.destinationTags.map((key) => destinationLabels[copyLocale][key]),
+            ...card.travelStyles.map((key) => styleLabels[copyLocale][key]),
+          ].join(' '),
+        }
+      })
       // Payload should enforce the same AND query. Keep a projection-level
       // contract guard so an adapter or array-query regression cannot broaden
       // the public result set.
       .filter((card) => isDiscoveryCardMatch(card, query)),
-  )
+  ).slice(0, limit)
 }
 
 const logDiscoveryCompleted = ({

@@ -8,9 +8,11 @@ import type { TourEnquiryContext } from './enquiryContext'
 const toSubmissionContext = (context: TourEnquiryContext): LeadSubmissionContext => ({
   discovery: context.discovery
     ? {
-        destination: context.discovery.destination,
-        duration: context.discovery.duration,
-        style: context.discovery.style,
+      destination: context.discovery.destination,
+      duration: context.discovery.duration,
+      q: context.discovery.q,
+      style: context.discovery.style,
+      type: context.discovery.type,
       }
     : undefined,
   source: context.source || undefined,

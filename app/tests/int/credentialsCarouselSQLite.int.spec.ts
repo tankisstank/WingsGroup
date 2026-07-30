@@ -45,3 +45,22 @@ describe('credentials carousel local SQLite bootstrap', () => {
     ])
   })
 })
+
+describe('US-057 local SQLite repair parity', () => {
+  it('adds tour type and departure price-basis columns to live and version tables idempotently', async () => {
+    tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'wings-us057-'))
+    const databasePath = path.join(tempDirectory, 'payload.db')
+    const initial = new DatabaseSync(databasePath)
+    initial.exec(`CREATE TABLE tour_products (id INTEGER PRIMARY KEY); CREATE TABLE _tour_products_v (id INTEGER PRIMARY KEY); CREATE TABLE tour_departures (id INTEGER PRIMARY KEY); CREATE TABLE _tour_departures_v (id INTEGER PRIMARY KEY);`)
+    initial.close()
+    await repairLocalSQLiteSchema(`file:${databasePath}`)
+    await repairLocalSQLiteSchema(`file:${databasePath}`)
+    const verified = new DatabaseSync(databasePath)
+    const columns = (table: string) => (verified.prepare(`PRAGMA table_info("${table}")`).all() as Array<{ name: string }>).map(({ name }) => name)
+    expect(columns('tour_products')).toContain('tour_type')
+    expect(columns('_tour_products_v')).toContain('version_tour_type')
+    expect(columns('tour_departures')).toContain('price_basis')
+    expect(columns('_tour_departures_v')).toContain('version_price_basis')
+    verified.close()
+  })
+})

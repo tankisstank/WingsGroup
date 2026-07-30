@@ -148,7 +148,9 @@ const localSQLiteColumnRepairs = [
       ['enquiry_context_tour_slug', 'TEXT'],
       ['enquiry_context_discovery_destination', 'TEXT'],
       ['enquiry_context_discovery_duration', 'TEXT'],
+      ['enquiry_context_discovery_q', 'TEXT'],
       ['enquiry_context_discovery_style', 'TEXT'],
+      ['enquiry_context_discovery_type', 'TEXT'],
       ['delivery_status', "TEXT NOT NULL DEFAULT 'pending'"],
       ['delivery_updated_at', 'TEXT'],
       ['delivery_error_code', 'TEXT'],
@@ -161,6 +163,7 @@ const localSQLiteColumnRepairs = [
       ['price_from', 'NUMERIC'],
       ['currency', "TEXT DEFAULT 'USD'"],
       ['taxonomy_provenance', 'TEXT'],
+      ['tour_type', 'TEXT'],
     ],
   },
   {
@@ -170,7 +173,16 @@ const localSQLiteColumnRepairs = [
       ['version_price_from', 'NUMERIC'],
       ['version_currency', "TEXT DEFAULT 'USD'"],
       ['version_taxonomy_provenance', 'TEXT'],
+      ['version_tour_type', 'TEXT'],
     ],
+  },
+  {
+    table: 'tour_departures',
+    columns: [['price_basis', 'TEXT']],
+  },
+  {
+    table: '_tour_departures_v',
+    columns: [['version_price_basis', 'TEXT']],
   },
   {
     table: 'pages_blocks_credentials_carousel_items',

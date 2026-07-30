@@ -216,7 +216,9 @@ export const plugins: Plugin[] = [
                 fields: [
                   { name: 'destination', type: 'text', maxLength: 64 },
                   { name: 'duration', type: 'text', maxLength: 64 },
+                  { name: 'q', type: 'text', maxLength: 80 },
                   { name: 'style', type: 'text', maxLength: 64 },
+                  { name: 'type', type: 'text', maxLength: 32 },
                 ],
               },
             ],
