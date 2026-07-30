@@ -9,9 +9,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   `)
 }
 
-export async function down({ db }: MigrateDownArgs): Promise<void> {
-  await db.execute(sql`
-    ALTER TABLE "form_submissions" DROP COLUMN IF EXISTS "enquiry_context_discovery_q";
-    ALTER TABLE "form_submissions" DROP COLUMN IF EXISTS "enquiry_context_discovery_type";
-  `)
-}
+// Discovery context is durable operational evidence. As with the parent lead
+// context migration, rollback uses a forward fix rather than deleting
+// attribution already attached to submitted leads.
+export async function down(_args: MigrateDownArgs): Promise<void> {}
