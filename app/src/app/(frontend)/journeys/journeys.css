@@ -310,6 +310,20 @@ body[data-site-code='wing-side'] .ws-journeys__empty {
   padding: clamp(1.5rem, 5vw, 3rem);
 }
 
+body[data-site-code='wing-side'] :is(.ws-journeys__paths,.ws-journeys__destinations,.ws-journeys__faq,.ws-journeys__final) {
+  width: min(72rem, calc(100% - 2rem)); margin: 0 auto 4rem; border-radius: 1.5rem; padding: clamp(1.5rem,4vw,3rem);
+}
+body[data-site-code='wing-side'] .ws-journeys__paths { display:grid; grid-template-columns: 1fr 1fr; gap:2rem; color:#fff; background: linear-gradient(110deg, color-mix(in oklch,var(--site-brand) 88%,#03172f), rgba(4,28,55,.88)), url('/wingsside-hifi/hero-halong.jpg') center/cover; }
+body[data-site-code='wing-side'] .ws-journeys__paths ol { display:grid; gap:1rem; margin:0; padding:0; list-style:none; }
+body[data-site-code='wing-side'] .ws-journeys__paths li { display:grid; gap:.25rem; border-top:1px solid rgba(255,255,255,.28); padding-top:1rem; }
+body[data-site-code='wing-side'] .ws-journeys__destinations { background:var(--site-background); }
+body[data-site-code='wing-side'] .ws-journeys__destinations > div { display:flex; flex-wrap:wrap; gap:.75rem; }
+body[data-site-code='wing-side'] .ws-journeys__destinations a { min-height:44px; display:inline-flex; align-items:center; border:1px solid var(--site-border); border-radius:999px; padding:0 1rem; background:var(--site-surface); }
+body[data-site-code='wing-side'] .ws-journeys__faq { display:grid; grid-template-columns:1fr 1fr; gap:2rem; background:var(--site-surface); }
+body[data-site-code='wing-side'] .ws-journeys__faq details { border-bottom:1px solid var(--site-border); padding:.8rem 0; }
+body[data-site-code='wing-side'] .ws-journeys__faq summary { min-height:44px; display:flex; align-items:center; cursor:pointer; font-weight:750; }
+body[data-site-code='wing-side'] .ws-journeys__final { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:var(--site-surface); box-shadow:0 16px 36px rgba(15,23,42,.09); }
+
 @media (prefers-reduced-motion: reduce) {
   body[data-site-code='wing-side'] .ws-journeys-card,
   body[data-site-code='wing-side'] .ws-journeys-card__media img {
@@ -350,4 +364,6 @@ body[data-site-code='wing-side'] .ws-journeys__empty {
   body[data-site-code='wing-side'] .ws-journeys-card__media {
     aspect-ratio: 3 / 2;
   }
+  body[data-site-code='wing-side'] :is(.ws-journeys__paths,.ws-journeys__faq) { grid-template-columns:1fr; }
+  body[data-site-code='wing-side'] .ws-journeys__final { display:grid; }
 }

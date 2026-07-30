@@ -31,6 +31,7 @@ export type DiscoverySEO = {
 }
 
 export type DiscoveryTourCard = {
+  commerce?: { availability: string; canBook: boolean; departureDate: string; price: DiscoveryTourPriceState }
   currency: string | null
   destinationTags: TourDestinationKey[]
   duration: { days: number; nights: number | null }
@@ -83,6 +84,7 @@ export type DiscoveryMedia = {
   url?: null | string
 }
 export type DiscoveryTourDoc = {
+  activeDepartures?: Array<DiscoveryDepartureDoc> | null
   _status?: null | string
   destinationTags?: null | string[]
   durationDays?: null | number
@@ -92,6 +94,7 @@ export type DiscoveryTourDoc = {
   currency?: null | string
   priceFrom?: null | number
   routeLabel?: null | string
+  primaryCTA?: { mode?: null | string } | null
   site?: Relation
   slug?: null | string
   summary?: null | string
@@ -111,6 +114,16 @@ const scalarParamOrder = ['q', 'type', 'destination', 'style', 'duration'] as co
 export const normalizeDiscoverySearch = (value: unknown): string | undefined => {
   const normalized = String(value || '').normalize('NFKC').replace(/\s+/gu, ' ').trim()
   return normalized ? Array.from(normalized).slice(0, 80).join('') : undefined
+}
+export type DiscoveryDepartureDoc = {
+  availabilityBadge?: null | string
+  availabilityStatus?: null | string
+  currency?: null | string
+  departureDate?: null | string
+  priceBasis?: null | string
+  priceFrom?: null | number
+  site?: Relation
+  tourProduct?: Relation
 }
 
 const isDiscoveryTourType = (value: string): value is DiscoveryTourType =>
@@ -143,6 +156,29 @@ const projectPriceState = (tour: DiscoveryTourDoc): DiscoveryTourPriceState => {
   }
 
   return { kind: 'on-request' }
+}
+
+const projectGroupCommerce = (tour: DiscoveryTourDoc): DiscoveryTourCard['commerce'] | undefined => {
+  if (tour.tourType !== 'group' || !Array.isArray(tour.activeDepartures)) return undefined
+  const now = Date.now()
+  const candidate = tour.activeDepartures
+    .filter((departure) => {
+      const date = Date.parse(departure.departureDate || '')
+      return date > now && departure.priceBasis === 'per-person' &&
+        (departure.availabilityStatus === 'open' || departure.availabilityStatus === 'limited') &&
+        sameRelation(departure.site, tour.site)
+    })
+    .sort((a, b) => Date.parse(a.departureDate || '') - Date.parse(b.departureDate || ''))[0]
+  if (!candidate) return undefined
+  const currency = normalizeSupportedTourCurrency(candidate.currency)
+  if (!currency || typeof candidate.priceFrom !== 'number' || !Number.isFinite(candidate.priceFrom) || candidate.priceFrom <= 0) return undefined
+  const canBook = tour.primaryCTA?.mode === 'hold-seat'
+  return {
+    availability: candidate.availabilityBadge?.trim() || candidate.availabilityStatus || 'Open',
+    canBook,
+    departureDate: candidate.departureDate!,
+    price: { currency, kind: 'from', value: candidate.priceFrom },
+  }
 }
 
 const asPage = (value: DiscoveryTourDoc['wrapperPage']): DiscoveryPage | null =>
@@ -439,6 +475,7 @@ export const projectDiscoveryTour = ({
   if (!publicSummary || !publicTitle) return null
 
   return {
+    ...(projectGroupCommerce(tour) ? { commerce: projectGroupCommerce(tour) } : {}),
     currency: normalizeSupportedTourCurrency(tour.currency),
     destinationTags: normalizeTourDestinationKeys(destinationTags),
     duration: {

@@ -28,6 +28,7 @@ export * from './discoveryCore'
 
 const pagesCollection = 'pages' as never
 const tourProductsCollection = 'tour-products' as never
+const tourDeparturesCollection = 'tour-departures' as never
 const wingSideSiteCode = 'wing-side'
 
 type VerifiedWrapperPage = DiscoveryPage & { _status: 'published'; site: Site }
@@ -143,15 +144,41 @@ const queryDiscoveryCards = async ({
   })
 
   const candidateTours = result.docs as DiscoveryTourDoc[]
+  const tourIDs = candidateTours.map((tour) => tour.id).filter((id): id is RelationID => id != null)
+  const departures = tourIDs.length
+    ? await payload.find({
+        collection: tourDeparturesCollection,
+        depth: 0,
+        draft: false,
+        fallbackLocale: 'en',
+        limit: 1000,
+        locale,
+        overrideAccess: false,
+        pagination: false,
+        where: { and: [{ site: { equals: site.id } }, { tourProduct: { in: tourIDs } }] },
+      })
+    : { docs: [] }
+  const departuresByTour = new Map<string, DiscoveryTourDoc['activeDepartures']>()
+  for (const departure of departures.docs as NonNullable<DiscoveryTourDoc['activeDepartures']>) {
+    const productID = typeof departure.tourProduct === 'object' ? departure.tourProduct?.id : departure.tourProduct
+    if (productID == null) continue
+    const existing = departuresByTour.get(String(productID)) || []
+    existing.push(departure)
+    departuresByTour.set(String(productID), existing)
+  }
+  const withDepartures = candidateTours.map((tour) => ({
+    ...tour,
+    activeDepartures: departuresByTour.get(String(tour.id)) || [],
+  }))
   const verifiedWrappers = await verifyWrapperPages({
     locale,
     payload,
     site,
-    tours: candidateTours,
+    tours: withDepartures,
   })
 
   return sortProjectedDiscoveryCards(
-    withVerifiedWrapperPages(candidateTours, verifiedWrappers)
+    withVerifiedWrapperPages(withDepartures, verifiedWrappers)
       .map((tour) => projectDiscoveryTour({ locale, site, tour }))
       .filter((card): card is DiscoveryTourCard => Boolean(card))
       // Payload should enforce the same AND query. Keep a projection-level
@@ -180,6 +207,9 @@ const logDiscoveryCompleted = ({
     action: 'wingsside_discovery_completed',
     ...(query.destination ? { destination_code: query.destination } : {}),
     ...(query.duration ? { duration_code: query.duration } : {}),
+    ...(query.type ? { type_code: query.type } : {}),
+    has_search: Boolean(query.q),
+    ...(query.q ? { search_length: query.q.length } : {}),
     duration_ms: durationMs,
     invalid_filter_count: query.unknownValueCount,
     relaxed: result.relaxed ? result.relaxed.removed : null,

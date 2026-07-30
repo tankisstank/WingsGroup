@@ -122,7 +122,7 @@ describe('WingSideJourneysClient', () => {
     )
 
     const card = screen.getByRole('link', { name: /private hanoi/i })
-    expect(within(card).getByText('Tailor-made quote')).toBeTruthy()
+    expect(within(card).getByText('Presupuesto a medida')).toBeTruthy()
     expect(card.textContent).not.toMatch(/\$0|USD 0|Desde\s+0/)
     expect(card.textContent).not.toMatch(/book now|available seats|instant booking/i)
   })

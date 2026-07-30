@@ -39,6 +39,7 @@ type Props = {
 export const WingSideJourneysClient = ({ context, locale }: Props) => {
   const copy = getWingSideJourneysCopy(locale)
   const uxCopy = journeyUxCopy[locale]
+  const v2 = journeyV2Copy[locale]
   const router = useRouter()
   const toSitePath = useSitePath()
   const searchParams = useSearchParams()
@@ -308,8 +309,8 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                     <strong>{item.title}</strong>
                     <span>{item.summary}</span>
                     <span className="ws-journeys-card__price">
-                      <span>{item.tourType === 'group' ? 'Schedule on request' : 'Tailor-made quote'}</span>
-                      <small>{item.tourType === 'group' ? 'Dates and availability are confirmed with the team.' : 'Designed around your dates and service level.'}</small>
+                      <span>{item.tourType === 'group' ? (item.commerce ? formatJourneyPrice(item.commerce.price, locale) : v2.schedule) : v2.quote}</span>
+                      <small>{item.tourType === 'group' ? (item.commerce ? `${formatDeparture(item.commerce.departureDate, locale)} · ${item.commerce.availability}` : v2.scheduleBody) : v2.quoteBody}</small>
                     </span>
                     <span className="ws-journeys-card__chips">
                       {item.destinationTags.slice(0, 2).map((tag) => (
@@ -320,7 +321,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                       ))}
                     </span>
                     <span className="ws-journeys-card__action">
-                      {item.tourType === 'group' ? 'Check availability' : 'Request quote'}
+                      {item.tourType === 'group' ? (item.commerce?.canBook ? v2.book : item.commerce ? v2.departures : v2.availability) : v2.requestQuote}
                       <ArrowRightIcon aria-hidden="true" />
                     </span>
                   </span>
@@ -359,6 +360,13 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
           </div>
         )}
       </section>
+      <section className="ws-journeys__paths">
+        <div><p className="kicker">{v2.twoWays}</p><h2>{v2.freedom}</h2><p>{v2.pathBody}</p><div className="ws-journeys__actions"><SiteLink className="btn btn-primary" href={buildDiscoveryHref({ ...normalizedQuery, type: 'group' })}>{v2.groups}</SiteLink><SiteLink className="btn btn-ghost" href={buildTourEnquiryHref({ basePath: '/plan-your-trip', context: { discovery: { ...normalizedQuery, type: 'private' }, source: 'journeys' }, intent: 'request-quote' })}>{v2.private}</SiteLink></div></div>
+        <ol><li><strong>{v2.groupTitle}</strong><span>{v2.groupBody}</span></li><li><strong>{v2.privateTitle}</strong><span>{v2.privateBody}</span></li></ol>
+      </section>
+      <section className="ws-journeys__destinations"><p className="kicker">{v2.explore}</p><h2>{v2.landscape}</h2><div>{tourDestinationOptions.slice(0, 3).map(({ value }) => <SiteLink key={value} href={buildDiscoveryHref({ ...normalizedQuery, destination: value })}>{destinationLabels[locale][value]}</SiteLink>)}</div></section>
+      <section className="ws-journeys__faq"><div><p className="kicker">{v2.before}</p><h2>{v2.facts}</h2></div><div>{v2.faq.map((item) => <details key={item.q}><summary>{item.q}</summary><p>{item.a}</p></details>)}</div></section>
+      <section className="ws-journeys__final"><h2>{v2.final}</h2><div className="ws-journeys__actions"><SiteLink className="btn btn-primary" href={buildDiscoveryHref({ ...normalizedQuery, type: 'group' })}>{v2.groups}</SiteLink><SiteLink className="btn btn-ghost" href={planHref}>{v2.private}</SiteLink></div></section>
     </div>
   )
 }
@@ -552,3 +560,14 @@ const formatJourneyPrice = (
     return `${copy.from} ${price.currency} ${price.value}`
   }
 }
+
+const formatDeparture = (value: string, locale: WingSideJourneyLocale) =>
+  new Intl.DateTimeFormat(localeNumberFormat[locale] || localeNumberFormat.en, { dateStyle: 'medium' }).format(new Date(value))
+
+const journeyV2Copy = {
+  en: { availability: 'Check availability', before: 'Before you choose', book: 'Book', departures: 'View departures', explore: 'Explore by place', facts: 'A better choice starts with the right facts.', final: 'Travel together—or make it entirely yours.', freedom: 'Choose the freedom that fits.', groupBody: 'Shared departures with published facts when available.', groupTitle: 'Small-group tours', groups: 'Explore group tours', landscape: 'Start with a landscape.', pathBody: 'Join a scheduled group or shape a private route around your dates.', private: 'Design a private tour', privateBody: 'Flexible dates, pace and service level.', privateTitle: 'Private tours', quote: 'Tailor-made quote', quoteBody: 'Designed around your dates and service level.', requestQuote: 'Request quote', schedule: 'Schedule on request', scheduleBody: 'Dates and availability are confirmed with the team.', twoWays: 'Two ways to travel', faq: [{ q: 'What changes between a small-group and private tour?', a: 'Groups use published departures; private journeys are shaped around you.' }, { q: 'Will my filters remain when I contact WingSide?', a: 'Yes. Your validated journey context is retained.' }] },
+  vi: { availability: 'Kiểm tra chỗ', before: 'Trước khi chọn', book: 'Đặt chỗ', departures: 'Xem khởi hành', explore: 'Khám phá theo nơi chốn', facts: 'Lựa chọn tốt hơn bắt đầu từ thông tin đúng.', final: 'Đi cùng nhau—hoặc theo cách của riêng bạn.', freedom: 'Chọn sự tự do phù hợp.', groupBody: 'Khởi hành chung với thông tin đã công bố.', groupTitle: 'Tour nhóm nhỏ', groups: 'Khám phá tour nhóm', landscape: 'Bắt đầu từ một vùng đất.', pathBody: 'Tham gia nhóm hoặc thiết kế hành trình riêng.', private: 'Thiết kế tour riêng', privateBody: 'Linh hoạt ngày đi, nhịp độ và dịch vụ.', privateTitle: 'Tour riêng', quote: 'Báo giá thiết kế riêng', quoteBody: 'Thiết kế theo ngày đi và dịch vụ của bạn.', requestQuote: 'Yêu cầu báo giá', schedule: 'Lịch theo yêu cầu', scheduleBody: 'Đội ngũ xác nhận ngày và tình trạng chỗ.', twoWays: 'Hai cách để du lịch', faq: [{ q: 'Tour nhóm và tour riêng khác nhau thế nào?', a: 'Tour nhóm theo lịch công bố; tour riêng được thiết kế cho bạn.' }, { q: 'Bộ lọc có được giữ khi liên hệ không?', a: 'Có. Ngữ cảnh hành trình đã xác thực được giữ lại.' }] },
+  it: { availability: 'Verifica disponibilità', before: 'Prima di scegliere', book: 'Prenota', departures: 'Vedi partenze', explore: 'Esplora per luogo', facts: 'Una scelta migliore parte dai fatti giusti.', final: 'Viaggia insieme—o rendilo completamente tuo.', freedom: 'Scegli la libertà giusta.', groupBody: 'Partenze condivise con fatti pubblicati.', groupTitle: 'Tour per piccoli gruppi', groups: 'Esplora tour di gruppo', landscape: 'Inizia da un paesaggio.', pathBody: 'Unisciti a un gruppo o crea un itinerario privato.', private: 'Crea un tour privato', privateBody: 'Date, ritmo e servizio flessibili.', privateTitle: 'Tour privati', quote: 'Preventivo su misura', quoteBody: 'Creato per le tue date e il tuo servizio.', requestQuote: 'Richiedi preventivo', schedule: 'Programma su richiesta', scheduleBody: 'Date e disponibilità sono confermate dal team.', twoWays: 'Due modi di viaggiare', faq: [{ q: 'Qual è la differenza?', a: 'I gruppi hanno partenze pubblicate; i privati sono su misura.' }, { q: 'I filtri restano?', a: 'Sì. Il contesto validato viene mantenuto.' }] },
+  es: { availability: 'Consultar disponibilidad', before: 'Antes de elegir', book: 'Reservar', departures: 'Ver salidas', explore: 'Explora por lugar', facts: 'Una mejor elección empieza con los datos adecuados.', final: 'Viaja en grupo—o hazlo completamente tuyo.', freedom: 'Elige la libertad que encaja.', groupBody: 'Salidas compartidas con datos publicados.', groupTitle: 'Tours en grupo pequeño', groups: 'Explorar tours en grupo', landscape: 'Empieza con un paisaje.', pathBody: 'Únete a un grupo o crea una ruta privada.', private: 'Diseñar un tour privado', privateBody: 'Fechas, ritmo y servicio flexibles.', privateTitle: 'Tours privados', quote: 'Presupuesto a medida', quoteBody: 'Diseñado según tus fechas y servicio.', requestQuote: 'Solicitar presupuesto', schedule: 'Calendario bajo solicitud', scheduleBody: 'El equipo confirma fechas y disponibilidad.', twoWays: 'Dos formas de viajar', faq: [{ q: '¿Cuál es la diferencia?', a: 'Los grupos usan salidas publicadas; los privados son a medida.' }, { q: '¿Se conservan los filtros?', a: 'Sí. Se conserva el contexto validado.' }] },
+  pt: { availability: 'Ver disponibilidade', before: 'Antes de escolher', book: 'Reservar', departures: 'Ver partidas', explore: 'Explorar por lugar', facts: 'Uma escolha melhor começa com os factos certos.', final: 'Viaje em conjunto—ou torne-o inteiramente seu.', freedom: 'Escolha a liberdade certa.', groupBody: 'Partidas partilhadas com informação publicada.', groupTitle: 'Tours em pequenos grupos', groups: 'Explorar tours de grupo', landscape: 'Comece por uma paisagem.', pathBody: 'Junte-se a um grupo ou crie uma rota privada.', private: 'Criar tour privado', privateBody: 'Datas, ritmo e serviço flexíveis.', privateTitle: 'Tours privados', quote: 'Orçamento personalizado', quoteBody: 'Criado para as suas datas e serviço.', requestQuote: 'Pedir orçamento', schedule: 'Calendário sob consulta', scheduleBody: 'A equipa confirma datas e disponibilidade.', twoWays: 'Duas formas de viajar', faq: [{ q: 'Qual é a diferença?', a: 'Grupos usam partidas publicadas; privados são personalizados.' }, { q: 'Os filtros são mantidos?', a: 'Sim. O contexto validado é mantido.' }] },
+} as const
