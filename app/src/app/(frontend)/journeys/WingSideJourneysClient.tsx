@@ -311,7 +311,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                     <span>{item.summary}</span>
                     <span className="ws-journeys-card__price">
                       <span>{item.tourType === 'group' ? (item.commerce ? formatJourneyPrice(item.commerce.price, locale) : v2.schedule) : v2.quote}</span>
-                      <small>{item.tourType === 'group' ? (item.commerce ? `${formatDeparture(item.commerce.departureDate, locale)} · ${item.commerce.availability}` : v2.scheduleBody) : v2.quoteBody}</small>
+                      <small>{item.tourType === 'group' ? (item.commerce ? `${formatJourneyDeparture(item.commerce.departureDate, locale)} · ${item.commerce.availability}` : v2.scheduleBody) : v2.quoteBody}</small>
                     </span>
                     <span className="ws-journeys-card__chips">
                       {item.destinationTags.slice(0, 2).map((tag) => (
@@ -564,8 +564,13 @@ const formatJourneyPrice = (
   }
 }
 
-const formatDeparture = (value: string, locale: WingSideJourneyLocale) =>
-  new Intl.DateTimeFormat(localeNumberFormat[locale] || localeNumberFormat.en, { dateStyle: 'medium' }).format(new Date(value))
+export const formatJourneyDeparture = (value: string, locale: WingSideJourneyLocale) =>
+  new Intl.DateTimeFormat(localeNumberFormat[locale] || localeNumberFormat.en, {
+    dateStyle: 'medium',
+    // Payload stores departureDate as a day-only value. UTC preserves that
+    // calendar date across SSR and every visitor timezone.
+    timeZone: 'UTC',
+  }).format(new Date(value))
 
 const journeyV2Copy = {
   en: { availability: 'Check availability', before: 'Before you choose', book: 'Book', departures: 'View departures', explore: 'Explore by place', facts: 'A better choice starts with the right facts.', final: 'Travel together—or make it entirely yours.', freedom: 'Choose the freedom that fits.', groupBody: 'Shared departures with published facts when available.', groupTitle: 'Small-group tours', groups: 'Explore group tours', landscape: 'Start with a landscape.', pathBody: 'Join a scheduled group or shape a private route around your dates.', private: 'Design a private tour', privateBody: 'Flexible dates, pace and service level.', privateTitle: 'Private tours', quote: 'Tailor-made quote', quoteBody: 'Designed around your dates and service level.', requestQuote: 'Request quote', schedule: 'Schedule on request', scheduleBody: 'Dates and availability are confirmed with the team.', twoWays: 'Two ways to travel', faq: [{ q: 'What changes between a small-group and private tour?', a: 'Groups use published departures; private journeys are shaped around you.' }, { q: 'Will my filters remain when I contact WingSide?', a: 'Yes. Your validated journey context is retained.' }] },
