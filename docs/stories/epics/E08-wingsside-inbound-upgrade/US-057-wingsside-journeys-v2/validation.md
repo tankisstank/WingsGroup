@@ -44,4 +44,13 @@ quote posture. No small-group price, departure or availability was invented;
 product/CMS must classify and populate verified group inventory before the
 group commerce anatomy appears publicly.
 
+The read-only production/source audit on 2026-07-31 classified the 22-tour
+catalog as seven pure group, eight pure private, four hybrid records that the
+current enum cannot represent, and three redirected/stale source records. It
+also captured 22 future departure candidates across two pure-group products
+and one blocked hybrid product. The candidate is not an apply plan: supplier
+fulfilment authorization is not recorded, and its live source evidence expires
+after 24 hours. See
+`production-group-commerce-audit-2026-07-31.md`.
+
 No production deployment is asserted by this proof.

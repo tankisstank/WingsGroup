@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "mode": "read-only-candidate",
+  "checkedAt": "2026-07-30T17:42:54.2727958Z",
+  "expiresAt": "2026-07-31T17:42:54.2727958Z",
+  "production": {
+    "host": "https://wingside.vn",
+    "catalogCount": 22,
+    "catalogBatchId": "wingsside-bestprice-22-20260717",
+    "catalogResponseSha256": "71dbcec863508fdba9c1f2e11d642548700a35e4fafce26f4e78ef21dfd2e3a7",
+    "targetDepartureCount": 0,
+    "targetProductPriceCount": 0
+  },
+  "source": {
+    "system": "bestpricetravel",
+    "kind": "public-supplier-page",
+    "commercialAuthorization": "unverified"
+  },
+  "classifications": {
+    "pureGroup": [
+      {
+        "productId": 62,
+        "sourceType": "Group tour"
+      },
+      {
+        "productId": 63,
+        "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+        "sourceId": "vietnam-tours--best-of-northern-vietnam-6-days",
+        "sourceUrl": "https://www.bestpricetravel.com/vietnam-tours/best-of-northern-vietnam-6-days.html",
+        "sourceSha256": "0435846534bdef6f94640e0da45e3381a4f9bda854674c0a4a623d90e5608f37",
+        "sourceType": "Flexible group tour",
+        "groupSize": "Min 1, Max 12",
+        "evidence": ["Guarantee depart", "/pax", "InStock"]
+      },
+      {
+        "productId": 67,
+        "sourceType": "Group tour"
+      },
+      {
+        "productId": 68,
+        "sourceType": "Flexible group tour"
+      },
+      {
+        "productId": 69,
+        "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+        "sourceId": "vietnam-tours--highlights-of-vietnam-12-days",
+        "sourceUrl": "https://www.bestpricetravel.com/vietnam-tours/highlights-of-vietnam-12-days.html",
+        "sourceSha256": "5c93cf1c7df9958ad2a7f3dc04e2836ec5e8da5ada07fa982f53105c1b7b4f34",
+        "sourceType": "Flexible group tour",
+        "groupSize": "Min 1, Max 12",
+        "evidence": ["Guarantee depart", "/pax", "InStock"]
+      },
+      {
+        "productId": 71,
+        "sourceType": "Flexible group tour"
+      },
+      {
+        "productId": 79,
+        "sourceType": "Group tour, Flexible group tour"
+      }
+    ],
+    "purePrivate": [
+      {
+        "productId": 70,
+        "sourceType": "Private tour"
+      },
+      {
+        "productId": 72,
+        "sourceType": "Private tour"
+      },
+      {
+        "productId": 73,
+        "sourceType": "Private tour"
+      },
+      {
+        "productId": 74,
+        "slug": "ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi",
+        "sourceId": "ninh-binh-tours--ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi",
+        "sourceSha256": "a6b1debef96256e05d7fcff6b0f91da566f663ed6920922b1eae443c84d41bbf",
+        "sourceType": "Private tour",
+        "evidence": ["source heading and URL explicitly say Private Tour"]
+      },
+      {
+        "productId": 75,
+        "slug": "ninh-binh-hoa-lu-trang-an-full-day-private-tour-from-hanoi",
+        "sourceId": "ninh-binh-tours--ninh-binh-hoa-lu-trang-an-full-day-private-tour",
+        "sourceSha256": "fb0f7c51aaecccd1fe0902080e416d71f87605748c2d141289462ebc1355e853",
+        "sourceType": "Private tour",
+        "evidence": ["source heading and URL explicitly say Private Tour"]
+      },
+      {
+        "productId": 78,
+        "sourceType": "Private tour",
+        "sourceIdentityDrift": true
+      },
+      {
+        "productId": 80,
+        "sourceType": "Private tour"
+      },
+      {
+        "productId": 81,
+        "sourceType": "Private tour"
+      }
+    ],
+    "hybridUnsupportedByCurrentEnum": [
+      {"productId": 64, "sourceType": "Private tour, Flexible group tour"},
+      {"productId": 65, "sourceType": "Private tour, Flexible group tour"},
+      {"productId": 82, "sourceType": "Private tour, Flexible group tour"},
+      {"productId": 83, "sourceType": "Private tour, Flexible group tour"}
+    ],
+    "unresolvedRedirectedSourceProductIds": [66, 76, 77]
+  },
+  "departures": [
+    {"productId": 63, "departureDate": "2026-12-23", "priceFrom": 741, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 63, "departureDate": "2026-12-25", "priceFrom": 741, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 63, "departureDate": "2026-12-27", "priceFrom": 741, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 63, "departureDate": "2026-12-30", "priceFrom": 741, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 65, "departureDate": "2026-08-01", "priceFrom": 1699, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 65, "departureDate": "2026-08-05", "priceFrom": 1699, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 65, "departureDate": "2026-08-08", "priceFrom": 1699, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 65, "departureDate": "2026-08-12", "priceFrom": 1699, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 65, "departureDate": "2026-08-15", "priceFrom": 1699, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 65, "departureDate": "2026-08-19", "priceFrom": 1699, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 65, "departureDate": "2026-08-22", "priceFrom": 1699, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 65, "departureDate": "2026-08-26", "priceFrom": 1699, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 65, "departureDate": "2026-08-29", "priceFrom": 1699, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 69, "departureDate": "2026-08-01", "priceFrom": 1120, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 69, "departureDate": "2026-08-05", "priceFrom": 1120, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 69, "departureDate": "2026-08-08", "priceFrom": 1120, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 69, "departureDate": "2026-08-12", "priceFrom": 1120, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 69, "departureDate": "2026-08-15", "priceFrom": 1120, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 69, "departureDate": "2026-08-19", "priceFrom": 1120, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 69, "departureDate": "2026-08-22", "priceFrom": 1120, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 69, "departureDate": "2026-08-26", "priceFrom": 1120, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"},
+    {"productId": 69, "departureDate": "2026-08-29", "priceFrom": 1120, "currency": "USD", "priceBasis": "per-person", "availabilityStatus": "open", "availabilityBadge": "Guaranteed departure"}
+  ],
+  "activation": {
+    "permitted": false,
+    "reason": "The candidate uses current public supplier pages, but no first-party inventory feed or commercial authorization is recorded.",
+    "commerceEligibleAfterAuthorization": [63, 69],
+    "commerceBlockedByHybridModel": [65],
+    "primaryCTAAfterApply": "View departures",
+    "directBooking": false,
+    "requiredBeforeApply": [
+      "Deploy the immutable US-057 release and additive migrations.",
+      "Record supplier/product-owner authorization to publish these prices and departures.",
+      "Regenerate and sign a non-expired plan from the live production database and source pages.",
+      "Create and restore-test an encrypted PostgreSQL backup.",
+      "Apply one group tour as canary, verify public UI and rollback, then promote."
+    ]
+  }
+}
