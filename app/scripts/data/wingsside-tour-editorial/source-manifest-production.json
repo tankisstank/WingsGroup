@@ -1,0 +1,95 @@
+{
+  "generatedFrom": "wing-side-published-en-tour-products",
+  "sourceLocale": "en",
+  "tours": [
+    {
+      "checksum": "009a37c0ee105f01200d0e5d9e03de6dd4e21bdfba035756a9f9cb776143fd48",
+      "slug": "a-glimpse-of-central-vietnam-5-days"
+    },
+    {
+      "checksum": "48543c0ccfb3c4220aae3a5b5dc41b3d75a2f272ffc132a8c26c6d74c54acb63",
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days"
+    },
+    {
+      "checksum": "cd4f6660ad9f5b2a0841a7ea64405f72b9b1eb0d16e47c01b082401cb6c4faf8",
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days"
+    },
+    {
+      "checksum": "ead2b56ae079e8a917bbddc9870c66432ccd0b23e82f38e744dc26398daa406e",
+      "slug": "best-of-vietnam-and-cambodia-15-days"
+    },
+    {
+      "checksum": "985e9c36f1eca3678c237bea971a8722e044b5cae9d16145da4731977c61a317",
+      "slug": "central-vietnam-adventure-4-days"
+    },
+    {
+      "checksum": "da4f6165ca4f26fac67b6e6d0f66b1a7aadbb7853ad11bc7907d8d66822fe9a0",
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days"
+    },
+    {
+      "checksum": "142d68b0714127fc4e4092cb1a32185839b56cd7bd1b3b01d71a98c3ed68f56d",
+      "slug": "discover-halong-bay-ninh-binh-package-2-days"
+    },
+    {
+      "checksum": "e193e7a0e0bf4b2c173bd2cd2b8a5751ac8a223285d1082be9b0b8c0f5908e49",
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days"
+    },
+    {
+      "checksum": "ccf40be067151998e2232a52f9f9a18c5fb3b4a6830f7f2b855de4f59efaae7a",
+      "slug": "hoi-an-surrounding-and-beach-break-7-days"
+    },
+    {
+      "checksum": "54bc8111b9de62fd723e06eca3a1aa985cbc44575c7b0620d9de39000a5a3078",
+      "slug": "luxury-mekong-delta-speedboat-tour-full-day"
+    },
+    {
+      "checksum": "1299eb473cfb6c1d7b1cdef8b370ce93c9428ed63534408cb48958673730f005",
+      "slug": "mekong-delta-gateway-3-days"
+    },
+    {
+      "checksum": "8c83d5a2f616021602a47f3316b0538d3ce898b177972f11af4657babdf860f7",
+      "slug": "mekong-delta-with-floating-market-2-days"
+    },
+    {
+      "checksum": "bd8813c4bc04bba2c64994b8ca4847d2209391e4057c65f0c35d86ae6cf0794f",
+      "slug": "ninh-binh-hoa-lu-trang-an-full-day-private-tour-from-hanoi"
+    },
+    {
+      "checksum": "99cb1b99f6548d9e90d9fe357a15e32f6cfb759294502340f546dee3d4391bd4",
+      "slug": "ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi"
+    },
+    {
+      "checksum": "bb5e16d036d1814f17777f73bb1d064e9a65e3fd30e217581b4aa2a93d1f9038",
+      "slug": "northern-vietnam-highlights-for-family-6-days"
+    },
+    {
+      "checksum": "8ede63888dd12f01dfec5e9b156fbebd4f00659a12d9094ba4475c5a5d29aef8",
+      "slug": "northern-vietnam-soft-adventure-8-days"
+    },
+    {
+      "checksum": "d4168c7cb64b6fe94a990a253e52b8e88c14c01ea33413dbf7e64b24634fd55a",
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise"
+    },
+    {
+      "checksum": "c4bde30d51b9ff23a59dd47755423c0a4d3ee49d91ee601f3d31cc847b0cf60e",
+      "slug": "sapa-trekking-ethnic-market-3-days"
+    },
+    {
+      "checksum": "5e1a2dab7ce8e59bf19a7b20e7c4b041b89f19129d1a7d2c501e585a82010b72",
+      "slug": "southern-beauty-beach-relaxation-8-days"
+    },
+    {
+      "checksum": "38f1cde83dde320a0005224e10c08a04d5a262bcba54fe813398e8264eea6e83",
+      "slug": "vietnam-at-a-glance-7-days"
+    },
+    {
+      "checksum": "d43ba327205304834150e12db25796f81a847df6c38f0ed113958b30d6de47da",
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days"
+    },
+    {
+      "checksum": "8690327351f12d86eda2f39f82e256370beca35b39d49e8a4e3fadca1045fc77",
+      "slug": "vietnam-memorable-honeymoon-trip-8-days"
+    }
+  ],
+  "version": 1
+}

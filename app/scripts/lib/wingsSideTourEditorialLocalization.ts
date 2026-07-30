@@ -873,7 +873,7 @@ export const loadWingsSideTourEditorialCatalog = async ({
     return catalog
   }
   const [manifestRaw, ...localeRaw] = await Promise.all([
-    fs.readFile(path.join(dataDirectory, 'source-manifest.json'), 'utf8'),
+    fs.readFile(path.join(dataDirectory, 'source-manifest-production.json'), 'utf8'),
     ...wingsSideTourEditorialLocales.map((locale) =>
       fs.readFile(path.join(dataDirectory, `${locale}.json`), 'utf8'),
     ),

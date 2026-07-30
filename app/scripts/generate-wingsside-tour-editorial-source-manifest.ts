@@ -14,7 +14,7 @@ const outputPath =
     import.meta.dirname,
     'data',
     'wingsside-tour-editorial',
-    'source-manifest.json',
+    'source-manifest-production.json',
   )
 
 if (!sourcePath) {
