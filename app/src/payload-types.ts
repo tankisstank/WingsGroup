@@ -757,6 +757,28 @@ export interface Page {
             id?: string | null;
           }[]
         | null;
+      whyTourSlots?:
+        | {
+            key: 'local-design' | 'flexible-planning' | 'style-matching' | 'collaborative-care';
+            selectionMode: 'manual' | 'rule';
+            tour?: (number | null) | TourProduct;
+            rule?: {
+              destinationTag?: ('hanoi' | 'halong' | 'hoian' | 'hue' | 'mekong' | 'sapa') | null;
+              travelStyle?: ('luxury' | 'family' | 'culture' | 'adventure' | 'wellness' | 'romance') | null;
+              minDurationDays?: number | null;
+              maxDurationDays?: number | null;
+            };
+            fallbackTour?: (number | null) | TourProduct;
+            presentation?: {
+              mode?: ('inherit' | 'override') | null;
+              badge?: string | null;
+              body?: string | null;
+              ctaLabel?: string | null;
+              media?: (number | null) | Media;
+            };
+            id?: string | null;
+          }[]
+        | null;
       destKicker?: string | null;
       destTitle?: string | null;
       destLede?: string | null;
@@ -2219,6 +2241,19 @@ export interface FormSubmission {
   id: number;
   site?: (number | null) | Site;
   /**
+   * Private journey and discovery metadata. Kept separate from customer-authored form fields.
+   */
+  enquiryContext?: {
+    source?: string | null;
+    tourId?: string | null;
+    tourSlug?: string | null;
+    discovery?: {
+      destination?: string | null;
+      duration?: string | null;
+      style?: string | null;
+    };
+  };
+  /**
    * Private operational state for notification delivery and reconciliation.
    */
   deliveryStatus: 'pending' | 'queued' | 'delivered' | 'queue_failed' | 'delivery_failed';
@@ -2913,6 +2948,32 @@ export interface PagesSelect<T extends boolean = true> {
                     body?: T;
                     cta?: T;
                     href?: T;
+                    id?: T;
+                  };
+              whyTourSlots?:
+                | T
+                | {
+                    key?: T;
+                    selectionMode?: T;
+                    tour?: T;
+                    rule?:
+                      | T
+                      | {
+                          destinationTag?: T;
+                          travelStyle?: T;
+                          minDurationDays?: T;
+                          maxDurationDays?: T;
+                        };
+                    fallbackTour?: T;
+                    presentation?:
+                      | T
+                      | {
+                          mode?: T;
+                          badge?: T;
+                          body?: T;
+                          ctaLabel?: T;
+                          media?: T;
+                        };
                     id?: T;
                   };
               destKicker?: T;
@@ -4147,6 +4208,20 @@ export interface FormsSelect<T extends boolean = true> {
  */
 export interface FormSubmissionsSelect<T extends boolean = true> {
   site?: T;
+  enquiryContext?:
+    | T
+    | {
+        source?: T;
+        tourId?: T;
+        tourSlug?: T;
+        discovery?:
+          | T
+          | {
+              destination?: T;
+              duration?: T;
+              style?: T;
+            };
+      };
   deliveryStatus?: T;
   deliveryUpdatedAt?: T;
   deliveryErrorCode?: T;

@@ -18,7 +18,7 @@ export const wingsSideCredentialsProductionPlanSchemaVersion = 1
 
 export type WingsSideCredentialsProductionLocale =
   (typeof wingsSideCredentialsProductionLocales)[number]
-export type WingsSideCredentialsState = 'after' | 'before' | 'mixed' | 'unknown'
+export type WingsSideCredentialsState = 'after' | 'before' | 'media-only' | 'mixed' | 'unknown'
 
 export type WingsSideCredentialsSourceIdentity = {
   assetRootBasename: string
@@ -64,7 +64,16 @@ export type WingsSideCredentialsPlan = {
   createdAt: string
   expectedItemCount: 24
   expectedLocales: WingsSideCredentialsProductionLocale[]
-  mediaOperations: Array<{ action: 'create'; file: string; itemID: string; sha256: string }>
+  mediaOperations: Array<
+    | { action: 'create'; file: string; itemID: string; sha256: string }
+    | {
+        action: 'reuse'
+        file: string
+        itemID: string
+        mediaID: number | string
+        sha256: string
+      }
+  >
   mode: 'plan'
   pageOperations: Array<{
     afterChecksum: string
@@ -381,10 +390,14 @@ export const classifyWingsSideCredentialsState = ({
         localeBlocks[0].checksum === afterBlockChecksum({ locale, manifest, mediaIDs })
       )
     })
-    state =
-      afterBlocksMatch && blocks.length === wingsSideCredentialsProductionLocales.length
-        ? 'after'
-        : 'mixed'
+    if (noCredentialBlocks) {
+      state = 'media-only'
+    } else {
+      state =
+        afterBlocksMatch && blocks.length === wingsSideCredentialsProductionLocales.length
+          ? 'after'
+          : 'mixed'
+    }
   } else if (blocks.length > 0 || scopedMedia.length > 0) {
     state = 'mixed'
   }
@@ -395,30 +408,50 @@ export const classifyWingsSideCredentialsState = ({
 export const buildWingsSideCredentialsPlan = async ({
   homes,
   manifest,
+  media = [],
   runID,
   siteID,
   sourceIdentity,
 }: {
   homes: CredentialHomeSnapshot[]
   manifest: WingsSideCredentialManifest
+  media?: CredentialMediaSnapshot[]
   runID: string
   siteID: number | string
   sourceIdentity: WingsSideCredentialsSourceIdentity
 }): Promise<WingsSideCredentialsPlan> => {
+  const existingMediaByFilename = new Map(
+    media
+      .filter((item) => String(item.siteID) === String(siteID) && item.filename)
+      .map((item) => [String(item.filename), item]),
+  )
   const mediaOperations = manifest.items.map((item) => {
     const asset = sourceIdentity.assets.find((candidate) => candidate.file === item.file)
     if (!asset) throw new Error(`Missing source fingerprint for ${item.file}`)
+    const existing = existingMediaByFilename.get(item.file)
+    if (existing) {
+      return {
+        action: 'reuse' as const,
+        file: item.file,
+        itemID: item.id,
+        mediaID: existing.id,
+        sha256: asset.sha256,
+      }
+    }
     return { action: 'create' as const, file: item.file, itemID: item.id, sha256: asset.sha256 }
   })
-  const placeholderMediaIDs = new Map(
-    manifest.items.map((item) => [item.id, `planned:${item.file}`]),
+  const plannedMediaIDs = new Map(
+    mediaOperations.map((operation) => [
+      operation.itemID,
+      operation.action === 'reuse' ? operation.mediaID : `planned:${operation.file}`,
+    ]),
   )
   const pageOperations = wingsSideCredentialsProductionLocales.map((locale) => {
     const home = homes.find((candidate) => candidate.locale === locale)
     if (!home) throw new Error(`Missing ${locale} Home page snapshot`)
     const afterLayout = [
       ...stripCredentialsBlocks(home.layout),
-      buildWingsSideCredentialsBlock({ locale, manifest, mediaIDs: placeholderMediaIDs }),
+      buildWingsSideCredentialsBlock({ locale, manifest, mediaIDs: plannedMediaIDs }),
     ]
     return {
       afterChecksum: layoutChecksum(afterLayout),
@@ -506,8 +539,8 @@ export const assertWingsSideCredentialsPlanMatchesSource = ({
   for (let index = 0; index < manifest.items.length; index += 1) {
     const item = manifest.items[index]
     const operation = plan.mediaOperations[index]
-    if (!operation || operation.action !== 'create') {
-      throw new Error(`Credentials plan missing create operation for ${item.id}`)
+    if (!operation || !['create', 'reuse'].includes(operation.action)) {
+      throw new Error(`Credentials plan missing media operation for ${item.id}`)
     }
     if (operationIDs.has(operation.itemID) || operationFiles.has(operation.file)) {
       throw new Error('Credentials plan contains duplicate media operation identity')

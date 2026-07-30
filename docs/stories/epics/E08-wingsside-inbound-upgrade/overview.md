@@ -43,6 +43,8 @@ architecture and avoids building a parallel site, CMS, or page builder.
 | US-050  | high-risk | production released | Real-tour Home discovery and BUG-WS-001 remediation                 |
 | US-051  | normal    | production released | WingSide homepage process-board redesign                            |
 | US-052  | high-risk | production released | WingSide credentials Proof Archive                                  |
+| US-053  | high-risk | planned             | Multilingual public-acquisition blocker remediation                 |
+| US-054  | high-risk | implemented, release pending | Guided Tour Discovery MVP                                  |
 
 ## Current evidence
 
@@ -142,6 +144,17 @@ architecture and avoids building a parallel site, CMS, or page builder.
   curation by stable tour source identity, applies the PostgreSQL relation
   migration, and renders real 6/6/3 discovery cards. Guarded apply, independent
   audit, canary, public browser filters and responsive captures all passed.
+- The 2026-07-25 public-acquisition audit is triaged in
+  `audit-2026-07-25-triage.md`. US-053 owns four reproducible P0 classes:
+  tenant/locale SEO isolation, form accessibility, internal-route integrity and
+  multilingual editorial leakage. CR-WS-002 retains the non-P0 conversion and
+  trust improvements without implying implementation has started.
+- The companion navigation-flow proposal confirms that the current hub -> Tour
+  Detail -> consultation spine remains valid. Product ownership approved the
+  new Guided Tour Discovery MVP as fast-track US-054: published same-site
+  listing, destination/style/duration filters, URL state and zero-result
+  consultation recovery across EN/VI/IT/ES/PT. Date, guests, budget, save and
+  compare are explicitly deferred.
 
 ## Current constraints
 
@@ -150,3 +163,4 @@ architecture and avoids building a parallel site, CMS, or page builder.
 - Hero field config lives in `app/src/heros/config.ts`.
 - Locale expansion has a broad blast radius and must separate CMS-enabled,
   public-enabled, and ads-ready locales.
+- Product ownership confirmed the configured public locale set as EN/VI/IT/ES/PT.

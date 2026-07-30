@@ -9,9 +9,9 @@ import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import { defaultTourSectionOrder, defaultTourSectionVisibility } from './sectionRegistry'
 import { ScheduleInteractiveDepartures } from './ScheduleInteractiveDepartures'
 import { TourItineraryDayDetails } from './TourItineraryDayDetails'
+import { normalizeGovernedTourPrice } from './currency'
 import type {
   DepartureCardViewModel,
-  MarketPageViewModel,
   SchedulePageViewModel,
   TourCardViewModel,
   TourResolvedData,
@@ -23,7 +23,6 @@ import {
   getAvailabilityLabel,
   getContactPath,
   getDurationLabel,
-  getLowestPrice,
   getMarketConfig,
   getMealChipFlags,
   getSchedulePath,
@@ -35,11 +34,152 @@ import {
   type TourInquiryIntent,
 } from './utils'
 import { isConsultativeTourSiteCode } from '@/utilities/siteCapabilities'
+import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { TourEnquiryContextBridge } from './TourEnquiryContextBridge'
-import { normalizeWingSideConsultativeTour } from './wingsSideTourViewModel'
+import type { TourEnquiryContext } from './enquiryContext'
+import { getWingSideTourCopy, normalizeWingSideConsultativeTour } from './wingsSideTourViewModel'
 
 /** Retail = WingsGo dense conversion. Consultative = Wingside private inbound. */
 export type TourDetailPresentation = 'consultative' | 'retail'
+
+const consultativeChrome = {
+  en: {
+    factsDescription:
+      'Duration, route rhythm, lodging and group style — what guests need before a private consult.',
+    factsEyebrow: 'Trip at a glance',
+    factsTitle: 'What you need to know first',
+    galleryDescription: 'A visual read of the route before the day-by-day detail.',
+    galleryTitle: "Places you'll move through",
+    enquiryContext: 'Journey context',
+    enquiryDescription:
+      'Tell us your dates and group size. A local planner replies within 24 hours (GMT+7).',
+    enquiryEyebrow: 'Next step',
+    planningNotes: 'Planning notes',
+    priceDescription:
+      'Share your preferred dates and group size. We will confirm a tailored quote before any deposit.',
+    priceEyebrow: 'Dates & price',
+    priceHow: 'How booking works',
+    priceReply: 'We reply within 24 hours with a tailored outline.',
+    priceShare: 'Share dates, party size, and pace preference.',
+    priceTitle: 'A private quote for your dates',
+    relatedDescription: 'Nearby private journeys to compare pace, style, and destinations.',
+    relatedEyebrow: 'Related journeys',
+    relatedTitle: 'Other itineraries near this need',
+    railAvailability: 'Dates and availability confirmed for your trip',
+    railPace: 'A private journey shaped around your pace',
+    railReply: 'Reply within 24 hours',
+  },
+  es: {
+    factsDescription:
+      'Duración, ritmo de la ruta, alojamiento y tipo de grupo: lo esencial antes de hablar con un especialista.',
+    factsEyebrow: 'El viaje de un vistazo',
+    factsTitle: 'Lo primero que conviene saber',
+    galleryDescription: 'Una mirada visual a la ruta antes del itinerario día a día.',
+    galleryTitle: 'Lugares que forman parte del viaje',
+    enquiryContext: 'Contexto del viaje',
+    enquiryDescription:
+      'Cuéntanos tus fechas y el tamaño del grupo. Un especialista local responde en 24 horas (GMT+7).',
+    enquiryEyebrow: 'Siguiente paso',
+    planningNotes: 'Notas para planificar',
+    priceDescription:
+      'Comparte tus fechas y el tamaño del grupo. Confirmaremos una propuesta personalizada antes de cualquier depósito.',
+    priceEyebrow: 'Fechas y precio',
+    priceHow: 'Cómo funciona la reserva',
+    priceReply: 'Respondemos en 24 horas con una primera propuesta personalizada.',
+    priceShare: 'Comparte fechas, número de viajeros y ritmo preferido.',
+    priceTitle: 'Una propuesta privada para tus fechas',
+    relatedDescription: 'Viajes privados cercanos por ritmo, estilo y destinos.',
+    relatedEyebrow: 'Viajes relacionados',
+    relatedTitle: 'Otros itinerarios afines a tu idea',
+    railAvailability: 'Fechas y disponibilidad confirmadas para tu viaje',
+    railPace: 'Un viaje privado adaptado a tu ritmo',
+    railReply: 'Respuesta en 24 horas',
+  },
+  it: {
+    factsDescription:
+      'Durata, ritmo dell’itinerario, sistemazioni e tipo di gruppo: ciò che serve prima della consulenza.',
+    factsEyebrow: 'Il viaggio in breve',
+    factsTitle: 'Le informazioni da conoscere subito',
+    galleryDescription: 'Uno sguardo visivo al percorso prima dell’itinerario giorno per giorno.',
+    galleryTitle: 'I luoghi che attraverserai',
+    enquiryContext: 'Contesto del viaggio',
+    enquiryDescription:
+      'Indicaci le date e il numero di partecipanti. Un esperto locale risponde entro 24 ore (GMT+7).',
+    enquiryEyebrow: 'Passo successivo',
+    planningNotes: 'Note per la pianificazione',
+    priceDescription:
+      'Indicaci le date e il numero di partecipanti. Confermeremo un preventivo su misura prima di qualsiasi acconto.',
+    priceEyebrow: 'Date e prezzo',
+    priceHow: 'Come funziona la prenotazione',
+    priceReply: 'Rispondiamo entro 24 ore con una prima proposta su misura.',
+    priceShare: 'Indicaci date, numero di partecipanti e ritmo preferito.',
+    priceTitle: 'Un preventivo privato per le tue date',
+    relatedDescription: 'Viaggi privati simili per ritmo, stile e destinazioni.',
+    relatedEyebrow: 'Viaggi correlati',
+    relatedTitle: 'Altri itinerari vicini alle tue esigenze',
+    railAvailability: 'Date e disponibilità confermate per il tuo viaggio',
+    railPace: 'Un viaggio privato costruito sul tuo ritmo',
+    railReply: 'Risposta entro 24 ore',
+  },
+  pt: {
+    factsDescription:
+      'Duração, ritmo do roteiro, hospedagem e perfil do grupo: o essencial antes da consultoria.',
+    factsEyebrow: 'A viagem em resumo',
+    factsTitle: 'O que você precisa saber primeiro',
+    galleryDescription: 'Uma visão da rota antes do roteiro dia a dia.',
+    galleryTitle: 'Lugares que fazem parte da viagem',
+    enquiryContext: 'Contexto da viagem',
+    enquiryDescription:
+      'Informe as datas e o tamanho do grupo. Um especialista local responde em até 24 horas (GMT+7).',
+    enquiryEyebrow: 'Próximo passo',
+    planningNotes: 'Notas de planejamento',
+    priceDescription:
+      'Informe as datas e o tamanho do grupo. Confirmaremos uma proposta personalizada antes de qualquer depósito.',
+    priceEyebrow: 'Datas e preço',
+    priceHow: 'Como funciona a reserva',
+    priceReply: 'Respondemos em até 24 horas com uma proposta inicial personalizada.',
+    priceShare: 'Informe datas, número de viajantes e ritmo desejado.',
+    priceTitle: 'Uma proposta privativa para suas datas',
+    relatedDescription: 'Viagens privativas próximas em ritmo, estilo e destinos.',
+    relatedEyebrow: 'Viagens relacionadas',
+    relatedTitle: 'Outros roteiros próximos do que você procura',
+    railAvailability: 'Datas e disponibilidade confirmadas para sua viagem',
+    railPace: 'Uma viagem privativa no seu ritmo',
+    railReply: 'Resposta em até 24 horas',
+  },
+  vi: {
+    factsDescription:
+      'Thời lượng, tuyến điểm, lưu trú và nhịp hành trình để bạn cân nhắc trước khi trao đổi với chuyên viên.',
+    factsEyebrow: 'Tổng quan chuyến đi',
+    factsTitle: 'Thông tin cần biết trước',
+    galleryDescription: 'Hình ảnh thực tế của tuyến trước phần lịch trình từng ngày.',
+    galleryTitle: 'Những nơi bạn sẽ đi qua',
+    enquiryContext: 'Thông tin hành trình',
+    enquiryDescription:
+      'Gửi ngày đi và số khách. Chuyên viên địa phương phản hồi trong 24 giờ (GMT+7).',
+    enquiryEyebrow: 'Bước tiếp theo',
+    planningNotes: 'Lưu ý lập kế hoạch',
+    priceDescription:
+      'Chia sẻ ngày đi và số khách dự kiến. Chúng tôi sẽ xác nhận báo giá thiết kế riêng trước khi bạn đặt cọc.',
+    priceEyebrow: 'Thời điểm & giá',
+    priceHow: 'Cách xác nhận hành trình',
+    priceReply: 'Chúng tôi phản hồi trong 24 giờ với đề xuất ban đầu.',
+    priceShare: 'Chia sẻ ngày đi, số khách và nhịp mong muốn.',
+    priceTitle: 'Báo giá riêng theo ngày đi',
+    relatedDescription:
+      'Các hành trình có tuyến điểm, phong cách và thời lượng gần với lựa chọn này.',
+    relatedEyebrow: 'Hành trình liên quan',
+    relatedTitle: 'Hành trình gần với nhu cầu này',
+    railAvailability: 'Ngày đi và tình trạng dịch vụ được xác nhận theo chuyến của bạn',
+    railPace: 'Hành trình riêng theo nhịp của bạn',
+    railReply: 'Phản hồi trong 24 giờ',
+  },
+} as const
+
+const getConsultativeChrome = (locale: SupportedLocaleCode) =>
+  locale in consultativeChrome
+    ? consultativeChrome[locale as keyof typeof consultativeChrome]
+    : consultativeChrome.en
 
 const resolveTourSiteCode = (siteCode?: null | string, presentation?: TourDetailPresentation) => {
   if (siteCode) {
@@ -54,6 +194,30 @@ const asArray = <T,>(value?: T[] | null) => (Array.isArray(value) ? value : [])
 
 const asDoc = <T extends object>(value: T | number | string | null | undefined): T | null =>
   value && typeof value === 'object' ? value : null
+
+const getGovernedPricePostureInput = ({
+  nextDeparture,
+  tour,
+}: {
+  nextDeparture?: null | { currency?: unknown; priceFrom?: unknown }
+  tour: { currency?: unknown; priceFrom?: unknown }
+}) => {
+  const departurePrice = normalizeGovernedTourPrice({
+    currency: nextDeparture?.currency,
+    value: nextDeparture?.priceFrom,
+  })
+
+  if (departurePrice) {
+    return { currency: departurePrice.currency, priceFrom: departurePrice.value }
+  }
+
+  const tourPrice = normalizeGovernedTourPrice({
+    currency: tour.currency,
+    value: tour.priceFrom,
+  })
+
+  return tourPrice ? { currency: tourPrice.currency, priceFrom: tourPrice.value } : {}
+}
 
 const splitSummaryParagraphs = (summary?: null | string) =>
   String(summary || '')
@@ -283,16 +447,19 @@ const getConsultativePrimaryLabel = ({
 }: {
   compact?: boolean
   ctaLabel?: null | string
-  locale: 'en' | 'vi'
+  locale: SupportedLocaleCode
   override?: null | string
 }) => {
+  const copy = getWingSideTourCopy(locale)
   const fallback = compact
-    ? locale === 'en'
-      ? 'Consult'
-      : 'Tư vấn'
-    : locale === 'en'
-      ? 'Request consultation'
-      : 'Yêu cầu tư vấn'
+    ? {
+        en: 'Consult',
+        es: 'Consultar',
+        it: 'Consulenza',
+        pt: 'Consultar',
+        vi: 'Tư vấn',
+      }[locale as 'en' | 'es' | 'it' | 'pt' | 'vi'] || 'Consult'
+    : copy.request
 
   // Sanitize override the same way as CMS CTA labels (do not trust retail hold-seat copy).
   if (isUsableText(override) && !isRetailOrBareContactLabel(override)) {
@@ -324,7 +491,7 @@ const TourDecisionHeader = ({
   tour,
   variants,
 }: {
-  locale: 'en' | 'vi'
+  locale: SupportedLocaleCode
   nextDeparture: Record<string, any> | null
   presentation?: TourDetailPresentation
   siteCode?: null | string
@@ -332,6 +499,7 @@ const TourDecisionHeader = ({
   variants: Array<Record<string, any>>
 }) => {
   const isConsultative = presentation === 'consultative'
+  const wingSideCopy = getWingSideTourCopy(locale)
   const reviewSnapshot = tour.reviewSnapshot || null
   const summaryParagraphs = splitSummaryParagraphs(tour.summary)
   const badgeGroups = getBadgeGroups(asArray<Record<string, any>>(tour.badges))
@@ -355,7 +523,7 @@ const TourDecisionHeader = ({
     !/^img[- ]?video$/i.test(String(heroMedia.alt))
       ? heroMedia.alt
       : routeChips.length > 0
-        ? `${routeChips[routeChips.length - 1]} · private journey`
+        ? `${routeChips[routeChips.length - 1]} · ${wingSideCopy.journey.toLowerCase()}`
         : null
   const consultPrimaryFallback = getTourInquiryPath({
     intent: consultativeCtaIntent,
@@ -364,6 +532,7 @@ const TourDecisionHeader = ({
     tourId: tour.id,
     tourSlug: tour.slug,
     tourTitle: tour.title,
+    discoveryContext: tour.discoveryContext,
   })
   const consultPrimaryHref = resolveConsultativeCtaHref({
     cmsHref: cta.href,
@@ -376,16 +545,17 @@ const TourDecisionHeader = ({
     tourId: tour.id,
     tourSlug: tour.slug,
     tourTitle: tour.title,
+    discoveryContext: tour.discoveryContext,
   })
   const consultPrimaryLabel = getConsultativePrimaryLabel({
     ctaLabel: cta.label,
     locale,
     override: nextDeparture?.ctaLabelOverride,
   })
-  const consultSecondaryLabel = locale === 'en' ? 'Contact us' : 'Liên hệ'
+  const consultSecondaryLabel = wingSideCopy.contact
   const heroEyebrow = [
     isUsableText(tour.market) ? String(tour.market).toUpperCase() : null,
-    locale === 'en' ? 'TAILOR-MADE' : 'THIẾT KẾ RIÊNG',
+    wingSideCopy.journey.toUpperCase(),
     durationLabel ? durationLabel.toUpperCase() : null,
   ]
     .filter(Boolean)
@@ -445,7 +615,7 @@ const TourDecisionHeader = ({
                 data-od-id="tour-duration"
               >
                 <span className="block text-xs font-semibold uppercase text-muted-foreground">
-                  {locale === 'en' ? 'Duration' : 'Thời lượng'}
+                  {wingSideCopy.durationLabel}
                 </span>
                 <strong className="mt-1 block text-sm text-foreground">{durationLabel}</strong>
               </div>
@@ -456,7 +626,7 @@ const TourDecisionHeader = ({
                 data-od-id="tour-destination"
               >
                 <span className="block text-xs font-semibold uppercase text-muted-foreground">
-                  {locale === 'en' ? 'Destination' : 'Điểm đến'}
+                  {wingSideCopy.destination}
                 </span>
                 <strong className="mt-1 block text-sm text-foreground">
                   {tour.destinationLabel}
@@ -468,7 +638,7 @@ const TourDecisionHeader = ({
                 data-od-id="tour-destination"
               >
                 <span className="block text-xs font-semibold uppercase text-muted-foreground">
-                  {locale === 'en' ? 'Destination' : 'Điểm đến'}
+                  {wingSideCopy.destination}
                 </span>
                 <strong className="mt-1 block text-sm capitalize text-foreground">
                   {tour.market}
@@ -479,12 +649,9 @@ const TourDecisionHeader = ({
           {routeChips.length > 0 ? (
             <div data-od-id="tour-route">
               <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
-                {locale === 'en' ? 'Route' : 'Lộ trình'}
+                {wingSideCopy.route}
               </p>
-              <div
-                className="flex flex-wrap gap-2"
-                aria-label={locale === 'en' ? 'Route' : 'Lộ trình'}
-              >
+              <div className="flex flex-wrap gap-2" aria-label={wingSideCopy.route}>
                 {routeChips.map((chip) => (
                   <span
                     className="rounded-full border border-[color:var(--site-brand)]/20 bg-[color:var(--site-brand)]/8 px-3 py-1.5 text-xs font-semibold text-[var(--site-brand)]"
@@ -621,6 +788,7 @@ const TourDecisionHeader = ({
                   source: 'tour-detail-hero',
                   tourId: tour.id,
                   tourSlug: tour.slug,
+                  discoveryContext: tour.discoveryContext,
                 })
               }
             >
@@ -640,6 +808,7 @@ const TourDecisionHeader = ({
                 source: 'tour-detail-hero',
                 tourId: tour.id,
                 tourSlug: tour.slug,
+                discoveryContext: tour.discoveryContext,
               })}
             >
               Nhận tư vấn nhanh
@@ -675,38 +844,47 @@ const TourFactGrid = ({
   presentation = 'retail',
   tour,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   presentation?: TourDetailPresentation
   tour: Record<string, any>
 }) => {
   const isConsultative = presentation === 'consultative'
   const durationLabel = getDurationLabel(tour.durationDays, tour.durationNights, locale)
-  const labels =
-    isConsultative && locale === 'en'
-      ? {
-          description:
-            'Duration, route rhythm, lodging and group style — what guests need before a private consult.',
-          duration: 'Duration',
-          eyebrow: 'Decision facts',
-          group: 'Group style',
-          hotel: 'Lodging',
-          meals: 'Meals',
-          operator: 'Operations',
-          route: 'Route',
-          title: 'What you need to know first',
-        }
-      : {
-          description:
-            'Khối này gom các tín hiệu khách thường cần để chốt nhanh: route, thời lượng, nhịp ăn ở, quy mô đoàn và cách giữ chỗ.',
-          duration: 'Thời lượng',
-          eyebrow: 'Thông tin quyết định',
-          group: 'Đoàn khách',
-          hotel: 'Khách sạn',
-          meals: 'Bữa ăn',
-          operator: 'Điều hành',
-          route: 'Route',
-          title: 'Thông tin tour cần thấy ngay',
-        }
+  const wingSideCopy = getWingSideTourCopy(locale)
+  const chrome = getConsultativeChrome(locale)
+  const labels = isConsultative
+    ? {
+        description: chrome.factsDescription,
+        duration: wingSideCopy.durationLabel,
+        eyebrow: chrome.factsEyebrow,
+        group:
+          locale === 'vi'
+            ? 'Đoàn khách'
+            : locale === 'it'
+              ? 'Tipo di gruppo'
+              : locale === 'es'
+                ? 'Tipo de grupo'
+                : locale === 'pt'
+                  ? 'Perfil do grupo'
+                  : 'Group style',
+        hotel: wingSideCopy.accommodation,
+        meals: wingSideCopy.meals,
+        operator: chrome.planningNotes,
+        route: wingSideCopy.route,
+        title: chrome.factsTitle,
+      }
+    : {
+        description:
+          'Thời lượng, tuyến điểm, lưu trú và nhịp hành trình để bạn cân nhắc trước khi trao đổi với chuyên viên.',
+        duration: 'Thời lượng',
+        eyebrow: 'Tổng quan chuyến đi',
+        group: 'Đoàn khách',
+        hotel: 'Khách sạn',
+        meals: 'Bữa ăn',
+        operator: 'Lưu ý lập kế hoạch',
+        route: 'Tuyến điểm',
+        title: 'Thông tin cần biết trước',
+      }
 
   return (
     <Panel data-od-id="tour-facts" id="facts">
@@ -754,7 +932,7 @@ const TourReviewsProofSection = ({
   presentation = 'retail',
   tour,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   presentation?: TourDetailPresentation
   tour: Record<string, any>
 }) => {
@@ -814,7 +992,7 @@ const TourWhyChooseSection = ({
   presentation = 'retail',
   tour,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   presentation?: TourDetailPresentation
   tour: Record<string, any>
 }) => {
@@ -851,9 +1029,11 @@ const TourJourneyGallerySection = ({
   locale,
   tour,
 }: {
-  locale: 'en' | 'vi'
+  locale: SupportedLocaleCode
   tour: Record<string, any>
 }) => {
+  const chrome = getConsultativeChrome(locale)
+  const wingSideCopy = getWingSideTourCopy(locale)
   const gallery = asArray<Record<string, any>>(tour.gallery)
     .filter((item) => typeof item === 'object')
     .slice(0, 5)
@@ -862,13 +1042,9 @@ const TourJourneyGallerySection = ({
   return (
     <Panel data-od-id="tour-gallery" id="gallery">
       <SectionHeading
-        eyebrow={locale === 'en' ? 'Journey gallery' : 'Thư viện hành trình'}
-        title={locale === 'en' ? "Places you'll move through" : 'Những nơi bạn sẽ đi qua'}
-        description={
-          locale === 'en'
-            ? 'A visual read of the route before the day-by-day detail.'
-            : 'Hình ảnh thực tế của tuyến trước phần lịch trình từng ngày.'
-        }
+        eyebrow={wingSideCopy.gallery}
+        title={chrome.galleryTitle}
+        description={chrome.galleryDescription}
       />
       <div className="grid auto-rows-[9rem] grid-cols-2 gap-3 sm:auto-rows-[11rem] md:grid-cols-4">
         {gallery.map((media, index) => (
@@ -897,10 +1073,12 @@ const TourConsultationSection = ({
   tour,
 }: {
   enquiryForm?: FormType | null
-  locale: 'en' | 'vi'
+  locale: SupportedLocaleCode
   siteCode?: null | string
   tour: Record<string, any>
 }) => {
+  const chrome = getConsultativeChrome(locale)
+  const wingSideCopy = getWingSideTourCopy(locale)
   const href = getTourInquiryPath({
     intent: 'inquiry',
     siteCode: resolveTourSiteCode(siteCode, 'consultative'),
@@ -908,8 +1086,10 @@ const TourConsultationSection = ({
     tourId: tour.id,
     tourSlug: tour.slug,
     tourTitle: tour.title,
+    discoveryContext: tour.discoveryContext,
   })
   const context = {
+    discovery: tour.discoveryContext?.discovery,
     source: 'tour-detail-enquiry',
     tourId: tour.id,
     tourSlug: tour.slug,
@@ -919,17 +1099,13 @@ const TourConsultationSection = ({
     <Panel id="enquire">
       <div data-od-id="tour-enquiry">
         <SectionHeading
-          eyebrow={locale === 'en' ? 'Next step' : 'Bước tiếp theo'}
-          title={locale === 'en' ? 'Request consultation' : 'Yêu cầu tư vấn'}
-          description={
-            locale === 'en'
-              ? 'Tell us dates and party size. A local planner replies with the first direction within one business day (GMT+7).'
-              : 'Gửi ngày đi và số khách. Planner địa phương phản hồi hướng đầu tiên trong một ngày làm việc (GMT+7).'
-          }
+          eyebrow={chrome.enquiryEyebrow}
+          title={wingSideCopy.request}
+          description={chrome.enquiryDescription}
         />
         <div className="mt-5 rounded-[20px] border border-border/70 bg-muted/20 p-4">
           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-            {locale === 'en' ? 'Journey context' : 'Ngữ cảnh hành trình'}
+            {chrome.enquiryContext}
           </p>
           <p className="mt-2 font-semibold text-foreground">{tour.title}</p>
         </div>
@@ -948,12 +1124,12 @@ const TourConsultationSection = ({
         ) : (
           <div className="mt-6 flex flex-wrap gap-3">
             <SiteLink className={`${TourPrimaryCtaClass} tour-cta-primary--pulse`} href={href}>
-              {locale === 'en' ? 'Start your enquiry' : 'Bắt đầu yêu cầu'}
+              {wingSideCopy.request}
             </SiteLink>
           </div>
         )}
         <SiteLink className={`${TourGhostCtaClass} mt-4`} href={href}>
-          {locale === 'en' ? 'Continue on Contact' : 'Tiếp tục tại trang Liên hệ'}
+          {wingSideCopy.contact}
         </SiteLink>
       </div>
     </Panel>
@@ -965,7 +1141,7 @@ const TourRouteVisualSection = ({
   presentation = 'retail',
   tour,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   presentation?: TourDetailPresentation
   tour: Record<string, any>
 }) => {
@@ -973,26 +1149,20 @@ const TourRouteVisualSection = ({
   const travelLegs = asArray<Record<string, any>>(tour.routeViz?.travelLegs)
   const mapImage = tour.routeViz?.mapImage
   const summaryParagraphs = splitSummaryParagraphs(tour.summary)
-  const isEn = presentation === 'consultative' && locale === 'en'
+  const wingSideCopy = getWingSideTourCopy(locale)
 
   return (
     <Panel data-od-id="tour-overview" id="route">
       <SectionHeading
-        eyebrow={isEn ? 'Journey overview' : 'Hành trình trực quan'}
-        title={
-          isEn
-            ? /north/i.test(String(tour.title || tour.market || ''))
-              ? 'Four legs, one North story'
-              : 'One private route, shaped around your pace'
-            : 'Nhịp hành trình và route thực tế'
-        }
+        eyebrow={presentation === 'consultative' ? wingSideCopy.overview : 'Hành trình trực quan'}
+        title={presentation === 'consultative' ? wingSideCopy.overview : 'Nhịp hành trình thực tế'}
         description={isUsableText(tour.routeViz?.routeCaption) ? tour.routeViz.routeCaption : null}
       />
       <div className="grid gap-6 lg:grid-cols-[1fr_0.95fr]">
         <div className="space-y-4">
           <div className="rounded-[24px] border border-border/60 bg-muted/20 p-5">
             <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              {isEn ? 'Route summary' : 'Tóm tắt route'}
+              {presentation === 'consultative' ? wingSideCopy.route : 'Tóm tắt tuyến điểm'}
             </p>
             <p className="mt-2 text-lg font-semibold text-foreground">
               {tour.factSummary?.routeSummary || tour.title}
@@ -1013,11 +1183,13 @@ const TourRouteVisualSection = ({
                       key={`${stop.label}-${index}`}
                     >
                       <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                        {isEn ? 'Leg' : 'Bước'} {String(index + 1).padStart(2, '0')}
+                        {wingSideCopy.leg} {String(index + 1).padStart(2, '0')}
                       </p>
                       <p className="mt-2 text-base font-semibold text-foreground">{stop.label}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {stop.type || (isEn ? 'Journey stop' : 'Điểm trong chương trình')}
+                        {stop.type && stop.type !== 'sightseeing'
+                          ? stop.type
+                          : wingSideCopy.journeyStop}
                       </p>
                     </div>
                   ))}
@@ -1026,7 +1198,7 @@ const TourRouteVisualSection = ({
             {travelLegs.length > 0 ? (
               <div className="rounded-[24px] border border-border/60 bg-background p-5">
                 <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                  {isEn ? 'Travel legs' : 'Chặng di chuyển'}
+                  {presentation === 'consultative' ? wingSideCopy.transport : 'Chặng di chuyển'}
                 </p>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   {travelLegs.map((leg, index) => (
@@ -1038,7 +1210,8 @@ const TourRouteVisualSection = ({
                         {leg.from} → {leg.to}
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {leg.mode || (isEn ? 'Private transfer' : 'Theo tuyến')}
+                        {leg.mode ||
+                          (presentation === 'consultative' ? wingSideCopy.transport : 'Theo tuyến')}
                       </p>
                     </div>
                   ))}
@@ -1058,7 +1231,7 @@ const TourRouteVisualSection = ({
           ) : (
             <div className="flex h-full flex-col justify-center gap-4 p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                {isEn ? 'Key places' : 'Các điểm chính'}
+                {presentation === 'consultative' ? wingSideCopy.destination : 'Các điểm chính'}
               </p>
               <div className="flex flex-wrap gap-3">
                 {routeStops.length > 0
@@ -1091,7 +1264,7 @@ const TourItinerarySection = ({
   presentation = 'retail',
   tour,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   presentation?: TourDetailPresentation
   tour: Record<string, any>
 }) => {
@@ -1099,8 +1272,10 @@ const TourItinerarySection = ({
   const itineraryDays = asArray<Record<string, any>>(tour.itineraryDays)
   const groupedThemeCount = new Set(itineraryDays.map((day) => day.route).filter(Boolean)).size
   const isEn = locale === 'en'
-  const heading =
-    isConsultative && isEn
+  const wingSideCopy = getWingSideTourCopy(locale)
+  const heading = isConsultative
+    ? { eyebrow: wingSideCopy.itinerary, title: wingSideCopy.itinerary }
+    : isEn
       ? { eyebrow: 'Itinerary', title: 'Day-by-day journey' }
       : { eyebrow: 'Lịch trình', title: 'Lịch trình theo ngày' }
 
@@ -1121,10 +1296,10 @@ const TourItinerarySection = ({
             const dayId = `itinerary-day-${day.dayNumber || index + 1}`
             const panelId = `${dayId}-panel`
             const infoItems = compactInfoItems([
-              [isEn ? 'Meals' : 'Bữa ăn', day.meals],
-              [isEn ? 'Transport' : 'Di chuyển', day.transport],
-              [isEn ? 'Stay' : 'Lưu trú', day.accommodation],
-              [isEn ? 'Sleep standard' : 'Tiêu chuẩn nghỉ', day.sleepingStandard],
+              [wingSideCopy.meals, day.meals],
+              [wingSideCopy.transport, day.transport],
+              [wingSideCopy.accommodation, day.accommodation],
+              [wingSideCopy.sleepStandard, day.sleepingStandard],
             ])
 
             return (
@@ -1141,7 +1316,7 @@ const TourItinerarySection = ({
                 >
                   <div className="shrink-0 rounded-[16px] bg-muted/50 px-3 py-2 text-center sm:rounded-[20px] sm:px-4 sm:py-3">
                     <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                      Day
+                      {wingSideCopy.dayLabel}
                     </p>
                     <p className="text-xl font-semibold sm:text-2xl">
                       {String(day.dayNumber || index + 1).padStart(2, '0')}
@@ -1372,12 +1547,13 @@ const TourServicesSection = ({
   presentation = 'retail',
   tour,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   presentation?: TourDetailPresentation
   tour: Record<string, any>
 }) => {
   const isConsultative = presentation === 'consultative'
   const isEn = locale === 'en'
+  const wingSideCopy = getWingSideTourCopy(locale)
   const includes = asArray<Record<string, any>>(tour.includes)
   const excludes = asArray<Record<string, any>>(tour.excludes)
   const accommodationStops = collectAccommodationStops(
@@ -1394,8 +1570,8 @@ const TourServicesSection = ({
     return (
       <Panel data-od-id="tour-services" id="services">
         <SectionHeading
-          eyebrow={isEn ? 'Included & excluded' : 'Dịch vụ'}
-          title={isEn ? 'What is included — and what is not' : 'Giá đã gồm gì và chi phí tự túc'}
+          eyebrow={`${wingSideCopy.includes} & ${wingSideCopy.excludes}`}
+          title={`${wingSideCopy.includes} — ${wingSideCopy.excludes}`}
           description={null}
         />
         <div className="grid gap-5 md:grid-cols-2">
@@ -1404,7 +1580,7 @@ const TourServicesSection = ({
             data-od-id="tour-included"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--site-brand)]">
-              {isEn ? 'Included' : 'Đã gồm'}
+              {wingSideCopy.includes}
             </p>
             <ul className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
               {includes.length > 0 ? (
@@ -1419,7 +1595,7 @@ const TourServicesSection = ({
             data-od-id="tour-excluded"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              {isEn ? 'Not included' : 'Chưa gồm'}
+              {wingSideCopy.excludes}
             </p>
             <ul className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
               {excludes.length > 0 ? (
@@ -1453,7 +1629,7 @@ const TourServicesSection = ({
             {servicesSummary.hotelSummary || tour.factSummary?.hotelSummary ? (
               <div className="rounded-[22px] border border-border/60 bg-background p-4">
                 <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                  {isEn ? 'Lodging' : 'Lưu trú'}
+                  {wingSideCopy.accommodation}
                 </p>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">
                   {servicesSummary.hotelSummary || tour.factSummary?.hotelSummary}
@@ -1463,7 +1639,7 @@ const TourServicesSection = ({
             {servicesSummary.transportSummary || servicesSummary.mealsSummary ? (
               <div className="rounded-[22px] border border-border/60 bg-background p-4">
                 <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                  {isEn ? 'Transport & meals' : 'Di chuyển & ăn uống'}
+                  {wingSideCopy.transport} & {wingSideCopy.meals}
                 </p>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">
                   {[servicesSummary.transportSummary, servicesSummary.mealsSummary]
@@ -1579,20 +1755,14 @@ const TourPricePostureSection = ({
   nextDeparture,
   tour,
 }: {
-  locale: 'en' | 'vi'
+  locale: SupportedLocaleCode
   nextDeparture: Record<string, any> | null
   tour: Record<string, any>
 }) => {
-  const isEn = locale === 'en'
+  const chrome = getConsultativeChrome(locale)
   const pricePosture = getTourPricePosture({
-    currency: nextDeparture?.currency || tour.currency,
     locale,
-    priceFrom:
-      typeof nextDeparture?.priceFrom === 'number'
-        ? nextDeparture.priceFrom
-        : typeof tour.priceFrom === 'number'
-          ? tour.priceFrom
-          : null,
+    ...getGovernedPricePostureInput({ nextDeparture, tour }),
   })
   const seasonNotes = [
     tour.factSummary?.seasonNote,
@@ -1603,13 +1773,9 @@ const TourPricePostureSection = ({
   return (
     <Panel data-od-id="tour-price" id="departures">
       <SectionHeading
-        eyebrow={isEn ? 'Dates & price' : 'Thời điểm & giá'}
-        title={isEn ? 'Private pricing posture' : 'Cách định giá private'}
-        description={
-          isEn
-            ? 'No public seat inventory. Final price is confirmed with sales for your travel window.'
-            : 'Không hiển thị inventory ghế công khai. Giá chốt với sales theo khung thời gian của bạn.'
-        }
+        eyebrow={chrome.priceEyebrow}
+        title={chrome.priceTitle}
+        description={chrome.priceDescription}
       />
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-[24px] border border-border/60 bg-muted/25 p-5">
@@ -1621,24 +1787,12 @@ const TourPricePostureSection = ({
         </div>
         <div className="rounded-[24px] border border-border/60 bg-background p-5">
           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-            {isEn ? 'How booking works' : 'Cách chốt tour'}
+            {chrome.priceHow}
           </p>
           <ul className="mt-3 space-y-2 text-sm leading-7 text-muted-foreground">
-            <li>
-              {isEn
-                ? 'Share dates, party size, and pace preference.'
-                : 'Chia sẻ ngày đi, số khách và nhịp mong muốn.'}
-            </li>
-            <li>
-              {isEn
-                ? 'We reply within 24 hours with a tailored outline.'
-                : 'Phản hồi trong 24 giờ với đề xuất riêng.'}
-            </li>
-            <li>
-              {isEn
-                ? 'Sales confirms price before any hold or deposit.'
-                : 'Sales xác nhận giá trước khi giữ chỗ hoặc đặt cọc.'}
-            </li>
+            <li>{chrome.priceShare}</li>
+            <li>{chrome.priceReply}</li>
+            <li>{pricePosture.honesty}</li>
           </ul>
         </div>
       </div>
@@ -1664,24 +1818,19 @@ const TourDecisionRail = ({
   siteCode: siteCodeProp,
   tour,
 }: {
-  locale: 'en' | 'vi'
+  locale: SupportedLocaleCode
   nextDeparture: Record<string, any> | null
   siteCode?: null | string
   tour: Record<string, any>
 }) => {
-  const isEn = locale === 'en'
+  const chrome = getConsultativeChrome(locale)
+  const wingSideCopy = getWingSideTourCopy(locale)
   const cta = tour.primaryCTA || {}
   const intent = getConsultativePrimaryIntent(cta.mode || tour.bcfg?.ctaStyle)
   const siteCode = resolveTourSiteCode(siteCodeProp, 'consultative')
   const pricePosture = getTourPricePosture({
-    currency: nextDeparture?.currency || tour.currency,
     locale,
-    priceFrom:
-      typeof nextDeparture?.priceFrom === 'number'
-        ? nextDeparture.priceFrom
-        : typeof tour.priceFrom === 'number'
-          ? tour.priceFrom
-          : null,
+    ...getGovernedPricePostureInput({ nextDeparture, tour }),
   })
   const durationLabel = getDurationLabel(tour.durationDays, tour.durationNights, locale)
   const primaryLabel = getConsultativePrimaryLabel({
@@ -1696,6 +1845,7 @@ const TourDecisionRail = ({
     tourId: tour.id,
     tourSlug: tour.slug,
     tourTitle: tour.title,
+    discoveryContext: tour.discoveryContext,
   })
   const primaryHref = resolveConsultativeCtaHref({
     cmsHref: cta.href,
@@ -1705,7 +1855,7 @@ const TourDecisionRail = ({
   return (
     <aside
       className="tour-decision-rail hidden lg:block"
-      aria-label={isEn ? 'Plan this journey' : 'Lên kế hoạch'}
+      aria-label={wingSideCopy.request}
       data-od-id="tour-decision-rail"
     >
       <div className="sticky top-24 space-y-4 rounded-[28px] border border-border/70 bg-card/95 p-5 shadow-sm">
@@ -1735,15 +1885,16 @@ const TourDecisionRail = ({
               tourId: tour.id,
               tourSlug: tour.slug,
               tourTitle: tour.title,
+              discoveryContext: tour.discoveryContext,
             })}
           >
-            {isEn ? 'Contact us' : 'Liên hệ'}
+            {wingSideCopy.contact}
           </SiteLink>
         </div>
         <ul className="space-y-2 text-sm leading-6 text-muted-foreground">
-          <li>{isEn ? 'Private / tailor-made pacing' : 'Nhịp private / tailor-made'}</li>
-          <li>{isEn ? 'Reply within 24 hours' : 'Phản hồi trong 24 giờ'}</li>
-          <li>{isEn ? 'No public seat scarcity claims' : 'Không scarcity ghế công khai'}</li>
+          <li>{chrome.railPace}</li>
+          <li>{chrome.railReply}</li>
+          <li>{chrome.railAvailability}</li>
         </ul>
       </div>
     </aside>
@@ -1755,7 +1906,7 @@ const DepartureMatrix = ({
   locale,
 }: {
   departures: DepartureCardViewModel[]
-  locale: 'en' | 'vi'
+  locale: SupportedLocaleCode
 }) => {
   if (departures.length === 0) {
     return null
@@ -1856,7 +2007,7 @@ const TourDepartureSection = ({
   locale,
 }: {
   departures: DepartureCardViewModel[]
-  locale: 'en' | 'vi'
+  locale: SupportedLocaleCode
 }) => (
   <Panel id="departures">
     <SectionHeading
@@ -1873,7 +2024,7 @@ const TourFAQSection = ({
   presentation = 'retail',
   tour,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   presentation?: TourDetailPresentation
   tour: Record<string, any>
 }) => {
@@ -1914,7 +2065,7 @@ const TourRelatedSection = ({
   presentation = 'retail',
   tour,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   presentation?: TourDetailPresentation
   tour: Record<string, any>
 }) => {
@@ -1922,6 +2073,8 @@ const TourRelatedSection = ({
     (item) => typeof item === 'object',
   )
   const isEn = presentation === 'consultative' && locale === 'en'
+  const chrome = getConsultativeChrome(locale)
+  const wingSideCopy = getWingSideTourCopy(locale)
 
   const fallback = [
     {
@@ -1969,12 +2122,14 @@ const TourRelatedSection = ({
   return (
     <Panel data-od-id="tour-related" id="related">
       <SectionHeading
-        eyebrow={isEn ? 'Related journeys' : 'Tour liên quan'}
-        title={isEn ? 'Other itineraries near this need' : 'Các line gần với nhu cầu này'}
+        eyebrow={presentation === 'consultative' ? chrome.relatedEyebrow : 'Tour liên quan'}
+        title={
+          presentation === 'consultative' ? chrome.relatedTitle : 'Hành trình gần với nhu cầu này'
+        }
         description={
-          isEn
-            ? 'Nearby private journeys to compare pace, style, and destinations.'
-            : 'Gợi ý thêm các chương trình gần thị trường hoặc ngân sách để khách dễ so sánh.'
+          presentation === 'consultative'
+            ? chrome.relatedDescription
+            : 'Các hành trình có tuyến điểm, phong cách và thời lượng gần với lựa chọn này.'
         }
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -2002,7 +2157,7 @@ const TourRelatedSection = ({
                   className="mt-4 inline-flex text-sm font-semibold no-underline"
                   href={item.href}
                 >
-                  {isEn ? 'Explore ->' : 'Khám phá ->'}
+                  {presentation === 'consultative' ? `${wingSideCopy.overview} →` : 'Khám phá →'}
                 </SiteLink>
               ) : null}
             </div>
@@ -2020,7 +2175,7 @@ const StickyBookingCTASection = ({
   siteCode: siteCodeProp,
   tour,
 }: {
-  locale?: 'en' | 'vi'
+  locale?: SupportedLocaleCode
   nextDeparture: Record<string, any> | null
   presentation?: TourDetailPresentation
   siteCode?: null | string
@@ -2029,14 +2184,8 @@ const StickyBookingCTASection = ({
   const isConsultative = presentation === 'consultative'
   const siteCode = isConsultative ? resolveTourSiteCode(siteCodeProp, presentation) : undefined
   const pricePosture = getTourPricePosture({
-    currency: nextDeparture?.currency || tour.currency,
     locale,
-    priceFrom:
-      typeof nextDeparture?.priceFrom === 'number'
-        ? nextDeparture.priceFrom
-        : typeof tour.priceFrom === 'number'
-          ? tour.priceFrom
-          : null,
+    ...getGovernedPricePostureInput({ nextDeparture, tour }),
   })
 
   if (isConsultative) {
@@ -2064,6 +2213,7 @@ const StickyBookingCTASection = ({
                 tourId: tour.id,
                 tourSlug: tour.slug,
                 tourTitle: tour.title,
+                discoveryContext: tour.discoveryContext,
               })}
             >
               {getConsultativePrimaryLabel({
@@ -2106,6 +2256,7 @@ const StickyBookingCTASection = ({
                 source: 'tour-detail-sticky',
                 tourId: tour.id,
                 tourSlug: tour.slug,
+                discoveryContext: tour.discoveryContext,
               })}
             >
               <span className="sm:hidden">{nextDeparture?.ctaLabelOverride || 'Tư vấn'}</span>
@@ -2129,22 +2280,29 @@ const StickyBookingCTASection = ({
 
 export const TourDetailPage = ({
   data,
+  discoveryContext,
   enquiryForm,
   locale,
   presentation = 'retail',
   siteCode: siteCodeProp,
 }: {
   data: TourResolvedData
+  discoveryContext?: Omit<TourEnquiryContext, 'source' | 'tourId' | 'tourSlug' | 'tourTitle'>
   enquiryForm?: FormType | null
-  locale: 'en' | 'vi'
+  locale: SupportedLocaleCode
   presentation?: TourDetailPresentation
   siteCode?: null | string
 }) => {
   const isConsultative = presentation === 'consultative' || isConsultativeTourSiteCode(siteCodeProp)
   const resolvedPresentation: TourDetailPresentation = isConsultative ? 'consultative' : 'retail'
-  const tour = isConsultative ? normalizeWingSideConsultativeTour(data.tour) : data.tour
+  const baseTour: TourResolvedData['tour'] = isConsultative
+    ? normalizeWingSideConsultativeTour(data.tour, locale)
+    : data.tour
+  const tour: TourResolvedData['tour'] = { ...baseTour, discoveryContext }
   const siteCode = resolveTourSiteCode(siteCodeProp, resolvedPresentation)
   const isEn = locale === 'en'
+  const chrome = getConsultativeChrome(locale)
+  const wingSideCopy = getWingSideTourCopy(locale)
   const visibleSections = new Set(data.sectionVisibility || defaultTourSectionVisibility)
   let sectionOrder = (data.sectionOrder || defaultTourSectionOrder).filter((section) =>
     visibleSections.has(section),
@@ -2217,30 +2375,29 @@ export const TourDetailPage = ({
   }
 
   const navSections = sectionOrder.filter((section) => !['hero', 'sticky-cta'].includes(section))
-  const navLabels: Record<string, { long: string; short: string }> =
-    isConsultative && isEn
-      ? {
-          departures: { long: 'Dates & price', short: 'Dates' },
-          facts: { long: 'Facts', short: 'Facts' },
-          faq: { long: 'FAQ', short: 'FAQ' },
-          itinerary: { long: 'Itinerary', short: 'Days' },
-          related: { long: 'Related', short: 'Related' },
-          reviews: { long: 'Reviews', short: 'Reviews' },
-          route: { long: 'Overview', short: 'Route' },
-          services: { long: 'Included', short: 'Include' },
-          'why-choose': { long: 'Highlights', short: 'Why' },
-        }
-      : {
-          departures: { long: 'Lịch khởi hành', short: 'Khởi hành' },
-          facts: { long: 'Thông tin tour', short: 'Thông tin' },
-          faq: { long: 'FAQ', short: 'FAQ' },
-          itinerary: { long: 'Lịch trình', short: 'Lịch trình' },
-          related: { long: 'Tour liên quan', short: 'Liên quan' },
-          reviews: { long: 'Đánh giá', short: 'Đánh giá' },
-          route: { long: 'Hành trình', short: 'Hành trình' },
-          services: { long: 'Dịch vụ & lưu trú', short: 'Dịch vụ' },
-          'why-choose': { long: 'Điểm nổi bật', short: 'Nổi bật' },
-        }
+  const navLabels: Record<string, { long: string; short: string }> = isConsultative
+    ? {
+        departures: { long: chrome.priceEyebrow, short: chrome.priceEyebrow },
+        facts: { long: chrome.factsEyebrow, short: chrome.factsEyebrow },
+        faq: { long: 'FAQ', short: 'FAQ' },
+        itinerary: { long: wingSideCopy.itinerary, short: wingSideCopy.itinerary },
+        related: { long: chrome.relatedEyebrow, short: chrome.relatedEyebrow },
+        reviews: { long: 'Reviews', short: 'Reviews' },
+        route: { long: wingSideCopy.overview, short: wingSideCopy.route },
+        services: { long: wingSideCopy.includes, short: wingSideCopy.includes },
+        'why-choose': { long: 'Highlights', short: 'Why' },
+      }
+    : {
+        departures: { long: 'Lịch khởi hành', short: 'Khởi hành' },
+        facts: { long: 'Thông tin tour', short: 'Thông tin' },
+        faq: { long: 'FAQ', short: 'FAQ' },
+        itinerary: { long: 'Lịch trình', short: 'Lịch trình' },
+        related: { long: 'Tour liên quan', short: 'Liên quan' },
+        reviews: { long: 'Đánh giá', short: 'Đánh giá' },
+        route: { long: 'Hành trình', short: 'Hành trình' },
+        services: { long: 'Dịch vụ & lưu trú', short: 'Dịch vụ' },
+        'why-choose': { long: 'Điểm nổi bật', short: 'Nổi bật' },
+      }
 
   const bodySections = sectionOrder.filter(
     (section) => section !== 'hero' && section !== 'sticky-cta',
@@ -2263,7 +2420,9 @@ export const TourDetailPage = ({
         data-od-id={isConsultative ? 'tour-jump-nav' : undefined}
       >
         <nav
-          aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
+          aria-label={
+            isConsultative ? wingSideCopy.overview : isEn ? 'Tour sections' : 'Mục lục tour'
+          }
           className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm lg:flex-wrap lg:items-center lg:gap-3 [&::-webkit-scrollbar]:hidden"
         >
           {navSections.map((section) => (
@@ -2280,7 +2439,7 @@ export const TourDetailPage = ({
                   className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
                   href="#gallery"
                 >
-                  {isEn ? 'Gallery' : 'Hình ảnh'}
+                  {wingSideCopy.gallery}
                 </a>
               ) : null}
               {isConsultative && section === 'departures' ? (
@@ -2288,7 +2447,7 @@ export const TourDetailPage = ({
                   className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
                   href="#enquire"
                 >
-                  {isEn ? 'Enquire' : 'Tư vấn'}
+                  {wingSideCopy.request}
                 </a>
               ) : null}
             </React.Fragment>
@@ -2345,7 +2504,7 @@ const DepartureStrip = ({
   locale,
 }: {
   departures: DepartureCardViewModel[]
-  locale: 'en' | 'vi'
+  locale: SupportedLocaleCode
 }) => {
   const items = departures.slice(0, 6)
 

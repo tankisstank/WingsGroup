@@ -65,7 +65,7 @@ export async function Footer() {
               </div>
             ) : null}
           </div>
-          <nav aria-label="WingSide shortcuts" className="ws-hifi-footer-links">
+          <nav aria-label={chromeCopy.footerNavigation} className="ws-hifi-footer-links">
             {(wingSideNav || []).slice(1).map((item) => (
               <SiteLink href={item.href} key={item.href}>
                 {item.label}

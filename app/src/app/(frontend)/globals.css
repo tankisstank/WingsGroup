@@ -4186,7 +4186,7 @@ body[data-site-code='wing-side'] .site-header__bar {
 body[data-site-code='wing-side'] .site-header-cta,
 body[data-site-code='wing-side'] .site-panel-cta {
   border-color: color-mix(in oklch, var(--site-gold) 72%, var(--site-border));
-  color: color-mix(in oklch, var(--site-foreground) 90%, black);
+  color: var(--site-cta-fg);
   background: var(--site-gold);
   box-shadow: 0 10px 24px color-mix(in oklch, var(--site-gold) 24%, transparent);
 }
@@ -4195,8 +4195,15 @@ body[data-site-code='wing-side'] .site-header-cta:hover,
 body[data-site-code='wing-side'] .site-header-cta:focus-visible,
 body[data-site-code='wing-side'] .site-panel-cta:hover,
 body[data-site-code='wing-side'] .site-panel-cta:focus-visible {
-  color: color-mix(in oklch, var(--site-foreground) 94%, black);
+  color: var(--site-cta-fg);
   background: color-mix(in oklch, var(--site-gold) 86%, white);
+}
+
+body[data-site-code='wing-side'] .site-header-cta:focus-visible,
+body[data-site-code='wing-side'] .site-panel-cta:focus-visible,
+body[data-site-code='wing-side'] .ws-hifi-footer-links__cta:focus-visible {
+  outline: 3px solid var(--site-cta-fg);
+  outline-offset: 3px;
 }
 
 body[data-site-code='wing-side'] .theme-nav-link {
@@ -4480,7 +4487,7 @@ body[data-site-preset='wings-side-editorial'] .tour-cta-primary,
   justify-content: center;
   border: 1px solid color-mix(in oklch, #b87a14 55%, transparent);
   background: #b87a14;
-  color: #ffffff;
+  color: var(--site-cta-fg, #111827);
   box-shadow: 0 10px 28px color-mix(in oklch, #b87a14 28%, transparent);
 }
 
@@ -4491,9 +4498,9 @@ body[data-site-preset='wings-side-editorial-inbound-v2'] .tour-cta-primary:focus
 body[data-site-preset='wings-side-editorial'] .tour-cta-primary:hover,
 body[data-site-preset='wings-side-editorial'] .tour-cta-primary:focus-visible {
   background: #c98a22;
-  color: #ffffff;
-  outline: 2px solid color-mix(in oklch, #b87a14 45%, white);
-  outline-offset: 2px;
+  color: var(--site-cta-fg, #111827);
+  outline: 3px solid var(--site-cta-fg, #111827);
+  outline-offset: 3px;
 }
 
 @keyframes tour-cta-gold-pulse {
@@ -4535,6 +4542,35 @@ body[data-site-theme='wings-side']
   article:has(.tour-detail--consultative)
   > nav[aria-label='Breadcrumb'] {
   padding-bottom: 0.35rem;
+}
+
+body[data-site-code='wing-side'] .wingsside-tour-breadcrumb {
+  color: var(--site-muted);
+  font-size: 0.82rem;
+}
+
+body[data-site-code='wing-side'] .wingsside-tour-breadcrumb ol {
+  width: fit-content;
+  gap: 0.45rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--site-border);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--site-surface, #fff) 88%, transparent);
+}
+
+body[data-site-code='wing-side'] .wingsside-tour-breadcrumb li {
+  gap: 0.45rem;
+}
+
+body[data-site-code='wing-side'] .wingsside-tour-breadcrumb__link {
+  color: var(--site-text);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+body[data-site-code='wing-side'] .wingsside-tour-breadcrumb [aria-current='page'] {
+  color: var(--site-foreground);
+  font-weight: 500;
 }
 
 .tour-itinerary-day summary {

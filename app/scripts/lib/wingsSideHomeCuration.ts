@@ -37,10 +37,19 @@ export const wingsSideHomeFeaturedSelections = [
   { sourceId: 'vietnam-tours--a-glimpse-of-the-central-vietnam-5-days', tour: 486 },
 ] as const
 
+/** Approved US-055 mapping. IDs are resolved from stable importer source IDs at apply time. */
+export const wingsSideWhyTravelSelections = [
+  { key: 'local-design', sourceId: 'vietnam-tours--best-of-northern-vietnam-6-days', tour: 491 },
+  { key: 'flexible-planning', sourceId: 'vietnam-tours--northern-vietnam-highlights-for-family-6-days', tour: 517 },
+  { key: 'style-matching', sourceId: 'vietnam-tours--vietnam-luxury-wellness-retreat-escape-8-days', tour: 533 },
+  { key: 'collaborative-care', sourceId: 'vietnam-tours--highlights-of-vietnam-12-days', tour: 504 },
+] as const
+
 export type WingSideHomeCuration = {
   destinationTourSelections: Array<{ key: WingsSideHomeDestinationSelectionKey; tour: number }>
   featuredJourneySelections: Array<{ tour: number }>
   styleTourSelections: Array<{ key: WingsSideHomeStyleSelectionKey; tour: number }>
+  whyTourSlots: Array<{ key: (typeof wingsSideWhyTravelSelections)[number]['key']; selectionMode: 'manual'; tour: number }>
 }
 
 export const wingsSideHomeCuration: WingSideHomeCuration = {
@@ -50,6 +59,11 @@ export const wingsSideHomeCuration: WingSideHomeCuration = {
   })),
   featuredJourneySelections: wingsSideHomeFeaturedSelections.map(({ tour }) => ({ tour })),
   styleTourSelections: wingsSideHomeStyleSelections.map(({ key, tour }) => ({ key, tour })),
+  whyTourSlots: wingsSideWhyTravelSelections.map(({ key, tour }) => ({
+    key,
+    selectionMode: 'manual' as const,
+    tour,
+  })),
 }
 
 export const wingsSideHomeCurationSourceIDs = [
@@ -57,6 +71,7 @@ export const wingsSideHomeCurationSourceIDs = [
     ...wingsSideHomeDestinationSelections.map(({ sourceId }) => sourceId),
     ...wingsSideHomeStyleSelections.map(({ sourceId }) => sourceId),
     ...wingsSideHomeFeaturedSelections.map(({ sourceId }) => sourceId),
+    ...wingsSideWhyTravelSelections.map(({ sourceId }) => sourceId),
   ]),
 ]
 
@@ -80,6 +95,11 @@ export const resolveWingsSideHomeCuration = (
     })),
     styleTourSelections: wingsSideHomeStyleSelections.map(({ key, sourceId }) => ({
       key,
+      tour: resolveTour(sourceId),
+    })),
+    whyTourSlots: wingsSideWhyTravelSelections.map(({ key, sourceId }) => ({
+      key,
+      selectionMode: 'manual' as const,
       tour: resolveTour(sourceId),
     })),
   }
@@ -135,10 +155,16 @@ const sameCuration = (
   const featuredJourneySelections = (actual?.featuredJourneySelections || []).map(({ tour }) => ({
     tour: relationID(tour),
   }))
+  const whyTourSlots = (actual?.whyTourSlots || []).map(({ key, selectionMode, tour }) => ({
+    key,
+    selectionMode,
+    tour: relationID(tour),
+  }))
   return (
     JSON.stringify(destinationTourSelections) === JSON.stringify(approved.destinationTourSelections) &&
     JSON.stringify(styleTourSelections) === JSON.stringify(approved.styleTourSelections) &&
-    JSON.stringify(featuredJourneySelections) === JSON.stringify(approved.featuredJourneySelections)
+    JSON.stringify(featuredJourneySelections) === JSON.stringify(approved.featuredJourneySelections) &&
+    JSON.stringify(whyTourSlots) === JSON.stringify(approved.whyTourSlots)
   )
 }
 
@@ -187,6 +213,7 @@ export const auditWingsSideHomeCuration = ({
     assertTour(selection.tour, 'travelStyles', selection.key)
   }
   for (const selection of approved.featuredJourneySelections) assertTour(selection.tour)
+  for (const selection of approved.whyTourSlots) assertTour(selection.tour)
 
   return {
     findings,
@@ -197,6 +224,7 @@ export const auditWingsSideHomeCuration = ({
       ...approved.destinationTourSelections.map(({ tour }) => tour),
       ...approved.styleTourSelections.map(({ tour }) => tour),
       ...approved.featuredJourneySelections.map(({ tour }) => tour),
+      ...approved.whyTourSlots.map(({ tour }) => tour),
     ])],
   }
 }

@@ -60,8 +60,8 @@ const getFontPresetTokens = (fontPreset?: string | null) => {
 
 /**
  * Locked Open Design hi-fi tokens (`wingside-hifi-fix-8pages.html`).
- * Cool paper + structure blue + wing green accent; book-gold CTA only
- * (white label on darker gold for AA contrast).
+ * Cool paper + structure blue + wing green accent; book-gold CTA only.
+ * Ink labels keep normal-size CTA text above WCAG AA contrast.
  */
 export const wingsSideHiFiTokens = {
   accent: '#104030',
@@ -70,7 +70,7 @@ export const wingsSideHiFiTokens = {
   brand: '#005090',
   brandHover: '#0A65AD',
   brandSoft: '#E8F1F8',
-  ctaFg: '#FFFFFF',
+  ctaFg: '#111827',
   foreground: '#1B2430',
   gold: '#B87A14',
   maxWidth: '70rem',

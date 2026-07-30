@@ -154,9 +154,6 @@ const getMarkerMatches = (strings: string[], patterns: RegExp[]) =>
     ),
   )
 
-const containsMarker = (strings: string[], patterns: RegExp[]) =>
-  strings.some((value) => patterns.some((pattern) => pattern.test(value)))
-
 const buildSignature = (doc: unknown) =>
   getDocStrings(doc)
     .slice(0, 20)
@@ -298,6 +295,12 @@ export const summarizeLocaleAuditRows = (rows: LocaleContentAuditRow[]): LocaleC
 
   return { bySite, totals }
 }
+
+export const getLocaleContentBlockerCount = (summary: LocaleContentAuditSummary): number =>
+  summary.totals.missing +
+  summary.totals.placeholder +
+  summary.totals.mixedLanguage +
+  summary.totals.needsEditorialReview
 
 export const toPagePathMap = <T extends AuditDoc>(docs: T[]) =>
   new Map(docs.map((doc) => [getDocPath(doc), doc] as const))

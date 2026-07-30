@@ -11,6 +11,22 @@ const activateLocaleLink = async (page: Page, scope: Locator | Page, label: RegE
 }
 
 test.describe('WingsSide locale continuity', () => {
+  test('keeps unprefixed English and /vi Vietnamese self-canonical', async ({ page }) => {
+    await page.goto(`${e2eBaseURL}/wingsside`, { waitUntil: 'domcontentloaded' })
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'https://wingside.vn',
+    )
+
+    await page.goto(`${e2eBaseURL}/wingsside/vi`, { waitUntil: 'domcontentloaded' })
+    await expect(page.locator('html')).toHaveAttribute('lang', 'vi')
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'https://wingside.vn/vi',
+    )
+  })
+
   test('keeps the selected locale through switch, footer navigation, back, and refresh on the local alias flow', async ({
     page,
   }) => {

@@ -5,6 +5,7 @@ import {
 } from '@/tours/sectionRegistry'
 import {
   getFutureDepartures,
+  formatTourPrice,
   getMealChipFlags,
   getNextDeparture,
   getTourInquiryPath,
@@ -101,6 +102,19 @@ describe('tour detail builder inquiry and departure utilities', () => {
     expect(getTourPricePosture({ locale: 'en', priceFrom: 1200, currency: 'USD' }).label).toBe(
       'From',
     )
+    expect(formatTourPrice(1200, 'USD')).toBeTruthy()
+    expect(formatTourPrice(30_900_000, 'VND')).toBeTruthy()
+    expect(formatTourPrice(1200, null)).toBeNull()
+    expect(formatTourPrice(1200, 'ABC')).toBeNull()
+    expect(formatTourPrice(1200, 'XXX')).toBeNull()
+    expect(formatTourPrice(1200, 'EUR')).toBeNull()
+    expect(formatTourPrice(1200, 'GBP')).toBeNull()
+    expect(formatTourPrice(0, 'USD')).toBeNull()
+    expect(formatTourPrice(-1, 'USD')).toBeNull()
+    expect(formatTourPrice(Number.POSITIVE_INFINITY, 'USD')).toBeNull()
+    expect(getTourPricePosture({ locale: 'en', priceFrom: 1200, currency: 'ABC' })).toMatchObject({
+      label: 'Price on request',
+    })
   })
 
   it('honors external consultative CTA hrefs but rebuilds bare contact shells', () => {

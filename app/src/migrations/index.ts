@@ -21,6 +21,8 @@ import * as migration_20260724_110000_wing_side_supported_locales from './202607
 import * as migration_20260724_120000_tour_product_taxonomy from './20260724_120000_tour_product_taxonomy'
 import * as migration_20260724_130000_wing_side_display_brand from './20260724_130000_wing_side_display_brand'
 import * as migration_20260725_090000_wings_side_home_tour_curation from './20260725_090000_wings_side_home_tour_curation'
+import * as migration_20260728_090000_wings_side_why_travel_tours from './20260728_090000_wings_side_why_travel_tours'
+import * as migration_20260728_100000_lead_enquiry_context from './20260728_100000_lead_enquiry_context'
 
 export const migrations = [
   {
@@ -137,5 +139,15 @@ export const migrations = [
     up: migration_20260725_090000_wings_side_home_tour_curation.up,
     down: migration_20260725_090000_wings_side_home_tour_curation.down,
     name: '20260725_090000_wings_side_home_tour_curation',
+  },
+  {
+    up: migration_20260728_090000_wings_side_why_travel_tours.up,
+    down: migration_20260728_090000_wings_side_why_travel_tours.down,
+    name: '20260728_090000_wings_side_why_travel_tours',
+  },
+  {
+    up: migration_20260728_100000_lead_enquiry_context.up,
+    down: migration_20260728_100000_lead_enquiry_context.down,
+    name: '20260728_100000_lead_enquiry_context',
   },
 ]

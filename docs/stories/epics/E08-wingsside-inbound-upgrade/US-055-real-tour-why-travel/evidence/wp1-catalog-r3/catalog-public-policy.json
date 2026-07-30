@@ -1,0 +1,13 @@
+{
+  "artifactPurpose": "wingsside-tour-editorial-catalog-v2-review",
+  "decision": "D6-C",
+  "policyID": "wingsside-development-team-catalog-approval",
+  "policyVersion": 1,
+  "signerRole": "development-team-release-approver",
+  "keyID": "rehearsal-ecdd9c72831901b8bac711f5",
+  "publicKeySpkiBase64": "MCowBQYDK2VwAyEAWVzFUNWVFM2GD9ygQZndX4EuwBnHAlybpN3Lxf5+oDY=",
+  "rehearsalOnly": true,
+  "trustedSignerIDs": [
+    "wingsside-development-team-local-rehearsal"
+  ]
+}

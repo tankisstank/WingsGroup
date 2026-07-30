@@ -1,7 +1,27 @@
 import type { Payload, PayloadRequest } from 'payload'
 
 import { publicLocales, type LocalizedCopy, type PublicLocaleCode } from '../../src/i18n/publicCopy'
+import { wingsSideLocalizationBackfillContext } from '../../src/utilities/wingsSideLocalizationBackfillContext'
 import { applyWingsSideEditorialTerminology } from './wingssideEditorialTerminology'
+
+const isSQLiteBusyError = (error: unknown): boolean => {
+  const text = error instanceof Error ? `${error.message} ${String(error.cause || '')}` : String(error)
+
+  return /SQLITE_BUSY|database is locked/i.test(text)
+}
+
+const withSQLiteBusyRetry = async <T>(operation: () => Promise<T>): Promise<T> => {
+  let attempt = 0
+  while (true) {
+    try {
+      return await operation()
+    } catch (error) {
+      attempt += 1
+      if (attempt >= 5 || !isSQLiteBusyError(error)) throw error
+      await new Promise((resolve) => setTimeout(resolve, attempt * 250))
+    }
+  }
+}
 
 const linkItem = (label: string, url: string) => ({
   link: {
@@ -259,14 +279,17 @@ export async function backfillWingsSideSiteSettings(
 
     if (options.dryRun) continue
 
-    await payload.update({
-      id: settings.id,
-      collection: 'site-settings',
-      data: targetData,
-      locale,
-      overrideAccess: true,
-      req,
-    })
+    await withSQLiteBusyRetry(() =>
+      payload.update({
+        id: settings.id,
+        collection: 'site-settings',
+        context: wingsSideLocalizationBackfillContext,
+        data: targetData,
+        locale,
+        overrideAccess: true,
+        req,
+      }),
+    )
   }
 
   return updates

@@ -622,50 +622,58 @@ async function getAdminRequestContext() {
 export async function seedHeroPresentationSmoke(): Promise<Record<HeroPresentationKey, number>> {
   const { payload, req } = await getAdminRequestContext()
 
-  return ensureHeroPresentationFixtures({ payload, req })
+  try {
+    return await ensureHeroPresentationFixtures({ payload, req })
+  } finally {
+    await payload.destroy()
+  }
 }
 
 export async function seedPhase1LaunchSmoke(): Promise<void> {
   const { payload, req } = await getAdminRequestContext()
-  const requiredSiteCodes = ['wings-go', 'wing-side', 'wings-plus', 'wings-care', 'wings-pass']
-  const presetIDs = await ensureThemePresetSeeds(payload, req)
-  const heroPresetIDs = await ensureHeroPresentationPresetSeeds(payload, req)
-  const sites = await payload.find({
-    collection: 'sites',
-    depth: 0,
-    limit: 10,
-    pagination: false,
-    req,
-    where: {
-      code: {
-        in: requiredSiteCodes,
-      },
-    },
-  })
-
-  const missingSiteCodes = requiredSiteCodes.filter(
-    (code) => !sites.docs.some((site) => site.code === code),
-  )
-
-  if (missingSiteCodes.length > 0) {
-    throw new Error(
-      `Missing seeded sites for smoke tests: ${missingSiteCodes.join(', ')}. Run the subsites seed first.`,
-    )
-  }
-
-  for (const site of sites.docs) {
-    await ensureSiteThemeMetadata({
-      payload,
-      presetIDs,
-      heroPresetIDs,
+  try {
+    const requiredSiteCodes = ['wings-go', 'wing-side', 'wings-plus', 'wings-care', 'wings-pass']
+    const presetIDs = await ensureThemePresetSeeds(payload, req)
+    const heroPresetIDs = await ensureHeroPresentationPresetSeeds(payload, req)
+    const sites = await payload.find({
+      collection: 'sites',
+      depth: 0,
+      limit: 10,
+      pagination: false,
       req,
-      siteCode: site.code,
-      siteID: site.id,
+      where: {
+        code: {
+          in: requiredSiteCodes,
+        },
+      },
     })
-  }
 
-  await ensureProductionDomains({ payload, req })
-  await ensureWingsPlusNavigationLocales({ payload, req })
-  await ensureNavigationCorrections({ payload, req })
-  await ensureHeroPresentationFixtures({ payload, req })
+    const missingSiteCodes = requiredSiteCodes.filter(
+      (code) => !sites.docs.some((site) => site.code === code),
+    )
+
+    if (missingSiteCodes.length > 0) {
+      throw new Error(
+        `Missing seeded sites for smoke tests: ${missingSiteCodes.join(', ')}. Run the subsites seed first.`,
+      )
+    }
+
+    for (const site of sites.docs) {
+      await ensureSiteThemeMetadata({
+        payload,
+        presetIDs,
+        heroPresetIDs,
+        req,
+        siteCode: site.code,
+        siteID: site.id,
+      })
+    }
+
+    await ensureProductionDomains({ payload, req })
+    await ensureWingsPlusNavigationLocales({ payload, req })
+    await ensureNavigationCorrections({ payload, req })
+    await ensureHeroPresentationFixtures({ payload, req })
+  } finally {
+    await payload.destroy()
+  }
 }

@@ -5,7 +5,21 @@ export type LeadSubmissionField = {
   value: LeadFieldValue
 }
 
+export type LeadDiscoveryContext = {
+  destination?: string
+  duration?: string
+  style?: string
+}
+
+export type LeadSubmissionContext = {
+  discovery?: LeadDiscoveryContext
+  source?: string
+  tourId?: string
+  tourSlug?: string
+}
+
 export type LeadSubmissionRequest = {
+  context?: LeadSubmissionContext
   formId: number | string
   honeypot?: string
   idempotencyKey: string

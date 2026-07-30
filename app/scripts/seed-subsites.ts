@@ -12438,172 +12438,182 @@ async function _seedLightweightSite(
 
 async function main() {
   const payload = await getPayload({ config })
-  const requestedSeed = process.env.SEED_ONLY_SITE?.trim().toLowerCase() || null
-  const seededAdminUser = await ensureLocalAdminUser(payload)
-  const users = await payload.find({
-    collection: 'users',
-    depth: 0,
-    limit: 1,
-    where: {
-      email: {
-        equals: localAdminCredentials.email,
+  try {
+    const requestedSeed = process.env.SEED_ONLY_SITE?.trim().toLowerCase() || null
+    const seededAdminUser = await ensureLocalAdminUser(payload)
+    const users = await payload.find({
+      collection: 'users',
+      depth: 0,
+      limit: 1,
+      where: {
+        email: {
+          equals: localAdminCredentials.email,
+        },
       },
-    },
-  })
-  const currentUser = users.docs[0] || seededAdminUser
+    })
+    const currentUser = users.docs[0] || seededAdminUser
 
-  if (!currentUser) {
-    throw new Error('No admin user found. The local admin seed did not complete.')
-  }
-
-  const adminUser =
-    currentUser.role === 'super-admin'
-      ? currentUser
-      : await payload.update({
-          collection: 'users',
-          id: currentUser.id,
-          data: {
-            role: 'super-admin',
-            sites: [],
-          },
-        })
-
-  const req = await createLocalReq({ user: adminUser }, payload)
-  const databaseURL = process.env.DATABASE_URL || ''
-  const isSQLiteSeed = !/^postgres(?:ql)?:\/\//.test(databaseURL)
-
-  if (isSQLiteSeed) {
-    disableLocalTransactionsForSeed(payload)
-    disableVersionWritesForSeed(payload)
-  }
-  const heroPresetIDs = await ensureHeroPresentationPresetSeeds(payload, req)
-  Object.assign(heroPresentationPresetIDsByKey, heroPresetIDs)
-
-  const requestedSites = requestedSeed
-    ? requestedSeed
-        .split(',')
-        .map((value) => value.trim())
-        .filter(Boolean)
-    : null
-
-  payload.logger.info('Seeding theme presets...')
-  await seedThemePresets(payload, req)
-
-  const wingsGroupSeed = siteSeeds.find((site) => site.code === 'wings-group')!
-  const wingsGoSeed = siteSeeds.find((site) => site.code === 'wings-go')!
-  const wingsSideSeed = siteSeeds.find((site) => site.code === 'wing-side')!
-  const wingsPassSeed = siteSeeds.find((site) => site.code === 'wings-pass')!
-  const wingsPlusSeed = siteSeeds.find((site) => site.code === 'wings-plus')!
-  const wingsCareSeed = siteSeeds.find((site) => site.code === 'wings-care')!
-
-  const seeders: Record<string, () => Promise<void>> = {
-    'wings-group': async () => {
-      payload.logger.info('Seeding WingsGroup corporate hub...')
-      await seedWingsGroup(payload, req, wingsGroupSeed)
-    },
-    'wings-go': async () => {
-      payload.logger.info('Seeding WingsGo production content...')
-      await seedWingsGo(payload, req, wingsGoSeed)
-    },
-    'wing-side': async () => {
-      payload.logger.info('Seeding WingsSide production content...')
-      await seedWingsSide(payload, req, wingsSideSeed)
-    },
-    'wings-pass': async () => {
-      payload.logger.info('Seeding WingsPass production content...')
-      await seedWingsPass(payload, req, wingsPassSeed)
-    },
-    'wings-plus': async () => {
-      payload.logger.info('Seeding WingsPlus production content...')
-      await seedWingsPlus(payload, req, wingsPlusSeed)
-    },
-    'wings-care': async () => {
-      payload.logger.info('Seeding WingsCare production content...')
-      await seedWingsCare(payload, req, wingsCareSeed)
-    },
-  }
-
-  if (requestedSites) {
-    const normalizedSites = [
-      ...new Set(requestedSites.map((site) => site.replace(/^wingsplus$/, 'wings-plus'))),
-    ]
-
-    for (const site of normalizedSites) {
-      const seedFn = seeders[site]
-
-      if (!seedFn) {
-        throw new Error(`Unknown SEED_ONLY_SITE value: ${requestedSeed}`)
-      }
-
-      await seedFn()
+    if (!currentUser) {
+      throw new Error('No admin user found. The local admin seed did not complete.')
     }
 
-    payload.logger.info(`Selective seed completed for ${normalizedSites.join(', ')}.`)
-    return
+    const adminUser =
+      currentUser.role === 'super-admin'
+        ? currentUser
+        : await payload.update({
+            collection: 'users',
+            id: currentUser.id,
+            data: {
+              role: 'super-admin',
+              sites: [],
+            },
+          })
+
+    const req = await createLocalReq({ user: adminUser }, payload)
+    const databaseURL = process.env.DATABASE_URL || ''
+    const isSQLiteSeed = !/^postgres(?:ql)?:\/\//.test(databaseURL)
+
+    if (isSQLiteSeed) {
+      disableLocalTransactionsForSeed(payload)
+      disableVersionWritesForSeed(payload)
+    }
+    const heroPresetIDs = await ensureHeroPresentationPresetSeeds(payload, req)
+    Object.assign(heroPresentationPresetIDsByKey, heroPresetIDs)
+
+    const requestedSites = requestedSeed
+      ? requestedSeed
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean)
+      : null
+
+    payload.logger.info('Seeding theme presets...')
+    await seedThemePresets(payload, req)
+
+    const wingsGroupSeed = siteSeeds.find((site) => site.code === 'wings-group')!
+    const wingsGoSeed = siteSeeds.find((site) => site.code === 'wings-go')!
+    const wingsSideSeed = siteSeeds.find((site) => site.code === 'wing-side')!
+    const wingsPassSeed = siteSeeds.find((site) => site.code === 'wings-pass')!
+    const wingsPlusSeed = siteSeeds.find((site) => site.code === 'wings-plus')!
+    const wingsCareSeed = siteSeeds.find((site) => site.code === 'wings-care')!
+
+    const seeders: Record<string, () => Promise<void>> = {
+      'wings-group': async () => {
+        payload.logger.info('Seeding WingsGroup corporate hub...')
+        await seedWingsGroup(payload, req, wingsGroupSeed)
+      },
+      'wings-go': async () => {
+        payload.logger.info('Seeding WingsGo production content...')
+        await seedWingsGo(payload, req, wingsGoSeed)
+      },
+      'wing-side': async () => {
+        payload.logger.info('Seeding WingsSide production content...')
+        await seedWingsSide(payload, req, wingsSideSeed)
+      },
+      'wings-pass': async () => {
+        payload.logger.info('Seeding WingsPass production content...')
+        await seedWingsPass(payload, req, wingsPassSeed)
+      },
+      'wings-plus': async () => {
+        payload.logger.info('Seeding WingsPlus production content...')
+        await seedWingsPlus(payload, req, wingsPlusSeed)
+      },
+      'wings-care': async () => {
+        payload.logger.info('Seeding WingsCare production content...')
+        await seedWingsCare(payload, req, wingsCareSeed)
+      },
+    }
+
+    if (requestedSites) {
+      const normalizedSites = [
+        ...new Set(requestedSites.map((site) => site.replace(/^wingsplus$/, 'wings-plus'))),
+      ]
+
+      for (const site of normalizedSites) {
+        const seedFn = seeders[site]
+
+        if (!seedFn) {
+          throw new Error(`Unknown SEED_ONLY_SITE value: ${requestedSeed}`)
+        }
+
+        await seedFn()
+      }
+
+      payload.logger.info(`Selective seed completed for ${normalizedSites.join(', ')}.`)
+      return
+    }
+
+    await seedWingsGroup(payload, req, wingsGroupSeed)
+    await seedWingsGo(payload, req, wingsGoSeed)
+    await seedWingsSide(payload, req, wingsSideSeed)
+    await seedWingsPass(payload, req, wingsPassSeed)
+    await seedWingsPlus(payload, req, wingsPlusSeed)
+    await seedWingsCare(payload, req, wingsCareSeed)
+
+    await payload.updateGlobal({
+      slug: 'header',
+      req,
+      context: seedContext,
+      data: {
+        navItems: [
+          {
+            link: {
+              type: 'custom',
+              label: 'Sites',
+              url: '/',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Admin',
+              url: '/admin',
+            },
+          },
+        ],
+      },
+    })
+
+    await payload.updateGlobal({
+      slug: 'footer',
+      req,
+      context: seedContext,
+      data: {
+        navItems: [
+          {
+            link: {
+              type: 'custom',
+              label: 'WingsGroup',
+              url: '/',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Payload Admin',
+              url: '/admin',
+            },
+          },
+        ],
+      },
+    })
+
+    payload.logger.info('Production-oriented subsites seeded successfully.')
+  } finally {
+    await payload.destroy()
   }
-
-  await seedWingsGroup(payload, req, wingsGroupSeed)
-  await seedWingsGo(payload, req, wingsGoSeed)
-  await seedWingsSide(payload, req, wingsSideSeed)
-  await seedWingsPass(payload, req, wingsPassSeed)
-  await seedWingsPlus(payload, req, wingsPlusSeed)
-  await seedWingsCare(payload, req, wingsCareSeed)
-
-  await payload.updateGlobal({
-    slug: 'header',
-    req,
-    context: seedContext,
-    data: {
-      navItems: [
-        {
-          link: {
-            type: 'custom',
-            label: 'Sites',
-            url: '/',
-          },
-        },
-        {
-          link: {
-            type: 'custom',
-            label: 'Admin',
-            url: '/admin',
-          },
-        },
-      ],
-    },
-  })
-
-  await payload.updateGlobal({
-    slug: 'footer',
-    req,
-    context: seedContext,
-    data: {
-      navItems: [
-        {
-          link: {
-            type: 'custom',
-            label: 'WingsGroup',
-            url: '/',
-          },
-        },
-        {
-          link: {
-            type: 'custom',
-            label: 'Payload Admin',
-            url: '/admin',
-          },
-        },
-      ],
-    },
-  })
-
-  payload.logger.info('Production-oriented subsites seeded successfully.')
 }
 
 try {
   await main()
-  process.exit(0)
+  if (process.env.WINGSSIDE_REHEARSAL_EXIT_AFTER_SEED === 'true') {
+    process.exit(0)
+  }
 } catch (error) {
   console.error(error)
-  process.exit(1)
+  if (process.env.WINGSSIDE_REHEARSAL_EXIT_AFTER_SEED === 'true') {
+    process.exit(1)
+  } else {
+    process.exitCode = 1
+  }
 }

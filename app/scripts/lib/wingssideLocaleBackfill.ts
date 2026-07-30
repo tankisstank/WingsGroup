@@ -1,5 +1,6 @@
 import type { Payload, PayloadRequest } from 'payload'
 import type { PublicLocaleCode } from '../../src/i18n/publicCopy'
+import { wingsSideLocalizationBackfillContext } from '../../src/utilities/wingsSideLocalizationBackfillContext'
 import { backfillWingsSideSiteSettings } from './wingssideSiteSettingsBackfill'
 import { applyWingsSideEditorialTerminology } from './wingssideEditorialTerminology'
 
@@ -45,12 +46,26 @@ type PageDoc = {
   title?: null | string
 }
 
-const seedContext = {
-  disableRevalidate: true,
-  seed: true,
+const seedData = <T>(data: T) => data as never
+
+const isSQLiteBusyError = (error: unknown): boolean => {
+  const text = error instanceof Error ? `${error.message} ${String(error.cause || '')}` : String(error)
+
+  return /SQLITE_BUSY|database is locked/i.test(text)
 }
 
-const seedData = <T>(data: T) => data as never
+const withSQLiteBusyRetry = async <T>(operation: () => Promise<T>): Promise<T> => {
+  let attempt = 0
+  while (true) {
+    try {
+      return await operation()
+    } catch (error) {
+      attempt += 1
+      if (attempt >= 5 || !isSQLiteBusyError(error)) throw error
+      await new Promise((resolve) => setTimeout(resolve, attempt * 250))
+    }
+  }
+}
 
 const richTextFromSections = (sections: readonly RichTextSection[]): SeedRichText => ({
   root: {
@@ -548,14 +563,16 @@ const updatePageLocale = async (
     return { action: 'update' as const }
   }
 
-  await payload.update({
-    collection: 'pages',
-    id: pageID,
-    locale,
-    req,
-    context: seedContext,
-    data: seedData(stripGeneratedIDs(localizedData)),
-  })
+  await withSQLiteBusyRetry(() =>
+    payload.update({
+      collection: 'pages',
+      id: pageID,
+      locale,
+      req,
+      context: wingsSideLocalizationBackfillContext,
+      data: seedData(stripGeneratedIDs(localizedData)),
+    }),
+  )
 
   return { action: 'update' as const }
 }
@@ -5930,7 +5947,7 @@ export async function backfillWingsSideLocales(
   const pages = await payload.find({
     collection: 'pages',
     depth: 2,
-    limit: 100,
+    limit: 1000,
     locale: 'en',
     pagination: false,
     overrideAccess: true,

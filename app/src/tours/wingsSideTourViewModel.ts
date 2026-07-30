@@ -2,15 +2,20 @@ import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import type { Media } from '@/payload-types'
 
 import type { TourResolvedData } from './types'
+import { buildTourEnquiryHref, type TourEnquiryContext } from './enquiryContext'
+import {
+  normalizeGovernedTourPrice,
+  normalizeSupportedTourCurrency,
+  type SupportedTourCurrencyCode,
+} from './currency'
 
 type LooseRecord = Record<string, unknown>
 type WingSideDepartureDisplay = LooseRecord & {
-  currency: string
+  currency: SupportedTourCurrencyCode
   departureDate: string
   id?: number | string
   price: number
 }
-
 const asRecord = (value: unknown): LooseRecord =>
   value && typeof value === 'object' ? (value as LooseRecord) : {}
 const asText = (value: unknown): string => (typeof value === 'string' ? value : '')
@@ -22,6 +27,7 @@ const technicalSentences = [
   'BestPrice source does not provide fixed future departure dates in this raw batch.',
   'Sales must confirm final price and departure availability before publishing.',
 ]
+const sourceBrandPattern = /\bbest\s*price(?:\s+travel)?\b|\bbestpricetravel\b/iu
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
@@ -33,6 +39,10 @@ const technicalSentencePatterns = technicalSentences.map(
 export const sanitizeWingSidePublicText = (value?: null | string): string => {
   let sanitized = String(value || '').normalize('NFKC')
   for (const pattern of technicalSentencePatterns) sanitized = sanitized.replace(pattern, '$1')
+  sanitized = sanitized
+    .split(/(?<=[.!?])\s+|\n+/u)
+    .filter((sentence) => !sourceBrandPattern.test(sentence))
+    .join(' ')
   return sanitized
     .replace(/([\p{Ll}\d][.!?])(?=\p{Lu})/gu, '$1 ')
     .replace(/\s+/g, ' ')
@@ -57,12 +67,17 @@ const copyByLocale = {
     includes: 'Included',
     itinerary: 'Day-by-day itinerary',
     journey: 'Tailor-made journey',
+    journeyStop: 'Journey stop',
+    leg: 'Leg',
     meals: 'Meals',
+    noMeals: 'No meals',
     overview: 'Journey overview',
     price: 'From',
     priceOnRequestShort: 'On request · reply within 24h',
     request: 'Request consultation',
     route: 'Route',
+    sleepStandard: 'Sleep standard',
+    transport: 'Transport',
   },
   es: {
     accommodation: 'Alojamiento',
@@ -81,12 +96,17 @@ const copyByLocale = {
     includes: 'Incluido',
     itinerary: 'Itinerario día a día',
     journey: 'Viaje a medida',
+    journeyStop: 'Parada del viaje',
+    leg: 'Etapa',
     meals: 'Comidas',
+    noMeals: 'Sin comidas',
     overview: 'Resumen del viaje',
     price: 'Desde',
     priceOnRequestShort: 'Bajo consulta · respuesta en 24h',
     request: 'Solicitar asesoría',
     route: 'Ruta',
+    sleepStandard: 'Estándar de alojamiento',
+    transport: 'Transporte',
   },
   it: {
     accommodation: 'Sistemazione',
@@ -105,12 +125,17 @@ const copyByLocale = {
     includes: 'Incluso',
     itinerary: 'Itinerario giorno per giorno',
     journey: 'Viaggio su misura',
+    journeyStop: 'Tappa del viaggio',
+    leg: 'Tappa',
     meals: 'Pasti',
+    noMeals: 'Nessun pasto',
     overview: 'Panoramica del viaggio',
     price: 'Da',
     priceOnRequestShort: 'Su richiesta · risposta entro 24h',
     request: 'Richiedi una consulenza',
     route: 'Itinerario',
+    sleepStandard: 'Standard del pernottamento',
+    transport: 'Trasporto',
   },
   pt: {
     accommodation: 'Hospedagem',
@@ -129,12 +154,17 @@ const copyByLocale = {
     includes: 'Incluído',
     itinerary: 'Roteiro dia a dia',
     journey: 'Viagem sob medida',
+    journeyStop: 'Parada do roteiro',
+    leg: 'Etapa',
     meals: 'Refeições',
+    noMeals: 'Sem refeições',
     overview: 'Visão geral da viagem',
     price: 'A partir de',
     priceOnRequestShort: 'Sob consulta · resposta em 24h',
     request: 'Solicitar consultoria',
     route: 'Rota',
+    sleepStandard: 'Padrão de hospedagem',
+    transport: 'Transporte',
   },
   vi: {
     accommodation: 'Lưu trú',
@@ -153,12 +183,17 @@ const copyByLocale = {
     includes: 'Bao gồm',
     itinerary: 'Lịch trình từng ngày',
     journey: 'Hành trình thiết kế riêng',
+    journeyStop: 'Điểm trong chương trình',
+    leg: 'Bước',
     meals: 'Bữa ăn',
+    noMeals: 'Không bao gồm bữa ăn',
     overview: 'Tổng quan hành trình',
     price: 'Từ',
     priceOnRequestShort: 'Theo yêu cầu · phản hồi trong 24h',
     request: 'Yêu cầu tư vấn',
     route: 'Tuyến điểm',
+    sleepStandard: 'Tiêu chuẩn nghỉ',
+    transport: 'Di chuyển',
   },
 } as const
 
@@ -228,6 +263,13 @@ const routePlaceAliases = [
   ['ha-noi', /\b(?:ha noi|hanoi)\b/giu, 'Hanoi'],
   ['fansipan', /\bfansipan\b/giu, 'Fansipan'],
   ['sapa', /\b(?:sa pa|sapa)\b/giu, 'Sapa'],
+  ['cat-cat', /\bcat cat\b/giu, 'Cat Cat'],
+  ['y-linh-ho', /\b(?:y|i) linh ho\b/giu, 'Y Linh Ho'],
+  ['lao-chai', /\blao chai\b/giu, 'Lao Chai'],
+  ['ta-van', /\bta van\b/giu, 'Ta Van'],
+  ['bac-ha', /\bbac ha\b/giu, 'Bac Ha'],
+  ['ban-pho', /\bban pho\b/giu, 'Ban Pho'],
+  ['lao-cai', /\blao cai\b/giu, 'Lao Cai'],
   ['hue', /\bhue\b/giu, 'Hue'],
   ['mekong', /\bmekong\b/giu, 'Mekong'],
   ['can-tho', /\bcan tho\b/giu, 'Can Tho'],
@@ -238,7 +280,12 @@ const routePlaceAliases = [
   ['siem-reap', /\bsiem reap\b/giu, 'Siem Reap'],
 ] as const
 
-const extractKnownRouteStops = (value: unknown): string[] => {
+export type WingSideRouteEntity = {
+  key: string
+  label: string
+}
+
+const extractKnownRouteEntities = (value: unknown): WingSideRouteEntity[] => {
   const comparable = sanitizeWingSidePublicText(asText(value))
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
@@ -251,26 +298,30 @@ const extractKnownRouteStops = (value: unknown): string[] => {
     return match ? [{ index: match.index, key, label }] : []
   })
 
-  return matches.sort((left, right) => left.index - right.index).map(({ label }) => label)
+  return matches
+    .sort((left, right) => left.index - right.index)
+    .map(({ key, label }) => ({ key, label }))
 }
 
-const mergeRouteSequences = (sequences: string[][]): string[] => {
+const mergeRouteSequences = (sequences: WingSideRouteEntity[][]): WingSideRouteEntity[] => {
   const nodes = new Map<string, { label: string; order: number }>()
   const edges = new Map<string, Set<string>>()
   const indegree = new Map<string, number>()
   let order = 0
 
   for (const sequence of sequences) {
-    const unique = sequence.filter((label, index) => sequence.indexOf(label) === index)
-    for (const label of unique) {
-      const key = label.toLocaleLowerCase('en')
+    const unique = sequence.filter(
+      (entity, index) => sequence.findIndex((candidate) => candidate.key === entity.key) === index,
+    )
+    for (const entity of unique) {
+      const { key, label } = entity
       if (!nodes.has(key)) nodes.set(key, { label, order: order++ })
       if (!edges.has(key)) edges.set(key, new Set())
       if (!indegree.has(key)) indegree.set(key, 0)
     }
     for (let index = 1; index < unique.length; index += 1) {
-      const from = unique[index - 1].toLocaleLowerCase('en')
-      const to = unique[index].toLocaleLowerCase('en')
+      const from = unique[index - 1].key
+      const to = unique[index].key
       if (from === to || edges.get(from)?.has(to)) continue
       edges.get(from)?.add(to)
       indegree.set(to, (indegree.get(to) || 0) + 1)
@@ -284,7 +335,7 @@ const mergeRouteSequences = (sequences: string[][]): string[] => {
   while (queue.length > 0) {
     const key = queue.shift()
     if (!key) break
-    result.push(nodes.get(key)?.label || key)
+    result.push(key)
     for (const next of edges.get(key) || []) {
       indegree.set(next, (indegree.get(next) || 0) - 1)
       if (indegree.get(next) === 0) {
@@ -294,29 +345,52 @@ const mergeRouteSequences = (sequences: string[][]): string[] => {
     }
   }
 
-  return result.length === nodes.size
-    ? result
-    : [...nodes.values()].sort((left, right) => left.order - right.order).map(({ label }) => label)
+  const orderedKeys =
+    result.length === nodes.size
+      ? result
+      : [...nodes.entries()]
+          .sort(([, left], [, right]) => left.order - right.order)
+          .map(([key]) => key)
+  return orderedKeys.map((key) => ({ key, label: nodes.get(key)?.label || key }))
 }
 
-export const deriveWingSideRoute = (tour: LooseRecord): string[] => {
+const fallbackRouteEntity = (label: string): WingSideRouteEntity => ({
+  key: label
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[đĐ]/gu, 'd')
+    .toLocaleLowerCase('en')
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-|-$/gu, ''),
+  label,
+})
+
+export const deriveWingSideRouteEntities = (tour: LooseRecord): WingSideRouteEntity[] => {
   const routeViz = asRecord(tour.routeViz)
   const configuredStops = [...(Array.isArray(routeViz.stops) ? routeViz.stops : [])]
     .sort(
       (left: LooseRecord, right: LooseRecord) => Number(left.order || 0) - Number(right.order || 0),
     )
-    .flatMap((stop: LooseRecord) => routeParts(asText(stop.label)))
+    .flatMap((stop: LooseRecord) =>
+      routeParts(asText(stop.label)).map((label) => {
+        const known = extractKnownRouteEntities(label)[0]
+        return known || fallbackRouteEntity(label)
+      }),
+    )
   if (
     configuredStops.length > 0 &&
-    !configuredStops.every((stop) => /^(?:vietnam|tours?)$/iu.test(stop))
+    !configuredStops.every((stop) => /^(?:vietnam|tours?)$/iu.test(stop.label))
   ) {
-    return [...new Set(configuredStops)].slice(0, 5)
+    return configuredStops.filter(
+      (stop, index) =>
+        configuredStops.findIndex((candidate) => candidate.key === stop.key) === index,
+    )
   }
 
   const days = Array.isArray(tour.itineraryDays) ? tour.itineraryDays : []
-  const slugAndTitleStops = extractKnownRouteStops(`${asText(tour.slug)} ${asText(tour.title)}`)
+  const slugAndTitleStops = extractKnownRouteEntities(`${asText(tour.slug)} ${asText(tour.title)}`)
   const itineraryStopSequence = days.flatMap((day: LooseRecord) =>
-    extractKnownRouteStops(`${asText(day.route)} ${asText(day.title)}`),
+    extractKnownRouteEntities(`${asText(day.route)} ${asText(day.title)}`),
   )
   const knownStops = mergeRouteSequences([slugAndTitleStops, itineraryStopSequence])
 
@@ -326,24 +400,64 @@ export const deriveWingSideRoute = (tour: LooseRecord): string[] => {
       (stop) =>
         stop.split(/\s+/u).length <= 2 &&
         !knownStops.some((known) =>
-          stop.toLocaleLowerCase('en').includes(known.toLocaleLowerCase('en')),
+          stop.toLocaleLowerCase('en').includes(known.label.toLocaleLowerCase('en')),
         ),
     )
-    return [...knownStops, ...(knownStops.length <= 2 ? conciseEditorialStops : [])].slice(0, 5)
+    return [
+      ...knownStops,
+      ...(knownStops.length <= 2 ? conciseEditorialStops.map(fallbackRouteEntity) : []),
+    ]
   }
   const titleFallback =
     derivedStops.length === 0
       ? days.flatMap((day: LooseRecord) => routeParts(asText(day.title)))
       : []
-  const source = configuredStops.length > 0 ? configuredStops : [...derivedStops, ...titleFallback]
+  const source =
+    configuredStops.length > 0
+      ? configuredStops
+      : [...derivedStops, ...titleFallback].map(fallbackRouteEntity)
   const seen = new Set<string>()
 
-  return source.filter((stop: string) => {
-    const key = stop.toLocaleLowerCase('en')
-    if (seen.has(key)) return false
-    seen.add(key)
+  return source.filter((stop) => {
+    if (seen.has(stop.key)) return false
+    seen.add(stop.key)
     return true
   })
+}
+
+export const deriveWingSideRoute = (tour: LooseRecord): string[] =>
+  deriveWingSideRouteEntities(tour).map(({ label }) => label)
+
+const missingMealPattern = /^(?:n\/?a|none|no meals?|not included|không có)$/iu
+const serializedMealSegmentPattern =
+  /^(?:n\/?a|none|no meals?|(?:breakfast|lunch|dinner)(?:\s*,\s*(?:breakfast|lunch|dinner))*)$/iu
+
+export const normalizeWingSideDayMeal = ({
+  dayIndex,
+  locale,
+  totalDays,
+  value,
+}: {
+  dayIndex: number
+  locale?: null | string
+  totalDays: number
+  value: unknown
+}): string => {
+  const raw = sanitizeWingSidePublicText(asText(value))
+  const segments = raw.split(/\s*;\s*/u)
+  if (
+    segments.length > 1 &&
+    segments.length !== totalDays &&
+    segments.every((segment) => serializedMealSegmentPattern.test(segment.trim()))
+  ) {
+    return ''
+  }
+  const selected = segments.length === totalDays ? segments[dayIndex] || '' : raw
+  if (!selected) return ''
+  if (missingMealPattern.test(selected.trim())) {
+    return getWingSideTourCopy(locale).noMeals
+  }
+  return selected.trim()
 }
 
 const peakChargePattern = /\b(?:peak|high) season\b|\bsurcharge\b|\bcompulsory dinner\b/iu
@@ -377,7 +491,10 @@ export const classifyWingSideServices = (tour: LooseRecord) => {
 
 const sanitizeListItems = (value: unknown) => publicList(value).map((label) => ({ label }))
 
-export const normalizeWingSideConsultativeTour = <T extends LooseRecord>(tour: T): T => {
+export const normalizeWingSideConsultativeTour = <T extends LooseRecord>(
+  tour: T,
+  locale?: null | string,
+): T => {
   const routeStops = deriveWingSideRoute(tour)
   const services = classifyWingSideServices(tour)
   const factSummary = asRecord(tour.factSummary)
@@ -408,10 +525,15 @@ export const normalizeWingSideConsultativeTour = <T extends LooseRecord>(tour: T
     },
     includes: services.includes.map((label) => ({ label })),
     itineraryDays: (Array.isArray(tour.itineraryDays) ? tour.itineraryDays : []).map(
-      (day: LooseRecord) => ({
+      (day: LooseRecord, index: number, days: LooseRecord[]) => ({
         ...day,
         accommodation: sanitizeField(day.accommodation),
-        meals: sanitizeField(day.meals),
+        meals: normalizeWingSideDayMeal({
+          dayIndex: index,
+          locale,
+          totalDays: days.length,
+          value: day.meals,
+        }),
         notes: sanitizeField(day.notes),
         route: sanitizeField(day.route),
         summary: sanitizeField(day.summary),
@@ -426,7 +548,12 @@ export const normalizeWingSideConsultativeTour = <T extends LooseRecord>(tour: T
     routeViz: {
       ...routeViz,
       routeCaption: sanitizeField(routeViz.routeCaption),
-      stops: routeStops.map((label, index) => ({ label, order: index + 1, type: 'sightseeing' })),
+      stops: deriveWingSideRouteEntities(tour).map(({ key, label }, index) => ({
+        key,
+        label,
+        order: index + 1,
+        type: 'sightseeing',
+      })),
     },
     servicesSummary: {
       ...servicesSummary,
@@ -458,15 +585,18 @@ export const buildWingSideTourCTA = (
   id: number | string,
   intent: WingSideTourCTAIntent = 'inquiry',
   source = intent === 'contact' ? 'tour-detail-contact' : 'tour-detail',
-) => {
-  const params = new URLSearchParams({
+  discoveryContext?: Omit<TourEnquiryContext, 'source' | 'tourId' | 'tourSlug'>,
+) =>
+  buildTourEnquiryHref({
+    basePath: '/contact-us',
+    context: {
+      ...discoveryContext,
+      source,
+      tourId: id,
+      tourSlug: slug,
+    },
     intent,
-    source,
-    tour: slug,
-    tourId: String(id),
   })
-  return `/contact-us?${params.toString()}`
-}
 
 const publicList = (value: unknown) =>
   (Array.isArray(value) ? value : [])
@@ -492,10 +622,12 @@ export type WingSideTourViewModel = ReturnType<typeof buildWingSideTourViewModel
 
 export const buildWingSideTourViewModel = ({
   data,
+  discoveryContext,
   locale,
   now = new Date(),
 }: {
   data: TourResolvedData
+  discoveryContext?: Omit<TourEnquiryContext, 'source' | 'tourId' | 'tourSlug'>
   locale: SupportedLocaleCode | string
   now?: Date
 }) => {
@@ -505,23 +637,25 @@ export const buildWingSideTourViewModel = ({
   const futureDepartures = (data.departures || [])
     .filter((departure) => isFutureWingSideDeparture(departure.departureDate, now))
     .sort((left, right) => String(left.departureDate).localeCompare(String(right.departureDate)))
-  const productPrice =
-    typeof tour.priceFrom === 'number' && tour.priceFrom > 0 ? tour.priceFrom : null
-  const productCurrency = asText(tour.currency) || 'USD'
+  const productPrice = normalizeGovernedTourPrice({
+    currency: tour.currency,
+    value: tour.priceFrom,
+  })
   const displayDepartures = futureDepartures.flatMap<WingSideDepartureDisplay>((departure) => {
-    const departurePrice =
-      typeof departure.priceFrom === 'number' && departure.priceFrom > 0
-        ? departure.priceFrom
-        : null
-    const price = departurePrice ?? productPrice
-    if (price === null) return []
+    const departureCurrency = normalizeSupportedTourCurrency(departure.currency)
+    const departurePrice = normalizeGovernedTourPrice({
+      currency: departure.currency,
+      value: departure.priceFrom,
+    })
+    const governedPrice = departurePrice ?? (departureCurrency ? productPrice : null)
+    if (!governedPrice) return []
     return [
       {
         ...departure,
-        currency: departurePrice ? asText(departure.currency) || productCurrency : productCurrency,
+        currency: governedPrice.currency,
         departureDate: asText(departure.departureDate),
         id: relationID(departure.id) ?? undefined,
-        price,
+        price: governedPrice.value,
       },
     ]
   })
@@ -538,7 +672,12 @@ export const buildWingSideTourViewModel = ({
     .map((day: LooseRecord, index: number) => ({
       accommodation: sanitizeWingSidePublicText(asText(day.accommodation)),
       dayNumber: Number(day.dayNumber || index + 1),
-      meals: sanitizeWingSidePublicText(asText(day.meals)),
+      meals: normalizeWingSideDayMeal({
+        dayIndex: index,
+        locale,
+        totalDays: Array.isArray(tour.itineraryDays) ? tour.itineraryDays.length : 0,
+        value: day.meals,
+      }),
       media: getDayMedia(day),
       route: sanitizeWingSidePublicText(asText(day.route)),
       summary: sanitizeWingSidePublicText(asText(day.summary)),
@@ -576,9 +715,9 @@ export const buildWingSideTourViewModel = ({
     throw new Error('WingSide tour detail requires a TourProduct ID and slug')
 
   return {
-    contactHref: buildWingSideTourCTA(slug, id, 'contact'),
+    contactHref: buildWingSideTourCTA(slug, id, 'contact', undefined, discoveryContext),
     copy,
-    ctaHref: buildWingSideTourCTA(slug, id, 'inquiry'),
+    ctaHref: buildWingSideTourCTA(slug, id, 'inquiry', undefined, discoveryContext),
     duration,
     excludes: publicList(tour.excludes),
     gallery,

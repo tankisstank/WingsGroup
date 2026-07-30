@@ -4,12 +4,39 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { queryPlanFormField, setNativeInputValue } from './planFormNative'
+import type { LeadSubmissionContext } from '@/lead-capture/types'
 
 type ChipGroup = {
   label: string
   multi?: boolean
   name: string
   options: string[]
+}
+
+const preferredMonthLabelByLocale: Record<string, string> = {
+  en: 'Preferred travel month/date window',
+  es: 'Mes o intervalo de fechas preferido',
+  it: 'Mese o intervallo di date preferito',
+  pt: 'Mês ou intervalo de datas preferido',
+  vi: 'Khoảng tháng/ngày dự kiến',
+}
+
+const countryResidenceLabelByLocale: Record<string, string> = {
+  en: 'Country of residence',
+  es: 'País de residencia',
+  it: 'Paese di residenza',
+  pt: 'País de residência',
+  vi: 'Quốc gia cư trú',
+}
+
+const normalizeContextCode = (value?: string) => {
+  const code = String(value || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  return code && code.length <= 64 ? code : undefined
 }
 
 /**
@@ -53,6 +80,7 @@ export const PlanPrefillBridge = ({
   const [budget, setBudget] = useState('')
   const [consent, setConsent] = useState(false)
   const [consentError, setConsentError] = useState(false)
+  const consentInputRef = React.useRef<HTMLInputElement>(null)
 
   const readParam = useMemo(
     () => (key: string) => {
@@ -68,9 +96,22 @@ export const PlanPrefillBridge = ({
   }
 
   const hideRawFields = (root: Element) => {
-    for (const name of ['country', 'travel-month', 'group-size']) {
-      const wrap = root
-        .querySelector(`[name="${name}"]`)
+    const locale = document.documentElement.lang
+    const countryControl = root.querySelector<HTMLElement>('[name="country"]')
+    countryControl?.setAttribute(
+      'aria-label',
+      countryResidenceLabelByLocale[locale] || countryResidenceLabelByLocale.en,
+    )
+
+    const labelsByName: Record<string, string> = {
+      'group-size': groupLabel,
+      'travel-month': preferredMonthLabelByLocale[locale] || monthLabel,
+    }
+
+    for (const [name, label] of Object.entries(labelsByName)) {
+      const control = root.querySelector<HTMLElement>(`[name="${name}"]`)
+      control?.setAttribute('aria-label', label)
+      const wrap = control
         ?.closest('.mb-6, .mb-4') as HTMLElement | null
       if (wrap) wrap.setAttribute('data-ws-plan-hide', 'true')
     }
@@ -148,7 +189,6 @@ export const PlanPrefillBridge = ({
     if (!midHost?.isConnected) return
 
     const destination = readParam('destination')
-    const duration = readParam('duration')
     const monthParam = readParam('month')
     const styleParam = readParam('style')
 
@@ -172,7 +212,6 @@ export const PlanPrefillBridge = ({
           item.toLowerCase().includes(destination.replace(/-/g, ' ')),
         ) || destination
       setDest((current) => (current.includes(label) ? current : [...current, label]))
-      setField('country', label)
     }
 
     if (styleParam) {
@@ -183,21 +222,6 @@ export const PlanPrefillBridge = ({
       setStyle(label)
     }
 
-    if (destination || duration || styleParam) {
-      const message = queryPlanFormField('message') as HTMLTextAreaElement | null
-      if (message && !message.value.trim()) {
-        setNativeInputValue(
-          message,
-          [
-            destination ? `Destination: ${destination}` : null,
-            duration ? `Duration: ${duration}` : null,
-            styleParam ? `Style: ${styleParam}` : null,
-          ]
-            .filter(Boolean)
-            .join('\n'),
-        )
-      }
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [midHost, readParam])
 
@@ -214,49 +238,41 @@ export const PlanPrefillBridge = ({
   }, [group])
 
   useEffect(() => {
-    if (dest.length) setField('country', dest.join(', '))
+    const form = document.querySelector('.ws-hifi-plan-form form') as HTMLFormElement | null
+    if (!form) return
 
-    const message = queryPlanFormField('message') as HTMLTextAreaElement | null
-    if (!message) return
-
-    const chipBlock = [
-      dest.length ? `Destinations: ${dest.join(', ')}` : null,
-      style ? `Style: ${style}` : null,
-      budget ? `Budget: ${budget}` : null,
-      group
-        ? `Group size: ${groupOptions.find((option) => option.value === group)?.label || group}`
-        : null,
-      consent ? 'Consent: privacy policy accepted' : null,
-    ]
-      .filter(Boolean)
-      .join('\n')
-
-    const base = message.value
-      .replace(/^Destinations:.*$/gim, '')
-      .replace(/^Style:.*$/gim, '')
-      .replace(/^Budget:.*$/gim, '')
-      .replace(/^Group size:.*$/gim, '')
-      .replace(/^Consent:.*$/gim, '')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim()
-
-    setNativeInputValue(message, [chipBlock, base].filter(Boolean).join('\n\n'))
-  }, [budget, consent, dest, group, groupOptions, style])
+    const destination =
+      normalizeContextCode(readParam('destination')) ||
+      (dest.length === 1 ? normalizeContextCode(dest[0]) : undefined)
+    const styleCode = normalizeContextCode(readParam('style')) || normalizeContextCode(style)
+    const context: LeadSubmissionContext = {
+      discovery: {
+        destination,
+        duration: normalizeContextCode(readParam('duration')),
+        style: styleCode,
+      },
+      source: normalizeContextCode(readParam('source')) || 'plan',
+      tourId: readParam('tourId'),
+      tourSlug: normalizeContextCode(readParam('tour')),
+    }
+    form.dataset.wsEnquiryContext = JSON.stringify(context)
+  }, [dest, midHost, readParam, style])
 
   useEffect(() => {
     const form = document.querySelector('.ws-hifi-plan-form form') as HTMLFormElement | null
     if (!form) return
 
-    const onSubmit = (event: Event) => {
+    const onValidate = (event: Event) => {
       if (!consent) {
         event.preventDefault()
         event.stopPropagation()
         setConsentError(true)
+        window.requestAnimationFrame(() => consentInputRef.current?.focus())
       }
     }
 
-    form.addEventListener('submit', onSubmit, true)
-    return () => form.removeEventListener('submit', onSubmit, true)
+    form.addEventListener('ws-plan-validate', onValidate)
+    return () => form.removeEventListener('ws-plan-validate', onValidate)
   }, [consent, consentHost])
 
   const groups: ChipGroup[] = [
@@ -269,15 +285,21 @@ export const PlanPrefillBridge = ({
     <>
       <div className="field ws-plan-visual-field" data-order="month">
         <label className="field-label" htmlFor="ws-plan-travel-month">
-          {monthLabel}
+          {preferredMonthLabelByLocale[document.documentElement.lang] || monthLabel}
         </label>
         <select
+          aria-required={
+            queryPlanFormField('travel-month')?.hasAttribute('required') || undefined
+          }
           className="input"
           id="ws-plan-travel-month"
           onChange={(event) => setMonth(event.target.value)}
+          required={queryPlanFormField('travel-month')?.hasAttribute('required')}
           value={month}
         >
-          <option value="">{monthLabel}</option>
+          <option value="">
+            {preferredMonthLabelByLocale[document.documentElement.lang] || monthLabel}
+          </option>
           {monthOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -359,18 +381,20 @@ export const PlanPrefillBridge = ({
     <>
       <label className="ws-plan-consent" data-invalid={consentError ? 'true' : 'false'}>
         <input
+          aria-describedby={consentError ? 'ws-plan-consent-error' : undefined}
+          aria-invalid={consentError || undefined}
           checked={consent}
           onChange={(event) => {
             setConsent(event.target.checked)
             if (event.target.checked) setConsentError(false)
           }}
-          required
+          ref={consentInputRef}
           type="checkbox"
         />
         <span>{consentLabel}</span>
       </label>
       {consentError ? (
-        <p className="ws-plan-consent-error" role="alert">
+        <p className="ws-plan-consent-error" id="ws-plan-consent-error" role="alert">
           {consentLabel}
         </p>
       ) : null}

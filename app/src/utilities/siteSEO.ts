@@ -2,7 +2,7 @@ import type { Site, SiteSetting } from '@/payload-types'
 
 import { domainCandidates, normalizeHost } from './siteDomains'
 import { isPublicLocale, type SupportedLocaleCode } from './sitePaths'
-import { normalizeCanonicalPath, prefixCanonicalPathWithLocale } from './siteURLs'
+import { prefixCanonicalPathWithLocale } from './siteURLs'
 
 const nonPublicHostPatterns = [
   /^localhost$/,
@@ -111,11 +111,7 @@ export const getSiteSitemapURL = ({
   origin: string
   path?: null | string
 }): string => {
-  const normalizedPath = normalizeCanonicalPath(path)
-  const localizedPath =
-    locale === 'vi'
-      ? normalizedPath
-      : prefixCanonicalPathWithLocale(normalizedPath, locale)
+  const localizedPath = prefixCanonicalPathWithLocale(path, locale)
 
   return `${origin}${localizedPath === '/' ? '' : localizedPath}`
 }

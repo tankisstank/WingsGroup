@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "packageID": "WP2",
+  "runID": "wingsside-us055-s3-20260728-r2",
+  "decision": "D4-C",
+  "status": "blocked",
+  "sourceInventory": {
+    "tourCount": 22,
+    "sourceReferenceCount": 714,
+    "uniqueMediaIDCount": 714,
+    "uniqueContentHashCount": 586,
+    "missingSourceCount": 0,
+    "sourceSnapshotSha256": "707a1acc8655663937c043143c24b062ee478d28d888ee029a2858da331fa446",
+    "inventoryFileSha256": "7b1186411ae25f8a384c7157e6a989df4aeedca12b4e910853063524482d7e92"
+  },
+  "confirmedWatermarkPositiveExamples": [
+    {
+      "mediaID": 5626,
+      "filename": "bpt-vietnam-tours-a-glimpse-of-the-central-vietnam-5-days-01-91f5e1fe.jpg",
+      "sourceSha256": "91f5e1fef354a8dfe257df5cdf223b6ea8702b6ad7204606d970530b8c83ef37",
+      "finding": "Visible BestPrice Travel logo and text at bottom right."
+    },
+    {
+      "mediaID": 5698,
+      "filename": "bpt-vietnam-tours-best-of-south-vietnam-5-days-01-64b08ff6.jpg",
+      "finding": "Visible translucent BestPrice Travel logo and text at bottom right."
+    },
+    {
+      "mediaID": 6202,
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-01-b50ad507.jpg",
+      "finding": "Visible BestPrice Travel logo and text at bottom right."
+    }
+  ],
+  "ocrAssessment": {
+    "engine": "rapidocr_onnxruntime",
+    "engineVersion": "1.4.4",
+    "status": "rejected-as-release-proof",
+    "reason": "The engine detected the mark on media 5626 and 6202 but returned no matching text for visibly watermarked media 5698, including contrast-enhanced variants. It therefore has a demonstrated false negative and cannot prove zero watermark text."
+  },
+  "editAssessment": {
+    "tool": "built-in image generation edit",
+    "attemptedMediaID": 5626,
+    "status": "rejected",
+    "sourceDimensions": {
+      "width": 800,
+      "height": 450
+    },
+    "candidateDimensions": {
+      "width": 1672,
+      "height": 941
+    },
+    "candidateSha256": "e205365782793bfd59c190ce5a90d25c447abbde789715dc912cc1c7b80e4205",
+    "reason": "The candidate regenerated the full scene and changed subjects, framing, detail and dimensions instead of limiting the change to the watermark region. The candidate was not copied into the repository or accepted as an output."
+  },
+  "releaseEvidence": {
+    "processedOutputCount": 0,
+    "passedManualReviewCount": 0,
+    "signedRightsArtifactCount": 0,
+    "signedOcrArtifactCount": 0,
+    "contactSheetStatus": "not-release-ready"
+  },
+  "blockers": [
+    "No reliable OCR/frame method available in the run can detect every known visible watermark without false negatives.",
+    "The image-generation edit changed protected image invariants and was rejected.",
+    "The full 586-content-hash inventory has not completed per-asset watermark disposition and manual visual review.",
+    "No protected owned-or-licensed rights artifacts or signed reviewer/OCR artifacts were supplied for the authenticated release evidence producer."
+  ],
+  "sourceMutation": {
+    "overwrittenOrDeletedSourceCount": 0,
+    "verification": "Canonical inventory was generated and then independently regenerated in verify mode with an identical sourceSnapshotSha256."
+  }
+}

@@ -124,6 +124,18 @@ export const getLocaleFallback = (locale?: null | string): SupportedLocaleCode =
 export const isCopyLocale = (value?: null | string): value is CopyLocaleCode =>
   Boolean(value && copyLocaleCodes.includes(value as CopyLocaleCode))
 
+export const getPublicLocaleMetadataForSite = (
+  supportedLocales?: null | readonly string[],
+): LocaleMetadata[] => {
+  if (!supportedLocales?.length) {
+    return []
+  }
+
+  const siteLocales = new Set(supportedLocales)
+
+  return publicLocaleMetadata.filter((locale) => siteLocales.has(locale.code))
+}
+
 export const getCopyLocale = (locale?: null | string): CopyLocaleCode => {
   const fallbackLocale = getLocaleFallback(locale)
 

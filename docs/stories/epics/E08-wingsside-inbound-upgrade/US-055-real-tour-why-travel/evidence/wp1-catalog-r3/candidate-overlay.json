@@ -1,0 +1,977 @@
+{
+  "candidateChecksum": "79dfd59a8b734d51c7771d2f02d7a8934ee35216d99e7e6c3d917316dde7c30a",
+  "englishTours": [
+    {
+      "slug": "a-glimpse-of-central-vietnam-5-days",
+      "title": "Central Vietnam in 5 Days",
+      "summary": "A journey linking Da Nang, Hue and Hoi An for guests who want to explore Central Vietnam's heritage at a measured pace. Five days balance imperial architecture, old-town life, My Son Sanctuary and independently planned free time.",
+      "routeSummary": "Da Nang - Hue - Hoi An - My Son - Da Nang",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Central Vietnam, 5 days",
+        "description": "Explore Da Nang, Hue, Hoi An and My Son on a five-day journey balancing heritage visits with time to explore independently.",
+        "title": "Central Vietnam Journey, 5 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "7df2c9305419b5a0d0765fed9ce295a1e71ff61a15d87ad4f52707db2bf85276",
+      "preservedServiceRowChecksum": "da19a58ec9ffaac77ab4e334545d09d4a9b73527dd21bb353b989af8faf1345b",
+      "sourceChecksum": "d5d19fdd0b307851182d23864abf3108201aec99b964343c53dca8271cf7ad0b",
+      "tourID": 486
+    },
+    {
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+      "title": "Northern Vietnam: Hanoi, Sa Pa and Ha Long in 6 Days",
+      "summary": "A six-day journey through Hanoi, Sa Pa, Fansipan and Ha Long Bay, combining old-quarter food, village trekking, highland scenery and an overnight cruise. The route follows a clearly structured sequence of city visits, active days and cruise time.",
+      "routeSummary": "Hanoi - Sa Pa - Fansipan - Hanoi - Ha Long Bay - Hanoi",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Northern Vietnam, 6 days",
+        "description": "A six-day journey through Hanoi, Sa Pa, Fansipan and Ha Long Bay, with local food, trekking and an overnight cruise.",
+        "title": "Hanoi, Sa Pa and Ha Long, 6 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "78a1d37047a1a4515797559380166fb4ada2f490a139f63556c053f382fa3548",
+      "preservedServiceRowChecksum": "376818cf59b79b30c5a0a8424cb2cf9a4e6200d14b7fcd573505802befed6b56",
+      "sourceChecksum": "d8bade96c8dc2e6f10d7d7a758421e649b268e59f57ed4a650ca7b7da4a57a10",
+      "tourID": 491
+    },
+    {
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days",
+      "title": "Southern Vietnam: Saigon, Cu Chi and the Mekong in 5 Days",
+      "summary": "Five days connecting the energy of Saigon, the wartime history of the Cu Chi tunnels and the waterways of My Tho and Can Tho. The route suits a first visit to southern Vietnam while retaining time to explore the city independently.",
+      "routeSummary": "Ho Chi Minh City - Cu Chi tunnels - My Tho - Can Tho - Ho Chi Minh City",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Southern Vietnam, 5 days",
+        "description": "Explore Ho Chi Minh City, the Cu Chi tunnels, My Tho, Can Tho and Cai Rang floating market on a five-day southern Vietnam journey.",
+        "title": "Saigon, Cu Chi and the Mekong, 5 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "c3062315ebbb27a48d3e66fe0f1ffdb83ab5977774e995fb6a8f333cafa5965b",
+      "preservedServiceRowChecksum": "2d5ab2caf6511b013d22d1aa14b8f2908e7f2d9be86305edbd7235edff66ece6",
+      "sourceChecksum": "dba4322328a34a4f57d7f1ba52596304fbe7cf94eb063f5fdc3213d9f41f527d",
+      "tourID": 492
+    },
+    {
+      "slug": "best-of-vietnam-and-cambodia-15-days",
+      "title": "Vietnam and Cambodia in 15 Days",
+      "summary": "A 15-day journey across Vietnam and onward to Angkor, from Hanoi and Ha Long Bay through Hoi An, Ho Chi Minh City and the Mekong Delta to Siem Reap. Heritage, food and landscapes are balanced with scheduled free days.",
+      "routeSummary": "Hanoi - Ha Long Bay - Da Nang - Hoi An - Ho Chi Minh City - Can Tho - Siem Reap",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Vietnam and Cambodia",
+        "description": "Travel for 15 days from Hanoi, Ha Long Bay and Hoi An through the Mekong Delta to the Angkor temples near Siem Reap.",
+        "title": "Vietnam and Cambodia Journey, 15 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "cb1895f3d2546067218c5440996265c6c7664c2d38fe165edd269932861c90ad",
+      "preservedServiceRowChecksum": "658d81610ecf9d48c7a39bf0eff7dfc8726d490fca0f2693247b209c32879254",
+      "sourceChecksum": "077bdee949817444d716f6ba219e2059efc9501056ecba6bfde934f6a710ff34",
+      "tourID": 251
+    },
+    {
+      "slug": "central-vietnam-adventure-4-days",
+      "title": "Active Central Vietnam in 4 Days",
+      "summary": "Four active days from Hue to Hoi An with a zipline and high-ropes course, a motorbike journey over Hai Van Pass and a hands-on farming experience in Cam Thanh. The program suits guests who are comfortable with sustained outdoor activity.",
+      "routeSummary": "Hue - Thanh Tan - Lang Co - Hai Van Pass - Hoi An - Cam Thanh - Da Nang",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Active Central Vietnam",
+        "description": "A four-day active journey from Hue to Hoi An with ziplining, Hai Van Pass by motorbike, cycling and a Cam Thanh basket-boat experience.",
+        "title": "Active Central Vietnam, 4 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "bb3cbf013c5aadd47be2d69c2b1512169b7e569a37dc33cacca19a22c897b1c8",
+      "preservedServiceRowChecksum": "2af9e1aa088439be7569b1ababadaf8b8d537418374e9925db6e646e5134c99b",
+      "sourceChecksum": "f09672026d6b18ec87aa8539e5c83d9531c1979a1827a6368fddba0c7b46770d",
+      "tourID": 495
+    },
+    {
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days",
+      "title": "Da Nang, Hoi An and Ba Na Hills in 5 Days",
+      "summary": "A five-day journey focused on Central Vietnam's distinctive places: Da Nang's food scene, the Golden Bridge at Ba Na Hills, Hue's imperial heritage, Son Tra Peninsula, the Marble Mountains and Hoi An Ancient Town.",
+      "routeSummary": "Da Nang - Ba Na Hills - Hue - Son Tra - Marble Mountains - Hoi An",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Da Nang, Hoi An and Ba Na Hills",
+        "description": "Explore Da Nang, the Golden Bridge, Hue, Son Tra, the Marble Mountains and Hoi An on a five-day Central Vietnam journey.",
+        "title": "Da Nang, Hoi An and Ba Na Hills, 5 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "8db6acecc5783f89578eaa497926f80f793093287d2e31b6691a7351b4e2ee78",
+      "preservedServiceRowChecksum": "ae783e10f35dfd4017f2e6e3e6504b3283726ddb54ed4b5329e56e94d4da7576",
+      "sourceChecksum": "3ab314c97837d8567ebc8c5218c64595f1b89927f1d416ce8fa0a20ba24f52fe",
+      "tourID": 497
+    },
+    {
+      "slug": "discover-halong-bay-ninh-binh-package-2-days",
+      "title": "Ha Long Bay and Ninh Binh in 2 Days",
+      "summary": "A compact two-day route pairing Ha Long Bay with Ninh Binh's limestone scenery. The program includes a day cruise, Sung Sot Cave, kayaking or a bamboo boat, Tam Coc and the former capital of Hoa Lu.",
+      "routeSummary": "Hanoi - Ha Long Bay - Ninh Binh - Tam Coc - Hoa Lu - Hanoi",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Ha Long Bay and Ninh Binh",
+        "description": "Travel from Hanoi to Ha Long Bay, Sung Sot Cave, Tam Coc and Hoa Lu on a focused two-day journey.",
+        "title": "Ha Long Bay and Ninh Binh, 2 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "a6592d44e074e0aa5a4d327ca11b65d0879acceb3d30d82b826707a4c7706cc6",
+      "preservedServiceRowChecksum": "0befdbf16e5395cbab600c9104709d9b22ad943ba854d4541064bbb812196e3c",
+      "sourceChecksum": "6ccc7afe246ca3930efc61728dfb9418ae0f4a3c3e13c31c44e9b4eb463f2836",
+      "tourID": 226
+    },
+    {
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+      "title": "Vietnam from North to South in 12 Days",
+      "summary": "A 12-day journey from Hanoi and Ha Long Bay through Hoi An and Hue to Ho Chi Minh City, the Cu Chi tunnels and the Mekong Delta. It offers a balanced introduction for guests who want to understand several sides of Vietnam in one trip.",
+      "routeSummary": "Hanoi - Ha Long Bay - Hoi An - Hue - Ho Chi Minh City - Cu Chi - Ben Tre",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Vietnam highlights, 12 days",
+        "description": "A 12-day journey through Hanoi, Ha Long Bay, Hoi An, Hue, Ho Chi Minh City, Cu Chi and Ben Tre.",
+        "title": "Vietnam from North to South, 12 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "6ad37de4e15db1305f80684b987450993b955795ce74a32b23715a809cba98c8",
+      "preservedServiceRowChecksum": "7da31786afc8a511547a9836c3689c38ab9658aca1c48d27f8133e8c7546715d",
+      "sourceChecksum": "645d4f2857f7723ff387cb516e4ac936e4ed1fe0a6ad948b8876a063a3bc1c6e",
+      "tourID": 504
+    },
+    {
+      "slug": "hoi-an-surrounding-and-beach-break-7-days",
+      "title": "Hoi An and a Coastal Break in 7 Days",
+      "summary": "A relaxed week based around Hoi An, combining Tra Que village, old-town food, My Son Sanctuary, Ba Na Hills and unstructured time by the coast. Activities are arranged on days 1-4 and day 7, leaving days 5 and 6 free.",
+      "routeSummary": "Da Nang - Hoi An - Tra Que - My Son - Ba Na Hills - Da Nang",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Hoi An and coastal break",
+        "description": "Spend a week around Hoi An with Tra Que, local food, My Son, Ba Na Hills and time to unwind by the coast.",
+        "title": "Hoi An and Coastal Break, 7 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "d6fb11491969b6415cc808a35c212f7a2f6f01ddf02dd446353a1dc912cfc807",
+      "preservedServiceRowChecksum": "e4c5e78b957e0da8ae01f0966bb6604104b03e73599308217768e2340bdc2a78",
+      "sourceChecksum": "8c6c8d98ec18b473c64316b184276b26d7c94d9d3c94b6bcd778880aeaa0979e",
+      "tourID": 506
+    },
+    {
+      "slug": "luxury-mekong-delta-speedboat-tour-full-day",
+      "title": "Mekong Delta Speedboat Journey",
+      "summary": "A day journey from Ho Chi Minh City into the Mekong Delta's smaller waterways by speedboat. The route brings together a riverside market, rural communities, a regional lunch and local places of worship.",
+      "routeSummary": "Ho Chi Minh City - Mekong Delta waterways - Ho Chi Minh City",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Mekong Delta by speedboat",
+        "description": "Leave Ho Chi Minh City by speedboat for a day among riverside markets, rural communities and the foodways of the Mekong Delta.",
+        "title": "Mekong Delta Speedboat Day | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "05f6a5ec876b60ab61c631662e0a184f4a075220951f46dbb63c03b8da572ec3",
+      "preservedServiceRowChecksum": "bee37f7c4df9cb55ae181422604a27010acc64abc30dbc0dad060def5174f0f5",
+      "sourceChecksum": "01ddcf1a4f83ae7a2ac86315c1273b1bdc22e5b54ea47ecfa486297b100b5c32",
+      "tourID": 326
+    },
+    {
+      "slug": "mekong-delta-gateway-3-days",
+      "title": "A 3-Day Introduction to the Mekong Delta",
+      "summary": "Three days following the Delta's everyday rhythms through Cai Be, Tan Phong, Sa Dec and Can Tho. The journey focuses on fruit gardens, local crafts, cultural encounters and the early-morning Cai Rang floating market.",
+      "routeSummary": "Ho Chi Minh City - Cai Be - Tan Phong - Sa Dec - Can Tho - Ho Chi Minh City",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Mekong Delta, 3 days",
+        "description": "Explore Cai Be, Tan Phong, Sa Dec, Can Tho and Cai Rang floating market on a considered three-day Mekong Delta journey.",
+        "title": "Mekong Delta Introduction, 3 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "508b7f88b7b5e10a21d87d856cc9b4ff41ab39419263bb7b9250d678c64dd840",
+      "preservedServiceRowChecksum": "5a57e28983132668d6080dccc4125483088f05a2d4634489ad6a328042e1e8e1",
+      "sourceChecksum": "0b6b1a664a09c8b7dcec555af58d3a5eb9c84f010607f4f89a9c4c3935204ef8",
+      "tourID": 328
+    },
+    {
+      "slug": "mekong-delta-with-floating-market-2-days",
+      "title": "The Mekong Delta and Cai Rang Floating Market in 2 Days",
+      "summary": "A two-day journey from Ho Chi Minh City through Ben Tre to Can Tho, combining coconut-candy workshops, shaded waterways and the early-morning trade of Cai Rang floating market.",
+      "routeSummary": "Ho Chi Minh City - Ben Tre - Can Tho - Cai Rang floating market - Ho Chi Minh City",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Mekong Delta and floating market",
+        "description": "Travel through Ben Tre and Can Tho for coconut workshops, small-boat waterways and the early Cai Rang floating market.",
+        "title": "Mekong Delta and Floating Market, 2 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "d7cbc7fe001ff2ed7349efc440e7ea2f93f8bd637c79dc76947b779779e346d6",
+      "preservedServiceRowChecksum": "3b66882dafd694eea1681f7505a0d3e1d848915f01b96713eac909c0ab7455fb",
+      "sourceChecksum": "f65b29ff0fddb8145d0da41c484d28333567f607e22881149cffbd2d2577db0b",
+      "tourID": 330
+    },
+    {
+      "slug": "ninh-binh-hoa-lu-trang-an-full-day-private-tour-from-hanoi",
+      "title": "Private Hoa Lu and Trang An Day from Hanoi",
+      "summary": "A private day journey to the former capital at Hoa Lu and the Trang An World Heritage landscape. The program connects the history of the Dinh and Early Le dynasties with a boat route through rivers, caves and Ninh Binh's limestone peaks.",
+      "routeSummary": "Hanoi - Hoa Lu Ancient Capital - Trang An - Hanoi",
+      "primaryCTALabel": "Discuss this private day tour",
+      "meta": {
+        "breadcrumbLabel": "Hoa Lu and Trang An",
+        "description": "Visit Hoa Lu and travel by small boat through the Trang An landscape on a private day journey from Hanoi.",
+        "title": "Private Hoa Lu and Trang An Day | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "47e0c69a71d4e793760cc72748d50aee2bf8cb8389a102e6e2d13c3c8d438f17",
+      "preservedServiceRowChecksum": "13b9decb286b9f042b8398728f27f80b655d063d21c4829ee3b297cfa4eef599",
+      "sourceChecksum": "186345043392ad2fb07c03d75798a5eba48d5a49a7878cb91a92577db8d0d5f7",
+      "tourID": 405
+    },
+    {
+      "slug": "ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi",
+      "title": "Private Ninh Binh: Tam Coc and Mua Cave from Hanoi",
+      "summary": "A private day journey from Hanoi combining the panoramic viewpoint at Mua Cave, cycling through the countryside and a boat ride through Tam Coc's three caves. The climb has nearly 500 steps and is best suited to guests comfortable with sustained walking.",
+      "routeSummary": "Hanoi - Mua Cave - Tam Coc - Hanoi",
+      "primaryCTALabel": "Discuss this private day tour",
+      "meta": {
+        "breadcrumbLabel": "Tam Coc and Mua Cave",
+        "description": "Travel privately from Hanoi to Ninh Binh for the Mua Cave climb, countryside cycling and a boat journey through Tam Coc.",
+        "title": "Private Tam Coc and Mua Cave Day | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "2529caf4196d991ceb903179ffd5a9d9d8f6b6bc839898e82f864c85ab76e979",
+      "preservedServiceRowChecksum": "9452c4c149f4a00465ded67af6578594c8e292f9a839e4d28968644cd7545db2",
+      "sourceChecksum": "0a2657ac4fa39c4010937747e39aab39d9d927a35d1a1a6af4b9de026fa66ae3",
+      "tourID": 407
+    },
+    {
+      "slug": "northern-vietnam-highlights-for-family-6-days",
+      "title": "Northern Vietnam for Families in 6 Days",
+      "summary": "A six-day family journey combining Hanoi's heritage, pottery making in Bat Trang, tea culture in Tan Cuong and an overnight cruise on Ha Long Bay. Practical activities create an approachable pace for adults and children to share.",
+      "routeSummary": "Hanoi - Bat Trang - Tan Cuong - Ha Long Bay - Hanoi",
+      "primaryCTALabel": "Discuss this family journey",
+      "meta": {
+        "breadcrumbLabel": "Northern Vietnam for families",
+        "description": "A six-day family journey through Hanoi, Bat Trang pottery village, the Tan Cuong tea region and Ha Long Bay.",
+        "title": "Northern Vietnam for Families, 6 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "67ea8cd6bbba0d22fec6356c5e5bcea33942659609cec855d31729f0a7e106d7",
+      "preservedServiceRowChecksum": "9a1e064eab3d57fb6921ff81cb398346adef34cfb2daca4874471eb81eb94a16",
+      "sourceChecksum": "5b524f158d96abe578e8eea959eaf453fad9895daa97b53ff1a62b9fda7aea35",
+      "tourID": 517
+    },
+    {
+      "slug": "northern-vietnam-soft-adventure-8-days",
+      "title": "A Moderate-Paced Northern Vietnam Adventure in 8 Days",
+      "summary": "Eight days from Hanoi through Ky Son village, Mai Chau valley and Tam Coc to Ha Long Bay. Homestay experiences, cycling, cooking, small-boat travel and two nights on a cruise suit guests who enjoy a moderate level of activity.",
+      "routeSummary": "Hanoi - Ky Son - Mai Chau - Ninh Binh - Ha Long Bay - Hanoi",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Northern Vietnam moderate adventure",
+        "description": "An eight-day journey through Ky Son, Mai Chau and Ninh Binh, followed by two nights cruising Ha Long Bay.",
+        "title": "Northern Vietnam Moderate Adventure, 8 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "778eb2df8d19bfa84d8f34e3439c8d06fc8b0651e743ad3cf00138f49145a1d1",
+      "preservedServiceRowChecksum": "fb76a1f5932d332dca0ce0c3b7c4d9414bfe1244167ff88379659849bae7a59f",
+      "sourceChecksum": "859fc5e70aa936e1f58ba48fa72d99f7b0400ef05f4cabc82b03931d2b8dfab3",
+      "tourID": 518
+    },
+    {
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
+      "title": "A Romantic Phu Quoc Escape in 5 Days",
+      "summary": "A five-day escape for two, beginning with a dinner cruise on the Saigon River and continuing with unhurried time on Phu Quoc. Day 4 is intentionally free.",
+      "routeSummary": "Ho Chi Minh City - Phu Quoc - Ho Chi Minh City",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Romantic Phu Quoc",
+        "description": "Five days for two, pairing a Saigon River dinner cruise with a coastal stay on Phu Quoc.",
+        "title": "Romantic Phu Quoc Escape, 5 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "ab4d4d536c31a2969335c8eaa1b4866b9b8b516a44060efa8502bb8b4da10011",
+      "preservedServiceRowChecksum": "2a704ca0c2ab51b04285a14534764fb3163116eefbd5db65bf6aa81cd8cec9c1",
+      "sourceChecksum": "b02e8dc1127755c9ead616fa59eee21fb2c0b14b38b2662e6f3b4967bf357cf8",
+      "tourID": 498
+    },
+    {
+      "slug": "sapa-trekking-ethnic-market-3-days",
+      "title": "Sa Pa Trekking and a Highland Market in 3 Days",
+      "summary": "A three-day active journey linking Cat Cat village, Muong Hoa valley and Bac Ha market. Guided walks offer a closer view of Hmong, Giay, Dao and Nung community life alongside the terraced landscapes of Lao Cai.",
+      "routeSummary": "Sa Pa - Cat Cat - Y Linh Ho - Lao Chai - Ta Van - Bac Ha - Lao Cai - Hanoi",
+      "primaryCTALabel": "Discuss this trekking journey",
+      "meta": {
+        "breadcrumbLabel": "Sa Pa and the highland market",
+        "description": "Walk through Cat Cat, Muong Hoa, Lao Chai and Ta Van, then visit Bac Ha market on a three-day highland journey.",
+        "title": "Sa Pa Trekking and Bac Ha Market, 3 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "cfa26406dbdaaa30181e2ce57709a7ca36b9bccaaa4d47b2417ec6df9070d2b1",
+      "preservedServiceRowChecksum": "aa90948bb22c412d646e9852e5e7dd80e3e78b2cf5119a9811181f46171b8c27",
+      "sourceChecksum": "ce0bb480fe3046a61ec37435ea33338b1e3b4daa4436019290b9620cbe868b94",
+      "tourID": 442
+    },
+    {
+      "slug": "southern-beauty-beach-relaxation-8-days",
+      "title": "Southern Vietnam and a Ninh Thuan Coastal Break in 8 Days",
+      "summary": "Eight days combining Ho Chi Minh City, the Cu Chi tunnels and Ben Tre with a slower coastal stay in Ninh Thuan. Days 5-7 are left free.",
+      "routeSummary": "Ho Chi Minh City - Cu Chi - Ben Tre - Ninh Thuan - Ho Chi Minh City",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Southern Vietnam and Ninh Thuan",
+        "description": "Travel from Saigon, Cu Chi and Ben Tre to an unhurried coastal stay in Ninh Thuan over eight days.",
+        "title": "Southern Vietnam and Ninh Thuan Coast, 8 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "62281351b669ec796fd21636fd9ff574410679c5a451c76c796b0a0dbaa6df18",
+      "preservedServiceRowChecksum": "7643b96d44f5dd713b69adca787109ce47da77702af90bdc15d9cd965ae05577",
+      "sourceChecksum": "68bac86f07a6a25d9a229eaa7521ddbe61f0d301d2bb192efc0799a33e40adf1",
+      "tourID": 524
+    },
+    {
+      "slug": "vietnam-at-a-glance-7-days",
+      "title": "Vietnam in One Week",
+      "summary": "Seven days introducing Vietnam from Hanoi and Ha Long Bay to Ho Chi Minh City, the Cu Chi tunnels and Ben Tre. The route suits guests with limited time who still want a considered mix of landscape, history and local life.",
+      "routeSummary": "Hanoi - Ha Long Bay - Ho Chi Minh City - Cu Chi - Ben Tre",
+      "primaryCTALabel": "Discuss this journey",
+      "meta": {
+        "breadcrumbLabel": "Vietnam in one week",
+        "description": "A one-week journey from Hanoi and Ha Long Bay to Ho Chi Minh City, the Cu Chi tunnels and Ben Tre.",
+        "title": "Vietnam in 7 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "482c0e12056604b378d8c1e7d35f27c6b0d06b3fd7d12dc5959391e073352918",
+      "preservedServiceRowChecksum": "ed4d7237ac9cd38ec768de12fe3ecfec97dfb0b9a1ff064df87c268af3c1d0c6",
+      "sourceChecksum": "43bf5c68a3c286b3bef65a07071c7be8e945ccd0fe18b6383ab652263449c421",
+      "tourID": 526
+    },
+    {
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days",
+      "title": "A Vietnam Wellness Retreat in 8 Days",
+      "summary": "Eight unhurried days between Hanoi, Mai Chau valley and a resort near Hoi An. Cycling, a guided walk through Thai villages, spa treatments and restorative activities create a balanced route for guests who want time to reset.",
+      "routeSummary": "Hanoi - Mai Chau - Hanoi - Da Nang - Hoi An",
+      "primaryCTALabel": "Discuss this retreat",
+      "meta": {
+        "breadcrumbLabel": "Vietnam wellness retreat",
+        "description": "Reset over eight days in Hanoi, Mai Chau and a wellness resort near Hoi An, with cycling, walking and spa time.",
+        "title": "Vietnam Wellness Retreat, 8 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "242f9ba46f7a6be6aaa69a5da0978b5bf6e2015679203a6f5fc3629cafbb3fed",
+      "preservedServiceRowChecksum": "0e5f720994385fb4f2c4433b8430723d19ef6d21445c443a2a71de4c6c0e155b",
+      "sourceChecksum": "910b1d8145275d7afbba66598c026c13f247df17455258465d8db3dc29dd159f",
+      "tourID": 533
+    },
+    {
+      "slug": "vietnam-memorable-honeymoon-trip-8-days",
+      "title": "A Vietnam Honeymoon in 8 Days",
+      "summary": "An eight-day journey for two from Hanoi and Ninh Binh to Ha Long Bay and onward to Hoi An. Highlights include a candlelit dinner, an overnight cruise and a sunset dinner on the river.",
+      "routeSummary": "Hanoi - Hoa Lu - Tam Coc - Ha Long Bay - Da Nang - Hoi An",
+      "primaryCTALabel": "Discuss this honeymoon",
+      "meta": {
+        "breadcrumbLabel": "Vietnam honeymoon",
+        "description": "Eight romantic days through Hanoi, Tam Coc, Ha Long Bay and Hoi An, with three experiences arranged for two.",
+        "title": "Vietnam Honeymoon, 8 Days | WingSide"
+      },
+      "authoredAgainstSourceChecksum": "b0af895a7dfc0a96d940e2bc9008d1f8baa79aa1cd72bf9a27b590c5e235de3b",
+      "preservedServiceRowChecksum": "c90a3ab95bb567ba56eef00a53d779c2cd95d3fad0d2b4116933617222ad939e",
+      "sourceChecksum": "250b54cf9fd0e1d03ccf3c0ed921aeabdba34dcd662cbc73adb3ea5130e69c6f",
+      "tourID": 534
+    }
+  ],
+  "inputArtifacts": {
+    "englishCandidate": {
+      "canonicalJsonSha256": "58140cc91e61e8b9dd87ed3ff70554cacf25e69baede2a008a7e11fe8c12acc7",
+      "gitBlobOid": "dfa02654e5baca9ea9cb3cbf9e26c307e9a4bbfd",
+      "leaderWorktree": {
+        "absolutePath": "E:\\repo\\WingsTravel-audit-r1-20260728\\app\\scripts\\data\\wingsside-tour-content-candidates\\en.json",
+        "canonicalJsonSha256": "58140cc91e61e8b9dd87ed3ff70554cacf25e69baede2a008a7e11fe8c12acc7",
+        "gitBlobOid": "dfa02654e5baca9ea9cb3cbf9e26c307e9a4bbfd",
+        "rawSha256": "d8e68f263b7cbf2fb7c1c95fd3cb57d16b3bafd6c265ec21c251238cefc864e4"
+      },
+      "path": "scripts/data/wingsside-tour-content-candidates/en.json",
+      "rawSha256": "d8e68f263b7cbf2fb7c1c95fd3cb57d16b3bafd6c265ec21c251238cefc864e4"
+    },
+    "historicalSourceManifest": {
+      "canonicalJsonSha256": "1a68891f35b25b6fcde681bfc339ba5b97e42aca263f0abc47cd248e5f5f398c",
+      "gitBlobOid": "1fecbdf6248efd189c0fe4e7baa2387cbd282a4b",
+      "leaderWorktree": {
+        "absolutePath": "E:\\repo\\WingsTravel-audit-r1-20260728\\app\\scripts\\data\\wingsside-tour-editorial\\source-manifest.json",
+        "canonicalJsonSha256": "1a68891f35b25b6fcde681bfc339ba5b97e42aca263f0abc47cd248e5f5f398c",
+        "gitBlobOid": "1fecbdf6248efd189c0fe4e7baa2387cbd282a4b",
+        "rawSha256": "fe4bf345f5928aada614b24f629c9f47077072b91dc4d2818180196bc9d82c7f"
+      },
+      "path": "scripts/data/wingsside-tour-editorial/source-manifest.json",
+      "rawSha256": "fe4bf345f5928aada614b24f629c9f47077072b91dc4d2818180196bc9d82c7f"
+    },
+    "pricingDisclosures": {
+      "canonicalJsonSha256": "4538cb5e7df76c8d1e7f25a3d4f98cee55f5be7cd0a0aa7620b15d955ec22f06",
+      "gitBlobOid": "058cc9fec4b4f3b7d0a37483e1aca4f2cc76f6f5",
+      "leaderWorktree": {
+        "absolutePath": "E:\\repo\\WingsTravel-audit-r1-20260728\\app\\scripts\\data\\wingsside-tour-content-candidates\\pricing-disclosures.json",
+        "canonicalJsonSha256": "4538cb5e7df76c8d1e7f25a3d4f98cee55f5be7cd0a0aa7620b15d955ec22f06",
+        "gitBlobOid": "058cc9fec4b4f3b7d0a37483e1aca4f2cc76f6f5",
+        "rawSha256": "76c549ec8166124f2a4f33a9a113fda791ad812df1b14b9cff1680e683554f07"
+      },
+      "path": "scripts/data/wingsside-tour-content-candidates/pricing-disclosures.json",
+      "rawSha256": "76c549ec8166124f2a4f33a9a113fda791ad812df1b14b9cff1680e683554f07"
+    }
+  },
+  "pricingDisclosures": [
+    {
+      "slug": "a-glimpse-of-central-vietnam-5-days",
+      "sourceRowID": "6a5a42d0e9a62d80e46ba98f",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "labels": {
+        "en": "The peak-season surcharge and compulsory dinner at the accommodation are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
+      }
+    },
+    {
+      "slug": "a-glimpse-of-central-vietnam-5-days",
+      "sourceRowID": "6a5a42d0e9a62d80e46ba999",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+      "sourceRowID": "6a5a42d2e9a62d80e46ba9ab",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+      "sourceRowID": "6a5a42d2e9a62d80e46ba9b4",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days",
+      "sourceRowID": "6a5a42d3e9a62d80e46ba9c3",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days",
+      "sourceRowID": "6a5a42d3e9a62d80e46ba9cb",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "best-of-vietnam-and-cambodia-15-days",
+      "sourceRowID": "6a5a42d5e9a62d80e46ba9e6",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the accommodation (if any)",
+      "sourceLabelChecksum": "82c40ea972bd24981ae98d371ec206155fce2fc56036e4d83d08ec85df7268b2",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory dinner at the accommodation, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no alojamento não estão incluídos."
+      }
+    },
+    {
+      "slug": "best-of-vietnam-and-cambodia-15-days",
+      "sourceRowID": "6a5a42d5e9a62d80e46ba9ec",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "central-vietnam-adventure-4-days",
+      "sourceRowID": "6a5a42d7e9a62d80e46ba9fa",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "central-vietnam-adventure-4-days",
+      "sourceRowID": "6a5a42d7e9a62d80e46baa02",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days",
+      "sourceRowID": "6a5a42d8e9a62d80e46baa12",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days",
+      "sourceRowID": "6a5a42d8e9a62d80e46baa1a",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "discover-halong-bay-ninh-binh-package-2-days",
+      "sourceRowID": "6a5a42dae9a62d80e46baa2e",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+      "sourceRowID": "6a5a42dbe9a62d80e46baa45",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+      "sourceRowID": "6a5a42dbe9a62d80e46baa4e",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "hoi-an-surrounding-and-beach-break-7-days",
+      "sourceRowID": "6a5a42dce9a62d80e46baa5e",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "hoi-an-surrounding-and-beach-break-7-days",
+      "sourceRowID": "6a5a42dce9a62d80e46baa66",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "luxury-mekong-delta-speedboat-tour-full-day",
+      "sourceRowID": "6a5a42dee9a62d80e46baa74",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "mekong-delta-gateway-3-days",
+      "sourceRowID": "6a5a42dfe9a62d80e46baa86",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "mekong-delta-with-floating-market-2-days",
+      "sourceRowID": "6a5a42e0e9a62d80e46baa98",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "ninh-binh-hoa-lu-trang-an-full-day-private-tour-from-hanoi",
+      "sourceRowID": "6a5a42e2e9a62d80e46baab7",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi",
+      "sourceRowID": "6a5a42e1e9a62d80e46baaa8",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "northern-vietnam-highlights-for-family-6-days",
+      "sourceRowID": "6a5a42e2e9a62d80e46baac7",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "northern-vietnam-highlights-for-family-6-days",
+      "sourceRowID": "6a5a42e2e9a62d80e46baacf",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "northern-vietnam-soft-adventure-8-days",
+      "sourceRowID": "6a5a42e4e9a62d80e46baae1",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "labels": {
+        "en": "The peak-season surcharge and compulsory dinner at the accommodation are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
+      }
+    },
+    {
+      "slug": "northern-vietnam-soft-adventure-8-days",
+      "sourceRowID": "6a5a42e4e9a62d80e46baaea",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
+      "sourceRowID": "6a5a42e5e9a62d80e46baaf9",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
+      "sourceRowID": "6a5a42e5e9a62d80e46bab01",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "sapa-trekking-ethnic-market-3-days",
+      "sourceRowID": "6a5a42e6e9a62d80e46bab10",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "labels": {
+        "en": "The peak-season surcharge and compulsory dinner at the accommodation are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
+      }
+    },
+    {
+      "slug": "sapa-trekking-ethnic-market-3-days",
+      "sourceRowID": "6a5a42e6e9a62d80e46bab17",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "southern-beauty-beach-relaxation-8-days",
+      "sourceRowID": "6a5a42e8e9a62d80e46bab28",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner in the accommodation.",
+      "sourceLabelChecksum": "aa40c5047f778cf59a72f213ef23d929068b5ba2c584ac2808105da1b8cc6103",
+      "labels": {
+        "en": "The peak-season surcharge and compulsory dinner at the accommodation are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại nơi lưu trú.",
+        "it": "Il supplemento di alta stagione e la cena obbligatoria in struttura non sono inclusi.",
+        "es": "El suplemento de temporada alta y la cena obligatoria en el alojamiento no están incluidos.",
+        "pt": "O suplemento de época alta e o jantar obrigatório no alojamento não estão incluídos."
+      }
+    },
+    {
+      "slug": "southern-beauty-beach-relaxation-8-days",
+      "sourceRowID": "6a5a42e8e9a62d80e46bab31",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "vietnam-at-a-glance-7-days",
+      "sourceRowID": "6a5a42ece9a62d80e46bab79",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "vietnam-at-a-glance-7-days",
+      "sourceRowID": "6a5a42ece9a62d80e46bab81",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days",
+      "sourceRowID": "6a5a42e9e9a62d80e46bab43",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days",
+      "sourceRowID": "6a5a42e9e9a62d80e46bab4c",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    },
+    {
+      "slug": "vietnam-memorable-honeymoon-trip-8-days",
+      "sourceRowID": "6a5a42eae9a62d80e46bab5f",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "Peak season surcharge & compulsory dinner at the hotel (if any)",
+      "sourceLabelChecksum": "4ba127b7c7ffa7c5385b2246b84bf50ce953a83181f488b33a7fd9df823fc5fc",
+      "labels": {
+        "en": "The peak-season surcharge and any compulsory hotel dinner, if applicable, are not included.",
+        "vi": "Chưa bao gồm phụ thu mùa cao điểm và bữa tối bắt buộc tại khách sạn, nếu áp dụng.",
+        "it": "Il supplemento di alta stagione e l'eventuale cena obbligatoria in hotel non sono inclusi.",
+        "es": "El suplemento de temporada alta y, si corresponde, la cena obligatoria en el hotel no están incluidos.",
+        "pt": "O suplemento de época alta e, quando aplicável, o jantar obrigatório no hotel não estão incluídos."
+      }
+    },
+    {
+      "slug": "vietnam-memorable-honeymoon-trip-8-days",
+      "sourceRowID": "6a5a42eae9a62d80e46bab67",
+      "sourceBucket": "includes",
+      "targetBucket": "excludes",
+      "sourceLabel": "A fuel surcharge will be applied if fuel prices rise above 15%",
+      "sourceLabelChecksum": "0794dcb55049c1199c690d615cb052a70cd7ad496048277dc777f0c9d5a30db8",
+      "labels": {
+        "en": "A fuel surcharge is not included and will apply if the fuel price rises by more than 15%.",
+        "vi": "Chưa bao gồm phụ thu nhiên liệu; khoản này sẽ áp dụng nếu giá nhiên liệu tăng trên 15%.",
+        "it": "Il supplemento carburante non è incluso e sarà applicato se il prezzo del carburante aumenta di oltre il 15%.",
+        "es": "El suplemento de combustible no está incluido y se aplicará si el precio del combustible aumenta más de un 15 %.",
+        "pt": "O suplemento de combustível não está incluído e será aplicado se o preço do combustível aumentar mais de 15%."
+      }
+    }
+  ],
+  "siteCode": "wing-side",
+  "sourceSnapshotChecksum": "76cc78beabc2a399aa2ed2d2a51cb4f632fa5714833c3e39090e14691cb83b50",
+  "supportedLocales": [
+    "en",
+    "vi",
+    "it",
+    "es",
+    "pt"
+  ],
+  "version": 1
+}

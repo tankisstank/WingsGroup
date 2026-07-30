@@ -38,7 +38,7 @@ const card = (id: number, title: string) => ({
   hero: { alt: `${title} image`, url: `/media/${id}.jpg` },
   href: `/tours/${id}`,
   id,
-  price: { currency: 'USD', kind: 'from' as const, value: 2450 },
+  price: { currency: 'USD' as const, kind: 'from' as const, value: 2450 },
   summary: `${title} summary`,
   title,
 })
@@ -72,7 +72,7 @@ describe('HomeHiFiPage curated tours', () => {
       within(destinations)
         .getByRole('link', { name: /sapa curated tour/i })
         .getAttribute('href'),
-    ).toBe('/destinations?destination=sapa')
+    ).toBe('/journeys?destination=sapa')
     expect(within(destinations).getByText('Sapa curated tour summary')).toBeTruthy()
 
     const styles = screen.getByTestId('home-styles-grid')
@@ -80,7 +80,7 @@ describe('HomeHiFiPage curated tours', () => {
       within(styles)
         .getByRole('link', { name: /romance curated tour/i })
         .getAttribute('href'),
-    ).toBe('/styles?style=romance')
+    ).toBe('/journeys?style=romance')
 
     expect(screen.getByText('Featured on request')).toBeTruthy()
     expect(screen.getByText('On request')).toBeTruthy()
@@ -110,5 +110,26 @@ describe('HomeHiFiPage curated tours', () => {
 
     expect(screen.getAllByText('Curated journeys are not currently available.')).toHaveLength(3)
     expect(screen.queryByText('Can one trip cover the icons — without the rush?')).toBeNull()
+  })
+
+  it('omits Why Travel instead of falling back to static product-like cards when configured slots are invalid', () => {
+    const model = baseModel()
+    model.homeCuration = {
+      destinationTours: [],
+      featuredJourneys: [],
+      issues: [],
+      state: 'ready',
+      styleTours: [],
+      whyTravel: {
+        cards: [],
+        issues: ['Selected representative tour is unpublished.'],
+        state: 'invalid',
+      },
+    }
+
+    render(<HomeHiFiPage model={model} />)
+
+    expect(document.querySelector('[data-od-id="home-why"]')).toBeNull()
+    expect(document.querySelector('[data-od-id="why-featured"]')).toBeNull()
   })
 })

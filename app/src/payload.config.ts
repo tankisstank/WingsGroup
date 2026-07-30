@@ -52,7 +52,7 @@ const smtpConfigured = Boolean(
     process.env.SMTP_FROM_EMAIL,
 )
 
-if (!isPostgresURL) {
+if (!isPostgresURL && !shouldPushDatabaseSchema) {
   await repairLocalSQLiteSchema(databaseURL)
 }
 
@@ -168,6 +168,7 @@ export default buildConfig({
         push: shouldPushDatabaseSchema,
       })
     : sqliteAdapter({
+        busyTimeout: 30000,
         client: {
           url: databaseURL,
         },

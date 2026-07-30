@@ -1,0 +1,220 @@
+{
+  "artifactContractVersion": 1,
+  "checks": [
+    {
+      "name": "frozen-source-artifact",
+      "status": "pass",
+      "artifactChecksum": "d2373c00d761e958498db7f6f79e896201f3651e6e5eb6659736e09b956a232b",
+      "artifactRawSha256": "ab96c5edfdc4810d1ce6e594d20fb224a097facc26544079ce3dfe641ce83001",
+      "itineraryDays": 116,
+      "serviceRows": 331,
+      "snapshotChecksum": "76cc78beabc2a399aa2ed2d2a51cb4f632fa5714833c3e39090e14691cb83b50",
+      "tours": 22
+    },
+    {
+      "name": "container-started",
+      "status": "pass",
+      "image": "postgres:16",
+      "imageReference": "postgres@sha256:33f923b05f64ca54ac4401c01126a6b92afe839a0aa0a52bc5aeb5cc958e5f20",
+      "persistentVolume": false
+    },
+    {
+      "name": "postgres-final-server-readiness",
+      "status": "pass",
+      "attempts": 4,
+      "host": "127.0.0.1",
+      "port": 5432,
+      "transport": "tcp"
+    },
+    {
+      "name": "target-identity",
+      "status": "pass",
+      "database": "wingsside_us055_rehearsal_84e125654f06",
+      "host": "127.0.0.1",
+      "port": 55301
+    },
+    {
+      "name": "postgres-version",
+      "status": "pass",
+      "major": 16,
+      "serverVersion": "16.14 (Debian 16.14-1.pgdg13+1)"
+    },
+    {
+      "name": "child-environment-sanitized",
+      "status": "pass",
+      "inheritedKeys": [
+        "APPDATA",
+        "ComSpec",
+        "LOCALAPPDATA",
+        "PATH",
+        "PATHEXT",
+        "SystemRoot",
+        "TEMP",
+        "TMP",
+        "USERPROFILE"
+      ],
+      "productionCapabilitiesBlanked": [
+        "CRON_SECRET",
+        "IMPORT_ADMIN_EMAIL",
+        "REDIS_URL",
+        "SMTP_FROM_EMAIL",
+        "SMTP_HOST",
+        "SMTP_PASSWORD",
+        "SMTP_USER",
+        "WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_PATH",
+        "WINGSSIDE_TOUR_EDITORIAL_CATALOG_V2_SHA256",
+        "WINGSTRAVEL_RELEASE_SHA"
+      ]
+    },
+    {
+      "name": "payload-migrations",
+      "status": "pass",
+      "payloadDbPush": false
+    },
+    {
+      "name": "seed-full-frozen-source",
+      "status": "pass",
+      "artifactChecksum": "d2373c00d761e958498db7f6f79e896201f3651e6e5eb6659736e09b956a232b",
+      "itineraryChecksum": "8e5a71c1ca3b5666b06a56399859c3a55592e31179de972ab303cf0651402445",
+      "itineraryDays": 116,
+      "serviceChecksum": "108ad5c8a296e9a97b5b2e55493cc64a9dc8f9753dd6736d03491e0bbcab9cce",
+      "serviceRows": 331,
+      "tourChecksums": [
+        {
+          "checksum": "34d1935455bc82b083abe47e9499f241c403f4a4144d74f203293043b7b105a0",
+          "slug": "a-glimpse-of-central-vietnam-5-days"
+        },
+        {
+          "checksum": "e3bc5bfe413a98ffd9ef43cc6fe21e5630eecda6baf7f21b964aae20d78c1eeb",
+          "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days"
+        },
+        {
+          "checksum": "88bd928c90b9489c1aceb3f5f9e9f9a8ecfb10ece1327ecabfba28454cd72900",
+          "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days"
+        },
+        {
+          "checksum": "31ef8c6661ccf040d2d3b7749870d466b5e957321858c5db5445ab69757ba716",
+          "slug": "best-of-vietnam-and-cambodia-15-days"
+        },
+        {
+          "checksum": "6c5552a62168a194e2d4113e4ac19be7ac035b8cde0d94b4d06ab833c7bb2a45",
+          "slug": "central-vietnam-adventure-4-days"
+        },
+        {
+          "checksum": "7e45094099f09e40d29a4c1989357c12e9af459b58a42139264aec7e2b329ceb",
+          "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days"
+        },
+        {
+          "checksum": "f5e4bc300c4b7b78da75d2a7e9e6ec71cef23759a045f3ab71ae0fcbe70a6af4",
+          "slug": "discover-halong-bay-ninh-binh-package-2-days"
+        },
+        {
+          "checksum": "e093962621d3ca26e02ca126a31ee87119c2dcd7e7eac2870f3d89b167c024cc",
+          "slug": "highlights-of-vietnam-from-north-to-south-12-days"
+        },
+        {
+          "checksum": "66bb3f827de57862b9c649803ca73f01d3b182c603ce1708103c6f73b26c968e",
+          "slug": "hoi-an-surrounding-and-beach-break-7-days"
+        },
+        {
+          "checksum": "92fd649e1bad4764ab44f87f6e15be22d7c9fc5fb14c8e140a5b7a008214d02c",
+          "slug": "luxury-mekong-delta-speedboat-tour-full-day"
+        },
+        {
+          "checksum": "fc4a59c27e2a44212e0cf966e9f94f7fefb516f202e596ef7895bd9258e48571",
+          "slug": "mekong-delta-gateway-3-days"
+        },
+        {
+          "checksum": "6cf0eeb47aa121e6c146f21e450a0726836c6b4edfb875f8b4ab0eb2cd5aa7e3",
+          "slug": "mekong-delta-with-floating-market-2-days"
+        },
+        {
+          "checksum": "c76354f324ea13ccfb3082a738fd775dcd96535afbb1aad28aefe0e4ce52602b",
+          "slug": "ninh-binh-hoa-lu-trang-an-full-day-private-tour-from-hanoi"
+        },
+        {
+          "checksum": "9945c18719023f192d093c3cad0f558d0c3cb2b9747019395156b426d432e178",
+          "slug": "ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi"
+        },
+        {
+          "checksum": "e5200e3fd678fc3b036e78f99a090363223a4786300ff26cfd0c28b7d512d64d",
+          "slug": "northern-vietnam-highlights-for-family-6-days"
+        },
+        {
+          "checksum": "8d9f01343314f5e79843ac4cd9b04d0c6513c8f991a6b7fabec4334424862cc3",
+          "slug": "northern-vietnam-soft-adventure-8-days"
+        },
+        {
+          "checksum": "20a68cf652561c7f74519a9b21108059fd6dab19d76468c8195074c954de0310",
+          "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise"
+        },
+        {
+          "checksum": "373aca0d10d3665b843febeca9275a35559ce6ad3dbf79731b2f8f1d1f4c699d",
+          "slug": "sapa-trekking-ethnic-market-3-days"
+        },
+        {
+          "checksum": "952c111085930e421cce1087778c88214b4a5001397f02d78474b785598f3ea3",
+          "slug": "southern-beauty-beach-relaxation-8-days"
+        },
+        {
+          "checksum": "85831d2147c1d58ae2b3707903e6055d113b37ba34d1617502655b0ced7b944d",
+          "slug": "vietnam-at-a-glance-7-days"
+        },
+        {
+          "checksum": "c390049f5a2175cab54fc88cc4dedec0138599d98d7aac2c89d375a2163a221a",
+          "slug": "vietnam-luxury-wellness-retreat-escape-8-days"
+        },
+        {
+          "checksum": "d05979dbb1d316a649b57c906a1e5e2fa1d35031a269d6103e26de50d2834678",
+          "slug": "vietnam-memorable-honeymoon-trip-8-days"
+        }
+      ],
+      "tours": 22
+    },
+    {
+      "name": "postgres-crud",
+      "status": "pass",
+      "create": true,
+      "delete": true,
+      "insert": true,
+      "update": true
+    },
+    {
+      "name": "backup",
+      "status": "pass",
+      "bytes": 1693199,
+      "format": "postgres-custom",
+      "sha256": "e738503b1ccfeb484c14394bbaa7a44f64830c6a3af88cc30bbe88a78b319d72"
+    },
+    {
+      "name": "restore-drill",
+      "status": "pass",
+      "artifactChecksum": "d2373c00d761e958498db7f6f79e896201f3651e6e5eb6659736e09b956a232b",
+      "database": "wingsside_us055_rehearsal_84e125654f06_restore_rehearsal",
+      "itineraryChecksum": "8e5a71c1ca3b5666b06a56399859c3a55592e31179de972ab303cf0651402445",
+      "itineraryDays": 116,
+      "serviceChecksum": "108ad5c8a296e9a97b5b2e55493cc64a9dc8f9753dd6736d03491e0bbcab9cce",
+      "serviceRows": 331,
+      "tours": 22
+    },
+    {
+      "name": "catalog-plan-apply-verify-rollback-verify",
+      "status": "pending",
+      "reason": "catalog-r3-not-supplied"
+    },
+    {
+      "attempts": 1,
+      "containerName": "wingsside-us055-rehearsal-84e125654f06",
+      "name": "cleanup",
+      "status": "pass",
+      "verification": "absent"
+    }
+  ],
+  "completedAt": "2026-07-28T14:24:25.074Z",
+  "durationSeconds": 88,
+  "evidenceContainsCredentials": false,
+  "image": "postgres@sha256:33f923b05f64ca54ac4401c01126a6b92afe839a0aa0a52bc5aeb5cc958e5f20",
+  "mode": "disposable-local-rehearsal",
+  "runID": "84e125654f06",
+  "status": "baseline-ready-catalog-pending"
+}

@@ -194,6 +194,34 @@ export const plugins: Plugin[] = [
 
         const privateDeliveryFields: Field[] = [
           {
+            name: 'enquiryContext',
+            label: 'Enquiry context',
+            type: 'group',
+            access: {
+              read: ({ req }) => Boolean(req.user),
+            },
+            admin: {
+              description:
+                'Private journey and discovery metadata. Kept separate from customer-authored form fields.',
+              position: 'sidebar',
+              readOnly: true,
+            },
+            fields: [
+              { name: 'source', type: 'text', maxLength: 32 },
+              { name: 'tourId', type: 'text', maxLength: 128 },
+              { name: 'tourSlug', type: 'text', maxLength: 160 },
+              {
+                name: 'discovery',
+                type: 'group',
+                fields: [
+                  { name: 'destination', type: 'text', maxLength: 64 },
+                  { name: 'duration', type: 'text', maxLength: 64 },
+                  { name: 'style', type: 'text', maxLength: 64 },
+                ],
+              },
+            ],
+          },
+          {
             name: 'deliveryStatus',
             type: 'select',
             access: {

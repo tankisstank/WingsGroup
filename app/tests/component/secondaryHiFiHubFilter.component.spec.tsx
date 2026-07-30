@@ -21,7 +21,7 @@ const card = (key: string, id: number) => ({
   href: `/en/tour/${key}-tour`,
   id,
   key,
-  price: { currency: 'USD', kind: 'from' as const, value: 1000 + id },
+  price: { currency: 'USD' as const, kind: 'from' as const, value: 1000 + id },
   summary: `Published ${key} tour`,
   title: `${key[0]!.toUpperCase()}${key.slice(1)} Tour`,
 })

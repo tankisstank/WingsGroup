@@ -1,0 +1,1759 @@
+{
+  "version": 1,
+  "locale": "vi",
+  "voice": "calm-specific-consultative",
+  "tours": [
+    {
+      "slug": "a-glimpse-of-central-vietnam-5-days",
+      "title": "Miền Trung Việt Nam trong 5 ngày",
+      "summary": "Hành trình riêng nối Đà Nẵng, Huế và Hội An dành cho khách muốn tìm hiểu di sản miền Trung với nhịp đi vừa phải. Năm ngày kết hợp kiến trúc cố đô, đời sống phố cổ, thánh địa Mỹ Sơn và thời gian tự do để tự chọn trải nghiệm phù hợp.",
+      "routeSummary": "Đà Nẵng - Huế - Hội An - Mỹ Sơn - Đà Nẵng",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến Đà Nẵng, di chuyển về Huế",
+          "route": "Sân bay Đà Nẵng - Huế",
+          "summary": "Đón tại sân bay quốc tế Đà Nẵng và di chuyển bằng đường bộ đến Huế. Sau khi nhận phòng, phần còn lại trong ngày dành để nghỉ ngơi hoặc tự khám phá thành phố. Giờ nhận phòng tiêu chuẩn là 14:00; nhận phòng sớm tùy tình trạng phòng và có thể phát sinh phụ phí.",
+          "meals": "Không bao gồm",
+          "transport": "Xe riêng đón sân bay và di chuyển Đà Nẵng - Huế"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Nửa ngày khám phá Cố đô Huế",
+          "route": "Sông Hương - chùa Thiên Mụ - Đại Nội - chợ Đông Ba",
+          "summary": "Khởi hành khoảng 08:00 cho hành trình ghép đoàn nửa ngày. Du thuyền trên sông Hương đến chùa Thiên Mụ, tiếp tục tham quan Đại Nội và nghe câu chuyện về triều Nguyễn. Dừng tại chợ Đông Ba để quan sát nhịp buôn bán địa phương, thử món ăn đường phố hoặc chọn quà lưu niệm. Buổi chiều tự do; có thể chọn thêm trải nghiệm ẩm thực hoặc tham quan Huế vào buổi tối.",
+          "meals": "Bữa sáng"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Từ Huế đến Hội An",
+          "route": "Huế - Hội An",
+          "summary": "Sau bữa sáng và trả phòng, di chuyển bằng xe đến Hội An. Nhận phòng rồi tự do đi bộ trong phố cổ, ngắm những dãy nhà vàng, đèn lồng và nhịp sống chậm bên sông. Khách muốn có hướng dẫn chuyên sâu có thể chọn thêm tour đi bộ, trải nghiệm ẩm thực bằng xe máy hoặc lớp nấu ăn.",
+          "meals": "Bữa sáng",
+          "transport": "Xe đường bộ Huế - Hội An"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Thánh địa Mỹ Sơn và văn hóa Chăm",
+          "route": "Hội An - Mỹ Sơn - sông Thu Bồn - Hội An",
+          "summary": "Chọn chuyến buổi sáng hoặc trải nghiệm hoàng hôn đến thánh địa Mỹ Sơn, Di sản Văn hóa Thế giới nằm trong thung lũng xanh. Hướng dẫn viên giới thiệu lịch sử Champa giữa quần thể tháp gạch cổ và chương trình biểu diễn truyền thống. Tiếp tục ghé nhà dân làm bánh tráng, dùng bữa tại địa phương; phương án hoàng hôn dùng bữa nhẹ. Kết thúc bằng chuyến thuyền thư thả trên sông Thu Bồn về Hội An.",
+          "meals": "Bữa sáng và bữa trưa; phương án hoàng hôn dùng bữa nhẹ",
+          "transport": "Xe và thuyền trên sông Thu Bồn"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Rời Hội An, tiễn sân bay Đà Nẵng",
+          "route": "Hội An - sân bay Đà Nẵng",
+          "summary": "Dùng bữa sáng, thu xếp hành lý và trả phòng. Xe đưa đoàn từ Hội An đến Đà Nẵng theo giờ bay tiếp theo.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng Hội An - sân bay Đà Nẵng"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn theo chương trình",
+        "Toàn bộ phương tiện tại Việt Nam, gồm đón và tiễn sân bay, theo lịch trình",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Vé vào cửa các điểm tham quan tại Việt Nam theo lịch trình",
+        "Các bữa ăn được ghi rõ trong chương trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Phương tiện đến hoặc rời Việt Nam",
+        "Thuế quốc tế hoặc thuế khởi hành",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Lệ phí hộ chiếu",
+        "Bảo hiểm du lịch trong thời gian ở Việt Nam",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước đóng chai",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Lưu trú phòng đôi hoặc hai giường đơn tại Huế và Hội An theo hạng đã xác nhận.",
+        "mealsSummary": "Bữa sáng từ ngày 2 đến ngày 5; bữa trưa hoặc bữa nhẹ tại Mỹ Sơn tùy khung giờ đã chọn.",
+        "transportSummary": "Xe đón sân bay, các chặng Đà Nẵng - Huế - Hội An và tiễn sân bay; thuyền sông Thu Bồn trong ngày Mỹ Sơn.",
+        "operatorNotes": "Lịch Mỹ Sơn có phương án buổi sáng hoặc hoàng hôn. Nhận phòng sớm và các tour tự chọn cần được xác nhận riêng."
+      },
+      "meta": {
+        "title": "Hành trình miền Trung Việt Nam 5 ngày | WingSide",
+        "description": "Khám phá Đà Nẵng, Huế, Hội An và Mỹ Sơn trong hành trình riêng 5 ngày với lịch trình cân bằng giữa di sản và thời gian tự do.",
+        "breadcrumbLabel": "Miền Trung Việt Nam 5 ngày"
+      }
+    },
+    {
+      "slug": "best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days",
+      "title": "Tinh hoa miền Bắc: Hà Nội, Sa Pa và Hạ Long trong 6 ngày",
+      "summary": "Hành trình riêng sáu ngày đi qua Hà Nội, Sa Pa, Fansipan và vịnh Hạ Long, kết hợp ẩm thực phố cổ, trekking bản làng, cảnh quan núi cao và một đêm trên du thuyền. Nhịp đi được thiết kế rõ ràng, có thể điều chỉnh theo thể lực và sở thích của đoàn.",
+      "routeSummary": "Hà Nội - Sa Pa - Fansipan - Hà Nội - vịnh Hạ Long - Hà Nội",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến Hà Nội và khám phá ẩm thực phố cổ",
+          "route": "Sân bay Nội Bài - Hà Nội",
+          "summary": "Đón tại sân bay Nội Bài, về khách sạn nhận phòng và nghỉ ngơi. Khoảng 17:30, gặp hướng dẫn viên tại khu vực hồ Hoàn Kiếm để bắt đầu chuyến đi bộ ẩm thực trong phố cổ. Thực đơn thay đổi theo ngày, thường có phở, bún thang hoặc bún bò Huế, bánh cuốn, bánh mì, nộm bò khô, nem chua rán và cà phê trứng. Vui lòng báo trước chế độ ăn chay, thuần chay hoặc dị ứng.",
+          "meals": "Bữa tối",
+          "transport": "Xe riêng đón sân bay"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Tham quan Hà Nội, đi xe lên Sa Pa",
+          "route": "Văn Miếu - khu Ba Đình - hồ Tây - Sa Pa",
+          "summary": "Buổi sáng tham quan Văn Miếu, bên ngoài Lăng Chủ tịch Hồ Chí Minh, chùa Một Cột, hồ Tây và chùa Trấn Quốc; dùng bữa trưa tại nhà hàng Việt Nam. Lăng chỉ tham quan bên ngoài từ tháng 6 đến tháng 8 và khách cần mặc trang phục lịch sự, che vai và đầu gối. Khoảng 14:30, lên xe đi Sa Pa qua vùng đồi và ruộng bậc thang, nhận phòng khi đến nơi.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan Hà Nội và xe ghép chất lượng cao Hà Nội - Sa Pa"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Trekking Ý Linh Hồ, Lao Chải và Tả Van",
+          "route": "Sa Pa - Ý Linh Hồ - Lao Chải - Tả Van - Sa Pa",
+          "summary": "Sau bữa sáng, trekking khoảng 13 km theo cung đường chủ yếu xuống dốc cùng hướng dẫn viên địa phương. Đi qua Ý Linh Hồ bên suối Mường Hoa, tìm hiểu đời sống người H'Mông Đen tại Lao Chải và cộng đồng người Giáy ở Tả Van giữa ruộng bậc thang. Dùng bữa trưa trên tuyến rồi trở lại thị trấn Sa Pa nghỉ đêm. Cung đường được xếp mức dễ nhưng vẫn cần giày phù hợp và thể lực đi bộ liên tục.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Đi bộ trekking và xe hỗ trợ theo chương trình"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Fansipan và trở về Hà Nội",
+          "route": "Sa Pa - Fansipan - Hà Nội",
+          "summary": "Di chuyển đến ga cáp treo Fansipan, ngắm dãy Hoàng Liên Sơn và các thung lũng từ trên cao. Từ ga trên, hành trình lên đỉnh 3.143 m có khoảng 600 bậc đá và thường mất khoảng 1,5 giờ; có thể điều chỉnh theo thể lực và thời tiết. Sau thời gian tham quan khu vực đỉnh, đi cáp treo xuống và trở về Hà Nội vào buổi chiều.",
+          "meals": "Bữa sáng",
+          "transport": "Xe, cáp treo Fansipan và xe Sa Pa - Hà Nội"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Từ Hà Nội đến du thuyền Hạ Long",
+          "route": "Hà Nội - vịnh Hạ Long",
+          "summary": "Đón tại khách sạn khoảng 08:00-08:30 và di chuyển đến Hạ Long. Làm thủ tục lên du thuyền khoảng 11:30-12:00, dùng đồ uống chào mừng và bữa trưa trong lúc tàu đi giữa các đảo đá vôi. Buổi chiều tham gia hang động, chèo kayak hoặc bơi tùy hải trình từng tàu. Trở lại du thuyền dùng bữa tối; câu mực, trò chơi hoặc xem phim tùy tiện ích của tàu.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Xe đưa đón Hà Nội - Hạ Long và du thuyền",
+          "accommodation": "Nghỉ đêm trên du thuyền vịnh Hạ Long"
+        },
+        {
+          "dayNumber": 6,
+          "title": "Rời du thuyền Hạ Long, trở về Hà Nội",
+          "route": "Vịnh Hạ Long - Hà Nội",
+          "summary": "Có thể bắt đầu ngày mới bằng Thái Cực Quyền trước bữa sáng, tùy chương trình của du thuyền. Tàu tiếp tục đến điểm cuối như hang Trung Trang, hang Sửng Sốt hoặc hang Sáng - Tối theo hải trình đã chọn. Trả cabin, dùng bữa brunch trên đường về cảng, rời tàu khoảng 11:30 và lên xe trở lại Hà Nội. Điểm tham quan buổi sáng thay đổi theo từng du thuyền.",
+          "meals": "Bữa sáng và brunch",
+          "transport": "Du thuyền và xe Hạ Long - Hà Nội"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn tại khách sạn; không áp dụng cho đêm tàu hoặc homestay nếu có",
+        "Phương tiện trong Việt Nam theo lịch trình, không gồm đón và tiễn sân bay",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Xe limousine ghép Hà Nội - Sa Pa - Hà Nội",
+        "Xe đưa đón Hà Nội - vịnh Hạ Long - Hà Nội",
+        "Vé vào cửa theo lịch trình",
+        "Các bữa ăn được ghi rõ trong chương trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
+        "Đón và tiễn sân bay",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Bảo hiểm du lịch",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại Hà Nội và Sa Pa; một đêm trên du thuyền Hạ Long theo hạng đã xác nhận.",
+        "mealsSummary": "Bữa ăn theo từng ngày, từ bữa tối ẩm thực Hà Nội đến bữa trưa, tối và brunch trên du thuyền.",
+        "transportSummary": "Xe đường bộ Hà Nội - Sa Pa - Hà Nội, xe đưa đón Hạ Long, cáp treo Fansipan và du thuyền.",
+        "operatorNotes": "Cung trekking dài khoảng 13 km. Hoạt động Fansipan và Hạ Long phụ thuộc thời tiết, thể lực và hải trình của du thuyền."
+      },
+      "meta": {
+        "title": "Hà Nội, Sa Pa và Hạ Long 6 ngày | WingSide",
+        "description": "Hành trình riêng 6 ngày qua Hà Nội, Sa Pa, Fansipan và vịnh Hạ Long, kết hợp ẩm thực, trekking và nghỉ đêm trên du thuyền.",
+        "breadcrumbLabel": "Tinh hoa miền Bắc 6 ngày"
+      }
+    },
+    {
+      "slug": "best-of-south-vietnam-saigon-cu-chi-tunnel-mekong-delta-5-days",
+      "title": "Tinh hoa miền Nam: Sài Gòn, Củ Chi và miền Tây trong 5 ngày",
+      "summary": "Hành trình năm ngày kết nối nhịp sống Sài Gòn, chiều sâu lịch sử tại địa đạo Củ Chi và miền sông nước Mỹ Tho - Cần Thơ. Lịch trình phù hợp với khách lần đầu đến miền Nam và vẫn chừa khoảng riêng để tự khám phá thành phố.",
+      "routeSummary": "TP. Hồ Chí Minh - địa đạo Củ Chi - Mỹ Tho - Cần Thơ - TP. Hồ Chí Minh",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến TP. Hồ Chí Minh",
+          "route": "Sân bay Tân Sơn Nhất - trung tâm TP. Hồ Chí Minh",
+          "summary": "Đón tại sân bay Tân Sơn Nhất và đưa về khách sạn trung tâm. Giờ nhận phòng tiêu chuẩn là 14:00; nhận phòng sớm cần xác nhận và có thể phát sinh phụ phí. Buổi tối tự do, hoặc chọn thêm chương trình nghệ thuật, du thuyền ăn tối trên sông Sài Gòn hay khám phá thành phố bằng xe máy.",
+          "meals": "Không bao gồm",
+          "transport": "Xe riêng đón sân bay"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Địa đạo Củ Chi và các dấu ấn lịch sử Sài Gòn",
+          "route": "TP. Hồ Chí Minh - Củ Chi - TP. Hồ Chí Minh",
+          "summary": "Khởi hành khoảng 08:00 đến địa đạo Củ Chi, tìm hiểu mạng lưới hầm ngầm, lối vào bí mật, hầm trú ẩn và đời sống thời chiến. Trường bắn là hoạt động tự chọn có phụ phí. Sau bữa trưa nhẹ, trở lại thành phố tham quan Dinh Độc Lập, Nhà thờ Đức Bà đang trùng tu, Bưu điện Trung tâm, Bảo tàng Chứng tích Chiến tranh và chợ Bến Thành.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Từ Sài Gòn về miền sông nước Cần Thơ",
+          "route": "TP. Hồ Chí Minh - Mỹ Tho - Cần Thơ",
+          "summary": "Sau bữa sáng và trả phòng, đi Mỹ Tho, ghé chùa Vĩnh Tràng rồi xuống xuồng nhỏ len qua kênh rạch và rừng dừa nước. Thăm vườn cây, xem làm kẹo dừa, đi xe lôi trong xóm, thưởng thức trái cây và mật ong trước bữa trưa bên sông. Buổi chiều tiếp tục đến Cần Thơ nhận phòng.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe, thuyền máy, xuồng chèo và xe lôi"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Chợ nổi Cái Răng lúc bình minh",
+          "route": "Cần Thơ - chợ nổi Cái Răng - TP. Hồ Chí Minh",
+          "summary": "Rời khách sạn sớm để đi thuyền gỗ đến chợ nổi Cái Răng, quan sát sinh hoạt mua bán trên sông. Ghé một lò hủ tiếu nhỏ và thưởng thức trái cây nhiệt đới trên đường về bến. Sau khi trả phòng, dùng bữa trưa tại điểm dừng miền Tây rồi trở lại TP. Hồ Chí Minh.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Thuyền chợ nổi và xe Cần Thơ - TP. Hồ Chí Minh"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Rời TP. Hồ Chí Minh",
+          "route": "Khách sạn - sân bay Tân Sơn Nhất",
+          "summary": "Dùng bữa sáng và tự do cho đến giờ trả phòng. Có thể đặt thêm chuyến khám phá Sài Gòn buổi sớm nếu giờ bay phù hợp. Xe đưa ra sân bay Tân Sơn Nhất để tiếp tục hành trình.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng tiễn sân bay"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn theo chương trình, trừ đêm homestay hoặc tàu nếu có",
+        "Xe điều hòa và các chặng đưa đón, gồm đón và tiễn sân bay, theo lịch trình",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Vé vào cửa theo lịch trình",
+        "Các bữa ăn được ghi rõ trong chương trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Bảo hiểm du lịch",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại TP. Hồ Chí Minh và Cần Thơ theo hạng đã xác nhận.",
+        "mealsSummary": "Bữa sáng hằng ngày từ ngày 2; bữa trưa trong các ngày Củ Chi và miền Tây.",
+        "transportSummary": "Xe đón tiễn sân bay, xe tham quan, thuyền và xuồng tại đồng bằng sông Cửu Long.",
+        "operatorNotes": "Ngày chợ nổi khởi hành sớm. Trường bắn Củ Chi và các trải nghiệm buổi tối là lựa chọn riêng có phụ phí."
+      },
+      "meta": {
+        "title": "Sài Gòn, Củ Chi và miền Tây 5 ngày | WingSide",
+        "description": "Khám phá TP. Hồ Chí Minh, địa đạo Củ Chi, Mỹ Tho, Cần Thơ và chợ nổi Cái Răng trong hành trình miền Nam 5 ngày.",
+        "breadcrumbLabel": "Tinh hoa miền Nam 5 ngày"
+      }
+    },
+    {
+      "slug": "best-of-vietnam-and-cambodia-15-days",
+      "title": "Tinh hoa Việt Nam và Campuchia trong 15 ngày",
+      "summary": "Hành trình xuyên Việt kết hợp Angkor trong 15 ngày, đi từ Hà Nội và vịnh Hạ Long qua Hội An, TP. Hồ Chí Minh, đồng bằng sông Cửu Long đến Siem Reap. Chương trình cân bằng giữa di sản, ẩm thực, cảnh quan và những ngày tự do có thể cá nhân hóa.",
+      "routeSummary": "Hà Nội - Hạ Long - Đà Nẵng - Hội An - TP. Hồ Chí Minh - Cần Thơ - Siem Reap",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến Hà Nội",
+          "route": "Sân bay Nội Bài - Hà Nội",
+          "summary": "Đón sân bay và về khách sạn nhận phòng. Thời gian còn lại tự do nghỉ ngơi hoặc chọn thêm lớp nấu ăn và chuyến ẩm thực phố cổ vào buổi tối.",
+          "meals": "Không bao gồm",
+          "transport": "Xe riêng đón sân bay"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Nửa ngày khám phá Hà Nội",
+          "route": "Văn Miếu - khu Ba Đình - hồ Tây - phố cổ",
+          "summary": "Tham quan những điểm tiêu biểu của thủ đô cùng hướng dẫn viên, gồm Văn Miếu, khu Ba Đình, chùa Một Cột, hồ Tây và chùa Trấn Quốc. Buổi chiều tự do để đi bộ quanh hồ Hoàn Kiếm hoặc khám phá phố cổ theo nhịp riêng.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan Hà Nội"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Du thuyền vịnh Hạ Long",
+          "route": "Hà Nội - vịnh Hạ Long",
+          "summary": "Rời Hà Nội vào buổi sáng, lên du thuyền khoảng giữa trưa và dùng bữa trong lúc tàu đi giữa các đảo đá vôi. Hoạt động hang động, kayak hoặc bơi thay đổi theo hải trình và thời tiết. Dùng bữa tối, nghỉ đêm trên vịnh.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Xe Hà Nội - Hạ Long và du thuyền",
+          "accommodation": "Nghỉ đêm trên du thuyền"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Rời Hạ Long, bay đến Đà Nẵng",
+          "route": "Vịnh Hạ Long - Hà Nội - Đà Nẵng - Hội An",
+          "summary": "Đón bình minh trên vịnh, tham gia hoạt động buổi sáng theo chương trình tàu rồi trả cabin và dùng brunch. Trở về Hà Nội, nối chuyến bay đến Đà Nẵng và di chuyển về Hội An nhận phòng.",
+          "meals": "Bữa sáng và brunch",
+          "transport": "Du thuyền, xe và chuyến bay Hà Nội - Đà Nẵng"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Đi bộ khám phá Hội An",
+          "route": "Phố cổ Hội An",
+          "summary": "Cùng hướng dẫn viên đi qua các hội quán, nhà cổ, Chùa Cầu và những con phố bên sông để hiểu lịch sử thương cảng Hội An. Phần còn lại trong ngày dành để tự khám phá, may đo hoặc thưởng thức ẩm thực địa phương.",
+          "meals": "Bữa sáng",
+          "transport": "Đi bộ"
+        },
+        {
+          "dayNumber": 6,
+          "title": "Một ngày tự do ở Hội An",
+          "route": "Hội An",
+          "summary": "Tự do nghỉ ngơi hoặc chọn thêm Mỹ Sơn, trải nghiệm làm nông và nấu ăn, chương trình nghệ thuật hay chuyến ẩm thực bằng xe tay ga. Các hoạt động tự chọn cần đặt trước và tùy tình trạng chỗ.",
+          "meals": "Bữa sáng"
+        },
+        {
+          "dayNumber": 7,
+          "title": "Bay vào TP. Hồ Chí Minh",
+          "route": "Hội An - Đà Nẵng - TP. Hồ Chí Minh",
+          "summary": "Trả phòng, di chuyển đến sân bay Đà Nẵng và bay vào TP. Hồ Chí Minh. Đón sân bay, về khách sạn nhận phòng và tự do khám phá thành phố vào buổi tối.",
+          "meals": "Bữa sáng",
+          "transport": "Xe và chuyến bay Đà Nẵng - TP. Hồ Chí Minh"
+        },
+        {
+          "dayNumber": 8,
+          "title": "Nửa ngày tham quan TP. Hồ Chí Minh",
+          "route": "Dinh Độc Lập - Bưu điện Trung tâm - bảo tàng - chợ Bến Thành",
+          "summary": "Tìm hiểu các lớp lịch sử thành phố qua Dinh Độc Lập, kiến trúc thuộc địa ở khu trung tâm, Bảo tàng Chứng tích Chiến tranh và chợ Bến Thành. Nhà thờ Đức Bà có thể chỉ tham quan bên ngoài trong thời gian trùng tu.",
+          "meals": "Bữa sáng",
+          "transport": "Xe tham quan"
+        },
+        {
+          "dayNumber": 9,
+          "title": "Mỹ Tho và đời sống miệt vườn",
+          "route": "TP. Hồ Chí Minh - Mỹ Tho - Cần Thơ",
+          "summary": "Đi Mỹ Tho, ghé chùa Vĩnh Tràng rồi xuống thuyền khám phá kênh rạch, vườn cây và nghề làm kẹo dừa. Thưởng thức trái cây, dùng bữa trưa bên sông và tiếp tục đến Cần Thơ nghỉ đêm.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe, thuyền máy và xuồng chèo"
+        },
+        {
+          "dayNumber": 10,
+          "title": "Chợ nổi Cái Răng, trở lại Sài Gòn",
+          "route": "Cần Thơ - chợ nổi Cái Răng - TP. Hồ Chí Minh",
+          "summary": "Đi thuyền sớm đến chợ nổi Cái Răng, ghé lò hủ tiếu và quan sát đời sống ven sông. Sau khi trả phòng và dùng bữa trưa trên đường, trở lại TP. Hồ Chí Minh.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Thuyền và xe Cần Thơ - TP. Hồ Chí Minh"
+        },
+        {
+          "dayNumber": 11,
+          "title": "Bay đến Siem Reap",
+          "route": "TP. Hồ Chí Minh - Siem Reap",
+          "summary": "Di chuyển ra sân bay và bay đến Siem Reap. Đón tại sân bay Campuchia, về khách sạn nhận phòng và chuẩn bị cho hai ngày khám phá quần thể Angkor.",
+          "meals": "Bữa sáng",
+          "transport": "Xe và chuyến bay TP. Hồ Chí Minh - Siem Reap"
+        },
+        {
+          "dayNumber": 12,
+          "title": "Angkor Wat và kinh đô Angkor Thom",
+          "route": "Angkor Thom - Bayon - Ta Prohm - Angkor Wat",
+          "summary": "Khám phá những công trình quan trọng của Angkor, từ cổng Angkor Thom và các gương mặt đá Bayon đến Ta Prohm phủ rễ cây. Buổi chiều tham quan Angkor Wat, tìm hiểu bố cục đền, phù điêu và biểu tượng Khmer.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan Siem Reap"
+        },
+        {
+          "dayNumber": 13,
+          "title": "Banteay Srei và làng Pradark",
+          "route": "Siem Reap - Banteay Srei - Pradark",
+          "summary": "Đi ra vùng nông thôn để tham quan Banteay Srei, nổi bật với các mảng chạm khắc sa thạch hồng tinh xảo. Ghé làng Pradark tìm hiểu đời sống địa phương và nghề thủ công trước khi trở về Siem Reap.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan"
+        },
+        {
+          "dayNumber": 14,
+          "title": "Siem Reap theo nhịp riêng",
+          "route": "Siem Reap",
+          "summary": "Một ngày tự do để nghỉ ngơi hoặc chọn thêm làng nổi Kampong Khleang, zipline trong rừng hay ngắm bình minh Angkor bằng tuk-tuk. Mỗi lựa chọn phụ thuộc thời tiết và cần xác nhận riêng.",
+          "meals": "Bữa sáng"
+        },
+        {
+          "dayNumber": 15,
+          "title": "Rời Siem Reap",
+          "route": "Khách sạn - sân bay Siem Reap",
+          "summary": "Dùng bữa sáng, tự do đến giờ trả phòng và di chuyển ra sân bay cho chuyến bay tiếp theo.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng tiễn sân bay"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn theo chương trình",
+        "Phương tiện tại Việt Nam và Campuchia, gồm đón và tiễn sân bay, theo lịch trình",
+        "Hai chuyến bay nội địa Hà Nội - Đà Nẵng và Đà Nẵng - TP. Hồ Chí Minh",
+        "Chuyến bay TP. Hồ Chí Minh - Siem Reap",
+        "Các bữa ăn được ghi rõ trong chương trình",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Vé vào cửa theo lịch trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế và các loại thuế liên quan, ngoài các chặng đã ghi là bao gồm",
+        "Thị thực Việt Nam và Campuchia cùng lệ phí hộ chiếu",
+        "Bảo hiểm du lịch",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại Hà Nội, Hội An, TP. Hồ Chí Minh, Cần Thơ và Siem Reap; một đêm du thuyền Hạ Long.",
+        "mealsSummary": "Bữa sáng hằng ngày sau ngày đến; các bữa trưa, tối và brunch theo lịch trình.",
+        "transportSummary": "Xe đường bộ, du thuyền Hạ Long, thuyền miền Tây và ba chuyến bay trong khu vực.",
+        "operatorNotes": "Lịch Hạ Long phụ thuộc hải trình và thời tiết. Hoạt động ngày tự do tại Hội An và Siem Reap không nằm trong giá cơ bản."
+      },
+      "meta": {
+        "title": "Việt Nam và Campuchia 15 ngày | WingSide",
+        "description": "Hành trình 15 ngày từ Hà Nội, Hạ Long, Hội An và miền Tây đến quần thể Angkor tại Siem Reap.",
+        "breadcrumbLabel": "Tinh hoa Việt Nam và Campuchia"
+      }
+    },
+    {
+      "slug": "central-vietnam-adventure-4-days",
+      "title": "Phiêu lưu miền Trung Việt Nam trong 4 ngày",
+      "summary": "Bốn ngày vận động ngoài trời từ Huế đến Hội An với zipline, thử thách trên cao, cung đường đèo Hải Vân bằng xe máy và trải nghiệm nông nghiệp ở Cẩm Thanh. Chương trình dành cho khách thích hoạt động nhưng vẫn có thể điều chỉnh theo thể lực.",
+      "routeSummary": "Huế - Thanh Tân - Lăng Cô - đèo Hải Vân - Hội An - Cẩm Thanh - Đà Nẵng",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Zipline và thử thách trên cao tại Thanh Tân",
+          "route": "Huế - suối khoáng Thanh Tân - Huế",
+          "summary": "Di chuyển từ Huế đến Thanh Tân để tham gia zipline và hệ thống thử thách trên cao với nhiều cấp độ. Hướng dẫn an toàn và trang bị được thực hiện trước khi vào tuyến. Hoạt động có giới hạn sức khỏe, chiều cao và cân nặng; khách có bệnh tim mạch, huyết áp hoặc hạn chế vận động cần trao đổi trước khi đặt.",
+          "meals": "Bữa trưa",
+          "transport": "Xe đưa đón Huế - Thanh Tân"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Cung đường ven biển Huế - Hội An bằng xe máy",
+          "route": "Huế - suối Voi - Lăng Cô - đèo Hải Vân - Hội An",
+          "summary": "Khởi hành bằng xe máy qua vùng nông thôn, dừng tại suối Voi và đầm Lập An, dùng bữa trưa dã ngoại gần Lăng Cô. Tiếp tục vượt đèo Hải Vân với tầm nhìn ra biển rồi xuống Đà Nẵng và đến Hội An. Hình thức tự lái hay ngồi sau tài xế cần được xác nhận theo giấy phép và kinh nghiệm.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe máy có tài xế hoặc tự lái theo phương án đã xác nhận"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Đạp xe và làm nông tại Cẩm Thanh",
+          "route": "Hội An - Cẩm Thanh - Hội An",
+          "summary": "Đạp xe qua làng quê Cẩm Thanh, gặp nông dân địa phương và tìm hiểu các công việc trồng lúa. Thử cưỡi trâu, đánh bắt cá theo cách truyền thống, dùng bữa trưa và đi thuyền thúng trong rừng dừa nước trước khi trở lại Hội An.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe đạp và thuyền thúng"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Rời Hội An",
+          "route": "Hội An - sân bay Đà Nẵng",
+          "summary": "Dùng bữa sáng và tự do đến giờ trả phòng tiêu chuẩn 12:00. Xe đưa từ Hội An đến sân bay Đà Nẵng theo giờ bay.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng tiễn sân bay"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn theo chương trình",
+        "Phương tiện theo lịch trình, gồm đón và tiễn sân bay",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các hoạt động",
+        "Vé và thiết bị cho các hoạt động được ghi trong lịch trình",
+        "Các bữa ăn được ghi rõ trong chương trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Bảo hiểm du lịch có bảo hiểm cho hoạt động mạo hiểm",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại Huế và Hội An theo hạng đã xác nhận.",
+        "mealsSummary": "Bữa ăn theo chương trình, gồm bữa trưa trong ba ngày hoạt động.",
+        "transportSummary": "Xe đưa đón, xe máy trên cung Huế - Hội An, xe đạp và thuyền thúng.",
+        "operatorNotes": "Zipline, highwire và xe máy cần kiểm tra điều kiện sức khỏe, cân nặng, giấy phép và bảo hiểm trước khi xác nhận."
+      },
+      "meta": {
+        "title": "Phiêu lưu miền Trung 4 ngày | WingSide",
+        "description": "Hành trình 4 ngày từ Huế đến Hội An với zipline, đèo Hải Vân bằng xe máy, đạp xe và thuyền thúng Cẩm Thanh.",
+        "breadcrumbLabel": "Phiêu lưu miền Trung 4 ngày"
+      }
+    },
+    {
+      "slug": "central-vietnam-da-nang-hoi-an-ba-na-hills-5-days",
+      "title": "Đà Nẵng, Hội An và Bà Nà Hills trong 5 ngày",
+      "summary": "Hành trình năm ngày tập trung vào những điểm nổi bật của miền Trung: ẩm thực Đà Nẵng, Cầu Vàng tại Bà Nà Hills, di sản Huế, bán đảo Sơn Trà, Ngũ Hành Sơn và phố cổ Hội An.",
+      "routeSummary": "Đà Nẵng - Bà Nà Hills - Huế - Sơn Trà - Ngũ Hành Sơn - Hội An",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến Đà Nẵng và đi bộ khám phá ẩm thực",
+          "route": "Sân bay Đà Nẵng - trung tâm thành phố",
+          "summary": "Đón sân bay và về khách sạn nhận phòng. Khoảng 17:00, bắt đầu chuyến đi bộ ẩm thực dài khoảng 2,5 giờ và 3 km, thử các món địa phương tại những hàng quán được chọn theo ngày. Báo trước nếu có dị ứng hoặc chế độ ăn đặc biệt.",
+          "meals": "Bữa tối",
+          "transport": "Xe riêng đón sân bay và đi bộ"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Bà Nà Hills và Cầu Vàng",
+          "route": "Đà Nẵng - Bà Nà Hills - Đà Nẵng",
+          "summary": "Đi cáp treo lên Bà Nà Hills, tham quan Cầu Vàng, vườn hoa Le Jardin d'Amour và các khu vui chơi theo thời gian cho phép. Hầm rượu Debay là điểm tự chọn có thể phát sinh vé riêng. Trở về Đà Nẵng vào cuối ngày.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe và cáp treo Bà Nà Hills"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Một ngày khám phá Cố đô Huế",
+          "route": "Đà Nẵng hoặc Hội An - Huế - Đà Nẵng hoặc Hội An",
+          "summary": "Khởi hành sớm đi Huế, tham quan lăng Khải Định, dùng bữa trưa rồi tiếp tục đến Đại Nội và các điểm tiêu biểu của cố đô. Lịch dừng có thể thay đổi theo giao thông và giờ mở cửa; trở lại nơi lưu trú vào buổi tối.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan khứ hồi Huế"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Sơn Trà, Ngũ Hành Sơn và Hội An",
+          "route": "Sơn Trà - chùa Linh Ứng - Ngũ Hành Sơn - Cẩm Thanh - Hội An",
+          "summary": "Tham quan bán đảo Sơn Trà và tượng Quan Âm cao 67 m tại chùa Linh Ứng, sau đó khám phá hang động và chùa tại Ngũ Hành Sơn. Buổi chiều trải nghiệm rừng dừa Cẩm Thanh trước khi đi bộ trong phố cổ Hội An và dùng bữa tối.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Xe và thuyền thúng"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Rời Đà Nẵng",
+          "route": "Khách sạn - sân bay Đà Nẵng",
+          "summary": "Dùng bữa sáng, tự do đến giờ trả phòng và di chuyển ra sân bay Đà Nẵng cho chuyến bay tiếp theo.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng tiễn sân bay"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn theo chương trình",
+        "Phương tiện theo lịch trình, gồm đón và tiễn sân bay",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Vé vào cửa theo lịch trình",
+        "Vé cáp treo Bà Nà Hills",
+        "Các bữa ăn được ghi rõ trong chương trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Bảo hiểm du lịch",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại Đà Nẵng hoặc Hội An theo hạng đã xác nhận.",
+        "mealsSummary": "Bữa sáng từ ngày 2; các bữa trưa, tối theo từng ngày tham quan.",
+        "transportSummary": "Xe đón tiễn sân bay, xe tham quan, cáp treo Bà Nà Hills và thuyền thúng Cẩm Thanh.",
+        "operatorNotes": "Lịch Bà Nà Hills và Huế phụ thuộc thời tiết, giao thông và giờ vận hành. Hầm rượu Debay có thể cần vé riêng."
+      },
+      "meta": {
+        "title": "Đà Nẵng, Hội An và Bà Nà Hills 5 ngày | WingSide",
+        "description": "Khám phá ẩm thực Đà Nẵng, Cầu Vàng, Huế, Sơn Trà, Ngũ Hành Sơn và Hội An trong hành trình miền Trung 5 ngày.",
+        "breadcrumbLabel": "Đà Nẵng, Hội An và Bà Nà Hills"
+      }
+    },
+    {
+      "slug": "discover-halong-bay-ninh-binh-package-2-days",
+      "title": "Hạ Long và Ninh Bình trong 2 ngày",
+      "summary": "Hai ngày gọn nhịp kết nối vịnh Hạ Long với cảnh quan núi đá vôi Ninh Bình. Hành trình gồm du thuyền trong ngày, hang Sửng Sốt, chèo kayak hoặc thuyền nan, Tam Cốc và cố đô Hoa Lư.",
+      "routeSummary": "Hà Nội - vịnh Hạ Long - Ninh Bình - Tam Cốc - Hoa Lư - Hà Nội",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Du thuyền Hạ Long, đi tiếp Ninh Bình",
+          "route": "Hà Nội - vịnh Hạ Long - Ninh Bình",
+          "summary": "Đón tại Hà Nội khoảng 08:00-08:30 và đi Hạ Long trong khoảng 2,5 giờ. Lên tàu, dùng bữa trưa giữa cảnh quan đảo đá vôi, đi thuyền nan hoặc kayak tại hang Luồn và tham quan hang Sửng Sốt. Rời cảng vào cuối chiều, chuyển tiếp đến Ninh Bình và nhận phòng bungalow.",
+          "meals": "Bữa trưa và bữa tối",
+          "transport": "Xe, du thuyền và kayak hoặc thuyền nan",
+          "accommodation": "Bungalow tại Ninh Bình"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Tam Cốc và cố đô Hoa Lư",
+          "route": "Tam Cốc - Hoa Lư - Hà Nội",
+          "summary": "Sau bữa sáng, đi thuyền khoảng hai giờ trên sông Ngô Đồng qua các hang và cánh đồng Tam Cốc. Tiếp tục đến cố đô Hoa Lư, tìm hiểu dấu ấn các triều Đinh - Tiền Lê, dùng bữa trưa rồi trở lại Hà Nội.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Thuyền Tam Cốc, xe đạp theo chương trình và xe về Hà Nội"
+        }
+      ],
+      "includes": [
+        "Xe đón tại khu phố cổ Hà Nội và di chuyển đến Hạ Long",
+        "Xe Hạ Long - Ninh Bình và Ninh Bình - Hà Nội",
+        "Một đêm bungalow phòng đôi hoặc hai giường đơn tại Ninh Bình",
+        "Hướng dẫn viên nói tiếng Anh theo chương trình",
+        "Xe đạp và thuyền tại Ninh Bình",
+        "Vé tham quan và vé du thuyền theo lịch trình",
+        "Nước uống và khăn giấy theo tiêu chuẩn nhà tổ chức",
+        "Các bữa ăn được ghi rõ trong chương trình"
+      ],
+      "excludes": [
+        "Đồ uống và các bữa không ghi trong chương trình",
+        "Bảo hiểm du lịch",
+        "Các khoản chi cá nhân",
+        "Tiền tip cho hướng dẫn viên và tài xế",
+        "Dịch vụ không được nêu trong phần bao gồm",
+        "Thị thực Việt Nam"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Một đêm bungalow phòng đôi hoặc hai giường đơn tại Ninh Bình.",
+        "mealsSummary": "Bữa trưa và tối ngày 1; bữa sáng và trưa ngày 2.",
+        "transportSummary": "Xe khứ hồi từ Hà Nội, du thuyền Hạ Long, thuyền Tam Cốc, kayak hoặc thuyền nan và xe đạp.",
+        "operatorNotes": "Điểm đón áp dụng tại khu phố cổ Hà Nội. Hoạt động trên vịnh phụ thuộc thời tiết và chỉ đạo của cảng."
+      },
+      "meta": {
+        "title": "Hạ Long và Ninh Bình 2 ngày | WingSide",
+        "description": "Hành trình 2 ngày từ Hà Nội đến vịnh Hạ Long, hang Sửng Sốt, Tam Cốc và cố đô Hoa Lư.",
+        "breadcrumbLabel": "Hạ Long và Ninh Bình 2 ngày"
+      }
+    },
+    {
+      "slug": "highlights-of-vietnam-from-north-to-south-12-days",
+      "title": "Điểm nhấn Việt Nam từ Bắc vào Nam trong 12 ngày",
+      "summary": "Hành trình 12 ngày đi từ Hà Nội và vịnh Hạ Long qua Hội An, Huế đến TP. Hồ Chí Minh, địa đạo Củ Chi và đồng bằng sông Cửu Long. Đây là lựa chọn cân bằng cho khách muốn nhìn thấy những nét tiêu biểu của Việt Nam trong một chuyến đi.",
+      "routeSummary": "Hà Nội - vịnh Hạ Long - Hội An - Huế - TP. Hồ Chí Minh - Củ Chi - Bến Tre",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến Hà Nội",
+          "route": "Sân bay Nội Bài - Hà Nội",
+          "summary": "Đón tại cột số 10 bên ngoài nhà ga sân bay Nội Bài và đưa về khách sạn. Giờ nhận phòng tiêu chuẩn là 14:00; nhận sớm có phụ phí. Phần còn lại trong ngày tự do hoặc chọn thêm chuyến đi bộ ẩm thực.",
+          "meals": "Không bao gồm",
+          "transport": "Xe riêng đón sân bay"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Nửa ngày khám phá Hà Nội",
+          "route": "Văn Miếu - chùa Một Cột - khu Ba Đình - chùa Trấn Quốc",
+          "summary": "Khởi hành khoảng 08:00-08:30, tham quan Văn Miếu, chùa Một Cột, khu Lăng Chủ tịch Hồ Chí Minh và chùa Trấn Quốc trước bữa trưa. Lăng đóng cửa thứ Hai, thứ Sáu và giai đoạn tháng 6-8; khi đóng cửa chỉ tham quan bên ngoài. Chuyến có thể chuyển sang 13:00 tùy chỗ.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan ghép đoàn"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Nghỉ đêm trên du thuyền Hạ Long",
+          "route": "Hà Nội - vịnh Hạ Long",
+          "summary": "Đón khoảng 08:00 đi cảng Hạ Long, lên tàu vào buổi trưa, nghe hướng dẫn an toàn và dùng bữa trong lúc du thuyền vào vịnh. Buổi chiều bơi, chèo kayak hoặc thăm hang theo hải trình, sau đó có thể tham gia lớp làm nem. Dùng bữa tối và nghỉ đêm trên tàu; thủy thủ đoàn nói tiếng Anh phụ trách khách trên vịnh.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Xe Hà Nội - Hạ Long và du thuyền",
+          "accommodation": "Nghỉ đêm trên du thuyền"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Buổi sáng trên vịnh, trở về Hà Nội",
+          "route": "Vịnh Hạ Long - Hà Nội",
+          "summary": "Có thể tập Thái Cực Quyền trên boong trước bữa sáng. Du thuyền tiếp tục đến một điểm tham quan theo hải trình, trở lại tàu khoảng 10:00 để trả cabin và dùng brunch. Rời cảng vào giữa trưa, về khu phố cổ Hà Nội rồi tự do buổi chiều.",
+          "meals": "Bữa sáng và brunch",
+          "transport": "Du thuyền và xe Hạ Long - Hà Nội"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Bay đến Đà Nẵng, về Hội An",
+          "route": "Hà Nội - Đà Nẵng - Hội An",
+          "summary": "Xe đưa ra sân bay Nội Bài theo giờ bay đến Đà Nẵng. Đón tại sân bay Đà Nẵng và di chuyển về khách sạn Hội An. Phần còn lại trong ngày tự do nghỉ ngơi hoặc đi bộ trong phố cổ.",
+          "meals": "Bữa sáng",
+          "transport": "Xe và chuyến bay Hà Nội - Đà Nẵng"
+        },
+        {
+          "dayNumber": 6,
+          "title": "Đi bộ khám phá phố cổ Hội An",
+          "route": "Chợ Hội An - hội quán Phúc Kiến - nhà cổ - Chùa Cầu",
+          "summary": "Đi bộ qua chợ Hội An, hội quán Phúc Kiến, các nhà cổ Phùng Hưng và Tấn Ký, Bảo tàng Văn hóa Dân gian và Chùa Cầu. Trên đường, ghé các xưởng thủ công và ngõ nhỏ để hiểu rõ hơn đời sống của thương cảng xưa.",
+          "meals": "Bữa sáng",
+          "transport": "Đi bộ"
+        },
+        {
+          "dayNumber": 7,
+          "title": "Từ Hội An đến Huế",
+          "route": "Hội An - Huế",
+          "summary": "Sau bữa sáng, tự do thu xếp hành lý rồi đi đường bộ khoảng hai giờ đến Huế. Nhận phòng và dành phần còn lại trong ngày để tự khám phá; các trải nghiệm ẩm thực buổi tối có thể đặt riêng.",
+          "meals": "Bữa sáng",
+          "transport": "Xe Hội An - Huế"
+        },
+        {
+          "dayNumber": 8,
+          "title": "Nửa ngày khám phá Cố đô Huế",
+          "route": "Chùa Thiên Mụ - Đại Nội - chợ Đông Ba",
+          "summary": "Đón khoảng 08:00-08:30, tham quan chùa Thiên Mụ bên sông Hương, quần thể Đại Nội và chợ Đông Ba. Trở lại khách sạn vào giữa ngày; buổi chiều tự do hoặc chọn thêm trải nghiệm ẩm thực Huế.",
+          "meals": "Bữa sáng",
+          "transport": "Xe tham quan ghép đoàn"
+        },
+        {
+          "dayNumber": 9,
+          "title": "Bay đến TP. Hồ Chí Minh",
+          "route": "Huế - sân bay Phú Bài - TP. Hồ Chí Minh",
+          "summary": "Di chuyển ra sân bay Phú Bài và bay khoảng 1,5 giờ đến TP. Hồ Chí Minh. Đón sân bay, về khách sạn trung tâm và tự do buổi chiều tối; du thuyền ăn tối, chương trình nghệ thuật và tour xe máy là lựa chọn có phụ phí.",
+          "meals": "Bữa sáng",
+          "transport": "Xe và chuyến bay Huế - TP. Hồ Chí Minh"
+        },
+        {
+          "dayNumber": 10,
+          "title": "Địa đạo Củ Chi và trung tâm Sài Gòn",
+          "route": "TP. Hồ Chí Minh - Củ Chi - TP. Hồ Chí Minh",
+          "summary": "Đi khoảng 1,5 giờ đến Củ Chi, xem tư liệu, tìm hiểu hệ thống hầm dài 136 dặm, khu sinh hoạt và các loại bẫy. Trường bắn có phụ phí. Sau bữa trưa nhẹ, trở lại thành phố tham quan Dinh Độc Lập, Nhà thờ Đức Bà đang trùng tu, Bưu điện Trung tâm và Bảo tàng Chứng tích Chiến tranh.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan ghép đoàn"
+        },
+        {
+          "dayNumber": 11,
+          "title": "Một ngày ở đồng bằng sông Cửu Long",
+          "route": "TP. Hồ Chí Minh - Bến Tre - TP. Hồ Chí Minh",
+          "summary": "Khởi hành lúc 08:00 đến Bến Tre, đi thuyền trên sông Hàm Luông, ghé xưởng dừa và dệt chiếu, đi bộ trong làng và thử xe lôi. Dùng bữa trưa với món địa phương rồi xuống xuồng nhỏ qua kênh rạch trước khi về TP. Hồ Chí Minh.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe, thuyền máy, xuồng chèo và xe lôi"
+        },
+        {
+          "dayNumber": 12,
+          "title": "Rời TP. Hồ Chí Minh",
+          "route": "Khách sạn - sân bay Tân Sơn Nhất",
+          "summary": "Dùng bữa sáng, thu xếp hành lý và tự do đến giờ xe đưa ra sân bay. Giờ trả phòng tiêu chuẩn là 12:00; trả phòng muộn cần xác nhận và có phụ phí.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng tiễn sân bay"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn có điều hòa tại khách sạn",
+        "Phương tiện có điều hòa theo lịch trình, gồm đón và tiễn sân bay",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Các bữa ăn được ghi rõ trong chương trình",
+        "Vé vào cửa theo lịch trình",
+        "Hai chuyến bay nội địa Hà Nội - Đà Nẵng và Huế - TP. Hồ Chí Minh"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Lệ phí hộ chiếu",
+        "Bảo hiểm du lịch",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại Hà Nội, Hội An, Huế và TP. Hồ Chí Minh; một đêm du thuyền Hạ Long.",
+        "mealsSummary": "Bữa sáng hằng ngày sau ngày đến, các bữa trưa theo lịch và trọn bữa trên du thuyền.",
+        "transportSummary": "Xe đường bộ, du thuyền Hạ Long, thuyền miền Tây và hai chuyến bay nội địa.",
+        "operatorNotes": "Hải trình Hạ Long phụ thuộc thời tiết. Lăng Chủ tịch Hồ Chí Minh và Nhà thờ Đức Bà có giới hạn tham quan theo thời điểm."
+      },
+      "meta": {
+        "title": "Việt Nam từ Bắc vào Nam 12 ngày | WingSide",
+        "description": "Hành trình 12 ngày qua Hà Nội, Hạ Long, Hội An, Huế, TP. Hồ Chí Minh, Củ Chi và Bến Tre.",
+        "breadcrumbLabel": "Điểm nhấn Việt Nam 12 ngày"
+      }
+    },
+    {
+      "slug": "hoi-an-surrounding-and-beach-break-7-days",
+      "title": "Hội An, vùng phụ cận và kỳ nghỉ biển 7 ngày",
+      "summary": "Một tuần thư thả tại Hội An kết hợp đời sống làng quê Trà Quế, ẩm thực phố cổ, thánh địa Mỹ Sơn, Bà Nà Hills và thời gian nghỉ tự do. Sáu ngày có hoạt động được sắp xếp vào ngày 1-5 và ngày 7; ngày 6 dành cho nghỉ biển hoặc trải nghiệm riêng theo sở thích.",
+      "routeSummary": "Đà Nẵng - Hội An - Trà Quế - Mỹ Sơn - Bà Nà Hills - Đà Nẵng",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến Hội An",
+          "route": "Sân bay Đà Nẵng - Hội An",
+          "summary": "Đón tại sân bay quốc tế Đà Nẵng và đưa về khách sạn Hội An. Buổi tối tự do dạo phố cổ hoặc chọn thêm chương trình nghệ thuật, ẩm thực bằng xe đạp hay trải nghiệm làng dừa và làm đèn lồng.",
+          "meals": "Không bao gồm",
+          "transport": "Xe riêng đón sân bay"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Làm nông ở Trà Quế và khám phá ẩm thực Hội An",
+          "route": "Hội An - làng rau Trà Quế - phố cổ Hội An",
+          "summary": "Đạp xe qua ruộng lúa đến làng rau hữu cơ Trà Quế, uống trà tại nhà dân và tham gia các công việc làm vườn trước bữa trưa. Buổi tối đi bộ thưởng thức thực đơn thay đổi theo ngày, có thể gồm nem, cà phê trứng, bánh mì, cao lầu, mì Quảng, bánh hoa hồng trắng và món ngọt. Báo trước chế độ ăn đặc biệt.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Xe đạp và đi bộ"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Thánh địa Mỹ Sơn",
+          "route": "Hội An - Mỹ Sơn - sông Thu Bồn - Hội An",
+          "summary": "Chọn chuyến buổi sáng hoặc hoàng hôn đến Mỹ Sơn, tìm hiểu văn minh Champa giữa quần thể đền tháp và xem biểu diễn truyền thống. Ghé nhà dân học làm bánh tráng, dùng bữa tại nhà; phương án hoàng hôn thay bằng bánh mì và dừa. Trở về Hội An bằng thuyền trên sông Thu Bồn.",
+          "meals": "Bữa sáng",
+          "transport": "Xe và thuyền"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Một ngày tại Bà Nà Hills",
+          "route": "Hội An - Bà Nà Hills - Hội An",
+          "summary": "Đón khoảng 07:45-08:00, đi cáp treo lên Bà Nà Hills và tham quan Cầu Vàng, vườn Le Jardin d'Amour, chùa Linh Ứng. Dùng buffet trưa, vui chơi tại Fantasy Park và lên đỉnh Núi Chúa cao 1.487 m nếu thời tiết cho phép trước khi trở về.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe và cáp treo"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Ngày tự do ở Hội An",
+          "route": "Hội An",
+          "summary": "Dành ngày nghỉ theo nhịp riêng tại phố cổ hoặc bãi biển. Có thể đặt thêm làng dừa Cẩm Thanh và làm đèn lồng, lớp nấu ăn kết hợp đạp xe, đảo Cù Lao Chàm hoặc chương trình Ký ức Hội An.",
+          "meals": "Bữa sáng"
+        },
+        {
+          "dayNumber": 7,
+          "title": "Rời Hội An",
+          "route": "Hội An - sân bay Đà Nẵng",
+          "summary": "Dùng bữa sáng cuối tại Hội An, trả phòng và tự do đến giờ xe đưa ra sân bay Đà Nẵng. Giờ đón được sắp theo chuyến bay đã xác nhận.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng tiễn sân bay"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn theo chương trình",
+        "Phương tiện tại Việt Nam, gồm đón và tiễn sân bay, theo lịch trình",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Vé vào cửa theo lịch trình",
+        "Các bữa ăn được ghi rõ trong chương trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Bảo hiểm du lịch",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại Hội An theo hạng đã xác nhận.",
+        "mealsSummary": "Bữa sáng từ ngày 2, bữa trưa tại Trà Quế và Bà Nà, tour ẩm thực buổi tối.",
+        "transportSummary": "Xe đón tiễn sân bay, xe đạp, thuyền sông Thu Bồn và cáp treo Bà Nà Hills.",
+        "operatorNotes": "Ngày 6 dành cho thời gian nghỉ tự do. Lịch xác nhận cuối cùng sẽ nêu rõ lựa chọn nghỉ biển hoặc trải nghiệm riêng nếu khách yêu cầu."
+      },
+      "meta": {
+        "title": "Hội An và nghỉ biển 7 ngày | WingSide",
+        "description": "Một tuần tại Hội An với Trà Quế, tour ẩm thực, Mỹ Sơn, Bà Nà Hills và thời gian tự do bên biển.",
+        "breadcrumbLabel": "Hội An và nghỉ biển 7 ngày"
+      }
+    },
+    {
+      "slug": "luxury-mekong-delta-speedboat-tour-full-day",
+      "title": "Khám phá miền Tây bằng tàu cao tốc trong ngày",
+      "summary": "Chuyến đi riêng trong ngày từ TP. Hồ Chí Minh vào các nhánh sông xanh của đồng bằng sông Cửu Long bằng tàu cao tốc. Lịch trình kết hợp chợ ven sông, làng quê, bữa trưa miền Tây và những điểm tín ngưỡng địa phương.",
+      "routeSummary": "TP. Hồ Chí Minh - các nhánh sông miền Tây - TP. Hồ Chí Minh",
+      "primaryCTALabel": "Thiết kế chuyến đi riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Trải nghiệm đời sống ven sông miền Tây",
+          "route": "TP. Hồ Chí Minh - vùng hạ lưu Mekong - TP. Hồ Chí Minh",
+          "summary": "Gặp hướng dẫn viên lúc 08:00, ra bến và lên tàu cao tốc lúc 08:15; bữa sáng nhẹ phục vụ trên tàu. Rời thành phố qua kênh nhỏ, ghé chùa Tường Vân và chợ ven sông rồi đi sâu vào vùng vườn cây, ruộng lúa và kênh Thủ Thừa. Tùy điều kiện, thăm nhà dân hoặc cơ sở địa phương, thử dừa tươi và rượu miền Tây. Dùng bữa trưa lúc 12:30, sau đó có thể ghé cơ sở trẻ em do nhà chùa quản lý và đền Cao Đài; đền thường đóng nên chỉ xem bên ngoài. Tàu về lúc 14:30, đến thành phố khoảng 16:00.",
+          "meals": "Bữa sáng nhẹ và bữa trưa",
+          "transport": "Xe đưa đón và tàu cao tốc"
+        }
+      ],
+      "includes": [
+        "Đón và trả tại khách sạn",
+        "Bữa sáng nhẹ",
+        "Bữa trưa",
+        "Nước giải khát và trái cây địa phương không giới hạn theo phục vụ trên tàu",
+        "Hướng dẫn viên nói tiếng Anh",
+        "Vé vào cửa theo lịch trình"
+      ],
+      "excludes": [
+        "Các khoản chi cá nhân",
+        "Tiền tip",
+        "Dịch vụ không được nêu trong phần bao gồm"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Không bao gồm lưu trú.",
+        "mealsSummary": "Bữa sáng nhẹ trên tàu và bữa trưa miền Tây.",
+        "transportSummary": "Xe từ khách sạn đến bến và tàu cao tốc khứ hồi.",
+        "operatorNotes": "Tuyến ghé nhà dân linh hoạt và hướng dẫn viên có thể kết hợp hai phương án theo mực nước, thời tiết và điều kiện địa phương."
+      },
+      "meta": {
+        "title": "Tour tàu cao tốc miền Tây trong ngày | WingSide",
+        "description": "Rời TP. Hồ Chí Minh bằng tàu cao tốc để khám phá chợ ven sông, làng quê và ẩm thực miền Tây trong một ngày.",
+        "breadcrumbLabel": "Tàu cao tốc miền Tây"
+      }
+    },
+    {
+      "slug": "mekong-delta-gateway-3-days",
+      "title": "Cửa ngõ đồng bằng sông Cửu Long trong 3 ngày",
+      "summary": "Ba ngày đi sâu vào nhịp sống miền Tây qua Cái Bè, Tân Phong, Sa Đéc và Cần Thơ. Hành trình chú trọng vườn trái cây, nghề thủ công, dấu ấn giao thoa văn hóa và chợ nổi Cái Răng.",
+      "routeSummary": "TP. Hồ Chí Minh - Cái Bè - Tân Phong - Sa Đéc - Cần Thơ - TP. Hồ Chí Minh",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Cái Bè và cù lao Tân Phong",
+          "route": "Cái Bè - Tân Phong",
+          "summary": "Đi thuyền quan sát hoạt động chợ sông Cái Bè, ghé làng làm cốm kẹo và trại ong trước khi đến cù lao Tân Phong. Thưởng thức trái cây, trà và đờn ca tài tử tại nhà vườn, xuống xuồng nhỏ qua kênh rồi tham gia lớp nấu ăn và dùng bữa trưa. Trở lại bến Cái Bè khoảng 13:00.",
+          "meals": "Bữa trưa",
+          "transport": "Thuyền máy và xuồng chèo"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Sa Đéc, làng gạch và dấu ấn Người tình",
+          "route": "Sa Đéc - Vĩnh Long - Cần Thơ",
+          "summary": "Tham quan làng hoa Sa Đéc, đình Tân Hòa, làng gạch Xẻo Vạt và chợ Sa Đéc trước bữa trưa. Buổi chiều tìm hiểu cộng đồng Hoa qua nhà cổ Huỳnh Thủy Lê, chùa Kiến An Cung và trường Trưng Vương. Nhà cổ hiện có thể tạm đóng; lịch dừng sẽ điều chỉnh tại chỗ. Tiếp tục đến Cần Thơ nghỉ đêm.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Chợ nổi Cái Răng, trở về Sài Gòn",
+          "route": "Cần Thơ - chợ nổi Cái Răng - TP. Hồ Chí Minh",
+          "summary": "Rời Cần Thơ đến chợ nổi Cái Răng, quan sát sinh hoạt buôn bán trên sông và dùng bữa trưa. Ghé cơ sở làm hủ tiếu để xem quy trình sản xuất trước khi lên xe trở lại TP. Hồ Chí Minh.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Thuyền và xe Cần Thơ - TP. Hồ Chí Minh"
+        }
+      ],
+      "includes": [
+        "Xe khứ hồi từ TP. Hồ Chí Minh",
+        "Các chuyến thuyền trên sông Mekong",
+        "Ba bữa trưa và hai bữa sáng",
+        "Hai đêm lưu trú theo hạng đã xác nhận",
+        "Hướng dẫn viên nói tiếng Anh",
+        "Vé vào cửa theo lịch trình"
+      ],
+      "excludes": [
+        "Đồ uống",
+        "Bảo hiểm du lịch",
+        "Các khoản chi cá nhân",
+        "Tiền tip",
+        "Dịch vụ không được nêu trong phần bao gồm"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Hai đêm lưu trú theo hạng đã xác nhận; địa điểm nghỉ đêm đầu tiên sẽ được chốt cùng lịch trình cuối cùng.",
+        "mealsSummary": "Ba bữa trưa và hai bữa sáng.",
+        "transportSummary": "Xe khứ hồi từ TP. Hồ Chí Minh cùng thuyền máy và xuồng tại miền Tây.",
+        "operatorNotes": "Nhà cổ Huỳnh Thủy Lê có thể tạm đóng. Điểm lưu trú đêm đầu tiên sẽ được xác nhận trước khi đặt dịch vụ."
+      },
+      "meta": {
+        "title": "Đồng bằng sông Cửu Long 3 ngày | WingSide",
+        "description": "Khám phá Cái Bè, Tân Phong, Sa Đéc, Cần Thơ và chợ nổi Cái Răng trong hành trình miền Tây 3 ngày.",
+        "breadcrumbLabel": "Cửa ngõ miền Tây 3 ngày"
+      }
+    },
+    {
+      "slug": "mekong-delta-with-floating-market-2-days",
+      "title": "Miền Tây và chợ nổi Cái Răng trong 2 ngày",
+      "summary": "Chuyến đi hai ngày từ TP. Hồ Chí Minh qua Bến Tre đến Cần Thơ, kết hợp nghề làm kẹo dừa, kênh rạch rợp bóng dừa nước và chợ nổi Cái Răng vào sáng sớm.",
+      "routeSummary": "TP. Hồ Chí Minh - Bến Tre - Cần Thơ - chợ nổi Cái Răng - TP. Hồ Chí Minh",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Bến Tre và những con kênh dừa nước",
+          "route": "TP. Hồ Chí Minh - Bến Tre - Cần Thơ",
+          "summary": "Đón tại khách sạn Sài Gòn và đi Bến Tre. Từ chợ địa phương, xuống thuyền đến cơ sở kẹo dừa Lan Thanh, xem quy trình và có thể tự thử làm kẹo. Tiếp tục đến Nhơn Thạnh, đi xe lôi, dùng bữa trưa rồi xuống xuồng chèo 5-7 phút dưới tán dừa nước. Cuối chiều đi Cần Thơ nhận phòng.",
+          "meals": "Bữa trưa",
+          "transport": "Xe riêng, thuyền máy, xe lôi và xuồng chèo"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Chợ nổi Cái Răng, trở lại TP. Hồ Chí Minh",
+          "route": "Cần Thơ - chợ nổi Cái Răng - TP. Hồ Chí Minh",
+          "summary": "Đi xe khoảng 15 phút ra bến, lên thuyền gỗ đến chợ nổi Cái Răng. Quan sát đời sống trên sông, ghé lò hủ tiếu và thưởng thức trái cây nhiệt đới. Trả phòng, dùng bữa trưa tại điểm dừng miền Tây rồi về TP. Hồ Chí Minh.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Thuyền và xe riêng"
+        }
+      ],
+      "includes": [
+        "Xe riêng đón và trả tại khách sạn ở TP. Hồ Chí Minh",
+        "Các chuyến thuyền theo lịch trình",
+        "Vé tham quan và phí được cấp phép",
+        "Một đêm khách sạn tại Cần Thơ",
+        "Hướng dẫn viên nói tiếng Anh",
+        "Các bữa ăn được ghi rõ trong chương trình",
+        "Nước lạnh và khăn giấy theo phục vụ của nhà tổ chức"
+      ],
+      "excludes": [
+        "Đồ uống",
+        "Bảo hiểm du lịch",
+        "Các khoản chi cá nhân",
+        "Tiền tip",
+        "Dịch vụ không được nêu trong phần bao gồm"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Một đêm khách sạn tại Cần Thơ.",
+        "mealsSummary": "Bữa trưa ngày 1; bữa sáng và trưa ngày 2.",
+        "transportSummary": "Xe riêng khứ hồi TP. Hồ Chí Minh, thuyền máy, xuồng chèo và xe lôi.",
+        "operatorNotes": "Chợ nổi hoạt động sớm và quy mô thay đổi theo mùa, ngày trong tuần và điều kiện giao thương."
+      },
+      "meta": {
+        "title": "Miền Tây và chợ nổi 2 ngày | WingSide",
+        "description": "Đi Bến Tre và Cần Thơ trong 2 ngày, trải nghiệm kẹo dừa, xuồng kênh rạch và chợ nổi Cái Răng.",
+        "breadcrumbLabel": "Miền Tây và chợ nổi 2 ngày"
+      }
+    },
+    {
+      "slug": "ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi",
+      "title": "Tour riêng Ninh Bình: Tam Cốc và Hang Múa từ Hà Nội",
+      "summary": "Chuyến đi riêng trong ngày từ Hà Nội kết hợp tầm nhìn toàn cảnh tại Hang Múa, đạp xe giữa đồng quê và đi thuyền qua ba hang của Tam Cốc. Lịch trình có gần 500 bậc leo núi nên phù hợp với khách có thể lực đi bộ tốt.",
+      "routeSummary": "Hà Nội - Hang Múa - Tam Cốc - Hà Nội",
+      "primaryCTALabel": "Thiết kế chuyến đi riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Hang Múa và Tam Cốc trong ngày",
+          "route": "Hà Nội - Ninh Bình - Hang Múa - Tam Cốc - Hà Nội",
+          "summary": "Rời Hà Nội lúc 08:00, đến Hang Múa và leo gần 500 bậc lên đỉnh để ngắm toàn cảnh Tam Cốc. Tiếp tục đạp xe qua cánh đồng, dùng bữa trưa với món địa phương rồi xuống thuyền nan tại bến Tam Cốc, đi qua Hang Cả, Hang Hai và Hang Ba. Nghỉ ngắn tại bến trước khi về Hà Nội, dự kiến đến khoảng 18:00.",
+          "meals": "Bữa trưa",
+          "transport": "Xe riêng, xe đạp và thuyền nan"
+        }
+      ],
+      "includes": [
+        "Xe hoặc minivan đón và trả theo chương trình",
+        "Hướng dẫn viên nói tiếng Anh",
+        "Xe đạp",
+        "Vé tham quan và chuyến thuyền",
+        "Nước khoáng và khăn ướt",
+        "Bữa ăn được ghi trong lịch trình"
+      ],
+      "excludes": [
+        "Đồ uống và các bữa không ghi trong chương trình",
+        "Bảo hiểm du lịch",
+        "Các khoản chi cá nhân",
+        "Tiền tip",
+        "Dịch vụ không được nêu trong phần bao gồm"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Không bao gồm lưu trú.",
+        "mealsSummary": "Một bữa trưa tại nhà hàng địa phương.",
+        "transportSummary": "Xe riêng khứ hồi Hà Nội, xe đạp và thuyền nan Tam Cốc.",
+        "operatorNotes": "Đường lên Hang Múa có gần 500 bậc, dốc và có thể trơn khi mưa; cần giày phù hợp và cân nhắc thể lực."
+      },
+      "meta": {
+        "title": "Tour riêng Tam Cốc và Hang Múa | WingSide",
+        "description": "Đi Ninh Bình trong ngày từ Hà Nội, leo Hang Múa, đạp xe và ngồi thuyền qua ba hang Tam Cốc.",
+        "breadcrumbLabel": "Tam Cốc và Hang Múa"
+      }
+    },
+    {
+      "slug": "ninh-binh-hoa-lu-trang-an-full-day-private-tour-from-hanoi",
+      "title": "Tour riêng Hoa Lư và Tràng An trong ngày từ Hà Nội",
+      "summary": "Chuyến đi riêng trong ngày đến cố đô Hoa Lư và Di sản thế giới Tràng An. Hành trình kết hợp lịch sử triều Đinh - Tiền Lê với chuyến thuyền qua sông, hang động và núi đá vôi Ninh Bình.",
+      "routeSummary": "Hà Nội - cố đô Hoa Lư - Tràng An - Hà Nội",
+      "primaryCTALabel": "Thiết kế chuyến đi riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Cố đô Hoa Lư và tuyến thuyền Tràng An",
+          "route": "Hà Nội - Hoa Lư - Tràng An - Hà Nội",
+          "summary": "Khởi hành lúc 08:00 đến Ninh Bình, tham quan cố đô Hoa Lư và đền vua Đinh, vua Lê với các mảng chạm khắc gỗ đá thế kỷ XVII. Sau thời gian dùng bữa trưa tự túc tại nhà hàng địa phương, xuống thuyền do người dân chèo qua hệ thống sông, hang và núi đá vôi Tràng An. Trở lại Hà Nội bằng xe, dự kiến khoảng 16:00.",
+          "meals": "Bữa trưa không bao gồm",
+          "transport": "Xe riêng và thuyền Tràng An"
+        }
+      ],
+      "includes": [
+        "Xe riêng có điều hòa, gồm đón và trả tại khách sạn",
+        "Hướng dẫn viên nói tiếng Anh",
+        "Vé tham quan và chuyến thuyền",
+        "Nước khoáng và khăn ướt"
+      ],
+      "excludes": [
+        "Đồ uống và các bữa không ghi trong chương trình",
+        "Bảo hiểm du lịch",
+        "Các khoản chi cá nhân",
+        "Tiền tip",
+        "Dịch vụ không được nêu trong phần bao gồm",
+        "Bữa trưa tại nhà hàng địa phương"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Không bao gồm lưu trú.",
+        "mealsSummary": "Bữa trưa tại nhà hàng địa phương không nằm trong giá cơ bản.",
+        "transportSummary": "Xe riêng khứ hồi Hà Nội và thuyền chèo tại Tràng An.",
+        "operatorNotes": "Tuyến thuyền Tràng An và thời lượng có thể thay đổi theo điều tiết tại bến, mực nước và thời tiết."
+      },
+      "meta": {
+        "title": "Tour riêng Hoa Lư và Tràng An | WingSide",
+        "description": "Khám phá cố đô Hoa Lư và đi thuyền qua quần thể Tràng An trong chuyến riêng một ngày từ Hà Nội.",
+        "breadcrumbLabel": "Hoa Lư và Tràng An"
+      }
+    },
+    {
+      "slug": "northern-vietnam-highlights-for-family-6-days",
+      "title": "Điểm nhấn miền Bắc dành cho gia đình trong 6 ngày",
+      "summary": "Hành trình sáu ngày dành cho gia đình, kết hợp di sản Hà Nội, làm gốm Bát Tràng, văn hóa trà Tân Cương và một đêm trên du thuyền Hạ Long. Các hoạt động thực hành tạo nhịp đi gần gũi cho cả người lớn và trẻ em.",
+      "routeSummary": "Hà Nội - Bát Tràng - Tân Cương - vịnh Hạ Long - Hà Nội",
+      "primaryCTALabel": "Thiết kế hành trình gia đình",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Gia đình đến Hà Nội",
+          "route": "Sân bay Nội Bài - Hà Nội",
+          "summary": "Đón tại sân bay Nội Bài và đưa về khách sạn. Giờ nhận phòng tiêu chuẩn là 14:00; nhận sớm cần xác nhận và có phụ phí. Phần còn lại trong ngày dành để nghỉ ngơi hoặc tự khám phá.",
+          "meals": "Không bao gồm",
+          "transport": "Xe riêng đón sân bay"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Hà Nội và trải nghiệm làm gốm Bát Tràng",
+          "route": "Văn Miếu - Ba Đình - chùa Trấn Quốc - Bát Tràng",
+          "summary": "Khoảng 08:00 tham quan Văn Miếu, quảng trường Ba Đình, khu Lăng Chủ tịch Hồ Chí Minh và chùa Trấn Quốc, sau đó dùng bữa trưa Việt Nam. Buổi chiều đi làng gốm Bát Tràng, dạo làng và cùng gia đình thử tạo một sản phẩm gốm trước khi trở lại Hà Nội.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Vùng chè Tân Cương - Phúc Trìu",
+          "route": "Hà Nội - Tân Cương - Phúc Trìu - Hà Nội",
+          "summary": "Khám phá vùng chè Thái Nguyên với hồ Núi Cốc, nhà thờ Tân Cương và chùa Y Na; nếu đúng phiên có thể ghé chợ chè Phúc Trìu hoặc Phúc Xuân. Dùng bữa trưa tại farmstay, sau đó cùng nghệ nhân hái chè và tìm hiểu kỹ thuật sao chè thủ công.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe đường bộ"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Gia đình lên du thuyền Hạ Long",
+          "route": "Hà Nội - vịnh Hạ Long",
+          "summary": "Đón khoảng 08:00-08:30 đi Hạ Long và lên du thuyền khoảng 12:00. Sau bữa trưa, gia đình có thể bơi, thăm hang, chèo kayak hoặc đi thuyền nan theo hải trình. Cuối chiều có giờ khuyến mại đồ uống và lớp nấu ăn, tiếp đến bữa tối và hoạt động trên tàu. Thủy thủ đoàn nói tiếng Anh phụ trách khách trên vịnh.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Xe Hà Nội - Hạ Long và du thuyền",
+          "accommodation": "Nghỉ đêm trên du thuyền"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Buổi sáng trên vịnh, về Hà Nội",
+          "route": "Vịnh Hạ Long - Hà Nội",
+          "summary": "Có thể tham gia Thái Cực Quyền trước bữa sáng nhẹ, sau đó khám phá điểm cuối theo hải trình của tàu. Dùng brunch trong lúc tàu về cảng và lên xe trở lại Hà Nội. Buổi chiều tự do nghỉ ngơi hoặc đi bộ trong phố cổ.",
+          "meals": "Bữa sáng và brunch",
+          "transport": "Du thuyền và xe Hạ Long - Hà Nội"
+        },
+        {
+          "dayNumber": 6,
+          "title": "Rời Hà Nội",
+          "route": "Khách sạn - sân bay Nội Bài",
+          "summary": "Dùng bữa sáng, hoàn tất trả phòng và lên xe ra sân bay. Giờ trả phòng tiêu chuẩn là 12:00; trả muộn cần đặt trước.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng tiễn sân bay"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn có điều hòa tại khách sạn",
+        "Phương tiện có điều hòa theo lịch trình, gồm đón và tiễn sân bay",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Các bữa ăn được ghi rõ trong chương trình",
+        "Vé vào cửa theo lịch trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Bảo hiểm du lịch",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại Hà Nội và một đêm du thuyền Hạ Long theo hạng đã xác nhận.",
+        "mealsSummary": "Bữa sáng từ ngày 2, các bữa trưa theo chương trình và bữa tối, brunch trên du thuyền.",
+        "transportSummary": "Xe đón tiễn sân bay, xe tham quan Hà Nội - Thái Nguyên và xe, du thuyền Hạ Long.",
+        "operatorNotes": "Lịch Hạ Long phụ thuộc hải trình và thời tiết. Hoạt động làm gốm, sao chè và trên vịnh cần chọn theo độ tuổi của trẻ."
+      },
+      "meta": {
+        "title": "Miền Bắc cho gia đình 6 ngày | WingSide",
+        "description": "Hành trình gia đình 6 ngày qua Hà Nội, Bát Tràng, vùng chè Tân Cương và vịnh Hạ Long.",
+        "breadcrumbLabel": "Miền Bắc cho gia đình"
+      }
+    },
+    {
+      "slug": "northern-vietnam-soft-adventure-8-days",
+      "title": "Phiêu lưu nhẹ nhàng miền Bắc trong 8 ngày",
+      "summary": "Tám ngày đi từ Hà Nội qua làng Kỳ Sơn, thung lũng Mai Châu, Tam Cốc đến vịnh Hạ Long. Hành trình kết hợp homestay, đạp xe, nấu ăn, thuyền nan và hai đêm du thuyền, phù hợp với khách thích vận động vừa phải.",
+      "routeSummary": "Hà Nội - Kỳ Sơn - Mai Châu - Ninh Bình - vịnh Hạ Long - Hà Nội",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến Hà Nội",
+          "route": "Sân bay Nội Bài - Hà Nội",
+          "summary": "Đón tại sân bay và đưa về khách sạn. Giờ nhận phòng tiêu chuẩn là 14:00; nhận sớm có phụ phí. Tự do nghỉ ngơi, đi bộ quanh thành phố hoặc đặt riêng chuyến ẩm thực.",
+          "meals": "Không bao gồm",
+          "transport": "Xe riêng đón sân bay"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Làng Kỳ Sơn và cung đạp xe đồng quê",
+          "route": "Hà Nội - Kỳ Sơn - Tam Sơn - Vân Minh - Chằm",
+          "summary": "Rời Hà Nội khoảng 08:00 đến homestay Kỳ Sơn giữa ruộng và núi Ba Vì. Uống trà, tìm hiểu nhà gỗ truyền thống, tham gia lớp nấu món Việt và dùng bữa trưa. Buổi chiều ngâm tay thảo mộc, massage tay rồi đạp xe qua các làng nông nghiệp; trở về dùng món quê, bữa tối và ngâm chân thảo mộc.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Minibus và xe đạp",
+          "accommodation": "Homestay tại Kỳ Sơn"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Từ Kỳ Sơn đến thung lũng Mai Châu",
+          "route": "Kỳ Sơn - Mai Châu",
+          "summary": "Khởi hành bằng minibus lúc 10:00, đi khoảng 2,5 giờ đến Mai Châu và dùng bữa trưa, có lựa chọn chay. Buổi chiều tự do đi bộ, mua đồ thủ công hoặc đạp xe ngắm ruộng bậc thang; hoạt động xe đạp có thể tính thêm phí.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Minibus; xe đạp tự chọn"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Mai Châu, Tam Cốc và chùa Bích Động",
+          "route": "Mai Châu - Ninh Bình - Tam Cốc - Bích Động",
+          "summary": "Rời Mai Châu lúc 08:00 đến Ninh Bình. Đi xe đạp hoặc xe trâu qua làng, trường học, nhà thờ và đồng lúa. Sau bữa trưa, xuống thuyền nan đi qua ba hang Tam Cốc, ngắm núi đá vôi và ruộng lúa, rồi thăm chùa Bích Động trước khi nhận phòng.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe, xe đạp hoặc xe trâu và thuyền nan"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Từ Ninh Bình đến du thuyền Hạ Long",
+          "route": "Ninh Bình - vịnh Hạ Long",
+          "summary": "Đón khoảng 08:00-08:30, đi chừng 2,5 giờ đến cảng và lên tàu vào buổi trưa. Dùng bữa trưa, sau đó chèo kayak, nghỉ trên bãi biển hoặc thăm hang theo hải trình. Trở lại tàu ngắm hoàng hôn, dùng bữa tối và nghỉ đêm; thủy thủ đoàn nói tiếng Anh phụ trách trên vịnh.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Xe Ninh Bình - Hạ Long và du thuyền",
+          "accommodation": "Đêm thứ nhất trên du thuyền"
+        },
+        {
+          "dayNumber": 6,
+          "title": "Một ngày trọn vẹn trên vịnh Hạ Long",
+          "route": "Vịnh Hạ Long",
+          "summary": "Bắt đầu bằng Thái Cực Quyền, yoga hoặc Vovinam tùy tàu, sau đó chuyển sang thuyền nhỏ để khám phá sâu hơn. Hoạt động có thể gồm kayak, bơi, thăm hang hoặc đạp xe. Trở về tàu chính dùng bữa trưa, tiếp tục tham quan, ăn tối và nghỉ đêm thứ hai.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Du thuyền và thuyền ngày",
+          "accommodation": "Đêm thứ hai trên du thuyền"
+        },
+        {
+          "dayNumber": 7,
+          "title": "Về Hà Nội và tour ẩm thực bằng xe máy",
+          "route": "Vịnh Hạ Long - Hà Nội",
+          "summary": "Dùng bữa sáng nhẹ, trả cabin và ăn brunch khi tàu về cảng. Xe đưa về Hà Nội khoảng 15:00-15:30. Lúc 18:00, gặp hướng dẫn viên để khám phá phố cổ, hồ Hoàn Kiếm và các hàng ăn địa phương bằng xe máy, dùng cà phê, món nhẹ, bữa tối và món ngọt.",
+          "meals": "Bữa sáng, brunch và bữa tối",
+          "transport": "Du thuyền, xe Hạ Long - Hà Nội và xe máy có tài xế"
+        },
+        {
+          "dayNumber": 8,
+          "title": "Rời Hà Nội",
+          "route": "Khách sạn - sân bay Nội Bài",
+          "summary": "Tự do buổi sáng, dùng bữa sáng và trả phòng trước 12:00. Xe đưa ra sân bay theo giờ bay; trả phòng muộn cần được xác nhận trước.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng tiễn sân bay"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn tại khách sạn, không gồm homestay nếu có",
+        "Phương tiện tại Việt Nam, gồm đón và tiễn sân bay, theo lịch trình",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Vé vào cửa theo lịch trình",
+        "Các bữa ăn được ghi rõ trong chương trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Phương tiện đến hoặc rời Việt Nam",
+        "Thuế quốc tế hoặc thuế khởi hành",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Bảo hiểm du lịch trong thời gian ở Việt Nam",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước đóng chai",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại Hà Nội, Mai Châu và Ninh Bình; homestay Kỳ Sơn; hai đêm du thuyền Hạ Long.",
+        "mealsSummary": "Các bữa theo lịch trình, gồm bữa tại homestay, Mai Châu, Ninh Bình, trọn bữa trên tàu và tour ẩm thực Hà Nội.",
+        "transportSummary": "Minibus, xe đạp, xe trâu, thuyền Tam Cốc, du thuyền Hạ Long và xe máy có tài xế.",
+        "operatorNotes": "Hoạt động đạp xe Mai Châu có thể tính thêm phí. Lịch hai ngày trên vịnh phụ thuộc tàu và thời tiết."
+      },
+      "meta": {
+        "title": "Phiêu lưu nhẹ miền Bắc 8 ngày | WingSide",
+        "description": "Hành trình 8 ngày qua Kỳ Sơn, Mai Châu, Ninh Bình và hai đêm du thuyền Hạ Long.",
+        "breadcrumbLabel": "Phiêu lưu nhẹ miền Bắc"
+      }
+    },
+    {
+      "slug": "romantic-getaway-in-phu-quoc-5-days-of-love-paradise",
+      "title": "Kỳ nghỉ lãng mạn tại Phú Quốc trong 5 ngày",
+      "summary": "Chuyến nghỉ dưỡng dành cho hai người, bắt đầu bằng du thuyền ăn tối trên sông Sài Gòn rồi tiếp nối bằng những ngày riêng tư tại Phú Quốc. Ngày 4 dành trọn cho thời gian tự do trên đảo, để hai người chọn nghỉ biển hoặc trải nghiệm theo sở thích.",
+      "routeSummary": "TP. Hồ Chí Minh - Phú Quốc - TP. Hồ Chí Minh",
+      "primaryCTALabel": "Thiết kế kỳ nghỉ đôi",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến Sài Gòn và du thuyền ăn tối",
+          "route": "Sân bay Tân Sơn Nhất - sông Sài Gòn",
+          "summary": "Đón sân bay và đưa về khách sạn; giờ nhận phòng tiêu chuẩn là 14:00, nhận sớm có phụ phí. Khoảng 18:00-18:30 đi ra bến, lên du thuyền ngắm thành phố lên đèn. Dùng bữa tối từ khoảng 19:00 cùng chương trình biểu diễn, rời tàu lúc 21:00 và trở về khách sạn.",
+          "meals": "Bữa tối",
+          "transport": "Xe riêng và du thuyền sông Sài Gòn"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Bay đến Phú Quốc và bữa tối dành cho hai người",
+          "route": "TP. Hồ Chí Minh - Phú Quốc",
+          "summary": "Dùng bữa sáng, ra sân bay và bay đến Phú Quốc. Đón tại sân bay đảo, về khách sạn nhận phòng rồi tự do nghỉ bên bãi biển. Buổi tối dùng bữa riêng với hải sản và món địa phương tại khách sạn.",
+          "meals": "Bữa sáng và bữa tối",
+          "transport": "Xe và chuyến bay TP. Hồ Chí Minh - Phú Quốc"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Những ngày tự do tại Phú Quốc",
+          "route": "Phú Quốc",
+          "summary": "Dành thời gian cho nhau bên biển, bơi, thưởng thức hải sản hoặc ghé chợ đêm. Có thể chọn thêm tuyến Nam đảo và Hòn Thơm, lặn ngắm san hô ba đảo, Bắc đảo - Rạch Vẹm hoặc buổi tối riêng trên thuyền; tất cả cần xác nhận và tính phí riêng.",
+          "meals": "Bữa sáng"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Rời Phú Quốc",
+          "route": "Phú Quốc - TP. Hồ Chí Minh",
+          "summary": "Dùng bữa sáng, tự do đến giờ trả phòng và lên xe ra sân bay cho chuyến bay về TP. Hồ Chí Minh. Giờ trả phòng tiêu chuẩn là 12:00; trả muộn cần đặt trước.",
+          "meals": "Bữa sáng",
+          "transport": "Xe và chuyến bay Phú Quốc - TP. Hồ Chí Minh"
+        }
+      ],
+      "includes": [
+        "Phòng đôi có điều hòa tại khách sạn",
+        "Phương tiện có điều hòa theo lịch trình, gồm đón và tiễn sân bay",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng có hướng dẫn",
+        "Các bữa ăn được ghi rõ trong chương trình",
+        "Vé vào cửa theo lịch trình",
+        "Hai chuyến bay nội địa TP. Hồ Chí Minh - Phú Quốc và Phú Quốc - TP. Hồ Chí Minh"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Bảo hiểm du lịch",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại TP. Hồ Chí Minh và khu nghỉ dưỡng tại Phú Quốc theo hạng đã xác nhận.",
+        "mealsSummary": "Bữa tối du thuyền ngày 1, bữa tối đôi ngày 2 và bữa sáng theo chương trình.",
+        "transportSummary": "Xe đón tiễn sân bay, du thuyền sông Sài Gòn và hai chuyến bay nội địa.",
+        "operatorNotes": "Ngày 4 là thời gian tự do trên đảo và sẽ được thể hiện rõ trong lịch xác nhận cuối cùng."
+      },
+      "meta": {
+        "title": "Kỳ nghỉ lãng mạn Phú Quốc 5 ngày | WingSide",
+        "description": "Năm ngày dành cho hai người với du thuyền ăn tối sông Sài Gòn và kỳ nghỉ biển riêng tư tại Phú Quốc.",
+        "breadcrumbLabel": "Phú Quốc lãng mạn 5 ngày"
+      }
+    },
+    {
+      "slug": "sapa-trekking-ethnic-market-3-days",
+      "title": "Trekking Sa Pa và chợ phiên vùng cao trong 3 ngày",
+      "summary": "Hành trình ba ngày dành cho khách trẻ yêu thích đi bộ, kết nối bản Cát Cát, thung lũng Mường Hoa và chợ Bắc Hà. Chuyến đi mở ra góc nhìn gần hơn về đời sống H'Mông, Giáy, Dao, Nùng và cảnh quan ruộng bậc thang.",
+      "routeSummary": "Sa Pa - Cát Cát - Ý Linh Hồ - Lao Chải - Tả Van - Bắc Hà - Lào Cai - Hà Nội",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đi bộ bản Cát Cát",
+          "route": "Sa Pa - bản Cát Cát - Sa Pa",
+          "summary": "Đi bộ khoảng 2,5 km qua bản Cát Cát, quan sát đời sống cộng đồng, thung lũng và nhà máy thủy điện do người Pháp xây từ năm 1925. Trở lại thị trấn bằng xe buýt, dùng bữa tối và tự do khám phá Sa Pa về đêm.",
+          "meals": "Không bao gồm",
+          "transport": "Đi bộ và xe buýt địa phương"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Ý Linh Hồ, Lao Chải và Tả Van",
+          "route": "Sa Pa - Ý Linh Hồ - Lao Chải - Tả Van - Sa Pa",
+          "summary": "Trekking khoảng 5 km trong thung lũng Mường Hoa qua Ý Linh Hồ, Lao Chải của người H'Mông Đen và Tả Van của người Giáy. Ngắm dãy Hoàng Liên Sơn, ruộng bậc thang và nghe câu chuyện dân gian địa phương. Dùng bữa trưa rồi lên xe từ cầu Tả Van về Sa Pa.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Đi bộ và xe hỗ trợ"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Chợ Bắc Hà và dinh Hoàng A Tưởng",
+          "route": "Sa Pa - Bắc Hà - Bản Phố - Lào Cai - Hà Nội",
+          "summary": "Trả phòng rồi đến chợ Bắc Hà, tìm hiểu sắc màu văn hóa Dao, Mông và Nùng cùng các sản phẩm thổ cẩm. Sau bữa trưa, đi bộ khoảng 4 km qua dinh Hoàng A Tưởng và bản Phố của người H'Mông Hoa, có thể thử rượu ngô địa phương. Đi xe về Lào Cai và tiếp tục hành trình Hà Nội.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe đường bộ và đi bộ"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn theo chương trình",
+        "Phương tiện theo lịch trình",
+        "Hướng dẫn viên nói tiếng Anh",
+        "Vé vào cửa các điểm được ghi trong chương trình",
+        "Hai bữa sáng và hai bữa trưa"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Xe buýt hoặc tàu Hà Nội - Sa Pa",
+        "Thư chấp thuận thị thực Việt Nam một lần",
+        "Phương tiện đến hoặc rời Việt Nam",
+        "Thuế quốc tế hoặc thuế khởi hành",
+        "Thị thực Việt Nam và lệ phí hộ chiếu",
+        "Bảo hiểm du lịch trong thời gian ở Việt Nam",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước đóng chai"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại Sa Pa theo hạng đã xác nhận.",
+        "mealsSummary": "Hai bữa sáng và hai bữa trưa theo lịch trình đã xác nhận.",
+        "transportSummary": "Xe tại Sa Pa, Bắc Hà và Lào Cai; chưa gồm chặng Hà Nội - Sa Pa.",
+        "operatorNotes": "Chợ Bắc Hà hoạt động theo phiên. Tổng quãng trekking được nêu là 2,5 km ngày 1, 5 km ngày 2 và 4 km ngày 3."
+      },
+      "meta": {
+        "title": "Trekking Sa Pa và chợ Bắc Hà 3 ngày | WingSide",
+        "description": "Trekking Cát Cát, Mường Hoa, Lao Chải, Tả Van và khám phá chợ Bắc Hà trong hành trình vùng cao 3 ngày.",
+        "breadcrumbLabel": "Sa Pa và chợ vùng cao"
+      }
+    },
+    {
+      "slug": "southern-beauty-beach-relaxation-8-days",
+      "title": "Sắc màu miền Nam và nghỉ biển Ninh Thuận trong 8 ngày",
+      "summary": "Tám ngày kết hợp TP. Hồ Chí Minh, địa đạo Củ Chi, Bến Tre và khoảng nghỉ chậm bên biển Ninh Thuận. Ba ngày liên tiếp được dành cho nghỉ dưỡng tự do tại vùng duyên hải.",
+      "routeSummary": "TP. Hồ Chí Minh - Củ Chi - Bến Tre - Ninh Thuận - TP. Hồ Chí Minh",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến TP. Hồ Chí Minh",
+          "route": "Sân bay Tân Sơn Nhất - trung tâm thành phố",
+          "summary": "Đón sân bay và đưa về khách sạn trung tâm. Giờ nhận phòng tiêu chuẩn là 14:00; nhận sớm có phụ phí. Phần còn lại trong ngày tự do hoặc chọn thêm chuyến khám phá Sài Gòn về đêm.",
+          "meals": "Không bao gồm",
+          "transport": "Xe riêng đón sân bay"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Địa đạo Củ Chi và các công trình trung tâm",
+          "route": "TP. Hồ Chí Minh - Củ Chi - TP. Hồ Chí Minh",
+          "summary": "Khởi hành lúc 08:00 đến Củ Chi, xem tư liệu, đi vào một đoạn hầm nếu phù hợp thể lực và thử trà, khoai mì. Trường bắn là lựa chọn có phụ phí. Sau bữa trưa nhẹ, trở lại thành phố tham quan Nhà hát Thành phố, trụ sở UBND từ bên ngoài, Nhà thờ Đức Bà đang trùng tu, Bưu điện Trung tâm và chợ Bến Thành.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Một ngày ở Bến Tre",
+          "route": "TP. Hồ Chí Minh - Bến Tre - TP. Hồ Chí Minh",
+          "summary": "Đón khoảng 07:00-07:30, đi Bến Tre và du thuyền trên sông Hàm Luông. Ghé xưởng dừa, nhà dệt chiếu, thưởng thức trái cây và trà, sau đó đi xe lôi hoặc xe đạp qua làng. Dùng bữa trưa rồi xuống xuồng nan qua kênh dừa nước, trở về thành phố khoảng 17:00.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe, thuyền, xuồng nan và xe lôi hoặc xe đạp"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Từ TP. Hồ Chí Minh đến Ninh Thuận",
+          "route": "TP. Hồ Chí Minh - Ninh Thuận",
+          "summary": "Dùng bữa sáng, rời khách sạn và đi xe buýt đến Ninh Thuận. Nhận phòng tại khu vực biển và dành phần còn lại trong ngày để nghỉ ngơi bên bờ biển.",
+          "meals": "Bữa sáng",
+          "transport": "Xe buýt đường dài"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Những ngày nghỉ tự do ở Ninh Thuận",
+          "route": "Ninh Thuận",
+          "summary": "Ba ngày từ ngày 5 đến ngày 7 dành cho nghỉ dưỡng linh hoạt tại một trong những vùng biển yên tĩnh của Việt Nam. Dùng bữa sáng, thư giãn bên bãi biển hoặc hồ bơi và tự chọn hoạt động theo điều kiện thời tiết.",
+          "meals": "Bữa sáng"
+        },
+        {
+          "dayNumber": 8,
+          "title": "Trở lại TP. Hồ Chí Minh",
+          "route": "Ninh Thuận - TP. Hồ Chí Minh",
+          "summary": "Dùng bữa sáng và tự do đến giờ trả phòng lúc 12:00. Xe đón tại khách sạn và đưa về TP. Hồ Chí Minh, kết thúc hành trình.",
+          "meals": "Bữa sáng",
+          "transport": "Xe buýt đường dài"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn tại khách sạn, trừ đêm tàu hoặc homestay nếu có",
+        "Phương tiện theo lịch trình, gồm đón và tiễn sân bay",
+        "Vé tàu ghế mềm ban ngày nếu chương trình thực tế sử dụng",
+        "Các bữa ăn được ghi rõ trong chương trình",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Vé vào cửa theo lịch trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Phương tiện đến hoặc rời Việt Nam",
+        "Thuế quốc tế hoặc thuế khởi hành",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Bảo hiểm du lịch trong thời gian ở Việt Nam",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước đóng chai",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại TP. Hồ Chí Minh và khu nghỉ dưỡng biển Ninh Thuận.",
+        "mealsSummary": "Bữa sáng theo chương trình cùng bữa trưa trong các ngày Củ Chi và Bến Tre.",
+        "transportSummary": "Xe đón sân bay, xe tham quan và xe buýt đường dài TP. Hồ Chí Minh - Ninh Thuận khứ hồi.",
+        "operatorNotes": "Ngày 5-7 là thời gian nghỉ tự do. Chặng đến Ninh Thuận có thể đi tàu hoặc xe buýt; phương án cuối cùng sẽ được xác nhận trước khi đặt dịch vụ."
+      },
+      "meta": {
+        "title": "Miền Nam và nghỉ biển Ninh Thuận 8 ngày | WingSide",
+        "description": "Tám ngày từ Sài Gòn, Củ Chi và Bến Tre đến kỳ nghỉ biển thư thả tại Ninh Thuận.",
+        "breadcrumbLabel": "Miền Nam và biển Ninh Thuận"
+      }
+    },
+    {
+      "slug": "vietnam-luxury-wellness-retreat-escape-8-days",
+      "title": "Kỳ nghỉ dưỡng chăm sóc sức khỏe tại Việt Nam trong 8 ngày",
+      "summary": "Tám ngày chậm rãi giữa Hà Nội, thung lũng Mai Châu và khu nghỉ dưỡng tại Hội An. Chương trình kết hợp đạp xe, trekking làng Thái, chăm sóc spa và các hoạt động cân bằng thân - tâm.",
+      "routeSummary": "Hà Nội - Mai Châu - Hà Nội - Đà Nẵng - Hội An",
+      "primaryCTALabel": "Thiết kế kỳ nghỉ chăm sóc sức khỏe",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến Hà Nội",
+          "route": "Sân bay Nội Bài - Hà Nội",
+          "summary": "Đón sân bay và đưa về khách sạn hạng sang tại Hà Nội. Giờ nhận phòng từ 14:00; nhận sớm có phụ phí. Phần còn lại trong ngày tự do nghỉ ngơi hoặc đi bộ khám phá thành phố.",
+          "meals": "Không bao gồm",
+          "transport": "Xe riêng đón sân bay"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Thung lũng Mai Châu",
+          "route": "Hà Nội - đèo Thung Khe - Mai Châu",
+          "summary": "Đón tại phố cổ khoảng 07:00-07:30, đi theo đường núi đến Mai Châu và dừng trên đèo Thung Khe ngắm toàn thung lũng. Dùng bữa trưa, có thể yêu cầu món chay. Buổi chiều tự do đi bộ, mua đồ thủ công hoặc tham gia tour đạp xe có hướng dẫn với phụ phí; buổi tối dùng món Thái, nhóm trên năm khách có thể xem múa truyền thống và thử rượu cần.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe Hà Nội - Mai Châu; xe đạp tự chọn"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Đạp xe và trekking các bản xa",
+          "route": "Mai Châu - Nà Mèo - Nà Mo - Xăm Pà - Hà Nội",
+          "summary": "Sau bữa sáng tại homestay, đạp xe 2 km cùng hướng dẫn viên người Thái rồi trekking qua các bản Nà Mèo, Nà Mo và Xăm Pà, ngắm ruộng bậc thang và tìm hiểu đời sống địa phương. Trở lại homestay trả phòng, dùng bữa trưa và rời Mai Châu khoảng 15:30 để về Hà Nội.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe đạp, đi bộ và xe Mai Châu - Hà Nội"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Bay đến Đà Nẵng, về Hội An",
+          "route": "Hà Nội - Đà Nẵng - Hội An",
+          "summary": "Dùng bữa sáng, trả phòng và ra sân bay cho chuyến bay đến Đà Nẵng. Đón tại sân bay, về khu nghỉ dưỡng tại Hội An và tự do buổi chiều tối bên phố cổ.",
+          "meals": "Bữa sáng",
+          "transport": "Xe và chuyến bay Hà Nội - Đà Nẵng"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Ba ngày tái tạo năng lượng tại Hội An",
+          "route": "Hội An",
+          "summary": "Từ ngày 5 đến ngày 7, tận hưởng gói spa hoặc massage và lịch hoạt động của khu nghỉ dưỡng. Có thể tham gia Thái Cực Quyền sáng hoặc chiều, đạp xe qua đồng lúa, lớp nấu ăn, tiếng Việt, cà phê, vẽ khăn hay cho cá koi ăn. Một số hoạt động cần đặt trước và có thể tính thêm phí.",
+          "meals": "Bữa sáng"
+        },
+        {
+          "dayNumber": 8,
+          "title": "Rời Đà Nẵng",
+          "route": "Hội An - sân bay Đà Nẵng",
+          "summary": "Dùng bữa sáng cuối, thu xếp hành lý và lên xe từ Hội An đến sân bay quốc tế Đà Nẵng theo giờ bay.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng tiễn sân bay"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn theo chương trình",
+        "Phương tiện tại Việt Nam, gồm đón và tiễn sân bay, theo lịch trình",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Gói spa hoặc massage tại khu nghỉ dưỡng Almanity Hội An",
+        "Chuyến bay nội địa Hà Nội - Đà Nẵng",
+        "Vé vào cửa theo lịch trình",
+        "Các bữa ăn được ghi rõ trong chương trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Lệ phí hộ chiếu",
+        "Bảo hiểm du lịch",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn hạng sang tại Hà Nội, homestay hoặc lưu trú Mai Châu và khu nghỉ dưỡng Almanity Hội An.",
+        "mealsSummary": "Bữa sáng theo chương trình cùng các bữa trưa tại Mai Châu.",
+        "transportSummary": "Xe đường bộ, xe đạp và chuyến bay Hà Nội - Đà Nẵng.",
+        "operatorNotes": "Ngày 5-7 dành cho kỳ nghỉ tại Hội An. Nội dung spa và lịch lớp học phụ thuộc chương trình hiện hành của khu nghỉ dưỡng."
+      },
+      "meta": {
+        "title": "Kỳ nghỉ wellness Việt Nam 8 ngày | WingSide",
+        "description": "Tái tạo năng lượng trong 8 ngày qua Hà Nội, Mai Châu và khu nghỉ dưỡng spa tại Hội An.",
+        "breadcrumbLabel": "Kỳ nghỉ wellness Việt Nam"
+      }
+    },
+    {
+      "slug": "vietnam-memorable-honeymoon-trip-8-days",
+      "title": "Tuần trăng mật đáng nhớ tại Việt Nam trong 8 ngày",
+      "summary": "Hành trình tám ngày dành cho các cặp đôi, đi từ Hà Nội và Ninh Bình đến vịnh Hạ Long rồi tiếp tục vào Hội An. Những điểm nhấn riêng tư gồm bữa tối dưới ánh nến, đêm du thuyền và bữa tối ngắm hoàng hôn trên sông.",
+      "routeSummary": "Hà Nội - Hoa Lư - Tam Cốc - vịnh Hạ Long - Đà Nẵng - Hội An",
+      "primaryCTALabel": "Thiết kế tuần trăng mật",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Đến Hà Nội và bữa tối dưới ánh nến",
+          "route": "Sân bay Nội Bài - Hà Nội",
+          "summary": "Đón tại sân bay và đưa về khách sạn. Giờ nhận phòng tiêu chuẩn là 14:00; nhận sớm có phụ phí. Buổi tối dùng bữa riêng dưới ánh nến tại nhà hàng địa phương.",
+          "meals": "Bữa tối",
+          "transport": "Xe riêng đón sân bay"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Nửa ngày Hà Nội dành cho hai người",
+          "route": "Văn Miếu - chùa Một Cột - khu Ba Đình - hồ Tây",
+          "summary": "Chuyến khởi hành sáng hoặc chiều tùy chỗ, tham quan Văn Miếu, chùa Một Cột, bên ngoài Lăng Chủ tịch Hồ Chí Minh, hồ Tây và chùa Trấn Quốc rồi dùng bữa Việt Nam. Lăng đóng cửa thứ Hai, thứ Sáu và từ tháng 6 đến tháng 8. Phần còn lại trong ngày tự do.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Hoa Lư và Tam Cốc",
+          "route": "Hà Nội - Tam Cốc - Hoa Lư - Hà Nội",
+          "summary": "Đón khoảng 08:00-08:30 đi Ninh Bình. Ngồi thuyền nan khoảng hai giờ trên sông Ngô Đồng qua Hang Cả, Hang Hai và Hang Ba, dùng bữa trưa địa phương rồi tham quan đền vua Đinh, vua Lê tại cố đô Hoa Lư. Trở về Hà Nội khoảng 18:30-19:00.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe và thuyền nan"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Đêm lãng mạn trên vịnh Hạ Long",
+          "route": "Hà Nội - vịnh Hạ Long",
+          "summary": "Đón khoảng 08:00-08:30, đi 2,5 giờ đến Hạ Long và lên tàu khoảng 12:00. Dùng bữa trưa, tham gia kayak, bơi hoặc thăm hang theo hải trình, ngắm hoàng hôn và dùng bữa tối khoảng 19:00-19:30. Nghỉ đêm trên tàu; thủy thủ đoàn nói tiếng Anh phụ trách khách.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Xe và du thuyền",
+          "accommodation": "Nghỉ đêm trên du thuyền"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Rời Hạ Long, bay đến Đà Nẵng",
+          "route": "Vịnh Hạ Long - Hà Nội - Đà Nẵng - Hội An",
+          "summary": "Có thể tập Thái Cực Quyền hoặc ngắm bình minh, dùng bữa sáng lúc 07:00 rồi thăm hang hoặc chèo kayak theo lịch tàu. Trả cabin lúc 10:00, dùng brunch và rời cảng khoảng 11:30-11:45. Về Hà Nội, nối chuyến bay đến Đà Nẵng rồi đi xe khoảng 45 phút đến Hội An.",
+          "meals": "Bữa sáng và brunch",
+          "transport": "Du thuyền, xe và chuyến bay Hà Nội - Đà Nẵng"
+        },
+        {
+          "dayNumber": 6,
+          "title": "Đi bộ khám phá Hội An",
+          "route": "Chợ Hội An - hội quán Phúc Kiến - nhà cổ - Chùa Cầu",
+          "summary": "Đi bộ qua chợ Hội An, hội quán Phúc Kiến, nhà cổ Phùng Hưng hoặc Tấn Ký, Bảo tàng Văn hóa Dân gian và Chùa Cầu. Ghé các cửa hàng thủ công, phòng tranh và ngõ nhỏ để cảm nhận nhịp sống của phố cổ.",
+          "meals": "Bữa sáng",
+          "transport": "Đi bộ"
+        },
+        {
+          "dayNumber": 7,
+          "title": "Ngày tự do và bữa tối hoàng hôn ở Hội An",
+          "route": "Hội An - sông Thu Bồn và sông Hoài",
+          "summary": "Ban ngày tự do nghỉ ngơi, đạp xe hoặc chọn thêm lớp nấu ăn, làng dừa Cẩm Thanh, Trà Quế, Mỹ Sơn hay tour ẩm thực. Lúc 16:45 lên thuyền, khởi hành 17:00 và dùng bữa tối riêng trong khi ngắm phố Hội lên đèn; xe đưa về khách sạn sau chuyến đi.",
+          "meals": "Bữa sáng và bữa tối",
+          "transport": "Du thuyền ăn tối và xe đưa về khách sạn"
+        },
+        {
+          "dayNumber": 8,
+          "title": "Rời Hội An",
+          "route": "Hội An - sân bay Đà Nẵng",
+          "summary": "Dùng bữa sáng, trả phòng trước 12:00 và lên xe đến sân bay Đà Nẵng. Trả phòng muộn phụ thuộc tình trạng phòng và có phụ phí.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng tiễn sân bay"
+        }
+      ],
+      "includes": [
+        "Phòng đôi có điều hòa tại khách sạn",
+        "Phương tiện có điều hòa theo lịch trình, gồm đón và tiễn sân bay",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Các bữa ăn được ghi rõ trong chương trình",
+        "Vé vào cửa theo lịch trình",
+        "Chuyến bay nội địa Hà Nội - Đà Nẵng"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Bảo hiểm du lịch",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại Hà Nội và Hội An; một đêm du thuyền Hạ Long.",
+        "mealsSummary": "Bữa tối dưới ánh nến, bữa trên du thuyền, bữa tối hoàng hôn và các bữa theo lịch trình.",
+        "transportSummary": "Xe đón tiễn sân bay, thuyền Tam Cốc, du thuyền Hạ Long và chuyến bay Hà Nội - Đà Nẵng.",
+        "operatorNotes": "Lịch Hạ Long phụ thuộc hải trình và thời tiết. Hai bữa tối riêng và các hoạt động tự chọn cần xác nhận trước."
+      },
+      "meta": {
+        "title": "Tuần trăng mật Việt Nam 8 ngày | WingSide",
+        "description": "Tám ngày lãng mạn qua Hà Nội, Tam Cốc, vịnh Hạ Long và Hội An với ba trải nghiệm dành riêng cho cặp đôi.",
+        "breadcrumbLabel": "Tuần trăng mật Việt Nam"
+      }
+    },
+    {
+      "slug": "vietnam-at-a-glance-7-days",
+      "title": "Việt Nam trong một tuần",
+      "summary": "Bảy ngày giới thiệu những nét tiêu biểu của Việt Nam từ Hà Nội và vịnh Hạ Long đến TP. Hồ Chí Minh, địa đạo Củ Chi và Bến Tre. Chương trình phù hợp với khách có thời gian giới hạn nhưng muốn kết hợp cảnh quan, lịch sử và đời sống địa phương.",
+      "routeSummary": "Hà Nội - vịnh Hạ Long - TP. Hồ Chí Minh - Củ Chi - Bến Tre",
+      "primaryCTALabel": "Thiết kế hành trình riêng",
+      "itineraryDays": [
+        {
+          "dayNumber": 1,
+          "title": "Chào Hà Nội",
+          "route": "Sân bay Nội Bài - Hà Nội",
+          "summary": "Gặp hướng dẫn viên tại điểm hẹn sân bay, nghe giới thiệu ngắn và về khách sạn nhận phòng. Phần còn lại trong ngày tự do; nếu sân bay đông và không thấy người đón, liên hệ số hỗ trợ trong xác nhận chuyến đi.",
+          "meals": "Không bao gồm",
+          "transport": "Xe riêng đón sân bay"
+        },
+        {
+          "dayNumber": 2,
+          "title": "Những dấu ấn lịch sử Hà Nội",
+          "route": "Văn Miếu - chùa Một Cột - khu Ba Đình - hồ Tây",
+          "summary": "Khoảng 08:00 bắt đầu chuyến nửa ngày qua Văn Miếu, chùa Một Cột, bên ngoài Lăng Chủ tịch Hồ Chí Minh, hồ Tây và chùa Trấn Quốc, kết thúc bằng bữa trưa Việt Nam. Chuyến có thể khởi hành buổi chiều; Lăng đóng thứ Hai, thứ Sáu và từ tháng 6 đến tháng 8.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan"
+        },
+        {
+          "dayNumber": 3,
+          "title": "Du thuyền qua vịnh Hạ Long",
+          "route": "Hà Nội - vịnh Hạ Long",
+          "summary": "Đón khoảng 08:00-08:30, đi 2,5 giờ đến Hạ Long và lên du thuyền. Dùng bữa trưa khi tàu đi giữa các đảo đá vôi, sau đó thăm hang, chèo kayak hoặc bơi theo hải trình. Dùng bữa tối và nghỉ đêm trên tàu; thủy thủ đoàn nói tiếng Anh phụ trách khách.",
+          "meals": "Bữa sáng, bữa trưa và bữa tối",
+          "transport": "Xe và du thuyền",
+          "accommodation": "Nghỉ đêm trên du thuyền"
+        },
+        {
+          "dayNumber": 4,
+          "title": "Rời Hạ Long, bay vào TP. Hồ Chí Minh",
+          "route": "Vịnh Hạ Long - Hà Nội - TP. Hồ Chí Minh",
+          "summary": "Có thể tập Thái Cực Quyền hoặc ngắm bình minh, dùng bữa sáng nhẹ rồi tham quan hang theo chương trình tàu. Trả cabin, dùng brunch và rời cảng trước 12:00. Xe đưa ra sân bay cho chuyến bay đến TP. Hồ Chí Minh; đón tại sân bay và về khách sạn.",
+          "meals": "Bữa sáng và brunch",
+          "transport": "Du thuyền, xe và chuyến bay Hà Nội - TP. Hồ Chí Minh"
+        },
+        {
+          "dayNumber": 5,
+          "title": "Củ Chi và các địa danh lịch sử Sài Gòn",
+          "route": "TP. Hồ Chí Minh - Củ Chi - TP. Hồ Chí Minh",
+          "summary": "Khởi hành 08:00 đến địa đạo Củ Chi, tìm hiểu hệ thống hầm và đời sống thời chiến; trường bắn là lựa chọn có phụ phí. Dùng bữa trưa nhẹ rồi lúc 13:30 tham quan Dinh Độc Lập, Bảo tàng Chứng tích Chiến tranh, Nhà thờ Đức Bà đang trùng tu, Bưu điện Trung tâm và một chợ địa phương.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe tham quan"
+        },
+        {
+          "dayNumber": 6,
+          "title": "Khám phá Bến Tre",
+          "route": "TP. Hồ Chí Minh - Bến Tre - TP. Hồ Chí Minh",
+          "summary": "Đón khoảng 08:00 đi Bến Tre, xuống thuyền trên sông Hàm Luông và ghé xưởng dừa hoặc nhà dệt chiếu. Đi bộ trong làng, thử xe lôi, thưởng thức trái cây và dùng bữa trưa bên sông. Lúc 13:30 đi xuồng nan qua kênh dừa nước, về khách sạn khoảng 17:00.",
+          "meals": "Bữa sáng và bữa trưa",
+          "transport": "Xe, thuyền máy, xuồng nan và xe lôi"
+        },
+        {
+          "dayNumber": 7,
+          "title": "Rời TP. Hồ Chí Minh",
+          "route": "Khách sạn - sân bay Tân Sơn Nhất",
+          "summary": "Dùng bữa sáng và tự do đến giờ xe đưa ra sân bay. Giờ trả phòng tiêu chuẩn là 12:00; trả muộn tùy tình trạng phòng và có phụ phí.",
+          "meals": "Bữa sáng",
+          "transport": "Xe riêng tiễn sân bay"
+        }
+      ],
+      "includes": [
+        "Phòng đôi hoặc hai giường đơn tại khách sạn, trừ đêm tàu hoặc homestay nếu có",
+        "Phương tiện tại Việt Nam, gồm đón và tiễn sân bay, theo lịch trình",
+        "Hướng dẫn viên địa phương nói tiếng Anh trong các chặng tham quan",
+        "Vé vào cửa theo lịch trình",
+        "Chuyến bay nội địa Hà Nội - TP. Hồ Chí Minh",
+        "Các bữa ăn được ghi rõ trong chương trình"
+      ],
+      "excludes": [
+        "Nhận phòng sớm và trả phòng muộn",
+        "Vé máy bay quốc tế đến hoặc rời Việt Nam và các loại thuế liên quan",
+        "Thị thực Việt Nam; hộ chiếu cần còn hạn trên 6 tháng và có ít nhất 3 trang trống",
+        "Bảo hiểm du lịch",
+        "Tiền tip, giặt là và các khoản chi cá nhân",
+        "Các bữa không ghi trong lịch trình và nước uống trong bữa ăn",
+        "Tip cho hướng dẫn viên và tài xế, khuyến nghị 3-5 USD mỗi khách mỗi ngày",
+        "Tip hoàn toàn tự nguyện và nên dựa trên chất lượng dịch vụ thực tế"
+      ],
+      "servicesSummary": {
+        "hotelSummary": "Khách sạn tại Hà Nội và TP. Hồ Chí Minh; một đêm du thuyền Hạ Long.",
+        "mealsSummary": "Bữa sáng theo chương trình, bữa trưa tại Hà Nội, Củ Chi và Bến Tre, trọn bữa trên du thuyền.",
+        "transportSummary": "Xe đường bộ, du thuyền Hạ Long, thuyền Bến Tre và chuyến bay Hà Nội - TP. Hồ Chí Minh.",
+        "operatorNotes": "Hải trình Hạ Long phụ thuộc thời tiết. Lăng Chủ tịch Hồ Chí Minh và Nhà thờ Đức Bà có giới hạn tham quan."
+      },
+      "meta": {
+        "title": "Việt Nam trong 7 ngày | WingSide",
+        "description": "Một tuần từ Hà Nội, Hạ Long đến TP. Hồ Chí Minh, Củ Chi và Bến Tre.",
+        "breadcrumbLabel": "Việt Nam trong một tuần"
+      }
+    }
+  ]
+}

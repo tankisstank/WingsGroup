@@ -14,6 +14,12 @@ const storyRoot = path.join(repoRoot, 'docs', 'stories')
 
 const EXTERNAL_SOURCE = 'wingstravel-plane-import'
 const action = process.argv[2] || 'preview'
+const storyIdFilter = new Set(
+  String(process.env.PLANE_STORY_IDS || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean),
+)
 
 const planeConfig = {
   apiKey: process.env.PLANE_API_KEY || '',
@@ -40,7 +46,8 @@ const PROJECT_TEXT = {
   },
   WGO: {
     name: 'WingsGo',
-    description: 'Site WingsGo với nội dung, campaign, tour và các deliverable public của giai đoạn 1.',
+    description:
+      'Site WingsGo với nội dung, campaign, tour và các deliverable public của giai đoạn 1.',
   },
   WSIDE: {
     name: 'WingSide',
@@ -224,21 +231,25 @@ const CHILD_TASK_TEXT = {
   'US-003': [
     {
       title: 'Xây dựng bản ghi site đầy đủ định danh',
-      description: 'Site record cần lưu được identity, domain, locale support và trạng thái active để làm nền cho multisite.',
+      description:
+        'Site record cần lưu được identity, domain, locale support và trạng thái active để làm nền cho multisite.',
     },
     {
       title: 'Tách cấu hình thương hiệu, SEO, navigation và contact theo site',
-      description: 'Site settings phải là nơi quản trị brand, SEO, navigation và dữ liệu liên hệ dùng chung cho từng site.',
+      description:
+        'Site settings phải là nơi quản trị brand, SEO, navigation và dữ liệu liên hệ dùng chung cho từng site.',
     },
     {
       title: 'Resolve đúng site context cho public và admin',
-      description: 'Public rendering và admin behavior phải xác định đúng ngữ cảnh site trước khi render hoặc thao tác dữ liệu.',
+      description:
+        'Public rendering và admin behavior phải xác định đúng ngữ cảnh site trước khi render hoặc thao tác dữ liệu.',
     },
   ],
   'US-004': [
     {
       title: 'Khởi tạo locale tiếng Việt và tiếng Anh',
-      description: 'Nền tảng bắt đầu với hai locale chính là tiếng Việt và tiếng Anh để phục vụ phase 1.',
+      description:
+        'Nền tảng bắt đầu với hai locale chính là tiếng Việt và tiếng Anh để phục vụ phase 1.',
     },
     {
       title: 'Cho phép chuyển locale khi biên tập trong CMS',
@@ -246,21 +257,25 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Render route và metadata đúng locale, đúng site',
-      description: 'Public route và metadata cần phản ánh đúng locale và site context của trang đang được xem.',
+      description:
+        'Public route và metadata cần phản ánh đúng locale và site context của trang đang được xem.',
     },
   ],
   'US-005': [
     {
       title: 'Quản trị trang marketing bằng structured content',
-      description: 'Các trang marketing lõi được quản lý từ dữ liệu có cấu trúc trong Payload thay vì hardcode.',
+      description:
+        'Các trang marketing lõi được quản lý từ dữ liệu có cấu trúc trong Payload thay vì hardcode.',
     },
     {
       title: 'Tạo pattern landing page tái sử dụng',
-      description: 'Ít nhất một mẫu landing page có thể tái sử dụng cho campaign hoặc biến thể theo thị trường.',
+      description:
+        'Ít nhất một mẫu landing page có thể tái sử dụng cho campaign hoặc biến thể theo thị trường.',
     },
     {
       title: 'Cho phép editor chỉnh hero, CTA và section chuẩn',
-      description: 'Editor có thể chỉnh hero, CTA và các section hỗ trợ trong trường hợp chuẩn mà không cần thay code.',
+      description:
+        'Editor có thể chỉnh hero, CTA và các section hỗ trợ trong trường hợp chuẩn mà không cần thay code.',
     },
   ],
   'US-006': [
@@ -270,7 +285,8 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Giới hạn site-manager theo site được phân công',
-      description: 'Site-manager chỉ được xem và thao tác trên các site nằm trong phạm vi phân công.',
+      description:
+        'Site-manager chỉ được xem và thao tác trên các site nằm trong phạm vi phân công.',
     },
     {
       title: 'Giới hạn editor theo site và phạm vi biên tập',
@@ -278,7 +294,8 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Khóa field nhạy cảm cho role có quyền thấp',
-      description: 'Các trường nhạy cảm chỉ mở cho role có quyền cao hơn để tránh sửa sai cấu hình hệ thống.',
+      description:
+        'Các trường nhạy cảm chỉ mở cho role có quyền cao hơn để tránh sửa sai cấu hình hệ thống.',
     },
   ],
   'US-007': [
@@ -288,7 +305,8 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Đảm bảo core pages ổn định trên mobile và desktop',
-      description: 'Các trang lõi phải hiển thị ổn trên mobile và desktop, không có lỗi layout nghiêm trọng.',
+      description:
+        'Các trang lõi phải hiển thị ổn trên mobile và desktop, không có lỗi layout nghiêm trọng.',
     },
     {
       title: 'Hoàn tất luồng cập nhật nội dung từ CMS',
@@ -302,7 +320,8 @@ const CHILD_TASK_TEXT = {
   'US-008': [
     {
       title: 'Sinh metadata ổn định cho route quan trọng',
-      description: 'Các route launch-critical cần có title, description, canonical và sharing image metadata ổn định.',
+      description:
+        'Các route launch-critical cần có title, description, canonical và sharing image metadata ổn định.',
     },
     {
       title: 'Tránh trùng canonical giữa site và locale',
@@ -324,7 +343,8 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Tạo hướng triển khai JSON-LD tái sử dụng',
-      description: 'JSON-LD cần có cách triển khai dùng lại được, tránh markup ad hoc theo từng page.',
+      description:
+        'JSON-LD cần có cách triển khai dùng lại được, tránh markup ad hoc theo từng page.',
     },
     {
       title: 'Áp dụng markup cho page type đại diện',
@@ -332,7 +352,8 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Ghi lại research và quyết định triển khai vào docs',
-      description: 'Research note và lựa chọn triển khai phải được cập nhật lại vào tài liệu bền vững.',
+      description:
+        'Research note và lựa chọn triển khai phải được cập nhật lại vào tài liệu bền vững.',
     },
   ],
   'US-010': [
@@ -342,11 +363,13 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Bổ sung internal links cho trang quan trọng',
-      description: 'Các trang launch-critical không được bị orphan khỏi hệ thống liên kết nội bộ có ý nghĩa.',
+      description:
+        'Các trang launch-critical không được bị orphan khỏi hệ thống liên kết nội bộ có ý nghĩa.',
     },
     {
       title: 'Mở các field SEO tối thiểu trong Payload',
-      description: 'Payload collections cần có trường tối thiểu để quản trị SEO ổn định cho các page type đã chọn.',
+      description:
+        'Payload collections cần có trường tối thiểu để quản trị SEO ổn định cho các page type đã chọn.',
     },
     {
       title: 'Giữ field mới nhận biết theo site và locale',
@@ -356,7 +379,8 @@ const CHILD_TASK_TEXT = {
   'US-011': [
     {
       title: 'Thiết lập theme foundation cho public experience',
-      description: 'Public experience dùng nền tảng theme có tài liệu cho màu sắc, typography, spacing, CTA và shared chrome.',
+      description:
+        'Public experience dùng nền tảng theme có tài liệu cho màu sắc, typography, spacing, CTA và shared chrome.',
     },
     {
       title: 'Cho phép override brand theo site',
@@ -364,7 +388,8 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Giữ semantic HTML và section pattern tái sử dụng',
-      description: 'Theme work không được làm mất semantic HTML hoặc phá các section pattern có thể dùng lại.',
+      description:
+        'Theme work không được làm mất semantic HTML hoặc phá các section pattern có thể dùng lại.',
     },
     {
       title: 'Tài liệu hóa theme rules để handover',
@@ -374,27 +399,33 @@ const CHILD_TASK_TEXT = {
   'US-012': [
     {
       title: 'Thay dashboard và login copy mặc định bằng hướng dẫn WingsTravel',
-      description: 'Dashboard và login copy mặc định của template được thay bằng hướng dẫn quản trị phù hợp WingsTravel.',
+      description:
+        'Dashboard và login copy mặc định của template được thay bằng hướng dẫn quản trị phù hợp WingsTravel.',
     },
     {
       title: 'Hiển thị shortcut và status card theo role',
-      description: 'Super-admin, site-manager và editor nhìn thấy shortcut và status card phù hợp vai trò.',
+      description:
+        'Super-admin, site-manager và editor nhìn thấy shortcut và status card phù hợp vai trò.',
     },
     {
       title: 'Hiển thị context site được phân công cho user scoped',
-      description: 'User bị giới hạn theo site thấy context site và link tới pages, posts, media, forms, settings, preview liên quan.',
+      description:
+        'User bị giới hạn theo site thấy context site và link tới pages, posts, media, forms, settings, preview liên quan.',
     },
     {
       title: 'Giữ đầy đủ capability phase 1 trong Payload',
-      description: 'Các capability phase 1 vẫn đi qua collections, globals, plugins và custom admin components mà không bypass access rules.',
+      description:
+        'Các capability phase 1 vẫn đi qua collections, globals, plugins và custom admin components mà không bypass access rules.',
     },
     {
       title: 'Giới hạn plugin bổ sung trong ranh giới Payload-first',
-      description: 'Plugin public chỉ phục vụ content governance, import/export hoặc editorial quality phù hợp phase 1.',
+      description:
+        'Plugin public chỉ phục vụ content governance, import/export hoặc editorial quality phù hợp phase 1.',
     },
     {
       title: 'Không thêm booking, payment, CRM, automation hoặc analytics nâng cao',
-      description: 'Story này không mở rộng sang booking, payment, CRM pipeline, automation workflow hoặc advanced analytics dashboard.',
+      description:
+        'Story này không mở rộng sang booking, payment, CRM pipeline, automation workflow hoặc advanced analytics dashboard.',
     },
   ],
   'US-015': [
@@ -420,31 +451,37 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Expose data attributes cho presentation và business variant',
-      description: 'Public markup cần có data attributes thể hiện presentation và business variant.',
+      description:
+        'Public markup cần có data attributes thể hiện presentation và business variant.',
     },
   ],
   'US-018': [
     {
       title: 'Tạo custom view /admin/site-review trong CMS',
-      description: 'CMS cần có custom view /admin/site-review, được link từ admin navigation và operator console.',
+      description:
+        'CMS cần có custom view /admin/site-review, được link từ admin navigation và operator console.',
     },
     {
       title: 'Nhóm page/post theo site và preview URL trong iframe',
-      description: 'View site review nhóm page và post theo site, đồng thời preview URL được chọn trong iframe.',
+      description:
+        'View site review nhóm page và post theo site, đồng thời preview URL được chọn trong iframe.',
     },
     {
       title: 'Mở edit action về route edit native của Payload',
-      description: 'Mỗi page hoặc post có action Edit mở đúng route edit native của Payload cho document đó.',
+      description:
+        'Mỗi page hoặc post có action Edit mở đúng route edit native của Payload cho document đó.',
     },
     {
       title: 'Áp dụng access control hiện có khi hiển thị document',
-      description: 'Visibility của site và document phải dùng Payload access control hiện có với overrideAccess false.',
+      description:
+        'Visibility của site và document phải dùng Payload access control hiện có với overrideAccess false.',
     },
   ],
   'US-019': [
     {
       title: 'Tạo command go-live review trong repo',
-      description: 'Repo có command local để chạy go-live review với app WingsTravel đang chạy local hoặc preview.',
+      description:
+        'Repo có command local để chạy go-live review với app WingsTravel đang chạy local hoặc preview.',
     },
     {
       title: 'Cho phép review toàn bộ site hoặc path cụ thể',
@@ -456,11 +493,13 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Kiểm tra route status, browser error và SEO nền tảng',
-      description: 'Report kiểm tra status, lỗi browser, horizontal overflow, title, meta description, canonical, H1 và alt ảnh.',
+      description:
+        'Report kiểm tra status, lỗi browser, horizontal overflow, title, meta description, canonical, H1 và alt ảnh.',
     },
     {
       title: 'Bổ sung finding nội dung và conversion theo page purpose',
-      description: 'Report có finding về nội dung/copy, CTA chuyển đổi và inquiry path cho campaign và travel-product pages.',
+      description:
+        'Report có finding về nội dung/copy, CTA chuyển đổi và inquiry path cho campaign và travel-product pages.',
     },
     {
       title: 'Xuất JSON và Markdown report',
@@ -490,17 +529,20 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Hoàn tất proof ở đủ lớp kiểm thử chính',
-      description: 'Có unit, component, integration, CMS E2E, frontend E2E và visual proof đã chọn.',
+      description:
+        'Có unit, component, integration, CMS E2E, frontend E2E và visual proof đã chọn.',
     },
   ],
   'US-021': [
     {
       title: 'Tách rõ các scope quyết định trong CMS',
-      description: 'CMS cần tách rõ site theme shell, site default hero và page-level hero override.',
+      description:
+        'CMS cần tách rõ site theme shell, site default hero và page-level hero override.',
     },
     {
       title: 'Định nghĩa scope site theme shell',
-      description: 'Site theme shell là lớp giao diện site-level, không lẫn với hero default hoặc override từng page.',
+      description:
+        'Site theme shell là lớp giao diện site-level, không lẫn với hero default hoặc override từng page.',
     },
     {
       title: 'Định nghĩa scope site default hero',
@@ -508,15 +550,18 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Định nghĩa scope page-level hero override',
-      description: 'Page-level hero override chỉ áp dụng cho trang cụ thể và không thay đổi default toàn site.',
+      description:
+        'Page-level hero override chỉ áp dụng cho trang cụ thể và không thay đổi default toàn site.',
     },
     {
       title: 'Giới hạn quyền truy cập /admin/theme và hero editing',
-      description: '/admin/theme chỉ cho site-manager và super-admin; page-level Hero editing theo quyền update page của editor.',
+      description:
+        '/admin/theme chỉ cho site-manager và super-admin; page-level Hero editing theo quyền update page của editor.',
     },
     {
       title: 'Loại bỏ decision path legacy song song cho hero',
-      description: 'Flow editor-facing không còn expose legacy hero-presentation controls như một đường quyết định song song.',
+      description:
+        'Flow editor-facing không còn expose legacy hero-presentation controls như một đường quyết định song song.',
     },
   ],
   'US-022': [
@@ -526,23 +571,28 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Cung cấp hai theme preset code-owned',
-      description: 'CMS backend có hai theme preset riêng là ats-compact và finexy-soft do code quản lý.',
+      description:
+        'CMS backend có hai theme preset riêng là ats-compact và finexy-soft do code quản lý.',
     },
     {
       title: 'Thiết kế ats-compact theo hướng compact, rõ active state',
-      description: 'ats-compact dùng teal/slate, sidebar/navigation mạnh, active state rõ, bảng compact và border tiết chế.',
+      description:
+        'ats-compact dùng teal/slate, sidebar/navigation mạnh, active state rõ, bảng compact và border tiết chế.',
     },
     {
       title: 'Thiết kế finexy-soft theo hướng mềm và giàu dashboard',
-      description: 'finexy-soft dùng orange/charcoal, rounded cards, pill actions, metric cards, role/site summary và quick actions.',
+      description:
+        'finexy-soft dùng orange/charcoal, rounded cards, pill actions, metric cards, role/site summary và quick actions.',
     },
     {
       title: 'Dùng chung semantic backend token contract',
-      description: 'Hai theme dùng cùng token contract để admin components đổi theme mà không rewrite view logic.',
+      description:
+        'Hai theme dùng cùng token contract để admin components đổi theme mà không rewrite view logic.',
     },
     {
       title: 'Đảm bảo các route Payload hiện có tiếp tục hoạt động',
-      description: 'Các route /admin, /admin/console, /admin/theme, /admin/site-review, list view và edit view vẫn hoạt động.',
+      description:
+        'Các route /admin, /admin/console, /admin/theme, /admin/site-review, list view và edit view vẫn hoạt động.',
     },
   ],
   'US-023': [
@@ -612,65 +662,79 @@ const CHILD_TASK_TEXT = {
   'US-025': [
     {
       title: 'Chạy PostgreSQL disposable từ empty đến head',
-      description: 'Command repo-local spin up PostgreSQL dùng một lần và apply toàn bộ committed migrations từ schema rỗng đến head.',
+      description:
+        'Command repo-local spin up PostgreSQL dùng một lần và apply toàn bộ committed migrations từ schema rỗng đến head.',
     },
     {
       title: 'Fail khi migration lỗi, drift hoặc schema lệch expectation',
-      description: 'Command trả non-zero nếu migration lỗi, phát hiện drift hoặc schema sau migration không khớp expectation từ Payload.',
+      description:
+        'Command trả non-zero nếu migration lỗi, phát hiện drift hoặc schema sau migration không khớp expectation từ Payload.',
     },
     {
       title: 'Chạy gate trên PostgreSQL, không dùng SQLite',
-      description: 'Smoke gate phải chạy trên PostgreSQL để bắt lỗi khác biệt dialect thay vì chỉ kiểm tra SQLite.',
+      description:
+        'Smoke gate phải chạy trên PostgreSQL để bắt lỗi khác biệt dialect thay vì chỉ kiểm tra SQLite.',
     },
     {
       title: 'Kiểm tra seed/import sau migration',
-      description: 'Sau migration cần chạy kiểm tra seed/import để đảm bảo dataset đại diện load được trên schema PostgreSQL mới.',
+      description:
+        'Sau migration cần chạy kiểm tra seed/import để đảm bảo dataset đại diện load được trên schema PostgreSQL mới.',
     },
     {
       title: 'Tài liệu hóa ranh giới SQLite bootstrap-only',
-      description: 'Ghi rõ SQLite chỉ dùng bootstrap local; repairLocalSQLiteSchema không thay thế migration thật trên PostgreSQL.',
+      description:
+        'Ghi rõ SQLite chỉ dùng bootstrap local; repairLocalSQLiteSchema không thay thế migration thật trên PostgreSQL.',
     },
     {
       title: 'Ghi rollback path cho migration gần nhất',
-      description: 'Cần có đường rollback cho migration gần nhất, bằng down migration hoặc quy trình restore từ backup rõ ràng.',
+      description:
+        'Cần có đường rollback cho migration gần nhất, bằng down migration hoặc quy trình restore từ backup rõ ràng.',
     },
   ],
   'US-035': [
     {
       title: 'Tạo collection departure-variants',
-      description: 'Nền tảng có collection cấu trúc để mô tả biến thể khởi hành theo điểm xuất phát, hãng bay hoặc lớp trình bày.',
+      description:
+        'Nền tảng có collection cấu trúc để mô tả biến thể khởi hành theo điểm xuất phát, hãng bay hoặc lớp trình bày.',
     },
     {
       title: 'Giới hạn phạm vi override của variant',
-      description: 'Variant chỉ được override một tập trường có kiểm soát, không nhân bản hoặc thay thế toàn bộ product truth.',
+      description:
+        'Variant chỉ được override một tập trường có kiểm soát, không nhân bản hoặc thay thế toàn bộ product truth.',
     },
     {
       title: 'Liên kết departure với variant phù hợp',
-      description: 'Mỗi departure có thể trỏ tới variant để public renderer biết cách merge dữ liệu khi hiển thị.',
+      description:
+        'Mỗi departure có thể trỏ tới variant để public renderer biết cách merge dữ liệu khi hiển thị.',
     },
     {
       title: 'Merge base, variant và departure an toàn',
-      description: 'Public tour resolution phải hợp nhất base tour, variant và departure theo thứ tự rõ ràng, không leak field ngoài contract.',
+      description:
+        'Public tour resolution phải hợp nhất base tour, variant và departure theo thứ tự rõ ràng, không leak field ngoài contract.',
     },
   ],
   'US-036': [
     {
       title: 'Nhóm field authoring cho base tour',
-      description: 'Admin tour base cần nhóm rõ decision data, route, reviews, itinerary, services, FAQ và builder settings.',
+      description:
+        'Admin tour base cần nhóm rõ decision data, route, reviews, itinerary, services, FAQ và builder settings.',
     },
     {
       title: 'Nhóm tín hiệu commerce cho departures',
-      description: 'Departure authoring cần expose các field giá, ngày, trạng thái và tín hiệu chuyển đổi theo nhóm dễ hiểu.',
+      description:
+        'Departure authoring cần expose các field giá, ngày, trạng thái và tín hiệu chuyển đổi theo nhóm dễ hiểu.',
     },
     {
       title: 'Nhóm tab override cho variants',
-      description: 'Variant authoring cần tách tab override để editor hiểu rõ phần nào đang thay đổi so với base tour.',
+      description:
+        'Variant authoring cần tách tab override để editor hiểu rõ phần nào đang thay đổi so với base tour.',
     },
   ],
   'US-037': [
     {
       title: 'Chuyển hero thành decision header',
-      description: 'Tour detail hero cần ưu tiên thông tin quyết định như giá, lịch, hành trình, CTA và proof thay vì hero trang generic.',
+      description:
+        'Tour detail hero cần ưu tiên thông tin quyết định như giá, lịch, hành trình, CTA và proof thay vì hero trang generic.',
     },
     {
       title: 'Hiển thị review snapshot và route visual',
@@ -678,29 +742,35 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Render itinerary theo từng ngày và gắn gallery',
-      description: 'Itinerary phải đọc được theo ngày và có thể dùng media/gallery liên quan tới từng chặng.',
+      description:
+        'Itinerary phải đọc được theo ngày và có thể dùng media/gallery liên quan tới từng chặng.',
     },
     {
       title: 'Trình bày services và departures như commerce modules',
-      description: 'Dịch vụ bao gồm/không bao gồm và khởi hành phải có cấu trúc ra quyết định, không chỉ là đoạn text.',
+      description:
+        'Dịch vụ bao gồm/không bao gồm và khởi hành phải có cấu trúc ra quyết định, không chỉ là đoạn text.',
     },
     {
       title: 'Giữ sticky CTA sẵn sàng cho builder',
-      description: 'Sticky CTA cần là vùng chuyển đổi ổn định để phase sau gắn lead hoặc booking intent.',
+      description:
+        'Sticky CTA cần là vùng chuyển đổi ổn định để phase sau gắn lead hoặc booking intent.',
     },
   ],
   'US-038': [
     {
       title: 'Dựng compact hero với thống kê lịch khởi hành',
-      description: 'Trang lịch khởi hành cần hero gọn, nêu nhanh số lượng lịch, điểm đến và tín hiệu giá.',
+      description:
+        'Trang lịch khởi hành cần hero gọn, nêu nhanh số lượng lịch, điểm đến và tín hiệu giá.',
     },
     {
       title: 'Đưa featured departures lên trước danh sách đầy đủ',
-      description: 'Các lịch đáng chú ý cần được ưu tiên trước bảng đầy đủ để tăng khả năng chuyển đổi.',
+      description:
+        'Các lịch đáng chú ý cần được ưu tiên trước bảng đầy đủ để tăng khả năng chuyển đổi.',
     },
     {
       title: 'Cho phép lọc departures theo nhóm',
-      description: 'Danh sách khởi hành cần filter được theo nhóm có ý nghĩa để người dùng tìm lịch phù hợp.',
+      description:
+        'Danh sách khởi hành cần filter được theo nhóm có ý nghĩa để người dùng tìm lịch phù hợp.',
     },
     {
       title: 'Thêm trust strip và CTA band',
@@ -714,89 +784,109 @@ const CHILD_TASK_TEXT = {
   'US-039': [
     {
       title: 'Cập nhật product contract tour platform',
-      description: 'Tài liệu sản phẩm cần phản ánh đúng collection, renderer, variant và schedule surface đã triển khai.',
+      description:
+        'Tài liệu sản phẩm cần phản ánh đúng collection, renderer, variant và schedule surface đã triển khai.',
     },
     {
       title: 'Tài liệu hóa builder foundation',
-      description: 'Builder foundation cần ghi rõ section model, vùng chuyển đổi và ranh giới với Page Composer generic.',
+      description:
+        'Builder foundation cần ghi rõ section model, vùng chuyển đổi và ranh giới với Page Composer generic.',
     },
     {
       title: 'Tài liệu hóa variant model',
-      description: 'Variant model cần có contract rõ về base tour, departure, override và merge order.',
+      description:
+        'Variant model cần có contract rõ về base tour, departure, override và merge order.',
     },
     {
       title: 'Tài liệu hóa editorial workflow',
-      description: 'Editor cần biết thao tác tour, departure, variant và lịch khởi hành theo quy trình dễ theo.',
+      description:
+        'Editor cần biết thao tác tour, departure, variant và lịch khởi hành theo quy trình dễ theo.',
     },
     {
       title: 'Tài liệu hóa import mapping',
-      description: 'Mapping từ Google Sheets/Docs vào tour structured data cần đủ rõ để tiếp tục import-assisted updates.',
+      description:
+        'Mapping từ Google Sheets/Docs vào tour structured data cần đủ rõ để tiếp tục import-assisted updates.',
     },
   ],
   'US-026': [
     {
       title: 'Đăng ký đầy đủ story set US-026 đến US-034',
-      description: 'Harness cần có đủ các story của E08 để tách việc nâng cấp WingSide inbound thành các lát triển khai kiểm soát được.',
+      description:
+        'Harness cần có đủ các story của E08 để tách việc nâng cấp WingSide inbound thành các lát triển khai kiểm soát được.',
     },
     {
       title: 'Tạo folder epic E08 trong tài liệu story',
-      description: 'Epic folder là nơi gom overview, audit và story packet của initiative WingSide inbound upgrade.',
+      description:
+        'Epic folder là nơi gom overview, audit và story packet của initiative WingSide inbound upgrade.',
     },
     {
       title: 'Tổng hợp audit hardcode locale theo file',
-      description: 'Các rủi ro locale hardcode phải được ghi nhận theo file để tránh mở public locale sai hoặc fallback copy sai.',
+      description:
+        'Các rủi ro locale hardcode phải được ghi nhận theo file để tránh mở public locale sai hoặc fallback copy sai.',
     },
     {
       title: 'Chốt quyết định tái sử dụng block',
-      description: 'Các block Page Composer cần ưu tiên tái sử dụng hoặc mở rộng block hiện có trước khi thêm schema mới.',
+      description:
+        'Các block Page Composer cần ưu tiên tái sử dụng hoặc mở rộng block hiện có trước khi thêm schema mới.',
     },
     {
       title: 'Chốt quyết định tái sử dụng hero system',
-      description: 'Hero inbound phải đi qua hệ thống hero presentation hiện có và trỏ đúng về cấu hình hero trong app.',
+      description:
+        'Hero inbound phải đi qua hệ thống hero presentation hiện có và trỏ đúng về cấu hình hero trong app.',
     },
     {
       title: 'Ghi rõ nguồn nội dung và luật locale launch',
-      description: 'Nội dung, provenance và danh sách locale được phép public cần được chốt trước các story downstream.',
+      description:
+        'Nội dung, provenance và danh sách locale được phép public cần được chốt trước các story downstream.',
     },
   ],
   'US-027': [
     {
       title: 'Thêm preset giao diện inbound v2 cho WingSide',
-      description: 'Preset wings-side-editorial-inbound-v2 định nghĩa token theme inbound mà không thay đổi các site khác.',
+      description:
+        'Preset wings-side-editorial-inbound-v2 định nghĩa token theme inbound mà không thay đổi các site khác.',
     },
     {
       title: 'Áp dụng bảng màu inbound bằng token được quản trị',
-      description: 'Màu nền, chữ, CTA và trạng thái nhấn phải đi qua token theme thay vì hardcode rải rác.',
+      description:
+        'Màu nền, chữ, CTA và trạng thái nhấn phải đi qua token theme thay vì hardcode rải rác.',
     },
     {
       title: 'Giữ nguyên mapping font hiện có',
-      description: 'WingSide tiếp tục dùng Playfair Display và Inter cho tới khi quyết định Fraunces được chốt riêng.',
+      description:
+        'WingSide tiếp tục dùng Playfair Display và Inter cho tới khi quyết định Fraunces được chốt riêng.',
     },
     {
       title: 'Kiểm tra render desktop và mobile của /wingsside',
-      description: 'Route public WingSide phải hiển thị đúng theme trên desktop và mobile, không overflow nghiêm trọng.',
+      description:
+        'Route public WingSide phải hiển thị đúng theme trên desktop và mobile, không overflow nghiêm trọng.',
     },
     {
       title: 'Chứng minh theme không leak sang site khác',
-      description: 'WingsGo hoặc một site không phải WingSide cần smoke để xác nhận CSS scoped không ảnh hưởng chéo.',
+      description:
+        'WingsGo hoặc một site không phải WingSide cần smoke để xác nhận CSS scoped không ảnh hưởng chéo.',
     },
   ],
   'US-028': [
     {
       title: 'Tạo RevealOnScroll dùng IntersectionObserver',
-      description: 'Primitive reveal chỉ kích hoạt khi element vào viewport và có fallback phù hợp cho reduced-motion.',
+      description:
+        'Primitive reveal chỉ kích hoạt khi element vào viewport và có fallback phù hợp cho reduced-motion.',
     },
     {
       title: 'Tạo CountUp có fallback an toàn',
-      description: 'CountUp hỗ trợ số, suffix, duration và locale; giá trị không phải số phải render text fallback thay vì lỗi.',
+      description:
+        'CountUp hỗ trợ số, suffix, duration và locale; giá trị không phải số phải render text fallback thay vì lỗi.',
     },
     {
       title: 'Tạo hook theo dõi hướng cuộn',
-      description: 'useScrollDirection cần cleanup listener và throttle bằng requestAnimationFrame để tránh ảnh hưởng hiệu năng.',
+      description:
+        'useScrollDirection cần cleanup listener và throttle bằng requestAnimationFrame để tránh ảnh hưởng hiệu năng.',
     },
     {
       title: 'Bổ sung utility CSS motion dùng chung',
-      description: 'Các class reveal, hover lift, image zoom và Ken Burns được định nghĩa ở global CSS với contract rõ ràng.',
+      description:
+        'Các class reveal, hover lift, image zoom và Ken Burns được định nghĩa ở global CSS với contract rõ ràng.',
     },
     {
       title: 'Không thêm thư viện motion mới',
@@ -806,19 +896,23 @@ const CHILD_TASK_TEXT = {
   'US-029': [
     {
       title: 'Tái sử dụng hero presentation system hiện có',
-      description: 'Hero inbound dùng preset được quản trị trong hệ thống hero hiện tại, không tạo song song một hero framework mới.',
+      description:
+        'Hero inbound dùng preset được quản trị trong hệ thống hero hiện tại, không tạo song song một hero framework mới.',
     },
     {
       title: 'Không đưa video hero vào wave đầu',
-      description: 'Wave 1 chỉ dùng image-only carousel để giảm rủi ro performance và production readiness.',
+      description:
+        'Wave 1 chỉ dùng image-only carousel để giảm rủi ro performance và production readiness.',
     },
     {
       title: 'Dựng planner widget có label và control truy cập được',
-      description: 'Planner form cần có label rõ, control truy cập được và submit về URL site-aware.',
+      description:
+        'Planner form cần có label rõ, control truy cập được và submit về URL site-aware.',
     },
     {
       title: 'Kiểm thử hành vi hero/search trên /wingsside',
-      description: 'E2E public xác nhận preset, slide, Ken Burns marker, form label, routing và mobile no-overflow.',
+      description:
+        'E2E public xác nhận preset, slide, Ken Burns marker, form label, routing và mobile no-overflow.',
     },
   ],
   'US-030': [
@@ -832,33 +926,40 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Mở rộng Testimonial cho carousel có kiểm soát',
-      description: 'Testimonials carousel phải đi qua block Testimonial, không tạo dữ liệu đánh giá giả.',
+      description:
+        'Testimonials carousel phải đi qua block Testimonial, không tạo dữ liệu đánh giá giả.',
     },
     {
       title: 'Chốt quyết định itinerary grid trước khi thêm block mới',
-      description: 'Nếu itinerary grid cần schema mới, quyết định phải được ghi trước khi mở rộng Page Composer.',
+      description:
+        'Nếu itinerary grid cần schema mới, quyết định phải được ghi trước khi mở rộng Page Composer.',
     },
     {
       title: 'Không dùng tour section registry cho Page Composer',
-      description: 'Page Composer không được phụ thuộc app/src/tours/sectionRegistry.ts vì đó là registry cho tour detail.',
+      description:
+        'Page Composer không được phụ thuộc app/src/tours/sectionRegistry.ts vì đó là registry cho tour detail.',
     },
   ],
   'US-031': [
     {
       title: 'Tạo locale metadata dùng chung',
-      description: 'Locale metadata là contract trung tâm cho CMS-enabled, public-enabled và ads-ready locales.',
+      description:
+        'Locale metadata là contract trung tâm cho CMS-enabled, public-enabled và ads-ready locales.',
     },
     {
       title: 'Mở rộng Payload localization và options trong Sites',
-      description: 'Payload và collection Sites cần nhận biết các locale mục tiêu mà không tự động public toàn bộ.',
+      description:
+        'Payload và collection Sites cần nhận biết các locale mục tiêu mà không tự động public toàn bộ.',
     },
     {
       title: 'Giới hạn sitemap, nav và hreflang theo public locale',
-      description: 'Chỉ các locale public-enabled được xuất hiện ở route, navigation, sitemap và hreflang.',
+      description:
+        'Chỉ các locale public-enabled được xuất hiện ở route, navigation, sitemap và hreflang.',
     },
     {
       title: 'Fallback chrome IT/ES/PT sang tiếng Anh',
-      description: 'Các locale quảng cáo chưa đủ native copy cần fallback public chrome sang tiếng Anh, không rơi về tiếng Việt.',
+      description:
+        'Các locale quảng cáo chưa đủ native copy cần fallback public chrome sang tiếng Anh, không rơi về tiếng Việt.',
     },
     {
       title: 'Chặn JA/KO/FR/DE khỏi public surface',
@@ -866,7 +967,8 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Hoàn tất smoke migration PostgreSQL',
-      description: 'Thay đổi locale có blast radius database nên phải qua PostgreSQL migration smoke/staging gate.',
+      description:
+        'Thay đổi locale có blast radius database nên phải qua PostgreSQL migration smoke/staging gate.',
     },
   ],
   'US-032': [
@@ -880,11 +982,13 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Đánh dấu locale hiện tại bằng aria-current',
-      description: 'Language switcher phải đánh dấu locale đang xem bằng aria-current để hỗ trợ accessibility.',
+      description:
+        'Language switcher phải đánh dấu locale đang xem bằng aria-current để hỗ trợ accessibility.',
     },
     {
       title: 'Ẩn các locale chưa được public',
-      description: 'Public-disabled locales không được xuất hiện trong language switcher hoặc nav public.',
+      description:
+        'Public-disabled locales không được xuất hiện trong language switcher hoặc nav public.',
     },
     {
       title: 'Smoke header của site khác',
@@ -894,7 +998,8 @@ const CHILD_TASK_TEXT = {
   'US-033': [
     {
       title: 'Hoàn thiện content map WingSide inbound',
-      description: 'Content map cần bao gồm page map, claim register, asset provenance và guard chống copy competitor.',
+      description:
+        'Content map cần bao gồm page map, claim register, asset provenance và guard chống copy competitor.',
     },
     {
       title: 'Seed nội dung tiếng Anh cho sáu trang lõi',
@@ -906,7 +1011,8 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Không dùng testimonial, rating hoặc claim giả',
-      description: 'Seed content không được tạo bằng chứng xã hội, rating, giấy phép hoặc claim chưa được xác thực.',
+      description:
+        'Seed content không được tạo bằng chứng xã hội, rating, giấy phép hoặc claim chưa được xác thực.',
     },
     {
       title: 'Không dùng text hoặc asset sao chép từ competitor',
@@ -916,11 +1022,13 @@ const CHILD_TASK_TEXT = {
   'US-034': [
     {
       title: 'Chạy hoặc ghi blocker cho full validation ladder',
-      description: 'Typecheck, lint, integration, component, E2E liên quan và build phải pass hoặc có blocker rõ.',
+      description:
+        'Typecheck, lint, integration, component, E2E liên quan và build phải pass hoặc có blocker rõ.',
     },
     {
       title: 'Chạy go-live review hoặc ghi blocker',
-      description: 'Pipeline go-live:review cần được chạy cho WingSide hoặc nêu rõ lý do chưa chạy được.',
+      description:
+        'Pipeline go-live:review cần được chạy cho WingSide hoặc nêu rõ lý do chưa chạy được.',
     },
     {
       title: 'Thu đủ screenshot cần thiết',
@@ -936,7 +1044,8 @@ const CHILD_TASK_TEXT = {
     },
     {
       title: 'Hoàn tất checklist nội dung và pháp lý',
-      description: 'Content/legal checklist cần hoàn chỉnh trước khi coi WingSide inbound là sẵn sàng phát hành.',
+      description:
+        'Content/legal checklist cần hoàn chỉnh trước khi coi WingSide inbound là sẵn sàng phát hành.',
     },
   ],
 }
@@ -964,7 +1073,9 @@ function walkFiles(dirPath) {
 
 function resolveStoryFileInDir(dirPath, storyId) {
   const lowerId = storyId.toLowerCase()
-  const directFile = walkFiles(dirPath).find((filePath) => path.basename(filePath).toLowerCase().startsWith(lowerId))
+  const directFile = walkFiles(dirPath).find((filePath) =>
+    path.basename(filePath).toLowerCase().startsWith(lowerId),
+  )
   if (directFile) {
     return directFile
   }
@@ -1144,7 +1255,16 @@ function runHarnessSql(sql) {
   const isWindows = process.platform === 'win32'
   const command = isWindows ? 'powershell.exe' : path.join(repoRoot, 'scripts', 'harness')
   const args = isWindows
-    ? ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', path.join(repoRoot, 'scripts', 'harness.ps1'), 'query', 'sql', sql]
+    ? [
+        '-NoProfile',
+        '-ExecutionPolicy',
+        'Bypass',
+        '-File',
+        path.join(repoRoot, 'scripts', 'harness.ps1'),
+        'query',
+        'sql',
+        sql,
+      ]
     : ['query', 'sql', sql]
   const result = spawnSync(command, args, {
     cwd: repoRoot,
@@ -1167,7 +1287,9 @@ function loadStoriesFromHarness() {
   const sql =
     "SELECT json_group_array(json_object('id', id, 'title', title, 'created_at', created_at, 'risk_lane', risk_lane, 'status', status, 'unit', unit_proof, 'integration', integration_proof, 'e2e', e2e_proof, 'platform', platform_proof, 'evidence', evidence, 'notes', notes)) AS data FROM story WHERE id LIKE 'US-%';"
   const raw = runHarnessSql(sql)
-  return JSON.parse(raw).sort((left, right) => left.id.localeCompare(right.id, undefined, { numeric: true }))
+  return JSON.parse(raw).sort((left, right) =>
+    left.id.localeCompare(right.id, undefined, { numeric: true }),
+  )
 }
 
 function resolveStoryPath(story, mapping, manifest) {
@@ -1195,7 +1317,9 @@ function resolveStoryPath(story, mapping, manifest) {
 
 function extractSection(markdown, sectionTitle) {
   const lines = markdown.replace(/\r/g, '').split('\n')
-  const start = lines.findIndex((line) => line.trim().toLowerCase() === `## ${sectionTitle}`.toLowerCase())
+  const start = lines.findIndex(
+    (line) => line.trim().toLowerCase() === `## ${sectionTitle}`.toLowerCase(),
+  )
   if (start === -1) {
     return []
   }
@@ -1324,16 +1448,16 @@ function toPlaneStateName(story, mapping = {}) {
 }
 
 function buildStoryDescription(story, mapping, sourcePath) {
-  const sourceText = sourcePath ? path.relative(repoRoot, sourcePath).replaceAll('\\', '/') : 'Không tìm thấy file story'
+  const sourceText = sourcePath
+    ? path.relative(repoRoot, sourcePath).replaceAll('\\', '/')
+    : 'Không tìm thấy file story'
   return [
     `<h2>${escapeHtml(story.id)} - ${escapeHtml(translateStoryTitle(story.id, story.title))}</h2>`,
     '<ul>',
     `<li>Mức rủi ro: ${escapeHtml(normalizeRiskLane(story.risk_lane))}</li>`,
     `<li>Trạng thái Plane: ${escapeHtml(toPlaneStateName(story, mapping))}</li>`,
     `<li>Trạng thái bằng chứng: ${escapeHtml(toProofStatusLabel(story, mapping))}</li>`,
-    mapping.proofStatusNote
-      ? `<li>Ghi chú proof: ${escapeHtml(mapping.proofStatusNote)}</li>`
-      : '',
+    mapping.proofStatusNote ? `<li>Ghi chú proof: ${escapeHtml(mapping.proofStatusNote)}</li>` : '',
     `<li>Site: ${escapeHtml(translatePropertyOptionValue('Site', mapping.site))}</li>`,
     mapping.epicKey ? `<li>Epic: ${escapeHtml(mapping.epicKey)}</li>` : '',
     `<li>Giai đoạn: ${escapeHtml(translatePropertyOptionValue('Phase', mapping.phase))}</li>`,
@@ -1353,7 +1477,9 @@ function buildChildTitle(storyId, index, criterion = '') {
 }
 
 function buildChildDescription(storyId, index, criterion, sourcePath) {
-  const sourceText = sourcePath ? path.relative(repoRoot, sourcePath).replaceAll('\\', '/') : 'Không tìm thấy file story'
+  const sourceText = sourcePath
+    ? path.relative(repoRoot, sourcePath).replaceAll('\\', '/')
+    : 'Không tìm thấy file story'
   const mapped = CHILD_TASK_TEXT[storyId]?.[index]
   return [
     `<h3>${escapeHtml(buildChildTitle(storyId, index, criterion))}</h3>`,
@@ -1368,48 +1494,68 @@ function buildChildDescription(storyId, index, criterion, sourcePath) {
 function buildStoryRecords(manifest) {
   const stories = loadStoriesFromHarness()
   const mappedStoryIds = new Set(Object.keys(manifest.storyMappings || {}))
-  return stories.filter((story) => mappedStoryIds.has(story.id)).map((story) => {
-    const mapping = manifest.storyMappings[story.id] || {
-      projectKey: 'core',
-      module: 'CMS Admin UX',
-      site: 'Core',
-      phase: 'Phase 1',
-      workstream: 'CMS',
-      customerVisible: 'Yes',
-    }
-    const sourcePath = resolveStoryPath(story, mapping, manifest)
-    const markdown = sourcePath && fs.existsSync(sourcePath) ? fs.readFileSync(sourcePath, 'utf8') : ''
-    const acceptanceCriteria = markdown ? extractAcceptanceCriteria(markdown) : []
+  return stories
+    .filter(
+      (story) =>
+        mappedStoryIds.has(story.id) && (storyIdFilter.size === 0 || storyIdFilter.has(story.id)),
+    )
+    .map((story) => {
+      const mapping = manifest.storyMappings[story.id] || {
+        projectKey: 'core',
+        module: 'CMS Admin UX',
+        site: 'Core',
+        phase: 'Phase 1',
+        workstream: 'CMS',
+        customerVisible: 'Yes',
+      }
+      const sourcePath = resolveStoryPath(story, mapping, manifest)
+      const markdown =
+        sourcePath && fs.existsSync(sourcePath) ? fs.readFileSync(sourcePath, 'utf8') : ''
+      const acceptanceCriteria = markdown ? extractAcceptanceCriteria(markdown) : []
 
-    return {
-      story,
-      mapping,
-      sourcePath,
-      descriptionHtml: buildStoryDescription(story, mapping, sourcePath),
-      parentName: `${story.id} ${translateStoryTitle(story.id, story.title)}`,
-      childTasks: acceptanceCriteria.map((criterion, index) => ({
-        externalId: `${story.id}-ac-${index + 1}`,
-        originalCriterion: criterion,
-        title: buildChildTitle(story.id, index, criterion),
-        descriptionHtml: buildChildDescription(story.id, index, criterion, sourcePath),
-      })),
-    }
-  })
+      return {
+        story,
+        mapping,
+        sourcePath,
+        descriptionHtml: buildStoryDescription(story, mapping, sourcePath),
+        parentName: `${story.id} ${translateStoryTitle(story.id, story.title)}`,
+        childTasks: acceptanceCriteria.map((criterion, index) => ({
+          externalId: `${story.id}-ac-${index + 1}`,
+          originalCriterion: criterion,
+          title: buildChildTitle(story.id, index, criterion),
+          descriptionHtml: buildChildDescription(story.id, index, criterion, sourcePath),
+        })),
+      }
+    })
 }
 
 function deriveEpicDates(records) {
   const dates = records.map((record) => deriveRecordDates(record.story, record.childTasks.length))
   return {
-    startDate: dates.map((item) => item.startDate).filter(Boolean).sort().at(0) || null,
-    targetDate: dates.map((item) => item.targetDate).filter(Boolean).sort().at(-1) || null,
+    startDate:
+      dates
+        .map((item) => item.startDate)
+        .filter(Boolean)
+        .sort()
+        .at(0) || null,
+    targetDate:
+      dates
+        .map((item) => item.targetDate)
+        .filter(Boolean)
+        .sort()
+        .at(-1) || null,
   }
 }
 
 function buildEpicDescription(epicConfig, records) {
   const sourceText = epicConfig.source || 'Không có tài liệu nguồn'
-  const storyList = records
-    .map((record) => `<li>${escapeHtml(record.story.id)} - ${escapeHtml(translateStoryTitle(record.story.id, record.story.title))}</li>`)
-    .join('\n') || '<li>Epic dùng để ghi chú hoặc supervision plan, chưa có US riêng.</li>'
+  const storyList =
+    records
+      .map(
+        (record) =>
+          `<li>${escapeHtml(record.story.id)} - ${escapeHtml(translateStoryTitle(record.story.id, record.story.title))}</li>`,
+      )
+      .join('\n') || '<li>Epic dùng để ghi chú hoặc supervision plan, chưa có US riêng.</li>'
 
   return [
     `<h2>${escapeHtml(epicConfig.name)}</h2>`,
@@ -1433,9 +1579,13 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
 
     const records = storyRecords.filter((record) => record.mapping.epicKey === epicConfig.key)
 
-    const workItems = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/`)
+    const workItems = await client.list(
+      `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/`,
+    )
     const parentIds = records
-      .map((record) => workItems.find((item) => item.external_id === `story:${record.story.id}`)?.id)
+      .map(
+        (record) => workItems.find((item) => item.external_id === `story:${record.story.id}`)?.id,
+      )
       .filter(Boolean)
     const derivedEpicDates = deriveEpicDates(records)
     const epicDates = {
@@ -1446,7 +1596,9 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
     let epicLinked = false
 
     try {
-      const existingEpicWorkItem = workItems.find((item) => item.external_id === `epic-workitem:${epicConfig.key}`)
+      const existingEpicWorkItem = workItems.find(
+        (item) => item.external_id === `epic-workitem:${epicConfig.key}`,
+      )
       if (existingEpicWorkItem) {
         const updatedEpicWorkItem = await client.request(
           'PATCH',
@@ -1462,15 +1614,21 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
         for (const parentId of parentIds) {
           const item = workItems.find((candidate) => candidate.id === parentId)
           if (item?.parent !== updatedEpicWorkItem.id) {
-            await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${parentId}/`, {
-              parent: updatedEpicWorkItem.id,
-            })
+            await client.request(
+              'PATCH',
+              `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${parentId}/`,
+              {
+                parent: updatedEpicWorkItem.id,
+              },
+            )
           }
         }
         continue
       }
 
-      const types = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-item-types/`)
+      const types = await client.list(
+        `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-item-types/`,
+      )
       const epicType = types.find((item) => item.name === EPIC_TYPE_NAME)
 
       if (epicType) {
@@ -1490,18 +1648,30 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
         }
 
         if (!epicWorkItem) {
-          epicWorkItem = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/`, payload)
+          epicWorkItem = await client.request(
+            'POST',
+            `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/`,
+            payload,
+          )
           workItems.push(epicWorkItem)
         } else {
-          epicWorkItem = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${epicWorkItem.id}/`, payload)
+          epicWorkItem = await client.request(
+            'PATCH',
+            `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${epicWorkItem.id}/`,
+            payload,
+          )
         }
 
         for (const parentId of parentIds) {
           const item = workItems.find((candidate) => candidate.id === parentId)
           if (item?.parent !== epicWorkItem.id) {
-            await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${parentId}/`, {
-              parent: epicWorkItem.id,
-            })
+            await client.request(
+              'PATCH',
+              `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${parentId}/`,
+              {
+                parent: epicWorkItem.id,
+              },
+            )
           }
         }
 
@@ -1515,7 +1685,9 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
       if (epicLinked) {
         continue
       }
-      const epics = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/epics/`)
+      const epics = await client.list(
+        `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/epics/`,
+      )
       let epic =
         epics.find((item) => item.external_id === `epic:${epicConfig.key}`) ||
         epics.find((item) => item.name === epicConfig.name)
@@ -1531,19 +1703,33 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
       }
 
       if (!epic) {
-        epic = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/epics/`, payload)
+        epic = await client.request(
+          'POST',
+          `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/epics/`,
+          payload,
+        )
       } else {
-        epic = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/epics/${epic.id}/`, payload)
+        epic = await client.request(
+          'PATCH',
+          `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/epics/${epic.id}/`,
+          payload,
+        )
       }
 
       if (parentIds.length) {
-        const linkedItems = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/epics/${epic.id}/issues/?per_page=100`)
+        const linkedItems = await client.list(
+          `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/epics/${epic.id}/issues/?per_page=100`,
+        )
         const linkedIds = new Set(linkedItems.map((item) => item.id))
         const missingIds = parentIds.filter((id) => !linkedIds.has(id))
         if (missingIds.length) {
-          await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/epics/${epic.id}/issues/`, {
-            work_item_ids: missingIds,
-          })
+          await client.request(
+            'POST',
+            `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/epics/${epic.id}/issues/`,
+            {
+              work_item_ids: missingIds,
+            },
+          )
         }
       }
       epicLinked = true
@@ -1552,23 +1738,33 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
     }
 
     if (!epicLinked && parentIds.length) {
-      const modules = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/modules/`)
+      const modules = await client.list(
+        `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/modules/`,
+      )
       let moduleRecord =
         modules.find((item) => item.external_id === `epic-module:${epicConfig.key}`) ||
         modules.find((item) => item.name === epicConfig.name)
 
       if (!moduleRecord) {
-        moduleRecord = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/modules/`, {
-          name: toPlaneItemName(epicConfig.name),
-          description: epicConfig.description,
-          external_id: `epic-module:${epicConfig.key}`,
-          external_source: EXTERNAL_SOURCE,
-        })
+        moduleRecord = await client.request(
+          'POST',
+          `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/modules/`,
+          {
+            name: toPlaneItemName(epicConfig.name),
+            description: epicConfig.description,
+            external_id: `epic-module:${epicConfig.key}`,
+            external_source: EXTERNAL_SOURCE,
+          },
+        )
       }
 
-      await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/modules/${moduleRecord.id}/module-issues/`, {
-        issues: parentIds,
-      })
+      await client.request(
+        'POST',
+        `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/modules/${moduleRecord.id}/module-issues/`,
+        {
+          issues: parentIds,
+        },
+      )
     }
   }
 }
@@ -1604,7 +1800,9 @@ class PlaneClient {
         if (attempt < 5) {
           attempt += 1
           const waitMs = Math.min(30000, 1000 * 2 ** attempt)
-          console.warn(`Network error on ${method} ${pathname}: ${error.message}; retrying in ${Math.ceil(waitMs / 1000)}s`)
+          console.warn(
+            `Network error on ${method} ${pathname}: ${error.message}; retrying in ${Math.ceil(waitMs / 1000)}s`,
+          )
           await sleep(waitMs)
           continue
         }
@@ -1615,7 +1813,9 @@ class PlaneClient {
         attempt += 1
         const retryAfter = Number(response.headers.get('Retry-After') || '65')
         const waitMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 65000
-        console.warn(`Rate limited on ${method} ${pathname}; retrying in ${Math.ceil(waitMs / 1000)}s`)
+        console.warn(
+          `Rate limited on ${method} ${pathname}; retrying in ${Math.ceil(waitMs / 1000)}s`,
+        )
         await sleep(waitMs)
         continue
       }
@@ -1664,7 +1864,9 @@ class PlaneClient {
           if (attempt < 5) {
             attempt += 1
             const waitMs = Math.min(30000, 1000 * 2 ** attempt)
-            console.warn(`Network error on GET ${next}: ${error.message}; retrying in ${Math.ceil(waitMs / 1000)}s`)
+            console.warn(
+              `Network error on GET ${next}: ${error.message}; retrying in ${Math.ceil(waitMs / 1000)}s`,
+            )
             await sleep(waitMs)
             continue
           }
@@ -1685,7 +1887,10 @@ class PlaneClient {
 }
 
 function findByNames(items, names) {
-  return items.find((item) => names.includes(item.name) || names.includes(item.display_name) || names.includes(item.title))
+  return items.find(
+    (item) =>
+      names.includes(item.name) || names.includes(item.display_name) || names.includes(item.title),
+  )
 }
 
 function toPlaneItemName(value) {
@@ -1698,13 +1903,18 @@ async function cleanupDemoContent(client) {
   const pages = await client.list(`/api/v1/workspaces/${workspaceSlug}/pages/`)
   const demoPage = pages.find((item) => item.name === "Welcome to Company's Wiki")
   if (demoPage) {
-    console.warn('Workspace page mặc định của Plane không hỗ trợ sửa/xóa qua API public; bỏ qua bước dọn page demo.')
+    console.warn(
+      'Workspace page mặc định của Plane không hỗ trợ sửa/xóa qua API public; bỏ qua bước dọn page demo.',
+    )
   }
 
   const projects = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/`)
   const demoProject = projects.find((item) => item.identifier === 'WINGS' && !item.external_source)
   if (demoProject) {
-    await client.request('DELETE', `/api/v1/workspaces/${workspaceSlug}/projects/${demoProject.id}/`)
+    await client.request(
+      'DELETE',
+      `/api/v1/workspaces/${workspaceSlug}/projects/${demoProject.id}/`,
+    )
   }
 }
 
@@ -1714,30 +1924,49 @@ async function ensureWorkspacePrerequisites(client, manifest) {
   let initiative = null
   try {
     const initiatives = await client.list(`/api/v1/workspaces/${workspaceSlug}/initiatives/`)
-    initiative = initiatives.find((item) => [INITIATIVE_TEXT.currentName, INITIATIVE_TEXT.name].includes(item.name))
+    initiative = initiatives.find((item) =>
+      [INITIATIVE_TEXT.currentName, INITIATIVE_TEXT.name].includes(item.name),
+    )
     if (!initiative) {
-      initiative = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/initiatives/`, {
-        name: INITIATIVE_TEXT.name,
-        description: INITIATIVE_TEXT.description,
-        state: 'ACTIVE',
-      })
+      initiative = await client.request(
+        'POST',
+        `/api/v1/workspaces/${workspaceSlug}/initiatives/`,
+        {
+          name: INITIATIVE_TEXT.name,
+          description: INITIATIVE_TEXT.description,
+          state: 'ACTIVE',
+        },
+      )
     } else {
-      initiative = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/`, {
-        name: INITIATIVE_TEXT.name,
-        description: INITIATIVE_TEXT.description,
-      })
+      initiative = await client.request(
+        'PATCH',
+        `/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/`,
+        {
+          name: INITIATIVE_TEXT.name,
+          description: INITIATIVE_TEXT.description,
+        },
+      )
     }
   } catch (error) {
-    if (!error.message.includes('/initiatives/') || !error.message.includes('403') || !error.message.includes('Payment required')) {
+    if (
+      !error.message.includes('/initiatives/') ||
+      !error.message.includes('403') ||
+      !error.message.includes('Payment required')
+    ) {
       throw error
     }
-    console.warn('Plane plan hiện tại không hỗ trợ Initiatives; tiếp tục đồng bộ Project/Epic/US mà không liên kết Initiative.')
+    console.warn(
+      'Plane plan hiện tại không hỗ trợ Initiatives; tiếp tục đồng bộ Project/Epic/US mà không liên kết Initiative.',
+    )
   }
 
   const projects = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/`)
   const projectMap = new Map()
   for (const projectConfig of manifest.projects) {
-    const text = PROJECT_TEXT[projectConfig.identifier] || { name: projectConfig.name, description: projectConfig.description }
+    const text = PROJECT_TEXT[projectConfig.identifier] || {
+      name: projectConfig.name,
+      description: projectConfig.description,
+    }
     let project =
       projects.find((item) => item.identifier === projectConfig.identifier) ||
       projects.find((item) => [projectConfig.name, text.name].includes(item.name))
@@ -1752,21 +1981,30 @@ async function ensureWorkspacePrerequisites(client, manifest) {
       })
     } else {
       try {
-        project = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/`, {
-          name: text.name,
-          description: text.description,
-          intake_view: true,
-          module_view: true,
-          page_view: true,
-          issue_views_view: true,
-          is_issue_type_enabled: true,
-        })
+        project = await client.request(
+          'PATCH',
+          `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/`,
+          {
+            name: text.name,
+            description: text.description,
+            intake_view: true,
+            module_view: true,
+            page_view: true,
+            issue_views_view: true,
+            is_issue_type_enabled: true,
+          },
+        )
       } catch (error) {
-        if (!error.message.includes('400') || !error.message.includes('Archived project cannot be updated')) {
+        if (
+          !error.message.includes('400') ||
+          !error.message.includes('Archived project cannot be updated')
+        ) {
           throw error
         }
         project = { ...project, skipHistorySync: true }
-        console.warn(`Project ${project.identifier || project.name} đã archive; giữ nguyên và bỏ qua đồng bộ lịch sử.`)
+        console.warn(
+          `Project ${project.identifier || project.name} đã archive; giữ nguyên và bỏ qua đồng bộ lịch sử.`,
+        )
       }
     }
 
@@ -1774,16 +2012,24 @@ async function ensureWorkspacePrerequisites(client, manifest) {
   }
 
   if (initiative) {
-    const initiativeProjects = await client.list(`/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/projects/`)
-    const initiativeProjectIds = new Set(initiativeProjects.map((item) => item.id || item.project || item.project_id))
+    const initiativeProjects = await client.list(
+      `/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/projects/`,
+    )
+    const initiativeProjectIds = new Set(
+      initiativeProjects.map((item) => item.id || item.project || item.project_id),
+    )
     const missingProjectIds = [...projectMap.values()]
       .map((project) => project.id)
       .filter((projectId) => projectId && !initiativeProjectIds.has(projectId))
 
     if (missingProjectIds.length) {
-      await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/projects/`, {
-        project_ids: missingProjectIds,
-      })
+      await client.request(
+        'POST',
+        `/api/v1/workspaces/${workspaceSlug}/initiatives/${initiative.id}/projects/`,
+        {
+          project_ids: missingProjectIds,
+        },
+      )
     }
   }
 
@@ -1802,17 +2048,23 @@ async function ensureProjectSetup(client, manifest, project) {
     is_issue_type_enabled: true,
   })
 
-  const states = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/states/`)
+  const states = await client.list(
+    `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/states/`,
+  )
   const stateMap = new Map()
   for (const state of states) {
     const desiredName = translateStateName(state.name)
     let updated = state
     if (desiredName !== state.name) {
-      updated = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/states/${state.id}/`, {
-        name: desiredName,
-        color: state.color,
-        group: state.group,
-      })
+      updated = await client.request(
+        'PATCH',
+        `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/states/${state.id}/`,
+        {
+          name: desiredName,
+          color: state.color,
+          group: state.group,
+        },
+      )
     }
     stateMap.set(state.name, updated)
     stateMap.set(desiredName, updated)
@@ -1822,13 +2074,17 @@ async function ensureProjectSetup(client, manifest, project) {
     const desiredName = translateStateName(stateConfig.name)
     if (!stateMap.has(desiredName)) {
       try {
-        const created = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/states/`, {
-          name: desiredName,
-          color: stateConfig.color,
-          group: stateConfig.group,
-          external_id: `state:${stateConfig.name}`,
-          external_source: EXTERNAL_SOURCE,
-        })
+        const created = await client.request(
+          'POST',
+          `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/states/`,
+          {
+            name: desiredName,
+            color: stateConfig.color,
+            group: stateConfig.group,
+            external_id: `state:${stateConfig.name}`,
+            external_source: EXTERNAL_SOURCE,
+          },
+        )
         stateMap.set(stateConfig.name, created)
         stateMap.set(desiredName, created)
       } catch (error) {
@@ -1849,17 +2105,23 @@ async function ensureProjectSetup(client, manifest, project) {
     }
   }
 
-  const modules = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/`)
+  const modules = await client.list(
+    `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/`,
+  )
   const moduleMap = new Map()
   for (const moduleRecord of modules) {
     const originalName = moduleRecord.name
     const desiredName = translateModuleName(moduleRecord.name)
     let updated = moduleRecord
     if (desiredName !== moduleRecord.name) {
-      updated = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/${moduleRecord.id}/`, {
-        name: desiredName,
-        description: `Nhóm công việc: ${desiredName}`,
-      })
+      updated = await client.request(
+        'PATCH',
+        `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/${moduleRecord.id}/`,
+        {
+          name: desiredName,
+          description: `Nhóm công việc: ${desiredName}`,
+        },
+      )
     }
     moduleMap.set(originalName, updated)
     moduleMap.set(desiredName, updated)
@@ -1887,21 +2149,28 @@ async function ensureProjectSetup(client, manifest, project) {
       moduleMap.set(moduleName, existingModule)
       moduleMap.set(desiredName, existingModule)
     } else if (!existingModule) {
-      const created = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/`, {
-        name: desiredName,
-        description: `Nhóm công việc: ${desiredName}`,
-        external_id: `module:${moduleName}`,
-        external_source: EXTERNAL_SOURCE,
-      })
+      const created = await client.request(
+        'POST',
+        `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/`,
+        {
+          name: desiredName,
+          description: `Nhóm công việc: ${desiredName}`,
+          external_id: `module:${moduleName}`,
+          external_source: EXTERNAL_SOURCE,
+        },
+      )
       moduleMap.set(moduleName, created)
       moduleMap.set(desiredName, created)
     }
   }
 
   const projectConfig = manifest.projects.find((item) => item.identifier === project.identifier)
-  for (const epicConfig of (manifest.epics || []).filter((item) => item.projectKey === projectConfig?.key)) {
+  for (const epicConfig of (manifest.epics || []).filter(
+    (item) => item.projectKey === projectConfig?.key,
+  )) {
     const desiredName = epicConfig.name
-    let existingModule = moduleMap.get(desiredName) || moduleMap.get(`epic-module:${epicConfig.key}`)
+    let existingModule =
+      moduleMap.get(desiredName) || moduleMap.get(`epic-module:${epicConfig.key}`)
     if (existingModule && existingModule.name !== desiredName) {
       existingModule = await client.request(
         'PATCH',
@@ -1914,28 +2183,38 @@ async function ensureProjectSetup(client, manifest, project) {
       moduleMap.set(epicConfig.name, existingModule)
       moduleMap.set(desiredName, existingModule)
     } else if (!existingModule) {
-      const created = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/`, {
-        name: desiredName,
-        description: epicConfig.description,
-        external_id: `epic-module:${epicConfig.key}`,
-        external_source: EXTERNAL_SOURCE,
-      })
+      const created = await client.request(
+        'POST',
+        `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/modules/`,
+        {
+          name: desiredName,
+          description: epicConfig.description,
+          external_id: `epic-module:${epicConfig.key}`,
+          external_source: EXTERNAL_SOURCE,
+        },
+      )
       moduleMap.set(epicConfig.name, created)
       moduleMap.set(desiredName, created)
     }
   }
 
-  const milestones = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/milestones/`)
+  const milestones = await client.list(
+    `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/milestones/`,
+  )
   const milestoneMap = new Map()
   for (const milestone of milestones) {
     const originalTitle = milestone.title
     const desiredTitle = translateMilestoneTitle(milestone.title)
     let updated = milestone
     if (desiredTitle !== milestone.title) {
-      updated = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/milestones/${milestone.id}/`, {
-        title: desiredTitle,
-        target_date: milestone.target_date,
-      })
+      updated = await client.request(
+        'PATCH',
+        `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/milestones/${milestone.id}/`,
+        {
+          title: desiredTitle,
+          target_date: milestone.target_date,
+        },
+      )
     }
     milestoneMap.set(originalTitle, updated)
     milestoneMap.set(desiredTitle, updated)
@@ -1944,12 +2223,16 @@ async function ensureProjectSetup(client, manifest, project) {
   for (const milestoneConfig of manifest.milestones) {
     const desiredTitle = translateMilestoneTitle(milestoneConfig.title)
     if (!milestoneMap.has(desiredTitle)) {
-      const created = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/milestones/`, {
-        title: desiredTitle,
-        target_date: milestoneConfig.targetDate,
-        external_id: `milestone:${milestoneConfig.title}`,
-        external_source: EXTERNAL_SOURCE,
-      })
+      const created = await client.request(
+        'POST',
+        `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/milestones/`,
+        {
+          title: desiredTitle,
+          target_date: milestoneConfig.targetDate,
+          external_id: `milestone:${milestoneConfig.title}`,
+          external_source: EXTERNAL_SOURCE,
+        },
+      )
       milestoneMap.set(milestoneConfig.title, created)
       milestoneMap.set(desiredTitle, created)
     }
@@ -1957,12 +2240,20 @@ async function ensureProjectSetup(client, manifest, project) {
 
   let types
   try {
-    types = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/work-item-types/`)
+    types = await client.list(
+      `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/work-item-types/`,
+    )
   } catch (error) {
-    if (!error.message.includes('/work-item-types/') || !error.message.includes('402') || !error.message.includes('Payment required')) {
+    if (
+      !error.message.includes('/work-item-types/') ||
+      !error.message.includes('402') ||
+      !error.message.includes('Payment required')
+    ) {
       throw error
     }
-    console.warn(`Plane plan hiện tại không hỗ trợ work item types cho ${project.identifier || project.name}; bỏ qua custom properties.`)
+    console.warn(
+      `Plane plan hiện tại không hỗ trợ work item types cho ${project.identifier || project.name}; bỏ qua custom properties.`,
+    )
     return {
       stateMap,
       moduleMap,
@@ -1987,12 +2278,19 @@ async function ensureProjectSetup(client, manifest, project) {
     const originalLabel = property.display_name || property.name
     const key =
       Object.keys(PROPERTY_TEXT).find(
-        (candidate) => candidate === originalLabel || PROPERTY_TEXT[candidate].name === originalLabel,
+        (candidate) =>
+          candidate === originalLabel || PROPERTY_TEXT[candidate].name === originalLabel,
       ) || originalLabel
     const desiredDisplay = translatePropertyLabel(key)
     const desiredDescription = translatePropertyDescription(key, property.description)
     let updated = property
-    const optionNames = property.property_type === 'OPTION' ? translatePropertyOptions(key, manifest.customProperties.find((item) => item.name === key)?.options || []) : undefined
+    const optionNames =
+      property.property_type === 'OPTION'
+        ? translatePropertyOptions(
+            key,
+            manifest.customProperties.find((item) => item.name === key)?.options || [],
+          )
+        : undefined
 
     try {
       updated = await client.request(
@@ -2006,7 +2304,9 @@ async function ensureProjectSetup(client, manifest, project) {
       )
     } catch (error) {
       if (property.property_type === 'OPTION' && String(error.message).includes('"context"')) {
-        console.warn(`Skipping dropdown option sync for "${desiredDisplay}" because Plane API requires option context.`)
+        console.warn(
+          `Skipping dropdown option sync for "${desiredDisplay}" because Plane API requires option context.`,
+        )
         updated = await client.request(
           'PATCH',
           `/api/v1/workspaces/${workspaceSlug}/projects/${projectId}/work-item-types/${defaultType.id}/work-item-properties/${property.id}/`,
@@ -2034,7 +2334,10 @@ async function ensureProjectSetup(client, manifest, project) {
 
   for (const propertyConfig of manifest.customProperties) {
     const desiredDisplay = translatePropertyLabel(propertyConfig.name)
-    const desiredDescription = translatePropertyDescription(propertyConfig.name, propertyConfig.description)
+    const desiredDescription = translatePropertyDescription(
+      propertyConfig.name,
+      propertyConfig.description,
+    )
     let property = propertyMap.get(propertyConfig.name) || propertyMap.get(desiredDisplay)
     if (!property) {
       property = await client.request(
@@ -2047,7 +2350,9 @@ async function ensureProjectSetup(client, manifest, project) {
           property_type: propertyConfig.propertyType,
           options:
             propertyConfig.propertyType === 'OPTION'
-              ? translatePropertyOptions(propertyConfig.name, propertyConfig.options).map((name) => ({ name }))
+              ? translatePropertyOptions(propertyConfig.name, propertyConfig.options).map(
+                  (name) => ({ name }),
+                )
               : undefined,
           external_id: `property:${propertyConfig.name}`,
           external_source: EXTERNAL_SOURCE,
@@ -2094,7 +2399,14 @@ async function ensureWorkspacePages(client, manifest) {
   }
 }
 
-async function setPropertyValue(client, workspaceSlug, projectId, workItemId, propertyId, rawValue) {
+async function setPropertyValue(
+  client,
+  workspaceSlug,
+  projectId,
+  workItemId,
+  propertyId,
+  rawValue,
+) {
   if (!propertyId || rawValue == null || rawValue === '') {
     return
   }
@@ -2157,13 +2469,23 @@ async function ensureHistory(client, manifest, projectMap) {
     }
 
     if (!parent) {
-      parent = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/`, parentPayload)
+      parent = await client.request(
+        'POST',
+        `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/`,
+        parentPayload,
+      )
       workItems.push(parent)
     } else {
-      parent = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${parent.id}/`, parentPayload)
+      parent = await client.request(
+        'PATCH',
+        `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${parent.id}/`,
+        parentPayload,
+      )
     }
 
-    const moduleId = setup.moduleMap.get(record.mapping.module)?.id || setup.moduleMap.get(translateModuleName(record.mapping.module))?.id
+    const moduleId =
+      setup.moduleMap.get(record.mapping.module)?.id ||
+      setup.moduleMap.get(translateModuleName(record.mapping.module))?.id
     if (moduleId) {
       try {
         await client.request(
@@ -2177,12 +2499,42 @@ async function ensureHistory(client, manifest, projectMap) {
     }
 
     const optionId = (propertyName, value) =>
-      setup.propertyOptionMap.get(propertyName)?.get(translatePropertyOptionValue(propertyName, value))?.id
+      setup.propertyOptionMap
+        .get(propertyName)
+        ?.get(translatePropertyOptionValue(propertyName, value))?.id
 
-    await setPropertyValue(client, workspaceSlug, project.id, parent.id, setup.propertyMap.get('Story ID')?.id, record.story.id)
-    await setPropertyValue(client, workspaceSlug, project.id, parent.id, setup.propertyMap.get('Epic')?.id, record.mapping.epicKey || '')
-    await setPropertyValue(client, workspaceSlug, project.id, parent.id, setup.propertyMap.get('Site')?.id, optionId('Site', record.mapping.site))
-    await setPropertyValue(client, workspaceSlug, project.id, parent.id, setup.propertyMap.get('Phase')?.id, optionId('Phase', record.mapping.phase))
+    await setPropertyValue(
+      client,
+      workspaceSlug,
+      project.id,
+      parent.id,
+      setup.propertyMap.get('Story ID')?.id,
+      record.story.id,
+    )
+    await setPropertyValue(
+      client,
+      workspaceSlug,
+      project.id,
+      parent.id,
+      setup.propertyMap.get('Epic')?.id,
+      record.mapping.epicKey || '',
+    )
+    await setPropertyValue(
+      client,
+      workspaceSlug,
+      project.id,
+      parent.id,
+      setup.propertyMap.get('Site')?.id,
+      optionId('Site', record.mapping.site),
+    )
+    await setPropertyValue(
+      client,
+      workspaceSlug,
+      project.id,
+      parent.id,
+      setup.propertyMap.get('Phase')?.id,
+      optionId('Phase', record.mapping.phase),
+    )
     await setPropertyValue(
       client,
       workspaceSlug,
@@ -2235,17 +2587,29 @@ async function ensureHistory(client, manifest, projectMap) {
       }
 
       if (!child) {
-        child = await client.request('POST', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/`, childPayload)
+        child = await client.request(
+          'POST',
+          `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/`,
+          childPayload,
+        )
         workItems.push(child)
       } else {
-        child = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${child.id}/`, childPayload)
+        child = await client.request(
+          'PATCH',
+          `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${child.id}/`,
+          childPayload,
+        )
       }
 
       if (!child.name.startsWith(record.story.id)) {
-        child = await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${child.id}/`, {
-          ...childPayload,
-          name: buildChildTitle(record.story.id, index, childTask.originalCriterion),
-        })
+        child = await client.request(
+          'PATCH',
+          `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${child.id}/`,
+          {
+            ...childPayload,
+            name: buildChildTitle(record.story.id, index, childTask.originalCriterion),
+          },
+        )
       }
     }
   }
@@ -2278,10 +2642,14 @@ async function syncHistoryDates(client, manifest, projectMap) {
       return
     }
 
-    await client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${item.id}/`, {
-      start_date: dates.startDate,
-      target_date: dates.targetDate,
-    })
+    await client.request(
+      'PATCH',
+      `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${item.id}/`,
+      {
+        start_date: dates.startDate,
+        target_date: dates.targetDate,
+      },
+    )
     patchedCount += 1
   }
 
@@ -2295,7 +2663,11 @@ async function syncHistoryDates(client, manifest, projectMap) {
 
     for (const [index, childTask] of record.childTasks.entries()) {
       const child = workItems.find((item) => item.external_id === `child:${childTask.externalId}`)
-      await patchDates(project, child, deriveChildDates(record.story, index, record.childTasks.length))
+      await patchDates(
+        project,
+        child,
+        deriveChildDates(record.story, index, record.childTasks.length),
+      )
     }
   }
 
@@ -2305,8 +2677,12 @@ async function syncHistoryDates(client, manifest, projectMap) {
 async function syncWingsGoItems(client, manifest, projectMap) {
   const workspaceSlug = client.config.workspaceSlug
   const project = projectMap.get('wingsgo')
-  const records = buildStoryRecords(manifest).filter((record) => record.mapping.projectKey === 'wingsgo')
-  const workItems = await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/`)
+  const records = buildStoryRecords(manifest).filter(
+    (record) => record.mapping.projectKey === 'wingsgo',
+  )
+  const workItems = await client.list(
+    `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/`,
+  )
   let patchedCount = 0
   let missingCount = 0
 
@@ -2317,7 +2693,11 @@ async function syncWingsGoItems(client, manifest, projectMap) {
     }
 
     patchedCount += 1
-    return client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${item.id}/`, payload)
+    return client.request(
+      'PATCH',
+      `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${item.id}/`,
+      payload,
+    )
   }
 
   for (const record of records) {
@@ -2368,7 +2748,11 @@ async function syncImportedWorkItems(client, manifest, projectMap) {
     }
 
     patchedCount += 1
-    return client.request('PATCH', `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${item.id}/`, payload)
+    return client.request(
+      'PATCH',
+      `/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/work-items/${item.id}/`,
+      payload,
+    )
   }
 
   for (const [projectKey, groupedRecords] of projectRecords.entries()) {

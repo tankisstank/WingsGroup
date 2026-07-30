@@ -331,15 +331,18 @@ const main = async () => {
     })
 
     if (phase === 'plan') {
-      if (snapshot.state !== 'before') {
+      if (!['before', 'media-only'].includes(snapshot.state)) {
         throw new Error(
-          `Credentials plan refused: expected exact before, observed ${snapshot.state}`,
+          `Credentials plan refused: expected before or media-only, observed ${snapshot.state}`,
         )
       }
-      await assertNoGlobalMediaFilenameCollisions({ manifest, payload, req })
+      if (snapshot.state === 'before') {
+        await assertNoGlobalMediaFilenameCollisions({ manifest, payload, req })
+      }
       const plan = await buildWingsSideCredentialsPlan({
         homes: current.homes,
         manifest,
+        media: current.media,
         runID: randomUUID(),
         siteID: site.id,
         sourceIdentity,
@@ -409,9 +412,9 @@ const main = async () => {
         logJSON({ phase, planPath, planSha256, resumed: true, state: snapshot.state, writes: 0 })
         return
       }
-      if (snapshot.state !== 'before') {
+      if (!['before', 'media-only'].includes(snapshot.state)) {
         throw new Error(
-          `Credentials apply refused: expected before or after, observed ${snapshot.state}`,
+          `Credentials apply refused: expected before, media-only or after, observed ${snapshot.state}`,
         )
       }
       const result = await applyWingsSideCredentialsProductionPlan({

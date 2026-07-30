@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "sourceSnapshotSha256": "707a1acc8655663937c043143c24b062ee478d28d888ee029a2858da331fa446",
+  "statement": "No faithful clean replacement candidate survived deterministic ranking and manual review. This no-write result does not assert ownership or license rights.",
+  "coverage": {
+    "acceptedCandidateCount": 0,
+    "blockedPositiveCount": 220,
+    "revalidatedCleanCount": 366,
+    "reclassifiedFalseNegativeCount": 29,
+    "exactDuplicateAcceptedCount": 0,
+    "nearDuplicateAcceptedCount": 0,
+    "manuallyRejectedNearDuplicateCount": 4
+  },
+  "candidates": [],
+  "rejectedNearDuplicateDecisionSha256": "085f1d18cc1b307962acda657413a916fae22806223b2b6259b689349ad000ff",
+  "rejectedNearDuplicates": [
+    {
+      "sourceSha256": "4b450b90b82d8bcba8c9c6321ae14872935451782ef9d5e0ffa07a313a8b4b6c",
+      "sourceMediaIDs": [2730],
+      "candidateSha256": "0b4977613ebd884cfe70b854772b6980fd644dc2536cb71b1048151182d7f2d5",
+      "candidateMediaIDs": [2721],
+      "matchType": "near-duplicate",
+      "confidence": "rejected",
+      "reason": "Near-identical cave frame, but the proposed candidate visibly retains the BestPrice Travel wordmark in the upper-right region and was reclassified watermark-positive by R4."
+    },
+    {
+      "sourceSha256": "627e96721a0d0f9469a7e8aac7be8b540d6f1af5d4c51f50b1b2f55fba30dcc8",
+      "sourceMediaIDs": [6659],
+      "candidateSha256": "77809644dd4e2dca09b5e9d4345a9df62176b4137c56e57b7a62a6648b75d857",
+      "candidateMediaIDs": [6647],
+      "matchType": "near-duplicate",
+      "confidence": "rejected",
+      "reason": "Near-identical cave frame, but the proposed candidate visibly retains the BestPrice Travel wordmark in the lower-left region and was reclassified watermark-positive by R4."
+    },
+    {
+      "sourceSha256": "95ea117d6b31d3161816ec03956eb50904e27467c027b42556db64c3794d6988",
+      "sourceMediaIDs": [5872],
+      "candidateSha256": "bbe612e8ab9dd832b762bd7f4d1fac721dfd8a419198e2bde1853f8c6b3c7439",
+      "candidateMediaIDs": [6579],
+      "matchType": "near-duplicate",
+      "confidence": "rejected",
+      "reason": "Near-identical Hoi An portrait frame, but the proposed candidate visibly retains the BestPrice Travel wordmark in the lower-left region and was reclassified watermark-positive by R4."
+    },
+    {
+      "sourceSha256": "b6111ae17dba8a37cd0731f26fe0f85c6536fd9ab4b759d59f96e0dccda93cfe",
+      "sourceMediaIDs": [6421],
+      "candidateSha256": "714a471fccfe62a7723704802440d49f311310212c6ad41c827aa397d69e510a",
+      "candidateMediaIDs": [6442],
+      "matchType": "near-duplicate",
+      "confidence": "rejected",
+      "reason": "Near-identical post-office group frame, but the proposed candidate visibly retains the BestPrice Travel wordmark in the lower-right region and was reclassified watermark-positive by R4."
+    }
+  ],
+  "applyContract": {
+    "mode": "no-write-candidate-map",
+    "sourceMediaWrite": false,
+    "productionWrite": false,
+    "preserveSourceMediaIDs": true,
+    "candidateReferenceMode": "existing-clean-media-id-only",
+    "requiredPreconditions": [
+      "Independent reviewer approves each non-empty candidate mapping.",
+      "Candidate hash remains classified clean in the sealed superseding disposition.",
+      "Source snapshot and candidate mapping hashes match exactly.",
+      "A separate authorized apply plan preserves source media IDs and records rollback."
+    ]
+  }
+}

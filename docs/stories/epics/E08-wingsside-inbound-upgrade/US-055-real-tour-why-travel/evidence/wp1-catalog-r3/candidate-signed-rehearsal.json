@@ -1,0 +1,42 @@
+{
+  "approval": {
+    "artifactPurpose": "wingsside-tour-editorial-catalog-v2-review",
+    "decision": "D6-C",
+    "policyID": "wingsside-development-team-catalog-approval",
+    "policyVersion": 1,
+    "signerRole": "development-team-release-approver",
+    "approvedAt": "2026-07-28T14:00:00.000Z",
+    "approvedBy": "wingsside-development-team-local-rehearsal",
+    "keyID": "rehearsal-14a6c1459d5786db3d0ce4f9",
+    "publicKeySpkiBase64": "MCowBQYDK2VwAyEAMiFSNzmpzVGO8CntrL/diYTyHmNmT1nM2juTPRt9048=",
+    "rehearsalOnly": true,
+    "runID": "wingsside-us055-s3-20260728-r3-catalog"
+  },
+  "reviewPacket": {
+    "candidateChecksum": "79dfd59a8b734d51c7771d2f02d7a8934ee35216d99e7e6c3d917316dde7c30a",
+    "expectedGovernedDisclosureCount": 38,
+    "expectedTourCount": 22,
+    "policy": {
+      "artifactPurpose": "wingsside-tour-editorial-catalog-v2-review",
+      "decision": "D6-C",
+      "policyID": "wingsside-development-team-catalog-approval",
+      "policyVersion": 1,
+      "signerRole": "development-team-release-approver"
+    },
+    "sourceSnapshotChecksum": "76cc78beabc2a399aa2ed2d2a51cb4f632fa5714833c3e39090e14691cb83b50",
+    "status": "LOCAL_REHEARSAL_REVIEW_REQUIRED",
+    "supportedLocales": [
+      "en",
+      "vi",
+      "it",
+      "es",
+      "pt"
+    ],
+    "version": 1
+  },
+  "signature": {
+    "algorithm": "ed25519",
+    "valueBase64": "TwXHzS9zrE+XXhxIkqIsRPbyhZS8oCDma/ij9Yd/1Oe5oa6gTyk74mepw2dMxNq+wUDkTn5Yq+vDDzhyp1axBQ=="
+  },
+  "version": 1
+}

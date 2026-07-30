@@ -10,27 +10,52 @@ import { Width } from '../Width'
 export const Number: React.FC<
   TextField & {
     errors: Partial<FieldErrorsImpl>
+    formID?: number | string
     register: UseFormRegister<FieldValues>
+    requiredLabel?: string
+    requiredMessage?: string
   }
-> = ({ name, defaultValue, errors, label, register, required, width }) => {
+> = ({
+  name,
+  defaultValue,
+  errors,
+  formID,
+  label,
+  register,
+  required,
+  requiredLabel = 'required',
+  requiredMessage = 'This field is required',
+  width,
+}) => {
+  const fieldID = formID
+    ? `${String(formID).toLowerCase().replace(/[^a-z0-9_-]+/g, '-')}-${name
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, '-')}`
+    : name
+  const errorID = `${fieldID}-error`
+
   return (
     <Width width={width}>
-      <Label htmlFor={name}>
+      <Label htmlFor={fieldID}>
         {label}
 
         {required && (
           <span className="required">
-            * <span className="sr-only">(required)</span>
+            * <span className="sr-only">({requiredLabel})</span>
           </span>
         )}
       </Label>
       <Input
+        aria-describedby={errors[name] ? errorID : undefined}
+        aria-invalid={Boolean(errors[name])}
+        aria-required={required || undefined}
         defaultValue={defaultValue}
-        id={name}
+        id={fieldID}
+        required={Boolean(required)}
         type="number"
-        {...register(name, { required })}
+        {...register(name, { required: required ? requiredMessage : false })}
       />
-      {errors[name] && <Error name={name} />}
+      {errors[name] && <Error id={errorID} name={name} />}
     </Width>
   )
 }

@@ -43,6 +43,22 @@ const wingsSideHomeCurationSQLiteStatements = [
     FOREIGN KEY ("_parent_id") REFERENCES "pages"("id") ON UPDATE no action ON DELETE cascade,
     FOREIGN KEY ("tour_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE set null
   )`,
+  `CREATE TABLE IF NOT EXISTS "home_why_tour_slots" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "id" TEXT PRIMARY KEY NOT NULL,
+    "key" TEXT, "selection_mode" TEXT, "tour_id" INTEGER,
+    "rule_destination_tag" TEXT, "rule_travel_style" TEXT,
+    "rule_min_duration_days" NUMERIC, "rule_max_duration_days" NUMERIC,
+    "fallback_tour_id" INTEGER, "presentation_mode" TEXT, "presentation_media_id" INTEGER,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages"("id") ON UPDATE no action ON DELETE cascade,
+    FOREIGN KEY ("tour_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("fallback_tour_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("presentation_media_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null
+  )`,
+  `CREATE TABLE IF NOT EXISTS "home_why_tour_slots_locales" (
+    "presentation_badge" TEXT, "presentation_body" TEXT, "presentation_cta_label" TEXT,
+    "id" INTEGER PRIMARY KEY NOT NULL, "_locale" TEXT NOT NULL, "_parent_id" TEXT NOT NULL,
+    FOREIGN KEY ("_parent_id") REFERENCES "home_why_tour_slots"("id") ON UPDATE no action ON DELETE cascade
+  )`,
   `CREATE TABLE IF NOT EXISTS "_home_dest_tours_v" (
     "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "id" INTEGER PRIMARY KEY NOT NULL,
     "_uuid" TEXT, "key" TEXT, "tour_id" INTEGER,
@@ -61,13 +77,28 @@ const wingsSideHomeCurationSQLiteStatements = [
     FOREIGN KEY ("_parent_id") REFERENCES "_pages_v"("id") ON UPDATE no action ON DELETE cascade,
     FOREIGN KEY ("tour_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE set null
   )`,
+  `CREATE TABLE IF NOT EXISTS "_home_why_tour_slots_v" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "id" INTEGER PRIMARY KEY NOT NULL,
+    "_uuid" TEXT, "key" TEXT, "selection_mode" TEXT, "tour_id" INTEGER,
+    "rule_destination_tag" TEXT, "rule_travel_style" TEXT,
+    "rule_min_duration_days" NUMERIC, "rule_max_duration_days" NUMERIC,
+    "fallback_tour_id" INTEGER, "presentation_mode" TEXT, "presentation_media_id" INTEGER,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_home_why_tour_slots_v_locales" (
+    "presentation_badge" TEXT, "presentation_body" TEXT, "presentation_cta_label" TEXT,
+    "id" INTEGER PRIMARY KEY NOT NULL, "_locale" TEXT NOT NULL, "_parent_id" INTEGER NOT NULL,
+    FOREIGN KEY ("_parent_id") REFERENCES "_home_why_tour_slots_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
   ...[
     'home_dest_tours',
     'home_style_tours',
     'home_featured_tours',
+    'home_why_tour_slots',
     '_home_dest_tours_v',
     '_home_style_tours_v',
     '_home_featured_tours_v',
+    '_home_why_tour_slots_v',
   ].flatMap((table) => [
     `CREATE INDEX IF NOT EXISTS "${table}_order_idx" ON "${table}" ("_order")`,
     `CREATE INDEX IF NOT EXISTS "${table}_parent_id_idx" ON "${table}" ("_parent_id")`,
@@ -112,6 +143,12 @@ const localSQLiteColumnRepairs = [
   {
     table: 'form_submissions',
     columns: [
+      ['enquiry_context_source', 'TEXT'],
+      ['enquiry_context_tour_id', 'TEXT'],
+      ['enquiry_context_tour_slug', 'TEXT'],
+      ['enquiry_context_discovery_destination', 'TEXT'],
+      ['enquiry_context_discovery_duration', 'TEXT'],
+      ['enquiry_context_discovery_style', 'TEXT'],
       ['delivery_status', "TEXT NOT NULL DEFAULT 'pending'"],
       ['delivery_updated_at', 'TEXT'],
       ['delivery_error_code', 'TEXT'],

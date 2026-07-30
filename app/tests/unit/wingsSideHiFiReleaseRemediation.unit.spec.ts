@@ -9,7 +9,13 @@ import {
   type WingsSideHiFiSeedPayload,
 } from '../../scripts/lib/wingssideHiFiContentSeed'
 
-const createPayload = () => {
+const createPayload = (
+  initial?: (args: {
+    index: number
+    locale: (typeof WINGSSIDE_HIFI_SEED_LOCALES)[number]
+    target: ReturnType<typeof listWingsSideHiFiSeedTargets>[number]
+  }) => unknown,
+) => {
   const pagesByLocale = new Map(
     WINGSSIDE_HIFI_SEED_LOCALES.map((locale) => [
       locale,
@@ -17,7 +23,7 @@ const createPayload = () => {
         id: index + 1,
         pathname: target.pathname,
         slug: target.slug,
-        wingsSideHiFi: null,
+        wingsSideHiFi: initial?.({ index, locale, target }) ?? null,
       })),
     ]),
   )
@@ -84,6 +90,53 @@ describe('WingSide hi-fi release remediation', () => {
     ).resolves.toEqual({ direction: 'rollback', mutated: 40, verified: 40 })
     expect(update).toHaveBeenCalledTimes(80)
     expect(pagesByLocale.get('en')!.every((page) => page.wingsSideHiFi === null)).toBe(true)
+  })
+
+  it('does not emit already-correct records after apply and preserves unrelated data', async () => {
+    const unrelated = {
+      credentials: { selectedIds: ['cred-1', 'cred-2'] },
+      hero: { media: 1234 },
+      home: { curation: { selectedTourIds: ['tour-a'] } },
+      unrelatedRoute: { enabled: true },
+    }
+    const { pagesByLocale, payload, update } = createPayload(({ index, locale }) =>
+      locale === 'en' && index === 0 ? structuredClone(unrelated) : null,
+    )
+    const plan = await buildWingsSideHiFiReleasePlan({ payload, siteCode: 'wing-side' })
+    expect(plan.entries).toHaveLength(40)
+    const homeEntry = plan.entries.find(
+      (entry) => entry.locale === 'en' && entry.routeVariant === 'home',
+    )!
+    expect(homeEntry.beforeChecksum).toBe(checksumWingsSideHiFiValue(null))
+
+    await expect(
+      executeWingsSideHiFiReleasePlan({ direction: 'apply', payload, plan }),
+    ).resolves.toEqual({ direction: 'apply', mutated: 40, verified: 40 })
+    const home = pagesByLocale.get('en')![0]!.wingsSideHiFi as typeof unrelated & {
+      enabled?: boolean
+    }
+    expect(home.credentials).toEqual(unrelated.credentials)
+    expect(home.hero.media).toBe(1234)
+    expect(home.home.curation).toEqual(unrelated.home.curation)
+    expect(home.unrelatedRoute).toEqual(unrelated.unrelatedRoute)
+    expect(home.enabled).toBe(true)
+
+    const regenerated = await buildWingsSideHiFiReleasePlan({ payload, siteCode: 'wing-side' })
+    expect(regenerated.entries).toHaveLength(0)
+    expect(update).toHaveBeenCalledTimes(40)
+
+    await expect(
+      executeWingsSideHiFiReleasePlan({ direction: 'rollback', payload, plan }),
+    ).resolves.toEqual({ direction: 'rollback', mutated: 40, verified: 40 })
+    const rolledBackHome = pagesByLocale.get('en')![0]!.wingsSideHiFi as typeof unrelated & {
+      enabled?: boolean
+    }
+    expect(rolledBackHome.credentials).toEqual(unrelated.credentials)
+    expect(rolledBackHome.hero.media).toBe(1234)
+    expect(rolledBackHome.home.curation).toEqual(unrelated.home.curation)
+    expect(rolledBackHome.unrelatedRoute).toEqual(unrelated.unrelatedRoute)
+    expect(rolledBackHome.enabled).toBeUndefined()
+    expect(update).toHaveBeenCalledTimes(80)
   })
 
   it('refuses apply when current data drifted after the plan was created', async () => {

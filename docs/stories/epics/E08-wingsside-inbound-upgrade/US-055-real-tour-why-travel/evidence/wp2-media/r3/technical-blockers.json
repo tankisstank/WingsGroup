@@ -1,0 +1,1537 @@
+{
+  "blockedAssetCount": 191,
+  "blockers": [
+    {
+      "filename": "bpt-ninh-binh-tours-ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi-05-00f1b497.jpg",
+      "mediaIDs": [
+        4742
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "00f1b497edba3984d2d87c49f3062da058a700eb0b171e681d1541c07c699f99"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-23-017ae5fa.jpg",
+      "mediaIDs": [
+        6635
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "017ae5fad57fd3ddf9ebf55dd8eaa22e657361962063771ff8065865e57c5df2"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-luxury-wellness-retreat-escape-8-days-03-01f49d0d.jpg",
+      "mediaIDs": [
+        6192
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "01f49d0daa1cc34664682f48adfcd1e5cfc639e5ade22a047b331641f3d6a1f9"
+    },
+    {
+      "filename": "bpt-vietnam-tours-a-glimpse-of-the-central-vietnam-5-days-10-0234dc2f.jpg",
+      "mediaIDs": [
+        5635
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "0234dc2fb452deb0ee6ae651619036914cb926e58c688ccc0ab84260d04dcf82"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-northern-vietnam-6-days-23-02b4443c.jpg",
+      "mediaIDs": [
+        6374
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "02b4443c05db408ad13438cdf3d0b4e0da4e91cacf93aaa58bffb9da920fc8dd"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-south-vietnam-5-days-15-03ef65ec.jpg",
+      "mediaIDs": [
+        6399
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "03ef65ec5b08162247b167c820dbfc5a03a2fb648c43401bfecc943c990cb7ec"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-02-04178b46.jpg",
+      "mediaIDs": [
+        6107
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "04178b461398a8aeeec93020e99ef717ba3b986accde2089c46563841e8da297"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-14-055f2f69.jpg",
+      "mediaIDs": [
+        6748
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "055f2f6953dce16db73996fcd9ccf925c7fab54b1773c115337e2ced64ec351d"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-21-05d90e70.jpg",
+      "mediaIDs": [
+        6633
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "05d90e70472995481e44b80fa0bb8d23cd2095ee449d3142a938a1ad011dc0fb"
+    },
+    {
+      "filename": "bpt-vietnam-tours-hoi-an-surrounding-and-beach-break-7days-02-06238733.jpg",
+      "mediaIDs": [
+        5867
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "062387337a6cd3cdf1dbc64611cdbe9729bc41c41bc6dfc91c1410f1ec6293b2"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-03-07522020.jpg",
+      "mediaIDs": [
+        6012
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "07522020133907f5c1fa4ff60aa0d8cd1dc0625e9b1fabf25788af3c125641a0"
+    },
+    {
+      "filename": "bpt-mekong-delta-tours-mekong-delta-with-floating-market-2-days-15-077b0ae7.jpg",
+      "mediaIDs": [
+        6605
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "077b0ae70ab1d2d5cd836e2a3244c4e8a3a80972bac5bef5432125f6b556d93c"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-11-0897dd45.jpg",
+      "mediaIDs": [
+        5852
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "0897dd45aa5d75b176718aa3246619ebb37943ff1766adbeed57bfab068d876d"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-09-0c206aef.jpg",
+      "mediaIDs": [
+        2997
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "0c206aef284c76dcb83f3f9e213350494579c84e6cab4055ee4577388d85b4b1"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-43-0c8c5816.jpg",
+      "mediaIDs": [
+        6447
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "0c8c5816bd830b6c391d1d5f5ad2eb16a181e36be01152a0622edc818faf7bef"
+    },
+    {
+      "filename": "bpt-vietnam-tours-da-nang-hoi-an-ba-na-hills-5-days-21-0d10a451.jpg",
+      "mediaIDs": [
+        6499
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "0d10a4516033d6a3d20d6ba02ec2638228f2a79137aa6a8ec73eb5eeb069e800"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-34-0e1f03f1.jpg",
+      "mediaIDs": [
+        6541
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "0e1f03f1713a8726329097fb268d4ed1599649e8e04206c4f08fedc23af32454"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-12-0e8f8aa4.jpg",
+      "mediaIDs": [
+        6009
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "0e8f8aa48ef7d094e143a6a035d83007afdd1b06074f98bbefcc78e23590f790"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-07-12320959.jpg",
+      "mediaIDs": [
+        2995
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "12320959d133547735ae658bfed3b6449e76a49733845b6e0dae82c981bcffe3"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-south-vietnam-5-days-03-125824d2.jpg",
+      "mediaIDs": [
+        5700
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "125824d2e6d1dbadf5c8b48322f27c1dea57251dcc40ce5b8c9dffd6b51bee0a"
+    },
+    {
+      "filename": "bpt-vietnam-tours-a-glimpse-of-the-central-vietnam-5-days-06-14852bd2.jpg",
+      "mediaIDs": [
+        5631
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "14852bd23c32a9b7da1607f75fe98224840be5e96aacb25354959fff8e62171b"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-44-19267e99.jpg",
+      "mediaIDs": [
+        6551
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "19267e993ce8e81cc94c44a6838748b795683851b059d63e26d512b2114fbaed"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-09-19fc01f5.jpg",
+      "mediaIDs": [
+        6210
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "19fc01f509462cfb721ba03382c47e803fc6c818dd11cc4fe537f06e6b71a61d"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-28-1c920845.jpg",
+      "mediaIDs": [
+        6762
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "1c9208459577d158cdeba61a46ede84674845d9d7b83e7487546e9261b396330"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-35-1cd38741.jpg",
+      "mediaIDs": [
+        6542
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "1cd38741cc338ee4429e973f581c9cf724f1fceb59560c9d6e462e7ca90a33fa"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-south-vietnam-5-days-04-1ebdc6bf.jpg",
+      "mediaIDs": [
+        5701
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "1ebdc6bfffee2d07c96311c31634d246eceb413bb9a38b946cd11c47db64cbf0"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-19-1f5f1e45.jpg",
+      "mediaIDs": [
+        6651
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "1f5f1e453d82b21b3a57302372ad970530ea2fd64ef8cd98d400e9f38c10ff23"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-south-vietnam-5-days-05-200079d6.jpg",
+      "mediaIDs": [
+        5702
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "200079d665539aeaa7f7053fabb6cbd0ad65896ae3ded4e3515e21207a595004"
+    },
+    {
+      "filename": "bpt-vietnam-tours-deep-in-love-in-phu-quoc-5-days-02-220c9733.jpg",
+      "mediaIDs": [
+        5771
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "220c9733aeda1c27fda7a85830c5f04bee7d4d916f313c70a43ea38896468d59"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-03-234f1f44.jpg",
+      "mediaIDs": [
+        6000
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "234f1f44234068f6ff76de4239a9e1352f6547e65dc6f77e92c1e0eee5210224"
+    },
+    {
+      "filename": "bpt-vietnam-tours-hoi-an-surrounding-and-beach-break-7days-16-258c026a.jpg",
+      "mediaIDs": [
+        6577
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "258c026af00c59cd3ba437456d74c68f9d0e885fabe7f96b854435bbc65ae139"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-14-26ab6499.jpg",
+      "mediaIDs": [
+        6626
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "26ab6499a3448cb1a58ba728165b1f0019f8478a43a65c84c09de2856e6b5759"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-04-2761ae94.jpg",
+      "mediaIDs": [
+        6205
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "2761ae9466c98787858a69bf7cf9657e132da0ada9a5f5c7c5b4d23c37dbfc51"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-15-279afc0d.jpg",
+      "mediaIDs": [
+        6749
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "279afc0d6133fcf2cc137eab09898343e4ddc4aaac062b28de486b939ef41161"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-northern-vietnam-6-days-24-28086101.jpg",
+      "mediaIDs": [
+        6375
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "280861011b6bfbf84226f9b72cc6c481f5882320bf00929eb68ae88d6fb46f70"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-16-28df86e3.jpg",
+      "mediaIDs": [
+        6775
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "28df86e30e073d0576a6dbf5fdb7ff800af221a928b3e760ab06260c49401d66"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-luxury-wellness-retreat-escape-8-days-20-29665939.jpg",
+      "mediaIDs": [
+        6734
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "29665939902c64fe0dc4137de651d4d9867621d9c1836d6b35f772e44b046fef"
+    },
+    {
+      "filename": "bpt-mekong-delta-tours-mekong-delta-gateway-3-days-11-2ae4af47.jpg",
+      "mediaIDs": [
+        3881
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "2ae4af477f83f458b1cb6f560069999f77bc4ef325e9d624e4338a431fd9f2e3"
+    },
+    {
+      "filename": "bpt-vietnam-tours-southern-beauty-and-relaxation-8-days-19-2b1f4176.jpg",
+      "mediaIDs": [
+        6710
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "2b1f4176fb1f912c28b497c0442047794dda4edec9952b91f2e900ac417394b1"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-32-2b684c00.jpg",
+      "mediaIDs": [
+        6436
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "2b684c00b0514a4e07ee752d150ef70670b718bc38e268bbe1442e41733c431f"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-17-2c17afa2.jpg",
+      "mediaIDs": [
+        6776
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "2c17afa2a0804ace329ba323c46231c20a13f786671f98e7f87c9e7220629ec7"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-17-2f54ad5b.jpg",
+      "mediaIDs": [
+        6524
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "2f54ad5bce930be91738d80c8512e971572bc77d0956a1d7f6918873c21d2f3a"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-13-2f91b2dc.png",
+      "mediaIDs": [
+        6772
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "2f91b2dc79942001ddb1bff9c27e38feeb271e30e204aa82fd8d37183685ec9f"
+    },
+    {
+      "filename": "bpt-vietnam-tours-deep-in-love-in-phu-quoc-5-days-14-30483076.jpg",
+      "mediaIDs": [
+        6677
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "30483076809a4cca9b5ec38a470504fa761074a8059b9f93d57a755ea0c3a30a"
+    },
+    {
+      "filename": "bpt-vietnam-tours-a-glimpse-of-the-central-vietnam-5-days-18-3175a2be.jpg",
+      "mediaIDs": [
+        6347
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "3175a2bec9df932d7c987e1337fee559f3d11230161e60ab5a7c9148d9598a69"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-29-34033ea3.jpg",
+      "mediaIDs": [
+        6536
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "34033ea3385d43a571b2ba2aad8913517be59323efbd063c7fa555f656792abc"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-37-36e2aff1.jpg",
+      "mediaIDs": [
+        6544
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "36e2aff1669fa226f173abd2a60672a23f46a1cf413b3c7ea26d7ef93c157394"
+    },
+    {
+      "filename": "bpt-vietnam-tours-a-glimpse-of-the-central-vietnam-5-days-07-37ce06e7.jpg",
+      "mediaIDs": [
+        5632
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "37ce06e7ec20af3ba11c4b1493b79b890716c419c268788f84ba3587d53f098d"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-46-3a5c14c0.jpg",
+      "mediaIDs": [
+        6553
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "3a5c14c0f1fef56218090748e571b9677ff9569ac613ae54feb9c257f0a04ace"
+    },
+    {
+      "filename": "bpt-vietnam-tours-central-vietnam-adventure-4-days-07-3c91e637.jpg",
+      "mediaIDs": [
+        5740
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "3c91e637443d091ffff912cb0451b66595e81873903cb411c6d0818247e1db93"
+    },
+    {
+      "filename": "bpt-mekong-delta-tours-mekong-delta-with-floating-market-2-days-05-3d6c218c.jpg",
+      "mediaIDs": [
+        3898
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "3d6c218c63361be19f7387e68d5cf8093dc49d995d0ce03126a1c24fe7a7b148"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-25-3dbbe88d.jpg",
+      "mediaIDs": [
+        6429
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "3dbbe88d8a454fd6fecc8e241112120d34fee8f8b9a577bf96d017483baf9bed"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-03-3e13449f.jpg",
+      "mediaIDs": [
+        5844
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "3e13449f657c244b242d08a5cb5e4144444ec8fbf97755847d0b9aa48d76513a"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-33-42aa0e5a.png",
+      "mediaIDs": [
+        6540
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "42aa0e5a456bfd91bddd61ad1e81c956ca4edc397f9f7a1b3a63009cae6b676f"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-16-4692061c.jpg",
+      "mediaIDs": [
+        6628
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "4692061caafa2d6a743fac749f6eb447c0f880ca4d88053e95c8ab66d513387f"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-08-482b9d36.jpg",
+      "mediaIDs": [
+        6113
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "482b9d3696c3fbe0eb5b0eb5bc57e7da985735a69adf778dfab43c83cd0d0ef5"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-25-49872dcc.jpg",
+      "mediaIDs": [
+        6759
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "49872dcc2ba63a398d6655b4227e376162c0a12499779de982dfca8fce370e0d"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-27-4a97f4c4.jpg",
+      "mediaIDs": [
+        6761
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "4a97f4c49afb388c0b91b1f3aa3464adea77198a12df08a6e670a0e974fc842e"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-luxury-wellness-retreat-escape-8-days-16-4b1686f6.png",
+      "mediaIDs": [
+        6730
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "4b1686f60545994726261aa7d4354c30cd3a29ac732ae0dfd26cd817fb414776"
+    },
+    {
+      "filename": "bpt-halong-bay-tours-discover-halong-bay-ninh-binh-2-days-11-4b450b90.jpg",
+      "mediaIDs": [
+        2730
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "4b450b90b82d8bcba8c9c6321ae14872935451782ef9d5e0ffa07a313a8b4b6c"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-luxury-wellness-retreat-escape-8-days-19-4b6218b9.jpg",
+      "mediaIDs": [
+        6733
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "4b6218b9005e404bcb16d4673b7a1e12c58a6a206a2c43a432ccb0675e99f7a5"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-09-4cfd7bb6.jpg",
+      "mediaIDs": [
+        6114
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "4cfd7bb6209d007e417ecd5f37bdd39ec6c742bbb143de74b2063b5d3ce62898"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-northern-vietnam-6-days-25-4e9c78fa.jpg",
+      "mediaIDs": [
+        6376
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "4e9c78fa35326bbd6f6ba67409657abe16373729aace10fec733cdf13b4ae2c6"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-luxury-wellness-retreat-escape-8-days-07-4ef947c0.jpg",
+      "mediaIDs": [
+        6196
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "4ef947c0dd0ad499daea1d2e9a61172073b21b759dfbff4133805ad0a5aeae00"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-43-513d2936.jpg",
+      "mediaIDs": [
+        6550
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "513d29368c078a7690ce971e3761ca3c7469b5bcc9f136559303e41c8e6d0c1d"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-16-53006049.jpg",
+      "mediaIDs": [
+        6648
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "53006049a73ee0444d839c9f6b929019e2ff161734deb3f7ce613ca301683d55"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-24-5387e039.jpg",
+      "mediaIDs": [
+        6656
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "5387e039ece9a1cc1b7692bb58e6dda26b4bb55a28257535e0a5994796969096"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-18-53dc4b99.jpg",
+      "mediaIDs": [
+        6752
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "53dc4b9954116a2355384495354a60ec5ab7bf9a8e7c34df3ed079716c8f23f4"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-27-585e1799.jpg",
+      "mediaIDs": [
+        6431
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "585e17996067dd4619a32748d234187555d4112d840005bd10c712960ad3870d"
+    },
+    {
+      "filename": "bpt-ninh-binh-tours-ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi-03-58fb88aa.jpg",
+      "mediaIDs": [
+        4740
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "58fb88aa6cc06e8fefe4796eaf097411ae090b989e383477a6722f219a3466e1"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-08-5960aab5.jpg",
+      "mediaIDs": [
+        5849
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "5960aab556df8bb10e80390e1f6c16c2623b19ba786d227ed5e9ca9610287ed9"
+    },
+    {
+      "filename": "bpt-vietnam-tours-hoi-an-surrounding-and-beach-break-7days-08-5b79da16.jpg",
+      "mediaIDs": [
+        5873
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "5b79da1686c6e53b0d69e8e000e85852cf2600a89f79015f37441c5ee1792ace"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-luxury-wellness-retreat-escape-8-days-10-5b83d9da.jpg",
+      "mediaIDs": [
+        6199
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "5b83d9dacc935bb7edeab5cd9dd8e72e4b3dc5e78a383f9613730ca3cf4bb81d"
+    },
+    {
+      "filename": "bpt-mekong-delta-tours-mekong-delta-with-floating-market-2-days-08-5c76c8d6.jpg",
+      "mediaIDs": [
+        3901
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "5c76c8d6ca66bd6374b22d6e10f051b5828aa46f25629d89255e4bd1aaa00b58"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-05-5db987ce.jpg",
+      "mediaIDs": [
+        6110
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "5db987ce130b8589a304a1361476bf0fc10e6486ae8694d51ce67a0d619b672d"
+    },
+    {
+      "filename": "bpt-vietnam-tours-southern-beauty-and-relaxation-8-days-11-5ed36438.jpg",
+      "mediaIDs": [
+        6092
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "5ed364386e19352ebf6d0b7f3bb2636e14f9385b678c71f885af2027cf32d851"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-13-5ff400de.jpg",
+      "mediaIDs": [
+        6625
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "5ff400dee6cf86ee6e5bbdc8af936a38e7b4b8a62460e36ce4b88fab56cc44ee"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-32-61c3674c.jpg",
+      "mediaIDs": [
+        6539
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "61c3674c3b234ee3059318cc7b193d3bcfc5790e107f199e453805f3f11994e3"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-27-627e9672.jpg",
+      "mediaIDs": [
+        6659
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "627e96721a0d0f9469a7e8aac7be8b540d6f1af5d4c51f50b1b2f55fba30dcc8"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-luxury-wellness-retreat-escape-8-days-18-62c717e4.jpg",
+      "mediaIDs": [
+        6732
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "62c717e4d6ae7cfbb61fa35060f8ffaf23d5e8f309d549c2b1fb842cdf837e04"
+    },
+    {
+      "filename": "bpt-vietnam-tours-central-vietnam-adventure-4-days-06-633312bd.jpg",
+      "mediaIDs": [
+        5739
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "633312bd88c9ffb218e54290dde34f0bd94058050f8f714b8003a5d8868f1e7a"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-04-63665d59.jpg",
+      "mediaIDs": [
+        6109
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "63665d599e18447a4f682523adb98460620adc801a9b41087984b6883a9d34dc"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-24-64616a59.png",
+      "mediaIDs": [
+        6758
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "64616a598063e46fd345f39cc5222a9395179200eea71526428d50a60da862ed"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-south-vietnam-5-days-01-64b08ff6.jpg",
+      "mediaIDs": [
+        5698
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "64b08ff6ed11c598a50ff115aacd93a00235271844184f11ccff2f6e8b128e77"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-northern-vietnam-6-days-22-65904335.png",
+      "mediaIDs": [
+        6373
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "6590433545123241484a27fb15531cfeaa7e7ed8f2792bea49b9f4d2e404c057"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-northern-vietnam-6-days-12-6880b0df.jpg",
+      "mediaIDs": [
+        5697
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "6880b0dfd2dace141eff1cfabdb5d68418726c2496ed3013744cdbcf062c3cda"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-14-688221b5.jpg",
+      "mediaIDs": [
+        6418
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "688221b504b833fda0826f21f2c9f073162c5d8ba648091d7e95c0f1b5c293b6"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-08-6966f5a1.jpg",
+      "mediaIDs": [
+        2996
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "6966f5a1551a988c683137934bd645910ec8eb2375e1b5382fb7d284a914d615"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-07-6cde1406.jpg",
+      "mediaIDs": [
+        6112
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "6cde1406d77cf79e1b1d9cc321b0a85dd304823dbf5228e13bd999033af0f4cb"
+    },
+    {
+      "filename": "bpt-vietnam-tours-central-vietnam-adventure-4-days-15-6da09cde.jpg",
+      "mediaIDs": [
+        6479
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "6da09cde4d5145c2d631f9259e9166d18faab56b3a38af86e20ee814afc68c28"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-48-6e1d42f8.jpg",
+      "mediaIDs": [
+        6555
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "6e1d42f870aff4359d10fb94a87d675c8d0c666f35c6c445ac3fd3f19fce0e7f"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-02-6e995684.jpg",
+      "mediaIDs": [
+        2990
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "6e995684798eb4108bd5c44f1f6f2097d8259e63fa976d0cc2462d95651333ef"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-45-70188825.jpg",
+      "mediaIDs": [
+        6552
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "701888256411dc6b95d33ac305a5399bb0ab53e24656d8095b9d0870a58179c0"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-36-70bf3021.jpg",
+      "mediaIDs": [
+        6440
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "70bf3021fdb86b09830abf165672271cdc1617f3bd78dfcb6319beb854a6dcac"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-47-72c49945.jpg",
+      "mediaIDs": [
+        6554
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "72c49945ccb6fe1a8319415ac48eb9ed63e3c7f5ebac469d61cedb8ade029732"
+    },
+    {
+      "filename": "bpt-vietnam-tours-a-glimpse-of-the-central-vietnam-5-days-21-739ccd75.jpg",
+      "mediaIDs": [
+        6350
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "739ccd75f7275e34a29cb118a553e47d8622a0e868df245e1a566d247ef3df18"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-northern-vietnam-6-days-06-740388f6.jpg",
+      "mediaIDs": [
+        5691
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "740388f6d3dd2c8ca21a3a9ae503c9964ac042ef54c0f6e7b903eed136b89bf4"
+    },
+    {
+      "filename": "bpt-ninh-binh-tours-ninh-binh-hoa-lu-trang-an-full-day-private-tour-03-74e6a13a.jpg",
+      "mediaIDs": [
+        4716
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "74e6a13a51b807aaaa69674aabe42adc84b5b3c53cbc8dba284681a0f4c18e84"
+    },
+    {
+      "filename": "bpt-vietnam-tours-hoi-an-surrounding-and-beach-break-7days-10-771d1c93.jpg",
+      "mediaIDs": [
+        5875
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "771d1c93ff015fd5917728249638e57d7d22a3242212181188b79a1d007a8b6a"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-36-787c2120.jpg",
+      "mediaIDs": [
+        6543
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "787c21206c5554e86421297b7378cda50b82458325957016baac882e8fc98ae4"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-22-7990fa45.jpg",
+      "mediaIDs": [
+        6529
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "7990fa457c7a127aa0a553e6ed0ae0407e7ee516663a035339d6ac316a17ddf6"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-03-7a788e41.jpg",
+      "mediaIDs": [
+        2991
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "7a788e419d0f7cf3e78f5d92901d4e05ac35ebe97eb0700cf12117903debb3c6"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-29-7cbcc3cc.jpg",
+      "mediaIDs": [
+        6763
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "7cbcc3ccb5f8136608447e467bd76d61e616bfe8823056c7e6d6c1ad98fefeef"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-28-7d736384.png",
+      "mediaIDs": [
+        6432
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "7d736384743e4b623635f577bd057f32de5bc1ceac78cdad56c1d099196e59d3"
+    },
+    {
+      "filename": "bpt-mekong-delta-tours-mekong-delta-gateway-3-days-08-7fa70b56.jpg",
+      "mediaIDs": [
+        3878
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "7fa70b56e7dd09b5f80fe86cc4c3dc88090657b636fe07d7904d6d32dfd2c3d1"
+    },
+    {
+      "filename": "bpt-vietnam-tours-a-glimpse-of-the-central-vietnam-5-days-11-8403174e.jpg",
+      "mediaIDs": [
+        5636
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "8403174e05d03f216362cd67ed16f834463bcd12a280c54eabbf6cd94ae9af7a"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-northern-vietnam-6-days-07-846e7c28.jpg",
+      "mediaIDs": [
+        5692
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "846e7c281d0323661e909d64b05978493d5471f8cc2ac10fdcece3b2b65b055c"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-05-85289b81.jpg",
+      "mediaIDs": [
+        6206
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "85289b813e80e4d9e809facd990e79a931cfb01c3aa1c20280ff595fc4b599ac"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-19-8693ba28.jpg",
+      "mediaIDs": [
+        6778
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "8693ba28de1f24259b3058aba26155f9906d8d4e5a8702c22c3299dbd5cff5c6"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-53-870ca322.jpg",
+      "mediaIDs": [
+        6457,
+        6769
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "870ca3223241800c2e6548fb2d62de2365144d9531e1c3ef1cfe2bfb217554f8"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-20-87241b7a.jpg",
+      "mediaIDs": [
+        6779
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "87241b7a26c21e9d7e82fd28a132e7d0cb399b34ead793fb8a261f9f02581316"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-22-891052f9.jpg",
+      "mediaIDs": [
+        6634
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "891052f9c3dd221eba4b9cd1da4e5c93559408bf0fac9914dec96e35cc6f807d"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-south-vietnam-5-days-12-8b1ff3c2.jpg",
+      "mediaIDs": [
+        5709
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "8b1ff3c2b10c1d1224b1ebbae9aed7d1f3773de3641967f0c248f6660709fafc"
+    },
+    {
+      "filename": "bpt-vietnam-tours-central-vietnam-adventure-4-days-09-8d544a87.png",
+      "mediaIDs": [
+        5742
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "8d544a8703f5abb90e344fe3c37a2cafc6527cc6ff47493efb8ae2a6680923f4"
+    },
+    {
+      "filename": "bpt-vietnam-tours-da-nang-hoi-an-ba-na-hills-5-days-19-91744e96.png",
+      "mediaIDs": [
+        6497
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "91744e962b0177c8e6f89a02be8ff0e0231303994171fe4b878d4c0d8bdbd49c"
+    },
+    {
+      "filename": "bpt-vietnam-tours-a-glimpse-of-the-central-vietnam-5-days-01-91f5e1fe.jpg",
+      "mediaIDs": [
+        5626
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "91f5e1fef354a8dfe257df5cdf223b6ea8702b6ad7204606d970530b8c83ef37"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-06-94de1a4c.jpg",
+      "mediaIDs": [
+        6207
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "94de1a4ccabf503a0942c1f61da1cccd475433f5eee69506e7620b6c03e22a39"
+    },
+    {
+      "filename": "bpt-vietnam-tours-hoi-an-surrounding-and-beach-break-7days-07-95ea117d.jpg",
+      "mediaIDs": [
+        5872
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "95ea117d6b31d3161816ec03956eb50904e27467c027b42556db64c3794d6988"
+    },
+    {
+      "filename": "bpt-vietnam-tours-southern-beauty-and-relaxation-8-days-21-960dbfb1.png",
+      "mediaIDs": [
+        6712
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "960dbfb137908040e59dacdbf826628aeead6730f1587103ea5d5d502e9e10ea"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-45-9b0436b8.jpg",
+      "mediaIDs": [
+        6449
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "9b0436b84e6688b9e1f22e22d74ec4324bd94a5c1b0b2d7914b3d1b1bcd1583f"
+    },
+    {
+      "filename": "bpt-vietnam-tours-hoi-an-surrounding-and-beach-break-7days-15-9ead78db.jpg",
+      "mediaIDs": [
+        6576
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "9ead78db1cf0a6a82312ac8a3b16d679ad23f15c7eb9340f8341623b48d4a748"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-19-a3457143.jpg",
+      "mediaIDs": [
+        6631
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "a345714302e639a1faa1054d72cc1db8c026dcb2b3ba07552a270777f56c0b04"
+    },
+    {
+      "filename": "bpt-vietnam-tours-central-vietnam-adventure-4-days-14-a4d15cbe.jpg",
+      "mediaIDs": [
+        6478
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "a4d15cbe7d96337abda028c5f0c048b54d882ddd2bd72732847a08e9140e982b"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-northern-vietnam-6-days-09-a5206f09.jpg",
+      "mediaIDs": [
+        5694
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "a5206f0935adc1a1fa5ed4d3eae67db85f8ca015b6db3ac4efd9ce498cc8fcba"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-luxury-wellness-retreat-escape-8-days-04-a5bcab53.jpg",
+      "mediaIDs": [
+        6193
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "a5bcab5326d0ddb73a414bfe2dcdf2f0c48c7ec2c865809bd7eb222397de03b5"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-25-a64431a4.jpg",
+      "mediaIDs": [
+        6532
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "a64431a46dac687d15ce4cf099b5cec8a704e94257f786ab467a05662f6fac3e"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-luxury-wellness-retreat-escape-8-days-21-a658f431.jpg",
+      "mediaIDs": [
+        6735
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "a658f431953d5cbb36cd471915b903a6f6dbae47a88d49c14322e4a82ec74cc3"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-37-a663feb4.jpg",
+      "mediaIDs": [
+        6441
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "a663feb497b97cc06d15516769b3c4d0ef47f79eab1cda39f9bd3a4637dc7836"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-38-a7b75a62.jpg",
+      "mediaIDs": [
+        6545
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "a7b75a62268407b379f6ded98a3327c9492d8d633c4c3d1ea334f388e3ba838d"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-25-ab7f9bee.jpg",
+      "mediaIDs": [
+        6657
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "ab7f9beecc0ae4f8a20f3431098dfa1df4a0879af7cfb323edaff6e18bd6cdfc"
+    },
+    {
+      "filename": "bpt-vietnam-tours-a-glimpse-of-the-central-vietnam-5-days-16-acd762d8.png",
+      "mediaIDs": [
+        6345
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "acd762d827b4151d1cf8d3a313e93dd49dd747e63a5940d513958fbbd05eef6c"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-16-ad0098bd.jpg",
+      "mediaIDs": [
+        6420
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "ad0098bdccc6a8ef7e4167660dcbd9937823eef2aa752119eba627d6c36be699"
+    },
+    {
+      "filename": "bpt-ninh-binh-tours-ninh-binh-hoa-lu-trang-an-full-day-private-tour-02-ad857557.jpg",
+      "mediaIDs": [
+        4715
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "ad857557f32f8f49321c94a522d7bf45582526568eb3cbee808a3058b844b0b4"
+    },
+    {
+      "filename": "bpt-sapa-tours-sapa-trekking-ethnic-market-3-days-15-aef905ba.jpg",
+      "mediaIDs": [
+        6690
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "aef905bac8a6e69cd010d2932a5ef8661bdb48430f97d7bed2f3b688033408c8"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-14-af7ef2fd.jpg",
+      "mediaIDs": [
+        6521
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "af7ef2fd27500c523c74fb5db22650f4d7f3625d8ff2ebcd8aa0a4cc7bd8efab"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-18-b183ecdf.jpg",
+      "mediaIDs": [
+        6422
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "b183ecdf0ecac7611588d4f1b8ebdac29e5fe61db8112a3849de421a5a2fb5f3"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-01-b50ad507.jpg",
+      "mediaIDs": [
+        6202
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "b50ad5077bb47e6be75bb73ee20a4a302f37132b5102eb8d779c5b7e0a07ef73"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-17-b6111ae1.jpg",
+      "mediaIDs": [
+        6421
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "b6111ae17dba8a37cd0731f26fe0f85c6536fd9ab4b759d59f96e0dccda93cfe"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-06-b75e103c.jpg",
+      "mediaIDs": [
+        5847
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "b75e103c509825e5a437e6df0674e65aeae93b4621cccf6e7e43eda441882254"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-39-b8a25860.jpg",
+      "mediaIDs": [
+        6546
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "b8a258604375ad7e33b3f0c459b094926e982e3262c65f93876ece0f0dc0b3fe"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-12-ba3d96bd.jpg",
+      "mediaIDs": [
+        6021
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "ba3d96bd12366558fc98dece9aa17d6382e7359050925d553faa6ac86d96c2e9"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-40-bb93d22c.jpg",
+      "mediaIDs": [
+        6547
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "bb93d22c7e62818c602bc6c3005622f64ac5632ac9d3d2fd5ec3526906a2937d"
+    },
+    {
+      "filename": "bpt-vietnam-tours-southern-beauty-and-relaxation-8-days-25-bbb9f8bc.jpg",
+      "mediaIDs": [
+        6716
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "bbb9f8bc065db8b7fd58bd69b9577192e84956905ef2087e173f28707610a386"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-06-bbf4fed0.jpg",
+      "mediaIDs": [
+        6111
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "bbf4fed0f92d89acb2c13ed1da4d96c3b45619fecac8b43d96d38266195e165f"
+    },
+    {
+      "filename": "bpt-mekong-delta-tours-mekong-delta-gateway-3-days-12-bd1160c9.jpg",
+      "mediaIDs": [
+        3882
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "bd1160c9ea04ca93bb6e5a29cffb6213b40fc8f10221ee3f71d0f4fbc72022da"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-15-bf2745fa.jpg",
+      "mediaIDs": [
+        6419
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "bf2745fab45ff3ab72fb4328ab1e7fc317e3509683e35d7499dad729e42b835b"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-14-c0527d00.jpg",
+      "mediaIDs": [
+        6773
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "c0527d0076fc285dfcaaeea925796c28a47400cd76faf00565c9494f4ed9a7f0"
+    },
+    {
+      "filename": "bpt-vietnam-tours-hoi-an-surrounding-and-beach-break-7days-19-c3638845.jpg",
+      "mediaIDs": [
+        6580
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "c36388451973fe02f9ffd6ec6fdf49f0aecd0a07e6663cb3919f12055c42e0f3"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-12-c4753d81.jpg",
+      "mediaIDs": [
+        5853
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "c4753d8114f8360eedb2e5560ba99ec44235c1722c9fcd110c32b1e3b0140b9f"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-21-c9ebcfe1.png",
+      "mediaIDs": [
+        6653
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "c9ebcfe1f6ec66dc651de171f2f58a274c56227d7b064756596c932162aa9677"
+    },
+    {
+      "filename": "bpt-sapa-tours-sapa-trekking-ethnic-market-3-days-14-c9ff7eb4.jpg",
+      "mediaIDs": [
+        6689
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "c9ff7eb405be7656ebeadcdc091bb9e443b3e458944191abdd2bd16e22f41693"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-31-cac3a35c.jpg",
+      "mediaIDs": [
+        6538
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "cac3a35cbac45403ba4cf21171dd7854cd0724e51411b3a2ce3b09e7fba1d038"
+    },
+    {
+      "filename": "bpt-vietnam-tours-da-nang-hoi-an-ba-na-hills-5-days-04-cb48292c.jpg",
+      "mediaIDs": [
+        5761
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "cb48292c641af0de43ad611a1e435548abbab230a2197f7c37180fac8c95adf7"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-south-vietnam-5-days-02-cd69728a.jpg",
+      "mediaIDs": [
+        5699
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "cd69728ae183d5002433bae37943cdaf6f3f1015a1c79551ffb80c00b9775375"
+    },
+    {
+      "filename": "bpt-vietnam-tours-a-glimpse-of-the-central-vietnam-5-days-19-ce79d0cd.jpg",
+      "mediaIDs": [
+        6348
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "ce79d0cda2f2fb8c1446bb2edf55b598fa4e640e634f56025f40986a6f0eefb1"
+    },
+    {
+      "filename": "bpt-sapa-tours-sapa-trekking-ethnic-market-3-days-13-d0ce690b.jpg",
+      "mediaIDs": [
+        6688
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "d0ce690b1cc46d4a6574ee4bf669960c71882025943b543a175c8d5e45ea6bdf"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-26-d1ee7f14.jpg",
+      "mediaIDs": [
+        6658
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "d1ee7f14b918de589cef5e6081f81a142af70e9fe865179aed0b07a1b2e9c569"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-30-d409abcb.jpg",
+      "mediaIDs": [
+        6662
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "d409abcb83f0c1bf1ad7d1b29cba982063a4b0824eeb9da26523f43e0ed6f132"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-04-d5fe0ede.jpg",
+      "mediaIDs": [
+        5845
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "d5fe0edec388c10266beb5ab7a033d27aba1d5b2ee1ced90c177e6fd6f8da829"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-05-d627e6d5.jpg",
+      "mediaIDs": [
+        2993
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "d627e6d569251cee891ef622b7913d3c6d820f8daf5b1dd3d40b351fd0146b55"
+    },
+    {
+      "filename": "bpt-vietnam-tours-hoi-an-surrounding-and-beach-break-7days-04-d85dd710.jpg",
+      "mediaIDs": [
+        5869
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "d85dd710771f44b817dd22a9f32cff2a796f817799a6130e9a34c5fea0d76154"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-23-d89e9bed.jpg",
+      "mediaIDs": [
+        6530
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "d89e9bed9276fb1f9faae3b70ee4b2c13e36e1e8003e8ac9d0a22b28946a14ea"
+    },
+    {
+      "filename": "bpt-vietnam-tours-hoi-an-surrounding-and-beach-break-7days-09-d997ea5a.jpg",
+      "mediaIDs": [
+        5874
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "d997ea5a4c967e71245395906bc0289288ba5693f47aec6ec7567cf244aae7e6"
+    },
+    {
+      "filename": "bpt-mekong-delta-tours-mekong-delta-gateway-3-days-09-dbb94505.jpg",
+      "mediaIDs": [
+        3879
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "dbb94505389779984aa374d32881f2aa033e415a97d7d8c1091aedfb3388d34b"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-26-dd44b9ef.jpg",
+      "mediaIDs": [
+        6760
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "dd44b9efd3c9d6515a1f731002d2bfc5f5ce1e51c5a3600bdd62f7f2957b2c3c"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-02-de8169dd.jpg",
+      "mediaIDs": [
+        5999
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "de8169dd0dea1e159b90278bc288d389c072c1ea0da3605078f6aa13ca1ab740"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-18-df60b10c.jpg",
+      "mediaIDs": [
+        6777
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "df60b10cacb150080354f37bbce09767392975d542eee48841e065912101e114"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-17-df615105.png",
+      "mediaIDs": [
+        6629
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "df615105f564713669a55220dec61abb3dbab57da7c408a89dd954ce613e6fa7"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-08-dff98475.jpg",
+      "mediaIDs": [
+        6017
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "dff98475b1eb70ca673ee4f49baa428c2762188865934849823927b182b57b72"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-south-vietnam-5-days-08-e2133d2f.jpg",
+      "mediaIDs": [
+        5705
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "e2133d2f9baac13745ce4993362fd0e7c5e284ef526f2a067805d2bde807010e"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-luxury-wellness-retreat-escape-8-days-06-e2e2571f.jpg",
+      "mediaIDs": [
+        6195
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "e2e2571f450b17f8229b394509e5e96f91a1e8338751b53644780a5505421b88"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-northern-vietnam-6-days-20-e45dd588.jpg",
+      "mediaIDs": [
+        6371
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "e45dd58888c06a24aab9e6025c2999d1eee94fa09e0cd6a8dbac859fa69ee91c"
+    },
+    {
+      "filename": "bpt-vietnam-tours-highlights-of-vietnam-12-days-28-e63a39d5.jpg",
+      "mediaIDs": [
+        6535
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "e63a39d5aa4e5d9d5ceae539caba6250b8037cb5069516e693a26a140a303a14"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-10-e9caef22.jpg",
+      "mediaIDs": [
+        6019
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "e9caef22efdc24f097d34f6490a9209f037b22a358fe97c6ca713c8e2b4f38fa"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-northern-vietnam-6-days-13-ebc5a1e9.jpg",
+      "mediaIDs": [
+        6364
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "ebc5a1e98c0368815d84efeb36c2bf0b48e6199c554879202b2fff24076e6166"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-21-ec989663.jpg",
+      "mediaIDs": [
+        6780
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "ec989663c7b30b646aa9df7010f03af08a93c95a28d8dd3a6d876b34123777f5"
+    },
+    {
+      "filename": "bpt-vietnam-tours-southern-beauty-and-relaxation-8-days-12-efabaa94.jpg",
+      "mediaIDs": [
+        6093
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "efabaa9435dc22eeca836d7addf38ecc5c89d86ce266bc3ea690e96c3646f461"
+    },
+    {
+      "filename": "bpt-vietnam-tours-southern-beauty-and-relaxation-8-days-07-f06d6cd2.jpg",
+      "mediaIDs": [
+        6088
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "f06d6cd2840839039fe0db8586be938bc583236c781d309ccffa682d5bc25548"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-05-f2a44c7e.jpg",
+      "mediaIDs": [
+        6002
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "f2a44c7e0405f46f357f0441cd771c017d19b662e91218e6046f5ae5b7a24a24"
+    },
+    {
+      "filename": "bpt-vietnam-tours-best-of-northern-vietnam-6-days-10-f30e0d40.jpg",
+      "mediaIDs": [
+        5695
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "f30e0d4015e9b1a20717a744f0a6b95d8da5c422a0667608e13c160852c993d8"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-highlights-for-family-6-days-18-f432cb98.jpg",
+      "mediaIDs": [
+        6630
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "f432cb9847b40a679904103f69a20f4e6b0cfadad44a1266794cc32bdcf04fed"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-11-f48589b4.jpg",
+      "mediaIDs": [
+        6116
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "f48589b487c99e477c2cad3eb2c61edaba3ce76e2f15f7994d1ebeb98cf871a9"
+    },
+    {
+      "filename": "bpt-vietnam-tours-hoi-an-surrounding-and-beach-break-7days-13-f508c171.png",
+      "mediaIDs": [
+        6574
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "f508c17101ab0da3d543d0e0c17b4ec1d2d8aaa9b2062b193bfc9f7218bbf272"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-memorable-honeymoon-trip-8-days-11-f6e81206.jpg",
+      "mediaIDs": [
+        6212
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "f6e81206ee3a393e576f9bc4db723129d41a446fa189e8c724a8637903a0ed3c"
+    },
+    {
+      "filename": "bpt-vietnam-tours-northern-vietnam-soft-adventure-8-days-28-f844395c.jpg",
+      "mediaIDs": [
+        6660
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "f844395c30978ce17ac1c100344da22ae04fd9d55f53672a6d9544fecf0110dc"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-29-f8dc2075.jpg",
+      "mediaIDs": [
+        6433
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "f8dc2075fe8c01f6e1e1b86d6f220665a3704dc4d3c11d9ce9052572d10b003f"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-luxury-wellness-retreat-escape-8-days-17-f948e0b8.jpg",
+      "mediaIDs": [
+        6731
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "f948e0b859283829fab8b7651086bb0da8eae7d3f30b1f100d0652158b6a6485"
+    },
+    {
+      "filename": "bpt-vietnam-tours-vietnam-at-a-glance-7-days-12-f9d74119.jpg",
+      "mediaIDs": [
+        6117
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "f9d741194f76f8e6cfcd5ccbbb1faa0a674286b93bd6c368d315c765f80a516d"
+    },
+    {
+      "filename": "bpt-vietnam-tours-southern-beauty-and-relaxation-8-days-23-fc495d7e.jpg",
+      "mediaIDs": [
+        6714
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "fc495d7ec74e075c66878ca75cb68f75564075034ce0f5b157fb0716ca5378e2"
+    },
+    {
+      "filename": "bpt-indochina-tours-best-of-vietnam-and-cambodia-15-days-30-fc72fc8c.jpg",
+      "mediaIDs": [
+        6434
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "fc72fc8cd7d3d3a14472f78299e1f472fee522f3d265d23c2eb0bb92876c59b0"
+    },
+    {
+      "filename": "bpt-vietnam-tours-southern-beauty-and-relaxation-8-days-04-fd6ec1cb.jpg",
+      "mediaIDs": [
+        6085
+      ],
+      "reason": "Visible watermark confirmed; no faithful imagegen output passed subject, framing, dimension, and watermark-removal invariants.",
+      "sourceSha256": "fd6ec1cbfc4ed3859fc5671a0f4ebb096c8f65562cfb66c3a3c47c3f6c93bbd4"
+    }
+  ],
+  "decision": "D4-C",
+  "schemaVersion": 1,
+  "statement": "This is an exact per-content-hash technical blocker list. It is not a blanket rights claim and does not hide rejected candidates."
+}

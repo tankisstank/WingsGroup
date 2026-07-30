@@ -15,6 +15,10 @@ import { useSitePublicLocale } from '@/providers/SitePath'
 import { useSitePath } from '@/utilities/useSitePath'
 import { getCopyLocale } from '@/utilities/locales'
 import { TurnstileWidget } from './TurnstileWidget'
+import type { LocalizedCopy } from '@/i18n/publicCopy'
+import type { LeadSubmissionContext } from '@/lead-capture/types'
+
+import './form-layout.css'
 
 export type FormBlockType = {
   blockName?: string
@@ -23,6 +27,20 @@ export type FormBlockType = {
   form: FormType | null
   introContent?: DefaultTypedEditorState
   presentation?: 'centered-card' | 'minimal' | 'split-contact' | 'support-channels'
+}
+
+type FormLocalizedCopy = {
+  asideDescription: string
+  asideLabel: string
+  asideTitle: string
+  bullets: readonly [string, string, string]
+  fieldLabels: Record<string, string>
+  loading: string
+  required: string
+  requiredMessage: string
+  submit: string
+  successDescription: string
+  successTitle: string
 }
 
 const formCopy = {
@@ -40,6 +58,7 @@ const formCopy = {
       airport: 'Airport',
       brief: 'Needs / budget / timing',
       company: 'Company / traveler group',
+      country: 'Country of residence',
       email: 'Email',
       'full-name': 'Full name',
       'group-size': 'Estimated group size',
@@ -47,7 +66,10 @@ const formCopy = {
       phone: 'Phone number',
       'policy-code': 'Tour / contract / policy code if available',
       'service-date': 'Service date',
+      'travel-month': 'Preferred travel month/date window',
     } as Record<string, string>,
+    required: 'required',
+    requiredMessage: 'This field is required',
     loading: 'Sending your request, please wait...',
     submit: 'Send brief',
     successDescription:
@@ -68,6 +90,7 @@ const formCopy = {
       airport: 'Aeropuerto',
       brief: 'Necesidades / presupuesto / fechas',
       company: 'Empresa / grupo de viajeros',
+      country: 'País de residencia',
       email: 'Email',
       'full-name': 'Nombre completo',
       'group-size': 'Tamaño estimado del grupo',
@@ -75,7 +98,10 @@ const formCopy = {
       phone: 'Teléfono',
       'policy-code': 'Código de tour / contrato / póliza si aplica',
       'service-date': 'Fecha del servicio',
+      'travel-month': 'Mes o intervalo de fechas preferido',
     } as Record<string, string>,
+    required: 'obligatorio',
+    requiredMessage: 'Este campo es obligatorio',
     loading: 'Enviando tu solicitud, por favor espera...',
     submit: 'Enviar solicitud',
     successDescription:
@@ -96,6 +122,7 @@ const formCopy = {
       airport: 'Aeroporto',
       brief: 'Esigenze / budget / periodo',
       company: 'Azienda / gruppo di viaggiatori',
+      country: 'Paese di residenza',
       email: 'Email',
       'full-name': 'Nome completo',
       'group-size': 'Dimensione stimata del gruppo',
@@ -103,7 +130,10 @@ const formCopy = {
       phone: 'Telefono',
       'policy-code': 'Codice tour / contratto / polizza se disponibile',
       'service-date': 'Data del servizio',
+      'travel-month': 'Mese o intervallo di date preferito',
     } as Record<string, string>,
+    required: 'obbligatorio',
+    requiredMessage: 'Questo campo è obbligatorio',
     loading: 'Invio della richiesta in corso...',
     submit: 'Invia richiesta',
     successDescription:
@@ -124,6 +154,7 @@ const formCopy = {
       airport: 'Aeroporto',
       brief: 'Necessidades / orçamento / datas',
       company: 'Empresa / grupo de viajantes',
+      country: 'País de residência',
       email: 'Email',
       'full-name': 'Nome completo',
       'group-size': 'Dimensão estimada do grupo',
@@ -131,7 +162,10 @@ const formCopy = {
       phone: 'Telefone',
       'policy-code': 'Código de tour / contrato / apólice se disponível',
       'service-date': 'Data do serviço',
+      'travel-month': 'Mês ou intervalo de datas preferido',
     } as Record<string, string>,
+    required: 'obrigatório',
+    requiredMessage: 'Este campo é obrigatório',
     loading: 'A enviar o seu pedido...',
     submit: 'Enviar pedido',
     successDescription:
@@ -142,19 +176,34 @@ const formCopy = {
     asideLabel: 'Thông tin hỗ trợ tư vấn',
     asideTitle: 'Gửi yêu cầu, nhận tư vấn đúng nhu cầu',
     asideDescription:
-      'Team WingsGroup sẽ kiểm tra lịch, ngân sách, điểm đến và phản hồi phương án phù hợp để khách không phải tự lọc quá nhiều thông tin.',
+      'Đội ngũ WingsGroup sẽ kiểm tra lịch, ngân sách, điểm đến và phản hồi phương án phù hợp để khách không phải tự lọc quá nhiều thông tin.',
     bullets: [
       'Phản hồi theo giờ làm việc',
       'Tư vấn theo lịch và ngân sách thật',
-      'Có thể chuyển tiếp cho sales/content manager',
+      'Chuyển đúng người phụ trách tư vấn hoặc nội dung',
     ],
-    fieldLabels: {} as Record<string, string>,
+    fieldLabels: {
+      airport: 'Sân bay',
+      brief: 'Nhu cầu / ngân sách / thời gian',
+      company: 'Công ty / nhóm khách',
+      country: 'Quốc gia cư trú',
+      email: 'Email',
+      'full-name': 'Họ và tên',
+      'group-size': 'Số khách dự kiến',
+      message: 'Lời nhắn',
+      phone: 'Số điện thoại',
+      'policy-code': 'Mã tour / hợp đồng / hồ sơ nếu có',
+      'service-date': 'Ngày sử dụng dịch vụ',
+      'travel-month': 'Khoảng tháng/ngày dự kiến',
+    } as Record<string, string>,
     loading: 'Đang gửi yêu cầu, vui lòng chờ...',
-    submit: '',
-    successDescription: '',
-    successTitle: '',
+    required: 'bắt buộc',
+    requiredMessage: 'Vui lòng điền thông tin này',
+    submit: 'Gửi yêu cầu',
+    successDescription: 'Đội ngũ tư vấn sẽ đọc nội dung và phản hồi với hướng đề xuất phù hợp.',
+    successTitle: 'Đã nhận yêu cầu',
   },
-} as const
+} as const satisfies LocalizedCopy<FormLocalizedCopy>
 
 type FormCopyLocale = keyof typeof formCopy
 
@@ -163,6 +212,31 @@ const getFormCopyLocale = (locale?: null | string): FormCopyLocale =>
 
 const getFieldName = (field: FormFieldBlock) =>
   'name' in field && typeof field.name === 'string' ? field.name : null
+
+const sanitizeFormControlSegment = (value?: null | string) =>
+  String(value || 'field')
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'field'
+
+const getFieldControlID = (formID: string | number, fieldName: string) =>
+  `${sanitizeFormControlSegment(String(formID))}-${sanitizeFormControlSegment(fieldName)}`
+
+const readLeadSubmissionContext = (
+  form: HTMLFormElement | null,
+): LeadSubmissionContext | undefined => {
+  const serialized = form?.dataset.wsEnquiryContext
+  if (!serialized) return undefined
+
+  try {
+    const context = JSON.parse(serialized) as unknown
+    return context && typeof context === 'object' && !Array.isArray(context)
+      ? (context as LeadSubmissionContext)
+      : undefined
+  } catch {
+    return undefined
+  }
+}
 
 export const FormBlock: React.FC<
   {
@@ -227,6 +301,8 @@ export const FormBlock: React.FC<
   const [turnstileToken, setTurnstileToken] = useState('')
   const [honeypot, setHoneypot] = useState('')
   const errorRef = useRef<HTMLDivElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+  const handlingNativeInvalidRef = useRef(false)
   const submittingRef = useRef(false)
   const idempotencyKeyRef = useRef<string | null>(null)
   const router = useRouter()
@@ -241,6 +317,11 @@ export const FormBlock: React.FC<
   const onSubmit = useCallback(
     (data: FormFieldBlock[]) => {
       if (submittingRef.current) return
+      const externalValidation = formRef.current?.dispatchEvent(
+        new CustomEvent('ws-plan-validate', { bubbles: true, cancelable: true }),
+      )
+      if (externalValidation === false) return
+
       submittingRef.current = true
       idempotencyKeyRef.current ||= crypto.randomUUID()
 
@@ -255,6 +336,7 @@ export const FormBlock: React.FC<
         try {
           const req = await fetch(`${getClientSideURL()}/api/lead-submissions`, {
             body: JSON.stringify({
+              context: readLeadSubmissionContext(formRef.current),
               formId: formID,
               honeypot,
               idempotencyKey: idempotencyKeyRef.current,
@@ -316,6 +398,36 @@ export const FormBlock: React.FC<
       void submitForm()
     },
     [router, formID, redirect, confirmationType, copyLocale, honeypot, toSitePath, turnstileToken],
+  )
+
+  const onInvalid = useCallback(
+    (formErrors: typeof errors) => {
+      const [firstInvalidName] = Object.keys(formErrors)
+
+      if (!firstInvalidName || !formID) return
+
+      const form = formRef.current
+      const target = form?.ownerDocument.getElementById(getFieldControlID(formID, firstInvalidName))
+
+      if (form && target && form.contains(target)) {
+        target.focus()
+      }
+    },
+    [formID],
+  )
+
+  const onNativeInvalid = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      if (handlingNativeInvalidRef.current) return
+
+      handlingNativeInvalidRef.current = true
+      void handleSubmit(onSubmit, onInvalid)()
+      queueMicrotask(() => {
+        handlingNativeInvalidRef.current = false
+      })
+    },
+    [handleSubmit, onInvalid, onSubmit],
   )
 
   if (!formFromProps || !formID) {
@@ -405,21 +517,25 @@ export const FormBlock: React.FC<
               <form
                 aria-busy={isLoading}
                 data-od-id={formOdId}
+                ref={formRef}
                 id={formID}
-                onSubmit={handleSubmit(onSubmit)}
+                onInvalidCapture={onNativeInvalid}
+                onSubmit={handleSubmit(onSubmit, onInvalid)}
               >
                 <div aria-hidden="true" className="absolute left-[-10000px]" tabIndex={-1}>
-                  <label htmlFor={`${formID}-website`}>Website</label>
                   <input
+                    aria-hidden="true"
                     autoComplete="off"
                     id={`${formID}-website`}
+                    name="_website"
+                    role="presentation"
                     tabIndex={-1}
                     type="text"
                     onChange={(event) => setHoneypot(event.target.value)}
                     value={honeypot}
                   />
                 </div>
-                <div className="mb-4 last:mb-0">
+                <div className="site-form-fields mb-4 last:mb-0">
                   {localizedForm &&
                     localizedForm.fields &&
                     localizedForm.fields?.map((field, index) => {
@@ -427,14 +543,21 @@ export const FormBlock: React.FC<
                       const Field: React.FC<any> = fields?.[field.blockType as keyof typeof fields]
                       if (Field) {
                         return (
-                          <div className="mb-6 last:mb-0" key={index}>
+                          <div
+                            className="site-form-field mb-6 last:mb-0"
+                            data-form-field-type={field.blockType}
+                            key={index}
+                          >
                             <Field
                               form={localizedForm}
                               {...field}
                               {...formMethods}
                               control={control}
                               errors={errors}
+                              formID={formID}
                               register={register}
+                              requiredLabel={copy.required}
+                              requiredMessage={copy.requiredMessage}
                             />
                           </div>
                         )

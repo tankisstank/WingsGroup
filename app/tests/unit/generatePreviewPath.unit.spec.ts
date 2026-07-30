@@ -20,7 +20,7 @@ describe('generatePreviewPath', () => {
       slug: 'home',
     })
 
-    expect(path).toContain('path=%2Fen')
+    expect(new URLSearchParams(path?.split('?')[1]).get('path')).toBe('/')
   })
 
   it('prefixes child-site preview paths with local site alias', async () => {
@@ -40,6 +40,6 @@ describe('generatePreviewPath', () => {
       slug: 'wings-side-home',
     })
 
-    expect(path).toContain('path=%2Fwingsside%2Fen')
+    expect(new URLSearchParams(path?.split('?')[1]).get('path')).toBe('/wingsside')
   })
 })

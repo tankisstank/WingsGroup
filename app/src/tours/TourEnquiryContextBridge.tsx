@@ -2,24 +2,24 @@
 
 import { useEffect } from 'react'
 
-import { setNativeInputValue } from '@/components/WingsSideHiFi/planFormNative'
+import type { LeadSubmissionContext } from '@/lead-capture/types'
+import type { TourEnquiryContext } from './enquiryContext'
 
-export type TourEnquiryContext = {
-  source?: null | string
-  tourId?: null | number | string
-  tourSlug?: null | string
-  tourTitle?: null | string
-}
-
-const contextMessage = ({ source, tourId, tourSlug, tourTitle }: TourEnquiryContext) =>
-  [
-    tourTitle ? `Tour: ${tourTitle}` : null,
-    tourSlug ? `Tour slug: ${tourSlug}` : null,
-    tourId !== null && tourId !== undefined && tourId !== '' ? `Tour ID: ${tourId}` : null,
-    source ? `Source: ${source}` : null,
-  ]
-    .filter(Boolean)
-    .join('\n')
+const toSubmissionContext = (context: TourEnquiryContext): LeadSubmissionContext => ({
+  discovery: context.discovery
+    ? {
+        destination: context.discovery.destination,
+        duration: context.discovery.duration,
+        style: context.discovery.style,
+      }
+    : undefined,
+  source: context.source || undefined,
+  tourId:
+    context.tourId !== null && context.tourId !== undefined && context.tourId !== ''
+      ? String(context.tourId)
+      : undefined,
+  tourSlug: context.tourSlug || undefined,
+})
 
 export const TourEnquiryContextBridge = ({
   context,
@@ -31,16 +31,15 @@ export const TourEnquiryContextBridge = ({
   useEffect(() => {
     const root = document.querySelector(rootSelector)
     if (!root) return
-    const message = root.querySelector('[name="message"]') as HTMLTextAreaElement | null
-    const prefix = contextMessage(context)
-    if (!message || !prefix) return
+    const form = root.matches('form')
+      ? (root as HTMLFormElement)
+      : root.querySelector<HTMLFormElement>('form')
+    if (!form) return
 
-    const existing = message.value.trim()
-    if (existing.includes(prefix)) return
-    setNativeInputValue(message, [prefix, existing].filter(Boolean).join('\n\n'))
+    form.dataset.wsEnquiryContext = JSON.stringify(toSubmissionContext(context))
   }, [context, rootSelector])
 
   return null
 }
 
-export const getTourEnquiryContextMessage = contextMessage
+export { getTourEnquiryContextMessage } from './enquiryContext'

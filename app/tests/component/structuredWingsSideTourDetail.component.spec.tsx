@@ -85,17 +85,95 @@ describe('consultative TourDetailPage contract', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: 'Best of Northern Vietnam' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: "Places you'll move through" })).toBeTruthy()
-    expect(screen.getByRole('heading', { name: 'Private pricing posture' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'A private quote for your dates' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Request consultation' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Other itineraries near this need' })).toBeTruthy()
-    expect(screen.getByRole('link', { name: 'Start your enquiry' }).getAttribute('href')).toContain(
-      'source=tour-detail-enquiry',
-    )
+    expect(
+      screen
+        .getAllByRole('link', { name: 'Request consultation' })
+        .some((link) => link.getAttribute('href')?.includes('source=tour-detail-enquiry')),
+    ).toBe(true)
     const emptySurcharge = document.querySelector('[data-od-id="tour-surcharge"]')
     expect(emptySurcharge).toBeTruthy()
     expect(emptySurcharge?.hasAttribute('hidden')).toBe(true)
     expect(screen.queryByText(/Giữ chỗ|Tour outbound|Xem lịch khởi hành/i)).toBeNull()
   })
+
+  it.each([
+    ['missing currency', { currency: null, priceFrom: 1200 }],
+    ['unsupported currency', { currency: 'ABC', priceFrom: 1200 }],
+    ['pseudo currency', { currency: 'XXX', priceFrom: 1200 }],
+    ['EUR currency', { currency: 'EUR', priceFrom: 1200 }],
+    ['GBP currency', { currency: 'GBP', priceFrom: 1200 }],
+    ['zero price', { currency: 'USD', priceFrom: 0 }],
+    ['negative price', { currency: 'USD', priceFrom: -1 }],
+    ['nonfinite price', { currency: 'USD', priceFrom: Number.POSITIVE_INFINITY }],
+  ])('fails closed for %s in routed consultative detail', (_label, nextDeparture) => {
+    render(
+      <TourDetailPage
+        data={{
+          ...data,
+          nextDeparture,
+          tour: {
+            ...data.tour,
+            currency: 'VND',
+            priceFrom: null,
+          },
+        }}
+        locale="en"
+        presentation="consultative"
+        siteCode="wing-side"
+      />,
+    )
+
+    expect(screen.getAllByText('Price on request').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('On request · reply within 24h').length).toBeGreaterThan(0)
+  })
+
+  it('renders governed prices from the routed consultative detail', () => {
+    render(
+      <TourDetailPage
+        data={{
+          ...data,
+          nextDeparture: { currency: 'USD', priceFrom: 1200 },
+        }}
+        locale="en"
+        presentation="consultative"
+        siteCode="wing-side"
+      />,
+    )
+
+    expect(screen.getAllByText('From').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Price on request')).toBeNull()
+  })
+
+  it.each([
+    [
+      'it',
+      'Un preventivo privato per le tue date',
+      '6 giorni / 5 notti',
+      'Richiedi una consulenza',
+    ],
+    ['es', 'Una propuesta privada para tus fechas', '6 días / 5 noches', 'Solicitar asesoría'],
+    ['pt', 'Uma proposta privativa para suas datas', '6 dias / 5 noites', 'Solicitar consultoria'],
+  ] as const)(
+    'renders native consultative chrome for %s',
+    (locale, priceTitle, duration, request) => {
+      render(
+        <TourDetailPage
+          data={data}
+          locale={locale}
+          presentation="consultative"
+          siteCode="wing-side"
+        />,
+      )
+
+      expect(screen.getByRole('heading', { name: priceTitle })).toBeTruthy()
+      expect(screen.getAllByText(duration).length).toBeGreaterThan(0)
+      expect(screen.getAllByRole('link', { name: request }).length).toBeGreaterThan(0)
+      expect(screen.queryByText('Yêu cầu tư vấn')).toBeNull()
+    },
+  )
 
   it('renders sanitized route and service truth without exposing import provenance', () => {
     const polluted: TourResolvedData = {

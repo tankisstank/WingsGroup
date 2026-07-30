@@ -58,7 +58,7 @@ const packageOdIdByHref: Record<string, string> = {
   '/packages/vietnam-highlights': 'pkg-highlights',
   '/packages/northern-vietnam': 'pkg-north',
   '/packages/central-heritage': 'pkg-central',
-  '/packages/family-vietnam': 'pkg-family',
+  '/packages/vietnam-highlights#family': 'pkg-family',
   '/packages#south': 'pkg-south',
 }
 

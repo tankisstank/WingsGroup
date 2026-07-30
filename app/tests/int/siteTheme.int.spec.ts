@@ -3,6 +3,26 @@ import { wingsSideInboundThemePresetKey } from '@/utilities/themeSeed'
 import { defaultThemePresetByKey, type ThemePresetTokens } from '@/utilities/themeTokens'
 import { describe, expect, it } from 'vitest'
 
+const relativeLuminance = (hex: string) => {
+  const channels = hex
+    .replace('#', '')
+    .match(/.{2}/g)!
+    .map((channel) => Number.parseInt(channel, 16) / 255)
+    .map((channel) =>
+      channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+    )
+  return channels[0]! * 0.2126 + channels[1]! * 0.7152 + channels[2]! * 0.0722
+}
+
+const contrastRatio = (first: string, second: string) => {
+  const firstLuminance = relativeLuminance(first)
+  const secondLuminance = relativeLuminance(second)
+  return (
+    (Math.max(firstLuminance, secondLuminance) + 0.05) /
+    (Math.min(firstLuminance, secondLuminance) + 0.05)
+  )
+}
+
 describe('site theme tokens', () => {
   it('exposes the full WingSide hi-fi semantic token bridge used by the 8-page product CSS', () => {
     const style = getSiteThemeTokens(
@@ -32,6 +52,8 @@ describe('site theme tokens', () => {
     // Gold/brown is for CTA moments; spacing is tightened to hi-fi section cadence.
     expect(style['--site-cta']).toBe(style['--site-gold'])
     expect(style['--section-space']).toContain('1.65rem')
+    expect(contrastRatio(style['--site-cta'], style['--site-cta-fg'])).toBeGreaterThanOrEqual(4.5)
+    expect(contrastRatio(style['--site-cta-fg'], '#FFFFFF')).toBeGreaterThanOrEqual(3)
   })
 
   it('bridges WingSide semantic tokens by site identity even when its CMS theme is custom', () => {
@@ -56,7 +78,7 @@ describe('site theme tokens', () => {
       '--site-brand': '#005090',
       '--site-brand-soft': '#E8F1F8',
       '--site-cta': '#B87A14',
-      '--site-cta-fg': '#FFFFFF',
+      '--site-cta-fg': '#111827',
       '--site-foreground': '#1B2430',
       '--site-gold': '#B87A14',
       '--site-max': '70rem',
@@ -189,7 +211,7 @@ describe('site theme tokens', () => {
         '--site-brand-soft': '#E8F1F8',
         '--site-button-style': 'pill',
         '--site-cta': '#B87A14',
-        '--site-cta-fg': '#FFFFFF',
+        '--site-cta-fg': '#111827',
         '--site-font-body': 'var(--font-editorial-body), var(--font-geist-sans)',
         '--site-font-heading': 'var(--font-editorial-heading), Georgia, serif',
         '--site-foreground': '#1B2430',
@@ -254,7 +276,7 @@ describe('site theme tokens', () => {
         '--site-border': '#E2E6ED',
         '--site-brand': '#005090',
         '--site-cta': '#B87A14',
-        '--site-cta-fg': '#FFFFFF',
+        '--site-cta-fg': '#111827',
         '--site-font-body': 'var(--font-editorial-body), var(--font-geist-sans)',
         '--site-font-heading': 'var(--font-editorial-heading), Georgia, serif',
         '--site-gold': '#B87A14',
