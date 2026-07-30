@@ -15,11 +15,15 @@ export type DiscoveryDurationCode = (typeof discoveryDurationCodes)[number]
 export type DiscoveryQuery = {
   destination?: TourDestinationKey
   duration?: DiscoveryDurationCode
+  q?: string
   style?: TourTravelStyleKey
+  type?: DiscoveryTourType
   unknownValueCount: number
 }
 
-export type DiscoveryFilterKey = 'destination' | 'duration' | 'style'
+export const discoveryTourTypes = ['group', 'private'] as const
+export type DiscoveryTourType = (typeof discoveryTourTypes)[number]
+export type DiscoveryFilterKey = 'destination' | 'duration' | 'style' | 'type'
 
 export type DiscoverySEO = {
   canonicalPath: '/journeys'
@@ -35,9 +39,11 @@ export type DiscoveryTourCard = {
   id: number | string
   price: DiscoveryTourPriceState
   priceFrom: number | null
+  routeLabel?: string | null
   slug: string
   summary: string
   title: string
+  tourType?: DiscoveryTourType
   travelStyles: TourTravelStyleKey[]
 }
 
@@ -85,10 +91,12 @@ export type DiscoveryTourDoc = {
   id?: RelationID
   currency?: null | string
   priceFrom?: null | number
+  routeLabel?: null | string
   site?: Relation
   slug?: null | string
   summary?: null | string
   title?: null | string
+  tourType?: null | string
   travelStyles?: null | string[]
   wrapperPage?: DiscoveryPage | Relation
 }
@@ -98,7 +106,15 @@ export type DiscoveryWhere = {
   and?: DiscoveryWhere[]
 }
 
-const scalarParamOrder = ['destination', 'style', 'duration'] as const
+const scalarParamOrder = ['q', 'type', 'destination', 'style', 'duration'] as const
+
+export const normalizeDiscoverySearch = (value: unknown): string | undefined => {
+  const normalized = String(value || '').normalize('NFKC').replace(/\s+/gu, ' ').trim()
+  return normalized ? Array.from(normalized).slice(0, 80).join('') : undefined
+}
+
+const isDiscoveryTourType = (value: string): value is DiscoveryTourType =>
+  discoveryTourTypes.includes(value as DiscoveryTourType)
 
 const relationID = (value: Relation): RelationID | null => {
   if (typeof value === 'number' || typeof value === 'string') return value
@@ -200,6 +216,19 @@ export const normalizeDiscoveryQuery = (
   }
 
   normalizeScalar({
+    assign: (type) => {
+      query.type = type
+    },
+    isKnown: isDiscoveryTourType,
+    key: 'type',
+  })
+  const qValues = params.getAll('q')
+  if (qValues.length) {
+    const q = normalizeDiscoverySearch(qValues[0])
+    if (q) query.q = q
+    query.unknownValueCount += Math.max(0, qValues.length - 1)
+  }
+  normalizeScalar({
     assign: (destination) => {
       query.destination = destination
     },
@@ -262,9 +291,11 @@ export const isDurationMatch = (
 }
 
 export const isDiscoveryCardMatch = (
-  card: Pick<DiscoveryTourCard, 'destinationTags' | 'duration' | 'travelStyles'>,
+  card: Pick<DiscoveryTourCard, 'destinationTags' | 'duration' | 'summary' | 'title' | 'tourType' | 'travelStyles'>,
   query: Omit<DiscoveryQuery, 'unknownValueCount'>,
 ): boolean =>
+  (!query.type || (card.tourType || 'private') === query.type) &&
+  (!query.q || `${card.title} ${card.summary} ${card.destinationTags.join(' ')} ${card.travelStyles.join(' ')}`.normalize('NFKC').toLocaleLowerCase().includes(query.q.toLocaleLowerCase())) &&
   (!query.destination || card.destinationTags.includes(query.destination)) &&
   (!query.style || card.travelStyles.includes(query.style)) &&
   isDurationMatch(card.duration.days, query.duration)
@@ -306,6 +337,7 @@ export const buildDiscoveryWhere = (
   ]
 
   if (query.destination) conditions.push({ destinationTags: { in: [query.destination] } })
+  if (query.type) conditions.push({ tourType: { equals: query.type } })
   if (query.style) conditions.push({ travelStyles: { in: [query.style] } })
   if (query.duration === '1-7') {
     conditions.push({ durationDays: { greater_than_equal: 1 } })
@@ -399,7 +431,9 @@ export const projectDiscoveryTour = ({
   if (relationID(heroMedia.site as Relation) != null && !sameRelation(heroMedia.site, site))
     return null
 
-  const price = projectPriceState(tour)
+  // Product-level `priceFrom` is never a per-person claim. Only a verified
+  // departure with explicit `per-person` basis may become public commerce.
+  const price: DiscoveryTourPriceState = { kind: 'on-request' }
   const publicSummary = sanitizeWingSidePublicText(tour.summary)
   const publicTitle = sanitizeWingSidePublicText(tour.title)
   if (!publicSummary || !publicTitle) return null
@@ -423,10 +457,12 @@ export const projectDiscoveryTour = ({
     href: getPageCanonicalPath(wrapperPage, locale),
     id,
     price,
-    priceFrom: price.kind === 'from' ? price.value : null,
+    priceFrom: null,
+    routeLabel: nonEmpty(tour.routeLabel) ? sanitizeWingSidePublicText(tour.routeLabel) || null : null,
     slug: tour.slug.trim(),
     summary: publicSummary,
     title: publicTitle,
+    tourType: tour.tourType === 'group' ? 'group' : 'private',
     travelStyles: normalizeTourTravelStyleKeys(travelStyles),
   }
 }

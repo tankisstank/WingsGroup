@@ -96,8 +96,8 @@ describe('WingSideJourneysClient', () => {
     )
     expect(within(card).getByRole('img').getAttribute('src')).toBe('/media/hanoi.jpg')
     expect(within(card).getByText('6 days / 5 nights')).toBeTruthy()
-    expect(within(card).getByText('From $1,290')).toBeTruthy()
-    expect(within(card).getByText('Final price is confirmed before any hold.')).toBeTruthy()
+    expect(within(card).getByText('Tailor-made quote')).toBeTruthy()
+    expect(within(card).getByText('Designed around your dates and service level.')).toBeTruthy()
     expect(card.textContent).not.toMatch(/book now|available seats|instant booking/i)
   })
 
@@ -122,10 +122,7 @@ describe('WingSideJourneysClient', () => {
     )
 
     const card = screen.getByRole('link', { name: /private hanoi/i })
-    expect(within(card).getByText('Precio bajo solicitud')).toBeTruthy()
-    expect(
-      within(card).getByText('El precio final se confirma antes de cualquier reserva.'),
-    ).toBeTruthy()
+    expect(within(card).getByText('Tailor-made quote')).toBeTruthy()
     expect(card.textContent).not.toMatch(/\$0|USD 0|Desde\s+0/)
     expect(card.textContent).not.toMatch(/book now|available seats|instant booking/i)
   })
@@ -266,7 +263,7 @@ describe('WingSideJourneysClient', () => {
     expect(router.refresh).not.toHaveBeenCalled()
   })
 
-  it('shows eight recommended cards first, supports search and loads more without changing filters', () => {
+  it('shows eight recommended cards first and loads more without weakening server filters', () => {
     const items = Array.from({ length: 10 }, (_, index) => ({
       ...context().result.items[0]!,
       duration: { days: 10 - index, nights: 9 - index },
@@ -292,14 +289,7 @@ describe('WingSideJourneysClient', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Load more journeys' }))
     expect(screen.getAllByRole('link', { name: /journey|mekong/i })).toHaveLength(10)
 
-    fireEvent.change(screen.getByRole('searchbox', { name: 'Search journeys' }), {
-      target: { value: 'Mekong' },
-    })
-    expect(screen.getAllByRole('link', { name: /mekong/i })).toHaveLength(1)
-    expect(
-      screen.getByRole('heading', { name: /1 journey for Hanoi · Culture · 8-14 days/ }),
-    ).toBeTruthy()
-    expect(router.replace).not.toHaveBeenCalled()
+    expect(screen.getByRole('searchbox', { name: 'Search journeys' }).getAttribute('name')).toBe('q')
   })
 
   it('sorts the current strict result set by duration without changing query state', () => {

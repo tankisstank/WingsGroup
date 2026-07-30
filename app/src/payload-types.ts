@@ -1837,6 +1837,10 @@ export interface TourProduct {
     | 'other';
   tourCode?: string | null;
   /**
+   * Không có giá trị được hiểu là private để public discovery fail closed.
+   */
+  tourType?: ('group' | 'private') | null;
+  /**
    * Key ổn định để lọc tour; nhãn hiển thị do CMS quản lý.
    */
   destinationTags?:
@@ -2152,6 +2156,7 @@ export interface TourDeparture {
   airline?: string | null;
   priceFrom: number;
   currency: 'VND' | 'USD';
+  priceBasis?: ('per-person' | 'per-booking') | null;
   promoLabel?: string | null;
   urgencyLabel?: string | null;
   availabilityBadge?: string | null;
@@ -3614,6 +3619,7 @@ export interface TourProductsSelect<T extends boolean = true> {
   site?: T;
   market?: T;
   tourCode?: T;
+  tourType?: T;
   destinationTags?: T;
   travelStyles?: T;
   taxonomyProvenance?: T;
@@ -3862,6 +3868,7 @@ export interface TourDeparturesSelect<T extends boolean = true> {
   airline?: T;
   priceFrom?: T;
   currency?: T;
+  priceBasis?: T;
   promoLabel?: T;
   urgencyLabel?: T;
   availabilityBadge?: T;

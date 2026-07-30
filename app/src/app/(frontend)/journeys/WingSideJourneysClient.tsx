@@ -24,7 +24,7 @@ import { useSitePath } from '@/utilities/useSitePath'
 
 import './journeys.css'
 
-const fieldOrder = ['destination', 'style', 'duration'] as const
+const fieldOrder = ['q', 'type', 'destination', 'style', 'duration'] as const
 
 const journeysNavigationRestoreKey = 'wingsside:journeys:navigation-restore'
 const initialVisibleJourneyCount = 8
@@ -44,7 +44,6 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
   const searchParams = useSearchParams()
   const pendingSearchRef = useRef(searchParams?.toString() || '')
   const [isPending, startTransition] = useTransition()
-  const [search, setSearch] = useState('')
   const [sort, setSort] = useState<'duration' | 'recommended'>('recommended')
   const [visibleCount, setVisibleCount] = useState(initialVisibleJourneyCount)
   const current = context.query
@@ -67,33 +66,22 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
       })
     : null
   const activeFilters = [
+    normalizedQuery.q ? `“${normalizedQuery.q}”` : null,
+    normalizedQuery.type ? (normalizedQuery.type === 'group' ? 'Small group' : 'Private') : null,
     normalizedQuery.destination ? destinationLabels[locale][normalizedQuery.destination] : null,
     normalizedQuery.style ? styleLabels[locale][normalizedQuery.style] : null,
     normalizedQuery.duration ? durationLabels[locale][normalizedQuery.duration] : null,
   ].filter((label): label is string => Boolean(label))
 
   const filteredItems = useMemo(() => {
-    const normalizedSearch = search.trim().toLocaleLowerCase(locale)
-    const matches = normalizedSearch
-      ? context.result.items.filter((item) =>
-          [
-            item.title,
-            item.summary,
-            ...item.destinationTags.map((tag) => destinationLabels[locale][tag]),
-            ...item.travelStyles.map((tag) => styleLabels[locale][tag]),
-          ]
-            .join(' ')
-            .toLocaleLowerCase(locale)
-            .includes(normalizedSearch),
-        )
-      : [...context.result.items]
+    const matches = [...context.result.items]
 
     if (sort === 'duration') {
       matches.sort((left, right) => left.duration.days - right.duration.days)
     }
 
     return matches
-  }, [context.result.items, locale, search, sort])
+  }, [context.result.items, sort])
   const visibleItems = filteredItems.slice(0, visibleCount)
   const resultSummary = buildResultSummary(
     filteredItems.length,
@@ -188,6 +176,29 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
       </section>
 
       <section aria-busy={isPending} aria-label={copy.filters} className="ws-journeys__filters">
+        <label className="ws-journeys-filter ws-journeys-filter--search">
+          <span>{uxCopy.search}</span>
+          <input
+            aria-label={uxCopy.search}
+            maxLength={80}
+            name="q"
+            onChange={(event) => replaceQuery('q', event.target.value)}
+            placeholder={uxCopy.searchPlaceholder}
+            type="search"
+            value={normalizedQuery.q || ''}
+          />
+        </label>
+        <FilterSelect
+          allLabel="All tours"
+          label="Tour type"
+          name="type"
+          onChange={replaceQuery}
+          options={[
+            { label: 'Small group', value: 'group' },
+            { label: 'Private', value: 'private' },
+          ]}
+          value={normalizedQuery.type || ''}
+        />
         <FilterSelect
           allLabel={copy.all}
           label={copy.destination}
@@ -260,18 +271,6 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
           </div>
           <div className="ws-journeys__tools">
             <label>
-              <span>{uxCopy.search}</span>
-              <input
-                onChange={(event) => {
-                  setSearch(event.target.value)
-                  setVisibleCount(initialVisibleJourneyCount)
-                }}
-                placeholder={uxCopy.searchPlaceholder}
-                type="search"
-                value={search}
-              />
-            </label>
-            <label>
               <span>{uxCopy.sort}</span>
               <select
                 onChange={(event) => {
@@ -298,16 +297,19 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                   <span className="ws-journeys-card__media">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img alt={item.hero.alt} decoding="async" loading="lazy" src={item.hero.url} />
+                    <i className={`ws-journeys-card__type ws-journeys-card__type--${item.tourType || 'private'}`}>
+                      {item.tourType === 'group' ? 'Small group' : 'Private'}
+                    </i>
                   </span>
                   <span className="ws-journeys-card__body">
                     <span className="ws-journeys-card__meta">
-                      {formatJourneyDuration(item.duration, locale)}
+                      {item.routeLabel ? `${item.routeLabel} · ` : ''}{formatJourneyDuration(item.duration, locale)}
                     </span>
                     <strong>{item.title}</strong>
                     <span>{item.summary}</span>
                     <span className="ws-journeys-card__price">
-                      <span>{formatJourneyPrice(item.price, locale)}</span>
-                      <small>{priceHonestyCopy[locale] || priceHonestyCopy.en}</small>
+                      <span>{item.tourType === 'group' ? 'Schedule on request' : 'Tailor-made quote'}</span>
+                      <small>{item.tourType === 'group' ? 'Dates and availability are confirmed with the team.' : 'Designed around your dates and service level.'}</small>
                     </span>
                     <span className="ws-journeys-card__chips">
                       {item.destinationTags.slice(0, 2).map((tag) => (
@@ -318,7 +320,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                       ))}
                     </span>
                     <span className="ws-journeys-card__action">
-                      {copy.view}
+                      {item.tourType === 'group' ? 'Check availability' : 'Request quote'}
                       <ArrowRightIcon aria-hidden="true" />
                     </span>
                   </span>
@@ -337,21 +339,6 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
               </div>
             ) : null}
           </>
-        ) : search.trim() && context.result.items.length ? (
-          <div className="ws-journeys__empty" data-testid="journeys-search-empty">
-            <h2>{uxCopy.noSearchTitle}</h2>
-            <p>{uxCopy.noSearchBody}</p>
-            <button
-              className="btn btn-ghost"
-              onClick={() => {
-                setSearch('')
-                setVisibleCount(initialVisibleJourneyCount)
-              }}
-              type="button"
-            >
-              {uxCopy.clearSearch}
-            </button>
-          </div>
         ) : (
           <div className="ws-journeys__empty" data-testid="journeys-empty">
             <h2>{copy.emptyTitle}</h2>
@@ -475,8 +462,8 @@ const FilterSelect = ({
 }: {
   allLabel: string
   label: string
-  name: 'destination' | 'duration' | 'style'
-  onChange: (name: 'destination' | 'duration' | 'style', value: string) => void
+  name: 'destination' | 'duration' | 'style' | 'type'
+  onChange: (name: JourneyFilterName, value: string) => void
   options: Array<{ label: string; value: string }>
   value: string
 }) => (

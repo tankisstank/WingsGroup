@@ -118,6 +118,16 @@ export const TourDepartures: CollectionConfig = {
       options: supportedTourCurrencyOptions,
     },
     {
+      name: 'priceBasis',
+      label: 'Cơ sở giá',
+      type: 'select',
+      options: [
+        { label: 'Mỗi khách', value: 'per-person' },
+        { label: 'Mỗi booking', value: 'per-booking' },
+      ],
+      admin: { position: 'sidebar' },
+    },
+    {
       name: 'promoLabel',
       label: 'Promo label',
       localized: true,

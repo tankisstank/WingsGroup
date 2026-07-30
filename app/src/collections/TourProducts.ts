@@ -33,7 +33,7 @@ export const TourProducts: CollectionConfig = {
   admin: {
     description:
       'Tour có cấu trúc dùng chung cho WingsGo và WingsSide. Dữ liệu này là nguồn thật để render trang tour và discovery theo site.',
-    defaultColumns: ['title', 'site', 'destinationTags', 'travelStyles', 'updatedAt'],
+    defaultColumns: ['title', 'site', 'tourType', 'destinationTags', 'travelStyles', 'updatedAt'],
     group: adminGroups.content,
     livePreview: {
       url: ({ data, req }) =>
@@ -97,6 +97,19 @@ export const TourProducts: CollectionConfig = {
       label: 'Mã tour',
       type: 'text',
       admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'tourType',
+      label: 'Loại tour WingSide',
+      type: 'select',
+      options: [
+        { label: 'Small group', value: 'group' },
+        { label: 'Private', value: 'private' },
+      ],
+      admin: {
+        description: 'Không có giá trị được hiểu là private để public discovery fail closed.',
         position: 'sidebar',
       },
     },

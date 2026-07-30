@@ -136,11 +136,13 @@ describe('WingSide discovery pure contract', () => {
       hero: { alt: 'Hanoi hero', url: '/media/hanoi.jpg' },
       href: '/tour/hanoi-private-tour',
       id: 12,
-      price: { currency: 'USD', kind: 'from', value: 1290 },
-      priceFrom: 1290,
+      price: { kind: 'on-request' },
+      priceFrom: null,
+      routeLabel: null,
       slug: 'hanoi-private-tour',
       summary: 'Private Hanoi discovery.',
       title: 'Hanoi Private Tour',
+      tourType: 'private',
       travelStyles: ['culture'],
     })
 
@@ -246,13 +248,13 @@ describe('WingSide discovery pure contract', () => {
   it.each([
     ['USD', 1290],
     ['VND', 30_900_000],
-  ])('projects supported %s prices from the governed allowlist', (currency, priceFrom) => {
+  ])('never treats a TourProduct price as a per-person departure price', (currency, priceFrom) => {
     expect(
       projectDiscoveryTour({ locale: 'en', site, tour: tour({ currency, priceFrom }) }),
     ).toMatchObject({
       currency,
-      price: { currency, kind: 'from', value: priceFrom },
-      priceFrom,
+      price: { kind: 'on-request' },
+      priceFrom: null,
     })
   })
 })
