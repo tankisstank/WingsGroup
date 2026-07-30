@@ -76,17 +76,26 @@ contract, resale permission, allocation, or owned availability feed. Publishing
 those prices as WingSide commerce without that confirmation could make an
 unfulfillable availability claim.
 
+The current TourDeparture contract also has no `verifiedAt`/`expiresAt`
+fail-closed guard and no uniqueness constraint for a product/date/variant.
+Consequently, the `open` values in the evidence JSON are proposed mappings,
+not verified WingSide availability and not applyable rows. A governed refresh
+SLA, runtime expiry check and deterministic deduplication key are required
+before supplier-derived commerce can remain accurate in production.
+
 Production apply therefore remains blocked until all of the following are true:
 
 1. Product/operations records authorization to publish and fulfil the three
    source-backed products.
 2. Product decides how hybrid group/private tours are represented. Until then,
    ID 65 must not enter group commerce.
-3. The immutable US-057 release and additive migrations are deployed.
-4. A fresh plan re-reads both production PostgreSQL and the source, verifies the
+3. The departure contract gains freshness/expiry enforcement and a unique
+   site/product/date/variant identity.
+4. The immutable US-057 release and additive migrations are deployed.
+5. A fresh plan re-reads both production PostgreSQL and the source, verifies the
    exact 22-tour scope, and pins record/source checksums.
-5. An encrypted PostgreSQL backup and restore drill pass.
-6. ID 63 or 69 is applied as a canary; public Journeys/detail/contact
+6. An encrypted PostgreSQL backup and restore drill pass.
+7. ID 63 or 69 is applied as a canary; public Journeys/detail/contact
    behaviour and rollback are verified before promotion.
 
 No production database, deployment, CMS record, or public traffic was changed

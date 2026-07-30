@@ -136,14 +136,18 @@
   ],
   "activation": {
     "permitted": false,
+    "candidateRowsAreApplyable": false,
     "reason": "The candidate uses current public supplier pages, but no first-party inventory feed or commercial authorization is recorded.",
     "commerceEligibleAfterAuthorization": [63, 69],
     "commerceBlockedByHybridModel": [65],
+    "availabilityStatusMapping": "proposed-only; open is not verified WingSide availability",
     "primaryCTAAfterApply": "View departures",
     "directBooking": false,
     "requiredBeforeApply": [
       "Deploy the immutable US-057 release and additive migrations.",
       "Record supplier/product-owner authorization to publish these prices and departures.",
+      "Add fail-closed verifiedAt/expiresAt freshness enforcement and a governed refresh SLA.",
+      "Add deterministic departure deduplication/uniqueness for site, product, date and variant.",
       "Regenerate and sign a non-expired plan from the live production database and source pages.",
       "Create and restore-test an encrypted PostgreSQL backup.",
       "Apply one group tour as canary, verify public UI and rollback, then promote."
