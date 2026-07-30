@@ -39,6 +39,14 @@ const normalizeContextCode = (value?: string) => {
   return code && code.length <= 64 ? code : undefined
 }
 
+const normalizeDiscoverySearch = (value?: string) => {
+  const search = String(value || '').normalize('NFKC').replace(/\s+/gu, ' ').trim()
+  return search ? Array.from(search).slice(0, 80).join('') : undefined
+}
+
+const normalizeDiscoveryType = (value?: string) =>
+  value === 'group' || value === 'private' ? value : undefined
+
 /**
  * Plan form chrome: URL prefill + visible month/group selectors + chips + consent.
  * Hosts reattach via MutationObserver when FormBlock rerenders.
@@ -249,7 +257,9 @@ export const PlanPrefillBridge = ({
       discovery: {
         destination,
         duration: normalizeContextCode(readParam('duration')),
+        q: normalizeDiscoverySearch(readParam('q')),
         style: styleCode,
+        type: normalizeDiscoveryType(readParam('type')),
       },
       source: normalizeContextCode(readParam('source')) || 'plan',
       tourId: readParam('tourId'),

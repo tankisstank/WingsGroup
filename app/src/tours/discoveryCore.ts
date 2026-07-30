@@ -375,7 +375,12 @@ export const buildDiscoveryWhere = (
   ]
 
   if (query.destination) conditions.push({ destinationTags: { in: [query.destination] } })
-  if (query.type) conditions.push({ tourType: { equals: query.type } })
+  if (query.type === 'group') conditions.push({ tourType: { equals: 'group' } })
+  if (query.type === 'private') {
+    // Legacy untyped products intentionally project as private. Keep the
+    // adapter predicate aligned so deep links do not silently drop them.
+    conditions.push({ or: [{ tourType: { equals: 'private' } }, { tourType: { exists: false } }] })
+  }
   if (query.style) conditions.push({ travelStyles: { in: [query.style] } })
   if (query.duration === '1-7') {
     conditions.push({ durationDays: { greater_than_equal: 1 } })

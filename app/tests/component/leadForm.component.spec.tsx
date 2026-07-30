@@ -241,6 +241,16 @@ describe('lead form hardened submission', () => {
     expect(screen.getByRole('alert').id).toBe('ws-plan-consent-error')
   })
 
+  it('keeps Journeys q/type in hidden plan context without changing the visitor message', async () => {
+    window.history.replaceState({}, '', '/wingsside/en/plan-your-trip?q=H%C3%A0%20N%E1%BB%99i&type=group&destination=hanoi&style=culture&duration=8-14&source=journeys')
+    document.body.innerHTML = '<div class="ws-hifi-plan-form"><form><textarea name="message"></textarea></form></div>'
+    render(<PlanPrefillBridge budgetLabel="Budget" budgetOptions={[]} consentLabel="Consent" destLabel="Destination" destOptions={['Hanoi']} groupLabel="Group" groupOptions={[]} monthLabel="Month" monthOptions={[]} styleLabel="Style" styleOptions={['Culture']} searchParams={{ q: 'Hà Nội', type: 'group', destination: 'hanoi', style: 'culture', duration: '8-14', source: 'journeys' }} />)
+    const planForm = document.querySelector<HTMLFormElement>('.ws-hifi-plan-form form')!
+    await waitFor(() => expect(planForm.dataset.wsEnquiryContext).toBeTruthy())
+    expect(JSON.parse(planForm.dataset.wsEnquiryContext!)).toMatchObject({ discovery: { q: 'Hà Nội', type: 'group', destination: 'hanoi', style: 'culture', duration: '8-14' } })
+    expect(document.querySelector<HTMLTextAreaElement>('textarea[name="message"]')?.value).toBe('')
+  })
+
   it('keeps customer message clean and submits validated tour context separately', async () => {
     const fetchMock = vi
       .fn()

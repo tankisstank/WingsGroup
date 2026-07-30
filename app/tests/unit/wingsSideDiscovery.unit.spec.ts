@@ -134,6 +134,10 @@ describe('WingSide discovery pure contract', () => {
       { _status: { equals: 'published' } },
       { wrapperPage: { exists: true } },
     ])
+    expect(buildDiscoveryWhere({ type: 'group' }).and).toContainEqual({ tourType: { equals: 'group' } })
+    expect(buildDiscoveryWhere({ type: 'private' }).and).toContainEqual({
+      or: [{ tourType: { equals: 'private' } }, { tourType: { exists: false } }],
+    })
   })
 
   it('projects only safe public fields and fails closed for invalid records', () => {

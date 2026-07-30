@@ -2,6 +2,8 @@ import { cleanup, render, screen, within } from '@testing-library/react'
 import React from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+const bridge = vi.hoisted(() => vi.fn())
+
 vi.mock('@/components/SiteLink', () => ({
   SiteLink: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={String(href)} {...props}>
@@ -10,7 +12,7 @@ vi.mock('@/components/SiteLink', () => ({
   ),
 }))
 vi.mock('@/blocks/Form/Component', () => ({ FormBlock: () => null }))
-vi.mock('@/tours/TourEnquiryContextBridge', () => ({ TourEnquiryContextBridge: () => null }))
+vi.mock('@/tours/TourEnquiryContextBridge', () => ({ TourEnquiryContextBridge: ({ context }: { context: unknown }) => { bridge(context); return null } }))
 
 import { SecondaryHiFiPage } from '@/components/WingsSideHiFi/SecondaryHiFiPage'
 import type { WingsSideHiFiPageModel } from '@/utilities/wingsSideHiFiPageModel'
@@ -50,6 +52,12 @@ const model = (routeVariant: 'destinations' | 'styles'): WingsSideHiFiPageModel 
 afterEach(cleanup)
 
 describe('WingSide category-first hub filters', () => {
+  it.each([{ q: 'Hà Nội' }, { type: 'group' }])('installs hidden Contact context for q/type-only discovery without a textarea leak', (discovery) => {
+    bridge.mockReset()
+    render(<SecondaryHiFiPage model={{ ...model('destinations'), routeContent: { form: { fields: [], id: 1 }, formTitle: 'Contact' }, routePath: '/contact-us', routeVariant: 'contact' } as WingsSideHiFiPageModel} publicPathname="/contact-us" searchParams={{ source: 'journeys', ...discovery }} />)
+    expect(bridge).toHaveBeenCalledWith(expect.objectContaining({ discovery }))
+    expect(document.querySelector('textarea')).toBeNull()
+  })
   it('shows only the destination selected by the Home CTA query', () => {
     render(
       <SecondaryHiFiPage

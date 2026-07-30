@@ -396,9 +396,20 @@ test.describe('WingSide guided journey discovery', () => {
 
     await journeys.getByRole('link', { name: 'Share this brief' }).click()
     await expect(page).toHaveURL(`${origin}${planHref}`, { timeout: 60_000 })
+    await page.goto(`${localPath('en', '/plan-your-trip')}?q=route&type=private&${orderedParams(zeroResult)}`, { waitUntil: 'domcontentloaded' })
     const message = page.locator('textarea[name="message"]')
-    await expect(message).toHaveValue(new RegExp(`Destination: ${zeroResult.destination}`))
-    await expect(message).toHaveValue(new RegExp(`Duration: ${zeroResult.duration}`))
-    await expect(message).toHaveValue(new RegExp(`Style: ${zeroResult.style}`))
+    await expect(message).toHaveValue('')
+    await message.fill('Visitor-authored request.')
+    await expect(message).toHaveValue('Visitor-authored request.')
+    const context = await page.locator('.ws-hifi-plan-form form').evaluate((form) =>
+      JSON.parse((form as HTMLFormElement).dataset.wsEnquiryContext || '{}'),
+    )
+    expect(context.discovery).toMatchObject({
+      destination: zeroResult.destination,
+      duration: zeroResult.duration,
+      q: 'route',
+      style: zeroResult.style,
+      type: 'private',
+    })
   })
 })

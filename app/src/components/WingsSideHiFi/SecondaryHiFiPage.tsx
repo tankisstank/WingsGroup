@@ -74,7 +74,9 @@ const ContactBody = ({
   ]
     .filter(Boolean)
     .join(' · ')
-  const hasTourContext = Boolean(contextLabel)
+  const hasTourContext = Boolean(
+    contextLabel || tourContext.discovery?.q || tourContext.discovery?.type,
+  )
 
   return (
     <>
