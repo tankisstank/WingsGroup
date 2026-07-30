@@ -130,7 +130,7 @@ describe('consultative TourDetailPage contract', () => {
     expect(screen.getAllByText('On request · reply within 24h').length).toBeGreaterThan(0)
   })
 
-  it('renders governed prices from the routed consultative detail', () => {
+  it('does not expose departure prices on a private consultative detail', () => {
     render(
       <TourDetailPage
         data={{
@@ -143,8 +143,9 @@ describe('consultative TourDetailPage contract', () => {
       />,
     )
 
-    expect(screen.getAllByText('From').length).toBeGreaterThan(0)
-    expect(screen.queryByText('Price on request')).toBeNull()
+    expect(screen.queryByText('From')).toBeNull()
+    expect(screen.queryByText('$1,200')).toBeNull()
+    expect(screen.getAllByRole('link', { name: 'Request consultation' }).length).toBeGreaterThan(0)
   })
 
   it.each([

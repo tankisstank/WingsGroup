@@ -146,20 +146,6 @@ const sameRelation = (left: Relation, right: Relation): boolean => {
 const nonEmpty = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
 
-const projectPriceState = (tour: DiscoveryTourDoc): DiscoveryTourPriceState => {
-  const currency = normalizeSupportedTourCurrency(tour.currency)
-  if (
-    typeof tour.priceFrom === 'number' &&
-    Number.isFinite(tour.priceFrom) &&
-    tour.priceFrom > 0 &&
-    currency
-  ) {
-    return { currency, kind: 'from', value: tour.priceFrom }
-  }
-
-  return { kind: 'on-request' }
-}
-
 const projectGroupCommerce = (tour: DiscoveryTourDoc): DiscoveryTourCard['commerce'] | undefined => {
   if (tour.tourType !== 'group' || !Array.isArray(tour.activeDepartures)) return undefined
   const now = Date.now()

@@ -208,8 +208,8 @@ describe('WingSide discovery server query contract', () => {
       currency: 'USD',
       hero: { url: '/media/hero.jpg' },
       href: '/tour/private-hanoi-2',
-      price: { currency: 'USD', kind: 'from', value: 1290 },
-      priceFrom: 1290,
+      price: { kind: 'on-request' },
+      priceFrom: null,
       title: 'Private Hanoi',
     })
     expect(context.result.items[0]).not.toHaveProperty('_status')
@@ -270,7 +270,7 @@ describe('WingSide discovery server query contract', () => {
     })
   })
 
-  it('uses only the supported tour currency allowlist for discovery price projection', async () => {
+  it('never projects product-level prices as per-person discovery prices', async () => {
     mockDiscoveryFind(
       [
         product({
@@ -313,16 +313,8 @@ describe('WingSide discovery server query contract', () => {
     const context = await getWingSideDiscoveryContext({ input: {}, locale: 'en' })
     const pricesBySlug = new Map(context.result.items.map((item) => [item.slug, item.price]))
 
-    expect(pricesBySlug.get('supported-usd')).toEqual({
-      currency: 'USD',
-      kind: 'from',
-      value: 1290,
-    })
-    expect(pricesBySlug.get('supported-vnd')).toEqual({
-      currency: 'VND',
-      kind: 'from',
-      value: 30900000,
-    })
+    expect(pricesBySlug.get('supported-usd')).toEqual({ kind: 'on-request' })
+    expect(pricesBySlug.get('supported-vnd')).toEqual({ kind: 'on-request' })
     expect(pricesBySlug.get('unsupported-abc')).toEqual({ kind: 'on-request' })
     expect(pricesBySlug.get('unsupported-xxx')).toEqual({ kind: 'on-request' })
   })

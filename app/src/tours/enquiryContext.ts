@@ -125,9 +125,6 @@ export const buildTourDetailDiscoveryHref = (
 
 export const getTourEnquiryContextMessage = ({
   discovery,
-  source,
-  tourId,
-  tourSlug,
   tourTitle,
 }: TourEnquiryContext) =>
   [

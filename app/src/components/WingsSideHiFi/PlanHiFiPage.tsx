@@ -231,6 +231,7 @@ export const PlanHiFiPage = ({
                     destOptions={copy.plan.destChips}
                     groupLabel={localeKey === 'vi' ? 'Quy mô đoàn' : 'Group size'}
                     groupOptions={groupOptionsForLocale(locale)}
+                    locale={localeKey}
                     monthLabel={localeKey === 'vi' ? 'Tháng đi' : 'Travel month'}
                     monthOptions={monthOptionsForLocale(locale)}
                     searchParams={searchParams}

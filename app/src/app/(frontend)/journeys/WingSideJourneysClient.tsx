@@ -536,14 +536,6 @@ const priceCopy = {
   vi: { from: 'Gia tu', onRequest: 'Gia theo yeu cau' },
 } as const
 
-const priceHonestyCopy = {
-  en: 'Final price is confirmed before any hold.',
-  es: 'El precio final se confirma antes de cualquier reserva.',
-  it: 'Il prezzo finale viene confermato prima di qualsiasi opzione.',
-  pt: 'O preco final e confirmado antes de qualquer bloqueio.',
-  vi: 'Gia cuoi cung duoc xac nhan truoc khi giu cho.',
-} as const
-
 const localeNumberFormat = {
   en: 'en-US',
   es: 'es-ES',

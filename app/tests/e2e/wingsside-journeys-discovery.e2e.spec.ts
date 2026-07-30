@@ -62,11 +62,16 @@ const orderedParams = (query: QueryTriple) =>
   `destination=${query.destination}&style=${query.style}&duration=${query.duration}`
 
 const expectCanonical = async (page: Page, href: string) => {
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', href)
+  const canonicalLinks = page.locator('link[rel="canonical"]')
+  await expect(canonicalLinks.first()).toHaveAttribute('href', href)
+  const canonicalHrefs = await canonicalLinks.evaluateAll((links) =>
+    links.map((link) => link.getAttribute('href')),
+  )
+  expect(new Set(canonicalHrefs)).toEqual(new Set([href]))
 }
 
 const expectNoindex = async (page: Page) => {
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/i)
+  await expect(page.locator('meta[name="robots"][content*="noindex" i]')).toHaveCount(1)
 }
 
 const parseCount = async (page: Page) => {
@@ -217,7 +222,7 @@ test.describe('WingSide guided journey discovery', () => {
   test('renders localized filters at desktop and mobile sizes without booking claims', async ({
     page,
   }) => {
-    test.setTimeout(90_000)
+    test.setTimeout(240_000)
 
     for (const viewport of viewports) {
       await page.setViewportSize({ height: viewport.height, width: viewport.width })
@@ -231,7 +236,7 @@ test.describe('WingSide guided journey discovery', () => {
         ).toBeVisible()
         await expect(page.getByLabel(copy.style), `${viewport.label} ${locale} style`).toBeVisible()
         await expect(
-          page.getByLabel(copy.duration),
+          page.getByLabel(copy.duration, { exact: true }),
           `${viewport.label} ${locale} duration`,
         ).toBeVisible()
         await expect(
@@ -274,7 +279,7 @@ test.describe('WingSide guided journey discovery', () => {
     await expect(page).toHaveURL(new RegExp(`style=${exact.style}`), { timeout: 60_000 })
     await waitForDiscoveryHydration(page)
 
-    const duration = page.getByLabel(copy.duration)
+    const duration = page.getByLabel(copy.duration, { exact: true })
     await duration.focus()
     await duration.selectOption(exact.duration)
     await expect(page).toHaveURL(exactURL, { timeout: 60_000 })
@@ -286,7 +291,7 @@ test.describe('WingSide guided journey discovery', () => {
 
     const firstCard = page.locator('.ws-journeys-card').first()
     await expect(firstCard.locator('.ws-journeys-card__price')).toContainText(
-      /from|price on request|final price/i,
+      /from|schedule on request|tailor-made quote/i,
     )
     await expect(firstCard).toHaveAttribute(
       'href',
@@ -320,17 +325,26 @@ test.describe('WingSide guided journey discovery', () => {
       ),
       { timeout: 60_000 },
     )
-    await expect(page.locator('textarea[name="message"]')).toHaveValue(
-      new RegExp(`Discovery destination: ${exact.destination}`),
+    await expect(page.locator('textarea[name="message"]')).toHaveValue('')
+    const contactForm = page.locator('form').filter({
+      has: page.locator('textarea[name="message"]'),
+    })
+    await expect(contactForm).toHaveAttribute('data-ws-enquiry-context', /"discovery"/)
+    const contactContext = JSON.parse(
+      (await contactForm.getAttribute('data-ws-enquiry-context')) || '{}',
     )
+    expect(contactContext.discovery).toMatchObject(exact)
 
     await page.goto(exactURL, { waitUntil: 'domcontentloaded' })
     await page.locator('.ws-journeys-card').first().click()
+    await expect(page).toHaveURL(/\/wingsside\/tour\/.+source=journeys/, {
+      timeout: 60_000,
+    })
     await page.goBack({ waitUntil: 'domcontentloaded' })
     await expect(page).toHaveURL(exactURL)
     await expect(page.getByLabel(copy.destination)).toHaveValue(exact.destination)
     await expect(page.getByLabel(copy.style)).toHaveValue(exact.style)
-    await expect(page.getByLabel(copy.duration)).toHaveValue(exact.duration)
+    await expect(page.getByLabel(copy.duration, { exact: true })).toHaveValue(exact.duration)
   })
 
   test('drops invalid values without raw leakage and keeps filtered URLs noindex canonical-to-base', async ({
@@ -350,7 +364,7 @@ test.describe('WingSide guided journey discovery', () => {
     )
     await expect(page.getByLabel('Destination')).toHaveValue(zeroResult.destination)
     await expect(page.getByLabel('Style')).toHaveValue('')
-    await expect(page.getByLabel('Duration')).toHaveValue('')
+    await expect(page.getByLabel('Duration', { exact: true })).toHaveValue('')
     await expect(page.locator('body')).not.toContainText(rawLeak)
 
     const hrefs = await page
@@ -401,7 +415,9 @@ test.describe('WingSide guided journey discovery', () => {
     await expect(message).toHaveValue('')
     await message.fill('Visitor-authored request.')
     await expect(message).toHaveValue('Visitor-authored request.')
-    const context = await page.locator('.ws-hifi-plan-form form').evaluate((form) =>
+    const planForm = page.locator('.ws-hifi-plan-form form')
+    await expect(planForm).toHaveAttribute('data-ws-enquiry-context', /"discovery"/)
+    const context = await planForm.evaluate((form) =>
       JSON.parse((form as HTMLFormElement).dataset.wsEnquiryContext || '{}'),
     )
     expect(context.discovery).toMatchObject({

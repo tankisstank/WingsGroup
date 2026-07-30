@@ -1,14 +1,47 @@
 # US-057 Validation
 
-Local proof completed on 2026-07-30 covers query normalization/serialization,
-strict localized q/type/destination/style/duration AND matching, missing-type
-private fallback, group/private card states, hidden context propagation,
-SQLite repair parity, generated types, TypeScript, migration and upgrade smoke.
+Local implementation proof completed on 2026-07-30 covers query
+normalization/serialization, strict localized
+q/type/destination/style/duration AND matching, missing-type private fallback,
+verified-departure-only group commerce, hidden context propagation, SQLite
+repair parity and additive PostgreSQL migrations.
 
-Focused component/unit/integration suites are recorded in the worker report.
-WP4 correction proof covers q/type-only hidden Plan and Contact context,
-legacy private query inclusion, and visitor-authored textarea preservation.
-Lint completed with zero errors (existing repository warnings remain). Build
-and targeted browser E2E were attempted but are blocked by the pre-existing
-`node_modules` junction, which Turbopack rejects because it points outside the
-worktree. No production or Plane evidence is asserted here.
+## Automated gates
+
+- TypeScript: pass.
+- Component: 77/77 pass.
+- Integration: all configured suites pass; environment-dependent suites keep
+  their existing skips.
+- PostgreSQL empty-to-head migration smoke: pass.
+- PostgreSQL pre-head upgrade smoke: pass.
+- Production build: pass.
+- Lint: zero errors; existing repository warnings remain.
+- Journeys browser E2E: 5/5 pass on Chromium, covering tenant isolation,
+  EN/VI/IT/ES/PT desktop and mobile filters, strict AND deep links,
+  detail/contact/back context, invalid-query no-leak and true zero-result
+  recovery.
+- Full unit command: 692 pass and five canonical-locale failures. The same
+  five failures reproduce unchanged on clean base `a6a7a45`; US-057 does not
+  change either failing SEO implementation or test file.
+
+`validate:wingsside:locales` reaches the editorial catalog gate but stops
+because the local source data is still the unsafe positional v1 format without
+stable `sourceRowID` dispositions. This is a pre-existing data prerequisite,
+not a Journeys renderer/schema failure.
+
+## Visual evidence
+
+- `evidence/journeys-desktop-1440.png`
+- `evidence/journeys-mobile-390.png`
+
+The repo-preferred `agent-browser` daemon could not complete its own offline
+doctor check on this workstation, so screenshots and interactive QA used the
+committed Playwright stack as the documented fallback.
+
+Current local CMS inventory has no confirmed `tourType` backfill. Existing
+records therefore use the documented private fallback and show tailor-made
+quote posture. No small-group price, departure or availability was invented;
+product/CMS must classify and populate verified group inventory before the
+group commerce anatomy appears publicly.
+
+No production deployment is asserted by this proof.

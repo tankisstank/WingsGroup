@@ -60,6 +60,7 @@ export const PlanPrefillBridge = ({
   destOptions,
   groupLabel,
   groupOptions,
+  locale = 'en',
   monthLabel,
   monthOptions,
   searchParams,
@@ -73,6 +74,7 @@ export const PlanPrefillBridge = ({
   destOptions: string[]
   groupLabel: string
   groupOptions: Array<{ label: string; value: string }>
+  locale?: string
   monthLabel: string
   monthOptions: Array<{ label: string; value: string }>
   searchParams?: Record<string, string | string[] | undefined>
@@ -88,7 +90,9 @@ export const PlanPrefillBridge = ({
   const [budget, setBudget] = useState('')
   const [consent, setConsent] = useState(false)
   const [consentError, setConsentError] = useState(false)
+  const [monthRequired, setMonthRequired] = useState(false)
   const consentInputRef = React.useRef<HTMLInputElement>(null)
+  const localizedMonthLabel = preferredMonthLabelByLocale[locale] || monthLabel
 
   const readParam = useMemo(
     () => (key: string) => {
@@ -104,7 +108,6 @@ export const PlanPrefillBridge = ({
   }
 
   const hideRawFields = (root: Element) => {
-    const locale = document.documentElement.lang
     const countryControl = root.querySelector<HTMLElement>('[name="country"]')
     countryControl?.setAttribute(
       'aria-label',
@@ -113,7 +116,7 @@ export const PlanPrefillBridge = ({
 
     const labelsByName: Record<string, string> = {
       'group-size': groupLabel,
-      'travel-month': preferredMonthLabelByLocale[locale] || monthLabel,
+      'travel-month': localizedMonthLabel,
     }
 
     for (const [name, label] of Object.entries(labelsByName)) {
@@ -234,6 +237,11 @@ export const PlanPrefillBridge = ({
   }, [midHost, readParam])
 
   useEffect(() => {
+    if (!midHost?.isConnected) return
+    setMonthRequired(Boolean(queryPlanFormField('travel-month')?.hasAttribute('required')))
+  }, [midHost])
+
+  useEffect(() => {
     if (!month) return
     const label = monthOptions.find((option) => option.value === month)?.label || month
     setField('travel-month', label)
@@ -295,20 +303,18 @@ export const PlanPrefillBridge = ({
     <>
       <div className="field ws-plan-visual-field" data-order="month">
         <label className="field-label" htmlFor="ws-plan-travel-month">
-          {preferredMonthLabelByLocale[document.documentElement.lang] || monthLabel}
+          {localizedMonthLabel}
         </label>
         <select
-          aria-required={
-            queryPlanFormField('travel-month')?.hasAttribute('required') || undefined
-          }
+          aria-required={monthRequired || undefined}
           className="input"
           id="ws-plan-travel-month"
           onChange={(event) => setMonth(event.target.value)}
-          required={queryPlanFormField('travel-month')?.hasAttribute('required')}
+          required={monthRequired}
           value={month}
         >
           <option value="">
-            {preferredMonthLabelByLocale[document.documentElement.lang] || monthLabel}
+            {localizedMonthLabel}
           </option>
           {monthOptions.map((option) => (
             <option key={option.value} value={option.value}>
