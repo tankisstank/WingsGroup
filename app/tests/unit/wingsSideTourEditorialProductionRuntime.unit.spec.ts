@@ -293,7 +293,7 @@ const fixture = ({ mutateEnglishOnLocalizedArrayWrite = false } = {}) => {
         } as TourProduct
         if (
           mutateEnglishOnLocalizedArrayWrite &&
-          args.locale !== 'en' &&
+          String(args.locale) !== 'en' &&
           ('includes' in args.data || 'excludes' in args.data)
         ) {
           const englishIndex = state.en.findIndex((tour) => String(tour.id) === String(args.id))
@@ -522,7 +522,12 @@ describe('WingSide tour editorial production transaction runtime', () => {
         plan,
         req: req as never,
       }),
-    ).resolves.toEqual({ unchanged: 22, updated: 110 })
+    ).resolves.toEqual({
+      sharedUnchanged: 0,
+      sharedUpdated: 22,
+      unchanged: 0,
+      updated: 88,
+    })
     await expect(
       verifyWingsSideTourEditorialProductionPlan({
         catalog,
@@ -531,7 +536,7 @@ describe('WingSide tour editorial production transaction runtime', () => {
         plan,
         req: req as never,
       }),
-    ).resolves.toEqual({ checked: 88, state: 'after' })
+    ).resolves.toEqual({ checked: 110, state: 'after' })
     expect(state().en[0]!.includes).toEqual([{ id: 'include-1', label: 'English included 1' }])
   })
 })

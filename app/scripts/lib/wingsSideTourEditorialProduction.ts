@@ -1024,35 +1024,6 @@ export const buildWingsSideTourEditorialPlan = ({
     serviceRowLedger,
     serviceRowLedgerChecksum,
   }
-  }
-  {
-    const englishEntries = sourceTours.map((source) => {
-      const beforeSource = englishBeforeBySlug?.get(source.slug) ?? source
-      const before = {
-        excludes: cloneJSON((beforeSource as Record<string, unknown>).excludes ?? []),
-        includes: cloneJSON((beforeSource as Record<string, unknown>).includes ?? []),
-      }
-      const after = {
-        excludes: cloneJSON(source.excludes ?? []),
-        includes: cloneJSON(source.includes ?? []),
-      }
-      return {
-        after,
-        afterChecksum: editorialChecksum(after),
-        before,
-        beforeChecksum: editorialChecksum(before),
-        slug: source.slug,
-        tourID: source.id,
-      }
-    })
-    plan.englishNormalization = {
-      aggregateChecksums: {
-        after: editorialChecksum(englishEntries.map(({ afterChecksum }) => afterChecksum)),
-        before: editorialChecksum(englishEntries.map(({ beforeChecksum }) => beforeChecksum)),
-      },
-      entries: englishEntries,
-    }
-  }
   assertEditorialPlanShape(plan)
   return plan
 }

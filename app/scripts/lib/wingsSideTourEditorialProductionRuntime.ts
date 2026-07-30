@@ -23,6 +23,7 @@ import {
   buildWingsSideTourEditorialPlan,
   editorialChecksum,
   editorialRelationID,
+  isWingsSideTourEditorialCanaryPlan,
   normalizeWingsSideEnglishCommercialArrays,
   snapshotEditorialOwnedFields,
   snapshotEditorialSharedServices,
@@ -173,15 +174,20 @@ export const loadWingsSideTourEditorialProductionInventory = async ({
   payload,
   req,
 }: {
-  commercialCardinalities: Map<string, { excludes: number; includes: number }>
+  commercialCardinalities?: Map<string, { excludes: number; includes: number }>
   payload: Payload
   req: PayloadRequest
 }): Promise<ProductionInventory> => {
   const siteID = await findSiteID(payload, req)
-  const sourceTours = normalizeWingsSideEnglishCommercialArrays({
-    cardinalities: commercialCardinalities,
-    sourceTours: await findTours({ locale: 'en', payload, req, siteID }),
-  })
+  const sourceTours = await findTours({ locale: 'en', payload, req, siteID })
+  // Validate that the current shared rows can be reconciled to the approved
+  // cardinalities, but retain the raw English snapshot for signed drift checks.
+  if (commercialCardinalities) {
+    normalizeWingsSideEnglishCommercialArrays({
+      cardinalities: commercialCardinalities,
+      sourceTours,
+    })
+  }
   if (sourceTours.length !== wingsSideTourEditorialExpectedTourCount) {
     throw new Error(
       `Expected exactly 22 published WingSide English tours, found ${sourceTours.length}`,
@@ -330,14 +336,14 @@ export const verifyWingsSideTourEditorialProductionPlan = async ({
   plan,
   req,
 }: {
-  catalog: WingsSideTourEditorialCatalog
+  catalog?: WingsSideTourEditorialCatalog
   expectedState: 'after' | 'before'
   payload: Payload
   plan: WingsSideTourEditorialPlan
   req: PayloadRequest
 }) => {
   const inventory = await loadWingsSideTourEditorialProductionInventory({
-    commercialCardinalities: commercialCardinalitiesFromCatalog(catalog),
+    commercialCardinalities: catalog ? commercialCardinalitiesFromCatalog(catalog) : undefined,
     payload,
     req,
   })
