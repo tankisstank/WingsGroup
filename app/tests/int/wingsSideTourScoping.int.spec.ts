@@ -89,17 +89,23 @@ describe('WingSide structured tour query perimeter', () => {
     expect(calls.every(([args]) => args.fallbackLocale === false)).toBe(true)
   })
 
-  it('keeps Page and Tour public queries site-scoped and wrapper-gated in the route source', () => {
-    const source = readFileSync(
+  it('keeps delegated Page and Tour queries site-scoped and wrapper-gated', () => {
+    const routeSource = readFileSync(
       join(process.cwd(), 'src', 'app', '(frontend)', '[...slug]', 'page.tsx'),
       'utf8',
     )
-    expect(source).toContain('const where = await appendSiteWhere')
-    expect(source).toContain('fallbackLocale: false')
-    expect(source).toContain('overrideAccess: draft')
-    expect(source).toContain('hasMatchingWingSideTourWrapper(tourData.tour, wrapperPageID)')
-    expect(source).toContain('notFound()')
-    expect(source).toContain('<RelatedPages locale={locale} pages={relatedPages} />')
+    const delegatedSource = readFileSync(
+      join(process.cwd(), 'src', 'app', '(frontend)', 'cmsPage.tsx'),
+      'utf8',
+    )
+    expect(routeSource).toContain('renderCmsPageByPath')
+    expect(routeSource).toContain('generateCmsPageMetadataByPath')
+    expect(delegatedSource).toContain('const where = await appendSiteWhere')
+    expect(delegatedSource).toContain('fallbackLocale: false')
+    expect(delegatedSource).toContain('overrideAccess: draft')
+    expect(delegatedSource).toContain('hasMatchingWingSideTourWrapper(tourData.tour, wrapperPageID)')
+    expect(delegatedSource).toContain('notFound()')
+    expect(delegatedSource).toContain('<RelatedPages locale={locale} pages={relatedPages} />')
   })
 
   it('executes the pure wrapper boundary for match, mismatch, and missing relations', () => {
