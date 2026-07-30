@@ -43,13 +43,23 @@ export async function GET(request: Request) {
 
   for (const locale of getSiteSitemapLocales(site)) {
     sitemap.push({
-      loc: getSiteSitemapURL({ locale, origin, path: '/posts' }),
+      loc: getSiteSitemapURL({
+        defaultLocale: site.defaultLocale,
+        locale,
+        origin,
+        path: '/posts',
+      }),
       lastmod: settings.docs[0]?.updatedAt || dateFallback,
     })
 
     if (site.code === 'wing-side') {
       sitemap.push({
-        loc: getSiteSitemapURL({ locale, origin, path: '/journeys' }),
+        loc: getSiteSitemapURL({
+          defaultLocale: site.defaultLocale,
+          locale,
+          origin,
+          path: '/journeys',
+        }),
         lastmod: settings.docs[0]?.updatedAt || dateFallback,
       })
     }
@@ -137,6 +147,7 @@ export async function GET(request: Request) {
         .filter((page) => Boolean(page?.pathname || page?.slug))
         .map((page) => ({
           loc: getSiteSitemapURL({
+            defaultLocale: site.defaultLocale,
             locale,
             origin,
             path: getPageCanonicalPath(page),

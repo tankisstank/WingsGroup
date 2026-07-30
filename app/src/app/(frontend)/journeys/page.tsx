@@ -57,11 +57,21 @@ export async function generateMetadata({
   const seo = getDiscoverySEOPolicy(normalizeDiscoveryQuery(searchParams))
   const copy = getWingSideJourneysCopy(locale)
   const origin = getCanonicalSiteOrigin({ settings, site })
-  const canonical = getSiteSitemapURL({ locale, origin, path: routePath })
+  const canonical = getSiteSitemapURL({
+    defaultLocale: site.defaultLocale,
+    locale,
+    origin,
+    path: routePath,
+  })
   const languages = Object.fromEntries(
     getSiteSitemapLocales(site).map((publicLocale) => [
       publicLocale,
-      getSiteSitemapURL({ locale: publicLocale, origin, path: routePath }),
+      getSiteSitemapURL({
+        defaultLocale: site.defaultLocale,
+        locale: publicLocale,
+        origin,
+        path: routePath,
+      }),
     ]),
   )
   const title = `${copy.metaTitle} | ${settings?.siteName || 'WingSide'}`

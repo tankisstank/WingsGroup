@@ -103,15 +103,21 @@ export const getSiteSitemapLocales = (
 }
 
 export const getSiteSitemapURL = ({
+  defaultLocale = 'en',
   locale,
   origin,
   path,
 }: {
+  defaultLocale?: null | SupportedLocaleCode
   locale?: null | SupportedLocaleCode
   origin: string
   path?: null | string
 }): string => {
-  const localizedPath = prefixCanonicalPathWithLocale(path, locale)
+  const normalizedPath = prefixCanonicalPathWithLocale(path, null)
+  const localizedPath =
+    !locale || locale === defaultLocale
+      ? normalizedPath
+      : `/${locale}${normalizedPath === '/' ? '' : normalizedPath}`.replace(/\/+/g, '/')
 
   return `${origin}${localizedPath === '/' ? '' : localizedPath}`
 }

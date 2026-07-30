@@ -74,6 +74,7 @@ export async function GET(request: Request) {
         .filter((post) => Boolean(post?.slug))
         .map((post) => ({
           loc: getSiteSitemapURL({
+            defaultLocale: site.defaultLocale,
             locale,
             origin,
             path: getPostCanonicalPath(post.slug),

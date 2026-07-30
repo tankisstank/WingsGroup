@@ -120,12 +120,13 @@ describe('multisite inventory contract', () => {
           Object.values(site.nestedRouteSamples)[0] ||
           '/'
         const expectedPath =
-          locale === 'vi'
+          locale === site.defaultLocale
             ? nestedPath
             : `/${locale}${nestedPath === '/' ? '' : nestedPath}`
 
         expect(
           getSiteSitemapURL({
+            defaultLocale: site.defaultLocale,
             locale,
             origin,
             path: nestedPath,

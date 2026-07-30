@@ -59,6 +59,7 @@ export const generateMeta = async (args: {
     site,
   })
   const canonicalURL = getSiteSitemapURL({
+    defaultLocale: site.defaultLocale,
     locale: (locale as SupportedLocaleCode | null | undefined) || undefined,
     origin: canonicalOrigin,
     path: canonicalPath,
@@ -68,7 +69,12 @@ export const generateMeta = async (args: {
   const languages = Object.fromEntries(
     siteLocales.map((publicLocale) => [
       publicLocale,
-      getSiteSitemapURL({ locale: publicLocale, origin: canonicalOrigin, path: canonicalPath }),
+      getSiteSitemapURL({
+        defaultLocale: site.defaultLocale,
+        locale: publicLocale,
+        origin: canonicalOrigin,
+        path: canonicalPath,
+      }),
     ]),
   )
 
