@@ -289,6 +289,49 @@ describe('WingSideJourneysClient', () => {
     expect(screen.queryByRole('link', { name: /private hanoi/i })).toBeNull()
   })
 
+  it('keeps the remaining brief when style is removed and makes private CTAs explicit', () => {
+    render(
+      <WingSideJourneysClient
+        context={context({
+          query: {
+            destination: 'hanoi',
+            duration: '15-plus',
+            q: 'quiet',
+            style: 'business',
+            type: 'group',
+            unknownValueCount: 0,
+          },
+          result: {
+            appliedQuery: {
+              destination: 'hanoi',
+              duration: '15-plus',
+              q: 'quiet',
+              style: 'business',
+              type: 'group',
+            },
+            items: [],
+            relaxed: null,
+            total: 0,
+            unknownValueCount: 0,
+          },
+        })}
+        locale="en"
+      />,
+    )
+
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(
+      'Find your Vietnam journey',
+    )
+    expect(screen.getByRole('link', { name: 'Remove Business' }).getAttribute('href')).toBe(
+      '/journeys?q=quiet&type=group&destination=hanoi&duration=15-plus',
+    )
+    for (const link of screen.getAllByRole('link', { name: 'Design a private tour' })) {
+      expect(link.getAttribute('href')).toBe(
+        '/plan-your-trip?intent=request-quote&source=journeys&q=quiet&type=private&destination=hanoi&style=business&duration=15-plus',
+      )
+    }
+  })
+
   it('uses an in-app transition for shareable public URL state and retains focus', () => {
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 128 })
     render(<WingSideJourneysClient context={context()} locale="en" />)

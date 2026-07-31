@@ -382,9 +382,14 @@ test.describe('WingSide guided journey discovery', () => {
   }) => {
     test.setTimeout(180_000)
 
-    const zeroResult = findZeroResultQuery(await fetchWingSideTours(request))
+    const zeroResult = {
+      ...findZeroResultQuery(await fetchWingSideTours(request)),
+      q: 'zz-no-result',
+      type: 'group' as const,
+    }
+    const zeroResultParams = `q=${encodeURIComponent(zeroResult.q)}&type=${zeroResult.type}&${orderedParams(zeroResult)}`
     await page.setViewportSize({ height: 844, width: 390 })
-    await page.goto(`${localPath('en', '/journeys')}?${orderedParams(zeroResult)}`, {
+    await page.goto(`${localPath('en', '/journeys')}?${zeroResultParams}`, {
       waitUntil: 'domcontentloaded',
     })
 
@@ -393,8 +398,8 @@ test.describe('WingSide guided journey discovery', () => {
       'No exact match yet — but we can design it.',
     )
 
-    const planHref = `${localHref('en', '/plan-your-trip')}?intent=inquiry&source=journeys&${orderedParams(zeroResult)}`
-    const removeStyleHref = `${localHref('en', '/journeys')}?destination=${zeroResult.destination}&duration=${zeroResult.duration}`
+    const planHref = `${localHref('en', '/plan-your-trip')}?intent=inquiry&source=journeys&${zeroResultParams}`
+    const removeStyleHref = `${localHref('en', '/journeys')}?q=${encodeURIComponent(zeroResult.q)}&type=${zeroResult.type}&destination=${zeroResult.destination}&duration=${zeroResult.duration}`
     const journeys = page.getByTestId('wingsside-journeys')
     await expect(journeys.getByRole('link', { name: 'Share this brief' })).toHaveAttribute(
       'href',

@@ -61,11 +61,13 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
     context: { discovery: normalizedQuery, source: 'journeys' },
     intent: 'contact',
   })
+  const privatePlanHref = buildTourEnquiryHref({
+    basePath: '/plan-your-trip',
+    context: { discovery: { ...normalizedQuery, type: 'private' }, source: 'journeys' },
+    intent: 'request-quote',
+  })
   const removeStyleHref = normalizedQuery.style
-    ? buildDiscoveryHref({
-        ...(normalizedQuery.destination ? { destination: normalizedQuery.destination } : {}),
-        ...(normalizedQuery.duration ? { duration: normalizedQuery.duration } : {}),
-      })
+    ? buildDiscoveryHref({ ...normalizedQuery, style: undefined })
     : null
   const activeFilters = [
     normalizedQuery.q ? `“${normalizedQuery.q}”` : null,
@@ -441,11 +443,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
             </SiteLink>
             <SiteLink
               className="btn btn-ghost"
-              href={buildTourEnquiryHref({
-                basePath: '/plan-your-trip',
-                context: { discovery: { ...normalizedQuery, type: 'private' }, source: 'journeys' },
-                intent: 'request-quote',
-              })}
+              href={privatePlanHref}
             >
               {v2.private}
             </SiteLink>
@@ -499,7 +497,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
           >
             {v2.groups}
           </SiteLink>
-          <SiteLink className="btn btn-ghost" href={planHref}>
+          <SiteLink className="btn btn-ghost" href={privatePlanHref}>
             {v2.private}
           </SiteLink>
         </div>
