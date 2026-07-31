@@ -90,4 +90,4 @@ LABEL org.opencontainers.image.revision=${WINGSTRAVEL_RELEASE_SHA}
 CMD ["pnpm", "run", "import:wingsside:credentials:prod", "--", "plan"]
 
 FROM tools AS us057-ops
-RUN apk add --no-cache age postgresql-client
+RUN apk add --no-cache age postgresql16-client

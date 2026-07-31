@@ -240,7 +240,7 @@ plan after the backup binding or canary starts.
 
 ## 6. Encrypted backup and US057 disposable restore drill
 
-The `us057-ops` image contains PostgreSQL client tools and `age`; credentials
+The `us057-ops` image contains PostgreSQL 16 client tools and `age`; credentials
 come only from the shared env file. The age identity is mounted read-only and is
 never printed.
 
