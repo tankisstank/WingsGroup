@@ -158,6 +158,23 @@ export const TourDepartures: CollectionConfig = {
       },
     },
     {
+      name: 'sourceProvenance',
+      label: 'Nguồn inventory',
+      type: 'group',
+      admin: {
+        description:
+          'Bằng chứng nguồn cho inventory được đồng bộ. Không dùng trường này cho departure nhập tay.',
+      },
+      fields: [
+        { name: 'sourceSystem', type: 'text' },
+        { name: 'sourceUrl', type: 'text' },
+        { name: 'sourcePageSha256', type: 'text' },
+        { name: 'sourceRowSha256', type: 'text' },
+        { name: 'checkedAt', type: 'date' },
+        { name: 'managedBy', type: 'text', admin: { readOnly: true } },
+      ],
+    },
+    {
       name: 'promoLabel',
       label: 'Promo label',
       localized: true,

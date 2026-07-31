@@ -22,6 +22,8 @@ export type ClassificationManifest = {
 }
 
 export type CommerceDeparture = {
+  recordId?: number | string
+  inventoryIdentity?: string
   sourceId: string
   departureDate: string
   variantKey: string
@@ -62,6 +64,10 @@ export type SourceDepartureRow = Omit<
   productId: number
   sourceId: string
   sourceStatus: 'guaranteed-departure'
+  evidenceKind: 'exact-html-row'
+  requestedSourceUrl: string
+  finalSourceUrl: string
+  httpStatus: 200
   exactRowDate: string
   exactRowPerPaxPrice: string
 }
@@ -111,6 +117,14 @@ const stable = (value: unknown): string => {
 export const groupCommerceChecksum = (value: unknown) =>
   createHash('sha256').update(stable(value)).digest('hex')
 
+export const groupCommerceProductChecksum = (product: CommerceProductSnapshot) =>
+  groupCommerceChecksum({
+    ...product,
+    departures: product.departures.map(
+      ({ inventoryIdentity: _inventoryIdentity, recordId: _recordId, ...departure }) => departure,
+    ),
+  })
+
 export const WINGSSIDE_GROUP_COMMERCE_CLASSIFICATION_SHA256 =
   'd359b6a12beae01bc3bad444f9ff63b3a0fc01290a6e0118d3eb4a84ca9fa7c2'
 
@@ -124,7 +138,7 @@ const assertDate = (value: string, label: string) => {
   return parsed
 }
 
-const departureIdentity = (siteCode: string, row: Pick<CommerceDeparture, 'sourceId' | 'departureDate' | 'variantKey'>) =>
+export const groupCommerceDepartureIdentity = (siteCode: string, row: Pick<CommerceDeparture, 'sourceId' | 'departureDate' | 'variantKey'>) =>
   `${siteCode}|${row.sourceId}|${row.departureDate}|${row.variantKey}`
 
 export const assertClassificationManifest = (manifest: ClassificationManifest) => {
@@ -160,7 +174,9 @@ export const assertClassificationManifest = (manifest: ClassificationManifest) =
 
 const assertSnapshot = (snapshot: CommerceSnapshot, manifest: ClassificationManifest) => {
   if (snapshot.schemaVersion !== 1) throw new Error('Unsupported snapshot schema')
-  assertSha(snapshot.releaseSha, 'snapshot.releaseSha')
+  if (!/^[a-f0-9]{40}$/u.test(snapshot.releaseSha)) {
+    throw new Error('snapshot.releaseSha must be a full lowercase Git SHA')
+  }
   assertDate(snapshot.capturedAt, 'snapshot.capturedAt')
   if (snapshot.products.length !== 22) throw new Error('Live snapshot must contain exactly 22 tours')
   const expected = new Map(manifest.products.map((product) => [product.sourceId, product]))
@@ -206,6 +222,10 @@ const governedDepartureRows = ({
       throw new Error('Departure candidate must classify as group or hybrid')
     }
     if (
+      row.evidenceKind !== 'exact-html-row' ||
+      row.httpStatus !== 200 ||
+      row.requestedSourceUrl !== row.finalSourceUrl ||
+      row.finalSourceUrl !== row.sourceUrl ||
       row.sourceStatus !== 'guaranteed-departure' ||
       row.exactRowDate !== row.departureDate ||
       row.exactRowPerPaxPrice !== `${row.currency} ${row.priceFrom}/pax` ||
@@ -232,6 +252,10 @@ const governedDepartureRows = ({
     ) {
       throw new Error('Departure sourceUrl must be an absolute BestPrice URL')
     }
+    const expectedSlug = row.sourceId.split('--').at(-1)
+    if (!expectedSlug || !sourceURL.pathname.toLowerCase().includes(expectedSlug.toLowerCase())) {
+      throw new Error('Departure sourceUrl does not match the locked product source identity')
+    }
     if (row.verifiedAt !== evidence.checkedAt || row.expiresAt !== evidence.expiresAt) {
       throw new Error('Departure freshness must be bound to its source evidence envelope')
     }
@@ -252,7 +276,7 @@ const governedDepartureRows = ({
       bookingMode: 'inquiry',
       canHoldSeat: false,
     }
-    const identity = departureIdentity(manifest.siteCode, departure)
+    const identity = groupCommerceDepartureIdentity(manifest.siteCode, departure)
     const existing = deduped.get(identity)
     if (existing && groupCommerceChecksum(existing) !== groupCommerceChecksum(departure)) {
       throw new Error(`Conflicting departure rows for ${identity}`)
@@ -282,22 +306,37 @@ export const createGroupCommercePlan = ({
   }
   const entries = manifest.products.map((locked) => {
     const before = structuredClone(snapshot.products.find((row) => row.sourceId === locked.sourceId)!)
+    const existingDepartures = new Map(
+      before.departures.map((departure) => [
+        groupCommerceDepartureIdentity(manifest.siteCode, departure),
+        structuredClone(departure),
+      ]),
+    )
+    for (const departure of bySource.get(locked.sourceId) || []) {
+      const identity = groupCommerceDepartureIdentity(manifest.siteCode, departure)
+      const existing = existingDepartures.get(identity)
+      existingDepartures.set(identity, {
+        ...structuredClone(departure),
+        ...(existing?.recordId === undefined ? {} : { recordId: existing.recordId }),
+        inventoryIdentity: identity,
+      })
+    }
     const after: CommerceProductSnapshot = {
       ...structuredClone(before),
       tourType: locked.classification,
       departures:
         locked.classification === null
           ? structuredClone(before.departures)
-          : [...(bySource.get(locked.sourceId) || [])].sort((a, b) =>
-              departureIdentity(manifest.siteCode, a).localeCompare(departureIdentity(manifest.siteCode, b)),
+          : [...existingDepartures.values()].sort((a, b) =>
+              groupCommerceDepartureIdentity(manifest.siteCode, a).localeCompare(groupCommerceDepartureIdentity(manifest.siteCode, b)),
             ),
     }
     return {
       productId: locked.productId,
       sourceId: locked.sourceId,
       classification: locked.classification,
-      preimageSha256: groupCommerceChecksum(before),
-      postimageSha256: groupCommerceChecksum(after),
+      preimageSha256: groupCommerceProductChecksum(before),
+      postimageSha256: groupCommerceProductChecksum(after),
       before,
       after,
     }
@@ -377,7 +416,7 @@ export const transitionGroupCommerceSnapshot = ({
       const entry = replacements.get(current.sourceId)
       if (!entry) return structuredClone(current)
       const expected = mode === 'apply' ? entry.preimageSha256 : entry.postimageSha256
-      if (groupCommerceChecksum(current) !== expected) {
+      if (groupCommerceProductChecksum(current) !== expected) {
         throw new Error(`Preimage conflict for ${current.sourceId}; refusing ${mode}`)
       }
       return structuredClone(mode === 'apply' ? entry.after : entry.before)
@@ -398,7 +437,7 @@ export const verifyGroupCommerceSnapshot = ({
   for (const entry of plan.entries) {
     const actual = products.get(entry.sourceId)
     const expected = expectedState === 'after' ? entry.postimageSha256 : entry.preimageSha256
-    if (!actual || groupCommerceChecksum(actual) !== expected) {
+    if (!actual || groupCommerceProductChecksum(actual) !== expected) {
       throw new Error(`Verification failed for ${entry.sourceId}`)
     }
   }

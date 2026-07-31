@@ -2166,6 +2166,17 @@ export interface TourDeparture {
    */
   expiresAt?: string | null;
   inventoryIdentity?: string | null;
+  /**
+   * Bằng chứng nguồn cho inventory được đồng bộ. Không dùng trường này cho departure nhập tay.
+   */
+  sourceProvenance?: {
+    sourceSystem?: string | null;
+    sourceUrl?: string | null;
+    sourcePageSha256?: string | null;
+    sourceRowSha256?: string | null;
+    checkedAt?: string | null;
+    managedBy?: string | null;
+  };
   promoLabel?: string | null;
   urgencyLabel?: string | null;
   availabilityBadge?: string | null;
@@ -3883,6 +3894,16 @@ export interface TourDeparturesSelect<T extends boolean = true> {
   verifiedAt?: T;
   expiresAt?: T;
   inventoryIdentity?: T;
+  sourceProvenance?:
+    | T
+    | {
+        sourceSystem?: T;
+        sourceUrl?: T;
+        sourcePageSha256?: T;
+        sourceRowSha256?: T;
+        checkedAt?: T;
+        managedBy?: T;
+      };
   promoLabel?: T;
   urgencyLabel?: T;
   availabilityBadge?: T;

@@ -21,7 +21,7 @@ const now = new Date('2026-07-31T10:00:00.000Z')
 
 const snapshot = (): CommerceSnapshot => ({
   schemaVersion: 1,
-  releaseSha: 'b'.repeat(64),
+  releaseSha: 'b'.repeat(40),
   capturedAt: '2026-07-31T09:55:00.000Z',
   products: manifest.products.map((product) => ({
     productId: product.productId,
@@ -47,7 +47,11 @@ const sourceRow = (productId: 63 | 65 | 69, date: string, price: number) => {
     availabilityBadge: 'Guaranteed departure' as const,
     verifiedAt: '2026-07-31T09:30:00.000Z',
     expiresAt: '2026-07-31T17:30:00.000Z',
-    sourceUrl: `https://www.bestpricetravel.com/${sourceId}.html`,
+    sourceUrl: `https://www.bestpricetravel.com/${sourceId.split('--').at(-1)}.html`,
+    requestedSourceUrl: `https://www.bestpricetravel.com/${sourceId.split('--').at(-1)}.html`,
+    finalSourceUrl: `https://www.bestpricetravel.com/${sourceId.split('--').at(-1)}.html`,
+    httpStatus: 200 as const,
+    evidenceKind: 'exact-html-row' as const,
     sourcePageSha256: sha,
     sourceRowSha256: groupCommerceChecksum({ productId, date, price }),
     sourceStatus: 'guaranteed-departure' as const,
