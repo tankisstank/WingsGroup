@@ -107,6 +107,14 @@
     "productId": 69,
     "sourceId": "vietnam-tours--highlights-of-vietnam-12-days",
     "sourceUrl": "https://www.bestpricetravel.com/vietnam-tours/highlights-of-vietnam-12-days.html",
+    "departureDate": "2026-08-01",
+    "variantKey": "standard",
+    "priceFrom": 1120
+  },
+  {
+    "productId": 69,
+    "sourceId": "vietnam-tours--highlights-of-vietnam-12-days",
+    "sourceUrl": "https://www.bestpricetravel.com/vietnam-tours/highlights-of-vietnam-12-days.html",
     "departureDate": "2026-08-05",
     "variantKey": "standard",
     "priceFrom": 1120

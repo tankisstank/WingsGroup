@@ -18,11 +18,12 @@ model blockers are therefore resolved:
 - The card CTA is a real context-preserving Contact link. Tour identity stays
   in structured metadata and does not prefill the visitor's message.
 
-A fresh public-source probe after implementation validated 21 exact visible
-rows: four for product 63, nine for hybrid product 65 and eight for product
-69. Product 69's former `2026-08-01` row was no longer present and was
-therefore removed from the activation candidate; its visible rows now begin
-at `2026-08-05`. The committed candidate inputs are
+A final public-source probe at `2026-07-31T03:29:23Z` validated 22 exact visible
+rows: four for product 63, nine for hybrid product 65 and nine for product 69.
+Product 69's `2026-08-01` row was visible again and is still future-dated at
+the verification instant, so it remains governed commerce inventory. It will
+automatically downgrade to Contact once expired rather than removing the tour
+from the catalog. The committed candidate inputs are
 `app/scripts/data/wingsside-group-commerce-v1/source-candidates.json`.
 
 This update does not assert a production write or deployment. The original
