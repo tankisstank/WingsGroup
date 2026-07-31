@@ -4,6 +4,7 @@ import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/access/siteScope'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { supportedTourCurrencyOptions } from '@/tours/currency'
+import { setDepartureInventoryIdentity } from '@/tours/departureCommerce'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 
 import {
@@ -128,6 +129,35 @@ export const TourDepartures: CollectionConfig = {
       admin: { position: 'sidebar' },
     },
     {
+      name: 'verifiedAt',
+      label: 'Xác minh giá / tồn kho lúc',
+      type: 'date',
+      admin: {
+        description:
+          'Commerce chỉ hiển thị khi thời điểm xác minh và hết hạn tạo thành cửa sổ còn hiệu lực.',
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'expiresAt',
+      label: 'Hết hạn xác minh lúc',
+      type: 'date',
+      admin: {
+        description: 'Sau thời điểm này giá và availability tự động fail closed.',
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'inventoryIdentity',
+      label: 'Định danh inventory',
+      type: 'text',
+      unique: true,
+      admin: {
+        hidden: true,
+        readOnly: true,
+      },
+    },
+    {
       name: 'promoLabel',
       label: 'Promo label',
       localized: true,
@@ -230,6 +260,7 @@ export const TourDepartures: CollectionConfig = {
     afterChange: [revalidateTourDeparture],
     afterDelete: [revalidateTourDepartureDelete],
     beforeChange: [enforceSiteAccess, preventEditorPublish],
+    beforeValidate: [setDepartureInventoryIdentity],
   },
   versions: {
     drafts: {

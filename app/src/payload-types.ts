@@ -1837,9 +1837,9 @@ export interface TourProduct {
     | 'other';
   tourCode?: string | null;
   /**
-   * Không có giá trị được hiểu là private để public discovery fail closed.
+   * Hybrid biểu diễn tour có cả lịch ghép đã xác minh và lựa chọn thiết kế riêng. Không có giá trị được hiểu là private để public discovery fail closed.
    */
-  tourType?: ('group' | 'private') | null;
+  tourType?: ('group' | 'private' | 'hybrid') | null;
   /**
    * Key ổn định để lọc tour; nhãn hiển thị do CMS quản lý.
    */
@@ -2157,6 +2157,15 @@ export interface TourDeparture {
   priceFrom: number;
   currency: 'VND' | 'USD';
   priceBasis?: ('per-person' | 'per-booking') | null;
+  /**
+   * Commerce chỉ hiển thị khi thời điểm xác minh và hết hạn tạo thành cửa sổ còn hiệu lực.
+   */
+  verifiedAt?: string | null;
+  /**
+   * Sau thời điểm này giá và availability tự động fail closed.
+   */
+  expiresAt?: string | null;
+  inventoryIdentity?: string | null;
   promoLabel?: string | null;
   urgencyLabel?: string | null;
   availabilityBadge?: string | null;
@@ -3871,6 +3880,9 @@ export interface TourDeparturesSelect<T extends boolean = true> {
   priceFrom?: T;
   currency?: T;
   priceBasis?: T;
+  verifiedAt?: T;
+  expiresAt?: T;
+  inventoryIdentity?: T;
   promoLabel?: T;
   urgencyLabel?: T;
   availabilityBadge?: T;

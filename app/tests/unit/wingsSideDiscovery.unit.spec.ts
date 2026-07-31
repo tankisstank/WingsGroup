@@ -134,10 +134,29 @@ describe('WingSide discovery pure contract', () => {
       { _status: { equals: 'published' } },
       { wrapperPage: { exists: true } },
     ])
-    expect(buildDiscoveryWhere({ type: 'group' }).and).toContainEqual({ tourType: { equals: 'group' } })
-    expect(buildDiscoveryWhere({ type: 'private' }).and).toContainEqual({
-      or: [{ tourType: { equals: 'private' } }, { tourType: { exists: false } }],
+    expect(buildDiscoveryWhere({ type: 'group' }).and).toContainEqual({
+      or: [{ tourType: { equals: 'group' } }, { tourType: { equals: 'hybrid' } }],
     })
+    expect(buildDiscoveryWhere({ type: 'private' }).and).toContainEqual({
+      or: [
+        { tourType: { equals: 'private' } },
+        { tourType: { equals: 'hybrid' } },
+        { tourType: { exists: false } },
+      ],
+    })
+    const hybridCard: Pick<
+      DiscoveryTourCard,
+      'destinationTags' | 'duration' | 'summary' | 'title' | 'tourType' | 'travelStyles'
+    > = {
+      destinationTags: ['hanoi'],
+      duration: { days: 9, nights: 8 },
+      summary: 'Shared or private.',
+      title: 'Northern journey',
+      tourType: 'hybrid',
+      travelStyles: ['culture'],
+    }
+    expect(isDiscoveryCardMatch(hybridCard, { type: 'group' })).toBe(true)
+    expect(isDiscoveryCardMatch(hybridCard, { type: 'private' })).toBe(true)
   })
 
   it('projects only safe public fields and fails closed for invalid records', () => {

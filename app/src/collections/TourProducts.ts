@@ -107,9 +107,11 @@ export const TourProducts: CollectionConfig = {
       options: [
         { label: 'Small group', value: 'group' },
         { label: 'Private', value: 'private' },
+        { label: 'Small group + Private', value: 'hybrid' },
       ],
       admin: {
-        description: 'Không có giá trị được hiểu là private để public discovery fail closed.',
+        description:
+          'Hybrid biểu diễn tour có cả lịch ghép đã xác minh và lựa chọn thiết kế riêng. Không có giá trị được hiểu là private để public discovery fail closed.',
         position: 'sidebar',
       },
     },

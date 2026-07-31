@@ -300,7 +300,11 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img alt={item.hero.alt} decoding="async" loading="lazy" src={item.hero.url} />
                     <i className={`ws-journeys-card__type ws-journeys-card__type--${item.tourType || 'private'}`}>
-                      {item.tourType === 'group' ? tourTypeCopy.group : tourTypeCopy.private}
+                      {item.tourType === 'group'
+                        ? tourTypeCopy.group
+                        : item.tourType === 'hybrid'
+                          ? `${tourTypeCopy.group} / ${tourTypeCopy.private}`
+                          : tourTypeCopy.private}
                     </i>
                   </span>
                   <span className="ws-journeys-card__body">
@@ -310,8 +314,28 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                     <strong>{item.title}</strong>
                     <span>{item.summary}</span>
                     <span className="ws-journeys-card__price">
-                      <span>{item.tourType === 'group' ? (item.commerce ? formatJourneyPrice(item.commerce.price, locale) : v2.schedule) : v2.quote}</span>
-                      <small>{item.tourType === 'group' ? (item.commerce ? `${formatJourneyDeparture(item.commerce.departureDate, locale)} · ${item.commerce.availability}` : v2.scheduleBody) : v2.quoteBody}</small>
+                      <span>
+                        {item.tourType === 'hybrid'
+                          ? item.commerce
+                            ? `${formatJourneyPrice(item.commerce.price, locale)} · ${v2.quote}`
+                            : `${tourTypeCopy.group} / ${tourTypeCopy.private}`
+                          : item.tourType === 'group'
+                            ? item.commerce
+                              ? formatJourneyPrice(item.commerce.price, locale)
+                              : v2.schedule
+                            : v2.quote}
+                      </span>
+                      <small>
+                        {item.tourType === 'hybrid'
+                          ? item.commerce
+                            ? `${formatJourneyDeparture(item.commerce.departureDate, locale)} · ${item.commerce.availability} · ${v2.quoteBody}`
+                            : `${v2.scheduleBody} ${v2.quoteBody}`
+                          : item.tourType === 'group'
+                            ? item.commerce
+                              ? `${formatJourneyDeparture(item.commerce.departureDate, locale)} · ${item.commerce.availability}`
+                              : v2.scheduleBody
+                            : v2.quoteBody}
+                      </small>
                     </span>
                     <span className="ws-journeys-card__chips">
                       {item.destinationTags.slice(0, 2).map((tag) => (
@@ -322,7 +346,15 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                       ))}
                     </span>
                     <span className="ws-journeys-card__action">
-                      {item.tourType === 'group' ? (item.commerce?.canBook ? v2.book : item.commerce ? v2.departures : v2.availability) : v2.requestQuote}
+                      {item.tourType === 'hybrid'
+                        ? v2.requestQuote
+                        : item.tourType === 'group'
+                          ? item.commerce?.canBook
+                            ? v2.book
+                            : item.commerce
+                              ? v2.departures
+                              : v2.availability
+                          : v2.requestQuote}
                       <ArrowRightIcon aria-hidden="true" />
                     </span>
                   </span>

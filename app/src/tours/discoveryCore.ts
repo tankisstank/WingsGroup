@@ -7,6 +7,7 @@ import {
   type TourTravelStyleKey,
 } from './taxonomy'
 import { normalizeSupportedTourCurrency, type SupportedTourCurrencyCode } from './currency'
+import { isDepartureVerificationCurrent } from './departureCommerce'
 import { sanitizeWingSidePublicText } from './wingsSideTourViewModel'
 
 export const discoveryDurationCodes = ['1-7', '8-14', '15-plus'] as const
@@ -17,12 +18,13 @@ export type DiscoveryQuery = {
   duration?: DiscoveryDurationCode
   q?: string
   style?: TourTravelStyleKey
-  type?: DiscoveryTourType
+  type?: DiscoveryTourFilterType
   unknownValueCount: number
 }
 
 export const discoveryTourTypes = ['group', 'private'] as const
-export type DiscoveryTourType = (typeof discoveryTourTypes)[number]
+export type DiscoveryTourFilterType = (typeof discoveryTourTypes)[number]
+export type DiscoveryTourType = DiscoveryTourFilterType | 'hybrid'
 export type DiscoveryFilterKey = 'destination' | 'duration' | 'style' | 'type'
 
 export type DiscoverySEO = {
@@ -122,14 +124,16 @@ export type DiscoveryDepartureDoc = {
   availabilityStatus?: null | string
   currency?: null | string
   departureDate?: null | string
+  expiresAt?: null | string
   priceBasis?: null | string
   priceFrom?: null | number
   site?: Relation
   tourProduct?: Relation
+  verifiedAt?: null | string
 }
 
-const isDiscoveryTourType = (value: string): value is DiscoveryTourType =>
-  discoveryTourTypes.includes(value as DiscoveryTourType)
+const isDiscoveryTourType = (value: string): value is DiscoveryTourFilterType =>
+  discoveryTourTypes.includes(value as DiscoveryTourFilterType)
 
 const relationID = (value: Relation): RelationID | null => {
   if (typeof value === 'number' || typeof value === 'string') return value
@@ -147,12 +151,18 @@ const nonEmpty = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
 
 const projectGroupCommerce = (tour: DiscoveryTourDoc): DiscoveryTourCard['commerce'] | undefined => {
-  if (tour.tourType !== 'group' || !Array.isArray(tour.activeDepartures)) return undefined
+  if (
+    !['group', 'hybrid'].includes(String(tour.tourType)) ||
+    !Array.isArray(tour.activeDepartures)
+  ) {
+    return undefined
+  }
   const now = Date.now()
   const candidate = tour.activeDepartures
     .filter((departure) => {
       const date = Date.parse(departure.departureDate || '')
-      return date > now && departure.priceBasis === 'per-person' &&
+      return date > now && isDepartureVerificationCurrent(departure, now) &&
+        departure.priceBasis === 'per-person' &&
         (departure.availabilityStatus === 'open' || departure.availabilityStatus === 'limited') &&
         sameRelation(departure.site, tour.site)
     })
@@ -160,7 +170,7 @@ const projectGroupCommerce = (tour: DiscoveryTourDoc): DiscoveryTourCard['commer
   if (!candidate) return undefined
   const currency = normalizeSupportedTourCurrency(candidate.currency)
   if (!currency || typeof candidate.priceFrom !== 'number' || !Number.isFinite(candidate.priceFrom) || candidate.priceFrom <= 0) return undefined
-  const canBook = tour.primaryCTA?.mode === 'hold-seat'
+  const canBook = tour.tourType === 'group' && tour.primaryCTA?.mode === 'hold-seat'
   return {
     availability: candidate.availabilityBadge?.trim() || candidate.availabilityStatus || 'Open',
     canBook,
@@ -318,7 +328,10 @@ export const isDiscoveryCardMatch = (
   card: Pick<DiscoveryTourCard, 'destinationTags' | 'duration' | 'summary' | 'title' | 'tourType' | 'travelStyles'> & { routeLabel?: string | null; searchText?: string },
   query: Omit<DiscoveryQuery, 'unknownValueCount'>,
 ): boolean =>
-  (!query.type || (card.tourType || 'private') === query.type) &&
+  (!query.type ||
+    (query.type === 'group'
+      ? card.tourType === 'group' || card.tourType === 'hybrid'
+      : card.tourType === 'private' || card.tourType === 'hybrid' || !card.tourType)) &&
   (!query.q || `${card.title} ${card.summary} ${card.routeLabel || ''} ${card.searchText || ''} ${card.destinationTags.join(' ')} ${card.travelStyles.join(' ')}`.normalize('NFKC').toLocaleLowerCase().includes(query.q.toLocaleLowerCase())) &&
   (!query.destination || card.destinationTags.includes(query.destination)) &&
   (!query.style || card.travelStyles.includes(query.style)) &&
@@ -361,11 +374,21 @@ export const buildDiscoveryWhere = (
   ]
 
   if (query.destination) conditions.push({ destinationTags: { in: [query.destination] } })
-  if (query.type === 'group') conditions.push({ tourType: { equals: 'group' } })
+  if (query.type === 'group') {
+    conditions.push({
+      or: [{ tourType: { equals: 'group' } }, { tourType: { equals: 'hybrid' } }],
+    })
+  }
   if (query.type === 'private') {
     // Legacy untyped products intentionally project as private. Keep the
     // adapter predicate aligned so deep links do not silently drop them.
-    conditions.push({ or: [{ tourType: { equals: 'private' } }, { tourType: { exists: false } }] })
+    conditions.push({
+      or: [
+        { tourType: { equals: 'private' } },
+        { tourType: { equals: 'hybrid' } },
+        { tourType: { exists: false } },
+      ],
+    })
   }
   if (query.style) conditions.push({ travelStyles: { in: [query.style] } })
   if (query.duration === '1-7') {
@@ -492,7 +515,10 @@ export const projectDiscoveryTour = ({
     slug: tour.slug.trim(),
     summary: publicSummary,
     title: publicTitle,
-    tourType: tour.tourType === 'group' ? 'group' : 'private',
+    tourType:
+      tour.tourType === 'group' || tour.tourType === 'hybrid'
+        ? tour.tourType
+        : 'private',
     travelStyles: normalizeTourTravelStyleKeys(travelStyles),
   }
 }

@@ -10,6 +10,7 @@ import { defaultTourSectionOrder, defaultTourSectionVisibility } from './section
 import { ScheduleInteractiveDepartures } from './ScheduleInteractiveDepartures'
 import { TourItineraryDayDetails } from './TourItineraryDayDetails'
 import { normalizeGovernedTourPrice } from './currency'
+import { isDepartureVerificationCurrent } from './departureCommerce'
 import type {
   DepartureCardViewModel,
   SchedulePageViewModel,
@@ -199,14 +200,23 @@ const getGovernedPricePostureInput = ({
   nextDeparture,
   tour,
 }: {
-  nextDeparture?: null | { availabilityStatus?: unknown; currency?: unknown; priceBasis?: unknown; priceFrom?: unknown }
+  nextDeparture?: null | {
+    availabilityStatus?: unknown
+    currency?: unknown
+    expiresAt?: null | string
+    priceBasis?: unknown
+    priceFrom?: unknown
+    verifiedAt?: null | string
+  }
   tour: { tourType?: unknown }
 }) => {
   // WingSide never turns a product-level price into a per-person claim.
   // Commerce is reserved for a group product with an explicit verified
   // departure capability; every other posture remains consultative.
   if (
-    tour.tourType !== 'group' ||
+    !['group', 'hybrid'].includes(String(tour.tourType || '')) ||
+    !nextDeparture ||
+    !isDepartureVerificationCurrent(nextDeparture) ||
     nextDeparture?.priceBasis !== 'per-person' ||
     !['open', 'limited'].includes(String(nextDeparture?.availabilityStatus || ''))
   ) return {}
