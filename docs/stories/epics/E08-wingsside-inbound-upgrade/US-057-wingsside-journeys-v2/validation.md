@@ -71,6 +71,15 @@ replacing the catalog data layer.
   the recorded app rollback target. No migration or production data mutation
   was performed.
 
+## 2026-07-31 decision-band hotfix
+
+- Public app-only hotfix `00add94b3e2c510b7d66ee68c62f5e80d1c2ee5a` corrects
+  the decision-list body placement into the content column below its title.
+  Browser measurement on `wingside.vn` confirmed title/body share x=839.3px
+  with a 449.2px content column; no horizontal overflow was introduced.
+- PostgreSQL and Redis remained unchanged. The immediate app rollback target is
+  the prior visual remediation release `ee69e4a9e2c52ba9440805f5ecf7f44d09470403`.
+
 ## Automated gates
 
 - TypeScript: pass.
