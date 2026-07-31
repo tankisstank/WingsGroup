@@ -57,6 +57,20 @@ replacing the catalog data layer.
   cleanup: `/home/ubuntu/wings-travel/releases/wingsside-us057-1dc91b0`, SHA
   `1dc91b0de859626e2ba233065117b2be61aa670d`, with live health still `ok`.
 
+## 2026-07-31 app-only public promotion
+
+- Approved public promotion moved only the application symlink/container to
+  `ee69e4a9e2c52ba9440805f5ecf7f44d09470403` and immutable image
+  `sha256:1c8209a26ea472bb284da2563d7a71fe0be06e4dec8345b087a4990f762448f4`.
+  PostgreSQL and Redis container IDs were verified unchanged.
+- Direct `agent-browser` QA at `https://wingside.vn/journeys` confirmed Plus
+  Jakarta Sans, desktop three-column grid with three loaded destination images
+  and no overflow. At 390px the group deep link rendered one-column cards and
+  decision band, no overflow and zero `Book` CTA.
+- The prior app release `1dc91b0de859626e2ba233065117b2be61aa670d` remains
+  the recorded app rollback target. No migration or production data mutation
+  was performed.
+
 ## Automated gates
 
 - TypeScript: pass.

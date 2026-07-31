@@ -39,8 +39,9 @@ and bottom conversion panel. It preserves the existing route, URL state,
 Payload query and truthful commerce fallback, and does not add sample tours,
 shortlist storage or a booking capability.
 
-The implementation passed two independent visual-spec review cycles and an
-isolated app-only real-tenant canary at desktop and mobile. The canary was
-removed after QA; public traffic remains on the accepted release. US-057 now
-awaits stakeholder visual confirmation before any separately approved public
-promotion.
+The implementation passed two independent visual-spec review cycles, an
+isolated app-only real-tenant canary, and an approved app-only public promotion
+at desktop and mobile. Public traffic now runs the immutable app SHA
+`ee69e4a9e2c52ba9440805f5ecf7f44d09470403`; data, classification and
+departure contracts remain unchanged. US-057 awaits stakeholder visual
+confirmation before closure.
