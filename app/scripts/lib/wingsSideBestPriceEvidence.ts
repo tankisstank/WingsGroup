@@ -19,7 +19,8 @@ const sha256 = (value: string) => createHash('sha256').update(value).digest('hex
 const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')
 const sourceDatePatterns = (dateOnly: string) => {
   const parsed = new Date(`${dateOnly}T00:00:00.000Z`)
-  if (!Number.isFinite(parsed.getTime())) throw new Error(`Invalid candidate departure date: ${dateOnly}`)
+  if (!Number.isFinite(parsed.getTime()))
+    throw new Error(`Invalid candidate departure date: ${dateOnly}`)
   const display = new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: 'short',
@@ -55,7 +56,9 @@ export const captureBestPriceExactRowEvidence = async ({
   for (const candidate of candidates) {
     const expected = locked.get(candidate.productId)
     if (!expected || expected.sourceId !== candidate.sourceId) {
-      throw new Error(`Evidence candidate ${candidate.productId} does not match the locked manifest`)
+      throw new Error(
+        `Evidence candidate ${candidate.productId} does not match the locked manifest`,
+      )
     }
     const requested = new URL(candidate.sourceUrl)
     const expectedSlug = candidate.sourceId.split('--').at(-1)
@@ -68,7 +71,12 @@ export const captureBestPriceExactRowEvidence = async ({
       throw new Error(`Evidence candidate ${candidate.productId} has a mismatched source URL`)
     }
     const response = await fetcher(requested, { redirect: 'follow' })
-    if (!response.ok || response.status !== 200 || response.redirected || response.url !== requested.href) {
+    if (
+      !response.ok ||
+      response.status !== 200 ||
+      response.redirected ||
+      response.url !== requested.href
+    ) {
       throw new Error(`Evidence candidate ${candidate.productId} redirected or failed`)
     }
     const html = await response.text()
@@ -78,13 +86,29 @@ export const captureBestPriceExactRowEvidence = async ({
     )
     const datePattern = `(?:${sourceDatePatterns(candidate.departureDate).join('|')})`
     const pricePattern = `(?:USD(?:<[^>]+>|\\s)*|US(?:<[^>]+>|\\s)*\\$(?:<[^>]+>|\\s)*)${candidate.priceFrom}(?:\\.00)?(?:<[^>]+>|\\s)*\\/(?:<[^>]+>|\\s)*pax`
+    const departureItems = [
+      ...withoutJSONLD.matchAll(/<div\b[^>]*\bdata-count=["'][^"']+["'][^>]*>/giu),
+    ].map((match, index, matches) =>
+      withoutJSONLD.slice(
+        match.index,
+        matches[index + 1]?.index ?? Math.min(withoutJSONLD.length, match.index + 20_000),
+      ),
+    )
+    const structuredRow = departureItems.find(
+      (item) =>
+        new RegExp(datePattern, 'iu').test(item) &&
+        new RegExp(pricePattern, 'iu').test(item) &&
+        /Guarantee\s+depart/iu.test(item),
+    )
     const rowPattern = new RegExp(
       `<(?:tr|li|div)\\b[^>]*>[\\s\\S]{0,1500}?${datePattern}[\\s\\S]{0,700}?${pricePattern}[\\s\\S]{0,1500}?<\\/(?:tr|li|div)>`,
       'iu',
     )
-    const exactRow = withoutJSONLD.match(rowPattern)?.[0]
+    const exactRow = structuredRow || withoutJSONLD.match(rowPattern)?.[0]
     if (!exactRow) {
-      throw new Error(`Evidence candidate ${candidate.productId} lacks an exact visible date/price row`)
+      throw new Error(
+        `Evidence candidate ${candidate.productId} lacks an exact visible date/price row`,
+      )
     }
     rows.push({
       productId: candidate.productId,

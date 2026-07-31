@@ -94,7 +94,7 @@ const createPayload = () => {
       importBatchId: manifest.batchId,
     },
   }))
-  const departures: Array<Record<string, any>> = [{
+  const departures: Array<{ id: number; [key: string]: unknown }> = [{
     _status: 'published',
     id: 900,
     site: 3,
@@ -115,14 +115,22 @@ const createPayload = () => {
     }),
     findByID: vi.fn(async ({ id }: { id: number | string }) =>
       departures.find((row) => String(row.id) === String(id))),
-    update: vi.fn(async ({ collection, data, id }: { collection: string; data: any; id: number | string }) => {
+    update: vi.fn(async ({
+      collection,
+      data,
+      id,
+    }: {
+      collection: string
+      data: Record<string, unknown>
+      id: number | string
+    }) => {
       const rows = collection === 'tour-products' ? tours : departures
       const row = rows.find((candidate) => String(candidate.id) === String(id))
       if (!row) throw new Error(`Missing ${collection}:${id}`)
       Object.assign(row, data)
       return row
     }),
-    create: vi.fn(async ({ data }: { data: any }) => {
+    create: vi.fn(async ({ data }: { data: Record<string, unknown> }) => {
       const row = {
         ...data,
         id: nextID++,

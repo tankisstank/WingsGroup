@@ -84,10 +84,12 @@ describe('WingSideJourneysClient', () => {
   it('renders typed cards with safe detail, plan and contact context links', () => {
     render(<WingSideJourneysClient context={context()} locale="en" />)
 
-    const card = screen.getByRole('link', { name: /private hanoi/i })
-    expect(card.getAttribute('href')).toBe(
-      '/tour/private-hanoi?source=journeys&destination=hanoi&style=culture&duration=8-14',
-    )
+    const card = screen.getByRole('article', { name: /private hanoi/i })
+    expect(
+      within(card)
+        .getByRole('link', { name: /private hanoi/i })
+        .getAttribute('href'),
+    ).toBe('/tour/private-hanoi?source=journeys&destination=hanoi&style=culture&duration=8-14')
     expect(screen.getByRole('link', { name: 'Plan trip' }).getAttribute('href')).toBe(
       '/plan-your-trip?intent=inquiry&source=journeys&destination=hanoi&style=culture&duration=8-14',
     )
@@ -121,7 +123,7 @@ describe('WingSideJourneysClient', () => {
       />,
     )
 
-    const card = screen.getByRole('link', { name: /private hanoi/i })
+    const card = screen.getByRole('article', { name: /private hanoi/i })
     expect(within(card).getByText('Presupuesto a medida')).toBeTruthy()
     expect(card.textContent).not.toMatch(/\$0|USD 0|Desde\s+0/)
     expect(card.textContent).not.toMatch(/book now|available seats|instant booking/i)
@@ -152,7 +154,7 @@ describe('WingSideJourneysClient', () => {
       />,
     )
 
-    const card = screen.getByRole('link', { name: /hybrid northern vietnam/i })
+    const card = screen.getByRole('article', { name: /hybrid northern vietnam/i })
     expect(within(card).getByText('Small group / Private')).toBeTruthy()
     expect(within(card).getByText('View departures')).toBeTruthy()
     expect(card.textContent).toMatch(/741/)
@@ -182,9 +184,14 @@ describe('WingSideJourneysClient', () => {
       />,
     )
 
-    const card = screen.getByRole('link', { name: /group northern vietnam/i })
+    const card = screen.getByRole('article', { name: /group northern vietnam/i })
     expect(within(card).getByText('Schedule on request')).toBeTruthy()
     expect(within(card).getByText('Check availability')).toBeTruthy()
+    const contact = within(card).getByRole('link', { name: /check availability/i })
+    expect(contact.getAttribute('href')).toContain('/contact-us?')
+    expect(contact.getAttribute('href')).toContain('intent=contact')
+    expect(contact.getAttribute('href')).toContain('tourId=')
+    expect(contact.getAttribute('href')).toContain('tour=')
     expect(card.textContent).not.toMatch(/\bbook\b|guaranteed departure|available seats/i)
   })
 
@@ -210,8 +217,11 @@ describe('WingSideJourneysClient', () => {
       />,
     )
 
-    const card = screen.getByRole('link', { name: /hybrid northern vietnam/i })
+    const card = screen.getByRole('article', { name: /hybrid northern vietnam/i })
     expect(within(card).getByText('Request quote')).toBeTruthy()
+    const contact = within(card).getByRole('link', { name: /request quote/i })
+    expect(contact.getAttribute('href')).toContain('/contact-us?')
+    expect(contact.getAttribute('href')).toContain('intent=request-quote')
     expect(card.textContent).toContain('Dates and availability are confirmed with the team.')
     expect(card.textContent).toContain('Designed around your dates and service level.')
     expect(card.textContent).not.toMatch(/\bbook\b|guaranteed departure|available seats/i)
@@ -379,7 +389,9 @@ describe('WingSideJourneysClient', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Load more journeys' }))
     expect(screen.getAllByRole('link', { name: /journey|mekong/i })).toHaveLength(10)
 
-    expect(screen.getByRole('searchbox', { name: 'Search journeys' }).getAttribute('name')).toBe('q')
+    expect(screen.getByRole('searchbox', { name: 'Search journeys' }).getAttribute('name')).toBe(
+      'q',
+    )
   })
 
   it('sorts the current strict result set by duration without changing query state', () => {

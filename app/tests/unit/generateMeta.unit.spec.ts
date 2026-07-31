@@ -58,7 +58,7 @@ describe('generateMeta multisite locale contract', () => {
       })
 
       expect(metadata.alternates?.canonical, `${site.name} canonical`).toBe(
-        `${site.canonicalDomain}${locale === 'en' ? `${path === '/' ? '' : path}` : `/${locale}${path === '/' ? '' : path}`}`.replace(
+        `${site.canonicalDomain}${locale === site.defaultLocale ? `${path === '/' ? '' : path}` : `/${locale}${path === '/' ? '' : path}`}`.replace(
           /(?<!:)\/{2,}/g,
           '/',
         ),
@@ -191,7 +191,7 @@ describe('generateMeta multisite locale contract', () => {
 
   it('prioritizes the CMS SEO title and always identifies the current site', async () => {
     mocks.getCurrentSite.mockResolvedValue({
-      defaultLocale: 'vi',
+      defaultLocale: 'en',
       primaryDomain: 'wingside.vn',
       supportedLocales: ['vi', 'en'],
     })
@@ -223,7 +223,7 @@ describe('generateMeta multisite locale contract', () => {
 
     mocks.getCurrentSite.mockResolvedValue({
       additionalDomains: [],
-      defaultLocale: 'vi',
+      defaultLocale: 'en',
       primaryDomain: site.primaryDomain,
       supportedLocales: site.supportedLocales,
     })

@@ -178,11 +178,33 @@ const localSQLiteColumnRepairs = [
   },
   {
     table: 'tour_departures',
-    columns: [['price_basis', 'TEXT']],
+    columns: [
+      ['price_basis', 'TEXT'],
+      ['verified_at', 'TEXT'],
+      ['expires_at', 'TEXT'],
+      ['inventory_identity', 'TEXT'],
+      ['source_provenance_source_system', 'TEXT'],
+      ['source_provenance_source_url', 'TEXT'],
+      ['source_provenance_source_page_sha256', 'TEXT'],
+      ['source_provenance_source_row_sha256', 'TEXT'],
+      ['source_provenance_checked_at', 'TEXT'],
+      ['source_provenance_managed_by', 'TEXT'],
+    ],
   },
   {
     table: '_tour_departures_v',
-    columns: [['version_price_basis', 'TEXT']],
+    columns: [
+      ['version_price_basis', 'TEXT'],
+      ['version_verified_at', 'TEXT'],
+      ['version_expires_at', 'TEXT'],
+      ['version_inventory_identity', 'TEXT'],
+      ['version_source_provenance_source_system', 'TEXT'],
+      ['version_source_provenance_source_url', 'TEXT'],
+      ['version_source_provenance_source_page_sha256', 'TEXT'],
+      ['version_source_provenance_source_row_sha256', 'TEXT'],
+      ['version_source_provenance_checked_at', 'TEXT'],
+      ['version_source_provenance_managed_by', 'TEXT'],
+    ],
   },
   {
     table: 'pages_blocks_credentials_carousel_items',
@@ -407,6 +429,16 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
     }
     for (const statement of wingsSideHomeCurationSQLiteStatements) {
       db.exec(`${statement};`)
+    }
+    const tourDeparturesTable = db
+      .prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?')
+      .get('table', 'tour_departures') as { name?: string } | undefined
+    if (tourDeparturesTable?.name) {
+      db.exec(`
+        CREATE UNIQUE INDEX IF NOT EXISTS "tour_departures_inventory_identity_unique"
+        ON "tour_departures" ("inventory_identity")
+        WHERE "inventory_identity" IS NOT NULL;
+      `)
     }
     // Earlier US-050 bootstrap drafts created the short dbName tables with a
     // `tag` column. CREATE TABLE IF NOT EXISTS cannot repair that shape, so

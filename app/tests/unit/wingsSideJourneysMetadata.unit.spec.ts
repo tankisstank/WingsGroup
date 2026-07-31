@@ -48,7 +48,7 @@ describe('WingSide journeys route', () => {
     mocks.getCurrentSite.mockResolvedValue({
       additionalDomains: [],
       code: 'wing-side',
-      defaultLocale: 'vi',
+      defaultLocale: 'en',
       id: 3,
       primaryDomain: 'wingside.vn',
       supportedLocales: ['vi', 'en', 'it', 'es', 'pt'],

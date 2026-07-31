@@ -2162,7 +2162,7 @@ export interface TourDeparture {
    */
   verifiedAt?: string | null;
   /**
-   * Sau thời điểm này giá và availability tự động fail closed.
+   * Sau thời điểm này chỉ giá, ngày khởi hành và availability ngừng hiển thị; tour vẫn mở để khách liên hệ.
    */
   expiresAt?: string | null;
   inventoryIdentity?: string | null;

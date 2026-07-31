@@ -1,5 +1,35 @@
 # US-057 production group-commerce audit — 2026-07-31
 
+## Decision and implementation update — 2026-07-31
+
+Product accepted using the source-site prices and the recorded 22-tour
+classification for WingSide. The earlier commercial-authorization and hybrid
+model blockers are therefore resolved:
+
+- `hybrid` is now a first-class tour type and participates in both Small group
+  and Private filters.
+- Hybrid inventory may show a verified price and departure, but never a direct
+  `Book` action.
+- `verifiedAt`, `expiresAt`, deterministic inventory identity and managed
+  source provenance now govern every published commerce row.
+- Expiry closes only the commercial claims. The tour stays in the catalog and
+  becomes a contact path: group uses `Schedule on request` +
+  `Check availability`; hybrid/private uses quote/contact.
+- The card CTA is a real context-preserving Contact link. Tour identity stays
+  in structured metadata and does not prefill the visitor's message.
+
+A fresh public-source probe after implementation validated 21 exact visible
+rows: four for product 63, nine for hybrid product 65 and eight for product
+69. Product 69's former `2026-08-01` row was no longer present and was
+therefore removed from the activation candidate; its visible rows now begin
+at `2026-08-05`. The committed candidate inputs are
+`app/scripts/data/wingsside-group-commerce-v1/source-candidates.json`.
+
+This update does not assert a production write or deployment. The original
+read-only observations below remain the historical audit record; statements
+about missing runtime capabilities describe the state at audit time and are
+superseded by this update.
+
 ## Outcome
 
 The read-only production audit found a safe candidate set, but it did not
