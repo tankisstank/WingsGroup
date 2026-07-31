@@ -82,12 +82,16 @@ const createPayload = () => {
     id: number
     site: number
     tourType: string | null
+    destinationTags: string[]
+    travelStyles: string[]
     sourceProvenance: { sourceSystem: string; sourceId: string; importBatchId: string }
   }> = manifest.products.map((locked) => ({
     _status: 'published',
+    destinationTags: ['hanoi'],
     id: locked.productId,
     site: 3,
     tourType: null,
+    travelStyles: ['culture'],
     sourceProvenance: {
       sourceSystem: 'bestpricetravel',
       sourceId: locked.sourceId,
@@ -107,6 +111,23 @@ const createPayload = () => {
   }]
   let nextID = 901
   const payload = {
+    db: {
+      updateOne: vi.fn(async ({
+        collection,
+        data,
+        id,
+      }: {
+        collection: string
+        data: Record<string, unknown>
+        id: number | string
+      }) => {
+        if (collection !== 'tour-products') throw new Error(`Unexpected collection ${collection}`)
+        const row = tours.find((candidate) => String(candidate.id) === String(id))
+        if (!row) throw new Error(`Missing ${collection}:${id}`)
+        Object.assign(row, data)
+        return row
+      }),
+    },
     find: vi.fn(async ({ collection }: { collection: string }) => {
       if (collection === 'sites') return { docs: [site] }
       if (collection === 'tour-products') return { docs: tours }
@@ -208,6 +229,17 @@ describe('WingSide Payload group-commerce adapter', () => {
     })
     expect(receipt.createdDepartureIDs).toHaveLength(1)
     expect(fixture.departures.find(({ id }) => id === 900)).toBeTruthy()
+    expect(fixture.tours.every(({ destinationTags, travelStyles }) =>
+      JSON.stringify(destinationTags) === JSON.stringify(['hanoi']) &&
+      JSON.stringify(travelStyles) === JSON.stringify(['culture']))).toBe(true)
+    const payloadCalls = fixture.payload as unknown as {
+      db: { updateOne: ReturnType<typeof vi.fn> }
+      update: ReturnType<typeof vi.fn>
+    }
+    expect(payloadCalls.db.updateOne).toHaveBeenCalledTimes(
+      plan.entries.filter(({ after, before: entryBefore }) => entryBefore.tourType !== after.tourType).length,
+    )
+    expect(payloadCalls.update.mock.calls.some(([args]) => args.collection === 'tour-products')).toBe(false)
     await expect(verifyGroupCommercePayload({
       expectedState: 'after',
       manifest,
@@ -243,6 +275,9 @@ describe('WingSide Payload group-commerce adapter', () => {
     })
     expect(fixture.departures.map(({ id }) => id)).toEqual([900])
     expect(fixture.tours.every(({ tourType }) => tourType === null)).toBe(true)
+    expect(fixture.tours.every(({ destinationTags, travelStyles }) =>
+      JSON.stringify(destinationTags) === JSON.stringify(['hanoi']) &&
+      JSON.stringify(travelStyles) === JSON.stringify(['culture']))).toBe(true)
   })
 
   it('rejects expired apply in the adapter while preserving rollback recovery', async () => {

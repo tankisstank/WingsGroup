@@ -372,14 +372,18 @@ export const mutateGroupCommercePayload = async ({
     for (const entry of plan.entries) {
       if (alreadyTarget.has(entry.sourceId)) continue
       const target = mode === 'apply' ? entry.after : entry.before
-      await payload.update({
+      // This governed writer changes one non-localized scalar only. Payload's
+      // high-level partial update can reconcile omitted has-many field tables,
+      // which previously removed destination/style taxonomy rows in production.
+      // Keep the scalar write in the same transaction without invoking that
+      // field reconciliation. The signed plan and receipt are the audit record;
+      // this intentionally does not create a collection version.
+      await payload.db.updateOne({
         collection: 'tour-products',
-        context: commerceWriteContext,
         data: { tourType: target.tourType } as never,
         id: entry.productId,
-        locale: 'en',
-        overrideAccess: false,
         req,
+        returning: false,
       })
       const currentRows = new Map(entry.before.departures.map((row) => [groupCommerceDepartureIdentity(plan.siteCode, row), row]))
       const targetRows = new Map(target.departures.map((row) => [groupCommerceDepartureIdentity(plan.siteCode, row), row]))

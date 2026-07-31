@@ -1,6 +1,7 @@
 import config from '../../src/payload.config'
 import { isDepartureVerificationCurrent } from '../../src/tours/departureCommerce'
 import manifestJSON from '../data/wingsside-group-commerce-v1/classification.json'
+import { sql } from '@payloadcms/db-postgres'
 import { createLocalReq, getPayload, type PayloadRequest } from 'payload'
 
 import {
@@ -21,6 +22,52 @@ const manifest = manifestJSON as ClassificationManifest
 const releaseSha = 'c'.repeat(40)
 const payload = await getPayload({ config })
 const suffix = `${process.pid}-${Date.now()}`
+
+type RawTaxonomyRow = {
+  kind: 'destination' | 'style'
+  order: number
+  parent_id: number
+  value: string
+}
+
+const readRawTaxonomy = async () => {
+  const database = payload.db as unknown as {
+    drizzle: {
+      execute: (query: unknown) => Promise<{ rows?: RawTaxonomyRow[] } | RawTaxonomyRow[]>
+    }
+  }
+  const result = await database.drizzle.execute(sql`
+    SELECT 'destination'::text AS kind, parent_id, "order", value::text
+    FROM tour_products_destination_tags
+    UNION ALL
+    SELECT 'style'::text AS kind, parent_id, "order", value::text
+    FROM tour_products_travel_styles
+    ORDER BY parent_id, kind, "order", value
+  `)
+  const rows = Array.isArray(result) ? result : result.rows || []
+  const scopedIDs = new Set(manifest.products.map(({ productId }) => productId))
+  return rows
+    .filter(({ parent_id }) => scopedIDs.has(Number(parent_id)))
+    .map(({ kind, order, parent_id, value }) => ({
+      kind,
+      order: Number(order),
+      parentId: Number(parent_id),
+      value,
+    }))
+}
+
+const assertRawTaxonomy = async ({
+  expected,
+  label,
+}: {
+  expected: Awaited<ReturnType<typeof readRawTaxonomy>>
+  label: string
+}) => {
+  const actual = await readRawTaxonomy()
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    throw new Error(`${label} changed PostgreSQL taxonomy join rows outside the commerce plan`)
+  }
+}
 
 const bootstrapReq = await createLocalReq(
   {
@@ -112,11 +159,13 @@ const assertUnmanagedDeparture = async ({
 const runLifecycle = async ({
   label,
   plan,
+  rawTaxonomyBefore,
   req,
   unmanaged,
 }: {
   label: 'canary' | 'full'
   plan: ReturnType<typeof createGroupCommercePlan>
+  rawTaxonomyBefore: Awaited<ReturnType<typeof readRawTaxonomy>>
   req: PayloadRequest
   unmanaged: { id: number | string; inventoryIdentity: string }
 }) => {
@@ -129,6 +178,9 @@ const runLifecycle = async ({
     planSha256,
     req,
   })
+  // Read the physical join tables after the transaction commits and before any
+  // Payload-level verification can reuse the request/session state.
+  await assertRawTaxonomy({ expected: rawTaxonomyBefore, label: `${label} apply` })
   const after = await verifyGroupCommercePayload({
     expectedState: 'after',
     manifest,
@@ -188,6 +240,7 @@ const runLifecycle = async ({
     receipt,
     req,
   })
+  await assertRawTaxonomy({ expected: rawTaxonomyBefore, label: `${label} rollback` })
   const before = await verifyGroupCommercePayload({
     expectedState: 'before',
     manifest,
@@ -338,7 +391,7 @@ try {
     req,
   })
   if (!unmanaged.inventoryIdentity || isDepartureVerificationCurrent(unmanaged)) {
-    throw new Error('Expired unmanaged departure fixture is not fail-closed')
+    throw new Error('Expired unmanaged departure fixture must be excluded from commerce claims')
   }
 
   const before = await import('./wingsSideGroupCommercePayloadAdapter').then(
@@ -368,16 +421,22 @@ try {
   }
   const full = createGroupCommercePlan({ evidence, manifest, now, snapshot: before })
   const canary = deriveGroupCommerceCanaryPlan({ fullPlan: full, productId: 63 })
+  const rawTaxonomyBefore = await readRawTaxonomy()
+  if (rawTaxonomyBefore.length !== manifest.products.length * 2) {
+    throw new Error(`Expected 44 PostgreSQL taxonomy join rows, found ${rawTaxonomyBefore.length}`)
+  }
 
   const canaryResult = await runLifecycle({
     label: 'canary',
     plan: canary,
+    rawTaxonomyBefore,
     req,
     unmanaged: { id: unmanaged.id, inventoryIdentity: unmanaged.inventoryIdentity },
   })
   const fullResult = await runLifecycle({
     label: 'full',
     plan: full,
+    rawTaxonomyBefore,
     req,
     unmanaged: { id: unmanaged.id, inventoryIdentity: unmanaged.inventoryIdentity },
   })
