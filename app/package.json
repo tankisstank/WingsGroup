@@ -40,6 +40,7 @@
     "import:wingsside:tour-editorial:prod:plan": "pnpm run import:wingsside:tour-editorial:prod -- plan",
     "import:wingsside:tour-editorial:prod:rollback": "pnpm run import:wingsside:tour-editorial:prod -- rollback",
     "import:wingsside:tour-editorial:prod:verify": "pnpm run import:wingsside:tour-editorial:prod -- verify",
+    "lifecycle:wingsside:group-commerce": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/wingsside-group-commerce-lifecycle.ts",
     "parse:tours:doicanhviet": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/parse-doicanhviet.ts",
     "import:tours:doicanhviet": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-doicanhviet.ts",
     "import:tours:bestprice22": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-bestprice-22.ts",

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "siteCode": "wings-side",
+  "batchId": "wingsside-bestprice-22-20260717",
+  "authorizedSourceSystem": "bestpricetravel",
+  "products": [
+    { "productId": 62, "sourceId": "vietnam-tours--a-glimpse-of-the-central-vietnam-5-days", "classification": "group" },
+    { "productId": 63, "sourceId": "vietnam-tours--best-of-northern-vietnam-6-days", "classification": "group" },
+    { "productId": 64, "sourceId": "vietnam-tours--best-of-south-vietnam-5-days", "classification": "hybrid" },
+    { "productId": 65, "sourceId": "indochina-tours--best-of-vietnam-and-cambodia-15-days", "classification": "hybrid" },
+    { "productId": 66, "sourceId": "vietnam-tours--central-vietnam-adventure-4-days", "classification": null },
+    { "productId": 67, "sourceId": "vietnam-tours--da-nang-hoi-an-ba-na-hills-5-days", "classification": "group" },
+    { "productId": 68, "sourceId": "halong-bay-tours--discover-halong-bay-ninh-binh-2-days", "classification": "group" },
+    { "productId": 69, "sourceId": "vietnam-tours--highlights-of-vietnam-12-days", "classification": "group" },
+    { "productId": 70, "sourceId": "vietnam-tours--hoi-an-surrounding-and-beach-break-7days", "classification": "private" },
+    { "productId": 71, "sourceId": "mekong-delta-tours--luxury-mekong-delta-speedboat-tour-full-day", "classification": "group" },
+    { "productId": 72, "sourceId": "mekong-delta-tours--mekong-delta-gateway-3-days", "classification": "private" },
+    { "productId": 73, "sourceId": "mekong-delta-tours--mekong-delta-with-floating-market-2-days", "classification": "private" },
+    { "productId": 74, "sourceId": "ninh-binh-tours--ninh-binh-tam-coc-mua-cave-private-tour-from-hanoi", "classification": "private" },
+    { "productId": 75, "sourceId": "ninh-binh-tours--ninh-binh-hoa-lu-trang-an-full-day-private-tour", "classification": "private" },
+    { "productId": 76, "sourceId": "vietnam-tours--northern-vietnam-highlights-for-family-6-days", "classification": null },
+    { "productId": 77, "sourceId": "vietnam-tours--northern-vietnam-soft-adventure-8-days", "classification": null },
+    { "productId": 78, "sourceId": "vietnam-tours--deep-in-love-in-phu-quoc-5-days", "classification": "private" },
+    { "productId": 79, "sourceId": "sapa-tours--sapa-trekking-ethnic-market-3-days", "classification": "group" },
+    { "productId": 80, "sourceId": "vietnam-tours--southern-beauty-and-relaxation-8-days", "classification": "private" },
+    { "productId": 81, "sourceId": "vietnam-tours--vietnam-luxury-wellness-retreat-escape-8-days", "classification": "private" },
+    { "productId": 82, "sourceId": "vietnam-tours--vietnam-memorable-honeymoon-trip-8-days", "classification": "hybrid" },
+    { "productId": 83, "sourceId": "vietnam-tours--vietnam-at-a-glance-7-days", "classification": "hybrid" }
+  ]
+}
