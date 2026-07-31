@@ -361,7 +361,10 @@ const main = async () => {
   }
 }
 
-void main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error)
-  process.exitCode = 1
-})
+void main().then(
+  () => process.exit(0),
+  (error) => {
+    console.error(error instanceof Error ? error.message : error)
+    process.exit(1)
+  },
+)
