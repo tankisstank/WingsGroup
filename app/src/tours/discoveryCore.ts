@@ -478,17 +478,18 @@ export const projectDiscoveryTour = ({
     return null
   }
 
+  const publicSummary = sanitizeWingSidePublicText(tour.summary)
+  const publicTitle = sanitizeWingSidePublicText(tour.title)
+  if (!publicSummary || !publicTitle) return null
+
   const heroMedia = asMedia(tour.heroMedia)
-  if (!heroMedia || !nonEmpty(heroMedia.url) || !nonEmpty(heroMedia.alt)) return null
+  if (!heroMedia || !nonEmpty(heroMedia.url)) return null
   if (relationID(heroMedia.site as Relation) != null && !sameRelation(heroMedia.site, site))
     return null
 
   // Product-level `priceFrom` is never a per-person claim. Only a verified
   // departure with explicit `per-person` basis may become public commerce.
   const price: DiscoveryTourPriceState = { kind: 'on-request' }
-  const publicSummary = sanitizeWingSidePublicText(tour.summary)
-  const publicTitle = sanitizeWingSidePublicText(tour.title)
-  if (!publicSummary || !publicTitle) return null
 
   return {
     ...(projectGroupCommerce(tour) ? { commerce: projectGroupCommerce(tour) } : {}),
@@ -504,7 +505,7 @@ export const projectDiscoveryTour = ({
           : null,
     },
     hero: {
-      alt: heroMedia.alt.trim(),
+      alt: sanitizeWingSidePublicText(heroMedia.alt) || publicTitle,
       url: heroMedia.url.trim(),
     },
     href: getPageCanonicalPath(wrapperPage, locale),

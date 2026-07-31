@@ -212,7 +212,7 @@ describe('WingSide discovery pure contract', () => {
         site,
         tour: tour({ heroMedia: { alt: '', site: 3, url: '/x.jpg' } }),
       }),
-    ).toBeNull()
+    ).toMatchObject({ hero: { alt: 'Hanoi Private Tour', url: '/x.jpg' } })
     expect(
       projectDiscoveryTour({
         site,
