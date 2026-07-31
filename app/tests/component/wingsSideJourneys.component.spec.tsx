@@ -118,7 +118,9 @@ describe('WingSideJourneysClient', () => {
       'ws-journeys-card__duration',
     )
     expect(within(card).getByText('Private').className).toContain('ws-journeys-card__type')
-    expect(screen.getByText('No lost context')).toBeTruthy()
+    expect(
+      [...document.querySelectorAll('.ws-journeys__paths li strong')].map((item) => item.textContent),
+    ).toEqual(['Small-group tours', 'Private tours', 'No lost context'])
     expect(screen.getAllByText(/Schedule on request/)).toHaveLength(1)
     expect(document.querySelectorAll('.ws-journeys__faq details')).toHaveLength(4)
     expect(document.querySelectorAll('.ws-journeys__destination-tile img')).toHaveLength(1)

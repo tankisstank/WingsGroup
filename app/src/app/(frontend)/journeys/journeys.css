@@ -1,6 +1,6 @@
 body[data-site-code='wing-side'] .ws-journeys {
   --journey-ink: var(--site-foreground);
-  --journey-navy: color-mix(in oklch, var(--site-brand) 82%, #03172f);
+  --journey-navy: color-mix(in oklch, var(--site-brand) 82%, var(--site-foreground));
   --journey-gold: var(--site-gold);
   --journey-paper: var(--site-surface);
   background: var(--site-background); color: var(--journey-ink); overflow: clip;
@@ -9,9 +9,9 @@ body[data-site-code='wing-side'] .ws-journeys {
 .ws-journeys .kicker { color: var(--journey-gold); font-size: .72rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
 body[data-site-code='wing-side'] .ws-journeys__hero { position: relative; isolation: isolate; min-height: clamp(32rem, calc(100svh - 4rem), 47.5rem); display: grid; align-items: end; overflow: hidden; padding: clamp(4rem, 9vw, 7rem) max(1.5rem, calc((100% - 72rem)/2)) clamp(4rem, 8vw, 6.5rem); color: white; background: var(--journey-navy); }
 body[data-site-code='wing-side'] .ws-journeys__hero::before { content: ''; position: absolute; inset: 0; z-index: -2; background: url('/wingsside-hifi/hero-halong.jpg') center 44% / cover no-repeat; transform: scale(1.03); transition: transform 900ms ease; }
-body[data-site-code='wing-side'] .ws-journeys__hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, color-mix(in oklch, var(--journey-navy) 95%, transparent), color-mix(in oklch, var(--journey-navy) 65%, transparent) 46%, transparent 82%), linear-gradient(0deg, color-mix(in oklch, #03172f 68%, transparent), transparent 55%); }
+body[data-site-code='wing-side'] .ws-journeys__hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, color-mix(in oklch, var(--journey-navy) 95%, transparent), color-mix(in oklch, var(--journey-navy) 65%, transparent) 46%, transparent 82%), linear-gradient(0deg, color-mix(in oklch, var(--journey-navy) 68%, transparent), transparent 55%); }
 body[data-site-code='wing-side'] .ws-journeys__hero-copy { max-width: 43rem; }
-body[data-site-code='wing-side'] .ws-journeys__hero h1 { max-width: 12ch; margin: .45rem 0 0; font-family: var(--font-plus-jakarta-sans, inherit); font-size: clamp(3.2rem, 7.4vw, 6.75rem); font-weight: 800; letter-spacing: -.07em; line-height: .9; }
+body[data-site-code='wing-side'] .ws-journeys__hero h1 { max-width: 12ch; margin: .45rem 0 0; font-family: var(--font-wingside-hifi, inherit); font-size: clamp(3.2rem, 7.4vw, 6.75rem); font-weight: 800; letter-spacing: -.07em; line-height: .9; }
 body[data-site-code='wing-side'] .ws-journeys__hero p:not(.kicker) { max-width: 52ch; margin: 1.3rem 0 0; color: color-mix(in srgb, white 88%, transparent); font-size: clamp(1rem, 1.6vw, 1.18rem); line-height: 1.65; }
 body[data-site-code='wing-side'] .ws-journeys__actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.6rem; }
 body[data-site-code='wing-side'] .ws-journeys__hero .btn-ghost { color: white; background: color-mix(in srgb, white 10%, transparent); border-color: color-mix(in srgb, white 48%, transparent); backdrop-filter: blur(8px); }

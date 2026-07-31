@@ -477,12 +477,12 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
             <span>{v2.groupBody}</span>
           </li>
           <li>
-            <strong>{v2.contextTitle}</strong>
-            <span>{v2.contextBody}</span>
-          </li>
-          <li>
             <strong>{v2.privateTitle}</strong>
             <span>{v2.privateBody}</span>
+          </li>
+          <li>
+            <strong>{v2.contextTitle}</strong>
+            <span>{v2.contextBody}</span>
           </li>
         </ol>
       </section>
