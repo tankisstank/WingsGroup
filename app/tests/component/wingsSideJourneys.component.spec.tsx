@@ -160,6 +160,63 @@ describe('WingSideJourneysClient', () => {
     expect(card.textContent).not.toMatch(/\bbook\b|instant booking|available seats/i)
   })
 
+  it('degrades expired group inventory to the contact availability posture', () => {
+    render(
+      <WingSideJourneysClient
+        context={context({
+          result: {
+            ...context().result,
+            items: [
+              {
+                ...context().result.items[0]!,
+                currency: null,
+                price: { kind: 'on-request' },
+                priceFrom: null,
+                title: 'Group Northern Vietnam',
+                tourType: 'group',
+              },
+            ],
+          },
+        })}
+        locale="en"
+      />,
+    )
+
+    const card = screen.getByRole('link', { name: /group northern vietnam/i })
+    expect(within(card).getByText('Schedule on request')).toBeTruthy()
+    expect(within(card).getByText('Check availability')).toBeTruthy()
+    expect(card.textContent).not.toMatch(/\bbook\b|guaranteed departure|available seats/i)
+  })
+
+  it('degrades expired hybrid inventory to a private/contact quote posture', () => {
+    render(
+      <WingSideJourneysClient
+        context={context({
+          result: {
+            ...context().result,
+            items: [
+              {
+                ...context().result.items[0]!,
+                currency: null,
+                price: { kind: 'on-request' },
+                priceFrom: null,
+                title: 'Hybrid Northern Vietnam',
+                tourType: 'hybrid',
+              },
+            ],
+          },
+        })}
+        locale="en"
+      />,
+    )
+
+    const card = screen.getByRole('link', { name: /hybrid northern vietnam/i })
+    expect(within(card).getByText('Request quote')).toBeTruthy()
+    expect(card.textContent).toContain('Dates and availability are confirmed with the team.')
+    expect(card.textContent).toContain('Designed around your dates and service level.')
+    expect(card.textContent).not.toMatch(/\bbook\b|guaranteed departure|available seats/i)
+  })
+
   it('announces invalid values without raw values', () => {
     render(
       <WingSideJourneysClient
