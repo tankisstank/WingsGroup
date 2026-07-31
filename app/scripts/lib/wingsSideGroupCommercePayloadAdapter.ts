@@ -377,7 +377,8 @@ export const mutateGroupCommercePayload = async ({
         context: commerceWriteContext,
         data: { tourType: target.tourType } as never,
         id: entry.productId,
-        overrideAccess: true,
+        locale: 'en',
+        overrideAccess: false,
         req,
       })
       const currentRows = new Map(entry.before.departures.map((row) => [groupCommerceDepartureIdentity(plan.siteCode, row), row]))

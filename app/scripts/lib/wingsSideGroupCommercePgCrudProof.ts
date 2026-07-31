@@ -136,6 +136,22 @@ const runLifecycle = async ({
     plan,
     req,
   })
+  for (const entry of plan.entries) {
+    const product = await payload.findByID({
+      collection: 'tour-products',
+      depth: 0,
+      id: entry.productId,
+      locale: 'en',
+      overrideAccess: true,
+      req,
+    })
+    if (
+      JSON.stringify(product.destinationTags) !== JSON.stringify(['hanoi']) ||
+      JSON.stringify(product.travelStyles) !== JSON.stringify(['culture'])
+    ) {
+      throw new Error(`${label} apply changed taxonomy outside the signed commerce plan`)
+    }
+  }
   await assertUnmanagedDeparture({
     expectedIdentity: unmanaged.inventoryIdentity,
     id: unmanaged.id,
@@ -270,6 +286,7 @@ try {
         _status: 'published',
         durationDays: 1,
         durationNights: 0,
+        destinationTags: ['hanoi'],
         itineraryDays: [{ dayNumber: 1, summary: 'Scoped proof day.', title: 'Proof day' }],
         market: 'vietnam',
         site: site.id,
@@ -281,6 +298,7 @@ try {
         },
         summary: 'Exact scoped US057 PostgreSQL proof product.',
         title: `Group commerce product ${locked.productId}`,
+        travelStyles: ['culture'],
       },
       draft: true,
       locale: 'en',
