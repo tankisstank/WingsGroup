@@ -123,7 +123,15 @@ describe('WingSideJourneysClient', () => {
     ).toEqual(['Small-group tours', 'Private tours', 'No lost context'])
     expect(screen.getAllByText(/Schedule on request/)).toHaveLength(1)
     expect(document.querySelectorAll('.ws-journeys__faq details')).toHaveLength(4)
-    expect(document.querySelectorAll('.ws-journeys__destination-tile img')).toHaveLength(1)
+    expect(document.querySelectorAll('.ws-journeys__destination-tile img')).toHaveLength(3)
+    expect(
+      [...document.querySelectorAll('.ws-journeys__faq summary')].map((item) => item.textContent),
+    ).toEqual([
+      'What changes between a small-group and private tour?',
+      'Why does a group tour say “Schedule on request”?',
+      'Can I turn a group brief into a private journey?',
+      'Will my filters remain when I contact WingSide?',
+    ])
   })
 
   it('renders localized honest on-request price state without availability claims', () => {
@@ -183,6 +191,37 @@ describe('WingSideJourneysClient', () => {
     expect(card.textContent).toMatch(/741/)
     expect(card.textContent).toContain('Tailor-made quote')
     expect(card.textContent).not.toMatch(/\bbook\b|instant booking|available seats/i)
+    expect(document.querySelectorAll('.ws-journeys__destination-tile')).toHaveLength(3)
+  })
+
+  it('keeps current group inventory in inquiry mode when no verified booking capability exists', () => {
+    render(
+      <WingSideJourneysClient
+        context={context({
+          result: {
+            ...context().result,
+            items: [
+              {
+                ...context().result.items[0]!,
+                commerce: {
+                  availability: 'Guaranteed departure',
+                  canBook: false,
+                  departureDate: '2026-12-23',
+                  price: { currency: 'USD', kind: 'from', value: 741 },
+                },
+                title: 'Group Northern Vietnam',
+                tourType: 'group',
+              },
+            ],
+          },
+        })}
+        locale="en"
+      />,
+    )
+
+    const card = screen.getByRole('article', { name: /group northern vietnam/i })
+    expect(within(card).getByRole('link', { name: 'View departures' })).toBeTruthy()
+    expect(card.textContent).not.toMatch(/\bbook\b/i)
   })
 
   it('degrades expired group inventory to the contact availability posture', () => {
@@ -309,6 +348,7 @@ describe('WingSideJourneysClient', () => {
     expect(screen.getByTestId('journeys-active-filters').textContent).toContain('Business')
     expect(screen.getByTestId('journeys-active-filters').textContent).toContain('Sa Pa')
     expect(screen.getByTestId('journeys-active-filters').textContent).toContain('8-14 days')
+    expect(document.querySelectorAll('.ws-journeys__destination-tile')).toHaveLength(3)
     expect(screen.queryByRole('link', { name: /private hanoi/i })).toBeNull()
   })
 

@@ -28,6 +28,11 @@ const fieldOrder = ['q', 'type', 'destination', 'style', 'duration'] as const
 
 const journeysNavigationRestoreKey = 'wingsside:journeys:navigation-restore'
 const initialVisibleJourneyCount = 8
+const journeyDestinationRail = [
+  { image: '/wingsside-hifi/sapa.jpg', value: 'sapa' },
+  { image: '/wingsside-hifi/halong.jpg', value: 'halong' },
+  { image: '/wingsside-hifi/mekong.jpg', value: 'mekong' },
+] as const
 
 type JourneyFilterName = (typeof fieldOrder)[number]
 
@@ -93,22 +98,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
     uxCopy.journeys,
     uxCopy.preferencesConnector,
   )
-  const destinationTiles = useMemo(() => {
-    const findJourney = (value: (typeof tourDestinationOptions)[number]['value']) =>
-      context.result.items.find((item) => item.destinationTags.includes(value))
-    const selected: Array<{
-      journey: (typeof context.result.items)[number]
-      value: (typeof tourDestinationOptions)[number]['value']
-    }> = []
-    const addIfPresent = (value: (typeof tourDestinationOptions)[number]['value']) => {
-      if (selected.length === 3 || selected.some((tile) => tile.value === value)) return
-      const journey = findJourney(value)
-      if (journey) selected.push({ journey, value })
-    }
-    ;(['sapa', 'halong', 'mekong'] as const).forEach(addIfPresent)
-    tourDestinationOptions.forEach(({ value }) => addIfPresent(value))
-    return selected
-  }, [context])
+  const decisionFaq = v2.faq
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -452,7 +442,8 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
         )}
       </section>
       <section className="ws-journeys__paths">
-        <div>
+        <div className="ws-journeys__paths-shell">
+         <div>
           <p className="kicker">{v2.twoWays}</p>
           <h2>{v2.freedom}</h2>
           <p>{v2.pathBody}</p>
@@ -471,7 +462,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
             </SiteLink>
           </div>
         </div>
-        <ol>
+         <ol>
           <li>
             <strong>{v2.groupTitle}</strong>
             <span>{v2.groupBody}</span>
@@ -484,20 +475,21 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
             <strong>{v2.contextTitle}</strong>
             <span>{v2.contextBody}</span>
           </li>
-        </ol>
+         </ol>
+        </div>
       </section>
       <section className="ws-journeys__destinations">
         <div className="ws-journeys__section-head"><div><p className="kicker">{v2.explore}</p><h2>{v2.landscape}</h2></div></div>
         <div className="ws-journeys__destination-rail">
-          {destinationTiles.map(({ journey, value }) => (
+          {journeyDestinationRail.map(({ image, value }) => (
             <SiteLink
               key={value}
               className="ws-journeys__destination-tile"
               href={buildDiscoveryHref({ ...normalizedQuery, destination: value })}
             >
-              {/* Existing Payload media URLs are not statically known to Next Image. */}
+              {/* Existing approved public media is not statically known to Next Image. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt={journey.hero.alt} loading="lazy" src={journey.hero.url} />
+              <img alt={destinationLabels[locale][value]} loading="lazy" src={image} />
               <span><i>{v2.destinationKickers?.[value as keyof typeof v2.destinationKickers] || v2.explore}</i><strong>{destinationLabels[locale]?.[value] || value}</strong><small>{v2.destinationBody}</small></span>
             </SiteLink>
           ))}
@@ -509,7 +501,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
           <h2>{v2.facts}</h2>
         </div>
         <div>
-          {v2.faq.map((item) => (
+          {decisionFaq.map((item) => (
             <details key={item.q}>
               <summary>{item.q}</summary>
               <p>{item.a}</p>
@@ -779,11 +771,11 @@ const journeyV2Copy = {
         a: 'Groups use published departures; private journeys are shaped around you.',
       },
       {
-        q: 'Will my filters remain when I contact WingSide?',
-        a: 'Yes. Your validated journey context is retained.',
+        q: 'Why does a group tour say “Schedule on request”?',
+        a: 'We only show price, dates and availability when verified departure information is current. The journey remains available to check with our team.',
       },
-      { q: 'Why does a group tour say “Schedule on request”?', a: 'We only show price, dates and availability when verified departure information is current. The journey remains available to check with our team.' },
       { q: 'Can I turn a group brief into a private journey?', a: 'Yes. Keep the same destination, style and duration, then ask us to shape it around your preferred dates.' },
+      { q: 'Will my filters remain when I contact WingSide?', a: 'Yes. Your validated journey context is retained.' },
     ],
   },
   vi: {
@@ -829,11 +821,11 @@ const journeyV2Copy = {
         a: 'Tour nhóm theo lịch công bố; tour riêng được thiết kế cho bạn.',
       },
       {
-        q: 'Bộ lọc có được giữ khi liên hệ không?',
-        a: 'Có. Ngữ cảnh hành trình đã xác thực được giữ lại.',
+        q: 'Vì sao tour nhóm hiển thị “Lịch theo yêu cầu”?',
+        a: 'Giá, ngày và tình trạng chỗ chỉ hiển thị khi dữ liệu khởi hành còn được xác minh. Bạn vẫn có thể kiểm tra hành trình với đội ngũ.',
       },
-      { q: 'Vì sao tour nhóm hiển thị “Lịch theo yêu cầu”?', a: 'Giá, ngày và tình trạng chỗ chỉ hiển thị khi dữ liệu khởi hành còn được xác minh. Bạn vẫn có thể kiểm tra hành trình với đội ngũ.' },
       { q: 'Có thể chuyển tiêu chí tour nhóm thành tour riêng không?', a: 'Có. Giữ nguyên điểm đến, phong cách và thời lượng rồi nhờ chúng tôi thiết kế theo ngày đi của bạn.' },
+      { q: 'Bộ lọc có được giữ khi liên hệ không?', a: 'Có. Ngữ cảnh hành trình đã xác thực được giữ lại.' },
     ],
   },
   it: {
@@ -878,9 +870,9 @@ const journeyV2Copy = {
         q: 'Qual è la differenza?',
         a: 'I gruppi hanno partenze pubblicate; i privati sono su misura.',
       },
-      { q: 'I filtri restano?', a: 'Sì. Il contesto validato viene mantenuto.' },
       { q: 'Perché “Programma su richiesta”?', a: 'Prezzo, date e disponibilità compaiono solo quando le partenze sono verificate.' },
       { q: 'Posso rendere privato un brief di gruppo?', a: 'Sì. Mantieni le preferenze e chiedi una proposta privata.' },
+      { q: 'I filtri restano?', a: 'Sì. Il contesto validato viene mantenuto.' },
     ],
   },
   es: {
@@ -925,9 +917,9 @@ const journeyV2Copy = {
         q: '¿Cuál es la diferencia?',
         a: 'Los grupos usan salidas publicadas; los privados son a medida.',
       },
-      { q: '¿Se conservan los filtros?', a: 'Sí. Se conserva el contexto validado.' },
       { q: '¿Por qué “Calendario bajo solicitud”?', a: 'Solo mostramos precio, fechas y disponibilidad cuando una salida está verificada.' },
       { q: '¿Puedo convertir un viaje grupal en privado?', a: 'Sí. Conserva tus preferencias y solicita una propuesta privada.' },
+      { q: '¿Se conservan los filtros?', a: 'Sí. Se conserva el contexto validado.' },
     ],
   },
   pt: {
@@ -972,9 +964,9 @@ const journeyV2Copy = {
         q: 'Qual é a diferença?',
         a: 'Grupos usam partidas publicadas; privados são personalizados.',
       },
-      { q: 'Os filtros são mantidos?', a: 'Sim. O contexto validado é mantido.' },
       { q: 'Porque “Calendário sob consulta”?', a: 'Preço, datas e disponibilidade só são mostrados quando a partida é verificada.' },
       { q: 'Posso tornar privado um brief de grupo?', a: 'Sim. Mantenha as preferências e peça uma proposta privada.' },
+      { q: 'Os filtros são mantidos?', a: 'Sim. O contexto validado é mantido.' },
     ],
   },
 } as const
