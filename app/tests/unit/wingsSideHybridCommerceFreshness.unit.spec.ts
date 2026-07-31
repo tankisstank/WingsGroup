@@ -120,6 +120,34 @@ describe('WingSide hybrid commerce freshness contract', () => {
     expect(card?.commerce).toBeUndefined()
   })
 
+  it('keeps an expired group tour discoverable while removing every commerce claim', () => {
+    const card = projectDiscoveryTour({
+      site: 3,
+      tour: {
+        ...hybridTour({
+          availabilityBadge: 'Guaranteed departure',
+          availabilityStatus: 'open',
+          currency: 'USD',
+          departureDate: isoFromNow(30 * 86_400_000),
+          expiresAt: isoFromNow(-1),
+          priceBasis: 'per-person',
+          priceFrom: 741,
+          site: 3,
+          verifiedAt: isoFromNow(-86_400_000),
+        }),
+        primaryCTA: { mode: 'hold-seat' },
+        tourType: 'group',
+      },
+    })
+
+    expect(card).toMatchObject({
+      title: 'Northern Vietnam',
+      tourType: 'group',
+      price: { kind: 'on-request' },
+    })
+    expect(card?.commerce).toBeUndefined()
+  })
+
   it('builds one UTC date identity per site, tour and variant', () => {
     expect(
       buildDepartureInventoryIdentity({

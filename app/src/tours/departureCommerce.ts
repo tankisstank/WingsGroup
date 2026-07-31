@@ -58,7 +58,10 @@ export const buildDepartureInventoryIdentity = ({
   return `s:${siteID}|t:${tourID}|d:${date}|v:${variant}`
 }
 
-/** Commerce is visible only inside an explicit, current verification window. */
+/**
+ * Price, departure and availability claims are visible only inside a current
+ * verification window. Expiry does not remove the tour or its contact fallback.
+ */
 export const isDepartureVerificationCurrent = (
   departure: GovernedDepartureFreshness,
   now = Date.now(),

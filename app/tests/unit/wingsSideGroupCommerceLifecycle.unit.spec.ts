@@ -158,6 +158,38 @@ describe('WingSide group commerce production lifecycle', () => {
     expect(groupCommerceChecksum(restored.products)).toBe(groupCommerceChecksum(before.products))
   })
 
+  it('rejects an expired apply plan but still permits an exact rollback', () => {
+    const before = snapshot()
+    const plan = createGroupCommercePlan({ evidence: evidence(), manifest, now, snapshot: before })
+    const planSha256 = groupCommerceChecksum(plan)
+    const after = transitionGroupCommerceSnapshot({
+      expectedPlanSha256: planSha256,
+      mode: 'apply',
+      now,
+      plan,
+      snapshot: before,
+    })
+    const expiredNow = new Date('2026-07-31T17:30:00.000Z')
+    expect(() =>
+      transitionGroupCommerceSnapshot({
+        expectedPlanSha256: planSha256,
+        mode: 'apply',
+        now: expiredNow,
+        plan,
+        snapshot: before,
+      }),
+    ).toThrow(/Plan has expired/)
+    expect(() =>
+      transitionGroupCommerceSnapshot({
+        expectedPlanSha256: planSha256,
+        mode: 'rollback',
+        now: expiredNow,
+        plan,
+        snapshot: after,
+      }),
+    ).not.toThrow()
+  })
+
   it('fails closed on preimage drift and tampered plan hashes', () => {
     const before = snapshot()
     const plan = createGroupCommercePlan({ evidence: evidence(), manifest, now, snapshot: before })
@@ -197,6 +229,8 @@ describe('WingSide group commerce production lifecycle', () => {
           planSha256: groupCommerceChecksum(plan),
           releaseSha: plan.releaseSha,
           restoreEvidenceSha256: sha,
+          mode: 'apply',
+          now,
         }),
       ).not.toThrow()
       expect(() =>
@@ -206,8 +240,36 @@ describe('WingSide group commerce production lifecycle', () => {
           plan,
           planSha256: groupCommerceChecksum(plan),
           releaseSha: plan.releaseSha,
+          mode: 'apply',
+          now,
         }),
       ).toThrow(/backupSha256/)
+      expect(() =>
+        assertGroupCommerceProductionWriteGate({
+          backupSha256: sha,
+          confirm: 'CONFIRM_WINGSSIDE_GROUP_COMMERCE_PRODUCTION_WRITE',
+          expectedConfirm: 'CONFIRM_WINGSSIDE_GROUP_COMMERCE_PRODUCTION_WRITE',
+          plan,
+          planSha256: groupCommerceChecksum(plan),
+          releaseSha: plan.releaseSha,
+          restoreEvidenceSha256: sha,
+          mode: 'apply',
+          now: new Date(plan.expiresAt),
+        }),
+      ).toThrow(/apply plan has expired/)
+      expect(() =>
+        assertGroupCommerceProductionWriteGate({
+          backupSha256: sha,
+          confirm: 'CONFIRM_WINGSSIDE_GROUP_COMMERCE_PRODUCTION_ROLLBACK',
+          expectedConfirm: 'CONFIRM_WINGSSIDE_GROUP_COMMERCE_PRODUCTION_ROLLBACK',
+          plan,
+          planSha256: groupCommerceChecksum(plan),
+          releaseSha: plan.releaseSha,
+          restoreEvidenceSha256: sha,
+          mode: 'rollback',
+          now: new Date(plan.expiresAt),
+        }),
+      ).not.toThrow()
     } finally {
       vi.unstubAllEnvs()
     }

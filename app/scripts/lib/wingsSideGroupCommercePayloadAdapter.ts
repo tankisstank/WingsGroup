@@ -215,6 +215,60 @@ export type GroupCommerceMutationReceipt = {
   createdDepartureIDs: Array<number | string>
 }
 
+/**
+ * Recover a lost apply receipt only from an exact, fully verified postimage.
+ * This is read-only and never broadens rollback beyond departures introduced
+ * by the immutable plan.
+ */
+export const recoverGroupCommerceMutationReceipt = async ({
+  manifest,
+  payload,
+  plan,
+  planSha256,
+  req,
+}: {
+  manifest: ClassificationManifest
+  payload: Payload
+  plan: CommercePlan
+  planSha256: string
+  req: PayloadRequest
+}): Promise<GroupCommerceMutationReceipt> => {
+  if (groupCommerceChecksum(plan) !== planSha256) throw new Error('Production plan hash mismatch')
+  const snapshot = await readGroupCommercePayloadSnapshot({
+    manifest,
+    payload,
+    releaseSha: plan.releaseSha,
+    req,
+  })
+  const bySource = new Map(snapshot.products.map((product) => [product.sourceId, product]))
+  const createdDepartureIDs: Array<number | string> = []
+  for (const entry of plan.entries) {
+    const current = bySource.get(entry.sourceId)
+    if (!current || groupCommerceProductChecksum(current) !== entry.postimageSha256) {
+      throw new Error(`Receipt recovery requires exact after-state for ${entry.sourceId}`)
+    }
+    const beforeIdentities = new Set(
+      entry.before.departures.map((row) => groupCommerceDepartureIdentity(plan.siteCode, row)),
+    )
+    for (const row of current.departures) {
+      if (beforeIdentities.has(groupCommerceDepartureIdentity(plan.siteCode, row))) continue
+      if (row.recordId === undefined) {
+        throw new Error(`Receipt recovery found a created departure without a record ID for ${entry.sourceId}`)
+      }
+      createdDepartureIDs.push(row.recordId)
+    }
+  }
+  if (new Set(createdDepartureIDs.map(String)).size !== createdDepartureIDs.length) {
+    throw new Error('Receipt recovery found duplicate created departure IDs')
+  }
+  return {
+    schemaVersion: 1,
+    planSha256,
+    releaseSha: plan.releaseSha,
+    createdDepartureIDs,
+  }
+}
+
 const departureWriteData = ({
   departure,
   siteID,
@@ -255,6 +309,7 @@ export const mutateGroupCommercePayload = async ({
   planSha256,
   receipt,
   req,
+  now = new Date(),
 }: {
   manifest: ClassificationManifest
   mode: 'apply' | 'rollback'
@@ -263,8 +318,12 @@ export const mutateGroupCommercePayload = async ({
   planSha256: string
   receipt?: GroupCommerceMutationReceipt
   req: PayloadRequest
+  now?: Date
 }): Promise<GroupCommerceMutationReceipt> => {
   if (groupCommerceChecksum(plan) !== planSha256) throw new Error('Production plan hash mismatch')
+  if (mode === 'apply' && Date.parse(plan.expiresAt) <= now.getTime()) {
+    throw new Error('Production apply plan has expired')
+  }
   if (mode === 'rollback' && (!receipt || receipt.planSha256 !== planSha256 || receipt.releaseSha !== plan.releaseSha)) {
     throw new Error('Rollback requires the exact apply receipt')
   }
@@ -365,8 +424,13 @@ export const mutateGroupCommercePayload = async ({
       }
       for (const id of receipt!.createdDepartureIDs) {
         const row = await payload.findByID({ collection: 'tour-departures', depth: 0, id, overrideAccess: true, req })
-        if (departureSource(row as TourDeparture).managedBy !== WINGSSIDE_GROUP_COMMERCE_MANAGED_BY) {
-          throw new Error(`Refusing to delete unmanaged departure ${id}`)
+        const expected = planCreated.get(String(id))!
+        const currentRow = snapshotManagedDeparture({
+          departure: row as TourDeparture,
+          sourceId: expected.sourceId,
+        })
+        if (groupCommerceChecksum(currentRow) !== groupCommerceChecksum(expected)) {
+          throw new Error(`Refusing to delete changed managed departure ${id}`)
         }
         await payload.delete({ collection: 'tour-departures', id, overrideAccess: true, req })
       }

@@ -2,8 +2,9 @@ import type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/db-postgres'
 import { sql } from '@payloadcms/db-postgres'
 
 /**
- * Additive commerce governance. Legacy departures remain valid content records,
- * but fail closed for commerce until verified_at/expires_at are populated.
+ * Additive commerce governance. Legacy departures remain valid content records
+ * and tours remain contactable, but commercial claims stay hidden until
+ * verified_at/expires_at form a current verification window.
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`

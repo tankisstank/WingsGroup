@@ -407,7 +407,9 @@ export const transitionGroupCommerceSnapshot = ({
   snapshot: CommerceSnapshot
 }): CommerceSnapshot => {
   if (groupCommerceChecksum(plan) !== expectedPlanSha256) throw new Error('Plan SHA-256 does not match')
-  if (Date.parse(plan.expiresAt) <= now.getTime()) throw new Error('Plan has expired')
+  if (mode === 'apply' && Date.parse(plan.expiresAt) <= now.getTime()) {
+    throw new Error('Plan has expired')
+  }
   if (snapshot.releaseSha !== plan.releaseSha) throw new Error('Snapshot release SHA drifted')
   const replacements = new Map(plan.entries.map((entry) => [entry.sourceId, entry]))
   return {
@@ -452,6 +454,8 @@ export const assertGroupCommerceProductionWriteGate = ({
   planSha256,
   releaseSha,
   restoreEvidenceSha256,
+  mode,
+  now = new Date(),
 }: {
   backupSha256?: string
   confirm?: string
@@ -460,12 +464,17 @@ export const assertGroupCommerceProductionWriteGate = ({
   planSha256: string
   releaseSha?: string
   restoreEvidenceSha256?: string
+  mode: 'apply' | 'rollback'
+  now?: Date
 }) => {
   if (process.env.NODE_ENV !== 'production') throw new Error('Production write gate requires NODE_ENV=production')
   if (process.env.PAYLOAD_DB_PUSH !== 'false') throw new Error('Production write gate requires PAYLOAD_DB_PUSH=false')
   if (confirm !== expectedConfirm) throw new Error('Production write confirmation is missing')
   if (groupCommerceChecksum(plan) !== planSha256) throw new Error('Production plan hash mismatch')
   if (releaseSha !== plan.releaseSha) throw new Error('Immutable release SHA does not match plan')
+  if (mode === 'apply' && Date.parse(plan.expiresAt) <= now.getTime()) {
+    throw new Error('Production apply plan has expired')
+  }
   assertSha(backupSha256 || '', 'backupSha256')
   assertSha(restoreEvidenceSha256 || '', 'restoreEvidenceSha256')
 }

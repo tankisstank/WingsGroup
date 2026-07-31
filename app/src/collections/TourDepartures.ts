@@ -143,7 +143,8 @@ export const TourDepartures: CollectionConfig = {
       label: 'Hết hạn xác minh lúc',
       type: 'date',
       admin: {
-        description: 'Sau thời điểm này giá và availability tự động fail closed.',
+        description:
+          'Sau thời điểm này chỉ giá, ngày khởi hành và availability ngừng hiển thị; tour vẫn mở để khách liên hệ.',
         position: 'sidebar',
       },
     },

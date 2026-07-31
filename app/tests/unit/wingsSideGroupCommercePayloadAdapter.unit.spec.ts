@@ -31,6 +31,7 @@ vi.mock('payload', async (importOriginal) => ({
 import {
   mutateGroupCommercePayload,
   readGroupCommercePayloadSnapshot,
+  recoverGroupCommerceMutationReceipt,
   verifyGroupCommercePayload,
   WINGSSIDE_GROUP_COMMERCE_MANAGED_BY,
 } from '../../scripts/lib/wingsSideGroupCommercePayloadAdapter'
@@ -195,6 +196,7 @@ describe('WingSide Payload group-commerce adapter', () => {
       plan,
       planSha256,
       req,
+      now: new Date('2026-07-31T10:00:00.000Z'),
     })
     expect(receipt.createdDepartureIDs).toHaveLength(1)
     expect(fixture.departures.find(({ id }) => id === 900)).toBeTruthy()
@@ -212,8 +214,16 @@ describe('WingSide Payload group-commerce adapter', () => {
       plan,
       planSha256,
       req,
+      now: new Date('2026-07-31T10:00:00.000Z'),
     })
     expect(second.createdDepartureIDs).toEqual(receipt.createdDepartureIDs)
+    await expect(recoverGroupCommerceMutationReceipt({
+      manifest,
+      payload: fixture.payload,
+      plan,
+      planSha256,
+      req,
+    })).resolves.toEqual(receipt)
     await mutateGroupCommercePayload({
       manifest,
       mode: 'rollback',
@@ -225,6 +235,96 @@ describe('WingSide Payload group-commerce adapter', () => {
     })
     expect(fixture.departures.map(({ id }) => id)).toEqual([900])
     expect(fixture.tours.every(({ tourType }) => tourType === null)).toBe(true)
+  })
+
+  it('rejects expired apply in the adapter while preserving rollback recovery', async () => {
+    const fixture = createPayload()
+    const req = {} as never
+    const before = await readGroupCommercePayloadSnapshot({ manifest, payload: fixture.payload, releaseSha, req })
+    const plan = createGroupCommercePlan({
+      evidence: evidence(),
+      manifest,
+      now: new Date('2026-07-31T10:00:00.000Z'),
+      snapshot: before,
+    })
+    await expect(mutateGroupCommercePayload({
+      manifest,
+      mode: 'apply',
+      payload: fixture.payload,
+      plan,
+      planSha256: groupCommerceChecksum(plan),
+      req,
+      now: new Date(plan.expiresAt),
+    })).rejects.toThrow(/apply plan has expired/)
+    expect(transaction.init).not.toHaveBeenCalled()
+  })
+
+  it('refuses receipt recovery unless every plan entry is at the exact after-state', async () => {
+    const fixture = createPayload()
+    const req = {} as never
+    const before = await readGroupCommercePayloadSnapshot({ manifest, payload: fixture.payload, releaseSha, req })
+    const plan = createGroupCommercePlan({
+      evidence: evidence(),
+      manifest,
+      now: new Date('2026-07-31T10:00:00.000Z'),
+      snapshot: before,
+    })
+    await expect(recoverGroupCommerceMutationReceipt({
+      manifest,
+      payload: fixture.payload,
+      plan,
+      planSha256: groupCommerceChecksum(plan),
+      req,
+    })).rejects.toThrow(/exact after-state/)
+  })
+
+  it('revalidates the full managed row immediately before rollback deletion', async () => {
+    const fixture = createPayload()
+    const req = {} as never
+    const before = await readGroupCommercePayloadSnapshot({ manifest, payload: fixture.payload, releaseSha, req })
+    const plan = createGroupCommercePlan({
+      evidence: evidence(),
+      manifest,
+      now: new Date('2026-07-31T10:00:00.000Z'),
+      snapshot: before,
+    })
+    const planSha256 = groupCommerceChecksum(plan)
+    const receipt = await mutateGroupCommercePayload({
+      manifest,
+      mode: 'apply',
+      payload: fixture.payload,
+      plan,
+      planSha256,
+      req,
+      now: new Date('2026-07-31T10:00:00.000Z'),
+    })
+    const mutablePayload = fixture.payload as unknown as {
+      findByID: (args: { id: number | string }) => Promise<
+        Record<string, unknown> & { sourceProvenance?: Record<string, unknown> }
+      >
+    }
+    const originalFindByID = mutablePayload.findByID
+    mutablePayload.findByID = vi.fn(async (args: { id: number | string }) => {
+      const row = await originalFindByID(args)
+      return {
+        ...row,
+        sourceProvenance: {
+          ...(row.sourceProvenance || {}),
+          sourceRowSha256: 'f'.repeat(64),
+        },
+      }
+    })
+    await expect(mutateGroupCommercePayload({
+      manifest,
+      mode: 'rollback',
+      payload: fixture.payload,
+      plan,
+      planSha256,
+      receipt,
+      req,
+      now: new Date(plan.expiresAt),
+    })).rejects.toThrow(/changed managed departure/)
+    expect(fixture.departures.some(({ id }) => id === receipt.createdDepartureIDs[0])).toBe(true)
   })
 
   it('refuses preimage drift without touching unmanaged rows', async () => {

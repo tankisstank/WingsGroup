@@ -20,6 +20,7 @@ import {
 import {
   mutateGroupCommercePayload,
   readGroupCommercePayloadSnapshot,
+  recoverGroupCommerceMutationReceipt,
   verifyGroupCommercePayload,
   type GroupCommerceMutationReceipt,
 } from './lib/wingsSideGroupCommercePayloadAdapter'
@@ -29,7 +30,7 @@ import {
 } from './lib/wingsSideBestPriceEvidence'
 import { assertWingsSideEditorialProductionWriteGuard } from './lib/wingsSideReleaseWriteGuard'
 
-type Phase = 'apply' | 'capture-evidence' | 'plan' | 'rollback' | 'verify'
+type Phase = 'apply' | 'capture-evidence' | 'plan' | 'recover-receipt' | 'rollback' | 'verify'
 
 const value = (name: string) => {
   const inline = process.argv.find((argument) => argument.startsWith(`${name}=`))
@@ -119,13 +120,14 @@ const assertMutationGates = ({
     planSha256,
     releaseSha: args.releaseSha,
     restoreEvidenceSha256: args.restoreEvidenceSha256,
+    mode: expectedConfirm === WINGSSIDE_GROUP_COMMERCE_APPLY_CONFIRM ? 'apply' : 'rollback',
   })
 }
 
 const main = async () => {
   const phase = process.argv[2] as Phase
-  if (!['apply', 'capture-evidence', 'plan', 'rollback', 'verify'].includes(phase)) {
-    throw new Error('Choose capture-evidence, plan, apply, verify, or rollback')
+  if (!['apply', 'capture-evidence', 'plan', 'recover-receipt', 'rollback', 'verify'].includes(phase)) {
+    throw new Error('Choose capture-evidence, plan, apply, recover-receipt, verify, or rollback')
   }
   const manifest = await readJSON<ClassificationManifest>(
     value('--classification') ||
@@ -162,6 +164,18 @@ const main = async () => {
     const planSha256 = String(value('--plan-sha256') || '')
     if (groupCommerceChecksum(plan) !== planSha256) throw new Error('Plan SHA-256 does not match')
     if (releaseSha !== plan.releaseSha) throw new Error('Release SHA does not match the immutable plan')
+    if (phase === 'recover-receipt') {
+      const result = await recoverGroupCommerceMutationReceipt({
+        manifest,
+        payload,
+        plan,
+        planSha256,
+        req,
+      })
+      const output = await writeJSON(value('--output'), result)
+      console.log(JSON.stringify({ output, phase, created: result.createdDepartureIDs.length }))
+      return
+    }
     if (phase === 'verify') {
       const result = await verifyGroupCommercePayload({
         expectedState: value('--state') === 'before' ? 'before' : 'after',
