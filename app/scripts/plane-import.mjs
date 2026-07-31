@@ -1441,6 +1441,9 @@ function toProofStatusLabel(story, mapping = {}) {
 }
 
 function toPlaneStateName(story, mapping = {}) {
+  if (Object.values(STATE_NAME_MAP).includes(mapping.planeStateOverride)) {
+    return mapping.planeStateOverride
+  }
   if (story.status === 'planned') {
     return 'Đã lên kế hoạch'
   }

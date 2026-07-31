@@ -1,7 +1,7 @@
 # US-057 Validation
 
-Production implementation and QA completed on 2026-07-31. US057 remains
-`in_progress` / `Chờ xác nhận` until stakeholder acceptance.
+Production implementation and QA completed on 2026-07-31. Stakeholder
+confirmation was received, so US057 is accepted and complete.
 
 The implementation is a surgical upgrade of the existing `/journeys` route,
 Payload query, URL state and tenant shell. It adds strict localized
@@ -116,4 +116,5 @@ deletion.
 No unresolved schema migration is required. Some production tours still lack
 approved card media; the UI keeps a neutral media panel and derives alt text
 from the real tour title rather than inventing an asset or claim. Stakeholder
-confirmation is the only remaining story-state gate.
+Stakeholder confirmation was the only remaining story-state gate and is now
+recorded as received.

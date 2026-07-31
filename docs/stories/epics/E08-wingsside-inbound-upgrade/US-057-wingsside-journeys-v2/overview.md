@@ -2,9 +2,9 @@
 
 ## Status
 
-in progress / Chờ xác nhận — production data activation and app promotion
-completed on 2026-07-31. The story remains open for stakeholder confirmation;
-it is not auto-promoted to accepted or complete.
+implemented / Hoàn tất — stakeholder confirmed the production delivery on
+2026-07-31. The published release and governed production data remain the
+accepted US057 baseline.
 
 ## Lane
 
