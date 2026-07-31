@@ -56,11 +56,6 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
     context: { discovery: normalizedQuery, source: 'journeys' },
     intent: 'inquiry',
   })
-  const contactHref = buildTourEnquiryHref({
-    basePath: '/contact-us',
-    context: { discovery: normalizedQuery, source: 'journeys' },
-    intent: 'contact',
-  })
   const privatePlanHref = buildTourEnquiryHref({
     basePath: '/plan-your-trip',
     context: { discovery: { ...normalizedQuery, type: 'private' }, source: 'journeys' },
@@ -98,6 +93,22 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
     uxCopy.journeys,
     uxCopy.preferencesConnector,
   )
+  const destinationTiles = useMemo(() => {
+    const findJourney = (value: (typeof tourDestinationOptions)[number]['value']) =>
+      context.result.items.find((item) => item.destinationTags.includes(value))
+    const selected: Array<{
+      journey: (typeof context.result.items)[number]
+      value: (typeof tourDestinationOptions)[number]['value']
+    }> = []
+    const addIfPresent = (value: (typeof tourDestinationOptions)[number]['value']) => {
+      if (selected.length === 3 || selected.some((tile) => tile.value === value)) return
+      const journey = findJourney(value)
+      if (journey) selected.push({ journey, value })
+    }
+    ;(['sapa', 'halong', 'mekong'] as const).forEach(addIfPresent)
+    tourDestinationOptions.forEach(({ value }) => addIfPresent(value))
+    return selected
+  }, [context])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -169,21 +180,28 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
     <div className="ws-journeys" data-testid="wingsside-journeys">
       <section className="ws-journeys__hero" data-testid="journeys-hero">
         <div className="ws-journeys__hero-copy">
-          <p className="kicker">WingSide</p>
-          <h1>{copy.title}</h1>
-          <p>{copy.metaDescription}</p>
+          <p className="kicker">{v2.heroKicker}</p>
+          <h1>{v2.heroTitle}</h1>
+          <p>{v2.heroBody}</p>
           <div className="ws-journeys__actions">
-            <SiteLink className="btn btn-primary" href={planHref}>
-              {copy.plan}
-            </SiteLink>
-            <SiteLink className="btn btn-ghost" href={contactHref}>
-              {copy.contact}
+            <a className="btn btn-primary" href="#journey-filters">
+              {v2.exploreTours}
+            </a>
+            <SiteLink className="btn btn-ghost" href={privatePlanHref}>
+              {v2.private}
             </SiteLink>
           </div>
         </div>
+        <span className="ws-journeys__hero-caption">{v2.heroCaption}</span>
       </section>
 
-      <section aria-busy={isPending} aria-label={copy.filters} className="ws-journeys__filters">
+      <section aria-busy={isPending} aria-label={copy.filters} className="ws-journeys__filter-section" id="journey-filters">
+       <div className="ws-journeys__filters">
+        <div className="ws-journeys__filter-head">
+          <div><h2>{v2.findTitle}</h2><p>{v2.findBody}</p></div>
+          <SiteLink className="ws-journeys__reset" href="/journeys">{copy.reset}</SiteLink>
+        </div>
+        <div className="ws-journeys__filter-grid">
         <label className="ws-journeys-filter ws-journeys-filter--search">
           <span>{uxCopy.search}</span>
           <input
@@ -240,9 +258,13 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
           }))}
           value={normalizedQuery.duration || ''}
         />
-        <SiteLink className="ws-journeys__reset" href="/journeys">
-          {copy.reset}
-        </SiteLink>
+          <a className="btn btn-ghost ws-journeys__show" href="#journeys-results-title">{v2.showJourneys}</a>
+        </div>
+        <div className="ws-journeys__filter-brief" aria-label={copy.activeFilters}>
+          <span>{v2.yourBrief}</span>
+          {activeFilters.length ? activeFilters.map((label) => <i key={label}>{label}</i>) : <i>{tourTypeCopy.all}</i>}
+        </div>
+       </div>
       </section>
 
       <p aria-live="polite" className="ws-journeys__sr-status" role="status">
@@ -337,14 +359,14 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                               ? `${tourTypeCopy.group} / ${tourTypeCopy.private}`
                               : tourTypeCopy.private}
                         </i>
+                        <i className="ws-journeys-card__duration">
+                          {formatJourneyDuration(item.duration, locale)}
+                        </i>
                       </span>
                       <span className="ws-journeys-card__body">
-                        <span className="ws-journeys-card__meta">
-                          {item.routeLabel ? `${item.routeLabel} · ` : ''}
-                          {formatJourneyDuration(item.duration, locale)}
-                        </span>
-                        <strong>{item.title}</strong>
-                        <span>{item.summary}</span>
+                        <span className="ws-journeys-card__meta">{item.routeLabel || destinationLabels[locale][item.destinationTags[0] || 'hanoi']}</span>
+                        <strong className="ws-journeys-card__title">{item.title}</strong>
+                        <span className="ws-journeys-card__summary">{item.summary}</span>
                         <span className="ws-journeys-card__price">
                           <span>
                             {item.tourType === 'hybrid'
@@ -455,21 +477,28 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
             <span>{v2.groupBody}</span>
           </li>
           <li>
+            <strong>{v2.contextTitle}</strong>
+            <span>{v2.contextBody}</span>
+          </li>
+          <li>
             <strong>{v2.privateTitle}</strong>
             <span>{v2.privateBody}</span>
           </li>
         </ol>
       </section>
       <section className="ws-journeys__destinations">
-        <p className="kicker">{v2.explore}</p>
-        <h2>{v2.landscape}</h2>
-        <div>
-          {tourDestinationOptions.slice(0, 3).map(({ value }) => (
+        <div className="ws-journeys__section-head"><div><p className="kicker">{v2.explore}</p><h2>{v2.landscape}</h2></div></div>
+        <div className="ws-journeys__destination-rail">
+          {destinationTiles.map(({ journey, value }) => (
             <SiteLink
               key={value}
+              className="ws-journeys__destination-tile"
               href={buildDiscoveryHref({ ...normalizedQuery, destination: value })}
             >
-              {destinationLabels[locale][value]}
+              {/* Existing Payload media URLs are not statically known to Next Image. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img alt={journey.hero.alt} loading="lazy" src={journey.hero.url} />
+              <span><i>{v2.destinationKickers?.[value as keyof typeof v2.destinationKickers] || v2.explore}</i><strong>{destinationLabels[locale]?.[value] || value}</strong><small>{v2.destinationBody}</small></span>
             </SiteLink>
           ))}
         </div>
@@ -489,7 +518,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
         </div>
       </section>
       <section className="ws-journeys__final">
-        <h2>{v2.final}</h2>
+        <div><p className="kicker">{v2.twoWays}</p><h2>{v2.final}</h2><p>{v2.finalBody}</p></div>
         <div className="ws-journeys__actions">
           <SiteLink
             className="btn btn-primary"
@@ -708,18 +737,30 @@ export const formatJourneyDeparture = (value: string, locale: WingSideJourneyLoc
 
 const journeyV2Copy = {
   en: {
+    contextBody: 'Your filters move into availability checks or private planning—without asking you to repeat them.',
+    contextTitle: 'No lost context',
+    destinationBody: 'Journeys shaped by the place, not a generic template.',
+    destinationKickers: { hanoi: 'Capital north', halong: 'Coastal north', sapa: 'Mountain north', mekong: 'River south' },
     availability: 'Check availability',
     before: 'Before you choose',
     book: 'Book',
     departures: 'View departures',
     explore: 'Explore by place',
+    exploreTours: 'Explore tours',
     facts: 'A better choice starts with the right facts.',
     final: 'Travel together—or make it entirely yours.',
+    finalBody: 'Start with a published small-group route, or let us shape a private journey around your dates.',
     freedom: 'Choose the freedom that fits.',
     groupBody: 'Shared departures with published facts when available.',
     groupTitle: 'Small-group tours',
+    heroBody: 'Join a small group on scheduled dates, or shape a private journey around your own pace.',
+    heroCaption: 'Ha Long Bay · group & private tours',
+    heroKicker: 'Small groups + private journeys',
+    heroTitle: 'Vietnam journeys for the way you travel.',
     groups: 'Explore group tours',
     landscape: 'Start with a landscape.',
+    findBody: 'Choose a group departure or a private journey, then refine your search.',
+    findTitle: 'Find the right tour',
     pathBody: 'Join a scheduled group or shape a private route around your dates.',
     private: 'Design a private tour',
     privateBody: 'Flexible dates, pace and service level.',
@@ -729,7 +770,9 @@ const journeyV2Copy = {
     requestQuote: 'Request quote',
     schedule: 'Schedule on request',
     scheduleBody: 'Dates and availability are confirmed with the team.',
+    showJourneys: 'Show journeys',
     twoWays: 'Two ways to travel',
+    yourBrief: 'Your brief',
     faq: [
       {
         q: 'What changes between a small-group and private tour?',
@@ -739,21 +782,35 @@ const journeyV2Copy = {
         q: 'Will my filters remain when I contact WingSide?',
         a: 'Yes. Your validated journey context is retained.',
       },
+      { q: 'Why does a group tour say “Schedule on request”?', a: 'We only show price, dates and availability when verified departure information is current. The journey remains available to check with our team.' },
+      { q: 'Can I turn a group brief into a private journey?', a: 'Yes. Keep the same destination, style and duration, then ask us to shape it around your preferred dates.' },
     ],
   },
   vi: {
+    contextBody: 'Bộ lọc được chuyển vào yêu cầu kiểm tra chỗ hoặc thiết kế riêng, không cần nhập lại.',
+    contextTitle: 'Không mất ngữ cảnh',
+    destinationBody: 'Hành trình bắt đầu từ nơi chốn, không phải một mẫu chung.',
+    destinationKickers: { hanoi: 'Thủ đô phía bắc', halong: 'Biển phía bắc', sapa: 'Núi phía bắc', mekong: 'Sông nước phía nam' },
     availability: 'Kiểm tra chỗ',
     before: 'Trước khi chọn',
     book: 'Đặt chỗ',
     departures: 'Xem khởi hành',
     explore: 'Khám phá theo nơi chốn',
+    exploreTours: 'Khám phá tour',
     facts: 'Lựa chọn tốt hơn bắt đầu từ thông tin đúng.',
     final: 'Đi cùng nhau—hoặc theo cách của riêng bạn.',
+    finalBody: 'Bắt đầu với hành trình nhóm có lịch, hoặc để chúng tôi thiết kế chuyến đi riêng theo ngày của bạn.',
     freedom: 'Chọn sự tự do phù hợp.',
     groupBody: 'Khởi hành chung với thông tin đã công bố.',
     groupTitle: 'Tour nhóm nhỏ',
+    heroBody: 'Tham gia nhóm nhỏ theo lịch hoặc thiết kế hành trình riêng theo nhịp của bạn.',
+    heroCaption: 'Vịnh Hạ Long · tour nhóm và tour riêng',
+    heroKicker: 'Nhóm nhỏ + hành trình riêng',
+    heroTitle: 'Hành trình Việt Nam theo cách bạn muốn đi.',
     groups: 'Khám phá tour nhóm',
     landscape: 'Bắt đầu từ một vùng đất.',
+    findBody: 'Chọn chuyến đi theo nhóm hoặc riêng, rồi tinh chỉnh tìm kiếm.',
+    findTitle: 'Tìm tour phù hợp',
     pathBody: 'Tham gia nhóm hoặc thiết kế hành trình riêng.',
     private: 'Thiết kế tour riêng',
     privateBody: 'Linh hoạt ngày đi, nhịp độ và dịch vụ.',
@@ -763,7 +820,9 @@ const journeyV2Copy = {
     requestQuote: 'Yêu cầu báo giá',
     schedule: 'Lịch theo yêu cầu',
     scheduleBody: 'Đội ngũ xác nhận ngày và tình trạng chỗ.',
+    showJourneys: 'Xem hành trình',
     twoWays: 'Hai cách để du lịch',
+    yourBrief: 'Tiêu chí của bạn',
     faq: [
       {
         q: 'Tour nhóm và tour riêng khác nhau thế nào?',
@@ -773,21 +832,35 @@ const journeyV2Copy = {
         q: 'Bộ lọc có được giữ khi liên hệ không?',
         a: 'Có. Ngữ cảnh hành trình đã xác thực được giữ lại.',
       },
+      { q: 'Vì sao tour nhóm hiển thị “Lịch theo yêu cầu”?', a: 'Giá, ngày và tình trạng chỗ chỉ hiển thị khi dữ liệu khởi hành còn được xác minh. Bạn vẫn có thể kiểm tra hành trình với đội ngũ.' },
+      { q: 'Có thể chuyển tiêu chí tour nhóm thành tour riêng không?', a: 'Có. Giữ nguyên điểm đến, phong cách và thời lượng rồi nhờ chúng tôi thiết kế theo ngày đi của bạn.' },
     ],
   },
   it: {
+    contextBody: 'I tuoi filtri passano alla verifica o alla pianificazione privata senza ripetizioni.',
+    contextTitle: 'Nessun contesto perso',
+    destinationBody: 'Viaggi ispirati dal luogo, non da un modello generico.',
+    destinationKickers: { hanoi: 'Capitale del nord', halong: 'Costa del nord', sapa: 'Montagne del nord', mekong: 'Fiume del sud' },
     availability: 'Verifica disponibilità',
     before: 'Prima di scegliere',
     book: 'Prenota',
     departures: 'Vedi partenze',
     explore: 'Esplora per luogo',
+    exploreTours: 'Esplora tour',
     facts: 'Una scelta migliore parte dai fatti giusti.',
     final: 'Viaggia insieme—o rendilo completamente tuo.',
+    finalBody: 'Inizia con un percorso di gruppo pubblicato o lascia che creiamo un viaggio privato per le tue date.',
     freedom: 'Scegli la libertà giusta.',
     groupBody: 'Partenze condivise con fatti pubblicati.',
     groupTitle: 'Tour per piccoli gruppi',
+    heroBody: 'Unisciti a un piccolo gruppo o crea un viaggio privato al tuo ritmo.',
+    heroCaption: 'Baia di Ha Long · tour di gruppo e privati',
+    heroKicker: 'Piccoli gruppi + viaggi privati',
+    heroTitle: 'Viaggi in Vietnam per il tuo modo di viaggiare.',
     groups: 'Esplora tour di gruppo',
     landscape: 'Inizia da un paesaggio.',
+    findBody: 'Scegli un gruppo o un viaggio privato, quindi perfeziona la ricerca.',
+    findTitle: 'Trova il tour giusto',
     pathBody: 'Unisciti a un gruppo o crea un itinerario privato.',
     private: 'Crea un tour privato',
     privateBody: 'Date, ritmo e servizio flessibili.',
@@ -797,28 +870,44 @@ const journeyV2Copy = {
     requestQuote: 'Richiedi preventivo',
     schedule: 'Programma su richiesta',
     scheduleBody: 'Date e disponibilità sono confermate dal team.',
+    showJourneys: 'Mostra viaggi',
     twoWays: 'Due modi di viaggiare',
+    yourBrief: 'Le tue preferenze',
     faq: [
       {
         q: 'Qual è la differenza?',
         a: 'I gruppi hanno partenze pubblicate; i privati sono su misura.',
       },
       { q: 'I filtri restano?', a: 'Sì. Il contesto validato viene mantenuto.' },
+      { q: 'Perché “Programma su richiesta”?', a: 'Prezzo, date e disponibilità compaiono solo quando le partenze sono verificate.' },
+      { q: 'Posso rendere privato un brief di gruppo?', a: 'Sì. Mantieni le preferenze e chiedi una proposta privata.' },
     ],
   },
   es: {
+    contextBody: 'Tus filtros pasan a la consulta o al diseño privado sin que debas repetirlos.',
+    contextTitle: 'Sin perder el contexto',
+    destinationBody: 'Viajes que nacen del lugar, no de una plantilla genérica.',
+    destinationKickers: { hanoi: 'Capital del norte', halong: 'Costa norte', sapa: 'Montaña norte', mekong: 'Río del sur' },
     availability: 'Consultar disponibilidad',
     before: 'Antes de elegir',
     book: 'Reservar',
     departures: 'Ver salidas',
     explore: 'Explora por lugar',
+    exploreTours: 'Explorar tours',
     facts: 'Una mejor elección empieza con los datos adecuados.',
     final: 'Viaja en grupo—o hazlo completamente tuyo.',
+    finalBody: 'Comienza con una ruta de grupo publicada o deja que creemos un viaje privado para tus fechas.',
     freedom: 'Elige la libertad que encaja.',
     groupBody: 'Salidas compartidas con datos publicados.',
     groupTitle: 'Tours en grupo pequeño',
+    heroBody: 'Únete a un grupo pequeño o diseña un viaje privado a tu propio ritmo.',
+    heroCaption: 'Bahía de Ha Long · tours en grupo y privados',
+    heroKicker: 'Grupos pequeños + viajes privados',
+    heroTitle: 'Viajes por Vietnam para tu forma de viajar.',
     groups: 'Explorar tours en grupo',
     landscape: 'Empieza con un paisaje.',
+    findBody: 'Elige una salida en grupo o un viaje privado y refina la búsqueda.',
+    findTitle: 'Encuentra el tour adecuado',
     pathBody: 'Únete a un grupo o crea una ruta privada.',
     private: 'Diseñar un tour privado',
     privateBody: 'Fechas, ritmo y servicio flexibles.',
@@ -828,28 +917,44 @@ const journeyV2Copy = {
     requestQuote: 'Solicitar presupuesto',
     schedule: 'Calendario bajo solicitud',
     scheduleBody: 'El equipo confirma fechas y disponibilidad.',
+    showJourneys: 'Mostrar viajes',
     twoWays: 'Dos formas de viajar',
+    yourBrief: 'Tu selección',
     faq: [
       {
         q: '¿Cuál es la diferencia?',
         a: 'Los grupos usan salidas publicadas; los privados son a medida.',
       },
       { q: '¿Se conservan los filtros?', a: 'Sí. Se conserva el contexto validado.' },
+      { q: '¿Por qué “Calendario bajo solicitud”?', a: 'Solo mostramos precio, fechas y disponibilidad cuando una salida está verificada.' },
+      { q: '¿Puedo convertir un viaje grupal en privado?', a: 'Sí. Conserva tus preferencias y solicita una propuesta privada.' },
     ],
   },
   pt: {
+    contextBody: 'Os seus filtros seguem para a verificação ou planeamento privado sem os repetir.',
+    contextTitle: 'Sem perder contexto',
+    destinationBody: 'Viagens inspiradas pelo lugar, não por um modelo genérico.',
+    destinationKickers: { hanoi: 'Capital do norte', halong: 'Costa norte', sapa: 'Montanha norte', mekong: 'Rio do sul' },
     availability: 'Ver disponibilidade',
     before: 'Antes de escolher',
     book: 'Reservar',
     departures: 'Ver partidas',
     explore: 'Explorar por lugar',
+    exploreTours: 'Explorar tours',
     facts: 'Uma escolha melhor começa com os factos certos.',
     final: 'Viaje em conjunto—ou torne-o inteiramente seu.',
+    finalBody: 'Comece com uma rota de grupo publicada ou deixe-nos criar uma viagem privada para as suas datas.',
     freedom: 'Escolha a liberdade certa.',
     groupBody: 'Partidas partilhadas com informação publicada.',
     groupTitle: 'Tours em pequenos grupos',
+    heroBody: 'Junte-se a um pequeno grupo ou crie uma viagem privada ao seu ritmo.',
+    heroCaption: 'Baía de Ha Long · tours de grupo e privados',
+    heroKicker: 'Pequenos grupos + viagens privadas',
+    heroTitle: 'Viagens no Vietname para a sua forma de viajar.',
     groups: 'Explorar tours de grupo',
     landscape: 'Comece por uma paisagem.',
+    findBody: 'Escolha uma partida de grupo ou viagem privada e refine a pesquisa.',
+    findTitle: 'Encontre o tour certo',
     pathBody: 'Junte-se a um grupo ou crie uma rota privada.',
     private: 'Criar tour privado',
     privateBody: 'Datas, ritmo e serviço flexíveis.',
@@ -859,13 +964,17 @@ const journeyV2Copy = {
     requestQuote: 'Pedir orçamento',
     schedule: 'Calendário sob consulta',
     scheduleBody: 'A equipa confirma datas e disponibilidade.',
+    showJourneys: 'Mostrar viagens',
     twoWays: 'Duas formas de viajar',
+    yourBrief: 'A sua seleção',
     faq: [
       {
         q: 'Qual é a diferença?',
         a: 'Grupos usam partidas publicadas; privados são personalizados.',
       },
       { q: 'Os filtros são mantidos?', a: 'Sim. O contexto validado é mantido.' },
+      { q: 'Porque “Calendário sob consulta”?', a: 'Preço, datas e disponibilidade só são mostrados quando a partida é verificada.' },
+      { q: 'Posso tornar privado um brief de grupo?', a: 'Sim. Mantenha as preferências e peça uma proposta privada.' },
     ],
   },
 } as const

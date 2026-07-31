@@ -1,444 +1,48 @@
 body[data-site-code='wing-side'] .ws-journeys {
-  background: var(--site-background);
-  color: var(--site-foreground);
+  --journey-ink: var(--site-foreground);
+  --journey-navy: color-mix(in oklch, var(--site-brand) 82%, #03172f);
+  --journey-gold: var(--site-gold);
+  --journey-paper: var(--site-surface);
+  background: var(--site-background); color: var(--journey-ink); overflow: clip;
 }
+.ws-journeys :is(h1,h2,h3,p) { margin-top: 0; }
+.ws-journeys .kicker { color: var(--journey-gold); font-size: .72rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+body[data-site-code='wing-side'] .ws-journeys__hero { position: relative; isolation: isolate; min-height: clamp(32rem, calc(100svh - 4rem), 47.5rem); display: grid; align-items: end; overflow: hidden; padding: clamp(4rem, 9vw, 7rem) max(1.5rem, calc((100% - 72rem)/2)) clamp(4rem, 8vw, 6.5rem); color: white; background: var(--journey-navy); }
+body[data-site-code='wing-side'] .ws-journeys__hero::before { content: ''; position: absolute; inset: 0; z-index: -2; background: url('/wingsside-hifi/hero-halong.jpg') center 44% / cover no-repeat; transform: scale(1.03); transition: transform 900ms ease; }
+body[data-site-code='wing-side'] .ws-journeys__hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, color-mix(in oklch, var(--journey-navy) 95%, transparent), color-mix(in oklch, var(--journey-navy) 65%, transparent) 46%, transparent 82%), linear-gradient(0deg, color-mix(in oklch, #03172f 68%, transparent), transparent 55%); }
+body[data-site-code='wing-side'] .ws-journeys__hero-copy { max-width: 43rem; }
+body[data-site-code='wing-side'] .ws-journeys__hero h1 { max-width: 12ch; margin: .45rem 0 0; font-family: var(--font-plus-jakarta-sans, inherit); font-size: clamp(3.2rem, 7.4vw, 6.75rem); font-weight: 800; letter-spacing: -.07em; line-height: .9; }
+body[data-site-code='wing-side'] .ws-journeys__hero p:not(.kicker) { max-width: 52ch; margin: 1.3rem 0 0; color: color-mix(in srgb, white 88%, transparent); font-size: clamp(1rem, 1.6vw, 1.18rem); line-height: 1.65; }
+body[data-site-code='wing-side'] .ws-journeys__actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.6rem; }
+body[data-site-code='wing-side'] .ws-journeys__hero .btn-ghost { color: white; background: color-mix(in srgb, white 10%, transparent); border-color: color-mix(in srgb, white 48%, transparent); backdrop-filter: blur(8px); }
+body[data-site-code='wing-side'] .ws-journeys__hero-caption { position: absolute; right: max(1.5rem, calc((100% - 72rem)/2)); bottom: 1.25rem; color: color-mix(in srgb, white 72%, transparent); font-size: .7rem; letter-spacing: .09em; text-transform: uppercase; }
 
-body[data-site-code='wing-side'] .ws-journeys__hero {
-  min-height: 28rem;
-  display: grid;
-  align-items: end;
-  padding: clamp(5rem, 10vw, 8rem) var(--site-page-gutter, 1.5rem) clamp(3rem, 7vw, 5rem);
-  background:
-    linear-gradient(90deg, rgba(14, 34, 39, 0.78), rgba(14, 34, 39, 0.34)),
-    url('/wingsside-hifi/hero-halong.jpg') center / cover;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__hero-copy {
-  max-width: 46rem;
-  color: white;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__hero h1 {
-  margin: 0.35rem 0 0;
-  font-size: clamp(2.6rem, 7vw, 5.8rem);
-  line-height: 0.98;
-  letter-spacing: 0;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__hero p:not(.kicker) {
-  max-width: 40rem;
-  margin-top: 1rem;
-  color: rgba(255, 255, 255, 0.84);
-  font-size: 1.05rem;
-  line-height: 1.7;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__actions,
-body[data-site-code='wing-side'] .ws-journeys__filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__actions {
-  margin-top: 1.5rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__filters {
-  width: min(72rem, calc(100% - 2rem));
-  margin: -2rem auto 0;
-  padding: 1rem;
-  border: 1px solid var(--site-border);
-  background: color-mix(in oklch, var(--site-surface) 94%, white);
-  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.12);
-  border-radius: 1.25rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-filter {
-  min-width: min(100%, 13rem);
-  flex: 1;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-filter span {
-  display: block;
-  margin-bottom: 0.4rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-filter :is(select, input) {
-  min-height: 44px;
-  width: 100%;
-  border: 1px solid var(--site-border);
-  background: var(--site-background);
-  padding: 0 0.85rem;
-  color: var(--site-foreground);
-}
-
-body[data-site-code='wing-side'] .ws-journeys__reset {
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 1rem;
-  color: var(--site-brand);
-  font-weight: 700;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__notice,
-body[data-site-code='wing-side'] .ws-journeys__active-filters,
-body[data-site-code='wing-side'] .ws-journeys__results {
-  width: min(72rem, calc(100% - 2rem));
-  margin-left: auto;
-  margin-right: auto;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__notice {
-  margin-top: 1.5rem;
-  border-left: 3px solid var(--site-gold);
-  background: color-mix(in oklch, var(--site-gold) 12%, transparent);
-  padding: 0.85rem 1rem;
-  font-weight: 650;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__active-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__active-filters span {
-  border: 1px solid var(--site-border);
-  border-radius: 999px;
-  background: var(--site-surface);
-  padding: 0.35rem 0.65rem;
-  color: var(--site-ink);
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__results {
-  padding: 3rem 0 5rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__results-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(18rem, 32rem);
-  align-items: end;
-  gap: 1rem;
-  margin-bottom: 1.4rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__results-head h2 {
-  margin-top: 0.35rem;
-  font-size: clamp(1.35rem, 3vw, 2rem);
-  line-height: 1.18;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__tools {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-  gap: 0.75rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__tools label {
-  display: grid;
-  gap: 0.35rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__tools label > span {
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__tools :is(input, select) {
-  width: 100%;
-  min-height: 44px;
-  border: 1px solid var(--site-border);
-  background: var(--site-surface);
-  padding: 0 0.8rem;
-  color: var(--site-foreground);
-}
-
-body[data-site-code='wing-side'] .ws-journeys__sr-status {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__grid[data-pending='true'] {
-  opacity: 0.58;
-  transition: opacity 160ms ease;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
-  gap: 1rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card {
-  display: grid;
-  overflow: hidden;
-  border: 1px solid var(--site-border);
-  background: var(--site-surface);
-  color: inherit;
-  text-decoration: none;
-  border-radius: 1.5rem;
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card:hover,
-body[data-site-code='wing-side'] .ws-journeys-card:focus-within {
-  transform: translateY(-3px);
-  border-color: color-mix(in oklch, var(--site-brand) 38%, var(--site-border));
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
-  outline: none;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__detail {
-  display: grid;
-  color: inherit;
-  text-decoration: none;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__media {
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  background: var(--site-surface-strong);
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__type {
-  position: absolute;
-  margin: 0.8rem;
-  border-radius: 999px;
-  background: var(--site-surface);
-  padding: 0.3rem 0.55rem;
-  color: var(--site-foreground);
-  font-size: 0.68rem;
-  font-style: normal;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__type--private {
-  background: var(--site-brand);
-  color: white;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 500ms ease;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card:hover img {
-  transform: scale(1.03);
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__body {
-  display: grid;
-  gap: 0.65rem;
-  padding: 1.1rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__meta,
-body[data-site-code='wing-side'] .kicker {
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__price {
-  display: grid;
-  gap: 0.2rem;
-  color: var(--site-brand);
-  font-weight: 800;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__price small {
-  color: color-mix(in oklch, var(--site-foreground) 72%, white);
-  font-size: 0.78rem;
-  font-weight: 500;
-  line-height: 1.35;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__chips i {
-  border: 1px solid var(--site-border);
-  padding: 0.3rem 0.55rem;
-  font-size: 0.78rem;
-  font-style: normal;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__action {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.45rem;
-  margin: 0 1.1rem 1.1rem;
-  font-weight: 800;
-  color: var(--site-brand);
-  text-decoration: none;
-}
-
-body[data-site-code='wing-side'] .ws-journeys-card__action svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__load-more {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-body[data-site-code='wing-side'] .ws-journeys__empty {
-  border: 1px solid var(--site-border);
-  background: var(--site-surface);
-  padding: clamp(1.5rem, 5vw, 3rem);
-}
-
-body[data-site-code='wing-side']
-  :is(.ws-journeys__paths, .ws-journeys__destinations, .ws-journeys__faq, .ws-journeys__final) {
-  width: min(72rem, calc(100% - 2rem));
-  margin: 0 auto 4rem;
-  border-radius: 1.5rem;
-  padding: clamp(1.5rem, 4vw, 3rem);
-}
-body[data-site-code='wing-side'] .ws-journeys__paths {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  color: #fff;
-  background:
-    linear-gradient(
-      110deg,
-      color-mix(in oklch, var(--site-brand) 88%, #03172f),
-      rgba(4, 28, 55, 0.88)
-    ),
-    url('/wingsside-hifi/hero-halong.jpg') center/cover;
-}
-body[data-site-code='wing-side'] .ws-journeys__paths ol {
-  display: grid;
-  gap: 1rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-body[data-site-code='wing-side'] .ws-journeys__paths li {
-  display: grid;
-  gap: 0.25rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.28);
-  padding-top: 1rem;
-}
-body[data-site-code='wing-side'] .ws-journeys__destinations {
-  background: var(--site-background);
-}
-body[data-site-code='wing-side'] .ws-journeys__destinations > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-body[data-site-code='wing-side'] .ws-journeys__destinations a {
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--site-border);
-  border-radius: 999px;
-  padding: 0 1rem;
-  background: var(--site-surface);
-}
-body[data-site-code='wing-side'] .ws-journeys__faq {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  background: var(--site-surface);
-}
-body[data-site-code='wing-side'] .ws-journeys__faq details {
-  border-bottom: 1px solid var(--site-border);
-  padding: 0.8rem 0;
-}
-body[data-site-code='wing-side'] .ws-journeys__faq summary {
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-weight: 750;
-}
-body[data-site-code='wing-side'] .ws-journeys__final {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  background: var(--site-surface);
-  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.09);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body[data-site-code='wing-side'] .ws-journeys-card,
-  body[data-site-code='wing-side'] .ws-journeys-card__media img {
-    transition: none;
-  }
-  body[data-site-code='wing-side'] .ws-journeys-card:hover,
-  body[data-site-code='wing-side'] .ws-journeys-card:focus-within,
-  body[data-site-code='wing-side'] .ws-journeys-card:hover img {
-    transform: none;
-  }
-}
-
-@media (max-width: 760px) {
-  body[data-site-code='wing-side'] .ws-journeys__results-head,
-  body[data-site-code='wing-side'] .ws-journeys__tools {
-    grid-template-columns: 1fr;
-  }
-
-  body[data-site-code='wing-side'] .ws-journeys__filters {
-    width: min(100% - 1rem, 40rem);
-    margin-top: -1rem;
-  }
-
-  body[data-site-code='wing-side']
-    .ws-journeys-card__body
-    > span:not(
-      .ws-journeys-card__meta,
-      .ws-journeys-card__price,
-      .ws-journeys-card__chips,
-      .ws-journeys-card__action
-    ) {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-  }
-
-  body[data-site-code='wing-side'] .ws-journeys-card__media {
-    aspect-ratio: 3 / 2;
-  }
-  body[data-site-code='wing-side'] :is(.ws-journeys__paths, .ws-journeys__faq) {
-    grid-template-columns: 1fr;
-  }
-  body[data-site-code='wing-side'] .ws-journeys__final {
-    display: grid;
-  }
-}
+body[data-site-code='wing-side'] .ws-journeys__filter-section { position: relative; z-index: 2; margin-top: -2.5rem; padding: 0 1rem clamp(2rem, 5vw, 4.5rem); }
+body[data-site-code='wing-side'] .ws-journeys__filters { width: min(72rem, 100%); margin: auto; padding: clamp(1.15rem, 2.5vw, 1.6rem); border: 1px solid color-mix(in oklch, var(--site-brand) 10%, var(--site-border)); border-radius: 1.5rem; background: var(--journey-paper); box-shadow: 0 18px 44px rgb(15 23 42 / .12); }
+body[data-site-code='wing-side'] .ws-journeys__filter-head { display: flex; justify-content: space-between; align-items: end; gap: 1rem; margin-bottom: 1rem; }
+.ws-journeys__filter-head h2 { margin: 0; font-size: 1.08rem; letter-spacing: -.02em; }.ws-journeys__filter-head p { margin: .25rem 0 0; color: color-mix(in oklch, var(--journey-ink) 64%, white); font-size: .86rem; }
+body[data-site-code='wing-side'] .ws-journeys__filter-grid { display: grid; grid-template-columns: 1.3fr repeat(4, 1fr) auto; gap: .75rem; align-items: end; }
+body[data-site-code='wing-side'] .ws-journeys-filter { display: grid; gap: .4rem; min-width: 0; }
+body[data-site-code='wing-side'] .ws-journeys-filter span,.ws-journeys__tools label > span { color: color-mix(in oklch, var(--journey-ink) 65%, white); font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+body[data-site-code='wing-side'] .ws-journeys-filter :is(select,input),body[data-site-code='wing-side'] .ws-journeys__tools select { box-sizing: border-box; width: 100%; min-height: 48px; border: 1px solid var(--site-border); border-radius: .9rem; padding: 0 .85rem; background: var(--journey-paper); color: var(--journey-ink); }
+body[data-site-code='wing-side'] .ws-journeys__show { min-height: 48px; white-space: nowrap; }
+body[data-site-code='wing-side'] .ws-journeys__reset { min-height: 44px; display: inline-flex; align-items: center; color: var(--site-brand); font-weight: 750; }
+body[data-site-code='wing-side'] .ws-journeys__filter-brief,body[data-site-code='wing-side'] .ws-journeys__active-filters { display:flex; align-items:center; flex-wrap:wrap; gap:.45rem; margin-top:.9rem; }
+.ws-journeys__filter-brief > span { margin-right:.2rem; color:color-mix(in oklch, var(--journey-ink) 60%, white); font-size:.75rem; font-weight:700; }.ws-journeys__filter-brief i,.ws-journeys__active-filters span { border-radius:999px; padding:.35rem .65rem; background:color-mix(in oklch, var(--site-brand) 8%, white); color:var(--site-brand); font-size:.75rem; font-style:normal; font-weight:750; }
+body[data-site-code='wing-side'] :is(.ws-journeys__notice,.ws-journeys__active-filters,.ws-journeys__results) { width:min(72rem, calc(100% - 2rem)); margin-inline:auto; }
+body[data-site-code='wing-side'] .ws-journeys__notice { margin-top:1rem; border-left:3px solid var(--journey-gold); padding:.8rem 1rem; background:color-mix(in oklch, var(--journey-gold) 10%, white); }.ws-journeys__sr-status { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+body[data-site-code='wing-side'] .ws-journeys__results { padding: clamp(1.5rem, 4vw, 3rem) 0 clamp(3rem, 6vw, 5rem); }.ws-journeys__results-head { display:flex; align-items:end; justify-content:space-between; gap:1rem; margin-bottom:1.75rem; }.ws-journeys__results-head h2 { margin:.35rem 0 0; font-size:clamp(1.45rem,3vw,2.15rem); letter-spacing:-.045em; }.ws-journeys__tools label { display:grid; gap:.35rem; min-width:13rem; }
+body[data-site-code='wing-side'] .ws-journeys__grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.25rem; transition:opacity 160ms ease; }.ws-journeys__grid[data-pending='true'] { opacity:.55; }
+body[data-site-code='wing-side'] .ws-journeys-card { min-width:0; display:flex; flex-direction:column; overflow:hidden; border:1px solid color-mix(in oklch,var(--site-border) 72%,transparent); border-radius:1.5rem; background:var(--journey-paper); box-shadow:0 8px 22px rgb(15 23 42 / .06); transition:transform 260ms ease,box-shadow 260ms ease; }.ws-journeys-card:hover,.ws-journeys-card:focus-within { transform:translateY(-3px); box-shadow:0 20px 42px rgb(15 23 42 / .14); }
+body[data-site-code='wing-side'] .ws-journeys-card__detail { display:grid; flex:1; color:inherit; text-decoration:none; }.ws-journeys-card__media { position:relative; display:block; aspect-ratio:4/3; overflow:hidden; background:var(--site-surface-strong); }.ws-journeys-card__media img { width:100%; height:100%; object-fit:cover; transition:transform 600ms ease; }.ws-journeys-card:hover img { transform:scale(1.045); }
+body[data-site-code='wing-side'] .ws-journeys-card :is(.ws-journeys-card__type,.ws-journeys-card__duration) { position:absolute; z-index:1; margin:0; border-radius:.5rem; padding:.45rem .65rem; color:white; font-size:.69rem; font-style:normal; font-weight:800; letter-spacing:.05em; text-transform:uppercase; backdrop-filter:blur(8px); }.ws-journeys-card__type { top:.8rem; left:.8rem; background:color-mix(in oklch,var(--site-brand) 90%,transparent); }.ws-journeys-card__type--private { background:color-mix(in oklch,var(--journey-gold) 88%,#5d3300); }.ws-journeys-card__duration { bottom:.8rem; left:.8rem; background:color-mix(in oklch,var(--journey-navy) 88%,transparent); }
+body[data-site-code='wing-side'] .ws-journeys-card__body { display:flex; flex:1; flex-direction:column; gap:.65rem; padding:1.15rem; }.ws-journeys-card__meta { color:var(--site-brand); font-size:.74rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }.ws-journeys-card__title { font-size:1.18rem; line-height:1.2; letter-spacing:-.025em; }.ws-journeys-card__summary { display:-webkit-box; overflow:hidden; color:color-mix(in oklch,var(--journey-ink) 67%,white); font-size:.88rem; line-height:1.48; -webkit-box-orient:vertical; -webkit-line-clamp:2; }.ws-journeys-card__chips { display:flex; flex-wrap:wrap; gap:.35rem; }.ws-journeys-card__chips i { border-radius:999px; padding:.3rem .55rem; background:color-mix(in oklch,var(--site-brand) 8%,white); color:var(--site-brand); font-size:.7rem; font-style:normal; font-weight:700; }.ws-journeys-card__price { display:grid; gap:.2rem; margin-top:auto; color:var(--site-brand); font-weight:800; }.ws-journeys-card__price small { color:color-mix(in oklch,var(--journey-ink) 67%,white); font-size:.77rem; font-weight:500; line-height:1.4; }.ws-journeys-card__action { display:inline-flex; align-items:center; justify-content:space-between; min-height:48px; margin:0 1.15rem 1.15rem; color:var(--site-brand); font-weight:800; text-decoration:none; }.ws-journeys-card__action svg { width:1rem; height:1rem; }.ws-journeys__load-more { display:flex; justify-content:center; margin-top:1.5rem; }.ws-journeys__empty { padding:clamp(2rem,5vw,4rem); border-radius:1.5rem; background:color-mix(in oklch,var(--site-brand) 8%,white); text-align:center; }.ws-journeys__empty p { max-width:55ch; margin-inline:auto; }
+body[data-site-code='wing-side'] :is(.ws-journeys__paths,.ws-journeys__destinations,.ws-journeys__faq,.ws-journeys__final) { width:min(72rem, calc(100% - 2rem)); margin:0 auto clamp(3.5rem,7vw,6rem); }.ws-journeys__paths { position:relative; isolation:isolate; display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(2rem,6vw,5rem); overflow:hidden; min-height:24rem; padding:clamp(2rem,6vw,5rem); color:white; background:var(--journey-navy); }.ws-journeys__paths::after { content:''; position:absolute; z-index:-1; inset:0 0 0 52%; opacity:.48; background:linear-gradient(90deg,var(--journey-navy),transparent 38%),url('/wingsside-hifi/hero-halong.jpg') center/cover; }.ws-journeys__paths h2 { max-width:12ch; font-size:clamp(2rem,4vw,3.25rem); letter-spacing:-.055em; }.ws-journeys__paths > div > p:not(.kicker),.ws-journeys__paths li span { color:color-mix(in srgb,white 76%,transparent); line-height:1.55; }.ws-journeys__paths ol { display:grid; align-content:center; margin:0; padding:0; list-style:none; border-top:1px solid rgb(255 255 255 / .24); }.ws-journeys__paths li { display:grid; grid-template-columns:3rem 1fr; gap:.75rem; padding:1rem 0; border-bottom:1px solid rgb(255 255 255 / .24); }.ws-journeys__paths li::before { color:var(--journey-gold); font-family:monospace; font-weight:800; }.ws-journeys__paths li:nth-child(1)::before { content:'01'; }.ws-journeys__paths li:nth-child(2)::before { content:'02'; }.ws-journeys__paths li:nth-child(3)::before { content:'03'; }.ws-journeys__paths li strong { display:block; }.ws-journeys__paths li span { font-size:.85rem; }
+body[data-site-code='wing-side'] .ws-journeys__section-head { display:flex; justify-content:space-between; align-items:end; gap:1rem; margin-bottom:1.75rem; }.ws-journeys__section-head h2 { margin:.35rem 0 0; font-size:clamp(1.8rem,3.5vw,2.8rem); letter-spacing:-.05em; }.ws-journeys__destination-rail { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }.ws-journeys__destination-tile { position:relative; isolation:isolate; min-height:22rem; overflow:hidden; border-radius:1.5rem; color:white; box-shadow:0 10px 26px rgb(15 23 42 / .1); }.ws-journeys__destination-tile img { position:absolute; z-index:-2; inset:0; width:100%; height:100%; object-fit:cover; transition:transform 700ms ease; }.ws-journeys__destination-tile::after { content:''; position:absolute; z-index:-1; inset:0; background:linear-gradient(0deg,rgb(3 23 47 / .82),transparent 70%); }.ws-journeys__destination-tile:hover img { transform:scale(1.045); }.ws-journeys__destination-tile > span { position:absolute; inset:auto 1.25rem 1.25rem; }.ws-journeys__destination-tile i { display:block; color:var(--journey-gold); font-size:.7rem; font-style:normal; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }.ws-journeys__destination-tile strong { display:block; margin:.3rem 0; font-size:1.7rem; letter-spacing:-.04em; }.ws-journeys__destination-tile small { color:rgb(255 255 255 / .78); font-size:.84rem; }
+body[data-site-code='wing-side'] .ws-journeys__faq { display:grid; grid-template-columns:.8fr 1.2fr; gap:clamp(2rem,6vw,5rem); align-items:start; }.ws-journeys__faq h2 { margin:.35rem 0 0; font-size:clamp(1.8rem,3.5vw,2.8rem); letter-spacing:-.05em; }.ws-journeys__faq > div:last-child { overflow:hidden; border:1px solid var(--site-border); border-radius:1.5rem; box-shadow:0 8px 22px rgb(15 23 42 / .06); }.ws-journeys__faq details { border-bottom:1px solid var(--site-border); background:var(--journey-paper); }.ws-journeys__faq details:last-child { border:0; }.ws-journeys__faq summary { position:relative; display:flex; align-items:center; min-height:64px; padding:1rem 3.5rem 1rem 1.25rem; cursor:pointer; font-weight:750; list-style:none; }.ws-journeys__faq summary::-webkit-details-marker { display:none; }.ws-journeys__faq summary::after { content:'+'; position:absolute; right:1.25rem; color:var(--journey-gold); font-size:1.4rem; }.ws-journeys__faq details[open] summary::after { content:'−'; }.ws-journeys__faq details p { margin:0; padding:0 3.5rem 1.25rem 1.25rem; color:color-mix(in oklch,var(--journey-ink) 66%,white); line-height:1.55; }
+body[data-site-code='wing-side'] .ws-journeys__final { display:grid; grid-template-columns:1fr auto; align-items:center; gap:2rem; padding:clamp(1.75rem,4vw,2.75rem); border:1px solid var(--site-border); border-radius:1.5rem; background:var(--journey-paper); box-shadow:0 10px 26px rgb(15 23 42 / .07); }.ws-journeys__final h2 { max-width:22ch; margin:.35rem 0 0; font-size:clamp(1.9rem,3.5vw,2.8rem); letter-spacing:-.055em; }.ws-journeys__final p:not(.kicker) { max-width:55ch; margin:.75rem 0 0; color:color-mix(in oklch,var(--journey-ink) 66%,white); }.ws-journeys__final .ws-journeys__actions { display:grid; min-width:14rem; margin:0; }.ws-journeys__final .btn { justify-content:center; }
+body[data-site-code='wing-side'] .ws-journeys :is(a,button,input,select,summary):focus-visible { outline:3px solid color-mix(in oklch,var(--journey-gold) 70%,white); outline-offset:3px; }
+@media (prefers-reduced-motion:reduce) { .ws-journeys *, .ws-journeys *::before, .ws-journeys *::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
+@media (max-width:1024px) { body[data-site-code='wing-side'] .ws-journeys__filter-grid { grid-template-columns:1.35fr 1fr 1fr; }.ws-journeys-filter--search { grid-column:span 2; }.ws-journeys__grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.ws-journeys__destination-rail { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:760px) { body[data-site-code='wing-side'] .ws-journeys__hero { min-height:calc(100svh - 4rem); padding-inline:1.25rem; }.ws-journeys__hero::after { background:linear-gradient(0deg,color-mix(in oklch,var(--journey-navy) 94%,transparent),color-mix(in oklch,var(--journey-navy) 18%,transparent) 78%); }.ws-journeys__hero h1 { font-size:clamp(3rem,14vw,4.7rem); }.ws-journeys__hero-caption { display:none; }.ws-journeys__actions .btn { min-width:100%; }.ws-journeys__filter-section { margin-top:0; padding:0; }.ws-journeys__filters { width:100%; border:0; border-radius:0; box-shadow:none; }.ws-journeys__filter-head { align-items:start; }.ws-journeys__filter-grid { grid-template-columns:1fr 1fr; }.ws-journeys-filter--search { grid-column:span 2; }.ws-journeys__show { grid-column:span 2; }.ws-journeys__results-head,.ws-journeys__paths,.ws-journeys__faq,.ws-journeys__final { grid-template-columns:1fr; }.ws-journeys__results-head { align-items:start; }.ws-journeys__grid,.ws-journeys__destination-rail { grid-template-columns:1fr; }.ws-journeys__paths::after { inset:45% 0 0; background:linear-gradient(0deg,var(--journey-navy),transparent),url('/wingsside-hifi/hero-halong.jpg') center/cover; }.ws-journeys__destination-tile { min-height:21rem; }.ws-journeys__final .ws-journeys__actions { min-width:0; }.ws-journeys__faq > div:last-child { width:100%; } }
+@media (max-width:430px) { body[data-site-code='wing-side'] .ws-journeys__filter-grid { grid-template-columns:1fr; }.ws-journeys-filter--search,.ws-journeys__show { grid-column:auto; }.ws-journeys__filter-head { display:block; }.ws-journeys__reset { margin-top:.6rem; }.ws-journeys__paths li { grid-template-columns:2.2rem 1fr; } }

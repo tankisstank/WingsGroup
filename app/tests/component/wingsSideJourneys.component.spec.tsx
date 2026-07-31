@@ -90,17 +90,38 @@ describe('WingSideJourneysClient', () => {
         .getByRole('link', { name: /private hanoi/i })
         .getAttribute('href'),
     ).toBe('/tour/private-hanoi?source=journeys&destination=hanoi&style=culture&duration=8-14')
-    expect(screen.getByRole('link', { name: 'Plan trip' }).getAttribute('href')).toBe(
-      '/plan-your-trip?intent=inquiry&source=journeys&destination=hanoi&style=culture&duration=8-14',
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(
+      'Vietnam journeys for the way you travel.',
     )
-    expect(screen.getByRole('link', { name: 'Contact us' }).getAttribute('href')).toBe(
-      '/contact-us?intent=contact&source=journeys&destination=hanoi&style=culture&duration=8-14',
+    expect(screen.getByRole('link', { name: 'Explore tours' }).getAttribute('href')).toBe(
+      '#journey-filters',
+    )
+    expect(screen.getAllByRole('link', { name: 'Design a private tour' })[0]?.getAttribute('href')).toBe(
+      '/plan-your-trip?intent=request-quote&source=journeys&type=private&destination=hanoi&style=culture&duration=8-14',
     )
     expect(within(card).getByRole('img').getAttribute('src')).toBe('/media/hanoi.jpg')
     expect(within(card).getByText('6 days / 5 nights')).toBeTruthy()
     expect(within(card).getByText('Tailor-made quote')).toBeTruthy()
     expect(within(card).getByText('Designed around your dates and service level.')).toBeTruthy()
     expect(card.textContent).not.toMatch(/book now|available seats|instant booking/i)
+  })
+
+  it('renders the locked visual-information architecture without inventing tour data', () => {
+    render(<WingSideJourneysClient context={context()} locale="en" />)
+
+    expect(screen.getByRole('heading', { name: 'Find the right tour' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Show journeys' }).getAttribute('href')).toBe(
+      '#journeys-results-title',
+    )
+    const card = screen.getByRole('article', { name: /private hanoi/i })
+    expect(within(card).getByText('6 days / 5 nights').className).toContain(
+      'ws-journeys-card__duration',
+    )
+    expect(within(card).getByText('Private').className).toContain('ws-journeys-card__type')
+    expect(screen.getByText('No lost context')).toBeTruthy()
+    expect(screen.getAllByText(/Schedule on request/)).toHaveLength(1)
+    expect(document.querySelectorAll('.ws-journeys__faq details')).toHaveLength(4)
+    expect(document.querySelectorAll('.ws-journeys__destination-tile img')).toHaveLength(1)
   })
 
   it('renders localized honest on-request price state without availability claims', () => {
@@ -320,7 +341,7 @@ describe('WingSideJourneysClient', () => {
     )
 
     expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(
-      'Find your Vietnam journey',
+      'Vietnam journeys for the way you travel.',
     )
     expect(screen.getByRole('link', { name: 'Remove Business' }).getAttribute('href')).toBe(
       '/journeys?q=quiet&type=group&destination=hanoi&duration=15-plus',
@@ -424,13 +445,13 @@ describe('WingSideJourneysClient', () => {
       />,
     )
 
-    expect(screen.getAllByRole('link', { name: /journey|mekong/i })).toHaveLength(8)
+    expect(screen.getAllByRole('article')).toHaveLength(8)
     expect(
       screen.getByRole('heading', { name: /10 journeys for Hanoi · Culture · 8-14 days/ }),
     ).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Load more journeys' }))
-    expect(screen.getAllByRole('link', { name: /journey|mekong/i })).toHaveLength(10)
+    expect(screen.getAllByRole('article')).toHaveLength(10)
 
     expect(screen.getByRole('searchbox', { name: 'Search journeys' }).getAttribute('name')).toBe(
       'q',
