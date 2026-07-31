@@ -1,5 +1,29 @@
 # US-057 production group-commerce audit — 2026-07-31
 
+## Production closure — 2026-07-31
+
+This section supersedes the historical no-write/blocker statements retained
+below.
+
+- Product accepted source pricing and the 22-tour classification.
+- Fresh production evidence captured 22 exact rows: 4 for product 63, 9 for
+  hybrid product 65 and 9 for product 69.
+- Additive US057 migrations are applied.
+- Encrypted backup checksum
+  `c5cc79e7bbbc8a3cd9fc5937e0e2e156b4eee5f30fd06c3af55b319aed43e126`
+  passed a PostgreSQL 16 restore drill.
+- Signed canary and full production apply verified 22/22 products and 22
+  managed departures.
+- All 93 destination/style taxonomy rows in the exact batch retained checksum
+  `1a0ca9766236394ed777af637f85fdf633d5aa7367258d477297814f46277551`.
+- Data release `e0021aaebd8cfb2208b52a61c2d7b697c55cb92f` and public app
+  release `1dc91b0de859626e2ba233065117b2be61aa670d` are live.
+- Public browser QA passed group/private/hybrid card semantics, strict
+  five-filter deep links, transparent zero-result recovery, empty visitor
+  message with structured context and 390 px no-overflow.
+- Expired managed inventory removes price/date/availability claims and routes
+  to Contact; the tour remains discoverable.
+
 ## Decision and implementation update — 2026-07-31
 
 Product accepted using the source-site prices and the recorded 22-tour
