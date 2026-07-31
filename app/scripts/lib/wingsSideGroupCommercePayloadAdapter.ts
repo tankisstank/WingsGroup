@@ -19,6 +19,7 @@ import {
 
 export const WINGSSIDE_GROUP_COMMERCE_MANAGED_BY = 'wingsside-group-commerce-v1'
 const payloadSiteCode = 'wing-side'
+const commerceWriteContext = { disableRevalidate: true, releaseRemediation: true }
 
 const relationID = (value: unknown): number | string | null => {
   if (typeof value === 'number' || typeof value === 'string') return value
@@ -373,6 +374,7 @@ export const mutateGroupCommercePayload = async ({
       const target = mode === 'apply' ? entry.after : entry.before
       await payload.update({
         collection: 'tour-products',
+        context: commerceWriteContext,
         data: { tourType: target.tourType } as never,
         id: entry.productId,
         overrideAccess: true,
@@ -386,6 +388,7 @@ export const mutateGroupCommercePayload = async ({
         if (recordID !== undefined) {
           await payload.update({
             collection: 'tour-departures',
+            context: commerceWriteContext,
             data: departureWriteData({ departure: targetRow, siteID, tourID: entry.productId }) as never,
             id: recordID,
             overrideAccess: true,
@@ -394,6 +397,7 @@ export const mutateGroupCommercePayload = async ({
         } else {
           const created = await payload.create({
             collection: 'tour-departures',
+            context: commerceWriteContext,
             data: departureWriteData({ departure: targetRow, siteID, tourID: entry.productId }) as never,
             overrideAccess: true,
             req,
@@ -432,7 +436,13 @@ export const mutateGroupCommercePayload = async ({
         if (groupCommerceChecksum(currentRow) !== groupCommerceChecksum(expected)) {
           throw new Error(`Refusing to delete changed managed departure ${id}`)
         }
-        await payload.delete({ collection: 'tour-departures', id, overrideAccess: true, req })
+        await payload.delete({
+          collection: 'tour-departures',
+          context: commerceWriteContext,
+          id,
+          overrideAccess: true,
+          req,
+        })
       }
     }
     await commitTransaction(req)
