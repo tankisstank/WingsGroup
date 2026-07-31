@@ -2,9 +2,10 @@
 
 ## Status
 
-implemented / Hoàn tất — stakeholder confirmed the production delivery on
-2026-07-31. The published release and governed production data remain the
-accepted US057 baseline.
+in progress / Đang thực hiện — the production commerce delivery remains live,
+but the stakeholder reopened US057 on 2026-07-31 because the public Journeys
+page does not meet the locked hi-fi v2 visual fidelity. This remediation is
+app-only: data, classification and departure contracts remain accepted.
 
 ## Lane
 
@@ -29,3 +30,16 @@ The public app runs the context-recovery hotfix
 `1dc91b0de859626e2ba233065117b2be61aa670d`. Expired departures remove only
 price/date/availability claims and fall back to Contact; they do not remove the
 tour from discovery.
+
+## Visual remediation pass
+
+The remediation restores the locked poster hero, filter workspace, card
+hierarchy, editorial decision band, image-led destination rail, decision FAQ
+and bottom conversion panel. It preserves the existing route, URL state,
+Payload query and truthful commerce fallback, and does not add sample tours,
+shortlist storage or a booking capability.
+
+The implementation is committed locally as an app-only remediation and passed
+two independent visual-spec review cycles. It awaits an approved app canary
+for real-tenant desktop/mobile visual verification before the story may return
+to stakeholder confirmation.

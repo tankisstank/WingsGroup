@@ -1,13 +1,42 @@
 # US-057 Validation
 
-Production implementation and QA completed on 2026-07-31. Stakeholder
-confirmation was received, so US057 is accepted and complete.
+The original production commerce delivery was accepted on 2026-07-31, then
+reopened the same day for a scoped visual-fidelity remediation. The live
+classification and departure data remain accepted; US057 is not complete until
+the public Journeys page meets the locked hi-fi v2 visual review.
 
 The implementation is a surgical upgrade of the existing `/journeys` route,
 Payload query, URL state and tenant shell. It adds strict localized
 q/type/destination/style/duration AND matching, group/private/hybrid card
 posture, verified-departure commerce and structured enquiry context without
 replacing the catalog data layer.
+
+## Visual remediation exit gate
+
+- Poster hero, desktop filter overlap, card overlays, editorial paths band,
+  image-led destination rail, three decision FAQ entries and bottom CTA match
+  the canonical v2 structure and visual posture with real production data.
+- Desktop 1440px and mobile 390px have no horizontal overflow, clipped type or
+  duration badge, console error or retail claim unsupported by data.
+- Existing strict-AND URLs, zero-result recovery, group/private/hybrid CTA
+  semantics, expiry fallback and enquiry context regressions remain green.
+- The remediation is app-only: no migration, CMS write or production data
+  mutation is permitted.
+
+## 2026-07-31 visual remediation evidence
+
+- Independent implementation and read-only visual reviews accepted the final
+  remediation commit after a second review cycle. The review specifically
+  verified the stable three-image destination rail, canonical FAQ sequence,
+  full-bleed editorial band, token-only color treatment, WingSide-only scope
+  and unchanged discovery/commerce/context behavior.
+- Focused Journeys component suite: 16/16 pass. TypeScript, scoped ESLint
+  (0 errors, 0 warnings), `git diff --check`, and production build pass.
+- Local `agent-browser` startup reached the repository's local bootstrap but
+  cannot resolve a WingSide tenant with production catalog data in this
+  worktree; `/journeys` therefore returns its expected tenant 404. Desktop and
+  mobile visual capture against a real WingSide tenant remain an app-only
+  canary release gate, not a reason to mutate catalog data locally.
 
 ## Automated gates
 
