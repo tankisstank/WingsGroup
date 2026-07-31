@@ -13,6 +13,7 @@
     "audit:wingsside:wp4r": "cross-env NODE_OPTIONS=--no-deprecation node scripts/audit-wingsside-wp4r.mjs",
     "audit:wingsside:home-curation": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/apply-wingsside-home-curation.ts --audit",
     "backfill:wingsside:locales": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/backfill-wingsside-locales.ts",
+    "bind:wingsside:us057-release-evidence": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/bind-wingsside-us057-release-evidence.ts",
     "editorial:inventory:wingsside": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/generate-wingsside-editorial-inventory.ts",
     "catalog:wingsside:source-snapshot": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/export-wingsside-catalog-source-snapshot.ts",
     "catalog:wingsside:candidate-overlay": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/build-wingsside-catalog-candidate-overlay.ts",

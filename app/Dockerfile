@@ -46,7 +46,10 @@ RUN \
 FROM base AS runner
 WORKDIR /app
 
+ARG WINGSTRAVEL_RELEASE_SHA
 ENV NODE_ENV production
+ENV WINGSTRAVEL_RELEASE_SHA=${WINGSTRAVEL_RELEASE_SHA}
+LABEL org.opencontainers.image.revision=${WINGSTRAVEL_RELEASE_SHA}
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -82,5 +85,9 @@ ARG WINGSTRAVEL_RELEASE_SHA
 ENV NODE_ENV production
 ENV PAYLOAD_DB_PUSH false
 ENV WINGSTRAVEL_RELEASE_SHA ${WINGSTRAVEL_RELEASE_SHA}
+LABEL org.opencontainers.image.revision=${WINGSTRAVEL_RELEASE_SHA}
 
 CMD ["pnpm", "run", "import:wingsside:credentials:prod", "--", "plan"]
+
+FROM tools AS us057-ops
+RUN apk add --no-cache age postgresql-client
