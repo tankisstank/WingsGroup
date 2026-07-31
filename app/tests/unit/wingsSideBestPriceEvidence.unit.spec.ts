@@ -32,7 +32,7 @@ describe('BestPrice exact-row evidence capture', () => {
   it('captures visible exact-row hashes with a maximum 24-hour envelope', async () => {
     const fetcher = vi.fn(async () =>
       response(
-        '<html><div class="departure">Wed, 23 Dec — <span>US</span> $741/pax — Guaranteed departure</div></html>',
+        '<html><div data-count="4" class="item"><div><span>Wed, 23 Dec</span></div><div>Guaranteed departure with promotion details and inclusions.</div><div class="price"><span class="font-size-13">US</span><span class="price-from">$741</span><span>/pax</span></div><button data-url="?departure_date=23-12-2026">Inquire</button></div></html>',
       ),
     )
     const evidence = await captureBestPriceExactRowEvidence({

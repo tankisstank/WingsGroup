@@ -35,6 +35,53 @@ const sourceDatePatterns = (dateOnly: string) => {
   ]
 }
 
+const exactDepartureRow = ({
+  dateOnly,
+  html,
+  priceFrom,
+}: {
+  dateOnly: string
+  html: string
+  priceFrom: number
+}) => {
+  const [year, month, day] = dateOnly.split('-')
+  const queryDate = `departure_date=${day}-${month}-${year}`
+  const queryIndex = html.indexOf(queryDate)
+  const datePattern = `(?:${sourceDatePatterns(dateOnly).join('|')})`
+  const pricePattern = `(?:USD(?:<[^>]+>|\\s)*|US(?:<[^>]+>|\\s)*\\$(?:<[^>]+>|\\s)*)${priceFrom}(?:\\.00)?(?:<[^>]+>|\\s)*\\/(?:<[^>]+>|\\s)*pax`
+  if (queryIndex >= 0) {
+    const itemStarts = [
+      html.lastIndexOf('<div data-count=', queryIndex),
+      html.lastIndexOf('<div class="item', queryIndex),
+    ]
+    const start = Math.max(...itemStarts)
+    const nextCandidates = [
+      html.indexOf('<div data-count=', queryIndex + queryDate.length),
+      html.indexOf('<div class="item', queryIndex + queryDate.length),
+    ].filter((index) => index >= 0)
+    const end = nextCandidates.length
+      ? Math.min(...nextCandidates)
+      : Math.min(html.length, queryIndex + 5000)
+    if (start >= 0 && end > queryIndex) {
+      const candidate = html.slice(start, end)
+      if (
+        new RegExp(datePattern, 'iu').test(candidate) &&
+        new RegExp(pricePattern, 'iu').test(candidate) &&
+        /Guarantee(?:d)?\s+depart/iu.test(candidate)
+      ) {
+        return candidate
+      }
+    }
+  }
+  const fallback = html.match(
+    new RegExp(
+      `<(?:tr|li|div)\\b[^>]*>[\\s\\S]{0,5000}?${datePattern}[\\s\\S]{0,5000}?${pricePattern}[\\s\\S]{0,5000}?<\\/(?:tr|li|div)>`,
+      'iu',
+    ),
+  )?.[0]
+  return fallback && /Guarantee(?:d)?\s+depart/iu.test(fallback) ? fallback : undefined
+}
+
 export const captureBestPriceExactRowEvidence = async ({
   candidates,
   fetcher = fetch,
@@ -84,27 +131,11 @@ export const captureBestPriceExactRowEvidence = async ({
       /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/giu,
       '',
     )
-    const datePattern = `(?:${sourceDatePatterns(candidate.departureDate).join('|')})`
-    const pricePattern = `(?:USD(?:<[^>]+>|\\s)*|US(?:<[^>]+>|\\s)*\\$(?:<[^>]+>|\\s)*)${candidate.priceFrom}(?:\\.00)?(?:<[^>]+>|\\s)*\\/(?:<[^>]+>|\\s)*pax`
-    const departureItems = [
-      ...withoutJSONLD.matchAll(/<div\b[^>]*\bdata-count=["'][^"']+["'][^>]*>/giu),
-    ].map((match, index, matches) =>
-      withoutJSONLD.slice(
-        match.index,
-        matches[index + 1]?.index ?? Math.min(withoutJSONLD.length, match.index + 20_000),
-      ),
-    )
-    const structuredRow = departureItems.find(
-      (item) =>
-        new RegExp(datePattern, 'iu').test(item) &&
-        new RegExp(pricePattern, 'iu').test(item) &&
-        /Guarantee\s+depart/iu.test(item),
-    )
-    const rowPattern = new RegExp(
-      `<(?:tr|li|div)\\b[^>]*>[\\s\\S]{0,1500}?${datePattern}[\\s\\S]{0,700}?${pricePattern}[\\s\\S]{0,1500}?<\\/(?:tr|li|div)>`,
-      'iu',
-    )
-    const exactRow = structuredRow || withoutJSONLD.match(rowPattern)?.[0]
+    const exactRow = exactDepartureRow({
+      dateOnly: candidate.departureDate,
+      html: withoutJSONLD,
+      priceFrom: candidate.priceFrom,
+    })
     if (!exactRow) {
       throw new Error(
         `Evidence candidate ${candidate.productId} lacks an exact visible date/price row`,
