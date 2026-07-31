@@ -274,7 +274,7 @@ const fixture = ({ mutateEnglishOnLocalizedArrayWrite = false } = {}) => {
         collection: 'pages' | 'tour-products'
         data: Record<string, unknown>
         id: number | string
-        locale: (typeof locales)[number]
+        locale: 'en' | (typeof locales)[number]
       }) => {
         if (args.collection === 'pages') {
           const index = wrappers[args.locale].findIndex(

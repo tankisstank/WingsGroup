@@ -577,16 +577,37 @@ body[data-site-code='wing-side'] .ws-hifi-creds__dialog-close svg {
 }
 
 body[data-site-code='wing-side'] .ws-hifi-creds__rail {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0.65rem;
   margin-top: 1rem;
+  overflow: hidden;
+}
+
+body[data-site-code='wing-side'] .ws-hifi-creds__rail-track,
+body[data-site-code='wing-side'] .ws-hifi-creds__rail-repeat {
+  display: flex;
+  width: max-content;
+  gap: 0.65rem;
+}
+
+body[data-site-code='wing-side'] .ws-hifi-creds__rail-track {
+  animation: ws-hifi-creds-rail 48s linear infinite;
+  will-change: transform;
+}
+
+body[data-site-code='wing-side'] .ws-hifi-creds__rail:hover .ws-hifi-creds__rail-track,
+body[data-site-code='wing-side'] .ws-hifi-creds__rail:focus-within .ws-hifi-creds__rail-track {
+  animation-play-state: paused;
+}
+
+@keyframes ws-hifi-creds-rail {
+  to {
+    transform: translateX(calc(-50% - 0.325rem));
+  }
 }
 
 body[data-site-code='wing-side'] .ws-hifi-creds__thumb {
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr);
-  min-width: 0;
+  flex: 0 0 190px;
   min-height: 76px;
   align-items: center;
   gap: 0.7rem;
@@ -675,12 +696,6 @@ body[data-site-code='wing-side'] .ws-hifi-creds button:focus-visible,
 body[data-site-code='wing-side'] .ws-hifi-creds a:focus-visible {
   outline: 3px solid var(--site-cta-fg, #111827);
   outline-offset: 3px;
-}
-
-@media (max-width: 1080px) {
-  body[data-site-code='wing-side'] .ws-hifi-creds__rail {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 760px) {
@@ -773,20 +788,11 @@ body[data-site-code='wing-side'] .ws-hifi-creds a:focus-visible {
   body[data-site-code='wing-side'] .ws-hifi-creds__rail {
     display: flex;
     width: calc(100vw - 1rem);
-    margin-right: -1rem;
-    padding-right: 1rem;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-  }
-
-  body[data-site-code='wing-side'] .ws-hifi-creds__rail::-webkit-scrollbar {
-    display: none;
+    overflow: hidden;
   }
 
   body[data-site-code='wing-side'] .ws-hifi-creds__thumb {
-    flex: 0 0 min(78vw, 280px);
-    scroll-snap-align: start;
+    flex-basis: min(78vw, 280px);
   }
 }
 

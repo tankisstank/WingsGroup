@@ -279,34 +279,66 @@ export const WingsSideCredentialsCarousel = ({
         </div>
 
         <div aria-label={labels.thumbnailRailLabel} className="ws-hifi-creds__rail">
-          {filteredRecords.map((record) => {
-            const isActive = record.id === activeRecord.id
-            return (
-              <button
-                aria-current={isActive ? 'true' : undefined}
-                aria-label={`${labels.viewDocument}: ${record.title}`}
-                className="ws-hifi-creds__thumb"
-                key={record.id}
-                onClick={() => setActiveId(record.id)}
-                type="button"
-              >
-                <Media
-                alt=""
-                className="ws-hifi-creds__thumb-media"
-                fill
-                imgClassName="ws-hifi-creds__thumb-image"
-                pictureClassName="ws-hifi-creds__media-picture"
-                resource={record.image}
-                src={record.image as never}
-                size="64px"
-              />
-                <span className="ws-hifi-creds__thumb-copy">
-                  <strong>{record.issuer}</strong>
-                  <span>{getProofTypeLabel(record.category, labels)}</span>
-                </span>
-              </button>
-            )
-          })}
+          <div className="ws-hifi-creds__rail-track">
+            {filteredRecords.map((record) => {
+              const isActive = record.id === activeRecord.id
+              return (
+                <button
+                  aria-current={isActive ? 'true' : undefined}
+                  aria-label={`${labels.viewDocument}: ${record.title}`}
+                  className="ws-hifi-creds__thumb"
+                  key={record.id}
+                  onClick={() => setActiveId(record.id)}
+                  type="button"
+                >
+                  <Media
+                    alt=""
+                    className="ws-hifi-creds__thumb-media"
+                    fill
+                    imgClassName="ws-hifi-creds__thumb-image"
+                    pictureClassName="ws-hifi-creds__media-picture"
+                    resource={record.image}
+                    src={record.image as never}
+                    size="64px"
+                  />
+                  <span className="ws-hifi-creds__thumb-copy">
+                    <strong>{record.issuer}</strong>
+                    <span>{getProofTypeLabel(record.category, labels)}</span>
+                  </span>
+                </button>
+              )
+            })}
+            <div aria-hidden="true" className="ws-hifi-creds__rail-repeat">
+              {filteredRecords.map((record) => {
+                const isActive = record.id === activeRecord.id
+                return (
+                  <button
+                    aria-current={isActive ? 'true' : undefined}
+                    className="ws-hifi-creds__thumb"
+                    key={`repeat-${record.id}`}
+                    onClick={() => setActiveId(record.id)}
+                    tabIndex={-1}
+                    type="button"
+                  >
+                    <Media
+                      alt=""
+                      className="ws-hifi-creds__thumb-media"
+                      fill
+                      imgClassName="ws-hifi-creds__thumb-image"
+                      pictureClassName="ws-hifi-creds__media-picture"
+                      resource={record.image}
+                      src={record.image as never}
+                      size="64px"
+                    />
+                    <span className="ws-hifi-creds__thumb-copy">
+                      <strong>{record.issuer}</strong>
+                      <span>{getProofTypeLabel(record.category, labels)}</span>
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         </div>
       </div>
 

@@ -3,15 +3,16 @@
 ## Proof Strategy
 
 Proof must show that the public archive is CMS-backed, suppresses unsupported or
-unverified rows, has accessible non-autoplay interactions, and preserves exact
-fixed frame heights at required breakpoints.
+unverified rows, has an accessible moving one-line credential rail (pause on
+hover/focus and reduced-motion fallback), and preserves exact fixed frame heights
+at required breakpoints.
 
 ## Test Plan
 
 | Layer | Cases |
 | --- | --- |
 | Unit | Pure mapper: 24 CMS rows -> 21 public records; unsupported/unverified/missing-image suppression; neutral missing-field text; generated image alt. CSS contract: desktop/mobile fixed heights, exact rows, contained images, obsolete selectors removed. |
-| Component | Filters with `aria-pressed`; stable active ID; previous/next wrapping; arrow keyboard behavior and guards; dialog open/Close/backdrop/focus return; accessible names; no timer/autoplay. |
+| Component | Filters with `aria-pressed`; stable active ID; previous/next wrapping; arrow keyboard behavior and guards; dialog open/Close/backdrop/focus return; accessible names; duplicated visual rail is hidden from the accessibility tree; no JavaScript timer/autoplay. |
 | Integration | Payload block remains registered; Media relationship exists; authoring choices restricted to `cert`/`award`; deprecated autoplay fields hidden. |
 | E2E | Focused WingSide home Proof Archive at 360, 390, 430, 600, 768, 820, 1024, 1366, 1440, 1920. Activate all 21 records and verify exact height before/after image settle, no horizontal overflow, `object-fit: contain`. |
 | Platform | Windows PowerShell commands only; no port 3000. |

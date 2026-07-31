@@ -1447,6 +1447,9 @@ function toPlaneStateName(story, mapping = {}) {
   if (story.status === 'planned') {
     return 'Đã lên kế hoạch'
   }
+  if (story.status === 'in_progress') {
+    return 'Đang thực hiện'
+  }
   return toProofStatusKey(story, mapping) === 'Full' ? 'Đã bàn giao' : 'Chờ xác nhận'
 }
 

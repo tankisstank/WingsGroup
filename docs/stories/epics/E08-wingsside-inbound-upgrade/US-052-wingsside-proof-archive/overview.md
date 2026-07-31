@@ -22,7 +22,10 @@ pipeline, and WingSide hi-fi composer boundaries.
 Only verified `cert` and `award` records with stable row IDs and populated Media
 relationships render publicly. Unsupported `member` and `iso` rows remain
 compatible as stored data but are excluded from this two-filter archive. There is
-no runtime fallback to locale credential records, no autoplay, and no timer.
+no runtime fallback to locale credential records and no JavaScript autoplay
+timer. The visible credential index is a single horizontal, continuously moving
+card rail; it pauses on hover or keyboard focus and disables movement for visitors
+who request reduced motion.
 
 ## Affected Users
 

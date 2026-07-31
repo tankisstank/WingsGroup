@@ -38,6 +38,16 @@ describe('WingsSide Proof Archive CSS contract', () => {
     expect(css).toContain('overflow-x: auto')
   })
 
+  it('renders the credential index as a looping one-line rail that pauses for interaction', () => {
+    const css = fs.readFileSync(cssPath, 'utf8')
+
+    expect(css).toContain('.ws-hifi-creds__rail-track')
+    expect(css).toContain('animation: ws-hifi-creds-rail 48s linear infinite')
+    expect(css).toContain('animation-play-state: paused')
+    expect(css).toContain('@keyframes ws-hifi-creds-rail')
+    expect(css).toContain('translateX(calc(-50% - 0.325rem))')
+  })
+
   it('keeps obsolete carousel selectors out of hifi-pages.css', () => {
     const css = fs.readFileSync(pageCssPath, 'utf8')
 
