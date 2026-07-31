@@ -34,9 +34,28 @@ replacing the catalog data layer.
   (0 errors, 0 warnings), `git diff --check`, and production build pass.
 - Local `agent-browser` startup reached the repository's local bootstrap but
   cannot resolve a WingSide tenant with production catalog data in this
-  worktree; `/journeys` therefore returns its expected tenant 404. Desktop and
-  mobile visual capture against a real WingSide tenant remain an app-only
-  canary release gate, not a reason to mutate catalog data locally.
+  worktree; `/journeys` therefore returns its expected tenant 404. This was
+  closed by the isolated VPS app-only canary below, without mutating catalog
+  data or public traffic.
+
+## 2026-07-31 app-only canary visual QA
+
+- Immutable canary SHA `ee69e4a9e2c52ba9440805f5ecf7f44d09470403` built on
+  the VPS as ARM64 image
+  `sha256:1c8209a26ea472bb284da2563d7a71fe0be06e4dec8345b087a4990f762448f4`.
+- The private port-3001 canary used the same PostgreSQL/Redis runtime contract
+  as production, passed live/tenant Journeys probes, then was removed after
+  QA. No migration, CMS write, data import, symlink switch or public traffic
+  promotion occurred.
+- `agent-browser` visual QA through a local tunnel/proxy verified the real
+  WingSide tenant: Plus Jakarta Sans was the computed hero font; desktop and
+  mobile had no horizontal overflow; mobile card grid and decision band stacked
+  to one column; all three stable destination images loaded; group inventory
+  exposed zero `Book` CTAs; and a strict five-filter zero result retained its
+  full brief and recovery actions.
+- The public rollback point was continuously preserved and rechecked after
+  cleanup: `/home/ubuntu/wings-travel/releases/wingsside-us057-1dc91b0`, SHA
+  `1dc91b0de859626e2ba233065117b2be61aa670d`, with live health still `ok`.
 
 ## Automated gates
 
