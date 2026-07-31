@@ -6,15 +6,19 @@ import path from 'node:path'
 import { createLocalReq, getPayload, type Payload } from 'payload'
 
 import {
+  assertGroupCommerceCanaryAttestation,
   assertGroupCommerceCanaryPromotion,
   assertGroupCommerceProductionWriteGate,
+  createGroupCommerceCanaryAttestation,
   createGroupCommercePlan,
-  deriveGroupCommerceCanaryPlan,
+  createGroupCommercePlanBundle,
   groupCommerceChecksum,
   WINGSSIDE_GROUP_COMMERCE_APPLY_CONFIRM,
   WINGSSIDE_GROUP_COMMERCE_ROLLBACK_CONFIRM,
   type ClassificationManifest,
   type CommercePlan,
+  type GroupCommerceCanaryAttestation,
+  type GroupCommerceCanaryReceipt,
   type SourceEvidence,
 } from './lib/wingsSideGroupCommerceLifecycle'
 import {
@@ -30,7 +34,14 @@ import {
 } from './lib/wingsSideBestPriceEvidence'
 import { assertWingsSideEditorialProductionWriteGuard } from './lib/wingsSideReleaseWriteGuard'
 
-type Phase = 'apply' | 'capture-evidence' | 'plan' | 'recover-receipt' | 'rollback' | 'verify'
+type Phase =
+  | 'apply'
+  | 'attest-canary'
+  | 'capture-evidence'
+  | 'plan'
+  | 'recover-receipt'
+  | 'rollback'
+  | 'verify'
 
 const value = (name: string) => {
   const inline = process.argv.find((argument) => argument.startsWith(`${name}=`))
@@ -86,8 +97,13 @@ const resolveRequest = async (payload: Payload, phase: Phase) => {
   )
 }
 
-const releaseGuardArgs = (planSha256: string, confirm: string | undefined) => ({
+const releaseGuardArgs = (
+  planSha256: string,
+  backupBindingSha256: string,
+  confirm: string | undefined,
+) => ({
   adminEmail: value('--admin-email') || process.env.IMPORT_ADMIN_EMAIL,
+  backupBindingSha256,
   backupPath: value('--backup'),
   backupSha256: value('--backup-sha256'),
   planSha256,
@@ -102,32 +118,51 @@ const releaseGuardArgs = (planSha256: string, confirm: string | undefined) => ({
 })
 
 const assertMutationGates = ({
+  backupBindingSha256,
+  canaryAttestationSha256,
   expectedConfirm,
   plan,
   planSha256,
 }: {
+  backupBindingSha256: string
+  canaryAttestationSha256?: string
   expectedConfirm: string
   plan: CommercePlan
   planSha256: string
 }) => {
-  const args = releaseGuardArgs(planSha256, value('--confirm'))
+  const args = releaseGuardArgs(planSha256, backupBindingSha256, value('--confirm'))
   assertWingsSideEditorialProductionWriteGuard(args)
   assertGroupCommerceProductionWriteGate({
     backupSha256: args.backupSha256,
+    canaryAttestationSha256,
     confirm: args.confirm,
     expectedConfirm,
     plan,
     planSha256,
     releaseSha: args.releaseSha,
     restoreEvidenceSha256: args.restoreEvidenceSha256,
+    trustedCanaryAttestationSha256:
+      process.env.WINGSSIDE_GROUP_COMMERCE_CANARY_ATTESTATION_SHA256,
     mode: expectedConfirm === WINGSSIDE_GROUP_COMMERCE_APPLY_CONFIRM ? 'apply' : 'rollback',
   })
 }
 
 const main = async () => {
   const phase = process.argv[2] as Phase
-  if (!['apply', 'capture-evidence', 'plan', 'recover-receipt', 'rollback', 'verify'].includes(phase)) {
-    throw new Error('Choose capture-evidence, plan, apply, recover-receipt, verify, or rollback')
+  if (
+    ![
+      'apply',
+      'attest-canary',
+      'capture-evidence',
+      'plan',
+      'recover-receipt',
+      'rollback',
+      'verify',
+    ].includes(phase)
+  ) {
+    throw new Error(
+      'Choose capture-evidence, plan, apply, attest-canary, recover-receipt, verify, or rollback',
+    )
   }
   const manifest = await readJSON<ClassificationManifest>(
     value('--classification') ||
@@ -151,13 +186,44 @@ const main = async () => {
     if (phase === 'plan') {
       const evidence = await readJSON<SourceEvidence>(value('--evidence'))
       const snapshot = await readGroupCommercePayloadSnapshot({ manifest, payload, releaseSha, req })
-      const fullPlan = createGroupCommercePlan({ evidence, manifest, snapshot })
       const canaryId = Number(value('--canary'))
-      const plan = canaryId
-        ? deriveGroupCommerceCanaryPlan({ fullPlan, productId: canaryId as 63 | 69 })
-        : fullPlan
+      if (canaryId) {
+        const canaryOutputArg = value('--canary-output')
+        if (!canaryOutputArg) {
+          throw new Error('--canary requires --canary-output so full and canary plans share one snapshot')
+        }
+        if (path.resolve(value('--output') || '') === path.resolve(canaryOutputArg)) {
+          throw new Error('--output and --canary-output must be different paths')
+        }
+        const bundle = createGroupCommercePlanBundle({
+          evidence,
+          manifest,
+          productId: canaryId as 63 | 69,
+          snapshot,
+        })
+        const output = await writeJSON(value('--output'), bundle.fullPlan)
+        const canaryOutput = await writeJSON(canaryOutputArg, bundle.canaryPlan)
+        console.log(
+          JSON.stringify({
+            output,
+            planSha256: bundle.fullPlanSha256,
+            entries: bundle.fullPlan.entries.length,
+            canaryOutput,
+            canaryPlanSha256: bundle.canaryPlanSha256,
+            canaryEntries: bundle.canaryPlan.entries.length,
+          }),
+        )
+        return
+      }
+      const plan = createGroupCommercePlan({ evidence, manifest, snapshot })
       const output = await writeJSON(value('--output'), plan)
-      console.log(JSON.stringify({ output, planSha256: groupCommerceChecksum(plan), entries: plan.entries.length }))
+      console.log(
+        JSON.stringify({
+          output,
+          planSha256: groupCommerceChecksum(plan),
+          entries: plan.entries.length,
+        }),
+      )
       return
     }
     const plan = await readJSON<CommercePlan>(value('--plan'))
@@ -187,10 +253,64 @@ const main = async () => {
       console.log(JSON.stringify(result))
       return
     }
+    if (phase === 'attest-canary') {
+      if (plan.kind !== 'canary') throw new Error('attest-canary requires a canary plan')
+      const fullPlan = await readJSON<CommercePlan>(value('--parent-plan'))
+      const receipt = await readJSON<GroupCommerceCanaryReceipt>(value('--receipt'))
+      const verification = await verifyGroupCommercePayload({
+        expectedState: 'after',
+        manifest,
+        payload,
+        plan,
+        req,
+      })
+      const attestation = createGroupCommerceCanaryAttestation({
+        canaryPlan: plan,
+        canaryPlanSha256: planSha256,
+        fullPlan,
+        receipt,
+        verification,
+      })
+      const output = await writeJSON(value('--output'), attestation)
+      console.log(
+        JSON.stringify({
+          output,
+          phase,
+          attestationSha256: groupCommerceChecksum(attestation),
+          checked: verification.checked,
+          state: verification.state,
+        }),
+      )
+      return
+    }
+    let backupBindingSha256 = planSha256
+    let canaryAttestationSha256: string | undefined
     if (plan.kind === 'full') {
       const canaryPlan = await readJSON<CommercePlan>(value('--canary-plan'))
       const canaryPlanSha256 = String(value('--canary-plan-sha256') || '')
       assertGroupCommerceCanaryPromotion({ canaryPlan, canaryPlanSha256, fullPlan: plan })
+      if (phase === 'apply') {
+        const attestation = await readJSON<GroupCommerceCanaryAttestation>(
+          value('--canary-attestation'),
+        )
+        const receipt = await readJSON<GroupCommerceCanaryReceipt>(value('--canary-receipt'))
+        canaryAttestationSha256 = String(value('--canary-attestation-sha256') || '')
+        assertGroupCommerceCanaryAttestation({
+          attestation,
+          attestationSha256: canaryAttestationSha256,
+          canaryPlan,
+          canaryPlanSha256,
+          fullPlan: plan,
+          receipt,
+        })
+        await verifyGroupCommercePayload({
+          expectedState: 'after',
+          manifest,
+          payload,
+          plan: canaryPlan,
+          req,
+        })
+      }
     } else {
       const parentPlan = await readJSON<CommercePlan>(value('--parent-plan'))
       assertGroupCommerceCanaryPromotion({
@@ -198,8 +318,11 @@ const main = async () => {
         canaryPlanSha256: planSha256,
         fullPlan: parentPlan,
       })
+      backupBindingSha256 = groupCommerceChecksum(parentPlan)
     }
     assertMutationGates({
+      backupBindingSha256,
+      canaryAttestationSha256,
       expectedConfirm:
         phase === 'apply'
           ? WINGSSIDE_GROUP_COMMERCE_APPLY_CONFIRM
@@ -213,6 +336,8 @@ const main = async () => {
         : undefined
     // Re-check both gates immediately before the transaction.
     assertMutationGates({
+      backupBindingSha256,
+      canaryAttestationSha256,
       expectedConfirm:
         phase === 'apply'
           ? WINGSSIDE_GROUP_COMMERCE_APPLY_CONFIRM

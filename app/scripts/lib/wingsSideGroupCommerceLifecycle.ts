@@ -103,6 +103,28 @@ export type CommercePlan = {
   entries: CommercePlanEntry[]
 }
 
+export type GroupCommerceCanaryReceipt = {
+  schemaVersion: 1
+  planSha256: string
+  releaseSha: string
+  createdDepartureIDs: Array<number | string>
+}
+
+export type GroupCommerceCanaryAttestation = {
+  schemaVersion: 1
+  kind: 'group-commerce-canary-attestation'
+  releaseSha: string
+  fullPlanSha256: string
+  canaryPlanSha256: string
+  canaryReceiptSha256: string
+  sourceEvidenceSha256: string
+  productId: 63 | 69
+  postimageSha256: string
+  verifiedAt: string
+  checked: 1
+  state: 'after'
+}
+
 const stable = (value: unknown): string => {
   if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`
   if (value && typeof value === 'object') {
@@ -362,6 +384,7 @@ export const deriveGroupCommerceCanaryPlan = ({
   productId: 63 | 69
 }): CommercePlan => {
   if (fullPlan.kind !== 'full' || fullPlan.entries.length !== 22) throw new Error('Canary requires the original full 22-tour plan')
+  if (![63, 69].includes(productId)) throw new Error('Canary product must be approved group tour 63 or 69')
   const entry = fullPlan.entries.find((candidate) => candidate.productId === productId)
   if (!entry || entry.after.departures.length === 0) throw new Error('Canary must have fresh source-backed departures')
   return {
@@ -369,6 +392,29 @@ export const deriveGroupCommerceCanaryPlan = ({
     kind: 'canary',
     parentPlanSha256: groupCommerceChecksum(fullPlan),
     entries: [structuredClone(entry)],
+  }
+}
+
+export const createGroupCommercePlanBundle = ({
+  evidence,
+  manifest,
+  now = new Date(),
+  productId,
+  snapshot,
+}: {
+  evidence: SourceEvidence
+  manifest: ClassificationManifest
+  now?: Date
+  productId: 63 | 69
+  snapshot: CommerceSnapshot
+}) => {
+  const fullPlan = createGroupCommercePlan({ evidence, manifest, now, snapshot })
+  const canaryPlan = deriveGroupCommerceCanaryPlan({ fullPlan, productId })
+  return {
+    fullPlan,
+    fullPlanSha256: groupCommerceChecksum(fullPlan),
+    canaryPlan,
+    canaryPlanSha256: groupCommerceChecksum(canaryPlan),
   }
 }
 
@@ -381,15 +427,114 @@ export const assertGroupCommerceCanaryPromotion = ({
   canaryPlanSha256: string
   fullPlan: CommercePlan
 }) => {
+  const canaryEntry = canaryPlan.entries[0]
+  const fullEntry = fullPlan.entries.find(({ productId }) => productId === canaryEntry?.productId)
   if (
     fullPlan.kind !== 'full' ||
     canaryPlan.kind !== 'canary' ||
     canaryPlan.entries.length !== 1 ||
-    ![63, 69].includes(canaryPlan.entries[0]!.productId) ||
+    !canaryEntry ||
+    ![63, 69].includes(canaryEntry.productId) ||
     canaryPlan.parentPlanSha256 !== groupCommerceChecksum(fullPlan) ||
-    groupCommerceChecksum(canaryPlan) !== canaryPlanSha256
+    groupCommerceChecksum(canaryPlan) !== canaryPlanSha256 ||
+    canaryPlan.releaseSha !== fullPlan.releaseSha ||
+    canaryPlan.siteCode !== fullPlan.siteCode ||
+    canaryPlan.batchId !== fullPlan.batchId ||
+    canaryPlan.sourceEvidenceSha256 !== fullPlan.sourceEvidenceSha256 ||
+    canaryPlan.expiresAt !== fullPlan.expiresAt ||
+    !fullEntry ||
+    groupCommerceChecksum(canaryEntry) !== groupCommerceChecksum(fullEntry)
   ) {
     throw new Error('Full promotion requires a verified canary linked to the immutable full plan')
+  }
+}
+
+export const createGroupCommerceCanaryAttestation = ({
+  canaryPlan,
+  canaryPlanSha256,
+  fullPlan,
+  receipt,
+  verification,
+  verifiedAt = new Date().toISOString(),
+}: {
+  canaryPlan: CommercePlan
+  canaryPlanSha256: string
+  fullPlan: CommercePlan
+  receipt: GroupCommerceCanaryReceipt
+  verification: { checked: number; state: string }
+  verifiedAt?: string
+}): GroupCommerceCanaryAttestation => {
+  assertGroupCommerceCanaryPromotion({ canaryPlan, canaryPlanSha256, fullPlan })
+  const verifiedAtMs = assertDate(verifiedAt, 'canaryAttestation.verifiedAt')
+  if (
+    receipt.schemaVersion !== 1 ||
+    receipt.planSha256 !== canaryPlanSha256 ||
+    receipt.releaseSha !== canaryPlan.releaseSha ||
+    verification.checked !== 1 ||
+    verification.state !== 'after' ||
+    verifiedAtMs > Date.parse(canaryPlan.expiresAt)
+  ) {
+    throw new Error('Canary attestation requires the exact apply receipt and verify-after result')
+  }
+  const entry = canaryPlan.entries[0]!
+  return {
+    schemaVersion: 1,
+    kind: 'group-commerce-canary-attestation',
+    releaseSha: canaryPlan.releaseSha,
+    fullPlanSha256: groupCommerceChecksum(fullPlan),
+    canaryPlanSha256,
+    canaryReceiptSha256: groupCommerceChecksum(receipt),
+    sourceEvidenceSha256: canaryPlan.sourceEvidenceSha256,
+    productId: entry.productId as 63 | 69,
+    postimageSha256: entry.postimageSha256,
+    verifiedAt,
+    checked: 1,
+    state: 'after',
+  }
+}
+
+export const assertGroupCommerceCanaryAttestation = ({
+  attestation,
+  attestationSha256,
+  canaryPlan,
+  canaryPlanSha256,
+  fullPlan,
+  receipt,
+}: {
+  attestation: GroupCommerceCanaryAttestation
+  attestationSha256: string
+  canaryPlan: CommercePlan
+  canaryPlanSha256: string
+  fullPlan: CommercePlan
+  receipt: GroupCommerceCanaryReceipt
+}) => {
+  assertGroupCommerceCanaryPromotion({ canaryPlan, canaryPlanSha256, fullPlan })
+  const entry = canaryPlan.entries[0]!
+  assertDate(attestation.verifiedAt, 'canaryAttestation.verifiedAt')
+  if (
+    groupCommerceChecksum(attestation) !== attestationSha256 ||
+    attestation.schemaVersion !== 1 ||
+    attestation.kind !== 'group-commerce-canary-attestation' ||
+    attestation.releaseSha !== fullPlan.releaseSha ||
+    attestation.fullPlanSha256 !== groupCommerceChecksum(fullPlan) ||
+    attestation.canaryPlanSha256 !== canaryPlanSha256 ||
+    attestation.canaryReceiptSha256 !== groupCommerceChecksum(receipt) ||
+    attestation.sourceEvidenceSha256 !== fullPlan.sourceEvidenceSha256 ||
+    attestation.productId !== entry.productId ||
+    attestation.postimageSha256 !== entry.postimageSha256 ||
+    attestation.checked !== 1 ||
+    attestation.state !== 'after' ||
+    receipt.schemaVersion !== 1 ||
+    receipt.planSha256 !== canaryPlanSha256 ||
+    receipt.releaseSha !== fullPlan.releaseSha
+  ) {
+    throw new Error('Full promotion requires an immutable canary apply/verify attestation')
+  }
+  return {
+    attestationSha256,
+    canaryPlanSha256,
+    fullPlanSha256: attestation.fullPlanSha256,
+    verifiedAt: attestation.verifiedAt,
   }
 }
 
@@ -448,22 +593,26 @@ export const verifyGroupCommerceSnapshot = ({
 
 export const assertGroupCommerceProductionWriteGate = ({
   backupSha256,
+  canaryAttestationSha256,
   confirm,
   expectedConfirm,
   plan,
   planSha256,
   releaseSha,
   restoreEvidenceSha256,
+  trustedCanaryAttestationSha256,
   mode,
   now = new Date(),
 }: {
   backupSha256?: string
+  canaryAttestationSha256?: string
   confirm?: string
   expectedConfirm: string
   plan: CommercePlan
   planSha256: string
   releaseSha?: string
   restoreEvidenceSha256?: string
+  trustedCanaryAttestationSha256?: string
   mode: 'apply' | 'rollback'
   now?: Date
 }) => {
@@ -474,6 +623,18 @@ export const assertGroupCommerceProductionWriteGate = ({
   if (releaseSha !== plan.releaseSha) throw new Error('Immutable release SHA does not match plan')
   if (mode === 'apply' && Date.parse(plan.expiresAt) <= now.getTime()) {
     throw new Error('Production apply plan has expired')
+  }
+  if (
+    mode === 'apply' &&
+    plan.kind === 'full' &&
+    (!canaryAttestationSha256 ||
+      !trustedCanaryAttestationSha256 ||
+      canaryAttestationSha256 !== trustedCanaryAttestationSha256)
+  ) {
+    throw new Error('Full production apply requires the trusted canary attestation SHA-256')
+  }
+  if (canaryAttestationSha256) {
+    assertSha(canaryAttestationSha256, 'canaryAttestationSha256')
   }
   assertSha(backupSha256 || '', 'backupSha256')
   assertSha(restoreEvidenceSha256 || '', 'restoreEvidenceSha256')

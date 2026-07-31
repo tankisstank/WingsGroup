@@ -72,6 +72,7 @@ const fixture = () => {
     NODE_ENV: 'production',
     PAYLOAD_DB_PUSH: 'false',
     POSTGRES_DB: 'wingstravel',
+    WINGSSIDE_RELEASE_BACKUP_BINDING_SHA256: undefined as string | undefined,
     WINGSSIDE_RELEASE_BACKUP_MANIFEST_SHA256: manifestSha256,
     WINGSSIDE_RELEASE_BACKUP_SHA256: backupSha256,
     WINGSSIDE_RELEASE_DATABASE_HOST: 'postgres',
@@ -120,6 +121,39 @@ describe('WingSide tour editorial production release guard', () => {
       releaseSha: 'a'.repeat(40),
       rollbackReleaseSha: 'b'.repeat(40),
     })
+  })
+
+  it('binds one verified backup to the parent full plan while a canary plan executes', () => {
+    const value = fixture()
+    const fullPlanSha256 = 'd'.repeat(64)
+    const manifestPath = `${value.args.backupPath}.json`
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as Record<
+      string,
+      unknown
+    >
+    manifest.intendedPlanSha256 = fullPlanSha256
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest))
+    value.args.backupBindingSha256 = fullPlanSha256
+    value.env.WINGSSIDE_RELEASE_BACKUP_BINDING_SHA256 = fullPlanSha256
+    value.env.WINGSSIDE_RELEASE_BACKUP_MANIFEST_SHA256 = sha256(
+      fs.readFileSync(manifestPath),
+    )
+
+    expect(
+      assertWingsSideEditorialProductionWriteGuard(value.args, value.env, value.io),
+    ).toMatchObject({
+      backupBindingSha256: fullPlanSha256,
+      planSha256: 'c'.repeat(64),
+    })
+  })
+
+  it('rejects a backup binding that is not protected by the release environment', () => {
+    const value = fixture()
+    value.args.backupBindingSha256 = 'd'.repeat(64)
+    value.env.WINGSSIDE_RELEASE_BACKUP_BINDING_SHA256 = 'e'.repeat(64)
+    expect(() =>
+      assertWingsSideEditorialProductionWriteGuard(value.args, value.env, value.io),
+    ).toThrow(/backup binding checksum/)
   })
 
   it.each([

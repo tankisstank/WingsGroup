@@ -2,10 +2,13 @@ import { describe, expect, it, vi } from 'vitest'
 
 import manifestJSON from '../../scripts/data/wingsside-group-commerce-v1/classification.json'
 import {
+  assertGroupCommerceCanaryAttestation,
   assertGroupCommerceCanaryPromotion,
   assertClassificationManifest,
   assertGroupCommerceProductionWriteGate,
+  createGroupCommerceCanaryAttestation,
   createGroupCommercePlan,
+  createGroupCommercePlanBundle,
   deriveGroupCommerceCanaryPlan,
   groupCommerceChecksum,
   transitionGroupCommerceSnapshot,
@@ -158,6 +161,70 @@ describe('WingSide group commerce production lifecycle', () => {
     expect(groupCommerceChecksum(restored.products)).toBe(groupCommerceChecksum(before.products))
   })
 
+  it('creates full and canary plans from one snapshot and requires an immutable verify attestation', () => {
+    const bundle = createGroupCommercePlanBundle({
+      evidence: evidence(),
+      manifest,
+      now,
+      productId: 63,
+      snapshot: snapshot(),
+    })
+    expect(bundle.canaryPlan.parentPlanSha256).toBe(bundle.fullPlanSha256)
+    expect(bundle.canaryPlan.entries[0]).toEqual(
+      bundle.fullPlan.entries.find(({ productId }) => productId === 63),
+    )
+    const receipt = {
+      schemaVersion: 1 as const,
+      planSha256: bundle.canaryPlanSha256,
+      releaseSha: bundle.canaryPlan.releaseSha,
+      createdDepartureIDs: [901],
+    }
+    const attestation = createGroupCommerceCanaryAttestation({
+      canaryPlan: bundle.canaryPlan,
+      canaryPlanSha256: bundle.canaryPlanSha256,
+      fullPlan: bundle.fullPlan,
+      receipt,
+      verification: { checked: 1, state: 'after' },
+      verifiedAt: '2026-07-31T10:05:00.000Z',
+    })
+    const attestationSha256 = groupCommerceChecksum(attestation)
+    expect(
+      assertGroupCommerceCanaryAttestation({
+        attestation,
+        attestationSha256,
+        canaryPlan: bundle.canaryPlan,
+        canaryPlanSha256: bundle.canaryPlanSha256,
+        fullPlan: bundle.fullPlan,
+        receipt,
+      }),
+    ).toMatchObject({
+      attestationSha256,
+      canaryPlanSha256: bundle.canaryPlanSha256,
+      fullPlanSha256: bundle.fullPlanSha256,
+    })
+
+    expect(() =>
+      assertGroupCommerceCanaryAttestation({
+        attestation,
+        attestationSha256,
+        canaryPlan: bundle.canaryPlan,
+        canaryPlanSha256: bundle.canaryPlanSha256,
+        fullPlan: bundle.fullPlan,
+        receipt: { ...receipt, createdDepartureIDs: [902] },
+      }),
+    ).toThrow(/immutable canary/)
+
+    const substitutedCanary = structuredClone(bundle.canaryPlan)
+    substitutedCanary.entries[0]!.after.tourType = 'private'
+    expect(() =>
+      assertGroupCommerceCanaryPromotion({
+        canaryPlan: substitutedCanary,
+        canaryPlanSha256: groupCommerceChecksum(substitutedCanary),
+        fullPlan: bundle.fullPlan,
+      }),
+    ).toThrow(/immutable full plan/)
+  })
+
   it('rejects an expired apply plan but still permits an exact rollback', () => {
     const before = snapshot()
     const plan = createGroupCommercePlan({ evidence: evidence(), manifest, now, snapshot: before })
@@ -223,23 +290,27 @@ describe('WingSide group commerce production lifecycle', () => {
       expect(() =>
         assertGroupCommerceProductionWriteGate({
           backupSha256: sha,
+          canaryAttestationSha256: sha,
           confirm: 'CONFIRM_WINGSSIDE_GROUP_COMMERCE_PRODUCTION_WRITE',
           expectedConfirm: 'CONFIRM_WINGSSIDE_GROUP_COMMERCE_PRODUCTION_WRITE',
           plan,
           planSha256: groupCommerceChecksum(plan),
           releaseSha: plan.releaseSha,
           restoreEvidenceSha256: sha,
+          trustedCanaryAttestationSha256: sha,
           mode: 'apply',
           now,
         }),
       ).not.toThrow()
       expect(() =>
         assertGroupCommerceProductionWriteGate({
+          canaryAttestationSha256: sha,
           confirm: 'CONFIRM_WINGSSIDE_GROUP_COMMERCE_PRODUCTION_WRITE',
           expectedConfirm: 'CONFIRM_WINGSSIDE_GROUP_COMMERCE_PRODUCTION_WRITE',
           plan,
           planSha256: groupCommerceChecksum(plan),
           releaseSha: plan.releaseSha,
+          trustedCanaryAttestationSha256: sha,
           mode: 'apply',
           now,
         }),
@@ -253,6 +324,21 @@ describe('WingSide group commerce production lifecycle', () => {
           planSha256: groupCommerceChecksum(plan),
           releaseSha: plan.releaseSha,
           restoreEvidenceSha256: sha,
+          mode: 'apply',
+          now,
+        }),
+      ).toThrow(/trusted canary attestation/)
+      expect(() =>
+        assertGroupCommerceProductionWriteGate({
+          backupSha256: sha,
+          canaryAttestationSha256: sha,
+          confirm: 'CONFIRM_WINGSSIDE_GROUP_COMMERCE_PRODUCTION_WRITE',
+          expectedConfirm: 'CONFIRM_WINGSSIDE_GROUP_COMMERCE_PRODUCTION_WRITE',
+          plan,
+          planSha256: groupCommerceChecksum(plan),
+          releaseSha: plan.releaseSha,
+          restoreEvidenceSha256: sha,
+          trustedCanaryAttestationSha256: sha,
           mode: 'apply',
           now: new Date(plan.expiresAt),
         }),

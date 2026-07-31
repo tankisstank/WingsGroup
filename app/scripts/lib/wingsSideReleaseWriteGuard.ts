@@ -16,6 +16,7 @@ type ReleaseGuardIO = Pick<typeof fs, 'existsSync' | 'readFileSync' | 'realpathS
 
 export type WingsSideEditorialProductionWriteGuardArgs = WingsSideReleaseWriteGuardArgs & {
   adminEmail?: string
+  backupBindingSha256?: string
   planSha256?: string
   releaseSourceSha?: string
   restoreEvidencePath?: string
@@ -182,6 +183,15 @@ export const assertWingsSideEditorialProductionWriteGuard = (
   if (env.WINGSSIDE_TOUR_EDITORIAL_PLAN_SHA256 !== planSha256) {
     throw new Error('Write blocked: editorial plan checksum does not match trusted environment')
   }
+  const backupBindingSha256 = args.backupBindingSha256
+    ? trustedSha256(args.backupBindingSha256, '--backup-binding-sha256')
+    : planSha256
+  if (
+    args.backupBindingSha256 &&
+    env.WINGSSIDE_RELEASE_BACKUP_BINDING_SHA256 !== backupBindingSha256
+  ) {
+    throw new Error('Write blocked: backup binding checksum does not match trusted environment')
+  }
   if (
     !args.releaseSha ||
     args.releaseSourceSha !== args.releaseSha ||
@@ -274,7 +284,7 @@ export const assertWingsSideEditorialProductionWriteGuard = (
     encrypted: true,
     file: path.basename(args.backupPath),
     format: 'postgres-custom',
-    intendedPlanSha256: planSha256,
+    intendedPlanSha256: backupBindingSha256,
     intendedReleaseSha: args.releaseSha,
     restoreDrillVerified: true,
     restoreEvidenceSha256,
@@ -292,6 +302,7 @@ export const assertWingsSideEditorialProductionWriteGuard = (
     databaseHost: databaseURL.hostname,
     databaseName,
     operator: args.adminEmail,
+    backupBindingSha256,
     planSha256,
     releaseSha: args.releaseSha,
     rollbackReleaseSha,
