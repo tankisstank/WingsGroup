@@ -347,7 +347,9 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
                     </span>
                     <span className="ws-journeys-card__action">
                       {item.tourType === 'hybrid'
-                        ? v2.requestQuote
+                        ? item.commerce
+                          ? v2.departures
+                          : v2.requestQuote
                         : item.tourType === 'group'
                           ? item.commerce?.canBook
                             ? v2.book

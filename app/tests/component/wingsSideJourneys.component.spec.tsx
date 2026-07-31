@@ -127,6 +127,39 @@ describe('WingSideJourneysClient', () => {
     expect(card.textContent).not.toMatch(/book now|available seats|instant booking/i)
   })
 
+  it('offers departures for fresh hybrid inventory without exposing direct booking', () => {
+    render(
+      <WingSideJourneysClient
+        context={context({
+          result: {
+            ...context().result,
+            items: [
+              {
+                ...context().result.items[0]!,
+                commerce: {
+                  availability: 'Guaranteed departure',
+                  canBook: false,
+                  departureDate: '2026-12-23',
+                  price: { currency: 'USD', kind: 'from', value: 741 },
+                },
+                title: 'Hybrid Northern Vietnam',
+                tourType: 'hybrid',
+              },
+            ],
+          },
+        })}
+        locale="en"
+      />,
+    )
+
+    const card = screen.getByRole('link', { name: /hybrid northern vietnam/i })
+    expect(within(card).getByText('Small group / Private')).toBeTruthy()
+    expect(within(card).getByText('View departures')).toBeTruthy()
+    expect(card.textContent).toMatch(/741/)
+    expect(card.textContent).toContain('Tailor-made quote')
+    expect(card.textContent).not.toMatch(/\bbook\b|instant booking|available seats/i)
+  })
+
   it('announces invalid values without raw values', () => {
     render(
       <WingSideJourneysClient
