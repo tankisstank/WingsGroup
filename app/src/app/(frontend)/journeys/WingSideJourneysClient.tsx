@@ -489,7 +489,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
             >
               {/* Existing approved public media is not statically known to Next Image. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt={destinationLabels[locale][value]} loading="lazy" src={image} />
+              <img alt={destinationLabels[locale][value]} loading="eager" src={image} />
               <span><i>{v2.destinationKickers?.[value as keyof typeof v2.destinationKickers] || v2.explore}</i><strong>{destinationLabels[locale]?.[value] || value}</strong><small>{v2.destinationBody}</small></span>
             </SiteLink>
           ))}
