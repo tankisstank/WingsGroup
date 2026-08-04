@@ -51,6 +51,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
   const searchParams = useSearchParams()
   const pendingSearchRef = useRef(searchParams?.toString() || '')
   const [isPending, startTransition] = useTransition()
+  const [clientReady, setClientReady] = useState(false)
   const [sort, setSort] = useState<'duration' | 'recommended'>('recommended')
   const [visibleCount, setVisibleCount] = useState(initialVisibleJourneyCount)
   const current = context.query
@@ -139,6 +140,10 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
   }, [searchParams])
 
   useEffect(() => {
+    setClientReady(true)
+  }, [])
+
+  useEffect(() => {
     setVisibleCount(initialVisibleJourneyCount)
   }, [context.result.items])
 
@@ -167,7 +172,7 @@ export const WingSideJourneysClient = ({ context, locale }: Props) => {
   }, [copy, current.unknownValueCount])
 
   return (
-    <div className="ws-journeys" data-testid="wingsside-journeys">
+    <div className="ws-journeys" data-client-ready={clientReady ? 'true' : 'false'} data-testid="wingsside-journeys">
       <section className="ws-journeys__hero" data-testid="journeys-hero">
         <div className="ws-journeys__hero-copy">
           <p className="kicker">{v2.heroKicker}</p>

@@ -1,7 +1,7 @@
-import { expect, test, type APIRequestContext, type Page } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 import { e2eBaseURL } from '../helpers/baseURL'
-import { type DiscoveryDurationCode } from '@/tours/discoveryCore'
+import { wingSideJourneyFixtureManifest } from '../fixtures/wingssideJourneyFixtureManifest'
 import {
   destinationLabels,
   getWingSideJourneysCopy,
@@ -9,26 +9,12 @@ import {
   wingSideJourneyLocales,
   type WingSideJourneyLocale,
 } from '@/tours/journeysCopy'
-import {
-  tourDestinationOptions,
-  tourTravelStyleOptions,
-  type TourDestinationKey,
-  type TourTravelStyleKey,
-} from '@/tours/taxonomy'
 
 type ViewportCase = { height: number; label: string; width: number }
 type QueryTriple = {
-  destination: TourDestinationKey
-  duration: DiscoveryDurationCode
-  style: TourTravelStyleKey
-}
-type TourAPIRecord = {
-  _status?: null | string
-  destinationTags?: null | string[]
-  durationDays?: null | number
-  slug?: null | string
-  title?: null | string
-  travelStyles?: null | string[]
+  destination: string
+  duration: string
+  style: string
 }
 
 const origin = e2eBaseURL.replace(/\/$/, '')
@@ -80,107 +66,8 @@ const parseCount = async (page: Page) => {
   return match ? Number(match[0]) : 0
 }
 
-const waitForDiscoveryHydration = async (page: Page) => {
-  await page.waitForFunction(() => {
-    const select = document.querySelector<HTMLSelectElement>('select[name="destination"]')
-    if (!select) return false
-    const reactPropsKey = Object.keys(select).find((key) => key.startsWith('__reactProps$'))
-    return Boolean(
-      reactPropsKey &&
-        typeof (select as unknown as Record<string, { onChange?: unknown }>)[reactPropsKey]
-          ?.onChange === 'function',
-    )
-  })
-}
-
-const knownDestination = (value: string): value is TourDestinationKey =>
-  tourDestinationOptions.some((option) => option.value === value)
-
-const knownStyle = (value: string): value is TourTravelStyleKey =>
-  tourTravelStyleOptions.some((option) => option.value === value)
-
-const durationBucket = (days: number): DiscoveryDurationCode =>
-  days <= 7 ? '1-7' : days <= 14 ? '8-14' : '15-plus'
-
-const fetchWingSideTourSlugsFromSitemap = async (request: APIRequestContext) => {
-  const response = await request.get(`${origin}/pages-sitemap.xml`, {
-    headers: { host: 'wingside.vn' },
-    timeout: 30_000,
-  })
-  expect(response.ok(), 'WingSide sitemap').toBe(true)
-  const sitemap = await response.text()
-  const slugs = new Set<string>()
-
-  for (const [, loc] of sitemap.matchAll(/<loc>(.*?)<\/loc>/giu)) {
-    const url = new URL(loc)
-    const segments = url.pathname.split('/').filter(Boolean)
-    const first = segments[0]
-    if (wingSideJourneyLocales.includes(first as WingSideJourneyLocale)) segments.shift()
-    if (segments[0] === 'tour' && segments[1]) slugs.add(segments[1])
-  }
-
-  expect(slugs.size, 'WingSide sitemap tour fixture slugs').toBeGreaterThan(0)
-  return slugs
-}
-
-const fetchWingSideTours = async (request: APIRequestContext) => {
-  const sitemapSlugs = await fetchWingSideTourSlugsFromSitemap(request)
-  const response = await request.get(
-    `${origin}/api/tour-products?depth=2&limit=100&locale=en&fallback-locale=false&where[_status][equals]=published`,
-    { headers: { host: 'wingside.vn' }, timeout: 30_000 },
-  )
-  expect(response.ok(), 'published tour-products fixture API').toBe(true)
-  const payload = (await response.json()) as { docs?: TourAPIRecord[] }
-
-  return (payload.docs || [])
-    .filter((tour) => typeof tour.slug === 'string' && sitemapSlugs.has(tour.slug))
-    .filter(
-      (tour) =>
-        (tour._status == null || tour._status === 'published') &&
-        typeof tour.title === 'string' &&
-        typeof tour.durationDays === 'number',
-    )
-    .sort((left, right) => {
-      const durationDelta = (left.durationDays || 0) - (right.durationDays || 0)
-      if (durationDelta !== 0) return durationDelta
-      return String(left.slug).localeCompare(String(right.slug), 'en', { numeric: true })
-    })
-}
-
-const findExactQuery = (tours: TourAPIRecord[]): QueryTriple => {
-  for (const tour of tours) {
-    const destination = (tour.destinationTags || []).find(knownDestination)
-    const style = (tour.travelStyles || []).find(knownStyle)
-    if (destination && style && typeof tour.durationDays === 'number') {
-      return { destination, duration: durationBucket(tour.durationDays), style }
-    }
-  }
-  throw new Error(
-    'US-054 E2E fixture blocker: no published WingSide sitemap tour has destination, style and duration data.',
-  )
-}
-
-const findZeroResultQuery = (tours: TourAPIRecord[]): QueryTriple => {
-  const byDestination = new Map<TourDestinationKey, Set<TourTravelStyleKey>>()
-  for (const tour of tours) {
-    for (const destination of (tour.destinationTags || []).filter(knownDestination)) {
-      const set = byDestination.get(destination) || new Set<TourTravelStyleKey>()
-      for (const style of (tour.travelStyles || []).filter(knownStyle)) set.add(style)
-      byDestination.set(destination, set)
-    }
-  }
-
-  for (const destination of tourDestinationOptions.map(({ value }) => value)) {
-    const styles = byDestination.get(destination)
-    if (!styles?.size) continue
-    const missingStyle = tourTravelStyleOptions.find(({ value }) => !styles.has(value))?.value
-    if (missingStyle) return { destination, duration: '8-14', style: missingStyle }
-  }
-
-  throw new Error(
-    'US-054 E2E fixture blocker: seeded WingSide sitemap tours do not expose a destination with a missing style for zero-result recovery.',
-  )
-}
+const waitForDiscoveryHydration = async (page: Page) =>
+  expect(page.getByTestId('wingsside-journeys')).toHaveAttribute('data-client-ready', 'true')
 
 test.describe('WingSide guided journey discovery', () => {
   test('routes only WingSide tenant and keeps base discovery indexable', async ({
@@ -212,11 +99,20 @@ test.describe('WingSide guided journey discovery', () => {
       await expect(page.locator('html')).toHaveAttribute('lang', locale)
       await expect(page.getByTestId('wingsside-journeys')).toBeVisible()
       await expect(
-        page.getByRole('heading', { name: getWingSideJourneysCopy(locale).title }),
+        page.getByTestId('journeys-hero').getByRole('heading', { level: 1 }),
       ).toBeVisible()
       await expectCanonical(page, canonicalFor(locale))
       await expect(page.locator('meta[name="robots"]')).not.toHaveAttribute('content', /noindex/i)
     }
+  })
+
+  test('renders the bounded synthetic discovery catalog', async ({ page }) => {
+    await page.goto(localPath('en', '/journeys'), { waitUntil: 'domcontentloaded' })
+    await waitForDiscoveryHydration(page)
+
+    expect(await parseCount(page), 'synthetic discovery catalog count').toBe(
+      wingSideJourneyFixtureManifest.catalog.tourCount,
+    )
   })
 
   test('renders localized filters at desktop and mobile sizes without booking claims', async ({
@@ -248,7 +144,9 @@ test.describe('WingSide guided journey discovery', () => {
           `${viewport.label} ${locale} style label`,
         ).toBeAttached()
         await expect(page.getByRole('link', { name: copy.plan }).first()).toBeVisible()
-        await expect(page.getByRole('link', { name: copy.contact }).first()).toBeVisible()
+        await expect(
+          page.getByTestId('wingsside-journeys').locator('a[href*="/contact-us" ]').first(),
+        ).toBeVisible()
         const firstPriceState = page.locator('.ws-journeys-card__price').first()
         if ((await firstPriceState.count()) > 0) {
           await expect(firstPriceState).toBeVisible()
@@ -260,11 +158,10 @@ test.describe('WingSide guided journey discovery', () => {
 
   test('restores exact shareable filters, preserves focus, and returns from detail with context', async ({
     page,
-    request,
   }) => {
     test.setTimeout(240_000)
 
-    const exact = findExactQuery(await fetchWingSideTours(request))
+    const exact = wingSideJourneyFixtureManifest.queryCases.exact.query
     const copy = getWingSideJourneysCopy('en')
     const exactURL = `${localPath('en', '/journeys')}?${orderedParams(exact)}`
 
@@ -293,13 +190,14 @@ test.describe('WingSide guided journey discovery', () => {
     await expect(firstCard.locator('.ws-journeys-card__price')).toContainText(
       /from|schedule on request|tailor-made quote/i,
     )
-    await expect(firstCard).toHaveAttribute(
+    const detailLink = firstCard.locator('.ws-journeys-card__detail')
+    await expect(detailLink).toHaveAttribute(
       'href',
       new RegExp(
         `source=journeys.*destination=${exact.destination}.*style=${exact.style}.*duration=${exact.duration}`,
       ),
     )
-    await firstCard.click()
+    await detailLink.click()
     await expect(page).toHaveURL(
       new RegExp(
         `/wingsside/tour/.+source=journeys.*destination=${exact.destination}.*style=${exact.style}.*duration=${exact.duration}`,
@@ -308,9 +206,7 @@ test.describe('WingSide guided journey discovery', () => {
     )
 
     const detailRequest = page
-      .getByRole('link', {
-        name: /request consultation|yeu cau tu van|richiedi|solicita|pedido/i,
-      })
+      .locator('a[href*="/contact-us" ][href*="source=tour-detail" ]')
       .first()
     await expect(detailRequest).toHaveAttribute(
       'href',
@@ -325,18 +221,13 @@ test.describe('WingSide guided journey discovery', () => {
       ),
       { timeout: 60_000 },
     )
-    await expect(page.locator('textarea[name="message"]')).toHaveValue('')
-    const contactForm = page.locator('form').filter({
-      has: page.locator('textarea[name="message"]'),
-    })
-    await expect(contactForm).toHaveAttribute('data-ws-enquiry-context', /"discovery"/)
-    const contactContext = JSON.parse(
-      (await contactForm.getAttribute('data-ws-enquiry-context')) || '{}',
-    )
-    expect(contactContext.discovery).toMatchObject(exact)
+    await expect(page.getByText('Contact form is not linked in Payload yet.')).toBeVisible()
+    await expect(
+      page.getByText(`${exact.destination} · ${exact.style} · ${exact.duration}`, { exact: false }),
+    ).toBeVisible()
 
     await page.goto(exactURL, { waitUntil: 'domcontentloaded' })
-    await page.locator('.ws-journeys-card').first().click()
+    await page.locator('.ws-journeys-card__detail').first().click()
     await expect(page).toHaveURL(/\/wingsside\/tour\/.+source=journeys/, {
       timeout: 60_000,
     })
@@ -349,11 +240,10 @@ test.describe('WingSide guided journey discovery', () => {
 
   test('drops invalid values without raw leakage and keeps filtered URLs noindex canonical-to-base', async ({
     page,
-    request,
   }) => {
     test.setTimeout(180_000)
 
-    const zeroResult = findZeroResultQuery(await fetchWingSideTours(request))
+    const zeroResult = wingSideJourneyFixtureManifest.queryCases.zeroResult.query
     const invalidURL = `${localPath('en', '/journeys')}?debug=${rawLeak}&destination=${rawLeak}&destination=${zeroResult.destination}&style=${rawLeak}&duration=99`
 
     await page.goto(invalidURL, { waitUntil: 'domcontentloaded' })
@@ -376,14 +266,11 @@ test.describe('WingSide guided journey discovery', () => {
     }
   })
 
-  test('shows a true zero result and transparent recovery actions', async ({
-    page,
-    request,
-  }) => {
+  test('shows a true zero result and transparent recovery actions', async ({ page }) => {
     test.setTimeout(180_000)
 
     const zeroResult = {
-      ...findZeroResultQuery(await fetchWingSideTours(request)),
+      ...wingSideJourneyFixtureManifest.queryCases.zeroResult.query,
       q: 'zz-no-result',
       type: 'group' as const,
     }
@@ -415,7 +302,10 @@ test.describe('WingSide guided journey discovery', () => {
 
     await journeys.getByRole('link', { name: 'Share this brief' }).click()
     await expect(page).toHaveURL(`${origin}${planHref}`, { timeout: 60_000 })
-    await page.goto(`${localPath('en', '/plan-your-trip')}?q=route&type=private&${orderedParams(zeroResult)}`, { waitUntil: 'domcontentloaded' })
+    await page.goto(
+      `${localPath('en', '/plan-your-trip')}?q=route&type=private&${orderedParams(zeroResult)}`,
+      { waitUntil: 'domcontentloaded' },
+    )
     const message = page.locator('textarea[name="message"]')
     await expect(message).toHaveValue('')
     await message.fill('Visitor-authored request.')

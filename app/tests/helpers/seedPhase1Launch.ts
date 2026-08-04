@@ -1,5 +1,6 @@
 import { createLocalReq, getPayload } from 'payload'
 
+import { seedWingSideJourneyFixtures } from './seedWingSideJourneyFixtures'
 import type { Page, SiteSetting } from '../../src/payload-types.js'
 import config from '../../src/payload.config.js'
 import {
@@ -672,6 +673,7 @@ export async function seedPhase1LaunchSmoke(): Promise<void> {
     await ensureProductionDomains({ payload, req })
     await ensureWingsPlusNavigationLocales({ payload, req })
     await ensureNavigationCorrections({ payload, req })
+    await seedWingSideJourneyFixtures({ payload, req })
     await ensureHeroPresentationFixtures({ payload, req })
   } finally {
     await payload.destroy()

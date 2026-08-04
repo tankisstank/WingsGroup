@@ -11,7 +11,7 @@ const getFieldMeta = async (locator: Locator) =>
     const field = element as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     return {
       name: field.getAttribute('name') || '',
-      required: field.hasAttribute('required'),
+      required: field.hasAttribute('required') || field.getAttribute('aria-required') === 'true',
       tagName: field.tagName.toLowerCase(),
       type: 'type' in field ? field.type : '',
       visible:
@@ -22,7 +22,10 @@ const getFieldMeta = async (locator: Locator) =>
   })
 
 const fillLeadForm = async (page: Page) => {
-  const form = page.locator('form').first()
+  const form = page
+    .locator('form')
+    .filter({ has: page.locator('button.site-form-submit') })
+    .first()
   await expect(form).toBeVisible()
 
   const fields = form.locator('input, textarea, select')
@@ -47,8 +50,8 @@ const fillLeadForm = async (page: Page) => {
         })),
       )
       const selected =
-        options.find((option, optionIndex) => optionIndex > 0 && option.value && !option.disabled)?.value ||
-        options.find((option) => option.value && !option.disabled)?.value
+        options.find((option, optionIndex) => optionIndex > 0 && option.value && !option.disabled)
+          ?.value || options.find((option) => option.value && !option.disabled)?.value
 
       if (selected) {
         await field.selectOption(selected)
@@ -95,6 +98,13 @@ const fillLeadForm = async (page: Page) => {
         break
       }
     }
+  }
+
+  const requiredCheckboxes = form.locator('button[role="checkbox"][aria-required="true"]')
+  const checkboxCount = await requiredCheckboxes.count()
+  for (let index = 0; index < checkboxCount; index += 1) {
+    const checkbox = requiredCheckboxes.nth(index)
+    if ((await checkbox.getAttribute('aria-checked')) !== 'true') await checkbox.click()
   }
 
   const comboboxes = form.getByRole('combobox')

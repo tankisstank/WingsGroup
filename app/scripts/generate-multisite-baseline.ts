@@ -12,6 +12,7 @@ import {
   type SupportedLocaleCode,
 } from '../src/utilities/locales'
 import { siteCodeToAliasMap } from '../src/utilities/sitePaths'
+import { getSiteSitemapURL } from '../src/utilities/siteSEO'
 
 type RouteRow = {
   evidenceFile: string
@@ -282,10 +283,13 @@ const countCollection = async (
   return countResult.totalDocs
 }
 
-const toCanonicalURL = (host: string, locale: string, path: string): string => {
-  const localizedPath = getLocalizedPath(path, locale)
-  return `https://${host}${localizedPath === '/' ? '' : localizedPath}`
-}
+const toCanonicalURL = (
+  host: string,
+  defaultLocale: SupportedLocaleCode,
+  locale: SupportedLocaleCode,
+  path: string,
+): string =>
+  getSiteSitemapURL({ defaultLocale, locale, origin: `https://${host}`, path })
 
 const buildRouteMatrix = (sites: SiteInventory[]): RouteRow[] => {
   const rows: RouteRow[] = []
@@ -303,7 +307,7 @@ const buildRouteMatrix = (sites: SiteInventory[]): RouteRow[] => {
 
       rows.push({
         evidenceFile: `staging-matrix/${site.name}-root-${host}.json`,
-        expectedCanonical: toCanonicalURL(canonicalHost, site.defaultLocale, '/'),
+        expectedCanonical: toCanonicalURL(canonicalHost, site.defaultLocale, site.defaultLocale, '/'),
         expectedIndexability: 'index',
         expectedStatus: 200,
         expectedTenant: site.name,
@@ -321,7 +325,7 @@ const buildRouteMatrix = (sites: SiteInventory[]): RouteRow[] => {
 
         rows.push({
           evidenceFile: `staging-matrix/${site.name}-${locale}-locale-root.json`,
-          expectedCanonical: toCanonicalURL(canonicalHost, locale, '/'),
+          expectedCanonical: toCanonicalURL(canonicalHost, site.defaultLocale, locale, '/'),
           expectedIndexability: 'index',
           expectedStatus: 200,
           expectedTenant: site.name,
@@ -335,7 +339,7 @@ const buildRouteMatrix = (sites: SiteInventory[]): RouteRow[] => {
         if (nestedPath) {
           rows.push({
             evidenceFile: `staging-matrix/${site.name}-${locale}-nested.json`,
-            expectedCanonical: toCanonicalURL(canonicalHost, locale, nestedPath),
+            expectedCanonical: toCanonicalURL(canonicalHost, site.defaultLocale, locale, nestedPath),
             expectedIndexability: 'index',
             expectedStatus: 200,
             expectedTenant: site.name,
@@ -349,7 +353,7 @@ const buildRouteMatrix = (sites: SiteInventory[]): RouteRow[] => {
 
         rows.push({
           evidenceFile: `staging-matrix/${site.name}-${locale}-search.json`,
-          expectedCanonical: toCanonicalURL(canonicalHost, locale, '/search'),
+          expectedCanonical: toCanonicalURL(canonicalHost, site.defaultLocale, locale, '/search'),
           expectedIndexability: 'noindex',
           expectedStatus: 200,
           expectedTenant: site.name,
@@ -363,7 +367,7 @@ const buildRouteMatrix = (sites: SiteInventory[]): RouteRow[] => {
         if (postPath) {
           rows.push({
             evidenceFile: `staging-matrix/${site.name}-${locale}-post.json`,
-            expectedCanonical: toCanonicalURL(canonicalHost, locale, postPath),
+            expectedCanonical: toCanonicalURL(canonicalHost, site.defaultLocale, locale, postPath),
             expectedIndexability: 'index',
             expectedStatus: 200,
             expectedTenant: site.name,
@@ -378,7 +382,7 @@ const buildRouteMatrix = (sites: SiteInventory[]): RouteRow[] => {
         if (formPath) {
           rows.push({
             evidenceFile: `staging-matrix/${site.name}-${locale}-form.json`,
-            expectedCanonical: toCanonicalURL(canonicalHost, locale, formPath),
+            expectedCanonical: toCanonicalURL(canonicalHost, site.defaultLocale, locale, formPath),
             expectedIndexability: 'index',
             expectedStatus: 200,
             expectedTenant: site.name,
