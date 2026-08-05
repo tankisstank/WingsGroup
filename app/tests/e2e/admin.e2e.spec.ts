@@ -263,6 +263,12 @@ test.describe('Admin Panel', () => {
       await expect(pagesMetric.getByText('Không thể tải dữ liệu.')).toBeVisible()
       await expect(postsMetric.getByText('12', { exact: true })).toBeVisible()
 
+      const retryBox = await pagesMetric
+        .getByRole('button', { name: 'Tải lại Trang' })
+        .boundingBox()
+      expect(retryBox?.height).toBeGreaterThanOrEqual(44)
+      expect(retryBox?.width).toBeGreaterThanOrEqual(44)
+
       const countsBeforeRetry = new Map(requestCounts)
       allowPagesCountSuccess = true
       await pagesMetric.getByRole('button', { name: 'Tải lại Trang' }).click()
@@ -494,6 +500,17 @@ test.describe('Admin Panel', () => {
         await page.goto(`${e2eBaseURL}${route}`)
         await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible()
         await assertNoHorizontalOverflow(page)
+
+        const operationalTargets =
+          route === '/admin'
+            ? page.locator('.wings-dashboard__actions > a')
+            : page.locator('.cms-console__quick-actions > a, .cms-console__link-list > a')
+
+        for (const target of await operationalTargets.all()) {
+          const box = await target.boundingBox()
+          expect(box?.height).toBeGreaterThanOrEqual(44)
+          expect(box?.width).toBeGreaterThanOrEqual(44)
+        }
       }
 
       await page.goto(`${e2eBaseURL}/admin`)
