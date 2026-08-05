@@ -28,7 +28,7 @@ that already succeeded.
 | Current role | `/api/users/me` | Name only the current role; handle unauthenticated/no-access explicitly. | None. |
 | Assigned site context | `/api/sites?depth=0&limit=20&sort=name` | List only returned/allowed sites; Console and dashboard label the aggregate read scope as all permitted sites/all locales. | None. |
 | Recent content | `/api/pages?depth=0&limit=5&sort=-updatedAt` | Show recency as recently updated, not review state. | None. |
-| Recent lead | `/api/form-submissions?depth=1&limit=5&sort=-createdAt` | Show immutable submission data only as allowed. | Define “new lead” window. |
+| Recent lead | `/api/form-submissions?depth=1&limit=5&sort=-createdAt` | Label as `Lead gần đây`; show immutable submission data only as allowed. No new/unread or time-window claim. | None. |
 | Metrics | Existing count endpoints | `Trang`, `Bài viết`, `Media`, `Tổng lead` are unfiltered collection counts; drafts filter `_status=draft`; show unavailable state on unknown data. | Review/schedule/import semantics. |
 
 An unavailable metric shows an em dash and `Chưa có dữ liệu`. It never uses a
@@ -92,6 +92,21 @@ least 44px. At 680px and below, the triage links remain Console, Review, and
 Lead, the Console presents the queue before secondary context, and no surface
 creates horizontal scroll. No raw component-level palette and no decorative
 gradient may be added.
+
+## Prototype authority boundary
+
+The restored self-contained HTML prototype is a visual and interaction
+reference. Implementation may reuse its information hierarchy, operator-first
+navigation, scope visibility, semantic colour roles, responsive breakpoints,
+minimum target intent, dialog ergonomics, and reduced-motion treatment.
+
+Prototype-only workflows remain excluded unless another approved contract
+provides backend evidence. This includes review approval/publish commands,
+comments and assignment, version diff/rollback, scheduled publish, lead delivery
+retry, user invitation, site activation, TourProduct pricing/readiness, media
+dependency analysis, and import dry-run/diff/compensating recovery. Route mockups
+for those areas are navigation/design references, not executable requirements
+for US-059. `prototype-implementation-guide.md` records the complete mapping.
 
 ## Accessibility and observability
 

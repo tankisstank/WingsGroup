@@ -21,11 +21,17 @@ real, but their operator experience is incomplete:
   data. Its usage summary is capped and its save path lacks an explicit impact
   confirmation.
 
-`cms-operator-console-prototype.html` is absent from the repository. It has no
-implementation authority; this packet and the product contract are the durable
-source of truth. Static numbers, publish steps, diff, rollback, lead workflow,
-and route screens from any external copy are not proof that the present Payload
-contracts provide those capabilities.
+`cms-operator-console-prototype.html` has been restored beside this packet. The
+self-contained artifact is 93,537 bytes with SHA-256
+`5a41fb2e77e6634d33ef19ae31787735b17b7b99b689ef0e825138ca727e3df9`;
+it has inline CSS/JavaScript and no external image, font, script, or stylesheet
+dependency. It is implementation authority for visual hierarchy, responsive
+intent, interaction affordances, and route discoverability only. This packet,
+the product contract, and current Payload code remain authority for data,
+permissions, API behaviour, and supported commands. Static numbers, publish
+steps, approval, diff, rollback, lead retry, scheduled work, invitation, and
+import dry-run shown by the prototype do not prove those capabilities exist.
+See `prototype-implementation-guide.md` for the authority map and run guidance.
 
 ## Target behaviour
 
@@ -122,6 +128,8 @@ TourProduct data. Those have no confirmed backend source in this story.
 ## Related material
 
 - `docs/product/cms-admin-design-language.md`
+- `docs/stories/epics/E05-cms-theme-management/US-059-cms-admin-design-language/prototype-implementation-guide.md`
+- `docs/stories/epics/E05-cms-theme-management/US-059-cms-admin-design-language/cms-operator-console-prototype.html`
 - `docs/product/cms-theme-management.md`
 - `docs/stories/epics/E05-cms-theme-management/US-022-cms-backend-theme-shell.md`
 - `source/strategy/18 Áp dụng Payload vào dự án WingsTravel.md`

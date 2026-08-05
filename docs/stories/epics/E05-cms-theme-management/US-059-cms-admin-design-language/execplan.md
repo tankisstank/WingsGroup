@@ -55,10 +55,22 @@ Expected implementation targets:
 - `app/src/components/AdminOperatorConsole/index.scss`
 - `app/src/components/AdminDashboard/WingsGroupMetrics.tsx` to remove duplicate
   zero-on-error metrics and use the same truthful labels
+- `app/src/components/AdminDashboard/WingsGroupMetricsClient.tsx` for isolated
+  hydrated request state and retry over existing authenticated REST routes
+- `app/src/components/AdminDashboard/index.scss`
+- `app/src/components/AdminMetrics/contract.ts`
+- `app/src/components/BeforeDashboard/index.tsx` for truthful dashboard copy
 - `app/src/app/(payload)/custom.scss`
 - `app/src/components/AdminNavIntro/index.tsx` only when its triage links need
   adjustment
 - `app/tests/e2e/admin.e2e.spec.ts`
+- `app/tests/component/adminOperatorConsole.component.spec.tsx`
+- `app/tests/component/wingsGroupMetrics.component.spec.tsx`
+- `app/scripts/prepare-phase1-e2e-db.mjs`
+- `app/scripts/seed-phase1-e2e-smoke.ts`
+- `app/tests/unit/phase1E2EProcessLifecycle.unit.spec.ts`
+- `docs/stories/epics/E05-cms-theme-management/US-059-cms-admin-design-language/cms-operator-console-prototype.html`
+- `docs/stories/epics/E05-cms-theme-management/US-059-cms-admin-design-language/prototype-implementation-guide.md`
 
 Do not modify `app/src/app/(payload)/layout.tsx` or
 `app/src/app/(payload)/admin/importMap.js` directly. Do not add a collection or
