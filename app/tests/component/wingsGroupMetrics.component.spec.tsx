@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import type { WidgetServerProps } from 'payload'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -6,6 +6,8 @@ import { WingsGroupMetrics } from '@/components/AdminDashboard/WingsGroupMetrics
 
 type CountArgs = {
   collection: string
+  overrideAccess?: boolean
+  req?: unknown
   where?: {
     _status?: {
       equals?: string
@@ -15,6 +17,8 @@ type CountArgs = {
 
 type FindArgs = {
   collection: string
+  overrideAccess?: boolean
+  req?: unknown
   sort?: string
 }
 
@@ -64,6 +68,12 @@ const defaultFind = ({ collection }: FindArgs) => {
   }
 }
 
+const jsonResponse = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    headers: { 'content-type': 'application/json' },
+    status,
+  })
+
 const renderWidget = async (overrides: MockOverrides = {}) => {
   const payload = {
     count: vi.fn(overrides.count ?? defaultCount),
@@ -84,7 +94,7 @@ const renderWidget = async (overrides: MockOverrides = {}) => {
     } as unknown as WidgetServerProps),
   )
 
-  return payload
+  return { payload, req }
 }
 
 const metricFor = (label: string) => {
@@ -101,7 +111,22 @@ const metricFor = (label: string) => {
 describe('WingsGroupMetrics truthful server read model', () => {
   afterEach(() => {
     cleanup()
+    vi.unstubAllGlobals()
     vi.restoreAllMocks()
+  })
+
+  it('keeps all initial Local API reads bound to the request access context', async () => {
+    const { payload, req } = await renderWidget()
+
+    for (const [args] of payload.count.mock.calls) {
+      expect(args.overrideAccess).toBe(false)
+      expect(args.req).toBe(req)
+    }
+
+    for (const [args] of payload.find.mock.calls) {
+      expect(args.overrideAccess).toBe(false)
+      expect(args.req).toBe(req)
+    }
   })
 
   it('isolates one recent find failure without hiding successful groups', async () => {
@@ -119,6 +144,91 @@ describe('WingsGroupMetrics truthful server read model', () => {
     expect(screen.getByText('Bài viết Hà Nội')).toBeTruthy()
     expect(screen.getByText('Liên hệ tour')).toBeTruthy()
     expect(screen.getByText('WingsTravel')).toBeTruthy()
+    expect(within(metricFor('Trang')).getByText('4')).toBeTruthy()
+  })
+
+  it('shows panel-local loading and retries only the failed recent endpoint', async () => {
+    let resolveRetry: (response: Response) => void = () => undefined
+    const retryResponse = new Promise<Response>((resolve) => {
+      resolveRetry = resolve
+    })
+    const fetchMock = vi.fn((_input: RequestInfo | URL, _init?: RequestInit) => retryResponse)
+    vi.stubGlobal('fetch', fetchMock)
+
+    await renderWidget({
+      find: async (args) => {
+        if (args.collection === 'pages') {
+          throw new Error('pages unavailable')
+        }
+
+        return defaultFind(args)
+      },
+    })
+
+    expect(screen.getByText('Bài viết Hà Nội')).toBeTruthy()
+    expect(screen.getByText('WingsTravel')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Tải lại trang cập nhật gần đây' }))
+
+    expect(screen.getByText('Đang tải trang cập nhật gần đây')).toBeTruthy()
+    expect(screen.getByText('Bài viết Hà Nội')).toBeTruthy()
+    expect(screen.getByText('WingsTravel')).toBeTruthy()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/pages?depth=0&limit=4&sort=-updatedAt')
+
+    await act(async () => {
+      resolveRetry(
+        jsonResponse({
+          docs: [
+            {
+              id: 'page-retry',
+              title: 'Trang sau retry',
+              updatedAt: '2026-08-05T04:00:00.000Z',
+            },
+          ],
+        }),
+      )
+      await retryResponse
+    })
+
+    await waitFor(() => expect(screen.getByText('Trang sau retry')).toBeTruthy())
+    expect(screen.getByText('Bài viết Hà Nội')).toBeTruthy()
+    expect(screen.getByText('WingsTravel')).toBeTruthy()
+  })
+
+  it('retries one failed metric without resetting successful metric panels', async () => {
+    let resolveRetry: (response: Response) => void = () => undefined
+    const retryResponse = new Promise<Response>((resolve) => {
+      resolveRetry = resolve
+    })
+    const fetchMock = vi.fn((_input: RequestInfo | URL, _init?: RequestInit) => retryResponse)
+    vi.stubGlobal('fetch', fetchMock)
+
+    await renderWidget({
+      count: async (args) => {
+        if (args.collection === 'pages' && args.where?._status?.equals === 'draft') {
+          throw new Error('draft pages unavailable')
+        }
+
+        return defaultCount(args)
+      },
+    })
+
+    expect(within(metricFor('Trang')).getByText('4')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Tải lại Trang nháp' }))
+
+    expect(within(metricFor('Trang nháp')).getByText('Đang tải dữ liệu')).toBeTruthy()
+    expect(within(metricFor('Trang')).getByText('4')).toBeTruthy()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      '/api/pages?depth=0&limit=0&where[_status][equals]=draft',
+    )
+
+    await act(async () => {
+      resolveRetry(jsonResponse({ totalDocs: 7 }))
+      await retryResponse
+    })
+
+    await waitFor(() => expect(within(metricFor('Trang nháp')).getByText('7')).toBeTruthy())
     expect(within(metricFor('Trang')).getByText('4')).toBeTruthy()
   })
 

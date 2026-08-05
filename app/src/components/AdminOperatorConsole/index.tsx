@@ -416,7 +416,8 @@ export default function AdminOperatorConsole() {
                   </Link>
                 ))}
               </div>
-            ) : taskSummaryLoading ? (
+            ) : null}
+            {taskSummaryLoading ? (
               <span aria-live="polite" role="status">
                 Đang tải tóm tắt nội dung.
               </span>
@@ -424,11 +425,11 @@ export default function AdminOperatorConsole() {
               <span aria-live="polite" role="status">
                 Một số số liệu tóm tắt chưa sẵn sàng.
               </span>
-            ) : (
+            ) : tasks.length === 0 ? (
               <span aria-live="polite" role="status">
                 Không có trang nháp, bài viết nháp hoặc lead trong phạm vi hiện tại.
               </span>
-            )}
+            ) : null}
           </section>
 
           <section className={`${baseClass}__metrics`} aria-label="Số liệu CMS">

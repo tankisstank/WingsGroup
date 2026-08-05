@@ -219,6 +219,27 @@ describe('AdminOperatorConsole request states', () => {
     expect(callsFor(endpoints.recentPages)).toBe(1)
   })
 
+  it('marks a partial task summary incomplete while retaining successful tasks', async () => {
+    vi.stubGlobal(
+      'fetch',
+      createFetchMock({
+        [endpoints.pageDrafts]: [() => jsonResponse({ totalDocs: 5 })],
+        [endpoints.postDrafts]: [() => jsonResponse({}, 500)],
+      }),
+    )
+
+    render(<AdminOperatorConsole />)
+
+    const summary = screen.getByRole('heading', { name: 'Tóm tắt nội dung' }).closest('section')
+    expect(summary).toBeTruthy()
+    expect(await within(summary as HTMLElement).findByText('Trang nháp')).toBeTruthy()
+    expect(within(summary as HTMLElement).getByText('5')).toBeTruthy()
+    expect(
+      within(summary as HTMLElement).getByText('Một số số liệu tóm tắt chưa sẵn sàng.'),
+    ).toBeTruthy()
+    expect(within(getMetric('Bài viết nháp')).getByRole('alert')).toBeTruthy()
+  })
+
   it('keeps truthful draft labels, real routes, and super-admin visibility', async () => {
     vi.stubGlobal(
       'fetch',
