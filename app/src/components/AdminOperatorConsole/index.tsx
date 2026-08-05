@@ -20,6 +20,11 @@ type CountItem = {
   query: string
 }
 
+type QueryResult<T> =
+  | { state: 'ready'; value: T }
+  | { state: 'no-access' }
+  | { state: 'error' }
+
 type RecentDoc = {
   id: number | string
   title?: string
@@ -74,7 +79,7 @@ const countItems: CountItem[] = [
   {
     href: '/admin/collections/form-submissions',
     key: 'leads',
-    label: 'Lead',
+    label: 'Tổng lead',
     query: '/api/form-submissions?depth=0&limit=0',
   },
 ]
@@ -97,27 +102,36 @@ const roleLabel: Record<Role, string> = {
   'super-admin': 'Quản trị toàn hệ',
 }
 
-const getRole = (user?: CurrentUser): Role => user?.role ?? 'editor'
+const getRole = (user?: CurrentUser): Role | undefined => user?.role
 
-const fetchJSON = async <T,>(url: string): Promise<T | null> => {
-  const response = await fetch(url, {
-    credentials: 'include',
-  })
+const fetchJSON = async <T,>(url: string): Promise<QueryResult<T>> => {
+  try {
+    const response = await fetch(url, {
+      credentials: 'include',
+    })
 
-  if (!response.ok) {
-    return null
+    if (response.status === 401 || response.status === 403) {
+      return { state: 'no-access' }
+    }
+
+    if (!response.ok) {
+      return { state: 'error' }
+    }
+
+    return { state: 'ready', value: (await response.json()) as T }
+  } catch {
+    return { state: 'error' }
   }
-
-  return (await response.json()) as T
 }
 
 export default function AdminOperatorConsole() {
   const [user, setUser] = useState<CurrentUser>()
-  const [counts, setCounts] = useState<Record<string, number>>({})
+  const [counts, setCounts] = useState<Record<string, QueryResult<number>>>({})
   const [recentPages, setRecentPages] = useState<RecentDoc[]>([])
   const [recentLeads, setRecentLeads] = useState<RecentLead[]>([])
   const [sites, setSites] = useState<SiteDoc[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     const loadConsole = async () => {
@@ -128,7 +142,12 @@ export default function AdminOperatorConsole() {
         Promise.all(
           countItems.map(async (item) => {
             const data = await fetchJSON<{ totalDocs?: number }>(item.query)
-            return [item.key, data?.totalDocs ?? 0] as const
+            return [
+              item.key,
+              data.state === 'ready'
+                ? { state: 'ready' as const, value: data.value.totalDocs ?? 0 }
+                : data,
+            ] as const
           }),
         ),
         fetchJSON<{ docs?: RecentDoc[] }>('/api/pages?depth=0&limit=5&sort=-updatedAt'),
@@ -136,16 +155,16 @@ export default function AdminOperatorConsole() {
         fetchJSON<{ docs?: SiteDoc[] }>('/api/sites?depth=0&limit=20&sort=name'),
       ])
 
-      setUser(me?.user)
+      setUser(me.state === 'ready' ? me.value.user : undefined)
       setCounts(Object.fromEntries(countResults))
-      setRecentPages(pages?.docs ?? [])
-      setRecentLeads(leads?.docs ?? [])
-      setSites(siteResult?.docs ?? [])
+      setRecentPages(pages.state === 'ready' ? pages.value.docs ?? [] : [])
+      setRecentLeads(leads.state === 'ready' ? leads.value.docs ?? [] : [])
+      setSites(siteResult.state === 'ready' ? siteResult.value.docs ?? [] : [])
       setIsLoading(false)
     }
 
     void loadConsole()
-  }, [])
+  }, [reloadKey])
 
   const role = getRole(user)
   const canPublish = role === 'site-manager' || role === 'super-admin'
@@ -156,26 +175,29 @@ export default function AdminOperatorConsole() {
         {
           href: '/admin/collections/pages?where[_status][equals]=draft',
           label: 'Trang chờ duyệt',
-          total: counts.pageDrafts ?? 0,
+          total: counts.pageDrafts?.state === 'ready' ? counts.pageDrafts.value : 0,
         },
         {
           href: '/admin/collections/posts?where[_status][equals]=draft',
           label: 'Bài viết chờ duyệt',
-          total: counts.postDrafts ?? 0,
+          total: counts.postDrafts?.state === 'ready' ? counts.postDrafts.value : 0,
         },
         {
           href: '/admin/collections/form-submissions',
-          label: 'Lead mới',
-          total: counts.leads ?? 0,
+          label: 'Tổng lead',
+          total: counts.leads?.state === 'ready' ? counts.leads.value : 0,
         },
       ].filter((task) => task.total > 0),
     [counts],
   )
 
   return (
-    <main className={baseClass}>
+    <main className={baseClass} id="cms-console-main">
       <AdminThemeBootstrap />
-      <div className={`${baseClass}__shell`}>
+      <a className={`${baseClass}__skip-link`} href="#cms-console-content">
+        Bỏ qua đến nội dung Console
+      </a>
+      <div className={`${baseClass}__shell`} id="cms-console-content">
         <header className={`${baseClass}__header`}>
           <div>
             <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
@@ -186,8 +208,7 @@ export default function AdminOperatorConsole() {
             <p>WingsGroup CMS</p>
             <h1>Console vận hành</h1>
             <span>
-              Một nơi để tạo nội dung, xem lead, duyệt bản nháp và xử lý dữ liệu theo quyền
-              được phân công.
+              Tổng hợp nội dung hiện có trong phạm vi bạn được Payload cho phép xem.
             </span>
           </div>
           <div className={`${baseClass}__header-side`}>
@@ -196,10 +217,16 @@ export default function AdminOperatorConsole() {
             </Link>
             <div className={`${baseClass}__role`}>
               <span>Vai trò</span>
-              <strong>{roleLabel[role]}</strong>
+              <strong>{role ? roleLabel[role] : 'Chưa xác định'}</strong>
             </div>
           </div>
         </header>
+
+        <section className={`${baseClass}__scope`} aria-label="Phạm vi dữ liệu">
+          <span>Phạm vi: Tất cả site được phân quyền</span>
+          <span>Locale nội dung: Tất cả locale</span>
+          <small>Đây là phạm vi đọc tổng hợp; quyền ghi được kiểm tra tại từng màn hình đích.</small>
+        </section>
 
         <section className={`${baseClass}__quick-actions`} aria-label="Hành động chính">
           <Link className={`${baseClass}__primary-action`} href="/admin/page-wizard">
@@ -207,9 +234,9 @@ export default function AdminOperatorConsole() {
           </Link>
           <Link href="/admin/site-review">Rà soát site/page</Link>
           {canPublish ? <Link href="/admin/theme">Quản lý theme</Link> : null}
-          <Link href="/admin/collections/form-submissions">Xem lead mới</Link>
+          <Link href="/admin/collections/form-submissions">Xem tổng lead</Link>
           <Link href="/admin/collections/pages?where[_status][equals]=draft">
-            Duyệt bản nháp
+            Xem trang nháp
           </Link>
           {canPublish ? <Link href="/admin/collections/imports">Nhập dữ liệu</Link> : null}
           {canPublish ? <Link href="/admin/collections/exports">Xuất dữ liệu</Link> : null}
@@ -217,8 +244,8 @@ export default function AdminOperatorConsole() {
 
         <section className={`${baseClass}__today`}>
           <div>
-            <h2>Việc cần làm hôm nay</h2>
-            <p>Chỉ hiển thị những mục đang có dữ liệu cần xử lý.</p>
+            <h2>Tóm tắt nội dung</h2>
+            <p>Chỉ hiển thị số liệu có nghĩa theo query hiện có.</p>
           </div>
           {isLoading ? (
             <span>Đang tải số liệu...</span>
@@ -232,18 +259,31 @@ export default function AdminOperatorConsole() {
               ))}
             </div>
           ) : (
-            <span>Không có việc khẩn cấp.</span>
+            <span>Chưa có số liệu cần lưu ý.</span>
           )}
         </section>
 
         <section className={`${baseClass}__metrics`} aria-label="Số liệu CMS">
-          {countItems.map((item) => (
+          {countItems.map((item) => {
+            const result = counts[item.key]
+
+            return (
             <Link href={item.href} key={item.key}>
               <span>{item.label}</span>
-              <strong>{counts[item.key] ?? 0}</strong>
+              {result?.state === 'ready' ? <strong>{result.value}</strong> : <strong>—</strong>}
+              {result?.state === 'error' ? (
+                <small>Không thể tải dữ liệu.</small>
+              ) : result?.state === 'no-access' ? <small>Không có quyền xem</small> : <small>Chưa có dữ liệu</small>}
             </Link>
-          ))}
+            )
+          })}
         </section>
+
+        {Object.values(counts).some((result) => result.state === 'error') ? (
+          <button className={`${baseClass}__retry`} onClick={() => setReloadKey((key) => key + 1)} type="button">
+            Tải lại các số liệu chưa có
+          </button>
+        ) : null}
 
         <section className={`${baseClass}__workspace`}>
           <div className={`${baseClass}__panel`}>
@@ -339,7 +379,7 @@ export default function AdminOperatorConsole() {
               <Link href="/admin/collections/sites">Site</Link>
               <Link href="/admin/collections/users">Người dùng</Link>
               <Link href="/admin/collections/redirects">Redirects</Link>
-              <Link href="/admin/collections/search-results">Search Results</Link>
+              <Link href="/admin/collections/search">Search</Link>
               <Link href="/admin/globals/header">Header global</Link>
               <Link href="/admin/globals/footer">Footer global</Link>
             </div>

@@ -21,9 +21,11 @@ real, but their operator experience is incomplete:
   data. Its usage summary is capped and its save path lacks an explicit impact
   confirmation.
 
-The supplied prototype is a strong visual reference, but its static numbers,
-publish steps, diff, rollback, lead workflow, and route screens are not proof
-that the present Payload contracts provide those capabilities.
+`cms-operator-console-prototype.html` is absent from the repository. It has no
+implementation authority; this packet and the product contract are the durable
+source of truth. Static numbers, publish steps, diff, rollback, lead workflow,
+and route screens from any external copy are not proof that the present Payload
+contracts provide those capabilities.
 
 ## Target behaviour
 
@@ -55,6 +57,8 @@ desktop/mobile interactions, and regression coverage.
 
 - Rebuild Console from real Payload REST queries using independently observable
   request states and retries.
+- Include the native dashboard metric widget in the same truthful metric
+  contract, removing its duplicate zero-on-error behaviour.
 - Apply the persistent admin design-language contract to Console, navigation
   introduction, and scoped admin shell styles.
 - Make all Console workspace and triage links native, valid Payload routes.
@@ -77,29 +81,20 @@ desktop/mobile interactions, and regression coverage.
   bootstrap contract.
 - Adding a generic modal framework for all admin routes.
 
-## Open decisions and stop gates
+## Recorded decisions and remaining stop gates
 
-Implementation may start with the Console and shell work that uses existing
-contracts. The following choices require explicit product approval before the
-related flow is implemented:
+The following decisions apply to US-059: Console and native dashboard are
+aggregate, read-only views across all sites/locales the current Payload session
+may read; labels state that scope explicitly. `Trang nháp` and `Bài viết nháp`
+mean `_status=draft`; `Tổng lead` means all accessible form-submissions; recent
+lists mean their stated sort order. Site Review stays read-only. Page Wizard
+retains the Payload-default `vi` locale and no locale API is added. The native
+dashboard widget is in scope so its zero-on-error fallback is removed.
 
-1. Define "awaiting review", "new lead", "scheduled publish", and "import"
-   from a named query and time window; no metric label may infer meaning from a
-   generic record count.
-2. Define the selected-site rule and locale source for Console. It must state
-   whether a user chooses one assigned site, receives an aggregate view, and
-   how a missing/ambiguous locale behaves.
-3. Decide whether Page Wizard may extend its private command/API to accept a
-   locale. The present endpoint does not support that contract.
-4. Choose either a read-only Site Review with preview/status/edit links, or a
-   separately approved review/publish workflow with its own data, audit, and
-   permission design.
-5. Confirm whether lead delivery timeline/retry, media usage/dependency
-   reporting, import dry-run/diff/rollback, and content dependency warnings
-   have existing backend sources. If not, defer them to separate product work.
-6. Confirm whether Group/Private and pricing mode are future TourProduct data
-   requirements. They are not currently available fields and must not be
-   simulated in this UI story.
+Implementation must still stop for a proposed approval queue, “new lead” time
+window, scheduled publish/import metric, lead delivery retry, media dependency
+report, import dry-run/diff/rollback, content dependency warning, or new
+TourProduct data. Those have no confirmed backend source in this story.
 
 ## Acceptance criteria
 

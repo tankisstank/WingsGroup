@@ -7,9 +7,12 @@ surfaces in WingsTravel. It applies to custom admin views and to scoped admin
 shell overrides; it does not change public-site design tokens, Payload schemas,
 REST contracts, or access control.
 
-The HTML prototype `cms-operator-console-prototype.html` is the visual source
-of truth for the operator console. It is not a source of fake data, invented
-workflow state, or routes that bypass Payload.
+`cms-operator-console-prototype.html` is not tracked in this repository and
+therefore has no implementation authority. This document is the visual and
+interaction source of truth until a version-controlled prototype is explicitly
+introduced and linked from here. Any remembered or external prototype remains
+only a non-binding reference; it cannot justify fake data, invented workflow
+state, or routes that bypass Payload.
 
 Feature-specific work records only its delta in that story's `design.md` and
 links here. When a story conflicts with this document, the product decision and
@@ -58,13 +61,24 @@ Custom views read from real Payload APIs and respect the collection's existing
 access checks. A hidden action is not authorization; Payload access control is
 the final enforcement point.
 
-- Show a selected site, locale, role, and the source of scope before a
-  write-capable action. If the selected context cannot be determined, do not
-  imply that a cross-site write is safe.
+- Console and the native dashboard are aggregate read models: they show all
+  records that the current Payload session is allowed to read. They must label
+  this as `Tất cả site được phân quyền` and `Tất cả locale`; admin-interface
+  language is separate from content locale. This aggregate context grants no
+  write authority.
+- A write-capable destination must show its own site, content locale, role,
+  and source of scope before confirmation. Page Wizard retains its current
+  Payload-default locale (`vi`) because its API does not accept locale input;
+  it must disclose that default rather than imply a locale selector.
 - For every request group, distinguish loading, empty, error, and no-access.
   A failed request never becomes `0`, an empty list, or a made-up status.
   Failed panels expose a local retry control while independent panels continue
   rendering.
+- Metrics count only documents visible through the current Payload session.
+  `Trang`, `Bài viết`, `Media`, and `Tổng lead` are unfiltered collection
+  counts; `Trang nháp` and `Bài viết nháp` use `_status=draft`; recent lists
+  are ordered by `updatedAt` or `createdAt` as named. A draft is not “chờ
+  duyệt”, and a lead count is not “lead mới” or unread work.
 - Metrics display an unavailable value and `Chưa có dữ liệu` when their source
   has not been confirmed. Their labels must describe the actual query
   semantics, not an assumed operational meaning.
@@ -126,3 +140,6 @@ signal and respects `prefers-reduced-motion`.
 - A new workflow that needs locale creation, approval state, delivery retry,
   dependency analysis, tour pricing/type, dry-run/diff, or rollback is a
   product/API decision. Record it and obtain approval before implementation.
+- Site Review remains a read-only preview, status, scope, and edit-link
+  surface in this story. Approval, comments, assignment, diff, publish, and
+  rollback are out of scope.

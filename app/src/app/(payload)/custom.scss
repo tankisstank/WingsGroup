@@ -1,6 +1,10 @@
 @import '@payloadcms/ui/scss';
 
 :root {
+  --wings-admin-action: #d9612f;
+  --wings-admin-action-soft: #fff0e9;
+  --wings-admin-focus-ring: #0f766e;
+  --wings-admin-healthy: #0f766e;
   --wings-admin-accent: #0f766e;
   --wings-admin-accent-soft: #d9f2ee;
   --wings-admin-active: #1e1c18;
@@ -34,6 +38,10 @@
 }
 
 .wings-admin-theme-finexy {
+  --wings-admin-action: #d9612f;
+  --wings-admin-action-soft: #fff0e9;
+  --wings-admin-focus-ring: #0f766e;
+  --wings-admin-healthy: #0f766e;
   --wings-admin-accent: #ff5a35;
   --wings-admin-accent-soft: #ffe2d6;
   --wings-admin-active: #1e1c18;
@@ -67,6 +75,10 @@
 }
 
 .wings-admin-theme-ats {
+  --wings-admin-action: #d9612f;
+  --wings-admin-action-soft: #fff0e9;
+  --wings-admin-focus-ring: #0f766e;
+  --wings-admin-healthy: #0f766e;
   --wings-admin-accent: #58c7cf;
   --wings-admin-accent-soft: #dff5f4;
   --wings-admin-active: #58c7cf;

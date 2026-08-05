@@ -13,18 +13,19 @@ Risk flags are authorization, public contracts, existing behaviour,
 cross-platform interaction, multi-domain scope, and weak proof. The work stays
 in the high-risk lane.
 
-Before any implementation that changes a command contract or claims a workflow,
-obtain a recorded human decision for: metric semantics, selected-site/locale
-policy, Page Wizard locale creation, Site Review workflow scope, unsupported
-lead/media/import/dependency features, and TourProduct type/pricing data.
+Recorded decisions: both operator summaries use aggregate, read-only scope over
+all site/locale records visible to the current session; drafts and lead metrics
+use the named collection queries in `design.md`; Page Wizard retains default
+`vi`; and Site Review stays read-only. Stop for unsupported lead/media/import/
+dependency features and TourProduct type/pricing data.
 
 ## Phases
 
 1. Re-audit current Payload configuration, collection access, plugin routes,
    and custom view sources against the route inventory. Confirm the exact
    status codes and query semantics used by each Console panel.
-2. Confirm the open product decisions. Split any approved new data/API workflow
-   into its own high-risk story rather than smuggling it into UI work.
+2. Apply the recorded scope and metric decisions. Split any proposed new data/API
+   workflow into its own high-risk story rather than smuggling it into UI work.
 3. Implement typed request results and per-panel retry behaviour in
    `AdminOperatorConsole`; keep real `fetchJSON`/`Promise.all` data loading and
    remove zero-on-error fallbacks. Correct the Search link to its real route.
@@ -52,6 +53,8 @@ Expected implementation targets:
 
 - `app/src/components/AdminOperatorConsole/index.tsx`
 - `app/src/components/AdminOperatorConsole/index.scss`
+- `app/src/components/AdminDashboard/WingsGroupMetrics.tsx` to remove duplicate
+  zero-on-error metrics and use the same truthful labels
 - `app/src/app/(payload)/custom.scss`
 - `app/src/components/AdminNavIntro/index.tsx` only when its triage links need
   adjustment

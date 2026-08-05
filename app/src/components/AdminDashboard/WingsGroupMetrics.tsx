@@ -160,7 +160,7 @@ export async function WingsGroupMetrics({ req }: WidgetServerProps) {
     {
       href: '/admin/collections/form-submissions',
       key: 'leads',
-      label: 'Lead',
+      label: 'Tổng lead',
       slug: 'form-submissions',
     },
   ]
@@ -187,12 +187,13 @@ export async function WingsGroupMetrics({ req }: WidgetServerProps) {
 
           return {
             ...target,
+            state: 'ready' as const,
             total: result.totalDocs,
           }
         } catch {
           return {
             ...target,
-            total: 0,
+            state: 'unavailable' as const,
           }
         }
       }),
@@ -224,21 +225,23 @@ export async function WingsGroupMetrics({ req }: WidgetServerProps) {
   ])
 
   const canPublish = user.role === 'super-admin' || user.role === 'site-manager'
-  const countByKey = Object.fromEntries(counts.map((item) => [item.key, item.total]))
-  const reviewTasks = [
+  const countByKey = Object.fromEntries(
+    counts.map((item) => [item.key, item.state === 'ready' ? item.total : undefined]),
+  )
+  const contentSummaries = [
     {
       href: '/admin/collections/pages?where[_status][equals]=draft',
-      label: 'Trang chờ duyệt',
+      label: 'Trang nháp',
       total: countByKey.pageDrafts ?? 0,
     },
     {
       href: '/admin/collections/posts?where[_status][equals]=draft',
-      label: 'Bài viết chờ duyệt',
+      label: 'Bài viết nháp',
       total: countByKey.postDrafts ?? 0,
     },
     {
       href: '/admin/collections/form-submissions',
-      label: 'Lead cần xử lý',
+      label: 'Tổng lead',
       total: countByKey.leads ?? 0,
     },
   ].filter((task) => task.total > 0)
@@ -273,17 +276,17 @@ export async function WingsGroupMetrics({ req }: WidgetServerProps) {
           </div>
         </div>
         <div className={`${baseClass}__section`}>
-          <h3>Việc cần xử lý</h3>
+          <h3>Tóm tắt nội dung</h3>
           <div className={`${baseClass}__task-list`}>
-            {reviewTasks.length > 0 ? (
-              reviewTasks.map((task) => (
+            {contentSummaries.length > 0 ? (
+              contentSummaries.map((task) => (
                 <Link href={task.href} key={task.label}>
                   <span>{task.label}</span>
                   <strong>{task.total}</strong>
                 </Link>
               ))
             ) : (
-              <span>Không có việc khẩn cấp</span>
+              <span>Chưa có số liệu cần lưu ý</span>
             )}
           </div>
         </div>
@@ -293,7 +296,12 @@ export async function WingsGroupMetrics({ req }: WidgetServerProps) {
         {counts.map((item) => (
           <Link href={item.href} key={item.key}>
             <span>{item.label}</span>
-            <strong>{item.total}</strong>
+            {item.state === 'ready' ? (
+              <strong>{item.total}</strong>
+            ) : (
+              <strong aria-label={`${item.label}: chưa có dữ liệu`}>—</strong>
+            )}
+            {item.state === 'unavailable' ? <small>Chưa có dữ liệu</small> : null}
           </Link>
         ))}
       </div>

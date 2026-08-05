@@ -9,7 +9,7 @@ globals, plugins, and access control own data and commands.
 
 ```text
 Payload session and assigned sites
-  -> Console context (role, site, locale)
+  -> aggregate read context (all permitted sites, all locales, role)
   -> independent query panels
   -> visible state: loading | empty | error | no-access | ready
   -> native Link to custom view, collection, or global
@@ -26,14 +26,16 @@ that already succeeded.
 | Surface | Existing source | Display rule | Decision required |
 | --- | --- | --- | --- |
 | Current role | `/api/users/me` | Name only the current role; handle unauthenticated/no-access explicitly. | None. |
-| Assigned site context | `/api/sites?depth=0&limit=20&sort=name` | List only returned/allowed sites and declare the active or aggregate scope. | Select-site and locale policy. |
+| Assigned site context | `/api/sites?depth=0&limit=20&sort=name` | List only returned/allowed sites; Console and dashboard label the aggregate read scope as all permitted sites/all locales. | None. |
 | Recent content | `/api/pages?depth=0&limit=5&sort=-updatedAt` | Show recency as recently updated, not review state. | None. |
 | Recent lead | `/api/form-submissions?depth=1&limit=5&sort=-createdAt` | Show immutable submission data only as allowed. | Define “new lead” window. |
-| Metrics | Existing `countItems` endpoints | Show the named query and unavailable state on unknown data. | Review/schedule/import semantics. |
+| Metrics | Existing count endpoints | `Trang`, `Bài viết`, `Media`, `Tổng lead` are unfiltered collection counts; drafts filter `_status=draft`; show unavailable state on unknown data. | Review/schedule/import semantics. |
 
 An unavailable metric shows an em dash and `Chưa có dữ liệu`. It never uses a
 zero fallback. An empty successful response may show zero only when the metric
-definition says a successful count of zero is meaningful.
+definition says a successful count of zero is meaningful. The native
+`WingsGroupMetrics` widget uses this same contract; it is not a second source
+of ambiguous zero values.
 
 ## Route and navigation contract
 
@@ -66,7 +68,7 @@ Each existing write-capable control uses the narrowest truthful surface:
 | Need | Existing entry point | Allowed story behaviour |
 | --- | --- | --- |
 | Start page draft | `/admin/page-wizard` | Require the supported site and layout-preset inputs; show current locale behaviour until the locale decision is approved. |
-| Inspect/review page | `/admin/site-review` | Preview, existing status, scope, and link to the record. No approval, diff, or rollback claim. |
+| Inspect/review page | `/admin/site-review` | Read-only preview, existing status/scope, and link to the record. No approval, comments, assignment, diff, publish, or rollback claim. |
 | Theme/hero configuration | `/admin/theme`, `theme-presets`, `hero-presentation-presets` | State whether the change is a global preset, site default, or page override; show current impact evidence and confirmation before a supported save. |
 | Content and media | Native collections | Link to Payload list/detail commands. Only show rename/delete dependency warnings if a real dependency query exists. |
 | Leads | `form-submissions` | Immutable inspection and existing delivery fields only. |

@@ -2,9 +2,7 @@
 
 .cms-console {
   min-height: 100%;
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.82), rgb(255 255 255 / 0.96)),
-    var(--theme-elevation-50);
+  background: var(--theme-elevation-50);
   color: var(--theme-text);
 
   &__shell {
@@ -15,7 +13,25 @@
     padding: 28px 24px 48px;
   }
 
+  &__skip-link {
+    left: 12px;
+    position: fixed;
+    top: -60px;
+    z-index: 10;
+    border-radius: 6px;
+    background: var(--theme-elevation-0);
+    color: var(--theme-text);
+    padding: 10px 12px;
+
+    &:focus-visible {
+      top: 12px;
+      outline: 3px solid var(--wings-admin-focus-ring);
+      outline-offset: 2px;
+    }
+  }
+
   &__header,
+  &__scope,
   &__today,
   &__workspace,
   &__recent,
@@ -127,6 +143,24 @@
     }
   }
 
+  &__scope {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    padding: 12px 16px;
+
+    span {
+      color: var(--theme-elevation-700);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    small {
+      color: var(--theme-elevation-650);
+      flex-basis: 100%;
+    }
+  }
+
   &__quick-actions,
   &__metrics {
     display: grid;
@@ -181,8 +215,19 @@
   }
 
   &__primary-action {
-    border-color: var(--theme-success-500) !important;
-    background: var(--theme-success-100) !important;
+    border-color: var(--wings-admin-action) !important;
+    background: var(--wings-admin-action-soft) !important;
+  }
+
+  &__retry {
+    justify-self: start;
+    border: 1px solid var(--wings-admin-action);
+    border-radius: 6px;
+    background: var(--theme-elevation-0);
+    color: var(--theme-text);
+    cursor: pointer;
+    min-height: 44px;
+    padding: 8px 12px;
   }
 
   &__today {
@@ -232,6 +277,10 @@
       font-size: 26px;
       line-height: 1;
     }
+
+    small {
+      color: var(--theme-elevation-650);
+    }
   }
 
   &__workspace {
@@ -273,7 +322,7 @@
     span {
       align-items: center;
       display: inline-flex;
-      min-height: 38px;
+      min-height: 44px;
       padding: 8px 11px;
       font-size: 13px;
       font-weight: 600;
@@ -329,7 +378,7 @@
       border-radius: 6px;
       color: var(--theme-text);
       display: block;
-      min-height: 38px;
+      min-height: 44px;
       padding: 8px 8px 7px;
       text-decoration: none;
     }
@@ -355,6 +404,7 @@
     }
 
     &__header,
+    &__scope,
     &__today {
       display: grid;
     }
@@ -425,6 +475,15 @@
 
     &__advanced .cms-console__link-list {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
     }
   }
 }
