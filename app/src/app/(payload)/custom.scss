@@ -1,41 +1,764 @@
 @import '@payloadcms/ui/scss';
 
 :root {
-  --wings-admin-action: #d9612f;
-  --wings-admin-action-soft: #fff0e9;
+  --wings-admin-action: #d9783c;
+  --wings-admin-action-soft: #fff1e8;
   --wings-admin-focus-ring: #0f766e;
-  --wings-admin-healthy: #0f766e;
-  --wings-admin-accent: #0f766e;
-  --wings-admin-accent-soft: #d9f2ee;
-  --wings-admin-active: #1e1c18;
+  --wings-admin-healthy: #0b827f;
+  --wings-admin-accent: #0e8a87;
+  --wings-admin-accent-soft: #e0f3f1;
+  --wings-admin-active: #27394d;
   --wings-admin-active-text: #ffffff;
-  --wings-admin-bg: #e9e8e6;
-  --wings-admin-border: #e5e0da;
-  --wings-admin-canvas: #f7f7f5;
-  --wings-admin-ink: #18312f;
-  --wings-admin-muted: #6f6a64;
-  --wings-admin-muted-strong: #59534e;
-  --wings-admin-negative: #e94e4e;
+  --wings-admin-bg: #e8eef3;
+  --wings-admin-border: #d6e0e7;
+  --wings-admin-canvas: #eef3f7;
+  --wings-admin-ink: #243244;
+  --wings-admin-muted: #6b7a88;
+  --wings-admin-muted-strong: #4f5f6c;
+  --wings-admin-negative: #c94c4c;
   --wings-admin-panel: #ffffff;
-  --wings-admin-panel-strong: #fff6f1;
-  --wings-admin-positive: #2fbf71;
-  --wings-admin-radius-lg: 22px;
-  --wings-admin-radius-md: 16px;
-  --wings-admin-radius-nav: 12px;
+  --wings-admin-panel-strong: #f5f9fb;
+  --wings-admin-positive: #238b6d;
+  --wings-admin-radius-lg: 7px;
+  --wings-admin-radius-md: 6px;
+  --wings-admin-radius-nav: 6px;
   --wings-admin-radius-pill: 999px;
-  --wings-admin-radius-sm: 10px;
-  --wings-admin-radius-xl: 32px;
-  --wings-admin-shadow: 0 24px 80px rgb(31 31 29 / 0.08);
-  --wings-admin-sidebar: #ffffff;
-  --wings-admin-sidebar-active-bg: #1e1c18;
+  --wings-admin-radius-sm: 4px;
+  --wings-admin-radius-xl: 8px;
+  --wings-admin-shadow: 0 1px 2px rgb(30 53 74 / 0.05), 0 10px 28px rgb(30 53 74 / 0.05);
+  --wings-admin-sidebar: #27394d;
+  --wings-admin-sidebar-active-bg: #344b63;
   --wings-admin-sidebar-active-text: #ffffff;
-  --wings-admin-sidebar-border: #e5e0da;
-  --wings-admin-sidebar-heading: #6f6a64;
-  --wings-admin-sidebar-hover-bg: #fff6f1;
-  --wings-admin-sidebar-text: #1f1f1d;
-  --wings-admin-text: #1f1f1d;
+  --wings-admin-sidebar-border: rgb(255 255 255 / 0.12);
+  --wings-admin-sidebar-heading: #a9b7c3;
+  --wings-admin-sidebar-hover-bg: rgb(255 255 255 / 0.08);
+  --wings-admin-sidebar-text: #eef5fa;
+  --wings-admin-text: #243244;
   --wings-admin-topbar: #ffffff;
-  --wings-admin-warning: #ff8a4c;
+  --wings-admin-warning: #d9783c;
+  --wings-admin-display: 'Bahnschrift', 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
+  --wings-admin-body: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+  --wings-admin-mono: 'Cascadia Code', Consolas, monospace;
+}
+
+/* WP1: shared Payload shell language. Both legacy theme keys stay on the same
+ * structural system; the small variant delta is reserved for focus contrast. */
+.wings-admin-shell.wings-admin-theme-finexy,
+.wings-admin-shell.wings-admin-theme-ats {
+  --wings-admin-action: #d9783c;
+  --wings-admin-action-soft: #fff1e8;
+  --wings-admin-focus-ring: #0f766e;
+  --wings-admin-healthy: #0b827f;
+  --wings-admin-accent: #0e8a87;
+  --wings-admin-accent-soft: #e0f3f1;
+  --wings-admin-active: #27394d;
+  --wings-admin-active-text: #ffffff;
+  --wings-admin-bg: #e8eef3;
+  --wings-admin-border: #d6e0e7;
+  --wings-admin-canvas: #eef3f7;
+  --wings-admin-ink: #243244;
+  --wings-admin-muted: #6b7a88;
+  --wings-admin-muted-strong: #4f5f6c;
+  --wings-admin-negative: #c94c4c;
+  --wings-admin-panel: #ffffff;
+  --wings-admin-panel-strong: #f5f9fb;
+  --wings-admin-positive: #238b6d;
+  --wings-admin-radius-lg: 7px;
+  --wings-admin-radius-md: 6px;
+  --wings-admin-radius-nav: 6px;
+  --wings-admin-radius-sm: 4px;
+  --wings-admin-radius-xl: 8px;
+  --wings-admin-shadow: 0 1px 2px rgb(30 53 74 / 0.05), 0 10px 28px rgb(30 53 74 / 0.05);
+  --wings-admin-sidebar: #27394d;
+  --wings-admin-sidebar-active-bg: #344b63;
+  --wings-admin-sidebar-active-text: #ffffff;
+  --wings-admin-sidebar-border: rgb(255 255 255 / 0.12);
+  --wings-admin-sidebar-heading: #a9b7c3;
+  --wings-admin-sidebar-hover-bg: rgb(255 255 255 / 0.08);
+  --wings-admin-sidebar-text: #eef5fa;
+  --wings-admin-text: #243244;
+  --wings-admin-topbar: #ffffff;
+  --wings-admin-warning: #d9783c;
+  --wings-admin-display: 'Bahnschrift', 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
+  --wings-admin-body: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+  --wings-admin-mono: 'Cascadia Code', Consolas, monospace;
+}
+
+.wings-admin-shell.wings-admin-theme-ats {
+  --wings-admin-accent: #11858b;
+  --wings-admin-accent-soft: #e2f5f4;
+  --wings-admin-focus-ring: #087d89;
+}
+
+html.wings-admin-shell,
+body.wings-admin-shell {
+  color: var(--wings-admin-text);
+  font-family: var(--wings-admin-body);
+}
+
+body.wings-admin-shell {
+  background: var(--wings-admin-bg);
+  color: var(--wings-admin-text);
+  line-height: 1.5;
+}
+
+body.wings-admin-shell :where(button, input, select, textarea) {
+  font-family: inherit;
+}
+
+body.wings-admin-shell :where(h1, h2, h3, h4, .render-title, .collection-list__title) {
+  color: var(--wings-admin-ink);
+  font-family: var(--wings-admin-display);
+  letter-spacing: -0.018em;
+}
+
+body.wings-admin-shell :where(code, pre, .mono, .pill--code) {
+  font-family: var(--wings-admin-mono);
+}
+
+body.wings-admin-shell .template-default,
+body.wings-admin-shell .template-default__wrap,
+body.wings-admin-shell .dashboard,
+body.wings-admin-shell .collection-list,
+body.wings-admin-shell .collection-edit,
+body.wings-admin-shell .login {
+  background: var(--wings-admin-canvas);
+  color: var(--wings-admin-text);
+}
+
+body.wings-admin-shell .template-default,
+body.wings-admin-shell .template-default__wrap {
+  min-height: 100vh;
+}
+
+body.wings-admin-shell .template-default,
+body.wings-admin-shell .template-default__wrap,
+body.wings-admin-shell .dashboard,
+body.wings-admin-shell .collection-list,
+body.wings-admin-shell .collection-edit {
+  background-image: none;
+  overflow-x: clip;
+}
+
+/* Brand surfaces */
+body.wings-admin-shell .wings-admin-icon,
+body.wings-admin-shell .wings-admin-logo__mark {
+  background: var(--wings-admin-action);
+  border-radius: 6px;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+body.wings-admin-shell .wings-admin-icon {
+  height: 28px;
+  width: 28px;
+}
+
+body.wings-admin-shell .wings-admin-logo {
+  color: var(--wings-admin-ink);
+  gap: 10px;
+}
+
+body.wings-admin-shell .wings-admin-logo__mark {
+  height: 32px;
+  width: 32px;
+}
+
+body.wings-admin-shell .wings-admin-logo__text {
+  gap: 3px;
+}
+
+body.wings-admin-shell .wings-admin-logo__text strong {
+  color: inherit;
+  font-family: var(--wings-admin-display);
+  font-size: 1rem;
+}
+
+body.wings-admin-shell .wings-admin-logo__text span {
+  color: var(--wings-admin-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+body.wings-admin-shell .nav .wings-admin-logo {
+  color: var(--wings-admin-sidebar-text);
+}
+
+body.wings-admin-shell .nav .wings-admin-logo__text span {
+  color: var(--wings-admin-sidebar-heading);
+}
+
+body.wings-admin-shell .wings-login-note {
+  background: var(--wings-admin-panel);
+  border: 1px solid var(--wings-admin-border);
+  border-left: 3px solid var(--wings-admin-accent);
+  border-radius: 5px;
+  color: var(--wings-admin-text);
+  margin-bottom: 14px;
+  padding: 10px 12px;
+}
+
+body.wings-admin-shell .wings-login-note p + p {
+  color: var(--wings-admin-muted);
+  font-size: 0.82rem;
+  margin-top: 3px;
+}
+
+/* Native Payload navigation */
+body.wings-admin-shell .nav {
+  background: var(--wings-admin-sidebar);
+  border-right: 1px solid var(--wings-admin-sidebar-border);
+  box-shadow: none;
+  color: var(--wings-admin-sidebar-text);
+}
+
+body.wings-admin-shell .nav__scroll {
+  scrollbar-color: rgb(255 255 255 / 0.22) transparent;
+}
+
+body.wings-admin-shell .nav a,
+body.wings-admin-shell .nav button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--wings-admin-radius-nav);
+  color: var(--wings-admin-sidebar-text);
+  display: flex;
+  font-size: 0.84rem;
+  font-weight: 600;
+  gap: 8px;
+  line-height: 1.25;
+  min-height: 38px;
+  padding: 7px 10px;
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+body.wings-admin-shell .nav a:hover,
+body.wings-admin-shell .nav button:hover,
+body.wings-admin-shell .nav a:focus-visible,
+body.wings-admin-shell .nav button:focus-visible {
+  background: var(--wings-admin-sidebar-hover-bg);
+  color: #ffffff;
+}
+
+body.wings-admin-shell .nav a[aria-current='page'],
+body.wings-admin-shell .nav button[aria-current='page'],
+body.wings-admin-shell .nav a.active,
+body.wings-admin-shell .nav button.active {
+  background: var(--wings-admin-sidebar-active-bg);
+  box-shadow: inset 3px 0 0 var(--wings-admin-action);
+  color: var(--wings-admin-sidebar-active-text);
+}
+
+body.wings-admin-shell .nav hr {
+  border-color: var(--wings-admin-sidebar-border);
+  opacity: 1;
+}
+
+body.wings-admin-shell .nav__label,
+body.wings-admin-shell .nav-group__label,
+body.wings-admin-shell .nav-group__toggle,
+body.wings-admin-shell .nav__group-label,
+body.wings-admin-shell .nav button[aria-expanded] {
+  background: transparent;
+  border: 0;
+  border-radius: var(--wings-admin-radius-nav);
+  color: var(--wings-admin-sidebar-heading);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  min-height: 30px;
+  padding: 6px 10px;
+  text-transform: uppercase;
+}
+
+body.wings-admin-shell .nav-group,
+body.wings-admin-shell .nav__group {
+  margin-block: 8px;
+}
+
+body.wings-admin-shell .nav-group__content,
+body.wings-admin-shell .nav__group-content {
+  padding-top: 2px;
+}
+
+body.wings-admin-shell .nav .wings-admin-nav-intro {
+  border-bottom-color: var(--wings-admin-sidebar-border);
+  margin: 0 0 14px;
+  padding-bottom: 14px;
+}
+
+body.wings-admin-shell .nav .wings-admin-nav-intro__head strong {
+  color: #ffffff;
+  font-family: var(--wings-admin-display);
+}
+
+body.wings-admin-shell .nav .wings-admin-nav-intro__head span {
+  color: var(--wings-admin-sidebar-heading);
+}
+
+body.wings-admin-shell .nav .wings-admin-nav-intro a {
+  color: var(--wings-admin-sidebar-text);
+}
+
+body.wings-admin-shell .nav .wings-admin-nav-intro a:hover,
+body.wings-admin-shell .nav .wings-admin-nav-intro a:focus-visible {
+  background: var(--wings-admin-sidebar-hover-bg);
+  box-shadow: inset 3px 0 0 var(--wings-admin-accent);
+  color: #ffffff;
+}
+
+body.wings-admin-shell .nav .wings-admin-nav-intro__icon {
+  background: rgb(14 138 135 / 0.16);
+  border-color: rgb(14 138 135 / 0.32);
+  color: #9be4e0;
+}
+
+/* Header and working canvas */
+body.wings-admin-shell .app-header {
+  align-items: center;
+  background: var(--wings-admin-topbar);
+  border-bottom: 1px solid var(--wings-admin-border);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.82) inset;
+  height: 72px;
+  min-height: 72px;
+  padding: 0 32px;
+  z-index: 20;
+}
+
+body.wings-admin-shell .app-header :where(a, button, .step-nav__controls) {
+  color: var(--wings-admin-muted-strong);
+}
+
+body.wings-admin-shell .dashboard__wrap,
+body.wings-admin-shell .collection-list__wrap,
+body.wings-admin-shell .collection-edit__wrap {
+  background: var(--wings-admin-canvas);
+  padding: 30px 34px 54px;
+}
+
+body.wings-admin-shell :where(.dashboard__header, .collection-list__header, .collection-edit__header, .list-header) {
+  align-items: flex-end;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  gap: 20px;
+  margin: 0 auto 22px;
+  max-width: 1480px;
+  padding: 0;
+}
+
+body.wings-admin-shell :where(.dashboard__header h1, .collection-list__header h1, .collection-edit__header h1, .list-header h1) {
+  font-size: clamp(1.9rem, 3vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.06;
+}
+
+body.wings-admin-shell :where(.dashboard__header p, .collection-list__header p, .collection-edit__header p) {
+  color: var(--wings-admin-muted);
+  margin-top: 7px;
+  max-width: 68ch;
+}
+
+body.wings-admin-shell :where(.dashboard__wrap > *, .collection-list__wrap > *, .collection-edit__wrap > *) {
+  max-width: 1480px;
+}
+
+/* Surface geometry, restrained at 4–7px */
+body.wings-admin-shell :where(.card, .dashboard__section, .collection-list__table, .table-wrap, .drawer__content, .modal__content) {
+  background: var(--wings-admin-panel);
+  border: 1px solid var(--wings-admin-border);
+  border-radius: var(--wings-admin-radius-md);
+  box-shadow: 0 1px 2px rgb(30 53 74 / 0.04);
+}
+
+body.wings-admin-shell :where(.card__header, .card__title, .dashboard__section-header, .collection-list__header) {
+  border-color: var(--wings-admin-border);
+}
+
+body.wings-admin-shell :where(.panel, .notice, .context, .metric) {
+  border-radius: var(--wings-admin-radius-md);
+}
+
+body.wings-admin-shell :where(.btn, .button, button) {
+  border-radius: var(--wings-admin-radius-sm);
+  line-height: 1.2;
+}
+
+body.wings-admin-shell :where(.btn--style-primary, .button--style-primary, .form-submit button[type='submit'], button[type='submit']) {
+  background: var(--wings-admin-action);
+  border-color: var(--wings-admin-action);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+body.wings-admin-shell :where(.btn--style-primary, .button--style-primary, .form-submit button[type='submit'], button[type='submit']):hover {
+  background: color-mix(in srgb, var(--wings-admin-action) 86%, #000000);
+  border-color: color-mix(in srgb, var(--wings-admin-action) 86%, #000000);
+  color: #ffffff;
+}
+
+body.wings-admin-shell :where(.btn--style-secondary, .button--style-secondary, .btn--style-default, .button--style-default) {
+  background: var(--wings-admin-panel);
+  border-color: var(--wings-admin-border);
+  color: var(--wings-admin-text);
+}
+
+body.wings-admin-shell :where(.btn--style-secondary, .button--style-secondary, .btn--style-default, .button--style-default):hover {
+  border-color: var(--wings-admin-accent);
+  color: var(--wings-admin-accent);
+}
+
+body.wings-admin-shell :where(.cms-console__primary-action, .wings-dashboard__actions a:first-child) {
+  background: var(--wings-admin-action) !important;
+  border-color: var(--wings-admin-action) !important;
+  color: #ffffff !important;
+}
+
+/* Native forms and Payload field controls */
+body.wings-admin-shell :where(.field-type__label, .field-label, .label, .field-type label) {
+  color: var(--wings-admin-ink);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+body.wings-admin-shell :where(.field-type input:not([type='checkbox']):not([type='radio']), .field-type select, .field-type textarea, .field-type .react-select__control, .login input, .login select, .login textarea, .search-filter input, .search-filter select) {
+  background: var(--wings-admin-panel);
+  border: 1px solid var(--wings-admin-border);
+  border-radius: 5px;
+  box-shadow: none;
+  color: var(--wings-admin-text);
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+body.wings-admin-shell :where(.field-type textarea, .login textarea) {
+  min-height: 92px;
+  resize: vertical;
+}
+
+body.wings-admin-shell :where(.field-type input[type='checkbox'], .field-type input[type='radio'], input[type='checkbox'], input[type='radio']) {
+  accent-color: var(--wings-admin-accent);
+}
+
+body.wings-admin-shell :where(.field-type .description, .field-type__description, .hint, .login .error, .form-field__error) {
+  color: var(--wings-admin-muted);
+  font-size: 0.76rem;
+}
+
+body.wings-admin-shell :where(input[aria-invalid='true'], select[aria-invalid='true'], textarea[aria-invalid='true'], .error input, .error select, .error textarea) {
+  border-color: var(--wings-admin-negative);
+  box-shadow: 0 0 0 1px var(--wings-admin-negative);
+}
+
+body.wings-admin-shell :where(.react-select__control, .rs__control) {
+  min-height: 38px;
+}
+
+body.wings-admin-shell :where(.react-select__menu, .rs__menu, .select-element__menu) {
+  background: var(--wings-admin-panel);
+  border: 1px solid var(--wings-admin-border);
+  border-radius: 5px;
+  box-shadow: var(--wings-admin-shadow);
+  color: var(--wings-admin-text);
+  z-index: 50;
+}
+
+/* Native list/detail tables */
+body.wings-admin-shell :where(.table, .collection-list__table, table) {
+  background: var(--wings-admin-panel);
+  border-color: var(--wings-admin-border);
+  border-collapse: collapse;
+  color: var(--wings-admin-text);
+  width: 100%;
+}
+
+body.wings-admin-shell :where(.table th, .table thead, table th) {
+  background: var(--wings-admin-panel-strong);
+  border-bottom: 1px solid var(--wings-admin-border);
+  color: var(--wings-admin-muted-strong);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.075em;
+  padding: 12px 16px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+body.wings-admin-shell :where(.table td, table td) {
+  border-top: 1px solid var(--wings-admin-border);
+  padding: 12px 16px;
+  vertical-align: top;
+}
+
+body.wings-admin-shell :where(.table tbody tr:hover, table tbody tr:hover) {
+  background: color-mix(in srgb, var(--wings-admin-accent-soft) 48%, transparent);
+}
+
+body.wings-admin-shell :where(.table a, .table-action, table a) {
+  color: var(--wings-admin-accent);
+  font-weight: 650;
+}
+
+/* Dialogs, drawers, notices, and status language */
+body.wings-admin-shell :where(.modal, .drawer, .popup, [role='dialog']) {
+  color: var(--wings-admin-text);
+}
+
+body.wings-admin-shell :where(.modal__content, .drawer__content, .popup__content, [role='dialog']) {
+  background: var(--wings-admin-panel);
+  border: 1px solid var(--wings-admin-border);
+  border-radius: 7px;
+  box-shadow: var(--wings-admin-shadow);
+}
+
+body.wings-admin-shell :where(.modal__header, .modal__footer, .drawer__header, .drawer__footer, .dialog-head, .dialog-foot) {
+  border-color: var(--wings-admin-border);
+  background: var(--wings-admin-panel);
+}
+
+body.wings-admin-shell :where(.modal__header h2, .drawer__header h2, [role='dialog'] h2) {
+  font-family: var(--wings-admin-display);
+  font-weight: 600;
+}
+
+body.wings-admin-shell :where(.toast, .notification, .pill--success, .status--success) {
+  background: var(--wings-admin-accent);
+  color: #ffffff;
+}
+
+body.wings-admin-shell :where(.pill--warning, .status--warning, .badge--warning) {
+  background: var(--wings-admin-action-soft);
+  color: color-mix(in srgb, var(--wings-admin-action) 78%, #000000);
+}
+
+body.wings-admin-shell :where(.pill--error, .status--error, .badge--error) {
+  background: color-mix(in srgb, var(--wings-admin-negative) 12%, #ffffff);
+  color: color-mix(in srgb, var(--wings-admin-negative) 78%, #000000);
+}
+
+/* One focus contract across native Payload and custom entry points. */
+body.wings-admin-shell :where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--wings-admin-focus-ring) 72%, #ffffff);
+  outline-offset: 2px;
+}
+
+body.wings-admin-shell :where(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
+/* Real Payload login stays the owner of authentication; only the surface is themed. */
+body.wings-admin-shell .login {
+  align-items: center;
+  background: var(--wings-admin-canvas);
+  display: flex;
+  min-height: 100vh;
+}
+
+body.wings-admin-shell :where(.login__wrap, .login__form, .before-login) {
+  color: var(--wings-admin-text);
+}
+
+body.wings-admin-shell .login__wrap {
+  max-width: 440px;
+}
+
+body.wings-admin-shell .login .wings-admin-logo {
+  margin-bottom: 18px;
+}
+
+/* Desktop: 258px sidebar and 72px topbar. */
+@media (min-width: 1051px) {
+  body.wings-admin-shell .nav,
+  body.wings-admin-shell .nav:not(.nav--nav-open) {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 258px;
+    z-index: 30;
+  }
+
+  body.wings-admin-shell .nav__scroll {
+    padding: 22px 14px 24px;
+  }
+
+  body.wings-admin-shell .nav:not(.nav--nav-open) + .template-default__wrap {
+    margin-left: 258px;
+    max-width: calc(100vw - 258px);
+    min-width: calc(100vw - 258px);
+    width: calc(100vw - 258px);
+  }
+}
+
+/* Tablet keeps the labels and 44px interaction targets. */
+@media (min-width: 681px) and (max-width: 1050px) {
+  body.wings-admin-shell .nav,
+  body.wings-admin-shell .nav:not(.nav--nav-open) {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 224px;
+    z-index: 30;
+  }
+
+  body.wings-admin-shell .nav__scroll {
+    overflow-x: hidden;
+    padding: 18px 12px 20px;
+  }
+
+  body.wings-admin-shell .nav a,
+  body.wings-admin-shell .nav button,
+  body.wings-admin-shell .nav .wings-admin-nav-intro a {
+    min-height: 44px;
+  }
+
+  body.wings-admin-shell .nav:not(.nav--nav-open) + .template-default__wrap {
+    margin-left: 224px;
+    max-width: calc(100vw - 224px);
+    min-width: calc(100vw - 224px);
+    width: calc(100vw - 224px);
+  }
+
+  body.wings-admin-shell .app-header {
+    padding-inline: 24px;
+  }
+
+  body.wings-admin-shell .dashboard__wrap,
+  body.wings-admin-shell .collection-list__wrap,
+  body.wings-admin-shell .collection-edit__wrap {
+    padding: 26px 24px 44px;
+  }
+}
+
+/* Mobile keeps a short triage rail and lets native collection work stay desktop/tablet-oriented. */
+@media (max-width: 680px) {
+  body.wings-admin-shell .nav,
+  body.wings-admin-shell .nav:not(.nav--nav-open) {
+    background: var(--wings-admin-sidebar);
+    bottom: auto;
+    height: 64px;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 100%;
+    z-index: 40;
+  }
+
+  body.wings-admin-shell .nav__scroll {
+    align-items: stretch;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 8px;
+  }
+
+  body.wings-admin-shell .nav .wings-admin-nav-intro {
+    align-items: stretch;
+    border: 0;
+    display: flex;
+    flex: 1 1 auto;
+    margin: 0;
+    min-width: 0;
+    padding: 0;
+  }
+
+  body.wings-admin-shell .nav .wings-admin-nav-intro__head {
+    display: none;
+  }
+
+  body.wings-admin-shell .nav .wings-admin-nav-intro__links {
+    display: flex;
+    flex: 1 1 auto;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  body.wings-admin-shell .nav .wings-admin-nav-intro a {
+    align-items: center;
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 48px;
+    min-width: 0;
+    padding: 8px 10px;
+    width: auto;
+  }
+
+  body.wings-admin-shell .nav .wings-admin-nav-intro a > span:not(.wings-admin-nav-intro__icon) {
+    clip: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    position: static;
+    white-space: nowrap;
+    width: auto;
+  }
+
+  body.wings-admin-shell .nav .nav__wrap {
+    display: none;
+  }
+
+  body.wings-admin-shell .template-default__nav-toggler-wrapper {
+    display: none;
+  }
+
+  body.wings-admin-shell .nav:not(.nav--nav-open) + .template-default__wrap {
+    margin-left: 0;
+    max-width: 100%;
+    min-width: 0;
+    padding-top: 64px;
+    width: 100%;
+  }
+
+  body.wings-admin-shell .app-header {
+    height: auto;
+    min-height: 72px;
+    padding: 10px 16px;
+  }
+
+  body.wings-admin-shell .dashboard__wrap,
+  body.wings-admin-shell .collection-list__wrap,
+  body.wings-admin-shell .collection-edit__wrap {
+    padding: 20px 16px 38px;
+  }
+
+  body.wings-admin-shell :where(.dashboard__header, .collection-list__header, .collection-edit__header, .list-header) {
+    align-items: flex-start;
+    display: grid;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  body.wings-admin-shell :where(.table, .collection-list__table, table) {
+    table-layout: fixed;
+  }
+
+  body.wings-admin-shell :where(.table th, .table td, table th, table td) {
+    overflow-wrap: anywhere;
+    padding: 10px 9px;
+  }
+
+  body.wings-admin-shell :where(.modal__content, .drawer__content, .popup__content, [role='dialog']) {
+    border-radius: 7px 7px 0 0;
+    max-height: 92vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.wings-admin-shell *,
+  body.wings-admin-shell *::before,
+  body.wings-admin-shell *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .wings-admin-theme-finexy {

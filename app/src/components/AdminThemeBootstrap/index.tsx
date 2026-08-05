@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 
 const adminThemeClasses = ['wings-admin-theme-ats', 'wings-admin-theme-finexy'] as const
+const adminShellClass = 'wings-admin-shell'
 const adminThemeStorageKey = 'wings-admin-theme'
 const defaultAdminTheme = 'finexy-soft'
 const validAdminThemes = ['ats-compact', 'finexy-soft'] as const
@@ -22,8 +23,9 @@ const applyAdminTheme = (theme: AdminTheme) => {
 
   for (const target of [document.documentElement, document.body]) {
     target.classList.remove(...adminThemeClasses)
-    target.classList.add(themeClass)
+    target.classList.add(adminShellClass, themeClass)
     target.dataset.adminTheme = theme
+    target.dataset.adminShell = 'payload'
   }
 }
 

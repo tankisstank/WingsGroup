@@ -2,11 +2,11 @@ import React from 'react'
 
 const BeforeLogin: React.FC = () => {
   return (
-    <div className="wings-login-note">
+    <div aria-label="Thông tin WingsGroup CMS" className="wings-login-note" role="note">
       <p>
-        <b>WingsGroup CMS</b>
-        {' Đăng nhập để quản lý nội dung theo site, xuất bản, media, lead và import/export dữ liệu.'}
+        <strong>WingsGroup CMS</strong>
       </p>
+      <p>Đăng nhập để quản lý nội dung theo site trong Payload.</p>
     </div>
   )
 }
