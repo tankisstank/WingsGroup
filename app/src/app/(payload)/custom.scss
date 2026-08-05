@@ -99,7 +99,40 @@ body.wings-admin-shell {
 body.wings-admin-shell {
   background: var(--wings-admin-bg);
   color: var(--wings-admin-text);
+  color-scheme: light;
   line-height: 1.5;
+}
+
+/* Payload can preserve a user's dark-mode preference in data-theme. The CMS
+ * design language is intentionally a single light operator canvas with a navy
+ * navigation rail, so map Payload's native elevation tokens back to the
+ * prototype palette instead of letting isolated native surfaces turn black. */
+html.wings-admin-shell[data-theme='dark'],
+body.wings-admin-shell[data-theme='dark'] {
+  --theme-bg: var(--wings-admin-canvas);
+  --theme-text: var(--wings-admin-text);
+  --theme-input-bg: var(--wings-admin-panel);
+  --theme-elevation-0: var(--wings-admin-panel);
+  --theme-elevation-50: var(--wings-admin-panel-strong);
+  --theme-elevation-100: var(--wings-admin-canvas);
+  --theme-elevation-150: var(--wings-admin-border);
+  --theme-elevation-200: var(--wings-admin-border);
+  --theme-elevation-250: var(--wings-admin-border);
+  --theme-elevation-300: var(--wings-admin-muted);
+  --theme-elevation-350: var(--wings-admin-muted);
+  --theme-elevation-400: var(--wings-admin-muted);
+  --theme-elevation-450: var(--wings-admin-muted-strong);
+  --theme-elevation-500: var(--wings-admin-muted-strong);
+  --theme-elevation-550: var(--wings-admin-muted-strong);
+  --theme-elevation-600: var(--wings-admin-muted-strong);
+  --theme-elevation-650: var(--wings-admin-ink);
+  --theme-elevation-700: var(--wings-admin-ink);
+  --theme-elevation-750: var(--wings-admin-ink);
+  --theme-elevation-800: var(--wings-admin-ink);
+  --theme-elevation-850: var(--wings-admin-ink);
+  --theme-elevation-900: var(--wings-admin-ink);
+  --theme-elevation-950: var(--wings-admin-ink);
+  --theme-elevation-1000: var(--wings-admin-ink);
 }
 
 body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(button, input, select, textarea) {
