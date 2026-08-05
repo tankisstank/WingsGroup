@@ -111,7 +111,13 @@ if (isPostgres) {
   if (runPnpm(['exec', 'payload', 'migrate']) !== 0) process.exit(1)
 
   console.log('[phase1-e2e-db] Seeding deterministic phase-1 fixtures')
-  if (runPnpm(['exec', 'tsx', 'scripts/seed-subsites.ts']) !== 0) process.exit(1)
+  if (
+    runPnpm(['exec', 'tsx', 'scripts/seed-subsites.ts'], {
+      WINGSSIDE_REHEARSAL_EXIT_AFTER_SEED: 'true',
+    }) !== 0
+  ) {
+    process.exit(1)
+  }
 } else {
   const sqlitePath = toSQLitePath(targetDatabaseURL)
 
