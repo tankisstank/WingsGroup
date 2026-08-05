@@ -1,106 +1,165 @@
 @import '@payloadcms/ui/scss';
 
 .wings-dashboard {
-  --wings-surface: var(--wings-admin-panel);
-  --wings-line: var(--wings-admin-border);
-  --wings-accent: var(--wings-admin-accent);
-  --wings-warning: #b7791f;
+  --dashboard-line: var(--wings-admin-border);
+  --dashboard-muted: var(--wings-admin-muted-strong);
+  --dashboard-surface: var(--wings-admin-panel);
 
-  background: var(--wings-surface);
-  border: 1px solid var(--wings-line);
-  border-radius: 8px;
-  display: grid;
-  gap: base(1.15);
-  padding: base(1.15);
+  background: var(--wings-admin-canvas);
   color: var(--wings-admin-text);
+  display: grid;
+  font-family: 'Bahnschrift', 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
+  gap: 17px;
+  padding: base(1.15);
+
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
 
   &__header {
-    align-items: flex-start;
+    align-items: end;
     display: flex;
     gap: base(1);
     justify-content: space-between;
 
     h2 {
-      font-size: 1.75rem;
-      line-height: 1.15;
-      margin: 0 0 base(0.25);
+      font-size: clamp(28px, 3vw, 40px);
+      letter-spacing: -0.025em;
+      line-height: 1.06;
+      margin-top: 4px;
     }
 
-    p {
-      color: var(--wings-admin-text);
-      margin: 0;
-      max-width: 72ch;
+    > div:first-child > p:last-child {
+      color: var(--dashboard-muted);
+      font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+      margin-top: 8px;
+      max-width: 68ch;
     }
   }
 
   &__eyebrow {
-    color: var(--wings-accent);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0;
+    color: var(--wings-admin-accent);
+    font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
   }
 
   &__role {
-    background: var(--wings-admin-panel);
-    border: 1px solid var(--wings-line);
-    border-radius: 6px;
+    background: var(--dashboard-surface);
+    border: 1px solid var(--dashboard-line);
+    border-left: 3px solid var(--wings-admin-accent);
+    border-radius: var(--wings-admin-radius-sm);
     min-width: 150px;
-    padding: base(0.5);
+    padding: base(0.55);
 
     span {
-      color: var(--wings-admin-muted-strong);
+      color: var(--dashboard-muted);
       display: block;
+      font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
       font-size: 0.75rem;
     }
 
     strong {
-      color: var(--wings-admin-text);
       display: block;
       margin-top: base(0.125);
     }
   }
 
-  &__scope {
+  &__actions {
+    align-items: center;
     display: flex;
     flex-wrap: wrap;
-    gap: base(0.35);
+    gap: 8px;
+
+    a {
+      align-items: center;
+      background: var(--dashboard-surface);
+      border: 1px solid var(--dashboard-line);
+      border-radius: var(--wings-admin-radius-sm);
+      color: var(--wings-admin-text);
+      display: inline-flex;
+      font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+      font-size: 13px;
+      font-weight: 650;
+      justify-content: center;
+      min-height: 44px;
+      padding: 7px 12px;
+      text-decoration: none;
+
+      &:hover {
+        border-color: var(--wings-admin-accent);
+        color: var(--wings-admin-accent);
+      }
+
+      &:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--wings-admin-action) 55%, white);
+        outline-offset: 3px;
+      }
+    }
+  }
+
+  &__primary-action {
+    background: var(--wings-admin-action) !important;
+    border-color: var(--wings-admin-action) !important;
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--wings-admin-action) 70%, black);
+    color: var(--wings-admin-active-text) !important;
+  }
+
+  &__scope {
+    align-items: center;
+    background: color-mix(in srgb, var(--wings-admin-accent-soft) 32%, var(--dashboard-surface));
+    border: 1px solid color-mix(in srgb, var(--wings-admin-accent) 28%, var(--dashboard-line));
+    border-left: 3px solid var(--wings-admin-accent);
+    border-radius: var(--wings-admin-radius-sm);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    padding: 12px 14px;
 
     span {
-      background: var(--wings-admin-panel);
-      border: 1px solid var(--wings-line);
-      border-radius: 999px;
       color: var(--wings-admin-text);
-      padding: base(0.2) base(0.45);
+      font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+      font-size: 13px;
+      font-weight: 650;
     }
   }
 
   &__operations {
     display: grid;
-    gap: base(0.75);
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr);
+    gap: 17px;
+    grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.85fr);
   }
 
   &__section {
-    background: var(--wings-admin-panel);
-    border: 1px solid var(--wings-admin-border);
-    border-radius: 6px;
-    padding: base(0.75);
+    background: var(--dashboard-surface);
+    border: 1px solid var(--dashboard-line);
+    box-shadow: var(--wings-admin-shadow);
+    min-width: 0;
+    padding: base(0.9);
 
     h3 {
-      margin: 0 0 base(0.35);
+      font-size: 20px;
+      letter-spacing: -0.01em;
+      margin-bottom: base(0.35);
     }
   }
 
   &__state {
-    color: var(--wings-admin-muted-strong);
+    color: var(--dashboard-muted);
+    font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
     margin: base(0.25) 0 0;
 
     button {
-      background: var(--wings-admin-panel);
-      border: 1px solid var(--wings-admin-border);
+      background: var(--dashboard-surface);
+      border: 1px solid var(--dashboard-line);
+      border-radius: var(--wings-admin-radius-sm);
       color: var(--wings-admin-text);
       cursor: pointer;
+      display: block;
       margin-top: base(0.35);
       min-height: 44px;
       padding: base(0.3) base(0.5);
@@ -110,14 +169,15 @@
   &__site-list {
     display: flex;
     flex-wrap: wrap;
-    gap: base(0.35);
+    gap: 7px;
 
     span {
       background: var(--wings-admin-accent-soft);
-      border: 1px solid var(--wings-admin-border);
-      border-radius: 999px;
+      border: 1px solid var(--dashboard-line);
+      border-radius: var(--wings-admin-radius-sm);
       color: var(--wings-admin-text);
-      padding: base(0.2) base(0.45);
+      font-size: 12px;
+      padding: 4px 7px;
     }
   }
 
@@ -127,9 +187,10 @@
 
     a {
       align-items: center;
-      border-bottom: 1px solid var(--wings-admin-border);
+      border-bottom: 1px solid var(--dashboard-line);
       color: var(--wings-admin-text);
       display: flex;
+      font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
       justify-content: space-between;
       padding: base(0.28) 0;
       text-decoration: none;
@@ -138,13 +199,13 @@
         border-bottom: 0;
       }
 
-      &:hover span {
-        color: var(--wings-accent);
+      &:hover {
+        color: var(--wings-admin-accent);
       }
     }
 
     strong {
-      color: var(--wings-warning);
+      color: var(--wings-admin-action);
       font-size: 1.15rem;
       line-height: 1;
     }
@@ -152,44 +213,47 @@
 
   &__metrics {
     display: grid;
-    gap: base(0.5);
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 13px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 
-    a {
-      background: var(--wings-admin-panel-strong);
-      border: 1px solid var(--wings-admin-border);
-      border-radius: 6px;
-      color: var(--wings-admin-text);
-      display: grid;
-      min-height: 92px;
-      padding: base(0.6);
-      text-decoration: none;
+    article {
+      background: var(--dashboard-surface);
+      border: 1px solid var(--dashboard-line);
+      box-shadow: var(--wings-admin-shadow);
+      min-height: 148px;
+      padding: base(0.7);
 
-      &:hover {
-        border-color: var(--wings-accent);
+      &:hover,
+      &:focus-within {
+        border-color: var(--wings-admin-accent);
       }
     }
 
-    span {
-      color: var(--wings-admin-muted-strong);
-      font-size: 0.85rem;
+    a {
+      display: grid;
+      min-height: 112px;
+      text-decoration: none;
+    }
+
+    span,
+    small {
+      color: var(--dashboard-muted);
+      font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+      font-size: 0.8rem;
     }
 
     strong {
       align-self: end;
       color: var(--wings-admin-text);
+      font-family: 'Bahnschrift', 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
       font-size: 2rem;
       line-height: 1;
     }
 
-    small {
-      color: var(--wings-admin-muted-strong);
-      margin-top: base(0.2);
-    }
-
     article > button {
-      background: var(--wings-admin-panel);
-      border: 1px solid var(--wings-admin-border);
+      background: var(--dashboard-surface);
+      border: 1px solid var(--dashboard-line);
+      border-radius: var(--wings-admin-radius-sm);
       color: var(--wings-admin-text);
       cursor: pointer;
       margin-top: base(0.25);
@@ -200,22 +264,28 @@
 
   &__columns {
     display: grid;
-    gap: base(0.75);
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 17px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    > div {
+      background: var(--dashboard-surface);
+      border: 1px solid var(--dashboard-line);
+      box-shadow: var(--wings-admin-shadow);
+      min-width: 0;
+      padding: base(0.9);
+    }
 
     h3 {
-      margin: 0 0 base(0.4);
+      font-size: 18px;
+      margin-bottom: base(0.4);
     }
 
     a {
       color: var(--wings-admin-text);
-    }
 
-    > div {
-      background: var(--wings-admin-panel);
-      border: 1px solid var(--wings-admin-border);
-      border-radius: 6px;
-      padding: base(0.75);
+      &:hover {
+        color: var(--wings-admin-accent);
+      }
     }
 
     ul {
@@ -227,51 +297,83 @@
     }
 
     li {
-      border-bottom: 1px solid var(--wings-admin-border);
+      border-bottom: 1px solid var(--dashboard-line);
       display: grid;
       gap: base(0.1);
       padding-bottom: base(0.35);
+
+      &:last-child {
+        border-bottom: 0;
+      }
     }
 
     span {
-      color: var(--wings-admin-muted-strong);
+      color: var(--dashboard-muted);
+      font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
       font-size: 0.8rem;
-    }
-  }
-
-  &__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: base(0.4);
-
-    a {
-      background: var(--wings-admin-panel-strong);
-      border: 1px solid var(--wings-admin-border);
-      border-radius: 6px;
-      color: var(--wings-admin-text);
-      padding: base(0.35) base(0.55);
-      text-decoration: none;
-
-      &:hover {
-        border-color: var(--wings-accent);
-        color: var(--wings-accent);
-      }
     }
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1050px) {
   .wings-dashboard {
+    &__header,
+    &__operations,
+    &__columns {
+      grid-template-columns: 1fr;
+    }
+
     &__header {
+      align-items: start;
       display: grid;
     }
 
-    &__role {
-      min-width: 0;
+    &__operations,
+    &__columns {
+      display: grid;
     }
 
-    &__operations {
+    &__metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}
+
+@media (max-width: 680px) {
+  .wings-dashboard {
+    gap: 14px;
+    padding: base(0.8);
+
+    &__actions {
+      align-items: stretch;
+      display: grid;
       grid-template-columns: 1fr;
     }
+
+    &__actions a {
+      width: 100%;
+    }
+
+    &__scope {
+      align-items: start;
+      display: grid;
+    }
+
+    &__metrics {
+      gap: 10px;
+    }
+
+    &__metrics article {
+      min-height: 126px;
+      padding: base(0.6);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wings-dashboard *,
+  .wings-dashboard *::before,
+  .wings-dashboard *::after {
+    transition-duration: 0.01ms !important;
   }
 }

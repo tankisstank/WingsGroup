@@ -37,6 +37,15 @@ type SiteDoc = {
   name?: null | string
 }
 
+type QueueItem = {
+  date?: null | string
+  href: string
+  id: number | string
+  kind: 'lead' | 'page'
+  meta: string
+  title: string
+}
+
 type MetricStates = Record<AdminMetricKey, RequestState<number>>
 
 type RequestMessageProps = {
@@ -180,6 +189,12 @@ const roleLabel: Record<Role, string> = {
   editor: 'Biên tập viên',
   'site-manager': 'Quản lý site',
   'super-admin': 'Quản trị toàn hệ',
+}
+
+const roleContextLabel: Record<Role, string> = {
+  editor: 'Editor',
+  'site-manager': 'Site manager',
+  'super-admin': 'Super Admin',
 }
 
 function RequestMessage({
@@ -333,6 +348,42 @@ export default function AdminOperatorConsole() {
     (state) =>
       state.state === 'error' || state.state === 'no-access' || state.state === 'unavailable',
   )
+  const queueItems = useMemo<QueueItem[]>(
+    () =>
+      [
+        ...(recentPages.state === 'ready'
+          ? recentPages.value.map((doc) => ({
+              date: doc.updatedAt,
+              href: `/admin/collections/pages/${doc.id}`,
+              id: `page-${String(doc.id)}`,
+              kind: 'page' as const,
+              meta: `Trang · Cập nhật ${formatDate(doc.updatedAt)}`,
+              title: doc.title || 'Trang chưa có tiêu đề',
+            }))
+          : []),
+        ...(recentLeads.state === 'ready'
+          ? recentLeads.value.map((doc) => ({
+              date: doc.createdAt,
+              href: `/admin/collections/form-submissions/${doc.id}`,
+              id: `lead-${String(doc.id)}`,
+              kind: 'lead' as const,
+              meta: `Lead · Gửi ${formatDate(doc.createdAt)}`,
+              title:
+                typeof doc.form === 'object' && doc.form?.title
+                  ? doc.form.title
+                  : 'Lead gửi về',
+            }))
+          : []),
+      ]
+        .sort((left, right) => {
+          const leftTime = left.date ? Date.parse(left.date) : 0
+          const rightTime = right.date ? Date.parse(right.date) : 0
+
+          return rightTime - leftTime
+        })
+        .slice(0, 6),
+    [recentLeads, recentPages],
+  )
 
   return (
     <>
@@ -382,14 +433,6 @@ export default function AdminOperatorConsole() {
             </div>
           </header>
 
-          <section className={`${baseClass}__scope`} aria-label="Phạm vi dữ liệu">
-            <span>Phạm vi: Tất cả site được phân quyền</span>
-            <span>Locale nội dung: Tất cả locale</span>
-            <small>
-              Đây là phạm vi đọc tổng hợp; quyền ghi được kiểm tra tại từng màn hình đích.
-            </small>
-          </section>
-
           <section className={`${baseClass}__quick-actions`} aria-label="Hành động chính">
             <Link className={`${baseClass}__primary-action`} href="/admin/page-wizard">
               Tạo trang nháp
@@ -402,8 +445,145 @@ export default function AdminOperatorConsole() {
             {canManageSite ? <Link href="/admin/collections/exports">Xuất dữ liệu</Link> : null}
           </section>
 
-          <section className={`${baseClass}__today`}>
+          <section className={`${baseClass}__scope`} aria-label="Phạm vi dữ liệu">
+            <span>Phạm vi: Tất cả site được phân quyền</span>
+            <span>Locale nội dung: Tất cả locale</span>
+            <small>
+              Đây là phạm vi đọc tổng hợp; quyền ghi được kiểm tra tại từng màn hình đích.
+            </small>
+          </section>
+
+          <section aria-label="Không gian vận hành" className={`${baseClass}__workspace`}>
+            <section aria-label="Hàng đợi hoạt động" className={`${baseClass}__queue`}>
+              <div className={`${baseClass}__panel-head`}>
+                <div>
+                  <p className={`${baseClass}__eyebrow`}>Operator workspace</p>
+                  <h2>Hàng đợi hoạt động</h2>
+                  <p>Dữ liệu gần đây theo đúng site, locale và quyền đọc của phiên hiện tại.</p>
+                </div>
+                <span className={`${baseClass}__queue-count`}>{queueItems.length} mục</span>
+              </div>
+              {queueItems.length > 0 ? (
+                <div aria-live="polite" className={`${baseClass}__task-list`}>
+                  {queueItems.map((item) => (
+                    <article className={`${baseClass}__task`} key={item.id}>
+                      <span aria-hidden="true" className={`${baseClass}__task-marker`}>
+                        {item.kind === 'page' ? 'P' : 'L'}
+                      </span>
+                      <div>
+                        <strong>
+                          <Link href={item.href}>{item.title}</Link>
+                        </strong>
+                        <span className={`${baseClass}__task-meta`}>{item.meta}</span>
+                      </div>
+                      <span className={`${baseClass}__badge ${baseClass}__badge--${item.kind}`}>
+                        {item.kind === 'page' ? 'Trang' : 'Lead'}
+                      </span>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+              <div className={`${baseClass}__queue-states`}>
+                <RequestMessage
+                  empty="Chưa có trang nào được cập nhật gần đây."
+                  error="Không thể tải trang cập nhật gần đây."
+                  loading="Đang tải trang cập nhật gần đây."
+                  noAccess="Không có quyền xem trang cập nhật gần đây."
+                  onRetry={() => void loadRecentPages()}
+                  retryLabel="Tải lại trang gần đây"
+                  state={recentPages}
+                  unavailable="Dữ liệu trang gần đây không khả dụng."
+                />
+                <RequestMessage
+                  empty="Chưa có lead nào."
+                  error="Không thể tải lead gần đây."
+                  loading="Đang tải lead gần đây."
+                  noAccess="Không có quyền xem lead gần đây."
+                  onRetry={() => void loadRecentLeads()}
+                  retryLabel="Tải lại lead gần đây"
+                  state={recentLeads}
+                  unavailable="Dữ liệu lead gần đây không khả dụng."
+                />
+              </div>
+            </section>
+
+            <aside className={`${baseClass}__stack`}>
+              <section className={`${baseClass}__context`}>
+                <p className={`${baseClass}__eyebrow`}>Context đang áp dụng</p>
+                <h2>Site và locale</h2>
+                <dl>
+                  <div>
+                    <dt>Quyền</dt>
+                    <dd>
+                      {me.state === 'ready' ? roleContextLabel[me.value.role] : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Locale</dt>
+                    <dd>Tất cả locale</dd>
+                  </div>
+                </dl>
+                <div className={`${baseClass}__context-sites`}>
+                  <span>Site được phân quyền</span>
+                  {sites.state === 'ready' ? (
+                    <div className={`${baseClass}__site-list`} aria-live="polite">
+                      {sites.value.map((site) => (
+                        <span key={site.id}>
+                          {site.name || site.code || `Site ${String(site.id)}`}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <RequestMessage
+                      empty="Chưa có site được gán."
+                      error="Không thể tải danh sách site."
+                      loading="Đang tải danh sách site."
+                      noAccess="Không có quyền xem danh sách site."
+                      onRetry={() => void loadSites()}
+                      retryLabel="Tải lại danh sách site"
+                      state={sites}
+                      unavailable="Dữ liệu site không khả dụng."
+                    />
+                  )}
+                </div>
+                {canManageSite ? (
+                  <div className={`${baseClass}__link-list`}>
+                    <Link href="/admin/theme">Theme Manager</Link>
+                    <Link href="/admin/collections/site-settings">Cấu hình site</Link>
+                  </div>
+                ) : null}
+              </section>
+              <section className={`${baseClass}__notice`}>
+                <h3>Operator guidance</h3>
+                <p>
+                  Console chỉ điều hướng tới capability thật. Site Review vẫn read-only; editor
+                  phức tạp mở ở màn hình native để giữ đủ context.
+                </p>
+              </section>
+              <section className={`${baseClass}__notice`}>
+                <h3>Native workspaces</h3>
+                <p>Các màn hình Payload giữ quyền sở hữu editor, collection và tác vụ dữ liệu.</p>
+                <div className={`${baseClass}__link-list`}>
+                  <Link href="/admin/site-review">Rà soát site/page bằng preview</Link>
+                  <Link href="/admin/page-wizard">Tạo trang nháp theo wizard</Link>
+                  <Link href="/admin/collections/pages">Quản lý trang</Link>
+                  <Link href="/admin/collections/posts">Quản lý bài viết</Link>
+                  <Link href="/admin/collections/media">Thư viện media</Link>
+                  <Link href="/admin/collections/form-submissions">Lead gửi về</Link>
+                  {canManageSite ? <Link href="/admin/collections/forms">Biểu mẫu</Link> : null}
+                  {canManageSite ? <Link href="/admin/collections/imports">Nhập dữ liệu</Link> : null}
+                  {canManageSite ? <Link href="/admin/collections/exports">Xuất dữ liệu</Link> : null}
+                  {!canManageSite && me.state === 'ready' ? (
+                    <span>Editor không có lối tắt import/export.</span>
+                  ) : null}
+                </div>
+              </section>
+            </aside>
+          </section>
+
+          <section className={`${baseClass}__summary`}>
             <div>
+              <p className={`${baseClass}__eyebrow`}>Triage summary</p>
               <h2>Tóm tắt nội dung</h2>
               <p>Chỉ hiển thị số liệu có nghĩa theo query hiện có.</p>
             </div>
@@ -441,126 +621,6 @@ export default function AdminOperatorConsole() {
                 state={metrics[descriptor.key]}
               />
             ))}
-          </section>
-
-          <section className={`${baseClass}__workspace`}>
-            <div className={`${baseClass}__panel`}>
-              <h2>Nội dung</h2>
-              <div className={`${baseClass}__link-list`}>
-                <Link href="/admin/site-review">Rà soát site/page bằng preview</Link>
-                <Link href="/admin/page-wizard">Tạo trang nháp theo wizard</Link>
-                <Link href="/admin/collections/pages">Quản lý trang</Link>
-                <Link href="/admin/collections/posts">Quản lý bài viết</Link>
-                <Link href="/admin/collections/media">Thư viện media</Link>
-              </div>
-            </div>
-
-            <div className={`${baseClass}__panel`}>
-              <h2>Lead</h2>
-              <p>Lead xuất hiện khi khách gửi form trên website.</p>
-              <div className={`${baseClass}__link-list`}>
-                <Link href="/admin/collections/form-submissions">Lead gửi về</Link>
-                {canManageSite ? <Link href="/admin/collections/forms">Biểu mẫu</Link> : null}
-              </div>
-            </div>
-
-            <div className={`${baseClass}__panel`}>
-              <h2>Cấu hình site</h2>
-              <p>Chỉ chỉnh các cấu hình thuộc site được phân quyền.</p>
-              {sites.state === 'ready' ? (
-                <div className={`${baseClass}__site-list`} aria-live="polite">
-                  {sites.value.map((site) => (
-                    <span key={site.id}>{site.name || site.code || `Site ${String(site.id)}`}</span>
-                  ))}
-                </div>
-              ) : (
-                <RequestMessage
-                  empty="Chưa có site được gán."
-                  error="Không thể tải danh sách site."
-                  loading="Đang tải danh sách site."
-                  noAccess="Không có quyền xem danh sách site."
-                  onRetry={() => void loadSites()}
-                  retryLabel="Tải lại danh sách site"
-                  state={sites}
-                  unavailable="Dữ liệu site không khả dụng."
-                />
-              )}
-              {canManageSite ? (
-                <div className={`${baseClass}__link-list`}>
-                  <Link href="/admin/theme">Theme Manager</Link>
-                  <Link href="/admin/collections/site-settings">Cấu hình site</Link>
-                </div>
-              ) : null}
-            </div>
-
-            <div className={`${baseClass}__panel`}>
-              <h2>Dữ liệu</h2>
-              <p>Dùng màn hình native để xem phạm vi, mapping và trạng thái tác vụ dữ liệu.</p>
-              <div className={`${baseClass}__link-list`}>
-                {canManageSite ? <Link href="/admin/collections/imports">Nhập dữ liệu</Link> : null}
-                {canManageSite ? <Link href="/admin/collections/exports">Xuất dữ liệu</Link> : null}
-                {!canManageSite && me.state === 'ready' ? (
-                  <span>Editor không có lối tắt import/export.</span>
-                ) : null}
-              </div>
-            </div>
-          </section>
-
-          <section className={`${baseClass}__recent`}>
-            <div>
-              <h2>Trang cập nhật gần đây</h2>
-              {recentPages.state === 'ready' ? (
-                <ul aria-live="polite">
-                  {recentPages.value.map((doc) => (
-                    <li key={doc.id}>
-                      <Link href={`/admin/collections/pages/${doc.id}`}>
-                        {doc.title || 'Trang chưa có tiêu đề'}
-                      </Link>
-                      <span>{formatDate(doc.updatedAt)}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <RequestMessage
-                  empty="Chưa có trang nào được cập nhật gần đây."
-                  error="Không thể tải trang cập nhật gần đây."
-                  loading="Đang tải trang cập nhật gần đây."
-                  noAccess="Không có quyền xem trang cập nhật gần đây."
-                  onRetry={() => void loadRecentPages()}
-                  retryLabel="Tải lại trang gần đây"
-                  state={recentPages}
-                  unavailable="Dữ liệu trang gần đây không khả dụng."
-                />
-              )}
-            </div>
-            <div>
-              <h2>Lead gửi gần đây</h2>
-              {recentLeads.state === 'ready' ? (
-                <ul aria-live="polite">
-                  {recentLeads.value.map((doc) => (
-                    <li key={doc.id}>
-                      <Link href={`/admin/collections/form-submissions/${doc.id}`}>
-                        {typeof doc.form === 'object' && doc.form?.title
-                          ? doc.form.title
-                          : 'Lead gửi về'}
-                      </Link>
-                      <span>{formatDate(doc.createdAt)}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <RequestMessage
-                  empty="Chưa có lead nào."
-                  error="Không thể tải lead gần đây."
-                  loading="Đang tải lead gần đây."
-                  noAccess="Không có quyền xem lead gần đây."
-                  onRetry={() => void loadRecentLeads()}
-                  retryLabel="Tải lại lead gần đây"
-                  state={recentLeads}
-                  unavailable="Dữ liệu lead gần đây không khả dụng."
-                />
-              )}
-            </div>
           </section>
 
           {isSuperAdmin ? (

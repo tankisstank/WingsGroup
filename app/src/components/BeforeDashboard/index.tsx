@@ -15,8 +15,10 @@ const BeforeDashboard: React.FC = () => {
       <Banner className={`${baseClass}__banner`} type="success">
         <h4>WingsGroup CMS đã sẵn sàng cho vận hành nội dung theo từng site.</h4>
       </Banner>
-      Dùng bảng điều hành bên dưới để xem số liệu thật, lead gần đây, bản nháp và các nhóm dữ liệu
-      được mở theo quyền của bạn.
+      <p className={`${baseClass}__intro`}>
+        Dùng bảng điều hành bên dưới để xem số liệu thật, lead gần đây, bản nháp và các nhóm dữ
+        liệu được mở theo quyền của bạn.
+      </p>
       <ul className={`${baseClass}__instructions`}>
         <li>Editor tạo và cập nhật bản nháp trong các site được phân quyền.</li>
         <li>Site manager và super admin duyệt publish, import và export dữ liệu.</li>

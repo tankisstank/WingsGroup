@@ -311,6 +311,18 @@ export function WingsGroupMetricsClient({
         </div>
       </div>
 
+      <div aria-label="Hành động chính" className={`${baseClass}__actions`}>
+        <Link className={`${baseClass}__primary-action`} href="/admin/page-wizard">
+          Tạo trang nháp
+        </Link>
+        <Link href="/admin/console">Console vận hành</Link>
+        <Link href="/admin/site-review">Rà soát site/page</Link>
+        <Link href="/admin/collections/form-submissions">Lead gửi về</Link>
+        <Link href="/admin/collections/pages/create">Tạo trang</Link>
+        <Link href="/admin/collections/posts/create">Tạo bài viết</Link>
+        <Link href="/admin/collections/media">Thư viện media</Link>
+      </div>
+
       <div className={`${baseClass}__scope`} aria-label="Phạm vi số liệu" role="group">
         <span>Tất cả site được phân quyền</span>
         <span>Tất cả locale</span>
@@ -471,14 +483,6 @@ export function WingsGroupMetricsClient({
         </div>
       </div>
 
-      <div className={`${baseClass}__actions`}>
-        <Link href="/admin/console">Console vận hành</Link>
-        <Link href="/admin/page-wizard">Tạo trang nháp</Link>
-        <Link href="/admin/collections/pages/create">Tạo trang</Link>
-        <Link href="/admin/collections/posts/create">Tạo bài viết</Link>
-        <Link href="/admin/collections/media">Thư viện media</Link>
-        <Link href="/admin/collections/form-submissions">Lead gửi về</Link>
-      </div>
     </section>
   )
 }

@@ -125,6 +125,25 @@ describe('AdminOperatorConsole request states', () => {
     expect(within(pagesMetric).queryByRole('button')).toBeNull()
   })
 
+  it('composes a real-data task queue, context panel, and metric strip', async () => {
+    vi.stubGlobal('fetch', createFetchMock())
+
+    render(<AdminOperatorConsole />)
+
+    const queue = await screen.findByRole('region', { name: 'Hàng đợi hoạt động' })
+    expect(within(queue).getByRole('link', { name: 'Trang Hà Nội' }).getAttribute('href')).toBe(
+      '/admin/collections/pages/page-1',
+    )
+    expect(within(queue).getByRole('link', { name: 'Liên hệ tour' }).getAttribute('href')).toBe(
+      '/admin/collections/form-submissions/lead-1',
+    )
+    expect(queue.querySelectorAll('.cms-console__task')).toHaveLength(2)
+    expect(queue.querySelector('.cms-console__badge--page')?.textContent).toBe('Trang')
+    expect(queue.querySelector('.cms-console__badge--lead')?.textContent).toBe('Lead')
+    expect(screen.getByRole('heading', { name: 'Site và locale' })).toBeTruthy()
+    expect(screen.getByRole('region', { name: 'Số liệu CMS' })).toBeTruthy()
+  })
+
   it('renders successful empty collection responses as empty', async () => {
     vi.stubGlobal(
       'fetch',
