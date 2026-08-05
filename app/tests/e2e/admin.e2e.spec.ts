@@ -126,7 +126,9 @@ test.describe('Admin Panel', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Bảng điều hành CMS' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Console vận hành' }).first()).toBeVisible()
     await expect(
-      page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Tạo trang nháp' }),
+      page
+        .locator('#wings-group-metrics-0')
+        .getByRole('link', { name: 'Tạo trang nháp', exact: true }),
     ).toBeVisible()
     await expect(
       page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Lead gửi về' }),
@@ -163,7 +165,9 @@ test.describe('Admin Panel', () => {
   test('can open operator console', async () => {
     await page.goto(`${e2eBaseURL}/admin/console`)
     await expect(page.getByRole('heading', { name: 'Console vận hành' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Tạo trang nháp' })).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: 'Tạo trang nháp', exact: true }),
+    ).toBeVisible()
     await expect(page.getByRole('link', { name: 'Xem tổng lead' })).toBeVisible()
     await expect(page.getByText('Phạm vi: Tất cả site được phân quyền')).toBeVisible()
     await expect(page.getByText('Locale nội dung: Tất cả locale')).toBeVisible()
@@ -605,7 +609,9 @@ test.describe('Admin Panel', () => {
       await editorPage.goto(`${e2eBaseURL}/admin/console`)
 
       await expect(editorPage.getByRole('heading', { name: 'Console vận hành' })).toBeVisible()
-      await expect(editorPage.getByRole('link', { name: 'Tạo trang nháp' })).toBeVisible()
+      await expect(
+        editorPage.getByRole('link', { name: 'Tạo trang nháp', exact: true }),
+      ).toBeVisible()
       await expect(editorPage.getByRole('link', { name: 'Nhập dữ liệu' })).toHaveCount(0)
       await expect(editorPage.getByRole('link', { name: 'Xuất dữ liệu' })).toHaveCount(0)
       await expect(editorPage.getByRole('link', { name: 'Quản lý theme' })).toHaveCount(0)
