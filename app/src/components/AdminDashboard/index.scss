@@ -92,6 +92,13 @@
   &__state {
     color: var(--theme-elevation-550);
     margin: base(0.25) 0 0;
+
+    button {
+      cursor: pointer;
+      margin-top: base(0.35);
+      min-height: 44px;
+      padding: base(0.3) base(0.5);
+    }
   }
 
   &__site-list {
@@ -172,6 +179,13 @@
     small {
       color: var(--theme-elevation-550);
       margin-top: base(0.2);
+    }
+
+    article > button {
+      cursor: pointer;
+      margin-top: base(0.25);
+      min-height: 44px;
+      padding: base(0.3) base(0.5);
     }
   }
 

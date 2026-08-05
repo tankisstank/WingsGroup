@@ -444,7 +444,7 @@ export function WingsGroupMetricsClient({
           )}
         </div>
         <div>
-          <h3>Lead mới nhất</h3>
+          <h3>Lead gần đây</h3>
           {recentSubmissions.state === 'ready' ? (
             <ul>
               {recentSubmissions.value.map((doc) => (
