@@ -737,9 +737,11 @@
     }
 
     .nav:not(.nav--nav-open) + .template-default__wrap {
+      box-sizing: border-box;
       margin-left: 68px;
-      min-width: 0;
-      width: calc(100% - 68px);
+      max-width: calc(100vw - 68px);
+      min-width: calc(100vw - 68px);
+      width: calc(100vw - 68px);
     }
   }
 }
@@ -786,9 +788,11 @@
     }
 
     .nav:not(.nav--nav-open) + .template-default__wrap {
+      box-sizing: border-box;
       margin-left: 224px;
-      min-width: 0;
-      width: calc(100% - 224px);
+      max-width: calc(100vw - 224px);
+      min-width: calc(100vw - 224px);
+      width: calc(100vw - 224px);
     }
 
     .cms-console__header > *,
