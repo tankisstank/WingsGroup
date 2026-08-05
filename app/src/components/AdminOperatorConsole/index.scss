@@ -4,6 +4,12 @@
   min-height: 100%;
   background: var(--theme-elevation-50);
   color: var(--theme-text);
+  scroll-margin-top: 12px;
+
+  &:focus-visible {
+    outline: 3px solid var(--wings-admin-focus-ring);
+    outline-offset: -3px;
+  }
 
   &__shell {
     display: grid;
@@ -169,7 +175,7 @@
   }
 
   &__quick-actions a,
-  &__metrics a,
+  &__metrics article,
   &__tasks a,
   &__link-list a,
   &__link-list span {
@@ -185,7 +191,8 @@
   }
 
   &__quick-actions a:hover,
-  &__metrics a:hover,
+  &__metrics article:hover,
+  &__metrics article:focus-within,
   &__tasks a:hover,
   &__link-list a:hover,
   &__recent a:hover,
@@ -230,6 +237,31 @@
     padding: 8px 12px;
   }
 
+  &__retry:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--theme-success-500) 65%, white);
+    outline-offset: 2px;
+  }
+
+  &__request-message {
+    display: grid;
+    gap: 8px;
+
+    p {
+      margin: 0;
+      color: var(--theme-elevation-650);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.45;
+      text-transform: none;
+    }
+
+    .cms-console__retry {
+      justify-self: start;
+      min-height: 36px;
+      padding: 6px 10px;
+    }
+  }
+
   &__today {
     display: flex;
     align-items: center;
@@ -263,14 +295,17 @@
     }
   }
 
-  &__metrics a {
+  &__metrics article {
     display: grid;
     gap: 7px;
     min-height: 88px;
     padding: 16px;
 
-    span {
+    > a {
+      border-radius: 4px;
       color: var(--theme-elevation-650);
+      font-weight: 600;
+      text-decoration: none;
     }
 
     strong {
@@ -464,7 +499,7 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    &__metrics a {
+    &__metrics article {
       min-height: 82px;
       padding: 14px;
     }
