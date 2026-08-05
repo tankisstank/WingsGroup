@@ -14,6 +14,7 @@
   --wings-admin-canvas: #f7f7f5;
   --wings-admin-ink: #18312f;
   --wings-admin-muted: #6f6a64;
+  --wings-admin-muted-strong: #59534e;
   --wings-admin-negative: #e94e4e;
   --wings-admin-panel: #ffffff;
   --wings-admin-panel-strong: #fff6f1;
@@ -51,6 +52,7 @@
   --wings-admin-canvas: #f7f7f5;
   --wings-admin-ink: #1f1f1d;
   --wings-admin-muted: #6f6a64;
+  --wings-admin-muted-strong: #59534e;
   --wings-admin-negative: #e94e4e;
   --wings-admin-panel: #ffffff;
   --wings-admin-panel-strong: #fff6f1;
@@ -88,6 +90,7 @@
   --wings-admin-canvas: #eef2f7;
   --wings-admin-ink: #263942;
   --wings-admin-muted: #7a858c;
+  --wings-admin-muted-strong: #526169;
   --wings-admin-negative: #d9534f;
   --wings-admin-panel: #ffffff;
   --wings-admin-panel-strong: #f6f9fb;
@@ -1160,7 +1163,7 @@
   .wings-dashboard__columns span,
   .wings-dashboard__metrics span,
   .wings-dashboard__metrics small {
-    color: var(--wings-admin-muted);
+    color: var(--wings-admin-muted-strong);
   }
 
   .wings-dashboard__site-list span {
@@ -1176,6 +1179,6 @@
   }
 
   .before-dashboard__heading p {
-    color: var(--wings-admin-muted);
+    color: var(--wings-admin-muted-strong);
   }
 }

@@ -1,9 +1,9 @@
 @import '@payloadcms/ui/scss';
 
 .wings-dashboard {
-  --wings-surface: color-mix(in srgb, var(--theme-elevation-0) 92%, #f5faf8);
-  --wings-line: color-mix(in srgb, var(--theme-elevation-150) 70%, #0f766e);
-  --wings-accent: #0f766e;
+  --wings-surface: var(--wings-admin-panel);
+  --wings-line: var(--wings-admin-border);
+  --wings-accent: var(--wings-admin-accent);
   --wings-warning: #b7791f;
 
   background: var(--wings-surface);
@@ -12,6 +12,7 @@
   display: grid;
   gap: base(1.15);
   padding: base(1.15);
+  color: var(--wings-admin-text);
 
   &__header {
     align-items: flex-start;
@@ -26,6 +27,7 @@
     }
 
     p {
+      color: var(--wings-admin-text);
       margin: 0;
       max-width: 72ch;
     }
@@ -40,19 +42,20 @@
   }
 
   &__role {
-    background: var(--theme-elevation-0);
+    background: var(--wings-admin-panel);
     border: 1px solid var(--wings-line);
     border-radius: 6px;
     min-width: 150px;
     padding: base(0.5);
 
     span {
-      color: var(--theme-elevation-500);
+      color: var(--wings-admin-muted-strong);
       display: block;
       font-size: 0.75rem;
     }
 
     strong {
+      color: var(--wings-admin-text);
       display: block;
       margin-top: base(0.125);
     }
@@ -64,10 +67,10 @@
     gap: base(0.35);
 
     span {
-      background: var(--theme-elevation-0);
+      background: var(--wings-admin-panel);
       border: 1px solid var(--wings-line);
       border-radius: 999px;
-      color: var(--theme-elevation-600);
+      color: var(--wings-admin-text);
       padding: base(0.2) base(0.45);
     }
   }
@@ -79,8 +82,8 @@
   }
 
   &__section {
-    background: var(--theme-elevation-0);
-    border: 1px solid var(--theme-elevation-100);
+    background: var(--wings-admin-panel);
+    border: 1px solid var(--wings-admin-border);
     border-radius: 6px;
     padding: base(0.75);
 
@@ -90,10 +93,13 @@
   }
 
   &__state {
-    color: var(--theme-elevation-550);
+    color: var(--wings-admin-muted-strong);
     margin: base(0.25) 0 0;
 
     button {
+      background: var(--wings-admin-panel);
+      border: 1px solid var(--wings-admin-border);
+      color: var(--wings-admin-text);
       cursor: pointer;
       margin-top: base(0.35);
       min-height: 44px;
@@ -107,10 +113,10 @@
     gap: base(0.35);
 
     span {
-      background: color-mix(in srgb, var(--theme-elevation-100) 82%, #0f766e);
-      border: 1px solid var(--theme-elevation-150);
+      background: var(--wings-admin-accent-soft);
+      border: 1px solid var(--wings-admin-border);
       border-radius: 999px;
-      color: var(--theme-text);
+      color: var(--wings-admin-text);
       padding: base(0.2) base(0.45);
     }
   }
@@ -121,8 +127,8 @@
 
     a {
       align-items: center;
-      border-bottom: 1px solid var(--theme-elevation-100);
-      color: var(--theme-text);
+      border-bottom: 1px solid var(--wings-admin-border);
+      color: var(--wings-admin-text);
       display: flex;
       justify-content: space-between;
       padding: base(0.28) 0;
@@ -150,10 +156,10 @@
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 
     a {
-      background: var(--theme-elevation-0);
-      border: 1px solid var(--theme-elevation-150);
+      background: var(--wings-admin-panel-strong);
+      border: 1px solid var(--wings-admin-border);
       border-radius: 6px;
-      color: var(--theme-text);
+      color: var(--wings-admin-text);
       display: grid;
       min-height: 92px;
       padding: base(0.6);
@@ -165,23 +171,26 @@
     }
 
     span {
-      color: var(--theme-elevation-550);
+      color: var(--wings-admin-muted-strong);
       font-size: 0.85rem;
     }
 
     strong {
       align-self: end;
-      color: var(--theme-text);
+      color: var(--wings-admin-text);
       font-size: 2rem;
       line-height: 1;
     }
 
     small {
-      color: var(--theme-elevation-550);
+      color: var(--wings-admin-muted-strong);
       margin-top: base(0.2);
     }
 
     article > button {
+      background: var(--wings-admin-panel);
+      border: 1px solid var(--wings-admin-border);
+      color: var(--wings-admin-text);
       cursor: pointer;
       margin-top: base(0.25);
       min-height: 44px;
@@ -198,9 +207,13 @@
       margin: 0 0 base(0.4);
     }
 
+    a {
+      color: var(--wings-admin-text);
+    }
+
     > div {
-      background: var(--theme-elevation-0);
-      border: 1px solid var(--theme-elevation-100);
+      background: var(--wings-admin-panel);
+      border: 1px solid var(--wings-admin-border);
       border-radius: 6px;
       padding: base(0.75);
     }
@@ -214,14 +227,14 @@
     }
 
     li {
-      border-bottom: 1px solid var(--theme-elevation-100);
+      border-bottom: 1px solid var(--wings-admin-border);
       display: grid;
       gap: base(0.1);
       padding-bottom: base(0.35);
     }
 
     span {
-      color: var(--theme-elevation-500);
+      color: var(--wings-admin-muted-strong);
       font-size: 0.8rem;
     }
   }
@@ -232,10 +245,10 @@
     gap: base(0.4);
 
     a {
-      background: var(--theme-elevation-0);
-      border: 1px solid var(--theme-elevation-150);
+      background: var(--wings-admin-panel-strong);
+      border: 1px solid var(--wings-admin-border);
       border-radius: 6px;
-      color: var(--theme-text);
+      color: var(--wings-admin-text);
       padding: base(0.35) base(0.55);
       text-decoration: none;
 

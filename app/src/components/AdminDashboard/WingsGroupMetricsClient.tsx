@@ -311,7 +311,7 @@ export function WingsGroupMetricsClient({
         </div>
       </div>
 
-      <div className={`${baseClass}__scope`} aria-label="Phạm vi số liệu">
+      <div className={`${baseClass}__scope`} aria-label="Phạm vi số liệu" role="group">
         <span>Tất cả site được phân quyền</span>
         <span>Tất cả locale</span>
       </div>

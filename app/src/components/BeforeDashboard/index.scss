@@ -1,6 +1,7 @@
 @import '@payloadcms/ui/scss';
 
 .dashboard .before-dashboard {
+  color: var(--wings-admin-text);
   margin-bottom: base(1.5);
 
   &__heading {
@@ -16,6 +17,7 @@
     }
 
     h1 {
+      color: var(--wings-admin-text);
       font-size: 2rem;
       line-height: 1.15;
       margin: 0;
@@ -42,5 +44,20 @@
 
   & a:hover {
     opacity: 0.85;
+  }
+}
+
+.wings-admin-theme-ats .dashboard .before-dashboard {
+  color: #ffffff;
+
+  &__heading {
+    h1,
+    p {
+      color: #ffffff;
+    }
+  }
+
+  &__instructions {
+    color: #ffffff;
   }
 }

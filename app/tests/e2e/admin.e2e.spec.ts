@@ -165,9 +165,7 @@ test.describe('Admin Panel', () => {
   test('can open operator console', async () => {
     await page.goto(`${e2eBaseURL}/admin/console`)
     await expect(page.getByRole('heading', { name: 'Console vận hành' })).toBeVisible()
-    await expect(
-      page.getByRole('link', { name: 'Tạo trang nháp', exact: true }),
-    ).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Tạo trang nháp', exact: true })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Xem tổng lead' })).toBeVisible()
     await expect(page.getByText('Phạm vi: Tất cả site được phân quyền')).toBeVisible()
     await expect(page.getByText('Locale nội dung: Tất cả locale')).toBeVisible()
@@ -507,9 +505,17 @@ test.describe('Admin Panel', () => {
             : page.locator('.cms-console__quick-actions > a, .cms-console__link-list > a')
 
         for (const target of await operationalTargets.all()) {
-          const box = await target.boundingBox()
-          expect(box?.height).toBeGreaterThanOrEqual(44)
-          expect(box?.width).toBeGreaterThanOrEqual(44)
+          const label = (await target.innerText()).trim()
+          await expect
+            .poll(async () => (await target.boundingBox())?.height ?? 0, {
+              message: `${route} ${width}px ${label} height`,
+            })
+            .toBeGreaterThanOrEqual(44)
+          await expect
+            .poll(async () => (await target.boundingBox())?.width ?? 0, {
+              message: `${route} ${width}px ${label} width`,
+            })
+            .toBeGreaterThanOrEqual(44)
         }
       }
 
