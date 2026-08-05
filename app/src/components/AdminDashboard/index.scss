@@ -58,6 +58,20 @@
     }
   }
 
+  &__scope {
+    display: flex;
+    flex-wrap: wrap;
+    gap: base(0.35);
+
+    span {
+      background: var(--theme-elevation-0);
+      border: 1px solid var(--wings-line);
+      border-radius: 999px;
+      color: var(--theme-elevation-600);
+      padding: base(0.2) base(0.45);
+    }
+  }
+
   &__operations {
     display: grid;
     gap: base(0.75);
@@ -73,6 +87,11 @@
     h3 {
       margin: 0 0 base(0.35);
     }
+  }
+
+  &__state {
+    color: var(--theme-elevation-550);
+    margin: base(0.25) 0 0;
   }
 
   &__site-list {
@@ -148,6 +167,11 @@
       color: var(--theme-text);
       font-size: 2rem;
       line-height: 1;
+    }
+
+    small {
+      color: var(--theme-elevation-550);
+      margin-top: base(0.2);
     }
   }
 
