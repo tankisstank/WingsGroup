@@ -968,7 +968,7 @@
   }
 
   .cms-console__quick-actions a,
-  .cms-console__metrics a,
+  .cms-console__metrics article,
   .cms-console__tasks a,
   .cms-console__link-list a,
   .wings-dashboard__metrics a,
@@ -1034,7 +1034,7 @@
   }
 
   .cms-console__quick-actions a,
-  .cms-console__metrics a,
+  .cms-console__metrics article,
   .cms-console__tasks a,
   .cms-console__link-list a,
   .wings-dashboard__metrics a,
@@ -1047,7 +1047,7 @@
     border-radius: var(--wings-admin-radius-md);
     background: var(--wings-admin-panel-strong);
     color: var(--wings-admin-text);
-    min-height: 38px;
+    min-height: 44px;
   }
 
   .cms-console__primary-action,
@@ -1059,7 +1059,7 @@
     color: #fff !important;
   }
 
-  .cms-console__metrics a,
+  .cms-console__metrics article,
   .wings-dashboard__metrics a {
     min-height: 78px;
   }
@@ -1068,5 +1068,114 @@
   .theme-manager__field-group-head {
     background: var(--wings-admin-sidebar);
     color: var(--wings-admin-active-text);
+  }
+}
+
+.wings-admin-theme-finexy,
+.wings-admin-theme-ats {
+  .cms-console {
+    color: var(--wings-admin-text);
+  }
+
+  .cms-console h1,
+  .cms-console h2,
+  .cms-console h3,
+  .cms-console__recent a,
+  .cms-console__metrics strong {
+    color: var(--wings-admin-text);
+  }
+
+  .cms-console__header p,
+  .cms-console__header span,
+  .cms-console__scope span,
+  .cms-console__scope small,
+  .cms-console__today p,
+  .cms-console__panel p,
+  .cms-console__recent span,
+  .cms-console__request-message p,
+  .cms-console__metrics small,
+  .cms-console__metrics article > a {
+    color: var(--wings-admin-muted);
+  }
+
+  .cms-console__metrics article > a {
+    background: transparent;
+    border: 0;
+  }
+
+  .cms-console__scope,
+  .cms-console__role,
+  .cms-console__admin-home {
+    background: var(--wings-admin-panel);
+    border-color: var(--wings-admin-border);
+  }
+
+  .cms-console__role span {
+    color: var(--wings-admin-muted);
+  }
+
+  .cms-console__role strong,
+  .cms-console__admin-home {
+    color: var(--wings-admin-text);
+  }
+
+  .cms-console__breadcrumbs a,
+  .cms-console__breadcrumbs a:hover {
+    color: var(--wings-admin-focus-ring);
+  }
+
+  .cms-console__primary-action,
+  .wings-dashboard__actions a:first-child {
+    background: #a63f1d !important;
+    border-color: #a63f1d !important;
+    color: #ffffff !important;
+  }
+
+  .cms-console__site-list span {
+    color: var(--wings-admin-text);
+  }
+
+  .wings-dashboard {
+    color: var(--wings-admin-text);
+  }
+
+  .wings-dashboard h2,
+  .wings-dashboard h3,
+  .wings-dashboard__role strong,
+  .wings-dashboard__columns a {
+    color: var(--wings-admin-text);
+  }
+
+  .wings-dashboard__role,
+  .wings-dashboard__section,
+  .wings-dashboard__columns > div,
+  .wings-dashboard__scope span {
+    background: var(--wings-admin-panel);
+    border-color: var(--wings-admin-border);
+    color: var(--wings-admin-text);
+  }
+
+  .wings-dashboard__role span,
+  .wings-dashboard__state,
+  .wings-dashboard__columns span,
+  .wings-dashboard__metrics span,
+  .wings-dashboard__metrics small {
+    color: var(--wings-admin-muted);
+  }
+
+  .wings-dashboard__site-list span {
+    background: var(--wings-admin-accent-soft);
+    border-color: var(--wings-admin-border);
+    color: var(--wings-admin-text);
+  }
+
+  .wings-dashboard__actions a {
+    align-items: center;
+    display: inline-flex;
+    min-height: 44px;
+  }
+
+  .before-dashboard__heading p {
+    color: var(--wings-admin-muted);
   }
 }
