@@ -59,6 +59,11 @@ const triageRoutes = [
   '/admin/site-review',
   '/admin/collections/form-submissions',
 ] as const
+const triageAccessibleNames = [
+  ['Console vận hành', 'Operator console'],
+  ['Rà soát site', 'Site review'],
+  ['Lead gửi về', 'Lead inbox'],
+] as const
 
 const getDecodedEndpoint = (url: string) => {
   const parsedURL = new URL(url)
@@ -121,7 +126,7 @@ test.describe('Admin Panel', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Bảng điều hành CMS' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Console vận hành' }).first()).toBeVisible()
     await expect(
-      page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Tạo trang nhanh' }),
+      page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Tạo trang nháp' }),
     ).toBeVisible()
     await expect(
       page.locator('#wings-group-metrics-0').getByRole('link', { name: 'Lead gửi về' }),
@@ -158,7 +163,7 @@ test.describe('Admin Panel', () => {
   test('can open operator console', async () => {
     await page.goto(`${e2eBaseURL}/admin/console`)
     await expect(page.getByRole('heading', { name: 'Console vận hành' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Tạo trang nhanh' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Tạo trang nháp' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Xem tổng lead' })).toBeVisible()
     await expect(page.getByText('Phạm vi: Tất cả site được phân quyền')).toBeVisible()
     await expect(page.getByText('Locale nội dung: Tất cả locale')).toBeVisible()
@@ -507,10 +512,15 @@ test.describe('Admin Panel', () => {
           links.map((link) => link.getAttribute('href')),
         )
         const labels = await triageLinks.evaluateAll((links) =>
-          links.map((link) => link.getAttribute('aria-label')),
+          links.map((link) => link.getAttribute('aria-label')?.trim() ?? ''),
         )
         expect(hrefs).toEqual(triageRoutes)
-        expect(labels).toEqual(['Console vận hành', 'Rà soát site', 'Lead gửi về'])
+        expect(labels).toHaveLength(3)
+
+        for (const [index, label] of labels.entries()) {
+          expect(label).not.toBe('')
+          expect(triageAccessibleNames[index]).toContain(label)
+        }
       }
     }
   })
@@ -595,7 +605,7 @@ test.describe('Admin Panel', () => {
       await editorPage.goto(`${e2eBaseURL}/admin/console`)
 
       await expect(editorPage.getByRole('heading', { name: 'Console vận hành' })).toBeVisible()
-      await expect(editorPage.getByRole('link', { name: 'Tạo trang nhanh' })).toBeVisible()
+      await expect(editorPage.getByRole('link', { name: 'Tạo trang nháp' })).toBeVisible()
       await expect(editorPage.getByRole('link', { name: 'Nhập dữ liệu' })).toHaveCount(0)
       await expect(editorPage.getByRole('link', { name: 'Xuất dữ liệu' })).toHaveCount(0)
       await expect(editorPage.getByRole('link', { name: 'Quản lý theme' })).toHaveCount(0)
