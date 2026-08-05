@@ -70,7 +70,9 @@ test.describe('Admin Panel', () => {
     await page.goto(`${e2eBaseURL}/admin/console`)
     await expect(page.getByRole('heading', { name: 'Console vận hành' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Tạo trang nhanh' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Xem lead mới' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Xem tổng lead' })).toBeVisible()
+    await expect(page.getByText('Phạm vi: Tất cả site được phân quyền')).toBeVisible()
+    await expect(page.getByText('Locale nội dung: Tất cả locale')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Nâng cao' })).toBeVisible()
   })
 

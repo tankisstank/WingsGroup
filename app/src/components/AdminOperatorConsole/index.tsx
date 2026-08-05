@@ -273,7 +273,11 @@ export default function AdminOperatorConsole() {
               {result?.state === 'ready' ? <strong>{result.value}</strong> : <strong>—</strong>}
               {result?.state === 'error' ? (
                 <small>Không thể tải dữ liệu.</small>
-              ) : result?.state === 'no-access' ? <small>Không có quyền xem</small> : <small>Chưa có dữ liệu</small>}
+              ) : result?.state === 'no-access' ? (
+                <small>Không có quyền xem</small>
+              ) : result ? null : (
+                <small>Đang tải dữ liệu</small>
+              )}
             </Link>
             )
           })}
