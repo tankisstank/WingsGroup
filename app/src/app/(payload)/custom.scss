@@ -102,7 +102,7 @@ body.wings-admin-shell {
   line-height: 1.5;
 }
 
-body.wings-admin-shell :where(button, input, select, textarea) {
+body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(button, input, select, textarea) {
   font-family: inherit;
 }
 
@@ -382,31 +382,31 @@ body.wings-admin-shell :where(.panel, .notice, .context, .metric) {
   border-radius: var(--wings-admin-radius-md);
 }
 
-body.wings-admin-shell :where(.btn, .button, button) {
+body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(.btn, .button, button) {
   border-radius: var(--wings-admin-radius-sm);
   line-height: 1.2;
 }
 
-body.wings-admin-shell :where(.btn--style-primary, .button--style-primary, .form-submit button[type='submit'], button[type='submit']) {
+body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(.btn--style-primary, .button--style-primary, .form-submit button[type='submit'], button[type='submit']) {
   background: var(--wings-admin-action);
   border-color: var(--wings-admin-action);
   color: #ffffff;
   font-weight: 700;
 }
 
-body.wings-admin-shell :where(.btn--style-primary, .button--style-primary, .form-submit button[type='submit'], button[type='submit']):hover {
+body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(.btn--style-primary, .button--style-primary, .form-submit button[type='submit'], button[type='submit']):hover {
   background: color-mix(in srgb, var(--wings-admin-action) 86%, #000000);
   border-color: color-mix(in srgb, var(--wings-admin-action) 86%, #000000);
   color: #ffffff;
 }
 
-body.wings-admin-shell :where(.btn--style-secondary, .button--style-secondary, .btn--style-default, .button--style-default) {
+body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(.btn--style-secondary, .button--style-secondary, .btn--style-default, .button--style-default) {
   background: var(--wings-admin-panel);
   border-color: var(--wings-admin-border);
   color: var(--wings-admin-text);
 }
 
-body.wings-admin-shell :where(.btn--style-secondary, .button--style-secondary, .btn--style-default, .button--style-default):hover {
+body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(.btn--style-secondary, .button--style-secondary, .btn--style-default, .button--style-default):hover {
   border-color: var(--wings-admin-accent);
   color: var(--wings-admin-accent);
 }
@@ -418,13 +418,13 @@ body.wings-admin-shell :where(.cms-console__primary-action, .wings-dashboard__ac
 }
 
 /* Native forms and Payload field controls */
-body.wings-admin-shell :where(.field-type__label, .field-label, .label, .field-type label) {
+body.wings-admin-shell :where(.template-default__wrap, .login) :where(.field-type__label, .field-label, .label, .field-type label) {
   color: var(--wings-admin-ink);
   font-size: 0.8rem;
   font-weight: 650;
 }
 
-body.wings-admin-shell :where(.field-type input:not([type='checkbox']):not([type='radio']), .field-type select, .field-type textarea, .field-type .react-select__control, .login input, .login select, .login textarea, .search-filter input, .search-filter select) {
+body.wings-admin-shell :where(.template-default__wrap, .login) :where(.field-type input:not([type='checkbox']):not([type='radio']), .field-type select, .field-type textarea, .field-type .react-select__control, .search-filter input, .search-filter select) {
   background: var(--wings-admin-panel);
   border: 1px solid var(--wings-admin-border);
   border-radius: 5px;
@@ -434,12 +434,12 @@ body.wings-admin-shell :where(.field-type input:not([type='checkbox']):not([type
   padding: 8px 10px;
 }
 
-body.wings-admin-shell :where(.field-type textarea, .login textarea) {
+body.wings-admin-shell :where(.template-default__wrap, .login) :where(.field-type textarea, textarea) {
   min-height: 92px;
   resize: vertical;
 }
 
-body.wings-admin-shell :where(.field-type input[type='checkbox'], .field-type input[type='radio'], input[type='checkbox'], input[type='radio']) {
+body.wings-admin-shell :where(.template-default__wrap, .login) :where(.field-type input[type='checkbox'], .field-type input[type='radio'], input[type='checkbox'], input[type='radio']) {
   accent-color: var(--wings-admin-accent);
 }
 
@@ -448,16 +448,16 @@ body.wings-admin-shell :where(.field-type .description, .field-type__description
   font-size: 0.76rem;
 }
 
-body.wings-admin-shell :where(input[aria-invalid='true'], select[aria-invalid='true'], textarea[aria-invalid='true'], .error input, .error select, .error textarea) {
+body.wings-admin-shell :where(.template-default__wrap, .login) :where(input[aria-invalid='true'], select[aria-invalid='true'], textarea[aria-invalid='true'], .error input, .error select, .error textarea) {
   border-color: var(--wings-admin-negative);
   box-shadow: 0 0 0 1px var(--wings-admin-negative);
 }
 
-body.wings-admin-shell :where(.react-select__control, .rs__control) {
+body.wings-admin-shell :where(.template-default__wrap, .login) :where(.react-select__control, .rs__control) {
   min-height: 38px;
 }
 
-body.wings-admin-shell :where(.react-select__menu, .rs__menu, .select-element__menu) {
+body.wings-admin-shell :where(.template-default__wrap, .login) :where(.react-select__menu, .rs__menu, .select-element__menu) {
   background: var(--wings-admin-panel);
   border: 1px solid var(--wings-admin-border);
   border-radius: 5px;
@@ -1299,175 +1299,20 @@ body.wings-admin-shell .login .wings-admin-logo {
   }
 }
 
-@media (min-width: 1051px), (max-width: 680px) {
+/* Theme-specific rules must preserve the shared prototype shell geometry. */
+@media (min-width: 1051px) {
   .wings-admin-theme-finexy,
   .wings-admin-theme-ats {
-    .nav:not(.nav--nav-open) {
-      background: var(--wings-admin-sidebar);
-      border-right: 1px solid var(--wings-admin-sidebar-border);
-      opacity: 1 !important;
-      position: fixed;
-      z-index: 30;
-      width: 68px;
-
-      .nav__scroll {
-        align-items: center;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        padding-inline: 8px;
-        padding-top: 78px;
-      }
-
-      .wings-admin-nav-intro {
-        border-bottom: 0;
-        gap: 8px;
-        margin: 0;
-        padding: 0;
-        width: 48px;
-
-        &__head {
-          align-items: center;
-          display: flex;
-          height: 44px;
-          justify-content: center;
-          padding: 0;
-          width: 44px;
-        }
-
-        &__head span,
-        &__head strong,
-        a > span:not(.wings-admin-nav-intro__icon) {
-          clip: rect(0 0 0 0);
-          border: 0;
-          height: 1px;
-          margin: -1px;
-          overflow: hidden;
-          padding: 0;
-          position: absolute;
-          white-space: nowrap;
-          width: 1px;
-        }
-
-        &__head::before {
-          align-items: center;
-          background: var(--wings-admin-accent);
-          border-radius: var(--wings-admin-radius-sm);
-          color: #ffffff;
-          content: 'WG';
-          display: inline-flex;
-          font-size: 0.68rem;
-          font-weight: 900;
-          height: 32px;
-          justify-content: center;
-          letter-spacing: -0.04em;
-          width: 32px;
-        }
-
-        &__links {
-          gap: 8px;
-          place-items: center;
-        }
-
-        a {
-          border-radius: var(--wings-admin-radius-sm);
-          height: 44px;
-          justify-content: center;
-          min-height: 44px;
-          padding: 0;
-          width: 44px;
-        }
-
-        .wings-admin-nav-intro__icon {
-          flex-basis: 30px;
-          height: 30px;
-          width: 30px;
-
-          svg {
-            height: 17px;
-            width: 17px;
-          }
-        }
-      }
-
-      .nav__wrap {
-        margin-top: 8px;
-        width: 48px;
-      }
-
-      .nav-group__toggle,
-      .nav button[aria-expanded] {
-        height: 44px;
-        justify-content: center;
-        min-height: 44px;
-        padding: 0;
-        width: 44px;
-      }
-
-      .nav-group__toggle::before,
-      .nav button[aria-expanded]::before {
-        align-items: center;
-        background: color-mix(in srgb, var(--wings-admin-sidebar-heading) 12%, transparent);
-        border: 1px solid var(--wings-admin-sidebar-border);
-        border-radius: var(--wings-admin-radius-sm);
-        color: var(--wings-admin-sidebar-text);
-        content: '••';
-        display: inline-flex;
-        font-size: 0.8rem;
-        font-weight: 600;
-        height: 34px;
-        justify-content: center;
-        letter-spacing: 0.01em;
-        width: 34px;
-      }
-
-      [id='nav-group-Advanced'] > .nav-group__toggle::before {
-        content: 'AD';
-      }
-
-      [id='nav-group-Site settings'] > .nav-group__toggle::before {
-        content: 'ST';
-      }
-
-      [id='nav-group-Content'] > .nav-group__toggle::before {
-        content: 'CT';
-      }
-
-      [id='nav-group-Media'] > .nav-group__toggle::before {
-        content: 'MD';
-      }
-
-      [id='nav-group-Leads'] > .nav-group__toggle::before {
-        content: 'LD';
-      }
-
-      [id='nav-group-Data'] > .nav-group__toggle::before {
-        content: 'DT';
-      }
-
-      [id='nav-group-Nâng cao'] > .nav-group__toggle::before {
-        content: 'NC';
-      }
-
-      .nav-group__label,
-      .nav__label,
-      .nav__group-label,
-      .nav-group__content,
-      .nav__group-content {
-        display: none;
-      }
-
-      .nav-group__indicator {
-        display: none;
-      }
+    .nav {
+      width: 258px;
     }
 
-    .nav:not(.nav--nav-open) + .template-default__wrap {
+    .template-default__wrap {
       box-sizing: border-box;
-      margin-left: 68px;
-      max-width: calc(100vw - 68px);
-      min-width: calc(100vw - 68px);
-      width: calc(100vw - 68px);
+      margin-left: 258px;
+      max-width: calc(100vw - 258px);
+      min-width: calc(100vw - 258px);
+      width: calc(100vw - 258px);
     }
   }
 }
@@ -1475,13 +1320,8 @@ body.wings-admin-shell .login .wings-admin-logo {
 @media (min-width: 681px) and (max-width: 1050px) {
   .wings-admin-theme-finexy,
   .wings-admin-theme-ats {
-    .nav:not(.nav--nav-open) {
-      background: var(--wings-admin-sidebar);
-      border-right: 1px solid var(--wings-admin-sidebar-border);
-      opacity: 1 !important;
-      position: fixed;
+    .nav {
       width: 224px;
-      z-index: 30;
 
       .nav__scroll {
         align-items: stretch;
@@ -1513,7 +1353,7 @@ body.wings-admin-shell .login .wings-admin-logo {
       }
     }
 
-    .nav:not(.nav--nav-open) + .template-default__wrap {
+    .template-default__wrap {
       box-sizing: border-box;
       margin-left: 224px;
       max-width: calc(100vw - 224px);
@@ -1548,15 +1388,73 @@ body.wings-admin-shell .login .wings-admin-logo {
 @media (max-width: 680px) {
   .wings-admin-theme-finexy,
   .wings-admin-theme-ats {
-    .nav .nav__wrap {
-      display: none;
+    .nav {
+      box-sizing: border-box;
+      height: 64px;
+      width: 100%;
+
+      .nav__scroll {
+        align-items: stretch;
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+        overflow-x: auto;
+        padding: 8px;
+      }
+
+      .wings-admin-nav-intro {
+        align-items: stretch;
+        border: 0;
+        display: flex;
+        flex: 1 1 auto;
+        margin: 0;
+        min-width: 0;
+        padding: 0;
+
+        &__head {
+          display: none;
+        }
+
+        &__links {
+          display: flex;
+          flex: 1 1 auto;
+          gap: 4px;
+          min-width: 0;
+        }
+
+        a {
+          align-items: center;
+          flex: 1 1 0;
+          justify-content: center;
+          min-height: 48px;
+          min-width: 0;
+          padding: 8px 10px;
+          width: auto;
+        }
+
+        a > span:not(.wings-admin-nav-intro__icon) {
+          clip: auto;
+          height: auto;
+          margin: 0;
+          overflow: visible;
+          position: static;
+          white-space: nowrap;
+          width: auto;
+        }
+      }
+
+      .nav__wrap {
+        display: none;
+      }
     }
 
-    .nav:not(.nav--nav-open) {
-      .wings-admin-nav-intro a {
-        min-height: 44px;
-        width: 44px;
-      }
+    .template-default__wrap {
+      box-sizing: border-box;
+      margin-left: 0;
+      max-width: 100%;
+      min-width: 0;
+      padding-top: 64px;
+      width: 100%;
     }
   }
 }
@@ -1677,10 +1575,6 @@ body.wings-admin-shell .login .wings-admin-logo {
       var(--wings-admin-bg);
   }
 
-  .cms-console__header,
-  .cms-console__today,
-  .cms-console__workspace,
-  .cms-console__recent,
   .cms-console__advanced,
   .wings-dashboard,
   .theme-manager__panel,
@@ -1743,10 +1637,6 @@ body.wings-admin-shell .login .wings-admin-logo {
     max-width: 1260px;
   }
 
-  .cms-console__header,
-  .cms-console__today,
-  .cms-console__workspace,
-  .cms-console__recent,
   .cms-console__advanced,
   .wings-dashboard,
   .theme-manager__panel,
