@@ -10,6 +10,7 @@ const e2eBaseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3100'
 const e2ePort = new URL(e2eBaseURL).port || '3100'
 const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === 'true'
 const disableWebServer = process.env.PLAYWRIGHT_DISABLE_WEB_SERVER === 'true'
+const chromiumExecutablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
 const productionLikeHosts = [
   'wingsgroup.vn',
   'www.wingsgroup.vn',
@@ -49,9 +50,10 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        channel: 'chromium',
+        ...(chromiumExecutablePath ? {} : { channel: 'chromium' }),
         launchOptions: {
           args: [`--host-resolver-rules=${hostResolverRules}`],
+          ...(chromiumExecutablePath ? { executablePath: chromiumExecutablePath } : {}),
         },
       },
     },
