@@ -249,7 +249,7 @@ test.describe('Phase 1 public frontend smoke', () => {
   test.beforeAll(async () => {
     if (process.env.PLAYWRIGHT_SKIP_PHASE1_SEED === 'true') return
 
-    await seedPhase1LaunchSmoke()
+    await seedPhase1LaunchSmoke({ destroyPayloadAfterSeed: false })
   })
 
   for (const route of phase1Routes) {

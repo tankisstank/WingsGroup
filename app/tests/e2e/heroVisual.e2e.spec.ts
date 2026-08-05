@@ -32,7 +32,7 @@ test.describe('Hero visual regression', () => {
   test.beforeAll(async () => {
     if (process.env.PLAYWRIGHT_SKIP_PHASE1_SEED === 'true') return
 
-    await seedPhase1LaunchSmoke()
+    await seedPhase1LaunchSmoke({ destroyPayloadAfterSeed: false })
   })
 
   for (const target of [

@@ -157,6 +157,10 @@ const productionDomainBySite = {
   'wing-side': 'wingside.vn',
 } as const
 
+type SeedPayloadLifecycleOptions = {
+  destroyPayloadAfterSeed?: boolean
+}
+
 async function ensureSiteThemeMetadata({
   payload,
   presetIDs,
@@ -619,17 +623,23 @@ async function getAdminRequestContext() {
   return { payload, req }
 }
 
-export async function seedHeroPresentationSmoke(): Promise<Record<HeroPresentationKey, number>> {
+export async function seedHeroPresentationSmoke({
+  destroyPayloadAfterSeed = false,
+}: SeedPayloadLifecycleOptions = {}): Promise<Record<HeroPresentationKey, number>> {
   const { payload, req } = await getAdminRequestContext()
 
   try {
     return await ensureHeroPresentationFixtures({ payload, req })
   } finally {
-    await payload.destroy()
+    if (destroyPayloadAfterSeed) {
+      await payload.destroy()
+    }
   }
 }
 
-export async function seedPhase1LaunchSmoke(): Promise<void> {
+export async function seedPhase1LaunchSmoke({
+  destroyPayloadAfterSeed = false,
+}: SeedPayloadLifecycleOptions = {}): Promise<void> {
   const { payload, req } = await getAdminRequestContext()
   try {
     const requiredSiteCodes = ['wings-go', 'wing-side', 'wings-plus', 'wings-care', 'wings-pass']
@@ -674,6 +684,8 @@ export async function seedPhase1LaunchSmoke(): Promise<void> {
     await ensureNavigationCorrections({ payload, req })
     await ensureHeroPresentationFixtures({ payload, req })
   } finally {
-    await payload.destroy()
+    if (destroyPayloadAfterSeed) {
+      await payload.destroy()
+    }
   }
 }
