@@ -38,6 +38,9 @@ export const siteField = (): Field => {
     relationTo: 'sites',
     required: true,
     admin: {
+      components: {
+        Cell: '@/components/AdminCells/SiteRelationCell',
+      },
       position: 'sidebar',
     },
     filterOptions: currentUserSiteFilter,

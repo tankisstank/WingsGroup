@@ -7,7 +7,13 @@ import {
   preventEditorPublish,
   usersReadAccess,
 } from '@/access/roles'
-import { enforceSiteAccess, siteManagerScopedAccess, siteScopedAccess } from '@/access/siteScope'
+import {
+  enforceSiteAccess,
+  siteManagerScopedAccess,
+  siteScopedAccess,
+  siteScopedOrPublished,
+} from '@/access/siteScope'
+import { enforceTourProductPublishSite } from '@/collections/Tours/hooks/enforceTourProductPublishSite'
 import type { AppUser } from '@/types/auth'
 import { describe, expect, it } from 'vitest'
 
@@ -86,6 +92,31 @@ describe('site-scoped editorial access', () => {
         in: [10],
       },
     })
+  })
+
+  it('fails closed for anonymous published reads when the site relation is missing', () => {
+    expect(siteScopedOrPublished()(accessArgs())).toEqual({
+      and: [
+        { _status: { equals: 'published' } },
+        { site: { exists: true } },
+      ],
+    })
+  })
+
+  it('blocks every Tour Product publish path without a site', () => {
+    expect(() =>
+      enforceTourProductPublishSite({
+        data: { _status: 'published' },
+        originalDoc: { _status: 'draft' },
+      } as never),
+    ).toThrow('Không thể xuất bản tour khi chưa gán site.')
+
+    expect(
+      enforceTourProductPublishSite({
+        data: { _status: 'published', site: 10 },
+        originalDoc: { _status: 'draft' },
+      } as never),
+    ).toEqual({ _status: 'published', site: 10 })
   })
 
   it('restricts shared site settings to managers within assigned sites', () => {

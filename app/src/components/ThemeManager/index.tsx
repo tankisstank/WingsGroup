@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import AdminThemeBootstrap from '@/components/AdminThemeBootstrap'
 
@@ -136,6 +136,10 @@ type UsageSummary = {
   totalHighImpactPages: number
 }
 
+type FetchResult<T> =
+  | { data: T; state: 'ready' }
+  | { message: string; state: 'no-access' | 'error' | 'unavailable' }
+
 const baseClass = 'theme-manager'
 
 const getOptionLabel = <T extends string>(
@@ -146,13 +150,47 @@ const getOptionLabel = <T extends string>(
 const normalizeColorInputValue = (value: string) =>
   /^#(?:[0-9a-fA-F]{6})$/.test(value) ? value : '#000000'
 
+const knownThemePresetLabels: Record<string, string> = Object.fromEntries(
+  [
+    ...themePresetKeyOptions,
+    { label: 'WingsSide cổ điển (WingsSide Classic)', value: 'wings-side-classic' },
+    { label: 'WingsSide biên tập (WingsSide Editorial)', value: 'wings-side-editorial' },
+    { label: 'WingsSide inbound biên tập v2 (WingsSide Editorial Inbound v2)', value: 'wings-side-editorial-inbound-v2' },
+  ].map((option) => [option.value, option.label]),
+)
+
+const heroVariantLabels: Record<string, string> = {
+  planner: 'Lập hành trình (Planner)',
+  'retail-departures': 'Lịch khởi hành bán lẻ (Retail departures)',
+  standard: 'Tiêu chuẩn (Standard)',
+  utility: 'Tiện ích (Utility)',
+}
+
+const displayThemePreset = (preset?: Pick<ThemePresetDoc, 'id' | 'key' | 'name'>) => {
+  const key = preset?.key || preset?.name?.toLowerCase()
+
+  if (key && knownThemePresetLabels[key]) {
+    return knownThemePresetLabels[key]
+  }
+
+  return preset?.name || preset?.key || (preset ? `Preset ${preset.id}` : 'Chưa chọn preset')
+}
+
+const displayHeroPreset = (
+  preset?: Pick<HeroPresentationPresetDoc, 'baseTemplate' | 'id' | 'key' | 'name'>,
+) => {
+  const meta = getHeroPresentationAdminMeta(preset?.baseTemplate)
+
+  return meta?.label || preset?.name || preset?.key || (preset ? `Preset hero ${preset.id}` : 'Chưa chọn')
+}
+
 const getPresetLabel = (value: string, presets: ThemePresetDoc[]) => {
   const preset =
     presets.find((item) => String(item.id) === String(value)) ||
     presets.find((item) => item.key === value)
 
   if (preset) {
-    return preset.name || preset.key || `Preset ${preset.id}`
+    return displayThemePreset(preset)
   }
 
   return getOptionLabel(themePresetKeyOptions, value) || 'Chưa chọn preset'
@@ -179,17 +217,26 @@ const defaultHeroFormState = (heroPresetID = ''): HeroFormState => ({
   variant: 'standard',
 })
 
-const fetchJSON = async <T,>(url: string): Promise<T | null> => {
-  const response = await fetch(url, {
-    credentials: 'include',
-  })
+const fetchJSON = async <T,>(url: string): Promise<FetchResult<T>> => {
+  try {
+    const response = await fetch(url, { credentials: 'include' })
 
-  if (!response.ok) {
-    return null
+    if (response.status === 401 || response.status === 403) {
+      return { message: 'Bạn không có quyền truy cập dữ liệu này.', state: 'no-access' }
+    }
+
+    if (!response.ok) {
+      return { message: `Không tải được dữ liệu (HTTP ${response.status}).`, state: 'error' }
+    }
+
+    return { data: (await response.json()) as T, state: 'ready' }
+  } catch {
+    return { message: 'Không thể kết nối để tải dữ liệu.', state: 'error' }
   }
-
-  return (await response.json()) as T
 }
+
+const resultMessage = (label: string, result: FetchResult<unknown>) =>
+  result.state === 'ready' ? null : `${label}: ${result.message}`
 
 const getUsageSummary = (pages: PageUsageDoc[]): UsageSummary => {
   const highImpactPages = pages.filter((page) => page.hero?.type === 'highImpact')
@@ -203,7 +250,7 @@ const getUsageSummary = (pages: PageUsageDoc[]): UsageSummary => {
     affectedPages: inheritPages.slice(0, 5).map((page) => ({
       id: page.id,
       pathname: page.pathname || '/',
-      title: page.title || `Page ${page.id}`,
+      title: page.title || `Trang ${page.id}`,
     })),
     inheritCount: inheritPages.length,
     legacyCount: legacyPages.length,
@@ -222,11 +269,15 @@ export default function ThemeManagerView() {
   const [form, setForm] = useState<ThemeFormState>(defaultFormState())
   const [heroForm, setHeroForm] = useState<HeroFormState>(defaultHeroFormState())
   const [notice, setNotice] = useState<Notice | null>(null)
+  const [loadIssues, setLoadIssues] = useState<string[]>([])
+  const [siteContextIssues, setSiteContextIssues] = useState<string[]>([])
   const [usageSummary, setUsageSummary] = useState<UsageSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSiteContextLoading, setIsSiteContextLoading] = useState(false)
   const [savingScope, setSavingScope] = useState<SaveScope | null>(null)
   const [savedSignature, setSavedSignature] = useState('')
   const [savedHeroSignature, setSavedHeroSignature] = useState('')
+  const siteContextRequest = useRef(0)
 
   useEffect(() => {
     const load = async () => {
@@ -241,20 +292,33 @@ export default function ThemeManagerView() {
         ),
       ])
 
-      const siteDocs = siteResult?.docs ?? []
-      const presetDocs = presetResult?.docs ?? []
-      const heroPresetDocs = heroPresetResult?.docs ?? []
+      const siteDocs = siteResult.state === 'ready' ? siteResult.data.docs ?? [] : []
+      const presetDocs = presetResult.state === 'ready' ? presetResult.data.docs ?? [] : []
+      const heroPresetDocs =
+        heroPresetResult.state === 'ready' ? heroPresetResult.data.docs ?? [] : []
       const siteID = String(siteDocs[0]?.id ?? '')
 
-      setUser(me?.user)
-      setSites(siteDocs)
-      setPresets(presetDocs)
-      setHeroPresets(heroPresetDocs)
+      // Do not replace a panel's known-good data when an unrelated resource
+      // fails. Each resource remains independently observable and retryable.
+      if (me.state === 'ready') setUser(me.data.user)
+      if (siteResult.state === 'ready') setSites(siteDocs)
+      if (presetResult.state === 'ready') setPresets(presetDocs)
+      if (heroPresetResult.state === 'ready') setHeroPresets(heroPresetDocs)
       setSelectedSiteID((current) => current || siteID)
-      setHeroForm((current) =>
-        current.presentationPreset
-          ? current
-          : defaultHeroFormState(String(heroPresetDocs[0]?.id || '')),
+      if (heroPresetResult.state === 'ready') {
+        setHeroForm((current) =>
+          current.presentationPreset
+            ? current
+            : defaultHeroFormState(String(heroPresetDocs[0]?.id || '')),
+        )
+      }
+      setLoadIssues(
+        [
+          resultMessage('Phiên người dùng', me),
+          resultMessage('Danh sách site', siteResult),
+          resultMessage('Preset giao diện', presetResult),
+          resultMessage('Preset hero', heroPresetResult),
+        ].filter((message): message is string => Boolean(message)),
       )
       setIsLoading(false)
     }
@@ -263,12 +327,20 @@ export default function ThemeManagerView() {
   }, [])
 
   useEffect(() => {
+    const requestID = ++siteContextRequest.current
+    let cancelled = false
+
     const loadSiteContext = async () => {
       if (!selectedSiteID) {
+        setUsageSummary(null)
+        setSelectedSettingsID(null)
         return
       }
 
       setNotice(null)
+      setSiteContextIssues([])
+      setIsSiteContextLoading(true)
+      setUsageSummary(null)
 
       const [settingsResult, pagesResult] = await Promise.all([
         fetchJSON<{ docs?: SiteSettingsDoc[] }>(
@@ -279,7 +351,24 @@ export default function ThemeManagerView() {
         ),
       ])
 
-      const settings = settingsResult?.docs?.[0]
+      if (cancelled || requestID !== siteContextRequest.current) return
+
+      const issues = [
+        resultMessage('Cấu hình site', settingsResult),
+        resultMessage('Phân tích tác động theo trang', pagesResult),
+      ].filter((message): message is string => Boolean(message))
+      setSiteContextIssues(issues)
+
+      if (pagesResult.state === 'ready') {
+        setUsageSummary(getUsageSummary(pagesResult.data.docs ?? []))
+      }
+
+      if (settingsResult.state !== 'ready') {
+        setIsSiteContextLoading(false)
+        return
+      }
+
+      const settings = settingsResult.data.docs?.[0]
       const selectedSiteName =
         sites.find((site) => String(site.id) === selectedSiteID)?.name || 'WingsGroup'
 
@@ -292,7 +381,7 @@ export default function ThemeManagerView() {
         setSavedSignature(JSON.stringify(nextThemeForm))
         setSavedHeroSignature(JSON.stringify(nextHeroForm))
         setSelectedSettingsID(null)
-        setUsageSummary(getUsageSummary(pagesResult?.docs ?? []))
+        setIsSiteContextLoading(false)
         return
       }
 
@@ -351,10 +440,13 @@ export default function ThemeManagerView() {
       setHeroForm(nextHeroForm)
       setSavedSignature(JSON.stringify(nextForm))
       setSavedHeroSignature(JSON.stringify(nextHeroForm))
-      setUsageSummary(getUsageSummary(pagesResult?.docs ?? []))
+      setIsSiteContextLoading(false)
     }
 
     void loadSiteContext()
+    return () => {
+      cancelled = true
+    }
   }, [heroPresets, presets, selectedSiteID, sites])
 
   const selectedSite = useMemo(
@@ -431,6 +523,42 @@ export default function ThemeManagerView() {
     variant: heroForm.variant,
   })
 
+  const hasUnsavedWork = hasUnsavedChanges || hasUnsavedHeroChanges
+
+  useEffect(() => {
+    if (!hasUnsavedWork) return
+
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    const warnBeforeNavigation = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) {
+        return
+      }
+      const anchor = (event.target as HTMLElement | null)?.closest('a[href]')
+      if (anchor && !window.confirm('Bạn có thay đổi chưa lưu. Rời trang và bỏ thay đổi?')) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+    }
+
+    window.addEventListener('beforeunload', warnBeforeUnload)
+    document.addEventListener('click', warnBeforeNavigation, true)
+    return () => {
+      window.removeEventListener('beforeunload', warnBeforeUnload)
+      document.removeEventListener('click', warnBeforeNavigation, true)
+    }
+  }, [hasUnsavedWork])
+
+  const changeSite = (nextSiteID: string) => {
+    if (nextSiteID === selectedSiteID) return
+    if (hasUnsavedWork && !window.confirm('Bạn có thay đổi chưa lưu. Đổi site và bỏ thay đổi?')) {
+      return
+    }
+    setSelectedSiteID(nextSiteID)
+  }
+
   const updateField = (field: keyof ThemeFormState, value: string) => {
     setForm((current) => ({
       ...current,
@@ -453,6 +581,12 @@ export default function ThemeManagerView() {
       })
       return
     }
+
+    const impact =
+      scope === 'hero'
+        ? `Hero mặc định áp dụng theo thứ tự toàn hệ → site ${selectedSite?.name || ''} → page. Chỉ page kế thừa site default mới thay đổi.`
+        : `Giao diện site áp dụng theo thứ tự toàn hệ → site ${selectedSite?.name || ''} → trang. Hãy kiểm tra lại xem trước của các trang liên quan.`
+    if (!window.confirm(`${impact}\n\nBạn muốn lưu thay đổi này?`)) return
 
     setSavingScope(scope)
     setNotice(null)
@@ -573,11 +707,11 @@ export default function ThemeManagerView() {
               <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
                 <Link href="/admin">Bảng điều hành admin</Link>
                 <span aria-hidden="true">/</span>
-                <span>Theme Manager</span>
+                <span>Quản lý giao diện</span>
               </nav>
               <p>WingsGroup CMS</p>
-              <h1>Theme Manager</h1>
-              <span>Đang tải Theme Manager...</span>
+              <h1>Quản lý giao diện</h1>
+              <span>Đang tải cấu hình giao diện...</span>
             </div>
             <div className={`${baseClass}__header-actions`}>
               <Link className={`${baseClass}__admin-home`} href="/admin">
@@ -600,11 +734,11 @@ export default function ThemeManagerView() {
               <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
                 <Link href="/admin">Bảng điều hành admin</Link>
                 <span aria-hidden="true">/</span>
-                <span>Theme Manager</span>
+                <span>Quản lý giao diện</span>
               </nav>
               <p>WingsGroup CMS</p>
-              <h1>Theme Manager</h1>
-              <span>Chỉ super-admin và site-manager mới được chỉnh theme.</span>
+              <h1>Quản lý giao diện</h1>
+              <span>Chỉ quản trị toàn hệ và quản lý site mới được chỉnh giao diện.</span>
             </div>
             <div className={`${baseClass}__header-actions`}>
               <Link className={`${baseClass}__admin-home`} href="/admin">
@@ -627,34 +761,42 @@ export default function ThemeManagerView() {
             <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
               <Link href="/admin">Bảng điều hành admin</Link>
               <span aria-hidden="true">/</span>
-              <span>Theme Manager</span>
+              <span>Quản lý giao diện</span>
             </nav>
             <p>WingsGroup CMS</p>
-            <h1>Theme Manager</h1>
+            <h1>Quản lý giao diện</h1>
             <span>
-              Tách riêng site theme shell và site default hero để editor quyết định nhanh bằng preset
-              preview.
+              Cấu hình giao diện theo thứ tự toàn hệ → site → page. Nội dung và locale của page
+              vẫn được quản lý độc lập trong editor.
             </span>
           </div>
           <div className={`${baseClass}__header-actions`}>
             <Link className={`${baseClass}__admin-home`} href="/admin">
               ← Về admin
             </Link>
-            <Link href="/admin/collections/site-settings">Site settings</Link>
+            <Link href="/admin/collections/site-settings">Cấu hình site</Link>
             <Link href="/admin/console">Quay lại console</Link>
           </div>
         </header>
+
+        {loadIssues.length > 0 ? (
+          <div className={`${baseClass}__message ${baseClass}__message--error`} role="alert">
+            <strong>Một số dữ liệu chưa tải được.</strong>
+            <ul>{loadIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul>
+            <button onClick={() => window.location.reload()} type="button">Tải lại dữ liệu</button>
+          </div>
+        ) : null}
 
         <section className={`${baseClass}__layout`}>
           <div className={`${baseClass}__panel`}>
             <section className={`${baseClass}__field-group`}>
               <div className={`${baseClass}__field-group-head`}>
-                <h2>Site context</h2>
-                {hasUnsavedChanges || hasUnsavedHeroChanges ? <span>Chưa lưu</span> : <span>Đã đồng bộ</span>}
+                <h2>Phạm vi site</h2>
+                {hasUnsavedWork ? <span>Chưa lưu</span> : <span>Đã đồng bộ</span>}
               </div>
               <label>
                 Site
-                <select onChange={(event) => setSelectedSiteID(event.target.value)} value={selectedSiteID}>
+                <select onChange={(event) => changeSite(event.target.value)} value={selectedSiteID}>
                   {sites.map((site) => (
                     <option key={site.id} value={site.id}>
                       {site.name || site.code || `Site ${site.id}`}
@@ -664,24 +806,31 @@ export default function ThemeManagerView() {
               </label>
               <div className={`${baseClass}__usage-grid`}>
                 <article>
-                  <strong>{usageSummary?.inheritCount || 0}</strong>
-                  <span>Page kế thừa hero site</span>
+                  <strong>{usageSummary ? usageSummary.inheritCount : '—'}</strong>
+                  <span>Trang kế thừa hero site</span>
                 </article>
                 <article>
-                  <strong>{usageSummary?.overrideCount || 0}</strong>
-                  <span>Page override riêng</span>
+                  <strong>{usageSummary ? usageSummary.overrideCount : '—'}</strong>
+                  <span>Trang ghi đè riêng</span>
                 </article>
                 <article>
-                  <strong>{usageSummary?.legacyCount || 0}</strong>
-                  <span>Page legacy fallback</span>
+                  <strong>{usageSummary ? usageSummary.legacyCount : '—'}</strong>
+                  <span>Trang dùng phương án tương thích</span>
                 </article>
               </div>
               <div className={`${baseClass}__impact`}>
-                <strong>Tác động khi đổi hero mặc định</strong>
-                <p>
-                  Chỉ {usageSummary?.inheritCount || 0} page đang `inherit` sẽ đổi theo.{' '}
-                  {usageSummary?.overrideCount || 0} page override riêng sẽ không bị ảnh hưởng.
-                </p>
+                <strong>Tác động: toàn hệ → site → page</strong>
+                {isSiteContextLoading ? <p>Đang phân tích tác động theo page...</p> : null}
+                {siteContextIssues.length > 0 ? (
+                  <p role="alert">{siteContextIssues.join(' ')}</p>
+                ) : usageSummary ? (
+                  <p>
+                    Chỉ {usageSummary.inheritCount} trang đang kế thừa sẽ đổi theo.{' '}
+                    {usageSummary.overrideCount} trang ghi đè riêng không bị ảnh hưởng.
+                  </p>
+                ) : (
+                  <p>Chưa có dữ liệu để xác nhận phạm vi tác động.</p>
+                )}
                 {usageSummary?.affectedPages?.length ? (
                   <ul>
                     {usageSummary.affectedPages.map((page) => (
@@ -692,19 +841,19 @@ export default function ThemeManagerView() {
                     ))}
                   </ul>
                 ) : (
-                  <p>Chưa có page high-impact nào đang kế thừa site default hero.</p>
+                  <p>Chưa có trang high-impact nào đang kế thừa hero mặc định của site.</p>
                 )}
               </div>
             </section>
 
             <section className={`${baseClass}__field-group`}>
               <div className={`${baseClass}__field-group-head`}>
-                <h2>Theme shell</h2>
+                <h2>Giao diện site</h2>
                 <span>{hasUnsavedChanges ? 'Chưa lưu' : 'Đã đồng bộ'}</span>
               </div>
               <div className={`${baseClass}__segments`}>
                 <label>
-                  Theme key
+                  Mã giao diện
                   <select onChange={(event) => updateField('themeKey', event.target.value)} value={form.themeKey}>
                     {themeKeyOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -714,12 +863,12 @@ export default function ThemeManagerView() {
                   </select>
                 </label>
                 <label>
-                  Preset
+                  Preset giao diện
                   <select onChange={(event) => updateField('themePreset', event.target.value)} value={form.themePreset}>
                     {presets.length > 0
                       ? presets.map((preset) => (
                           <option key={preset.id} value={preset.id}>
-                            {preset.name || preset.key || `Preset ${preset.id}`}
+                            {displayThemePreset(preset)}
                           </option>
                         ))
                       : themePresetKeyOptions.map((option) => (
@@ -731,19 +880,19 @@ export default function ThemeManagerView() {
                 </label>
               </div>
               <label>
-                Logo text
+                Chữ logo
                 <input onChange={(event) => updateField('logoText', event.target.value)} value={form.logoText} />
               </label>
             </section>
 
             <section className={`${baseClass}__field-group`}>
               <div className={`${baseClass}__field-group-head`}>
-                <h2>Hero presentation</h2>
+                <h2>Trình bày hero</h2>
                 <span>{hasUnsavedHeroChanges ? 'Chưa lưu' : 'Đã đồng bộ'}</span>
               </div>
               <p className={`${baseClass}__hint`}>
-                Site default chỉ điều khiển preset và behavior. Headline, CTA, ảnh, slides và video
-                vẫn được nhập ở từng page.
+                Mặc định của site chỉ điều khiển preset và hành vi. Tiêu đề, CTA, ảnh, slide và
+                video vẫn được nhập ở từng trang.
               </p>
               <div className={`${baseClass}__preset-grid`}>
                 {heroPresets.map((preset) => {
@@ -761,10 +910,10 @@ export default function ThemeManagerView() {
                         className={`${baseClass}__preset-canvas`}
                         data-template={preset.baseTemplate || 'centered-visual'}
                       >
-                        <span>{meta?.visualLabel || preset.baseTemplate || 'Hero preset'}</span>
+                        <span>{meta?.visualLabel || 'Preset hero'}</span>
                       </div>
                       <div className={`${baseClass}__preset-copy`}>
-                        <strong>{preset.name || preset.key || `Hero preset ${preset.id}`}</strong>
+                        <strong>{displayHeroPreset(preset)}</strong>
                         <p>{meta?.description || preset.description || 'Chọn preset để xem chi tiết.'}</p>
                       </div>
                       <div className={`${baseClass}__preset-chips`}>
@@ -783,15 +932,15 @@ export default function ThemeManagerView() {
               </div>
               <div className={`${baseClass}__segments`}>
                 <label>
-                  Business behavior
+                  Hành vi nghiệp vụ
                   <select
                     onChange={(event) => updateHeroField('variant', event.target.value)}
                     value={heroForm.variant}
                   >
-                    <option value="standard">Standard</option>
-                    <option value="retail-departures">Retail departures</option>
-                    <option value="planner">Planner</option>
-                    <option value="utility">Utility</option>
+                    <option value="standard">Tiêu chuẩn</option>
+                    <option value="retail-departures">Lịch khởi hành bán lẻ</option>
+                    <option value="planner">Lập hành trình</option>
+                    <option value="utility">Tiện ích</option>
                   </select>
                 </label>
               </div>
@@ -810,15 +959,15 @@ export default function ThemeManagerView() {
 
             <section className={`${baseClass}__field-group`}>
               <div className={`${baseClass}__field-group-head`}>
-                <h2>Colors</h2>
+                <h2>Màu sắc</h2>
                 <span>{form.backgroundStyle}</span>
               </div>
               <div className={`${baseClass}__swatches`}>
                 {[
-                  ['brandColor', 'Brand'],
-                  ['accentColor', 'Accent'],
-                  ['surfaceColor', 'Surface'],
-                  ['surfaceStrongColor', 'Surface strong'],
+                  ['brandColor', 'Màu thương hiệu'],
+                  ['accentColor', 'Màu nhấn'],
+                  ['surfaceColor', 'Màu bề mặt'],
+                  ['surfaceStrongColor', 'Màu bề mặt đậm'],
                 ].map(([field, label]) => (
                   <label className={`${baseClass}__color-field`} key={field}>
                     {label}
@@ -837,7 +986,7 @@ export default function ThemeManagerView() {
                   </label>
                 ))}
                 <label>
-                  Background
+                  Nền
                   <select
                     onChange={(event) => updateField('backgroundStyle', event.target.value)}
                     value={form.backgroundStyle}
@@ -854,12 +1003,12 @@ export default function ThemeManagerView() {
 
             <section className={`${baseClass}__field-group`}>
               <div className={`${baseClass}__field-group-head`}>
-                <h2>Typography, shape & layout</h2>
+                <h2>Chữ, hình khối và bố cục</h2>
                 <span>{form.layoutStyle}</span>
               </div>
               <div className={`${baseClass}__segments`}>
                 <label>
-                  Radius
+                  Bo góc
                   <select onChange={(event) => updateField('radius', event.target.value)} value={form.radius}>
                     {radiusOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -869,7 +1018,7 @@ export default function ThemeManagerView() {
                   </select>
                 </label>
                 <label>
-                  Spacing
+                  Khoảng cách
                   <select onChange={(event) => updateField('spacingScale', event.target.value)} value={form.spacingScale}>
                     {spacingScaleOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -879,7 +1028,7 @@ export default function ThemeManagerView() {
                   </select>
                 </label>
                 <label>
-                  Font
+                  Phông chữ
                   <select onChange={(event) => updateField('fontPreset', event.target.value)} value={form.fontPreset}>
                     {fontPresetOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -889,7 +1038,7 @@ export default function ThemeManagerView() {
                   </select>
                 </label>
                 <label>
-                  Button
+                  Nút bấm
                   <select onChange={(event) => updateField('buttonStyle', event.target.value)} value={form.buttonStyle}>
                     {buttonStyleOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -899,7 +1048,7 @@ export default function ThemeManagerView() {
                   </select>
                 </label>
                 <label>
-                  Layout
+                  Bố cục
                   <select onChange={(event) => updateField('layoutStyle', event.target.value)} value={form.layoutStyle}>
                     {layoutStyleOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -913,7 +1062,7 @@ export default function ThemeManagerView() {
 
             <div className={`${baseClass}__actions`}>
               <button disabled={savingScope !== null || !selectedSettingsID || !hasUnsavedChanges} onClick={() => save('theme')} type="button">
-                {savingScope === 'theme' ? 'Đang lưu theme...' : 'Lưu theme'}
+                {savingScope === 'theme' ? 'Đang lưu giao diện...' : 'Lưu giao diện'}
               </button>
               <button disabled={savingScope !== null || !selectedSettingsID || !hasUnsavedHeroChanges} onClick={() => save('hero')} type="button">
                 {savingScope === 'hero' ? 'Đang lưu hero...' : 'Lưu hero mặc định'}
@@ -930,7 +1079,7 @@ export default function ThemeManagerView() {
                 {savingScope === 'all' ? 'Đang lưu tất cả...' : 'Lưu tất cả'}
               </button>
               {selectedSite ? (
-                <Link href={`/admin/collections/site-settings/${selectedSettingsID}`}>Mở site settings</Link>
+                <Link href={`/admin/collections/site-settings/${selectedSettingsID}`}>Mở cấu hình site</Link>
               ) : null}
             </div>
 
@@ -947,21 +1096,22 @@ export default function ThemeManagerView() {
                 <p>{selectedSite?.name || selectedSite?.code || 'Chưa chọn site'}</p>
                 <strong>{presetLabel}</strong>
               </div>
-              <span>{hasUnsavedChanges || hasUnsavedHeroChanges ? 'Preview chưa lưu' : 'Preview live'}</span>
+              <span>{hasUnsavedWork ? 'Xem trước chưa lưu' : 'Xem trước đang áp dụng'}</span>
             </div>
 
             <div className={`${baseClass}__preview-card`}>
-              <span>Theme shell</span>
+              <span>Giao diện site</span>
               <h2>{form.logoText}</h2>
-              <p>Brand {previewTokens.brandColor} · Accent {previewTokens.accentColor}</p>
-              <button type="button">Primary CTA</button>
+              <p>Thương hiệu {previewTokens.brandColor} · Nhấn {previewTokens.accentColor}</p>
+              <button type="button">CTA chính</button>
             </div>
 
             <div className={`${baseClass}__preview-card`}>
-              <span>Site default hero</span>
-              <h2>{selectedHeroPreset?.name || 'Chưa chọn'}</h2>
+              <span>Hero mặc định của site</span>
+              <h2>{displayHeroPreset(selectedHeroPreset)}</h2>
               <p>
-                Template {selectedHeroPreset?.baseTemplate || 'n/a'} · Variant {heroForm.variant}
+                Mẫu {selectedHeroDefinition?.label || 'không áp dụng'} · Biến thể{' '}
+                {heroVariantLabels[heroForm.variant] || heroForm.variant}
               </p>
             </div>
 
@@ -970,11 +1120,11 @@ export default function ThemeManagerView() {
               data-template={selectedHeroPreset?.baseTemplate || 'centered-visual'}
             >
               <div className={`${baseClass}__hero-preview-copy`}>
-                <span>{selectedHeroPreset?.name || 'Hero presentation'}</span>
+                <span>{displayHeroPreset(selectedHeroPreset)}</span>
                 <h2>Trải nghiệm WingsGroup theo từng thị trường</h2>
                 <p>
-                  Preview mô phỏng cách template sắp xếp headline, CTA và vùng media. Nội dung thật
-                  vẫn lấy từ từng Page.
+                  Xem trước mô phỏng cách mẫu sắp xếp tiêu đề, CTA và vùng media. Nội dung thật
+                  vẫn lấy từ từng trang.
                 </p>
                 <div className={`${baseClass}__hero-preview-actions`}>
                   <button type="button">Tư vấn hành trình</button>
@@ -1019,16 +1169,16 @@ export default function ThemeManagerView() {
               </div>
 
               <div className={`${baseClass}__hero-preview-notes`}>
-                <strong>{selectedHeroDefinition?.label || selectedHeroPreset?.baseTemplate || 'Template'}</strong>
+                <strong>{selectedHeroDefinition?.label || selectedHeroPreset?.baseTemplate || 'Mẫu'}</strong>
                 <p>{selectedHeroMeta?.visualLabel || selectedHeroPreset?.description || 'Chọn preset để xem mô tả.'}</p>
               </div>
             </div>
 
             <div className={`${baseClass}__preview-summary`}>
-              <p>Theme key: {form.themeKey}</p>
+              <p>Mã giao diện: {form.themeKey}</p>
               <p>Preset: {previewTheme.themePreset}</p>
-              <p>Hero source cho page inherit: site default</p>
-              <p>Template hiện chọn: {selectedHeroPreset?.baseTemplate || 'n/a'}</p>
+              <p>Nguồn hero cho trang kế thừa: mặc định của site</p>
+              <p>Mẫu hiện chọn: {selectedHeroDefinition?.label || 'không áp dụng'}</p>
             </div>
           </aside>
         </section>

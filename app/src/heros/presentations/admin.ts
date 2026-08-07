@@ -65,16 +65,17 @@ const buildRequirement = (
   status,
 })
 
-export const getHeroPresentationAdminMeta = (
-  value: unknown,
-): HeroPresentationAdminMeta | null => {
+export const getHeroPresentationAdminMeta = (value: unknown): HeroPresentationAdminMeta | null => {
   const definition = getHeroPresentationDefinition(value)
 
   if (!definition) {
     return null
   }
 
-  const metaByKey: Record<HeroPresentationKey, Omit<HeroPresentationAdminMeta, 'description' | 'key' | 'label'>> = {
+  const metaByKey: Record<
+    HeroPresentationKey,
+    Omit<HeroPresentationAdminMeta, 'description' | 'key' | 'label'>
+  > = {
     'centered-visual': {
       businessFit: ['standard', 'utility'],
       requirementSummary: ['1 ảnh hero chính', 'không cần slides', 'không cần video'],
@@ -82,7 +83,11 @@ export const getHeroPresentationAdminMeta = (
     },
     'cinematic-carousel': {
       businessFit: ['standard', 'retail-departures'],
-      requirementSummary: ['tối thiểu 2 slides có ảnh', 'nội dung theo slide', 'không dùng ảnh chính đơn'],
+      requirementSummary: [
+        'tối thiểu 2 slides có ảnh',
+        'nội dung theo slide',
+        'không dùng ảnh chính đơn',
+      ],
       visualLabel: 'Carousel nhiều slide với overlay nội dung',
     },
     'gradient-mesh': {
@@ -122,8 +127,7 @@ export const getHeroPresentationAdminMeta = (
 
 export const getHeroPresetMeta = (
   preset?: HeroPresetLike | null,
-): HeroPresentationAdminMeta | null =>
-  getHeroPresentationAdminMeta(preset?.baseTemplate)
+): HeroPresentationAdminMeta | null => getHeroPresentationAdminMeta(preset?.baseTemplate)
 
 export const evaluateHeroPresentationRequirements = ({
   key,
@@ -253,7 +257,7 @@ export const evaluateHeroPresentationRequirements = ({
       buildRequirement(
         'planner-behavior',
         'behavior',
-        'Business behavior',
+        'Hành vi nghiệp vụ',
         'Planner split nên đi cùng variant planner để panel nghiệp vụ đúng ngữ cảnh.',
         variant === 'planner' ? 'recommended-ready' : 'recommended-missing',
       ),

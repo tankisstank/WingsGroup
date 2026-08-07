@@ -302,7 +302,7 @@ export function WingsGroupMetricsClient({
       <div className={`${baseClass}__header`}>
         <div>
           <p className={`${baseClass}__eyebrow`}>WingsGroup CMS</p>
-          <h2>Bảng điều hành CMS</h2>
+          <h2>Việc cần xử lý</h2>
           <p>Dashboard chỉ hiển thị dữ liệu mà phiên hiện tại được phép đọc.</p>
         </div>
         <div className={`${baseClass}__role`}>

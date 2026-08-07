@@ -25,13 +25,13 @@ export const heroPresentationDefinitions: readonly HeroPresentationDefinition[] 
   {
     capabilities: singleMediaCapabilities,
     description: 'Nội dung căn giữa phía trên, visual lớn nằm ngay bên dưới.',
-    label: 'Style 1 - Centered visual',
+    label: 'Kiểu 1 — Visual căn giữa (Centered visual)',
     value: 'centered-visual',
   },
   {
     capabilities: singleMediaCapabilities,
     description: 'Nội dung và CTA ở một bên, visual hoặc product mockup ở bên còn lại.',
-    label: 'Style 2 - Split visual',
+    label: 'Kiểu 2 — Visual tách đôi (Split visual)',
     value: 'split-visual',
   },
   {
@@ -40,7 +40,7 @@ export const heroPresentationDefinitions: readonly HeroPresentationDefinition[] 
       multipleMedia: true,
     },
     description: 'Nội dung ở trung tâm, nhiều visual card được xếp lớp và nghiêng xung quanh.',
-    label: 'Style 3 - Layered visuals',
+    label: 'Kiểu 3 — Visual xếp lớp (Layered visuals)',
     value: 'layered-visuals',
   },
   {
@@ -49,13 +49,13 @@ export const heroPresentationDefinitions: readonly HeroPresentationDefinition[] 
       singleMedia: false,
     },
     description: 'Nội dung căn giữa trên nền gradient mesh có chuyển động nhẹ.',
-    label: 'Style 4 - Animated gradient mesh',
+    label: 'Kiểu 4 — Lưới chuyển sắc động (Animated gradient mesh)',
     value: 'gradient-mesh',
   },
   {
     capabilities: singleMediaCapabilities,
     description: 'Copy và lựa chọn hành trình bên trái, visual lớn và panel tư vấn bên phải.',
-    label: 'Planner split',
+    label: 'Tách đôi cho lập hành trình (Planner split)',
     value: 'planner-split',
   },
   {
@@ -67,7 +67,7 @@ export const heroPresentationDefinitions: readonly HeroPresentationDefinition[] 
       video: false,
     },
     description: 'Carousel nhiều ảnh với nội dung theo slide, autoplay và điều khiển truy cập được.',
-    label: 'Cinematic carousel',
+    label: 'Băng chuyền điện ảnh (Cinematic carousel)',
     value: 'cinematic-carousel',
   },
   {
@@ -79,7 +79,7 @@ export const heroPresentationDefinitions: readonly HeroPresentationDefinition[] 
       video: true,
     },
     description: 'Video nền có poster, source mobile và fallback khi không thể phát.',
-    label: 'Video background',
+    label: 'Video nền (Video background)',
     value: 'video-background',
   },
 ] as const

@@ -192,9 +192,9 @@ const roleLabel: Record<Role, string> = {
 }
 
 const roleContextLabel: Record<Role, string> = {
-  editor: 'Editor',
-  'site-manager': 'Site manager',
-  'super-admin': 'Super Admin',
+  editor: 'Đang áp dụng: biên tập viên',
+  'site-manager': 'Đang áp dụng: quản lý site',
+  'super-admin': 'Đang áp dụng: quản trị toàn hệ',
 }
 
 function RequestMessage({
@@ -369,9 +369,7 @@ export default function AdminOperatorConsole() {
               kind: 'lead' as const,
               meta: `Lead · Gửi ${formatDate(doc.createdAt)}`,
               title:
-                typeof doc.form === 'object' && doc.form?.title
-                  ? doc.form.title
-                  : 'Lead gửi về',
+                typeof doc.form === 'object' && doc.form?.title ? doc.form.title : 'Lead gửi về',
             }))
           : []),
       ]
@@ -457,7 +455,7 @@ export default function AdminOperatorConsole() {
             <section aria-label="Hàng đợi hoạt động" className={`${baseClass}__queue`}>
               <div className={`${baseClass}__panel-head`}>
                 <div>
-                  <p className={`${baseClass}__eyebrow`}>Operator workspace</p>
+                  <p className={`${baseClass}__eyebrow`}>Không gian vận hành</p>
                   <h2>Hàng đợi hoạt động</h2>
                   <p>Dữ liệu gần đây theo đúng site, locale và quyền đọc của phiên hiện tại.</p>
                 </div>
@@ -514,9 +512,7 @@ export default function AdminOperatorConsole() {
                 <dl>
                   <div>
                     <dt>Quyền</dt>
-                    <dd>
-                      {me.state === 'ready' ? roleContextLabel[me.value.role] : '—'}
-                    </dd>
+                    <dd>{me.state === 'ready' ? roleContextLabel[me.value.role] : '—'}</dd>
                   </div>
                   <div>
                     <dt>Locale</dt>
@@ -548,20 +544,20 @@ export default function AdminOperatorConsole() {
                 </div>
                 {canManageSite ? (
                   <div className={`${baseClass}__link-list`}>
-                    <Link href="/admin/theme">Theme Manager</Link>
+                    <Link href="/admin/theme">Quản lý giao diện</Link>
                     <Link href="/admin/collections/site-settings">Cấu hình site</Link>
                   </div>
                 ) : null}
               </section>
               <section className={`${baseClass}__notice`}>
-                <h3>Operator guidance</h3>
+                <h3>Hướng dẫn vận hành</h3>
                 <p>
-                  Console chỉ điều hướng tới capability thật. Site Review vẫn read-only; editor
-                  phức tạp mở ở màn hình native để giữ đủ context.
+                  Console chỉ điều hướng tới capability thật. Khu vực rà soát site vẫn chỉ đọc;
+                  editor phức tạp mở ở màn hình Payload để giữ đủ ngữ cảnh.
                 </p>
               </section>
               <section className={`${baseClass}__notice`}>
-                <h3>Native workspaces</h3>
+                <h3>Khu vực Payload</h3>
                 <p>Các màn hình Payload giữ quyền sở hữu editor, collection và tác vụ dữ liệu.</p>
                 <div className={`${baseClass}__link-list`}>
                   <Link href="/admin/site-review">Rà soát site/page bằng preview</Link>
@@ -571,8 +567,12 @@ export default function AdminOperatorConsole() {
                   <Link href="/admin/collections/media">Thư viện media</Link>
                   <Link href="/admin/collections/form-submissions">Lead gửi về</Link>
                   {canManageSite ? <Link href="/admin/collections/forms">Biểu mẫu</Link> : null}
-                  {canManageSite ? <Link href="/admin/collections/imports">Nhập dữ liệu</Link> : null}
-                  {canManageSite ? <Link href="/admin/collections/exports">Xuất dữ liệu</Link> : null}
+                  {canManageSite ? (
+                    <Link href="/admin/collections/imports">Nhập dữ liệu</Link>
+                  ) : null}
+                  {canManageSite ? (
+                    <Link href="/admin/collections/exports">Xuất dữ liệu</Link>
+                  ) : null}
                   {!canManageSite && me.state === 'ready' ? (
                     <span>Editor không có lối tắt import/export.</span>
                   ) : null}
@@ -583,7 +583,7 @@ export default function AdminOperatorConsole() {
 
           <section className={`${baseClass}__summary`}>
             <div>
-              <p className={`${baseClass}__eyebrow`}>Triage summary</p>
+              <p className={`${baseClass}__eyebrow`}>Tóm tắt phân loại</p>
               <h2>Tóm tắt nội dung</h2>
               <p>Chỉ hiển thị số liệu có nghĩa theo query hiện có.</p>
             </div>

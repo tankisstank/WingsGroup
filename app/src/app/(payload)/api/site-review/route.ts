@@ -4,11 +4,7 @@ import { createLocalReq, getPayload } from 'payload'
 import type { Payload } from 'payload'
 
 import type { Page, Post, Site } from '@/payload-types'
-import {
-  getPageCanonicalPath,
-  getPostPath,
-  normalizeCanonicalPath,
-} from '@/utilities/siteURLs'
+import { getPageCanonicalPath, getPostPath, normalizeCanonicalPath } from '@/utilities/siteURLs'
 import { siteCodeToAliasMap } from '@/utilities/sitePaths'
 
 type ReviewItem = {
@@ -28,6 +24,9 @@ type ReviewSite = {
   label: string
   pathPrefix: string
 }
+
+type SourceName = 'pages' | 'posts' | 'sites'
+type SourceState = 'error' | 'ready'
 
 const getRelationID = (value: number | string | Site | null | undefined) => {
   if (!value) return null
@@ -85,83 +84,107 @@ const loadCollection = async <T extends Page | Post>({
   }) as unknown as Promise<{ docs: T[] }>
 
 export async function GET(): Promise<Response> {
-  const payload = await getPayload({ config })
-  const requestHeaders = await headers()
-  const { user } = await payload.auth({ headers: requestHeaders })
+  try {
+    const payload = await getPayload({ config })
+    const requestHeaders = await headers()
+    const { user } = await payload.auth({ headers: requestHeaders })
 
-  if (!user) {
-    return Response.json({ message: 'Bạn cần đăng nhập để xem site review.' }, { status: 401 })
-  }
+    if (!user) {
+      return Response.json({ message: 'Bạn cần đăng nhập để xem site review.' }, { status: 401 })
+    }
 
-  const req = await createLocalReq({ user }, payload)
-  const [siteResult, pageResult, postResult] = await Promise.all([
-    payload.find({
-      collection: 'sites',
-      depth: 0,
-      limit: 100,
-      overrideAccess: false,
-      req,
-      sort: 'name',
-    }) as Promise<{ docs: Site[] }>,
-    loadCollection<Page>({ collection: 'pages', payload, req }),
-    loadCollection<Post>({ collection: 'posts', payload, req }),
-  ])
+    const req = await createLocalReq({ user }, payload)
+    const [siteResult, pageResult, postResult] = await Promise.allSettled([
+      payload.find({
+        collection: 'sites',
+        depth: 0,
+        limit: 100,
+        overrideAccess: false,
+        req,
+        sort: 'name',
+      }) as Promise<{ docs: Site[] }>,
+      loadCollection<Page>({ collection: 'pages', payload, req }),
+      loadCollection<Post>({ collection: 'posts', payload, req }),
+    ])
 
-  const sitesByID = new Map<number | string, ReviewSite>()
+    if (siteResult.status === 'rejected') {
+      return Response.json(
+        { message: 'Không tải được phạm vi site được phân quyền.' },
+        { status: 500 },
+      )
+    }
 
-  for (const site of siteResult.docs) {
-    sitesByID.set(site.id, {
-      children: [],
-      code: site.code,
-      id: site.id,
-      label: site.name || site.code || `Site ${site.id}`,
-      pathPrefix: getSitePathPrefix(site),
+    const sourceState: Record<SourceName, SourceState> = {
+      pages: pageResult.status === 'fulfilled' ? 'ready' : 'error',
+      posts: postResult.status === 'fulfilled' ? 'ready' : 'error',
+      sites: 'ready',
+    }
+    const sourceErrors = (['pages', 'posts'] as const).flatMap((source) =>
+      sourceState[source] === 'error' ? [source] : [],
+    )
+    const pages = pageResult.status === 'fulfilled' ? pageResult.value.docs : []
+    const posts = postResult.status === 'fulfilled' ? postResult.value.docs : []
+
+    const sitesByID = new Map<number | string, ReviewSite>()
+
+    for (const site of siteResult.value.docs) {
+      sitesByID.set(site.id, {
+        children: [],
+        code: site.code,
+        id: site.id,
+        label: site.name || site.code || `Site ${site.id}`,
+        pathPrefix: getSitePathPrefix(site),
+      })
+    }
+
+    for (const page of pages) {
+      const siteID = getRelationID(page.site)
+      const site = typeof page.site === 'object' ? page.site : null
+      const group = siteID ? sitesByID.get(siteID) : undefined
+
+      if (!group) continue
+
+      group.children.push({
+        editPath: `/admin/collections/pages/${page.id}`,
+        id: page.id,
+        label: getTitle(page.title, `Trang ${page.id}`),
+        path: withSitePrefix(site, getPageCanonicalPath(page)),
+        status: getStatus(page),
+        type: 'page',
+        updatedAt: page.updatedAt,
+      })
+    }
+
+    for (const post of posts) {
+      const siteID = getRelationID(post.site)
+      const site = typeof post.site === 'object' ? post.site : null
+      const group = siteID ? sitesByID.get(siteID) : undefined
+
+      if (!group) continue
+
+      group.children.push({
+        editPath: `/admin/collections/posts/${post.id}`,
+        id: post.id,
+        label: getTitle(post.title, `Bài viết ${post.id}`),
+        path: withSitePrefix(site, getPostPath(post.slug)),
+        status: getStatus(post),
+        type: 'post',
+        updatedAt: post.updatedAt,
+      })
+    }
+
+    const sites = Array.from(sitesByID.values()).map((site) => ({
+      ...site,
+      children: site.children.sort((left, right) => left.path.localeCompare(right.path, 'vi')),
+    }))
+
+    return Response.json({
+      generatedAt: new Date().toISOString(),
+      sourceErrors,
+      sourceState,
+      sites,
     })
+  } catch {
+    return Response.json({ message: 'Không tải được Site Review. Hãy thử lại.' }, { status: 500 })
   }
-
-  for (const page of pageResult.docs) {
-    const siteID = getRelationID(page.site)
-    const site = typeof page.site === 'object' ? page.site : null
-    const group = siteID ? sitesByID.get(siteID) : undefined
-
-    if (!group) continue
-
-    group.children.push({
-      editPath: `/admin/collections/pages/${page.id}`,
-      id: page.id,
-      label: getTitle(page.title, `Trang ${page.id}`),
-      path: withSitePrefix(site, getPageCanonicalPath(page)),
-      status: getStatus(page),
-      type: 'page',
-      updatedAt: page.updatedAt,
-    })
-  }
-
-  for (const post of postResult.docs) {
-    const siteID = getRelationID(post.site)
-    const site = typeof post.site === 'object' ? post.site : null
-    const group = siteID ? sitesByID.get(siteID) : undefined
-
-    if (!group) continue
-
-    group.children.push({
-      editPath: `/admin/collections/posts/${post.id}`,
-      id: post.id,
-      label: getTitle(post.title, `Bài viết ${post.id}`),
-      path: withSitePrefix(site, getPostPath(post.slug)),
-      status: getStatus(post),
-      type: 'post',
-      updatedAt: post.updatedAt,
-    })
-  }
-
-  const sites = Array.from(sitesByID.values()).map((site) => ({
-    ...site,
-    children: site.children.sort((left, right) => left.path.localeCompare(right.path, 'vi')),
-  }))
-
-  return Response.json({
-    generatedAt: new Date().toISOString(),
-    sites,
-  })
 }

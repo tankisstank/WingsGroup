@@ -56,11 +56,7 @@ const getFieldValue = (fields: Record<string, FormFieldValue>, paths: string[]) 
   return undefined
 }
 
-const stringValue = (
-  fields: Record<string, FormFieldValue>,
-  paths: string[],
-  fallback: string,
-) => {
+const stringValue = (fields: Record<string, FormFieldValue>, paths: string[], fallback: string) => {
   const value = getFieldValue(fields, paths)
 
   return typeof value === 'string' && value ? value : fallback
@@ -109,7 +105,9 @@ export default function HeroPresentationGuide() {
 
   const [siteDefaults, setSiteDefaults] = useState<SiteSettingsDoc['heroDefaults'] | null>(null)
   const [overridePreset, setOverridePreset] = useState<HeroPresentationPresetDoc | null>(null)
-  const [siteResolution, setSiteResolution] = useState<'idle' | 'missing' | 'resolved' | 'unresolved'>('idle')
+  const [siteResolution, setSiteResolution] = useState<
+    'idle' | 'missing' | 'resolved' | 'unresolved'
+  >('idle')
 
   useEffect(() => {
     const loadSiteDefaults = async () => {
@@ -165,7 +163,9 @@ export default function HeroPresentationGuide() {
       presentation: legacyPresentation || null,
       presentationMode:
         presentationMode === 'inherit' || presentationMode === 'override' ? presentationMode : null,
-      presentationPreset: overridePresetInline?.baseTemplate ? overridePresetInline : overridePreset,
+      presentationPreset: overridePresetInline?.baseTemplate
+        ? overridePresetInline
+        : overridePreset,
       variant,
     },
     siteDefaults,
@@ -191,8 +191,8 @@ export default function HeroPresentationGuide() {
   if (type !== 'highImpact') {
     return (
       <section className="hero-presentation-guide hero-presentation-guide--muted">
-        <h3>Hero preview</h3>
-        <p>Chọn `High Impact` để bật site inheritance, page override và media guide.</p>
+        <h3>Xem trước Hero</h3>
+        <p>Chọn `High Impact` để bật kế thừa theo site, ghi đè theo trang và hướng dẫn media.</p>
       </section>
     )
   }
@@ -202,40 +202,38 @@ export default function HeroPresentationGuide() {
       <div className="hero-presentation-guide__copy">
         <span>Preview cấu trúc hero</span>
         <h3>{meta?.label || resolved.key}</h3>
-        <p>{meta?.description || 'Preview mô phỏng cấu trúc hero đã resolve.'}</p>
+        <p>{meta?.description || 'Bản xem trước mô phỏng cấu trúc hero đã được xác định.'}</p>
       </div>
 
       <div className="hero-presentation-guide__canvas" aria-hidden="true">
-        <div className="hero-presentation-guide__headline">Headline / CTA</div>
-        <div className="hero-presentation-guide__visual">
-          {meta?.visualLabel || resolved.key}
-        </div>
+        <div className="hero-presentation-guide__headline">Tiêu đề / CTA</div>
+        <div className="hero-presentation-guide__visual">{meta?.visualLabel || resolved.key}</div>
       </div>
 
       <div className="hero-presentation-guide__facts">
         <span>
           Nguồn áp dụng:{' '}
           {overrideSelectionMissing
-            ? 'page chưa chọn preset'
+            ? 'trang chưa chọn preset'
             : unresolvedSitePreview
-              ? 'site chưa resolve'
+              ? 'site chưa xác định'
               : resolved.source}
         </span>
-        <span>Presentation mode: {presentationMode}</span>
-        <span>Business behavior: {variant || siteDefaults?.variant || 'standard'}</span>
+        <span>Chế độ trình bày: {presentationMode}</span>
+        <span>Hành vi nghiệp vụ: {variant || siteDefaults?.variant || 'standard'}</span>
       </div>
 
       {overrideSelectionMissing ? (
         <div className="hero-presentation-guide__warning">
-          Page đang ở chế độ override nhưng chưa chọn preset. Preview hiện tại chỉ là fallback trung
-          lập, chưa phải page-level hero thực tế.
+          Trang đang ở chế độ ghi đè nhưng chưa chọn preset. Bản xem trước hiện tại chỉ là phương án
+          trung lập, chưa phải hero thực tế của trang.
         </div>
       ) : null}
 
       {unresolvedSitePreview ? (
         <div className="hero-presentation-guide__warning">
-          Không resolve được site-settings hiện tại, nên preview này chỉ là fallback trung lập chứ
-          chưa phản ánh chính xác site default hero.
+          Không xác định được cấu hình site hiện tại, nên bản xem trước này chỉ là phương án trung
+          lập, chưa phản ánh chính xác hero mặc định của site.
         </div>
       ) : null}
 
@@ -263,7 +261,10 @@ export default function HeroPresentationGuide() {
           {secondaryRequirements.length ? (
             <ul>
               {secondaryRequirements.map((item) => (
-                <li className="hero-presentation-guide__requirement hero-presentation-guide__requirement--muted" key={item.key}>
+                <li
+                  className="hero-presentation-guide__requirement hero-presentation-guide__requirement--muted"
+                  key={item.key}
+                >
                   <span>{item.label}</span>
                   <small>{item.description}</small>
                 </li>
@@ -276,8 +277,8 @@ export default function HeroPresentationGuide() {
       </div>
 
       <p className="hero-presentation-guide__meta">
-        Page có thể `inherit` site default hoặc `override` preset riêng. Media luôn thuộc page hiện
-        tại, kể cả khi presentation đang lấy từ site.
+        Trang có thể `inherit` mặc định của site hoặc `override` preset riêng. Media luôn thuộc trang
+        hiện tại, kể cả khi trình bày đang lấy từ site.
       </p>
     </section>
   )

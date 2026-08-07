@@ -388,6 +388,7 @@ describe('WingSide Payload group-commerce adapter', () => {
       plan,
       planSha256: groupCommerceChecksum(plan),
       req,
+      now: new Date('2026-07-31T10:00:00.000Z'),
     })).rejects.toThrow(/Preimage conflict/)
     expect(fixture.departures.map(({ id }) => id)).toEqual([900])
   })

@@ -56,6 +56,12 @@ export const Posts: CollectionConfig<'posts'> = {
     },
   },
   admin: {
+    components: {
+      beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
+      edit: {
+        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+      },
+    },
     description:
       'Quản lý bài viết theo site. Editor chỉ lưu nháp; site-manager hoặc super-admin duyệt publish.',
     defaultColumns: ['title', 'site', 'slug', 'updatedAt'],

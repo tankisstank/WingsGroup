@@ -7,49 +7,49 @@ export const themeKeyOptions = [
   { label: 'WingsPlus', value: 'wings-plus' },
   { label: 'WingsCare', value: 'wings-care' },
   { label: 'WingsPass', value: 'wings-pass' },
-  { label: 'Custom', value: 'custom' },
+  { label: 'Tùy chỉnh (Custom)', value: 'custom' },
 ] as const
 
 export const backgroundStyleOptions = [
-  { label: 'Plain', value: 'plain' },
-  { label: 'Soft gradient', value: 'soft-gradient' },
-  { label: 'Editorial', value: 'editorial' },
-  { label: 'Utility', value: 'utility' },
+  { label: 'Nền trơn (Plain)', value: 'plain' },
+  { label: 'Chuyển sắc nhẹ (Soft gradient)', value: 'soft-gradient' },
+  { label: 'Biên tập (Editorial)', value: 'editorial' },
+  { label: 'Tiện ích (Utility)', value: 'utility' },
 ] as const
 
 export const radiusOptions = [
-  { label: 'Small', value: 'sm' },
-  { label: 'Medium', value: 'md' },
-  { label: 'Large', value: 'lg' },
-  { label: 'Extra large', value: 'xl' },
+  { label: 'Nhỏ (Small)', value: 'sm' },
+  { label: 'Vừa (Medium)', value: 'md' },
+  { label: 'Lớn (Large)', value: 'lg' },
+  { label: 'Rất lớn (Extra large)', value: 'xl' },
 ] as const
 
 export const spacingScaleOptions = [
-  { label: 'Compact', value: 'compact' },
-  { label: 'Standard', value: 'standard' },
-  { label: 'Airy', value: 'airy' },
+  { label: 'Gọn (Compact)', value: 'compact' },
+  { label: 'Tiêu chuẩn (Standard)', value: 'standard' },
+  { label: 'Thoáng (Airy)', value: 'airy' },
 ] as const
 
 export const fontPresetOptions = [
-  { label: 'System', value: 'system' },
-  { label: 'Modern', value: 'modern' },
-  { label: 'Retail', value: 'retail' },
-  { label: 'Editorial', value: 'editorial' },
-  { label: 'Premium', value: 'premium' },
+  { label: 'Hệ thống (System)', value: 'system' },
+  { label: 'Hiện đại (Modern)', value: 'modern' },
+  { label: 'Bán lẻ (Retail)', value: 'retail' },
+  { label: 'Biên tập (Editorial)', value: 'editorial' },
+  { label: 'Cao cấp (Premium)', value: 'premium' },
 ] as const
 
 export const buttonStyleOptions = [
-  { label: 'Solid', value: 'solid' },
-  { label: 'Soft', value: 'soft' },
-  { label: 'Outline', value: 'outline' },
-  { label: 'Pill', value: 'pill' },
+  { label: 'Đặc (Solid)', value: 'solid' },
+  { label: 'Mềm (Soft)', value: 'soft' },
+  { label: 'Viền (Outline)', value: 'outline' },
+  { label: 'Dạng viên (Pill)', value: 'pill' },
 ] as const
 
 export const layoutStyleOptions = [
-  { label: 'Corporate', value: 'corporate' },
-  { label: 'Retail', value: 'retail' },
-  { label: 'Editorial', value: 'editorial' },
-  { label: 'Utility', value: 'utility' },
+  { label: 'Doanh nghiệp (Corporate)', value: 'corporate' },
+  { label: 'Bán lẻ (Retail)', value: 'retail' },
+  { label: 'Biên tập (Editorial)', value: 'editorial' },
+  { label: 'Tiện ích (Utility)', value: 'utility' },
 ] as const
 
 export type ThemeKey = (typeof themeKeyOptions)[number]['value']
@@ -76,12 +76,12 @@ export const asSelectOptions = <T extends string>(
 ): { label: string; value: T }[] => options as unknown as { label: string; value: T }[]
 
 export const themePresetKeyOptions = [
-  { label: 'Corporate', value: 'corporate' },
-  { label: 'Retail', value: 'retail' },
-  { label: 'Premium', value: 'premium' },
-  { label: 'Utility', value: 'utility' },
-  { label: 'Care', value: 'care' },
-  { label: 'Custom', value: 'custom' },
+  { label: 'Giao diện doanh nghiệp (Corporate)', value: 'corporate' },
+  { label: 'Giao diện bán lẻ (Retail)', value: 'retail' },
+  { label: 'Giao diện cao cấp (Premium)', value: 'premium' },
+  { label: 'Giao diện tiện ích (Utility)', value: 'utility' },
+  { label: 'Giao diện chăm sóc (Care)', value: 'care' },
+  { label: 'Giao diện tùy chỉnh (Custom)', value: 'custom' },
 ] as const
 
 export type ThemePresetKey = (typeof themePresetKeyOptions)[number]['value']

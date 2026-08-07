@@ -103,6 +103,34 @@ body.wings-admin-shell {
   line-height: 1.5;
 }
 
+/* Shared native/custom admin accessibility entry point. */
+body.wings-admin-shell .wings-admin-skip-link {
+  background: var(--wings-admin-action);
+  border-radius: var(--wings-admin-radius-sm);
+  box-shadow: var(--wings-admin-shadow);
+  color: var(--wings-admin-active-text);
+  font-weight: 700;
+  left: 14px;
+  padding: 10px 14px;
+  position: fixed;
+  text-decoration: none;
+  top: -80px;
+  transform: translateY(-120%);
+  transition: transform 120ms ease, top 120ms ease;
+  z-index: 100;
+}
+
+body.wings-admin-shell .wings-admin-skip-link:focus-visible {
+  outline: 3px solid var(--wings-admin-focus-ring);
+  outline-offset: 3px;
+  top: 12px;
+  transform: translateY(0);
+}
+
+body.wings-admin-shell [data-admin-main='true'] {
+  scroll-margin-top: 88px;
+}
+
 /* Payload can preserve a user's dark-mode preference in data-theme. The CMS
  * design language is intentionally a single light operator canvas with a navy
  * navigation rail, so map Payload's native elevation tokens back to the
@@ -347,6 +375,113 @@ body.wings-admin-shell .nav .wings-admin-nav-intro__icon {
   background: rgb(14 138 135 / 0.16);
   border-color: rgb(14 138 135 / 0.32);
   color: #9be4e0;
+}
+
+/* Native Payload nav toggler: keep the component's state and keyboard
+ * semantics, only change the visual glyph and the concise Vietnamese hint. */
+body.wings-admin-shell .nav-toggler {
+  align-items: center;
+  background: var(--wings-admin-sidebar) !important;
+  border: 1px solid var(--wings-admin-sidebar-border) !important;
+  border-radius: var(--wings-admin-radius-sm);
+  color: var(--wings-admin-sidebar-text);
+  display: inline-flex;
+  height: 44px;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  overflow: visible;
+  padding: 8px;
+  position: relative;
+  width: 44px;
+}
+
+body.wings-admin-shell .nav-toggler:hover,
+body.wings-admin-shell .nav-toggler:focus-visible {
+  background: var(--wings-admin-sidebar-hover-bg) !important;
+  color: #ffffff;
+}
+
+body.wings-admin-shell .nav-toggler:focus-visible {
+  outline: 3px solid var(--wings-admin-focus-ring);
+  outline-offset: 3px;
+}
+
+body.wings-admin-shell .nav-toggler::after {
+  content: none !important;
+}
+
+body.wings-admin-shell .nav-toggler .wings-admin-nav-tooltip {
+  background: var(--wings-admin-sidebar-active-bg);
+  border-radius: var(--wings-admin-radius-sm);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  left: calc(100% + 8px);
+  opacity: 0;
+  padding: 6px 8px;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: opacity 120ms ease;
+  white-space: nowrap;
+  z-index: 60;
+}
+
+body.wings-admin-shell .nav-toggler:hover .wings-admin-nav-tooltip,
+body.wings-admin-shell .nav-toggler:focus-visible .wings-admin-nav-tooltip {
+  opacity: 1;
+}
+
+body.wings-admin-shell .nav-toggler .hamburger {
+  background: transparent;
+  box-shadow: none;
+}
+
+body.wings-admin-shell .nav-toggler .hamburger__open-icon,
+body.wings-admin-shell .nav-toggler .hamburger__close-icon {
+  color: currentColor;
+}
+
+/* Compact rail active state remains visible through a left rule and a filled
+ * marker, so state is not conveyed by colour alone. */
+body.wings-admin-shell .nav:is([class*='collapsed'], [class*='closed']) a[aria-current='page'],
+body.wings-admin-shell .nav:is([class*='collapsed'], [class*='closed']) a.active {
+  position: relative;
+}
+
+body.wings-admin-shell .nav:is([class*='collapsed'], [class*='closed']) a[aria-current='page']::before,
+body.wings-admin-shell .nav:is([class*='collapsed'], [class*='closed']) a.active::before {
+  background: var(--wings-admin-action);
+  border-radius: 50%;
+  content: '';
+  height: 7px;
+  left: 4px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 7px;
+}
+
+body.wings-admin-shell .nav .nav__link:has(.nav__link-indicator),
+body.wings-admin-shell .nav .wings-admin-nav-intro a[aria-current='page'] {
+  box-shadow: inset 3px 0 0 var(--wings-admin-action);
+  position: relative;
+}
+
+body.wings-admin-shell .nav .nav__link:has(.nav__link-indicator)::before,
+body.wings-admin-shell .nav .wings-admin-nav-intro a[aria-current='page']::before {
+  background: var(--wings-admin-action);
+  border: 2px solid var(--wings-admin-sidebar);
+  border-radius: 50%;
+  content: '';
+  height: 8px;
+  left: 4px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
 }
 
 /* Header and working canvas */
@@ -1092,6 +1227,18 @@ body.wings-admin-shell .login .wings-admin-logo {
     margin-bottom: 2px;
   }
 
+  &__badge {
+    background: color-mix(in srgb, var(--theme-warning-500) 16%, white);
+    border: 1px solid var(--theme-warning-500);
+    border-radius: var(--wings-admin-radius-pill);
+    color: color-mix(in srgb, var(--theme-warning-500) 72%, black);
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+    padding: 3px 7px;
+  }
+
   p {
     margin: 0;
     color: var(--wings-admin-muted);
@@ -1128,9 +1275,122 @@ body.wings-admin-shell .login .wings-admin-logo {
 
 .collection-edit {
   .doc-controls__controls {
-    .wings-admin-guidance {
+    .wings-admin-guidance:not([data-tour-product-legacy-warning]) {
       display: none;
     }
+  }
+}
+
+.wings-content-locale-control {
+  background: var(--wings-admin-panel);
+  border: 1px solid var(--wings-admin-border);
+  border-left: 3px solid var(--wings-admin-accent);
+  border-radius: var(--wings-admin-radius-md);
+  box-shadow: var(--wings-admin-shadow);
+  color: var(--wings-admin-text);
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+  max-width: 100%;
+  padding: 12px 14px;
+}
+
+.wings-content-locale-control__heading {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.wings-content-locale-control__heading strong {
+  color: var(--wings-admin-ink);
+  font-size: 0.92rem;
+}
+
+.wings-content-locale-control__heading span,
+.wings-content-locale-control__hint {
+  color: var(--wings-admin-muted-strong);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.wings-content-locale-control__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wings-content-locale-control__options > div {
+  display: contents;
+}
+
+.wings-content-locale-control__options a {
+  border: 1px solid var(--wings-admin-border);
+  border-radius: var(--wings-admin-radius-pill);
+  color: var(--wings-admin-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 9px;
+  text-decoration: none;
+}
+
+.wings-content-locale-control__options a:hover,
+.wings-content-locale-control__options a:focus-visible,
+.wings-content-locale-control__options a.is-active {
+  background: var(--wings-admin-accent-soft);
+  border-color: var(--wings-admin-accent);
+  color: var(--wings-admin-ink);
+}
+
+.wings-content-locale-control__statuses {
+  display: grid;
+  gap: 6px 14px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.wings-content-locale-control__statuses span {
+  align-items: center;
+  display: flex;
+  gap: 7px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.wings-content-locale-control__statuses b {
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.wings-content-locale-control__statuses em {
+  background: var(--wings-admin-panel-strong);
+  border: 1px solid var(--wings-admin-border);
+  border-radius: var(--wings-admin-radius-pill);
+  color: var(--wings-admin-muted-strong);
+  font-size: 0.72rem;
+  font-style: normal;
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+
+.wings-content-locale-control__statuses em[data-status='published'] {
+  background: color-mix(in srgb, var(--wings-admin-positive) 12%, white);
+  border-color: var(--wings-admin-positive);
+  color: color-mix(in srgb, var(--wings-admin-positive) 70%, black);
+}
+
+.wings-content-locale-control__statuses em[data-status='uncreated'] {
+  background: color-mix(in srgb, var(--wings-admin-warning) 12%, white);
+  border-color: var(--wings-admin-warning);
+  color: color-mix(in srgb, var(--wings-admin-warning) 70%, black);
+}
+
+@media (max-width: 520px) {
+  .wings-content-locale-control {
+    padding: 10px;
+  }
+
+  .wings-content-locale-control__statuses {
+    grid-template-columns: 1fr;
   }
 }
 

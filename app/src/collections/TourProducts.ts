@@ -21,6 +21,7 @@ import {
   revalidateTourProductDelete,
 } from './Tours/hooks/revalidateTourContent'
 import { tourDestinationOptions, tourTravelStyleOptions } from '@/tours/taxonomy'
+import { enforceTourProductPublishSite } from './Tours/hooks/enforceTourProductPublishSite'
 
 export const TourProducts: CollectionConfig = {
   slug: 'tour-products',
@@ -31,6 +32,18 @@ export const TourProducts: CollectionConfig = {
     update: siteScopedAccess(),
   },
   admin: {
+    components: {
+      beforeList: [
+        '@/components/AdminGuidance/TourProductListGuidance',
+        '@/components/ContentLocaleControl#ContentLocaleListControl',
+      ],
+      edit: {
+        beforeDocumentControls: [
+          '@/components/AdminGuidance/TourProductEditGuidance',
+          '@/components/ContentLocaleControl#ContentLocaleDocumentControl',
+        ],
+      },
+    },
     description:
       'Tour có cấu trúc dùng chung cho WingsGo và WingsSide. Dữ liệu này là nguồn thật để render trang tour và discovery theo site.',
     defaultColumns: ['title', 'site', 'tourType', 'destinationTags', 'travelStyles', 'updatedAt'],
@@ -945,7 +958,7 @@ export const TourProducts: CollectionConfig = {
   hooks: {
     afterChange: [revalidateTourProduct],
     afterDelete: [revalidateTourProductDelete],
-    beforeChange: [enforceSiteAccess, preventEditorPublish],
+    beforeChange: [enforceSiteAccess, enforceTourProductPublishSite, preventEditorPublish],
   },
   versions: {
     drafts: {

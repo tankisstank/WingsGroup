@@ -33,7 +33,7 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
-import { cmsEnabledLocaleCodes } from './utilities/locales'
+import { cmsEnabledLocaleMetadata } from './utilities/locales'
 import { resolveLocalDatabaseURL } from './utilities/localDatabase'
 import { repairLocalSQLiteSchema } from './utilities/repairLocalSQLiteSchema'
 import { reconcileLeadNotificationTask, sendLeadNotificationTask } from './lead-capture/job'
@@ -65,7 +65,11 @@ export default buildConfig({
     components: {
       beforeLogin: ['@/components/AdminThemeBootstrap', '@/components/BeforeLogin'],
       beforeDashboard: ['@/components/BeforeDashboard'],
-      beforeNav: ['@/components/AdminThemeBootstrap', '@/components/AdminNavIntro'],
+      beforeNav: [
+        '@/components/AdminThemeBootstrap',
+        '@/components/AdminNavIntro',
+        '@/components/AdminNavTooltip',
+      ],
       graphics: {
         Icon: '@/components/AdminBranding/Icon#AdminIcon',
         Logo: '@/components/AdminBranding/Logo#AdminLogo',
@@ -148,6 +152,15 @@ export default buildConfig({
     : undefined,
   i18n: {
     fallbackLanguage: 'vi',
+    translations: {
+      vi: {
+        ...vi.translations,
+        general: {
+          ...vi.translations.general,
+          menu: 'điều hướng',
+        },
+      },
+    },
     supportedLanguages: {
       de,
       en,
@@ -190,7 +203,12 @@ export default buildConfig({
     Users,
   ],
   localization: {
-    locales: [...cmsEnabledLocaleCodes],
+    locales: cmsEnabledLocaleMetadata.map((locale) => ({
+      code: locale.code,
+      fallbackLocale: locale.fallbackLocale,
+      label: locale.label,
+      rtl: false,
+    })),
     defaultLocale: 'vi',
     fallback: true,
   },

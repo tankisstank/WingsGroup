@@ -21,6 +21,12 @@ export const TourDepartures: CollectionConfig = {
     update: siteScopedAccess(),
   },
   admin: {
+    components: {
+      beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
+      edit: {
+        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+      },
+    },
     description:
       'Lịch khởi hành và giá bán công khai. Mỗi record là một đợt đi để dùng lại trên tour detail, market, campaign và trang lịch.',
     defaultColumns: [

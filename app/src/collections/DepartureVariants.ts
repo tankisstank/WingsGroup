@@ -19,6 +19,12 @@ export const DepartureVariants: CollectionConfig = {
     update: siteScopedAccess(),
   },
   admin: {
+    components: {
+      beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
+      edit: {
+        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+      },
+    },
     description:
       'Biến thể tour có kiểm soát để dùng lại một tour gốc cho nhiều điểm đi, hãng bay, hoặc nhịp hành trình khác nhau mà không nhân bản toàn bộ trang tour.',
     defaultColumns: ['label', 'tourProduct', 'departureCity', 'airline', 'status'],

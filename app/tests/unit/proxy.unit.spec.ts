@@ -19,6 +19,29 @@ const overriddenRequestHeaders = (response: Response): Headers => {
 describe('tenant proxy rewrites', () => {
   const multisiteInventory = loadMultisiteAuditInventory()
 
+  it('bootstraps Vietnamese Payload admin locale with one same-route redirect', () => {
+    const initialResponse = proxy(
+      new NextRequest('http://localhost:3100/admin/login?returnTo=%2Fadmin%2Fconsole', {
+        headers: { host: 'localhost:3100' },
+      }),
+    )
+
+    expect(initialResponse.status).toBe(307)
+    expect(initialResponse.headers.get('location')).toBe(
+      'http://localhost:3100/admin/login?returnTo=%2Fadmin%2Fconsole',
+    )
+    expect(initialResponse.headers.get('set-cookie')).toContain('payload-lng=vi')
+
+    const settledResponse = proxy(
+      new NextRequest('http://localhost:3100/admin/login?returnTo=%2Fadmin%2Fconsole', {
+        headers: { cookie: 'payload-lng=vi', host: 'localhost:3100' },
+      }),
+    )
+
+    expect(settledResponse.status).toBe(200)
+    expect(settledResponse.headers.get('x-middleware-next')).toBe('1')
+  })
+
   it('preserves the trusted tenant bundle when Next processes the rewrite destination', () => {
     const publicResponse = proxy(
       new NextRequest('http://localhost:3100/wingsside', {

@@ -33,9 +33,16 @@
   }
 
   &__banner {
+    background: var(--wings-admin-accent-soft);
+    border: 1px solid var(--wings-admin-accent);
     border-radius: 6px;
+    color: var(--wings-admin-text);
+    display: block;
+    line-height: 1.45;
+    padding: base(0.55) base(0.7);
 
     & h4 {
+      color: var(--wings-admin-text);
       margin: 0;
     }
   }

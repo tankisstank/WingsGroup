@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import AdminThemeBootstrap from '@/components/AdminThemeBootstrap'
 
@@ -28,19 +28,20 @@ type ReviewSite = {
 type ReviewResponse = {
   generatedAt?: string
   message?: string
+  sourceErrors?: Array<'pages' | 'posts'>
   sites?: ReviewSite[]
 }
 
 const baseClass = 'site-review'
 
 const typeLabel: Record<ReviewItem['type'], string> = {
-  page: 'Page',
-  post: 'Post',
+  page: 'Trang',
+  post: 'Bài viết',
 }
 
 const statusLabel = (status?: string) => {
   if (status === 'draft') return 'Nháp'
-  if (status === 'published') return 'Published'
+  if (status === 'published') return 'Đã xuất bản'
   return 'Không rõ'
 }
 
@@ -55,35 +56,53 @@ export default function SiteReviewView() {
   const [filter, setFilter] = useState('')
   const [generatedAt, setGeneratedAt] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [sourceErrors, setSourceErrors] = useState<Array<'pages' | 'posts'>>([])
+  const [notice, setNotice] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [previewState, setPreviewState] = useState<'error' | 'loading' | 'ready'>('ready')
+  const [previewKey, setPreviewKey] = useState(0)
 
-  useEffect(() => {
-    const loadReview = async () => {
-      setIsLoading(true)
-      setError(null)
+  const loadReview = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    setNotice(null)
 
-      const response = await fetch('/api/site-review', {
-        credentials: 'include',
-      })
+    try {
+      const response = await fetch('/api/site-review', { credentials: 'include' })
       const data = (await response.json().catch(() => null)) as ReviewResponse | null
 
       if (!response.ok) {
-        setError(data?.message || 'Không tải được danh sách site/page.')
-        setIsLoading(false)
+        setError(
+          response.status === 401 || response.status === 403
+            ? 'Bạn không có quyền xem Site Review.'
+            : data?.message || 'Không tải được danh sách site/page.',
+        )
         return
       }
 
       const nextSites = data?.sites ?? []
-      const firstItem = nextSites.flatMap((site) => site.children)[0] ?? null
-
       setSites(nextSites)
-      setSelectedItem((current) => current || firstItem)
+      setSelectedItem((current) => {
+        const available = nextSites.flatMap((site) => site.children)
+        return current &&
+          available.some(
+            (item) => item.type === current.type && String(item.id) === String(current.id),
+          )
+          ? current
+          : (available[0] ?? null)
+      })
       setGeneratedAt(data?.generatedAt ?? null)
+      setSourceErrors(data?.sourceErrors ?? [])
+    } catch {
+      setError('Không tải được Site Review do lỗi kết nối. Hãy thử lại.')
+    } finally {
       setIsLoading(false)
     }
-
-    void loadReview()
   }, [])
+
+  useEffect(() => {
+    void loadReview()
+  }, [loadReview])
 
   const query = filter.trim().toLowerCase()
   const filteredSites = useMemo(
@@ -113,9 +132,28 @@ export default function SiteReviewView() {
   const selectedURL = selectedItem ? absoluteURL(selectedItem.path) : ''
   const totalItems = sites.reduce((total, site) => total + site.children.length, 0)
 
+  useEffect(() => {
+    if (
+      selectedItem &&
+      !filteredSites.some((site) =>
+        site.children.some(
+          (item) => item.type === selectedItem.type && String(item.id) === String(selectedItem.id),
+        ),
+      )
+    ) {
+      setSelectedItem(null)
+    }
+  }, [filteredSites, selectedItem])
+
   const copyURL = async () => {
     if (!selectedURL) return
-    await navigator.clipboard.writeText(selectedURL).catch(() => undefined)
+
+    try {
+      await navigator.clipboard.writeText(selectedURL)
+      setNotice('Đã sao chép URL preview.')
+    } catch {
+      setNotice('Không thể sao chép URL. Hãy sao chép thủ công từ dòng địa chỉ preview.')
+    }
   }
 
   return (
@@ -127,10 +165,10 @@ export default function SiteReviewView() {
             <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
               <Link href="/admin">Bảng điều hành admin</Link>
               <span aria-hidden="true">/</span>
-              <span>Site review</span>
+              <span>Rà soát site</span>
             </nav>
             <p>WingsGroup CMS</p>
-            <h1>Site review</h1>
+            <h1>Rà soát site</h1>
             <span>
               Danh sách chỉ gồm site, page và post mà tài khoản hiện tại được quyền đọc trong
               Payload.
@@ -157,10 +195,38 @@ export default function SiteReviewView() {
           </div>
         </div>
 
-        <nav className={`${baseClass}__tree`} aria-label="Site page tree">
+        <nav className={`${baseClass}__tree`} aria-label="Cây site và nội dung">
           {isLoading ? <p>Đang tải danh sách...</p> : null}
-          {error ? <p className={`${baseClass}__error`}>{error}</p> : null}
-          {!isLoading && !error && filteredSites.length === 0 ? <p>Không tìm thấy mục phù hợp.</p> : null}
+          {error ? (
+            <div className={`${baseClass}__error`} role="alert">
+              <p>{error}</p>
+              <button onClick={() => void loadReview()} type="button">
+                Thử lại
+              </button>
+            </div>
+          ) : null}
+          {sourceErrors.length > 0 ? (
+            <p className={`${baseClass}__error`} role="status">
+              Không tải được{' '}
+              {sourceErrors
+                .map((source) => typeLabel[source === 'pages' ? 'page' : 'post'])
+                .join(' và ')}
+              . Các dữ liệu còn lại vẫn có thể rà soát.
+            </p>
+          ) : null}
+          {!isLoading && !error && sites.length === 0 ? (
+            <p>Chưa có site nào trong phạm vi được phân quyền.</p>
+          ) : null}
+          {!isLoading && !error && sites.length > 0 && totalItems === 0 ? (
+            <p>Các site được phân quyền chưa có page hoặc bài viết để rà soát.</p>
+          ) : null}
+          {!isLoading &&
+          !error &&
+          sites.length > 0 &&
+          totalItems > 0 &&
+          filteredSites.length === 0 ? (
+            <p>Không tìm thấy mục phù hợp với bộ lọc hiện tại.</p>
+          ) : null}
           {filteredSites.map((site) => (
             <details key={site.id} open>
               <summary>
@@ -191,30 +257,33 @@ export default function SiteReviewView() {
       <section className={`${baseClass}__viewer`}>
         <div className={`${baseClass}__bar`}>
           <div>
-            <p>{selectedItem ? `${typeLabel[selectedItem.type]} · ${statusLabel(selectedItem.status)}` : 'Chưa chọn'}</p>
+            <p>
+              {selectedItem
+                ? `${typeLabel[selectedItem.type]} · ${statusLabel(selectedItem.status)}`
+                : 'Chưa chọn'}
+            </p>
             <h2>{selectedItem?.label || 'Chọn một trang để preview'}</h2>
             <span>{selectedURL || 'Danh sách sẽ hiện sau khi tải xong.'}</span>
           </div>
           <div className={`${baseClass}__actions`}>
-            {selectedItem ? <Link href={selectedItem.editPath}>Edit</Link> : null}
+            {selectedItem ? <Link href={selectedItem.editPath}>Mở trong Payload</Link> : null}
             {selectedURL ? (
               <a href={selectedURL} rel="noreferrer" target="_blank">
                 Mở tab mới
               </a>
             ) : null}
             <button disabled={!selectedURL} onClick={copyURL} type="button">
-              Copy URL
+              Sao chép URL
             </button>
             {selectedItem ? (
               <button
                 onClick={() => {
-                  const current = selectedItem
-                  setSelectedItem(null)
-                  window.setTimeout(() => setSelectedItem(current), 0)
+                  setPreviewState('loading')
+                  setPreviewKey((current) => current + 1)
                 }}
                 type="button"
               >
-                Reload preview
+                Tải lại preview
               </button>
             ) : null}
           </div>
@@ -222,15 +291,39 @@ export default function SiteReviewView() {
 
         <div className={`${baseClass}__frame-wrap`}>
           {selectedURL ? (
-            <iframe key={`${selectedItem?.type}-${selectedItem?.id}`} src={selectedURL} title="Preview selected WingsGroup page" />
+            <>
+              {previewState === 'loading' ? <p role="status">Đang tải preview...</p> : null}
+              {previewState === 'error' ? (
+                <p className={`${baseClass}__error`} role="alert">
+                  Không tải được preview. Hãy thử tải lại hoặc mở ở tab mới.
+                </p>
+              ) : null}
+              <iframe
+                key={`${selectedItem?.type}-${selectedItem?.id}-${previewKey}`}
+                onError={() => setPreviewState('error')}
+                onLoad={() => setPreviewState('ready')}
+                src={selectedURL}
+                title="Xem trước trang WingsGroup đang chọn"
+              />
+            </>
           ) : (
-            <div className={`${baseClass}__empty`}>Chưa có trang để preview.</div>
+            <div className={`${baseClass}__empty`}>
+              Chọn một mục trong danh sách để xem preview. Khu vực này chỉ đọc và không thay đổi nội
+              dung.
+            </div>
           )}
         </div>
 
+        {notice ? (
+          <p className={`${baseClass}__foot`} role="status">
+            {notice}
+          </p>
+        ) : null}
+
         {generatedAt ? (
           <footer className={`${baseClass}__foot`}>
-            Dữ liệu tải lúc {new Intl.DateTimeFormat('vi-VN', {
+            Dữ liệu tải lúc{' '}
+            {new Intl.DateTimeFormat('vi-VN', {
               dateStyle: 'medium',
               timeStyle: 'short',
               timeZone: 'Asia/Bangkok',

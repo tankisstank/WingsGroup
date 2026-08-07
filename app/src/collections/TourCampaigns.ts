@@ -30,6 +30,12 @@ export const TourCampaigns: CollectionConfig = {
     update: siteScopedAccess(),
   },
   admin: {
+    components: {
+      beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
+      edit: {
+        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+      },
+    },
     description:
       'Campaign season cho tour. Dùng để gom product và departure theo mùa hoặc line bán hàng cụ thể.',
     defaultColumns: ['title', 'site', 'seasonKey', 'updatedAt'],

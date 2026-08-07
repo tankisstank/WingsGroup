@@ -47,6 +47,8 @@ const allowedDevOrigins = [
   'wingspass.wingsgroup.vn',
   'wingside.vn',
   'www.wingside.vn',
+  // Allow Next.js dev resources and HMR through the local Tailscale interface.
+  '100.89.49.21',
 ]
 
 const nextConfig: NextConfig = {

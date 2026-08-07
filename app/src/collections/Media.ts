@@ -48,6 +48,12 @@ export const Media: CollectionConfig = {
     update: siteScopedAccess(),
   },
   admin: {
+    components: {
+      beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
+      edit: {
+        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+      },
+    },
     defaultColumns: ['filename', 'alt', 'site', 'updatedAt'],
     group: adminGroups.media,
   },

@@ -5,7 +5,6 @@ import type { Payload } from 'payload'
 
 import {
   createLayoutPresetData,
-  getLayoutPresetDefinition,
   isLayoutPresetKey,
   type LayoutPresetKey,
 } from '@/utilities/layoutPresets'
@@ -16,6 +15,16 @@ type PageWizardPayload = {
   slug?: string
   summary?: string
   title?: string
+}
+
+class PageWizardError extends Error {
+  status: number
+
+  constructor(message: string, status = 400) {
+    super(message)
+    this.name = 'PageWizardError'
+    this.status = status
+  }
 }
 
 const slugify = (value: string) =>
@@ -49,15 +58,68 @@ const findSiteForm = async (
     return scopedForms.docs[0].id
   }
 
-  const fallbackForms = await payload.find({
-    collection: 'forms',
-    depth: 0,
-    limit: 1,
-    overrideAccess: false,
-    req,
-  })
+  // A form must never be borrowed from another site. Presets that include a
+  // form gracefully render their governed CTA fallback when this is undefined.
+  return undefined
+}
 
-  return fallbackForms.docs[0]?.id
+const normalizeSiteID = (value: unknown): number | string | undefined => {
+  if (typeof value === 'number' && Number.isInteger(value) && value > 0) {
+    return value
+  }
+
+  if (typeof value === 'string' && /^\d+$/.test(value)) {
+    return Number(value)
+  }
+
+  return undefined
+}
+
+const valueContains = (value: unknown, expected: string): boolean => {
+  if (typeof value === 'string') return value === expected
+
+  if (value && typeof value === 'object') {
+    return Object.values(value).some((entry) => valueContains(entry, expected))
+  }
+
+  return false
+}
+
+const hasLayout = (value: unknown): boolean => {
+  if (Array.isArray(value)) return value.length > 0
+
+  if (value && typeof value === 'object') {
+    return Object.values(value).some((entry) => hasLayout(entry))
+  }
+
+  return false
+}
+
+const hasSameID = (value: unknown, expected: number | string): boolean =>
+  String(value && typeof value === 'object' && 'id' in value ? value.id : value) ===
+  String(expected)
+
+const parsePageWizardPayload = (body: unknown) => {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    throw new PageWizardError('Dữ liệu tạo trang không hợp lệ.')
+  }
+
+  const value = body as PageWizardPayload
+  const title = typeof value.title === 'string' ? value.title.trim() : ''
+  const slugSource = typeof value.slug === 'string' ? value.slug : title
+  const slug = slugify(slugSource)
+  const summary = typeof value.summary === 'string' ? value.summary.trim() : ''
+  const siteID = normalizeSiteID(value.site)
+
+  if (!siteID || !title || !slug) {
+    throw new PageWizardError('Thiếu site, tiêu đề hoặc đường dẫn.')
+  }
+
+  if (!isLayoutPresetKey(value.preset)) {
+    throw new PageWizardError('Loại trang không hợp lệ.')
+  }
+
+  return { preset: value.preset, siteID, slug, summary, title }
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -70,27 +132,49 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ message: 'Bạn cần đăng nhập để tạo trang.' }, { status: 401 })
     }
 
-    const body = (await request.json()) as PageWizardPayload
-    const title = body.title?.trim()
-    const slug = slugify(body.slug || title || '')
-    const preset = isLayoutPresetKey(body.preset)
-      ? body.preset
-      : getLayoutPresetDefinition(undefined).key
-    const siteID =
-      typeof body.site === 'string' && /^\d+$/.test(body.site) ? Number(body.site) : body.site
-
-    if (!siteID || !title || !slug) {
-      return Response.json(
-        { message: 'Thiếu site, tiêu đề hoặc đường dẫn.' },
-        { status: 400 },
-      )
+    let body: unknown
+    try {
+      body = await request.json()
+    } catch {
+      throw new PageWizardError('Dữ liệu tạo trang phải là JSON hợp lệ.')
     }
+    const { preset, siteID, slug, summary, title } = parsePageWizardPayload(body)
 
     const payloadReq = await createLocalReq({ user }, payload)
+
+    // Read through the caller's access rules so arbitrary IDs and cross-site
+    // submissions cannot create a page outside the current operator scope.
+    try {
+      await payload.findByID({
+        collection: 'sites',
+        depth: 0,
+        id: siteID,
+        overrideAccess: false,
+        req: payloadReq,
+      })
+    } catch {
+      throw new PageWizardError('Bạn không có quyền sử dụng site đã chọn.', 403)
+    }
+
+    const existing = await payload.find({
+      collection: 'pages',
+      depth: 0,
+      limit: 1,
+      overrideAccess: false,
+      req: payloadReq,
+      where: {
+        and: [{ site: { equals: siteID } }, { slug: { equals: slug } }],
+      },
+    })
+
+    if (existing.docs.length > 0) {
+      throw new PageWizardError('Đường dẫn này đã tồn tại trong site đã chọn.', 409)
+    }
+
     const formID = await findSiteForm(payload, payloadReq, siteID)
     const presetData = createLayoutPresetData(preset, {
       formID,
-      summary: body.summary?.trim(),
+      summary,
       title,
     })
 
@@ -100,7 +184,7 @@ export async function POST(request: Request): Promise<Response> {
         _status: 'draft',
         layoutPresetKey: preset,
         meta: {
-          description: body.summary,
+          description: summary,
           title,
         },
         site: siteID as number,
@@ -108,9 +192,41 @@ export async function POST(request: Request): Promise<Response> {
         title,
         ...presetData,
       } as never,
+      locale: 'vi',
       overrideAccess: false,
       req: payloadReq,
     })
+
+    const verifiedPage = await payload.findByID({
+      collection: 'pages',
+      depth: 0,
+      draft: true,
+      id: createdPage.id,
+      locale: 'all',
+      overrideAccess: false,
+      req: payloadReq,
+    })
+
+    const isValid =
+      hasSameID(verifiedPage.id, createdPage.id) &&
+      hasSameID(verifiedPage.site, siteID) &&
+      verifiedPage.slug === slug &&
+      valueContains(verifiedPage.title, title) &&
+      (!summary || valueContains(verifiedPage.meta?.description, summary)) &&
+      hasLayout(verifiedPage.layout)
+
+    if (!isValid) {
+      await payload.delete({
+        collection: 'pages',
+        id: createdPage.id,
+        overrideAccess: false,
+        req: payloadReq,
+      })
+      throw new PageWizardError(
+        'Trang nháp không vượt qua kiểm tra toàn vẹn dữ liệu và đã được hoàn tác.',
+        500,
+      )
+    }
 
     return Response.json({
       id: createdPage.id,
@@ -121,7 +237,7 @@ export async function POST(request: Request): Promise<Response> {
       {
         message: error instanceof Error ? error.message : 'Không tạo được trang nháp.',
       },
-      { status: 500 },
+      { status: error instanceof PageWizardError ? error.status : 500 },
     )
   }
 }

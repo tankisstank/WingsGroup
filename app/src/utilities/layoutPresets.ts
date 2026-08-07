@@ -37,7 +37,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'core',
     description: 'Trang chủ thiên về câu chuyện thương hiệu, số liệu và nội dung biên tập.',
     key: 'homepage-editorial',
-    label: 'Homepage editorial',
+    label: 'Trang chủ biên tập (Homepage editorial)',
     preview: {
       accent: 'editorial',
       sections: ['Hero centered', 'Editorial split', 'Stats', 'Stories', 'CTA'],
@@ -47,7 +47,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'core',
     description: 'Trang chủ điều hướng nhanh vào các nhóm dịch vụ và điểm đến.',
     key: 'homepage-service-hub',
-    label: 'Homepage service hub',
+    label: 'Trang chủ trung tâm dịch vụ (Homepage service hub)',
     preview: {
       accent: 'service',
       sections: ['Hero split', 'Bento services', 'Stats', 'Testimonials', 'CTA'],
@@ -58,7 +58,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     description:
       'Trang chủ inbound Vietnam thiên về trust proof, destination cards, sample itinerary và inquiry CTA.',
     key: 'wingsside-inbound-homepage',
-    label: 'WingsSide inbound homepage',
+    label: 'Trang chủ inbound WingsSide (WingsSide inbound homepage)',
     preview: {
       accent: 'inbound',
       sections: [
@@ -76,7 +76,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'service',
     description: 'Trang điểm đến giàu hình ảnh, trải nghiệm và nội dung SEO.',
     key: 'destination-showcase',
-    label: 'Destination showcase',
+    label: 'Giới thiệu điểm đến (Destination showcase)',
     preview: {
       accent: 'destination',
       sections: ['Hero layered', 'Alternating features', 'Media', 'FAQ', 'CTA'],
@@ -86,7 +86,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'service',
     description: 'Trang tour tập trung chuyển đổi với điểm nổi bật, giá và bằng chứng.',
     key: 'tour-conversion',
-    label: 'Tour conversion',
+    label: 'Chuyển đổi tour (Tour conversion)',
     preview: {
       accent: 'tour',
       sections: ['Hero split', 'Features', 'Pricing', 'Testimonials', 'FAQ', 'CTA'],
@@ -96,7 +96,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'service',
     description: 'Trang dịch vụ có quy trình, phương án lựa chọn và form tư vấn.',
     key: 'service-detail',
-    label: 'Service detail',
+    label: 'Chi tiết dịch vụ (Service detail)',
     preview: {
       accent: 'service',
       sections: ['Hero split', 'Sticky features', 'Comparison', 'FAQ', 'Form'],
@@ -106,7 +106,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'campaign',
     description: 'Landing page ra mắt chiến dịch, ưu đãi hoặc thị trường mới.',
     key: 'campaign-launch',
-    label: 'Campaign launch',
+    label: 'Ra mắt chiến dịch (Campaign launch)',
     preview: {
       accent: 'campaign',
       sections: ['Hero mesh', 'Bento benefits', 'Stats', 'Social proof', 'Form', 'CTA'],
@@ -116,7 +116,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'lead',
     description: 'Landing page nhận brochure, báo giá hoặc yêu cầu tư vấn.',
     key: 'lead-capture',
-    label: 'Lead capture',
+    label: 'Thu thập khách hàng tiềm năng (Lead capture)',
     preview: {
       accent: 'lead',
       sections: ['Hero centered', 'Benefits', 'Stats', 'Form', 'FAQ'],
@@ -126,7 +126,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'lead',
     description: 'Trang liên hệ với kênh hỗ trợ, cam kết phản hồi và form.',
     key: 'contact-support',
-    label: 'Contact and support',
+    label: 'Liên hệ và hỗ trợ (Contact and support)',
     preview: {
       accent: 'contact',
       sections: ['Hero low impact', 'Support channels', 'Form', 'FAQ'],
@@ -136,7 +136,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'service',
     description: 'Trang so sánh gói, quyền lợi hoặc phương án dịch vụ.',
     key: 'pricing-package-comparison',
-    label: 'Pricing and package comparison',
+    label: 'So sánh giá và gói dịch vụ (Pricing and package comparison)',
     preview: {
       accent: 'pricing',
       sections: ['Hero low impact', 'Tier cards', 'Comparison matrix', 'FAQ', 'CTA'],
@@ -146,7 +146,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'content',
     description: 'Trang hub bài viết theo phong cách tạp chí và chủ đề.',
     key: 'magazine-content-hub',
-    label: 'Magazine and content hub',
+    label: 'Trung tâm nội dung tạp chí (Magazine and content hub)',
     preview: {
       accent: 'content',
       sections: ['Hero editorial', 'Magazine archive', 'Stats', 'Newsletter CTA'],
@@ -156,7 +156,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'content',
     description: 'Trang hướng dẫn dài với mục lục, nội dung và FAQ.',
     key: 'long-form-guide',
-    label: 'Long-form guide',
+    label: 'Hướng dẫn chuyên sâu (Long-form guide)',
     preview: {
       accent: 'guide',
       sections: ['Hero low impact', 'Sidebar TOC', 'Media', 'FAQ', 'CTA'],
@@ -166,7 +166,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     category: 'content',
     description: 'Trang tổng hợp uy tín, logo, chỉ số và câu chuyện khách hàng.',
     key: 'social-proof',
-    label: 'Trust and social proof',
+    label: 'Bằng chứng uy tín (Trust and social proof)',
     preview: {
       accent: 'proof',
       sections: ['Hero centered', 'Logo proof', 'Featured quote', 'Social wall', 'CTA'],

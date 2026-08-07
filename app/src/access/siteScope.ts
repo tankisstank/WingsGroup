@@ -55,9 +55,18 @@ export const siteScopedOrPublished = (fieldName = 'site'): Access => {
   return (args) => {
     if (!args.req.user) {
       return {
-        _status: {
-          equals: 'published',
-        },
+        and: [
+          {
+            _status: {
+              equals: 'published',
+            },
+          },
+          {
+            [fieldName]: {
+              exists: true,
+            },
+          },
+        ],
       }
     }
 

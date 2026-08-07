@@ -55,8 +55,12 @@ export const Pages: CollectionConfig<'pages'> = {
   },
   admin: {
     components: {
+      beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
       edit: {
-        beforeDocumentControls: ['@/components/AdminGuidance/PageEditGuidance'],
+        beforeDocumentControls: [
+          '@/components/AdminGuidance/PageEditGuidance',
+          '@/components/ContentLocaleControl#ContentLocaleDocumentControl',
+        ],
       },
     },
     description:

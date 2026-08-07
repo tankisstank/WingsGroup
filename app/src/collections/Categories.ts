@@ -16,6 +16,12 @@ export const Categories: CollectionConfig = {
     update: siteScopedAccess(),
   },
   admin: {
+    components: {
+      beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
+      edit: {
+        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+      },
+    },
     defaultColumns: ['title', 'site', 'updatedAt'],
     group: adminGroups.content,
     hidden: hideFromEditors,

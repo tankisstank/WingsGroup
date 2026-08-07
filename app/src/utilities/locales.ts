@@ -24,7 +24,7 @@ export const localeMetadata = [
     isAdsReady: false,
     isCmsEnabled: true,
     isPublicEnabled: true,
-    label: 'Tiếng Việt',
+    label: 'Tiếng Việt (vi)',
   },
   {
     code: 'en',
@@ -33,7 +33,7 @@ export const localeMetadata = [
     isAdsReady: true,
     isCmsEnabled: true,
     isPublicEnabled: true,
-    label: 'English',
+    label: 'Tiếng Anh (en)',
   },
   {
     code: 'it',
@@ -42,7 +42,7 @@ export const localeMetadata = [
     isAdsReady: true,
     isCmsEnabled: true,
     isPublicEnabled: true,
-    label: 'Italiano',
+    label: 'Tiếng Ý (it)',
   },
   {
     code: 'es',
@@ -51,7 +51,7 @@ export const localeMetadata = [
     isAdsReady: true,
     isCmsEnabled: true,
     isPublicEnabled: true,
-    label: 'Español',
+    label: 'Tiếng Tây Ban Nha (es)',
   },
   {
     code: 'pt',
@@ -60,7 +60,7 @@ export const localeMetadata = [
     isAdsReady: true,
     isCmsEnabled: true,
     isPublicEnabled: true,
-    label: 'Português',
+    label: 'Tiếng Bồ Đào Nha (pt)',
   },
   {
     code: 'ja',
@@ -69,7 +69,7 @@ export const localeMetadata = [
     isAdsReady: false,
     isCmsEnabled: true,
     isPublicEnabled: false,
-    label: '日本語',
+    label: 'Tiếng Nhật (ja)',
   },
   {
     code: 'ko',
@@ -78,7 +78,7 @@ export const localeMetadata = [
     isAdsReady: false,
     isCmsEnabled: true,
     isPublicEnabled: false,
-    label: '한국어',
+    label: 'Tiếng Hàn (ko)',
   },
   {
     code: 'fr',
@@ -87,7 +87,7 @@ export const localeMetadata = [
     isAdsReady: false,
     isCmsEnabled: true,
     isPublicEnabled: false,
-    label: 'Français',
+    label: 'Tiếng Pháp (fr)',
   },
   {
     code: 'de',
@@ -96,7 +96,7 @@ export const localeMetadata = [
     isAdsReady: false,
     isCmsEnabled: true,
     isPublicEnabled: false,
-    label: 'Deutsch',
+    label: 'Tiếng Đức (de)',
   },
 ] as const satisfies readonly LocaleMetadata[]
 

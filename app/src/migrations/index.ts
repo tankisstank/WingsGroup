@@ -28,6 +28,7 @@ import * as migration_20260730_120000_wings_side_journeys_v2 from './20260730_12
 import * as migration_20260730_130000_wings_side_enquiry_discovery_context from './20260730_130000_wings_side_enquiry_discovery_context'
 import * as migration_20260731_090000_tour_commerce_freshness_identity from './20260731_090000_tour_commerce_freshness_identity'
 import * as migration_20260731_100000_tour_departure_source_provenance from './20260731_100000_tour_departure_source_provenance'
+import * as migration_20260806_090000_backfill_wingsgo_legacy_tour_sites from './20260806_090000_backfill_wingsgo_legacy_tour_sites'
 
 export const migrations = [
   {
@@ -179,5 +180,10 @@ export const migrations = [
     up: migration_20260731_100000_tour_departure_source_provenance.up,
     down: migration_20260731_100000_tour_departure_source_provenance.down,
     name: '20260731_100000_tour_departure_source_provenance',
+  },
+  {
+    up: migration_20260806_090000_backfill_wingsgo_legacy_tour_sites.up,
+    down: migration_20260806_090000_backfill_wingsgo_legacy_tour_sites.down,
+    name: '20260806_090000_backfill_wingsgo_legacy_tour_sites',
   },
 ]

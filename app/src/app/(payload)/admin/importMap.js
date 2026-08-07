@@ -2,7 +2,10 @@ import { ExportListMenuItem as ExportListMenuItem_cdf7e044479f899a31f804427d568b
 import { default as default_5dbc566c85bd9cddc4d9a87abea0f042 } from '@/components/ThemePresetEditor/PreviewField'
 import { default as default_24e9bab7be9a712d38ced61f96d0adf8 } from '@/components/ThemePresetEditor/ColorField'
 import { default as default_cbf8573eb8c8e46708c8e0a34465d9fd } from '@/components/HeroPresentationPresetEditor/PreviewField'
+import { default as default_7725e0de6628b628d01973d19a55b5b2 } from '@/components/AdminCells/SiteRelationCell'
 import { ImportListMenuItem as ImportListMenuItem_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { ContentLocaleListControl as ContentLocaleListControl_8b230dc8beea36b4e6d4c96bd2902084 } from '@/components/ContentLocaleControl'
+import { ContentLocaleDocumentControl as ContentLocaleDocumentControl_8b230dc8beea36b4e6d4c96bd2902084 } from '@/components/ContentLocaleControl'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -24,6 +27,8 @@ import { SlugField as SlugField_2b8867833a34864a02ddf429b0728a40 } from '@payloa
 import { default as default_83209cccf91b961ae76d509b468778cd } from '@/components/AdminGuidance/PageEditGuidance'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlocksFeatureClient as BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { default as default_245822b561ac10a6df6e1f638d3707d8 } from '@/components/AdminGuidance/TourProductListGuidance'
+import { default as default_6c48040f6618a25e23c2a770435a999b } from '@/components/AdminGuidance/TourProductEditGuidance'
 import { default as default_f740633a72c2a0b281d2398c24b80d8a } from '@/components/AdminGuidance/LeadListGuidance'
 import { FormatField as FormatField_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
 import { LimitField as LimitField_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
@@ -49,6 +54,7 @@ import { default as default_1a7510af427896d367a49dbf838d2de6 } from '@/component
 import { default as default_25ec89e89f52bc4500f96e91864b9a74 } from '@/components/AdminThemeBootstrap'
 import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/components/BeforeLogin'
 import { default as default_f56b2388657bfe700e8ea4dd7cf32a54 } from '@/components/AdminNavIntro'
+import { default as default_5a53651486694a2c2c0fcfa392913193 } from '@/components/AdminNavTooltip'
 import { ImportExportProvider as ImportExportProvider_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
 import { default as default_f9eef2fa35c867aa73ad97968a96fa57 } from '@/components/AdminOperatorConsole'
 import { default as default_dbfe8c9157153a1e71857346f3fece7d } from '@/components/ThemeManager'
@@ -63,7 +69,10 @@ export const importMap = {
   "@/components/ThemePresetEditor/PreviewField#default": default_5dbc566c85bd9cddc4d9a87abea0f042,
   "@/components/ThemePresetEditor/ColorField#default": default_24e9bab7be9a712d38ced61f96d0adf8,
   "@/components/HeroPresentationPresetEditor/PreviewField#default": default_cbf8573eb8c8e46708c8e0a34465d9fd,
+  "@/components/AdminCells/SiteRelationCell#default": default_7725e0de6628b628d01973d19a55b5b2,
   "@payloadcms/plugin-import-export/rsc#ImportListMenuItem": ImportListMenuItem_cdf7e044479f899a31f804427d568b36,
+  "@/components/ContentLocaleControl#ContentLocaleListControl": ContentLocaleListControl_8b230dc8beea36b4e6d4c96bd2902084,
+  "@/components/ContentLocaleControl#ContentLocaleDocumentControl": ContentLocaleDocumentControl_8b230dc8beea36b4e6d4c96bd2902084,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -85,6 +94,8 @@ export const importMap = {
   "@/components/AdminGuidance/PageEditGuidance#default": default_83209cccf91b961ae76d509b468778cd,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BlocksFeatureClient": BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/components/AdminGuidance/TourProductListGuidance#default": default_245822b561ac10a6df6e1f638d3707d8,
+  "@/components/AdminGuidance/TourProductEditGuidance#default": default_6c48040f6618a25e23c2a770435a999b,
   "@/components/AdminGuidance/LeadListGuidance#default": default_f740633a72c2a0b281d2398c24b80d8a,
   "@payloadcms/plugin-import-export/rsc#FormatField": FormatField_cdf7e044479f899a31f804427d568b36,
   "@payloadcms/plugin-import-export/rsc#LimitField": LimitField_cdf7e044479f899a31f804427d568b36,
@@ -110,6 +121,7 @@ export const importMap = {
   "@/components/AdminThemeBootstrap#default": default_25ec89e89f52bc4500f96e91864b9a74,
   "@/components/BeforeLogin#default": default_8a7ab0eb7ab5c511aba12e68480bfe5e,
   "@/components/AdminNavIntro#default": default_f56b2388657bfe700e8ea4dd7cf32a54,
+  "@/components/AdminNavTooltip#default": default_5a53651486694a2c2c0fcfa392913193,
   "@payloadcms/plugin-import-export/rsc#ImportExportProvider": ImportExportProvider_cdf7e044479f899a31f804427d568b36,
   "@/components/AdminOperatorConsole#default": default_f9eef2fa35c867aa73ad97968a96fa57,
   "@/components/ThemeManager#default": default_dbfe8c9157153a1e71857346f3fece7d,

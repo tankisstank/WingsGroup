@@ -281,7 +281,7 @@ describe('WingsGroupMetrics truthful server read model', () => {
   it('uses shared draft labels and the exact aggregate scope labels', async () => {
     await renderWidget({ role: 'super-admin' })
 
-    expect(screen.getByRole('heading', { name: 'Bảng điều hành CMS' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Việc cần xử lý' })).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Tạo trang nháp' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Site được phân quyền' })).toBeTruthy()
     expect(metricFor('Trang nháp')).toBeTruthy()

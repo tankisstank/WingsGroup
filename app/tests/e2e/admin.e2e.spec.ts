@@ -124,6 +124,12 @@ test.describe('Admin Panel', () => {
     await expect(page.locator('html')).toHaveAttribute('data-admin-theme', 'finexy-soft')
     await expect(page.locator('html')).toHaveClass(/wings-admin-theme-finexy/)
     await expect(page.getByRole('heading', { level: 1, name: 'Bảng điều hành CMS' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Bảng điều hành CMS' })).toHaveCount(1)
+    await expect(page.getByRole('heading', { level: 2, name: 'Việc cần xử lý' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Bảng điều hành CMS' })).toHaveCount(1)
+    await expect(page.locator('.before-dashboard__banner [role="status"]')).toBeVisible()
+    await expect(page.locator('.before-dashboard__banner h1, .before-dashboard__banner h2, .before-dashboard__banner h3, .before-dashboard__banner h4')).toHaveCount(0)
+    await expect(page.locator('html')).toHaveAttribute('lang', 'vi')
     await expect(page.getByRole('link', { name: 'Console vận hành' }).first()).toBeVisible()
     await expect(
       page
@@ -290,20 +296,20 @@ test.describe('Admin Panel', () => {
 
   test('can review theme manager without leaking preset ids', async () => {
     await page.goto(`${e2eBaseURL}/admin/theme`)
-    await expect(page.getByRole('heading', { name: 'Theme Manager' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Site context' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Colors' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Typography, shape & layout' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Hero presentation' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Quản lý giao diện' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Phạm vi site' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Màu sắc' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Chữ, hình khối và bố cục' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Trình bày hero' })).toBeVisible()
     await expect(page.locator('.theme-manager__hero-preview')).toBeVisible()
     await expect
       .poll(async () => page.locator('.theme-manager__preset-card').count())
       .toBeGreaterThanOrEqual(heroPresentationDefinitions.length)
-    await expect(page.locator('.theme-manager__usage-grid')).toContainText('Page kế thừa hero site')
+    await expect(page.locator('.theme-manager__usage-grid')).toContainText('Trang kế thừa hero site')
     await expect(page.locator('.theme-manager__requirement-list')).toBeVisible()
     await expect(page.locator('.theme-manager__preview-head strong')).not.toHaveText(/^\d+$/)
-    await expect(page.getByLabel('Brand color picker')).toBeVisible()
-    await expect(page.getByText(/Preview (live|chưa lưu)/)).toBeVisible()
+    await expect(page.getByLabel('Màu thương hiệu color picker')).toBeVisible()
+    await expect(page.getByText(/Xem trước (đang áp dụng|chưa lưu)/)).toBeVisible()
   })
 
   test('can preview and pick colors while creating a theme preset', async () => {
@@ -359,62 +365,99 @@ test.describe('Admin Panel', () => {
     test.setTimeout(90_000)
 
     const uniqueSlug = `campaign-launch-e2e-${Date.now()}`
+    let pageID: string | undefined
 
-    await page.goto(`${e2eBaseURL}/admin/page-wizard`)
-    await expect(page.getByRole('heading', { name: 'Tạo trang nhanh' })).toBeVisible()
-    await expect(page.getByRole('combobox', { name: /locale|ngôn ngữ/i })).toHaveCount(0)
-    // The preset buttons are present in SSR markup. Waiting for the async site
-    // list proves the client has hydrated before exercising React state.
-    await expect(page.getByRole('combobox', { name: 'Site' })).not.toHaveValue('')
-    const campaignPreset = page.getByRole('button', { name: /Campaign launch/ })
-    await campaignPreset.click()
-    await expect(campaignPreset).toHaveAttribute('aria-pressed', 'true')
-    await expect(page.locator('.page-wizard__preset-summary').getByText('Hero mesh')).toBeVisible()
-    await page.getByRole('button', { name: 'Tiếp tục' }).click()
+    try {
+      await page.goto(`${e2eBaseURL}/admin/page-wizard`)
+      await expect(page.getByRole('heading', { name: 'Tạo trang nhanh' })).toBeVisible()
+      await expect(page.getByRole('combobox', { name: /locale|ngôn ngữ/i })).toHaveCount(0)
+      // The preset buttons are present in SSR markup. Waiting for the async site
+      // list proves the client has hydrated before exercising React state.
+      const siteControl = page.getByRole('combobox', { name: 'Site' })
+      await expect(siteControl).not.toHaveValue('')
+      const selectedSiteID = await siteControl.inputValue()
+      const campaignPreset = page.getByRole('button', { name: /Ra mắt chiến dịch \(Campaign launch\)/ })
+      await campaignPreset.click()
+      await expect(campaignPreset).toHaveAttribute('aria-pressed', 'true')
+      await expect(
+        page.locator('.page-wizard__preset-summary').getByText('Hero lưới chuyển sắc'),
+      ).toBeVisible()
+      await page.getByRole('button', { name: 'Tiếp tục' }).click()
 
-    await page.getByPlaceholder('Ví dụ: Tour Nhật Bản mùa thu').fill('Campaign Launch E2E')
-    await page.getByPlaceholder('tour-nhat-ban-mua-thu').fill(uniqueSlug)
-    await page
-      .getByPlaceholder('Viết 1-2 câu giúp người đọc hiểu trang này dùng để làm gì.')
-      .fill('Draft created from the campaign launch layout preset.')
-    await page.getByRole('button', { name: 'Kiểm tra' }).click()
-    await expect(page.getByText('Campaign launch', { exact: true })).toBeVisible()
-    await expect(
-      page.getByText('Hero mesh • Bento benefits • Stats • Social proof • Form • CTA'),
-    ).toBeVisible()
-    const createRequestPromise = page.waitForRequest(
-      (request) =>
-        request.method() === 'POST' && new URL(request.url()).pathname === '/api/page-wizard',
-    )
-    await page.getByRole('button', { name: 'Tạo trang nháp' }).click()
-    const createRequest = await createRequestPromise
-    const createBody = createRequest.postDataJSON() as Record<string, unknown>
-    expect(createBody).not.toHaveProperty('locale')
-
-    await page.waitForURL(/\/admin\/collections\/pages\/[a-zA-Z0-9-_]+/, { timeout: 30_000 })
-    await expect(page).toHaveURL(/\/admin\/collections\/pages\/[a-zA-Z0-9-_]+/)
-    const pageID = page.url().split('/').pop()
-    expect(pageID).toBeTruthy()
-
-    const createdPage = await page.evaluate(async (id) => {
-      const response = await fetch(`/api/pages/${id}?depth=0&draft=true`, {
-        credentials: 'include',
+      await page.getByPlaceholder('Ví dụ: Tour Nhật Bản mùa thu').fill('Campaign Launch E2E')
+      await page.getByPlaceholder('tour-nhat-ban-mua-thu').fill(uniqueSlug)
+      await page
+        .getByPlaceholder('Viết 1-2 câu giúp người đọc hiểu trang này dùng để làm gì.')
+        .fill('Draft created from the campaign launch layout preset.')
+      await page.getByRole('button', { name: 'Kiểm tra' }).click()
+      await expect(page.getByText('Ra mắt chiến dịch (Campaign launch)', { exact: true })).toBeVisible()
+      await expect(
+        page.getByText(
+          'Hero lưới chuyển sắc • Lợi ích dạng bento • Số liệu • Bằng chứng xã hội • Biểu mẫu • Kêu gọi hành động',
+        ),
+      ).toBeVisible()
+      const createRequestPromise = page.waitForRequest(
+        (request) =>
+          request.method() === 'POST' && new URL(request.url()).pathname === '/api/page-wizard',
+      )
+      await page.getByRole('button', { name: 'Tạo trang nháp' }).click()
+      const createRequest = await createRequestPromise
+      const createBody = createRequest.postDataJSON() as Record<string, unknown>
+      expect(createBody).not.toHaveProperty('locale')
+      expect(createBody).toMatchObject({
+        preset: 'campaign-launch',
+        site: selectedSiteID,
+        slug: uniqueSlug,
+        summary: 'Draft created from the campaign launch layout preset.',
+        title: 'Campaign Launch E2E',
       })
+      await page.waitForURL(/\/admin\/collections\/pages\/[a-zA-Z0-9-_]+/, { timeout: 30_000 })
+      await expect(page).toHaveURL(/\/admin\/collections\/pages\/[a-zA-Z0-9-_]+/)
+      pageID = page.url().split('/').pop()
+      expect(pageID).toBeTruthy()
 
-      return response.json()
-    }, pageID)
+      const [viPage, enPage, allLocalesPage] = await page.evaluate(async (id) => {
+        const read = async (locale: string) => {
+          const response = await fetch(`/api/pages/${id}?depth=0&draft=true&locale=${locale}`, {
+            credentials: 'include',
+          })
 
-    expect(createdPage.layoutPresetKey).toBe('campaign-launch')
-    expect(createdPage._status).toBe('draft')
-    expect(createdPage.title).toBe('Campaign Launch E2E')
-    expect(createdPage.layout.map((block: { blockType: string }) => block.blockType)).toEqual(
-      expect.arrayContaining(['featureGrid', 'stats', 'testimonial', 'formBlock', 'cta']),
-    )
+          return response.json()
+        }
+
+        return Promise.all([read('vi'), read('en'), read('all')])
+      }, pageID)
+
+      expect(viPage).toMatchObject({
+        _status: 'draft',
+        layoutPresetKey: 'campaign-launch',
+        site: Number(selectedSiteID),
+        slug: uniqueSlug,
+        title: 'Campaign Launch E2E',
+      })
+      expect(viPage.meta.description).toBe('Draft created from the campaign launch layout preset.')
+      expect(viPage.layout.map((block: { blockType: string }) => block.blockType)).toEqual(
+        expect.arrayContaining(['featureGrid', 'stats', 'testimonial', 'formBlock', 'cta']),
+      )
+      expect(enPage.site).toBe(Number(selectedSiteID))
+      expect(enPage.slug).toBe(uniqueSlug)
+      expect(allLocalesPage.title.vi).toBe('Campaign Launch E2E')
+      expect(allLocalesPage.meta.description.vi).toBe(
+        'Draft created from the campaign launch layout preset.',
+      )
+      expect(allLocalesPage.layout.vi).toHaveLength(5)
+    } finally {
+      if (pageID) {
+        await page.evaluate(async (id) => {
+          await fetch(`/api/pages/${id}`, { credentials: 'include', method: 'DELETE' })
+        }, pageID)
+      }
+    }
   })
 
   test('keeps Site Review read-only without unsupported workflow controls', async () => {
     await page.goto(`${e2eBaseURL}/admin/site-review`)
-    await expect(page.getByRole('heading', { level: 1, name: 'Site review' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Rà soát site' })).toBeVisible()
     await expect(
       page.getByText(/chỉ gồm site, page và post mà tài khoản hiện tại được quyền đọc/i),
     ).toBeVisible()
@@ -578,12 +621,12 @@ test.describe('Admin Panel', () => {
     const heroGuide = page.locator('.hero-presentation-guide')
     await expect(heroGuide.getByText('Preview cấu trúc hero')).toBeVisible()
     await expect(heroGuide.getByText('Nguồn áp dụng: page')).toBeVisible()
-    await expect(heroGuide.getByText('Business behavior:')).toBeVisible()
+    await expect(heroGuide.getByText('Hành vi nghiệp vụ:')).toBeVisible()
     await expect(page.locator('#field-hero__media').getByText('Ảnh hero chính')).toBeVisible()
     await page.locator('#field-hero__presentationMode').getByRole('combobox').click()
     await page.getByRole('option', { name: 'Kế thừa từ site' }).click()
-    await expect(heroGuide.getByText(/Nguồn áp dụng: (site|site chưa resolve)/)).toBeVisible()
-    await expect(heroGuide.getByText(/Page có thể/)).toBeVisible()
+    await expect(heroGuide.getByText(/Nguồn áp dụng: (site|site chưa xác định)/)).toBeVisible()
+    await expect(heroGuide.getByText(/Trang có thể/)).toBeVisible()
   })
 
   test('site manager can read only assigned site settings through authenticated API', async ({

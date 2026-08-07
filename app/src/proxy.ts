@@ -16,6 +16,8 @@ const stripLeadingSegments = (pathname: string, count: number) => {
 }
 
 const localBootstrapHosts = new Set(['127.0.0.1', '::1', 'localhost'])
+const adminLocale = 'vi'
+const adminLocaleCookie = 'payload-lng'
 
 const isLocalDevelopmentHost = (host: null | string) =>
   Boolean(host && (localBootstrapHosts.has(host) || host.endsWith('.local')))
@@ -94,6 +96,24 @@ const getPreservedRewriteContext = (request: NextRequest): Headers | null => {
 }
 
 export function proxy(request: NextRequest) {
+  // Payload resolves its native Admin translation during the request from
+  // `payload-lng`. A client-side cookie write happens too late for the login
+  // shell, so bootstrap it with one same-URL redirect before Payload renders.
+  // This is an operator-UI preference only: it never changes CMS content
+  // locale, which continues to be explicit in editor and REST calls.
+  if (
+    (request.nextUrl.pathname === '/admin' || request.nextUrl.pathname.startsWith('/admin/')) &&
+    request.cookies.get(adminLocaleCookie)?.value !== adminLocale
+  ) {
+    const response = NextResponse.redirect(request.nextUrl)
+    response.cookies.set(adminLocaleCookie, adminLocale, {
+      maxAge: 60 * 60 * 24 * 365,
+      path: '/',
+      sameSite: 'lax',
+    })
+    return response
+  }
+
   const preservedRewriteContext = getPreservedRewriteContext(request)
 
   if (preservedRewriteContext) {

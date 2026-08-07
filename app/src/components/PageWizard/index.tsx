@@ -22,9 +22,9 @@ const baseClass = 'page-wizard'
 
 const categoryLabels: Record<LayoutPresetCategory, string> = {
   core: 'Trang nền tảng',
-  campaign: 'Landing / campaign',
-  content: 'Nội dung / editorial',
-  lead: 'Lead capture',
+  campaign: 'Landing / chiến dịch',
+  content: 'Nội dung / biên tập',
+  lead: 'Thu thập khách hàng tiềm năng (Lead capture)',
   service: 'Dịch vụ / sản phẩm',
 }
 
@@ -35,6 +35,62 @@ const templateIconLabels: Record<LayoutPresetCategory, string> = {
   lead: 'F',
   service: 'T',
 }
+
+const presetLabels: Record<LayoutPresetKey, string> = {
+  'campaign-launch': 'Ra mắt chiến dịch (Campaign launch)',
+  'contact-support': 'Liên hệ và hỗ trợ (Contact and support)',
+  'destination-showcase': 'Giới thiệu điểm đến (Destination showcase)',
+  'homepage-editorial': 'Trang chủ biên tập (Homepage editorial)',
+  'homepage-service-hub': 'Trang chủ trung tâm dịch vụ (Homepage service hub)',
+  'lead-capture': 'Thu thập khách hàng tiềm năng (Lead capture)',
+  'long-form-guide': 'Hướng dẫn chuyên sâu (Long-form guide)',
+  'magazine-content-hub': 'Trung tâm nội dung tạp chí (Magazine and content hub)',
+  'pricing-package-comparison': 'So sánh giá và gói dịch vụ (Pricing and package comparison)',
+  'service-detail': 'Chi tiết dịch vụ (Service detail)',
+  'social-proof': 'Bằng chứng uy tín (Trust and social proof)',
+  'tour-conversion': 'Chuyển đổi tour (Tour conversion)',
+  'wingsside-inbound-homepage': 'Trang chủ inbound WingSide (WingsSide inbound homepage)',
+}
+
+const sectionLabels: Record<string, string> = {
+  'Alternating features': 'Tính năng xen kẽ',
+  Benefits: 'Lợi ích',
+  'Bento benefits': 'Lợi ích dạng bento',
+  'Bento services': 'Dịch vụ dạng bento',
+  Comparison: 'So sánh',
+  'Comparison matrix': 'Ma trận so sánh',
+  'Editorial split': 'Khối biên tập tách đôi',
+  FAQ: 'Câu hỏi thường gặp',
+  Features: 'Tính năng',
+  Form: 'Biểu mẫu',
+  'Hero centered': 'Hero căn giữa',
+  'Hero cinematic': 'Hero điện ảnh',
+  'Hero editorial': 'Hero biên tập',
+  'Hero layered': 'Hero xếp lớp',
+  'Hero low impact': 'Hero gọn nhẹ',
+  'Hero mesh': 'Hero lưới chuyển sắc',
+  'Hero split': 'Hero tách đôi',
+  'Logo proof': 'Logo đối tác',
+  Media: 'Media',
+  'Magazine archive': 'Kho nội dung tạp chí',
+  'Sample itineraries': 'Lịch trình mẫu',
+  'Sidebar TOC': 'Mục lục bên cạnh',
+  'Social proof': 'Bằng chứng xã hội',
+  'Social wall': 'Tường phản hồi',
+  Stats: 'Số liệu',
+  'Sticky features': 'Tính năng ghim',
+  'Support channels': 'Kênh hỗ trợ',
+  Testimonials: 'Khách hàng đánh giá',
+  'Tier cards': 'Thẻ hạng dịch vụ',
+  'Value props': 'Giá trị nổi bật',
+  'Featured quote': 'Trích dẫn nổi bật',
+  Destinations: 'Điểm đến',
+  Stories: 'Câu chuyện',
+  CTA: 'Kêu gọi hành động',
+}
+
+const displayPresetLabel = (presetKey: LayoutPresetKey) => presetLabels[presetKey]
+const displaySections = (sections: readonly string[]) => sections.map((section) => sectionLabels[section] || section)
 
 const slugify = (value: string) =>
   value
@@ -101,6 +157,10 @@ export default function PageWizardView() {
   const canCreate = Boolean(siteID && preset && title.trim() && slug.trim())
 
   const createPage = async () => {
+    if (isSubmitting) {
+      return
+    }
+
     if (!canCreate) {
       setError('Vui lòng nhập đủ site, loại trang, tiêu đề và đường dẫn.')
       return
@@ -155,8 +215,8 @@ export default function PageWizardView() {
             <p>WingsGroup CMS</p>
             <h1>Tạo trang nhanh</h1>
             <span>
-              Dựng trang nháp theo từng bước. Sau khi tạo, bạn sẽ được chuyển sang màn chỉnh sửa
-              đầy đủ để kiểm tra nội dung và preview trước khi publish.
+              Dựng trang nháp theo từng bước. Sau khi tạo, bạn sẽ được chuyển sang màn chỉnh sửa đầy
+              đủ để kiểm tra nội dung và preview trước khi publish.
             </span>
           </div>
           <div className={`${baseClass}__header-actions`}>
@@ -176,7 +236,11 @@ export default function PageWizardView() {
           ))}
         </ol>
 
-        {error ? <div className={`${baseClass}__error`}>{error}</div> : null}
+        {error ? (
+          <div aria-live="assertive" className={`${baseClass}__error`} role="alert">
+            {error}
+          </div>
+        ) : null}
 
         {step === 1 ? (
           <section className={`${baseClass}__panel`}>
@@ -210,7 +274,7 @@ export default function PageWizardView() {
                           <span className={`${baseClass}__template-icon`} aria-hidden="true">
                             {templateIconLabels[item.category]}
                           </span>
-                          <strong>{item.label}</strong>
+                          <strong>{displayPresetLabel(item.key)}</strong>
                           <span>{item.description}</span>
                           <span
                             aria-hidden="true"
@@ -220,7 +284,7 @@ export default function PageWizardView() {
                             <i />
                             <i />
                           </span>
-                          <small>{item.preview.sections.join(' • ')}</small>
+                          <small>{displaySections(item.preview.sections).join(' • ')}</small>
                         </button>
                       ))}
                     </div>
@@ -230,10 +294,10 @@ export default function PageWizardView() {
 
               <aside className={`${baseClass}__preset-summary`}>
                 <span>Đang chọn</span>
-                <h3>{selectedPreset.label}</h3>
+                <h3>{displayPresetLabel(selectedPreset.key)}</h3>
                 <p>{selectedPreset.description}</p>
                 <ol>
-                  {selectedPreset.preview.sections.map((section) => (
+                  {displaySections(selectedPreset.preview.sections).map((section) => (
                     <li key={section}>{section}</li>
                   ))}
                 </ol>
@@ -284,7 +348,11 @@ export default function PageWizardView() {
               <button onClick={() => setStep(1)} type="button">
                 Quay lại
               </button>
-              <button disabled={!title.trim() || !slug.trim()} onClick={() => setStep(3)} type="button">
+              <button
+                disabled={!title.trim() || !slug.trim()}
+                onClick={() => setStep(3)}
+                type="button"
+              >
                 Kiểm tra
               </button>
             </div>
@@ -301,15 +369,19 @@ export default function PageWizardView() {
               </div>
               <div>
                 <dt>Loại trang</dt>
-                <dd>{selectedPreset.label}</dd>
+                <dd>{displayPresetLabel(selectedPreset.key)}</dd>
               </div>
               <div>
                 <dt>Cấu trúc gợi ý</dt>
-                <dd>{selectedPreset.preview.sections.join(' • ')}</dd>
+                <dd>{displaySections(selectedPreset.preview.sections).join(' • ')}</dd>
               </div>
               <div>
                 <dt>Tiêu đề</dt>
                 <dd>{title || 'Chưa nhập'}</dd>
+              </div>
+              <div>
+                <dt>Mô tả ngắn</dt>
+                <dd>{summary || 'Chưa nhập'}</dd>
               </div>
               <div>
                 <dt>Đường dẫn</dt>
