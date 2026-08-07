@@ -500,6 +500,23 @@ body.wings-admin-shell .app-header :where(a, button, .step-nav__controls) {
   color: var(--wings-admin-muted-strong);
 }
 
+/* Payload renders the locale control outside the normal header flex row. Keep
+ * it before the account target instead of occupying the same absolute corner. */
+body.wings-admin-shell .app-header__localizer.localizer {
+  right: calc(32px + 44px + 12px);
+  z-index: 2;
+}
+
+body.wings-admin-shell .app-header__account {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  position: relative;
+  z-index: 3;
+}
+
 body.wings-admin-shell .dashboard__wrap,
 body.wings-admin-shell .collection-list__wrap,
 body.wings-admin-shell .collection-edit__wrap {
@@ -764,6 +781,13 @@ body.wings-admin-shell .login .wings-admin-logo {
 
 /* Tablet keeps the labels and 44px interaction targets. */
 @media (min-width: 681px) and (max-width: 1050px) {
+  .wings-admin-theme-finexy,
+  .wings-admin-theme-ats {
+    .template-default__nav-toggler-wrapper {
+      left: calc(224px - 22px);
+    }
+  }
+
   body.wings-admin-shell .nav,
   body.wings-admin-shell .nav:not(.nav--nav-open) {
     bottom: 0;
@@ -888,6 +912,10 @@ body.wings-admin-shell .login .wings-admin-logo {
     height: auto;
     min-height: 72px;
     padding: 10px 16px;
+  }
+
+  body.wings-admin-shell .app-header__localizer.localizer {
+    right: calc(16px + 44px + 10px);
   }
 
   body.wings-admin-shell .dashboard__wrap,
@@ -1419,7 +1447,8 @@ body.wings-admin-shell .login .wings-admin-logo {
     background: transparent !important;
     box-shadow: none !important;
     height: 44px;
-    left: 16px;
+    /* Sit on the rail edge, never over the CMS/site heading. */
+    left: calc(258px - 22px);
     overflow: visible;
     position: fixed;
     top: 16px;
@@ -1442,6 +1471,14 @@ body.wings-admin-shell .login .wings-admin-logo {
     position: relative;
     width: 44px;
     z-index: 46;
+  }
+
+  /* This is also a native `.nav-toggler`; override the rail rule above with
+   * the same specificity so the hamburger remains visible without hover. */
+  .template-default__nav-toggler.nav-toggler {
+    background: var(--wings-admin-panel) !important;
+    border-color: var(--wings-admin-border) !important;
+    color: var(--wings-admin-text) !important;
   }
 
   .template-default__nav-toggler::before,
