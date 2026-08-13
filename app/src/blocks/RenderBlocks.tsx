@@ -15,6 +15,8 @@ import { ComparisonBlock } from '@/blocks/Comparison/Component'
 import { CredentialsCarouselBlock } from '@/blocks/CredentialsCarousel/Component'
 import { StatsBlock } from '@/blocks/Stats/Component'
 import { TestimonialBlock } from '@/blocks/Testimonial/Component'
+import { WingsGroupEcosystemComponent } from '@/blocks/WingsGroupEcosystem/Component'
+import { WingsGroupProofArchiveComponent } from '@/blocks/WingsGroupProofArchive/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -30,6 +32,8 @@ const blockComponents = {
   pricingTable: PricingTableBlock,
   stats: StatsBlock,
   testimonial: TestimonialBlock,
+  wingsGroupEcosystem: WingsGroupEcosystemComponent,
+  wingsGroupProofArchive: WingsGroupProofArchiveComponent,
 }
 
 export const RenderBlocks: React.FC<{

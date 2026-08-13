@@ -16,6 +16,8 @@ import { Comparison } from '../../blocks/Comparison/config'
 import { CredentialsCarousel } from '../../blocks/CredentialsCarousel/config'
 import { Stats } from '../../blocks/Stats/config'
 import { Testimonial } from '../../blocks/Testimonial/config'
+import { WingsGroupEcosystem } from '../../blocks/WingsGroupEcosystem/config'
+import { WingsGroupProofArchive } from '../../blocks/WingsGroupProofArchive/config'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { wingsSideHiFiTab } from '@/fields/wingsSideHiFi'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
@@ -26,6 +28,7 @@ import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 import { syncPagePathname } from './hooks/syncPagePathname'
 import { validateWingsSideHomeCuration } from './hooks/validateWingsSideHomeCuration'
+import { validateWingsGroupV3Governance } from './hooks/validateWingsGroupV3Governance'
 
 import {
   MetaDescriptionField,
@@ -156,6 +159,8 @@ export const Pages: CollectionConfig<'pages'> = {
                 MediaBlock,
                 Archive,
                 FormBlock,
+                WingsGroupEcosystem,
+                WingsGroupProofArchive,
               ],
               localized: true,
               required: true,
@@ -263,6 +268,7 @@ export const Pages: CollectionConfig<'pages'> = {
     beforeChange: [
       enforceSiteAccess,
       syncPagePathname,
+      validateWingsGroupV3Governance,
       validateWingsSideHomeCuration,
       preventEditorPublish,
       populatePublishedAt,

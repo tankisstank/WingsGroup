@@ -429,6 +429,37 @@ export interface SiteSetting {
       }[]
     | null;
   footerNote?: string | null;
+  /**
+   * Cấu hình fail-closed cho WingsGroup v3. Không bật nhóm này cho tenant không sử dụng contract E09.
+   */
+  wingsGroupV3?: {
+    enabled?: boolean | null;
+    englishPublicationState?: ('hidden' | 'route-ready' | 'approved') | null;
+    privacy?: {
+      policyVersion?: string | null;
+      consentVersion?: string | null;
+      consentRequired?: boolean | null;
+      retentionMonths?: number | null;
+      dataSubjectContact?: string | null;
+      interBranchTransferAllowed?: boolean | null;
+      policyRouteVi?: string | null;
+      policyRouteEn?: string | null;
+    };
+    /**
+     * Kênh chưa cấu hình không chặn release. Chỉ state approved mới được mở URL public.
+     */
+    consultationChannels?:
+      | {
+          key: 'zalo' | 'whatsapp' | 'messenger';
+          state: 'unconfigured' | 'pending' | 'approved' | 'disabled';
+          url?: string | null;
+          owner?: string | null;
+          sla?: string | null;
+          trackingReference?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -455,6 +486,36 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Metadata xuất bản có kiểm soát. Media cũ không có managedBy tiếp tục hoạt động như hiện tại.
+   */
+  governance?: {
+    managedBy?: 'wingsgroup-v3' | null;
+    /**
+     * Khóa attachment-id:source-sha256 để import idempotent, không dùng filename.
+     */
+    sourceIdentity?: string | null;
+    sourceAttachmentId?: string | null;
+    sourceArchiveSha256?: string | null;
+    sourceFileSha256?: string | null;
+    sourceFilename?: string | null;
+    provenanceReference?: string | null;
+    rightsState?: ('pending' | 'approved' | 'rejected') | null;
+    rightsEvidence?: string | null;
+    usageScope?: 'editorial-service' | null;
+    publicationState?: ('pending' | 'ready' | 'published' | 'rejected') | null;
+    derivativeState?: ('pending' | 'generated' | 'verified') | null;
+    responsiveDerivatives?:
+      | {
+          format: 'webp' | 'avif';
+          width: number;
+          height?: number | null;
+          url: string;
+          sha256: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -690,6 +751,8 @@ export interface Page {
     | MediaBlock
     | ArchiveBlock
     | FormBlock
+    | WingsGroupEcosystemBlock
+    | WingsGroupProofArchiveBlock
   )[];
   meta?: {
     title?: string | null;
@@ -1815,6 +1878,79 @@ export interface Form {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WingsGroupEcosystemBlock".
+ */
+export interface WingsGroupEcosystemBlock {
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  profiles: {
+    brandKey: 'wingsgo' | 'wing-side' | 'wingsplus' | 'wingscare' | 'wingspass';
+    brandName: string;
+    description: string;
+    serviceScope: {
+      label: string;
+      id?: string | null;
+    }[];
+    stageMedia: number | Media;
+    proofState: 'pending' | 'approved' | 'not-applicable';
+    proofReferences?:
+      | {
+          key: string;
+          id?: string | null;
+        }[]
+      | null;
+    cta: {
+      label: string;
+      state: 'contact-fallback' | 'approved-deep-link';
+      contactPath?: string | null;
+      url?: string | null;
+      owner?: string | null;
+      httpEvidence?: string | null;
+      canonicalEvidence?: string | null;
+      trackingEvidence?: string | null;
+      ownerApprovalEvidence?: string | null;
+    };
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'wingsGroupEcosystem';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WingsGroupProofArchiveBlock".
+ */
+export interface WingsGroupProofArchiveBlock {
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  /**
+   * Public renderer chỉ được hiển thị record có publicationState = approved.
+   */
+  records?:
+    | {
+        key: string;
+        kind: 'licence' | 'certificate' | 'award' | 'membership' | 'standard' | 'other';
+        publicationState: 'pending' | 'approved' | 'rejected';
+        title: string;
+        summary?: string | null;
+        sourceIssuer?: string | null;
+        context?: string | null;
+        evidenceDate?: string | null;
+        permissionState: 'pending' | 'approved' | 'denied';
+        permissionEvidence?: string | null;
+        media?: (number | null) | Media;
+        mediaProvenanceReference?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'wingsGroupProofArchive';
+}
+/**
  * Tour có cấu trúc dùng chung cho WingsGo và WingsSide. Dữ liệu này là nguồn thật để render trang tour và discovery theo site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2812,6 +2948,35 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   footerNote?: T;
+  wingsGroupV3?:
+    | T
+    | {
+        enabled?: T;
+        englishPublicationState?: T;
+        privacy?:
+          | T
+          | {
+              policyVersion?: T;
+              consentVersion?: T;
+              consentRequired?: T;
+              retentionMonths?: T;
+              dataSubjectContact?: T;
+              interBranchTransferAllowed?: T;
+              policyRouteVi?: T;
+              policyRouteEn?: T;
+            };
+        consultationChannels?:
+          | T
+          | {
+              key?: T;
+              state?: T;
+              url?: T;
+              owner?: T;
+              sla?: T;
+              trackingReference?: T;
+              id?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2913,6 +3078,8 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        wingsGroupEcosystem?: T | WingsGroupEcosystemBlockSelect<T>;
+        wingsGroupProofArchive?: T | WingsGroupProofArchiveBlockSelect<T>;
       };
   meta?:
     | T
@@ -3601,6 +3768,80 @@ export interface FormBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WingsGroupEcosystemBlock_select".
+ */
+export interface WingsGroupEcosystemBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  profiles?:
+    | T
+    | {
+        brandKey?: T;
+        brandName?: T;
+        description?: T;
+        serviceScope?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+        stageMedia?: T;
+        proofState?: T;
+        proofReferences?:
+          | T
+          | {
+              key?: T;
+              id?: T;
+            };
+        cta?:
+          | T
+          | {
+              label?: T;
+              state?: T;
+              contactPath?: T;
+              url?: T;
+              owner?: T;
+              httpEvidence?: T;
+              canonicalEvidence?: T;
+              trackingEvidence?: T;
+              ownerApprovalEvidence?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WingsGroupProofArchiveBlock_select".
+ */
+export interface WingsGroupProofArchiveBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  records?:
+    | T
+    | {
+        key?: T;
+        kind?: T;
+        publicationState?: T;
+        title?: T;
+        summary?: T;
+        sourceIssuer?: T;
+        context?: T;
+        evidenceDate?: T;
+        permissionState?: T;
+        permissionEvidence?: T;
+        media?: T;
+        mediaProvenanceReference?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -3962,6 +4203,32 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   site?: T;
   caption?: T;
+  governance?:
+    | T
+    | {
+        managedBy?: T;
+        sourceIdentity?: T;
+        sourceAttachmentId?: T;
+        sourceArchiveSha256?: T;
+        sourceFileSha256?: T;
+        sourceFilename?: T;
+        provenanceReference?: T;
+        rightsState?: T;
+        rightsEvidence?: T;
+        usageScope?: T;
+        publicationState?: T;
+        derivativeState?: T;
+        responsiveDerivatives?:
+          | T
+          | {
+              format?: T;
+              width?: T;
+              height?: T;
+              url?: T;
+              sha256?: T;
+              id?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   url?: T;

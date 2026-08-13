@@ -21,6 +21,10 @@ import {
   invalidateSettingsAfterChange,
   invalidateSettingsAfterDelete,
 } from '@/collections/hooks/invalidateTenantCache'
+import {
+  validateWingsGroupV3Settings,
+  wingsGroupV3SettingsField,
+} from '@/fields/wingsGroupV3'
 
 export const SiteSettings: CollectionConfig = {
   slug: 'site-settings',
@@ -310,11 +314,12 @@ export const SiteSettings: CollectionConfig = {
       type: 'textarea',
       localized: true,
     },
+    wingsGroupV3SettingsField,
   ],
   hooks: {
     afterChange: [invalidateSettingsAfterChange],
     afterDelete: [invalidateSettingsAfterDelete],
-    beforeChange: [enforceSiteAccess],
+    beforeChange: [enforceSiteAccess, validateWingsGroupV3Settings],
   },
   labels: {
     plural: adminLabel('Cấu hình site', 'Site settings'),

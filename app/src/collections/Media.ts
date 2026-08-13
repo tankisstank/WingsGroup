@@ -16,6 +16,10 @@ import {
   revalidateWingSideDiscovery,
   revalidateWingSideDiscoveryForTourDependency,
 } from '@/collections/Tours/hooks/revalidateTourContent'
+import {
+  mediaGovernanceField,
+  validateGovernedMediaBeforeChange,
+} from '@/fields/wingsGroupV3'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -77,6 +81,7 @@ export const Media: CollectionConfig = {
         },
       }),
     },
+    mediaGovernanceField,
   ],
   labels: {
     plural: adminLabel('Thư viện media', 'Media library'),
@@ -124,6 +129,6 @@ export const Media: CollectionConfig = {
   hooks: {
     afterChange: [revalidateCuratedTourMedia],
     afterDelete: [revalidateDeletedTourMedia],
-    beforeChange: [enforceSiteAccess],
+    beforeChange: [enforceSiteAccess, validateGovernedMediaBeforeChange],
   },
 }
