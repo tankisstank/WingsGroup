@@ -83,7 +83,9 @@
     "test:e2e:prepare-db": "cross-env NODE_OPTIONS=--no-deprecation node scripts/prepare-phase1-e2e-db.mjs",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation node scripts/run-integration-tests.mjs",
     "test:unit": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.unit.config.mts",
-    "validate:wingsside:locales": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/validate-wingsside-locales.ts"
+    "validate:wingsside:locales": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/validate-wingsside-locales.ts",
+    "multica:history:dry-run": "node scripts/multica-history-writer.mjs",
+    "multica:history:apply": "node scripts/multica-history-writer.mjs --apply"
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.84.1",
