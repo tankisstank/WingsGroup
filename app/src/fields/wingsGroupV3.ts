@@ -95,21 +95,69 @@ export const validateWingsGroupV3Settings: CollectionBeforeChangeHook = ({ data,
   return data
 }
 
-export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = ({
+const relationID = (value: unknown): number | string | undefined => {
+  if (typeof value === 'number' || typeof value === 'string') return value
+  const record = asRecord(value)
+  return typeof record.id === 'number' || typeof record.id === 'string' ? record.id : undefined
+}
+
+export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = async ({
   data,
   originalDoc,
+  req,
 }) => {
   const governance = data?.governance ?? originalDoc?.governance
   const result = validateMediaGovernance(governance)
   if (result !== true) throw new Error(result)
 
   const parsed = asRecord(governance)
+  const previous = asRecord(originalDoc?.governance)
+  const approvalChanged = parsed.rightsState === 'approved' && previous.rightsState !== 'approved'
+  const derivativesVerified =
+    parsed.derivativeState === 'verified' && previous.derivativeState !== 'verified'
+  const publicationApproved =
+    parsed.publicationState === 'published' && previous.publicationState !== 'published'
+  if (
+    (approvalChanged || derivativesVerified || publicationApproved) &&
+    req.user?.role !== 'super-admin'
+  ) {
+    throw new Error('Chỉ super-admin được duyệt quyền, derivatives hoặc publication state.')
+  }
   if (parsed.managedBy === 'wingsgroup-v3' && parsed.publicationState === 'published') {
     const site = data?.site ?? originalDoc?.site
-    const alt = data?.alt ?? originalDoc?.alt
-    if (!site) throw new Error('WingsGroup v3 media publish cần site scope.')
-    if (!asString(alt))
-      throw new Error('WingsGroup v3 media publish cần alt text cho locale hiện tại.')
+    const siteID = relationID(site)
+    if (siteID === undefined) throw new Error('WingsGroup v3 media publish cần site scope.')
+    const siteDoc = await req.payload.findByID({
+      collection: 'sites',
+      id: siteID,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    if (siteDoc.code !== 'wings-group') {
+      throw new Error('WingsGroup v3 media chỉ được publish trong site wings-group.')
+    }
+
+    const mediaID = relationID(originalDoc?.id)
+    if (mediaID === undefined) {
+      throw new Error('Lưu media ở trạng thái ready, nhập alt VI/EN, rồi mới publish.')
+    }
+    const localized = await Promise.all(
+      (['vi', 'en'] as const).map((locale) =>
+        req.payload.findByID({
+          collection: 'media',
+          id: mediaID,
+          depth: 0,
+          fallbackLocale: false,
+          locale,
+          overrideAccess: true,
+          req,
+        }),
+      ),
+    )
+    if (localized.some((record) => !asString(record.alt))) {
+      throw new Error('WingsGroup v3 media publish cần alt riêng cho cả vi và en.')
+    }
   }
 
   return data

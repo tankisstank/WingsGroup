@@ -29,12 +29,29 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
 }) => {
   const site = data?.site ?? originalDoc?.site
   const layout = data?.layout ?? originalDoc?.layout
-  if (!site || !Array.isArray(layout)) return data
+  if (!site) return data
 
   const isPublishing = (data?._status ?? originalDoc?._status) === 'published'
   const checks: Array<{ kind: 'editorial' | 'proof'; media: unknown }> = []
 
-  for (const rawBlock of layout) {
+  const hero = asRecord(data?.hero ?? originalDoc?.hero)
+  for (const value of [
+    hero.media,
+    ...(Array.isArray(hero.supportingMedia) ? hero.supportingMedia : []),
+  ]) {
+    if (value) checks.push({ kind: 'editorial', media: value })
+  }
+  for (const rawSlide of Array.isArray(hero.slides) ? hero.slides : []) {
+    const slide = asRecord(rawSlide)
+    if (slide.media) checks.push({ kind: 'editorial', media: slide.media })
+    if (slide.mobileMedia) checks.push({ kind: 'editorial', media: slide.mobileMedia })
+  }
+  const video = asRecord(hero.video)
+  for (const value of [video.desktopVideo, video.mobileVideo, video.poster]) {
+    if (value) checks.push({ kind: 'editorial', media: value })
+  }
+
+  for (const rawBlock of Array.isArray(layout) ? layout : []) {
     const block = asRecord(rawBlock)
     if (block.blockType === 'wingsGroupEcosystem') {
       for (const rawProfile of Array.isArray(block.profiles) ? block.profiles : []) {

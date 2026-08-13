@@ -51,7 +51,6 @@ export type WingsGroupV3MediaPlan = {
   planned: number
   records: WingsGroupV3MediaPlanItem[]
   siteCode: string
-  warnings: string[]
 }
 
 const sha256 = (value: Buffer | string): string => createHash('sha256').update(value).digest('hex')
@@ -114,7 +113,6 @@ export const buildWingsGroupV3MediaPlan = async ({
   manifest: WingsGroupV3MediaManifest
 }): Promise<WingsGroupV3MediaPlan> => {
   const errors: string[] = []
-  const warnings: string[] = []
   const records: WingsGroupV3MediaPlanItem[] = []
 
   for (const item of manifest.media) {
@@ -128,8 +126,8 @@ export const buildWingsGroupV3MediaPlan = async ({
       const metadata = await sharp(bytes).metadata()
       if (!metadata.width || !metadata.height) throw new Error('image dimensions are unavailable')
       if (metadata.width !== expected.width || metadata.height !== expected.height) {
-        warnings.push(
-          `${item.file}: manifest dimensions ${item.dimensions}; verified file dimensions ${metadata.width}x${metadata.height}`,
+        throw new Error(
+          `dimensions ${metadata.width}x${metadata.height} != reviewed manifest ${item.dimensions}`,
         )
       }
 
@@ -169,7 +167,6 @@ export const buildWingsGroupV3MediaPlan = async ({
     errors,
     planChecksum: sha256(stable(checksumInput)),
     planned: records.length,
-    warnings,
   }
 }
 
