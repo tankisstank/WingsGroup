@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "siteCode": "wings-group",
+  "release": "wingsgroup-v3",
+  "gates": [
+    {
+      "key": "legal-identity",
+      "priority": "P0",
+      "scope": "Legal entity and brand relationship wording",
+      "mandatory": true,
+      "state": "approved",
+      "owner": "Business and legal owner",
+      "evidenceRequirements": ["Approved legal wording", "Approval reference"],
+      "evidence": ["Stakeholder-provided legal identity and approved brand relationship wording, 2026-08-13"],
+      "approvedAt": "2026-08-13",
+      "legalEntity": {
+        "registeredName": "CÔNG TY CỔ PHẦN DU LỊCH ĐÔI CÁNH VIỆT",
+        "internationalName": "VIETWINGS.,JSC",
+        "shortName": "VIETWINGS.,JSC",
+        "businessRegistrationNumber": "0109983118",
+        "internationalTravelLicense": "01-2336/2023/TCDL-GP LHQT",
+        "representative": "Giám đốc Phạm Nguyễn Quân",
+        "registeredOffice": "Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà Nội",
+        "tourismOffice": "Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội"
+      },
+      "approvedPublicWording": "WingsGroup là thương hiệu phát triển mới trong cùng hệ sinh thái tổ chức với VietWings và Đôi Cánh Việt. Hệ sinh thái tiếp tục phát triển các thương hiệu WingsGo, WingSide, WingsCare và các dịch vụ liên quan.",
+      "failClosedBehavior": "Publish only the approved legal identity and relationship wording; do not infer additional corporate structure or claims.",
+      "consumers": ["US-061", "US-063", "US-065", "US-066"]
+    },
+    {
+      "key": "privacy-consent",
+      "priority": "P0",
+      "scope": "Privacy policy, consent version, retention and data-subject contact",
+      "mandatory": true,
+      "state": "approved",
+      "owner": "Business and legal owner",
+      "evidenceRequirements": ["Approved policy URL or version", "Retention policy", "Data-subject contact"],
+      "evidence": ["Stakeholder approval recorded in the E09 implementation session, 2026-08-14"],
+      "approvedAt": "2026-08-14",
+      "policy": {
+        "version": "wingsgroup-privacy-v1",
+        "routes": {
+          "vi": "/chinh-sach-bao-mat",
+          "en": "/en/chinh-sach-bao-mat"
+        },
+        "retentionPeriodMonths": 24,
+        "dataSubjectContact": "info@doicanhviet.com",
+        "interBranchTransfer": {
+          "allowed": true,
+          "scope": "WingsGroup, VietWings, Đôi Cánh Việt, WingSide and the appropriate WingsGroup service branches",
+          "purpose": "Route and respond to consultation requests"
+        }
+      },
+      "consent": {
+        "version": "wingsgroup-contact-v1",
+        "required": true,
+        "vi": "Tôi đồng ý để WingsGroup sử dụng thông tin đã cung cấp nhằm liên hệ, tư vấn và chuyển yêu cầu đến bộ phận phù hợp theo Chính sách bảo mật.",
+        "en": "I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy."
+      },
+      "failClosedBehavior": "Do not accept production leads or display unapproved privacy copy.",
+      "consumers": ["US-061", "US-064", "US-065", "US-066"]
+    },
+    {
+      "key": "consultation-channels",
+      "priority": "P0",
+      "scope": "Consultation-channel endpoints, owners, SLAs and tracking",
+      "mandatory": false,
+      "state": "pending-update",
+      "owner": "Commercial operations owner",
+      "channels": [
+        { "key": "zalo", "state": "unconfigured" },
+        { "key": "whatsapp", "state": "unconfigured" },
+        { "key": "messenger", "state": "unconfigured" }
+      ],
+      "evidenceRequirements": ["Approved HTTPS URL", "Named owner", "SLA", "Tracking proof"],
+      "releaseRule": "The built-in, consent-aware WingsGroup contact form is the required consultation path. External channels are optional and do not block release while unconfigured.",
+      "failClosedBehavior": "Show channels as chờ cập nhật or record a preferred channel only; do not open an external URL. A configured external channel must satisfy URL, owner, SLA, and tracking checks before it can be shown.",
+      "consumers": ["US-061", "US-063", "US-064", "US-066"]
+    },
+    {
+      "key": "proof-publication",
+      "priority": "P1",
+      "scope": "Trust and proof records",
+      "mandatory": true,
+      "state": "pending",
+      "owner": "Content and legal owner",
+      "evidenceRequirements": ["Source or issuer", "Context or date", "Publication permission", "Media provenance"],
+      "failClosedBehavior": "Do not publish the proof record or present editorial media as proof.",
+      "consumers": ["US-061", "US-063", "US-065", "US-066"]
+    },
+    {
+      "key": "ecosystem-deep-links",
+      "priority": "P2",
+      "scope": "Ecosystem brand destinations",
+      "mandatory": true,
+      "state": "pending",
+      "owner": "Destination site owner",
+      "links": [
+        { "key": "wingsgo", "state": "pending" },
+        { "key": "wing-side", "brand": "WingSide", "legacySlug": "wingsside", "state": "pending" },
+        { "key": "wingsplus", "state": "pending" },
+        { "key": "wingscare", "state": "pending" },
+        { "key": "wingspass", "state": "pending" }
+      ],
+      "evidenceRequirements": ["HTTP 200", "Expected tenant canonical", "Tracking QA", "Destination-owner approval"],
+      "failClosedBehavior": "Route the CTA to WingsGroup contact intake.",
+      "consumers": ["US-061", "US-062", "US-063", "US-066"]
+    },
+    {
+      "key": "locale-completeness",
+      "priority": "P2",
+      "scope": "Public locale inventory",
+      "mandatory": true,
+      "state": "pending",
+      "owner": "Content owner",
+      "requiredLocales": ["vi", "en"],
+      "editorialStyle": "Human-like, natural marketing copy with a refined and courteous luxury-travel tone.",
+      "evidenceRequirements": ["Approved Vietnamese and English route/chrome inventory", "Native-quality editorial review", "Locale QA"],
+      "failClosedBehavior": "Do not expose an incomplete English route or locale switch; preserve Vietnamese continuity while English is completed in parallel.",
+      "consumers": ["US-061", "US-062", "US-063", "US-065", "US-066"]
+    },
+    {
+      "key": "editorial-media",
+      "priority": "P1",
+      "scope": "Thirteen supplied editorial images",
+      "mandatory": true,
+      "state": "pending",
+      "owner": "Content and brand owner",
+      "rightsApproved": true,
+      "evidence": ["Stakeholder confirmed the 13 handoff images are licensed for use, 2026-08-13", "docs/product/wingsgroup-v3-media-manifest.json"],
+      "provenanceManifest": "docs/product/wingsgroup-v3-media-manifest.json",
+      "evidenceRequirements": ["Vietnamese alt text", "Source and provenance", "Publication rights", "WingsGroup site scope", "Responsive derivatives"],
+      "failClosedBehavior": "Do not publish a media item until its provenance, Vietnamese and English alt text, WingsGroup scope, and responsive derivatives are recorded; never label editorial media as legal proof.",
+      "consumers": ["US-061", "US-062", "US-063", "US-066"]
+    },
+    {
+      "key": "brand-logo-tokens",
+      "priority": "P1",
+      "scope": "Runtime WingsGroup logo export and brand tokens",
+      "mandatory": true,
+      "state": "pending",
+      "owner": "Brand owner",
+      "plannedInput": "Approved logo and token source will be supplied later.",
+      "evidenceRequirements": ["Approved runtime logo asset", "Approved token source", "Brand-owner confirmation"],
+      "failClosedBehavior": "Retain the existing approved runtime branding; do not adopt an unreconciled export.",
+      "consumers": ["US-061", "US-062", "US-063", "US-066"]
+    }
+  ]
+}
