@@ -12,7 +12,6 @@ import { RenderHero } from '@/heros/RenderHero'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { generateMeta } from '@/utilities/generateMeta'
 import {
-  appendSiteWhere,
   getCurrentLocale,
   getCurrentSite,
   getCurrentSitePrefix,
@@ -31,8 +30,8 @@ import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 import { queryPublishedPageLocalesByExactPath } from '@/utilities/pageLocaleInventory'
 import {
   getWingsGroupRouteDefinition,
-  isWingsGroupRoutePublic,
 } from '@/wingsgroup/corporateRoutes'
+import { queryPageByPath } from '@/utilities/cmsPageQuery'
 import {
   isRetailTourEnabledSiteCode,
   isStructuredTourDetailEnabledSiteCode,
@@ -381,98 +380,6 @@ export async function generateCmsPageMetadataByPath({
     locale,
     path: requestedPath,
   })
-}
-
-const queryPageByPath = async ({
-  depth = 3,
-  locale,
-  requestedPath,
-}: {
-  depth?: number
-  locale?: SupportedLocaleCode
-  requestedPath: string
-}) => {
-  const { isEnabled: draft } = await draftMode()
-  const payload = await getPayload({ config: configPromise })
-  const segments = requestedPath.split('/').filter(Boolean)
-  const candidateSlug = segments[segments.length - 1] || 'home'
-  const site = await getCurrentSite()
-  const candidateSlugs = [candidateSlug, `${site.code}-${candidateSlug}`]
-  const where = await appendSiteWhere({
-    or: [
-      {
-        pathname: {
-          equals: requestedPath,
-        },
-      },
-      {
-        slug: {
-          in: candidateSlugs,
-        },
-      },
-    ],
-  })
-
-  const findPage = async (requestedLocale?: SupportedLocaleCode) => {
-    const scopedWhere = draft
-      ? where
-      : {
-          and: [
-            where,
-            {
-              _status: {
-                equals: 'published',
-              },
-            },
-          ],
-        }
-
-    const result = await payload.find({
-      collection: 'pages',
-      draft,
-      fallbackLocale: false,
-      locale: requestedLocale,
-      depth,
-      limit: 1,
-      pagination: false,
-      overrideAccess: draft,
-      where: scopedWhere,
-    })
-
-    return result.docs?.[0] || null
-  }
-
-  const hasRenderableLocalizedContent = (page: Awaited<ReturnType<typeof findPage>>) => {
-    const placeholderTitles = new Set(['page', 'pagina', 'página', 'trang'])
-
-    if (!page) {
-      return false
-    }
-
-    if (Array.isArray(page.layout) && page.layout.length > 0) {
-      return true
-    }
-
-    if (page.hero?.richText) {
-      return true
-    }
-
-    return (
-      typeof page.title === 'string' &&
-      page.title.trim().length > 0 &&
-      !placeholderTitles.has(page.title.trim().toLowerCase())
-    )
-  }
-
-  const localizedPage = await findPage(locale)
-
-  if (!hasRenderableLocalizedContent(localizedPage)) return null
-  if (draft) return localizedPage
-
-  const settings = await getCurrentSiteSettings()
-  return isWingsGroupRoutePublic({ locale: locale || 'vi', page: localizedPage, settings, siteCode: site.code })
-    ? localizedPage
-    : null
 }
 
 const resolveStructuredTourPage = async ({

@@ -118,7 +118,15 @@ describe('WingsGroup corporate route contract', () => {
       ).toBe(false)
     }
 
-    for (const path of ['/posts', '/posts/example', '/posts/page/2', '/search']) {
+    for (const path of [
+      '/posts',
+      '/posts/example',
+      '/posts/page/2',
+      '/search',
+      '/foo/lien-he',
+      '/en/lien-he',
+      '/en/foo/lien-he',
+    ]) {
       expect(
         isWingsGroupV3PublicSurfacePathAllowed({
           locale: 'vi',
@@ -132,7 +140,7 @@ describe('WingsGroup corporate route contract', () => {
     expect(
       isWingsGroupV3PublicSurfacePathAllowed({
         locale: 'en',
-        path: '/posts',
+        path: '/foo/lien-he',
         settings,
         siteCode: 'wings-go',
       }),

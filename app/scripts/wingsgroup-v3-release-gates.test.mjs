@@ -43,6 +43,9 @@ test('the governed register has the immutable expected inventory and remains fai
   assert.equal(result.approved, false)
   assert.deepEqual(result.errors, [])
   assert.equal(result.mandatoryGateCount, 7)
+  assert.equal(result.pendingMandatory.length, 6)
+  assert.ok(result.pendingMandatory.some(({ key }) => key === 'privacy-consent'))
+  assert.ok(!result.pendingMandatory.some(({ key }) => key === 'legal-identity'))
   assert.deepEqual(
     governedRegister.gates.map(({ key, mandatory }) => ({ key, mandatory })),
     expectedGateInventory,

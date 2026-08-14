@@ -32,11 +32,9 @@
       "priority": "P0",
       "scope": "Privacy policy, consent version, retention and data-subject contact",
       "mandatory": true,
-      "state": "approved",
+      "state": "pending",
       "owner": "Business and legal owner",
       "evidenceRequirements": ["Approved policy URL or version", "Retention policy", "Data-subject contact"],
-      "evidence": ["Stakeholder approval recorded in the E09 implementation session, 2026-08-14"],
-      "approvedAt": "2026-08-14",
       "policy": {
         "version": "wingsgroup-privacy-v1",
         "routes": {
