@@ -10,6 +10,10 @@ import {
   parseWingsGroupV3MediaManifest,
 } from '../../scripts/lib/wingsGroupV3MediaPlan'
 import fs from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import os from 'node:os'
+import path from 'node:path'
+import sharp from 'sharp'
 
 const sha = 'a'.repeat(64)
 
@@ -107,20 +111,48 @@ describe('WingsGroup v3 fail-closed governance', () => {
   })
 
   it('blocks a manifest/file dimension mismatch', async () => {
-    const manifest = parseWingsGroupV3MediaManifest(
-      JSON.parse(
-        await fs.readFile(
-          '/home/docker-admin/src/WingsTravel/docs/product/wingsgroup-v3-media-manifest.json',
-          'utf8',
-        ),
-      ),
-    )
-    const plan = await buildWingsGroupV3MediaPlan({
-      assetsDirectory:
-        '/home/docker-admin/src/WingsTravel/artifacts/tmp/win-20-handoff/extracted/wingsgroup-v3-development-package/assets',
-      manifest,
-    })
-    expect(plan.errors).toContainEqual(expect.stringMatching(/airport-welcome.*dimensions/))
-    expect(plan.planned).toBe(12)
+    const assetsDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'wg-v3-media-'))
+    try {
+      const media = []
+      for (let index = 0; index < 13; index += 1) {
+        const file = `fixture-${index}.png`
+        const bytes = await sharp({
+          create: {
+            background: { b: index, g: 20 + index, r: 40 + index },
+            channels: 3,
+            height: 4,
+            width: 4,
+          },
+        })
+          .png()
+          .toBuffer()
+        await fs.writeFile(path.join(assetsDirectory, file), bytes)
+        media.push({
+          alt: { en: `English ${index}`, vi: `Tiếng Việt ${index}` },
+          dimensions: index === 4 ? '5x4' : '4x4',
+          file,
+          role: `Role ${index}`,
+          sha256: createHash('sha256').update(bytes).digest('hex'),
+        })
+      }
+      const manifest = parseWingsGroupV3MediaManifest({
+        media,
+        publicationState: 'ready_for_payload_import_not_published',
+        rights: { evidence: 'fixture approval', restriction: 'editorial only', state: 'approved' },
+        siteCode: 'wings-group',
+        sourcePackage: {
+          archiveSha256: 'a'.repeat(64),
+          assetsDirectory: 'fixture',
+          attachmentId: 'fixture-attachment',
+          manifest: 'fixture-manifest',
+        },
+        version: 1,
+      })
+      const plan = await buildWingsGroupV3MediaPlan({ assetsDirectory, manifest })
+      expect(plan.errors).toContainEqual(expect.stringMatching(/fixture-4.*dimensions/))
+      expect(plan.planned).toBe(12)
+    } finally {
+      await fs.rm(assetsDirectory, { force: true, recursive: true })
+    }
   })
 })

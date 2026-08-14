@@ -107,22 +107,33 @@ export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = asy
   req,
 }) => {
   const governance = data?.governance ?? originalDoc?.governance
+  const parsed = asRecord(governance)
+  const previous = asRecord(originalDoc?.governance)
+  const governedSnapshot = (record: UnknownRecord) => ({
+    derivativeState: record.derivativeState,
+    managedBy: record.managedBy,
+    provenanceReference: record.provenanceReference,
+    publicationState: record.publicationState,
+    responsiveDerivatives: record.responsiveDerivatives,
+    rightsEvidence: record.rightsEvidence,
+    rightsState: record.rightsState,
+    sourceArchiveSha256: record.sourceArchiveSha256,
+    sourceAttachmentId: record.sourceAttachmentId,
+    sourceFileSha256: record.sourceFileSha256,
+    sourceFilename: record.sourceFilename,
+    sourceIdentity: record.sourceIdentity,
+    usageScope: record.usageScope,
+  })
+  if (
+    req.user?.role !== 'super-admin' &&
+    JSON.stringify(governedSnapshot(parsed)) !== JSON.stringify(governedSnapshot(previous))
+  ) {
+    throw new Error('Chỉ super-admin được thay đổi metadata và trạng thái media governance.')
+  }
+
   const result = validateMediaGovernance(governance)
   if (result !== true) throw new Error(result)
 
-  const parsed = asRecord(governance)
-  const previous = asRecord(originalDoc?.governance)
-  const approvalChanged = parsed.rightsState === 'approved' && previous.rightsState !== 'approved'
-  const derivativesVerified =
-    parsed.derivativeState === 'verified' && previous.derivativeState !== 'verified'
-  const publicationApproved =
-    parsed.publicationState === 'published' && previous.publicationState !== 'published'
-  if (
-    (approvalChanged || derivativesVerified || publicationApproved) &&
-    req.user?.role !== 'super-admin'
-  ) {
-    throw new Error('Chỉ super-admin được duyệt quyền, derivatives hoặc publication state.')
-  }
   if (parsed.managedBy === 'wingsgroup-v3' && parsed.publicationState === 'published') {
     const site = data?.site ?? originalDoc?.site
     const siteID = relationID(site)
@@ -142,9 +153,19 @@ export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = asy
     if (mediaID === undefined) {
       throw new Error('Lưu media ở trạng thái ready, nhập alt VI/EN, rồi mới publish.')
     }
-    const localized = await Promise.all(
-      (['vi', 'en'] as const).map((locale) =>
-        req.payload.findByID({
+    const requestLocale = req.locale === 'en' ? 'en' : req.locale === 'vi' ? 'vi' : undefined
+    if (!requestLocale)
+      throw new Error('WingsGroup v3 media publish cần locale vi hoặc en rõ ràng.')
+    const hasPendingAlt = Object.prototype.hasOwnProperty.call(data || {}, 'alt')
+    const effectiveAlt: Partial<Record<'en' | 'vi', unknown>> = {}
+    if (hasPendingAlt) effectiveAlt[requestLocale] = data?.alt
+
+    const localesToRead = (['vi', 'en'] as const).filter(
+      (locale) => locale !== requestLocale || !hasPendingAlt,
+    )
+    await Promise.all(
+      localesToRead.map(async (locale) => {
+        const record = await req.payload.findByID({
           collection: 'media',
           id: mediaID,
           depth: 0,
@@ -152,10 +173,12 @@ export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = asy
           locale,
           overrideAccess: true,
           req,
-        }),
-      ),
+        })
+        effectiveAlt[locale] = record.alt
+        return record
+      }),
     )
-    if (localized.some((record) => !asString(record.alt))) {
+    if (!asString(effectiveAlt.vi) || !asString(effectiveAlt.en)) {
       throw new Error('WingsGroup v3 media publish cần alt riêng cho cả vi và en.')
     }
   }
