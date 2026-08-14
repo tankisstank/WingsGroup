@@ -484,6 +484,127 @@ describe('WingsGroup corporate route integration', () => {
     ).rejects.toThrow(/draft.*super-admin/)
   })
 
+  it('binds shared content changes to every approved locale', async () => {
+    const sharedContent = {
+      parentPage: 9,
+      pathname: '/ve-wingsgroup',
+      publishedAt: '2026-08-14T00:00:00.000Z',
+      relatedPages: [44],
+      slug: 've-wingsgroup',
+    }
+    const approvedVietnamese = routeData({
+      ...sharedContent,
+      wingsGroupRoute: {
+        archetype: 'corporate',
+        contentApproval: { en: null, vi: WINGSGROUP_CONTENT_VALIDATION_MARKER },
+        managedBy: 'wingsgroup-v3',
+        publication: { en: 'hidden', vi: 'approved' },
+      },
+    })
+    const approvedEnglish = routeData({
+      ...sharedContent,
+      wingsGroupRoute: {
+        archetype: 'corporate',
+        contentApproval: { en: WINGSGROUP_CONTENT_VALIDATION_MARKER, vi: null },
+        managedBy: 'wingsgroup-v3',
+        publication: { en: 'approved', vi: 'hidden' },
+      },
+    })
+
+    for (const { locale, originalDoc, settings } of [
+      { locale: 'en', originalDoc: approvedVietnamese, settings: trustedSettings() },
+      {
+        locale: 'vi',
+        originalDoc: approvedEnglish,
+        settings: trustedSettings({ englishPublicationState: 'approved' }),
+      },
+    ]) {
+      for (const mutation of [
+        { parentPage: null },
+        { pathname: null },
+        { publishedAt: null },
+        { relatedPages: null },
+        { slug: null },
+      ]) {
+        await expect(
+          validateWingsGroupV3Governance({
+            data: mutation,
+            originalDoc,
+            req: { ...request('site-manager', settings), locale },
+          } as never),
+        ).rejects.toThrow(/draft.*super-admin/)
+      }
+    }
+
+    const vietnameseDraft = await validateWingsGroupV3Governance({
+      data: { _status: 'draft', pathname: null, relatedPages: null, slug: null },
+      originalDoc: approvedVietnamese,
+      req: { ...request('site-manager'), locale: 'en' },
+    } as never)
+    expect(vietnameseDraft?.wingsGroupRoute?.contentApproval).toEqual({ en: null, vi: null })
+
+    const englishDraft = await validateWingsGroupV3Governance({
+      data: { _status: 'draft', relatedPages: null },
+      originalDoc: approvedEnglish,
+      req: {
+        ...request(
+          'site-manager',
+          trustedSettings({ englishPublicationState: 'approved' }),
+        ),
+        locale: 'vi',
+      },
+    } as never)
+    expect(englishDraft?.wingsGroupRoute?.contentApproval).toEqual({ en: null, vi: null })
+
+    for (const localizedMutation of [
+      { hero: null },
+      { layout: null },
+      { meta: null },
+      { title: 'Hidden English draft copy' },
+    ]) {
+      const localizedEnglishEdit = await validateWingsGroupV3Governance({
+        data: localizedMutation,
+        originalDoc: approvedVietnamese,
+        req: { ...request('site-manager'), locale: 'en' },
+      } as never)
+      expect(localizedEnglishEdit?.wingsGroupRoute?.contentApproval).toEqual({
+        en: null,
+        vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+      })
+    }
+
+    const approvedBoth = routeData({
+      ...sharedContent,
+      wingsGroupRoute: {
+        archetype: 'corporate',
+        contentApproval: { en: null, vi: null },
+        managedBy: 'wingsgroup-v3',
+        publication: { en: 'approved', vi: 'approved' },
+      },
+    })
+    const superAdminEdit = await validateWingsGroupV3Governance({
+      data: {
+        parentPage: null,
+        pathname: null,
+        publishedAt: null,
+        relatedPages: null,
+        slug: null,
+      },
+      originalDoc: approvedBoth,
+      req: {
+        ...request(
+          'super-admin',
+          trustedSettings({ englishPublicationState: 'approved' }),
+        ),
+        locale: 'en',
+      },
+    } as never)
+    expect(superAdminEdit?.wingsGroupRoute?.contentApproval).toEqual({
+      en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+      vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+    })
+  })
+
   it('accepts a governed VI corporate route and enforces same-site forms', async () => {
     await expect(
       validateWingsGroupV3Governance({ data: routeData(), originalDoc: {}, req: request() } as never),

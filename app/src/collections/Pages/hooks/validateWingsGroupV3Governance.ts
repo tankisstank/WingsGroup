@@ -46,13 +46,25 @@ const canonicalize = (value: unknown): unknown => {
   )
 }
 
-const CONTENT_FIELDS = ['hero', 'layout', 'meta', 'pathname', 'relatedPages', 'slug', 'title'] as const
+const LOCALIZED_CONTENT_FIELDS = ['hero', 'layout', 'meta', 'title'] as const
+const SHARED_CONTENT_FIELDS = [
+  'parentPage',
+  'pathname',
+  'publishedAt',
+  'relatedPages',
+  'slug',
+] as const
+const LOCALE_KEYS = ['vi', 'en'] as const
 
-const contentSnapshot = (data: UnknownRecord, originalDoc: UnknownRecord): string =>
+const contentSnapshot = (
+  fields: readonly string[],
+  data: UnknownRecord,
+  originalDoc: UnknownRecord,
+): string =>
   JSON.stringify(
     canonicalize(
       Object.fromEntries(
-        CONTENT_FIELDS.map((field) => [
+        fields.map((field) => [
           field,
           Object.prototype.hasOwnProperty.call(data, field) ? data[field] : originalDoc[field],
         ]),
@@ -60,10 +72,12 @@ const contentSnapshot = (data: UnknownRecord, originalDoc: UnknownRecord): strin
     ),
   )
 
-const originalContentSnapshot = (originalDoc: UnknownRecord): string =>
-  JSON.stringify(
-    canonicalize(Object.fromEntries(CONTENT_FIELDS.map((field) => [field, originalDoc[field]]))),
-  )
+const contentChanged = (
+  fields: readonly string[],
+  data: UnknownRecord,
+  originalDoc: UnknownRecord,
+): boolean =>
+  contentSnapshot(fields, data, originalDoc) !== contentSnapshot(fields, {}, originalDoc)
 
 const collectLinkURLs = (value: unknown, result: unknown[] = []): unknown[] => {
   if (Array.isArray(value)) {
@@ -177,14 +191,19 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
     }
 
     const localeKey = req.locale === 'en' ? 'en' : 'vi'
-    const contentChanged =
-      contentSnapshot(dataRecord, originalRecord) !== originalContentSnapshot(originalRecord)
+    const localizedContentChanged = contentChanged(
+      LOCALIZED_CONTENT_FIELDS,
+      dataRecord,
+      originalRecord,
+    )
+    const sharedContentChanged = contentChanged(SHARED_CONTENT_FIELDS, dataRecord, originalRecord)
     const publication = asRecord(routeGovernance.publication)
+    const approvedLocales = LOCALE_KEYS.filter((locale) => publication[locale] === 'approved')
     if (
-      contentChanged &&
       isPublishing &&
-      publication[localeKey] === 'approved' &&
-      req.user?.role !== 'super-admin'
+      req.user?.role !== 'super-admin' &&
+      ((localizedContentChanged && publication[localeKey] === 'approved') ||
+        (sharedContentChanged && approvedLocales.length > 0))
     ) {
       throw new Error(
         'Nội dung WingsGroup đã duyệt phải chuyển về draft và được super-admin phê duyệt lại.',
@@ -192,14 +211,19 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
     }
 
     const contentApproval = asRecord(routeGovernance.contentApproval)
-    const nextContentApproval = {
-      ...contentApproval,
-      ...(contentChanged ? { [localeKey]: null } : {}),
-      ...(isPublishing &&
-      publication[localeKey] === 'approved' &&
-      req.user?.role === 'super-admin'
-        ? { [localeKey]: WINGSGROUP_CONTENT_VALIDATION_MARKER }
-        : {}),
+    const nextContentApproval: UnknownRecord = { ...contentApproval }
+    if (sharedContentChanged) {
+      for (const locale of LOCALE_KEYS) nextContentApproval[locale] = null
+    } else if (localizedContentChanged) {
+      nextContentApproval[localeKey] = null
+    }
+    if (isPublishing && req.user?.role === 'super-admin') {
+      const localesToApprove = sharedContentChanged ? approvedLocales : [localeKey]
+      for (const locale of localesToApprove) {
+        if (publication[locale] === 'approved') {
+          nextContentApproval[locale] = WINGSGROUP_CONTENT_VALIDATION_MARKER
+        }
+      }
     }
     pendingRouteGovernance = { ...routeGovernance, contentApproval: nextContentApproval }
     routeGovernance = asRecord(pendingRouteGovernance)
