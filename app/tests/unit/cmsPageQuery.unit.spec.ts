@@ -78,6 +78,23 @@ describe('CMS page requested-path perimeter', () => {
     },
   )
 
+  it.each(['/lien-he', '/foo/lien-he'])(
+    'preserves trusted draft English lookup for shared path %s',
+    async (requestedPath) => {
+      mocks.draftMode.mockResolvedValue({ isEnabled: true })
+
+      await expect(queryPageByPath({ locale: 'en', requestedPath })).resolves.toEqual(contactPage)
+      expect(mocks.find).toHaveBeenCalledTimes(1)
+      expect(mocks.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          draft: true,
+          locale: 'en',
+          overrideAccess: true,
+        }),
+      )
+    },
+  )
+
   it('still resolves an exact governed Vietnamese path', async () => {
     await expect(queryPageByPath({ locale: 'vi', requestedPath: '/lien-he' })).resolves.toEqual(
       contactPage,

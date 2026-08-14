@@ -24,6 +24,7 @@ export const queryPageByPath = async ({
   const settings = await getCurrentSiteSettings()
 
   if (
+    !draft &&
     !isWingsGroupV3PublicSurfacePathAllowed({
       locale: locale || 'vi',
       path: requestedPath,
@@ -99,6 +100,8 @@ export const queryPageByPath = async ({
   const localizedPage = await findPage(locale)
 
   if (!hasRenderableLocalizedContent(localizedPage)) return null
+  // Draft mode is an authenticated editorial preview perimeter. Preserve its
+  // existing locale and slug-fallback behavior without widening public reads.
   if (draft) return localizedPage
 
   return isWingsGroupV3PublicSurfacePathAllowed({
