@@ -81,7 +81,7 @@
     },
     {
       "name": "wing-side",
-      "localAlias": "wingsside",
+      "localAlias": "wing-side",
       "primaryDomain": "wingside.vn",
       "canonicalDomain": "https://wingside.vn",
       "hosts": ["wingside.vn", "www.wingside.vn"],

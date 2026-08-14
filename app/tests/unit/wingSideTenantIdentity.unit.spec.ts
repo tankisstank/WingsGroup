@@ -2,16 +2,17 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-import { siteAliasToCodeMap } from '@/utilities/sitePaths'
+import { legacySiteAliasToCodeMap, siteAliasToCodeMap } from '@/utilities/sitePaths'
 import { getSiteThemeTokens } from '@/utilities/siteTheme'
 
 const appFile = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8')
 
 describe('Wingside tenant identity contract', () => {
   it('keeps public identity, technical code, local alias, and theme key distinct', () => {
-    expect(siteAliasToCodeMap.wingsside).toBe('wing-side')
-    expect(`/${Object.keys(siteAliasToCodeMap).find((alias) => alias === 'wingsside')}`).toBe(
-      '/wingsside',
+    expect(siteAliasToCodeMap['wing-side']).toBe('wing-side')
+    expect(legacySiteAliasToCodeMap.wingsside).toBe('wing-side')
+    expect(`/${Object.keys(siteAliasToCodeMap).find((alias) => alias === 'wing-side')}`).toBe(
+      '/wing-side',
     )
 
     const theme = getSiteThemeTokens(

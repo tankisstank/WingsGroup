@@ -40,6 +40,6 @@ describe('generatePreviewPath', () => {
       slug: 'wings-side-home',
     })
 
-    expect(new URLSearchParams(path?.split('?')[1]).get('path')).toBe('/wingsside')
+    expect(new URLSearchParams(path?.split('?')[1]).get('path')).toBe('/wing-side')
   })
 })

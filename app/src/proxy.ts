@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import {
   allSiteAliasToCodeMap,
+  getCanonicalSiteAlias,
   getLocaleFromPathname,
   getSiteAliasFromPathname,
 } from '@/utilities/sitePaths'
@@ -70,6 +71,9 @@ const getPreservedRewriteContext = (request: NextRequest): Headers | null => {
   const publicPath = request.headers.get('x-public-path')
   const publicAlias = publicPath ? getSiteAliasFromPathname(publicPath) : null
   const publicLocale = publicPath ? getLocaleFromPathname(publicPath) : null
+
+  if (publicAlias === 'wingsside') return null
+
   const expectedSiteCode = publicAlias ? allSiteAliasToCodeMap[publicAlias] : null
   const expectedPath = publicPath
     ? stripLeadingSegments(publicPath, publicAlias ? (publicLocale ? 2 : 1) : 1)
@@ -127,6 +131,15 @@ export function proxy(request: NextRequest) {
   const siteAlias = getSiteAliasFromPathname(request.nextUrl.pathname)
   const locale = getLocaleFromPathname(request.nextUrl.pathname)
   const effectiveHost = resolveEffectiveHost(request)
+
+  if (siteAlias === 'wingsside') {
+    const url = request.nextUrl.clone()
+    const segments = url.pathname.split('/').filter(Boolean)
+    segments[0] = getCanonicalSiteAlias(siteAlias) || siteAlias
+    url.pathname = `/${segments.join('/')}`
+
+    return NextResponse.redirect(url, 308)
+  }
 
   // Site aliases are a local multisite development contract. They must not
   // become alternate public production URLs (or tenant-selection inputs).
