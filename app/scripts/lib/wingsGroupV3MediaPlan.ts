@@ -9,12 +9,17 @@ export const WINGSGROUP_V3_DERIVATIVE_WIDTHS = [640, 960, 1440] as const
 export const WINGSGROUP_V3_DERIVATIVE_FORMATS = ['webp', 'avif'] as const
 
 export type WingsGroupV3MediaManifest = {
+  licenseScope?: string
   media: Array<{
     alt: { en: string; vi: string }
+    actualDimensions?: string
     dimensions: string
     file: string
+    focal?: { x: number; y: number }
     role: string
     sha256: string
+    upstreamManifestDimensions?: string
+    usageScope?: 'editorial-service'
   }>
   publicationState: string
   rights: {
@@ -35,12 +40,15 @@ export type WingsGroupV3MediaManifest = {
 export type WingsGroupV3MediaPlanItem = {
   alt: { en: string; vi: string }
   derivatives: Array<{ file: string; format: 'avif' | 'webp'; width: number }>
+  focal: { x: number; y: number }
   importFilename: string
   role: string
   sourceFile: string
   sourceFileSha256: string
   sourceIdentity: string
   sourceDimensions: { height: number; width: number }
+  upstreamManifestDimensions?: string
+  usageScope: 'editorial-service'
 }
 
 export type WingsGroupV3MediaPlan = {
@@ -72,6 +80,21 @@ const parseDimensions = (dimensions: string): { height: number; width: number } 
   return { width: Number(match[1]), height: Number(match[2]) }
 }
 
+const parseFocalPoint = (focal: { x: number; y: number } | undefined) => {
+  const point = focal || { x: 50, y: 50 }
+  if (
+    !Number.isFinite(point.x) ||
+    !Number.isFinite(point.y) ||
+    point.x < 0 ||
+    point.x > 100 ||
+    point.y < 0 ||
+    point.y > 100
+  ) {
+    throw new Error('Focal point must contain x/y percentages between 0 and 100.')
+  }
+  return { x: point.x, y: point.y }
+}
+
 export const parseWingsGroupV3MediaManifest = (value: unknown): WingsGroupV3MediaManifest => {
   const manifest = value as WingsGroupV3MediaManifest
   if (!manifest || typeof manifest !== 'object') throw new Error('Manifest must be an object.')
@@ -101,6 +124,11 @@ export const parseWingsGroupV3MediaManifest = (value: unknown): WingsGroupV3Medi
       throw new Error(`Manifest media ${item.file} has an invalid SHA-256.`)
     }
     parseDimensions(item.dimensions)
+    if (item.actualDimensions && item.actualDimensions !== item.dimensions) {
+      throw new Error(`Manifest media ${item.file} has conflicting actual dimensions.`)
+    }
+    if (item.upstreamManifestDimensions) parseDimensions(item.upstreamManifestDimensions)
+    parseFocalPoint(item.focal)
   }
   return manifest
 }
@@ -122,7 +150,7 @@ export const buildWingsGroupV3MediaPlan = async ({
       const actualSha = sha256(bytes)
       if (actualSha !== item.sha256) throw new Error(`checksum ${actualSha} != ${item.sha256}`)
 
-      const expected = parseDimensions(item.dimensions)
+      const expected = parseDimensions(item.actualDimensions || item.dimensions)
       const metadata = await sharp(bytes).metadata()
       if (!metadata.width || !metadata.height) throw new Error('image dimensions are unavailable')
       if (metadata.width !== expected.width || metadata.height !== expected.height) {
@@ -144,12 +172,15 @@ export const buildWingsGroupV3MediaPlan = async ({
             width,
           })),
         ),
+        focal: parseFocalPoint(item.focal),
         importFilename,
         role: item.role,
         sourceFile: item.file,
         sourceFileSha256: item.sha256,
         sourceIdentity: `${manifest.sourcePackage.attachmentId}:${item.sha256}`,
         sourceDimensions: { height: metadata.height, width: metadata.width },
+        upstreamManifestDimensions: item.upstreamManifestDimensions,
+        usageScope: item.usageScope || 'editorial-service',
       })
     } catch (error) {
       errors.push(`${item.file}: ${error instanceof Error ? error.message : String(error)}`)

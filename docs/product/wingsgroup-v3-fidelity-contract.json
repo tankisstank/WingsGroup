@@ -1,0 +1,195 @@
+{
+  "version": 1,
+  "release": "wingsgroup-v3",
+  "siteCode": "wings-group",
+  "locale": "vi",
+  "source": {
+    "handoffArchive": "wingsgroup-v3-development-handoff-2026-08-10.zip",
+    "prototype": "wingsgroup-information-site-v3.html",
+    "contract": "wingsgroup-v3-development-package/handoff/content-contract.md",
+    "status": "development-baseline"
+  },
+  "header": {
+    "selector": "[data-od-id=site-header]",
+    "brand": "WingsGroup",
+    "primaryNavigation": [
+      { "label": "Trang chủ", "target": "#home" },
+      { "label": "Dịch vụ", "target": "#services", "kind": "menu" },
+      { "label": "Hệ sinh thái", "target": "#about", "kind": "menu" },
+      { "label": "Về WingsGroup", "target": "#trust" },
+      { "label": "Cẩm nang", "target": "#news" }
+    ],
+    "mobileNavigation": [
+      { "label": "Trang chủ", "target": "#home" },
+      { "label": "Dịch vụ", "target": "#services" },
+      { "label": "Hệ sinh thái", "target": "#about" },
+      { "label": "Về WingsGroup", "target": "#trust" },
+      { "label": "Cẩm nang", "target": "#news" },
+      { "label": "Liên hệ", "target": "#contact" }
+    ],
+    "languageControl": { "current": "VI", "available": ["vi", "en"], "englishState": "coming-soon" },
+    "primaryCta": { "label": "Trao đổi nhu cầu", "target": "#contact" }
+  },
+  "sectionOrder": [
+    "hero",
+    "service-router",
+    "trust",
+    "proof",
+    "ecosystem",
+    "editorial",
+    "contact"
+  ],
+  "runtimeSectionOrder": [
+    "hero",
+    "ecosystem",
+    "trust",
+    "proof",
+    "editorial",
+    "contact"
+  ],
+  "sections": [
+    {
+      "key": "hero",
+      "selector": "[data-od-id=hero]",
+      "heading": "Tìm đúng dịch vụ cho hành trình của bạn.",
+      "eyebrow": "WingsGroup",
+      "ctas": [
+        { "label": "Khám phá dịch vụ", "target": "#services", "kind": "primary" },
+        { "label": "Tìm hiểu WingsGroup", "target": "#trust", "kind": "secondary" }
+      ],
+      "media": {
+        "kind": "carousel",
+        "selector": "[data-od-id=hero-carousel]",
+        "files": [
+          "wingsgroup-hero-discovery-guide.png",
+          "wingsgroup-hero-private-consultation.png",
+          "wingsgroup-hero-airport-welcome.png",
+          "wingsgroup-hero-partner-meeting.png"
+        ],
+        "controls": ["previous", "dots", "next"],
+        "altRequired": true,
+        "reducedMotion": "no-autoplay"
+      }
+    },
+    {
+      "key": "service-router",
+      "selector": "#services",
+      "heading": "Mỗi hành trình, một đội ngũ phù hợp.",
+      "eyebrow": "Dịch vụ",
+      "routeCount": 4,
+      "routes": [
+        { "key": "outbound", "heading": "Du lịch nước ngoài", "cta": "Trao đổi nhu cầu", "target": "#contact" },
+        { "key": "inbound", "heading": "Khám phá Việt Nam", "cta": "Trao đổi nhu cầu", "target": "#contact" },
+        { "key": "airport-mice", "heading": "Dịch vụ sân bay & đoàn riêng", "cta": "Trao đổi nhu cầu", "target": "#contact" },
+        { "key": "care", "heading": "Bảo hiểm & hỗ trợ sau chuyến đi", "cta": "Trao đổi nhu cầu", "target": "#contact" }
+      ]
+    },
+    {
+      "key": "trust",
+      "selector": "[data-od-id=trust]",
+      "heading": "Minh bạch để bạn an tâm lựa chọn.",
+      "eyebrow": "Thông tin doanh nghiệp",
+      "items": [
+        { "key": "legal", "heading": "Pháp nhân & giấy phép", "state": "pending" },
+        { "key": "capability", "heading": "Hồ sơ năng lực & chứng nhận", "state": "pending" },
+        { "key": "contact", "heading": "Kênh liên hệ chính thức", "state": "pending" }
+      ],
+      "pendingLabel": "Đang cập nhật"
+    },
+    {
+      "key": "proof",
+      "selector": "[data-od-id=proof-archive]",
+      "heading": "Những dấu mốc tạo nên niềm tin bền vững.",
+      "eyebrow": "Dẫn chứng năng lực",
+      "recordCount": 4,
+      "publicationRule": "Only records with source, date/context, and publication permission may leave pending state.",
+      "defaultState": "pending",
+      "pendingLabel": "Đang cập nhật",
+      "media": ["wingsgroup-journey-consultation.png"]
+    },
+    {
+      "key": "ecosystem",
+      "selector": "[data-od-id=ecosystem]",
+      "heading": "Một hệ sinh thái. Năm cách đồng hành.",
+      "eyebrow": "Hệ sinh thái dịch vụ",
+      "brandCount": 5,
+      "brands": ["WingsGo", "WingsSide", "WingsPass", "WingsPlus", "WingsCare"],
+      "singleDecisionUnit": true,
+      "stage": {
+        "frameHeightDesktop": 800,
+        "internalScroll": false,
+        "compactHeight": "natural",
+        "media": [
+          "wingsgroup-ecosystem-hero.png",
+          "wingsgroup-vietnam-discovery.png",
+          "wingsgroup-airport-service.png",
+          "wingsgroup-corporate-partnership.png",
+          "wingsgroup-travel-support.png"
+        ],
+        "ctaLocation": "profile-only",
+        "altRequired": true
+      },
+      "transitionBeforeTrustPx": { "min": 48, "max": 72 },
+      "ctaFallback": { "target": "#contact", "externalLinks": "disabled-until-approved" },
+      "proofState": "pending"
+    },
+    {
+      "key": "editorial",
+      "selector": "[data-od-id=news]",
+      "heading": "Góc nhìn để chuẩn bị kỹ hơn cho hành trình.",
+      "eyebrow": "Cập nhật",
+      "cardCount": 3,
+      "cards": [
+        { "key": "trust", "media": "wingsgroup-journey-guide.png", "tag": "Pháp lý & niềm tin" },
+        { "key": "selection", "media": "wingsgroup-selection-guide.png", "tag": "Cẩm nang lựa chọn" },
+        { "key": "trends", "media": "wingsgroup-travel-trends.png", "tag": "Xu hướng du lịch" }
+      ],
+      "sourceMetadataRequired": true
+    },
+    {
+      "key": "contact",
+      "selector": "[data-od-id=contact]",
+      "heading": "Hãy bắt đầu từ điều bạn đang cần.",
+      "eyebrow": "Liên hệ",
+      "formSelector": "[data-od-id=contact-intake]",
+      "fields": ["name", "need", "consent"],
+      "cta": "Nhận tư vấn phù hợp",
+      "consentRequired": true
+    }
+  ],
+  "consultationDialog": {
+    "selector": "[data-od-id=consultation-dialog]",
+    "triggerSelector": "[data-od-id=consultation-fab]",
+    "title": "Trao đổi với chuyên viên.",
+    "ariaLabelledBy": "consultation-title",
+    "channels": [
+      { "key": "zalo", "label": "Zalo OA", "state": "unconfigured" },
+      { "key": "whatsapp", "label": "WhatsApp", "state": "unconfigured" },
+      { "key": "messenger", "label": "Messenger", "state": "unconfigured" }
+    ],
+    "fallbackBehavior": "Store preferred channel in the governed contact intake; never open an external URL until the endpoint is approved.",
+    "humanConsultationOnly": true
+  },
+  "mediaExpectations": {
+    "manifest": "docs/product/wingsgroup-v3-media-manifest.json",
+    "governedAssetCount": 13,
+    "publicationState": "pending-production",
+    "usageScope": "editorial-service",
+    "bilingualAltRequired": true,
+    "checksumRequired": true,
+    "actualDimensionsRequired": true
+  },
+  "viewportMatrix": [
+    { "width": 375, "height": 812, "label": "mobile-small", "screenshotTarget": "header-hero-sections-dialog" },
+    { "width": 390, "height": 844, "label": "mobile", "screenshotTarget": "header-hero-sections-dialog" },
+    { "width": 768, "height": 1024, "label": "tablet", "screenshotTarget": "sections-ecosystem-form" },
+    { "width": 1024, "height": 768, "label": "desktop-compact", "screenshotTarget": "header-ecosystem-trust" },
+    { "width": 1280, "height": 800, "label": "desktop", "screenshotTarget": "full-home" },
+    { "width": 1440, "height": 900, "label": "desktop-wide", "screenshotTarget": "full-home" }
+  ],
+  "approval": {
+    "humanPublicationApproval": "not-granted",
+    "legalApproval": "not-granted",
+    "notes": "This is an executable development fidelity contract. Passing tests do not constitute human publication approval."
+  }
+}
