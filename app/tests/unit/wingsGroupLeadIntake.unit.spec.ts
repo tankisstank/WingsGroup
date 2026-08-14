@@ -2,9 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { parseLeadRequest, validateFieldsForForm } from '@/lead-capture/validation'
 import {
-  buildWingsGroupOperationalFields,
   getWingsGroupRetentionUntil,
-  isWingsGroupOperationalField,
   normalizeTrustedLeadSourcePath,
   resolveWingsGroupLeadGovernance,
   validateWingsGroupLeadContract,
@@ -105,28 +103,10 @@ describe('WingsGroup v3 lead governance', () => {
 
   it('derives bounded operational metadata and a 24-month retention marker', () => {
     const consentedAt = new Date('2024-02-29T10:15:00.000Z')
-    const fields = buildWingsGroupOperationalFields({
-      consentedAt,
-      contract: {
-        consent: true,
-        consentVersion: WINGSGROUP_CONSENT_VERSION,
-        preferredChannel: 'zalo',
-      },
-      locale: 'vi',
-      sourcePath: '/lien-he?forged=query',
-    })
 
     expect(normalizeTrustedLeadSourcePath('https://attacker.example/private')).toBe('/')
+    expect(normalizeTrustedLeadSourcePath('/lien-he?forged=query')).toBe('/lien-he')
     expect(getWingsGroupRetentionUntil(consentedAt)).toBe('2026-02-28T10:15:00.000Z')
-    expect(fields).toEqual(
-      expect.arrayContaining([
-        { field: '_wingsgroup_source_path', value: '/lien-he' },
-        { field: '_wingsgroup_consent_version', value: WINGSGROUP_CONSENT_VERSION },
-        { field: '_wingsgroup_retention_until', value: '2026-02-28T10:15:00.000Z' },
-        { field: '_wingsgroup_preferred_channel', value: 'zalo' },
-      ]),
-    )
-    expect(fields.every(({ field }) => isWingsGroupOperationalField(field))).toBe(true)
   })
 })
 

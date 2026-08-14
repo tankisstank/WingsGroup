@@ -20,6 +20,7 @@ import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
+import { wingsGroupLeadGovernanceField } from '@/lead-capture/governanceFields'
 
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -193,6 +194,7 @@ export const plugins: Plugin[] = [
         } as Field
 
         const privateDeliveryFields: Field[] = [
+          wingsGroupLeadGovernanceField,
           {
             name: 'enquiryContext',
             label: 'Enquiry context',

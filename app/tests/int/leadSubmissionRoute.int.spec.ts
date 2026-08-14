@@ -329,22 +329,25 @@ describe('lead submission endpoint integration', () => {
             tourSlug: undefined,
           },
           site: 9,
-          submissionData: expect.arrayContaining([
-            { field: '_wingsgroup_locale', value: 'en' },
-            { field: '_wingsgroup_source_path', value: '/en/lien-he' },
-            { field: '_wingsgroup_consent_version', value: 'wingsgroup-contact-v1' },
-            { field: '_wingsgroup_preferred_channel', value: 'zalo' },
-          ]),
+          submissionData: [
+            { field: 'name', value: 'Alice Private' },
+            { field: 'message', value: 'Private consultation need' },
+          ],
+          wingsGroupLead: expect.objectContaining({
+            consentVersion: 'wingsgroup-contact-v1',
+            locale: 'en',
+            preferredChannel: 'zalo',
+            sourcePath: '/en/lien-he',
+          }),
         }),
       }),
     )
-    const stored = mocks.create.mock.calls[0]?.[0]?.data.submissionData as Array<{
-      field: string
-      value: string
-    }>
-    expect(stored.find(({ field }) => field === '_wingsgroup_consented_at')?.value).toMatch(
-      /^\d{4}-\d{2}-\d{2}T/,
-    )
+    const governance = mocks.create.mock.calls[0]?.[0]?.data.wingsGroupLead as {
+      consentedAt: string
+      retentionUntil: string
+    }
+    expect(governance.consentedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+    expect(governance.retentionUntil).toMatch(/^\d{4}-\d{2}-\d{2}T/)
     expect(JSON.stringify([...consoleInfo.mock.calls, ...consoleWarn.mock.calls])).not.toMatch(
       /Alice Private|Private consultation need/,
     )

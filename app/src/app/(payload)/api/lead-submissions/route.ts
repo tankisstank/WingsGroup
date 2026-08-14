@@ -11,7 +11,8 @@ import {
 } from '@/lead-capture/validation'
 import { verifyTurnstile } from '@/lead-capture/turnstile'
 import {
-  buildWingsGroupOperationalFields,
+  getWingsGroupRetentionUntil,
+  normalizeTrustedLeadSourcePath,
   resolveWingsGroupLeadGovernance,
   toWingsGroupLeadPublicConfig,
   validateWingsGroupLeadContract,
@@ -170,8 +171,12 @@ export async function POST(request: Request): Promise<Response> {
 
   let wingsGroupContext:
     | {
-        locale: string
-        operationalFields: ReturnType<typeof buildWingsGroupOperationalFields>
+        locale: 'en' | 'vi'
+        consentVersion: string
+        consentedAt: string
+        preferredChannel?: 'messenger' | 'whatsapp' | 'zalo'
+        retentionUntil: string
+        sourcePath: string
       }
     | undefined
 
@@ -197,13 +202,12 @@ export async function POST(request: Request): Promise<Response> {
       const contract = validateWingsGroupLeadContract(input.leadContract, governance)
       const consentedAt = new Date()
       wingsGroupContext = {
-        locale,
-        operationalFields: buildWingsGroupOperationalFields({
-          consentedAt,
-          contract,
-          locale,
-          sourcePath,
-        }),
+        consentVersion: contract.consentVersion,
+        consentedAt: consentedAt.toISOString(),
+        locale: locale === 'en' ? 'en' : 'vi',
+        ...(contract.preferredChannel ? { preferredChannel: contract.preferredChannel } : {}),
+        retentionUntil: getWingsGroupRetentionUntil(consentedAt),
+        sourcePath: normalizeTrustedLeadSourcePath(sourcePath),
       }
     } catch {
       logOperationalEvent('warn', 'lead_validation_rejected', {
@@ -254,10 +258,8 @@ export async function POST(request: Request): Promise<Response> {
         enquiryContext,
         form: form.id,
         site: site.id,
-        submissionData: [
-          ...normalizedFields.map(({ field, value }) => ({ field, value })),
-          ...(wingsGroupContext?.operationalFields || []),
-        ],
+        submissionData: normalizedFields.map(({ field, value }) => ({ field, value })),
+        wingsGroupLead: wingsGroupContext,
       },
       overrideAccess: true,
     })

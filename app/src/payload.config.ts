@@ -36,7 +36,11 @@ import { getServerSideURL } from './utilities/getURL'
 import { cmsEnabledLocaleMetadata } from './utilities/locales'
 import { resolveLocalDatabaseURL } from './utilities/localDatabase'
 import { repairLocalSQLiteSchema } from './utilities/repairLocalSQLiteSchema'
-import { reconcileLeadNotificationTask, sendLeadNotificationTask } from './lead-capture/job'
+import {
+  purgeExpiredWingsGroupLeadsTask,
+  reconcileLeadNotificationTask,
+  sendLeadNotificationTask,
+} from './lead-capture/job'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -243,6 +247,10 @@ export default buildConfig({
         return authHeader === `Bearer ${secret}`
       },
     },
-    tasks: [sendLeadNotificationTask, reconcileLeadNotificationTask],
+    tasks: [
+      sendLeadNotificationTask,
+      reconcileLeadNotificationTask,
+      purgeExpiredWingsGroupLeadsTask,
+    ],
   },
 })

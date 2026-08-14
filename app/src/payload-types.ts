@@ -148,6 +148,7 @@ export interface Config {
     tasks: {
       sendLeadNotification: TaskSendLeadNotification;
       reconcileLeadNotificationQueueFailures: TaskReconcileLeadNotificationQueueFailures;
+      purgeExpiredWingsGroupLeads: TaskPurgeExpiredWingsGroupLeads;
       createCollectionExport: TaskCreateCollectionExport;
       createCollectionImport: TaskCreateCollectionImport;
       schedulePublish: TaskSchedulePublish;
@@ -2402,6 +2403,17 @@ export interface FormSubmission {
   id: number;
   site?: (number | null) | Site;
   /**
+   * Metadata riêng do server ghi sau khi xác thực tenant và consent; không chỉnh sửa thủ công.
+   */
+  wingsGroupLead?: {
+    locale?: ('vi' | 'en') | null;
+    sourcePath?: string | null;
+    consentVersion?: string | null;
+    consentedAt?: string | null;
+    retentionUntil?: string | null;
+    preferredChannel?: ('zalo' | 'whatsapp' | 'messenger') | null;
+  };
+  /**
    * Private journey and discovery metadata. Kept separate from customer-authored form fields.
    */
   enquiryContext?: {
@@ -2612,6 +2624,7 @@ export interface PayloadJob {
           | 'inline'
           | 'sendLeadNotification'
           | 'reconcileLeadNotificationQueueFailures'
+          | 'purgeExpiredWingsGroupLeads'
           | 'createCollectionExport'
           | 'createCollectionImport'
           | 'schedulePublish';
@@ -2652,6 +2665,7 @@ export interface PayloadJob {
         | 'inline'
         | 'sendLeadNotification'
         | 'reconcileLeadNotificationQueueFailures'
+        | 'purgeExpiredWingsGroupLeads'
         | 'createCollectionExport'
         | 'createCollectionImport'
         | 'schedulePublish'
@@ -4517,6 +4531,16 @@ export interface FormsSelect<T extends boolean = true> {
  */
 export interface FormSubmissionsSelect<T extends boolean = true> {
   site?: T;
+  wingsGroupLead?:
+    | T
+    | {
+        locale?: T;
+        sourcePath?: T;
+        consentVersion?: T;
+        consentedAt?: T;
+        retentionUntil?: T;
+        preferredChannel?: T;
+      };
   enquiryContext?:
     | T
     | {
@@ -4883,6 +4907,19 @@ export interface TaskReconcileLeadNotificationQueueFailures {
   input?: unknown;
   output: {
     requeued: number;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskPurgeExpiredWingsGroupLeads".
+ */
+export interface TaskPurgeExpiredWingsGroupLeads {
+  input?: unknown;
+  output: {
+    enabled: boolean;
+    deleted: number;
+    failed: number;
+    hasMore: boolean;
   };
 }
 /**

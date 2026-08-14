@@ -22,8 +22,6 @@ export const WINGSGROUP_POLICY_ROUTES = {
   vi: '/chinh-sach-bao-mat',
 } as const
 
-export const WINGSGROUP_OPERATIONAL_FIELD_PREFIX = '_wingsgroup_' as const
-
 type UnknownRecord = Record<string, unknown>
 
 type ResolvedWingsGroupLeadGovernance = {
@@ -190,51 +188,6 @@ export const getWingsGroupRetentionUntil = (consentedAt: Date): string => {
   result.setUTCFullYear(year, month, Math.min(day, lastDay))
   return result.toISOString()
 }
-
-export const buildWingsGroupOperationalFields = ({
-  consentedAt,
-  contract,
-  locale,
-  sourcePath,
-}: {
-  consentedAt: Date
-  contract: WingsGroupLeadContract
-  locale: string
-  sourcePath: string
-}): Array<{ field: string; value: string }> => [
-  { field: `${WINGSGROUP_OPERATIONAL_FIELD_PREFIX}locale`, value: locale },
-  {
-    field: `${WINGSGROUP_OPERATIONAL_FIELD_PREFIX}source_path`,
-    value: normalizeTrustedLeadSourcePath(sourcePath),
-  },
-  {
-    field: `${WINGSGROUP_OPERATIONAL_FIELD_PREFIX}privacy_version`,
-    value: WINGSGROUP_PRIVACY_VERSION,
-  },
-  {
-    field: `${WINGSGROUP_OPERATIONAL_FIELD_PREFIX}consent_version`,
-    value: contract.consentVersion,
-  },
-  {
-    field: `${WINGSGROUP_OPERATIONAL_FIELD_PREFIX}consented_at`,
-    value: consentedAt.toISOString(),
-  },
-  {
-    field: `${WINGSGROUP_OPERATIONAL_FIELD_PREFIX}retention_until`,
-    value: getWingsGroupRetentionUntil(consentedAt),
-  },
-  ...(contract.preferredChannel
-    ? [
-        {
-          field: `${WINGSGROUP_OPERATIONAL_FIELD_PREFIX}preferred_channel`,
-          value: contract.preferredChannel,
-        },
-      ]
-    : []),
-]
-
-export const isWingsGroupOperationalField = (field: string): boolean =>
-  field.startsWith(WINGSGROUP_OPERATIONAL_FIELD_PREFIX)
 
 export const getFormSiteCode = (formInput: unknown): string | null => {
   const form = asRecord(formInput)
