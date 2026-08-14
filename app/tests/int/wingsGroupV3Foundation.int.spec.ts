@@ -128,7 +128,7 @@ describe('WingsGroup v3 Payload foundation', () => {
     expect(checked.sort((left, right) => left - right)).toEqual([1, 2, 3, 4, 5, 6, 7])
   })
 
-  it('loads both localized alt values with fallback disabled before publication', async () => {
+  it('rejects a blank pending VI alt while persisted EN alt is valid', async () => {
     const calls: Array<{ fallbackLocale?: unknown; locale?: unknown }> = []
     await expect(
       validateGovernedMediaBeforeChange({
@@ -151,7 +151,7 @@ describe('WingsGroup v3 Payload foundation', () => {
             }) => {
               if (args.collection === 'sites') return { code: 'wings-group', id: 1 }
               calls.push(args)
-              return { alt: args.locale === 'vi' ? 'Alt VI' : '' }
+              return { alt: args.locale === 'en' ? 'Alt EN' : 'unexpected locale read' }
             },
           },
           locale: 'vi',
