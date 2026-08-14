@@ -7,9 +7,9 @@ import { resolveSiteSettingsUpsert } from '../../scripts/lib/wingsGroupV3MediaPl
 import {
   applyWingsGroupV3MediaWithRecovery,
   backupLocalDatabase,
-  inventoryWingsGroupV3UploadFiles,
   importWingsGroupV3Media,
   parseWingsGroupV3MediaCommand,
+  recoverWingsGroupV3MediaApply,
   WingsGroupV3MediaApplyError,
 } from '../../scripts/import-wingsgroup-v3-media'
 import {
@@ -132,7 +132,7 @@ describe('WingsGroup v3 fail-closed governance', () => {
     }
   })
 
-  it('recovers the database and upload inventory after a second-record apply failure', async () => {
+  it('rolls back only this import and preserves concurrent tenant files and writes', async () => {
     const rootDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'wg-v3-recovery-'))
     const assetsDirectory = path.join(rootDirectory, 'assets')
     const mediaDirectory = path.join(rootDirectory, 'media')
@@ -140,10 +140,10 @@ describe('WingsGroup v3 fail-closed governance', () => {
     const backupPath = path.join(rootDirectory, 'payload.sqlite.bak')
     await fs.mkdir(assetsDirectory)
     await fs.mkdir(mediaDirectory)
-    const databaseBefore = Buffer.from('database-before-apply')
-    await fs.writeFile(databasePath, databaseBefore)
+    await fs.writeFile(databasePath, 'database-before-apply')
     await fs.copyFile(databasePath, backupPath)
-    const preExistingUpload = path.join(mediaDirectory, 'pre-existing.png')
+    const preExistingUpload = path.join(mediaDirectory, 'pre-existing-tenant-upload.png')
+    const concurrentUpload = path.join(mediaDirectory, 'unrelated-concurrent-tenant-upload.png')
     await fs.writeFile(preExistingUpload, 'do-not-delete')
 
     const media = []
@@ -194,27 +194,71 @@ describe('WingsGroup v3 fail-closed governance', () => {
       })),
     } as never
     const documents: Array<Record<string, any>> = []
+    const databaseState = { targetRecords: [] as number[], unrelatedWrites: [] as string[] }
+    const transactionIDs: unknown[] = []
     let createCount = 0
+    let rollbackCount = 0
+    let commitCount = 0
     let destroyCount = 0
     const payload = {
-      find: async () => ({ docs: [] }),
-      create: async (args: { data: Record<string, any>; file: { name: string } }) => {
+      db: {
+        beginTransaction: async () => 'transaction-1',
+        commitTransaction: async () => {
+          commitCount += 1
+        },
+        rollbackTransaction: async () => {
+          rollbackCount += 1
+          databaseState.targetRecords = []
+        },
+      },
+      find: async (args: { req?: { transactionID?: unknown } }) => {
+        transactionIDs.push(args.req?.transactionID)
+        return { docs: [] }
+      },
+      create: async (args: {
+        data: Record<string, any>
+        file: { name: string }
+        req?: { transactionID?: unknown }
+      }) => {
+        transactionIDs.push(args.req?.transactionID)
         createCount += 1
-        await fs.writeFile(path.join(mediaDirectory, `failed-run-${createCount}.png`), 'new upload')
-        await fs.writeFile(databasePath, `database-mutated-${createCount}`)
-        if (createCount === 2) throw new Error('simulated second-record failure')
+        databaseState.targetRecords.push(createCount)
+        if (createCount === 1) {
+          databaseState.unrelatedWrites.push('tenant-42-write-after-apply-start')
+          await fs.writeFile(concurrentUpload, 'unrelated upload')
+        }
+        await fs.writeFile(
+          path.join(mediaDirectory, `run-owned-${createCount}.png`),
+          'import upload',
+        )
+        await fs.writeFile(
+          path.join(mediaDirectory, `run-owned-${createCount}-thumbnail.png`),
+          'import derivative',
+        )
+        await fs.writeFile(databasePath, `transaction-db-write-${createCount}`)
         const document = {
           ...args.data,
-          filename: args.file.name,
+          filename: `run-owned-${createCount}.png`,
           height: 4,
           id: createCount,
+          sizes: { thumbnail: { filename: `run-owned-${createCount}-thumbnail.png` } },
           width: 4,
         }
         documents.push(document)
         return document
       },
-      update: async (args: { id: number; data: Record<string, any>; locale: string }) => {
+      update: async (args: {
+        id: number
+        data: Record<string, any>
+        locale: string
+        req?: { transactionID?: unknown }
+      }) => {
+        transactionIDs.push(args.req?.transactionID)
         const document = documents.find((item) => item.id === args.id)!
+        if (args.locale === 'en' && args.id === 2) {
+          await fs.appendFile(databasePath, '|unrelated-db-write-after-apply-start')
+          throw new Error('simulated second-record English-alt failure')
+        }
         if (args.locale === 'en') {
           const alt = typeof document.alt === 'object' ? document.alt : { vi: document.alt }
           document.alt = { ...alt, en: args.data.alt }
@@ -225,8 +269,6 @@ describe('WingsGroup v3 fail-closed governance', () => {
         destroyCount += 1
       },
     }
-    const preExistingFiles = await inventoryWingsGroupV3UploadFiles(mediaDirectory)
-
     try {
       const failure = await applyWingsGroupV3MediaWithRecovery({
         assetsDirectory,
@@ -236,21 +278,146 @@ describe('WingsGroup v3 fail-closed governance', () => {
         mediaDirectory,
         payload: payload as never,
         plan,
-        preExistingUploadFiles: preExistingFiles,
-        req: {} as never,
+        req: { payload } as never,
         siteID: 7,
       }).catch((error: unknown) => error)
       expect(failure).toBeInstanceOf(WingsGroupV3MediaApplyError)
       expect((failure as WingsGroupV3MediaApplyError).message).toContain(
-        'simulated second-record failure',
+        'simulated second-record English-alt failure',
       )
       expect((failure as WingsGroupV3MediaApplyError).recovery.success).toBe(true)
-
-      expect(await fs.readFile(databasePath)).toEqual(databaseBefore)
+      expect((failure as WingsGroupV3MediaApplyError).recovery.transactionRollback).toMatchObject({
+        status: 'rolled-back',
+        succeeded: true,
+      })
+      expect(
+        (failure as WingsGroupV3MediaApplyError).recovery.runOwnedFileCleanup.removedFiles,
+      ).toHaveLength(4)
+      expect(rollbackCount).toBe(1)
+      expect(commitCount).toBe(0)
+      expect(transactionIDs.every((transactionID) => transactionID === 'transaction-1')).toBe(true)
+      expect(await fs.readFile(databasePath, 'utf8')).toBe(
+        'transaction-db-write-2|unrelated-db-write-after-apply-start',
+      )
+      expect(databaseState).toEqual({
+        targetRecords: [],
+        unrelatedWrites: ['tenant-42-write-after-apply-start'],
+      })
       expect(await fs.readFile(preExistingUpload)).toEqual(Buffer.from('do-not-delete'))
-      await expect(fs.access(path.join(mediaDirectory, 'failed-run-1.png'))).rejects.toThrow()
-      await expect(fs.access(path.join(mediaDirectory, 'failed-run-2.png'))).rejects.toThrow()
+      expect(await fs.readFile(concurrentUpload)).toEqual(Buffer.from('unrelated upload'))
+      for (const filename of [
+        'run-owned-1.png',
+        'run-owned-1-thumbnail.png',
+        'run-owned-2.png',
+        'run-owned-2-thumbnail.png',
+      ]) {
+        await expect(fs.access(path.join(mediaDirectory, filename))).rejects.toThrow()
+      }
       expect(createCount).toBe(2)
+      expect(destroyCount).toBe(1)
+    } finally {
+      await fs.rm(rootDirectory, { force: true, recursive: true })
+    }
+  })
+
+  it('fails before mutation when the adapter cannot provide an isolated transaction', async () => {
+    const rootDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'wg-v3-transaction-guard-'))
+    const assetsDirectory = path.join(rootDirectory, 'assets')
+    const mediaDirectory = path.join(rootDirectory, 'media')
+    const backupPath = path.join(rootDirectory, 'payload.sqlite.bak')
+    const databasePath = path.join(rootDirectory, 'payload.sqlite')
+    await fs.mkdir(assetsDirectory)
+    await fs.mkdir(mediaDirectory)
+    await fs.writeFile(databasePath, 'database')
+    await fs.copyFile(databasePath, backupPath)
+    const manifest = JSON.parse(
+      await fs.readFile(
+        path.resolve(process.cwd(), '../docs/product/wingsgroup-v3-media-manifest.json'),
+        'utf8',
+      ),
+    )
+    const plan = {
+      errors: [],
+      planned: 0,
+      records: [],
+    }
+    let createCount = 0
+    let destroyCount = 0
+    const payload = {
+      db: {},
+      create: async () => {
+        createCount += 1
+        return {}
+      },
+      destroy: async () => {
+        destroyCount += 1
+      },
+    }
+
+    try {
+      const failure = await applyWingsGroupV3MediaWithRecovery({
+        assetsDirectory,
+        backupPath,
+        databasePath,
+        manifest,
+        mediaDirectory,
+        payload: payload as never,
+        plan: plan as never,
+        req: {} as never,
+        siteID: 7,
+      }).catch((error: unknown) => error)
+      expect(failure).toBeInstanceOf(WingsGroupV3MediaApplyError)
+      expect((failure as WingsGroupV3MediaApplyError).message).toMatch(
+        /requires an isolated Payload/,
+      )
+      expect((failure as WingsGroupV3MediaApplyError).recovery.transactionRollback).toMatchObject({
+        status: 'unsupported',
+        succeeded: true,
+      })
+      expect((failure as WingsGroupV3MediaApplyError).recovery.manualRecoveryRequired).toBe(false)
+      expect(createCount).toBe(0)
+      expect(destroyCount).toBe(1)
+    } finally {
+      await fs.rm(rootDirectory, { force: true, recursive: true })
+    }
+  })
+
+  it('retains the backup path and requires manual recovery when rollback fails', async () => {
+    const rootDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'wg-v3-rollback-failure-'))
+    const ownedFile = path.join(rootDirectory, 'run-owned.png')
+    await fs.writeFile(ownedFile, 'manual recovery artifact')
+    let destroyCount = 0
+    const payload = {
+      db: {
+        rollbackTransaction: async () => {
+          throw new Error('simulated rollback failure')
+        },
+      },
+      destroy: async () => {
+        destroyCount += 1
+      },
+    }
+    try {
+      const recovery = await recoverWingsGroupV3MediaApply({
+        backupPath: path.join(rootDirectory, 'retained-backup.sqlite'),
+        databasePath: path.join(rootDirectory, 'payload.sqlite'),
+        payload: payload as never,
+        req: { transactionID: 'transaction-1' } as never,
+        runOwnedUploadFiles: new Set([ownedFile]),
+        transactionStatus: 'active',
+      })
+      expect(recovery).toMatchObject({
+        manualRecoveryRequired: true,
+        payloadClosed: true,
+        success: false,
+        transactionRollback: {
+          status: 'rollback-failed',
+          succeeded: false,
+        },
+      })
+      expect(recovery.backupPath).toContain('retained-backup.sqlite')
+      expect(recovery.runOwnedFileCleanup).toMatchObject({ attempted: false, success: false })
+      await expect(fs.access(ownedFile)).resolves.toBeUndefined()
       expect(destroyCount).toBe(1)
     } finally {
       await fs.rm(rootDirectory, { force: true, recursive: true })
@@ -435,7 +602,7 @@ describe('WingsGroup v3 fail-closed governance', () => {
         manifest,
         payload: payload as never,
         plan,
-        req: {} as never,
+        req: { transactionID: 'fixture-transaction' } as never,
         siteID: 7,
       })
       const second = await importWingsGroupV3Media({
@@ -444,7 +611,7 @@ describe('WingsGroup v3 fail-closed governance', () => {
         manifest,
         payload: payload as never,
         plan,
-        req: {} as never,
+        req: { transactionID: 'fixture-transaction' } as never,
         siteID: 7,
       })
 

@@ -12,7 +12,15 @@ import configPromise from '@payload-config'
 import fs from 'node:fs/promises'
 import fsSync from 'node:fs'
 import path from 'node:path'
-import { createLocalReq, getPayload, type Payload, type PayloadRequest, type Where } from 'payload'
+import {
+  commitTransaction,
+  createLocalReq,
+  getPayload,
+  initTransaction,
+  type Payload,
+  type PayloadRequest,
+  type Where,
+} from 'payload'
 
 import {
   assertApplicableWingsGroupV3MediaPlan,
@@ -110,77 +118,177 @@ export const backupLocalDatabase = (): WingsGroupV3LocalDatabaseBackup => {
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error)
 
-const collectUploadFiles = async (directory: string): Promise<Set<string>> => {
-  const files = new Set<string>()
-  const visit = async (currentDirectory: string): Promise<void> => {
-    let entries
-    try {
-      entries = await fs.readdir(currentDirectory, { withFileTypes: true })
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
-      throw error
-    }
-    for (const entry of entries) {
-      const entryPath = path.resolve(currentDirectory, entry.name)
-      if (entry.isDirectory()) await visit(entryPath)
-      else if (entry.isFile()) files.add(entryPath)
-    }
+const TRANSACTION_UNSUPPORTED_MESSAGE =
+  'WingsGroup v3 media apply requires an isolated Payload database transaction; refusing mutation because this adapter or request cannot guarantee transaction isolation.'
+
+type WingsGroupV3MediaDocument = Record<string, unknown>
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+
+const returnedUploadFilenames = (document: WingsGroupV3MediaDocument): string[] => {
+  const filenames = new Set<string>()
+  if (typeof document.filename === 'string') filenames.add(document.filename)
+  const sizes = isRecord(document.sizes) ? document.sizes : null
+  for (const size of Object.values(sizes || {})) {
+    if (isRecord(size) && typeof size.filename === 'string') filenames.add(size.filename)
   }
-  await visit(path.resolve(directory))
-  return files
+  return [...filenames]
 }
 
-export const inventoryWingsGroupV3UploadFiles = collectUploadFiles
-
-export type WingsGroupV3DatabaseRestoreResult = {
-  error?: string
-  restored: boolean
+const resolveRunOwnedUploadFile = (mediaDirectory: string, filename: string): string => {
+  const mediaRoot = path.resolve(mediaDirectory)
+  const filePath = path.resolve(mediaRoot, filename)
+  if (filePath !== mediaRoot && !filePath.startsWith(`${mediaRoot}${path.sep}`)) {
+    throw new Error(
+      `Payload returned an upload filename outside the governed media directory: ${filename}`,
+    )
+  }
+  return filePath
 }
 
-export const restoreWingsGroupV3SQLiteAtomically = async ({
-  backupPath,
-  databasePath,
+const trackCreatedMediaFiles = ({
+  document,
+  mediaDirectory,
+  runOwnedUploadFiles,
 }: {
-  backupPath: string
-  databasePath: string
-}): Promise<WingsGroupV3DatabaseRestoreResult> => {
-  const temporaryRestorePath = `${databasePath}.restore-wingsgroup-v3-${process.pid}-${Date.now()}`
-  try {
-    await fs.copyFile(backupPath, temporaryRestorePath)
-    await fs.rename(temporaryRestorePath, databasePath)
-    return { restored: true }
-  } catch (error) {
-    await fs.rm(temporaryRestorePath, { force: true }).catch(() => undefined)
-    return { error: errorMessage(error), restored: false }
+  document: WingsGroupV3MediaDocument
+  mediaDirectory: string
+  runOwnedUploadFiles: Set<string>
+}) => {
+  for (const filename of returnedUploadFilenames(document)) {
+    runOwnedUploadFiles.add(resolveRunOwnedUploadFile(mediaDirectory, filename))
   }
+}
+
+export type WingsGroupV3RunOwnedUploadCleanup = {
+  attempted: boolean
+  errors: string[]
+  removedFiles: string[]
+  success: boolean
+}
+
+export const cleanupWingsGroupV3RunOwnedUploadFiles = async (
+  runOwnedUploadFiles: ReadonlySet<string>,
+): Promise<WingsGroupV3RunOwnedUploadCleanup> => {
+  const errors: string[] = []
+  const removedFiles: string[] = []
+  for (const uploadFile of runOwnedUploadFiles) {
+    try {
+      await fs.rm(uploadFile, { force: true })
+      removedFiles.push(uploadFile)
+    } catch (error) {
+      errors.push(`Upload cleanup failed for ${uploadFile}: ${errorMessage(error)}`)
+    }
+  }
+  return {
+    attempted: true,
+    errors,
+    removedFiles,
+    success: errors.length === 0,
+  }
+}
+
+type WingsGroupV3TransactionStatus =
+  | 'not-started'
+  | 'unsupported'
+  | 'active'
+  | 'rolled-back'
+  | 'rollback-failed'
+  | 'committed'
+
+export type WingsGroupV3TransactionRollback = {
+  attempted: boolean
+  error?: string
+  status: WingsGroupV3TransactionStatus
+  succeeded: boolean
 }
 
 export type WingsGroupV3MediaRecoveryReport = {
   backupPath: string
   databasePath: string
-  databaseRestored: boolean
   errors: string[]
   manualRecoveryRequired: boolean
   payloadClosed: boolean
-  preservedUploadFiles: number
-  removedUploadFiles: string[]
+  runOwnedFileCleanup: WingsGroupV3RunOwnedUploadCleanup
   success: boolean
+  transactionRollback: WingsGroupV3TransactionRollback
+}
+
+const rollbackWingsGroupV3Transaction = async ({
+  payload,
+  req,
+}: {
+  payload: Payload
+  req?: PayloadRequest
+}): Promise<WingsGroupV3TransactionRollback> => {
+  const transactionID = await req?.transactionID
+  if (!transactionID) {
+    return {
+      attempted: true,
+      error: 'Transaction ID was unavailable while rollback was required.',
+      status: 'rollback-failed',
+      succeeded: false,
+    }
+  }
+  try {
+    await payload.db.rollbackTransaction(transactionID)
+    if (req) delete req.transactionID
+    return { attempted: true, status: 'rolled-back', succeeded: true }
+  } catch (error) {
+    if (req) delete req.transactionID
+    return {
+      attempted: true,
+      error: errorMessage(error),
+      status: 'rollback-failed',
+      succeeded: false,
+    }
+  }
 }
 
 export const recoverWingsGroupV3MediaApply = async ({
   backupPath,
   databasePath,
-  mediaDirectory,
   payload,
-  preExistingUploadFiles,
+  req,
+  runOwnedUploadFiles,
+  transactionStatus,
+  trackingErrors = [],
 }: {
   backupPath: string
   databasePath: string
-  mediaDirectory: string
   payload?: Pick<Payload, 'destroy'> | null
-  preExistingUploadFiles: ReadonlySet<string>
+  req?: PayloadRequest
+  runOwnedUploadFiles: ReadonlySet<string>
+  transactionStatus: WingsGroupV3TransactionStatus
+  trackingErrors?: string[]
 }): Promise<WingsGroupV3MediaRecoveryReport> => {
-  const errors: string[] = []
+  const errors = [...trackingErrors]
+  const transactionRollback =
+    transactionStatus === 'active'
+      ? await rollbackWingsGroupV3Transaction({ payload: payload as Payload, req })
+      : {
+          attempted: false,
+          status: transactionStatus,
+          succeeded: transactionStatus === 'unsupported' || transactionStatus === 'not-started',
+        }
+  if (transactionRollback.error) {
+    errors.push(`Transaction rollback failed: ${transactionRollback.error}`)
+  }
+
+  const rollbackAllowsCleanup = transactionRollback.status === 'rolled-back'
+  const runOwnedFileCleanup = rollbackAllowsCleanup
+    ? await cleanupWingsGroupV3RunOwnedUploadFiles(runOwnedUploadFiles)
+    : {
+        attempted: false,
+        errors: [
+          'Run-owned upload cleanup was skipped because transaction rollback did not succeed.',
+        ],
+        removedFiles: [],
+        success: false,
+      }
+  errors.push(...runOwnedFileCleanup.errors)
+
   let payloadClosed = true
   if (payload) {
     try {
@@ -191,48 +299,28 @@ export const recoverWingsGroupV3MediaApply = async ({
     }
   }
 
-  const databaseRestore = await restoreWingsGroupV3SQLiteAtomically({
-    backupPath,
-    databasePath,
-  })
-  if (databaseRestore.error) errors.push(`SQLite restore failed: ${databaseRestore.error}`)
-
-  const removedUploadFiles: string[] = []
-  try {
-    const currentUploadFiles = await collectUploadFiles(mediaDirectory)
-    for (const uploadFile of currentUploadFiles) {
-      if (preExistingUploadFiles.has(uploadFile)) continue
-      try {
-        await fs.rm(uploadFile, { force: true })
-        removedUploadFiles.push(uploadFile)
-      } catch (error) {
-        errors.push(`Upload cleanup failed for ${uploadFile}: ${errorMessage(error)}`)
-      }
-    }
-  } catch (error) {
-    errors.push(`Upload inventory failed during recovery: ${errorMessage(error)}`)
-  }
-
-  let preservedUploadFiles = 0
-  try {
-    const remainingUploadFiles = await collectUploadFiles(mediaDirectory)
-    preservedUploadFiles = [...preExistingUploadFiles].filter((file) =>
-      remainingUploadFiles.has(file),
-    ).length
-  } catch (error) {
-    errors.push(`Upload verification failed during recovery: ${errorMessage(error)}`)
-  }
-
+  const manualRecoveryRequired =
+    transactionRollback.status === 'rollback-failed' ||
+    transactionRollback.status === 'committed' ||
+    (transactionRollback.status !== 'unsupported' &&
+      transactionRollback.status !== 'not-started' &&
+      !runOwnedFileCleanup.success) ||
+    trackingErrors.length > 0 ||
+    !payloadClosed
   return {
     backupPath,
     databasePath,
-    databaseRestored: databaseRestore.restored,
     errors,
-    manualRecoveryRequired: errors.length > 0 || !databaseRestore.restored || !payloadClosed,
+    manualRecoveryRequired,
     payloadClosed,
-    preservedUploadFiles,
-    removedUploadFiles,
-    success: errors.length === 0 && databaseRestore.restored && payloadClosed,
+    runOwnedFileCleanup,
+    success:
+      transactionRollback.status === 'rolled-back' &&
+      transactionRollback.succeeded &&
+      runOwnedFileCleanup.success &&
+      payloadClosed &&
+      errors.length === 0,
+    transactionRollback,
   }
 }
 
@@ -242,8 +330,8 @@ export class WingsGroupV3MediaApplyError extends Error {
 
   constructor(originalError: unknown, recovery: WingsGroupV3MediaRecoveryReport) {
     super(
-      `WingsGroup v3 media apply failed: ${errorMessage(originalError)} Recovery ${
-        recovery.success ? 'succeeded' : 'failed'
+      `WingsGroup v3 media apply failed: ${errorMessage(originalError)} Transaction rollback ${
+        recovery.transactionRollback.status
       }; backup: ${recovery.backupPath}`,
     )
     this.name = 'WingsGroupV3MediaApplyError'
@@ -384,6 +472,7 @@ export const importWingsGroupV3Media = async ({
   apply,
   assetsDirectory,
   manifest,
+  onCreatedDocument,
   payload,
   plan,
   req,
@@ -392,11 +481,14 @@ export const importWingsGroupV3Media = async ({
   apply: boolean
   assetsDirectory: string
   manifest: WingsGroupV3MediaManifest
+  onCreatedDocument?: (document: WingsGroupV3MediaDocument) => void
   payload: Payload
   plan: WingsGroupV3MediaPlan
   req: PayloadRequest
   siteID: number | string
 }): Promise<WingsGroupV3MediaImportSummary> => {
+  if (apply && !req.transactionID) throw new Error(TRANSACTION_UNSUPPORTED_MESSAGE)
+
   const summary: WingsGroupV3MediaImportSummary = {
     created: 0,
     records: [],
@@ -434,6 +526,7 @@ export const importWingsGroupV3Media = async ({
           overrideAccess: true,
           req,
         })
+        onCreatedDocument?.(document as unknown as WingsGroupV3MediaDocument)
       }
     } else if (apply) {
       document = await payload.update({
@@ -483,7 +576,6 @@ export const applyWingsGroupV3MediaWithRecovery = async ({
   mediaDirectory,
   payload,
   plan,
-  preExistingUploadFiles,
   req,
   siteID,
 }: {
@@ -494,33 +586,62 @@ export const applyWingsGroupV3MediaWithRecovery = async ({
   mediaDirectory: string
   payload: Payload
   plan: WingsGroupV3MediaPlan
-  preExistingUploadFiles?: ReadonlySet<string>
   req: PayloadRequest
   siteID: number | string
 }): Promise<WingsGroupV3MediaImportSummary> => {
-  const inventory =
-    preExistingUploadFiles || (await inventoryWingsGroupV3UploadFiles(mediaDirectory))
-  let payloadClosed = false
+  const runOwnedUploadFiles = new Set<string>()
+  const trackingErrors: string[] = []
+  let transactionStatus: WingsGroupV3TransactionStatus = 'not-started'
   try {
+    const db = payload.db as typeof payload.db & {
+      beginTransaction?: unknown
+      commitTransaction?: unknown
+      rollbackTransaction?: unknown
+    }
+    if (
+      typeof db.beginTransaction !== 'function' ||
+      typeof db.commitTransaction !== 'function' ||
+      typeof db.rollbackTransaction !== 'function'
+    ) {
+      transactionStatus = 'unsupported'
+      throw new Error(TRANSACTION_UNSUPPORTED_MESSAGE)
+    }
+    const transactionStarted = await initTransaction(req)
+    if (!transactionStarted || !req.transactionID) {
+      transactionStatus = 'unsupported'
+      throw new Error(TRANSACTION_UNSUPPORTED_MESSAGE)
+    }
+    transactionStatus = 'active'
     const summary = await importWingsGroupV3Media({
       apply: true,
       assetsDirectory,
       manifest,
+      onCreatedDocument: (document) => {
+        try {
+          trackCreatedMediaFiles({ document, mediaDirectory, runOwnedUploadFiles })
+        } catch (error) {
+          trackingErrors.push(errorMessage(error))
+          throw error
+        }
+      },
       payload,
       plan,
       req,
       siteID,
     })
+    await commitTransaction(req)
+    transactionStatus = 'committed'
     await payload.destroy()
-    payloadClosed = true
     return summary
   } catch (error) {
     const recovery = await recoverWingsGroupV3MediaApply({
       backupPath,
       databasePath,
-      mediaDirectory,
-      payload: payloadClosed ? null : payload,
-      preExistingUploadFiles: inventory,
+      payload,
+      req,
+      runOwnedUploadFiles,
+      trackingErrors,
+      transactionStatus,
     })
     throw new WingsGroupV3MediaApplyError(error, recovery)
   }
@@ -554,14 +675,11 @@ const main = async () => {
 
   const { backupPath, databasePath } = backupLocalDatabase()
   const mediaDirectory = WINGSGROUP_V3_MEDIA_DIRECTORY
-  const preExistingUploadFiles = await inventoryWingsGroupV3UploadFiles(mediaDirectory)
   let payload: Payload | undefined
+  let req: PayloadRequest | undefined
   try {
     payload = await getPayload({ config: configPromise })
-    const req = await createLocalReq(
-      { context, user: { id: 0, role: 'super-admin' } as never },
-      payload,
-    )
+    req = await createLocalReq({ context, user: { id: 0, role: 'super-admin' } as never }, payload)
     const site = await findExactSite(payload, req)
     if (site.code !== WINGSGROUP_V3_IMPORT_SITE_CODE) {
       throw new Error(`Resolved site is not ${WINGSGROUP_V3_IMPORT_SITE_CODE}`)
@@ -574,7 +692,6 @@ const main = async () => {
       mediaDirectory,
       payload,
       plan,
-      preExistingUploadFiles,
       req,
       siteID: site.id,
     })
@@ -601,9 +718,10 @@ const main = async () => {
     const recovery = await recoverWingsGroupV3MediaApply({
       backupPath,
       databasePath,
-      mediaDirectory,
       payload,
-      preExistingUploadFiles,
+      req,
+      runOwnedUploadFiles: new Set(),
+      transactionStatus: 'not-started',
     })
     console.error(
       JSON.stringify(
