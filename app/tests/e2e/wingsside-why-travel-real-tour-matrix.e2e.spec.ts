@@ -4,7 +4,7 @@ import { e2eBaseURL } from '../helpers/baseURL'
 
 const enabled = process.env.WINGSSIDE_FULL_TOUR_LOCALE_GATE === 'true'
 const publicOrigin = 'https://wingside.vn'
-const localAliasPrefix = '/wingsside'
+const localAliasPrefix = '/wing-side'
 const locales = ['en', 'vi', 'it', 'es', 'pt'] as const
 const viewportWidths = [390, 1440] as const
 const stableRoles = [

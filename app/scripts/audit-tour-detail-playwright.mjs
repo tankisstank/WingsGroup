@@ -11,7 +11,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const outDir = path.resolve(__dirname, '../output/us046/playwright-tour-audit')
 const url =
   process.env.AUDIT_URL ||
-  'http://127.0.0.1:3010/wingsside/tour/best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days'
+  'http://127.0.0.1:3010/wing-side/tour/best-of-northern-vietnam-hanoi-ninh-binh-sapa-halong-6-days'
 
 fs.mkdirSync(outDir, { recursive: true })
 

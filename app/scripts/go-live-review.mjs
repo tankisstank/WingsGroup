@@ -107,7 +107,7 @@ const sites = [
     key: 'wingsside',
     identityTokens: ['WingSide', 'wingside.vn'],
     label: 'WingSide',
-    pathPrefix: '/wingsside',
+    pathPrefix: '/wing-side',
     publicHosts: ['wingside.vn'],
     siteCode: 'wing-side',
     siteIds: [3],

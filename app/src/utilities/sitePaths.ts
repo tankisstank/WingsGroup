@@ -170,7 +170,9 @@ export const prefixPathWithSite = (
   if (
     canonicalPathname === sitePrefix ||
     canonicalPathname.startsWith(`${sitePrefix}/`) ||
-    (canonicalSiteAlias && canonicalPathname.startsWith(`/${canonicalSiteAlias}`))
+    (canonicalSiteAlias &&
+      (canonicalPathname === `/${canonicalSiteAlias}` ||
+        canonicalPathname.startsWith(`/${canonicalSiteAlias}/`)))
   ) {
     return canonicalPathname + suffix
   }

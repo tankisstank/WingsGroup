@@ -59,6 +59,9 @@ describe('site path utilities', () => {
     expect(prefixPathWithSite('/wingsside/es/destinations', 'wingsside', 'es')).toBe(
       '/wing-side/es/destinations',
     )
+    expect(prefixPathWithSite('/wing-sideways/foo', 'wing-side', 'en')).toBe(
+      '/wing-side/en/wing-sideways/foo',
+    )
     expect(prefixPathWithSite('https://example.com/contact', 'wingscare')).toBe(
       'https://example.com/contact',
     )

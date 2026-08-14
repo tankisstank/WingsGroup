@@ -34,12 +34,12 @@ const phase1Routes = [
   },
   { path: '/wingsgo', title: /WingsGo/, heading: 'WingsGo' },
   { path: '/wingsgo/thi-truong/han-quoc', title: /Tour Hàn Quốc/, heading: 'Tour Hàn Quốc' },
-  { path: '/wingsside', title: /WingsSide/, heading: 'Tailor-made Vietnam journeys' },
-  { path: '/wingsside/destinations/ha-noi', title: /Hanoi/, heading: 'Hanoi' },
+  { path: '/wing-side', title: /WingsSide/, heading: 'Tailor-made Vietnam journeys' },
+  { path: '/wing-side/destinations/ha-noi', title: /Hanoi/, heading: 'Hanoi' },
   { path: '/wingsplus', title: /WingsPlus/ },
   { path: '/wingscare', title: /WingsCare/ },
   { path: '/wingspass', title: /WingsPass/ },
-  { path: '/wingsside/en', title: /WingsSide/, heading: 'Tailor-made Vietnam journeys' },
+  { path: '/wing-side/en', title: /WingsSide/, heading: 'Tailor-made Vietnam journeys' },
 ] as const
 
 const linkAuditRoutes = [
@@ -50,13 +50,13 @@ const linkAuditRoutes = [
   '/wingsgo',
   '/wingsgo/posts',
   '/wingsgo/search',
-  '/wingsside',
-  '/wingsside/en',
-  '/wingsside/it',
-  '/wingsside/es',
-  '/wingsside/pt',
-  '/wingsside/posts',
-  '/wingsside/search',
+  '/wing-side',
+  '/wing-side/en',
+  '/wing-side/it',
+  '/wing-side/es',
+  '/wing-side/pt',
+  '/wing-side/posts',
+  '/wing-side/search',
   '/wingspass',
   '/wingspass/search',
   '/wingscare',
@@ -72,32 +72,32 @@ const cmsOnlyLocales = ['ja', 'ko', 'fr', 'de'] as const
 const wingsSideCorePages = [
   {
     heading: 'Tailor-made Vietnam journeys',
-    path: '/wingsside',
+    path: '/wing-side',
     title: /WingsSide/,
   },
   {
     heading: 'Explore Vietnam by destination',
-    path: '/wingsside/destinations',
+    path: '/wing-side/destinations',
     title: /Destinations/,
   },
   {
     heading: 'Travel styles help guests self-qualify the right route',
-    path: '/wingsside/styles',
+    path: '/wing-side/styles',
     title: /Travel styles/,
   },
   {
     heading: 'Sample itineraries show possibility, not rigid product grids',
-    path: '/wingsside/packages',
+    path: '/wing-side/packages',
     title: /Vietnam packages/,
   },
   {
     heading: 'Plan your Vietnam journey with a local team',
-    path: '/wingsside/plan-your-trip',
+    path: '/wing-side/plan-your-trip',
     title: /Plan your trip/,
   },
   {
     heading: 'Tell us what kind of Vietnam journey you want to build',
-    path: '/wingsside/contact-us',
+    path: '/wing-side/contact-us',
     title: /Contact/,
   },
 ] as const
@@ -188,7 +188,7 @@ const getRouteLocale = (path: string) => {
 
 const localizeWingsSideRoute = (pathname: string, locale: 'en' | 'es' | 'it' | 'pt' | 'vi') => {
   const normalizedPathname = pathname.startsWith('/') ? pathname : `/${pathname}`
-  const prefix = locale === 'vi' ? '/wingsside' : `/wingsside/${locale}`
+  const prefix = locale === 'vi' ? '/wing-side' : `/wing-side/${locale}`
 
   return `${prefix}${normalizedPathname === '/' ? '' : normalizedPathname}`.replace(/\/+/g, '/')
 }
@@ -296,7 +296,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     await expect(page.locator('body')).toHaveAttribute('style', /--site-brand:\s*#1D4ED8/i)
     await expect(page.locator('body')).toHaveAttribute('style', /--site-accent:\s*#F97316/i)
 
-    await page.goto(`${e2eBaseURL}/wingsside`)
+    await page.goto(`${e2eBaseURL}/wing-side`)
 
     await expect(page.locator('body')).toHaveAttribute('data-site-theme', 'custom')
     await expect(page.locator('body')).toHaveAttribute(
@@ -325,7 +325,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     } as const
 
     for (const locale of wingsSidePublicAdLocales) {
-      await page.goto(`${e2eBaseURL}/wingsside/${locale}/search`)
+      await page.goto(`${e2eBaseURL}/wing-side/${locale}/search`)
 
       await expect(page.locator('html')).toHaveAttribute('lang', locale)
       await expect(
@@ -348,7 +348,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     test.setTimeout(60_000)
 
     await page.setViewportSize({ height: 900, width: 1440 })
-    await page.goto(`${e2eBaseURL}/wingsside`)
+    await page.goto(`${e2eBaseURL}/wing-side`)
 
     const home = page.getByTestId('wingsside-hifi-home')
     const hero = page.getByTestId('wingsside-hifi-home-hero-carousel')
@@ -380,11 +380,11 @@ test.describe('Phase 1 public frontend smoke', () => {
     await expect(durationSelect).toHaveValue('8-10-days')
     await planner.getByRole('button', { name: /Plan trip/i }).click()
     await expect(page).toHaveURL(
-      /\/wingsside\/plan-your-trip\?destination=hue-hoi-an&duration=8-10-days/,
+      /\/wing-side\/plan-your-trip\?destination=hue-hoi-an&duration=8-10-days/,
     )
 
     await page.setViewportSize({ height: 844, width: 390 })
-    await page.goto(`${e2eBaseURL}/wingsside`)
+    await page.goto(`${e2eBaseURL}/wing-side`)
     const mobileHero = page.getByTestId('wingsside-hifi-home-hero-carousel')
     await expect(mobileHero).toHaveAttribute('aria-roledescription', 'carousel')
     await expect(
@@ -433,7 +433,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(page.getByTestId('wingsside-specials')).toBeVisible({ timeout: 10_000 })
     }
 
-    for (const path of ['/wingsside', '/wingsside/en', '/wingsside/it']) {
+    for (const path of ['/wing-side', '/wing-side/en', '/wing-side/it']) {
       await page.setViewportSize({ height: 900, width: 768 })
       await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
 
@@ -443,7 +443,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(body).toHaveAttribute('data-public-route', '/')
       await expect(page.locator('.site-header-cta').first()).toHaveAttribute(
         'href',
-        /\/wingsside\/(?:en\/|it\/)?plan-your-trip$/,
+        /\/wing-side\/(?:en\/|it\/)?plan-your-trip$/,
       )
       await expect(page.locator('a[href*="lien-he"]')).toHaveCount(0)
 
@@ -460,7 +460,7 @@ test.describe('Phase 1 public frontend smoke', () => {
 
     for (const width of [768, 1024, 1280, 1440]) {
       await page.setViewportSize({ height: 900, width })
-      await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+      await page.goto(`${e2eBaseURL}/wing-side/en`, { waitUntil: 'domcontentloaded' })
       await revealSpecialsPastPlanner()
 
       const promo = page.getByTestId('wingsside-specials')
@@ -606,7 +606,7 @@ test.describe('Phase 1 public frontend smoke', () => {
 
     for (const width of [768, 1024, 1280, 1440]) {
       await page.setViewportSize({ height: 900, width })
-      await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+      await page.goto(`${e2eBaseURL}/wing-side/en`, { waitUntil: 'domcontentloaded' })
       await revealSpecialsPastPlanner()
 
       const promoBox = await page.getByTestId('wingsside-specials').boundingBox()
@@ -669,7 +669,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     }
 
     await page.setViewportSize({ height: 900, width: 1440 })
-    await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${e2eBaseURL}/wing-side/en`, { waitUntil: 'domcontentloaded' })
     // Planner occupies the first screen; Specials is intentionally hidden until scrolled past.
     await revealSpecialsPastPlanner()
     await expect(page.getByTestId('wingsside-specials')).toBeVisible()
@@ -682,16 +682,16 @@ test.describe('Phase 1 public frontend smoke', () => {
     await promoClose.focus()
     await promoClose.press('Tab')
     await expect(promoCTA).toBeFocused()
-    await Promise.all([page.waitForURL(/\/wingsside\/en\/packages$/), promoCTA.press('Enter')])
+    await Promise.all([page.waitForURL(/\/wing-side\/en\/packages$/), promoCTA.press('Enter')])
 
     await page.setViewportSize({ height: 900, width: 767 })
-    await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${e2eBaseURL}/wing-side/en`, { waitUntil: 'domcontentloaded' })
     await expect(page.getByTestId('wingsside-specials')).toBeHidden()
 
     for (const path of [
-      '/wingsside/packages',
-      '/wingsside/en/packages',
-      '/wingsside/it/packages',
+      '/wing-side/packages',
+      '/wing-side/en/packages',
+      '/wing-side/it/packages',
     ]) {
       await page.setViewportSize({ height: 900, width: 1280 })
       await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
@@ -710,7 +710,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     test.setTimeout(60_000)
 
     await page.setViewportSize({ height: 900, width: 1440 })
-    await page.goto(`${e2eBaseURL}/wingsside`)
+    await page.goto(`${e2eBaseURL}/wing-side`)
 
     // Bar B single composition owner: inventory body, CMS layout suppressed (forms only).
     await expect(page.locator('article[data-hifi-composer="true"]')).toBeVisible()
@@ -746,11 +746,11 @@ test.describe('Phase 1 public frontend smoke', () => {
     const destinationCard = page.getByTestId('wingsside-hifi-home-dest').getByRole('link').first()
     await expect(destinationCard).toHaveAttribute(
       'href',
-      /\/wingsside\/(?:en\/)?destinations(?:\/ha-noi)?$/,
+      /\/wing-side\/(?:en\/)?destinations(?:\/ha-noi)?$/,
     )
     await expect(
       page.getByTestId('wingsside-hifi-home-journeys').getByRole('link').first(),
-    ).toHaveAttribute('href', /\/wingsside\/(?:en\/)?packages\/vietnam-highlights$/)
+    ).toHaveAttribute('href', /\/wing-side\/(?:en\/)?packages\/vietnam-highlights$/)
     await expect(page.getByTestId('wingsside-hifi-home-related')).toBeVisible()
     await expect(
       page.locator('[data-od-id="home-creds"], [data-testid="wingsside-hifi-creds"]').first(),
@@ -763,7 +763,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     await expect(page.getByTestId('wingsside-hifi-footer')).toBeVisible()
 
     await page.setViewportSize({ height: 844, width: 390 })
-    await page.goto(`${e2eBaseURL}/wingsside`)
+    await page.goto(`${e2eBaseURL}/wing-side`)
     const overflowX = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
     )
@@ -775,7 +775,7 @@ test.describe('Phase 1 public frontend smoke', () => {
 
     for (const width of [1440, 390]) {
       await page.setViewportSize({ height: 900, width })
-      await page.goto(`${e2eBaseURL}/wingsside`, { waitUntil: 'domcontentloaded' })
+      await page.goto(`${e2eBaseURL}/wing-side`, { waitUntil: 'domcontentloaded' })
 
       const board = page.getByTestId('wingside-home-process-board')
       const stage = page.getByTestId('wingside-home-process-stage')
@@ -843,8 +843,8 @@ test.describe('Phase 1 public frontend smoke', () => {
         ),
       ).toHaveCount(0)
 
-      if (route.path === '/wingsside/plan-your-trip' || route.path === '/wingsside/contact-us') {
-        if (route.path === '/wingsside/plan-your-trip') {
+      if (route.path === '/wing-side/plan-your-trip' || route.path === '/wing-side/contact-us') {
+        if (route.path === '/wing-side/plan-your-trip') {
           // Inventory plan-steps may replace CMS form title; form may still render when present.
           await expect(page.locator('[data-od-id="plan-steps"], form').first()).toBeVisible()
         } else {
@@ -875,7 +875,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     test.setTimeout(120_000)
 
     await page.setViewportSize({ height: 900, width: 1440 })
-    await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${e2eBaseURL}/wing-side/en`, { waitUntil: 'domcontentloaded' })
     await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined)
 
     const primaryNav = page.getByRole('navigation', { name: 'Primary navigation' })
@@ -901,16 +901,16 @@ test.describe('Phase 1 public frontend smoke', () => {
     )
     await expect(languageSwitcher.getByRole('link', { name: 'Italiano' })).toHaveAttribute(
       'href',
-      /\/wingsside\/it$/,
+      /\/wing-side\/it$/,
     )
     await languageSwitcher.getByRole('link', { name: 'Italiano' }).click()
-    await page.waitForURL(/\/wingsside\/it$/)
+    await page.waitForURL(/\/wing-side\/it$/)
     await expect(page.locator('html')).toHaveAttribute('lang', 'it')
     await expect(
       page.getByRole('heading', { name: 'Viaggi su misura in Vietnam' }).first(),
     ).toBeVisible()
 
-    await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${e2eBaseURL}/wing-side/en`, { waitUntil: 'domcontentloaded' })
     await expect(languageSwitcher.getByText('日本語')).toHaveCount(0)
     await expect(languageSwitcher.getByText('한국어')).toHaveCount(0)
 
@@ -921,7 +921,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     ] as const
 
     for (const { cta, locale, destLabel } of localizedHeaderCopy) {
-      await page.goto(`${e2eBaseURL}/wingsside/${locale}`, { waitUntil: 'domcontentloaded' })
+      await page.goto(`${e2eBaseURL}/wing-side/${locale}`, { waitUntil: 'domcontentloaded' })
       await expect(page.getByRole('link', { name: cta }).first()).toBeVisible()
       await expect(
         page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link', {
@@ -931,11 +931,11 @@ test.describe('Phase 1 public frontend smoke', () => {
     }
 
     await page.setViewportSize({ height: 900, width: 1280 })
-    await page.goto(`${e2eBaseURL}/wingsside/it`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${e2eBaseURL}/wing-side/it`, { waitUntil: 'domcontentloaded' })
     await expect.poll(() => countPrimaryNavRows(page)).toBe(1)
 
     await page.setViewportSize({ height: 844, width: 390 })
-    await page.goto(`${e2eBaseURL}/wingsside/en`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${e2eBaseURL}/wing-side/en`, { waitUntil: 'domcontentloaded' })
     await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined)
     await page.getByRole('button', { name: 'Open navigation' }).click()
     const mobileNavigation = page.getByRole('navigation', { name: 'Mobile primary navigation' })
@@ -953,7 +953,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       .getByRole('navigation', { name: 'Mobile primary navigation' })
       .getByRole('link', { name: 'Destinations' })
       .click()
-    await expect(page).toHaveURL(/\/wingsside\/en\/destinations$/)
+    await expect(page).toHaveURL(/\/wing-side\/en\/destinations$/)
     await expect(page.getByRole('navigation', { name: 'Mobile primary navigation' })).toHaveCount(0)
 
     await page.setViewportSize({ height: 900, width: 1440 })
@@ -1015,7 +1015,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     } as const
 
     for (const [locale, copy] of Object.entries(localizedRootCopy)) {
-      await page.goto(`${e2eBaseURL}/wingsside/${locale}`, { waitUntil: 'domcontentloaded' })
+      await page.goto(`${e2eBaseURL}/wing-side/${locale}`, { waitUntil: 'domcontentloaded' })
       await expect(page.locator('html')).toHaveAttribute('lang', locale)
       await expect(page.getByRole('heading', { level: 1, name: copy.heading })).toBeVisible()
       await expect(page.getByRole('heading', { name: copy.heading }).first()).toBeVisible()
@@ -1043,7 +1043,7 @@ test.describe('Phase 1 public frontend smoke', () => {
   test('renders WingsSide localized routes without placeholder shells after locale backfill', async ({
     page,
   }) => {
-    await page.goto(`${e2eBaseURL}/wingsside/vi`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${e2eBaseURL}/wing-side/vi`, { waitUntil: 'domcontentloaded' })
     await expect(page.locator('html')).toHaveAttribute('lang', 'vi')
     await expect(
       page.getByRole('heading', { level: 1, name: 'Hành trình Việt Nam thiết kế riêng' }),
@@ -1051,7 +1051,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     await expect(page.getByRole('link', { name: 'Lên kế hoạch' }).first()).toBeVisible()
     await expect(page.getByRole('heading', { name: /^Trang$/ }).first()).toHaveCount(0)
 
-    await page.goto(`${e2eBaseURL}/wingsside/es/destinations/ha-noi`, {
+    await page.goto(`${e2eBaseURL}/wing-side/es/destinations/ha-noi`, {
       waitUntil: 'domcontentloaded',
     })
     await expect(page.locator('html')).toHaveAttribute('lang', 'es')
@@ -1068,25 +1068,25 @@ test.describe('Phase 1 public frontend smoke', () => {
         forbidden: 'Inbound Vietnam needs trust, not retail noise',
         heading: 'Khách quốc tế cần niềm tin, không cần những lời chào bán ồn ào',
         locale: 'vi',
-        path: '/wingsside/vi/about-us',
+        path: '/wing-side/vi/about-us',
       },
       {
         forbidden: 'Luxury journeys focus on curated stays',
         heading: 'Lusso',
         locale: 'it',
-        path: '/wingsside/it/styles/luxury',
+        path: '/wing-side/it/styles/luxury',
       },
       {
         forbidden: 'A multi-region first-time framework',
         heading: 'Vietnam esencial',
         locale: 'es',
-        path: '/wingsside/es/packages/vietnam-highlights',
+        path: '/wing-side/es/packages/vietnam-highlights',
       },
       {
         forbidden: 'Mekong adds river rhythm',
         heading: 'Mekong',
         locale: 'pt',
-        path: '/wingsside/pt/destinations/mekong',
+        path: '/wing-side/pt/destinations/mekong',
       },
     ] as const
 
@@ -1112,31 +1112,31 @@ test.describe('Phase 1 public frontend smoke', () => {
     })
 
     await page.setViewportSize({ height: 900, width: 1440 })
-    await page.goto(`${e2eBaseURL}/wingsside/en/search`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${e2eBaseURL}/wing-side/en/search`, { waitUntil: 'domcontentloaded' })
     await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined)
 
     const languageSwitcher = page.getByRole('navigation', { name: 'Language switcher' }).first()
     await expect(languageSwitcher.getByRole('link', { name: 'English' })).toHaveAttribute(
       'href',
-      /\/wingsside\/en\/search$/,
+      /\/wing-side\/en\/search$/,
     )
     await expect(languageSwitcher.getByRole('link', { name: 'Tiếng Việt' })).toHaveAttribute(
       'href',
-      /\/wingsside\/vi\/search$/,
+      /\/wing-side\/vi\/search$/,
     )
     await expect(languageSwitcher.getByRole('link', { name: 'Italiano' })).toHaveAttribute(
       'href',
-      /\/wingsside\/it\/search$/,
+      /\/wing-side\/it\/search$/,
     )
     expect(consoleErrors.join('\n')).not.toMatch(/hydration|did not match|server rendered/i)
 
-    await page.goto(`${e2eBaseURL}/wingsside/en/search?q=hanoi#results`, {
+    await page.goto(`${e2eBaseURL}/wing-side/en/search?q=hanoi#results`, {
       waitUntil: 'domcontentloaded',
     })
     const hydratedSwitcher = page.getByRole('navigation', { name: 'Language switcher' }).first()
     await expect(hydratedSwitcher).toHaveAttribute('data-client-ready', 'true')
     await hydratedSwitcher.getByRole('link', { name: 'Italiano' }).click()
-    await expect(page).toHaveURL(/\/wingsside\/it\/search\?q=hanoi#results$/)
+    await expect(page).toHaveURL(/\/wing-side\/it\/search\?q=hanoi#results$/)
   })
 
   test('keeps CMS-only locales out of public sitemaps', async ({ request }) => {
@@ -1378,7 +1378,7 @@ test.describe('Phase 1 public frontend smoke', () => {
   })
 
   test('WingsSide inherits its governed site hero presentation', async ({ page }) => {
-    await page.goto(`${e2eBaseURL}/wingsside`)
+    await page.goto(`${e2eBaseURL}/wing-side`)
 
     const hero = page.locator('[data-hero-presentation]')
     await expect(hero).toHaveAttribute('data-hero-template', 'cinematic-carousel')
@@ -1450,8 +1450,8 @@ test.describe('Phase 1 public frontend smoke', () => {
         const firstSegment = segments[0]
         const isLocaleRoute = firstSegment && isSupportedLocale(firstSegment)
         const localPath = isLocaleRoute
-          ? `/wingsside/${segments.join('/')}`
-          : `/wingsside${url.pathname === '/' ? '' : url.pathname}`
+          ? `/wing-side/${segments.join('/')}`
+          : `/wing-side${url.pathname === '/' ? '' : url.pathname}`
 
         return [localPath]
       })

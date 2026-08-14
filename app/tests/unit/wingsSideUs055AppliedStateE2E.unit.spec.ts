@@ -118,7 +118,7 @@ describe('US-055 applied-state 110 URL E2E evidence', () => {
   })
 
   it.each([
-    ['local Home alias', "const localAliasPrefix = '/wingsside'", "const localAliasPrefix = '/'"],
+    ['local Home alias', "const localAliasPrefix = '/wing-side'", "const localAliasPrefix = '/'"],
     [
       'public Host request',
       "headers: { host: 'wingside.vn' }",

@@ -42,7 +42,7 @@ const bannedBookingClaims =
   /\b(book now|direct booking|instant booking|live availability|reserve online|available seats)\b/i
 
 const localPrefix = (locale: WingSideJourneyLocale) =>
-  locale === 'en' ? '/wingsside' : `/wingsside/${locale}`
+  locale === 'en' ? '/wing-side' : `/wing-side/${locale}`
 
 const localPath = (locale: WingSideJourneyLocale, path: string) =>
   `${origin}${localHref(locale, path)}`
@@ -302,7 +302,7 @@ test.describe('WingSide guided journey discovery', () => {
     await firstCard.click()
     await expect(page).toHaveURL(
       new RegExp(
-        `/wingsside/tour/.+source=journeys.*destination=${exact.destination}.*style=${exact.style}.*duration=${exact.duration}`,
+        `/wing-side/tour/.+source=journeys.*destination=${exact.destination}.*style=${exact.style}.*duration=${exact.duration}`,
       ),
       { timeout: 60_000 },
     )
@@ -321,7 +321,7 @@ test.describe('WingSide guided journey discovery', () => {
     await detailRequest.click()
     await expect(page).toHaveURL(
       new RegExp(
-        `/wingsside/contact-us\\?intent=inquiry.*destination=${exact.destination}.*style=${exact.style}.*duration=${exact.duration}`,
+        `/wing-side/contact-us\\?intent=inquiry.*destination=${exact.destination}.*style=${exact.style}.*duration=${exact.duration}`,
       ),
       { timeout: 60_000 },
     )
@@ -337,7 +337,7 @@ test.describe('WingSide guided journey discovery', () => {
 
     await page.goto(exactURL, { waitUntil: 'domcontentloaded' })
     await page.locator('.ws-journeys-card').first().click()
-    await expect(page).toHaveURL(/\/wingsside\/tour\/.+source=journeys/, {
+    await expect(page).toHaveURL(/\/wing-side\/tour\/.+source=journeys/, {
       timeout: 60_000,
     })
     await page.goBack({ waitUntil: 'domcontentloaded' })
