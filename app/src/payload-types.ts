@@ -442,6 +442,14 @@ export interface SiteSetting {
       consentRequired?: boolean | null;
       retentionMonths?: number | null;
       dataSubjectContact?: string | null;
+      /**
+       * Do legal owner cung cấp; không tự tạo nội dung quyền.
+       */
+      dataSubjectRightsStatement?: string | null;
+      dataSubjectRightsEvidence?: string | null;
+      consentEvidenceReference?: string | null;
+      approvalState?: ('pending' | 'approved' | 'rejected') | null;
+      approvalReference?: string | null;
       interBranchTransferAllowed?: boolean | null;
       policyRouteVi?: string | null;
       policyRouteEn?: string | null;
@@ -1138,6 +1146,18 @@ export interface Page {
       scope?: string | null;
       effectiveDate?: string | null;
       version?: string | null;
+      retentionMonths?: number | null;
+      dataSubjectContact?: string | null;
+      /**
+       * Must be supplied by the legal owner; do not generate policy rights copy.
+       */
+      dataSubjectRightsStatement?: string | null;
+      dataSubjectRightsEvidence?: string | null;
+      policyVersion?: string | null;
+      consentVersion?: string | null;
+      consentEvidenceReference?: string | null;
+      privacyApprovalReference?: string | null;
+      validationMarker?: string | null;
       approvalState?: ('pending' | 'approved' | 'rejected') | null;
       approvalReference?: string | null;
     };
@@ -3011,6 +3031,11 @@ export interface SiteSettingsSelect<T extends boolean = true> {
               consentRequired?: T;
               retentionMonths?: T;
               dataSubjectContact?: T;
+              dataSubjectRightsStatement?: T;
+              dataSubjectRightsEvidence?: T;
+              consentEvidenceReference?: T;
+              approvalState?: T;
+              approvalReference?: T;
               interBranchTransferAllowed?: T;
               policyRouteVi?: T;
               policyRouteEn?: T;
@@ -3519,6 +3544,15 @@ export interface PagesSelect<T extends boolean = true> {
               scope?: T;
               effectiveDate?: T;
               version?: T;
+              retentionMonths?: T;
+              dataSubjectContact?: T;
+              dataSubjectRightsStatement?: T;
+              dataSubjectRightsEvidence?: T;
+              policyVersion?: T;
+              consentVersion?: T;
+              consentEvidenceReference?: T;
+              privacyApprovalReference?: T;
+              validationMarker?: T;
               approvalState?: T;
               approvalReference?: T;
             };

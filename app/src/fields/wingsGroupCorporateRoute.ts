@@ -67,6 +67,48 @@ export const wingsGroupCorporateRouteField: Field = {
         { name: 'effectiveDate', label: 'Effective date', type: 'date' },
         { name: 'version', label: 'Version', type: 'text' },
         {
+          name: 'retentionMonths',
+          label: 'Lead retention (months)',
+          type: 'number',
+          min: 24,
+          max: 24,
+        },
+        { name: 'dataSubjectContact', label: 'Data-subject contact', type: 'email' },
+        {
+          name: 'dataSubjectRightsStatement',
+          label: 'Approved data-subject rights statement',
+          type: 'textarea',
+          admin: {
+            description: 'Must be supplied by the legal owner; do not generate policy rights copy.',
+          },
+        },
+        {
+          name: 'dataSubjectRightsEvidence',
+          label: 'Data-subject rights evidence',
+          type: 'text',
+        },
+        { name: 'policyVersion', label: 'Privacy policy context version', type: 'text' },
+        { name: 'consentVersion', label: 'Consent context version', type: 'text' },
+        {
+          name: 'consentEvidenceReference',
+          label: 'Consent context evidence',
+          type: 'text',
+        },
+        {
+          name: 'privacyApprovalReference',
+          label: 'Trusted privacy approval evidence',
+          type: 'text',
+        },
+        {
+          name: 'validationMarker',
+          label: 'Server policy validation marker',
+          type: 'text',
+          admin: {
+            hidden: true,
+            readOnly: true,
+          },
+        },
+        {
           name: 'approvalState',
           label: 'Approval state',
           type: 'select',

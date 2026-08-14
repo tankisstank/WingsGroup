@@ -3,6 +3,7 @@ import type { Payload, PayloadRequest } from 'payload'
 import {
   WINGSGROUP_CORPORATE_ROUTES,
   WINGSGROUP_LEGAL_IDENTITY,
+  WINGSGROUP_RELATIONSHIP_STATEMENT_EN,
   WINGSGROUP_SITE_CODE,
   type WingsGroupRouteDefinition,
 } from '../../src/wingsgroup/corporateRoutes'
@@ -146,8 +147,8 @@ const routeContent: Record<Exclude<WingsGroupRouteDefinition['path'], '/'>, { en
       description: 'Corporate identity, offices and the public brand relationship behind WingsGroup.',
       layout: [
         content(
-          'One travel organisation, several service brands',
-          'WingsGroup, VietWings and Đôi Cánh Việt refer to the same organisation. WingsGroup, WingsGo, WingSide, WingsCare and the other service names are its newer public brands and service branches.',
+          'One organisational ecosystem, developing travel brands',
+          WINGSGROUP_RELATIONSHIP_STATEMENT_EN,
           `${WINGSGROUP_LEGAL_IDENTITY.legalEntityName} uses the international abbreviation ${WINGSGROUP_LEGAL_IDENTITY.internationalName}. Its legal representative is ${WINGSGROUP_LEGAL_IDENTITY.legalRepresentative}.`,
         ),
         features('Corporate details', 'Clear office information', 'The organisation maintains a registered office and a travel office in Hanoi.', [
@@ -284,10 +285,19 @@ export const routeGovernanceForSeed = (definition: WingsGroupRouteDefinition) =>
     ? {
         approvalReference: null,
         approvalState: 'pending' as const,
+        consentEvidenceReference: null,
+        consentVersion: WINGSGROUP_CONSENT_VERSION,
+        dataSubjectContact: WINGSGROUP_DATA_CONTACT,
+        dataSubjectRightsEvidence: null,
+        dataSubjectRightsStatement: null,
         effectiveDate: null,
         legalEntity: WINGSGROUP_LEGAL_IDENTITY.legalEntityName,
         legalOwner: null,
+        policyVersion: WINGSGROUP_PRIVACY_VERSION,
+        privacyApprovalReference: null,
+        retentionMonths: WINGSGROUP_LEAD_RETENTION_MONTHS,
         scope: null,
+        validationMarker: null,
         version: 'draft-1',
       }
     : undefined,
@@ -397,9 +407,14 @@ export const seedWingsGroupCorporateRoutes = async ({
     englishPublicationState: 'hidden',
     legalIdentity: WINGSGROUP_LEGAL_IDENTITY,
     privacy: {
+      approvalReference: null,
+      approvalState: 'pending',
       consentRequired: true,
+      consentEvidenceReference: null,
       consentVersion: WINGSGROUP_CONSENT_VERSION,
       dataSubjectContact: WINGSGROUP_DATA_CONTACT,
+      dataSubjectRightsEvidence: null,
+      dataSubjectRightsStatement: null,
       interBranchTransferAllowed: true,
       policyRouteEn: CONTACT_POLICY_ROUTES.en,
       policyRouteVi: CONTACT_POLICY_ROUTES.vi,

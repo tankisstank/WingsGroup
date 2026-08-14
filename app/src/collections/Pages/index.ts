@@ -21,7 +21,10 @@ import { WingsGroupProofArchive } from '../../blocks/WingsGroupProofArchive/conf
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { wingsSideHiFiTab } from '@/fields/wingsSideHiFi'
 import { wingsGroupCorporateRouteField } from '@/fields/wingsGroupCorporateRoute'
-import { buildWingsGroupPublicPageAccessWhere } from '@/wingsgroup/corporateRoutes'
+import {
+  buildWingsGroupPublicPageAccessWhere,
+  findTrustedWingsGroupSettingsForAccess,
+} from '@/wingsgroup/corporateRoutes'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
@@ -48,8 +51,9 @@ export const Pages: CollectionConfig<'pages'> = {
     read: async (args) => {
       const base = await siteScopedOrPublished()(args)
       if (args.req.user || base === false || base === true) return base
+      const settings = await findTrustedWingsGroupSettingsForAccess(args.req)
       return {
-        and: [base, buildWingsGroupPublicPageAccessWhere(args.req.locale)],
+        and: [base, buildWingsGroupPublicPageAccessWhere(args.req.locale, settings)],
       }
     },
     update: siteScopedAccess(),

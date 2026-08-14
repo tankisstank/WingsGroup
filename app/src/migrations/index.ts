@@ -32,6 +32,7 @@ import * as migration_20260806_090000_backfill_wingsgo_legacy_tour_sites from '.
 import * as migration_20260813_193226_wingsgroup_v3_data_foundation from './20260813_193226_wingsgroup_v3_data_foundation'
 import * as migration_20260814_090000_wingsgroup_lead_governance from './20260814_090000_wingsgroup_lead_governance'
 import * as migration_20260814_120000_wingsgroup_corporate_route_governance from './20260814_120000_wingsgroup_corporate_route_governance'
+import * as migration_20260814_130000_wingsgroup_policy_release_governance from './20260814_130000_wingsgroup_policy_release_governance'
 
 export const migrations = [
   {
@@ -203,5 +204,10 @@ export const migrations = [
     up: migration_20260814_120000_wingsgroup_corporate_route_governance.up,
     down: migration_20260814_120000_wingsgroup_corporate_route_governance.down,
     name: '20260814_120000_wingsgroup_corporate_route_governance',
+  },
+  {
+    up: migration_20260814_130000_wingsgroup_policy_release_governance.up,
+    down: migration_20260814_130000_wingsgroup_policy_release_governance.down,
+    name: '20260814_130000_wingsgroup_policy_release_governance',
   },
 ]

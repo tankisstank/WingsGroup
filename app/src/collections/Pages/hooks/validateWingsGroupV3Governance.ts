@@ -3,7 +3,9 @@ import {
   findWingsGroupPublicJargon,
   getWingsGroupRouteDefinition,
   getWingsGroupRoutePublicationState,
+  isWingsGroupPolicyApprovalComplete,
   isWingsGroupScopedInternalHref,
+  WINGSGROUP_POLICY_VALIDATION_MARKER,
   WINGSGROUP_SITE_CODE,
 } from '@/wingsgroup/corporateRoutes'
 
@@ -68,10 +70,17 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
   const isPublishing = (data?._status ?? originalDoc?._status) === 'published'
   const pathname = getPathname(dataRecord, originalRecord)
   const routeDefinition = getWingsGroupRouteDefinition(pathname)
-  const pendingRouteGovernance = data?.wingsGroupRoute ?? originalDoc?.wingsGroupRoute
+  const hasPendingRouteGovernance = Object.prototype.hasOwnProperty.call(
+    data || {},
+    'wingsGroupRoute',
+  )
+  let pendingRouteGovernance = hasPendingRouteGovernance
+    ? data?.wingsGroupRoute
+    : originalDoc?.wingsGroupRoute
   let siteCode: string | null = null
+  let siteID: number | string | undefined
   if (routeDefinition || asRecord(pendingRouteGovernance).managedBy === 'wingsgroup-v3') {
-    const siteID = relationID(site)
+    siteID = relationID(site)
     if (siteID === undefined) throw new Error('WingsGroup corporate route cần site scope.')
     const siteDoc = await req.payload.findByID({
       collection: 'sites',
@@ -85,7 +94,7 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
 
   if (
     req.user?.role !== 'super-admin' &&
-    governanceSnapshot(data?.wingsGroupRoute ?? originalDoc?.wingsGroupRoute) !==
+    governanceSnapshot(pendingRouteGovernance) !==
       governanceSnapshot(originalDoc?.wingsGroupRoute)
   ) {
     throw new Error('Chỉ super-admin được thay đổi WingsGroup route publication governance.')
@@ -95,12 +104,46 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
     if (!routeDefinition) {
       throw new Error('WingsGroup v3 chỉ cho phép chín corporate routes đã duyệt.')
     }
-    const routeGovernance = asRecord(pendingRouteGovernance)
+    let routeGovernance = asRecord(pendingRouteGovernance)
     if (
       routeGovernance.managedBy !== 'wingsgroup-v3' ||
       routeGovernance.archetype !== routeDefinition.archetype
     ) {
       throw new Error('WingsGroup corporate route thiếu archetype governance phù hợp.')
+    }
+
+    const settingsResult = await req.payload.find({
+      collection: 'site-settings',
+      depth: 0,
+      limit: 2,
+      overrideAccess: true,
+      pagination: false,
+      req,
+      where: { site: { equals: siteID } },
+    })
+    if (settingsResult.docs.length !== 1) {
+      throw new Error('WingsGroup corporate route cần đúng một trusted SiteSettings record.')
+    }
+    const settings = settingsResult.docs[0]
+
+    if (routeDefinition.policy) {
+      const policy = asRecord(routeGovernance.policy)
+      if (policy.approvalState === 'approved') {
+        if (!isWingsGroupPolicyApprovalComplete(policy, settings)) {
+          throw new Error('WingsGroup policy approval không khớp trusted privacy/legal settings.')
+        }
+        pendingRouteGovernance = {
+          ...routeGovernance,
+          policy: { ...policy, validationMarker: WINGSGROUP_POLICY_VALIDATION_MARKER },
+        }
+      } else {
+        pendingRouteGovernance = {
+          ...routeGovernance,
+          policy: { ...policy, validationMarker: null },
+        }
+      }
+      routeGovernance = asRecord(pendingRouteGovernance)
+      if (data) data.wingsGroupRoute = pendingRouteGovernance
     }
 
     const pageContent = {
@@ -124,6 +167,7 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
       getWingsGroupRoutePublicationState({
         locale: 'vi',
         page: { ...originalRecord, ...dataRecord, pathname, wingsGroupRoute: pendingRouteGovernance },
+        settings,
         siteCode,
       }) !== 'approved'
     ) {

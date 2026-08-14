@@ -1,5 +1,12 @@
 import type { CollectionBeforeChangeHook, Field } from 'payload'
 import { WINGSGROUP_LEGAL_IDENTITY } from '@/wingsgroup/corporateRoutes'
+import {
+  WINGSGROUP_CONSENT_VERSION,
+  WINGSGROUP_DATA_CONTACT,
+  WINGSGROUP_LEAD_RETENTION_MONTHS,
+  WINGSGROUP_POLICY_ROUTES,
+  WINGSGROUP_PRIVACY_VERSION,
+} from '@/lead-capture/wingsGroupV3'
 
 const HTTPS_URL = /^https:\/\//i
 const SHA256 = /^[a-f0-9]{64}$/
@@ -11,9 +18,25 @@ const asRecord = (value: unknown): UnknownRecord =>
 
 const asString = (value: unknown): string => (typeof value === 'string' ? value.trim() : '')
 
+const isTrimmedNonempty = (value: unknown): value is string =>
+  typeof value === 'string' && value.length > 0 && value === value.trim()
+
 const hasHTTPSURL = (value: unknown): boolean => HTTPS_URL.test(asString(value))
 
 const hasSha256 = (value: unknown): boolean => SHA256.test(asString(value))
+
+const canonicalize = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(canonicalize)
+  if (!value || typeof value !== 'object') return value
+  return Object.fromEntries(
+    Object.entries(value as UnknownRecord)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, item]) => [key, canonicalize(item)]),
+  )
+}
+
+export const wingsGroupV3ReleaseGovernanceSnapshot = (value: unknown): string =>
+  JSON.stringify(canonicalize(asRecord(value)))
 
 export const validateConsultationChannels = (value: unknown): true | string => {
   if (!Array.isArray(value)) return true
@@ -77,22 +100,67 @@ export const validateMediaGovernance = (value: unknown): true | string => {
   return true
 }
 
-export const validateWingsGroupV3Settings: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
-  const settings = asRecord(data?.wingsGroupV3 ?? originalDoc?.wingsGroupV3)
+export const validateWingsGroupV3Settings: CollectionBeforeChangeHook = ({
+  data,
+  originalDoc,
+  req,
+}) => {
+  const hasPendingSettings = Object.prototype.hasOwnProperty.call(data || {}, 'wingsGroupV3')
+  const settings = asRecord(
+    hasPendingSettings ? data?.wingsGroupV3 : originalDoc?.wingsGroupV3,
+  )
+  if (
+    req.context?.seed !== true &&
+    req.user?.role !== 'super-admin' &&
+    wingsGroupV3ReleaseGovernanceSnapshot(settings) !==
+      wingsGroupV3ReleaseGovernanceSnapshot(originalDoc?.wingsGroupV3)
+  ) {
+    throw new Error('Chỉ super-admin được thay đổi WingsGroup v3 release governance.')
+  }
   if (!settings.enabled) return data
 
   const privacy = asRecord(settings.privacy)
-  if (!asString(privacy.policyVersion)) throw new Error('WingsGroup v3 cần policy version.')
-  if (!asString(privacy.consentVersion)) throw new Error('WingsGroup v3 cần consent version.')
+  if (asString(privacy.policyVersion) !== WINGSGROUP_PRIVACY_VERSION) {
+    throw new Error('WingsGroup v3 policy version không khớp lead contract.')
+  }
+  if (asString(privacy.consentVersion) !== WINGSGROUP_CONSENT_VERSION) {
+    throw new Error('WingsGroup v3 consent version không khớp lead contract.')
+  }
   if (privacy.consentRequired !== true) throw new Error('WingsGroup v3 bắt buộc consent.')
-  if (privacy.retentionMonths !== 24) throw new Error('WingsGroup v3 giữ lead tối đa 24 tháng.')
-  if (!asString(privacy.dataSubjectContact)) {
-    throw new Error('WingsGroup v3 cần đầu mối dữ liệu cá nhân.')
+  if (privacy.retentionMonths !== WINGSGROUP_LEAD_RETENTION_MONTHS) {
+    throw new Error('WingsGroup v3 giữ lead tối đa 24 tháng.')
+  }
+  if (privacy.dataSubjectContact !== WINGSGROUP_DATA_CONTACT) {
+    throw new Error('WingsGroup v3 cần đúng đầu mối dữ liệu cá nhân đã duyệt.')
+  }
+  if (privacy.interBranchTransferAllowed !== true) {
+    throw new Error('WingsGroup v3 lead contract cần routing consent đã duyệt.')
+  }
+  if (
+    asString(privacy.policyRouteVi) !== WINGSGROUP_POLICY_ROUTES.vi ||
+    asString(privacy.policyRouteEn) !== WINGSGROUP_POLICY_ROUTES.en
+  ) {
+    throw new Error('WingsGroup v3 privacy route không khớp lead contract.')
+  }
+
+  if (privacy.approvalState === 'approved') {
+    if (!isTrimmedNonempty(privacy.dataSubjectRightsStatement)) {
+      throw new Error('Privacy approval cần nội dung quyền chủ thể dữ liệu do legal owner cung cấp.')
+    }
+    if (!isTrimmedNonempty(privacy.dataSubjectRightsEvidence)) {
+      throw new Error('Privacy approval cần bằng chứng quyền chủ thể dữ liệu.')
+    }
+    if (!isTrimmedNonempty(privacy.consentEvidenceReference)) {
+      throw new Error('Privacy approval cần bằng chứng consent context.')
+    }
+    if (!isTrimmedNonempty(privacy.approvalReference)) {
+      throw new Error('Privacy approval cần bằng chứng phê duyệt.')
+    }
   }
 
   const legalIdentity = asRecord(settings.legalIdentity)
   for (const [field, expected] of Object.entries(WINGSGROUP_LEGAL_IDENTITY)) {
-    if (asString(legalIdentity[field]) !== expected) {
+    if (legalIdentity[field] !== expected) {
       throw new Error(`WingsGroup v3 legal identity không hợp lệ: ${field}.`)
     }
   }
@@ -236,6 +304,36 @@ export const wingsGroupV3SettingsField: Field = {
           max: 24,
         },
         { name: 'dataSubjectContact', label: 'Đầu mối dữ liệu', type: 'email' },
+        {
+          name: 'dataSubjectRightsStatement',
+          label: 'Quyền chủ thể dữ liệu đã duyệt',
+          type: 'textarea',
+          admin: {
+            description: 'Do legal owner cung cấp; không tự tạo nội dung quyền.',
+          },
+        },
+        {
+          name: 'dataSubjectRightsEvidence',
+          label: 'Bằng chứng quyền chủ thể dữ liệu',
+          type: 'text',
+        },
+        {
+          name: 'consentEvidenceReference',
+          label: 'Bằng chứng consent context',
+          type: 'text',
+        },
+        {
+          name: 'approvalState',
+          label: 'Trạng thái privacy approval',
+          type: 'select',
+          defaultValue: 'pending',
+          options: ['pending', 'approved', 'rejected'],
+        },
+        {
+          name: 'approvalReference',
+          label: 'Bằng chứng privacy approval',
+          type: 'text',
+        },
         {
           name: 'interBranchTransferAllowed',
           label: 'Cho phép chuyển lead trong cùng tổ chức',
