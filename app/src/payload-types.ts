@@ -1137,6 +1137,10 @@ export interface Page {
       vi?: ('hidden' | 'pending' | 'approved') | null;
       en?: ('hidden' | 'pending' | 'approved') | null;
     };
+    contentApproval?: {
+      vi?: string | null;
+      en?: string | null;
+    };
     /**
      * Policy remains non-public until every field is present and approval state is approved.
      */
@@ -3531,6 +3535,12 @@ export interface PagesSelect<T extends boolean = true> {
         managedBy?: T;
         archetype?: T;
         publication?:
+          | T
+          | {
+              vi?: T;
+              en?: T;
+            };
+        contentApproval?:
           | T
           | {
               vi?: T;

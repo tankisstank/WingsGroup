@@ -4,8 +4,13 @@ import { describe, expect, it } from 'vitest'
 
 import { Pages } from '@/collections/Pages'
 import { validateWingsGroupV3Governance } from '@/collections/Pages/hooks/validateWingsGroupV3Governance'
-import { validateWingsGroupV3Settings } from '@/fields/wingsGroupV3'
 import {
+  protectWingsGroupSiteSettingsBeforeChange,
+  protectWingsGroupSiteSettingsBeforeDelete,
+  validateWingsGroupV3Settings,
+} from '@/fields/wingsGroupV3'
+import {
+  WINGSGROUP_CONTENT_VALIDATION_MARKER,
   WINGSGROUP_LEGAL_IDENTITY,
   WINGSGROUP_POLICY_VALIDATION_MARKER,
 } from '@/wingsgroup/corporateRoutes'
@@ -112,6 +117,126 @@ describe('WingsGroup corporate route integration', () => {
     expect(correctionMigration).toContain('wings_group_route_policy_data_subject_rights_statement')
     expect(correctionMigration).toContain('wings_group_v3_privacy_approval_state')
     expect(correctionMigration).not.toMatch(/UPDATE\s+"(?:pages|site_settings)"/i)
+    const integrityMigration = fs.readFileSync(
+      path.resolve(
+        process.cwd(),
+        'src/migrations/20260814_140000_wingsgroup_settings_content_integrity.ts',
+      ),
+      'utf8',
+    )
+    expect(integrityMigration).toContain('CREATE UNIQUE INDEX "site_settings_site_id_unique"')
+    expect(integrityMigration).toContain('wings_group_route_content_approval_vi')
+    expect(integrityMigration).not.toMatch(/(?:DELETE|UPDATE)\s+/i)
+  })
+
+  it('protects WingsGroup SiteSettings create/delete and rejects duplicate records', async () => {
+    const lifecycleRequest = ({
+      role,
+      settingsDocs = [],
+      siteCode = 'wings-group',
+    }: {
+      role: string
+      settingsDocs?: Array<{ id: number; site: number }>
+      siteCode?: string
+    }) => ({
+      context: {},
+      payload: {
+        find: async ({ collection }: { collection: string }) =>
+          collection === 'site-settings' ? { docs: settingsDocs } : { docs: [] },
+        findByID: async ({ collection, id }: { collection: string; id: number | string }) =>
+          collection === 'sites'
+            ? { code: siteCode, id }
+            : { id, site: 1 },
+      },
+      user: { role },
+    })
+
+    await expect(
+      protectWingsGroupSiteSettingsBeforeChange({
+        data: { site: 1 },
+        operation: 'create',
+        req: lifecycleRequest({ role: 'site-manager' }),
+      } as never),
+    ).rejects.toThrow(/super-admin/)
+
+    await expect(
+      protectWingsGroupSiteSettingsBeforeChange({
+        data: { site: 1 },
+        operation: 'create',
+        req: lifecycleRequest({ role: 'super-admin', settingsDocs: [{ id: 20, site: 1 }] }),
+      } as never),
+    ).rejects.toThrow(/một SiteSettings/)
+
+    await expect(
+      protectWingsGroupSiteSettingsBeforeChange({
+        data: { site: 1 },
+        operation: 'create',
+        req: lifecycleRequest({ role: 'super-admin' }),
+      } as never),
+    ).resolves.toBeTruthy()
+
+    await expect(
+      protectWingsGroupSiteSettingsBeforeChange({
+        data: { site: 1 },
+        operation: 'update',
+        originalDoc: { id: 20, site: 1 },
+        req: lifecycleRequest({
+          role: 'super-admin',
+          settingsDocs: [
+            { id: 20, site: 1 },
+            { id: 21, site: 1 },
+          ],
+        }),
+      } as never),
+    ).rejects.toThrow(/duplicate/)
+
+    await expect(
+      protectWingsGroupSiteSettingsBeforeChange({
+        data: { site: 2 },
+        operation: 'create',
+        req: lifecycleRequest({ role: 'site-manager', siteCode: 'wing-side' }),
+      } as never),
+    ).resolves.toBeTruthy()
+
+    await expect(
+      protectWingsGroupSiteSettingsBeforeDelete({
+        id: 20,
+        req: lifecycleRequest({
+          role: 'site-manager',
+          settingsDocs: [{ id: 20, site: 1 }],
+        }),
+      } as never),
+    ).rejects.toThrow(/super-admin/)
+
+    await expect(
+      protectWingsGroupSiteSettingsBeforeDelete({
+        id: 20,
+        req: lifecycleRequest({
+          role: 'super-admin',
+          settingsDocs: [
+            { id: 20, site: 1 },
+            { id: 21, site: 1 },
+          ],
+        }),
+      } as never),
+    ).rejects.toThrow(/duplicate/)
+
+    await expect(
+      protectWingsGroupSiteSettingsBeforeDelete({
+        id: 20,
+        req: lifecycleRequest({
+          role: 'super-admin',
+          settingsDocs: [{ id: 20, site: 1 }],
+        }),
+      } as never),
+    ).resolves.toBeUndefined()
+
+    await expect(
+      protectWingsGroupSiteSettingsBeforeDelete({
+        id: 20,
+        req: lifecycleRequest({ role: 'site-manager', siteCode: 'wing-side' }),
+      } as never),
+    ).resolves.toBeUndefined()
   })
 
   it('allows only super-admins to mutate the SiteSettings release-governance snapshot', async () => {
@@ -275,6 +400,88 @@ describe('WingsGroup corporate route integration', () => {
         req: request('super-admin', settings),
       } as never),
     ).rejects.toThrow(/trusted privacy/)
+  })
+
+  it('demotes draft content markers and blocks stale public About and policy mutations', async () => {
+    const approvedAbout = routeData({
+      wingsGroupRoute: {
+        archetype: 'corporate',
+        contentApproval: { en: null, vi: WINGSGROUP_CONTENT_VALIDATION_MARKER },
+        managedBy: 'wingsgroup-v3',
+        publication: { en: 'hidden', vi: 'approved' },
+      },
+    })
+
+    await expect(
+      validateWingsGroupV3Governance({
+        data: { title: 'Nội dung About đã thay đổi' },
+        originalDoc: approvedAbout,
+        req: { ...request('site-manager'), locale: 'vi' },
+      } as never),
+    ).rejects.toThrow(/draft.*super-admin/)
+
+    for (const mutation of [
+      { hero: null },
+      { layout: null },
+      { meta: null },
+      { relatedPages: [44] },
+      { slug: 'about-replaced' },
+    ]) {
+      await expect(
+        validateWingsGroupV3Governance({
+          data: mutation,
+          originalDoc: approvedAbout,
+          req: { ...request('site-manager'), locale: 'vi' },
+        } as never),
+      ).rejects.toThrow(/draft.*super-admin/)
+    }
+
+    const draftEdit = await validateWingsGroupV3Governance({
+      data: { _status: 'draft', hero: null, title: 'Bản nháp About mới' },
+      originalDoc: approvedAbout,
+      req: { ...request('site-manager'), locale: 'vi' },
+    } as never)
+    expect(draftEdit?._status).toBe('draft')
+    expect(draftEdit?.wingsGroupRoute?.contentApproval?.vi).toBeNull()
+
+    await expect(
+      validateWingsGroupV3Governance({
+        data: { _status: 'published' },
+        originalDoc: { ...approvedAbout, ...draftEdit },
+        req: { ...request('site-manager'), locale: 'vi' },
+      } as never),
+    ).rejects.toThrow(/publication gate/)
+
+    const superAdminEdit = await validateWingsGroupV3Governance({
+      data: { meta: null, title: 'About được duyệt lại' },
+      originalDoc: approvedAbout,
+      req: { ...request('super-admin'), locale: 'vi' },
+    } as never)
+    expect(superAdminEdit?.wingsGroupRoute?.contentApproval?.vi).toBe(
+      WINGSGROUP_CONTENT_VALIDATION_MARKER,
+    )
+
+    const policySettings = trustedSettings({ privacyApproved: true })
+    const approvedPolicyPage = routeData({
+      pathname: '/chinh-sach-bao-mat',
+      wingsGroupRoute: {
+        archetype: 'policy',
+        contentApproval: { en: null, vi: WINGSGROUP_CONTENT_VALIDATION_MARKER },
+        managedBy: 'wingsgroup-v3',
+        policy: {
+          ...approvedPolicy(policySettings),
+          validationMarker: WINGSGROUP_POLICY_VALIDATION_MARKER,
+        },
+        publication: { en: 'hidden', vi: 'approved' },
+      },
+    })
+    await expect(
+      validateWingsGroupV3Governance({
+        data: { layout: null },
+        originalDoc: approvedPolicyPage,
+        req: { ...request('site-manager', policySettings), locale: 'vi' },
+      } as never),
+    ).rejects.toThrow(/draft.*super-admin/)
   })
 
   it('accepts a governed VI corporate route and enforces same-site forms', async () => {

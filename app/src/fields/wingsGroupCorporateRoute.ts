@@ -52,6 +52,18 @@ export const wingsGroupCorporateRouteField: Field = {
       ],
     },
     {
+      name: 'contentApproval',
+      label: 'Server content approval markers',
+      type: 'group',
+      admin: {
+        hidden: true,
+      },
+      fields: [
+        { name: 'vi', type: 'text', admin: { readOnly: true } },
+        { name: 'en', type: 'text', admin: { readOnly: true } },
+      ],
+    },
+    {
       name: 'policy',
       label: 'Policy approval',
       type: 'group',

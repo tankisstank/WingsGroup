@@ -5,6 +5,7 @@ import {
   getWingsGroupRoutePublicationState,
   isWingsGroupPolicyApprovalComplete,
   isWingsGroupScopedInternalHref,
+  WINGSGROUP_CONTENT_VALIDATION_MARKER,
   WINGSGROUP_POLICY_VALIDATION_MARKER,
   WINGSGROUP_SITE_CODE,
 } from '@/wingsgroup/corporateRoutes'
@@ -34,6 +35,35 @@ const getPathname = (data: UnknownRecord, originalDoc: UnknownRecord): string =>
 }
 
 const governanceSnapshot = (value: unknown): string => JSON.stringify(asRecord(value))
+
+const canonicalize = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(canonicalize)
+  if (!value || typeof value !== 'object') return value
+  return Object.fromEntries(
+    Object.entries(value as UnknownRecord)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, item]) => [key, canonicalize(item)]),
+  )
+}
+
+const CONTENT_FIELDS = ['hero', 'layout', 'meta', 'pathname', 'relatedPages', 'slug', 'title'] as const
+
+const contentSnapshot = (data: UnknownRecord, originalDoc: UnknownRecord): string =>
+  JSON.stringify(
+    canonicalize(
+      Object.fromEntries(
+        CONTENT_FIELDS.map((field) => [
+          field,
+          Object.prototype.hasOwnProperty.call(data, field) ? data[field] : originalDoc[field],
+        ]),
+      ),
+    ),
+  )
+
+const originalContentSnapshot = (originalDoc: UnknownRecord): string =>
+  JSON.stringify(
+    canonicalize(Object.fromEntries(CONTENT_FIELDS.map((field) => [field, originalDoc[field]]))),
+  )
 
 const collectLinkURLs = (value: unknown, result: unknown[] = []): unknown[] => {
   if (Array.isArray(value)) {
@@ -145,6 +175,35 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
       routeGovernance = asRecord(pendingRouteGovernance)
       if (data) data.wingsGroupRoute = pendingRouteGovernance
     }
+
+    const localeKey = req.locale === 'en' ? 'en' : 'vi'
+    const contentChanged =
+      contentSnapshot(dataRecord, originalRecord) !== originalContentSnapshot(originalRecord)
+    const publication = asRecord(routeGovernance.publication)
+    if (
+      contentChanged &&
+      isPublishing &&
+      publication[localeKey] === 'approved' &&
+      req.user?.role !== 'super-admin'
+    ) {
+      throw new Error(
+        'Nội dung WingsGroup đã duyệt phải chuyển về draft và được super-admin phê duyệt lại.',
+      )
+    }
+
+    const contentApproval = asRecord(routeGovernance.contentApproval)
+    const nextContentApproval = {
+      ...contentApproval,
+      ...(contentChanged ? { [localeKey]: null } : {}),
+      ...(isPublishing &&
+      publication[localeKey] === 'approved' &&
+      req.user?.role === 'super-admin'
+        ? { [localeKey]: WINGSGROUP_CONTENT_VALIDATION_MARKER }
+        : {}),
+    }
+    pendingRouteGovernance = { ...routeGovernance, contentApproval: nextContentApproval }
+    routeGovernance = asRecord(pendingRouteGovernance)
+    if (data) data.wingsGroupRoute = pendingRouteGovernance
 
     const pageContent = {
       hero: data?.hero ?? originalDoc?.hero,

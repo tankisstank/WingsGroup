@@ -1,4 +1,4 @@
-import type { CollectionBeforeChangeHook, Field } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionBeforeDeleteHook, Field } from 'payload'
 import { WINGSGROUP_LEGAL_IDENTITY } from '@/wingsgroup/corporateRoutes'
 import {
   WINGSGROUP_CONSENT_VERSION,
@@ -175,6 +175,107 @@ const relationID = (value: unknown): number | string | undefined => {
   if (typeof value === 'number' || typeof value === 'string') return value
   const record = asRecord(value)
   return typeof record.id === 'number' || typeof record.id === 'string' ? record.id : undefined
+}
+
+const resolveSiteCode = async (
+  value: unknown,
+  req: Parameters<CollectionBeforeChangeHook>[0]['req'],
+): Promise<{ code: string | null; id: number | string } | null> => {
+  const id = relationID(value)
+  if (id === undefined) return null
+  const site = await req.payload.findByID({
+    collection: 'sites',
+    depth: 0,
+    id,
+    overrideAccess: true,
+    req,
+  })
+  return { code: typeof site.code === 'string' ? site.code : null, id }
+}
+
+const findSettingsForSite = async (
+  siteID: number | string,
+  req: Parameters<CollectionBeforeChangeHook>[0]['req'],
+) =>
+  req.payload.find({
+    collection: 'site-settings',
+    depth: 0,
+    limit: 2,
+    overrideAccess: true,
+    pagination: false,
+    req,
+    where: { site: { equals: siteID } },
+  })
+
+export const protectWingsGroupSiteSettingsBeforeChange: CollectionBeforeChangeHook = async ({
+  data,
+  operation,
+  originalDoc,
+  req,
+}) => {
+  const target = await resolveSiteCode(data?.site ?? originalDoc?.site, req)
+  if (!target) return data
+
+  const isTrustedOperator = req.context?.seed === true || req.user?.role === 'super-admin'
+  if (operation === 'create') {
+    if (target.code === 'wings-group' && !isTrustedOperator) {
+      throw new Error('Chỉ super-admin được tạo WingsGroup SiteSettings.')
+    }
+    const existing = await findSettingsForSite(target.id, req)
+    if (existing.docs.length > 0) {
+      throw new Error('Mỗi site chỉ được có một SiteSettings record.')
+    }
+    return data
+  }
+
+  const original = await resolveSiteCode(originalDoc?.site, req)
+  if (
+    original &&
+    String(original.id) !== String(target.id) &&
+    (original.code === 'wings-group' || target.code === 'wings-group') &&
+    !isTrustedOperator
+  ) {
+    throw new Error('Chỉ super-admin được chuyển WingsGroup SiteSettings sang site khác.')
+  }
+
+  if (target.code === 'wings-group') {
+    const existing = await findSettingsForSite(target.id, req)
+    if (
+      existing.docs.length !== 1 ||
+      (originalDoc?.id !== undefined &&
+        String(existing.docs[0]?.id) !== String(originalDoc.id))
+    ) {
+      throw new Error('WingsGroup SiteSettings duplicate hoặc không xác định; từ chối thay đổi.')
+    }
+  }
+
+  return data
+}
+
+export const protectWingsGroupSiteSettingsBeforeDelete: CollectionBeforeDeleteHook = async ({
+  id,
+  req,
+}) => {
+  const settings = await req.payload.findByID({
+    collection: 'site-settings',
+    depth: 0,
+    id,
+    overrideAccess: true,
+    req,
+  })
+  const target = await resolveSiteCode(settings.site, req)
+  if (target?.code !== 'wings-group') return
+
+  const existing = await findSettingsForSite(target.id, req)
+  if (
+    existing.docs.length !== 1 ||
+    String(existing.docs[0]?.id) !== String(settings.id)
+  ) {
+    throw new Error('WingsGroup SiteSettings duplicate hoặc không xác định; từ chối xóa.')
+  }
+  if (req.context?.seed !== true && req.user?.role !== 'super-admin') {
+    throw new Error('Chỉ super-admin được xóa WingsGroup SiteSettings.')
+  }
 }
 
 export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = async ({

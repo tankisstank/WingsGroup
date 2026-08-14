@@ -280,6 +280,7 @@ export const buildWingsGroupCorporateRouteSeeds = (): WingsGroupCorporateRouteSe
 
 export const routeGovernanceForSeed = (definition: WingsGroupRouteDefinition) => ({
   archetype: definition.archetype,
+  contentApproval: { en: null, vi: null },
   managedBy: 'wingsgroup-v3' as const,
   policy: definition.policy
     ? {

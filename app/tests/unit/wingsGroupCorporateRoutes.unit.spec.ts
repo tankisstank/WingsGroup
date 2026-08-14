@@ -8,6 +8,7 @@ import {
   hasApprovedPolicyGovernance,
   isValidWingsGroupPolicyDate,
   isWingsGroupRoutePublic,
+  WINGSGROUP_CONTENT_VALIDATION_MARKER,
   WINGSGROUP_CORPORATE_ROUTES,
   WINGSGROUP_LEGAL_IDENTITY,
   WINGSGROUP_POLICY_ROUTES,
@@ -31,6 +32,10 @@ const governedPage = (path = '/ve-wingsgroup') => ({
   pathname: path,
   wingsGroupRoute: {
     archetype: path === '/ve-wingsgroup' ? 'corporate' : 'policy',
+    contentApproval: {
+      en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+      vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+    },
     managedBy: 'wingsgroup-v3',
     publication: { en: 'approved', vi: 'approved' },
   },
@@ -134,6 +139,7 @@ describe('WingsGroup corporate route contract', () => {
     expect(viWhere).not.toContain('/chinh-sach-bao-mat')
     expect(enHiddenWhere).not.toContain('"equals":"wings-group"')
     expect(enWhere).toContain('wingsGroupRoute.publication.en')
+    expect(enWhere).toContain('wingsGroupRoute.contentApproval.en')
     expect(enWhere).toContain('wingsGroupRoute.policy.approvalState')
     expect(enWhere).toContain(WINGSGROUP_LEGAL_IDENTITY.legalEntityName)
     expect(enWhere).toContain('site.code')
@@ -148,6 +154,20 @@ describe('WingsGroup corporate route contract', () => {
         ),
       ),
     ).not.toContain('"equals":"wings-group"')
+    expect(
+      isWingsGroupRoutePublic({
+        locale: 'en',
+        page: {
+          ...governedPage(),
+          wingsGroupRoute: {
+            ...governedPage().wingsGroupRoute,
+            contentApproval: { en: null, vi: WINGSGROUP_CONTENT_VALIDATION_MARKER },
+          },
+        },
+        settings: trustedSettings({ englishPublicationState: 'approved' }),
+        siteCode: 'wings-group',
+      }),
+    ).toBe(false)
   })
 
   it('requires complete, exact policy approval metadata', () => {
@@ -216,6 +236,7 @@ describe('WingsGroup corporate route contract', () => {
       expect(resolveCorporateRouteSeedAction([], seed)).toBe('create')
       expect(resolveCorporateRouteSeedAction([{ id: 1, pathname: seed.path }], seed)).toBe('update')
       const governance = routeGovernanceForSeed(seed)
+      expect(governance.contentApproval).toEqual({ en: null, vi: null })
       expect(governance.publication.en).toBe('hidden')
       if (seed.policy) {
         expect(governance.publication.vi).toBe('pending')

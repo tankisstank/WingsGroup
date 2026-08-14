@@ -48,6 +48,7 @@ export const WINGSGROUP_RELATIONSHIP_STATEMENT_EN =
   'WingsGroup is a newly developed brand within the same organisational ecosystem as VietWings and Đôi Cánh Việt. The ecosystem continues to develop WingsGo, WingSide, WingsCare and related services.'
 
 export const WINGSGROUP_POLICY_VALIDATION_MARKER = 'wingsgroup-policy-governance-v1'
+export const WINGSGROUP_CONTENT_VALIDATION_MARKER = 'wingsgroup-content-approved-v1'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -174,13 +175,17 @@ export const getWingsGroupRoutePublicationState = ({
 
   const governance = asRecord(pageRecord.wingsGroupRoute)
   const publication = asRecord(governance.publication)
+  const contentApproval = asRecord(governance.contentApproval)
+  const localeKey = locale === 'en' ? 'en' : 'vi'
   if (
     governance.managedBy !== 'wingsgroup-v3' ||
     governance.archetype !== definition.archetype ||
-    publication[locale === 'en' ? 'en' : 'vi'] !== 'approved'
+    publication[localeKey] !== 'approved'
   ) {
-    return publication[locale === 'en' ? 'en' : 'vi'] === 'pending' ? 'pending' : 'hidden'
+    return publication[localeKey] === 'pending' ? 'pending' : 'hidden'
   }
+
+  if (contentApproval[localeKey] !== WINGSGROUP_CONTENT_VALIDATION_MARKER) return 'pending'
 
   if (locale === 'en') {
     const siteSettings = asRecord(settings)
@@ -382,6 +387,11 @@ export const buildWingsGroupPublicPageAccessWhere = (locale: unknown, settings: 
           { 'site.code': { equals: WINGSGROUP_SITE_CODE } },
           { 'wingsGroupRoute.managedBy': { equals: 'wingsgroup-v3' } },
           { [localeField]: { equals: 'approved' } },
+          {
+            [`wingsGroupRoute.contentApproval.${locale}`]: {
+              equals: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+            },
+          },
           { or: routeClauses },
         ],
       },

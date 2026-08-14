@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
 
 import { hideFromEditors } from '@/access/roles'
 import { enforceSiteAccess, siteManagerScopedAccess, siteScopedOrAnyone } from '@/access/siteScope'
@@ -22,6 +22,8 @@ import {
   invalidateSettingsAfterDelete,
 } from '@/collections/hooks/invalidateTenantCache'
 import {
+  protectWingsGroupSiteSettingsBeforeChange,
+  protectWingsGroupSiteSettingsBeforeDelete,
   validateWingsGroupV3Settings,
   wingsGroupV3SettingsField,
 } from '@/fields/wingsGroupV3'
@@ -47,7 +49,7 @@ export const SiteSettings: CollectionConfig = {
     useAsTitle: 'siteName',
   },
   fields: [
-    siteField(),
+    { ...siteField(), unique: true } as Field,
     {
       name: 'siteName',
       label: 'Tên site',
@@ -319,7 +321,12 @@ export const SiteSettings: CollectionConfig = {
   hooks: {
     afterChange: [invalidateSettingsAfterChange],
     afterDelete: [invalidateSettingsAfterDelete],
-    beforeChange: [enforceSiteAccess, validateWingsGroupV3Settings],
+    beforeChange: [
+      enforceSiteAccess,
+      protectWingsGroupSiteSettingsBeforeChange,
+      validateWingsGroupV3Settings,
+    ],
+    beforeDelete: [protectWingsGroupSiteSettingsBeforeDelete],
   },
   labels: {
     plural: adminLabel('Cấu hình site', 'Site settings'),
