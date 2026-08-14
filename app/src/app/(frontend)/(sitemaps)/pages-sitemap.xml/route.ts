@@ -11,6 +11,7 @@ import {
   getSiteSitemapURL,
 } from '@/utilities/siteSEO'
 import { hasMatchingWingSideTourWrapper } from '@/tours/wingsSideTourViewModel'
+import { isWingsGroupV3ExactPublicInventoryEnabled } from '@/wingsgroup/corporateRoutes'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,24 +34,33 @@ export async function GET(request: Request) {
       },
     },
   })
+  const settingsDoc = settings.docs[0]
+  const usesExactWingsGroupInventory = isWingsGroupV3ExactPublicInventoryEnabled({
+    settings: settingsDoc,
+    siteCode: site.code,
+  })
   const origin = getCanonicalSiteOrigin({
     requestOrigin: new URL(request.url).origin,
-    settings: settings.docs[0],
+    settings: settingsDoc,
     site,
   })
   const dateFallback = new Date().toISOString()
   const sitemap = []
 
-  for (const locale of getSiteSitemapLocales(site)) {
-    sitemap.push({
-      loc: getSiteSitemapURL({
-        defaultLocale: site.defaultLocale,
-        locale,
-        origin,
-        path: '/posts',
-      }),
-      lastmod: settings.docs[0]?.updatedAt || dateFallback,
-    })
+  const sitemapLocales = usesExactWingsGroupInventory ? (['vi'] as const) : getSiteSitemapLocales(site)
+
+  for (const locale of sitemapLocales) {
+    if (!usesExactWingsGroupInventory) {
+      sitemap.push({
+        loc: getSiteSitemapURL({
+          defaultLocale: site.defaultLocale,
+          locale,
+          origin,
+          path: '/posts',
+        }),
+        lastmod: settingsDoc?.updatedAt || dateFallback,
+      })
+    }
 
     if (site.code === 'wing-side') {
       sitemap.push({
@@ -60,7 +70,7 @@ export async function GET(request: Request) {
           origin,
           path: '/journeys',
         }),
-        lastmod: settings.docs[0]?.updatedAt || dateFallback,
+        lastmod: settingsDoc?.updatedAt || dateFallback,
       })
     }
 
@@ -136,7 +146,7 @@ export async function GET(request: Request) {
           locale,
           page,
           pathname: path,
-          settings: settings.docs[0],
+          settings: settingsDoc,
           siteCode: site.code,
         })
       ) {

@@ -74,6 +74,29 @@ export const getWingsGroupRouteDefinition = (
   return WINGSGROUP_CORPORATE_ROUTES.find((route) => route.path === path) || null
 }
 
+export const isWingsGroupV3ExactPublicInventoryEnabled = ({
+  settings,
+  siteCode,
+}: {
+  settings?: unknown
+  siteCode?: null | string
+}): boolean =>
+  siteCode === WINGSGROUP_SITE_CODE && asRecord(asRecord(settings).wingsGroupV3).enabled === true
+
+export const isWingsGroupV3PublicSurfacePathAllowed = ({
+  locale,
+  path,
+  settings,
+  siteCode,
+}: {
+  locale?: null | SupportedLocaleCode
+  path: unknown
+  settings?: unknown
+  siteCode?: null | string
+}): boolean =>
+  !isWingsGroupV3ExactPublicInventoryEnabled({ settings, siteCode }) ||
+  (locale === 'vi' && Boolean(getWingsGroupRouteDefinition(path)))
+
 export const isWingsGroupPolicyRoute = (value: unknown): boolean =>
   Boolean(getWingsGroupRouteDefinition(value)?.policy)
 

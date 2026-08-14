@@ -9,6 +9,7 @@ import {
   getSiteSitemapLocales,
   getSiteSitemapURL,
 } from '@/utilities/siteSEO'
+import { isWingsGroupV3ExactPublicInventoryEnabled } from '@/wingsgroup/corporateRoutes'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,9 +32,18 @@ export async function GET(request: Request) {
       },
     },
   })
+  const settingsDoc = settings.docs[0]
+  if (
+    isWingsGroupV3ExactPublicInventoryEnabled({
+      settings: settingsDoc,
+      siteCode: site.code,
+    })
+  ) {
+    return new Response('Not found', { status: 404 })
+  }
   const origin = getCanonicalSiteOrigin({
     requestOrigin: new URL(request.url).origin,
-    settings: settings.docs[0],
+    settings: settingsDoc,
     site,
   })
   const dateFallback = new Date().toISOString()

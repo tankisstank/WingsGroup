@@ -4,6 +4,7 @@ import { resolveHeaderPrimaryAction } from '@/utilities/headerPrimaryActions'
 import { getCurrentLocale, getCurrentPublicPathname, getCurrentSite } from '@/utilities/siteContext'
 import { defaultThemeKey } from '@/utilities/themeTokens'
 import React from 'react'
+import { isWingsGroupV3ExactPublicInventoryEnabled } from '@/wingsgroup/corporateRoutes'
 
 export async function Header() {
   const settings = await getCurrentSiteSettings()
@@ -32,6 +33,9 @@ export async function Header() {
       primaryAction={primaryAction}
       publicPathname={publicPathname}
       resolvedLocale={locale}
+      showSearch={
+        !isWingsGroupV3ExactPublicInventoryEnabled({ settings, siteCode: site.code })
+      }
       siteName={siteName}
       siteCode={site.code}
       supportedLocales={site.supportedLocales}

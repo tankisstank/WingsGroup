@@ -45,9 +45,10 @@ const blockComponents = {
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
   locale?: null | string
+  siteCode?: null | string
   wingsGroupV3Home?: boolean
 }> = (props) => {
-  const { blocks, locale, wingsGroupV3Home = false } = props
+  const { blocks, locale, siteCode, wingsGroupV3Home = false } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -72,7 +73,9 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               const blockProps =
-                block.blockType === 'wingsGroupEcosystem'
+                block.blockType === 'formBlock'
+                  ? { ...block, siteCode }
+                  : block.blockType === 'wingsGroupEcosystem'
                   ? { ...block, approvedProofKeys, locale }
                   : block.blockType === 'credentialsCarousel' ||
                       block.blockType === 'wingsGroupProofArchive' ||

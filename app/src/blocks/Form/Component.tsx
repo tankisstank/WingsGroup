@@ -273,6 +273,7 @@ export const FormBlock: React.FC<
     anchorId?: null | string
     formOdId?: string
     id?: string
+    siteCode?: null | string
     submitOdId?: string
   } & FormBlockType
 > = (props) => {
@@ -283,6 +284,7 @@ export const FormBlock: React.FC<
     formOdId,
     introContent,
     presentation = 'split-contact',
+    siteCode,
     submitOdId,
   } = props
   const resolvedAnchorId = anchorId === undefined ? 'contact-form' : anchorId || undefined
@@ -298,7 +300,8 @@ export const FormBlock: React.FC<
   const copyLocale = getFormCopyLocale(locale)
   const copy = formCopy[copyLocale]
   const wingsGroupCopy = wingsGroupLeadCopy[copyLocale === 'en' ? 'en' : 'vi']
-  const isWingsGroupV3 = getFormSiteCode(formFromProps) === WINGSGROUP_SITE_CODE
+  const isWingsGroupV3 =
+    siteCode === WINGSGROUP_SITE_CODE || getFormSiteCode(formFromProps) === WINGSGROUP_SITE_CODE
   const localizedFields =
     formFromProps?.fields?.map((field) => {
       const fieldName = getFieldName(field)

@@ -27,6 +27,7 @@ export const HeaderNav: React.FC<{
   }
   publicPathname?: string
   resolvedLocale?: SupportedLocaleCode
+  showSearch?: boolean
   siteCode?: string
   supportedLocales?: SupportedLocaleCode[]
   themeKey?: string
@@ -36,6 +37,7 @@ export const HeaderNav: React.FC<{
   primaryAction,
   publicPathname,
   resolvedLocale = 'vi',
+  showSearch = true,
   siteCode,
   supportedLocales,
   themeKey,
@@ -249,7 +251,7 @@ export const HeaderNav: React.FC<{
             {resolvedPrimaryAction.label}
           </SiteLink>
         ) : null}
-        {!isWingsSide ? (
+        {!isWingsSide && showSearch ? (
           <SiteLink className="site-icon-button" href="/search">
             <span className="sr-only">{copy.search}</span>
             <SearchIcon aria-hidden="true" className="h-5 w-5" />
@@ -267,7 +269,7 @@ export const HeaderNav: React.FC<{
             {resolvedPrimaryAction.label}
           </SiteLink>
         ) : null}
-        {!isWingsSide ? (
+        {!isWingsSide && showSearch ? (
           <SiteLink className="site-icon-button" href="/search">
             <span className="sr-only">{copy.search}</span>
             <SearchIcon aria-hidden="true" className="h-5 w-5" />

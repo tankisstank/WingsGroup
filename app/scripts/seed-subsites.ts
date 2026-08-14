@@ -15,6 +15,7 @@ import {
   siteHeroPresentationAssignments,
 } from '../src/utilities/heroPresentationSeed'
 import { backfillWingsSideLocales } from './lib/wingssideLocaleBackfill'
+import { seedWingsGroupCorporateRoutes } from './lib/wingsGroupCorporateRouteSeed'
 import type { CopyLocaleCode } from '../src/utilities/locales'
 import { ensureThemePresetSeeds, wingsSideInboundThemePresetKey } from '../src/utilities/themeSeed'
 
@@ -1490,6 +1491,46 @@ async function createRedirect(payload: Payload, req: PayloadRequest, from: strin
 async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: SiteSeed) {
   const site = await upsertSite(payload, req, siteSeed)
   await clearSiteContent(payload, req, site.id)
+
+  if (siteSeed.code === 'wings-group') {
+    const fallbackImage = await createMedia(
+      payload,
+      req,
+      site.id,
+      'WingsGroup consultation and travel planning',
+      'WingsGroup local preview fallback',
+      'Repository-owned fallback used for deterministic local and E2E rendering only.',
+      fallbackSeedImagePath,
+    )
+
+    await createSiteSettings(payload, req, site, siteSeed, fallbackImage.id, {
+      footerNote: 'CÔNG TY CỔ PHẦN DU LỊCH ĐÔI CÁNH VIỆT · Mã số doanh nghiệp 0109983118',
+      headerNavItems: [
+        linkItem('Trang chủ', '/'),
+        linkItem('Về WingsGroup', '/ve-wingsgroup'),
+        linkItem('Năng lực', '/nang-luc-dich-vu'),
+        linkItem('Tin cậy', '/tin-cay-va-phap-ly'),
+        linkItem('Tin tức', '/tin-tuc'),
+        linkItem('Liên hệ', '/lien-he'),
+      ],
+      footerNavItems: [
+        linkItem('Về WingsGroup', '/ve-wingsgroup'),
+        linkItem('Năng lực dịch vụ', '/nang-luc-dich-vu'),
+        linkItem('Tin cậy và pháp lý', '/tin-cay-va-phap-ly'),
+        linkItem('Tin tức', '/tin-tuc'),
+        linkItem('Liên hệ', '/lien-he'),
+      ],
+      supportEmail: 'info@doicanhviet.com',
+      supportPhone: '0975513886',
+      tagline: 'Tận tâm trong từng hành trình, vững vàng trong từng kết nối.',
+    })
+
+    const result = await seedWingsGroupCorporateRoutes({ payload, req })
+    payload.logger.info(
+      `Governed WingsGroup fixture seeded: ${result.created.length} created, ${result.updated.length} updated, ${result.policyPending.length} pending.`,
+    )
+    return
+  }
 
   const ecosystemHeroImage = await createMedia(
     payload,

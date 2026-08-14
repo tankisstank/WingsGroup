@@ -7,6 +7,8 @@ import {
   hasApprovedWingsGroupPrivacyGovernance,
   hasApprovedPolicyGovernance,
   isValidWingsGroupPolicyDate,
+  isWingsGroupV3ExactPublicInventoryEnabled,
+  isWingsGroupV3PublicSurfacePathAllowed,
   isWingsGroupRoutePublic,
   WINGSGROUP_CONTENT_VALIDATION_MARKER,
   WINGSGROUP_CORPORATE_ROUTES,
@@ -27,6 +29,7 @@ import {
   resolveCorporateRouteSeedAction,
   routeGovernanceForSeed,
 } from '../../scripts/lib/wingsGroupCorporateRouteSeed'
+import { contentPresentationDefinitions } from '@/blocks/presentations'
 
 const governedPage = (path = '/ve-wingsgroup') => ({
   pathname: path,
@@ -88,6 +91,52 @@ describe('WingsGroup corporate route contract', () => {
       '/dieu-khoan-su-dung',
       '/chinh-sach-thanh-toan',
     ])
+  })
+
+  it('fails closed outside the exact VI route inventory when WingsGroup v3 is enabled', () => {
+    const settings = { wingsGroupV3: { enabled: true } }
+    expect(
+      isWingsGroupV3ExactPublicInventoryEnabled({ settings, siteCode: 'wings-group' }),
+    ).toBe(true)
+
+    for (const { path } of WINGSGROUP_CORPORATE_ROUTES) {
+      expect(
+        isWingsGroupV3PublicSurfacePathAllowed({
+          locale: 'vi',
+          path,
+          settings,
+          siteCode: 'wings-group',
+        }),
+      ).toBe(true)
+      expect(
+        isWingsGroupV3PublicSurfacePathAllowed({
+          locale: 'en',
+          path,
+          settings,
+          siteCode: 'wings-group',
+        }),
+      ).toBe(false)
+    }
+
+    for (const path of ['/posts', '/posts/example', '/posts/page/2', '/search']) {
+      expect(
+        isWingsGroupV3PublicSurfacePathAllowed({
+          locale: 'vi',
+          path,
+          settings,
+          siteCode: 'wings-group',
+        }),
+      ).toBe(false)
+    }
+
+    expect(
+      isWingsGroupV3PublicSurfacePathAllowed({
+        locale: 'en',
+        path: '/posts',
+        settings,
+        siteCode: 'wings-go',
+      }),
+    ).toBe(true)
   })
 
   it('fails closed when governance, policy approval, or the English site gate is absent', () => {
@@ -250,6 +299,37 @@ describe('WingsGroup corporate route contract', () => {
         })
       } else {
         expect(governance.publication.vi).toBe('approved')
+      }
+    }
+  })
+
+  it('uses only registered presentation values in governed route fixtures', () => {
+    const allowedContentPresentations = new Set<string>(
+      contentPresentationDefinitions.map(({ value }) => value),
+    )
+    const contentBlocks = buildWingsGroupCorporateRouteSeeds().flatMap((route) =>
+      [route.vi, route.en].flatMap(({ layout }) =>
+        layout.filter((block) => block.blockType === 'content'),
+      ),
+    )
+
+    expect(contentBlocks.length).toBeGreaterThan(0)
+    for (const block of contentBlocks) {
+      expect(allowedContentPresentations.has(String(block.presentation))).toBe(true)
+    }
+  })
+
+  it('seeds exactly one localized H1 for every governed route', () => {
+    for (const route of buildWingsGroupCorporateRouteSeeds()) {
+      for (const locale of ['vi', 'en'] as const) {
+        const localized = route[locale]
+        const serialized = JSON.stringify({ hero: localized.hero, layout: localized.layout })
+        const h1Count = serialized.match(/"tag":"h1"/g)?.length || 0
+
+        expect(h1Count, `${locale} ${route.path}`).toBe(1)
+        expect(JSON.stringify(localized.hero), `${locale} ${route.path}`).toContain(
+          localized.title,
+        )
       }
     }
   })

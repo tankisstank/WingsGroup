@@ -11,6 +11,8 @@ import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
+import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
+import { isWingsGroupV3PublicSurfacePathAllowed } from '@/wingsgroup/corporateRoutes'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +27,17 @@ export default async function Page({ params: paramsPromise }: Args) {
   const payload = await getPayload({ config: configPromise })
   const locale = await getCurrentLocale()
   const site = await getCurrentSite()
+  const settings = await getCurrentSiteSettings()
+  if (
+    !isWingsGroupV3PublicSurfacePathAllowed({
+      locale,
+      path: `/posts/page/${pageNumber}`,
+      settings,
+      siteCode: site.code,
+    })
+  ) {
+    notFound()
+  }
   const copy = {
     en: {
       title: 'Posts',

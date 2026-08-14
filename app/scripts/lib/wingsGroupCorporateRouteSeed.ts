@@ -20,6 +20,7 @@ type SeedBlock = Record<string, unknown>
 
 type LocalizedRouteSeed = {
   description: string
+  hero: SeedBlock
   layout: SeedBlock[]
   title: string
 }
@@ -30,7 +31,11 @@ export type WingsGroupCorporateRouteSeed = WingsGroupRouteDefinition & {
   vi: LocalizedRouteSeed
 }
 
-const lexical = (heading: string, paragraphs: readonly string[]) => ({
+const lexical = (
+  heading: string,
+  paragraphs: readonly string[],
+  headingTag: 'h1' | 'h2' = 'h2',
+) => ({
   root: {
     children: [
       {
@@ -38,7 +43,7 @@ const lexical = (heading: string, paragraphs: readonly string[]) => ({
         direction: 'ltr',
         format: '',
         indent: 0,
-        tag: 'h2',
+        tag: headingTag,
         type: 'heading',
         version: 1,
       },
@@ -60,10 +65,15 @@ const lexical = (heading: string, paragraphs: readonly string[]) => ({
   },
 })
 
+const pageHero = (title: string): SeedBlock => ({
+  richText: lexical(title, [], 'h1'),
+  type: 'lowImpact',
+})
+
 const content = (heading: string, ...paragraphs: string[]): SeedBlock => ({
   blockType: 'content',
   columns: [{ richText: lexical(heading, paragraphs), size: 'full' }],
-  presentation: 'prose',
+  presentation: 'reading',
 })
 
 const features = (
@@ -110,6 +120,7 @@ const policyDraft = (locale: Locale, label: string): LocalizedRouteSeed => ({
     locale === 'en'
       ? `${label} is being prepared for legal ownership and editorial approval. It is not public policy.`
       : `${label} đang được hoàn thiện chủ sở hữu pháp lý và phê duyệt biên tập. Đây chưa phải chính sách công khai.`,
+  hero: pageHero(label),
   layout: [
     content(
       locale === 'en' ? 'Publication pending legal approval' : 'Chờ phê duyệt pháp lý để công bố',
@@ -129,6 +140,7 @@ const routeContent: Record<Exclude<WingsGroupRouteDefinition['path'], '/'>, { en
     vi: {
       title: 'Về WingsGroup',
       description: 'Thông tin doanh nghiệp, văn phòng và mối quan hệ thương hiệu của WingsGroup.',
+      hero: pageHero('Về WingsGroup'),
       layout: [
         content(
           'Một tổ chức du lịch, nhiều thương hiệu dịch vụ',
@@ -145,6 +157,7 @@ const routeContent: Record<Exclude<WingsGroupRouteDefinition['path'], '/'>, { en
     en: {
       title: 'About WingsGroup',
       description: 'Corporate identity, offices and the public brand relationship behind WingsGroup.',
+      hero: pageHero('About WingsGroup'),
       layout: [
         content(
           'One organisational ecosystem, developing travel brands',
@@ -163,6 +176,7 @@ const routeContent: Record<Exclude<WingsGroupRouteDefinition['path'], '/'>, { en
     vi: {
       title: 'Năng lực dịch vụ',
       description: 'Các nhóm dịch vụ du lịch được tổ chức theo nhu cầu khách hàng và đối tác.',
+      hero: pageHero('Năng lực dịch vụ'),
       layout: [
         features('Năng lực', 'Dịch vụ được tổ chức theo nhu cầu', 'Mỗi thương hiệu tập trung vào một hành trình phục vụ rõ ràng.', [
           { title: 'Du lịch nước ngoài', description: 'Tư vấn hành trình, lịch khởi hành và hỗ trợ trước chuyến đi.' },
@@ -176,6 +190,7 @@ const routeContent: Record<Exclude<WingsGroupRouteDefinition['path'], '/'>, { en
     en: {
       title: 'Service Capabilities',
       description: 'Travel services organised around the needs of travellers, groups and partners.',
+      hero: pageHero('Service Capabilities'),
       layout: [
         features('Capabilities', 'Services shaped around each request', 'Each public brand concentrates on a clear customer journey.', [
           { title: 'Outbound travel', description: 'Journey advice, departure planning and considerate pre-trip support.' },
@@ -191,6 +206,7 @@ const routeContent: Record<Exclude<WingsGroupRouteDefinition['path'], '/'>, { en
     vi: {
       title: 'Tin cậy và pháp lý',
       description: 'Thông tin pháp nhân và giấy phép đã được xác nhận cho WingsGroup.',
+      hero: pageHero('Tin cậy và pháp lý'),
       layout: [
         content(
           'Thông tin pháp lý công khai',
@@ -204,6 +220,7 @@ const routeContent: Record<Exclude<WingsGroupRouteDefinition['path'], '/'>, { en
     en: {
       title: 'Trust and Legal Information',
       description: 'Confirmed corporate identity and travel-licence information for WingsGroup.',
+      hero: pageHero('Trust and Legal Information'),
       layout: [
         content(
           'Public legal information',
@@ -219,11 +236,13 @@ const routeContent: Record<Exclude<WingsGroupRouteDefinition['path'], '/'>, { en
     vi: {
       title: 'Tin tức',
       description: 'Tin tức và góc nhìn từ WingsGroup.',
+      hero: pageHero('Tin tức'),
       layout: [{ blockType: 'archive', introContent: lexical('Tin tức và góc nhìn', ['Thông tin được biên tập theo phạm vi hoạt động của WingsGroup.']), limit: 9, populateBy: 'collection', presentation: 'card-grid', relationTo: 'posts' }],
     },
     en: {
       title: 'News and Insights',
       description: 'News and considered perspectives from WingsGroup.',
+      hero: pageHero('News and Insights'),
       layout: [{ blockType: 'archive', introContent: lexical('News and insights', ['Editorial updates are prepared within the public scope of WingsGroup.']), limit: 9, populateBy: 'collection', presentation: 'card-grid', relationTo: 'posts' }],
     },
   },
@@ -231,11 +250,13 @@ const routeContent: Record<Exclude<WingsGroupRouteDefinition['path'], '/'>, { en
     vi: {
       title: 'Liên hệ',
       description: 'Gửi nhu cầu để WingsGroup kết nối bạn với bộ phận phù hợp.',
+      hero: pageHero('Liên hệ'),
       layout: [content('Chúng tôi sẵn sàng lắng nghe', 'Hãy chia sẻ thời gian, số lượng khách, điểm đến hoặc loại dịch vụ bạn đang quan tâm.'), contactCTA('vi')],
     },
     en: {
       title: 'Contact',
       description: 'Share your request and WingsGroup will connect you with the most suitable team.',
+      hero: pageHero('Contact'),
       layout: [content('We would be pleased to hear from you', 'Please share your preferred timing, party size, destination or the service you are considering.'), contactCTA('en')],
     },
   },
@@ -259,6 +280,7 @@ const homepageFallback = (locale: Locale): LocalizedRouteSeed => ({
     locale === 'en'
       ? 'Travel services connected through one trusted organisation.'
       : 'Các dịch vụ du lịch được kết nối trong một tổ chức đáng tin cậy.',
+  hero: pageHero('WingsGroup'),
   layout: [
     content(
       locale === 'en' ? 'Thoughtful travel, connected expertise' : 'Tận tâm trong từng hành trình',
@@ -447,7 +469,7 @@ export const seedWingsGroupCorporateRoutes = async ({
     const base = { _status: 'draft' as const, pathname: route.path, site: site.id, slug, wingsGroupRoute: routeGovernanceForSeed(route) }
 
     if (action === 'create') {
-      page = (await payload.create({ collection: 'pages', context: { disableRevalidate: true }, data: { ...base, hero: { type: 'none' }, layout: route.vi.layout, meta: { breadcrumbLabel: route.vi.title, description: route.vi.description, title: route.vi.title }, title: route.vi.title }, locale: 'vi', overrideAccess: true, req } as never)) as (typeof existingPages)[number]
+      page = (await payload.create({ collection: 'pages', context: { disableRevalidate: true }, data: { ...base, hero: route.vi.hero, layout: route.vi.layout, meta: { breadcrumbLabel: route.vi.title, description: route.vi.description, title: route.vi.title }, title: route.vi.title }, locale: 'vi', overrideAccess: true, req } as never)) as (typeof existingPages)[number]
       if (!existingPages.some((candidate) => String(candidate.id) === String(page!.id))) {
         existingPages.push(page)
       }
@@ -463,9 +485,14 @@ export const seedWingsGroupCorporateRoutes = async ({
         const layout = route.path === '/lien-he'
           ? [...localized.layout, { blockName: 'WingsGroup contact form', blockType: 'formBlock', enableIntro: false, form: formID, presentation: 'split-contact' }]
           : localized.layout
-        await payload.update({ collection: 'pages', context: { disableRevalidate: true }, data: { hero: { type: 'none' }, layout, meta: { breadcrumbLabel: localized.title, description: localized.description, title: localized.title }, title: localized.title }, id: page!.id, locale, overrideAccess: true, req } as never)
+        await payload.update({ collection: 'pages', context: { disableRevalidate: true }, data: { hero: localized.hero, layout, meta: { breadcrumbLabel: localized.title, description: localized.description, title: localized.title }, title: localized.title }, id: page!.id, locale, overrideAccess: true, req } as never)
       }
     } else {
+      if (page?.hero?.type === 'none') {
+        for (const locale of ['vi', 'en'] as const) {
+          await payload.update({ collection: 'pages', context: { disableRevalidate: true }, data: { hero: route[locale].hero }, id: page.id, locale, overrideAccess: true, req } as never)
+        }
+      }
       result.preservedHome = true
     }
 

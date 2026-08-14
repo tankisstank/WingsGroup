@@ -325,6 +325,7 @@ export async function renderCmsPageByPath({
           <RenderBlocks
             blocks={page.layout}
             locale={locale}
+            siteCode={site.code}
             wingsGroupV3Home={useWingsGroupV3Home}
           />
           {!useWingsGroupV3Home ? <RelatedPages locale={locale} pages={relatedPages} /> : null}

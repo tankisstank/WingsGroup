@@ -55,7 +55,7 @@ const wingsGroupForm = {
     { blockType: 'textarea', label: 'Need', name: 'message', required: true },
   ],
   id: 'wingsgroup-contact',
-  site: { code: 'wings-group', id: 9 },
+  site: 9,
   submitButtonLabel: 'Send',
   title: 'WingsGroup Contact',
 }
@@ -347,7 +347,9 @@ describe('lead form hardened submission', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    render(<FormBlock enableIntro={false} form={wingsGroupForm as never} />)
+    render(
+      <FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />,
+    )
 
     const fullName = await screen.findByLabelText(/Full name/)
     const need = screen.getByLabelText(/Message/)
