@@ -11,11 +11,7 @@ import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { generateMeta } from '@/utilities/generateMeta'
-import {
-  getCurrentLocale,
-  getCurrentSite,
-  getCurrentSitePrefix,
-} from '@/utilities/siteContext'
+import { getCurrentLocale, getCurrentSite, getCurrentSitePrefix } from '@/utilities/siteContext'
 import { JsonLd } from '@/components/JsonLd'
 import PageClient from './[...slug]/page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
@@ -28,9 +24,7 @@ import { getCopyLocale } from '@/utilities/locales'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 import { queryPublishedPageLocalesByExactPath } from '@/utilities/pageLocaleInventory'
-import {
-  getWingsGroupRouteDefinition,
-} from '@/wingsgroup/corporateRoutes'
+import { getWingsGroupRouteDefinition } from '@/wingsgroup/corporateRoutes'
 import { queryPageByPath } from '@/utilities/cmsPageQuery'
 import {
   isRetailTourEnabledSiteCode,
@@ -62,6 +56,7 @@ import {
 import type { WingsSideHiFiPageSource } from '@/utilities/wingsSideHiFiPageModel'
 import { filterCmsLayoutBlocksForHiFiComposer } from '@/utilities/wingsSideHiFiComposer'
 import { isWingsGroupV3HomeLayout } from '@/components/WingsGroupV3/model'
+import { WingsGroupConsultationDialog } from '@/components/WingsGroupV3/ConsultationDialog'
 import { hydrateWingsSideHomeCuration, projectWingsSideHomeCuration } from '@/tours/homeCuration'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import type { Form as PayloadForm } from '@/payload-types'
@@ -109,17 +104,16 @@ export async function renderCmsPageByPath({
 
   // Structured tour detail: tighter vertical rhythm under fixed header.
   const isStructuredTour = Boolean(structuredPage)
-  const renderedBreadcrumbItems =
-    isStructuredTour
-      ? buildStructuredTourBreadcrumbItems({
-          baseItems: breadcrumbItems,
-          canonicalPath,
-          locale,
-          pageTitle: page.title,
-          searchParams,
-          siteCode: site.code,
-        })
-      : breadcrumbItems
+  const renderedBreadcrumbItems = isStructuredTour
+    ? buildStructuredTourBreadcrumbItems({
+        baseItems: breadcrumbItems,
+        canonicalPath,
+        locale,
+        pageTitle: page.title,
+        searchParams,
+        siteCode: site.code,
+      })
+    : breadcrumbItems
 
   // Tranche B1: dedicated hi-fi Home/Plan body replaces legacy hero/blocks/related.
   let hiFiModel = resolveWingsSideHiFiPageBodyModel({
@@ -289,14 +283,10 @@ export async function renderCmsPageByPath({
       {!useHiFiBody ? (
         <Breadcrumbs
           className={
-            isStructuredTour
-              ? 'wingsside-tour-breadcrumb container pb-3 pt-4 md:pt-5'
-              : undefined
+            isStructuredTour ? 'wingsside-tour-breadcrumb container pb-3 pt-4 md:pt-5' : undefined
           }
           items={renderedBreadcrumbItems}
-          linkClassName={
-            isStructuredTour ? 'wingsside-tour-breadcrumb__link' : undefined
-          }
+          linkClassName={isStructuredTour ? 'wingsside-tour-breadcrumb__link' : undefined}
         />
       ) : null}
 
@@ -319,14 +309,18 @@ export async function renderCmsPageByPath({
             {...page.hero}
             resolvedLocale={locale}
             siteHeroDefaults={settings?.heroDefaults}
+            allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Home}
             wingsGroupV3Enabled={useWingsGroupV3Home}
           />
           <RenderBlocks
             blocks={page.layout}
             locale={locale}
             siteCode={site.code}
+            wingsGroupLegalIdentity={settings?.wingsGroupV3?.legalIdentity}
+            allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Home}
             wingsGroupV3Home={useWingsGroupV3Home}
           />
+          {useWingsGroupV3Home ? <WingsGroupConsultationDialog /> : null}
           {!useWingsGroupV3Home ? <RelatedPages locale={locale} pages={relatedPages} /> : null}
         </>
       )}

@@ -12,11 +12,18 @@ import { resolveHeroPresentationConfig } from '@/heros/presentations/resolver'
 import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
 import type { SupportedLocaleCode } from '@/utilities/locales'
 
-import { areAllHeroMediaGoverned, isWingsGroupPublishedMedia, resolveSafeHeroLinks } from './model'
+import {
+  areAllHeroMediaRenderable,
+  areAllHeroMediaGoverned,
+  isWingsGroupPublishedMedia,
+  isWingsGroupRenderableMedia,
+  resolveSafeHeroLinks,
+} from './model'
 import styles from './WingsGroupV3.module.css'
 import { useReducedMotion } from './useReducedMotion'
 
 type Props = Page['hero'] & {
+  allowWingsGroupDevelopmentMedia?: boolean
   resolvedLocale?: SupportedLocaleCode
   siteHeroDefaults?: SiteHeroDefaultsLike | null
 }
@@ -43,7 +50,15 @@ const copyByLocale = {
 } as const
 
 export const WingsGroupEditorialHero = (props: Props) => {
-  const { links, media, resolvedLocale, richText, siteHeroDefaults, slides } = props
+  const {
+    allowWingsGroupDevelopmentMedia = false,
+    links,
+    media,
+    resolvedLocale,
+    richText,
+    siteHeroDefaults,
+    slides,
+  } = props
   const copy = resolvedLocale === 'en' ? copyByLocale.en : copyByLocale.vi
   const resolved = resolveHeroPresentationConfig({ hero: props, siteDefaults: siteHeroDefaults })
   const reducedMotion = useReducedMotion()
@@ -53,7 +68,12 @@ export const WingsGroupEditorialHero = (props: Props) => {
   const [manualPaused, setManualPaused] = useState(false)
   const [pageVisible, setPageVisible] = useState(true)
   const safeLinks = resolveSafeHeroLinks(links, resolvedLocale)
-  const allHeroMediaGoverned = areAllHeroMediaGoverned(props)
+  const allHeroMediaRenderable = allowWingsGroupDevelopmentMedia
+    ? areAllHeroMediaRenderable(props)
+    : areAllHeroMediaGoverned(props)
+  const isRenderableMedia = allowWingsGroupDevelopmentMedia
+    ? isWingsGroupRenderableMedia
+    : isWingsGroupPublishedMedia
 
   const pauseForInteraction = () => {
     setInteractionPaused(true)
@@ -66,7 +86,7 @@ export const WingsGroupEditorialHero = (props: Props) => {
         description: slide.description,
         eyebrow: slide.eyebrow,
         id: slide.id || `slide-${index}`,
-        media: allHeroMediaGoverned && isWingsGroupPublishedMedia(slide.media) ? slide.media : null,
+        media: allHeroMediaRenderable && isRenderableMedia(slide.media) ? slide.media : null,
         title: slide.title,
       }))
     }
@@ -76,11 +96,11 @@ export const WingsGroupEditorialHero = (props: Props) => {
         description: null,
         eyebrow: null,
         id: 'primary',
-        media: allHeroMediaGoverned && isWingsGroupPublishedMedia(media) ? media : null,
+        media: allHeroMediaRenderable && isRenderableMedia(media) ? media : null,
         title: null,
       },
     ]
-  }, [allHeroMediaGoverned, media, slides])
+  }, [allHeroMediaRenderable, isRenderableMedia, media, slides])
 
   const activeStory = heroStories[activeIndex] || heroStories[0]
   const autoplay =
@@ -129,8 +149,10 @@ export const WingsGroupEditorialHero = (props: Props) => {
       aria-label={resolvedLocale === 'en' ? 'WingsGroup introduction' : 'Giới thiệu WingsGroup'}
       className={styles.hero}
       data-hero-source={resolved.source}
+      data-od-id="hero"
       data-testid="wingsgroup-editorial-hero"
       data-wingsgroup-v3-hero="true"
+      id="home"
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setInteractionPaused(false)
       }}
@@ -150,11 +172,26 @@ export const WingsGroupEditorialHero = (props: Props) => {
           )}
           <div className={styles.heroActions}>
             <CMSLink {...safeLinks[0]} appearance="inline" className={styles.primaryAction} />
-            <CMSLink {...safeLinks[1]} appearance="inline" className={styles.secondaryAction} />
+            <a
+              className={styles.secondaryAction}
+              data-od-id="hero-consultation-trigger"
+              data-wingsgroup-consultation-trigger="true"
+              href={safeLinks[1].url || '/lien-he#contact-form'}
+            >
+              {resolvedLocale === 'en' ? 'Request a consultation' : 'Trao đổi với chuyên viên'}
+            </a>
           </div>
         </div>
 
-        <div aria-live="off" className={styles.heroStage}>
+        <figure
+          aria-label={
+            resolvedLocale === 'en'
+              ? 'WingsGroup service stories'
+              : 'Các hình ảnh về dịch vụ WingsGroup'
+          }
+          className={styles.heroStage}
+          data-od-id="hero-carousel"
+        >
           {activeStory?.media ? (
             <Media
               className={styles.heroMedia}
@@ -234,7 +271,7 @@ export const WingsGroupEditorialHero = (props: Props) => {
               ) : null}
             </div>
           ) : null}
-        </div>
+        </figure>
       </div>
     </section>
   )

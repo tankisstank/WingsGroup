@@ -17,10 +17,7 @@ import { getCopyLocale } from '@/utilities/locales'
 import { TurnstileWidget } from './TurnstileWidget'
 import type { LocalizedCopy } from '@/i18n/publicCopy'
 import type { LeadSubmissionContext } from '@/lead-capture/types'
-import type {
-  ConsultationChannelKey,
-  WingsGroupLeadPublicConfig,
-} from '@/lead-capture/types'
+import type { ConsultationChannelKey, WingsGroupLeadPublicConfig } from '@/lead-capture/types'
 import { getFormSiteCode, WINGSGROUP_SITE_CODE } from '@/lead-capture/wingsGroupV3'
 
 import './form-layout.css'
@@ -391,12 +388,28 @@ export const FormBlock: React.FC<
     return () => controller.abort()
   }, [isWingsGroupV3])
 
+  useEffect(() => {
+    const syncPreferredChannel = (event: Event) => {
+      const channel = (event as CustomEvent<{ channel?: string }>).detail?.channel
+      if (channel !== 'zalo' && channel !== 'whatsapp' && channel !== 'messenger') return
+      setPreferredChannel(channel)
+    }
+
+    window.addEventListener('wingsgroup-preferred-channel', syncPreferredChannel)
+    return () => window.removeEventListener('wingsgroup-preferred-channel', syncPreferredChannel)
+  }, [])
+
   const onSubmit = useCallback(
     (data: FormFieldBlock[]) => {
       if (submittingRef.current) return
 
       if (isWingsGroupV3) {
-        if (!leadConfig || !leadConfig.enabled || !('available' in leadConfig) || !leadConfig.available) {
+        if (
+          !leadConfig ||
+          !leadConfig.enabled ||
+          !('available' in leadConfig) ||
+          !leadConfig.available
+        ) {
           setError({ message: wingsGroupCopy.configUnavailable, status: '503' })
           return
         }
@@ -430,7 +443,10 @@ export const FormBlock: React.FC<
               formId: formID,
               honeypot,
               idempotencyKey: idempotencyKeyRef.current,
-              ...(isWingsGroupV3 && leadConfig?.enabled && 'available' in leadConfig && leadConfig.available
+              ...(isWingsGroupV3 &&
+              leadConfig?.enabled &&
+              'available' in leadConfig &&
+              leadConfig.available
                 ? {
                     leadContract: {
                       consent: consentAccepted,

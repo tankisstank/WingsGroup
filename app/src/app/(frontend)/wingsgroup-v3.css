@@ -84,3 +84,142 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-footer {
     scroll-behavior: auto !important;
   }
 }
+
+/* E09-20 VI homepage fidelity layer. Every rule remains tenant and release
+ * scoped so shared chrome and other sites keep their existing treatment. */
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] {
+  --site-muted: #737067;
+  --site-paper: #fffefa;
+  --site-accent-deep: #956325;
+  background: #fbfaf6;
+  color: #302d26;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  max-width: none;
+  padding-inline: clamp(1rem, 4vw, 2rem);
+  background: color-mix(in srgb, #fbfaf6 94%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__bar {
+  max-width: 1240px;
+  height: 76px;
+  margin-inline: auto;
+  padding: 0;
+  border-color: #dedbd3;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__brand {
+  min-width: 0;
+  max-width: none;
+  flex: 0 1 auto;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__brand-copy {
+  display: none;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-logo-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #d99a32;
+  color: #302d26;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.75rem;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-logo-text {
+  color: #302d26;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__nav {
+  gap: 1rem;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  .site-header__nav
+  > nav[aria-label='Primary navigation'] {
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__primary-link {
+  padding: 10px 0;
+  color: #302d26;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__primary-link:hover,
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  .site-header__primary-link:focus-visible {
+  color: #956325;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header-cta {
+  min-height: 42px;
+  border: 0;
+  border-radius: 0;
+  padding: 10px 13px;
+  background: #d99a32;
+  color: #302d26;
+  box-shadow: 0 5px 16px rgb(217 154 50 / 25%);
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header-cta:hover,
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header-cta:focus-visible {
+  background: #c58928;
+  color: #302d26;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-language-switcher {
+  min-height: 42px;
+  border-color: #dedbd3;
+  color: #302d26;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-language-switcher__link {
+  color: #302d26;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  .site-language-switcher__link--pending {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-mobile-nav {
+  border-color: #dedbd3;
+  background: #fffefa;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-mobile-nav__link {
+  min-height: 48px;
+  border-color: #dedbd3;
+  color: #302d26;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-footer {
+  border-color: #dedbd3;
+  background: #fffefa;
+}
+
+@media (max-width: 850px) {
+  body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__bar {
+    height: 64px;
+  }
+
+  body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header-cta--mobile {
+    max-width: none;
+  }
+}

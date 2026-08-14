@@ -20,6 +20,7 @@ export const RenderHero: React.FC<
     resolvedLocale?: SupportedLocaleCode
     siteHeroDefaults?: SiteHeroDefaultsLike | null
     wingsGroupV3Enabled?: boolean
+    allowWingsGroupDevelopmentMedia?: boolean
   }
 > = (props) => {
   const { type, wingsGroupV3Enabled } = props || {}

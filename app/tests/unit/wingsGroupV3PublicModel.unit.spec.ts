@@ -8,6 +8,7 @@ import {
   getWingsGroupHomeSection,
   isGovernedEditorialPost,
   isSafeSameSiteHref,
+  isWingsGroupDevelopmentMedia,
   isWingsGroupV3HomeLayout,
   isWingsGroupPublishedMedia,
   normalizeWingSidePath,
@@ -145,6 +146,21 @@ describe('WingsGroup v3 public view model', () => {
         }),
       ),
     ).toBe(false)
+  })
+
+  it('allows the governed development handoff only through the preview predicate', () => {
+    const pendingDevelopmentMedia = governedMedia({
+      governance: {
+        ...governedMedia().governance,
+        derivativeState: 'pending',
+        publicationState: 'pending',
+        responsiveDerivatives: [],
+        usageScope: 'editorial-service',
+      },
+    })
+
+    expect(isWingsGroupDevelopmentMedia(pendingDevelopmentMedia)).toBe(true)
+    expect(isWingsGroupPublishedMedia(pendingDevelopmentMedia)).toBe(false)
   })
 
   it('rejects scheme-relative, backslash, control and encoded externalization paths', () => {

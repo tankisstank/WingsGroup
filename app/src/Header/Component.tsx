@@ -14,7 +14,13 @@ export async function Header() {
   const siteName = settings?.siteName || ''
   const logoText = settings?.branding?.logoText || settings?.siteName
   const themeKey = settings?.branding?.themeKey || defaultThemeKey
-  const primaryAction = resolveHeaderPrimaryAction(site.code, locale)
+  const isWingsGroupHome =
+    site.code === 'wings-group' &&
+    publicPathname === '/' &&
+    settings?.wingsGroupV3?.enabled === true
+  const primaryAction = isWingsGroupHome
+    ? { label: 'Trao đổi nhu cầu', url: '#consultation-dialog' }
+    : resolveHeaderPrimaryAction(site.code, locale)
 
   return (
     <HeaderClient
@@ -33,9 +39,7 @@ export async function Header() {
       primaryAction={primaryAction}
       publicPathname={publicPathname}
       resolvedLocale={locale}
-      showSearch={
-        !isWingsGroupV3ExactPublicInventoryEnabled({ settings, siteCode: site.code })
-      }
+      showSearch={!isWingsGroupV3ExactPublicInventoryEnabled({ settings, siteCode: site.code })}
       siteName={siteName}
       siteCode={site.code}
       supportedLocales={site.supportedLocales}

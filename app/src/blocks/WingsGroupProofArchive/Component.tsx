@@ -1,6 +1,10 @@
 import type { WingsGroupProofArchiveBlock } from '@/payload-types'
 import { Media } from '@/components/Media'
-import { getApprovedProofRecords } from '@/components/WingsGroupV3/model'
+import {
+  getApprovedProofRecords,
+  isWingsGroupRenderableMedia,
+  isWingsGroupPublishedMedia,
+} from '@/components/WingsGroupV3/model'
 import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
 
 const copyByLocale = {
@@ -19,21 +23,34 @@ const copyByLocale = {
 } as const
 
 export const WingsGroupProofArchiveComponent = ({
+  allowWingsGroupDevelopmentMedia = false,
   description,
   eyebrow,
   locale,
   records,
   title,
-}: WingsGroupProofArchiveBlock & { locale?: null | string }) => {
+}: WingsGroupProofArchiveBlock & {
+  allowWingsGroupDevelopmentMedia?: boolean
+  locale?: null | string
+}) => {
   const approvedRecords = getApprovedProofRecords(records)
   const copy = locale === 'en' ? copyByLocale.en : copyByLocale.vi
+  const introRecord = records?.find((record) => record.key === 'proof-archive-intro')
+  const introMediaPredicate = allowWingsGroupDevelopmentMedia
+    ? isWingsGroupRenderableMedia
+    : isWingsGroupPublishedMedia
+  const introMedia =
+    introRecord && typeof introRecord.media === 'object' && introMediaPredicate(introRecord.media)
+      ? introRecord.media
+      : null
 
   return (
     <section
       aria-labelledby="wingsgroup-proof-archive-title"
       className={styles.section}
+      data-od-id="proof-archive"
       data-testid="wingsgroup-proof-archive"
-      id="proof-archive"
+      id="proof"
     >
       <div className="container">
         <header className={styles.sectionHeader}>
@@ -76,9 +93,29 @@ export const WingsGroupProofArchiveComponent = ({
             ))}
           </div>
         ) : (
-          <div className={styles.proofPending} role="status">
-            <strong>{copy.pendingTitle}</strong>
-            <p>{copy.pendingDescription}</p>
+          <div className={styles.proofLayout} role="status">
+            <aside className={styles.proofIntro}>
+              <p className={styles.eyebrow}>
+                {locale === 'en' ? 'Archive index' : 'Dấu mốc nổi bật'}
+              </p>
+              {introMedia ? (
+                <Media
+                  className={styles.proofIntroMedia}
+                  imgClassName={styles.proofIntroMedia}
+                  resource={introMedia}
+                  size="(max-width: 850px) 100vw, 33vw"
+                />
+              ) : null}
+              <p className={styles.proofIntroNote}>
+                {locale === 'en'
+                  ? 'The archive will open one verified record at a time.'
+                  : 'Hồ sơ sẽ được mở theo từng dấu mốc đã xác minh.'}
+              </p>
+            </aside>
+            <div className={styles.proofPending}>
+              <strong>{copy.pendingTitle}</strong>
+              <p>{copy.pendingDescription}</p>
+            </div>
           </div>
         )}
       </div>

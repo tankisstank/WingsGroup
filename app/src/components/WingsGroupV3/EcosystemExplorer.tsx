@@ -1,56 +1,65 @@
 'use client'
 
-import { ArrowRightIcon, ImageIcon } from 'lucide-react'
+import { ArrowUpRightIcon, ImageIcon } from 'lucide-react'
 import React, { useEffect, useId, useRef, useState } from 'react'
 
 import { Media } from '@/components/Media'
 import { SiteLink } from '@/components/SiteLink'
 import type { WingsGroupEcosystemBlock } from '@/payload-types'
 
-import { isWingsGroupPublishedMedia, resolveEcosystemCTA } from './model'
+import {
+  isWingsGroupRenderableMedia,
+  isWingsGroupPublishedMedia,
+  resolveEcosystemCTA,
+  WINGSGROUP_PROFILE_PRESENTATION,
+} from './model'
 import styles from './WingsGroupV3.module.css'
 import { useReducedMotion } from './useReducedMotion'
 
 type Props = WingsGroupEcosystemBlock & {
   approvedProofKeys?: readonly string[]
+  allowWingsGroupDevelopmentMedia?: boolean
   locale?: null | string
 }
 
 const copyByLocale = {
   en: {
-    approved: 'Verified information available',
-    fallback: 'The destination remains under review. This request will stay with WingsGroup.',
+    choose: 'Choose a WingsGroup service brand',
+    fallback:
+      'This request stays with WingsGroup while the destination endpoint is being reviewed.',
     imagePending: 'Editorial image pending publication review',
-    notApplicable: 'No public proof required',
     pending: 'Being updated',
-    tabs: 'Choose a WingsGroup service brand',
+    proof: 'Service feedback:',
+    railDescription: 'Select a team to see how it can accompany your next step.',
+    railTitle: 'Choose a service team',
   },
   vi: {
-    approved: 'Đã có thông tin được xác minh',
-    fallback: 'Điểm đến đang được kiểm tra. Yêu cầu sẽ tiếp tục qua WingsGroup.',
+    choose: 'Chọn thương hiệu dịch vụ trong WingsGroup',
+    fallback: 'Yêu cầu sẽ tiếp tục qua WingsGroup trong khi đầu mối riêng được kiểm tra.',
     imagePending: 'Ảnh biên tập đang chờ kiểm duyệt công bố',
-    notApplicable: 'Không yêu cầu hồ sơ công khai',
     pending: 'Đang cập nhật',
-    tabs: 'Chọn thương hiệu dịch vụ trong WingsGroup',
+    proof: 'Phản hồi sau dịch vụ:',
+    railDescription: 'Chạm để xem cách từng đội ngũ đồng hành cùng bạn.',
+    railTitle: 'Chọn một đơn vị',
   },
 } as const
 
 export const EcosystemExplorer = ({
   approvedProofKeys = [],
+  allowWingsGroupDevelopmentMedia = false,
   description,
   eyebrow,
   locale,
   profiles,
   title,
 }: Props) => {
+  const safeProfiles = (profiles || []).slice(0, 5)
   const [activeIndex, setActiveIndex] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
   const [manualPause, setManualPause] = useState(false)
   const id = useId().replace(/:/g, '')
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
   const reducedMotion = useReducedMotion()
   const copy = locale === 'en' ? copyByLocale.en : copyByLocale.vi
-  const safeProfiles = profiles || []
   const activeProfile = safeProfiles[activeIndex] || safeProfiles[0]
 
   useEffect(() => {
@@ -59,18 +68,29 @@ export const EcosystemExplorer = ({
   }, [activeIndex, safeProfiles.length])
 
   useEffect(() => {
-    if (reducedMotion || manualPause || isPaused || safeProfiles.length < 2) return
-
+    if (reducedMotion || manualPause || safeProfiles.length < 2) return
     const timer = window.setInterval(() => {
       if (document.visibilityState === 'visible') {
         setActiveIndex((current) => (current + 1) % safeProfiles.length)
       }
     }, 7000)
-
     return () => window.clearInterval(timer)
-  }, [isPaused, manualPause, reducedMotion, safeProfiles.length])
+  }, [manualPause, reducedMotion, safeProfiles.length])
 
   if (!activeProfile) return null
+
+  const presentation = WINGSGROUP_PROFILE_PRESENTATION[activeProfile.brandKey]
+  const cta = resolveEcosystemCTA(activeProfile, locale)
+  const hasApprovedProof =
+    activeProfile.proofState === 'approved' &&
+    (activeProfile.proofReferences || []).some((reference) =>
+      approvedProofKeys.includes(reference.key),
+    )
+  const mediaPredicate = allowWingsGroupDevelopmentMedia
+    ? isWingsGroupRenderableMedia
+    : isWingsGroupPublishedMedia
+  const media = mediaPredicate(activeProfile.stageMedia) ? activeProfile.stageMedia : null
+  const panelID = `${id}-ecosystem-active-detail`
 
   const selectProfile = (index: number, focus = false) => {
     setActiveIndex(index)
@@ -89,149 +109,148 @@ export const EcosystemExplorer = ({
     } else if (event.key === 'End') {
       nextIndex = safeProfiles.length - 1
     }
-
     if (nextIndex === null) return
     event.preventDefault()
     selectProfile(nextIndex, true)
   }
 
-  const cta = resolveEcosystemCTA(activeProfile, locale)
-  const hasApprovedProof =
-    activeProfile.proofState === 'approved' &&
-    (activeProfile.proofReferences || []).some((reference) =>
-      approvedProofKeys.includes(reference.key),
-    )
-  const proofLabel = hasApprovedProof
-    ? copy.approved
-    : activeProfile.proofState === 'not-applicable'
-      ? copy.notApplicable
-      : copy.pending
-  const panelID = `${id}-ecosystem-panel`
-  const media = isWingsGroupPublishedMedia(activeProfile.stageMedia)
-    ? activeProfile.stageMedia
-    : null
-  const ctaContent = (
-    <>
-      {cta.label}
-      <ArrowRightIcon aria-hidden="true" size={17} />
-    </>
-  )
-
   return (
     <section
       aria-labelledby={`${id}-title`}
       className={`${styles.section} ${styles.ecosystemSection}`}
+      data-od-id="ecosystem"
       data-testid="wingsgroup-ecosystem"
-      id="ecosystem"
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setIsPaused(false)
-      }}
-      onFocus={() => {
-        setIsPaused(true)
-        setManualPause(true)
-      }}
-      onMouseEnter={() => {
-        setIsPaused(true)
-        setManualPause(true)
-      }}
-      onMouseLeave={() => setIsPaused(false)}
+      id="about"
+      onFocus={() => setManualPause(true)}
+      onMouseEnter={() => setManualPause(true)}
     >
+      <span aria-hidden="true" className={styles.anchor} id="ecosystem" />
       <div className="container">
-        <header className={styles.sectionHeader}>
-          {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
-          <h2 className={styles.sectionTitle} id={`${id}-title`}>
-            {title}
-          </h2>
-          {description ? <p className={styles.sectionDescription}>{description}</p> : null}
+        <header className={styles.sectionHeader} data-od-id="ecosystem-unified-heading">
+          <div>
+            {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
+            <h2 className={styles.sectionTitle} id={`${id}-title`}>
+              {title || 'Một hệ sinh thái. Năm cách đồng hành.'}
+            </h2>
+          </div>
+          <p className={styles.sectionDescription} id="services">
+            {description ||
+              'Chọn điều bạn đang cần. Mỗi thương hiệu kết nối bạn với một đội ngũ, dịch vụ và điểm bắt đầu riêng.'}
+          </p>
         </header>
 
-        <div className={styles.ecosystemFrame} data-testid="wingsgroup-ecosystem-frame">
-          <div aria-label={copy.tabs} className={styles.ecosystemTabs} role="tablist">
-            {safeProfiles.map((profile, index) => (
-              <button
-                aria-controls={panelID}
-                aria-selected={activeIndex === index}
-                className={styles.ecosystemTab}
-                id={`${id}-ecosystem-tab-${index}`}
-                key={`${profile.brandKey}-${profile.id || index}`}
-                onClick={() => selectProfile(index)}
-                onKeyDown={(event) => onTabKeyDown(event, index)}
-                ref={(node) => {
-                  tabRefs.current[index] = node
-                }}
-                role="tab"
-                tabIndex={activeIndex === index ? 0 : -1}
-                type="button"
-              >
-                <span>{profile.brandName}</span>
-                <ArrowRightIcon aria-hidden="true" size={16} />
-              </button>
-            ))}
-          </div>
+        <div
+          aria-label={copy.choose}
+          className={styles.ecosystemUnified}
+          data-od-id="ecosystem-unified-stage"
+        >
+          <article aria-live="polite" className={styles.unifiedStage}>
+            {media ? (
+              <Media
+                className={styles.unifiedStageImage}
+                fill
+                imgClassName={styles.unifiedStageImage}
+                priority={activeIndex === 0}
+                resource={media}
+                size="(max-width: 850px) 100vw, 58vw"
+              />
+            ) : (
+              <div className={styles.mediaPending} role="status">
+                <ImageIcon aria-hidden="true" size={28} />
+                <span>{copy.imagePending}</span>
+              </div>
+            )}
+            <div className={styles.unifiedStageContent}>
+              <p className={styles.unifiedStageKicker}>
+                {String(activeIndex + 1).padStart(2, '0')} / {presentation?.category}
+              </p>
+              <h3 className={styles.unifiedStageTitle}>{presentation?.stageTitle}</h3>
+              <p className={styles.unifiedStageCopy}>
+                {activeProfile.serviceScope.map((service) => service.label).join(' · ')}
+              </p>
+            </div>
+          </article>
 
-          <div
-            aria-labelledby={`${id}-ecosystem-tab-${activeIndex}`}
-            className={styles.ecosystemPanel}
-            id={panelID}
-            role="tabpanel"
-          >
-            <div className={styles.ecosystemStage}>
-              {media ? (
-                <Media
-                  className={styles.stageMedia}
-                  fill
-                  imgClassName={styles.stageMedia}
-                  resource={media}
-                  size="(max-width: 850px) 100vw, 60vw"
-                />
-              ) : (
-                <div className={styles.mediaPending} role="status">
-                  <ImageIcon aria-hidden="true" size={28} />
-                  <span>{copy.imagePending}</span>
-                </div>
-              )}
+          <div className={styles.unifiedRailShell}>
+            <div className={styles.unifiedRailHeading}>
+              <b>{copy.railTitle}</b>
+              <p>{copy.railDescription}</p>
+            </div>
+            <div aria-label={copy.choose} className={styles.unifiedRail} role="tablist">
+              {safeProfiles.map((profile, index) => (
+                <button
+                  aria-controls={panelID}
+                  aria-selected={activeIndex === index}
+                  className={styles.unifiedBrand}
+                  data-od-id={`unified-brand-${profile.brandKey}`}
+                  key={`${profile.brandKey}-${profile.id || index}`}
+                  onClick={() => selectProfile(index)}
+                  onKeyDown={(event) => onTabKeyDown(event, index)}
+                  ref={(node) => {
+                    tabRefs.current[index] = node
+                  }}
+                  role="tab"
+                  tabIndex={activeIndex === index ? 0 : -1}
+                  type="button"
+                >
+                  <span className={styles.unifiedBrandNumber}>
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span className={styles.unifiedBrandCopy}>
+                    <b translate="no">{profile.brandName}</b>
+                    <small>{profile.serviceScope[0]?.label || presentation?.category}</small>
+                  </span>
+                  <span className={styles.unifiedBrandAction}>
+                    {locale === 'en' ? 'Explore' : 'Khám phá'}
+                  </span>
+                </button>
+              ))}
             </div>
 
-            <div aria-live="polite" className={styles.ecosystemDetails}>
-              <div className={styles.ecosystemCopy}>
-                <h3>{activeProfile.brandName}</h3>
-                <p>{activeProfile.description}</p>
-                <ul
-                  aria-label={locale === 'en' ? 'Service scope' : 'Phạm vi dịch vụ'}
-                  className={styles.serviceList}
-                >
-                  {activeProfile.serviceScope.map((service, index) => (
-                    <li key={`${service.label}-${service.id || index}`}>{service.label}</li>
-                  ))}
-                </ul>
-                <p
-                  className={styles.proofState}
-                  data-state={hasApprovedProof ? 'approved' : 'pending'}
-                >
-                  {proofLabel}
-                </p>
-              </div>
-              <div className={styles.ecosystemAction}>
-                {cta.href.startsWith('https://') ? (
-                  <a
-                    className={styles.ecosystemCta}
-                    data-cta-state="approved-deep-link"
-                    href={cta.href}
-                    rel="noopener noreferrer"
-                  >
-                    {ctaContent}
-                  </a>
-                ) : (
-                  <SiteLink
-                    className={styles.ecosystemCta}
-                    data-cta-state="contact-fallback"
-                    href={cta.href}
-                  >
-                    {ctaContent}
-                  </SiteLink>
-                )}
-                {cta.isFallback ? <p className={styles.fallbackNote}>{copy.fallback}</p> : null}
-              </div>
+            <div className={styles.unifiedDirectory}>
+              <article
+                aria-live="polite"
+                className={styles.unifiedDetailPanel}
+                data-od-id="ecosystem-active-detail"
+                id={panelID}
+                role="tabpanel"
+              >
+                <div className={styles.unifiedDetailIdent}>
+                  <h3>{activeProfile.brandName}</h3>
+                  <p>{presentation?.category}</p>
+                </div>
+                <div className={styles.unifiedDetailContent}>
+                  <p className={styles.unifiedDetailCopy}>{activeProfile.description}</p>
+                  <p className={styles.unifiedDetailProof}>
+                    <b>{copy.proof}</b>{' '}
+                    {hasApprovedProof ? 'Đã có thông tin được xác minh.' : copy.pending}
+                  </p>
+                  <ul className={styles.unifiedDetailServices}>
+                    {activeProfile.serviceScope.slice(0, 3).map((service, index) => (
+                      <li key={`${service.label}-${service.id || index}`}>{service.label}</li>
+                    ))}
+                  </ul>
+                  {cta.href.startsWith('https://') ? (
+                    <a
+                      className={styles.unifiedDetailCta}
+                      data-cta-state="approved-deep-link"
+                      href={cta.href}
+                      rel="noopener noreferrer"
+                    >
+                      {cta.label} <ArrowUpRightIcon aria-hidden="true" size={16} />
+                    </a>
+                  ) : (
+                    <SiteLink
+                      className={styles.unifiedDetailCta}
+                      data-cta-state="contact-fallback"
+                      href={cta.href}
+                    >
+                      {cta.label} <ArrowUpRightIcon aria-hidden="true" size={16} />
+                    </SiteLink>
+                  )}
+                  {cta.isFallback ? <p className={styles.fallbackNote}>{copy.fallback}</p> : null}
+                </div>
+              </article>
             </div>
           </div>
         </div>

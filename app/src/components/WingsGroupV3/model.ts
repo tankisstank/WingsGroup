@@ -95,6 +95,37 @@ export const isWingsGroupPublishedMedia = (value: unknown): value is Media => {
   )
 }
 
+/**
+ * The handoff media is licensed for development/staging review before
+ * production publication. The preview must be able to show those governed
+ * records without treating them as published proof or opening an unapproved
+ * external asset URL.
+ */
+export const isWingsGroupDevelopmentMedia = (value: unknown): value is Media => {
+  if (!isRecord(value) || !text(value.url) || !text(value.alt)) return false
+
+  const site = isRecord(value.site) ? value.site : null
+  const governance = isRecord(value.governance) ? value.governance : null
+  if (!site || site.code !== 'wings-group' || !governance) return false
+
+  const sourceAttachmentID = text(governance.sourceAttachmentId)
+  const sourceFileSha256 = text(governance.sourceFileSha256)
+  return (
+    governance.managedBy === 'wingsgroup-v3' &&
+    governance.rightsState === 'approved' &&
+    governance.usageScope === 'editorial-service' &&
+    SOURCE_IDENTITY.test(text(governance.sourceIdentity)) &&
+    Boolean(sourceAttachmentID) &&
+    SHA256.test(text(governance.sourceArchiveSha256)) &&
+    SHA256.test(sourceFileSha256) &&
+    text(governance.sourceIdentity) === `${sourceAttachmentID}:${sourceFileSha256}` &&
+    Boolean(text(governance.provenanceReference))
+  )
+}
+
+export const isWingsGroupRenderableMedia = (value: unknown): value is Media =>
+  isWingsGroupPublishedMedia(value) || isWingsGroupDevelopmentMedia(value)
+
 export const areAllHeroMediaGoverned = (hero: Page['hero']): boolean => {
   const relations: unknown[] = [
     hero.media,
@@ -106,6 +137,30 @@ export const areAllHeroMediaGoverned = (hero: Page['hero']): boolean => {
   ].filter((value) => value !== null && value !== undefined)
 
   return relations.length > 0 && relations.every(isWingsGroupPublishedMedia)
+}
+
+export const areAllHeroMediaRenderable = (hero: Page['hero']): boolean => {
+  const relations: unknown[] = [
+    hero.media,
+    ...(hero.supportingMedia || []),
+    ...(hero.slides || []).flatMap((slide) => [slide.media, slide.mobileMedia]),
+    hero.video?.desktopVideo,
+    hero.video?.mobileVideo,
+    hero.video?.poster,
+  ].filter((value) => value !== null && value !== undefined)
+
+  return relations.length > 0 && relations.every(isWingsGroupRenderableMedia)
+}
+
+export const WINGSGROUP_PROFILE_PRESENTATION: Record<
+  EcosystemProfile['brandKey'],
+  { category: string; stageTitle: string }
+> = {
+  wingsgo: { category: 'DU LỊCH NƯỚC NGOÀI', stageTitle: 'Đi xa, chuẩn bị rõ.' },
+  'wing-side': { category: 'KHÁM PHÁ VIỆT NAM', stageTitle: 'Việt Nam theo nhịp riêng.' },
+  wingspass: { category: 'DỊCH VỤ SÂN BAY', stageTitle: 'Qua sân bay nhẹ nhàng hơn.' },
+  wingsplus: { category: 'ĐOÀN RIÊNG & MICE', stageTitle: 'Một đoàn, một kế hoạch.' },
+  wingscare: { category: 'BẢO HIỂM & HỖ TRỢ', stageTitle: 'Yên tâm trong từng chặng.' },
 }
 
 export type ResolvedEcosystemCTA = {

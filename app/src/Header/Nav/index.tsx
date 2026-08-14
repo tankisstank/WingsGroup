@@ -56,6 +56,14 @@ export const HeaderNav: React.FC<{
       ? getWingsGroupSwitcherLocales(availableLocales, englishPublicationState)
       : availableLocales
   const isWingsSide = siteCode ? siteCode === 'wing-side' : themeKey === 'wings-side'
+  const isWingsGroupHome = siteCode === 'wings-group' && publicPathname === '/'
+  const wingsGroupHomeNav = [
+    { href: '#home', label: 'Trang chủ' },
+    { href: '#services', label: 'Dịch vụ' },
+    { href: '#about', label: 'Hệ sinh thái' },
+    { href: '#trust', label: 'Về WingsGroup' },
+    { href: '#news', label: 'Cẩm nang' },
+  ]
   const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
   const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null
   const resolvedPrimaryAction = wingsSideHiFiCta || primaryAction
@@ -209,6 +217,15 @@ export const HeaderNav: React.FC<{
           </a>
         )
       })}
+      {isWingsGroupHome && englishPublicationState !== 'approved' ? (
+        <span
+          aria-disabled="true"
+          className="site-language-switcher__link site-language-switcher__link--pending"
+          title="English — Sắp có"
+        >
+          EN
+        </span>
+      ) : null}
     </nav>
   )
 
@@ -219,35 +236,49 @@ export const HeaderNav: React.FC<{
       ref={headerNavRef}
     >
       <nav aria-label="Primary navigation" className="hidden items-center gap-3 xl:flex">
-        {wingsSideHiFiNav
-          ? wingsSideHiFiNav.map((item) => {
-              const itemPath = item.href.replace(/\/+$/, '') || '/'
-              const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
-              const isActive = itemPath === currentPath
-              return (
-                <SiteLink
-                  aria-current={isActive ? 'page' : undefined}
-                  className="theme-nav-link site-header__primary-link"
-                  data-active={isActive ? 'true' : 'false'}
-                  href={item.href}
-                  key={item.href}
-                >
-                  {item.label}
-                </SiteLink>
-              )
-            })
-          : navItems.map(({ link }, i) => {
-              return (
-                <CMSLink
-                  className="theme-nav-link site-header__primary-link"
-                  key={i}
-                  {...link}
-                  appearance="link"
-                />
-              )
-            })}
+        {isWingsGroupHome
+          ? wingsGroupHomeNav.map((item) => (
+              <SiteLink
+                className="theme-nav-link site-header__primary-link"
+                href={item.href}
+                key={item.href}
+              >
+                {item.label}
+              </SiteLink>
+            ))
+          : wingsSideHiFiNav
+            ? wingsSideHiFiNav.map((item) => {
+                const itemPath = item.href.replace(/\/+$/, '') || '/'
+                const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
+                const isActive = itemPath === currentPath
+                return (
+                  <SiteLink
+                    aria-current={isActive ? 'page' : undefined}
+                    className="theme-nav-link site-header__primary-link"
+                    data-active={isActive ? 'true' : 'false'}
+                    href={item.href}
+                    key={item.href}
+                  >
+                    {item.label}
+                  </SiteLink>
+                )
+              })
+            : navItems.map(({ link }, i) => {
+                return (
+                  <CMSLink
+                    className="theme-nav-link site-header__primary-link"
+                    key={i}
+                    {...link}
+                    appearance="link"
+                  />
+                )
+              })}
         {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
-          <SiteLink className="site-header-cta" href={resolvedPrimaryAction.url}>
+          <SiteLink
+            className="site-header-cta"
+            data-wingsgroup-consultation-trigger={isWingsGroupHome ? 'true' : undefined}
+            href={resolvedPrimaryAction.url}
+          >
             {resolvedPrimaryAction.label}
           </SiteLink>
         ) : null}
@@ -264,6 +295,7 @@ export const HeaderNav: React.FC<{
         {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
           <SiteLink
             className="site-header-cta site-header-cta--mobile"
+            data-wingsgroup-consultation-trigger={isWingsGroupHome ? 'true' : undefined}
             href={resolvedPrimaryAction.url}
           >
             {resolvedPrimaryAction.label}
@@ -297,38 +329,50 @@ export const HeaderNav: React.FC<{
           className="site-mobile-nav"
           id="mobile-primary-navigation"
         >
-          {wingsSideHiFiNav
-            ? wingsSideHiFiNav.map((item) => {
-                const itemPath = item.href.replace(/\/+$/, '') || '/'
-                const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
-                const isActive = itemPath === currentPath
-                return (
-                  <SiteLink
-                    aria-current={isActive ? 'page' : undefined}
-                    className="site-mobile-nav__link"
-                    data-active={isActive ? 'true' : 'false'}
-                    href={item.href}
-                    key={item.href}
-                    onClick={navigateAndCloseMobile}
-                  >
-                    {item.label}
-                  </SiteLink>
-                )
-              })
-            : navItems.map(({ link }, i) => {
-                return (
-                  <CMSLink
-                    appearance="inline"
-                    className="site-mobile-nav__link"
-                    key={i}
-                    onClick={navigateAndCloseMobile}
-                    {...link}
-                  />
-                )
-              })}
+          {isWingsGroupHome
+            ? wingsGroupHomeNav.map((item) => (
+                <SiteLink
+                  className="site-mobile-nav__link"
+                  href={item.href}
+                  key={item.href}
+                  onClick={navigateAndCloseMobile}
+                >
+                  {item.label}
+                </SiteLink>
+              ))
+            : wingsSideHiFiNav
+              ? wingsSideHiFiNav.map((item) => {
+                  const itemPath = item.href.replace(/\/+$/, '') || '/'
+                  const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
+                  const isActive = itemPath === currentPath
+                  return (
+                    <SiteLink
+                      aria-current={isActive ? 'page' : undefined}
+                      className="site-mobile-nav__link"
+                      data-active={isActive ? 'true' : 'false'}
+                      href={item.href}
+                      key={item.href}
+                      onClick={navigateAndCloseMobile}
+                    >
+                      {item.label}
+                    </SiteLink>
+                  )
+                })
+              : navItems.map(({ link }, i) => {
+                  return (
+                    <CMSLink
+                      appearance="inline"
+                      className="site-mobile-nav__link"
+                      key={i}
+                      onClick={navigateAndCloseMobile}
+                      {...link}
+                    />
+                  )
+                })}
           {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
             <SiteLink
               className="site-mobile-nav__link site-mobile-nav__link--primary"
+              data-wingsgroup-consultation-trigger={isWingsGroupHome ? 'true' : undefined}
               href={resolvedPrimaryAction.url}
               onClick={navigateAndCloseMobile}
             >

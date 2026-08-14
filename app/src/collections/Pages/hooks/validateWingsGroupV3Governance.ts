@@ -3,12 +3,14 @@ import {
   findWingsGroupPublicJargon,
   getWingsGroupRouteDefinition,
   getWingsGroupRoutePublicationState,
+  isWingsGroupLocalDraftPreview,
   isWingsGroupPolicyApprovalComplete,
   isWingsGroupScopedInternalHref,
   WINGSGROUP_CONTENT_VALIDATION_MARKER,
   WINGSGROUP_POLICY_VALIDATION_MARKER,
   WINGSGROUP_SITE_CODE,
 } from '@/wingsgroup/corporateRoutes'
+import { isWingsGroupDevelopmentMedia } from '@/components/WingsGroupV3/model'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -112,6 +114,10 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
   if (!site) return data
 
   const isPublishing = (data?._status ?? originalDoc?._status) === 'published'
+  const isLocalDraftPreview = isWingsGroupLocalDraftPreview({
+    context: req.context,
+    status: data?._status ?? originalDoc?._status,
+  })
   const pathname = getPathname(dataRecord, originalRecord)
   const routeDefinition = getWingsGroupRouteDefinition(pathname)
   const hasPendingRouteGovernance = Object.prototype.hasOwnProperty.call(
@@ -138,8 +144,7 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
 
   if (
     req.user?.role !== 'super-admin' &&
-    governanceSnapshot(pendingRouteGovernance) !==
-      governanceSnapshot(originalDoc?.wingsGroupRoute)
+    governanceSnapshot(pendingRouteGovernance) !== governanceSnapshot(originalDoc?.wingsGroupRoute)
   ) {
     throw new Error('Chỉ super-admin được thay đổi WingsGroup route publication governance.')
   }
@@ -249,7 +254,12 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
       isPublishing &&
       getWingsGroupRoutePublicationState({
         locale: 'vi',
-        page: { ...originalRecord, ...dataRecord, pathname, wingsGroupRoute: pendingRouteGovernance },
+        page: {
+          ...originalRecord,
+          ...dataRecord,
+          pathname,
+          wingsGroupRoute: pendingRouteGovernance,
+        },
         settings,
         siteCode,
       }) !== 'approved'
@@ -332,7 +342,7 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
       const media = await req.payload.findByID({
         collection: 'media',
         id,
-        depth: 0,
+        depth: isLocalDraftPreview ? 1 : 0,
         overrideAccess: true,
         req,
       })
@@ -344,8 +354,19 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
       throw new Error('WingsGroup v3 block không được tham chiếu media của tenant khác.')
     }
 
-    if (!isPublishing) continue
     const governance = asRecord(media.governance)
+    if (!isPublishing) {
+      if (
+        isLocalDraftPreview &&
+        governance.managedBy === 'wingsgroup-v3' &&
+        !isWingsGroupDevelopmentMedia(media)
+      ) {
+        throw new Error(
+          'WingsGroup local draft preview chỉ nhận development-governed media hợp lệ.',
+        )
+      }
+      continue
+    }
     if (governance.managedBy === 'wingsgroup-v3' && governance.publicationState !== 'published') {
       throw new Error('WingsGroup v3 page không được publish với media chưa qua publication gate.')
     }

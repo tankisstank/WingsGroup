@@ -7,6 +7,7 @@ import { Pages } from '@/collections/Pages'
 import { SiteSettings } from '@/collections/SiteSettings'
 import { validateGovernedMediaBeforeChange } from '@/fields/wingsGroupV3'
 import { validateWingsGroupV3Governance } from '@/collections/Pages/hooks/validateWingsGroupV3Governance'
+import { WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT } from '@/wingsgroup/corporateRoutes'
 
 const namedField = (fields: NonNullable<typeof SiteSettings.fields>, name: string) =>
   fields.find((field) => 'name' in field && field.name === name)
@@ -100,6 +101,52 @@ describe('WingsGroup v3 Payload foundation', () => {
         },
       } as never),
     ).rejects.toThrow(/tenant khác/)
+  })
+
+  it('accepts pending development media only in the explicit local draft preview path', async () => {
+    const media = {
+      alt: 'Preview editorial scene',
+      governance: {
+        derivativeState: 'pending',
+        managedBy: 'wingsgroup-v3',
+        publicationState: 'pending',
+        provenanceReference: 'manifest:preview',
+        rightsState: 'approved',
+        sourceArchiveSha256: 'a'.repeat(64),
+        sourceAttachmentId: 'attachment-preview',
+        sourceFileSha256: 'a'.repeat(64),
+        sourceIdentity: `attachment-preview:${'a'.repeat(64)}`,
+        usageScope: 'editorial-service',
+      },
+      id: 22,
+      site: {
+        code: 'wings-group',
+        id: 1,
+      },
+      url: '/media/preview.png',
+    }
+
+    await expect(
+      validateWingsGroupV3Governance({
+        data: { _status: 'draft', hero: { media: 22 }, layout: [], site: 1 },
+        originalDoc: {},
+        req: {
+          context: { [WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT]: true },
+          payload: { findByID: async () => media },
+        },
+      } as never),
+    ).resolves.toMatchObject({ _status: 'draft' })
+
+    await expect(
+      validateWingsGroupV3Governance({
+        data: { _status: 'published', hero: { media: 22 }, layout: [], site: 1 },
+        originalDoc: {},
+        req: {
+          context: { [WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT]: true },
+          payload: { findByID: async () => media },
+        },
+      } as never),
+    ).rejects.toThrow(/chưa qua publication gate/)
   })
 
   it('extracts main, supporting, slide and video hero media for same-site checks', async () => {

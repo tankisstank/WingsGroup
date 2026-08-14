@@ -17,6 +17,8 @@ import { StatsBlock } from '@/blocks/Stats/Component'
 import { TestimonialBlock } from '@/blocks/Testimonial/Component'
 import { WingsGroupEcosystemComponent } from '@/blocks/WingsGroupEcosystem/Component'
 import { WingsGroupProofArchiveComponent } from '@/blocks/WingsGroupProofArchive/Component'
+import { WingsGroupContactSection } from '@/blocks/WingsGroupContact/Component'
+import { WingsGroupTrustSection } from '@/blocks/WingsGroupTrust/Component'
 import {
   composeWingsGroupHomeBlocks,
   getApprovedProofRecords,
@@ -45,10 +47,28 @@ const blockComponents = {
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
   locale?: null | string
+  allowWingsGroupDevelopmentMedia?: boolean
   siteCode?: null | string
+  wingsGroupLegalIdentity?: {
+    legalEntityName?: null | string
+    internationalName?: null | string
+    registeredOffice?: null | string
+    travelOffice?: null | string
+    registrationNumber?: null | string
+    licenceNumber?: null | string
+    legalRepresentative?: null | string
+    relationshipStatement?: null | string
+  } | null
   wingsGroupV3Home?: boolean
 }> = (props) => {
-  const { blocks, locale, siteCode, wingsGroupV3Home = false } = props
+  const {
+    allowWingsGroupDevelopmentMedia = false,
+    blocks,
+    locale,
+    siteCode,
+    wingsGroupLegalIdentity,
+    wingsGroupV3Home = false,
+  } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -69,19 +89,26 @@ export const RenderBlocks: React.FC<{
             const Block =
               wingsGroupV3Home && blockType === 'archive'
                 ? WingsGroupEditorialRail
-                : blockComponents[blockType]
+                : wingsGroupV3Home && blockType === 'formBlock'
+                  ? WingsGroupContactSection
+                  : wingsGroupV3Home && (blockType === 'infoStrip' || blockType === 'stats')
+                    ? WingsGroupTrustSection
+                    : blockComponents[blockType]
 
             if (Block) {
               const blockProps =
                 block.blockType === 'formBlock'
-                  ? { ...block, siteCode }
+                  ? { ...block, allowWingsGroupDevelopmentMedia, locale, siteCode }
                   : block.blockType === 'wingsGroupEcosystem'
-                  ? { ...block, approvedProofKeys, locale }
-                  : block.blockType === 'credentialsCarousel' ||
-                      block.blockType === 'wingsGroupProofArchive' ||
-                      (wingsGroupV3Home && block.blockType === 'archive')
-                    ? { ...block, locale }
-                    : block
+                    ? { ...block, allowWingsGroupDevelopmentMedia, approvedProofKeys, locale }
+                    : wingsGroupV3Home &&
+                        (block.blockType === 'infoStrip' || block.blockType === 'stats')
+                      ? { ...block, legalIdentity: wingsGroupLegalIdentity, locale }
+                      : block.blockType === 'credentialsCarousel' ||
+                          block.blockType === 'wingsGroupProofArchive' ||
+                          (wingsGroupV3Home && block.blockType === 'archive')
+                        ? { ...block, allowWingsGroupDevelopmentMedia, locale }
+                        : block
               const section = wingsGroupV3Home ? getWingsGroupHomeSection(block) : null
 
               const renderedBlock = (

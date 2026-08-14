@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { WingsGroupEcosystemComponent } from '@/blocks/WingsGroupEcosystem/Component'
 import { WingsGroupProofArchiveComponent } from '@/blocks/WingsGroupProofArchive/Component'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
+import { WingsGroupTrustSection } from '@/blocks/WingsGroupTrust/Component'
+import { WingsGroupConsultationDialog } from '@/components/WingsGroupV3/ConsultationDialog'
 import { WingsGroupEditorialHero } from '@/components/WingsGroupV3/EditorialHero'
 import type { Media, Page, WingsGroupEcosystemBlock } from '@/payload-types'
 
@@ -108,6 +110,19 @@ beforeEach(() => {
       matches: false,
       removeEventListener: vi.fn(),
     }),
+  })
+  Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
+    configurable: true,
+    value() {
+      this.setAttribute('open', '')
+    },
+  })
+  Object.defineProperty(HTMLDialogElement.prototype, 'close', {
+    configurable: true,
+    value() {
+      this.removeAttribute('open')
+      this.dispatchEvent(new Event('close'))
+    },
   })
 })
 
@@ -219,6 +234,15 @@ describe('WingsGroup v3 public components', () => {
     expect(screen.queryByText(/rating/i)).toBeNull()
   })
 
+  it('renders the approved legal identity while keeping the three trust gates pending', () => {
+    render(<WingsGroupTrustSection locale="vi" />)
+
+    expect(screen.getByRole('heading', { name: 'Minh bạch để bạn an tâm lựa chọn.' })).toBeTruthy()
+    expect(screen.getByText('CÔNG TY CỔ PHẦN DU LỊCH ĐÔI CÁNH VIỆT')).toBeTruthy()
+    expect(screen.getAllByText('Đang cập nhật')).toHaveLength(3)
+    expect(document.querySelector('[data-od-id="trust"]')).toBeTruthy()
+  })
+
   it('pauses hero autoplay after manual navigation and keeps both CTAs internal', () => {
     vi.useFakeTimers()
     render(
@@ -248,5 +272,28 @@ describe('WingsGroup v3 public components', () => {
     expect(screen.getByAltText('Second story')).toBeTruthy()
     act(() => vi.advanceTimersByTime(9000))
     expect(screen.getByAltText('Second story')).toBeTruthy()
+  })
+
+  it('uses the shared specialist dialog trigger and returns focus after Escape', () => {
+    render(
+      <>
+        <button data-wingsgroup-consultation-trigger="true" type="button">
+          Open consultation
+        </button>
+        <WingsGroupConsultationDialog />
+      </>,
+    )
+
+    const trigger = screen.getByRole('button', { name: 'Open consultation' })
+    const dialog = document.querySelector<HTMLDialogElement>('[data-od-id="consultation-dialog"]')
+    expect(dialog).toBeTruthy()
+    trigger.focus()
+    fireEvent.click(trigger)
+    expect(dialog?.hasAttribute('open')).toBe(true)
+    expect(screen.getByRole('heading', { name: 'Trao đổi với chuyên viên.' })).toBeTruthy()
+
+    fireEvent.keyDown(dialog!, { key: 'Escape' })
+    expect(dialog?.hasAttribute('open')).toBe(false)
+    expect(document.activeElement).toBe(trigger)
   })
 })
