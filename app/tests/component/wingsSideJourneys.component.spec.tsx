@@ -339,7 +339,7 @@ describe('WingSideJourneysClient', () => {
 
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '1-7' } })
 
-    const href = '/wingsside/journeys?destination=hanoi&style=culture&duration=1-7'
+    const href = '/wing-side/journeys?destination=hanoi&style=culture&duration=1-7'
     expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
     expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
@@ -360,7 +360,7 @@ describe('WingSideJourneysClient', () => {
 
     fireEvent.change(screen.getByLabelText('Điểm đến'), { target: { value: 'hue' } })
 
-    const href = '/wingsside/vi/journeys?destination=hue&style=culture&duration=8-14'
+    const href = '/wing-side/vi/journeys?destination=hue&style=culture&duration=8-14'
     expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
     expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
@@ -389,17 +389,17 @@ describe('WingSideJourneysClient', () => {
     fireEvent.change(screen.getByLabelText('Style'), { target: { value: 'family' } })
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '15-plus' } })
 
-    expect(router.replace).toHaveBeenNthCalledWith(1, '/wingsside/journeys?destination=hanoi', {
+    expect(router.replace).toHaveBeenNthCalledWith(1, '/wing-side/journeys?destination=hanoi', {
       scroll: false,
     })
     expect(router.replace).toHaveBeenNthCalledWith(
       2,
-      '/wingsside/journeys?destination=hanoi&style=family',
+      '/wing-side/journeys?destination=hanoi&style=family',
       { scroll: false },
     )
     expect(router.replace).toHaveBeenNthCalledWith(
       3,
-      '/wingsside/journeys?destination=hanoi&style=family&duration=15-plus',
+      '/wing-side/journeys?destination=hanoi&style=family&duration=15-plus',
       { scroll: false },
     )
     expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()

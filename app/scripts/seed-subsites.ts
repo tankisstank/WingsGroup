@@ -2160,7 +2160,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
                 'Khách quốc tế cần câu chuyện theo điểm đến, hành trình mẫu, phong cách du lịch và luồng tư vấn rõ ràng.',
               imageID: destinationHubImage.id,
               meta: 'WingsSide',
-              url: '/wingsside',
+              url: '/wing-side',
             },
             {
               title: 'Airport service',
@@ -2253,7 +2253,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
                 'Inbound guests need destination storytelling, sample itineraries, travel styles, and inquiry-first planning.',
               imageID: destinationHubImage.id,
               meta: 'WingsSide',
-              url: '/wingsside',
+              url: '/wing-side',
             },
             {
               title: 'Airport service',
@@ -2686,7 +2686,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               title: 'WingsSide',
               description:
                 'Hành trình cho khách quốc tế tại Việt Nam với nội dung theo điểm đến và hành trình tham khảo.',
-              url: '/wingsside',
+              url: '/wing-side',
             },
             {
               title: 'WingsPass',
@@ -2785,7 +2785,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               title: 'WingsSide',
               description:
                 'Hành trình cho khách quốc tế tại Việt Nam với nội dung theo điểm đến và hành trình tham khảo.',
-              url: '/wingsside',
+              url: '/wing-side',
             },
             {
               title: 'WingsPass',
@@ -3882,7 +3882,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
                 'Hành trình cho khách quốc tế tại Việt Nam với nội dung theo điểm đến, phong cách du lịch và hành trình mẫu.',
               imageID: inboundImage.id,
               meta: 'Tư vấn hành trình',
-              url: '/wingsside',
+              url: '/wing-side',
             },
             {
               title: 'WingsPass',
@@ -4071,7 +4071,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
                 'Inbound Vietnam with destination storytelling, travel styles, and sample itineraries for international guests.',
               imageID: inboundImage.id,
               meta: 'Inbound planning',
-              url: '/wingsside',
+              url: '/wing-side',
             },
             {
               title: 'WingsPass',
