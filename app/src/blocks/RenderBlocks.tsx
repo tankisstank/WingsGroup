@@ -75,7 +75,8 @@ export const RenderBlocks: React.FC<{
                 block.blockType === 'wingsGroupEcosystem'
                   ? { ...block, approvedProofKeys, locale }
                   : block.blockType === 'credentialsCarousel' ||
-                      block.blockType === 'wingsGroupProofArchive'
+                      block.blockType === 'wingsGroupProofArchive' ||
+                      (wingsGroupV3Home && block.blockType === 'archive')
                     ? { ...block, locale }
                     : block
               const section = wingsGroupV3Home ? getWingsGroupHomeSection(block) : null

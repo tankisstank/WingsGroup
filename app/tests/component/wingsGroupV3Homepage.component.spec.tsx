@@ -4,8 +4,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { WingsGroupEcosystemComponent } from '@/blocks/WingsGroupEcosystem/Component'
 import { WingsGroupProofArchiveComponent } from '@/blocks/WingsGroupProofArchive/Component'
+import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { WingsGroupEditorialHero } from '@/components/WingsGroupV3/EditorialHero'
-import type { Media, WingsGroupEcosystemBlock } from '@/payload-types'
+import type { Media, Page, WingsGroupEcosystemBlock } from '@/payload-types'
+
+vi.mock('@/components/WingsGroupV3/EditorialRail', () => ({
+  WingsGroupEditorialRail: ({ locale }: { locale?: null | string }) => (
+    <div data-testid="editorial-rail-locale">{locale}</div>
+  ),
+}))
 
 vi.mock('@/components/Media', () => ({
   Media: ({ resource }: { resource?: { alt?: string; url?: string } }) => (
@@ -110,6 +117,18 @@ afterEach(() => {
 })
 
 describe('WingsGroup v3 public components', () => {
+  it('forwards the English locale when RenderBlocks substitutes the governed editorial rail', () => {
+    const archive = {
+      blockType: 'archive',
+      limit: 3,
+      populateBy: 'collection',
+    } as Page['layout'][number]
+
+    render(<RenderBlocks blocks={[archive]} locale="en" wingsGroupV3Home />)
+
+    expect(screen.getByTestId('editorial-rail-locale').textContent).toBe('en')
+  })
+
   it('keeps the ecosystem profile, stage, scope, proof state and CTA synchronized', () => {
     render(
       <WingsGroupEcosystemComponent
