@@ -5,6 +5,26 @@ import { pathToFileURL } from 'node:url'
 export const allowedGateStates = new Set(['pending', 'pending-update', 'approved', 'rejected', 'not-applicable'])
 export const allowedChannelStates = new Set(['unconfigured', 'configured', 'disabled'])
 
+export const expectedGateInventory = Object.freeze([
+  Object.freeze({ key: 'legal-identity', mandatory: true }),
+  Object.freeze({ key: 'privacy-consent', mandatory: true }),
+  Object.freeze({ key: 'consultation-channels', mandatory: false }),
+  Object.freeze({ key: 'proof-publication', mandatory: true }),
+  Object.freeze({ key: 'ecosystem-deep-links', mandatory: true }),
+  Object.freeze({ key: 'locale-completeness', mandatory: true }),
+  Object.freeze({ key: 'editorial-media', mandatory: true }),
+  Object.freeze({ key: 'brand-logo-tokens', mandatory: true }),
+])
+
+export const expectedConsultationChannelKeys = Object.freeze(['zalo', 'whatsapp', 'messenger'])
+export const expectedEcosystemDeepLinkKeys = Object.freeze([
+  'wingsgo',
+  'wing-side',
+  'wingsplus',
+  'wingscare',
+  'wingspass',
+])
+
 const defaultRegisterPath = path.resolve(
   import.meta.dirname,
   '..',
@@ -93,6 +113,23 @@ export const validateGate = (gate) => {
   return { errors, warnings }
 }
 
+const validateExactKeyInventory = ({ actualItems, expectedKeys, label }) => {
+  const keys = actualItems.map((item) => item?.key).filter((key) => typeof key === 'string' && key)
+  const expected = new Set(expectedKeys)
+  const missing = expectedKeys.filter((key) => !keys.includes(key))
+  const unexpected = [...new Set(keys.filter((key) => !expected.has(key)))]
+  const duplicates = [...new Set(keys.filter((key, index) => keys.indexOf(key) !== index))]
+  const errors = []
+
+  if (missing.length) errors.push(`Missing expected ${label} key(s): ${missing.join(', ')}.`)
+  if (unexpected.length) errors.push(`Unexpected ${label} key(s): ${unexpected.join(', ')}.`)
+  if (duplicates.length) errors.push(`Duplicate ${label} key(s): ${duplicates.join(', ')}.`)
+  if (actualItems.length !== keys.length)
+    errors.push(`${label[0].toUpperCase()}${label.slice(1)} entries require non-empty string keys.`)
+
+  return errors
+}
+
 export const assessReleaseGates = (register) => {
   const errors = []
   if (register?.version !== 1) errors.push('Register version must be 1.')
@@ -100,22 +137,53 @@ export const assessReleaseGates = (register) => {
   if (register?.release !== 'wingsgroup-v3') errors.push('Register must target release wingsgroup-v3.')
   if (!Array.isArray(register?.gates) || register.gates.length === 0) errors.push('Register requires gates.')
 
-  const gateResults = (register?.gates || []).map((gate) => ({ key: gate.key, ...validateGate(gate) }))
-  const duplicateKeys = gateResults.filter(
-    (gate, index) => gateResults.findIndex((candidate) => candidate.key === gate.key) !== index,
-  )
-  if (duplicateKeys.length) errors.push(`Duplicate gate key(s): ${[...new Set(duplicateKeys.map((gate) => gate.key))].join(', ')}.`)
+  const gates = Array.isArray(register?.gates) ? register.gates : []
+  const expectedGateKeys = expectedGateInventory.map((gate) => gate.key)
+  errors.push(...validateExactKeyInventory({ actualItems: gates, expectedKeys: expectedGateKeys, label: 'gate' }))
+
+  for (const expectedGate of expectedGateInventory) {
+    const matchingGate = gates.find((gate) => gate?.key === expectedGate.key)
+    if (matchingGate && matchingGate.mandatory !== expectedGate.mandatory) {
+      errors.push(
+        `Gate ${expectedGate.key} mandatory classification must be ${expectedGate.mandatory}; received ${String(matchingGate.mandatory)}.`,
+      )
+    }
+  }
+
+  const consultationGate = gates.find((gate) => gate?.key === 'consultation-channels')
+  if (consultationGate) {
+    errors.push(
+      ...validateExactKeyInventory({
+        actualItems: Array.isArray(consultationGate.channels) ? consultationGate.channels : [],
+        expectedKeys: expectedConsultationChannelKeys,
+        label: 'consultation channel',
+      }),
+    )
+  }
+
+  const ecosystemGate = gates.find((gate) => gate?.key === 'ecosystem-deep-links')
+  if (ecosystemGate) {
+    errors.push(
+      ...validateExactKeyInventory({
+        actualItems: Array.isArray(ecosystemGate.links) ? ecosystemGate.links : [],
+        expectedKeys: expectedEcosystemDeepLinkKeys,
+        label: 'ecosystem deep-link',
+      }),
+    )
+  }
+
+  const gateResults = gates.map((gate) => ({ key: gate?.key, ...validateGate(gate) }))
 
   const validationErrors = gateResults.flatMap((gate) => gate.errors.map((message) => `${gate.key}: ${message}`))
-  const pendingMandatory = (register?.gates || []).filter((gate) => gate.mandatory && gate.state !== 'approved')
+  const pendingMandatory = gates.filter((gate) => gate?.mandatory && gate.state !== 'approved')
   const approved = pendingMandatory.length === 0 && errors.length === 0 && validationErrors.length === 0
 
   return {
     approved,
     errors: [...errors, ...validationErrors],
     gateResults,
-    mandatoryGateCount: (register?.gates || []).filter((gate) => gate.mandatory).length,
-    pendingMandatory: pendingMandatory.map((gate) => ({ key: gate.key, state: gate.state })),
+    mandatoryGateCount: gates.filter((gate) => gate?.mandatory).length,
+    pendingMandatory: pendingMandatory.map((gate) => ({ key: gate?.key, state: gate?.state })),
     siteCode: register?.siteCode || null,
   }
 }
