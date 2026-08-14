@@ -6,6 +6,7 @@ import type {
   LeadSubmissionField,
   LeadSubmissionRequest,
 } from './types'
+import { parseWingsGroupLeadContract } from './wingsGroupV3'
 
 export const MAX_LEAD_BODY_BYTES = 32 * 1024
 const MAX_FIELD_VALUE_LENGTH = 4096
@@ -134,6 +135,19 @@ export const parseLeadRequest = (rawBody: string): LeadSubmissionRequest => {
   }
 
   const body = input as Record<string, unknown>
+  assertOnlyKeys(
+    body,
+    [
+      'context',
+      'formId',
+      'honeypot',
+      'idempotencyKey',
+      'leadContract',
+      'submissionData',
+      'turnstileToken',
+    ],
+    'Request body is invalid.',
+  )
   const formId = body.formId
   const idempotencyKey = body.idempotencyKey
 
@@ -171,6 +185,16 @@ export const parseLeadRequest = (rawBody: string): LeadSubmissionRequest => {
     formId: formId as number | string,
     honeypot: typeof body.honeypot === 'string' ? body.honeypot : undefined,
     idempotencyKey,
+    leadContract:
+      body.leadContract === undefined
+        ? undefined
+        : (() => {
+            try {
+              return parseWingsGroupLeadContract(body.leadContract)
+            } catch {
+              throw new LeadValidationError('Lead contract is invalid.')
+            }
+          })(),
     submissionData,
     turnstileToken: typeof body.turnstileToken === 'string' ? body.turnstileToken : undefined,
   }
@@ -206,6 +230,10 @@ export const validateFieldsForForm = (
       throw new LeadValidationError('Number field is invalid.')
     }
 
+    if (definition.blockType === 'checkbox' && typeof value !== 'boolean') {
+      throw new LeadValidationError('Checkbox field is invalid.')
+    }
+
     if (definition.blockType === 'select' && normalizedValue) {
       const allowedValues = new Set((definition.options || []).map((option) => option.value))
       if (!allowedValues.has(normalizedValue)) {
@@ -221,11 +249,15 @@ export const validateFieldsForForm = (
   })
 
   for (const definition of definitions.values()) {
-    if (definition.required && !normalized.some(({ field, value }) => field === definition.name && value)) {
+    const submitted = normalized.find(({ field }) => field === definition.name)
+    const hasRequiredValue =
+      definition.blockType === 'checkbox'
+        ? submitted?.value === 'true'
+        : Boolean(submitted?.value)
+    if (definition.required && !hasRequiredValue) {
       throw new LeadValidationError('A required field is missing.')
     }
   }
 
   return normalized
 }
-

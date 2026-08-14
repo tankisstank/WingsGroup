@@ -10,7 +10,19 @@ import {
   validateFieldsForForm,
 } from '@/lead-capture/validation'
 import { verifyTurnstile } from '@/lead-capture/turnstile'
-import { getCurrentSite } from '@/utilities/siteContext'
+import {
+  buildWingsGroupOperationalFields,
+  resolveWingsGroupLeadGovernance,
+  toWingsGroupLeadPublicConfig,
+  validateWingsGroupLeadContract,
+  validateWingsGroupRequiredFields,
+  WINGSGROUP_SITE_CODE,
+} from '@/lead-capture/wingsGroupV3'
+import {
+  getCurrentLocale,
+  getCurrentPublicPathname,
+  getCurrentSite,
+} from '@/utilities/siteContext'
 import { domainCandidates } from '@/utilities/siteDomains'
 import { incrementMetric, logOperationalEvent } from '@/observability'
 
@@ -27,6 +39,29 @@ const accepted = (): Response => json({ status: 'accepted' }, 202)
 const relationID = (value: Form['site']): number | string | null =>
   value && typeof value === 'object' ? value.id : value || null
 
+type PayloadClient = Awaited<ReturnType<typeof getPayload>>
+
+const getWingsGroupSettings = async (
+  payload: PayloadClient,
+  siteID: number | string,
+): Promise<unknown | null> => {
+  const settings = await payload.find({
+    collection: 'site-settings',
+    depth: 0,
+    limit: 2,
+    overrideAccess: true,
+    pagination: false,
+    where: { site: { equals: siteID } },
+  })
+
+  return settings.docs.length === 1 ? settings.docs[0] : null
+}
+
+const trustedContextHeadersPresent = (request: Request): boolean =>
+  request.headers.get('x-site-context-source') === 'proxy' &&
+  Boolean(request.headers.get('x-site-host')) &&
+  Boolean(request.headers.get('x-client-ip'))
+
 export async function POST(request: Request): Promise<Response> {
   // A release may intentionally defer email-provider configuration. Refuse the
   // submission explicitly instead of accepting a customer lead that cannot be
@@ -35,11 +70,7 @@ export async function POST(request: Request): Promise<Response> {
     return json({ error: 'Lead delivery is temporarily unavailable.' }, 503)
   }
 
-  if (
-    request.headers.get('x-site-context-source') !== 'proxy' ||
-    !request.headers.get('x-site-host') ||
-    !request.headers.get('x-client-ip')
-  ) {
+  if (!trustedContextHeadersPresent(request)) {
     return json({ error: 'Invalid submission.' }, 400)
   }
 
@@ -64,6 +95,7 @@ export async function POST(request: Request): Promise<Response> {
   // supplies a site identifier.
   const site = await getCurrentSite()
   const payload = await getPayload({ config: configPromise })
+  const isWingsGroupV3 = site.code === WINGSGROUP_SITE_CODE
 
   let store
   try {
@@ -136,6 +168,55 @@ export async function POST(request: Request): Promise<Response> {
     return json({ error: 'Invalid submission.' }, 400)
   }
 
+  let wingsGroupContext:
+    | {
+        locale: string
+        operationalFields: ReturnType<typeof buildWingsGroupOperationalFields>
+      }
+    | undefined
+
+  if (isWingsGroupV3) {
+    const [settings, locale, sourcePath] = await Promise.all([
+      getWingsGroupSettings(payload, site.id),
+      getCurrentLocale(),
+      getCurrentPublicPathname(),
+    ])
+    const governance = resolveWingsGroupLeadGovernance(settings, locale)
+    if (!governance) {
+      logOperationalEvent('warn', 'lead_configuration_unavailable', {
+        locale,
+        request_id: request.headers.get('x-request-id'),
+        site_code: site.code,
+        status_code: 503,
+      })
+      return json({ error: 'Service temporarily unavailable.' }, 503)
+    }
+
+    try {
+      validateWingsGroupRequiredFields(normalizedFields)
+      const contract = validateWingsGroupLeadContract(input.leadContract, governance)
+      const consentedAt = new Date()
+      wingsGroupContext = {
+        locale,
+        operationalFields: buildWingsGroupOperationalFields({
+          consentedAt,
+          contract,
+          locale,
+          sourcePath,
+        }),
+      }
+    } catch {
+      logOperationalEvent('warn', 'lead_validation_rejected', {
+        locale,
+        request_id: request.headers.get('x-request-id'),
+        result: 'rejected',
+        site_code: site.code,
+        status_code: 400,
+      })
+      return json({ error: 'Invalid submission.' }, 400)
+    }
+  }
+
   try {
     const siteFormRate = await store.checkValidatedRateLimits({
       formId: form.id,
@@ -156,15 +237,27 @@ export async function POST(request: Request): Promise<Response> {
 
   let submission
   try {
+    const enquiryContext = isWingsGroupV3
+      ? input.context
+        ? {
+            discovery: input.context.discovery,
+            tourId: input.context.tourId,
+            tourSlug: input.context.tourSlug,
+          }
+        : undefined
+      : input.context
     submission = await payload.create({
       collection: 'form-submissions',
       data: {
         deliveryStatus: 'pending',
         deliveryUpdatedAt: new Date().toISOString(),
-        enquiryContext: input.context,
+        enquiryContext,
         form: form.id,
         site: site.id,
-        submissionData: normalizedFields.map(({ field, value }) => ({ field, value })),
+        submissionData: [
+          ...normalizedFields.map(({ field, value }) => ({ field, value })),
+          ...(wingsGroupContext?.operationalFields || []),
+        ],
       },
       overrideAccess: true,
     })
@@ -248,9 +341,37 @@ export async function POST(request: Request): Promise<Response> {
     })
   }
 
+  logOperationalEvent('info', 'lead_submission_accepted', {
+    locale: wingsGroupContext?.locale,
+    request_id: request.headers.get('x-request-id'),
+    result: 'accepted',
+    site_code: site.code,
+    status_code: 202,
+  })
+
   return accepted()
 }
 
-export function GET(): Response {
-  return json({ error: 'Method not allowed.' }, 405)
+export async function GET(request: Request): Promise<Response> {
+  if (!trustedContextHeadersPresent(request)) {
+    return json({ error: 'Invalid request.' }, 400)
+  }
+
+  const site = await getCurrentSite()
+  if (site.code !== WINGSGROUP_SITE_CODE) return json({ enabled: false }, 200)
+
+  if (process.env.LEAD_DELIVERY_REQUIRED === 'false') {
+    return json(
+      { available: false, enabled: true, reason: 'configuration-unavailable' },
+      200,
+    )
+  }
+
+  const [payload, locale] = await Promise.all([
+    getPayload({ config: configPromise }),
+    getCurrentLocale(),
+  ])
+  const settings = await getWingsGroupSettings(payload, site.id).catch(() => null)
+
+  return json(toWingsGroupLeadPublicConfig(settings, locale), 200)
 }

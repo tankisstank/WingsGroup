@@ -2,6 +2,7 @@ import type { TaskConfig } from 'payload'
 
 import { createSMTPDelivery } from './delivery'
 import type { LeadDeliveryMessage } from './types'
+import { isWingsGroupOperationalField } from './wingsGroupV3'
 import { incrementMetric, logOperationalEvent } from '@/observability'
 
 type LeadNotificationTask = {
@@ -157,10 +158,12 @@ export const reconcileLeadNotificationTask: TaskConfig<ReconcileLeadNotification
         const queue = req.payload.jobs.queue as (args: Record<string, unknown>) => Promise<unknown>
         await queue({
           input: {
-            fields: (submission.submissionData || []).map(({ field, value }) => ({
-              label: labels.get(field) || field,
-              value,
-            })),
+            fields: (submission.submissionData || [])
+              .filter(({ field }) => !isWingsGroupOperationalField(field))
+              .map(({ field, value }) => ({
+                label: labels.get(field) || field,
+                value,
+              })),
             formTitle: form.title,
             siteCode: site.code,
             submissionId: String(submission.id),

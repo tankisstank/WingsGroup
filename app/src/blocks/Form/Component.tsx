@@ -17,6 +17,11 @@ import { getCopyLocale } from '@/utilities/locales'
 import { TurnstileWidget } from './TurnstileWidget'
 import type { LocalizedCopy } from '@/i18n/publicCopy'
 import type { LeadSubmissionContext } from '@/lead-capture/types'
+import type {
+  ConsultationChannelKey,
+  WingsGroupLeadPublicConfig,
+} from '@/lead-capture/types'
+import { getFormSiteCode, WINGSGROUP_SITE_CODE } from '@/lead-capture/wingsGroupV3'
 
 import './form-layout.css'
 
@@ -222,6 +227,31 @@ const sanitizeFormControlSegment = (value?: null | string) =>
 const getFieldControlID = (formID: string | number, fieldName: string) =>
   `${sanitizeFormControlSegment(String(formID))}-${sanitizeFormControlSegment(fieldName)}`
 
+const wingsGroupLeadCopy = {
+  en: {
+    channelsTitle: 'Optional consultation channels',
+    configLoading: 'Preparing the secure consultation form…',
+    configUnavailable:
+      'The consultation form is temporarily unavailable. Your details have not been submitted. Please try again later.',
+    consentRequired: 'Please confirm your consent before submitting this request.',
+    noPreference: 'No preference — use the contact form',
+    pending: 'Pending update',
+    policyLink: 'Read the Privacy Policy',
+    preferredChannel: 'Preferred contact channel (optional)',
+  },
+  vi: {
+    channelsTitle: 'Kênh tư vấn tùy chọn',
+    configLoading: 'Đang chuẩn bị biểu mẫu tư vấn bảo mật…',
+    configUnavailable:
+      'Biểu mẫu tư vấn đang tạm thời không khả dụng. Thông tin của bạn chưa được gửi. Vui lòng thử lại sau.',
+    consentRequired: 'Vui lòng xác nhận đồng ý trước khi gửi yêu cầu.',
+    noPreference: 'Không ưu tiên — sử dụng biểu mẫu liên hệ',
+    pending: 'Chờ cập nhật',
+    policyLink: 'Đọc Chính sách bảo mật',
+    preferredChannel: 'Kênh liên hệ ưu tiên (không bắt buộc)',
+  },
+} as const
+
 const readLeadSubmissionContext = (
   form: HTMLFormElement | null,
 ): LeadSubmissionContext | undefined => {
@@ -267,6 +297,8 @@ export const FormBlock: React.FC<
   const locale = useSitePublicLocale()
   const copyLocale = getFormCopyLocale(locale)
   const copy = formCopy[copyLocale]
+  const wingsGroupCopy = wingsGroupLeadCopy[copyLocale === 'en' ? 'en' : 'vi']
+  const isWingsGroupV3 = getFormSiteCode(formFromProps) === WINGSGROUP_SITE_CODE
   const localizedFields =
     formFromProps?.fields?.map((field) => {
       const fieldName = getFieldName(field)
@@ -300,7 +332,14 @@ export const FormBlock: React.FC<
   const [challengeSiteKey, setChallengeSiteKey] = useState<string>()
   const [turnstileToken, setTurnstileToken] = useState('')
   const [honeypot, setHoneypot] = useState('')
+  const [leadConfig, setLeadConfig] = useState<WingsGroupLeadPublicConfig | undefined>(
+    isWingsGroupV3 ? undefined : { enabled: false },
+  )
+  const [consentAccepted, setConsentAccepted] = useState(false)
+  const [consentError, setConsentError] = useState(false)
+  const [preferredChannel, setPreferredChannel] = useState<ConsultationChannelKey | ''>('')
   const errorRef = useRef<HTMLDivElement>(null)
+  const consentRef = useRef<HTMLButtonElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const handlingNativeInvalidRef = useRef(false)
   const submittingRef = useRef(false)
@@ -314,9 +353,57 @@ export const FormBlock: React.FC<
     }
   }, [error])
 
+  useEffect(() => {
+    if (!isWingsGroupV3) {
+      setLeadConfig({ enabled: false })
+      return
+    }
+
+    const controller = new AbortController()
+    const loadConfig = async () => {
+      try {
+        const response = await fetch(`${getClientSideURL()}/api/lead-submissions`, {
+          cache: 'no-store',
+          method: 'GET',
+          signal: controller.signal,
+        })
+        const body = (await response.json()) as WingsGroupLeadPublicConfig
+        setLeadConfig(
+          response.ok && body?.enabled === true
+            ? body
+            : { available: false, enabled: true, reason: 'configuration-unavailable' },
+        )
+      } catch (loadError) {
+        if ((loadError as { name?: string }).name !== 'AbortError') {
+          setLeadConfig({
+            available: false,
+            enabled: true,
+            reason: 'configuration-unavailable',
+          })
+        }
+      }
+    }
+
+    void loadConfig()
+    return () => controller.abort()
+  }, [isWingsGroupV3])
+
   const onSubmit = useCallback(
     (data: FormFieldBlock[]) => {
       if (submittingRef.current) return
+
+      if (isWingsGroupV3) {
+        if (!leadConfig || !leadConfig.enabled || !('available' in leadConfig) || !leadConfig.available) {
+          setError({ message: wingsGroupCopy.configUnavailable, status: '503' })
+          return
+        }
+        if (!consentAccepted) {
+          setConsentError(true)
+          queueMicrotask(() => consentRef.current?.focus())
+          return
+        }
+      }
+
       const externalValidation = formRef.current?.dispatchEvent(
         new CustomEvent('ws-plan-validate', { bubbles: true, cancelable: true }),
       )
@@ -340,6 +427,15 @@ export const FormBlock: React.FC<
               formId: formID,
               honeypot,
               idempotencyKey: idempotencyKeyRef.current,
+              ...(isWingsGroupV3 && leadConfig?.enabled && 'available' in leadConfig && leadConfig.available
+                ? {
+                    leadContract: {
+                      consent: consentAccepted,
+                      consentVersion: leadConfig.consentVersion,
+                      ...(preferredChannel ? { preferredChannel } : {}),
+                    },
+                  }
+                : {}),
               submissionData: dataToSend,
               turnstileToken: turnstileToken || undefined,
             }),
@@ -397,7 +493,21 @@ export const FormBlock: React.FC<
 
       void submitForm()
     },
-    [router, formID, redirect, confirmationType, copyLocale, honeypot, toSitePath, turnstileToken],
+    [
+      consentAccepted,
+      confirmationType,
+      copyLocale,
+      formID,
+      honeypot,
+      isWingsGroupV3,
+      leadConfig,
+      preferredChannel,
+      redirect,
+      router,
+      toSitePath,
+      turnstileToken,
+      wingsGroupCopy.configUnavailable,
+    ],
   )
 
   const onInvalid = useCallback(
@@ -566,6 +676,97 @@ export const FormBlock: React.FC<
                     })}
                 </div>
 
+                {isWingsGroupV3 && !leadConfig && (
+                  <p aria-live="polite" className="site-form-state" role="status">
+                    {wingsGroupCopy.configLoading}
+                  </p>
+                )}
+
+                {isWingsGroupV3 &&
+                  leadConfig?.enabled &&
+                  'available' in leadConfig &&
+                  !leadConfig.available && (
+                    <div className="site-form-state site-form-state--error" role="alert">
+                      {wingsGroupCopy.configUnavailable}
+                    </div>
+                  )}
+
+                {isWingsGroupV3 &&
+                  leadConfig?.enabled &&
+                  'available' in leadConfig &&
+                  leadConfig.available && (
+                    <div className="site-wingsgroup-lead-contract">
+                      {leadConfig.channels.length > 0 && (
+                        <fieldset className="site-wingsgroup-channels">
+                          <legend>{wingsGroupCopy.channelsTitle}</legend>
+                          <ul>
+                            {leadConfig.channels.map((channel) => (
+                              <li key={channel.key}>
+                                {channel.state === 'approved' && channel.href ? (
+                                  <a href={channel.href} rel="noreferrer" target="_blank">
+                                    {channel.label}
+                                  </a>
+                                ) : (
+                                  <span aria-disabled="true">
+                                    {channel.label} — {wingsGroupCopy.pending}
+                                  </span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                          <label htmlFor={`${formID}-preferred-channel`}>
+                            {wingsGroupCopy.preferredChannel}
+                          </label>
+                          <select
+                            id={`${formID}-preferred-channel`}
+                            onChange={(event) =>
+                              setPreferredChannel(event.target.value as ConsultationChannelKey | '')
+                            }
+                            value={preferredChannel}
+                          >
+                            <option value="">{wingsGroupCopy.noPreference}</option>
+                            {leadConfig.channels.map((channel) => (
+                              <option key={channel.key} value={channel.key}>
+                                {channel.label}
+                                {channel.state === 'pending-update'
+                                  ? ` — ${wingsGroupCopy.pending}`
+                                  : ''}
+                              </option>
+                            ))}
+                          </select>
+                        </fieldset>
+                      )}
+
+                      <div className="site-wingsgroup-consent">
+                        <button
+                          aria-describedby={
+                            consentError ? `${formID}-wingsgroup-consent-error` : undefined
+                          }
+                          aria-invalid={consentError || undefined}
+                          aria-checked={consentAccepted}
+                          className="site-wingsgroup-consent__control"
+                          id={`${formID}-wingsgroup-consent`}
+                          onClick={() => {
+                            setConsentAccepted((current) => !current)
+                            setConsentError(false)
+                          }}
+                          ref={consentRef}
+                          role="checkbox"
+                          type="button"
+                        >
+                          <span aria-hidden="true">{consentAccepted ? '✓' : ''}</span>
+                          <span>{leadConfig.consentCopy}</span>
+                        </button>
+                        <a href={leadConfig.policyHref}>{wingsGroupCopy.policyLink}</a>
+                        {consentError && (
+                          <p id={`${formID}-wingsgroup-consent-error`} role="alert">
+                            {wingsGroupCopy.consentRequired}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                 {challengeSiteKey && (
                   <div className="mb-4">
                     <TurnstileWidget onToken={setTurnstileToken} siteKey={challengeSiteKey} />
@@ -575,7 +776,14 @@ export const FormBlock: React.FC<
                 <Button
                   className="site-form-submit"
                   data-od-id={submitOdId}
-                  disabled={isLoading}
+                  disabled={
+                    isLoading ||
+                    (isWingsGroupV3 &&
+                      (!leadConfig ||
+                        !leadConfig.enabled ||
+                        !('available' in leadConfig) ||
+                        !leadConfig.available))
+                  }
                   form={formID}
                   type="submit"
                   variant="default"

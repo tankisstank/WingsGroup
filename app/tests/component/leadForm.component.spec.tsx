@@ -47,6 +47,19 @@ const mixedForm = {
   title: 'Planner form',
 }
 
+const wingsGroupForm = {
+  confirmationMessage: null,
+  confirmationType: 'message',
+  fields: [
+    { blockType: 'text', label: 'Full name', name: 'full-name', required: true },
+    { blockType: 'textarea', label: 'Need', name: 'message', required: true },
+  ],
+  id: 'wingsgroup-contact',
+  site: { code: 'wings-group', id: 9 },
+  submitButtonLabel: 'Send',
+  title: 'WingsGroup Contact',
+}
+
 describe('lead form hardened submission', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
@@ -300,5 +313,88 @@ describe('lead form hardened submission', () => {
     expect(
       body.submissionData.find(({ field }: { field: string }) => field === 'message').value,
     ).not.toMatch(/Tour slug|Tour ID|Source|Discovery/)
+  })
+
+  it('fails closed on missing consent, preserves values on delivery errors, and never links pending channels', async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === 'GET') {
+        return new Response(
+          JSON.stringify({
+            available: true,
+            channels: [
+              { key: 'zalo', label: 'Zalo', state: 'pending-update' },
+              {
+                href: 'https://example.com/whatsapp',
+                key: 'whatsapp',
+                label: 'WhatsApp',
+                state: 'approved',
+              },
+            ],
+            consentCopy:
+              'I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy.',
+            consentVersion: 'wingsgroup-contact-v1',
+            enabled: true,
+            policyHref: '/en/chinh-sach-bao-mat',
+            retentionMonths: 24,
+          }),
+          { status: 200 },
+        )
+      }
+
+      return new Response(JSON.stringify({ error: 'Lead delivery is temporarily unavailable.' }), {
+        status: 503,
+      })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(<FormBlock enableIntro={false} form={wingsGroupForm as never} />)
+
+    const fullName = await screen.findByLabelText(/Full name/)
+    const need = screen.getByLabelText(/Message/)
+    fireEvent.change(fullName, { target: { value: 'Alice' } })
+    fireEvent.change(need, { target: { value: 'Please plan a private journey.' } })
+
+    const consent = await screen.findByRole('checkbox', { name: /I agree that WingsGroup/ })
+    expect(consent.tagName).toBe('BUTTON')
+    expect(screen.queryByRole('link', { name: 'Zalo' })).toBeNull()
+    expect(
+      screen
+        .getAllByText(/Zalo — Pending update/)
+        .find((element) => element.tagName === 'SPAN')
+        ?.getAttribute('aria-disabled'),
+    ).toBe('true')
+    expect(screen.getByRole('link', { name: 'WhatsApp' }).getAttribute('href')).toBe(
+      'https://example.com/whatsapp',
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Send brief' }))
+    await waitFor(() => expect(document.activeElement).toBe(consent))
+    expect(consent.getAttribute('aria-invalid')).toBe('true')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    fireEvent.change(screen.getByLabelText(/Preferred contact channel/), {
+      target: { value: 'zalo' },
+    })
+    fireEvent.click(consent)
+    fireEvent.click(screen.getByRole('button', { name: 'Send brief' }))
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    await screen.findByRole('alert')
+    expect(fullName).toHaveProperty('value', 'Alice')
+    expect(need).toHaveProperty('value', 'Please plan a private journey.')
+    expect(consent.getAttribute('aria-checked')).toBe('true')
+
+    const postOptions = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')?.[1]
+    expect(JSON.parse(String(postOptions?.body))).toMatchObject({
+      leadContract: {
+        consent: true,
+        consentVersion: 'wingsgroup-contact-v1',
+        preferredChannel: 'zalo',
+      },
+      submissionData: [
+        { field: 'full-name', value: 'Alice' },
+        { field: 'message', value: 'Please plan a private journey.' },
+      ],
+    })
   })
 })
