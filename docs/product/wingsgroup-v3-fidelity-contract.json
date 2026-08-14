@@ -28,14 +28,18 @@
       { "label": "Liên hệ", "target": "#contact" }
     ],
     "languageControl": { "current": "VI", "available": ["vi", "en"], "englishState": "coming-soon" },
-    "primaryCta": { "label": "Trao đổi nhu cầu", "target": "#contact" }
+    "primaryCta": {
+      "label": "Trao đổi nhu cầu",
+      "target": "[data-od-id=consultation-dialog]",
+      "kind": "dialog",
+      "flow": "specialist-consultation-dialog"
+    }
   },
   "sectionOrder": [
     "hero",
-    "service-router",
+    "ecosystem",
     "trust",
     "proof",
-    "ecosystem",
     "editorial",
     "contact"
   ],
@@ -55,7 +59,12 @@
       "eyebrow": "WingsGroup",
       "ctas": [
         { "label": "Khám phá dịch vụ", "target": "#services", "kind": "primary" },
-        { "label": "Tìm hiểu WingsGroup", "target": "#trust", "kind": "secondary" }
+        {
+          "label": "Trao đổi với chuyên viên",
+          "target": "[data-od-id=consultation-dialog]",
+          "kind": "dialog",
+          "flow": "specialist-consultation-dialog"
+        }
       ],
       "media": {
         "kind": "carousel",
@@ -70,42 +79,6 @@
         "altRequired": true,
         "reducedMotion": "no-autoplay"
       }
-    },
-    {
-      "key": "service-router",
-      "selector": "#services",
-      "heading": "Mỗi hành trình, một đội ngũ phù hợp.",
-      "eyebrow": "Dịch vụ",
-      "routeCount": 4,
-      "routes": [
-        { "key": "outbound", "heading": "Du lịch nước ngoài", "cta": "Trao đổi nhu cầu", "target": "#contact" },
-        { "key": "inbound", "heading": "Khám phá Việt Nam", "cta": "Trao đổi nhu cầu", "target": "#contact" },
-        { "key": "airport-mice", "heading": "Dịch vụ sân bay & đoàn riêng", "cta": "Trao đổi nhu cầu", "target": "#contact" },
-        { "key": "care", "heading": "Bảo hiểm & hỗ trợ sau chuyến đi", "cta": "Trao đổi nhu cầu", "target": "#contact" }
-      ]
-    },
-    {
-      "key": "trust",
-      "selector": "[data-od-id=trust]",
-      "heading": "Minh bạch để bạn an tâm lựa chọn.",
-      "eyebrow": "Thông tin doanh nghiệp",
-      "items": [
-        { "key": "legal", "heading": "Pháp nhân & giấy phép", "state": "pending" },
-        { "key": "capability", "heading": "Hồ sơ năng lực & chứng nhận", "state": "pending" },
-        { "key": "contact", "heading": "Kênh liên hệ chính thức", "state": "pending" }
-      ],
-      "pendingLabel": "Đang cập nhật"
-    },
-    {
-      "key": "proof",
-      "selector": "[data-od-id=proof-archive]",
-      "heading": "Những dấu mốc tạo nên niềm tin bền vững.",
-      "eyebrow": "Dẫn chứng năng lực",
-      "recordCount": 4,
-      "publicationRule": "Only records with source, date/context, and publication permission may leave pending state.",
-      "defaultState": "pending",
-      "pendingLabel": "Đang cập nhật",
-      "media": ["wingsgroup-journey-consultation.png"]
     },
     {
       "key": "ecosystem",
@@ -134,6 +107,29 @@
       "proofState": "pending"
     },
     {
+      "key": "trust",
+      "selector": "[data-od-id=trust]",
+      "heading": "Minh bạch để bạn an tâm lựa chọn.",
+      "eyebrow": "Thông tin doanh nghiệp",
+      "items": [
+        { "key": "legal", "heading": "Pháp nhân & giấy phép", "state": "pending" },
+        { "key": "capability", "heading": "Hồ sơ năng lực & chứng nhận", "state": "pending" },
+        { "key": "contact", "heading": "Kênh liên hệ chính thức", "state": "pending" }
+      ],
+      "pendingLabel": "Đang cập nhật"
+    },
+    {
+      "key": "proof",
+      "selector": "[data-od-id=proof-archive]",
+      "heading": "Những dấu mốc tạo nên niềm tin bền vững.",
+      "eyebrow": "Dẫn chứng năng lực",
+      "recordCount": 4,
+      "publicationRule": "Only records with source, date/context, and publication permission may leave pending state.",
+      "defaultState": "pending",
+      "pendingLabel": "Đang cập nhật",
+      "media": ["wingsgroup-journey-consultation.png"]
+    },
+    {
       "key": "editorial",
       "selector": "[data-od-id=news]",
       "heading": "Góc nhìn để chuẩn bị kỹ hơn cho hành trình.",
@@ -157,9 +153,19 @@
       "consentRequired": true
     }
   ],
+  "archivalSourceRoles": {
+    "service-router": {
+      "sourceSelector": "#services",
+      "sourceOrder": "pre-runtime-transform",
+      "runtimeDisposition": "removed; the #services anchor is retained inside the unified ecosystem section"
+    }
+  },
   "consultationDialog": {
     "selector": "[data-od-id=consultation-dialog]",
     "triggerSelector": "[data-od-id=consultation-fab]",
+    "triggerLabel": "Trao đổi với chuyên viên",
+    "triggerFlow": "specialist-consultation-dialog",
+    "flowKey": "specialist-consultation-dialog",
     "title": "Trao đổi với chuyên viên.",
     "ariaLabelledBy": "consultation-title",
     "channels": [

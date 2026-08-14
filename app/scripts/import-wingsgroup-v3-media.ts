@@ -36,6 +36,7 @@ const relationID = (value: unknown): number | string | undefined => {
 }
 
 export const WINGSGROUP_V3_IMPORT_SITE_CODE = 'wings-group'
+export const WINGSGROUP_V3_MEDIA_DIRECTORY = path.resolve(import.meta.dirname, '../public/media')
 
 export type WingsGroupV3MediaImportSummary = {
   created: number
@@ -81,7 +82,12 @@ export const parseWingsGroupV3MediaCommand = (argv: string[]) => {
   }
 }
 
-const backupLocalDatabase = (): string => {
+export type WingsGroupV3LocalDatabaseBackup = {
+  backupPath: string
+  databasePath: string
+}
+
+export const backupLocalDatabase = (): WingsGroupV3LocalDatabaseBackup => {
   const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL)
   if (
     !databaseURL.startsWith('file:') ||
@@ -98,7 +104,152 @@ const backupLocalDatabase = (): string => {
     throw new Error(`SQLite database not found: ${databasePath}`)
   const backupPath = `${databasePath}.bak-wingsgroup-v3-${new Date().toISOString().replace(/[:.]/g, '-')}`
   fsSync.copyFileSync(databasePath, backupPath)
-  return backupPath
+  return { backupPath, databasePath }
+}
+
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error)
+
+const collectUploadFiles = async (directory: string): Promise<Set<string>> => {
+  const files = new Set<string>()
+  const visit = async (currentDirectory: string): Promise<void> => {
+    let entries
+    try {
+      entries = await fs.readdir(currentDirectory, { withFileTypes: true })
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return
+      throw error
+    }
+    for (const entry of entries) {
+      const entryPath = path.resolve(currentDirectory, entry.name)
+      if (entry.isDirectory()) await visit(entryPath)
+      else if (entry.isFile()) files.add(entryPath)
+    }
+  }
+  await visit(path.resolve(directory))
+  return files
+}
+
+export const inventoryWingsGroupV3UploadFiles = collectUploadFiles
+
+export type WingsGroupV3DatabaseRestoreResult = {
+  error?: string
+  restored: boolean
+}
+
+export const restoreWingsGroupV3SQLiteAtomically = async ({
+  backupPath,
+  databasePath,
+}: {
+  backupPath: string
+  databasePath: string
+}): Promise<WingsGroupV3DatabaseRestoreResult> => {
+  const temporaryRestorePath = `${databasePath}.restore-wingsgroup-v3-${process.pid}-${Date.now()}`
+  try {
+    await fs.copyFile(backupPath, temporaryRestorePath)
+    await fs.rename(temporaryRestorePath, databasePath)
+    return { restored: true }
+  } catch (error) {
+    await fs.rm(temporaryRestorePath, { force: true }).catch(() => undefined)
+    return { error: errorMessage(error), restored: false }
+  }
+}
+
+export type WingsGroupV3MediaRecoveryReport = {
+  backupPath: string
+  databasePath: string
+  databaseRestored: boolean
+  errors: string[]
+  manualRecoveryRequired: boolean
+  payloadClosed: boolean
+  preservedUploadFiles: number
+  removedUploadFiles: string[]
+  success: boolean
+}
+
+export const recoverWingsGroupV3MediaApply = async ({
+  backupPath,
+  databasePath,
+  mediaDirectory,
+  payload,
+  preExistingUploadFiles,
+}: {
+  backupPath: string
+  databasePath: string
+  mediaDirectory: string
+  payload?: Pick<Payload, 'destroy'> | null
+  preExistingUploadFiles: ReadonlySet<string>
+}): Promise<WingsGroupV3MediaRecoveryReport> => {
+  const errors: string[] = []
+  let payloadClosed = true
+  if (payload) {
+    try {
+      await payload.destroy()
+    } catch (error) {
+      payloadClosed = false
+      errors.push(`Payload close failed: ${errorMessage(error)}`)
+    }
+  }
+
+  const databaseRestore = await restoreWingsGroupV3SQLiteAtomically({
+    backupPath,
+    databasePath,
+  })
+  if (databaseRestore.error) errors.push(`SQLite restore failed: ${databaseRestore.error}`)
+
+  const removedUploadFiles: string[] = []
+  try {
+    const currentUploadFiles = await collectUploadFiles(mediaDirectory)
+    for (const uploadFile of currentUploadFiles) {
+      if (preExistingUploadFiles.has(uploadFile)) continue
+      try {
+        await fs.rm(uploadFile, { force: true })
+        removedUploadFiles.push(uploadFile)
+      } catch (error) {
+        errors.push(`Upload cleanup failed for ${uploadFile}: ${errorMessage(error)}`)
+      }
+    }
+  } catch (error) {
+    errors.push(`Upload inventory failed during recovery: ${errorMessage(error)}`)
+  }
+
+  let preservedUploadFiles = 0
+  try {
+    const remainingUploadFiles = await collectUploadFiles(mediaDirectory)
+    preservedUploadFiles = [...preExistingUploadFiles].filter((file) =>
+      remainingUploadFiles.has(file),
+    ).length
+  } catch (error) {
+    errors.push(`Upload verification failed during recovery: ${errorMessage(error)}`)
+  }
+
+  return {
+    backupPath,
+    databasePath,
+    databaseRestored: databaseRestore.restored,
+    errors,
+    manualRecoveryRequired: errors.length > 0 || !databaseRestore.restored || !payloadClosed,
+    payloadClosed,
+    preservedUploadFiles,
+    removedUploadFiles,
+    success: errors.length === 0 && databaseRestore.restored && payloadClosed,
+  }
+}
+
+export class WingsGroupV3MediaApplyError extends Error {
+  readonly originalError: unknown
+  readonly recovery: WingsGroupV3MediaRecoveryReport
+
+  constructor(originalError: unknown, recovery: WingsGroupV3MediaRecoveryReport) {
+    super(
+      `WingsGroup v3 media apply failed: ${errorMessage(originalError)} Recovery ${
+        recovery.success ? 'succeeded' : 'failed'
+      }; backup: ${recovery.backupPath}`,
+    )
+    this.name = 'WingsGroupV3MediaApplyError'
+    this.originalError = originalError
+    this.recovery = recovery
+  }
 }
 
 const findExactSite = async (payload: Payload, req: PayloadRequest) => {
@@ -324,6 +475,57 @@ export const importWingsGroupV3Media = async ({
   return summary
 }
 
+export const applyWingsGroupV3MediaWithRecovery = async ({
+  assetsDirectory,
+  backupPath,
+  databasePath,
+  manifest,
+  mediaDirectory,
+  payload,
+  plan,
+  preExistingUploadFiles,
+  req,
+  siteID,
+}: {
+  assetsDirectory: string
+  backupPath: string
+  databasePath: string
+  manifest: WingsGroupV3MediaManifest
+  mediaDirectory: string
+  payload: Payload
+  plan: WingsGroupV3MediaPlan
+  preExistingUploadFiles?: ReadonlySet<string>
+  req: PayloadRequest
+  siteID: number | string
+}): Promise<WingsGroupV3MediaImportSummary> => {
+  const inventory =
+    preExistingUploadFiles || (await inventoryWingsGroupV3UploadFiles(mediaDirectory))
+  let payloadClosed = false
+  try {
+    const summary = await importWingsGroupV3Media({
+      apply: true,
+      assetsDirectory,
+      manifest,
+      payload,
+      plan,
+      req,
+      siteID,
+    })
+    await payload.destroy()
+    payloadClosed = true
+    return summary
+  } catch (error) {
+    const recovery = await recoverWingsGroupV3MediaApply({
+      backupPath,
+      databasePath,
+      mediaDirectory,
+      payload: payloadClosed ? null : payload,
+      preExistingUploadFiles: inventory,
+    })
+    throw new WingsGroupV3MediaApplyError(error, recovery)
+  }
+}
+
 const main = async () => {
   const command = parseWingsGroupV3MediaCommand(process.argv.slice(2))
   const manifest = parseWingsGroupV3MediaManifest(
@@ -350,9 +552,12 @@ const main = async () => {
     return
   }
 
-  const backupPath = backupLocalDatabase()
-  const payload = await getPayload({ config: configPromise })
+  const { backupPath, databasePath } = backupLocalDatabase()
+  const mediaDirectory = WINGSGROUP_V3_MEDIA_DIRECTORY
+  const preExistingUploadFiles = await inventoryWingsGroupV3UploadFiles(mediaDirectory)
+  let payload: Payload | undefined
   try {
+    payload = await getPayload({ config: configPromise })
     const req = await createLocalReq(
       { context, user: { id: 0, role: 'super-admin' } as never },
       payload,
@@ -361,18 +566,59 @@ const main = async () => {
     if (site.code !== WINGSGROUP_V3_IMPORT_SITE_CODE) {
       throw new Error(`Resolved site is not ${WINGSGROUP_V3_IMPORT_SITE_CODE}`)
     }
-    const summary = await importWingsGroupV3Media({
-      apply: true,
+    const summary = await applyWingsGroupV3MediaWithRecovery({
       assetsDirectory: command.assetsDirectory,
+      backupPath,
+      databasePath,
       manifest,
+      mediaDirectory,
       payload,
       plan,
+      preExistingUploadFiles,
       req,
       siteID: site.id,
     })
     console.log(JSON.stringify({ backupPath, dryRun: false, ...summary }, null, 2))
-  } finally {
-    await payload.destroy()
+  } catch (error) {
+    if (error instanceof WingsGroupV3MediaApplyError) {
+      console.error(
+        JSON.stringify(
+          {
+            backupPath,
+            dryRun: false,
+            error: errorMessage(error.originalError),
+            failed: true,
+            recovery: error.recovery,
+          },
+          null,
+          2,
+        ),
+      )
+      process.exitCode = 1
+      return
+    }
+
+    const recovery = await recoverWingsGroupV3MediaApply({
+      backupPath,
+      databasePath,
+      mediaDirectory,
+      payload,
+      preExistingUploadFiles,
+    })
+    console.error(
+      JSON.stringify(
+        {
+          backupPath,
+          dryRun: false,
+          error: errorMessage(error),
+          failed: true,
+          recovery,
+        },
+        null,
+        2,
+      ),
+    )
+    process.exitCode = 1
   }
 }
 

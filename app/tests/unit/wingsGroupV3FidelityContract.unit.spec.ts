@@ -13,32 +13,42 @@ const getSection = (contract: Record<string, any>, key: string) =>
   contract.sections.find((section: Record<string, any>) => section.key === key)
 
 describe('WingsGroup v3 executable fidelity contract', () => {
-  it('is a valid seven-section Vietnamese public home contract', async () => {
+  it('is a valid six-section final-runtime Vietnamese public home contract', async () => {
     const contract = (await loadWingsGroupV3FidelityContract()) as Record<string, any>
 
     expect(contract.sectionOrder).toEqual([...WINGSGROUP_V3_FIDELITY_SECTION_ORDER])
+    expect(contract.runtimeSectionOrder).toEqual([...WINGSGROUP_V3_FIDELITY_SECTION_ORDER])
     expect(contract.sections.map((section: Record<string, any>) => section.key)).toEqual([
       ...WINGSGROUP_V3_FIDELITY_SECTION_ORDER,
     ])
-    expect(contract.header.primaryCta).toEqual({ label: 'Trao đổi nhu cầu', target: '#contact' })
+    expect(
+      contract.sections.some((section: Record<string, any>) => section.key === 'service-router'),
+    ).toBe(false)
+    expect(contract.header.primaryCta).toEqual({
+      flow: 'specialist-consultation-dialog',
+      kind: 'dialog',
+      label: 'Trao đổi nhu cầu',
+      target: '[data-od-id=consultation-dialog]',
+    })
     expect(contract.header.primaryNavigation).toHaveLength(5)
     expect(contract.header.mobileNavigation).toHaveLength(6)
   })
 
-  it('locks the handoff headings, route CTA, pending trust/proof state and consultation dialog', async () => {
+  it('locks the final-runtime headings, dialog triggers, pending trust/proof state and dialog', async () => {
     const contract = (await loadWingsGroupV3FidelityContract()) as Record<string, any>
     expect(getSection(contract, 'hero').heading).toBe('Tìm đúng dịch vụ cho hành trình của bạn.')
     expect(getSection(contract, 'hero').ctas.map((cta: Record<string, any>) => cta.label)).toEqual([
       'Khám phá dịch vụ',
-      'Tìm hiểu WingsGroup',
+      'Trao đổi với chuyên viên',
     ])
-    expect(getSection(contract, 'service-router').routes).toHaveLength(4)
-    expect(
-      getSection(contract, 'service-router').routes.every(
-        (route: Record<string, any>) =>
-          route.cta === 'Trao đổi nhu cầu' && route.target === '#contact',
-      ),
-    ).toBe(true)
+    expect(getSection(contract, 'hero').ctas[1]).toMatchObject({
+      flow: 'specialist-consultation-dialog',
+      kind: 'dialog',
+      target: '[data-od-id=consultation-dialog]',
+    })
+    expect(contract.header.primaryCta.flow).toBe(contract.consultationDialog.flowKey)
+    expect(contract.consultationDialog.triggerLabel).toBe('Trao đổi với chuyên viên')
+    expect(contract.consultationDialog.triggerFlow).toBe(contract.consultationDialog.flowKey)
     expect(getSection(contract, 'trust').heading).toBe('Minh bạch để bạn an tâm lựa chọn.')
     expect(
       getSection(contract, 'trust').items.every(
@@ -104,6 +114,16 @@ describe('WingsGroup v3 executable fidelity contract', () => {
       ),
     ) as Record<string, any>
     contract.sectionOrder = [...contract.sectionOrder, 'unexpected']
-    expect(() => assertWingsGroupV3FidelityContract(contract)).toThrow(/seven-section/)
+    expect(() => assertWingsGroupV3FidelityContract(contract)).toThrow(/six-section/)
+  })
+
+  it('rejects a stale standalone service router in the public runtime contract', async () => {
+    const contract = (await loadWingsGroupV3FidelityContract()) as Record<string, any>
+    contract.sectionOrder = [...contract.sectionOrder, 'service-router']
+    contract.sections = [
+      ...contract.sections,
+      { key: 'service-router', heading: 'obsolete', selector: '#services' },
+    ]
+    expect(() => assertWingsGroupV3FidelityContract(contract)).toThrow(/standalone service-router/)
   })
 })

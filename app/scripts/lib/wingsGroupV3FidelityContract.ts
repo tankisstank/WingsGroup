@@ -8,10 +8,9 @@ export const WINGSGROUP_V3_FIDELITY_CONTRACT_PATH = path.resolve(
 
 export const WINGSGROUP_V3_FIDELITY_SECTION_ORDER = [
   'hero',
-  'service-router',
+  'ecosystem',
   'trust',
   'proof',
-  'ecosystem',
   'editorial',
   'contact',
 ] as const
@@ -50,12 +49,18 @@ export const assessWingsGroupV3FidelityContract = (
   if (value.siteCode !== 'wings-group') errors.push('Contract siteCode must be wings-group.')
   if (value.locale !== 'vi') errors.push('Contract locale must be vi.')
   if (!exactStringArray(value.sectionOrder, WINGSGROUP_V3_FIDELITY_SECTION_ORDER)) {
-    errors.push('Contract sectionOrder must match the seven-section public VI order.')
+    errors.push('Contract sectionOrder must match the final six-section runtime VI order.')
+  }
+  if (!exactStringArray(value.runtimeSectionOrder, WINGSGROUP_V3_FIDELITY_SECTION_ORDER)) {
+    errors.push('Contract runtimeSectionOrder must match the final six-section runtime VI order.')
   }
 
   const sections = array(value.sections).filter(isRecord)
   if (sections.length !== WINGSGROUP_V3_FIDELITY_SECTION_ORDER.length) {
-    errors.push('Contract must define exactly seven sections.')
+    errors.push('Contract must define exactly six public runtime sections.')
+  }
+  if (sections.some((section) => section.key === 'service-router')) {
+    errors.push('Contract must not define a standalone service-router in the public runtime.')
   }
   if (
     !exactStringArray(
@@ -84,9 +89,41 @@ export const assessWingsGroupV3FidelityContract = (
     errors.push('Contract header needs desktop and mobile navigation.')
   }
 
+  const primaryCta = isRecord(header?.primaryCta) ? header.primaryCta : null
+  if (
+    !primaryCta ||
+    primaryCta.label !== 'Trao đổi nhu cầu' ||
+    primaryCta.target !== '[data-od-id=consultation-dialog]' ||
+    primaryCta.kind !== 'dialog' ||
+    primaryCta.flow !== 'specialist-consultation-dialog'
+  ) {
+    errors.push('Header primary CTA must use the specialist consultation dialog flow.')
+  }
+
+  const hero = sections.find((section) => section.key === 'hero')
+  const heroDialogCta = array(hero?.ctas)
+    .filter(isRecord)
+    .find((cta) => cta.kind === 'dialog')
+  if (
+    !heroDialogCta ||
+    heroDialogCta.label !== 'Trao đổi với chuyên viên' ||
+    heroDialogCta.target !== '[data-od-id=consultation-dialog]' ||
+    heroDialogCta.flow !== 'specialist-consultation-dialog'
+  ) {
+    errors.push('Hero secondary CTA must use the specialist consultation dialog flow.')
+  }
+
   const dialog = isRecord(value.consultationDialog) ? value.consultationDialog : null
   if (!dialog || !text(dialog.selector) || !text(dialog.triggerSelector) || !text(dialog.title)) {
     errors.push('Contract needs a specialist consultation dialog.')
+  }
+  if (
+    !dialog ||
+    dialog.flowKey !== 'specialist-consultation-dialog' ||
+    dialog.triggerLabel !== 'Trao đổi với chuyên viên' ||
+    dialog.triggerFlow !== 'specialist-consultation-dialog'
+  ) {
+    errors.push('Floating consultation trigger must use the specialist consultation dialog flow.')
   }
   const channels = array(dialog?.channels)
     .filter(isRecord)

@@ -5,8 +5,12 @@ import { validateProofRecords } from '@/blocks/WingsGroupProofArchive/config'
 import { validateConsultationChannels, validateMediaGovernance } from '@/fields/wingsGroupV3'
 import { resolveSiteSettingsUpsert } from '../../scripts/lib/wingsGroupV3MediaPlan'
 import {
+  applyWingsGroupV3MediaWithRecovery,
+  backupLocalDatabase,
+  inventoryWingsGroupV3UploadFiles,
   importWingsGroupV3Media,
   parseWingsGroupV3MediaCommand,
+  WingsGroupV3MediaApplyError,
 } from '../../scripts/import-wingsgroup-v3-media'
 import {
   buildWingsGroupV3MediaPlan,
@@ -126,6 +130,187 @@ describe('WingsGroup v3 fail-closed governance', () => {
         ]),
       ).toThrow(/supports only/)
     }
+  })
+
+  it('recovers the database and upload inventory after a second-record apply failure', async () => {
+    const rootDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'wg-v3-recovery-'))
+    const assetsDirectory = path.join(rootDirectory, 'assets')
+    const mediaDirectory = path.join(rootDirectory, 'media')
+    const databasePath = path.join(rootDirectory, 'payload.sqlite')
+    const backupPath = path.join(rootDirectory, 'payload.sqlite.bak')
+    await fs.mkdir(assetsDirectory)
+    await fs.mkdir(mediaDirectory)
+    const databaseBefore = Buffer.from('database-before-apply')
+    await fs.writeFile(databasePath, databaseBefore)
+    await fs.copyFile(databasePath, backupPath)
+    const preExistingUpload = path.join(mediaDirectory, 'pre-existing.png')
+    await fs.writeFile(preExistingUpload, 'do-not-delete')
+
+    const media = []
+    for (let index = 0; index < 2; index += 1) {
+      const file = `recovery-fixture-${index}.png`
+      const bytes = await sharp({
+        create: {
+          background: { b: index, g: 20 + index, r: 40 + index },
+          channels: 3,
+          height: 4,
+          width: 4,
+        },
+      })
+        .png()
+        .toBuffer()
+      await fs.writeFile(path.join(assetsDirectory, file), bytes)
+      media.push({
+        actualDimensions: '4x4',
+        alt: { en: `English ${index}`, vi: `Tiếng Việt ${index}` },
+        dimensions: '4x4',
+        file,
+        focal: { x: 50, y: 50 },
+        role: `Recovery fixture ${index}`,
+        sha256: createHash('sha256').update(bytes).digest('hex'),
+        usageScope: 'editorial-service',
+      })
+    }
+    const manifest = JSON.parse(
+      await fs.readFile(
+        path.resolve(process.cwd(), '../docs/product/wingsgroup-v3-media-manifest.json'),
+        'utf8',
+      ),
+    )
+    const plan = {
+      errors: [],
+      planned: media.length,
+      records: media.map((item, index) => ({
+        alt: item.alt,
+        focal: item.focal,
+        importFilename: item.file,
+        role: item.role,
+        sourceDimensions: { height: 4, width: 4 },
+        sourceFile: item.file,
+        sourceFileSha256: item.sha256,
+        sourceIdentity: `fixture-attachment:${item.sha256}`,
+        usageScope: item.usageScope,
+        index,
+      })),
+    } as never
+    const documents: Array<Record<string, any>> = []
+    let createCount = 0
+    let destroyCount = 0
+    const payload = {
+      find: async () => ({ docs: [] }),
+      create: async (args: { data: Record<string, any>; file: { name: string } }) => {
+        createCount += 1
+        await fs.writeFile(path.join(mediaDirectory, `failed-run-${createCount}.png`), 'new upload')
+        await fs.writeFile(databasePath, `database-mutated-${createCount}`)
+        if (createCount === 2) throw new Error('simulated second-record failure')
+        const document = {
+          ...args.data,
+          filename: args.file.name,
+          height: 4,
+          id: createCount,
+          width: 4,
+        }
+        documents.push(document)
+        return document
+      },
+      update: async (args: { id: number; data: Record<string, any>; locale: string }) => {
+        const document = documents.find((item) => item.id === args.id)!
+        if (args.locale === 'en') {
+          const alt = typeof document.alt === 'object' ? document.alt : { vi: document.alt }
+          document.alt = { ...alt, en: args.data.alt }
+        }
+        return document
+      },
+      destroy: async () => {
+        destroyCount += 1
+      },
+    }
+    const preExistingFiles = await inventoryWingsGroupV3UploadFiles(mediaDirectory)
+
+    try {
+      const failure = await applyWingsGroupV3MediaWithRecovery({
+        assetsDirectory,
+        backupPath,
+        databasePath,
+        manifest,
+        mediaDirectory,
+        payload: payload as never,
+        plan,
+        preExistingUploadFiles: preExistingFiles,
+        req: {} as never,
+        siteID: 7,
+      }).catch((error: unknown) => error)
+      expect(failure).toBeInstanceOf(WingsGroupV3MediaApplyError)
+      expect((failure as WingsGroupV3MediaApplyError).message).toContain(
+        'simulated second-record failure',
+      )
+      expect((failure as WingsGroupV3MediaApplyError).recovery.success).toBe(true)
+
+      expect(await fs.readFile(databasePath)).toEqual(databaseBefore)
+      expect(await fs.readFile(preExistingUpload)).toEqual(Buffer.from('do-not-delete'))
+      await expect(fs.access(path.join(mediaDirectory, 'failed-run-1.png'))).rejects.toThrow()
+      await expect(fs.access(path.join(mediaDirectory, 'failed-run-2.png'))).rejects.toThrow()
+      expect(createCount).toBe(2)
+      expect(destroyCount).toBe(1)
+    } finally {
+      await fs.rm(rootDirectory, { force: true, recursive: true })
+    }
+  })
+
+  it('retains the production guard and cross-tenant source-identity guard', async () => {
+    const environment = process.env as Record<string, string | undefined>
+    const originalNodeEnv = environment.NODE_ENV
+    environment.NODE_ENV = 'production'
+    try {
+      expect(() => backupLocalDatabase()).toThrow(/restricted to an explicit local SQLite/)
+    } finally {
+      if (originalNodeEnv === undefined) delete environment.NODE_ENV
+      else environment.NODE_ENV = originalNodeEnv
+    }
+
+    const manifest = JSON.parse(
+      await fs.readFile(
+        path.resolve(process.cwd(), '../docs/product/wingsgroup-v3-media-manifest.json'),
+        'utf8',
+      ),
+    )
+    const plan = {
+      errors: [],
+      records: [
+        {
+          alt: { en: 'English', vi: 'Tiếng Việt' },
+          focal: { x: 50, y: 50 },
+          importFilename: 'guard.png',
+          role: 'Guard fixture',
+          sourceDimensions: { height: 4, width: 4 },
+          sourceFile: 'guard.png',
+          sourceFileSha256: sha,
+          sourceIdentity: `fixture-attachment:${sha}`,
+          usageScope: 'editorial-service',
+        },
+      ],
+      planned: 1,
+    }
+    const payload = {
+      find: async (args: { collection: string; where: unknown }) => {
+        if (args.collection !== 'media') return { docs: [] }
+        const serialized = JSON.stringify(args.where)
+        return serialized.includes('site') && serialized.includes('sourceIdentity')
+          ? { docs: [] }
+          : { docs: [{ site: 42 }] }
+      },
+    }
+    await expect(
+      importWingsGroupV3Media({
+        apply: false,
+        assetsDirectory: '/tmp/unused',
+        manifest,
+        payload: payload as never,
+        plan: plan as never,
+        req: {} as never,
+        siteID: 7,
+      }),
+    ).rejects.toThrow(/across tenants/)
   })
 
   it('records the handoff dimensions discrepancy without changing the source checksum', async () => {
