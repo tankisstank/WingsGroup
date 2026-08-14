@@ -1,4 +1,6 @@
 import type { WingsGroupEcosystemBlock } from '@/payload-types'
+import { EcosystemExplorer } from '@/components/WingsGroupV3/EcosystemExplorer'
 
-/** US-061 schema-only fail-closed renderer. US-063 owns the public experience. */
-export const WingsGroupEcosystemComponent = (_props: WingsGroupEcosystemBlock) => null
+export const WingsGroupEcosystemComponent = (
+  props: WingsGroupEcosystemBlock & { locale?: null | string },
+) => <EcosystemExplorer {...props} />

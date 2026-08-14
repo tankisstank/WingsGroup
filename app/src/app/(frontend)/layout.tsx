@@ -117,6 +117,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         data-site-theme={siteTheme.themeKey}
         data-theme-key={siteTheme.themeKey}
         data-site-code={site.code}
+        data-wingsgroup-v3={settings?.wingsGroupV3?.enabled === true ? 'true' : 'false'}
         data-public-pathname={publicPathname}
         data-public-route={publicRoute}
         data-site-button-style={siteTheme.buttonStyle}

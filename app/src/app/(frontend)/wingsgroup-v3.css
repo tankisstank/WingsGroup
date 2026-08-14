@@ -1,0 +1,86 @@
+/*
+ * E09 shell treatment is deliberately site- and feature-gated. Values come
+ * from the existing runtime theme until the brand owner supplies final tokens.
+ */
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] {
+  background:
+    radial-gradient(
+      circle at 88% 8%,
+      color-mix(in oklch, var(--site-accent) 11%, transparent),
+      transparent 28rem
+    ),
+    linear-gradient(180deg, var(--background), var(--site-surface));
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__bar {
+  border-color: color-mix(in oklch, var(--site-brand) 14%, var(--site-border));
+  border-radius: 0 0 var(--site-radius) var(--site-radius);
+  background: color-mix(in oklch, var(--background) 88%, transparent);
+  box-shadow: 0 14px 40px color-mix(in oklch, var(--site-brand) 8%, transparent);
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__nav .theme-nav-link,
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-language-switcher__link {
+  align-items: center;
+  display: inline-flex;
+  min-height: 44px;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-mobile-nav__link {
+  min-height: 48px;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  article[data-wingsgroup-v3-home='true'] {
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] [data-wingsgroup-home-section] {
+  scroll-margin-top: 7rem;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  [data-wingsgroup-home-section='trust'] {
+  background: color-mix(in oklch, var(--site-surface-strong) 48%, transparent);
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  [data-wingsgroup-home-section='editorial'] {
+  background: color-mix(in oklch, var(--site-surface) 68%, var(--background));
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  [data-wingsgroup-home-section='contact'] {
+  background: color-mix(in oklch, var(--site-brand) 5%, var(--site-surface));
+  padding-block: clamp(3rem, 7vw, 6rem);
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-footer {
+  border-color: color-mix(in oklch, var(--site-brand) 18%, var(--site-border));
+  background: color-mix(in oklch, var(--site-brand) 7%, var(--site-surface));
+}
+
+@media (max-width: 850px) {
+  body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header {
+    top: 0;
+  }
+
+  body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__bar {
+    border-radius: 0 0 calc(var(--site-radius) * 0.75) calc(var(--site-radius) * 0.75);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-site-code='wings-group'][data-wingsgroup-v3='true'] *,
+  body[data-site-code='wings-group'][data-wingsgroup-v3='true'] *::before,
+  body[data-site-code='wings-group'][data-wingsgroup-v3='true'] *::after {
+    scroll-behavior: auto !important;
+  }
+}

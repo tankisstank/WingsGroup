@@ -17,6 +17,10 @@ import { StatsBlock } from '@/blocks/Stats/Component'
 import { TestimonialBlock } from '@/blocks/Testimonial/Component'
 import { WingsGroupEcosystemComponent } from '@/blocks/WingsGroupEcosystem/Component'
 import { WingsGroupProofArchiveComponent } from '@/blocks/WingsGroupProofArchive/Component'
+import {
+  composeWingsGroupHomeBlocks,
+  getWingsGroupHomeSection,
+} from '@/components/WingsGroupV3/model'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -39,15 +43,18 @@ const blockComponents = {
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
   locale?: null | string
+  wingsGroupV3Home?: boolean
 }> = (props) => {
-  const { blocks, locale } = props
+  const { blocks, locale, wingsGroupV3Home = false } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
   if (hasBlocks) {
+    const renderedBlocks = wingsGroupV3Home ? composeWingsGroupHomeBlocks(blocks) : blocks
+
     return (
       <Fragment>
-        {blocks.map((block, index) => {
+        {renderedBlocks.map((block, index) => {
           const { blockType } = block
 
           if (blockType && blockType in blockComponents) {
@@ -55,13 +62,26 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               const blockProps =
-                block.blockType === 'credentialsCarousel' ? { ...block, locale } : block
+                block.blockType === 'credentialsCarousel' ||
+                block.blockType === 'wingsGroupEcosystem' ||
+                block.blockType === 'wingsGroupProofArchive'
+                  ? { ...block, locale }
+                  : block
+              const section = wingsGroupV3Home ? getWingsGroupHomeSection(block) : null
 
-              return (
-                <Fragment key={index}>
+              const renderedBlock = (
+                <Fragment>
                   {/* @ts-expect-error there may be some mismatch between the expected types here */}
                   <Block {...blockProps} disableInnerContainer />
                 </Fragment>
+              )
+
+              return section ? (
+                <div data-wingsgroup-home-section={section} key={`${section}-${index}`}>
+                  {renderedBlock}
+                </div>
+              ) : (
+                <Fragment key={index}>{renderedBlock}</Fragment>
               )
             }
           }

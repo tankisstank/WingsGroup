@@ -58,6 +58,7 @@ import {
 } from '@/utilities/wingsSideHiFiDispatch'
 import type { WingsSideHiFiPageSource } from '@/utilities/wingsSideHiFiPageModel'
 import { filterCmsLayoutBlocksForHiFiComposer } from '@/utilities/wingsSideHiFiComposer'
+import { isWingsGroupV3HomeLayout } from '@/components/WingsGroupV3/model'
 import { hydrateWingsSideHomeCuration, projectWingsSideHomeCuration } from '@/tours/homeCuration'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import type { Form as PayloadForm } from '@/payload-types'
@@ -242,6 +243,11 @@ export async function renderCmsPageByPath({
       ? (hiFiModel.routeContent as { form?: unknown }).form
       : null
   const hiFiReusableBlocks = filterCmsLayoutBlocksForHiFiComposer(page.layout, consumedHiFiForm)
+  const useWingsGroupV3Home =
+    site.code === 'wings-group' &&
+    requestedPath === '/' &&
+    settings?.wingsGroupV3?.enabled === true &&
+    isWingsGroupV3HomeLayout(page.layout)
 
   return (
     <article
@@ -249,6 +255,7 @@ export async function renderCmsPageByPath({
         useHiFiBody ? 'pb-16 md:pb-20' : isStructuredTour ? 'pb-16 md:pb-20' : 'pt-16 pb-24'
       }
       data-hifi-body={useHiFiBody ? 'true' : 'false'}
+      data-wingsgroup-v3-home={useWingsGroupV3Home ? 'true' : 'false'}
     >
       <JsonLd
         data={[
@@ -304,8 +311,13 @@ export async function renderCmsPageByPath({
             {...page.hero}
             resolvedLocale={locale}
             siteHeroDefaults={settings?.heroDefaults}
+            wingsGroupV3Enabled={useWingsGroupV3Home}
           />
-          <RenderBlocks blocks={page.layout} locale={locale} />
+          <RenderBlocks
+            blocks={page.layout}
+            locale={locale}
+            wingsGroupV3Home={useWingsGroupV3Home}
+          />
           <RelatedPages locale={locale} pages={relatedPages} />
         </>
       )}

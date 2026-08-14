@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import './wingsgroup-v3.css';
 
 @config '../../../tailwind.config.mjs';
 
