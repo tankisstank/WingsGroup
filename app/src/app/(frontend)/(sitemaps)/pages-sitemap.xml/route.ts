@@ -94,6 +94,7 @@ export async function GET(request: Request) {
         pathname: true,
         title: true,
         updatedAt: true,
+        wingsGroupRoute: true,
       },
     })
     const tourResults =
@@ -135,6 +136,7 @@ export async function GET(request: Request) {
           locale,
           page,
           pathname: path,
+          settings: settings.docs[0],
           siteCode: site.code,
         })
       ) {

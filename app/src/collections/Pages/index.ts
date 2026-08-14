@@ -20,6 +20,8 @@ import { WingsGroupEcosystem } from '../../blocks/WingsGroupEcosystem/config'
 import { WingsGroupProofArchive } from '../../blocks/WingsGroupProofArchive/config'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { wingsSideHiFiTab } from '@/fields/wingsSideHiFi'
+import { wingsGroupCorporateRouteField } from '@/fields/wingsGroupCorporateRoute'
+import { buildWingsGroupPublicPageAccessWhere } from '@/wingsgroup/corporateRoutes'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
@@ -43,7 +45,13 @@ export const Pages: CollectionConfig<'pages'> = {
   access: {
     create: contentCreateAccess,
     delete: contentDeleteAccess,
-    read: siteScopedOrPublished(),
+    read: async (args) => {
+      const base = await siteScopedOrPublished()(args)
+      if (args.req.user || base === false || base === true) return base
+      return {
+        and: [base, buildWingsGroupPublicPageAccessWhere(args.req.locale)],
+      }
+    },
     update: siteScopedAccess(),
   },
   // This config controls what's populated by default when a page is referenced
@@ -230,6 +238,7 @@ export const Pages: CollectionConfig<'pages'> = {
         position: 'sidebar',
       },
     },
+    wingsGroupCorporateRouteField,
     slugField({
       overrides: (field) => {
         field.fields = field.fields.map((item) => {

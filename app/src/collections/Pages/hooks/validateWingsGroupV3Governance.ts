@@ -1,4 +1,11 @@
 import type { CollectionBeforeChangeHook } from 'payload'
+import {
+  findWingsGroupPublicJargon,
+  getWingsGroupRouteDefinition,
+  getWingsGroupRoutePublicationState,
+  isWingsGroupScopedInternalHref,
+  WINGSGROUP_SITE_CODE,
+} from '@/wingsgroup/corporateRoutes'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -17,6 +24,31 @@ const sameID = (left: unknown, right: unknown): boolean => {
   return leftID !== undefined && rightID !== undefined && String(leftID) === String(rightID)
 }
 
+const getPathname = (data: UnknownRecord, originalDoc: UnknownRecord): string => {
+  const pathname = data.pathname ?? originalDoc.pathname
+  if (typeof pathname === 'string') return pathname
+  const slug = data.slug ?? originalDoc.slug
+  return slug === 'home' ? '/' : typeof slug === 'string' ? `/${slug}` : ''
+}
+
+const governanceSnapshot = (value: unknown): string => JSON.stringify(asRecord(value))
+
+const collectLinkURLs = (value: unknown, result: unknown[] = []): unknown[] => {
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectLinkURLs(item, result))
+    return result
+  }
+  if (!value || typeof value !== 'object') return result
+
+  const record = asRecord(value)
+  if (record.link && typeof record.link === 'object') {
+    const link = asRecord(record.link)
+    if (link.type === 'custom' && link.url) result.push(link.url)
+  }
+  Object.values(record).forEach((item) => collectLinkURLs(item, result))
+  return result
+}
+
 /**
  * Payload admin relationship filters are editor guidance, not authorization.
  * This hook re-checks every WingsGroup v3 block media relation at the trusted
@@ -27,12 +59,88 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
   originalDoc,
   req,
 }) => {
+  const dataRecord = asRecord(data)
+  const originalRecord = asRecord(originalDoc)
   const site = data?.site ?? originalDoc?.site
   const layout = data?.layout ?? originalDoc?.layout
   if (!site) return data
 
   const isPublishing = (data?._status ?? originalDoc?._status) === 'published'
+  const pathname = getPathname(dataRecord, originalRecord)
+  const routeDefinition = getWingsGroupRouteDefinition(pathname)
+  const pendingRouteGovernance = data?.wingsGroupRoute ?? originalDoc?.wingsGroupRoute
+  let siteCode: string | null = null
+  if (routeDefinition || asRecord(pendingRouteGovernance).managedBy === 'wingsgroup-v3') {
+    const siteID = relationID(site)
+    if (siteID === undefined) throw new Error('WingsGroup corporate route cần site scope.')
+    const siteDoc = await req.payload.findByID({
+      collection: 'sites',
+      id: siteID,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    siteCode = typeof siteDoc.code === 'string' ? siteDoc.code : null
+  }
+
+  if (
+    req.user?.role !== 'super-admin' &&
+    governanceSnapshot(data?.wingsGroupRoute ?? originalDoc?.wingsGroupRoute) !==
+      governanceSnapshot(originalDoc?.wingsGroupRoute)
+  ) {
+    throw new Error('Chỉ super-admin được thay đổi WingsGroup route publication governance.')
+  }
+
+  if (siteCode === WINGSGROUP_SITE_CODE) {
+    if (!routeDefinition) {
+      throw new Error('WingsGroup v3 chỉ cho phép chín corporate routes đã duyệt.')
+    }
+    const routeGovernance = asRecord(pendingRouteGovernance)
+    if (
+      routeGovernance.managedBy !== 'wingsgroup-v3' ||
+      routeGovernance.archetype !== routeDefinition.archetype
+    ) {
+      throw new Error('WingsGroup corporate route thiếu archetype governance phù hợp.')
+    }
+
+    const pageContent = {
+      hero: data?.hero ?? originalDoc?.hero,
+      layout,
+      meta: data?.meta ?? originalDoc?.meta,
+      title: data?.title ?? originalDoc?.title,
+    }
+    if (isPublishing && findWingsGroupPublicJargon(pageContent)) {
+      throw new Error('WingsGroup public copy còn chứa thuật ngữ triển khai nội bộ.')
+    }
+
+    for (const href of collectLinkURLs(pageContent)) {
+      if (!isWingsGroupScopedInternalHref(href)) {
+        throw new Error('WingsGroup corporate route có internal link ngoài site scope.')
+      }
+    }
+
+    if (
+      isPublishing &&
+      getWingsGroupRoutePublicationState({
+        locale: 'vi',
+        page: { ...originalRecord, ...dataRecord, pathname, wingsGroupRoute: pendingRouteGovernance },
+        siteCode,
+      }) !== 'approved'
+    ) {
+      throw new Error('WingsGroup route chưa vượt qua publication gate tiếng Việt hoặc policy.')
+    }
+  } else if (asRecord(pendingRouteGovernance).managedBy === 'wingsgroup-v3') {
+    throw new Error('WingsGroup corporate governance không được gắn vào tenant khác.')
+  }
+
   const checks: Array<{ kind: 'editorial' | 'proof'; media: unknown }> = []
+  const scopedRelations: Array<{ collection: 'forms' | 'pages'; value: unknown }> = []
+
+  for (const relatedPage of Array.isArray(data?.relatedPages ?? originalDoc?.relatedPages)
+    ? (data?.relatedPages ?? originalDoc?.relatedPages)
+    : []) {
+    scopedRelations.push({ collection: 'pages', value: relatedPage })
+  }
 
   const hero = asRecord(data?.hero ?? originalDoc?.hero)
   for (const value of [
@@ -53,6 +161,9 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
 
   for (const rawBlock of Array.isArray(layout) ? layout : []) {
     const block = asRecord(rawBlock)
+    if (block.blockType === 'formBlock' && block.form) {
+      scopedRelations.push({ collection: 'forms', value: block.form })
+    }
     if (block.blockType === 'wingsGroupEcosystem') {
       for (const rawProfile of Array.isArray(block.profiles) ? block.profiles : []) {
         const profile = asRecord(rawProfile)
@@ -67,6 +178,21 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
           checks.push({ kind: 'proof', media: proof.media })
         }
       }
+    }
+  }
+
+  for (const relation of scopedRelations) {
+    const id = relationID(relation.value)
+    if (id === undefined) throw new Error('WingsGroup v3 site-scoped relation không hợp lệ.')
+    const related = await req.payload.findByID({
+      collection: relation.collection,
+      id,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    if (!sameID(related.site, site)) {
+      throw new Error('WingsGroup v3 page không được tham chiếu form hoặc page của tenant khác.')
     }
   }
 

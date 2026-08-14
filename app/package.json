@@ -74,6 +74,7 @@
     "plane:import:all": "cross-env NODE_OPTIONS=--no-deprecation node scripts/plane-import.mjs import-all",
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "seed:uat-accounts": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/seed-uat-accounts.ts",
+    "seed:wingsgroup:corporate-routes": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/seed-wingsgroup-corporate-routes.ts",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:unit && pnpm run test:component && pnpm run test:int && pnpm run test:e2e",
     "test:component": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.component.config.mts",

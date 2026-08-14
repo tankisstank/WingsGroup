@@ -6,6 +6,7 @@ import { isRuntimeResolvablePage } from './pageRuntimeResolvable'
 import { getSiteSitemapLocales } from './siteSEO'
 import type { SupportedLocaleCode } from './sitePaths'
 import { hasMatchingWingSideTourWrapper } from '@/tours/wingsSideTourViewModel'
+import { getCurrentSiteSettings } from './getSiteSettings'
 
 type PayloadLike = Pick<Awaited<ReturnType<typeof getPayload>>, 'find'>
 
@@ -23,6 +24,7 @@ export const queryPublishedPageLocalesByExactPath = async ({
 }): Promise<SupportedLocaleCode[]> => {
   const payload = payloadOverride || (await getPayload({ config: configPromise }))
   const site = await getCurrentSite()
+  const settings = site.code === 'wings-group' ? await getCurrentSiteSettings() : undefined
   const locales = getSiteSitemapLocales(site)
   const normalizedPathname = normalizePathname(requestedPath)
   const siteID = typeof site === 'object' && site ? site.id : site
@@ -41,7 +43,10 @@ export const queryPublishedPageLocalesByExactPath = async ({
       select: {
         hero: true,
         layout: true,
+        pathname: true,
+        slug: true,
         title: true,
+        wingsGroupRoute: true,
       },
       where: {
         and: [
@@ -95,6 +100,7 @@ export const queryPublishedPageLocalesByExactPath = async ({
         locale: candidateLocale,
         page: result.docs?.[0],
         pathname: normalizedPathname,
+        settings,
         siteCode: typeof site === 'object' ? site.code : undefined,
       })
     ) {

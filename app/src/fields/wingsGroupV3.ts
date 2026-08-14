@@ -1,4 +1,5 @@
 import type { CollectionBeforeChangeHook, Field } from 'payload'
+import { WINGSGROUP_LEGAL_IDENTITY } from '@/wingsgroup/corporateRoutes'
 
 const HTTPS_URL = /^https:\/\//i
 const SHA256 = /^[a-f0-9]{64}$/
@@ -87,6 +88,13 @@ export const validateWingsGroupV3Settings: CollectionBeforeChangeHook = ({ data,
   if (privacy.retentionMonths !== 24) throw new Error('WingsGroup v3 giữ lead tối đa 24 tháng.')
   if (!asString(privacy.dataSubjectContact)) {
     throw new Error('WingsGroup v3 cần đầu mối dữ liệu cá nhân.')
+  }
+
+  const legalIdentity = asRecord(settings.legalIdentity)
+  for (const [field, expected] of Object.entries(WINGSGROUP_LEGAL_IDENTITY)) {
+    if (asString(legalIdentity[field]) !== expected) {
+      throw new Error(`WingsGroup v3 legal identity không hợp lệ: ${field}.`)
+    }
   }
 
   const channelsResult = validateConsultationChannels(settings.consultationChannels)
@@ -243,6 +251,25 @@ export const wingsGroupV3SettingsField: Field = {
           label: 'Policy route (EN)',
           type: 'text',
         },
+      ],
+    },
+    {
+      name: 'legalIdentity',
+      label: 'Approved legal identity',
+      type: 'group',
+      admin: {
+        description:
+          'Dữ liệu pháp nhân đã được chốt cho E09; không thêm chứng nhận, đối tác hoặc review chưa có nguồn.',
+      },
+      fields: [
+        { name: 'legalEntityName', label: 'Tên pháp nhân', type: 'text' },
+        { name: 'internationalName', label: 'Tên quốc tế / viết tắt', type: 'text' },
+        { name: 'registeredOffice', label: 'Trụ sở đăng ký', type: 'textarea' },
+        { name: 'travelOffice', label: 'Văn phòng du lịch', type: 'textarea' },
+        { name: 'registrationNumber', label: 'Mã số doanh nghiệp', type: 'text' },
+        { name: 'licenceNumber', label: 'Giấy phép lữ hành quốc tế', type: 'text' },
+        { name: 'legalRepresentative', label: 'Người đại diện pháp luật', type: 'text' },
+        { name: 'relationshipStatement', label: 'Quan hệ thương hiệu', type: 'textarea' },
       ],
     },
     {

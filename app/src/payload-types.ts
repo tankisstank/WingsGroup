@@ -447,6 +447,19 @@ export interface SiteSetting {
       policyRouteEn?: string | null;
     };
     /**
+     * Dữ liệu pháp nhân đã được chốt cho E09; không thêm chứng nhận, đối tác hoặc review chưa có nguồn.
+     */
+    legalIdentity?: {
+      legalEntityName?: string | null;
+      internationalName?: string | null;
+      registeredOffice?: string | null;
+      travelOffice?: string | null;
+      registrationNumber?: string | null;
+      licenceNumber?: string | null;
+      legalRepresentative?: string | null;
+      relationshipStatement?: string | null;
+    };
+    /**
      * Kênh chưa cấu hình không chặn release. Chỉ state approved mới được mở URL public.
      */
     consultationChannels?:
@@ -1106,6 +1119,29 @@ export interface Page {
    */
   relatedPages?: (number | Page)[] | null;
   publishedAt?: string | null;
+  /**
+   * Fail-closed publication contract for the nine E09 WingsGroup routes. Approval fields are operator controlled.
+   */
+  wingsGroupRoute?: {
+    managedBy?: 'wingsgroup-v3' | null;
+    archetype?: ('home' | 'corporate' | 'capability' | 'trust' | 'editorial' | 'contact' | 'policy') | null;
+    publication?: {
+      vi?: ('hidden' | 'pending' | 'approved') | null;
+      en?: ('hidden' | 'pending' | 'approved') | null;
+    };
+    /**
+     * Policy remains non-public until every field is present and approval state is approved.
+     */
+    policy?: {
+      legalOwner?: string | null;
+      legalEntity?: string | null;
+      scope?: string | null;
+      effectiveDate?: string | null;
+      version?: string | null;
+      approvalState?: ('pending' | 'approved' | 'rejected') | null;
+      approvalReference?: string | null;
+    };
+  };
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -2979,6 +3015,18 @@ export interface SiteSettingsSelect<T extends boolean = true> {
               policyRouteVi?: T;
               policyRouteEn?: T;
             };
+        legalIdentity?:
+          | T
+          | {
+              legalEntityName?: T;
+              internationalName?: T;
+              registeredOffice?: T;
+              travelOffice?: T;
+              registrationNumber?: T;
+              licenceNumber?: T;
+              legalRepresentative?: T;
+              relationshipStatement?: T;
+            };
         consultationChannels?:
           | T
           | {
@@ -3452,6 +3500,29 @@ export interface PagesSelect<T extends boolean = true> {
       };
   relatedPages?: T;
   publishedAt?: T;
+  wingsGroupRoute?:
+    | T
+    | {
+        managedBy?: T;
+        archetype?: T;
+        publication?:
+          | T
+          | {
+              vi?: T;
+              en?: T;
+            };
+        policy?:
+          | T
+          | {
+              legalOwner?: T;
+              legalEntity?: T;
+              scope?: T;
+              effectiveDate?: T;
+              version?: T;
+              approvalState?: T;
+              approvalReference?: T;
+            };
+      };
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;

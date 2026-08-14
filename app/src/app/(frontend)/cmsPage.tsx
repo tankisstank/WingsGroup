@@ -30,6 +30,10 @@ import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 import { queryPublishedPageLocalesByExactPath } from '@/utilities/pageLocaleInventory'
 import {
+  getWingsGroupRouteDefinition,
+  isWingsGroupRoutePublic,
+} from '@/wingsgroup/corporateRoutes'
+import {
   isRetailTourEnabledSiteCode,
   isStructuredTourDetailEnabledSiteCode,
 } from '@/utilities/siteCapabilities'
@@ -248,6 +252,10 @@ export async function renderCmsPageByPath({
     requestedPath === '/' &&
     settings?.wingsGroupV3?.enabled === true &&
     isWingsGroupV3HomeLayout(page.layout)
+  const wingsGroupRoute =
+    site.code === 'wings-group' && settings?.wingsGroupV3?.enabled === true
+      ? getWingsGroupRouteDefinition(requestedPath)
+      : null
 
   return (
     <article
@@ -256,6 +264,7 @@ export async function renderCmsPageByPath({
       }
       data-hifi-body={useHiFiBody ? 'true' : 'false'}
       data-wingsgroup-v3-home={useWingsGroupV3Home ? 'true' : 'false'}
+      data-wingsgroup-v3-route={wingsGroupRoute?.archetype}
     >
       <JsonLd
         data={[
@@ -456,7 +465,13 @@ const queryPageByPath = async ({
 
   const localizedPage = await findPage(locale)
 
-  return hasRenderableLocalizedContent(localizedPage) ? localizedPage : null
+  if (!hasRenderableLocalizedContent(localizedPage)) return null
+  if (draft) return localizedPage
+
+  const settings = await getCurrentSiteSettings()
+  return isWingsGroupRoutePublic({ locale: locale || 'vi', page: localizedPage, settings, siteCode: site.code })
+    ? localizedPage
+    : null
 }
 
 const resolveStructuredTourPage = async ({

@@ -1,0 +1,80 @@
+import type { Field } from 'payload'
+
+export const wingsGroupCorporateRouteField: Field = {
+  name: 'wingsGroupRoute',
+  label: 'WingsGroup corporate route governance',
+  type: 'group',
+  admin: {
+    description:
+      'Fail-closed publication contract for the nine E09 WingsGroup routes. Approval fields are operator controlled.',
+    position: 'sidebar',
+  },
+  fields: [
+    {
+      name: 'managedBy',
+      label: 'Contract',
+      type: 'select',
+      options: [{ label: 'WingsGroup v3', value: 'wingsgroup-v3' }],
+    },
+    {
+      name: 'archetype',
+      label: 'Route archetype',
+      type: 'select',
+      options: [
+        { label: 'Home', value: 'home' },
+        { label: 'Corporate', value: 'corporate' },
+        { label: 'Capability', value: 'capability' },
+        { label: 'Trust', value: 'trust' },
+        { label: 'Editorial', value: 'editorial' },
+        { label: 'Contact', value: 'contact' },
+        { label: 'Policy', value: 'policy' },
+      ],
+    },
+    {
+      name: 'publication',
+      label: 'Localized publication gates',
+      type: 'group',
+      fields: [
+        {
+          name: 'vi',
+          label: 'Vietnamese',
+          type: 'select',
+          defaultValue: 'hidden',
+          options: ['hidden', 'pending', 'approved'],
+        },
+        {
+          name: 'en',
+          label: 'English',
+          type: 'select',
+          defaultValue: 'hidden',
+          options: ['hidden', 'pending', 'approved'],
+        },
+      ],
+    },
+    {
+      name: 'policy',
+      label: 'Policy approval',
+      type: 'group',
+      admin: {
+        condition: (_data, siblingData) => siblingData?.archetype === 'policy',
+        description:
+          'Policy remains non-public until every field is present and approval state is approved.',
+      },
+      fields: [
+        { name: 'legalOwner', label: 'Legal owner', type: 'text' },
+        { name: 'legalEntity', label: 'Legal entity', type: 'text' },
+        { name: 'scope', label: 'Policy scope', type: 'textarea' },
+        { name: 'effectiveDate', label: 'Effective date', type: 'date' },
+        { name: 'version', label: 'Version', type: 'text' },
+        {
+          name: 'approvalState',
+          label: 'Approval state',
+          type: 'select',
+          defaultValue: 'pending',
+          options: ['pending', 'approved', 'rejected'],
+        },
+        { name: 'approvalReference', label: 'Approval evidence/reference', type: 'text' },
+      ],
+    },
+  ],
+}
