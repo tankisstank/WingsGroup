@@ -51,11 +51,26 @@ const media = (id: number, alt: string, usageScope?: 'editorial-service'): Media
         { format: 'webp', sha256: sha, url: 'https://cdn.example/a.webp', width: 1280 },
         { format: 'avif', sha256: sha, url: 'https://cdn.example/a.avif', width: 1280 },
       ],
+      provenanceReference: `manifest:media-${id}`,
+      rightsEvidence: 'stakeholder-rights-approval',
       rightsState: 'approved',
+      sourceArchiveSha256: sha,
+      sourceAttachmentId: 'attachment-1',
+      sourceFileSha256: sha,
+      sourceIdentity: `attachment-1:${sha}`,
       usageScope,
     },
     id,
-    site: 1,
+    site: {
+      code: 'wings-group',
+      createdAt: '2026-08-14T00:00:00.000Z',
+      defaultLocale: 'vi',
+      id: 1,
+      name: 'WingsGroup',
+      primaryDomain: 'wingsgroup.vn',
+      supportedLocales: ['vi', 'en'],
+      updatedAt: '2026-08-14T00:00:00.000Z',
+    },
     updatedAt: '2026-08-14T00:00:00.000Z',
     url: `/media/${id}.png`,
   }) as Media
@@ -63,6 +78,7 @@ const media = (id: number, alt: string, usageScope?: 'editorial-service'): Media
 const profile = (
   brandKey: WingsGroupEcosystemBlock['profiles'][number]['brandKey'],
   brandName: string,
+  overrides: Partial<WingsGroupEcosystemBlock['profiles'][number]> = {},
 ): WingsGroupEcosystemBlock['profiles'][number] => ({
   brandKey,
   brandName,
@@ -74,6 +90,7 @@ const profile = (
   proofState: 'pending',
   serviceScope: [{ label: 'Travel planning' }],
   stageMedia: media(brandKey === 'wingsgo' ? 1 : 2, `${brandName} editorial scene`),
+  ...overrides,
 })
 
 beforeEach(() => {
@@ -137,6 +154,25 @@ describe('WingsGroup v3 public components', () => {
     expect(wingSide.getAttribute('aria-selected')).toBe('true')
     fireEvent.keyDown(wingSide, { key: 'Home' })
     expect(document.activeElement).toBe(wingsGo)
+  })
+
+  it('does not present profile proofState as verified without an approved proof record key', () => {
+    render(
+      <WingsGroupEcosystemComponent
+        blockType="wingsGroupEcosystem"
+        profiles={[
+          profile('wingsgo', 'WingsGo', {
+            proofReferences: [{ key: 'unverified-reference' }],
+            proofState: 'approved',
+          }),
+          profile('wing-side', 'WingSide'),
+        ]}
+        title="Ecosystem"
+      />,
+    )
+
+    expect(screen.getByText('Đang cập nhật')).toBeTruthy()
+    expect(screen.queryByText('Đã có thông tin được xác minh')).toBeNull()
   })
 
   it('renders a neutral pending Proof Archive without unapproved claims or media', () => {

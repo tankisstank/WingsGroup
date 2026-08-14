@@ -472,6 +472,71 @@
   max-width: 42rem;
 }
 
+.editorialIntro {
+  margin-bottom: clamp(1.75rem, 4vw, 3rem);
+  max-width: 48rem;
+}
+
+.editorialGrid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.editorialCard {
+  background: color-mix(in oklch, var(--site-surface) 90%, white);
+  border: 1px solid var(--site-border);
+  border-radius: var(--site-radius);
+  display: grid;
+  grid-template-rows: 16rem 1fr;
+  overflow: hidden;
+}
+
+.editorialMedia {
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+.editorialMedia :global(picture),
+.editorialMedia :global(img) {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.editorialCopy {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1.25rem;
+}
+
+.editorialCopy h3 {
+  font-size: 1.35rem;
+  line-height: 1.3;
+}
+
+.editorialCopy a {
+  color: var(--site-brand);
+  font-weight: 700;
+  min-height: 44px;
+  padding-block: 0.65rem;
+  width: fit-content;
+}
+
+.editorialMeta {
+  color: var(--muted-foreground);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  gap: 0.65rem;
+}
+
+.editorialAuthor {
+  color: var(--muted-foreground);
+  font-size: 0.86rem;
+}
+
 @media (max-width: 850px) {
   .hero {
     min-height: 0;
@@ -531,6 +596,10 @@
   }
 
   .proofGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .editorialGrid {
     grid-template-columns: minmax(0, 1fr);
   }
 }

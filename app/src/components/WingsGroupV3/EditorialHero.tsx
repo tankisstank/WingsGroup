@@ -12,7 +12,7 @@ import { resolveHeroPresentationConfig } from '@/heros/presentations/resolver'
 import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
 import type { SupportedLocaleCode } from '@/utilities/locales'
 
-import { isWingsGroupPublishedMedia, resolveSafeHeroLinks } from './model'
+import { areAllHeroMediaGoverned, isWingsGroupPublishedMedia, resolveSafeHeroLinks } from './model'
 import styles from './WingsGroupV3.module.css'
 import { useReducedMotion } from './useReducedMotion'
 
@@ -53,6 +53,7 @@ export const WingsGroupEditorialHero = (props: Props) => {
   const [manualPaused, setManualPaused] = useState(false)
   const [pageVisible, setPageVisible] = useState(true)
   const safeLinks = resolveSafeHeroLinks(links, resolvedLocale)
+  const allHeroMediaGoverned = areAllHeroMediaGoverned(props)
 
   const pauseForInteraction = () => {
     setInteractionPaused(true)
@@ -65,7 +66,7 @@ export const WingsGroupEditorialHero = (props: Props) => {
         description: slide.description,
         eyebrow: slide.eyebrow,
         id: slide.id || `slide-${index}`,
-        media: isWingsGroupPublishedMedia(slide.media) ? slide.media : null,
+        media: allHeroMediaGoverned && isWingsGroupPublishedMedia(slide.media) ? slide.media : null,
         title: slide.title,
       }))
     }
@@ -75,11 +76,11 @@ export const WingsGroupEditorialHero = (props: Props) => {
         description: null,
         eyebrow: null,
         id: 'primary',
-        media: isWingsGroupPublishedMedia(media) ? media : null,
+        media: allHeroMediaGoverned && isWingsGroupPublishedMedia(media) ? media : null,
         title: null,
       },
     ]
-  }, [media, slides])
+  }, [allHeroMediaGoverned, media, slides])
 
   const activeStory = heroStories[activeIndex] || heroStories[0]
   const autoplay =

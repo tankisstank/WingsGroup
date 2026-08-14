@@ -11,7 +11,10 @@ import { isWingsGroupPublishedMedia, resolveEcosystemCTA } from './model'
 import styles from './WingsGroupV3.module.css'
 import { useReducedMotion } from './useReducedMotion'
 
-type Props = WingsGroupEcosystemBlock & { locale?: null | string }
+type Props = WingsGroupEcosystemBlock & {
+  approvedProofKeys?: readonly string[]
+  locale?: null | string
+}
 
 const copyByLocale = {
   en: {
@@ -32,7 +35,14 @@ const copyByLocale = {
   },
 } as const
 
-export const EcosystemExplorer = ({ description, eyebrow, locale, profiles, title }: Props) => {
+export const EcosystemExplorer = ({
+  approvedProofKeys = [],
+  description,
+  eyebrow,
+  locale,
+  profiles,
+  title,
+}: Props) => {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [manualPause, setManualPause] = useState(false)
@@ -86,12 +96,16 @@ export const EcosystemExplorer = ({ description, eyebrow, locale, profiles, titl
   }
 
   const cta = resolveEcosystemCTA(activeProfile, locale)
-  const proofLabel =
-    activeProfile.proofState === 'approved'
-      ? copy.approved
-      : activeProfile.proofState === 'not-applicable'
-        ? copy.notApplicable
-        : copy.pending
+  const hasApprovedProof =
+    activeProfile.proofState === 'approved' &&
+    (activeProfile.proofReferences || []).some((reference) =>
+      approvedProofKeys.includes(reference.key),
+    )
+  const proofLabel = hasApprovedProof
+    ? copy.approved
+    : activeProfile.proofState === 'not-applicable'
+      ? copy.notApplicable
+      : copy.pending
   const panelID = `${id}-ecosystem-panel`
   const media = isWingsGroupPublishedMedia(activeProfile.stageMedia)
     ? activeProfile.stageMedia
@@ -192,7 +206,7 @@ export const EcosystemExplorer = ({ description, eyebrow, locale, profiles, titl
                 </ul>
                 <p
                   className={styles.proofState}
-                  data-state={activeProfile.proofState === 'approved' ? 'approved' : 'pending'}
+                  data-state={hasApprovedProof ? 'approved' : 'pending'}
                 >
                   {proofLabel}
                 </p>

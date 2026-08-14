@@ -1,20 +1,45 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  areAllHeroMediaGoverned,
   composeWingsGroupHomeBlocks,
   getApprovedProofRecords,
+  getWingsGroupSwitcherLocales,
   getWingsGroupHomeSection,
+  isGovernedEditorialPost,
+  isSafeSameSiteHref,
+  isWingsGroupV3HomeLayout,
   isWingsGroupPublishedMedia,
   normalizeWingSidePath,
+  resolveGovernedEditorialSelection,
   resolveEcosystemCTA,
   resolveSafeHeroLinks,
 } from '@/components/WingsGroupV3/model'
-import type { Media, Page, WingsGroupEcosystemBlock } from '@/payload-types'
+import type {
+  ArchiveBlock,
+  Media,
+  Page,
+  Post,
+  Site,
+  WingsGroupEcosystemBlock,
+} from '@/payload-types'
+import { localeMetadata } from '@/utilities/locales'
 
 const sha = 'a'.repeat(64)
-
-const governedMedia = (overrides: Partial<Media> = {}): Media =>
+const site = (code = 'wings-group'): Site =>
   ({
+    code,
+    createdAt: '2026-08-14T00:00:00.000Z',
+    defaultLocale: 'vi',
+    id: code === 'wings-group' ? 1 : 2,
+    name: code,
+    primaryDomain: `${code}.example`,
+    supportedLocales: ['vi', 'en'],
+    updatedAt: '2026-08-14T00:00:00.000Z',
+  }) as Site
+
+const governedMedia = (overrides: Partial<Media> = {}): Media => {
+  const base = {
     alt: 'A governed WingsGroup editorial scene',
     createdAt: '2026-08-14T00:00:00.000Z',
     governance: {
@@ -25,14 +50,56 @@ const governedMedia = (overrides: Partial<Media> = {}): Media =>
         { format: 'webp', sha256: sha, url: 'https://cdn.example/a.webp', width: 1280 },
         { format: 'avif', sha256: sha, url: 'https://cdn.example/a.avif', width: 1280 },
       ],
+      provenanceReference: 'docs/product/wingsgroup-v3-media-manifest.json#media-a',
+      rightsEvidence: 'stakeholder-rights-approval',
       rightsState: 'approved',
+      sourceArchiveSha256: sha,
+      sourceAttachmentId: 'attachment-1',
+      sourceFileSha256: sha,
+      sourceIdentity: `attachment-1:${sha}`,
     },
     id: 1,
-    site: 1,
+    site: site(),
     updatedAt: '2026-08-14T00:00:00.000Z',
     url: '/media/a.png',
+  } as Media
+
+  return {
+    ...base,
     ...overrides,
-  }) as Media
+    governance: { ...base.governance, ...overrides.governance },
+  } as Media
+}
+
+const editorialPost = (overrides: Partial<Post> = {}): Post => ({
+  _status: 'published',
+  authors: [1],
+  categories: [
+    {
+      createdAt: '2026-08-14T00:00:00.000Z',
+      id: 1,
+      site: site(),
+      slug: 'insights',
+      title: 'Insights',
+      updatedAt: '2026-08-14T00:00:00.000Z',
+    },
+  ],
+  content: { root: {} } as never,
+  createdAt: '2026-08-14T00:00:00.000Z',
+  id: 1,
+  meta: {
+    image: governedMedia({
+      governance: { ...governedMedia().governance, usageScope: 'editorial-service' },
+    }),
+  },
+  populatedAuthors: [{ id: '1', name: 'WingsGroup Editorial Team' }],
+  publishedAt: '2026-08-14T00:00:00.000Z',
+  site: site(),
+  slug: 'considered-travel',
+  title: 'Considered travel',
+  updatedAt: '2026-08-14T00:00:00.000Z',
+  ...overrides,
+})
 
 const profile = (
   overrides: Partial<WingsGroupEcosystemBlock['profiles'][number]> = {},
@@ -59,6 +126,47 @@ describe('WingsGroup v3 public view model', () => {
       ),
     ).toBe(false)
     expect(isWingsGroupPublishedMedia(governedMedia({ alt: '' }))).toBe(false)
+    expect(isWingsGroupPublishedMedia(governedMedia({ site: site('wings-go') }))).toBe(false)
+    expect(
+      isWingsGroupPublishedMedia(
+        governedMedia({ governance: { ...governedMedia().governance, rightsEvidence: '' } }),
+      ),
+    ).toBe(false)
+    expect(
+      isWingsGroupPublishedMedia(
+        governedMedia({
+          governance: {
+            ...governedMedia().governance,
+            responsiveDerivatives: [
+              { format: 'webp', sha256: 'bad', url: '//evil.example/a.webp', width: 1280 },
+              { format: 'avif', sha256: sha, url: 'https://cdn.example/a.avif', width: 1280 },
+            ],
+          },
+        }),
+      ),
+    ).toBe(false)
+  })
+
+  it('rejects scheme-relative, backslash, control and encoded externalization paths', () => {
+    for (const unsafe of [
+      '//evil.example/path',
+      '/\\evil.example/path',
+      '/safe\nnext',
+      '/%2f%2fevil.example',
+      '/%5cevil.example',
+    ]) {
+      expect(isSafeSameSiteHref(unsafe)).toBe(false)
+      expect(
+        resolveEcosystemCTA(
+          profile({ cta: { contactPath: unsafe, label: 'Contact', state: 'contact-fallback' } }),
+        ).href,
+      ).toBe('/lien-he#contact-form')
+      expect(
+        resolveSafeHeroLinks([{ link: { label: 'Unsafe', type: 'custom', url: unsafe } }])[0].url,
+      ).toBe('#ecosystem')
+    }
+    expect(isSafeSameSiteHref('/lien-he?source=home#contact-form')).toBe(true)
+    expect(isSafeSameSiteHref('#ecosystem')).toBe(true)
   })
 
   it('fails deep links closed and never emits the legacy WingSide slug', () => {
@@ -144,7 +252,7 @@ describe('WingsGroup v3 public view model', () => {
     const proof = block('wingsGroupProofArchive')
     const editorial = block('archive')
     const contact = block('formBlock')
-    const blocks = [contact, block('featureGrid'), proof, ecosystem, trust, editorial, trust]
+    const blocks = [contact, block('featureGrid'), proof, ecosystem, trust, editorial]
 
     expect(composeWingsGroupHomeBlocks(blocks)).toEqual([
       ecosystem,
@@ -160,5 +268,76 @@ describe('WingsGroup v3 public view model', () => {
       'editorial',
       'contact',
     ])
+    expect(isWingsGroupV3HomeLayout(blocks)).toBe(true)
+    expect(isWingsGroupV3HomeLayout(blocks.filter((item) => item !== contact))).toBe(false)
+    expect(isWingsGroupV3HomeLayout([...blocks, trust])).toBe(false)
+  })
+
+  it('gates every populated hero media relation as one fail-closed set', () => {
+    const hero = {
+      media: governedMedia(),
+      slides: [
+        {
+          media: governedMedia({ id: 2 }),
+          mobileMedia: governedMedia({ id: 3 }),
+        },
+      ],
+      supportingMedia: [governedMedia({ id: 4 })],
+      type: 'highImpact' as const,
+      video: { poster: governedMedia({ id: 5 }) },
+    } as Page['hero']
+
+    expect(areAllHeroMediaGoverned(hero)).toBe(true)
+    expect(
+      areAllHeroMediaGoverned({
+        ...hero,
+        supportingMedia: [governedMedia({ site: site('wings-care') })],
+      }),
+    ).toBe(false)
+    expect(areAllHeroMediaGoverned({ type: 'highImpact' } as Page['hero'])).toBe(false)
+  })
+
+  it('hides English from the WingsGroup shell until editorial approval', () => {
+    const locales = localeMetadata.filter((item) => item.code === 'vi' || item.code === 'en')
+    expect(getWingsGroupSwitcherLocales([...locales], 'hidden').map((item) => item.code)).toEqual([
+      'vi',
+    ])
+    expect(
+      getWingsGroupSwitcherLocales([...locales], 'route-ready').map((item) => item.code),
+    ).toEqual(['vi'])
+    expect(getWingsGroupSwitcherLocales([...locales], 'approved').map((item) => item.code)).toEqual(
+      ['vi', 'en'],
+    )
+  })
+
+  it('accepts exactly three fully governed editorial posts and rejects arbitrary selections', () => {
+    const block = {
+      blockType: 'archive',
+      limit: 3,
+      populateBy: 'collection',
+    } as ArchiveBlock
+    const posts = [
+      editorialPost({ id: 1 }),
+      editorialPost({ id: 2, slug: 'two' }),
+      editorialPost({ id: 3, slug: 'three' }),
+    ]
+
+    expect(posts.every(isGovernedEditorialPost)).toBe(true)
+    expect(resolveGovernedEditorialSelection(block, posts)).toHaveLength(3)
+    expect(resolveGovernedEditorialSelection({ ...block, limit: 4 }, posts)).toEqual([])
+    expect(
+      resolveGovernedEditorialSelection(block, [
+        posts[0],
+        editorialPost({ id: 4, site: site('wings-go') }),
+        posts[2],
+      ]),
+    ).toEqual([])
+    expect(
+      resolveGovernedEditorialSelection(block, [
+        posts[0],
+        editorialPost({ id: 5, populatedAuthors: [] }),
+        posts[2],
+      ]),
+    ).toEqual([])
   })
 })

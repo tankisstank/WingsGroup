@@ -20,6 +20,7 @@ export async function Header() {
       data={{
         navItems: settings?.headerNavItems || [],
       }}
+      englishPublicationState={settings?.wingsGroupV3?.englishPublicationState}
       accentColor={settings?.branding?.accentColor}
       brandColor={settings?.branding?.brandColor}
       logoImage={

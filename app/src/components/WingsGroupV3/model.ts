@@ -1,9 +1,13 @@
 import type {
+  ArchiveBlock,
+  Category,
   Media,
   Page,
+  Post,
   WingsGroupEcosystemBlock,
   WingsGroupProofArchiveBlock,
 } from '@/payload-types'
+import type { LocaleMetadata } from '@/utilities/locales'
 
 export type WingsGroupHomeSection = 'ecosystem' | 'trust' | 'proof' | 'editorial' | 'contact'
 
@@ -12,6 +16,9 @@ type EcosystemProfile = WingsGroupEcosystemBlock['profiles'][number]
 type ProofRecord = NonNullable<WingsGroupProofArchiveBlock['records']>[number]
 
 const text = (value: unknown): string => (typeof value === 'string' ? value.trim() : '')
+const SHA256 = /^[a-f0-9]{64}$/
+const SOURCE_IDENTITY = /^.+:[a-f0-9]{64}$/
+const UNSAFE_HREF = /[\\\u0000-\u001f\u007f]|%(?:0[0-9a-f]|1[0-9a-f]|2f|5c|7f)/i
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value)
@@ -31,8 +38,35 @@ const hasLegacyWingSidePath = (value: string): boolean => {
 export const normalizeWingSidePath = (value: string): string =>
   value.replace(/(^|\/)wingsside(?=\/|[?#]|$)/gi, '$1wing-side')
 
+export const isSafeSameSiteHref = (value: unknown): value is string => {
+  const href = text(value)
+  if (!href || UNSAFE_HREF.test(href)) return false
+  if (href.startsWith('#')) return /^#[a-z0-9][a-z0-9._:-]*$/i.test(href)
+  if (!href.startsWith('/') || href.startsWith('//')) return false
+
+  try {
+    const parsed = new URL(href, 'https://wingsgroup.invalid')
+    return parsed.origin === 'https://wingsgroup.invalid' && parsed.pathname.startsWith('/')
+  } catch {
+    return false
+  }
+}
+
+const hasGovernedDerivative = (value: unknown, format: 'avif' | 'webp'): boolean => {
+  if (!isRecord(value) || value.format !== format) return false
+  return (
+    Number.isFinite(value.width) &&
+    Number(value.width) > 0 &&
+    /^https:\/\//i.test(text(value.url)) &&
+    SHA256.test(text(value.sha256))
+  )
+}
+
 export const isWingsGroupPublishedMedia = (value: unknown): value is Media => {
   if (!isRecord(value) || !text(value.url) || !text(value.alt)) return false
+
+  const site = isRecord(value.site) ? value.site : null
+  if (!site || site.code !== 'wings-group') return false
 
   const governance = isRecord(value.governance) ? value.governance : null
   if (!governance) return false
@@ -40,16 +74,38 @@ export const isWingsGroupPublishedMedia = (value: unknown): value is Media => {
   const derivatives = Array.isArray(governance.responsiveDerivatives)
     ? governance.responsiveDerivatives.filter(isRecord)
     : []
-  const formats = new Set(derivatives.map((item) => text(item.format)))
+  const sourceAttachmentID = text(governance.sourceAttachmentId)
+  const sourceFileSha256 = text(governance.sourceFileSha256)
+  const sourceIdentity = text(governance.sourceIdentity)
 
   return (
     governance.managedBy === 'wingsgroup-v3' &&
     governance.publicationState === 'published' &&
     governance.rightsState === 'approved' &&
     governance.derivativeState === 'verified' &&
-    formats.has('webp') &&
-    formats.has('avif')
+    SOURCE_IDENTITY.test(sourceIdentity) &&
+    Boolean(sourceAttachmentID) &&
+    SHA256.test(text(governance.sourceArchiveSha256)) &&
+    SHA256.test(sourceFileSha256) &&
+    sourceIdentity === `${sourceAttachmentID}:${sourceFileSha256}` &&
+    Boolean(text(governance.provenanceReference)) &&
+    Boolean(text(governance.rightsEvidence)) &&
+    derivatives.some((item) => hasGovernedDerivative(item, 'webp')) &&
+    derivatives.some((item) => hasGovernedDerivative(item, 'avif'))
   )
+}
+
+export const areAllHeroMediaGoverned = (hero: Page['hero']): boolean => {
+  const relations: unknown[] = [
+    hero.media,
+    ...(hero.supportingMedia || []),
+    ...(hero.slides || []).flatMap((slide) => [slide.media, slide.mobileMedia]),
+    hero.video?.desktopVideo,
+    hero.video?.mobileVideo,
+    hero.video?.poster,
+  ].filter((value) => value !== null && value !== undefined)
+
+  return relations.length > 0 && relations.every(isWingsGroupPublishedMedia)
 }
 
 export type ResolvedEcosystemCTA = {
@@ -88,8 +144,8 @@ export const resolveEcosystemCTA = (
 
   const requestedFallback = text(cta.contactPath)
   const safeFallback =
-    requestedFallback.startsWith('/') && !hasLegacyWingSidePath(requestedFallback)
-      ? requestedFallback
+    isSafeSameSiteHref(requestedFallback) && !hasLegacyWingSidePath(requestedFallback)
+      ? normalizeWingSidePath(requestedFallback)
       : fallbackPath
 
   return {
@@ -132,7 +188,6 @@ export const getWingsGroupHomeSection = (block: LayoutBlock): WingsGroupHomeSect
   const name = normalizedBlockName(block)
   if (name.includes('trust')) return 'trust'
   if (name.includes('editorial')) return 'editorial'
-  if (name.includes('contact') && block.blockType === 'cta') return 'contact'
 
   return null
 }
@@ -163,8 +218,18 @@ export const composeWingsGroupHomeBlocks = (blocks: LayoutBlock[]): LayoutBlock[
   )
 }
 
-export const isWingsGroupV3HomeLayout = (blocks: LayoutBlock[]): boolean =>
-  blocks.some((block) => block.blockType === 'wingsGroupEcosystem')
+export const isWingsGroupV3HomeLayout = (blocks: LayoutBlock[]): boolean => {
+  const counts = new Map<WingsGroupHomeSection, number>(
+    WINGS_GROUP_HOME_ORDER.map((section) => [section, 0]),
+  )
+
+  for (const block of blocks) {
+    const section = getWingsGroupHomeSection(block)
+    if (section) counts.set(section, (counts.get(section) || 0) + 1)
+  }
+
+  return WINGS_GROUP_HOME_ORDER.every((section) => counts.get(section) === 1)
+}
 
 type HeroLink = NonNullable<Page['hero']['links']>[number]['link']
 
@@ -192,11 +257,50 @@ export const resolveSafeHeroLinks = (
     if (candidate.type === 'reference' && isRecord(candidate.reference?.value)) return candidate
 
     const url = text(candidate.url)
-    if (!url || (!url.startsWith('/') && !url.startsWith('#'))) return defaultLink
+    if (!isSafeSameSiteHref(url)) return defaultLink
 
     return {
       ...candidate,
       url: normalizeWingSidePath(url),
     }
   }) as [SafeHeroLink, SafeHeroLink]
+}
+
+export const getWingsGroupSwitcherLocales = (
+  locales: LocaleMetadata[],
+  publicationState?: null | 'approved' | 'hidden' | 'route-ready',
+): LocaleMetadata[] =>
+  publicationState === 'approved' ? locales : locales.filter((locale) => locale.code !== 'en')
+
+const isWingsGroupCategory = (value: unknown): value is Category =>
+  isRecord(value) &&
+  isRecord(value.site) &&
+  value.site.code === 'wings-group' &&
+  Boolean(text(value.title))
+
+export const isGovernedEditorialPost = (value: unknown): value is Post => {
+  if (!isRecord(value) || value._status !== 'published') return false
+  if (!isRecord(value.site) || value.site.code !== 'wings-group') return false
+  if (!text(value.title) || !text(value.slug) || !text(value.publishedAt)) return false
+  if (Number.isNaN(Date.parse(text(value.publishedAt)))) return false
+
+  const authors = Array.isArray(value.populatedAuthors) ? value.populatedAuthors : []
+  if (!authors.some((author) => isRecord(author) && Boolean(text(author.name)))) return false
+
+  const categories = Array.isArray(value.categories) ? value.categories : []
+  if (categories.length === 0 || !categories.every(isWingsGroupCategory)) return false
+
+  const meta = isRecord(value.meta) ? value.meta : null
+  const image = meta?.image || value.heroImage
+  return isWingsGroupPublishedMedia(image) && image.governance?.usageScope === 'editorial-service'
+}
+
+export const resolveGovernedEditorialSelection = (
+  block: ArchiveBlock,
+  candidates: unknown[],
+): Post[] => {
+  if (block.populateBy === 'selection' && (block.selectedDocs?.length || 0) !== 3) return []
+  if (block.populateBy !== 'selection' && block.limit !== 3) return []
+  if (candidates.length !== 3 || !candidates.every(isGovernedEditorialPost)) return []
+  return candidates as Post[]
 }

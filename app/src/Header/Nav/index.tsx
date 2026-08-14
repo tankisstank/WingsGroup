@@ -16,9 +16,11 @@ import {
 } from '@/utilities/sitePaths'
 import { getWingsSideHiFiCta, getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 import { Globe2Icon, MenuIcon, SearchIcon, XIcon } from 'lucide-react'
+import { getWingsGroupSwitcherLocales } from '@/components/WingsGroupV3/model'
 
 export const HeaderNav: React.FC<{
   data: { navItems?: HeaderType['navItems'] }
+  englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
   primaryAction?: {
     label: string
     url: string
@@ -30,6 +32,7 @@ export const HeaderNav: React.FC<{
   themeKey?: string
 }> = ({
   data,
+  englishPublicationState,
   primaryAction,
   publicPathname,
   resolvedLocale = 'vi',
@@ -45,7 +48,11 @@ export const HeaderNav: React.FC<{
   const pathname = useSitePublicPathname()
   const searchParams = useSearchParams()
   const localeSwitchPathname = pathname || publicPathname || '/'
-  const switcherLocales = getPublicLocaleMetadataForSite(supportedLocales)
+  const availableLocales = getPublicLocaleMetadataForSite(supportedLocales)
+  const switcherLocales =
+    siteCode === 'wings-group'
+      ? getWingsGroupSwitcherLocales(availableLocales, englishPublicationState)
+      : availableLocales
   const isWingsSide = siteCode ? siteCode === 'wing-side' : themeKey === 'wings-side'
   const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
   const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null

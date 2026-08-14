@@ -19,8 +19,10 @@ import { WingsGroupEcosystemComponent } from '@/blocks/WingsGroupEcosystem/Compo
 import { WingsGroupProofArchiveComponent } from '@/blocks/WingsGroupProofArchive/Component'
 import {
   composeWingsGroupHomeBlocks,
+  getApprovedProofRecords,
   getWingsGroupHomeSection,
 } from '@/components/WingsGroupV3/model'
+import { WingsGroupEditorialRail } from '@/components/WingsGroupV3/EditorialRail'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -51,6 +53,11 @@ export const RenderBlocks: React.FC<{
 
   if (hasBlocks) {
     const renderedBlocks = wingsGroupV3Home ? composeWingsGroupHomeBlocks(blocks) : blocks
+    const proofBlock = renderedBlocks.find((block) => block.blockType === 'wingsGroupProofArchive')
+    const approvedProofKeys =
+      wingsGroupV3Home && proofBlock?.blockType === 'wingsGroupProofArchive'
+        ? getApprovedProofRecords(proofBlock.records).map((record) => record.key)
+        : []
 
     return (
       <Fragment>
@@ -58,15 +65,19 @@ export const RenderBlocks: React.FC<{
           const { blockType } = block
 
           if (blockType && blockType in blockComponents) {
-            const Block = blockComponents[blockType]
+            const Block =
+              wingsGroupV3Home && blockType === 'archive'
+                ? WingsGroupEditorialRail
+                : blockComponents[blockType]
 
             if (Block) {
               const blockProps =
-                block.blockType === 'credentialsCarousel' ||
-                block.blockType === 'wingsGroupEcosystem' ||
-                block.blockType === 'wingsGroupProofArchive'
-                  ? { ...block, locale }
-                  : block
+                block.blockType === 'wingsGroupEcosystem'
+                  ? { ...block, approvedProofKeys, locale }
+                  : block.blockType === 'credentialsCarousel' ||
+                      block.blockType === 'wingsGroupProofArchive'
+                    ? { ...block, locale }
+                    : block
               const section = wingsGroupV3Home ? getWingsGroupHomeSection(block) : null
 
               const renderedBlock = (

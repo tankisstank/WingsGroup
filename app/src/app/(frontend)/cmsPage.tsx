@@ -318,7 +318,7 @@ export async function renderCmsPageByPath({
             locale={locale}
             wingsGroupV3Home={useWingsGroupV3Home}
           />
-          <RelatedPages locale={locale} pages={relatedPages} />
+          {!useWingsGroupV3Home ? <RelatedPages locale={locale} pages={relatedPages} /> : null}
         </>
       )}
     </article>

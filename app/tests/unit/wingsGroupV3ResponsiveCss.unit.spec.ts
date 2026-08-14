@@ -7,6 +7,7 @@ const componentCss = path.resolve(
   '../../src/components/WingsGroupV3/WingsGroupV3.module.css',
 )
 const shellCss = path.resolve(import.meta.dirname, '../../src/app/(frontend)/wingsgroup-v3.css')
+const cmsPage = path.resolve(import.meta.dirname, '../../src/app/(frontend)/cmsPage.tsx')
 
 describe('WingsGroup v3 responsive CSS contract', () => {
   it('keeps the ecosystem frame fixed at 800px only above the compact breakpoint', () => {
@@ -32,5 +33,13 @@ describe('WingsGroup v3 responsive CSS contract', () => {
       true,
     )
     expect(css).toContain("data-wingsgroup-v3='true'")
+  })
+
+  it('keeps RelatedPages outside the fixed WingsGroup v3 home composition', () => {
+    const source = fs.readFileSync(cmsPage, 'utf8')
+
+    expect(source).toContain(
+      '!useWingsGroupV3Home ? <RelatedPages locale={locale} pages={relatedPages} /> : null',
+    )
   })
 })
