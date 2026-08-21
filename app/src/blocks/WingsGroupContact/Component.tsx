@@ -7,6 +7,7 @@ import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
 type Props = FormBlockType & {
   locale?: null | string
   siteCode?: null | string
+  wingsGroupV3?: boolean
 }
 
 export const WingsGroupContactSection = ({
@@ -14,6 +15,7 @@ export const WingsGroupContactSection = ({
   id: _id,
   locale,
   siteCode,
+  wingsGroupV3,
   ...formBlock
 }: Props) => (
   <section
@@ -40,6 +42,7 @@ export const WingsGroupContactSection = ({
         formOdId="contact-intake"
         siteCode={siteCode}
         submitOdId="contact-submit"
+        wingsGroupV3={wingsGroupV3}
       />
     </div>
   </section>

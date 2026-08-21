@@ -42,15 +42,13 @@ import { GET, POST } from '@/app/(payload)/api/lead-submissions/route'
 const inventory = loadMultisiteAuditInventory()
 const sitesWithForms = inventory.sites.filter((site) => site.formRouteSample)
 
-const request = (
-  {
-    bodyOverrides = {},
-    host = 'www.wingsgo.vn',
-  }: {
-    bodyOverrides?: Record<string, unknown>
-    host?: string
-  } = {},
-) =>
+const request = ({
+  bodyOverrides = {},
+  host = 'www.wingsgo.vn',
+}: {
+  bodyOverrides?: Record<string, unknown>
+  host?: string
+} = {}) =>
   new Request(`https://${host}/api/lead-submissions`, {
     body: JSON.stringify({
       formId: 7,
@@ -81,10 +79,21 @@ describe('lead submission endpoint integration', () => {
       logger: { error: vi.fn() },
       update: mocks.update,
     })
-    mocks.checkIPRateLimit.mockResolvedValue({ allowed: true, ipCount: 1, requiresChallenge: false })
+    mocks.checkIPRateLimit.mockResolvedValue({
+      allowed: true,
+      ipCount: 1,
+      requiresChallenge: false,
+    })
     mocks.checkValidatedRateLimits.mockResolvedValue({ allowed: true, formCount: 1, ipCount: 1 })
     mocks.find.mockResolvedValue({
-      docs: [{ fields: [{ blockType: 'text', label: 'Name', name: 'name', required: true }], id: 7, site: 1, title: 'Contact' }],
+      docs: [
+        {
+          fields: [{ blockType: 'text', label: 'Name', name: 'name', required: true }],
+          id: 7,
+          site: 1,
+          title: 'Contact',
+        },
+      ],
     })
     mocks.reserveIdempotency.mockResolvedValue(true)
     mocks.update.mockResolvedValue({ id: 99 })
@@ -139,10 +148,12 @@ describe('lead submission endpoint integration', () => {
     const response = await POST(request({ bodyOverrides: { turnstileToken: 'verified-token' } }))
 
     expect(response.status).toBe(202)
-    expect(mocks.verifyTurnstile).toHaveBeenCalledWith(expect.objectContaining({
-      expectedHosts: expect.arrayContaining(['wingsgo.vn', 'www.wingsgo.vn']),
-      token: 'verified-token',
-    }))
+    expect(mocks.verifyTurnstile).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expectedHosts: expect.arrayContaining(['wingsgo.vn', 'www.wingsgo.vn']),
+        token: 'verified-token',
+      }),
+    )
   })
 
   it('validates, site-rate-limits, creates once and queues durable delivery', async () => {
@@ -150,46 +161,56 @@ describe('lead submission endpoint integration', () => {
 
     expect(response.status).toBe(202)
     expect(mocks.checkValidatedRateLimits).toHaveBeenCalledWith({ formId: 7, siteCode: 'wingsgo' })
-    expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({
-      collection: 'form-submissions',
-      data: expect.objectContaining({ deliveryStatus: 'pending', form: 7, site: 1 }),
-      overrideAccess: true,
-    }))
+    expect(mocks.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'form-submissions',
+        data: expect.objectContaining({ deliveryStatus: 'pending', form: 7, site: 1 }),
+        overrideAccess: true,
+      }),
+    )
     expect(mocks.completeIdempotency).toHaveBeenCalledWith(expect.any(String), 99)
-    expect(mocks.jobsQueue).toHaveBeenCalledWith(expect.objectContaining({
-      queue: 'lead-notifications',
-      task: 'sendLeadNotification',
-    }))
-    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ deliveryStatus: 'queued' }),
-      id: 99,
-    }))
+    expect(mocks.jobsQueue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queue: 'lead-notifications',
+        task: 'sendLeadNotification',
+      }),
+    )
+    expect(mocks.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ deliveryStatus: 'queued' }),
+        id: 99,
+      }),
+    )
   })
 
   it('accepts normalized enquiry context without mixing it into customer submission fields', async () => {
-    const response = await POST(request({
-      bodyOverrides: {
-        context: {
-          discovery: { destination: 'sapa', duration: 'multi-day', style: 'culture' },
-          source: 'journeys',
-          tourId: '42',
-          tourSlug: 'sapa-trek-and-market',
+    const response = await POST(
+      request({
+        bodyOverrides: {
+          context: {
+            discovery: { destination: 'sapa', duration: 'multi-day', style: 'culture' },
+            source: 'journeys',
+            tourId: '42',
+            tourSlug: 'sapa-trek-and-market',
+          },
         },
-      },
-    }))
+      }),
+    )
 
     expect(response.status).toBe(202)
-    expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({
-        enquiryContext: {
-          discovery: { destination: 'sapa', duration: 'multi-day', style: 'culture' },
-          source: 'journeys',
-          tourId: '42',
-          tourSlug: 'sapa-trek-and-market',
-        },
-        submissionData: [{ field: 'name', value: 'Alice' }],
+    expect(mocks.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          enquiryContext: {
+            discovery: { destination: 'sapa', duration: 'multi-day', style: 'culture' },
+            source: 'journeys',
+            tourId: '42',
+            tourSlug: 'sapa-trek-and-market',
+          },
+          submissionData: [{ field: 'name', value: 'Alice' }],
+        }),
       }),
-    }))
+    )
   })
 
   it('fails closed for WingsGroup without consent and never persists a forged site/source context', async () => {
@@ -207,9 +228,14 @@ describe('lead submission endpoint integration', () => {
                 wingsGroupV3: {
                   enabled: true,
                   privacy: {
+                    approvalReference: 'privacy-approval-2026-08-14',
+                    approvalState: 'approved',
+                    consentEvidenceReference: 'consent-evidence-2026-08-14',
                     consentRequired: true,
                     consentVersion: 'wingsgroup-contact-v1',
                     dataSubjectContact: 'info@doicanhviet.com',
+                    dataSubjectRightsEvidence: 'rights-evidence-2026-08-14',
+                    dataSubjectRightsStatement: 'Legal-owner supplied rights statement.',
                     interBranchTransferAllowed: true,
                     policyRouteEn: '/en/chinh-sach-bao-mat',
                     policyRouteVi: '/chinh-sach-bao-mat',
@@ -273,9 +299,14 @@ describe('lead submission endpoint integration', () => {
                   consultationChannels: [{ key: 'zalo', state: 'unconfigured' }],
                   enabled: true,
                   privacy: {
+                    approvalReference: 'privacy-approval-2026-08-14',
+                    approvalState: 'approved',
+                    consentEvidenceReference: 'consent-evidence-2026-08-14',
                     consentRequired: true,
                     consentVersion: 'wingsgroup-contact-v1',
                     dataSubjectContact: 'info@doicanhviet.com',
+                    dataSubjectRightsEvidence: 'rights-evidence-2026-08-14',
+                    dataSubjectRightsStatement: 'Legal-owner supplied rights statement.',
                     interBranchTransferAllowed: true,
                     policyRouteEn: '/en/chinh-sach-bao-mat',
                     policyRouteVi: '/chinh-sach-bao-mat',
@@ -355,6 +386,82 @@ describe('lead submission endpoint integration', () => {
     consoleWarn.mockRestore()
   })
 
+  it('does not expose or persist WingsGroup leads while privacy approval is pending', async () => {
+    vi.stubEnv('LEAD_DELIVERY_REQUIRED', 'true')
+    mocks.getCurrentSite.mockResolvedValue({
+      code: 'wings-group',
+      id: 9,
+      primaryDomain: 'wingsgroup.vn',
+    })
+    mocks.find.mockImplementation(async ({ collection }: { collection: string }) =>
+      collection === 'site-settings'
+        ? {
+            docs: [
+              {
+                site: 9,
+                wingsGroupV3: {
+                  enabled: true,
+                  privacy: {
+                    approvalReference: null,
+                    approvalState: 'pending',
+                    consentEvidenceReference: null,
+                    consentRequired: true,
+                    consentVersion: 'wingsgroup-contact-v1',
+                    dataSubjectContact: 'info@doicanhviet.com',
+                    dataSubjectRightsEvidence: null,
+                    dataSubjectRightsStatement: null,
+                    interBranchTransferAllowed: true,
+                    policyRouteEn: '/en/chinh-sach-bao-mat',
+                    policyRouteVi: '/chinh-sach-bao-mat',
+                    policyVersion: 'wingsgroup-privacy-v1',
+                    retentionMonths: 24,
+                  },
+                },
+              },
+            ],
+          }
+        : {
+            docs: [
+              {
+                fields: [
+                  { blockType: 'text', label: 'Name', name: 'name', required: true },
+                  { blockType: 'textarea', label: 'Need', name: 'message', required: true },
+                ],
+                id: 7,
+                site: 9,
+                title: 'WingsGroup Contact',
+              },
+            ],
+          },
+    )
+
+    const publicConfig = await GET(request({ host: 'wingsgroup.vn' }))
+    expect(publicConfig.status).toBe(200)
+    expect(await publicConfig.json()).toMatchObject({
+      available: false,
+      reason: 'configuration-unavailable',
+    })
+
+    const response = await POST(
+      request({
+        bodyOverrides: {
+          leadContract: {
+            consent: true,
+            consentVersion: 'wingsgroup-contact-v1',
+          },
+          submissionData: [
+            { field: 'name', value: 'Alice' },
+            { field: 'message', value: 'Consultation request' },
+          ],
+        },
+        host: 'wingsgroup.vn',
+      }),
+    )
+
+    expect(response.status).toBe(503)
+    expect(mocks.create).not.toHaveBeenCalled()
+  })
+
   it('returns only fail-closed public consultation-channel state for WingsGroup', async () => {
     mocks.getCurrentSite.mockResolvedValue({
       code: 'wings-group',
@@ -381,9 +488,14 @@ describe('lead submission endpoint integration', () => {
             ],
             enabled: true,
             privacy: {
+              approvalReference: 'privacy-approval-2026-08-14',
+              approvalState: 'approved',
+              consentEvidenceReference: 'consent-evidence-2026-08-14',
               consentRequired: true,
               consentVersion: 'wingsgroup-contact-v1',
               dataSubjectContact: 'info@doicanhviet.com',
+              dataSubjectRightsEvidence: 'rights-evidence-2026-08-14',
+              dataSubjectRightsStatement: 'Legal-owner supplied rights statement.',
               interBranchTransferAllowed: true,
               policyRouteEn: '/en/chinh-sach-bao-mat',
               policyRouteVi: '/chinh-sach-bao-mat',
@@ -412,14 +524,16 @@ describe('lead submission endpoint integration', () => {
   })
 
   it('rejects malformed or extended enquiry context before resolving a site', async () => {
-    const response = await POST(request({
-      bodyOverrides: {
-        context: {
-          discovery: { destination: 'Sa Pa!' },
-          privileged: true,
+    const response = await POST(
+      request({
+        bodyOverrides: {
+          context: {
+            discovery: { destination: 'Sa Pa!' },
+            privileged: true,
+          },
         },
-      },
-    }))
+      }),
+    )
 
     expect(response.status).toBe(400)
     expect(mocks.getCurrentSite).not.toHaveBeenCalled()
@@ -444,13 +558,15 @@ describe('lead submission endpoint integration', () => {
 
     expect(response.status).toBe(202)
     expect(mocks.jobsQueue).toHaveBeenCalledTimes(3)
-    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({
-        deliveryErrorCode: 'queue_unavailable',
-        deliveryStatus: 'queue_failed',
+    expect(mocks.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          deliveryErrorCode: 'queue_unavailable',
+          deliveryStatus: 'queue_failed',
+        }),
+        id: 99,
       }),
-      id: 99,
-    }))
+    )
   })
 
   it('keeps trusted host and form ownership scoped to each site with a public form route', async () => {
@@ -458,9 +574,10 @@ describe('lead submission endpoint integration', () => {
       vi.clearAllMocks()
       const host = site.hosts[0] || site.primaryDomain
       const currentSite = {
-        additionalDomains: (site.additionalDomains || site.hosts.filter((candidate) => candidate !== site.primaryDomain)).map(
-          (domain) => ({ domain }),
-        ),
+        additionalDomains: (
+          site.additionalDomains ||
+          site.hosts.filter((candidate) => candidate !== site.primaryDomain)
+        ).map((domain) => ({ domain })),
         code: site.name,
         id: site.id || 1,
         primaryDomain: site.primaryDomain,
@@ -474,7 +591,11 @@ describe('lead submission endpoint integration', () => {
         logger: { error: vi.fn() },
         update: mocks.update,
       })
-      mocks.checkIPRateLimit.mockResolvedValue({ allowed: true, ipCount: 1, requiresChallenge: false })
+      mocks.checkIPRateLimit.mockResolvedValue({
+        allowed: true,
+        ipCount: 1,
+        requiresChallenge: false,
+      })
       mocks.checkValidatedRateLimits.mockResolvedValue({ allowed: true, formCount: 1, ipCount: 1 })
       const formResult = {
         docs: [
@@ -500,9 +621,14 @@ describe('lead submission endpoint integration', () => {
                   wingsGroupV3: {
                     enabled: true,
                     privacy: {
+                      approvalReference: 'privacy-approval-2026-08-14',
+                      approvalState: 'approved',
+                      consentEvidenceReference: 'consent-evidence-2026-08-14',
                       consentRequired: true,
                       consentVersion: 'wingsgroup-contact-v1',
                       dataSubjectContact: 'info@doicanhviet.com',
+                      dataSubjectRightsEvidence: 'rights-evidence-2026-08-14',
+                      dataSubjectRightsStatement: 'Legal-owner supplied rights statement.',
                       interBranchTransferAllowed: true,
                       policyRouteEn: '/en/chinh-sach-bao-mat',
                       policyRouteVi: '/chinh-sach-bao-mat',
@@ -573,9 +699,10 @@ describe('lead submission endpoint integration', () => {
       vi.clearAllMocks()
       const host = site.hosts[0] || site.primaryDomain
       const currentSite = {
-        additionalDomains: (site.additionalDomains || site.hosts.filter((candidate) => candidate !== site.primaryDomain)).map(
-          (domain) => ({ domain }),
-        ),
+        additionalDomains: (
+          site.additionalDomains ||
+          site.hosts.filter((candidate) => candidate !== site.primaryDomain)
+        ).map((domain) => ({ domain })),
         code: site.name,
         id: site.id || 1,
         primaryDomain: site.primaryDomain,
@@ -589,7 +716,11 @@ describe('lead submission endpoint integration', () => {
         logger: { error: vi.fn() },
         update: mocks.update,
       })
-      mocks.checkIPRateLimit.mockResolvedValue({ allowed: true, ipCount: 3, requiresChallenge: true })
+      mocks.checkIPRateLimit.mockResolvedValue({
+        allowed: true,
+        ipCount: 3,
+        requiresChallenge: true,
+      })
       mocks.checkValidatedRateLimits.mockResolvedValue({ allowed: true, formCount: 1, ipCount: 1 })
       mocks.find.mockResolvedValue({
         docs: [

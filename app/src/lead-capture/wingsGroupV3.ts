@@ -32,6 +32,10 @@ type ResolvedWingsGroupLeadGovernance = {
   retentionMonths: typeof WINGSGROUP_LEAD_RETENTION_MONTHS
 }
 
+type WingsGroupLeadGovernanceOptions = {
+  allowPendingPrivacy?: boolean
+}
+
 const channelLabels = {
   en: { messenger: 'Messenger', whatsapp: 'WhatsApp', zalo: 'Zalo' },
   vi: { messenger: 'Messenger', whatsapp: 'WhatsApp', zalo: 'Zalo' },
@@ -44,6 +48,9 @@ const asRecord = (value: unknown): UnknownRecord =>
   value && typeof value === 'object' && !Array.isArray(value) ? (value as UnknownRecord) : {}
 
 const asString = (value: unknown): string => (typeof value === 'string' ? value.trim() : '')
+
+const isNonemptyString = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim().length > 0
 
 const isConsultationChannelKey = (value: unknown): value is ConsultationChannelKey =>
   typeof value === 'string' && consultationChannelKeys.includes(value as ConsultationChannelKey)
@@ -61,6 +68,7 @@ const isApprovedHTTPSURL = (value: unknown): value is string => {
 export const resolveWingsGroupLeadGovernance = (
   settingsInput: unknown,
   localeInput: unknown,
+  options: WingsGroupLeadGovernanceOptions = {},
 ): ResolvedWingsGroupLeadGovernance | null => {
   const settings = asRecord(settingsInput)
   const wingsGroupV3 = asRecord(settings.wingsGroupV3)
@@ -79,6 +87,14 @@ export const resolveWingsGroupLeadGovernance = (
   ) {
     return null
   }
+
+  const privacyApprovalComplete =
+    privacy.approvalState === 'approved' &&
+    isNonemptyString(privacy.approvalReference) &&
+    isNonemptyString(privacy.consentEvidenceReference) &&
+    isNonemptyString(privacy.dataSubjectRightsStatement) &&
+    isNonemptyString(privacy.dataSubjectRightsEvidence)
+  if (!privacyApprovalComplete && options.allowPendingPrivacy !== true) return null
 
   const locale = localeInput === 'en' ? 'en' : 'vi'
   const channels: ConsultationChannelPublicState[] = []
@@ -118,8 +134,9 @@ export const resolveWingsGroupLeadGovernance = (
 export const toWingsGroupLeadPublicConfig = (
   settings: unknown,
   locale: unknown,
+  options: WingsGroupLeadGovernanceOptions = {},
 ): WingsGroupLeadPublicConfig => {
-  const governance = resolveWingsGroupLeadGovernance(settings, locale)
+  const governance = resolveWingsGroupLeadGovernance(settings, locale, options)
   return governance
     ? { available: true, enabled: true, ...governance }
     : { available: false, enabled: true, reason: 'configuration-unavailable' }

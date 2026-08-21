@@ -49,6 +49,7 @@ export const RenderBlocks: React.FC<{
   locale?: null | string
   allowWingsGroupDevelopmentMedia?: boolean
   siteCode?: null | string
+  wingsGroupV3?: boolean
   wingsGroupLegalIdentity?: {
     legalEntityName?: null | string
     internationalName?: null | string
@@ -66,6 +67,7 @@ export const RenderBlocks: React.FC<{
     blocks,
     locale,
     siteCode,
+    wingsGroupV3 = false,
     wingsGroupLegalIdentity,
     wingsGroupV3Home = false,
   } = props
@@ -98,7 +100,13 @@ export const RenderBlocks: React.FC<{
             if (Block) {
               const blockProps =
                 block.blockType === 'formBlock'
-                  ? { ...block, allowWingsGroupDevelopmentMedia, locale, siteCode }
+                  ? {
+                      ...block,
+                      allowWingsGroupDevelopmentMedia,
+                      locale,
+                      siteCode,
+                      wingsGroupV3,
+                    }
                   : block.blockType === 'wingsGroupEcosystem'
                     ? { ...block, allowWingsGroupDevelopmentMedia, approvedProofKeys, locale }
                     : wingsGroupV3Home &&

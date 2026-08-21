@@ -236,7 +236,9 @@ export async function POST(request: Request): Promise<Response> {
       getCurrentLocale(),
       getCurrentPublicPathname(),
     ])
-    const governance = resolveWingsGroupLeadGovernance(settings, locale)
+    const governance = resolveWingsGroupLeadGovernance(settings, locale, {
+      allowPendingPrivacy: Boolean(previewLeadPath),
+    })
     if (!governance) {
       logOperationalEvent('warn', 'lead_configuration_unavailable', {
         locale,
@@ -462,5 +464,10 @@ export async function GET(request: Request): Promise<Response> {
   const locale = await getCurrentLocale()
   const settings = await getWingsGroupSettings(payload, site.id).catch(() => null)
 
-  return json(toWingsGroupLeadPublicConfig(settings, locale), 200)
+  return json(
+    toWingsGroupLeadPublicConfig(settings, locale, {
+      allowPendingPrivacy: Boolean(previewLeadPath),
+    }),
+    200,
+  )
 }

@@ -29,6 +29,7 @@ export type FormBlockType = {
   form: FormType | null
   introContent?: DefaultTypedEditorState
   presentation?: 'centered-card' | 'minimal' | 'split-contact' | 'support-channels'
+  wingsGroupV3?: boolean
 }
 
 type FormLocalizedCopy = {
@@ -283,6 +284,7 @@ export const FormBlock: React.FC<
     presentation = 'split-contact',
     siteCode,
     submitOdId,
+    wingsGroupV3 = false,
   } = props
   const resolvedAnchorId = anchorId === undefined ? 'contact-form' : anchorId || undefined
   const {
@@ -298,7 +300,10 @@ export const FormBlock: React.FC<
   const copy = formCopy[copyLocale]
   const wingsGroupCopy = wingsGroupLeadCopy[copyLocale === 'en' ? 'en' : 'vi']
   const isWingsGroupV3 =
-    siteCode === WINGSGROUP_SITE_CODE || getFormSiteCode(formFromProps) === WINGSGROUP_SITE_CODE
+    wingsGroupV3 ||
+    siteCode === WINGSGROUP_SITE_CODE ||
+    getFormSiteCode(formFromProps) === WINGSGROUP_SITE_CODE ||
+    (typeof document !== 'undefined' && document.body.dataset.siteCode === WINGSGROUP_SITE_CODE)
   const resolvedSubmitLabel =
     isWingsGroupV3 && copyLocale === 'vi' ? 'Nhận tư vấn phù hợp' : copy.submit || submitButtonLabel
   const localizedFields =

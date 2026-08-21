@@ -28,9 +28,14 @@ const settings = {
     ],
     enabled: true,
     privacy: {
+      approvalReference: 'privacy-approval-2026-08-14',
+      approvalState: 'approved',
+      consentEvidenceReference: 'consent-evidence-2026-08-14',
       consentRequired: true,
       consentVersion: 'wingsgroup-contact-v1',
       dataSubjectContact: 'info@doicanhviet.com',
+      dataSubjectRightsEvidence: 'rights-evidence-2026-08-14',
+      dataSubjectRightsStatement: 'Legal-owner supplied rights statement.',
       interBranchTransferAllowed: true,
       policyRouteEn: '/en/chinh-sach-bao-mat',
       policyRouteVi: '/chinh-sach-bao-mat',
@@ -74,6 +79,28 @@ describe('WingsGroup v3 lead governance', () => {
         'en',
       ),
     ).toBeNull()
+  })
+
+  it('keeps production lead governance hidden until privacy approval evidence is complete', () => {
+    const pendingSettings = {
+      ...settings,
+      wingsGroupV3: {
+        ...settings.wingsGroupV3,
+        privacy: {
+          ...settings.wingsGroupV3.privacy,
+          approvalReference: null,
+          approvalState: 'pending',
+          consentEvidenceReference: null,
+          dataSubjectRightsEvidence: null,
+          dataSubjectRightsStatement: null,
+        },
+      },
+    }
+
+    expect(resolveWingsGroupLeadGovernance(pendingSettings, 'vi')).toBeNull()
+    expect(
+      resolveWingsGroupLeadGovernance(pendingSettings, 'vi', { allowPendingPrivacy: true }),
+    ).toMatchObject({ consentVersion: WINGSGROUP_CONSENT_VERSION })
   })
 
   it('requires exact consent and required name/need semantics', () => {
@@ -140,9 +167,9 @@ describe('WingsGroup lead request boundary', () => {
       title: 'Consent form',
     } as Form
 
-    expect(() =>
-      validateFieldsForForm(form, [{ field: 'consent', value: false }]),
-    ).toThrow(/required/i)
+    expect(() => validateFieldsForForm(form, [{ field: 'consent', value: false }])).toThrow(
+      /required/i,
+    )
     expect(validateFieldsForForm(form, [{ field: 'consent', value: true }])).toEqual([
       { field: 'consent', label: 'Consent', value: 'true' },
     ])

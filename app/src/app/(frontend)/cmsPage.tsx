@@ -316,6 +316,7 @@ export async function renderCmsPageByPath({
             blocks={page.layout}
             locale={locale}
             siteCode={site.code}
+            wingsGroupV3={site.code === 'wings-group'}
             wingsGroupLegalIdentity={settings?.wingsGroupV3?.legalIdentity}
             allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Home}
             wingsGroupV3Home={useWingsGroupV3Home}

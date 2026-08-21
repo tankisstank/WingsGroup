@@ -99,9 +99,14 @@ const request = (role = 'super-admin', settings = trustedSettings()) => ({
 
 describe('WingsGroup corporate route integration', () => {
   it('registers the Page route governance field and additive PostgreSQL migration', () => {
-    expect(Pages.fields.find((field) => 'name' in field && field.name === 'wingsGroupRoute')).toBeTruthy()
+    expect(
+      Pages.fields.find((field) => 'name' in field && field.name === 'wingsGroupRoute'),
+    ).toBeTruthy()
     const migration = fs.readFileSync(
-      path.resolve(process.cwd(), 'src/migrations/20260814_120000_wingsgroup_corporate_route_governance.ts'),
+      path.resolve(
+        process.cwd(),
+        'src/migrations/20260814_120000_wingsgroup_corporate_route_governance.ts',
+      ),
       'utf8',
     )
     expect(migration).toContain('wings_group_route_policy_approval_state')
@@ -144,9 +149,7 @@ describe('WingsGroup corporate route integration', () => {
         find: async ({ collection }: { collection: string }) =>
           collection === 'site-settings' ? { docs: settingsDocs } : { docs: [] },
         findByID: async ({ collection, id }: { collection: string; id: number | string }) =>
-          collection === 'sites'
-            ? { code: siteCode, id }
-            : { id, site: 1 },
+          collection === 'sites' ? { code: siteCode, id } : { id, site: 1 },
       },
       user: { role },
     })
@@ -350,7 +353,13 @@ describe('WingsGroup corporate route integration', () => {
       await expect(
         validateWingsGroupV3Governance({
           data: routeData(),
-          originalDoc: { ...routeData(), wingsGroupRoute: { ...routeData().wingsGroupRoute, publication: { en: 'hidden', vi: 'pending' } } },
+          originalDoc: {
+            ...routeData(),
+            wingsGroupRoute: {
+              ...routeData().wingsGroupRoute,
+              publication: { en: 'hidden', vi: 'pending' },
+            },
+          },
           req: request(role),
         } as never),
       ).rejects.toThrow(/super-admin/)
@@ -360,7 +369,18 @@ describe('WingsGroup corporate route integration', () => {
   it('rejects policy publication until complete trusted approval is present', async () => {
     await expect(
       validateWingsGroupV3Governance({
-        data: routeData({ pathname: '/chinh-sach-bao-mat', wingsGroupRoute: { archetype: 'policy', managedBy: 'wingsgroup-v3', policy: { approvalState: 'pending', legalEntity: WINGSGROUP_LEGAL_IDENTITY.legalEntityName }, publication: { en: 'hidden', vi: 'approved' } } }),
+        data: routeData({
+          pathname: '/chinh-sach-bao-mat',
+          wingsGroupRoute: {
+            archetype: 'policy',
+            managedBy: 'wingsgroup-v3',
+            policy: {
+              approvalState: 'pending',
+              legalEntity: WINGSGROUP_LEGAL_IDENTITY.legalEntityName,
+            },
+            publication: { en: 'hidden', vi: 'approved' },
+          },
+        }),
         originalDoc: {},
         req: request(),
       } as never),
@@ -547,10 +567,7 @@ describe('WingsGroup corporate route integration', () => {
       data: { _status: 'draft', relatedPages: null },
       originalDoc: approvedEnglish,
       req: {
-        ...request(
-          'site-manager',
-          trustedSettings({ englishPublicationState: 'approved' }),
-        ),
+        ...request('site-manager', trustedSettings({ englishPublicationState: 'approved' })),
         locale: 'vi',
       },
     } as never)
@@ -592,10 +609,7 @@ describe('WingsGroup corporate route integration', () => {
       },
       originalDoc: approvedBoth,
       req: {
-        ...request(
-          'super-admin',
-          trustedSettings({ englishPublicationState: 'approved' }),
-        ),
+        ...request('super-admin', trustedSettings({ englishPublicationState: 'approved' })),
         locale: 'en',
       },
     } as never)
@@ -607,7 +621,11 @@ describe('WingsGroup corporate route integration', () => {
 
   it('accepts a governed VI corporate route and enforces same-site forms', async () => {
     await expect(
-      validateWingsGroupV3Governance({ data: routeData(), originalDoc: {}, req: request() } as never),
+      validateWingsGroupV3Governance({
+        data: routeData(),
+        originalDoc: {},
+        req: request(),
+      } as never),
     ).resolves.toBeTruthy()
 
     await expect(
@@ -629,10 +647,20 @@ describe('WingsGroup corporate route integration', () => {
 
   it('rejects internal implementation copy and cross-tenant public links', async () => {
     await expect(
-      validateWingsGroupV3Governance({ data: routeData({ title: 'Legacy root site' }), originalDoc: {}, req: request() } as never),
+      validateWingsGroupV3Governance({
+        data: routeData({ title: 'Legacy root site' }),
+        originalDoc: {},
+        req: request(),
+      } as never),
     ).rejects.toThrow(/thuật ngữ/)
     await expect(
-      validateWingsGroupV3Governance({ data: routeData({ layout: [{ blockType: 'cta', links: [{ link: { type: 'custom', url: '/wingsgo' } }] }] }), originalDoc: {}, req: request() } as never),
+      validateWingsGroupV3Governance({
+        data: routeData({
+          layout: [{ blockType: 'cta', links: [{ link: { type: 'custom', url: '/wingsgo' } }] }],
+        }),
+        originalDoc: {},
+        req: request(),
+      } as never),
     ).rejects.toThrow(/site scope/)
   })
 
@@ -654,7 +682,13 @@ describe('WingsGroup corporate route integration', () => {
       title: 'Liên hệ WingsGroup',
     }
     const payload = {
-      create: async ({ collection, data }: { collection: string; data: Record<string, unknown> }) => {
+      create: async ({
+        collection,
+        data,
+      }: {
+        collection: string
+        data: Record<string, unknown>
+      }) => {
         if (collection !== 'pages') throw new Error(`Unexpected create: ${collection}`)
         const page = { ...data, id: pages.length + 1 } as (typeof pages)[number]
         pages.push(page)
@@ -667,8 +701,20 @@ describe('WingsGroup corporate route integration', () => {
         if (collection === 'pages') return { docs: pages }
         throw new Error(`Unexpected find: ${collection}`)
       },
-      update: async ({ collection, data, id }: { collection: string; data: Record<string, unknown>; id: number }) => {
+      update: async ({
+        collection,
+        data,
+        id,
+      }: {
+        collection: string
+        data: Record<string, unknown>
+        id: number
+      }) => {
         if (collection === 'site-settings') return settings
+        if (collection === 'forms') {
+          Object.assign(form, data)
+          return form
+        }
         const page = pages.find((candidate) => candidate.id === id)
         if (!page) throw new Error(`Page ${id} missing`)
         Object.assign(page, data)
@@ -677,24 +723,28 @@ describe('WingsGroup corporate route integration', () => {
     }
     const req = { user: { role: 'super-admin' } }
 
-    const first = await seedWingsGroupCorporateRoutes({ payload: payload as never, req: req as never })
-    const second = await seedWingsGroupCorporateRoutes({ payload: payload as never, req: req as never })
+    const first = await seedWingsGroupCorporateRoutes({
+      payload: payload as never,
+      req: req as never,
+    })
+    const second = await seedWingsGroupCorporateRoutes({
+      payload: payload as never,
+      req: req as never,
+    })
 
     expect(first.created).toHaveLength(9)
     expect(second.created).toEqual([])
     expect(second.updated).toHaveLength(9)
-    expect(pages.map(({ pathname }) => pathname).sort()).toEqual(
-      [
-        '/',
-        '/chinh-sach-bao-mat',
-        '/chinh-sach-thanh-toan',
-        '/dieu-khoan-su-dung',
-        '/lien-he',
-        '/nang-luc-dich-vu',
-        '/tin-cay-va-phap-ly',
-        '/tin-tuc',
-        '/ve-wingsgroup',
-      ],
-    )
+    expect(pages.map(({ pathname }) => pathname).sort()).toEqual([
+      '/',
+      '/chinh-sach-bao-mat',
+      '/chinh-sach-thanh-toan',
+      '/dieu-khoan-su-dung',
+      '/lien-he',
+      '/nang-luc-dich-vu',
+      '/tin-cay-va-phap-ly',
+      '/tin-tuc',
+      '/ve-wingsgroup',
+    ])
   })
 })
