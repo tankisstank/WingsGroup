@@ -20,12 +20,18 @@ const isLocalHost = (headers: Headers | null | undefined): boolean => {
 const hasDraftModeCookie = (headers: Headers | null | undefined): boolean =>
   Boolean(headers?.get('cookie')?.match(/(?:^|;\s*)__prerender_bypass=[^;]+/u))
 
+const hasServerOwnedLocalDraftPreviewContext = (headers: Headers | null | undefined): boolean =>
+  headers?.get('x-site-context-source') === 'proxy' &&
+  headers.get('x-client-ip') === '127.0.0.1' &&
+  isLocalHost(headers) &&
+  hasDraftModeCookie(headers)
+
 export const hasWingsGroupLocalDraftPreviewSignal = ({
   context,
   headers,
 }: Pick<PreviewRequestLike, 'context' | 'headers'>): boolean =>
   context?.[WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT] === true ||
-  (isLocalHost(headers) && hasDraftModeCookie(headers))
+  hasServerOwnedLocalDraftPreviewContext(headers)
 
 export const hasExplicitWingsGroupLocalDraftPreviewSignal = ({
   context,

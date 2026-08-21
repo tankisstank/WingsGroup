@@ -23,6 +23,17 @@ const adminLocaleCookie = 'payload-lng'
 const isLocalDevelopmentHost = (host: null | string) =>
   Boolean(host && (localBootstrapHosts.has(host) || host.endsWith('.local')))
 
+const hasDraftModeCookie = (request: NextRequest): boolean =>
+  request.cookies.has('__prerender_bypass')
+
+const isServerOwnedLocalDraftPreview = (
+  request: NextRequest,
+  effectiveHost: null | string,
+): boolean =>
+  process.env.NODE_ENV !== 'production' &&
+  isLocalDevelopmentHost(effectiveHost) &&
+  hasDraftModeCookie(request)
+
 const notFoundResponse = () =>
   new NextResponse('Not Found', {
     headers: {
@@ -156,11 +167,17 @@ export function proxy(request: NextRequest) {
 
   const siteCode = siteAlias ? allSiteAliasToCodeMap[siteAlias] : null
   const sitePrefix = siteAlias ? `/${siteAlias}${locale ? `/${locale}` : ''}` : null
+  const localDraftPreview = isServerOwnedLocalDraftPreview(request, effectiveHost)
   const requestHeaders = createTrustedSiteContextHeaders(request.headers, {
-    // The deployment edge overwrites X-Real-IP with the connection address.
-    // createTrustedSiteContextHeaders removes any public X-Client-IP value
-    // before promoting this edge-owned value into internal request context.
-    clientIP: request.headers.get('x-real-ip'),
+    // A direct local Next server has no deployment edge. Its preview context is
+    // therefore derived from the server-observed local host and draft cookie,
+    // never from browser-supplied X-Real-IP/X-Client-IP values. On deployed
+    // hosts, only the edge-overwritten X-Real-IP is promoted.
+    clientIP: localDraftPreview
+      ? '127.0.0.1'
+      : isLocalDevelopmentHost(effectiveHost)
+        ? null
+        : request.headers.get('x-real-ip'),
     // Tenant selection is intentionally based on the effective HTTP Host. In
     // local/E2E deployments Next's URL can retain the listener hostname even
     // when the request Host targets a real tenant domain. Forwarded host is

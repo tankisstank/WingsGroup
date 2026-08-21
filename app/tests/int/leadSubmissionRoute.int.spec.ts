@@ -111,7 +111,14 @@ describe('lead submission endpoint integration', () => {
         idempotencyKey: '4cb68f3f-6dc9-4b3f-918b-74153f271abc',
         submissionData: [{ field: 'name', value: 'Alice' }],
       }),
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'content-type': 'application/json',
+        cookie: '__prerender_bypass=browser-forged',
+        'x-real-ip': '198.51.100.98',
+        'x-site-code': 'wings-group',
+        'x-site-context-source': 'proxy',
+        'x-site-host': '127.0.0.1',
+      },
       method: 'POST',
     })
 

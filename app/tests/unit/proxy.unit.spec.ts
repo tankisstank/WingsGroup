@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { proxy } from '@/proxy'
 import { loadMultisiteAuditInventory } from '../helpers/multisiteAuditInventory'
@@ -100,6 +100,59 @@ describe('tenant proxy rewrites', () => {
     expect(rebuiltHeaders.get('x-site-code')).toBeNull()
     expect(rebuiltHeaders.get('x-site-prefix')).toBeNull()
     expect(rebuiltHeaders.get('x-public-path')).toBe('/')
+  })
+
+  it('derives the local preview client context without browser edge headers', () => {
+    const response = proxy(
+      new NextRequest('http://localhost:3100/api/lead-submissions', {
+        headers: {
+          cookie: '__prerender_bypass=development-id',
+          host: 'localhost:3100',
+        },
+      }),
+    )
+
+    expect(overriddenRequestHeaders(response).get('x-client-ip')).toBe('127.0.0.1')
+  })
+
+  it('ignores forged edge headers on local preview requests', () => {
+    const response = proxy(
+      new NextRequest('http://localhost:3100/api/lead-submissions', {
+        headers: {
+          cookie: '__prerender_bypass=development-id',
+          host: 'localhost:3100',
+          'x-client-ip': '198.51.100.99',
+          'x-real-ip': '198.51.100.98',
+          'x-site-code': 'wings-care',
+          'x-site-context-source': 'proxy',
+          'x-site-host': 'wingscare.wingsgroup.vn',
+        },
+      }),
+    )
+    const headers = overriddenRequestHeaders(response)
+
+    expect(headers.get('x-client-ip')).toBe('127.0.0.1')
+    expect(headers.get('x-site-code')).toBeNull()
+    expect(headers.get('x-site-host')).toBe('localhost')
+  })
+
+  it('does not derive a local preview context in production', () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    try {
+      const response = proxy(
+        new NextRequest('http://localhost:3100/api/lead-submissions', {
+          headers: {
+            cookie: '__prerender_bypass=development-id',
+            host: 'localhost:3100',
+            'x-real-ip': '198.51.100.98',
+          },
+        }),
+      )
+
+      expect(overriddenRequestHeaders(response).get('x-client-ip')).toBeNull()
+    } finally {
+      vi.unstubAllEnvs()
+    }
   })
 
   it('preserves locale-only context for its internal rewrite destination', () => {

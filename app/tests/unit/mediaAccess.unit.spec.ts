@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { wingsGroupMediaReadAccess } from '@/access/siteScope'
+import {
+  hasExplicitWingsGroupLocalDraftPreviewSignal,
+  hasWingsGroupLocalDraftPreviewSignal,
+} from '@/wingsgroup/localPreview'
 import { WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT } from '@/wingsgroup/corporateRoutes'
 
 const request = ({
@@ -16,12 +20,39 @@ const request = ({
   headers: new Headers({
     ...(cookie ? { cookie } : {}),
     host: '127.0.0.1:4175',
+    'x-client-ip': '127.0.0.1',
+    'x-site-context-source': 'proxy',
     'x-site-host': '127.0.0.1',
   }),
   user,
 })
 
 describe('WingsGroup media read access', () => {
+  it('admits local draft preview only from server-derived context', () => {
+    const forged = new Headers({
+      cookie: '__prerender_bypass=run-owned-preview',
+      host: '127.0.0.1:4175',
+      'x-site-host': '127.0.0.1',
+    })
+    const trusted = new Headers({
+      cookie: '__prerender_bypass=run-owned-preview',
+      host: '127.0.0.1:4175',
+      'x-client-ip': '127.0.0.1',
+      'x-site-context-source': 'proxy',
+      'x-site-host': '127.0.0.1',
+    })
+
+    expect(hasWingsGroupLocalDraftPreviewSignal({ headers: forged })).toBe(false)
+    expect(hasWingsGroupLocalDraftPreviewSignal({ headers: trusted })).toBe(true)
+
+    vi.stubEnv('NODE_ENV', 'production')
+    try {
+      expect(hasExplicitWingsGroupLocalDraftPreviewSignal({ headers: trusted })).toBe(false)
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
   it('returns only governed published media gates to anonymous readers', async () => {
     const result = await wingsGroupMediaReadAccess({ req: request() } as never)
 
