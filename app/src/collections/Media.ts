@@ -1,4 +1,8 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  CollectionConfig,
+} from 'payload'
 
 import {
   FixedToolbarFeature,
@@ -9,17 +13,14 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
-import { enforceSiteAccess, siteScopedAccess, siteScopedOrAnyone } from '@/access/siteScope'
+import { enforceSiteAccess, siteScopedAccess, wingsGroupMediaReadAccess } from '@/access/siteScope'
 import { siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import {
   revalidateWingSideDiscovery,
   revalidateWingSideDiscoveryForTourDependency,
 } from '@/collections/Tours/hooks/revalidateTourContent'
-import {
-  mediaGovernanceField,
-  validateGovernedMediaBeforeChange,
-} from '@/fields/wingsGroupV3'
+import { mediaGovernanceField, validateGovernedMediaBeforeChange } from '@/fields/wingsGroupV3'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -48,7 +49,7 @@ export const Media: CollectionConfig = {
   access: {
     create: contentCreateAccess,
     delete: contentDeleteAccess,
-    read: siteScopedOrAnyone(),
+    read: wingsGroupMediaReadAccess,
     update: siteScopedAccess(),
   },
   admin: {
@@ -92,39 +93,42 @@ export const Media: CollectionConfig = {
     staticDir: path.resolve(dirname, '../../public/media'),
     adminThumbnail: 'thumbnail',
     focalPoint: true,
-    imageSizes: process.env.PAYLOAD_IMPORT_ORIGINALS_ONLY === 'true' ? [] : [
-      {
-        name: 'thumbnail',
-        width: 300,
-      },
-      {
-        name: 'square',
-        width: 500,
-        height: 500,
-      },
-      {
-        name: 'small',
-        width: 600,
-      },
-      {
-        name: 'medium',
-        width: 900,
-      },
-      {
-        name: 'large',
-        width: 1400,
-      },
-      {
-        name: 'xlarge',
-        width: 1920,
-      },
-      {
-        name: 'og',
-        width: 1200,
-        height: 630,
-        crop: 'center',
-      },
-    ],
+    imageSizes:
+      process.env.PAYLOAD_IMPORT_ORIGINALS_ONLY === 'true'
+        ? []
+        : [
+            {
+              name: 'thumbnail',
+              width: 300,
+            },
+            {
+              name: 'square',
+              width: 500,
+              height: 500,
+            },
+            {
+              name: 'small',
+              width: 600,
+            },
+            {
+              name: 'medium',
+              width: 900,
+            },
+            {
+              name: 'large',
+              width: 1400,
+            },
+            {
+              name: 'xlarge',
+              width: 1920,
+            },
+            {
+              name: 'og',
+              width: 1200,
+              height: 630,
+              crop: 'center',
+            },
+          ],
   },
   hooks: {
     afterChange: [revalidateCuratedTourMedia],

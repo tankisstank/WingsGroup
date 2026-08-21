@@ -31,6 +31,7 @@ interface HeaderClientProps {
   supportedLocales?: SupportedLocaleCode[]
   tagline?: null | string
   themeKey?: string
+  wingsGroupV3Home?: boolean
 }
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({
@@ -49,6 +50,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   supportedLocales,
   tagline,
   themeKey,
+  wingsGroupV3Home = false,
 }) => {
   /* Storing the value in a useState to avoid hydration errors */
   const [theme, setTheme] = useState<string | null>(null)
@@ -66,7 +68,11 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   }, [headerTheme])
 
   return (
-    <header className="container site-header" {...(theme ? { 'data-theme': theme } : {})}>
+    <header
+      className="container site-header"
+      {...(wingsGroupV3Home ? { 'data-od-id': 'site-header' } : {})}
+      {...(theme ? { 'data-theme': theme } : {})}
+    >
       <div className="site-header__bar py-8 flex justify-between border-b">
         <div className="site-header__brand flex items-center gap-3">
           <SiteLink href="/">
@@ -99,6 +105,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
           siteCode={siteCode}
           supportedLocales={supportedLocales}
           themeKey={themeKey}
+          wingsGroupV3Home={wingsGroupV3Home}
         />
       </div>
     </header>

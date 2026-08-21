@@ -14,6 +14,13 @@ import {
   WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT,
   WINGSGROUP_SITE_CODE,
 } from '../src/wingsgroup/corporateRoutes'
+import {
+  WINGSGROUP_CONSENT_VERSION,
+  WINGSGROUP_DATA_CONTACT,
+  WINGSGROUP_LEAD_RETENTION_MONTHS,
+  WINGSGROUP_POLICY_ROUTES,
+  WINGSGROUP_PRIVACY_VERSION,
+} from '../src/lead-capture/wingsGroupV3'
 import { resolveLocalDatabaseURL } from '../src/utilities/localDatabase'
 
 export const WINGSGROUP_PREVIEW_MEDIA_FILENAMES = [
@@ -53,6 +60,27 @@ export const assertWingsGroupPreviewMediaPending = (mediaDocs: readonly unknown[
     )
   }
 }
+
+export const WINGSGROUP_PREVIEW_CONTACT_FORM_TITLE = 'WingsGroup local draft contact intake'
+
+export const WINGSGROUP_PREVIEW_CONTACT_FIELDS = [
+  {
+    blockName: 'full-name',
+    blockType: 'text',
+    label: 'Họ và tên',
+    name: 'full-name',
+    required: true,
+    width: 100,
+  },
+  {
+    blockName: 'brief',
+    blockType: 'textarea',
+    label: 'Nhu cầu tư vấn',
+    name: 'brief',
+    required: true,
+    width: 100,
+  },
+] as const
 
 const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL)
 
@@ -148,6 +176,19 @@ const main = async () => {
     if (sites.docs.length !== 1) throw new Error('Expected exactly one WingsGroup site.')
     const site = sites.docs[0]
 
+    const settingsResult = await payload.find({
+      collection: 'site-settings',
+      depth: 0,
+      limit: 2,
+      overrideAccess: true,
+      pagination: false,
+      where: { site: { equals: site.id } },
+    })
+    if (settingsResult.docs.length !== 1) {
+      throw new Error('Expected exactly one WingsGroup site-settings record.')
+    }
+    const siteSettings = settingsResult.docs[0]
+
     const users = await payload.find({
       collection: 'users',
       depth: 0,
@@ -159,6 +200,11 @@ const main = async () => {
     const operator = users.docs[0]
     if (!operator) throw new Error('A local super-admin is required for the governed page hook.')
     const req = await createLocalReq({ user: operator }, payload)
+    req.context = {
+      ...(req.context || {}),
+      disableRevalidate: true,
+      [WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT]: true,
+    }
 
     const mediaResult = await payload.find({
       collection: 'media',
@@ -172,16 +218,84 @@ const main = async () => {
     const mediaBySource = new Map(
       mediaResult.docs.map((media) => [media.governance?.sourceFilename || '', media.id]),
     )
-    req.context = {
-      ...(req.context || {}),
-      disableRevalidate: true,
-      [WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT]: true,
-    }
     const mediaID = (filename: string) => {
       const id = mediaBySource.get(sourceFile(filename))
       if (id === undefined) throw new Error(`Missing governed media record for ${filename}.`)
       return id
     }
+
+    const settingsGovernance = {
+      ...(siteSettings.wingsGroupV3 || {}),
+      enabled: true,
+      englishPublicationState: 'hidden',
+      privacy: {
+        ...(siteSettings.wingsGroupV3?.privacy || {}),
+        consentRequired: true,
+        consentVersion: WINGSGROUP_CONSENT_VERSION,
+        dataSubjectContact: WINGSGROUP_DATA_CONTACT,
+        interBranchTransferAllowed: true,
+        policyRouteEn: WINGSGROUP_POLICY_ROUTES.en,
+        policyRouteVi: WINGSGROUP_POLICY_ROUTES.vi,
+        policyVersion: WINGSGROUP_PRIVACY_VERSION,
+        retentionMonths: WINGSGROUP_LEAD_RETENTION_MONTHS,
+      },
+      consultationChannels: [
+        { key: 'zalo', state: 'pending' },
+        { key: 'whatsapp', state: 'pending' },
+        { key: 'messenger', state: 'pending' },
+      ],
+    }
+
+    await payload.update({
+      collection: 'site-settings',
+      data: { wingsGroupV3: settingsGovernance },
+      id: siteSettings.id,
+      locale: 'vi',
+      overrideAccess: true,
+      req,
+    } as never)
+
+    const formsResult = await payload.find({
+      collection: 'forms',
+      depth: 0,
+      limit: 100,
+      overrideAccess: true,
+      pagination: false,
+      req,
+      where: { site: { equals: site.id } },
+    })
+    const existingContactForm = formsResult.docs.find(
+      (form) => form.title === WINGSGROUP_PREVIEW_CONTACT_FORM_TITLE,
+    )
+    const contactFormData = {
+      confirmationMessage: lexical(
+        'Đã nhận yêu cầu',
+        'Đây là bản xem trước cục bộ. Đội ngũ sẽ phản hồi sau khi kênh tiếp nhận chính thức được cấu hình.',
+      ),
+      confirmationType: 'message',
+      fields: WINGSGROUP_PREVIEW_CONTACT_FIELDS,
+      site: site.id,
+      submitButtonLabel: 'Nhận tư vấn phù hợp',
+      title: WINGSGROUP_PREVIEW_CONTACT_FORM_TITLE,
+    }
+    const contactForm = (
+      existingContactForm
+        ? await payload.update({
+            collection: 'forms',
+            data: contactFormData,
+            id: existingContactForm.id,
+            locale: 'vi',
+            overrideAccess: true,
+            req,
+          } as never)
+        : await payload.create({
+            collection: 'forms',
+            data: contactFormData,
+            locale: 'vi',
+            overrideAccess: true,
+            req,
+          } as never)
+    ) as (typeof formsResult.docs)[number]
 
     const profile = (
       brandKey: 'wingsgo' | 'wing-side' | 'wingspass' | 'wingsplus' | 'wingscare',
@@ -310,7 +424,12 @@ const main = async () => {
         presentation: 'magazine',
         relationTo: 'posts',
       },
-      { blockType: 'formBlock', enableIntro: false, form: 1, presentation: 'split-contact' },
+      {
+        blockType: 'formBlock',
+        enableIntro: false,
+        form: contactForm.id,
+        presentation: 'split-contact',
+      },
     ]
 
     await payload.update({
@@ -400,6 +519,7 @@ const main = async () => {
           pageID: 1,
           siteCode: WINGSGROUP_SITE_CODE,
           mediaCount: mediaBySource.size,
+          contactFormID: contactForm.id,
           layout: ['ecosystem', 'trust', 'proof', 'editorial', 'contact'],
         },
         null,

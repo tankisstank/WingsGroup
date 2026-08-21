@@ -228,7 +228,8 @@ describe('WingsGroup v3 public components', () => {
       />,
     )
 
-    expect(screen.getByText('Đang cập nhật')).toBeTruthy()
+    expect(screen.getAllByText('Đang cập nhật')).toHaveLength(4)
+    expect(screen.getAllByTestId('wingsgroup-proof-record')).toHaveLength(4)
     expect(screen.queryByText('Unapproved partner award')).toBeNull()
     expect(screen.queryByAltText('Unapproved award')).toBeNull()
     expect(screen.queryByText(/rating/i)).toBeNull()

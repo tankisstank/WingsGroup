@@ -1,11 +1,14 @@
 import type { WingsGroupProofArchiveBlock } from '@/payload-types'
 import { Media } from '@/components/Media'
-import {
-  getApprovedProofRecords,
-  isWingsGroupRenderableMedia,
-  isWingsGroupPublishedMedia,
-} from '@/components/WingsGroupV3/model'
+import { getApprovedProofRecords } from '@/components/WingsGroupV3/model'
 import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
+
+export const WINGSGROUP_PENDING_PROOF_KEYS = [
+  'proof-archive-intro',
+  'proof-certificates',
+  'proof-partner-reviews',
+  'proof-customer-reviews',
+] as const
 
 const copyByLocale = {
   en: {
@@ -23,7 +26,6 @@ const copyByLocale = {
 } as const
 
 export const WingsGroupProofArchiveComponent = ({
-  allowWingsGroupDevelopmentMedia = false,
   description,
   eyebrow,
   locale,
@@ -35,14 +37,6 @@ export const WingsGroupProofArchiveComponent = ({
 }) => {
   const approvedRecords = getApprovedProofRecords(records)
   const copy = locale === 'en' ? copyByLocale.en : copyByLocale.vi
-  const introRecord = records?.find((record) => record.key === 'proof-archive-intro')
-  const introMediaPredicate = allowWingsGroupDevelopmentMedia
-    ? isWingsGroupRenderableMedia
-    : isWingsGroupPublishedMedia
-  const introMedia =
-    introRecord && typeof introRecord.media === 'object' && introMediaPredicate(introRecord.media)
-      ? introRecord.media
-      : null
 
   return (
     <section
@@ -94,27 +88,23 @@ export const WingsGroupProofArchiveComponent = ({
           </div>
         ) : (
           <div className={styles.proofLayout} role="status">
-            <aside className={styles.proofIntro}>
-              <p className={styles.eyebrow}>
-                {locale === 'en' ? 'Archive index' : 'Dấu mốc nổi bật'}
-              </p>
-              {introMedia ? (
-                <Media
-                  className={styles.proofIntroMedia}
-                  imgClassName={styles.proofIntroMedia}
-                  resource={introMedia}
-                  size="(max-width: 850px) 100vw, 33vw"
-                />
-              ) : null}
-              <p className={styles.proofIntroNote}>
-                {locale === 'en'
-                  ? 'The archive will open one verified record at a time.'
-                  : 'Hồ sơ sẽ được mở theo từng dấu mốc đã xác minh.'}
-              </p>
-            </aside>
-            <div className={styles.proofPending}>
-              <strong>{copy.pendingTitle}</strong>
-              <p>{copy.pendingDescription}</p>
+            <div className={styles.proofPendingGrid} data-testid="wingsgroup-proof-pending-records">
+              {WINGSGROUP_PENDING_PROOF_KEYS.map((key, index) => (
+                <article
+                  className={styles.proofPending}
+                  data-proof-record-key={key}
+                  data-proof-record-status="pending"
+                  data-testid="wingsgroup-proof-record"
+                  key={key}
+                >
+                  <span className={styles.proofPendingIndex}>0{index + 1}</span>
+                  <strong>
+                    {locale === 'en' ? `Archive record ${index + 1}` : `Hồ sơ lưu trữ ${index + 1}`}
+                  </strong>
+                  <p>{copy.pendingDescription}</p>
+                  <span>{copy.pendingTitle}</span>
+                </article>
+              ))}
             </div>
           </div>
         )}

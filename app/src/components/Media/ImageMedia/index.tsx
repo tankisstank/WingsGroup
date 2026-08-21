@@ -76,6 +76,11 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
   }
 
   const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
+  const useAuthenticatedPreviewImage =
+    resource &&
+    typeof resource === 'object' &&
+    resource.governance?.managedBy === 'wingsgroup-v3' &&
+    resource.governance.publicationState !== 'published'
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
   const sizes =
@@ -93,6 +98,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
         blurDataURL={placeholderBlur}
         priority={priority}
         quality={80}
+        unoptimized={Boolean(useAuthenticatedPreviewImage)}
         loading={loading}
         sizes={sizes}
         src={src}

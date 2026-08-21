@@ -139,11 +139,7 @@ export const EcosystemExplorer = ({
           </p>
         </header>
 
-        <div
-          aria-label={copy.choose}
-          className={styles.ecosystemUnified}
-          data-od-id="ecosystem-unified-stage"
-        >
+        <div className={styles.ecosystemUnified} data-od-id="ecosystem-unified-stage">
           <article aria-live="polite" className={styles.unifiedStage}>
             {media ? (
               <Media

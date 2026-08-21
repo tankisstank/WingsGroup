@@ -656,6 +656,13 @@
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
 }
 
+.proofPendingGrid {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
 .proofIntro {
   min-width: 0;
 }
@@ -1116,6 +1123,7 @@
   }
 
   .proofGrid,
+  .proofPendingGrid,
   .editorialGrid {
     grid-template-columns: minmax(0, 1fr);
     gap: 32px;

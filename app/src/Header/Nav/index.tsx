@@ -18,6 +18,15 @@ import { getWingsSideHiFiCta, getWingsSideHiFiNavItems } from '@/utilities/wings
 import { Globe2Icon, MenuIcon, SearchIcon, XIcon } from 'lucide-react'
 import { getWingsGroupSwitcherLocales } from '@/components/WingsGroupV3/model'
 
+export const WINGSGROUP_HOME_NAV = [
+  { href: '#home', label: 'Trang chủ' },
+  { href: '#services', label: 'Dịch vụ' },
+  { href: '#about', label: 'Hệ sinh thái' },
+  { href: '#trust', label: 'Về WingsGroup' },
+  { href: '#news', label: 'Cẩm nang' },
+  { href: '#contact', label: 'Liên hệ' },
+] as const
+
 export const HeaderNav: React.FC<{
   data: { navItems?: HeaderType['navItems'] }
   englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
@@ -31,6 +40,7 @@ export const HeaderNav: React.FC<{
   siteCode?: string
   supportedLocales?: SupportedLocaleCode[]
   themeKey?: string
+  wingsGroupV3Home?: boolean
 }> = ({
   data,
   englishPublicationState,
@@ -41,6 +51,7 @@ export const HeaderNav: React.FC<{
   siteCode,
   supportedLocales,
   themeKey,
+  wingsGroupV3Home,
 }) => {
   const navItems = data?.navItems || []
   const [isOpen, setIsOpen] = useState(false)
@@ -56,14 +67,9 @@ export const HeaderNav: React.FC<{
       ? getWingsGroupSwitcherLocales(availableLocales, englishPublicationState)
       : availableLocales
   const isWingsSide = siteCode ? siteCode === 'wing-side' : themeKey === 'wings-side'
-  const isWingsGroupHome = siteCode === 'wings-group' && publicPathname === '/'
-  const wingsGroupHomeNav = [
-    { href: '#home', label: 'Trang chủ' },
-    { href: '#services', label: 'Dịch vụ' },
-    { href: '#about', label: 'Hệ sinh thái' },
-    { href: '#trust', label: 'Về WingsGroup' },
-    { href: '#news', label: 'Cẩm nang' },
-  ]
+  const isWingsGroupHome =
+    wingsGroupV3Home ?? (siteCode === 'wings-group' && publicPathname === '/')
+  const wingsGroupHomeNav = WINGSGROUP_HOME_NAV
   const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
   const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null
   const resolvedPrimaryAction = wingsSideHiFiCta || primaryAction

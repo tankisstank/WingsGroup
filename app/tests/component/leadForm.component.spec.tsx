@@ -111,13 +111,11 @@ describe('lead form hardened submission', () => {
   it('shows the Turnstile path only when the server requests a challenge', async () => {
     vi.stubGlobal(
       'fetch',
-      vi
-        .fn()
-        .mockResolvedValue(
-          new Response(JSON.stringify({ challengeRequired: true, siteKey: 'test-site-key' }), {
-            status: 403,
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ challengeRequired: true, siteKey: 'test-site-key' }), {
+          status: 403,
+        }),
+      ),
     )
 
     render(<FormBlock enableIntro={false} form={form as never} />)
@@ -255,12 +253,47 @@ describe('lead form hardened submission', () => {
   })
 
   it('keeps Journeys q/type in hidden plan context without changing the visitor message', async () => {
-    window.history.replaceState({}, '', '/wingsside/en/plan-your-trip?q=H%C3%A0%20N%E1%BB%99i&type=group&destination=hanoi&style=culture&duration=8-14&source=journeys')
-    document.body.innerHTML = '<div class="ws-hifi-plan-form"><form><textarea name="message"></textarea></form></div>'
-    render(<PlanPrefillBridge budgetLabel="Budget" budgetOptions={[]} consentLabel="Consent" destLabel="Destination" destOptions={['Hanoi']} groupLabel="Group" groupOptions={[]} monthLabel="Month" monthOptions={[]} styleLabel="Style" styleOptions={['Culture']} searchParams={{ q: 'Hà Nội', type: 'group', destination: 'hanoi', style: 'culture', duration: '8-14', source: 'journeys' }} />)
+    window.history.replaceState(
+      {},
+      '',
+      '/wingsside/en/plan-your-trip?q=H%C3%A0%20N%E1%BB%99i&type=group&destination=hanoi&style=culture&duration=8-14&source=journeys',
+    )
+    document.body.innerHTML =
+      '<div class="ws-hifi-plan-form"><form><textarea name="message"></textarea></form></div>'
+    render(
+      <PlanPrefillBridge
+        budgetLabel="Budget"
+        budgetOptions={[]}
+        consentLabel="Consent"
+        destLabel="Destination"
+        destOptions={['Hanoi']}
+        groupLabel="Group"
+        groupOptions={[]}
+        monthLabel="Month"
+        monthOptions={[]}
+        styleLabel="Style"
+        styleOptions={['Culture']}
+        searchParams={{
+          q: 'Hà Nội',
+          type: 'group',
+          destination: 'hanoi',
+          style: 'culture',
+          duration: '8-14',
+          source: 'journeys',
+        }}
+      />,
+    )
     const planForm = document.querySelector<HTMLFormElement>('.ws-hifi-plan-form form')!
     await waitFor(() => expect(planForm.dataset.wsEnquiryContext).toBeTruthy())
-    expect(JSON.parse(planForm.dataset.wsEnquiryContext!)).toMatchObject({ discovery: { q: 'Hà Nội', type: 'group', destination: 'hanoi', style: 'culture', duration: '8-14' } })
+    expect(JSON.parse(planForm.dataset.wsEnquiryContext!)).toMatchObject({
+      discovery: {
+        q: 'Hà Nội',
+        type: 'group',
+        destination: 'hanoi',
+        style: 'culture',
+        duration: '8-14',
+      },
+    })
     expect(document.querySelector<HTMLTextAreaElement>('textarea[name="message"]')?.value).toBe('')
   })
 
@@ -347,9 +380,7 @@ describe('lead form hardened submission', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    render(
-      <FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />,
-    )
+    render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)
 
     const fullName = await screen.findByLabelText(/Full name/)
     const need = screen.getByLabelText(/Message/)

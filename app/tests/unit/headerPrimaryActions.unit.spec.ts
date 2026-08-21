@@ -4,6 +4,7 @@ import {
   headerPrimaryActionsBySiteCode,
   resolveHeaderPrimaryAction,
 } from '@/utilities/headerPrimaryActions'
+import { WINGSGROUP_HOME_NAV } from '@/Header/Nav'
 
 describe('header primary action registry', () => {
   it('keeps theme-specific CTA registries explicit', () => {
@@ -49,5 +50,10 @@ describe('header primary action registry', () => {
       label: 'Contact',
       url: '/lien-he',
     })
+  })
+
+  it('keeps the mobile WingsGroup contact route separate from the consultation CTA', () => {
+    expect(WINGSGROUP_HOME_NAV).toContainEqual({ href: '#contact', label: 'Liên hệ' })
+    expect(WINGSGROUP_HOME_NAV).not.toContainEqual({ href: '#contact', label: 'Trao đổi nhu cầu' })
   })
 })

@@ -1,5 +1,8 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import type { PayloadRequest } from 'payload'
+import { appendFile, mkdir } from 'node:fs/promises'
+import path from 'node:path'
 
 import type { Form } from '@/payload-types'
 import { createLeadRedisStore, getClientIP } from '@/lead-capture/redis'
@@ -19,13 +22,14 @@ import {
   validateWingsGroupRequiredFields,
   WINGSGROUP_SITE_CODE,
 } from '@/lead-capture/wingsGroupV3'
-import {
-  getCurrentLocale,
-  getCurrentPublicPathname,
-  getCurrentSite,
-} from '@/utilities/siteContext'
+import { getCurrentLocale, getCurrentPublicPathname, getCurrentSite } from '@/utilities/siteContext'
 import { domainCandidates } from '@/utilities/siteDomains'
 import { incrementMetric, logOperationalEvent } from '@/observability'
+import {
+  getRunOwnedPreviewLeadPath,
+  hasExplicitWingsGroupLocalDraftPreviewSignal,
+  isExplicitWingsGroupLocalDraftPreviewRequest,
+} from '@/wingsgroup/localPreview'
 
 const json = (body: Record<string, unknown>, status: number): Response =>
   Response.json(body, {
@@ -36,7 +40,8 @@ const json = (body: Record<string, unknown>, status: number): Response =>
     status,
   })
 
-const accepted = (): Response => json({ status: 'accepted' }, 202)
+const accepted = (extra: Record<string, unknown> = {}): Response =>
+  json({ status: 'accepted', ...extra }, 202)
 const relationID = (value: Form['site']): number | string | null =>
   value && typeof value === 'object' ? value.id : value || null
 
@@ -59,18 +64,39 @@ const getWingsGroupSettings = async (
 }
 
 const trustedContextHeadersPresent = (request: Request): boolean =>
-  request.headers.get('x-site-context-source') === 'proxy' &&
-  Boolean(request.headers.get('x-site-host')) &&
-  Boolean(request.headers.get('x-client-ip'))
+  (request.headers.get('x-site-context-source') === 'proxy' &&
+    Boolean(request.headers.get('x-site-host')) &&
+    Boolean(request.headers.get('x-client-ip'))) ||
+  hasExplicitWingsGroupLocalDraftPreviewSignal({ headers: request.headers })
+
+const writePreviewLead = async ({
+  fields,
+  formID,
+  governance,
+  path: previewPath,
+  siteID,
+}: {
+  fields: Array<{ field: string; value: string }>
+  formID: Form['id']
+  governance: unknown
+  path: string
+  siteID: number | string
+}) => {
+  await mkdir(path.dirname(previewPath), { recursive: true })
+  await appendFile(
+    previewPath,
+    `${JSON.stringify({
+      fields,
+      formID,
+      governance,
+      receivedAt: new Date().toISOString(),
+      siteID,
+    })}\n`,
+    'utf8',
+  )
+}
 
 export async function POST(request: Request): Promise<Response> {
-  // A release may intentionally defer email-provider configuration. Refuse the
-  // submission explicitly instead of accepting a customer lead that cannot be
-  // delivered to an operator.
-  if (process.env.LEAD_DELIVERY_REQUIRED === 'false') {
-    return json({ error: 'Lead delivery is temporarily unavailable.' }, 503)
-  }
-
   if (!trustedContextHeadersPresent(request)) {
     return json({ error: 'Invalid submission.' }, 400)
   }
@@ -97,20 +123,44 @@ export async function POST(request: Request): Promise<Response> {
   const site = await getCurrentSite()
   const payload = await getPayload({ config: configPromise })
   const isWingsGroupV3 = site.code === WINGSGROUP_SITE_CODE
+  const previewSignal =
+    isWingsGroupV3 && hasExplicitWingsGroupLocalDraftPreviewSignal({ headers: request.headers })
+  const previewUser = previewSignal
+    ? (
+        await payload.auth({
+          headers: request.headers,
+          req: request as PayloadRequest,
+        })
+      ).user
+    : null
+  if (previewSignal && !previewUser) {
+    return json({ error: 'Preview authentication is required.' }, 403)
+  }
+  const previewLeadPath =
+    previewUser &&
+    isExplicitWingsGroupLocalDraftPreviewRequest({ headers: request.headers, user: previewUser })
+      ? getRunOwnedPreviewLeadPath()
+      : null
 
-  let store
-  try {
-    store = createLeadRedisStore()
-  } catch {
-    return json({ error: 'Service temporarily unavailable.' }, 503)
+  // A release may intentionally defer email-provider configuration. The only
+  // local exception is the authenticated, explicit preview sink above.
+  if (process.env.LEAD_DELIVERY_REQUIRED === 'false' && !previewLeadPath) {
+    return json({ error: 'Lead delivery is temporarily unavailable.' }, 503)
   }
 
   const ip = getClientIP(request.headers)
-  let rate
-  try {
-    rate = await store.checkIPRateLimit({ ip })
-  } catch {
-    return json({ error: 'Service temporarily unavailable.' }, 503)
+  let store: ReturnType<typeof createLeadRedisStore> | undefined
+  let rate: { allowed: boolean; requiresChallenge: boolean } = {
+    allowed: true,
+    requiresChallenge: false,
+  }
+  if (!previewLeadPath) {
+    try {
+      store = createLeadRedisStore()
+      rate = await store.checkIPRateLimit({ ip })
+    } catch {
+      return json({ error: 'Service temporarily unavailable.' }, 503)
+    }
   }
 
   if (!rate.allowed) return json({ error: 'Please try again later.' }, 429)
@@ -221,8 +271,30 @@ export async function POST(request: Request): Promise<Response> {
     }
   }
 
+  if (previewLeadPath) {
+    try {
+      await writePreviewLead({
+        fields: normalizedFields.map(({ field, value }) => ({ field, value })),
+        formID: form.id,
+        governance: wingsGroupContext,
+        path: previewLeadPath,
+        siteID: site.id,
+      })
+    } catch {
+      return json({ error: 'Service temporarily unavailable.' }, 503)
+    }
+
+    logOperationalEvent('info', 'lead_submission_preview_accepted', {
+      request_id: request.headers.get('x-request-id'),
+      result: 'accepted',
+      site_code: site.code,
+      status_code: 202,
+    })
+    return accepted({ preview: true })
+  }
+
   try {
-    const siteFormRate = await store.checkValidatedRateLimits({
+    const siteFormRate = await store!.checkValidatedRateLimits({
       formId: form.id,
       siteCode: site.code,
     })
@@ -233,7 +305,7 @@ export async function POST(request: Request): Promise<Response> {
 
   let reserved
   try {
-    reserved = await store.reserveIdempotency(input.idempotencyKey)
+    reserved = await store!.reserveIdempotency(input.idempotencyKey)
   } catch {
     return json({ error: 'Service temporarily unavailable.' }, 503)
   }
@@ -263,10 +335,10 @@ export async function POST(request: Request): Promise<Response> {
       },
       overrideAccess: true,
     })
-    await store.completeIdempotency(input.idempotencyKey, submission.id)
+    await store!.completeIdempotency(input.idempotencyKey, submission.id)
     incrementMetric('wingstravel_lead_submissions_total', { site: site.code })
   } catch {
-    await store.releaseIdempotency(input.idempotencyKey).catch(() => undefined)
+    await store!.releaseIdempotency(input.idempotencyKey).catch(() => undefined)
     return json({ error: 'Service temporarily unavailable.' }, 503)
   }
 
@@ -362,17 +434,32 @@ export async function GET(request: Request): Promise<Response> {
   const site = await getCurrentSite()
   if (site.code !== WINGSGROUP_SITE_CODE) return json({ enabled: false }, 200)
 
-  if (process.env.LEAD_DELIVERY_REQUIRED === 'false') {
-    return json(
-      { available: false, enabled: true, reason: 'configuration-unavailable' },
-      200,
-    )
+  const payload = await getPayload({ config: configPromise })
+  const previewSignal = hasExplicitWingsGroupLocalDraftPreviewSignal({
+    headers: request.headers,
+  })
+  const previewUser = previewSignal
+    ? (
+        await payload.auth({
+          headers: request.headers,
+          req: request as PayloadRequest,
+        })
+      ).user
+    : null
+  if (previewSignal && !previewUser) {
+    return json({ error: 'Preview authentication is required.' }, 403)
+  }
+  const previewLeadPath =
+    previewUser &&
+    isExplicitWingsGroupLocalDraftPreviewRequest({ headers: request.headers, user: previewUser })
+      ? getRunOwnedPreviewLeadPath()
+      : null
+
+  if (process.env.LEAD_DELIVERY_REQUIRED === 'false' && !previewLeadPath) {
+    return json({ available: false, enabled: true, reason: 'configuration-unavailable' }, 200)
   }
 
-  const [payload, locale] = await Promise.all([
-    getPayload({ config: configPromise }),
-    getCurrentLocale(),
-  ])
+  const locale = await getCurrentLocale()
   const settings = await getWingsGroupSettings(payload, site.id).catch(() => null)
 
   return json(toWingsGroupLeadPublicConfig(settings, locale), 200)

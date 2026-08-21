@@ -299,6 +299,8 @@ export const FormBlock: React.FC<
   const wingsGroupCopy = wingsGroupLeadCopy[copyLocale === 'en' ? 'en' : 'vi']
   const isWingsGroupV3 =
     siteCode === WINGSGROUP_SITE_CODE || getFormSiteCode(formFromProps) === WINGSGROUP_SITE_CODE
+  const resolvedSubmitLabel =
+    isWingsGroupV3 && copyLocale === 'vi' ? 'Nhận tư vấn phù hợp' : copy.submit || submitButtonLabel
   const localizedFields =
     formFromProps?.fields?.map((field) => {
       const fieldName = getFieldName(field)
@@ -807,7 +809,7 @@ export const FormBlock: React.FC<
                   type="submit"
                   variant="default"
                 >
-                  {isLoading ? copy.loading : copy.submit || submitButtonLabel}
+                  {isLoading ? copy.loading : resolvedSubmitLabel}
                 </Button>
               </form>
             )}

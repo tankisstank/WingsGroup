@@ -1,8 +1,9 @@
-import type { Access, CollectionBeforeChangeHook } from 'payload'
+import type { Access, CollectionBeforeChangeHook, Where } from 'payload'
 
 import type { AppUser, RelationID, RelationValue } from '@/types/auth'
 
 import { buildSiteWhere, getUserSiteIDs, hasRole, isSuperAdmin, normalizeRelationID } from './roles'
+import { isExplicitWingsGroupLocalDraftPreviewRequest } from '@/wingsgroup/localPreview'
 
 type SiteScopedData = {
   id: RelationID
@@ -49,6 +50,47 @@ export const siteScopedOrAnyone = (fieldName = 'site'): Access => {
 
     return siteScopedAccess(fieldName)(args)
   }
+}
+
+const publicMediaWhere: Where = {
+  or: [
+    { 'governance.managedBy': { not_equals: 'wingsgroup-v3' } },
+    {
+      and: [
+        { 'governance.managedBy': { equals: 'wingsgroup-v3' } },
+        { 'governance.publicationState': { equals: 'published' } },
+        { 'governance.rightsState': { equals: 'approved' } },
+        { 'governance.derivativeState': { equals: 'verified' } },
+        { 'governance.sourceAttachmentId': { exists: true } },
+        { 'governance.sourceIdentity': { exists: true } },
+        { 'governance.sourceArchiveSha256': { exists: true } },
+        { 'governance.sourceFileSha256': { exists: true } },
+        { 'governance.provenanceReference': { exists: true } },
+        { 'governance.rightsEvidence': { exists: true } },
+        { site: { exists: true } },
+        { url: { exists: true } },
+      ],
+    },
+  ],
+}
+
+/**
+ * Media is the one public collection whose records may contain governed
+ * development assets. Keep those assets invisible unless an authenticated
+ * operator is explicitly in the local Next draft preview.
+ */
+export const wingsGroupMediaReadAccess: Access = ({ req }) => {
+  if (
+    isExplicitWingsGroupLocalDraftPreviewRequest({
+      context: req.context as Record<string, unknown> | undefined,
+      headers: req.headers,
+      user: req.user,
+    })
+  ) {
+    return siteScopedAccess()({ req })
+  }
+
+  return publicMediaWhere
 }
 
 export const siteScopedOrPublished = (fieldName = 'site'): Access => {

@@ -45,6 +45,7 @@ export async function Header() {
       supportedLocales={site.supportedLocales}
       tagline={settings?.tagline}
       themeKey={themeKey}
+      wingsGroupV3Home={isWingsGroupHome}
     />
   )
 }

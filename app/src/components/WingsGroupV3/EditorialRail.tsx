@@ -82,7 +82,7 @@ const getFallbackEditorialMedia = async (): Promise<Map<string, MediaType>> => {
   const where = await appendSiteWhere()
   const result = await payload.find({
     collection: 'media',
-    depth: 0,
+    depth: 1,
     limit: 20,
     overrideAccess: true,
     pagination: false,

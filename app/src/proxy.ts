@@ -177,33 +177,65 @@ export function proxy(request: NextRequest) {
     return response
   }
 
-  if (!siteAlias) {
-    if (!locale) {
-      return withRequestID(NextResponse.next({
+  // Payload's upload directory is physically public, so route media URLs back
+  // through Payload's governed file handler. This keeps anonymous requests
+  // subject to the same publication gate as /api/media/file/*.
+  if (request.nextUrl.pathname === '/media' || request.nextUrl.pathname.startsWith('/media/')) {
+    const filename = request.nextUrl.pathname.slice('/media/'.length)
+    if (
+      !filename ||
+      filename === '.' ||
+      filename === '..' ||
+      filename.includes('/') ||
+      filename.includes('\\')
+    ) {
+      return notFoundResponse()
+    }
+
+    const url = request.nextUrl.clone()
+    url.pathname = `/api/media/file/${filename}`
+    return withRequestID(
+      NextResponse.rewrite(url, {
         request: {
           headers: requestHeaders,
         },
-      }))
+      }),
+    )
+  }
+
+  if (!siteAlias) {
+    if (!locale) {
+      return withRequestID(
+        NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        }),
+      )
     }
 
     const url = request.nextUrl.clone()
     url.pathname = stripLeadingSegments(request.nextUrl.pathname, 1)
 
-    return withRequestID(NextResponse.rewrite(url, {
-      request: {
-        headers: requestHeaders,
-      },
-    }))
+    return withRequestID(
+      NextResponse.rewrite(url, {
+        request: {
+          headers: requestHeaders,
+        },
+      }),
+    )
   }
 
   const url = request.nextUrl.clone()
   url.pathname = stripLeadingSegments(request.nextUrl.pathname, locale ? 2 : 1)
 
-  return withRequestID(NextResponse.rewrite(url, {
-    request: {
-      headers: requestHeaders,
-    },
-  }))
+  return withRequestID(
+    NextResponse.rewrite(url, {
+      request: {
+        headers: requestHeaders,
+      },
+    }),
+  )
 }
 
 export const config = {
