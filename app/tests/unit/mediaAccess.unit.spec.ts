@@ -1,15 +1,18 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { wingsGroupMediaReadAccess } from '@/access/siteScope'
+import { WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT } from '@/wingsgroup/corporateRoutes'
 
 const request = ({
   cookie,
+  context = {},
   user,
 }: {
   cookie?: string
-  user?: { role: 'super-admin' }
+  context?: Record<string, unknown>
+  user?: { role: 'editor' | 'site-manager' | 'super-admin'; sites?: Array<number | string> }
 } = {}) => ({
-  context: {},
+  context,
   headers: new Headers({
     ...(cookie ? { cookie } : {}),
     host: '127.0.0.1:4175',
@@ -35,26 +38,74 @@ describe('WingsGroup media read access', () => {
     const result = await wingsGroupMediaReadAccess({
       req: request({
         cookie: '__prerender_bypass=run-owned-preview',
-        user: { role: 'super-admin' },
+        user: { role: 'site-manager', sites: [7] },
       }),
     } as never)
 
-    expect(result).toBe(true)
+    expect(result).toEqual({ site: { in: [7] } })
   })
 
-  it('does not treat a local draft cookie as a production preview grant', async () => {
+  it('keeps a normal authenticated Media read scoped to the user site', async () => {
+    const result = await wingsGroupMediaReadAccess({
+      req: request({
+        user: { role: 'site-manager', sites: [7] },
+      }),
+    } as never)
+
+    expect(result).toEqual({ site: { in: [7] } })
+
+    const mediaRows = [
+      { id: 101, site: 7, filename: 'site-seven.jpg' },
+      { id: 202, site: 8, filename: 'site-eight.jpg' },
+    ]
+    const visibleRows = mediaRows.filter((row) =>
+      (result as { site: { in: Array<number | string> } }).site.in.some(
+        (siteID) => String(siteID) === String(row.site),
+      ),
+    )
+
+    expect(visibleRows).toEqual([mediaRows[0]])
+    expect(visibleRows).not.toContain(mediaRows[1])
+  })
+
+  it('fails closed for a production context marker on an authenticated site manager', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    try {
+      const result = await wingsGroupMediaReadAccess({
+        req: request({
+          context: { [WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT]: true },
+          user: { role: 'site-manager', sites: [7] },
+        }),
+      } as never)
+
+      expect(result).toBe(false)
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
+  it('fails closed for a production local draft cookie on an authenticated site manager', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     try {
       const result = await wingsGroupMediaReadAccess({
         req: request({
           cookie: '__prerender_bypass=run-owned-preview',
-          user: { role: 'super-admin' },
+          user: { role: 'site-manager', sites: [7] },
         }),
       } as never)
 
-      expect(result).not.toBe(true)
+      expect(result).toBe(false)
     } finally {
       vi.unstubAllEnvs()
     }
+  })
+
+  it('does not treat an anonymous local draft cookie as a preview grant', async () => {
+    const result = await wingsGroupMediaReadAccess({
+      req: request({ cookie: '__prerender_bypass=run-owned-preview' }),
+    } as never)
+
+    expect(result).toMatchObject({ or: expect.any(Array) })
+    expect(result).not.toBe(true)
   })
 })

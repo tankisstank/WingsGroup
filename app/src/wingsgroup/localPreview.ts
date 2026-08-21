@@ -20,12 +20,19 @@ const isLocalHost = (headers: Headers | null | undefined): boolean => {
 const hasDraftModeCookie = (headers: Headers | null | undefined): boolean =>
   Boolean(headers?.get('cookie')?.match(/(?:^|;\s*)__prerender_bypass=[^;]+/u))
 
-export const hasExplicitWingsGroupLocalDraftPreviewSignal = ({
+export const hasWingsGroupLocalDraftPreviewSignal = ({
   context,
   headers,
 }: Pick<PreviewRequestLike, 'context' | 'headers'>): boolean =>
   context?.[WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT] === true ||
-  (process.env.NODE_ENV !== 'production' && isLocalHost(headers) && hasDraftModeCookie(headers))
+  (isLocalHost(headers) && hasDraftModeCookie(headers))
+
+export const hasExplicitWingsGroupLocalDraftPreviewSignal = ({
+  context,
+  headers,
+}: Pick<PreviewRequestLike, 'context' | 'headers'>): boolean =>
+  process.env.NODE_ENV !== 'production' &&
+  hasWingsGroupLocalDraftPreviewSignal({ context, headers })
 
 export const isExplicitWingsGroupLocalDraftPreviewRequest = ({
   context,

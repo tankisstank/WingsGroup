@@ -3,7 +3,10 @@ import type { Access, CollectionBeforeChangeHook, Where } from 'payload'
 import type { AppUser, RelationID, RelationValue } from '@/types/auth'
 
 import { buildSiteWhere, getUserSiteIDs, hasRole, isSuperAdmin, normalizeRelationID } from './roles'
-import { isExplicitWingsGroupLocalDraftPreviewRequest } from '@/wingsgroup/localPreview'
+import {
+  hasWingsGroupLocalDraftPreviewSignal,
+  isExplicitWingsGroupLocalDraftPreviewRequest,
+} from '@/wingsgroup/localPreview'
 
 type SiteScopedData = {
   id: RelationID
@@ -80,17 +83,36 @@ const publicMediaWhere: Where = {
  * operator is explicitly in the local Next draft preview.
  */
 export const wingsGroupMediaReadAccess: Access = ({ req }) => {
+  const context = req.context as Record<string, unknown> | undefined
+  const headers = req.headers
+
+  if (!req.user) {
+    return publicMediaWhere
+  }
+
+  // A local draft-preview signal is never valid in production. Deny the
+  // request instead of falling through to the authenticated site scope, which
+  // could otherwise expose pending governed media through a trusted context.
+  if (
+    process.env.NODE_ENV === 'production' &&
+    hasWingsGroupLocalDraftPreviewSignal({ context, headers })
+  ) {
+    return false
+  }
+
   if (
     isExplicitWingsGroupLocalDraftPreviewRequest({
-      context: req.context as Record<string, unknown> | undefined,
-      headers: req.headers,
+      context,
+      headers,
       user: req.user,
     })
   ) {
     return siteScopedAccess()({ req })
   }
 
-  return publicMediaWhere
+  // Normal authenticated Media reads retain tenant isolation. Only anonymous
+  // reads use the public publication/evidence predicate above.
+  return siteScopedAccess()({ req })
 }
 
 export const siteScopedOrPublished = (fieldName = 'site'): Access => {
