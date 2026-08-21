@@ -22,6 +22,7 @@ import {
   WINGSGROUP_PRIVACY_VERSION,
 } from '@/lead-capture/wingsGroupV3'
 import { seedWingsGroupCorporateRoutes } from '../../scripts/lib/wingsGroupCorporateRouteSeed'
+import { wingsGroupLegacyContactFormFixture } from '../fixtures/wingsgroup-legacy-contact-form'
 
 const routeData = (overrides: Record<string, unknown> = {}) => ({
   _status: 'published',
@@ -745,6 +746,106 @@ describe('WingsGroup corporate route integration', () => {
       '/tin-cay-va-phap-ly',
       '/tin-tuc',
       '/ve-wingsgroup',
+    ])
+  })
+
+  it('deterministically reconciles a pre-existing legacy contact form and pending channels', async () => {
+    const pages: Array<Record<string, unknown> & { id: number; pathname: string }> = []
+    const form = {
+      ...wingsGroupLegacyContactFormFixture,
+      fields: [...wingsGroupLegacyContactFormFixture.fields],
+    }
+    const settings = {
+      id: 20,
+      wingsGroupV3: {
+        consultationChannels: [
+          {
+            key: 'zalo',
+            owner: 'Old owner',
+            sla: 'Old SLA',
+            state: 'approved',
+            trackingReference: 'old-tracking',
+            url: 'https://old.example/zalo',
+          },
+        ],
+      },
+    }
+    const updates: Array<{ collection: string; data: Record<string, unknown> }> = []
+    const payload = {
+      create: async ({
+        collection,
+        data,
+      }: {
+        collection: string
+        data: Record<string, unknown>
+      }) => {
+        if (collection !== 'pages') throw new Error(`Unexpected create: ${collection}`)
+        const page = { ...data, id: pages.length + 1 } as (typeof pages)[number]
+        pages.push(page)
+        return page
+      },
+      find: async ({ collection }: { collection: string }) => {
+        if (collection === 'sites') return { docs: [{ code: 'wings-group', id: 1 }] }
+        if (collection === 'site-settings') return { docs: [settings] }
+        if (collection === 'forms') return { docs: [form] }
+        if (collection === 'pages') return { docs: pages }
+        throw new Error(`Unexpected find: ${collection}`)
+      },
+      update: async ({
+        collection,
+        data,
+        id,
+      }: {
+        collection: string
+        data: Record<string, unknown>
+        id: number
+      }) => {
+        updates.push({ collection, data })
+        if (collection === 'site-settings') {
+          Object.assign(settings, data)
+          return settings
+        }
+        if (collection === 'forms') {
+          Object.assign(form, data)
+          return form
+        }
+        const page = pages.find((candidate) => candidate.id === id)
+        if (!page) throw new Error(`Page ${id} missing`)
+        Object.assign(page, data)
+        return page
+      },
+    }
+
+    await seedWingsGroupCorporateRoutes({
+      payload: payload as never,
+      req: { user: { role: 'super-admin' } } as never,
+    })
+
+    expect(form.fields).toEqual([
+      {
+        blockName: 'full-name',
+        blockType: 'text',
+        label: 'Họ và tên',
+        name: 'full-name',
+        required: true,
+        width: 100,
+      },
+      {
+        blockName: 'brief',
+        blockType: 'textarea',
+        label: 'Nhu cầu tư vấn',
+        name: 'brief',
+        required: true,
+        width: 100,
+      },
+    ])
+    expect(updates.find(({ collection }) => collection === 'forms')?.data.fields).toEqual(
+      form.fields,
+    )
+    expect(settings.wingsGroupV3.consultationChannels).toEqual([
+      { key: 'zalo', state: 'unconfigured' },
+      { key: 'whatsapp', state: 'unconfigured' },
+      { key: 'messenger', state: 'unconfigured' },
     ])
   })
 })

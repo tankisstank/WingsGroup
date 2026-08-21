@@ -4,6 +4,7 @@ import { parseLeadRequest, validateFieldsForForm } from '@/lead-capture/validati
 import {
   getWingsGroupRetentionUntil,
   normalizeTrustedLeadSourcePath,
+  resolveTrustedLeadSourcePath,
   resolveWingsGroupLeadGovernance,
   validateWingsGroupLeadContract,
   validateWingsGroupRequiredFields,
@@ -63,6 +64,22 @@ describe('WingsGroup v3 lead governance', () => {
         label: 'WhatsApp',
         state: 'approved',
       },
+    ])
+  })
+
+  it('backfills the three pending selector choices when channel settings are empty', () => {
+    const governance = resolveWingsGroupLeadGovernance(
+      {
+        ...settings,
+        wingsGroupV3: { ...settings.wingsGroupV3, consultationChannels: [] },
+      },
+      'vi',
+    )
+
+    expect(governance?.channels).toEqual([
+      { key: 'zalo', label: 'Zalo', state: 'pending-update' },
+      { key: 'whatsapp', label: 'WhatsApp', state: 'pending-update' },
+      { key: 'messenger', label: 'Messenger', state: 'pending-update' },
     ])
   })
 
@@ -134,6 +151,57 @@ describe('WingsGroup v3 lead governance', () => {
     expect(normalizeTrustedLeadSourcePath('https://attacker.example/private')).toBe('/')
     expect(normalizeTrustedLeadSourcePath('/lien-he?forged=query')).toBe('/lien-he')
     expect(getWingsGroupRetentionUntil(consentedAt)).toBe('2026-02-28T10:15:00.000Z')
+  })
+
+  it('normalizes only a same-origin, tenant- and locale-scoped public Referer', () => {
+    const site = {
+      additionalDomains: [{ domain: 'www.wingsgroup.vn' }],
+      code: 'wings-group',
+      primaryDomain: 'wingsgroup.vn',
+    }
+    const sourceRequest = (
+      referer: string,
+      requestURL = 'https://wingsgroup.vn/api/lead-submissions',
+    ) =>
+      new Request(requestURL, {
+        headers: {
+          referer,
+          'x-site-host': 'wingsgroup.vn',
+        },
+      })
+
+    expect(
+      resolveTrustedLeadSourcePath({
+        currentLocale: 'vi',
+        request: sourceRequest('https://wingsgroup.vn/lien-he?from=home'),
+        site,
+      }),
+    ).toBe('/lien-he')
+    expect(
+      resolveTrustedLeadSourcePath({
+        currentLocale: 'en',
+        request: sourceRequest('https://wingsgroup.vn/en/lien-he'),
+        site,
+      }),
+    ).toBe('/lien-he')
+
+    for (const referer of [
+      'https://attacker.example/lien-he',
+      'https://wingsgroup.vn/wingsgo/lien-he',
+      'https://wingsgroup.vn/en/lien-he',
+      'https://wingsgroup.vn/api/lead-submissions',
+      'not-a-url',
+      'https://wingsgroup.vn/%E0%A4%A',
+    ]) {
+      expect(
+        resolveTrustedLeadSourcePath({
+          currentLocale: 'vi',
+          request: sourceRequest(referer),
+          site,
+        }),
+        referer,
+      ).toBe('/')
+    }
   })
 })
 

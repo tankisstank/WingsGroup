@@ -16,13 +16,14 @@ import { verifyTurnstile } from '@/lead-capture/turnstile'
 import {
   getWingsGroupRetentionUntil,
   normalizeTrustedLeadSourcePath,
+  resolveTrustedLeadSourcePath,
   resolveWingsGroupLeadGovernance,
   toWingsGroupLeadPublicConfig,
   validateWingsGroupLeadContract,
   validateWingsGroupRequiredFields,
   WINGSGROUP_SITE_CODE,
 } from '@/lead-capture/wingsGroupV3'
-import { getCurrentLocale, getCurrentPublicPathname, getCurrentSite } from '@/utilities/siteContext'
+import { getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
 import { domainCandidates } from '@/utilities/siteDomains'
 import { incrementMetric, logOperationalEvent } from '@/observability'
 import {
@@ -231,11 +232,11 @@ export async function POST(request: Request): Promise<Response> {
     | undefined
 
   if (isWingsGroupV3) {
-    const [settings, locale, sourcePath] = await Promise.all([
+    const [settings, locale] = await Promise.all([
       getWingsGroupSettings(payload, site.id),
       getCurrentLocale(),
-      getCurrentPublicPathname(),
     ])
+    const sourcePath = resolveTrustedLeadSourcePath({ currentLocale: locale, request, site })
     const governance = resolveWingsGroupLeadGovernance(settings, locale, {
       allowPendingPrivacy: Boolean(previewLeadPath),
     })

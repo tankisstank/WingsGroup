@@ -17,7 +17,11 @@ import { getCopyLocale } from '@/utilities/locales'
 import { TurnstileWidget } from './TurnstileWidget'
 import type { LocalizedCopy } from '@/i18n/publicCopy'
 import type { LeadSubmissionContext } from '@/lead-capture/types'
-import type { ConsultationChannelKey, WingsGroupLeadPublicConfig } from '@/lead-capture/types'
+import type {
+  ConsultationChannelKey,
+  ConsultationChannelPublicState,
+  WingsGroupLeadPublicConfig,
+} from '@/lead-capture/types'
 import { getFormSiteCode, WINGSGROUP_SITE_CODE } from '@/lead-capture/wingsGroupV3'
 
 import './form-layout.css'
@@ -250,6 +254,12 @@ const wingsGroupLeadCopy = {
   },
 } as const
 
+const pendingConsultationChannels: ConsultationChannelPublicState[] = [
+  { key: 'zalo', label: 'Zalo', state: 'pending-update' },
+  { key: 'whatsapp', label: 'WhatsApp', state: 'pending-update' },
+  { key: 'messenger', label: 'Messenger', state: 'pending-update' },
+]
+
 const readLeadSubmissionContext = (
   form: HTMLFormElement | null,
 ): LeadSubmissionContext | undefined => {
@@ -353,6 +363,12 @@ export const FormBlock: React.FC<
   const idempotencyKeyRef = useRef<string | null>(null)
   const router = useRouter()
   const toSitePath = useSitePath()
+  const leadChannels =
+    leadConfig && leadConfig.enabled && 'available' in leadConfig && leadConfig.available
+      ? leadConfig.channels.length > 0
+        ? leadConfig.channels
+        : pendingConsultationChannels
+      : []
 
   useEffect(() => {
     if (error) {
@@ -722,11 +738,11 @@ export const FormBlock: React.FC<
                   'available' in leadConfig &&
                   leadConfig.available && (
                     <div className="site-wingsgroup-lead-contract">
-                      {leadConfig.channels.length > 0 && (
+                      {leadChannels.length > 0 && (
                         <fieldset className="site-wingsgroup-channels">
                           <legend>{wingsGroupCopy.channelsTitle}</legend>
                           <ul>
-                            {leadConfig.channels.map((channel) => (
+                            {leadChannels.map((channel) => (
                               <li key={channel.key}>
                                 {channel.state === 'approved' && channel.href ? (
                                   <a href={channel.href} rel="noreferrer" target="_blank">
@@ -751,7 +767,7 @@ export const FormBlock: React.FC<
                             value={preferredChannel}
                           >
                             <option value="">{wingsGroupCopy.noPreference}</option>
-                            {leadConfig.channels.map((channel) => (
+                            {leadChannels.map((channel) => (
                               <option key={channel.key} value={channel.key}>
                                 {channel.label}
                                 {channel.state === 'pending-update'

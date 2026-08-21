@@ -45,9 +45,11 @@ const sitesWithForms = inventory.sites.filter((site) => site.formRouteSample)
 const request = ({
   bodyOverrides = {},
   host = 'www.wingsgo.vn',
+  referer = `https://${host}/lien-he`,
 }: {
   bodyOverrides?: Record<string, unknown>
   host?: string
+  referer?: null | string
 } = {}) =>
   new Request(`https://${host}/api/lead-submissions`, {
     body: JSON.stringify({
@@ -56,12 +58,13 @@ const request = ({
       submissionData: [{ field: 'name', value: 'Alice' }],
       ...bodyOverrides,
     }),
-    headers: {
+    headers: new Headers({
+      ...(referer ? { referer } : {}),
       'content-type': 'application/json',
       'x-site-context-source': 'proxy',
       'x-client-ip': '198.51.100.10',
       'x-site-host': host,
-    },
+    }),
     method: 'POST',
   })
 
@@ -288,7 +291,6 @@ describe('lead submission endpoint integration', () => {
       primaryDomain: 'wingsgroup.vn',
     })
     mocks.getCurrentLocale.mockResolvedValue('en')
-    mocks.getCurrentPublicPathname.mockResolvedValue('/en/lien-he')
     mocks.find.mockImplementation(async ({ collection }: { collection: string }) =>
       collection === 'site-settings'
         ? {
@@ -347,6 +349,7 @@ describe('lead submission endpoint integration', () => {
           ],
         },
         host: 'wingsgroup.vn',
+        referer: 'https://wingsgroup.vn/en/lien-he',
       }),
     )
 
@@ -368,7 +371,7 @@ describe('lead submission endpoint integration', () => {
             consentVersion: 'wingsgroup-contact-v1',
             locale: 'en',
             preferredChannel: 'zalo',
-            sourcePath: '/en/lien-he',
+            sourcePath: '/lien-he',
           }),
         }),
       }),
@@ -384,6 +387,92 @@ describe('lead submission endpoint integration', () => {
     )
     consoleInfo.mockRestore()
     consoleWarn.mockRestore()
+  })
+
+  it('persists the same-origin public form route and ignores forged source assertions', async () => {
+    mocks.getCurrentSite.mockResolvedValue({
+      additionalDomains: [{ domain: 'www.wingsgroup.vn' }],
+      code: 'wings-group',
+      id: 9,
+      primaryDomain: 'wingsgroup.vn',
+    })
+    mocks.getCurrentLocale.mockResolvedValue('vi')
+    mocks.find.mockImplementation(async ({ collection }: { collection: string }) =>
+      collection === 'site-settings'
+        ? {
+            docs: [
+              {
+                site: 9,
+                wingsGroupV3: {
+                  enabled: true,
+                  privacy: {
+                    approvalReference: 'privacy-approval-2026-08-14',
+                    approvalState: 'approved',
+                    consentEvidenceReference: 'consent-evidence-2026-08-14',
+                    consentRequired: true,
+                    consentVersion: 'wingsgroup-contact-v1',
+                    dataSubjectContact: 'info@doicanhviet.com',
+                    dataSubjectRightsEvidence: 'rights-evidence-2026-08-14',
+                    dataSubjectRightsStatement: 'Legal-owner supplied rights statement.',
+                    interBranchTransferAllowed: true,
+                    policyRouteEn: '/en/chinh-sach-bao-mat',
+                    policyRouteVi: '/chinh-sach-bao-mat',
+                    policyVersion: 'wingsgroup-privacy-v1',
+                    retentionMonths: 24,
+                  },
+                },
+              },
+            ],
+          }
+        : {
+            docs: [
+              {
+                fields: [
+                  { blockType: 'text', label: 'Name', name: 'name', required: true },
+                  { blockType: 'textarea', label: 'Need', name: 'message', required: true },
+                ],
+                id: 7,
+                site: 9,
+                title: 'WingsGroup Contact',
+              },
+            ],
+          },
+    )
+
+    const cases = [
+      { expected: '/lien-he', referer: 'https://wingsgroup.vn/lien-he' },
+      { expected: '/', referer: 'https://attacker.example/lien-he' },
+      { expected: '/', referer: 'https://wingsgroup.vn/wingsgo/lien-he' },
+      { expected: '/', referer: 'https://wingsgroup.vn/en/lien-he' },
+      { expected: '/', referer: 'https://wingsgroup.vn/api/lead-submissions' },
+      { expected: '/', referer: 'malformed-referer' },
+    ]
+
+    for (const { expected, referer } of cases) {
+      mocks.create.mockClear()
+      const response = await POST(
+        request({
+          bodyOverrides: {
+            context: { source: 'forged-client-source' },
+            leadContract: {
+              consent: true,
+              consentVersion: 'wingsgroup-contact-v1',
+            },
+            submissionData: [
+              { field: 'name', value: 'Alice' },
+              { field: 'message', value: 'Consultation request' },
+            ],
+          },
+          host: 'wingsgroup.vn',
+          referer,
+        }),
+      )
+
+      expect(response.status, referer).toBe(202)
+      expect(mocks.create.mock.calls.at(-1)?.[0]?.data.wingsGroupLead.sourcePath, referer).toBe(
+        expected,
+      )
+    }
   })
 
   it('does not expose or persist WingsGroup leads while privacy approval is pending', async () => {

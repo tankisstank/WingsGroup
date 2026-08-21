@@ -1,3 +1,13 @@
+import type { Site } from '@/payload-types'
+
+import {
+  allSiteAliasToCodeMap,
+  getLocaleFromPathname,
+  getPublicRoutePathname,
+  getSiteAliasFromPathname,
+} from '@/utilities/sitePaths'
+import { domainCandidates, normalizeHost } from '@/utilities/siteDomains'
+
 import type {
   ConsultationChannelKey,
   ConsultationChannelPublicState,
@@ -65,6 +75,127 @@ const isApprovedHTTPSURL = (value: unknown): value is string => {
   }
 }
 
+const localSourceHosts = new Set(['127.0.0.1', '::1', 'localhost'])
+
+const relationDomains = (site: Pick<Site, 'additionalDomains' | 'primaryDomain'>): string[] => [
+  ...domainCandidates(site.primaryDomain),
+  ...((site.additionalDomains || []) as Array<{ domain?: null | string }>).flatMap(({ domain }) =>
+    domainCandidates(domain),
+  ),
+]
+
+const normalizedSafePath = (pathname: string): string | null => {
+  if (
+    !pathname ||
+    pathname.length > 512 ||
+    !pathname.startsWith('/') ||
+    pathname.startsWith('//') ||
+    pathname.includes('\\') ||
+    pathname.includes('//') ||
+    /[\u0000-\u001f\u007f]/u.test(pathname)
+  ) {
+    return null
+  }
+
+  let decodedPath: string
+  try {
+    decodedPath = decodeURIComponent(pathname)
+  } catch {
+    return null
+  }
+
+  if (
+    decodedPath !== pathname &&
+    (decodedPath.length > 512 ||
+      decodedPath.includes('?') ||
+      decodedPath.includes('#') ||
+      decodedPath.includes('\\') ||
+      decodedPath.includes('//') ||
+      /[\u0000-\u001f\u007f]/u.test(decodedPath))
+  ) {
+    return null
+  }
+
+  return decodedPath
+}
+
+/**
+ * Resolves the public page that contained a lead form from a same-origin
+ * browser Referer. The API path and client payload are deliberately excluded
+ * from this decision; the proxy-resolved tenant and locale remain authoritative.
+ */
+export const resolveTrustedLeadSourcePath = ({
+  currentLocale,
+  request,
+  site,
+}: {
+  currentLocale: unknown
+  request: Pick<Request, 'headers' | 'url'>
+  site: Pick<Site, 'additionalDomains' | 'code' | 'primaryDomain'>
+}): string => {
+  const referer = request.headers.get('referer')
+  if (!referer) return '/'
+
+  let refererURL: URL
+  let requestURL: URL
+  try {
+    refererURL = new URL(referer)
+    requestURL = new URL(request.url)
+  } catch {
+    return '/'
+  }
+
+  if (
+    !['http:', 'https:'].includes(refererURL.protocol) ||
+    refererURL.username ||
+    refererURL.password
+  ) {
+    return '/'
+  }
+
+  const siteHosts = new Set(relationDomains(site))
+  const requestHost = normalizeHost(requestURL.hostname)
+  const proxyHost = normalizeHost(request.headers.get('x-site-host'))
+  const expectedHost = proxyHost && siteHosts.has(proxyHost) ? proxyHost : requestHost
+  const localExpectedHost = expectedHost ? localSourceHosts.has(expectedHost) : false
+  const refererHost = normalizeHost(refererURL.hostname)
+
+  if (
+    !refererHost ||
+    refererHost !== expectedHost ||
+    (!siteHosts.has(refererHost) && !localExpectedHost) ||
+    refererURL.protocol !== requestURL.protocol ||
+    refererURL.hostname !== requestURL.hostname ||
+    refererURL.port !== requestURL.port
+  ) {
+    return '/'
+  }
+
+  const pathname = normalizedSafePath(refererURL.pathname)
+  if (!pathname) return '/'
+
+  const siteAlias = getSiteAliasFromPathname(pathname)
+  if (siteAlias && allSiteAliasToCodeMap[siteAlias] !== site.code) return '/'
+
+  const expectedLocale = currentLocale === 'en' ? 'en' : 'vi'
+  const refererLocale = getLocaleFromPathname(pathname)
+  if ((refererLocale || 'vi') !== expectedLocale) return '/'
+
+  const publicPath = getPublicRoutePathname(pathname)
+  if (
+    publicPath === '/api' ||
+    publicPath.startsWith('/api/') ||
+    publicPath === '/admin' ||
+    publicPath.startsWith('/admin/') ||
+    publicPath === '/_next' ||
+    publicPath.startsWith('/_next/')
+  ) {
+    return '/'
+  }
+
+  return normalizeTrustedLeadSourcePath(publicPath)
+}
+
 export const resolveWingsGroupLeadGovernance = (
   settingsInput: unknown,
   localeInput: unknown,
@@ -97,14 +228,18 @@ export const resolveWingsGroupLeadGovernance = (
   if (!privacyApprovalComplete && options.allowPendingPrivacy !== true) return null
 
   const locale = localeInput === 'en' ? 'en' : 'vi'
-  const channels: ConsultationChannelPublicState[] = []
-  const seen = new Set<ConsultationChannelKey>()
+  const configuredChannels = new Map<ConsultationChannelKey, UnknownRecord>()
   for (const channelInput of Array.isArray(wingsGroupV3.consultationChannels)
     ? wingsGroupV3.consultationChannels
     : []) {
     const channel = asRecord(channelInput)
-    if (!isConsultationChannelKey(channel.key) || seen.has(channel.key)) continue
-    seen.add(channel.key)
+    if (!isConsultationChannelKey(channel.key) || configuredChannels.has(channel.key)) continue
+    configuredChannels.set(channel.key, channel)
+  }
+
+  const channels: ConsultationChannelPublicState[] = []
+  for (const key of consultationChannelKeys) {
+    const channel = configuredChannels.get(key) || { key, state: 'unconfigured' }
     if (channel.state === 'disabled') continue
 
     const approved =
@@ -116,8 +251,8 @@ export const resolveWingsGroupLeadGovernance = (
 
     channels.push({
       ...(approved ? { href: asString(channel.url) } : {}),
-      key: channel.key,
-      label: channelLabels[locale][channel.key],
+      key,
+      label: channelLabels[locale][key],
       state: approved ? 'approved' : 'pending-update',
     })
   }

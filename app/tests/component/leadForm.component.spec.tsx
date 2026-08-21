@@ -430,4 +430,38 @@ describe('lead form hardened submission', () => {
       ],
     })
   })
+
+  it('keeps all pending preferred-channel choices interactable when the inventory is empty', async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === 'GET') {
+        return new Response(
+          JSON.stringify({
+            available: true,
+            channels: [],
+            consentCopy: 'I agree to the WingsGroup contact terms.',
+            consentVersion: 'wingsgroup-contact-v1',
+            enabled: true,
+            policyHref: '/chinh-sach-bao-mat',
+            retentionMonths: 24,
+          }),
+          { status: 200 },
+        )
+      }
+
+      return new Response(JSON.stringify({ status: 'accepted' }), { status: 202 })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)
+
+    await screen.findByRole('checkbox', { name: /I agree to the WingsGroup/ })
+    const select = await screen.findByRole('combobox', { name: /Preferred contact channel/ })
+    expect(select).toHaveProperty('disabled', false)
+    expect(screen.getByRole('option', { name: 'Zalo — Pending update' })).toBeTruthy()
+    expect(screen.getByRole('option', { name: 'WhatsApp — Pending update' })).toBeTruthy()
+    expect(screen.getByRole('option', { name: 'Messenger — Pending update' })).toBeTruthy()
+    expect(screen.queryByRole('link', { name: 'Zalo' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'WhatsApp' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Messenger' })).toBeNull()
+  })
 })

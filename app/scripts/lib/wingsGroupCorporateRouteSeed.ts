@@ -14,6 +14,7 @@ import {
   WINGSGROUP_POLICY_ROUTES as CONTACT_POLICY_ROUTES,
   WINGSGROUP_PRIVACY_VERSION,
 } from '../../src/lead-capture/wingsGroupV3'
+import { consultationChannelKeys } from '../../src/lead-capture/types'
 
 type Locale = 'en' | 'vi'
 type SeedBlock = Record<string, unknown>
@@ -500,6 +501,11 @@ const formFields = [
   },
 ]
 
+const pendingConsultationChannels = consultationChannelKeys.map((key) => ({
+  key,
+  state: 'unconfigured' as const,
+}))
+
 type SeedResult = {
   created: string[]
   policyPending: string[]
@@ -550,7 +556,7 @@ export const seedWingsGroupCorporateRoutes = async ({
     req,
     where: { site: { equals: site.id } },
   })
-  let form = forms.docs.find((candidate) => {
+  const matchingContractForms = forms.docs.filter((candidate) => {
     const names = new Set(
       (candidate.fields || []).flatMap((field) =>
         'name' in field && field.name ? [field.name] : [],
@@ -558,23 +564,31 @@ export const seedWingsGroupCorporateRoutes = async ({
     )
     return names.has('full-name') && (names.has('message') || names.has('brief'))
   })
-  if (!form) {
-    const seedOwnedForm = forms.docs.find((candidate) => candidate.title === 'Liên hệ WingsGroup')
-    if (seedOwnedForm) {
-      form = (await payload.update({
+  const seedOwnedForms = forms.docs.filter((candidate) => candidate.title === 'Liên hệ WingsGroup')
+  if (seedOwnedForms.length > 1) {
+    throw new Error('Duplicate WingsGroup contact forms owned by the corporate seed.')
+  }
+
+  if (seedOwnedForms.length === 0 && matchingContractForms.length > 1) {
+    throw new Error('Multiple legacy WingsGroup contact forms match the lead contract.')
+  }
+
+  const existingForm = seedOwnedForms[0] || matchingContractForms[0]
+  let form = existingForm
+    ? ((await payload.update({
         collection: 'forms',
         context: { disableRevalidate: true },
         data: {
           fields: formFields,
           submitButtonLabel: 'Nhận tư vấn phù hợp',
         },
-        id: seedOwnedForm.id,
+        id: existingForm.id,
         locale: 'vi',
         overrideAccess: true,
         req,
-      } as never)) as unknown as (typeof forms.docs)[number]
-    }
-  }
+      } as never)) as unknown as (typeof forms.docs)[number])
+    : undefined
+
   if (!form) {
     form = (await payload.create({
       collection: 'forms',
@@ -599,6 +613,7 @@ export const seedWingsGroupCorporateRoutes = async ({
 
   const settingsGovernance = {
     ...(settings.wingsGroupV3 || {}),
+    consultationChannels: pendingConsultationChannels,
     enabled: true,
     englishPublicationState: 'hidden',
     legalIdentity: WINGSGROUP_LEGAL_IDENTITY,
