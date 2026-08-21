@@ -4,6 +4,8 @@ import { wingsGroupMediaReadAccess } from '@/access/siteScope'
 import {
   hasExplicitWingsGroupLocalDraftPreviewSignal,
   hasWingsGroupLocalDraftPreviewSignal,
+  mintWingsGroupLocalPreviewGrant,
+  WINGSGROUP_LOCAL_PREVIEW_GRANT_COOKIE,
 } from '@/wingsgroup/localPreview'
 import { WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT } from '@/wingsgroup/corporateRoutes'
 
@@ -14,7 +16,11 @@ const request = ({
 }: {
   cookie?: string
   context?: Record<string, unknown>
-  user?: { role: 'editor' | 'site-manager' | 'super-admin'; sites?: Array<number | string> }
+  user?: {
+    id?: number | string
+    role: 'editor' | 'site-manager' | 'super-admin'
+    sites?: Array<number | string>
+  }
 } = {}) => ({
   context,
   headers: new Headers({
@@ -28,7 +34,7 @@ const request = ({
 })
 
 describe('WingsGroup media read access', () => {
-  it('admits local draft preview only from server-derived context', () => {
+  it('admits local draft preview only from server-derived context', async () => {
     const forged = new Headers({
       cookie: '__prerender_bypass=run-owned-preview',
       host: '127.0.0.1:4175',
@@ -42,12 +48,13 @@ describe('WingsGroup media read access', () => {
       'x-site-host': '127.0.0.1',
     })
 
-    expect(hasWingsGroupLocalDraftPreviewSignal({ headers: forged })).toBe(false)
-    expect(hasWingsGroupLocalDraftPreviewSignal({ headers: trusted })).toBe(true)
+    expect(await hasWingsGroupLocalDraftPreviewSignal({ headers: forged })).toBe(false)
+    expect(await hasWingsGroupLocalDraftPreviewSignal({ headers: trusted })).toBe(false)
 
     vi.stubEnv('NODE_ENV', 'production')
     try {
-      expect(hasExplicitWingsGroupLocalDraftPreviewSignal({ headers: trusted })).toBe(false)
+      expect(await hasWingsGroupLocalDraftPreviewSignal({ headers: trusted })).toBe(true)
+      expect(await hasExplicitWingsGroupLocalDraftPreviewSignal({ headers: trusted })).toBe(false)
     } finally {
       vi.unstubAllEnvs()
     }
@@ -66,10 +73,18 @@ describe('WingsGroup media read access', () => {
   })
 
   it('allows pending media only inside an authenticated local draft preview', async () => {
+    vi.stubEnv('LOCAL_PREVIEW_GRANT_SECRET', 'media-preview-test-secret')
+    const grant = await mintWingsGroupLocalPreviewGrant({
+      draftCookie: 'next-draft-token',
+      locale: 'vi',
+      siteCode: 'wings-group',
+      userID: 7,
+    })
+
     const result = await wingsGroupMediaReadAccess({
       req: request({
-        cookie: '__prerender_bypass=run-owned-preview',
-        user: { role: 'site-manager', sites: [7] },
+        cookie: `${WINGSGROUP_LOCAL_PREVIEW_GRANT_COOKIE}=${grant}; __prerender_bypass=next-draft-token`,
+        user: { id: 7, role: 'site-manager', sites: [7] },
       }),
     } as never)
 

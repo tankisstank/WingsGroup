@@ -8,6 +8,7 @@ import {
 } from '@/utilities/sitePaths'
 import { isPublicLocale } from '@/utilities/locales'
 import { createTrustedSiteContextHeaders, normalizeHost } from '@/utilities/siteDomains'
+import { hasWingsGroupLocalPreviewGrant } from '@/wingsgroup/localPreview'
 
 const stripLeadingSegments = (pathname: string, count: number) => {
   const segments = pathname.split('/').filter(Boolean)
@@ -23,16 +24,20 @@ const adminLocaleCookie = 'payload-lng'
 const isLocalDevelopmentHost = (host: null | string) =>
   Boolean(host && (localBootstrapHosts.has(host) || host.endsWith('.local')))
 
-const hasDraftModeCookie = (request: NextRequest): boolean =>
-  request.cookies.has('__prerender_bypass')
-
-const isServerOwnedLocalDraftPreview = (
+const isServerOwnedLocalDraftPreview = async (
   request: NextRequest,
   effectiveHost: null | string,
-): boolean =>
+  siteCode: null | string,
+  locale: null | string,
+): Promise<boolean> =>
   process.env.NODE_ENV !== 'production' &&
   isLocalDevelopmentHost(effectiveHost) &&
-  hasDraftModeCookie(request)
+  (await hasWingsGroupLocalPreviewGrant({
+    headers: request.headers,
+    host: effectiveHost,
+    locale,
+    siteCode,
+  }))
 
 const notFoundResponse = () =>
   new NextResponse('Not Found', {
@@ -110,7 +115,7 @@ const getPreservedRewriteContext = (request: NextRequest): Headers | null => {
   return new Headers(request.headers)
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Payload resolves its native Admin translation during the request from
   // `payload-lng`. A client-side cookie write happens too late for the login
   // shell, so bootstrap it with one same-URL redirect before Payload renders.
@@ -167,12 +172,18 @@ export function proxy(request: NextRequest) {
 
   const siteCode = siteAlias ? allSiteAliasToCodeMap[siteAlias] : null
   const sitePrefix = siteAlias ? `/${siteAlias}${locale ? `/${locale}` : ''}` : null
-  const localDraftPreview = isServerOwnedLocalDraftPreview(request, effectiveHost)
+  const localDraftPreview = await isServerOwnedLocalDraftPreview(
+    request,
+    effectiveHost,
+    siteAlias ? allSiteAliasToCodeMap[siteAlias] : null,
+    locale,
+  )
   const requestHeaders = createTrustedSiteContextHeaders(request.headers, {
     // A direct local Next server has no deployment edge. Its preview context is
-    // therefore derived from the server-observed local host and draft cookie,
-    // never from browser-supplied X-Real-IP/X-Client-IP values. On deployed
-    // hosts, only the edge-overwritten X-Real-IP is promoted.
+    // therefore derived from the server-observed local host and the signed,
+    // expiring grant minted by /next/preview, never from browser-supplied
+    // draft-cookie or X-Real-IP/X-Client-IP values. On deployed hosts, only
+    // the edge-overwritten X-Real-IP is promoted.
     clientIP: localDraftPreview
       ? '127.0.0.1'
       : isLocalDevelopmentHost(effectiveHost)

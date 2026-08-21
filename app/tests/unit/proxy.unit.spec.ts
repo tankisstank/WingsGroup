@@ -2,6 +2,10 @@ import { NextRequest } from 'next/server'
 import { describe, expect, it, vi } from 'vitest'
 
 import { proxy } from '@/proxy'
+import {
+  mintWingsGroupLocalPreviewGrant,
+  WINGSGROUP_LOCAL_PREVIEW_GRANT_COOKIE,
+} from '@/wingsgroup/localPreview'
 import { loadMultisiteAuditInventory } from '../helpers/multisiteAuditInventory'
 
 const overriddenRequestHeaders = (response: Response): Headers => {
@@ -16,11 +20,23 @@ const overriddenRequestHeaders = (response: Response): Headers => {
   return headers
 }
 
+const localPreviewCookie = async (): Promise<string> => {
+  vi.stubEnv('LOCAL_PREVIEW_GRANT_SECRET', 'proxy-test-preview-secret')
+  const grant = await mintWingsGroupLocalPreviewGrant({
+    draftCookie: 'development-id',
+    locale: 'vi',
+    siteCode: 'wings-group',
+    userID: 'proxy-user',
+  })
+  if (!grant) throw new Error('Test preview grant was not minted')
+  return `${WINGSGROUP_LOCAL_PREVIEW_GRANT_COOKIE}=${grant}; __prerender_bypass=development-id`
+}
+
 describe('tenant proxy rewrites', () => {
   const multisiteInventory = loadMultisiteAuditInventory()
 
-  it('permanently redirects the legacy WingSide alias before tenant rewrite', () => {
-    const response = proxy(
+  it('permanently redirects the legacy WingSide alias before tenant rewrite', async () => {
+    const response = await proxy(
       new NextRequest(
         'http://localhost:3100/wingsside/it/destinations/ha-noi?source=legacy&campaign=summer',
         { headers: { host: 'localhost:3100' } },
@@ -34,8 +50,8 @@ describe('tenant proxy rewrites', () => {
     expect(response.headers.get('x-middleware-rewrite')).toBeNull()
   })
 
-  it('bootstraps Vietnamese Payload admin locale with one same-route redirect', () => {
-    const initialResponse = proxy(
+  it('bootstraps Vietnamese Payload admin locale with one same-route redirect', async () => {
+    const initialResponse = await proxy(
       new NextRequest('http://localhost:3100/admin/login?returnTo=%2Fadmin%2Fconsole', {
         headers: { host: 'localhost:3100' },
       }),
@@ -47,7 +63,7 @@ describe('tenant proxy rewrites', () => {
     )
     expect(initialResponse.headers.get('set-cookie')).toContain('payload-lng=vi')
 
-    const settledResponse = proxy(
+    const settledResponse = await proxy(
       new NextRequest('http://localhost:3100/admin/login?returnTo=%2Fadmin%2Fconsole', {
         headers: { cookie: 'payload-lng=vi', host: 'localhost:3100' },
       }),
@@ -57,8 +73,8 @@ describe('tenant proxy rewrites', () => {
     expect(settledResponse.headers.get('x-middleware-next')).toBe('1')
   })
 
-  it('preserves the trusted tenant bundle when Next processes the rewrite destination', () => {
-    const publicResponse = proxy(
+  it('preserves the trusted tenant bundle when Next processes the rewrite destination', async () => {
+    const publicResponse = await proxy(
       new NextRequest('http://localhost:3100/wing-side', {
         headers: { host: 'localhost:3100' },
       }),
@@ -69,7 +85,7 @@ describe('tenant proxy rewrites', () => {
     expect(rewrittenHeaders.get('x-site-code')).toBe('wing-side')
     expect(rewrittenHeaders.get('x-public-path')).toBe('/wing-side')
 
-    const internalResponse = proxy(
+    const internalResponse = await proxy(
       new NextRequest('http://localhost:3100/', {
         headers: rewrittenHeaders,
       }),
@@ -82,8 +98,8 @@ describe('tenant proxy rewrites', () => {
     expect(serverComponentHeaders.get('x-public-path')).toBe('/wing-side')
   })
 
-  it('rebuilds an inconsistent client-supplied tenant bundle', () => {
-    const response = proxy(
+  it('rebuilds an inconsistent client-supplied tenant bundle', async () => {
+    const response = await proxy(
       new NextRequest('http://localhost:3100/', {
         headers: {
           host: 'localhost:3100',
@@ -102,11 +118,11 @@ describe('tenant proxy rewrites', () => {
     expect(rebuiltHeaders.get('x-public-path')).toBe('/')
   })
 
-  it('derives the local preview client context without browser edge headers', () => {
-    const response = proxy(
+  it('derives the local preview client context without browser edge headers', async () => {
+    const response = await proxy(
       new NextRequest('http://localhost:3100/api/lead-submissions', {
         headers: {
-          cookie: '__prerender_bypass=development-id',
+          cookie: await localPreviewCookie(),
           host: 'localhost:3100',
         },
       }),
@@ -115,11 +131,11 @@ describe('tenant proxy rewrites', () => {
     expect(overriddenRequestHeaders(response).get('x-client-ip')).toBe('127.0.0.1')
   })
 
-  it('ignores forged edge headers on local preview requests', () => {
-    const response = proxy(
+  it('ignores forged edge headers on local preview requests', async () => {
+    const response = await proxy(
       new NextRequest('http://localhost:3100/api/lead-submissions', {
         headers: {
-          cookie: '__prerender_bypass=development-id',
+          cookie: await localPreviewCookie(),
           host: 'localhost:3100',
           'x-client-ip': '198.51.100.99',
           'x-real-ip': '198.51.100.98',
@@ -136,10 +152,10 @@ describe('tenant proxy rewrites', () => {
     expect(headers.get('x-site-host')).toBe('localhost')
   })
 
-  it('does not derive a local preview context in production', () => {
+  it('does not derive a local preview context in production', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     try {
-      const response = proxy(
+      const response = await proxy(
         new NextRequest('http://localhost:3100/api/lead-submissions', {
           headers: {
             cookie: '__prerender_bypass=development-id',
@@ -155,14 +171,14 @@ describe('tenant proxy rewrites', () => {
     }
   })
 
-  it('preserves locale-only context for its internal rewrite destination', () => {
-    const publicResponse = proxy(
+  it('preserves locale-only context for its internal rewrite destination', async () => {
+    const publicResponse = await proxy(
       new NextRequest('http://localhost:3100/it/search', {
         headers: { host: 'localhost:3100' },
       }),
     )
     const rewrittenHeaders = overriddenRequestHeaders(publicResponse)
-    const internalResponse = proxy(
+    const internalResponse = await proxy(
       new NextRequest('http://localhost:3100/search', {
         headers: rewrittenHeaders,
       }),
@@ -174,14 +190,14 @@ describe('tenant proxy rewrites', () => {
     expect(serverComponentHeaders.get('x-site-code')).toBeNull()
   })
 
-  it('preserves locale-only public-host context when Next rewrites to a local dev listener', () => {
-    const publicResponse = proxy(
+  it('preserves locale-only public-host context when Next rewrites to a local dev listener', async () => {
+    const publicResponse = await proxy(
       new NextRequest('http://wingscare.wingsgroup.vn:3100/en', {
         headers: { host: '127.0.0.1:3100' },
       }),
     )
     const rewrittenHeaders = overriddenRequestHeaders(publicResponse)
-    const internalResponse = proxy(
+    const internalResponse = await proxy(
       new NextRequest('http://localhost:3100/', {
         headers: rewrittenHeaders,
       }),
@@ -193,14 +209,14 @@ describe('tenant proxy rewrites', () => {
     expect(serverComponentHeaders.get('x-public-path')).toBe('/en')
   })
 
-  it('preserves a local alias bundle when Next switches localhost and 127.0.0.1 internally', () => {
-    const publicResponse = proxy(
+  it('preserves a local alias bundle when Next switches localhost and 127.0.0.1 internally', async () => {
+    const publicResponse = await proxy(
       new NextRequest('http://127.0.0.1:3100/wing-side/en/destinations/ha-noi', {
         headers: { host: '127.0.0.1:3100' },
       }),
     )
     const rewrittenHeaders = overriddenRequestHeaders(publicResponse)
-    const internalResponse = proxy(
+    const internalResponse = await proxy(
       new NextRequest('http://localhost:3100/destinations/ha-noi', {
         headers: rewrittenHeaders,
       }),
@@ -213,11 +229,11 @@ describe('tenant proxy rewrites', () => {
     expect(serverComponentHeaders.get('x-locale')).toBe('en')
   })
 
-  it('bounds a self-consistent alias bundle to the same local alias identity', () => {
+  it('bounds a self-consistent alias bundle to the same local alias identity', async () => {
     // A second Proxy invocation and a direct local request are indistinguishable.
     // Preserving this bundle cannot escalate production tenancy: getCurrentSite
     // remains host-first outside development and rejects host/code mismatches.
-    const response = proxy(
+    const response = await proxy(
       new NextRequest('http://localhost:3100/', {
         headers: {
           host: 'localhost:3100',
@@ -236,8 +252,8 @@ describe('tenant proxy rewrites', () => {
     expect(headers.get('x-site-host')).toBe('localhost')
   })
 
-  it('prefers a public browser hostname over a local dev listener host when they differ', () => {
-    const response = proxy(
+  it('prefers a public browser hostname over a local dev listener host when they differ', async () => {
+    const response = await proxy(
       new NextRequest('http://wingscare.wingsgroup.vn:3100/en', {
         headers: {
           host: '127.0.0.1:3100',
@@ -253,12 +269,12 @@ describe('tenant proxy rewrites', () => {
     )
   })
 
-  it('returns 404 for CMS-only locales on every public host in the multisite inventory', () => {
+  it('returns 404 for CMS-only locales on every public host in the multisite inventory', async () => {
     for (const site of multisiteInventory.sites) {
       const nestedPath = Object.values(site.nestedRouteSamples)[0] || '/'
 
       for (const host of site.hosts) {
-        const response = proxy(
+        const response = await proxy(
           new NextRequest(`https://${host}/ja${nestedPath === '/' ? '' : nestedPath}`, {
             headers: { host },
           }),
@@ -269,7 +285,7 @@ describe('tenant proxy rewrites', () => {
     }
   })
 
-  it('returns 404 for every local site alias on public hosts', () => {
+  it('returns 404 for every local site alias on public hosts', async () => {
     for (const site of multisiteInventory.sites) {
       const sampleLocale = site.publicLocales[0] || site.defaultLocale
       const nestedPath =
@@ -277,7 +293,7 @@ describe('tenant proxy rewrites', () => {
 
       for (const host of site.hosts) {
         const aliasedPath = `/${site.localAlias}/${sampleLocale}${nestedPath === '/' ? '' : nestedPath}`
-        const response = proxy(
+        const response = await proxy(
           new NextRequest(`https://${host}${aliasedPath}`, {
             headers: { host },
           }),
@@ -288,13 +304,13 @@ describe('tenant proxy rewrites', () => {
     }
   })
 
-  it('keeps every local alias available on localhost bootstrap hosts', () => {
+  it('keeps every local alias available on localhost bootstrap hosts', async () => {
     for (const site of multisiteInventory.sites) {
       const sampleLocale = site.publicLocales[0] || site.defaultLocale
       const nestedPath =
         site.nestedRouteSamples[sampleLocale] || Object.values(site.nestedRouteSamples)[0] || '/'
       const publicPath = `/${site.localAlias}/${sampleLocale}${nestedPath === '/' ? '' : nestedPath}`
-      const response = proxy(
+      const response = await proxy(
         new NextRequest(`http://localhost:3100${publicPath}`, {
           headers: { host: 'localhost:3100' },
         }),

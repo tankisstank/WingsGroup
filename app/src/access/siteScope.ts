@@ -82,7 +82,7 @@ const publicMediaWhere: Where = {
  * development assets. Keep those assets invisible unless an authenticated
  * operator is explicitly in the local Next draft preview.
  */
-export const wingsGroupMediaReadAccess: Access = ({ req }) => {
+export const wingsGroupMediaReadAccess: Access = async ({ req }) => {
   const context = req.context as Record<string, unknown> | undefined
   const headers = req.headers
 
@@ -95,13 +95,13 @@ export const wingsGroupMediaReadAccess: Access = ({ req }) => {
   // could otherwise expose pending governed media through a trusted context.
   if (
     process.env.NODE_ENV === 'production' &&
-    hasWingsGroupLocalDraftPreviewSignal({ context, headers })
+    (await hasWingsGroupLocalDraftPreviewSignal({ context, headers }))
   ) {
     return false
   }
 
   if (
-    isExplicitWingsGroupLocalDraftPreviewRequest({
+    await isExplicitWingsGroupLocalDraftPreviewRequest({
       context,
       headers,
       user: req.user,

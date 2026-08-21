@@ -65,10 +65,9 @@ const getWingsGroupSettings = async (
 }
 
 const trustedContextHeadersPresent = (request: Request): boolean =>
-  (request.headers.get('x-site-context-source') === 'proxy' &&
-    Boolean(request.headers.get('x-site-host')) &&
-    Boolean(request.headers.get('x-client-ip'))) ||
-  hasExplicitWingsGroupLocalDraftPreviewSignal({ headers: request.headers })
+  request.headers.get('x-site-context-source') === 'proxy' &&
+  Boolean(request.headers.get('x-site-host')) &&
+  Boolean(request.headers.get('x-client-ip'))
 
 const writePreviewLead = async ({
   fields,
@@ -124,8 +123,14 @@ export async function POST(request: Request): Promise<Response> {
   const site = await getCurrentSite()
   const payload = await getPayload({ config: configPromise })
   const isWingsGroupV3 = site.code === WINGSGROUP_SITE_CODE
+  const currentLocale = await getCurrentLocale()
   const previewSignal =
-    isWingsGroupV3 && hasExplicitWingsGroupLocalDraftPreviewSignal({ headers: request.headers })
+    isWingsGroupV3 &&
+    (await hasExplicitWingsGroupLocalDraftPreviewSignal({
+      headers: request.headers,
+      locale: currentLocale,
+      siteCode: site.code,
+    }))
   const previewUser = previewSignal
     ? (
         await payload.auth({
@@ -139,7 +144,12 @@ export async function POST(request: Request): Promise<Response> {
   }
   const previewLeadPath =
     previewUser &&
-    isExplicitWingsGroupLocalDraftPreviewRequest({ headers: request.headers, user: previewUser })
+    (await isExplicitWingsGroupLocalDraftPreviewRequest({
+      headers: request.headers,
+      locale: currentLocale,
+      siteCode: site.code,
+      user: previewUser,
+    }))
       ? getRunOwnedPreviewLeadPath()
       : null
 
@@ -234,7 +244,7 @@ export async function POST(request: Request): Promise<Response> {
   if (isWingsGroupV3) {
     const [settings, locale] = await Promise.all([
       getWingsGroupSettings(payload, site.id),
-      getCurrentLocale(),
+      Promise.resolve(currentLocale),
     ])
     const sourcePath = resolveTrustedLeadSourcePath({ currentLocale: locale, request, site })
     const governance = resolveWingsGroupLeadGovernance(settings, locale, {
@@ -438,8 +448,11 @@ export async function GET(request: Request): Promise<Response> {
   if (site.code !== WINGSGROUP_SITE_CODE) return json({ enabled: false }, 200)
 
   const payload = await getPayload({ config: configPromise })
-  const previewSignal = hasExplicitWingsGroupLocalDraftPreviewSignal({
+  const locale = await getCurrentLocale()
+  const previewSignal = await hasExplicitWingsGroupLocalDraftPreviewSignal({
     headers: request.headers,
+    locale,
+    siteCode: site.code,
   })
   const previewUser = previewSignal
     ? (
@@ -454,7 +467,12 @@ export async function GET(request: Request): Promise<Response> {
   }
   const previewLeadPath =
     previewUser &&
-    isExplicitWingsGroupLocalDraftPreviewRequest({ headers: request.headers, user: previewUser })
+    (await isExplicitWingsGroupLocalDraftPreviewRequest({
+      headers: request.headers,
+      locale,
+      siteCode: site.code,
+      user: previewUser,
+    }))
       ? getRunOwnedPreviewLeadPath()
       : null
 
@@ -462,7 +480,6 @@ export async function GET(request: Request): Promise<Response> {
     return json({ available: false, enabled: true, reason: 'configuration-unavailable' }, 200)
   }
 
-  const locale = await getCurrentLocale()
   const settings = await getWingsGroupSettings(payload, site.id).catch(() => null)
 
   return json(
