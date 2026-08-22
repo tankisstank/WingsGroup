@@ -34,6 +34,7 @@ import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 import { cmsEnabledLocaleMetadata } from './utilities/locales'
+import { prepareWingsGroupLocalPreviewIsolation } from './utilities/localPreviewIsolation'
 import { resolveLocalDatabaseURL } from './utilities/localDatabase'
 import { repairLocalSQLiteSchema } from './utilities/repairLocalSQLiteSchema'
 import {
@@ -44,16 +45,25 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL)
+const localPreviewIsolation =
+  process.env.E09_PREVIEW_MEDIA_DIRECTORY?.trim() && process.env.E09_PREVIEW_MEDIA_SEED === 'true'
+    ? prepareWingsGroupLocalPreviewIsolation({
+        databaseURL: process.env.DATABASE_URL,
+        mediaDirectory: process.env.E09_PREVIEW_MEDIA_DIRECTORY,
+      })
+    : null
+const databaseURL = resolveLocalDatabaseURL(
+  localPreviewIsolation?.databaseURL || process.env.DATABASE_URL,
+)
 const isPostgresURL =
   databaseURL.startsWith('postgres://') || databaseURL.startsWith('postgresql://')
 const shouldPushDatabaseSchema = process.env.PAYLOAD_DB_PUSH === 'true'
 const smtpPort = Number.parseInt(process.env.SMTP_PORT || '587', 10)
 const smtpConfigured = Boolean(
   process.env.SMTP_HOST &&
-    process.env.SMTP_USER &&
-    process.env.SMTP_PASSWORD &&
-    process.env.SMTP_FROM_EMAIL,
+  process.env.SMTP_USER &&
+  process.env.SMTP_PASSWORD &&
+  process.env.SMTP_FROM_EMAIL,
 )
 
 if (!isPostgresURL && !shouldPushDatabaseSchema) {

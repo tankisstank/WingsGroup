@@ -10,7 +10,6 @@ import path from 'node:path'
 
 import { createLocalReq, getPayload } from 'payload'
 
-import config from '../src/payload.config'
 import {
   WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT,
   WINGSGROUP_SITE_CODE,
@@ -22,8 +21,7 @@ import {
   WINGSGROUP_POLICY_ROUTES,
   WINGSGROUP_PRIVACY_VERSION,
 } from '../src/lead-capture/wingsGroupV3'
-import { resolveLocalDatabaseURL } from '../src/utilities/localDatabase'
-import { isRunOwnedLocalPreviewPath } from '../src/utilities/localPreviewMedia'
+import { prepareWingsGroupLocalPreviewIsolation } from '../src/utilities/localPreviewIsolation'
 import {
   assertApplicableWingsGroupV3MediaPlan,
   buildWingsGroupV3MediaPlan,
@@ -90,7 +88,6 @@ export const WINGSGROUP_PREVIEW_CONTACT_FIELDS = [
   },
 ] as const
 
-const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL)
 const defaultManifestPath = path.resolve(
   process.cwd(),
   '../docs/product/wingsgroup-v3-media-manifest.json',
@@ -109,20 +106,6 @@ export const parseWingsGroupV3PreviewSeedCommand = (argv: string[]) => {
     assetsDirectory: assetsDirectory ? path.resolve(assetsDirectory) : null,
     manifestPath: path.resolve(option('manifest') || defaultManifestPath),
   }
-}
-
-export const assertRunOwnedWingsGroupPreviewDatabase = (value: string): string => {
-  const databasePath = path.resolve(value.replace(/^file:/, ''))
-  if (
-    !isRunOwnedLocalPreviewPath(databasePath) ||
-    path.basename(databasePath) !== 'e09-preview.db' ||
-    !path.basename(path.dirname(databasePath)).startsWith('e09-preview-')
-  ) {
-    throw new Error(
-      'This preview seed is restricted to e09-preview.db inside a run-owned /tmp or /dev/shm e09-preview-* directory.',
-    )
-  }
-  return databasePath
 }
 
 const lexical = (heading: string, paragraph: string) => ({
@@ -184,7 +167,7 @@ const main = async () => {
       JSON.stringify(
         {
           apply: false,
-          databaseURL,
+          databaseURL: process.env.DATABASE_URL || 'file:./payload-tourplatform.db',
           expected: 'file:./e09-preview.db',
           manifestPath: command.manifestPath,
           layout: ['ecosystem', 'trust', 'proof', 'editorial', 'contact'],
@@ -196,7 +179,17 @@ const main = async () => {
     return
   }
 
-  const databasePath = assertRunOwnedWingsGroupPreviewDatabase(databaseURL)
+  const mediaDirectory = process.env.E09_PREVIEW_MEDIA_DIRECTORY?.trim()
+  if (!mediaDirectory || process.env.E09_PREVIEW_MEDIA_SEED !== 'true') {
+    throw new Error(
+      'Set E09_PREVIEW_MEDIA_SEED=true and E09_PREVIEW_MEDIA_DIRECTORY to a run-owned media directory.',
+    )
+  }
+  const previewIsolation = prepareWingsGroupLocalPreviewIsolation({
+    databaseURL: process.env.DATABASE_URL,
+    mediaDirectory,
+  })
+  const databasePath = previewIsolation.databasePath
   const assetsDirectory = command.assetsDirectory!
   const manifest = parseWingsGroupV3MediaManifest(
     JSON.parse(await fs.readFile(command.manifestPath, 'utf8')),
@@ -204,6 +197,7 @@ const main = async () => {
   const plan = await buildWingsGroupV3MediaPlan({ assetsDirectory, manifest })
   assertApplicableWingsGroupV3MediaPlan(plan)
 
+  const { default: config } = await import('../src/payload.config')
   const payload = await getPayload({ config })
   try {
     const sites = await payload.find({
@@ -248,26 +242,10 @@ const main = async () => {
       [WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT]: true,
     }
 
-    const mediaDirectory = process.env.E09_PREVIEW_MEDIA_DIRECTORY?.trim()
-    if (!mediaDirectory || process.env.E09_PREVIEW_MEDIA_SEED !== 'true') {
-      throw new Error(
-        'Set E09_PREVIEW_MEDIA_SEED=true and E09_PREVIEW_MEDIA_DIRECTORY to a run-owned media directory.',
-      )
-    }
-    if (
-      !isRunOwnedLocalPreviewPath(mediaDirectory) ||
-      !path.basename(path.dirname(path.resolve(mediaDirectory))).startsWith('e09-preview-')
-    ) {
-      throw new Error(
-        'E09 preview media must be stored under a run-owned /tmp or /dev/shm e09-preview-* directory.',
-      )
-    }
-    await fs.mkdir(mediaDirectory, { recursive: true })
-
     const mediaSeed = await seedWingsGroupV3PreviewMedia({
       assetsDirectory,
       manifest,
-      mediaDirectory,
+      mediaDirectory: previewIsolation.mediaDirectory,
       payload,
       plan,
       req,

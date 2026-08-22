@@ -1,19 +1,16 @@
 import path from 'node:path'
 
-const RUN_OWNED_PREVIEW_ROOTS = ['/tmp', '/dev/shm']
-
-export const isRunOwnedLocalPreviewPath = (value: string): boolean => {
-  const resolved = path.resolve(value)
-  return RUN_OWNED_PREVIEW_ROOTS.some((root) => {
-    const relative = path.relative(root, resolved)
-    return relative !== '' && !relative.startsWith('..') && !path.isAbsolute(relative)
-  })
-}
+import { prepareWingsGroupLocalPreviewIsolation } from './localPreviewIsolation'
 
 export const resolveWingsGroupLocalPreviewMediaDirectory = (
   configuredDirectory = process.env.E09_PREVIEW_MEDIA_DIRECTORY,
 ): string => {
   if (!configuredDirectory?.trim()) {
+    if (process.env.E09_PREVIEW_MEDIA_SEED === 'true') {
+      throw new Error(
+        'E09_PREVIEW_MEDIA_SEED requires E09_PREVIEW_MEDIA_DIRECTORY; normal public/media is not a preview target.',
+      )
+    }
     return path.resolve(import.meta.dirname, '../../public/media')
   }
 
@@ -23,15 +20,15 @@ export const resolveWingsGroupLocalPreviewMediaDirectory = (
     )
   }
 
-  const resolved = path.resolve(configuredDirectory)
-  if (
-    !isRunOwnedLocalPreviewPath(resolved) ||
-    !path.basename(path.dirname(resolved)).startsWith('e09-preview-')
-  ) {
+  const databaseURL = process.env.DATABASE_URL
+  if (!databaseURL) {
     throw new Error(
-      'E09 preview media must be stored under a run-owned /tmp or /dev/shm e09-preview-* directory.',
+      'E09 preview media requires DATABASE_URL to derive the same exclusive preview root.',
     )
   }
 
-  return resolved
+  return prepareWingsGroupLocalPreviewIsolation({
+    databaseURL,
+    mediaDirectory: configuredDirectory,
+  }).mediaDirectory
 }

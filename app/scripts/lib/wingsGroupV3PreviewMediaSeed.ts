@@ -3,7 +3,6 @@ import path from 'node:path'
 
 import type { Payload, PayloadRequest } from 'payload'
 
-import { buildWingsGroupV3MediaSeedData } from '../import-wingsgroup-v3-media'
 import type { WingsGroupV3MediaManifest, WingsGroupV3MediaPlan } from './wingsGroupV3MediaPlan'
 
 const context = { disableRevalidate: true, e09PreviewMediaSeed: true, seed: true }
@@ -173,6 +172,7 @@ export const seedWingsGroupV3PreviewMedia = async ({
     siteID,
     verified: 0,
   }
+  const { buildWingsGroupV3MediaSeedData } = await import('../import-wingsgroup-v3-media')
 
   try {
     for (const record of plan.records) {
