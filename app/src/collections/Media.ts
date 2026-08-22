@@ -1,7 +1,9 @@
 import type {
   CollectionAfterChangeHook,
   CollectionAfterDeleteHook,
+  CollectionBeforeChangeHook,
   CollectionConfig,
+  PayloadRequest,
 } from 'payload'
 
 import {
@@ -19,10 +21,44 @@ import {
 } from '@/collections/Tours/hooks/revalidateTourContent'
 import { mediaGovernanceField, validateGovernedMediaBeforeChange } from '@/fields/wingsGroupV3'
 import { resolveWingsGroupLocalPreviewMediaDirectory } from '@/utilities/localPreviewMedia'
+import {
+  deleteWingsGroupLocalPreviewMedia,
+  getWingsGroupLocalPreviewMedia,
+  isWingsGroupLocalPreviewStoreConfigured,
+  putWingsGroupLocalPreviewMedia,
+} from '@/utilities/localPreviewStore'
 
+const localPreviewStore = isWingsGroupLocalPreviewStoreConfigured()
 const mediaStaticDir = resolveWingsGroupLocalPreviewMediaDirectory(
   process.env.E09_PREVIEW_MEDIA_DIRECTORY,
 )
+
+const storeLocalPreviewMedia: CollectionBeforeChangeHook = async ({ data, req }) => {
+  if (!localPreviewStore || !req.file?.data) return data
+  const filename = typeof data?.filename === 'string' ? data.filename : req.file.name
+  if (!filename) throw new Error('E09 preview media upload has no safe filename.')
+  await putWingsGroupLocalPreviewMedia({
+    bytes: req.file.data,
+    contentType: req.file.mimetype,
+    filename,
+  })
+  return data
+}
+
+const deleteLocalPreviewMedia: CollectionAfterDeleteHook = async ({ doc }) => {
+  if (localPreviewStore && typeof doc.filename === 'string') {
+    await deleteWingsGroupLocalPreviewMedia(doc.filename)
+  }
+  return doc
+}
+
+const serveLocalPreviewMedia = async (
+  _req: PayloadRequest,
+  { params }: { params: { filename: string } },
+): Promise<Response> => {
+  if (!localPreviewStore) return new Response(null, { status: 404 })
+  return getWingsGroupLocalPreviewMedia(params.filename)
+}
 
 const revalidateCuratedTourMedia: CollectionAfterChangeHook = async ({
   doc,
@@ -88,12 +124,14 @@ export const Media: CollectionConfig = {
     singular: adminLabel('Media', 'Media'),
   },
   upload: {
-    // Keep the normal public/media default, with an explicit run-owned local-preview override.
-    staticDir: mediaStaticDir,
-    adminThumbnail: 'thumbnail',
-    focalPoint: true,
-    imageSizes:
-      process.env.PAYLOAD_IMPORT_ORIGINALS_ONLY === 'true'
+    ...(mediaStaticDir ? { staticDir: mediaStaticDir } : {}),
+    ...(localPreviewStore ? { adminThumbnail: undefined } : { adminThumbnail: 'thumbnail' }),
+    disableLocalStorage: localPreviewStore,
+    focalPoint: !localPreviewStore,
+    handlers: localPreviewStore ? [serveLocalPreviewMedia] : undefined,
+    imageSizes: localPreviewStore
+      ? []
+      : process.env.PAYLOAD_IMPORT_ORIGINALS_ONLY === 'true'
         ? []
         : [
             {
@@ -131,7 +169,7 @@ export const Media: CollectionConfig = {
   },
   hooks: {
     afterChange: [revalidateCuratedTourMedia],
-    afterDelete: [revalidateDeletedTourMedia],
-    beforeChange: [enforceSiteAccess, validateGovernedMediaBeforeChange],
+    afterDelete: [revalidateDeletedTourMedia, deleteLocalPreviewMedia],
+    beforeChange: [enforceSiteAccess, validateGovernedMediaBeforeChange, storeLocalPreviewMedia],
   },
 }

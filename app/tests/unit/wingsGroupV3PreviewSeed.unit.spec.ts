@@ -1,134 +1,181 @@
-import os from 'node:os'
+import crypto from 'node:crypto'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
-import { randomUUID } from 'node:crypto'
-import { spawnSync } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { DatabaseSync } from 'node:sqlite'
 import { pathToFileURL } from 'node:url'
 
-import { describe, expect, it, vi } from 'vitest'
+import sharp from 'sharp'
+import { describe, expect, it } from 'vitest'
 
 import {
   assertWingsGroupPreviewMediaPending,
   parseWingsGroupV3PreviewSeedCommand,
   WINGSGROUP_PREVIEW_MEDIA_FILENAMES,
 } from '../../scripts/seed-wingsgroup-v3-home-preview'
-import { seedWingsGroupV3PreviewMedia } from '../../scripts/lib/wingsGroupV3PreviewMediaSeed'
-import {
-  prepareWingsGroupLocalPreviewIsolation,
-  releaseWingsGroupLocalPreviewIsolation,
-} from '@/utilities/localPreviewIsolation'
-import { resolveLocalDatabaseURL } from '@/utilities/localDatabase'
-import { resolveWingsGroupLocalPreviewMediaDirectory } from '@/utilities/localPreviewMedia'
-import { repairLocalSQLiteSchema } from '@/utilities/repairLocalSQLiteSchema'
-import type {
-  WingsGroupV3MediaManifest,
-  WingsGroupV3MediaPlan,
-  WingsGroupV3MediaPlanItem,
-} from '../../scripts/lib/wingsGroupV3MediaPlan'
+import { startWingsGroupLocalPreviewStore } from '@/utilities/localPreviewStore'
 
-type PreviewSeedRecord = Pick<
-  WingsGroupV3MediaPlanItem,
-  'alt' | 'focal' | 'sourceFile' | 'sourceFileSha256' | 'sourceIdentity'
-> & { site?: number | string }
+const sourceRoot = path.resolve(process.cwd())
+const seedScript = path.resolve(sourceRoot, 'scripts/seed-wingsgroup-v3-home-preview.ts')
+const payloadConfig = pathToFileURL(path.resolve(sourceRoot, 'src/payload.config.ts')).href
+const baseDatabase = path.resolve(sourceRoot, 'e09-preview.db')
 
-type PreviewSeedManifest = Pick<WingsGroupV3MediaManifest, 'sourcePackage'>
-
-type FakeMediaDocument = {
-  filename: string
-  governance: Record<string, unknown>
-  height: number
-  id: number
-  site: number
-  width: number
+type ChildResult = {
+  error?: Error
+  status: number | null
+  stderr: string
+  stdout: string
 }
 
-type FakePayloadData = {
-  governance?: Record<string, unknown>
-  site?: number
+type PipelineBody = {
+  results: Array<{
+    response?: { result?: { rows: Array<Array<{ value?: unknown }>> } }
+  }>
 }
 
-type FakeWhereClause = Record<string, { equals?: string } | undefined>
+const runProcess = (
+  args: string[],
+  env: NodeJS.ProcessEnv,
+  timeoutMs = 60000,
+): Promise<ChildResult> =>
+  new Promise((resolve) => {
+    const child = spawn(process.execPath, args, {
+      cwd: sourceRoot,
+      env,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    let stdout = ''
+    let stderr = ''
+    let error: Error | undefined
+    const timeout = setTimeout(() => {
+      error = new Error('child process timed out')
+      child.kill('SIGTERM')
+    }, timeoutMs)
+    child.stdout.on('data', (chunk: Buffer) => {
+      stdout += chunk.toString()
+    })
+    child.stderr.on('data', (chunk: Buffer) => {
+      stderr += chunk.toString()
+    })
+    child.once('error', (value) => {
+      error = value instanceof Error ? value : new Error(String(value))
+    })
+    child.once('close', (status) => {
+      clearTimeout(timeout)
+      resolve({ error, status, stderr, stdout })
+    })
+  })
 
-type FakePayloadArgs = {
-  data?: FakePayloadData
-  file?: { name: string }
-  id?: number
-  where?: FakeWhereClause & { and?: FakeWhereClause[] }
-}
+const runNode = (source: string, env: NodeJS.ProcessEnv) =>
+  runProcess(['--import=tsx/esm', '--input-type=module', '-e', source], env)
 
-vi.mock('../../scripts/import-wingsgroup-v3-media', () => ({
-  buildWingsGroupV3MediaSeedData: ({
-    manifest,
-    record,
-    siteID,
-  }: {
-    manifest: PreviewSeedManifest
-    record: PreviewSeedRecord
-    siteID: number | string
-  }) => ({
-    alt: record.alt.vi,
-    focalX: record.focal.x,
-    focalY: record.focal.y,
-    governance: {
-      managedBy: 'wingsgroup-v3',
-      publicationState: 'pending',
-      sourceFilename: record.sourceFile,
-      sourceIdentity: record.sourceIdentity,
-      sourceFileSha256: record.sourceFileSha256,
-      sourceArchiveSha256: manifest.sourcePackage.archiveSha256,
-    },
-    site: siteID,
-  }),
-}))
-
-const pendingMedia = (sourceFilename: string) => ({
-  governance: {
-    managedBy: 'wingsgroup-v3',
-    publicationState: 'pending',
-    sourceFilename,
-  },
+const previewEnvironment = (store: { token: string; url: string }): NodeJS.ProcessEnv => ({
+  ...process.env,
+  DATABASE_URL: store.url,
+  E09_PREVIEW_MEDIA_SEED: 'true',
+  E09_PREVIEW_STORE_TOKEN: store.token,
+  E09_PREVIEW_STORE_URL: store.url,
+  NODE_ENV: 'test',
+  NODE_NO_WARNINGS: '1',
+  PAYLOAD_SECRET: 'e09-correction-3-test-secret',
 })
 
-describe('E09-20 local preview seed', () => {
-  it('keeps all 13 governed editorial assets pending', () => {
-    const media = WINGSGROUP_PREVIEW_MEDIA_FILENAMES.map(pendingMedia)
+const pipeline = async (store: { token: string; url: string }, sql: string) => {
+  const response = await fetch(`${store.url}/v2/pipeline`, {
+    body: JSON.stringify({
+      requests: [{ stmt: { sql, want_rows: true }, type: 'execute' }],
+    }),
+    headers: {
+      authorization: `Bearer ${store.token}`,
+      'content-type': 'application/json',
+    },
+    method: 'POST',
+  })
+  return { body: (await response.json()) as PipelineBody, status: response.status }
+}
 
+const pipelineValue = (body: PipelineBody): unknown =>
+  body.results[0]?.response?.result?.rows[0]?.[0]?.value
+
+const parseJSONOutput = <T>(stdout: string): T => {
+  const jsonStart = stdout.indexOf('{')
+  if (jsonStart < 0) throw new Error('Child emitted no JSON summary.')
+  return JSON.parse(stdout.slice(jsonStart)) as T
+}
+
+const parseSeedSummary = (stdout: string) =>
+  parseJSONOutput<{
+    mediaSeed: { created?: number; reused?: number; verified: number }
+  }>(stdout)
+
+const createManifestFixture = async () => {
+  const assetsDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-assets-'))
+  const media = []
+  for (const [index, filename] of WINGSGROUP_PREVIEW_MEDIA_FILENAMES.entries()) {
+    const bytes = await sharp({
+      create: {
+        channels: 3,
+        background: { b: index * 7, g: index * 11, r: index * 13 },
+        height: 1,
+        width: 1,
+      },
+    })
+      .png()
+      .toBuffer()
+    fs.writeFileSync(path.join(assetsDirectory, filename), bytes)
+    media.push({
+      actualDimensions: '1x1',
+      alt: { en: `English ${index}`, vi: `Tiếng Việt ${index}` },
+      dimensions: '1x1',
+      file: filename,
+      focal: { x: 50, y: 50 },
+      role: 'editorial-service',
+      sha256: crypto.createHash('sha256').update(bytes).digest('hex'),
+      usageScope: 'editorial-service',
+    })
+  }
+  const manifestPath = path.join(assetsDirectory, 'manifest.json')
+  fs.writeFileSync(
+    manifestPath,
+    JSON.stringify({
+      licenseScope: 'test-only',
+      media,
+      publicationState: 'pending-production',
+      rights: { evidence: 'test', restriction: 'test', state: 'approved' },
+      siteCode: 'wings-group',
+      sourcePackage: {
+        archiveSha256: 'a'.repeat(64),
+        attachmentId: 'e09-correction-3-test',
+        assetsDirectory: 'assets',
+        manifest: 'manifest',
+      },
+      version: 1,
+    }),
+  )
+  return { assetsDirectory, manifestPath }
+}
+
+describe('E09 local preview correction 3', () => {
+  it('keeps all 13 governed editorial assets pending and rejects the old file contract', () => {
+    const media = WINGSGROUP_PREVIEW_MEDIA_FILENAMES.map((sourceFilename) => ({
+      governance: {
+        managedBy: 'wingsgroup-v3',
+        publicationState: 'pending',
+        sourceFilename,
+      },
+    }))
     expect(() => assertWingsGroupPreviewMediaPending(media)).not.toThrow()
     expect(() =>
-      assertWingsGroupPreviewMediaPending([
-        ...media.slice(0, -1),
-        pendingMedia(WINGSGROUP_PREVIEW_MEDIA_FILENAMES.at(-1)!),
-      ]),
-    ).not.toThrow()
-    expect(() =>
-      assertWingsGroupPreviewMediaPending([
-        ...media.slice(0, -1),
-        {
-          governance: {
-            managedBy: 'wingsgroup-v3',
-            publicationState: 'published',
-            sourceFilename: WINGSGROUP_PREVIEW_MEDIA_FILENAMES.at(-1),
-          },
-        },
-      ]),
+      assertWingsGroupPreviewMediaPending(
+        media.map((item, index) =>
+          index === 12
+            ? { governance: { ...item.governance, publicationState: 'published' } }
+            : item,
+        ),
+      ),
     ).toThrow(/remain pending/)
-  })
 
-  it('uses the draft page path and contains no media promotion mutation', () => {
-    const source = fs.readFileSync(
-      path.resolve(process.cwd(), 'scripts/seed-wingsgroup-v3-home-preview.ts'),
-      'utf8',
-    )
-
-    expect(source).toContain("_status: 'draft'")
-    expect(source).toContain('WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT')
-    expect(source).not.toContain("publicationState: 'published'")
-    expect(source).toContain('E09_PREVIEW_MEDIA_SEED')
-    expect(source).toContain('seedWingsGroupV3PreviewMedia')
-  })
-
-  it('requires explicit assets and a newly created preview database', () => {
     expect(() => parseWingsGroupV3PreviewSeedCommand(['--apply'])).toThrow('--assets-dir')
     expect(
       parseWingsGroupV3PreviewSeedCommand([
@@ -136,477 +183,209 @@ describe('E09-20 local preview seed', () => {
         '--assets-dir=/tmp/e09-preview-assets',
         '--manifest=/tmp/manifest.json',
       ]),
-    ).toMatchObject({
-      apply: true,
-      assetsDirectory: '/tmp/e09-preview-assets',
-      manifestPath: '/tmp/manifest.json',
-    })
-    expect(() =>
-      prepareWingsGroupLocalPreviewIsolation({
-        databaseURL: 'file:./e09-preview.db',
-        mediaDirectory: './media',
-      }),
-    ).toThrow(/direct \/tmp or \/dev\/shm/)
+    ).toMatchObject({ apply: true })
 
-    const preExistingRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-preexisting-'))
-    try {
-      expect(() =>
-        prepareWingsGroupLocalPreviewIsolation({
-          databaseURL: `file:${path.join(preExistingRoot, 'e09-preview.db')}`,
-          mediaDirectory: path.join(preExistingRoot, 'media'),
-        }),
-      ).toThrow(/capability|already exists|created exclusively/)
-    } finally {
-      fs.rmSync(preExistingRoot, { recursive: true, force: true })
-    }
-  })
-
-  it('rejects a copied valid marker without the out-of-band capability before consumers mutate', () => {
-    const sourceRoot = path.join(os.tmpdir(), `e09-preview-${randomUUID()}`)
-    const forgedRoot = path.join(os.tmpdir(), `e09-preview-${randomUUID()}`)
-    const sourceDatabaseURL = `file:${path.join(sourceRoot, 'e09-preview.db')}`
-    const sourceMediaDirectory = path.join(sourceRoot, 'media')
-    const forgedDatabaseURL = `file:${path.join(forgedRoot, 'e09-preview.db')}`
-    const forgedMediaDirectory = path.join(forgedRoot, 'media')
-    let payloadImport = 0
-    let schemaRepair = 0
-    let payloadWrite = 0
-
-    try {
-      const source = prepareWingsGroupLocalPreviewIsolation({
-        databaseURL: sourceDatabaseURL,
-        mediaDirectory: sourceMediaDirectory,
-      })
-      const marker = fs.readFileSync(path.join(sourceRoot, '.e09-preview-root.json'), 'utf8')
-      releaseWingsGroupLocalPreviewIsolation(source.rootPath)
-
-      fs.mkdirSync(forgedRoot, { mode: 0o700 })
-      fs.writeFileSync(path.join(forgedRoot, '.e09-preview-root.json'), marker, { mode: 0o600 })
-
-      expect(() => {
-        const isolation = prepareWingsGroupLocalPreviewIsolation({
-          databaseURL: forgedDatabaseURL,
-          mediaDirectory: forgedMediaDirectory,
-        })
-        payloadImport += 1
-        schemaRepair += 1
-        payloadWrite += 1
-        return isolation
-      }).toThrow(/capability|authenticate|current/)
-      expect({ payloadImport, schemaRepair, payloadWrite }).toEqual({
-        payloadImport: 0,
-        schemaRepair: 0,
-        payloadWrite: 0,
-      })
-      expect(fs.existsSync(path.join(forgedRoot, 'e09-preview.db'))).toBe(false)
-      expect(fs.existsSync(forgedMediaDirectory)).toBe(false)
-    } finally {
-      releaseWingsGroupLocalPreviewIsolation(sourceRoot)
-      releaseWingsGroupLocalPreviewIsolation(forgedRoot)
-      fs.rmSync(sourceRoot, { recursive: true, force: true })
-      fs.rmSync(forgedRoot, { recursive: true, force: true })
-    }
-  })
-
-  it('rejects arbitrary preview media directories and production preview configuration', () => {
-    const environment = process.env as Record<string, string | undefined>
-    const originalNodeEnv = environment.NODE_ENV
-    const originalSeedFlag = environment.E09_PREVIEW_MEDIA_SEED
-    environment.E09_PREVIEW_MEDIA_SEED = 'true'
-    expect(() => resolveWingsGroupLocalPreviewMediaDirectory('/tmp/not-e09/media')).toThrow(
-      /e09-preview|exclusive|DATABASE_URL/,
+    const isolationSource = fs.readFileSync(
+      path.resolve(sourceRoot, 'src/utilities/localPreviewStore.ts'),
+      'utf8',
     )
-
-    delete environment.E09_PREVIEW_MEDIA_DIRECTORY
-    expect(() => resolveWingsGroupLocalPreviewMediaDirectory()).toThrow(/public\/media/)
-
-    environment.NODE_ENV = 'production'
-    try {
-      expect(() =>
-        resolveWingsGroupLocalPreviewMediaDirectory('/tmp/e09-preview-production/media'),
-      ).toThrow(/non-production/)
-    } finally {
-      if (originalNodeEnv === undefined) delete environment.NODE_ENV
-      else environment.NODE_ENV = originalNodeEnv
-      if (originalSeedFlag === undefined) delete environment.E09_PREVIEW_MEDIA_SEED
-      else environment.E09_PREVIEW_MEDIA_SEED = originalSeedFlag
-    }
+    const seedSource = fs.readFileSync(seedScript, 'utf8')
+    expect(isolationSource).not.toContain('/proc/self/fd/')
+    expect(isolationSource).not.toContain('e09-preview.db')
+    expect(seedSource).not.toContain('previewCapability')
+    expect(seedSource).not.toContain('E09_PREVIEW_ROOT_CAPABILITY')
   })
 
-  it('rejects symlinked preview roots and media/database leaves before mutation', () => {
-    const outsideRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-unowned-target-'))
-    const symlinkedRoot = path.join(os.tmpdir(), `e09-preview-${randomUUID()}`)
-    const databaseURL = `file:${path.join(symlinkedRoot, 'e09-preview.db')}`
-    const mediaDirectory = path.join(symlinkedRoot, 'media')
-    let payloadMutations = 0
-    const environment = process.env as Record<string, string | undefined>
-    const originalCapability = environment.E09_PREVIEW_ROOT_CAPABILITY
-
+  it('reproduces the old DB/deleted-alias and media-leaf swap without an external mutation', async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-'))
+    const external = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-external-'))
+    const externalDatabase = path.join(external, 'external.db')
+    const externalMedia = path.join(external, 'external-media')
+    const externalWal = `${externalDatabase}-wal`
+    const externalShm = `${externalDatabase}-shm`
+    fs.mkdirSync(path.join(root, 'media'))
+    const preparedDatabase = path.join(root, 'e09-preview.db')
+    const preparedDB = new DatabaseSync(preparedDatabase)
+    preparedDB.exec('CREATE TABLE preparation(value TEXT);')
+    preparedDB.close()
+    const store = await startWingsGroupLocalPreviewStore({ baseDatabasePath: preparedDatabase })
     try {
-      fs.symlinkSync(outsideRoot, symlinkedRoot, 'dir')
-      expect(() => {
-        const isolation = prepareWingsGroupLocalPreviewIsolation({
-          databaseURL,
-          mediaDirectory,
-        })
-        payloadMutations += 1
-        return isolation
-      }).toThrow(/symlink/)
-      expect(payloadMutations).toBe(0)
-      expect(fs.existsSync(path.join(outsideRoot, 'e09-preview.db'))).toBe(false)
+      fs.mkdirSync(externalMedia)
+      fs.writeFileSync(path.join(externalMedia, 'sentinel.txt'), 'media sentinel')
+      const externalDB = new DatabaseSync(externalDatabase)
+      externalDB.exec('PRAGMA journal_mode=WAL; CREATE TABLE sentinel(value TEXT);')
+      externalDB.prepare('INSERT INTO sentinel VALUES (?)').run('database sentinel')
+      externalDB.close()
+      fs.writeFileSync(externalWal, 'wal sentinel')
+      fs.writeFileSync(externalShm, 'shm sentinel')
 
-      fs.rmSync(symlinkedRoot, { force: true })
-      const owned = prepareWingsGroupLocalPreviewIsolation({ databaseURL, mediaDirectory })
-      environment.E09_PREVIEW_ROOT_CAPABILITY = owned.capability
-      releaseWingsGroupLocalPreviewIsolation(owned.rootPath)
+      // These are the exact names the old /proc/self/fd SQLite consumer
+      // re-resolved after its accepted DB leaf was unlinked.
+      fs.rmSync(preparedDatabase)
+      fs.symlinkSync(externalDatabase, path.join(root, 'e09-preview.db'))
+      fs.symlinkSync(externalDatabase, path.join(root, 'e09-preview.db (deleted)'))
+      fs.rmSync(path.join(root, 'media'), { recursive: true })
+      fs.symlinkSync(externalMedia, path.join(root, 'media'), 'dir')
 
-      const mediaSentinel = path.join(outsideRoot, 'media-sentinel.txt')
-      fs.writeFileSync(mediaSentinel, 'untouched')
-      fs.rmSync(mediaDirectory, { recursive: true, force: true })
-      fs.symlinkSync(outsideRoot, mediaDirectory, 'dir')
-      expect(() => {
-        const isolation = prepareWingsGroupLocalPreviewIsolation({
-          databaseURL,
-          mediaDirectory,
-        })
-        payloadMutations += 1
-        return isolation
-      }).toThrow(/symlink/)
-      expect(payloadMutations).toBe(0)
-      expect(fs.readFileSync(mediaSentinel, 'utf8')).toBe('untouched')
-
-      fs.rmSync(mediaDirectory, { force: true })
-      fs.mkdirSync(mediaDirectory, { mode: 0o700 })
-      fs.chmodSync(mediaDirectory, 0o700)
-      fs.rmSync(path.join(symlinkedRoot, 'e09-preview.db'), { force: true })
-      fs.symlinkSync(outsideRoot, path.join(symlinkedRoot, 'e09-preview.db'), 'file')
-      expect(() => prepareWingsGroupLocalPreviewIsolation({ databaseURL, mediaDirectory })).toThrow(
-        /symlink/,
+      const pragma = await pipeline(store, 'PRAGMA journal_mode=WAL;')
+      const schema = await pipeline(
+        store,
+        "CREATE TABLE IF NOT EXISTS correction3_probe(value TEXT); INSERT INTO correction3_probe VALUES ('memory-only');",
       )
-      expect(payloadMutations).toBe(0)
-      expect(fs.existsSync(path.join(outsideRoot, 'e09-preview.db'))).toBe(false)
-    } finally {
-      if (originalCapability === undefined) delete environment.E09_PREVIEW_ROOT_CAPABILITY
-      else environment.E09_PREVIEW_ROOT_CAPABILITY = originalCapability
-      releaseWingsGroupLocalPreviewIsolation(symlinkedRoot)
-      fs.rmSync(symlinkedRoot, { recursive: true, force: true })
-      fs.rmSync(outsideRoot, { recursive: true, force: true })
-    }
-  })
+      expect(pragma.status).toBe(200)
+      expect(pipelineValue(pragma.body)).toBe('memory')
+      expect(schema.status).toBe(200)
 
-  it('keeps SQLite and Payload descriptor consumers safe after leaf symlink replacement', async () => {
-    const rootPath = path.join(os.tmpdir(), `e09-preview-${randomUUID()}`)
-    const databaseURL = `file:${path.join(rootPath, 'e09-preview.db')}`
-    const mediaDirectory = path.join(rootPath, 'media')
-    const outsideRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-external-'))
-    const outsideDatabase = path.join(outsideRoot, 'external.db')
-    const outsideMedia = path.join(outsideRoot, 'external-media')
-    const environment = process.env as Record<string, string | undefined>
-    const originals = {
-      capability: environment.E09_PREVIEW_ROOT_CAPABILITY,
-      databaseURL: environment.DATABASE_URL,
-      mediaDirectory: environment.E09_PREVIEW_MEDIA_DIRECTORY,
-      mediaSeed: environment.E09_PREVIEW_MEDIA_SEED,
-      nodeEnv: environment.NODE_ENV,
-    }
-
-    try {
-      environment.DATABASE_URL = databaseURL
-      environment.E09_PREVIEW_MEDIA_DIRECTORY = mediaDirectory
-      environment.E09_PREVIEW_MEDIA_SEED = 'true'
-      environment.NODE_ENV = 'test'
-      fs.writeFileSync(outsideDatabase, 'external database must remain unchanged')
-      fs.mkdirSync(outsideMedia)
-      fs.writeFileSync(
-        path.join(outsideMedia, 'sentinel.txt'),
-        'external media must remain unchanged',
-      )
-
-      const isolation = prepareWingsGroupLocalPreviewIsolation({ databaseURL, mediaDirectory })
-      expect(isolation.databasePath).toMatch(/^\/proc\/self\/fd\/\d+$/)
-      expect(isolation.mediaDirectory).toMatch(/^\/proc\/self\/fd\/\d+$/)
-
-      fs.rmSync(mediaDirectory, { recursive: true, force: true })
-      fs.symlinkSync(outsideMedia, mediaDirectory, 'dir')
-      fs.rmSync(path.join(rootPath, 'e09-preview.db'), { force: true })
-      fs.symlinkSync(outsideDatabase, path.join(rootPath, 'e09-preview.db'), 'file')
-
-      const payloadStaticDir = resolveWingsGroupLocalPreviewMediaDirectory(mediaDirectory)
-      expect(payloadStaticDir).toBe(isolation.mediaDirectory)
-      await repairLocalSQLiteSchema(resolveLocalDatabaseURL(isolation.databaseURL))
-      const database = new DatabaseSync(isolation.databasePath)
-      try {
-        database.exec('CREATE TABLE IF NOT EXISTS descriptor_consumer_proof (value TEXT);')
-      } finally {
-        database.close()
-      }
-
-      expect(() =>
-        fs.writeFileSync(path.join(payloadStaticDir, 'must-not-escape.txt'), 'descriptor-safe'),
-      ).toThrow()
-      expect(fs.readFileSync(outsideDatabase, 'utf8')).toBe(
-        'external database must remain unchanged',
-      )
-      expect(fs.readFileSync(path.join(outsideMedia, 'sentinel.txt'), 'utf8')).toBe(
-        'external media must remain unchanged',
-      )
-      expect(fs.existsSync(path.join(outsideMedia, 'must-not-escape.txt'))).toBe(false)
-    } finally {
-      if (originals.capability === undefined) delete environment.E09_PREVIEW_ROOT_CAPABILITY
-      else environment.E09_PREVIEW_ROOT_CAPABILITY = originals.capability
-      if (originals.databaseURL === undefined) delete environment.DATABASE_URL
-      else environment.DATABASE_URL = originals.databaseURL
-      if (originals.mediaDirectory === undefined) delete environment.E09_PREVIEW_MEDIA_DIRECTORY
-      else environment.E09_PREVIEW_MEDIA_DIRECTORY = originals.mediaDirectory
-      if (originals.mediaSeed === undefined) delete environment.E09_PREVIEW_MEDIA_SEED
-      else environment.E09_PREVIEW_MEDIA_SEED = originals.mediaSeed
-      if (originals.nodeEnv === undefined) delete environment.NODE_ENV
-      else environment.NODE_ENV = originals.nodeEnv
-      releaseWingsGroupLocalPreviewIsolation(rootPath)
-      fs.rmSync(rootPath, { recursive: true, force: true })
-      fs.rmSync(outsideRoot, { recursive: true, force: true })
-    }
-  })
-
-  it('supports separate seed/server handoff only with the authenticated capability', () => {
-    const rootPath = path.join(os.tmpdir(), `e09-preview-${randomUUID()}`)
-    const databaseURL = `file:${path.join(rootPath, 'e09-preview.db')}`
-    const mediaDirectory = path.join(rootPath, 'media')
-    const isolationURL = pathToFileURL(
-      path.resolve(process.cwd(), 'src/utilities/localPreviewIsolation.ts'),
-    ).href
-    const payloadConfigURL = pathToFileURL(
-      path.resolve(process.cwd(), 'src/payload.config.ts'),
-    ).href
-    const childSource = `
-      import fs from 'node:fs'
-      import path from 'node:path'
-      import { DatabaseSync } from 'node:sqlite'
-      import {
-        prepareWingsGroupLocalPreviewIsolation,
-        releaseWingsGroupLocalPreviewIsolation,
-      } from ${JSON.stringify(isolationURL)}
-
-      const isolation = prepareWingsGroupLocalPreviewIsolation({
-        databaseURL: ${JSON.stringify(databaseURL)},
-        mediaDirectory: ${JSON.stringify(mediaDirectory)},
-      })
-      if (process.env.HANDOFF_MODE === 'server') {
-        const { default: payloadConfigPromise } = await import(${JSON.stringify(payloadConfigURL)})
-        const payloadConfig = await payloadConfigPromise
-        const mediaCollection = payloadConfig.collections.find((collection) => collection.slug === 'media')
-        const staticDir = mediaCollection?.upload?.staticDir
-        if (typeof staticDir !== 'string' || !/^\\/proc\\/self\\/fd\\/\\d+$/.test(staticDir))
-          throw new Error('Payload config did not retain a descriptor-backed media consumer')
-      }
-      const database = new DatabaseSync(isolation.databasePath)
-      database.exec('CREATE TABLE IF NOT EXISTS process_handoff (value TEXT);')
-      database.close()
-      fs.writeFileSync(path.join(isolation.mediaDirectory, process.env.HANDOFF_MODE + '.txt'), 'safe')
-      console.log(JSON.stringify({
-        capability: isolation.capability,
-        capabilityExpiresAt: isolation.capabilityExpiresAt,
-        databasePath: isolation.databasePath,
-        mediaDirectory: isolation.mediaDirectory,
-      }))
-      releaseWingsGroupLocalPreviewIsolation(isolation.rootPath)
-    `
-    const runChild = (mode: 'seed' | 'server', capability?: string) => {
-      const childEnvironment: Record<string, string | undefined> = {
-        ...process.env,
-        DATABASE_URL: databaseURL,
-        E09_PREVIEW_MEDIA_DIRECTORY: mediaDirectory,
-        E09_PREVIEW_MEDIA_SEED: 'true',
-        HANDOFF_MODE: mode,
-        NODE_ENV: 'test',
-        NODE_NO_WARNINGS: '1',
-      }
-      if (capability === undefined) delete childEnvironment.E09_PREVIEW_ROOT_CAPABILITY
-      else childEnvironment.E09_PREVIEW_ROOT_CAPABILITY = capability
-      return spawnSync(
-        process.execPath,
-        ['--import=tsx/esm', '--input-type=module', '-e', childSource],
-        {
-          cwd: process.cwd(),
-          encoding: 'utf8',
-          env: childEnvironment as NodeJS.ProcessEnv,
+      const mediaResponse = await fetch(`${store.url}/preview-media/proof.png`, {
+        body: new Uint8Array([1, 2, 3]),
+        headers: {
+          authorization: `Bearer ${store.token}`,
+          'content-type': 'image/png',
         },
+        method: 'PUT',
+      })
+      expect(mediaResponse.status).toBe(204)
+      expect(fs.readFileSync(path.join(externalMedia, 'sentinel.txt'), 'utf8')).toBe(
+        'media sentinel',
       )
-    }
-
-    try {
-      const first = runChild('seed')
-      expect(first.status, first.stderr).toBe(0)
-      const firstResult = JSON.parse(first.stdout.trim()) as {
-        capability: string
-        capabilityExpiresAt: number
+      expect(fs.readFileSync(externalWal, 'utf8')).toBe('wal sentinel')
+      expect(fs.readFileSync(externalShm, 'utf8')).toBe('shm sentinel')
+      expect(fs.existsSync(path.join(externalMedia, 'proof.png'))).toBe(false)
+      const externalRead = new DatabaseSync(externalDatabase, { readOnly: true })
+      try {
+        expect(externalRead.prepare('SELECT COUNT(*) AS count FROM sentinel').get()?.count).toBe(1)
+      } finally {
+        externalRead.close()
       }
-      expect(firstResult.capability).toMatch(/^[a-f0-9]{64}$/)
-      expect(firstResult.capabilityExpiresAt).toBeGreaterThan(Date.now())
-
-      const second = runChild('server', firstResult.capability)
-      expect(second.status, second.stderr).toBe(0)
-      const secondResult = JSON.parse(second.stdout.trim()) as {
-        capability: string
-        databasePath: string
-        mediaDirectory: string
-      }
-      expect(secondResult.capability).toBe(firstResult.capability)
-      expect(secondResult.databasePath).toMatch(/^\/proc\/self\/fd\/\d+$/)
-      expect(secondResult.mediaDirectory).toMatch(/^\/proc\/self\/fd\/\d+$/)
-      expect(fs.existsSync(path.join(mediaDirectory, 'seed.txt'))).toBe(true)
-      expect(fs.existsSync(path.join(mediaDirectory, 'server.txt'))).toBe(true)
-
-      const denied = runChild('server')
-      expect(denied.status).not.toBe(0)
-      expect(`${denied.stdout}\n${denied.stderr}`).toMatch(/capability|authenticate/)
     } finally {
-      releaseWingsGroupLocalPreviewIsolation(rootPath)
-      fs.rmSync(rootPath, { recursive: true, force: true })
-    }
-  }, 15000)
-
-  it('creates and reuses 13 governed pending media records in one fresh fixture', async () => {
-    const rootPath = path.join(os.tmpdir(), `e09-preview-${randomUUID()}`)
-    const databaseURL = `file:${path.join(rootPath, 'e09-preview.db')}`
-    const mediaDirectory = path.join(rootPath, 'media')
-    const assetsDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-assets-'))
-    const environment = process.env as Record<string, string | undefined>
-    const originals = {
-      databaseURL: environment.DATABASE_URL,
-      mediaDirectory: environment.E09_PREVIEW_MEDIA_DIRECTORY,
-      mediaSeed: environment.E09_PREVIEW_MEDIA_SEED,
-      nodeEnv: environment.NODE_ENV,
-    }
-
-    const records = WINGSGROUP_PREVIEW_MEDIA_FILENAMES.map((sourceFile, index) => ({
-      alt: { en: `English ${index}`, vi: `Tiếng Việt ${index}` },
-      derivatives: [],
-      focal: { x: 50, y: 50 },
-      importFilename: `import-${index}.png`,
-      role: 'editorial-service',
-      sourceDimensions: { height: 1, width: 1 },
-      sourceFile,
-      sourceFileSha256: `${String(index).padStart(2, '0')}`.repeat(32),
-      sourceIdentity: `preview-test:${index}`,
-      usageScope: 'editorial-service' as const,
-    }))
-    const manifest = {
-      licenseScope: 'test-only',
-      publicationState: 'pending-production',
-      rights: { evidence: 'test', restriction: 'test', state: 'approved' },
-      sourcePackage: {
-        archiveSha256: 'a'.repeat(64),
-        attachmentId: 'preview-test',
-        assetsDirectory: 'assets',
-        manifest: 'manifest',
-      },
-    } as unknown as WingsGroupV3MediaManifest
-    const plan = {
-      archiveSha256: 'a'.repeat(64),
-      attachmentId: 'preview-test',
-      errors: [],
-      planChecksum: 'test',
-      planned: records.length,
-      records,
-      siteCode: 'wings-group',
-    } as unknown as WingsGroupV3MediaPlan
-    const documents = new Map<string, FakeMediaDocument>()
-    const payload = {
-      create: async ({ data, file }: FakePayloadArgs) => {
-        if (!data?.governance || data.site === undefined || !file) {
-          throw new Error('Incomplete fake media create')
-        }
-        const document = {
-          governance: data.governance,
-          height: 1,
-          id: documents.size + 1,
-          site: data.site,
-          width: 1,
-          filename: file.name,
-        }
-        const sourceIdentity = data.governance.sourceIdentity
-        if (typeof sourceIdentity !== 'string') throw new Error('Missing fake source identity')
-        documents.set(sourceIdentity, document)
-        return document
-      },
-      delete: async ({ id }: FakePayloadArgs) => {
-        if (id === undefined) throw new Error('Missing fake media id')
-        for (const [identity, document] of documents) {
-          if (document.id === id) documents.delete(identity)
-        }
-      },
-      find: async ({ where }: FakePayloadArgs) => {
-        const clauses: FakeWhereClause[] = Array.isArray(where?.and)
-          ? where.and
-          : where
-            ? [where]
-            : []
-        const identityClause = clauses.find((clause) => clause?.['governance.sourceIdentity'])
-        const identity = identityClause?.['governance.sourceIdentity']?.equals
-        const document = identity ? documents.get(identity) : undefined
-        return { docs: document ? [document] : [] }
-      },
-      update: async ({ id, data }: FakePayloadArgs) => {
-        if (id === undefined) throw new Error('Missing fake media id')
-        const document = [...documents.values()].find((value) => value.id === id)
-        if (!document) throw new Error(`Unknown test media ${id}`)
-        if (data?.governance) document.governance = data.governance
-        return document
-      },
-    }
-
-    try {
-      environment.DATABASE_URL = databaseURL
-      environment.E09_PREVIEW_MEDIA_DIRECTORY = mediaDirectory
-      environment.E09_PREVIEW_MEDIA_SEED = 'true'
-      environment.NODE_ENV = 'test'
-      for (const record of records)
-        fs.writeFileSync(path.join(assetsDirectory, record.sourceFile), 'x')
-
-      const isolation = prepareWingsGroupLocalPreviewIsolation({
-        databaseURL,
-        mediaDirectory,
-      })
-      const first = await seedWingsGroupV3PreviewMedia({
-        assetsDirectory,
-        manifest,
-        mediaDirectory: isolation.mediaDirectory,
-        payload: payload as never,
-        plan,
-        req: {} as never,
-        siteID: 1,
-      })
-      const second = await seedWingsGroupV3PreviewMedia({
-        assetsDirectory,
-        manifest,
-        mediaDirectory: isolation.mediaDirectory,
-        payload: payload as never,
-        plan,
-        req: {} as never,
-        siteID: 1,
-      })
-
-      expect(first).toMatchObject({ created: 13, reused: 0, verified: 13 })
-      expect(second).toMatchObject({ created: 0, reused: 13, verified: 13 })
-      expect(documents).toHaveLength(13)
-      expect(
-        [...documents.values()].every(
-          (document) => document.governance.publicationState === 'pending',
-        ),
-      ).toBe(true)
-    } finally {
-      if (originals.databaseURL === undefined) delete environment.DATABASE_URL
-      else environment.DATABASE_URL = originals.databaseURL
-      if (originals.mediaDirectory === undefined) delete environment.E09_PREVIEW_MEDIA_DIRECTORY
-      else environment.E09_PREVIEW_MEDIA_DIRECTORY = originals.mediaDirectory
-      if (originals.mediaSeed === undefined) delete environment.E09_PREVIEW_MEDIA_SEED
-      else environment.E09_PREVIEW_MEDIA_SEED = originals.mediaSeed
-      if (originals.nodeEnv === undefined) delete environment.NODE_ENV
-      else environment.NODE_ENV = originals.nodeEnv
-      releaseWingsGroupLocalPreviewIsolation(rootPath)
-      fs.rmSync(rootPath, { recursive: true, force: true })
-      fs.rmSync(assetsDirectory, { recursive: true, force: true })
+      await store.close()
+      fs.rmSync(root, { force: true, recursive: true })
+      fs.rmSync(external, { force: true, recursive: true })
     }
   })
+
+  it('rejects malformed, forged, expired, and post-close authorization before mutation', async () => {
+    const external = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-auth-external-'))
+    const externalDatabase = path.join(external, 'external.db')
+    const store = await startWingsGroupLocalPreviewStore({ ttlMs: 0 })
+    try {
+      for (const token of ['', 'forged', `${store.token.slice(0, -1)}0`]) {
+        const response = await fetch(`${store.url}/v2/pipeline`, {
+          body: JSON.stringify({
+            requests: [{ stmt: { sql: 'CREATE TABLE mutation(value TEXT)' }, type: 'execute' }],
+          }),
+          headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+          method: 'POST',
+        })
+        expect(response.status).toBe(401)
+      }
+      expect((await pipeline({ ...store }, 'SELECT 1')).status).toBe(401)
+      expect(fs.existsSync(externalDatabase)).toBe(false)
+    } finally {
+      await store.close()
+      fs.rmSync(external, { force: true, recursive: true })
+    }
+
+    const reused = await startWingsGroupLocalPreviewStore()
+    const oldURL = reused.url
+    const oldToken = reused.token
+    await reused.close()
+    await expect(
+      fetch(`${oldURL}/v2/pipeline`, { headers: { authorization: `Bearer ${oldToken}` } }),
+    ).rejects.toThrow()
+  })
+
+  it('runs the actual fresh seed twice without exposing the store token, then boots a distinct Payload process', async () => {
+    if (!fs.existsSync(baseDatabase)) {
+      throw new Error(
+        'E09-70 correction-3 evidence gap: app/e09-preview.db is required as the disposable Payload baseline for the real seed command.',
+      )
+    }
+    const fixture = await createManifestFixture()
+    const mediaParent = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-media-leaf-'))
+    const mediaRoot = path.join(mediaParent, 'media')
+    const externalMediaRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-media-target-'))
+    fs.writeFileSync(path.join(externalMediaRoot, 'sentinel.txt'), 'external media sentinel')
+    fs.symlinkSync(externalMediaRoot, mediaRoot, 'dir')
+    const store = await startWingsGroupLocalPreviewStore({ baseDatabasePath: baseDatabase })
+    const environment = previewEnvironment(store)
+    environment.E09_PREVIEW_MEDIA_DIRECTORY = mediaRoot
+    try {
+      const seedArgs = [
+        '--import=tsx/esm',
+        seedScript,
+        '--apply',
+        `--assets-dir=${fixture.assetsDirectory}`,
+        `--manifest=${fixture.manifestPath}`,
+      ]
+      const first = await runProcess(seedArgs, environment)
+      expect(
+        first.status,
+        JSON.stringify({ error: first.error?.message, stderr: first.stderr, stdout: first.stdout }),
+      ).toBe(0)
+      expect(`${first.stdout}\n${first.stderr}`).not.toContain(store.token)
+      const firstSummary = parseSeedSummary(first.stdout)
+      expect(firstSummary.mediaSeed).toMatchObject({ created: 13, verified: 13 })
+
+      const second = await runProcess(seedArgs, environment)
+      expect(second.status, second.stderr).toBe(0)
+      expect(`${second.stdout}\n${second.stderr}`).not.toContain(store.token)
+      const secondSummary = parseSeedSummary(second.stdout)
+      expect(secondSummary.mediaSeed).toMatchObject({ reused: 13, verified: 13 })
+
+      const server = await runNode(
+        `
+          const { getPayload } = await import('payload')
+          const { default: config } = await import(${JSON.stringify(payloadConfig)})
+          const payload = await getPayload({ config })
+          const result = await payload.find({ collection: 'media', depth: 0, limit: 30, overrideAccess: true, pagination: false })
+          const media = result.docs.filter((doc) => doc.governance?.managedBy === 'wingsgroup-v3')
+          const filename = media[0]?.filename
+          if (!filename) throw new Error('real Payload server found no governed media')
+          const mediaCollection = payload.config.collections.find((collection) => collection.slug === 'media')
+          const response = await mediaCollection.upload.handlers[0]({}, { doc: media[0], params: { collection: 'media', filename } })
+          console.log(JSON.stringify({ count: media.length, status: response.status, bytes: (await response.arrayBuffer()).byteLength }))
+          await payload.destroy()
+        `,
+        environment,
+      )
+      expect(server.status, server.stderr).toBe(0)
+      expect(parseJSONOutput(server.stdout)).toMatchObject({ count: 13, status: 200 })
+
+      const denied = await runNode(
+        `
+          const response = await fetch(${JSON.stringify(`${store.url}/v2/pipeline`)}, {
+            body: JSON.stringify({ requests: [{ stmt: { sql: 'INSERT INTO media (filename) VALUES (\\'unauthorized\\')' }, type: 'execute' }] }),
+            headers: { 'content-type': 'application/json' },
+            method: 'POST',
+          })
+          console.log(JSON.stringify({ status: response.status }))
+        `,
+        { ...environment, E09_PREVIEW_STORE_TOKEN: '' },
+      )
+      expect(denied.status, denied.stderr).toBe(0)
+      expect(parseJSONOutput(denied.stdout)).toMatchObject({ status: 401 })
+
+      const remaining = await pipeline(
+        store,
+        "SELECT COUNT(*) AS count FROM media WHERE governance_managed_by = 'wingsgroup-v3'",
+      )
+      expect(remaining.status).toBe(200)
+      expect(pipelineValue(remaining.body)).toBe('13')
+
+      const media = await fetch(`${store.url}/preview-media/wg-v3-test.png`, {
+        headers: { authorization: `Bearer ${store.token}` },
+      })
+      expect(media.status).toBe(404)
+      expect(fs.readFileSync(path.join(externalMediaRoot, 'sentinel.txt'), 'utf8')).toBe(
+        'external media sentinel',
+      )
+      expect(fs.readdirSync(externalMediaRoot)).toEqual(['sentinel.txt'])
+    } finally {
+      await store.close()
+      fs.rmSync(fixture.assetsDirectory, { force: true, recursive: true })
+      fs.rmSync(mediaParent, { force: true, recursive: true })
+      fs.rmSync(externalMediaRoot, { force: true, recursive: true })
+    }
+  }, 120000)
 })

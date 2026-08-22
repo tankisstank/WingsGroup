@@ -34,9 +34,12 @@ import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 import { cmsEnabledLocaleMetadata } from './utilities/locales'
-import { prepareWingsGroupLocalPreviewIsolation } from './utilities/localPreviewIsolation'
 import { resolveLocalDatabaseURL } from './utilities/localDatabase'
 import { repairLocalSQLiteSchema } from './utilities/repairLocalSQLiteSchema'
+import {
+  getWingsGroupLocalPreviewStoreURL,
+  isWingsGroupLocalPreviewStoreConfigured,
+} from './utilities/localPreviewStore'
 import {
   purgeExpiredWingsGroupLeadsTask,
   reconcileLeadNotificationTask,
@@ -45,16 +48,13 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const localPreviewIsolation =
-  process.env.E09_PREVIEW_MEDIA_DIRECTORY?.trim() && process.env.E09_PREVIEW_MEDIA_SEED === 'true'
-    ? prepareWingsGroupLocalPreviewIsolation({
-        databaseURL: process.env.DATABASE_URL,
-        mediaDirectory: process.env.E09_PREVIEW_MEDIA_DIRECTORY,
-      })
-    : null
+const localPreviewStore = isWingsGroupLocalPreviewStoreConfigured()
 const databaseURL = resolveLocalDatabaseURL(
-  localPreviewIsolation?.databaseURL || process.env.DATABASE_URL,
+  localPreviewStore ? getWingsGroupLocalPreviewStoreURL() : process.env.DATABASE_URL,
 )
+const databaseAuthToken = localPreviewStore
+  ? process.env.E09_PREVIEW_STORE_TOKEN!.trim()
+  : undefined
 const isPostgresURL =
   databaseURL.startsWith('postgres://') || databaseURL.startsWith('postgresql://')
 const shouldPushDatabaseSchema = process.env.PAYLOAD_DB_PUSH === 'true'
@@ -197,6 +197,7 @@ export default buildConfig({
     : sqliteAdapter({
         busyTimeout: 30000,
         client: {
+          ...(databaseAuthToken ? { authToken: databaseAuthToken } : {}),
           url: databaseURL,
         },
         push: shouldPushDatabaseSchema,

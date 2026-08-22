@@ -4,6 +4,7 @@ import path from 'node:path'
 import type { Payload, PayloadRequest } from 'payload'
 
 import type { WingsGroupV3MediaManifest, WingsGroupV3MediaPlan } from './wingsGroupV3MediaPlan'
+import { isWingsGroupLocalPreviewStoreConfigured } from '../../src/utilities/localPreviewStore'
 
 const context = { disableRevalidate: true, e09PreviewMediaSeed: true, seed: true }
 
@@ -162,7 +163,8 @@ export const seedWingsGroupV3PreviewMedia = async ({
     )
   }
 
-  await fs.mkdir(mediaDirectory, { recursive: true })
+  const memoryStore = isWingsGroupLocalPreviewStoreConfigured()
+  if (!memoryStore) await fs.mkdir(mediaDirectory, { recursive: true })
   const createdIDs: RelationID[] = []
   const runOwnedUploadFiles = new Set<string>()
   const summary: WingsGroupV3PreviewMediaSeedSummary = {
@@ -219,8 +221,10 @@ export const seedWingsGroupV3PreviewMedia = async ({
         const id = relationID(document.id)
         if (id === undefined) throw new Error(`Preview media ${record.sourceFile} has no id.`)
         createdIDs.push(id)
-        for (const filename of returnedUploadFilenames(document)) {
-          runOwnedUploadFiles.add(resolveRunOwnedUploadFile(mediaDirectory, filename))
+        if (!memoryStore) {
+          for (const filename of returnedUploadFilenames(document)) {
+            runOwnedUploadFiles.add(resolveRunOwnedUploadFile(mediaDirectory, filename))
+          }
         }
       }
 
@@ -260,13 +264,15 @@ export const seedWingsGroupV3PreviewMedia = async ({
         )
       }
     }
-    for (const file of runOwnedUploadFiles) {
-      try {
-        await fs.rm(file, { force: true })
-      } catch (cleanupError) {
-        cleanupErrors.push(
-          `Preview media file cleanup failed for ${file}: ${cleanupError instanceof Error ? cleanupError.message : String(cleanupError)}`,
-        )
+    if (!memoryStore) {
+      for (const file of runOwnedUploadFiles) {
+        try {
+          await fs.rm(file, { force: true })
+        } catch (cleanupError) {
+          cleanupErrors.push(
+            `Preview media file cleanup failed for ${file}: ${cleanupError instanceof Error ? cleanupError.message : String(cleanupError)}`,
+          )
+        }
       }
     }
     if (cleanupErrors.length > 0) {

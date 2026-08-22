@@ -19,6 +19,7 @@
     "catalog:wingsside:candidate-overlay": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/build-wingsside-catalog-candidate-overlay.ts",
     "catalog:wingsside:rehearse-v2": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/rehearse-wingsside-catalog-v2.ts",
     "postbuild": "node scripts/prepare-standalone.mjs",
+    "preview:wingsgroup:v3": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/preview-wingsgroup-v3.ts",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "db:migrate:smoke": "cross-env NODE_OPTIONS=--no-deprecation node scripts/db-migrate-smoke.mjs",
     "db:upgrade:smoke": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node scripts/db-upgrade-smoke.mjs",
