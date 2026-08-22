@@ -273,6 +273,9 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
   const checks: Array<{ kind: 'editorial' | 'proof'; media: unknown }> = []
   const scopedRelations: Array<{ collection: 'forms' | 'pages'; value: unknown }> = []
 
+  const parentPage = data?.parentPage ?? originalDoc?.parentPage
+  if (parentPage) scopedRelations.push({ collection: 'pages', value: parentPage })
+
   for (const relatedPage of Array.isArray(data?.relatedPages ?? originalDoc?.relatedPages)
     ? (data?.relatedPages ?? originalDoc?.relatedPages)
     : []) {

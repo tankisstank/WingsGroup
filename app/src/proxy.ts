@@ -178,7 +178,7 @@ export async function proxy(request: NextRequest) {
     siteAlias ? allSiteAliasToCodeMap[siteAlias] : null,
     locale,
   )
-  const requestHeaders = createTrustedSiteContextHeaders(request.headers, {
+  const requestHeaders = await createTrustedSiteContextHeaders(request.headers, {
     // A direct local Next server has no deployment edge. Its preview context is
     // therefore derived from the server-observed local host and the signed,
     // expiring grant minted by /next/preview, never from browser-supplied

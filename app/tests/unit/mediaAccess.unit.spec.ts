@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { wingsGroupMediaReadAccess } from '@/access/siteScope'
+import { createTrustedSiteContextHeaders } from '@/utilities/siteDomains'
 import {
   hasExplicitWingsGroupLocalDraftPreviewSignal,
   hasWingsGroupLocalDraftPreviewSignal,
@@ -12,10 +13,12 @@ import { WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT } from '@/wingsgroup/corporateRo
 const request = ({
   cookie,
   context = {},
+  external = true,
   user,
 }: {
   cookie?: string
   context?: Record<string, unknown>
+  external?: boolean
   user?: {
     id?: number | string
     role: 'editor' | 'site-manager' | 'super-admin'
@@ -25,7 +28,7 @@ const request = ({
   context,
   headers: new Headers({
     ...(cookie ? { cookie } : {}),
-    host: '127.0.0.1:4175',
+    ...(external ? { host: '127.0.0.1:4175' } : {}),
     'x-client-ip': '127.0.0.1',
     'x-site-context-source': 'proxy',
     'x-site-host': '127.0.0.1',
@@ -61,7 +64,7 @@ describe('WingsGroup media read access', () => {
   })
 
   it('returns only governed published media gates to anonymous readers', async () => {
-    const result = await wingsGroupMediaReadAccess({ req: request() } as never)
+    const result = await wingsGroupMediaReadAccess({ req: request({ external: false }) } as never)
 
     expect(result).toMatchObject({
       or: expect.arrayContaining([
@@ -70,6 +73,48 @@ describe('WingsGroup media read access', () => {
         }),
       ]),
     })
+  })
+
+  it('rejects raw or forged anonymous media requests', async () => {
+    await expect(wingsGroupMediaReadAccess({ req: request() } as never)).resolves.toBe(false)
+  })
+
+  it('scopes public media files to the signed proxy tenant context', async () => {
+    vi.stubEnv('SITE_CONTEXT_SECRET', 'media-context-test-secret')
+    try {
+      const headers = await createTrustedSiteContextHeaders(
+        new Headers({ host: 'wingsgroup.example' }),
+        {
+          host: 'wingsgroup.example',
+          publicPath: '/media/logo.webp',
+          siteCode: 'wings-group',
+        },
+      )
+      const result = await wingsGroupMediaReadAccess({
+        req: {
+          headers,
+          payload: {
+            find: async () => ({
+              docs: [
+                {
+                  additionalDomains: [],
+                  code: 'wings-group',
+                  id: 7,
+                  isActive: true,
+                  primaryDomain: 'wingsgroup.example',
+                },
+              ],
+            }),
+          },
+        },
+      } as never)
+
+      expect(result).toMatchObject({
+        and: [{ site: { equals: 7 } }, { or: expect.any(Array) }],
+      })
+    } finally {
+      vi.unstubAllEnvs()
+    }
   })
 
   it('allows pending media only inside an authenticated local draft preview', async () => {
@@ -148,7 +193,7 @@ describe('WingsGroup media read access', () => {
 
   it('does not treat an anonymous local draft cookie as a preview grant', async () => {
     const result = await wingsGroupMediaReadAccess({
-      req: request({ cookie: '__prerender_bypass=run-owned-preview' }),
+      req: request({ cookie: '__prerender_bypass=run-owned-preview', external: false }),
     } as never)
 
     expect(result).toMatchObject({ or: expect.any(Array) })

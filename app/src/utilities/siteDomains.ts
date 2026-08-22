@@ -24,6 +24,7 @@ export const internalSiteContextHeaderNames = [
   'x-site-context-source',
   'x-site-host',
   'x-site-prefix',
+  'x-site-context-signature',
 ] as const
 
 type TrustedSiteContext = {
@@ -41,10 +42,88 @@ type TrustedSiteContext = {
  * tenant headers. The proxy calls this helper for every frontend request,
  * removes any client-supplied values, and then creates a fresh context.
  */
-export const createTrustedSiteContextHeaders = (
+const base64urlEncode = (value: Uint8Array): string => {
+  let binary = ''
+  for (const byte of value) binary += String.fromCharCode(byte)
+  return btoa(binary).replace(/\+/gu, '-').replace(/\//gu, '_').replace(/=+$/u, '')
+}
+
+const base64urlDecode = (value: string): Uint8Array | null => {
+  if (!/^[A-Za-z0-9_-]+$/u.test(value)) return null
+
+  try {
+    const padded = value.replace(/-/gu, '+').replace(/_/gu, '/')
+    const binary = atob(`${padded}${'='.repeat((4 - (padded.length % 4)) % 4)}`)
+    return Uint8Array.from(binary, (character) => character.charCodeAt(0))
+  } catch {
+    return null
+  }
+}
+
+const getSiteContextSecret = (): string | null =>
+  process.env.SITE_CONTEXT_SECRET?.trim() || process.env.PAYLOAD_SECRET?.trim() || null
+
+const importSiteContextKey = async (
+  secret: string,
+  usage: KeyUsage[],
+): Promise<CryptoKey | null> => {
+  const cryptoAPI = globalThis.crypto
+  if (!cryptoAPI?.subtle) return null
+
+  return cryptoAPI.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { hash: 'SHA-256', name: 'HMAC' },
+    false,
+    usage,
+  )
+}
+
+const siteContextSigningPayload = (headers: Headers): string =>
+  [
+    normalizeHost(headers.get('x-site-host')) || '',
+    headers.get('x-public-path') || '/',
+    headers.get('x-locale') || '',
+    headers.get('x-site-code') || '',
+    headers.get('x-site-prefix') || '',
+    headers.get('x-request-id') || '',
+  ].join('\n')
+
+const signSiteContext = async (headers: Headers): Promise<string | null> => {
+  const secret = getSiteContextSecret()
+  const cryptoAPI = globalThis.crypto
+  const key = secret && (await importSiteContextKey(secret, ['sign']))
+  if (!cryptoAPI?.subtle || !key) return null
+
+  const signature = await cryptoAPI.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(siteContextSigningPayload(headers)),
+  )
+  return base64urlEncode(new Uint8Array(signature))
+}
+
+export const hasValidTrustedSiteContext = async (headers: Headers): Promise<boolean> => {
+  if (headers.get('x-site-context-source') !== 'proxy') return false
+
+  const secret = getSiteContextSecret()
+  const cryptoAPI = globalThis.crypto
+  const key = secret && (await importSiteContextKey(secret, ['verify']))
+  const signature = base64urlDecode(headers.get('x-site-context-signature') || '')
+  if (!cryptoAPI?.subtle || !key || !signature) return false
+
+  return cryptoAPI.subtle.verify(
+    'HMAC',
+    key,
+    signature as BufferSource,
+    new TextEncoder().encode(siteContextSigningPayload(headers)),
+  )
+}
+
+export const createTrustedSiteContextHeaders = async (
   incomingHeaders: Headers,
   context: TrustedSiteContext,
-): Headers => {
+): Promise<Headers> => {
   const requestHeaders = new Headers(incomingHeaders)
 
   for (const headerName of internalSiteContextHeaderNames) {
@@ -72,6 +151,9 @@ export const createTrustedSiteContextHeaders = (
   if (context.sitePrefix) {
     requestHeaders.set('x-site-prefix', context.sitePrefix)
   }
+
+  const signature = await signSiteContext(requestHeaders)
+  if (signature) requestHeaders.set('x-site-context-signature', signature)
 
   return requestHeaders
 }
@@ -108,7 +190,8 @@ export const domainCandidates = (domain?: null | string): string[] => {
 
   for (const host of [...hosts]) {
     if (host.endsWith('.local')) {
-      const productionHost = localBootstrapProductionHostMap[host] || host.replace(/\.local$/, '.vn')
+      const productionHost =
+        localBootstrapProductionHostMap[host] || host.replace(/\.local$/, '.vn')
       addHostVariants(hosts, productionHost)
     }
   }

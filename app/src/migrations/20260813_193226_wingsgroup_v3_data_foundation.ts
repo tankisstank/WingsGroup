@@ -8,34 +8,64 @@ import { sql } from '@payloadcms/db-postgres'
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
-    CREATE TYPE "public"."enum_site_settings_wings_group_v3_consultation_channels_key"
-      AS ENUM('zalo', 'whatsapp', 'messenger');
-    CREATE TYPE "public"."enum_site_settings_wings_group_v3_consultation_channels_state"
-      AS ENUM('unconfigured', 'pending', 'approved', 'disabled');
-    CREATE TYPE "public"."enum_site_settings_wings_group_v3_english_publication_state"
-      AS ENUM('hidden', 'route-ready', 'approved');
-    CREATE TYPE "public"."wg_eco_brand"
-      AS ENUM('wingsgo', 'wing-side', 'wingsplus', 'wingscare', 'wingspass');
-    CREATE TYPE "public"."wg_eco_proof_state"
-      AS ENUM('pending', 'approved', 'not-applicable');
-    CREATE TYPE "public"."wg_eco_cta_state"
-      AS ENUM('contact-fallback', 'approved-deep-link');
-    CREATE TYPE "public"."wg_proof_kind"
-      AS ENUM('licence', 'certificate', 'award', 'membership', 'standard', 'other');
-    CREATE TYPE "public"."wg_proof_pub" AS ENUM('pending', 'approved', 'rejected');
-    CREATE TYPE "public"."wg_proof_perm" AS ENUM('pending', 'approved', 'denied');
-    CREATE TYPE "public"."enum_media_governance_responsive_derivatives_format"
-      AS ENUM('webp', 'avif');
-    CREATE TYPE "public"."enum_media_governance_managed_by" AS ENUM('wingsgroup-v3');
-    CREATE TYPE "public"."enum_media_governance_rights_state"
-      AS ENUM('pending', 'approved', 'rejected');
-    CREATE TYPE "public"."enum_media_governance_usage_scope" AS ENUM('editorial-service');
-    CREATE TYPE "public"."enum_media_governance_publication_state"
-      AS ENUM('pending', 'ready', 'published', 'rejected');
-    CREATE TYPE "public"."enum_media_governance_derivative_state"
-      AS ENUM('pending', 'generated', 'verified');
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_site_settings_wings_group_v3_consultation_channels_key"
+        AS ENUM('zalo', 'whatsapp', 'messenger');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_site_settings_wings_group_v3_consultation_channels_state"
+        AS ENUM('unconfigured', 'pending', 'approved', 'disabled');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_site_settings_wings_group_v3_english_publication_state"
+        AS ENUM('hidden', 'route-ready', 'approved');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."wg_eco_brand"
+        AS ENUM('wingsgo', 'wing-side', 'wingsplus', 'wingscare', 'wingspass');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."wg_eco_proof_state"
+        AS ENUM('pending', 'approved', 'not-applicable');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."wg_eco_cta_state"
+        AS ENUM('contact-fallback', 'approved-deep-link');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."wg_proof_kind"
+        AS ENUM('licence', 'certificate', 'award', 'membership', 'standard', 'other');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."wg_proof_pub" AS ENUM('pending', 'approved', 'rejected');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."wg_proof_perm" AS ENUM('pending', 'approved', 'denied');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_media_governance_responsive_derivatives_format"
+        AS ENUM('webp', 'avif');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_media_governance_managed_by" AS ENUM('wingsgroup-v3');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_media_governance_rights_state"
+        AS ENUM('pending', 'approved', 'rejected');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_media_governance_usage_scope" AS ENUM('editorial-service');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_media_governance_publication_state"
+        AS ENUM('pending', 'ready', 'published', 'rejected');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_media_governance_derivative_state"
+        AS ENUM('pending', 'generated', 'verified');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-    CREATE TABLE "site_settings_wings_group_v3_consultation_channels" (
+    CREATE TABLE IF NOT EXISTS "site_settings_wings_group_v3_consultation_channels" (
       "_order" integer NOT NULL,
       "_parent_id" integer NOT NULL,
       "id" varchar PRIMARY KEY NOT NULL,
@@ -48,7 +78,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "tracking_reference" varchar
     );
 
-    CREATE TABLE "wg_ecosystem" (
+    CREATE TABLE IF NOT EXISTS "wg_ecosystem" (
       "_order" integer NOT NULL,
       "_parent_id" integer NOT NULL,
       "_path" text NOT NULL,
@@ -59,7 +89,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "description" varchar,
       "block_name" varchar
     );
-    CREATE TABLE "wg_eco_profiles" (
+    CREATE TABLE IF NOT EXISTS "wg_eco_profiles" (
       "_order" integer NOT NULL,
       "_parent_id" varchar NOT NULL,
       "_locale" "_locales" NOT NULL,
@@ -79,14 +109,14 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "cta_tracking_evidence" varchar,
       "cta_owner_approval_evidence" varchar
     );
-    CREATE TABLE "wg_eco_services" (
+    CREATE TABLE IF NOT EXISTS "wg_eco_services" (
       "_order" integer NOT NULL,
       "_parent_id" varchar NOT NULL,
       "_locale" "_locales" NOT NULL,
       "id" varchar PRIMARY KEY NOT NULL,
       "label" varchar
     );
-    CREATE TABLE "wg_eco_proof_refs" (
+    CREATE TABLE IF NOT EXISTS "wg_eco_proof_refs" (
       "_order" integer NOT NULL,
       "_parent_id" varchar NOT NULL,
       "_locale" "_locales" NOT NULL,
@@ -94,7 +124,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "key" varchar
     );
 
-    CREATE TABLE "wg_proof" (
+    CREATE TABLE IF NOT EXISTS "wg_proof" (
       "_order" integer NOT NULL,
       "_parent_id" integer NOT NULL,
       "_path" text NOT NULL,
@@ -105,7 +135,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "description" varchar,
       "block_name" varchar
     );
-    CREATE TABLE "wg_proof_records" (
+    CREATE TABLE IF NOT EXISTS "wg_proof_records" (
       "_order" integer NOT NULL,
       "_parent_id" varchar NOT NULL,
       "_locale" "_locales" NOT NULL,
@@ -124,7 +154,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "media_provenance_reference" varchar
     );
 
-    CREATE TABLE "_wg_ecosystem_v" (
+    CREATE TABLE IF NOT EXISTS "_wg_ecosystem_v" (
       "_order" integer NOT NULL,
       "_parent_id" integer NOT NULL,
       "_path" text NOT NULL,
@@ -136,7 +166,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "_uuid" varchar,
       "block_name" varchar
     );
-    CREATE TABLE "_wg_eco_profiles_v" (
+    CREATE TABLE IF NOT EXISTS "_wg_eco_profiles_v" (
       "_order" integer NOT NULL,
       "_parent_id" integer NOT NULL,
       "_locale" "_locales" NOT NULL,
@@ -157,7 +187,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "cta_owner_approval_evidence" varchar,
       "_uuid" varchar
     );
-    CREATE TABLE "_wg_eco_services_v" (
+    CREATE TABLE IF NOT EXISTS "_wg_eco_services_v" (
       "_order" integer NOT NULL,
       "_parent_id" integer NOT NULL,
       "_locale" "_locales" NOT NULL,
@@ -165,7 +195,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "label" varchar,
       "_uuid" varchar
     );
-    CREATE TABLE "_wg_eco_proof_refs_v" (
+    CREATE TABLE IF NOT EXISTS "_wg_eco_proof_refs_v" (
       "_order" integer NOT NULL,
       "_parent_id" integer NOT NULL,
       "_locale" "_locales" NOT NULL,
@@ -174,7 +204,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "_uuid" varchar
     );
 
-    CREATE TABLE "_wg_proof_v" (
+    CREATE TABLE IF NOT EXISTS "_wg_proof_v" (
       "_order" integer NOT NULL,
       "_parent_id" integer NOT NULL,
       "_path" text NOT NULL,
@@ -186,7 +216,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "_uuid" varchar,
       "block_name" varchar
     );
-    CREATE TABLE "_wg_proof_records_v" (
+    CREATE TABLE IF NOT EXISTS "_wg_proof_records_v" (
       "_order" integer NOT NULL,
       "_parent_id" integer NOT NULL,
       "_locale" "_locales" NOT NULL,
@@ -206,7 +236,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "_uuid" varchar
     );
 
-    CREATE TABLE "media_governance_responsive_derivatives" (
+    CREATE TABLE IF NOT EXISTS "media_governance_responsive_derivatives" (
       "_order" integer NOT NULL,
       "_parent_id" integer NOT NULL,
       "id" varchar PRIMARY KEY NOT NULL,
@@ -218,158 +248,199 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     );
 
     ALTER TABLE "site_settings"
-      ADD COLUMN "wings_group_v3_enabled" boolean DEFAULT false,
-      ADD COLUMN "wings_group_v3_english_publication_state"
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_enabled" boolean DEFAULT false,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_english_publication_state"
         "enum_site_settings_wings_group_v3_english_publication_state" DEFAULT 'hidden',
-      ADD COLUMN "wings_group_v3_privacy_policy_version" varchar,
-      ADD COLUMN "wings_group_v3_privacy_consent_version" varchar,
-      ADD COLUMN "wings_group_v3_privacy_consent_required" boolean,
-      ADD COLUMN "wings_group_v3_privacy_retention_months" numeric,
-      ADD COLUMN "wings_group_v3_privacy_data_subject_contact" varchar,
-      ADD COLUMN "wings_group_v3_privacy_inter_branch_transfer_allowed" boolean,
-      ADD COLUMN "wings_group_v3_privacy_policy_route_vi" varchar,
-      ADD COLUMN "wings_group_v3_privacy_policy_route_en" varchar;
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_privacy_policy_version" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_privacy_consent_version" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_privacy_consent_required" boolean,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_privacy_retention_months" numeric,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_privacy_data_subject_contact" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_privacy_inter_branch_transfer_allowed" boolean,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_privacy_policy_route_vi" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_privacy_policy_route_en" varchar;
 
     ALTER TABLE "media"
-      ADD COLUMN "governance_managed_by" "enum_media_governance_managed_by",
-      ADD COLUMN "governance_source_identity" varchar,
-      ADD COLUMN "governance_source_attachment_id" varchar,
-      ADD COLUMN "governance_source_archive_sha256" varchar,
-      ADD COLUMN "governance_source_file_sha256" varchar,
-      ADD COLUMN "governance_source_filename" varchar,
-      ADD COLUMN "governance_provenance_reference" varchar,
-      ADD COLUMN "governance_rights_state" "enum_media_governance_rights_state" DEFAULT 'pending',
-      ADD COLUMN "governance_rights_evidence" varchar,
-      ADD COLUMN "governance_usage_scope" "enum_media_governance_usage_scope",
-      ADD COLUMN "governance_publication_state"
+      ADD COLUMN IF NOT EXISTS "governance_managed_by" "enum_media_governance_managed_by",
+      ADD COLUMN IF NOT EXISTS "governance_source_identity" varchar,
+      ADD COLUMN IF NOT EXISTS "governance_source_attachment_id" varchar,
+      ADD COLUMN IF NOT EXISTS "governance_source_archive_sha256" varchar,
+      ADD COLUMN IF NOT EXISTS "governance_source_file_sha256" varchar,
+      ADD COLUMN IF NOT EXISTS "governance_source_filename" varchar,
+      ADD COLUMN IF NOT EXISTS "governance_provenance_reference" varchar,
+      ADD COLUMN IF NOT EXISTS "governance_rights_state" "enum_media_governance_rights_state" DEFAULT 'pending',
+      ADD COLUMN IF NOT EXISTS "governance_rights_evidence" varchar,
+      ADD COLUMN IF NOT EXISTS "governance_usage_scope" "enum_media_governance_usage_scope",
+      ADD COLUMN IF NOT EXISTS "governance_publication_state"
         "enum_media_governance_publication_state" DEFAULT 'pending',
-      ADD COLUMN "governance_derivative_state"
+      ADD COLUMN IF NOT EXISTS "governance_derivative_state"
         "enum_media_governance_derivative_state" DEFAULT 'pending';
 
-    ALTER TABLE "site_settings_wings_group_v3_consultation_channels"
-      ADD CONSTRAINT "site_settings_wings_group_v3_consultation_channels_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."site_settings"("id")
-      ON DELETE cascade ON UPDATE no action;
-    ALTER TABLE "wg_ecosystem"
-      ADD CONSTRAINT "wg_ecosystem_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."pages"("id")
-      ON DELETE cascade ON UPDATE no action;
-    ALTER TABLE "wg_eco_profiles"
-      ADD CONSTRAINT "wg_eco_profiles_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."wg_ecosystem"("id")
-      ON DELETE cascade ON UPDATE no action,
-      ADD CONSTRAINT "wg_eco_profiles_stage_media_id_media_id_fk"
-      FOREIGN KEY ("stage_media_id") REFERENCES "public"."media"("id")
-      ON DELETE set null ON UPDATE no action;
-    ALTER TABLE "wg_eco_services"
-      ADD CONSTRAINT "wg_eco_services_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."wg_eco_profiles"("id")
-      ON DELETE cascade ON UPDATE no action;
-    ALTER TABLE "wg_eco_proof_refs"
-      ADD CONSTRAINT "wg_eco_proof_refs_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."wg_eco_profiles"("id")
-      ON DELETE cascade ON UPDATE no action;
-    ALTER TABLE "wg_proof"
-      ADD CONSTRAINT "wg_proof_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."pages"("id")
-      ON DELETE cascade ON UPDATE no action;
-    ALTER TABLE "wg_proof_records"
-      ADD CONSTRAINT "wg_proof_records_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."wg_proof"("id")
-      ON DELETE cascade ON UPDATE no action,
-      ADD CONSTRAINT "wg_proof_records_media_id_media_id_fk"
-      FOREIGN KEY ("media_id") REFERENCES "public"."media"("id")
-      ON DELETE set null ON UPDATE no action;
+    DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'site_settings_wings_group_v3_consultation_channels_parent_id_fk') THEN
+        ALTER TABLE "site_settings_wings_group_v3_consultation_channels"
+          ADD CONSTRAINT "site_settings_wings_group_v3_consultation_channels_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."site_settings"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'wg_ecosystem_parent_id_fk') THEN
+        ALTER TABLE "wg_ecosystem"
+          ADD CONSTRAINT "wg_ecosystem_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."pages"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'wg_eco_profiles_parent_id_fk') THEN
+        ALTER TABLE "wg_eco_profiles"
+          ADD CONSTRAINT "wg_eco_profiles_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."wg_ecosystem"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'wg_eco_profiles_stage_media_id_media_id_fk') THEN
+        ALTER TABLE "wg_eco_profiles"
+          ADD CONSTRAINT "wg_eco_profiles_stage_media_id_media_id_fk"
+          FOREIGN KEY ("stage_media_id") REFERENCES "public"."media"("id")
+          ON DELETE set null ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'wg_eco_services_parent_id_fk') THEN
+        ALTER TABLE "wg_eco_services"
+          ADD CONSTRAINT "wg_eco_services_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."wg_eco_profiles"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'wg_eco_proof_refs_parent_id_fk') THEN
+        ALTER TABLE "wg_eco_proof_refs"
+          ADD CONSTRAINT "wg_eco_proof_refs_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."wg_eco_profiles"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'wg_proof_parent_id_fk') THEN
+        ALTER TABLE "wg_proof"
+          ADD CONSTRAINT "wg_proof_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."pages"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'wg_proof_records_parent_id_fk') THEN
+        ALTER TABLE "wg_proof_records"
+          ADD CONSTRAINT "wg_proof_records_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."wg_proof"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'wg_proof_records_media_id_media_id_fk') THEN
+        ALTER TABLE "wg_proof_records"
+          ADD CONSTRAINT "wg_proof_records_media_id_media_id_fk"
+          FOREIGN KEY ("media_id") REFERENCES "public"."media"("id")
+          ON DELETE set null ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_wg_ecosystem_v_parent_id_fk') THEN
+        ALTER TABLE "_wg_ecosystem_v"
+          ADD CONSTRAINT "_wg_ecosystem_v_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."_pages_v"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_wg_eco_profiles_v_parent_id_fk') THEN
+        ALTER TABLE "_wg_eco_profiles_v"
+          ADD CONSTRAINT "_wg_eco_profiles_v_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."_wg_ecosystem_v"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_wg_eco_profiles_v_stage_media_id_media_id_fk') THEN
+        ALTER TABLE "_wg_eco_profiles_v"
+          ADD CONSTRAINT "_wg_eco_profiles_v_stage_media_id_media_id_fk"
+          FOREIGN KEY ("stage_media_id") REFERENCES "public"."media"("id")
+          ON DELETE set null ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_wg_eco_services_v_parent_id_fk') THEN
+        ALTER TABLE "_wg_eco_services_v"
+          ADD CONSTRAINT "_wg_eco_services_v_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."_wg_eco_profiles_v"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_wg_eco_proof_refs_v_parent_id_fk') THEN
+        ALTER TABLE "_wg_eco_proof_refs_v"
+          ADD CONSTRAINT "_wg_eco_proof_refs_v_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."_wg_eco_profiles_v"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_wg_proof_v_parent_id_fk') THEN
+        ALTER TABLE "_wg_proof_v"
+          ADD CONSTRAINT "_wg_proof_v_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."_pages_v"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_wg_proof_records_v_parent_id_fk') THEN
+        ALTER TABLE "_wg_proof_records_v"
+          ADD CONSTRAINT "_wg_proof_records_v_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."_wg_proof_v"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_wg_proof_records_v_media_id_media_id_fk') THEN
+        ALTER TABLE "_wg_proof_records_v"
+          ADD CONSTRAINT "_wg_proof_records_v_media_id_media_id_fk"
+          FOREIGN KEY ("media_id") REFERENCES "public"."media"("id")
+          ON DELETE set null ON UPDATE no action;
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'media_governance_responsive_derivatives_parent_id_fk') THEN
+        ALTER TABLE "media_governance_responsive_derivatives"
+          ADD CONSTRAINT "media_governance_responsive_derivatives_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "public"."media"("id")
+          ON DELETE cascade ON UPDATE no action;
+      END IF;
+    END $$;
 
-    ALTER TABLE "_wg_ecosystem_v"
-      ADD CONSTRAINT "_wg_ecosystem_v_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."_pages_v"("id")
-      ON DELETE cascade ON UPDATE no action;
-    ALTER TABLE "_wg_eco_profiles_v"
-      ADD CONSTRAINT "_wg_eco_profiles_v_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."_wg_ecosystem_v"("id")
-      ON DELETE cascade ON UPDATE no action,
-      ADD CONSTRAINT "_wg_eco_profiles_v_stage_media_id_media_id_fk"
-      FOREIGN KEY ("stage_media_id") REFERENCES "public"."media"("id")
-      ON DELETE set null ON UPDATE no action;
-    ALTER TABLE "_wg_eco_services_v"
-      ADD CONSTRAINT "_wg_eco_services_v_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."_wg_eco_profiles_v"("id")
-      ON DELETE cascade ON UPDATE no action;
-    ALTER TABLE "_wg_eco_proof_refs_v"
-      ADD CONSTRAINT "_wg_eco_proof_refs_v_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."_wg_eco_profiles_v"("id")
-      ON DELETE cascade ON UPDATE no action;
-    ALTER TABLE "_wg_proof_v"
-      ADD CONSTRAINT "_wg_proof_v_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."_pages_v"("id")
-      ON DELETE cascade ON UPDATE no action;
-    ALTER TABLE "_wg_proof_records_v"
-      ADD CONSTRAINT "_wg_proof_records_v_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."_wg_proof_v"("id")
-      ON DELETE cascade ON UPDATE no action,
-      ADD CONSTRAINT "_wg_proof_records_v_media_id_media_id_fk"
-      FOREIGN KEY ("media_id") REFERENCES "public"."media"("id")
-      ON DELETE set null ON UPDATE no action;
-    ALTER TABLE "media_governance_responsive_derivatives"
-      ADD CONSTRAINT "media_governance_responsive_derivatives_parent_id_fk"
-      FOREIGN KEY ("_parent_id") REFERENCES "public"."media"("id")
-      ON DELETE cascade ON UPDATE no action;
-
-    CREATE INDEX "site_settings_wg_v3_channels_order_idx"
+    CREATE INDEX IF NOT EXISTS "site_settings_wg_v3_channels_order_idx"
       ON "site_settings_wings_group_v3_consultation_channels" ("_order");
-    CREATE INDEX "site_settings_wg_v3_channels_parent_idx"
+    CREATE INDEX IF NOT EXISTS "site_settings_wg_v3_channels_parent_idx"
       ON "site_settings_wings_group_v3_consultation_channels" ("_parent_id");
-    CREATE INDEX "wg_ecosystem_order_idx" ON "wg_ecosystem" ("_order");
-    CREATE INDEX "wg_ecosystem_parent_id_idx" ON "wg_ecosystem" ("_parent_id");
-    CREATE INDEX "wg_ecosystem_path_idx" ON "wg_ecosystem" ("_path");
-    CREATE INDEX "wg_ecosystem_locale_idx" ON "wg_ecosystem" ("_locale");
-    CREATE INDEX "wg_eco_profiles_order_idx" ON "wg_eco_profiles" ("_order");
-    CREATE INDEX "wg_eco_profiles_parent_id_idx" ON "wg_eco_profiles" ("_parent_id");
-    CREATE INDEX "wg_eco_profiles_locale_idx" ON "wg_eco_profiles" ("_locale");
-    CREATE INDEX "wg_eco_profiles_stage_media_idx" ON "wg_eco_profiles" ("stage_media_id");
-    CREATE INDEX "wg_eco_services_order_idx" ON "wg_eco_services" ("_order");
-    CREATE INDEX "wg_eco_services_parent_id_idx" ON "wg_eco_services" ("_parent_id");
-    CREATE INDEX "wg_eco_services_locale_idx" ON "wg_eco_services" ("_locale");
-    CREATE INDEX "wg_eco_proof_refs_order_idx" ON "wg_eco_proof_refs" ("_order");
-    CREATE INDEX "wg_eco_proof_refs_parent_id_idx" ON "wg_eco_proof_refs" ("_parent_id");
-    CREATE INDEX "wg_eco_proof_refs_locale_idx" ON "wg_eco_proof_refs" ("_locale");
-    CREATE INDEX "wg_proof_order_idx" ON "wg_proof" ("_order");
-    CREATE INDEX "wg_proof_parent_id_idx" ON "wg_proof" ("_parent_id");
-    CREATE INDEX "wg_proof_path_idx" ON "wg_proof" ("_path");
-    CREATE INDEX "wg_proof_locale_idx" ON "wg_proof" ("_locale");
-    CREATE INDEX "wg_proof_records_order_idx" ON "wg_proof_records" ("_order");
-    CREATE INDEX "wg_proof_records_parent_id_idx" ON "wg_proof_records" ("_parent_id");
-    CREATE INDEX "wg_proof_records_locale_idx" ON "wg_proof_records" ("_locale");
-    CREATE INDEX "wg_proof_records_media_idx" ON "wg_proof_records" ("media_id");
+    CREATE INDEX IF NOT EXISTS "wg_ecosystem_order_idx" ON "wg_ecosystem" ("_order");
+    CREATE INDEX IF NOT EXISTS "wg_ecosystem_parent_id_idx" ON "wg_ecosystem" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "wg_ecosystem_path_idx" ON "wg_ecosystem" ("_path");
+    CREATE INDEX IF NOT EXISTS "wg_ecosystem_locale_idx" ON "wg_ecosystem" ("_locale");
+    CREATE INDEX IF NOT EXISTS "wg_eco_profiles_order_idx" ON "wg_eco_profiles" ("_order");
+    CREATE INDEX IF NOT EXISTS "wg_eco_profiles_parent_id_idx" ON "wg_eco_profiles" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "wg_eco_profiles_locale_idx" ON "wg_eco_profiles" ("_locale");
+    CREATE INDEX IF NOT EXISTS "wg_eco_profiles_stage_media_idx" ON "wg_eco_profiles" ("stage_media_id");
+    CREATE INDEX IF NOT EXISTS "wg_eco_services_order_idx" ON "wg_eco_services" ("_order");
+    CREATE INDEX IF NOT EXISTS "wg_eco_services_parent_id_idx" ON "wg_eco_services" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "wg_eco_services_locale_idx" ON "wg_eco_services" ("_locale");
+    CREATE INDEX IF NOT EXISTS "wg_eco_proof_refs_order_idx" ON "wg_eco_proof_refs" ("_order");
+    CREATE INDEX IF NOT EXISTS "wg_eco_proof_refs_parent_id_idx" ON "wg_eco_proof_refs" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "wg_eco_proof_refs_locale_idx" ON "wg_eco_proof_refs" ("_locale");
+    CREATE INDEX IF NOT EXISTS "wg_proof_order_idx" ON "wg_proof" ("_order");
+    CREATE INDEX IF NOT EXISTS "wg_proof_parent_id_idx" ON "wg_proof" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "wg_proof_path_idx" ON "wg_proof" ("_path");
+    CREATE INDEX IF NOT EXISTS "wg_proof_locale_idx" ON "wg_proof" ("_locale");
+    CREATE INDEX IF NOT EXISTS "wg_proof_records_order_idx" ON "wg_proof_records" ("_order");
+    CREATE INDEX IF NOT EXISTS "wg_proof_records_parent_id_idx" ON "wg_proof_records" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "wg_proof_records_locale_idx" ON "wg_proof_records" ("_locale");
+    CREATE INDEX IF NOT EXISTS "wg_proof_records_media_idx" ON "wg_proof_records" ("media_id");
 
-    CREATE INDEX "_wg_ecosystem_v_order_idx" ON "_wg_ecosystem_v" ("_order");
-    CREATE INDEX "_wg_ecosystem_v_parent_id_idx" ON "_wg_ecosystem_v" ("_parent_id");
-    CREATE INDEX "_wg_ecosystem_v_path_idx" ON "_wg_ecosystem_v" ("_path");
-    CREATE INDEX "_wg_ecosystem_v_locale_idx" ON "_wg_ecosystem_v" ("_locale");
-    CREATE INDEX "_wg_eco_profiles_v_order_idx" ON "_wg_eco_profiles_v" ("_order");
-    CREATE INDEX "_wg_eco_profiles_v_parent_id_idx" ON "_wg_eco_profiles_v" ("_parent_id");
-    CREATE INDEX "_wg_eco_profiles_v_locale_idx" ON "_wg_eco_profiles_v" ("_locale");
-    CREATE INDEX "_wg_eco_profiles_v_stage_media_idx" ON "_wg_eco_profiles_v" ("stage_media_id");
-    CREATE INDEX "_wg_eco_services_v_order_idx" ON "_wg_eco_services_v" ("_order");
-    CREATE INDEX "_wg_eco_services_v_parent_id_idx" ON "_wg_eco_services_v" ("_parent_id");
-    CREATE INDEX "_wg_eco_services_v_locale_idx" ON "_wg_eco_services_v" ("_locale");
-    CREATE INDEX "_wg_eco_proof_refs_v_order_idx" ON "_wg_eco_proof_refs_v" ("_order");
-    CREATE INDEX "_wg_eco_proof_refs_v_parent_id_idx" ON "_wg_eco_proof_refs_v" ("_parent_id");
-    CREATE INDEX "_wg_eco_proof_refs_v_locale_idx" ON "_wg_eco_proof_refs_v" ("_locale");
-    CREATE INDEX "_wg_proof_v_order_idx" ON "_wg_proof_v" ("_order");
-    CREATE INDEX "_wg_proof_v_parent_id_idx" ON "_wg_proof_v" ("_parent_id");
-    CREATE INDEX "_wg_proof_v_path_idx" ON "_wg_proof_v" ("_path");
-    CREATE INDEX "_wg_proof_v_locale_idx" ON "_wg_proof_v" ("_locale");
-    CREATE INDEX "_wg_proof_records_v_order_idx" ON "_wg_proof_records_v" ("_order");
-    CREATE INDEX "_wg_proof_records_v_parent_id_idx" ON "_wg_proof_records_v" ("_parent_id");
-    CREATE INDEX "_wg_proof_records_v_locale_idx" ON "_wg_proof_records_v" ("_locale");
-    CREATE INDEX "_wg_proof_records_v_media_idx" ON "_wg_proof_records_v" ("media_id");
-    CREATE INDEX "media_governance_derivatives_order_idx"
+    CREATE INDEX IF NOT EXISTS "_wg_ecosystem_v_order_idx" ON "_wg_ecosystem_v" ("_order");
+    CREATE INDEX IF NOT EXISTS "_wg_ecosystem_v_parent_id_idx" ON "_wg_ecosystem_v" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "_wg_ecosystem_v_path_idx" ON "_wg_ecosystem_v" ("_path");
+    CREATE INDEX IF NOT EXISTS "_wg_ecosystem_v_locale_idx" ON "_wg_ecosystem_v" ("_locale");
+    CREATE INDEX IF NOT EXISTS "_wg_eco_profiles_v_order_idx" ON "_wg_eco_profiles_v" ("_order");
+    CREATE INDEX IF NOT EXISTS "_wg_eco_profiles_v_parent_id_idx" ON "_wg_eco_profiles_v" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "_wg_eco_profiles_v_locale_idx" ON "_wg_eco_profiles_v" ("_locale");
+    CREATE INDEX IF NOT EXISTS "_wg_eco_profiles_v_stage_media_idx" ON "_wg_eco_profiles_v" ("stage_media_id");
+    CREATE INDEX IF NOT EXISTS "_wg_eco_services_v_order_idx" ON "_wg_eco_services_v" ("_order");
+    CREATE INDEX IF NOT EXISTS "_wg_eco_services_v_parent_id_idx" ON "_wg_eco_services_v" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "_wg_eco_services_v_locale_idx" ON "_wg_eco_services_v" ("_locale");
+    CREATE INDEX IF NOT EXISTS "_wg_eco_proof_refs_v_order_idx" ON "_wg_eco_proof_refs_v" ("_order");
+    CREATE INDEX IF NOT EXISTS "_wg_eco_proof_refs_v_parent_id_idx" ON "_wg_eco_proof_refs_v" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "_wg_eco_proof_refs_v_locale_idx" ON "_wg_eco_proof_refs_v" ("_locale");
+    CREATE INDEX IF NOT EXISTS "_wg_proof_v_order_idx" ON "_wg_proof_v" ("_order");
+    CREATE INDEX IF NOT EXISTS "_wg_proof_v_parent_id_idx" ON "_wg_proof_v" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "_wg_proof_v_path_idx" ON "_wg_proof_v" ("_path");
+    CREATE INDEX IF NOT EXISTS "_wg_proof_v_locale_idx" ON "_wg_proof_v" ("_locale");
+    CREATE INDEX IF NOT EXISTS "_wg_proof_records_v_order_idx" ON "_wg_proof_records_v" ("_order");
+    CREATE INDEX IF NOT EXISTS "_wg_proof_records_v_parent_id_idx" ON "_wg_proof_records_v" ("_parent_id");
+    CREATE INDEX IF NOT EXISTS "_wg_proof_records_v_locale_idx" ON "_wg_proof_records_v" ("_locale");
+    CREATE INDEX IF NOT EXISTS "_wg_proof_records_v_media_idx" ON "_wg_proof_records_v" ("media_id");
+    CREATE INDEX IF NOT EXISTS "media_governance_derivatives_order_idx"
       ON "media_governance_responsive_derivatives" ("_order");
-    CREATE INDEX "media_governance_derivatives_parent_idx"
+    CREATE INDEX IF NOT EXISTS "media_governance_derivatives_parent_idx"
       ON "media_governance_responsive_derivatives" ("_parent_id");
-    CREATE UNIQUE INDEX "media_governance_source_identity_idx"
+    CREATE UNIQUE INDEX IF NOT EXISTS "media_governance_source_identity_idx"
       ON "media" ("governance_source_identity");
   `)
 }

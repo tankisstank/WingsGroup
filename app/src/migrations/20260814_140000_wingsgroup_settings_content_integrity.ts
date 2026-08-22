@@ -8,17 +8,17 @@ import { sql } from '@payloadcms/db-postgres'
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
-    CREATE UNIQUE INDEX "site_settings_site_id_unique"
+    CREATE UNIQUE INDEX IF NOT EXISTS "site_settings_site_id_unique"
       ON "site_settings" USING btree ("site_id")
       WHERE "site_id" IS NOT NULL;
 
     ALTER TABLE "pages"
-      ADD COLUMN "wings_group_route_content_approval_vi" varchar,
-      ADD COLUMN "wings_group_route_content_approval_en" varchar;
+      ADD COLUMN IF NOT EXISTS "wings_group_route_content_approval_vi" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_route_content_approval_en" varchar;
 
     ALTER TABLE "_pages_v"
-      ADD COLUMN "version_wings_group_route_content_approval_vi" varchar,
-      ADD COLUMN "version_wings_group_route_content_approval_en" varchar;
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_content_approval_vi" varchar,
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_content_approval_en" varchar;
   `)
 }
 

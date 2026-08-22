@@ -56,7 +56,7 @@ describe('site domain utilities', () => {
     expect(requestHostCandidates(headers)).not.toContain('attacker.example')
   })
 
-  it('strips spoofed tenant headers before creating trusted proxy context', () => {
+  it('strips spoofed tenant headers before creating trusted proxy context', async () => {
     const incoming = new Headers({
       'x-locale': 'vi',
       'x-public-path': '/spoofed',
@@ -66,7 +66,7 @@ describe('site domain utilities', () => {
       'x-site-prefix': '/wingscare',
     })
 
-    const trusted = createTrustedSiteContextHeaders(incoming, {
+    const trusted = await createTrustedSiteContextHeaders(incoming, {
       host: 'wingsgo.vn',
       locale: 'en',
       publicPath: '/wingsgo/en/tours',
@@ -83,8 +83,8 @@ describe('site domain utilities', () => {
     expect(internalSiteContextHeaderNames).toContain('x-site-code')
   })
 
-  it('does not preserve optional spoofed values when the trusted context omits them', () => {
-    const trusted = createTrustedSiteContextHeaders(
+  it('does not preserve optional spoofed values when the trusted context omits them', async () => {
+    const trusted = await createTrustedSiteContextHeaders(
       new Headers({ 'x-site-code': 'wings-care', 'x-site-prefix': '/wingscare' }),
       {
         host: 'localhost',

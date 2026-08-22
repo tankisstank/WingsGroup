@@ -130,7 +130,9 @@ describe('WingsGroup corporate route integration', () => {
       ),
       'utf8',
     )
-    expect(integrityMigration).toContain('CREATE UNIQUE INDEX "site_settings_site_id_unique"')
+    expect(integrityMigration).toContain(
+      'CREATE UNIQUE INDEX IF NOT EXISTS "site_settings_site_id_unique"',
+    )
     expect(integrityMigration).toContain('wings_group_route_content_approval_vi')
     expect(integrityMigration).not.toMatch(/(?:DELETE|UPDATE)\s+/i)
   })

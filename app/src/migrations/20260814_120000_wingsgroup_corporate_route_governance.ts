@@ -8,73 +8,93 @@ import { sql } from '@payloadcms/db-postgres'
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
-    CREATE TYPE "public"."enum_pages_wings_group_route_managed_by"
-      AS ENUM('wingsgroup-v3');
-    CREATE TYPE "public"."enum_pages_wings_group_route_archetype"
-      AS ENUM('home', 'corporate', 'capability', 'trust', 'editorial', 'contact', 'policy');
-    CREATE TYPE "public"."enum_pages_wings_group_route_publication_vi"
-      AS ENUM('hidden', 'pending', 'approved');
-    CREATE TYPE "public"."enum_pages_wings_group_route_publication_en"
-      AS ENUM('hidden', 'pending', 'approved');
-    CREATE TYPE "public"."enum_pages_wings_group_route_policy_approval_state"
-      AS ENUM('pending', 'approved', 'rejected');
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_pages_wings_group_route_managed_by"
+        AS ENUM('wingsgroup-v3');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_pages_wings_group_route_archetype"
+        AS ENUM('home', 'corporate', 'capability', 'trust', 'editorial', 'contact', 'policy');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_pages_wings_group_route_publication_vi"
+        AS ENUM('hidden', 'pending', 'approved');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_pages_wings_group_route_publication_en"
+        AS ENUM('hidden', 'pending', 'approved');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum_pages_wings_group_route_policy_approval_state"
+        AS ENUM('pending', 'approved', 'rejected');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-    CREATE TYPE "public"."enum__pages_v_version_wings_group_route_managed_by"
-      AS ENUM('wingsgroup-v3');
-    CREATE TYPE "public"."enum__pages_v_version_wings_group_route_archetype"
-      AS ENUM('home', 'corporate', 'capability', 'trust', 'editorial', 'contact', 'policy');
-    CREATE TYPE "public"."enum__pages_v_version_wings_group_route_publication_vi"
-      AS ENUM('hidden', 'pending', 'approved');
-    CREATE TYPE "public"."enum__pages_v_version_wings_group_route_publication_en"
-      AS ENUM('hidden', 'pending', 'approved');
-    CREATE TYPE "public"."enum__pages_v_version_wings_group_route_policy_approval_state"
-      AS ENUM('pending', 'approved', 'rejected');
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum__pages_v_version_wings_group_route_managed_by"
+        AS ENUM('wingsgroup-v3');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum__pages_v_version_wings_group_route_archetype"
+        AS ENUM('home', 'corporate', 'capability', 'trust', 'editorial', 'contact', 'policy');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum__pages_v_version_wings_group_route_publication_vi"
+        AS ENUM('hidden', 'pending', 'approved');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum__pages_v_version_wings_group_route_publication_en"
+        AS ENUM('hidden', 'pending', 'approved');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      CREATE TYPE "public"."enum__pages_v_version_wings_group_route_policy_approval_state"
+        AS ENUM('pending', 'approved', 'rejected');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
     ALTER TABLE "pages"
-      ADD COLUMN "wings_group_route_managed_by"
+      ADD COLUMN IF NOT EXISTS "wings_group_route_managed_by"
         "enum_pages_wings_group_route_managed_by",
-      ADD COLUMN "wings_group_route_archetype"
+      ADD COLUMN IF NOT EXISTS "wings_group_route_archetype"
         "enum_pages_wings_group_route_archetype",
-      ADD COLUMN "wings_group_route_publication_vi"
+      ADD COLUMN IF NOT EXISTS "wings_group_route_publication_vi"
         "enum_pages_wings_group_route_publication_vi" DEFAULT 'hidden',
-      ADD COLUMN "wings_group_route_publication_en"
+      ADD COLUMN IF NOT EXISTS "wings_group_route_publication_en"
         "enum_pages_wings_group_route_publication_en" DEFAULT 'hidden',
-      ADD COLUMN "wings_group_route_policy_legal_owner" varchar,
-      ADD COLUMN "wings_group_route_policy_legal_entity" varchar,
-      ADD COLUMN "wings_group_route_policy_scope" varchar,
-      ADD COLUMN "wings_group_route_policy_effective_date" timestamp(3) with time zone,
-      ADD COLUMN "wings_group_route_policy_version" varchar,
-      ADD COLUMN "wings_group_route_policy_approval_state"
+      ADD COLUMN IF NOT EXISTS "wings_group_route_policy_legal_owner" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_route_policy_legal_entity" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_route_policy_scope" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_route_policy_effective_date" timestamp(3) with time zone,
+      ADD COLUMN IF NOT EXISTS "wings_group_route_policy_version" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_route_policy_approval_state"
         "enum_pages_wings_group_route_policy_approval_state" DEFAULT 'pending',
-      ADD COLUMN "wings_group_route_policy_approval_reference" varchar;
+      ADD COLUMN IF NOT EXISTS "wings_group_route_policy_approval_reference" varchar;
 
     ALTER TABLE "_pages_v"
-      ADD COLUMN "version_wings_group_route_managed_by"
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_managed_by"
         "enum__pages_v_version_wings_group_route_managed_by",
-      ADD COLUMN "version_wings_group_route_archetype"
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_archetype"
         "enum__pages_v_version_wings_group_route_archetype",
-      ADD COLUMN "version_wings_group_route_publication_vi"
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_publication_vi"
         "enum__pages_v_version_wings_group_route_publication_vi" DEFAULT 'hidden',
-      ADD COLUMN "version_wings_group_route_publication_en"
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_publication_en"
         "enum__pages_v_version_wings_group_route_publication_en" DEFAULT 'hidden',
-      ADD COLUMN "version_wings_group_route_policy_legal_owner" varchar,
-      ADD COLUMN "version_wings_group_route_policy_legal_entity" varchar,
-      ADD COLUMN "version_wings_group_route_policy_scope" varchar,
-      ADD COLUMN "version_wings_group_route_policy_effective_date" timestamp(3) with time zone,
-      ADD COLUMN "version_wings_group_route_policy_version" varchar,
-      ADD COLUMN "version_wings_group_route_policy_approval_state"
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_policy_legal_owner" varchar,
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_policy_legal_entity" varchar,
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_policy_scope" varchar,
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_policy_effective_date" timestamp(3) with time zone,
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_policy_version" varchar,
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_policy_approval_state"
         "enum__pages_v_version_wings_group_route_policy_approval_state" DEFAULT 'pending',
-      ADD COLUMN "version_wings_group_route_policy_approval_reference" varchar;
+      ADD COLUMN IF NOT EXISTS "version_wings_group_route_policy_approval_reference" varchar;
 
     ALTER TABLE "site_settings"
-      ADD COLUMN "wings_group_v3_legal_identity_legal_entity_name" varchar,
-      ADD COLUMN "wings_group_v3_legal_identity_international_name" varchar,
-      ADD COLUMN "wings_group_v3_legal_identity_registered_office" varchar,
-      ADD COLUMN "wings_group_v3_legal_identity_travel_office" varchar,
-      ADD COLUMN "wings_group_v3_legal_identity_registration_number" varchar,
-      ADD COLUMN "wings_group_v3_legal_identity_licence_number" varchar,
-      ADD COLUMN "wings_group_v3_legal_identity_legal_representative" varchar,
-      ADD COLUMN "wings_group_v3_legal_identity_relationship_statement" varchar;
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_legal_identity_legal_entity_name" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_legal_identity_international_name" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_legal_identity_registered_office" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_legal_identity_travel_office" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_legal_identity_registration_number" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_legal_identity_licence_number" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_legal_identity_legal_representative" varchar,
+      ADD COLUMN IF NOT EXISTS "wings_group_v3_legal_identity_relationship_statement" varchar;
   `)
 }
 

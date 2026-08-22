@@ -55,9 +55,14 @@ describe('WingsGroup v3 Payload foundation', () => {
       ),
       'utf8',
     )
-    expect(migration).toContain('CREATE TABLE "wg_ecosystem"')
-    expect(migration).toContain('CREATE TABLE "wg_proof"')
-    expect(migration).toContain('CREATE TABLE "media_governance_responsive_derivatives"')
+    expect(migration).toContain('CREATE TABLE IF NOT EXISTS "wg_ecosystem"')
+    expect(migration).toContain('CREATE TABLE IF NOT EXISTS "wg_proof"')
+    expect(migration).toContain(
+      'CREATE TABLE IF NOT EXISTS "media_governance_responsive_derivatives"',
+    )
+    expect(migration).toContain('ADD COLUMN IF NOT EXISTS "wings_group_v3_enabled"')
+    expect(migration).toContain('CREATE UNIQUE INDEX IF NOT EXISTS')
+    expect(migration).toContain('pg_constraint')
     expect(migration).not.toContain('tour_products')
     expect(migration).not.toContain('form_submissions')
   })
@@ -97,6 +102,20 @@ describe('WingsGroup v3 Payload foundation', () => {
         req: {
           payload: {
             findByID: async () => ({ governance: {}, id: 22, site: 2 }),
+          },
+        },
+      } as never),
+    ).rejects.toThrow(/tenant khác/)
+  })
+
+  it('checks Page parent relations at the trusted server boundary', async () => {
+    await expect(
+      validateWingsGroupV3Governance({
+        data: { layout: [], parentPage: 22, site: 1 },
+        originalDoc: {},
+        req: {
+          payload: {
+            findByID: async () => ({ id: 22, site: 2 }),
           },
         },
       } as never),
