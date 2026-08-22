@@ -266,6 +266,10 @@ const localizedText = (value, fallback = '') => {
   return fallback
 }
 
+const directContactMethodPattern =
+  /(?:hotline|phone|điện thoại|dien thoai|email|zalo|address|địa chỉ|dia chi|tel:|mailto:|\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b|\+?\d[\d\s().-]{7,}\d)/i
+const hasDirectContactMethod = (text) => directContactMethodPattern.test(text || '')
+
 const fetchJSON = async (url) => {
   const controller = new AbortController()
   const timeoutID = setTimeout(() => controller.abort(), pageTimeout)
@@ -332,7 +336,7 @@ const expectedContent = {
     requiredSignals: [
       {
         key: 'contact method',
-        pattern: /(hotline|phone|điện thoại|dien thoai|email|zalo|address|địa chỉ|dia chi)/i,
+        pattern: directContactMethodPattern,
       },
       {
         key: 'lead action',
@@ -728,18 +732,15 @@ function reviewContent(result) {
 
   if (
     ['campaign', 'travel-product'].includes(result.purpose) &&
-    !/(hotline|zalo|email|liên hệ|lien he|contact|plan your trip|trip planner|travel brief|tailored proposal|inquiry)/i.test(
+    !hasDirectContactMethod(text) &&
+    !/(liên hệ|lien he|contact|plan your trip|trip planner|travel brief|tailored proposal|inquiry)/i.test(
       text,
     )
   ) {
     blockers.push('Conversion page does not expose a clear contact or inquiry path.')
   }
 
-  if (
-    result.purpose === 'lead-contact' &&
-    result.forms === 0 &&
-    !/(hotline|zalo|email|tel:|mailto:)/i.test(text)
-  ) {
+  if (result.purpose === 'lead-contact' && result.forms === 0 && !hasDirectContactMethod(text)) {
     blockers.push('Contact page has no form or clear direct contact method.')
   }
 
@@ -815,11 +816,12 @@ const fetchTextProbe = async (pathname) => {
 }
 
 const identitySnapshot = async (browser, url, extraHTTPHeaders = {}) => {
-  const context = await browser.newContext({ extraHTTPHeaders })
-  const page = await context.newPage()
-  page.setDefaultNavigationTimeout(pageTimeout)
-  page.setDefaultTimeout(pageTimeout)
+  let context
   try {
+    context = await browser.newContext({ extraHTTPHeaders })
+    const page = await context.newPage()
+    page.setDefaultNavigationTimeout(pageTimeout)
+    page.setDefaultTimeout(pageTimeout)
     const response = await page.goto(url, { timeout: pageTimeout, waitUntil: 'domcontentloaded' })
     const identity = await page.evaluate(() => ({
       bodyTheme: document.body.getAttribute('data-site-theme') || '',
@@ -841,25 +843,43 @@ const identitySnapshot = async (browser, url, extraHTTPHeaders = {}) => {
       headers: response?.headers() || {},
       ok: response?.ok() || false,
       status: response?.status() || null,
+      attempts: 1,
       url,
     }
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const timedOut =
+      /timeout|timed out|aborted/i.test(errorMessage) || error?.name === 'TimeoutError'
     return {
       bodyTheme: '',
       brandText: [],
       canonical: '',
-      error: error instanceof Error ? error.message : String(error),
+      error: errorMessage,
+      errorKind: timedOut ? 'timeout' : 'error',
       h1: [],
       headers: {},
       htmlLang: '',
+      inconclusive: timedOut,
       ok: false,
       status: null,
       title: '',
+      attempts: 1,
       url,
     }
   } finally {
-    await context.close()
+    if (context) await context.close()
   }
+}
+
+const identitySnapshotWithRetry = async (browser, url, extraHTTPHeaders = {}, maxAttempts = 2) => {
+  let snapshot
+  let attempts = 0
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    attempts = attempt
+    snapshot = await identitySnapshot(browser, url, extraHTTPHeaders)
+    if (!snapshot.inconclusive || attempt === maxAttempts) break
+  }
+  return { ...snapshot, attempts }
 }
 
 const identityFingerprint = (snapshot) =>
@@ -893,6 +913,31 @@ const extractAdvertisedURLs = (text, pathname) => {
     .filter((value) => /^https?:\/\//i.test(value))
 }
 
+const extractAdvertisedSitemapURLs = (text) =>
+  [
+    ...String(text || '').matchAll(
+      /<(?:[\w.-]+:)?sitemap\b[^>]*>([\s\S]*?)<\/(?:[\w.-]+:)?sitemap>/gi,
+    ),
+  ]
+    .flatMap((match) => [...match[1].matchAll(/<loc(?:\s[^>]*)?>([\s\S]*?)<\/loc>/gi)])
+    .map((match) => decodeXMLText(match[1].trim()))
+    .filter((value) => /^https?:\/\//i.test(value))
+
+const buildSitemapProbePaths = (text) => [
+  ...new Set(
+    extractAdvertisedSitemapURLs(text)
+      .map((value) => {
+        try {
+          const url = new URL(value)
+          return `${url.pathname}${url.search}`
+        } catch {
+          return ''
+        }
+      })
+      .filter(Boolean),
+  ),
+]
+
 async function inspectSiteProbe(browser, site) {
   const routePrefix = routingMode === 'path' ? site.pathPrefix : ''
   const homepageURL = targetURL(joinRoute(routePrefix, '/'))
@@ -900,34 +945,44 @@ async function inspectSiteProbe(browser, site) {
   const targetPath = joinRoute(routePrefix, '/')
   const otherSiteCode = otherSite?.siteCode || 'invalid-site'
   const otherSiteAlias = otherSite?.key || 'invalid-site'
-  const seoPaths = ['/robots.txt', '/sitemap.xml', '/pages-sitemap.xml', '/posts-sitemap.xml']
+  const identityProbeInputs = [
+    [homepageURL, {}],
+    [targetURL(targetPath, new URLSearchParams({ site: otherSiteCode }).toString()), {}],
+    [targetURL(targetPath, new URLSearchParams({ siteAlias: otherSiteAlias }).toString()), {}],
+    [homepageURL, { 'x-site-code': otherSiteCode }],
+    [
+      homepageURL,
+      {
+        'x-locale': 'en',
+        'x-public-path': otherSite?.pathPrefix || '/invalid-site',
+        'x-site-context-source': 'proxy',
+        'x-site-host': otherSite?.publicHosts[0] || 'invalid.example.com',
+        'x-site-prefix': otherSite?.pathPrefix || '/invalid-site',
+      },
+    ],
+  ]
+  const identitySnapshots = []
+  for (const [url, headers] of identityProbeInputs) {
+    identitySnapshots.push(await identitySnapshotWithRetry(browser, url, headers))
+  }
   const [
     baseline,
     siteQueryInjection,
     siteAliasQueryInjection,
     siteHeaderInjection,
     internalHeaderInjection,
-    ...seoEndpoints
-  ] = await Promise.all([
-    identitySnapshot(browser, homepageURL),
-    identitySnapshot(
-      browser,
-      targetURL(targetPath, new URLSearchParams({ site: otherSiteCode }).toString()),
-    ),
-    identitySnapshot(
-      browser,
-      targetURL(targetPath, new URLSearchParams({ siteAlias: otherSiteAlias }).toString()),
-    ),
-    identitySnapshot(browser, homepageURL, { 'x-site-code': otherSiteCode }),
-    identitySnapshot(browser, homepageURL, {
-      'x-locale': 'en',
-      'x-public-path': otherSite?.pathPrefix || '/invalid-site',
-      'x-site-context-source': 'proxy',
-      'x-site-host': otherSite?.publicHosts[0] || 'invalid.example.com',
-      'x-site-prefix': otherSite?.pathPrefix || '/invalid-site',
-    }),
-    ...seoPaths.map((pathname) => fetchTextProbe(pathname)),
-  ])
+  ] = identitySnapshots
+  const initialSeoEndpoints = await Promise.all(
+    ['/robots.txt', '/sitemap.xml'].map((pathname) => fetchTextProbe(pathname)),
+  )
+  const sitemapEndpoint = initialSeoEndpoints.find(
+    (endpoint) => endpoint.pathname === '/sitemap.xml',
+  )
+  const advertisedChildPaths = buildSitemapProbePaths(sitemapEndpoint?.text)
+  const seoEndpoints = [
+    ...initialSeoEndpoints,
+    ...(await Promise.all(advertisedChildPaths.map((pathname) => fetchTextProbe(pathname)))),
+  ]
 
   return {
     baseline,
@@ -935,6 +990,10 @@ async function inspectSiteProbe(browser, site) {
     recordType: 'site-probe',
     seoEndpoints: seoEndpoints.map((endpoint) => ({
       absoluteURLs: extractAdvertisedURLs(endpoint.text, endpoint.pathname),
+      advertised:
+        endpoint.pathname === '/robots.txt' || endpoint.pathname === '/sitemap.xml'
+          ? true
+          : advertisedChildPaths.includes(endpoint.pathname),
       containsForbiddenHost: forbiddenHostPattern.test(endpoint.text),
       contentLength: endpoint.contentLength,
       error: endpoint.error,
@@ -954,51 +1013,67 @@ async function inspectSiteProbe(browser, site) {
 function reviewSiteProbe(probe, site) {
   const blockers = []
   const warnings = []
-
-  if (!probe?.baseline?.ok)
-    blockers.push(`Homepage identity probe returned HTTP ${probe?.baseline?.status || 'unknown'}.`)
-  if (probe?.baseline?.bodyTheme !== site.themeKey) {
+  const addInconclusiveFinding = (label, snapshot) => {
+    if (!snapshot?.inconclusive) return false
     blockers.push(
-      `Homepage theme ${probe?.baseline?.bodyTheme || '(missing)'} does not match ${site.themeKey}.`,
+      `Environment-inconclusive: ${label} identity probe timed out after ${snapshot.attempts || 1} attempt(s): ${snapshot.error || 'timeout'}`,
     )
+    return true
   }
 
-  const expectedIdentities = (site.identityTokens?.length ? site.identityTokens : [site.label])
-    .map((value) => value.toLowerCase().replace(/[^a-z0-9]/g, ''))
-    .filter(Boolean)
-  const titleIdentity = (probe?.baseline?.title || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-  if (!expectedIdentities.some((identity) => titleIdentity.includes(identity)))
-    blockers.push(`Homepage title does not identify ${site.label}.`)
-  const brandIdentities = (probe?.baseline?.brandText || []).map((value) =>
-    value.toLowerCase().replace(/[^a-z0-9]/g, ''),
-  )
-  if (
-    !brandIdentities.some((value) =>
-      expectedIdentities.some((identity) => value.includes(identity)),
-    )
-  ) {
-    blockers.push(`Homepage visible brand mark does not identify ${site.label}.`)
-  }
-  if (forbiddenHostPattern.test(probe?.baseline?.canonical || '')) {
-    blockers.push('Homepage canonical contains a forbidden development host.')
-  } else if (probe?.baseline?.canonical) {
-    try {
-      const canonicalURL = new URL(probe.baseline.canonical)
-      const canonicalHost = canonicalURL.hostname.toLowerCase().replace(/^www\./, '')
-      if (!hostnameBelongsToSite(canonicalHost, site.publicHosts)) {
-        blockers.push(
-          `Homepage canonical hostname ${canonicalHost} does not belong to ${site.label}.`,
-        )
-      }
-      if (canonicalURL.protocol !== 'https:') blockers.push('Homepage canonical is not HTTPS.')
-    } catch {
-      blockers.push('Homepage canonical is not a valid absolute URL.')
+  const baselineInconclusive = addInconclusiveFinding('Homepage', probe?.baseline)
+  if (!baselineInconclusive) {
+    if (!probe?.baseline?.ok)
+      blockers.push(
+        `Homepage identity probe returned HTTP ${probe?.baseline?.status || 'unknown'}.`,
+      )
+    if (probe?.baseline?.bodyTheme !== site.themeKey) {
+      blockers.push(
+        `Homepage theme ${probe?.baseline?.bodyTheme || '(missing)'} does not match ${site.themeKey}.`,
+      )
     }
-  } else {
-    blockers.push('Homepage canonical is missing.')
+
+    const expectedIdentities = (site.identityTokens?.length ? site.identityTokens : [site.label])
+      .map((value) => value.toLowerCase().replace(/[^a-z0-9]/g, ''))
+      .filter(Boolean)
+    const titleIdentity = (probe?.baseline?.title || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (!expectedIdentities.some((identity) => titleIdentity.includes(identity)))
+      blockers.push(`Homepage title does not identify ${site.label}.`)
+    const brandIdentities = (probe?.baseline?.brandText || []).map((value) =>
+      value.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    )
+    if (
+      !brandIdentities.some((value) =>
+        expectedIdentities.some((identity) => value.includes(identity)),
+      )
+    ) {
+      blockers.push(`Homepage visible brand mark does not identify ${site.label}.`)
+    }
+    if (forbiddenHostPattern.test(probe?.baseline?.canonical || '')) {
+      blockers.push('Homepage canonical contains a forbidden development host.')
+    } else if (probe?.baseline?.canonical) {
+      try {
+        const canonicalURL = new URL(probe.baseline.canonical)
+        const canonicalHost = canonicalURL.hostname.toLowerCase().replace(/^www\./, '')
+        if (!hostnameBelongsToSite(canonicalHost, site.publicHosts)) {
+          blockers.push(
+            `Homepage canonical hostname ${canonicalHost} does not belong to ${site.label}.`,
+          )
+        }
+        if (canonicalURL.protocol !== 'https:') blockers.push('Homepage canonical is not HTTPS.')
+      } catch {
+        blockers.push('Homepage canonical is not a valid absolute URL.')
+      }
+    } else {
+      blockers.push('Homepage canonical is missing.')
+    }
   }
 
   for (const endpoint of probe?.seoEndpoints || []) {
+    if (endpoint.notApplicable) {
+      warnings.push(`${endpoint.pathname} is not advertised and is not applicable.`)
+      continue
+    }
     if (endpoint.status !== 200) {
       blockers.push(`${endpoint.pathname} returned HTTP ${endpoint.status || 'unknown'}.`)
     }
@@ -1066,32 +1141,34 @@ function reviewSiteProbe(probe, site) {
       )
   }
 
-  const headers = probe?.baseline?.headers || {}
-  const requiredHeaders = [
-    'x-content-type-options',
-    'referrer-policy',
-    'permissions-policy',
-    'cross-origin-opener-policy',
-    'cross-origin-resource-policy',
-  ]
-  const headerFindings = []
-  for (const header of requiredHeaders) {
-    if (!headers[header]) headerFindings.push(`Security header ${header} is missing.`)
+  if (!baselineInconclusive) {
+    const headers = probe?.baseline?.headers || {}
+    const requiredHeaders = [
+      'x-content-type-options',
+      'referrer-policy',
+      'permissions-policy',
+      'cross-origin-opener-policy',
+      'cross-origin-resource-policy',
+    ]
+    const headerFindings = []
+    for (const header of requiredHeaders) {
+      if (!headers[header]) headerFindings.push(`Security header ${header} is missing.`)
+    }
+    const csp =
+      headers['content-security-policy'] || headers['content-security-policy-report-only'] || ''
+    if (!csp) headerFindings.push('Content Security Policy is missing.')
+    if (!headers['x-frame-options'] && !/frame-ancestors/i.test(csp)) {
+      headerFindings.push('Frame embedding protection is missing.')
+    }
+    if (
+      routingMode === 'domain' &&
+      new URL(baseURL).protocol === 'https:' &&
+      !headers['strict-transport-security']
+    ) {
+      headerFindings.push('Security header strict-transport-security is missing.')
+    }
+    ;(routingMode === 'domain' ? blockers : warnings).push(...headerFindings)
   }
-  const csp =
-    headers['content-security-policy'] || headers['content-security-policy-report-only'] || ''
-  if (!csp) headerFindings.push('Content Security Policy is missing.')
-  if (!headers['x-frame-options'] && !/frame-ancestors/i.test(csp)) {
-    headerFindings.push('Frame embedding protection is missing.')
-  }
-  if (
-    routingMode === 'domain' &&
-    new URL(baseURL).protocol === 'https:' &&
-    !headers['strict-transport-security']
-  ) {
-    headerFindings.push('Security header strict-transport-security is missing.')
-  }
-  ;(routingMode === 'domain' ? blockers : warnings).push(...headerFindings)
 
   for (const [name, candidate] of [
     ['site query-string', probe?.siteQueryInjection],
@@ -1099,12 +1176,16 @@ function reviewSiteProbe(probe, site) {
     ['x-site-code header', probe?.siteHeaderInjection],
     ['internal-header bundle', probe?.internalHeaderInjection],
   ]) {
+    if (addInconclusiveFinding(name, candidate)) continue
     if ([400, 403, 404].includes(candidate?.status)) continue
     if (!candidate?.ok) {
       blockers.push(
         `${name} tenant-injection probe failed with HTTP ${candidate?.status || 'unknown'}.`,
       )
-    } else if (identityFingerprint(candidate) !== identityFingerprint(probe.baseline)) {
+    } else if (
+      !baselineInconclusive &&
+      identityFingerprint(candidate) !== identityFingerprint(probe.baseline)
+    ) {
       blockers.push(`${name} tenant-injection probe changed the rendered site identity.`)
     }
   }
@@ -1684,7 +1765,10 @@ export {
   checkpointScope,
   checkpointVersion,
   deriveSiteDecision,
+  extractAdvertisedSitemapURLs,
   extractAdvertisedURLs,
+  buildSitemapProbePaths,
+  hasDirectContactMethod,
   hostnameBelongsToSite,
   hasStrongCTA,
   identityFingerprint,
@@ -1694,6 +1778,7 @@ export {
   parseRequestedPaths,
   positiveInteger,
   reviewSiteProbe,
+  reviewContent,
   runPool,
   withTimeout,
 }
