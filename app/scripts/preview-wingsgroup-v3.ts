@@ -17,6 +17,22 @@ import {
 const option = (argv: string[], name: string): string | undefined =>
   argv.find((argument) => argument.startsWith(`--${name}=`))?.slice(name.length + 3)
 
+const loopbackHost = (value: string | undefined): string => {
+  const host = value || '127.0.0.1'
+  if (!['127.0.0.1', '::1', 'localhost'].includes(host)) {
+    throw new Error('--hostname must be a loopback host for the local E09 preview.')
+  }
+  return host
+}
+
+const localPort = (value: string | undefined): string | undefined => {
+  if (!value) return undefined
+  if (!/^\d+$/u.test(value) || Number(value) < 1 || Number(value) > 65535) {
+    throw new Error('--port must be a valid TCP port.')
+  }
+  return value
+}
+
 const runChild = (
   command: string,
   args: string[],
@@ -36,6 +52,8 @@ const main = async () => {
   const argv = process.argv.slice(2)
   const assetsDirectory = option(argv, 'assets-dir')
   if (!assetsDirectory) throw new Error('--assets-dir is required.')
+  const hostname = loopbackHost(option(argv, 'hostname'))
+  const port = localPort(option(argv, 'port'))
 
   let store: WingsGroupLocalPreviewStore | undefined
   try {
@@ -67,7 +85,11 @@ const main = async () => {
     if (seedStatus !== 0) process.exitCode = seedStatus
     if (seedStatus !== 0) return
 
-    await runChild('node_modules/next/dist/bin/next', ['dev'], environment)
+    // Webpack keeps this portable local preview independent of any prior
+    // Turbopack cache location (including a cache symlink from another run).
+    const nextArgs = ['dev', '--webpack', '--hostname', hostname]
+    if (port) nextArgs.push('--port', port)
+    await runChild('node_modules/next/dist/bin/next', nextArgs, environment)
   } finally {
     await store?.close()
   }
