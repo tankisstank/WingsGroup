@@ -6,6 +6,8 @@ import test from 'node:test'
 
 import {
   appendJSONLine,
+  buildExplicitRouteInventory,
+  classifyExpectedConsoleError,
   checkpointScope,
   checkpointVersion,
   deriveSiteDecision,
@@ -13,8 +15,10 @@ import {
   hostnameBelongsToSite,
   hasStrongCTA,
   identityFingerprint,
+  isProtectedInventoryError,
   normalizeHostname,
   parseCheckpoint,
+  parseRequestedPaths,
   positiveInteger,
   reviewSiteProbe,
   runPool,
@@ -69,6 +73,69 @@ test('positiveInteger rejects values that could silently disable the worker pool
   assert.equal(positiveInteger('4', 1, 'concurrency'), 4)
   assert.throws(() => positiveInteger('NaN', 4, 'concurrency'), /concurrency must be an integer/)
   assert.throws(() => positiveInteger('0', 4, 'concurrency'), /concurrency must be an integer/)
+})
+
+test('explicit route inventory deduplicates requested paths for protected page APIs', () => {
+  assert.deepEqual(parseRequestedPaths('/, /lien-he,/lien-he, /chinh-sach-bao-mat'), [
+    '/',
+    '/lien-he',
+    '/chinh-sach-bao-mat',
+  ])
+  assert.equal(isProtectedInventoryError(new Error('403 Forbidden: /api/pages')), true)
+  assert.equal(isProtectedInventoryError(new Error('500 Internal Server Error')), false)
+
+  const routes = buildExplicitRouteInventory({ key: 'wingsgroup', pathPrefix: '' }, [
+    '/',
+    '/lien-he',
+    '/chinh-sach-bao-mat',
+  ])
+  assert.deepEqual(
+    routes.map(({ pathname, purpose, routePath, source }) => ({
+      pathname,
+      purpose,
+      routePath,
+      source,
+    })),
+    [
+      { pathname: '/', purpose: 'homepage', routePath: '/', source: 'explicit-route' },
+      {
+        pathname: '/lien-he',
+        purpose: 'lead-contact',
+        routePath: '/lien-he',
+        source: 'explicit-route',
+      },
+      {
+        pathname: '/chinh-sach-bao-mat',
+        purpose: 'trust',
+        routePath: '/chinh-sach-bao-mat',
+        source: 'explicit-route',
+      },
+    ],
+  )
+})
+
+test('console review preserves genuine errors while classifying known local gate noise', () => {
+  assert.equal(
+    classifyExpectedConsoleError(
+      "WebSocket connection to 'ws://127.0.0.1:4489/_next/webpack-hmr?id=abc' failed",
+      'webpack-internal://next-dev/web-socket.js',
+    ),
+    'next-dev-hmr',
+  )
+  assert.equal(
+    classifyExpectedConsoleError(
+      'Failed to load resource: the server responded with a status of 403 (Forbidden)',
+      'http://127.0.0.1:4489/api/media/file/pending.jpg',
+    ),
+    'protected-api-denial',
+  )
+  assert.equal(
+    classifyExpectedConsoleError(
+      'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+      'http://127.0.0.1:4489/api/media/file/pending.jpg',
+    ),
+    null,
+  )
 })
 
 test('runPool enforces its concurrency bound and visits every task once', async () => {
@@ -218,7 +285,9 @@ test('site probe accepts either the WingSide brand or its public domain identity
   }
   probe.seoEndpoints = probe.seoEndpoints.map((endpoint) => ({
     ...endpoint,
-    absoluteURLs: endpoint.absoluteURLs.map((url) => url.replaceAll('wingsgroup.vn', 'wingside.vn')),
+    absoluteURLs: endpoint.absoluteURLs.map((url) =>
+      url.replaceAll('wingsgroup.vn', 'wingside.vn'),
+    ),
   }))
 
   const review = reviewSiteProbe(probe, wingSideSite)

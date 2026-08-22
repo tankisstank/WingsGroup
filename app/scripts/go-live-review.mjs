@@ -22,6 +22,28 @@ const baseURL =
   'http://localhost:3000'
 const selectedSite = args.get('site') || process.env.GO_LIVE_SITE || ''
 const selectedPath = args.get('path') || process.env.GO_LIVE_PATH || ''
+const parseRequestedPaths = (value) => [
+  ...new Set(
+    String(value || '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
+  ),
+]
+const isProtectedInventoryError = (error) => /^(?:401|403)\b/.test(error?.message || '')
+const classifyExpectedConsoleError = (message, location = '') => {
+  if (/webpack-hmr|hot-reloader\/app\/web-socket/i.test(message)) return 'next-dev-hmr'
+  if (
+    /Failed to load resource: the server responded with a status of 403/i.test(message) &&
+    /\/api\/(?:lead-submissions|media\/file|pages|posts|site-settings)(?:[/?]|$)/i.test(location)
+  ) {
+    return 'protected-api-denial'
+  }
+  return null
+}
+const selectedPaths = parseRequestedPaths(
+  [selectedPath, args.get('paths') || process.env.GO_LIVE_PATHS || ''].filter(Boolean).join(','),
+)
 const positiveInteger = (value, fallback, name, minimum = 1) => {
   const parsed = Number(value ?? fallback)
   if (!Number.isSafeInteger(parsed) || parsed < minimum) {
@@ -180,7 +202,7 @@ const checkpointScope = JSON.stringify({
   baseURL: new URL(baseURL).origin,
   publicOrigin: publicOrigin || null,
   routingMode,
-  selectedPath: selectedPath || null,
+  selectedPaths: selectedPaths.length ? selectedPaths : null,
   sites: selectedSites.map((site) => site.key),
   version: checkpointVersion,
 })
@@ -209,6 +231,24 @@ const joinRoute = (prefix, pathname) => {
   if (nextPrefix === '/') return nextPath
   return `${nextPrefix}${nextPath === '/' ? '' : nextPath}`.replace(/\/+/g, '/')
 }
+
+const buildExplicitRouteInventory = (site, paths, routePrefix = '') =>
+  paths.map((pathname) => {
+    const normalizedPathname = normalizePath(
+      pathname.startsWith(site.pathPrefix) && site.pathPrefix
+        ? pathname.slice(site.pathPrefix.length) || '/'
+        : pathname,
+    )
+    return {
+      id: `${site.key}-${slugify(normalizedPathname)}`,
+      pathname: normalizedPathname,
+      purpose: classifyPurpose(normalizedPathname, normalizedPathname),
+      routePath: joinRoute(routePrefix, normalizedPathname),
+      source: 'explicit-route',
+      status: 'published',
+      title: normalizedPathname === '/' ? 'Homepage' : normalizedPathname,
+    }
+  })
 
 const relationId = (value) => {
   if (!value) return null
@@ -337,13 +377,18 @@ const worstStatus = (...statuses) =>
   )
 
 async function loadInventory() {
-  const pagesData = await fetchJSON(`${baseURL}/api/pages?limit=1000&depth=1`)
-  const pages = pagesData.docs || []
+  let pages = null
+  try {
+    const pagesData = await fetchJSON(`${baseURL}/api/pages?limit=1000&depth=1`)
+    pages = pagesData.docs || []
+  } catch (error) {
+    if (!selectedPaths.length || !isProtectedInventoryError(error)) throw error
+  }
 
   return selectedSites
     .map((site) => {
       const routePrefix = routingMode === 'path' ? site.pathPrefix : ''
-      const docs = pages
+      const docs = (pages || [])
         .filter((doc) => {
           if (doc.site && typeof doc.site === 'object') {
             const code = String(doc.site.code || '').toLowerCase()
@@ -366,11 +411,23 @@ async function loadInventory() {
             status: doc._status || 'published',
           }
         })
+      const explicitDocs = buildExplicitRouteInventory(site, selectedPaths, routePrefix)
+      const routeDocs = [
+        ...docs,
+        ...explicitDocs.filter(
+          (explicitDoc) =>
+            !docs.some(
+              (doc) =>
+                normalizePath(doc.routePath) === normalizePath(explicitDoc.routePath) ||
+                normalizePath(doc.pathname) === normalizePath(explicitDoc.pathname),
+            ),
+        ),
+      ]
 
-      const seen = new Set(docs.map((doc) => doc.pathname))
+      const seen = new Set(routeDocs.map((doc) => doc.pathname))
       for (const route of [...extraRoutes, ...(site.requiredRoutes || [])]) {
         if (!seen.has(route.pathname)) {
-          docs.push({
+          routeDocs.push({
             ...route,
             id: `${site.key}-${route.pathname}`,
             routePath: joinRoute(routePrefix, route.pathname),
@@ -383,12 +440,15 @@ async function loadInventory() {
 
       return {
         ...site,
-        pages: docs
+        pages: routeDocs
           .filter(
             (doc) =>
-              !selectedPath ||
-              normalizePath(doc.routePath) === normalizePath(selectedPath) ||
-              normalizePath(doc.pathname) === normalizePath(selectedPath),
+              !selectedPaths.length ||
+              selectedPaths.some(
+                (pathValue) =>
+                  normalizePath(doc.routePath) === normalizePath(pathValue) ||
+                  normalizePath(doc.pathname) === normalizePath(pathValue),
+              ),
           )
           .sort((left, right) => left.routePath.localeCompare(right.routePath, 'vi')),
       }
@@ -398,10 +458,18 @@ async function loadInventory() {
 
 async function inspectPage(page, target, mode, screenshotPath) {
   const consoleErrors = []
+  const expectedConsoleErrors = []
   const pageErrors = []
 
   page.on('console', (message) => {
-    if (message.type() === 'error') consoleErrors.push(message.text())
+    if (message.type() !== 'error') return
+    const text = message.text()
+    const expectedReason = classifyExpectedConsoleError(text, message.location().url)
+    if (expectedReason) {
+      expectedConsoleErrors.push({ location: message.location().url, reason: expectedReason, text })
+    } else {
+      consoleErrors.push(text)
+    }
   })
   page.on('pageerror', (error) => pageErrors.push(error.message))
 
@@ -455,6 +523,48 @@ async function inspectPage(page, target, mode, screenshotPath) {
       .filter(visible)
       .map(textOf)
       .filter(Boolean)
+    const formEvidence = Array.from(document.querySelectorAll('form')).map((form) => {
+      const preferredChannel = form.querySelector('select[name="preferredChannel"]')
+      const controls = Array.from(form.elements).map((control) => ({
+        disabled: 'disabled' in control && Boolean(control.disabled),
+        name: control.getAttribute('name') || '',
+        type: control.getAttribute('type') || control.tagName.toLowerCase(),
+      }))
+      return {
+        action: form.getAttribute('action') || '',
+        consentPresent: Boolean(form.querySelector('[role="checkbox"]')),
+        controls,
+        disabledControlCount: controls.filter((control) => control.disabled).length,
+        preferredChannelOptions: preferredChannel
+          ? Array.from(preferredChannel.options).map((option) => ({
+              disabled: option.disabled,
+              text: textOf(option),
+              value: option.value,
+            }))
+          : [],
+        submitDisabled: Boolean(form.querySelector('button[type="submit"]:disabled')),
+      }
+    })
+    const externalLinks = anchors
+      .filter(visible)
+      .map((anchor) => anchor.href)
+      .filter((href) => {
+        try {
+          const url = new URL(href, document.baseURI)
+          return ['http:', 'https:'].includes(url.protocol) && url.hostname !== location.hostname
+        } catch {
+          return false
+        }
+      })
+    const tenantPrefixedLinks = anchors
+      .map((anchor) => anchor.getAttribute('href') || '')
+      .filter((href) =>
+        /^\/(?:wingsgo|wingsside|wing-side|wingsplus|wingscare|wingspass)(?:\/|$)/i.test(href),
+      )
+    const visibleImageSources = images.filter((image) => image.visible).map((image) => image.src)
+    const crossTenantMedia = visibleImageSources.filter((src) =>
+      /\/(?:wingsgo|wingsside|wing-side|wingsplus|wingscare|wingspass)(?:\/|$)/i.test(src),
+    )
 
     return {
       title: document.title,
@@ -476,6 +586,11 @@ async function inspectPage(page, target, mode, screenshotPath) {
       visibleButtons: buttons.filter(visible).length,
       firstViewportCTA: [...firstViewportLinks, ...firstViewportButtons].slice(0, 12),
       forms: document.querySelectorAll('form').length,
+      formEvidence,
+      externalLinks,
+      tenantPrefixedLinks,
+      visibleImageSources,
+      crossTenantMedia,
       missingAltImages: images.filter((image) => image.visible && !image.alt.trim()).length,
       imageCount: images.filter((image) => image.visible).length,
       jsonLdCount: document.querySelectorAll('script[type="application/ld+json"]').length,
@@ -493,6 +608,7 @@ async function inspectPage(page, target, mode, screenshotPath) {
       .relative(path.resolve(process.cwd(), '..'), screenshotPath)
       .replaceAll('\\', '/'),
     consoleErrors,
+    expectedConsoleErrors,
     pageErrors,
     ...metrics,
   }
@@ -518,11 +634,20 @@ function reviewTechnical(result) {
   if (!result.canonical) warnings.push('Canonical URL is missing.')
   if (result.missingAltImages)
     warnings.push(`${result.missingAltImages} visible image(s) have empty alt text.`)
+  if (result.siteKey === 'wingsgroup' && result.tenantPrefixedLinks?.length) {
+    blockers.push(
+      `WingsGroup page exposes ${result.tenantPrefixedLinks.length} tenant-prefixed link(s).`,
+    )
+  }
+  if (result.siteKey === 'wingsgroup' && result.crossTenantMedia?.length) {
+    blockers.push(
+      `WingsGroup page exposes ${result.crossTenantMedia.length} cross-tenant media source(s).`,
+    )
+  }
 
   const normalizeIdentity = (value) => (value || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-  const expectedIdentities = (result.identityTokens?.length
-    ? result.identityTokens
-    : [result.siteLabel]
+  const expectedIdentities = (
+    result.identityTokens?.length ? result.identityTokens : [result.siteLabel]
   )
     .map(normalizeIdentity)
     .filter(Boolean)
@@ -1258,7 +1383,12 @@ async function main() {
   const inventory = await loadInventory()
   const checkpointData = await loadCheckpoint()
   const checkpoint = checkpointData.records
-  const browser = await chromium.launch({ headless: true })
+  const browser = await chromium.launch({
+    headless: true,
+    ...(process.env.GO_LIVE_BROWSER_EXECUTABLE_PATH
+      ? { executablePath: process.env.GO_LIVE_BROWSER_EXECUTABLE_PATH }
+      : {}),
+  })
   const pageRecords = new Map()
   const siteProbes = new Map()
   const tasks = []
@@ -1467,7 +1597,13 @@ async function main() {
             canonical: '',
             clientWidth: mode.width,
             consoleErrors: [],
+            expectedConsoleErrors: [],
             firstViewportCTA: [],
+            formEvidence: [],
+            externalLinks: [],
+            tenantPrefixedLinks: [],
+            visibleImageSources: [],
+            crossTenantMedia: [],
             h1: [],
             imageCount: 0,
             jsonLdCount: 0,
@@ -1542,6 +1678,8 @@ if (isMainModule) {
 
 export {
   appendJSONLine,
+  buildExplicitRouteInventory,
+  classifyExpectedConsoleError,
   checkpointKey,
   checkpointScope,
   checkpointVersion,
@@ -1550,8 +1688,10 @@ export {
   hostnameBelongsToSite,
   hasStrongCTA,
   identityFingerprint,
+  isProtectedInventoryError,
   normalizeHostname,
   parseCheckpoint,
+  parseRequestedPaths,
   positiveInteger,
   reviewSiteProbe,
   runPool,
