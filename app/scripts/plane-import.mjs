@@ -225,6 +225,12 @@ const STORY_TITLE_MAP = {
   'US-033': 'Seed nội dung và media WingSide',
   'US-034': 'Bằng chứng sẵn sàng phát hành WingSide',
   'US-049': 'Phân loại taxonomy tour WingSide',
+  'US-061': 'Nền tảng contract, media và fidelity WingsGroup v3',
+  'US-062': 'Fidelity homepage và UX tư vấn responsive',
+  'US-063': 'Quản trị publication, brand, proof và editorial gate',
+  'US-064': 'Consent lead-intake và consultation fallback',
+  'US-065': 'Corporate routes, legal/locale và publication governance',
+  'US-066': 'PostgreSQL, cross-tenant và go-live readiness',
 }
 
 const CHILD_TASK_TEXT = {
@@ -1580,6 +1586,12 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
       continue
     }
 
+    const epicStateId = epicConfig.planeStateOverride
+      ? (
+          await client.list(`/api/v1/workspaces/${workspaceSlug}/projects/${project.id}/states/`)
+        ).find((state) => state.name === epicConfig.planeStateOverride)?.id
+      : undefined
+
     const records = storyRecords.filter((record) => record.mapping.epicKey === epicConfig.key)
 
     const workItems = await client.list(
@@ -1610,6 +1622,7 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
             name: toPlaneItemName(epicConfig.name),
             description_html: descriptionHtml,
             priority: 'high',
+            ...(epicStateId ? { state: epicStateId } : {}),
             start_date: epicDates.startDate,
             target_date: epicDates.targetDate,
           },
@@ -1644,6 +1657,7 @@ async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
           description_html: descriptionHtml,
           priority: 'high',
           type: epicType.id,
+          ...(epicStateId ? { state: epicStateId } : {}),
           start_date: epicDates.startDate,
           target_date: epicDates.targetDate,
           external_id: `epic-workitem:${epicConfig.key}`,

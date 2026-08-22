@@ -31,3 +31,16 @@ Tiến độ được theo dõi theo 3 lớp:
 
 Trạng thái trong Plane phản ánh delivery thực tế của dự án.
 Tài liệu chi tiết và bằng chứng kỹ thuật vẫn được đối chiếu từ repo nội bộ khi cần.
+
+## E09 - Trải nghiệm public WingsGroup v3
+
+E09 đã được ghi nhận là accepted engineering trong khoảng bằng chứng
+`2026-08-14` đến `2026-08-22`. Sáu story US-061 đến US-066 được map dưới Epic
+native E09 trong project lõi WingsGroup và hiện ở trạng thái `Chờ xác nhận`;
+đây không phải là production launch.
+
+Các cổng còn mở là legal/privacy/consent, proof publication rights, brand
+token/logo, editorial media và English copy, consultation endpoint owner/SLA/
+tracking, ecosystem destination validation, cùng hai environment gate là
+disposable PostgreSQL rehearsal và Harness database. Các route, media, proof,
+English và external channel chưa đủ điều kiện vẫn giữ fail-closed.
