@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { proxy } from '@/proxy'
+import { createTrustedSiteContextHeaders, SITE_CONTEXT_TTL_SECONDS } from '@/utilities/siteDomains'
 import {
   mintWingsGroupLocalPreviewGrant,
   WINGSGROUP_LOCAL_PREVIEW_GRANT_COOKIE,
@@ -34,6 +35,23 @@ const localPreviewCookie = async (): Promise<string> => {
 
 describe('tenant proxy rewrites', () => {
   const multisiteInventory = loadMultisiteAuditInventory()
+
+  beforeEach(() => {
+    vi.stubEnv('SITE_CONTEXT_SECRET', 'proxy-test-context-secret')
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  const signedAliasHeaders = async (): Promise<Headers> =>
+    createTrustedSiteContextHeaders(new Headers({ host: 'localhost:3100' }), {
+      host: 'localhost',
+      publicPath: '/wingsgo',
+      requestID: 'proxy-test-request',
+      siteCode: 'wings-go',
+      sitePrefix: '/wingsgo',
+    })
 
   it('permanently redirects the legacy WingSide alias before tenant rewrite', async () => {
     const response = await proxy(
@@ -229,10 +247,7 @@ describe('tenant proxy rewrites', () => {
     expect(serverComponentHeaders.get('x-locale')).toBe('en')
   })
 
-  it('bounds a self-consistent alias bundle to the same local alias identity', async () => {
-    // A second Proxy invocation and a direct local request are indistinguishable.
-    // Preserving this bundle cannot escalate production tenancy: getCurrentSite
-    // remains host-first outside development and rejects host/code mismatches.
+  it('rejects a self-consistent unsigned alias bundle', async () => {
     const response = await proxy(
       new NextRequest('http://localhost:3100/', {
         headers: {
@@ -247,9 +262,88 @@ describe('tenant proxy rewrites', () => {
     )
     const headers = overriddenRequestHeaders(response)
 
-    expect(headers.get('x-site-code')).toBe('wing-side')
-    expect(headers.get('x-site-prefix')).toBe('/wing-side')
+    expect(headers.get('x-site-code')).toBeNull()
+    expect(headers.get('x-site-prefix')).toBeNull()
     expect(headers.get('x-site-host')).toBe('localhost')
+  })
+
+  it('fails closed for missing, forged, and altered context signatures', async () => {
+    const valid = await signedAliasHeaders()
+    const cases = [
+      ['missing', (headers: Headers) => headers.delete('x-site-context-signature')],
+      ['forged', (headers: Headers) => headers.set('x-site-context-signature', 'forged')],
+      ['altered', (headers: Headers) => headers.set('x-site-prefix', '/wingsgo/altered')],
+    ] as const
+
+    for (const [label, alter] of cases) {
+      const headers = new Headers(valid)
+      alter(headers)
+      const response = await proxy(
+        new NextRequest('http://localhost:3100/', {
+          headers,
+        }),
+      )
+
+      expect(overriddenRequestHeaders(response).get('x-site-code'), label).toBeNull()
+      expect(overriddenRequestHeaders(response).get('x-site-prefix'), label).toBeNull()
+    }
+  })
+
+  it('rejects an expired signed context', async () => {
+    vi.useFakeTimers()
+    try {
+      const headers = await signedAliasHeaders()
+      vi.advanceTimersByTime((SITE_CONTEXT_TTL_SECONDS + 1) * 1000)
+
+      const response = await proxy(
+        new NextRequest('http://localhost:3100/', {
+          headers,
+        }),
+      )
+
+      expect(overriddenRequestHeaders(response).get('x-site-code')).toBeNull()
+      expect(overriddenRequestHeaders(response).get('x-site-prefix')).toBeNull()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('consumes a signed context once at the internal rewrite boundary', async () => {
+    const headers = await signedAliasHeaders()
+    const firstResponse = await proxy(
+      new NextRequest('http://localhost:3100/', {
+        headers,
+      }),
+    )
+    const firstHeaders = overriddenRequestHeaders(firstResponse)
+    expect(firstHeaders.get('x-site-code')).toBe('wings-go')
+
+    const replayResponse = await proxy(
+      new NextRequest('http://localhost:3100/', {
+        headers,
+      }),
+    )
+    const replayHeaders = overriddenRequestHeaders(replayResponse)
+    expect(replayHeaders.get('x-site-code')).toBeNull()
+    expect(replayHeaders.get('x-site-prefix')).toBeNull()
+  })
+
+  it('routes a preserved tenant media destination through governed Payload handling', async () => {
+    const publicResponse = await proxy(
+      new NextRequest('http://localhost:3100/wingsgo/media/e09-pending.jpg', {
+        headers: { host: 'localhost:3100' },
+      }),
+    )
+    const rewrittenHeaders = overriddenRequestHeaders(publicResponse)
+    const internalResponse = await proxy(
+      new NextRequest('http://localhost:3100/media/e09-pending.jpg', {
+        headers: rewrittenHeaders,
+      }),
+    )
+
+    expect(internalResponse.headers.get('x-middleware-rewrite')).toBe(
+      'http://localhost:3100/api/media/file/e09-pending.jpg',
+    )
   })
 
   it('prefers a public browser hostname over a local dev listener host when they differ', async () => {

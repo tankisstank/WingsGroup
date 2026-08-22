@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -22,6 +22,7 @@ import {
   invalidateSiteContextCache,
 } from '@/utilities/siteContext'
 import { Sites } from '@/collections/Sites'
+import { createTrustedSiteContextHeaders } from '@/utilities/siteDomains'
 
 const sites = [
   {
@@ -51,13 +52,17 @@ const sites = [
 ]
 
 const trustedHeaders = (values: Record<string, string> = {}) =>
-  new Headers({
-    'x-site-context-source': 'proxy',
-    ...values,
+  createTrustedSiteContextHeaders(new Headers(), {
+    host: values['x-site-host'] || 'localhost',
+    locale: values['x-locale'],
+    publicPath: values['x-public-path'] || '/',
+    siteCode: values['x-site-code'],
+    sitePrefix: values['x-site-prefix'],
   })
 
 describe('site context security', () => {
   beforeEach(() => {
+    vi.stubEnv('SITE_CONTEXT_SECRET', 'site-context-security-test-secret')
     invalidateSiteContextCache()
     mocks.notFound.mockClear()
     mocks.headers.mockReset()
@@ -71,6 +76,10 @@ describe('site context security', () => {
     })
   })
 
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it('ignores client-supplied tenant headers without trusted proxy context', async () => {
     mocks.headers.mockResolvedValue(
       new Headers({
@@ -82,26 +91,39 @@ describe('site context security', () => {
     await expect(getCurrentSite()).resolves.toMatchObject({ code: 'wings-group' })
   })
 
+  it('ignores a self-consistent proxy bundle without a valid signature', async () => {
+    mocks.headers.mockResolvedValue(
+      new Headers({
+        'x-site-code': 'wings-go',
+        'x-site-context-source': 'proxy',
+        'x-site-host': 'localhost',
+        'x-site-prefix': '/wingsgo',
+      }),
+    )
+
+    await expect(getCurrentSite()).resolves.toMatchObject({ code: 'wings-group' })
+  })
+
   it('accepts a known route site code only from trusted proxy context', async () => {
-    mocks.headers.mockResolvedValue(trustedHeaders({ 'x-site-code': 'wings-go' }))
+    mocks.headers.mockResolvedValue(await trustedHeaders({ 'x-site-code': 'wings-go' }))
 
     await expect(getCurrentSite()).resolves.toMatchObject({ code: 'wings-go' })
   })
 
   it('resolves an allowed production host through the trusted proxy context', async () => {
-    mocks.headers.mockResolvedValue(trustedHeaders({ 'x-site-host': 'wingsgo.vn' }))
+    mocks.headers.mockResolvedValue(await trustedHeaders({ 'x-site-host': 'wingsgo.vn' }))
 
     await expect(getCurrentSite()).resolves.toMatchObject({ code: 'wings-go' })
   })
 
   it('resolves wingside.vn to the WingSide tenant', async () => {
-    mocks.headers.mockResolvedValue(trustedHeaders({ 'x-site-host': 'wingside.vn' }))
+    mocks.headers.mockResolvedValue(await trustedHeaders({ 'x-site-host': 'wingside.vn' }))
 
     await expect(getCurrentSite()).resolves.toMatchObject({ code: 'wing-side', id: 3 })
   })
 
   it('fails closed for an unknown trusted host', async () => {
-    mocks.headers.mockResolvedValue(trustedHeaders({ 'x-site-host': 'attacker.example' }))
+    mocks.headers.mockResolvedValue(await trustedHeaders({ 'x-site-host': 'attacker.example' }))
 
     await expect(getCurrentSite()).rejects.toThrow('NEXT_NOT_FOUND')
     expect(mocks.notFound).toHaveBeenCalledOnce()
@@ -109,7 +131,7 @@ describe('site context security', () => {
 
   it('fails closed when a deployed host conflicts with a path alias', async () => {
     mocks.headers.mockResolvedValue(
-      trustedHeaders({
+      await trustedHeaders({
         'x-site-code': 'wings-go',
         'x-site-host': 'wingsgroup.vn',
       }),
@@ -128,7 +150,7 @@ describe('site context security', () => {
 
     invalidateSiteContextCache()
     mocks.headers.mockResolvedValue(
-      trustedHeaders({
+      await trustedHeaders({
         'x-locale': 'en',
         'x-site-code': 'wings-go',
       }),
@@ -137,7 +159,7 @@ describe('site context security', () => {
   })
 
   it('always adds the resolved site constraint to collection queries', async () => {
-    mocks.headers.mockResolvedValue(trustedHeaders({ 'x-site-code': 'wings-go' }))
+    mocks.headers.mockResolvedValue(await trustedHeaders({ 'x-site-code': 'wings-go' }))
 
     await expect(
       appendSiteWhere({

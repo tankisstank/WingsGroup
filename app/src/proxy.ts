@@ -7,7 +7,11 @@ import {
   getSiteAliasFromPathname,
 } from '@/utilities/sitePaths'
 import { isPublicLocale } from '@/utilities/locales'
-import { createTrustedSiteContextHeaders, normalizeHost } from '@/utilities/siteDomains'
+import {
+  createTrustedSiteContextHeaders,
+  hasValidTrustedSiteContext,
+  normalizeHost,
+} from '@/utilities/siteDomains'
 import { hasWingsGroupLocalPreviewGrant } from '@/wingsgroup/localPreview'
 
 const stripLeadingSegments = (pathname: string, count: number) => {
@@ -81,7 +85,7 @@ const isEquivalentPreservedHost = (preservedHost: null | string, currentHost: nu
   return localBootstrapHosts.has(preservedHost) && localBootstrapHosts.has(currentHost)
 }
 
-const getPreservedRewriteContext = (request: NextRequest): Headers | null => {
+const getPreservedRewriteContext = async (request: NextRequest): Promise<Headers | null> => {
   if (request.headers.get('x-site-context-source') !== 'proxy') return null
 
   const publicPath = request.headers.get('x-public-path')
@@ -112,7 +116,47 @@ const getPreservedRewriteContext = (request: NextRequest): Headers | null => {
     return null
   }
 
+  if (!(await hasValidTrustedSiteContext(request.headers, { consumeReplayToken: true }))) {
+    return null
+  }
+
   return new Headers(request.headers)
+}
+
+const isMediaPath = (pathname: string): boolean =>
+  pathname === '/media' || pathname.startsWith('/media/')
+
+const getMediaFilename = (pathname: string): string | null => {
+  if (!isMediaPath(pathname)) return null
+
+  const filename = pathname.slice('/media/'.length)
+  if (
+    !filename ||
+    filename === '.' ||
+    filename === '..' ||
+    filename.includes('/') ||
+    filename.includes('\\')
+  ) {
+    return ''
+  }
+
+  return filename
+}
+
+const rewriteMediaRequest = (request: NextRequest, requestHeaders: Headers): NextResponse => {
+  const filename = getMediaFilename(request.nextUrl.pathname)
+  if (!filename) return notFoundResponse()
+
+  const url = request.nextUrl.clone()
+  url.pathname = `/api/media/file/${filename}`
+  const response = NextResponse.rewrite(url, {
+    request: {
+      headers: requestHeaders,
+    },
+  })
+  const requestID = requestHeaders.get('x-request-id')
+  if (requestID) response.headers.set('X-Request-ID', requestID)
+  return response
 }
 
 export async function proxy(request: NextRequest) {
@@ -134,9 +178,13 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
-  const preservedRewriteContext = getPreservedRewriteContext(request)
+  const preservedRewriteContext = await getPreservedRewriteContext(request)
 
   if (preservedRewriteContext) {
+    if (isMediaPath(request.nextUrl.pathname)) {
+      return rewriteMediaRequest(request, preservedRewriteContext)
+    }
+
     const response = NextResponse.next({ request: { headers: preservedRewriteContext } })
     const requestID = preservedRewriteContext.get('x-request-id')
     if (requestID) response.headers.set('X-Request-ID', requestID)
@@ -208,27 +256,8 @@ export async function proxy(request: NextRequest) {
   // Payload's upload directory is physically public, so route media URLs back
   // through Payload's governed file handler. This keeps anonymous requests
   // subject to the same publication gate as /api/media/file/*.
-  if (request.nextUrl.pathname === '/media' || request.nextUrl.pathname.startsWith('/media/')) {
-    const filename = request.nextUrl.pathname.slice('/media/'.length)
-    if (
-      !filename ||
-      filename === '.' ||
-      filename === '..' ||
-      filename.includes('/') ||
-      filename.includes('\\')
-    ) {
-      return notFoundResponse()
-    }
-
-    const url = request.nextUrl.clone()
-    url.pathname = `/api/media/file/${filename}`
-    return withRequestID(
-      NextResponse.rewrite(url, {
-        request: {
-          headers: requestHeaders,
-        },
-      }),
-    )
+  if (isMediaPath(request.nextUrl.pathname)) {
+    return withRequestID(rewriteMediaRequest(request, requestHeaders))
   }
 
   if (!siteAlias) {

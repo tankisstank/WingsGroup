@@ -13,6 +13,12 @@ import {
   hasValidTrustedSiteContext,
   requestHostCandidates,
 } from '@/utilities/siteDomains'
+import {
+  allSiteAliasToCodeMap,
+  getLocaleFromPathname,
+  getSiteAliasFromPathname,
+  isPublicLocale,
+} from '@/utilities/sitePaths'
 
 type SiteScopedData = {
   id: RelationID
@@ -135,11 +141,19 @@ const getPublicMediaWhere = async (req: PayloadRequest): Promise<Where | false> 
   if (!isExternalHTTPRequest(req)) return publicMediaWhere
 
   const publicPath = req.headers.get('x-public-path') || ''
+  const publicAlias = getSiteAliasFromPathname(publicPath)
+  const publicLocale = getLocaleFromPathname(publicPath)
+  const pathSegments = publicPath.split('/').filter(Boolean)
+  const pathOffset = publicAlias ? (publicLocale ? 2 : 1) : publicLocale ? 1 : 0
+  const mediaPath = `/${pathSegments.slice(pathOffset).join('/')}`
+  const contextSiteCode = req.headers.get('x-site-code') || null
   if (
-    !publicPath.startsWith('/media/') ||
-    publicPath.slice('/media/'.length).includes('/') ||
-    publicPath.slice('/media/'.length).includes('\\') ||
-    ['.', '..'].includes(publicPath.slice('/media/'.length)) ||
+    !mediaPath.startsWith('/media/') ||
+    mediaPath.slice('/media/'.length).includes('/') ||
+    mediaPath.slice('/media/'.length).includes('\\') ||
+    ['.', '..'].includes(mediaPath.slice('/media/'.length)) ||
+    (publicLocale && !isPublicLocale(publicLocale)) ||
+    (publicAlias && contextSiteCode !== allSiteAliasToCodeMap[publicAlias]) ||
     !(await hasValidTrustedSiteContext(req.headers))
   ) {
     return false
