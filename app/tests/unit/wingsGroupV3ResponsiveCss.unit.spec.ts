@@ -38,8 +38,17 @@ describe('WingsGroup v3 responsive CSS contract', () => {
   it('keeps RelatedPages outside the fixed WingsGroup v3 home composition', () => {
     const source = fs.readFileSync(cmsPage, 'utf8')
 
+    expect(source).toContain("useWingsGroupV3Home ? 'wingsgroup-v3-home' : ''")
     expect(source).toContain(
       '!useWingsGroupV3Home ? <RelatedPages locale={locale} pages={relatedPages} /> : null',
+    )
+  })
+
+  it('uses the V3 article class as the spacing boundary in the shell', () => {
+    const css = fs.readFileSync(shellCss, 'utf8')
+
+    expect(css).toMatch(
+      /body\[data-site-code='wings-group'\]\[data-wingsgroup-v3='true'\][\s\S]*?article\.wingsgroup-v3-home\s*\{[\s\S]*?padding-bottom:\s*0;[\s\S]*?padding-top:\s*0;/,
     )
   })
 })

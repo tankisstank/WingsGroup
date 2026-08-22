@@ -5,6 +5,7 @@
  */
 import 'dotenv/config'
 
+import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { createLocalReq, getPayload } from 'payload'
@@ -22,6 +23,13 @@ import {
   WINGSGROUP_PRIVACY_VERSION,
 } from '../src/lead-capture/wingsGroupV3'
 import { resolveLocalDatabaseURL } from '../src/utilities/localDatabase'
+import { isRunOwnedLocalPreviewPath } from '../src/utilities/localPreviewMedia'
+import {
+  assertApplicableWingsGroupV3MediaPlan,
+  buildWingsGroupV3MediaPlan,
+  parseWingsGroupV3MediaManifest,
+} from './lib/wingsGroupV3MediaPlan'
+import { seedWingsGroupV3PreviewMedia } from './lib/wingsGroupV3PreviewMediaSeed'
 
 export const WINGSGROUP_PREVIEW_MEDIA_FILENAMES = [
   'wingsgroup-hero-discovery-guide.png',
@@ -83,6 +91,39 @@ export const WINGSGROUP_PREVIEW_CONTACT_FIELDS = [
 ] as const
 
 const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL)
+const defaultManifestPath = path.resolve(
+  process.cwd(),
+  '../docs/product/wingsgroup-v3-media-manifest.json',
+)
+
+export const parseWingsGroupV3PreviewSeedCommand = (argv: string[]) => {
+  const option = (name: string): string | undefined =>
+    argv.find((argument) => argument.startsWith(`--${name}=`))?.slice(name.length + 3)
+  const apply = argv.includes('--apply')
+  const assetsDirectory = option('assets-dir')
+  if (apply && !assetsDirectory) {
+    throw new Error('--assets-dir is required with --apply.')
+  }
+  return {
+    apply,
+    assetsDirectory: assetsDirectory ? path.resolve(assetsDirectory) : null,
+    manifestPath: path.resolve(option('manifest') || defaultManifestPath),
+  }
+}
+
+export const assertRunOwnedWingsGroupPreviewDatabase = (value: string): string => {
+  const databasePath = path.resolve(value.replace(/^file:/, ''))
+  if (
+    !isRunOwnedLocalPreviewPath(databasePath) ||
+    path.basename(databasePath) !== 'e09-preview.db' ||
+    !path.basename(path.dirname(databasePath)).startsWith('e09-preview-')
+  ) {
+    throw new Error(
+      'This preview seed is restricted to e09-preview.db inside a run-owned /tmp or /dev/shm e09-preview-* directory.',
+    )
+  }
+  return databasePath
+}
 
 const lexical = (heading: string, paragraph: string) => ({
   root: {
@@ -137,14 +178,15 @@ const lexical = (heading: string, paragraph: string) => ({
 const sourceFile = (value: string) => value
 
 const main = async () => {
-  const apply = process.argv.includes('--apply')
-  if (!apply) {
+  const command = parseWingsGroupV3PreviewSeedCommand(process.argv.slice(2))
+  if (!command.apply) {
     console.log(
       JSON.stringify(
         {
           apply: false,
           databaseURL,
           expected: 'file:./e09-preview.db',
+          manifestPath: command.manifestPath,
           layout: ['ecosystem', 'trust', 'proof', 'editorial', 'contact'],
         },
         null,
@@ -154,14 +196,13 @@ const main = async () => {
     return
   }
 
-  if (
-    !databaseURL.startsWith('file:') ||
-    !path.basename(databaseURL.replace(/^file:/, '')).includes('e09-preview')
-  ) {
-    throw new Error(
-      'This preview seed is restricted to the run-owned e09-preview.db SQLite database.',
-    )
-  }
+  const databasePath = assertRunOwnedWingsGroupPreviewDatabase(databaseURL)
+  const assetsDirectory = command.assetsDirectory!
+  const manifest = parseWingsGroupV3MediaManifest(
+    JSON.parse(await fs.readFile(command.manifestPath, 'utf8')),
+  )
+  const plan = await buildWingsGroupV3MediaPlan({ assetsDirectory, manifest })
+  assertApplicableWingsGroupV3MediaPlan(plan)
 
   const payload = await getPayload({ config })
   try {
@@ -203,8 +244,35 @@ const main = async () => {
     req.context = {
       ...(req.context || {}),
       disableRevalidate: true,
+      e09PreviewMediaSeed: true,
       [WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT]: true,
     }
+
+    const mediaDirectory = process.env.E09_PREVIEW_MEDIA_DIRECTORY?.trim()
+    if (!mediaDirectory || process.env.E09_PREVIEW_MEDIA_SEED !== 'true') {
+      throw new Error(
+        'Set E09_PREVIEW_MEDIA_SEED=true and E09_PREVIEW_MEDIA_DIRECTORY to a run-owned media directory.',
+      )
+    }
+    if (
+      !isRunOwnedLocalPreviewPath(mediaDirectory) ||
+      !path.basename(path.dirname(path.resolve(mediaDirectory))).startsWith('e09-preview-')
+    ) {
+      throw new Error(
+        'E09 preview media must be stored under a run-owned /tmp or /dev/shm e09-preview-* directory.',
+      )
+    }
+    await fs.mkdir(mediaDirectory, { recursive: true })
+
+    const mediaSeed = await seedWingsGroupV3PreviewMedia({
+      assetsDirectory,
+      manifest,
+      mediaDirectory,
+      payload,
+      plan,
+      req,
+      siteID: site.id,
+    })
 
     const mediaResult = await payload.find({
       collection: 'media',
@@ -518,7 +586,9 @@ const main = async () => {
           apply: true,
           pageID: 1,
           siteCode: WINGSGROUP_SITE_CODE,
-          mediaCount: mediaBySource.size,
+          databasePath,
+          mediaCount: mediaSeed.verified,
+          mediaSeed,
           contactFormID: contactForm.id,
           layout: ['ecosystem', 'trust', 'proof', 'editorial', 'contact'],
         },

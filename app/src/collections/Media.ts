@@ -9,9 +9,6 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
 import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, wingsGroupMediaReadAccess } from '@/access/siteScope'
 import { siteField } from '@/fields/site'
@@ -21,9 +18,11 @@ import {
   revalidateWingSideDiscoveryForTourDependency,
 } from '@/collections/Tours/hooks/revalidateTourContent'
 import { mediaGovernanceField, validateGovernedMediaBeforeChange } from '@/fields/wingsGroupV3'
+import { resolveWingsGroupLocalPreviewMediaDirectory } from '@/utilities/localPreviewMedia'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const mediaStaticDir = resolveWingsGroupLocalPreviewMediaDirectory(
+  process.env.E09_PREVIEW_MEDIA_DIRECTORY,
+)
 
 const revalidateCuratedTourMedia: CollectionAfterChangeHook = async ({
   doc,
@@ -89,8 +88,8 @@ export const Media: CollectionConfig = {
     singular: adminLabel('Media', 'Media'),
   },
   upload: {
-    // Upload to the public/media directory in Next.js making them publicly accessible even outside of Payload
-    staticDir: path.resolve(dirname, '../../public/media'),
+    // Keep the normal public/media default, with an explicit run-owned local-preview override.
+    staticDir: mediaStaticDir,
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     imageSizes:

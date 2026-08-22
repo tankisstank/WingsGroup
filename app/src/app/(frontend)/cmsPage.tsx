@@ -245,6 +245,7 @@ export async function renderCmsPageByPath({
     requestedPath === '/' &&
     settings?.wingsGroupV3?.enabled === true &&
     isWingsGroupV3HomeLayout(page.layout)
+  const isWingsGroupV3LocalPreview = draft && useWingsGroupV3Home
   const wingsGroupRoute =
     site.code === 'wings-group' && settings?.wingsGroupV3?.enabled === true
       ? getWingsGroupRouteDefinition(requestedPath)
@@ -252,10 +253,13 @@ export async function renderCmsPageByPath({
 
   return (
     <article
-      className={
-        useHiFiBody ? 'pb-16 md:pb-20' : isStructuredTour ? 'pb-16 md:pb-20' : 'pt-16 pb-24'
-      }
-      data-hifi-body={useHiFiBody ? 'true' : 'false'}
+      className={[
+        useWingsGroupV3Home ? 'wingsgroup-v3-home' : '',
+        useHiFiBody ? 'pb-16 md:pb-20' : isStructuredTour ? 'pb-16 md:pb-20' : 'pt-16 pb-24',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      data-hifi-body={useHiFiBody || isWingsGroupV3LocalPreview ? 'true' : 'false'}
       data-wingsgroup-v3-home={useWingsGroupV3Home ? 'true' : 'false'}
       data-wingsgroup-v3-route={wingsGroupRoute?.archetype}
     >

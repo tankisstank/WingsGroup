@@ -36,8 +36,7 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-mobile-nav__
   min-height: 48px;
 }
 
-body[data-site-code='wings-group'][data-wingsgroup-v3='true']
-  article[data-wingsgroup-v3-home='true'] {
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] article.wingsgroup-v3-home {
   padding-bottom: 0;
   padding-top: 0;
 }
