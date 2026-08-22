@@ -562,6 +562,8 @@ const main = async () => {
       JSON.stringify(
         {
           apply: true,
+          previewCapability: previewIsolation.capability,
+          previewCapabilityExpiresAt: new Date(previewIsolation.capabilityExpiresAt).toISOString(),
           pageID: 1,
           siteCode: WINGSGROUP_SITE_CODE,
           databasePath,
