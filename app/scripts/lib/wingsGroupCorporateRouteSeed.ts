@@ -876,6 +876,7 @@ export const seedWingsGroupCorporateRoutes = async ({
       slug,
       wingsGroupRoute: routeGovernanceForSeed(route),
     }
+    const resolvedViLayout = resolveRouteLayout(route.vi.layout)
 
     if (action === 'create') {
       page = (await payload.create({
@@ -884,7 +885,7 @@ export const seedWingsGroupCorporateRoutes = async ({
         data: {
           ...base,
           hero: route.vi.hero,
-          layout: route.vi.layout,
+          layout: resolvedViLayout,
           meta: {
             breadcrumbLabel: route.vi.title,
             description: route.vi.description,

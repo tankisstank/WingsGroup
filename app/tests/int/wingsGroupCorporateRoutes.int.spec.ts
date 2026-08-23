@@ -691,6 +691,7 @@ describe('WingsGroup corporate route integration', () => {
       { filename: 'wingsgroup-corporate-partnership.png', governance: {}, id: 104 },
       { filename: 'wingsgroup-travel-support.png', governance: {}, id: 105 },
     ]
+    const createdLayouts = new Map<string, unknown>()
     const payload = {
       create: async ({
         collection,
@@ -700,6 +701,22 @@ describe('WingsGroup corporate route integration', () => {
         data: Record<string, unknown>
       }) => {
         if (collection !== 'pages') throw new Error(`Unexpected create: ${collection}`)
+        const layout = data.layout
+        if (Array.isArray(layout)) {
+          const ecosystemBlock = layout.find(
+            (block) =>
+              block &&
+              typeof block === 'object' &&
+              !Array.isArray(block) &&
+              (block as { blockType?: unknown }).blockType === 'wingsGroupEcosystem',
+          ) as { profiles?: Array<{ stageMedia?: unknown }> } | undefined
+          if (ecosystemBlock) {
+            expect(
+              ecosystemBlock.profiles?.every((profile) => typeof profile.stageMedia === 'number'),
+            ).toBe(true)
+          }
+        }
+        createdLayouts.set(String(data.pathname), layout)
         const page = { ...data, id: pages.length + 1 } as (typeof pages)[number]
         pages.push(page)
         return page
@@ -746,6 +763,14 @@ describe('WingsGroup corporate route integration', () => {
     expect(first.created).toHaveLength(10)
     expect(second.created).toEqual([])
     expect(second.updated).toHaveLength(10)
+    const createdEcosystemBlock = (
+      createdLayouts.get('/he-sinh-thai') as Array<Record<string, unknown>>
+    ).find((block) => block.blockType === 'wingsGroupEcosystem') as {
+      profiles: Array<{ stageMedia?: unknown }>
+    }
+    expect(createdEcosystemBlock.profiles.map((profile) => profile.stageMedia)).toEqual([
+      101, 102, 103, 104, 105,
+    ])
     expect(pages.map(({ pathname }) => pathname).sort()).toEqual([
       '/',
       '/chinh-sach-bao-mat',
