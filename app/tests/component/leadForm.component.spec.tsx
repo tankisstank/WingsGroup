@@ -110,6 +110,30 @@ describe('lead form hardened submission', () => {
     await screen.findByRole('status')
   })
 
+  it('shows the refined English success response after a contact request is accepted', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(new Response(JSON.stringify({ status: 'accepted' }), { status: 202 })),
+    )
+
+    render(<FormBlock enableIntro={false} form={form as never} />)
+    fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'Alice' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send brief' }))
+
+    expect(
+      await screen.findByText(
+        'A specialist will review your plans and return with a tailored proposal.',
+      ),
+    ).toBeTruthy()
+    expect(
+      screen.queryByText(
+        'The planning team will review the brief and respond with a suitable proposal direction.',
+      ),
+    ).toBeNull()
+  })
+
   it('uses polished English support-panel copy for the WingsGroup contact form', () => {
     document.documentElement.lang = 'en'
     render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)

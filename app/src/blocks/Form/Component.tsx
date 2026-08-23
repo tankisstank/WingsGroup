@@ -80,8 +80,7 @@ const formCopy = {
     requiredMessage: 'This field is required',
     loading: 'Sending your request, please wait...',
     submit: 'Send brief',
-    successDescription:
-      'The planning team will review the brief and respond with a suitable proposal direction.',
+    successDescription: 'A specialist will review your plans and return with a tailored proposal.',
     successTitle: 'Brief received',
   },
   es: {
