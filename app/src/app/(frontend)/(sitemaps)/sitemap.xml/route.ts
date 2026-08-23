@@ -3,7 +3,6 @@ import { getPayload } from 'payload'
 
 import { getCurrentSite } from '@/utilities/siteContext'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
-import { isWingsGroupV3ExactPublicInventoryEnabled } from '@/wingsgroup/corporateRoutes'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,23 +39,15 @@ export async function GET(request: Request) {
     },
   })
   const settingsDoc = settings.docs[0]
-  const usesExactWingsGroupInventory = isWingsGroupV3ExactPublicInventoryEnabled({
-    settings: settingsDoc,
-    siteCode: site.code,
-  })
   const origin = getCanonicalSiteOrigin({
     requestOrigin: new URL(request.url).origin,
     settings: settingsDoc,
     site,
   })
   const lastmod = site.updatedAt ? `<lastmod>${xmlEscape(site.updatedAt)}</lastmod>` : ''
-  const sitemapEntries = [
-    'pages-sitemap.xml',
-    ...(usesExactWingsGroupInventory ? [] : ['posts-sitemap.xml']),
-  ]
+  const sitemapEntries = ['pages-sitemap.xml', 'posts-sitemap.xml']
     .map(
-      (pathname) =>
-        `<sitemap><loc>${xmlEscape(`${origin}/${pathname}`)}</loc>${lastmod}</sitemap>`,
+      (pathname) => `<sitemap><loc>${xmlEscape(`${origin}/${pathname}`)}</loc>${lastmod}</sitemap>`,
     )
     .join('')
 

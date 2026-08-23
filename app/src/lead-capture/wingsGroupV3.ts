@@ -47,12 +47,24 @@ type WingsGroupLeadGovernanceOptions = {
 }
 
 const channelLabels = {
-  en: { messenger: 'Messenger', whatsapp: 'WhatsApp', zalo: 'Zalo' },
-  vi: { messenger: 'Messenger', whatsapp: 'WhatsApp', zalo: 'Zalo' },
+  en: {
+    callback: 'Specialist callback',
+    messenger: 'Messenger',
+    whatsapp: 'WhatsApp',
+    zalo: 'Zalo OA',
+  },
+  vi: {
+    callback: 'Chuyên viên gọi lại',
+    messenger: 'Messenger',
+    whatsapp: 'WhatsApp',
+    zalo: 'Zalo OA',
+  },
 } as const
 
 const nameFieldAliases = new Set(['full-name', 'full_name', 'name'])
 const needFieldAliases = new Set(['brief', 'message', 'need', 'needs'])
+const emailFieldAliases = new Set(['e-mail', 'email'])
+const phoneFieldAliases = new Set(['mobile', 'mobile-phone', 'phone', 'telephone'])
 
 const asRecord = (value: unknown): UnknownRecord =>
   value && typeof value === 'object' && !Array.isArray(value) ? (value as UnknownRecord) : {}
@@ -243,6 +255,7 @@ export const resolveWingsGroupLeadGovernance = (
     if (channel.state === 'disabled') continue
 
     const approved =
+      key !== 'callback' &&
       channel.state === 'approved' &&
       isApprovedHTTPSURL(channel.url) &&
       Boolean(asString(channel.owner)) &&
@@ -321,6 +334,31 @@ export const validateWingsGroupRequiredFields = (
 
   if (!hasValue(nameFieldAliases) || !hasValue(needFieldAliases)) {
     throw new Error('Required WingsGroup lead fields are missing.')
+  }
+}
+
+const isValidEmail = (value: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(value)
+
+const isValidPhone = (value: string): boolean => {
+  if (!/^\+?[0-9().\s-]+$/u.test(value)) return false
+  const digits = value.replace(/\D/gu, '')
+  return digits.length >= 7 && digits.length <= 15
+}
+
+export const validateWingsGroupContactDetails = (
+  fields: Array<{ field: string; value: string }>,
+  preferredChannel?: ConsultationChannelKey,
+): void => {
+  const findValue = (aliases: Set<string>): string =>
+    fields.find(({ field }) => aliases.has(field.toLowerCase()))?.value.trim() || ''
+  const email = findValue(emailFieldAliases)
+  const phone = findValue(phoneFieldAliases)
+  const validEmail = isValidEmail(email)
+  const validPhone = isValidPhone(phone)
+
+  if (!validEmail && !validPhone) throw new Error('Valid email or phone is required.')
+  if (preferredChannel === 'callback' && !validPhone) {
+    throw new Error('A specialist callback requires a valid phone number.')
   }
 }
 

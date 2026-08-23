@@ -52,7 +52,9 @@ const wingsGroupForm = {
   confirmationType: 'message',
   fields: [
     { blockType: 'text', label: 'Full name', name: 'full-name', required: true },
-    { blockType: 'textarea', label: 'Need', name: 'message', required: true },
+    { blockType: 'email', label: 'Email', name: 'email', required: false },
+    { blockType: 'text', label: 'Phone', name: 'phone', required: false },
+    { blockType: 'textarea', label: 'Need', name: 'brief', required: true },
   ],
   id: 'wingsgroup-contact',
   site: 9,
@@ -355,13 +357,14 @@ describe('lead form hardened submission', () => {
           JSON.stringify({
             available: true,
             channels: [
-              { key: 'zalo', label: 'Zalo', state: 'pending-update' },
+              { key: 'zalo', label: 'Zalo OA', state: 'pending-update' },
               {
                 href: 'https://example.com/whatsapp',
                 key: 'whatsapp',
                 label: 'WhatsApp',
                 state: 'approved',
               },
+              { key: 'callback', label: 'Chuyên viên gọi lại', state: 'pending-update' },
             ],
             consentCopy:
               'I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy.',
@@ -383,22 +386,29 @@ describe('lead form hardened submission', () => {
     render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)
 
     const fullName = await screen.findByLabelText(/Full name/)
-    const need = screen.getByLabelText(/Message/)
+    const need = screen.getByLabelText(/Needs \/ budget \/ timing/)
     fireEvent.change(fullName, { target: { value: 'Alice' } })
     fireEvent.change(need, { target: { value: 'Please plan a private journey.' } })
 
     const consent = await screen.findByRole('checkbox', { name: /I agree that WingsGroup/ })
     expect(consent.tagName).toBe('BUTTON')
-    expect(screen.queryByRole('link', { name: 'Zalo' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Zalo OA' })).toBeNull()
     expect(
       screen
-        .getAllByText(/Zalo — Pending update/)
+        .getAllByText(/Zalo OA — Pending update/)
         .find((element) => element.tagName === 'SPAN')
         ?.getAttribute('aria-disabled'),
     ).toBe('true')
+    expect(
+      screen
+        .getAllByText(/Chuyên viên gọi lại — Pending update/)
+        .find((element) => element.tagName === 'SPAN'),
+    ).toBeTruthy()
+    expect(screen.queryByRole('link', { name: 'Chuyên viên gọi lại' })).toBeNull()
     expect(screen.getByRole('link', { name: 'WhatsApp' }).getAttribute('href')).toBe(
       'https://example.com/whatsapp',
     )
+    expect(screen.getByText(/Information is retained for up to 24 months/)).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Send brief' }))
     await waitFor(() => expect(document.activeElement).toBe(consent))
@@ -406,7 +416,7 @@ describe('lead form hardened submission', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
 
     fireEvent.change(screen.getByLabelText(/Preferred contact channel/), {
-      target: { value: 'zalo' },
+      target: { value: 'callback' },
     })
     fireEvent.click(consent)
     fireEvent.click(screen.getByRole('button', { name: 'Send brief' }))
@@ -422,11 +432,13 @@ describe('lead form hardened submission', () => {
       leadContract: {
         consent: true,
         consentVersion: 'wingsgroup-contact-v1',
-        preferredChannel: 'zalo',
+        preferredChannel: 'callback',
       },
       submissionData: [
         { field: 'full-name', value: 'Alice' },
-        { field: 'message', value: 'Please plan a private journey.' },
+        { field: 'email', value: '' },
+        { field: 'phone', value: '' },
+        { field: 'brief', value: 'Please plan a private journey.' },
       ],
     })
   })
@@ -457,11 +469,16 @@ describe('lead form hardened submission', () => {
     await screen.findByRole('checkbox', { name: /I agree to the WingsGroup/ })
     const select = await screen.findByRole('combobox', { name: /Preferred contact channel/ })
     expect(select).toHaveProperty('disabled', false)
-    expect(screen.getByRole('option', { name: 'Zalo — Pending update' })).toBeTruthy()
+    expect(screen.getByRole('option', { name: 'Zalo OA — Pending update' })).toBeTruthy()
     expect(screen.getByRole('option', { name: 'WhatsApp — Pending update' })).toBeTruthy()
     expect(screen.getByRole('option', { name: 'Messenger — Pending update' })).toBeTruthy()
-    expect(screen.queryByRole('link', { name: 'Zalo' })).toBeNull()
+    expect(
+      screen.getByRole('option', { name: 'Chuyên viên gọi lại — Pending update' }),
+    ).toBeTruthy()
+    expect(screen.queryByRole('link', { name: 'Zalo OA' })).toBeNull()
     expect(screen.queryByRole('link', { name: 'WhatsApp' })).toBeNull()
     expect(screen.queryByRole('link', { name: 'Messenger' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Chuyên viên gọi lại' })).toBeNull()
+    expect(screen.getByText(/Information is retained for up to 24 months/)).toBeTruthy()
   })
 })

@@ -255,9 +255,10 @@ const wingsGroupLeadCopy = {
 } as const
 
 const pendingConsultationChannels: ConsultationChannelPublicState[] = [
-  { key: 'zalo', label: 'Zalo', state: 'pending-update' },
+  { key: 'zalo', label: 'Zalo OA', state: 'pending-update' },
   { key: 'whatsapp', label: 'WhatsApp', state: 'pending-update' },
   { key: 'messenger', label: 'Messenger', state: 'pending-update' },
+  { key: 'callback', label: 'Chuyên viên gọi lại', state: 'pending-update' },
 ]
 
 const readLeadSubmissionContext = (
@@ -414,7 +415,13 @@ export const FormBlock: React.FC<
   useEffect(() => {
     const syncPreferredChannel = (event: Event) => {
       const channel = (event as CustomEvent<{ channel?: string }>).detail?.channel
-      if (channel !== 'zalo' && channel !== 'whatsapp' && channel !== 'messenger') return
+      if (
+        channel !== 'zalo' &&
+        channel !== 'whatsapp' &&
+        channel !== 'messenger' &&
+        channel !== 'callback'
+      )
+        return
       setPreferredChannel(channel)
     }
 
@@ -800,6 +807,11 @@ export const FormBlock: React.FC<
                           <span>{leadConfig.consentCopy}</span>
                         </button>
                         <a href={leadConfig.policyHref}>{wingsGroupCopy.policyLink}</a>
+                        <p className="site-wingsgroup-consent__retention">
+                          {copyLocale === 'en'
+                            ? `Information is retained for up to ${leadConfig.retentionMonths} months under the Privacy Policy.`
+                            : `Thông tin được lưu tối đa ${leadConfig.retentionMonths} tháng theo Chính sách bảo mật.`}
+                        </p>
                         {consentError && (
                           <p id={`${formID}-wingsgroup-consent-error`} role="alert">
                             {wingsGroupCopy.consentRequired}

@@ -13,6 +13,12 @@ const channels = [
     note: 'Tiếp tục cuộc trò chuyện từ Facebook',
     mark: 'ME',
   },
+  {
+    key: 'callback',
+    label: 'Chuyên viên gọi lại',
+    note: 'Để lại số điện thoại để chuyên viên liên hệ',
+    mark: 'CB',
+  },
 ] as const
 
 export const WingsGroupConsultationDialog = () => {
@@ -185,7 +191,7 @@ export const WingsGroupConsultationDialog = () => {
                 <span className={styles.channelArrow} aria-hidden="true">
                   ↗
                 </span>
-                <span className={styles.channelPending}>Đang cập nhật</span>
+                <span className={styles.channelPending}>Chờ cập nhật</span>
               </button>
             ))}
           </div>

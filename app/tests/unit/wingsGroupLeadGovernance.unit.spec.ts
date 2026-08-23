@@ -15,9 +15,9 @@ describe('WingsGroup lead governance fields', () => {
       name: 'wingsGroupLead',
       type: 'group',
     })
-    const access = ('access' in wingsGroupLeadGovernanceField
-      ? wingsGroupLeadGovernanceField.access
-      : {}) as {
+    const access = (
+      'access' in wingsGroupLeadGovernanceField ? wingsGroupLeadGovernanceField.access : {}
+    ) as {
       read: (args: unknown) => boolean
       update: (args: unknown) => boolean
     }
@@ -25,9 +25,17 @@ describe('WingsGroup lead governance fields', () => {
     expect(access.read({ req: { user: { id: 1 } } })).toBe(true)
     expect(access.update({ req: { user: { id: 1 } } })).toBe(false)
 
-    const fields = 'fields' in wingsGroupLeadGovernanceField ? wingsGroupLeadGovernanceField.fields : []
+    const fields =
+      'fields' in wingsGroupLeadGovernanceField ? wingsGroupLeadGovernanceField.fields : []
     const retention = fields.find((field) => 'name' in field && field.name === 'retentionUntil')
     expect(retention).toMatchObject({ index: true, type: 'date' })
+    const preferredChannel = fields.find(
+      (field) => 'name' in field && field.name === 'preferredChannel',
+    )
+    expect(preferredChannel).toMatchObject({
+      options: ['zalo', 'whatsapp', 'messenger', 'callback'],
+      type: 'select',
+    })
   })
 })
 
@@ -35,9 +43,12 @@ describe('WingsGroup lead retention', () => {
   it('is disabled by default without touching data', async () => {
     const payload = { delete: vi.fn(), find: vi.fn() }
 
-    await expect(
-      runWingsGroupLeadRetentionBatch({ enabled: false, payload }),
-    ).resolves.toEqual({ deleted: 0, enabled: false, failed: 0, hasMore: false })
+    await expect(runWingsGroupLeadRetentionBatch({ enabled: false, payload })).resolves.toEqual({
+      deleted: 0,
+      enabled: false,
+      failed: 0,
+      hasMore: false,
+    })
     expect(payload.find).not.toHaveBeenCalled()
     expect(payload.delete).not.toHaveBeenCalled()
   })
@@ -103,17 +114,33 @@ describe('WingsGroup lead retention', () => {
 describe('WingsGroup lead governance migration', () => {
   it('is additive/idempotent on apply and has an explicit scoped down path', () => {
     const source = fs.readFileSync(
-      path.resolve(
-        process.cwd(),
-        'src/migrations/20260814_090000_wingsgroup_lead_governance.ts',
-      ),
+      path.resolve(process.cwd(), 'src/migrations/20260814_090000_wingsgroup_lead_governance.ts'),
       'utf8',
     )
 
     expect(source).toMatch(/ADD COLUMN IF NOT EXISTS "wings_group_lead_retention_until"/)
-    expect(source).toMatch(/CREATE INDEX IF NOT EXISTS "form_submissions_wings_group_lead_site_retention_idx"/)
-    expect(source).toMatch(/DROP INDEX IF EXISTS "form_submissions_wings_group_lead_site_retention_idx"/)
+    expect(source).toMatch(
+      /CREATE INDEX IF NOT EXISTS "form_submissions_wings_group_lead_site_retention_idx"/,
+    )
+    expect(source).toMatch(
+      /DROP INDEX IF EXISTS "form_submissions_wings_group_lead_site_retention_idx"/,
+    )
     expect(source).toMatch(/DROP COLUMN IF EXISTS "wings_group_lead_retention_until"/)
     expect(source).toContain('site_id')
+  })
+
+  it('registers the additive callback enum migration without a rollback deletion', () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), 'src/migrations/20260823_090000_wingsgroup_callback_channel.ts'),
+      'utf8',
+    )
+
+    expect(source).toMatch(
+      /enum_site_settings_wings_group_v3_consultation_channels_key[\s\S]*ADD VALUE IF NOT EXISTS 'callback'/,
+    )
+    expect(source).toMatch(
+      /enum_form_submissions_wings_group_lead_preferred_channel[\s\S]*ADD VALUE IF NOT EXISTS 'callback'/,
+    )
+    expect(source).not.toMatch(/DROP TYPE|DROP VALUE/i)
   })
 })

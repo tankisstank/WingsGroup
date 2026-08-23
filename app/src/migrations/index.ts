@@ -34,6 +34,7 @@ import * as migration_20260814_090000_wingsgroup_lead_governance from './2026081
 import * as migration_20260814_120000_wingsgroup_corporate_route_governance from './20260814_120000_wingsgroup_corporate_route_governance'
 import * as migration_20260814_130000_wingsgroup_policy_release_governance from './20260814_130000_wingsgroup_policy_release_governance'
 import * as migration_20260814_140000_wingsgroup_settings_content_integrity from './20260814_140000_wingsgroup_settings_content_integrity'
+import * as migration_20260823_090000_wingsgroup_callback_channel from './20260823_090000_wingsgroup_callback_channel'
 
 export const migrations = [
   {
@@ -215,5 +216,10 @@ export const migrations = [
     up: migration_20260814_140000_wingsgroup_settings_content_integrity.up,
     down: migration_20260814_140000_wingsgroup_settings_content_integrity.down,
     name: '20260814_140000_wingsgroup_settings_content_integrity',
+  },
+  {
+    up: migration_20260823_090000_wingsgroup_callback_channel.up,
+    down: migration_20260823_090000_wingsgroup_callback_channel.down,
+    name: '20260823_090000_wingsgroup_callback_channel',
   },
 ]

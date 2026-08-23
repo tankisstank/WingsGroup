@@ -472,7 +472,7 @@ export interface SiteSetting {
      */
     consultationChannels?:
       | {
-          key: 'zalo' | 'whatsapp' | 'messenger';
+          key: 'zalo' | 'whatsapp' | 'messenger' | 'callback';
           state: 'unconfigured' | 'pending' | 'approved' | 'disabled';
           url?: string | null;
           owner?: string | null;
@@ -2473,7 +2473,7 @@ export interface FormSubmission {
     consentVersion?: string | null;
     consentedAt?: string | null;
     retentionUntil?: string | null;
-    preferredChannel?: ('zalo' | 'whatsapp' | 'messenger') | null;
+    preferredChannel?: ('zalo' | 'whatsapp' | 'messenger' | 'callback') | null;
   };
   /**
    * Private journey and discovery metadata. Kept separate from customer-authored form fields.

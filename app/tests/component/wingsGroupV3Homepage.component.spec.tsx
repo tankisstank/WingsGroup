@@ -374,4 +374,22 @@ describe('WingsGroup v3 public components', () => {
     expect(dialog?.hasAttribute('open')).toBe(false)
     expect(document.activeElement).toBe(trigger)
   })
+
+  it('dispatches callback intake without rendering a channel deep link', () => {
+    const onPreferredChannel = vi.fn()
+    window.addEventListener('wingsgroup-preferred-channel', onPreferredChannel)
+    render(<WingsGroupConsultationDialog />)
+
+    const trigger = screen.getByRole('button', { name: 'Trao đổi với chuyên viên' })
+    fireEvent.click(trigger)
+    expect(screen.getAllByText('Chờ cập nhật')).toHaveLength(4)
+    const callback = screen.getByRole('button', { name: /Chuyên viên gọi lại/ })
+    fireEvent.click(callback)
+
+    expect(onPreferredChannel).toHaveBeenCalledWith(
+      expect.objectContaining({ detail: { channel: 'callback' } }),
+    )
+    expect(document.querySelector('[data-od-id="consultation-dialog"] a[href]')).toBeNull()
+    window.removeEventListener('wingsgroup-preferred-channel', onPreferredChannel)
+  })
 })

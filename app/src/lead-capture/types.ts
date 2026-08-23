@@ -20,7 +20,7 @@ export type LeadSubmissionContext = {
   tourSlug?: string
 }
 
-export const consultationChannelKeys = ['zalo', 'whatsapp', 'messenger'] as const
+export const consultationChannelKeys = ['zalo', 'whatsapp', 'messenger', 'callback'] as const
 
 export type ConsultationChannelKey = (typeof consultationChannelKeys)[number]
 

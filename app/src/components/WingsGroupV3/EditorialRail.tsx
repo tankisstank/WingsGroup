@@ -13,6 +13,7 @@ import {
   isWingsGroupPublishedMedia,
   resolveGovernedEditorialSelection,
 } from './model'
+import { getWingsGroupEditorialPostPath } from '@/utilities/wingsGroupEditorial'
 import styles from './WingsGroupV3.module.css'
 
 const FALLBACK_EDITORIAL = [
@@ -126,7 +127,7 @@ const renderPostCard = (post: Post, locale?: null | string) => {
         <p className={styles.editorialAuthor}>
           {author ? `${locale === 'en' ? 'By' : 'Tác giả'}: ${author}` : null}
         </p>
-        <SiteLink href={`/posts/${post.slug}`}>
+        <SiteLink href={getWingsGroupEditorialPostPath(post.slug)}>
           {locale === 'en' ? 'Read story' : 'Đọc bài viết'}
         </SiteLink>
       </div>

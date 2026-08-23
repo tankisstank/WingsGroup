@@ -51,7 +51,7 @@ export const wingsGroupLeadGovernanceField: Field = {
     {
       name: 'preferredChannel',
       type: 'select',
-      options: ['zalo', 'whatsapp', 'messenger'],
+      options: ['zalo', 'whatsapp', 'messenger', 'callback'],
     },
   ],
 }

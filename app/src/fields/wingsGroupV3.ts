@@ -483,7 +483,7 @@ export const wingsGroupV3SettingsField: Field = {
           label: 'Kênh',
           type: 'select',
           required: true,
-          options: ['zalo', 'whatsapp', 'messenger'],
+          options: ['zalo', 'whatsapp', 'messenger', 'callback'],
         },
         {
           name: 'state',

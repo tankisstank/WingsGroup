@@ -1218,6 +1218,62 @@
   font-size: 0.8125rem;
 }
 
+.editorialArchive {
+  padding-top: 48px;
+}
+
+.editorialArchiveList {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--site-border, #dedbd3);
+}
+
+.editorialArchiveItem {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 24px;
+  align-items: baseline;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--site-border, #dedbd3);
+}
+
+.editorialArchiveItem h3 {
+  margin: 0;
+  font-family: var(--site-font-sans, sans-serif);
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.editorialArchiveItem h3 a {
+  color: var(--site-ink, #282621);
+  text-decoration: none;
+}
+
+.editorialArchiveItem h3 a:hover {
+  color: var(--site-accent-deep, #956325);
+}
+
+.editorialArchiveMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: var(--muted-foreground, #777269);
+  font-family: var(--site-font-mono, monospace);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.editorialArchiveEmpty {
+  margin: 0;
+  padding: 24px 0;
+  color: var(--muted-foreground, #777269);
+}
+
 @media (max-width: 850px) {
   .consultationDialog {
     width: min(100%, calc(100vw - 20px));
@@ -1312,6 +1368,11 @@
   .editorialCard:first-child,
   .editorialCard {
     grid-template-rows: 235px 1fr;
+  }
+
+  .editorialArchiveItem {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
   }
 
   .contactSection :global(.site-lead-form-shell) {

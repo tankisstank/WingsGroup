@@ -20,6 +20,7 @@ import {
   resolveWingsGroupLeadGovernance,
   toWingsGroupLeadPublicConfig,
   validateWingsGroupLeadContract,
+  validateWingsGroupContactDetails,
   validateWingsGroupRequiredFields,
   WINGSGROUP_SITE_CODE,
 } from '@/lead-capture/wingsGroupV3'
@@ -235,7 +236,7 @@ export async function POST(request: Request): Promise<Response> {
         locale: 'en' | 'vi'
         consentVersion: string
         consentedAt: string
-        preferredChannel?: 'messenger' | 'whatsapp' | 'zalo'
+        preferredChannel?: 'callback' | 'messenger' | 'whatsapp' | 'zalo'
         retentionUntil: string
         sourcePath: string
       }
@@ -263,6 +264,7 @@ export async function POST(request: Request): Promise<Response> {
     try {
       validateWingsGroupRequiredFields(normalizedFields)
       const contract = validateWingsGroupLeadContract(input.leadContract, governance)
+      validateWingsGroupContactDetails(normalizedFields, contract.preferredChannel)
       const consentedAt = new Date()
       wingsGroupContext = {
         consentVersion: contract.consentVersion,

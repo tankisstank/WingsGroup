@@ -28,6 +28,7 @@ import { WingsGroupEditorialRail } from '@/components/WingsGroupV3/EditorialRail
 import type { WingsGroupRouteArchetype } from '@/wingsgroup/corporateRoutes'
 import { WingsGroupCapabilitySection } from '@/blocks/WingsGroupCapability/Component'
 import { WingsGroupCorporateSection } from '@/blocks/WingsGroupCorporate/Component'
+import { WingsGroupEditorialArchive } from '@/components/WingsGroupV3/EditorialArchive'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -106,9 +107,13 @@ export const RenderBlocks: React.FC<{
                       ? WingsGroupCapabilitySection
                       : wingsGroupV3 && wingsGroupV3Route === 'corporate' && blockType === 'content'
                         ? WingsGroupCorporateSection
-                        : wingsGroupV3 && wingsGroupV3Route === 'trust' && blockType === 'content'
-                          ? WingsGroupTrustSection
-                          : blockComponents[blockType]
+                        : wingsGroupV3 &&
+                            wingsGroupV3Route === 'editorial' &&
+                            blockType === 'archive'
+                          ? WingsGroupEditorialArchive
+                          : wingsGroupV3 && wingsGroupV3Route === 'trust' && blockType === 'content'
+                            ? WingsGroupTrustSection
+                            : blockComponents[blockType]
 
             if (Block) {
               const blockProps =

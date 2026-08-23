@@ -6,6 +6,7 @@ import {
   normalizeTrustedLeadSourcePath,
   resolveTrustedLeadSourcePath,
   resolveWingsGroupLeadGovernance,
+  validateWingsGroupContactDetails,
   validateWingsGroupLeadContract,
   validateWingsGroupRequiredFields,
   WINGSGROUP_CONSENT_COPY,
@@ -57,17 +58,18 @@ describe('WingsGroup v3 lead governance', () => {
       retentionMonths: 24,
     })
     expect(governance?.channels).toEqual([
-      { key: 'zalo', label: 'Zalo', state: 'pending-update' },
+      { key: 'zalo', label: 'Zalo OA', state: 'pending-update' },
       {
         href: 'https://example.com/whatsapp',
         key: 'whatsapp',
         label: 'WhatsApp',
         state: 'approved',
       },
+      { key: 'callback', label: 'Chuyên viên gọi lại', state: 'pending-update' },
     ])
   })
 
-  it('backfills the three pending selector choices when channel settings are empty', () => {
+  it('backfills the four pending selector choices when channel settings are empty', () => {
     const governance = resolveWingsGroupLeadGovernance(
       {
         ...settings,
@@ -77,9 +79,10 @@ describe('WingsGroup v3 lead governance', () => {
     )
 
     expect(governance?.channels).toEqual([
-      { key: 'zalo', label: 'Zalo', state: 'pending-update' },
+      { key: 'zalo', label: 'Zalo OA', state: 'pending-update' },
       { key: 'whatsapp', label: 'WhatsApp', state: 'pending-update' },
       { key: 'messenger', label: 'Messenger', state: 'pending-update' },
+      { key: 'callback', label: 'Chuyên viên gọi lại', state: 'pending-update' },
     ])
   })
 
@@ -96,6 +99,35 @@ describe('WingsGroup v3 lead governance', () => {
         'en',
       ),
     ).toBeNull()
+  })
+
+  it('keeps callback intake-only even when an unsafe deep-link configuration is supplied', () => {
+    const governance = resolveWingsGroupLeadGovernance(
+      {
+        ...settings,
+        wingsGroupV3: {
+          ...settings.wingsGroupV3,
+          consultationChannels: [
+            {
+              key: 'callback',
+              owner: 'Commercial operations',
+              sla: '4 business hours',
+              state: 'approved',
+              trackingReference: 'callback-intake-only',
+              url: 'https://example.com/callback',
+            },
+          ],
+        },
+      },
+      'vi',
+    )
+
+    expect(governance?.channels).toEqual([
+      { key: 'zalo', label: 'Zalo OA', state: 'pending-update' },
+      { key: 'whatsapp', label: 'WhatsApp', state: 'pending-update' },
+      { key: 'messenger', label: 'Messenger', state: 'pending-update' },
+      { key: 'callback', label: 'Chuyên viên gọi lại', state: 'pending-update' },
+    ])
   })
 
   it('keeps production lead governance hidden until privacy approval evidence is complete', () => {
@@ -151,6 +183,42 @@ describe('WingsGroup v3 lead governance', () => {
     expect(normalizeTrustedLeadSourcePath('https://attacker.example/private')).toBe('/')
     expect(normalizeTrustedLeadSourcePath('/lien-he?forged=query')).toBe('/lien-he')
     expect(getWingsGroupRetentionUntil(consentedAt)).toBe('2026-02-28T10:15:00.000Z')
+  })
+
+  it('requires valid contact details and a phone number for callback intake', () => {
+    expect(() =>
+      validateWingsGroupContactDetails([
+        { field: 'full-name', value: 'Alice' },
+        { field: 'brief', value: 'Consultation request' },
+      ]),
+    ).toThrow(/email or phone/i)
+    expect(() =>
+      validateWingsGroupContactDetails([
+        { field: 'full-name', value: 'Alice' },
+        { field: 'email', value: 'alice@example.com' },
+        { field: 'brief', value: 'Consultation request' },
+      ]),
+    ).not.toThrow()
+    expect(() =>
+      validateWingsGroupContactDetails(
+        [
+          { field: 'full-name', value: 'Alice' },
+          { field: 'email', value: 'alice@example.com' },
+          { field: 'brief', value: 'Consultation request' },
+        ],
+        'callback',
+      ),
+    ).toThrow(/phone/i)
+    expect(() =>
+      validateWingsGroupContactDetails(
+        [
+          { field: 'full-name', value: 'Alice' },
+          { field: 'phone', value: '+84 912 345 678' },
+          { field: 'brief', value: 'Consultation request' },
+        ],
+        'callback',
+      ),
+    ).not.toThrow()
   })
 
   it('normalizes only a same-origin, tenant- and locale-scoped public Referer', () => {

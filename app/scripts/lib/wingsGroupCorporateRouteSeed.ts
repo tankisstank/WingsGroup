@@ -628,6 +628,22 @@ const formFields = [
     width: 100,
   },
   {
+    blockName: 'email',
+    blockType: 'email',
+    label: 'Email',
+    name: 'email',
+    required: false,
+    width: 100,
+  },
+  {
+    blockName: 'phone',
+    blockType: 'text',
+    label: 'Số điện thoại',
+    name: 'phone',
+    required: false,
+    width: 100,
+  },
+  {
     blockName: 'brief',
     blockType: 'textarea',
     label: 'Nhu cầu tư vấn',

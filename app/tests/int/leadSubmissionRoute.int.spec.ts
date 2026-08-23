@@ -68,6 +68,59 @@ const request = ({
     method: 'POST',
   })
 
+const configureWingsGroupContactTest = () => {
+  mocks.getCurrentSite.mockResolvedValue({
+    code: 'wings-group',
+    id: 9,
+    primaryDomain: 'wingsgroup.vn',
+  })
+  mocks.getCurrentLocale.mockResolvedValue('vi')
+  mocks.find.mockImplementation(async ({ collection }: { collection: string }) =>
+    collection === 'site-settings'
+      ? {
+          docs: [
+            {
+              site: 9,
+              wingsGroupV3: {
+                consultationChannels: [{ key: 'callback', state: 'unconfigured' }],
+                enabled: true,
+                privacy: {
+                  approvalReference: 'privacy-approval-2026-08-14',
+                  approvalState: 'approved',
+                  consentEvidenceReference: 'consent-evidence-2026-08-14',
+                  consentRequired: true,
+                  consentVersion: 'wingsgroup-contact-v1',
+                  dataSubjectContact: 'info@doicanhviet.com',
+                  dataSubjectRightsEvidence: 'rights-evidence-2026-08-14',
+                  dataSubjectRightsStatement: 'Legal-owner supplied rights statement.',
+                  interBranchTransferAllowed: true,
+                  policyRouteEn: '/en/chinh-sach-bao-mat',
+                  policyRouteVi: '/chinh-sach-bao-mat',
+                  policyVersion: 'wingsgroup-privacy-v1',
+                  retentionMonths: 24,
+                },
+              },
+            },
+          ],
+        }
+      : {
+          docs: [
+            {
+              fields: [
+                { blockType: 'text', label: 'Full name', name: 'full-name', required: true },
+                { blockType: 'email', label: 'Email', name: 'email', required: false },
+                { blockType: 'text', label: 'Phone', name: 'phone', required: false },
+                { blockType: 'textarea', label: 'Need', name: 'brief', required: true },
+              ],
+              id: 7,
+              site: 9,
+              title: 'WingsGroup Contact',
+            },
+          ],
+        },
+  )
+}
+
 describe('lead submission endpoint integration', () => {
   beforeEach(() => {
     vi.unstubAllEnvs()
@@ -102,6 +155,115 @@ describe('lead submission endpoint integration', () => {
     mocks.update.mockResolvedValue({ id: 99 })
     mocks.create.mockResolvedValue({ id: 99 })
     mocks.jobsQueue.mockResolvedValue({ id: 100 })
+  })
+
+  it('accepts an email-only WingsGroup lead and persists the trusted contract', async () => {
+    configureWingsGroupContactTest()
+
+    const response = await POST(
+      request({
+        bodyOverrides: {
+          leadContract: {
+            consent: true,
+            consentVersion: 'wingsgroup-contact-v1',
+          },
+          submissionData: [
+            { field: 'full-name', value: 'Alice' },
+            { field: 'email', value: 'alice@example.com' },
+            { field: 'brief', value: 'Consultation request' },
+          ],
+        },
+        host: 'wingsgroup.vn',
+      }),
+    )
+
+    expect(response.status).toBe(202)
+    expect(mocks.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          site: 9,
+          wingsGroupLead: expect.objectContaining({ sourcePath: '/lien-he' }),
+        }),
+      }),
+    )
+  })
+
+  it('accepts callback intake with a valid phone and persists callback without a URL', async () => {
+    configureWingsGroupContactTest()
+
+    const response = await POST(
+      request({
+        bodyOverrides: {
+          leadContract: {
+            consent: true,
+            consentVersion: 'wingsgroup-contact-v1',
+            preferredChannel: 'callback',
+          },
+          submissionData: [
+            { field: 'full-name', value: 'Alice' },
+            { field: 'phone', value: '+84 912 345 678' },
+            { field: 'brief', value: 'Please call me back' },
+          ],
+        },
+        host: 'wingsgroup.vn',
+      }),
+    )
+
+    expect(response.status).toBe(202)
+    expect(mocks.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          wingsGroupLead: expect.objectContaining({ preferredChannel: 'callback' }),
+        }),
+      }),
+    )
+    const body = await GET(request({ host: 'wingsgroup.vn' })).then((result) => result.json())
+    expect(body.channels).toContainEqual({
+      key: 'callback',
+      label: 'Chuyên viên gọi lại',
+      state: 'pending-update',
+    })
+    expect(body.channels.find(({ key }: { key: string }) => key === 'callback')).not.toHaveProperty(
+      'href',
+    )
+  })
+
+  it('rejects WingsGroup leads without valid contact details or callback phone', async () => {
+    configureWingsGroupContactTest()
+
+    const noContact = await POST(
+      request({
+        bodyOverrides: {
+          leadContract: { consent: true, consentVersion: 'wingsgroup-contact-v1' },
+          submissionData: [
+            { field: 'full-name', value: 'Alice' },
+            { field: 'brief', value: 'Consultation request' },
+          ],
+        },
+        host: 'wingsgroup.vn',
+      }),
+    )
+    expect(noContact.status).toBe(400)
+
+    const callbackWithoutPhone = await POST(
+      request({
+        bodyOverrides: {
+          leadContract: {
+            consent: true,
+            consentVersion: 'wingsgroup-contact-v1',
+            preferredChannel: 'callback',
+          },
+          submissionData: [
+            { field: 'full-name', value: 'Alice' },
+            { field: 'email', value: 'alice@example.com' },
+            { field: 'brief', value: 'Please call me back' },
+          ],
+        },
+        host: 'wingsgroup.vn',
+      }),
+    )
+    expect(callbackWithoutPhone.status).toBe(400)
+    expect(mocks.create).not.toHaveBeenCalled()
   })
 
   it('rejects requests that did not pass through trusted context middleware', async () => {
@@ -261,6 +423,7 @@ describe('lead submission endpoint integration', () => {
               {
                 fields: [
                   { blockType: 'text', label: 'Name', name: 'name', required: true },
+                  { blockType: 'email', label: 'Email', name: 'email', required: false },
                   { blockType: 'textarea', label: 'Need', name: 'message', required: true },
                 ],
                 id: 7,
@@ -331,6 +494,7 @@ describe('lead submission endpoint integration', () => {
               {
                 fields: [
                   { blockType: 'text', label: 'Name', name: 'name', required: true },
+                  { blockType: 'email', label: 'Email', name: 'email', required: false },
                   { blockType: 'textarea', label: 'Need', name: 'message', required: true },
                 ],
                 id: 7,
@@ -352,6 +516,7 @@ describe('lead submission endpoint integration', () => {
           },
           submissionData: [
             { field: 'name', value: 'Alice Private' },
+            { field: 'email', value: 'alice@example.com' },
             { field: 'message', value: 'Private consultation need' },
           ],
         },
@@ -372,6 +537,7 @@ describe('lead submission endpoint integration', () => {
           site: 9,
           submissionData: [
             { field: 'name', value: 'Alice Private' },
+            { field: 'email', value: 'alice@example.com' },
             { field: 'message', value: 'Private consultation need' },
           ],
           wingsGroupLead: expect.objectContaining({
@@ -436,6 +602,7 @@ describe('lead submission endpoint integration', () => {
               {
                 fields: [
                   { blockType: 'text', label: 'Name', name: 'name', required: true },
+                  { blockType: 'email', label: 'Email', name: 'email', required: false },
                   { blockType: 'textarea', label: 'Need', name: 'message', required: true },
                 ],
                 id: 7,
@@ -467,6 +634,7 @@ describe('lead submission endpoint integration', () => {
             },
             submissionData: [
               { field: 'name', value: 'Alice' },
+              { field: 'email', value: 'alice@example.com' },
               { field: 'message', value: 'Consultation request' },
             ],
           },
@@ -608,13 +776,14 @@ describe('lead submission endpoint integration', () => {
 
     expect(response.status).toBe(200)
     expect(body.channels).toEqual([
-      { key: 'zalo', label: 'Zalo', state: 'pending-update' },
+      { key: 'zalo', label: 'Zalo OA', state: 'pending-update' },
       {
         href: 'https://example.com/whatsapp',
         key: 'whatsapp',
         label: 'WhatsApp',
         state: 'approved',
       },
+      { key: 'callback', label: 'Chuyên viên gọi lại', state: 'pending-update' },
     ])
     expect(JSON.stringify(body)).not.toContain('messenger')
   })
@@ -699,7 +868,10 @@ describe('lead submission endpoint integration', () => {
             fields: [
               { blockType: 'text', label: 'Name', name: 'name', required: true },
               ...(site.name === 'wings-group'
-                ? [{ blockType: 'textarea', label: 'Need', name: 'message', required: true }]
+                ? [
+                    { blockType: 'email', label: 'Email', name: 'email', required: false },
+                    { blockType: 'textarea', label: 'Need', name: 'message', required: true },
+                  ]
                 : []),
             ],
             id: 7,
@@ -753,6 +925,7 @@ describe('lead submission endpoint integration', () => {
                   },
                   submissionData: [
                     { field: 'name', value: 'Alice' },
+                    { field: 'email', value: 'alice@example.com' },
                     { field: 'message', value: 'Consultation request' },
                   ],
                 }
