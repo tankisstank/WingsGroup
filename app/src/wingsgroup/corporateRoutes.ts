@@ -25,6 +25,7 @@ export const isWingsGroupLocalDraftPreview = ({
 export const WINGSGROUP_CORPORATE_ROUTES = [
   { archetype: 'home', path: '/', policy: false },
   { archetype: 'corporate', path: '/ve-wingsgroup', policy: false },
+  { archetype: 'ecosystem', path: '/he-sinh-thai', policy: false },
   { archetype: 'capability', path: '/nang-luc-dich-vu', policy: false },
   { archetype: 'trust', path: '/tin-cay-va-phap-ly', policy: false },
   { archetype: 'editorial', path: '/tin-tuc', policy: false },
@@ -237,6 +238,37 @@ export const getWingsGroupRoutePublicationState = ({
 export const isWingsGroupRoutePublic = (
   args: Parameters<typeof getWingsGroupRoutePublicationState>[0],
 ) => getWingsGroupRoutePublicationState(args) === 'approved'
+
+/**
+ * A pending policy route may render a controlled publication-status notice.
+ * It is deliberately separate from `isWingsGroupRoutePublic`: pending policy
+ * content is not approved policy, must not be returned by anonymous Payload
+ * reads, and must never enter the public sitemap.
+ */
+export const isWingsGroupPendingPolicyRouteRenderable = ({
+  locale,
+  page,
+  settings,
+  siteCode,
+}: Parameters<typeof getWingsGroupRoutePublicationState>[0]): boolean => {
+  if (siteCode !== WINGSGROUP_SITE_CODE || locale !== 'vi') return false
+  const pageRecord = asRecord(page)
+  const pathname = pageRecord.pathname || (pageRecord.slug === 'home' ? '/' : pageRecord.slug)
+  const definition = getWingsGroupRouteDefinition(pathname)
+  if (!definition?.policy || !hasTrustedWingsGroupSettings(settings)) return false
+
+  const governance = asRecord(pageRecord.wingsGroupRoute)
+  const publication = asRecord(governance.publication)
+  const policy = asRecord(governance.policy)
+
+  return (
+    pageRecord._status === 'published' &&
+    governance.managedBy === 'wingsgroup-v3' &&
+    governance.archetype === definition.archetype &&
+    publication.vi === 'pending' &&
+    policy.approvalState === 'pending'
+  )
+}
 
 const INTERNAL_JARGON = [
   /\broot site\b/iu,

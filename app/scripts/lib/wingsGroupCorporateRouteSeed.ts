@@ -26,6 +26,13 @@ type LocalizedRouteSeed = {
   title: string
 }
 
+const ecosystemMediaFallbacks: Record<string, string> = {
+  'wingsgroup-airport-service.png': 'wingspass-fast-track-hero.png',
+  'wingsgroup-corporate-partnership.png': 'wingsplus-private-mice-hero.png',
+  'wingsgroup-travel-support.png': 'wingscare-travel-care-hero.png',
+  'wingsgroup-vietnam-discovery.png': 'wingsside-vietnam-journey-hero.png',
+}
+
 export type WingsGroupCorporateRouteSeed = WingsGroupRouteDefinition & {
   en: LocalizedRouteSeed
   preserveExisting: boolean
@@ -150,6 +157,131 @@ const policyDraft = (locale: Locale, label: string): LocalizedRouteSeed => ({
   title: label,
 })
 
+const ecosystemRoute = (locale: Locale): LocalizedRouteSeed => ({
+  description:
+    locale === 'en'
+      ? 'Five service brands, each with a clear role and a considered route into consultation.'
+      : 'Năm thương hiệu dịch vụ, mỗi thương hiệu có một vai trò rõ ràng và một điểm bắt đầu phù hợp.',
+  hero: pageHero(locale === 'en' ? 'The WingsGroup ecosystem' : 'Hệ sinh thái WingsGroup'),
+  layout: [
+    {
+      blockType: 'wingsGroupEcosystem',
+      description:
+        locale === 'en'
+          ? 'Choose what you need. Each brand connects you with a focused service team and a clear next step.'
+          : 'Chọn điều bạn đang cần. Mỗi thương hiệu kết nối bạn với một đội ngũ dịch vụ và điểm bắt đầu rõ ràng.',
+      eyebrow: locale === 'en' ? 'Service ecosystem' : 'Hệ sinh thái dịch vụ',
+      profiles: [
+        {
+          brandKey: 'wingsgo',
+          brandName: 'WingsGo',
+          cta: {
+            contactPath: '/lien-he#contact-form',
+            label: locale === 'en' ? 'Talk with WingsGo' : 'Trao đổi với WingsGo',
+            state: 'contact-fallback',
+          },
+          description:
+            locale === 'en'
+              ? 'Outbound journeys, departure planning and a clear starting point for travel abroad.'
+              : 'Hành trình nước ngoài, lịch khởi hành và một điểm bắt đầu rõ ràng cho chuyến đi xa.',
+          proofState: 'pending',
+          serviceScope: [
+            { label: locale === 'en' ? 'Outbound travel' : 'Du lịch nước ngoài' },
+            { label: locale === 'en' ? 'Departure planning' : 'Lịch khởi hành' },
+            { label: locale === 'en' ? 'Pre-trip guidance' : 'Thông tin trước chuyến đi' },
+          ],
+          stageMedia: 'wingsgroup-ecosystem-hero.png',
+        },
+        {
+          brandKey: 'wing-side',
+          brandName: 'WingSide',
+          cta: {
+            contactPath: '/lien-he#contact-form',
+            label: locale === 'en' ? 'Talk with WingSide' : 'Trao đổi với WingSide',
+            state: 'contact-fallback',
+          },
+          description:
+            locale === 'en'
+              ? 'Vietnam journeys shaped around local rhythm, destination and the way you prefer to travel.'
+              : 'Hành trình Việt Nam được thiết kế theo nhịp đi, điểm đến và cách bạn muốn trải nghiệm.',
+          proofState: 'pending',
+          serviceScope: [
+            { label: locale === 'en' ? 'Tailor-made Vietnam' : 'Thiết kế hành trình Việt Nam' },
+            { label: locale === 'en' ? 'Local experiences' : 'Trải nghiệm địa phương' },
+            { label: locale === 'en' ? 'Private groups' : 'Nhóm riêng' },
+          ],
+          stageMedia: 'wingsgroup-vietnam-discovery.png',
+        },
+        {
+          brandKey: 'wingspass',
+          brandName: 'WingsPass',
+          cta: {
+            contactPath: '/lien-he#contact-form',
+            label: locale === 'en' ? 'Talk with WingsPass' : 'Trao đổi với WingsPass',
+            state: 'contact-fallback',
+          },
+          description:
+            locale === 'en'
+              ? 'Airport service support for a calmer start and finish to your journey.'
+              : 'Dịch vụ hỗ trợ sân bay để những điểm chạm đầu và cuối hành trình nhẹ nhàng hơn.',
+          proofState: 'pending',
+          serviceScope: [
+            { label: locale === 'en' ? 'Fast Track by request' : 'Fast Track theo nhu cầu' },
+            { label: locale === 'en' ? 'Airport arrival support' : 'Đón tiễn sân bay' },
+            { label: locale === 'en' ? 'Airport touchpoints' : 'Hỗ trợ tại sân bay' },
+          ],
+          stageMedia: 'wingsgroup-airport-service.png',
+        },
+        {
+          brandKey: 'wingsplus',
+          brandName: 'WingsPlus',
+          cta: {
+            contactPath: '/lien-he#contact-form',
+            label: locale === 'en' ? 'Talk with WingsPlus' : 'Trao đổi với WingsPlus',
+            state: 'contact-fallback',
+          },
+          description:
+            locale === 'en'
+              ? 'Private journeys, corporate groups and MICE proposals shaped around a shared brief.'
+              : 'Hành trình riêng, đoàn doanh nghiệp và đề xuất MICE được xây dựng từ một nhu cầu chung.',
+          proofState: 'pending',
+          serviceScope: [
+            { label: locale === 'en' ? 'Private journeys' : 'Hành trình riêng' },
+            { label: locale === 'en' ? 'Corporate groups' : 'Đoàn doanh nghiệp' },
+            { label: 'MICE' },
+          ],
+          stageMedia: 'wingsgroup-corporate-partnership.png',
+        },
+        {
+          brandKey: 'wingscare',
+          brandName: 'WingsCare',
+          cta: {
+            contactPath: '/lien-he#contact-form',
+            label: locale === 'en' ? 'Talk with WingsCare' : 'Trao đổi với WingsCare',
+            state: 'contact-fallback',
+          },
+          description:
+            locale === 'en'
+              ? 'Travel care and support that helps clarify the assistance available along the way.'
+              : 'Chăm sóc và hỗ trợ hành trình, giúp làm rõ những quyền lợi và đầu mối cần biết.',
+          proofState: 'pending',
+          serviceScope: [
+            { label: locale === 'en' ? 'Travel care' : 'Chăm sóc hành trình' },
+            { label: locale === 'en' ? 'Support guidance' : 'Hướng dẫn hỗ trợ' },
+            { label: locale === 'en' ? 'Before-trip notes' : 'Lưu ý trước hành trình' },
+          ],
+          stageMedia: 'wingsgroup-travel-support.png',
+        },
+      ],
+      title:
+        locale === 'en'
+          ? 'One ecosystem. Five ways to move forward.'
+          : 'Một hệ sinh thái. Năm cách đồng hành.',
+    },
+  ],
+  title: locale === 'en' ? 'The WingsGroup ecosystem' : 'Hệ sinh thái WingsGroup',
+})
+
 const routeContent: Record<
   Exclude<WingsGroupRouteDefinition['path'], '/'>,
   { en: LocalizedRouteSeed; vi: LocalizedRouteSeed }
@@ -200,6 +332,10 @@ const routeContent: Record<
         contactCTA('en'),
       ],
     },
+  },
+  '/he-sinh-thai': {
+    vi: ecosystemRoute('vi'),
+    en: ecosystemRoute('en'),
   },
   '/nang-luc-dich-vu': {
     vi: {
@@ -547,6 +683,58 @@ export const seedWingsGroupCorporateRoutes = async ({
     throw new Error('Expected exactly one WingsGroup site-settings record.')
   const settings = settingsResult.docs[0]
 
+  const mediaResult = await payload.find({
+    collection: 'media',
+    depth: 0,
+    limit: 100,
+    overrideAccess: true,
+    pagination: false,
+    req,
+    where: { site: { equals: site.id } },
+  })
+  const mediaByFilename = new Map<string, { id: number | string; publishable: boolean }>()
+  for (const media of mediaResult.docs) {
+    const filename =
+      typeof media.filename === 'string'
+        ? media.filename
+        : typeof media.governance?.sourceFilename === 'string'
+          ? media.governance.sourceFilename
+          : null
+    const governance = media.governance
+    const publishable =
+      governance?.managedBy !== 'wingsgroup-v3' || governance.publicationState === 'published'
+    if (filename) mediaByFilename.set(filename, { id: media.id, publishable })
+    if (typeof media.governance?.sourceFilename === 'string') {
+      mediaByFilename.set(media.governance.sourceFilename, { id: media.id, publishable })
+    }
+  }
+
+  const resolveRouteLayout = (layout: SeedBlock[]): SeedBlock[] =>
+    layout.map((block) => {
+      if (block.blockType !== 'wingsGroupEcosystem' || !Array.isArray(block.profiles)) {
+        return block
+      }
+
+      return {
+        ...block,
+        profiles: block.profiles.map((profile) => {
+          if (!profile || typeof profile !== 'object' || Array.isArray(profile)) return profile
+          const stageMedia = (profile as SeedBlock).stageMedia
+          if (typeof stageMedia !== 'string') return profile
+          const preferredMedia = mediaByFilename.get(stageMedia)
+          const fallbackFilename = ecosystemMediaFallbacks[stageMedia]
+          const fallbackMedia = fallbackFilename ? mediaByFilename.get(fallbackFilename) : undefined
+          const mediaID = (preferredMedia?.publishable ? preferredMedia : fallbackMedia)?.id
+          if (mediaID === undefined) {
+            throw new Error(
+              `WingsGroup ecosystem route requires a publishable site-scoped media fixture for ${stageMedia}.`,
+            )
+          }
+          return { ...(profile as SeedBlock), stageMedia: mediaID }
+        }),
+      }
+    })
+
   const forms = await payload.find({
     collection: 'forms',
     depth: 0,
@@ -726,12 +914,13 @@ export const seedWingsGroupCorporateRoutes = async ({
                 },
               ]
             : localized.layout
+        const resolvedLayout = resolveRouteLayout(layout)
         await payload.update({
           collection: 'pages',
           context: { disableRevalidate: true },
           data: {
             hero: localized.hero,
-            layout,
+            layout: resolvedLayout,
             meta: {
               breadcrumbLabel: localized.title,
               description: localized.description,

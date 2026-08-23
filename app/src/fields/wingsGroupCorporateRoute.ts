@@ -6,7 +6,7 @@ export const wingsGroupCorporateRouteField: Field = {
   type: 'group',
   admin: {
     description:
-      'Fail-closed publication contract for the nine E09 WingsGroup routes. Approval fields are operator controlled.',
+      'Fail-closed publication contract for the ten E09 WingsGroup routes. Approval fields are operator controlled.',
     position: 'sidebar',
   },
   fields: [
@@ -23,6 +23,7 @@ export const wingsGroupCorporateRouteField: Field = {
       options: [
         { label: 'Home', value: 'home' },
         { label: 'Corporate', value: 'corporate' },
+        { label: 'Ecosystem', value: 'ecosystem' },
         { label: 'Capability', value: 'capability' },
         { label: 'Trust', value: 'trust' },
         { label: 'Editorial', value: 'editorial' },

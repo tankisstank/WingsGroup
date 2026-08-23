@@ -151,7 +151,7 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
 
   if (siteCode === WINGSGROUP_SITE_CODE) {
     if (!routeDefinition) {
-      throw new Error('WingsGroup v3 chỉ cho phép chín corporate routes đã duyệt.')
+      throw new Error('WingsGroup v3 chỉ cho phép mười corporate routes đã duyệt.')
     }
     let routeGovernance = asRecord(pendingRouteGovernance)
     if (

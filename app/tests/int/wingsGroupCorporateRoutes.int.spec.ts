@@ -684,6 +684,13 @@ describe('WingsGroup corporate route integration', () => {
       site: 1,
       title: 'Liên hệ WingsGroup',
     }
+    const media = [
+      { filename: 'wingsgroup-ecosystem-hero.png', governance: {}, id: 101 },
+      { filename: 'wingsgroup-vietnam-discovery.png', governance: {}, id: 102 },
+      { filename: 'wingsgroup-airport-service.png', governance: {}, id: 103 },
+      { filename: 'wingsgroup-corporate-partnership.png', governance: {}, id: 104 },
+      { filename: 'wingsgroup-travel-support.png', governance: {}, id: 105 },
+    ]
     const payload = {
       create: async ({
         collection,
@@ -701,6 +708,7 @@ describe('WingsGroup corporate route integration', () => {
         if (collection === 'sites') return { docs: [{ code: 'wings-group', id: 1 }] }
         if (collection === 'site-settings') return { docs: [settings] }
         if (collection === 'forms') return { docs: [form] }
+        if (collection === 'media') return { docs: media }
         if (collection === 'pages') return { docs: pages }
         throw new Error(`Unexpected find: ${collection}`)
       },
@@ -735,14 +743,15 @@ describe('WingsGroup corporate route integration', () => {
       req: req as never,
     })
 
-    expect(first.created).toHaveLength(9)
+    expect(first.created).toHaveLength(10)
     expect(second.created).toEqual([])
-    expect(second.updated).toHaveLength(9)
+    expect(second.updated).toHaveLength(10)
     expect(pages.map(({ pathname }) => pathname).sort()).toEqual([
       '/',
       '/chinh-sach-bao-mat',
       '/chinh-sach-thanh-toan',
       '/dieu-khoan-su-dung',
+      '/he-sinh-thai',
       '/lien-he',
       '/nang-luc-dich-vu',
       '/tin-cay-va-phap-ly',
@@ -757,6 +766,13 @@ describe('WingsGroup corporate route integration', () => {
       ...wingsGroupLegacyContactFormFixture,
       fields: [...wingsGroupLegacyContactFormFixture.fields],
     }
+    const media = [
+      { filename: 'wingsgroup-ecosystem-hero.png', governance: {}, id: 101 },
+      { filename: 'wingsgroup-vietnam-discovery.png', governance: {}, id: 102 },
+      { filename: 'wingsgroup-airport-service.png', governance: {}, id: 103 },
+      { filename: 'wingsgroup-corporate-partnership.png', governance: {}, id: 104 },
+      { filename: 'wingsgroup-travel-support.png', governance: {}, id: 105 },
+    ]
     const settings = {
       id: 20,
       wingsGroupV3: {
@@ -790,6 +806,7 @@ describe('WingsGroup corporate route integration', () => {
         if (collection === 'sites') return { docs: [{ code: 'wings-group', id: 1 }] }
         if (collection === 'site-settings') return { docs: [settings] }
         if (collection === 'forms') return { docs: [form] }
+        if (collection === 'media') return { docs: media }
         if (collection === 'pages') return { docs: pages }
         throw new Error(`Unexpected find: ${collection}`)
       },

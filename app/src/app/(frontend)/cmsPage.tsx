@@ -24,7 +24,10 @@ import { getCopyLocale } from '@/utilities/locales'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 import { queryPublishedPageLocalesByExactPath } from '@/utilities/pageLocaleInventory'
-import { getWingsGroupRouteDefinition } from '@/wingsgroup/corporateRoutes'
+import {
+  getWingsGroupRouteDefinition,
+  isWingsGroupPendingPolicyRouteRenderable,
+} from '@/wingsgroup/corporateRoutes'
 import { queryPageByPath } from '@/utilities/cmsPageQuery'
 import {
   isRetailTourEnabledSiteCode,
@@ -350,6 +353,7 @@ export async function generateCmsPageMetadataByPath({
     : []
 
   const site = await getCurrentSite()
+  const settings = await getCurrentSiteSettings()
   if (page && site.code === 'wing-side' && requestedPath.startsWith('/tour/')) {
     const cleanTitle = sanitizeWingSidePublicText(String(page.title || '')).replace(
       /\s+\d+\s+days?$/i,
@@ -373,12 +377,33 @@ export async function generateCmsPageMetadataByPath({
     })
   }
 
-  return generateMeta({
+  const metadata = await generateMeta({
     alternateLocales,
     doc: page,
     locale,
     path: requestedPath,
   })
+
+  if (
+    page &&
+    ('__wingsGroupPendingPolicy' in page ||
+      isWingsGroupPendingPolicyRouteRenderable({
+        locale,
+        page,
+        settings,
+        siteCode: site.code,
+      }))
+  ) {
+    return {
+      ...metadata,
+      robots: {
+        follow: false,
+        index: false,
+      },
+    }
+  }
+
+  return metadata
 }
 
 const resolveStructuredTourPage = async ({

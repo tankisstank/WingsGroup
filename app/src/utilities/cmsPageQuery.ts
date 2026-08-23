@@ -3,9 +3,12 @@ import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 
 import {
+  hasTrustedWingsGroupSettings,
+  getWingsGroupRouteDefinition,
   isWingsGroupRoutePublic,
   isWingsGroupV3PublicSurfacePathAllowed,
 } from '@/wingsgroup/corporateRoutes'
+import { buildWingsGroupPendingPolicyPage } from '@/wingsgroup/pendingPolicyPage'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
@@ -98,23 +101,54 @@ export const queryPageByPath = async ({
   }
 
   const localizedPage = await findPage(locale)
+  const pendingPolicyPage =
+    !draft &&
+    locale === 'vi' &&
+    isWingsGroupV3PublicSurfacePathAllowed({
+      locale: 'vi',
+      path: requestedPath,
+      settings,
+      siteCode: site.code,
+    })
+      ? hasTrustedWingsGroupSettings(settings)
+        ? buildWingsGroupPendingPolicyPage({
+            path: requestedPath,
+            siteID: site.id,
+          })
+        : null
+      : null
 
-  if (!hasRenderableLocalizedContent(localizedPage)) return null
+  const localizedPagePath = localizedPage
+    ? localizedPage.pathname || (localizedPage.slug === 'home' ? '/' : localizedPage.slug)
+    : null
+  const hasWrongWingsGroupRouteFallback =
+    site.code === 'wings-group' &&
+    getWingsGroupRouteDefinition(requestedPath) !== null &&
+    localizedPagePath !== requestedPath
+
+  if (hasWrongWingsGroupRouteFallback || !hasRenderableLocalizedContent(localizedPage)) {
+    return pendingPolicyPage
+  }
   // Draft mode is an authenticated editorial preview perimeter. Preserve its
   // existing locale and slug-fallback behavior without widening public reads.
   if (draft) return localizedPage
 
-  return isWingsGroupV3PublicSurfacePathAllowed({
-    locale: locale || 'vi',
-    path: requestedPath,
-    settings,
-    siteCode: site.code,
-  }) && isWingsGroupRoutePublic({
-    locale: locale || 'vi',
-    page: localizedPage,
-    settings,
-    siteCode: site.code,
-  })
-    ? localizedPage
-    : null
+  if (
+    isWingsGroupV3PublicSurfacePathAllowed({
+      locale: locale || 'vi',
+      path: requestedPath,
+      settings,
+      siteCode: site.code,
+    }) &&
+    isWingsGroupRoutePublic({
+      locale: locale || 'vi',
+      page: localizedPage,
+      settings,
+      siteCode: site.code,
+    })
+  ) {
+    return localizedPage
+  }
+
+  return pendingPolicyPage
 }

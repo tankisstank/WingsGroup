@@ -102,15 +102,68 @@ describe('CMS page requested-path perimeter', () => {
     expect(mocks.find).toHaveBeenCalledTimes(1)
   })
 
+  it('returns a controlled Vietnamese policy notice without exposing a draft', async () => {
+    await expect(
+      queryPageByPath({ locale: 'vi', requestedPath: '/chinh-sach-bao-mat' }),
+    ).resolves.toMatchObject({
+      __wingsGroupPendingPolicy: true,
+      _status: 'published',
+      pathname: '/chinh-sach-bao-mat',
+      site: 1,
+    })
+    expect(mocks.find).toHaveBeenCalledWith(
+      expect.objectContaining({ draft: false, overrideAccess: false }),
+    )
+    expect(
+      JSON.stringify(await queryPageByPath({ locale: 'vi', requestedPath: '/dieu-khoan-su-dung' })),
+    ).not.toContain('https://')
+  })
+
+  it('replaces a published pending policy record instead of exposing its body', async () => {
+    const pendingPolicyPage = {
+      _status: 'published',
+      id: 99,
+      layout: [
+        {
+          blockType: 'content',
+          columns: [{ richText: { root: { children: [{ text: 'UNAPPROVED POLICY BODY' }] } } }],
+        },
+      ],
+      pathname: '/chinh-sach-bao-mat',
+      site: 1,
+      slug: 'chinh-sach-bao-mat',
+      title: 'Chính sách bảo mật',
+      wingsGroupRoute: {
+        archetype: 'policy',
+        managedBy: 'wingsgroup-v3',
+        policy: { approvalState: 'pending' },
+        publication: { en: 'hidden', vi: 'pending' },
+      },
+    }
+    mocks.find.mockResolvedValue({ docs: [pendingPolicyPage] })
+
+    const resolved = await queryPageByPath({
+      locale: 'vi',
+      requestedPath: '/chinh-sach-bao-mat',
+    })
+
+    expect(resolved).toMatchObject({
+      __wingsGroupPendingPolicy: true,
+      pathname: '/chinh-sach-bao-mat',
+    })
+    expect(JSON.stringify(resolved)).not.toContain('UNAPPROVED POLICY BODY')
+    expect(resolved).not.toBe(pendingPolicyPage)
+  })
+
   it('preserves nested slug fallback behavior for other tenants', async () => {
     const wingsGoPage = { ...contactPage, site: 2, wingsGroupRoute: null }
     mocks.site = { code: 'wings-go', id: 2 }
     mocks.settings = {}
     mocks.find.mockResolvedValue({ docs: [wingsGoPage] })
 
-    await expect(
-      queryPageByPath({ locale: 'vi', requestedPath: '/foo/lien-he' }),
-    ).resolves.toEqual(wingsGoPage)
+    await expect(queryPageByPath({ locale: 'vi', requestedPath: '/foo/lien-he' })).resolves.toEqual(
+      wingsGoPage,
+    )
     expect(mocks.find).toHaveBeenCalledTimes(1)
   })
 })

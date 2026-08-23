@@ -1128,11 +1128,13 @@ export interface Page {
   relatedPages?: (number | Page)[] | null;
   publishedAt?: string | null;
   /**
-   * Fail-closed publication contract for the nine E09 WingsGroup routes. Approval fields are operator controlled.
+   * Fail-closed publication contract for the ten E09 WingsGroup routes. Approval fields are operator controlled.
    */
   wingsGroupRoute?: {
     managedBy?: 'wingsgroup-v3' | null;
-    archetype?: ('home' | 'corporate' | 'capability' | 'trust' | 'editorial' | 'contact' | 'policy') | null;
+    archetype?:
+      | ('home' | 'corporate' | 'ecosystem' | 'capability' | 'trust' | 'editorial' | 'contact' | 'policy')
+      | null;
     publication?: {
       vi?: ('hidden' | 'pending' | 'approved') | null;
       en?: ('hidden' | 'pending' | 'approved') | null;

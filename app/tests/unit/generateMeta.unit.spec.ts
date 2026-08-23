@@ -110,6 +110,39 @@ describe('generateMeta multisite locale contract', () => {
     })
   })
 
+  it('builds the canonical Vietnamese ecosystem metadata without exposing English approval', async () => {
+    mocks.getCurrentSite.mockResolvedValue({
+      additionalDomains: [{ domain: 'www.wingsgroup.vn' }],
+      defaultLocale: 'vi',
+      primaryDomain: 'wingsgroup.vn',
+      supportedLocales: ['vi', 'en'],
+    })
+    mocks.getCurrentSiteSettings.mockResolvedValue({
+      seo: {
+        canonicalDomain: 'https://wingsgroup.vn',
+        defaultDescription: 'WingsGroup',
+        defaultTitle: 'WingsGroup',
+      },
+      siteName: 'WingsGroup',
+    })
+
+    const metadata = await generateMeta({
+      alternateLocales: ['vi'],
+      doc: {
+        pathname: '/he-sinh-thai',
+        title: 'Hệ sinh thái WingsGroup',
+      },
+      locale: 'vi',
+      path: '/he-sinh-thai',
+    })
+
+    expect(metadata.alternates?.canonical).toBe('https://wingsgroup.vn/he-sinh-thai')
+    expect(metadata.alternates?.languages).toEqual({
+      vi: 'https://wingsgroup.vn/he-sinh-thai',
+    })
+    expect(metadata.alternates?.languages).not.toHaveProperty('en')
+  })
+
   it('omits unpublished locale alternates when route inventory is narrower than site locales', async () => {
     const site = inventory.sites.find((entry) => entry.name === 'wing-side')!
 
