@@ -1,6 +1,9 @@
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { isWingsGroupLocalPreviewStoreConfigured } from './localPreviewStore'
+
+const localPreviewMediaModuleDirectory = path.dirname(fileURLToPath(import.meta.url))
 
 export const resolveWingsGroupLocalPreviewMediaDirectory = (
   configuredDirectory = process.env.E09_PREVIEW_MEDIA_DIRECTORY,
@@ -13,7 +16,7 @@ export const resolveWingsGroupLocalPreviewMediaDirectory = (
         'E09_PREVIEW_MEDIA_SEED requires the authenticated in-memory E09 preview store; normal public/media is not a preview target.',
       )
     }
-    return path.resolve(import.meta.dirname, '../../public/media')
+    return path.resolve(localPreviewMediaModuleDirectory, '../../public/media')
   }
 
   if (process.env.NODE_ENV === 'production' || process.env.E09_PREVIEW_MEDIA_SEED !== 'true') {
