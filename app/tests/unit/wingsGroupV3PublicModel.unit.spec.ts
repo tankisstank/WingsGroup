@@ -12,9 +12,12 @@ import {
   isWingsGroupV3HomeLayout,
   isWingsGroupPublishedMedia,
   normalizeWingSidePath,
+  resolveWingsGroupEcosystemProfiles,
   resolveGovernedEditorialSelection,
   resolveEcosystemCTA,
   resolveSafeHeroLinks,
+  WINGSGROUP_CAPABILITY_ROWS,
+  WINGSGROUP_PROFILE_ORDER,
 } from '@/components/WingsGroupV3/model'
 import type {
   ArchiveBlock,
@@ -119,6 +122,34 @@ const profile = (
 })
 
 describe('WingsGroup v3 public view model', () => {
+  it('keeps the ecosystem and capability projections in governed branded order', () => {
+    const shuffledProfiles = [
+      profile({ brandKey: 'wingscare', brandName: 'WingsCare' }),
+      profile({ brandKey: 'wingsgo', brandName: 'WingsGo' }),
+      profile({ brandKey: 'wingsplus', brandName: 'WingsPlus' }),
+      profile({ brandKey: 'wingspass', brandName: 'WingsPass' }),
+      profile({ brandKey: 'wing-side', brandName: 'WingSide' }),
+    ]
+
+    expect(
+      resolveWingsGroupEcosystemProfiles(shuffledProfiles).map(({ brandKey }) => brandKey),
+    ).toEqual(WINGSGROUP_PROFILE_ORDER)
+    expect(WINGSGROUP_CAPABILITY_ROWS.vi.map(({ title }) => title)).toEqual([
+      'WingsGo',
+      'WingSide',
+      'WingsPass',
+      'WingsPlus',
+      'WingsCare',
+    ])
+    expect(WINGSGROUP_CAPABILITY_ROWS.en.map(({ title }) => title)).toEqual([
+      'WingsGo',
+      'WingSide',
+      'WingsPass',
+      'WingsPlus',
+      'WingsCare',
+    ])
+  })
+
   it('requires the complete media publication contract', () => {
     expect(isWingsGroupPublishedMedia(governedMedia())).toBe(true)
     expect(

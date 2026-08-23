@@ -293,9 +293,9 @@ const routeContent: Record<
       hero: pageHero('Về WingsGroup'),
       layout: [
         content(
-          'Một tổ chức du lịch, nhiều thương hiệu dịch vụ',
+          'Mối quan hệ thương hiệu',
           WINGSGROUP_LEGAL_IDENTITY.relationshipStatement,
-          `${WINGSGROUP_LEGAL_IDENTITY.legalEntityName} có tên quốc tế và viết tắt ${WINGSGROUP_LEGAL_IDENTITY.internationalName}. Người đại diện pháp luật: ${WINGSGROUP_LEGAL_IDENTITY.legalRepresentative}.`,
+          `${WINGSGROUP_LEGAL_IDENTITY.legalEntityName} có tên quốc tế và viết tắt ${WINGSGROUP_LEGAL_IDENTITY.internationalName}. Người đại diện: ${WINGSGROUP_LEGAL_IDENTITY.legalRepresentative}.`,
         ),
         features(
           'Thông tin doanh nghiệp',
@@ -316,7 +316,7 @@ const routeContent: Record<
       hero: pageHero('About WingsGroup'),
       layout: [
         content(
-          'One organisational ecosystem, developing travel brands',
+          'Brand relationship',
           WINGSGROUP_RELATIONSHIP_STATEMENT_EN,
           `${WINGSGROUP_LEGAL_IDENTITY.legalEntityName} uses the international abbreviation ${WINGSGROUP_LEGAL_IDENTITY.internationalName}. Its legal representative is ${WINGSGROUP_LEGAL_IDENTITY.legalRepresentative}.`,
         ),
@@ -413,7 +413,7 @@ const routeContent: Record<
           'Thông tin pháp lý công khai',
           `Pháp nhân: ${WINGSGROUP_LEGAL_IDENTITY.legalEntityName} (${WINGSGROUP_LEGAL_IDENTITY.internationalName}).`,
           `Mã số doanh nghiệp: ${WINGSGROUP_LEGAL_IDENTITY.registrationNumber}. Giấy phép kinh doanh dịch vụ lữ hành quốc tế: ${WINGSGROUP_LEGAL_IDENTITY.licenceNumber}.`,
-          `Người đại diện pháp luật: ${WINGSGROUP_LEGAL_IDENTITY.legalRepresentative}.`,
+          `Người đại diện: ${WINGSGROUP_LEGAL_IDENTITY.legalRepresentative}.`,
         ),
         contactCTA('vi'),
       ],

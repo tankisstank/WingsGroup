@@ -26,6 +26,8 @@ import {
 } from '@/components/WingsGroupV3/model'
 import { WingsGroupEditorialRail } from '@/components/WingsGroupV3/EditorialRail'
 import type { WingsGroupRouteArchetype } from '@/wingsgroup/corporateRoutes'
+import { WingsGroupCapabilitySection } from '@/blocks/WingsGroupCapability/Component'
+import { WingsGroupCorporateSection } from '@/blocks/WingsGroupCorporate/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -98,9 +100,15 @@ export const RenderBlocks: React.FC<{
                   ? WingsGroupContactSection
                   : wingsGroupV3Home && (blockType === 'infoStrip' || blockType === 'stats')
                     ? WingsGroupTrustSection
-                    : wingsGroupV3 && wingsGroupV3Route === 'trust' && blockType === 'content'
-                      ? WingsGroupTrustSection
-                      : blockComponents[blockType]
+                    : wingsGroupV3 &&
+                        wingsGroupV3Route === 'capability' &&
+                        blockType === 'featureGrid'
+                      ? WingsGroupCapabilitySection
+                      : wingsGroupV3 && wingsGroupV3Route === 'corporate' && blockType === 'content'
+                        ? WingsGroupCorporateSection
+                        : wingsGroupV3 && wingsGroupV3Route === 'trust' && blockType === 'content'
+                          ? WingsGroupTrustSection
+                          : blockComponents[blockType]
 
             if (Block) {
               const blockProps =
@@ -114,7 +122,9 @@ export const RenderBlocks: React.FC<{
                     }
                   : block.blockType === 'wingsGroupEcosystem'
                     ? { ...block, allowWingsGroupDevelopmentMedia, approvedProofKeys, locale }
-                    : wingsGroupV3 && wingsGroupV3Route === 'trust' && block.blockType === 'content'
+                    : wingsGroupV3 &&
+                        (wingsGroupV3Route === 'corporate' || wingsGroupV3Route === 'trust') &&
+                        block.blockType === 'content'
                       ? { ...block, legalIdentity: wingsGroupLegalIdentity, locale }
                       : wingsGroupV3Home &&
                           (block.blockType === 'infoStrip' || block.blockType === 'stats')

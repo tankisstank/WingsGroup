@@ -163,6 +163,70 @@ export const WINGSGROUP_PROFILE_PRESENTATION: Record<
   wingscare: { category: 'BẢO HIỂM & HỖ TRỢ', stageTitle: 'Yên tâm trong từng chặng.' },
 }
 
+export const WINGSGROUP_PROFILE_ORDER = [
+  'wingsgo',
+  'wing-side',
+  'wingspass',
+  'wingsplus',
+  'wingscare',
+] as const satisfies readonly EcosystemProfile['brandKey'][]
+
+export const WINGSGROUP_CAPABILITY_ROWS = {
+  en: [
+    {
+      title: 'WingsGo',
+      description: 'Journey advice, departure planning and pre-trip support.',
+    },
+    {
+      title: 'WingSide',
+      description: 'Vietnam journeys shaped around local rhythm and private groups.',
+    },
+    {
+      title: 'WingsPass',
+      description: 'Airport touchpoints, arrival support and Fast Track by request.',
+    },
+    {
+      title: 'WingsPlus',
+      description: 'Private journeys, corporate groups and considered event programmes.',
+    },
+    {
+      title: 'WingsCare',
+      description: 'Clearer guidance on travel care, benefits and support options.',
+    },
+  ],
+  vi: [
+    {
+      title: 'WingsGo',
+      description: 'Tư vấn hành trình, lịch khởi hành và hỗ trợ trước chuyến đi.',
+    },
+    {
+      title: 'WingSide',
+      description: 'Hành trình Việt Nam theo nhịp riêng và nhu cầu của nhóm riêng.',
+    },
+    {
+      title: 'WingsPass',
+      description: 'Hỗ trợ tại điểm chạm, đón tiễn và Fast Track theo nhu cầu.',
+    },
+    {
+      title: 'WingsPlus',
+      description: 'Hành trình riêng, đoàn doanh nghiệp và chương trình theo mục tiêu.',
+    },
+    {
+      title: 'WingsCare',
+      description: 'Làm rõ quyền lợi, phạm vi hỗ trợ và lưu ý trước hành trình.',
+    },
+  ],
+} as const
+
+export const resolveWingsGroupEcosystemProfiles = (
+  profiles?: readonly EcosystemProfile[] | null,
+): EcosystemProfile[] => {
+  const byBrandKey = new Map(profiles?.map((profile) => [profile.brandKey, profile]) || [])
+  return WINGSGROUP_PROFILE_ORDER.map((brandKey) => byBrandKey.get(brandKey)).filter(
+    (profile): profile is EcosystemProfile => Boolean(profile),
+  )
+}
+
 export type ResolvedEcosystemCTA = {
   href: string
   isFallback: boolean

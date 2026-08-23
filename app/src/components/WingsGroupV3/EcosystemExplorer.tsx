@@ -11,6 +11,7 @@ import {
   isWingsGroupRenderableMedia,
   isWingsGroupPublishedMedia,
   resolveEcosystemCTA,
+  resolveWingsGroupEcosystemProfiles,
   WINGSGROUP_PROFILE_PRESENTATION,
 } from './model'
 import styles from './WingsGroupV3.module.css'
@@ -53,7 +54,7 @@ export const EcosystemExplorer = ({
   profiles,
   title,
 }: Props) => {
-  const safeProfiles = (profiles || []).slice(0, 5)
+  const safeProfiles = resolveWingsGroupEcosystemProfiles(profiles)
   const [activeIndex, setActiveIndex] = useState(0)
   const [manualPause, setManualPause] = useState(false)
   const id = useId().replace(/:/g, '')
@@ -119,6 +120,7 @@ export const EcosystemExplorer = ({
       aria-labelledby={`${id}-title`}
       className={`${styles.section} ${styles.ecosystemSection}`}
       data-od-id="ecosystem"
+      data-profile-count={safeProfiles.length}
       data-testid="wingsgroup-ecosystem"
       id="about"
       onFocus={() => setManualPause(true)}
@@ -160,10 +162,9 @@ export const EcosystemExplorer = ({
               <p className={styles.unifiedStageKicker}>
                 {String(activeIndex + 1).padStart(2, '0')} / {presentation?.category}
               </p>
-              <h3 className={styles.unifiedStageTitle}>{presentation?.stageTitle}</h3>
-              <p className={styles.unifiedStageCopy}>
-                {activeProfile.serviceScope.map((service) => service.label).join(' · ')}
-              </p>
+              <p className={styles.unifiedStageTitle}>{activeProfile.brandName}</p>
+              <p className={styles.unifiedStageSubtitle}>{presentation?.stageTitle}</p>
+              <p className={styles.unifiedStageCopy}>{activeProfile.description}</p>
             </div>
           </article>
 

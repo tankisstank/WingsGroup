@@ -106,9 +106,7 @@ export const validateWingsGroupV3Settings: CollectionBeforeChangeHook = ({
   req,
 }) => {
   const hasPendingSettings = Object.prototype.hasOwnProperty.call(data || {}, 'wingsGroupV3')
-  const settings = asRecord(
-    hasPendingSettings ? data?.wingsGroupV3 : originalDoc?.wingsGroupV3,
-  )
+  const settings = asRecord(hasPendingSettings ? data?.wingsGroupV3 : originalDoc?.wingsGroupV3)
   if (
     req.context?.seed !== true &&
     req.user?.role !== 'super-admin' &&
@@ -145,7 +143,9 @@ export const validateWingsGroupV3Settings: CollectionBeforeChangeHook = ({
 
   if (privacy.approvalState === 'approved') {
     if (!isTrimmedNonempty(privacy.dataSubjectRightsStatement)) {
-      throw new Error('Privacy approval cần nội dung quyền chủ thể dữ liệu do legal owner cung cấp.')
+      throw new Error(
+        'Privacy approval cần nội dung quyền chủ thể dữ liệu do legal owner cung cấp.',
+      )
     }
     if (!isTrimmedNonempty(privacy.dataSubjectRightsEvidence)) {
       throw new Error('Privacy approval cần bằng chứng quyền chủ thể dữ liệu.')
@@ -242,8 +242,7 @@ export const protectWingsGroupSiteSettingsBeforeChange: CollectionBeforeChangeHo
     const existing = await findSettingsForSite(target.id, req)
     if (
       existing.docs.length !== 1 ||
-      (originalDoc?.id !== undefined &&
-        String(existing.docs[0]?.id) !== String(originalDoc.id))
+      (originalDoc?.id !== undefined && String(existing.docs[0]?.id) !== String(originalDoc.id))
     ) {
       throw new Error('WingsGroup SiteSettings duplicate hoặc không xác định; từ chối thay đổi.')
     }
@@ -267,10 +266,7 @@ export const protectWingsGroupSiteSettingsBeforeDelete: CollectionBeforeDeleteHo
   if (target?.code !== 'wings-group') return
 
   const existing = await findSettingsForSite(target.id, req)
-  if (
-    existing.docs.length !== 1 ||
-    String(existing.docs[0]?.id) !== String(settings.id)
-  ) {
+  if (existing.docs.length !== 1 || String(existing.docs[0]?.id) !== String(settings.id)) {
     throw new Error('WingsGroup SiteSettings duplicate hoặc không xác định; từ chối xóa.')
   }
   if (req.context?.seed !== true && req.user?.role !== 'super-admin') {
@@ -467,7 +463,7 @@ export const wingsGroupV3SettingsField: Field = {
         { name: 'travelOffice', label: 'Văn phòng du lịch', type: 'textarea' },
         { name: 'registrationNumber', label: 'Mã số doanh nghiệp', type: 'text' },
         { name: 'licenceNumber', label: 'Giấy phép lữ hành quốc tế', type: 'text' },
-        { name: 'legalRepresentative', label: 'Người đại diện pháp luật', type: 'text' },
+        { name: 'legalRepresentative', label: 'Người đại diện', type: 'text' },
         { name: 'relationshipStatement', label: 'Quan hệ thương hiệu', type: 'textarea' },
       ],
     },

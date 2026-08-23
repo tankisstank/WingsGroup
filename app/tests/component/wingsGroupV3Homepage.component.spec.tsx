@@ -3,6 +3,8 @@ import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { WingsGroupEcosystemComponent } from '@/blocks/WingsGroupEcosystem/Component'
+import { WingsGroupCapabilitySection } from '@/blocks/WingsGroupCapability/Component'
+import { WingsGroupCorporateSection } from '@/blocks/WingsGroupCorporate/Component'
 import { WingsGroupProofArchiveComponent } from '@/blocks/WingsGroupProofArchive/Component'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { WingsGroupTrustSection } from '@/blocks/WingsGroupTrust/Component'
@@ -165,10 +167,85 @@ describe('WingsGroup v3 public components', () => {
     fireEvent.click(wingSideTab)
     expect(screen.getByRole('heading', { name: 'WingSide', level: 3 })).toBeTruthy()
     expect(screen.getByAltText('WingSide editorial scene')).toBeTruthy()
-    expect(screen.getByText('WingSide service profile')).toBeTruthy()
+    expect(screen.getAllByText('WingSide service profile')).toHaveLength(2)
     expect(screen.getByRole('link', { name: /Tư vấn WingSide/ }).getAttribute('href')).toBe(
       '/lien-he#contact-form',
     )
+  })
+
+  it('keeps the governed explorer in canonical five-profile order', () => {
+    render(
+      <WingsGroupEcosystemComponent
+        blockType="wingsGroupEcosystem"
+        locale="vi"
+        profiles={[
+          profile('wingscare', 'WingsCare'),
+          profile('wingsplus', 'WingsPlus'),
+          profile('wingsgo', 'WingsGo'),
+          profile('wingspass', 'WingsPass'),
+          profile('wing-side', 'WingSide'),
+        ]}
+        title="Một hệ sinh thái. Năm cách đồng hành."
+      />,
+    )
+
+    expect(screen.getByTestId('wingsgroup-ecosystem').dataset.profileCount).toBe('5')
+    expect(screen.getAllByRole('tab').map((tab) => tab.querySelector('b')?.textContent)).toEqual([
+      'WingsGo',
+      'WingSide',
+      'WingsPass',
+      'WingsPlus',
+      'WingsCare',
+    ])
+    expect(screen.getAllByText('WingsGo service profile')).toHaveLength(2)
+  })
+
+  it('renders capability as five contact-fallback service rows instead of generic cards', () => {
+    render(
+      <WingsGroupCapabilitySection
+        description="Mỗi thương hiệu tập trung vào một hành trình phục vụ rõ ràng."
+        eyebrow="Năng lực"
+        items={[
+          { description: 'one', title: 'one' },
+          { description: 'two', title: 'two' },
+          { description: 'three', title: 'three' },
+          { description: 'four', title: 'four' },
+        ]}
+        locale="vi"
+        title="Dịch vụ được tổ chức theo nhu cầu"
+      />,
+    )
+
+    expect(screen.getAllByRole('article')).toHaveLength(5)
+    expect(screen.getByRole('heading', { name: 'WingsCare', level: 3 })).toBeTruthy()
+    expect(screen.getAllByRole('link', { name: /Trao đổi nhu cầu/ })).toHaveLength(5)
+    expect(
+      screen
+        .getAllByRole('link')
+        .every((link) => link.getAttribute('href') === '/lien-he#contact-form'),
+    ).toBe(true)
+  })
+
+  it('renders only the approved corporate relationship wording and identity', () => {
+    render(<WingsGroupCorporateSection locale="vi" />)
+
+    expect(screen.getByTestId('wingsgroup-corporate').dataset.relationshipStatement).toBe(
+      'governed',
+    )
+    expect(
+      screen.getByText(
+        'WingsGroup là thương hiệu phát triển mới trong cùng hệ sinh thái tổ chức với VietWings và Đôi Cánh Việt. Hệ sinh thái tiếp tục phát triển các thương hiệu WingsGo, WingSide, WingsCare và các dịch vụ liên quan.',
+      ),
+    ).toBeTruthy()
+    expect(screen.getByText('CÔNG TY CỔ PHẦN DU LỊCH ĐÔI CÁNH VIỆT')).toBeTruthy()
+    expect(screen.queryByText(/đối tác chiến lược|hàng đầu|phục vụ hàng triệu/i)).toBeNull()
+  })
+
+  it('uses the approved Vietnamese representative label without legal-representative wording', () => {
+    render(<WingsGroupCorporateSection locale="vi" />)
+
+    expect(screen.getByText('Người đại diện')).toBeTruthy()
+    expect(screen.queryByText(/Người đại diện pháp luật/i)).toBeNull()
   })
 
   it('supports roving tab focus with arrow, Home and End keys', () => {
