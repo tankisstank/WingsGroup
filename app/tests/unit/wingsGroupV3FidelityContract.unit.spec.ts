@@ -81,7 +81,7 @@ describe('WingsGroup v3 executable fidelity contract', () => {
       bilingualAltRequired: true,
       checksumRequired: true,
       governedAssetCount: 13,
-      publicationState: 'pending-production',
+      publicationState: 'approved-for-production',
       usageScope: 'editorial-service',
     })
     expect(getSection(contract, 'ecosystem').stage).toMatchObject({

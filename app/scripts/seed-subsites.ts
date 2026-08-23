@@ -1273,6 +1273,7 @@ async function createSiteSettings(
     faviconImageID?: number | string
     headerNavItems?: Array<ReturnType<typeof linkItem>>
     logoImageID?: number | string | null
+    salesEmail?: string
     supportEmail?: string
     supportPhone?: string
     tagline?: string
@@ -1314,6 +1315,7 @@ async function createSiteSettings(
         canonicalDomain: `https://${siteSeed.domain.replace('.local', '.vn')}`,
       },
       supportEmail: overrides.supportEmail || `hello@${siteSeed.domain.replace('.local', '.vn')}`,
+      salesEmail: overrides.salesEmail,
       supportPhone: overrides.supportPhone || '+84 28 0000 0000',
       headerNavItems: overrides.headerNavItems || [linkItem('Trang chủ', '/')],
       footerNavItems: overrides.footerNavItems || [linkItem('Trang chủ', '/')],
@@ -1520,8 +1522,9 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
         linkItem('Tin tức', '/tin-tuc'),
         linkItem('Liên hệ', '/lien-he'),
       ],
-      supportEmail: 'info@doicanhviet.com',
-      supportPhone: '0975513886',
+      salesEmail: 'sales@wingsgroup.vn',
+      supportEmail: 'info@wingsgroup.vn',
+      supportPhone: '0912910101',
       tagline: 'Tận tâm trong từng hành trình, vững vàng trong từng kết nối.',
     })
 
@@ -4293,8 +4296,9 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
         linkItem('Chính sách thanh toán', '/chinh-sach-thanh-toan'),
         linkItem('Liên hệ', '/lien-he'),
       ],
-      supportEmail: 'info@doicanhviet.com',
-      supportPhone: '0975513886',
+      salesEmail: 'sales@wingsgroup.vn',
+      supportEmail: 'info@wingsgroup.vn',
+      supportPhone: '0912910101',
       tagline:
         'Lớp umbrella của hệ sinh thái WingsGroup, kết nối tour đại trà ra nước ngoài, hành trình cho khách quốc tế tại Việt Nam, hỗ trợ sân bay, private / MICE và chăm sóc sau bán.',
     },

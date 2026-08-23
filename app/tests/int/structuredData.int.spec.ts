@@ -18,6 +18,7 @@ const settings = {
     canonicalDomain: 'https://wingsgroup.example',
     defaultDescription: 'Default WingsGroup SEO description',
   },
+  salesEmail: 'sales@wingsgroup.example',
   supportEmail: 'support@wingsgroup.example',
   supportPhone: '+84123456789',
   updatedAt: '2026-01-01T00:00:00.000Z',
@@ -37,6 +38,11 @@ describe('structured data builders', () => {
         email: 'support@wingsgroup.example',
         telephone: '+84123456789',
         contactType: 'customer support',
+      },
+      {
+        '@type': 'ContactPoint',
+        email: 'sales@wingsgroup.example',
+        contactType: 'sales',
       },
     ])
   })

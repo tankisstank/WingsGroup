@@ -15,7 +15,7 @@ export const expectedGateInventory = Object.freeze([
   Object.freeze({ key: 'legal-identity', mandatory: true }),
   Object.freeze({ key: 'privacy-consent', mandatory: true }),
   Object.freeze({ key: 'consultation-channels', mandatory: false }),
-  Object.freeze({ key: 'proof-publication', mandatory: true }),
+  Object.freeze({ key: 'proof-publication', mandatory: false }),
   Object.freeze({ key: 'ecosystem-deep-links', mandatory: false }),
   Object.freeze({ key: 'locale-completeness', mandatory: true }),
   Object.freeze({ key: 'editorial-media', mandatory: true }),

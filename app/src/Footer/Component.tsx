@@ -28,6 +28,10 @@ export async function Footer() {
   const wingSideFooterCopy = isWingSide ? getWingSideFooterCopy(locale) : null
 
   const navItems = settings?.footerNavItems || []
+  const salesEmail =
+    settings?.salesEmail && settings.salesEmail !== settings.supportEmail
+      ? settings.salesEmail
+      : null
 
   return (
     <footer
@@ -124,19 +128,25 @@ export async function Footer() {
             {settings?.footerNote ? (
               <div className="text-xs text-muted-foreground max-w-md">{settings.footerNote}</div>
             ) : null}
-            {settings?.supportEmail || settings?.supportPhone ? (
+            {settings?.supportEmail || salesEmail || settings?.supportPhone ? (
               <div className="site-footer__contacts">
                 {settings.supportEmail ? (
-                  <span>
+                  <a href={`mailto:${settings.supportEmail}`}>
                     <MailIcon aria-hidden="true" className="h-4 w-4" />
                     {settings.supportEmail}
-                  </span>
+                  </a>
+                ) : null}
+                {salesEmail ? (
+                  <a href={`mailto:${salesEmail}`}>
+                    <MailIcon aria-hidden="true" className="h-4 w-4" />
+                    {salesEmail}
+                  </a>
                 ) : null}
                 {settings.supportPhone ? (
-                  <span>
+                  <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
                     <PhoneIcon aria-hidden="true" className="h-4 w-4" />
                     {settings.supportPhone}
-                  </span>
+                  </a>
                 ) : null}
               </div>
             ) : null}

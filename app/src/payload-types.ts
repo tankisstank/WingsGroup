@@ -388,6 +388,7 @@ export interface SiteSetting {
     variant?: ('standard' | 'retail-departures' | 'planner' | 'utility') | null;
   };
   supportEmail?: string | null;
+  salesEmail?: string | null;
   supportPhone?: string | null;
   headerNavItems?:
     | {
@@ -2994,6 +2995,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         variant?: T;
       };
   supportEmail?: T;
+  salesEmail?: T;
   supportPhone?: T;
   headerNavItems?:
     | T

@@ -123,7 +123,8 @@ export const SiteSettings: CollectionConfig = {
           type: 'relationship',
           relationTo: 'theme-presets',
           admin: {
-            description: 'Preset theme mặc định. Các field bên dưới sẽ override preset nếu được nhập.',
+            description:
+              'Preset theme mặc định. Các field bên dưới sẽ override preset nếu được nhập.',
           },
         },
         {
@@ -273,6 +274,11 @@ export const SiteSettings: CollectionConfig = {
     {
       name: 'supportEmail',
       label: 'Email hỗ trợ',
+      type: 'email',
+    },
+    {
+      name: 'salesEmail',
+      label: 'Email bộ phận sales',
       type: 'email',
     },
     {

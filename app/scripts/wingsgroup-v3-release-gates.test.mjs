@@ -45,11 +45,13 @@ test('the governed register has the immutable expected inventory and remains fai
 
   assert.equal(result.approved, false)
   assert.deepEqual(result.errors, [])
-  assert.equal(result.mandatoryGateCount, 6)
-  assert.equal(result.pendingMandatory.length, 5)
+  assert.equal(result.mandatoryGateCount, 5)
+  assert.equal(result.pendingMandatory.length, 3)
   assert.ok(result.pendingMandatory.some(({ key }) => key === 'privacy-consent'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'legal-identity'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'ecosystem-deep-links'))
+  assert.ok(!result.pendingMandatory.some(({ key }) => key === 'proof-publication'))
+  assert.ok(!result.pendingMandatory.some(({ key }) => key === 'editorial-media'))
   assert.deepEqual(
     governedRegister.gates.map(({ key, mandatory }) => ({ key, mandatory })),
     expectedGateInventory,
@@ -93,6 +95,11 @@ test('the complete optional consultation-channel gate may remain pending without
     gateByKey(candidate, 'consultation-channels').channels.map(({ key }) => key),
     expectedConsultationChannelKeys,
   )
+  assert.deepEqual(gateByKey(candidate, 'consultation-channels').directContacts, {
+    contactEmail: 'info@wingsgroup.vn',
+    hotline: '0912910101',
+    salesEmail: 'sales@wingsgroup.vn',
+  })
   assert.equal(result.approved, true)
   assert.deepEqual(result.pendingMandatory, [])
 })
@@ -134,6 +141,17 @@ test('pending ecosystem deep links remain non-blocking while their CTAs stay fai
   assert.match(ecosystemGate.failClosedBehavior, /contact intake/i)
 })
 
+test('pending proof publication remains non-blocking while every proof stays fail-closed', () => {
+  const candidate = fullyApprovedRegister()
+  const proofGate = gateByKey(candidate, 'proof-publication')
+
+  assert.equal(proofGate.mandatory, false)
+  assert.equal(proofGate.state, 'pending')
+  assert.equal(assessReleaseGates(candidate).approved, true)
+  assert.match(proofGate.releaseRule, /specific proof record/i)
+  assert.match(proofGate.failClosedBehavior, /Do not publish/i)
+})
+
 test('upgrading ecosystem deep links to mandatory violates their locked P2 classification', () => {
   const candidate = fullyApprovedRegister()
   const ecosystemGate = gateByKey(candidate, 'ecosystem-deep-links')
@@ -163,16 +181,29 @@ test('omitting any expected gate fails closed', () => {
   }
 })
 
-test('downgrading a mandatory gate to optional fails closed', () => {
+test('downgrading a mandatory publication gate to optional fails closed', () => {
   const candidate = fullyApprovedRegister()
-  gateByKey(candidate, 'proof-publication').mandatory = false
+  gateByKey(candidate, 'editorial-media').mandatory = false
 
   const result = assessReleaseGates(candidate)
 
   assert.equal(result.approved, false)
   assert.match(
     result.errors.join(' '),
-    /Gate proof-publication mandatory classification must be true; received false/,
+    /Gate editorial-media mandatory classification must be true; received false/,
+  )
+})
+
+test('upgrading proof publication to a release blocker violates its locked classification', () => {
+  const candidate = fullyApprovedRegister()
+  gateByKey(candidate, 'proof-publication').mandatory = true
+
+  const result = assessReleaseGates(candidate)
+
+  assert.equal(result.approved, false)
+  assert.match(
+    result.errors.join(' '),
+    /Gate proof-publication mandatory classification must be false; received true/,
   )
 })
 

@@ -70,8 +70,13 @@
         { "key": "whatsapp", "state": "unconfigured" },
         { "key": "messenger", "state": "unconfigured" }
       ],
+      "directContacts": {
+        "contactEmail": "info@wingsgroup.vn",
+        "hotline": "0912910101",
+        "salesEmail": "sales@wingsgroup.vn"
+      },
       "evidenceRequirements": ["Approved HTTPS URL", "Named owner", "SLA", "Tracking proof"],
-      "releaseRule": "The built-in, consent-aware WingsGroup contact form is the required consultation path. External channels are optional and do not block release while unconfigured.",
+      "releaseRule": "The built-in, consent-aware WingsGroup contact form and the approved hotline/email contacts are the consultation path. External channels are optional and do not block release while unconfigured.",
       "failClosedBehavior": "Show channels as chờ cập nhật or record a preferred channel only; do not open an external URL. A configured external channel must satisfy URL, owner, SLA, and tracking checks before it can be shown.",
       "consumers": ["US-061", "US-063", "US-064", "US-066"]
     },
@@ -79,10 +84,11 @@
       "key": "proof-publication",
       "priority": "P1",
       "scope": "Trust and proof records",
-      "mandatory": true,
+      "mandatory": false,
       "state": "pending",
       "owner": "Content and legal owner",
       "evidenceRequirements": ["Source or issuer", "Context or date", "Publication permission", "Media provenance"],
+      "releaseRule": "Proof is required only when a specific proof record is proposed for publication. A pending proof archive must not block release when it remains hidden.",
       "failClosedBehavior": "Do not publish the proof record or present editorial media as proof.",
       "consumers": ["US-061", "US-063", "US-065", "US-066"]
     },
@@ -122,13 +128,14 @@
       "priority": "P1",
       "scope": "Thirteen supplied editorial images",
       "mandatory": true,
-      "state": "pending",
+      "state": "approved",
       "owner": "Content and brand owner",
       "rightsApproved": true,
-      "evidence": ["Stakeholder confirmed the 13 handoff images are licensed for use, 2026-08-13", "docs/product/wingsgroup-v3-media-manifest.json"],
+      "evidence": ["Stakeholder confirmed the 13 handoff images were created with ChatGPT and may be used for WingsGroup, 2026-08-23", "docs/product/wingsgroup-v3-media-manifest.json"],
+      "approvedAt": "2026-08-23",
       "provenanceManifest": "docs/product/wingsgroup-v3-media-manifest.json",
       "evidenceRequirements": ["Vietnamese alt text", "Source and provenance", "Publication rights", "WingsGroup site scope", "Responsive derivatives"],
-      "failClosedBehavior": "Do not publish a media item until its provenance, Vietnamese and English alt text, WingsGroup scope, and responsive derivatives are recorded; never label editorial media as legal proof.",
+      "failClosedBehavior": "Do not publish a media item until its provenance, Vietnamese and English alt text, WingsGroup scope, responsive derivatives, and production import are recorded; never label editorial media as legal proof.",
       "consumers": ["US-061", "US-062", "US-063", "US-066"]
     },
     {

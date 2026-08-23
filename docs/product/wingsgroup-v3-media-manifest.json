@@ -1,12 +1,12 @@
 {
   "version": 1,
   "siteCode": "wings-group",
-  "publicationState": "pending-production",
-  "licenseScope": "Licensed for WingsGroup v3 development and staging review only; production publication requires a separate approval.",
+  "publicationState": "approved-for-production",
+  "licenseScope": "Approved for WingsGroup v3 development, staging, and production editorial use.",
   "rights": {
     "state": "approved",
-    "evidence": "Stakeholder confirmation that the 13 handoff images are licensed for WingsGroup v3 development use, 2026-08-13.",
-    "restriction": "Development/staging use only until production publication approval is recorded. Do not present any image as legal proof, review, award, certificate, or performance evidence."
+    "evidence": "Stakeholder confirmed that the 13 handoff images were created with ChatGPT and approved for WingsGroup editorial use, including production, 2026-08-23.",
+    "restriction": "Do not present any image as legal proof, review, award, certificate, or performance evidence. Runtime publication still requires the governed site scope, bilingual alt text, verified responsive derivatives, and a completed production import."
   },
   "sourcePackage": {
     "attachmentId": "wingsgroup-v3-development-handoff-2026-08-10",

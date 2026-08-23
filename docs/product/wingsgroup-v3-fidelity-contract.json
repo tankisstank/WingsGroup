@@ -179,7 +179,7 @@
   "mediaExpectations": {
     "manifest": "docs/product/wingsgroup-v3-media-manifest.json",
     "governedAssetCount": 13,
-    "publicationState": "pending-production",
+    "publicationState": "approved-for-production",
     "usageScope": "editorial-service",
     "bilingualAltRequired": true,
     "checksumRequired": true,

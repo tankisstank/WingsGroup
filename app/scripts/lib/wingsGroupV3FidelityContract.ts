@@ -149,8 +149,10 @@ export const assessWingsGroupV3FidelityContract = (
   if (mediaExpectations?.governedAssetCount !== 13) {
     errors.push('Contract must govern exactly 13 development assets.')
   }
-  if (mediaExpectations?.publicationState !== 'pending-production') {
-    errors.push('Contract media publicationState must remain pending-production.')
+  if (mediaExpectations?.publicationState !== 'approved-for-production') {
+    errors.push(
+      'Contract media publicationState must match the approved-for-production rights decision.',
+    )
   }
 
   return { errors, valid: errors.length === 0 }
