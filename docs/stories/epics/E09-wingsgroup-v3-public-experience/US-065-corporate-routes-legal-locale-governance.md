@@ -51,7 +51,8 @@ không leak English hoặc policy draft, và chỉ publish nội dung khi route/
 
 ## Pending Gates
 
-`privacy-consent` là cổng mandatory duy nhất còn pending. Consultation channels
+Privacy/consent source contract đã được stakeholder duyệt ngày `2026-08-24`;
+runtime policy/consent proof vẫn là release work riêng. Consultation channels
 và ecosystem destination validation vẫn optional/fail-closed; brand token/logo,
 13-asset site-scope/publication authorization và English editorial review đã
 approved. Environment gates được giữ ở US-066.

@@ -47,6 +47,7 @@ và mobile; consultation flow phải có fallback nội bộ, consent-aware và 
 
 ## Pending Gates
 
-Legal/privacy/consent approval, editorial media và English copy approval, brand
-token/logo, consultation endpoint owner/SLA/tracking và ecosystem destination
-validation vẫn mở.
+Editorial media và English copy approval, brand token/logo, consultation endpoint
+owner/SLA/tracking và ecosystem destination validation vẫn mở; privacy/consent
+source contract đã được stakeholder duyệt ngày `2026-08-24`, còn runtime consent
+proof là release work riêng.

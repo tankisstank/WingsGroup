@@ -30,6 +30,10 @@ import {
   buildWingsGroupCorporateRouteSeeds,
   resolveCorporateRouteSeedAction,
   routeGovernanceForSeed,
+  WINGSGROUP_PRIVACY_APPROVAL_REFERENCE,
+  WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
+  WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_EN,
+  WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_VI,
   wingsGroupSettingsSeed,
 } from '../../scripts/lib/wingsGroupCorporateRouteSeed'
 import { contentPresentationDefinitions } from '@/blocks/presentations'
@@ -421,7 +425,7 @@ describe('WingsGroup corporate route contract', () => {
     expect(findWingsGroupPublicJargon({ body: 'Nội dung cho site con.' })).toBeTruthy()
   })
 
-  it('builds an idempotent route plan with route-ready English and pending policy gates', () => {
+  it('builds an idempotent route plan with approved privacy and pending Terms/Payment gates', () => {
     const seeds = buildWingsGroupCorporateRouteSeeds()
     expect(seeds).toHaveLength(10)
     const ecosystem = seeds.find((seed) => seed.path === '/he-sinh-thai')
@@ -448,17 +452,43 @@ describe('WingsGroup corporate route contract', () => {
       expect(resolveCorporateRouteSeedAction([{ id: 1, pathname: seed.path }], seed)).toBe('update')
       const governance = routeGovernanceForSeed(seed)
       if (seed.policy) {
-        expect(governance.contentApproval).toEqual({ en: null, vi: null })
-        expect(governance.publication.en).toBe('hidden')
-        expect(governance.publication.vi).toBe('pending')
-        expect(governance.policy).toMatchObject({
-          approvalState: 'pending',
-          dataSubjectRightsStatement: null,
-          effectiveDate: null,
-          legalOwner: null,
-          privacyApprovalReference: null,
-          validationMarker: null,
-        })
+        if (seed.path === '/chinh-sach-bao-mat') {
+          expect(JSON.stringify(seed.vi)).toContain(
+            'Tôi đồng ý để WingsGroup sử dụng thông tin đã cung cấp nhằm liên hệ, tư vấn và chuyển yêu cầu đến bộ phận phù hợp theo Chính sách bảo mật.',
+          )
+          expect(JSON.stringify(seed.en)).toContain(
+            'I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy.',
+          )
+          expect(governance.contentApproval).toEqual({
+            en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+            vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+          })
+          expect(governance.publication).toEqual({ en: 'approved', vi: 'approved' })
+          expect(governance.policy).toMatchObject({
+            approvalReference: WINGSGROUP_PRIVACY_APPROVAL_REFERENCE,
+            approvalState: 'approved',
+            consentEvidenceReference: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
+            dataSubjectRightsEvidence: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
+            dataSubjectRightsStatement: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_VI,
+            effectiveDate: '2026-08-24',
+            legalOwner: 'Business and legal owner',
+            privacyApprovalReference: WINGSGROUP_PRIVACY_APPROVAL_REFERENCE,
+            validationMarker: WINGSGROUP_POLICY_VALIDATION_MARKER,
+            version: WINGSGROUP_PRIVACY_VERSION,
+          })
+        } else {
+          expect(governance.contentApproval).toEqual({ en: null, vi: null })
+          expect(governance.publication.en).toBe('hidden')
+          expect(governance.publication.vi).toBe('pending')
+          expect(governance.policy).toMatchObject({
+            approvalState: 'pending',
+            dataSubjectRightsStatement: null,
+            effectiveDate: null,
+            legalOwner: null,
+            privacyApprovalReference: null,
+            validationMarker: null,
+          })
+        }
       } else {
         expect(governance.contentApproval).toEqual({
           en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
@@ -468,6 +498,10 @@ describe('WingsGroup corporate route contract', () => {
         expect(governance.publication.vi).toBe('approved')
       }
     }
+
+    expect(WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_EN).toBe(
+      'Data subjects may contact info@doicanhviet.com.',
+    )
   })
 
   it('uses only registered presentation values in governed route fixtures', () => {

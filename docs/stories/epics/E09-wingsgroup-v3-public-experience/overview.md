@@ -29,7 +29,7 @@ chưa được cấp.
 | US-061 | Contract nền tảng v3, media và fidelity | Accepted engineering; 13 editorial assets đã có quyền sử dụng WingsGroup, còn kiểm soát import/runtime |
 | US-062 | Fidelity homepage và UX tư vấn responsive | Accepted engineering; chờ cổng công bố |
 | US-063 | Publication, brand, proof và editorial gates | Accepted engineering; brand/media/English evidence đã được duyệt, proof vẫn fail-closed |
-| US-064 | Consent lead-intake và consultation fallback | Accepted engineering; chờ privacy/endpoint approval |
+| US-064 | Consent lead-intake và consultation fallback | Accepted engineering; privacy contract đã được duyệt, runtime delivery/endpoint còn chờ |
 | US-065 | Corporate routes, legal/locale và publication governance | Accepted engineering; English đã được duyệt, legal/privacy vẫn fail-closed |
 | US-066 | PostgreSQL, cross-tenant và go-live readiness | Accepted engineering; rehearsal/môi trường còn mở |
 
@@ -53,8 +53,13 @@ không phải proof mới được tạo bởi story reconciliation này.
 
 Trạng thái hiện tại theo release-gates contract và các review cuối:
 
-- `privacy-consent` là cổng mandatory duy nhất còn pending, gồm chính sách và
-  quyền nhận lead production;
+- `privacy-consent` source-contract gate đã được stakeholder duyệt ngày
+  `2026-08-24`, với policy routes `/chinh-sach-bao-mat` và
+  `/en/chinh-sach-bao-mat`, retention 24 tháng, data-subject contact
+  `info@doicanhviet.com` và inter-branch routing được phép;
+- Runtime policy routes, consent persistence, migration/seed và production smoke
+  proof vẫn là release work riêng; lead delivery chỉ dùng Payload/CMS database
+  và release configuration yêu cầu `LEAD_DELIVERY_REQUIRED=false`;
 - `proof-publication` là cổng optional/non-blocking, vẫn fail-closed cho tới khi
   từng proof record có đủ source, context/date, rights và provenance;
 - consultation channels vẫn optional/fail-closed pending URL production, owner,
@@ -69,8 +74,10 @@ bằng chứng approved; các mục này không còn là publication gate pendin
 dụng asset không phải là xác nhận import/runtime production hoặc legal proof.
 
 Khi các cổng chưa đóng, hệ thống phải giữ policy routes, proof records và external
-deep-links ở trạng thái fail-closed, và không nhận lead production. English locale
-và brand/media evidence đã được duyệt không thay đổi các kiểm soát runtime còn lại.
+deep-links ở trạng thái fail-closed, và không nhận lead production. Privacy contract
+đã được duyệt không thay thế runtime route, consent persistence, migration/seed,
+delivery hoặc production smoke proof. English locale và brand/media evidence đã
+được duyệt không thay đổi các kiểm soát runtime còn lại.
 Không có report nào trong sổ trên là production launch approval.
 
 ## Mapping thời gian

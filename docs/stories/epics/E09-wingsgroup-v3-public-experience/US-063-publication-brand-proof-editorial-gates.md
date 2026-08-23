@@ -49,8 +49,10 @@ WingsGroup v3 chỉ được công bố claim, proof, logo/token và editorial m
 
 ## Pending Gates
 
-`privacy-consent` là cổng mandatory duy nhất còn pending. Proof publication vẫn
-optional/non-blocking và fail-closed; consultation channels và ecosystem
-destinations cũng optional/fail-closed khi chưa có endpoint/destination evidence.
+Privacy/consent source contract đã được stakeholder duyệt ngày `2026-08-24`;
+runtime policy/consent proof và production lead delivery vẫn là release work
+riêng. Proof publication vẫn optional/non-blocking và fail-closed; consultation
+channels và ecosystem destinations cũng optional/fail-closed khi chưa có
+endpoint/destination evidence.
 Brand token/logo, 13-asset site-scope/publication authorization và English native
 editorial review đã approved, nhưng không phải production launch approval.

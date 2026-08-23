@@ -51,6 +51,8 @@ quyền xuất bản.
 
 ## Pending Gates
 
-Production publication approval for editorial media/proof, legal/privacy/consent,
-brand token/logo, consultation owner/SLA/tracking và ecosystem destinations;
-disposable PostgreSQL rehearsal và Harness DB vẫn là environment gates.
+Production publication approval for editorial media/proof, consultation
+owner/SLA/tracking và ecosystem destinations; source privacy/consent contract đã
+được stakeholder duyệt ngày `2026-08-24`, nhưng runtime policy/consent proof vẫn
+là release work riêng. Disposable PostgreSQL rehearsal và Harness DB vẫn là
+environment gates.

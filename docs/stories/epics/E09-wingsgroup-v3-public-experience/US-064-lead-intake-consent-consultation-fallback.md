@@ -2,7 +2,8 @@
 
 ## Trạng thái
 
-Accepted engineering; Chờ xác nhận privacy và production delivery approval.
+Accepted engineering; privacy contract đã được duyệt, Chờ xác nhận runtime và
+production delivery approval.
 
 ## Lane
 
@@ -13,7 +14,8 @@ high-risk
 Contact intake của WingsGroup phải thu thập đúng name/brief/consent, ghi được
 ngữ cảnh route/site/locale và retention, đồng thời có fallback nội bộ khi các
 kênh tư vấn ngoài chưa được cấu hình. Production phải fail-closed cho tới khi
-privacy/consent và delivery owner được duyệt.
+runtime policy/consent proof và delivery owner được duyệt; source privacy/consent
+contract đã được stakeholder duyệt ngày `2026-08-24`.
 
 ## Relevant Product Docs
 
@@ -44,10 +46,13 @@ privacy/consent và delivery owner được duyệt.
 ## Evidence
 
 - `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-30-31-rereview-3.json` — accepted SHA `ca7ccbae8ec2f5e5186e4a9ce81b4d8f134c7ea6`.
+- Stakeholder-approved privacy and consent contract, 2026-08-24: `/chinh-sach-bao-mat`, `/en/chinh-sach-bao-mat`, retention 24 months, data-subject contact `info@doicanhviet.com`, inter-branch routing allowed.
 - `docs/product/wingsgroup-v3-release-gates.json` (gate: `privacy-consent`)
 - `docs/product/wingsgroup-v3-release-gates.json` (gate: `consultation-channels`)
 
 ## Pending Gates
 
-Legal/privacy/consent approval và consultation endpoint owner/SLA/tracking còn
-pending. Không có production lead-delivery approval trong evidence này.
+Source privacy/consent approval đã hoàn tất ngày `2026-08-24`; runtime policy
+routes, consent persistence, migration/seed, production smoke và consultation
+endpoint owner/SLA/tracking còn pending. Không có production lead-delivery
+approval trong evidence này.

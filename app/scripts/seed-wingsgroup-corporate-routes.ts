@@ -23,8 +23,13 @@ const main = async () => {
       JSON.stringify(
         {
           apply: false,
-          englishPublicationState: 'route-ready',
-          policyPublicationState: 'pending',
+          englishPublicationState: 'approved',
+          privacyApprovalState: 'approved',
+          policyPublicationState: {
+            privacy: 'approved',
+            terms: 'pending',
+            payment: 'pending',
+          },
           routes: buildWingsGroupCorporateRouteSeeds().map(({ archetype, path, policy }) => ({
             archetype,
             path,

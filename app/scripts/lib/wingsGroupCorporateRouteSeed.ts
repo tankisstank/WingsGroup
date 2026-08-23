@@ -4,6 +4,7 @@ import {
   WINGSGROUP_CORPORATE_ROUTES,
   WINGSGROUP_CONTENT_VALIDATION_MARKER,
   WINGSGROUP_LEGAL_IDENTITY,
+  WINGSGROUP_POLICY_VALIDATION_MARKER,
   WINGSGROUP_RELATIONSHIP_STATEMENT_EN,
   WINGSGROUP_SITE_CODE,
   type WingsGroupRouteDefinition,
@@ -128,6 +129,37 @@ const contactCTA = (locale: Locale): SeedBlock => ({
         : 'Đội ngũ WingsGroup sẽ xem xét yêu cầu và kết nối với bộ phận dịch vụ phù hợp.',
     ],
   ),
+})
+
+export const WINGSGROUP_PRIVACY_APPROVAL_REFERENCE = 'stakeholder-privacy-consent-2026-08-24'
+export const WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE =
+  'stakeholder-privacy-consent-2026-08-24'
+export const WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_VI =
+  'Người có dữ liệu có thể liên hệ qua info@doicanhviet.com.'
+export const WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_EN =
+  'Data subjects may contact info@doicanhviet.com.'
+
+const isApprovedPrivacyRoute = (definition: WingsGroupRouteDefinition): boolean =>
+  definition.path === CONTACT_POLICY_ROUTES.vi
+
+const approvedPrivacyPolicy = (locale: Locale): LocalizedRouteSeed => ({
+  description:
+    locale === 'en'
+      ? `Approved WingsGroup privacy and consent contract ${WINGSGROUP_PRIVACY_VERSION}.`
+      : `Hợp đồng quyền riêng tư và đồng ý của WingsGroup ${WINGSGROUP_PRIVACY_VERSION} đã được duyệt.`,
+  hero: pageHero(locale === 'en' ? 'Privacy Policy' : 'Chính sách bảo mật'),
+  layout: [
+    content(
+      locale === 'en' ? 'Privacy and consent contract' : 'Hợp đồng quyền riêng tư và đồng ý',
+      locale === 'en'
+        ? 'I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy.'
+        : 'Tôi đồng ý để WingsGroup sử dụng thông tin đã cung cấp nhằm liên hệ, tư vấn và chuyển yêu cầu đến bộ phận phù hợp theo Chính sách bảo mật.',
+      locale === 'en'
+        ? 'Retention period: 24 months. Data-subject contact: info@doicanhviet.com. Inter-branch routing is permitted for consultation requests.'
+        : 'Thời hạn lưu trữ: 24 tháng. Liên hệ về dữ liệu cá nhân: info@doicanhviet.com. Cho phép chuyển yêu cầu giữa các chi nhánh để định tuyến và phản hồi tư vấn.',
+    ),
+  ],
+  title: locale === 'en' ? 'Privacy Policy' : 'Chính sách bảo mật',
 })
 
 const policyDraft = (locale: Locale, label: string): LocalizedRouteSeed => ({
@@ -490,8 +522,8 @@ const routeContent: Record<
     },
   },
   '/chinh-sach-bao-mat': {
-    vi: policyDraft('vi', 'Chính sách bảo mật'),
-    en: policyDraft('en', 'Privacy Policy'),
+    vi: approvedPrivacyPolicy('vi'),
+    en: approvedPrivacyPolicy('en'),
   },
   '/dieu-khoan-su-dung': {
     vi: policyDraft('vi', 'Điều khoản sử dụng'),
@@ -529,40 +561,65 @@ export const buildWingsGroupCorporateRouteSeeds = (): WingsGroupCorporateRouteSe
       : { ...routeContent[definition.path], preserveExisting: false }),
   }))
 
-export const routeGovernanceForSeed = (definition: WingsGroupRouteDefinition) => ({
-  archetype: definition.archetype,
-  contentApproval: definition.policy
-    ? { en: null, vi: null }
-    : {
-        en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
-        vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
-      },
-  managedBy: 'wingsgroup-v3' as const,
-  policy: definition.policy
-    ? {
-        approvalReference: null,
-        approvalState: 'pending' as const,
-        consentEvidenceReference: null,
-        consentVersion: WINGSGROUP_CONSENT_VERSION,
-        dataSubjectContact: WINGSGROUP_DATA_CONTACT,
-        dataSubjectRightsEvidence: null,
-        dataSubjectRightsStatement: null,
-        effectiveDate: null,
-        legalEntity: WINGSGROUP_LEGAL_IDENTITY.legalEntityName,
-        legalOwner: null,
-        policyVersion: WINGSGROUP_PRIVACY_VERSION,
-        privacyApprovalReference: null,
-        retentionMonths: WINGSGROUP_LEAD_RETENTION_MONTHS,
-        scope: null,
-        validationMarker: null,
-        version: 'draft-1',
-      }
-    : undefined,
-  publication: {
-    en: definition.policy ? ('hidden' as const) : ('approved' as const),
-    vi: definition.policy ? ('pending' as const) : ('approved' as const),
-  },
-})
+export const routeGovernanceForSeed = (definition: WingsGroupRouteDefinition) => {
+  const approvedPrivacy = isApprovedPrivacyRoute(definition)
+
+  return {
+    archetype: definition.archetype,
+    contentApproval: definition.policy
+      ? approvedPrivacy
+        ? {
+            en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+            vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+          }
+        : { en: null, vi: null }
+      : {
+          en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+          vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+        },
+    managedBy: 'wingsgroup-v3' as const,
+    policy: definition.policy
+      ? {
+          approvalReference: approvedPrivacy ? WINGSGROUP_PRIVACY_APPROVAL_REFERENCE : null,
+          approvalState: approvedPrivacy ? ('approved' as const) : ('pending' as const),
+          consentEvidenceReference: approvedPrivacy
+            ? WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE
+            : null,
+          consentVersion: WINGSGROUP_CONSENT_VERSION,
+          dataSubjectContact: WINGSGROUP_DATA_CONTACT,
+          dataSubjectRightsEvidence: approvedPrivacy
+            ? WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE
+            : null,
+          dataSubjectRightsStatement: approvedPrivacy
+            ? WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_VI
+            : null,
+          effectiveDate: approvedPrivacy ? '2026-08-24' : null,
+          legalEntity: WINGSGROUP_LEGAL_IDENTITY.legalEntityName,
+          legalOwner: approvedPrivacy ? 'Business and legal owner' : null,
+          policyVersion: WINGSGROUP_PRIVACY_VERSION,
+          privacyApprovalReference: approvedPrivacy
+            ? WINGSGROUP_PRIVACY_APPROVAL_REFERENCE
+            : null,
+          retentionMonths: WINGSGROUP_LEAD_RETENTION_MONTHS,
+          scope: approvedPrivacy ? 'WingsGroup privacy and consent contract' : null,
+          validationMarker: approvedPrivacy ? WINGSGROUP_POLICY_VALIDATION_MARKER : null,
+          version: approvedPrivacy ? WINGSGROUP_PRIVACY_VERSION : 'draft-1',
+        }
+      : undefined,
+    publication: {
+      en: definition.policy
+        ? approvedPrivacy
+          ? ('approved' as const)
+          : ('hidden' as const)
+        : ('approved' as const),
+      vi: definition.policy
+        ? approvedPrivacy
+          ? ('approved' as const)
+          : ('pending' as const)
+        : ('approved' as const),
+    },
+  }
+}
 
 export const resolveCorporateRouteSeedAction = (
   existing: Array<{ id: number | string; pathname?: null | string }>,
@@ -829,17 +886,17 @@ export const seedWingsGroupCorporateRoutes = async ({
     ...(settings.wingsGroupV3 || {}),
     consultationChannels: pendingConsultationChannels,
     enabled: true,
-    englishPublicationState: 'route-ready',
+    englishPublicationState: 'approved',
     legalIdentity: WINGSGROUP_LEGAL_IDENTITY,
     privacy: {
-      approvalReference: null,
-      approvalState: 'pending',
+      approvalReference: WINGSGROUP_PRIVACY_APPROVAL_REFERENCE,
+      approvalState: 'approved',
       consentRequired: true,
-      consentEvidenceReference: null,
+      consentEvidenceReference: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
       consentVersion: WINGSGROUP_CONSENT_VERSION,
       dataSubjectContact: WINGSGROUP_DATA_CONTACT,
-      dataSubjectRightsEvidence: null,
-      dataSubjectRightsStatement: null,
+      dataSubjectRightsEvidence: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
+      dataSubjectRightsStatement: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_VI,
       interBranchTransferAllowed: true,
       policyRouteEn: CONTACT_POLICY_ROUTES.en,
       policyRouteVi: CONTACT_POLICY_ROUTES.vi,
@@ -1006,21 +1063,24 @@ export const seedWingsGroupCorporateRoutes = async ({
       result.preservedHome = true
     }
 
-    if (route.policy) {
+    if (route.policy && !isApprovedPrivacyRoute(route)) {
       result.policyPending.push(route.path)
       continue
     }
 
+    const publishLocales = isApprovedPrivacyRoute(route) ? (['vi', 'en'] as const) : (['vi'] as const)
     try {
-      await payload.update({
-        collection: 'pages',
-        context: { disableRevalidate: true },
-        data: { _status: 'published' },
-        id: page!.id,
-        locale: 'vi',
-        overrideAccess: true,
-        req,
-      } as never)
+      for (const locale of publishLocales) {
+        await payload.update({
+          collection: 'pages',
+          context: { disableRevalidate: true },
+          data: { _status: 'published' },
+          id: page!.id,
+          locale,
+          overrideAccess: true,
+          req,
+        } as never)
+      }
     } catch (error) {
       if (route.path !== '/') throw error
       result.policyPending.push('/')

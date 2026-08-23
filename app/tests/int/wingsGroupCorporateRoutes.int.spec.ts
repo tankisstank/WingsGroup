@@ -669,7 +669,7 @@ describe('WingsGroup corporate route integration', () => {
 
   it('reconciles the same technical inventory twice without duplicate Page rows', async () => {
     const pages: Array<Record<string, unknown> & { id: number; pathname: string }> = []
-    const settings = {
+    const settings: { id: number; wingsGroupV3: Record<string, unknown> } = {
       id: 20,
       wingsGroupV3: {
         consultationChannels: [{ key: 'zalo', state: 'unconfigured' }],
@@ -758,7 +758,10 @@ describe('WingsGroup corporate route integration', () => {
         data: Record<string, unknown>
         id: number
       }) => {
-        if (collection === 'site-settings') return settings
+        if (collection === 'site-settings') {
+          Object.assign(settings, data)
+          return settings
+        }
         if (collection === 'forms') {
           Object.assign(form, data)
           return form
@@ -783,6 +786,40 @@ describe('WingsGroup corporate route integration', () => {
     expect(first.created).toHaveLength(10)
     expect(second.created).toEqual([])
     expect(second.updated).toHaveLength(10)
+    expect(first.policyPending).toEqual(['/dieu-khoan-su-dung', '/chinh-sach-thanh-toan'])
+    expect(second.policyPending).toEqual(['/dieu-khoan-su-dung', '/chinh-sach-thanh-toan'])
+    expect(settings.wingsGroupV3.privacy).toMatchObject({
+      approvalState: 'approved',
+      consentRequired: true,
+      dataSubjectContact: 'info@doicanhviet.com',
+      interBranchTransferAllowed: true,
+      policyRouteEn: '/en/chinh-sach-bao-mat',
+      policyRouteVi: '/chinh-sach-bao-mat',
+      policyVersion: 'wingsgroup-privacy-v1',
+      retentionMonths: 24,
+    })
+    expect(settings.wingsGroupV3.englishPublicationState).toBe('approved')
+    const privacyPage = pages.find(({ pathname }) => pathname === '/chinh-sach-bao-mat')
+    expect(privacyPage?._status).toBe('published')
+    expect(privacyPage?.wingsGroupRoute).toMatchObject({
+      contentApproval: {
+        en: 'wingsgroup-content-approved-v1',
+        vi: 'wingsgroup-content-approved-v1',
+      },
+      publication: { en: 'approved', vi: 'approved' },
+      policy: { approvalState: 'approved' },
+    })
+    expect(JSON.stringify(privacyPage)).toContain(
+      'I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy.',
+    )
+    for (const path of ['/dieu-khoan-su-dung', '/chinh-sach-thanh-toan']) {
+      const pendingPage = pages.find(({ pathname }) => pathname === path)
+      expect(pendingPage?._status, path).not.toBe('published')
+      expect(pendingPage?.wingsGroupRoute).toMatchObject({
+        publication: { en: 'hidden', vi: 'pending' },
+        policy: { approvalState: 'pending' },
+      })
+    }
     const createdEcosystemBlock = (
       createdLayouts.get('/he-sinh-thai') as Array<Record<string, unknown>>
     ).find((block) => block.blockType === 'wingsGroupEcosystem') as {

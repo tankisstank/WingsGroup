@@ -49,6 +49,10 @@ proof môi trường phát triển; không được nâng thành staging/product
 ## Pending Gates
 
 Disposable PostgreSQL rehearsal and missing Harness DB are environment gates.
-Human gates remain legal/privacy/consent, proof publication rights, brand
-token/logo, editorial media/English copy, consultation owner/SLA/tracking và
-ecosystem destination validation.
+The privacy/consent source contract was stakeholder-approved on 2026-08-24 with
+the approved policy routes, 24-month retention, data-subject contact
+`info@doicanhviet.com`, and permitted inter-branch routing. Runtime policy routes,
+consent persistence, migration/seed, production smoke and Payload/CMS-only lead
+delivery with `LEAD_DELIVERY_REQUIRED=false` remain release work. Human gates
+remain proof publication rights, brand token/logo, editorial media/English copy,
+consultation owner/SLA/tracking và ecosystem destination validation.

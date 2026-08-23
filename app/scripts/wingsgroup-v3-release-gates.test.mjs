@@ -40,13 +40,15 @@ const fullyApprovedRegister = () => {
   return candidate
 }
 
-test('the governed register has the immutable expected inventory and remains fail-closed while mandatory gates are pending', () => {
+test('the governed register has the immutable expected inventory and records the approved source contracts', () => {
   const result = assessReleaseGates(register())
 
-  assert.equal(result.approved, false)
+  assert.equal(result.approved, true)
   assert.deepEqual(result.errors, [])
   assert.equal(result.mandatoryGateCount, 5)
-  assert.deepEqual(result.pendingMandatory, [{ key: 'privacy-consent', state: 'pending' }])
+  assert.deepEqual(result.pendingMandatory, [])
+  assert.equal(gateByKey(governedRegister, 'privacy-consent').state, 'approved')
+  assert.equal(gateByKey(governedRegister, 'privacy-consent').approvedAt, '2026-08-24')
   assert.equal(gateByKey(governedRegister, 'locale-completeness').state, 'approved')
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'locale-completeness'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'legal-identity'))

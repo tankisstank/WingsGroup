@@ -44,9 +44,15 @@ trong governed media manifest, cùng locale completeness và native English
 editorial review đã có bằng chứng approved. Đây là publication evidence, không
 phải xác nhận production launch hoặc hoàn tất import/runtime media.
 
-Cổng mandatory duy nhất còn pending là `privacy-consent`. Proof publication vẫn
-optional/non-blocking và fail-closed; consultation channels và ecosystem
-destinations vẫn optional/fail-closed khi thiếu URL, owner/SLA/tracking hoặc
-destination evidence. Hai environment gate là disposable PostgreSQL rehearsal và
-Harness database vẫn mở; các route policy, lead production, proof record và
-external channel chưa đủ điều kiện tiếp tục fail-closed.
+Source-contract gate `privacy-consent` đã được stakeholder duyệt ngày
+`2026-08-24`, với policy routes `/chinh-sach-bao-mat` và
+`/en/chinh-sach-bao-mat`, retention 24 tháng, data-subject contact
+`info@doicanhviet.com` và inter-branch routing được phép. Runtime policy routes,
+consent persistence, migration/seed, production smoke và Payload/CMS-only lead
+delivery với `LEAD_DELIVERY_REQUIRED=false` vẫn là release work riêng.
+
+Proof publication vẫn optional/non-blocking và fail-closed; consultation channels
+và ecosystem destinations vẫn optional/fail-closed khi thiếu URL, owner/SLA/
+tracking hoặc destination evidence. Hai environment gate là disposable PostgreSQL
+rehearsal và Harness database vẫn mở; các route policy, lead production, proof
+record và external channel chưa đủ điều kiện tiếp tục fail-closed.

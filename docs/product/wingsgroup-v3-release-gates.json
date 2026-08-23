@@ -32,7 +32,7 @@
       "priority": "P0",
       "scope": "Privacy policy, consent version, retention and data-subject contact",
       "mandatory": true,
-      "state": "pending",
+      "state": "approved",
       "owner": "Business and legal owner",
       "evidenceRequirements": ["Approved policy URL or version", "Retention policy", "Data-subject contact"],
       "policy": {
@@ -55,6 +55,12 @@
         "vi": "Tôi đồng ý để WingsGroup sử dụng thông tin đã cung cấp nhằm liên hệ, tư vấn và chuyển yêu cầu đến bộ phận phù hợp theo Chính sách bảo mật.",
         "en": "I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy."
       },
+      "evidence": [
+        "Stakeholder-approved privacy and consent contract, 2026-08-24",
+        "Approved policy routes: /chinh-sach-bao-mat and /en/chinh-sach-bao-mat; retention 24 months; data-subject contact info@doicanhviet.com; inter-branch routing allowed",
+        "Lead delivery remains Payload/CMS database only; release configuration requires LEAD_DELIVERY_REQUIRED=false. Runtime policy routes, consent persistence, migration/seed and production smoke proof remain separate release work."
+      ],
+      "approvedAt": "2026-08-24",
       "failClosedBehavior": "Do not accept production leads or display unapproved privacy copy.",
       "consumers": ["US-061", "US-064", "US-065", "US-066"]
     },
