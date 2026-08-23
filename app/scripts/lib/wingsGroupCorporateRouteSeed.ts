@@ -597,9 +597,7 @@ export const routeGovernanceForSeed = (definition: WingsGroupRouteDefinition) =>
           legalEntity: WINGSGROUP_LEGAL_IDENTITY.legalEntityName,
           legalOwner: approvedPrivacy ? 'Business and legal owner' : null,
           policyVersion: WINGSGROUP_PRIVACY_VERSION,
-          privacyApprovalReference: approvedPrivacy
-            ? WINGSGROUP_PRIVACY_APPROVAL_REFERENCE
-            : null,
+          privacyApprovalReference: approvedPrivacy ? WINGSGROUP_PRIVACY_APPROVAL_REFERENCE : null,
           retentionMonths: WINGSGROUP_LEAD_RETENTION_MONTHS,
           scope: approvedPrivacy ? 'WingsGroup privacy and consent contract' : null,
           validationMarker: approvedPrivacy ? WINGSGROUP_POLICY_VALIDATION_MARKER : null,
@@ -1068,7 +1066,9 @@ export const seedWingsGroupCorporateRoutes = async ({
       continue
     }
 
-    const publishLocales = isApprovedPrivacyRoute(route) ? (['vi', 'en'] as const) : (['vi'] as const)
+    const publishLocales = isApprovedPrivacyRoute(route)
+      ? (['vi', 'en'] as const)
+      : (['vi'] as const)
     try {
       for (const locale of publishLocales) {
         await payload.update({
