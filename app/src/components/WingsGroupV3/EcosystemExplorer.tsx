@@ -31,6 +31,7 @@ const copyByLocale = {
     imagePending: 'Editorial image pending publication review',
     pending: 'Being updated',
     proof: 'Service feedback:',
+    verified: 'Verified information is available.',
     railDescription: 'Select a team to see how it can accompany your next step.',
     railTitle: 'Choose a service team',
   },
@@ -40,6 +41,7 @@ const copyByLocale = {
     imagePending: 'Ảnh biên tập đang chờ kiểm duyệt công bố',
     pending: 'Đang cập nhật',
     proof: 'Phản hồi sau dịch vụ:',
+    verified: 'Đã có thông tin được xác minh.',
     railDescription: 'Chạm để xem cách từng đội ngũ đồng hành cùng bạn.',
     railTitle: 'Chọn một đơn vị',
   },
@@ -80,7 +82,8 @@ export const EcosystemExplorer = ({
 
   if (!activeProfile) return null
 
-  const presentation = WINGSGROUP_PROFILE_PRESENTATION[activeProfile.brandKey]
+  const presentation =
+    WINGSGROUP_PROFILE_PRESENTATION[activeProfile.brandKey]?.[locale === 'en' ? 'en' : 'vi']
   const cta = resolveEcosystemCTA(activeProfile, locale)
   const hasApprovedProof =
     activeProfile.proofState === 'approved' &&
@@ -132,12 +135,17 @@ export const EcosystemExplorer = ({
           <div>
             {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
             <h2 className={styles.sectionTitle} id={`${id}-title`}>
-              {title || 'Một hệ sinh thái. Năm cách đồng hành.'}
+              {title ||
+                (locale === 'en'
+                  ? 'One ecosystem. Five ways to move forward.'
+                  : 'Một hệ sinh thái. Năm cách đồng hành.')}
             </h2>
           </div>
           <p className={styles.sectionDescription} id="services">
             {description ||
-              'Chọn điều bạn đang cần. Mỗi thương hiệu kết nối bạn với một đội ngũ, dịch vụ và điểm bắt đầu riêng.'}
+              (locale === 'en'
+                ? 'Choose what you need. Each brand connects you with a focused team and a clear next step.'
+                : 'Chọn điều bạn đang cần. Mỗi thương hiệu kết nối bạn với một đội ngũ, dịch vụ và điểm bắt đầu riêng.')}
           </p>
         </header>
 
@@ -219,8 +227,7 @@ export const EcosystemExplorer = ({
                 <div className={styles.unifiedDetailContent}>
                   <p className={styles.unifiedDetailCopy}>{activeProfile.description}</p>
                   <p className={styles.unifiedDetailProof}>
-                    <b>{copy.proof}</b>{' '}
-                    {hasApprovedProof ? 'Đã có thông tin được xác minh.' : copy.pending}
+                    <b>{copy.proof}</b> {hasApprovedProof ? copy.verified : copy.pending}
                   </p>
                   <ul className={styles.unifiedDetailServices}>
                     {activeProfile.serviceScope.slice(0, 3).map((service, index) => (

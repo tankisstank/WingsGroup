@@ -35,6 +35,9 @@ export const WINGSGROUP_CORPORATE_ROUTES = [
   { archetype: 'policy', path: '/chinh-sach-thanh-toan', policy: true },
 ] as const
 
+export const WINGSGROUP_PUBLIC_LOCALE_CODES = ['vi', 'en'] as const
+export type WingsGroupPublicLocale = (typeof WINGSGROUP_PUBLIC_LOCALE_CODES)[number]
+
 export type WingsGroupRouteDefinition = (typeof WINGSGROUP_CORPORATE_ROUTES)[number]
 export type WingsGroupRouteArchetype = WingsGroupRouteDefinition['archetype']
 export type WingsGroupRoutePath = WingsGroupRouteDefinition['path']
@@ -84,6 +87,20 @@ export const getWingsGroupRouteDefinition = (value: unknown): WingsGroupRouteDef
   return WINGSGROUP_CORPORATE_ROUTES.find((route) => route.path === path) || null
 }
 
+export const isWingsGroupEnglishPublicRoute = ({
+  path,
+  settings,
+}: {
+  path: unknown
+  settings?: unknown
+}): boolean => {
+  const definition = getWingsGroupRouteDefinition(path)
+  if (!definition) return false
+
+  const state = asRecord(asRecord(settings).wingsGroupV3).englishPublicationState
+  return state === 'approved' || (state === 'route-ready' && !definition.policy)
+}
+
 export const isWingsGroupV3ExactPublicInventoryEnabled = ({
   settings,
   siteCode,
@@ -105,7 +122,8 @@ export const isWingsGroupV3PublicSurfacePathAllowed = ({
   siteCode?: null | string
 }): boolean =>
   !isWingsGroupV3ExactPublicInventoryEnabled({ settings, siteCode }) ||
-  (locale === 'vi' && Boolean(getWingsGroupRouteDefinition(path)))
+  (locale === 'vi' && Boolean(getWingsGroupRouteDefinition(path))) ||
+  (locale === 'en' && isWingsGroupEnglishPublicRoute({ path, settings }))
 
 export const isWingsGroupPolicyRoute = (value: unknown): boolean =>
   Boolean(getWingsGroupRouteDefinition(value)?.policy)
@@ -222,10 +240,8 @@ export const getWingsGroupRoutePublicationState = ({
 
   if (contentApproval[localeKey] !== WINGSGROUP_CONTENT_VALIDATION_MARKER) return 'pending'
 
-  if (locale === 'en') {
-    const siteSettings = asRecord(settings)
-    const wingsGroupV3 = asRecord(siteSettings.wingsGroupV3)
-    if (wingsGroupV3.englishPublicationState !== 'approved') return 'hidden'
+  if (locale === 'en' && !isWingsGroupEnglishPublicRoute({ path: pathname, settings })) {
+    return 'hidden'
   }
 
   if (definition.policy && !hasApprovedPolicyGovernance(asRecord(governance.policy), settings)) {
@@ -360,7 +376,9 @@ export const buildWingsGroupPublicPageAccessWhere = (locale: unknown, settings: 
   if (!hasTrustedWingsGroupSettings(settings)) return { or: [otherTenants] }
   if (
     locale === 'en' &&
-    asRecord(asRecord(settings).wingsGroupV3).englishPublicationState !== 'approved'
+    !['route-ready', 'approved'].includes(
+      asRecord(asRecord(settings).wingsGroupV3).englishPublicationState as string,
+    )
   ) {
     return { or: [otherTenants] }
   }
@@ -368,76 +386,80 @@ export const buildWingsGroupPublicPageAccessWhere = (locale: unknown, settings: 
     locale === 'en' ? 'wingsGroupRoute.publication.en' : 'wingsGroupRoute.publication.vi'
 
   const privacy = asRecord(asRecord(asRecord(settings).wingsGroupV3).privacy)
-  const policyRoutes: Where[] = hasApprovedWingsGroupPrivacyGovernance(settings)
-    ? WINGSGROUP_CORPORATE_ROUTES.filter(({ policy }) => policy).map(
-        ({ archetype, path }): Where => ({
-          and: [
-            { pathname: { equals: path } },
-            { 'wingsGroupRoute.archetype': { equals: archetype } },
-            { 'wingsGroupRoute.policy.approvalState': { equals: 'approved' } },
-            {
-              'wingsGroupRoute.policy.validationMarker': {
-                equals: WINGSGROUP_POLICY_VALIDATION_MARKER,
+  const englishRouteReady =
+    locale === 'en' &&
+    asRecord(asRecord(settings).wingsGroupV3).englishPublicationState === 'route-ready'
+  const policyRoutes: Where[] =
+    !englishRouteReady && hasApprovedWingsGroupPrivacyGovernance(settings)
+      ? WINGSGROUP_CORPORATE_ROUTES.filter(({ policy }) => policy).map(
+          ({ archetype, path }): Where => ({
+            and: [
+              { pathname: { equals: path } },
+              { 'wingsGroupRoute.archetype': { equals: archetype } },
+              { 'wingsGroupRoute.policy.approvalState': { equals: 'approved' } },
+              {
+                'wingsGroupRoute.policy.validationMarker': {
+                  equals: WINGSGROUP_POLICY_VALIDATION_MARKER,
+                },
               },
-            },
-            { 'wingsGroupRoute.policy.legalOwner': { not_equals: '' } },
-            {
-              'wingsGroupRoute.policy.legalEntity': {
-                equals: WINGSGROUP_LEGAL_IDENTITY.legalEntityName,
+              { 'wingsGroupRoute.policy.legalOwner': { not_equals: '' } },
+              {
+                'wingsGroupRoute.policy.legalEntity': {
+                  equals: WINGSGROUP_LEGAL_IDENTITY.legalEntityName,
+                },
               },
-            },
-            { 'wingsGroupRoute.policy.scope': { not_equals: '' } },
-            {
-              'wingsGroupRoute.policy.effectiveDate': {
-                greater_than: '1900-01-01T00:00:00.000Z',
+              { 'wingsGroupRoute.policy.scope': { not_equals: '' } },
+              {
+                'wingsGroupRoute.policy.effectiveDate': {
+                  greater_than: '1900-01-01T00:00:00.000Z',
+                },
               },
-            },
-            { 'wingsGroupRoute.policy.version': { not_equals: '' } },
-            { 'wingsGroupRoute.policy.approvalReference': { not_equals: '' } },
-            {
-              'wingsGroupRoute.policy.retentionMonths': {
-                equals: WINGSGROUP_LEAD_RETENTION_MONTHS,
+              { 'wingsGroupRoute.policy.version': { not_equals: '' } },
+              { 'wingsGroupRoute.policy.approvalReference': { not_equals: '' } },
+              {
+                'wingsGroupRoute.policy.retentionMonths': {
+                  equals: WINGSGROUP_LEAD_RETENTION_MONTHS,
+                },
               },
-            },
-            {
-              'wingsGroupRoute.policy.dataSubjectContact': {
-                equals: WINGSGROUP_DATA_CONTACT,
+              {
+                'wingsGroupRoute.policy.dataSubjectContact': {
+                  equals: WINGSGROUP_DATA_CONTACT,
+                },
               },
-            },
-            {
-              'wingsGroupRoute.policy.dataSubjectRightsStatement': {
-                equals: asString(privacy.dataSubjectRightsStatement),
+              {
+                'wingsGroupRoute.policy.dataSubjectRightsStatement': {
+                  equals: asString(privacy.dataSubjectRightsStatement),
+                },
               },
-            },
-            {
-              'wingsGroupRoute.policy.dataSubjectRightsEvidence': {
-                equals: asString(privacy.dataSubjectRightsEvidence),
+              {
+                'wingsGroupRoute.policy.dataSubjectRightsEvidence': {
+                  equals: asString(privacy.dataSubjectRightsEvidence),
+                },
               },
-            },
-            {
-              'wingsGroupRoute.policy.policyVersion': {
-                equals: asString(privacy.policyVersion),
+              {
+                'wingsGroupRoute.policy.policyVersion': {
+                  equals: asString(privacy.policyVersion),
+                },
               },
-            },
-            {
-              'wingsGroupRoute.policy.consentVersion': {
-                equals: asString(privacy.consentVersion),
+              {
+                'wingsGroupRoute.policy.consentVersion': {
+                  equals: asString(privacy.consentVersion),
+                },
               },
-            },
-            {
-              'wingsGroupRoute.policy.consentEvidenceReference': {
-                equals: asString(privacy.consentEvidenceReference),
+              {
+                'wingsGroupRoute.policy.consentEvidenceReference': {
+                  equals: asString(privacy.consentEvidenceReference),
+                },
               },
-            },
-            {
-              'wingsGroupRoute.policy.privacyApprovalReference': {
-                equals: asString(privacy.approvalReference),
+              {
+                'wingsGroupRoute.policy.privacyApprovalReference': {
+                  equals: asString(privacy.approvalReference),
+                },
               },
-            },
-          ],
-        }),
-      )
-    : []
+            ],
+          }),
+        )
+      : []
   const routeClauses: Where[] = [
     ...WINGSGROUP_CORPORATE_ROUTES.filter(({ policy }) => !policy).map(
       ({ archetype, path }): Where => ({

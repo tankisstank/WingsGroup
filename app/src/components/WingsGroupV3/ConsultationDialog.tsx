@@ -2,28 +2,57 @@
 
 import React, { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSitePublicLocale } from '@/providers/SitePath'
+import { useSitePath } from '@/utilities/useSitePath'
 
 import styles from './WingsGroupV3.module.css'
 
-const channels = [
-  { key: 'zalo', label: 'Zalo OA', note: 'Thuận tiện cho khách tại Việt Nam', mark: 'ZA' },
-  { key: 'whatsapp', label: 'WhatsApp', note: 'Phù hợp trao đổi với khách quốc tế', mark: 'WA' },
-  {
-    key: 'messenger',
-    label: 'Messenger',
-    note: 'Tiếp tục cuộc trò chuyện từ Facebook',
-    mark: 'ME',
-  },
-  {
-    key: 'callback',
-    label: 'Chuyên viên gọi lại',
-    note: 'Để lại số điện thoại để chuyên viên liên hệ',
-    mark: 'CB',
-  },
-] as const
+const channelsByLocale = {
+  en: [
+    { key: 'zalo', label: 'Zalo OA', note: 'Convenient for guests in Vietnam', mark: 'ZA' },
+    {
+      key: 'whatsapp',
+      label: 'WhatsApp',
+      note: 'A practical option for international guests',
+      mark: 'WA',
+    },
+    {
+      key: 'messenger',
+      label: 'Messenger',
+      note: 'Continue a conversation from Facebook',
+      mark: 'ME',
+    },
+    {
+      key: 'callback',
+      label: 'Specialist callback',
+      note: 'Leave your number and a specialist will call',
+      mark: 'CB',
+    },
+  ],
+  vi: [
+    { key: 'zalo', label: 'Zalo OA', note: 'Thuận tiện cho khách tại Việt Nam', mark: 'ZA' },
+    { key: 'whatsapp', label: 'WhatsApp', note: 'Phù hợp trao đổi với khách quốc tế', mark: 'WA' },
+    {
+      key: 'messenger',
+      label: 'Messenger',
+      note: 'Tiếp tục cuộc trò chuyện từ Facebook',
+      mark: 'ME',
+    },
+    {
+      key: 'callback',
+      label: 'Chuyên viên gọi lại',
+      note: 'Để lại số điện thoại để chuyên viên liên hệ',
+      mark: 'CB',
+    },
+  ],
+} as const
 
 export const WingsGroupConsultationDialog = () => {
   const router = useRouter()
+  const locale = useSitePublicLocale()
+  const toSitePath = useSitePath()
+  const isEnglish = locale === 'en'
+  const channels = channelsByLocale[isEnglish ? 'en' : 'vi']
   const dialogRef = useRef<HTMLDialogElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const lastFocusedRef = useRef<HTMLElement | null>(null)
@@ -97,7 +126,7 @@ export const WingsGroupConsultationDialog = () => {
       if (!channels.some((item) => item.key === channel)) return
       window.dispatchEvent(new CustomEvent('wingsgroup-preferred-channel', { detail: { channel } }))
       closeDialog()
-      router.push(`/lien-he?channel=${encodeURIComponent(channel)}#contact-form`)
+      router.push(toSitePath(`/lien-he?channel=${encodeURIComponent(channel)}#contact-form`))
       window.setTimeout(() => {
         document
           .querySelector<HTMLInputElement>(
@@ -138,7 +167,7 @@ export const WingsGroupConsultationDialog = () => {
       dialog.removeEventListener('keydown', onKeyDown)
       observer?.disconnect()
     }
-  }, [router])
+  }, [channels, router, toSitePath])
 
   return (
     <>
@@ -150,7 +179,8 @@ export const WingsGroupConsultationDialog = () => {
         data-wingsgroup-consultation-trigger="true"
         type="button"
       >
-        <span aria-hidden="true">↗</span>Trao đổi với chuyên viên
+        <span aria-hidden="true">↗</span>
+        {isEnglish ? 'Speak with a specialist' : 'Trao đổi với chuyên viên'}
       </button>
       <dialog
         aria-labelledby="consultation-title"
@@ -161,11 +191,15 @@ export const WingsGroupConsultationDialog = () => {
         <div className={styles.consultationDialogInner}>
           <div className={styles.consultationDialogTop}>
             <div>
-              <p className={styles.eyebrow}>Tư vấn hành trình</p>
-              <h2 id="consultation-title">Trao đổi với chuyên viên.</h2>
+              <p className={styles.eyebrow}>
+                {isEnglish ? 'Journey consultation' : 'Tư vấn hành trình'}
+              </p>
+              <h2 id="consultation-title">
+                {isEnglish ? 'Speak with a specialist.' : 'Trao đổi với chuyên viên.'}
+              </h2>
             </div>
             <button
-              aria-label="Đóng bảng chọn kênh"
+              aria-label={isEnglish ? 'Close channel chooser' : 'Đóng bảng chọn kênh'}
               className={styles.consultationClose}
               onClick={() => dialogRef.current?.close()}
               ref={closeRef}
@@ -175,10 +209,14 @@ export const WingsGroupConsultationDialog = () => {
             </button>
           </div>
           <p>
-            Chọn kênh bạn thường dùng. Đội ngũ WingsGroup sẽ trực tiếp tiếp nhận và làm rõ nhu cầu
-            trước hành trình.
+            {isEnglish
+              ? 'Choose the channel you prefer. The WingsGroup team will listen carefully and clarify your needs before the journey begins.'
+              : 'Chọn kênh bạn thường dùng. Đội ngũ WingsGroup sẽ trực tiếp tiếp nhận và làm rõ nhu cầu trước hành trình.'}
           </p>
-          <div aria-label="Chọn kênh tư vấn" className={styles.channelList}>
+          <div
+            aria-label={isEnglish ? 'Choose a consultation channel' : 'Chọn kênh tư vấn'}
+            className={styles.channelList}
+          >
             {channels.map((channel) => (
               <button
                 className={styles.channelChoice}
@@ -194,13 +232,16 @@ export const WingsGroupConsultationDialog = () => {
                 <span className={styles.channelArrow} aria-hidden="true">
                   ↗
                 </span>
-                <span className={styles.channelPending}>Chờ cập nhật</span>
+                <span className={styles.channelPending}>
+                  {isEnglish ? 'Being updated' : 'Chờ cập nhật'}
+                </span>
               </button>
             ))}
           </div>
           <p className={styles.consultationNote}>
-            Kênh ngoài form đang chờ cập nhật. Bạn vẫn có thể để lại thông tin trong biểu mẫu bên
-            dưới.
+            {isEnglish
+              ? 'External channels are being updated. You can still leave your details in the form below.'
+              : 'Kênh ngoài form đang chờ cập nhật. Bạn vẫn có thể để lại thông tin trong biểu mẫu bên dưới.'}
           </p>
         </div>
       </dialog>

@@ -13,7 +13,10 @@ import {
   getSiteSitemapLocales,
   getSiteSitemapURL,
 } from '@/utilities/siteSEO'
-import { isWingsGroupV3ExactPublicInventoryEnabled } from '@/wingsgroup/corporateRoutes'
+import {
+  isWingsGroupEnglishPublicRoute,
+  isWingsGroupV3ExactPublicInventoryEnabled,
+} from '@/wingsgroup/corporateRoutes'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,8 +52,14 @@ export async function GET(request: Request) {
   const dateFallback = new Date().toISOString()
   const sitemap = []
 
+  const exactInventoryLocales = isWingsGroupEnglishPublicRoute({
+    path: '/tin-tuc',
+    settings: settingsDoc,
+  })
+    ? (['vi', 'en'] as const)
+    : (['vi'] as const)
   for (const locale of isExactWingsGroupInventory
-    ? (['vi'] as const)
+    ? exactInventoryLocales
     : getSiteSitemapLocales(site)) {
     const results = await payload.find({
       collection: 'posts',

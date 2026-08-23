@@ -22,9 +22,13 @@ import {
   buildWebPageJSONLD,
 } from '@/utilities/structuredData'
 import { WINGSGROUP_EDITORIAL_ARCHIVE_PATH } from '@/utilities/wingsGroupEditorial'
-import { isWingsGroupV3ExactPublicInventoryEnabled } from '@/wingsgroup/corporateRoutes'
+import {
+  isWingsGroupEnglishPublicRoute,
+  isWingsGroupV3ExactPublicInventoryEnabled,
+} from '@/wingsgroup/corporateRoutes'
 import { formatDateTime } from '@/utilities/formatDateTime'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+import { getPageCanonicalPath } from '@/utilities/siteURLs'
 
 type Args = {
   params: Promise<{ slug: string }>
@@ -41,7 +45,9 @@ const getArticle = async (slug: string) => {
   if (
     site.code !== 'wings-group' ||
     !isWingsGroupV3ExactPublicInventoryEnabled({ settings, siteCode: site.code }) ||
-    (!draft && locale !== 'vi')
+    (!draft &&
+      ((locale !== 'vi' && locale !== 'en') ||
+        (locale === 'en' && !isWingsGroupEnglishPublicRoute({ path: '/tin-tuc', settings }))))
   ) {
     return null
   }
@@ -64,13 +70,17 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   const { draft, locale, post, settings, site } = article
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
-  const canonicalPath = getWingsGroupEditorialPostPath(post.slug)
+  const canonicalPath = getPageCanonicalPath(
+    { pathname: getWingsGroupEditorialPostPath(post.slug) },
+    locale,
+  )
+  const archivePath = getPageCanonicalPath({ pathname: WINGSGROUP_EDITORIAL_ARCHIVE_PATH }, locale)
   const authorNames = getGovernedEditorialAuthorNames(post)
   const breadcrumbItems = [
     { label: settings?.siteName || 'WingsGroup', path: '/' },
     {
       label: locale === 'en' ? 'News and insights' : 'Tin tức',
-      path: WINGSGROUP_EDITORIAL_ARCHIVE_PATH,
+      path: archivePath,
     },
     { label: post.meta?.breadcrumbLabel || post.title, path: canonicalPath },
   ]

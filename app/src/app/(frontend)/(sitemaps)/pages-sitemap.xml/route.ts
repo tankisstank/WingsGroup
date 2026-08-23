@@ -11,7 +11,10 @@ import {
   getSiteSitemapURL,
 } from '@/utilities/siteSEO'
 import { hasMatchingWingSideTourWrapper } from '@/tours/wingsSideTourViewModel'
-import { isWingsGroupV3ExactPublicInventoryEnabled } from '@/wingsgroup/corporateRoutes'
+import {
+  isWingsGroupEnglishPublicRoute,
+  isWingsGroupV3ExactPublicInventoryEnabled,
+} from '@/wingsgroup/corporateRoutes'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,7 +50,11 @@ export async function GET(request: Request) {
   const dateFallback = new Date().toISOString()
   const sitemap = []
 
-  const sitemapLocales = usesExactWingsGroupInventory ? (['vi'] as const) : getSiteSitemapLocales(site)
+  const sitemapLocales = usesExactWingsGroupInventory
+    ? isWingsGroupEnglishPublicRoute({ path: '/', settings: settingsDoc })
+      ? (['vi', 'en'] as const)
+      : (['vi'] as const)
+    : getSiteSitemapLocales(site)
 
   for (const locale of sitemapLocales) {
     if (!usesExactWingsGroupInventory) {

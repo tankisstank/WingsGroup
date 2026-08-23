@@ -16,6 +16,7 @@ import {
   WINGSGROUP_LEGAL_IDENTITY,
   WINGSGROUP_POLICY_ROUTES,
   WINGSGROUP_POLICY_VALIDATION_MARKER,
+  WINGSGROUP_PUBLIC_LOCALE_CODES,
   WINGSGROUP_RELATIONSHIP_STATEMENT_EN,
 } from '@/wingsgroup/corporateRoutes'
 import {
@@ -29,9 +30,11 @@ import {
   buildWingsGroupCorporateRouteSeeds,
   resolveCorporateRouteSeedAction,
   routeGovernanceForSeed,
+  wingsGroupSettingsSeed,
 } from '../../scripts/lib/wingsGroupCorporateRouteSeed'
 import { contentPresentationDefinitions } from '@/blocks/presentations'
 import { isRuntimeResolvablePage } from '@/utilities/pageRuntimeResolvable'
+import { getPageCanonicalPath } from '@/utilities/siteURLs'
 
 const governedPage = (path = '/ve-wingsgroup') => ({
   pathname: path,
@@ -77,6 +80,7 @@ const trustedSettings = ({
 
 describe('WingsGroup corporate route contract', () => {
   it('defines exactly the ten accepted paths and only three policy paths', () => {
+    expect(WINGSGROUP_PUBLIC_LOCALE_CODES).toEqual(['vi', 'en'])
     expect(WINGSGROUP_CORPORATE_ROUTES.map(({ path }) => path)).toEqual([
       '/',
       '/ve-wingsgroup',
@@ -148,6 +152,46 @@ describe('WingsGroup corporate route contract', () => {
         siteCode: 'wings-go',
       }),
     ).toBe(true)
+  })
+
+  it('exposes only the non-policy English inventory when the locale is route-ready', () => {
+    const settings = { wingsGroupV3: { enabled: true, englishPublicationState: 'route-ready' } }
+
+    for (const route of WINGSGROUP_CORPORATE_ROUTES) {
+      expect(
+        isWingsGroupV3PublicSurfacePathAllowed({
+          locale: 'en',
+          path: route.path,
+          settings,
+          siteCode: 'wings-group',
+        }),
+      ).toBe(!route.policy)
+    }
+  })
+
+  it('keeps English route-ready publication fail-closed for policies and preserves locale metadata paths', () => {
+    const settings = trustedSettings({ englishPublicationState: 'route-ready' })
+    const nonPolicy = governedPage('/ve-wingsgroup')
+    const policy = governedPage('/chinh-sach-bao-mat')
+
+    expect(
+      getWingsGroupRoutePublicationState({
+        locale: 'en',
+        page: nonPolicy,
+        settings,
+        siteCode: 'wings-group',
+      }),
+    ).toBe('approved')
+    expect(
+      getWingsGroupRoutePublicationState({
+        locale: 'en',
+        page: policy,
+        settings,
+        siteCode: 'wings-group',
+      }),
+    ).toBe('hidden')
+    expect(getPageCanonicalPath({ pathname: '/ve-wingsgroup' }, 'vi')).toBe('/vi/ve-wingsgroup')
+    expect(getPageCanonicalPath({ pathname: '/ve-wingsgroup' }, 'en')).toBe('/ve-wingsgroup')
   })
 
   it('keeps the Vietnamese ecosystem route eligible for pages-sitemap only after publication governance', async () => {
@@ -366,7 +410,7 @@ describe('WingsGroup corporate route contract', () => {
     expect(JSON.stringify(about.en)).not.toMatch(
       /same (?:legal entity|organisation)\b|service branches/i,
     )
-    expect(routeGovernanceForSeed(about).publication.en).toBe('hidden')
+    expect(routeGovernanceForSeed(about).publication.en).toBe('approved')
   })
 
   it('detects prohibited implementation language in public copy', () => {
@@ -377,7 +421,7 @@ describe('WingsGroup corporate route contract', () => {
     expect(findWingsGroupPublicJargon({ body: 'Nội dung cho site con.' })).toBeTruthy()
   })
 
-  it('builds an idempotent route plan with policy and English gates pending', () => {
+  it('builds an idempotent route plan with route-ready English and pending policy gates', () => {
     const seeds = buildWingsGroupCorporateRouteSeeds()
     expect(seeds).toHaveLength(10)
     const ecosystem = seeds.find((seed) => seed.path === '/he-sinh-thai')
@@ -403,9 +447,9 @@ describe('WingsGroup corporate route contract', () => {
       expect(resolveCorporateRouteSeedAction([], seed)).toBe('create')
       expect(resolveCorporateRouteSeedAction([{ id: 1, pathname: seed.path }], seed)).toBe('update')
       const governance = routeGovernanceForSeed(seed)
-      expect(governance.contentApproval).toEqual({ en: null, vi: null })
-      expect(governance.publication.en).toBe('hidden')
       if (seed.policy) {
+        expect(governance.contentApproval).toEqual({ en: null, vi: null })
+        expect(governance.publication.en).toBe('hidden')
         expect(governance.publication.vi).toBe('pending')
         expect(governance.policy).toMatchObject({
           approvalState: 'pending',
@@ -416,6 +460,11 @@ describe('WingsGroup corporate route contract', () => {
           validationMarker: null,
         })
       } else {
+        expect(governance.contentApproval).toEqual({
+          en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+          vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+        })
+        expect(governance.publication.en).toBe('approved')
         expect(governance.publication.vi).toBe('approved')
       }
     }
@@ -447,6 +496,20 @@ describe('WingsGroup corporate route contract', () => {
         expect(h1Count, `${locale} ${route.path}`).toBe(1)
         expect(JSON.stringify(localized.hero), `${locale} ${route.path}`).toContain(localized.title)
       }
+    }
+  })
+
+  it('seeds polished English metadata and the required direct contact values', () => {
+    expect(wingsGroupSettingsSeed.en.salesEmail).toBe('sales@wingsgroup.vn')
+    expect(wingsGroupSettingsSeed.en.supportEmail).toBe('info@wingsgroup.vn')
+    expect(wingsGroupSettingsSeed.en.supportPhone).toBe('0912910101')
+
+    for (const route of buildWingsGroupCorporateRouteSeeds().filter(({ policy }) => !policy)) {
+      expect(route.en.title, route.path).not.toMatch(/[à-ỹ]/i)
+      expect(route.en.description, route.path).not.toMatch(/[à-ỹ]/i)
+      expect(JSON.stringify(route.en), route.path).not.toMatch(
+        /(?:Đang cập nhật|Trao đổi với chuyên viên|Hệ sinh thái)/i,
+      )
     }
   })
 

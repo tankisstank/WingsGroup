@@ -36,6 +36,16 @@ export const WingsGroupContactSection = ({
             : 'Để lại một vài thông tin ngắn, đội ngũ phù hợp của WingsGroup sẽ chủ động kết nối.'}
         </p>
       </header>
+      {wingsGroupV3 ? (
+        <div className={styles.contactDirect} data-testid="wingsgroup-direct-contacts">
+          <span>
+            {locale === 'en' ? 'Prefer a direct conversation?' : 'Bạn muốn trao đổi trực tiếp?'}
+          </span>
+          <a href="tel:0912910101">0912910101</a>
+          <a href="mailto:info@wingsgroup.vn">info@wingsgroup.vn</a>
+          <a href="mailto:sales@wingsgroup.vn">sales@wingsgroup.vn</a>
+        </div>
+      ) : null}
       <FormBlock
         {...(formBlock as unknown as Parameters<typeof FormBlock>[0])}
         anchorId="contact-form"

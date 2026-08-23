@@ -26,7 +26,10 @@ export async function Header() {
     settings?.wingsGroupV3?.enabled === true &&
     Boolean(getWingsGroupRouteDefinition(publicPathname))
   const primaryAction = isWingsGroupV3Surface
-    ? { label: 'Trao đổi nhu cầu', url: '#consultation-dialog' }
+    ? {
+        label: locale === 'en' ? 'Speak with a specialist' : 'Trao đổi nhu cầu',
+        url: '#consultation-dialog',
+      }
     : resolveHeaderPrimaryAction(site.code, locale)
 
   return (

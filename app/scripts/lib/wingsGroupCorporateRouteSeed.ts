@@ -2,6 +2,7 @@ import type { Payload, PayloadRequest } from 'payload'
 
 import {
   WINGSGROUP_CORPORATE_ROUTES,
+  WINGSGROUP_CONTENT_VALIDATION_MARKER,
   WINGSGROUP_LEGAL_IDENTITY,
   WINGSGROUP_RELATIONSHIP_STATEMENT_EN,
   WINGSGROUP_SITE_CODE,
@@ -530,7 +531,12 @@ export const buildWingsGroupCorporateRouteSeeds = (): WingsGroupCorporateRouteSe
 
 export const routeGovernanceForSeed = (definition: WingsGroupRouteDefinition) => ({
   archetype: definition.archetype,
-  contentApproval: { en: null, vi: null },
+  contentApproval: definition.policy
+    ? { en: null, vi: null }
+    : {
+        en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+        vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+      },
   managedBy: 'wingsgroup-v3' as const,
   policy: definition.policy
     ? {
@@ -553,7 +559,7 @@ export const routeGovernanceForSeed = (definition: WingsGroupRouteDefinition) =>
       }
     : undefined,
   publication: {
-    en: 'hidden' as const,
+    en: definition.policy ? ('hidden' as const) : ('approved' as const),
     vi: definition.policy ? ('pending' as const) : ('approved' as const),
   },
 })
@@ -588,6 +594,9 @@ export const wingsGroupSettingsSeed = {
       nav('Contact', '/lien-he'),
     ],
     tagline: 'Thoughtful travel, connected expertise.',
+    salesEmail: 'sales@wingsgroup.vn',
+    supportEmail: 'info@wingsgroup.vn',
+    supportPhone: '0912910101',
   },
   vi: {
     footerNavItems: [
@@ -607,6 +616,9 @@ export const wingsGroupSettingsSeed = {
       nav('Liên hệ', '/lien-he'),
     ],
     tagline: 'Tận tâm trong từng hành trình, vững vàng trong từng kết nối.',
+    salesEmail: 'sales@wingsgroup.vn',
+    supportEmail: 'info@wingsgroup.vn',
+    supportPhone: '0912910101',
   },
 } as const
 
@@ -817,7 +829,7 @@ export const seedWingsGroupCorporateRoutes = async ({
     ...(settings.wingsGroupV3 || {}),
     consultationChannels: pendingConsultationChannels,
     enabled: true,
-    englishPublicationState: 'hidden',
+    englishPublicationState: 'route-ready',
     legalIdentity: WINGSGROUP_LEGAL_IDENTITY,
     privacy: {
       approvalReference: null,
@@ -967,6 +979,30 @@ export const seedWingsGroupCorporateRoutes = async ({
           } as never)
         }
       }
+
+      const localized = route.en
+      const resolvedEnglishLayout = resolvedRouteLayouts.get(`${route.path}:en`)
+      if (!resolvedEnglishLayout) {
+        throw new Error(`Missing resolved en layout for ${route.path}.`)
+      }
+      await payload.update({
+        collection: 'pages',
+        context: { disableRevalidate: true },
+        data: {
+          hero: localized.hero,
+          layout: resolvedEnglishLayout,
+          meta: {
+            breadcrumbLabel: localized.title,
+            description: localized.description,
+            title: localized.title,
+          },
+          title: localized.title,
+        },
+        id: page!.id,
+        locale: 'en',
+        overrideAccess: true,
+        req,
+      } as never)
       result.preservedHome = true
     }
 

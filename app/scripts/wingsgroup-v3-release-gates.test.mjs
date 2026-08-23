@@ -48,6 +48,7 @@ test('the governed register has the immutable expected inventory and remains fai
   assert.equal(result.mandatoryGateCount, 5)
   assert.equal(result.pendingMandatory.length, 3)
   assert.ok(result.pendingMandatory.some(({ key }) => key === 'privacy-consent'))
+  assert.ok(result.pendingMandatory.some(({ key }) => key === 'locale-completeness'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'legal-identity'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'ecosystem-deep-links'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'proof-publication'))

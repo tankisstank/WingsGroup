@@ -115,11 +115,14 @@
       "priority": "P2",
       "scope": "Public locale inventory",
       "mandatory": true,
-      "state": "pending",
+      "state": "route-ready",
       "owner": "Content owner",
       "requiredLocales": ["vi", "en"],
       "editorialStyle": "Human-like, natural marketing copy with a refined and courteous luxury-travel tone.",
       "evidenceRequirements": ["Approved Vietnamese and English route/chrome inventory", "Native-quality editorial review", "Locale QA"],
+      "routeReadyEvidence": [
+        "WP-EN-01 automated route, metadata, chrome, copy and fail-closed contract proof"
+      ],
       "failClosedBehavior": "Do not expose an incomplete English route or locale switch; preserve Vietnamese continuity while English is completed in parallel.",
       "consumers": ["US-061", "US-062", "US-063", "US-065", "US-066"]
     },

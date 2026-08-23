@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url'
 export const allowedGateStates = new Set([
   'pending',
   'pending-update',
+  'route-ready',
   'approved',
   'rejected',
   'not-applicable',
@@ -72,6 +73,12 @@ export const validateGate = (gate) => {
   if (gate?.state === 'approved') {
     if (!Array.isArray(gate.evidence) || gate.evidence.length === 0)
       errors.push('Approved gate requires a non-sensitive evidence reference.')
+  }
+
+  if (gate?.state === 'route-ready') {
+    if (!Array.isArray(gate.routeReadyEvidence) || gate.routeReadyEvidence.length === 0) {
+      errors.push('Route-ready gate requires automated route-readiness evidence.')
+    }
   }
 
   if (gate?.key === 'privacy-consent' && gate?.state === 'approved') {

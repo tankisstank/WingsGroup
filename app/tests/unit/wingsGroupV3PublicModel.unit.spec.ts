@@ -344,14 +344,14 @@ describe('WingsGroup v3 public view model', () => {
     expect(areAllHeroMediaGoverned({ type: 'highImpact' } as Page['hero'])).toBe(false)
   })
 
-  it('hides English from the WingsGroup shell until editorial approval', () => {
+  it('shows route-ready English in the WingsGroup shell while editorial approval remains separate', () => {
     const locales = localeMetadata.filter((item) => item.code === 'vi' || item.code === 'en')
     expect(getWingsGroupSwitcherLocales([...locales], 'hidden').map((item) => item.code)).toEqual([
       'vi',
     ])
     expect(
       getWingsGroupSwitcherLocales([...locales], 'route-ready').map((item) => item.code),
-    ).toEqual(['vi'])
+    ).toEqual(['vi', 'en'])
     expect(getWingsGroupSwitcherLocales([...locales], 'approved').map((item) => item.code)).toEqual(
       ['vi', 'en'],
     )

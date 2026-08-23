@@ -16,29 +16,54 @@ import {
 import { getWingsGroupEditorialPostPath } from '@/utilities/wingsGroupEditorial'
 import styles from './WingsGroupV3.module.css'
 
-const FALLBACK_EDITORIAL = [
-  {
-    key: 'trust',
-    sourceFilename: 'wingsgroup-journey-guide.png',
-    tag: 'Pháp lý & niềm tin',
-    title: 'Những điều cần kiểm tra trước khi chọn dịch vụ du lịch',
-    summary: 'Thông tin rõ ràng giúp bạn bắt đầu hành trình với nhiều chủ động hơn.',
-  },
-  {
-    key: 'selection',
-    sourceFilename: 'wingsgroup-selection-guide.png',
-    tag: 'Cẩm nang lựa chọn',
-    title: 'Cách chọn đúng line outbound cho Hàn, Nhật, Trung',
-    summary: 'Đặt thời gian, ngân sách và kỳ vọng vào cùng một điểm bắt đầu.',
-  },
-  {
-    key: 'trends',
-    sourceFilename: 'wingsgroup-travel-trends.png',
-    tag: 'Xu hướng du lịch',
-    title: 'Xu hướng du lịch cao cấp và private journey 2026',
-    summary: 'Một góc nhìn để chuẩn bị kỹ hơn cho chuyến đi tiếp theo.',
-  },
-] as const
+const FALLBACK_EDITORIAL = {
+  en: [
+    {
+      key: 'trust',
+      sourceFilename: 'wingsgroup-journey-guide.png',
+      tag: 'Trust and clarity',
+      title: 'What to check before choosing a travel service',
+      summary: 'Clear information gives every journey a more confident beginning.',
+    },
+    {
+      key: 'selection',
+      sourceFilename: 'wingsgroup-selection-guide.png',
+      tag: 'A considered choice',
+      title: 'How to find the right service for your journey',
+      summary: 'Bring timing, budget and expectations to the same starting point.',
+    },
+    {
+      key: 'trends',
+      sourceFilename: 'wingsgroup-travel-trends.png',
+      tag: 'Travel perspective',
+      title: 'A more thoughtful approach to private travel',
+      summary: 'A perspective to help you prepare for what comes next.',
+    },
+  ],
+  vi: [
+    {
+      key: 'trust',
+      sourceFilename: 'wingsgroup-journey-guide.png',
+      tag: 'Pháp lý & niềm tin',
+      title: 'Những điều cần kiểm tra trước khi chọn dịch vụ du lịch',
+      summary: 'Thông tin rõ ràng giúp bạn bắt đầu hành trình với nhiều chủ động hơn.',
+    },
+    {
+      key: 'selection',
+      sourceFilename: 'wingsgroup-selection-guide.png',
+      tag: 'Cẩm nang lựa chọn',
+      title: 'Cách chọn đúng line outbound cho Hàn, Nhật, Trung',
+      summary: 'Đặt thời gian, ngân sách và kỳ vọng vào cùng một điểm bắt đầu.',
+    },
+    {
+      key: 'trends',
+      sourceFilename: 'wingsgroup-travel-trends.png',
+      tag: 'Xu hướng du lịch',
+      title: 'Xu hướng du lịch cao cấp và private journey 2026',
+      summary: 'Một góc nhìn để chuẩn bị kỹ hơn cho chuyến đi tiếp theo.',
+    },
+  ],
+} as const
 
 const getCandidates = async (block: ArchiveBlock, locale?: null | string): Promise<unknown[]> => {
   const selectedIDs =
@@ -181,7 +206,7 @@ export const WingsGroupEditorialRail = async (
         <div className={styles.editorialGrid}>
           {posts.length === 3
             ? posts.map((post) => renderPostCard(post, locale))
-            : FALLBACK_EDITORIAL.map((item) => {
+            : FALLBACK_EDITORIAL[locale === 'en' ? 'en' : 'vi'].map((item) => {
                 const media = fallbackMedia?.get(item.sourceFilename)
                 return (
                   <article

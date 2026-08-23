@@ -13,9 +13,19 @@ import { WingsGroupEditorialHero } from '@/components/WingsGroupV3/EditorialHero
 import type { Media, Page, WingsGroupEcosystemBlock } from '@/payload-types'
 
 const navigationMock = vi.hoisted(() => ({ push: vi.fn() }))
+const siteLocaleMock = vi.hoisted(() => ({ value: 'vi' as 'en' | 'vi' }))
 
 vi.mock('next/navigation', () => ({
   useRouter: () => navigationMock,
+}))
+
+vi.mock('@/providers/SitePath', () => ({
+  useSitePublicLocale: () => siteLocaleMock.value,
+  useSitePublicPathname: () => (siteLocaleMock.value === 'en' ? '/en/' : '/'),
+}))
+
+vi.mock('@/utilities/useSitePath', () => ({
+  useSitePath: () => (path: string) => (siteLocaleMock.value === 'en' ? `/en${path}` : path),
 }))
 
 vi.mock('@/components/WingsGroupV3/EditorialRail', () => ({
@@ -137,6 +147,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup()
   vi.useRealTimers()
+  siteLocaleMock.value = 'vi'
 })
 
 describe('WingsGroup v3 public components', () => {
@@ -177,6 +188,23 @@ describe('WingsGroup v3 public components', () => {
     expect(screen.getByRole('link', { name: /Tư vấn WingSide/ }).getAttribute('href')).toBe(
       '/lien-he#contact-form',
     )
+  })
+
+  it('renders the English explorer rail and service presentation as a parallel locale', () => {
+    render(
+      <WingsGroupEcosystemComponent
+        blockType="wingsGroupEcosystem"
+        locale="en"
+        profiles={[profile('wingsgo', 'WingsGo')]}
+        title="One ecosystem. Five ways to move forward."
+      />,
+    )
+
+    expect(screen.getByText('OUTBOUND TRAVEL')).toBeTruthy()
+    expect(screen.getByText('Go further, prepared.')).toBeTruthy()
+    expect(screen.getByRole('tab', { name: /Explore/ })).toBeTruthy()
+    expect(screen.getByText('Being updated')).toBeTruthy()
+    expect(screen.queryByText('Đang cập nhật')).toBeNull()
   })
 
   it('keeps the governed explorer in canonical five-profile order', () => {
@@ -398,5 +426,19 @@ describe('WingsGroup v3 public components', () => {
     expect(navigationMock.push).toHaveBeenCalledWith('/lien-he?channel=callback#contact-form')
     expect(document.querySelector('[data-od-id="consultation-dialog"] a[href]')).toBeNull()
     window.removeEventListener('wingsgroup-preferred-channel', onPreferredChannel)
+  })
+
+  it('localizes the consultation dialog and preserves the English contact path', () => {
+    siteLocaleMock.value = 'en'
+    render(<WingsGroupConsultationDialog />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Speak with a specialist' }))
+    expect(screen.getByRole('heading', { name: 'Speak with a specialist.' })).toBeTruthy()
+    expect(screen.getByText(/Choose the channel you prefer\./)).toBeTruthy()
+    expect(screen.getAllByText('Being updated')).toHaveLength(4)
+    expect(screen.getByRole('button', { name: /Specialist callback/ })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: /Specialist callback/ }))
+    expect(navigationMock.push).toHaveBeenCalledWith('/en/lien-he?channel=callback#contact-form')
   })
 })

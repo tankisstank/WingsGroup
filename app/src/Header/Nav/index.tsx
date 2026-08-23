@@ -35,6 +35,29 @@ export const WINGSGROUP_V3_ROUTE_NAV = [
   { href: '/tin-tuc', label: 'Cẩm nang' },
 ] as const
 
+const WINGSGROUP_HOME_NAV_EN = [
+  { href: '#home', label: 'Home' },
+  { href: '#services', label: 'Services' },
+  { href: '#about', label: 'Our ecosystem' },
+  { href: '#trust', label: 'About WingsGroup' },
+  { href: '#news', label: 'Journal' },
+  { href: '#contact', label: 'Contact' },
+] as const
+
+const WINGSGROUP_V3_ROUTE_NAV_EN = [
+  { href: '/', label: 'Home' },
+  { href: '/nang-luc-dich-vu', label: 'Services' },
+  { href: '/he-sinh-thai', label: 'Our ecosystem' },
+  { href: '/ve-wingsgroup', label: 'About WingsGroup' },
+  { href: '/tin-tuc', label: 'Journal' },
+] as const
+
+export const getWingsGroupHomeNav = (locale: SupportedLocaleCode) =>
+  locale === 'en' ? WINGSGROUP_HOME_NAV_EN : WINGSGROUP_HOME_NAV
+
+export const getWingsGroupV3RouteNav = (locale: SupportedLocaleCode) =>
+  locale === 'en' ? WINGSGROUP_V3_ROUTE_NAV_EN : WINGSGROUP_V3_ROUTE_NAV
+
 export const HeaderNav: React.FC<{
   data: { navItems?: HeaderType['navItems'] }
   englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
@@ -80,7 +103,8 @@ export const HeaderNav: React.FC<{
   const isWingsGroupHome =
     wingsGroupV3Home ?? (siteCode === 'wings-group' && publicPathname === '/')
   const isWingsGroupV3Surface = wingsGroupV3Surface ?? isWingsGroupHome
-  const wingsGroupHomeNav = WINGSGROUP_HOME_NAV
+  const wingsGroupHomeNav = getWingsGroupHomeNav(resolvedLocale)
+  const wingsGroupRouteNav = getWingsGroupV3RouteNav(resolvedLocale)
   const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
   const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null
   const resolvedPrimaryAction = wingsSideHiFiCta || primaryAction
@@ -234,7 +258,7 @@ export const HeaderNav: React.FC<{
           </a>
         )
       })}
-      {isWingsGroupV3Surface && englishPublicationState !== 'approved' ? (
+      {isWingsGroupV3Surface && englishPublicationState === 'hidden' ? (
         <span
           aria-disabled="true"
           className="site-language-switcher__link site-language-switcher__link--pending"
@@ -264,7 +288,7 @@ export const HeaderNav: React.FC<{
               </SiteLink>
             ))
           : isWingsGroupV3Surface
-            ? WINGSGROUP_V3_ROUTE_NAV.map((item) => (
+            ? wingsGroupRouteNav.map((item) => (
                 <SiteLink
                   aria-current={
                     item.href === getPublicRoutePathname(pathname || publicPathname || '/')
@@ -373,7 +397,7 @@ export const HeaderNav: React.FC<{
                 </SiteLink>
               ))
             : isWingsGroupV3Surface
-              ? WINGSGROUP_V3_ROUTE_NAV.map((item) => (
+              ? wingsGroupRouteNav.map((item) => (
                   <SiteLink
                     aria-current={
                       item.href === getPublicRoutePathname(pathname || publicPathname || '/')

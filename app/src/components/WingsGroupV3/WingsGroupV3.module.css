@@ -992,6 +992,24 @@
   margin-bottom: 28px;
 }
 
+.contactDirect {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-bottom: 32px;
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.875rem;
+}
+
+.contactDirect a {
+  color: var(--background, #fbfaf6);
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: var(--site-accent, #d99a32);
+  text-underline-offset: 4px;
+}
+
 .contactSection .sectionTitle,
 .contactSection .sectionDescription,
 .contactSection .eyebrow {

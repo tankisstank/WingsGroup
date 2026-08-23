@@ -154,13 +154,28 @@ export const areAllHeroMediaRenderable = (hero: Page['hero']): boolean => {
 
 export const WINGSGROUP_PROFILE_PRESENTATION: Record<
   EcosystemProfile['brandKey'],
-  { category: string; stageTitle: string }
+  { en: { category: string; stageTitle: string }; vi: { category: string; stageTitle: string } }
 > = {
-  wingsgo: { category: 'DU LỊCH NƯỚC NGOÀI', stageTitle: 'Đi xa, chuẩn bị rõ.' },
-  'wing-side': { category: 'KHÁM PHÁ VIỆT NAM', stageTitle: 'Việt Nam theo nhịp riêng.' },
-  wingspass: { category: 'DỊCH VỤ SÂN BAY', stageTitle: 'Qua sân bay nhẹ nhàng hơn.' },
-  wingsplus: { category: 'ĐOÀN RIÊNG & MICE', stageTitle: 'Một đoàn, một kế hoạch.' },
-  wingscare: { category: 'BẢO HIỂM & HỖ TRỢ', stageTitle: 'Yên tâm trong từng chặng.' },
+  wingsgo: {
+    en: { category: 'OUTBOUND TRAVEL', stageTitle: 'Go further, prepared.' },
+    vi: { category: 'DU LỊCH NƯỚC NGOÀI', stageTitle: 'Đi xa, chuẩn bị rõ.' },
+  },
+  'wing-side': {
+    en: { category: 'VIETNAM DISCOVERY', stageTitle: 'Vietnam, at your own pace.' },
+    vi: { category: 'KHÁM PHÁ VIỆT NAM', stageTitle: 'Việt Nam theo nhịp riêng.' },
+  },
+  wingspass: {
+    en: { category: 'AIRPORT SERVICES', stageTitle: 'A smoother airport experience.' },
+    vi: { category: 'DỊCH VỤ SÂN BAY', stageTitle: 'Qua sân bay nhẹ nhàng hơn.' },
+  },
+  wingsplus: {
+    en: { category: 'PRIVATE GROUPS & MICE', stageTitle: 'One group, one considered plan.' },
+    vi: { category: 'ĐOÀN RIÊNG & MICE', stageTitle: 'Một đoàn, một kế hoạch.' },
+  },
+  wingscare: {
+    en: { category: 'TRAVEL CARE & SUPPORT', stageTitle: 'Confidence at every step.' },
+    vi: { category: 'BẢO HIỂM & HỖ TRỢ', stageTitle: 'Yên tâm trong từng chặng.' },
+  },
 }
 
 export const WINGSGROUP_PROFILE_ORDER = [
@@ -389,7 +404,9 @@ export const getWingsGroupSwitcherLocales = (
   locales: LocaleMetadata[],
   publicationState?: null | 'approved' | 'hidden' | 'route-ready',
 ): LocaleMetadata[] =>
-  publicationState === 'approved' ? locales : locales.filter((locale) => locale.code !== 'en')
+  publicationState === 'approved' || publicationState === 'route-ready'
+    ? locales
+    : locales.filter((locale) => locale.code !== 'en')
 
 const isWingsGroupCategory = (value: unknown): value is Category =>
   isRecord(value) &&
