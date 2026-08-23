@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeftIcon, ChevronRightIcon, ImageIcon, PauseIcon, PlayIcon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon, PauseIcon, PlayIcon } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { CMSLink } from '@/components/Link'
@@ -30,7 +30,6 @@ type Props = Page['hero'] & {
 
 const copyByLocale = {
   en: {
-    imagePending: 'Editorial image pending publication review',
     next: 'Next hero story',
     pause: 'Pause hero carousel',
     play: 'Play hero carousel',
@@ -39,7 +38,6 @@ const copyByLocale = {
     title: 'Travel services, connected with care',
   },
   vi: {
-    imagePending: 'Ảnh biên tập đang chờ kiểm duyệt công bố',
     next: 'Nội dung hero tiếp theo',
     pause: 'Dừng carousel hero',
     play: 'Tiếp tục carousel hero',
@@ -203,10 +201,7 @@ export const WingsGroupEditorialHero = (props: Props) => {
               size="(max-width: 850px) 100vw, 55vw"
             />
           ) : (
-            <div className={styles.mediaPending} role="status">
-              <ImageIcon aria-hidden="true" size={30} />
-              <span>{copy.imagePending}</span>
-            </div>
+            <div aria-hidden="true" className={styles.mediaPending} />
           )}
 
           {activeStory?.title || activeStory?.description ? (

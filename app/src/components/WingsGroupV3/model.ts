@@ -253,7 +253,8 @@ export const resolveEcosystemCTA = (
   locale?: null | string,
 ): ResolvedEcosystemCTA => {
   const cta = profile.cta
-  const fallbackLabel = locale === 'en' ? 'Request a consultation' : 'Nhận tư vấn phù hợp'
+  const fallbackLabel =
+    locale === 'en' ? 'Speak with a WingsGroup specialist' : 'Trao đổi với chuyên viên'
   const fallbackPath = '/lien-he#contact-form'
   const hasApprovalEvidence = [
     cta.owner,
@@ -285,7 +286,7 @@ export const resolveEcosystemCTA = (
   return {
     href: safeFallback,
     isFallback: true,
-    label: text(cta.label) || fallbackLabel,
+    label: fallbackLabel,
   }
 }
 

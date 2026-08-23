@@ -110,6 +110,21 @@ describe('lead form hardened submission', () => {
     await screen.findByRole('status')
   })
 
+  it('uses polished English support-panel copy for the WingsGroup contact form', () => {
+    document.documentElement.lang = 'en'
+    render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)
+
+    expect(
+      screen.getByRole('heading', {
+        name: 'Share your plans; our specialists will guide the next step.',
+      }),
+    ).toBeTruthy()
+    expect(screen.getByText('A response during business hours')).toBeTruthy()
+    expect(screen.getByText('Advice tailored to your timing and budget')).toBeTruthy()
+    expect(screen.getByText('Introduced to the right specialist')).toBeTruthy()
+    expect(screen.queryByText(/content manager|sales or content/i)).toBeNull()
+  })
+
   it('shows the Turnstile path only when the server requests a challenge', async () => {
     vi.stubGlobal(
       'fetch',
@@ -392,7 +407,7 @@ describe('lead form hardened submission', () => {
     const need = screen.getByLabelText(/Needs \/ budget \/ timing/)
     expect(screen.getByRole('combobox', { name: /Preferred contact channel/ })).toHaveProperty(
       'value',
-      'callback',
+      '',
     )
     fireEvent.change(fullName, { target: { value: 'Alice' } })
     fireEvent.change(need, { target: { value: 'Please plan a private journey.' } })
@@ -400,17 +415,7 @@ describe('lead form hardened submission', () => {
     const consent = await screen.findByRole('checkbox', { name: /I agree that WingsGroup/ })
     expect(consent.tagName).toBe('BUTTON')
     expect(screen.queryByRole('link', { name: 'Zalo OA' })).toBeNull()
-    expect(
-      screen
-        .getAllByText(/Zalo OA — Pending update/)
-        .find((element) => element.tagName === 'SPAN')
-        ?.getAttribute('aria-disabled'),
-    ).toBe('true')
-    expect(
-      screen
-        .getAllByText(/Chuyên viên gọi lại — Pending update/)
-        .find((element) => element.tagName === 'SPAN'),
-    ).toBeTruthy()
+    expect(screen.queryByText(/Pending update|Chờ cập nhật/)).toBeNull()
     expect(screen.queryByRole('link', { name: 'Chuyên viên gọi lại' })).toBeNull()
     expect(screen.getByRole('link', { name: 'WhatsApp' }).getAttribute('href')).toBe(
       'https://example.com/whatsapp',
@@ -422,9 +427,6 @@ describe('lead form hardened submission', () => {
     expect(consent.getAttribute('aria-invalid')).toBe('true')
     expect(fetchMock).toHaveBeenCalledTimes(1)
 
-    fireEvent.change(screen.getByLabelText(/Preferred contact channel/), {
-      target: { value: 'callback' },
-    })
     fireEvent.click(consent)
     fireEvent.click(screen.getByRole('button', { name: 'Send brief' }))
 
@@ -439,7 +441,6 @@ describe('lead form hardened submission', () => {
       leadContract: {
         consent: true,
         consentVersion: 'wingsgroup-contact-v1',
-        preferredChannel: 'callback',
       },
       submissionData: [
         { field: 'full-name', value: 'Alice' },
@@ -450,7 +451,7 @@ describe('lead form hardened submission', () => {
     })
   })
 
-  it('keeps all pending preferred-channel choices interactable when the inventory is empty', async () => {
+  it('hides unavailable preferred-channel choices when the inventory is empty', async () => {
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       if (init?.method === 'GET') {
         return new Response(
@@ -474,14 +475,8 @@ describe('lead form hardened submission', () => {
     render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)
 
     await screen.findByRole('checkbox', { name: /I agree to the WingsGroup/ })
-    const select = await screen.findByRole('combobox', { name: /Preferred contact channel/ })
-    expect(select).toHaveProperty('disabled', false)
-    expect(screen.getByRole('option', { name: 'Zalo OA — Pending update' })).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'WhatsApp — Pending update' })).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Messenger — Pending update' })).toBeTruthy()
-    expect(
-      screen.getByRole('option', { name: 'Chuyên viên gọi lại — Pending update' }),
-    ).toBeTruthy()
+    expect(screen.queryByRole('combobox', { name: /Preferred contact channel/ })).toBeNull()
+    expect(screen.queryByText(/Pending update|Chờ cập nhật/)).toBeNull()
     expect(screen.queryByRole('link', { name: 'Zalo OA' })).toBeNull()
     expect(screen.queryByRole('link', { name: 'WhatsApp' })).toBeNull()
     expect(screen.queryByRole('link', { name: 'Messenger' })).toBeNull()

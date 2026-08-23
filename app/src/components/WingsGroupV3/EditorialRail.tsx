@@ -224,7 +224,7 @@ export const WingsGroupEditorialRail = async (
                     <div className={styles.editorialCopy}>
                       <div className={styles.editorialMeta}>
                         <span>{item.tag}</span>
-                        <span>WingsGroup v3</span>
+                        <span>WingsGroup</span>
                       </div>
                       <h3>{item.title}</h3>
                       <p className={styles.editorialAuthor}>{item.summary}</p>

@@ -7,52 +7,11 @@ import { useSitePath } from '@/utilities/useSitePath'
 
 import styles from './WingsGroupV3.module.css'
 
-const channelsByLocale = {
-  en: [
-    { key: 'zalo', label: 'Zalo OA', note: 'Convenient for guests in Vietnam', mark: 'ZA' },
-    {
-      key: 'whatsapp',
-      label: 'WhatsApp',
-      note: 'A practical option for international guests',
-      mark: 'WA',
-    },
-    {
-      key: 'messenger',
-      label: 'Messenger',
-      note: 'Continue a conversation from Facebook',
-      mark: 'ME',
-    },
-    {
-      key: 'callback',
-      label: 'Specialist callback',
-      note: 'Leave your number and a specialist will call',
-      mark: 'CB',
-    },
-  ],
-  vi: [
-    { key: 'zalo', label: 'Zalo OA', note: 'Thuận tiện cho khách tại Việt Nam', mark: 'ZA' },
-    { key: 'whatsapp', label: 'WhatsApp', note: 'Phù hợp trao đổi với khách quốc tế', mark: 'WA' },
-    {
-      key: 'messenger',
-      label: 'Messenger',
-      note: 'Tiếp tục cuộc trò chuyện từ Facebook',
-      mark: 'ME',
-    },
-    {
-      key: 'callback',
-      label: 'Chuyên viên gọi lại',
-      note: 'Để lại số điện thoại để chuyên viên liên hệ',
-      mark: 'CB',
-    },
-  ],
-} as const
-
 export const WingsGroupConsultationDialog = () => {
   const router = useRouter()
   const locale = useSitePublicLocale()
   const toSitePath = useSitePath()
   const isEnglish = locale === 'en'
-  const channels = channelsByLocale[isEnglish ? 'en' : 'vi']
   const dialogRef = useRef<HTMLDialogElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const lastFocusedRef = useRef<HTMLElement | null>(null)
@@ -116,17 +75,13 @@ export const WingsGroupConsultationDialog = () => {
         first.focus()
       }
     }
-    const onChannel = (event: MouseEvent) => {
+    const onContactForm = (event: MouseEvent) => {
       const target = event.target
       if (!(target instanceof Element)) return
-      const button = target.closest<HTMLButtonElement>('[data-consult-channel]')
+      const button = target.closest<HTMLButtonElement>('[data-consult-form]')
       if (!button) return
-      const channel = button.dataset.consultChannel
-      if (!channel) return
-      if (!channels.some((item) => item.key === channel)) return
-      window.dispatchEvent(new CustomEvent('wingsgroup-preferred-channel', { detail: { channel } }))
       closeDialog()
-      router.push(toSitePath(`/lien-he?channel=${encodeURIComponent(channel)}#contact-form`))
+      router.push(toSitePath('/lien-he#contact-form'))
       window.setTimeout(() => {
         document
           .querySelector<HTMLInputElement>(
@@ -137,7 +92,7 @@ export const WingsGroupConsultationDialog = () => {
     }
 
     document.addEventListener('click', onTrigger)
-    document.addEventListener('click', onChannel)
+    document.addEventListener('click', onContactForm)
     window.addEventListener('wingsgroup-consultation-open', onOpenEvent)
     dialog.addEventListener('cancel', onCancel)
     dialog.addEventListener('close', onClose)
@@ -159,7 +114,7 @@ export const WingsGroupConsultationDialog = () => {
 
     return () => {
       document.removeEventListener('click', onTrigger)
-      document.removeEventListener('click', onChannel)
+      document.removeEventListener('click', onContactForm)
       window.removeEventListener('wingsgroup-consultation-open', onOpenEvent)
       dialog.removeEventListener('cancel', onCancel)
       dialog.removeEventListener('close', onClose)
@@ -167,7 +122,7 @@ export const WingsGroupConsultationDialog = () => {
       dialog.removeEventListener('keydown', onKeyDown)
       observer?.disconnect()
     }
-  }, [channels, router, toSitePath])
+  }, [router, toSitePath])
 
   return (
     <>
@@ -210,39 +165,25 @@ export const WingsGroupConsultationDialog = () => {
           </div>
           <p>
             {isEnglish
-              ? 'Choose the channel you prefer. The WingsGroup team will listen carefully and clarify your needs before the journey begins.'
-              : 'Chọn kênh bạn thường dùng. Đội ngũ WingsGroup sẽ trực tiếp tiếp nhận và làm rõ nhu cầu trước hành trình.'}
+              ? 'Share what you need. The WingsGroup team will listen carefully and clarify your plans before the journey begins.'
+              : 'Để lại nhu cầu. Đội ngũ WingsGroup sẽ trực tiếp tiếp nhận và làm rõ nhu cầu trước hành trình.'}
           </p>
-          <div
-            aria-label={isEnglish ? 'Choose a consultation channel' : 'Chọn kênh tư vấn'}
-            className={styles.channelList}
-          >
-            {channels.map((channel) => (
-              <button
-                className={styles.channelChoice}
-                data-consult-channel={channel.key}
-                key={channel.key}
-                type="button"
-              >
-                <span className={styles.channelMark}>{channel.mark}</span>
-                <span>
-                  <b>{channel.label}</b>
-                  <small>{channel.note}</small>
-                </span>
-                <span className={styles.channelArrow} aria-hidden="true">
-                  ↗
-                </span>
-                <span className={styles.channelPending}>
-                  {isEnglish ? 'Being updated' : 'Chờ cập nhật'}
-                </span>
-              </button>
-            ))}
-          </div>
-          <p className={styles.consultationNote}>
-            {isEnglish
-              ? 'External channels are being updated. You can still leave your details in the form below.'
-              : 'Kênh ngoài form đang chờ cập nhật. Bạn vẫn có thể để lại thông tin trong biểu mẫu bên dưới.'}
-          </p>
+          <button className={styles.channelChoice} data-consult-form="true" type="button">
+            <span className={styles.channelMark} aria-hidden="true">
+              ↗
+            </span>
+            <span>
+              <b>{isEnglish ? 'Share your plans' : 'Để lại nhu cầu'}</b>
+              <small>
+                {isEnglish
+                  ? 'Our specialists will guide the next step.'
+                  : 'Chuyên viên sẽ đồng hành cùng bạn.'}
+              </small>
+            </span>
+            <span className={styles.channelArrow} aria-hidden="true">
+              ↗
+            </span>
+          </button>
         </div>
       </dialog>
     </>

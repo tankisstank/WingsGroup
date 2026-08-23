@@ -227,7 +227,7 @@ describe('WingsGroup v3 public view model', () => {
     ).toEqual({
       href: '/lien-he#contact-form',
       isFallback: true,
-      label: 'WingSide',
+      label: 'Speak with a WingsGroup specialist',
     })
 
     expect(

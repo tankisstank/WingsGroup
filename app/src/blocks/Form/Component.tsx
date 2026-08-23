@@ -54,13 +54,13 @@ type FormLocalizedCopy = {
 const formCopy = {
   en: {
     asideLabel: 'Consultation support information',
-    asideTitle: 'Send a request, receive the right consultation',
+    asideTitle: 'Share your plans; our specialists will guide the next step.',
     asideDescription:
       'The WingsGroup team will review the timing, budget, destination, and service context before recommending the right next step.',
     bullets: [
-      'Business-hours response',
-      'Advice based on real timing and budget',
-      'Routed to the right sales or content manager',
+      'A response during business hours',
+      'Advice tailored to your timing and budget',
+      'Introduced to the right specialist',
     ],
     fieldLabels: {
       airport: 'Airport',
@@ -238,7 +238,6 @@ const wingsGroupLeadCopy = {
       'The consultation form is temporarily unavailable. Your details have not been submitted. Please try again later.',
     consentRequired: 'Please confirm your consent before submitting this request.',
     noPreference: 'No preference — use the contact form',
-    pending: 'Pending update',
     policyLink: 'Read the Privacy Policy',
     preferredChannel: 'Preferred contact channel (optional)',
   },
@@ -249,18 +248,10 @@ const wingsGroupLeadCopy = {
       'Biểu mẫu tư vấn đang tạm thời không khả dụng. Thông tin của bạn chưa được gửi. Vui lòng thử lại sau.',
     consentRequired: 'Vui lòng xác nhận đồng ý trước khi gửi yêu cầu.',
     noPreference: 'Không ưu tiên — sử dụng biểu mẫu liên hệ',
-    pending: 'Chờ cập nhật',
     policyLink: 'Đọc Chính sách bảo mật',
     preferredChannel: 'Kênh liên hệ ưu tiên (không bắt buộc)',
   },
 } as const
-
-const pendingConsultationChannels: ConsultationChannelPublicState[] = [
-  { key: 'zalo', label: 'Zalo OA', state: 'pending-update' },
-  { key: 'whatsapp', label: 'WhatsApp', state: 'pending-update' },
-  { key: 'messenger', label: 'Messenger', state: 'pending-update' },
-  { key: 'callback', label: 'Chuyên viên gọi lại', state: 'pending-update' },
-]
 
 const readLeadSubmissionContext = (
   form: HTMLFormElement | null,
@@ -367,10 +358,18 @@ export const FormBlock: React.FC<
   const toSitePath = useSitePath()
   const leadChannels =
     leadConfig && leadConfig.enabled && 'available' in leadConfig && leadConfig.available
-      ? leadConfig.channels.length > 0
-        ? leadConfig.channels
-        : pendingConsultationChannels
+      ? leadConfig.channels.filter(
+          (
+            channel,
+          ): channel is ConsultationChannelPublicState & { href: string; state: 'approved' } =>
+            channel.state === 'approved' &&
+            typeof channel.href === 'string' &&
+            channel.href.length > 0,
+        )
       : []
+  const approvedPreferredChannel = leadChannels.some((channel) => channel.key === preferredChannel)
+    ? preferredChannel
+    : ''
 
   useEffect(() => {
     if (!isWingsGroupV3) return
@@ -490,7 +489,9 @@ export const FormBlock: React.FC<
                     leadContract: {
                       consent: consentAccepted,
                       consentVersion: leadConfig.consentVersion,
-                      ...(preferredChannel ? { preferredChannel } : {}),
+                      ...(approvedPreferredChannel
+                        ? { preferredChannel: approvedPreferredChannel }
+                        : {}),
                     },
                   }
                 : {}),
@@ -558,8 +559,8 @@ export const FormBlock: React.FC<
       formID,
       honeypot,
       isWingsGroupV3,
+      approvedPreferredChannel,
       leadConfig,
-      preferredChannel,
       redirect,
       router,
       toSitePath,
@@ -760,15 +761,9 @@ export const FormBlock: React.FC<
                           <ul>
                             {leadChannels.map((channel) => (
                               <li key={channel.key}>
-                                {channel.state === 'approved' && channel.href ? (
-                                  <a href={channel.href} rel="noreferrer" target="_blank">
-                                    {channel.label}
-                                  </a>
-                                ) : (
-                                  <span aria-disabled="true">
-                                    {channel.label} — {wingsGroupCopy.pending}
-                                  </span>
-                                )}
+                                <a href={channel.href} rel="noreferrer" target="_blank">
+                                  {channel.label}
+                                </a>
                               </li>
                             ))}
                           </ul>
@@ -786,9 +781,6 @@ export const FormBlock: React.FC<
                             {leadChannels.map((channel) => (
                               <option key={channel.key} value={channel.key}>
                                 {channel.label}
-                                {channel.state === 'pending-update'
-                                  ? ` — ${wingsGroupCopy.pending}`
-                                  : ''}
                               </option>
                             ))}
                           </select>

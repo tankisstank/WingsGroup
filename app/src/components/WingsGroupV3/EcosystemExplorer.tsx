@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowUpRightIcon, ImageIcon } from 'lucide-react'
+import { ArrowUpRightIcon } from 'lucide-react'
 import React, { useEffect, useId, useRef, useState } from 'react'
 
 import { Media } from '@/components/Media'
@@ -26,20 +26,13 @@ type Props = WingsGroupEcosystemBlock & {
 const copyByLocale = {
   en: {
     choose: 'Choose a WingsGroup service brand',
-    fallback:
-      'This request stays with WingsGroup while the destination endpoint is being reviewed.',
-    imagePending: 'Editorial image pending publication review',
-    pending: 'Being updated',
-    proof: 'Service feedback:',
+    proof: 'Client feedback:',
     verified: 'Verified information is available.',
     railDescription: 'Select a team to see how it can accompany your next step.',
     railTitle: 'Choose a service team',
   },
   vi: {
     choose: 'Chọn thương hiệu dịch vụ trong WingsGroup',
-    fallback: 'Yêu cầu sẽ tiếp tục qua WingsGroup trong khi đầu mối riêng được kiểm tra.',
-    imagePending: 'Ảnh biên tập đang chờ kiểm duyệt công bố',
-    pending: 'Đang cập nhật',
     proof: 'Phản hồi sau dịch vụ:',
     verified: 'Đã có thông tin được xác minh.',
     railDescription: 'Chạm để xem cách từng đội ngũ đồng hành cùng bạn.',
@@ -161,10 +154,7 @@ export const EcosystemExplorer = ({
                 size="(max-width: 850px) 100vw, 58vw"
               />
             ) : (
-              <div className={styles.mediaPending} role="status">
-                <ImageIcon aria-hidden="true" size={28} />
-                <span>{copy.imagePending}</span>
-              </div>
+              <div aria-hidden="true" className={styles.mediaPending} />
             )}
             <div className={styles.unifiedStageContent}>
               <p className={styles.unifiedStageKicker}>
@@ -226,9 +216,11 @@ export const EcosystemExplorer = ({
                 </div>
                 <div className={styles.unifiedDetailContent}>
                   <p className={styles.unifiedDetailCopy}>{activeProfile.description}</p>
-                  <p className={styles.unifiedDetailProof}>
-                    <b>{copy.proof}</b> {hasApprovedProof ? copy.verified : copy.pending}
-                  </p>
+                  {hasApprovedProof ? (
+                    <p className={styles.unifiedDetailProof}>
+                      <b>{copy.proof}</b> {copy.verified}
+                    </p>
+                  ) : null}
                   <ul className={styles.unifiedDetailServices}>
                     {activeProfile.serviceScope.slice(0, 3).map((service, index) => (
                       <li key={`${service.label}-${service.id || index}`}>{service.label}</li>
@@ -252,7 +244,6 @@ export const EcosystemExplorer = ({
                       {cta.label} <ArrowUpRightIcon aria-hidden="true" size={16} />
                     </SiteLink>
                   )}
-                  {cta.isFallback ? <p className={styles.fallbackNote}>{copy.fallback}</p> : null}
                 </div>
               </article>
             </div>

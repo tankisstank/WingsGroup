@@ -175,19 +175,19 @@ describe('WingsGroup v3 public components', () => {
 
     expect(screen.getByRole('heading', { name: 'WingsGo', level: 3 })).toBeTruthy()
     expect(screen.getByAltText('WingsGo editorial scene')).toBeTruthy()
-    expect(screen.getByText('Đang cập nhật')).toBeTruthy()
-    expect(screen.getByRole('link', { name: /Tư vấn WingsGo/ }).getAttribute('href')).toBe(
-      '/lien-he#contact-form',
-    )
+    expect(screen.queryByText('Đang cập nhật')).toBeNull()
+    expect(
+      screen.getByRole('link', { name: /Trao đổi với chuyên viên/ }).getAttribute('href'),
+    ).toBe('/lien-he#contact-form')
 
     const wingSideTab = screen.getByRole('tab', { name: /WingSide/ })
     fireEvent.click(wingSideTab)
     expect(screen.getByRole('heading', { name: 'WingSide', level: 3 })).toBeTruthy()
     expect(screen.getByAltText('WingSide editorial scene')).toBeTruthy()
     expect(screen.getAllByText('WingSide service profile')).toHaveLength(2)
-    expect(screen.getByRole('link', { name: /Tư vấn WingSide/ }).getAttribute('href')).toBe(
-      '/lien-he#contact-form',
-    )
+    expect(
+      screen.getByRole('link', { name: /Trao đổi với chuyên viên/ }).getAttribute('href'),
+    ).toBe('/lien-he#contact-form')
   })
 
   it('renders the English explorer rail and service presentation as a parallel locale', () => {
@@ -203,7 +203,9 @@ describe('WingsGroup v3 public components', () => {
     expect(screen.getByText('OUTBOUND TRAVEL')).toBeTruthy()
     expect(screen.getByText('Go further, prepared.')).toBeTruthy()
     expect(screen.getByRole('tab', { name: /Explore/ })).toBeTruthy()
-    expect(screen.getByText('Being updated')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Speak with a WingsGroup specialist' })).toBeTruthy()
+    expect(screen.queryByText('Being updated')).toBeNull()
+    expect(screen.queryByText(/publication review|endpoint|Service feedback/i)).toBeNull()
     expect(screen.queryByText('Đang cập nhật')).toBeNull()
   })
 
@@ -316,7 +318,7 @@ describe('WingsGroup v3 public components', () => {
       />,
     )
 
-    expect(screen.getByText('Đang cập nhật')).toBeTruthy()
+    expect(screen.queryByText('Đang cập nhật')).toBeNull()
     expect(screen.queryByText('Đã có thông tin được xác minh')).toBeNull()
   })
 
@@ -386,6 +388,25 @@ describe('WingsGroup v3 public components', () => {
     expect(screen.getByAltText('Second story')).toBeTruthy()
   })
 
+  it('keeps the English hero media fallback visually neutral until media is approved', () => {
+    siteLocaleMock.value = 'en'
+    render(
+      <WingsGroupEditorialHero
+        behaviorMode="override"
+        behaviorOverrides={{ autoplay: false }}
+        links={[]}
+        presentation="cinematic-carousel"
+        resolvedLocale="en"
+        richText={null}
+        slides={[]}
+        type="highImpact"
+      />,
+    )
+
+    expect(screen.queryByText(/publication review|Editorial image pending/i)).toBeNull()
+    expect(screen.queryByRole('status')).toBeNull()
+  })
+
   it('uses the shared specialist dialog trigger and returns focus after Escape', () => {
     render(
       <>
@@ -409,23 +430,19 @@ describe('WingsGroup v3 public components', () => {
     expect(document.activeElement).toBe(trigger)
   })
 
-  it('dispatches callback intake without rendering a channel deep link', () => {
-    const onPreferredChannel = vi.fn()
-    window.addEventListener('wingsgroup-preferred-channel', onPreferredChannel)
+  it('routes to the governed contact form without rendering unavailable channels', () => {
     render(<WingsGroupConsultationDialog />)
 
     const trigger = screen.getByRole('button', { name: 'Trao đổi với chuyên viên' })
     fireEvent.click(trigger)
-    expect(screen.getAllByText('Chờ cập nhật')).toHaveLength(4)
-    const callback = screen.getByRole('button', { name: /Chuyên viên gọi lại/ })
-    fireEvent.click(callback)
+    expect(screen.queryByText('Chờ cập nhật')).toBeNull()
+    expect(
+      screen.queryByRole('button', { name: /Zalo|WhatsApp|Messenger|Chuyên viên gọi lại/ }),
+    ).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: /^Để lại nhu cầu/ }))
 
-    expect(onPreferredChannel).toHaveBeenCalledWith(
-      expect.objectContaining({ detail: { channel: 'callback' } }),
-    )
-    expect(navigationMock.push).toHaveBeenCalledWith('/lien-he?channel=callback#contact-form')
+    expect(navigationMock.push).toHaveBeenCalledWith('/lien-he#contact-form')
     expect(document.querySelector('[data-od-id="consultation-dialog"] a[href]')).toBeNull()
-    window.removeEventListener('wingsgroup-preferred-channel', onPreferredChannel)
   })
 
   it('localizes the consultation dialog and preserves the English contact path', () => {
@@ -434,11 +451,12 @@ describe('WingsGroup v3 public components', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Speak with a specialist' }))
     expect(screen.getByRole('heading', { name: 'Speak with a specialist.' })).toBeTruthy()
-    expect(screen.getByText(/Choose the channel you prefer\./)).toBeTruthy()
-    expect(screen.getAllByText('Being updated')).toHaveLength(4)
-    expect(screen.getByRole('button', { name: /Specialist callback/ })).toBeTruthy()
+    expect(screen.getByText(/Share what you need\./)).toBeTruthy()
+    expect(screen.getByRole('button', { name: /^Share your plans/ })).toBeTruthy()
+    expect(screen.queryByText('Being updated')).toBeNull()
+    expect(screen.queryByText(/External channels|Zalo|WhatsApp|Messenger/)).toBeNull()
 
-    fireEvent.click(screen.getByRole('button', { name: /Specialist callback/ }))
-    expect(navigationMock.push).toHaveBeenCalledWith('/en/lien-he?channel=callback#contact-form')
+    fireEvent.click(screen.getByRole('button', { name: /^Share your plans/ }))
+    expect(navigationMock.push).toHaveBeenCalledWith('/en/lien-he#contact-form')
   })
 })
