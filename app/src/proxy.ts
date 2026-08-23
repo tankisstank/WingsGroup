@@ -22,11 +22,15 @@ const stripLeadingSegments = (pathname: string, count: number) => {
 }
 
 const localBootstrapHosts = new Set(['127.0.0.1', '::1', 'localhost'])
+const localListenerHosts = new Set(['0.0.0.0', ...localBootstrapHosts])
 const adminLocale = 'vi'
 const adminLocaleCookie = 'payload-lng'
 
 const isLocalDevelopmentHost = (host: null | string) =>
   Boolean(host && (localBootstrapHosts.has(host) || host.endsWith('.local')))
+
+const isLocalListenerHost = (host: null | string) =>
+  Boolean(host && (localListenerHosts.has(host) || host.endsWith('.local')))
 
 const isServerOwnedLocalDraftPreview = async (
   request: NextRequest,
@@ -57,11 +61,11 @@ const resolveEffectiveHost = (request: NextRequest): string | null => {
   const urlHost = normalizeHost(request.nextUrl.hostname)
 
   if (headerHost && urlHost && headerHost !== urlHost) {
-    if (isLocalDevelopmentHost(headerHost) && !isLocalDevelopmentHost(urlHost)) {
+    if (isLocalDevelopmentHost(headerHost) && !isLocalListenerHost(urlHost)) {
       return urlHost
     }
 
-    if (isLocalDevelopmentHost(urlHost) && !isLocalDevelopmentHost(headerHost)) {
+    if (isLocalListenerHost(urlHost) && !isLocalDevelopmentHost(headerHost)) {
       return headerHost
     }
   }

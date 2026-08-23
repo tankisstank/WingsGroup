@@ -363,6 +363,34 @@ describe('tenant proxy rewrites', () => {
     )
   })
 
+  it('prefers the tenant Host over a 0.0.0.0 standalone listener host', async () => {
+    const response = await proxy(
+      new NextRequest('http://0.0.0.0:4519/', {
+        headers: { host: 'wingsgroup.local:4519' },
+      }),
+    )
+
+    expect(overriddenRequestHeaders(response).get('x-site-host')).toBe('wingsgroup.local')
+  })
+
+  it('does not treat a client Host of 0.0.0.0 as a local production tenant', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    try {
+      const response = await proxy(
+        new NextRequest('http://wingsgroup.local:4519/', {
+          headers: { host: '0.0.0.0:4519' },
+        }),
+      )
+      const headers = overriddenRequestHeaders(response)
+
+      expect(headers.get('x-site-host')).toBe('0.0.0.0')
+      expect(headers.get('x-site-code')).toBeNull()
+      expect(headers.get('x-client-ip')).toBeNull()
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
   it('returns 404 for CMS-only locales on every public host in the multisite inventory', async () => {
     for (const site of multisiteInventory.sites) {
       const nestedPath = Object.values(site.nestedRouteSamples)[0] || '/'
