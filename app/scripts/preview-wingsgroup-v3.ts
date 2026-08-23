@@ -78,8 +78,8 @@ const main = async () => {
     const seedArgs = ['--apply', `--assets-dir=${path.resolve(assetsDirectory)}`]
     if (manifest) seedArgs.push(`--manifest=${path.resolve(manifest)}`)
     const seedStatus = await runChild(
-      'scripts/seed-wingsgroup-v3-home-preview.ts',
-      seedArgs,
+      'node_modules/tsx/dist/cli.mjs',
+      ['scripts/seed-wingsgroup-v3-home-preview.ts', ...seedArgs],
       environment,
     )
     if (seedStatus !== 0) process.exitCode = seedStatus
