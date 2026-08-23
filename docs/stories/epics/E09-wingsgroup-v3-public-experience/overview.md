@@ -26,11 +26,11 @@ chưa được cấp.
 
 | Story | Phạm vi | Tình trạng hiện tại |
 | --- | --- | --- |
-| US-061 | Contract nền tảng v3, media và fidelity | Accepted engineering; chờ cổng công bố |
+| US-061 | Contract nền tảng v3, media và fidelity | Accepted engineering; 13 editorial assets đã có quyền sử dụng WingsGroup, còn kiểm soát import/runtime |
 | US-062 | Fidelity homepage và UX tư vấn responsive | Accepted engineering; chờ cổng công bố |
-| US-063 | Publication, brand, proof và editorial gates | Accepted engineering; chờ quyền publication |
+| US-063 | Publication, brand, proof và editorial gates | Accepted engineering; brand/media/English evidence đã được duyệt, proof vẫn fail-closed |
 | US-064 | Consent lead-intake và consultation fallback | Accepted engineering; chờ privacy/endpoint approval |
-| US-065 | Corporate routes, legal/locale và publication governance | Accepted engineering; English/legal còn fail-closed |
+| US-065 | Corporate routes, legal/locale và publication governance | Accepted engineering; English đã được duyệt, legal/privacy vẫn fail-closed |
 | US-066 | PostgreSQL, cross-tenant và go-live readiness | Accepted engineering; rehearsal/môi trường còn mở |
 
 ## Sổ bằng chứng đã chấp nhận
@@ -45,25 +45,33 @@ không phải proof mới được tạo bởi story reconciliation này.
 | E09-30-31 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-30-31-rereview-3.json` | `ca7ccbae8ec2f5e5186e4a9ce81b4d8f134c7ea6` | Accepted: signed preview grant, consent intake và forged-context denial |
 | E09-40-41 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-40-41-rereview-1.json` | `d7215b54c8c62fa56eaee139fab190e8dd65cb0c` | Accepted: proxy/media bypass closure và cross-tenant isolation |
 | E09-50-51 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-50-51-rereview-1.json` | `ebb4175b2b104f1b564232f7051282bc3881f574` | Accepted engineering correction; production launch blocked |
+| WP-BRAND-01 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-brand-kit-20260823/reports/WP-BRAND-01.json` | `0c45339b55d6aa7e0138aa0fbe1ddfc8a4c08085` | Accepted brand kit implementation; approved logo/token evidence and CMS/static fallback precedence |
+| Editorial media authorization | `docs/product/wingsgroup-v3-media-manifest.json` | `0c4a5a2c0a73e006ab4fa38f16189574e0b845dc` | Exactly 13 assets; WingsGroup production editorial-use rights approved, not legal proof; governed import/derivative checks remain required before runtime publication |
+| EN-EDITORIAL-03 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-en-editorial-audit-20260824/reports/EN-EDITORIAL-03-final.json` | `95e887ec6da2f74a1a7403f0d8e4e62de95cc85d` | Independent Terra acceptance: no P0/P1/P2 public-English findings; native editorial sign-off recommended |
 
 ## Cổng còn mở
 
-Chỉ các cổng sau được ghi nhận là pending theo release-gates contract và các
-review cuối:
+Trạng thái hiện tại theo release-gates contract và các review cuối:
 
-- legal/privacy/consent approval, gồm chính sách và quyền nhận lead production;
-- proof publication rights và provenance cho trust/proof records;
-- brand token/logo được brand owner duyệt;
-- editorial media publication và bản copy tiếng Anh được editorial/content
-  owner duyệt;
-- consultation endpoint owner, SLA và tracking; các kênh Zalo, WhatsApp,
-  Messenger vẫn không có URL production được duyệt;
-- ecosystem destination validation cho năm điểm đến và owner tương ứng;
-- environment gates: disposable PostgreSQL rehearsal và Harness database.
+- `privacy-consent` là cổng mandatory duy nhất còn pending, gồm chính sách và
+  quyền nhận lead production;
+- `proof-publication` là cổng optional/non-blocking, vẫn fail-closed cho tới khi
+  từng proof record có đủ source, context/date, rights và provenance;
+- consultation channels vẫn optional/fail-closed pending URL production, owner,
+  SLA và tracking; các kênh Zalo, WhatsApp, Messenger chưa được mở external URL;
+- ecosystem deep-links vẫn optional/fail-closed pending destination validation và
+  owner tương ứng;
+- environment gates vẫn mở: disposable PostgreSQL rehearsal và Harness database.
 
-Khi các cổng chưa đóng, hệ thống phải giữ English/policy routes và external
-deep-links ở trạng thái fail-closed, giữ media/proof pending, và không nhận lead
-production. Không có report nào trong sổ trên là production launch approval.
+Brand logo/tokens, quyền site-scope và production editorial-use của 13 asset trong
+media manifest, cùng locale completeness và native English editorial review đã có
+bằng chứng approved; các mục này không còn là publication gate pending. Quyền sử
+dụng asset không phải là xác nhận import/runtime production hoặc legal proof.
+
+Khi các cổng chưa đóng, hệ thống phải giữ policy routes, proof records và external
+deep-links ở trạng thái fail-closed, và không nhận lead production. English locale
+và brand/media evidence đã được duyệt không thay đổi các kiểm soát runtime còn lại.
+Không có report nào trong sổ trên là production launch approval.
 
 ## Mapping thời gian
 

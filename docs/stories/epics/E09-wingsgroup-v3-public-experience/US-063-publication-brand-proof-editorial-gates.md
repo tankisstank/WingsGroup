@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Accepted engineering; Chờ xác nhận quyền publication.
+Accepted engineering; Chờ xác nhận các quyền publication còn lại.
 
 ## Lane
 
@@ -25,9 +25,9 @@ WingsGroup v3 chỉ được công bố claim, proof, logo/token và editorial m
 
 - Legal identity chỉ dùng exact registered identity và approved relationship wording; không suy diễn thêm corporate structure, review, award hoặc certification claim.
 - Proof record chỉ rời pending khi có source/issuer, context/date, publication permission và media provenance; bốn record pending vẫn được kiểm đếm rõ.
-- Mười ba editorial assets giữ development/staging-only scope, không được trình bày như legal proof, và không được public khi publication rights chưa được ghi nhận.
-- Brand logo/runtime token chỉ đổi sau khi brand owner cung cấp export, token source và confirmation; không dùng unreconciled export.
-- English copy/metadata/media và public editorial content phải qua native-quality review trước khi bật locale hoặc publish.
+- Mười ba editorial assets đã có site-scope và quyền WingsGroup production editorial use trong media manifest; không được trình bày như legal proof, và runtime publication vẫn cần governed production import, bilingual alt text, provenance và verified derivatives.
+- Brand logo/runtime token đã được triển khai từ brand kit được owner duyệt tại SHA `0c45339b55d6aa7e0138aa0fbe1ddfc8a4c08085`; các export chưa reconcile tiếp tục bị chặn.
+- English route/chrome/metadata/copy đã có native-quality editorial acceptance; policy/legal publication vẫn qua gate riêng trước khi publish.
 - Release-gates report phân biệt accepted engineering với human publication approval và giữ production decision ở trạng thái blocked khi gate mandatory còn pending.
 
 ## Validation
@@ -43,8 +43,14 @@ WingsGroup v3 chỉ được công bố claim, proof, logo/token và editorial m
 - `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-00-11-rereview-2.json` — accepted SHA `547ab08a6b0bea30664ece2d5537d7a86833d1b1`.
 - `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-20-rereview-2.json` — accepted SHA `72a28cf6441f5b6269fe68d5e08e1c42beb0b20a`.
 - `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-50-51-rereview-1.json` — accepted engineering correction at SHA `ebb4175b2b104f1b564232f7051282bc3881f574`, production launch blocked.
+- `/home/docker-admin/.codex-orchestrator/runs/wings-e09-brand-kit-20260823/reports/WP-BRAND-01.json` — approved brand kit implementation at SHA `0c45339b55d6aa7e0138aa0fbe1ddfc8a4c08085`.
+- `docs/product/wingsgroup-v3-media-manifest.json` — exactly 13 WingsGroup editorial assets with approved production-use rights and governed runtime restrictions.
+- `/home/docker-admin/.codex-orchestrator/runs/wings-e09-en-editorial-audit-20260824/reports/EN-EDITORIAL-03-final.json` — independent Terra accepted SHA `95e887ec6da2f74a1a7403f0d8e4e62de95cc85d`, no P0/P1/P2 public-English findings.
 
 ## Pending Gates
 
-Proof publication rights, editorial media/English copy, brand token/logo,
-legal/privacy/consent và ecosystem destination validation chưa được đóng.
+`privacy-consent` là cổng mandatory duy nhất còn pending. Proof publication vẫn
+optional/non-blocking và fail-closed; consultation channels và ecosystem
+destinations cũng optional/fail-closed khi chưa có endpoint/destination evidence.
+Brand token/logo, 13-asset site-scope/publication authorization và English native
+editorial review đã approved, nhưng không phải production launch approval.

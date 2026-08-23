@@ -39,8 +39,14 @@ E09 đã được ghi nhận là accepted engineering trong khoảng bằng ch�
 native E09 trong project lõi WingsGroup và hiện ở trạng thái `Chờ xác nhận`;
 đây không phải là production launch.
 
-Các cổng còn mở là legal/privacy/consent, proof publication rights, brand
-token/logo, editorial media và English copy, consultation endpoint owner/SLA/
-tracking, ecosystem destination validation, cùng hai environment gate là
-disposable PostgreSQL rehearsal và Harness database. Các route, media, proof,
-English và external channel chưa đủ điều kiện vẫn giữ fail-closed.
+Brand logo/tokens, quyền site-scope và production editorial-use của đúng 13 asset
+trong governed media manifest, cùng locale completeness và native English
+editorial review đã có bằng chứng approved. Đây là publication evidence, không
+phải xác nhận production launch hoặc hoàn tất import/runtime media.
+
+Cổng mandatory duy nhất còn pending là `privacy-consent`. Proof publication vẫn
+optional/non-blocking và fail-closed; consultation channels và ecosystem
+destinations vẫn optional/fail-closed khi thiếu URL, owner/SLA/tracking hoặc
+destination evidence. Hai environment gate là disposable PostgreSQL rehearsal và
+Harness database vẫn mở; các route policy, lead production, proof record và
+external channel chưa đủ điều kiện tiếp tục fail-closed.
