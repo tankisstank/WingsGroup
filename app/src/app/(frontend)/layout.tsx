@@ -29,12 +29,16 @@ import { getCanonicalSiteOrigin, getSiteSitemapURL } from '@/utilities/siteSEO'
 import { WingsSideSpecialsPromo } from '@/components/WingsSideSpecialsPromo'
 import { getPublicRoutePathname } from '@/utilities/sitePaths'
 import { getWingsGroupRouteDefinition } from '@/wingsgroup/corporateRoutes'
+import { WINGSGROUP_BRAND, isWingsGroupBrandSite } from '@/wingsgroup/brand'
 
-const getSiteFaviconURL = (settings: Awaited<ReturnType<typeof getCurrentSiteSettings>>) => {
+const getSiteFaviconURL = (
+  settings: Awaited<ReturnType<typeof getCurrentSiteSettings>>,
+  siteCode?: null | string,
+) => {
   const favicon = settings?.branding?.faviconImage
 
   if (!favicon || typeof favicon !== 'object' || !favicon.url) {
-    return null
+    return isWingsGroupBrandSite(siteCode) ? WINGSGROUP_BRAND.assets.favicon : null
   }
 
   return getMediaUrl(favicon.url, favicon.updatedAt)
@@ -83,7 +87,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const publicRoute = getPublicRoutePathname(publicPathname)
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
   const siteTheme = getSiteThemeTokens(settings, { siteCode: site.code })
-  const faviconURL = getSiteFaviconURL(settings)
+  const faviconURL = getSiteFaviconURL(settings, site.code)
   const chromeCopy = getRuntimeLocaleCopy(publicChromeCopy, locale)
 
   return (
@@ -104,7 +108,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <InitTheme />
         {faviconURL ? (
           <>
-            <link href={faviconURL} rel="icon" />
+            <link href={faviconURL} rel="icon" sizes="512x512" type="image/png" />
             <link href={faviconURL} rel="apple-touch-icon" />
           </>
         ) : (
@@ -173,6 +177,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
   const canonicalURL = getSiteSitemapURL({ origin: canonicalOrigin, path: '/' })
   const image = buildConfiguredAbsoluteMediaURL({
+    fallbackPath: isWingsGroupBrandSite(site.code)
+      ? WINGSGROUP_BRAND.assets.ogImage
+      : '/website-template-OG.webp',
     media: settings?.seo?.defaultImage,
     settings,
   })

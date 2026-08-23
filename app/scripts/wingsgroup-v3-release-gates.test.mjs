@@ -46,13 +46,14 @@ test('the governed register has the immutable expected inventory and remains fai
   assert.equal(result.approved, false)
   assert.deepEqual(result.errors, [])
   assert.equal(result.mandatoryGateCount, 5)
-  assert.equal(result.pendingMandatory.length, 3)
+  assert.equal(result.pendingMandatory.length, 2)
   assert.ok(result.pendingMandatory.some(({ key }) => key === 'privacy-consent'))
   assert.ok(result.pendingMandatory.some(({ key }) => key === 'locale-completeness'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'legal-identity'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'ecosystem-deep-links'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'proof-publication'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'editorial-media'))
+  assert.ok(!result.pendingMandatory.some(({ key }) => key === 'brand-logo-tokens'))
   assert.deepEqual(
     governedRegister.gates.map(({ key, mandatory }) => ({ key, mandatory })),
     expectedGateInventory,

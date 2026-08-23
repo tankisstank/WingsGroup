@@ -8,6 +8,7 @@ import {
   resolveThemePresetTokens,
   type ThemeSettingsLike,
 } from './themeTokens'
+import { isWingsGroupBrandSite, WINGSGROUP_BRAND } from '@/wingsgroup/brand'
 
 const radiusMap: Record<'sm' | 'md' | 'lg' | 'xl', string> = {
   lg: '1.25rem',
@@ -136,8 +137,17 @@ export const getSiteThemeTokens = (
   const isWingsSide = context.siteCode
     ? context.siteCode === 'wing-side'
     : themeKey === 'wings-side'
-  const resolvedBrandColor = isWingsSide ? wingsSideHiFiTokens.brand : brandColor
-  const resolvedAccentColor = isWingsSide ? wingsSideHiFiTokens.accent : accentColor
+  const isWingsGroup = isWingsGroupBrandSite(context.siteCode)
+  const resolvedBrandColor = isWingsSide
+    ? wingsSideHiFiTokens.brand
+    : isWingsGroup
+      ? WINGSGROUP_BRAND.primary
+      : brandColor
+  const resolvedAccentColor = isWingsSide
+    ? wingsSideHiFiTokens.accent
+    : isWingsGroup
+      ? WINGSGROUP_BRAND.accent
+      : accentColor
   const wingsSideSemanticTokens = isWingsSide
     ? {
         '--section-space': 'clamp(1.65rem, 3.8vw, 2.75rem)',

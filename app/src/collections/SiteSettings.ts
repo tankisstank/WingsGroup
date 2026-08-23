@@ -101,9 +101,9 @@ export const SiteSettings: CollectionConfig = {
           label: 'Favicon',
           type: 'upload',
           relationTo: 'media',
-          required: true,
           admin: {
-            description: 'Biểu tượng bắt buộc cho tab trình duyệt và shortcut của từng site.',
+            description:
+              'Ảnh favicon tùy chọn; để trống để dùng fallback tĩnh theo bộ nhận diện của site.',
           },
         },
         {

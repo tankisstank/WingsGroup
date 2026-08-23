@@ -146,10 +146,14 @@
       "priority": "P1",
       "scope": "Runtime WingsGroup logo export and brand tokens",
       "mandatory": true,
-      "state": "pending",
+      "state": "approved",
       "owner": "Brand owner",
-      "plannedInput": "Approved logo and token source will be supplied later.",
       "evidenceRequirements": ["Approved runtime logo asset", "Approved token source", "Brand-owner confirmation"],
+      "evidence": [
+        "https://quyt-lenovo.taild819fc.ts.net/WingsGroup-web-brand-kit.zip sha256:4e4011664c352b281c727ffbd0b0ef513c1d877ea4692d348a352af54e16c44f",
+        "https://quyt-lenovo.taild819fc.ts.net/WingsGroup-web-brand-kit/WEB-BRAND-GUIDE.md sha256:16abdaa214fc4157a890abea3db07e3183769d3904a18506f1f0ab8e3358ffa3",
+        "Brand owner supplied approval date: 2026-08-23; committed PNG master checksums and dimensions recorded in app/src/wingsgroup/brand.ts"
+      ],
       "failClosedBehavior": "Retain the existing approved runtime branding; do not adopt an unreconciled export.",
       "consumers": ["US-061", "US-062", "US-063", "US-066"]
     }

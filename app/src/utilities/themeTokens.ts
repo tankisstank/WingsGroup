@@ -99,10 +99,13 @@ export type ThemePresetTokens = {
   surfaceStrongColor: string
 }
 
-export type ThemePresetRecord = {
-  key?: string | null
-  tokens?: Partial<ThemePresetTokens> | null
-} | null | undefined
+export type ThemePresetRecord =
+  | {
+      key?: string | null
+      tokens?: Partial<ThemePresetTokens> | null
+    }
+  | null
+  | undefined
 
 export type ThemePresetRelationLike = number | string | ThemePresetRecord
 
@@ -135,9 +138,9 @@ const themeKeyToPresetKey: Record<string, ThemePresetKey> = {
 
 export const defaultThemePresetByKey: Record<ThemePresetKey, ThemePresetTokens> = {
   corporate: {
-    accentColor: '#F59E0B',
+    accentColor: '#FDB515',
     backgroundStyle: 'soft-gradient',
-    brandColor: '#0F172A',
+    brandColor: '#005090',
     buttonStyle: 'solid',
     fontPreset: 'system',
     layoutStyle: 'corporate',

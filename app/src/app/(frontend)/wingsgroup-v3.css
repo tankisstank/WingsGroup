@@ -105,7 +105,7 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true']
 body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   .site-header--wingsgroup-v3
   .site-header__primary-link[data-active='true'] {
-  color: #8b4f00;
+  color: var(--site-brand, #005090);
   text-decoration: underline;
   text-underline-offset: 5px;
 }
@@ -114,10 +114,10 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   .site-header--wingsgroup-v3
   .site-header-cta {
   align-items: center;
-  background: #d9952b;
-  border: 1px solid #d9952b;
+  background: var(--site-accent, #fdb515);
+  border: 1px solid var(--site-accent, #fdb515);
   border-radius: 0;
-  color: #211b13;
+  color: var(--site-brand, #005090);
   display: inline-flex;
   font-size: 0.78rem;
   font-weight: 700;
@@ -132,8 +132,8 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true']
 body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   .site-header--wingsgroup-v3
   .site-header-cta:focus-visible {
-  background: #f0b24d;
-  color: #211b13;
+  background: color-mix(in srgb, var(--site-accent, #fdb515) 80%, #000);
+  color: var(--site-brand, #005090);
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .wingsgroup-v3-surface {
@@ -160,7 +160,7 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .wingsgroup-v3-bre
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .wingsgroup-v3-breadcrumb__link:hover,
 body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   .wingsgroup-v3-breadcrumb__link:focus-visible {
-  color: #8b4f00;
+  color: var(--site-brand, #005090);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -345,12 +345,12 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-footer--wing
   }
 }
 
-/* E09-20 VI homepage fidelity layer. Every rule remains tenant and release
- * scoped so shared chrome and other sites keep their existing treatment. */
+/* WingsGroup v3 brand layer. Every rule remains tenant and release scoped so
+ * shared chrome and other sites keep their existing treatment. */
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] {
   --site-muted: #737067;
   --site-paper: #fffefa;
-  --site-accent-deep: #956325;
+  --site-accent-deep: var(--site-brand, #005090);
   background: #fbfaf6;
   color: #302d26;
 }
@@ -390,10 +390,18 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-logo-mark {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #d99a32;
+  background: var(--site-accent, #fdb515);
   color: #302d26;
   font-family: var(--font-geist-mono), monospace;
   font-size: 0.75rem;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-logo-image--wingsgroup {
+  display: block;
+  height: 60px;
+  object-fit: contain;
+  object-position: center;
+  width: 180px;
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-logo-text {
@@ -423,7 +431,7 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__prim
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__primary-link:hover,
 body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   .site-header__primary-link:focus-visible {
-  color: #956325;
+  color: var(--site-brand, #005090);
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header-cta {
@@ -431,15 +439,15 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header-cta {
   border: 0;
   border-radius: 0;
   padding: 10px 13px;
-  background: #d99a32;
-  color: #302d26;
-  box-shadow: 0 5px 16px rgb(217 154 50 / 25%);
+  background: var(--site-accent, #fdb515);
+  color: var(--site-brand, #005090);
+  box-shadow: 0 5px 16px color-mix(in srgb, var(--site-accent, #fdb515) 25%, transparent);
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header-cta:hover,
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header-cta:focus-visible {
-  background: #c58928;
-  color: #302d26;
+  background: color-mix(in srgb, var(--site-accent, #fdb515) 80%, #000);
+  color: var(--site-brand, #005090);
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-language-switcher {
@@ -496,7 +504,7 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-footer {
 
 .wingsgroup-v3-editorial-article__eyebrow {
   margin: 0 0 16px;
-  color: var(--site-accent-deep, #956325);
+  color: var(--site-accent-deep, #005090);
   font-family: var(--site-font-mono, monospace);
   font-size: 0.6875rem;
   letter-spacing: 0.08em;

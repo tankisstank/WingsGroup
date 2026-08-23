@@ -271,8 +271,8 @@ const englishTitleMap: Record<string, string> = {
 
 const siteSeeds: SiteSeed[] = [
   {
-    accentColor: '#A16207',
-    brandColor: '#1C1917',
+    accentColor: '#FDB515',
+    brandColor: '#005090',
     code: 'wings-group',
     domain: 'wingsgroup.local',
     name: 'WingsGroup',
@@ -1270,9 +1270,10 @@ async function createSiteSettings(
   overrides: {
     footerNote?: string
     footerNavItems?: Array<ReturnType<typeof linkItem>>
-    faviconImageID?: number | string
+    faviconImageID?: number | string | null
     headerNavItems?: Array<ReturnType<typeof linkItem>>
     logoImageID?: number | string | null
+    defaultImageID?: number | string | null
     salesEmail?: string
     supportEmail?: string
     supportPhone?: string
@@ -1293,7 +1294,8 @@ async function createSiteSettings(
         ...(siteSeed.brandColor ? { brandColor: siteSeed.brandColor } : {}),
         ...(siteSeed.accentColor ? { accentColor: siteSeed.accentColor } : {}),
         logoImage: overrides.logoImageID === undefined ? null : overrides.logoImageID,
-        faviconImage: overrides.faviconImageID || heroImageID,
+        faviconImage:
+          overrides.faviconImageID === undefined ? heroImageID : overrides.faviconImageID,
         // Tenant identity is `wing-side`, while the established visual theme
         // option is `wings-side`. Keep those separate instead of submitting an
         // invalid select value during deterministic fixture seeding.
@@ -1311,7 +1313,8 @@ async function createSiteSettings(
         defaultTitle: siteSeed.name,
         titleSuffix: siteSeed.seoSuffix,
         defaultDescription: siteSeed.seoDescription,
-        defaultImage: heroImageID,
+        defaultImage:
+          overrides.defaultImageID === undefined ? heroImageID : overrides.defaultImageID,
         canonicalDomain: `https://${siteSeed.domain.replace('.local', '.vn')}`,
       },
       supportEmail: overrides.supportEmail || `hello@${siteSeed.domain.replace('.local', '.vn')}`,
@@ -4299,6 +4302,9 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
       salesEmail: 'sales@wingsgroup.vn',
       supportEmail: 'info@wingsgroup.vn',
       supportPhone: '0912910101',
+      defaultImageID: null,
+      faviconImageID: null,
+      logoImageID: null,
       tagline:
         'Lớp umbrella của hệ sinh thái WingsGroup, kết nối tour đại trà ra nước ngoài, hành trình cho khách quốc tế tại Việt Nam, hỗ trợ sân bay, private / MICE và chăm sóc sau bán.',
     },

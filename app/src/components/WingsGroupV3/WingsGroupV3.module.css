@@ -143,7 +143,7 @@
 .consultationFab:focus-visible,
 .consultationClose:focus-visible,
 .channelChoice:focus-visible {
-  outline: 3px solid var(--site-accent, #d99a32);
+  outline: 3px solid var(--site-accent, #fdb515);
   outline-offset: 3px;
 }
 
@@ -252,7 +252,7 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--site-accent, #d99a32);
+  background: var(--site-accent, #fdb515);
   content: '';
   transform: scale(1.2);
 }
@@ -330,7 +330,7 @@
 
 .unifiedStageKicker {
   margin: 0 0 12px;
-  color: var(--site-accent, #d99a32);
+  color: var(--site-accent, #fdb515);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -425,7 +425,7 @@
 
 .unifiedBrandNumber,
 .unifiedBrandAction {
-  color: var(--site-accent, #d99a32);
+  color: var(--site-accent, #fdb515);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -546,7 +546,7 @@
 }
 
 .unifiedDetailCta:hover {
-  background: var(--site-accent, #d99a32);
+  background: var(--site-accent, #fdb515);
   color: var(--foreground, #302d26);
 }
 
@@ -603,7 +603,7 @@
 }
 
 .routeNumber {
-  color: var(--site-accent-deep, #956325);
+  color: var(--site-accent-deep, #005090);
   font-family: var(--site-font-mono, var(--font-geist-mono)), monospace;
   font-size: 0.75rem;
   font-weight: 700;
@@ -621,7 +621,7 @@
 
 .routeCta:hover,
 .routeCta:focus-visible {
-  color: var(--site-accent-deep, #956325);
+  color: var(--site-accent-deep, #005090);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -772,7 +772,7 @@
 }
 
 .trustDetailNumber {
-  color: var(--site-accent-deep, #956325);
+  color: var(--site-accent-deep, #005090);
   font-family: var(--site-font-mono, var(--font-geist-mono)), monospace;
   font-size: 0.75rem;
   font-weight: 700;
@@ -972,7 +972,7 @@
   width: fit-content;
   min-height: 44px;
   padding: 10px 0;
-  color: var(--site-brand, #956325);
+  color: var(--site-brand, #005090);
   font-weight: 700;
 }
 
@@ -1006,7 +1006,7 @@
   color: var(--background, #fbfaf6);
   font-weight: 650;
   text-decoration: underline;
-  text-decoration-color: var(--site-accent, #d99a32);
+  text-decoration-color: var(--site-accent, #fdb515);
   text-underline-offset: 4px;
 }
 
@@ -1076,8 +1076,8 @@
 
 .contactSection :global(.site-form-submit) {
   min-height: 48px;
-  border-color: var(--site-accent, #d99a32);
-  background: var(--site-accent, #d99a32);
+  border-color: var(--site-accent, #fdb515);
+  background: var(--site-accent, #fdb515);
   color: var(--foreground, #302d26);
 }
 
@@ -1093,7 +1093,7 @@
   padding: 11px 14px;
   border: 1px solid var(--foreground, #302d26);
   border-radius: 999px;
-  background: var(--site-accent, #d99a32);
+  background: var(--site-accent, #fdb515);
   color: var(--foreground, #302d26);
   font: inherit;
   font-size: 0.8125rem;
@@ -1189,7 +1189,7 @@
 }
 
 .channelChoice:hover {
-  background: color-mix(in oklab, var(--site-accent, #d99a32) 12%, transparent);
+  background: color-mix(in oklab, var(--site-accent, #fdb515) 12%, transparent);
 }
 
 .channelMark {
@@ -1217,7 +1217,7 @@
 
 .channelArrow {
   align-self: start;
-  color: var(--site-accent-deep, #956325);
+  color: var(--site-accent-deep, #005090);
   font-weight: 700;
 }
 
@@ -1272,7 +1272,7 @@
 }
 
 .editorialArchiveItem h3 a:hover {
-  color: var(--site-accent-deep, #956325);
+  color: var(--site-accent-deep, #005090);
 }
 
 .editorialArchiveMeta {

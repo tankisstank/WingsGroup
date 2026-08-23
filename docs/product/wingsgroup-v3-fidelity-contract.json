@@ -9,6 +9,20 @@
     "contract": "wingsgroup-v3-development-package/handoff/content-contract.md",
     "status": "development-baseline"
   },
+  "brandKit": {
+    "sourceArchive": "https://quyt-lenovo.taild819fc.ts.net/WingsGroup-web-brand-kit.zip",
+    "guide": "https://quyt-lenovo.taild819fc.ts.net/WingsGroup-web-brand-kit/WEB-BRAND-GUIDE.md",
+    "ownerApprovalDate": "2026-08-23",
+    "tokens": { "primary": "#005090", "accent": "#FDB515" },
+    "assetPath": "/brand/wingsgroup/",
+    "assetContract": {
+      "unit": "css-px",
+      "doNotCrop": true,
+      "doNotUpscale": true,
+      "logoCssSize": [180, 60],
+      "markCssSize": [40, 40]
+    }
+  },
   "header": {
     "selector": "[data-od-id=site-header]",
     "brand": "WingsGroup",

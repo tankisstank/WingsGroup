@@ -329,9 +329,9 @@ export interface SiteSetting {
     accentColor?: string | null;
     logoImage?: (number | null) | Media;
     /**
-     * Biểu tượng bắt buộc cho tab trình duyệt và shortcut của từng site.
+     * Ảnh favicon tùy chọn; để trống để dùng fallback tĩnh theo bộ nhận diện của site.
      */
-    faviconImage: number | Media;
+    faviconImage?: (number | null) | Media;
     /**
      * Mã ổn định dùng cho render frontend. Không phụ thuộc tên hiển thị site.
      */

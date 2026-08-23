@@ -5,6 +5,7 @@ import React from 'react'
 import type { Media } from '@/payload-types'
 
 import { getMediaUrl } from '@/utilities/getMediaUrl'
+import { WINGSGROUP_BRAND, isWingsGroupBrandSite } from '@/wingsgroup/brand'
 
 interface Props {
   accentColor?: null | string
@@ -34,30 +35,45 @@ export const Logo = (props: Props) => {
   const loading = loadingFromProps || 'lazy'
   const priority = priorityFromProps || 'low'
   const logoImageUrl = logoImage?.url ? getMediaUrl(logoImage.url, logoImage.updatedAt) : ''
-  const label = logoText || logoImage?.alt || 'Site logo'
   const isPriorityImage = priority === 'high'
   const resolvedLogoImage = logoImageUrl && logoImage ? logoImage : null
   const wingsSideFallback = !resolvedLogoImage && siteCode === 'wing-side'
+  const wingsGroupFallback = !resolvedLogoImage && isWingsGroupBrandSite(siteCode)
+  const label =
+    logoText ||
+    logoImage?.alt ||
+    (isWingsGroupBrandSite(siteCode) ? WINGSGROUP_BRAND.displayTitle : 'Site logo')
 
-  if (resolvedLogoImage || wingsSideFallback) {
+  if (resolvedLogoImage || wingsGroupFallback || wingsSideFallback) {
     return (
       <span
         aria-label={label}
         className={clsx('inline-flex items-center', className)}
         data-fetch-priority={priority}
         data-loading={loading}
-        data-logo-source={wingsSideFallback ? 'wingsside-hifi' : 'cms'}
+        data-logo-source={
+          wingsGroupFallback ? 'wingsgroup-brand-kit' : wingsSideFallback ? 'wingsside-hifi' : 'cms'
+        }
       >
         <NextImage
           alt=""
           aria-hidden="true"
-          className="site-logo-image h-12 w-auto max-w-[160px] object-contain"
-          height={resolvedLogoImage?.height || 96}
+          className={clsx(
+            'site-logo-image object-contain',
+            wingsGroupFallback ? 'site-logo-image--wingsgroup' : 'h-12 w-auto max-w-[160px]',
+          )}
+          height={wingsGroupFallback ? 60 : resolvedLogoImage?.height || 96}
           loading={isPriorityImage ? undefined : loading}
           priority={isPriorityImage}
-          src={wingsSideFallback ? WINGSSIDE_LOGO_FALLBACK : logoImageUrl}
+          src={
+            wingsGroupFallback
+              ? WINGSGROUP_BRAND.assets.logoPrimary
+              : wingsSideFallback
+                ? WINGSSIDE_LOGO_FALLBACK
+                : logoImageUrl
+          }
           unoptimized
-          width={resolvedLogoImage?.width || 320}
+          width={wingsGroupFallback ? 180 : resolvedLogoImage?.width || 320}
         />
       </span>
     )

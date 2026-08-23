@@ -11,6 +11,7 @@ import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 import { MailIcon, PhoneIcon } from 'lucide-react'
 import { getWingsGroupRouteDefinition } from '@/wingsgroup/corporateRoutes'
+import { isWingsGroupBrandSite } from '@/wingsgroup/brand'
 
 export async function Footer() {
   const settings = await getCurrentSiteSettings()
@@ -32,6 +33,13 @@ export async function Footer() {
     settings?.salesEmail && settings.salesEmail !== settings.supportEmail
       ? settings.salesEmail
       : null
+  const hasConfiguredLogoImage = Boolean(
+    settings?.branding?.logoImage &&
+    typeof settings.branding.logoImage === 'object' &&
+    'url' in settings.branding.logoImage &&
+    settings.branding.logoImage.url,
+  )
+  const usesWingsGroupBrandFallback = isWingsGroupBrandSite(site.code) && !hasConfiguredLogoImage
 
   return (
     <footer
@@ -115,6 +123,11 @@ export async function Footer() {
               <Logo
                 accentColor={settings?.branding?.accentColor}
                 brandColor={settings?.branding?.brandColor}
+                logoImage={
+                  settings?.branding?.logoImage && typeof settings.branding.logoImage === 'object'
+                    ? settings.branding.logoImage
+                    : null
+                }
                 logoText={settings?.branding?.logoText || settings?.siteName}
                 siteCode={site.code}
               />
@@ -122,7 +135,7 @@ export async function Footer() {
             {settings?.siteName ? (
               <div className="text-sm font-semibold">{settings.siteName}</div>
             ) : null}
-            {settings?.tagline ? (
+            {settings?.tagline && !usesWingsGroupBrandFallback ? (
               <div className="text-sm text-muted-foreground">{settings.tagline}</div>
             ) : null}
             {settings?.footerNote ? (
