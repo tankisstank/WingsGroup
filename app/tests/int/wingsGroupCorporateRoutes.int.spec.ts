@@ -685,11 +685,31 @@ describe('WingsGroup corporate route integration', () => {
       title: 'Liên hệ WingsGroup',
     }
     const media = [
-      { filename: 'wingsgroup-ecosystem-hero.png', governance: {}, id: 101 },
-      { filename: 'wingsgroup-vietnam-discovery.png', governance: {}, id: 102 },
-      { filename: 'wingsgroup-airport-service.png', governance: {}, id: 103 },
-      { filename: 'wingsgroup-corporate-partnership.png', governance: {}, id: 104 },
-      { filename: 'wingsgroup-travel-support.png', governance: {}, id: 105 },
+      {
+        filename: 'wingsgroup-ecosystem-hero.png',
+        governance: { managedBy: 'wingsgroup-v3', publicationState: 'published' },
+        id: 101,
+      },
+      {
+        filename: 'wingsgroup-vietnam-discovery.png',
+        governance: { managedBy: 'wingsgroup-v3', publicationState: 'published' },
+        id: 102,
+      },
+      {
+        filename: 'wingsgroup-airport-service.png',
+        governance: { managedBy: 'wingsgroup-v3', publicationState: 'published' },
+        id: 103,
+      },
+      {
+        filename: 'wingsgroup-corporate-partnership.png',
+        governance: { managedBy: 'wingsgroup-v3', publicationState: 'published' },
+        id: 104,
+      },
+      {
+        filename: 'wingsgroup-travel-support.png',
+        governance: { managedBy: 'wingsgroup-v3', publicationState: 'published' },
+        id: 105,
+      },
     ]
     const createdLayouts = new Map<string, unknown>()
     const payload = {
@@ -907,5 +927,114 @@ describe('WingsGroup corporate route integration', () => {
       { key: 'whatsapp', state: 'unconfigured' },
       { key: 'messenger', state: 'unconfigured' },
     ])
+  })
+
+  it('fails before Page create when an exact ecosystem fixture is missing or pending', async () => {
+    const primaryFilenames = [
+      'wingsgroup-ecosystem-hero.png',
+      'wingsgroup-vietnam-discovery.png',
+      'wingsgroup-airport-service.png',
+      'wingsgroup-corporate-partnership.png',
+      'wingsgroup-travel-support.png',
+    ]
+    const publishedPrimaryMedia = primaryFilenames.map((filename, index) => ({
+      filename,
+      governance: { managedBy: 'wingsgroup-v3', publicationState: 'published' },
+      id: 201 + index,
+    }))
+    const buildAttempt = (media: Array<Record<string, unknown>>) => {
+      const state = { pageCreates: 0 }
+      const pages: Array<Record<string, unknown> & { id: number; pathname: string }> = []
+      const settings = { id: 20, wingsGroupV3: { consultationChannels: [] } }
+      const form = {
+        fields: [
+          { blockType: 'text', name: 'full-name' },
+          { blockType: 'textarea', name: 'brief' },
+        ],
+        id: 30,
+        site: 1,
+        title: 'Liên hệ WingsGroup',
+      }
+      const payload = {
+        create: async ({
+          collection,
+          data,
+        }: {
+          collection: string
+          data: Record<string, unknown>
+        }) => {
+          if (collection !== 'pages') throw new Error(`Unexpected create: ${collection}`)
+          state.pageCreates += 1
+          const page = { ...data, id: pages.length + 1 } as (typeof pages)[number]
+          pages.push(page)
+          return page
+        },
+        find: async ({ collection }: { collection: string }) => {
+          if (collection === 'sites') return { docs: [{ code: 'wings-group', id: 1 }] }
+          if (collection === 'site-settings') return { docs: [settings] }
+          if (collection === 'forms') return { docs: [form] }
+          if (collection === 'media') return { docs: media }
+          if (collection === 'pages') return { docs: pages }
+          throw new Error(`Unexpected find: ${collection}`)
+        },
+        update: async ({
+          collection,
+          id,
+        }: {
+          collection: string
+          data: Record<string, unknown>
+          id: number
+        }) => {
+          if (collection === 'site-settings') return settings
+          if (collection === 'forms') return form
+          const page = pages.find((candidate) => candidate.id === id)
+          if (!page) throw new Error(`Page ${id} missing`)
+          return page
+        },
+      }
+
+      return {
+        run: seedWingsGroupCorporateRoutes({
+          payload: payload as never,
+          req: { user: { role: 'super-admin' } } as never,
+        }),
+        state,
+      }
+    }
+
+    const missingPrimary = buildAttempt([
+      ...publishedPrimaryMedia.filter(
+        (media) => media.filename !== 'wingsgroup-airport-service.png',
+      ),
+      {
+        filename: 'wingspass-fast-track-hero.png',
+        governance: { managedBy: 'wingsgroup-v3', publicationState: 'published' },
+        id: 299,
+      },
+    ])
+    await expect(missingPrimary.run).rejects.toThrow(
+      /publishable site-scoped media fixture for wingsgroup-airport-service\.png/,
+    )
+    expect(missingPrimary.state.pageCreates).toBe(0)
+
+    const pendingPrimary = buildAttempt([
+      ...publishedPrimaryMedia.map((media) =>
+        media.filename === 'wingsgroup-airport-service.png'
+          ? {
+              ...media,
+              governance: { managedBy: 'wingsgroup-v3', publicationState: 'pending' },
+            }
+          : media,
+      ),
+      {
+        filename: 'wingspass-fast-track-hero.png',
+        governance: { managedBy: 'wingsgroup-v3', publicationState: 'published' },
+        id: 300,
+      },
+    ])
+    await expect(pendingPrimary.run).rejects.toThrow(
+      /publishable site-scoped media fixture for wingsgroup-airport-service\.png/,
+    )
+    expect(pendingPrimary.state.pageCreates).toBe(0)
   })
 })

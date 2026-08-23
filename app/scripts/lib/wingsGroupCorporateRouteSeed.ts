@@ -25,13 +25,6 @@ type LocalizedRouteSeed = {
   title: string
 }
 
-const ecosystemMediaFallbacks: Record<string, string> = {
-  'wingsgroup-airport-service.png': 'wingspass-fast-track-hero.png',
-  'wingsgroup-corporate-partnership.png': 'wingsplus-private-mice-hero.png',
-  'wingsgroup-travel-support.png': 'wingscare-travel-care-hero.png',
-  'wingsgroup-vietnam-discovery.png': 'wingsside-vietnam-journey-hero.png',
-}
-
 export type WingsGroupCorporateRouteSeed = WingsGroupRouteDefinition & {
   en: LocalizedRouteSeed
   preserveExisting: boolean
@@ -737,9 +730,7 @@ export const seedWingsGroupCorporateRoutes = async ({
           const stageMedia = (profile as SeedBlock).stageMedia
           if (typeof stageMedia !== 'string') return profile
           const preferredMedia = mediaByFilename.get(stageMedia)
-          const fallbackFilename = ecosystemMediaFallbacks[stageMedia]
-          const fallbackMedia = fallbackFilename ? mediaByFilename.get(fallbackFilename) : undefined
-          const mediaID = (preferredMedia?.publishable ? preferredMedia : fallbackMedia)?.id
+          const mediaID = preferredMedia?.publishable ? preferredMedia.id : undefined
           if (mediaID === undefined) {
             throw new Error(
               `WingsGroup ecosystem route requires a publishable site-scoped media fixture for ${stageMedia}.`,
@@ -749,6 +740,14 @@ export const seedWingsGroupCorporateRoutes = async ({
         }),
       }
     })
+
+  const routeSeeds = buildWingsGroupCorporateRouteSeeds()
+  const resolvedRouteLayouts = new Map<string, SeedBlock[]>()
+  for (const route of routeSeeds) {
+    for (const locale of ['vi', 'en'] as const) {
+      resolvedRouteLayouts.set(`${route.path}:${locale}`, resolveRouteLayout(route[locale].layout))
+    }
+  }
 
   const forms = await payload.find({
     collection: 'forms',
@@ -865,7 +864,7 @@ export const seedWingsGroupCorporateRoutes = async ({
   const existingPages = existingResult.docs
   const result: SeedResult = { created: [], policyPending: [], preservedHome: false, updated: [] }
 
-  for (const route of buildWingsGroupCorporateRouteSeeds()) {
+  for (const route of routeSeeds) {
     const action = resolveCorporateRouteSeedAction(existingPages, route)
     let page = existingPages.find((candidate) => candidate.pathname === route.path)
     const slug = route.path === '/' ? 'home' : route.path.slice(1)
@@ -876,7 +875,8 @@ export const seedWingsGroupCorporateRoutes = async ({
       slug,
       wingsGroupRoute: routeGovernanceForSeed(route),
     }
-    const resolvedViLayout = resolveRouteLayout(route.vi.layout)
+    const resolvedViLayout = resolvedRouteLayouts.get(`${route.path}:vi`)
+    if (!resolvedViLayout) throw new Error(`Missing resolved VI layout for ${route.path}.`)
 
     if (action === 'create') {
       page = (await payload.create({
@@ -917,10 +917,14 @@ export const seedWingsGroupCorporateRoutes = async ({
     if (!route.preserveExisting || action === 'create') {
       for (const locale of ['vi', 'en'] as const) {
         const localized = route[locale]
+        const resolvedLocaleLayout = resolvedRouteLayouts.get(`${route.path}:${locale}`)
+        if (!resolvedLocaleLayout) {
+          throw new Error(`Missing resolved ${locale} layout for ${route.path}.`)
+        }
         const layout =
           route.path === '/lien-he'
             ? [
-                ...localized.layout,
+                ...resolvedLocaleLayout,
                 {
                   blockName: 'WingsGroup contact form',
                   blockType: 'formBlock',
@@ -929,14 +933,13 @@ export const seedWingsGroupCorporateRoutes = async ({
                   presentation: 'split-contact',
                 },
               ]
-            : localized.layout
-        const resolvedLayout = resolveRouteLayout(layout)
+            : resolvedLocaleLayout
         await payload.update({
           collection: 'pages',
           context: { disableRevalidate: true },
           data: {
             hero: localized.hero,
-            layout: resolvedLayout,
+            layout,
             meta: {
               breadcrumbLabel: localized.title,
               description: localized.description,
