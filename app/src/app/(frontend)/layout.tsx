@@ -28,6 +28,7 @@ import { getCurrentSite } from '@/utilities/siteContext'
 import { getCanonicalSiteOrigin, getSiteSitemapURL } from '@/utilities/siteSEO'
 import { WingsSideSpecialsPromo } from '@/components/WingsSideSpecialsPromo'
 import { getPublicRoutePathname } from '@/utilities/sitePaths'
+import { getWingsGroupRouteDefinition } from '@/wingsgroup/corporateRoutes'
 
 const getSiteFaviconURL = (settings: Awaited<ReturnType<typeof getCurrentSiteSettings>>) => {
   const favicon = settings?.branding?.faviconImage
@@ -75,6 +76,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const settings = await getCurrentSiteSettings()
   const locale = await getCurrentLocale()
   const publicPathname = await getCurrentPublicPathname()
+  const isWingsGroupV3Surface =
+    site.code === 'wings-group' &&
+    settings?.wingsGroupV3?.enabled === true &&
+    Boolean(getWingsGroupRouteDefinition(publicPathname))
   const publicRoute = getPublicRoutePathname(publicPathname)
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
   const siteTheme = getSiteThemeTokens(settings, { siteCode: site.code })
@@ -136,11 +141,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           >
             {chromeCopy.skipToMain}
           </a>
-          <AdminBar
-            adminBarProps={{
-              preview: isEnabled,
-            }}
-          />
+          {!isWingsGroupV3Surface ? (
+            <AdminBar
+              adminBarProps={{
+                preview: isEnabled,
+              }}
+            />
+          ) : null}
 
           <Header />
           <main id="main-content" tabIndex={-1}>

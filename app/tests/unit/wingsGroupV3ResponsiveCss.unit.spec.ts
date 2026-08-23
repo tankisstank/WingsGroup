@@ -39,9 +39,7 @@ describe('WingsGroup v3 responsive CSS contract', () => {
     const source = fs.readFileSync(cmsPage, 'utf8')
 
     expect(source).toContain("useWingsGroupV3Home ? 'wingsgroup-v3-home' : ''")
-    expect(source).toContain(
-      '!useWingsGroupV3Home ? <RelatedPages locale={locale} pages={relatedPages} /> : null',
-    )
+    expect(source).toContain('!useWingsGroupV3Home && !useWingsGroupV3Surface ?')
   })
 
   it('uses the V3 article class as the spacing boundary in the shell', () => {

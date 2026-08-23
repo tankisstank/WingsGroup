@@ -4,7 +4,10 @@ import { resolveHeaderPrimaryAction } from '@/utilities/headerPrimaryActions'
 import { getCurrentLocale, getCurrentPublicPathname, getCurrentSite } from '@/utilities/siteContext'
 import { defaultThemeKey } from '@/utilities/themeTokens'
 import React from 'react'
-import { isWingsGroupV3ExactPublicInventoryEnabled } from '@/wingsgroup/corporateRoutes'
+import {
+  getWingsGroupRouteDefinition,
+  isWingsGroupV3ExactPublicInventoryEnabled,
+} from '@/wingsgroup/corporateRoutes'
 
 export async function Header() {
   const settings = await getCurrentSiteSettings()
@@ -18,7 +21,11 @@ export async function Header() {
     site.code === 'wings-group' &&
     publicPathname === '/' &&
     settings?.wingsGroupV3?.enabled === true
-  const primaryAction = isWingsGroupHome
+  const isWingsGroupV3Surface =
+    site.code === 'wings-group' &&
+    settings?.wingsGroupV3?.enabled === true &&
+    Boolean(getWingsGroupRouteDefinition(publicPathname))
+  const primaryAction = isWingsGroupV3Surface
     ? { label: 'Trao đổi nhu cầu', url: '#consultation-dialog' }
     : resolveHeaderPrimaryAction(site.code, locale)
 
@@ -46,6 +53,7 @@ export async function Header() {
       tagline={settings?.tagline}
       themeKey={themeKey}
       wingsGroupV3Home={isWingsGroupHome}
+      wingsGroupV3Surface={isWingsGroupV3Surface}
     />
   )
 }

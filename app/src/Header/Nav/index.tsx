@@ -27,6 +27,14 @@ export const WINGSGROUP_HOME_NAV = [
   { href: '#contact', label: 'Liên hệ' },
 ] as const
 
+export const WINGSGROUP_V3_ROUTE_NAV = [
+  { href: '/', label: 'Trang chủ' },
+  { href: '/nang-luc-dich-vu', label: 'Dịch vụ' },
+  { href: '/he-sinh-thai', label: 'Hệ sinh thái' },
+  { href: '/ve-wingsgroup', label: 'Về WingsGroup' },
+  { href: '/tin-tuc', label: 'Cẩm nang' },
+] as const
+
 export const HeaderNav: React.FC<{
   data: { navItems?: HeaderType['navItems'] }
   englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
@@ -41,6 +49,7 @@ export const HeaderNav: React.FC<{
   supportedLocales?: SupportedLocaleCode[]
   themeKey?: string
   wingsGroupV3Home?: boolean
+  wingsGroupV3Surface?: boolean
 }> = ({
   data,
   englishPublicationState,
@@ -52,6 +61,7 @@ export const HeaderNav: React.FC<{
   supportedLocales,
   themeKey,
   wingsGroupV3Home,
+  wingsGroupV3Surface,
 }) => {
   const navItems = data?.navItems || []
   const [isOpen, setIsOpen] = useState(false)
@@ -69,6 +79,7 @@ export const HeaderNav: React.FC<{
   const isWingsSide = siteCode ? siteCode === 'wing-side' : themeKey === 'wings-side'
   const isWingsGroupHome =
     wingsGroupV3Home ?? (siteCode === 'wings-group' && publicPathname === '/')
+  const isWingsGroupV3Surface = wingsGroupV3Surface ?? isWingsGroupHome
   const wingsGroupHomeNav = WINGSGROUP_HOME_NAV
   const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
   const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null
@@ -223,7 +234,7 @@ export const HeaderNav: React.FC<{
           </a>
         )
       })}
-      {isWingsGroupHome && englishPublicationState !== 'approved' ? (
+      {isWingsGroupV3Surface && englishPublicationState !== 'approved' ? (
         <span
           aria-disabled="true"
           className="site-language-switcher__link site-language-switcher__link--pending"
@@ -252,37 +263,52 @@ export const HeaderNav: React.FC<{
                 {item.label}
               </SiteLink>
             ))
-          : wingsSideHiFiNav
-            ? wingsSideHiFiNav.map((item) => {
-                const itemPath = item.href.replace(/\/+$/, '') || '/'
-                const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
-                const isActive = itemPath === currentPath
-                return (
-                  <SiteLink
-                    aria-current={isActive ? 'page' : undefined}
-                    className="theme-nav-link site-header__primary-link"
-                    data-active={isActive ? 'true' : 'false'}
-                    href={item.href}
-                    key={item.href}
-                  >
-                    {item.label}
-                  </SiteLink>
-                )
-              })
-            : navItems.map(({ link }, i) => {
-                return (
-                  <CMSLink
-                    className="theme-nav-link site-header__primary-link"
-                    key={i}
-                    {...link}
-                    appearance="link"
-                  />
-                )
-              })}
+          : isWingsGroupV3Surface
+            ? WINGSGROUP_V3_ROUTE_NAV.map((item) => (
+                <SiteLink
+                  aria-current={
+                    item.href === getPublicRoutePathname(pathname || publicPathname || '/')
+                      ? 'page'
+                      : undefined
+                  }
+                  className="theme-nav-link site-header__primary-link"
+                  href={item.href}
+                  key={item.href}
+                >
+                  {item.label}
+                </SiteLink>
+              ))
+            : wingsSideHiFiNav
+              ? wingsSideHiFiNav.map((item) => {
+                  const itemPath = item.href.replace(/\/+$/, '') || '/'
+                  const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
+                  const isActive = itemPath === currentPath
+                  return (
+                    <SiteLink
+                      aria-current={isActive ? 'page' : undefined}
+                      className="theme-nav-link site-header__primary-link"
+                      data-active={isActive ? 'true' : 'false'}
+                      href={item.href}
+                      key={item.href}
+                    >
+                      {item.label}
+                    </SiteLink>
+                  )
+                })
+              : navItems.map(({ link }, i) => {
+                  return (
+                    <CMSLink
+                      className="theme-nav-link site-header__primary-link"
+                      key={i}
+                      {...link}
+                      appearance="link"
+                    />
+                  )
+                })}
         {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
           <SiteLink
             className="site-header-cta"
-            data-wingsgroup-consultation-trigger={isWingsGroupHome ? 'true' : undefined}
+            data-wingsgroup-consultation-trigger={isWingsGroupV3Surface ? 'true' : undefined}
             href={resolvedPrimaryAction.url}
           >
             {resolvedPrimaryAction.label}
@@ -301,7 +327,7 @@ export const HeaderNav: React.FC<{
         {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
           <SiteLink
             className="site-header-cta site-header-cta--mobile"
-            data-wingsgroup-consultation-trigger={isWingsGroupHome ? 'true' : undefined}
+            data-wingsgroup-consultation-trigger={isWingsGroupV3Surface ? 'true' : undefined}
             href={resolvedPrimaryAction.url}
           >
             {resolvedPrimaryAction.label}
@@ -346,39 +372,55 @@ export const HeaderNav: React.FC<{
                   {item.label}
                 </SiteLink>
               ))
-            : wingsSideHiFiNav
-              ? wingsSideHiFiNav.map((item) => {
-                  const itemPath = item.href.replace(/\/+$/, '') || '/'
-                  const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
-                  const isActive = itemPath === currentPath
-                  return (
-                    <SiteLink
-                      aria-current={isActive ? 'page' : undefined}
-                      className="site-mobile-nav__link"
-                      data-active={isActive ? 'true' : 'false'}
-                      href={item.href}
-                      key={item.href}
-                      onClick={navigateAndCloseMobile}
-                    >
-                      {item.label}
-                    </SiteLink>
-                  )
-                })
-              : navItems.map(({ link }, i) => {
-                  return (
-                    <CMSLink
-                      appearance="inline"
-                      className="site-mobile-nav__link"
-                      key={i}
-                      onClick={navigateAndCloseMobile}
-                      {...link}
-                    />
-                  )
-                })}
+            : isWingsGroupV3Surface
+              ? WINGSGROUP_V3_ROUTE_NAV.map((item) => (
+                  <SiteLink
+                    aria-current={
+                      item.href === getPublicRoutePathname(pathname || publicPathname || '/')
+                        ? 'page'
+                        : undefined
+                    }
+                    className="site-mobile-nav__link"
+                    href={item.href}
+                    key={item.href}
+                    onClick={navigateAndCloseMobile}
+                  >
+                    {item.label}
+                  </SiteLink>
+                ))
+              : wingsSideHiFiNav
+                ? wingsSideHiFiNav.map((item) => {
+                    const itemPath = item.href.replace(/\/+$/, '') || '/'
+                    const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
+                    const isActive = itemPath === currentPath
+                    return (
+                      <SiteLink
+                        aria-current={isActive ? 'page' : undefined}
+                        className="site-mobile-nav__link"
+                        data-active={isActive ? 'true' : 'false'}
+                        href={item.href}
+                        key={item.href}
+                        onClick={navigateAndCloseMobile}
+                      >
+                        {item.label}
+                      </SiteLink>
+                    )
+                  })
+                : navItems.map(({ link }, i) => {
+                    return (
+                      <CMSLink
+                        appearance="inline"
+                        className="site-mobile-nav__link"
+                        key={i}
+                        onClick={navigateAndCloseMobile}
+                        {...link}
+                      />
+                    )
+                  })}
           {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
             <SiteLink
               className="site-mobile-nav__link site-mobile-nav__link--primary"
-              data-wingsgroup-consultation-trigger={isWingsGroupHome ? 'true' : undefined}
+              data-wingsgroup-consultation-trigger={isWingsGroupV3Surface ? 'true' : undefined}
               href={resolvedPrimaryAction.url}
               onClick={navigateAndCloseMobile}
             >

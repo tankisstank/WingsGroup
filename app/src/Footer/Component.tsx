@@ -1,5 +1,5 @@
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
-import { getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
+import { getCurrentLocale, getCurrentPublicPathname, getCurrentSite } from '@/utilities/siteContext'
 import React from 'react'
 
 import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
@@ -10,13 +10,19 @@ import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
 import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 import { MailIcon, PhoneIcon } from 'lucide-react'
+import { getWingsGroupRouteDefinition } from '@/wingsgroup/corporateRoutes'
 
 export async function Footer() {
   const settings = await getCurrentSiteSettings()
   const site = await getCurrentSite()
   const locale = await getCurrentLocale()
+  const publicPathname = await getCurrentPublicPathname()
   const chromeCopy = getRuntimeLocaleCopy(publicChromeCopy, locale)
   const isWingSide = site.code === 'wing-side'
+  const isWingsGroupV3Surface =
+    site.code === 'wings-group' &&
+    settings?.wingsGroupV3?.enabled === true &&
+    Boolean(getWingsGroupRouteDefinition(publicPathname))
   const hiFiCopy = isWingSide ? getWingsSideHiFiCopy(locale) : null
   const wingSideNav = isWingSide ? getWingsSideHiFiNavItems(locale) : null
   const wingSideFooterCopy = isWingSide ? getWingSideFooterCopy(locale) : null
@@ -28,7 +34,7 @@ export async function Footer() {
       className={
         isWingSide
           ? 'site-footer site-footer--wingsside-hifi mt-auto border-t'
-          : 'site-footer mt-auto border-t'
+          : `site-footer mt-auto border-t${isWingsGroupV3Surface ? ' site-footer--wingsgroup-v3' : ''}`
       }
       data-site-code={site.code}
       data-testid={isWingSide ? 'wingsside-hifi-footer' : undefined}
@@ -69,18 +75,32 @@ export async function Footer() {
           <nav aria-label={chromeCopy.footerNavigation} className="ws-hifi-footer-columns">
             <section>
               <h2>{wingSideFooterCopy!.explore}</h2>
-              {(wingSideNav || []).slice(1, 4).map((item) => <SiteLink href={item.href} key={item.href}>{item.label}</SiteLink>)}
+              {(wingSideNav || []).slice(1, 4).map((item) => (
+                <SiteLink href={item.href} key={item.href}>
+                  {item.label}
+                </SiteLink>
+              ))}
             </section>
             <section>
               <h2>{wingSideFooterCopy!.travel}</h2>
-              {navItems.map(({ link }, index) => <CMSLink className="ws-hifi-footer-link" key={index} {...link} />)}
-              <SiteLink href="/plan-your-trip">{hiFiCopy?.home.planTripCta || wingSideFooterCopy!.plan}</SiteLink>
+              {navItems.map(({ link }, index) => (
+                <CMSLink className="ws-hifi-footer-link" key={index} {...link} />
+              ))}
+              <SiteLink href="/plan-your-trip">
+                {hiFiCopy?.home.planTripCta || wingSideFooterCopy!.plan}
+              </SiteLink>
             </section>
             <section>
               <h2>{wingSideFooterCopy!.help}</h2>
               <SiteLink href="/contact-us">{wingSideFooterCopy!.contact}</SiteLink>
-              {settings?.supportEmail ? <a href={`mailto:${settings.supportEmail}`}>{settings.supportEmail}</a> : null}
-              {settings?.supportPhone ? <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>{settings.supportPhone}</a> : null}
+              {settings?.supportEmail ? (
+                <a href={`mailto:${settings.supportEmail}`}>{settings.supportEmail}</a>
+              ) : null}
+              {settings?.supportPhone ? (
+                <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
+                  {settings.supportPhone}
+                </a>
+              ) : null}
             </section>
           </nav>
         </div>
@@ -123,7 +143,7 @@ export async function Footer() {
           </div>
 
           <div className="flex flex-col-reverse items-start gap-4 md:flex-row md:flex-wrap md:items-center md:justify-end">
-            <ThemeSelector copy={chromeCopy.themeSelector} />
+            {!isWingsGroupV3Surface ? <ThemeSelector copy={chromeCopy.themeSelector} /> : null}
             <nav
               aria-label={chromeCopy.footerNavigation}
               className="flex flex-col gap-4 md:flex-row md:flex-wrap md:justify-end"
@@ -139,10 +159,47 @@ export async function Footer() {
   )
 }
 
-const getWingSideFooterCopy = (locale: string) => ({
-  en: { contact: 'Contact us', explore: 'Explore', help: 'Need a hand?', plan: 'Plan trip', travel: 'Travel with us' },
-  vi: { contact: 'Liên hệ', explore: 'Khám phá', help: 'Cần hỗ trợ?', plan: 'Lên kế hoạch', travel: 'Đi cùng chúng tôi' },
-  it: { contact: 'Contattaci', explore: 'Esplora', help: 'Serve aiuto?', plan: 'Pianifica', travel: 'Viaggia con noi' },
-  es: { contact: 'Contáctanos', explore: 'Explora', help: '¿Necesitas ayuda?', plan: 'Planifica', travel: 'Viaja con nosotros' },
-  pt: { contact: 'Contacte-nos', explore: 'Explorar', help: 'Precisa de ajuda?', plan: 'Planear', travel: 'Viaje connosco' },
-}[locale] || { contact: 'Contact us', explore: 'Explore', help: 'Need a hand?', plan: 'Plan trip', travel: 'Travel with us' })
+const getWingSideFooterCopy = (locale: string) =>
+  ({
+    en: {
+      contact: 'Contact us',
+      explore: 'Explore',
+      help: 'Need a hand?',
+      plan: 'Plan trip',
+      travel: 'Travel with us',
+    },
+    vi: {
+      contact: 'Liên hệ',
+      explore: 'Khám phá',
+      help: 'Cần hỗ trợ?',
+      plan: 'Lên kế hoạch',
+      travel: 'Đi cùng chúng tôi',
+    },
+    it: {
+      contact: 'Contattaci',
+      explore: 'Esplora',
+      help: 'Serve aiuto?',
+      plan: 'Pianifica',
+      travel: 'Viaggia con noi',
+    },
+    es: {
+      contact: 'Contáctanos',
+      explore: 'Explora',
+      help: '¿Necesitas ayuda?',
+      plan: 'Planifica',
+      travel: 'Viaja con nosotros',
+    },
+    pt: {
+      contact: 'Contacte-nos',
+      explore: 'Explorar',
+      help: 'Precisa de ajuda?',
+      plan: 'Planear',
+      travel: 'Viaje connosco',
+    },
+  })[locale] || {
+    contact: 'Contact us',
+    explore: 'Explore',
+    help: 'Need a hand?',
+    plan: 'Plan trip',
+    travel: 'Travel with us',
+  }

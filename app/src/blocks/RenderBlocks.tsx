@@ -25,6 +25,7 @@ import {
   getWingsGroupHomeSection,
 } from '@/components/WingsGroupV3/model'
 import { WingsGroupEditorialRail } from '@/components/WingsGroupV3/EditorialRail'
+import type { WingsGroupRouteArchetype } from '@/wingsgroup/corporateRoutes'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -61,6 +62,7 @@ export const RenderBlocks: React.FC<{
     relationshipStatement?: null | string
   } | null
   wingsGroupV3Home?: boolean
+  wingsGroupV3Route?: WingsGroupRouteArchetype
 }> = (props) => {
   const {
     allowWingsGroupDevelopmentMedia = false,
@@ -70,6 +72,7 @@ export const RenderBlocks: React.FC<{
     wingsGroupV3 = false,
     wingsGroupLegalIdentity,
     wingsGroupV3Home = false,
+    wingsGroupV3Route,
   } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
@@ -95,7 +98,9 @@ export const RenderBlocks: React.FC<{
                   ? WingsGroupContactSection
                   : wingsGroupV3Home && (blockType === 'infoStrip' || blockType === 'stats')
                     ? WingsGroupTrustSection
-                    : blockComponents[blockType]
+                    : wingsGroupV3 && wingsGroupV3Route === 'trust' && blockType === 'content'
+                      ? WingsGroupTrustSection
+                      : blockComponents[blockType]
 
             if (Block) {
               const blockProps =
@@ -109,14 +114,16 @@ export const RenderBlocks: React.FC<{
                     }
                   : block.blockType === 'wingsGroupEcosystem'
                     ? { ...block, allowWingsGroupDevelopmentMedia, approvedProofKeys, locale }
-                    : wingsGroupV3Home &&
-                        (block.blockType === 'infoStrip' || block.blockType === 'stats')
+                    : wingsGroupV3 && wingsGroupV3Route === 'trust' && block.blockType === 'content'
                       ? { ...block, legalIdentity: wingsGroupLegalIdentity, locale }
-                      : block.blockType === 'credentialsCarousel' ||
-                          block.blockType === 'wingsGroupProofArchive' ||
-                          (wingsGroupV3Home && block.blockType === 'archive')
-                        ? { ...block, allowWingsGroupDevelopmentMedia, locale }
-                        : block
+                      : wingsGroupV3Home &&
+                          (block.blockType === 'infoStrip' || block.blockType === 'stats')
+                        ? { ...block, legalIdentity: wingsGroupLegalIdentity, locale }
+                        : block.blockType === 'credentialsCarousel' ||
+                            block.blockType === 'wingsGroupProofArchive' ||
+                            (wingsGroupV3Home && block.blockType === 'archive')
+                          ? { ...block, allowWingsGroupDevelopmentMedia, locale }
+                          : block
               const section = wingsGroupV3Home ? getWingsGroupHomeSection(block) : null
 
               const renderedBlock = (

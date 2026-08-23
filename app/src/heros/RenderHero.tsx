@@ -27,7 +27,7 @@ export const RenderHero: React.FC<
 
   if (!type || type === 'none') return null
 
-  if (wingsGroupV3Enabled && type === 'highImpact') {
+  if (wingsGroupV3Enabled) {
     return <WingsGroupEditorialHero {...props} />
   }
 

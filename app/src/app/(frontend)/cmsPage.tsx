@@ -248,22 +248,28 @@ export async function renderCmsPageByPath({
     requestedPath === '/' &&
     settings?.wingsGroupV3?.enabled === true &&
     isWingsGroupV3HomeLayout(page.layout)
-  const isWingsGroupV3LocalPreview = draft && useWingsGroupV3Home
   const wingsGroupRoute =
     site.code === 'wings-group' && settings?.wingsGroupV3?.enabled === true
       ? getWingsGroupRouteDefinition(requestedPath)
       : null
+  const useWingsGroupV3Surface = Boolean(wingsGroupRoute)
+  const isWingsGroupV3LocalPreview = draft && useWingsGroupV3Surface
+  const isWingsGroupPendingPolicy = Boolean(page && '__wingsGroupPendingPolicy' in page)
 
   return (
     <article
       className={[
         useWingsGroupV3Home ? 'wingsgroup-v3-home' : '',
+        useWingsGroupV3Surface ? 'wingsgroup-v3-surface' : '',
+        isWingsGroupPendingPolicy ? 'wingsgroup-v3-route-policy' : '',
         useHiFiBody ? 'pb-16 md:pb-20' : isStructuredTour ? 'pb-16 md:pb-20' : 'pt-16 pb-24',
       ]
         .filter(Boolean)
         .join(' ')}
       data-hifi-body={useHiFiBody || isWingsGroupV3LocalPreview ? 'true' : 'false'}
       data-wingsgroup-v3-home={useWingsGroupV3Home ? 'true' : 'false'}
+      data-wingsgroup-v3-surface={useWingsGroupV3Surface ? 'true' : 'false'}
+      data-wingsgroup-pending-policy={isWingsGroupPendingPolicy ? 'true' : 'false'}
       data-wingsgroup-v3-route={wingsGroupRoute?.archetype}
     >
       <JsonLd
@@ -290,10 +296,20 @@ export async function renderCmsPageByPath({
       {!useHiFiBody ? (
         <Breadcrumbs
           className={
-            isStructuredTour ? 'wingsside-tour-breadcrumb container pb-3 pt-4 md:pt-5' : undefined
+            useWingsGroupV3Surface
+              ? 'wingsgroup-v3-breadcrumb container'
+              : isStructuredTour
+                ? 'wingsside-tour-breadcrumb container pb-3 pt-4 md:pt-5'
+                : undefined
           }
           items={renderedBreadcrumbItems}
-          linkClassName={isStructuredTour ? 'wingsside-tour-breadcrumb__link' : undefined}
+          linkClassName={
+            useWingsGroupV3Surface
+              ? 'wingsgroup-v3-breadcrumb__link'
+              : isStructuredTour
+                ? 'wingsside-tour-breadcrumb__link'
+                : undefined
+          }
         />
       ) : null}
 
@@ -316,8 +332,8 @@ export async function renderCmsPageByPath({
             {...page.hero}
             resolvedLocale={locale}
             siteHeroDefaults={settings?.heroDefaults}
-            allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Home}
-            wingsGroupV3Enabled={useWingsGroupV3Home}
+            allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Surface}
+            wingsGroupV3Enabled={useWingsGroupV3Surface}
           />
           <RenderBlocks
             blocks={page.layout}
@@ -325,11 +341,14 @@ export async function renderCmsPageByPath({
             siteCode={site.code}
             wingsGroupV3={site.code === 'wings-group'}
             wingsGroupLegalIdentity={settings?.wingsGroupV3?.legalIdentity}
-            allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Home}
+            allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Surface}
             wingsGroupV3Home={useWingsGroupV3Home}
+            wingsGroupV3Route={wingsGroupRoute?.archetype}
           />
-          {useWingsGroupV3Home ? <WingsGroupConsultationDialog /> : null}
-          {!useWingsGroupV3Home ? <RelatedPages locale={locale} pages={relatedPages} /> : null}
+          {useWingsGroupV3Surface ? <WingsGroupConsultationDialog /> : null}
+          {!useWingsGroupV3Home && !useWingsGroupV3Surface ? (
+            <RelatedPages locale={locale} pages={relatedPages} />
+          ) : null}
         </>
       )}
     </article>
