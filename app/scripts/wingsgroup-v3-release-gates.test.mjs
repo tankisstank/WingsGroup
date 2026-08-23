@@ -10,7 +10,10 @@ import {
 } from './wingsgroup-v3-release-gates.mjs'
 
 const governedRegister = JSON.parse(
-  fs.readFileSync(new URL('../../docs/product/wingsgroup-v3-release-gates.json', import.meta.url), 'utf8'),
+  fs.readFileSync(
+    new URL('../../docs/product/wingsgroup-v3-release-gates.json', import.meta.url),
+    'utf8',
+  ),
 )
 
 const register = () => structuredClone(governedRegister)
@@ -42,10 +45,11 @@ test('the governed register has the immutable expected inventory and remains fai
 
   assert.equal(result.approved, false)
   assert.deepEqual(result.errors, [])
-  assert.equal(result.mandatoryGateCount, 7)
-  assert.equal(result.pendingMandatory.length, 6)
+  assert.equal(result.mandatoryGateCount, 6)
+  assert.equal(result.pendingMandatory.length, 5)
   assert.ok(result.pendingMandatory.some(({ key }) => key === 'privacy-consent'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'legal-identity'))
+  assert.ok(!result.pendingMandatory.some(({ key }) => key === 'ecosystem-deep-links'))
   assert.deepEqual(
     governedRegister.gates.map(({ key, mandatory }) => ({ key, mandatory })),
     expectedGateInventory,
@@ -111,11 +115,37 @@ test('approved privacy gate requires the complete stakeholder-approved contract'
 })
 
 test('the fully evidenced expected inventory can pass the release-gate contract', () => {
-  const result = assessReleaseGates(fullyApprovedRegister())
+  const candidate = fullyApprovedRegister()
+  const result = assessReleaseGates(candidate)
 
   assert.equal(result.approved, true)
   assert.deepEqual(result.errors, [])
   assert.deepEqual(result.pendingMandatory, [])
+  assert.equal(gateByKey(candidate, 'ecosystem-deep-links').state, 'pending')
+})
+
+test('pending ecosystem deep links remain non-blocking while their CTAs stay fail-closed', () => {
+  const candidate = fullyApprovedRegister()
+  const ecosystemGate = gateByKey(candidate, 'ecosystem-deep-links')
+
+  assert.equal(ecosystemGate.mandatory, false)
+  assert.equal(ecosystemGate.state, 'pending')
+  assert.equal(assessReleaseGates(candidate).approved, true)
+  assert.match(ecosystemGate.failClosedBehavior, /contact intake/i)
+})
+
+test('upgrading ecosystem deep links to mandatory violates their locked P2 classification', () => {
+  const candidate = fullyApprovedRegister()
+  const ecosystemGate = gateByKey(candidate, 'ecosystem-deep-links')
+  ecosystemGate.mandatory = true
+
+  const result = assessReleaseGates(candidate)
+
+  assert.equal(result.approved, false)
+  assert.match(
+    result.errors.join(' '),
+    /Gate ecosystem-deep-links mandatory classification must be false; received true/,
+  )
 })
 
 test('omitting any expected gate fails closed', () => {
@@ -126,7 +156,10 @@ test('omitting any expected gate fails closed', () => {
     const result = assessReleaseGates(candidate)
 
     assert.equal(result.approved, false, expectedGate.key)
-    assert.match(result.errors.join(' '), new RegExp(`Missing expected gate key\\(s\\): ${expectedGate.key}`))
+    assert.match(
+      result.errors.join(' '),
+      new RegExp(`Missing expected gate key\\(s\\): ${expectedGate.key}`),
+    )
   }
 })
 
@@ -161,11 +194,17 @@ test('upgrading the optional consultation gate to mandatory also violates its lo
 test('extra, duplicate, and renamed gates fail closed', () => {
   const extra = fullyApprovedRegister()
   extra.gates.push({ ...structuredClone(extra.gates[0]), key: 'unreviewed-gate' })
-  assert.match(assessReleaseGates(extra).errors.join(' '), /Unexpected gate key\(s\): unreviewed-gate/)
+  assert.match(
+    assessReleaseGates(extra).errors.join(' '),
+    /Unexpected gate key\(s\): unreviewed-gate/,
+  )
 
   const duplicate = fullyApprovedRegister()
   duplicate.gates.push(structuredClone(duplicate.gates[0]))
-  assert.match(assessReleaseGates(duplicate).errors.join(' '), /Duplicate gate key\(s\): legal-identity/)
+  assert.match(
+    assessReleaseGates(duplicate).errors.join(' '),
+    /Duplicate gate key\(s\): legal-identity/,
+  )
 
   const renamed = fullyApprovedRegister()
   gateByKey(renamed, 'brand-logo-tokens').key = 'brand-assets'
@@ -200,7 +239,10 @@ test('consultation-channel inventory rejects omissions, extras, and duplicates',
 test('ecosystem deep-link inventory is immutable', () => {
   const candidate = fullyApprovedRegister()
   const ecosystemGate = gateByKey(candidate, 'ecosystem-deep-links')
-  assert.deepEqual(ecosystemGate.links.map(({ key }) => key), expectedEcosystemDeepLinkKeys)
+  assert.deepEqual(
+    ecosystemGate.links.map(({ key }) => key),
+    expectedEcosystemDeepLinkKeys,
+  )
   ecosystemGate.links[1].key = 'wingsside'
 
   const errors = assessReleaseGates(candidate).errors.join(' ')

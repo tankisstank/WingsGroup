@@ -2,7 +2,13 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-export const allowedGateStates = new Set(['pending', 'pending-update', 'approved', 'rejected', 'not-applicable'])
+export const allowedGateStates = new Set([
+  'pending',
+  'pending-update',
+  'approved',
+  'rejected',
+  'not-applicable',
+])
 export const allowedChannelStates = new Set(['unconfigured', 'configured', 'disabled'])
 
 export const expectedGateInventory = Object.freeze([
@@ -10,7 +16,7 @@ export const expectedGateInventory = Object.freeze([
   Object.freeze({ key: 'privacy-consent', mandatory: true }),
   Object.freeze({ key: 'consultation-channels', mandatory: false }),
   Object.freeze({ key: 'proof-publication', mandatory: true }),
-  Object.freeze({ key: 'ecosystem-deep-links', mandatory: true }),
+  Object.freeze({ key: 'ecosystem-deep-links', mandatory: false }),
   Object.freeze({ key: 'locale-completeness', mandatory: true }),
   Object.freeze({ key: 'editorial-media', mandatory: true }),
   Object.freeze({ key: 'brand-logo-tokens', mandatory: true }),
@@ -54,7 +60,8 @@ export const validateGate = (gate) => {
   if (!gate?.key) errors.push('Gate key is required.')
   if (!gate?.scope) errors.push('Gate scope is required.')
   if (typeof gate?.mandatory !== 'boolean') errors.push('Gate mandatory flag is required.')
-  if (!allowedGateStates.has(gate?.state)) errors.push(`Unsupported gate state: ${gate?.state || '(missing)'}.`)
+  if (!allowedGateStates.has(gate?.state))
+    errors.push(`Unsupported gate state: ${gate?.state || '(missing)'}.`)
   if (!gate?.owner) errors.push('Gate owner is required.')
   if (!Array.isArray(gate?.evidenceRequirements) || gate.evidenceRequirements.length === 0)
     errors.push('At least one evidence requirement is required.')
@@ -71,12 +78,20 @@ export const validateGate = (gate) => {
     if (!gate?.policy?.version) errors.push('Approved privacy gate requires a policy version.')
     if (!gate?.policy?.routes?.vi || !gate?.policy?.routes?.en)
       errors.push('Approved privacy gate requires Vietnamese and English policy routes.')
-    if (!Number.isInteger(gate?.policy?.retentionPeriodMonths) || gate.policy.retentionPeriodMonths <= 0)
+    if (
+      !Number.isInteger(gate?.policy?.retentionPeriodMonths) ||
+      gate.policy.retentionPeriodMonths <= 0
+    )
       errors.push('Approved privacy gate requires a positive retention period in months.')
     if (!/^\S+@\S+\.\S+$/.test(gate?.policy?.dataSubjectContact || ''))
       errors.push('Approved privacy gate requires a valid data-subject contact email.')
-    if (gate?.policy?.interBranchTransfer?.allowed !== true || !gate?.policy?.interBranchTransfer?.scope)
-      errors.push('Approved privacy gate requires an explicit inter-branch transfer decision and scope.')
+    if (
+      gate?.policy?.interBranchTransfer?.allowed !== true ||
+      !gate?.policy?.interBranchTransfer?.scope
+    )
+      errors.push(
+        'Approved privacy gate requires an explicit inter-branch transfer decision and scope.',
+      )
     if (!gate?.consent?.version || gate?.consent?.required !== true)
       errors.push('Approved privacy gate requires a mandatory versioned consent contract.')
     if (!gate?.consent?.vi || !gate?.consent?.en)
@@ -88,10 +103,12 @@ export const validateGate = (gate) => {
     if (!allowedChannelStates.has(channel?.state))
       errors.push(`Unsupported consultation channel state: ${channel?.state || '(missing)'}.`)
     if (channel?.state === 'configured') {
-      if (!/^https:\/\//.test(channel.url || '')) errors.push(`Configured channel ${channel.key} requires an HTTPS URL.`)
+      if (!/^https:\/\//.test(channel.url || ''))
+        errors.push(`Configured channel ${channel.key} requires an HTTPS URL.`)
       if (!channel.owner) errors.push(`Configured channel ${channel.key} requires an owner.`)
       if (!channel.sla) errors.push(`Configured channel ${channel.key} requires an SLA.`)
-      if (!channel.trackingEvidence) errors.push(`Configured channel ${channel.key} requires tracking evidence.`)
+      if (!channel.trackingEvidence)
+        errors.push(`Configured channel ${channel.key} requires tracking evidence.`)
     }
   }
 
@@ -100,10 +117,13 @@ export const validateGate = (gate) => {
     if (!allowedGateStates.has(link?.state))
       errors.push(`Unsupported ecosystem deep-link state: ${link?.state || '(missing)'}.`)
     if (link?.state === 'approved') {
-      if (!/^https:\/\//.test(link.url || '')) errors.push(`Approved deep link ${link.key} requires an HTTPS URL.`)
-      if (!/^https:\/\//.test(link.expectedCanonical || '')) errors.push(`Approved deep link ${link.key} requires an HTTPS canonical.`)
+      if (!/^https:\/\//.test(link.url || ''))
+        errors.push(`Approved deep link ${link.key} requires an HTTPS URL.`)
+      if (!/^https:\/\//.test(link.expectedCanonical || ''))
+        errors.push(`Approved deep link ${link.key} requires an HTTPS canonical.`)
       if (!link.owner) errors.push(`Approved deep link ${link.key} requires an owner.`)
-      if (!link.trackingEvidence) errors.push(`Approved deep link ${link.key} requires tracking evidence.`)
+      if (!link.trackingEvidence)
+        errors.push(`Approved deep link ${link.key} requires tracking evidence.`)
     }
   }
 
@@ -133,13 +153,22 @@ const validateExactKeyInventory = ({ actualItems, expectedKeys, label }) => {
 export const assessReleaseGates = (register) => {
   const errors = []
   if (register?.version !== 1) errors.push('Register version must be 1.')
-  if (register?.siteCode !== 'wings-group') errors.push('Register must target site code wings-group.')
-  if (register?.release !== 'wingsgroup-v3') errors.push('Register must target release wingsgroup-v3.')
-  if (!Array.isArray(register?.gates) || register.gates.length === 0) errors.push('Register requires gates.')
+  if (register?.siteCode !== 'wings-group')
+    errors.push('Register must target site code wings-group.')
+  if (register?.release !== 'wingsgroup-v3')
+    errors.push('Register must target release wingsgroup-v3.')
+  if (!Array.isArray(register?.gates) || register.gates.length === 0)
+    errors.push('Register requires gates.')
 
   const gates = Array.isArray(register?.gates) ? register.gates : []
   const expectedGateKeys = expectedGateInventory.map((gate) => gate.key)
-  errors.push(...validateExactKeyInventory({ actualItems: gates, expectedKeys: expectedGateKeys, label: 'gate' }))
+  errors.push(
+    ...validateExactKeyInventory({
+      actualItems: gates,
+      expectedKeys: expectedGateKeys,
+      label: 'gate',
+    }),
+  )
 
   for (const expectedGate of expectedGateInventory) {
     const matchingGate = gates.find((gate) => gate?.key === expectedGate.key)
@@ -174,9 +203,12 @@ export const assessReleaseGates = (register) => {
 
   const gateResults = gates.map((gate) => ({ key: gate?.key, ...validateGate(gate) }))
 
-  const validationErrors = gateResults.flatMap((gate) => gate.errors.map((message) => `${gate.key}: ${message}`))
+  const validationErrors = gateResults.flatMap((gate) =>
+    gate.errors.map((message) => `${gate.key}: ${message}`),
+  )
   const pendingMandatory = gates.filter((gate) => gate?.mandatory && gate.state !== 'approved')
-  const approved = pendingMandatory.length === 0 && errors.length === 0 && validationErrors.length === 0
+  const approved =
+    pendingMandatory.length === 0 && errors.length === 0 && validationErrors.length === 0
 
   return {
     approved,
@@ -215,10 +247,12 @@ export async function main(argv = process.argv) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main().then((exitCode) => {
-    process.exitCode = exitCode
-  }).catch((error) => {
-    console.error(error instanceof Error ? error.message : String(error))
-    process.exitCode = 2
-  })
+  main()
+    .then((exitCode) => {
+      process.exitCode = exitCode
+    })
+    .catch((error) => {
+      console.error(error instanceof Error ? error.message : String(error))
+      process.exitCode = 2
+    })
 }

@@ -90,7 +90,7 @@
       "key": "ecosystem-deep-links",
       "priority": "P2",
       "scope": "Ecosystem brand destinations",
-      "mandatory": true,
+      "mandatory": false,
       "state": "pending",
       "owner": "Destination site owner",
       "links": [
