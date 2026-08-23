@@ -472,7 +472,7 @@ export interface SiteSetting {
      */
     consultationChannels?:
       | {
-          key: 'zalo' | 'whatsapp' | 'messenger' | 'callback';
+          key: 'zalo' | 'whatsapp' | 'messenger';
           state: 'unconfigured' | 'pending' | 'approved' | 'disabled';
           url?: string | null;
           owner?: string | null;

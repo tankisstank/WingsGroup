@@ -881,7 +881,6 @@ describe('WingsGroup corporate route integration', () => {
       { key: 'zalo', state: 'unconfigured' },
       { key: 'whatsapp', state: 'unconfigured' },
       { key: 'messenger', state: 'unconfigured' },
-      { key: 'callback', state: 'unconfigured' },
     ])
   })
 })

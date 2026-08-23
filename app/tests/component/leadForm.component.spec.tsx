@@ -383,10 +383,17 @@ describe('lead form hardened submission', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
+    window.history.replaceState({}, '', '/lien-he?channel=callback#contact-form')
     render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)
 
     const fullName = await screen.findByLabelText(/Full name/)
+    expect(screen.getByLabelText(/Email/)).toBeTruthy()
+    expect(screen.getByLabelText(/Phone number/)).toBeTruthy()
     const need = screen.getByLabelText(/Needs \/ budget \/ timing/)
+    expect(screen.getByRole('combobox', { name: /Preferred contact channel/ })).toHaveProperty(
+      'value',
+      'callback',
+    )
     fireEvent.change(fullName, { target: { value: 'Alice' } })
     fireEvent.change(need, { target: { value: 'Please plan a private journey.' } })
 

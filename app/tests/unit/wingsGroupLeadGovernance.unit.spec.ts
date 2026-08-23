@@ -3,6 +3,7 @@ import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 
 import { wingsGroupLeadGovernanceField } from '@/lead-capture/governanceFields'
+import { wingsGroupV3SettingsField } from '@/fields/wingsGroupV3'
 import {
   runWingsGroupLeadRetentionBatch,
   WINGSGROUP_RETENTION_BATCH_LIMIT,
@@ -36,6 +37,18 @@ describe('WingsGroup lead governance fields', () => {
       options: ['zalo', 'whatsapp', 'messenger', 'callback'],
       type: 'select',
     })
+  })
+
+  it('keeps external consultation settings at three providers and excludes callback', () => {
+    const fields = 'fields' in wingsGroupV3SettingsField ? wingsGroupV3SettingsField.fields : []
+    const consultationChannels = fields.find(
+      (field) => 'name' in field && field.name === 'consultationChannels',
+    )
+    expect(consultationChannels).toMatchObject({ maxRows: 3, type: 'array' })
+    const channelFields =
+      consultationChannels && 'fields' in consultationChannels ? consultationChannels.fields : []
+    const keyField = channelFields.find((field) => 'name' in field && field.name === 'key')
+    expect(keyField).toMatchObject({ options: ['zalo', 'whatsapp', 'messenger'] })
   })
 })
 
@@ -135,9 +148,7 @@ describe('WingsGroup lead governance migration', () => {
       'utf8',
     )
 
-    expect(source).toMatch(
-      /enum_site_settings_wings_group_v3_consultation_channels_key[\s\S]*ADD VALUE IF NOT EXISTS 'callback'/,
-    )
+    expect(source).not.toMatch(/enum_site_settings_wings_group_v3_consultation_channels_key/)
     expect(source).toMatch(
       /enum_form_submissions_wings_group_lead_preferred_channel[\s\S]*ADD VALUE IF NOT EXISTS 'callback'/,
     )

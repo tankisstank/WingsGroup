@@ -10,6 +10,7 @@ import {
 
 const HTTPS_URL = /^https:\/\//i
 const SHA256 = /^[a-f0-9]{64}$/
+const EXTERNAL_CONSULTATION_CHANNEL_KEYS = new Set(['zalo', 'whatsapp', 'messenger'])
 
 type UnknownRecord = Record<string, unknown>
 
@@ -46,6 +47,9 @@ export const validateConsultationChannels = (value: unknown): true | string => {
     const channel = asRecord(rawChannel)
     const key = asString(channel.key)
     if (!key || keys.has(key)) return 'Mỗi kênh tư vấn phải có một key duy nhất.'
+    if (!EXTERNAL_CONSULTATION_CHANNEL_KEYS.has(key)) {
+      return 'Kênh callback chỉ được chọn trong biểu mẫu tiếp nhận, không phải kênh ngoài form.'
+    }
     keys.add(key)
 
     if (channel.state === 'approved') {
@@ -483,7 +487,7 @@ export const wingsGroupV3SettingsField: Field = {
           label: 'Kênh',
           type: 'select',
           required: true,
-          options: ['zalo', 'whatsapp', 'messenger', 'callback'],
+          options: ['zalo', 'whatsapp', 'messenger'],
         },
         {
           name: 'state',

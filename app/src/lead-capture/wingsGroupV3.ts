@@ -246,6 +246,7 @@ export const resolveWingsGroupLeadGovernance = (
     : []) {
     const channel = asRecord(channelInput)
     if (!isConsultationChannelKey(channel.key) || configuredChannels.has(channel.key)) continue
+    if (channel.key === 'callback') continue
     configuredChannels.set(channel.key, channel)
   }
 

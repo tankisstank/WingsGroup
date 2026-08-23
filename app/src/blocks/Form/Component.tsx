@@ -22,6 +22,7 @@ import type {
   ConsultationChannelPublicState,
   WingsGroupLeadPublicConfig,
 } from '@/lead-capture/types'
+import { consultationChannelKeys } from '@/lead-capture/types'
 import { getFormSiteCode, WINGSGROUP_SITE_CODE } from '@/lead-capture/wingsGroupV3'
 
 import './form-layout.css'
@@ -370,6 +371,14 @@ export const FormBlock: React.FC<
         ? leadConfig.channels
         : pendingConsultationChannels
       : []
+
+  useEffect(() => {
+    if (!isWingsGroupV3) return
+    const channel = new URLSearchParams(window.location.search).get('channel')
+    if (channel && consultationChannelKeys.includes(channel as ConsultationChannelKey)) {
+      setPreferredChannel(channel as ConsultationChannelKey)
+    }
+  }, [isWingsGroupV3])
 
   useEffect(() => {
     if (error) {

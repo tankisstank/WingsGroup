@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 
 import styles from './WingsGroupV3.module.css'
 
@@ -22,6 +23,7 @@ const channels = [
 ] as const
 
 export const WingsGroupConsultationDialog = () => {
+  const router = useRouter()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const lastFocusedRef = useRef<HTMLElement | null>(null)
@@ -92,9 +94,10 @@ export const WingsGroupConsultationDialog = () => {
       if (!button) return
       const channel = button.dataset.consultChannel
       if (!channel) return
+      if (!channels.some((item) => item.key === channel)) return
       window.dispatchEvent(new CustomEvent('wingsgroup-preferred-channel', { detail: { channel } }))
       closeDialog()
-      window.location.hash = 'contact-form'
+      router.push(`/lien-he?channel=${encodeURIComponent(channel)}#contact-form`)
       window.setTimeout(() => {
         document
           .querySelector<HTMLInputElement>(
@@ -135,7 +138,7 @@ export const WingsGroupConsultationDialog = () => {
       dialog.removeEventListener('keydown', onKeyDown)
       observer?.disconnect()
     }
-  }, [])
+  }, [router])
 
   return (
     <>

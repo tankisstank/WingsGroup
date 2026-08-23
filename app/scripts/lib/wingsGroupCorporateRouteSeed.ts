@@ -14,7 +14,6 @@ import {
   WINGSGROUP_POLICY_ROUTES as CONTACT_POLICY_ROUTES,
   WINGSGROUP_PRIVACY_VERSION,
 } from '../../src/lead-capture/wingsGroupV3'
-import { consultationChannelKeys } from '../../src/lead-capture/types'
 
 type Locale = 'en' | 'vi'
 type SeedBlock = Record<string, unknown>
@@ -653,7 +652,7 @@ const formFields = [
   },
 ]
 
-const pendingConsultationChannels = consultationChannelKeys.map((key) => ({
+const pendingConsultationChannels = (['zalo', 'whatsapp', 'messenger'] as const).map((key) => ({
   key,
   state: 'unconfigured' as const,
 }))

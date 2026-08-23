@@ -12,6 +12,12 @@ import { WingsGroupConsultationDialog } from '@/components/WingsGroupV3/Consulta
 import { WingsGroupEditorialHero } from '@/components/WingsGroupV3/EditorialHero'
 import type { Media, Page, WingsGroupEcosystemBlock } from '@/payload-types'
 
+const navigationMock = vi.hoisted(() => ({ push: vi.fn() }))
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => navigationMock,
+}))
+
 vi.mock('@/components/WingsGroupV3/EditorialRail', () => ({
   WingsGroupEditorialRail: ({ locale }: { locale?: null | string }) => (
     <div data-testid="editorial-rail-locale">{locale}</div>
@@ -389,6 +395,7 @@ describe('WingsGroup v3 public components', () => {
     expect(onPreferredChannel).toHaveBeenCalledWith(
       expect.objectContaining({ detail: { channel: 'callback' } }),
     )
+    expect(navigationMock.push).toHaveBeenCalledWith('/lien-he?channel=callback#contact-form')
     expect(document.querySelector('[data-od-id="consultation-dialog"] a[href]')).toBeNull()
     window.removeEventListener('wingsgroup-preferred-channel', onPreferredChannel)
   })

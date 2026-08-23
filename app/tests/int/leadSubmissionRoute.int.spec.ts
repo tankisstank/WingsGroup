@@ -82,7 +82,7 @@ const configureWingsGroupContactTest = () => {
             {
               site: 9,
               wingsGroupV3: {
-                consultationChannels: [{ key: 'callback', state: 'unconfigured' }],
+                consultationChannels: [{ key: 'zalo', state: 'unconfigured' }],
                 enabled: true,
                 privacy: {
                   approvalReference: 'privacy-approval-2026-08-14',
@@ -213,7 +213,10 @@ describe('lead submission endpoint integration', () => {
     expect(mocks.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          wingsGroupLead: expect.objectContaining({ preferredChannel: 'callback' }),
+          wingsGroupLead: expect.objectContaining({
+            preferredChannel: 'callback',
+            sourcePath: '/lien-he',
+          }),
         }),
       }),
     )
