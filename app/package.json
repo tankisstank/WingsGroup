@@ -28,6 +28,8 @@
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "import:wingsgroup:v3:content": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/import-wingsgroup-v3-content.ts",
+    "test:int:wingsgroup:v3:content": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node scripts/wingsgroup-v3-content-postgres-smoke.mjs",
     "go-live:review": "cross-env NODE_OPTIONS=--no-deprecation node scripts/go-live-review.mjs",
     "ii": "cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install",
     "import:brand-assets": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-brand-assets.ts",

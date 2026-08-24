@@ -650,7 +650,21 @@ export const validateWingsGroupV3DerivativeLedger = async ({
   const persistedLedger = Array.isArray(persistedGovernance.responsiveDerivatives)
     ? persistedGovernance.responsiveDerivatives
     : []
-  if (persistedLedger.length > 0 && JSON.stringify(persistedLedger) !== JSON.stringify(ledger)) {
+  const comparableLedger = (entries: unknown[]) =>
+    entries.map((entry) => {
+      const value = isRecord(entry) ? entry : {}
+      return {
+        format: value.format,
+        height: value.height,
+        sha256: value.sha256,
+        url: value.url,
+        width: value.width,
+      }
+    })
+  if (
+    persistedLedger.length > 0 &&
+    JSON.stringify(comparableLedger(persistedLedger)) !== JSON.stringify(comparableLedger(ledger))
+  ) {
     throw new Error(
       `Media ${record.sourceFile} persisted derivative ledger does not match the physical files`,
     )
@@ -927,7 +941,7 @@ const findMediaBySourceIdentity = async ({
     ...(locale ? { locale, fallbackLocale: false } : {}),
     overrideAccess: true,
     pagination: false,
-    req,
+    req: { ...req, payloadDataLoader: undefined },
     where: whereAnd(
       { site: { equals: siteID } },
       { 'governance.sourceIdentity': { equals: sourceIdentity } },
@@ -944,7 +958,7 @@ const findMediaBySourceIdentity = async ({
     ...(locale ? { locale, fallbackLocale: false } : {}),
     overrideAccess: true,
     pagination: false,
-    req,
+    req: { ...req, payloadDataLoader: undefined },
     where: { 'governance.sourceIdentity': { equals: sourceIdentity } },
   })
   for (const document of global.docs) {
