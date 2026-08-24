@@ -147,6 +147,75 @@ describe('WingsGroup v3 fail-closed governance', () => {
     ).resolves.toBeTruthy()
   })
 
+  it.each([
+    ['vi', 'Tiếng Việt exact alt', 'English exact alt'],
+    ['en', 'English exact alt', 'Tiếng Việt exact alt'],
+  ] as const)(
+    'isolates the opposite-locale governed-media read for %s publication',
+    async (locale, submittedAlt, oppositeAlt) => {
+      const request = {
+        context: createWingsGroupV3ProductionPublishContext(`op-locale-${locale}-2026082501`),
+        locale,
+        payloadDataLoader: { stale: true },
+        user: { role: 'super-admin' },
+      }
+      const nestedRequests: Array<Record<string, unknown>> = []
+      const payload = {
+        findByID: async ({
+          collection,
+          locale: nestedLocale,
+          req: nestedRequest,
+        }: {
+          collection: string
+          locale?: string
+          req: Record<string, unknown>
+        }) => {
+          if (collection === 'sites') {
+            return { code: 'wings-group', id: 7, primaryDomain: 'wingsgroup.example' }
+          }
+          nestedRequests.push(nestedRequest)
+          nestedRequest.locale = nestedLocale
+          return { alt: oppositeAlt }
+        },
+      }
+
+      await expect(
+        validateGovernedMediaBeforeChange({
+          data: {
+            alt: submittedAlt,
+            governance: {
+              derivativeState: 'verified',
+              managedBy: 'wingsgroup-v3',
+              provenanceReference: 'manifest:v1',
+              publicationState: 'published',
+              responsiveDerivatives: completePublicLedger('https://wingsgroup.example'),
+              rightsEvidence: 'stakeholder-approval',
+              rightsState: 'approved',
+              sourceArchiveSha256: sha,
+              sourceAttachmentId: 'attachment-1',
+              sourceFileSha256: sha,
+              sourceIdentity: `attachment-1:${sha}`,
+            },
+            site: 7,
+          },
+          originalDoc: {
+            governance: { managedBy: 'wingsgroup-v3', publicationState: 'ready' },
+            id: 22,
+          },
+          req: { ...request, payload } as never,
+        } as never),
+      ).resolves.toBeTruthy()
+
+      expect(nestedRequests).toHaveLength(1)
+      expect(nestedRequests[0]).toMatchObject({
+        locale: locale === 'vi' ? 'en' : 'vi',
+        payloadDataLoader: undefined,
+      })
+      expect(request.locale).toBe(locale)
+      expect(request.payloadDataLoader).toEqual({ stale: true })
+    },
+  )
+
   it('rejects a partial or invalid public ledger while preserving local pending governance', () => {
     const publishedGovernance = {
       derivativeState: 'verified',

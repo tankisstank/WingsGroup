@@ -1,10 +1,6 @@
 #!/usr/bin/env node
 
-/*
- * Disposable PostgreSQL integration proof for the governed WingsGroup content
- * importer. It creates only local synthetic fixture bytes and tears down both
- * the database container and generated media files before exiting.
- */
+/* Process-isolated disposable PostgreSQL proof for governed WingsGroup media. */
 import { createHash } from 'node:crypto'
 import { spawn, spawnSync } from 'node:child_process'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
@@ -12,26 +8,27 @@ import os from 'node:os'
 import path from 'node:path'
 
 const container = `wings-content-smoke-${Date.now()}`
-const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'wp-rel-22-content-'))
-const operationID = 'op-20260824-wingsgroup-v3-content-smoke'
-const fixtureFiles = [
-  'wingsgroup-hero-discovery-guide.png',
-  'wingsgroup-hero-private-consultation.png',
-  'wingsgroup-hero-airport-welcome.png',
-  'wingsgroup-hero-partner-meeting.png',
-  'wingsgroup-ecosystem-hero.png',
-  'wingsgroup-vietnam-discovery.png',
-  'wingsgroup-airport-service.png',
-  'wingsgroup-corporate-partnership.png',
-  'wingsgroup-travel-support.png',
-  'wingsgroup-journey-consultation.png',
-  'wingsgroup-archive-01.png',
-  'wingsgroup-archive-02.png',
-  'wingsgroup-proof-archive-01.png',
+const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'wp-rel-27-media-'))
+const runToken = path.basename(tempRoot)
+const operationID = 'op-20260824-wingsgroup-v3-media-smoke'
+const fixtureStems = [
+  'wingsgroup-hero-discovery-guide',
+  'wingsgroup-hero-private-consultation',
+  'wingsgroup-hero-airport-welcome',
+  'wingsgroup-hero-partner-meeting',
+  'wingsgroup-ecosystem-hero',
+  'wingsgroup-vietnam-discovery',
+  'wingsgroup-airport-service',
+  'wingsgroup-corporate-partnership',
+  'wingsgroup-travel-support',
+  'wingsgroup-journey-consultation',
+  'wingsgroup-archive-01',
+  'wingsgroup-archive-02',
+  'wingsgroup-proof-archive-01',
 ]
-let databaseURL
-let payload
-const generatedMedia = new Set()
+const mediaDirectory = path.resolve(import.meta.dirname, '../public/media')
+const manifestPath = path.join(tempRoot, 'manifest.json')
+const statePath = path.join(tempRoot, 'phase-state.json')
 
 const sh = (command, args, options = {}) => {
   const result = spawnSync(command, args, { encoding: 'utf8', ...options })
@@ -40,11 +37,7 @@ const sh = (command, args, options = {}) => {
 
 const run = (command, args, environment = process.env) =>
   new Promise((resolve) => {
-    const child = spawn(command, args, {
-      env: environment,
-      shell: process.platform === 'win32',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    })
+    const child = spawn(command, args, { env: environment, stdio: ['ignore', 'pipe', 'pipe'] })
     let stdout = ''
     let stderr = ''
     child.stdout.on('data', (chunk) => {
@@ -73,70 +66,70 @@ const waitForPostgres = async () => {
     if (result.status === 0 && /accepting connections/.test(result.stdout)) return
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }
-  const state = sh('docker', [
-    'inspect',
-    '--format',
-    '{{.State.Status}} exit={{.State.ExitCode}} error={{.State.Error}}',
-    container,
-  ])
-  const logs = sh('docker', ['logs', '--tail', '40', container])
-  throw new Error(
-    [
-      'Disposable PostgreSQL did not become ready after 60 health checks.',
-      `Container state: ${state.stdout.trim() || state.stderr.trim() || '<unavailable>'}`,
-      `Container log tail:\n${logs.stdout.trim() || logs.stderr.trim() || '<empty>'}`,
-    ].join('\n'),
-  )
+  throw new Error('Disposable PostgreSQL did not become ready after 60 health checks.')
 }
 
 const teardown = async () => {
-  const pool = payload?.db?.pool
-  if (pool && typeof pool.end === 'function') {
-    const idleClients = new Set((pool._idle || []).map(({ client }) => client))
-    for (const client of pool._clients || []) {
-      if (!idleClients.has(client) && typeof client.release === 'function') {
-        try {
-          client.release()
-        } catch {
-          // The disposable harness must continue cleanup if a client is already released.
-        }
-      }
-    }
-    await pool.end().catch(() => undefined)
+  try {
+    const state = JSON.parse(await readFile(statePath, 'utf8'))
+    await Promise.all((state.generatedMedia || []).map((filename) => rm(filename, { force: true })))
+  } catch {
+    // Continue cleanup if a phase failed before writing state.
   }
-  if (payload) await payload.destroy().catch(() => undefined)
-  await Promise.all([...generatedMedia].map((filename) => rm(filename, { force: true })))
   await rm(tempRoot, { force: true, recursive: true })
   sh('docker', ['rm', '-f', container])
 }
 
-const writeEnglishMediaLocaleFixture = async ({ alt, mediaID, payload, postgresAdapter }) => {
-  const write = await payload.db.drizzle.execute(
-    postgresAdapter.sql`
-      INSERT INTO "media_locales" ("alt", "_locale", "_parent_id")
-      VALUES (${alt}, 'en', ${mediaID})
-      ON CONFLICT ("_locale", "_parent_id")
-      DO UPDATE SET "alt" = EXCLUDED."alt"
-    `,
-  )
-  if (write.rowCount !== 1)
-    throw new Error(`EN media locale fixture write affected ${write.rowCount} rows.`)
-  const rows = await payload.db.drizzle.execute(
-    postgresAdapter.sql`
-      SELECT "alt", "_locale", "_parent_id"
-      FROM "media_locales"
-      WHERE "_locale" = 'en' AND "_parent_id" = ${mediaID}
-    `,
-  )
-  if (rows.rows.length !== 1 || rows.rows[0]?.alt !== alt || rows.rows[0]?._locale !== 'en') {
-    throw new Error(`EN media locale fixture row is invalid: ${JSON.stringify(rows.rows[0])}`)
+const writeFixture = async () => {
+  const manifest = {
+    licenseScope: 'Local integration fixture only.',
+    media: [],
+    publicationState: 'approved-for-production',
+    rights: {
+      evidence: 'Local integration fixture.',
+      restriction: 'Local only.',
+      state: 'approved',
+    },
+    siteCode: 'wings-group',
+    sourcePackage: {
+      archiveSha256: 'e'.repeat(64),
+      attachmentId: `wp-rel-24-fixture-${runToken}`,
+      assetsDirectory: tempRoot,
+      manifest: 'local-fixture',
+    },
+    version: 1,
   }
+  const { default: sharp } = await import('sharp')
+  for (let index = 0; index < fixtureStems.length; index += 1) {
+    const file = `${fixtureStems[index]}-${runToken}.png`
+    const bytes = await sharp({
+      create: {
+        background: { b: 203, g: 91, r: 17 + index * 13 },
+        channels: 3,
+        height: 1024,
+        width: 1536,
+      },
+    })
+      .png()
+      .toBuffer()
+    await writeFile(path.join(tempRoot, file), bytes)
+    manifest.media.push({
+      actualDimensions: '1536x1024',
+      alt: { en: `English fixture alt ${index}`, vi: `Mô tả fixture tiếng Việt ${index}` },
+      dimensions: '1536x1024',
+      file,
+      focal: { x: 50, y: 50 },
+      role: `fixture-${index}`,
+      sha256: sha256(bytes),
+      usageScope: 'editorial-service',
+    })
+  }
+  await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`)
 }
 
 try {
-  if (sh('docker', ['version', '--format', '{{.Server.Version}}']).status !== 0) {
-    throw new Error('Docker is unavailable for the disposable PostgreSQL proof.')
-  }
+  if (sh('docker', ['version', '--format', '{{.Server.Version}}']).status !== 0)
+    throw new Error('Docker is unavailable.')
   const started = sh('docker', [
     'run',
     '-d',
@@ -160,248 +153,43 @@ try {
     .stdout.trim()
     .match(/:(\d+)$/)?.[1]
   if (!port) throw new Error('Could not resolve disposable PostgreSQL port.')
-  databaseURL = `postgresql://smoke:smoke@127.0.0.1:${port}/wings_content_smoke`
+  const databaseURL = `postgresql://smoke:smoke@127.0.0.1:${port}/wings_content_smoke`
   const environment = {
     ...process.env,
     DATABASE_URL: databaseURL,
     NODE_ENV: 'test',
     PAYLOAD_DB_PUSH: 'false',
-    PAYLOAD_SECRET: 'wp-rel-22-local-only',
+    PAYLOAD_SECRET: 'wp-rel-27-local-only',
     NODE_OPTIONS: '--no-deprecation',
+    WP_REL_27_MANIFEST: manifestPath,
+    WP_REL_27_MEDIA_DIRECTORY: mediaDirectory,
+    WP_REL_27_OPERATION_ID: operationID,
+    WP_REL_27_ROOT: tempRoot,
+    WP_REL_27_STATE: statePath,
   }
+  await writeFixture()
   const migrated = await run('pnpm', ['exec', 'payload', 'migrate'], environment)
   if (migrated.code !== 0) throw new Error('Payload migration failed on disposable PostgreSQL.')
-
-  process.env.DATABASE_URL = databaseURL
-  process.env.PAYLOAD_DB_PUSH = 'false'
-  process.env.PAYLOAD_SECRET = 'wp-rel-22-local-only'
-  process.env.NODE_ENV = 'test'
-  const [
-    { createLocalReq, getPayload, commitTransaction, initTransaction },
-    sharpModule,
-    content,
-    media,
-    mediaPlanHelpers,
-    wingsGroupV3Fields,
-    postgresAdapter,
-  ] = await Promise.all([
-    import('payload'),
-    import('sharp'),
-    import('./import-wingsgroup-v3-content.ts'),
-    import('./import-wingsgroup-v3-media.ts'),
-    import('./lib/wingsGroupV3MediaPlan.ts'),
-    import('../src/fields/wingsGroupV3.ts'),
-    import('@payloadcms/db-postgres'),
-  ])
-  const sharp = sharpModule.default
-  payload = await getPayload({ config: (await import('../src/payload.config.ts')).default })
-  const bootstrapReq = await createLocalReq(
-    { context: { disableRevalidate: true, seed: true }, user: { id: 0, role: 'super-admin' } },
-    payload,
-  )
-  const site = await payload.create({
-    collection: 'sites',
-    data: {
-      code: 'wings-group',
-      defaultLocale: 'vi',
-      isActive: true,
-      name: 'WingsGroup',
-      primaryDomain: 'wingsgroup.test',
-      supportedLocales: ['vi', 'en'],
-    },
-    overrideAccess: true,
-    req: bootstrapReq,
-  })
-  const operator = await payload.create({
-    collection: 'users',
-    data: {
-      email: 'wp-rel-22-operator@wingsgroup.test',
-      name: 'WP-REL-22 operator',
-      password: 'local-only-password',
-      role: 'super-admin',
-      sites: [site.id],
-    },
-    overrideAccess: true,
-    req: bootstrapReq,
-  })
-  const req = await createLocalReq(
-    { context: { disableRevalidate: true, seed: true }, user: operator },
-    payload,
-  )
-  await payload.create({
-    collection: 'site-settings',
-    data: {
-      branding: { logoText: 'WingsGroup', themeKey: 'wings-group' },
-      site: site.id,
-      siteName: 'WingsGroup',
-    },
-    overrideAccess: true,
-    req,
-  })
-
-  const manifest = {
-    licenseScope: 'Local integration fixture only.',
-    media: [],
-    publicationState: 'approved-for-production',
-    rights: {
-      evidence: 'Local integration fixture.',
-      restriction: 'Local only.',
-      state: 'approved',
-    },
-    siteCode: 'wings-group',
-    sourcePackage: {
-      archiveSha256: 'e'.repeat(64),
-      attachmentId: 'wp-rel-22-fixture',
-      assetsDirectory: tempRoot,
-      manifest: 'local-fixture',
-    },
-    version: 1,
-  }
-  for (let index = 0; index < 13; index += 1) {
-    const file = fixtureFiles[index]
-    const bytes = await sharp({
-      create: {
-        background: { b: 40 + index, g: 80, r: 160 },
-        channels: 3,
-        height: 1024,
-        width: 1536,
-      },
-    })
-      .png()
-      .toBuffer()
-    await writeFile(path.join(tempRoot, file), bytes)
-    manifest.media.push({
-      actualDimensions: '1536x1024',
-      alt: { en: `English fixture alt ${index}`, vi: `Mô tả fixture tiếng Việt ${index}` },
-      dimensions: '1536x1024',
-      file,
-      focal: { x: 50, y: 50 },
-      role: `fixture-${index}`,
-      sha256: sha256(bytes),
-      usageScope: 'editorial-service',
-    })
-  }
-  const mediaManifest = mediaPlanHelpers.parseWingsGroupV3MediaManifest(manifest)
-  const mediaPlan = await mediaPlanHelpers.buildWingsGroupV3MediaPlan({
-    assetsDirectory: tempRoot,
-    manifest: mediaManifest,
-  })
-  if (
-    mediaPlan.errors.length ||
-    mediaPlan.records.length !== 13 ||
-    mediaPlan.records.reduce((count, record) => count + record.derivatives.length, 0) !== 78
-  ) {
-    throw new Error(
-      'The integration fixture did not produce exactly 13 sources and 78 derivatives.',
+  const phaseResults = []
+  for (const phase of ['bootstrap', 'apply', 'publish', 'verify']) {
+    const result = await run(
+      'pnpm',
+      ['exec', 'tsx', 'scripts/wingsgroup-v3-media-process-phase.mjs', phase],
+      environment,
     )
+    phaseResults.push({ phase, exitCode: result.code })
+    if (result.code !== 0) throw new Error(`Process-isolated media phase failed: ${phase}`)
   }
-  for (const record of mediaPlan.records) {
-    const bytes = await readFile(path.join(tempRoot, record.sourceFile))
-    const document = await payload.create({
-      collection: 'media',
-      context: { disableRevalidate: true, seed: true },
-      data: media.buildWingsGroupV3MediaSeedData({
-        manifest: mediaManifest,
-        record,
-        siteID: site.id,
-      }),
-      file: {
-        data: bytes,
-        mimetype: 'image/png',
-        name: record.importFilename,
-        size: bytes.byteLength,
-      },
-      locale: 'vi',
-      overrideAccess: true,
-      req,
-    })
-    for (const filename of [
-      document.filename,
-      ...Object.values(document.sizes || {}).map((size) => size?.filename),
-    ].filter(Boolean))
-      generatedMedia.add(path.resolve('public/media', filename))
-    const ledger = await media.validateWingsGroupV3DerivativeLedger({
-      document,
-      mediaDirectory: media.WINGSGROUP_V3_MEDIA_DIRECTORY,
-      publicOrigin: 'https://wingsgroup.test',
-      record,
-    })
-    await writeEnglishMediaLocaleFixture({
-      alt: record.alt.en,
-      mediaID: document.id,
-      payload,
-      postgresAdapter,
-    })
-    await payload.update({
-      collection: 'media',
-      context: { disableRevalidate: true, seed: true },
-      data: {
-        governance: {
-          ...media.buildWingsGroupV3MediaGovernance({ manifest: mediaManifest, record }),
-          derivativeState: 'verified',
-          publicationState: 'published',
-          responsiveDerivatives: ledger,
-        },
-      },
-      id: document.id,
-      locale: 'vi',
-      overrideAccess: true,
-      req: {
-        ...req,
-        context: {
-          ...req.context,
-          ...wingsGroupV3Fields.createWingsGroupV3ProductionPublishContext(operationID),
-        },
-      },
-    })
-    await writeEnglishMediaLocaleFixture({
-      alt: record.alt.en,
-      mediaID: document.id,
-      payload,
-      postgresAdapter,
-    })
-  }
-  const contentPlan = content.buildWingsGroupV3ContentPlan({ mediaPlan })
-  const inventory = await content.readWingsGroupV3ContentInventory({
-    manifest: mediaManifest,
-    mediaPlan,
-    payload,
-    publicOrigin: 'https://wingsgroup.test',
-    req,
-    siteID: site.id,
-  })
-  const contentReq = await createLocalReq(
-    { context: { disableRevalidate: true, seed: true }, user: operator },
-    payload,
+  const proof = JSON.parse(await readFile(statePath, 'utf8'))
+  if (
+    proof.apply?.created !== 13 ||
+    proof.publish?.localizedAltVerified !== 26 ||
+    proof.publish?.responsiveDerivatives?.persisted !== 78 ||
+    proof.publish?.publication !== 'published' ||
+    proof.verify?.verified !== 13
   )
-  const transactionID = await initTransaction(contentReq)
-  if (!transactionID) throw new Error('Content integration transaction did not start.')
-  await content.applyWingsGroupV3Content({ inventory, payload, req: contentReq })
-  await commitTransaction(contentReq)
-  const postApply = await content.readWingsGroupV3ContentInventory({
-    manifest: mediaManifest,
-    mediaPlan,
-    payload,
-    publicOrigin: 'https://wingsgroup.test',
-    req: contentReq,
-    siteID: site.id,
-  })
-  const verification = content.verifyWingsGroupV3ContentInventory({
-    formID: postApply.form.id,
-    inventory: postApply,
-  })
-  if (verification.publishedLocales !== 16 || verification.routeCount !== 10)
-    throw new Error('Content integration publication counts did not match the governed contract.')
-  console.log(
-    JSON.stringify({
-      derivativeCount: 78,
-      mediaCount: 13,
-      planChecksum: contentPlan.contentChecksum,
-      publishedLocales: verification.publishedLocales,
-      routeCount: verification.routeCount,
-      status: 'pass',
-    }),
-  )
+    throw new Error(`Process-isolated media proof counts did not match: ${JSON.stringify(proof)}`)
+  console.log(JSON.stringify({ phaseResults, proof, status: 'pass' }, null, 2))
 } finally {
   await teardown()
 }

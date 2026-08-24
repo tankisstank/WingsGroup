@@ -1026,6 +1026,62 @@ const validatePersistedMedia = ({
   }
 }
 
+export const persistAndVerifyWingsGroupV3LocalizedAlts = async ({
+  manifest,
+  payload,
+  record,
+  req,
+  siteID,
+  mediaID,
+}: {
+  manifest: WingsGroupV3MediaManifest
+  payload: Payload
+  record: WingsGroupV3MediaPlanItem
+  req: PayloadRequest
+  siteID: number | string
+  mediaID: number | string
+}) => {
+  const updatedDocuments = new Map<'en' | 'vi', unknown>()
+  for (const locale of ['vi', 'en'] as const) {
+    const updated = await payload.update({
+      collection: 'media',
+      context,
+      data: { alt: record.alt[locale] } as never,
+      id: mediaID,
+      locale,
+      overrideAccess: true,
+      req,
+    })
+    updatedDocuments.set(locale, updated)
+  }
+
+  for (const locale of ['vi', 'en'] as const) {
+    const found = await findMediaBySourceIdentity({
+      locale,
+      payload,
+      req,
+      siteID,
+      sourceIdentity: record.sourceIdentity,
+    })
+    const localized = found || updatedDocuments.get(locale)
+    if (!localized || String(relationID(localized.id)) !== String(mediaID)) {
+      throw new Error(
+        `Media ${record.sourceFile} is missing from the WingsGroup ${locale} locale scope`,
+      )
+    }
+    const localizedAlt = isRecord(localized.alt) ? localized.alt[locale] : localized.alt
+    validatePersistedMedia({
+      document: { ...localized, alt: localizedAlt },
+      expectedSourceArchiveSha256: manifest.sourcePackage.archiveSha256,
+      expectedSourceAttachmentId: manifest.sourcePackage.attachmentId,
+      expectedGovernance: buildWingsGroupV3MediaGovernance({ manifest, record }),
+      expectedAlt: record.alt[locale],
+      record,
+      siteID,
+    })
+  }
+}
+
 export const importWingsGroupV3Media = async ({
   apply,
   assetsDirectory,
@@ -1122,14 +1178,13 @@ export const importWingsGroupV3Media = async ({
     }
 
     if (apply && document) {
-      await payload.update({
-        collection: 'media',
-        context,
-        data: { alt: record.alt.en } as never,
-        id: document.id,
-        locale: 'en',
-        overrideAccess: true,
+      await persistAndVerifyWingsGroupV3LocalizedAlts({
+        manifest,
+        mediaID: document.id,
+        payload,
+        record,
         req,
+        siteID,
       })
       if (requirePhysicalDerivatives) {
         if (!mediaDirectory || !publicOrigin) {
@@ -1390,6 +1445,7 @@ export const publishWingsGroupV3MediaWithRecovery = async ({
         collection: 'media',
         context: publishContext,
         data: {
+          alt: record.alt.vi,
           governance: {
             ...governance,
             derivativeState: 'verified',
@@ -1400,6 +1456,14 @@ export const publishWingsGroupV3MediaWithRecovery = async ({
         locale: 'vi',
         overrideAccess: true,
         req,
+      })
+      await persistAndVerifyWingsGroupV3LocalizedAlts({
+        manifest,
+        mediaID: document.id,
+        payload,
+        record,
+        req,
+        siteID,
       })
     }
 

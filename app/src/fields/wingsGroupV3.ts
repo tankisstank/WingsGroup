@@ -470,6 +470,7 @@ export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = asy
     )
     await Promise.all(
       localesToRead.map(async (locale) => {
+        const localeReq = { ...req, locale, payloadDataLoader: undefined }
         const record = await req.payload.findByID({
           collection: 'media',
           id: mediaID,
@@ -477,7 +478,7 @@ export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = asy
           fallbackLocale: false,
           locale,
           overrideAccess: true,
-          req,
+          req: localeReq,
         })
         effectiveAlt[locale] = record.alt
         return record
