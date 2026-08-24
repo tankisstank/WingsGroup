@@ -11,6 +11,12 @@ import {
 const HTTPS_URL = /^https:\/\//i
 const SHA256 = /^[a-f0-9]{64}$/
 const EXTERNAL_CONSULTATION_CHANNEL_KEYS = new Set(['zalo', 'whatsapp', 'messenger'])
+const SAFE_DERIVATIVE_FILENAME = /^[A-Za-z0-9][A-Za-z0-9._-]*\.(?:avif|webp)$/u
+const WINGSGROUP_V3_PUBLISH_CONTEXT_MARKER = Symbol('wingsgroup-v3-production-publish')
+
+type WingsGroupV3ProductionPublishContext = {
+  [WINGSGROUP_V3_PUBLISH_CONTEXT_MARKER]: string
+}
 
 export const WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES = [
   { format: 'webp', name: 'wingsgroup-v3-640-webp', width: 640 },
@@ -28,6 +34,24 @@ export const getWingsGroupV3DerivativeSizeName = (
   WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.find(
     (size) => size.format === format && size.width === width,
   )?.name
+
+export const createWingsGroupV3ProductionPublishContext = (
+  operationID: string,
+): Readonly<WingsGroupV3ProductionPublishContext> => {
+  if (!/^[a-z0-9][a-z0-9._-]{15,127}$/u.test(operationID)) {
+    throw new Error('WingsGroup production publication context requires an operation ID.')
+  }
+  return Object.freeze({ [WINGSGROUP_V3_PUBLISH_CONTEXT_MARKER]: operationID })
+}
+
+const hasWingsGroupV3ProductionPublishContext = (value: unknown): boolean =>
+  Boolean(
+    value &&
+    typeof value === 'object' &&
+    typeof (value as Partial<WingsGroupV3ProductionPublishContext>)[
+      WINGSGROUP_V3_PUBLISH_CONTEXT_MARKER
+    ] === 'string',
+  )
 
 export const generateWingsGroupV3DerivativeImageName = ({
   extension,
@@ -56,6 +80,9 @@ const isTrimmedNonempty = (value: unknown): value is string =>
 const hasHTTPSURL = (value: unknown): boolean => HTTPS_URL.test(asString(value))
 
 const hasSha256 = (value: unknown): boolean => SHA256.test(asString(value))
+
+export const isWingsGroupV3DerivativeFilename = (value: unknown): value is string =>
+  typeof value === 'string' && SAFE_DERIVATIVE_FILENAME.test(value)
 
 const canonicalize = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(canonicalize)
@@ -116,22 +143,77 @@ export const validateMediaGovernance = (value: unknown): true | string => {
   const derivatives = Array.isArray(governance.responsiveDerivatives)
     ? governance.responsiveDerivatives.map(asRecord)
     : []
-  const formats = new Set(derivatives.map((item) => item.format))
-  if (!formats.has('webp') || !formats.has('avif')) {
-    return 'Media publish cần cả WebP và AVIF.'
+  const expectedKeys = new Set(
+    WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ format, width }) => `${format}:${width}`),
+  )
+  const actualKeys = new Set<string>()
+  if (derivatives.length !== WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.length) {
+    return 'Media publish cần đúng sáu responsive derivatives.'
   }
-  if (
-    derivatives.some(
-      (item) =>
-        !Number.isFinite(item.width) ||
-        Number(item.width) <= 0 ||
-        !hasHTTPSURL(item.url) ||
-        !hasSha256(item.sha256),
-    )
-  ) {
-    return 'Mỗi derivative cần width, URL HTTPS và SHA-256 hợp lệ.'
+  for (const item of derivatives) {
+    const format = item.format
+    const width = item.width
+    const key = `${String(format)}:${String(width)}`
+    if (!expectedKeys.has(key) || actualKeys.has(key)) {
+      return 'Media publish cần đúng một derivative cho từng width/format.'
+    }
+    actualKeys.add(key)
+    if (
+      !Number.isInteger(width) ||
+      !hasHTTPSURL(item.url) ||
+      !hasSha256(item.sha256) ||
+      typeof item.height !== 'number' ||
+      !Number.isInteger(item.height) ||
+      item.height < 1
+    ) {
+      return 'Mỗi derivative cần width, height, URL HTTPS và SHA-256 hợp lệ.'
+    }
+    let url: URL
+    try {
+      url = new URL(String(item.url))
+    } catch {
+      return 'Mỗi derivative cần URL HTTPS hợp lệ.'
+    }
+    const filename = url.pathname.slice('/media/'.length)
+    if (
+      url.protocol !== 'https:' ||
+      url.search ||
+      url.hash ||
+      !url.pathname.startsWith('/media/') ||
+      !SAFE_DERIVATIVE_FILENAME.test(filename) ||
+      !filename.endsWith(`.${String(format)}`)
+    ) {
+      return 'Mỗi derivative cần filename flat an toàn dưới /media/.'
+    }
   }
 
+  return true
+}
+
+export const validateWingsGroupV3PublicMedia = (
+  value: unknown,
+  publicOrigin?: string,
+): true | string => {
+  const governance = asRecord(value)
+  if (governance.managedBy !== 'wingsgroup-v3' || governance.publicationState !== 'published') {
+    return 'WingsGroup public media must be published governed media.'
+  }
+  const result = validateMediaGovernance(governance)
+  if (result !== true) return result
+  if (publicOrigin) {
+    let origin: URL
+    try {
+      origin = new URL(publicOrigin)
+    } catch {
+      return 'Media publish cần public origin hợp lệ.'
+    }
+    const derivatives = Array.isArray(governance.responsiveDerivatives)
+      ? governance.responsiveDerivatives.map(asRecord)
+      : []
+    if (derivatives.some((item) => new URL(String(item.url)).origin !== origin.origin)) {
+      return 'Media publish cần derivative URL cùng origin với site.'
+    }
+  }
   return true
 }
 
@@ -339,6 +421,16 @@ export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = asy
     throw new Error('Chỉ super-admin được thay đổi metadata và trạng thái media governance.')
   }
 
+  const isPublished =
+    parsed.managedBy === 'wingsgroup-v3' && parsed.publicationState === 'published'
+  const wasPublished =
+    previous.managedBy === 'wingsgroup-v3' && previous.publicationState === 'published'
+  if (isPublished && !wasPublished && !hasWingsGroupV3ProductionPublishContext(req.context)) {
+    throw new Error(
+      'WingsGroup v3 publication is server-owned; use the operation-bound production-publish phase.',
+    )
+  }
+
   const result = validateMediaGovernance(governance)
   if (result !== true) throw new Error(result)
 
@@ -356,6 +448,11 @@ export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = asy
     if (siteDoc.code !== 'wings-group') {
       throw new Error('WingsGroup v3 media chỉ được publish trong site wings-group.')
     }
+    const publicResult = validateWingsGroupV3PublicMedia(
+      governance,
+      `https://${siteDoc.primaryDomain}`,
+    )
+    if (publicResult !== true) throw new Error(publicResult)
 
     const mediaID = relationID(originalDoc?.id)
     if (mediaID === undefined) {

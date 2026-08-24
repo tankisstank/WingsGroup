@@ -19,6 +19,10 @@ import {
   getSiteAliasFromPathname,
   isPublicLocale,
 } from '@/utilities/sitePaths'
+import {
+  isWingsGroupV3DerivativeFilename,
+  WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES,
+} from '@/fields/wingsGroupV3'
 
 type SiteScopedData = {
   id: RelationID
@@ -71,26 +75,40 @@ export const siteScopedOrAnyone = (fieldName = 'site'): Access => {
   }
 }
 
-const publicMediaWhere: Where = {
-  or: [
-    { 'governance.managedBy': { not_equals: 'wingsgroup-v3' } },
-    {
-      and: [
-        { 'governance.managedBy': { equals: 'wingsgroup-v3' } },
-        { 'governance.publicationState': { equals: 'published' } },
-        { 'governance.rightsState': { equals: 'approved' } },
-        { 'governance.derivativeState': { equals: 'verified' } },
-        { 'governance.sourceAttachmentId': { exists: true } },
-        { 'governance.sourceIdentity': { exists: true } },
-        { 'governance.sourceArchiveSha256': { exists: true } },
-        { 'governance.sourceFileSha256': { exists: true } },
-        { 'governance.provenanceReference': { exists: true } },
-        { 'governance.rightsEvidence': { exists: true } },
-        { site: { exists: true } },
-        { url: { exists: true } },
-      ],
-    },
-  ],
+const publicMediaWhere = (requestedFilename?: string): Where => {
+  const governedConditions: Where[] = [
+    { 'governance.managedBy': { equals: 'wingsgroup-v3' } },
+    { 'governance.publicationState': { equals: 'published' } },
+    { 'governance.rightsState': { equals: 'approved' } },
+    { 'governance.derivativeState': { equals: 'verified' } },
+    { 'governance.sourceAttachmentId': { exists: true } },
+    { 'governance.sourceIdentity': { exists: true } },
+    { 'governance.sourceArchiveSha256': { exists: true } },
+    { 'governance.sourceFileSha256': { exists: true } },
+    { 'governance.provenanceReference': { exists: true } },
+    { 'governance.rightsEvidence': { exists: true } },
+    { site: { exists: true } },
+    { url: { exists: true } },
+    ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(
+      ({ format, width }) =>
+        ({
+          and: [
+            { 'governance.responsiveDerivatives.format': { equals: format } },
+            { 'governance.responsiveDerivatives.width': { equals: width } },
+          ],
+        }) as Where,
+    ),
+  ]
+  if (requestedFilename) {
+    governedConditions.push(
+      isWingsGroupV3DerivativeFilename(requestedFilename)
+        ? { 'governance.responsiveDerivatives.url': { like: `%/media/${requestedFilename}` } }
+        : { 'governance.responsiveDerivatives.url': { equals: '__invalid-derivative__' } },
+    )
+  }
+  return {
+    or: [{ 'governance.managedBy': { not_equals: 'wingsgroup-v3' } }, { and: governedConditions }],
+  }
 }
 
 const resolveTrustedPublicMediaSiteID = async (req: PayloadRequest): Promise<RelationID | null> => {
@@ -138,7 +156,7 @@ const resolveTrustedPublicMediaSiteID = async (req: PayloadRequest): Promise<Rel
 }
 
 const getPublicMediaWhere = async (req: PayloadRequest): Promise<Where | false> => {
-  if (!isExternalHTTPRequest(req)) return publicMediaWhere
+  if (!isExternalHTTPRequest(req)) return publicMediaWhere()
 
   const publicPath = req.headers.get('x-public-path') || ''
   const publicAlias = getSiteAliasFromPathname(publicPath)
@@ -162,8 +180,10 @@ const getPublicMediaWhere = async (req: PayloadRequest): Promise<Where | false> 
   const siteID = await resolveTrustedPublicMediaSiteID(req)
   if (siteID === null) return false
 
+  const requestedFilename = mediaPath.slice('/media/'.length)
+
   return {
-    and: [{ site: { equals: siteID } }, publicMediaWhere],
+    and: [{ site: { equals: siteID } }, publicMediaWhere(requestedFilename)],
   }
 }
 

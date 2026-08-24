@@ -1,4 +1,5 @@
 import type {
+  CollectionAfterReadHook,
   CollectionAfterChangeHook,
   CollectionAfterDeleteHook,
   CollectionBeforeChangeHook,
@@ -22,6 +23,7 @@ import {
 import {
   generateWingsGroupV3DerivativeImageName,
   mediaGovernanceField,
+  validateWingsGroupV3PublicMedia,
   validateGovernedMediaBeforeChange,
   WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES,
 } from '@/fields/wingsGroupV3'
@@ -81,6 +83,35 @@ const revalidateCuratedTourMedia: CollectionAfterChangeHook = async ({
 
 const revalidateDeletedTourMedia: CollectionAfterDeleteHook = ({ doc, req: { context } }) => {
   if (!context.disableRevalidate) revalidateWingSideDiscovery()
+  return doc
+}
+
+export const enforceAnonymousGovernedMediaRead: CollectionAfterReadHook = async ({ doc, req }) => {
+  const governance = doc?.governance
+  if (req.user || governance?.managedBy !== 'wingsgroup-v3') return doc
+
+  const siteID =
+    typeof doc.site === 'object' && doc.site && 'id' in doc.site
+      ? doc.site.id
+      : typeof doc.site === 'number' || typeof doc.site === 'string'
+        ? doc.site
+        : undefined
+  if (siteID === undefined) throw new Error('WingsGroup public media requires site scope.')
+
+  const site = await req.payload.findByID({
+    collection: 'sites',
+    depth: 0,
+    id: siteID,
+    overrideAccess: true,
+    req,
+  })
+  const result = validateWingsGroupV3PublicMedia(
+    governance,
+    site?.code === 'wings-group' ? `https://${site.primaryDomain}` : undefined,
+  )
+  if (site?.code !== 'wings-group' || result !== true) {
+    throw new Error(result === true ? 'WingsGroup public media site scope is invalid.' : result)
+  }
   return doc
 }
 
@@ -179,6 +210,7 @@ export const Media: CollectionConfig = {
           ],
   },
   hooks: {
+    afterRead: [enforceAnonymousGovernedMediaRead],
     afterChange: [revalidateCuratedTourMedia],
     afterDelete: [revalidateDeletedTourMedia, deleteLocalPreviewMedia],
     beforeChange: [enforceSiteAccess, validateGovernedMediaBeforeChange, storeLocalPreviewMedia],

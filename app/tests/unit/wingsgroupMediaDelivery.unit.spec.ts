@@ -7,7 +7,7 @@ import {
   generateWingsGroupV3DerivativeImageName,
   WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES,
 } from '@/fields/wingsGroupV3'
-import { Media } from '@/collections/Media'
+import { enforceAnonymousGovernedMediaRead, Media } from '@/collections/Media'
 import { createTrustedSiteContextHeaders } from '@/utilities/siteDomains'
 
 const request = (
@@ -19,6 +19,17 @@ const request = (
 })
 
 describe('WingsGroup governed derivative delivery', () => {
+  const publicLedger = (origin = 'https://wingsgroup.example') =>
+    [640, 960, 1440].flatMap((width) =>
+      (['webp', 'avif'] as const).map((format) => ({
+        format,
+        height: 400,
+        sha256: 'a'.repeat(64),
+        url: `${origin}/media/wingsgroup-airport-service-abcdef123456-${width}.${format}`,
+        width,
+      })),
+    )
+
   it('keeps the Payload file route single-segment and emits flat governed filenames', () => {
     const installedPayloadRoute = readFileSync(
       path.resolve(process.cwd(), 'node_modules/payload/dist/uploads/endpoints/index.js'),
@@ -114,5 +125,60 @@ describe('WingsGroup governed derivative delivery', () => {
     } finally {
       vi.unstubAllEnvs()
     }
+  })
+
+  it('fails closed for partial public ledgers and allows only a complete same-site ledger', async () => {
+    const site = {
+      code: 'wings-group',
+      id: 7,
+      primaryDomain: 'wingsgroup.example',
+    }
+    const request = {
+      payload: {
+        findByID: async () => site,
+      },
+      user: undefined,
+    }
+    const baseGovernance = {
+      derivativeState: 'verified',
+      managedBy: 'wingsgroup-v3',
+      provenanceReference: 'manifest:v1',
+      publicationState: 'published',
+      rightsEvidence: 'approved',
+      rightsState: 'approved',
+      sourceArchiveSha256: 'a'.repeat(64),
+      sourceAttachmentId: 'attachment',
+      sourceFileSha256: 'a'.repeat(64),
+      sourceIdentity: 'attachment:a',
+    }
+    await expect(
+      enforceAnonymousGovernedMediaRead({
+        doc: {
+          governance: { ...baseGovernance, responsiveDerivatives: publicLedger().slice(0, 2) },
+          site: 7,
+        },
+        req: request,
+      } as never),
+    ).rejects.toThrow(/sáu|six|derivative/)
+
+    await expect(
+      enforceAnonymousGovernedMediaRead({
+        doc: { governance: { ...baseGovernance, responsiveDerivatives: publicLedger() }, site: 7 },
+        req: request,
+      } as never),
+    ).resolves.toMatchObject({ site: 7 })
+
+    await expect(
+      enforceAnonymousGovernedMediaRead({
+        doc: {
+          governance: {
+            ...baseGovernance,
+            responsiveDerivatives: publicLedger('https://other.example'),
+          },
+          site: 7,
+        },
+        req: request,
+      } as never),
+    ).rejects.toThrow(/origin/)
   })
 })

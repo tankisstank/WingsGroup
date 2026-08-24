@@ -57,7 +57,9 @@ owner/SLA/tracking và ecosystem destinations; source privacy/consent contract �
 là release work riêng. WP-REL-14 replaces the prior placeholder interpretation
 with six concrete Payload-managed sizes (640/960/1440 in WebP/AVIF), flat
 filenames compatible with `/file/:filename`, a forward-only PostgreSQL
-migration, physical-file and ledger SHA checks, and a separate operation-bound
+migration, decoded physical-file format/dimension and ledger SHA checks, and a separate operation-bound
 second-confirmation `production-publish` phase. No production import, runtime
 publication or cutover approval has been performed. Disposable PostgreSQL
 rehearsal and Harness DB remain environment gates.
+WP-REL-16 additionally makes publication server-owned and rejects anonymous
+delivery unless the exact six-entry same-site ledger is present.

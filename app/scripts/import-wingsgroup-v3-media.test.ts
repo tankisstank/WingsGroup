@@ -3,6 +3,7 @@ import { readFile, rm, writeFile, mkdtemp } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
+import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -41,6 +42,13 @@ const plan = {
 } as never
 
 const hash = (value: string) => createHash('sha256').update(value).digest('hex')
+
+const imageBytes = async (format: 'avif' | 'webp', width = 640, height = 400) =>
+  sharp({
+    create: { background: 'red', channels: 3, height, width },
+  })
+    [format]()
+    .toBuffer()
 
 const createFixture = async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'wg-v3-production-gate-'))
@@ -203,7 +211,12 @@ describe('WingsGroup v3 production media writer gate', () => {
     } as never
     try {
       for (const [index, derivative] of derivatives.entries()) {
-        if (index > 0) await writeFile(path.join(root, derivative.file), `derivative-${index}`)
+        if (index > 0) {
+          await writeFile(
+            path.join(root, derivative.file),
+            await imageBytes(derivative.format, derivative.width),
+          )
+        }
       }
       const sizes = Object.fromEntries(
         derivatives.map((derivative) => [
@@ -226,7 +239,12 @@ describe('WingsGroup v3 production media writer gate', () => {
       ).rejects.toThrow(/missing|ENOENT/)
 
       for (const [index, derivative] of derivatives.entries()) {
-        if (index === 0) await writeFile(path.join(root, derivative.file), 'derivative-0')
+        if (index === 0) {
+          await writeFile(
+            path.join(root, derivative.file),
+            await imageBytes(derivative.format, derivative.width),
+          )
+        }
       }
       const ledger = derivatives.map((derivative, index) => ({
         format: derivative.format,
@@ -243,6 +261,61 @@ describe('WingsGroup v3 production media writer gate', () => {
           record,
         }),
       ).rejects.toThrow(/ledger/)
+    } finally {
+      await rm(root, { force: true, recursive: true })
+    }
+  })
+
+  it('rejects corrupt files and decoded format or dimension mismatches', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'wg-v3-derivative-decode-'))
+    const derivatives = [640, 960, 1440].flatMap((width) =>
+      (['webp', 'avif'] as const).map((format) => ({
+        file: `wingsgroup-airport-service-abcdef123456-${width}.${format}`,
+        format,
+        width,
+      })),
+    )
+    const record = { derivatives, sourceFile: 'wingsgroup-airport-service.png' } as never
+    const sizes = Object.fromEntries(
+      derivatives.map((derivative) => [
+        `wingsgroup-v3-${derivative.width}-${derivative.format}`,
+        {
+          filename: derivative.file,
+          height: 400,
+          mimeType: `image/${derivative.format}`,
+          width: derivative.width,
+        },
+      ]),
+    )
+    try {
+      for (const derivative of derivatives) {
+        await writeFile(
+          path.join(root, derivative.file),
+          await imageBytes(derivative.format, derivative.width),
+        )
+      }
+      await writeFile(
+        path.join(root, derivatives[0].file),
+        await imageBytes('avif', derivatives[0].width),
+      )
+      await expect(
+        validateWingsGroupV3DerivativeLedger({
+          document: { sizes },
+          mediaDirectory: root,
+          publicOrigin: 'https://wingsgroup.example',
+          record,
+        }),
+      ).rejects.toThrow(/decoded metadata/)
+
+      await writeFile(path.join(root, derivatives[0].file), 'not-an-image')
+      await expect(
+        validateWingsGroupV3DerivativeLedger({
+          document: { sizes },
+          mediaDirectory: root,
+          publicOrigin: 'https://wingsgroup.example',
+          record,
+        }),
+      ).rejects.toThrow(/cannot be decoded/)
     } finally {
       await rm(root, { force: true, recursive: true })
     }

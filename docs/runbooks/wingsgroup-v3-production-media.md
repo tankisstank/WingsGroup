@@ -190,8 +190,10 @@ The importer validates the complete plan before Payload initialization, then
 uses a transaction, exact source identity, site scope and ownership checks. It
 creates missing governed records and reuses only already-owned matching
 records. Payload persists six concrete sizes (640/960/1440 in WebP/AVIF), and
-the importer reads every returned size column and file, checks its dimensions,
-MIME type and SHA-256, and records the six-entry ledger as
+the importer reads every returned size column and file, decodes every physical
+file with the repository-pinned `sharp` tool, compares detected format,
+dimensions and MIME type to the expected derivative, checks SHA-256, and records
+the six-entry ledger as
 `derivativeState=generated`, `publicationState=pending`. It does not delete or
 overwrite unowned media.
 
@@ -226,7 +228,8 @@ sudo docker run --rm \
 
 Record `verified` (source records), `localizedAltVerified` (locale values), and
 `responsiveDerivatives.persisted=78` with the command output. A missing file,
-wrong Payload size metadata, MIME type, filename, URL, or SHA-256 fails closed.
+corrupt file, decoded format/dimension mismatch, wrong Payload size metadata,
+MIME type, filename, URL, or SHA-256 fails closed.
 This phase remains read-only and leaves all records pending.
 
 ## 5. Separate production publication
@@ -235,6 +238,12 @@ Publication is a second confirmation for the same named operation ID. It must
 follow a successful `production-verify`, reuse the exact archive/plan/release/
 database/backup/restore bindings, and supply both the original write token and
 the operation-bound publication token:
+
+Ordinary CMS/admin/REST/GraphQL updates cannot set a governed WingsGroup v3
+record to `publicationState=published`, including super-admin requests. The
+collection lifecycle rejects that transition unless the importer supplies its
+private server-owned context after the exact physical preflight; client data,
+headers, and `overrideAccess` cannot forge it.
 
 ```text
 WINGSGROUP_V3_PRODUCTION_PUBLICATION_CONFIRMATION_TOKEN=CONFIRM_WINGSGROUP_V3_PRODUCTION_MEDIA_PUBLICATION:<same-operation-id>

@@ -13,6 +13,7 @@ import configPromise from '@payload-config'
 import fs from 'node:fs/promises'
 import fsSync from 'node:fs'
 import path from 'node:path'
+import sharp from 'sharp'
 import {
   commitTransaction,
   createLocalReq,
@@ -32,6 +33,7 @@ import {
   type WingsGroupV3MediaPlanItem,
 } from './lib/wingsGroupV3MediaPlan'
 import {
+  createWingsGroupV3ProductionPublishContext,
   getWingsGroupV3DerivativeSizeName,
   WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES,
 } from '../src/fields/wingsGroupV3'
@@ -613,7 +615,27 @@ export const validateWingsGroupV3DerivativeLedger = async ({
     }
 
     const filePath = resolveFlatGovernedDerivative(mediaDirectory, derivative.file)
-    const fileSha256 = sha256(await fs.readFile(filePath))
+    const fileBytes = await fs.readFile(filePath)
+    let metadata: sharp.Metadata
+    try {
+      metadata = await sharp(fileBytes).metadata()
+    } catch (error) {
+      throw new Error(
+        `Media ${record.sourceFile} derivative ${derivative.file} cannot be decoded: ${errorMessage(error)}`,
+      )
+    }
+    const detectedFormat =
+      metadata.format === 'heif' && metadata.compression === 'av1' ? 'avif' : metadata.format
+    if (
+      detectedFormat !== derivative.format ||
+      metadata.width !== derivative.width ||
+      metadata.height !== size.height
+    ) {
+      throw new Error(
+        `Media ${record.sourceFile} derivative ${derivative.file} decoded metadata does not match the governed derivative`,
+      )
+    }
+    const fileSha256 = sha256(fileBytes)
     const url = `${origin}/media/${derivative.file}`
     ledger.push({
       format: derivative.format,
@@ -1283,6 +1305,7 @@ export const publishWingsGroupV3MediaWithRecovery = async ({
   databasePath,
   manifest,
   mediaDirectory,
+  operationID,
   payload,
   plan,
   publicOrigin,
@@ -1293,6 +1316,7 @@ export const publishWingsGroupV3MediaWithRecovery = async ({
   databasePath: string
   manifest: WingsGroupV3MediaManifest
   mediaDirectory: string
+  operationID: string
   payload: Payload
   plan: WingsGroupV3MediaPlan
   publicOrigin: string
@@ -1333,6 +1357,10 @@ export const publishWingsGroupV3MediaWithRecovery = async ({
       throw new Error(TRANSACTION_UNSUPPORTED_MESSAGE)
     }
     transactionStatus = 'active'
+    const publishContext = {
+      ...context,
+      ...createWingsGroupV3ProductionPublishContext(operationID),
+    }
 
     for (const record of plan.records) {
       const document = await findMediaBySourceIdentity({
@@ -1346,7 +1374,7 @@ export const publishWingsGroupV3MediaWithRecovery = async ({
       const governance = isRecord(document.governance) ? document.governance : {}
       await payload.update({
         collection: 'media',
-        context,
+        context: publishContext,
         data: {
           governance: {
             ...governance,
@@ -1558,6 +1586,7 @@ const main = async () => {
           payload,
           plan,
           publicOrigin: `https://${site.primaryDomain}`,
+          operationID: binding.operationID,
           req,
           siteID: site.id,
         })

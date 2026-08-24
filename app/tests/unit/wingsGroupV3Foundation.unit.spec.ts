@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest'
 
 import { validateEcosystemProfiles } from '@/blocks/WingsGroupEcosystem/config'
 import { validateProofRecords } from '@/blocks/WingsGroupProofArchive/config'
-import { validateConsultationChannels, validateMediaGovernance } from '@/fields/wingsGroupV3'
+import {
+  createWingsGroupV3ProductionPublishContext,
+  validateConsultationChannels,
+  validateGovernedMediaBeforeChange,
+  validateMediaGovernance,
+} from '@/fields/wingsGroupV3'
 import { resolveSiteSettingsUpsert } from '../../scripts/lib/wingsGroupV3MediaPlan'
 import {
   applyWingsGroupV3MediaWithRecovery,
@@ -23,6 +28,17 @@ import path from 'node:path'
 import sharp from 'sharp'
 
 const sha = 'a'.repeat(64)
+
+const completePublicLedger = (origin = 'https://cdn.example') =>
+  [640, 960, 1440].flatMap((width) =>
+    (['webp', 'avif'] as const).map((format) => ({
+      format,
+      height: 400,
+      sha256: sha,
+      url: `${origin}/media/wingsgroup-airport-service-abcdef123456-${width}.${format}`,
+      width,
+    })),
+  )
 
 describe('WingsGroup v3 fail-closed governance', () => {
   it('keeps unconfigured consultation channels non-blocking but gates approved URLs', () => {
@@ -54,16 +70,109 @@ describe('WingsGroup v3 fail-closed governance', () => {
         managedBy: 'wingsgroup-v3',
         provenanceReference: 'manifest:v1',
         publicationState: 'published',
-        responsiveDerivatives: [
-          { format: 'webp', sha256: sha, url: 'https://cdn.example/a.webp', width: 640 },
-          { format: 'avif', sha256: sha, url: 'https://cdn.example/a.avif', width: 640 },
-        ],
+        responsiveDerivatives: [...completePublicLedger()],
         rightsEvidence: 'stakeholder-approval',
         rightsState: 'approved',
         sourceArchiveSha256: sha,
         sourceAttachmentId: 'attachment-1',
         sourceFileSha256: sha,
         sourceIdentity: `attachment-1:${sha}`,
+      }),
+    ).toBe(true)
+  })
+
+  it('rejects direct super-admin publication without the private production context', async () => {
+    await expect(
+      validateGovernedMediaBeforeChange({
+        data: {
+          governance: {
+            derivativeState: 'verified',
+            managedBy: 'wingsgroup-v3',
+            provenanceReference: 'manifest:v1',
+            publicationState: 'published',
+            responsiveDerivatives: completePublicLedger('https://wingsgroup.example'),
+            rightsEvidence: 'stakeholder-approval',
+            rightsState: 'approved',
+            sourceArchiveSha256: sha,
+            sourceAttachmentId: 'attachment-1',
+            sourceFileSha256: sha,
+            sourceIdentity: `attachment-1:${sha}`,
+          },
+          site: 7,
+        },
+        originalDoc: {
+          governance: { managedBy: 'wingsgroup-v3', publicationState: 'ready' },
+          id: 22,
+        },
+        req: { locale: 'vi', payload: {}, user: { role: 'super-admin' } },
+      } as never),
+    ).rejects.toThrow(/server-owned/)
+  })
+
+  it('accepts publication only with the operation-bound server context after exact ledger validation', async () => {
+    await expect(
+      validateGovernedMediaBeforeChange({
+        data: {
+          governance: {
+            derivativeState: 'verified',
+            managedBy: 'wingsgroup-v3',
+            provenanceReference: 'manifest:v1',
+            publicationState: 'published',
+            responsiveDerivatives: completePublicLedger('https://wingsgroup.example'),
+            rightsEvidence: 'stakeholder-approval',
+            rightsState: 'approved',
+            sourceArchiveSha256: sha,
+            sourceAttachmentId: 'attachment-1',
+            sourceFileSha256: sha,
+            sourceIdentity: `attachment-1:${sha}`,
+          },
+          site: 7,
+        },
+        originalDoc: {
+          governance: { managedBy: 'wingsgroup-v3', publicationState: 'ready' },
+          id: 22,
+        },
+        req: {
+          context: createWingsGroupV3ProductionPublishContext('op-20260824-wingsgroup-v3-media'),
+          locale: 'vi',
+          payload: {
+            findByID: async ({ collection }: { collection: string }) =>
+              collection === 'sites'
+                ? { code: 'wings-group', id: 7, primaryDomain: 'wingsgroup.example' }
+                : { alt: 'English alt' },
+          },
+          user: { role: 'super-admin' },
+        },
+      } as never),
+    ).resolves.toBeTruthy()
+  })
+
+  it('rejects a partial or invalid public ledger while preserving local pending governance', () => {
+    const publishedGovernance = {
+      derivativeState: 'verified',
+      managedBy: 'wingsgroup-v3',
+      provenanceReference: 'manifest:v1',
+      publicationState: 'published',
+      responsiveDerivatives: completePublicLedger(),
+      rightsEvidence: 'stakeholder-approval',
+      rightsState: 'approved',
+      sourceArchiveSha256: sha,
+      sourceAttachmentId: 'attachment-1',
+      sourceFileSha256: sha,
+      sourceIdentity: `attachment-1:${sha}`,
+    }
+    expect(
+      validateMediaGovernance({
+        ...publishedGovernance,
+        responsiveDerivatives: publishedGovernance.responsiveDerivatives.slice(0, -1),
+      }),
+    ).toMatch(/responsive derivatives/)
+    expect(
+      validateMediaGovernance({
+        derivativeState: 'pending',
+        managedBy: 'wingsgroup-v3',
+        publicationState: 'pending',
+        responsiveDerivatives: [],
       }),
     ).toBe(true)
   })
