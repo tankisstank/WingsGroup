@@ -152,6 +152,13 @@ const parseProductionDatabaseURL = (environment: WingsGroupV3ProductionEnvironme
   if (!['postgres:', 'postgresql:'].includes(databaseURL.protocol)) {
     throw new Error('Production media gate requires PostgreSQL DATABASE_URL')
   }
+  if (
+    databaseURL.search ||
+    databaseURL.hash ||
+    !/^\/[A-Za-z0-9_][A-Za-z0-9_$.-]*$/u.test(databaseURL.pathname)
+  ) {
+    throw new Error('Production media gate requires an exact nonempty PostgreSQL database path')
+  }
   return databaseURL
 }
 
@@ -200,13 +207,16 @@ export const assertWingsGroupV3ProductionMediaGate = ({
 
   const databaseURL = parseProductionDatabaseURL(env)
   const databaseName = databaseURL.pathname.replace(/^\//u, '')
+  if (!databaseName || !env.WINGSGROUP_V3_PRODUCTION_DATABASE_NAME) {
+    throw new Error('Production media gate requires an exact nonempty database-name binding')
+  }
   if (databaseURL.hostname !== 'postgres') {
     throw new Error('Production media gate requires the trusted postgres target')
   }
-  if (
-    env.WINGSGROUP_V3_PRODUCTION_DATABASE_HOST !== databaseURL.hostname ||
-    env.WINGSGROUP_V3_PRODUCTION_DATABASE_NAME !== databaseName
-  ) {
+  if (env.WINGSGROUP_V3_PRODUCTION_DATABASE_HOST !== databaseURL.hostname) {
+    throw new Error('Production media gate database target binding mismatch')
+  }
+  if (env.WINGSGROUP_V3_PRODUCTION_DATABASE_NAME !== databaseName) {
     throw new Error('Production media gate database target binding mismatch')
   }
 
@@ -473,10 +483,11 @@ type WingsGroupV3MediaDocument = Record<string, unknown>
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 
-const returnedUploadFilenames = (document: WingsGroupV3MediaDocument): string[] => {
+const returnedUploadFilenames = (document: unknown): string[] => {
+  const persisted = isRecord(document) ? document : {}
   const filenames = new Set<string>()
-  if (typeof document.filename === 'string') filenames.add(document.filename)
-  const sizes = isRecord(document.sizes) ? document.sizes : null
+  if (typeof persisted.filename === 'string') filenames.add(persisted.filename)
+  const sizes = isRecord(persisted.sizes) ? persisted.sizes : null
   for (const size of Object.values(sizes || {})) {
     if (isRecord(size) && typeof size.filename === 'string') filenames.add(size.filename)
   }
@@ -499,7 +510,7 @@ const trackCreatedMediaFiles = ({
   mediaDirectory,
   runOwnedUploadFiles,
 }: {
-  document: WingsGroupV3MediaDocument
+  document: unknown
   mediaDirectory: string
   runOwnedUploadFiles: Set<string>
 }) => {
@@ -744,11 +755,13 @@ export const buildWingsGroupV3MediaSeedData = ({
 })
 
 const findMediaBySourceIdentity = async ({
+  locale,
   payload,
   req,
   siteID,
   sourceIdentity,
 }: {
+  locale?: 'en' | 'vi'
   payload: Payload
   req: PayloadRequest
   siteID: number | string
@@ -758,6 +771,7 @@ const findMediaBySourceIdentity = async ({
     collection: 'media',
     depth: 0,
     limit: 2,
+    ...(locale ? { locale, fallbackLocale: false } : {}),
     overrideAccess: true,
     pagination: false,
     req,
@@ -774,6 +788,7 @@ const findMediaBySourceIdentity = async ({
     collection: 'media',
     depth: 0,
     limit: 2,
+    ...(locale ? { locale, fallbackLocale: false } : {}),
     overrideAccess: true,
     pagination: false,
     req,
@@ -794,36 +809,48 @@ const validatePersistedMedia = ({
   document,
   expectedSourceArchiveSha256,
   expectedSourceAttachmentId,
+  expectedGovernance,
+  expectedAlt,
   record,
   siteID,
 }: {
-  document: Record<string, any>
+  document: unknown
+  expectedGovernance: ReturnType<typeof buildWingsGroupV3MediaGovernance>
+  expectedAlt?: string
   expectedSourceArchiveSha256: string
   expectedSourceAttachmentId: string
   record: WingsGroupV3MediaPlanItem
   siteID: number | string
 }) => {
-  if (String(relationID(document.site)) !== String(siteID)) {
+  const persisted = isRecord(document) ? document : {}
+  if (String(relationID(persisted.site)) !== String(siteID)) {
     throw new Error(`Media ${record.sourceFile} is not scoped to ${WINGSGROUP_V3_IMPORT_SITE_CODE}`)
   }
   if (
-    document.width !== record.sourceDimensions.width ||
-    document.height !== record.sourceDimensions.height
+    persisted.width !== record.sourceDimensions.width ||
+    persisted.height !== record.sourceDimensions.height
   ) {
     throw new Error(
-      `Media ${record.sourceFile} persisted dimensions ${document.width}x${document.height} do not match ${record.sourceDimensions.width}x${record.sourceDimensions.height}`,
+      `Media ${record.sourceFile} persisted dimensions ${persisted.width}x${persisted.height} do not match ${record.sourceDimensions.width}x${record.sourceDimensions.height}`,
     )
   }
-  if (document.governance?.sourceFileSha256 !== record.sourceFileSha256) {
-    throw new Error(`Media ${record.sourceFile} persisted checksum does not match the handoff.`)
+  const governance = isRecord(persisted.governance) ? persisted.governance : {}
+  if (expectedAlt !== undefined && persisted.alt !== expectedAlt) {
+    throw new Error(
+      `Media ${record.sourceFile} persisted localized alt does not match the handoff.`,
+    )
   }
-  if (
-    document.governance?.managedBy !== 'wingsgroup-v3' ||
-    document.governance?.sourceIdentity !== record.sourceIdentity ||
-    document.governance?.sourceArchiveSha256 !== expectedSourceArchiveSha256 ||
-    document.governance?.sourceAttachmentId !== expectedSourceAttachmentId
-  ) {
-    throw new Error(`Media ${record.sourceFile} is not an owned WingsGroup v3 record`)
+  const expectedGovernanceFields = {
+    ...expectedGovernance,
+    sourceArchiveSha256: expectedSourceArchiveSha256,
+    sourceAttachmentId: expectedSourceAttachmentId,
+  }
+  for (const [field, expected] of Object.entries(expectedGovernanceFields)) {
+    if (JSON.stringify(governance[field]) !== JSON.stringify(expected)) {
+      throw new Error(
+        `Media ${record.sourceFile} persisted governance ${field} does not match the handoff.`,
+      )
+    }
   }
 }
 
@@ -892,6 +919,7 @@ export const importWingsGroupV3Media = async ({
         document,
         expectedSourceArchiveSha256: manifest.sourcePackage.archiveSha256,
         expectedSourceAttachmentId: manifest.sourcePackage.attachmentId,
+        expectedGovernance: buildWingsGroupV3MediaGovernance({ manifest, record }),
         record,
         siteID,
       })
@@ -922,6 +950,7 @@ export const importWingsGroupV3Media = async ({
         document,
         expectedSourceArchiveSha256: manifest.sourcePackage.archiveSha256,
         expectedSourceAttachmentId: manifest.sourcePackage.attachmentId,
+        expectedGovernance: buildWingsGroupV3MediaGovernance({ manifest, record }),
         record,
         siteID,
       })
@@ -962,25 +991,37 @@ export const verifyWingsGroupV3Media = async ({
     sourceDimensions: { height: number; width: number }
   }>
   for (const record of plan.records) {
-    const document = await findMediaBySourceIdentity({
-      payload,
-      req,
-      siteID,
-      sourceIdentity: record.sourceIdentity,
-    })
-    if (!document) {
-      throw new Error(`Media ${record.sourceFile} is missing from the WingsGroup site scope`)
-    }
-    validatePersistedMedia({
-      document,
-      expectedSourceArchiveSha256: manifest.sourcePackage.archiveSha256,
-      expectedSourceAttachmentId: manifest.sourcePackage.attachmentId,
-      record,
-      siteID,
-    })
+    const expectedGovernance = buildWingsGroupV3MediaGovernance({ manifest, record })
+    const localizedDocuments = await Promise.all(
+      (['vi', 'en'] as const).map(async (locale) => {
+        const document = await findMediaBySourceIdentity({
+          locale,
+          payload,
+          req,
+          siteID,
+          sourceIdentity: record.sourceIdentity,
+        })
+        if (!document) {
+          throw new Error(
+            `Media ${record.sourceFile} is missing from the WingsGroup ${locale} locale scope`,
+          )
+        }
+        validatePersistedMedia({
+          document,
+          expectedSourceArchiveSha256: manifest.sourcePackage.archiveSha256,
+          expectedSourceAttachmentId: manifest.sourcePackage.attachmentId,
+          expectedGovernance,
+          expectedAlt: record.alt[locale],
+          record,
+          siteID,
+        })
+        return document
+      }),
+    )
+    const document = localizedDocuments[0]
     records.push({
-      filename: document.filename || record.importFilename,
-      id: document.id,
+      filename: typeof document.filename === 'string' ? document.filename : record.importFilename,
+      id: relationID(document.id) || record.sourceIdentity,
       sourceDimensions: record.sourceDimensions,
       sourceIdentity: record.sourceIdentity,
     })
@@ -989,6 +1030,13 @@ export const verifyWingsGroupV3Media = async ({
     records,
     siteCode: WINGSGROUP_V3_IMPORT_SITE_CODE,
     siteID,
+    localizedAltVerified: records.length * 2,
+    responsiveDerivatives: {
+      planned: plan.records.reduce((total, record) => total + record.derivatives.length, 0),
+      persisted: 0,
+      state: 'pending' as const,
+      verified: false,
+    },
     verified: records.length,
   }
 }
@@ -1116,9 +1164,11 @@ const main = async () => {
           JSON.stringify(
             {
               archiveSha256: binding.archiveSha256,
+              localizedAltVerified: verification.localizedAltVerified,
               operationID: binding.operationID,
               phase: command.phase,
               planSha256: binding.planSha256,
+              responsiveDerivatives: verification.responsiveDerivatives,
               siteCode: verification.siteCode,
               verified: verification.verified,
             },

@@ -17,7 +17,8 @@ Stop before `production-apply` when any item is missing or mismatched:
 - the approved archive SHA-256
 - the generated plan SHA-256
 - the exact site scope `wings-group`
-- the PostgreSQL production target and `PAYLOAD_DB_PUSH=false`
+- the PostgreSQL production target with one nonempty exact database path and
+  matching trusted database-name binding, plus `PAYLOAD_DB_PUSH=false`
 - the immutable release SHA binding
 - a fresh operation ID and operation-bound confirmation token
 - encrypted backup evidence or successful disposable-restore evidence
@@ -130,7 +131,10 @@ records. It does not delete or overwrite unowned media.
 After the write, with fresh authorization for the same operation, run the
 read-only verifier. It requires the production target, release, operation,
 archive and plan bindings but does not require the write confirmation or backup
-files:
+files. The verifier reads each source record in both `vi` and `en`, and checks
+the site, dimensions, source identity/archive/attachment/file checksum,
+source filename, provenance, rights evidence/state, usage scope, publication
+state, derivative state, and the complete responsive-derivative inventory.
 
 ```bash
 pnpm exec tsx scripts/import-wingsgroup-v3-media.ts production-verify \
@@ -143,9 +147,15 @@ pnpm exec tsx scripts/import-wingsgroup-v3-media.ts production-verify \
   --operation-id=<same-operation-id>
 ```
 
-Record the verified count and keep the command output with the release
-evidence. Runtime publication remains fail-closed until responsive derivatives,
-governance and production smoke checks are complete.
+Record `verified` (source records) and `localizedAltVerified` (locale values)
+and keep the command output with the release evidence. The current importer
+does not generate or persist responsive derivative files: a successful verifier
+therefore reports `responsiveDerivatives.state: pending`,
+`responsiveDerivatives.persisted: 0`, and `responsiveDerivatives.verified: false`
+while retaining the plan's responsive-derivative count in `planned`. Never
+interpret the plan's 78 planned derivatives as generated or verified. Runtime
+publication remains fail-closed until responsive derivatives, governance and
+production smoke checks are complete.
 
 ## Rollback and recovery
 

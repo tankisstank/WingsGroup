@@ -40,7 +40,7 @@ quyền xuất bản.
 | Unit | E09-00-11 final re-review: 2 files, 18 tests passed. |
 | Integration | E09-00-11 final re-review: foundation integration 7 tests passed. |
 | Platform | Archived handoff runtime khớp sáu section và ba dialog triggers; 13 media record governed và pending. |
-| Release | `node scripts/wingsgroup-v3-release-gates.mjs --json` validates the governed register; editorial-media remains approved while production import, derivative verification and runtime publication remain separate fail-closed gates. |
+| Release | `node scripts/wingsgroup-v3-release-gates.mjs --json` validates the governed register; editorial-media remains approved while production import, responsive-derivative verification and runtime publication remain separate fail-closed gates. |
 
 ## Evidence
 
@@ -57,6 +57,9 @@ owner/SLA/tracking và ecosystem destinations; source privacy/consent contract �
 là release work riêng. WP-REL-07 verified the 13-source/78-derivative media plan;
 WP-REL-10 adds an explicit production-apply/production-verify capability guarded
 by operation-bound confirmation, release/plan/archive binding and backup/restore
-evidence. No production import, runtime publication or cutover approval has been
-performed. Disposable PostgreSQL rehearsal and Harness DB remain environment
-gates.
+evidence. WP-REL-12 closes the exact-database binding finding and makes
+production-verify check both localized alts plus every persisted governance field;
+it reports responsive derivatives as pending/zero persisted rather than claiming
+the 78 planned derivatives were generated. No production import, runtime
+publication or cutover approval has been performed. Disposable PostgreSQL
+rehearsal and Harness DB remain environment gates.

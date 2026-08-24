@@ -7,8 +7,10 @@ import { describe, expect, it } from 'vitest'
 
 import {
   assertWingsGroupV3ProductionMediaGate,
+  buildWingsGroupV3MediaGovernance,
   initializeWingsGroupV3ProductionWriter,
   parseWingsGroupV3MediaCommand,
+  verifyWingsGroupV3Media,
   type WingsGroupV3ProductionApplyArgs,
   WINGSGROUP_V3_PRODUCTION_CONFIRMATION_PREFIX,
 } from './import-wingsgroup-v3-media'
@@ -117,6 +119,72 @@ const baseEnv = (fixture: Awaited<ReturnType<typeof createFixture>>): FixtureEnv
   WINGSTRAVEL_RELEASE_SHA: releaseSha,
 })
 
+const verificationManifest = {
+  licenseScope: 'WingsGroup editorial-service scope',
+  media: [],
+  publicationState: 'approved-for-production',
+  rights: {
+    evidence: 'Approved handoff evidence',
+    restriction: 'Editorial use only',
+    state: 'approved',
+  },
+  siteCode: 'wings-group',
+  sourcePackage: {
+    archiveSha256: archiveSha256,
+    attachmentId: 'verification-attachment',
+  },
+  version: 1,
+} as never
+
+const verificationRecord = {
+  alt: { en: 'Verified English alt', vi: 'Alt tiếng Việt đã xác minh' },
+  derivatives: [
+    { file: 'one.webp', format: 'webp' as const, width: 640 },
+    { file: 'one.avif', format: 'avif' as const, width: 640 },
+  ],
+  focal: { x: 50, y: 50 },
+  importFilename: 'verification.png',
+  role: 'service-verification',
+  sourceDimensions: { height: 1024, width: 1536 },
+  sourceFile: 'verification.png',
+  sourceFileSha256: 'f'.repeat(64),
+  sourceIdentity: 'verification-attachment:f'.repeat(1),
+  usageScope: 'editorial-service' as const,
+}
+
+const verificationPlan = { records: [verificationRecord] } as never
+
+const createVerificationPayload = ({
+  altOverrides = {},
+  documentOverrides = {},
+  governanceOverrides = {},
+}: {
+  altOverrides?: Partial<Record<'en' | 'vi', string>>
+  documentOverrides?: Record<string, unknown>
+  governanceOverrides?: Record<string, unknown>
+} = {}) => {
+  const expectedGovernance = buildWingsGroupV3MediaGovernance({
+    manifest: verificationManifest,
+    record: verificationRecord,
+  })
+  return {
+    find: async ({ locale }: { locale?: 'en' | 'vi' }) => ({
+      docs: [
+        {
+          id: 101,
+          site: 7,
+          width: verificationRecord.sourceDimensions.width,
+          height: verificationRecord.sourceDimensions.height,
+          filename: verificationRecord.importFilename,
+          alt: altOverrides[locale || 'vi'] || verificationRecord.alt[locale || 'vi'],
+          governance: { ...expectedGovernance, ...governanceOverrides },
+          ...documentOverrides,
+        },
+      ],
+    }),
+  } as never
+}
+
 describe('WingsGroup v3 production media writer gate', () => {
   it('keeps plan/local apply distinct and accepts only explicit production verbs', () => {
     expect(
@@ -196,6 +264,29 @@ describe('WingsGroup v3 production media writer gate', () => {
       'database protocol',
       (_args, env) => (env.DATABASE_URL = 'file:production.sqlite'),
       /PostgreSQL/,
+    ],
+    [
+      'empty database path',
+      (_args, env) => {
+        env.DATABASE_URL = 'postgresql://operator@postgres/'
+        env.WINGSGROUP_V3_PRODUCTION_DATABASE_NAME = ''
+      },
+      /exact nonempty PostgreSQL database path/,
+    ],
+    [
+      'ambiguous database path',
+      (_args, env) => (env.DATABASE_URL = `${databaseURL}/other`),
+      /exact nonempty PostgreSQL database path/,
+    ],
+    [
+      'empty trusted database binding',
+      (_args, env) => (env.WINGSGROUP_V3_PRODUCTION_DATABASE_NAME = ''),
+      /exact nonempty database-name binding/,
+    ],
+    [
+      'database query override',
+      (_args, env) => (env.DATABASE_URL = `${databaseURL}?dbname=other`),
+      /exact nonempty PostgreSQL database path/,
     ],
     [
       'production marker',
@@ -348,5 +439,67 @@ describe('WingsGroup v3 production media writer gate', () => {
     } finally {
       await rm(fixture.root, { force: true, recursive: true })
     }
+  })
+
+  it('verifies both localized alts and reports responsive derivatives as pending, not verified', async () => {
+    const result = await verifyWingsGroupV3Media({
+      manifest: verificationManifest,
+      payload: createVerificationPayload(),
+      plan: verificationPlan,
+      req: {} as never,
+      siteID: 7,
+    })
+
+    expect(result).toMatchObject({
+      localizedAltVerified: 2,
+      responsiveDerivatives: {
+        persisted: 0,
+        planned: 2,
+        state: 'pending',
+        verified: false,
+      },
+      verified: 1,
+    })
+  })
+
+  it.each([
+    ['vi localized alt', { vi: 'wrong Vietnamese alt' }, /localized alt/],
+    ['en localized alt', { en: 'wrong English alt' }, /localized alt/],
+  ])('rejects a mismatched %s', async (_name, altOverrides, pattern) => {
+    await expect(
+      verifyWingsGroupV3Media({
+        manifest: verificationManifest,
+        payload: createVerificationPayload({ altOverrides }),
+        plan: verificationPlan,
+        req: {} as never,
+        siteID: 7,
+      }),
+    ).rejects.toThrow(pattern)
+  })
+
+  it.each([
+    ['managedBy', { managedBy: 'other' }],
+    ['source identity', { sourceIdentity: 'other-identity' }],
+    ['archive checksum', { sourceArchiveSha256: 'e'.repeat(64) }],
+    ['attachment identity', { sourceAttachmentId: 'other-attachment' }],
+    ['source checksum', { sourceFileSha256: 'e'.repeat(64) }],
+    ['source filename', { sourceFilename: 'other.png' }],
+    ['provenance', { provenanceReference: 'other-reference' }],
+    ['rights state', { rightsState: 'pending' }],
+    ['rights evidence', { rightsEvidence: 'other evidence' }],
+    ['usage scope', { usageScope: 'other-scope' }],
+    ['publication state', { publicationState: 'published' }],
+    ['derivative state', { derivativeState: 'verified' }],
+    ['responsive derivative inventory', { responsiveDerivatives: [{ width: 640 }] }],
+  ])('rejects a mismatched persisted governance %s', async (_name, governanceOverrides) => {
+    await expect(
+      verifyWingsGroupV3Media({
+        manifest: verificationManifest,
+        payload: createVerificationPayload({ governanceOverrides }),
+        plan: verificationPlan,
+        req: {} as never,
+        siteID: 7,
+      }),
+    ).rejects.toThrow(/persisted governance/)
   })
 })
