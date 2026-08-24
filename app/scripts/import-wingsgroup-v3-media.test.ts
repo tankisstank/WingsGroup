@@ -11,8 +11,10 @@ import {
   initializeWingsGroupV3ProductionWriter,
   parseWingsGroupV3MediaCommand,
   verifyWingsGroupV3Media,
+  validateWingsGroupV3DerivativeLedger,
   type WingsGroupV3ProductionApplyArgs,
   WINGSGROUP_V3_PRODUCTION_CONFIRMATION_PREFIX,
+  WINGSGROUP_V3_PRODUCTION_PUBLICATION_CONFIRMATION_PREFIX,
 } from './import-wingsgroup-v3-media'
 
 const archiveSha256 = 'a'.repeat(64)
@@ -186,6 +188,66 @@ const createVerificationPayload = ({
 }
 
 describe('WingsGroup v3 production media writer gate', () => {
+  it('fails closed when a governed Payload derivative is missing or its persisted hash differs', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'wg-v3-derivative-ledger-'))
+    const derivatives = [640, 960, 1440].flatMap((width) =>
+      (['webp', 'avif'] as const).map((format) => ({
+        file: `wingsgroup-airport-service-abcdef123456-${width}.${format}`,
+        format,
+        width,
+      })),
+    )
+    const record = {
+      derivatives,
+      sourceFile: 'wingsgroup-airport-service.png',
+    } as never
+    try {
+      for (const [index, derivative] of derivatives.entries()) {
+        if (index > 0) await writeFile(path.join(root, derivative.file), `derivative-${index}`)
+      }
+      const sizes = Object.fromEntries(
+        derivatives.map((derivative) => [
+          `wingsgroup-v3-${derivative.width}-${derivative.format}`,
+          {
+            filename: derivative.file,
+            height: 400,
+            mimeType: `image/${derivative.format}`,
+            width: derivative.width,
+          },
+        ]),
+      )
+      await expect(
+        validateWingsGroupV3DerivativeLedger({
+          document: { sizes },
+          mediaDirectory: root,
+          publicOrigin: 'https://wingsgroup.example',
+          record,
+        }),
+      ).rejects.toThrow(/missing|ENOENT/)
+
+      for (const [index, derivative] of derivatives.entries()) {
+        if (index === 0) await writeFile(path.join(root, derivative.file), 'derivative-0')
+      }
+      const ledger = derivatives.map((derivative, index) => ({
+        format: derivative.format,
+        height: 400,
+        sha256: index === 0 ? '0'.repeat(64) : hash(`derivative-${index}`),
+        url: `https://wingsgroup.example/media/${derivative.file}`,
+        width: derivative.width,
+      }))
+      await expect(
+        validateWingsGroupV3DerivativeLedger({
+          document: { governance: { responsiveDerivatives: ledger }, sizes },
+          mediaDirectory: root,
+          publicOrigin: 'https://wingsgroup.example',
+          record,
+        }),
+      ).rejects.toThrow(/ledger/)
+    } finally {
+      await rm(root, { force: true, recursive: true })
+    }
+  })
+
   it('keeps plan/local apply distinct and accepts only explicit production verbs', () => {
     expect(
       parseWingsGroupV3MediaCommand([
@@ -210,6 +272,15 @@ describe('WingsGroup v3 production media writer gate', () => {
         '--site-code=wings-group',
       ]),
     ).toMatchObject({ apply: false, phase: 'production-verify', production: true })
+    expect(
+      parseWingsGroupV3MediaCommand([
+        'production-publish',
+        '--manifest=/tmp/manifest.json',
+        '--assets-dir=/tmp/assets',
+        '--site-code=wings-group',
+        '--publish-confirm=publication-token',
+      ]),
+    ).toMatchObject({ apply: true, phase: 'production-publish', production: true })
     expect(() =>
       parseWingsGroupV3MediaCommand([
         'rollback',
@@ -243,6 +314,39 @@ describe('WingsGroup v3 production media writer gate', () => {
         planSha256,
         releaseSha,
       })
+    } finally {
+      await rm(fixture.root, { force: true, recursive: true })
+    }
+  })
+
+  it('requires a second operation-bound confirmation for production publication', async () => {
+    const fixture = await createFixture()
+    try {
+      const args = baseArgs(fixture)
+      const env = baseEnv(fixture)
+      const publicationConfirmation = `${WINGSGROUP_V3_PRODUCTION_PUBLICATION_CONFIRMATION_PREFIX}:${operationID}`
+      args.publishConfirm = publicationConfirmation
+      env.WINGSGROUP_V3_PRODUCTION_PUBLICATION_CONFIRMATION_TOKEN = publicationConfirmation
+      expect(
+        assertWingsGroupV3ProductionMediaGate({
+          args,
+          env,
+          manifest,
+          phase: 'publish',
+          plan,
+        }),
+      ).toMatchObject({ operationID, planSha256, releaseSha })
+
+      delete env.WINGSGROUP_V3_PRODUCTION_PUBLICATION_CONFIRMATION_TOKEN
+      expect(() =>
+        assertWingsGroupV3ProductionMediaGate({
+          args,
+          env,
+          manifest,
+          phase: 'publish',
+          plan,
+        }),
+      ).toThrow(/publication confirmation/)
     } finally {
       await rm(fixture.root, { force: true, recursive: true })
     }

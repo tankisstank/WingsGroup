@@ -12,6 +12,37 @@ const HTTPS_URL = /^https:\/\//i
 const SHA256 = /^[a-f0-9]{64}$/
 const EXTERNAL_CONSULTATION_CHANNEL_KEYS = new Set(['zalo', 'whatsapp', 'messenger'])
 
+export const WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES = [
+  { format: 'webp', name: 'wingsgroup-v3-640-webp', width: 640 },
+  { format: 'avif', name: 'wingsgroup-v3-640-avif', width: 640 },
+  { format: 'webp', name: 'wingsgroup-v3-960-webp', width: 960 },
+  { format: 'avif', name: 'wingsgroup-v3-960-avif', width: 960 },
+  { format: 'webp', name: 'wingsgroup-v3-1440-webp', width: 1440 },
+  { format: 'avif', name: 'wingsgroup-v3-1440-avif', width: 1440 },
+] as const
+
+export const getWingsGroupV3DerivativeSizeName = (
+  format: 'avif' | 'webp',
+  width: number,
+): string | undefined =>
+  WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.find(
+    (size) => size.format === format && size.width === width,
+  )?.name
+
+export const generateWingsGroupV3DerivativeImageName = ({
+  extension,
+  originalName,
+  width,
+}: {
+  extension: string
+  originalName: string
+  width: number
+}): string => {
+  const governedName = /^wg-v3-([a-f0-9]{12})-(.+)$/u.exec(originalName)
+  if (!governedName) return `${originalName}-${width}.${extension}`
+  return `${governedName[2]}-${governedName[1]}-${width}.${extension}`
+}
+
 type UnknownRecord = Record<string, unknown>
 
 const asRecord = (value: unknown): UnknownRecord =>

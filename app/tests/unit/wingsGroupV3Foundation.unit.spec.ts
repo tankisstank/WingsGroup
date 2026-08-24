@@ -278,6 +278,7 @@ describe('WingsGroup v3 fail-closed governance', () => {
         mediaDirectory,
         payload: payload as never,
         plan,
+        requirePhysicalDerivatives: false,
         req: { payload } as never,
         siteID: 7,
       }).catch((error: unknown) => error)
@@ -363,6 +364,7 @@ describe('WingsGroup v3 fail-closed governance', () => {
         mediaDirectory,
         payload: payload as never,
         plan: plan as never,
+        requirePhysicalDerivatives: false,
         req: {} as never,
         siteID: 7,
       }).catch((error: unknown) => error)
@@ -602,6 +604,7 @@ describe('WingsGroup v3 fail-closed governance', () => {
         manifest,
         payload: payload as never,
         plan,
+        requirePhysicalDerivatives: false,
         req: { transactionID: 'fixture-transaction' } as never,
         siteID: 7,
       })
@@ -611,6 +614,7 @@ describe('WingsGroup v3 fail-closed governance', () => {
         manifest,
         payload: payload as never,
         plan,
+        requirePhysicalDerivatives: false,
         req: { transactionID: 'fixture-transaction' } as never,
         siteID: 7,
       })

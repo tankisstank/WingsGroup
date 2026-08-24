@@ -167,7 +167,7 @@ export const buildWingsGroupV3MediaPlan = async ({
         alt: item.alt,
         derivatives: widths.flatMap((width) =>
           WINGSGROUP_V3_DERIVATIVE_FORMATS.map((format) => ({
-            file: `wingsgroup-v3/${stem}-${identityPrefix}-${width}.${format}`,
+            file: `${stem}-${identityPrefix}-${width}.${format}`,
             format,
             width,
           })),

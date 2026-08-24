@@ -143,11 +143,11 @@
       "state": "approved",
       "owner": "Content and brand owner",
       "rightsApproved": true,
-      "evidence": ["Stakeholder confirmed the 13 handoff images were created with ChatGPT and may be used for WingsGroup, 2026-08-23", "docs/product/wingsgroup-v3-media-manifest.json", "WP-REL-07 verified 13 source checksums and dimensions with plan checksum e0d7fcf0f98fc900ebcdad92c2fb930e6799fefcc8cbbcfff1888a3f2189aede; WP-REL-10 adds an approval-gated production operation, and WP-REL-12 makes the verifier bilingual/governance-complete while keeping responsive derivatives pending; no production import was performed"],
+      "evidence": ["Stakeholder confirmed the 13 handoff images were created with ChatGPT and may be used for WingsGroup, 2026-08-23", "docs/product/wingsgroup-v3-media-manifest.json", "WP-REL-14 verifies the flat Payload-managed six-size derivative contract for 13 sources and 78 files with plan checksum 18d2610de98940f03b39448f7a3cf665be1d2498cae6b57a848a3b0daaaf2943; production apply, verify, and the separate second-confirmation publication phase remain unexecuted"],
       "approvedAt": "2026-08-23",
       "provenanceManifest": "docs/product/wingsgroup-v3-media-manifest.json",
       "evidenceRequirements": ["Vietnamese alt text", "Source and provenance", "Publication rights", "WingsGroup site scope", "Responsive derivatives"],
-      "failClosedBehavior": "Do not publish a media item until its provenance, Vietnamese and English alt text, WingsGroup scope, responsive derivatives, and production import are recorded; never label editorial media as legal proof.",
+      "failClosedBehavior": "Do not publish a media item until its provenance, Vietnamese and English alt text, WingsGroup scope, six physical Payload derivatives with matching ledger hashes, and production import are recorded; never label editorial media as legal proof.",
       "consumers": ["US-061", "US-062", "US-063", "US-066"]
     },
     {

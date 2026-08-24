@@ -31,6 +31,10 @@ import {
   type WingsGroupV3MediaPlan,
   type WingsGroupV3MediaPlanItem,
 } from './lib/wingsGroupV3MediaPlan'
+import {
+  getWingsGroupV3DerivativeSizeName,
+  WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES,
+} from '../src/fields/wingsGroupV3'
 import { resolveLocalDatabaseURL } from '../src/utilities/localDatabase'
 
 const context = { disableRevalidate: true, seed: true }
@@ -48,10 +52,17 @@ export const WINGSGROUP_V3_IMPORT_SITE_CODE = 'wings-group'
 export const WINGSGROUP_V3_MEDIA_DIRECTORY = path.resolve(import.meta.dirname, '../public/media')
 export const WINGSGROUP_V3_PRODUCTION_CONFIRMATION_PREFIX =
   'CONFIRM_WINGSGROUP_V3_PRODUCTION_MEDIA_WRITE'
+export const WINGSGROUP_V3_PRODUCTION_PUBLICATION_CONFIRMATION_PREFIX =
+  'CONFIRM_WINGSGROUP_V3_PRODUCTION_MEDIA_PUBLICATION'
 const WINGSGROUP_V3_EXPECTED_MEDIA_COUNT = 13
 const WINGSGROUP_V3_EXPECTED_DERIVATIVE_COUNT = 78
 
-type WingsGroupV3MediaPhase = 'plan' | 'apply' | 'production-apply' | 'production-verify'
+type WingsGroupV3MediaPhase =
+  | 'plan'
+  | 'apply'
+  | 'production-apply'
+  | 'production-publish'
+  | 'production-verify'
 
 type WingsGroupV3ProductionEvidence = Record<string, unknown>
 
@@ -64,6 +75,7 @@ export type WingsGroupV3ProductionApplyArgs = {
   confirm?: string
   operationID?: string
   planSha256?: string
+  publishConfirm?: string
   releaseSha?: string
   restoreEvidencePath?: string
   restoreEvidenceSha256?: string
@@ -172,7 +184,7 @@ export const assertWingsGroupV3ProductionMediaGate = ({
 }: {
   args: WingsGroupV3ProductionApplyArgs
   manifest: WingsGroupV3MediaManifest
-  phase: 'apply' | 'verify'
+  phase: 'apply' | 'verify' | 'publish'
   plan: WingsGroupV3MediaPlan
   env?: WingsGroupV3ProductionEnvironment
   io?: WingsGroupV3ProductionGateIO
@@ -263,6 +275,17 @@ export const assertWingsGroupV3ProductionMediaGate = ({
     env.WINGSGROUP_V3_PRODUCTION_CONFIRMATION_TOKEN !== expectedConfirmation
   ) {
     throw new Error('Production media gate requires the operation-bound confirmation token')
+  }
+
+  if (phase === 'publish') {
+    const expectedPublicationConfirmation = `${WINGSGROUP_V3_PRODUCTION_PUBLICATION_CONFIRMATION_PREFIX}:${operationID}`
+    if (
+      args.publishConfirm !== expectedPublicationConfirmation ||
+      env.WINGSGROUP_V3_PRODUCTION_PUBLICATION_CONFIRMATION_TOKEN !==
+        expectedPublicationConfirmation
+    ) {
+      throw new Error('Production media gate requires the operation-bound publication confirmation')
+    }
   }
 
   const backupEvidenceSha256 = trustedSha256(args.backupEvidenceSha256, '--backup-evidence-sha256')
@@ -406,9 +429,13 @@ const argumentValue = (argv: string[], name: string): string | undefined => {
 
 export const parseWingsGroupV3MediaCommand = (argv: string[]) => {
   const positionalValue = argv.find((argument) => !argument.startsWith('--')) || 'plan'
-  if (!['plan', 'apply', 'production-apply', 'production-verify'].includes(positionalValue)) {
+  if (
+    !['plan', 'apply', 'production-apply', 'production-publish', 'production-verify'].includes(
+      positionalValue,
+    )
+  ) {
     throw new Error(
-      'WingsGroup v3 media supports only plan, local apply, production-apply, and production-verify; rollback is backup/restore only.',
+      'WingsGroup v3 media supports only plan, local apply, production-apply, production-verify, and production-publish; rollback is backup/restore only.',
     )
   }
   if (argv.includes('--verify') || argv.includes('--rollback')) {
@@ -422,8 +449,14 @@ export const parseWingsGroupV3MediaCommand = (argv: string[]) => {
   if (!manifest) throw new Error('--manifest is required.')
   if (!assetsDirectory) throw new Error('--assets-dir is required.')
   const apply =
-    positional === 'apply' || positional === 'production-apply' || argv.includes('--apply')
-  const production = positional === 'production-apply' || positional === 'production-verify'
+    positional === 'apply' ||
+    positional === 'production-apply' ||
+    positional === 'production-publish' ||
+    argv.includes('--apply')
+  const production =
+    positional === 'production-apply' ||
+    positional === 'production-publish' ||
+    positional === 'production-verify'
   const siteCode = argumentValue(argv, '--site-code')
   if (apply && siteCode !== WINGSGROUP_V3_IMPORT_SITE_CODE) {
     throw new Error(`Apply requires --site-code=${WINGSGROUP_V3_IMPORT_SITE_CODE}`)
@@ -439,6 +472,7 @@ export const parseWingsGroupV3MediaCommand = (argv: string[]) => {
     operationID: argumentValue(argv, '--operation-id'),
     phase: positional,
     planSha256: argumentValue(argv, '--plan-sha256'),
+    publishConfirm: argumentValue(argv, '--publish-confirm'),
     production,
     releaseSha: argumentValue(argv, '--release-sha'),
     restoreEvidencePath: argumentValue(argv, '--restore-evidence'),
@@ -503,6 +537,103 @@ const resolveRunOwnedUploadFile = (mediaDirectory: string, filename: string): st
     )
   }
   return filePath
+}
+
+type WingsGroupV3DerivativeLedgerEntry = {
+  format: 'avif' | 'webp'
+  height: number
+  sha256: string
+  url: string
+  width: number
+}
+
+const normalizeWingsGroupV3PublicOrigin = (value: string): string => {
+  let origin: URL
+  try {
+    origin = new URL(value)
+  } catch {
+    throw new Error(`WingsGroup public origin is invalid: ${value}`)
+  }
+  if (origin.protocol !== 'https:' || origin.pathname !== '/' || origin.search || origin.hash) {
+    throw new Error('WingsGroup derivative URLs require an HTTPS origin without a path')
+  }
+  return origin.origin
+}
+
+const resolveFlatGovernedDerivative = (mediaDirectory: string, filename: string): string => {
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]*\.(?:avif|webp)$/u.test(filename)) {
+    throw new Error(
+      `WingsGroup derivative filename is not a safe flat Payload filename: ${filename}`,
+    )
+  }
+  return resolveRunOwnedUploadFile(mediaDirectory, filename)
+}
+
+export const validateWingsGroupV3DerivativeLedger = async ({
+  document,
+  mediaDirectory,
+  publicOrigin,
+  record,
+}: {
+  document: unknown
+  mediaDirectory: string
+  publicOrigin: string
+  record: WingsGroupV3MediaPlanItem
+}): Promise<WingsGroupV3DerivativeLedgerEntry[]> => {
+  const persisted = isRecord(document) ? document : {}
+  const sizes = isRecord(persisted.sizes) ? persisted.sizes : {}
+  const origin = normalizeWingsGroupV3PublicOrigin(publicOrigin)
+  if (record.derivatives.length !== WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.length) {
+    throw new Error(`Media ${record.sourceFile} does not have the complete six-derivative plan`)
+  }
+
+  const ledger = [] as WingsGroupV3DerivativeLedgerEntry[]
+  for (const derivative of record.derivatives) {
+    const sizeName = getWingsGroupV3DerivativeSizeName(derivative.format, derivative.width)
+    const size = sizeName && isRecord(sizes[sizeName]) ? sizes[sizeName] : null
+    if (!sizeName || !size) {
+      throw new Error(
+        `Media ${record.sourceFile} is missing Payload size ${derivative.format}/${derivative.width}`,
+      )
+    }
+    if (size.filename !== derivative.file) {
+      throw new Error(
+        `Media ${record.sourceFile} Payload filename does not match the governed plan`,
+      )
+    }
+    if (size.width !== derivative.width || typeof size.height !== 'number' || size.height < 1) {
+      throw new Error(
+        `Media ${record.sourceFile} Payload dimensions do not match the governed derivative`,
+      )
+    }
+    if (size.mimeType !== `image/${derivative.format}`) {
+      throw new Error(
+        `Media ${record.sourceFile} Payload MIME type does not match the governed derivative`,
+      )
+    }
+
+    const filePath = resolveFlatGovernedDerivative(mediaDirectory, derivative.file)
+    const fileSha256 = sha256(await fs.readFile(filePath))
+    const url = `${origin}/media/${derivative.file}`
+    ledger.push({
+      format: derivative.format,
+      height: size.height,
+      sha256: fileSha256,
+      url,
+      width: derivative.width,
+    })
+  }
+
+  const persistedGovernance = isRecord(persisted.governance) ? persisted.governance : {}
+  const persistedLedger = Array.isArray(persistedGovernance.responsiveDerivatives)
+    ? persistedGovernance.responsiveDerivatives
+    : []
+  if (persistedLedger.length > 0 && JSON.stringify(persistedLedger) !== JSON.stringify(ledger)) {
+    throw new Error(
+      `Media ${record.sourceFile} persisted derivative ledger does not match the physical files`,
+    )
+  }
+  return ledger
 }
 
 const trackCreatedMediaFiles = ({
@@ -840,11 +971,16 @@ const validatePersistedMedia = ({
       `Media ${record.sourceFile} persisted localized alt does not match the handoff.`,
     )
   }
-  const expectedGovernanceFields = {
-    ...expectedGovernance,
-    sourceArchiveSha256: expectedSourceArchiveSha256,
-    sourceAttachmentId: expectedSourceAttachmentId,
-  }
+  const expectedGovernanceFields = Object.fromEntries(
+    Object.entries({
+      ...expectedGovernance,
+      sourceArchiveSha256: expectedSourceArchiveSha256,
+      sourceAttachmentId: expectedSourceAttachmentId,
+    }).filter(
+      ([field]) =>
+        !['derivativeState', 'publicationState', 'responsiveDerivatives'].includes(field),
+    ),
+  )
   for (const [field, expected] of Object.entries(expectedGovernanceFields)) {
     if (JSON.stringify(governance[field]) !== JSON.stringify(expected)) {
       throw new Error(
@@ -861,6 +997,9 @@ export const importWingsGroupV3Media = async ({
   onCreatedDocument,
   payload,
   plan,
+  mediaDirectory,
+  publicOrigin,
+  requirePhysicalDerivatives = true,
   req,
   siteID,
 }: {
@@ -870,6 +1009,9 @@ export const importWingsGroupV3Media = async ({
   onCreatedDocument?: (document: WingsGroupV3MediaDocument) => void
   payload: Payload
   plan: WingsGroupV3MediaPlan
+  mediaDirectory?: string
+  publicOrigin?: string
+  requirePhysicalDerivatives?: boolean
   req: PayloadRequest
   siteID: number | string
 }): Promise<WingsGroupV3MediaImportSummary> => {
@@ -923,6 +1065,13 @@ export const importWingsGroupV3Media = async ({
         record,
         siteID,
       })
+      const persistedGovernance = isRecord(document.governance) ? document.governance : {}
+      if (
+        persistedGovernance.publicationState === 'published' ||
+        !['pending', 'generated'].includes(String(persistedGovernance.derivativeState))
+      ) {
+        throw new Error(`Media ${record.sourceFile} has non-retryable governed publication state`)
+      }
       if (apply) {
         document = await payload.update({
           collection: 'media',
@@ -946,6 +1095,34 @@ export const importWingsGroupV3Media = async ({
         overrideAccess: true,
         req,
       })
+      if (requirePhysicalDerivatives) {
+        if (!mediaDirectory || !publicOrigin) {
+          throw new Error(
+            'WingsGroup derivative validation requires media directory and public origin',
+          )
+        }
+        const ledger = await validateWingsGroupV3DerivativeLedger({
+          document,
+          mediaDirectory,
+          publicOrigin,
+          record,
+        })
+        document = await payload.update({
+          collection: 'media',
+          context,
+          data: {
+            governance: {
+              ...buildWingsGroupV3MediaGovernance({ manifest, record }),
+              derivativeState: 'generated',
+              responsiveDerivatives: ledger,
+            },
+          } as never,
+          id: document.id,
+          locale: 'vi',
+          overrideAccess: true,
+          req,
+        })
+      }
       validatePersistedMedia({
         document,
         expectedSourceArchiveSha256: manifest.sourcePackage.archiveSha256,
@@ -972,15 +1149,23 @@ export const importWingsGroupV3Media = async ({
 }
 
 export const verifyWingsGroupV3Media = async ({
+  expectedPublicationState = 'pending',
   manifest,
+  mediaDirectory,
   payload,
   plan,
+  publicOrigin,
+  requirePhysicalDerivatives = false,
   req,
   siteID,
 }: {
+  expectedPublicationState?: 'pending' | 'published'
   manifest: WingsGroupV3MediaManifest
+  mediaDirectory?: string
   payload: Payload
   plan: WingsGroupV3MediaPlan
+  publicOrigin?: string
+  requirePhysicalDerivatives?: boolean
   req: PayloadRequest
   siteID: number | string
 }) => {
@@ -990,6 +1175,7 @@ export const verifyWingsGroupV3Media = async ({
     sourceIdentity: string
     sourceDimensions: { height: number; width: number }
   }>
+  let physicalDerivativesVerified = false
   for (const record of plan.records) {
     const expectedGovernance = buildWingsGroupV3MediaGovernance({ manifest, record })
     const localizedDocuments = await Promise.all(
@@ -1015,10 +1201,55 @@ export const verifyWingsGroupV3Media = async ({
           record,
           siteID,
         })
+        const governance = isRecord(document.governance) ? document.governance : {}
+        if (governance.publicationState !== expectedPublicationState) {
+          throw new Error(
+            `Media ${record.sourceFile} persisted governance publication state is not ${expectedPublicationState}`,
+          )
+        }
+        if (
+          !requirePhysicalDerivatives &&
+          !['pending', 'generated'].includes(String(governance.derivativeState))
+        ) {
+          throw new Error(
+            `Media ${record.sourceFile} persisted governance derivative state is invalid`,
+          )
+        }
+        const expectedDerivativeState =
+          expectedPublicationState === 'published' ? 'verified' : 'generated'
+        if (requirePhysicalDerivatives && governance.derivativeState !== expectedDerivativeState) {
+          throw new Error(
+            `Media ${record.sourceFile} is not in ${expectedDerivativeState} derivative state`,
+          )
+        }
+        if (
+          !requirePhysicalDerivatives &&
+          governance.derivativeState === 'pending' &&
+          Array.isArray(governance.responsiveDerivatives) &&
+          governance.responsiveDerivatives.length > 0
+        ) {
+          throw new Error(
+            `Media ${record.sourceFile} persisted governance has an unexpected pending derivative ledger`,
+          )
+        }
         return document
       }),
     )
     const document = localizedDocuments[0]
+    if (requirePhysicalDerivatives) {
+      if (!mediaDirectory || !publicOrigin) {
+        throw new Error(
+          'WingsGroup derivative verification requires media directory and public origin',
+        )
+      }
+      await validateWingsGroupV3DerivativeLedger({
+        document,
+        mediaDirectory,
+        publicOrigin,
+        record,
+      })
+      physicalDerivativesVerified = true
+    }
     records.push({
       filename: typeof document.filename === 'string' ? document.filename : record.importFilename,
       id: relationID(document.id) || record.sourceIdentity,
@@ -1033,11 +1264,129 @@ export const verifyWingsGroupV3Media = async ({
     localizedAltVerified: records.length * 2,
     responsiveDerivatives: {
       planned: plan.records.reduce((total, record) => total + record.derivatives.length, 0),
-      persisted: 0,
-      state: 'pending' as const,
-      verified: false,
+      persisted: physicalDerivativesVerified
+        ? plan.records.reduce((total, record) => total + record.derivatives.length, 0)
+        : 0,
+      state: physicalDerivativesVerified
+        ? expectedPublicationState === 'published'
+          ? ('verified' as const)
+          : ('generated' as const)
+        : ('pending' as const),
+      verified: physicalDerivativesVerified,
     },
     verified: records.length,
+  }
+}
+
+export const publishWingsGroupV3MediaWithRecovery = async ({
+  backupPath,
+  databasePath,
+  manifest,
+  mediaDirectory,
+  payload,
+  plan,
+  publicOrigin,
+  req,
+  siteID,
+}: {
+  backupPath: string
+  databasePath: string
+  manifest: WingsGroupV3MediaManifest
+  mediaDirectory: string
+  payload: Payload
+  plan: WingsGroupV3MediaPlan
+  publicOrigin: string
+  req: PayloadRequest
+  siteID: number | string
+}) => {
+  const runOwnedUploadFiles = new Set<string>()
+  let transactionStatus: WingsGroupV3TransactionStatus = 'not-started'
+  try {
+    await verifyWingsGroupV3Media({
+      expectedPublicationState: 'pending',
+      manifest,
+      mediaDirectory,
+      payload,
+      plan,
+      publicOrigin,
+      requirePhysicalDerivatives: true,
+      req,
+      siteID,
+    })
+
+    const db = payload.db as typeof payload.db & {
+      beginTransaction?: unknown
+      commitTransaction?: unknown
+      rollbackTransaction?: unknown
+    }
+    if (
+      typeof db.beginTransaction !== 'function' ||
+      typeof db.commitTransaction !== 'function' ||
+      typeof db.rollbackTransaction !== 'function'
+    ) {
+      transactionStatus = 'unsupported'
+      throw new Error(TRANSACTION_UNSUPPORTED_MESSAGE)
+    }
+    const transactionStarted = await initTransaction(req)
+    if (!transactionStarted || !req.transactionID) {
+      transactionStatus = 'unsupported'
+      throw new Error(TRANSACTION_UNSUPPORTED_MESSAGE)
+    }
+    transactionStatus = 'active'
+
+    for (const record of plan.records) {
+      const document = await findMediaBySourceIdentity({
+        locale: 'vi',
+        payload,
+        req,
+        siteID,
+        sourceIdentity: record.sourceIdentity,
+      })
+      if (!document) throw new Error(`Media ${record.sourceFile} is missing before publication`)
+      const governance = isRecord(document.governance) ? document.governance : {}
+      await payload.update({
+        collection: 'media',
+        context,
+        data: {
+          governance: {
+            ...governance,
+            derivativeState: 'verified',
+            publicationState: 'published',
+          },
+        } as never,
+        id: document.id,
+        locale: 'vi',
+        overrideAccess: true,
+        req,
+      })
+    }
+
+    const verification = await verifyWingsGroupV3Media({
+      expectedPublicationState: 'published',
+      manifest,
+      mediaDirectory,
+      payload,
+      plan,
+      publicOrigin,
+      requirePhysicalDerivatives: true,
+      req,
+      siteID,
+    })
+    await commitTransaction(req)
+    transactionStatus = 'committed'
+    await payload.destroy()
+    return verification
+  } catch (error) {
+    const recovery = await recoverWingsGroupV3MediaApply({
+      backupPath,
+      databasePath,
+      payload,
+      req,
+      runOwnedUploadFiles,
+      trackingErrors: [],
+      transactionStatus,
+    })
+    throw new WingsGroupV3MediaApplyError(error, recovery)
   }
 }
 
@@ -1049,6 +1398,8 @@ export const applyWingsGroupV3MediaWithRecovery = async ({
   mediaDirectory,
   payload,
   plan,
+  publicOrigin,
+  requirePhysicalDerivatives = true,
   req,
   siteID,
 }: {
@@ -1059,6 +1410,8 @@ export const applyWingsGroupV3MediaWithRecovery = async ({
   mediaDirectory: string
   payload: Payload
   plan: WingsGroupV3MediaPlan
+  publicOrigin?: string
+  requirePhysicalDerivatives?: boolean
   req: PayloadRequest
   siteID: number | string
 }): Promise<WingsGroupV3MediaImportSummary> => {
@@ -1099,6 +1452,9 @@ export const applyWingsGroupV3MediaWithRecovery = async ({
       },
       payload,
       plan,
+      mediaDirectory,
+      publicOrigin,
+      requirePhysicalDerivatives,
       req,
       siteID,
     })
@@ -1131,11 +1487,20 @@ const main = async () => {
   })
   assertApplicableWingsGroupV3MediaPlan(plan)
 
-  if (command.phase === 'production-apply' || command.phase === 'production-verify') {
+  if (
+    command.phase === 'production-apply' ||
+    command.phase === 'production-publish' ||
+    command.phase === 'production-verify'
+  ) {
     const binding = assertWingsGroupV3ProductionMediaGate({
       args: command,
       manifest,
-      phase: command.phase === 'production-apply' ? 'apply' : 'verify',
+      phase:
+        command.phase === 'production-apply'
+          ? 'apply'
+          : command.phase === 'production-publish'
+            ? 'publish'
+            : 'verify',
       plan,
     })
     let payload: Payload | undefined
@@ -1152,9 +1517,13 @@ const main = async () => {
       }
       if (command.phase === 'production-verify') {
         const verification = await verifyWingsGroupV3Media({
+          expectedPublicationState: 'pending',
           manifest,
+          mediaDirectory: WINGSGROUP_V3_MEDIA_DIRECTORY,
           payload,
           plan,
+          publicOrigin: `https://${site.primaryDomain}`,
+          requirePhysicalDerivatives: true,
           req,
           siteID: site.id,
         })
@@ -1180,6 +1549,39 @@ const main = async () => {
       }
 
       payloadOwnedByRecovery = true
+      if (command.phase === 'production-publish') {
+        const verification = await publishWingsGroupV3MediaWithRecovery({
+          backupPath: 'verified encrypted backup evidence',
+          databasePath: binding.databaseName,
+          manifest,
+          mediaDirectory: WINGSGROUP_V3_MEDIA_DIRECTORY,
+          payload,
+          plan,
+          publicOrigin: `https://${site.primaryDomain}`,
+          req,
+          siteID: site.id,
+        })
+        payload = undefined
+        console.log(
+          JSON.stringify(
+            {
+              archiveSha256: binding.archiveSha256,
+              localizedAltVerified: verification.localizedAltVerified,
+              operationID: binding.operationID,
+              phase: command.phase,
+              planSha256: binding.planSha256,
+              publication: 'published',
+              responsiveDerivatives: verification.responsiveDerivatives,
+              siteCode: verification.siteCode,
+              verified: verification.verified,
+            },
+            null,
+            2,
+          ),
+        )
+        return
+      }
+
       const summary = await applyWingsGroupV3MediaWithRecovery({
         assetsDirectory: command.assetsDirectory,
         backupPath: 'verified encrypted backup evidence',
@@ -1188,6 +1590,7 @@ const main = async () => {
         mediaDirectory: WINGSGROUP_V3_MEDIA_DIRECTORY,
         payload,
         plan,
+        publicOrigin: `https://${site.primaryDomain}`,
         req,
         siteID: site.id,
       })
@@ -1250,6 +1653,7 @@ const main = async () => {
       mediaDirectory,
       payload,
       plan,
+      requirePhysicalDerivatives: false,
       req,
       siteID: site.id,
     })

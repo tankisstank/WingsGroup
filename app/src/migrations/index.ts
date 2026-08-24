@@ -36,6 +36,7 @@ import * as migration_20260814_130000_wingsgroup_policy_release_governance from 
 import * as migration_20260814_140000_wingsgroup_settings_content_integrity from './20260814_140000_wingsgroup_settings_content_integrity'
 import * as migration_20260823_090000_wingsgroup_callback_channel from './20260823_090000_wingsgroup_callback_channel'
 import * as migration_20260823_110000_wingsgroup_public_contact_identity from './20260823_110000_wingsgroup_public_contact_identity'
+import * as migration_20260824_150000_wingsgroup_v3_media_sizes from './20260824_150000_wingsgroup_v3_media_sizes'
 
 export const migrations = [
   {
@@ -227,5 +228,10 @@ export const migrations = [
     up: migration_20260823_110000_wingsgroup_public_contact_identity.up,
     down: migration_20260823_110000_wingsgroup_public_contact_identity.down,
     name: '20260823_110000_wingsgroup_public_contact_identity',
+  },
+  {
+    up: migration_20260824_150000_wingsgroup_v3_media_sizes.up,
+    down: migration_20260824_150000_wingsgroup_v3_media_sizes.down,
+    name: '20260824_150000_wingsgroup_v3_media_sizes',
   },
 ]

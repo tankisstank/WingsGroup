@@ -54,12 +54,10 @@ quyền xuất bản.
 Production publication approval for editorial media/proof, consultation
 owner/SLA/tracking và ecosystem destinations; source privacy/consent contract đã
 được stakeholder duyệt ngày `2026-08-24`, nhưng runtime policy/consent proof vẫn
-là release work riêng. WP-REL-07 verified the 13-source/78-derivative media plan;
-WP-REL-10 adds an explicit production-apply/production-verify capability guarded
-by operation-bound confirmation, release/plan/archive binding and backup/restore
-evidence. WP-REL-12 closes the exact-database binding finding and makes
-production-verify check both localized alts plus every persisted governance field;
-it reports responsive derivatives as pending/zero persisted rather than claiming
-the 78 planned derivatives were generated. No production import, runtime
+là release work riêng. WP-REL-14 replaces the prior placeholder interpretation
+with six concrete Payload-managed sizes (640/960/1440 in WebP/AVIF), flat
+filenames compatible with `/file/:filename`, a forward-only PostgreSQL
+migration, physical-file and ledger SHA checks, and a separate operation-bound
+second-confirmation `production-publish` phase. No production import, runtime
 publication or cutover approval has been performed. Disposable PostgreSQL
 rehearsal and Harness DB remain environment gates.

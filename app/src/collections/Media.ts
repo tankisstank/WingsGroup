@@ -19,7 +19,12 @@ import {
   revalidateWingSideDiscovery,
   revalidateWingSideDiscoveryForTourDependency,
 } from '@/collections/Tours/hooks/revalidateTourContent'
-import { mediaGovernanceField, validateGovernedMediaBeforeChange } from '@/fields/wingsGroupV3'
+import {
+  generateWingsGroupV3DerivativeImageName,
+  mediaGovernanceField,
+  validateGovernedMediaBeforeChange,
+  WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES,
+} from '@/fields/wingsGroupV3'
 import { resolveWingsGroupLocalPreviewMediaDirectory } from '@/utilities/localPreviewMedia'
 import {
   deleteWingsGroupLocalPreviewMedia,
@@ -165,6 +170,12 @@ export const Media: CollectionConfig = {
               height: 630,
               crop: 'center',
             },
+            ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ format, name, width }) => ({
+              formatOptions: { format },
+              generateImageName: generateWingsGroupV3DerivativeImageName,
+              name,
+              width,
+            })),
           ],
   },
   hooks: {
