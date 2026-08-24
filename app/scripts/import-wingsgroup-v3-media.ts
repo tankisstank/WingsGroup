@@ -8,6 +8,7 @@
  */
 import 'dotenv/config'
 
+import { createHash } from 'node:crypto'
 import configPromise from '@payload-config'
 import fs from 'node:fs/promises'
 import fsSync from 'node:fs'
@@ -45,6 +46,331 @@ const relationID = (value: unknown): number | string | undefined => {
 
 export const WINGSGROUP_V3_IMPORT_SITE_CODE = 'wings-group'
 export const WINGSGROUP_V3_MEDIA_DIRECTORY = path.resolve(import.meta.dirname, '../public/media')
+export const WINGSGROUP_V3_PRODUCTION_CONFIRMATION_PREFIX =
+  'CONFIRM_WINGSGROUP_V3_PRODUCTION_MEDIA_WRITE'
+const WINGSGROUP_V3_EXPECTED_MEDIA_COUNT = 13
+const WINGSGROUP_V3_EXPECTED_DERIVATIVE_COUNT = 78
+
+type WingsGroupV3MediaPhase = 'plan' | 'apply' | 'production-apply' | 'production-verify'
+
+type WingsGroupV3ProductionEvidence = Record<string, unknown>
+
+type WingsGroupV3ProductionGateIO = Pick<typeof fsSync, 'existsSync' | 'readFileSync'>
+
+export type WingsGroupV3ProductionApplyArgs = {
+  archiveSha256?: string
+  backupEvidencePath?: string
+  backupEvidenceSha256?: string
+  confirm?: string
+  operationID?: string
+  planSha256?: string
+  releaseSha?: string
+  restoreEvidencePath?: string
+  restoreEvidenceSha256?: string
+  siteCode?: string
+}
+
+type WingsGroupV3ProductionEnvironment = Partial<Record<string, string | undefined>>
+
+const sha256 = (value: Buffer | string): string => createHash('sha256').update(value).digest('hex')
+
+const trustedSha256 = (value: string | undefined, label: string): string => {
+  if (!value || !/^[0-9a-f]{64}$/u.test(value)) {
+    throw new Error(`Production media gate requires ${label} as a lowercase SHA-256`)
+  }
+  return value
+}
+
+const productionOperationID = (value: string | undefined): string => {
+  if (!value || !/^[a-z0-9][a-z0-9._-]{15,127}$/u.test(value)) {
+    throw new Error('Production media gate requires a fresh operation ID')
+  }
+  return value
+}
+
+const readProductionEvidence = (
+  evidencePath: string | undefined,
+  label: string,
+  io: WingsGroupV3ProductionGateIO,
+): WingsGroupV3ProductionEvidence => {
+  if (!evidencePath || !io.existsSync(evidencePath)) {
+    throw new Error(`Production media gate requires ${label}`)
+  }
+  try {
+    const parsed = JSON.parse(io.readFileSync(evidencePath, 'utf8'))
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('object')
+    return parsed as WingsGroupV3ProductionEvidence
+  } catch {
+    throw new Error(`Production media gate requires valid ${label}`)
+  }
+}
+
+const assertEvidenceBinding = ({
+  evidence,
+  label,
+  operationID,
+  databaseHost,
+  databaseName,
+  releaseSha,
+  archiveSha256,
+  planSha256,
+}: {
+  evidence: WingsGroupV3ProductionEvidence
+  label: string
+  operationID: string
+  databaseHost: string
+  databaseName: string
+  releaseSha: string
+  archiveSha256: string
+  planSha256: string
+}) => {
+  const binding = {
+    operationID,
+    databaseHost,
+    databaseName,
+    releaseSha,
+    archiveSha256,
+    planSha256,
+  }
+  for (const [key, expected] of Object.entries(binding)) {
+    if (evidence[key] !== expected) {
+      throw new Error(`Production media gate ${label} binding mismatch`)
+    }
+  }
+}
+
+const parseProductionDatabaseURL = (environment: WingsGroupV3ProductionEnvironment): URL => {
+  if (!environment.DATABASE_URL) {
+    throw new Error('Production media gate requires DATABASE_URL')
+  }
+  let databaseURL: URL
+  try {
+    databaseURL = new URL(environment.DATABASE_URL)
+  } catch {
+    throw new Error('Production media gate requires a valid DATABASE_URL')
+  }
+  if (!['postgres:', 'postgresql:'].includes(databaseURL.protocol)) {
+    throw new Error('Production media gate requires PostgreSQL DATABASE_URL')
+  }
+  return databaseURL
+}
+
+export const assertWingsGroupV3ProductionMediaGate = ({
+  args,
+  manifest,
+  phase,
+  plan,
+  env = process.env,
+  io = fsSync,
+}: {
+  args: WingsGroupV3ProductionApplyArgs
+  manifest: WingsGroupV3MediaManifest
+  phase: 'apply' | 'verify'
+  plan: WingsGroupV3MediaPlan
+  env?: WingsGroupV3ProductionEnvironment
+  io?: WingsGroupV3ProductionGateIO
+}) => {
+  const derivativeCount = plan.records.reduce(
+    (total, record) => total + record.derivatives.length,
+    0,
+  )
+  if (
+    plan.errors.length > 0 ||
+    plan.planned !== WINGSGROUP_V3_EXPECTED_MEDIA_COUNT ||
+    plan.records.length !== WINGSGROUP_V3_EXPECTED_MEDIA_COUNT ||
+    derivativeCount !== WINGSGROUP_V3_EXPECTED_DERIVATIVE_COUNT
+  ) {
+    throw new Error('Production media gate requires the complete 13-source/78-derivative plan')
+  }
+  if (args.siteCode !== WINGSGROUP_V3_IMPORT_SITE_CODE) {
+    throw new Error('Production media gate requires --site-code=wings-group')
+  }
+  if (env.WINGSGROUP_V3_PRODUCTION_SITE_CODE !== WINGSGROUP_V3_IMPORT_SITE_CODE) {
+    throw new Error('Production media gate requires the trusted WingsGroup site scope')
+  }
+  if (env.NODE_ENV !== 'production') {
+    throw new Error('Production media gate requires NODE_ENV=production')
+  }
+  if (env.PAYLOAD_DB_PUSH !== 'false') {
+    throw new Error('Production media gate requires PAYLOAD_DB_PUSH=false')
+  }
+  if (env.WINGSGROUP_V3_PRODUCTION_ALLOW !== 'production') {
+    throw new Error('Production media gate requires the trusted production target marker')
+  }
+
+  const databaseURL = parseProductionDatabaseURL(env)
+  const databaseName = databaseURL.pathname.replace(/^\//u, '')
+  if (databaseURL.hostname !== 'postgres') {
+    throw new Error('Production media gate requires the trusted postgres target')
+  }
+  if (
+    env.WINGSGROUP_V3_PRODUCTION_DATABASE_HOST !== databaseURL.hostname ||
+    env.WINGSGROUP_V3_PRODUCTION_DATABASE_NAME !== databaseName
+  ) {
+    throw new Error('Production media gate database target binding mismatch')
+  }
+
+  const archiveSha256 = trustedSha256(args.archiveSha256, '--archive-sha256')
+  if (
+    archiveSha256 !== manifest.sourcePackage.archiveSha256 ||
+    env.WINGSGROUP_V3_MEDIA_ARCHIVE_SHA256 !== archiveSha256
+  ) {
+    throw new Error('Production media gate archive checksum binding mismatch')
+  }
+  const planSha256 = trustedSha256(args.planSha256, '--plan-sha256')
+  if (planSha256 !== plan.planChecksum || env.WINGSGROUP_V3_MEDIA_PLAN_SHA256 !== planSha256) {
+    throw new Error('Production media gate plan checksum binding mismatch')
+  }
+
+  if (!args.releaseSha || !/^[0-9a-f]{40}$/u.test(args.releaseSha)) {
+    throw new Error('Production media gate requires a full lowercase --release-sha')
+  }
+  if (
+    env.WINGSTRAVEL_RELEASE_SHA !== args.releaseSha ||
+    env.WINGSGROUP_V3_PRODUCTION_RELEASE_SHA !== args.releaseSha
+  ) {
+    throw new Error('Production media gate release SHA binding mismatch')
+  }
+  const operationID = productionOperationID(args.operationID)
+  if (env.WINGSGROUP_V3_PRODUCTION_OPERATION_ID !== operationID) {
+    throw new Error('Production media gate operation binding mismatch')
+  }
+
+  if (phase === 'verify') {
+    return {
+      archiveSha256,
+      databaseHost: databaseURL.hostname,
+      databaseName,
+      operationID,
+      planSha256,
+      releaseSha: args.releaseSha,
+    }
+  }
+
+  const expectedConfirmation = `${WINGSGROUP_V3_PRODUCTION_CONFIRMATION_PREFIX}:${operationID}`
+  if (
+    args.confirm !== expectedConfirmation ||
+    env.WINGSGROUP_V3_PRODUCTION_CONFIRMATION_TOKEN !== expectedConfirmation
+  ) {
+    throw new Error('Production media gate requires the operation-bound confirmation token')
+  }
+
+  const backupEvidenceSha256 = trustedSha256(args.backupEvidenceSha256, '--backup-evidence-sha256')
+  if (env.WINGSGROUP_V3_PRODUCTION_BACKUP_EVIDENCE_SHA256 !== backupEvidenceSha256) {
+    throw new Error('Production media gate backup evidence checksum binding mismatch')
+  }
+  if (!args.backupEvidencePath || !io.existsSync(args.backupEvidencePath)) {
+    throw new Error('Production media gate requires encrypted backup evidence')
+  }
+  if (sha256(io.readFileSync(args.backupEvidencePath)) !== backupEvidenceSha256) {
+    throw new Error('Production media gate backup evidence checksum mismatch')
+  }
+  const restoreEvidenceSha256 = trustedSha256(
+    args.restoreEvidenceSha256,
+    '--restore-evidence-sha256',
+  )
+  if (env.WINGSGROUP_V3_PRODUCTION_RESTORE_EVIDENCE_SHA256 !== restoreEvidenceSha256) {
+    throw new Error('Production media gate restore evidence checksum binding mismatch')
+  }
+  if (!args.restoreEvidencePath || !io.existsSync(args.restoreEvidencePath)) {
+    throw new Error('Production media gate requires disposable restore evidence')
+  }
+  if (sha256(io.readFileSync(args.restoreEvidencePath)) !== restoreEvidenceSha256) {
+    throw new Error('Production media gate restore evidence checksum mismatch')
+  }
+
+  const backupEvidence = readProductionEvidence(
+    args.backupEvidencePath,
+    'encrypted backup evidence',
+    io,
+  )
+  if (
+    backupEvidence.status !== 'verified' ||
+    backupEvidence.encrypted !== true ||
+    backupEvidence.format !== 'postgres-custom'
+  ) {
+    throw new Error('Production media gate encrypted backup evidence is not verified')
+  }
+  assertEvidenceBinding({
+    archiveSha256,
+    databaseHost: databaseURL.hostname,
+    databaseName,
+    evidence: backupEvidence,
+    label: 'encrypted backup evidence',
+    operationID,
+    planSha256,
+    releaseSha: args.releaseSha,
+  })
+  const backupSha256 = trustedSha256(
+    String(backupEvidence.backupSha256 || ''),
+    'backup evidence backup SHA-256',
+  )
+
+  const restoreEvidence = readProductionEvidence(
+    args.restoreEvidencePath,
+    'disposable restore evidence',
+    io,
+  )
+  if (restoreEvidence.status !== 'verified' || restoreEvidence.disposableRestore !== true) {
+    throw new Error('Production media gate disposable restore evidence is not verified')
+  }
+  assertEvidenceBinding({
+    archiveSha256,
+    databaseHost: databaseURL.hostname,
+    databaseName,
+    evidence: restoreEvidence,
+    label: 'disposable restore evidence',
+    operationID,
+    planSha256,
+    releaseSha: args.releaseSha,
+  })
+  if (
+    restoreEvidence.backupSha256 !== backupSha256 ||
+    typeof restoreEvidence.targetDatabase !== 'string' ||
+    restoreEvidence.targetDatabase === databaseName ||
+    backupEvidence.restoreEvidenceSha256 !== restoreEvidenceSha256
+  ) {
+    throw new Error('Production media gate backup and restore evidence are not bound')
+  }
+
+  return {
+    archiveSha256,
+    backupEvidenceSha256,
+    backupSha256,
+    databaseHost: databaseURL.hostname,
+    databaseName,
+    operationID,
+    planSha256,
+    releaseSha: args.releaseSha,
+    restoreEvidenceSha256,
+  }
+}
+
+export const initializeWingsGroupV3ProductionWriter = async <T>({
+  args,
+  env = process.env,
+  initialize,
+  io = fsSync,
+  manifest,
+  plan,
+}: {
+  args: WingsGroupV3ProductionApplyArgs
+  env?: WingsGroupV3ProductionEnvironment
+  initialize: (binding: Record<string, string | undefined>) => Promise<T>
+  io?: WingsGroupV3ProductionGateIO
+  manifest: WingsGroupV3MediaManifest
+  plan: WingsGroupV3MediaPlan
+}) => {
+  const binding = assertWingsGroupV3ProductionMediaGate({
+    args,
+    env,
+    io,
+    manifest,
+    phase: 'apply',
+    plan,
+  })
+  return initialize(binding)
+}
 
 export type WingsGroupV3MediaImportSummary = {
   created: number
@@ -61,32 +387,53 @@ export type WingsGroupV3MediaImportSummary = {
   verified: number
 }
 
+const argumentValue = (argv: string[], name: string): string | undefined => {
+  const inline = argv.find((argument) => argument.startsWith(`${name}=`))
+  if (inline) return inline.slice(name.length + 1)
+  const index = argv.indexOf(name)
+  return index >= 0 ? argv[index + 1] : undefined
+}
+
 export const parseWingsGroupV3MediaCommand = (argv: string[]) => {
-  const positional = argv.find((argument) => !argument.startsWith('--')) || 'plan'
-  if (
-    !['plan', 'apply'].includes(positional) ||
-    argv.includes('--verify') ||
-    argv.includes('--rollback')
-  ) {
+  const positionalValue = argv.find((argument) => !argument.startsWith('--')) || 'plan'
+  if (!['plan', 'apply', 'production-apply', 'production-verify'].includes(positionalValue)) {
     throw new Error(
-      'WingsGroup v3 media supports only plan and explicit local apply; verify/rollback are not part of this governed seed.',
+      'WingsGroup v3 media supports only plan, local apply, production-apply, and production-verify; rollback is backup/restore only.',
     )
   }
-  const option = (name: string): string | undefined =>
-    argv.find((argument) => argument.startsWith(`--${name}=`))?.slice(name.length + 3)
-  const manifest = option('manifest')
-  const assetsDirectory = option('assets-dir')
+  if (argv.includes('--verify') || argv.includes('--rollback')) {
+    throw new Error(
+      'WingsGroup v3 media does not support generic verify/rollback; use production-verify and the governed backup/restore procedure.',
+    )
+  }
+  const positional = positionalValue as WingsGroupV3MediaPhase
+  const manifest = argumentValue(argv, '--manifest')
+  const assetsDirectory = argumentValue(argv, '--assets-dir')
   if (!manifest) throw new Error('--manifest is required.')
   if (!assetsDirectory) throw new Error('--assets-dir is required.')
-  const apply = positional === 'apply' || argv.includes('--apply')
-  if (apply && option('site-code') !== WINGSGROUP_V3_IMPORT_SITE_CODE) {
+  const apply =
+    positional === 'apply' || positional === 'production-apply' || argv.includes('--apply')
+  const production = positional === 'production-apply' || positional === 'production-verify'
+  const siteCode = argumentValue(argv, '--site-code')
+  if (apply && siteCode !== WINGSGROUP_V3_IMPORT_SITE_CODE) {
     throw new Error(`Apply requires --site-code=${WINGSGROUP_V3_IMPORT_SITE_CODE}`)
   }
   return {
     apply,
     assetsDirectory: path.resolve(assetsDirectory),
+    archiveSha256: argumentValue(argv, '--archive-sha256'),
+    backupEvidencePath: argumentValue(argv, '--backup-evidence'),
+    backupEvidenceSha256: argumentValue(argv, '--backup-evidence-sha256'),
+    confirm: argumentValue(argv, '--confirm'),
     manifestPath: path.resolve(manifest),
-    siteCode: option('site-code'),
+    operationID: argumentValue(argv, '--operation-id'),
+    phase: positional,
+    planSha256: argumentValue(argv, '--plan-sha256'),
+    production,
+    releaseSha: argumentValue(argv, '--release-sha'),
+    restoreEvidencePath: argumentValue(argv, '--restore-evidence'),
+    restoreEvidenceSha256: argumentValue(argv, '--restore-evidence-sha256'),
+    siteCode,
   }
 }
 
@@ -434,7 +781,7 @@ const findMediaBySourceIdentity = async ({
   })
   for (const document of global.docs) {
     const documentSiteID = relationID(document.site)
-    if (documentSiteID !== undefined && String(documentSiteID) !== String(siteID)) {
+    if (documentSiteID === undefined || String(documentSiteID) !== String(siteID)) {
       throw new Error(
         `Refusing to reuse WingsGroup media source identity across tenants: ${sourceIdentity}`,
       )
@@ -445,10 +792,14 @@ const findMediaBySourceIdentity = async ({
 
 const validatePersistedMedia = ({
   document,
+  expectedSourceArchiveSha256,
+  expectedSourceAttachmentId,
   record,
   siteID,
 }: {
   document: Record<string, any>
+  expectedSourceArchiveSha256: string
+  expectedSourceAttachmentId: string
   record: WingsGroupV3MediaPlanItem
   siteID: number | string
 }) => {
@@ -465,6 +816,14 @@ const validatePersistedMedia = ({
   }
   if (document.governance?.sourceFileSha256 !== record.sourceFileSha256) {
     throw new Error(`Media ${record.sourceFile} persisted checksum does not match the handoff.`)
+  }
+  if (
+    document.governance?.managedBy !== 'wingsgroup-v3' ||
+    document.governance?.sourceIdentity !== record.sourceIdentity ||
+    document.governance?.sourceArchiveSha256 !== expectedSourceArchiveSha256 ||
+    document.governance?.sourceAttachmentId !== expectedSourceAttachmentId
+  ) {
+    throw new Error(`Media ${record.sourceFile} is not an owned WingsGroup v3 record`)
   }
 }
 
@@ -528,16 +887,25 @@ export const importWingsGroupV3Media = async ({
         })
         onCreatedDocument?.(document as unknown as WingsGroupV3MediaDocument)
       }
-    } else if (apply) {
-      document = await payload.update({
-        collection: 'media',
-        context,
-        data: buildWingsGroupV3MediaSeedData({ manifest, record, siteID }) as never,
-        id: document.id,
-        locale: 'vi',
-        overrideAccess: true,
-        req,
+    } else {
+      validatePersistedMedia({
+        document,
+        expectedSourceArchiveSha256: manifest.sourcePackage.archiveSha256,
+        expectedSourceAttachmentId: manifest.sourcePackage.attachmentId,
+        record,
+        siteID,
       })
+      if (apply) {
+        document = await payload.update({
+          collection: 'media',
+          context,
+          data: buildWingsGroupV3MediaSeedData({ manifest, record, siteID }) as never,
+          id: document.id,
+          locale: 'vi',
+          overrideAccess: true,
+          req,
+        })
+      }
     }
 
     if (apply && document) {
@@ -550,7 +918,13 @@ export const importWingsGroupV3Media = async ({
         overrideAccess: true,
         req,
       })
-      validatePersistedMedia({ document, record, siteID })
+      validatePersistedMedia({
+        document,
+        expectedSourceArchiveSha256: manifest.sourcePackage.archiveSha256,
+        expectedSourceAttachmentId: manifest.sourcePackage.attachmentId,
+        record,
+        siteID,
+      })
     }
 
     if (action === 'created') summary.created += 1
@@ -566,6 +940,57 @@ export const importWingsGroupV3Media = async ({
   }
 
   return summary
+}
+
+export const verifyWingsGroupV3Media = async ({
+  manifest,
+  payload,
+  plan,
+  req,
+  siteID,
+}: {
+  manifest: WingsGroupV3MediaManifest
+  payload: Payload
+  plan: WingsGroupV3MediaPlan
+  req: PayloadRequest
+  siteID: number | string
+}) => {
+  const records = [] as Array<{
+    filename: string
+    id: number | string
+    sourceIdentity: string
+    sourceDimensions: { height: number; width: number }
+  }>
+  for (const record of plan.records) {
+    const document = await findMediaBySourceIdentity({
+      payload,
+      req,
+      siteID,
+      sourceIdentity: record.sourceIdentity,
+    })
+    if (!document) {
+      throw new Error(`Media ${record.sourceFile} is missing from the WingsGroup site scope`)
+    }
+    validatePersistedMedia({
+      document,
+      expectedSourceArchiveSha256: manifest.sourcePackage.archiveSha256,
+      expectedSourceAttachmentId: manifest.sourcePackage.attachmentId,
+      record,
+      siteID,
+    })
+    records.push({
+      filename: document.filename || record.importFilename,
+      id: document.id,
+      sourceDimensions: record.sourceDimensions,
+      sourceIdentity: record.sourceIdentity,
+    })
+  }
+  return {
+    records,
+    siteCode: WINGSGROUP_V3_IMPORT_SITE_CODE,
+    siteID,
+    verified: records.length,
+  }
 }
 
 export const applyWingsGroupV3MediaWithRecovery = async ({
@@ -657,6 +1082,89 @@ const main = async () => {
     manifest,
   })
   assertApplicableWingsGroupV3MediaPlan(plan)
+
+  if (command.phase === 'production-apply' || command.phase === 'production-verify') {
+    const binding = assertWingsGroupV3ProductionMediaGate({
+      args: command,
+      manifest,
+      phase: command.phase === 'production-apply' ? 'apply' : 'verify',
+      plan,
+    })
+    let payload: Payload | undefined
+    let payloadOwnedByRecovery = false
+    try {
+      payload = await getPayload({ config: configPromise })
+      const req = await createLocalReq(
+        { context, user: { id: 0, role: 'super-admin' } as never },
+        payload,
+      )
+      const site = await findExactSite(payload, req)
+      if (site.code !== WINGSGROUP_V3_IMPORT_SITE_CODE) {
+        throw new Error(`Resolved site is not ${WINGSGROUP_V3_IMPORT_SITE_CODE}`)
+      }
+      if (command.phase === 'production-verify') {
+        const verification = await verifyWingsGroupV3Media({
+          manifest,
+          payload,
+          plan,
+          req,
+          siteID: site.id,
+        })
+        await payload.destroy()
+        payload = undefined
+        console.log(
+          JSON.stringify(
+            {
+              archiveSha256: binding.archiveSha256,
+              operationID: binding.operationID,
+              phase: command.phase,
+              planSha256: binding.planSha256,
+              siteCode: verification.siteCode,
+              verified: verification.verified,
+            },
+            null,
+            2,
+          ),
+        )
+        return
+      }
+
+      payloadOwnedByRecovery = true
+      const summary = await applyWingsGroupV3MediaWithRecovery({
+        assetsDirectory: command.assetsDirectory,
+        backupPath: 'verified encrypted backup evidence',
+        databasePath: binding.databaseName,
+        manifest,
+        mediaDirectory: WINGSGROUP_V3_MEDIA_DIRECTORY,
+        payload,
+        plan,
+        req,
+        siteID: site.id,
+      })
+      payload = undefined
+      console.log(
+        JSON.stringify(
+          {
+            archiveSha256: binding.archiveSha256,
+            created: summary.created,
+            operationID: binding.operationID,
+            phase: command.phase,
+            planSha256: binding.planSha256,
+            reused: summary.reused,
+            siteCode: summary.siteCode,
+            verified: summary.verified,
+          },
+          null,
+          2,
+        ),
+      )
+    } catch (error) {
+      if (payload && !payloadOwnedByRecovery) await payload.destroy()
+      payload = undefined
+      throw error
+    }
+    return
+  }
 
   if (!command.apply) {
     console.log(
