@@ -296,6 +296,19 @@ describe('WingsGroup v3 production media writer gate', () => {
       }
       await writeFile(
         path.join(root, derivatives[0].file),
+        await imageBytes(derivatives[0].format, derivatives[0].width + 1),
+      )
+      await expect(
+        validateWingsGroupV3DerivativeLedger({
+          document: { sizes },
+          mediaDirectory: root,
+          publicOrigin: 'https://wingsgroup.example',
+          record,
+        }),
+      ).rejects.toThrow(/decoded metadata/)
+
+      await writeFile(
+        path.join(root, derivatives[0].file),
         await imageBytes('avif', derivatives[0].width),
       )
       await expect(
