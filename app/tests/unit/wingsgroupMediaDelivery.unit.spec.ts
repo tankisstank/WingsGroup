@@ -46,6 +46,20 @@ describe('WingsGroup governed derivative delivery', () => {
     expect(WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES).toHaveLength(6)
   })
 
+  it('renders CMS routes dynamically so published media is not frozen from the build database', () => {
+    const catchAllRoute = readFileSync(
+      path.resolve(process.cwd(), 'src/app/(frontend)/[...slug]/page.tsx'),
+      'utf8',
+    )
+    const rootRoute = readFileSync(
+      path.resolve(process.cwd(), 'src/app/(frontend)/page.tsx'),
+      'utf8',
+    )
+
+    expect(catchAllRoute).toContain("export const dynamic = 'force-dynamic'")
+    expect(rootRoute).toContain("export const dynamic = 'force-dynamic'")
+  })
+
   it('maps every configured governed size to a concrete PostgreSQL migration column', () => {
     const configuredImageSizes =
       Media.upload && typeof Media.upload !== 'boolean' ? Media.upload.imageSizes || [] : []
