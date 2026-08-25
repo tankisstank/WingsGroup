@@ -46,3 +46,29 @@ This is implementation-worker evidence only; it is not independent approval.
 - `pnpm exec next build --webpack`: passed, including static generation of 17/17 pages.
 - Default `pnpm build`: environment-blocked because the repository-local `node_modules` symlink points outside the checkout root; the linked checkout was not modified.
 - Browser review: no screenshots recorded. A fresh disposable seed was blocked by the governed media fixture `wingsgroup-vietnam-discovery.png`; an older disposable snapshot also required a schema migration that failed in the existing migration API. No production endpoint or CMS data was modified.
+
+## P1 Correction Validation — 2026-08-25
+
+This corrective pass resolves the two P1 findings from the independent review
+of commit `4076b97c0bb4ca46c9a248d96aa3fdc489af3e69`.
+
+- Every public media-led V3 route now supplies a primary hero destination that
+  exists on that route or safely leads to `/lien-he#contact-form`; only the
+  ecosystem route retains `#ecosystem`.
+- Production inventory verification now compares every expected `page.hero`
+  media relation with the persisted relation and the verified WingsGroup
+  published-media inventory. Missing, mismatched, cross-site and unpublished
+  relations fail closed.
+- Focused importer checks: 2 tests passed (hero destinations plus valid,
+  missing, mismatched, cross-site and unpublished hero-media evidence).
+- Focused regressions: 42 unit tests, 19 component tests and 14 integration
+  tests passed.
+- `pnpm exec tsc --noEmit`, `pnpm lint`, Prettier check and
+  `pnpm exec next build --webpack` passed.
+- The full standalone importer-spec run still has one pre-existing idempotent
+  write-count assertion failure (`30` observed versus `40` expected); it is
+  unchanged by this correction and outside the two P1 changes. It remains a
+  follow-up test-maintenance item, not evidence for browser fidelity.
+- Browser evidence remains pending because the clean clone does not contain a
+  usable governed 13-media preview fixture. No production import, deployment
+  or cutover was run.

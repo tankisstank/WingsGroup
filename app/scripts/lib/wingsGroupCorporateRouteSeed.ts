@@ -79,11 +79,44 @@ const lexical = (
   },
 })
 
-const pageHero = (title: string, media?: string): SeedBlock => ({
+const heroPrimaryLink = (url: string, label: string): SeedBlock => ({
+  link: {
+    appearance: 'default',
+    label,
+    type: 'custom',
+    url,
+  },
+})
+
+const pageHero = (title: string, media?: string, links?: SeedBlock[]): SeedBlock => ({
+  ...(links ? { links } : {}),
   ...(media ? { media } : {}),
   richText: lexical(title, [], 'h1'),
   type: 'highImpact',
 })
+
+const ecosystemHeroLinks = (locale: Locale): SeedBlock[] => [
+  heroPrimaryLink(
+    '#ecosystem',
+    locale === 'en' ? 'Explore the ecosystem' : 'Khám phá hệ sinh thái',
+  ),
+]
+
+const capabilityHeroLinks = (locale: Locale): SeedBlock[] => [
+  heroPrimaryLink('#services', locale === 'en' ? 'Explore services' : 'Khám phá dịch vụ'),
+]
+
+const trustHeroLinks = (locale: Locale): SeedBlock[] => [
+  heroPrimaryLink('#trust', locale === 'en' ? 'Review the record' : 'Xem thông tin'),
+]
+
+const editorialHeroLinks = (locale: Locale): SeedBlock[] => [
+  heroPrimaryLink('#news', locale === 'en' ? 'Read the latest' : 'Đọc tin mới'),
+]
+
+const contactHeroLinks = (locale: Locale, url = '/lien-he#contact-form'): SeedBlock[] => [
+  heroPrimaryLink(url, locale === 'en' ? 'Request a consultation' : 'Trao đổi với chuyên viên'),
+]
 
 const content = (heading: string, ...paragraphs: string[]): SeedBlock => ({
   blockType: 'content',
@@ -191,6 +224,7 @@ const ecosystemRoute = (locale: Locale): LocalizedRouteSeed => ({
   hero: pageHero(
     locale === 'en' ? 'The WingsGroup ecosystem' : 'Hệ sinh thái WingsGroup',
     'wingsgroup-ecosystem-hero.png',
+    ecosystemHeroLinks(locale),
   ),
   layout: [
     {
@@ -319,7 +353,7 @@ const routeContent: Record<
     vi: {
       title: 'Về WingsGroup',
       description: 'Thông tin doanh nghiệp, văn phòng và mối quan hệ thương hiệu của WingsGroup.',
-      hero: pageHero('Về WingsGroup', 'wingsgroup-ecosystem-hero.png'),
+      hero: pageHero('Về WingsGroup', 'wingsgroup-ecosystem-hero.png', contactHeroLinks('vi')),
       layout: [
         content(
           'Mối quan hệ thương hiệu',
@@ -332,7 +366,7 @@ const routeContent: Record<
       title: 'About WingsGroup',
       description:
         'Corporate identity, offices and the public brand relationship behind WingsGroup.',
-      hero: pageHero('About WingsGroup', 'wingsgroup-ecosystem-hero.png'),
+      hero: pageHero('About WingsGroup', 'wingsgroup-ecosystem-hero.png', contactHeroLinks('en')),
       layout: [
         content(
           'Brand relationship',
@@ -350,7 +384,11 @@ const routeContent: Record<
     vi: {
       title: 'Năng lực dịch vụ',
       description: 'Các nhóm dịch vụ du lịch được tổ chức theo nhu cầu khách hàng và đối tác.',
-      hero: pageHero('Năng lực dịch vụ', 'wingsgroup-vietnam-discovery.png'),
+      hero: pageHero(
+        'Năng lực dịch vụ',
+        'wingsgroup-vietnam-discovery.png',
+        capabilityHeroLinks('vi'),
+      ),
       layout: [
         features(
           'Năng lực',
@@ -384,7 +422,11 @@ const routeContent: Record<
     en: {
       title: 'Service Capabilities',
       description: 'Travel services organised around the needs of travellers, groups and partners.',
-      hero: pageHero('Service Capabilities', 'wingsgroup-vietnam-discovery.png'),
+      hero: pageHero(
+        'Service Capabilities',
+        'wingsgroup-vietnam-discovery.png',
+        capabilityHeroLinks('en'),
+      ),
       layout: [
         features(
           'Capabilities',
@@ -420,7 +462,7 @@ const routeContent: Record<
     vi: {
       title: 'Tin cậy và pháp lý',
       description: 'Thông tin pháp nhân và giấy phép đã được xác nhận cho WingsGroup.',
-      hero: pageHero('Tin cậy và pháp lý', 'wingsgroup-travel-support.png'),
+      hero: pageHero('Tin cậy và pháp lý', 'wingsgroup-travel-support.png', trustHeroLinks('vi')),
       layout: [
         content(
           'Thông tin pháp lý công khai',
@@ -433,7 +475,11 @@ const routeContent: Record<
     en: {
       title: 'Trust and Legal Information',
       description: 'Confirmed corporate identity and travel-licence information for WingsGroup.',
-      hero: pageHero('Trust and Legal Information', 'wingsgroup-travel-support.png'),
+      hero: pageHero(
+        'Trust and Legal Information',
+        'wingsgroup-travel-support.png',
+        trustHeroLinks('en'),
+      ),
       layout: [
         content(
           'Public legal information',
@@ -448,7 +494,7 @@ const routeContent: Record<
     vi: {
       title: 'Tin tức',
       description: 'Tin tức và góc nhìn từ WingsGroup.',
-      hero: pageHero('Tin tức', 'wingsgroup-travel-support.png'),
+      hero: pageHero('Tin tức', 'wingsgroup-travel-support.png', editorialHeroLinks('vi')),
       layout: [
         {
           blockType: 'archive',
@@ -465,7 +511,11 @@ const routeContent: Record<
     en: {
       title: 'News and Insights',
       description: 'News and considered perspectives from WingsGroup.',
-      hero: pageHero('News and Insights', 'wingsgroup-travel-support.png'),
+      hero: pageHero(
+        'News and Insights',
+        'wingsgroup-travel-support.png',
+        editorialHeroLinks('en'),
+      ),
       layout: [
         {
           blockType: 'archive',
@@ -484,7 +534,11 @@ const routeContent: Record<
     vi: {
       title: 'Liên hệ',
       description: 'Gửi nhu cầu để WingsGroup kết nối bạn với bộ phận phù hợp.',
-      hero: pageHero('Liên hệ', 'wingsgroup-corporate-partnership.png'),
+      hero: pageHero(
+        'Liên hệ',
+        'wingsgroup-corporate-partnership.png',
+        contactHeroLinks('vi', '#contact-form'),
+      ),
       layout: [
         content(
           'Chúng tôi sẵn sàng lắng nghe',
@@ -496,7 +550,11 @@ const routeContent: Record<
       title: 'Contact',
       description:
         'Share your request and WingsGroup will connect you with the most suitable team.',
-      hero: pageHero('Contact', 'wingsgroup-corporate-partnership.png'),
+      hero: pageHero(
+        'Contact',
+        'wingsgroup-corporate-partnership.png',
+        contactHeroLinks('en', '#contact-form'),
+      ),
       layout: [
         content(
           'We would be pleased to hear from you',
@@ -525,7 +583,7 @@ const homepageFallback = (locale: Locale): LocalizedRouteSeed => ({
     locale === 'en'
       ? 'Travel services connected through one trusted organisation.'
       : 'Các dịch vụ du lịch được kết nối trong một tổ chức đáng tin cậy.',
-  hero: pageHero('WingsGroup', 'wingsgroup-ecosystem-hero.png'),
+  hero: pageHero('WingsGroup', 'wingsgroup-ecosystem-hero.png', ecosystemHeroLinks(locale)),
   layout: [
     content(
       locale === 'en' ? 'Thoughtful travel, connected expertise' : 'Tận tâm trong từng hành trình',

@@ -62,6 +62,12 @@ const PRODUCTION_DATABASE_HOST = 'postgres'
 type UnknownRecord = Record<string, unknown>
 type ContentLocale = 'en' | 'vi'
 type ContentPhase = 'plan' | 'production-apply' | 'production-verify'
+type VerifiedHeroMedia = {
+  managedBy: unknown
+  publicationState: unknown
+  siteCode: unknown
+  siteID: number | string
+}
 
 export type WingsGroupV3ContentProductionArgs = {
   confirm?: string
@@ -781,17 +787,93 @@ const verifyFormContract = (form: UnknownRecord, siteID: number | string): void 
   }
 }
 
+type HeroMediaRelation = { path: string; value: unknown }
+
+const heroMediaRelations = (value: unknown): HeroMediaRelation[] => {
+  const hero = asRecord(value)
+  const slides = Array.isArray(hero.slides) ? hero.slides.map(asRecord) : []
+  const supportingMedia = Array.isArray(hero.supportingMedia) ? hero.supportingMedia : []
+  const video = asRecord(hero.video)
+  return [
+    { path: 'media', value: hero.media },
+    ...supportingMedia.map((media, index) => ({ path: `supportingMedia[${index}]`, value: media })),
+    ...slides.flatMap((slide, index) => [
+      { path: `slides[${index}].media`, value: slide.media },
+      { path: `slides[${index}].mobileMedia`, value: slide.mobileMedia },
+    ]),
+    { path: 'video.desktopVideo', value: video.desktopVideo },
+    { path: 'video.mobileVideo', value: video.mobileVideo },
+    { path: 'video.poster', value: video.poster },
+  ].filter(({ value: relation }) => relation !== null && relation !== undefined)
+}
+
+const verifyHeroMediaContract = ({
+  expected,
+  governedPublishedMedia,
+  locale,
+  page,
+  siteID,
+}: {
+  expected: UnknownRecord
+  governedPublishedMedia: ReadonlyMap<string, VerifiedHeroMedia>
+  locale: ContentLocale
+  page: UnknownRecord
+  siteID: number | string
+}): void => {
+  const expectedHero = asRecord(asRecord(expected.locales)[locale]).hero
+  const expectedRelations = heroMediaRelations(expectedHero)
+  if (expectedRelations.length === 0) return
+
+  const actualRelations = new Map(
+    heroMediaRelations(page.hero).map((relation) => [relation.path, relation.value]),
+  )
+
+  for (const expectedRelation of expectedRelations) {
+    const expectedID = relationID(expectedRelation.value)
+    if (expectedID === undefined) {
+      throw new Error(
+        `WingsGroup ${locale} ${String(page.pathname)} has an unresolved expected hero media relation ${expectedRelation.path}.`,
+      )
+    }
+    const actualID = relationID(actualRelations.get(expectedRelation.path))
+    if (actualID === undefined) {
+      throw new Error(
+        `WingsGroup ${locale} ${String(page.pathname)} required hero media relation ${expectedRelation.path} is missing.`,
+      )
+    }
+    if (String(actualID) !== String(expectedID)) {
+      throw new Error(
+        `WingsGroup ${locale} ${String(page.pathname)} hero media relation ${expectedRelation.path} mismatches the approved contract.`,
+      )
+    }
+    const verified = governedPublishedMedia.get(String(actualID))
+    if (
+      !verified ||
+      verified.managedBy !== 'wingsgroup-v3' ||
+      verified.publicationState !== 'published' ||
+      verified.siteCode !== WINGSGROUP_SITE_CODE ||
+      String(verified.siteID) !== String(siteID)
+    ) {
+      throw new Error(
+        `WingsGroup ${locale} ${String(page.pathname)} hero media relation ${expectedRelation.path} is not a governed, site-scoped, published WingsGroup media record.`,
+      )
+    }
+  }
+}
+
 const verifyPageContract = ({
   locale,
   page,
   expected,
   formID,
+  governedPublishedMedia,
   siteID,
 }: {
   locale: ContentLocale
   page: UnknownRecord
   expected: UnknownRecord
   formID: number | string
+  governedPublishedMedia: ReadonlyMap<string, VerifiedHeroMedia>
   siteID: number | string
 }) => {
   if (String(relationID(page.site)) !== String(siteID)) {
@@ -827,6 +909,13 @@ const verifyPageContract = ({
   if (checksum(governedRoute) !== checksum(expectedGovernance)) {
     throw new Error(`WingsGroup ${locale} ${String(page.pathname)} governance mismatch.`)
   }
+  verifyHeroMediaContract({
+    expected,
+    governedPublishedMedia,
+    locale,
+    page,
+    siteID,
+  })
   const serialized = JSON.stringify(page.layout)
   if (serialized.includes(WINGSGROUP_V3_CONTENT_FORM_KEY))
     throw new Error('Unresolved production form relation remains in a Page.')
@@ -882,6 +971,7 @@ const heroDataForLocale = (value: unknown): UnknownRecord => {
 
 type Inventory = {
   form?: UnknownRecord
+  governedPublishedMedia?: Map<string, VerifiedHeroMedia>
   mediaIDs: Map<string, number | string>
   pages: { en: Map<string, UnknownRecord>; vi: Map<string, UnknownRecord> }
   settings: UnknownRecord
@@ -948,8 +1038,15 @@ export const readWingsGroupV3ContentInventory = async ({
     )
   }
   const mediaIDs = new Map<string, number | string>()
+  const governedPublishedMedia = new Map<string, VerifiedHeroMedia>()
   for (const record of mediaVerification.records) {
     mediaIDs.set(record.sourceIdentity, record.id)
+    governedPublishedMedia.set(String(record.id), {
+      managedBy: 'wingsgroup-v3',
+      publicationState: 'published',
+      siteCode: WINGSGROUP_SITE_CODE,
+      siteID: resolvedSiteID,
+    })
     const planned = mediaPlan.records.find(
       (candidate) => candidate.sourceIdentity === record.sourceIdentity,
     )
@@ -962,7 +1059,7 @@ export const readWingsGroupV3ContentInventory = async ({
     if (!mediaIDs.has(record.sourceIdentity))
       throw new Error(`Missing governed media relation ${record.sourceFile}.`)
   }
-  return { form, mediaIDs, mediaVerification, pages, settings, site }
+  return { form, governedPublishedMedia, mediaIDs, mediaVerification, pages, settings, site }
 }
 
 export const verifyWingsGroupV3ContentInventory = ({
@@ -985,6 +1082,7 @@ export const verifyWingsGroupV3ContentInventory = ({
       verifyPageContract({
         expected: route,
         formID,
+        governedPublishedMedia: inventory.governedPublishedMedia || new Map(),
         locale,
         page,
         siteID: relationID(inventory.site.id)!,

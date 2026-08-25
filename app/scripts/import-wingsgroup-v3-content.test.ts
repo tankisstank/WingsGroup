@@ -192,6 +192,24 @@ describe('WingsGroup v3 production content importer contract', () => {
         pathname,
       ).toMatchObject({ media: expect.stringMatching(/^wingsgroup-.+\.png$/) })
     }
+    const primaryHeroDestinations = {
+      '/': '#services',
+      '/he-sinh-thai': '#ecosystem',
+      '/lien-he': '#contact-form',
+      '/nang-luc-dich-vu': '#services',
+      '/tin-cay-va-phap-ly': '#trust',
+      '/tin-tuc': '#news',
+      '/ve-wingsgroup': '/lien-he#contact-form',
+    }
+    for (const [pathname, destination] of Object.entries(primaryHeroDestinations)) {
+      const route = contract.pages.find((page) => page.path === pathname)!
+      for (const locale of ['vi', 'en'] as const) {
+        const links = (route.locales[locale].hero as { links?: Array<{ link?: unknown }> }).links
+        expect(links?.[0]?.link).toMatchObject({ url: destination })
+        if (destination === '#ecosystem') continue
+        expect(links?.[0]?.link).not.toMatchObject({ url: '#ecosystem' })
+      }
+    }
     expect(contract.pages.find((page) => page.path === '/dieu-khoan-su-dung')?.publication).toEqual(
       {
         en: 'hidden',
@@ -267,6 +285,7 @@ describe('WingsGroup v3 production content importer contract', () => {
         const localized = route.locales[locale]
         pages[locale].set(route.path, {
           _status: route.publication[locale] === 'approved' ? 'published' : 'draft',
+          hero: localized.hero,
           layout: localized.layout,
           pathname: route.path,
           site: 1,
@@ -291,6 +310,17 @@ describe('WingsGroup v3 production content importer contract', () => {
         ),
       },
     }
+    const governedPublishedMedia = new Map(
+      [...new Set([...mediaIDs.values()].map(String))].map((id) => [
+        id,
+        {
+          managedBy: 'wingsgroup-v3',
+          publicationState: 'published',
+          siteCode: WINGSGROUP_SITE_CODE,
+          siteID: 1,
+        },
+      ]),
+    )
     const persistedGovernance = {
       ...resolved.pages[0].governance,
       policy: {
@@ -328,6 +358,7 @@ describe('WingsGroup v3 production content importer contract', () => {
         formID: 77,
         inventory: {
           form: { fields: contract.form.fields, id: 77, site: 1, title: contract.form.title },
+          governedPublishedMedia,
           mediaIDs,
           pages,
           settings: persistedSettings,
@@ -335,6 +366,79 @@ describe('WingsGroup v3 production content importer contract', () => {
         },
       }),
     ).toEqual({ publishedLocales: 16, publishedRoutes: 8, routeCount: 10 })
+
+    const about = pages.vi.get('/ve-wingsgroup')!
+    const originalHero = about.hero as Record<string, unknown>
+    const originalMediaID = String(originalHero.media)
+
+    about.hero = { ...originalHero, media: null }
+    expect(() =>
+      verifyWingsGroupV3ContentInventory({
+        contract: resolved,
+        formID: 77,
+        inventory: {
+          form: { fields: contract.form.fields, id: 77, site: 1, title: contract.form.title },
+          governedPublishedMedia,
+          mediaIDs,
+          pages,
+          settings: persistedSettings,
+          site: { code: WINGSGROUP_SITE_CODE, id: 1 },
+        },
+      }),
+    ).toThrow(/required hero media relation media is missing/)
+
+    about.hero = { ...originalHero, media: 999 }
+    expect(() =>
+      verifyWingsGroupV3ContentInventory({
+        contract: resolved,
+        formID: 77,
+        inventory: {
+          form: { fields: contract.form.fields, id: 77, site: 1, title: contract.form.title },
+          governedPublishedMedia,
+          mediaIDs,
+          pages,
+          settings: persistedSettings,
+          site: { code: WINGSGROUP_SITE_CODE, id: 1 },
+        },
+      }),
+    ).toThrow(/hero media relation media mismatches the approved contract/)
+
+    about.hero = originalHero
+    const originalVerifiedMedia = governedPublishedMedia.get(originalMediaID)!
+    governedPublishedMedia.set(originalMediaID, { ...originalVerifiedMedia, siteID: 2 })
+    expect(() =>
+      verifyWingsGroupV3ContentInventory({
+        contract: resolved,
+        formID: 77,
+        inventory: {
+          form: { fields: contract.form.fields, id: 77, site: 1, title: contract.form.title },
+          governedPublishedMedia,
+          mediaIDs,
+          pages,
+          settings: persistedSettings,
+          site: { code: WINGSGROUP_SITE_CODE, id: 1 },
+        },
+      }),
+    ).toThrow(/not a governed, site-scoped, published WingsGroup media record/)
+
+    governedPublishedMedia.set(originalMediaID, {
+      ...originalVerifiedMedia,
+      publicationState: 'pending',
+    })
+    expect(() =>
+      verifyWingsGroupV3ContentInventory({
+        contract: resolved,
+        formID: 77,
+        inventory: {
+          form: { fields: contract.form.fields, id: 77, site: 1, title: contract.form.title },
+          governedPublishedMedia,
+          mediaIDs,
+          pages,
+          settings: persistedSettings,
+          site: { code: WINGSGROUP_SITE_CODE, id: 1 },
+        },
+      }),
+    ).toThrow(/not a governed, site-scoped, published WingsGroup media record/)
   })
 
   it('applies the same scoped contract idempotently without changing the target tenant', async () => {
@@ -367,6 +471,17 @@ describe('WingsGroup v3 production content importer contract', () => {
     }
     const inventory = {
       form: { fields: contract.form.fields, id: 77, site: 1, title: contract.form.title },
+      governedPublishedMedia: new Map(
+        [...new Set([...mediaIDs.values()].map(String))].map((id) => [
+          id,
+          {
+            managedBy: 'wingsgroup-v3',
+            publicationState: 'published',
+            siteCode: WINGSGROUP_SITE_CODE,
+            siteID: 1,
+          },
+        ]),
+      ),
       mediaIDs,
       pages: { en: new Map(), vi: new Map() },
       settings: { ...contract.settings, id: 11 },
