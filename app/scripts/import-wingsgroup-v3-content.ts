@@ -824,6 +824,49 @@ const verifyPageContract = ({
   }
 }
 
+const emptyLocalizedHero = {
+  behaviorMode: null,
+  behaviorOverrides: {
+    autoplay: null,
+    intervalMs: null,
+    loop: null,
+    pauseOnHover: null,
+    showArrows: null,
+    showDots: null,
+    transition: null,
+    transitionMs: null,
+  },
+  links: [],
+  media: null,
+  presentation: null,
+  presentationMode: null,
+  presentationPreset: null,
+  richText: null,
+  slides: [],
+  supportingMedia: [],
+  type: 'none',
+  variant: null,
+  video: { desktopVideo: null, mobileVideo: null, poster: null },
+}
+
+const heroDataForLocale = (value: unknown): UnknownRecord => {
+  const hero = asRecord(value)
+  const behaviorOverrides = asRecord(hero.behaviorOverrides)
+  const video = asRecord(hero.video)
+  return {
+    ...emptyLocalizedHero,
+    ...hero,
+    behaviorOverrides: {
+      ...emptyLocalizedHero.behaviorOverrides,
+      ...behaviorOverrides,
+    },
+    video: {
+      ...emptyLocalizedHero.video,
+      ...video,
+    },
+  }
+}
+
 type Inventory = {
   form?: UnknownRecord
   mediaIDs: Map<string, number | string>
@@ -958,7 +1001,7 @@ const pageDataForLocale = ({
   const resolved = resolveRelations(localized, mediaIDs, formID) as UnknownRecord
   return {
     _status: contractRoute.publication[locale] === 'approved' ? 'published' : 'draft',
-    hero: resolved.hero,
+    hero: heroDataForLocale(resolved.hero),
     layout: resolved.layout,
     meta: resolved.meta ?? { breadcrumbLabel: null, description: null, image: null, title: null },
     pathname: contractRoute.path,

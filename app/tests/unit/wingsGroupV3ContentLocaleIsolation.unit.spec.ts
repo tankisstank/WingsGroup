@@ -18,6 +18,10 @@ const collectMediaNames = (value: unknown, result = new Set<string>()): Set<stri
 describe('WingsGroup content locale request isolation', () => {
   it('writes each route locale with an isolated request and exact locale value', async () => {
     const contract = buildWingsGroupV3ContentContract()
+    for (const pathname of ['/he-sinh-thai', '/lien-he']) {
+      const route = contract.pages.find((candidate) => candidate.path === pathname)
+      if (route) (route.locales.en as unknown as Record<string, unknown>).hero = undefined
+    }
     const mediaIDs = new Map(
       [...collectMediaNames(contract)].map((name, index) => [name, index + 100]),
     )
@@ -60,6 +64,37 @@ describe('WingsGroup content locale request isolation', () => {
     ).toBe(true)
     expect(pageWrites[0].data).toMatchObject({ pathname: '/', _status: 'published' })
     expect(pageWrites[1].data).toMatchObject({ pathname: '/', _status: 'published' })
+    expect(
+      pageWrites.find(
+        (write) =>
+          write.locale === 'en' &&
+          (write.data as Record<string, unknown>).pathname === '/he-sinh-thai',
+      )?.data,
+    ).toMatchObject({
+      hero: {
+        behaviorOverrides: {
+          autoplay: null,
+          intervalMs: null,
+          loop: null,
+          pauseOnHover: null,
+          showArrows: null,
+          showDots: null,
+          transition: null,
+          transitionMs: null,
+        },
+        links: [],
+        media: null,
+        presentation: null,
+        presentationMode: null,
+        presentationPreset: null,
+        richText: null,
+        slides: [],
+        supportingMedia: [],
+        type: 'none',
+        variant: null,
+        video: { desktopVideo: null, mobileVideo: null, poster: null },
+      },
+    })
     expect(
       pageWrites.find(
         (write) => (write.data as Record<string, unknown>).pathname === '/ve-wingsgroup',

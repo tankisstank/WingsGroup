@@ -312,6 +312,35 @@ try {
     phaseResults.push({ phase, exitCode: result.code })
     if (result.code !== 0) throw new Error(`Process-isolated media phase failed: ${phase}`)
     if (phase === 'legacy-content') {
+      const legacyHeroLinkSeed = sh('docker', [
+        'exec',
+        container,
+        'psql',
+        '-U',
+        'smoke',
+        '-d',
+        'wings_content_smoke',
+        '-Atc',
+        "insert into pages_hero_links (\"_order\", \"_parent_id\", \"_locale\", id, link_type, link_url, link_label, link_appearance) select 0, p.id, 'en', 'wp-rel-43-legacy-' || replace(trim(both '/' from p.pathname), '/', '-'), 'custom', 'https://wingsgo.vn', 'Legacy ecosystem route', 'default' from pages p where p.pathname in ('/he-sinh-thai', '/lien-he') and not exists (select 1 from pages_hero_links existing where existing.\"_parent_id\" = p.id and existing.\"_locale\" = 'en' and existing.link_url = 'https://wingsgo.vn');",
+      ])
+      if (legacyHeroLinkSeed.status !== 0)
+        throw new Error(`Legacy hero link PostgreSQL seed failed: ${legacyHeroLinkSeed.stderr}`)
+      const legacyHeroLinkPreconditionInventory = sh('docker', [
+        'exec',
+        container,
+        'psql',
+        '-U',
+        'smoke',
+        '-d',
+        'wings_content_smoke',
+        '-Atc',
+        "select count(*) from pages_hero_links hl join pages p on p.id = hl.\"_parent_id\" where p.pathname in ('/he-sinh-thai', '/lien-he') and hl.\"_locale\" = 'en' and hl.link_url = 'https://wingsgo.vn';",
+      ])
+      const legacyHeroLinksSeeded = Number(legacyHeroLinkPreconditionInventory.stdout.trim())
+      if (legacyHeroLinkPreconditionInventory.status !== 0 || legacyHeroLinksSeeded !== 2)
+        throw new Error(
+          `Legacy hero link precondition did not match: ${legacyHeroLinkPreconditionInventory.stderr || legacyHeroLinksSeeded}`,
+        )
       const legacyPreconditionInventory = sh('docker', [
         'exec',
         container,
@@ -337,6 +366,12 @@ try {
           `Legacy precondition counts did not match: ${JSON.stringify(legacyPrecondition)}`,
         )
       const state = JSON.parse(await readFile(statePath, 'utf8'))
+      state.legacyHeroLinks = {
+        locale: 'en',
+        routes: ['/he-sinh-thai', '/lien-he'],
+        seeded: legacyHeroLinksSeeded,
+        url: 'https://wingsgo.vn',
+      }
       state.legacyPrecondition = legacyPrecondition
       await writeFile(statePath, JSON.stringify(state) + '\n')
     }
@@ -363,8 +398,20 @@ try {
     '-Atc',
     "select count(*) filter (where pl.meta_title is not null), count(*) filter (where pl.meta_description is not null), count(*) filter (where pl.meta_image_id is not null), count(*) filter (where pl.meta_breadcrumb_label is not null) from pages_locales pl join pages p on p.id = pl._parent_id where p.pathname <> '/';",
   ])
+  const heroLinkInventory = sh('docker', [
+    'exec',
+    container,
+    'psql',
+    '-U',
+    'smoke',
+    '-d',
+    'wings_content_smoke',
+    '-Atc',
+    "select count(*) from pages_hero_links hl join pages p on p.id = hl.\"_parent_id\" where p.pathname in ('/he-sinh-thai', '/lien-he') and hl.\"_locale\" = 'en' and hl.link_url = 'https://wingsgo.vn';",
+  ])
   const proof = JSON.parse(await readFile(statePath, 'utf8'))
   proof.content.publicJargonCount = Number(jargonInventory.stdout.trim())
+  proof.content.legacyHeroLinksRemaining = Number(heroLinkInventory.stdout.trim())
   const [
     metaTitleRemaining,
     metaDescriptionRemaining,
@@ -385,6 +432,7 @@ try {
     proof.verify?.verified !== 13 ||
     proof.legacySeed?.legacyMatches !== 35 ||
     proof.legacySeed?.layoutLegacyMatches !== 5 ||
+    proof.legacyHeroLinks?.seeded !== 2 ||
     proof.legacyPrecondition?.heroMatches !== 20 ||
     proof.legacyPrecondition?.metaDescriptionMatches !== 15 ||
     proof.legacyPrecondition?.totalMatches !== 35 ||
@@ -394,6 +442,7 @@ try {
     proof.content?.secondWrites !== 20 ||
     proof.content?.formPresent !== true ||
     proof.content?.publicJargonCount !== 0 ||
+    proof.content?.legacyHeroLinksRemaining !== 0 ||
     Object.values(proof.content?.metaGroupClear || {}).some((count) => count !== 0) ||
     proof.contentRollback?.error !== 'WP-REL-35 induced mid-content-write failure.' ||
     proof.contentRollback?.pageWrites !== 1 ||
