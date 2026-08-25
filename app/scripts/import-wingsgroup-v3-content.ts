@@ -552,8 +552,18 @@ export const buildWingsGroupV3ContentContract = () => ({
     path: route.path,
     governance: routeGovernanceForSeed(route),
     locales: {
-      en: route.path === '/' ? buildProductionHomepage('en') : route.en,
-      vi: route.path === '/' ? buildProductionHomepage('vi') : route.vi,
+      en:
+        route.path === '/'
+          ? buildProductionHomepage('en')
+          : route.path === '/lien-he'
+            ? { ...route.en, layout: [...route.en.layout, contactBlock()] }
+            : route.en,
+      vi:
+        route.path === '/'
+          ? buildProductionHomepage('vi')
+          : route.path === '/lien-he'
+            ? { ...route.vi, layout: [...route.vi.layout, contactBlock()] }
+            : route.vi,
     },
     publication: routeGovernanceForSeed(route).publication,
   })),

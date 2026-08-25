@@ -169,6 +169,15 @@ describe('WingsGroup v3 production content importer contract', () => {
       'archive',
       'formBlock',
     ])
+    const contact = contract.pages.find((page) => page.path === '/lien-he')
+    expect(contact?.locales.vi.layout.at(-1)).toMatchObject({
+      blockType: 'formBlock',
+      form: WINGSGROUP_V3_CONTENT_FORM_KEY,
+    })
+    expect(contact?.locales.en.layout.at(-1)).toMatchObject({
+      blockType: 'formBlock',
+      form: WINGSGROUP_V3_CONTENT_FORM_KEY,
+    })
     expect(contract.pages[0].locales.en.title).toBe('WingsGroup')
     expect(contract.pages.find((page) => page.path === '/dieu-khoan-su-dung')?.publication).toEqual(
       {
