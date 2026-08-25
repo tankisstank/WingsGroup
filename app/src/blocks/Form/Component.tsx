@@ -11,6 +11,7 @@ import { BadgeCheckIcon, ClockIcon, HeadphonesIcon, SendIcon } from 'lucide-reac
 
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
+import { WINGSGROUP_CONTACT_FOCUS_SESSION_KEY } from '@/utilities/wingsGroupConsultation'
 import { useSitePublicLocale } from '@/providers/SitePath'
 import { useSitePath } from '@/utilities/useSitePath'
 import { getCopyLocale } from '@/utilities/locales'
@@ -369,6 +370,37 @@ export const FormBlock: React.FC<
   const approvedPreferredChannel = leadChannels.some((channel) => channel.key === preferredChannel)
     ? preferredChannel
     : ''
+
+  useEffect(() => {
+    if (
+      !isWingsGroupV3 ||
+      !resolvedAnchorId ||
+      window.location.hash !== `#${resolvedAnchorId}` ||
+      window.sessionStorage.getItem(WINGSGROUP_CONTACT_FOCUS_SESSION_KEY) !== resolvedAnchorId
+    )
+      return
+
+    let animationFrame = 0
+    let attempts = 0
+    const focusWhenReady = () => {
+      const target = formRef.current?.querySelector<HTMLElement>(
+        'input:not([type="hidden"]):not([aria-hidden="true"]):not([disabled]), textarea:not([aria-hidden="true"]):not([disabled]), select:not([aria-hidden="true"]):not([disabled])',
+      )
+
+      if (!target && attempts++ < 4) {
+        animationFrame = window.requestAnimationFrame(focusWhenReady)
+        return
+      }
+      if (!target) return
+
+      window.sessionStorage.removeItem(WINGSGROUP_CONTACT_FOCUS_SESSION_KEY)
+      target.focus({ preventScroll: true })
+      target.scrollIntoView?.({ block: 'center' })
+    }
+
+    animationFrame = window.requestAnimationFrame(focusWhenReady)
+    return () => window.cancelAnimationFrame(animationFrame)
+  }, [isWingsGroupV3, resolvedAnchorId])
 
   useEffect(() => {
     if (!isWingsGroupV3) return

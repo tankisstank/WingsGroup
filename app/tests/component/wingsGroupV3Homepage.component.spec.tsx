@@ -442,6 +442,7 @@ describe('WingsGroup v3 public components', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Để lại nhu cầu/ }))
 
     expect(navigationMock.push).toHaveBeenCalledWith('/lien-he#contact-form')
+    expect(window.sessionStorage.getItem('wingsgroup-contact-focus')).toBe('contact-form')
     expect(document.querySelector('[data-od-id="consultation-dialog"] a[href]')).toBeNull()
   })
 

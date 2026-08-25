@@ -78,6 +78,7 @@ describe('lead form hardened submission', () => {
 
   afterEach(() => {
     cleanup()
+    window.sessionStorage.removeItem('wingsgroup-contact-focus')
     window.history.replaceState({}, '', '/')
   })
 
@@ -147,6 +148,25 @@ describe('lead form hardened submission', () => {
     expect(screen.getByText('Advice tailored to your timing and budget')).toBeTruthy()
     expect(screen.getByText('Introduced to the right specialist')).toBeTruthy()
     expect(screen.queryByText(/content manager|sales or content/i)).toBeNull()
+  })
+
+  it('focuses the contact intake only after a consultation dialog handoff', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(JSON.stringify({ available: false, enabled: true }), { status: 200 }),
+        ),
+    )
+    window.history.replaceState({}, '', '/lien-he#contact-form')
+    window.sessionStorage.setItem('wingsgroup-contact-focus', 'contact-form')
+
+    render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)
+
+    const fullName = await screen.findByLabelText(/Full name/i)
+    await waitFor(() => expect(document.activeElement).toBe(fullName))
+    expect(window.sessionStorage.getItem('wingsgroup-contact-focus')).toBeNull()
   })
 
   it('shows the Turnstile path only when the server requests a challenge', async () => {

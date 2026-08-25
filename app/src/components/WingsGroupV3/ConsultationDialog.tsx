@@ -4,6 +4,10 @@ import React, { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSitePublicLocale } from '@/providers/SitePath'
 import { useSitePath } from '@/utilities/useSitePath'
+import {
+  WINGSGROUP_CONTACT_FORM_ANCHOR,
+  WINGSGROUP_CONTACT_FOCUS_SESSION_KEY,
+} from '@/utilities/wingsGroupConsultation'
 
 import styles from './WingsGroupV3.module.css'
 
@@ -15,6 +19,7 @@ export const WingsGroupConsultationDialog = () => {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const lastFocusedRef = useRef<HTMLElement | null>(null)
+  const restoreFocusOnCloseRef = useRef(true)
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -35,9 +40,10 @@ export const WingsGroupConsultationDialog = () => {
       requestAnimationFrame(() => closeRef.current?.focus())
     }
 
-    const closeDialog = () => {
+    const closeDialog = ({ restoreFocus = true }: { restoreFocus?: boolean } = {}) => {
+      restoreFocusOnCloseRef.current = restoreFocus
       if (dialog.open) dialog.close()
-      requestAnimationFrame(() => lastFocusedRef.current?.focus())
+      else if (restoreFocus) requestAnimationFrame(() => lastFocusedRef.current?.focus())
     }
 
     const onTrigger = (event: MouseEvent) => {
@@ -52,7 +58,12 @@ export const WingsGroupConsultationDialog = () => {
       event.preventDefault()
       closeDialog()
     }
-    const onClose = () => requestAnimationFrame(() => lastFocusedRef.current?.focus())
+    const onClose = () => {
+      if (restoreFocusOnCloseRef.current) {
+        requestAnimationFrame(() => lastFocusedRef.current?.focus())
+      }
+      restoreFocusOnCloseRef.current = true
+    }
     const onDialogClick = (event: MouseEvent) => {
       if (event.target === dialog) closeDialog()
     }
@@ -80,15 +91,12 @@ export const WingsGroupConsultationDialog = () => {
       if (!(target instanceof Element)) return
       const button = target.closest<HTMLButtonElement>('[data-consult-form]')
       if (!button) return
-      closeDialog()
+      closeDialog({ restoreFocus: false })
+      window.sessionStorage.setItem(
+        WINGSGROUP_CONTACT_FOCUS_SESSION_KEY,
+        WINGSGROUP_CONTACT_FORM_ANCHOR,
+      )
       router.push(toSitePath('/lien-he#contact-form'))
-      window.setTimeout(() => {
-        document
-          .querySelector<HTMLInputElement>(
-            '[data-od-id="contact-intake"] input:not([aria-hidden="true"])',
-          )
-          ?.focus()
-      }, 80)
     }
 
     document.addEventListener('click', onTrigger)
