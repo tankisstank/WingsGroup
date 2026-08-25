@@ -263,6 +263,59 @@ test.describe('Phase 1 public frontend smoke', () => {
     })
   }
 
+  test('keeps the WingsGroup mobile navigation visible and operable at 390px', async ({ page }) => {
+    await page.setViewportSize({ height: 844, width: 390 })
+    await page.goto(e2eBaseURL, { waitUntil: 'domcontentloaded' })
+
+    const toggle = page.getByRole('button', { name: 'Mở điều hướng' })
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    await expect(toggle).toHaveAccessibleName('Đóng điều hướng')
+
+    const mobileNavigation = page.getByRole('navigation', { name: 'Mobile primary navigation' })
+    await expect(mobileNavigation).toBeVisible()
+    await expect
+      .poll(() =>
+        mobileNavigation.evaluate((element) => {
+          const styles = window.getComputedStyle(element)
+          const box = element.getBoundingClientRect()
+
+          return {
+            display: styles.display,
+            height: box.height,
+            visibility: styles.visibility,
+            width: box.width,
+          }
+        }),
+      )
+      .toMatchObject({ display: 'flex', visibility: 'visible' })
+
+    const mobileLinks = mobileNavigation.getByRole('link')
+    await expect(mobileLinks).toHaveCount(9)
+    for (const link of await mobileLinks.all()) {
+      await expect(link).toBeVisible()
+    }
+    await expect
+      .poll(() => mobileNavigation.evaluate((element) => element.getBoundingClientRect().width))
+      .toBeGreaterThan(0)
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    ).toBe(true)
+
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('navigation', { name: 'Mobile primary navigation' })).toHaveCount(0)
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(toggle).toHaveAccessibleName('Mở điều hướng')
+
+    await page.setViewportSize({ height: 900, width: 1440 })
+    await page.reload({ waitUntil: 'domcontentloaded' })
+    await expect(page.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible()
+    await expect(page.getByRole('navigation', { name: 'Mobile primary navigation' })).toHaveCount(0)
+  })
+
   test('renders WingsPlus primary navigation in Vietnamese and English', async ({ page }) => {
     await page.setViewportSize({ height: 900, width: 1600 })
 

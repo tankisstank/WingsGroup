@@ -271,7 +271,7 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-footer--wing
   body[data-site-code='wings-group'][data-wingsgroup-v3='true']
     .site-header--wingsgroup-v3
     .site-header__nav
-    > nav {
+    > nav[aria-label='Primary navigation'] {
     display: flex;
   }
 
@@ -294,7 +294,7 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-footer--wing
   body[data-site-code='wings-group'][data-wingsgroup-v3='true']
     .site-header--wingsgroup-v3
     .site-header__nav
-    > nav {
+    > nav[aria-label='Primary navigation'] {
     display: none;
   }
 
