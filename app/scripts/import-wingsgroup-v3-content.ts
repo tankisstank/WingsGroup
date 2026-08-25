@@ -822,11 +822,19 @@ const verifyHeroMediaContract = ({
 }): void => {
   const expectedHero = asRecord(asRecord(expected.locales)[locale]).hero
   const expectedRelations = heroMediaRelations(expectedHero)
-  if (expectedRelations.length === 0) return
-
-  const actualRelations = new Map(
-    heroMediaRelations(page.hero).map((relation) => [relation.path, relation.value]),
+  const expectedRelationPaths = new Set(expectedRelations.map((relation) => relation.path))
+  const actualRelations = heroMediaRelations(page.hero)
+  const actualRelationValues = new Map(
+    actualRelations.map((relation) => [relation.path, relation.value]),
   )
+
+  for (const actualRelation of actualRelations) {
+    if (!expectedRelationPaths.has(actualRelation.path)) {
+      throw new Error(
+        `WingsGroup ${locale} ${String(page.pathname)} has an unexpected hero media relation ${actualRelation.path}.`,
+      )
+    }
+  }
 
   for (const expectedRelation of expectedRelations) {
     const expectedID = relationID(expectedRelation.value)
@@ -835,7 +843,7 @@ const verifyHeroMediaContract = ({
         `WingsGroup ${locale} ${String(page.pathname)} has an unresolved expected hero media relation ${expectedRelation.path}.`,
       )
     }
-    const actualID = relationID(actualRelations.get(expectedRelation.path))
+    const actualID = relationID(actualRelationValues.get(expectedRelation.path))
     if (actualID === undefined) {
       throw new Error(
         `WingsGroup ${locale} ${String(page.pathname)} required hero media relation ${expectedRelation.path} is missing.`,

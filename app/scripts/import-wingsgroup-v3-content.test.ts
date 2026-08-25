@@ -439,6 +439,58 @@ describe('WingsGroup v3 production content importer contract', () => {
         },
       }),
     ).toThrow(/not a governed, site-scoped, published WingsGroup media record/)
+
+    governedPublishedMedia.set(originalMediaID, originalVerifiedMedia)
+    about.hero = { ...originalHero, supportingMedia: [999] }
+    expect(() =>
+      verifyWingsGroupV3ContentInventory({
+        contract: resolved,
+        formID: 77,
+        inventory: {
+          form: { fields: contract.form.fields, id: 77, site: 1, title: contract.form.title },
+          governedPublishedMedia,
+          mediaIDs,
+          pages,
+          settings: persistedSettings,
+          site: { code: WINGSGROUP_SITE_CODE, id: 1 },
+        },
+      }),
+    ).toThrow(/unexpected hero media relation supportingMedia\[0\]/)
+
+    about.hero = { ...originalHero, slides: [{ media: 999, mobileMedia: 998 }] }
+    expect(() =>
+      verifyWingsGroupV3ContentInventory({
+        contract: resolved,
+        formID: 77,
+        inventory: {
+          form: { fields: contract.form.fields, id: 77, site: 1, title: contract.form.title },
+          governedPublishedMedia,
+          mediaIDs,
+          pages,
+          settings: persistedSettings,
+          site: { code: WINGSGROUP_SITE_CODE, id: 1 },
+        },
+      }),
+    ).toThrow(/unexpected hero media relation slides\[0\].media/)
+
+    about.hero = originalHero
+    const terms = pages.vi.get('/dieu-khoan-su-dung')!
+    terms.hero = { media: 999, type: 'highImpact' }
+    expect(() =>
+      verifyWingsGroupV3ContentInventory({
+        contract: resolved,
+        formID: 77,
+        inventory: {
+          form: { fields: contract.form.fields, id: 77, site: 1, title: contract.form.title },
+          governedPublishedMedia,
+          mediaIDs,
+          pages,
+          settings: persistedSettings,
+          site: { code: WINGSGROUP_SITE_CODE, id: 1 },
+        },
+      }),
+    ).toThrow(/unexpected hero media relation media/)
+    terms.hero = undefined
   })
 
   it('applies the same scoped contract idempotently without changing the target tenant', async () => {
@@ -503,8 +555,9 @@ describe('WingsGroup v3 production content importer contract', () => {
     expect(first.writes).toHaveLength(20)
     expect(second.writes).toEqual(first.writes)
     expect(writes.length).toBe(firstWriteCount + 23)
-    expect(localeWrites).toHaveLength(40)
-    expect(localeWrites.slice(0, 2).map(({ locale }) => locale)).toEqual(['vi', 'en'])
+    expect(localeWrites).toHaveLength(30)
+    expect(localeWrites.slice(0, 10).every(({ locale }) => locale === 'en')).toBe(true)
+    expect(localeWrites.slice(10, 12).map(({ locale }) => locale)).toEqual(['vi', 'en'])
     expect(localeWrites.every(({ locale, request }) => request.locale === locale)).toBe(true)
     expect(localeWrites.every(({ request }) => request.fallbackLocale === false)).toBe(true)
     expect(localeWrites.every(({ request }) => request.payloadDataLoader === undefined)).toBe(true)
