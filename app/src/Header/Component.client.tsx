@@ -75,7 +75,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
       {...(wingsGroupV3Surface ? { 'data-od-id': 'site-header' } : {})}
       {...(theme ? { 'data-theme': theme } : {})}
     >
-      <div className="site-header__bar py-8 flex justify-between border-b">
+      <div className="site-header__bar flex justify-between">
         <div className="site-header__brand flex items-center gap-3">
           <SiteLink href="/">
             <Logo

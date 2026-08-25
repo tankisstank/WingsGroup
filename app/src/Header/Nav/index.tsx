@@ -280,7 +280,17 @@ export const HeaderNav: React.FC<{
         {isWingsGroupHome
           ? wingsGroupHomeNav.map((item) => (
               <SiteLink
+                aria-current={
+                  item.href === getPublicRoutePathname(pathname || publicPathname || '/')
+                    ? 'page'
+                    : undefined
+                }
                 className="theme-nav-link site-header__primary-link"
+                data-active={
+                  item.href === getPublicRoutePathname(pathname || publicPathname || '/')
+                    ? 'true'
+                    : 'false'
+                }
                 href={item.href}
                 key={item.href}
               >
@@ -296,6 +306,11 @@ export const HeaderNav: React.FC<{
                       : undefined
                   }
                   className="theme-nav-link site-header__primary-link"
+                  data-active={
+                    item.href === getPublicRoutePathname(pathname || publicPathname || '/')
+                      ? 'true'
+                      : 'false'
+                  }
                   href={item.href}
                   key={item.href}
                 >
@@ -388,6 +403,11 @@ export const HeaderNav: React.FC<{
           {isWingsGroupHome
             ? wingsGroupHomeNav.map((item) => (
                 <SiteLink
+                  data-active={
+                    item.href === getPublicRoutePathname(pathname || publicPathname || '/')
+                      ? 'true'
+                      : 'false'
+                  }
                   className="site-mobile-nav__link"
                   href={item.href}
                   key={item.href}
@@ -405,6 +425,11 @@ export const HeaderNav: React.FC<{
                         : undefined
                     }
                     className="site-mobile-nav__link"
+                    data-active={
+                      item.href === getPublicRoutePathname(pathname || publicPathname || '/')
+                        ? 'true'
+                        : 'false'
+                    }
                     href={item.href}
                     key={item.href}
                     onClick={navigateAndCloseMobile}

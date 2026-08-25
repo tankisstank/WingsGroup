@@ -59,8 +59,8 @@
 .heroInner {
   display: grid;
   align-items: end;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
-  gap: 60px;
+  grid-template-columns: minmax(0, 460px) minmax(0, 1fr) minmax(0, 300px);
+  gap: clamp(28px, 4vw, 64px);
   width: 100%;
   max-width: 1240px;
   margin: auto;
@@ -148,6 +148,7 @@
 }
 
 .heroStage {
+  grid-column: 2 / span 2;
   position: relative;
   min-height: 365px;
   margin: 0;
@@ -1317,6 +1318,7 @@
   }
 
   .heroStage {
+    grid-column: auto;
     min-height: 275px;
   }
 

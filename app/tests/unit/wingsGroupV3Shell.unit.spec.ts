@@ -43,4 +43,20 @@ describe('WingsGroup v3 shared public shell', () => {
     expect(css).toContain('border-radius: 0')
     expect(css).toContain("data-wingsgroup-v3='true'")
   })
+
+  it('uses text navigation, a quiet breadcrumb and a flat mobile list for the v3 shell', () => {
+    const nav = read('Header/Nav/index.tsx')
+    const css = read('app/(frontend)/wingsgroup-v3.css')
+    const heroCss = read('components/WingsGroupV3/WingsGroupV3.module.css')
+
+    expect(nav).toContain('data-active={')
+    expect(css).toContain('.site-header--wingsgroup-v3\n  .theme-nav-link')
+    expect(css).toContain('.wingsgroup-v3-breadcrumb > ol')
+    expect(css).toContain('.site-mobile-nav__link--primary')
+    expect(css).toContain('border-bottom: 1px solid #dedbd3')
+    expect(heroCss).toContain(
+      'grid-template-columns: minmax(0, 460px) minmax(0, 1fr) minmax(0, 300px)',
+    )
+    expect(heroCss).toContain('grid-column: 2 / span 2')
+  })
 })
