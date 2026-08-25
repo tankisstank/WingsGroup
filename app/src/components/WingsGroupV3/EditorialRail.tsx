@@ -5,8 +5,9 @@ import React from 'react'
 import { Media } from '@/components/Media'
 import { SiteLink } from '@/components/SiteLink'
 import type { ArchiveBlock, Media as MediaType, Post } from '@/payload-types'
-import { appendSiteWhere } from '@/utilities/siteContext'
+import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
 import type { SupportedLocaleCode } from '@/utilities/locales'
+import { hydrateScopedWingsGroupMediaRelations } from '@/utilities/wingsGroupMediaRelations'
 
 import {
   isWingsGroupDevelopmentMedia,
@@ -66,6 +67,7 @@ const FALLBACK_EDITORIAL = {
 } as const
 
 const getCandidates = async (block: ArchiveBlock, locale?: null | string): Promise<unknown[]> => {
+  const site = await getCurrentSite()
   const selectedIDs =
     block.populateBy === 'selection'
       ? (block.selectedDocs || []).map((entry) =>
@@ -98,8 +100,9 @@ const getCandidates = async (block: ArchiveBlock, locale?: null | string): Promi
     where,
   })
 
-  if (selectedIDs.length === 0) return result.docs
-  const byID = new Map(result.docs.map((post) => [String(post.id), post]))
+  const hydratedDocs = hydrateScopedWingsGroupMediaRelations(result.docs, site)
+  if (selectedIDs.length === 0) return hydratedDocs
+  const byID = new Map(hydratedDocs.map((post) => [String(post.id), post]))
   return selectedIDs.map((id) => byID.get(String(id))).filter(Boolean)
 }
 

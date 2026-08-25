@@ -12,16 +12,13 @@ const relationID = (value: unknown): number | string | null =>
       ? value
       : null
 
-const isGovernedMediaRelation = (value: RecordValue): boolean =>
-  typeof value.url === 'string' && typeof value.alt === 'string' && isRecord(value.governance)
-
 /**
  * Anonymous site reads intentionally do not populate the `sites` collection.
- * Payload consequently leaves a governed media relation's `site` as its ID.
+ * Payload consequently leaves a scoped record's `site` relation as its ID.
  *
  * A page has already been queried under the current site's server-side scope.
- * This adapter restores only that known site identity on matching media records
- * so the client-side publication validator can remain fail-closed for any
+ * This adapter restores only that known site identity on matching records so
+ * the client-side media and editorial validators remain fail-closed for any
  * foreign or unresolved relationship.
  */
 export const hydrateScopedWingsGroupMediaRelations = <T>(
@@ -37,7 +34,7 @@ export const hydrateScopedWingsGroupMediaRelations = <T>(
     const hydrated = Object.fromEntries(
       Object.entries(current).map(([key, child]) => [key, visit(child)]),
     )
-    if (!isGovernedMediaRelation(current) || String(relationID(current.site)) !== String(site.id)) {
+    if (String(relationID(current.site)) !== String(site.id)) {
       return hydrated
     }
 
