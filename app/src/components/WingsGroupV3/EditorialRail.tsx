@@ -1,4 +1,5 @@
 import configPromise from '@payload-config'
+import { draftMode, headers } from 'next/headers'
 import { getPayload } from 'payload'
 import React from 'react'
 
@@ -8,6 +9,7 @@ import type { ArchiveBlock, Media as MediaType, Post } from '@/payload-types'
 import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
 import type { SupportedLocaleCode } from '@/utilities/locales'
 import { hydrateScopedWingsGroupMediaRelations } from '@/utilities/wingsGroupMediaRelations'
+import { createWingsGroupLocalPreviewPayloadReq } from '@/wingsgroup/localPreview'
 
 import {
   isWingsGroupDevelopmentMedia,
@@ -108,6 +110,10 @@ const getCandidates = async (block: ArchiveBlock, locale?: null | string): Promi
 
 const getFallbackEditorialMedia = async (): Promise<Map<string, MediaType>> => {
   const payload = await getPayload({ config: configPromise })
+  const { isEnabled: draft } = await draftMode()
+  const previewReq = draft
+    ? await createWingsGroupLocalPreviewPayloadReq({ headers: await headers(), payload })
+    : undefined
   const where = await appendSiteWhere()
   const result = await payload.find({
     collection: 'media',
@@ -115,6 +121,7 @@ const getFallbackEditorialMedia = async (): Promise<Map<string, MediaType>> => {
     limit: 20,
     overrideAccess: true,
     pagination: false,
+    req: previewReq,
     where,
   })
   return new Map(

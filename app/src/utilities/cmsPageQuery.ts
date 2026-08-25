@@ -1,5 +1,5 @@
 import configPromise from '@payload-config'
-import { draftMode } from 'next/headers'
+import { draftMode, headers } from 'next/headers'
 import { getPayload } from 'payload'
 
 import {
@@ -8,6 +8,7 @@ import {
   isWingsGroupRoutePublic,
   isWingsGroupV3PublicSurfacePathAllowed,
 } from '@/wingsgroup/corporateRoutes'
+import { createWingsGroupLocalPreviewPayloadReq } from '@/wingsgroup/localPreview'
 import { buildWingsGroupPendingPolicyPage } from '@/wingsgroup/pendingPolicyPage'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
@@ -40,6 +41,10 @@ export const queryPageByPath = async ({
   }
 
   const payload = await getPayload({ config: configPromise })
+  const requestHeaders = await headers()
+  const previewReq = draft
+    ? await createWingsGroupLocalPreviewPayloadReq({ headers: requestHeaders, payload })
+    : undefined
   const segments = requestedPath.split('/').filter(Boolean)
   const candidateSlug = segments[segments.length - 1] || 'home'
   const candidateSlugs = [candidateSlug, `${site.code}-${candidateSlug}`]
@@ -81,6 +86,7 @@ export const queryPageByPath = async ({
       limit: 1,
       pagination: false,
       overrideAccess: draft,
+      req: previewReq,
       where: scopedWhere,
     })
 

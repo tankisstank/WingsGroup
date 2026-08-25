@@ -1,3 +1,6 @@
+import type { Payload } from 'payload'
+import { createLocalReq } from 'payload'
+
 import { defaultSiteCode } from '@/utilities/sitePaths'
 
 import { WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT } from './corporateRoutes'
@@ -288,6 +291,39 @@ export const hasWingsGroupLocalPreviewGrant = async ({
       siteCode,
     }),
   )
+
+/**
+ * Re-establish the signed local-preview context on server-side Payload reads.
+ * Draft Mode itself is not a media authorization signal: the context only
+ * exists after the loopback-only preview grant has been verified.
+ */
+export const createWingsGroupLocalPreviewPayloadReq = async ({
+  headers,
+  payload,
+}: {
+  headers: Headers
+  payload: Payload
+}) => {
+  if (!(await hasWingsGroupLocalDraftPreviewSignal({ headers }))) return undefined
+
+  const operators = await payload.find({
+    collection: 'users',
+    depth: 0,
+    limit: 2,
+    overrideAccess: true,
+    pagination: false,
+    where: { role: { equals: 'super-admin' } },
+  })
+  const operator = operators.docs[0]
+  if (!operator) return undefined
+
+  const req = await createLocalReq({ user: operator }, payload)
+  req.context = {
+    ...(req.context || {}),
+    [WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT]: true,
+  }
+  return req
+}
 
 export const isExplicitWingsGroupLocalDraftPreviewRequest = async ({
   context: _context,

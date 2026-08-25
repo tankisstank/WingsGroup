@@ -27,6 +27,7 @@ import {
   validateGovernedMediaBeforeChange,
   WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES,
 } from '@/fields/wingsGroupV3'
+import { isWingsGroupLocalDraftPreview } from '@/wingsgroup/corporateRoutes'
 import { resolveWingsGroupLocalPreviewMediaDirectory } from '@/utilities/localPreviewMedia'
 import {
   deleteWingsGroupLocalPreviewMedia,
@@ -88,7 +89,14 @@ const revalidateDeletedTourMedia: CollectionAfterDeleteHook = ({ doc, req: { con
 
 export const enforceAnonymousGovernedMediaRead: CollectionAfterReadHook = async ({ doc, req }) => {
   const governance = doc?.governance
-  if (req.user || governance?.managedBy !== 'wingsgroup-v3') return doc
+  if (
+    req.user ||
+    governance?.managedBy !== 'wingsgroup-v3' ||
+    (process.env.NODE_ENV !== 'production' &&
+      isWingsGroupLocalDraftPreview({ context: req.context, status: 'draft' }))
+  ) {
+    return doc
+  }
 
   const siteID =
     typeof doc.site === 'object' && doc.site && 'id' in doc.site

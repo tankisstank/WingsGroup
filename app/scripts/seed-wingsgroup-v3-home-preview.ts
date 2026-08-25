@@ -516,91 +516,118 @@ const seedPreviewContent = async ({
     },
   ]
 
-  await payload.update({
+  const existingHome = await payload.find({
     collection: 'pages',
-    data: {
-      _status: 'draft',
-      hero: {
-        behaviorMode: 'override',
-        behaviorOverrides: {
-          autoplay: true,
-          intervalMs: 6500,
-          loop: true,
-          pauseOnHover: true,
-          showArrows: true,
-          showDots: true,
-          transition: 'crossfade',
-          transitionMs: 600,
+    depth: 0,
+    limit: 2,
+    overrideAccess: true,
+    pagination: false,
+    req,
+    where: {
+      and: [{ site: { equals: site.id } }, { pathname: { equals: '/' } }],
+    },
+  })
+  if (existingHome.docs.length > 1) {
+    throw new Error('Expected at most one WingsGroup homepage.')
+  }
+
+  const homePageData = {
+    _status: 'draft',
+    site: site.id,
+    slug: 'home',
+    wingsGroupRoute: {
+      archetype: 'home',
+      managedBy: 'wingsgroup-v3',
+      publication: { en: 'hidden', vi: 'hidden' },
+    },
+    hero: {
+      behaviorMode: 'override',
+      behaviorOverrides: {
+        autoplay: true,
+        intervalMs: 6500,
+        loop: true,
+        pauseOnHover: true,
+        showArrows: true,
+        showDots: true,
+        transition: 'crossfade',
+        transitionMs: 600,
+      },
+      links: [
+        {
+          link: {
+            appearance: 'default',
+            label: 'Khám phá dịch vụ',
+            type: 'custom',
+            url: '#services',
+          },
         },
-        links: [
-          {
-            link: {
-              appearance: 'default',
-              label: 'Khám phá dịch vụ',
-              type: 'custom',
-              url: '#services',
-            },
+        {
+          link: {
+            appearance: 'outline',
+            label: 'Trao đổi với chuyên viên',
+            type: 'custom',
+            url: '/lien-he#contact-form',
           },
-          {
-            link: {
-              appearance: 'outline',
-              label: 'Trao đổi với chuyên viên',
-              type: 'custom',
-              url: '/lien-he#contact-form',
-            },
-          },
-        ],
-        richText: lexical(
-          'Tìm đúng dịch vụ cho hành trình của bạn.',
-          'Từ chuyến đi nước ngoài đến trải nghiệm tại Việt Nam, dịch vụ sân bay và đoàn riêng, WingsGroup kết nối bạn với đội ngũ phù hợp cho từng nhu cầu.',
-        ),
-        slides: [
-          {
-            description: 'Một điểm chạm cho nhiều nhu cầu du lịch.',
-            eyebrow: 'WingsGroup',
-            media: mediaID('wingsgroup-hero-discovery-guide.png'),
-            title: 'Khám phá Việt Nam',
-          },
-          {
-            description: 'Một điểm chạm cho nhiều nhu cầu du lịch.',
-            eyebrow: 'WingsGroup',
-            media: mediaID('wingsgroup-hero-private-consultation.png'),
-            title: 'Tư vấn hành trình riêng',
-          },
-          {
-            description: 'Một điểm chạm cho nhiều nhu cầu du lịch.',
-            eyebrow: 'WingsGroup',
-            media: mediaID('wingsgroup-hero-airport-welcome.png'),
-            title: 'Đón khách tại sân bay',
-          },
-          {
-            description: 'Một điểm chạm cho nhiều nhu cầu du lịch.',
-            eyebrow: 'WingsGroup',
-            media: mediaID('wingsgroup-hero-partner-meeting.png'),
-            title: 'Gặp gỡ đối tác doanh nghiệp',
-          },
-        ],
-        type: 'highImpact',
-      },
-      layout,
-      meta: {
-        description:
-          'WingsGroup — điểm bắt đầu để tìm đúng dịch vụ du lịch, thông tin doanh nghiệp và đầu mối phù hợp.',
-        title: 'WingsGroup — Hệ sinh thái dịch vụ du lịch',
-      },
-      title: 'WingsGroup',
-    } as never,
-    id: 1,
+        },
+      ],
+      richText: lexical(
+        'Tìm đúng dịch vụ cho hành trình của bạn.',
+        'Từ chuyến đi nước ngoài đến trải nghiệm tại Việt Nam, dịch vụ sân bay và đoàn riêng, WingsGroup kết nối bạn với đội ngũ phù hợp cho từng nhu cầu.',
+      ),
+      slides: [
+        {
+          description: 'Một điểm chạm cho nhiều nhu cầu du lịch.',
+          eyebrow: 'WingsGroup',
+          media: mediaID('wingsgroup-hero-discovery-guide.png'),
+          title: 'Khám phá Việt Nam',
+        },
+        {
+          description: 'Một điểm chạm cho nhiều nhu cầu du lịch.',
+          eyebrow: 'WingsGroup',
+          media: mediaID('wingsgroup-hero-private-consultation.png'),
+          title: 'Tư vấn hành trình riêng',
+        },
+        {
+          description: 'Một điểm chạm cho nhiều nhu cầu du lịch.',
+          eyebrow: 'WingsGroup',
+          media: mediaID('wingsgroup-hero-airport-welcome.png'),
+          title: 'Đón khách tại sân bay',
+        },
+        {
+          description: 'Một điểm chạm cho nhiều nhu cầu du lịch.',
+          eyebrow: 'WingsGroup',
+          media: mediaID('wingsgroup-hero-partner-meeting.png'),
+          title: 'Gặp gỡ đối tác doanh nghiệp',
+        },
+      ],
+      type: 'highImpact',
+    },
+    layout,
+    meta: {
+      description:
+        'WingsGroup — điểm bắt đầu để tìm đúng dịch vụ du lịch, thông tin doanh nghiệp và đầu mối phù hợp.',
+      title: 'WingsGroup — Hệ sinh thái dịch vụ du lịch',
+    },
+    title: 'WingsGroup',
+  } as never
+  const homePageWrite = {
+    collection: 'pages' as const,
+    data: homePageData,
     locale: 'vi',
     overrideAccess: true,
     req,
-  })
+  }
+  const homePage = (
+    existingHome.docs[0]
+      ? await payload.update({ ...homePageWrite, id: existingHome.docs[0].id } as never)
+      : await payload.create(homePageWrite as never)
+  ) as (typeof existingHome.docs)[number]
 
   console.log(
     JSON.stringify(
       {
         apply: true,
-        pageID: 1,
+        pageID: homePage.id,
         siteCode: WINGSGROUP_SITE_CODE,
         mediaCount: mediaSeed.verified,
         mediaSeed,
