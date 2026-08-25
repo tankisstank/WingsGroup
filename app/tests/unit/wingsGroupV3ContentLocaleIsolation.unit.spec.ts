@@ -54,11 +54,19 @@ describe('WingsGroup content locale request isolation', () => {
       pageWrites.every(
         (write) =>
           (write.req as Record<string, unknown>).locale === write.locale &&
+          (write.req as Record<string, unknown>).fallbackLocale === false &&
           (write.req as Record<string, unknown>).payloadDataLoader === undefined,
       ),
     ).toBe(true)
     expect(pageWrites[0].data).toMatchObject({ pathname: '/', _status: 'published' })
     expect(pageWrites[1].data).toMatchObject({ pathname: '/', _status: 'published' })
+    expect(
+      pageWrites.find(
+        (write) => (write.data as Record<string, unknown>).pathname === '/ve-wingsgroup',
+      )?.data,
+    ).toMatchObject({
+      meta: { breadcrumbLabel: null, description: null, image: null, title: null },
+    })
     expect(settingsWrites).toHaveLength(2)
     expect(settingsWrites.map((write) => write.locale)).toEqual(['vi', 'en'])
     expect(

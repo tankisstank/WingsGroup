@@ -362,6 +362,7 @@ describe('WingsGroup v3 production content importer contract', () => {
     expect(localeWrites).toHaveLength(40)
     expect(localeWrites.slice(0, 2).map(({ locale }) => locale)).toEqual(['vi', 'en'])
     expect(localeWrites.every(({ locale, request }) => request.locale === locale)).toBe(true)
+    expect(localeWrites.every(({ request }) => request.fallbackLocale === false)).toBe(true)
     expect(localeWrites.every(({ request }) => request.payloadDataLoader === undefined)).toBe(true)
     expect(inventory.site).toEqual({ code: WINGSGROUP_SITE_CODE, id: 1 })
   })

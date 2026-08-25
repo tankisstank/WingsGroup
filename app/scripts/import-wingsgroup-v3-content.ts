@@ -960,7 +960,7 @@ const pageDataForLocale = ({
     _status: contractRoute.publication[locale] === 'approved' ? 'published' : 'draft',
     hero: resolved.hero,
     layout: resolved.layout,
-    meta: resolved.meta,
+    meta: resolved.meta ?? { breadcrumbLabel: null, description: null, image: null, title: null },
     pathname: contractRoute.path,
     slug: contractRoute.path === '/' ? 'home' : contractRoute.path.slice(1),
     title: resolved.title,
@@ -988,7 +988,7 @@ const contentPageWrite = async ({
   siteID: number | string
 }) => {
   const data = { ...pageDataForLocale({ contractRoute, formID, locale, mediaIDs }), site: siteID }
-  const localeReq = { ...req, locale, payloadDataLoader: undefined }
+  const localeReq = { ...req, fallbackLocale: false, locale, payloadDataLoader: undefined }
   if (existing) {
     return payload.update({
       collection: 'pages',
