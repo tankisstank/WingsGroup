@@ -269,6 +269,14 @@
   text-align: center;
 }
 
+.mediaPending strong {
+  max-width: 28ch;
+  color: var(--background, #fbfaf6);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
 .ecosystemSection {
   margin-bottom: clamp(3rem, 5vw, 4.5rem);
   padding-bottom: 0;
@@ -566,11 +574,15 @@
 }
 
 .routeHeader {
-  display: flex;
+  display: grid;
   align-items: end;
-  justify-content: space-between;
+  grid-template-columns: minmax(0, 460px) minmax(0, 1fr) minmax(0, 300px);
   gap: 32px;
   margin-bottom: 30px;
+}
+
+.routeHeader .sectionDescription {
+  grid-column: 2 / span 2;
 }
 
 .capabilityRows {
@@ -986,6 +998,36 @@
 .contactSection {
   background: var(--foreground, #302d26);
   color: var(--background, #fbfaf6);
+}
+
+.contactIntro {
+  padding-bottom: 34px;
+  padding-top: 54px;
+  border-bottom: 1px solid var(--site-border, #dedbd3);
+}
+
+.contactIntroCopy {
+  max-width: 46rem;
+  margin-top: 14px;
+}
+
+.contactIntroCopy :global(h1),
+.contactIntroCopy :global(h2),
+.contactIntroCopy :global(h3) {
+  max-width: 16ch;
+  margin: 0;
+  color: var(--foreground, #302d26);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.contactIntroCopy :global(p) {
+  max-width: 54ch;
+  margin: 18px 0 0;
+  color: var(--muted-foreground, #777269);
+  font-size: 1.0625rem;
+  line-height: 1.6;
 }
 
 .contactHeader {
@@ -1492,4 +1534,18 @@
   .unifiedDetailCta:hover {
     transform: none;
   }
+}
+
+/* Keep the v3 navigation editorial and flat even when the shared theme
+ * supplies rounded or elevated defaults. */
+:global(body[data-site-code='wings-group'][data-wingsgroup-v3='true']):has(.hero)
+  :global(.site-header--wingsgroup-v3 .site-header__bar),
+:global(body[data-site-code='wings-group'][data-wingsgroup-v3='true']):has(.hero)
+  :global(.site-header--wingsgroup-v3 .theme-nav-link),
+:global(body[data-site-code='wings-group'][data-wingsgroup-v3='true']):has(.hero)
+  :global(.site-header--wingsgroup-v3 .site-language-switcher__link),
+:global(body[data-site-code='wings-group'][data-wingsgroup-v3='true']):has(.hero)
+  :global(.site-header--wingsgroup-v3 .site-mobile-nav__link) {
+  border-radius: 0;
+  box-shadow: none;
 }

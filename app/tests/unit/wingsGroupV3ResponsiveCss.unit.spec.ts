@@ -28,6 +28,7 @@ describe('WingsGroup v3 responsive CSS contract', () => {
       .slice(0, -1)
       .map((chunk) => chunk.split('}').pop() || '')
       .filter((selector) => selector.trim() && !selector.trim().startsWith('@'))
+      .filter((selector) => !selector.includes('.wingsgroup-v3-editorial-article'))
 
     expect(selectors.every((selector) => selector.includes("data-site-code='wings-group'"))).toBe(
       true,

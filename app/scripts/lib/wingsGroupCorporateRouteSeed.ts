@@ -79,9 +79,10 @@ const lexical = (
   },
 })
 
-const pageHero = (title: string): SeedBlock => ({
+const pageHero = (title: string, media?: string): SeedBlock => ({
+  ...(media ? { media } : {}),
   richText: lexical(title, [], 'h1'),
-  type: 'lowImpact',
+  type: 'highImpact',
 })
 
 const content = (heading: string, ...paragraphs: string[]): SeedBlock => ({
@@ -187,7 +188,10 @@ const ecosystemRoute = (locale: Locale): LocalizedRouteSeed => ({
     locale === 'en'
       ? 'Five service brands, each with a clear role and a considered route into consultation.'
       : 'Năm thương hiệu dịch vụ, mỗi thương hiệu có một vai trò rõ ràng và một điểm bắt đầu phù hợp.',
-  hero: pageHero(locale === 'en' ? 'The WingsGroup ecosystem' : 'Hệ sinh thái WingsGroup'),
+  hero: pageHero(
+    locale === 'en' ? 'The WingsGroup ecosystem' : 'Hệ sinh thái WingsGroup',
+    'wingsgroup-ecosystem-hero.png',
+  ),
   layout: [
     {
       blockType: 'wingsGroupEcosystem',
@@ -315,46 +319,26 @@ const routeContent: Record<
     vi: {
       title: 'Về WingsGroup',
       description: 'Thông tin doanh nghiệp, văn phòng và mối quan hệ thương hiệu của WingsGroup.',
-      hero: pageHero('Về WingsGroup'),
+      hero: pageHero('Về WingsGroup', 'wingsgroup-ecosystem-hero.png'),
       layout: [
         content(
           'Mối quan hệ thương hiệu',
           WINGSGROUP_LEGAL_IDENTITY.relationshipStatement,
           `${WINGSGROUP_LEGAL_IDENTITY.legalEntityName} có tên quốc tế và viết tắt ${WINGSGROUP_LEGAL_IDENTITY.internationalName}. Người đại diện: ${WINGSGROUP_LEGAL_IDENTITY.legalRepresentative}.`,
         ),
-        features(
-          'Thông tin doanh nghiệp',
-          'Địa chỉ làm việc minh bạch',
-          'Thông tin được quản lý tập trung tại WingsGroup.',
-          [
-            { title: 'Trụ sở đăng ký', description: WINGSGROUP_LEGAL_IDENTITY.registeredOffice },
-            { title: 'Văn phòng du lịch', description: WINGSGROUP_LEGAL_IDENTITY.travelOffice },
-          ],
-        ),
-        contactCTA('vi'),
       ],
     },
     en: {
       title: 'About WingsGroup',
       description:
         'Corporate identity, offices and the public brand relationship behind WingsGroup.',
-      hero: pageHero('About WingsGroup'),
+      hero: pageHero('About WingsGroup', 'wingsgroup-ecosystem-hero.png'),
       layout: [
         content(
           'Brand relationship',
           WINGSGROUP_RELATIONSHIP_STATEMENT_EN,
           `${WINGSGROUP_LEGAL_IDENTITY.legalEntityName} uses the international abbreviation ${WINGSGROUP_LEGAL_IDENTITY.internationalName}. Its legal representative is ${WINGSGROUP_LEGAL_IDENTITY.legalRepresentative}.`,
         ),
-        features(
-          'Corporate details',
-          'Clear office information',
-          'The organisation maintains a registered office and a travel office in Hanoi.',
-          [
-            { title: 'Registered office', description: WINGSGROUP_LEGAL_IDENTITY.registeredOffice },
-            { title: 'Travel office', description: WINGSGROUP_LEGAL_IDENTITY.travelOffice },
-          ],
-        ),
-        contactCTA('en'),
       ],
     },
   },
@@ -366,7 +350,7 @@ const routeContent: Record<
     vi: {
       title: 'Năng lực dịch vụ',
       description: 'Các nhóm dịch vụ du lịch được tổ chức theo nhu cầu khách hàng và đối tác.',
-      hero: pageHero('Năng lực dịch vụ'),
+      hero: pageHero('Năng lực dịch vụ', 'wingsgroup-vietnam-discovery.png'),
       layout: [
         features(
           'Năng lực',
@@ -374,31 +358,33 @@ const routeContent: Record<
           'Mỗi thương hiệu tập trung vào một hành trình phục vụ rõ ràng.',
           [
             {
-              title: 'Du lịch nước ngoài',
+              title: 'WingsGo',
               description: 'Tư vấn hành trình, lịch khởi hành và hỗ trợ trước chuyến đi.',
             },
             {
-              title: 'Đón khách tại Việt Nam',
-              description: 'Thiết kế hành trình Việt Nam linh hoạt cho khách quốc tế.',
+              title: 'WingSide',
+              description: 'Hành trình Việt Nam theo nhịp riêng và nhu cầu của nhóm riêng.',
             },
             {
-              title: 'Khách đoàn và sự kiện',
-              description:
-                'Đề xuất riêng cho đoàn doanh nghiệp, hội nghị và chuyến đi theo yêu cầu.',
+              title: 'WingsPass',
+              description: 'Hỗ trợ tại điểm chạm, đón tiễn và Fast Track theo nhu cầu.',
             },
             {
-              title: 'Dịch vụ hỗ trợ',
-              description: 'Hỗ trợ sân bay, chăm sóc hành trình và các nhu cầu liên quan.',
+              title: 'WingsPlus',
+              description: 'Hành trình riêng, đoàn doanh nghiệp và chương trình theo mục tiêu.',
+            },
+            {
+              title: 'WingsCare',
+              description: 'Làm rõ quyền lợi, phạm vi hỗ trợ và lưu ý trước hành trình.',
             },
           ],
         ),
-        contactCTA('vi'),
       ],
     },
     en: {
       title: 'Service Capabilities',
       description: 'Travel services organised around the needs of travellers, groups and partners.',
-      hero: pageHero('Service Capabilities'),
+      hero: pageHero('Service Capabilities', 'wingsgroup-vietnam-discovery.png'),
       layout: [
         features(
           'Capabilities',
@@ -406,25 +392,27 @@ const routeContent: Record<
           'Each public brand concentrates on a clear customer journey.',
           [
             {
-              title: 'Outbound travel',
-              description: 'Journey advice, departure planning and considerate pre-trip support.',
+              title: 'WingsGo',
+              description: 'Journey advice, departure planning and pre-trip support.',
             },
             {
-              title: 'Travel in Vietnam',
-              description: 'Flexible Vietnam journeys designed for international guests.',
+              title: 'WingSide',
+              description: 'Vietnam journeys shaped around local rhythm and private groups.',
             },
             {
-              title: 'Groups and events',
-              description:
-                'Tailored proposals for corporate groups, meetings and special journeys.',
+              title: 'WingsPass',
+              description: 'Airport touchpoints, arrival support and Fast Track by request.',
             },
             {
-              title: 'Travel support',
-              description: 'Airport assistance, journey care and related services.',
+              title: 'WingsPlus',
+              description: 'Private journeys, corporate groups and considered event programmes.',
+            },
+            {
+              title: 'WingsCare',
+              description: 'Clearer guidance on travel care, benefits and support options.',
             },
           ],
         ),
-        contactCTA('en'),
       ],
     },
   },
@@ -432,7 +420,7 @@ const routeContent: Record<
     vi: {
       title: 'Tin cậy và pháp lý',
       description: 'Thông tin pháp nhân và giấy phép đã được xác nhận cho WingsGroup.',
-      hero: pageHero('Tin cậy và pháp lý'),
+      hero: pageHero('Tin cậy và pháp lý', 'wingsgroup-travel-support.png'),
       layout: [
         content(
           'Thông tin pháp lý công khai',
@@ -440,13 +428,12 @@ const routeContent: Record<
           `Mã số doanh nghiệp: ${WINGSGROUP_LEGAL_IDENTITY.registrationNumber}. Giấy phép kinh doanh dịch vụ lữ hành quốc tế: ${WINGSGROUP_LEGAL_IDENTITY.licenceNumber}.`,
           `Người đại diện: ${WINGSGROUP_LEGAL_IDENTITY.legalRepresentative}.`,
         ),
-        contactCTA('vi'),
       ],
     },
     en: {
       title: 'Trust and Legal Information',
       description: 'Confirmed corporate identity and travel-licence information for WingsGroup.',
-      hero: pageHero('Trust and Legal Information'),
+      hero: pageHero('Trust and Legal Information', 'wingsgroup-travel-support.png'),
       layout: [
         content(
           'Public legal information',
@@ -454,7 +441,6 @@ const routeContent: Record<
           `Business registration: ${WINGSGROUP_LEGAL_IDENTITY.registrationNumber}. International travel licence: ${WINGSGROUP_LEGAL_IDENTITY.licenceNumber}.`,
           `Legal representative: ${WINGSGROUP_LEGAL_IDENTITY.legalRepresentative}.`,
         ),
-        contactCTA('en'),
       ],
     },
   },
@@ -462,7 +448,7 @@ const routeContent: Record<
     vi: {
       title: 'Tin tức',
       description: 'Tin tức và góc nhìn từ WingsGroup.',
-      hero: pageHero('Tin tức'),
+      hero: pageHero('Tin tức', 'wingsgroup-travel-support.png'),
       layout: [
         {
           blockType: 'archive',
@@ -479,7 +465,7 @@ const routeContent: Record<
     en: {
       title: 'News and Insights',
       description: 'News and considered perspectives from WingsGroup.',
-      hero: pageHero('News and Insights'),
+      hero: pageHero('News and Insights', 'wingsgroup-travel-support.png'),
       layout: [
         {
           blockType: 'archive',
@@ -498,26 +484,24 @@ const routeContent: Record<
     vi: {
       title: 'Liên hệ',
       description: 'Gửi nhu cầu để WingsGroup kết nối bạn với bộ phận phù hợp.',
-      hero: pageHero('Liên hệ'),
+      hero: pageHero('Liên hệ', 'wingsgroup-corporate-partnership.png'),
       layout: [
         content(
           'Chúng tôi sẵn sàng lắng nghe',
           'Hãy chia sẻ thời gian, số lượng khách, điểm đến hoặc loại dịch vụ bạn đang quan tâm.',
         ),
-        contactCTA('vi'),
       ],
     },
     en: {
       title: 'Contact',
       description:
         'Share your request and WingsGroup will connect you with the most suitable team.',
-      hero: pageHero('Contact'),
+      hero: pageHero('Contact', 'wingsgroup-corporate-partnership.png'),
       layout: [
         content(
           'We would be pleased to hear from you',
           'Please share your preferred timing, party size, destination or the service you are considering.',
         ),
-        contactCTA('en'),
       ],
     },
   },
@@ -541,7 +525,7 @@ const homepageFallback = (locale: Locale): LocalizedRouteSeed => ({
     locale === 'en'
       ? 'Travel services connected through one trusted organisation.'
       : 'Các dịch vụ du lịch được kết nối trong một tổ chức đáng tin cậy.',
-  hero: pageHero('WingsGroup'),
+  hero: pageHero('WingsGroup', 'wingsgroup-ecosystem-hero.png'),
   layout: [
     content(
       locale === 'en' ? 'Thoughtful travel, connected expertise' : 'Tận tâm trong từng hành trình',
@@ -784,6 +768,48 @@ export const seedWingsGroupCorporateRoutes = async ({
     }
   }
 
+  const resolveMediaReference = (value: unknown, label: string): unknown => {
+    if (typeof value !== 'string') return value
+    const preferredMedia = mediaByFilename.get(value)
+    const mediaID = preferredMedia?.publishable ? preferredMedia.id : undefined
+    if (mediaID === undefined) {
+      throw new Error(
+        `WingsGroup ${label} requires a publishable site-scoped media fixture for ${value}.`,
+      )
+    }
+    return mediaID
+  }
+
+  const resolveRouteHero = (hero: SeedBlock, label: string): SeedBlock => ({
+    ...hero,
+    ...(Object.prototype.hasOwnProperty.call(hero, 'media')
+      ? { media: resolveMediaReference(hero.media, `${label} hero`) }
+      : {}),
+    ...(Array.isArray(hero.slides)
+      ? {
+          slides: hero.slides.map((slide, index) =>
+            slide && typeof slide === 'object' && !Array.isArray(slide)
+              ? {
+                  ...(slide as SeedBlock),
+                  media: resolveMediaReference(
+                    (slide as SeedBlock).media,
+                    `${label} hero slide ${index + 1}`,
+                  ),
+                  ...(Object.prototype.hasOwnProperty.call(slide, 'mobileMedia')
+                    ? {
+                        mobileMedia: resolveMediaReference(
+                          (slide as SeedBlock).mobileMedia,
+                          `${label} mobile hero slide ${index + 1}`,
+                        ),
+                      }
+                    : {}),
+                }
+              : slide,
+          ),
+        }
+      : {}),
+  })
+
   const resolveRouteLayout = (layout: SeedBlock[]): SeedBlock[] =>
     layout.map((block) => {
       if (block.blockType !== 'wingsGroupEcosystem' || !Array.isArray(block.profiles)) {
@@ -796,23 +822,24 @@ export const seedWingsGroupCorporateRoutes = async ({
           if (!profile || typeof profile !== 'object' || Array.isArray(profile)) return profile
           const stageMedia = (profile as SeedBlock).stageMedia
           if (typeof stageMedia !== 'string') return profile
-          const preferredMedia = mediaByFilename.get(stageMedia)
-          const mediaID = preferredMedia?.publishable ? preferredMedia.id : undefined
-          if (mediaID === undefined) {
-            throw new Error(
-              `WingsGroup ecosystem route requires a publishable site-scoped media fixture for ${stageMedia}.`,
-            )
+          return {
+            ...(profile as SeedBlock),
+            stageMedia: resolveMediaReference(stageMedia, 'ecosystem profile'),
           }
-          return { ...(profile as SeedBlock), stageMedia: mediaID }
         }),
       }
     })
 
   const routeSeeds = buildWingsGroupCorporateRouteSeeds()
   const resolvedRouteLayouts = new Map<string, SeedBlock[]>()
+  const resolvedRouteHeroes = new Map<string, SeedBlock>()
   for (const route of routeSeeds) {
     for (const locale of ['vi', 'en'] as const) {
       resolvedRouteLayouts.set(`${route.path}:${locale}`, resolveRouteLayout(route[locale].layout))
+      resolvedRouteHeroes.set(
+        `${route.path}:${locale}`,
+        resolveRouteHero(route[locale].hero, `${locale}:${route.path}`),
+      )
     }
   }
 
@@ -951,7 +978,7 @@ export const seedWingsGroupCorporateRoutes = async ({
         context: { disableRevalidate: true },
         data: {
           ...base,
-          hero: route.vi.hero,
+          hero: resolvedRouteHeroes.get(`${route.path}:vi`),
           layout: resolvedViLayout,
           meta: {
             breadcrumbLabel: route.vi.title,
@@ -1005,7 +1032,7 @@ export const seedWingsGroupCorporateRoutes = async ({
           collection: 'pages',
           context: { disableRevalidate: true },
           data: {
-            hero: localized.hero,
+            hero: resolvedRouteHeroes.get(`${route.path}:${locale}`),
             layout,
             meta: {
               breadcrumbLabel: localized.title,
@@ -1026,7 +1053,7 @@ export const seedWingsGroupCorporateRoutes = async ({
           await payload.update({
             collection: 'pages',
             context: { disableRevalidate: true },
-            data: { hero: route[locale].hero },
+            data: { hero: resolvedRouteHeroes.get(`${route.path}:${locale}`) },
             id: page.id,
             locale,
             overrideAccess: true,
@@ -1044,7 +1071,7 @@ export const seedWingsGroupCorporateRoutes = async ({
         collection: 'pages',
         context: { disableRevalidate: true },
         data: {
-          hero: localized.hero,
+          hero: resolvedRouteHeroes.get(`${route.path}:en`),
           layout: resolvedEnglishLayout,
           meta: {
             breadcrumbLabel: localized.title,

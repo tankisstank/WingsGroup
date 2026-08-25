@@ -30,6 +30,7 @@ type Props = Page['hero'] & {
 
 const copyByLocale = {
   en: {
+    mediaFallback: 'WingsGroup image pending governed publication.',
     next: 'Next hero story',
     pause: 'Pause hero carousel',
     play: 'Play hero carousel',
@@ -38,6 +39,7 @@ const copyByLocale = {
     title: 'Travel services, connected with care',
   },
   vi: {
+    mediaFallback: 'Hình ảnh WingsGroup đang chờ trạng thái xuất bản được kiểm soát.',
     next: 'Nội dung hero tiếp theo',
     pause: 'Dừng carousel hero',
     play: 'Tiếp tục carousel hero',
@@ -201,7 +203,9 @@ export const WingsGroupEditorialHero = (props: Props) => {
               size="(max-width: 850px) 100vw, 55vw"
             />
           ) : (
-            <div aria-hidden="true" className={styles.mediaPending} />
+            <div className={styles.mediaPending} data-media-state="safe-fallback">
+              <strong>{copy.mediaFallback}</strong>
+            </div>
           )}
 
           {activeStory?.title || activeStory?.description ? (

@@ -179,6 +179,19 @@ describe('WingsGroup v3 production content importer contract', () => {
       form: WINGSGROUP_V3_CONTENT_FORM_KEY,
     })
     expect(contract.pages[0].locales.en.title).toBe('WingsGroup')
+    for (const pathname of [
+      '/ve-wingsgroup',
+      '/he-sinh-thai',
+      '/nang-luc-dich-vu',
+      '/tin-cay-va-phap-ly',
+      '/tin-tuc',
+      '/lien-he',
+    ]) {
+      expect(
+        contract.pages.find((page) => page.path === pathname)?.locales.vi.hero,
+        pathname,
+      ).toMatchObject({ media: expect.stringMatching(/^wingsgroup-.+\.png$/) })
+    }
     expect(contract.pages.find((page) => page.path === '/dieu-khoan-su-dung')?.publication).toEqual(
       {
         en: 'hidden',
@@ -207,6 +220,13 @@ describe('WingsGroup v3 production content importer contract', () => {
         'wingsgroup-journey-consultation.png',
       ]),
     )
+    expect(() =>
+      resolveWingsGroupV3ContentContract({
+        contract,
+        formID: 77,
+        mediaIDs: new Map(),
+      }),
+    ).toThrow(/Missing governed WingsGroup media relation/)
   })
 
   it('resolves only site-scoped media and form relations before apply', () => {

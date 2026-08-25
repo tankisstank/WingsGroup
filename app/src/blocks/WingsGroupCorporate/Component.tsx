@@ -50,6 +50,14 @@ export const WingsGroupCorporateSection = ({ legalIdentity, locale }: Props) => 
               <dt>{isEnglish ? 'Representative' : 'Người đại diện'}</dt>
               <dd>{identity.legalRepresentative}</dd>
             </div>
+            <div>
+              <dt>{isEnglish ? 'Registered office' : 'Trụ sở đăng ký'}</dt>
+              <dd>{identity.registeredOffice}</dd>
+            </div>
+            <div>
+              <dt>{isEnglish ? 'Travel office' : 'Văn phòng du lịch'}</dt>
+              <dd>{identity.travelOffice}</dd>
+            </div>
           </dl>
         </div>
       </div>

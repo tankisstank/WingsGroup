@@ -388,7 +388,7 @@ describe('WingsGroup v3 public components', () => {
     expect(screen.getByAltText('Second story')).toBeTruthy()
   })
 
-  it('keeps the English hero media fallback visually neutral until media is approved', () => {
+  it('keeps a deterministic, non-blank English hero fallback until media is approved', () => {
     siteLocaleMock.value = 'en'
     render(
       <WingsGroupEditorialHero
@@ -403,8 +403,25 @@ describe('WingsGroup v3 public components', () => {
       />,
     )
 
-    expect(screen.queryByText(/publication review|Editorial image pending/i)).toBeNull()
+    expect(screen.getByText('WingsGroup image pending governed publication.')).toBeTruthy()
+    expect(document.querySelector('[data-media-state="safe-fallback"]')).toBeTruthy()
     expect(screen.queryByRole('status')).toBeNull()
+  })
+
+  it('keeps the ecosystem stage readable when governed media is unavailable', () => {
+    render(
+      <WingsGroupEcosystemComponent
+        blockType="wingsGroupEcosystem"
+        locale="en"
+        profiles={[profile('wingsgo', 'WingsGo', { stageMedia: null as never })]}
+        title="Choose a service team"
+      />,
+    )
+
+    expect(
+      screen.getByText('A governed service image will appear here when available.'),
+    ).toBeTruthy()
+    expect(document.querySelector('[data-media-state="safe-fallback"]')).toBeTruthy()
   })
 
   it('uses the shared specialist dialog trigger and returns focus after Escape', () => {

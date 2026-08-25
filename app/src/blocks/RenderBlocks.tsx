@@ -29,6 +29,7 @@ import type { WingsGroupRouteArchetype } from '@/wingsgroup/corporateRoutes'
 import { WingsGroupCapabilitySection } from '@/blocks/WingsGroupCapability/Component'
 import { WingsGroupCorporateSection } from '@/blocks/WingsGroupCorporate/Component'
 import { WingsGroupEditorialArchive } from '@/components/WingsGroupV3/EditorialArchive'
+import { WingsGroupContactIntro } from '@/components/WingsGroupV3/ContactIntro'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -107,13 +108,21 @@ export const RenderBlocks: React.FC<{
                       ? WingsGroupCapabilitySection
                       : wingsGroupV3 && wingsGroupV3Route === 'corporate' && blockType === 'content'
                         ? WingsGroupCorporateSection
-                        : wingsGroupV3 &&
-                            wingsGroupV3Route === 'editorial' &&
-                            blockType === 'archive'
-                          ? WingsGroupEditorialArchive
-                          : wingsGroupV3 && wingsGroupV3Route === 'trust' && blockType === 'content'
-                            ? WingsGroupTrustSection
-                            : blockComponents[blockType]
+                        : wingsGroupV3 && wingsGroupV3Route === 'contact' && blockType === 'content'
+                          ? WingsGroupContactIntro
+                          : wingsGroupV3 &&
+                              wingsGroupV3Route === 'contact' &&
+                              blockType === 'formBlock'
+                            ? WingsGroupContactSection
+                            : wingsGroupV3 &&
+                                wingsGroupV3Route === 'editorial' &&
+                                blockType === 'archive'
+                              ? WingsGroupEditorialArchive
+                              : wingsGroupV3 &&
+                                  wingsGroupV3Route === 'trust' &&
+                                  blockType === 'content'
+                                ? WingsGroupTrustSection
+                                : blockComponents[blockType]
 
             if (Block) {
               const blockProps =
@@ -131,14 +140,16 @@ export const RenderBlocks: React.FC<{
                         (wingsGroupV3Route === 'corporate' || wingsGroupV3Route === 'trust') &&
                         block.blockType === 'content'
                       ? { ...block, legalIdentity: wingsGroupLegalIdentity, locale }
-                      : wingsGroupV3Home &&
-                          (block.blockType === 'infoStrip' || block.blockType === 'stats')
-                        ? { ...block, legalIdentity: wingsGroupLegalIdentity, locale }
-                        : block.blockType === 'credentialsCarousel' ||
-                            block.blockType === 'wingsGroupProofArchive' ||
-                            (wingsGroupV3Home && block.blockType === 'archive')
-                          ? { ...block, allowWingsGroupDevelopmentMedia, locale }
-                          : block
+                      : wingsGroupV3 && wingsGroupV3Route === 'contact' && blockType === 'content'
+                        ? { ...block, locale }
+                        : wingsGroupV3Home &&
+                            (block.blockType === 'infoStrip' || block.blockType === 'stats')
+                          ? { ...block, legalIdentity: wingsGroupLegalIdentity, locale }
+                          : block.blockType === 'credentialsCarousel' ||
+                              block.blockType === 'wingsGroupProofArchive' ||
+                              (wingsGroupV3Home && block.blockType === 'archive')
+                            ? { ...block, allowWingsGroupDevelopmentMedia, locale }
+                            : block
               const section = wingsGroupV3Home ? getWingsGroupHomeSection(block) : null
 
               const renderedBlock = (

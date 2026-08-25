@@ -32,3 +32,17 @@ build; no production endpoint is modified.
 
 Populate after independent review with the accepted commit SHA, exact commands,
 browser screenshots and report checksums.
+
+## Worker Validation Record — 2026-08-25
+
+This is implementation-worker evidence only; it is not independent approval.
+
+- Focused unit coverage: 6 files, 42 tests passed.
+- Focused component coverage: 3 files, 19 tests passed.
+- Focused corporate-route integration: 14 tests passed.
+- `pnpm exec tsc --noEmit`: passed.
+- `pnpm lint`: passed with 0 errors and 176 existing warnings.
+- Prettier check on changed files: passed.
+- `pnpm exec next build --webpack`: passed, including static generation of 17/17 pages.
+- Default `pnpm build`: environment-blocked because the repository-local `node_modules` symlink points outside the checkout root; the linked checkout was not modified.
+- Browser review: no screenshots recorded. A fresh disposable seed was blocked by the governed media fixture `wingsgroup-vietnam-discovery.png`; an older disposable snapshot also required a schema migration that failed in the existing migration API. No production endpoint or CMS data was modified.

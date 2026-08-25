@@ -8,7 +8,10 @@ const payloadMock = vi.hoisted(() => ({
 
 vi.mock('@payload-config', () => ({ default: {} }))
 vi.mock('payload', () => ({ getPayload: vi.fn(async () => payloadMock) }))
-vi.mock('@/utilities/siteContext', () => ({ appendSiteWhere: vi.fn(async () => ({})) }))
+vi.mock('@/utilities/siteContext', () => ({
+  appendSiteWhere: vi.fn(async () => ({})),
+  getCurrentSite: vi.fn(async () => ({ code: 'wings-group', id: 1 })),
+}))
 vi.mock('@/components/Media', () => ({
   Media: () => <div data-testid="editorial-media" />,
 }))

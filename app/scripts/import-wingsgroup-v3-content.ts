@@ -580,6 +580,9 @@ const resolveRelations = (
   if (Array.isArray(value)) return value.map((item) => resolveRelations(item, mediaIDs, formID))
   if (!value || typeof value !== 'object') {
     if (typeof value === 'string' && mediaIDs.has(value)) return mediaIDs.get(value)
+    if (typeof value === 'string' && value.endsWith('.png')) {
+      throw new Error(`Missing governed WingsGroup media relation: ${value}.`)
+    }
     return value
   }
   const record = value as UnknownRecord

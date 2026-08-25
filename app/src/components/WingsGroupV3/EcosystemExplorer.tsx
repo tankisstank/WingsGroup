@@ -26,6 +26,7 @@ type Props = WingsGroupEcosystemBlock & {
 const copyByLocale = {
   en: {
     choose: 'Choose a WingsGroup service brand',
+    mediaFallback: 'A governed service image will appear here when available.',
     proof: 'Client feedback:',
     verified: 'Verified information is available.',
     railDescription: 'Select a team to see how it can accompany your next step.',
@@ -33,6 +34,7 @@ const copyByLocale = {
   },
   vi: {
     choose: 'Chọn thương hiệu dịch vụ trong WingsGroup',
+    mediaFallback: 'Hình ảnh dịch vụ được kiểm soát sẽ xuất hiện khi sẵn sàng.',
     proof: 'Phản hồi sau dịch vụ:',
     verified: 'Đã có thông tin được xác minh.',
     railDescription: 'Chạm để xem cách từng đội ngũ đồng hành cùng bạn.',
@@ -154,7 +156,9 @@ export const EcosystemExplorer = ({
                 size="(max-width: 850px) 100vw, 58vw"
               />
             ) : (
-              <div aria-hidden="true" className={styles.mediaPending} />
+              <div className={styles.mediaPending} data-media-state="safe-fallback">
+                <strong>{copy.mediaFallback}</strong>
+              </div>
             )}
             <div className={styles.unifiedStageContent}>
               <p className={styles.unifiedStageKicker}>
