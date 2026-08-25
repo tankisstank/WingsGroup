@@ -71,5 +71,11 @@ commits `4076b97c0bb4ca46c9a248d96aa3fdc489af3e69` and
   30 page updates (10 English updates after creation, then 10 VI/EN update
   pairs on the second pass). The full importer suite is green.
 - Browser evidence remains pending because the clean clone does not contain a
-  usable governed 13-media preview fixture. No production import, deployment
-  or cutover was run.
+  production-like baseline compatible with the current Payload schema. The
+  original 13-file handoff passed plan integrity against the governed clone
+  manifest; however, the available SQLite snapshots respectively lack the
+  page expected by the legacy preview seed or the current `sales_email`
+  column. The seed now carries its authenticated request context when reading
+  pending preview media and supplies the approved legal identity when enabling
+  the controlled fixture. No production import, deployment or cutover was
+  run.

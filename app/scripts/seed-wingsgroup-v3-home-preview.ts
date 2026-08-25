@@ -11,6 +11,7 @@ import path from 'node:path'
 import { createLocalReq, getPayload } from 'payload'
 
 import {
+  WINGSGROUP_LEGAL_IDENTITY,
   WINGSGROUP_LOCAL_DRAFT_PREVIEW_CONTEXT,
   WINGSGROUP_SITE_CODE,
 } from '../src/wingsgroup/corporateRoutes'
@@ -293,6 +294,7 @@ const seedPreviewContent = async ({
     limit: 30,
     overrideAccess: true,
     pagination: false,
+    req,
     where: { site: { equals: site.id } },
   })
   assertWingsGroupPreviewMediaPending(mediaResult.docs)
@@ -309,6 +311,7 @@ const seedPreviewContent = async ({
     ...(siteSettings.wingsGroupV3 || {}),
     enabled: true,
     englishPublicationState: 'hidden',
+    legalIdentity: WINGSGROUP_LEGAL_IDENTITY,
     privacy: {
       ...(siteSettings.wingsGroupV3?.privacy || {}),
       consentRequired: true,
