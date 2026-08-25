@@ -12,6 +12,7 @@ import { buildWingsGroupPendingPolicyPage } from '@/wingsgroup/pendingPolicyPage
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
+import { hydrateScopedWingsGroupMediaRelations } from '@/utilities/wingsGroupMediaRelations'
 
 export const queryPageByPath = async ({
   depth = 3,
@@ -83,7 +84,8 @@ export const queryPageByPath = async ({
       where: scopedWhere,
     })
 
-    return result.docs?.[0] || null
+    const page = result.docs?.[0] || null
+    return page ? hydrateScopedWingsGroupMediaRelations(page, site) : null
   }
 
   const hasRenderableLocalizedContent = (page: Awaited<ReturnType<typeof findPage>>) => {

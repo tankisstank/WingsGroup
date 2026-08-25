@@ -28,6 +28,7 @@ import type {
   WingsGroupEcosystemBlock,
 } from '@/payload-types'
 import { localeMetadata } from '@/utilities/locales'
+import { hydrateScopedWingsGroupMediaRelations } from '@/utilities/wingsGroupMediaRelations'
 
 const sha = 'a'.repeat(64)
 const site = (code = 'wings-group'): Site =>
@@ -177,6 +178,19 @@ describe('WingsGroup v3 public view model', () => {
         }),
       ),
     ).toBe(false)
+  })
+
+  it('hydrates only same-site media IDs for an anonymously scoped public page', () => {
+    const sameSiteMedia = governedMedia({ site: 1 })
+    const foreignMedia = governedMedia({ id: 2, site: 2 })
+    const hydrated = hydrateScopedWingsGroupMediaRelations(
+      { foreignMedia, nested: { sameSiteMedia } },
+      site(),
+    )
+
+    expect(isWingsGroupPublishedMedia(hydrated.nested.sameSiteMedia)).toBe(true)
+    expect(isWingsGroupPublishedMedia(hydrated.foreignMedia)).toBe(false)
+    expect(hydrated.foreignMedia.site).toBe(2)
   })
 
   it('allows the governed development handoff only through the preview predicate', () => {
