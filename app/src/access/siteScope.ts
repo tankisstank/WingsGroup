@@ -19,10 +19,7 @@ import {
   getSiteAliasFromPathname,
   isPublicLocale,
 } from '@/utilities/sitePaths'
-import {
-  isWingsGroupV3DerivativeFilename,
-  WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES,
-} from '@/fields/wingsGroupV3'
+import { isWingsGroupV3DerivativeFilename } from '@/fields/wingsGroupV3'
 
 type SiteScopedData = {
   id: RelationID
@@ -89,21 +86,12 @@ const publicMediaWhere = (requestedFilename?: string): Where => {
     { 'governance.rightsEvidence': { exists: true } },
     { site: { exists: true } },
     { url: { exists: true } },
-    ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(
-      ({ format, width }) =>
-        ({
-          and: [
-            { 'governance.responsiveDerivatives.format': { equals: format } },
-            { 'governance.responsiveDerivatives.width': { equals: width } },
-          ],
-        }) as Where,
-    ),
   ]
   if (requestedFilename) {
     governedConditions.push(
       isWingsGroupV3DerivativeFilename(requestedFilename)
         ? { 'governance.responsiveDerivatives.url': { like: `%/media/${requestedFilename}` } }
-        : { 'governance.responsiveDerivatives.url': { equals: '__invalid-derivative__' } },
+        : { filename: { equals: requestedFilename } },
     )
   }
   return {

@@ -127,6 +127,65 @@ describe('WingsGroup governed derivative delivery', () => {
     }
   })
 
+  it('uses the requested public filename without requiring six array rows to match at once', async () => {
+    vi.stubEnv('SITE_CONTEXT_SECRET', 'wingsgroup-delivery-test-secret')
+    const readAccess = async (publicPath: string) => {
+      const headers = await createTrustedSiteContextHeaders(
+        new Headers({ host: 'wingsgroup.example' }),
+        {
+          host: 'wingsgroup.example',
+          publicPath,
+          siteCode: 'wings-group',
+        },
+      )
+      return wingsGroupMediaReadAccess({
+        req: {
+          headers,
+          payload: {
+            find: async () => ({
+              docs: [
+                {
+                  code: 'wings-group',
+                  id: 7,
+                  isActive: true,
+                  primaryDomain: 'wingsgroup.example',
+                },
+              ],
+            }),
+          },
+        },
+      } as never)
+    }
+
+    try {
+      const original = await readAccess('/media/wg-v3-abcdef123456-wingsgroup-airport-service.png')
+      const derivative = await readAccess('/media/wingsgroup-airport-service-abcdef123456-640.webp')
+      const originalConditions = (original as { and: Array<{ or: Array<{ and: unknown[] }> }> })
+        .and[1].or[1].and
+      const derivativeConditions = (derivative as { and: Array<{ or: Array<{ and: unknown[] }> }> })
+        .and[1].or[1].and
+
+      expect(originalConditions).toContainEqual({
+        filename: { equals: 'wg-v3-abcdef123456-wingsgroup-airport-service.png' },
+      })
+      expect(derivativeConditions).toContainEqual({
+        'governance.responsiveDerivatives.url': {
+          like: '%/media/wingsgroup-airport-service-abcdef123456-640.webp',
+        },
+      })
+      expect(
+        derivativeConditions.filter(
+          (condition) =>
+            typeof condition === 'object' &&
+            condition !== null &&
+            'governance.responsiveDerivatives.format' in condition,
+        ),
+      ).toHaveLength(0)
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
   it('fails closed for partial public ledgers and allows only a complete same-site ledger', async () => {
     const site = {
       code: 'wings-group',
