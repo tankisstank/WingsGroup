@@ -171,7 +171,7 @@ try {
   const migrated = await run('pnpm', ['exec', 'payload', 'migrate'], environment)
   if (migrated.code !== 0) throw new Error('Payload migration failed on disposable PostgreSQL.')
   const phaseResults = []
-  for (const phase of ['bootstrap', 'apply', 'publish', 'verify']) {
+  for (const phase of ['bootstrap', 'apply', 'publish', 'verify', 'content-rollback', 'content']) {
     const result = await run(
       'pnpm',
       ['exec', 'tsx', 'scripts/wingsgroup-v3-media-process-phase.mjs', phase],
@@ -186,7 +186,17 @@ try {
     proof.publish?.localizedAltVerified !== 26 ||
     proof.publish?.responsiveDerivatives?.persisted !== 78 ||
     proof.publish?.publication !== 'published' ||
-    proof.verify?.verified !== 13
+    proof.verify?.verified !== 13 ||
+    proof.content?.routeCount !== 10 ||
+    proof.content?.publishedLocales !== 16 ||
+    proof.content?.firstWrites !== 20 ||
+    proof.content?.secondWrites !== 20 ||
+    proof.content?.formPresent !== true ||
+    proof.contentRollback?.error !== 'WP-REL-35 induced mid-content-write failure.' ||
+    proof.contentRollback?.pageWrites !== 1 ||
+    proof.contentRollback?.formCount !== 0 ||
+    proof.contentRollback?.pageCount !== 0 ||
+    proof.contentRollback?.settingsUnchanged !== true
   )
     throw new Error(`Process-isolated media proof counts did not match: ${JSON.stringify(proof)}`)
   console.log(JSON.stringify({ phaseResults, proof, status: 'pass' }, null, 2))

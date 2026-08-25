@@ -12,9 +12,10 @@ const operationID = process.env.WP_REL_27_OPERATION_ID
 if (!root || !manifestPath || !statePath || !mediaDirectory || !operationID)
   throw new Error('WP-REL-27 phase requires local fixture paths and operation ID.')
 
-const { createLocalReq, getPayload } = await import('payload')
+const { commitTransaction, createLocalReq, getPayload, initTransaction } = await import('payload')
 const config = (await import('../src/payload.config.ts')).default
 const media = await import('./import-wingsgroup-v3-media.ts')
+const content = await import('./import-wingsgroup-v3-content.ts')
 const planHelpers = await import('./lib/wingsGroupV3MediaPlan.ts')
 const payload = await getPayload({ config })
 let destroyedByRecovery = false
@@ -44,6 +45,30 @@ const readState = async () => {
     return JSON.parse(await readFile(statePath, 'utf8'))
   } catch {
     return { generatedMedia: [] }
+  }
+}
+
+const addFixtureMediaAliases = (inventory, contract) => {
+  const names = new Set()
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      value.forEach(visit)
+      return
+    }
+    if (typeof value === 'string' && value.endsWith('.png')) {
+      names.add(value)
+      return
+    }
+    if (!value || typeof value !== 'object') return
+    Object.values(value).forEach(visit)
+  }
+  visit(contract)
+  for (const name of names) {
+    const stem = name.slice(0, -'.png'.length)
+    const planned = plan.records.find((record) => record.sourceFile.startsWith(`${stem}-`))
+    if (!planned) continue
+    const mediaID = inventory.mediaIDs.get(planned.sourceFile)
+    if (mediaID !== undefined) inventory.mediaIDs.set(name, mediaID)
   }
 }
 
@@ -136,6 +161,163 @@ try {
         req,
         siteID: site.id,
       })
+    } else if (phase === 'content-rollback') {
+      const contract = content.buildWingsGroupV3ContentContract()
+      const inventory = await content.readWingsGroupV3ContentInventory({
+        manifest,
+        mediaDirectory,
+        mediaPlan: plan,
+        payload,
+        publicOrigin: 'https://wingsgroup.test',
+        req,
+        siteID: site.id,
+      })
+      addFixtureMediaAliases(inventory, contract)
+      const settingsBeforeResult = await payload.find({
+        collection: 'site-settings',
+        depth: 0,
+        limit: 2,
+        overrideAccess: true,
+        pagination: false,
+        req,
+        where: { site: { equals: site.id } },
+      })
+      const settingsBefore = settingsBeforeResult.docs[0] || null
+      const transactionID = await initTransaction(req)
+      if (!transactionID || !req.transactionID)
+        throw new Error('Content rollback smoke transaction could not be initialized.')
+      let pageWrites = 0
+      const failingPayload = {
+        ...payload,
+        create: async (args) => payload.create(args),
+        update: async (args) => {
+          const result = await payload.update(args)
+          if (args.collection === 'pages') {
+            pageWrites += 1
+            if (pageWrites === 1) throw new Error('WP-REL-35 induced mid-content-write failure.')
+          }
+          return result
+        },
+      }
+      let rollbackError = ''
+      try {
+        await content.applyWingsGroupV3Content({
+          contract,
+          inventory,
+          payload: failingPayload,
+          req,
+        })
+        await commitTransaction(req)
+        throw new Error('WP-REL-35 induced failure did not occur.')
+      } catch (error) {
+        rollbackError = error instanceof Error ? error.message : String(error)
+        if (req.transactionID && payload.db) await payload.db.rollbackTransaction(req.transactionID)
+      }
+      const forms = await payload.find({
+        collection: 'forms',
+        depth: 0,
+        limit: 100,
+        overrideAccess: true,
+        pagination: false,
+        req,
+        where: { title: { equals: 'WingsGroup production contact intake' } },
+      })
+      const settingsResult = await payload.find({
+        collection: 'site-settings',
+        depth: 0,
+        limit: 2,
+        overrideAccess: true,
+        pagination: false,
+        req,
+        where: { site: { equals: site.id } },
+      })
+      const pages = await payload.find({
+        collection: 'pages',
+        depth: 0,
+        limit: 100,
+        overrideAccess: true,
+        pagination: false,
+        req,
+        where: { site: { equals: site.id } },
+      })
+      const settings = settingsResult.docs[0] || {}
+      state.contentRollback = {
+        error: rollbackError,
+        formCount: forms.docs.length,
+        pageWrites,
+        pageCount: pages.docs.length,
+        settingsUnchanged: JSON.stringify(settings) === JSON.stringify(settingsBefore),
+        settingsHasWingsGroupV3: Boolean(settings.wingsGroupV3),
+      }
+      if (
+        rollbackError !== 'WP-REL-35 induced mid-content-write failure.' ||
+        forms.docs.length !== 0 ||
+        pages.docs.length !== 0 ||
+        !state.contentRollback.settingsUnchanged
+      )
+        throw new Error(`Content rollback proof failed: ${JSON.stringify(state.contentRollback)}`)
+    } else if (phase === 'content') {
+      const contract = content.buildWingsGroupV3ContentContract()
+      const transactionID = await initTransaction(req)
+      if (!transactionID || !req.transactionID)
+        throw new Error('Content smoke transaction could not be initialized.')
+      try {
+        const firstInventory = await content.readWingsGroupV3ContentInventory({
+          manifest,
+          mediaDirectory,
+          mediaPlan: plan,
+          payload,
+          publicOrigin: 'https://wingsgroup.test',
+          req,
+          siteID: site.id,
+        })
+        addFixtureMediaAliases(firstInventory, contract)
+        const first = await content.applyWingsGroupV3Content({
+          contract,
+          inventory: firstInventory,
+          payload,
+          req,
+        })
+        const secondInventory = await content.readWingsGroupV3ContentInventory({
+          manifest,
+          mediaDirectory,
+          mediaPlan: plan,
+          payload,
+          publicOrigin: 'https://wingsgroup.test',
+          req,
+          siteID: site.id,
+        })
+        addFixtureMediaAliases(secondInventory, contract)
+        const second = await content.applyWingsGroupV3Content({
+          contract,
+          inventory: secondInventory,
+          payload,
+          req,
+        })
+        const verifiedInventory = await content.readWingsGroupV3ContentInventory({
+          manifest,
+          mediaDirectory,
+          mediaPlan: plan,
+          payload,
+          publicOrigin: 'https://wingsgroup.test',
+          req,
+          siteID: site.id,
+        })
+        state.content = {
+          ...content.verifyWingsGroupV3ContentInventory({
+            contract,
+            formID: verifiedInventory.form?.id || '',
+            inventory: verifiedInventory,
+          }),
+          firstWrites: first.writes.length,
+          secondWrites: second.writes.length,
+          formPresent: Boolean(verifiedInventory.form),
+        }
+        await commitTransaction(req)
+      } catch (error) {
+        if (req.transactionID && payload.db) await payload.db.rollbackTransaction(req.transactionID)
+        throw error
+      }
     } else throw new Error(`Unknown WP-REL-27 phase: ${phase}`)
   }
   await writeFile(statePath, `${JSON.stringify(state)}\n`)

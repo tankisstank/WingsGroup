@@ -314,6 +314,7 @@ describe('WingsGroup v3 production content importer contract', () => {
       [...collectMediaNames(contract)].map((name, index) => [name, index + 100]),
     )
     const writes: string[] = []
+    const localeWrites: Array<{ locale: string; request: Record<string, unknown> }> = []
     const payload = {
       create: async (args: unknown) => {
         const input = args as Record<string, unknown>
@@ -326,6 +327,12 @@ describe('WingsGroup v3 production content importer contract', () => {
       update: async (args: unknown) => {
         const input = args as Record<string, unknown>
         writes.push(`update:${String(input.collection)}`)
+        if (input.collection === 'pages') {
+          localeWrites.push({
+            locale: String(input.locale),
+            request: input.req as Record<string, unknown>,
+          })
+        }
         return { ...(input.data as Record<string, unknown>), id: input.id }
       },
     }
@@ -352,6 +359,10 @@ describe('WingsGroup v3 production content importer contract', () => {
     expect(first.writes).toHaveLength(20)
     expect(second.writes).toEqual(first.writes)
     expect(writes.length).toBe(firstWriteCount + 23)
+    expect(localeWrites).toHaveLength(40)
+    expect(localeWrites.slice(0, 2).map(({ locale }) => locale)).toEqual(['vi', 'en'])
+    expect(localeWrites.every(({ locale, request }) => request.locale === locale)).toBe(true)
+    expect(localeWrites.every(({ request }) => request.payloadDataLoader === undefined)).toBe(true)
     expect(inventory.site).toEqual({ code: WINGSGROUP_SITE_CODE, id: 1 })
   })
 })

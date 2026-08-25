@@ -988,6 +988,7 @@ const contentPageWrite = async ({
   siteID: number | string
 }) => {
   const data = { ...pageDataForLocale({ contractRoute, formID, locale, mediaIDs }), site: siteID }
+  const localeReq = { ...req, locale, payloadDataLoader: undefined }
   if (existing) {
     return payload.update({
       collection: 'pages',
@@ -996,7 +997,7 @@ const contentPageWrite = async ({
       id: existing.id,
       locale,
       overrideAccess: true,
-      req,
+      req: localeReq,
     } as never)
   }
   return payload.create({
@@ -1005,7 +1006,7 @@ const contentPageWrite = async ({
     data: data as never,
     locale,
     overrideAccess: true,
-    req,
+    req: localeReq,
   } as never)
 }
 
@@ -1052,7 +1053,7 @@ export const applyWingsGroupV3Content = async ({
     id: inventory.settings.id,
     locale: 'vi',
     overrideAccess: true,
-    req,
+    req: { ...req, locale: 'vi', payloadDataLoader: undefined },
   } as never)
   await payload.update({
     collection: 'site-settings',
@@ -1061,7 +1062,7 @@ export const applyWingsGroupV3Content = async ({
     id: inventory.settings.id,
     locale: 'en',
     overrideAccess: true,
-    req,
+    req: { ...req, locale: 'en', payloadDataLoader: undefined },
   } as never)
 
   const writes: string[] = []
