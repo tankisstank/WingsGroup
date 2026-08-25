@@ -41,9 +41,8 @@ export const queryPageByPath = async ({
   }
 
   const payload = await getPayload({ config: configPromise })
-  const requestHeaders = await headers()
   const previewReq = draft
-    ? await createWingsGroupLocalPreviewPayloadReq({ headers: requestHeaders, payload })
+    ? await createWingsGroupLocalPreviewPayloadReq({ headers: await headers(), payload })
     : undefined
   const segments = requestedPath.split('/').filter(Boolean)
   const candidateSlug = segments[segments.length - 1] || 'home'

@@ -304,6 +304,10 @@ export const createWingsGroupLocalPreviewPayloadReq = async ({
   headers: Headers
   payload: Payload
 }) => {
+  // Production's trusted loopback preview path is intentionally separate from
+  // this disposable local fixture. Never synthesize an operator request from
+  // a production draft cookie, even when the edge has normalized its headers.
+  if (process.env.NODE_ENV === 'production') return undefined
   if (!(await hasWingsGroupLocalDraftPreviewSignal({ headers }))) return undefined
 
   const operators = await payload.find({

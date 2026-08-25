@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  createWingsGroupLocalPreviewPayloadReq,
   hasExplicitWingsGroupLocalDraftPreviewSignal,
   hasWingsGroupLocalPreviewGrant,
   isExplicitWingsGroupLocalDraftPreviewRequest,
@@ -181,5 +182,18 @@ describe('server-verifiable local preview grant', () => {
         userID: 77,
       }),
     ).toBeNull()
+  })
+
+  it('never derives an operator Payload request from a production preview cookie', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    const payload = { find: vi.fn() }
+
+    await expect(
+      createWingsGroupLocalPreviewPayloadReq({
+        headers: previewHeaders({ cookie: '__prerender_bypass=trusted-loopback-cookie' }),
+        payload: payload as never,
+      }),
+    ).resolves.toBeUndefined()
+    expect(payload.find).not.toHaveBeenCalled()
   })
 })

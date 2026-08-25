@@ -7,12 +7,13 @@ import {
 
 const mocks = vi.hoisted(() => ({
   draftMode: vi.fn(),
+  headers: vi.fn(),
   find: vi.fn(),
   settings: {} as Record<string, unknown>,
   site: { code: 'wings-group', id: 1 },
 }))
 
-vi.mock('next/headers', () => ({ draftMode: mocks.draftMode }))
+vi.mock('next/headers', () => ({ draftMode: mocks.draftMode, headers: mocks.headers }))
 vi.mock('@payload-config', () => ({ default: {} }))
 vi.mock('payload', () => ({ getPayload: vi.fn(async () => ({ find: mocks.find })) }))
 vi.mock('@/utilities/getSiteSettings', () => ({
@@ -57,6 +58,7 @@ const contactPage = {
 describe('CMS page requested-path perimeter', () => {
   beforeEach(() => {
     mocks.draftMode.mockResolvedValue({ isEnabled: false })
+    mocks.headers.mockResolvedValue(new Headers())
     mocks.find.mockReset()
     mocks.find.mockResolvedValue({ docs: [contactPage] })
     mocks.site = { code: 'wings-group', id: 1 }
@@ -83,7 +85,10 @@ describe('CMS page requested-path perimeter', () => {
     async (requestedPath) => {
       mocks.draftMode.mockResolvedValue({ isEnabled: true })
 
-      await expect(queryPageByPath({ locale: 'en', requestedPath })).resolves.toEqual(contactPage)
+      await expect(queryPageByPath({ locale: 'en', requestedPath })).resolves.toMatchObject({
+        ...contactPage,
+        site: mocks.site,
+      })
       expect(mocks.find).toHaveBeenCalledTimes(1)
       expect(mocks.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -96,9 +101,12 @@ describe('CMS page requested-path perimeter', () => {
   )
 
   it('still resolves an exact governed Vietnamese path', async () => {
-    await expect(queryPageByPath({ locale: 'vi', requestedPath: '/lien-he' })).resolves.toEqual(
-      contactPage,
-    )
+    await expect(
+      queryPageByPath({ locale: 'vi', requestedPath: '/lien-he' }),
+    ).resolves.toMatchObject({
+      ...contactPage,
+      site: mocks.site,
+    })
     expect(mocks.find).toHaveBeenCalledTimes(1)
   })
 

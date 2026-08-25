@@ -19,8 +19,6 @@ import { startWingsGroupLocalPreviewStore } from '@/utilities/localPreviewStore'
 const sourceRoot = path.resolve(process.cwd())
 const seedScript = path.resolve(sourceRoot, 'scripts/seed-wingsgroup-v3-home-preview.ts')
 const payloadConfig = pathToFileURL(path.resolve(sourceRoot, 'src/payload.config.ts')).href
-const baseDatabase = path.resolve(sourceRoot, 'e09-preview.db')
-
 type ChildResult = {
   error?: Error
   status: number | null
@@ -69,6 +67,68 @@ const runProcess = (
 
 const runNode = (source: string, env: NodeJS.ProcessEnv) =>
   runProcess(['--import=tsx/esm', '--input-type=module', '-e', source], env)
+
+const createCurrentSchemaPreviewBaseline = async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-baseline-'))
+  const database = path.join(root, 'e09-preview.db')
+  const environment: NodeJS.ProcessEnv = {
+    ...process.env,
+    DATABASE_URL: `file:${database}`,
+    NODE_ENV: 'test',
+    NODE_NO_WARNINGS: '1',
+    PAYLOAD_DB_PUSH: 'true',
+    PAYLOAD_SECRET: 'e09-preview-current-schema-test-secret',
+  }
+  const bootstrap = await runNode(
+    `
+      const { createLocalReq, getPayload } = await import('payload')
+      const { default: config } = await import(${JSON.stringify(payloadConfig)})
+      const { ensureLocalAdminUser } = await import('./src/utilities/adminSeed')
+      const payload = await getPayload({ config })
+      try {
+        const admin = await ensureLocalAdminUser(payload)
+        const req = await createLocalReq({ user: admin }, payload)
+        req.context = { disableRevalidate: true, seed: true }
+        const site = await payload.create({
+          collection: 'sites',
+          overrideAccess: true,
+          req,
+          data: {
+            code: 'wings-group',
+            defaultLocale: 'vi',
+            isActive: true,
+            name: 'WingsGroup',
+            primaryDomain: 'wingsgroup.local',
+            supportedLocales: ['vi', 'en'],
+          },
+        })
+        await payload.create({
+          collection: 'site-settings',
+          locale: 'vi',
+          overrideAccess: true,
+          req,
+          data: {
+            branding: { logoText: 'WingsGroup', themeKey: 'wings-group' },
+            salesEmail: 'sales@wingsgroup.vn',
+            seo: { canonicalDomain: 'https://wingsgroup.vn' },
+            site: site.id,
+            siteName: 'WingsGroup',
+            supportEmail: 'info@wingsgroup.vn',
+            supportPhone: '0912910101',
+          },
+        })
+      } finally {
+        await payload.destroy()
+      }
+    `,
+    environment,
+  )
+  if (bootstrap.status !== 0) {
+    fs.rmSync(root, { force: true, recursive: true })
+    throw new Error(`Current-schema E09 baseline bootstrap failed: ${bootstrap.stderr}`)
+  }
+  return { database, root }
+}
 
 const previewEnvironment = (store: { token: string; url: string }): NodeJS.ProcessEnv => ({
   ...process.env,
@@ -296,18 +356,14 @@ describe('E09 local preview correction 3', () => {
   })
 
   it('runs the actual fresh seed twice without exposing the store token, then boots a distinct Payload process', async () => {
-    if (!fs.existsSync(baseDatabase)) {
-      throw new Error(
-        'E09-70 correction-3 evidence gap: app/e09-preview.db is required as the disposable Payload baseline for the real seed command.',
-      )
-    }
+    const baseline = await createCurrentSchemaPreviewBaseline()
     const fixture = await createManifestFixture()
     const mediaParent = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-media-leaf-'))
     const mediaRoot = path.join(mediaParent, 'media')
     const externalMediaRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-media-target-'))
     fs.writeFileSync(path.join(externalMediaRoot, 'sentinel.txt'), 'external media sentinel')
     fs.symlinkSync(externalMediaRoot, mediaRoot, 'dir')
-    const store = await startWingsGroupLocalPreviewStore({ baseDatabasePath: baseDatabase })
+    const store = await startWingsGroupLocalPreviewStore({ baseDatabasePath: baseline.database })
     const environment = previewEnvironment(store)
     environment.E09_PREVIEW_MEDIA_DIRECTORY = mediaRoot
     try {
@@ -335,10 +391,14 @@ describe('E09 local preview correction 3', () => {
 
       const server = await runNode(
         `
-          const { getPayload } = await import('payload')
+          const { createLocalReq, getPayload } = await import('payload')
           const { default: config } = await import(${JSON.stringify(payloadConfig)})
           const payload = await getPayload({ config })
-          const result = await payload.find({ collection: 'media', depth: 0, limit: 30, overrideAccess: true, pagination: false })
+          const operators = await payload.find({ collection: 'users', depth: 0, limit: 1, overrideAccess: true, pagination: false, where: { role: { equals: 'super-admin' } } })
+          const operator = operators.docs[0]
+          if (!operator) throw new Error('real Payload server found no local operator')
+          const req = await createLocalReq({ user: operator }, payload)
+          const result = await payload.find({ collection: 'media', depth: 0, limit: 30, pagination: false, req })
           const media = result.docs.filter((doc) => doc.governance?.managedBy === 'wingsgroup-v3')
           const filename = media[0]?.filename
           if (!filename) throw new Error('real Payload server found no governed media')
@@ -383,6 +443,7 @@ describe('E09 local preview correction 3', () => {
       expect(fs.readdirSync(externalMediaRoot)).toEqual(['sentinel.txt'])
     } finally {
       await store.close()
+      fs.rmSync(baseline.root, { force: true, recursive: true })
       fs.rmSync(fixture.assetsDirectory, { force: true, recursive: true })
       fs.rmSync(mediaParent, { force: true, recursive: true })
       fs.rmSync(externalMediaRoot, { force: true, recursive: true })
