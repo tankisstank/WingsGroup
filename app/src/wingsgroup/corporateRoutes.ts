@@ -87,6 +87,17 @@ export const getWingsGroupRouteDefinition = (value: unknown): WingsGroupRouteDef
   return WINGSGROUP_CORPORATE_ROUTES.find((route) => route.path === path) || null
 }
 
+/**
+ * Shared chrome may cover the editorial archive and one governed article
+ * descendant. The article route performs the record-level governance check;
+ * this helper only admits the bounded public path shape.
+ */
+export const isWingsGroupV3SurfacePath = (value: unknown): boolean => {
+  const rawPath = asString(value).split(/[?#]/u, 1)[0]
+  if (getWingsGroupRouteDefinition(rawPath)) return true
+  return /^\/tin-tuc\/[^/]+\/?$/u.test(rawPath)
+}
+
 export const isWingsGroupEnglishPublicRoute = ({
   path,
   settings,

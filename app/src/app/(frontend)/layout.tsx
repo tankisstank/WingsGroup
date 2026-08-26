@@ -28,7 +28,7 @@ import { getCurrentSite } from '@/utilities/siteContext'
 import { getCanonicalSiteOrigin, getSiteSitemapURL } from '@/utilities/siteSEO'
 import { WingsSideSpecialsPromo } from '@/components/WingsSideSpecialsPromo'
 import { getPublicRoutePathname } from '@/utilities/sitePaths'
-import { getWingsGroupRouteDefinition } from '@/wingsgroup/corporateRoutes'
+import { isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
 import { WINGSGROUP_BRAND, isWingsGroupBrandSite } from '@/wingsgroup/brand'
 
 const getSiteFaviconURL = (
@@ -83,7 +83,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const isWingsGroupV3Surface =
     site.code === 'wings-group' &&
     settings?.wingsGroupV3?.enabled === true &&
-    Boolean(getWingsGroupRouteDefinition(publicPathname))
+    isWingsGroupV3SurfacePath(publicPathname)
   const publicRoute = getPublicRoutePathname(publicPathname)
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
   const siteTheme = getSiteThemeTokens(settings, { siteCode: site.code })

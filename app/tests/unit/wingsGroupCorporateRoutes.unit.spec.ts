@@ -10,6 +10,7 @@ import {
   isWingsGroupPendingPolicyRouteRenderable,
   isWingsGroupV3ExactPublicInventoryEnabled,
   isWingsGroupV3PublicSurfacePathAllowed,
+  isWingsGroupV3SurfacePath,
   isWingsGroupRoutePublic,
   WINGSGROUP_CONTENT_VALIDATION_MARKER,
   WINGSGROUP_CORPORATE_ROUTES,
@@ -102,6 +103,20 @@ describe('WingsGroup corporate route contract', () => {
       '/dieu-khoan-su-dung',
       '/chinh-sach-thanh-toan',
     ])
+  })
+
+  it('matches the editorial archive and exactly one article descendant only', () => {
+    expect(isWingsGroupV3SurfacePath('/tin-tuc')).toBe(true)
+    expect(isWingsGroupV3SurfacePath('/tin-tuc/governed-article')).toBe(true)
+
+    for (const path of [
+      '/tin-tuc/governed-article/extra',
+      '/tin-tuc//governed-article',
+      '/posts/governed-article',
+      '/tin-tuc/governed-article/comments',
+    ]) {
+      expect(isWingsGroupV3SurfacePath(path)).toBe(false)
+    }
   })
 
   it('fails closed outside the exact VI route inventory when WingsGroup v3 is enabled', () => {

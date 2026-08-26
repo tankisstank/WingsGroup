@@ -10,7 +10,7 @@ describe('WingsGroup v3 shared public shell', () => {
     const header = read('Header/Component.tsx')
     const nav = read('Header/Nav/index.tsx')
 
-    expect(header).toContain('getWingsGroupRouteDefinition(publicPathname)')
+    expect(header).toContain('isWingsGroupV3SurfacePath(publicPathname)')
     expect(header).toContain("url: '#consultation-dialog'")
     expect(nav).toContain("{ href: '/he-sinh-thai', label: 'Hệ sinh thái' }")
     expect(nav).toContain("{ href: '/tin-tuc', label: 'Cẩm nang' }")
@@ -23,6 +23,8 @@ describe('WingsGroup v3 shared public shell', () => {
     const layout = read('app/(frontend)/layout.tsx')
     const page = read('app/(frontend)/cmsPage.tsx')
 
+    expect(footer).toContain('isWingsGroupV3SurfacePath(publicPathname)')
+    expect(layout).toContain('isWingsGroupV3SurfacePath(publicPathname)')
     expect(footer).toContain("' site-footer--wingsgroup-v3'")
     expect(footer).toContain('!isWingsGroupV3Surface ? <ThemeSelector')
     expect(layout).toContain('!isWingsGroupV3Surface ? (')

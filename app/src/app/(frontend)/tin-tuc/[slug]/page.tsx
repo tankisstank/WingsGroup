@@ -3,18 +3,21 @@ import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
-import RichText from '@/components/RichText'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { JsonLd } from '@/components/JsonLd'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { WingsGroupEditorialArticle } from '@/components/WingsGroupV3/EditorialArticle'
 import { getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 import {
-  getGovernedEditorialAuthorNames,
+  getWingsGroupEditorialOpenGraphMedia,
   getWingsGroupEditorialPostPath,
+  queryWingsGroupEditorialFallbackMedia,
   queryWingsGroupEditorialPosts,
+  resolveWingsGroupEditorialMedia,
+  selectWingsGroupEditorialRelatedPosts,
 } from '@/utilities/wingsGroupEditorial'
 import {
   buildArticleJSONLD,
@@ -26,12 +29,19 @@ import {
   isWingsGroupEnglishPublicRoute,
   isWingsGroupV3ExactPublicInventoryEnabled,
 } from '@/wingsgroup/corporateRoutes'
-import { formatDateTime } from '@/utilities/formatDateTime'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
 
 type Args = {
   params: Promise<{ slug: string }>
+}
+
+const decodeEditorialSlug = (slug: string) => {
+  try {
+    return decodeURIComponent(slug)
+  } catch {
+    notFound()
+  }
 }
 
 const getArticle = async (slug: string) => {
@@ -63,19 +73,47 @@ const getArticle = async (slug: string) => {
   return post ? { draft, locale, post, settings, site } : null
 }
 
+const getArticlePresentation = async (
+  post: Awaited<ReturnType<typeof queryWingsGroupEditorialPosts>>[number],
+  locale: 'en' | 'vi',
+) => {
+  const [fallbackMedia, candidates] = await Promise.all([
+    queryWingsGroupEditorialFallbackMedia({ locale }),
+    queryWingsGroupEditorialPosts({ locale }),
+  ])
+  const heroMedia = resolveWingsGroupEditorialMedia(post, fallbackMedia)
+  const relatedItems = selectWingsGroupEditorialRelatedPosts(post, candidates).map(
+    (relatedPost) => ({
+      media: resolveWingsGroupEditorialMedia(relatedPost, fallbackMedia),
+      post: relatedPost,
+    }),
+  )
+
+  return { heroMedia, relatedItems }
+}
+
 export default async function Page({ params: paramsPromise }: Args) {
   const { slug } = await paramsPromise
-  const article = await getArticle(decodeURIComponent(slug))
+  const article = await getArticle(decodeEditorialSlug(slug))
   if (!article) notFound()
 
   const { draft, locale, post, settings, site } = article
+  const resolvedLocale = locale === 'en' ? 'en' : 'vi'
+  const { heroMedia, relatedItems } = await getArticlePresentation(post, resolvedLocale)
+  const structuredMedia = getWingsGroupEditorialOpenGraphMedia(heroMedia) || heroMedia
+  const structuredPost = structuredMedia
+    ? {
+        ...post,
+        heroImage: heroMedia,
+        meta: { ...(post.meta || {}), image: structuredMedia },
+      }
+    : post
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
   const canonicalPath = getPageCanonicalPath(
     { pathname: getWingsGroupEditorialPostPath(post.slug) },
     locale,
   )
   const archivePath = getPageCanonicalPath({ pathname: WINGSGROUP_EDITORIAL_ARCHIVE_PATH }, locale)
-  const authorNames = getGovernedEditorialAuthorNames(post)
   const breadcrumbItems = [
     { label: settings?.siteName || 'WingsGroup', path: '/' },
     {
@@ -100,7 +138,12 @@ export default async function Page({ params: paramsPromise }: Args) {
             settings,
             title: post.meta?.title || post.title,
           }),
-          buildArticleJSONLD({ canonicalOrigin, path: canonicalPath, post, settings }),
+          buildArticleJSONLD({
+            canonicalOrigin,
+            path: canonicalPath,
+            post: structuredPost,
+            settings,
+          }),
           buildBreadcrumbListJSONLD(
             breadcrumbItems.map((item) => ({ name: item.label, path: item.path })),
             settings,
@@ -114,37 +157,33 @@ export default async function Page({ params: paramsPromise }: Args) {
         items={breadcrumbItems}
         linkClassName="wingsgroup-v3-breadcrumb__link"
       />
-      <header className="container wingsgroup-v3-editorial-article__header">
-        <p className="wingsgroup-v3-editorial-article__eyebrow">
-          {locale === 'en' ? 'Editorial' : 'Biên tập'}
-        </p>
-        <h1>{post.title}</h1>
-        <div className="wingsgroup-v3-editorial-article__meta">
-          {post.publishedAt ? (
-            <time dateTime={post.publishedAt}>{formatDateTime(post.publishedAt)}</time>
-          ) : null}
-          {authorNames.length > 0 ? (
-            <span>
-              {locale === 'en' ? 'By' : 'Tác giả'}: {authorNames.join(', ')}
-            </span>
-          ) : null}
-          <span>{locale === 'en' ? 'Source: WingsGroup' : 'Nguồn: WingsGroup'}</span>
-        </div>
-      </header>
-      <div className="container wingsgroup-v3-editorial-article__body">
-        <RichText data={post.content} enableGutter={false} />
-      </div>
+      <WingsGroupEditorialArticle
+        heroMedia={heroMedia}
+        locale={resolvedLocale}
+        post={post}
+        relatedItems={relatedItems}
+      />
     </article>
   )
 }
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug } = await paramsPromise
-  const article = await getArticle(decodeURIComponent(slug))
+  const article = await getArticle(decodeEditorialSlug(slug))
   if (!article) return { robots: { follow: false, index: false } }
 
+  const locale = article.locale === 'en' ? 'en' : 'vi'
+  const { heroMedia } = await getArticlePresentation(article.post, locale)
+  const openGraphMedia = getWingsGroupEditorialOpenGraphMedia(heroMedia)
+  const metadataPost = openGraphMedia
+    ? {
+        ...article.post,
+        meta: { ...(article.post.meta || {}), image: openGraphMedia },
+      }
+    : article.post
+
   return generateMeta({
-    doc: article.post,
+    doc: metadataPost,
     locale: article.locale as SupportedLocaleCode,
     path: getWingsGroupEditorialPostPath(article.post.slug),
   })

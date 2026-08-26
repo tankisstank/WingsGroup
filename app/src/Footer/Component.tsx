@@ -10,7 +10,7 @@ import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
 import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 import { MailIcon, PhoneIcon } from 'lucide-react'
-import { getWingsGroupRouteDefinition } from '@/wingsgroup/corporateRoutes'
+import { isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
 import { isWingsGroupBrandSite } from '@/wingsgroup/brand'
 
 export async function Footer() {
@@ -23,7 +23,7 @@ export async function Footer() {
   const isWingsGroupV3Surface =
     site.code === 'wings-group' &&
     settings?.wingsGroupV3?.enabled === true &&
-    Boolean(getWingsGroupRouteDefinition(publicPathname))
+    isWingsGroupV3SurfacePath(publicPathname)
   const hiFiCopy = isWingSide ? getWingsSideHiFiCopy(locale) : null
   const wingSideNav = isWingSide ? getWingsSideHiFiNavItems(locale) : null
   const wingSideFooterCopy = isWingSide ? getWingSideFooterCopy(locale) : null

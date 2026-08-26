@@ -6,8 +6,8 @@ import { defaultThemeKey } from '@/utilities/themeTokens'
 import { isWingsGroupBrandSite } from '@/wingsgroup/brand'
 import React from 'react'
 import {
-  getWingsGroupRouteDefinition,
   isWingsGroupV3ExactPublicInventoryEnabled,
+  isWingsGroupV3SurfacePath,
 } from '@/wingsgroup/corporateRoutes'
 
 export async function Header() {
@@ -32,7 +32,7 @@ export async function Header() {
   const isWingsGroupV3Surface =
     site.code === 'wings-group' &&
     settings?.wingsGroupV3?.enabled === true &&
-    Boolean(getWingsGroupRouteDefinition(publicPathname))
+    isWingsGroupV3SurfacePath(publicPathname)
   const primaryAction = isWingsGroupV3Surface
     ? {
         label: locale === 'en' ? 'Speak with a specialist' : 'Trao đổi nhu cầu',
