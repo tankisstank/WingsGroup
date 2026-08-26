@@ -266,7 +266,16 @@ export const getWingsGroupEditorialOpenGraphMedia = (media?: Media | null): Medi
     )
     .sort((left, right) => (right.width || 0) - (left.width || 0))[0]
 
-  return derivative?.url ? { ...media, url: derivative.url } : null
+  return derivative?.url
+    ? {
+        ...media,
+        sizes: {
+          ...(media.sizes || {}),
+          og: { ...(media.sizes?.og || {}), url: derivative.url },
+        },
+        url: derivative.url,
+      }
+    : null
 }
 
 /**

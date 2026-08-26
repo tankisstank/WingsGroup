@@ -157,9 +157,12 @@ describe('WingsGroup v3 editorial eligibility', () => {
   })
 
   it('uses the widest verified WebP derivative for public OG metadata', () => {
-    expect(getWingsGroupEditorialOpenGraphMedia(governedMedia())?.url).toBe(
-      'https://media.wingsgroup.vn/journey-1200.webp',
+    const openGraphMedia = getWingsGroupEditorialOpenGraphMedia(
+      governedMedia({ sizes: { og: { url: '/media/stale-1200x630.png' } } }),
     )
+
+    expect(openGraphMedia?.url).toBe('https://media.wingsgroup.vn/journey-1200.webp')
+    expect(openGraphMedia?.sizes?.og?.url).toBe('https://media.wingsgroup.vn/journey-1200.webp')
   })
 
   it('derives archive OG metadata from the governed editorial fallback register', () => {
