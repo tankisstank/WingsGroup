@@ -60,6 +60,11 @@ import type { WingsSideHiFiPageSource } from '@/utilities/wingsSideHiFiPageModel
 import { filterCmsLayoutBlocksForHiFiComposer } from '@/utilities/wingsSideHiFiComposer'
 import { isWingsGroupV3HomeLayout } from '@/components/WingsGroupV3/model'
 import { WingsGroupConsultationDialog } from '@/components/WingsGroupV3/ConsultationDialog'
+import {
+  getWingsGroupEditorialArchiveOpenGraphMedia,
+  queryWingsGroupEditorialFallbackMedia,
+  WINGSGROUP_EDITORIAL_ARCHIVE_PATH,
+} from '@/utilities/wingsGroupEditorial'
 import { hydrateWingsSideHomeCuration, projectWingsSideHomeCuration } from '@/tours/homeCuration'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import type { Form as PayloadForm } from '@/payload-types'
@@ -373,6 +378,15 @@ export async function generateCmsPageMetadataByPath({
 
   const site = await getCurrentSite()
   const settings = await getCurrentSiteSettings()
+  const editorialArchiveOpenGraphMedia =
+    page &&
+    site.code === 'wings-group' &&
+    settings?.wingsGroupV3?.enabled === true &&
+    requestedPath === WINGSGROUP_EDITORIAL_ARCHIVE_PATH
+      ? getWingsGroupEditorialArchiveOpenGraphMedia(
+          await queryWingsGroupEditorialFallbackMedia({ locale: locale === 'en' ? 'en' : 'vi' }),
+        )
+      : null
   if (page && site.code === 'wing-side' && requestedPath.startsWith('/tour/')) {
     const cleanTitle = sanitizeWingSidePublicText(String(page.title || '')).replace(
       /\s+\d+\s+days?$/i,
@@ -398,7 +412,12 @@ export async function generateCmsPageMetadataByPath({
 
   const metadata = await generateMeta({
     alternateLocales,
-    doc: page,
+    doc: editorialArchiveOpenGraphMedia
+      ? {
+          ...page,
+          meta: { ...(page?.meta || {}), image: editorialArchiveOpenGraphMedia },
+        }
+      : page,
     locale,
     path: requestedPath,
   })

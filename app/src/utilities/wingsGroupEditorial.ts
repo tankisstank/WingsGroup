@@ -269,6 +269,18 @@ export const getWingsGroupEditorialOpenGraphMedia = (media?: Media | null): Medi
   return derivative?.url ? { ...media, url: derivative.url } : null
 }
 
+/**
+ * The archive is a CMS page, while its editorial cards resolve their imagery
+ * from the governed fallback register. Keep its social metadata on that same
+ * register rather than inheriting a legacy CMS SEO image that may be private.
+ */
+export const getWingsGroupEditorialArchiveOpenGraphMedia = (
+  fallbackMedia: WingsGroupEditorialMediaMap,
+): Media | null =>
+  getWingsGroupEditorialOpenGraphMedia(
+    fallbackMedia.get(WINGSGROUP_EDITORIAL_FALLBACK_MEDIA_FILENAMES[0]),
+  )
+
 export const selectWingsGroupEditorialRelatedPosts = (
   post: Pick<Post, 'id' | 'relatedPosts'>,
   candidates: Post[],

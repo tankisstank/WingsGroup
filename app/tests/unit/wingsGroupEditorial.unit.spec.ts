@@ -5,6 +5,7 @@ import {
   applyWingsGroupEditorialPublicCopy,
   formatWingsGroupEditorialDate,
   getGovernedEditorialAuthorNames,
+  getWingsGroupEditorialArchiveOpenGraphMedia,
   getWingsGroupEditorialOpenGraphMedia,
   getWingsGroupEditorialPostPath,
   isGovernedWingsGroupEditorialPost,
@@ -159,6 +160,17 @@ describe('WingsGroup v3 editorial eligibility', () => {
     expect(getWingsGroupEditorialOpenGraphMedia(governedMedia())?.url).toBe(
       'https://media.wingsgroup.vn/journey-1200.webp',
     )
+  })
+
+  it('derives archive OG metadata from the governed editorial fallback register', () => {
+    const fallback = governedMedia({ id: 47 })
+
+    expect(
+      getWingsGroupEditorialArchiveOpenGraphMedia(
+        new Map([['wingsgroup-journey-guide.png', fallback]]),
+      )?.url,
+    ).toBe('https://media.wingsgroup.vn/journey-1200.webp')
+    expect(getWingsGroupEditorialArchiveOpenGraphMedia(new Map())).toBeNull()
   })
 
   it('prioritizes explicit related posts and excludes the current article', () => {
