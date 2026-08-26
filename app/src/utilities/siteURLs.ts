@@ -69,6 +69,8 @@ export const buildConfiguredAbsoluteMediaURL = ({
   if (media && typeof media === 'object' && 'url' in media && media.url) {
     const mediaPath = media.sizes?.og?.url || media.url
 
+    if (/^https?:\/\//i.test(mediaPath)) return mediaPath
+
     return `${baseURL}${mediaPath}`
   }
 
