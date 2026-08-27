@@ -357,6 +357,31 @@ describe('WingsGroup v3 public components', () => {
     expect(document.querySelector('[data-od-id="trust"]')).toBeTruthy()
   })
 
+  it('renders approved business figures in both locales without changing proof-gate state', () => {
+    const items = [
+      {
+        description: 'Số liệu do WingsGroup cung cấp.',
+        label: 'Khách hàng cá nhân đồng hành',
+        value: '10.000+',
+      },
+      {
+        description: 'Figures supplied by WingsGroup.',
+        label: 'Individual travellers served',
+        value: '10,000+',
+      },
+    ] as never
+
+    const { rerender } = render(<WingsGroupTrustSection items={items} locale="vi" />)
+    expect(screen.getByText('10.000+')).toBeTruthy()
+    expect(screen.getByText('Khách hàng cá nhân đồng hành')).toBeTruthy()
+    expect(screen.getAllByText('Đang cập nhật')).toHaveLength(3)
+
+    rerender(<WingsGroupTrustSection items={items} locale="en" />)
+    expect(screen.getByText('10,000+')).toBeTruthy()
+    expect(screen.getByText('Individual travellers served')).toBeTruthy()
+    expect(screen.getAllByText('Being updated')).toHaveLength(3)
+  })
+
   it('pauses hero autoplay after manual navigation and keeps both CTAs internal', () => {
     vi.useFakeTimers()
     render(

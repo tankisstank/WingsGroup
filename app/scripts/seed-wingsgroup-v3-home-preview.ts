@@ -460,7 +460,24 @@ const seedPreviewContent = async ({
       description:
         'Thông tin pháp nhân đã được ghi nhận; các hồ sơ chứng minh khác vẫn chờ kiểm tra.',
       eyebrow: 'Thông tin doanh nghiệp',
-      items: [{ label: 'Pháp nhân đã được xác nhận' }],
+      items: [
+        { label: 'Pháp nhân đã được xác nhận' },
+        {
+          description: 'Số liệu do WingsGroup cung cấp.',
+          label: 'Khách hàng cá nhân đồng hành',
+          value: '10.000+',
+        },
+        {
+          description: 'Số liệu do WingsGroup cung cấp.',
+          label: 'Chương trình MICE doanh nghiệp',
+          value: '500+',
+        },
+        {
+          description: 'Số liệu do WingsGroup cung cấp.',
+          label: 'Đánh giá hài lòng về dịch vụ Fast Track',
+          value: '98%',
+        },
+      ],
       title: 'Minh bạch để bạn an tâm lựa chọn.',
     },
     {

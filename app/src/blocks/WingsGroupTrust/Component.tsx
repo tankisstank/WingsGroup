@@ -1,4 +1,4 @@
-import type { SiteSetting } from '@/payload-types'
+import type { InfoStripBlock, SiteSetting } from '@/payload-types'
 import React from 'react'
 
 import { WINGSGROUP_LEGAL_IDENTITY } from '@/wingsgroup/corporateRoutes'
@@ -7,6 +7,7 @@ import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
 type LegalIdentity = NonNullable<SiteSetting['wingsGroupV3']>['legalIdentity']
 
 type Props = {
+  items?: InfoStripBlock['items']
   legalIdentity?: LegalIdentity | null
   locale?: null | string
 }
@@ -40,8 +41,9 @@ const copyByLocale = {
   },
 } as const
 
-export const WingsGroupTrustSection = ({ legalIdentity, locale }: Props) => {
+export const WingsGroupTrustSection = ({ items, legalIdentity, locale }: Props) => {
   const copy = locale === 'en' ? copyByLocale.en : copyByLocale.vi
+  const isEnglish = locale === 'en'
   const identity = {
     ...WINGSGROUP_LEGAL_IDENTITY,
     ...(legalIdentity || {}),
@@ -69,6 +71,22 @@ export const WingsGroupTrustSection = ({ legalIdentity, locale }: Props) => {
               <span>{identity.registrationNumber}</span>
               <span>{identity.licenceNumber}</span>
             </div>
+            {items?.some((item) => item.value) ? (
+              <div
+                aria-label={isEnglish ? 'WingsGroup figures' : 'Số liệu WingsGroup'}
+                className={styles.trustMetrics}
+              >
+                {items
+                  .filter((item) => item.value)
+                  .map((item) => (
+                    <article className={styles.trustMetric} key={`${item.label}-${item.value}`}>
+                      <strong>{item.value}</strong>
+                      <b>{item.label}</b>
+                      {item.description ? <p>{item.description}</p> : null}
+                    </article>
+                  ))}
+              </div>
+            ) : null}
           </div>
           <div className={styles.trustDetails}>
             {copy.rows.map(([heading, description], index) => (

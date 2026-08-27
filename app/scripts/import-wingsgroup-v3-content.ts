@@ -391,6 +391,29 @@ const buildProductionHomepage = (locale: ContentLocale) => {
         eyebrow: vietnamese ? 'Thông tin doanh nghiệp' : 'Corporate information',
         items: [
           { label: vietnamese ? 'Pháp nhân đã được xác nhận' : 'Corporate identity recorded' },
+          {
+            description: vietnamese
+              ? 'Số liệu do WingsGroup cung cấp.'
+              : 'Figures supplied by WingsGroup.',
+            label: vietnamese ? 'Khách hàng cá nhân đồng hành' : 'Individual travellers served',
+            value: vietnamese ? '10.000+' : '10,000+',
+          },
+          {
+            description: vietnamese
+              ? 'Số liệu do WingsGroup cung cấp.'
+              : 'Figures supplied by WingsGroup.',
+            label: vietnamese ? 'Chương trình MICE doanh nghiệp' : 'Corporate MICE programmes',
+            value: '500+',
+          },
+          {
+            description: vietnamese
+              ? 'Số liệu do WingsGroup cung cấp.'
+              : 'Figures supplied by WingsGroup.',
+            label: vietnamese
+              ? 'Đánh giá hài lòng về dịch vụ Fast Track'
+              : 'Fast Track satisfaction rating',
+            value: '98%',
+          },
         ],
         title: vietnamese
           ? 'Minh bạch để bạn an tâm lựa chọn.'
