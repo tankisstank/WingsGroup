@@ -1105,8 +1105,13 @@ export const verifyWingsGroupV3ContentInventory = ({
   verifySettingsContract(inventory.settings)
   if (!inventory.form) throw new Error('WingsGroup production contact form is missing.')
   verifyFormContract(inventory.form, relationID(inventory.site.id)!)
+  const resolvedContract = resolveWingsGroupV3ContentContract({
+    contract,
+    formID,
+    mediaIDs: inventory.mediaIDs,
+  })
   let publishedLocales = 0
-  for (const route of contract.pages) {
+  for (const route of resolvedContract.pages) {
     for (const locale of ['vi', 'en'] as const) {
       const page = inventory.pages[locale].get(route.path)
       if (!page) throw new Error(`Missing WingsGroup ${locale} route ${route.path}.`)
@@ -1123,8 +1128,9 @@ export const verifyWingsGroupV3ContentInventory = ({
   }
   return {
     publishedLocales,
-    publishedRoutes: contract.pages.filter((route) => route.publication.vi === 'approved').length,
-    routeCount: contract.pages.length,
+    publishedRoutes: resolvedContract.pages.filter((route) => route.publication.vi === 'approved')
+      .length,
+    routeCount: resolvedContract.pages.length,
   }
 }
 
