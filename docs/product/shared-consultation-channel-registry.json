@@ -26,14 +26,14 @@
     {
       "siteCode": "wings-go",
       "brand": "WingsGo",
-      "state": "planned",
-      "note": "Dùng cùng OA; chỉ bật sau khi site owner xác nhận vị trí CTA, tracking và QA route."
+      "state": "configured",
+      "note": "CTA đã live trong release cd78eaf431ffab7fa4f764e47dfccb328d4ddde5; route smoke HTTP 200."
     },
     {
       "siteCode": "wing-side",
       "brand": "WingSide",
-      "state": "planned",
-      "note": "Dùng cùng OA; chỉ bật sau khi site owner xác nhận vị trí CTA, tracking và QA route."
+      "state": "configured",
+      "note": "CTA đã live trong release cd78eaf431ffab7fa4f764e47dfccb328d4ddde5; route smoke HTTP 200."
     }
   ],
   "rolloutRules": [

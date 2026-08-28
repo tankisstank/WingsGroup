@@ -21,11 +21,11 @@ Nguồn máy đọc: [`shared-consultation-channel-registry.json`](./shared-cons
 ## Phạm vi rollout
 
 - **WingsGroup (`wings-group`)**: đã cấu hình production.
-- **WingsGo (`wingsgo`)**: đã ghi nhận là site rollout kế tiếp, chưa tự động bật
-  CTA trong production.
-- **WingSide (`wing-side`)**: đã ghi nhận là site rollout kế tiếp, chưa tự động
-  bật CTA trong production.
+- **WingsGo (`wings-go`)**: CTA đã live trong release
+  `cd78eaf431ffab7fa4f764e47dfccb328d4ddde5`.
+- **WingSide (`wing-side`)**: CTA đã live trong cùng release
+  `cd78eaf431ffab7fa4f764e47dfccb328d4ddde5`.
 
-Khi triển khai cho WingsGo hoặc WingSide, seed/migration phải đọc registry này,
-ghi channel vào SiteSettings của đúng tenant, rồi QA canonical URL, tracking,
-owner/SLA và fallback form. Không sao chép OAID vào component riêng lẻ.
+Khi triển khai thêm site, seed/migration phải đọc registry này, ghi channel vào
+SiteSettings của đúng tenant, rồi QA canonical URL, tracking, owner/SLA và
+fallback form. Không sao chép OAID vào component riêng lẻ.
