@@ -24,7 +24,7 @@
       "note": "Đã apply production trong release 99bce539efb8fbde99d04e65f912e0eedffe9634."
     },
     {
-      "siteCode": "wingsgo",
+      "siteCode": "wings-go",
       "brand": "WingsGo",
       "state": "planned",
       "note": "Dùng cùng OA; chỉ bật sau khi site owner xác nhận vị trí CTA, tracking và QA route."
