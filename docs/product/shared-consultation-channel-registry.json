@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "organization": "CÔNG TY CỔ PHẦN DU LỊCH ĐÔI CÁNH VIỆT",
+  "internationalName": "VIETWINGS.,JSC",
+  "channel": {
+    "key": "zalo",
+    "label": "Zalo OA",
+    "displayName": "Wingsgroup - Vietwings Travel",
+    "oaid": "4142059657526524531",
+    "url": "https://zalo.me/4142059657526524531",
+    "owner": "WingsGroup Sales",
+    "sla": {
+      "vi": "Phản hồi trong 1 ngày làm việc",
+      "en": "Reply within 1 business day"
+    },
+    "trackingReference": "stakeholder-approved-zalo-oa-4142059657526524531-2026-08-29",
+    "state": "approved"
+  },
+  "siteRollout": [
+    {
+      "siteCode": "wings-group",
+      "brand": "WingsGroup",
+      "state": "configured",
+      "note": "Đã apply production trong release 99bce539efb8fbde99d04e65f912e0eedffe9634."
+    },
+    {
+      "siteCode": "wingsgo",
+      "brand": "WingsGo",
+      "state": "planned",
+      "note": "Dùng cùng OA; chỉ bật sau khi site owner xác nhận vị trí CTA, tracking và QA route."
+    },
+    {
+      "siteCode": "wing-side",
+      "brand": "WingSide",
+      "state": "planned",
+      "note": "Dùng cùng OA; chỉ bật sau khi site owner xác nhận vị trí CTA, tracking và QA route."
+    }
+  ],
+  "rolloutRules": [
+    "Không hard-code OAID theo từng component hoặc từng site.",
+    "Mỗi site phải map channel registry vào SiteSettings trước khi public.",
+    "Chỉ hiển thị external CTA khi state=approved và có HTTPS URL, owner, SLA và trackingReference.",
+    "Site chưa được rollout giữ fallback form liên hệ và trạng thái chờ cập nhật."
+  ],
+  "lastUpdated": "2026-08-29"
+}
