@@ -1685,6 +1685,29 @@
   text-underline-offset: 3px;
 }
 
+/* At the 960px container breakpoint, the three-column archive row leaves the
+ * copy column too narrow. Keep the media and metadata rails in place, then
+ * let the editorial copy span the first two tracks on the row below. */
+@media (min-width: 851px) and (max-width: 1279px) {
+  .editorialArchiveLead .editorialArchiveMedia,
+  .editorialArchiveItem .editorialArchiveMedia {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .editorialArchiveLead .editorialArchiveCopy,
+  .editorialArchiveItem .editorialArchiveCopy {
+    grid-column: 1 / span 2;
+    grid-row: 2;
+  }
+
+  .editorialArchiveLead .editorialArchiveMeta,
+  .editorialArchiveItem .editorialArchiveMeta {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+}
+
 @media (max-width: 850px) {
   .consultationDialog {
     width: min(100%, calc(100vw - 20px));

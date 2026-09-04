@@ -64,4 +64,12 @@ describe('WingsGroup v3 responsive CSS contract', () => {
       /@media \(max-width: 850px\)[\s\S]*?:global\(\.wingsgroup-v3-editorial-article\) \.editorialArticleHeader,[\s\S]*?padding-inline:\s*20px;/,
     )
   })
+
+  it('moves archive copy below media between the desktop and mobile breakpoints', () => {
+    const css = fs.readFileSync(componentCss, 'utf8')
+
+    expect(css).toMatch(
+      /@media \(min-width: 851px\) and \(max-width: 1279px\)[\s\S]*?\.editorialArchiveLead \.editorialArchiveMedia,[\s\S]*?grid-column:\s*1;[\s\S]*?grid-row:\s*1;[\s\S]*?\.editorialArchiveLead \.editorialArchiveCopy,[\s\S]*?grid-column:\s*1 \/ span 2;[\s\S]*?grid-row:\s*2;[\s\S]*?\.editorialArchiveLead \.editorialArchiveMeta,[\s\S]*?grid-column:\s*3;[\s\S]*?grid-row:\s*1 \/ span 2;/,
+    )
+  })
 })
