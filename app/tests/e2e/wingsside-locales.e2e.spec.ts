@@ -10,7 +10,7 @@ const activateLocaleLink = async (page: Page, scope: Locator | Page, label: RegE
   await link.click()
 }
 
-test.describe('WingsSide locale continuity', () => {
+test.describe('WingSide locale continuity', () => {
   test('keeps unprefixed English and /vi Vietnamese self-canonical', async ({ page }) => {
     await page.goto(`${e2eBaseURL}/wingsside`, { waitUntil: 'domcontentloaded' })
     await expect(page.locator('html')).toHaveAttribute('lang', 'en')
@@ -40,7 +40,7 @@ test.describe('WingsSide locale continuity', () => {
     await expect(languageSwitcher).toHaveAttribute('data-client-ready', 'true')
     await expect(languageSwitcher.getByRole('link', { name: 'Italiano' })).toHaveAttribute(
       'href',
-      '/wingsside/it/search?q=hanoi#results',
+      '/wing-side/it/search?q=hanoi#results',
     )
 
     await activateLocaleLink(page, page, 'Italiano')

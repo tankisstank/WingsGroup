@@ -118,7 +118,7 @@ const navigationCorrectionsBySite = {
   'wing-side': {
     en: {
       footerNote:
-        'WingsSide focuses on inbound planning, destination storytelling, travel styles, and trip inquiry instead of a retail tour grid.',
+        'WingSide focuses on inbound planning, destination storytelling, travel styles, and trip inquiry instead of a retail tour grid.',
       headerNavItems: [
         { link: { label: 'Home', type: 'custom' as const, url: '/' } },
         { link: { label: 'Destinations', type: 'custom' as const, url: '/destinations' } },
@@ -133,7 +133,7 @@ const navigationCorrectionsBySite = {
     },
     vi: {
       footerNote:
-        'WingsSide tập trung inbound planning, destination storytelling, travel styles và trip inquiry thay vì retail tour grid.',
+        'WingSide tập trung inbound planning, destination storytelling, travel styles và trip inquiry thay vì retail tour grid.',
       headerNavItems: [
         { link: { label: 'Trang chủ', type: 'custom' as const, url: '/' } },
         { link: { label: 'Điểm đến', type: 'custom' as const, url: '/destinations' } },

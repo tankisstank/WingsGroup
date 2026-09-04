@@ -1,6 +1,6 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
-import { hideFromEditors } from '@/access/roles'
+import { hideFromEditors, normalizeRelationID } from '@/access/roles'
 import { enforceSiteAccess, siteManagerScopedAccess, siteScopedOrAnyone } from '@/access/siteScope'
 import { link } from '@/fields/link'
 import { siteField } from '@/fields/site'
@@ -21,6 +21,67 @@ import {
   invalidateSettingsAfterChange,
   invalidateSettingsAfterDelete,
 } from '@/collections/hooks/invalidateTenantCache'
+
+const brandingMediaFields = [
+  ['branding.logoImage', 'branding', 'logoImage'],
+  ['branding.faviconImage', 'branding', 'faviconImage'],
+  ['seo.defaultImage', 'seo', 'defaultImage'],
+] as const
+
+const validateBrandingMediaOwnership: CollectionBeforeChangeHook = async ({
+  data,
+  originalDoc,
+  req,
+}) => {
+  const nextData = data as {
+    branding?: Record<string, unknown>
+    seo?: Record<string, unknown>
+    site?: unknown
+  }
+  const previousData = originalDoc as {
+    branding?: Record<string, unknown>
+    seo?: Record<string, unknown>
+    site?: unknown
+  } | null
+  const siteID =
+    normalizeRelationID(nextData.site as never) || normalizeRelationID(previousData?.site as never)
+  const branding = {
+    ...(previousData?.branding || {}),
+    ...(nextData.branding || {}),
+  }
+  const seo = {
+    ...(previousData?.seo || {}),
+    ...(nextData.seo || {}),
+  }
+
+  if (!siteID) {
+    throw new Error('A site is required before branding media can be saved.')
+  }
+
+  for (const [fieldName, groupName, propertyName] of brandingMediaFields) {
+    const value = groupName === 'branding' ? branding[propertyName] : seo[propertyName]
+    const mediaID = normalizeRelationID(value as never)
+
+    if (!mediaID) continue
+
+    const media = await req.payload.findByID({
+      collection: 'media',
+      depth: 0,
+      id: mediaID,
+      overrideAccess: true,
+      req,
+    })
+    const mediaSiteID = normalizeRelationID(media.site)
+
+    if (!mediaSiteID || String(mediaSiteID) !== String(siteID)) {
+      throw new Error(
+        `Branding field ${fieldName} must reference media owned by the selected site.`,
+      )
+    }
+  }
+
+  return data
+}
 
 export const SiteSettings: CollectionConfig = {
   slug: 'site-settings',
@@ -117,7 +178,8 @@ export const SiteSettings: CollectionConfig = {
           type: 'relationship',
           relationTo: 'theme-presets',
           admin: {
-            description: 'Preset theme mặc định. Các field bên dưới sẽ override preset nếu được nhập.',
+            description:
+              'Preset theme mặc định. Các field bên dưới sẽ override preset nếu được nhập.',
           },
         },
         {
@@ -314,7 +376,7 @@ export const SiteSettings: CollectionConfig = {
   hooks: {
     afterChange: [invalidateSettingsAfterChange],
     afterDelete: [invalidateSettingsAfterDelete],
-    beforeChange: [enforceSiteAccess],
+    beforeChange: [enforceSiteAccess, validateBrandingMediaOwnership],
   },
   labels: {
     plural: adminLabel('Cấu hình site', 'Site settings'),

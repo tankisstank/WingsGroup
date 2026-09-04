@@ -30,6 +30,8 @@
     "go-live:review": "cross-env NODE_OPTIONS=--no-deprecation node scripts/go-live-review.mjs",
     "ii": "cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install",
     "import:brand-assets": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-brand-assets.ts",
+    "apply:wingsgroup:news-editorial": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/apply-wingsgroup-news-editorial.ts",
+    "apply:wingsgroup:news-editorial:apply": "pnpm run apply:wingsgroup:news-editorial -- --apply",
     "import:wingsside:credentials": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-wingsside-credentials.ts",
     "import:wingsside:credentials:prod": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-wingsside-credentials-production.ts",
     "import:wingsside:credentials:prod:apply": "pnpm run import:wingsside:credentials:prod -- apply",
@@ -72,6 +74,11 @@
     "plane:sync:wingsgo": "cross-env NODE_OPTIONS=--no-deprecation node scripts/plane-import.mjs sync-wingsgo",
     "plane:sync:workitems": "cross-env NODE_OPTIONS=--no-deprecation node scripts/plane-import.mjs sync-workitems",
     "plane:import:all": "cross-env NODE_OPTIONS=--no-deprecation node scripts/plane-import.mjs import-all",
+    "multica:preview": "cross-env NODE_OPTIONS=--no-deprecation node scripts/multica-import.mjs preview",
+    "multica:preview:json": "cross-env NODE_OPTIONS=--no-deprecation node scripts/multica-import.mjs preview --json",
+    "multica:history:plan": "cross-env NODE_OPTIONS=--no-deprecation node scripts/multica-import.mjs plan",
+    "multica:history:apply": "cross-env NODE_OPTIONS=--no-deprecation node scripts/multica-import.mjs apply",
+    "multica:verify": "cross-env NODE_OPTIONS=--no-deprecation node scripts/verify-multica-contract.mjs",
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "seed:uat-accounts": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/seed-uat-accounts.ts",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
@@ -84,6 +91,7 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation node scripts/run-integration-tests.mjs",
     "test:unit": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.unit.config.mts",
     "validate:wingsside:locales": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/validate-wingsside-locales.ts"
+    ,"validate:wingsgroup:v3-gates": "cross-env NODE_OPTIONS=--no-deprecation node scripts/wingsgroup-v3-release-gates.mjs"
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.84.1",

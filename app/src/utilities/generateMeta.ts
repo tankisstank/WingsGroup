@@ -9,6 +9,7 @@ import { getCurrentSiteSettings } from './getSiteSettings'
 import { getCurrentSite } from './siteContext'
 import { getCanonicalSiteOrigin, getSiteSitemapURL } from './siteSEO'
 import { isPublicLocale } from './sitePaths'
+import { getSiteBrandAssetURL, getSiteOwnedMedia } from './siteBranding'
 
 const getImageURL = ({
   image,
@@ -28,10 +29,13 @@ export const generateMeta = async (args: {
   const site = await getCurrentSite()
   const settings = await getCurrentSiteSettings()
 
-  const ogImage = getImageURL({
-    image: doc?.meta?.image || settings?.seo?.defaultImage,
-    settings,
-  })
+  const ogMedia =
+    getSiteOwnedMedia(doc?.meta?.image, site.id) ||
+    getSiteOwnedMedia(settings?.seo?.defaultImage, site.id)
+  const fallbackOGImage = getSiteBrandAssetURL(site.code, 'ogImage') || '/website-template-OG.webp'
+  const ogImage = ogMedia
+    ? getImageURL({ image: ogMedia, settings })
+    : buildConfiguredAbsoluteMediaURL({ fallbackPath: fallbackOGImage, media: null, settings })
   const seoDefaultTitle = settings?.seo?.defaultTitle || settings?.siteName || 'WingsGroup'
   const seoTitleSuffix = settings?.seo?.titleSuffix
   const description =

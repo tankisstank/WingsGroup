@@ -31,7 +31,7 @@ export const searchPageCopyByLocale: Record<PublicLocaleCode, SearchPageCopy> = 
     emptyText:
       'Es posible que el contenido aún no esté publicado o que la solicitud requiera asesoría según salidas y disponibilidad reales. Envíe una consulta para que el equipo revise y proponga la mejor opción.',
     heading: 'Busca con rapidez tours, destinos y campañas',
-    kicker: 'Buscar en WingsSide',
+    kicker: 'Buscar en WingSide',
     paragraph:
       'Introduce un mercado, temporada, ciudad o tipo de viaje. Si aún no ves el contenido adecuado, envía una solicitud para que el equipo revise las salidas y opciones más relevantes.',
     searchAria: 'Sugerencias de búsqueda',
@@ -43,7 +43,7 @@ export const searchPageCopyByLocale: Record<PublicLocaleCode, SearchPageCopy> = 
     emptyText:
       'Il contenuto potrebbe non essere ancora pubblicato oppure la richiesta potrebbe richiedere una consulenza basata su disponibilità e calendario reali. Invia una richiesta e la squadra ti proporrà la direzione più adatta.',
     heading: 'Cerca rapidamente tour, destinazioni e campagne',
-    kicker: 'Cerca in WingsSide',
+    kicker: 'Cerca in WingSide',
     paragraph:
       'Inserisci mercato, stagione, città o tipo di viaggio. Se il contenuto giusto non è ancora disponibile, invia una richiesta così la squadra potrà verificare partenze e proposte pertinenti.',
     searchAria: 'Suggerimenti di ricerca',
@@ -55,7 +55,7 @@ export const searchPageCopyByLocale: Record<PublicLocaleCode, SearchPageCopy> = 
     emptyText:
       'O conteúdo pode ainda não estar publicado ou o pedido pode precisar de aconselhamento com base em disponibilidade e datas reais. Envie um pedido para que a equipa possa rever e sugerir a melhor direção.',
     heading: 'Pesquise rapidamente tours, destinos e campanhas',
-    kicker: 'Pesquisar na WingsSide',
+    kicker: 'Pesquisar na WingSide',
     paragraph:
       'Introduza mercado, época, cidade ou tipo de viagem. Se o conteúdo certo ainda não estiver disponível, envie um pedido para que a equipa reveja saídas e opções relevantes.',
     searchAria: 'Sugestões de pesquisa',
@@ -72,7 +72,7 @@ export const searchPageCopyByLocale: Record<PublicLocaleCode, SearchPageCopy> = 
     emptyText:
       'Có thể nội dung chưa được xuất bản hoặc yêu cầu này cần được tư vấn dựa trên lịch khởi hành và khả năng phục vụ thực tế. Hãy gửi yêu cầu để đội ngũ kiểm tra và phản hồi hướng phù hợp.',
     heading: 'Tìm nhanh tour, điểm đến và chiến dịch',
-    kicker: 'Tìm kiếm WingsSide',
+    kicker: 'Tìm kiếm WingSide',
     paragraph:
       'Nhập thị trường, mùa đi, thành phố hoặc loại trải nghiệm. Nếu chưa thấy nội dung phù hợp, hãy gửi yêu cầu để đội ngũ kiểm tra lịch và các lựa chọn liên quan.',
     searchAria: 'Gợi ý tìm kiếm',

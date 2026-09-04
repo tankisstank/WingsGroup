@@ -20,17 +20,23 @@ import { Globe2Icon, MenuIcon, SearchIcon, XIcon } from 'lucide-react'
 
 export const HeaderNav: React.FC<{
   data: { navItems?: HeaderType['navItems'] }
+  defaultLocale?: SupportedLocaleCode
+  englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
   primaryAction?: {
     label: string
     url: string
   }
   publicPathname?: string
   resolvedLocale?: SupportedLocaleCode
+  showSearch?: boolean
   siteCode?: string
   supportedLocales?: SupportedLocaleCode[]
   themeKey?: string
+  wingsGroupV3Home?: boolean
+  wingsGroupV3Surface?: boolean
 }> = ({
   data,
+  defaultLocale,
   primaryAction,
   publicPathname,
   resolvedLocale = 'vi',
@@ -51,7 +57,11 @@ export const HeaderNav: React.FC<{
   const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
   const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null
   const resolvedPrimaryAction = wingsSideHiFiCta || primaryAction
-  const sharedZaloCTA = getSharedZaloCTA(siteCode, resolvedLocale)
+  // Child-site contact is provided by the bottom-right contact FAB; keep the top bar focused on navigation.
+  const sharedZaloCTA =
+    siteCode === 'wings-go' || siteCode === 'wing-side'
+      ? null
+      : getSharedZaloCTA(siteCode, resolvedLocale)
   const shouldRenderPrimaryAction =
     resolvedPrimaryAction &&
     !(wingsSideHiFiNav
@@ -186,6 +196,7 @@ export const HeaderNav: React.FC<{
         const href = buildLocaleSwitchHref(
           `${localeSwitchPathname}${clientReady ? locationSuffix : ''}`,
           metadata.code,
+          defaultLocale,
         )
 
         return (

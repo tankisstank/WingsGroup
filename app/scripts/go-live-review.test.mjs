@@ -130,7 +130,7 @@ test('public hostname comparison normalizes URL, www, case, and trailing dot var
   assert.equal(hostnameBelongsToSite('wingsside.vn', ['wingside.vn']), false)
 })
 
-test('CTA review recognizes the real WingsSide conversion vocabulary', () => {
+test('CTA review recognizes the real WingSide conversion vocabulary', () => {
   for (const label of ['Plan trip', 'Consult', 'Share your brief', 'Write a message']) {
     assert.equal(hasStrongCTA(label), true, label)
   }

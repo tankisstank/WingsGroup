@@ -75,7 +75,7 @@ const lastLineWith = (lines: JsonLine[], key: string) => {
   return line
 }
 
-cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', () => {
+cliDescribe('WingSide credentials production CLI disposable PostgreSQL proof', () => {
   let payload: Payload | undefined
   let req: PayloadRequest | undefined
   let pageID: number | string | undefined
@@ -233,7 +233,7 @@ cliDescribe('WingsSide credentials production CLI disposable PostgreSQL proof', 
         code: 'wing-side',
         defaultLocale: 'en',
         isActive: false,
-        name: 'WingsSide CLI proof',
+        name: 'WingSide CLI proof',
         primaryDomain: `wingsside-cli-proof-${process.pid}.invalid`,
         supportedLocales: [...wingsSideCredentialsProductionLocales],
       },

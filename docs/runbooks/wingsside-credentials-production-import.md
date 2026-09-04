@@ -1,6 +1,6 @@
-# WingsSide Credentials Production Import
+# WingSide Credentials Production Import
 
-Use this runbook only for the committed US-047 WingsSide credentials catalog in
+Use this runbook only for the committed US-047 WingSide credentials catalog in
 `app/assets/wingsside-credentials`.
 
 Hard guards enforced by the CLI:
@@ -80,7 +80,7 @@ Container:
 docker run --rm --platform linux/arm64 --network wingstravel_default --env-file /home/ubuntu/wings-travel/shared/.env -e WINGSTRAVEL_RELEASE_SHA=$releaseSha -v /home/ubuntu/wings-travel/shared/data/media:/app/public/media -v /home/ubuntu/wings-travel/shared/artifacts/wingsside-credentials:/app/artifacts/release/wingsside-credentials wings-travel-tools:us047 pnpm run import:wingsside:credentials:prod:rollback -- --plan artifacts/release/wingsside-credentials/plan.json --plan-sha256 <sha256> --admin-email <super-admin-email> --confirm CONFIRM_WINGSSIDE_CREDENTIALS_PRODUCTION_ROLLBACK
 ```
 
-Expected exact before: no credentials carousel blocks on the five WingsSide Home
+Expected exact before: no credentials carousel blocks on the five WingSide Home
 locales and no matching credential media records.
 
 Expected exact after: 24 content-addressed Media records and one deterministic

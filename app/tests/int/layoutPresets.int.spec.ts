@@ -59,10 +59,10 @@ describe('layout preset registry', () => {
     expect(getLayoutPresetDefinition('unknown').key).toBe('homepage-editorial')
   })
 
-  it('builds the WingsSide inbound homepage from governed composer blocks', () => {
+  it('builds the WingSide inbound homepage from governed composer blocks', () => {
     const data = createLayoutPresetData('wingsside-inbound-homepage', {
       summary: 'Inbound Vietnam planning',
-      title: 'WingsSide',
+      title: 'WingSide',
     })
     const blockTypes = data.layout.map((block) => block.blockType)
     const presentations = data.layout.map((block) =>

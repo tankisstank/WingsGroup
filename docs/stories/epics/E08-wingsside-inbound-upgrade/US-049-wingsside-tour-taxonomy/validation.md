@@ -70,7 +70,7 @@ PostgreSQL backup, migration plan, content diff approval and rollback point.
   both backup and active SQLite return `ok` from `PRAGMA integrity_check`.
 - Local tenant code is normalized from the legacy `wings-side` value to
   `wing-side`. The technical theme key remains `wings-side`.
-- Public display identity is normalized to `WingSide`; `WingsSide` and
+- Public display identity is normalized to `WingSide`; `WingSide` and
   `Wingside` are retained only where they are part of internal code symbols or
   historical evidence.
 - The guarded hi-fi content seed updated exactly 40 page-locale targets. Its
@@ -85,7 +85,7 @@ PostgreSQL backup, migration plan, content diff approval and rollback point.
 - Agent-browser verification confirms the structured tour route has one H1,
   consultation CTAs and one governed form; Contact has one H1, one form,
   email, phone and WhatsApp channels. Visible copy contains `WingSide` and no
-  `WingsSide`/`Wingside` spelling.
+  `WingSide`/`Wingside` spelling.
 - Referenced media and the hi-fi logo return HTTP 200 from the local release.
 - Full-site domain-routed go-live review completed 91/91 checks with
   `pass_with_notes` and no site-level issue. The remaining notes are

@@ -151,7 +151,7 @@ Correction changes covered:
   self comparison, identical default copy, Spanish `todo`, Style logic,
   mixed-language evidence, blocker count and strict negative behavior.
 - Validator/audit mismatch was traced to `limit: 100` page queries truncating
-  WingsSide local DB inventory. The validator and backfill source query now use
+  WingSide local DB inventory. The validator and backfill source query now use
   `limit: 1000`; missing routes are not allowlisted or weakened.
 - Backfill scripts now retry transient SQLite `SQLITE_BUSY` writes and internal
   seed/backfill context bypasses unrelated home-curation tour eligibility hooks

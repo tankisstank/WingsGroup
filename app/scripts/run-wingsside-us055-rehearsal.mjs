@@ -134,7 +134,7 @@ const requestLocalHome = (port) =>
       {
         hostname: '127.0.0.1',
         method: 'GET',
-        path: '/wingsside',
+        path: '/wing-side',
         port,
       },
       (response) => {
@@ -657,7 +657,7 @@ try {
         httpStatus: 200,
         locale: 'en',
         markerCount: 4,
-        path: '/wingsside',
+        path: '/wing-side',
       }
       record('home-route-diagnostic', homeRouteProof)
       await journal('home-route-diagnostic', 'after', homeRouteProof)

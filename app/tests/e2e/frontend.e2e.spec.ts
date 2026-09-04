@@ -34,12 +34,12 @@ const phase1Routes = [
   },
   { path: '/wingsgo', title: /WingsGo/, heading: 'WingsGo' },
   { path: '/wingsgo/thi-truong/han-quoc', title: /Tour Hàn Quốc/, heading: 'Tour Hàn Quốc' },
-  { path: '/wingsside', title: /WingsSide/, heading: 'Tailor-made Vietnam journeys' },
-  { path: '/wingsside/destinations/ha-noi', title: /Hanoi/, heading: 'Hanoi' },
+  { path: '/wing-side', title: /WingSide/, heading: 'Tailor-made Vietnam journeys' },
+  { path: '/wing-side/destinations/ha-noi', title: /Hanoi/, heading: 'Hanoi' },
   { path: '/wingsplus', title: /WingsPlus/ },
   { path: '/wingscare', title: /WingsCare/ },
   { path: '/wingspass', title: /WingsPass/ },
-  { path: '/wingsside/en', title: /WingsSide/, heading: 'Tailor-made Vietnam journeys' },
+  { path: '/wing-side/en', title: /WingSide/, heading: 'Tailor-made Vietnam journeys' },
 ] as const
 
 const linkAuditRoutes = [
@@ -50,13 +50,13 @@ const linkAuditRoutes = [
   '/wingsgo',
   '/wingsgo/posts',
   '/wingsgo/search',
-  '/wingsside',
-  '/wingsside/en',
-  '/wingsside/it',
-  '/wingsside/es',
-  '/wingsside/pt',
-  '/wingsside/posts',
-  '/wingsside/search',
+  '/wing-side',
+  '/wing-side/en',
+  '/wing-side/it',
+  '/wing-side/es',
+  '/wing-side/pt',
+  '/wing-side/posts',
+  '/wing-side/search',
   '/wingspass',
   '/wingspass/search',
   '/wingscare',
@@ -72,32 +72,32 @@ const cmsOnlyLocales = ['ja', 'ko', 'fr', 'de'] as const
 const wingsSideCorePages = [
   {
     heading: 'Tailor-made Vietnam journeys',
-    path: '/wingsside',
-    title: /WingsSide/,
+    path: '/wing-side',
+    title: /WingSide/,
   },
   {
     heading: 'Explore Vietnam by destination',
-    path: '/wingsside/destinations',
+    path: '/wing-side/destinations',
     title: /Destinations/,
   },
   {
     heading: 'Travel styles help guests self-qualify the right route',
-    path: '/wingsside/styles',
+    path: '/wing-side/styles',
     title: /Travel styles/,
   },
   {
     heading: 'Sample itineraries show possibility, not rigid product grids',
-    path: '/wingsside/packages',
+    path: '/wing-side/packages',
     title: /Vietnam packages/,
   },
   {
     heading: 'Plan your Vietnam journey with a local team',
-    path: '/wingsside/plan-your-trip',
+    path: '/wing-side/plan-your-trip',
     title: /Plan your trip/,
   },
   {
     heading: 'Tell us what kind of Vietnam journey you want to build',
-    path: '/wingsside/contact-us',
+    path: '/wing-side/contact-us',
     title: /Contact/,
   },
 ] as const
@@ -188,7 +188,7 @@ const getRouteLocale = (path: string) => {
 
 const localizeWingsSideRoute = (pathname: string, locale: 'en' | 'es' | 'it' | 'pt' | 'vi') => {
   const normalizedPathname = pathname.startsWith('/') ? pathname : `/${pathname}`
-  const prefix = locale === 'vi' ? '/wingsside' : `/wingsside/${locale}`
+  const prefix = locale === 'vi' ? '/wing-side' : `/wing-side/${locale}`
 
   return `${prefix}${normalizedPathname === '/' ? '' : normalizedPathname}`.replace(/\/+/g, '/')
 }
@@ -308,7 +308,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     await expect(page.locator('body')).toHaveAttribute('style', /--site-accent:\s*#104030/i)
   })
 
-  test('serves WingsSide public ad locales with governed localized chrome', async ({ page }) => {
+  test('serves WingSide public ad locales with governed localized chrome', async ({ page }) => {
     await page.setViewportSize({ height: 900, width: 1440 })
 
     const searchHeadingByLocale = {
@@ -433,7 +433,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(page.getByTestId('wingsside-specials')).toBeVisible({ timeout: 10_000 })
     }
 
-    for (const path of ['/wingsside', '/wingsside/en', '/wingsside/it']) {
+    for (const path of ['/wing-side', '/wing-side/en', '/wing-side/it']) {
       await page.setViewportSize({ height: 900, width: 768 })
       await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
 
@@ -689,9 +689,9 @@ test.describe('Phase 1 public frontend smoke', () => {
     await expect(page.getByTestId('wingsside-specials')).toBeHidden()
 
     for (const path of [
-      '/wingsside/packages',
-      '/wingsside/en/packages',
-      '/wingsside/it/packages',
+      '/wing-side/packages',
+      '/wing-side/en/packages',
+      '/wing-side/it/packages',
     ]) {
       await page.setViewportSize({ height: 900, width: 1280 })
       await page.goto(`${e2eBaseURL}${path}`, { waitUntil: 'domcontentloaded' })
@@ -706,7 +706,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     }
   })
 
-  test('renders WingsSide governed inbound composer blocks', async ({ page }) => {
+  test('renders WingSide governed inbound composer blocks', async ({ page }) => {
     test.setTimeout(60_000)
 
     await page.setViewportSize({ height: 900, width: 1440 })
@@ -828,7 +828,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     }
   })
 
-  test('renders WingsSide inbound core content pages on desktop and mobile', async ({ page }) => {
+  test('renders WingSide inbound core content pages on desktop and mobile', async ({ page }) => {
     test.setTimeout(120_000)
 
     for (const route of wingsSideCorePages) {
@@ -839,12 +839,12 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(page.getByRole('heading', { name: route.heading }).first()).toBeVisible()
       await expect(
         page.getByText(
-          /WingsSide inbound hero|Vietnam destination cover|Vietnam travel styles image|Vietnam sample itineraries image|Planning cue/,
+          /WingSide inbound hero|Vietnam destination cover|Vietnam travel styles image|Vietnam sample itineraries image|Planning cue/,
         ),
       ).toHaveCount(0)
 
-      if (route.path === '/wingsside/plan-your-trip' || route.path === '/wingsside/contact-us') {
-        if (route.path === '/wingsside/plan-your-trip') {
+      if (route.path === '/wing-side/plan-your-trip' || route.path === '/wing-side/contact-us') {
+        if (route.path === '/wing-side/plan-your-trip') {
           // Inventory plan-steps may replace CMS form title; form may still render when present.
           await expect(page.locator('[data-od-id="plan-steps"], form').first()).toBeVisible()
         } else {
@@ -871,7 +871,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     }
   })
 
-  test('renders WingsSide hi-fi 8-page nav IA and language switcher', async ({ page }) => {
+  test('renders WingSide hi-fi 8-page nav IA and language switcher', async ({ page }) => {
     test.setTimeout(120_000)
 
     await page.setViewportSize({ height: 900, width: 1440 })
@@ -967,7 +967,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     expect(wingsGoOverflowX).toBe(false)
   })
 
-  test('renders WingsSide localized root pages with real core content', async ({ page }) => {
+  test('renders WingSide localized root pages with real core content', async ({ page }) => {
     // Body strings follow Bar B inventory i18n; planner panel remains CMS/HighImpact locale copy.
     const localizedRootCopy = {
       es: {
@@ -1032,7 +1032,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(planner.getByLabel(copy.plannerDuration)).toBeVisible()
       await expect(planner.getByRole('button', { name: copy.plannerCta })).toBeVisible()
       await expect(planner.getByText('Plan a private Vietnam journey')).toHaveCount(0)
-      await expect(page.getByText('WingsSide inbound hero')).toHaveCount(0)
+      await expect(page.getByText('WingSide inbound hero')).toHaveCount(0)
 
       const footerLink = page.locator('.site-footer .theme-nav-link').first()
       await expect(footerLink).toHaveCSS('color', 'rgb(5, 40, 41)')
@@ -1040,7 +1040,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     }
   })
 
-  test('renders WingsSide localized routes without placeholder shells after locale backfill', async ({
+  test('renders WingSide localized routes without placeholder shells after locale backfill', async ({
     page,
   }) => {
     await page.goto(`${e2eBaseURL}/wingsside/vi`, { waitUntil: 'domcontentloaded' })
@@ -1060,7 +1060,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     await expect(page.getByRole('heading', { name: /^Page$/ }).first()).toHaveCount(0)
   })
 
-  test('renders localized WingsSide content across page patterns after backfill', async ({
+  test('renders localized WingSide content across page patterns after backfill', async ({
     page,
   }) => {
     const scenarios = [
@@ -1068,25 +1068,25 @@ test.describe('Phase 1 public frontend smoke', () => {
         forbidden: 'Inbound Vietnam needs trust, not retail noise',
         heading: 'Khách quốc tế cần niềm tin, không cần những lời chào bán ồn ào',
         locale: 'vi',
-        path: '/wingsside/vi/about-us',
+        path: '/wing-side/vi/about-us',
       },
       {
         forbidden: 'Luxury journeys focus on curated stays',
         heading: 'Lusso',
         locale: 'it',
-        path: '/wingsside/it/styles/luxury',
+        path: '/wing-side/it/styles/luxury',
       },
       {
         forbidden: 'A multi-region first-time framework',
         heading: 'Vietnam esencial',
         locale: 'es',
-        path: '/wingsside/es/packages/vietnam-highlights',
+        path: '/wing-side/es/packages/vietnam-highlights',
       },
       {
         forbidden: 'Mekong adds river rhythm',
         heading: 'Mekong',
         locale: 'pt',
-        path: '/wingsside/pt/destinations/mekong',
+        path: '/wing-side/pt/destinations/mekong',
       },
     ] as const
 
@@ -1101,7 +1101,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     }
   })
 
-  test('keeps WingsSide language switcher hrefs stable on localized nested routes', async ({
+  test('keeps WingSide language switcher hrefs stable on localized nested routes', async ({
     page,
   }) => {
     const consoleErrors: string[] = []
@@ -1367,17 +1367,17 @@ test.describe('Phase 1 public frontend smoke', () => {
     expect(rootHTML).toContain('WingsGroup - hệ sinh thái du lịch nhiều line business')
     expect(careHTML).toContain('WingsCare | Care And Support')
     expect(careHTML).toContain('Travel care rõ quyền lợi, rõ hỗ trợ')
-    expect(sideHTML).toContain('WingsSide | Tailor-made Vietnam journeys')
+    expect(sideHTML).toContain('WingSide | Tailor-made Vietnam journeys')
     expect(sideHTML).toContain('data-site-theme="custom"')
     expect(sideHTML).toContain('https://wingside.vn')
     expect(passHTML).toContain('WingsPass')
     expect(passHTML).toContain('data-site-theme="wings-pass"')
     expect(passHTML).toContain('https://wingspass.wingsgroup.vn')
-    expect(forwardedSideHTML).not.toContain('WingsSide | Tailor-made Vietnam journeys')
+    expect(forwardedSideHTML).not.toContain('WingSide | Tailor-made Vietnam journeys')
     expect(forwardedSideHTML).not.toContain('data-site-theme="custom"')
   })
 
-  test('WingsSide inherits its governed site hero presentation', async ({ page }) => {
+  test('WingSide inherits its governed site hero presentation', async ({ page }) => {
     await page.goto(`${e2eBaseURL}/wingsside`)
 
     const hero = page.locator('[data-hero-presentation]')
@@ -1450,8 +1450,8 @@ test.describe('Phase 1 public frontend smoke', () => {
         const firstSegment = segments[0]
         const isLocaleRoute = firstSegment && isSupportedLocale(firstSegment)
         const localPath = isLocaleRoute
-          ? `/wingsside/${segments.join('/')}`
-          : `/wingsside${url.pathname === '/' ? '' : url.pathname}`
+          ? `/wing-side/${segments.join('/')}`
+          : `/wing-side${url.pathname === '/' ? '' : url.pathname}`
 
         return [localPath]
       })

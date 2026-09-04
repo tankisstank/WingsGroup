@@ -16,14 +16,14 @@ describe('WingsSideHiFiPageModel resolver', () => {
     expect(WINGSSIDE_HIFI_ROUTE_VARIANTS).toHaveLength(8)
     for (const path of WINGSSIDE_HIFI_COMPOSER_ROUTES) {
       expect(WINGSSIDE_HIFI_PATH_TO_VARIANT[path]).toBeTruthy()
-      expect(resolveWingsSideHiFiRouteVariant(`/wingsside${path === '/' ? '' : path}`)).toBe(
+      expect(resolveWingsSideHiFiRouteVariant(`/wing-side${path === '/' ? '' : path}`)).toBe(
         WINGSSIDE_HIFI_PATH_TO_VARIANT[path],
       )
     }
   })
 
   it('returns null for non-hub routes', () => {
-    expect(resolveWingsSideHiFiPageModel({ page: {}, publicPathname: '/wingsside/tour/x' })).toBeNull()
+    expect(resolveWingsSideHiFiPageModel({ page: {}, publicPathname: '/wing-side/tour/x' })).toBeNull()
   })
 
   it('exposes stable ordered mandatory sections per variant', () => {
@@ -49,7 +49,7 @@ describe('WingsSideHiFiPageModel resolver', () => {
           },
         },
       },
-      publicPathname: '/wingsside/packages',
+      publicPathname: '/wing-side/packages',
     })
 
     expect(model).not.toBeNull()
@@ -82,7 +82,7 @@ describe('WingsSideHiFiPageModel resolver', () => {
           },
         },
       },
-      publicPathname: '/wingsside/it/contact-us',
+      publicPathname: '/wing-side/it/contact-us',
     })
 
     expect(model!.locale).toBe('it')
@@ -101,7 +101,7 @@ describe('WingsSideHiFiPageModel resolver', () => {
           home: { pillarsTitle: 'x' },
         },
       },
-      publicPathname: '/wingsside',
+      publicPathname: '/wing-side',
     })
     expect(model!.issues.some((i) => i.code === 'route_variant_mismatch')).toBe(true)
   })

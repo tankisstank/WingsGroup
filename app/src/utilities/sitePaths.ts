@@ -1,7 +1,7 @@
 export const siteAliasToCodeMap = {
   wingsgroup: 'wings-group',
   wingsgo: 'wings-go',
-  wingsside: 'wing-side',
+  'wing-side': 'wing-side',
   wingspass: 'wings-pass',
   wingsplus: 'wings-plus',
   wingscare: 'wings-care',
@@ -11,6 +11,11 @@ export type SiteAlias = keyof typeof siteAliasToCodeMap
 
 export const legacySiteAliasToCodeMap = {
   wingstravel: 'wings-group',
+  wingsside: 'wing-side',
+} as const
+
+export const legacySiteAliasRedirectMap = {
+  wingsside: 'wing-side',
 } as const
 
 export const allSiteAliasToCodeMap = {
@@ -171,6 +176,7 @@ export const prefixPathWithSite = (
 export const buildLocaleSwitchHref = (
   pathname: string,
   targetLocale: SupportedLocaleCode,
+  defaultLocale?: SupportedLocaleCode,
 ): string => {
   const { pathname: rawPathname, suffix } = splitPathSuffix(pathname)
   const normalizedPathname = normalizeSiteAwarePath(rawPathname)
@@ -187,6 +193,10 @@ export const buildLocaleSwitchHref = (
     currentLocale && restSegments[0] === currentLocale ? restSegments.slice(1) : restSegments
   const sitePrefix = siteAlias ? `/${siteAlias}` : ''
   const restPath = pathWithoutLocale.length > 0 ? `/${pathWithoutLocale.join('/')}` : ''
+
+  if (targetLocale === defaultLocale) {
+    return `${sitePrefix}${restPath || '/'}`.replace(/\/+/g, '/') + suffix
+  }
 
   return `${sitePrefix}/${targetLocale}${restPath}`.replace(/\/+/g, '/') + suffix
 }

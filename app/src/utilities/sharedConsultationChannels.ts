@@ -12,7 +12,8 @@ export const sharedZaloOa = {
   },
 } as const
 
-const supportedSiteCodes = new Set(['wings-go', 'wing-side'])
+// Child sites use the shared bottom-right contact FAB; do not expose Zalo in their top navigation.
+const supportedSiteCodes = new Set(['wings-group'])
 
 export const getSharedZaloCTA = (
   siteCode?: null | string,

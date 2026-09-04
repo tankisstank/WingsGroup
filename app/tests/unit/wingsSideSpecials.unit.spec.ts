@@ -16,12 +16,12 @@ describe('WingSide Specials helpers', () => {
     '/es',
     '/pt',
     '/vi',
-    '/wingsside',
-    '/wingsside/en/',
-    '/wingsside/it',
-    '/wingsside/es',
-    '/wingsside/pt',
-    '/wingsside/vi',
+    '/wing-side',
+    '/wing-side/en/',
+    '/wing-side/it',
+    '/wing-side/es',
+    '/wing-side/pt',
+    '/wing-side/vi',
   ])('recognizes Home pathname %s', (pathname) =>
     expect(isWingsSideSpecialsHomePathname(pathname)).toBe(true),
   )
@@ -33,11 +33,11 @@ describe('WingSide Specials helpers', () => {
     '/es/packages',
     '/pt/packages',
     '/vi/packages',
-    '/wingsside/en/packages',
-    '/wingsside/it/packages',
-    '/wingsside/es/packages',
-    '/wingsside/pt/packages',
-    '/wingsside/vi/packages',
+    '/wing-side/en/packages',
+    '/wing-side/it/packages',
+    '/wing-side/es/packages',
+    '/wing-side/pt/packages',
+    '/wing-side/vi/packages',
   ])('rejects non-Home pathname %s', (pathname) =>
     expect(isWingsSideSpecialsHomePathname(pathname)).toBe(false),
   )
@@ -65,7 +65,7 @@ describe('WingSide Specials helpers', () => {
     expect(shouldRenderWingsSideSpecials('wing-side', '/')).toBe(true)
     expect(shouldRenderWingsSideSpecials('wing-side', '/en')).toBe(true)
     expect(shouldRenderWingsSideSpecials('wing-side', '/it')).toBe(true)
-    expect(shouldRenderWingsSideSpecials('wing-side', '/wingsside/pt')).toBe(true)
+    expect(shouldRenderWingsSideSpecials('wing-side', '/wing-side/pt')).toBe(true)
     expect(shouldRenderWingsSideSpecials('wing-side', '/packages')).toBe(false)
     expect(shouldRenderWingsSideSpecials('wings-go', '/')).toBe(false)
     expect(shouldRenderWingsSideSpecials('wing-side', '/?campaign=hot')).toBe(true)

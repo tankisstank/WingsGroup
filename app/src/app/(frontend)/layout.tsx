@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import { cn } from '@/utilities/ui'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
-import { Inter, Nunito_Sans, Playfair_Display, Plus_Jakarta_Sans, Rubik } from 'next/font/google'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
@@ -28,46 +27,27 @@ import { getCurrentSite } from '@/utilities/siteContext'
 import { getCanonicalSiteOrigin, getSiteSitemapURL } from '@/utilities/siteSEO'
 import { WingsSideSpecialsPromo } from '@/components/WingsSideSpecialsPromo'
 import { getPublicRoutePathname } from '@/utilities/sitePaths'
+import { getSiteBrandAssetURL, getSiteOwnedMedia } from '@/utilities/siteBranding'
+import { SiteContactFab } from '@/components/SiteContactFab'
+import { isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
+import { WINGSGROUP_BRAND, isWingsGroupBrandSite } from '@/wingsgroup/brand'
 
-const getSiteFaviconURL = (settings: Awaited<ReturnType<typeof getCurrentSiteSettings>>) => {
+const getSiteFaviconURL = (
+  settings: Awaited<ReturnType<typeof getCurrentSiteSettings>>,
+  siteID: number,
+  siteCode: string,
+) => {
   const favicon = settings?.branding?.faviconImage
+  const ownedFavicon = getSiteOwnedMedia(favicon, siteID)
+  const staticFavicon = isWingsGroupBrandSite(siteCode)
+    ? WINGSGROUP_BRAND.assets.favicon
+    : getSiteBrandAssetURL(siteCode, 'favicon')
 
-  if (!favicon || typeof favicon !== 'object' || !favicon.url) {
-    return null
-  }
-
-  return getMediaUrl(favicon.url, favicon.updatedAt)
+  return (
+    staticFavicon ||
+    (ownedFavicon?.url ? getMediaUrl(ownedFavicon.url, ownedFavicon.updatedAt) : null)
+  )
 }
-
-const wingsGoHeading = Rubik({
-  display: 'swap',
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-retail-heading',
-})
-
-const wingsGoBody = Nunito_Sans({
-  display: 'swap',
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-retail-body',
-})
-
-const wingsSideHeading = Playfair_Display({
-  display: 'swap',
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-editorial-heading',
-})
-
-const wingsSideBody = Inter({
-  display: 'swap',
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-editorial-body',
-})
-
-const wingsSideHiFi = Plus_Jakarta_Sans({
-  display: 'swap',
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-wingsside-hifi',
-})
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
@@ -75,23 +55,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const settings = await getCurrentSiteSettings()
   const locale = await getCurrentLocale()
   const publicPathname = await getCurrentPublicPathname()
+  const isWingsGroupV3Surface =
+    site.code === 'wings-group' &&
+    settings?.wingsGroupV3?.enabled === true &&
+    isWingsGroupV3SurfacePath(publicPathname)
   const publicRoute = getPublicRoutePathname(publicPathname)
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
   const siteTheme = getSiteThemeTokens(settings, { siteCode: site.code })
-  const faviconURL = getSiteFaviconURL(settings)
+  const faviconURL = getSiteFaviconURL(settings, site.id, site.code)
   const chromeCopy = getRuntimeLocaleCopy(publicChromeCopy, locale)
 
   return (
     <html
-      className={cn(
-        GeistSans.variable,
-        GeistMono.variable,
-        wingsGoHeading.variable,
-        wingsGoBody.variable,
-        wingsSideHeading.variable,
-        wingsSideBody.variable,
-        wingsSideHiFi.variable,
-      )}
+      className={cn(GeistSans.variable, GeistMono.variable)}
       lang={locale}
       suppressHydrationWarning
     >
@@ -99,15 +75,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <InitTheme />
         {faviconURL ? (
           <>
-            <link href={faviconURL} rel="icon" />
+            <link href={faviconURL} rel="icon" type="image/png" />
             <link href={faviconURL} rel="apple-touch-icon" />
           </>
-        ) : (
-          <>
-            <link href="/favicon.ico" rel="icon" sizes="32x32" />
-            <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
-          </>
-        )}
+        ) : null}
         <meta content={siteTheme.brandColor} name="theme-color" />
       </head>
       <body
@@ -117,6 +88,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         data-site-theme={siteTheme.themeKey}
         data-theme-key={siteTheme.themeKey}
         data-site-code={site.code}
+        data-wingsgroup-v3={settings?.wingsGroupV3?.enabled === true ? 'true' : 'false'}
         data-public-pathname={publicPathname}
         data-public-route={publicRoute}
         data-site-button-style={siteTheme.buttonStyle}
@@ -135,13 +107,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           >
             {chromeCopy.skipToMain}
           </a>
-          <AdminBar
-            adminBarProps={{
-              preview: isEnabled,
-            }}
-          />
+          {!isWingsGroupV3Surface ? <AdminBar adminBarProps={{ preview: isEnabled }} /> : null}
 
           <Header />
+          <SiteContactFab locale={locale} siteCode={site.code} />
           <main id="main-content" tabIndex={-1}>
             {children}
           </main>
@@ -164,14 +133,30 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = settings?.seo?.defaultDescription || settings?.tagline || defaultTitle
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
   const canonicalURL = getSiteSitemapURL({ origin: canonicalOrigin, path: '/' })
+  const defaultImage = getSiteOwnedMedia(settings?.seo?.defaultImage, site.id)
+  const fallbackOGImage = isWingsGroupBrandSite(site.code)
+    ? WINGSGROUP_BRAND.assets.ogImage
+    : getSiteBrandAssetURL(site.code, 'ogImage') || '/website-template-OG.webp'
   const image = buildConfiguredAbsoluteMediaURL({
-    media: settings?.seo?.defaultImage,
+    fallbackPath: fallbackOGImage,
+    media: defaultImage,
     settings,
   })
+  const faviconURL = getSiteFaviconURL(settings, site.id, site.code)
+  const manifestURL = getSiteBrandAssetURL(site.code, 'manifest')
 
   return {
     description,
     metadataBase: new URL(canonicalOrigin),
+    ...(faviconURL
+      ? {
+          icons: {
+            apple: [{ url: faviconURL }],
+            icon: [{ type: 'image/png', url: faviconURL }],
+          },
+        }
+      : {}),
+    ...(manifestURL ? { manifest: manifestURL } : {}),
     alternates: {
       canonical: canonicalURL,
     },

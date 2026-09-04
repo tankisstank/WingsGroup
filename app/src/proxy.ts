@@ -4,6 +4,7 @@ import {
   allSiteAliasToCodeMap,
   getLocaleFromPathname,
   getSiteAliasFromPathname,
+  legacySiteAliasRedirectMap,
 } from '@/utilities/sitePaths'
 import { isPublicLocale } from '@/utilities/locales'
 import { createTrustedSiteContextHeaders, normalizeHost } from '@/utilities/siteDomains'
@@ -16,6 +17,7 @@ const stripLeadingSegments = (pathname: string, count: number) => {
 }
 
 const localBootstrapHosts = new Set(['127.0.0.1', '::1', 'localhost'])
+const wingsGroupCanonicalHost = 'wingsgroup.vn'
 const adminLocale = 'vi'
 const adminLocaleCookie = 'payload-lng'
 
@@ -128,6 +130,20 @@ export function proxy(request: NextRequest) {
   const locale = getLocaleFromPathname(request.nextUrl.pathname)
   const effectiveHost = resolveEffectiveHost(request)
 
+  if (
+    siteAlias &&
+    siteAlias in legacySiteAliasRedirectMap &&
+    isLocalDevelopmentHost(effectiveHost)
+  ) {
+    const url = request.nextUrl.clone()
+    const segments = url.pathname.split('/').filter(Boolean)
+    segments[0] = legacySiteAliasRedirectMap[
+      siteAlias as keyof typeof legacySiteAliasRedirectMap
+    ]
+    url.pathname = `/${segments.join('/')}`
+    return NextResponse.redirect(url, 308)
+  }
+
   // Site aliases are a local multisite development contract. They must not
   // become alternate public production URLs (or tenant-selection inputs).
   if (siteAlias && !isLocalDevelopmentHost(effectiveHost)) {
@@ -139,6 +155,15 @@ export function proxy(request: NextRequest) {
   // locale is stripped and accidentally served as the default homepage.
   if (locale && !isPublicLocale(locale)) {
     return notFoundResponse()
+  }
+
+  // Vietnamese is the WingsGroup default locale. Keeping /vi as a rewrite
+  // creates duplicate public URLs after a visitor switches language, so move
+  // it to the canonical no-prefix route before rendering.
+  if (!siteAlias && effectiveHost === wingsGroupCanonicalHost && locale === 'vi') {
+    const url = request.nextUrl.clone()
+    url.pathname = stripLeadingSegments(request.nextUrl.pathname, 1)
+    return NextResponse.redirect(url, 308)
   }
 
   const siteCode = siteAlias ? allSiteAliasToCodeMap[siteAlias] : null

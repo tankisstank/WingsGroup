@@ -687,7 +687,7 @@ const validateDesiredPayload = (
       ...(page || { id: 'virtual', slug: target.slug, pathname: target.pathname }),
       wingsSideHiFi: desired as WingsSideHiFiPageSource['wingsSideHiFi'],
     },
-    publicPathname: `/wingsside${target.pathname === '/' ? '' : target.pathname}`,
+    publicPathname: `/wing-side${target.pathname === '/' ? '' : target.pathname}`,
   })
   return {
     hasCritical: (model?.issues || []).some((issue) => issue.severity === 'critical'),

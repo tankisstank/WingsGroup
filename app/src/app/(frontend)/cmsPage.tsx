@@ -346,7 +346,7 @@ export async function generateCmsPageMetadataByPath({
       doc: {
         ...page,
         meta: { ...page.meta, description: boundedDescription },
-        title: `${cleanTitle} | WingsSide`,
+        title: `${cleanTitle} | WingSide`,
       },
       locale,
       path: requestedPath,

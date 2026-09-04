@@ -98,9 +98,9 @@ export const heroPresentationPresetSeeds: readonly HeroPresentationPresetSeed[] 
       transitionMs: 800,
     },
     description:
-      'WingsSide inbound homepage carousel with image-only atmosphere and planner search widget.',
+      'WingSide inbound homepage carousel with image-only atmosphere and planner search widget.',
     key: 'wingsside-inbound-cinematic-search',
-    name: 'WingsSide Inbound Cinematic Search',
+    name: 'WingSide Inbound Cinematic Search',
     slots: {
       showBadge: true,
       showBusinessPanel: true,

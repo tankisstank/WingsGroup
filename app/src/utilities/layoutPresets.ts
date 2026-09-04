@@ -58,7 +58,7 @@ export const layoutPresetDefinitions: readonly LayoutPresetDefinition[] = [
     description:
       'Trang chủ inbound Vietnam thiên về trust proof, destination cards, sample itinerary và inquiry CTA.',
     key: 'wingsside-inbound-homepage',
-    label: 'Trang chủ inbound WingsSide (WingsSide inbound homepage)',
+    label: 'Trang chủ inbound WingSide (WingSide inbound homepage)',
     preview: {
       accent: 'inbound',
       sections: [
@@ -530,7 +530,7 @@ export const createLayoutPresetData = (
         layout: [
           infoStrip(
             'Travel planning signals',
-            'Bốn điểm nhấn giúp khách inbound hiểu ngay cách WingsSide hỗ trợ một hành trình riêng tại Việt Nam.',
+            'Bốn điểm nhấn giúp khách inbound hiểu ngay cách WingSide hỗ trợ một hành trình riêng tại Việt Nam.',
             [
               {
                 label: 'Destination-led',

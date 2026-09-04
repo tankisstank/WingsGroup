@@ -23,7 +23,7 @@ if (requestedPublicLocales) {
   )
 
   if (unknownLocales.length > 0) {
-    console.error(`Unknown WingsSide public locale(s): ${unknownLocales.join(', ')}`)
+    console.error(`Unknown WingSide public locale(s): ${unknownLocales.join(', ')}`)
     process.exit(1)
   }
 }
@@ -85,7 +85,7 @@ try {
   const skippedSettings = result.siteSettingsUpdates.filter((entry) => entry.action === 'skip').length
 
   payload.logger.info(
-    `${dryRun || validateOnly ? 'Dry run prepared' : 'Backfilled'} WingsSide locales ${result.locales.join(', ')} across ${result.totalPages} pages. pageUpdates=${updatedPages} pageSkips=${skippedPages} settingsUpdates=${updatedSettings} settingsSkips=${skippedSettings}.`,
+    `${dryRun || validateOnly ? 'Dry run prepared' : 'Backfilled'} WingSide locales ${result.locales.join(', ')} across ${result.totalPages} pages. pageUpdates=${updatedPages} pageSkips=${skippedPages} settingsUpdates=${updatedSettings} settingsSkips=${skippedSettings}.`,
   )
   process.exit(0)
 } catch (error) {

@@ -19,6 +19,32 @@ const overriddenRequestHeaders = (response: Response): Headers => {
 describe('tenant proxy rewrites', () => {
   const multisiteInventory = loadMultisiteAuditInventory()
 
+  it('redirects the legacy WingSide path alias to the canonical WingSide slug', () => {
+    const response = proxy(
+      new NextRequest('http://localhost:3100/wingsside/en/destinations/ha-noi', {
+        headers: { host: 'localhost:3100' },
+      }),
+    )
+
+    expect(response.status).toBe(308)
+    expect(response.headers.get('location')).toBe(
+      'http://localhost:3100/wing-side/en/destinations/ha-noi',
+    )
+  })
+
+  it('redirects the WingsGroup default Vietnamese locale prefix to its canonical URL', () => {
+    const response = proxy(
+      new NextRequest('https://wingsgroup.vn/vi/tin-tuc/huong-dan?source=menu', {
+        headers: { host: 'wingsgroup.vn' },
+      }),
+    )
+
+    expect(response.status).toBe(308)
+    expect(response.headers.get('location')).toBe(
+      'https://wingsgroup.vn/tin-tuc/huong-dan?source=menu',
+    )
+  })
+
   it('bootstraps Vietnamese Payload admin locale with one same-route redirect', () => {
     const initialResponse = proxy(
       new NextRequest('http://localhost:3100/admin/login?returnTo=%2Fadmin%2Fconsole', {
@@ -44,7 +70,7 @@ describe('tenant proxy rewrites', () => {
 
   it('preserves the trusted tenant bundle when Next processes the rewrite destination', () => {
     const publicResponse = proxy(
-      new NextRequest('http://localhost:3100/wingsside', {
+      new NextRequest('http://localhost:3100/wing-side', {
         headers: { host: 'localhost:3100' },
       }),
     )
@@ -52,7 +78,7 @@ describe('tenant proxy rewrites', () => {
 
     expect(publicResponse.headers.get('x-middleware-rewrite')).toBe('http://localhost:3100/')
     expect(rewrittenHeaders.get('x-site-code')).toBe('wing-side')
-    expect(rewrittenHeaders.get('x-public-path')).toBe('/wingsside')
+    expect(rewrittenHeaders.get('x-public-path')).toBe('/wing-side')
 
     const internalResponse = proxy(
       new NextRequest('http://localhost:3100/', {
@@ -63,8 +89,8 @@ describe('tenant proxy rewrites', () => {
 
     expect(internalResponse.headers.get('x-middleware-next')).toBe('1')
     expect(serverComponentHeaders.get('x-site-code')).toBe('wing-side')
-    expect(serverComponentHeaders.get('x-site-prefix')).toBe('/wingsside')
-    expect(serverComponentHeaders.get('x-public-path')).toBe('/wingsside')
+    expect(serverComponentHeaders.get('x-site-prefix')).toBe('/wing-side')
+    expect(serverComponentHeaders.get('x-public-path')).toBe('/wing-side')
   })
 
   it('rebuilds an inconsistent client-supplied tenant bundle', () => {
@@ -72,11 +98,11 @@ describe('tenant proxy rewrites', () => {
       new NextRequest('http://localhost:3100/', {
         headers: {
           host: 'localhost:3100',
-          'x-public-path': '/wingsside/not-the-current-route',
+          'x-public-path': '/wing-side/not-the-current-route',
           'x-site-code': 'wing-side',
           'x-site-context-source': 'proxy',
           'x-site-host': 'localhost',
-          'x-site-prefix': '/wingsside',
+          'x-site-prefix': '/wing-side',
         },
       }),
     )
@@ -127,7 +153,7 @@ describe('tenant proxy rewrites', () => {
 
   it('preserves a local alias bundle when Next switches localhost and 127.0.0.1 internally', () => {
     const publicResponse = proxy(
-      new NextRequest('http://127.0.0.1:3100/wingsside/en/destinations/ha-noi', {
+      new NextRequest('http://127.0.0.1:3100/wing-side/en/destinations/ha-noi', {
         headers: { host: '127.0.0.1:3100' },
       }),
     )
@@ -140,8 +166,8 @@ describe('tenant proxy rewrites', () => {
     const serverComponentHeaders = overriddenRequestHeaders(internalResponse)
 
     expect(serverComponentHeaders.get('x-site-code')).toBe('wing-side')
-    expect(serverComponentHeaders.get('x-site-prefix')).toBe('/wingsside/en')
-    expect(serverComponentHeaders.get('x-public-path')).toBe('/wingsside/en/destinations/ha-noi')
+    expect(serverComponentHeaders.get('x-site-prefix')).toBe('/wing-side/en')
+    expect(serverComponentHeaders.get('x-public-path')).toBe('/wing-side/en/destinations/ha-noi')
     expect(serverComponentHeaders.get('x-locale')).toBe('en')
   })
 
@@ -153,18 +179,18 @@ describe('tenant proxy rewrites', () => {
       new NextRequest('http://localhost:3100/', {
         headers: {
           host: 'localhost:3100',
-          'x-public-path': '/wingsside',
+          'x-public-path': '/wing-side',
           'x-site-code': 'wing-side',
           'x-site-context-source': 'proxy',
           'x-site-host': 'localhost',
-          'x-site-prefix': '/wingsside',
+          'x-site-prefix': '/wing-side',
         },
       }),
     )
     const headers = overriddenRequestHeaders(response)
 
     expect(headers.get('x-site-code')).toBe('wing-side')
-    expect(headers.get('x-site-prefix')).toBe('/wingsside')
+    expect(headers.get('x-site-prefix')).toBe('/wing-side')
     expect(headers.get('x-site-host')).toBe('localhost')
   })
 

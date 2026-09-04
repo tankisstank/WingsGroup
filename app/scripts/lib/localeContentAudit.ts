@@ -93,7 +93,7 @@ const forbiddenMarkersByLocale: Record<PublicLocaleCode, string[]> = {
 
 const approvedTerms = new Set([
   // Brand and proper nouns intentionally remain stable across locales.
-  'WingsSide',
+  'WingSide',
   'Vietnam',
   'Vietname',
   'Hanoi',
@@ -262,7 +262,7 @@ export const auditWingsSideLocaleContent = (input: LocaleAuditInput): LocaleAudi
         pushFinding(findings, {
           fieldPath: 'pages.pathname',
           locale,
-          message: `Missing required WingsSide page path ${pathname}.`,
+          message: `Missing required WingSide page path ${pathname}.`,
           pathname,
         })
         continue
@@ -294,7 +294,7 @@ export const auditWingsSideLocaleContent = (input: LocaleAuditInput): LocaleAudi
       pushFinding(findings, {
         fieldPath: 'site-settings',
         locale,
-        message: 'Missing WingsSide site settings for locale.',
+        message: 'Missing WingSide site settings for locale.',
       })
       continue
     }
@@ -365,7 +365,7 @@ export const auditWingsSideLocaleContent = (input: LocaleAuditInput): LocaleAudi
 
 export const renderLocaleAuditMarkdown = (result: LocaleAuditResult): string => {
   const lines = [
-    '# WingsSide locale validation',
+    '# WingSide locale validation',
     '',
     `Status: ${result.ok ? 'PASS' : 'FAIL'}`,
     `Expected routes: ${result.summary.expectedRouteCount}`,

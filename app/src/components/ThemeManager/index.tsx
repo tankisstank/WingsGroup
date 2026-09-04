@@ -153,9 +153,9 @@ const normalizeColorInputValue = (value: string) =>
 const knownThemePresetLabels: Record<string, string> = Object.fromEntries(
   [
     ...themePresetKeyOptions,
-    { label: 'WingsSide cổ điển (WingsSide Classic)', value: 'wings-side-classic' },
-    { label: 'WingsSide biên tập (WingsSide Editorial)', value: 'wings-side-editorial' },
-    { label: 'WingsSide inbound biên tập v2 (WingsSide Editorial Inbound v2)', value: 'wings-side-editorial-inbound-v2' },
+    { label: 'WingSide cổ điển (WingSide Classic)', value: 'wings-side-classic' },
+    { label: 'WingSide biên tập (WingSide Editorial)', value: 'wings-side-editorial' },
+    { label: 'WingSide inbound biên tập v2 (WingSide Editorial Inbound v2)', value: 'wings-side-editorial-inbound-v2' },
   ].map((option) => [option.value, option.label]),
 )
 

@@ -193,7 +193,7 @@ export const renderWingsSideEditorialReviewPacket = (
   const localeEntries = inventory.filter((entry) => entry.locale === locale)
   const routeOrder = [...wingsSideBackfillPaths, '/search', '*']
   const lines = [
-    `# WingsSide editorial review packet — ${locale}`,
+    `# WingSide editorial review packet — ${locale}`,
     '',
     `Regional variant: ${localeVariants[locale]}`,
     '',

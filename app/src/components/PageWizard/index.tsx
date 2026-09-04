@@ -49,7 +49,7 @@ const presetLabels: Record<LayoutPresetKey, string> = {
   'service-detail': 'Chi tiết dịch vụ (Service detail)',
   'social-proof': 'Bằng chứng uy tín (Trust and social proof)',
   'tour-conversion': 'Chuyển đổi tour (Tour conversion)',
-  'wingsside-inbound-homepage': 'Trang chủ inbound WingSide (WingsSide inbound homepage)',
+  'wingsside-inbound-homepage': 'Trang chủ inbound WingSide (WingSide inbound homepage)',
 }
 
 const sectionLabels: Record<string, string> = {

@@ -64,7 +64,7 @@ describe('WingSide taxonomy write gate', () => {
           editorialApproval: wingsSideTourTaxonomyMappingRevision,
           production: false,
         },
-        env: { DATABASE_URL: 'file:E:/tmp/wing-side.db', NODE_ENV: 'development' },
+        env: { DATABASE_URL: 'file:E:/tmp/wingsside.db', NODE_ENV: 'development' },
         mode: 'apply',
       }),
     ).toEqual({ environment: 'local-sqlite', productionMutation: false })

@@ -40,7 +40,7 @@ const assertDisposableDatabase = () => {
   }
 }
 
-adapterDescribe('WingsSide credentials production PostgreSQL transaction proof', () => {
+adapterDescribe('WingSide credentials production PostgreSQL transaction proof', () => {
   let payload: Payload
   let req: PayloadRequest
   let siteID: number | string

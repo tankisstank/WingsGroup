@@ -118,7 +118,7 @@ describe('lead form hardened submission', () => {
   it('localizes Vietnamese form labels and focuses the first invalid numeric-id control', async () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
-    window.history.replaceState({}, '', '/wingsside/vi/plan-your-trip')
+    window.history.replaceState({}, '', '/wing-side/vi/plan-your-trip')
     document.documentElement.lang = 'vi'
 
     render(<FormBlock enableIntro={false} form={{ ...mixedForm, id: 9 } as never} />)
@@ -137,7 +137,7 @@ describe('lead form hardened submission', () => {
   })
 
   it('uses stable unique ids and describedby associations for every field type', async () => {
-    window.history.replaceState({}, '', '/wingsside/en/contact-us')
+    window.history.replaceState({}, '', '/wing-side/en/contact-us')
     document.documentElement.lang = 'en'
 
     render(
@@ -179,7 +179,7 @@ describe('lead form hardened submission', () => {
   })
 
   it('aligns native required, aria-required and script validation semantics', async () => {
-    window.history.replaceState({}, '', '/wingsside/en/plan-your-trip')
+    window.history.replaceState({}, '', '/wing-side/en/plan-your-trip')
 
     render(<FormBlock enableIntro={false} form={mixedForm as never} />)
 
@@ -242,7 +242,7 @@ describe('lead form hardened submission', () => {
   })
 
   it('keeps Journeys q/type in hidden plan context without changing the visitor message', async () => {
-    window.history.replaceState({}, '', '/wingsside/en/plan-your-trip?q=H%C3%A0%20N%E1%BB%99i&type=group&destination=hanoi&style=culture&duration=8-14&source=journeys')
+    window.history.replaceState({}, '', '/wing-side/en/plan-your-trip?q=H%C3%A0%20N%E1%BB%99i&type=group&destination=hanoi&style=culture&duration=8-14&source=journeys')
     document.body.innerHTML = '<div class="ws-hifi-plan-form"><form><textarea name="message"></textarea></form></div>'
     render(<PlanPrefillBridge budgetLabel="Budget" budgetOptions={[]} consentLabel="Consent" destLabel="Destination" destOptions={['Hanoi']} groupLabel="Group" groupOptions={[]} monthLabel="Month" monthOptions={[]} styleLabel="Style" styleOptions={['Culture']} searchParams={{ q: 'Hà Nội', type: 'group', destination: 'hanoi', style: 'culture', duration: '8-14', source: 'journeys' }} />)
     const planForm = document.querySelector<HTMLFormElement>('.ws-hifi-plan-form form')!

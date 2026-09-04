@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/wingsside/packages',
+  usePathname: () => '/wing-side/packages',
   useSearchParams: () => new URLSearchParams(),
 }))
 

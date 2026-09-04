@@ -12,3 +12,8 @@ artifacts/tmp/
 # Nested repositories kept outside this workspace commit
 payload/
 sub/
+
+# Harness core maintenance binary
+scripts/bin/harness
+scripts/bin/harness.exe
+.seo-cache/

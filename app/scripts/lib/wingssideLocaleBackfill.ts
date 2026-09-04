@@ -553,7 +553,7 @@ const updatePageLocale = async (
       currentData,
       differencePaths: collectDifferencePaths(currentData, targetData),
       locale,
-      message: 'WingsSide locale backfill comparison mismatch',
+      message: 'WingSide locale backfill comparison mismatch',
       pageID,
       targetData,
     })
@@ -890,7 +890,7 @@ const homeCopy = {
       linkItem('Plan your trip', '/plan-your-trip'),
       linkItem('Explore destinations', '/destinations', 'outline'),
     ],
-    meta: 'WingsSide tailor-made Vietnam journeys',
+    meta: 'WingSide tailor-made Vietnam journeys',
     packagesDescription:
       'Itinerary cards are directional examples that help guests imagine what can be built without forcing a rigid catalog.',
     packagesEyebrow: 'Sample itineraries',
@@ -924,7 +924,7 @@ const homeCopy = {
     whyDescription:
       'Inbound guests need to trust the operator before they send a detailed planning brief.',
     whyEyebrow: 'How we plan',
-    whyTitle: 'Why travel with WingsSide',
+    whyTitle: 'Why travel with WingSide',
   },
   vi: {
     ctaDescription:
@@ -940,7 +940,7 @@ const homeCopy = {
       linkItem('Lên kế hoạch', '/plan-your-trip'),
       linkItem('Điểm đến', '/destinations', 'outline'),
     ],
-    meta: 'WingsSide hành trình Việt Nam thiết kế riêng',
+    meta: 'WingSide hành trình Việt Nam thiết kế riêng',
     packagesDescription:
       'Các hành trình mẫu giúp khách hình dung những khả năng phù hợp mà không bị giới hạn trong một danh mục cứng.',
     packagesEyebrow: 'Hành trình mẫu',
@@ -970,11 +970,11 @@ const homeCopy = {
     trustDescription:
       'Trang chủ ưu tiên điểm đến, phong cách và thông tin hữu ích trước khi yêu cầu khách điền biểu mẫu chi tiết.',
     trustEyebrow: 'Tư vấn cho khách quốc tế',
-    trustTitle: 'WingsSide được thiết kế để xây dựng niềm tin',
+    trustTitle: 'WingSide được thiết kế để xây dựng niềm tin',
     whyDescription:
       'Khách quốc tế cần tin tưởng đơn vị tổ chức trước khi gửi yêu cầu chuyến đi chi tiết.',
     whyEyebrow: 'Lớp niềm tin',
-    whyTitle: 'Vì sao đi cùng WingsSide',
+    whyTitle: 'Vì sao đi cùng WingSide',
   },
   it: {
     ctaDescription:
@@ -990,7 +990,7 @@ const homeCopy = {
       linkItem('Pianifica il viaggio', '/plan-your-trip'),
       linkItem('Destinazioni', '/destinations', 'outline'),
     ],
-    meta: 'WingsSide Vietnam su misura',
+    meta: 'WingSide Vietnam su misura',
     packagesDescription:
       'Le schede itinerario restano esempi marketing: mostrano possibilità, non un catalogo rigido.',
     packagesEyebrow: 'Itinerari',
@@ -1020,11 +1020,11 @@ const homeCopy = {
     trustDescription:
       'La pagina iniziale presenta destinazioni, stile e indicazioni utili prima di chiedere di compilare un modulo dettagliato.',
     trustEyebrow: 'Consulenza per viaggiatori internazionali',
-    trustTitle: 'WingsSide nasce per costruire fiducia',
+    trustTitle: 'WingSide nasce per costruire fiducia',
     whyDescription:
       'I viaggiatori internazionali devono potersi fidare dell’operatore prima di inviare una richiesta dettagliata.',
     whyEyebrow: 'Sezione fiducia',
-    whyTitle: 'Perché viaggiare con WingsSide',
+    whyTitle: 'Perché viaggiare con WingSide',
   },
   es: {
     ctaDescription:
@@ -1040,7 +1040,7 @@ const homeCopy = {
       linkItem('Planifica tu viaje', '/plan-your-trip'),
       linkItem('Destinos', '/destinations', 'outline'),
     ],
-    meta: 'WingsSide Vietnam a medida',
+    meta: 'WingSide Vietnam a medida',
     packagesDescription:
       'Las tarjetas de itinerario son ejemplos de marketing: muestran posibilidades, no un catálogo rígido.',
     packagesEyebrow: 'Itinerarios',
@@ -1070,11 +1070,11 @@ const homeCopy = {
     trustDescription:
       'La portada prioriza destinos, estilo y señales de planificación antes de pedir un formulario completo.',
     trustEyebrow: 'Asesoría para viajeros internacionales',
-    trustTitle: 'WingsSide está diseñado para generar confianza',
+    trustTitle: 'WingSide está diseñado para generar confianza',
     whyDescription:
       'Los viajeros internacionales necesitan confiar en el operador antes de enviar una solicitud detallada.',
     whyEyebrow: 'Sección confianza',
-    whyTitle: 'Por qué viajar con WingsSide',
+    whyTitle: 'Por qué viajar con WingSide',
   },
   pt: {
     ctaDescription:
@@ -1090,7 +1090,7 @@ const homeCopy = {
       linkItem('Planear a viagem', '/plan-your-trip'),
       linkItem('Destinos', '/destinations', 'outline'),
     ],
-    meta: 'WingsSide Vietname à medida',
+    meta: 'WingSide Vietname à medida',
     packagesDescription:
       'Os cartões de itinerário são exemplos de marketing: mostram possibilidades, não um catálogo rígido.',
     packagesEyebrow: 'Itinerários',
@@ -1120,11 +1120,11 @@ const homeCopy = {
     trustDescription:
       'A homepage prioriza destinos, estilo e sinais de planeamento antes de pedir um formulário completo.',
     trustEyebrow: 'Aconselhamento para viajantes internacionais',
-    trustTitle: 'A WingsSide foi desenhada para gerar confiança',
+    trustTitle: 'A WingSide foi desenhada para gerar confiança',
     whyDescription:
       'Os viajantes internacionais precisam de confiar no operador antes de enviar um pedido detalhado.',
     whyEyebrow: 'Secção confiança',
-    whyTitle: 'Porque viajar com a WingsSide',
+    whyTitle: 'Porque viajar com a WingSide',
   },
 } as const
 
@@ -3197,7 +3197,7 @@ const getPage = (assets: Assets, pathname: (typeof requiredPaths)[number]) => {
   const page = assets.pagesByPath.get(pathname)
 
   if (!page) {
-    throw new Error(`Missing WingsSide page ${pathname}`)
+    throw new Error(`Missing WingSide page ${pathname}`)
   }
 
   return page
@@ -3251,7 +3251,7 @@ const destinationDetailCopy: Record<
       'A destination page should combine overview, seasonality, top experiences, related routes, and a clear path to inquiry.',
     infoEyebrow: 'Destination page structure',
     infoTitle: (title) => `${title} as an inbound planning page`,
-    metaDescription: (title) => `${title} destination page for WingsSide inbound Vietnam planning.`,
+    metaDescription: (title) => `${title} destination page for WingSide inbound Vietnam planning.`,
     rows: [
       {
         description:
@@ -3286,7 +3286,7 @@ const destinationDetailCopy: Record<
     infoEyebrow: 'Estructura de página de destino',
     infoTitle: (title) => `${title} como página para planificar el viaje`,
     metaDescription: (title) =>
-      `Página de destino ${title} para planificar un viaje a Vietnam con WingsSide.`,
+      `Página de destino ${title} para planificar un viaje a Vietnam con WingSide.`,
     rows: [
       {
         description:
@@ -3321,7 +3321,7 @@ const destinationDetailCopy: Record<
     infoEyebrow: 'Struttura della pagina destinazione',
     infoTitle: (title) => `${title} come pagina per pianificare il viaggio`,
     metaDescription: (title) =>
-      `Pagina destinazione ${title} per pianificare un viaggio in Vietnam con WingsSide.`,
+      `Pagina destinazione ${title} per pianificare un viaggio in Vietnam con WingSide.`,
     rows: [
       {
         description:
@@ -3356,7 +3356,7 @@ const destinationDetailCopy: Record<
     infoEyebrow: 'Estrutura da página de destino',
     infoTitle: (title) => `${title} como página para planear a viagem`,
     metaDescription: (title) =>
-      `Página de destino ${title} para planear uma viagem ao Vietname com a WingsSide.`,
+      `Página de destino ${title} para planear uma viagem ao Vietname com a WingSide.`,
     rows: [
       {
         description:
@@ -3391,7 +3391,7 @@ const destinationDetailCopy: Record<
     infoEyebrow: 'Cấu trúc trang điểm đến',
     infoTitle: (title) => `${title} như một trang lên ý tưởng hành trình`,
     metaDescription: (title) =>
-      `Trang điểm đến ${title} để lên kế hoạch hành trình Việt Nam cùng WingsSide.`,
+      `Trang điểm đến ${title} để lên kế hoạch hành trình Việt Nam cùng WingSide.`,
     rows: [
       {
         description:
@@ -3432,7 +3432,7 @@ const styleDetailCopy: Record<
       'Use the planner and mention the style you prefer so the team can adjust pacing, hotels, and route depth.',
     ctaTitle: 'Want a trip built around this style?',
     eyebrow: 'Style logic',
-    metaDescription: (title) => `${title} travel style page for WingsSide.`,
+    metaDescription: (title) => `${title} travel style page for WingSide.`,
     metaTitle: (title) => `${title} Vietnam travel`,
     pointMeta: 'Travel style',
     sectionDescription:
@@ -3444,7 +3444,7 @@ const styleDetailCopy: Record<
       'Use el planificador e indique el estilo que prefiere para que el equipo ajuste ritmo, hoteles y profundidad de ruta.',
     ctaTitle: '¿Quiere un viaje construido alrededor de este estilo?',
     eyebrow: 'Lógica del estilo',
-    metaDescription: (title) => `Página de estilo ${title.toLowerCase()} de WingsSide.`,
+    metaDescription: (title) => `Página de estilo ${title.toLowerCase()} de WingSide.`,
     metaTitle: (title) => `${title} para viajar por Vietnam`,
     pointMeta: 'Estilo de viaje',
     sectionDescription:
@@ -3456,7 +3456,7 @@ const styleDetailCopy: Record<
       'Usa lo strumento di pianificazione e indica lo stile che preferisci, così la squadra potrà adattare ritmo, hotel e profondità dell’itinerario.',
     ctaTitle: 'Vuoi un viaggio costruito intorno a questo stile?',
     eyebrow: 'Logica dello stile',
-    metaDescription: (title) => `Pagina dello stile ${title.toLowerCase()} di WingsSide.`,
+    metaDescription: (title) => `Pagina dello stile ${title.toLowerCase()} di WingSide.`,
     metaTitle: (title) => `${title} per viaggiare in Vietnam`,
     pointMeta: 'Stile di viaggio',
     sectionDescription:
@@ -3468,7 +3468,7 @@ const styleDetailCopy: Record<
       'Use o planeador e indique o estilo que prefere para a equipa ajustar ritmo, hotéis e profundidade da rota.',
     ctaTitle: 'Quer uma viagem construída em torno deste estilo?',
     eyebrow: 'Lógica do estilo',
-    metaDescription: (title) => `Página de estilo ${title.toLowerCase()} da WingsSide.`,
+    metaDescription: (title) => `Página de estilo ${title.toLowerCase()} da WingSide.`,
     metaTitle: (title) => `${title} para viajar pelo Vietname`,
     pointMeta: 'Estilo de viagem',
     sectionDescription:
@@ -3480,7 +3480,7 @@ const styleDetailCopy: Record<
       'Hãy dùng công cụ lên kế hoạch và cho biết phong cách bạn ưu tiên để đội ngũ điều chỉnh nhịp đi, khách sạn và chiều sâu trải nghiệm.',
     ctaTitle: 'Muốn dựng hành trình quanh phong cách này?',
     eyebrow: 'Định hướng phong cách',
-    metaDescription: (title) => `Trang phong cách ${title.toLowerCase()} của WingsSide.`,
+    metaDescription: (title) => `Trang phong cách ${title.toLowerCase()} của WingSide.`,
     metaTitle: (title) => `${title} du lịch Việt Nam`,
     pointMeta: 'Phong cách du lịch',
     sectionDescription: 'Trang phong cách giúp khách chọn đúng hướng trước khi gửi yêu cầu tư vấn.',
@@ -3500,34 +3500,34 @@ const packageDetailCopy: Record<
     ctaParagraph:
       'These package pages are planning references. The real next step is a custom inquiry, not a fixed checkout.',
     ctaTitle: 'Would you like to adapt this sample itinerary?',
-    metaDescription: (title) => `${title} sample itinerary page for WingsSide.`,
+    metaDescription: (title) => `${title} sample itinerary page for WingSide.`,
   },
   es: {
     ctaParagraph:
       'Estos itinerarios sirven como referencia. El siguiente paso es solicitar una propuesta personalizada, no realizar una compra fija.',
     ctaTitle: '¿Necesita ajustar este itinerario de ejemplo?',
     metaDescription: (title) =>
-      `Página de itinerario de ejemplo ${title.toLowerCase()} para WingsSide.`,
+      `Página de itinerario de ejemplo ${title.toLowerCase()} para WingSide.`,
   },
   it: {
     ctaParagraph:
       'Questi itinerari servono come riferimento. Il passo successivo è chiedere una proposta personalizzata, non effettuare un acquisto fisso.',
     ctaTitle: 'Vuoi adattare questo itinerario di esempio?',
     metaDescription: (title) =>
-      `Pagina itinerario di esempio ${title.toLowerCase()} per WingsSide.`,
+      `Pagina itinerario di esempio ${title.toLowerCase()} per WingSide.`,
   },
   pt: {
     ctaParagraph:
       'Estes itinerários servem de referência. O passo seguinte é pedir uma proposta personalizada, não efetuar uma compra fixa.',
     ctaTitle: 'Precisa de ajustar este itinerário de exemplo?',
     metaDescription: (title) =>
-      `Página de itinerário de exemplo ${title.toLowerCase()} para a WingsSide.`,
+      `Página de itinerário de exemplo ${title.toLowerCase()} para a WingSide.`,
   },
   vi: {
     ctaParagraph:
       'Những hành trình này dùng để tham khảo. Bước tiếp theo là gửi yêu cầu để nhận đề xuất phù hợp, không phải mua một gói cố định.',
     ctaTitle: 'Cần điều chỉnh hành trình mẫu này?',
-    metaDescription: (title) => `Trang hành trình mẫu ${title.toLowerCase()} cho WingsSide.`,
+    metaDescription: (title) => `Trang hành trình mẫu ${title.toLowerCase()} cho WingSide.`,
   },
 }
 
@@ -4255,7 +4255,7 @@ const plannerChromeCopy: Record<
       {
         answer:
           'No. A clear interest in destinations, an approximate travel window, and a preferred style are enough to start a useful conversation.',
-        question: 'Do I need to know the full itinerary before contacting WingsSide?',
+        question: 'Do I need to know the full itinerary before contacting WingSide?',
       },
       {
         answer:
@@ -4291,7 +4291,7 @@ const plannerChromeCopy: Record<
       {
         answer:
           'No. Basta con un interés claro por destinos, una ventana de viaje aproximada y un estilo preferido para iniciar una conversación útil.',
-        question: '¿Necesito conocer todo el itinerario antes de contactar a WingsSide?',
+        question: '¿Necesito conocer todo el itinerario antes de contactar a WingSide?',
       },
       {
         answer:
@@ -4328,7 +4328,7 @@ const plannerChromeCopy: Record<
       {
         answer:
           'No. Basta un interesse chiaro per le destinazioni, una finestra di viaggio approssimativa e uno stile preferito per iniziare una conversazione utile.',
-        question: 'Devo conoscere tutto l’itinerario prima di contattare WingsSide?',
+        question: 'Devo conoscere tutto l’itinerario prima di contattare WingSide?',
       },
       {
         answer: 'Sì. In futuro l’itinerario potrà includere i servizi aeroportuali di WingsPass.',
@@ -4364,7 +4364,7 @@ const plannerChromeCopy: Record<
       {
         answer:
           'Não. Basta um interesse claro por destinos, uma janela de viagem aproximada e um estilo preferido para iniciar uma conversa útil.',
-        question: 'Preciso de conhecer todo o itinerário antes de contactar a WingsSide?',
+        question: 'Preciso de conhecer todo o itinerário antes de contactar a WingSide?',
       },
       {
         answer:
@@ -4401,7 +4401,7 @@ const plannerChromeCopy: Record<
       {
         answer:
           'Không. Chỉ cần có hứng thú rõ về điểm đến, khoảng thời gian dự kiến và phong cách du lịch là đủ để bắt đầu một cuộc trao đổi hữu ích.',
-        question: 'Tôi có cần biết toàn bộ hành trình trước khi liên hệ WingsSide không?',
+        question: 'Tôi có cần biết toàn bộ hành trình trước khi liên hệ WingSide không?',
       },
       {
         answer: 'Có. Sau này hành trình có thể bổ sung các dịch vụ hỗ trợ sân bay của WingsPass.',
@@ -4595,7 +4595,7 @@ const buildHomePageData = (assets: Assets, locale: SupportedBackfillLocale) => {
   const routeCopy = localizedRouteCards[locale]
 
   return {
-    title: 'WingsSide',
+    title: 'WingSide',
     hero: {
       type: 'highImpact',
       presentationMode: 'inherit',
@@ -4755,8 +4755,8 @@ const buildAboutPageData = (assets: Assets, locale: SupportedBackfillLocale) => 
       title: 'About',
       heading: 'Inbound Vietnam needs trust, not retail noise',
       paragraph:
-        'WingsSide follows a destination-led, style-led, inquiry-first structure because the inbound customer journey is different from outbound retail.',
-      stripTitle: 'Why WingsSide feels different from WingsGo',
+        'WingSide follows a destination-led, style-led, inquiry-first structure because the inbound customer journey is different from outbound retail.',
+      stripTitle: 'Why WingSide feels different from WingsGo',
       stripDescription:
         'The site is organized around destination discovery, travel styles, planning, and operator trust instead of early price comparison.',
       items: [
@@ -4785,15 +4785,15 @@ const buildAboutPageData = (assets: Assets, locale: SupportedBackfillLocale) => 
       ],
       col1: 'Guests should be able to move from Vietnam-level exploration into destination pages such as Hanoi, Ha Long, Hoi An, Hue, and the Mekong.',
       col2: 'Instead of a wall of prices, the site explains travel styles, sample itineraries, and the planning process.',
-      meta: 'About WingsSide',
-      metaDesc: 'About page for the WingsSide inbound positioning and travel planning model.',
+      meta: 'About WingSide',
+      metaDesc: 'About page for the WingSide inbound positioning and travel planning model.',
     },
     vi: {
       title: 'Giới thiệu',
       heading: 'Khách quốc tế cần niềm tin, không cần những lời chào bán ồn ào',
       paragraph:
-        'WingsSide tổ chức nội dung theo điểm đến, phong cách du lịch và nhu cầu tư vấn, vì khách quốc tế tìm kiếm hành trình khác với việc chọn sản phẩm đại trà.',
-      stripTitle: 'Vì sao WingsSide khác WingsGo',
+        'WingSide tổ chức nội dung theo điểm đến, phong cách du lịch và nhu cầu tư vấn, vì khách quốc tế tìm kiếm hành trình khác với việc chọn sản phẩm đại trà.',
+      stripTitle: 'Vì sao WingSide khác WingsGo',
       stripDescription:
         'Trang web ưu tiên khám phá điểm đến, phong cách du lịch, tư vấn hành trình và uy tín của đơn vị tổ chức thay vì đưa khách vào so giá quá sớm.',
       items: [
@@ -4823,15 +4823,15 @@ const buildAboutPageData = (assets: Assets, locale: SupportedBackfillLocale) => 
       ],
       col1: 'Khách có thể bắt đầu từ bức tranh toàn cảnh Việt Nam rồi khám phá Hà Nội, Hạ Long, Hội An, Huế và Mekong.',
       col2: 'Thay vì dồn khách vào một bảng giá, trang web giải thích phong cách du lịch, hành trình mẫu và quy trình tư vấn.',
-      meta: 'Giới thiệu WingsSide',
-      metaDesc: 'Tìm hiểu cách WingsSide tư vấn và thiết kế hành trình Việt Nam cho khách quốc tế.',
+      meta: 'Giới thiệu WingSide',
+      metaDesc: 'Tìm hiểu cách WingSide tư vấn và thiết kế hành trình Việt Nam cho khách quốc tế.',
     },
     it: {
       title: 'Chi siamo',
       heading: 'I viaggiatori internazionali cercano fiducia, non promesse commerciali rumorose',
       paragraph:
-        'WingsSide organizza i contenuti per destinazioni, stili di viaggio e richieste di consulenza, perché chi arriva dall’estero segue un percorso diverso dalla scelta di prodotti standardizzati.',
-      stripTitle: 'Perché WingsSide si sente diversa da WingsGo',
+        'WingSide organizza i contenuti per destinazioni, stili di viaggio e richieste di consulenza, perché chi arriva dall’estero segue un percorso diverso dalla scelta di prodotti standardizzati.',
+      stripTitle: 'Perché WingSide si sente diversa da WingsGo',
       stripDescription:
         'Il sito privilegia la scoperta delle destinazioni, gli stili di viaggio, la consulenza e l’affidabilità dell’operatore, senza spingere subito al confronto dei prezzi.',
       items: [
@@ -4862,16 +4862,16 @@ const buildAboutPageData = (assets: Assets, locale: SupportedBackfillLocale) => 
       ],
       col1: 'Gli utenti dovrebbero potersi muovere dall’esplorazione a livello Vietnam verso Hanoi, Ha Long, Hoi An, Hue e Mekong.',
       col2: 'Invece di una parete di prezzi, il sito presenta stili di viaggio, itinerari di esempio e il percorso di consulenza.',
-      meta: 'Chi siamo | WingsSide',
+      meta: 'Chi siamo | WingSide',
       metaDesc:
-        'Scopri come WingsSide consiglia e progetta viaggi su misura in Vietnam per ospiti internazionali.',
+        'Scopri come WingSide consiglia e progetta viaggi su misura in Vietnam per ospiti internazionali.',
     },
     es: {
       title: 'Nosotros',
       heading: 'Los viajeros internacionales buscan confianza, no mensajes comerciales ruidosos',
       paragraph:
-        'WingsSide organiza el contenido por destinos, estilos de viaje y solicitudes de asesoría, porque quienes llegan del extranjero siguen un proceso distinto de la elección de productos estandarizados.',
-      stripTitle: 'Por qué WingsSide se siente diferente de WingsGo',
+        'WingSide organiza el contenido por destinos, estilos de viaje y solicitudes de asesoría, porque quienes llegan del extranjero siguen un proceso distinto de la elección de productos estandarizados.',
+      stripTitle: 'Por qué WingSide se siente diferente de WingsGo',
       stripDescription:
         'El sitio prioriza el descubrimiento de destinos, los estilos de viaje, la asesoría y la fiabilidad del operador, sin empujar demasiado pronto a comparar precios.',
       items: [
@@ -4901,16 +4901,16 @@ const buildAboutPageData = (assets: Assets, locale: SupportedBackfillLocale) => 
       ],
       col1: 'Los usuarios deberían poder pasar de una exploración a nivel Vietnam hacia Hanói, Ha Long, Hoi An, Hue y Mekong.',
       col2: 'En lugar de un muro de precios, el sitio presenta estilos de viaje, itinerarios de ejemplo y el proceso de asesoría.',
-      meta: 'Sobre WingsSide',
+      meta: 'Sobre WingSide',
       metaDesc:
-        'Descubre cómo WingsSide asesora y diseña viajes a medida por Vietnam para huéspedes internacionales.',
+        'Descubre cómo WingSide asesora y diseña viajes a medida por Vietnam para huéspedes internacionales.',
     },
     pt: {
       title: 'Sobre',
       heading: 'Os viajantes internacionais procuram confiança, não mensagens comerciais ruidosas',
       paragraph:
-        'A WingsSide organiza os conteúdos por destinos, estilos de viagem e pedidos de aconselhamento, porque quem chega do estrangeiro segue um processo diferente da escolha de produtos padronizados.',
-      stripTitle: 'Porque a WingsSide se sente diferente da WingsGo',
+        'A WingSide organiza os conteúdos por destinos, estilos de viagem e pedidos de aconselhamento, porque quem chega do estrangeiro segue um processo diferente da escolha de produtos padronizados.',
+      stripTitle: 'Porque a WingSide se sente diferente da WingsGo',
       stripDescription:
         'O site privilegia a descoberta de destinos, os estilos de viagem, o aconselhamento e a fiabilidade do operador, sem empurrar demasiado cedo para a comparação de preços.',
       items: [
@@ -4941,9 +4941,9 @@ const buildAboutPageData = (assets: Assets, locale: SupportedBackfillLocale) => 
       ],
       col1: 'Os utilizadores devem poder passar da exploração ao nível Vietname para Hanói, Ha Long, Hoi An, Hue e Mekong.',
       col2: 'Em vez de uma parede de preços, o site apresenta estilos de viagem, itinerários de exemplo e o processo de aconselhamento.',
-      meta: 'Sobre a WingsSide',
+      meta: 'Sobre a WingSide',
       metaDesc:
-        'Descubra como a WingsSide aconselha e desenha viagens à medida pelo Vietname para hóspedes internacionais.',
+        'Descubra como a WingSide aconselha e desenha viagens à medida pelo Vietname para hóspedes internacionais.',
     },
   }[locale]
 
@@ -4993,7 +4993,7 @@ const buildContactPageData = (assets: Assets, locale: SupportedBackfillLocale) =
       sideBody:
         'The response starts from destinations, style, timing, and group needs, not from a fixed catalog.',
       body: 'The team reads the brief, evaluates route and rhythm, then replies with a useful direction instead of pushing a standard checkout.',
-      meta: 'Contact WingsSide',
+      meta: 'Contact WingSide',
     },
     vi: {
       title: 'Liên hệ',
@@ -5005,7 +5005,7 @@ const buildContactPageData = (assets: Assets, locale: SupportedBackfillLocale) =
       sideBody:
         'Phản hồi bắt đầu từ điểm đến, phong cách, thời gian và nhu cầu của nhóm, không từ một danh mục cố định.',
       body: 'Đội ngũ đọc yêu cầu, đánh giá hành trình và nhịp đi, rồi phản hồi bằng một hướng phù hợp thay vì đẩy khách vào quy trình mua tiêu chuẩn.',
-      meta: 'Liên hệ WingsSide',
+      meta: 'Liên hệ WingSide',
     },
     it: {
       title: 'Contatti',
@@ -5017,7 +5017,7 @@ const buildContactPageData = (assets: Assets, locale: SupportedBackfillLocale) =
       sideBody:
         'La risposta parte da destinazioni, stile, periodo e gruppo, non da un catalogo fisso.',
       body: 'La squadra legge la richiesta, valuta itinerario e ritmo, poi propone una direzione utile invece di spingere verso un acquisto standard.',
-      meta: 'Contatti WingsSide',
+      meta: 'Contatti WingSide',
     },
     es: {
       title: 'Contacto',
@@ -5028,7 +5028,7 @@ const buildContactPageData = (assets: Assets, locale: SupportedBackfillLocale) =
       sideTitle: 'De la solicitud a la propuesta',
       sideBody: 'La respuesta parte de destinos, estilo, fechas y grupo, no de un catálogo fijo.',
       body: 'El equipo lee la solicitud, evalúa el itinerario y el ritmo, y propone una dirección útil en lugar de empujar hacia una compra estándar.',
-      meta: 'Contacto WingsSide',
+      meta: 'Contacto WingSide',
     },
     pt: {
       title: 'Contacto',
@@ -5039,7 +5039,7 @@ const buildContactPageData = (assets: Assets, locale: SupportedBackfillLocale) =
       sideTitle: 'Do pedido à proposta',
       sideBody: 'A resposta parte de destinos, estilo, datas e grupo, não de um catálogo fixo.',
       body: 'A equipa lê o pedido, avalia o itinerário e o ritmo, e propõe uma direção útil em vez de forçar uma compra padronizada.',
-      meta: 'Contacto WingsSide',
+      meta: 'Contacto WingSide',
     },
   }[locale]
 
@@ -5099,7 +5099,7 @@ const buildDestinationHubData = (assets: Assets, locale: SupportedBackfillLocale
         'Start from the role each place plays in a Vietnam route: Hanoi for the north, Ha Long for seascape contrast, Hue and Hoi An for heritage, and the Mekong for a softer southern extension.',
       sideTitle: 'Start with a shortlist',
       sideBody:
-        'Use the hub to shortlist regions before sending a brief. WingsSide can then shape pacing, hotels, transfers, and local experiences around your group.',
+        'Use the hub to shortlist regions before sending a brief. WingSide can then shape pacing, hotels, transfers, and local experiences around your group.',
       gridTitle: 'Key Vietnam destinations',
       gridDescription:
         'These entry points help guests understand how each region can shape a private Vietnam journey.',
@@ -5115,7 +5115,7 @@ const buildDestinationHubData = (assets: Assets, locale: SupportedBackfillLocale
         'Hãy bắt đầu từ vai trò của từng nơi trong hành trình: Hà Nội mở ra miền Bắc, Hạ Long mang đến cảnh quan vịnh biển, Huế và Hội An giàu di sản, còn Mekong tạo một phần kết nhẹ nhàng ở miền Nam.',
       sideTitle: 'Chọn vùng ưu tiên',
       sideBody:
-        'Chọn những vùng bạn quan tâm trước khi gửi yêu cầu. Sau đó WingsSide sẽ gợi ý nhịp đi, khách sạn, phương án di chuyển và trải nghiệm địa phương phù hợp.',
+        'Chọn những vùng bạn quan tâm trước khi gửi yêu cầu. Sau đó WingSide sẽ gợi ý nhịp đi, khách sạn, phương án di chuyển và trải nghiệm địa phương phù hợp.',
       gridTitle: 'Các điểm đến then chốt ở Việt Nam',
       gridDescription:
         'Những điểm vào này giúp khách hiểu mỗi vùng sẽ định hình hành trình riêng như thế nào.',
@@ -5131,7 +5131,7 @@ const buildDestinationHubData = (assets: Assets, locale: SupportedBackfillLocale
         'Inizia dal ruolo di ogni luogo nel viaggio: Hanoi apre il Nord, Ha Long offre paesaggi marini, Hue e Hoi An raccontano il patrimonio, mentre il Mekong crea una conclusione più lenta nel Sud.',
       sideTitle: 'Scegli le regioni prioritarie',
       sideBody:
-        'Scegli le regioni che ti interessano prima di inviare la richiesta. WingsSide potrà poi definire ritmo, hotel, trasferimenti ed esperienze locali.',
+        'Scegli le regioni che ti interessano prima di inviare la richiesta. WingSide potrà poi definire ritmo, hotel, trasferimenti ed esperienze locali.',
       gridTitle: 'Destinazioni principali del Vietnam',
       gridDescription:
         'Questi ingressi aiutano a capire come ogni regione possa modellare un viaggio privato in Vietnam.',
@@ -5147,7 +5147,7 @@ const buildDestinationHubData = (assets: Assets, locale: SupportedBackfillLocale
         'Empieza por el papel de cada lugar en el viaje: Hanói abre el norte, Ha Long aporta paisajes marinos, Hue y Hoi An cuentan el patrimonio, y el Mekong ofrece un final más pausado en el sur.',
       sideTitle: 'Elige las regiones prioritarias',
       sideBody:
-        'Elige las regiones que te interesan antes de enviar la solicitud. WingsSide podrá después definir el ritmo, los hoteles, los traslados y las experiencias locales.',
+        'Elige las regiones que te interesan antes de enviar la solicitud. WingSide podrá después definir el ritmo, los hoteles, los traslados y las experiencias locales.',
       gridTitle: 'Principales destinos de Vietnam',
       gridDescription:
         'Estos puntos de entrada ayudan a entender cómo cada región puede dar forma a un viaje privado por Vietnam.',
@@ -5163,7 +5163,7 @@ const buildDestinationHubData = (assets: Assets, locale: SupportedBackfillLocale
         'Comece pelo papel de cada lugar na viagem: Hanói abre o norte, Ha Long oferece paisagens marítimas, Hue e Hoi An contam o património, e o Mekong cria um final mais pausado no sul.',
       sideTitle: 'Escolha as regiões prioritárias',
       sideBody:
-        'Escolha as regiões que lhe interessam antes de enviar o pedido. A WingsSide poderá depois definir o ritmo, os hotéis, os transferes e as experiências locais.',
+        'Escolha as regiões que lhe interessam antes de enviar o pedido. A WingSide poderá depois definir o ritmo, os hotéis, os transferes e as experiências locais.',
       gridTitle: 'Principais destinos do Vietname',
       gridDescription:
         'Estas entradas ajudam a perceber como cada região pode moldar uma viagem privada ao Vietname.',
@@ -5217,7 +5217,7 @@ const buildStyleHubData = (assets: Assets, locale: SupportedBackfillLocale) => {
       body1:
         'Travel styles turn a broad Vietnam idea into a useful planning direction. They help the team understand pacing, hotel expectations, activity level, and contextual depth for each day.',
       body2:
-        'This page is intentionally not a fixed price grid. It gives international guests a clearer way to brief WingsSide before a tailored itinerary is prepared.',
+        'This page is intentionally not a fixed price grid. It gives international guests a clearer way to brief WingSide before a tailored itinerary is prepared.',
       meta: 'Travel styles',
     },
     vi: {
@@ -5228,7 +5228,7 @@ const buildStyleHubData = (assets: Assets, locale: SupportedBackfillLocale) => {
       body1:
         'Phong cách du lịch biến một ý tưởng rộng về Việt Nam thành định hướng rõ ràng. Thông tin này giúp đội ngũ hiểu nhịp đi, kỳ vọng về khách sạn, mức vận động và chiều sâu trải nghiệm.',
       body2:
-        'Trang này không phải bảng giá cố định. Nó giúp khách quốc tế mô tả nhu cầu rõ ràng trước khi WingsSide thiết kế hành trình riêng.',
+        'Trang này không phải bảng giá cố định. Nó giúp khách quốc tế mô tả nhu cầu rõ ràng trước khi WingSide thiết kế hành trình riêng.',
       meta: 'Phong cách du lịch',
     },
     it: {
@@ -5239,7 +5239,7 @@ const buildStyleHubData = (assets: Assets, locale: SupportedBackfillLocale) => {
       body1:
         'Gli stili trasformano un’idea generale del Vietnam in una direzione concreta. Aiutano la squadra a capire ritmo, aspettative sugli hotel, livello di attività e profondità delle esperienze.',
       body2:
-        'La pagina non è una griglia di prezzi fissi. Aiuta gli ospiti europei a descrivere le proprie esigenze prima che WingsSide prepari un itinerario su misura.',
+        'La pagina non è una griglia di prezzi fissi. Aiuta gli ospiti europei a descrivere le proprie esigenze prima che WingSide prepari un itinerario su misura.',
       meta: 'Stili di viaggio',
     },
     es: {
@@ -5250,7 +5250,7 @@ const buildStyleHubData = (assets: Assets, locale: SupportedBackfillLocale) => {
       body1:
         'Los estilos convierten una idea general de Vietnam en una dirección concreta. Ayudan al equipo a comprender el ritmo, las expectativas de hotel, el nivel de actividad y la profundidad de las experiencias.',
       body2:
-        'La página no es una parrilla de precios fijos. Ayuda a los huéspedes europeos a describir sus necesidades antes de que WingsSide prepare un itinerario a medida.',
+        'La página no es una parrilla de precios fijos. Ayuda a los huéspedes europeos a describir sus necesidades antes de que WingSide prepare un itinerario a medida.',
       meta: 'Estilos de viaje',
     },
     pt: {
@@ -5261,7 +5261,7 @@ const buildStyleHubData = (assets: Assets, locale: SupportedBackfillLocale) => {
       body1:
         'Os estilos transformam uma ideia geral do Vietname numa direção concreta. Ajudam a equipa a compreender o ritmo, as expectativas de hotel, o nível de atividade e a profundidade das experiências.',
       body2:
-        'A página não é uma grelha de preços fixos. Ajuda os hóspedes europeus a descrever as suas necessidades antes de a WingsSide preparar um itinerário à medida.',
+        'A página não é uma grelha de preços fixos. Ajuda os hóspedes europeus a descrever as suas necessidades antes de a WingSide preparar um itinerário à medida.',
       meta: 'Estilos de viagem',
     },
   }[locale]
@@ -5536,42 +5536,42 @@ const buildTravelGuidePageData = (assets: Assets, locale: SupportedBackfillLocal
     },
     vi: {
       title: 'Cẩm nang du lịch',
-      heading: 'Cẩm nang giúp khách tìm thấy WingsSide và tự tin hơn khi lên kế hoạch',
+      heading: 'Cẩm nang giúp khách tìm thấy WingSide và tự tin hơn khi lên kế hoạch',
       paragraph:
         'Các bài cẩm nang giúp khách quốc tế hiểu mùa vụ, di chuyển và bối cảnh điểm đến trước khi gửi yêu cầu tư vấn.',
       archiveTitle: 'Bài cẩm nang mới nhất',
       archiveBody:
-        'Thư viện nội dung này chỉ hiển thị bài viết của WingsSide và hỗ trợ tăng trưởng SEO theo điểm đến.',
+        'Thư viện nội dung này chỉ hiển thị bài viết của WingSide và hỗ trợ tăng trưởng SEO theo điểm đến.',
       meta: 'Cẩm nang du lịch',
     },
     it: {
       title: 'Guida di viaggio',
-      heading: 'La guida aiuta a trovare WingsSide e a pianificare con fiducia',
+      heading: 'La guida aiuta a trovare WingSide e a pianificare con fiducia',
       paragraph:
         'Gli articoli aiutano i viaggiatori internazionali a capire stagionalità, trasferimenti e contesto delle destinazioni prima di chiedere una consulenza.',
       archiveTitle: 'Ultimi articoli di viaggio',
       archiveBody:
-        'Questo archivio mostra solo i contenuti di WingsSide e sostiene la crescita SEO per destinazione.',
+        'Questo archivio mostra solo i contenuti di WingSide e sostiene la crescita SEO per destinazione.',
       meta: 'Guida di viaggio',
     },
     es: {
       title: 'Guía de viaje',
-      heading: 'La guía ayuda a encontrar WingsSide y a planificar con confianza',
+      heading: 'La guía ayuda a encontrar WingSide y a planificar con confianza',
       paragraph:
         'Los artículos ayudan a los viajeros internacionales a comprender la temporada, los traslados y el contexto de cada destino antes de solicitar asesoría.',
       archiveTitle: 'Últimos artículos de viaje',
       archiveBody:
-        'Este archivo muestra solo el contenido de WingsSide y apoya el crecimiento SEO por destino.',
+        'Este archivo muestra solo el contenido de WingSide y apoya el crecimiento SEO por destino.',
       meta: 'Guía de viaje',
     },
     pt: {
       title: 'Guia de viagem',
-      heading: 'O guia ajuda a encontrar a WingsSide e a planear com confiança',
+      heading: 'O guia ajuda a encontrar a WingSide e a planear com confiança',
       paragraph:
         'Os artigos ajudam os viajantes internacionais a compreender a época, os transferes e o contexto de cada destino antes de pedir aconselhamento.',
       archiveTitle: 'Artigos de viagem mais recentes',
       archiveBody:
-        'Este arquivo mostra apenas os conteúdos da WingsSide e apoia o crescimento SEO por destino.',
+        'Este arquivo mostra apenas os conteúdos da WingSide e apoia o crescimento SEO por destino.',
       meta: 'Guia de viagem',
     },
   }[locale]
@@ -5604,17 +5604,17 @@ const buildTestimonialsPageData = (assets: Assets, locale: SupportedBackfillLoca
       gridTitle: 'How trust appears on the site',
       gridDescription:
         'This page uses structured cards to present credibility instead of hiding everything in long paragraphs.',
-      meta: 'WingsSide trust',
+      meta: 'WingSide trust',
     },
     vi: {
       title: 'Niềm tin và bằng chứng',
       heading: 'Thông tin đáng tin cậy cần xuất hiện trước bảng giá',
       paragraph:
         'Cảm nhận của khách, quy trình rõ ràng và hiểu biết điểm đến giúp khách quốc tế tự tin trước khi gửi yêu cầu chi tiết.',
-      gridTitle: 'WingsSide xây dựng niềm tin như thế nào',
+      gridTitle: 'WingSide xây dựng niềm tin như thế nào',
       gridDescription:
         'Trang này trình bày các bằng chứng quan trọng theo từng nhóm rõ ràng, thay vì giấu trong những đoạn văn dài.',
-      meta: 'Niềm tin WingsSide',
+      meta: 'Niềm tin WingSide',
     },
     it: {
       title: 'Fiducia e trasparenza',
@@ -5644,7 +5644,7 @@ const buildTestimonialsPageData = (assets: Assets, locale: SupportedBackfillLoca
       gridTitle: 'Como a confiança aparece no site',
       gridDescription:
         'A página apresenta as provas mais importantes em secções claras, em vez de as esconder em parágrafos longos.',
-      meta: 'Confiança WingsSide',
+      meta: 'Confiança WingSide',
     },
   }[locale]
 
@@ -5837,7 +5837,7 @@ const buildPageData = (assets: Assets, locale: SupportedBackfillLocale, pathname
         return buildPackageDetailData(assets, locale, pathname as keyof typeof packageEntries)
       }
 
-      throw new Error(`No backfill builder registered for WingsSide page ${pathname}`)
+      throw new Error(`No backfill builder registered for WingSide page ${pathname}`)
   }
 }
 
@@ -5871,12 +5871,12 @@ const deriveAssets = (pagesByPath: Map<string, PageDoc>): Assets => {
     heroImageID || secondaryImageID || travelStylesImageID || sampleItinerariesImageID
 
   if (!fallbackImageID) {
-    throw new Error('Could not derive required WingsSide media relations for locale backfill.')
+    throw new Error('Could not derive required WingSide media relations for locale backfill.')
   }
 
   if (!tripPlannerFormID || !guideCategoryID) {
     throw new Error(
-      'Could not derive required WingsSide form/category relations for locale backfill.',
+      'Could not derive required WingSide form/category relations for locale backfill.',
     )
   }
 
@@ -5941,7 +5941,7 @@ export async function backfillWingsSideLocales(
   const site = siteResult.docs[0]
 
   if (!site) {
-    throw new Error('Could not find WingsSide site record for locale backfill.')
+    throw new Error('Could not find WingSide site record for locale backfill.')
   }
 
   const pages = await payload.find({
@@ -5972,7 +5972,7 @@ export async function backfillWingsSideLocales(
 
   for (const pathname of requiredPaths) {
     if (!pagesByPath.has(pathname)) {
-      throw new Error(`WingsSide locale backfill missing source page ${pathname}`)
+      throw new Error(`WingSide locale backfill missing source page ${pathname}`)
     }
   }
 

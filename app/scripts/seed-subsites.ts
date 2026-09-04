@@ -279,7 +279,7 @@ const siteSeeds: SiteSeed[] = [
       'Corporate hub and multisite content platform for the WingsGroup ecosystem, outbound tours, inbound journeys, fast track services, and premium travel programs.',
     seoSuffix: 'Travel Ecosystem',
     summary:
-      'Corporate hub điều hướng sang WingsGo, WingsSide, WingsPass, WingsPlus và các line business khác của VietWings.',
+      'Corporate hub điều hướng sang WingsGo, WingSide, WingsPass, WingsPlus và các line business khác của VietWings.',
     themePreset: 'corporate',
   },
   {
@@ -1631,7 +1631,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
             value: 'wingsgo',
           },
           {
-            label: 'WingsSide - inbound Vietnam',
+            label: 'WingSide - inbound Vietnam',
             value: 'wingsside',
           },
           {
@@ -1751,7 +1751,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               url: 'https://wingsgo.vn',
             },
             {
-              title: 'WingsSide',
+              title: 'WingSide',
               description:
                 'Điểm vào dành cho khách quốc tế tại Việt Nam với nội dung theo điểm đến, phong cách du lịch, hành trình mẫu và luồng tư vấn.',
               imageID: inboundImage.id,
@@ -1798,7 +1798,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
             },
             {
               label: 'Khách quốc tế tại Việt Nam',
-              value: 'WingsSide',
+              value: 'WingSide',
               description:
                 'Dành cho khách quốc tế cần hành trình consultative, tailor-made và insight điểm đến.',
             },
@@ -1831,7 +1831,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
       meta: {
         title: 'Hệ sinh thái WingsGroup',
         description:
-          'Giải thích vai trò của WingsGo, WingsSide, WingsPass, WingsPlus và WingsCare trong hệ sinh thái WingsGroup.',
+          'Giải thích vai trò của WingsGo, WingSide, WingsPass, WingsPlus và WingsCare trong hệ sinh thái WingsGroup.',
         image: ecosystemHeroImage.id,
         breadcrumbLabel: 'Hệ sinh thái',
       },
@@ -1865,7 +1865,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               url: 'https://wingsgo.vn',
             },
             {
-              title: 'WingsSide',
+              title: 'WingSide',
               description:
                 'Inbound Vietnam entry with destination storytelling, travel styles, sample itineraries, and inquiry-first planning flows.',
               imageID: inboundImage.id,
@@ -1912,7 +1912,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
             },
             {
               label: 'Khách quốc tế tại Việt Nam',
-              value: 'WingsSide',
+              value: 'WingSide',
               description:
                 'For visitors planning tailor-made Vietnam journeys through consultation.',
             },
@@ -1943,7 +1943,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
       meta: {
         title: 'WingsGroup Ecosystem',
         description:
-          'Understand the different roles of WingsGo, WingsSide, WingsPass, WingsPlus, and WingsCare inside the WingsGroup ecosystem.',
+          'Understand the different roles of WingsGo, WingSide, WingsPass, WingsPlus, and WingsCare inside the WingsGroup ecosystem.',
         image: ecosystemHeroImage.id,
         breadcrumbLabel: 'Ecosystem',
       },
@@ -2159,8 +2159,8 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               description:
                 'Khách quốc tế cần câu chuyện theo điểm đến, hành trình mẫu, phong cách du lịch và luồng tư vấn rõ ràng.',
               imageID: destinationHubImage.id,
-              meta: 'WingsSide',
-              url: '/wingsside',
+              meta: 'WingSide',
+              url: '/wing-side',
             },
             {
               title: 'Airport service',
@@ -2252,8 +2252,8 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               description:
                 'Inbound guests need destination storytelling, sample itineraries, travel styles, and inquiry-first planning.',
               imageID: destinationHubImage.id,
-              meta: 'WingsSide',
-              url: '/wingsside',
+              meta: 'WingSide',
+              url: '/wing-side',
             },
             {
               title: 'Airport service',
@@ -2626,7 +2626,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
         ],
         richText: richText(
           'Liên hệ một lần, điều phối đúng line business',
-          'Nếu khách hàng chưa biết nên vào WingsGo, WingsSide, WingsPass, WingsPlus hay WingsCare, root site phải đóng vai trò tuyến tiếp nhận chung và điều phối về đội phù hợp.',
+          'Nếu khách hàng chưa biết nên vào WingsGo, WingSide, WingsPass, WingsPlus hay WingsCare, root site phải đóng vai trò tuyến tiếp nhận chung và điều phối về đội phù hợp.',
           'h1',
         ),
       },
@@ -2683,10 +2683,10 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               url: '/wingsgo',
             },
             {
-              title: 'WingsSide',
+              title: 'WingSide',
               description:
                 'Hành trình cho khách quốc tế tại Việt Nam với nội dung theo điểm đến và hành trình tham khảo.',
-              url: '/wingsside',
+              url: '/wing-side',
             },
             {
               title: 'WingsPass',
@@ -2725,7 +2725,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
         ],
         richText: richText(
           'One contact layer, routed to the right business line',
-          'If visitors are not sure whether they need WingsGo, WingsSide, WingsPass, WingsPlus, or WingsCare, the root site should work as the shared intake and routing surface.',
+          'If visitors are not sure whether they need WingsGo, WingSide, WingsPass, WingsPlus, or WingsCare, the root site should work as the shared intake and routing surface.',
           'h1',
         ),
       },
@@ -2782,10 +2782,10 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               url: '/wingsgo',
             },
             {
-              title: 'WingsSide',
+              title: 'WingSide',
               description:
                 'Hành trình cho khách quốc tế tại Việt Nam với nội dung theo điểm đến và hành trình tham khảo.',
-              url: '/wingsside',
+              url: '/wing-side',
             },
             {
               title: 'WingsPass',
@@ -3277,7 +3277,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
         { kind: 'heading', tag: 'h2', text: '5 site con giải quyết 5 hành trình khác nhau' },
         {
           kind: 'paragraph',
-          text: 'WingsGo phục vụ retail outbound. WingsSide phục vụ inbound Vietnam. WingsPass phục vụ fast-track sân bay. WingsPlus phục vụ private, MICE và brief high-value. WingsCare phục vụ quyền lợi, care và hỗ trợ sau bán.',
+          text: 'WingsGo phục vụ retail outbound. WingSide phục vụ inbound Vietnam. WingsPass phục vụ fast-track sân bay. WingsPlus phục vụ private, MICE và brief high-value. WingsCare phục vụ quyền lợi, care và hỗ trợ sau bán.',
         },
         { kind: 'heading', tag: 'h2', text: 'Visitor nên dùng root site thế nào' },
         {
@@ -3299,7 +3299,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
         { kind: 'heading', tag: 'h2', text: 'Five child sites for five different journeys' },
         {
           kind: 'paragraph',
-          text: 'WingsGo handles retail outbound. WingsSide handles inbound Vietnam. WingsPass handles airport support. WingsPlus handles private, MICE, and high-value briefs. WingsCare handles benefits, care, and after-sales support.',
+          text: 'WingsGo handles retail outbound. WingSide handles inbound Vietnam. WingsPass handles airport support. WingsPlus handles private, MICE, and high-value briefs. WingsCare handles benefits, care, and after-sales support.',
         },
         { kind: 'heading', tag: 'h2', text: 'How visitors should use the root site' },
         {
@@ -3324,10 +3324,10 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
           kind: 'paragraph',
           text: 'WingsGo dành cho khách muốn duyệt tour, xem campaign mùa vụ, đọc lịch khởi hành và so sánh chương trình retail outbound một cách trực tiếp.',
         },
-        { kind: 'heading', tag: 'h2', text: 'WingsSide: tư vấn hành trình cho khách quốc tế' },
+        { kind: 'heading', tag: 'h2', text: 'WingSide: tư vấn hành trình cho khách quốc tế' },
         {
           kind: 'paragraph',
-          text: 'WingsSide không nên nói như một bảng giá retail. Site này cần nội dung theo điểm đến, hành trình tham khảo và luồng tư vấn dành cho khách quốc tế.',
+          text: 'WingSide không nên nói như một bảng giá retail. Site này cần nội dung theo điểm đến, hành trình tham khảo và luồng tư vấn dành cho khách quốc tế.',
         },
         { kind: 'heading', tag: 'h2', text: 'WingsPass, WingsPlus, WingsCare' },
         {
@@ -3346,10 +3346,10 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
           kind: 'paragraph',
           text: 'WingsGo is for visitors who want to browse tours, seasonal campaigns, departure schedules, and structured outbound retail detail.',
         },
-        { kind: 'heading', tag: 'h2', text: 'WingsSide: inbound consultative' },
+        { kind: 'heading', tag: 'h2', text: 'WingSide: inbound consultative' },
         {
           kind: 'paragraph',
-          text: 'WingsSide should not feel like a retail price sheet. It needs destination storytelling, sample itineraries, and inquiry-first planning for international guests.',
+          text: 'WingSide should not feel like a retail price sheet. It needs destination storytelling, sample itineraries, and inquiry-first planning for international guests.',
         },
         { kind: 'heading', tag: 'h2', text: 'WingsPass, WingsPlus, WingsCare' },
         {
@@ -3370,9 +3370,9 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
       heroImageID: scheduleGuideImage.id,
       categoryIDs: [guideCategory.id],
       viDescription:
-        'Cẩm nang nhanh giúp visitor chọn đúng điểm vào giữa WingsGo, WingsSide, WingsPass, WingsPlus và WingsCare.',
+        'Cẩm nang nhanh giúp visitor chọn đúng điểm vào giữa WingsGo, WingSide, WingsPass, WingsPlus và WingsCare.',
       enDescription:
-        'A quick guide to choosing the right entry point between WingsGo, WingsSide, WingsPass, WingsPlus, and WingsCare.',
+        'A quick guide to choosing the right entry point between WingsGo, WingSide, WingsPass, WingsPlus, and WingsCare.',
       viSections: [
         { kind: 'heading', tag: 'h2', text: 'Bắt đầu từ nhu cầu thay vì từ menu' },
         {
@@ -3387,7 +3387,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
         { kind: 'heading', tag: 'h2', text: 'Nếu cần brief riêng hoặc hành trình theo yêu cầu' },
         {
           kind: 'paragraph',
-          text: 'Inbound Vietnam nên đi qua WingsSide. Private / MICE / high-value nên đi qua WingsPlus. Fast-track sân bay nên đi qua WingsPass. Quyền lợi và care support nên đi qua WingsCare.',
+          text: 'Inbound Vietnam nên đi qua WingSide. Private / MICE / high-value nên đi qua WingsPlus. Fast-track sân bay nên đi qua WingsPass. Quyền lợi và care support nên đi qua WingsCare.',
         },
         { kind: 'heading', tag: 'h2', text: 'Nếu vẫn chưa chắc' },
         {
@@ -3409,7 +3409,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
         { kind: 'heading', tag: 'h2', text: 'If the visitor needs a tailored brief' },
         {
           kind: 'paragraph',
-          text: 'Inbound Vietnam belongs in WingsSide. Private or MICE briefs belong in WingsPlus. Airport support belongs in WingsPass. Benefits and care belong in WingsCare.',
+          text: 'Inbound Vietnam belongs in WingSide. Private or MICE briefs belong in WingsPlus. Airport support belongs in WingsPass. Benefits and care belong in WingsCare.',
         },
         { kind: 'heading', tag: 'h2', text: 'If the visitor still is not sure' },
         {
@@ -3629,24 +3629,24 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
       heroImageID: inboundImage.id,
       categoryIDs: [trendCategory.id, capabilityCategory.id],
       viDescription:
-        'Bài xu hướng ở cấp root site để giới thiệu logic inbound và dẫn khách sang WingsSide.',
+        'Bài xu hướng ở cấp root site để giới thiệu logic inbound và dẫn khách sang WingSide.',
       enDescription:
-        'A trend-level article that introduces inbound journey logic and routes visitors into WingsSide.',
+        'A trend-level article that introduces inbound journey logic and routes visitors into WingSide.',
       viSections: [
         { kind: 'heading', tag: 'h2', text: 'Inbound không nên được bán như một bảng tour ghép' },
         {
           kind: 'paragraph',
           text: 'Khách quốc tế thường không mua Việt Nam như mua một retail departure page. Họ cần hiểu nhịp hành trình, tổ hợp điểm đến, phong cách du lịch và mức độ cá nhân hóa.',
         },
-        { kind: 'heading', tag: 'h2', text: 'Tại sao WingsSide là bề mặt đúng' },
+        { kind: 'heading', tag: 'h2', text: 'Tại sao WingSide là bề mặt đúng' },
         {
           kind: 'paragraph',
-          text: 'WingsSide có cụm điểm đến, các phong cách du lịch và hành trình tham khảo. Đó là cấu trúc đúng cho một hành trình Việt Nam thiết kế riêng theo nhu cầu tư vấn.',
+          text: 'WingSide có cụm điểm đến, các phong cách du lịch và hành trình tham khảo. Đó là cấu trúc đúng cho một hành trình Việt Nam thiết kế riêng theo nhu cầu tư vấn.',
         },
         { kind: 'heading', tag: 'h2', text: 'Root site chỉ nên làm gì' },
         {
           kind: 'paragraph',
-          text: 'Root site có thể viết ở mức định hướng xu hướng và capability, sau đó chuyển traffic sang WingsSide để khách tiếp tục lên kế hoạch cụ thể.',
+          text: 'Root site có thể viết ở mức định hướng xu hướng và capability, sau đó chuyển traffic sang WingSide để khách tiếp tục lên kế hoạch cụ thể.',
         },
       ],
       enSections: [
@@ -3659,15 +3659,15 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
           kind: 'paragraph',
           text: 'International guests usually do not buy Vietnam the same way a retail outbound customer buys a departure-based page. They need pace, destination combination, travel style, and personalization context.',
         },
-        { kind: 'heading', tag: 'h2', text: 'Why WingsSide is the right surface' },
+        { kind: 'heading', tag: 'h2', text: 'Why WingSide is the right surface' },
         {
           kind: 'paragraph',
-          text: 'WingsSide provides destination hubs, travel styles, and sample itineraries. That is the right structure for tailor-made or inquiry-led inbound planning.',
+          text: 'WingSide provides destination hubs, travel styles, and sample itineraries. That is the right structure for tailor-made or inquiry-led inbound planning.',
         },
         { kind: 'heading', tag: 'h2', text: 'What the root site should do instead' },
         {
           kind: 'paragraph',
-          text: 'The root site can write at the level of trend and capability, then route the visitor into WingsSide for actual trip planning.',
+          text: 'The root site can write at the level of trend and capability, then route the visitor into WingSide for actual trip planning.',
         },
       ],
     },
@@ -3877,12 +3877,12 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               url: '/wingsgo',
             },
             {
-              title: 'WingsSide',
+              title: 'WingSide',
               description:
                 'Hành trình cho khách quốc tế tại Việt Nam với nội dung theo điểm đến, phong cách du lịch và hành trình mẫu.',
               imageID: inboundImage.id,
               meta: 'Tư vấn hành trình',
-              url: '/wingsside',
+              url: '/wing-side',
             },
             {
               title: 'WingsPass',
@@ -3929,7 +3929,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
             {
               label: 'Site con đang phát triển',
               value: '5',
-              description: 'WingsGo, WingsSide, WingsPass, WingsPlus và WingsCare.',
+              description: 'WingsGo, WingSide, WingsPass, WingsPlus và WingsCare.',
             },
             {
               label: 'Ngôn ngữ phase 1',
@@ -3954,7 +3954,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               title: 'Khách quốc tế tại Việt Nam',
               description: 'Destination-led planning và tailor-made journey cho khách quốc tế.',
               imageID: destinationHubImage.id,
-              meta: 'WingsSide',
+              meta: 'WingSide',
               url: '/nang-luc-dich-vu',
             },
             {
@@ -4066,12 +4066,12 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               url: '/wingsgo',
             },
             {
-              title: 'WingsSide',
+              title: 'WingSide',
               description:
                 'Inbound Vietnam with destination storytelling, travel styles, and sample itineraries for international guests.',
               imageID: inboundImage.id,
               meta: 'Inbound planning',
-              url: '/wingsside',
+              url: '/wing-side',
             },
             {
               title: 'WingsPass',
@@ -4115,7 +4115,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
             {
               label: 'Child sites in phase 1',
               value: '5',
-              description: 'WingsGo, WingsSide, WingsPass, WingsPlus, and WingsCare.',
+              description: 'WingsGo, WingSide, WingsPass, WingsPlus, and WingsCare.',
             },
             {
               label: 'Phase 1 locales',
@@ -4140,7 +4140,7 @@ async function seedWingsGroup(payload: Payload, req: PayloadRequest, siteSeed: S
               title: 'Inbound Vietnam',
               description: 'Destination-led planning and tailor-made inbound journeys.',
               imageID: destinationHubImage.id,
-              meta: 'WingsSide',
+              meta: 'WingSide',
               url: '/nang-luc-dich-vu',
             },
             {
@@ -4459,8 +4459,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         },
         {
           label: 'Liên hệ',
-          value: '+84 903 000 111',
-          description: 'Có thể gửi yêu cầu qua form, hotline hoặc email sales@wingsgo.vn.',
+          value: '0912910101',
+          description: 'Có thể gửi yêu cầu qua form, hotline hoặc email sales@wingsgroup.vn.',
         },
       ],
       'Xác nhận & hỗ trợ',
@@ -4532,12 +4532,12 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         [
           {
             label: 'Hotline / Zalo',
-            value: '+84 903 000 111',
+            value: '0912910101',
             description: 'Ưu tiên phản hồi trong giờ làm việc.',
           },
           {
             label: 'Email',
-            value: 'sales@wingsgo.vn',
+            value: 'sales@wingsgroup.vn',
             description: 'Phù hợp khi gửi danh sách khách hoặc yêu cầu đoàn riêng.',
           },
           {
@@ -7142,8 +7142,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       linkItem('Giới thiệu', '/gioi-thieu'),
       linkItem('Liên hệ', '/lien-he'),
     ],
-    supportEmail: 'sales@wingsgo.vn',
-    supportPhone: '+84 903 000 111',
+    supportEmail: 'sales@wingsgroup.vn',
+    supportPhone: '0912910101',
     tagline: siteSeed.summary,
   })
 
@@ -7427,7 +7427,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     payload,
     req,
     site.id,
-    'WingsSide Vietnam hero',
+    'WingSide Vietnam hero',
     'Private Vietnam journey through heritage towns and coastal landscapes',
     'Vietnam journey scene used to introduce destination-led, tailor-made travel planning.',
     path.join(seedAssetsDir, 'wingsside-vietnam-journey-hero.png'),
@@ -7445,7 +7445,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     payload,
     req,
     site.id,
-    'WingsSide travel styles cover',
+    'WingSide travel styles cover',
     'Private Vietnam travel styles for culture, family, luxury, and adventure',
     'Editorial travel style image for matching trip rhythm, comfort, and interests.',
     path.join(seedAssetsDir, 'wingsside-travel-styles.png'),
@@ -7454,7 +7454,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     payload,
     req,
     site.id,
-    'WingsSide sample itineraries cover',
+    'WingSide sample itineraries cover',
     'Curated Vietnam itinerary route across heritage and nature',
     'Editorial itinerary image for sample Vietnam journeys that can be tailored.',
     path.join(seedAssetsDir, 'wingsside-sample-itineraries.png'),
@@ -7534,7 +7534,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       ],
       richText: richText(
         'Tell us what kind of Vietnam journey you want to build',
-        'WingsSide is designed for custom inquiries, destination planning, and consultative conversations rather than price-only browsing.',
+        'WingSide is designed for custom inquiries, destination planning, and consultative conversations rather than price-only browsing.',
         'h1',
       ),
     },
@@ -7573,7 +7573,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     ],
     meta: {
       title: 'Contact Us',
-      description: 'Inquiry page for WingsSide inbound Vietnam journeys.',
+      description: 'Inquiry page for WingSide inbound Vietnam journeys.',
       image: heroImage.id,
     },
   })
@@ -7585,13 +7585,13 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       type: 'lowImpact',
       richText: richText(
         'Inbound Vietnam needs trust, not retail noise',
-        'WingsSide follows a destination-led, style-led, inquiry-first structure because the inbound customer journey is different from outbound retail.',
+        'WingSide follows a destination-led, style-led, inquiry-first structure because the inbound customer journey is different from outbound retail.',
         'h1',
       ),
     },
     layout: [
       infoStripBlock(
-        'Why WingsSide feels different from WingsGo',
+        'Why WingSide feels different from WingsGo',
         'The site is organized around destination discovery, trip planning, travel styles, and operator trust instead of early price comparison.',
         [
           {
@@ -7636,8 +7636,8 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       ]),
     ],
     meta: {
-      title: 'About WingsSide',
-      description: 'About page for the WingsSide inbound positioning and travel planning model.',
+      title: 'About WingSide',
+      description: 'About page for the WingSide inbound positioning and travel planning model.',
       image: heroImage.id,
     },
   })
@@ -7666,7 +7666,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
           size: 'oneThird',
           title: 'Start with a shortlist',
           paragraph:
-            'Use the hub to shortlist regions before sending a brief. WingsSide can then shape pacing, hotels, transfers, and local experiences around your group.',
+            'Use the hub to shortlist regions before sending a brief. WingSide can then shape pacing, hotels, transfers, and local experiences around your group.',
         },
       ]),
       featureGridBlock(
@@ -7715,7 +7715,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     ],
     meta: {
       title: 'Vietnam destinations',
-      description: 'Destination hub for WingsSide inbound Vietnam pages.',
+      description: 'Destination hub for WingSide inbound Vietnam pages.',
       image: heroImage.id,
       breadcrumbLabel: 'Destinations',
     },
@@ -7745,7 +7745,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
           size: 'half',
           title: 'Built for consultative selling',
           paragraph:
-            'The page is intentionally not a fixed price grid. It gives European inbound guests a clearer way to brief WingsSide before a tailored itinerary is prepared.',
+            'The page is intentionally not a fixed price grid. It gives European inbound guests a clearer way to brief WingSide before a tailored itinerary is prepared.',
         },
       ]),
       featureGridBlock(
@@ -7786,7 +7786,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     ],
     meta: {
       title: 'Travel styles',
-      description: 'Travel style hub for WingsSide inbound pages.',
+      description: 'Travel style hub for WingSide inbound pages.',
       image: heroImage.id,
       breadcrumbLabel: 'Styles',
     },
@@ -7859,7 +7859,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     ],
     meta: {
       title: 'Vietnam packages',
-      description: 'Curated sample itineraries for WingsSide inbound planning.',
+      description: 'Curated sample itineraries for WingSide inbound planning.',
       image: secondaryImage.id,
       breadcrumbLabel: 'Packages',
     },
@@ -7916,7 +7916,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
         'These FAQs address the common uncertainty on the inbound side before users send a brief.',
         [
           {
-            question: 'Do I need to know my full itinerary before contacting WingsSide?',
+            question: 'Do I need to know my full itinerary before contacting WingSide?',
             answer:
               'No. A clear destination interest, approximate travel window, and travel style are enough to begin a useful planning conversation.',
           },
@@ -7932,7 +7932,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     relatedPages: [contactPage.id, destinationHub.id, styleHub.id],
     meta: {
       title: 'Plan your trip',
-      description: 'Trip planning page for WingsSide inbound inquiries.',
+      description: 'Trip planning page for WingSide inbound inquiries.',
       image: heroImage.id,
     },
   })
@@ -7958,7 +7958,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     ],
     meta: {
       title: 'Travel guide',
-      description: 'Travel guide archive for WingsSide destination and planning content.',
+      description: 'Travel guide archive for WingSide destination and planning content.',
       image: secondaryImage.id,
     },
   })
@@ -8004,7 +8004,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     ],
     meta: {
       title: 'Testimonials and trust',
-      description: 'Trust signals and proof page for WingsSide inbound planning.',
+      description: 'Trust signals and proof page for WingSide inbound planning.',
       image: secondaryImage.id,
     },
   })
@@ -8073,7 +8073,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       ],
       meta: {
         title: args.title,
-        description: `${args.title} destination page for WingsSide inbound Vietnam planning.`,
+        description: `${args.title} destination page for WingSide inbound Vietnam planning.`,
         image: secondaryImage.id,
       },
     })
@@ -8221,7 +8221,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       ],
       meta: {
         title: `${args.title} Vietnam travel`,
-        description: `${args.title} travel style page for WingsSide.`,
+        description: `${args.title} travel style page for WingSide.`,
         image: secondaryImage.id,
       },
     })
@@ -8343,7 +8343,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       ],
       meta: {
         title: args.title,
-        description: `${args.title} sample itinerary page for WingsSide.`,
+        description: `${args.title} sample itinerary page for WingSide.`,
         image: secondaryImage.id,
       },
     })
@@ -8444,7 +8444,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     categories: [guideCategory.id],
     meta: {
       title: 'Best time to travel in Northern Vietnam',
-      description: 'Guide post for northern Vietnam planning on WingsSide.',
+      description: 'Guide post for northern Vietnam planning on WingSide.',
       image: secondaryImage.id,
     },
   })
@@ -8472,13 +8472,13 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     heroImage: secondaryImage.id,
     content: richText(
       'Luxury is not only about hotel stars',
-      'This guide supports the trust-first positioning of WingsSide by explaining how pacing, curation, service smoothness, and destination flow shape a premium journey.',
+      'This guide supports the trust-first positioning of WingSide by explaining how pacing, curation, service smoothness, and destination flow shape a premium journey.',
       'h2',
     ),
     categories: [guideCategory.id],
     meta: {
       title: 'What makes a Vietnam trip feel luxury instead of generic?',
-      description: 'Guide post supporting luxury travel positioning on WingsSide.',
+      description: 'Guide post supporting luxury travel positioning on WingSide.',
       image: secondaryImage.id,
     },
   })
@@ -8547,7 +8547,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
           {
             title: 'Inbound Vietnam',
             description:
-              'Learn how WingsSide approaches private Vietnam travel, local route design, practical pacing, and support for international guests.',
+              'Learn how WingSide approaches private Vietnam travel, local route design, practical pacing, and support for international guests.',
             url: '/about-us',
           },
           {
@@ -8563,7 +8563,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
         'Explore',
       ),
       featureGridBlock(
-        'Why travel with WingsSide',
+        'Why travel with WingSide',
         'A useful inbound journey starts with clear advice, realistic pacing, and a planning process shaped around the people who will travel.',
         [
           {
@@ -8914,7 +8914,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
         linkItem('Pianifica il viaggio', '/plan-your-trip'),
         linkItem('Destinazioni', '/destinations', 'outline'),
       ],
-      meta: 'WingsSide Vietnam su misura',
+      meta: 'WingSide Vietnam su misura',
       paragraph:
         'Esperienze private, flessibili e progettate localmente attraverso destinazioni, stili di viaggio e consulenza.',
       packagesDescription:
@@ -8949,7 +8949,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       whyDescription:
         'I viaggiatori inbound devono fidarsi dell’operatore prima di inviare un brief di pianificazione.',
       whyEyebrow: 'Come pianifichiamo',
-      whyTitle: 'Perché viaggiare con WingsSide',
+      whyTitle: 'Perché viaggiare con WingSide',
     },
     es: {
       ctaDescription:
@@ -8966,7 +8966,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
         linkItem('Planifica tu viaje', '/plan-your-trip'),
         linkItem('Destinos', '/destinations', 'outline'),
       ],
-      meta: 'WingsSide Vietnam a medida',
+      meta: 'WingSide Vietnam a medida',
       paragraph:
         'Experiencias privadas y flexibles, diseñadas localmente a partir de destinos, estilos de viaje y planificación consultiva.',
       packagesDescription:
@@ -9001,7 +9001,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       whyDescription:
         'Los viajeros inbound necesitan confiar en el operador antes de enviar un brief de planificación.',
       whyEyebrow: 'Cómo planificamos',
-      whyTitle: 'Por qué viajar con WingsSide',
+      whyTitle: 'Por qué viajar con WingSide',
     },
     pt: {
       ctaDescription:
@@ -9018,7 +9018,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
         linkItem('Planear a viagem', '/plan-your-trip'),
         linkItem('Destinos', '/destinations', 'outline'),
       ],
-      meta: 'WingsSide Vietname à medida',
+      meta: 'WingSide Vietname à medida',
       paragraph:
         'Experiências privadas, flexíveis e desenhadas localmente através de destinos, estilos de viagem e planeamento consultivo.',
       packagesDescription:
@@ -9053,7 +9053,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       whyDescription:
         'Os viajantes precisam de confiar no operador antes de enviar um pedido de planeamento.',
       whyEyebrow: 'Como planeamos',
-      whyTitle: 'Porque viajar com a WingsSide',
+      whyTitle: 'Porque viajar com a WingSide',
     },
   } as const
 
@@ -9999,7 +9999,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
         sideBody:
           'La risposta parte da destinazioni, stile, periodo e gruppo, non da un catalogo fisso.',
         body: 'Il team legge il brief, valuta rotta e ritmo, poi risponde con una direzione utile invece di spingere un checkout standard.',
-        meta: 'Contatti WingsSide',
+        meta: 'Contatti WingSide',
       },
       es: {
         title: 'Contacto',
@@ -10014,7 +10014,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
         sideTitle: 'Del brief a la propuesta',
         sideBody: 'La respuesta parte de destinos, estilo, fechas y grupo, no de un catálogo fijo.',
         body: 'El equipo lee el brief, evalúa ruta y ritmo, y responde con una dirección útil en lugar de empujar un checkout estándar.',
-        meta: 'Contacto WingsSide',
+        meta: 'Contacto WingSide',
       },
       pt: {
         title: 'Contacto',
@@ -10029,14 +10029,14 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
         sideTitle: 'Do brief à proposta',
         sideBody: 'A resposta parte de destinos, estilo, datas e grupo, não de um catálogo fixo.',
         body: 'A equipa lê o brief, avalia rota e ritmo, e responde com uma direção útil em vez de forçar um checkout padrão.',
-        meta: 'Contacto WingsSide',
+        meta: 'Contacto WingSide',
       },
     },
   })
 
   const wingsSideSettings = await createSiteSettings(payload, req, site, siteSeed, heroImage.id, {
     footerNote:
-      'WingsSide tập trung vào hành trình Việt Nam thiết kế riêng, kể chuyện theo điểm đến, phong cách du lịch và tư vấn theo nhu cầu thay vì một bảng tour bán sẵn.',
+      'WingSide tập trung vào hành trình Việt Nam thiết kế riêng, kể chuyện theo điểm đến, phong cách du lịch và tư vấn theo nhu cầu thay vì một bảng tour bán sẵn.',
     headerNavItems: [
       linkItem('Trang chủ', '/'),
       linkItem('Điểm đến', '/destinations'),
@@ -10053,15 +10053,15 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       linkItem('Liên hệ', '/contact-us'),
     ],
     logoImageID: null,
-    supportEmail: 'hello@wingside.vn',
-    supportPhone: '+84 903 000 222',
+    supportEmail: 'info@wingsgroup.vn',
+    supportPhone: '0912910101',
     tagline:
       'Thiết kế hành trình Việt Nam theo điểm đến, phong cách du lịch và tư vấn cá nhân hóa.',
   })
 
   await updateSiteSettingsLocale(payload, req, wingsSideSettings.id, 'en', {
     footerNote:
-      'WingsSide focuses on inbound planning, destination storytelling, travel styles, and trip inquiry instead of a retail tour grid.',
+      'WingSide focuses on inbound planning, destination storytelling, travel styles, and trip inquiry instead of a retail tour grid.',
     headerNavItems: [
       linkItem('Home', '/'),
       linkItem('Destinations', '/destinations'),
@@ -10088,7 +10088,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
 
   await updateSiteSettingsLocale(payload, req, wingsSideSettings.id, 'it', {
     footerNote:
-      'WingsSide si concentra su viaggi in Vietnam su misura, destinazioni, stili di viaggio e richieste personalizzate.',
+      'WingSide si concentra su viaggi in Vietnam su misura, destinazioni, stili di viaggio e richieste personalizzate.',
     headerNavItems: [
       linkItem('Home', '/'),
       linkItem('Destinazioni', '/destinations'),
@@ -10106,7 +10106,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     ],
     seo: {
       defaultDescription:
-        'WingsSide crea viaggi su misura in Vietnam con destinazioni curate, ritmo editoriale e consulenza locale.',
+        'WingSide crea viaggi su misura in Vietnam con destinazioni curate, ritmo editoriale e consulenza locale.',
       defaultTitle: 'wingside.vn',
       titleSuffix: 'Vietnam su misura',
     },
@@ -10115,7 +10115,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
 
   await updateSiteSettingsLocale(payload, req, wingsSideSettings.id, 'es', {
     footerNote:
-      'WingsSide se centra en viajes a Vietnam a medida, destinos, estilos de viaje y solicitudes personalizadas.',
+      'WingSide se centra en viajes a Vietnam a medida, destinos, estilos de viaje y solicitudes personalizadas.',
     headerNavItems: [
       linkItem('Inicio', '/'),
       linkItem('Destinos', '/destinations'),
@@ -10133,7 +10133,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     ],
     seo: {
       defaultDescription:
-        'WingsSide diseña viajes a Vietnam hechos a medida con destinos seleccionados, ritmo editorial y asesoría local.',
+        'WingSide diseña viajes a Vietnam hechos a medida con destinos seleccionados, ritmo editorial y asesoría local.',
       defaultTitle: 'wingside.vn',
       titleSuffix: 'Vietnam a medida',
     },
@@ -10142,7 +10142,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
 
   await updateSiteSettingsLocale(payload, req, wingsSideSettings.id, 'pt', {
     footerNote:
-      'A WingsSide foca-se em viagens ao Vietname feitas à medida, destinos, estilos de viagem e pedidos personalizados.',
+      'A WingSide foca-se em viagens ao Vietname feitas à medida, destinos, estilos de viagem e pedidos personalizados.',
     headerNavItems: [
       linkItem('Início', '/'),
       linkItem('Destinos', '/destinations'),
@@ -10160,7 +10160,7 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     ],
     seo: {
       defaultDescription:
-        'A WingsSide desenha viagens ao Vietname feitas à medida com destinos selecionados, ritmo editorial e consultoria local.',
+        'A WingSide desenha viagens ao Vietname feitas à medida com destinos selecionados, ritmo editorial e consultoria local.',
       defaultTitle: 'wingside.vn',
       titleSuffix: 'Vietname sob medida',
     },
@@ -10171,13 +10171,13 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
     await backfillWingsSideLocales(payload, req)
   }
 
-  await createRedirect(payload, req, '/wingsside/about', '/wingsside/about-us')
-  await createRedirect(payload, req, '/wingsside/contact', '/wingsside/contact-us')
+  await createRedirect(payload, req, '/wing-side/about', '/wing-side/about-us')
+  await createRedirect(payload, req, '/wing-side/contact', '/wing-side/contact-us')
   await createRedirect(
     payload,
     req,
-    '/wingsside/destinations/ha-long-bay',
-    '/wingsside/destinations/ha-long',
+    '/wing-side/destinations/ha-long-bay',
+    '/wing-side/destinations/ha-long',
   )
 }
 
@@ -11717,7 +11717,7 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
           },
           {
             title: 'Bảo hiểm cho khách quốc tế',
-            description: 'Thông tin hỗ trợ khách quốc tế khi đi cùng WingsSide hoặc package riêng.',
+            description: 'Thông tin hỗ trợ khách quốc tế khi đi cùng WingSide hoặc package riêng.',
             meta: 'Khách quốc tế',
           },
           {
@@ -11762,7 +11762,7 @@ async function seedWingsCare(payload: Payload, req: PayloadRequest, siteSeed: Si
           {
             title: 'Inbound and international guest cover',
             description:
-              'Support information for international guests traveling with WingsSide or tailor-made packages.',
+              'Support information for international guests traveling with WingSide or tailor-made packages.',
             meta: 'Inbound',
           },
           {
@@ -12416,7 +12416,7 @@ async function _seedLightweightSite(
             size: 'full',
             title: 'Site scope',
             paragraph:
-              'This page exists so the multisite shell is navigable while the deeper production build for this business line is scheduled after WingsGo and WingsSide.',
+              'This page exists so the multisite shell is navigable while the deeper production build for this business line is scheduled after WingsGo and WingSide.',
           },
         ]),
       ],
@@ -12507,7 +12507,7 @@ async function main() {
         await seedWingsGo(payload, req, wingsGoSeed)
       },
       'wing-side': async () => {
-        payload.logger.info('Seeding WingsSide production content...')
+        payload.logger.info('Seeding WingSide production content...')
         await seedWingsSide(payload, req, wingsSideSeed)
       },
       'wings-pass': async () => {

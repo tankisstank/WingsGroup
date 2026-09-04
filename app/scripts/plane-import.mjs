@@ -41,8 +41,9 @@ const PROJECT_TEXT = {
       'Nền tảng dùng chung cho CMS đa site, đa ngôn ngữ, page builder, giao diện quản trị, theme, SEO và hạ tầng.',
   },
   WTRAVEL: {
-    name: 'WingsTravel',
-    description: 'Site umbrella của WingsTravel và các deliverable riêng cho giai đoạn 1.',
+    name: 'WingsGroup',
+    description:
+      'Site umbrella WingsGroup và các deliverable public riêng trong nền tảng multisite.',
   },
   WGO: {
     name: 'WingsGo',
@@ -123,7 +124,7 @@ const PROPERTY_TEXT = {
     description: 'Phân loại theo site hoặc phần lõi dùng chung.',
     options: {
       Core: 'Lõi',
-      WingsTravel: 'WingsTravel',
+      WingsGroup: 'WingsGroup',
       WingsGo: 'WingsGo',
       WingSide: 'WingSide',
       WingsPlus: 'WingsPlus',
@@ -225,6 +226,15 @@ const STORY_TITLE_MAP = {
   'US-033': 'Seed nội dung và media WingSide',
   'US-034': 'Bằng chứng sẵn sàng phát hành WingSide',
   'US-049': 'Phân loại taxonomy tour WingSide',
+  'US-060': 'Chốt governance và release gates WingsGroup v3',
+  'US-061': 'Xây nền dữ liệu Payload cho WingsGroup v3',
+  'US-062': 'Implement shell và editorial hero WingsGroup v3',
+  'US-063': 'Implement trang chủ WingsGroup v3',
+  'US-064': 'Hoàn thiện lead intake WingsGroup v3',
+  'US-065': 'Áp dụng v3 cho corporate và policy routes',
+  'US-066': 'QA SEO và release readiness WingsGroup v3',
+  'US-068': 'Triển khai asset thương hiệu cho child site',
+  'US-069': 'Nhúng GA4 và Google Ads tracking đa site',
 }
 
 const CHILD_TASK_TEXT = {
@@ -1048,6 +1058,38 @@ const CHILD_TASK_TEXT = {
         'Content/legal checklist cần hoàn chỉnh trước khi coi WingSide inbound là sẵn sàng phát hành.',
     },
   ],
+  'US-069': [
+    {
+      title: 'Chốt account, ID và conversion theo site',
+      description:
+        'Xác nhận quyền truy cập, GA4 streams, Google Ads conversions và mapping cho sáu production domain.',
+    },
+    {
+      title: 'Thiết kế event contract và consent tracking',
+      description:
+        'Chốt event, tham số, consent state, attribution và ranh giới không gửi PII trước khi implement.',
+    },
+    {
+      title: 'Implement tracking adapter site-aware',
+      description:
+        'Thêm provider dùng chung, cấu hình theo tenant, route page view, form, CTA và contact events.',
+    },
+    {
+      title: 'Bảo vệ PII và cập nhật CSP',
+      description:
+        'Validate attribution, chặn dữ liệu nhạy cảm, cập nhật CSP và kiểm tra không có request bị chặn.',
+    },
+    {
+      title: 'Kiểm thử staging và pilot WingsGo',
+      description:
+        'Chạy test tự động, GA4 DebugView/Realtime, Ads diagnostics và enable có kiểm soát trên WingsGo.',
+    },
+    {
+      title: 'Mở rộng production và bàn giao vận hành',
+      description:
+        'Enable các site còn lại, theo dõi 24–48 giờ, ghi proof, rollback và handover tracking.',
+    },
+  ],
 }
 
 function readJson(filePath) {
@@ -1410,8 +1452,16 @@ function deriveStoryDates(story) {
   }
 }
 
-function deriveRecordDates(story, childCount = 0) {
+function deriveRecordDates(story, childCount = 0, mapping = {}) {
   const baseDates = deriveStoryDates(story)
+  const mappedStartDate = toDateOnly(mapping.startDate)
+  const mappedTargetDate = toDateOnly(mapping.targetDate)
+  if (mappedStartDate || mappedTargetDate) {
+    return {
+      startDate: mappedStartDate || baseDates.startDate,
+      targetDate: mappedTargetDate || mappedStartDate || baseDates.targetDate,
+    }
+  }
   if (baseDates.startDate && childCount > 0) {
     const sequentialTargetDate = addDays(baseDates.startDate, childCount - 1)
     return {
@@ -1422,8 +1472,8 @@ function deriveRecordDates(story, childCount = 0) {
   return baseDates
 }
 
-function deriveChildDates(story, childIndex, childCount = 0) {
-  const recordDates = deriveRecordDates(story, childCount)
+function deriveChildDates(story, childIndex, childCount = 0, mapping = {}) {
+  const recordDates = deriveRecordDates(story, childCount, mapping)
   if (recordDates.startDate && childCount > 0) {
     const spanDays = diffDays(recordDates.startDate, recordDates.targetDate)
     const offset = childCount <= 1 ? 0 : Math.round((childIndex * spanDays) / (childCount - 1))
@@ -1446,6 +1496,9 @@ function toPlaneStateName(story, mapping = {}) {
   }
   if (story.status === 'planned') {
     return 'Đã lên kế hoạch'
+  }
+  if (story.status === 'in_progress' || story.status === 'changed') {
+    return 'Đang thực hiện'
   }
   return toProofStatusKey(story, mapping) === 'Full' ? 'Đã bàn giao' : 'Chờ xác nhận'
 }
@@ -1533,7 +1586,9 @@ function buildStoryRecords(manifest) {
 }
 
 function deriveEpicDates(records) {
-  const dates = records.map((record) => deriveRecordDates(record.story, record.childTasks.length))
+  const dates = records.map((record) =>
+    deriveRecordDates(record.story, record.childTasks.length, record.mapping),
+  )
   return {
     startDate:
       dates
@@ -2135,7 +2190,7 @@ async function ensureProjectSetup(client, manifest, project) {
 
   for (const moduleName of manifest.modules) {
     const desiredName = translateModuleName(moduleName)
-    const legacyExternalId = `module:${moduleName.replaceAll('WingSide', 'WingsSide')}`
+    const legacyExternalId = `module:${moduleName.replaceAll('WingSide', 'WingSide')}`
     let existingModule =
       moduleMap.get(desiredName) ||
       moduleMap.get(`module:${moduleName}`) ||
@@ -2459,7 +2514,7 @@ async function ensureHistory(client, manifest, projectMap) {
       workItems.find((item) => item.name === record.parentName)
 
     const desiredStateId = setup.stateMap.get(toPlaneStateName(record.story, record.mapping))?.id
-    const storyDates = deriveRecordDates(record.story, record.childTasks.length)
+    const storyDates = deriveRecordDates(record.story, record.childTasks.length, record.mapping)
     const parentPayload = {
       name: toPlaneItemName(record.parentName),
       description_html: record.descriptionHtml,
@@ -2572,7 +2627,12 @@ async function ensureHistory(client, manifest, projectMap) {
     )
 
     for (const [index, childTask] of record.childTasks.entries()) {
-      const childDates = deriveChildDates(record.story, index, record.childTasks.length)
+      const childDates = deriveChildDates(
+        record.story,
+        index,
+        record.childTasks.length,
+        record.mapping,
+      )
       let child =
         workItems.find((item) => item.external_id === `child:${childTask.externalId}`) ||
         workItems.find((item) => item.parent === parent.id && item.name === childTask.title)
@@ -2659,7 +2719,7 @@ async function syncHistoryDates(client, manifest, projectMap) {
   for (const record of storyRecords) {
     const project = projectMap.get(record.mapping.projectKey)
     const workItems = projectWorkItems.get(record.mapping.projectKey)
-    const dates = deriveRecordDates(record.story, record.childTasks.length)
+    const dates = deriveRecordDates(record.story, record.childTasks.length, record.mapping)
     const parent = workItems.find((item) => item.external_id === `story:${record.story.id}`)
 
     await patchDates(project, parent, dates)
@@ -2669,7 +2729,7 @@ async function syncHistoryDates(client, manifest, projectMap) {
       await patchDates(
         project,
         child,
-        deriveChildDates(record.story, index, record.childTasks.length),
+        deriveChildDates(record.story, index, record.childTasks.length, record.mapping),
       )
     }
   }
@@ -2705,7 +2765,7 @@ async function syncWingsGoItems(client, manifest, projectMap) {
 
   for (const record of records) {
     const parent = workItems.find((item) => item.external_id === `story:${record.story.id}`)
-    const parentDates = deriveRecordDates(record.story, record.childTasks.length)
+    const parentDates = deriveRecordDates(record.story, record.childTasks.length, record.mapping)
 
     await patchItem(parent, {
       name: toPlaneItemName(record.parentName),
@@ -2716,7 +2776,12 @@ async function syncWingsGoItems(client, manifest, projectMap) {
 
     for (const [index, childTask] of record.childTasks.entries()) {
       const child = workItems.find((item) => item.external_id === `child:${childTask.externalId}`)
-      const childDates = deriveChildDates(record.story, index, record.childTasks.length)
+      const childDates = deriveChildDates(
+        record.story,
+        index,
+        record.childTasks.length,
+        record.mapping,
+      )
       await patchItem(child, {
         name: toPlaneItemName(childTask.title),
         description_html: childTask.descriptionHtml,
@@ -2768,7 +2833,7 @@ async function syncImportedWorkItems(client, manifest, projectMap) {
 
     for (const record of groupedRecords) {
       const parent = workItems.find((item) => item.external_id === `story:${record.story.id}`)
-      const parentDates = deriveRecordDates(record.story, record.childTasks.length)
+      const parentDates = deriveRecordDates(record.story, record.childTasks.length, record.mapping)
       const desiredStateId = stateMap.get(toPlaneStateName(record.story, record.mapping))
 
       await patchItem(project, parent, {
@@ -2781,7 +2846,12 @@ async function syncImportedWorkItems(client, manifest, projectMap) {
 
       for (const [index, childTask] of record.childTasks.entries()) {
         const child = workItems.find((item) => item.external_id === `child:${childTask.externalId}`)
-        const childDates = deriveChildDates(record.story, index, record.childTasks.length)
+        const childDates = deriveChildDates(
+          record.story,
+          index,
+          record.childTasks.length,
+          record.mapping,
+        )
         await patchItem(project, child, {
           name: toPlaneItemName(childTask.title),
           description_html: childTask.descriptionHtml,

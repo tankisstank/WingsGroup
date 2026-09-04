@@ -53,6 +53,11 @@ const allowedDevOrigins = [
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // Payload's SQLite adapter loads libsql through an optional runtime path;
+  // include it explicitly so standalone local/staging smoke servers can boot.
+  outputFileTracingIncludes: {
+    '/*': ['./node_modules/libsql/**/*', './node_modules/@libsql/**/*'],
+  },
   allowedDevOrigins,
   // Temporarily required on Windows until Next.js fixes Turbopack Sass resolution.
   // See: https://github.com/vercel/next.js/issues/86431

@@ -125,7 +125,7 @@ export const buildWingsSideCredentialsBlock = ({
   return {
     ariaLabel: copy.ariaLabel,
     autoplay: false,
-    blockName: 'WingsSide credentials catalog',
+    blockName: 'WingSide credentials catalog',
     blockType: 'credentialsCarousel' as const,
     description: copy.description,
     eyebrow: copy.eyebrow,
@@ -238,7 +238,7 @@ const credentialSourceChecksum = (value: unknown) =>
  *
  * This is not production publication approval. The single-language manifest metadata remains
  * verbatim across rehearsal locales: no unsupported localization, current partnership, or
- * WingsSide legal-identity claim is inferred.
+ * WingSide legal-identity claim is inferred.
  */
 export const buildUs055RehearsalHomeCredentials = (
   manifest: WingsSideCredentialManifest,

@@ -10,7 +10,7 @@ normal
 
 ## Product Contract
 
-Homepage WingsSide replaces the equal-weight four-step card grid in `home-pillars`
+Homepage WingSide replaces the equal-weight four-step card grid in `home-pillars`
 with a planning desk that explains the flow from brief to match, draft, and lock.
 The section keeps the current header copy and CMS/local step data binding, provides
 an actionable CTA to `#home-planner`, and does not change the `/plan-your-trip`

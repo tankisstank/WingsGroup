@@ -29,7 +29,7 @@ const png = Buffer.from(
   'base64',
 )
 
-adapterDescribe('WingsSide BestPrice release repair adapter transaction proof', () => {
+adapterDescribe('WingSide BestPrice release repair adapter transaction proof', () => {
   let payload: Payload
   let req: PayloadRequest
   let siteID: number | string

@@ -44,7 +44,7 @@ const homes = (): CredentialHomeSnapshot[] =>
     }
   })
 
-describe('WingsSide credentials production plan contract', () => {
+describe('WingSide credentials production plan contract', () => {
   it('pins source identity, exact locale order and aggregate review totals', async () => {
     const manifest = await loadWingsSideCredentialManifest()
     const sourceIdentity = await buildWingsSideCredentialsSourceIdentity(manifest, releaseSha)

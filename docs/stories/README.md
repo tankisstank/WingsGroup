@@ -18,6 +18,15 @@ Current seeded epic:
   - `US-011` multisite theme foundation
 - `E05-cms-theme-management`
   - `US-014` CMS-managed multisite theme configuration
+  - `US-068` child-site brand assets and tenant metadata
+- `E09-wingsgroup-v3-public-experience`
+  - `US-060` governance and release gates
+  - `US-061` Payload data foundation
+  - `US-062` shell and editorial hero
+  - `US-063` homepage v3
+  - `US-064` lead intake and consultation channels
+  - `US-065` corporate and policy routes
+  - `US-066` SEO and release readiness
 
 ## Normal Story
 

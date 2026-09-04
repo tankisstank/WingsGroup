@@ -166,7 +166,7 @@ export const wingsSideHiFiFields = (): Field[] => [
     type: 'select',
     options: [...WINGSSIDE_HIFI_ROUTE_VARIANTS],
     admin: {
-      description: 'Phải khớp pathname hub WingsSide tương ứng.',
+      description: 'Phải khớp pathname hub WingSide tương ứng.',
       condition: (_, siblingData) => Boolean(siblingData?.enabled),
     },
   },
@@ -562,13 +562,13 @@ export const wingsSideHiFiFields = (): Field[] => [
   },
 ]
 
-/** Pages admin tab — only meaningful for WingsSide hub pages. */
+/** Pages admin tab — only meaningful for WingSide hub pages. */
 export const wingsSideHiFiTab = (): Tab => ({
   name: 'wingsSideHiFi',
-  label: 'WingsSide Hi-Fi',
+  label: 'WingSide Hi-Fi',
   fields: wingsSideHiFiFields(),
   admin: {
     description:
-      'Hợp đồng nội dung typed cho 8 route hub WingsSide. Không dùng JSON editor. Media/form qua relationship Payload.',
+      'Hợp đồng nội dung typed cho 8 route hub WingSide. Không dùng JSON editor. Media/form qua relationship Payload.',
   },
 })

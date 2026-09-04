@@ -78,10 +78,10 @@ const customThemePresetSeedCatalog: Array<{
   tokens: ThemePresetTokens
 }> = [
   {
-    description: 'Current WingsSide premium look preserved as a rollback-safe preset.',
+    description: 'Current WingSide premium look preserved as a rollback-safe preset.',
     isActive: true,
     key: 'wings-side-classic',
-    name: 'WingsSide Classic',
+    name: 'WingSide Classic',
     tokens: {
       ...defaultThemePresetByKey.premium,
       accentColor: '#EA580C',
@@ -90,10 +90,10 @@ const customThemePresetSeedCatalog: Array<{
   },
   {
     description:
-      'Editorial premium travel preset for WingsSide using the site brand palette instead of the reference brand colors.',
+      'Editorial premium travel preset for WingSide using the site brand palette instead of the reference brand colors.',
     isActive: true,
     key: 'wings-side-editorial',
-    name: 'WingsSide Editorial',
+    name: 'WingSide Editorial',
     tokens: {
       ...defaultThemePresetByKey.premium,
       accentColor: '#C09030',
@@ -108,10 +108,10 @@ const customThemePresetSeedCatalog: Array<{
   },
   {
     description:
-      'Inbound editorial launch preset for WingsSide: warm paper surfaces, Deep Teal identity, Mustard Gold CTA, and Terracotta editorial accents.',
+      'Inbound editorial launch preset for WingSide: warm paper surfaces, Deep Teal identity, Mustard Gold CTA, and Terracotta editorial accents.',
     isActive: true,
     key: wingsSideInboundThemePresetKey,
-    name: 'WingsSide Editorial Inbound v2',
+    name: 'WingSide Editorial Inbound v2',
     tokens: {
       ...defaultThemePresetByKey.premium,
       accentColor: '#C9A75C',

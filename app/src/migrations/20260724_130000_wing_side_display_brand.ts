@@ -25,10 +25,10 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     UPDATE "pages_locales" AS pl
     SET "meta_title" = regexp_replace(
       pl."meta_title",
-      '^(WingsSide|Wingside|Wing Side|wingside\.vn)',
+      '^(WingSide|Wingside|Wing Side|wingside\.vn)',
       'WingSide'
     )
-    WHERE pl."meta_title" ~ '^(WingsSide|Wingside|Wing Side|wingside\.vn)'
+    WHERE pl."meta_title" ~ '^(WingSide|Wingside|Wing Side|wingside\.vn)'
       AND EXISTS (
         SELECT 1
         FROM "pages" AS p
@@ -39,7 +39,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
 
     UPDATE "forms"
     SET "title" = 'WingSide Trip Planner'
-    WHERE "title" IN ('WingsSide Trip Planner', 'Wingside Trip Planner')
+    WHERE "title" IN ('WingSide Trip Planner', 'Wingside Trip Planner')
       AND "site_id" = (SELECT "id" FROM "sites" WHERE "code" = 'wing-side');
   `)
 }
@@ -47,7 +47,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
     UPDATE "forms"
-    SET "title" = 'WingsSide Trip Planner'
+    SET "title" = 'WingSide Trip Planner'
     WHERE "title" = 'WingSide Trip Planner'
       AND "site_id" = (SELECT "id" FROM "sites" WHERE "code" = 'wing-side');
 

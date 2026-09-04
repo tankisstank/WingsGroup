@@ -11,7 +11,7 @@ const pageCssPath = path.resolve(
   '../../src/components/WingsSideHiFi/hifi-pages.css',
 )
 
-describe('WingsSide Proof Archive CSS contract', () => {
+describe('WingSide Proof Archive CSS contract', () => {
   it('keeps the fixed desktop and mobile proof-stage frames', () => {
     const css = fs.readFileSync(cssPath, 'utf8')
 

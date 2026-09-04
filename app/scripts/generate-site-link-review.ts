@@ -25,7 +25,7 @@ const siteAliasByCode: Record<string, string> = {
   'wings-go': 'wingsgo',
   'wings-pass': 'wingspass',
   'wings-plus': 'wingsplus',
-  'wing-side': 'wingsside',
+  'wing-side': 'wing-side',
   'wings-group': '',
 }
 

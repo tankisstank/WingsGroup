@@ -60,7 +60,7 @@ export type WingsSideSiteSettingsCopy = {
 const wingsSideSiteSettingsSourceCopy: LocalizedCopy<WingsSideSiteSettingsCopy> = {
   en: {
     footerNote:
-      'WingsSide focuses on inbound planning, destination storytelling, travel styles, and trip inquiry instead of a retail tour grid.',
+      'WingSide focuses on inbound planning, destination storytelling, travel styles, and trip inquiry instead of a retail tour grid.',
     footerNavItems: [
       linkItem('Destinations', '/destinations'),
       linkItem('Plan Your Trip', '/plan-your-trip'),
@@ -78,8 +78,8 @@ const wingsSideSiteSettingsSourceCopy: LocalizedCopy<WingsSideSiteSettingsCopy> 
     ],
     seo: {
       defaultDescription:
-        'WingsSide plans tailor-made Vietnam journeys with destination-led discovery, travel styles, and consultative trip requests.',
-      defaultTitle: 'WingsSide',
+        'WingSide plans tailor-made Vietnam journeys with destination-led discovery, travel styles, and consultative trip requests.',
+      defaultTitle: 'WingSide',
       titleSuffix: 'Tailor-made Vietnam journeys',
     },
     tagline:
@@ -87,7 +87,7 @@ const wingsSideSiteSettingsSourceCopy: LocalizedCopy<WingsSideSiteSettingsCopy> 
   },
   es: {
     footerNote:
-      'WingsSide se centra en viajes a Vietnam a medida, destinos, estilos de viaje y solicitudes personalizadas.',
+      'WingSide se centra en viajes a Vietnam a medida, destinos, estilos de viaje y solicitudes personalizadas.',
     footerNavItems: [
       linkItem('Destinos', '/destinations'),
       linkItem('Planifica', '/plan-your-trip'),
@@ -105,15 +105,15 @@ const wingsSideSiteSettingsSourceCopy: LocalizedCopy<WingsSideSiteSettingsCopy> 
     ],
     seo: {
       defaultDescription:
-        'WingsSide diseña viajes a Vietnam hechos a medida con destinos seleccionados, ritmo editorial y asesoría local.',
-      defaultTitle: 'WingsSide',
+        'WingSide diseña viajes a Vietnam hechos a medida con destinos seleccionados, ritmo editorial y asesoría local.',
+      defaultTitle: 'WingSide',
       titleSuffix: 'Vietnam a medida',
     },
     tagline: 'Viajes a medida por Vietnam con destinos, estilos y asesoría.',
   },
   it: {
     footerNote:
-      'WingsSide si concentra su viaggi in Vietnam su misura, destinazioni, stili di viaggio e richieste personalizzate.',
+      'WingSide si concentra su viaggi in Vietnam su misura, destinazioni, stili di viaggio e richieste personalizzate.',
     footerNavItems: [
       linkItem('Destinazioni', '/destinations'),
       linkItem('Pianifica', '/plan-your-trip'),
@@ -131,15 +131,15 @@ const wingsSideSiteSettingsSourceCopy: LocalizedCopy<WingsSideSiteSettingsCopy> 
     ],
     seo: {
       defaultDescription:
-        'WingsSide crea viaggi su misura in Vietnam con destinazioni curate, ritmo editoriale e consulenza locale.',
-      defaultTitle: 'WingsSide',
+        'WingSide crea viaggi su misura in Vietnam con destinazioni curate, ritmo editoriale e consulenza locale.',
+      defaultTitle: 'WingSide',
       titleSuffix: 'Vietnam su misura',
     },
     tagline: 'Viaggi in Vietnam su misura con destinazioni, stili e consulenza.',
   },
   pt: {
     footerNote:
-      'A WingsSide foca-se em viagens ao Vietname feitas à medida, destinos, estilos de viagem e pedidos personalizados.',
+      'A WingSide foca-se em viagens ao Vietname feitas à medida, destinos, estilos de viagem e pedidos personalizados.',
     footerNavItems: [
       linkItem('Destinos', '/destinations'),
       linkItem('Planear', '/plan-your-trip'),
@@ -157,15 +157,15 @@ const wingsSideSiteSettingsSourceCopy: LocalizedCopy<WingsSideSiteSettingsCopy> 
     ],
     seo: {
       defaultDescription:
-        'A WingsSide desenha viagens ao Vietname feitas à medida com destinos selecionados, ritmo editorial e consultoria local.',
-      defaultTitle: 'WingsSide',
+        'A WingSide desenha viagens ao Vietname feitas à medida com destinos selecionados, ritmo editorial e consultoria local.',
+      defaultTitle: 'WingSide',
       titleSuffix: 'Vietname sob medida',
     },
     tagline: 'Viagens à medida pelo Vietname com destinos, estilos e consultoria.',
   },
   vi: {
     footerNote:
-      'WingsSide tập trung vào hành trình Việt Nam thiết kế riêng, kể chuyện theo điểm đến, phong cách du lịch và tư vấn theo nhu cầu thay vì một bảng tour bán sẵn.',
+      'WingSide tập trung vào hành trình Việt Nam thiết kế riêng, kể chuyện theo điểm đến, phong cách du lịch và tư vấn theo nhu cầu thay vì một bảng tour bán sẵn.',
     footerNavItems: [
       linkItem('Điểm đến', '/destinations'),
       linkItem('Lên kế hoạch', '/plan-your-trip'),
@@ -183,8 +183,8 @@ const wingsSideSiteSettingsSourceCopy: LocalizedCopy<WingsSideSiteSettingsCopy> 
     ],
     seo: {
       defaultDescription:
-        'WingsSide lập kế hoạch hành trình Việt Nam may đo theo điểm đến, phong cách du lịch và tư vấn địa phương.',
-      defaultTitle: 'WingsSide',
+        'WingSide lập kế hoạch hành trình Việt Nam may đo theo điểm đến, phong cách du lịch và tư vấn địa phương.',
+      defaultTitle: 'WingSide',
       titleSuffix: 'Hành trình Việt Nam may đo',
     },
     tagline: 'Thiết kế hành trình Việt Nam theo điểm đến, phong cách du lịch và tư vấn cá nhân hóa.',
@@ -225,7 +225,7 @@ export async function backfillWingsSideSiteSettings(
   const settings = settingsResult.docs[0]
 
   if (!settings) {
-    throw new Error('Could not find WingsSide site settings record for locale backfill.')
+    throw new Error('Could not find WingSide site settings record for locale backfill.')
   }
 
   const locales = options.locales || [...publicLocales]
@@ -270,7 +270,7 @@ export async function backfillWingsSideSiteSettings(
       payload.logger.info({
         currentData: JSON.parse(currentComparable),
         locale,
-        message: 'WingsSide site-settings backfill comparison mismatch',
+        message: 'WingSide site-settings backfill comparison mismatch',
         targetData,
       })
     }

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "siteCode": "wings-group",
+  "rights": {
+    "state": "approved",
+    "evidence": "Stakeholder confirmation, 2026-08-13: all 13 WingsGroup v3 handoff images are licensed for project use.",
+    "restriction": "Editorial and service media only. They are not legal proof, certificates, reviews, awards, partner endorsements, or customer testimonials."
+  },
+  "sourcePackage": {
+    "attachmentId": "019ff9e2-a63a-72e3-b769-205608264d46",
+    "archiveSha256": "eea0c9fdcdae0475b82adf35e5b3161e9a99667f4ba98c92d65e5cd53a1ba98b",
+    "manifest": "artifacts/tmp/win-20-handoff/extracted/wingsgroup-v3-development-package/handoff/asset-manifest.md",
+    "assetsDirectory": "artifacts/tmp/win-20-handoff/extracted/wingsgroup-v3-development-package/assets"
+  },
+  "media": [
+    {"file":"wingsgroup-hero-private-consultation.png","sha256":"4dde3166ff04c6819e93d377481d63f87bf0218598057f267b933e25add2a935","dimensions":"1672x941","role":"Hero slide / tư vấn hành trình","alt":{"vi":"Chuyên viên tư vấn cùng một cặp đôi xem bản đồ và lên kế hoạch hành trình.","en":"A travel consultant reviews a map and plans a journey with a couple."}},
+    {"file":"wingsgroup-hero-airport-welcome.png","sha256":"640599489eeaf79a02439d001bd120741a8f2faeacd86669b2401803c391479a","dimensions":"1672x941","role":"Hero slide / dịch vụ sân bay","alt":{"vi":"Nhân viên đón tiếp một gia đình tại sảnh đến sân bay.","en":"A host welcomes a family at an airport arrivals hall."}},
+    {"file":"wingsgroup-hero-partner-meeting.png","sha256":"5710c79c4d93e30515533cf6bcfa0b0c34a80a6976d5d746bb22e4f0f17419f5","dimensions":"1672x941","role":"Hero slide / đối tác","alt":{"vi":"Đại diện dịch vụ chào đón nhóm khách tại sảnh khách sạn.","en":"A service representative welcomes a group of guests in a hotel lobby."}},
+    {"file":"wingsgroup-hero-discovery-guide.png","sha256":"56525b6d1da980be2f78a1de15dfff3464db67187cfa5bc76e4bb99836982d44","dimensions":"1672x941","role":"Hero slide / hướng dẫn","alt":{"vi":"Hướng dẫn viên giới thiệu phố cổ Hội An cho nhóm du khách.","en":"A guide introduces Hoi An's old quarter to a group of travellers."}},
+    {"file":"wingsgroup-ecosystem-hero.png","sha256":"9e7816d2a51835f9907bd455d2a3c5a3e1aabcf64d71d1e80593a68091f7e1a3","dimensions":"1536x1024","role":"Ecosystem stage","alt":{"vi":"Chuyên viên tư vấn trình bày lựa chọn hành trình cho một cặp đôi.","en":"A travel consultant presents journey options to a couple."}},
+    {"file":"wingsgroup-journey-consultation.png","sha256":"b150b69a12a8cd6c5a57dd0cc3d98dfb5a1631d9135f1d6667d0f731739f9766","dimensions":"1536x1024","role":"Editorial / consultation image","alt":{"vi":"Chuyên viên tư vấn trao đổi kế hoạch du lịch với khách trong không gian riêng.","en":"A consultant discusses travel plans with guests in a private setting."}},
+    {"file":"wingsgroup-journey-guide.png","sha256":"17dc3324a7e36169809b698e9c70caaa194495b04bc1ff07c06c930507724551","dimensions":"1536x1024","role":"Editorial guide card","alt":{"vi":"Chuyên viên cùng khách xem tài liệu hành trình trên bàn.","en":"A consultant and guests review journey materials at a table."}},
+    {"file":"wingsgroup-selection-guide.png","sha256":"24666504130d78c5a25777506d3fecdfe46a348b264716785841ad828e69a146","dimensions":"1536x1024","role":"Editorial selection guide card","alt":{"vi":"Chuyên viên tư vấn cùng khách so sánh lựa chọn hành trình.","en":"A consultant helps guests compare journey options."}},
+    {"file":"wingsgroup-travel-trends.png","sha256":"5d5f3931db921e794833a6a930bd00551991b2850657434268485df457ec75a7","dimensions":"1536x1024","role":"Editorial travel trend card","alt":{"vi":"Nhóm du khách ngắm thung lũng núi trong chuyến khám phá.","en":"Travellers look across a mountain valley during a discovery journey."}},
+    {"file":"wingsgroup-airport-service.png","sha256":"3f92a884cdc7498a9380f6f979115978c3f07ba4ecde77e3412a36a674b04e50","dimensions":"1536x1024","role":"Service / airport media","alt":{"vi":"Nhân viên hỗ trợ một gia đình tại khu vực sân bay.","en":"A service host assists a family in an airport terminal."}},
+    {"file":"wingsgroup-corporate-partnership.png","sha256":"5bf1694a3032b2157b382f01fc5cda10a14308d0a3ef945cad2429703fe21378","dimensions":"1536x1024","role":"Corporate / partner media","alt":{"vi":"Nhóm chuyên viên thảo luận kế hoạch hành trình trong phòng họp nhìn ra Hà Nội.","en":"A team discusses journey planning in a meeting room overlooking Hanoi."}},
+    {"file":"wingsgroup-travel-support.png","sha256":"aa36c2ec7b12c89e81c1e3e4f75602c90db8b03697b18cabf5ea772402ccc103","dimensions":"1536x1024","role":"Care / support media","alt":{"vi":"Chuyên viên hỗ trợ khách xem lựa chọn trên điện thoại và tài liệu hành trình.","en":"A consultant helps a guest review options on a phone and travel documents."}},
+    {"file":"wingsgroup-vietnam-discovery.png","sha256":"e8e71f232684f3bf33b25f008d2c6bf3ae82eccda94a5d5153d26f6f4e32444a","dimensions":"1536x1024","role":"Inbound / Vietnam media","alt":{"vi":"Hướng dẫn viên dẫn nhóm du khách dạo qua phố cổ Hội An.","en":"A guide leads travellers through Hoi An's old quarter."}}
+  ],
+  "publicationState": "ready_for_payload_import_not_published",
+  "remainingBeforePublish": ["Create Payload Media records", "Generate responsive WebP/AVIF derivatives", "Attach each record to WingsGroup site scope"]
+}

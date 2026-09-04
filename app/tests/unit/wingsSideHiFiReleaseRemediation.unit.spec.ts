@@ -39,7 +39,7 @@ const createPayload = (
     find: vi.fn(async (args) => {
       if (args.collection === 'sites') return { docs: [{ id: 3, code: 'wing-side' }] }
       if (args.collection === 'forms') {
-        return { docs: [{ id: 9, site: 3, title: 'WingsSide Trip Planner' }] }
+        return { docs: [{ id: 9, site: 3, title: 'WingSide Trip Planner' }] }
       }
       if (args.collection === 'pages') {
         return {

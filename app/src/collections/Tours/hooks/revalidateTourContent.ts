@@ -52,9 +52,9 @@ export const revalidateWingSideDiscovery = () => {
   revalidateMany([...wingsSideDiscoveryPaths])
   for (const path of wingsSideDiscoveryPaths) {
     const suffix = path === '/' ? '' : path
-    revalidatePath(`/wingsside${suffix}`)
+    revalidatePath(`/wing-side${suffix}`)
     for (const locale of publicLocaleCodes) {
-      revalidatePath(`/wingsside/${locale}${suffix}`)
+      revalidatePath(`/wing-side/${locale}${suffix}`)
     }
   }
 }

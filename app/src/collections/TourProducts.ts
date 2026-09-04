@@ -45,7 +45,7 @@ export const TourProducts: CollectionConfig = {
       },
     },
     description:
-      'Tour có cấu trúc dùng chung cho WingsGo và WingsSide. Dữ liệu này là nguồn thật để render trang tour và discovery theo site.',
+      'Tour có cấu trúc dùng chung cho WingsGo và WingSide. Dữ liệu này là nguồn thật để render trang tour và discovery theo site.',
     defaultColumns: ['title', 'site', 'tourType', 'destinationTags', 'travelStyles', 'updatedAt'],
     group: adminGroups.content,
     livePreview: {

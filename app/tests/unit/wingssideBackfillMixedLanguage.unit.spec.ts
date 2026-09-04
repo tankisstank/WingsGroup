@@ -5,7 +5,7 @@ import { join } from 'node:path'
 const repoFile = (relativePath: string) => join(process.cwd(), relativePath)
 
 describe('wingsside backfill mixed-language cleanup', () => {
-  it('keeps repaired WingsSide locale backfill copy free of known mixed-language literals', async () => {
+  it('keeps repaired WingSide locale backfill copy free of known mixed-language literals', async () => {
     const localeBackfill = await readFile(repoFile('scripts/lib/wingssideLocaleBackfill.ts'), 'utf8')
     const siteSettingsBackfill = await readFile(
       repoFile('scripts/lib/wingssideSiteSettingsBackfill.ts'),
@@ -24,17 +24,17 @@ describe('wingsside backfill mixed-language cleanup', () => {
       'como página de planificación inbound',
       'como página de planeamento inbound',
       'come pagina di pianificazione inbound',
-      'Trang điểm đến ${title} cho planning inbound Việt Nam của WingsSide.',
+      'Trang điểm đến ${title} cho planning inbound Việt Nam của WingSide.',
     ]
 
     const forbiddenSiteSettingsLiterals = [
-      'WingsSide se centra en planificación inbound, destinos, estilos de viaje y solicitudes a medida.',
+      'WingSide se centra en planificación inbound, destinos, estilos de viaje y solicitudes a medida.',
       'Planificación inbound de Vietnam con destinos, estilos y asesoría.',
-      'WingsSide si concentra su pianificazione inbound, destinazioni, stili di viaggio e richieste su misura.',
+      'WingSide si concentra su pianificazione inbound, destinazioni, stili di viaggio e richieste su misura.',
       'Pianificazione inbound Vietnam con destinazioni, stili e consulenza.',
-      'A WingsSide foca-se em planeamento inbound, destinos, estilos de viagem e pedidos à medida.',
+      'A WingSide foca-se em planeamento inbound, destinos, estilos de viagem e pedidos à medida.',
       'Planeamento inbound do Vietname com destinos, estilos e consultoria.',
-      'WingsSide tập trung inbound planning, destination storytelling, travel styles và trip inquiry thay vì retail tour grid.',
+      'WingSide tập trung inbound planning, destination storytelling, travel styles và trip inquiry thay vì retail tour grid.',
       'Lập kế hoạch inbound Vietnam với điểm đến, phong cách du lịch và luồng tư vấn.',
     ]
 

@@ -47,8 +47,13 @@ const runtimeSiteCodeByReferenceCode: Record<string, string> = {
   wingsgo: 'wings-go',
   wingspass: 'wings-pass',
   wingsside: 'wing-side',
+  'wing-side': 'wing-side',
   wingscare: 'wings-care',
   wingsplus: 'wings-plus',
+}
+
+const manifestDirectoryByReferenceCode: Record<string, string> = {
+  'wing-side': 'wingsside',
 }
 
 const mimeByExtension: Record<string, string> = {
@@ -60,6 +65,24 @@ const mimeByExtension: Record<string, string> = {
 
 const seedContext = {
   disableRevalidate: true,
+}
+
+const args = process.argv.slice(2)
+const dryRun = args.includes('--dry-run')
+const apply = args.includes('--apply')
+const requestedSiteCodes = args
+  .flatMap((arg, index) => (arg === '--site' ? [args[index + 1]] : []))
+  .filter((siteCode): siteCode is string => Boolean(siteCode))
+
+if (dryRun === apply) {
+  throw new Error('Choose exactly one mode: --dry-run or --apply.')
+}
+
+if (
+  args.includes('--site') &&
+  requestedSiteCodes.length !== args.filter((arg) => arg === '--site').length
+) {
+  throw new Error('Each --site option requires a runtime site code.')
 }
 
 const richText = (heading: string, body: string) => ({
@@ -146,6 +169,32 @@ async function createBrandMedia({
   })
 }
 
+async function findBrandMedia({
+  assetPath,
+  payload,
+  req,
+  siteID,
+}: {
+  assetPath: string
+  payload: Awaited<ReturnType<typeof getPayload>>
+  req: Awaited<ReturnType<typeof createLocalReq>>
+  siteID: number
+}) {
+  const existing = await payload.find({
+    collection: 'media',
+    depth: 0,
+    limit: 1,
+    overrideAccess: true,
+    pagination: false,
+    req,
+    where: {
+      and: [{ filename: { equals: path.basename(assetPath) } }, { site: { equals: siteID } }],
+    },
+  })
+
+  return existing.docs[0]
+}
+
 async function main() {
   const databaseURL = resolveLocalDatabaseURL(
     process.env.DATABASE_URL || DEFAULT_LOCAL_DATABASE_URL,
@@ -153,10 +202,10 @@ async function main() {
   const isPostgresURL =
     databaseURL.startsWith('postgres://') || databaseURL.startsWith('postgresql://')
 
-  if (!isPostgresURL && databaseURL.startsWith('file:')) {
+  if (apply && !isPostgresURL && databaseURL.startsWith('file:')) {
     const sqlitePath = path.resolve(process.cwd(), databaseURL.replace(/^file:/, ''))
     execFileSync(
-      'python',
+      process.env.PYTHON_BIN || 'python3',
       [
         '-c',
         [
@@ -201,7 +250,26 @@ async function main() {
   const req = await createLocalReq({ user: adminUsers.docs[0] }, payload)
   const reference = await readJSON<BrandReference>(referencePath)
 
-  for (const brandSite of reference.sites) {
+  const selectedSites = reference.sites.filter((brandSite) => {
+    const runtimeCode = runtimeSiteCodeByReferenceCode[brandSite.siteCode]
+    return requestedSiteCodes.length === 0 || requestedSiteCodes.includes(runtimeCode)
+  })
+
+  if (requestedSiteCodes.length > 0) {
+    const knownRuntimeCodes = new Set(
+      reference.sites.map((brandSite) => runtimeSiteCodeByReferenceCode[brandSite.siteCode]),
+    )
+    const unknownSiteCodes = requestedSiteCodes.filter(
+      (siteCode) => !knownRuntimeCodes.has(siteCode),
+    )
+    if (unknownSiteCodes.length > 0) {
+      throw new Error(`Unknown runtime site code(s): ${unknownSiteCodes.join(', ')}`)
+    }
+  }
+
+  const plan: Array<Record<string, unknown>> = []
+
+  for (const brandSite of selectedSites) {
     const runtimeCode = runtimeSiteCodeByReferenceCode[brandSite.siteCode]
     if (!runtimeCode) {
       throw new Error(`No runtime site code configured for ${brandSite.siteCode}`)
@@ -246,35 +314,63 @@ async function main() {
     const manifestPath = path.join(
       visualIdentityRoot,
       'exports',
-      brandSite.siteCode,
+      manifestDirectoryByReferenceCode[brandSite.siteCode] || brandSite.siteCode,
       'manifest.json',
     )
     const manifest = await readJSON<AssetManifest>(manifestPath)
 
-    const logo = await createBrandMedia({
-      assetPath: manifest.assets.logoPrimary,
-      caption: `Generated primary logo from ${brandSite.displayTitle} source board.`,
-      payload,
-      req,
-      siteID: site.id,
-      title: `${brandSite.displayTitle} primary logo`,
+    const [existingLogo, existingFavicon, existingOGImage] = await Promise.all([
+      findBrandMedia({ assetPath: manifest.assets.logoPrimary, payload, req, siteID: site.id }),
+      findBrandMedia({ assetPath: manifest.assets.favicon, payload, req, siteID: site.id }),
+      findBrandMedia({ assetPath: manifest.assets.ogImage, payload, req, siteID: site.id }),
+    ])
+
+    const changes = {
+      favicon: existingFavicon ? 'reuse' : 'create',
+      logo: existingLogo ? 'reuse' : 'create',
+      ogImage: existingOGImage ? 'reuse' : 'create',
+      settings: 'update',
+    }
+
+    plan.push({
+      assets: manifest.assets,
+      changes,
+      displayTitle: brandSite.displayTitle,
+      siteCode: runtimeCode,
     })
-    const favicon = await createBrandMedia({
-      assetPath: manifest.assets.favicon,
-      caption: `Generated favicon from ${brandSite.displayTitle} mark.`,
-      payload,
-      req,
-      siteID: site.id,
-      title: `${brandSite.displayTitle} favicon`,
-    })
-    const ogImage = await createBrandMedia({
-      assetPath: manifest.assets.ogImage,
-      caption: `Generated Open Graph image for ${brandSite.displayTitle}.`,
-      payload,
-      req,
-      siteID: site.id,
-      title: `${brandSite.displayTitle} Open Graph image`,
-    })
+
+    if (dryRun) continue
+
+    const logo =
+      existingLogo ||
+      (await createBrandMedia({
+        assetPath: manifest.assets.logoPrimary,
+        caption: `Generated primary logo from ${brandSite.displayTitle} source board.`,
+        payload,
+        req,
+        siteID: site.id,
+        title: `${brandSite.displayTitle} primary logo`,
+      }))
+    const favicon =
+      existingFavicon ||
+      (await createBrandMedia({
+        assetPath: manifest.assets.favicon,
+        caption: `Generated favicon from ${brandSite.displayTitle} mark.`,
+        payload,
+        req,
+        siteID: site.id,
+        title: `${brandSite.displayTitle} favicon`,
+      }))
+    const ogImage =
+      existingOGImage ||
+      (await createBrandMedia({
+        assetPath: manifest.assets.ogImage,
+        caption: `Generated Open Graph image for ${brandSite.displayTitle}.`,
+        payload,
+        req,
+        siteID: site.id,
+        title: `${brandSite.displayTitle} Open Graph image`,
+      }))
 
     await payload.update({
       collection: 'site-settings',
@@ -303,7 +399,8 @@ async function main() {
     console.log(`Imported brand assets for ${runtimeCode}`)
   }
 
-  console.log('Brand asset import completed.')
+  console.log(JSON.stringify({ mode: dryRun ? 'dry-run' : 'apply', plan }, null, 2))
+  console.log(`Brand asset import ${dryRun ? 'dry-run completed' : 'completed'}.`)
   await payload.destroy()
 }
 

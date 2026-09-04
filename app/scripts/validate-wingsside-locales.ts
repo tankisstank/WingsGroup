@@ -65,7 +65,7 @@ const siteResult = await payload.find({
 const site = siteResult.docs[0]
 
 if (!site) {
-  throw new Error('Could not find WingsSide site record for locale validation.')
+  throw new Error('Could not find WingSide site record for locale validation.')
 }
 
 const input: LocaleAuditInput = {

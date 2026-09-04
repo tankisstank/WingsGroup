@@ -21,7 +21,7 @@ const sites = [
     note: 'Current local hostname resolution renders the WingsGroup umbrella site for wingsgroup.vn.',
   },
   { key: 'wingsgo', label: 'wingsgo.vn', host: 'wingsgo.vn', pathPrefix: '/wingsgo', siteId: 2 },
-  { key: 'wingsside', label: 'wingside.vn', host: 'wingside.vn', pathPrefix: '/wingsside', siteId: 3 },
+  { key: 'wingsside', label: 'wingside.vn', host: 'wingside.vn', pathPrefix: '/wing-side', siteId: 3 },
 ]
 
 const extraPublicRoutes = {
@@ -230,7 +230,7 @@ function buildMarkdown({ generatedAt, publicResults, cmsResults, pagesBySite, lo
   lines.push('')
   lines.push('## Scope')
   lines.push('')
-  lines.push('- Previewed `wingsgroup.vn`, `wingsgo.vn`, `wingside.vn` on the local Next/Payload server. Public screenshots use the repo-approved local path-prefix model: `/`, `/wingsgo`, and `/wingsside`.')
+  lines.push('- Previewed `wingsgroup.vn`, `wingsgo.vn`, `wingside.vn` on the local Next/Payload server. Public screenshots use the repo-approved local path-prefix model: `/`, `/wingsgo`, and `/wing-side`.')
   lines.push('- Previewed each selected public page in desktop `1440x1000` and mobile `390x844`.')
   lines.push('- Previewed CMS dashboard, operator console, site review, page wizard, and theme manager in desktop/mobile.')
   lines.push('- Excluded published `/hero-*` presentation test pages from wingsgroup/WingsGroup because they are component demo pages, not production navigation pages.')
@@ -284,7 +284,7 @@ function buildMarkdown({ generatedAt, publicResults, cmsResults, pagesBySite, lo
   lines.push('')
   lines.push('1. Clarify `wingsgroup.vn`: currently it renders the WingsGroup umbrella experience. If WingsGroup is a distinct corporate brand, create separate site settings/page content before visual optimization.')
   lines.push('2. For WingsGo conversion pages, prioritize first-screen CTA hierarchy, price/schedule scan density, and tour comparison affordances.')
-  lines.push('3. For WingsSide pages, prioritize inquiry path clarity, destination/package cross-links, and stronger trust proof above long editorial sections.')
+  lines.push('3. For WingSide pages, prioritize inquiry path clarity, destination/package cross-links, and stronger trust proof above long editorial sections.')
   lines.push('4. For CMS, tune mobile only for emergency/quick edits; desktop should remain the primary operator workflow.')
   lines.push('')
 

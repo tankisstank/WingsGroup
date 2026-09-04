@@ -44,7 +44,7 @@ Local implementation evidence recorded on 2026-07-25:
   exploratory runs.
 - Local strict multisite audit passed with blockerCount 0:
   `artifacts/us-053-multisite-locale-audit/locale-content-audit.md`.
-- Local strict WingsSide required-route validation failed because the local DB
+- Local strict WingSide required-route validation failed because the local DB
   has 105 missing required path findings under `fallbackLocale:false`:
   `artifacts/us-053-locales/wingsside-locale-validation.md`.
 - Tests:
@@ -63,9 +63,9 @@ Correction cycle 1 local evidence recorded on 2026-07-26:
 - Restored classifier unit tests for default-locale self comparison, identical
   default copy, Spanish `todo`, Style logic, mixed-language evidence, blocker
   count and strict negative behavior.
-- Reconciled strict multisite audit PASS vs WingsSide validator FAIL: validator
+- Reconciled strict multisite audit PASS vs WingSide validator FAIL: validator
   and backfill source queries used `limit: 100`, which truncated the local
-  WingsSide page inventory. Both now use `limit: 1000`; missing findings are
+  WingSide page inventory. Both now use `limit: 1000`; missing findings are
   not allowlisted.
 - Ran guarded local backfill and hi-fi content seed against local SQLite only,
   with backups recorded in artifacts/app. No production CMS apply was run.

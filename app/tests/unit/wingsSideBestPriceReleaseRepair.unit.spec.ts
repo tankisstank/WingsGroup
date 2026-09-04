@@ -163,7 +163,7 @@ const applySnapshot = (
   return next
 }
 
-describe('WingsSide BestPrice exact-scope release repair planner', () => {
+describe('WingSide BestPrice exact-scope release repair planner', () => {
   it('accepts exactly 22 valid same-tenant aggregates and plans only field updates', () => {
     const scoped = assertReleaseRepairScope({ aggregates: aggregates(), siteID })
     const plan = buildReleaseRepairPlanRecords({ aggregates: scoped, siteID })

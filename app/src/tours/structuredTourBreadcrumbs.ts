@@ -50,7 +50,7 @@ export const buildStructuredTourBreadcrumbItems = ({
 }): BreadcrumbItem[] => {
   if (siteCode !== 'wing-side') return baseItems
 
-  const home = baseItems[0] || { label: 'WingsSide', path: '/' }
+  const home = baseItems[0] || { label: 'WingSide', path: '/' }
   const context = readSafeTourEnquiryContext(searchParams)
   const fromJourneys = context.source === 'journeys'
   const parent = fromJourneys

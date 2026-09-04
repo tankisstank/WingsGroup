@@ -39,7 +39,7 @@ const row = (
   ...overrides,
 })
 
-describe('WingsSide Proof Archive view model', () => {
+describe('WingSide Proof Archive view model', () => {
   it('maps 24 CMS rows into the 21 public verified proof records', () => {
     const items = [
       ...Array.from({ length: 21 }, (_, index) =>

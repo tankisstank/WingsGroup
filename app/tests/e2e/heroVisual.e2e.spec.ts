@@ -36,10 +36,10 @@ test.describe('Hero visual regression', () => {
   })
 
   for (const target of [
-    { name: 'wingsside-planner-desktop', path: '/wingsside', width: 1440, height: 900 },
+    { name: 'wingsside-planner-desktop', path: '/wing-side', width: 1440, height: 900 },
     {
       name: 'wingsside-planner-mobile',
-      path: '/wingsside',
+      path: '/wing-side',
       width: 390,
       height: 844,
     },

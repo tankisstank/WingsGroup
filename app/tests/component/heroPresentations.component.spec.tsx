@@ -66,7 +66,7 @@ describe('hero presentation components', () => {
     expect(screen.getByText('Planner panel')).toBeTruthy()
   })
 
-  it('renders WingsSide hi-fi editorial split layout for the inbound cinematic preset', () => {
+  it('renders WingSide hi-fi editorial split layout for the inbound cinematic preset', () => {
     render(
       <CinematicCarouselHero
         badge="Journeys"

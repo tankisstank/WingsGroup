@@ -84,7 +84,7 @@ const buildCompleteInput = (): LocaleAuditInput => ({
   settingsByLocale: Object.fromEntries(publicLocales.map((locale) => [locale, buildSettings(locale)])),
 })
 
-describe('WingsSide locale content audit', () => {
+describe('WingSide locale content audit', () => {
   it('passes complete localized fixture data', () => {
     const result = auditWingsSideLocaleContent(buildCompleteInput())
 
@@ -150,7 +150,7 @@ describe('WingsSide locale content audit', () => {
       throw new Error('Fixture setup failed.')
     }
 
-    italianPage.title = 'WingsSide Hanoi Mekong'
+    italianPage.title = 'WingSide Hanoi Mekong'
 
     const result = auditWingsSideLocaleContent(input)
     const markdown = renderLocaleAuditMarkdown(result)

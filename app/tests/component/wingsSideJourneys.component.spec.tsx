@@ -76,7 +76,7 @@ beforeEach(() => {
   window.history.replaceState(
     null,
     '',
-    '/wingsside/journeys?destination=hanoi&style=culture&duration=8-14&utm_source=pm',
+    '/wing-side/journeys?destination=hanoi&style=culture&duration=8-14&utm_source=pm',
   )
 })
 
@@ -339,7 +339,7 @@ describe('WingSideJourneysClient', () => {
 
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '1-7' } })
 
-    const href = '/wingsside/journeys?destination=hanoi&style=culture&duration=1-7'
+    const href = '/wing-side/journeys?destination=hanoi&style=culture&duration=1-7'
     expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
     expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
@@ -351,7 +351,7 @@ describe('WingSideJourneysClient', () => {
     window.history.replaceState(
       null,
       '',
-      '/wingsside/vi/journeys?destination=hanoi&style=culture&duration=8-14',
+      '/wing-side/vi/journeys?destination=hanoi&style=culture&duration=8-14',
     )
     params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14')
 
@@ -360,7 +360,7 @@ describe('WingSideJourneysClient', () => {
 
     fireEvent.change(screen.getByLabelText('Điểm đến'), { target: { value: 'hue' } })
 
-    const href = '/wingsside/vi/journeys?destination=hue&style=culture&duration=8-14'
+    const href = '/wing-side/vi/journeys?destination=hue&style=culture&duration=8-14'
     expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
     expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
@@ -368,7 +368,7 @@ describe('WingSideJourneysClient', () => {
   })
 
   it('keeps prior filters when destination, style and duration change sequentially', () => {
-    window.history.replaceState(null, '', '/wingsside/journeys?utm_source=pm')
+    window.history.replaceState(null, '', '/wing-side/journeys?utm_source=pm')
     params = new URLSearchParams('utm_source=pm')
 
     render(
@@ -389,17 +389,17 @@ describe('WingSideJourneysClient', () => {
     fireEvent.change(screen.getByLabelText('Style'), { target: { value: 'family' } })
     fireEvent.change(screen.getByLabelText('Duration'), { target: { value: '15-plus' } })
 
-    expect(router.replace).toHaveBeenNthCalledWith(1, '/wingsside/journeys?destination=hanoi', {
+    expect(router.replace).toHaveBeenNthCalledWith(1, '/wing-side/journeys?destination=hanoi', {
       scroll: false,
     })
     expect(router.replace).toHaveBeenNthCalledWith(
       2,
-      '/wingsside/journeys?destination=hanoi&style=family',
+      '/wing-side/journeys?destination=hanoi&style=family',
       { scroll: false },
     )
     expect(router.replace).toHaveBeenNthCalledWith(
       3,
-      '/wingsside/journeys?destination=hanoi&style=family&duration=15-plus',
+      '/wing-side/journeys?destination=hanoi&style=family&duration=15-plus',
       { scroll: false },
     )
     expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
@@ -470,7 +470,7 @@ describe('WingSideJourneysClient', () => {
   })
 
   it('restores the changed filter focus and scroll after document navigation', () => {
-    const href = '/wingsside/journeys?destination=hanoi&style=family&duration=15-plus'
+    const href = '/wing-side/journeys?destination=hanoi&style=family&duration=15-plus'
     window.history.replaceState(null, '', href)
     window.sessionStorage.setItem(
       restoreKey,

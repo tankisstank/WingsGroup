@@ -8,7 +8,7 @@ import {
 import { wingsSideBackfillPaths } from '../../scripts/lib/wingssideLocaleBackfill'
 import { rejectedTranslatedLocaleTerms } from '../../scripts/lib/wingssideEditorialTerminology'
 
-describe('WingsSide editorial inventory', () => {
+describe('WingSide editorial inventory', () => {
   it('covers every localized backfill route plus shared site, chrome, and search copy', async () => {
     const inventory = buildWingsSideEditorialInventory()
 
@@ -46,7 +46,7 @@ describe('WingsSide editorial inventory', () => {
       ).toBe(true)
 
       const packet = renderWingsSideEditorialReviewPacket(inventory, locale)
-      expect(packet).toContain(`# WingsSide editorial review packet — ${locale}`)
+      expect(packet).toContain(`# WingSide editorial review packet — ${locale}`)
       expect(packet).toContain('## Required route checklist')
       expect(packet).toContain('### /destinations/ha-noi')
       expect(packet).toContain('Decision: ☐ approved')

@@ -112,7 +112,7 @@ const plannerStyles = [
 const plannerPanelCopyByLocale = {
   en: {
     ariaLabel: 'Trip planning starter',
-    cuesAriaLabel: 'WingsSide planning cues',
+    cuesAriaLabel: 'WingSide planning cues',
     ctaLabel: 'Plan trip →',
     description: 'Choose a starting direction and send it into the trip planning flow.',
     destinationLabel: 'Destination',
@@ -156,7 +156,7 @@ const plannerPanelCopyByLocale = {
   },
   es: {
     ariaLabel: 'Inicio de planificación de viaje',
-    cuesAriaLabel: 'Señales de planificación WingsSide',
+    cuesAriaLabel: 'Señales de planificación WingSide',
     ctaLabel: 'Planifica →',
     description: 'Elige una dirección inicial y envíala al flujo de planificación.',
     destinationLabel: 'Destino',
@@ -200,7 +200,7 @@ const plannerPanelCopyByLocale = {
   },
   it: {
     ariaLabel: 'Inizio pianificazione viaggio',
-    cuesAriaLabel: 'Segnali di pianificazione WingsSide',
+    cuesAriaLabel: 'Segnali di pianificazione WingSide',
     ctaLabel: 'Pianifica →',
     description: 'Scegli una direzione iniziale e inviala al flusso di pianificazione.',
     destinationLabel: 'Destinazione',
@@ -244,7 +244,7 @@ const plannerPanelCopyByLocale = {
   },
   pt: {
     ariaLabel: 'Início do planeamento da viagem',
-    cuesAriaLabel: 'Sinais de planeamento WingsSide',
+    cuesAriaLabel: 'Sinais de planeamento WingSide',
     ctaLabel: 'Planear →',
     description: 'Escolha uma direção inicial e envie-a para o fluxo de planeamento.',
     destinationLabel: 'Destino',
@@ -288,7 +288,7 @@ const plannerPanelCopyByLocale = {
   },
   vi: {
     ariaLabel: 'Khởi tạo kế hoạch chuyến đi',
-    cuesAriaLabel: 'Gợi ý lập kế hoạch WingsSide',
+    cuesAriaLabel: 'Gợi ý lập kế hoạch WingSide',
     ctaLabel: 'Lên kế hoạch →',
     description: 'Chọn hướng đi ban đầu và gửi vào luồng lập kế hoạch.',
     destinationLabel: 'Điểm đến',

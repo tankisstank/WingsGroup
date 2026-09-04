@@ -284,7 +284,7 @@ const assertRouteSpecContract = (source) => {
 export const assertUs055HomeSpecContract = (source) => {
   for (const contract of [
     "const locales = ['en', 'vi', 'it', 'es', 'pt'] as const",
-    "const localAliasPrefix = '/wingsside'",
+    "const localAliasPrefix = '/wing-side'",
     'const viewportWidths = [390, 1440] as const',
     "marker: 'why-featured'",
     "role: 'local-design'",

@@ -7,6 +7,9 @@ Start from:
 - `docs/product/WingsGroup-context.md`
 - `docs/product/phase-1-scope.md`
 - `docs/product/multisite-platform.md`
+- `docs/product/wingsgroup-v3-public-experience.md`
+- `docs/product/wingsgroup-v3-release-gates.md`
+- `docs/product/wingsgroup-v3-media-manifest.md`
 - `docs/product/editorial-operations.md`
 - `docs/product/acceptance-and-kpis.md`
 - `docs/product/ai-agent-seo-and-theme.md`
@@ -23,6 +26,9 @@ Current seed set:
 - `WingsGroup-context.md`: source hierarchy and high-level project direction
 - `phase-1-scope.md`: locked phase-1 contract and out-of-scope boundary
 - `multisite-platform.md`: site model, platform rules, and environment topology
+- `wingsgroup-v3-public-experience.md`: governed public experience, data/CTA/media contracts, and go-live gates for E09
+- `wingsgroup-v3-release-gates.md`: fail-closed release-gate register and checker contract for US-060
+- `wingsgroup-v3-media-manifest.md`: licensed handoff media, provenance, bilingual alt text, and publication controls
 - `editorial-operations.md`: minimum CMS and editorial behaviors
 - `acceptance-and-kpis.md`: acceptance baseline and KPI shape
 - `ai-agent-seo-and-theme.md`: AI-agent-oriented SEO direction and theme-system requirement

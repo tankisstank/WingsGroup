@@ -3,7 +3,7 @@ import type { Validate } from 'payload'
 export const themeKeyOptions = [
   { label: 'WingsGroup', value: 'wings-group' },
   { label: 'WingsGo', value: 'wings-go' },
-  { label: 'WingsSide', value: 'wings-side' },
+  { label: 'WingSide', value: 'wings-side' },
   { label: 'WingsPlus', value: 'wings-plus' },
   { label: 'WingsCare', value: 'wings-care' },
   { label: 'WingsPass', value: 'wings-pass' },

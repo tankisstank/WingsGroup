@@ -27,7 +27,7 @@ const walkStrings = (value: unknown, path = 'copy'): Array<{ path: string; value
   return Object.entries(value).flatMap(([key, nested]) => walkStrings(nested, `${path}.${key}`))
 }
 
-describe('WingsSide locale copy contract', () => {
+describe('WingSide locale copy contract', () => {
   it('matches the configured public locale source', () => {
     expect(() => assertPublicLocaleSourceMatches()).not.toThrow()
   })
@@ -56,7 +56,7 @@ describe('WingsSide locale copy contract', () => {
     expect(() => getRequiredLocaleCopy(incomplete, 'it')).toThrow(/Missing required public locale copy/)
   })
 
-  it('contains complete localized WingsSide site-settings copy', () => {
+  it('contains complete localized WingSide site-settings copy', () => {
     expect(Object.keys(wingsSideSiteSettingsCopy).sort()).toEqual([...publicLocales].sort())
 
     for (const locale of publicLocales) {
@@ -70,7 +70,7 @@ describe('WingsSide locale copy contract', () => {
     }
   })
 
-  it('keeps WingsSide page backfill user copy off vi-versus-English branching', async () => {
+  it('keeps WingSide page backfill user copy off vi-versus-English branching', async () => {
     const source = await readFile(repoFile('scripts/lib/wingssideLocaleBackfill.ts'), 'utf8')
 
     expect(source).not.toContain("locale === 'vi'")

@@ -26,7 +26,7 @@ const contrastRatio = (first: string, second: string) => {
 describe('site theme tokens', () => {
   it('exposes the full WingSide hi-fi semantic token bridge used by the 8-page product CSS', () => {
     const style = getSiteThemeTokens(
-      { branding: { themeKey: 'wings-side' }, siteName: 'WingsSide' },
+      { branding: { themeKey: 'wings-side' }, siteName: 'WingSide' },
       { siteCode: 'wing-side' },
     ).style as Record<string, string>
 
@@ -190,7 +190,7 @@ describe('site theme tokens', () => {
           tokens: editorialTokens,
         },
       },
-      siteName: 'WingsSide',
+      siteName: 'WingSide',
     }
 
     // Hi-fi token bridge wins for brand/surface/CTA even when CMS preset is editorial teal.
@@ -231,12 +231,12 @@ describe('site theme tokens', () => {
         '--site-wine': '#8B2E28',
       },
       themeKey: 'wings-side',
-      themeName: 'WingsSide',
+      themeName: 'WingSide',
       themePreset: 'wings-side-editorial',
     })
   })
 
-  it('resolves the WingsSide inbound v2 editorial launch palette', () => {
+  it('resolves the WingSide inbound v2 editorial launch palette', () => {
     const inboundTokens: ThemePresetTokens = {
       ...defaultThemePresetByKey.premium,
       accentColor: '#C9A75C',
@@ -259,7 +259,7 @@ describe('site theme tokens', () => {
           tokens: inboundTokens,
         },
       },
-      siteName: 'WingsSide',
+      siteName: 'WingSide',
     }
 
     expect(getSiteThemeTokens(settings)).toMatchObject({
@@ -288,7 +288,7 @@ describe('site theme tokens', () => {
         '--site-theme-preset': wingsSideInboundThemePresetKey,
       },
       themeKey: 'wings-side',
-      themeName: 'WingsSide',
+      themeName: 'WingSide',
       themePreset: wingsSideInboundThemePresetKey,
     })
   })

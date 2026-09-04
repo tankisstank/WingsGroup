@@ -45,7 +45,7 @@ const sites = [
     code: 'wing-side',
     defaultLocale: 'en',
     isActive: true,
-    name: 'WingsSide',
+    name: 'WingSide',
     primaryDomain: 'wingside.vn',
   },
 ]

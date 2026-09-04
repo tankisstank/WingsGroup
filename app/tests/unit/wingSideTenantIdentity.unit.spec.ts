@@ -9,9 +9,9 @@ const appFile = (path: string) => readFileSync(resolve(process.cwd(), path), 'ut
 
 describe('Wingside tenant identity contract', () => {
   it('keeps public identity, technical code, local alias, and theme key distinct', () => {
-    expect(siteAliasToCodeMap.wingsside).toBe('wing-side')
-    expect(`/${Object.keys(siteAliasToCodeMap).find((alias) => alias === 'wingsside')}`).toBe(
-      '/wingsside',
+    expect(siteAliasToCodeMap['wing-side']).toBe('wing-side')
+    expect(`/${Object.keys(siteAliasToCodeMap).find((alias) => alias === 'wing-side')}`).toBe(
+      '/wing-side',
     )
 
     const theme = getSiteThemeTokens(
@@ -40,7 +40,7 @@ describe('Wingside tenant identity contract', () => {
 
     expect(migration).toContain('UPDATE "pages_locales" AS pl')
     expect(migration).toContain('SET "title" = \'wingside.vn\'')
-    expect(migration).toContain('SET "title" = \'WingsSide\'')
+    expect(migration).toContain('SET "title" = \'WingSide\'')
     expect(migration).toContain('regexp_replace')
     expect(migration).toContain('p."site_id"')
     expect(migration).toContain("WHERE \"code\" IN ('wings-side', 'wing-side')")
@@ -50,7 +50,7 @@ describe('Wingside tenant identity contract', () => {
     ).toBeLessThan(migration.lastIndexOf('SET "code" = \'wings-side\''))
   })
 
-  it('locks the release tenant to the WingsSide theme and public SEO identity', () => {
+  it('locks the release tenant to the WingSide theme and public SEO identity', () => {
     const migration = appFile('src/migrations/20260723_170000_wing_side_release_identity.ts')
 
     expect(migration).toContain('"branding_theme_key" = \'wings-side\'')
@@ -85,7 +85,7 @@ describe('Wingside tenant identity contract', () => {
 
     expect(migration).toContain('"support_email" = \'hello@wingside.vn\'')
     expect(migration).toContain('"support_email" = \'hello@wingsside.vn\'')
-    expect(migration).toContain('"title" = \'WingsSide\'')
+    expect(migration).toContain('"title" = \'WingSide\'')
     expect(migration).toContain('"link_url" = \'https://wingsside.vn\'')
     expect(migration).toContain('"link_url" = \'https://wingside.vn\'')
     expect(migration).toContain(
