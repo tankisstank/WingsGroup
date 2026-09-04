@@ -1951,3 +1951,29 @@
   border-radius: 0;
   box-shadow: none;
 }
+
+/* Keep every editorial article section on the same horizontal track as the
+ * v3 breadcrumb. The shared `.container` utility expands to the viewport's
+ * breakpoint width, while the breadcrumb intentionally uses a 1240px track.
+ * Scoping this with the article surface also makes the rule win over the
+ * utility without changing other sites or v3 surfaces. */
+:global(.wingsgroup-v3-editorial-article) .editorialArticleHeader,
+:global(.wingsgroup-v3-editorial-article) .editorialArticleHeroGrid,
+:global(.wingsgroup-v3-editorial-article) .editorialArticleLayout {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2rem);
+}
+
+:global(.wingsgroup-v3-editorial-article) .editorialArticleBody {
+  justify-self: start;
+}
+
+@media (max-width: 850px) {
+  :global(.wingsgroup-v3-editorial-article) .editorialArticleHeader,
+  :global(.wingsgroup-v3-editorial-article) .editorialArticleHeroGrid,
+  :global(.wingsgroup-v3-editorial-article) .editorialArticleLayout {
+    padding-inline: 20px;
+  }
+}
