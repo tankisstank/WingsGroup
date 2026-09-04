@@ -217,7 +217,14 @@ describe('WingsGroup v3 production content importer contract', () => {
       },
     )
     expect(contract.settings.wingsGroupV3.consultationChannels).toEqual([
-      { key: 'zalo', state: 'unconfigured' },
+      {
+        key: 'zalo',
+        state: 'approved',
+        url: 'https://zalo.me/4142059657526524531',
+        owner: 'WingsGroup Sales',
+        sla: 'Phản hồi trong 1 ngày làm việc / Reply within 1 business day',
+        trackingReference: 'stakeholder-approved-zalo-oa-4142059657526524531-2026-08-29',
+      },
       { key: 'whatsapp', state: 'unconfigured' },
       { key: 'messenger', state: 'unconfigured' },
     ])

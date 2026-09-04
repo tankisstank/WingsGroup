@@ -2,10 +2,8 @@
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
-
 import type { Header as HeaderType, Media } from '@/payload-types'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
-
 import { Logo } from '@/components/Logo/Logo'
 import { SiteLink } from '@/components/SiteLink'
 import { HeaderNav } from './Nav'
@@ -13,19 +11,15 @@ import { HeaderNav } from './Nav'
 interface HeaderClientProps {
   accentColor?: null | string
   brandColor?: null | string
-  data: {
-    navItems?: HeaderType['navItems']
-  }
+  data: { navItems?: HeaderType['navItems'] }
   englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
   logoImage?: Media | null
   logoText?: null | string
-  primaryAction?: {
-    label: string
-    url: string
-  }
+  primaryAction?: { label: string; url: string }
   publicPathname?: string
   resolvedLocale?: SupportedLocaleCode
   showSearch?: boolean
+  siteID?: null | number | string
   siteName?: null | string
   siteCode?: string
   supportedLocales?: SupportedLocaleCode[]
@@ -46,6 +40,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   publicPathname,
   resolvedLocale,
   showSearch,
+  siteID,
   siteName,
   siteCode,
   supportedLocales,
@@ -54,21 +49,15 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   wingsGroupV3Home = false,
   wingsGroupV3Surface = false,
 }) => {
-  /* Storing the value in a useState to avoid hydration errors */
   const [theme, setTheme] = useState<string | null>(null)
   const { headerTheme, setHeaderTheme } = useHeaderTheme()
   const pathname = usePathname()
-
   useEffect(() => {
     setHeaderTheme(null)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname])
-
+  }, [pathname, setHeaderTheme])
   useEffect(() => {
     if (headerTheme && headerTheme !== theme) setTheme(headerTheme)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [headerTheme])
-
+  }, [headerTheme, theme])
   return (
     <header
       className={`container site-header${wingsGroupV3Surface ? ' site-header--wingsgroup-v3' : ''}`}
@@ -85,6 +74,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
               logoImage={logoImage}
               logoText={logoText}
               priority="high"
+              siteID={siteID}
               siteCode={siteCode}
             />
           </SiteLink>

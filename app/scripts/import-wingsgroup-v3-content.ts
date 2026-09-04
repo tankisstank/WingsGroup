@@ -539,7 +539,14 @@ const productionSettings = {
   legalIdentity: WINGSGROUP_LEGAL_IDENTITY,
   wingsGroupV3: {
     consultationChannels: [
-      { key: 'zalo', state: 'unconfigured' },
+      {
+        key: 'zalo',
+        state: 'approved',
+        url: 'https://zalo.me/4142059657526524531',
+        owner: 'WingsGroup Sales',
+        sla: 'Phản hồi trong 1 ngày làm việc / Reply within 1 business day',
+        trackingReference: 'stakeholder-approved-zalo-oa-4142059657526524531-2026-08-29',
+      },
       { key: 'whatsapp', state: 'unconfigured' },
       { key: 'messenger', state: 'unconfigured' },
     ],
@@ -779,7 +786,18 @@ const verifySettingsContract = (settings: UnknownRecord): void => {
       : []
     ).map((channel) => {
       const item = asRecord(channel)
-      return { key: item.key, state: item.state }
+      return {
+        key: item.key,
+        state: item.state,
+        ...(item.state === 'approved'
+          ? {
+              url: item.url,
+              owner: item.owner,
+              sla: item.sla,
+              trackingReference: item.trackingReference,
+            }
+          : {}),
+      }
     }),
     enabled: actual.enabled,
     englishPublicationState: actual.englishPublicationState,
@@ -1380,10 +1398,19 @@ const main = async () => {
         req,
       })
       await commitTransaction(req)
+      const postApplyInventory = await readWingsGroupV3ContentInventory({
+        manifest,
+        mediaDirectory: command.mediaDirectory,
+        mediaPlan,
+        payload: payload as ContentPayload,
+        publicOrigin: `https://${String(site.primaryDomain)}`,
+        req,
+        siteID: resolvedSiteID,
+      })
       const verification = verifyWingsGroupV3ContentInventory({
         contract: buildWingsGroupV3ContentContract(),
-        formID: result.formID,
-        inventory,
+        formID: relationID(postApplyInventory.form?.id) || result.formID,
+        inventory: postApplyInventory,
       })
       console.log(
         JSON.stringify(

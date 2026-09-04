@@ -33,6 +33,9 @@ export async function GET(request: Request) {
 
   const body = [
     'User-agent: *',
+    ...(site.code === 'wings-group'
+      ? ['Content-Signal: search=yes, ai-input=yes, ai-train=yes, use=full']
+      : []),
     'Allow: /',
     'Disallow: /admin/',
     'Disallow: /api/users/',
@@ -51,4 +54,3 @@ export async function GET(request: Request) {
     },
   })
 }
-

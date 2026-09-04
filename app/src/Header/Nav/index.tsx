@@ -15,6 +15,7 @@ import {
   type SupportedLocaleCode,
 } from '@/utilities/sitePaths'
 import { getWingsSideHiFiCta, getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
+import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
 import { Globe2Icon, MenuIcon, SearchIcon, XIcon } from 'lucide-react'
 import { getWingsGroupSwitcherLocales } from '@/components/WingsGroupV3/model'
 
@@ -108,6 +109,8 @@ export const HeaderNav: React.FC<{
   const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
   const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null
   const resolvedPrimaryAction = wingsSideHiFiCta || primaryAction
+  const sharedZaloCTA =
+    getSharedZaloCTA(siteCode, resolvedLocale)
   const shouldRenderPrimaryAction =
     resolvedPrimaryAction &&
     !(wingsSideHiFiNav
@@ -353,6 +356,17 @@ export const HeaderNav: React.FC<{
             {resolvedPrimaryAction.label}
           </SiteLink>
         ) : null}
+        {sharedZaloCTA ? (
+          <a
+            aria-label={sharedZaloCTA.ariaLabel}
+            className="site-header-zalo-link"
+            href={sharedZaloCTA.href}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {sharedZaloCTA.label}
+          </a>
+        ) : null}
         {!isWingsSide && showSearch ? (
           <SiteLink className="site-icon-button" href="/search">
             <span className="sr-only">{copy.search}</span>
@@ -371,6 +385,17 @@ export const HeaderNav: React.FC<{
           >
             {resolvedPrimaryAction.label}
           </SiteLink>
+        ) : null}
+        {sharedZaloCTA ? (
+          <a
+            aria-label={sharedZaloCTA.ariaLabel}
+            className="site-header-zalo-link site-header-zalo-link--mobile"
+            href={sharedZaloCTA.href}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {sharedZaloCTA.label}
+          </a>
         ) : null}
         {!isWingsSide && showSearch ? (
           <SiteLink className="site-icon-button" href="/search">
@@ -475,6 +500,18 @@ export const HeaderNav: React.FC<{
             >
               {resolvedPrimaryAction.label}
             </SiteLink>
+          ) : null}
+          {sharedZaloCTA ? (
+            <a
+              aria-label={sharedZaloCTA.ariaLabel}
+              className="site-mobile-nav__link site-mobile-nav__link--external"
+              href={sharedZaloCTA.href}
+              rel="noopener noreferrer"
+              target="_blank"
+              onClick={() => setIsOpen(false)}
+            >
+              {sharedZaloCTA.label}
+            </a>
           ) : null}
           {languageSwitcher}
         </nav>

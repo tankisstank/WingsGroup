@@ -518,9 +518,9 @@ const en: SectionCopy = {
       'Refine when ready',
     ],
     channels: [
-      { label: 'Email', value: 'hello@wingside.vn', href: 'mailto:hello@wingside.vn' },
-      { label: 'Phone', value: '+84 903 000 222', href: 'tel:+84903000222' },
-      { label: 'WhatsApp', value: '+84 903 000 222', href: 'https://wa.me/84903000222' },
+      { label: 'Email', value: 'info@wingsgroup.vn', href: 'mailto:info@wingsgroup.vn' },
+      { label: 'Phone', value: '0912910101', href: 'tel:0912910101' },
+      { label: 'WhatsApp', value: '0912910101', href: 'https://wa.me/84912910101' },
     ],
   },
   creds: {
@@ -817,7 +817,11 @@ const vi: SectionCopy = {
         body: 'Ngày nhẹ và không gian phục hồi.',
         href: '/styles#wellness',
       },
-      { title: 'Lãng mạn', body: 'Tuần trăng mật và những kỳ nghỉ riêng tư.', href: '/styles#romance' },
+      {
+        title: 'Lãng mạn',
+        body: 'Tuần trăng mật và những kỳ nghỉ riêng tư.',
+        href: '/styles#romance',
+      },
     ],
     cta: 'Đã chọn phong cách? Đưa vào brief',
   },
@@ -923,9 +927,9 @@ const vi: SectionCopy = {
       'Chỉnh khi sẵn sàng',
     ],
     channels: [
-      { label: 'Email', value: 'hello@wingside.vn', href: 'mailto:hello@wingside.vn' },
-      { label: 'Điện thoại', value: '+84 903 000 222', href: 'tel:+84903000222' },
-      { label: 'WhatsApp', value: '+84 903 000 222', href: 'https://wa.me/84903000222' },
+      { label: 'Email', value: 'info@wingsgroup.vn', href: 'mailto:info@wingsgroup.vn' },
+      { label: 'Điện thoại', value: '0912910101', href: 'tel:0912910101' },
+      { label: 'WhatsApp', value: '0912910101', href: 'https://wa.me/84912910101' },
     ],
   },
   creds: {
@@ -1332,9 +1336,9 @@ const it: SectionCopy = {
       'Raffina quando sei pronto',
     ],
     channels: [
-      { label: 'Email', value: 'hello@wingside.vn', href: 'mailto:hello@wingside.vn' },
-      { label: 'Telefono', value: '+84 903 000 222', href: 'tel:+84903000222' },
-      { label: 'WhatsApp', value: '+84 903 000 222', href: 'https://wa.me/84903000222' },
+      { label: 'Email', value: 'info@wingsgroup.vn', href: 'mailto:info@wingsgroup.vn' },
+      { label: 'Telefono', value: '0912910101', href: 'tel:0912910101' },
+      { label: 'WhatsApp', value: '0912910101', href: 'https://wa.me/84912910101' },
     ],
   },
   creds: {
@@ -1749,9 +1753,9 @@ const es: SectionCopy = {
       'Refinas cuando estés listo',
     ],
     channels: [
-      { label: 'Email', value: 'hello@wingside.vn', href: 'mailto:hello@wingside.vn' },
-      { label: 'Teléfono', value: '+84 903 000 222', href: 'tel:+84903000222' },
-      { label: 'WhatsApp', value: '+84 903 000 222', href: 'https://wa.me/84903000222' },
+      { label: 'Email', value: 'info@wingsgroup.vn', href: 'mailto:info@wingsgroup.vn' },
+      { label: 'Teléfono', value: '0912910101', href: 'tel:0912910101' },
+      { label: 'WhatsApp', value: '0912910101', href: 'https://wa.me/84912910101' },
     ],
   },
   creds: {
@@ -2159,9 +2163,9 @@ const pt: SectionCopy = {
       'Refine quando estiver pronto',
     ],
     channels: [
-      { label: 'Email', value: 'hello@wingside.vn', href: 'mailto:hello@wingside.vn' },
-      { label: 'Telefone', value: '+84 903 000 222', href: 'tel:+84903000222' },
-      { label: 'WhatsApp', value: '+84 903 000 222', href: 'https://wa.me/84903000222' },
+      { label: 'Email', value: 'info@wingsgroup.vn', href: 'mailto:info@wingsgroup.vn' },
+      { label: 'Telefone', value: '0912910101', href: 'tel:0912910101' },
+      { label: 'WhatsApp', value: '0912910101', href: 'https://wa.me/84912910101' },
     ],
   },
   creds: {

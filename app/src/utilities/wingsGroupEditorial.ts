@@ -192,22 +192,9 @@ export const applyWingsGroupEditorialPublicCopy = (
   post: Post,
   locale: SupportedLocaleCode,
 ): Post => {
-  if (post.slug !== WINGSGROUP_TRUST_ARTICLE_SLUG || (locale !== 'vi' && locale !== 'en')) {
-    return post
-  }
+  void locale
+  return post
 
-  const copy = TRUST_ARTICLE_PUBLIC_COPY[locale]
-  return {
-    ...post,
-    content: createTrustArticleContent(locale),
-    meta: {
-      ...(post.meta || {}),
-      breadcrumbLabel: copy.breadcrumbLabel,
-      description: copy.description,
-      title: copy.title,
-    },
-    title: copy.title,
-  }
 }
 
 export const getWingsGroupTrustArticleLocalizedUpdate = (locale: 'en' | 'vi') => {

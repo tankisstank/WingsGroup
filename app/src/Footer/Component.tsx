@@ -9,6 +9,7 @@ import { SiteLink } from '@/components/SiteLink'
 import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
 import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
+import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
 import { MailIcon, PhoneIcon } from 'lucide-react'
 import { isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
 import { isWingsGroupBrandSite } from '@/wingsgroup/brand'
@@ -24,6 +25,7 @@ export async function Footer() {
     site.code === 'wings-group' &&
     settings?.wingsGroupV3?.enabled === true &&
     isWingsGroupV3SurfacePath(publicPathname)
+  const sharedZaloCTA = getSharedZaloCTA(site.code, locale)
   const hiFiCopy = isWingSide ? getWingsSideHiFiCopy(locale) : null
   const wingSideNav = isWingSide ? getWingsSideHiFiNavItems(locale) : null
   const wingSideFooterCopy = isWingSide ? getWingSideFooterCopy(locale) : null
@@ -105,6 +107,11 @@ export async function Footer() {
             <section>
               <h2>{wingSideFooterCopy!.help}</h2>
               <SiteLink href="/contact-us">{wingSideFooterCopy!.contact}</SiteLink>
+              {sharedZaloCTA ? (
+                <a href={sharedZaloCTA.href} rel="noopener noreferrer" target="_blank">
+                  {sharedZaloCTA.label}
+                </a>
+              ) : null}
               {settings?.supportEmail ? (
                 <a href={`mailto:${settings.supportEmail}`}>{settings.supportEmail}</a>
               ) : null}
@@ -174,6 +181,16 @@ export async function Footer() {
               {navItems.map(({ link }, i) => {
                 return <CMSLink className="theme-nav-link" key={i} {...link} />
               })}
+              {sharedZaloCTA ? (
+                <a
+                  className="theme-nav-link"
+                  href={sharedZaloCTA.href}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  {sharedZaloCTA.label}
+                </a>
+              ) : null}
             </nav>
           </div>
         </div>

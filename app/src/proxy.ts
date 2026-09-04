@@ -222,6 +222,12 @@ export async function proxy(request: NextRequest) {
     return notFoundResponse()
   }
 
+  if (!siteAlias && effectiveHost === 'wingsgroup.vn' && locale === 'vi') {
+    const url = request.nextUrl.clone()
+    url.pathname = stripLeadingSegments(request.nextUrl.pathname, 1)
+    return NextResponse.redirect(url, 308)
+  }
+
   const siteCode = siteAlias ? allSiteAliasToCodeMap[siteAlias] : null
   const sitePrefix = siteAlias ? `/${siteAlias}${locale ? `/${locale}` : ''}` : null
   const localDraftPreview = await isServerOwnedLocalDraftPreview(

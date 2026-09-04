@@ -8,6 +8,7 @@ import {
   WINGSGROUP_CONTACT_FORM_ANCHOR,
   WINGSGROUP_CONTACT_FOCUS_SESSION_KEY,
 } from '@/utilities/wingsGroupConsultation'
+import { sharedZaloOa } from '@/utilities/sharedConsultationChannels'
 
 import styles from './WingsGroupV3.module.css'
 
@@ -176,22 +177,49 @@ export const WingsGroupConsultationDialog = () => {
               ? 'Share what you need. The WingsGroup team will listen carefully and clarify your plans before the journey begins.'
               : 'Để lại nhu cầu. Đội ngũ WingsGroup sẽ trực tiếp tiếp nhận và làm rõ nhu cầu trước hành trình.'}
           </p>
-          <button className={styles.channelChoice} data-consult-form="true" type="button">
-            <span className={styles.channelMark} aria-hidden="true">
-              ↗
-            </span>
-            <span>
-              <b>{isEnglish ? 'Share your plans' : 'Để lại nhu cầu'}</b>
-              <small>
-                {isEnglish
-                  ? 'Our specialists will guide the next step.'
-                  : 'Chuyên viên sẽ đồng hành cùng bạn.'}
-              </small>
-            </span>
-            <span className={styles.channelArrow} aria-hidden="true">
-              ↗
-            </span>
-          </button>
+          <div className={styles.channelList}>
+            <a
+              aria-label={isEnglish ? 'Open WingsGroup Zalo OA' : 'Mở Zalo OA WingsGroup'}
+              className={`${styles.channelChoice} ${styles.channelChoiceZalo}`}
+              href={sharedZaloOa.href}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <span
+                className={`${styles.channelMark} ${styles.channelMarkZalo}`}
+                aria-hidden="true"
+              >
+                Z
+              </span>
+              <span>
+                <b>{sharedZaloOa.label}</b>
+                <small>
+                  {isEnglish
+                    ? 'Open a direct chat with Wingsgroup - Vietwings Travel.'
+                    : 'Nhắn tin trực tiếp với Wingsgroup - Vietwings Travel.'}
+                </small>
+              </span>
+              <span className={styles.channelArrow} aria-hidden="true">
+                ↗
+              </span>
+            </a>
+            <button className={styles.channelChoice} data-consult-form="true" type="button">
+              <span className={styles.channelMark} aria-hidden="true">
+                ↗
+              </span>
+              <span>
+                <b>{isEnglish ? 'Share your plans' : 'Để lại nhu cầu'}</b>
+                <small>
+                  {isEnglish
+                    ? 'Our specialists will guide the next step.'
+                    : 'Chuyên viên sẽ đồng hành cùng bạn.'}
+                </small>
+              </span>
+              <span className={styles.channelArrow} aria-hidden="true">
+                ↗
+              </span>
+            </button>
+          </div>
         </div>
       </dialog>
     </>

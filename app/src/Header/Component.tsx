@@ -42,9 +42,7 @@ export async function Header() {
 
   return (
     <HeaderClient
-      data={{
-        navItems: settings?.headerNavItems || [],
-      }}
+      data={{ navItems: settings?.headerNavItems || [] }}
       englishPublicationState={settings?.wingsGroupV3?.englishPublicationState}
       accentColor={settings?.branding?.accentColor}
       brandColor={settings?.branding?.brandColor}
@@ -58,6 +56,7 @@ export async function Header() {
       publicPathname={publicPathname}
       resolvedLocale={locale}
       showSearch={!isWingsGroupV3ExactPublicInventoryEnabled({ settings, siteCode: site.code })}
+      siteID={site.id}
       siteName={siteName}
       siteCode={site.code}
       supportedLocales={site.supportedLocales}

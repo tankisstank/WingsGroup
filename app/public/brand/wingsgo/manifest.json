@@ -1,0 +1,31 @@
+{
+  "siteCode": "wings-go",
+  "displayTitle": "WingsGo",
+  "sourcePdf": "pdf/WINGS GO.pdf",
+  "tagline": "Go More. Feel More.",
+  "valueLine": "GLOBAL MINDSET",
+  "colors": {
+    "primary": "#005090",
+    "accent": "#0090E0"
+  },
+  "assets": {
+    "logoPrimary": "/brand/wingsgo/wingsgo-logo-primary.png",
+    "logoReverse": "/brand/wingsgo/wingsgo-logo-reverse.png",
+    "mark": "/brand/wingsgo/wingsgo-mark.png",
+    "favicon": "/brand/wingsgo/wingsgo-favicon.png",
+    "ogImage": "/brand/wingsgo/wingsgo-og-image.png"
+  },
+  "provenance": {
+    "sourceRoot": "source/brand/visual-identity",
+    "sourceManifest": "exports/wingsgo/manifest.json",
+    "sourceManifestSha256": "b3be0ea130f9f6a20773547eec7b045a32040e42f4def4cd1b2522f919302ed4",
+    "referenceUpdatedAt": "2026-06-19",
+    "sha256": {
+      "logoPrimary": "1bd15fd3e256d8555c4aac4ea6a5f8c06dca4b9e257eb0351d1f8b37e91d5bc8",
+      "logoReverse": "66c667f57ce95b9b8826cf8776532f1eb6dd7702951c263823b34ce9dbba7c21",
+      "mark": "e1277922ddd425c6f04436d5ffbed2b037beae794325f97e66bb72b6dd579d06",
+      "favicon": "c75e8ea46134dc736e23b5f665cc1d50e285fbf0e948d66d908adafa366f7de0",
+      "ogImage": "ef713fc6e37e9e05dc35324d1b585ea380375c3df9024ee87f3c536786ea4d31"
+    }
+  }
+}
