@@ -376,7 +376,7 @@ const parseMarket = (category: string) => {
   if (/nhat[-_ ]ban|japan/.test(normalized)) return 'japan' as const
   if (/trung[-_ ]quoc|china/.test(normalized)) return 'china' as const
   if (
-    /noi[-_ ]dia|viet[-_ ]nam|dien[-_ ]bien|da[-_ ]lat|nha[-_ ]trang|da[-_ ]nang|hoi[-_ ]an|hue/iu.test(
+    /noi[-_ ]dia|viet[-_ ]nam|mien[-_ ]trung|dien[-_ ]bien|da[-_ ]lat|nha[-_ ]trang|da[-_ ]nang|hoi[-_ ]an|hue/iu.test(
       normalized,
     )
   )
