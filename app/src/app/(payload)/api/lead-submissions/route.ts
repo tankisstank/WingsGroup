@@ -352,8 +352,13 @@ export async function POST(request: Request): Promise<Response> {
     })
     await store!.completeIdempotency(input.idempotencyKey, submission.id)
     incrementMetric('wingstravel_lead_submissions_total', { site: site.code })
-  } catch {
+  } catch (error) {
     await store!.releaseIdempotency(input.idempotencyKey).catch(() => undefined)
+    payload.logger.error({
+      msg: 'Lead submission persistence failed.',
+      error_name: error instanceof Error ? error.name : 'unknown',
+      siteCode: site.code,
+    })
     return json({ error: 'Service temporarily unavailable.' }, 503)
   }
 
