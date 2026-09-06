@@ -40,6 +40,7 @@ import * as migration_20260824_150000_wingsgroup_v3_media_sizes from './20260824
 import * as migration_20260824_160000_wingsgroup_ecosystem_route_archetype from './20260824_160000_wingsgroup_ecosystem_route_archetype'
 import * as migration_20260906_081500_lead_notification_job_tasks from './20260906_081500_lead_notification_job_tasks'
 import * as migration_20260906_083000_payload_jobs_meta from './20260906_083000_payload_jobs_meta'
+import * as migration_20260906_084000_payload_jobs_stats from './20260906_084000_payload_jobs_stats'
 
 export const migrations = [
   {
@@ -251,5 +252,10 @@ export const migrations = [
     up: migration_20260906_083000_payload_jobs_meta.up,
     down: migration_20260906_083000_payload_jobs_meta.down,
     name: '20260906_083000_payload_jobs_meta',
+  },
+  {
+    up: migration_20260906_084000_payload_jobs_stats.up,
+    down: migration_20260906_084000_payload_jobs_stats.down,
+    name: '20260906_084000_payload_jobs_stats',
   },
 ]
