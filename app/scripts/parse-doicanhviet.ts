@@ -94,6 +94,7 @@ const main = async () => {
     `${JSON.stringify(
       {
         sourceSnapshotHash: sourceInventory.sourceSnapshotHash,
+        referenceDate,
         records: normalized,
       },
       null,

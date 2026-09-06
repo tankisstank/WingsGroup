@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildImportPlan, WINGS_GO_SITE_CODE } from '../../scripts/import-doicanhviet'
+import {
+  buildImportPlan,
+  selectionCollisionMessages,
+  WINGS_GO_SITE_CODE,
+} from '../../scripts/import-doicanhviet'
 import type { NormalizedTour } from '../../scripts/lib/doicanhviet'
 
 const record = (sourceId: string): NormalizedTour =>
@@ -118,5 +122,20 @@ describe('Doicanhviet importer plan contract', () => {
         },
       }),
     ).toThrow('Approved slug collision')
+  })
+
+  it('preflights duplicate source identities and departure identities in the selected batch', () => {
+    const duplicate = record('alpha')
+    duplicate.departures = [...duplicate.departures, { ...duplicate.departures[0] }]
+    expect(selectionCollisionMessages([duplicate], decisions)).toEqual([
+      'departure identity DCV-alpha|2030-01-02 (alpha)',
+    ])
+    expect(() =>
+      buildImportPlan({
+        args: { 'dry-run': true },
+        records: [record('alpha'), record('alpha')],
+        decisions,
+      }),
+    ).toThrow('source ID alpha (alpha, alpha)')
   })
 })

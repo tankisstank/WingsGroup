@@ -1,5 +1,6 @@
 import 'dotenv/config'
 
+import { createHash } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -34,6 +35,7 @@ export const WINGS_GO_SITE_CODE = 'wings-go' as const
 type InputEnvelope = {
   records: NormalizedTour[]
   sourceSnapshotHash?: string
+  referenceDate?: string
 }
 
 export type ImportPlanRecord = {
@@ -80,6 +82,8 @@ type ValidatedImportInput = {
   filePath: string
   decisionsPath: string
   sourceSnapshotHash?: string
+  referenceDate: string
+  runId: string
   only?: Set<string>
   limit?: number
   siteCode: typeof WINGS_GO_SITE_CODE
@@ -88,6 +92,14 @@ type ValidatedImportInput = {
   adminEmail?: string
   selectionSource: 'only' | 'approved-decisions' | 'all'
   selected: NormalizedTour[]
+}
+
+type ImportRunArtifacts = {
+  runDir: string
+  runId: string
+  normalizedDatasetHash: string
+  decisionFileHash: string
+  sourceInventoryHash?: string
 }
 
 const defaultArtifactDir = path.resolve(
@@ -116,6 +128,29 @@ const context = { disableRevalidate: true, import: true }
 
 const isSha256 = (value: string) => /^[a-f0-9]{64}$/iu.test(value)
 
+const dateOnly = (value: unknown) => String(value || '').slice(0, 10)
+
+const isISODate = (value: string) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/u.test(value)) return false
+  const parsed = new Date(`${value}T00:00:00.000Z`)
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value
+}
+
+const currentUTCDate = () => new Date().toISOString().slice(0, 10)
+
+const validRunID = (value: string) => /^[a-zA-Z0-9][a-zA-Z0-9._-]{2,119}$/u.test(value)
+
+const hashFile = async (filePath: string) => {
+  const hash = createHash('sha256')
+  const data = await fs.readFile(filePath)
+  hash.update(data)
+  return { bytes: data.byteLength, sha256: hash.digest('hex') }
+}
+
+const writeExclusiveJSON = async (filePath: string, value: unknown) => {
+  await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, { encoding: 'utf8', flag: 'wx' })
+}
+
 const normalizedArg = (args: Record<string, string | boolean>, key: string) => {
   const value = args[key]
   return typeof value === 'string' ? value.trim() : ''
@@ -124,14 +159,122 @@ const normalizedArg = (args: Record<string, string | boolean>, key: string) => {
 const parseInputEnvelope = (value: unknown): InputEnvelope => {
   if (Array.isArray(value)) return { records: value as NormalizedTour[] }
   if (!value || typeof value !== 'object') throw new Error('Normalized input must be an array')
-  const envelope = value as { records?: unknown; sourceSnapshotHash?: unknown }
+  const envelope = value as {
+    records?: unknown
+    sourceSnapshotHash?: unknown
+    referenceDate?: unknown
+  }
   if (!Array.isArray(envelope.records)) throw new Error('Normalized input records must be an array')
   const sourceSnapshotHash =
     typeof envelope.sourceSnapshotHash === 'string' ? envelope.sourceSnapshotHash.trim() : undefined
   if (sourceSnapshotHash && !isSha256(sourceSnapshotHash)) {
     throw new Error('Invalid sourceSnapshotHash in normalized input')
   }
-  return { records: envelope.records as NormalizedTour[], sourceSnapshotHash }
+  const referenceDate =
+    typeof envelope.referenceDate === 'string' ? envelope.referenceDate.trim() : undefined
+  if (referenceDate && !isISODate(referenceDate)) {
+    throw new Error('Invalid referenceDate in normalized input')
+  }
+  return { records: envelope.records as NormalizedTour[], sourceSnapshotHash, referenceDate }
+}
+
+const resolveRunID = (args: Record<string, string | boolean>, batchId: string) => {
+  const supplied = normalizedArg(args, 'run-id')
+  const runId = supplied || `${batchId}-${new Date().toISOString().replace(/[^0-9]/gu, '').slice(0, 17)}`
+  if (!validRunID(runId)) throw new Error('Invalid --run-id')
+  return runId
+}
+
+export const prepareRunArtifacts = async ({
+  decisionsPath,
+  filePath,
+  referenceDate,
+  runId,
+  sourceSnapshotHash,
+}: {
+  decisionsPath: string
+  filePath: string
+  referenceDate: string
+  runId: string
+  sourceSnapshotHash?: string
+}): Promise<ImportRunArtifacts> => {
+  const runDir = path.join(path.dirname(filePath), runId)
+  await fs.mkdir(runDir, { recursive: false })
+  const [normalized, decisions] = await Promise.all([hashFile(filePath), hashFile(decisionsPath)])
+  const sourceInventoryPath = path.join(path.dirname(filePath), 'source-inventory.json')
+  const sourceInventory = await fs
+    .access(sourceInventoryPath)
+    .then(() => hashFile(sourceInventoryPath))
+    .catch(() => undefined)
+
+  await Promise.all([
+    fs.copyFile(filePath, path.join(runDir, 'tours.normalized.json')),
+    fs.copyFile(decisionsPath, path.join(runDir, 'import-decisions.json')),
+    sourceInventory
+      ? fs.copyFile(sourceInventoryPath, path.join(runDir, 'source-inventory.json'))
+      : Promise.resolve(),
+  ])
+  const provenance = {
+    version: 1,
+    runId,
+    executionDate: new Date().toISOString(),
+    referenceDate,
+    sourceSnapshotHash: sourceSnapshotHash || null,
+    source: {
+      inventoryPath: sourceInventoryPath,
+      inventorySha256: sourceInventory?.sha256 || null,
+    },
+    normalized: { path: filePath, ...normalized },
+    decisions: { path: decisionsPath, ...decisions, retainedCopy: 'import-decisions.json' },
+    retainedCopies: {
+      normalized: 'tours.normalized.json',
+      sourceInventory: sourceInventory ? 'source-inventory.json' : null,
+      decisions: 'import-decisions.json',
+    },
+  }
+  await writeExclusiveJSON(path.join(runDir, 'provenance.json'), provenance)
+  await fs.writeFile(
+    path.join(runDir, 'checksums.sha256'),
+    [
+      `${normalized.sha256}  normalized-source:${filePath}`,
+      `${decisions.sha256}  import-decisions.json`,
+      sourceInventory ? `${sourceInventory.sha256}  source-inventory:${sourceInventoryPath}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n') + '\n',
+    'utf8',
+  )
+  return {
+    runDir,
+    runId,
+    normalizedDatasetHash: normalized.sha256,
+    decisionFileHash: decisions.sha256,
+    sourceInventoryHash: sourceInventory?.sha256,
+  }
+}
+
+const refreshRunChecksums = async (artifacts: ImportRunArtifacts) => {
+  const names = [
+    'import-decisions.json',
+    'provenance.json',
+    'tours.normalized.json',
+    'source-inventory.json',
+    'import-dry-run.json',
+    'import-result.json',
+  ]
+  const lines: string[] = []
+  for (const name of names) {
+    const filePath = path.join(artifacts.runDir, name)
+    const file = await fs
+      .access(filePath)
+      .then(() => hashFile(filePath))
+      .catch(() => undefined)
+    if (file) lines.push(`${file.sha256}  ${name}`)
+  }
+  lines.push(`${artifacts.normalizedDatasetHash}  normalized-source`)
+  lines.push(`${artifacts.decisionFileHash}  import-decisions.json.source`)
+  if (artifacts.sourceInventoryHash) lines.push(`${artifacts.sourceInventoryHash}  source-inventory`)
+  await fs.writeFile(path.join(artifacts.runDir, 'checksums.sha256'), `${lines.join('\n')}\n`, 'utf8')
 }
 
 const validateSourceSnapshotHash = ({ expected, input }: { expected?: string; input?: string }) => {
@@ -330,6 +473,25 @@ const findExistingProduct = async (
   return (result.docs[0] as any) || null
 }
 
+const findExistingProductBySlug = async (
+  payload: Payload,
+  siteID: number | string,
+  slug: string,
+  req: PayloadRequest,
+) => {
+  const result = await payload.find({
+    collection: 'tour-products',
+    depth: 0,
+    limit: 2,
+    pagination: false,
+    overrideAccess: true,
+    req,
+    where: whereAnd({ site: { equals: siteID } }, { slug: { equals: slug } }),
+  })
+  if (result.docs.length > 1) throw new Error(`Product slug collision: multiple products for ${slug}`)
+  return (result.docs[0] as any) || null
+}
+
 const findPage = async (
   payload: Payload,
   siteID: number | string,
@@ -480,7 +642,7 @@ const buildPageData = ({
   },
 })
 
-type ImportState = {
+export type ImportState = {
   created: number
   skippedExisting: number
   skippedDecision: number
@@ -491,6 +653,307 @@ type ImportState = {
   departuresCreated: number
   pagesCreated: number
   productsCreated: number
+  mediaRolledBack: number
+  pagesRolledBack: number
+  productsRolledBack: number
+  departuresRolledBack: number
+  parentPagesCreated: number
+  parentPagesRolledBack: number
+  cleanupFailures: number
+  partialFailures: number
+}
+
+export const activeCounts = (state: ImportState) => ({
+  media: state.mediaCreated - state.mediaRolledBack,
+  pages: state.pagesCreated - state.pagesRolledBack,
+  products: state.productsCreated - state.productsRolledBack,
+  departures: state.departuresCreated - state.departuresRolledBack,
+})
+
+export type CleanupOutcome = {
+  status: 'complete' | 'partial-failure'
+  referenceCoverage: 'all-configured-collections-records-only'
+  deleted: {
+    media: Array<number | string>
+    page: Array<number | string>
+    product: Array<number | string>
+    departures: Array<number | string>
+  }
+  retained: Array<{ collection: string; id: number | string; reason: string }>
+  errors: Array<{ collection: string; id: number | string; error: string }>
+}
+
+export type MediaReferenceIndex = {
+  ids: Set<string>
+  coverage: 'complete' | 'incomplete'
+  gaps: string[]
+}
+
+const collectMediaRelationIDs = (value: unknown, ids: Set<string>) => {
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectMediaRelationIDs(item, ids))
+    return
+  }
+  if (typeof value === 'number' || typeof value === 'string') {
+    ids.add(String(value))
+    return
+  }
+  if (value && typeof value === 'object') {
+    const relationID = (value as { id?: unknown }).id
+    if (typeof relationID === 'number' || typeof relationID === 'string') ids.add(String(relationID))
+  }
+}
+
+const fieldValue = (value: any, name?: string) => (name ? value?.[name] : value)
+
+const scanMediaFields = (
+  fields: any[],
+  value: any,
+  ids: Set<string>,
+  gaps: string[],
+  pathPrefix: string,
+) => {
+  if (!Array.isArray(fields)) {
+    gaps.push(`${pathPrefix}:missing-field-schema`)
+    return
+  }
+  for (const field of fields) {
+    if (field.type === 'tabs') {
+      for (const tab of field.tabs || [])
+        scanMediaFields(tab.fields, value, ids, gaps, `${pathPrefix}.tabs`)
+      continue
+    }
+    if (field.type === 'row' || field.type === 'collapsible') {
+      scanMediaFields(field.fields, value, ids, gaps, `${pathPrefix}.${field.type}`)
+      continue
+    }
+
+    const current = fieldValue(value, field.name)
+    const fieldPath = field.name ? `${pathPrefix}.${field.name}` : pathPrefix
+    if (field.type === 'upload' || field.type === 'relationship') {
+      const relationTo = field.relationTo
+      if (relationTo === 'media' || (Array.isArray(relationTo) && relationTo.includes('media')))
+        collectMediaRelationIDs(current, ids)
+    }
+    if (field.type === 'json' && current != null) gaps.push(`${fieldPath}:dynamic-json`)
+    // Lexical/rich-text editor features can embed upload-bearing blocks whose
+    // relationship schema is not represented as ordinary Payload fields. Keep
+    // these collections in scope and fail closed when content is present.
+    if (field.type === 'richText' && current != null) gaps.push(`${fieldPath}:dynamic-rich-text`)
+
+    if (field.localized && current && typeof current === 'object' && !Array.isArray(current)) {
+      for (const localeValue of Object.values(current)) {
+        scanMediaFields(
+          [{ ...field, localized: false }],
+          { [field.name]: localeValue },
+          ids,
+          gaps,
+          `${fieldPath}[locale]`,
+        )
+      }
+    } else if (field.type === 'array') {
+      for (const item of Array.isArray(current) ? current : [])
+        scanMediaFields(field.fields || [], item, ids, gaps, `${fieldPath}[]`)
+    } else if (field.type === 'blocks') {
+      for (const item of Array.isArray(current) ? current : []) {
+        const block = (field.blocks || []).find((candidate: any) => candidate.slug === item?.blockType)
+        if (!block) gaps.push(`${fieldPath}[${item?.blockType || 'unknown'}]:missing-block-schema`)
+        else scanMediaFields(block.fields, item, ids, gaps, `${fieldPath}[${item.blockType}]`)
+      }
+    } else if (field.type === 'group') {
+      scanMediaFields(field.fields, current, ids, gaps, fieldPath)
+    } else if (field.fields && current && typeof current === 'object') {
+      scanMediaFields(field.fields, current, ids, gaps, fieldPath)
+    }
+  }
+}
+
+const fieldsCanReferenceMedia = (fields: any[]): boolean => {
+  if (!Array.isArray(fields)) return false
+  return fields.some((field) => {
+    if (field.type === 'upload' || field.type === 'relationship') {
+      const relationTo = field.relationTo
+      if (relationTo === 'media' || (Array.isArray(relationTo) && relationTo.includes('media'))) return true
+    }
+    if (field.type === 'richText') return true
+    if (field.type === 'tabs') return (field.tabs || []).some((tab: any) => fieldsCanReferenceMedia(tab.fields))
+    if (field.type === 'blocks') return (field.blocks || []).some((block: any) => fieldsCanReferenceMedia(block.fields))
+    if (field.type === 'array' || field.type === 'group' || field.type === 'row' || field.type === 'collapsible')
+      return fieldsCanReferenceMedia(field.fields)
+    return false
+  })
+}
+
+const fetchAll = async (payload: Payload, options: Record<string, unknown>) => {
+  const result = await payload.find({
+    ...options,
+    depth: 0,
+    limit: 10000,
+    pagination: false,
+    locale: 'all',
+    overrideAccess: true,
+  } as any)
+  return result
+}
+
+export const buildMediaReferenceIndex = async (payload: Payload, req: PayloadRequest) => {
+  const ids = new Set<string>()
+  const gaps: string[] = []
+  const configuredCollections = ((payload as any).config?.collections || []) as any[]
+  for (const collection of configuredCollections) {
+    if (collection.slug === 'media') continue
+    // Avoid querying unrelated collections (notably payload-jobs). Besides
+    // reducing work, this prevents schema drift in an unrelated collection
+    // from blocking the media reference safety decision.
+    if (!fieldsCanReferenceMedia(collection.fields)) continue
+    const result = await fetchAll(payload, { collection: collection.slug, req })
+    if (result.hasNextPage) gaps.push(`${collection.slug}:pagination-truncated`)
+    for (const doc of result.docs || [])
+      scanMediaFields(collection.fields, doc, ids, gaps, collection.slug)
+
+    // Payload's versions table is only addressable for collections that opt in to
+    // versions. Calling findVersions for an ordinary collection makes Drizzle build
+    // a version query with no backing schema (and can throw before media cleanup).
+    if (collection.versions) {
+      const findVersions = (payload as any).findVersions
+      if (typeof findVersions !== 'function') {
+        gaps.push(`${collection.slug}:versions-api-unavailable`)
+      } else {
+        const versions = await findVersions.call(payload, {
+          collection: collection.slug,
+          depth: 0,
+          limit: 10000,
+          pagination: false,
+          locale: 'all',
+          overrideAccess: true,
+          req,
+        })
+        if (versions.hasNextPage) gaps.push(`${collection.slug}:version-pagination-truncated`)
+        for (const version of versions.docs || [])
+          scanMediaFields(collection.fields, version.version || version, ids, gaps, `${collection.slug}.versions`)
+      }
+    }
+  }
+  for (const global of (((payload as any).config?.globals || []) as any[])) {
+    if (!fieldsCanReferenceMedia(global.fields)) continue
+    try {
+      const doc = await (payload as any).findGlobal({ slug: global.slug, depth: 0, locale: 'all', overrideAccess: true, req })
+      scanMediaFields(global.fields, doc, ids, gaps, `global:${global.slug}`)
+      if (global.versions) {
+        const findGlobalVersions = (payload as any).findGlobalVersions
+        if (typeof findGlobalVersions !== 'function') {
+          gaps.push(`global:${global.slug}:versions-api-unavailable`)
+        } else {
+          const versions = await findGlobalVersions.call(payload, {
+            global: global.slug,
+            depth: 0,
+            limit: 10000,
+            pagination: false,
+            locale: 'all',
+            overrideAccess: true,
+            req,
+          })
+          if (versions.hasNextPage) gaps.push(`global:${global.slug}:version-pagination-truncated`)
+          for (const version of versions.docs || [])
+            scanMediaFields(global.fields, version.version || version, ids, gaps, `global:${global.slug}.versions`)
+        }
+      }
+    } catch (error) {
+      gaps.push(`global:${global.slug}:lookup-failed:${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
+  return { ids, coverage: gaps.length ? 'incomplete' : 'complete', gaps } as MediaReferenceIndex
+}
+
+export const cleanupCreatedResources = async ({
+  createdDepartures,
+  createdMedia,
+  createdPage,
+  createdProduct,
+  payload,
+  req,
+  mediaReferenceIndex: suppliedMediaReferenceIndex,
+}: {
+  createdDepartures: Array<number | string>
+  createdMedia: Array<number | string>
+  createdPage: number | string | null
+  createdProduct: number | string | null
+  payload: Payload
+  req: PayloadRequest
+  mediaReferenceIndex?: MediaReferenceIndex
+}): Promise<CleanupOutcome> => {
+  const outcome: CleanupOutcome = {
+    status: 'complete',
+    referenceCoverage: 'all-configured-collections-records-only',
+    deleted: { media: [], page: [], product: [], departures: [] },
+    retained: [],
+    errors: [],
+  }
+
+  const remove = async (collection: 'media' | 'pages' | 'tour-products' | 'tour-departures', id: number | string, key: keyof CleanupOutcome['deleted']) => {
+    try {
+      await payload.delete({ collection, id, overrideAccess: true, req, context })
+      outcome.deleted[key].push(id)
+    } catch (error) {
+      outcome.status = 'partial-failure'
+      outcome.errors.push({
+        collection,
+        id,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
+
+  for (const id of [...createdDepartures].reverse()) await remove('tour-departures', id, 'departures')
+  if (createdProduct) await remove('tour-products', createdProduct, 'product')
+  if (createdPage) await remove('pages', createdPage, 'page')
+
+  let mediaReferenceIndex: MediaReferenceIndex
+  if (suppliedMediaReferenceIndex) {
+    mediaReferenceIndex = suppliedMediaReferenceIndex
+  } else {
+    try {
+      mediaReferenceIndex = await buildMediaReferenceIndex(payload, req)
+    } catch (error) {
+      mediaReferenceIndex = {
+        ids: new Set<string>(),
+        coverage: 'incomplete',
+        gaps: [`scanner-failed:${error instanceof Error ? error.message : String(error)}`],
+      }
+    }
+  }
+
+  for (const id of [...createdMedia].reverse()) {
+    try {
+      if (mediaReferenceIndex.coverage !== 'complete') {
+        outcome.status = 'partial-failure'
+        outcome.retained.push({
+          collection: 'media',
+          id,
+          reason: `reference-coverage-incomplete:${mediaReferenceIndex.gaps.join('|')}`,
+        })
+        continue
+      }
+      if (mediaReferenceIndex.ids.has(String(id))) {
+        outcome.retained.push({
+          collection: 'media',
+          id,
+          reason: 'referenced-by-schema-guided-record-or-version',
+        })
+        continue
+      }
+      await remove('media', id, 'media')
+    } catch (error) {
+      outcome.status = 'partial-failure'
+      outcome.retained.push({ collection: 'media', id, reason: 'reference-check-failed' })
+      outcome.errors.push({
+        collection: 'media',
+        id,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
+  return outcome
 }
 
 const sortRecords = (records: NormalizedTour[]) =>
@@ -498,26 +961,52 @@ const sortRecords = (records: NormalizedTour[]) =>
     left.sourceId.localeCompare(right.sourceId, 'en', { numeric: true }),
   )
 
-const assertApprovedSlugUniqueness = (records: NormalizedTour[], decisions: DecisionMap) => {
-  const approvedSlugs = new Map<string, string>()
-  for (const record of records.filter((item) => item.kind === 'tour')) {
-    const decision = decisions[record.sourceId]
-    if (decision?.action !== 'create' || decision.approved !== true || !decision.approvedSlug)
-      continue
-    if (!isDescriptivePublicSlug(decision.approvedSlug)) {
-      throw new Error(`Invalid approvedSlug for ${record.sourceId}: ${decision.approvedSlug}`)
+export const selectionCollisionMessages = (records: NormalizedTour[], decisions: DecisionMap) => {
+  const collisions: string[] = []
+  const seen = new Map<string, string>()
+  const register = (kind: string, key: string, sourceId: string) => {
+    const previous = seen.get(`${kind}:${key}`)
+    if (previous) {
+      collisions.push(`${kind} ${key} (${previous}, ${sourceId})`)
+    } else {
+      seen.set(`${kind}:${key}`, sourceId)
     }
-    const previous = approvedSlugs.get(decision.approvedSlug)
-    if (previous && previous !== record.sourceId) {
-      throw new Error(
-        `Approved slug collision: ${decision.approvedSlug} (${previous}, ${record.sourceId})`,
-      )
-    }
-    approvedSlugs.set(decision.approvedSlug, record.sourceId)
   }
+
+  for (const record of records) {
+    const decision = decisions[record.sourceId]
+    if (
+      record.kind !== 'tour' ||
+      decision?.action !== 'create' ||
+      decision.approved !== true ||
+      !decision.approvedSlug
+    )
+      continue
+    const tourCode = sourceTourCode(record.sourceId, record.source.sourceSystem)
+    register('source ID', record.sourceId, record.sourceId)
+    register('tourCode', tourCode, record.sourceId)
+    register('product slug', decision.approvedSlug, record.sourceId)
+    register('page pathname', `/tour/${decision.approvedSlug}`, record.sourceId)
+    const departureKeys = new Set<string>()
+    for (const departure of vndDepartures(record)) {
+      const key = `${tourCode}|${dateOnly(departure.departureDate)}`
+      if (departureKeys.has(key)) collisions.push(`departure identity ${key} (${record.sourceId})`)
+      departureKeys.add(key)
+    }
+  }
+  return [...new Set(collisions)]
 }
 
-const commonInput = (args: Record<string, string | boolean>) => {
+const assertSelectionCollisionFree = (records: NormalizedTour[], decisions: DecisionMap) => {
+  const collisions = selectionCollisionMessages(records, decisions)
+  if (collisions.length)
+    throw new Error(`Approved slug collision or other selection collision: ${collisions.join('; ')}`)
+}
+
+const commonInput = (
+  args: Record<string, string | boolean>,
+  inputReferenceDate?: string,
+) => {
   const mode = String(args.mode || 'create-only')
   if (mode !== 'create-only') throw new Error('Phase lõi chỉ hỗ trợ --mode create-only')
   if (args.publish || args.overwrite)
@@ -540,6 +1029,8 @@ const commonInput = (args: Record<string, string | boolean>) => {
   const importLocale = importLocaleValue as 'en' | 'vi'
 
   const dryRun = Boolean(args['dry-run'])
+  const referenceDate = normalizedArg(args, 'reference-date') || inputReferenceDate || currentUTCDate()
+  if (!isISODate(referenceDate)) throw new Error('Invalid --reference-date; expected YYYY-MM-DD')
   const explicitBatchId = normalizedArg(args, 'batch-id')
   if (!dryRun && !explicitBatchId) throw new Error('Apply requires explicit --batch-id')
   const batchId = explicitBatchId || 'dcv-dry-run'
@@ -547,8 +1038,9 @@ const commonInput = (args: Record<string, string | boolean>) => {
 
   const adminEmail = normalizedArg(args, 'admin-email')
   if (!dryRun && !adminEmail) throw new Error('Apply requires --admin-email')
+  if (!dryRun && args.apply !== true) throw new Error('Apply requires explicit --apply')
 
-  return { dryRun, siteCode, importLocale, batchId, adminEmail: adminEmail || undefined }
+  return { dryRun, siteCode, importLocale, batchId, adminEmail: adminEmail || undefined, referenceDate }
 }
 
 const selectedRecordsFor = ({
@@ -619,7 +1111,7 @@ export const validateImportCLI = ({
   const selection = selectedRecordsFor({ args, records, decisions, dryRun: common.dryRun })
   if (!selection.selected.length)
     throw new Error('Không có normalized record phù hợp --only/--limit')
-  assertApprovedSlugUniqueness(selection.selected, decisions)
+  assertSelectionCollisionFree(selection.selected, decisions)
   if (!common.dryRun) {
     const invalid = selection.selected.filter((record) => {
       const action = decisions[record.sourceId]?.action
@@ -653,7 +1145,7 @@ export const buildImportPlan = ({
   const selection = selectedRecordsFor({ args, records, decisions, dryRun })
   if (!selection.selected.length)
     throw new Error('Không có normalized record phù hợp --only/--limit')
-  assertApprovedSlugUniqueness(selection.selected, decisions)
+  assertSelectionCollisionFree(selection.selected, decisions)
 
   const planRecords: ImportPlanRecord[] = selection.selected.map((record) => {
     const decision = decisions[record.sourceId]
@@ -715,7 +1207,6 @@ export const buildImportPlan = ({
 
 const loadValidatedInput = async (): Promise<ValidatedImportInput> => {
   const args = parseArgs(process.argv.slice(2))
-  const { dryRun, siteCode, importLocale, batchId, adminEmail } = commonInput(args)
   const filePath = path.resolve(
     String(args.file || path.join(defaultArtifactDir, 'tours.normalized.json')),
   )
@@ -724,6 +1215,10 @@ const loadValidatedInput = async (): Promise<ValidatedImportInput> => {
   )
   const input = parseInputEnvelope(await parseJSONFile<unknown>(filePath))
   const decisions = await parseJSONFile<DecisionMap>(decisionsPath)
+  const { dryRun, siteCode, importLocale, batchId, adminEmail, referenceDate } = commonInput(
+    args,
+    input.referenceDate,
+  )
   const sourceSnapshotHash = validateSourceSnapshotHash({
     expected: normalizedArg(args, 'source-inventory-hash') || undefined,
     input: input.sourceSnapshotHash,
@@ -736,7 +1231,7 @@ const loadValidatedInput = async (): Promise<ValidatedImportInput> => {
   })
   if (!selection.selected.length)
     throw new Error('Không có normalized record phù hợp --only/--limit')
-  assertApprovedSlugUniqueness(selection.selected, decisions)
+  assertSelectionCollisionFree(selection.selected, decisions)
   validateImportCLI({ args, records: input.records, decisions })
   return {
     args,
@@ -745,6 +1240,8 @@ const loadValidatedInput = async (): Promise<ValidatedImportInput> => {
     filePath,
     decisionsPath,
     sourceSnapshotHash,
+    referenceDate,
+    runId: resolveRunID(args, batchId),
     only: selection.only,
     limit: selection.limit,
     siteCode,
@@ -767,7 +1264,16 @@ const main = async () => {
     siteCode,
     importLocale,
     batchId,
+    referenceDate,
+    runId,
   } = input
+  const artifacts = await prepareRunArtifacts({
+    decisionsPath: input.decisionsPath,
+    filePath: input.filePath,
+    referenceDate,
+    runId,
+    sourceSnapshotHash,
+  })
   const dryRun = Boolean(args['dry-run'])
   const mode = String(args.mode || 'create-only')
 
@@ -778,10 +1284,17 @@ const main = async () => {
       decisions,
       inputSourceSnapshotHash: sourceSnapshotHash,
     })
-    const outputPath = path.join(path.dirname(filePath), 'import-dry-run.json')
-    await fs.mkdir(path.dirname(outputPath), { recursive: true })
-    await fs.writeFile(outputPath, `${JSON.stringify(plan, null, 2)}\n`, 'utf8')
-    console.log(JSON.stringify({ outputPath, ...plan }, null, 2))
+    const outputPath = path.join(artifacts.runDir, 'import-dry-run.json')
+    await writeExclusiveJSON(outputPath, {
+      ...plan,
+      runId,
+      executionDate: new Date().toISOString(),
+      referenceDate,
+      normalizedDatasetHash: artifacts.normalizedDatasetHash,
+      decisionFileHash: artifacts.decisionFileHash,
+    })
+    await refreshRunChecksums(artifacts)
+    console.log(JSON.stringify({ outputPath, ...plan, runId, referenceDate }, null, 2))
     return
   }
 
@@ -813,31 +1326,70 @@ const main = async () => {
       departuresCreated: 0,
       pagesCreated: 0,
       productsCreated: 0,
+      mediaRolledBack: 0,
+      pagesRolledBack: 0,
+      productsRolledBack: 0,
+      departuresRolledBack: 0,
+      parentPagesCreated: 0,
+      parentPagesRolledBack: 0,
+      cleanupFailures: 0,
+      partialFailures: 0,
     }
     const report: Array<Record<string, unknown>> = []
 
     // Preflight every write candidate before creating the parent page or any media.
-    for (const record of input.selected) {
+    const writeCandidates = input.selected.filter((record) => {
       const decision = decisions[record.sourceId]
-      if (record.kind !== 'tour' || decision?.action === 'skip' || decision?.action === 'reject')
-        continue
+      return record.kind === 'tour' && decision?.action === 'create' && decision.approved === true
+    })
+    assertSelectionCollisionFree(input.selected, decisions)
+    const preflightCollisions: string[] = []
+    for (const record of writeCandidates) {
+      const decision = decisions[record.sourceId]
       const decisionError = validateDecision(record, decision)
       if (decisionError) throw new Error(`${record.sourceId}: ${decisionError}`)
       const tourCode = sourceTourCode(record.sourceId, record.source.sourceSystem)
       const slug = decision!.approvedSlug!
-      const existingProduct = await findExistingProduct(payload, site.id, tourCode, req)
-      if (existingProduct) {
-        throw new Error(`IMPORT_COLLISION existing product ${tourCode} for ${record.sourceId}`)
+      try {
+        const existingProduct = await findExistingProduct(payload, site.id, tourCode, req)
+        if (existingProduct) {
+          preflightCollisions.push(`existing product ${tourCode} for ${record.sourceId}`)
+        }
+      } catch (error) {
+        preflightCollisions.push(
+          `${tourCode} product lookup failed: ${error instanceof Error ? error.message : String(error)}`,
+        )
       }
-      const existingPage = await findPage(payload, site.id, `/tour/${slug}`, req)
-      if (existingPage) {
-        throw new Error(`IMPORT_COLLISION existing page path /tour/${slug} for ${record.sourceId}`)
+      try {
+        const existingProductSlug = await findExistingProductBySlug(payload, site.id, slug, req)
+        if (existingProductSlug) {
+          preflightCollisions.push(`existing product slug ${slug} for ${record.sourceId}`)
+        }
+      } catch (error) {
+        preflightCollisions.push(
+          `${slug} product slug lookup failed: ${error instanceof Error ? error.message : String(error)}`,
+        )
+      }
+      try {
+        const existingPage = await findPage(payload, site.id, `/tour/${slug}`, req)
+        if (existingPage) {
+          preflightCollisions.push(`existing page path /tour/${slug} for ${record.sourceId}`)
+        }
+      } catch (error) {
+        preflightCollisions.push(
+          `${slug} page lookup failed: ${error instanceof Error ? error.message : String(error)}`,
+        )
       }
     }
+    if (preflightCollisions.length)
+      throw new Error(`IMPORT_COLLISION preflight: ${[...new Set(preflightCollisions)].join('; ')}`)
 
-    if (!parentPage) {
+    let parentPageCreated = false
+    if (!parentPage && writeCandidates.length) {
       parentPage = await createTourParentPage(payload, site.id, siteCode, req, importLocale)
       state.pagesCreated += 1
+      state.parentPagesCreated += 1
+      parentPageCreated = true
     }
 
     for (const record of input.selected) {
@@ -881,8 +1433,9 @@ const main = async () => {
       const title = removeAirlineMarkers(decision?.approvedTitle?.trim() || record.title)
       const pagePath = `/tour/${slug}`
       const imageSelection = getApprovedImages(record, decision as Decision)
+      const referenceTimestamp = Date.parse(`${referenceDate}T00:00:00.000Z`)
       const futureDepartures = vndDepartures(record).filter(
-        (departure) => new Date(departure.departureDate).getTime() > Date.now(),
+        (departure) => new Date(departure.departureDate).getTime() > referenceTimestamp,
       )
       const predicted = {
         sourceId: record.sourceId,
@@ -900,6 +1453,12 @@ const main = async () => {
       let createdPage: number | string | null = null
       let createdProduct: number | string | null = null
       const createdDepartures: Array<number | string> = []
+      const journal = {
+        createdMediaIds: createdMedia,
+        createdPageId: null as number | string | null,
+        createdProductId: null as number | string | null,
+        createdDepartureIds: createdDepartures,
+      }
       try {
         const mediaIDs: Array<number | string> = []
         const mediaBySourceKey = new Map<string, number | string>()
@@ -942,6 +1501,7 @@ const main = async () => {
           }) as never,
         })
         createdPage = page.id
+        journal.createdPageId = page.id
         state.pagesCreated += 1
         const product = await payload.create({
           collection: 'tour-products',
@@ -960,6 +1520,7 @@ const main = async () => {
           }) as never,
         })
         createdProduct = product.id
+        journal.createdProductId = product.id
         state.productsCreated += 1
         for (const departure of futureDepartures) {
           const created = await payload.create({
@@ -1008,53 +1569,103 @@ const main = async () => {
           productId: product.id,
           departureIds: createdDepartures,
           mediaIds: createdMedia,
+          journal,
         })
       } catch (error) {
         state.errors += 1
-        for (const id of createdDepartures.reverse()) {
-          await payload
-            .delete({ collection: 'tour-departures', id, overrideAccess: true, req, context })
-            .catch(() => undefined)
-        }
-        if (createdProduct)
-          await payload
-            .delete({
-              collection: 'tour-products',
-              id: createdProduct,
-              overrideAccess: true,
-              req,
-              context,
-            })
-            .catch(() => undefined)
-        if (createdPage)
-          await payload
-            .delete({ collection: 'pages', id: createdPage, overrideAccess: true, req, context })
-            .catch(() => undefined)
-        for (const id of createdMedia.reverse()) {
-          await payload
-            .delete({ collection: 'media', id, overrideAccess: true, req, context })
-            .catch(() => undefined)
-        }
+        const cleanup = await cleanupCreatedResources({
+          createdDepartures,
+          createdMedia,
+          createdPage,
+          createdProduct,
+          payload,
+          req,
+        })
+        state.departuresRolledBack += cleanup.deleted.departures.length
+        state.productsRolledBack += cleanup.deleted.product.length
+        state.pagesRolledBack += cleanup.deleted.page.length
+        state.mediaRolledBack += cleanup.deleted.media.length
+        state.cleanupFailures += cleanup.errors.length
+        if (cleanup.status === 'partial-failure') state.partialFailures += 1
         report.push({
+          ...predicted,
           sourceId: record.sourceId,
           status: 'error',
           reason: error instanceof Error ? error.message : String(error),
+          journal,
+          cleanup,
         })
       }
     }
 
-    const outputPath = path.join(
-      path.dirname(filePath),
-      dryRun ? 'import-dry-run.json' : 'import-result.json',
-    )
-    await fs.mkdir(path.dirname(outputPath), { recursive: true })
-    await fs.writeFile(
-      outputPath,
-      `${JSON.stringify({ runAt: new Date().toISOString(), dryRun, siteCode, siteId: site.id, locale: importLocale, batchId, adminUserId: adminUser.id, mode, state, report }, null, 2)}\n`,
-      'utf8',
-    )
-    console.log(JSON.stringify({ outputPath, ...state }, null, 2))
-    if (state.errors > 0) process.exitCode = 1
+    if (parentPageCreated && parentPage) {
+      const children = await payload.find({
+        collection: 'pages',
+        depth: 0,
+        limit: 1,
+        pagination: false,
+        overrideAccess: true,
+        req,
+        where: { parentPage: { equals: parentPage.id } },
+      })
+      if (!children.docs.length) {
+        try {
+          await payload.delete({
+            collection: 'pages',
+            id: parentPage.id,
+            overrideAccess: true,
+            req,
+            context,
+          })
+          state.pagesRolledBack += 1
+          state.parentPagesRolledBack += 1
+          report.push({
+            status: 'parent-rolled-back',
+            parentPageId: parentPage.id,
+            reason: 'created-by-run-and-unreferenced',
+          })
+        } catch (error) {
+          state.cleanupFailures += 1
+          state.partialFailures += 1
+          report.push({
+            status: 'parent-cleanup-error',
+            parentPageId: parentPage.id,
+            reason: error instanceof Error ? error.message : String(error),
+          })
+        }
+      } else {
+        report.push({
+          status: 'parent-retained',
+          parentPageId: parentPage.id,
+          reason: 'referenced-by-child-page',
+        })
+      }
+    }
+
+    const outputPath = path.join(artifacts.runDir, 'import-result.json')
+    const result = {
+      version: 2,
+      status: state.partialFailures ? 'partial-failure' : state.errors ? 'failed-records' : 'ok',
+      runId,
+      executionDate: new Date().toISOString(),
+      referenceDate,
+      dryRun,
+      siteCode,
+      siteId: site.id,
+      locale: importLocale,
+      batchId,
+      adminUserId: adminUser.id,
+      mode,
+      sourceSnapshotHash: sourceSnapshotHash || null,
+      normalizedDatasetHash: artifacts.normalizedDatasetHash,
+      decisionFileHash: artifacts.decisionFileHash,
+      state: { ...state, active: activeCounts(state) },
+      report,
+    }
+    await writeExclusiveJSON(outputPath, result)
+    await refreshRunChecksums(artifacts)
+    console.log(JSON.stringify({ outputPath, ...result.state }, null, 2))
+    if (state.errors > 0 || state.partialFailures > 0) process.exitCode = 1
   } finally {
     await payload.destroy()
   }

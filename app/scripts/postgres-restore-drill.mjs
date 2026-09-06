@@ -17,6 +17,7 @@ const restoreURL = process.env.RESTORE_DATABASE_URL || (
 )
 const ageIdentity = process.env.BACKUP_AGE_IDENTITY
 const assertionProfile = process.env.RESTORE_ASSERTION_PROFILE || ''
+const scope = assertionProfile === 'doicanhviet-wingsgo' ? 'wings-go' : 'full-site'
 
 if (!backupFile || !fs.existsSync(backupFile)) throw new Error('BACKUP_FILE must exist.')
 if (!restoreURL || !/^postgres(?:ql)?:\/\//i.test(restoreURL)) {
@@ -102,8 +103,24 @@ try {
   const homepages = Number(
     run('psql', ['--tuples-only', '--no-align', '--command', "select count(distinct site_id) from pages where pathname = '/' and _status = 'published';"], { capture: true }),
   )
-  if (activeSites < 6 || homepages < 6) {
+  if (scope === 'full-site' && (activeSites < 6 || homepages < 6)) {
     throw new Error(`Restore validation failed: activeSites=${activeSites}, homepages=${homepages}.`)
+  }
+  let scopedEvidence = null
+  if (scope === 'wings-go') {
+    const wingsGoSites = Number(
+      run('psql', ['--tuples-only', '--no-align', '--command', "select count(*) from sites where code = 'wings-go' and is_active = true;"], { capture: true }),
+    )
+    const wingsGoHomepages = Number(
+      run('psql', ['--tuples-only', '--no-align', '--command', "select count(distinct p.site_id) from pages p join sites s on s.id = p.site_id where s.code = 'wings-go' and p.pathname = '/' and p._status = 'published';"], { capture: true }),
+    )
+    const otherActiveSites = Number(
+      run('psql', ['--tuples-only', '--no-align', '--command', "select count(*) from sites where is_active = true and code <> 'wings-go';"], { capture: true }),
+    )
+    if (wingsGoSites !== 1 || wingsGoHomepages !== 1 || otherActiveSites !== 0) {
+      throw new Error(`WingsGo restore assertions failed: wingsGoSites=${wingsGoSites}, wingsGoHomepages=${wingsGoHomepages}, otherActiveSites=${otherActiveSites}.`)
+    }
+    scopedEvidence = { wingsGoSites, wingsGoHomepages, otherActiveSites }
   }
 
   let profileEvidence = null
@@ -171,6 +188,8 @@ try {
     durationSeconds: Math.round((Date.now() - startedAt) / 1000),
     homepages,
     assertionProfile: assertionProfile || null,
+    scope,
+    scopedEvidence,
     profileEvidence,
     restoreListVerified: true,
     verifiedAt: new Date().toISOString(),
