@@ -52,6 +52,10 @@ type PayloadClient = Awaited<ReturnType<typeof getPayload>>
 const persistenceErrorDetails = (error: unknown) => {
   const record = error && typeof error === 'object' ? (error as Record<string, unknown>) : null
   const data = Array.isArray(record?.data) ? record.data : []
+  const dataRecord =
+    record?.data && typeof record.data === 'object' && !Array.isArray(record.data)
+      ? (record.data as Record<string, unknown>)
+      : null
   const validationFields = data
     .flatMap((entry) => {
       if (!entry || typeof entry !== 'object') return []
@@ -63,6 +67,12 @@ const persistenceErrorDetails = (error: unknown) => {
     .slice(0, 12)
 
   return {
+    error_data_keys: dataRecord
+      ? Object.keys(dataRecord)
+          .filter((key) => /^[A-Za-z0-9_-]{1,64}$/.test(key))
+          .sort()
+          .slice(0, 12)
+      : [],
     error_keys: record
       ? Object.keys(record)
           .filter((key) => /^[A-Za-z0-9_-]{1,64}$/.test(key))
@@ -70,6 +80,7 @@ const persistenceErrorDetails = (error: unknown) => {
           .slice(0, 12)
       : [],
     error_name: error instanceof Error ? error.name : 'unknown',
+    error_status: typeof record?.status === 'number' ? record.status : null,
     validation_fields: validationFields,
   }
 }
