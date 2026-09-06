@@ -60,13 +60,13 @@ const persistenceErrorDetails = (error: unknown) => {
     ...data,
     ...(Array.isArray(dataRecord?.errors) ? dataRecord.errors : []),
   ]
-  const validationFields = validationEntries
+  const validationPaths = validationEntries
     .flatMap((entry) => {
       if (!entry || typeof entry !== 'object') return []
-      const field = (entry as Record<string, unknown>).field
-      return typeof field === 'string' && /^[A-Za-z0-9_[\].-]{1,160}$/.test(field) ? [field] : []
+      const path = (entry as Record<string, unknown>).path
+      return typeof path === 'string' && /^[A-Za-z0-9_[\].-]{1,160}$/.test(path) ? [path] : []
     })
-    .filter((field, index, fields) => fields.indexOf(field) === index)
+    .filter((path, index, paths) => paths.indexOf(path) === index)
     .sort()
     .slice(0, 12)
 
@@ -85,7 +85,7 @@ const persistenceErrorDetails = (error: unknown) => {
       : [],
     error_name: error instanceof Error ? error.name : 'unknown',
     error_status: typeof record?.status === 'number' ? record.status : null,
-    validation_fields: validationFields,
+    validation_paths: validationPaths,
   }
 }
 
