@@ -56,7 +56,11 @@ const persistenceErrorDetails = (error: unknown) => {
     record?.data && typeof record.data === 'object' && !Array.isArray(record.data)
       ? (record.data as Record<string, unknown>)
       : null
-  const validationFields = data
+  const validationEntries = [
+    ...data,
+    ...(Array.isArray(dataRecord?.errors) ? dataRecord.errors : []),
+  ]
+  const validationFields = validationEntries
     .flatMap((entry) => {
       if (!entry || typeof entry !== 'object') return []
       const field = (entry as Record<string, unknown>).field
