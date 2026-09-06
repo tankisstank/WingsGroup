@@ -3,6 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # Dockerfile also defines offline operations stages after `runner`; pin
+      # the public service to the Next.js runtime image.
+      target: runner
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       PAYLOAD_DB_PUSH: ${PAYLOAD_DB_PUSH:-false}
