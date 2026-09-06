@@ -1,120 +1,133 @@
-import 'dotenv/config'
-
-import { createLocalReq, getPayload } from 'payload'
-
-import config from '../src/payload.config'
+import {
+  applySelection,
+  createLifecyclePlan,
+  DOICANHVIET_SITE_CODE,
+  initializePayloadForApply,
+  printLifecycleError,
+  printLifecycleJSON,
+  relationID,
+  resolveSuperAdmin,
+  resolveWingsGoSite,
+} from './doicanhviet-lifecycle-safety'
 
 const context = { disableRevalidate: true, import: true }
 
-const relationID = (value: number | string | { id?: number | string } | null | undefined) =>
-  value && typeof value === 'object' ? value.id : value
-
 const main = async () => {
-  const payload = await getPayload({ config })
-  const adminEmail = process.env.IMPORT_ADMIN_EMAIL || process.env.ADMIN_EMAIL
-  if (!adminEmail) throw new Error('Missing IMPORT_ADMIN_EMAIL or ADMIN_EMAIL')
+  const plan = createLifecyclePlan(process.argv.slice(2), 'delete')
+  const selection = applySelection(plan)
+  if (!plan.apply) {
+    printLifecycleJSON({
+      apply: false,
+      operation: 'delete',
+      requiresExplicitOnlyOnApply: selection.sourceIds.length === 0,
+      selection,
+      siteCode: DOICANHVIET_SITE_CODE,
+    })
+    return
+  }
 
-  const admin = await payload.find({
-    collection: 'users',
-    depth: 0,
-    limit: 1,
-    overrideAccess: true,
-    where: { email: { equals: adminEmail } },
-  })
-  if (!admin.docs[0]) throw new Error(`Admin user not found: ${adminEmail}`)
-  const req = await createLocalReq({ user: admin.docs[0] }, payload)
-
-  const site = await payload.find({
-    collection: 'sites',
-    depth: 0,
-    limit: 1,
-    overrideAccess: true,
-    req,
-    where: { code: { equals: 'wings-go' } },
-  })
-  if (!site.docs[0]) throw new Error('WingsGo site not found: wings-go')
-  const siteID = site.docs[0].id
-
-  const products = await payload.find({
-    collection: 'tour-products',
-    depth: 0,
-    limit: 200,
-    overrideAccess: true,
-    req,
-    where: {
-      and: [{ site: { equals: siteID } }, { tourCode: { like: 'DCV-' } }],
-    },
-  })
-
-  let departuresDeleted = 0
-  let pagesDeleted = 0
-  let productsDeleted = 0
-  const pageIDs = products.docs
-    .map((product) => relationID((product as any).wrapperPage))
-    .filter(Boolean)
-
-  for (const product of products.docs) {
-    const departures = await payload.find({
-      collection: 'tour-departures',
+  const runtime = await initializePayloadForApply()
+  const { payload } = runtime
+  try {
+    const user = await resolveSuperAdmin(payload, plan.adminEmail!)
+    const req = await runtime.createLocalReq({ user }, payload)
+    const site = await resolveWingsGoSite(payload, req)
+    const productsResult = await payload.find({
+      collection: 'tour-products',
       depth: 0,
-      limit: 100,
+      pagination: false,
       overrideAccess: true,
       req,
-      where: { tourProduct: { equals: product.id } },
+      where: { and: [{ site: { equals: site.id } }, { tourCode: { in: selection.tourCodes } }] },
     })
-
-    for (const departure of departures.docs) {
-      await payload.delete({
+    const products = [...productsResult.docs].sort((left: any, right: any) =>
+      String(left.tourCode).localeCompare(String(right.tourCode), 'en'),
+    ) as Array<Record<string, any>>
+    const plans: Array<{
+      product: Record<string, any>
+      departures: any[]
+      pageId: number | string | null
+    }> = []
+    const pageIDs = new Set<string>()
+    for (const product of products) {
+      const departuresResult = await payload.find({
         collection: 'tour-departures',
-        context,
-        id: departure.id,
+        depth: 0,
+        pagination: false,
         overrideAccess: true,
         req,
+        where: { and: [{ site: { equals: site.id } }, { tourProduct: { equals: product.id } }] },
       })
-      departuresDeleted += 1
+      const pageId = relationID(product.wrapperPage)
+      if (pageId !== null) pageIDs.add(String(pageId))
+      plans.push({
+        product,
+        departures: [...departuresResult.docs].sort((left: any, right: any) =>
+          String(left.id).localeCompare(String(right.id), 'en'),
+        ),
+        pageId,
+      })
     }
 
-    await payload.delete({
-      collection: 'tour-products',
-      context,
-      id: product.id,
-      overrideAccess: true,
-      req,
-    })
-    productsDeleted += 1
-  }
-
-  for (const pageID of pageIDs) {
-    await payload
-      .delete({
+    const pages = new Map<string, any>()
+    for (const pageId of pageIDs) {
+      const page = await payload.findByID({
         collection: 'pages',
-        context,
-        id: pageID as number | string,
+        id: pageId,
+        depth: 0,
         overrideAccess: true,
         req,
       })
-      .then(() => {
-        pagesDeleted += 1
-      })
-      .catch(() => undefined)
-  }
+      if (String(relationID(page.site)) !== String(site.id))
+        throw new Error(`Page site mismatch: ${pageId}`)
+      pages.set(pageId, page)
+    }
 
-  console.log(
-    JSON.stringify(
-      {
-        departuresDeleted,
-        pagesDeleted,
-        productsDeleted,
-        siteId: siteID,
-      },
-      null,
-      2,
-    ),
-  )
-  await payload.destroy()
+    let departuresDeleted = 0
+    for (const { departures, pageId, product } of [...plans].reverse()) {
+      for (const departure of [...departures].reverse()) {
+        await payload.delete({
+          collection: 'tour-departures',
+          context,
+          id: departure.id,
+          overrideAccess: true,
+          req,
+        })
+        departuresDeleted += 1
+      }
+      await payload.delete({
+        collection: 'tour-products',
+        context,
+        id: product.id,
+        overrideAccess: true,
+        req,
+      })
+      if (pageId !== null && pages.has(String(pageId))) {
+        await payload.delete({
+          collection: 'pages',
+          context,
+          id: pageId,
+          overrideAccess: true,
+          req,
+        })
+      }
+    }
+    printLifecycleJSON({
+      apply: true,
+      departuresDeleted,
+      operation: 'delete',
+      pagesDeleted: pages.size,
+      productsDeleted: products.length,
+      selection,
+      siteCode: DOICANHVIET_SITE_CODE,
+      siteId: relationID(site.id),
+    })
+  } finally {
+    await payload.destroy()
+  }
 }
 
 main().catch((error) => {
-  console.error(error)
+  printLifecycleError(error)
   process.exitCode = 1
 })
