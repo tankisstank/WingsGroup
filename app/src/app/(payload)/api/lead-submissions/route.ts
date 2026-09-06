@@ -428,15 +428,17 @@ export async function POST(request: Request): Promise<Response> {
       task: 'sendLeadNotification',
     }
     let queued = false
+    let queueError: unknown
     for (let attempt = 0; attempt < 3 && !queued; attempt += 1) {
       try {
         await queue(job)
         queued = true
-      } catch {
+      } catch (error) {
+        queueError = error
         if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 100 * 2 ** attempt))
       }
     }
-    if (!queued) throw new Error('Lead notification queue failed.')
+    if (!queued) throw queueError || new Error('Lead notification queue failed.')
     await payload.update({
       collection: 'form-submissions',
       id: submission.id,
