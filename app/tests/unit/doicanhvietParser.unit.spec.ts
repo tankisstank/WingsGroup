@@ -1,10 +1,16 @@
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import {
   annotateDuplicateCandidates,
+  buildSourceInventory,
   buildTourWrapperLayout,
   deterministicMediaFilename,
   isDescriptivePublicSlug,
+  readCrawlerRecords,
   removeAirlineMarkers,
   parseDoicanhvietRecord,
   sourceSlug,
@@ -116,6 +122,7 @@ describe('doicanhviet parser', () => {
       record: {
         tour_id: 'fixture-date',
         category: 'han-quoc',
+        url: 'https://doicanhviet.com/han-quoc/fixture-date.html',
         content: {
           heading: 'Tour Hàn Quốc 5N4Đ khởi hành năm 2025',
           body_text: 'NGÀY 1: HÀ NỘI - SEOUL\nKhởi hành.',
@@ -159,6 +166,7 @@ describe('doicanhviet parser', () => {
       record: {
         tour_id: 'fixture-ambiguous-year',
         category: 'han-quoc',
+        url: 'https://doicanhviet.com/han-quoc/fixture-ambiguous-year.html',
         crawled_at: '2026-07-15T00:00:00.000Z',
         content: {
           heading: 'Tour Hàn Quốc 5N4Đ',
@@ -187,6 +195,7 @@ describe('doicanhviet parser', () => {
       record: {
         tour_id: 'fixture-itinerary-errors',
         category: 'han-quoc',
+        url: 'https://doicanhviet.com/han-quoc/fixture-itinerary-errors.html',
         content: {
           heading: 'Tour Hàn Quốc 3 ngày 2 đêm',
           body_text: [
@@ -227,6 +236,7 @@ describe('doicanhviet parser', () => {
         record: {
           tour_id: sourceId,
           category: 'han-quoc',
+          url: `https://doicanhviet.com/han-quoc/${sourceId}.html`,
           content: {
             heading: 'Tour Hàn Quốc 3 ngày 2 đêm',
             body_text: 'Thời gian: 3 ngày - 2 đêm\nNGÀY 1: HÀ NỘI - SEOUL\nKhởi hành.',
@@ -262,6 +272,124 @@ describe('doicanhviet parser', () => {
 
     expect(record.kind).toBe('invalid')
     expect(record.publishEligible).toBe(false)
+  })
+
+  it('rejects a missing source URL before normalization can be publishable', async () => {
+    const record = await parseDoicanhvietRecord({
+      crawlerRoot: 'E:\\repo\\doicanhviet-crawler',
+      sourceFile: 'fixture.json',
+      record: {
+        tour_id: 'fixture-missing-url',
+        category: 'han-quoc',
+        content: {
+          heading: 'Tour Hàn Quốc 2 ngày 1 đêm',
+          body_text: 'NGÀY 1: HÀ NỘI - SEOUL\nKhởi hành.',
+        },
+      },
+    })
+
+    expect(record.kind).toBe('invalid')
+    expect(record.blockingErrors).toContain('MISSING_SOURCE_URL')
+    expect(record.publishEligible).toBe(false)
+  })
+
+  it('normalizes VND, return date, departure city, and a stable reference clock', async () => {
+    const input = {
+      crawlerRoot: 'E:\\repo\\doicanhviet-crawler',
+      sourceFile: 'fixture.json',
+      record: {
+        tour_id: 'fixture-departure-contract',
+        category: 'han-quoc',
+        url: 'https://doicanhviet.com/han-quoc/fixture.html',
+        crawled_at: '2099-01-01T00:00:00.000Z',
+        content: {
+          heading: 'Tour Hàn Quốc 2 ngày 1 đêm',
+          body_text: [
+            'Thời gian: 2 ngày - 1 đêm',
+            'NGÀY 1: HÀ NỘI - SEOUL',
+            'Khởi hành sang Seoul.',
+            'NGÀY 2: SEOUL - HÀ NỘI',
+            'Trở về Hà Nội.',
+          ].join('\n'),
+          tables: [
+            [
+              ['NGÀY KHỞI HÀNH', 'NGƯỜI LỚN'],
+              ['20/8/2026', '10.000.000 VNĐ'],
+            ],
+          ],
+        },
+      },
+      referenceDate: '2026-01-01',
+    } as const
+
+    const first = await parseDoicanhvietRecord(input)
+    const second = await parseDoicanhvietRecord(input)
+    expect(first).toEqual(second)
+    expect(first.departures[0]).toMatchObject({
+      departureDate: '2026-08-20T00:00:00.000Z',
+      returnDate: '2026-08-21T00:00:00.000Z',
+      departureCity: 'HÀ NỘI',
+      currency: 'VND',
+      priceFrom: 10000000,
+      availabilityStatus: 'open',
+    })
+    expect(first.sectionVisibility).toContain('sticky-cta')
+
+    const afterDeparture = await parseDoicanhvietRecord({
+      ...input,
+      referenceDate: '2026-08-21',
+    })
+    expect(afterDeparture.sectionVisibility).not.toContain('sticky-cta')
+  })
+
+  it('keeps source images inside the source tour directory', async () => {
+    const record = await parseDoicanhvietRecord({
+      crawlerRoot: 'E:\\repo\\doicanhviet-crawler',
+      sourceFile: 'fixture.json',
+      record: {
+        tour_id: 'fixture-image-containment',
+        category: 'han-quoc',
+        url: 'https://doicanhviet.com/han-quoc/fixture.html',
+        content: { heading: 'Tour Hàn Quốc 2 ngày 1 đêm', body_text: 'NGÀY 1: HÀ NỘI - SEOUL' },
+        images: [{ local_path: 'images/fixture-image-containment/../../outside.jpg' }],
+      },
+    })
+
+    expect(record.images).toHaveLength(0)
+    expect(record.warnings).toContain(
+      'INVALID_IMAGE_PATH:images/fixture-image-containment/../../outside.jpg',
+    )
+  })
+
+  it('creates a deterministic local source inventory and sorts selected IDs', async () => {
+    const crawlerRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'doicanhviet-parser-'))
+    try {
+      await fs.mkdir(path.join(crawlerRoot, 'storage', 'datasets', 'default'), { recursive: true })
+      await fs.mkdir(path.join(crawlerRoot, 'storage', 'images', '10'), { recursive: true })
+      await fs.writeFile(
+        path.join(crawlerRoot, 'storage', 'datasets', 'default', 'b.json'),
+        JSON.stringify({ tour_id: '10' }),
+      )
+      await fs.writeFile(
+        path.join(crawlerRoot, 'storage', 'datasets', 'default', 'a.json'),
+        JSON.stringify({ tour_id: '2' }),
+      )
+      await fs.writeFile(path.join(crawlerRoot, 'storage', 'images', '10', 'hero.jpg'), 'image')
+
+      const first = await buildSourceInventory(crawlerRoot)
+      const second = await buildSourceInventory(crawlerRoot)
+      expect(first).toEqual(second)
+      expect(first.files.map((file) => file.path)).toEqual([
+        'storage/datasets/default/a.json',
+        'storage/datasets/default/b.json',
+        'storage/images/10/hero.jpg',
+      ])
+
+      const selected = await readCrawlerRecords(crawlerRoot, new Set(['10', '2']))
+      expect(selected.map(({ record }) => record.tour_id)).toEqual(['2', '10'])
+    } finally {
+      await fs.rm(crawlerRoot, { recursive: true, force: true })
+    }
   })
 
   it('removes airline markers from public titles and generated slugs', () => {
