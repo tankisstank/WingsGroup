@@ -69,6 +69,41 @@ describe('doicanhviet parser', () => {
     expect(record.parsedValues.market.value).toBe('korea')
   })
 
+  it('recovers punctuationless and mixed itinerary markers', async () => {
+    const record = await parseDoicanhvietRecord({
+      crawlerRoot: 'E:\\repo\\doicanhviet-crawler',
+      sourceFile: 'fixture.json',
+      record: {
+        tour_id: 'fixture-punctuationless-itinerary',
+        category: 'han-quoc',
+        url: 'https://doicanhviet.com/han-quoc/fixture-punctuationless-itinerary.html',
+        content: {
+          heading: 'Tour Hàn Quốc 3 ngày 2 đêm',
+          body_text: [
+            'Thời gian: 3 ngày - 2 đêm',
+            'NGÀY 1 HÀ NỘI - SEOUL',
+            'Khởi hành sang Seoul.',
+            'NGÀY 2',
+            'SEOUL - NAMI',
+            'Tham quan đảo Nami.',
+            'NGÀY 3: SEOUL - HÀ NỘI',
+            'Trở về Hà Nội.',
+          ].join('\n'),
+          tables: [],
+        },
+      },
+    })
+
+    expect(record.itineraryDays.map((day) => day.dayNumber)).toEqual([1, 2, 3])
+    expect(record.itineraryDays[0].title).toBe('HÀ NỘI - SEOUL')
+    expect(record.itineraryDays[1].title).toBe('SEOUL - NAMI')
+    expect(record.itineraryDays[1].summary).toBe('Tham quan đảo Nami.')
+    expect(record.itineraryDays[2].title).toBe('SEOUL - HÀ NỘI')
+    expect(record.blockingErrors).not.toContain('MISSING_ITINERARY_TITLE:2')
+    expect(record.blockingErrors).not.toContain('NON_CONTIGUOUS_ITINERARY_DAY:2')
+    expect(record.blockingErrors).not.toContain('ITINERARY_DURATION_MISMATCH:3/3')
+  })
+
   it('flags domestic tours without a supported market instead of guessing', async () => {
     const record = await parseDoicanhvietRecord({
       crawlerRoot: 'E:\\repo\\doicanhviet-crawler',

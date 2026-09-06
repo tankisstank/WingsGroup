@@ -425,7 +425,7 @@ const parseSummary = (record: RawRecord, title: string) => {
 
 const parseItinerary = (body: string) => {
   const days: NormalizedTour['itineraryDays'] = []
-  const marker = /(?:^|\n)\s*NGÀY\s*(\d+)\s*(?::|[-–—.])/giu
+  const marker = /(?:^|\n)\s*NGÀY\s*(\d+)(?=\s*(?::|[-–—.])|\s|$)/giu
   const matches = Array.from(body.matchAll(marker))
   matches.forEach((match, index) => {
     const start = (match.index || 0) + match[0].lastIndexOf('NGÀY')
@@ -433,11 +433,22 @@ const parseItinerary = (body: string) => {
     const chunk = body.slice(start, end).trim()
     const firstLineEnd = chunk.indexOf('\n')
     const header = cleanText(firstLineEnd >= 0 ? chunk.slice(0, firstLineEnd) : chunk)
-    const content = trimSourceUiTail(firstLineEnd >= 0 ? chunk.slice(firstLineEnd + 1) : '')
-    const headerWithoutMarker = header.replace(/^NGÀY\s*\d+\s*(?::|[-–—.])\s*/iu, '')
+    const rawContent = firstLineEnd >= 0 ? chunk.slice(firstLineEnd + 1) : ''
+    const headerWithoutMarker = header.replace(/^NGÀY\s*\d+\s*(?:(?::|[-–—.])\s*)?/iu, '')
+    const headerTitle = cleanText(headerWithoutMarker)
+    const contentBeforeUiTail = trimSourceUiTail(rawContent)
+    const contentLines = contentBeforeUiTail.split(/\n+/u)
+    const fallbackTitleIndex = contentLines.findIndex((line) => cleanText(line))
+    const fallbackTitle =
+      !headerTitle && fallbackTitleIndex >= 0 ? cleanText(contentLines[fallbackTitleIndex]) : ''
+    const title = cleanText((headerTitle || fallbackTitle).replace(/ĂN\s*:.*/iu, ''))
+    const content = trimSourceUiTail(
+      !headerTitle && fallbackTitleIndex >= 0
+        ? contentLines.filter((_line, lineIndex) => lineIndex !== fallbackTitleIndex).join('\n')
+        : rawContent,
+    )
     const mealsMatch = headerWithoutMarker.match(/ĂN\s*:\s*([S\-\/T]+)/iu)
     const meals = mealsMatch ? mealsMatch[1].replace(/\s+/g, '') : undefined
-    const title = cleanText(headerWithoutMarker.replace(/ĂN\s*:.*/iu, ''))
     const route = cleanText(title.replace(/[–—]/g, '-'))
     const transport = extractItinerarySentence(
       content,
