@@ -17,6 +17,7 @@ import {
 type CreatedRecord = {
   status: string
   sourceId: string
+  parentPageId?: number | string
   productId?: number | string
   createdPageId?: number | string | null
   departureIds?: Array<number | string>
@@ -111,6 +112,27 @@ const main = async () => {
     return
   }
 
+  // Reserve the report before opening Payload or deleting anything. The file is
+  // then updated as a journal; a collision or write failure cannot erase the
+  // only rollback evidence after destructive work has started.
+  const journal: Array<Record<string, unknown>> = []
+  const reportHeader = {
+    version: 2,
+    status: 'started',
+    apply: true,
+    batchId: result.batchId,
+    runId: result.runId || null,
+    siteCode: DOICANHVIET_SITE_CODE,
+    siteId: result.siteId,
+    sourceImportResult: resultPath,
+    startedAt: new Date().toISOString(),
+  }
+  await fs.writeFile(outputPath, `${JSON.stringify({ ...reportHeader, journal }, null, 2)}\n`, { encoding: 'utf8', flag: 'wx' })
+  const persistJournal = async (entry: Record<string, unknown>) => {
+    journal.push({ at: new Date().toISOString(), ...entry })
+    await fs.writeFile(outputPath, `${JSON.stringify({ ...reportHeader, status: 'in-progress', journal }, null, 2)}\n`, 'utf8')
+  }
+
   const runtime = await initializePayloadForApply()
   const { payload } = runtime
   try {
@@ -120,6 +142,7 @@ const main = async () => {
     if (!sameID(site.id, result.siteId)) {
       throw new Error(`Import result siteId does not match ${DOICANHVIET_SITE_CODE}`)
     }
+    await persistJournal({ stage: 'preflight', status: 'verified-site', siteId: relationID(site.id) })
 
     const verified: Array<{
       item: CreatedRecord
@@ -222,8 +245,11 @@ const main = async () => {
       try {
         await payload.delete({ collection, id, context, overrideAccess: true, req })
         record.deleted[key].push(id)
+        await persistJournal({ stage: 'delete', status: 'deleted', collection, id, sourceId: record.sourceId })
       } catch (error) {
-        record.errors.push({ collection, id, error: errorMessage(error) })
+        const message = errorMessage(error)
+        record.errors.push({ collection, id, error: message })
+        await persistJournal({ stage: 'delete', status: 'error', collection, id, sourceId: record.sourceId, error: message })
       }
     }
 
@@ -267,6 +293,42 @@ const main = async () => {
       }
     }
 
+    let parent: { status: 'deleted' | 'retained' | 'error'; id: number | string; reason: string } | null = null
+    const parentEntry = result.report.find(
+      (item) => item.status === 'parent-retained' && item.parentPageId !== undefined,
+    )
+    if (parentEntry?.parentPageId !== undefined) {
+      try {
+        const parentPage = await payload.findByID({
+          collection: 'pages',
+          id: parentEntry.parentPageId,
+          depth: 0,
+          overrideAccess: true,
+          req,
+        })
+        if (!sameID(parentPage.site, site.id)) throw new Error('Parent page site mismatch')
+        const children = await payload.find({
+          collection: 'pages',
+          depth: 0,
+          limit: 1,
+          pagination: false,
+          overrideAccess: true,
+          req,
+          where: { parentPage: { equals: parentPage.id } },
+        })
+        if (children.docs.length) {
+          parent = { status: 'retained', id: parentPage.id, reason: 'still-referenced-by-page-children' }
+        } else {
+          await payload.delete({ collection: 'pages', id: parentPage.id, context, overrideAccess: true, req })
+          parent = { status: 'deleted', id: parentPage.id, reason: 'created-by-import-and-unreferenced-after-child-rollback' }
+          await persistJournal({ stage: 'parent', status: 'deleted', id: parentPage.id })
+        }
+      } catch (error) {
+        parent = { status: 'error', id: parentEntry.parentPageId, reason: errorMessage(error) }
+        await persistJournal({ stage: 'parent', status: 'error', id: parentEntry.parentPageId, error: parent.reason })
+      }
+    }
+
     const errors = rollbackRecords.flatMap((record) => record.errors)
     const retainedMedia = rollbackRecords.flatMap((record) => record.retainedMedia)
     const rollbackReport = {
@@ -284,19 +346,21 @@ const main = async () => {
         referencedCount: mediaReferenceIndex.ids.size,
         gaps: mediaReferenceIndex.gaps,
       },
-      status: errors.length || retainedMedia.length ? 'partial-failure' : 'ok',
+      status: errors.length || retainedMedia.length || parent?.status === 'error' ? 'partial-failure' : 'ok',
+      parent,
       deleted: {
         tours: rollbackRecords.filter((record) => record.deleted.product.length).length,
         departures: rollbackRecords.flatMap((record) => record.deleted.departures),
         products: rollbackRecords.flatMap((record) => record.deleted.product),
-        pages: rollbackRecords.flatMap((record) => record.deleted.page),
+        pages: [...rollbackRecords.flatMap((record) => record.deleted.page), ...(parent?.status === 'deleted' ? [parent.id] : [])],
         media: rollbackRecords.flatMap((record) => record.deleted.media),
       },
       retainedMedia,
       errors,
       records: rollbackRecords,
+      journal,
     }
-    await fs.writeFile(outputPath, `${JSON.stringify(rollbackReport, null, 2)}\n`, { encoding: 'utf8', flag: 'wx' })
+    await fs.writeFile(outputPath, `${JSON.stringify(rollbackReport, null, 2)}\n`, 'utf8')
     printLifecycleJSON({ ...rollbackReport, outputPath })
     if (rollbackReport.status !== 'ok') process.exitCode = 1
   } finally {
