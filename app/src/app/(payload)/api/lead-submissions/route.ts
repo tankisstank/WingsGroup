@@ -447,7 +447,7 @@ export async function POST(request: Request): Promise<Response> {
       },
       overrideAccess: true,
     })
-  } catch {
+  } catch (error) {
     // The record starts as pending, so even if this status update fails the
     // database-backed reconciler can still recover it. Redis is not used as a
     // delivery ledger.
@@ -467,6 +467,7 @@ export async function POST(request: Request): Promise<Response> {
       msg: 'Lead notification could not be queued.',
       siteCode: site.code,
       submissionId: submission.id,
+      ...persistenceErrorDetails(error),
     })
     incrementMetric('wingstravel_lead_queue_failures_total', { site: site.code })
     logOperationalEvent('error', 'lead_queue_failed', {
