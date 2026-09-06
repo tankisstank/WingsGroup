@@ -104,7 +104,7 @@ describe('doicanhviet parser', () => {
     expect(record.blockingErrors).not.toContain('ITINERARY_DURATION_MISMATCH:3/3')
   })
 
-  it('flags domestic tours without a supported market instead of guessing', async () => {
+  it('maps domestic tour categories to the supported Vietnam market', async () => {
     const record = await parseDoicanhvietRecord({
       crawlerRoot: 'E:\\repo\\doicanhviet-crawler',
       sourceFile: 'fixture.json',
@@ -122,8 +122,8 @@ describe('doicanhviet parser', () => {
     })
 
     expect(record.kind).toBe('tour')
-    expect(record.market).toBeNull()
-    expect(record.warnings).toContain('UNMAPPED_MARKET')
+    expect(record.market).toBe('vietnam')
+    expect(record.warnings).not.toContain('UNMAPPED_MARKET')
     expect(record.publishEligible).toBe(false)
   })
 
