@@ -534,9 +534,10 @@ const commonInput = (args: Record<string, string | boolean>) => {
     throw new Error(`--site-code must be ${WINGS_GO_SITE_CODE}`)
   }
 
-  const importLocale = normalizedArg(args, 'locale') || 'vi'
-  if (importLocale !== 'vi' && importLocale !== 'en')
+  const importLocaleValue = normalizedArg(args, 'locale') || 'vi'
+  if (importLocaleValue !== 'vi' && importLocaleValue !== 'en')
     throw new Error('Only --locale vi|en is supported')
+  const importLocale = importLocaleValue as 'en' | 'vi'
 
   const dryRun = Boolean(args['dry-run'])
   const explicitBatchId = normalizedArg(args, 'batch-id')
@@ -768,6 +769,7 @@ const main = async () => {
     batchId,
   } = input
   const dryRun = Boolean(args['dry-run'])
+  const mode = String(args.mode || 'create-only')
 
   if (dryRun) {
     const plan = buildImportPlan({

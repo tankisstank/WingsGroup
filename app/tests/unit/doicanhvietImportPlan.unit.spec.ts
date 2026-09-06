@@ -48,7 +48,7 @@ const record = (sourceId: string): NormalizedTour =>
       sourceUrl: `https://doicanhviet.com/${sourceId}`,
       sourceHash: `${sourceId}-hash`,
     },
-  }) as NormalizedTour
+  }) as unknown as NormalizedTour
 
 const decisions = {
   alpha: { action: 'create' as const, approved: true, approvedSlug: 'alpha-tour' },
