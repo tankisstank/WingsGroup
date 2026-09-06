@@ -91,7 +91,14 @@ const main = async () => {
   )
   await fs.writeFile(
     path.join(artifactDir, 'tours.normalized.json'),
-    `${JSON.stringify(normalized, null, 2)}\n`,
+    `${JSON.stringify(
+      {
+        sourceSnapshotHash: sourceInventory.sourceSnapshotHash,
+        records: normalized,
+      },
+      null,
+      2,
+    )}\n`,
     'utf8',
   )
   await fs.writeFile(path.join(artifactDir, 'import-review.md'), buildReview(normalized), 'utf8')
