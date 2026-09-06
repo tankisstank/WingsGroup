@@ -47,12 +47,16 @@ const shouldPushDatabaseSchema = process.env.PAYLOAD_DB_PUSH === 'true'
 const smtpPort = Number.parseInt(process.env.SMTP_PORT || '587', 10)
 const smtpConfigured = Boolean(
   process.env.SMTP_HOST &&
-    process.env.SMTP_USER &&
-    process.env.SMTP_PASSWORD &&
-    process.env.SMTP_FROM_EMAIL,
+  process.env.SMTP_USER &&
+  process.env.SMTP_PASSWORD &&
+  process.env.SMTP_FROM_EMAIL,
 )
 
-if (!isPostgresURL && !shouldPushDatabaseSchema) {
+if (
+  !isPostgresURL &&
+  !shouldPushDatabaseSchema &&
+  process.env.PAYLOAD_SKIP_LOCAL_SQLITE_REPAIR !== 'true'
+) {
   await repairLocalSQLiteSchema(databaseURL)
 }
 

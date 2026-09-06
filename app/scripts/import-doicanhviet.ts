@@ -2,11 +2,10 @@ import 'dotenv/config'
 
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import type { File, Payload, PayloadRequest, Where } from 'payload'
-import { createLocalReq, getPayload } from 'payload'
 
-import config from '../src/payload.config'
 import {
   buildTourWrapperLayout,
   deterministicMediaFilename,
@@ -29,6 +28,67 @@ type Decision = {
 }
 
 type DecisionMap = Record<string, Decision>
+
+export const WINGS_GO_SITE_CODE = 'wings-go' as const
+
+type InputEnvelope = {
+  records: NormalizedTour[]
+  sourceSnapshotHash?: string
+}
+
+export type ImportPlanRecord = {
+  sourceId: string
+  status: 'would-create' | 'skippedDecision' | 'rejected' | 'error'
+  reason?: string
+  tourCode?: string
+  slug?: string
+  pagePath?: string
+  departureDates?: Array<{
+    departureDate: string
+    returnDate: string
+    departureCity?: string
+    priceFrom: number
+    currency?: string
+  }>
+  sourceHash?: string
+}
+
+export type ImportPlan = {
+  version: 1
+  mode: 'dry-run'
+  dryRun: true
+  siteCode: typeof WINGS_GO_SITE_CODE
+  locale: 'en' | 'vi'
+  batchId: string
+  selectionSource: 'only' | 'approved-decisions' | 'all'
+  selectedSourceIds: string[]
+  sourceSnapshotHash?: string
+  records: ImportPlanRecord[]
+}
+
+type ImportPlanInput = {
+  args: Record<string, string | boolean>
+  records: NormalizedTour[]
+  decisions: DecisionMap
+  inputSourceSnapshotHash?: string
+}
+
+type ValidatedImportInput = {
+  args: Record<string, string | boolean>
+  records: NormalizedTour[]
+  decisions: DecisionMap
+  filePath: string
+  decisionsPath: string
+  sourceSnapshotHash?: string
+  only?: Set<string>
+  limit?: number
+  siteCode: typeof WINGS_GO_SITE_CODE
+  importLocale: 'en' | 'vi'
+  batchId: string
+  adminEmail?: string
+  selectionSource: 'only' | 'approved-decisions' | 'all'
+  selected: NormalizedTour[]
+}
 
 const defaultArtifactDir = path.resolve(
   import.meta.dirname,
@@ -53,6 +113,36 @@ const sectionOrder = [
 ]
 
 const context = { disableRevalidate: true, import: true }
+
+const isSha256 = (value: string) => /^[a-f0-9]{64}$/iu.test(value)
+
+const normalizedArg = (args: Record<string, string | boolean>, key: string) => {
+  const value = args[key]
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+const parseInputEnvelope = (value: unknown): InputEnvelope => {
+  if (Array.isArray(value)) return { records: value as NormalizedTour[] }
+  if (!value || typeof value !== 'object') throw new Error('Normalized input must be an array')
+  const envelope = value as { records?: unknown; sourceSnapshotHash?: unknown }
+  if (!Array.isArray(envelope.records)) throw new Error('Normalized input records must be an array')
+  const sourceSnapshotHash =
+    typeof envelope.sourceSnapshotHash === 'string' ? envelope.sourceSnapshotHash.trim() : undefined
+  if (sourceSnapshotHash && !isSha256(sourceSnapshotHash)) {
+    throw new Error('Invalid sourceSnapshotHash in normalized input')
+  }
+  return { records: envelope.records as NormalizedTour[], sourceSnapshotHash }
+}
+
+const validateSourceSnapshotHash = ({ expected, input }: { expected?: string; input?: string }) => {
+  if (!expected) return input
+  if (!isSha256(expected)) throw new Error('Invalid --source-inventory-hash')
+  if (!input) throw new Error('--source-inventory-hash is not bound to normalized input')
+  if (expected.toLowerCase() !== input.toLowerCase()) {
+    throw new Error('--source-inventory-hash does not match normalized input')
+  }
+  return input
+}
 
 const whereAnd = (...clauses: Where[]): Where => ({ and: clauses })
 
@@ -95,7 +185,7 @@ const resolveTourParentPage = async (
   siteID: number | string,
   siteCode: string,
   req: PayloadRequest,
-  dryRun: boolean,
+  _dryRun: boolean,
   locale: 'en' | 'vi',
 ) => {
   const result = await payload.find({
@@ -112,7 +202,16 @@ const resolveTourParentPage = async (
       `Expected at most one ${siteCode} parent page at /tour, found ${result.docs.length}`,
     )
   if (result.docs[0]) return result.docs[0] as any
-  if (dryRun) return null
+  return null
+}
+
+const createTourParentPage = async (
+  payload: Payload,
+  siteID: number | string,
+  siteCode: string,
+  req: PayloadRequest,
+  locale: 'en' | 'vi',
+) => {
   return payload.create({
     collection: 'pages',
     locale,
@@ -219,12 +318,15 @@ const findExistingProduct = async (
   const result = await payload.find({
     collection: 'tour-products',
     depth: 0,
-    limit: 1,
+    limit: 2,
     pagination: false,
     overrideAccess: true,
     req,
     where: whereAnd({ site: { equals: siteID } }, { tourCode: { equals: tourCode } }),
   })
+  if (result.docs.length > 1) {
+    throw new Error(`Product collision: multiple products for ${tourCode}`)
+  }
   return (result.docs[0] as any) || null
 }
 
@@ -237,14 +339,20 @@ const findPage = async (
   const result = await payload.find({
     collection: 'pages',
     depth: 0,
-    limit: 1,
+    limit: 2,
     pagination: false,
     overrideAccess: true,
     req,
     where: whereAnd({ site: { equals: siteID } }, { pathname: { equals: pathname } }),
   })
+  if (result.docs.length > 1) {
+    throw new Error(`Page-path collision: multiple pages for ${pathname}`)
+  }
   return (result.docs[0] as any) || null
 }
+
+const vndDepartures = (record: NormalizedTour) =>
+  record.departures.filter((departure) => departure.currency === 'VND')
 
 const buildProductData = ({
   record,
@@ -285,8 +393,8 @@ const buildProductData = ({
   durationNights: record.durationNights,
   wrapperPage,
   summary: record.summary || title,
-  priceFrom: record.priceFrom || record.departures[0]?.priceFrom,
-  currency: record.currency || record.departures[0]?.currency || 'USD',
+  priceFrom: vndDepartures(record)[0]?.priceFrom,
+  currency: vndDepartures(record).length ? 'VND' : undefined,
   heroMedia: heroMedia || undefined,
   gallery,
   highlights: [],
@@ -385,40 +493,14 @@ type ImportState = {
   productsCreated: number
 }
 
-const main = async () => {
-  const args = parseArgs(process.argv.slice(2))
-  const mode = String(args.mode || 'create-only')
-  if (mode !== 'create-only') throw new Error('Phase lõi chỉ hỗ trợ --mode create-only')
-  if (args.publish || args.overwrite)
-    throw new Error('Phase lõi không hỗ trợ --publish hoặc --overwrite')
-  const filePath = path.resolve(
-    String(args.file || path.join(defaultArtifactDir, 'tours.normalized.json')),
+const sortRecords = (records: NormalizedTour[]) =>
+  [...records].sort((left, right) =>
+    left.sourceId.localeCompare(right.sourceId, 'en', { numeric: true }),
   )
-  const decisionsPath = path.resolve(
-    String(args.decisions || path.join(path.dirname(filePath), 'import-decisions.json')),
-  )
-  const dryRun = Boolean(args['dry-run'])
-  const importLocale = String(args.locale || 'vi')
-  if (importLocale !== 'vi' && importLocale !== 'en')
-    throw new Error('Only --locale vi|en is supported')
-  const siteCode = String(args['site-code'] || 'wing-side').trim()
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(siteCode)) throw new Error('Invalid --site-code')
-  const batchId = String(
-    args['batch-id'] || `dcv-${new Date().toISOString().replace(/[:.]/g, '-')}`,
-  ).trim()
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{2,79}$/u.test(batchId)) throw new Error('Invalid --batch-id')
-  const records = await parseJSONFile<NormalizedTour[]>(filePath)
-  const decisions = await parseJSONFile<DecisionMap>(decisionsPath)
-  const only = args.only ? selectedSourceIDs(args.only) : undefined
-  const limit = args.limit ? Number(args.limit) : undefined
-  const selected = records
-    .filter((record) => !only || only.has(record.sourceId))
-    .sort((left, right) => left.sourceId.localeCompare(right.sourceId, 'en', { numeric: true }))
-    .slice(0, limit)
-  if (!selected.length) throw new Error('Không có normalized record phù hợp --only/--limit')
 
+const assertApprovedSlugUniqueness = (records: NormalizedTour[], decisions: DecisionMap) => {
   const approvedSlugs = new Map<string, string>()
-  for (const record of selected.filter((item) => item.kind === 'tour')) {
+  for (const record of records.filter((item) => item.kind === 'tour')) {
     const decision = decisions[record.sourceId]
     if (decision?.action !== 'create' || decision.approved !== true || !decision.approvedSlug)
       continue
@@ -433,165 +515,416 @@ const main = async () => {
     }
     approvedSlugs.set(decision.approvedSlug, record.sourceId)
   }
+}
 
-  const adminEmail = String(args['admin-email'] || process.env.IMPORT_ADMIN_EMAIL || '').trim()
-  if (!adminEmail) throw new Error('Thiếu --admin-email hoặc IMPORT_ADMIN_EMAIL')
-  const payload = await getPayload({ config })
-  const adminUser = await resolveAdmin(payload, adminEmail)
-  const req = await createLocalReq({ user: adminUser }, payload)
-  const site = await resolveSite(payload, req, siteCode)
-  const parentPage = await resolveTourParentPage(
-    payload,
-    site.id,
-    siteCode,
-    req,
-    dryRun,
-    importLocale,
-  )
-  const state: ImportState = {
-    created: 0,
-    skippedExisting: 0,
-    skippedDecision: 0,
-    rejected: 0,
-    errors: 0,
-    mediaCreated: 0,
-    mediaReused: 0,
-    departuresCreated: 0,
-    pagesCreated: 0,
-    productsCreated: 0,
+const commonInput = (args: Record<string, string | boolean>) => {
+  const mode = String(args.mode || 'create-only')
+  if (mode !== 'create-only') throw new Error('Phase lõi chỉ hỗ trợ --mode create-only')
+  if (args.publish || args.overwrite)
+    throw new Error('Phase lõi không hỗ trợ --publish hoặc --overwrite')
+
+  const rawSiteCode = Object.prototype.hasOwnProperty.call(args, 'site-code')
+    ? normalizedArg(args, 'site-code')
+    : WINGS_GO_SITE_CODE
+  const siteCode = rawSiteCode || WINGS_GO_SITE_CODE
+  if (Object.prototype.hasOwnProperty.call(args, 'site-code') && !rawSiteCode) {
+    throw new Error(`--site-code must be ${WINGS_GO_SITE_CODE}`)
   }
-  const report: Array<Record<string, unknown>> = []
+  if (siteCode !== WINGS_GO_SITE_CODE) {
+    throw new Error(`--site-code must be ${WINGS_GO_SITE_CODE}`)
+  }
 
-  for (const record of selected) {
+  const importLocale = normalizedArg(args, 'locale') || 'vi'
+  if (importLocale !== 'vi' && importLocale !== 'en')
+    throw new Error('Only --locale vi|en is supported')
+
+  const dryRun = Boolean(args['dry-run'])
+  const explicitBatchId = normalizedArg(args, 'batch-id')
+  if (!dryRun && !explicitBatchId) throw new Error('Apply requires explicit --batch-id')
+  const batchId = explicitBatchId || 'dcv-dry-run'
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{2,79}$/u.test(batchId)) throw new Error('Invalid --batch-id')
+
+  const adminEmail = normalizedArg(args, 'admin-email')
+  if (!dryRun && !adminEmail) throw new Error('Apply requires --admin-email')
+
+  return { dryRun, siteCode, importLocale, batchId, adminEmail: adminEmail || undefined }
+}
+
+const selectedRecordsFor = ({
+  args,
+  records,
+  decisions,
+  dryRun,
+}: {
+  args: Record<string, string | boolean>
+  records: NormalizedTour[]
+  decisions: DecisionMap
+  dryRun: boolean
+}) => {
+  const onlyProvided = Object.prototype.hasOwnProperty.call(args, 'only')
+  const onlyValue = normalizedArg(args, 'only')
+  if (onlyProvided && !onlyValue) throw new Error('--only must contain at least one source ID')
+  const only = onlyProvided ? selectedSourceIDs(onlyValue) : undefined
+  const limitValue = normalizedArg(args, 'limit')
+  const limit = limitValue ? Number(limitValue) : undefined
+  if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) {
+    throw new Error('--limit must be a positive integer')
+  }
+  if (!dryRun && limit !== undefined)
+    throw new Error('Apply requires exact selection; --limit is not allowed')
+
+  const sorted = sortRecords(records)
+  if (only) {
+    const available = new Set(records.map((record) => record.sourceId))
+    const missing = [...only].filter((sourceId) => !available.has(sourceId)).sort()
+    if (missing.length) throw new Error(`--only contains unknown source IDs: ${missing.join(',')}`)
+    return {
+      only,
+      limit,
+      selectionSource: 'only' as const,
+      selected: sorted.filter((record) => only.has(record.sourceId)),
+    }
+  }
+
+  if (!dryRun) {
+    const approved = sorted.filter(
+      (record) =>
+        decisions[record.sourceId]?.action === 'create' &&
+        decisions[record.sourceId]?.approved === true,
+    )
+    if (!approved.length)
+      throw new Error('Apply requires --only or a non-empty approved decision set')
+    return { only, limit, selectionSource: 'approved-decisions' as const, selected: approved }
+  }
+
+  return {
+    only,
+    limit,
+    selectionSource: 'all' as const,
+    selected: sorted.slice(0, limit),
+  }
+}
+
+export const validateImportCLI = ({
+  args,
+  records,
+  decisions,
+}: {
+  args: Record<string, string | boolean>
+  records: NormalizedTour[]
+  decisions: DecisionMap
+}) => {
+  const common = commonInput(args)
+  const selection = selectedRecordsFor({ args, records, decisions, dryRun: common.dryRun })
+  if (!selection.selected.length)
+    throw new Error('Không có normalized record phù hợp --only/--limit')
+  assertApprovedSlugUniqueness(selection.selected, decisions)
+  if (!common.dryRun) {
+    const invalid = selection.selected.filter((record) => {
+      const action = decisions[record.sourceId]?.action
+      return (
+        action !== 'skip' &&
+        action !== 'reject' &&
+        Boolean(validateDecision(record, decisions[record.sourceId]))
+      )
+    })
+    if (invalid.length) {
+      throw new Error(
+        `Apply selection contains invalid decisions: ${invalid.map((record) => `${record.sourceId}:${validateDecision(record, decisions[record.sourceId])}`).join('; ')}`,
+      )
+    }
+  }
+  return { ...common, ...selection }
+}
+
+export const buildImportPlan = ({
+  args,
+  records,
+  decisions,
+  inputSourceSnapshotHash,
+}: ImportPlanInput): ImportPlan => {
+  const { dryRun, siteCode, importLocale, batchId } = commonInput(args)
+  if (!dryRun) throw new Error('buildImportPlan is only for --dry-run')
+  const sourceSnapshotHash = validateSourceSnapshotHash({
+    expected: normalizedArg(args, 'source-inventory-hash') || undefined,
+    input: inputSourceSnapshotHash,
+  })
+  const selection = selectedRecordsFor({ args, records, decisions, dryRun })
+  if (!selection.selected.length)
+    throw new Error('Không có normalized record phù hợp --only/--limit')
+  assertApprovedSlugUniqueness(selection.selected, decisions)
+
+  const planRecords: ImportPlanRecord[] = selection.selected.map((record) => {
     const decision = decisions[record.sourceId]
     const decisionError = validateDecision(record, decision)
     if (record.kind !== 'tour') {
-      state.rejected += 1
-      report.push({
+      return {
         sourceId: record.sourceId,
         status: 'rejected',
         reason: decision?.notes || `NON_TOUR_KIND:${record.kind}`,
-      })
-      continue
+      }
     }
     if (decision?.action === 'skip') {
-      state.skippedDecision += 1
-      report.push({
+      return {
         sourceId: record.sourceId,
         status: 'skippedDecision',
         reason: decision.notes || 'skip',
-      })
-      continue
+      }
     }
     if (decision?.action === 'reject') {
-      state.rejected += 1
-      report.push({
+      return {
         sourceId: record.sourceId,
         status: 'rejected',
-        reason: decision?.notes || decisionError,
-      })
-      continue
-    }
-    if (decisionError) {
-      state.errors += 1
-      report.push({ sourceId: record.sourceId, status: 'error', reason: decisionError })
-      continue
-    }
-
-    const tourCode = sourceTourCode(record.sourceId, record.source.sourceSystem)
-    let existing: any
-    try {
-      existing = await findExistingProduct(payload, site.id, tourCode, req)
-    } catch (error) {
-      state.errors += 1
-      report.push({
-        sourceId: record.sourceId,
-        status: 'error',
-        reason: error instanceof Error ? error.message : String(error),
-      })
-      continue
-    }
-    if (existing) {
-      state.skippedExisting += 1
-      report.push({
-        sourceId: record.sourceId,
-        status: 'skippedExisting',
-        productId: existing.id,
-        tourCode,
-      })
-      continue
-    }
-
-    const slug = decision?.approvedSlug as string
-    const title = removeAirlineMarkers(decision?.approvedTitle?.trim() || record.title)
-    const pagePath = `/tour/${slug}`
-    const imageSelection = getApprovedImages(record, decision as Decision)
-    const futureDepartures = record.departures.filter(
-      (departure) => new Date(departure.departureDate).getTime() > Date.now(),
-    )
-    let pageExisting: any
-    try {
-      pageExisting = await findPage(payload, site.id, pagePath, req)
-    } catch (error) {
-      state.errors += 1
-      report.push({
-        sourceId: record.sourceId,
-        status: 'error',
-        reason: error instanceof Error ? error.message : String(error),
-      })
-      continue
-    }
-    const predicted = {
-      sourceId: record.sourceId,
-      tourCode,
-      slug,
-      pagePath,
-      existingPageId: pageExisting?.id || null,
-      mediaCount: record.images.length,
-      futureDepartures: futureDepartures.length,
-      status: dryRun ? 'dryRun' : 'pending',
-      batchId,
-      parentPage: parentPage?.id || 'would-create:/tour',
-    }
-    if (dryRun) {
-      report.push(predicted)
-      state.created += 1
-      continue
-    }
-
-    const createdMedia: Array<number | string> = []
-    let createdPage: number | string | null = null
-    let createdProduct: number | string | null = null
-    const createdDepartures: Array<number | string> = []
-    try {
-      const mediaIDs: Array<number | string> = []
-      const mediaBySourceKey = new Map<string, number | string>()
-      for (const [imageIndex, image] of record.images.entries()) {
-        const media = await resolveOrCreateMedia({
-          image,
-          imageIndex,
-          payload,
-          req,
-          sourceId: record.sourceId,
-          sourceSystem: record.source.sourceSystem,
-          siteID: site.id,
-          createdMedia,
-          locale: importLocale,
-        })
-        mediaBySourceKey.set(image.sourceKey, media.doc.id)
-        mediaIDs.push(media.doc.id)
-        if (media.reused) state.mediaReused += 1
-        else state.mediaCreated += 1
+        reason: decision.notes || decisionError || 'reject',
       }
-      const heroMedia = imageSelection.hero
-        ? mediaBySourceKey.get(imageSelection.hero.sourceKey) || null
-        : null
-      const gallery = imageSelection.gallery
-        .map((image) => mediaBySourceKey.get(image.sourceKey))
-        .filter(Boolean) as Array<number | string>
-      const page =
-        pageExisting ||
-        (await payload.create({
+    }
+    if (decisionError) return { sourceId: record.sourceId, status: 'error', reason: decisionError }
+
+    const slug = decision!.approvedSlug!
+    return {
+      sourceId: record.sourceId,
+      status: 'would-create',
+      tourCode: sourceTourCode(record.sourceId, record.source.sourceSystem),
+      slug,
+      pagePath: `/tour/${slug}`,
+      departureDates: record.departures.map((departure) => ({
+        departureDate: departure.departureDate,
+        returnDate: departure.returnDate,
+        departureCity: departure.departureCity,
+        priceFrom: departure.priceFrom,
+        currency: departure.currency,
+      })),
+      sourceHash: record.sourceHash,
+    }
+  })
+
+  return {
+    version: 1,
+    mode: 'dry-run',
+    dryRun: true,
+    siteCode,
+    locale: importLocale,
+    batchId,
+    selectionSource: selection.selectionSource,
+    selectedSourceIds: selection.selected.map((record) => record.sourceId),
+    sourceSnapshotHash,
+    records: planRecords,
+  }
+}
+
+const loadValidatedInput = async (): Promise<ValidatedImportInput> => {
+  const args = parseArgs(process.argv.slice(2))
+  const { dryRun, siteCode, importLocale, batchId, adminEmail } = commonInput(args)
+  const filePath = path.resolve(
+    String(args.file || path.join(defaultArtifactDir, 'tours.normalized.json')),
+  )
+  const decisionsPath = path.resolve(
+    String(args.decisions || path.join(path.dirname(filePath), 'import-decisions.json')),
+  )
+  const input = parseInputEnvelope(await parseJSONFile<unknown>(filePath))
+  const decisions = await parseJSONFile<DecisionMap>(decisionsPath)
+  const sourceSnapshotHash = validateSourceSnapshotHash({
+    expected: normalizedArg(args, 'source-inventory-hash') || undefined,
+    input: input.sourceSnapshotHash,
+  })
+  const selection = selectedRecordsFor({
+    args,
+    records: input.records,
+    decisions,
+    dryRun,
+  })
+  if (!selection.selected.length)
+    throw new Error('Không có normalized record phù hợp --only/--limit')
+  assertApprovedSlugUniqueness(selection.selected, decisions)
+  validateImportCLI({ args, records: input.records, decisions })
+  return {
+    args,
+    records: input.records,
+    decisions,
+    filePath,
+    decisionsPath,
+    sourceSnapshotHash,
+    only: selection.only,
+    limit: selection.limit,
+    siteCode,
+    importLocale,
+    batchId,
+    adminEmail,
+    selectionSource: selection.selectionSource,
+    selected: selection.selected,
+  }
+}
+
+const main = async () => {
+  const input = await loadValidatedInput()
+  const {
+    args,
+    records,
+    decisions,
+    filePath,
+    sourceSnapshotHash,
+    siteCode,
+    importLocale,
+    batchId,
+  } = input
+  const dryRun = Boolean(args['dry-run'])
+
+  if (dryRun) {
+    const plan = buildImportPlan({
+      args,
+      records,
+      decisions,
+      inputSourceSnapshotHash: sourceSnapshotHash,
+    })
+    const outputPath = path.join(path.dirname(filePath), 'import-dry-run.json')
+    await fs.mkdir(path.dirname(outputPath), { recursive: true })
+    await fs.writeFile(outputPath, `${JSON.stringify(plan, null, 2)}\n`, 'utf8')
+    console.log(JSON.stringify({ outputPath, ...plan }, null, 2))
+    return
+  }
+
+  const [{ createLocalReq, getPayload }, { default: config }] = await Promise.all([
+    import('payload'),
+    import('../src/payload.config'),
+  ])
+  const payload = await getPayload({ config })
+  try {
+    const adminUser = await resolveAdmin(payload, input.adminEmail!)
+    const req = await createLocalReq({ user: adminUser }, payload)
+    const site = await resolveSite(payload, req, siteCode)
+    let parentPage = await resolveTourParentPage(
+      payload,
+      site.id,
+      siteCode,
+      req,
+      false,
+      importLocale,
+    )
+    const state: ImportState = {
+      created: 0,
+      skippedExisting: 0,
+      skippedDecision: 0,
+      rejected: 0,
+      errors: 0,
+      mediaCreated: 0,
+      mediaReused: 0,
+      departuresCreated: 0,
+      pagesCreated: 0,
+      productsCreated: 0,
+    }
+    const report: Array<Record<string, unknown>> = []
+
+    // Preflight every write candidate before creating the parent page or any media.
+    for (const record of input.selected) {
+      const decision = decisions[record.sourceId]
+      if (record.kind !== 'tour' || decision?.action === 'skip' || decision?.action === 'reject')
+        continue
+      const decisionError = validateDecision(record, decision)
+      if (decisionError) throw new Error(`${record.sourceId}: ${decisionError}`)
+      const tourCode = sourceTourCode(record.sourceId, record.source.sourceSystem)
+      const slug = decision!.approvedSlug!
+      const existingProduct = await findExistingProduct(payload, site.id, tourCode, req)
+      if (existingProduct) {
+        throw new Error(`IMPORT_COLLISION existing product ${tourCode} for ${record.sourceId}`)
+      }
+      const existingPage = await findPage(payload, site.id, `/tour/${slug}`, req)
+      if (existingPage) {
+        throw new Error(`IMPORT_COLLISION existing page path /tour/${slug} for ${record.sourceId}`)
+      }
+    }
+
+    if (!parentPage) {
+      parentPage = await createTourParentPage(payload, site.id, siteCode, req, importLocale)
+      state.pagesCreated += 1
+    }
+
+    for (const record of input.selected) {
+      const decision = decisions[record.sourceId]
+      const decisionError = validateDecision(record, decision)
+      if (record.kind !== 'tour') {
+        state.rejected += 1
+        report.push({
+          sourceId: record.sourceId,
+          status: 'rejected',
+          reason: decision?.notes || `NON_TOUR_KIND:${record.kind}`,
+        })
+        continue
+      }
+      if (decision?.action === 'skip') {
+        state.skippedDecision += 1
+        report.push({
+          sourceId: record.sourceId,
+          status: 'skippedDecision',
+          reason: decision.notes || 'skip',
+        })
+        continue
+      }
+      if (decision?.action === 'reject') {
+        state.rejected += 1
+        report.push({
+          sourceId: record.sourceId,
+          status: 'rejected',
+          reason: decision?.notes || decisionError,
+        })
+        continue
+      }
+      if (decisionError) {
+        state.errors += 1
+        report.push({ sourceId: record.sourceId, status: 'error', reason: decisionError })
+        continue
+      }
+
+      const tourCode = sourceTourCode(record.sourceId, record.source.sourceSystem)
+      const slug = decision?.approvedSlug as string
+      const title = removeAirlineMarkers(decision?.approvedTitle?.trim() || record.title)
+      const pagePath = `/tour/${slug}`
+      const imageSelection = getApprovedImages(record, decision as Decision)
+      const futureDepartures = vndDepartures(record).filter(
+        (departure) => new Date(departure.departureDate).getTime() > Date.now(),
+      )
+      const predicted = {
+        sourceId: record.sourceId,
+        tourCode,
+        slug,
+        pagePath,
+        mediaCount: record.images.length,
+        futureDepartures: futureDepartures.length,
+        status: 'pending',
+        batchId,
+        parentPage: parentPage.id,
+      }
+
+      const createdMedia: Array<number | string> = []
+      let createdPage: number | string | null = null
+      let createdProduct: number | string | null = null
+      const createdDepartures: Array<number | string> = []
+      try {
+        const mediaIDs: Array<number | string> = []
+        const mediaBySourceKey = new Map<string, number | string>()
+        for (const [imageIndex, image] of record.images.entries()) {
+          const media = await resolveOrCreateMedia({
+            image,
+            imageIndex,
+            payload,
+            req,
+            sourceId: record.sourceId,
+            sourceSystem: record.source.sourceSystem,
+            siteID: site.id,
+            createdMedia,
+            locale: importLocale,
+          })
+          mediaBySourceKey.set(image.sourceKey, media.doc.id)
+          mediaIDs.push(media.doc.id)
+          if (media.reused) state.mediaReused += 1
+          else state.mediaCreated += 1
+        }
+        const heroMedia = imageSelection.hero
+          ? mediaBySourceKey.get(imageSelection.hero.sourceKey) || null
+          : null
+        const gallery = imageSelection.gallery
+          .map((image) => mediaBySourceKey.get(image.sourceKey))
+          .filter(Boolean) as Array<number | string>
+        const page = await payload.create({
           collection: 'pages',
           locale: importLocale,
           req,
@@ -605,117 +938,132 @@ const main = async () => {
             heroMedia,
             siteCode,
           }) as never,
-        }))
-      if (!pageExisting) {
+        })
         createdPage = page.id
         state.pagesCreated += 1
-      }
-      const product = await payload.create({
-        collection: 'tour-products',
-        locale: importLocale,
-        req,
-        context,
-        data: buildProductData({
-          record,
-          slug,
-          title,
-          siteID: site.id,
-          wrapperPage: page.id,
-          heroMedia,
-          gallery: gallery.length ? gallery : mediaIDs,
-          batchId,
-        }) as never,
-      })
-      createdProduct = product.id
-      state.productsCreated += 1
-      for (const departure of futureDepartures) {
-        const created = await payload.create({
-          collection: 'tour-departures',
+        const product = await payload.create({
+          collection: 'tour-products',
           locale: importLocale,
           req,
           context,
-          data: {
-            _status: 'draft',
-            site: site.id,
-            tourProduct: product.id,
-            departureDate: departure.departureDate,
-            priceFrom: departure.priceFrom,
-            currency: departure.currency || record.currency || 'USD',
-            airline: departure.airline || record.airline,
-            availabilityStatus: 'open',
-            isFeatured: createdDepartures.length === 0,
-          } as never,
+          data: buildProductData({
+            record,
+            slug,
+            title,
+            siteID: site.id,
+            wrapperPage: page.id,
+            heroMedia,
+            gallery: gallery.length ? gallery : mediaIDs,
+            batchId,
+          }) as never,
         })
-        createdDepartures.push(created.id)
-        state.departuresCreated += 1
-      }
-      const verified = await findExistingProduct(payload, site.id, tourCode, req)
-      if (
-        !verified ||
-        String(verified.wrapperPage?.id || verified.wrapperPage) !== String(page.id)
-      ) {
-        throw new Error('POST_WRITE_VERIFY_FAILED')
-      }
-      state.created += 1
-      report.push({
-        ...predicted,
-        status: 'created',
-        pageId: page.id,
-        createdPageId: createdPage,
-        productId: product.id,
-        departureIds: createdDepartures,
-        mediaIds: createdMedia,
-      })
-    } catch (error) {
-      state.errors += 1
-      for (const id of createdDepartures.reverse()) {
-        await payload
-          .delete({ collection: 'tour-departures', id, overrideAccess: true, req, context })
-          .catch(() => undefined)
-      }
-      if (createdProduct)
-        await payload
-          .delete({
-            collection: 'tour-products',
-            id: createdProduct,
-            overrideAccess: true,
+        createdProduct = product.id
+        state.productsCreated += 1
+        for (const departure of futureDepartures) {
+          const created = await payload.create({
+            collection: 'tour-departures',
+            locale: importLocale,
             req,
             context,
+            data: {
+              _status: 'draft',
+              site: site.id,
+              tourProduct: product.id,
+              departureDate: departure.departureDate,
+              returnDate: departure.returnDate,
+              departureCity: departure.departureCity,
+              priceFrom: departure.priceFrom,
+              currency: departure.currency,
+              airline: departure.airline || record.airline,
+              sourceProvenance: {
+                sourceSystem: record.source.sourceSystem,
+                sourceUrl: record.sourceUrl || record.source.sourceUrl,
+                sourcePageSha256: record.sourceHash,
+                sourceRowSha256: record.sourceHash,
+                checkedAt: record.crawledAt || record.source.crawledAt,
+                managedBy: `import:${batchId}`,
+              },
+              availabilityStatus: 'open',
+              isFeatured: createdDepartures.length === 0,
+            } as never,
           })
-          .catch(() => undefined)
-      if (createdPage)
-        await payload
-          .delete({ collection: 'pages', id: createdPage, overrideAccess: true, req, context })
-          .catch(() => undefined)
-      for (const id of createdMedia.reverse()) {
-        await payload
-          .delete({ collection: 'media', id, overrideAccess: true, req, context })
-          .catch(() => undefined)
+          createdDepartures.push(created.id)
+          state.departuresCreated += 1
+        }
+        const verified = await findExistingProduct(payload, site.id, tourCode, req)
+        if (
+          !verified ||
+          String(verified.wrapperPage?.id || verified.wrapperPage) !== String(page.id)
+        ) {
+          throw new Error('POST_WRITE_VERIFY_FAILED')
+        }
+        state.created += 1
+        report.push({
+          ...predicted,
+          status: 'created',
+          pageId: page.id,
+          createdPageId: createdPage,
+          productId: product.id,
+          departureIds: createdDepartures,
+          mediaIds: createdMedia,
+        })
+      } catch (error) {
+        state.errors += 1
+        for (const id of createdDepartures.reverse()) {
+          await payload
+            .delete({ collection: 'tour-departures', id, overrideAccess: true, req, context })
+            .catch(() => undefined)
+        }
+        if (createdProduct)
+          await payload
+            .delete({
+              collection: 'tour-products',
+              id: createdProduct,
+              overrideAccess: true,
+              req,
+              context,
+            })
+            .catch(() => undefined)
+        if (createdPage)
+          await payload
+            .delete({ collection: 'pages', id: createdPage, overrideAccess: true, req, context })
+            .catch(() => undefined)
+        for (const id of createdMedia.reverse()) {
+          await payload
+            .delete({ collection: 'media', id, overrideAccess: true, req, context })
+            .catch(() => undefined)
+        }
+        report.push({
+          sourceId: record.sourceId,
+          status: 'error',
+          reason: error instanceof Error ? error.message : String(error),
+        })
       }
-      report.push({
-        sourceId: record.sourceId,
-        status: 'error',
-        reason: error instanceof Error ? error.message : String(error),
-      })
     }
-  }
 
-  const outputPath = path.join(
-    path.dirname(filePath),
-    dryRun ? 'import-dry-run.json' : 'import-result.json',
-  )
-  await fs.mkdir(path.dirname(outputPath), { recursive: true })
-  await fs.writeFile(
-    outputPath,
-    `${JSON.stringify({ runAt: new Date().toISOString(), dryRun, siteCode, siteId: site.id, locale: importLocale, batchId, adminUserId: adminUser.id, mode, state, report }, null, 2)}\n`,
-    'utf8',
-  )
-  console.log(JSON.stringify({ outputPath, ...state }, null, 2))
-  if (state.errors > 0) process.exitCode = 1
-  await payload.destroy()
+    const outputPath = path.join(
+      path.dirname(filePath),
+      dryRun ? 'import-dry-run.json' : 'import-result.json',
+    )
+    await fs.mkdir(path.dirname(outputPath), { recursive: true })
+    await fs.writeFile(
+      outputPath,
+      `${JSON.stringify({ runAt: new Date().toISOString(), dryRun, siteCode, siteId: site.id, locale: importLocale, batchId, adminUserId: adminUser.id, mode, state, report }, null, 2)}\n`,
+      'utf8',
+    )
+    console.log(JSON.stringify({ outputPath, ...state }, null, 2))
+    if (state.errors > 0) process.exitCode = 1
+  } finally {
+    await payload.destroy()
+  }
 }
 
-main().catch((error) => {
-  console.error(error)
-  process.exitCode = 1
-})
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))
+) {
+  main().catch((error) => {
+    console.error(error)
+    process.exitCode = 1
+  })
+}
