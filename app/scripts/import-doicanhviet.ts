@@ -704,6 +704,102 @@ const collectMediaRelationIDs = (value: unknown, ids: Set<string>) => {
   }
 }
 
+const lexicalElementNodeTypes = new Set([
+  'root',
+  'paragraph',
+  'heading',
+  'quote',
+  'list',
+  'listitem',
+  'link',
+  'autolink',
+  'code',
+  'table',
+  'tablerow',
+  'tablecell',
+])
+const lexicalLeafNodeTypes = new Set([
+  'text',
+  'linebreak',
+  'tab',
+  'horizontalrule',
+])
+const lexicalBlockSchemas: Record<string, { mediaFields: string[]; richTextFields: string[] }> = {
+  banner: { mediaFields: [], richTextFields: ['content'] },
+  code: { mediaFields: [], richTextFields: [] },
+  mediaBlock: { mediaFields: ['media'], richTextFields: [] },
+}
+
+const isObjectRecord = (value: unknown): value is Record<string, any> =>
+  Boolean(value && typeof value === 'object' && !Array.isArray(value))
+
+const scanLexicalMediaReferences = (
+  value: unknown,
+  ids: Set<string>,
+  gaps: string[],
+  pathPrefix: string,
+) => {
+  if (value == null) return
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => scanLexicalMediaReferences(item, ids, gaps, `${pathPrefix}[${index}]`))
+    return
+  }
+  if (!isObjectRecord(value)) {
+    gaps.push(`${pathPrefix}:malformed-lexical-node`)
+    return
+  }
+
+  // Payload stores a rich-text field as SerializedEditorState: { root: {...} }.
+  if (isObjectRecord(value.root) && value.type === undefined) {
+    scanLexicalMediaReferences(value.root, ids, gaps, `${pathPrefix}.root`)
+    return
+  }
+
+  const nodeType = typeof value.type === 'string' ? value.type : ''
+  if (nodeType === 'upload' || nodeType === 'relationship') {
+    const relationTo = value.relationTo
+    if (relationTo === undefined || relationTo === null) {
+      gaps.push(`${pathPrefix}:missing-relation-to`)
+    } else if (relationTo === 'media' || (Array.isArray(relationTo) && relationTo.includes('media'))) {
+      if (value.value === undefined || value.value === null) gaps.push(`${pathPrefix}:missing-media-value`)
+      else collectMediaRelationIDs(value.value, ids)
+    }
+    return
+  }
+  if (nodeType === 'block' || nodeType === 'inlineBlock') {
+    if (!isObjectRecord(value.fields) || typeof value.fields.blockType !== 'string') {
+      gaps.push(`${pathPrefix}:malformed-block`)
+      return
+    }
+    const schema = lexicalBlockSchemas[value.fields.blockType]
+    if (!schema) {
+      gaps.push(`${pathPrefix}.${value.fields.blockType}:unknown-block-schema`)
+      return
+    }
+    for (const fieldName of schema.mediaFields) {
+      if (value.fields[fieldName] === undefined || value.fields[fieldName] === null)
+        gaps.push(`${pathPrefix}.${fieldName}:missing-media-value`)
+      else collectMediaRelationIDs(value.fields[fieldName], ids)
+    }
+    for (const fieldName of schema.richTextFields)
+      scanLexicalMediaReferences(value.fields[fieldName], ids, gaps, `${pathPrefix}.${fieldName}`)
+    return
+  }
+  if (!lexicalElementNodeTypes.has(nodeType) && !lexicalLeafNodeTypes.has(nodeType)) {
+    gaps.push(`${pathPrefix}:unknown-node-${nodeType || 'missing-type'}`)
+    return
+  }
+  if (lexicalElementNodeTypes.has(nodeType)) {
+    if (!Array.isArray(value.children)) {
+      gaps.push(`${pathPrefix}:missing-children`)
+      return
+    }
+    value.children.forEach((child: unknown, index: number) =>
+      scanLexicalMediaReferences(child, ids, gaps, `${pathPrefix}.children[${index}]`),
+    )
+  }
+}
+
 const fieldValue = (value: any, name?: string) => (name ? value?.[name] : value)
 
 const scanMediaFields = (
@@ -736,10 +832,8 @@ const scanMediaFields = (
         collectMediaRelationIDs(current, ids)
     }
     if (field.type === 'json' && current != null) gaps.push(`${fieldPath}:dynamic-json`)
-    // Lexical/rich-text editor features can embed upload-bearing blocks whose
-    // relationship schema is not represented as ordinary Payload fields. Keep
-    // these collections in scope and fail closed when content is present.
-    if (field.type === 'richText' && current != null) gaps.push(`${fieldPath}:dynamic-rich-text`)
+    if (field.type === 'richText' && current != null)
+      scanLexicalMediaReferences(current, ids, gaps, fieldPath)
 
     if (field.localized && current && typeof current === 'object' && !Array.isArray(current)) {
       for (const localeValue of Object.values(current)) {
@@ -801,7 +895,6 @@ export const buildMediaReferenceIndex = async (payload: Payload, req: PayloadReq
   const gaps: string[] = []
   const configuredCollections = ((payload as any).config?.collections || []) as any[]
   for (const collection of configuredCollections) {
-    if (collection.slug === 'media') continue
     // Avoid querying unrelated collections (notably payload-jobs). Besides
     // reducing work, this prevents schema drift in an unrelated collection
     // from blocking the media reference safety decision.

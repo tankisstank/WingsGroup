@@ -105,6 +105,66 @@ describe('Doicanhviet importer rollback and provenance safety', () => {
     expect([...index.ids]).toEqual(['22'])
   })
 
+  it('treats ordinary Lexical text and supported nodes as complete', async () => {
+    const payload = {
+      config: { collections: [{ slug: 'posts', fields: [{ name: 'content', type: 'richText' }] }], globals: [] },
+      find: async () => ({
+        docs: [{ content: { root: { type: 'root', children: [{ type: 'paragraph', children: [{ type: 'text', text: 'hello', version: 1 }] }] } } }],
+        hasNextPage: false,
+      }),
+    }
+    const index = await buildMediaReferenceIndex(payload as any, {} as any)
+    expect(index).toMatchObject({ coverage: 'complete' })
+    expect([...index.ids]).toEqual([])
+  })
+
+  it('indexes Lexical media uploads, including a media self-caption, and retains referenced media', async () => {
+    const payload = {
+      config: {
+        collections: [
+          { slug: 'posts', fields: [{ name: 'content', type: 'richText' }] },
+          { slug: 'media', fields: [{ name: 'caption', type: 'richText' }] },
+        ],
+        globals: [],
+      },
+      find: async ({ collection }: { collection: string }) => ({
+        docs: [
+          collection === 'posts'
+            ? { content: { root: { type: 'root', children: [{ type: 'upload', relationTo: 'media', value: 11, id: 'upload-1', version: 3 }] } } }
+            : { caption: { root: { type: 'root', children: [{ type: 'relationship', relationTo: 'media', value: 12 }] } } },
+        ],
+        hasNextPage: false,
+      }),
+      delete: async () => undefined,
+    }
+    const index = await buildMediaReferenceIndex(payload as any, {} as any)
+    expect(index.coverage).toBe('complete')
+    expect([...index.ids].sort()).toEqual(['11', '12'])
+    const cleanup = await cleanupCreatedResources({
+      createdDepartures: [],
+      createdMedia: [11],
+      createdPage: null,
+      createdProduct: null,
+      payload: payload as any,
+      req: {} as any,
+    })
+    expect(cleanup.deleted.media).toEqual([])
+    expect(cleanup.retained).toEqual([{ collection: 'media', id: 11, reason: 'referenced-by-schema-guided-record-or-version' }])
+  })
+
+  it('fails closed for an unknown Lexical embedded node', async () => {
+    const payload = {
+      config: { collections: [{ slug: 'posts', fields: [{ name: 'content', type: 'richText' }] }], globals: [] },
+      find: async () => ({
+        docs: [{ content: { root: { type: 'root', children: [{ type: 'customUploadWidget', mediaId: 13 }] } } }],
+        hasNextPage: false,
+      }),
+    }
+    const index = await buildMediaReferenceIndex(payload as any, {} as any)
+    expect(index.coverage).toBe('incomplete')
+    expect(index.gaps.some((gap) => gap.includes('unknown-node-customUploadWidget'))).toBe(true)
+  })
+
   it('records failed deletes and preserves the complete write journal', async () => {
     const deleted: Array<[string, number]> = []
     const payload = {
