@@ -12,6 +12,7 @@ describe('preview handoff initializer', () => {
     vi.clearAllMocks()
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('PREVIEW_HANDOFF_SECRET', 'route-handoff-secret')
+    vi.stubEnv('PREVIEW_PUBLIC_ORIGINS', 'wings-go=wingsgo.vn')
     mocks.auth.mockResolvedValue({ user: { id: 77, role: 'super-admin' } })
     mocks.findByID.mockResolvedValue({
       id: 308,
@@ -36,5 +37,24 @@ describe('preview handoff initializer', () => {
     mocks.auth.mockResolvedValue({ user: null })
     expect((await GET(new NextRequest('https://wingsgroup.vn/next/preview?collection=pages&id=308&path=%2Ftour'))).status).toBe(403)
     expect((await GET(new NextRequest('https://wingsgroup.vn/next/preview?collection=pages&id=308&path=https%3A%2F%2Fevil.example'))).status).toBe(404)
+  })
+
+  it('does not use a stale local CMS domain as a production preview target', async () => {
+    mocks.findByID.mockResolvedValue({
+      id: 308,
+      pathname: '/tour/tour-6n5d-hang-chau-o-tran-thuong-hai-hang-chau-bay-ca-dcv-265869',
+      site: { code: 'wings-go', primaryDomain: 'wingsgo.local' },
+    })
+
+    const response = await GET(new NextRequest('https://wingsgroup.vn/next/preview?collection=pages&id=308&path=%2Ftour'))
+    const html = await response.text()
+    expect(response.status).toBe(200)
+    expect(html).toContain('action="https://wingsgo.vn/next/preview/handoff"')
+    expect(html).not.toContain('wingsgo.local')
+  })
+
+  it('fails closed when no public destination is allowlisted', async () => {
+    vi.stubEnv('PREVIEW_PUBLIC_ORIGINS', '')
+    expect((await GET(new NextRequest('https://wingsgroup.vn/next/preview?collection=pages&id=308&path=%2Ftour'))).status).toBe(503)
   })
 })

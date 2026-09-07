@@ -13,6 +13,8 @@ services:
       NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
       CRON_SECRET: ${CRON_SECRET}
       PREVIEW_HANDOFF_SECRET: ${PREVIEW_HANDOFF_SECRET}
+      # Public-domain allowlist for server-side cross-domain preview handoffs.
+      PREVIEW_PUBLIC_ORIGINS: ${PREVIEW_PUBLIC_ORIGINS}
       REDIS_URL: redis://redis:6379
       REDIS_KEY_PREFIX: ${REDIS_KEY_PREFIX:-wingstravel-production}
       SITE_CACHE_TTL_SECONDS: ${SITE_CACHE_TTL_SECONDS:-120}

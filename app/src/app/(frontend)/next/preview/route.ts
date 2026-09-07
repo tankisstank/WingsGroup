@@ -5,15 +5,12 @@ import { NextRequest } from 'next/server'
 import configPromise from '@payload-config'
 import { normalizeRelationID } from '@/access/roles'
 import { mintPreviewHandoff, type PreviewCollection } from '@/utilities/previewHandoff'
+import { getProductionPreviewOrigin } from '@/utilities/previewOrigin'
 import { defaultSiteCode, siteCodeToAliasMap } from '@/utilities/sitePaths'
 
 const collections = new Set<PreviewCollection>(['pages', 'posts', 'tour-campaigns', 'tour-products'])
 const safePath = (value: string | null) =>
   value && value.startsWith('/') && !value.startsWith('//') && !/[?#\\]/u.test(value) ? value : null
-const siteOrigin = (site: { primaryDomain?: null | string } | null | undefined) => {
-  const host = site?.primaryDomain?.trim().replace(/^https?:\/\//u, '').replace(/\/$/u, '')
-  return host && process.env.NODE_ENV === 'production' ? `https://${host}` : ''
-}
 const handoffForm = (action: string, handoff: string) => new Response(
   `<!doctype html><meta name="referrer" content="no-referrer"><form method="post" action="${action}"><input type="hidden" name="handoff" value="${handoff}"></form><script>document.forms[0].submit()</script>`,
   { headers: { 'Cache-Control': 'no-store', 'Content-Type': 'text/html; charset=utf-8', 'Referrer-Policy': 'no-referrer' } },
@@ -45,8 +42,14 @@ export async function GET(req: NextRequest): Promise<Response> {
   if (!path) return new Response('Preview path is unavailable', { status: 409 })
   const handoff = await mintPreviewHandoff({ collection, documentID: String(document.id), locale: params.get('locale') || 'vi', path, siteCode: site.code })
   if (!handoff) return new Response('Preview handoff could not be issued', { status: 503 })
-  const target = siteOrigin(site)
-    ? `${siteOrigin(site)}/next/preview/handoff`
+  const productionOrigin = process.env.NODE_ENV === 'production'
+    ? getProductionPreviewOrigin(site.code)
+    : null
+  if (process.env.NODE_ENV === 'production' && !productionOrigin) {
+    return new Response('Preview destination is not configured for this site', { status: 503 })
+  }
+  const target = productionOrigin
+    ? `${productionOrigin}/next/preview/handoff`
     : `${site.code === defaultSiteCode ? '' : `/${siteCodeToAliasMap[site.code]}`}/next/preview/handoff`
   return handoffForm(target, handoff)
 }
