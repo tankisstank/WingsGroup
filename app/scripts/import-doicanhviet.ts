@@ -826,15 +826,9 @@ const scanMediaFields = (
 
     const current = fieldValue(value, field.name)
     const fieldPath = field.name ? `${pathPrefix}.${field.name}` : pathPrefix
-    if (field.type === 'upload' || field.type === 'relationship') {
-      const relationTo = field.relationTo
-      if (relationTo === 'media' || (Array.isArray(relationTo) && relationTo.includes('media')))
-        collectMediaRelationIDs(current, ids)
-    }
-    if (field.type === 'json' && current != null) gaps.push(`${fieldPath}:dynamic-json`)
-    if (field.type === 'richText' && current != null)
-      scanLexicalMediaReferences(current, ids, gaps, fieldPath)
-
+    // A localized rich-text value is a locale map, not a Lexical node. Recurse
+    // into each locale before inspecting the field itself so normal Payload
+    // localization does not make reference coverage look incomplete.
     if (field.localized && current && typeof current === 'object' && !Array.isArray(current)) {
       for (const localeValue of Object.values(current)) {
         scanMediaFields(
@@ -845,7 +839,18 @@ const scanMediaFields = (
           `${fieldPath}[locale]`,
         )
       }
-    } else if (field.type === 'array') {
+      continue
+    }
+    if (field.type === 'upload' || field.type === 'relationship') {
+      const relationTo = field.relationTo
+      if (relationTo === 'media' || (Array.isArray(relationTo) && relationTo.includes('media')))
+        collectMediaRelationIDs(current, ids)
+    }
+    if (field.type === 'json' && current != null) gaps.push(`${fieldPath}:dynamic-json`)
+    if (field.type === 'richText' && current != null)
+      scanLexicalMediaReferences(current, ids, gaps, fieldPath)
+
+    if (field.type === 'array') {
       for (const item of Array.isArray(current) ? current : [])
         scanMediaFields(field.fields || [], item, ids, gaps, `${fieldPath}[]`)
     } else if (field.type === 'blocks') {
