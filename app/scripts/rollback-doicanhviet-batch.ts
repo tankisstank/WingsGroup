@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
+import { buildMediaReferenceIndex, type MediaReferenceIndex } from './import-doicanhviet'
 import {
   createLifecyclePlan,
   DOICANHVIET_SITE_CODE,
@@ -16,10 +17,17 @@ import {
 type CreatedRecord = {
   status: string
   sourceId: string
+  parentPageId?: number | string
   productId?: number | string
   createdPageId?: number | string | null
   departureIds?: Array<number | string>
   mediaIds?: Array<number | string>
+  journal?: {
+    createdProductId?: number | string | null
+    createdPageId?: number | string | null
+    createdDepartureIds?: Array<number | string>
+    createdMediaIds?: Array<number | string>
+  }
 }
 
 type ImportResult = {
@@ -27,15 +35,43 @@ type ImportResult = {
   siteCode: string
   siteId: number | string
   batchId: string
+  runId?: string
   report: CreatedRecord[]
+}
+
+type RollbackRecord = {
+  sourceId: string
+  productId: number | string
+  deleted: {
+    departures: Array<number | string>
+    product: Array<number | string>
+    page: Array<number | string>
+    media: Array<number | string>
+  }
+  retainedMedia: Array<{ id: number | string; reason: string }>
+  errors: Array<{ collection: string; id: number | string; error: string }>
 }
 
 const context = { disableRevalidate: true, import: true, rollback: true }
 
 const sortedCreatedRecords = (result: ImportResult) =>
   result.report
-    .filter((item) => item.status === 'created' && item.productId !== undefined)
+    .filter((item) => item.status === 'created' && (item.productId !== undefined || item.journal?.createdProductId !== undefined))
+    .map((item) => ({
+      ...item,
+      productId: item.productId ?? item.journal?.createdProductId,
+      createdPageId: item.createdPageId ?? item.journal?.createdPageId,
+      departureIds: item.departureIds ?? item.journal?.createdDepartureIds ?? [],
+      mediaIds: item.mediaIds ?? item.journal?.createdMediaIds ?? [],
+    }))
     .sort((left, right) => left.sourceId.localeCompare(right.sourceId, 'en', { numeric: true }))
+
+const errorMessage = (error: unknown) => error instanceof Error ? error.message : String(error)
+
+const outputPathFor = (resultPath: string, value: unknown) =>
+  typeof value === 'string' && value.trim()
+    ? path.resolve(value)
+    : `${resultPath}.rollback-${new Date().toISOString().replace(/[^0-9]/gu, '')}.json`
 
 const main = async () => {
   const plan = createLifecyclePlan(process.argv.slice(2), 'rollback')
@@ -43,7 +79,8 @@ const main = async () => {
   if (typeof file !== 'string' || !file.trim())
     throw new Error('Missing --file <import-result.json>')
 
-  const result = JSON.parse(await fs.readFile(path.resolve(file), 'utf8')) as ImportResult
+  const resultPath = path.resolve(file)
+  const result = JSON.parse(await fs.readFile(resultPath, 'utf8')) as ImportResult
   if (result.dryRun) throw new Error('Cannot rollback a dry-run report')
   if (result.siteCode !== DOICANHVIET_SITE_CODE) {
     throw new Error(
@@ -56,11 +93,13 @@ const main = async () => {
 
   const created = sortedCreatedRecords(result)
   if (!created.length) throw new Error('No created records found in import result')
+  const outputPath = outputPathFor(resultPath, plan.args.output)
 
   if (!plan.apply) {
     printLifecycleJSON({
       apply: false,
       batchId: result.batchId,
+      outputPath,
       siteCode: DOICANHVIET_SITE_CODE,
       tours: created.map((item) => ({
         sourceId: item.sourceId,
@@ -73,6 +112,27 @@ const main = async () => {
     return
   }
 
+  // Reserve the report before opening Payload or deleting anything. The file is
+  // then updated as a journal; a collision or write failure cannot erase the
+  // only rollback evidence after destructive work has started.
+  const journal: Array<Record<string, unknown>> = []
+  const reportHeader = {
+    version: 2,
+    status: 'started',
+    apply: true,
+    batchId: result.batchId,
+    runId: result.runId || null,
+    siteCode: DOICANHVIET_SITE_CODE,
+    siteId: result.siteId,
+    sourceImportResult: resultPath,
+    startedAt: new Date().toISOString(),
+  }
+  await fs.writeFile(outputPath, `${JSON.stringify({ ...reportHeader, journal }, null, 2)}\n`, { encoding: 'utf8', flag: 'wx' })
+  const persistJournal = async (entry: Record<string, unknown>) => {
+    journal.push({ at: new Date().toISOString(), ...entry })
+    await fs.writeFile(outputPath, `${JSON.stringify({ ...reportHeader, status: 'in-progress', journal }, null, 2)}\n`, 'utf8')
+  }
+
   const runtime = await initializePayloadForApply()
   const { payload } = runtime
   try {
@@ -82,6 +142,7 @@ const main = async () => {
     if (!sameID(site.id, result.siteId)) {
       throw new Error(`Import result siteId does not match ${DOICANHVIET_SITE_CODE}`)
     }
+    await persistJournal({ stage: 'preflight', status: 'verified-site', siteId: relationID(site.id) })
 
     const verified: Array<{
       item: CreatedRecord
@@ -167,48 +228,141 @@ const main = async () => {
       verified.push({ item, product, departures, page, media })
     }
 
-    for (const { departures, media, page, product } of [...verified].reverse()) {
-      for (const departure of [...departures].reverse()) {
-        await payload.delete({
-          collection: 'tour-departures',
-          id: departure.id,
-          context,
-          overrideAccess: true,
-          req,
-        })
-      }
-      await payload.delete({
-        collection: 'tour-products',
-        id: product.id,
-        context,
-        overrideAccess: true,
-        req,
-      })
-      if (page)
-        await payload.delete({
-          collection: 'pages',
-          id: page.id,
-          context,
-          overrideAccess: true,
-          req,
-        })
-      for (const mediaItem of [...media].reverse()) {
-        await payload.delete({
-          collection: 'media',
-          id: mediaItem.id,
-          context,
-          overrideAccess: true,
-          req,
-        })
+    const rollbackRecords: RollbackRecord[] = verified.map(({ item, product }) => ({
+      sourceId: item.sourceId,
+      productId: product.id,
+      deleted: { departures: [], product: [], page: [], media: [] },
+      retainedMedia: [],
+      errors: [],
+    }))
+    const rollbackByProductID = new Map(rollbackRecords.map((item) => [String(item.productId), item]))
+    const remove = async (
+      collection: 'media' | 'pages' | 'tour-products' | 'tour-departures',
+      id: number | string,
+      record: RollbackRecord,
+      key: keyof RollbackRecord['deleted'],
+    ) => {
+      try {
+        await payload.delete({ collection, id, context, overrideAccess: true, req })
+        record.deleted[key].push(id)
+        await persistJournal({ stage: 'delete', status: 'deleted', collection, id, sourceId: record.sourceId })
+      } catch (error) {
+        const message = errorMessage(error)
+        record.errors.push({ collection, id, error: message })
+        await persistJournal({ stage: 'delete', status: 'error', collection, id, sourceId: record.sourceId, error: message })
       }
     }
-    printLifecycleJSON({
+
+    // Delete the owned graph first. Build one schema-guided index afterwards so deleted
+    // product/page references do not make every owned image look externally referenced.
+    for (const { departures, page, product } of [...verified].reverse()) {
+      const record = rollbackByProductID.get(String(product.id))!
+      for (const departure of [...departures].reverse()) {
+        await remove('tour-departures', departure.id, record, 'departures')
+      }
+      await remove('tour-products', product.id, record, 'product')
+      if (page) await remove('pages', page.id, record, 'page')
+    }
+
+    let mediaReferenceIndex: MediaReferenceIndex
+    try {
+      mediaReferenceIndex = await buildMediaReferenceIndex(payload, req)
+    } catch (error) {
+      mediaReferenceIndex = {
+        ids: new Set<string>(),
+        coverage: 'incomplete',
+        gaps: [`scanner-failed:${errorMessage(error)}`],
+      }
+    }
+    for (const { item, media } of verified) {
+      const record = rollbackByProductID.get(String(item.productId))!
+      for (const mediaItem of [...media].reverse()) {
+        if (mediaReferenceIndex.coverage !== 'complete') {
+          record.retainedMedia.push({
+            id: mediaItem.id,
+            reason: `reference-coverage-incomplete:${mediaReferenceIndex.gaps.join('|')}`,
+          })
+        } else if (mediaReferenceIndex.ids.has(String(mediaItem.id))) {
+          record.retainedMedia.push({
+            id: mediaItem.id,
+            reason: 'referenced-by-schema-guided-record-or-version',
+          })
+        } else {
+          await remove('media', mediaItem.id, record, 'media')
+        }
+      }
+    }
+
+    let parent: { status: 'deleted' | 'retained' | 'error'; id: number | string; reason: string } | null = null
+    const parentEntry = result.report.find(
+      (item) => item.status === 'parent-retained' && item.parentPageId !== undefined,
+    )
+    if (parentEntry?.parentPageId !== undefined) {
+      try {
+        const parentPage = await payload.findByID({
+          collection: 'pages',
+          id: parentEntry.parentPageId,
+          depth: 0,
+          overrideAccess: true,
+          req,
+        })
+        if (!sameID(parentPage.site, site.id)) throw new Error('Parent page site mismatch')
+        const children = await payload.find({
+          collection: 'pages',
+          depth: 0,
+          limit: 1,
+          pagination: false,
+          overrideAccess: true,
+          req,
+          where: { parentPage: { equals: parentPage.id } },
+        })
+        if (children.docs.length) {
+          parent = { status: 'retained', id: parentPage.id, reason: 'still-referenced-by-page-children' }
+        } else {
+          await payload.delete({ collection: 'pages', id: parentPage.id, context, overrideAccess: true, req })
+          parent = { status: 'deleted', id: parentPage.id, reason: 'created-by-import-and-unreferenced-after-child-rollback' }
+          await persistJournal({ stage: 'parent', status: 'deleted', id: parentPage.id })
+        }
+      } catch (error) {
+        parent = { status: 'error', id: parentEntry.parentPageId, reason: errorMessage(error) }
+        await persistJournal({ stage: 'parent', status: 'error', id: parentEntry.parentPageId, error: parent.reason })
+      }
+    }
+
+    const errors = rollbackRecords.flatMap((record) => record.errors)
+    const retainedMedia = rollbackRecords.flatMap((record) => record.retainedMedia)
+    const rollbackReport = {
+      version: 2,
       apply: true,
       batchId: result.batchId,
-      deletedTours: verified.length,
+      runId: result.runId || null,
       siteCode: DOICANHVIET_SITE_CODE,
       siteId: relationID(site.id),
-    })
+      sourceImportResult: resultPath,
+      executionDate: new Date().toISOString(),
+      referenceCoverage: 'all-configured-collections-records-only',
+      mediaReferenceIndex: {
+        coverage: mediaReferenceIndex.coverage,
+        referencedCount: mediaReferenceIndex.ids.size,
+        gaps: mediaReferenceIndex.gaps,
+      },
+      status: errors.length || retainedMedia.length || parent?.status === 'error' ? 'partial-failure' : 'ok',
+      parent,
+      deleted: {
+        tours: rollbackRecords.filter((record) => record.deleted.product.length).length,
+        departures: rollbackRecords.flatMap((record) => record.deleted.departures),
+        products: rollbackRecords.flatMap((record) => record.deleted.product),
+        pages: [...rollbackRecords.flatMap((record) => record.deleted.page), ...(parent?.status === 'deleted' ? [parent.id] : [])],
+        media: rollbackRecords.flatMap((record) => record.deleted.media),
+      },
+      retainedMedia,
+      errors,
+      records: rollbackRecords,
+      journal,
+    }
+    await fs.writeFile(outputPath, `${JSON.stringify(rollbackReport, null, 2)}\n`, 'utf8')
+    printLifecycleJSON({ ...rollbackReport, outputPath })
+    if (rollbackReport.status !== 'ok') process.exitCode = 1
   } finally {
     await payload.destroy()
   }

@@ -25,4 +25,18 @@ describe('Doicanhviet importer apply gates', () => {
       }),
     ).toThrow('Apply requires --only or a non-empty approved decision set')
   })
+
+  it('requires the explicit apply guard even when all other apply arguments exist', () => {
+    expect(() =>
+      validateImportCLI({
+        args: {
+          'batch-id': 'batch-001',
+          'admin-email': 'admin@example.test',
+          only: 'alpha',
+        },
+        records: [],
+        decisions: {},
+      }),
+    ).toThrow('Apply requires explicit --apply')
+  })
 })
