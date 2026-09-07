@@ -13,6 +13,9 @@ importers:
 
   .:
     dependencies:
+      '@libsql/client':
+        specifier: 0.14.0
+        version: 0.14.0
       '@payloadcms/admin-bar':
         specifier: 3.84.1
         version: 3.84.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)

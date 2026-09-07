@@ -13,7 +13,8 @@ import {
   resolveWingsGoSite,
   sameID,
 } from './doicanhviet-lifecycle-safety'
-import { sourceTourCode, type NormalizedTour } from './lib/doicanhviet'
+import { sourceTourCode } from './lib/doicanhviet'
+import { parseInputEnvelope } from './import-doicanhviet'
 
 const defaultArtifactDir = path.resolve(
   import.meta.dirname,
@@ -30,7 +31,7 @@ const main = async () => {
   const filePath = path.resolve(
     String(plan.args.file || path.join(defaultArtifactDir, 'tours.normalized.json')),
   )
-  const normalized = JSON.parse(await fs.readFile(filePath, 'utf8')) as NormalizedTour[]
+  const normalized = parseInputEnvelope(JSON.parse(await fs.readFile(filePath, 'utf8'))).records
   const today = new Date()
   const threshold = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
   const selected = normalized

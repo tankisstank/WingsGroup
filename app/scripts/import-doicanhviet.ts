@@ -32,7 +32,7 @@ type DecisionMap = Record<string, Decision>
 
 export const WINGS_GO_SITE_CODE = 'wings-go' as const
 
-type InputEnvelope = {
+export type InputEnvelope = {
   records: NormalizedTour[]
   sourceSnapshotHash?: string
   referenceDate?: string
@@ -156,7 +156,7 @@ const normalizedArg = (args: Record<string, string | boolean>, key: string) => {
   return typeof value === 'string' ? value.trim() : ''
 }
 
-const parseInputEnvelope = (value: unknown): InputEnvelope => {
+export const parseInputEnvelope = (value: unknown): InputEnvelope => {
   if (Array.isArray(value)) return { records: value as NormalizedTour[] }
   if (!value || typeof value !== 'object') throw new Error('Normalized input must be an array')
   const envelope = value as {

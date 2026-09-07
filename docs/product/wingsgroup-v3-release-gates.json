@@ -32,7 +32,7 @@
       "priority": "P0",
       "scope": "Privacy policy, consent version, retention and data-subject contact",
       "mandatory": true,
-      "state": "approved",
+      "state": "pending-update",
       "owner": "Business and legal owner",
       "evidenceRequirements": ["Approved policy URL or version", "Retention policy", "Data-subject contact"],
       "policy": {
@@ -121,7 +121,7 @@
       "priority": "P2",
       "scope": "Public locale inventory",
       "mandatory": true,
-      "state": "approved",
+      "state": "route-ready",
       "owner": "Content owner",
       "requiredLocales": ["vi", "en"],
       "editorialStyle": "Human-like, natural marketing copy with a refined and courteous luxury-travel tone.",
@@ -131,7 +131,9 @@
         "/home/docker-admin/.codex-orchestrator/runs/wings-e09-en-editorial-audit-20260824/reports/EN-EDITORIAL-03-final.json; independent Terra review accepted at audited head 95e887ec6da2f74a1a7403f0d8e4e62de95cc85d",
         "Native editorial acceptance: no P0/P1/P2 public-English editorial findings; native editorial sign-off recommended"
       ],
-      "approvedAt": "2026-08-24",
+      "routeReadyEvidence": [
+        "WP-EN-01 accepted the Vietnamese and English route, metadata, chrome, copy and fail-closed inventory; final content approval remains a separate gate."
+      ],
       "failClosedBehavior": "Do not expose an incomplete English route or locale switch; preserve Vietnamese continuity while English is completed in parallel.",
       "consumers": ["US-061", "US-062", "US-063", "US-065", "US-066"]
     },

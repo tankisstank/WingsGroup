@@ -85,9 +85,6 @@ export const createLifecyclePlan = (
 
   const batchId =
     typeof args['batch-id'] === 'string' && args['batch-id'].trim() ? args['batch-id'].trim() : null
-  if (operation === 'rollback' && !batchId) {
-    throw new Error('Rollback requires --batch-id')
-  }
   if (operation === 'rollback' && args['batch-id'] === true) {
     throw new Error('--batch-id requires a value')
   }
@@ -95,6 +92,9 @@ export const createLifecyclePlan = (
   const only = args.only === undefined ? new Set<string>() : sourceSelection(args.only)
   if (apply && operation !== 'rollback' && only.size === 0) {
     throw new Error('Apply requires explicit --only source IDs')
+  }
+  if ((operation === 'rollback' || operation === 'publish' || operation === 'contact-only') && apply && !batchId) {
+    throw new Error(`${operation} apply requires --batch-id`)
   }
 
   const adminEmail = textArg(args['admin-email']) || null

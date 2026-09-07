@@ -1267,9 +1267,10 @@ async function createSiteSettings(
   siteSeed: SiteSeed,
   heroImageID: number | string,
   overrides: {
+    defaultImageID?: number | string | null
     footerNote?: string
     footerNavItems?: Array<ReturnType<typeof linkItem>>
-    faviconImageID?: number | string
+    faviconImageID?: number | string | null
     headerNavItems?: Array<ReturnType<typeof linkItem>>
     logoImageID?: number | string | null
     supportEmail?: string
@@ -1291,7 +1292,7 @@ async function createSiteSettings(
         ...(siteSeed.brandColor ? { brandColor: siteSeed.brandColor } : {}),
         ...(siteSeed.accentColor ? { accentColor: siteSeed.accentColor } : {}),
         logoImage: overrides.logoImageID === undefined ? null : overrides.logoImageID,
-        faviconImage: overrides.faviconImageID || heroImageID,
+        faviconImage: overrides.faviconImageID === undefined ? heroImageID : overrides.faviconImageID,
         // Tenant identity is `wing-side`, while the established visual theme
         // option is `wings-side`. Keep those separate instead of submitting an
         // invalid select value during deterministic fixture seeding.
@@ -1309,7 +1310,7 @@ async function createSiteSettings(
         defaultTitle: siteSeed.name,
         titleSuffix: siteSeed.seoSuffix,
         defaultDescription: siteSeed.seoDescription,
-        defaultImage: heroImageID,
+        defaultImage: overrides.defaultImageID === undefined ? heroImageID : overrides.defaultImageID,
         canonicalDomain: `https://${siteSeed.domain.replace('.local', '.vn')}`,
       },
       supportEmail: overrides.supportEmail || `hello@${siteSeed.domain.replace('.local', '.vn')}`,
@@ -10052,6 +10053,8 @@ async function seedWingsSide(payload: Payload, req: PayloadRequest, siteSeed: Si
       linkItem('Cẩm nang du lịch', '/travel-guide'),
       linkItem('Liên hệ', '/contact-us'),
     ],
+    defaultImageID: null,
+    faviconImageID: null,
     logoImageID: null,
     supportEmail: 'info@wingsgroup.vn',
     supportPhone: '0912910101',

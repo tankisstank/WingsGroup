@@ -532,8 +532,7 @@ const buildHTML = ({ generatedAt, sites }: { generatedAt: string; sites: SiteNod
 </html>`
 }
 
-const { createClient } =
-  await import('../node_modules/.pnpm/@libsql+client@0.14.0/node_modules/@libsql/client/lib-esm/node.js')
+const { createClient } = await import('@libsql/client/node')
 const client = createClient({ url: getDatabaseURL() })
 
 const [siteRows, pageRows, postRows] = await Promise.all([

@@ -125,10 +125,14 @@ export const snapshotDepartures = (
     if (date.getTime() <= Date.now()) continue
     departures.push({
       departureDate: date.toISOString(),
+      returnDate: date.toISOString(),
       priceFrom,
       currency: 'USD',
       rawDate: match[0],
       rawRow: [text],
+      availabilityStatus: 'open',
+      isFeatured: false,
+      sourceRowIndex: departures.length,
     })
   }
   return Array.from(new Map(departures.map((item) => [item.departureDate, item])).values())

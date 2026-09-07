@@ -33,7 +33,7 @@ export type NormalizedDeparture = {
   rawDate: string
   rawRow: string[]
   airline?: string
-  currency?: 'VND'
+  currency?: 'VND' | 'USD'
   availabilityStatus: 'open'
   isFeatured: boolean
   sourceRowIndex: number
@@ -158,7 +158,7 @@ export type NormalizedTour = RichNormalizedContract & {
   durationNights: number | null
   summary: string
   priceFrom: number | null
-  currency?: 'VND'
+  currency?: 'VND' | 'USD'
   itineraryDays: NormalizedItineraryDay[]
   departures: SourceDeparture[]
   sourcePricing: { tables: unknown[] }

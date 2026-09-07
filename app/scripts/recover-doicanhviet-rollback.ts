@@ -145,9 +145,6 @@ export const buildRecoveryScope = ({
     throw new Error(`Previous rollback report must target ${DOICANHVIET_SITE_CODE}`)
   if (!importReport.batchId || previousRollbackReport.batchId !== importReport.batchId)
     throw new Error('Import and previous rollback reports must have the same batchId')
-  if (previousRollbackReport.siteImportResult !== undefined) {
-    throw new Error('Previous rollback report contains an invalid sourceImportResult field')
-  }
   if (path.resolve(previousRollbackReport.sourceImportResult || '') !== path.resolve(importPath))
     throw new Error('Previous rollback report is not bound to the supplied import report')
   if (!isID(importReport.siteId) || !isID(previousRollbackReport.siteId) || !sameID(importReport.siteId, previousRollbackReport.siteId))
@@ -352,7 +349,7 @@ const main = async () => {
     const mediaRows: Array<{ id: ID; sourceId: string; action: 'delete' | 'already-absent'; reason?: string }> = []
     for (const [mediaIdKey, sourceId] of scope.mediaSourceById) {
       const mediaId = mediaIdKey
-      const media = await findOne(payload, 'media', mediaId, req)
+      const media = (await findOne(payload, 'media', mediaId, req)) as Record<string, any> | null
       if (!media) {
         mediaRows.push({ id: mediaId, sourceId, action: 'already-absent' })
         continue

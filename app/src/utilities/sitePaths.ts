@@ -12,7 +12,6 @@ export type SiteAlias = keyof typeof siteAliasToCodeMap
 export const legacySiteAliasToCodeMap = {
   wingsside: 'wing-side',
   wingstravel: 'wings-group',
-  wingsside: 'wing-side',
 } as const
 
 export const legacySiteAliasRedirectMap = {

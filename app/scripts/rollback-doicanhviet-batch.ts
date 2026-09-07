@@ -18,7 +18,7 @@ type CreatedRecord = {
   status: string
   sourceId: string
   parentPageId?: number | string
-  productId?: number | string
+  productId?: number | string | null
   createdPageId?: number | string | null
   departureIds?: Array<number | string>
   mediaIds?: Array<number | string>
@@ -154,7 +154,7 @@ const main = async () => {
     const productIDs = new Set<string>()
     for (const item of created) {
       const productID = item.productId
-      if (!item.sourceId || productID === undefined || productIDs.has(String(productID))) {
+      if (!item.sourceId || productID === undefined || productID === null || productIDs.has(String(productID))) {
         throw new Error(`Duplicate or invalid created product: ${item.sourceId}`)
       }
       productIDs.add(String(productID))

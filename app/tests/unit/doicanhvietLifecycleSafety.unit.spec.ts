@@ -46,6 +46,8 @@ describe('DoicanhViet lifecycle safety boundary', () => {
         DOICANHVIET_SITE_CODE,
         '--only',
         'DCV-215094,215093',
+        '--batch-id',
+        'us044-publish-test',
         '--admin-email',
         'admin@example.test',
       ],
