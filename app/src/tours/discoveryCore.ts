@@ -1,4 +1,5 @@
 import { isSupportedLocale } from '@/utilities/locales'
+import { normalizePublicMediaURL } from '@/utilities/getMediaUrl'
 
 import {
   normalizeTourDestinationKeys,
@@ -506,7 +507,7 @@ export const projectDiscoveryTour = ({
     },
     hero: {
       alt: sanitizeWingSidePublicText(heroMedia.alt) || publicTitle,
-      url: heroMedia.url.trim(),
+      url: normalizePublicMediaURL(heroMedia.url.trim()),
     },
     href: getPageCanonicalPath(wrapperPage, locale),
     id,

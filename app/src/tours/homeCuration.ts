@@ -1,4 +1,5 @@
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
+import { normalizePublicMediaURL } from '@/utilities/getMediaUrl'
 import type { Site } from '@/payload-types'
 import type { Payload } from 'payload'
 import {
@@ -324,7 +325,10 @@ const projectTour = ({
             ? tour.durationNights
             : null,
       },
-      hero: { alt: heroMedia.alt?.trim() || tour.title.trim(), url: heroMedia.url.trim() },
+      hero: {
+        alt: heroMedia.alt?.trim() || tour.title.trim(),
+        url: normalizePublicMediaURL(heroMedia.url.trim()),
+      },
       href: getPageCanonicalPath(wrapperPage, locale),
       id: tourID,
       price,
@@ -450,7 +454,13 @@ const projectWhyTravelSlots = ({ home, locale, pageSite }: { home?: HomeCuration
         override && nonEmpty(slot.presentation?.ctaLabel)
           ? slot.presentation.ctaLabel.trim()
           : undefined,
-      hero: overrideMedia && nonEmpty(overrideMedia.url) ? { alt: overrideMedia.alt?.trim() || card.title, url: overrideMedia.url.trim() } : card.hero,
+      hero:
+        overrideMedia && nonEmpty(overrideMedia.url)
+          ? {
+              alt: overrideMedia.alt?.trim() || card.title,
+              url: normalizePublicMediaURL(overrideMedia.url.trim()),
+            }
+          : card.hero,
       key: slot.key!,
     })
   }

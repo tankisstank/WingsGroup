@@ -160,6 +160,14 @@ describe('WingSide discovery pure contract', () => {
   })
 
   it('projects only safe public fields and fails closed for invalid records', () => {
+    expect(
+      projectDiscoveryTour({
+        locale: 'en',
+        site,
+        tour: tour({ heroMedia: { alt: 'Hanoi hero', site: 3, url: '/api/media/file/hanoi.jpg?tag=1' } }),
+      })?.hero.url,
+    ).toBe('/media/hanoi.jpg?tag=1')
+
     expect(projectDiscoveryTour({ locale: 'en', site, tour: tour() })).toEqual({
       currency: 'USD',
       destinationTags: ['hanoi'],

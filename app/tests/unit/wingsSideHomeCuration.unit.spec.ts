@@ -203,6 +203,36 @@ describe('WingSide Home curation audit', () => {
   })
 })
 describe('WingSide Home runtime curation loader', () => {
+  it('projects Payload internal hero URLs through the public media route', () => {
+    const populatedTour = (id: number) => ({
+      ...eligibleTours.get(String(id))!,
+      heroMedia: { alt: `Hero ${id}`, url: `/api/media/file/hero-${id}.jpg?tag=1` },
+      wrapperPage: { pathname: `/tour/tour-${id}`, site: siteID },
+    })
+    const result = projectWingsSideHomeCuration({
+      home: {
+        destinationTourSelections: wingsSideHomeDestinationSelections.map((selection) => ({
+          ...selection,
+          tour: populatedTour(selection.tour),
+        })),
+        featuredJourneySelections: wingsSideHomeFeaturedSelections.map((selection) => ({
+          ...selection,
+          tour: populatedTour(selection.tour),
+        })),
+        styleTourSelections: wingsSideHomeStyleSelections.map((selection) => ({
+          ...selection,
+          tour: populatedTour(selection.tour),
+        })),
+      },
+      pageSite: siteID,
+    })
+
+    expect(result.featuredJourneys).toHaveLength(3)
+    expect(result.featuredJourneys[0]?.hero.url).toBe(
+      `/media/hero-${wingsSideHomeFeaturedSelections[0]?.tour}.jpg?tag=1`,
+    )
+  })
+
   it('hydrates explicitly queried tour, wrapper, and media relations into a ready projection', async () => {
     const priceByTourID = new Map<number, { currency?: string; priceFrom?: number }>([
       [491, { currency: 'USD', priceFrom: 1200 }],
