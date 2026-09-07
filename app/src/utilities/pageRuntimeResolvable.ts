@@ -1,10 +1,14 @@
 import type { SupportedLocaleCode } from './sitePaths'
 import type { hasMatchingWingSideTourWrapper as matchWingSideTourWrapper } from '@/tours/wingsSideTourViewModel'
+import { isWingsGroupRoutePublic } from '@/wingsgroup/corporateRoutes'
 
 type RenderablePageLike = {
   hero?: null | { richText?: unknown }
   layout?: null | unknown[]
+  pathname?: null | string
+  slug?: null | string
   title?: null | string
+  wingsGroupRoute?: unknown
 }
 
 type TourWrapperPageLike = {
@@ -42,6 +46,7 @@ export const isRuntimeResolvablePage = async ({
   locale,
   page,
   pathname,
+  settings,
   siteCode,
 }: {
   getResolvedTourDetailBySlug?: (args: {
@@ -54,9 +59,11 @@ export const isRuntimeResolvablePage = async ({
   locale: SupportedLocaleCode
   page?: null | (RenderablePageLike & TourWrapperPageLike)
   pathname: string
+  settings?: unknown
   siteCode?: null | string
 }): Promise<boolean> => {
   if (!hasRenderableLocalizedPageContent(page)) return false
+  if (!isWingsGroupRoutePublic({ locale, page, settings, siteCode })) return false
 
   const tourSlug = siteCode === 'wing-side' ? getStructuredTourSlugFromPath(pathname) : null
   if (!tourSlug) return true

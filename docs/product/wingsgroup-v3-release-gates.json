@@ -31,12 +31,10 @@
       "key": "privacy-consent",
       "priority": "P0",
       "scope": "Privacy policy, consent version, retention and data-subject contact",
-      "mandatory": false,
+      "mandatory": true,
       "state": "approved",
       "owner": "Business and legal owner",
       "evidenceRequirements": ["Approved policy URL or version", "Retention policy", "Data-subject contact"],
-      "evidence": ["Stakeholder approval recorded in the E09 implementation session, 2026-08-14"],
-      "approvedAt": "2026-08-14",
       "policy": {
         "version": "wingsgroup-privacy-v1",
         "routes": {
@@ -57,6 +55,12 @@
         "vi": "Tôi đồng ý để WingsGroup sử dụng thông tin đã cung cấp nhằm liên hệ, tư vấn và chuyển yêu cầu đến bộ phận phù hợp theo Chính sách bảo mật.",
         "en": "I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy."
       },
+      "evidence": [
+        "Stakeholder-approved privacy and consent contract, 2026-08-24",
+        "Approved policy routes: /chinh-sach-bao-mat and /en/chinh-sach-bao-mat; retention 24 months; data-subject contact info@doicanhviet.com; inter-branch routing allowed",
+        "Lead delivery remains Payload/CMS database only; release configuration requires LEAD_DELIVERY_REQUIRED=false. Runtime policy routes, consent persistence, migration/seed and production smoke proof remain separate release work."
+      ],
+      "approvedAt": "2026-08-24",
       "failClosedBehavior": "Do not accept production leads or display unapproved privacy copy.",
       "consumers": ["US-061", "US-064", "US-065", "US-066"]
     },
@@ -65,28 +69,21 @@
       "priority": "P0",
       "scope": "Consultation-channel endpoints, owners, SLAs and tracking",
       "mandatory": false,
-      "state": "approved",
-      "owner": "WingsGroup Sales",
+      "state": "pending-update",
+      "owner": "Commercial operations owner",
       "channels": [
-        {
-          "key": "zalo",
-          "state": "configured",
-          "url": "https://zalo.me/4142059657526524531",
-          "owner": "WingsGroup Sales",
-          "sla": "Phản hồi trong 1 ngày làm việc / Reply within 1 business day",
-          "trackingEvidence": "stakeholder-approved-zalo-oa-4142059657526524531-2026-08-29"
-        },
+        { "key": "zalo", "state": "unconfigured" },
         { "key": "whatsapp", "state": "unconfigured" },
         { "key": "messenger", "state": "unconfigured" }
       ],
-      "evidence": [
-        "Stakeholder approved Wingsgroup - Vietwings Travel OAID 4142059657526524531, 2026-08-29",
-        "Production browser smoke confirmed the direct-contact section and consultation dialog OA links, release 6766013a6f4f178071841d50aea4fa16a04ee3c3"
-      ],
-      "approvedAt": "2026-08-29",
+      "directContacts": {
+        "contactEmail": "info@wingsgroup.vn",
+        "hotline": "0912910101",
+        "salesEmail": "sales@wingsgroup.vn"
+      },
       "evidenceRequirements": ["Approved HTTPS URL", "Named owner", "SLA", "Tracking proof"],
-      "releaseRule": "The built-in, consent-aware WingsGroup contact form is the required consultation path. External channels are optional and do not block release while unconfigured.",
-      "failClosedBehavior": "Only the approved Zalo OA may open its configured URL. WhatsApp and Messenger remain chờ cập nhật; a future configured channel must satisfy URL, owner, SLA, and tracking checks before it can be shown.",
+      "releaseRule": "The built-in, consent-aware WingsGroup contact form and the approved hotline/email contacts are the consultation path. External channels are optional and do not block release while unconfigured.",
+      "failClosedBehavior": "Show channels as chờ cập nhật or record a preferred channel only; do not open an external URL. A configured external channel must satisfy URL, owner, SLA, and tracking checks before it can be shown.",
       "consumers": ["US-061", "US-063", "US-064", "US-066"]
     },
     {
@@ -97,6 +94,7 @@
       "state": "pending",
       "owner": "Content and legal owner",
       "evidenceRequirements": ["Source or issuer", "Context or date", "Publication permission", "Media provenance"],
+      "releaseRule": "Proof is required only when a specific proof record is proposed for publication. A pending proof archive must not block release when it remains hidden.",
       "failClosedBehavior": "Do not publish the proof record or present editorial media as proof.",
       "consumers": ["US-061", "US-063", "US-065", "US-066"]
     },
@@ -125,11 +123,15 @@
       "mandatory": true,
       "state": "approved",
       "owner": "Content owner",
-      "approvedAt": "2026-08-25",
-      "evidence": ["Independent native editorial audit accepted Vietnamese and English public copy", "Production smoke: Vietnamese and English route/chrome/sitemap inventory, 2026-08-26"],
       "requiredLocales": ["vi", "en"],
       "editorialStyle": "Human-like, natural marketing copy with a refined and courteous luxury-travel tone.",
       "evidenceRequirements": ["Approved Vietnamese and English route/chrome inventory", "Native-quality editorial review", "Locale QA"],
+      "evidence": [
+        "WP-EN-01 accepted route, metadata, chrome, copy and fail-closed contract evidence at 27e64f1f1e8856b613eb42489522babb3126f8d4",
+        "/home/docker-admin/.codex-orchestrator/runs/wings-e09-en-editorial-audit-20260824/reports/EN-EDITORIAL-03-final.json; independent Terra review accepted at audited head 95e887ec6da2f74a1a7403f0d8e4e62de95cc85d",
+        "Native editorial acceptance: no P0/P1/P2 public-English editorial findings; native editorial sign-off recommended"
+      ],
+      "approvedAt": "2026-08-24",
       "failClosedBehavior": "Do not expose an incomplete English route or locale switch; preserve Vietnamese continuity while English is completed in parallel.",
       "consumers": ["US-061", "US-062", "US-063", "US-065", "US-066"]
     },
@@ -141,11 +143,11 @@
       "state": "approved",
       "owner": "Content and brand owner",
       "rightsApproved": true,
-      "approvedAt": "2026-08-25",
-      "evidence": ["Stakeholder confirmed the 13 handoff images are licensed for use, 2026-08-13", "Governed media import/publish created 13 records with VI/EN alt, provenance, rights, site scope and 78 derivatives", "docs/product/wingsgroup-v3-media-manifest.json"],
+      "evidence": ["Stakeholder confirmed the 13 handoff images were created with ChatGPT and may be used for WingsGroup, 2026-08-23", "docs/product/wingsgroup-v3-media-manifest.json", "WP-REL-14 verifies the flat Payload-managed six-size derivative contract for 13 sources and 78 files with plan checksum 18d2610de98940f03b39448f7a3cf665be1d2498cae6b57a848a3b0daaaf2943; WP-REL-16 adds the server-owned publication boundary, exact public ledger gate, and decoded physical derivative checks; production apply, verify, and the separate second-confirmation publication phase remain unexecuted"],
+      "approvedAt": "2026-08-23",
       "provenanceManifest": "docs/product/wingsgroup-v3-media-manifest.json",
       "evidenceRequirements": ["Vietnamese alt text", "Source and provenance", "Publication rights", "WingsGroup site scope", "Responsive derivatives"],
-      "failClosedBehavior": "Do not publish a media item until its provenance, Vietnamese and English alt text, WingsGroup scope, and responsive derivatives are recorded; never label editorial media as legal proof.",
+      "failClosedBehavior": "Do not publish a media item until its provenance, Vietnamese and English alt text, WingsGroup scope, six physical Payload derivatives decoded as the expected WebP/AVIF formats and dimensions with matching ledger hashes, and production import are recorded; never label editorial media as legal proof.",
       "consumers": ["US-061", "US-062", "US-063", "US-066"]
     },
     {
@@ -155,9 +157,12 @@
       "mandatory": true,
       "state": "approved",
       "owner": "Brand owner",
-      "approvedAt": "2026-08-25",
-      "evidence": ["Stakeholder supplied WingsGroup web brand kit and WEB-BRAND-GUIDE.md", "Independent brand review accepted runtime fallback and tenant isolation"],
       "evidenceRequirements": ["Approved runtime logo asset", "Approved token source", "Brand-owner confirmation"],
+      "evidence": [
+        "https://quyt-lenovo.taild819fc.ts.net/WingsGroup-web-brand-kit.zip sha256:4e4011664c352b281c727ffbd0b0ef513c1d877ea4692d348a352af54e16c44f",
+        "https://quyt-lenovo.taild819fc.ts.net/WingsGroup-web-brand-kit/WEB-BRAND-GUIDE.md sha256:16abdaa214fc4157a890abea3db07e3183769d3904a18506f1f0ab8e3358ffa3",
+        "Brand owner supplied approval date: 2026-08-23; committed PNG master checksums and dimensions recorded in app/src/wingsgroup/brand.ts"
+      ],
       "failClosedBehavior": "Retain the existing approved runtime branding; do not adopt an unreconciled export.",
       "consumers": ["US-061", "US-062", "US-063", "US-066"]
     }

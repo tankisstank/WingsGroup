@@ -9,15 +9,24 @@ import { getCurrentSiteSettings } from './getSiteSettings'
 import { getCurrentSite } from './siteContext'
 import { getCanonicalSiteOrigin, getSiteSitemapURL } from './siteSEO'
 import { isPublicLocale } from './sitePaths'
-import { getSiteBrandAssetURL, getSiteOwnedMedia } from './siteBranding'
+import { WINGSGROUP_BRAND, isWingsGroupBrandSite } from '@/wingsgroup/brand'
 
 const getImageURL = ({
   image,
+  siteCode,
   settings,
 }: {
   image?: Media | Config['db']['defaultIDType'] | null
+  siteCode?: null | string
   settings?: Parameters<typeof buildConfiguredAbsoluteMediaURL>[0]['settings']
-}) => buildConfiguredAbsoluteMediaURL({ media: image, settings })
+}) =>
+  buildConfiguredAbsoluteMediaURL({
+    fallbackPath: isWingsGroupBrandSite(siteCode)
+      ? WINGSGROUP_BRAND.assets.ogImage
+      : '/website-template-OG.webp',
+    media: image,
+    settings,
+  })
 
 export const generateMeta = async (args: {
   alternateLocales?: SupportedLocaleCode[]
@@ -29,13 +38,11 @@ export const generateMeta = async (args: {
   const site = await getCurrentSite()
   const settings = await getCurrentSiteSettings()
 
-  const ogMedia =
-    getSiteOwnedMedia(doc?.meta?.image, site.id) ||
-    getSiteOwnedMedia(settings?.seo?.defaultImage, site.id)
-  const fallbackOGImage = getSiteBrandAssetURL(site.code, 'ogImage') || '/website-template-OG.webp'
-  const ogImage = ogMedia
-    ? getImageURL({ image: ogMedia, settings })
-    : buildConfiguredAbsoluteMediaURL({ fallbackPath: fallbackOGImage, media: null, settings })
+  const ogImage = getImageURL({
+    image: doc?.meta?.image || settings?.seo?.defaultImage,
+    siteCode: site.code,
+    settings,
+  })
   const seoDefaultTitle = settings?.seo?.defaultTitle || settings?.siteName || 'WingsGroup'
   const seoTitleSuffix = settings?.seo?.titleSuffix
   const description =

@@ -1,24 +1,72 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
+import type {
+  CollectionAfterReadHook,
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  CollectionBeforeChangeHook,
+  CollectionConfig,
+  PayloadRequest,
+} from 'payload'
 
 import {
   FixedToolbarFeature,
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
 import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
-import { enforceSiteAccess, siteScopedAccess, siteScopedOrAnyone } from '@/access/siteScope'
+import { enforceSiteAccess, siteScopedAccess, wingsGroupMediaReadAccess } from '@/access/siteScope'
 import { siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import {
   revalidateWingSideDiscovery,
   revalidateWingSideDiscoveryForTourDependency,
 } from '@/collections/Tours/hooks/revalidateTourContent'
+import {
+  generateWingsGroupV3DerivativeImageName,
+  mediaGovernanceField,
+  validateWingsGroupV3PublicMedia,
+  validateGovernedMediaBeforeChange,
+  WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES,
+} from '@/fields/wingsGroupV3'
+import { isWingsGroupLocalDraftPreview } from '@/wingsgroup/corporateRoutes'
+import { resolveWingsGroupLocalPreviewMediaDirectory } from '@/utilities/localPreviewMedia'
+import {
+  deleteWingsGroupLocalPreviewMedia,
+  getWingsGroupLocalPreviewMedia,
+  isWingsGroupLocalPreviewStoreConfigured,
+  putWingsGroupLocalPreviewMedia,
+} from '@/utilities/localPreviewStore'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const localPreviewStore = isWingsGroupLocalPreviewStoreConfigured()
+const mediaStaticDir = resolveWingsGroupLocalPreviewMediaDirectory(
+  process.env.E09_PREVIEW_MEDIA_DIRECTORY,
+)
+
+const storeLocalPreviewMedia: CollectionBeforeChangeHook = async ({ data, req }) => {
+  if (!localPreviewStore || !req.file?.data) return data
+  const filename = typeof data?.filename === 'string' ? data.filename : req.file.name
+  if (!filename) throw new Error('E09 preview media upload has no safe filename.')
+  await putWingsGroupLocalPreviewMedia({
+    bytes: req.file.data,
+    contentType: req.file.mimetype,
+    filename,
+  })
+  return data
+}
+
+const deleteLocalPreviewMedia: CollectionAfterDeleteHook = async ({ doc }) => {
+  if (localPreviewStore && typeof doc.filename === 'string') {
+    await deleteWingsGroupLocalPreviewMedia(doc.filename)
+  }
+  return doc
+}
+
+const serveLocalPreviewMedia = async (
+  _req: PayloadRequest,
+  { params }: { params: { filename: string } },
+): Promise<Response> => {
+  if (!localPreviewStore) return new Response(null, { status: 404 })
+  return getWingsGroupLocalPreviewMedia(params.filename)
+}
 
 const revalidateCuratedTourMedia: CollectionAfterChangeHook = async ({
   doc,
@@ -39,12 +87,48 @@ const revalidateDeletedTourMedia: CollectionAfterDeleteHook = ({ doc, req: { con
   return doc
 }
 
+export const enforceAnonymousGovernedMediaRead: CollectionAfterReadHook = async ({ doc, req }) => {
+  const governance = doc?.governance
+  if (
+    req.user ||
+    governance?.managedBy !== 'wingsgroup-v3' ||
+    (process.env.NODE_ENV !== 'production' &&
+      isWingsGroupLocalDraftPreview({ context: req.context, status: 'draft' }))
+  ) {
+    return doc
+  }
+
+  const siteID =
+    typeof doc.site === 'object' && doc.site && 'id' in doc.site
+      ? doc.site.id
+      : typeof doc.site === 'number' || typeof doc.site === 'string'
+        ? doc.site
+        : undefined
+  if (siteID === undefined) throw new Error('WingsGroup public media requires site scope.')
+
+  const site = await req.payload.findByID({
+    collection: 'sites',
+    depth: 0,
+    id: siteID,
+    overrideAccess: true,
+    req,
+  })
+  const result = validateWingsGroupV3PublicMedia(
+    governance,
+    site?.code === 'wings-group' ? `https://${site.primaryDomain}` : undefined,
+  )
+  if (site?.code !== 'wings-group' || result !== true) {
+    throw new Error(result === true ? 'WingsGroup public media site scope is invalid.' : result)
+  }
+  return doc
+}
+
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
     create: contentCreateAccess,
     delete: contentDeleteAccess,
-    read: siteScopedOrAnyone(),
+    read: wingsGroupMediaReadAccess,
     update: siteScopedAccess(),
   },
   admin: {
@@ -77,53 +161,66 @@ export const Media: CollectionConfig = {
         },
       }),
     },
+    mediaGovernanceField,
   ],
   labels: {
     plural: adminLabel('Thư viện media', 'Media library'),
     singular: adminLabel('Media', 'Media'),
   },
   upload: {
-    // Upload to the public/media directory in Next.js making them publicly accessible even outside of Payload
-    staticDir: path.resolve(dirname, '../../public/media'),
-    adminThumbnail: 'thumbnail',
-    focalPoint: true,
-    imageSizes: process.env.PAYLOAD_IMPORT_ORIGINALS_ONLY === 'true' ? [] : [
-      {
-        name: 'thumbnail',
-        width: 300,
-      },
-      {
-        name: 'square',
-        width: 500,
-        height: 500,
-      },
-      {
-        name: 'small',
-        width: 600,
-      },
-      {
-        name: 'medium',
-        width: 900,
-      },
-      {
-        name: 'large',
-        width: 1400,
-      },
-      {
-        name: 'xlarge',
-        width: 1920,
-      },
-      {
-        name: 'og',
-        width: 1200,
-        height: 630,
-        crop: 'center',
-      },
-    ],
+    ...(mediaStaticDir ? { staticDir: mediaStaticDir } : {}),
+    ...(localPreviewStore ? { adminThumbnail: undefined } : { adminThumbnail: 'thumbnail' }),
+    disableLocalStorage: localPreviewStore,
+    focalPoint: !localPreviewStore,
+    handlers: localPreviewStore ? [serveLocalPreviewMedia] : undefined,
+    imageSizes: localPreviewStore
+      ? []
+      : process.env.PAYLOAD_IMPORT_ORIGINALS_ONLY === 'true'
+        ? []
+        : [
+            {
+              name: 'thumbnail',
+              width: 300,
+            },
+            {
+              name: 'square',
+              width: 500,
+              height: 500,
+            },
+            {
+              name: 'small',
+              width: 600,
+            },
+            {
+              name: 'medium',
+              width: 900,
+            },
+            {
+              name: 'large',
+              width: 1400,
+            },
+            {
+              name: 'xlarge',
+              width: 1920,
+            },
+            {
+              name: 'og',
+              width: 1200,
+              height: 630,
+              crop: 'center',
+            },
+            ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ format, name, width }) => ({
+              formatOptions: { format },
+              generateImageName: generateWingsGroupV3DerivativeImageName,
+              name,
+              width,
+            })),
+          ],
   },
   hooks: {
+    afterRead: [enforceAnonymousGovernedMediaRead],
     afterChange: [revalidateCuratedTourMedia],
-    afterDelete: [revalidateDeletedTourMedia],
-    beforeChange: [enforceSiteAccess],
+    afterDelete: [revalidateDeletedTourMedia, deleteLocalPreviewMedia],
+    beforeChange: [enforceSiteAccess, validateGovernedMediaBeforeChange, storeLocalPreviewMedia],
   },
 }

@@ -337,7 +337,7 @@ test.describe('WingSide guided journey discovery', () => {
 
     await page.goto(exactURL, { waitUntil: 'domcontentloaded' })
     await page.locator('.ws-journeys-card').first().click()
-    await expect(page).toHaveURL(/\/wingsside\/tour\/.+source=journeys/, {
+    await expect(page).toHaveURL(/\/wing-side\/tour\/.+source=journeys/, {
       timeout: 60_000,
     })
     await page.goBack({ waitUntil: 'domcontentloaded' })

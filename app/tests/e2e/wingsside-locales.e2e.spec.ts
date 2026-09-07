@@ -3,23 +3,36 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 const e2eBaseURL = (process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3100').replace(/\/$/, '')
 
 const localAliasUrl = (locale: 'en' | 'it', path: string) =>
-  `${e2eBaseURL}/wingsside/${locale}${path}`
+  `${e2eBaseURL}/wing-side/${locale}${path}`
 
 const activateLocaleLink = async (page: Page, scope: Locator | Page, label: RegExp | string) => {
   const link = scope.getByRole('link', { name: label }).first()
   await link.click()
 }
 
-test.describe('WingSide locale continuity', () => {
+test.describe('WingsSide locale continuity', () => {
+  test('permanently redirects the legacy alias to the canonical locale path', async ({ request }) => {
+    const legacyPath = '/wingsside/it/search?q=hanoi'
+    const canonicalPath = '/wing-side/it/search?q=hanoi'
+    const redirect = await request.get(`${e2eBaseURL}${legacyPath}`, { maxRedirects: 0 })
+
+    expect(redirect.status()).toBe(308)
+    expect(redirect.headers().location).toBe(`${e2eBaseURL}${canonicalPath}`)
+
+    const followed = await request.get(`${e2eBaseURL}${legacyPath}`)
+    expect(followed.status()).toBe(200)
+    expect(followed.url()).toBe(`${e2eBaseURL}${canonicalPath}`)
+  })
+
   test('keeps unprefixed English and /vi Vietnamese self-canonical', async ({ page }) => {
-    await page.goto(`${e2eBaseURL}/wingsside`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${e2eBaseURL}/wing-side`, { waitUntil: 'domcontentloaded' })
     await expect(page.locator('html')).toHaveAttribute('lang', 'en')
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       'href',
       'https://wingside.vn',
     )
 
-    await page.goto(`${e2eBaseURL}/wingsside/vi`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${e2eBaseURL}/wing-side/vi`, { waitUntil: 'domcontentloaded' })
     await expect(page.locator('html')).toHaveAttribute('lang', 'vi')
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       'href',
@@ -44,7 +57,7 @@ test.describe('WingSide locale continuity', () => {
     )
 
     await activateLocaleLink(page, page, 'Italiano')
-    await expect(page).toHaveURL(`${e2eBaseURL}/wingsside/it/search?q=hanoi#results`)
+    await expect(page).toHaveURL(`${e2eBaseURL}/wing-side/it/search?q=hanoi#results`)
     await expect(page.locator('html')).toHaveAttribute('lang', 'it')
     await expect(
       page.getByRole('navigation', { name: 'Navigazione del piè di pagina' }),
@@ -52,15 +65,15 @@ test.describe('WingSide locale continuity', () => {
 
     const footerNavigation = page.getByRole('navigation', { name: 'Navigazione del piè di pagina' })
     await footerNavigation.getByRole('link', { name: 'Destinazioni' }).click()
-    await expect(page).toHaveURL(`${e2eBaseURL}/wingsside/it/destinations`)
+    await expect(page).toHaveURL(`${e2eBaseURL}/wing-side/it/destinations`)
     await expect(page.locator('html')).toHaveAttribute('lang', 'it')
 
     await page.goBack({ waitUntil: 'domcontentloaded' })
-    await expect(page).toHaveURL(`${e2eBaseURL}/wingsside/it/search?q=hanoi#results`)
+    await expect(page).toHaveURL(`${e2eBaseURL}/wing-side/it/search?q=hanoi#results`)
     await expect(page.locator('html')).toHaveAttribute('lang', 'it')
 
     await page.reload({ waitUntil: 'domcontentloaded' })
-    await expect(page).toHaveURL(`${e2eBaseURL}/wingsside/it/search?q=hanoi#results`)
+    await expect(page).toHaveURL(`${e2eBaseURL}/wing-side/it/search?q=hanoi#results`)
     await expect(page.locator('html')).toHaveAttribute('lang', 'it')
   })
 })

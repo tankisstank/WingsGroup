@@ -76,6 +76,27 @@ export const buildOrganizationJSONLD = (
   const siteName = settings?.siteName || settings?.seo?.defaultTitle || 'WingsGroup'
   const siteUrl = buildCanonicalUrl(settings, '/', options)
   const logo = getMediaUrl(settings?.branding?.logoImage, settings)
+  const contactPoints = [
+    ...(settings?.supportEmail || settings?.supportPhone
+      ? [
+          {
+            '@type': 'ContactPoint' as const,
+            ...(settings.supportEmail ? { email: settings.supportEmail } : {}),
+            ...(settings.supportPhone ? { telephone: settings.supportPhone } : {}),
+            contactType: 'customer support',
+          },
+        ]
+      : []),
+    ...(settings?.salesEmail && settings.salesEmail !== settings.supportEmail
+      ? [
+          {
+            '@type': 'ContactPoint' as const,
+            email: settings.salesEmail,
+            contactType: 'sales',
+          },
+        ]
+      : []),
+  ]
 
   return {
     '@id': `${siteUrl}#organization`,
@@ -83,18 +104,7 @@ export const buildOrganizationJSONLD = (
     name: siteName,
     url: siteUrl,
     ...(logo ? { logo } : {}),
-    ...(settings?.supportEmail || settings?.supportPhone
-      ? {
-          contactPoint: [
-            {
-              '@type': 'ContactPoint',
-              ...(settings.supportEmail ? { email: settings.supportEmail } : {}),
-              ...(settings.supportPhone ? { telephone: settings.supportPhone } : {}),
-              contactType: 'customer support',
-            },
-          ],
-        }
-      : {}),
+    ...(contactPoints.length ? { contactPoint: contactPoints } : {}),
   }
 }
 
@@ -219,7 +229,8 @@ export const buildArticleJSONLD = ({
   const url = buildCanonicalUrl(settings, path || `/posts/${post.slug}`, { canonicalOrigin })
   const siteUrl = buildCanonicalUrl(settings, '/', { canonicalOrigin })
   const image = getMediaUrl(post.meta?.image || post.heroImage, settings)
-  const description = post.meta?.description || settings?.seo?.defaultDescription || settings?.tagline || undefined
+  const description =
+    post.meta?.description || settings?.seo?.defaultDescription || settings?.tagline || undefined
   const name = post.meta?.title || post.title
   const authors = post.populatedAuthors?.map((author) => author.name).filter(Boolean)
 
@@ -262,7 +273,8 @@ export const buildPostJsonLd = ({
   const url = buildCanonicalUrl(settings, path || `/posts/${post.slug}`, { canonicalOrigin })
   const siteUrl = buildCanonicalUrl(settings, '/', { canonicalOrigin })
   const image = getMediaUrl(post.meta?.image || post.heroImage, settings)
-  const description = post.meta?.description || settings?.seo?.defaultDescription || settings?.tagline || undefined
+  const description =
+    post.meta?.description || settings?.seo?.defaultDescription || settings?.tagline || undefined
   const name = post.meta?.title || post.title
 
   const webPage: JsonLdNode = {

@@ -154,6 +154,12 @@ const localSQLiteColumnRepairs = [
       ['delivery_status', "TEXT NOT NULL DEFAULT 'pending'"],
       ['delivery_updated_at', 'TEXT'],
       ['delivery_error_code', 'TEXT'],
+      ['wings_group_lead_locale', 'TEXT'],
+      ['wings_group_lead_source_path', 'TEXT'],
+      ['wings_group_lead_consent_version', 'TEXT'],
+      ['wings_group_lead_consented_at', 'TEXT'],
+      ['wings_group_lead_retention_until', 'TEXT'],
+      ['wings_group_lead_preferred_channel', 'TEXT'],
     ],
   },
   {

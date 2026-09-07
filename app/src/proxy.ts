@@ -2,12 +2,17 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import {
   allSiteAliasToCodeMap,
+  getCanonicalSiteAlias,
   getLocaleFromPathname,
   getSiteAliasFromPathname,
-  legacySiteAliasRedirectMap,
 } from '@/utilities/sitePaths'
 import { isPublicLocale } from '@/utilities/locales'
-import { createTrustedSiteContextHeaders, normalizeHost } from '@/utilities/siteDomains'
+import {
+  createTrustedSiteContextHeaders,
+  hasValidTrustedSiteContext,
+  normalizeHost,
+} from '@/utilities/siteDomains'
+import { hasWingsGroupLocalPreviewGrant } from '@/wingsgroup/localPreview'
 
 const stripLeadingSegments = (pathname: string, count: number) => {
   const segments = pathname.split('/').filter(Boolean)
@@ -17,12 +22,30 @@ const stripLeadingSegments = (pathname: string, count: number) => {
 }
 
 const localBootstrapHosts = new Set(['127.0.0.1', '::1', 'localhost'])
-const wingsGroupCanonicalHost = 'wingsgroup.vn'
+const localListenerHosts = new Set(['0.0.0.0', ...localBootstrapHosts])
 const adminLocale = 'vi'
 const adminLocaleCookie = 'payload-lng'
 
 const isLocalDevelopmentHost = (host: null | string) =>
   Boolean(host && (localBootstrapHosts.has(host) || host.endsWith('.local')))
+
+const isLocalListenerHost = (host: null | string) =>
+  Boolean(host && (localListenerHosts.has(host) || host.endsWith('.local')))
+
+const isServerOwnedLocalDraftPreview = async (
+  request: NextRequest,
+  effectiveHost: null | string,
+  siteCode: null | string,
+  locale: null | string,
+): Promise<boolean> =>
+  process.env.NODE_ENV !== 'production' &&
+  isLocalDevelopmentHost(effectiveHost) &&
+  (await hasWingsGroupLocalPreviewGrant({
+    headers: request.headers,
+    host: effectiveHost,
+    locale,
+    siteCode,
+  }))
 
 const notFoundResponse = () =>
   new NextResponse('Not Found', {
@@ -38,11 +61,11 @@ const resolveEffectiveHost = (request: NextRequest): string | null => {
   const urlHost = normalizeHost(request.nextUrl.hostname)
 
   if (headerHost && urlHost && headerHost !== urlHost) {
-    if (isLocalDevelopmentHost(headerHost) && !isLocalDevelopmentHost(urlHost)) {
+    if (isLocalDevelopmentHost(headerHost) && !isLocalListenerHost(urlHost)) {
       return urlHost
     }
 
-    if (isLocalDevelopmentHost(urlHost) && !isLocalDevelopmentHost(headerHost)) {
+    if (isLocalListenerHost(urlHost) && !isLocalDevelopmentHost(headerHost)) {
       return headerHost
     }
   }
@@ -66,12 +89,15 @@ const isEquivalentPreservedHost = (preservedHost: null | string, currentHost: nu
   return localBootstrapHosts.has(preservedHost) && localBootstrapHosts.has(currentHost)
 }
 
-const getPreservedRewriteContext = (request: NextRequest): Headers | null => {
+const getPreservedRewriteContext = async (request: NextRequest): Promise<Headers | null> => {
   if (request.headers.get('x-site-context-source') !== 'proxy') return null
 
   const publicPath = request.headers.get('x-public-path')
   const publicAlias = publicPath ? getSiteAliasFromPathname(publicPath) : null
   const publicLocale = publicPath ? getLocaleFromPathname(publicPath) : null
+
+  if (publicAlias === 'wingsside') return null
+
   const expectedSiteCode = publicAlias ? allSiteAliasToCodeMap[publicAlias] : null
   const expectedPath = publicPath
     ? stripLeadingSegments(publicPath, publicAlias ? (publicLocale ? 2 : 1) : 1)
@@ -94,10 +120,50 @@ const getPreservedRewriteContext = (request: NextRequest): Headers | null => {
     return null
   }
 
+  if (!(await hasValidTrustedSiteContext(request.headers, { consumeReplayToken: true }))) {
+    return null
+  }
+
   return new Headers(request.headers)
 }
 
-export function proxy(request: NextRequest) {
+const isMediaPath = (pathname: string): boolean =>
+  pathname === '/media' || pathname.startsWith('/media/')
+
+const getMediaFilename = (pathname: string): string | null => {
+  if (!isMediaPath(pathname)) return null
+
+  const filename = pathname.slice('/media/'.length)
+  if (
+    !filename ||
+    filename === '.' ||
+    filename === '..' ||
+    filename.includes('/') ||
+    filename.includes('\\')
+  ) {
+    return ''
+  }
+
+  return filename
+}
+
+const rewriteMediaRequest = (request: NextRequest, requestHeaders: Headers): NextResponse => {
+  const filename = getMediaFilename(request.nextUrl.pathname)
+  if (!filename) return notFoundResponse()
+
+  const url = request.nextUrl.clone()
+  url.pathname = `/api/media/file/${filename}`
+  const response = NextResponse.rewrite(url, {
+    request: {
+      headers: requestHeaders,
+    },
+  })
+  const requestID = requestHeaders.get('x-request-id')
+  if (requestID) response.headers.set('X-Request-ID', requestID)
+  return response
+}
+
+export async function proxy(request: NextRequest) {
   // Payload resolves its native Admin translation during the request from
   // `payload-lng`. A client-side cookie write happens too late for the login
   // shell, so bootstrap it with one same-URL redirect before Payload renders.
@@ -116,9 +182,13 @@ export function proxy(request: NextRequest) {
     return response
   }
 
-  const preservedRewriteContext = getPreservedRewriteContext(request)
+  const preservedRewriteContext = await getPreservedRewriteContext(request)
 
   if (preservedRewriteContext) {
+    if (isMediaPath(request.nextUrl.pathname)) {
+      return rewriteMediaRequest(request, preservedRewriteContext)
+    }
+
     const response = NextResponse.next({ request: { headers: preservedRewriteContext } })
     const requestID = preservedRewriteContext.get('x-request-id')
     if (requestID) response.headers.set('X-Request-ID', requestID)
@@ -130,17 +200,12 @@ export function proxy(request: NextRequest) {
   const locale = getLocaleFromPathname(request.nextUrl.pathname)
   const effectiveHost = resolveEffectiveHost(request)
 
-  if (
-    siteAlias &&
-    siteAlias in legacySiteAliasRedirectMap &&
-    isLocalDevelopmentHost(effectiveHost)
-  ) {
+  if (siteAlias === 'wingsside') {
     const url = request.nextUrl.clone()
     const segments = url.pathname.split('/').filter(Boolean)
-    segments[0] = legacySiteAliasRedirectMap[
-      siteAlias as keyof typeof legacySiteAliasRedirectMap
-    ]
+    segments[0] = getCanonicalSiteAlias(siteAlias) || siteAlias
     url.pathname = `/${segments.join('/')}`
+
     return NextResponse.redirect(url, 308)
   }
 
@@ -157,10 +222,7 @@ export function proxy(request: NextRequest) {
     return notFoundResponse()
   }
 
-  // Vietnamese is the WingsGroup default locale. Keeping /vi as a rewrite
-  // creates duplicate public URLs after a visitor switches language, so move
-  // it to the canonical no-prefix route before rendering.
-  if (!siteAlias && effectiveHost === wingsGroupCanonicalHost && locale === 'vi') {
+  if (!siteAlias && effectiveHost === 'wingsgroup.vn' && locale === 'vi') {
     const url = request.nextUrl.clone()
     url.pathname = stripLeadingSegments(request.nextUrl.pathname, 1)
     return NextResponse.redirect(url, 308)
@@ -168,11 +230,23 @@ export function proxy(request: NextRequest) {
 
   const siteCode = siteAlias ? allSiteAliasToCodeMap[siteAlias] : null
   const sitePrefix = siteAlias ? `/${siteAlias}${locale ? `/${locale}` : ''}` : null
-  const requestHeaders = createTrustedSiteContextHeaders(request.headers, {
-    // The deployment edge overwrites X-Real-IP with the connection address.
-    // createTrustedSiteContextHeaders removes any public X-Client-IP value
-    // before promoting this edge-owned value into internal request context.
-    clientIP: request.headers.get('x-real-ip'),
+  const localDraftPreview = await isServerOwnedLocalDraftPreview(
+    request,
+    effectiveHost,
+    siteAlias ? allSiteAliasToCodeMap[siteAlias] : null,
+    locale,
+  )
+  const requestHeaders = await createTrustedSiteContextHeaders(request.headers, {
+    // A direct local Next server has no deployment edge. Its preview context is
+    // therefore derived from the server-observed local host and the signed,
+    // expiring grant minted by /next/preview, never from browser-supplied
+    // draft-cookie or X-Real-IP/X-Client-IP values. On deployed hosts, only
+    // the edge-overwritten X-Real-IP is promoted.
+    clientIP: localDraftPreview
+      ? '127.0.0.1'
+      : isLocalDevelopmentHost(effectiveHost)
+        ? null
+        : request.headers.get('x-real-ip'),
     // Tenant selection is intentionally based on the effective HTTP Host. In
     // local/E2E deployments Next's URL can retain the listener hostname even
     // when the request Host targets a real tenant domain. Forwarded host is
@@ -189,33 +263,46 @@ export function proxy(request: NextRequest) {
     return response
   }
 
+  // Payload's upload directory is physically public, so route media URLs back
+  // through Payload's governed file handler. This keeps anonymous requests
+  // subject to the same publication gate as /api/media/file/*.
+  if (isMediaPath(request.nextUrl.pathname)) {
+    return withRequestID(rewriteMediaRequest(request, requestHeaders))
+  }
+
   if (!siteAlias) {
     if (!locale) {
-      return withRequestID(NextResponse.next({
-        request: {
-          headers: requestHeaders,
-        },
-      }))
+      return withRequestID(
+        NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        }),
+      )
     }
 
     const url = request.nextUrl.clone()
     url.pathname = stripLeadingSegments(request.nextUrl.pathname, 1)
 
-    return withRequestID(NextResponse.rewrite(url, {
-      request: {
-        headers: requestHeaders,
-      },
-    }))
+    return withRequestID(
+      NextResponse.rewrite(url, {
+        request: {
+          headers: requestHeaders,
+        },
+      }),
+    )
   }
 
   const url = request.nextUrl.clone()
   url.pathname = stripLeadingSegments(request.nextUrl.pathname, locale ? 2 : 1)
 
-  return withRequestID(NextResponse.rewrite(url, {
-    request: {
-      headers: requestHeaders,
-    },
-  }))
+  return withRequestID(
+    NextResponse.rewrite(url, {
+      request: {
+        headers: requestHeaders,
+      },
+    }),
+  )
 }
 
 export const config = {

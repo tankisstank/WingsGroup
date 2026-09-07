@@ -11,12 +11,20 @@ import { BadgeCheckIcon, ClockIcon, HeadphonesIcon, SendIcon } from 'lucide-reac
 
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
+import { WINGSGROUP_CONTACT_FOCUS_SESSION_KEY } from '@/utilities/wingsGroupConsultation'
 import { useSitePublicLocale } from '@/providers/SitePath'
 import { useSitePath } from '@/utilities/useSitePath'
 import { getCopyLocale } from '@/utilities/locales'
 import { TurnstileWidget } from './TurnstileWidget'
 import type { LocalizedCopy } from '@/i18n/publicCopy'
 import type { LeadSubmissionContext } from '@/lead-capture/types'
+import type {
+  ConsultationChannelKey,
+  ConsultationChannelPublicState,
+  WingsGroupLeadPublicConfig,
+} from '@/lead-capture/types'
+import { consultationChannelKeys } from '@/lead-capture/types'
+import { getFormSiteCode, WINGSGROUP_SITE_CODE } from '@/lead-capture/wingsGroupV3'
 
 import './form-layout.css'
 
@@ -27,6 +35,7 @@ export type FormBlockType = {
   form: FormType | null
   introContent?: DefaultTypedEditorState
   presentation?: 'centered-card' | 'minimal' | 'split-contact' | 'support-channels'
+  wingsGroupV3?: boolean
 }
 
 type FormLocalizedCopy = {
@@ -46,13 +55,13 @@ type FormLocalizedCopy = {
 const formCopy = {
   en: {
     asideLabel: 'Consultation support information',
-    asideTitle: 'Send a request, receive the right consultation',
+    asideTitle: 'Share your plans; our specialists will guide the next step.',
     asideDescription:
       'The WingsGroup team will review the timing, budget, destination, and service context before recommending the right next step.',
     bullets: [
-      'Business-hours response',
-      'Advice based on real timing and budget',
-      'Routed to the right sales or content manager',
+      'A response during business hours',
+      'Advice tailored to your timing and budget',
+      'Introduced to the right specialist',
     ],
     fieldLabels: {
       airport: 'Airport',
@@ -72,8 +81,7 @@ const formCopy = {
     requiredMessage: 'This field is required',
     loading: 'Sending your request, please wait...',
     submit: 'Send brief',
-    successDescription:
-      'The planning team will review the brief and respond with a suitable proposal direction.',
+    successDescription: 'A specialist will review your plans and return with a tailored proposal.',
     successTitle: 'Brief received',
   },
   es: {
@@ -222,6 +230,29 @@ const sanitizeFormControlSegment = (value?: null | string) =>
 const getFieldControlID = (formID: string | number, fieldName: string) =>
   `${sanitizeFormControlSegment(String(formID))}-${sanitizeFormControlSegment(fieldName)}`
 
+const wingsGroupLeadCopy = {
+  en: {
+    channelsTitle: 'Optional consultation channels',
+    configLoading: 'Preparing the secure consultation form…',
+    configUnavailable:
+      'The consultation form is temporarily unavailable. Your details have not been submitted. Please try again later.',
+    consentRequired: 'Please confirm your consent before submitting this request.',
+    noPreference: 'No preference — use the contact form',
+    policyLink: 'Read the Privacy Policy',
+    preferredChannel: 'Preferred contact channel (optional)',
+  },
+  vi: {
+    channelsTitle: 'Kênh tư vấn tùy chọn',
+    configLoading: 'Đang chuẩn bị biểu mẫu tư vấn bảo mật…',
+    configUnavailable:
+      'Biểu mẫu tư vấn đang tạm thời không khả dụng. Thông tin của bạn chưa được gửi. Vui lòng thử lại sau.',
+    consentRequired: 'Vui lòng xác nhận đồng ý trước khi gửi yêu cầu.',
+    noPreference: 'Không ưu tiên — sử dụng biểu mẫu liên hệ',
+    policyLink: 'Đọc Chính sách bảo mật',
+    preferredChannel: 'Kênh liên hệ ưu tiên (không bắt buộc)',
+  },
+} as const
+
 const readLeadSubmissionContext = (
   form: HTMLFormElement | null,
 ): LeadSubmissionContext | undefined => {
@@ -243,6 +274,7 @@ export const FormBlock: React.FC<
     anchorId?: null | string
     formOdId?: string
     id?: string
+    siteCode?: null | string
     submitOdId?: string
   } & FormBlockType
 > = (props) => {
@@ -253,7 +285,9 @@ export const FormBlock: React.FC<
     formOdId,
     introContent,
     presentation = 'split-contact',
+    siteCode,
     submitOdId,
+    wingsGroupV3 = false,
   } = props
   const resolvedAnchorId = anchorId === undefined ? 'contact-form' : anchorId || undefined
   const {
@@ -267,6 +301,14 @@ export const FormBlock: React.FC<
   const locale = useSitePublicLocale()
   const copyLocale = getFormCopyLocale(locale)
   const copy = formCopy[copyLocale]
+  const wingsGroupCopy = wingsGroupLeadCopy[copyLocale === 'en' ? 'en' : 'vi']
+  const isWingsGroupV3 =
+    wingsGroupV3 ||
+    siteCode === WINGSGROUP_SITE_CODE ||
+    getFormSiteCode(formFromProps) === WINGSGROUP_SITE_CODE ||
+    (typeof document !== 'undefined' && document.body.dataset.siteCode === WINGSGROUP_SITE_CODE)
+  const resolvedSubmitLabel =
+    isWingsGroupV3 && copyLocale === 'vi' ? 'Nhận tư vấn phù hợp' : copy.submit || submitButtonLabel
   const localizedFields =
     formFromProps?.fields?.map((field) => {
       const fieldName = getFieldName(field)
@@ -300,13 +342,73 @@ export const FormBlock: React.FC<
   const [challengeSiteKey, setChallengeSiteKey] = useState<string>()
   const [turnstileToken, setTurnstileToken] = useState('')
   const [honeypot, setHoneypot] = useState('')
+  const [leadConfig, setLeadConfig] = useState<WingsGroupLeadPublicConfig | undefined>(
+    isWingsGroupV3 ? undefined : { enabled: false },
+  )
+  const [consentAccepted, setConsentAccepted] = useState(false)
+  const [consentError, setConsentError] = useState(false)
+  const [preferredChannel, setPreferredChannel] = useState<ConsultationChannelKey | ''>('')
   const errorRef = useRef<HTMLDivElement>(null)
+  const consentRef = useRef<HTMLButtonElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const handlingNativeInvalidRef = useRef(false)
   const submittingRef = useRef(false)
   const idempotencyKeyRef = useRef<string | null>(null)
   const router = useRouter()
   const toSitePath = useSitePath()
+  const leadChannels =
+    leadConfig && leadConfig.enabled && 'available' in leadConfig && leadConfig.available
+      ? leadConfig.channels.filter(
+          (
+            channel,
+          ): channel is ConsultationChannelPublicState & { href: string; state: 'approved' } =>
+            channel.state === 'approved' &&
+            typeof channel.href === 'string' &&
+            channel.href.length > 0,
+        )
+      : []
+  const approvedPreferredChannel = leadChannels.some((channel) => channel.key === preferredChannel)
+    ? preferredChannel
+    : ''
+
+  useEffect(() => {
+    if (
+      !isWingsGroupV3 ||
+      !resolvedAnchorId ||
+      window.location.hash !== `#${resolvedAnchorId}` ||
+      window.sessionStorage.getItem(WINGSGROUP_CONTACT_FOCUS_SESSION_KEY) !== resolvedAnchorId
+    )
+      return
+
+    let animationFrame = 0
+    let attempts = 0
+    const focusWhenReady = () => {
+      const target = formRef.current?.querySelector<HTMLElement>(
+        'input:not([type="hidden"]):not([aria-hidden="true"]):not([disabled]), textarea:not([aria-hidden="true"]):not([disabled]), select:not([aria-hidden="true"]):not([disabled])',
+      )
+
+      if (!target && attempts++ < 4) {
+        animationFrame = window.requestAnimationFrame(focusWhenReady)
+        return
+      }
+      if (!target) return
+
+      window.sessionStorage.removeItem(WINGSGROUP_CONTACT_FOCUS_SESSION_KEY)
+      target.focus({ preventScroll: true })
+      target.scrollIntoView?.({ block: 'center' })
+    }
+
+    animationFrame = window.requestAnimationFrame(focusWhenReady)
+    return () => window.cancelAnimationFrame(animationFrame)
+  }, [isWingsGroupV3, resolvedAnchorId])
+
+  useEffect(() => {
+    if (!isWingsGroupV3) return
+    const channel = new URLSearchParams(window.location.search).get('channel')
+    if (channel && consultationChannelKeys.includes(channel as ConsultationChannelKey)) {
+      setPreferredChannel(channel as ConsultationChannelKey)
+    }
+  }, [isWingsGroupV3])
 
   useEffect(() => {
     if (error) {
@@ -314,9 +416,79 @@ export const FormBlock: React.FC<
     }
   }, [error])
 
+  useEffect(() => {
+    if (!isWingsGroupV3) {
+      setLeadConfig({ enabled: false })
+      return
+    }
+
+    const controller = new AbortController()
+    const loadConfig = async () => {
+      try {
+        const response = await fetch(`${getClientSideURL()}/api/lead-submissions`, {
+          cache: 'no-store',
+          method: 'GET',
+          signal: controller.signal,
+        })
+        const body = (await response.json()) as WingsGroupLeadPublicConfig
+        setLeadConfig(
+          response.ok && body?.enabled === true
+            ? body
+            : { available: false, enabled: true, reason: 'configuration-unavailable' },
+        )
+      } catch (loadError) {
+        if ((loadError as { name?: string }).name !== 'AbortError') {
+          setLeadConfig({
+            available: false,
+            enabled: true,
+            reason: 'configuration-unavailable',
+          })
+        }
+      }
+    }
+
+    void loadConfig()
+    return () => controller.abort()
+  }, [isWingsGroupV3])
+
+  useEffect(() => {
+    const syncPreferredChannel = (event: Event) => {
+      const channel = (event as CustomEvent<{ channel?: string }>).detail?.channel
+      if (
+        channel !== 'zalo' &&
+        channel !== 'whatsapp' &&
+        channel !== 'messenger' &&
+        channel !== 'callback'
+      )
+        return
+      setPreferredChannel(channel)
+    }
+
+    window.addEventListener('wingsgroup-preferred-channel', syncPreferredChannel)
+    return () => window.removeEventListener('wingsgroup-preferred-channel', syncPreferredChannel)
+  }, [])
+
   const onSubmit = useCallback(
     (data: FormFieldBlock[]) => {
       if (submittingRef.current) return
+
+      if (isWingsGroupV3) {
+        if (
+          !leadConfig ||
+          !leadConfig.enabled ||
+          !('available' in leadConfig) ||
+          !leadConfig.available
+        ) {
+          setError({ message: wingsGroupCopy.configUnavailable, status: '503' })
+          return
+        }
+        if (!consentAccepted) {
+          setConsentError(true)
+          queueMicrotask(() => consentRef.current?.focus())
+          return
+        }
+      }
+
       const externalValidation = formRef.current?.dispatchEvent(
         new CustomEvent('ws-plan-validate', { bubbles: true, cancelable: true }),
       )
@@ -340,6 +512,20 @@ export const FormBlock: React.FC<
               formId: formID,
               honeypot,
               idempotencyKey: idempotencyKeyRef.current,
+              ...(isWingsGroupV3 &&
+              leadConfig?.enabled &&
+              'available' in leadConfig &&
+              leadConfig.available
+                ? {
+                    leadContract: {
+                      consent: consentAccepted,
+                      consentVersion: leadConfig.consentVersion,
+                      ...(approvedPreferredChannel
+                        ? { preferredChannel: approvedPreferredChannel }
+                        : {}),
+                    },
+                  }
+                : {}),
               submissionData: dataToSend,
               turnstileToken: turnstileToken || undefined,
             }),
@@ -397,7 +583,21 @@ export const FormBlock: React.FC<
 
       void submitForm()
     },
-    [router, formID, redirect, confirmationType, copyLocale, honeypot, toSitePath, turnstileToken],
+    [
+      consentAccepted,
+      confirmationType,
+      copyLocale,
+      formID,
+      honeypot,
+      isWingsGroupV3,
+      approvedPreferredChannel,
+      leadConfig,
+      redirect,
+      router,
+      toSitePath,
+      turnstileToken,
+      wingsGroupCopy.configUnavailable,
+    ],
   )
 
   const onInvalid = useCallback(
@@ -566,6 +766,93 @@ export const FormBlock: React.FC<
                     })}
                 </div>
 
+                {isWingsGroupV3 && !leadConfig && (
+                  <p aria-live="polite" className="site-form-state" role="status">
+                    {wingsGroupCopy.configLoading}
+                  </p>
+                )}
+
+                {isWingsGroupV3 &&
+                  leadConfig?.enabled &&
+                  'available' in leadConfig &&
+                  !leadConfig.available && (
+                    <div className="site-form-state site-form-state--error" role="alert">
+                      {wingsGroupCopy.configUnavailable}
+                    </div>
+                  )}
+
+                {isWingsGroupV3 &&
+                  leadConfig?.enabled &&
+                  'available' in leadConfig &&
+                  leadConfig.available && (
+                    <div className="site-wingsgroup-lead-contract">
+                      {leadChannels.length > 0 && (
+                        <fieldset className="site-wingsgroup-channels">
+                          <legend>{wingsGroupCopy.channelsTitle}</legend>
+                          <ul>
+                            {leadChannels.map((channel) => (
+                              <li key={channel.key}>
+                                <a href={channel.href} rel="noreferrer" target="_blank">
+                                  {channel.label}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                          <label htmlFor={`${formID}-preferred-channel`}>
+                            {wingsGroupCopy.preferredChannel}
+                          </label>
+                          <select
+                            id={`${formID}-preferred-channel`}
+                            onChange={(event) =>
+                              setPreferredChannel(event.target.value as ConsultationChannelKey | '')
+                            }
+                            value={preferredChannel}
+                          >
+                            <option value="">{wingsGroupCopy.noPreference}</option>
+                            {leadChannels.map((channel) => (
+                              <option key={channel.key} value={channel.key}>
+                                {channel.label}
+                              </option>
+                            ))}
+                          </select>
+                        </fieldset>
+                      )}
+
+                      <div className="site-wingsgroup-consent">
+                        <button
+                          aria-describedby={
+                            consentError ? `${formID}-wingsgroup-consent-error` : undefined
+                          }
+                          aria-invalid={consentError || undefined}
+                          aria-checked={consentAccepted}
+                          className="site-wingsgroup-consent__control"
+                          id={`${formID}-wingsgroup-consent`}
+                          onClick={() => {
+                            setConsentAccepted((current) => !current)
+                            setConsentError(false)
+                          }}
+                          ref={consentRef}
+                          role="checkbox"
+                          type="button"
+                        >
+                          <span aria-hidden="true">{consentAccepted ? '✓' : ''}</span>
+                          <span>{leadConfig.consentCopy}</span>
+                        </button>
+                        <a href={leadConfig.policyHref}>{wingsGroupCopy.policyLink}</a>
+                        <p className="site-wingsgroup-consent__retention">
+                          {copyLocale === 'en'
+                            ? `Information is retained for up to ${leadConfig.retentionMonths} months under the Privacy Policy.`
+                            : `Thông tin được lưu tối đa ${leadConfig.retentionMonths} tháng theo Chính sách bảo mật.`}
+                        </p>
+                        {consentError && (
+                          <p id={`${formID}-wingsgroup-consent-error`} role="alert">
+                            {wingsGroupCopy.consentRequired}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                 {challengeSiteKey && (
                   <div className="mb-4">
                     <TurnstileWidget onToken={setTurnstileToken} siteKey={challengeSiteKey} />
@@ -575,12 +862,19 @@ export const FormBlock: React.FC<
                 <Button
                   className="site-form-submit"
                   data-od-id={submitOdId}
-                  disabled={isLoading}
+                  disabled={
+                    isLoading ||
+                    (isWingsGroupV3 &&
+                      (!leadConfig ||
+                        !leadConfig.enabled ||
+                        !('available' in leadConfig) ||
+                        !leadConfig.available))
+                  }
                   form={formID}
                   type="submit"
                   variant="default"
                 >
-                  {isLoading ? copy.loading : copy.submit || submitButtonLabel}
+                  {isLoading ? copy.loading : resolvedSubmitLabel}
                 </Button>
               </form>
             )}

@@ -22,6 +22,28 @@ const baseURL =
   'http://localhost:3000'
 const selectedSite = args.get('site') || process.env.GO_LIVE_SITE || ''
 const selectedPath = args.get('path') || process.env.GO_LIVE_PATH || ''
+const parseRequestedPaths = (value) => [
+  ...new Set(
+    String(value || '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
+  ),
+]
+const isProtectedInventoryError = (error) => /^(?:401|403)\b/.test(error?.message || '')
+const classifyExpectedConsoleError = (message, location = '') => {
+  if (/webpack-hmr|hot-reloader\/app\/web-socket/i.test(message)) return 'next-dev-hmr'
+  if (
+    /Failed to load resource: the server responded with a status of 403/i.test(message) &&
+    /\/api\/(?:lead-submissions|media\/file|pages|posts|site-settings)(?:[/?]|$)/i.test(location)
+  ) {
+    return 'protected-api-denial'
+  }
+  return null
+}
+const selectedPaths = parseRequestedPaths(
+  [selectedPath, args.get('paths') || process.env.GO_LIVE_PATHS || ''].filter(Boolean).join(','),
+)
 const positiveInteger = (value, fallback, name, minimum = 1) => {
   const parsed = Number(value ?? fallback)
   if (!Number.isSafeInteger(parsed) || parsed < minimum) {
@@ -180,7 +202,7 @@ const checkpointScope = JSON.stringify({
   baseURL: new URL(baseURL).origin,
   publicOrigin: publicOrigin || null,
   routingMode,
-  selectedPath: selectedPath || null,
+  selectedPaths: selectedPaths.length ? selectedPaths : null,
   sites: selectedSites.map((site) => site.key),
   version: checkpointVersion,
 })
@@ -210,6 +232,24 @@ const joinRoute = (prefix, pathname) => {
   return `${nextPrefix}${nextPath === '/' ? '' : nextPath}`.replace(/\/+/g, '/')
 }
 
+const buildExplicitRouteInventory = (site, paths, routePrefix = '') =>
+  paths.map((pathname) => {
+    const normalizedPathname = normalizePath(
+      pathname.startsWith(site.pathPrefix) && site.pathPrefix
+        ? pathname.slice(site.pathPrefix.length) || '/'
+        : pathname,
+    )
+    return {
+      id: `${site.key}-${slugify(normalizedPathname)}`,
+      pathname: normalizedPathname,
+      purpose: classifyPurpose(normalizedPathname, normalizedPathname),
+      routePath: joinRoute(routePrefix, normalizedPathname),
+      source: 'explicit-route',
+      status: 'published',
+      title: normalizedPathname === '/' ? 'Homepage' : normalizedPathname,
+    }
+  })
+
 const relationId = (value) => {
   if (!value) return null
   if (typeof value === 'object') return value.id ?? null
@@ -225,6 +265,10 @@ const localizedText = (value, fallback = '') => {
   }
   return fallback
 }
+
+const directContactMethodPattern =
+  /(?:hotline|phone|điện thoại|dien thoai|email|zalo|address|địa chỉ|dia chi|tel:|mailto:|\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b|\+?\d[\d\s().-]{7,}\d)/i
+const hasDirectContactMethod = (text) => directContactMethodPattern.test(text || '')
 
 const fetchJSON = async (url) => {
   const controller = new AbortController()
@@ -292,7 +336,7 @@ const expectedContent = {
     requiredSignals: [
       {
         key: 'contact method',
-        pattern: /(hotline|phone|điện thoại|dien thoai|email|zalo|address|địa chỉ|dia chi)/i,
+        pattern: directContactMethodPattern,
       },
       {
         key: 'lead action',
@@ -337,13 +381,18 @@ const worstStatus = (...statuses) =>
   )
 
 async function loadInventory() {
-  const pagesData = await fetchJSON(`${baseURL}/api/pages?limit=1000&depth=1`)
-  const pages = pagesData.docs || []
+  let pages = null
+  try {
+    const pagesData = await fetchJSON(`${baseURL}/api/pages?limit=1000&depth=1`)
+    pages = pagesData.docs || []
+  } catch (error) {
+    if (!selectedPaths.length || !isProtectedInventoryError(error)) throw error
+  }
 
   return selectedSites
     .map((site) => {
       const routePrefix = routingMode === 'path' ? site.pathPrefix : ''
-      const docs = pages
+      const docs = (pages || [])
         .filter((doc) => {
           if (doc.site && typeof doc.site === 'object') {
             const code = String(doc.site.code || '').toLowerCase()
@@ -366,11 +415,23 @@ async function loadInventory() {
             status: doc._status || 'published',
           }
         })
+      const explicitDocs = buildExplicitRouteInventory(site, selectedPaths, routePrefix)
+      const routeDocs = [
+        ...docs,
+        ...explicitDocs.filter(
+          (explicitDoc) =>
+            !docs.some(
+              (doc) =>
+                normalizePath(doc.routePath) === normalizePath(explicitDoc.routePath) ||
+                normalizePath(doc.pathname) === normalizePath(explicitDoc.pathname),
+            ),
+        ),
+      ]
 
-      const seen = new Set(docs.map((doc) => doc.pathname))
+      const seen = new Set(routeDocs.map((doc) => doc.pathname))
       for (const route of [...extraRoutes, ...(site.requiredRoutes || [])]) {
         if (!seen.has(route.pathname)) {
-          docs.push({
+          routeDocs.push({
             ...route,
             id: `${site.key}-${route.pathname}`,
             routePath: joinRoute(routePrefix, route.pathname),
@@ -383,12 +444,15 @@ async function loadInventory() {
 
       return {
         ...site,
-        pages: docs
+        pages: routeDocs
           .filter(
             (doc) =>
-              !selectedPath ||
-              normalizePath(doc.routePath) === normalizePath(selectedPath) ||
-              normalizePath(doc.pathname) === normalizePath(selectedPath),
+              !selectedPaths.length ||
+              selectedPaths.some(
+                (pathValue) =>
+                  normalizePath(doc.routePath) === normalizePath(pathValue) ||
+                  normalizePath(doc.pathname) === normalizePath(pathValue),
+              ),
           )
           .sort((left, right) => left.routePath.localeCompare(right.routePath, 'vi')),
       }
@@ -398,10 +462,18 @@ async function loadInventory() {
 
 async function inspectPage(page, target, mode, screenshotPath) {
   const consoleErrors = []
+  const expectedConsoleErrors = []
   const pageErrors = []
 
   page.on('console', (message) => {
-    if (message.type() === 'error') consoleErrors.push(message.text())
+    if (message.type() !== 'error') return
+    const text = message.text()
+    const expectedReason = classifyExpectedConsoleError(text, message.location().url)
+    if (expectedReason) {
+      expectedConsoleErrors.push({ location: message.location().url, reason: expectedReason, text })
+    } else {
+      consoleErrors.push(text)
+    }
   })
   page.on('pageerror', (error) => pageErrors.push(error.message))
 
@@ -455,6 +527,48 @@ async function inspectPage(page, target, mode, screenshotPath) {
       .filter(visible)
       .map(textOf)
       .filter(Boolean)
+    const formEvidence = Array.from(document.querySelectorAll('form')).map((form) => {
+      const preferredChannel = form.querySelector('select[name="preferredChannel"]')
+      const controls = Array.from(form.elements).map((control) => ({
+        disabled: 'disabled' in control && Boolean(control.disabled),
+        name: control.getAttribute('name') || '',
+        type: control.getAttribute('type') || control.tagName.toLowerCase(),
+      }))
+      return {
+        action: form.getAttribute('action') || '',
+        consentPresent: Boolean(form.querySelector('[role="checkbox"]')),
+        controls,
+        disabledControlCount: controls.filter((control) => control.disabled).length,
+        preferredChannelOptions: preferredChannel
+          ? Array.from(preferredChannel.options).map((option) => ({
+              disabled: option.disabled,
+              text: textOf(option),
+              value: option.value,
+            }))
+          : [],
+        submitDisabled: Boolean(form.querySelector('button[type="submit"]:disabled')),
+      }
+    })
+    const externalLinks = anchors
+      .filter(visible)
+      .map((anchor) => anchor.href)
+      .filter((href) => {
+        try {
+          const url = new URL(href, document.baseURI)
+          return ['http:', 'https:'].includes(url.protocol) && url.hostname !== location.hostname
+        } catch {
+          return false
+        }
+      })
+    const tenantPrefixedLinks = anchors
+      .map((anchor) => anchor.getAttribute('href') || '')
+      .filter((href) =>
+        /^\/(?:wingsgo|wingsside|wing-side|wingsplus|wingscare|wingspass)(?:\/|$)/i.test(href),
+      )
+    const visibleImageSources = images.filter((image) => image.visible).map((image) => image.src)
+    const crossTenantMedia = visibleImageSources.filter((src) =>
+      /\/(?:wingsgo|wingsside|wing-side|wingsplus|wingscare|wingspass)(?:\/|$)/i.test(src),
+    )
 
     return {
       title: document.title,
@@ -476,6 +590,11 @@ async function inspectPage(page, target, mode, screenshotPath) {
       visibleButtons: buttons.filter(visible).length,
       firstViewportCTA: [...firstViewportLinks, ...firstViewportButtons].slice(0, 12),
       forms: document.querySelectorAll('form').length,
+      formEvidence,
+      externalLinks,
+      tenantPrefixedLinks,
+      visibleImageSources,
+      crossTenantMedia,
       missingAltImages: images.filter((image) => image.visible && !image.alt.trim()).length,
       imageCount: images.filter((image) => image.visible).length,
       jsonLdCount: document.querySelectorAll('script[type="application/ld+json"]').length,
@@ -493,6 +612,7 @@ async function inspectPage(page, target, mode, screenshotPath) {
       .relative(path.resolve(process.cwd(), '..'), screenshotPath)
       .replaceAll('\\', '/'),
     consoleErrors,
+    expectedConsoleErrors,
     pageErrors,
     ...metrics,
   }
@@ -518,11 +638,20 @@ function reviewTechnical(result) {
   if (!result.canonical) warnings.push('Canonical URL is missing.')
   if (result.missingAltImages)
     warnings.push(`${result.missingAltImages} visible image(s) have empty alt text.`)
+  if (result.siteKey === 'wingsgroup' && result.tenantPrefixedLinks?.length) {
+    blockers.push(
+      `WingsGroup page exposes ${result.tenantPrefixedLinks.length} tenant-prefixed link(s).`,
+    )
+  }
+  if (result.siteKey === 'wingsgroup' && result.crossTenantMedia?.length) {
+    blockers.push(
+      `WingsGroup page exposes ${result.crossTenantMedia.length} cross-tenant media source(s).`,
+    )
+  }
 
   const normalizeIdentity = (value) => (value || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-  const expectedIdentities = (result.identityTokens?.length
-    ? result.identityTokens
-    : [result.siteLabel]
+  const expectedIdentities = (
+    result.identityTokens?.length ? result.identityTokens : [result.siteLabel]
   )
     .map(normalizeIdentity)
     .filter(Boolean)
@@ -603,18 +732,15 @@ function reviewContent(result) {
 
   if (
     ['campaign', 'travel-product'].includes(result.purpose) &&
-    !/(hotline|zalo|email|liên hệ|lien he|contact|plan your trip|trip planner|travel brief|tailored proposal|inquiry)/i.test(
+    !hasDirectContactMethod(text) &&
+    !/(liên hệ|lien he|contact|plan your trip|trip planner|travel brief|tailored proposal|inquiry)/i.test(
       text,
     )
   ) {
     blockers.push('Conversion page does not expose a clear contact or inquiry path.')
   }
 
-  if (
-    result.purpose === 'lead-contact' &&
-    result.forms === 0 &&
-    !/(hotline|zalo|email|tel:|mailto:)/i.test(text)
-  ) {
+  if (result.purpose === 'lead-contact' && result.forms === 0 && !hasDirectContactMethod(text)) {
     blockers.push('Contact page has no form or clear direct contact method.')
   }
 
@@ -690,11 +816,12 @@ const fetchTextProbe = async (pathname) => {
 }
 
 const identitySnapshot = async (browser, url, extraHTTPHeaders = {}) => {
-  const context = await browser.newContext({ extraHTTPHeaders })
-  const page = await context.newPage()
-  page.setDefaultNavigationTimeout(pageTimeout)
-  page.setDefaultTimeout(pageTimeout)
+  let context
   try {
+    context = await browser.newContext({ extraHTTPHeaders })
+    const page = await context.newPage()
+    page.setDefaultNavigationTimeout(pageTimeout)
+    page.setDefaultTimeout(pageTimeout)
     const response = await page.goto(url, { timeout: pageTimeout, waitUntil: 'domcontentloaded' })
     const identity = await page.evaluate(() => ({
       bodyTheme: document.body.getAttribute('data-site-theme') || '',
@@ -716,25 +843,43 @@ const identitySnapshot = async (browser, url, extraHTTPHeaders = {}) => {
       headers: response?.headers() || {},
       ok: response?.ok() || false,
       status: response?.status() || null,
+      attempts: 1,
       url,
     }
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const timedOut =
+      /timeout|timed out|aborted/i.test(errorMessage) || error?.name === 'TimeoutError'
     return {
       bodyTheme: '',
       brandText: [],
       canonical: '',
-      error: error instanceof Error ? error.message : String(error),
+      error: errorMessage,
+      errorKind: timedOut ? 'timeout' : 'error',
       h1: [],
       headers: {},
       htmlLang: '',
+      inconclusive: timedOut,
       ok: false,
       status: null,
       title: '',
+      attempts: 1,
       url,
     }
   } finally {
-    await context.close()
+    if (context) await context.close()
   }
+}
+
+const identitySnapshotWithRetry = async (browser, url, extraHTTPHeaders = {}, maxAttempts = 2) => {
+  let snapshot
+  let attempts = 0
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    attempts = attempt
+    snapshot = await identitySnapshot(browser, url, extraHTTPHeaders)
+    if (!snapshot.inconclusive || attempt === maxAttempts) break
+  }
+  return { ...snapshot, attempts }
 }
 
 const identityFingerprint = (snapshot) =>
@@ -768,6 +913,31 @@ const extractAdvertisedURLs = (text, pathname) => {
     .filter((value) => /^https?:\/\//i.test(value))
 }
 
+const extractAdvertisedSitemapURLs = (text) =>
+  [
+    ...String(text || '').matchAll(
+      /<(?:[\w.-]+:)?sitemap\b[^>]*>([\s\S]*?)<\/(?:[\w.-]+:)?sitemap>/gi,
+    ),
+  ]
+    .flatMap((match) => [...match[1].matchAll(/<loc(?:\s[^>]*)?>([\s\S]*?)<\/loc>/gi)])
+    .map((match) => decodeXMLText(match[1].trim()))
+    .filter((value) => /^https?:\/\//i.test(value))
+
+const buildSitemapProbePaths = (text) => [
+  ...new Set(
+    extractAdvertisedSitemapURLs(text)
+      .map((value) => {
+        try {
+          const url = new URL(value)
+          return `${url.pathname}${url.search}`
+        } catch {
+          return ''
+        }
+      })
+      .filter(Boolean),
+  ),
+]
+
 async function inspectSiteProbe(browser, site) {
   const routePrefix = routingMode === 'path' ? site.pathPrefix : ''
   const homepageURL = targetURL(joinRoute(routePrefix, '/'))
@@ -775,34 +945,44 @@ async function inspectSiteProbe(browser, site) {
   const targetPath = joinRoute(routePrefix, '/')
   const otherSiteCode = otherSite?.siteCode || 'invalid-site'
   const otherSiteAlias = otherSite?.key || 'invalid-site'
-  const seoPaths = ['/robots.txt', '/sitemap.xml', '/pages-sitemap.xml', '/posts-sitemap.xml']
+  const identityProbeInputs = [
+    [homepageURL, {}],
+    [targetURL(targetPath, new URLSearchParams({ site: otherSiteCode }).toString()), {}],
+    [targetURL(targetPath, new URLSearchParams({ siteAlias: otherSiteAlias }).toString()), {}],
+    [homepageURL, { 'x-site-code': otherSiteCode }],
+    [
+      homepageURL,
+      {
+        'x-locale': 'en',
+        'x-public-path': otherSite?.pathPrefix || '/invalid-site',
+        'x-site-context-source': 'proxy',
+        'x-site-host': otherSite?.publicHosts[0] || 'invalid.example.com',
+        'x-site-prefix': otherSite?.pathPrefix || '/invalid-site',
+      },
+    ],
+  ]
+  const identitySnapshots = []
+  for (const [url, headers] of identityProbeInputs) {
+    identitySnapshots.push(await identitySnapshotWithRetry(browser, url, headers))
+  }
   const [
     baseline,
     siteQueryInjection,
     siteAliasQueryInjection,
     siteHeaderInjection,
     internalHeaderInjection,
-    ...seoEndpoints
-  ] = await Promise.all([
-    identitySnapshot(browser, homepageURL),
-    identitySnapshot(
-      browser,
-      targetURL(targetPath, new URLSearchParams({ site: otherSiteCode }).toString()),
-    ),
-    identitySnapshot(
-      browser,
-      targetURL(targetPath, new URLSearchParams({ siteAlias: otherSiteAlias }).toString()),
-    ),
-    identitySnapshot(browser, homepageURL, { 'x-site-code': otherSiteCode }),
-    identitySnapshot(browser, homepageURL, {
-      'x-locale': 'en',
-      'x-public-path': otherSite?.pathPrefix || '/invalid-site',
-      'x-site-context-source': 'proxy',
-      'x-site-host': otherSite?.publicHosts[0] || 'invalid.example.com',
-      'x-site-prefix': otherSite?.pathPrefix || '/invalid-site',
-    }),
-    ...seoPaths.map((pathname) => fetchTextProbe(pathname)),
-  ])
+  ] = identitySnapshots
+  const initialSeoEndpoints = await Promise.all(
+    ['/robots.txt', '/sitemap.xml'].map((pathname) => fetchTextProbe(pathname)),
+  )
+  const sitemapEndpoint = initialSeoEndpoints.find(
+    (endpoint) => endpoint.pathname === '/sitemap.xml',
+  )
+  const advertisedChildPaths = buildSitemapProbePaths(sitemapEndpoint?.text)
+  const seoEndpoints = [
+    ...initialSeoEndpoints,
+    ...(await Promise.all(advertisedChildPaths.map((pathname) => fetchTextProbe(pathname)))),
+  ]
 
   return {
     baseline,
@@ -810,6 +990,10 @@ async function inspectSiteProbe(browser, site) {
     recordType: 'site-probe',
     seoEndpoints: seoEndpoints.map((endpoint) => ({
       absoluteURLs: extractAdvertisedURLs(endpoint.text, endpoint.pathname),
+      advertised:
+        endpoint.pathname === '/robots.txt' || endpoint.pathname === '/sitemap.xml'
+          ? true
+          : advertisedChildPaths.includes(endpoint.pathname),
       containsForbiddenHost: forbiddenHostPattern.test(endpoint.text),
       contentLength: endpoint.contentLength,
       error: endpoint.error,
@@ -829,51 +1013,67 @@ async function inspectSiteProbe(browser, site) {
 function reviewSiteProbe(probe, site) {
   const blockers = []
   const warnings = []
-
-  if (!probe?.baseline?.ok)
-    blockers.push(`Homepage identity probe returned HTTP ${probe?.baseline?.status || 'unknown'}.`)
-  if (probe?.baseline?.bodyTheme !== site.themeKey) {
+  const addInconclusiveFinding = (label, snapshot) => {
+    if (!snapshot?.inconclusive) return false
     blockers.push(
-      `Homepage theme ${probe?.baseline?.bodyTheme || '(missing)'} does not match ${site.themeKey}.`,
+      `Environment-inconclusive: ${label} identity probe timed out after ${snapshot.attempts || 1} attempt(s): ${snapshot.error || 'timeout'}`,
     )
+    return true
   }
 
-  const expectedIdentities = (site.identityTokens?.length ? site.identityTokens : [site.label])
-    .map((value) => value.toLowerCase().replace(/[^a-z0-9]/g, ''))
-    .filter(Boolean)
-  const titleIdentity = (probe?.baseline?.title || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-  if (!expectedIdentities.some((identity) => titleIdentity.includes(identity)))
-    blockers.push(`Homepage title does not identify ${site.label}.`)
-  const brandIdentities = (probe?.baseline?.brandText || []).map((value) =>
-    value.toLowerCase().replace(/[^a-z0-9]/g, ''),
-  )
-  if (
-    !brandIdentities.some((value) =>
-      expectedIdentities.some((identity) => value.includes(identity)),
-    )
-  ) {
-    blockers.push(`Homepage visible brand mark does not identify ${site.label}.`)
-  }
-  if (forbiddenHostPattern.test(probe?.baseline?.canonical || '')) {
-    blockers.push('Homepage canonical contains a forbidden development host.')
-  } else if (probe?.baseline?.canonical) {
-    try {
-      const canonicalURL = new URL(probe.baseline.canonical)
-      const canonicalHost = canonicalURL.hostname.toLowerCase().replace(/^www\./, '')
-      if (!hostnameBelongsToSite(canonicalHost, site.publicHosts)) {
-        blockers.push(
-          `Homepage canonical hostname ${canonicalHost} does not belong to ${site.label}.`,
-        )
-      }
-      if (canonicalURL.protocol !== 'https:') blockers.push('Homepage canonical is not HTTPS.')
-    } catch {
-      blockers.push('Homepage canonical is not a valid absolute URL.')
+  const baselineInconclusive = addInconclusiveFinding('Homepage', probe?.baseline)
+  if (!baselineInconclusive) {
+    if (!probe?.baseline?.ok)
+      blockers.push(
+        `Homepage identity probe returned HTTP ${probe?.baseline?.status || 'unknown'}.`,
+      )
+    if (probe?.baseline?.bodyTheme !== site.themeKey) {
+      blockers.push(
+        `Homepage theme ${probe?.baseline?.bodyTheme || '(missing)'} does not match ${site.themeKey}.`,
+      )
     }
-  } else {
-    blockers.push('Homepage canonical is missing.')
+
+    const expectedIdentities = (site.identityTokens?.length ? site.identityTokens : [site.label])
+      .map((value) => value.toLowerCase().replace(/[^a-z0-9]/g, ''))
+      .filter(Boolean)
+    const titleIdentity = (probe?.baseline?.title || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (!expectedIdentities.some((identity) => titleIdentity.includes(identity)))
+      blockers.push(`Homepage title does not identify ${site.label}.`)
+    const brandIdentities = (probe?.baseline?.brandText || []).map((value) =>
+      value.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    )
+    if (
+      !brandIdentities.some((value) =>
+        expectedIdentities.some((identity) => value.includes(identity)),
+      )
+    ) {
+      blockers.push(`Homepage visible brand mark does not identify ${site.label}.`)
+    }
+    if (forbiddenHostPattern.test(probe?.baseline?.canonical || '')) {
+      blockers.push('Homepage canonical contains a forbidden development host.')
+    } else if (probe?.baseline?.canonical) {
+      try {
+        const canonicalURL = new URL(probe.baseline.canonical)
+        const canonicalHost = canonicalURL.hostname.toLowerCase().replace(/^www\./, '')
+        if (!hostnameBelongsToSite(canonicalHost, site.publicHosts)) {
+          blockers.push(
+            `Homepage canonical hostname ${canonicalHost} does not belong to ${site.label}.`,
+          )
+        }
+        if (canonicalURL.protocol !== 'https:') blockers.push('Homepage canonical is not HTTPS.')
+      } catch {
+        blockers.push('Homepage canonical is not a valid absolute URL.')
+      }
+    } else {
+      blockers.push('Homepage canonical is missing.')
+    }
   }
 
   for (const endpoint of probe?.seoEndpoints || []) {
+    if (endpoint.notApplicable) {
+      warnings.push(`${endpoint.pathname} is not advertised and is not applicable.`)
+      continue
+    }
     if (endpoint.status !== 200) {
       blockers.push(`${endpoint.pathname} returned HTTP ${endpoint.status || 'unknown'}.`)
     }
@@ -941,32 +1141,34 @@ function reviewSiteProbe(probe, site) {
       )
   }
 
-  const headers = probe?.baseline?.headers || {}
-  const requiredHeaders = [
-    'x-content-type-options',
-    'referrer-policy',
-    'permissions-policy',
-    'cross-origin-opener-policy',
-    'cross-origin-resource-policy',
-  ]
-  const headerFindings = []
-  for (const header of requiredHeaders) {
-    if (!headers[header]) headerFindings.push(`Security header ${header} is missing.`)
+  if (!baselineInconclusive) {
+    const headers = probe?.baseline?.headers || {}
+    const requiredHeaders = [
+      'x-content-type-options',
+      'referrer-policy',
+      'permissions-policy',
+      'cross-origin-opener-policy',
+      'cross-origin-resource-policy',
+    ]
+    const headerFindings = []
+    for (const header of requiredHeaders) {
+      if (!headers[header]) headerFindings.push(`Security header ${header} is missing.`)
+    }
+    const csp =
+      headers['content-security-policy'] || headers['content-security-policy-report-only'] || ''
+    if (!csp) headerFindings.push('Content Security Policy is missing.')
+    if (!headers['x-frame-options'] && !/frame-ancestors/i.test(csp)) {
+      headerFindings.push('Frame embedding protection is missing.')
+    }
+    if (
+      routingMode === 'domain' &&
+      new URL(baseURL).protocol === 'https:' &&
+      !headers['strict-transport-security']
+    ) {
+      headerFindings.push('Security header strict-transport-security is missing.')
+    }
+    ;(routingMode === 'domain' ? blockers : warnings).push(...headerFindings)
   }
-  const csp =
-    headers['content-security-policy'] || headers['content-security-policy-report-only'] || ''
-  if (!csp) headerFindings.push('Content Security Policy is missing.')
-  if (!headers['x-frame-options'] && !/frame-ancestors/i.test(csp)) {
-    headerFindings.push('Frame embedding protection is missing.')
-  }
-  if (
-    routingMode === 'domain' &&
-    new URL(baseURL).protocol === 'https:' &&
-    !headers['strict-transport-security']
-  ) {
-    headerFindings.push('Security header strict-transport-security is missing.')
-  }
-  ;(routingMode === 'domain' ? blockers : warnings).push(...headerFindings)
 
   for (const [name, candidate] of [
     ['site query-string', probe?.siteQueryInjection],
@@ -974,12 +1176,16 @@ function reviewSiteProbe(probe, site) {
     ['x-site-code header', probe?.siteHeaderInjection],
     ['internal-header bundle', probe?.internalHeaderInjection],
   ]) {
+    if (addInconclusiveFinding(name, candidate)) continue
     if ([400, 403, 404].includes(candidate?.status)) continue
     if (!candidate?.ok) {
       blockers.push(
         `${name} tenant-injection probe failed with HTTP ${candidate?.status || 'unknown'}.`,
       )
-    } else if (identityFingerprint(candidate) !== identityFingerprint(probe.baseline)) {
+    } else if (
+      !baselineInconclusive &&
+      identityFingerprint(candidate) !== identityFingerprint(probe.baseline)
+    ) {
       blockers.push(`${name} tenant-injection probe changed the rendered site identity.`)
     }
   }
@@ -1258,7 +1464,12 @@ async function main() {
   const inventory = await loadInventory()
   const checkpointData = await loadCheckpoint()
   const checkpoint = checkpointData.records
-  const browser = await chromium.launch({ headless: true })
+  const browser = await chromium.launch({
+    headless: true,
+    ...(process.env.GO_LIVE_BROWSER_EXECUTABLE_PATH
+      ? { executablePath: process.env.GO_LIVE_BROWSER_EXECUTABLE_PATH }
+      : {}),
+  })
   const pageRecords = new Map()
   const siteProbes = new Map()
   const tasks = []
@@ -1467,7 +1678,13 @@ async function main() {
             canonical: '',
             clientWidth: mode.width,
             consoleErrors: [],
+            expectedConsoleErrors: [],
             firstViewportCTA: [],
+            formEvidence: [],
+            externalLinks: [],
+            tenantPrefixedLinks: [],
+            visibleImageSources: [],
+            crossTenantMedia: [],
             h1: [],
             imageCount: 0,
             jsonLdCount: 0,
@@ -1542,18 +1759,26 @@ if (isMainModule) {
 
 export {
   appendJSONLine,
+  buildExplicitRouteInventory,
+  classifyExpectedConsoleError,
   checkpointKey,
   checkpointScope,
   checkpointVersion,
   deriveSiteDecision,
+  extractAdvertisedSitemapURLs,
   extractAdvertisedURLs,
+  buildSitemapProbePaths,
+  hasDirectContactMethod,
   hostnameBelongsToSite,
   hasStrongCTA,
   identityFingerprint,
+  isProtectedInventoryError,
   normalizeHostname,
   parseCheckpoint,
+  parseRequestedPaths,
   positiveInteger,
   reviewSiteProbe,
+  reviewContent,
   runPool,
   withTimeout,
 }

@@ -29,4 +29,12 @@ describe('lead capture security integration', () => {
     expect(task).toBeDefined()
     expect(task?.retries).toMatchObject({ attempts: 3, backoff: { type: 'exponential' } })
   })
+
+  it('registers a fail-safe scheduled WingsGroup retention task', () => {
+    const task = payload.config.jobs?.tasks?.find(
+      ({ slug }) => slug === 'purgeExpiredWingsGroupLeads',
+    )
+    expect(task).toBeDefined()
+    expect(task?.schedule).toEqual([{ cron: '0 15 3 * * *', queue: 'lead-retention' }])
+  })
 })

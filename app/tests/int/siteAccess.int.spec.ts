@@ -11,6 +11,7 @@ import {
   enforceSiteAccess,
   siteManagerScopedAccess,
   siteScopedAccess,
+  siteScopedOrAnyone,
   siteScopedOrPublished,
 } from '@/access/siteScope'
 import { enforceTourProductPublishSite } from '@/collections/Tours/hooks/enforceTourProductPublishSite'
@@ -35,9 +36,10 @@ const editor: AppUser = {
   sites: [10],
 }
 
-const accessArgs = (user?: AppUser): AccessArgs =>
+const accessArgs = (user?: AppUser, headers?: Headers): AccessArgs =>
   ({
     req: {
+      headers,
       user,
     },
   }) as AccessArgs
@@ -96,10 +98,18 @@ describe('site-scoped editorial access', () => {
 
   it('fails closed for anonymous published reads when the site relation is missing', () => {
     expect(siteScopedOrPublished()(accessArgs())).toEqual({
-      and: [
-        { _status: { equals: 'published' } },
-        { site: { exists: true } },
-      ],
+      and: [{ _status: { equals: 'published' } }, { site: { exists: true } }],
+    })
+  })
+
+  it('blocks anonymous HTTP collection reads while preserving local server queries', () => {
+    const externalHeaders = new Headers({ host: 'wingsgroup.example' })
+
+    expect(siteScopedOrAnyone()(accessArgs(undefined, externalHeaders))).toBe(false)
+    expect(siteScopedOrPublished()(accessArgs(undefined, externalHeaders))).toBe(false)
+    expect(siteScopedOrAnyone()(accessArgs())).toBe(true)
+    expect(siteScopedOrPublished()(accessArgs())).toEqual({
+      and: [{ _status: { equals: 'published' } }, { site: { exists: true } }],
     })
   })
 

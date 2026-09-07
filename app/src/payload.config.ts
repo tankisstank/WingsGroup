@@ -36,11 +36,25 @@ import { getServerSideURL } from './utilities/getURL'
 import { cmsEnabledLocaleMetadata } from './utilities/locales'
 import { resolveLocalDatabaseURL } from './utilities/localDatabase'
 import { repairLocalSQLiteSchema } from './utilities/repairLocalSQLiteSchema'
-import { reconcileLeadNotificationTask, sendLeadNotificationTask } from './lead-capture/job'
+import {
+  getWingsGroupLocalPreviewStoreURL,
+  isWingsGroupLocalPreviewStoreConfigured,
+} from './utilities/localPreviewStore'
+import {
+  purgeExpiredWingsGroupLeadsTask,
+  reconcileLeadNotificationTask,
+  sendLeadNotificationTask,
+} from './lead-capture/job'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const databaseURL = resolveLocalDatabaseURL(process.env.DATABASE_URL)
+const localPreviewStore = isWingsGroupLocalPreviewStoreConfigured()
+const databaseURL = resolveLocalDatabaseURL(
+  localPreviewStore ? getWingsGroupLocalPreviewStoreURL() : process.env.DATABASE_URL,
+)
+const databaseAuthToken = localPreviewStore
+  ? process.env.E09_PREVIEW_STORE_TOKEN!.trim()
+  : undefined
 const isPostgresURL =
   databaseURL.startsWith('postgres://') || databaseURL.startsWith('postgresql://')
 const shouldPushDatabaseSchema = process.env.PAYLOAD_DB_PUSH === 'true'
@@ -187,6 +201,7 @@ export default buildConfig({
     : sqliteAdapter({
         busyTimeout: 30000,
         client: {
+          ...(databaseAuthToken ? { authToken: databaseAuthToken } : {}),
           url: databaseURL,
         },
         push: shouldPushDatabaseSchema,
@@ -247,6 +262,10 @@ export default buildConfig({
         return authHeader === `Bearer ${secret}`
       },
     },
-    tasks: [sendLeadNotificationTask, reconcileLeadNotificationTask],
+    tasks: [
+      sendLeadNotificationTask,
+      reconcileLeadNotificationTask,
+      purgeExpiredWingsGroupLeadsTask,
+    ],
   },
 })

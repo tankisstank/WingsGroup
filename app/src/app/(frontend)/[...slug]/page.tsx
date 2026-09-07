@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 
-import {
-  generateCmsPageMetadataByPath,
-  renderCmsPageByPath,
-} from '@/app/(frontend)/cmsPage'
+import { generateCmsPageMetadataByPath, renderCmsPageByPath } from '@/app/(frontend)/cmsPage'
 import { isSupportedLocale } from '@/utilities/sitePaths'
+
+// CMS content, including governed media publication state, is resolved from
+// the production tenant at request time. Static generation uses the build
+// database and can otherwise freeze a pre-publication media state.
+export const dynamic = 'force-dynamic'
 
 type Args = {
   params: Promise<{

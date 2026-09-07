@@ -1,0 +1,177 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import {
+  WINGSGROUP_CONTENT_VALIDATION_MARKER,
+  WINGSGROUP_LEGAL_IDENTITY,
+} from '@/wingsgroup/corporateRoutes'
+
+const mocks = vi.hoisted(() => ({
+  draftMode: vi.fn(),
+  headers: vi.fn(),
+  find: vi.fn(),
+  settings: {} as Record<string, unknown>,
+  site: { code: 'wings-group', id: 1 },
+}))
+
+vi.mock('next/headers', () => ({ draftMode: mocks.draftMode, headers: mocks.headers }))
+vi.mock('@payload-config', () => ({ default: {} }))
+vi.mock('payload', () => ({ getPayload: vi.fn(async () => ({ find: mocks.find })) }))
+vi.mock('@/utilities/getSiteSettings', () => ({
+  getCurrentSiteSettings: vi.fn(async () => mocks.settings),
+}))
+vi.mock('@/utilities/siteContext', () => ({
+  appendSiteWhere: vi.fn(async (where: Record<string, unknown>) => ({
+    and: [{ site: { equals: mocks.site.id } }, where],
+  })),
+  getCurrentSite: vi.fn(async () => mocks.site),
+}))
+
+import { queryPageByPath } from '@/utilities/cmsPageQuery'
+
+const wingsGroupSettings = {
+  wingsGroupV3: {
+    enabled: true,
+    englishPublicationState: 'hidden',
+    legalIdentity: WINGSGROUP_LEGAL_IDENTITY,
+  },
+}
+
+const contactPage = {
+  _status: 'published',
+  id: 6,
+  layout: [{ blockType: 'content' }],
+  pathname: '/lien-he',
+  site: 1,
+  slug: 'lien-he',
+  title: 'Liên hệ',
+  wingsGroupRoute: {
+    archetype: 'contact',
+    contentApproval: {
+      en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+      vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+    },
+    managedBy: 'wingsgroup-v3',
+    publication: { en: 'hidden', vi: 'approved' },
+  },
+}
+
+describe('CMS page requested-path perimeter', () => {
+  beforeEach(() => {
+    mocks.draftMode.mockResolvedValue({ isEnabled: false })
+    mocks.headers.mockResolvedValue(new Headers())
+    mocks.find.mockReset()
+    mocks.find.mockResolvedValue({ docs: [contactPage] })
+    mocks.site = { code: 'wings-group', id: 1 }
+    mocks.settings = wingsGroupSettings
+  })
+
+  it('rejects a nested Vietnamese alias before the slug fallback can resolve it', async () => {
+    await expect(
+      queryPageByPath({ locale: 'vi', requestedPath: '/foo/lien-he' }),
+    ).resolves.toBeNull()
+    expect(mocks.find).not.toHaveBeenCalled()
+  })
+
+  it.each(['/lien-he', '/foo/lien-he', '/en/lien-he', '/en/foo/lien-he'])(
+    'rejects hidden English or locale-prefixed path %s before lookup',
+    async (requestedPath) => {
+      await expect(queryPageByPath({ locale: 'en', requestedPath })).resolves.toBeNull()
+      expect(mocks.find).not.toHaveBeenCalled()
+    },
+  )
+
+  it.each(['/lien-he', '/foo/lien-he'])(
+    'preserves trusted draft English lookup for shared path %s',
+    async (requestedPath) => {
+      mocks.draftMode.mockResolvedValue({ isEnabled: true })
+
+      await expect(queryPageByPath({ locale: 'en', requestedPath })).resolves.toMatchObject({
+        ...contactPage,
+        site: mocks.site,
+      })
+      expect(mocks.find).toHaveBeenCalledTimes(1)
+      expect(mocks.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          draft: true,
+          locale: 'en',
+          overrideAccess: true,
+        }),
+      )
+    },
+  )
+
+  it('still resolves an exact governed Vietnamese path', async () => {
+    await expect(
+      queryPageByPath({ locale: 'vi', requestedPath: '/lien-he' }),
+    ).resolves.toMatchObject({
+      ...contactPage,
+      site: mocks.site,
+    })
+    expect(mocks.find).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns a controlled Vietnamese policy notice without exposing a draft', async () => {
+    await expect(
+      queryPageByPath({ locale: 'vi', requestedPath: '/chinh-sach-bao-mat' }),
+    ).resolves.toMatchObject({
+      __wingsGroupPendingPolicy: true,
+      _status: 'published',
+      pathname: '/chinh-sach-bao-mat',
+      site: 1,
+    })
+    expect(mocks.find).toHaveBeenCalledWith(
+      expect.objectContaining({ draft: false, overrideAccess: false }),
+    )
+    expect(
+      JSON.stringify(await queryPageByPath({ locale: 'vi', requestedPath: '/dieu-khoan-su-dung' })),
+    ).not.toContain('https://')
+  })
+
+  it('replaces a published pending policy record instead of exposing its body', async () => {
+    const pendingPolicyPage = {
+      _status: 'published',
+      id: 99,
+      layout: [
+        {
+          blockType: 'content',
+          columns: [{ richText: { root: { children: [{ text: 'UNAPPROVED POLICY BODY' }] } } }],
+        },
+      ],
+      pathname: '/chinh-sach-bao-mat',
+      site: 1,
+      slug: 'chinh-sach-bao-mat',
+      title: 'Chính sách bảo mật',
+      wingsGroupRoute: {
+        archetype: 'policy',
+        managedBy: 'wingsgroup-v3',
+        policy: { approvalState: 'pending' },
+        publication: { en: 'hidden', vi: 'pending' },
+      },
+    }
+    mocks.find.mockResolvedValue({ docs: [pendingPolicyPage] })
+
+    const resolved = await queryPageByPath({
+      locale: 'vi',
+      requestedPath: '/chinh-sach-bao-mat',
+    })
+
+    expect(resolved).toMatchObject({
+      __wingsGroupPendingPolicy: true,
+      pathname: '/chinh-sach-bao-mat',
+    })
+    expect(JSON.stringify(resolved)).not.toContain('UNAPPROVED POLICY BODY')
+    expect(resolved).not.toBe(pendingPolicyPage)
+  })
+
+  it('preserves nested slug fallback behavior for other tenants', async () => {
+    const wingsGoPage = { ...contactPage, site: 2, wingsGroupRoute: null }
+    mocks.site = { code: 'wings-go', id: 2 }
+    mocks.settings = {}
+    mocks.find.mockResolvedValue({ docs: [wingsGoPage] })
+
+    await expect(queryPageByPath({ locale: 'vi', requestedPath: '/foo/lien-he' })).resolves.toEqual(
+      wingsGoPage,
+    )
+    expect(mocks.find).toHaveBeenCalledTimes(1)
+  })
+})

@@ -29,6 +29,18 @@ import * as migration_20260730_130000_wings_side_enquiry_discovery_context from 
 import * as migration_20260731_090000_tour_commerce_freshness_identity from './20260731_090000_tour_commerce_freshness_identity'
 import * as migration_20260731_100000_tour_departure_source_provenance from './20260731_100000_tour_departure_source_provenance'
 import * as migration_20260806_090000_backfill_wingsgo_legacy_tour_sites from './20260806_090000_backfill_wingsgo_legacy_tour_sites'
+import * as migration_20260813_193226_wingsgroup_v3_data_foundation from './20260813_193226_wingsgroup_v3_data_foundation'
+import * as migration_20260814_090000_wingsgroup_lead_governance from './20260814_090000_wingsgroup_lead_governance'
+import * as migration_20260814_120000_wingsgroup_corporate_route_governance from './20260814_120000_wingsgroup_corporate_route_governance'
+import * as migration_20260814_130000_wingsgroup_policy_release_governance from './20260814_130000_wingsgroup_policy_release_governance'
+import * as migration_20260814_140000_wingsgroup_settings_content_integrity from './20260814_140000_wingsgroup_settings_content_integrity'
+import * as migration_20260823_090000_wingsgroup_callback_channel from './20260823_090000_wingsgroup_callback_channel'
+import * as migration_20260823_110000_wingsgroup_public_contact_identity from './20260823_110000_wingsgroup_public_contact_identity'
+import * as migration_20260824_150000_wingsgroup_v3_media_sizes from './20260824_150000_wingsgroup_v3_media_sizes'
+import * as migration_20260824_160000_wingsgroup_ecosystem_route_archetype from './20260824_160000_wingsgroup_ecosystem_route_archetype'
+import * as migration_20260906_081500_lead_notification_job_tasks from './20260906_081500_lead_notification_job_tasks'
+import * as migration_20260906_083000_payload_jobs_meta from './20260906_083000_payload_jobs_meta'
+import * as migration_20260906_084000_payload_jobs_stats from './20260906_084000_payload_jobs_stats'
 
 export const migrations = [
   {
@@ -185,5 +197,65 @@ export const migrations = [
     up: migration_20260806_090000_backfill_wingsgo_legacy_tour_sites.up,
     down: migration_20260806_090000_backfill_wingsgo_legacy_tour_sites.down,
     name: '20260806_090000_backfill_wingsgo_legacy_tour_sites',
+  },
+  {
+    up: migration_20260813_193226_wingsgroup_v3_data_foundation.up,
+    down: migration_20260813_193226_wingsgroup_v3_data_foundation.down,
+    name: '20260813_193226_wingsgroup_v3_data_foundation',
+  },
+  {
+    up: migration_20260814_090000_wingsgroup_lead_governance.up,
+    down: migration_20260814_090000_wingsgroup_lead_governance.down,
+    name: '20260814_090000_wingsgroup_lead_governance',
+  },
+  {
+    up: migration_20260814_120000_wingsgroup_corporate_route_governance.up,
+    down: migration_20260814_120000_wingsgroup_corporate_route_governance.down,
+    name: '20260814_120000_wingsgroup_corporate_route_governance',
+  },
+  {
+    up: migration_20260814_130000_wingsgroup_policy_release_governance.up,
+    down: migration_20260814_130000_wingsgroup_policy_release_governance.down,
+    name: '20260814_130000_wingsgroup_policy_release_governance',
+  },
+  {
+    up: migration_20260814_140000_wingsgroup_settings_content_integrity.up,
+    down: migration_20260814_140000_wingsgroup_settings_content_integrity.down,
+    name: '20260814_140000_wingsgroup_settings_content_integrity',
+  },
+  {
+    up: migration_20260823_090000_wingsgroup_callback_channel.up,
+    down: migration_20260823_090000_wingsgroup_callback_channel.down,
+    name: '20260823_090000_wingsgroup_callback_channel',
+  },
+  {
+    up: migration_20260823_110000_wingsgroup_public_contact_identity.up,
+    down: migration_20260823_110000_wingsgroup_public_contact_identity.down,
+    name: '20260823_110000_wingsgroup_public_contact_identity',
+  },
+  {
+    up: migration_20260824_150000_wingsgroup_v3_media_sizes.up,
+    down: migration_20260824_150000_wingsgroup_v3_media_sizes.down,
+    name: '20260824_150000_wingsgroup_v3_media_sizes',
+  },
+  {
+    up: migration_20260824_160000_wingsgroup_ecosystem_route_archetype.up,
+    down: migration_20260824_160000_wingsgroup_ecosystem_route_archetype.down,
+    name: '20260824_160000_wingsgroup_ecosystem_route_archetype',
+  },
+  {
+    up: migration_20260906_081500_lead_notification_job_tasks.up,
+    down: migration_20260906_081500_lead_notification_job_tasks.down,
+    name: '20260906_081500_lead_notification_job_tasks',
+  },
+  {
+    up: migration_20260906_083000_payload_jobs_meta.up,
+    down: migration_20260906_083000_payload_jobs_meta.down,
+    name: '20260906_083000_payload_jobs_meta',
+  },
+  {
+    up: migration_20260906_084000_payload_jobs_stats.up,
+    down: migration_20260906_084000_payload_jobs_stats.down,
+    name: '20260906_084000_payload_jobs_stats',
   },
 ]

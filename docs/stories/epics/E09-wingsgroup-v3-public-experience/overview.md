@@ -1,113 +1,87 @@
 # E09 - Trải nghiệm public WingsGroup v3
 
-## Status
+## Trạng thái
 
-in_progress — production live; post-deployment operational acceptance remains in progress.
+Accepted engineering; chờ xác nhận các cổng công bố và môi trường trước khi
+production launch. E09 không phải là xác nhận go-live.
 
-## Classification
+## Tài liệu sản phẩm
 
-- Input type: new initiative.
-- Lane: high-risk.
-- Risk flags: authorization/site scope, data model, audit/security, external
-  systems, public contracts, cross-platform, existing behavior, and
-  multi-domain.
-- Hard gates: privacy/security and external provider behavior.
+- `docs/product/wingsgroup-v3-fidelity-contract.json`
+- `docs/product/wingsgroup-v3-media-manifest.json`
+- `docs/product/wingsgroup-v3-release-gates.json`
+- `docs/product/go-live-review-pipeline.md`
+- `docs/product/multisite-platform.md`
+- `docs/product/editorial-operations.md`
 
-## Source
+## Mục tiêu
 
-- Multica parent issue: `WIN-20`.
-- Handoff attachment ID: `019ff9e2-a63a-72e3-b769-205608264d46`.
-- Handoff checksum:
-  `eea0c9fdcdae0475b82adf35e5b3161e9a99667f4ba98c92d65e5cd53a1ba98b`.
-- Product contract: `docs/product/wingsgroup-v3-public-experience.md`.
+Đưa trải nghiệm public WingsGroup v3, các route doanh nghiệp, contact intake,
+media/proof governance và readiness evidence về một nguồn story có thể kiểm
+toán. Các package engineering đã được review độc lập; tài liệu này giữ nguyên
+ranh giới giữa bằng chứng kỹ thuật đã chấp nhận và quyền công bố production
+chưa được cấp.
 
-## Objective
+## Phạm vi story
 
-Deliver the approved WingsGroup v3 public experience as a governed,
-site-scoped upgrade in the existing Payload-first multisite application. The
-initiative delivered the supplied prototype and 13 editorial assets to the
-public WingsGroup site. Production is live; the remaining work is operational
-acceptance and preservation of safe fallbacks for unconfigured channels, proof
-and ecosystem destinations.
+| Story | Phạm vi | Tình trạng hiện tại |
+| --- | --- | --- |
+| US-061 | Contract nền tảng v3, media và fidelity | Accepted engineering; 13 editorial assets đã có quyền sử dụng WingsGroup, còn kiểm soát import/runtime |
+| US-062 | Fidelity homepage và UX tư vấn responsive | Accepted engineering; chờ cổng công bố |
+| US-063 | Publication, brand, proof và editorial gates | Accepted engineering; brand/media/English evidence đã được duyệt, proof vẫn fail-closed |
+| US-064 | Consent lead-intake và consultation fallback | Accepted engineering; privacy contract đã được duyệt, runtime delivery/endpoint còn chờ |
+| US-065 | Corporate routes, legal/locale và publication governance | Accepted engineering; English đã được duyệt, legal/privacy vẫn fail-closed |
+| US-066 | PostgreSQL, cross-tenant và go-live readiness | Accepted engineering; rehearsal/môi trường còn mở |
 
-## Working Timeline
+## Sổ bằng chứng đã chấp nhận
 
-- Start date: 2026-08-13.
-- Production confirmation: 2026-08-26.
-- Post-deployment target: 2026-08-28 for backup/restore evidence, authorized
-  lead-path verification, and initial monitoring review.
+Các SHA dưới đây là `reviewed_head_sha` hoặc `reviewed_sha` trong report có sẵn;
+không phải proof mới được tạo bởi story reconciliation này.
 
-## Scope Checkpoint
+| Package | Report | SHA | Kết luận |
+| --- | --- | --- | --- |
+| E09-00-11 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-00-11-rereview-2.json` | `547ab08a6b0bea30664ece2d5537d7a86833d1b1` | Accepted: runtime fidelity, 13 media governed, transaction/rollback và tenant guard |
+| E09-20 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-20-rereview-2.json` | `72a28cf6441f5b6269fe68d5e08e1c42beb0b20a` | Accepted: media boundary, responsive homepage, pending proof và preview contact |
+| E09-30-31 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-30-31-rereview-3.json` | `ca7ccbae8ec2f5e5186e4a9ce81b4d8f134c7ea6` | Accepted: signed preview grant, consent intake và forged-context denial |
+| E09-40-41 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-40-41-rereview-1.json` | `d7215b54c8c62fa56eaee139fab190e8dd65cb0c` | Accepted: proxy/media bypass closure và cross-tenant isolation |
+| E09-50-51 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-fidelity-20260814/reports/E09-50-51-rereview-1.json` | `ebb4175b2b104f1b564232f7051282bc3881f574` | Accepted engineering correction; production launch blocked |
+| WP-BRAND-01 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-brand-kit-20260823/reports/WP-BRAND-01.json` | `0c45339b55d6aa7e0138aa0fbe1ddfc8a4c08085` | Accepted brand kit implementation; approved logo/token evidence and CMS/static fallback precedence |
+| Editorial media authorization | `docs/product/wingsgroup-v3-media-manifest.json` | `0c4a5a2c0a73e006ab4fa38f16189574e0b845dc` | Exactly 13 assets; WingsGroup production editorial-use rights approved, not legal proof; governed import/derivative checks remain required before runtime publication |
+| EN-EDITORIAL-03 | `/home/docker-admin/.codex-orchestrator/runs/wings-e09-en-editorial-audit-20260824/reports/EN-EDITORIAL-03-final.json` | `95e887ec6da2f74a1a7403f0d8e4e62de95cc85d` | Independent Terra acceptance: no P0/P1/P2 public-English findings; native editorial sign-off recommended |
 
-- Vietnamese and English are required E09 delivery locales. English is built in
-  parallel and remains hidden per route until route, chrome, metadata, and
-  editorial review are complete.
-- The 13 handoff images are licensed for project use. They remain unpublished
-  until each record has provenance, bilingual alt text, WingsGroup scope, and
-  responsive derivatives.
-- The approved brand spelling is `WingSide`; its canonical path slug is
-  `/wing-side`. `/wingsside` is redirect-only compatibility and must not appear
-  in new public links, canonicals, tracking or CMS records.
-- Privacy input is approved: consent `wingsgroup-contact-v1` is mandatory, lead
-  retention is 24 months, the data-subject contact is
-  `info@doicanhviet.com`, and consultation requests may be routed to the
-  appropriate branch within the same organization.
+## Cổng còn mở
 
-## Workstreams
+Trạng thái hiện tại theo release-gates contract và các review cuối:
 
-| Harness | Multica | Lane | Status | Workstream |
-| --- | --- | --- | --- | --- |
-| US-060 | WIN-28 | high-risk | implemented | Chốt governance và release gates |
-| US-061 | WIN-29 | high-risk | in_progress | Xây nền dữ liệu Payload (đã live; thiếu evidence PostgreSQL rehearsal) |
-| US-062 | WIN-30 | high-risk | implemented | Implement shell và editorial hero |
-| US-063 | WIN-31 | high-risk | implemented | Implement homepage v3 |
-| US-064 | WIN-32 | high-risk | in_progress | Hoàn thiện lead intake (đã live; chờ test lead có ủy quyền) |
-| US-065 | WIN-33 | high-risk | implemented | Áp dụng v3 cho corporate và policy routes |
-| US-066 | WIN-34 | high-risk | in_progress | QA SEO và post-deployment acceptance |
+- `privacy-consent` source-contract gate đã được stakeholder duyệt ngày
+  `2026-08-24`, với policy routes `/chinh-sach-bao-mat` và
+  `/en/chinh-sach-bao-mat`, retention 24 tháng, data-subject contact
+  `info@doicanhviet.com` và inter-branch routing được phép;
+- Runtime policy routes, consent persistence, migration/seed và production smoke
+  proof vẫn là release work riêng; lead delivery chỉ dùng Payload/CMS database
+  và release configuration yêu cầu `LEAD_DELIVERY_REQUIRED=false`;
+- `proof-publication` là cổng optional/non-blocking, vẫn fail-closed cho tới khi
+  từng proof record có đủ source, context/date, rights và provenance;
+- consultation channels vẫn optional/fail-closed pending URL production, owner,
+  SLA và tracking; các kênh Zalo, WhatsApp, Messenger chưa được mở external URL;
+- ecosystem deep-links vẫn optional/fail-closed pending destination validation và
+  owner tương ứng;
+- environment gates vẫn mở: disposable PostgreSQL rehearsal và Harness database.
 
-## Dependency Order
+Brand logo/tokens, quyền site-scope và production editorial-use của 13 asset trong
+media manifest, cùng locale completeness và native English editorial review đã có
+bằng chứng approved; các mục này không còn là publication gate pending. Quyền sử
+dụng asset không phải là xác nhận import/runtime production hoặc legal proof.
 
-```text
-US-060
-  -> US-061
-      -> US-062
-          -> US-063
-              -> US-064
-                  -> US-065
-                      -> US-066
-```
+Khi các cổng chưa đóng, hệ thống phải giữ policy routes, proof records và external
+deep-links ở trạng thái fail-closed, và không nhận lead production. Privacy contract
+đã được duyệt không thay thế runtime route, consent persistence, migration/seed,
+delivery hoặc production smoke proof. English locale và brand/media evidence đã
+được duyệt không thay đổi các kiểm soát runtime còn lại.
+Không có report nào trong sổ trên là production launch approval.
 
-Parallel work is allowed only after the upstream data and governance contracts
-used by that workstream are accepted.
+## Mapping thời gian
 
-## Validation Shape
-
-- Unit proof for parsers, state transitions, responsive helpers, and validation
-  rules.
-- Integration proof for Payload schema, site scope, locale, media, form, and
-  SEO behavior.
-- E2E proof for public routes, navigation, carousel, contact dialog, form
-  states, tenant links, and accessibility.
-- Platform proof for PostgreSQL migration, build, go-live review, responsive
-  screenshots, canonical, sitemap, robots, CSP, and analytics events.
-
-## Open Decisions
-
-- The official **Wingsgroup - Vietwings Travel** Zalo OA is approved and live
-  in direct-contact and consultation-dialog surfaces. WhatsApp and Messenger
-  endpoint owners and SLAs remain pending-update; the built-in form is the
-  non-blocking fallback.
-- Proof sources and publication permissions remain pending; proof is not
-  published.
-- Ecosystem deep links remain disabled until destination checks pass; CTA
-  fallback remains the WingsGroup intake form.
-- Production backup/restore evidence, an authorized real-lead check, and the
-  initial 24–48 hour monitoring review remain operational acceptance work.
-
-## Exit Criteria
-
-- US-060 through US-065 have implementation and public-smoke evidence.
-- US-066 records post-deployment operational evidence and explicit acceptance.
-- Harness, Multica, and Plane show the same parent, child titles, states, and
-  dates.
-- No production promotion occurs without explicit release approval.
+Evidence đầu tiên của E09 là package E09-00-11 ngày `2026-08-14`; review cuối
+E09-50-51 được ghi nhận ngày `2026-08-22`. Đây là khoảng thời gian duy nhất
+được dùng cho mapping Epic; không suy đoán ngày bàn giao production.

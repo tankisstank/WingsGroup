@@ -1,0 +1,577 @@
+import { describe, expect, it } from 'vitest'
+
+import {
+  buildWingsGroupPublicPageAccessWhere,
+  findWingsGroupPublicJargon,
+  getWingsGroupRoutePublicationState,
+  hasApprovedWingsGroupPrivacyGovernance,
+  hasApprovedPolicyGovernance,
+  isValidWingsGroupPolicyDate,
+  isWingsGroupPendingPolicyRouteRenderable,
+  isWingsGroupV3ExactPublicInventoryEnabled,
+  isWingsGroupV3PublicSurfacePathAllowed,
+  isWingsGroupV3SurfacePath,
+  isWingsGroupRoutePublic,
+  WINGSGROUP_CONTENT_VALIDATION_MARKER,
+  WINGSGROUP_CORPORATE_ROUTES,
+  WINGSGROUP_LEGAL_IDENTITY,
+  WINGSGROUP_POLICY_ROUTES,
+  WINGSGROUP_POLICY_VALIDATION_MARKER,
+  WINGSGROUP_PUBLIC_LOCALE_CODES,
+  WINGSGROUP_RELATIONSHIP_STATEMENT_EN,
+} from '@/wingsgroup/corporateRoutes'
+import {
+  WINGSGROUP_CONSENT_VERSION,
+  WINGSGROUP_DATA_CONTACT,
+  WINGSGROUP_LEAD_RETENTION_MONTHS,
+  WINGSGROUP_POLICY_ROUTES as CONTACT_POLICY_ROUTES,
+  WINGSGROUP_PRIVACY_VERSION,
+} from '@/lead-capture/wingsGroupV3'
+import {
+  buildWingsGroupCorporateRouteSeeds,
+  resolveCorporateRouteSeedAction,
+  routeGovernanceForSeed,
+  WINGSGROUP_PRIVACY_APPROVAL_REFERENCE,
+  WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
+  WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_EN,
+  WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_VI,
+  wingsGroupSettingsSeed,
+} from '../../scripts/lib/wingsGroupCorporateRouteSeed'
+import { contentPresentationDefinitions } from '@/blocks/presentations'
+import { isRuntimeResolvablePage } from '@/utilities/pageRuntimeResolvable'
+import { getPageCanonicalPath } from '@/utilities/siteURLs'
+
+const governedPage = (path = '/ve-wingsgroup') => ({
+  pathname: path,
+  wingsGroupRoute: {
+    archetype: path === '/ve-wingsgroup' ? 'corporate' : 'policy',
+    contentApproval: {
+      en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+      vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+    },
+    managedBy: 'wingsgroup-v3',
+    publication: { en: 'approved', vi: 'approved' },
+  },
+})
+
+const trustedSettings = ({
+  englishPublicationState = 'hidden',
+  privacyApproved = false,
+}: {
+  englishPublicationState?: 'approved' | 'hidden' | 'route-ready'
+  privacyApproved?: boolean
+} = {}) => ({
+  wingsGroupV3: {
+    enabled: true,
+    englishPublicationState,
+    legalIdentity: WINGSGROUP_LEGAL_IDENTITY,
+    privacy: {
+      approvalReference: privacyApproved ? 'privacy-approval-2026-08-14' : null,
+      approvalState: privacyApproved ? 'approved' : 'pending',
+      consentEvidenceReference: privacyApproved ? 'consent-evidence-2026-08-14' : null,
+      consentRequired: true,
+      consentVersion: WINGSGROUP_CONSENT_VERSION,
+      dataSubjectContact: WINGSGROUP_DATA_CONTACT,
+      dataSubjectRightsEvidence: privacyApproved ? 'rights-evidence-2026-08-14' : null,
+      dataSubjectRightsStatement: privacyApproved ? 'Legal-owner supplied rights statement.' : null,
+      interBranchTransferAllowed: true,
+      policyRouteEn: CONTACT_POLICY_ROUTES.en,
+      policyRouteVi: CONTACT_POLICY_ROUTES.vi,
+      policyVersion: WINGSGROUP_PRIVACY_VERSION,
+      retentionMonths: WINGSGROUP_LEAD_RETENTION_MONTHS,
+    },
+  },
+})
+
+describe('WingsGroup corporate route contract', () => {
+  it('defines exactly the ten accepted paths and only three policy paths', () => {
+    expect(WINGSGROUP_PUBLIC_LOCALE_CODES).toEqual(['vi', 'en'])
+    expect(WINGSGROUP_CORPORATE_ROUTES.map(({ path }) => path)).toEqual([
+      '/',
+      '/ve-wingsgroup',
+      '/he-sinh-thai',
+      '/nang-luc-dich-vu',
+      '/tin-cay-va-phap-ly',
+      '/tin-tuc',
+      '/lien-he',
+      '/chinh-sach-bao-mat',
+      '/dieu-khoan-su-dung',
+      '/chinh-sach-thanh-toan',
+    ])
+    expect(WINGSGROUP_POLICY_ROUTES).toEqual([
+      '/chinh-sach-bao-mat',
+      '/dieu-khoan-su-dung',
+      '/chinh-sach-thanh-toan',
+    ])
+  })
+
+  it('matches the editorial archive and exactly one article descendant only', () => {
+    expect(isWingsGroupV3SurfacePath('/tin-tuc')).toBe(true)
+    expect(isWingsGroupV3SurfacePath('/tin-tuc/governed-article')).toBe(true)
+
+    for (const path of [
+      '/tin-tuc/governed-article/extra',
+      '/tin-tuc//governed-article',
+      '/posts/governed-article',
+      '/tin-tuc/governed-article/comments',
+    ]) {
+      expect(isWingsGroupV3SurfacePath(path)).toBe(false)
+    }
+  })
+
+  it('fails closed outside the exact VI route inventory when WingsGroup v3 is enabled', () => {
+    const settings = { wingsGroupV3: { enabled: true } }
+    expect(isWingsGroupV3ExactPublicInventoryEnabled({ settings, siteCode: 'wings-group' })).toBe(
+      true,
+    )
+
+    for (const { path } of WINGSGROUP_CORPORATE_ROUTES) {
+      expect(
+        isWingsGroupV3PublicSurfacePathAllowed({
+          locale: 'vi',
+          path,
+          settings,
+          siteCode: 'wings-group',
+        }),
+      ).toBe(true)
+      expect(
+        isWingsGroupV3PublicSurfacePathAllowed({
+          locale: 'en',
+          path,
+          settings,
+          siteCode: 'wings-group',
+        }),
+      ).toBe(false)
+    }
+
+    for (const path of [
+      '/posts',
+      '/posts/example',
+      '/posts/page/2',
+      '/search',
+      '/foo/lien-he',
+      '/en/lien-he',
+      '/en/foo/lien-he',
+    ]) {
+      expect(
+        isWingsGroupV3PublicSurfacePathAllowed({
+          locale: 'vi',
+          path,
+          settings,
+          siteCode: 'wings-group',
+        }),
+      ).toBe(false)
+    }
+
+    expect(
+      isWingsGroupV3PublicSurfacePathAllowed({
+        locale: 'en',
+        path: '/foo/lien-he',
+        settings,
+        siteCode: 'wings-go',
+      }),
+    ).toBe(true)
+  })
+
+  it('exposes only the non-policy English inventory when the locale is route-ready', () => {
+    const settings = { wingsGroupV3: { enabled: true, englishPublicationState: 'route-ready' } }
+
+    for (const route of WINGSGROUP_CORPORATE_ROUTES) {
+      expect(
+        isWingsGroupV3PublicSurfacePathAllowed({
+          locale: 'en',
+          path: route.path,
+          settings,
+          siteCode: 'wings-group',
+        }),
+      ).toBe(!route.policy)
+    }
+  })
+
+  it('keeps English route-ready publication fail-closed for policies and preserves locale metadata paths', () => {
+    const settings = trustedSettings({ englishPublicationState: 'route-ready' })
+    const nonPolicy = governedPage('/ve-wingsgroup')
+    const policy = governedPage('/chinh-sach-bao-mat')
+
+    expect(
+      getWingsGroupRoutePublicationState({
+        locale: 'en',
+        page: nonPolicy,
+        settings,
+        siteCode: 'wings-group',
+      }),
+    ).toBe('approved')
+    expect(
+      getWingsGroupRoutePublicationState({
+        locale: 'en',
+        page: policy,
+        settings,
+        siteCode: 'wings-group',
+      }),
+    ).toBe('hidden')
+    expect(getPageCanonicalPath({ pathname: '/ve-wingsgroup' }, 'vi')).toBe('/vi/ve-wingsgroup')
+    expect(getPageCanonicalPath({ pathname: '/ve-wingsgroup' }, 'en')).toBe('/ve-wingsgroup')
+  })
+
+  it('keeps the Vietnamese ecosystem route eligible for pages-sitemap only after publication governance', async () => {
+    const settings = trustedSettings()
+    const ecosystemPage = {
+      layout: [{ blockType: 'wingsGroupEcosystem' }],
+      pathname: '/he-sinh-thai',
+      title: 'Hệ sinh thái WingsGroup',
+      wingsGroupRoute: {
+        archetype: 'ecosystem',
+        contentApproval: {
+          en: null,
+          vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+        },
+        managedBy: 'wingsgroup-v3',
+        publication: { en: 'hidden', vi: 'approved' },
+      },
+    }
+
+    await expect(
+      isRuntimeResolvablePage({
+        locale: 'vi',
+        page: ecosystemPage,
+        pathname: '/he-sinh-thai',
+        settings,
+        siteCode: 'wings-group',
+      }),
+    ).resolves.toBe(true)
+    await expect(
+      isRuntimeResolvablePage({
+        locale: 'en',
+        page: ecosystemPage,
+        pathname: '/he-sinh-thai',
+        settings: trustedSettings({ englishPublicationState: 'approved' }),
+        siteCode: 'wings-group',
+      }),
+    ).resolves.toBe(false)
+  })
+
+  it('fails closed when governance, policy approval, or the English site gate is absent', () => {
+    expect(
+      isWingsGroupRoutePublic({
+        locale: 'vi',
+        page: { pathname: '/ve-wingsgroup' },
+        siteCode: 'wings-group',
+      }),
+    ).toBe(false)
+    expect(
+      getWingsGroupRoutePublicationState({
+        locale: 'vi',
+        page: governedPage('/chinh-sach-bao-mat'),
+        settings: trustedSettings(),
+        siteCode: 'wings-group',
+      }),
+    ).toBe('pending')
+    expect(
+      isWingsGroupRoutePublic({
+        locale: 'en',
+        page: governedPage(),
+        settings: trustedSettings(),
+        siteCode: 'wings-group',
+      }),
+    ).toBe(false)
+    expect(
+      isWingsGroupRoutePublic({
+        locale: 'en',
+        page: governedPage(),
+        settings: trustedSettings({ englishPublicationState: 'approved' }),
+        siteCode: 'wings-group',
+      }),
+    ).toBe(true)
+  })
+
+  it('allows only a controlled Vietnamese pending-policy notice to render', () => {
+    const settings = trustedSettings()
+    const page = {
+      _status: 'published',
+      pathname: '/chinh-sach-bao-mat',
+      wingsGroupRoute: {
+        archetype: 'policy',
+        managedBy: 'wingsgroup-v3',
+        policy: { approvalState: 'pending' },
+        publication: { en: 'hidden', vi: 'pending' },
+      },
+    }
+
+    expect(
+      isWingsGroupPendingPolicyRouteRenderable({
+        locale: 'vi',
+        page,
+        settings,
+        siteCode: 'wings-group',
+      }),
+    ).toBe(true)
+    expect(
+      isWingsGroupPendingPolicyRouteRenderable({
+        locale: 'en',
+        page,
+        settings,
+        siteCode: 'wings-group',
+      }),
+    ).toBe(false)
+    expect(
+      isWingsGroupPendingPolicyRouteRenderable({
+        locale: 'vi',
+        page: { ...page, _status: 'draft' },
+        settings,
+        siteCode: 'wings-group',
+      }),
+    ).toBe(false)
+  })
+
+  it('adds the same locale and policy gate to anonymous direct Page reads', () => {
+    const viWhere = JSON.stringify(buildWingsGroupPublicPageAccessWhere('vi', trustedSettings()))
+    const enHiddenWhere = JSON.stringify(
+      buildWingsGroupPublicPageAccessWhere('en', trustedSettings()),
+    )
+    const enWhere = JSON.stringify(
+      buildWingsGroupPublicPageAccessWhere(
+        'en',
+        trustedSettings({ englishPublicationState: 'approved', privacyApproved: true }),
+      ),
+    )
+    expect(viWhere).toContain('wingsGroupRoute.publication.vi')
+    expect(viWhere).not.toContain('/chinh-sach-bao-mat')
+    expect(enHiddenWhere).not.toContain('"equals":"wings-group"')
+    expect(enWhere).toContain('wingsGroupRoute.publication.en')
+    expect(enWhere).toContain('wingsGroupRoute.contentApproval.en')
+    expect(enWhere).toContain('wingsGroupRoute.policy.approvalState')
+    expect(enWhere).toContain(WINGSGROUP_LEGAL_IDENTITY.legalEntityName)
+    expect(enWhere).toContain('site.code')
+    expect(enWhere).not.toContain('"exists"')
+    expect(enWhere).toContain('"pathname":{"equals":"/ve-wingsgroup"}')
+    expect(enWhere).toContain('"wingsGroupRoute.archetype":{"equals":"corporate"}')
+    expect(
+      JSON.stringify(
+        buildWingsGroupPublicPageAccessWhere(
+          'all',
+          trustedSettings({ englishPublicationState: 'approved', privacyApproved: true }),
+        ),
+      ),
+    ).not.toContain('"equals":"wings-group"')
+    expect(
+      isWingsGroupRoutePublic({
+        locale: 'en',
+        page: {
+          ...governedPage(),
+          wingsGroupRoute: {
+            ...governedPage().wingsGroupRoute,
+            contentApproval: { en: null, vi: WINGSGROUP_CONTENT_VALIDATION_MARKER },
+          },
+        },
+        settings: trustedSettings({ englishPublicationState: 'approved' }),
+        siteCode: 'wings-group',
+      }),
+    ).toBe(false)
+  })
+
+  it('requires complete, exact policy approval metadata', () => {
+    const settings = trustedSettings({ privacyApproved: true })
+    const privacy = settings.wingsGroupV3.privacy
+    const approved = {
+      approvalReference: 'legal-minute-2026-08-14',
+      approvalState: 'approved',
+      consentEvidenceReference: privacy.consentEvidenceReference,
+      consentVersion: privacy.consentVersion,
+      dataSubjectContact: privacy.dataSubjectContact,
+      dataSubjectRightsEvidence: privacy.dataSubjectRightsEvidence,
+      dataSubjectRightsStatement: privacy.dataSubjectRightsStatement,
+      effectiveDate: '2026-09-01',
+      legalEntity: WINGSGROUP_LEGAL_IDENTITY.legalEntityName,
+      legalOwner: 'Authorized legal owner',
+      policyVersion: privacy.policyVersion,
+      privacyApprovalReference: privacy.approvalReference,
+      retentionMonths: WINGSGROUP_LEAD_RETENTION_MONTHS,
+      scope: 'WingsGroup public contact service',
+      validationMarker: WINGSGROUP_POLICY_VALIDATION_MARKER,
+      version: '1.0',
+    }
+    expect(hasApprovedWingsGroupPrivacyGovernance(settings)).toBe(true)
+    expect(hasApprovedPolicyGovernance(approved, settings)).toBe(true)
+    expect(hasApprovedPolicyGovernance({ ...approved, approvalReference: '   ' }, settings)).toBe(
+      false,
+    )
+    expect(
+      hasApprovedPolicyGovernance({ ...approved, legalEntity: 'Another company' }, settings),
+    ).toBe(false)
+    expect(
+      hasApprovedPolicyGovernance({ ...approved, effectiveDate: '2026-99-99' }, settings),
+    ).toBe(false)
+    expect(hasApprovedPolicyGovernance({ ...approved, retentionMonths: 23 }, settings)).toBe(false)
+    expect(
+      hasApprovedPolicyGovernance(
+        { ...approved, dataSubjectRightsStatement: 'Different' },
+        settings,
+      ),
+    ).toBe(false)
+    expect(hasApprovedPolicyGovernance({ ...approved, validationMarker: null }, settings)).toBe(
+      false,
+    )
+    expect(isValidWingsGroupPolicyDate('2026-99-99')).toBe(false)
+  })
+
+  it('uses only the exact approved relationship statement and keeps its faithful English copy hidden', () => {
+    expect(WINGSGROUP_LEGAL_IDENTITY.relationshipStatement).toBe(
+      'WingsGroup là thương hiệu phát triển mới trong cùng hệ sinh thái tổ chức với VietWings và Đôi Cánh Việt. Hệ sinh thái tiếp tục phát triển các thương hiệu WingsGo, WingSide, WingsCare và các dịch vụ liên quan.',
+    )
+    expect(WINGSGROUP_RELATIONSHIP_STATEMENT_EN).toBe(
+      'WingsGroup is a newly developed brand within the same organisational ecosystem as VietWings and Đôi Cánh Việt. The ecosystem continues to develop WingsGo, WingSide, WingsCare and related services.',
+    )
+    const about = buildWingsGroupCorporateRouteSeeds().find(
+      ({ path }) => path === '/ve-wingsgroup',
+    )!
+    expect(JSON.stringify(about.vi)).toContain(WINGSGROUP_LEGAL_IDENTITY.relationshipStatement)
+    expect(JSON.stringify(about.en)).toContain(WINGSGROUP_RELATIONSHIP_STATEMENT_EN)
+    expect(JSON.stringify(about.en)).not.toMatch(
+      /same (?:legal entity|organisation)\b|service branches/i,
+    )
+    expect(routeGovernanceForSeed(about).publication.en).toBe('approved')
+  })
+
+  it('detects prohibited implementation language in public copy', () => {
+    expect(findWingsGroupPublicJargon({ title: 'A courteous public introduction' })).toBeNull()
+    expect(
+      findWingsGroupPublicJargon({ body: 'This root site routes every line business.' }),
+    ).toBeTruthy()
+    expect(findWingsGroupPublicJargon({ body: 'Nội dung cho site con.' })).toBeTruthy()
+  })
+
+  it('builds an idempotent route plan with approved privacy and pending Terms/Payment gates', () => {
+    const seeds = buildWingsGroupCorporateRouteSeeds()
+    expect(seeds).toHaveLength(10)
+    const ecosystem = seeds.find((seed) => seed.path === '/he-sinh-thai')
+    expect(ecosystem?.archetype).toBe('ecosystem')
+    const ecosystemBlock = ecosystem?.vi.layout.find(
+      (block) => block.blockType === 'wingsGroupEcosystem',
+    ) as { profiles?: Array<{ brandKey: string }> } | undefined
+    expect(ecosystemBlock?.profiles?.map((profile) => profile.brandKey)).toEqual([
+      'wingsgo',
+      'wing-side',
+      'wingspass',
+      'wingsplus',
+      'wingscare',
+    ])
+    expect(
+      seeds
+        .flatMap((seed) => [seed.vi, seed.en])
+        .every((copy) => !findWingsGroupPublicJargon(copy)),
+    ).toBe(true)
+    expect(JSON.stringify(seeds)).not.toMatch(/\/wingsside(?:[/?#"])/i)
+
+    for (const seed of seeds) {
+      expect(resolveCorporateRouteSeedAction([], seed)).toBe('create')
+      expect(resolveCorporateRouteSeedAction([{ id: 1, pathname: seed.path }], seed)).toBe('update')
+      const governance = routeGovernanceForSeed(seed)
+      if (seed.policy) {
+        if (seed.path === '/chinh-sach-bao-mat') {
+          expect(JSON.stringify(seed.vi)).toContain(
+            'Tôi đồng ý để WingsGroup sử dụng thông tin đã cung cấp nhằm liên hệ, tư vấn và chuyển yêu cầu đến bộ phận phù hợp theo Chính sách bảo mật.',
+          )
+          expect(JSON.stringify(seed.en)).toContain(
+            'I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy.',
+          )
+          expect(governance.contentApproval).toEqual({
+            en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+            vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+          })
+          expect(governance.publication).toEqual({ en: 'approved', vi: 'approved' })
+          expect(governance.policy).toMatchObject({
+            approvalReference: WINGSGROUP_PRIVACY_APPROVAL_REFERENCE,
+            approvalState: 'approved',
+            consentEvidenceReference: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
+            dataSubjectRightsEvidence: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
+            dataSubjectRightsStatement: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_VI,
+            effectiveDate: '2026-08-24',
+            legalOwner: 'Business and legal owner',
+            privacyApprovalReference: WINGSGROUP_PRIVACY_APPROVAL_REFERENCE,
+            validationMarker: WINGSGROUP_POLICY_VALIDATION_MARKER,
+            version: WINGSGROUP_PRIVACY_VERSION,
+          })
+        } else {
+          expect(governance.contentApproval).toEqual({ en: null, vi: null })
+          expect(governance.publication.en).toBe('hidden')
+          expect(governance.publication.vi).toBe('pending')
+          expect(governance.policy).toMatchObject({
+            approvalState: 'pending',
+            dataSubjectRightsStatement: null,
+            effectiveDate: null,
+            legalOwner: null,
+            privacyApprovalReference: null,
+            validationMarker: null,
+          })
+        }
+      } else {
+        expect(governance.contentApproval).toEqual({
+          en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+          vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+        })
+        expect(governance.publication.en).toBe('approved')
+        expect(governance.publication.vi).toBe('approved')
+      }
+    }
+
+    expect(WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_EN).toBe(
+      'Data subjects may contact info@doicanhviet.com.',
+    )
+  })
+
+  it('uses only registered presentation values in governed route fixtures', () => {
+    const allowedContentPresentations = new Set<string>(
+      contentPresentationDefinitions.map(({ value }) => value),
+    )
+    const contentBlocks = buildWingsGroupCorporateRouteSeeds().flatMap((route) =>
+      [route.vi, route.en].flatMap(({ layout }) =>
+        layout.filter((block) => block.blockType === 'content'),
+      ),
+    )
+
+    expect(contentBlocks.length).toBeGreaterThan(0)
+    for (const block of contentBlocks) {
+      expect(allowedContentPresentations.has(String(block.presentation))).toBe(true)
+    }
+  })
+
+  it('seeds exactly one localized H1 for every governed route', () => {
+    for (const route of buildWingsGroupCorporateRouteSeeds()) {
+      for (const locale of ['vi', 'en'] as const) {
+        const localized = route[locale]
+        const serialized = JSON.stringify({ hero: localized.hero, layout: localized.layout })
+        const h1Count = serialized.match(/"tag":"h1"/g)?.length || 0
+
+        expect(h1Count, `${locale} ${route.path}`).toBe(1)
+        expect(JSON.stringify(localized.hero), `${locale} ${route.path}`).toContain(localized.title)
+      }
+    }
+  })
+
+  it('seeds polished English metadata and the required direct contact values', () => {
+    expect(wingsGroupSettingsSeed.en.salesEmail).toBe('sales@wingsgroup.vn')
+    expect(wingsGroupSettingsSeed.en.supportEmail).toBe('info@wingsgroup.vn')
+    expect(wingsGroupSettingsSeed.en.supportPhone).toBe('0912910101')
+
+    for (const route of buildWingsGroupCorporateRouteSeeds().filter(({ policy }) => !policy)) {
+      expect(route.en.title, route.path).not.toMatch(/[à-ỹ]/i)
+      expect(route.en.description, route.path).not.toMatch(/[à-ỹ]/i)
+      expect(JSON.stringify(route.en), route.path).not.toMatch(
+        /(?:Đang cập nhật|Trao đổi với chuyên viên|Hệ sinh thái)/i,
+      )
+    }
+  })
+
+  it('rejects duplicate route rows instead of choosing one nondeterministically', () => {
+    const route = buildWingsGroupCorporateRouteSeeds()[1]
+    expect(() =>
+      resolveCorporateRouteSeedAction(
+        [
+          { id: 1, pathname: route.path },
+          { id: 2, pathname: route.path },
+        ],
+        route,
+      ),
+    ).toThrow(/Duplicate/)
+  })
+})

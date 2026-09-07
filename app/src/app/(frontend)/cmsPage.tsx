@@ -11,12 +11,7 @@ import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { generateMeta } from '@/utilities/generateMeta'
-import {
-  appendSiteWhere,
-  getCurrentLocale,
-  getCurrentSite,
-  getCurrentSitePrefix,
-} from '@/utilities/siteContext'
+import { getCurrentLocale, getCurrentSite, getCurrentSitePrefix } from '@/utilities/siteContext'
 import { JsonLd } from '@/components/JsonLd'
 import PageClient from './[...slug]/page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
@@ -29,6 +24,11 @@ import { getCopyLocale } from '@/utilities/locales'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 import { queryPublishedPageLocalesByExactPath } from '@/utilities/pageLocaleInventory'
+import {
+  getWingsGroupRouteDefinition,
+  isWingsGroupPendingPolicyRouteRenderable,
+} from '@/wingsgroup/corporateRoutes'
+import { queryPageByPath } from '@/utilities/cmsPageQuery'
 import {
   isRetailTourEnabledSiteCode,
   isStructuredTourDetailEnabledSiteCode,
@@ -58,6 +58,13 @@ import {
 } from '@/utilities/wingsSideHiFiDispatch'
 import type { WingsSideHiFiPageSource } from '@/utilities/wingsSideHiFiPageModel'
 import { filterCmsLayoutBlocksForHiFiComposer } from '@/utilities/wingsSideHiFiComposer'
+import { isWingsGroupV3HomeLayout } from '@/components/WingsGroupV3/model'
+import { WingsGroupConsultationDialog } from '@/components/WingsGroupV3/ConsultationDialog'
+import {
+  getWingsGroupEditorialArchiveOpenGraphMedia,
+  queryWingsGroupEditorialFallbackMedia,
+  WINGSGROUP_EDITORIAL_ARCHIVE_PATH,
+} from '@/utilities/wingsGroupEditorial'
 import { hydrateWingsSideHomeCuration, projectWingsSideHomeCuration } from '@/tours/homeCuration'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import type { Form as PayloadForm } from '@/payload-types'
@@ -105,17 +112,16 @@ export async function renderCmsPageByPath({
 
   // Structured tour detail: tighter vertical rhythm under fixed header.
   const isStructuredTour = Boolean(structuredPage)
-  const renderedBreadcrumbItems =
-    isStructuredTour
-      ? buildStructuredTourBreadcrumbItems({
-          baseItems: breadcrumbItems,
-          canonicalPath,
-          locale,
-          pageTitle: page.title,
-          searchParams,
-          siteCode: site.code,
-        })
-      : breadcrumbItems
+  const renderedBreadcrumbItems = isStructuredTour
+    ? buildStructuredTourBreadcrumbItems({
+        baseItems: breadcrumbItems,
+        canonicalPath,
+        locale,
+        pageTitle: page.title,
+        searchParams,
+        siteCode: site.code,
+      })
+    : breadcrumbItems
 
   // Tranche B1: dedicated hi-fi Home/Plan body replaces legacy hero/blocks/related.
   let hiFiModel = resolveWingsSideHiFiPageBodyModel({
@@ -242,13 +248,34 @@ export async function renderCmsPageByPath({
       ? (hiFiModel.routeContent as { form?: unknown }).form
       : null
   const hiFiReusableBlocks = filterCmsLayoutBlocksForHiFiComposer(page.layout, consumedHiFiForm)
+  const useWingsGroupV3Home =
+    site.code === 'wings-group' &&
+    requestedPath === '/' &&
+    settings?.wingsGroupV3?.enabled === true &&
+    isWingsGroupV3HomeLayout(page.layout)
+  const wingsGroupRoute =
+    site.code === 'wings-group' && settings?.wingsGroupV3?.enabled === true
+      ? getWingsGroupRouteDefinition(requestedPath)
+      : null
+  const useWingsGroupV3Surface = Boolean(wingsGroupRoute)
+  const isWingsGroupV3LocalPreview = draft && useWingsGroupV3Surface
+  const isWingsGroupPendingPolicy = Boolean(page && '__wingsGroupPendingPolicy' in page)
 
   return (
     <article
-      className={
-        useHiFiBody ? 'pb-16 md:pb-20' : isStructuredTour ? 'pb-16 md:pb-20' : 'pt-16 pb-24'
-      }
-      data-hifi-body={useHiFiBody ? 'true' : 'false'}
+      className={[
+        useWingsGroupV3Home ? 'wingsgroup-v3-home' : '',
+        useWingsGroupV3Surface ? 'wingsgroup-v3-surface' : '',
+        isWingsGroupPendingPolicy ? 'wingsgroup-v3-route-policy' : '',
+        useHiFiBody ? 'pb-16 md:pb-20' : isStructuredTour ? 'pb-16 md:pb-20' : 'pt-16 pb-24',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      data-hifi-body={useHiFiBody || isWingsGroupV3LocalPreview ? 'true' : 'false'}
+      data-wingsgroup-v3-home={useWingsGroupV3Home ? 'true' : 'false'}
+      data-wingsgroup-v3-surface={useWingsGroupV3Surface ? 'true' : 'false'}
+      data-wingsgroup-pending-policy={isWingsGroupPendingPolicy ? 'true' : 'false'}
+      data-wingsgroup-v3-route={wingsGroupRoute?.archetype}
     >
       <JsonLd
         data={[
@@ -274,13 +301,19 @@ export async function renderCmsPageByPath({
       {!useHiFiBody ? (
         <Breadcrumbs
           className={
-            isStructuredTour
-              ? 'wingsside-tour-breadcrumb container pb-3 pt-4 md:pt-5'
-              : undefined
+            useWingsGroupV3Surface
+              ? 'wingsgroup-v3-breadcrumb container'
+              : isStructuredTour
+                ? 'wingsside-tour-breadcrumb container pb-3 pt-4 md:pt-5'
+                : undefined
           }
           items={renderedBreadcrumbItems}
           linkClassName={
-            isStructuredTour ? 'wingsside-tour-breadcrumb__link' : undefined
+            useWingsGroupV3Surface
+              ? 'wingsgroup-v3-breadcrumb__link'
+              : isStructuredTour
+                ? 'wingsside-tour-breadcrumb__link'
+                : undefined
           }
         />
       ) : null}
@@ -304,9 +337,23 @@ export async function renderCmsPageByPath({
             {...page.hero}
             resolvedLocale={locale}
             siteHeroDefaults={settings?.heroDefaults}
+            allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Surface}
+            wingsGroupV3Enabled={useWingsGroupV3Surface}
           />
-          <RenderBlocks blocks={page.layout} locale={locale} />
-          <RelatedPages locale={locale} pages={relatedPages} />
+          <RenderBlocks
+            blocks={page.layout}
+            locale={locale}
+            siteCode={site.code}
+            wingsGroupV3={site.code === 'wings-group'}
+            wingsGroupLegalIdentity={settings?.wingsGroupV3?.legalIdentity}
+            allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Surface}
+            wingsGroupV3Home={useWingsGroupV3Home}
+            wingsGroupV3Route={wingsGroupRoute?.archetype}
+          />
+          {useWingsGroupV3Surface ? <WingsGroupConsultationDialog /> : null}
+          {!useWingsGroupV3Home && !useWingsGroupV3Surface ? (
+            <RelatedPages locale={locale} pages={relatedPages} />
+          ) : null}
         </>
       )}
     </article>
@@ -330,6 +377,16 @@ export async function generateCmsPageMetadataByPath({
     : []
 
   const site = await getCurrentSite()
+  const settings = await getCurrentSiteSettings()
+  const editorialArchiveOpenGraphMedia =
+    page &&
+    site.code === 'wings-group' &&
+    settings?.wingsGroupV3?.enabled === true &&
+    requestedPath === WINGSGROUP_EDITORIAL_ARCHIVE_PATH
+      ? getWingsGroupEditorialArchiveOpenGraphMedia(
+          await queryWingsGroupEditorialFallbackMedia({ locale: locale === 'en' ? 'en' : 'vi' }),
+        )
+      : null
   if (page && site.code === 'wing-side' && requestedPath.startsWith('/tour/')) {
     const cleanTitle = sanitizeWingSidePublicText(String(page.title || '')).replace(
       /\s+\d+\s+days?$/i,
@@ -353,98 +410,38 @@ export async function generateCmsPageMetadataByPath({
     })
   }
 
-  return generateMeta({
+  const metadata = await generateMeta({
     alternateLocales,
-    doc: page,
+    doc: editorialArchiveOpenGraphMedia
+      ? {
+          ...page,
+          meta: { ...(page?.meta || {}), image: editorialArchiveOpenGraphMedia },
+        }
+      : page,
     locale,
     path: requestedPath,
   })
-}
 
-const queryPageByPath = async ({
-  depth = 3,
-  locale,
-  requestedPath,
-}: {
-  depth?: number
-  locale?: SupportedLocaleCode
-  requestedPath: string
-}) => {
-  const { isEnabled: draft } = await draftMode()
-  const payload = await getPayload({ config: configPromise })
-  const segments = requestedPath.split('/').filter(Boolean)
-  const candidateSlug = segments[segments.length - 1] || 'home'
-  const site = await getCurrentSite()
-  const candidateSlugs = [candidateSlug, `${site.code}-${candidateSlug}`]
-  const where = await appendSiteWhere({
-    or: [
-      {
-        pathname: {
-          equals: requestedPath,
-        },
+  if (
+    page &&
+    ('__wingsGroupPendingPolicy' in page ||
+      isWingsGroupPendingPolicyRouteRenderable({
+        locale,
+        page,
+        settings,
+        siteCode: site.code,
+      }))
+  ) {
+    return {
+      ...metadata,
+      robots: {
+        follow: false,
+        index: false,
       },
-      {
-        slug: {
-          in: candidateSlugs,
-        },
-      },
-    ],
-  })
-
-  const findPage = async (requestedLocale?: SupportedLocaleCode) => {
-    const scopedWhere = draft
-      ? where
-      : {
-          and: [
-            where,
-            {
-              _status: {
-                equals: 'published',
-              },
-            },
-          ],
-        }
-
-    const result = await payload.find({
-      collection: 'pages',
-      draft,
-      fallbackLocale: false,
-      locale: requestedLocale,
-      depth,
-      limit: 1,
-      pagination: false,
-      overrideAccess: draft,
-      where: scopedWhere,
-    })
-
-    return result.docs?.[0] || null
+    }
   }
 
-  const hasRenderableLocalizedContent = (page: Awaited<ReturnType<typeof findPage>>) => {
-    const placeholderTitles = new Set(['page', 'pagina', 'página', 'trang'])
-
-    if (!page) {
-      return false
-    }
-
-    if (Array.isArray(page.layout) && page.layout.length > 0) {
-      return true
-    }
-
-    if (page.hero?.richText) {
-      return true
-    }
-
-    return (
-      typeof page.title === 'string' &&
-      page.title.trim().length > 0 &&
-      !placeholderTitles.has(page.title.trim().toLowerCase())
-    )
-  }
-
-  const localizedPage = await findPage(locale)
-
-  return hasRenderableLocalizedContent(localizedPage) ? localizedPage : null
+  return metadata
 }
 
 const resolveStructuredTourPage = async ({

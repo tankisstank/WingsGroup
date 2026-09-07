@@ -32,6 +32,8 @@ import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getPostCanonicalPath } from '@/utilities/siteURLs'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
+import { isWingsGroupV3PublicSurfacePathAllowed } from '@/wingsgroup/corporateRoutes'
+import { notFound } from 'next/navigation'
 
 type Args = {
   params: Promise<{
@@ -47,12 +49,22 @@ export default async function Post({ params: paramsPromise }: Args) {
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const url = `${sitePrefix}/posts/${decodedSlug}`.replace(/\/+/g, '/')
+  const settings = await getCurrentSiteSettings()
+  const site = await getCurrentSite()
+  if (
+    !isWingsGroupV3PublicSurfacePathAllowed({
+      locale,
+      path: `/posts/${decodedSlug}`,
+      settings,
+      siteCode: site.code,
+    })
+  ) {
+    notFound()
+  }
   const post = await queryPostBySlug({ slug: decodedSlug, locale })
 
   if (!post) return <PayloadRedirects url={url} />
 
-  const settings = await getCurrentSiteSettings()
-  const site = await getCurrentSite()
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
   const canonicalPath = getPostCanonicalPath(decodedSlug, locale)
   const breadcrumbItems = buildPostBreadcrumbItems({

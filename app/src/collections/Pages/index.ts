@@ -16,8 +16,15 @@ import { Comparison } from '../../blocks/Comparison/config'
 import { CredentialsCarousel } from '../../blocks/CredentialsCarousel/config'
 import { Stats } from '../../blocks/Stats/config'
 import { Testimonial } from '../../blocks/Testimonial/config'
+import { WingsGroupEcosystem } from '../../blocks/WingsGroupEcosystem/config'
+import { WingsGroupProofArchive } from '../../blocks/WingsGroupProofArchive/config'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { wingsSideHiFiTab } from '@/fields/wingsSideHiFi'
+import { wingsGroupCorporateRouteField } from '@/fields/wingsGroupCorporateRoute'
+import {
+  buildWingsGroupPublicPageAccessWhere,
+  findTrustedWingsGroupSettingsForAccess,
+} from '@/wingsgroup/corporateRoutes'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
@@ -26,6 +33,7 @@ import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 import { syncPagePathname } from './hooks/syncPagePathname'
 import { validateWingsSideHomeCuration } from './hooks/validateWingsSideHomeCuration'
+import { validateWingsGroupV3Governance } from './hooks/validateWingsGroupV3Governance'
 
 import {
   MetaDescriptionField,
@@ -40,7 +48,14 @@ export const Pages: CollectionConfig<'pages'> = {
   access: {
     create: contentCreateAccess,
     delete: contentDeleteAccess,
-    read: siteScopedOrPublished(),
+    read: async (args) => {
+      const base = await siteScopedOrPublished()(args)
+      if (args.req.user || base === false || base === true) return base
+      const settings = await findTrustedWingsGroupSettingsForAccess(args.req)
+      return {
+        and: [base, buildWingsGroupPublicPageAccessWhere(args.req.locale, settings)],
+      }
+    },
     update: siteScopedAccess(),
   },
   // This config controls what's populated by default when a page is referenced
@@ -156,6 +171,8 @@ export const Pages: CollectionConfig<'pages'> = {
                 MediaBlock,
                 Archive,
                 FormBlock,
+                WingsGroupEcosystem,
+                WingsGroupProofArchive,
               ],
               localized: true,
               required: true,
@@ -225,6 +242,7 @@ export const Pages: CollectionConfig<'pages'> = {
         position: 'sidebar',
       },
     },
+    wingsGroupCorporateRouteField,
     slugField({
       overrides: (field) => {
         field.fields = field.fields.map((item) => {
@@ -263,6 +281,7 @@ export const Pages: CollectionConfig<'pages'> = {
     beforeChange: [
       enforceSiteAccess,
       syncPagePathname,
+      validateWingsGroupV3Governance,
       validateWingsSideHomeCuration,
       preventEditorPublish,
       populatePublishedAt,

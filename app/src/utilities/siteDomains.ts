@@ -24,7 +24,16 @@ export const internalSiteContextHeaderNames = [
   'x-site-context-source',
   'x-site-host',
   'x-site-prefix',
+  'x-site-context-issued-at',
+  'x-site-context-expires-at',
+  'x-site-context-nonce',
+  'x-site-context-signature',
 ] as const
+
+export const SITE_CONTEXT_TTL_SECONDS = 30
+
+const maximumConsumedSiteContextNonces = 4096
+const consumedSiteContextNonces = new Map<string, number>()
 
 type TrustedSiteContext = {
   clientIP?: null | string
@@ -41,10 +50,131 @@ type TrustedSiteContext = {
  * tenant headers. The proxy calls this helper for every frontend request,
  * removes any client-supplied values, and then creates a fresh context.
  */
-export const createTrustedSiteContextHeaders = (
+const base64urlEncode = (value: Uint8Array): string => {
+  let binary = ''
+  for (const byte of value) binary += String.fromCharCode(byte)
+  return btoa(binary).replace(/\+/gu, '-').replace(/\//gu, '_').replace(/=+$/u, '')
+}
+
+const base64urlDecode = (value: string): Uint8Array | null => {
+  if (!/^[A-Za-z0-9_-]+$/u.test(value)) return null
+
+  try {
+    const padded = value.replace(/-/gu, '+').replace(/_/gu, '/')
+    const binary = atob(`${padded}${'='.repeat((4 - (padded.length % 4)) % 4)}`)
+    return Uint8Array.from(binary, (character) => character.charCodeAt(0))
+  } catch {
+    return null
+  }
+}
+
+const getSiteContextSecret = (): string | null =>
+  process.env.SITE_CONTEXT_SECRET?.trim() || process.env.PAYLOAD_SECRET?.trim() || null
+
+const importSiteContextKey = async (
+  secret: string,
+  usage: KeyUsage[],
+): Promise<CryptoKey | null> => {
+  const cryptoAPI = globalThis.crypto
+  if (!cryptoAPI?.subtle) return null
+
+  return cryptoAPI.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { hash: 'SHA-256', name: 'HMAC' },
+    false,
+    usage,
+  )
+}
+
+const siteContextSigningPayload = (headers: Headers): string =>
+  [
+    normalizeHost(headers.get('x-site-host')) || '',
+    headers.get('x-public-path') || '/',
+    headers.get('x-locale') || '',
+    headers.get('x-site-code') || '',
+    headers.get('x-site-prefix') || '',
+    headers.get('x-request-id') || '',
+    headers.get('x-site-context-issued-at') || '',
+    headers.get('x-site-context-expires-at') || '',
+    headers.get('x-site-context-nonce') || '',
+  ].join('\n')
+
+const signSiteContext = async (headers: Headers): Promise<string | null> => {
+  const secret = getSiteContextSecret()
+  const cryptoAPI = globalThis.crypto
+  const key = secret && (await importSiteContextKey(secret, ['sign']))
+  if (!cryptoAPI?.subtle || !key) return null
+
+  const signature = await cryptoAPI.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(siteContextSigningPayload(headers)),
+  )
+  return base64urlEncode(new Uint8Array(signature))
+}
+
+const consumeSiteContextNonce = (nonce: string, expiresAt: number): boolean => {
+  const now = Math.floor(Date.now() / 1000)
+
+  for (const [consumedNonce, consumedExpiresAt] of consumedSiteContextNonces) {
+    if (consumedExpiresAt <= now) consumedSiteContextNonces.delete(consumedNonce)
+  }
+
+  if (consumedSiteContextNonces.has(nonce)) return false
+
+  consumedSiteContextNonces.set(nonce, expiresAt)
+  while (consumedSiteContextNonces.size > maximumConsumedSiteContextNonces) {
+    const oldestNonce = consumedSiteContextNonces.keys().next().value
+    if (!oldestNonce) break
+    consumedSiteContextNonces.delete(oldestNonce)
+  }
+
+  return true
+}
+
+export const hasValidTrustedSiteContext = async (
+  headers: Headers,
+  { consumeReplayToken = false }: { consumeReplayToken?: boolean } = {},
+): Promise<boolean> => {
+  if (headers.get('x-site-context-source') !== 'proxy') return false
+
+  const issuedAt = Number(headers.get('x-site-context-issued-at'))
+  const expiresAt = Number(headers.get('x-site-context-expires-at'))
+  const nonce = headers.get('x-site-context-nonce') || ''
+  const now = Math.floor(Date.now() / 1000)
+  if (
+    !Number.isSafeInteger(issuedAt) ||
+    !Number.isSafeInteger(expiresAt) ||
+    !nonce ||
+    issuedAt > now + 5 ||
+    expiresAt <= now ||
+    expiresAt - issuedAt <= 0 ||
+    expiresAt - issuedAt > SITE_CONTEXT_TTL_SECONDS
+  ) {
+    return false
+  }
+
+  const secret = getSiteContextSecret()
+  const cryptoAPI = globalThis.crypto
+  const key = secret && (await importSiteContextKey(secret, ['verify']))
+  const signature = base64urlDecode(headers.get('x-site-context-signature') || '')
+  if (!cryptoAPI?.subtle || !key || !signature) return false
+
+  const validSignature = await cryptoAPI.subtle.verify(
+    'HMAC',
+    key,
+    signature as BufferSource,
+    new TextEncoder().encode(siteContextSigningPayload(headers)),
+  )
+
+  return validSignature && (!consumeReplayToken || consumeSiteContextNonce(nonce, expiresAt))
+}
+
+export const createTrustedSiteContextHeaders = async (
   incomingHeaders: Headers,
   context: TrustedSiteContext,
-): Headers => {
+): Promise<Headers> => {
   const requestHeaders = new Headers(incomingHeaders)
 
   for (const headerName of internalSiteContextHeaderNames) {
@@ -72,6 +202,14 @@ export const createTrustedSiteContextHeaders = (
   if (context.sitePrefix) {
     requestHeaders.set('x-site-prefix', context.sitePrefix)
   }
+
+  const issuedAt = Math.floor(Date.now() / 1000)
+  requestHeaders.set('x-site-context-issued-at', String(issuedAt))
+  requestHeaders.set('x-site-context-expires-at', String(issuedAt + SITE_CONTEXT_TTL_SECONDS))
+  requestHeaders.set('x-site-context-nonce', crypto.randomUUID())
+
+  const signature = await signSiteContext(requestHeaders)
+  if (signature) requestHeaders.set('x-site-context-signature', signature)
 
   return requestHeaders
 }
@@ -108,7 +246,8 @@ export const domainCandidates = (domain?: null | string): string[] => {
 
   for (const host of [...hosts]) {
     if (host.endsWith('.local')) {
-      const productionHost = localBootstrapProductionHostMap[host] || host.replace(/\.local$/, '.vn')
+      const productionHost =
+        localBootstrapProductionHostMap[host] || host.replace(/\.local$/, '.vn')
       addHostVariants(hosts, productionHost)
     }
   }

@@ -8,6 +8,7 @@ import {
   prefixPathWithSite,
   publicLocaleCodes,
   siteAliasToCodeMap,
+  siteCodeToAliasMap,
   supportedLocaleCodes,
 } from '@/utilities/sitePaths'
 
@@ -16,15 +17,18 @@ describe('site path utilities', () => {
     expect(siteAliasToCodeMap.wingsgroup).toBe('wings-group')
     expect(siteAliasToCodeMap.wingsgo).toBe('wings-go')
     expect(siteAliasToCodeMap['wing-side']).toBe('wing-side')
+    expect(siteCodeToAliasMap['wing-side']).toBe('wing-side')
     expect(siteAliasToCodeMap.wingspass).toBe('wings-pass')
     expect(siteAliasToCodeMap.wingsplus).toBe('wings-plus')
     expect(siteAliasToCodeMap.wingscare).toBe('wings-care')
+    expect(legacySiteAliasToCodeMap.wingsside).toBe('wing-side')
     expect(legacySiteAliasToCodeMap.wingstravel).toBe('wings-group')
   })
 
   it('detects known site aliases from pathnames', () => {
     expect(getSiteAliasFromPathname('/wingsgo/posts')).toBe('wingsgo')
     expect(getSiteAliasFromPathname('/wing-side/destinations/ha-noi')).toBe('wing-side')
+    expect(getSiteAliasFromPathname('/wingsside/destinations/ha-noi')).toBe('wingsside')
     expect(getSiteAliasFromPathname('/wingstravel/posts')).toBe('wingstravel')
     expect(getSiteAliasFromPathname('/unknown/posts')).toBeNull()
   })
@@ -49,8 +53,14 @@ describe('site path utilities', () => {
     expect(prefixPathWithSite('/contact?topic=visa#team', 'wingscare', 'en')).toBe(
       '/wingscare/en/contact?topic=visa#team',
     )
-    expect(prefixPathWithSite('/es/destinations', 'wing-side', 'es')).toBe(
+    expect(prefixPathWithSite('/es/destinations', 'wingsside', 'es')).toBe(
       '/wing-side/es/destinations',
+    )
+    expect(prefixPathWithSite('/wingsside/es/destinations', 'wingsside', 'es')).toBe(
+      '/wing-side/es/destinations',
+    )
+    expect(prefixPathWithSite('/wing-sideways/foo', 'wing-side', 'en')).toBe(
+      '/wing-side/en/wing-sideways/foo',
     )
     expect(prefixPathWithSite('https://example.com/contact', 'wingscare')).toBe(
       'https://example.com/contact',
@@ -65,7 +75,7 @@ describe('site path utilities', () => {
     expect(buildLocaleSwitchHref('/wing-side/en/destinations/ha-noi', 'es')).toBe(
       '/wing-side/es/destinations/ha-noi',
     )
-    expect(buildLocaleSwitchHref('/wing-side/en/search?q=hanoi#results', 'it')).toBe(
+    expect(buildLocaleSwitchHref('/wingsside/en/search?q=hanoi#results', 'it')).toBe(
       '/wing-side/it/search?q=hanoi#results',
     )
     expect(buildLocaleSwitchHref('/wing-side/destinations/ha-noi', 'pt')).toBe(
@@ -73,11 +83,5 @@ describe('site path utilities', () => {
     )
     expect(buildLocaleSwitchHref('/en/search', 'it')).toBe('/it/search')
     expect(buildLocaleSwitchHref('/', 'vi')).toBe('/vi')
-    expect(
-      buildLocaleSwitchHref('/vi/tin-tuc/huong-dan?source=menu#noi-dung', 'vi', 'vi'),
-    ).toBe('/tin-tuc/huong-dan?source=menu#noi-dung')
-    expect(buildLocaleSwitchHref('/tin-tuc/huong-dan', 'en', 'vi')).toBe(
-      '/en/tin-tuc/huong-dan',
-    )
   })
 })

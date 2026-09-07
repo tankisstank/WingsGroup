@@ -9,6 +9,7 @@ import React from 'react'
 import type { Props as MediaProps } from '../types'
 
 import { cssVariables } from '@/cssVariables'
+import { isWingsGroupPublishedMedia } from '@/components/WingsGroupV3/model'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 
 const { breakpoints } = cssVariables
@@ -76,6 +77,26 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
   }
 
   const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
+  const useAuthenticatedPreviewImage =
+    resource &&
+    typeof resource === 'object' &&
+    resource.governance?.managedBy === 'wingsgroup-v3' &&
+    resource.governance.publicationState !== 'published'
+
+  const responsiveSources =
+    resource && typeof resource === 'object' && isWingsGroupPublishedMedia(resource)
+      ? (['avif', 'webp'] as const).map((format) => {
+          const entries = (resource.governance?.responsiveDerivatives || [])
+            .filter((entry) => entry.format === format && entry.url && entry.width)
+            .sort((left, right) => left.width - right.width)
+          return {
+            format,
+            srcSet: entries
+              .map((entry) => `${getMediaUrl(entry.url, resource.updatedAt)} ${entry.width}w`)
+              .join(', '),
+          }
+        })
+      : []
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
   const sizes =
@@ -84,6 +105,11 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
 
   return (
     <picture className={cn(fill && 'relative block', pictureClassName)}>
+      {responsiveSources
+        .filter(({ srcSet }) => Boolean(srcSet))
+        .map(({ format, srcSet }) => (
+          <source key={format} sizes={sizes} srcSet={srcSet} type={`image/${format}`} />
+        ))}
       <NextImage
         alt={alt || ''}
         className={cn(imgClassName)}
@@ -93,6 +119,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
         blurDataURL={placeholderBlur}
         priority={priority}
         quality={80}
+        unoptimized={Boolean(useAuthenticatedPreviewImage)}
         loading={loading}
         sizes={sizes}
         src={src}

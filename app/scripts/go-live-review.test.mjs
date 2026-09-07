@@ -6,16 +6,24 @@ import test from 'node:test'
 
 import {
   appendJSONLine,
+  buildExplicitRouteInventory,
+  buildSitemapProbePaths,
+  classifyExpectedConsoleError,
   checkpointScope,
   checkpointVersion,
   deriveSiteDecision,
+  extractAdvertisedSitemapURLs,
   extractAdvertisedURLs,
+  hasDirectContactMethod,
   hostnameBelongsToSite,
   hasStrongCTA,
   identityFingerprint,
+  isProtectedInventoryError,
   normalizeHostname,
   parseCheckpoint,
+  parseRequestedPaths,
   positiveInteger,
+  reviewContent,
   reviewSiteProbe,
   runPool,
   withTimeout,
@@ -54,21 +62,82 @@ const siteProbe = () => ({
   siteAliasQueryInjection: structuredClone(identity),
   siteHeaderInjection: structuredClone(identity),
   siteQueryInjection: structuredClone(identity),
-  seoEndpoints: ['/robots.txt', '/sitemap.xml', '/pages-sitemap.xml', '/posts-sitemap.xml'].map(
-    (pathname) => ({
-      absoluteURLs: [`https://wingsgroup.vn${pathname}`],
-      containsForbiddenHost: false,
-      finalURL: `http://localhost:3000${pathname}`,
-      pathname,
-      status: 200,
-    }),
-  ),
+  seoEndpoints: ['/robots.txt', '/sitemap.xml', '/pages-sitemap.xml'].map((pathname) => ({
+    absoluteURLs: [`https://wingsgroup.vn${pathname}`],
+    containsForbiddenHost: false,
+    finalURL: `http://localhost:3000${pathname}`,
+    pathname,
+    status: 200,
+  })),
 })
 
 test('positiveInteger rejects values that could silently disable the worker pool', () => {
   assert.equal(positiveInteger('4', 1, 'concurrency'), 4)
   assert.throws(() => positiveInteger('NaN', 4, 'concurrency'), /concurrency must be an integer/)
   assert.throws(() => positiveInteger('0', 4, 'concurrency'), /concurrency must be an integer/)
+})
+
+test('explicit route inventory deduplicates requested paths for protected page APIs', () => {
+  assert.deepEqual(parseRequestedPaths('/, /lien-he,/lien-he, /chinh-sach-bao-mat'), [
+    '/',
+    '/lien-he',
+    '/chinh-sach-bao-mat',
+  ])
+  assert.equal(isProtectedInventoryError(new Error('403 Forbidden: /api/pages')), true)
+  assert.equal(isProtectedInventoryError(new Error('500 Internal Server Error')), false)
+
+  const routes = buildExplicitRouteInventory({ key: 'wingsgroup', pathPrefix: '' }, [
+    '/',
+    '/lien-he',
+    '/chinh-sach-bao-mat',
+  ])
+  assert.deepEqual(
+    routes.map(({ pathname, purpose, routePath, source }) => ({
+      pathname,
+      purpose,
+      routePath,
+      source,
+    })),
+    [
+      { pathname: '/', purpose: 'homepage', routePath: '/', source: 'explicit-route' },
+      {
+        pathname: '/lien-he',
+        purpose: 'lead-contact',
+        routePath: '/lien-he',
+        source: 'explicit-route',
+      },
+      {
+        pathname: '/chinh-sach-bao-mat',
+        purpose: 'trust',
+        routePath: '/chinh-sach-bao-mat',
+        source: 'explicit-route',
+      },
+    ],
+  )
+})
+
+test('console review preserves genuine errors while classifying known local gate noise', () => {
+  assert.equal(
+    classifyExpectedConsoleError(
+      "WebSocket connection to 'ws://127.0.0.1:4489/_next/webpack-hmr?id=abc' failed",
+      'webpack-internal://next-dev/web-socket.js',
+    ),
+    'next-dev-hmr',
+  )
+  assert.equal(
+    classifyExpectedConsoleError(
+      'Failed to load resource: the server responded with a status of 403 (Forbidden)',
+      'http://127.0.0.1:4489/api/media/file/pending.jpg',
+    ),
+    'protected-api-denial',
+  )
+  assert.equal(
+    classifyExpectedConsoleError(
+      'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+      'http://127.0.0.1:4489/api/media/file/pending.jpg',
+    ),
+    null,
+  )
 })
 
 test('runPool enforces its concurrency bound and visits every task once', async () => {
@@ -121,6 +190,22 @@ test('SEO extraction ignores XML namespace declarations and reads only advertise
       '/robots.txt',
     ),
     ['https://wingsgroup.vn', 'https://wingsgroup.vn/sitemap.xml'],
+  )
+})
+
+test('sitemap child probes are derived from sitemap index entries only', () => {
+  const sitemapIndex = `
+    <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <sitemap><loc>https://wingsgroup.vn/pages-sitemap.xml</loc></sitemap>
+    </sitemapindex>
+  `
+  assert.deepEqual(extractAdvertisedSitemapURLs(sitemapIndex), [
+    'https://wingsgroup.vn/pages-sitemap.xml',
+  ])
+  assert.deepEqual(buildSitemapProbePaths(sitemapIndex), ['/pages-sitemap.xml'])
+  assert.deepEqual(
+    buildSitemapProbePaths('<urlset><url><loc>https://wingsgroup.vn/</loc></url></urlset>'),
+    [],
   )
 })
 
@@ -195,6 +280,87 @@ test('site probe accepts matching identity, scoped SEO URLs, and baseline header
   assert.deepEqual(review.blockers, [])
 })
 
+test('site probe preserves a genuine advertised sitemap-child failure', () => {
+  const probe = siteProbe()
+  probe.seoEndpoints.push({
+    absoluteURLs: ['https://wingsgroup.vn/posts-sitemap.xml'],
+    advertised: true,
+    containsForbiddenHost: false,
+    finalURL: 'http://localhost:3000/posts-sitemap.xml',
+    pathname: '/posts-sitemap.xml',
+    status: 404,
+  })
+  const review = reviewSiteProbe(probe, site)
+  assert.ok(
+    review.blockers.some((finding) => finding.includes('/posts-sitemap.xml returned HTTP 404')),
+  )
+})
+
+test('site probe does not fail for an unadvertised posts sitemap', () => {
+  const review = reviewSiteProbe(siteProbe(), site)
+  assert.equal(
+    review.blockers.some((finding) => finding.includes('posts-sitemap')),
+    false,
+  )
+})
+
+test('site probe reports repeated identity timeout as environment-inconclusive without false negatives', () => {
+  const probe = siteProbe()
+  probe.baseline = {
+    ...structuredClone(identity),
+    attempts: 2,
+    error: 'page.goto: Timeout 45000ms exceeded.',
+    errorKind: 'timeout',
+    inconclusive: true,
+    ok: false,
+    status: null,
+  }
+  const review = reviewSiteProbe(probe, site)
+  assert.equal(review.status, 'blocked')
+  assert.ok(review.blockers.some((finding) => finding.includes('Environment-inconclusive')))
+  assert.equal(
+    review.blockers.some((finding) => /missing|does not identify|tenant-injection/i.test(finding)),
+    false,
+  )
+})
+
+test('site probe reports tenant identity timeout without a false HTTP or identity finding', () => {
+  const probe = siteProbe()
+  probe.siteQueryInjection = {
+    ...structuredClone(identity),
+    attempts: 2,
+    error: 'page.goto: Timeout 45000ms exceeded.',
+    errorKind: 'timeout',
+    inconclusive: true,
+    ok: false,
+    status: null,
+  }
+  const review = reviewSiteProbe(probe, site)
+  assert.ok(review.blockers.some((finding) => finding.includes('Environment-inconclusive')))
+  assert.equal(
+    review.blockers.some((finding) =>
+      /failed with HTTP unknown|changed the rendered site identity/i.test(finding),
+    ),
+    false,
+  )
+})
+
+test('contact review accepts visible email and phone without changing form authorization evidence', () => {
+  assert.equal(hasDirectContactMethod('info@doicanhviet.com · 0975513886'), true)
+  const review = reviewContent({
+    bodyText: 'Reach us at info@doicanhviet.com or 0975513886.',
+    bodyTextLength: 55,
+    firstViewportCTA: ['Contact'],
+    forms: 0,
+    purpose: 'lead-contact',
+  })
+  assert.deepEqual(review.blockers, [])
+  assert.equal(
+    review.warnings.some((finding) => finding.includes('contact method')),
+    false,
+  )
+})
+
 test('site probe accepts either the WingSide brand or its public domain identity', () => {
   const wingSideSite = {
     key: 'wingsside',
@@ -218,7 +384,9 @@ test('site probe accepts either the WingSide brand or its public domain identity
   }
   probe.seoEndpoints = probe.seoEndpoints.map((endpoint) => ({
     ...endpoint,
-    absoluteURLs: endpoint.absoluteURLs.map((url) => url.replaceAll('wingsgroup.vn', 'wingside.vn')),
+    absoluteURLs: endpoint.absoluteURLs.map((url) =>
+      url.replaceAll('wingsgroup.vn', 'wingside.vn'),
+    ),
   }))
 
   const review = reviewSiteProbe(probe, wingSideSite)

@@ -2,7 +2,7 @@ import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'paylo
 
 import { revalidatePath } from 'next/cache.js'
 
-import { publicLocaleCodes } from '@/utilities/sitePaths'
+import { publicLocaleCodes, siteCodeToAliasMap } from '@/utilities/sitePaths'
 
 const marketSlugByKey: Record<string, string> = {
   china: 'trung-quoc',
@@ -12,6 +12,7 @@ const marketSlugByKey: Record<string, string> = {
 
 const basePaths = ['/tour', '/thi-truong', '/campaign', '/lich-khoi-hanh']
 export const wingsSideDiscoveryPaths = ['/', '/destinations', '/styles'] as const
+const wingsSidePublicPrefix = `/${siteCodeToAliasMap['wing-side']}`
 
 const revalidateLocalizedPath = (path: string) => {
   revalidatePath(path)
@@ -52,9 +53,9 @@ export const revalidateWingSideDiscovery = () => {
   revalidateMany([...wingsSideDiscoveryPaths])
   for (const path of wingsSideDiscoveryPaths) {
     const suffix = path === '/' ? '' : path
-    revalidatePath(`/wing-side${suffix}`)
+    revalidatePath(`${wingsSidePublicPrefix}${suffix}`)
     for (const locale of publicLocaleCodes) {
-      revalidatePath(`/wing-side/${locale}${suffix}`)
+      revalidatePath(`${wingsSidePublicPrefix}/${locale}${suffix}`)
     }
   }
 }

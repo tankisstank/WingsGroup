@@ -7,6 +7,7 @@ import { LowImpactHero } from '@/heros/LowImpact'
 import { MediumImpactHero } from '@/heros/MediumImpact'
 import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
 import type { SupportedLocaleCode } from '@/utilities/locales'
+import { WingsGroupEditorialHero } from '@/components/WingsGroupV3/EditorialHero'
 
 const heroes = {
   highImpact: HighImpactHero,
@@ -18,11 +19,17 @@ export const RenderHero: React.FC<
   Page['hero'] & {
     resolvedLocale?: SupportedLocaleCode
     siteHeroDefaults?: SiteHeroDefaultsLike | null
+    wingsGroupV3Enabled?: boolean
+    allowWingsGroupDevelopmentMedia?: boolean
   }
 > = (props) => {
-  const { type } = props || {}
+  const { type, wingsGroupV3Enabled } = props || {}
 
   if (!type || type === 'none') return null
+
+  if (wingsGroupV3Enabled) {
+    return <WingsGroupEditorialHero {...props} />
+  }
 
   const HeroToRender = heroes[type]
 

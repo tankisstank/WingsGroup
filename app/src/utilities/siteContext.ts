@@ -4,10 +4,8 @@ import configPromise from '@payload-config'
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload, type Where } from 'payload'
-import { domainCandidates } from './siteDomains'
-import {
-  getSharedCachedValue,
-} from '@/infrastructure/cache/sharedCache'
+import { domainCandidates, hasValidTrustedSiteContext } from './siteDomains'
+import { getSharedCachedValue } from '@/infrastructure/cache/sharedCache'
 import { invalidateSitesCache } from '@/infrastructure/cache/tenantCache'
 import {
   allSiteAliasToCodeMap,
@@ -122,7 +120,7 @@ const isLocalBootstrapHost = (host?: null | string): boolean =>
 
 export const getCurrentSite = async (): Promise<Site> => {
   const requestHeaders = await headers()
-  const hasTrustedProxyContext = requestHeaders.get('x-site-context-source') === 'proxy'
+  const hasTrustedProxyContext = await hasValidTrustedSiteContext(requestHeaders)
   const routeSiteCode = hasTrustedProxyContext ? requestHeaders.get('x-site-code') : null
   const requestHost = hasTrustedProxyContext ? requestHeaders.get('x-site-host') : null
   const isLocalBootstrapRequest =
@@ -158,7 +156,7 @@ export const getCurrentSite = async (): Promise<Site> => {
 export const getCurrentSitePrefix = async (): Promise<string> => {
   const requestHeaders = await headers()
 
-  return requestHeaders.get('x-site-context-source') === 'proxy'
+  return (await hasValidTrustedSiteContext(requestHeaders))
     ? requestHeaders.get('x-site-prefix') || ''
     : ''
 }
@@ -166,15 +164,15 @@ export const getCurrentSitePrefix = async (): Promise<string> => {
 export const getCurrentPublicPathname = async (): Promise<string> => {
   const requestHeaders = await headers()
 
-  return requestHeaders.get('x-public-path') || '/'
+  return (await hasValidTrustedSiteContext(requestHeaders))
+    ? requestHeaders.get('x-public-path') || '/'
+    : '/'
 }
 
 export const getCurrentLocale = async (): Promise<SupportedLocaleCode> => {
   const requestHeaders = await headers()
-  const headerLocale =
-    requestHeaders.get('x-site-context-source') === 'proxy'
-      ? requestHeaders.get('x-locale')
-      : null
+  const hasTrustedProxyContext = await hasValidTrustedSiteContext(requestHeaders)
+  const headerLocale = hasTrustedProxyContext ? requestHeaders.get('x-locale') : null
 
   if (isSupportedLocale(headerLocale)) {
     return headerLocale
@@ -182,20 +180,14 @@ export const getCurrentLocale = async (): Promise<SupportedLocaleCode> => {
 
   const site = await getCurrentSite()
 
-  if (
-    site?.code === 'wing-side' &&
-    requestHeaders.get('x-site-context-source') === 'proxy' &&
-    isSupportedLocale('en')
-  ) {
+  if (site?.code === 'wing-side' && hasTrustedProxyContext && isSupportedLocale('en')) {
     return 'en'
   }
 
   return site?.defaultLocale || 'vi'
 }
 
-export const appendSiteWhere = async (
-  where?: Where,
-): Promise<Where> => {
+export const appendSiteWhere = async (where?: Where): Promise<Where> => {
   const site = await getCurrentSite()
 
   const siteConstraint: Where = {

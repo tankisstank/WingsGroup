@@ -4,6 +4,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { DEFAULT_LOCAL_DATABASE_URL, resolveLocalDatabaseURL } from '../src/utilities/localDatabase'
+import { siteCodeToAliasMap } from '../src/utilities/sitePaths'
 
 type TreeItem = {
   children?: TreeItem[]
@@ -25,7 +26,7 @@ const siteAliasByCode: Record<string, string> = {
   'wings-go': 'wingsgo',
   'wings-pass': 'wingspass',
   'wings-plus': 'wingsplus',
-  'wing-side': 'wing-side',
+  'wing-side': siteCodeToAliasMap['wing-side'],
   'wings-group': '',
 }
 

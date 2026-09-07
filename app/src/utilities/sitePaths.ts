@@ -10,6 +10,7 @@ export const siteAliasToCodeMap = {
 export type SiteAlias = keyof typeof siteAliasToCodeMap
 
 export const legacySiteAliasToCodeMap = {
+  wingsside: 'wing-side',
   wingstravel: 'wings-group',
   wingsside: 'wing-side',
 } as const
@@ -33,6 +34,14 @@ export const siteCodeToAliasMap = Object.fromEntries(
 ) as Record<string, SiteAlias>
 
 export const knownSiteAliases = Object.keys(allSiteAliasToCodeMap) as SiteRouteAlias[]
+
+export const getCanonicalSiteAlias = (alias?: null | string): null | string => {
+  if (!alias) return null
+
+  const siteCode = allSiteAliasToCodeMap[alias as SiteRouteAlias]
+
+  return siteCode ? siteCodeToAliasMap[siteCode] : alias
+}
 
 export {
   cmsEnabledLocaleCodes as supportedLocaleCodes,
@@ -148,29 +157,39 @@ export const prefixPathWithSite = (
     return normalizedPath
   }
 
+  const canonicalSiteAlias = getCanonicalSiteAlias(siteAlias)
+  const existingSiteAlias = getSiteAliasFromPathname(pathname)
+  const canonicalPathname =
+    existingSiteAlias &&
+    canonicalSiteAlias &&
+    getCanonicalSiteAlias(existingSiteAlias) === canonicalSiteAlias
+      ? pathname.replace(`/${existingSiteAlias}`, `/${canonicalSiteAlias}`)
+      : pathname
   const localePrefix = isSupportedLocale(locale) ? `/${locale}` : ''
-  const sitePrefix = siteAlias ? `/${siteAlias}${localePrefix}` : localePrefix
+  const sitePrefix = canonicalSiteAlias ? `/${canonicalSiteAlias}${localePrefix}` : localePrefix
 
   if (!sitePrefix) {
     return normalizedPath
   }
 
   if (
-    pathname === sitePrefix ||
-    pathname.startsWith(`${sitePrefix}/`) ||
-    (siteAlias && pathname.startsWith(`/${siteAlias}`))
+    canonicalPathname === sitePrefix ||
+    canonicalPathname.startsWith(`${sitePrefix}/`) ||
+    (canonicalSiteAlias &&
+      (canonicalPathname === `/${canonicalSiteAlias}` ||
+        canonicalPathname.startsWith(`/${canonicalSiteAlias}/`)))
   ) {
-    return normalizedPath
+    return canonicalPathname + suffix
   }
 
-  const normalizedSegments = pathname.split('/').filter(Boolean)
+  const normalizedSegments = canonicalPathname.split('/').filter(Boolean)
   const leadingLocale = normalizedSegments[0]
 
-  if (siteAlias && isSupportedLocale(leadingLocale)) {
-    return `/${siteAlias}${pathname}`.replace(/\/+/g, '/') + suffix
+  if (canonicalSiteAlias && isSupportedLocale(leadingLocale)) {
+    return `/${canonicalSiteAlias}${canonicalPathname}`.replace(/\/+/g, '/') + suffix
   }
 
-  return `${sitePrefix}${pathname === '/' ? '' : pathname}` + suffix
+  return `${sitePrefix}${canonicalPathname === '/' ? '' : canonicalPathname}` + suffix
 }
 
 export const buildLocaleSwitchHref = (
@@ -186,12 +205,13 @@ export const buildLocaleSwitchHref = (
   }
 
   const siteAlias = getSiteAliasFromPathname(normalizedPathname)
+  const canonicalSiteAlias = getCanonicalSiteAlias(siteAlias)
   const currentLocale = getLocaleFromPathname(normalizedPathname)
   const segments = normalizedPathname.split('/').filter(Boolean)
   const restSegments = siteAlias ? segments.slice(1) : segments
   const pathWithoutLocale =
     currentLocale && restSegments[0] === currentLocale ? restSegments.slice(1) : restSegments
-  const sitePrefix = siteAlias ? `/${siteAlias}` : ''
+  const sitePrefix = canonicalSiteAlias ? `/${canonicalSiteAlias}` : ''
   const restPath = pathWithoutLocale.length > 0 ? `/${pathWithoutLocale.join('/')}` : ''
 
   if (targetLocale === defaultLocale) {

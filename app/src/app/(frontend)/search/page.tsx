@@ -13,6 +13,9 @@ import { generateMeta } from '@/utilities/generateMeta'
 import { CMSLink } from '@/components/Link'
 import { getSearchCopy, searchMetadataCopy, searchPageCopyByLocale } from '@/i18n/searchCopy'
 import { CompassIcon, HeadphonesIcon, MapPinnedIcon, PlaneIcon } from 'lucide-react'
+import { notFound } from 'next/navigation'
+import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
+import { isWingsGroupV3PublicSurfacePathAllowed } from '@/wingsgroup/corporateRoutes'
 
 type Args = {
   searchParams: Promise<{
@@ -25,6 +28,17 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
   const payload = await getPayload({ config: configPromise })
   const locale = await getCurrentLocale()
   const site = await getCurrentSite()
+  const settings = await getCurrentSiteSettings()
+  if (
+    !isWingsGroupV3PublicSurfacePathAllowed({
+      locale,
+      path: '/search',
+      settings,
+      siteCode: site.code,
+    })
+  ) {
+    notFound()
+  }
   const contactPath = resolveSiteInquiryContactPath(site?.code)
   const copy = getSearchCopy(searchPageCopyByLocale, locale)
 

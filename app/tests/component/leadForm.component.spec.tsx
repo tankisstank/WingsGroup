@@ -47,6 +47,21 @@ const mixedForm = {
   title: 'Planner form',
 }
 
+const wingsGroupForm = {
+  confirmationMessage: null,
+  confirmationType: 'message',
+  fields: [
+    { blockType: 'text', label: 'Full name', name: 'full-name', required: true },
+    { blockType: 'email', label: 'Email', name: 'email', required: false },
+    { blockType: 'text', label: 'Phone', name: 'phone', required: false },
+    { blockType: 'textarea', label: 'Need', name: 'brief', required: true },
+  ],
+  id: 'wingsgroup-contact',
+  site: 9,
+  submitButtonLabel: 'Send',
+  title: 'WingsGroup Contact',
+}
+
 describe('lead form hardened submission', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
@@ -63,6 +78,7 @@ describe('lead form hardened submission', () => {
 
   afterEach(() => {
     cleanup()
+    window.sessionStorage.removeItem('wingsgroup-contact-focus')
     window.history.replaceState({}, '', '/')
   })
 
@@ -95,16 +111,72 @@ describe('lead form hardened submission', () => {
     await screen.findByRole('status')
   })
 
-  it('shows the Turnstile path only when the server requests a challenge', async () => {
+  it('shows the refined English success response after a contact request is accepted', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(new Response(JSON.stringify({ status: 'accepted' }), { status: 202 })),
+    )
+
+    render(<FormBlock enableIntro={false} form={form as never} />)
+    fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'Alice' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send brief' }))
+
+    expect(
+      await screen.findByText(
+        'A specialist will review your plans and return with a tailored proposal.',
+      ),
+    ).toBeTruthy()
+    expect(
+      screen.queryByText(
+        'The planning team will review the brief and respond with a suitable proposal direction.',
+      ),
+    ).toBeNull()
+  })
+
+  it('uses polished English support-panel copy for the WingsGroup contact form', () => {
+    document.documentElement.lang = 'en'
+    render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)
+
+    expect(
+      screen.getByRole('heading', {
+        name: 'Share your plans; our specialists will guide the next step.',
+      }),
+    ).toBeTruthy()
+    expect(screen.getByText('A response during business hours')).toBeTruthy()
+    expect(screen.getByText('Advice tailored to your timing and budget')).toBeTruthy()
+    expect(screen.getByText('Introduced to the right specialist')).toBeTruthy()
+    expect(screen.queryByText(/content manager|sales or content/i)).toBeNull()
+  })
+
+  it('focuses the contact intake only after a consultation dialog handoff', async () => {
     vi.stubGlobal(
       'fetch',
       vi
         .fn()
         .mockResolvedValue(
-          new Response(JSON.stringify({ challengeRequired: true, siteKey: 'test-site-key' }), {
-            status: 403,
-          }),
+          new Response(JSON.stringify({ available: false, enabled: true }), { status: 200 }),
         ),
+    )
+    window.history.replaceState({}, '', '/lien-he#contact-form')
+    window.sessionStorage.setItem('wingsgroup-contact-focus', 'contact-form')
+
+    render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)
+
+    const fullName = await screen.findByLabelText(/Full name/i)
+    await waitFor(() => expect(document.activeElement).toBe(fullName))
+    expect(window.sessionStorage.getItem('wingsgroup-contact-focus')).toBeNull()
+  })
+
+  it('shows the Turnstile path only when the server requests a challenge', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ challengeRequired: true, siteKey: 'test-site-key' }), {
+          status: 403,
+        }),
+      ),
     )
 
     render(<FormBlock enableIntro={false} form={form as never} />)
@@ -118,7 +190,7 @@ describe('lead form hardened submission', () => {
   it('localizes Vietnamese form labels and focuses the first invalid numeric-id control', async () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
-    window.history.replaceState({}, '', '/wing-side/vi/plan-your-trip')
+    window.history.replaceState({}, '', '/wingsside/vi/plan-your-trip')
     document.documentElement.lang = 'vi'
 
     render(<FormBlock enableIntro={false} form={{ ...mixedForm, id: 9 } as never} />)
@@ -137,7 +209,7 @@ describe('lead form hardened submission', () => {
   })
 
   it('uses stable unique ids and describedby associations for every field type', async () => {
-    window.history.replaceState({}, '', '/wing-side/en/contact-us')
+    window.history.replaceState({}, '', '/wingsside/en/contact-us')
     document.documentElement.lang = 'en'
 
     render(
@@ -179,7 +251,7 @@ describe('lead form hardened submission', () => {
   })
 
   it('aligns native required, aria-required and script validation semantics', async () => {
-    window.history.replaceState({}, '', '/wing-side/en/plan-your-trip')
+    window.history.replaceState({}, '', '/wingsside/en/plan-your-trip')
 
     render(<FormBlock enableIntro={false} form={mixedForm as never} />)
 
@@ -242,12 +314,47 @@ describe('lead form hardened submission', () => {
   })
 
   it('keeps Journeys q/type in hidden plan context without changing the visitor message', async () => {
-    window.history.replaceState({}, '', '/wing-side/en/plan-your-trip?q=H%C3%A0%20N%E1%BB%99i&type=group&destination=hanoi&style=culture&duration=8-14&source=journeys')
-    document.body.innerHTML = '<div class="ws-hifi-plan-form"><form><textarea name="message"></textarea></form></div>'
-    render(<PlanPrefillBridge budgetLabel="Budget" budgetOptions={[]} consentLabel="Consent" destLabel="Destination" destOptions={['Hanoi']} groupLabel="Group" groupOptions={[]} monthLabel="Month" monthOptions={[]} styleLabel="Style" styleOptions={['Culture']} searchParams={{ q: 'Hà Nội', type: 'group', destination: 'hanoi', style: 'culture', duration: '8-14', source: 'journeys' }} />)
+    window.history.replaceState(
+      {},
+      '',
+      '/wingsside/en/plan-your-trip?q=H%C3%A0%20N%E1%BB%99i&type=group&destination=hanoi&style=culture&duration=8-14&source=journeys',
+    )
+    document.body.innerHTML =
+      '<div class="ws-hifi-plan-form"><form><textarea name="message"></textarea></form></div>'
+    render(
+      <PlanPrefillBridge
+        budgetLabel="Budget"
+        budgetOptions={[]}
+        consentLabel="Consent"
+        destLabel="Destination"
+        destOptions={['Hanoi']}
+        groupLabel="Group"
+        groupOptions={[]}
+        monthLabel="Month"
+        monthOptions={[]}
+        styleLabel="Style"
+        styleOptions={['Culture']}
+        searchParams={{
+          q: 'Hà Nội',
+          type: 'group',
+          destination: 'hanoi',
+          style: 'culture',
+          duration: '8-14',
+          source: 'journeys',
+        }}
+      />,
+    )
     const planForm = document.querySelector<HTMLFormElement>('.ws-hifi-plan-form form')!
     await waitFor(() => expect(planForm.dataset.wsEnquiryContext).toBeTruthy())
-    expect(JSON.parse(planForm.dataset.wsEnquiryContext!)).toMatchObject({ discovery: { q: 'Hà Nội', type: 'group', destination: 'hanoi', style: 'culture', duration: '8-14' } })
+    expect(JSON.parse(planForm.dataset.wsEnquiryContext!)).toMatchObject({
+      discovery: {
+        q: 'Hà Nội',
+        type: 'group',
+        destination: 'hanoi',
+        style: 'culture',
+        duration: '8-14',
+      },
+    })
     expect(document.querySelector<HTMLTextAreaElement>('textarea[name="message"]')?.value).toBe('')
   })
 
@@ -300,5 +407,124 @@ describe('lead form hardened submission', () => {
     expect(
       body.submissionData.find(({ field }: { field: string }) => field === 'message').value,
     ).not.toMatch(/Tour slug|Tour ID|Source|Discovery/)
+  })
+
+  it('fails closed on missing consent, preserves values on delivery errors, and never links pending channels', async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === 'GET') {
+        return new Response(
+          JSON.stringify({
+            available: true,
+            channels: [
+              { key: 'zalo', label: 'Zalo OA', state: 'pending-update' },
+              {
+                href: 'https://example.com/whatsapp',
+                key: 'whatsapp',
+                label: 'WhatsApp',
+                state: 'approved',
+              },
+              { key: 'callback', label: 'Chuyên viên gọi lại', state: 'pending-update' },
+            ],
+            consentCopy:
+              'I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy.',
+            consentVersion: 'wingsgroup-contact-v1',
+            enabled: true,
+            policyHref: '/en/chinh-sach-bao-mat',
+            retentionMonths: 24,
+          }),
+          { status: 200 },
+        )
+      }
+
+      return new Response(JSON.stringify({ error: 'Lead delivery is temporarily unavailable.' }), {
+        status: 503,
+      })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    window.history.replaceState({}, '', '/lien-he?channel=callback#contact-form')
+    render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)
+
+    const fullName = await screen.findByLabelText(/Full name/)
+    expect(screen.getByLabelText(/Email/)).toBeTruthy()
+    expect(screen.getByLabelText(/Phone number/)).toBeTruthy()
+    const need = screen.getByLabelText(/Needs \/ budget \/ timing/)
+    expect(screen.getByRole('combobox', { name: /Preferred contact channel/ })).toHaveProperty(
+      'value',
+      '',
+    )
+    fireEvent.change(fullName, { target: { value: 'Alice' } })
+    fireEvent.change(need, { target: { value: 'Please plan a private journey.' } })
+
+    const consent = await screen.findByRole('checkbox', { name: /I agree that WingsGroup/ })
+    expect(consent.tagName).toBe('BUTTON')
+    expect(screen.queryByRole('link', { name: 'Zalo OA' })).toBeNull()
+    expect(screen.queryByText(/Pending update|Chờ cập nhật/)).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Chuyên viên gọi lại' })).toBeNull()
+    expect(screen.getByRole('link', { name: 'WhatsApp' }).getAttribute('href')).toBe(
+      'https://example.com/whatsapp',
+    )
+    expect(screen.getByText(/Information is retained for up to 24 months/)).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Send brief' }))
+    await waitFor(() => expect(document.activeElement).toBe(consent))
+    expect(consent.getAttribute('aria-invalid')).toBe('true')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    fireEvent.click(consent)
+    fireEvent.click(screen.getByRole('button', { name: 'Send brief' }))
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    await screen.findByRole('alert')
+    expect(fullName).toHaveProperty('value', 'Alice')
+    expect(need).toHaveProperty('value', 'Please plan a private journey.')
+    expect(consent.getAttribute('aria-checked')).toBe('true')
+
+    const postOptions = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')?.[1]
+    expect(JSON.parse(String(postOptions?.body))).toMatchObject({
+      leadContract: {
+        consent: true,
+        consentVersion: 'wingsgroup-contact-v1',
+      },
+      submissionData: [
+        { field: 'full-name', value: 'Alice' },
+        { field: 'email', value: '' },
+        { field: 'phone', value: '' },
+        { field: 'brief', value: 'Please plan a private journey.' },
+      ],
+    })
+  })
+
+  it('hides unavailable preferred-channel choices when the inventory is empty', async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === 'GET') {
+        return new Response(
+          JSON.stringify({
+            available: true,
+            channels: [],
+            consentCopy: 'I agree to the WingsGroup contact terms.',
+            consentVersion: 'wingsgroup-contact-v1',
+            enabled: true,
+            policyHref: '/chinh-sach-bao-mat',
+            retentionMonths: 24,
+          }),
+          { status: 200 },
+        )
+      }
+
+      return new Response(JSON.stringify({ status: 'accepted' }), { status: 202 })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(<FormBlock enableIntro={false} form={wingsGroupForm as never} siteCode="wings-group" />)
+
+    await screen.findByRole('checkbox', { name: /I agree to the WingsGroup/ })
+    expect(screen.queryByRole('combobox', { name: /Preferred contact channel/ })).toBeNull()
+    expect(screen.queryByText(/Pending update|Chờ cập nhật/)).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Zalo OA' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'WhatsApp' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Messenger' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Chuyên viên gọi lại' })).toBeNull()
+    expect(screen.getByText(/Information is retained for up to 24 months/)).toBeTruthy()
   })
 })

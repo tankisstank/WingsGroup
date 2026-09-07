@@ -2,6 +2,7 @@ import type { TaskConfig } from 'payload'
 
 import { createSMTPDelivery } from './delivery'
 import type { LeadDeliveryMessage } from './types'
+import { runWingsGroupLeadRetentionBatch } from './retention'
 import { incrementMetric, logOperationalEvent } from '@/observability'
 
 type LeadNotificationTask = {
@@ -193,4 +194,33 @@ export const reconcileLeadNotificationTask: TaskConfig<ReconcileLeadNotification
 
     return { output: { requeued } }
   },
+}
+
+type PurgeExpiredWingsGroupLeadsTask = {
+  input: Record<string, never>
+  output: {
+    deleted: number
+    enabled: boolean
+    failed: number
+    hasMore: boolean
+  }
+}
+
+export const purgeExpiredWingsGroupLeadsTask: TaskConfig<PurgeExpiredWingsGroupLeadsTask> = {
+  slug: 'purgeExpiredWingsGroupLeads',
+  label: 'Purge expired WingsGroup leads',
+  outputSchema: [
+    { name: 'enabled', type: 'checkbox', required: true },
+    { name: 'deleted', type: 'number', required: true },
+    { name: 'failed', type: 'number', required: true },
+    { name: 'hasMore', type: 'checkbox', required: true },
+  ],
+  schedule: [{ cron: '0 15 3 * * *', queue: 'lead-retention' }],
+  handler: async ({ req }) => ({
+    output: await runWingsGroupLeadRetentionBatch({
+      enabled: process.env.LEAD_RETENTION_ENABLED === 'true',
+      payload: req.payload,
+      req,
+    }),
+  }),
 }

@@ -20,6 +20,7 @@ import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
+import { wingsGroupLeadGovernanceField } from '@/lead-capture/governanceFields'
 
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -189,10 +190,17 @@ export const plugins: Plugin[] = [
       fields: ({ defaultFields }) => {
         const submissionSiteField = {
           ...siteField(),
+          // Public lead creation is allowed only through the server route,
+          // which resolves and verifies the tenant before its Local API call.
+          // Payload still evaluates relationship filterOptions with no user on
+          // that call, so the operator-only selector must not reject this
+          // already-authorized site relation.
+          filterOptions: () => true,
           required: false,
         } as Field
 
         const privateDeliveryFields: Field[] = [
+          wingsGroupLeadGovernanceField,
           {
             name: 'enquiryContext',
             label: 'Enquiry context',
@@ -230,7 +238,8 @@ export const plugins: Plugin[] = [
               read: ({ req }) => Boolean(req.user),
             },
             admin: {
-              description: 'Private operational state for notification delivery and reconciliation.',
+              description:
+                'Private operational state for notification delivery and reconciliation.',
               position: 'sidebar',
               readOnly: true,
             },

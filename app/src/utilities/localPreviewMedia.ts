@@ -1,0 +1,31 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { isWingsGroupLocalPreviewStoreConfigured } from './localPreviewStore'
+
+const localPreviewMediaModuleDirectory = path.dirname(fileURLToPath(import.meta.url))
+
+export const resolveWingsGroupLocalPreviewMediaDirectory = (
+  configuredDirectory = process.env.E09_PREVIEW_MEDIA_DIRECTORY,
+): string | undefined => {
+  if (isWingsGroupLocalPreviewStoreConfigured()) return undefined
+
+  if (!configuredDirectory?.trim()) {
+    if (process.env.E09_PREVIEW_MEDIA_SEED === 'true') {
+      throw new Error(
+        'E09_PREVIEW_MEDIA_SEED requires the authenticated in-memory E09 preview store; normal public/media is not a preview target.',
+      )
+    }
+    return path.resolve(localPreviewMediaModuleDirectory, '../../public/media')
+  }
+
+  if (process.env.NODE_ENV === 'production' || process.env.E09_PREVIEW_MEDIA_SEED !== 'true') {
+    throw new Error(
+      'E09_PREVIEW_MEDIA_DIRECTORY requires the explicit non-production local preview media seed.',
+    )
+  }
+
+  throw new Error(
+    'E09_PREVIEW_MEDIA_DIRECTORY is no longer accepted: local preview media must use the authenticated in-memory store.',
+  )
+}

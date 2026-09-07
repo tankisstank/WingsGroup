@@ -1,5 +1,5 @@
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
-import { getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
+import { getCurrentLocale, getCurrentPublicPathname, getCurrentSite } from '@/utilities/siteContext'
 import React from 'react'
 
 import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
@@ -11,26 +11,44 @@ import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
 import { MailIcon, PhoneIcon } from 'lucide-react'
+import { isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
+import { isWingsGroupBrandSite } from '@/wingsgroup/brand'
 
 export async function Footer() {
   const settings = await getCurrentSiteSettings()
   const site = await getCurrentSite()
   const locale = await getCurrentLocale()
+  const publicPathname = await getCurrentPublicPathname()
   const chromeCopy = getRuntimeLocaleCopy(publicChromeCopy, locale)
   const isWingSide = site.code === 'wing-side'
+  const isWingsGroupV3Surface =
+    site.code === 'wings-group' &&
+    settings?.wingsGroupV3?.enabled === true &&
+    isWingsGroupV3SurfacePath(publicPathname)
   const sharedZaloCTA = getSharedZaloCTA(site.code, locale)
   const hiFiCopy = isWingSide ? getWingsSideHiFiCopy(locale) : null
   const wingSideNav = isWingSide ? getWingsSideHiFiNavItems(locale) : null
   const wingSideFooterCopy = isWingSide ? getWingSideFooterCopy(locale) : null
 
   const navItems = settings?.footerNavItems || []
+  const salesEmail =
+    settings?.salesEmail && settings.salesEmail !== settings.supportEmail
+      ? settings.salesEmail
+      : null
+  const hasConfiguredLogoImage = Boolean(
+    settings?.branding?.logoImage &&
+    typeof settings.branding.logoImage === 'object' &&
+    'url' in settings.branding.logoImage &&
+    settings.branding.logoImage.url,
+  )
+  const usesWingsGroupBrandFallback = isWingsGroupBrandSite(site.code) && !hasConfiguredLogoImage
 
   return (
     <footer
       className={
         isWingSide
           ? 'site-footer site-footer--wingsside-hifi mt-auto border-t'
-          : 'site-footer mt-auto border-t'
+          : `site-footer mt-auto border-t${isWingsGroupV3Surface ? ' site-footer--wingsgroup-v3' : ''}`
       }
       data-site-code={site.code}
       data-testid={isWingSide ? 'wingsside-hifi-footer' : undefined}
@@ -112,6 +130,11 @@ export async function Footer() {
               <Logo
                 accentColor={settings?.branding?.accentColor}
                 brandColor={settings?.branding?.brandColor}
+                logoImage={
+                  settings?.branding?.logoImage && typeof settings.branding.logoImage === 'object'
+                    ? settings.branding.logoImage
+                    : null
+                }
                 logoText={settings?.branding?.logoText || settings?.siteName}
                 siteCode={site.code}
               />
@@ -119,32 +142,38 @@ export async function Footer() {
             {settings?.siteName ? (
               <div className="text-sm font-semibold">{settings.siteName}</div>
             ) : null}
-            {settings?.tagline ? (
+            {settings?.tagline && !usesWingsGroupBrandFallback ? (
               <div className="text-sm text-muted-foreground">{settings.tagline}</div>
             ) : null}
             {settings?.footerNote ? (
               <div className="text-xs text-muted-foreground max-w-md">{settings.footerNote}</div>
             ) : null}
-            {settings?.supportEmail || settings?.supportPhone ? (
+            {settings?.supportEmail || salesEmail || settings?.supportPhone ? (
               <div className="site-footer__contacts">
                 {settings.supportEmail ? (
-                  <span>
+                  <a href={`mailto:${settings.supportEmail}`}>
                     <MailIcon aria-hidden="true" className="h-4 w-4" />
                     {settings.supportEmail}
-                  </span>
+                  </a>
+                ) : null}
+                {salesEmail ? (
+                  <a href={`mailto:${salesEmail}`}>
+                    <MailIcon aria-hidden="true" className="h-4 w-4" />
+                    {salesEmail}
+                  </a>
                 ) : null}
                 {settings.supportPhone ? (
-                  <span>
+                  <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
                     <PhoneIcon aria-hidden="true" className="h-4 w-4" />
                     {settings.supportPhone}
-                  </span>
+                  </a>
                 ) : null}
               </div>
             ) : null}
           </div>
 
           <div className="flex flex-col-reverse items-start gap-4 md:flex-row md:flex-wrap md:items-center md:justify-end">
-            <ThemeSelector copy={chromeCopy.themeSelector} />
+            {!isWingsGroupV3Surface ? <ThemeSelector copy={chromeCopy.themeSelector} /> : null}
             <nav
               aria-label={chromeCopy.footerNavigation}
               className="flex flex-col gap-4 md:flex-row md:flex-wrap md:justify-end"

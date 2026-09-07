@@ -98,11 +98,18 @@ describe('WingSide structured tour query perimeter', () => {
       join(process.cwd(), 'src', 'app', '(frontend)', 'cmsPage.tsx'),
       'utf8',
     )
+    const pageQuerySource = readFileSync(
+      join(process.cwd(), 'src', 'utilities', 'cmsPageQuery.ts'),
+      'utf8',
+    )
     expect(routeSource).toContain('renderCmsPageByPath')
     expect(routeSource).toContain('generateCmsPageMetadataByPath')
-    expect(delegatedSource).toContain('const where = await appendSiteWhere')
-    expect(delegatedSource).toContain('fallbackLocale: false')
-    expect(delegatedSource).toContain('overrideAccess: draft')
+    expect(delegatedSource).toContain("import { queryPageByPath } from '@/utilities/cmsPageQuery'")
+    expect(pageQuerySource).toContain('const where = await appendSiteWhere')
+    expect(pageQuerySource).toContain('fallbackLocale: false')
+    expect(pageQuerySource).toContain('overrideAccess: draft')
+    expect(pageQuerySource).toContain('isWingsGroupV3PublicSurfacePathAllowed')
+    expect(pageQuerySource).toContain('path: requestedPath')
     expect(delegatedSource).toContain('hasMatchingWingSideTourWrapper(tourData.tour, wrapperPageID)')
     expect(delegatedSource).toContain('notFound()')
     expect(delegatedSource).toContain('<RelatedPages locale={locale} pages={relatedPages} />')

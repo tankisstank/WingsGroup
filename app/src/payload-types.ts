@@ -148,6 +148,7 @@ export interface Config {
     tasks: {
       sendLeadNotification: TaskSendLeadNotification;
       reconcileLeadNotificationQueueFailures: TaskReconcileLeadNotificationQueueFailures;
+      purgeExpiredWingsGroupLeads: TaskPurgeExpiredWingsGroupLeads;
       createCollectionExport: TaskCreateCollectionExport;
       createCollectionImport: TaskCreateCollectionImport;
       schedulePublish: TaskSchedulePublish;
@@ -328,9 +329,9 @@ export interface SiteSetting {
     accentColor?: string | null;
     logoImage?: (number | null) | Media;
     /**
-     * Biểu tượng bắt buộc cho tab trình duyệt và shortcut của từng site.
+     * Ảnh favicon tùy chọn; để trống để dùng fallback tĩnh theo bộ nhận diện của site.
      */
-    faviconImage: number | Media;
+    faviconImage?: (number | null) | Media;
     /**
      * Mã ổn định dùng cho render frontend. Không phụ thuộc tên hiển thị site.
      */
@@ -387,6 +388,7 @@ export interface SiteSetting {
     variant?: ('standard' | 'retail-departures' | 'planner' | 'utility') | null;
   };
   supportEmail?: string | null;
+  salesEmail?: string | null;
   supportPhone?: string | null;
   headerNavItems?:
     | {
@@ -429,6 +431,58 @@ export interface SiteSetting {
       }[]
     | null;
   footerNote?: string | null;
+  /**
+   * Cấu hình fail-closed cho WingsGroup v3. Không bật nhóm này cho tenant không sử dụng contract E09.
+   */
+  wingsGroupV3?: {
+    enabled?: boolean | null;
+    englishPublicationState?: ('hidden' | 'route-ready' | 'approved') | null;
+    privacy?: {
+      policyVersion?: string | null;
+      consentVersion?: string | null;
+      consentRequired?: boolean | null;
+      retentionMonths?: number | null;
+      dataSubjectContact?: string | null;
+      /**
+       * Do legal owner cung cấp; không tự tạo nội dung quyền.
+       */
+      dataSubjectRightsStatement?: string | null;
+      dataSubjectRightsEvidence?: string | null;
+      consentEvidenceReference?: string | null;
+      approvalState?: ('pending' | 'approved' | 'rejected') | null;
+      approvalReference?: string | null;
+      interBranchTransferAllowed?: boolean | null;
+      policyRouteVi?: string | null;
+      policyRouteEn?: string | null;
+    };
+    /**
+     * Dữ liệu pháp nhân đã được chốt cho E09; không thêm chứng nhận, đối tác hoặc review chưa có nguồn.
+     */
+    legalIdentity?: {
+      legalEntityName?: string | null;
+      internationalName?: string | null;
+      registeredOffice?: string | null;
+      travelOffice?: string | null;
+      registrationNumber?: string | null;
+      licenceNumber?: string | null;
+      legalRepresentative?: string | null;
+      relationshipStatement?: string | null;
+    };
+    /**
+     * Kênh chưa cấu hình không chặn release. Chỉ state approved mới được mở URL public.
+     */
+    consultationChannels?:
+      | {
+          key: 'zalo' | 'whatsapp' | 'messenger';
+          state: 'unconfigured' | 'pending' | 'approved' | 'disabled';
+          url?: string | null;
+          owner?: string | null;
+          sla?: string | null;
+          trackingReference?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -455,6 +509,36 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Metadata xuất bản có kiểm soát. Media cũ không có managedBy tiếp tục hoạt động như hiện tại.
+   */
+  governance?: {
+    managedBy?: 'wingsgroup-v3' | null;
+    /**
+     * Khóa attachment-id:source-sha256 để import idempotent, không dùng filename.
+     */
+    sourceIdentity?: string | null;
+    sourceAttachmentId?: string | null;
+    sourceArchiveSha256?: string | null;
+    sourceFileSha256?: string | null;
+    sourceFilename?: string | null;
+    provenanceReference?: string | null;
+    rightsState?: ('pending' | 'approved' | 'rejected') | null;
+    rightsEvidence?: string | null;
+    usageScope?: 'editorial-service' | null;
+    publicationState?: ('pending' | 'ready' | 'published' | 'rejected') | null;
+    derivativeState?: ('pending' | 'generated' | 'verified') | null;
+    responsiveDerivatives?:
+      | {
+          format: 'webp' | 'avif';
+          width: number;
+          height?: number | null;
+          url: string;
+          sha256: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -516,6 +600,54 @@ export interface Media {
       filename?: string | null;
     };
     og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    'wingsgroup-v3-640-webp'?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    'wingsgroup-v3-640-avif'?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    'wingsgroup-v3-960-webp'?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    'wingsgroup-v3-960-avif'?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    'wingsgroup-v3-1440-webp'?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    'wingsgroup-v3-1440-avif'?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -690,6 +822,8 @@ export interface Page {
     | MediaBlock
     | ArchiveBlock
     | FormBlock
+    | WingsGroupEcosystemBlock
+    | WingsGroupProofArchiveBlock
   )[];
   meta?: {
     title?: string | null;
@@ -1042,6 +1176,47 @@ export interface Page {
    */
   relatedPages?: (number | Page)[] | null;
   publishedAt?: string | null;
+  /**
+   * Fail-closed publication contract for the ten E09 WingsGroup routes. Approval fields are operator controlled.
+   */
+  wingsGroupRoute?: {
+    managedBy?: 'wingsgroup-v3' | null;
+    archetype?:
+      | ('home' | 'corporate' | 'ecosystem' | 'capability' | 'trust' | 'editorial' | 'contact' | 'policy')
+      | null;
+    publication?: {
+      vi?: ('hidden' | 'pending' | 'approved') | null;
+      en?: ('hidden' | 'pending' | 'approved') | null;
+    };
+    contentApproval?: {
+      vi?: string | null;
+      en?: string | null;
+    };
+    /**
+     * Policy remains non-public until every field is present and approval state is approved.
+     */
+    policy?: {
+      legalOwner?: string | null;
+      legalEntity?: string | null;
+      scope?: string | null;
+      effectiveDate?: string | null;
+      version?: string | null;
+      retentionMonths?: number | null;
+      dataSubjectContact?: string | null;
+      /**
+       * Must be supplied by the legal owner; do not generate policy rights copy.
+       */
+      dataSubjectRightsStatement?: string | null;
+      dataSubjectRightsEvidence?: string | null;
+      policyVersion?: string | null;
+      consentVersion?: string | null;
+      consentEvidenceReference?: string | null;
+      privacyApprovalReference?: string | null;
+      validationMarker?: string | null;
+      approvalState?: ('pending' | 'approved' | 'rejected') | null;
+      approvalReference?: string | null;
+    };
+  };
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -1815,6 +1990,79 @@ export interface Form {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WingsGroupEcosystemBlock".
+ */
+export interface WingsGroupEcosystemBlock {
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  profiles: {
+    brandKey: 'wingsgo' | 'wing-side' | 'wingsplus' | 'wingscare' | 'wingspass';
+    brandName: string;
+    description: string;
+    serviceScope: {
+      label: string;
+      id?: string | null;
+    }[];
+    stageMedia: number | Media;
+    proofState: 'pending' | 'approved' | 'not-applicable';
+    proofReferences?:
+      | {
+          key: string;
+          id?: string | null;
+        }[]
+      | null;
+    cta: {
+      label: string;
+      state: 'contact-fallback' | 'approved-deep-link';
+      contactPath?: string | null;
+      url?: string | null;
+      owner?: string | null;
+      httpEvidence?: string | null;
+      canonicalEvidence?: string | null;
+      trackingEvidence?: string | null;
+      ownerApprovalEvidence?: string | null;
+    };
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'wingsGroupEcosystem';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WingsGroupProofArchiveBlock".
+ */
+export interface WingsGroupProofArchiveBlock {
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  /**
+   * Public renderer chỉ được hiển thị record có publicationState = approved.
+   */
+  records?:
+    | {
+        key: string;
+        kind: 'licence' | 'certificate' | 'award' | 'membership' | 'standard' | 'other';
+        publicationState: 'pending' | 'approved' | 'rejected';
+        title: string;
+        summary?: string | null;
+        sourceIssuer?: string | null;
+        context?: string | null;
+        evidenceDate?: string | null;
+        permissionState: 'pending' | 'approved' | 'denied';
+        permissionEvidence?: string | null;
+        media?: (number | null) | Media;
+        mediaProvenanceReference?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'wingsGroupProofArchive';
+}
+/**
  * Tour có cấu trúc dùng chung cho WingsGo và WingsSide. Dữ liệu này là nguồn thật để render trang tour và discovery theo site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2266,6 +2514,17 @@ export interface FormSubmission {
   id: number;
   site?: (number | null) | Site;
   /**
+   * Metadata riêng do server ghi sau khi xác thực tenant và consent; không chỉnh sửa thủ công.
+   */
+  wingsGroupLead?: {
+    locale?: ('vi' | 'en') | null;
+    sourcePath?: string | null;
+    consentVersion?: string | null;
+    consentedAt?: string | null;
+    retentionUntil?: string | null;
+    preferredChannel?: ('zalo' | 'whatsapp' | 'messenger' | 'callback') | null;
+  };
+  /**
    * Private journey and discovery metadata. Kept separate from customer-authored form fields.
    */
   enquiryContext?: {
@@ -2476,6 +2735,7 @@ export interface PayloadJob {
           | 'inline'
           | 'sendLeadNotification'
           | 'reconcileLeadNotificationQueueFailures'
+          | 'purgeExpiredWingsGroupLeads'
           | 'createCollectionExport'
           | 'createCollectionImport'
           | 'schedulePublish';
@@ -2516,6 +2776,7 @@ export interface PayloadJob {
         | 'inline'
         | 'sendLeadNotification'
         | 'reconcileLeadNotificationQueueFailures'
+        | 'purgeExpiredWingsGroupLeads'
         | 'createCollectionExport'
         | 'createCollectionImport'
         | 'schedulePublish'
@@ -2782,6 +3043,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         variant?: T;
       };
   supportEmail?: T;
+  salesEmail?: T;
   supportPhone?: T;
   headerNavItems?:
     | T
@@ -2812,6 +3074,52 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   footerNote?: T;
+  wingsGroupV3?:
+    | T
+    | {
+        enabled?: T;
+        englishPublicationState?: T;
+        privacy?:
+          | T
+          | {
+              policyVersion?: T;
+              consentVersion?: T;
+              consentRequired?: T;
+              retentionMonths?: T;
+              dataSubjectContact?: T;
+              dataSubjectRightsStatement?: T;
+              dataSubjectRightsEvidence?: T;
+              consentEvidenceReference?: T;
+              approvalState?: T;
+              approvalReference?: T;
+              interBranchTransferAllowed?: T;
+              policyRouteVi?: T;
+              policyRouteEn?: T;
+            };
+        legalIdentity?:
+          | T
+          | {
+              legalEntityName?: T;
+              internationalName?: T;
+              registeredOffice?: T;
+              travelOffice?: T;
+              registrationNumber?: T;
+              licenceNumber?: T;
+              legalRepresentative?: T;
+              relationshipStatement?: T;
+            };
+        consultationChannels?:
+          | T
+          | {
+              key?: T;
+              state?: T;
+              url?: T;
+              owner?: T;
+              sla?: T;
+              trackingReference?: T;
+              id?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2913,6 +3221,8 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        wingsGroupEcosystem?: T | WingsGroupEcosystemBlockSelect<T>;
+        wingsGroupProofArchive?: T | WingsGroupProofArchiveBlockSelect<T>;
       };
   meta?:
     | T
@@ -3271,6 +3581,44 @@ export interface PagesSelect<T extends boolean = true> {
       };
   relatedPages?: T;
   publishedAt?: T;
+  wingsGroupRoute?:
+    | T
+    | {
+        managedBy?: T;
+        archetype?: T;
+        publication?:
+          | T
+          | {
+              vi?: T;
+              en?: T;
+            };
+        contentApproval?:
+          | T
+          | {
+              vi?: T;
+              en?: T;
+            };
+        policy?:
+          | T
+          | {
+              legalOwner?: T;
+              legalEntity?: T;
+              scope?: T;
+              effectiveDate?: T;
+              version?: T;
+              retentionMonths?: T;
+              dataSubjectContact?: T;
+              dataSubjectRightsStatement?: T;
+              dataSubjectRightsEvidence?: T;
+              policyVersion?: T;
+              consentVersion?: T;
+              consentEvidenceReference?: T;
+              privacyApprovalReference?: T;
+              validationMarker?: T;
+              approvalState?: T;
+              approvalReference?: T;
+            };
+      };
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;
@@ -3596,6 +3944,80 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WingsGroupEcosystemBlock_select".
+ */
+export interface WingsGroupEcosystemBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  profiles?:
+    | T
+    | {
+        brandKey?: T;
+        brandName?: T;
+        description?: T;
+        serviceScope?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+        stageMedia?: T;
+        proofState?: T;
+        proofReferences?:
+          | T
+          | {
+              key?: T;
+              id?: T;
+            };
+        cta?:
+          | T
+          | {
+              label?: T;
+              state?: T;
+              contactPath?: T;
+              url?: T;
+              owner?: T;
+              httpEvidence?: T;
+              canonicalEvidence?: T;
+              trackingEvidence?: T;
+              ownerApprovalEvidence?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WingsGroupProofArchiveBlock_select".
+ */
+export interface WingsGroupProofArchiveBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  records?:
+    | T
+    | {
+        key?: T;
+        kind?: T;
+        publicationState?: T;
+        title?: T;
+        summary?: T;
+        sourceIssuer?: T;
+        context?: T;
+        evidenceDate?: T;
+        permissionState?: T;
+        permissionEvidence?: T;
+        media?: T;
+        mediaProvenanceReference?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -3962,6 +4384,32 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   site?: T;
   caption?: T;
+  governance?:
+    | T
+    | {
+        managedBy?: T;
+        sourceIdentity?: T;
+        sourceAttachmentId?: T;
+        sourceArchiveSha256?: T;
+        sourceFileSha256?: T;
+        sourceFilename?: T;
+        provenanceReference?: T;
+        rightsState?: T;
+        rightsEvidence?: T;
+        usageScope?: T;
+        publicationState?: T;
+        derivativeState?: T;
+        responsiveDerivatives?:
+          | T
+          | {
+              format?: T;
+              width?: T;
+              height?: T;
+              url?: T;
+              sha256?: T;
+              id?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4037,6 +4485,66 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
         og?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        'wingsgroup-v3-640-webp'?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        'wingsgroup-v3-640-avif'?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        'wingsgroup-v3-960-webp'?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        'wingsgroup-v3-960-avif'?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        'wingsgroup-v3-1440-webp'?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        'wingsgroup-v3-1440-avif'?:
           | T
           | {
               url?: T;
@@ -4250,6 +4758,16 @@ export interface FormsSelect<T extends boolean = true> {
  */
 export interface FormSubmissionsSelect<T extends boolean = true> {
   site?: T;
+  wingsGroupLead?:
+    | T
+    | {
+        locale?: T;
+        sourcePath?: T;
+        consentVersion?: T;
+        consentedAt?: T;
+        retentionUntil?: T;
+        preferredChannel?: T;
+      };
   enquiryContext?:
     | T
     | {
@@ -4616,6 +5134,19 @@ export interface TaskReconcileLeadNotificationQueueFailures {
   input?: unknown;
   output: {
     requeued: number;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskPurgeExpiredWingsGroupLeads".
+ */
+export interface TaskPurgeExpiredWingsGroupLeads {
+  input?: unknown;
+  output: {
+    enabled: boolean;
+    deleted: number;
+    failed: number;
+    hasMore: boolean;
   };
 }
 /**

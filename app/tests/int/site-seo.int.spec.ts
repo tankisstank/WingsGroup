@@ -44,9 +44,9 @@ describe('site SEO utilities', () => {
     expect(buildConfiguredCanonicalURL({ path: getPageCanonicalPath('about'), settings })).toBe(
       'https://wingsgroup.com/about',
     )
-    expect(buildConfiguredCanonicalURL({ path: getPageCanonicalPath('/destinations/ha-noi'), settings })).toBe(
-      'https://wingsgroup.com/destinations/ha-noi',
-    )
+    expect(
+      buildConfiguredCanonicalURL({ path: getPageCanonicalPath('/destinations/ha-noi'), settings }),
+    ).toBe('https://wingsgroup.com/destinations/ha-noi')
     expect(buildConfiguredCanonicalURL({ path: getPostCanonicalPath('launch'), settings })).toBe(
       'https://wingsgroup.com/posts/launch',
     )
@@ -77,7 +77,9 @@ describe('site SEO utilities', () => {
       },
     } as const
 
-    expect(buildConfiguredCanonicalURL({ path: '/about', settings })).toBe('https://wingsgroup.com/about')
+    expect(buildConfiguredCanonicalURL({ path: '/about', settings })).toBe(
+      'https://wingsgroup.com/about',
+    )
     expect(buildConfiguredCanonicalURL({ path: '/about', settings: wingsGoSettings })).toBe(
       'https://wingsgo.vn/about',
     )
@@ -95,9 +97,9 @@ describe('site SEO utilities', () => {
       },
     } as const
 
-    expect(
-      buildConfiguredCanonicalURL({ path: '/about', settings: localConfiguredSettings }),
-    ).toBe('http://localhost:3000/about')
+    expect(buildConfiguredCanonicalURL({ path: '/about', settings: localConfiguredSettings })).toBe(
+      'http://localhost:3000/about',
+    )
 
     expect(
       getCanonicalSiteOrigin({
@@ -110,7 +112,7 @@ describe('site SEO utilities', () => {
     ).toBe('https://wingsgo.vn')
   })
 
-  it('builds configured absolute media URLs from the configured origin only', () => {
+  it('builds configured media URLs without double-prefixing an absolute governed derivative', () => {
     expect(
       buildConfiguredAbsoluteMediaURL({
         media: {
@@ -125,6 +127,21 @@ describe('site SEO utilities', () => {
         settings,
       }),
     ).toBe('https://wingsgroup.com/media/plain-og.png')
+
+    expect(
+      buildConfiguredAbsoluteMediaURL({
+        media: {
+          id: 10,
+          url: 'https://wingsgroup.vn/media/wingsgroup-journey-guide-1440.webp',
+          sizes: {
+            og: {
+              url: 'https://wingsgroup.vn/media/wingsgroup-journey-guide-1440.webp',
+            },
+          },
+        } as never,
+        settings,
+      }),
+    ).toBe('https://wingsgroup.vn/media/wingsgroup-journey-guide-1440.webp')
   })
 
   it('allows route-level SEO consumers to override canonical origin safely', () => {
