@@ -16,14 +16,17 @@ const handoffForm = (action: string, handoff: string) => {
   const formActionPolicy = `form-action 'self'${actionOrigin ? ` ${actionOrigin}` : ''}`
 
   return new Response(
-    `<!doctype html><meta name="referrer" content="no-referrer"><form method="post" action="${action}"><input type="hidden" name="handoff" value="${handoff}"></form><script>document.forms[0].submit()</script>`,
+    `<!doctype html><meta name="referrer" content="origin"><form method="post" action="${action}"><input type="hidden" name="handoff" value="${handoff}"></form><script>document.forms[0].submit()</script>`,
     {
       headers: {
         'Cache-Control': 'no-store',
         'Content-Security-Policy': formActionPolicy,
         'Content-Security-Policy-Report-Only': formActionPolicy,
         'Content-Type': 'text/html; charset=utf-8',
-        'Referrer-Policy': 'no-referrer',
+        // The handoff token remains POST-only. Sending only the CMS origin lets
+        // the child page prove the trusted iframe parent without leaking path,
+        // query, or token into the cross-domain request.
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
       },
     },
   )

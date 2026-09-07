@@ -28,6 +28,7 @@ describe('preview handoff initializer', () => {
     expect(response.status).toBe(200)
     expect(html).toContain('action="https://wingsgo.vn/next/preview/handoff"')
     expect(response.headers.get('Content-Security-Policy')).toBe("form-action 'self' https://wingsgo.vn")
+    expect(response.headers.get('Referrer-Policy')).toBe('strict-origin-when-cross-origin')
     expect(html).toContain('name="handoff"')
     expect(html).not.toContain('localhost')
     expect(html).not.toContain('PREVIEW_SECRET')
