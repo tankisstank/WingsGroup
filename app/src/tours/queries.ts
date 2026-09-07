@@ -42,6 +42,13 @@ const tourDeparturesCollection = 'tour-departures' as never
 const tourCampaignsCollection = 'tour-campaigns' as never
 const departureVariantsCollection = 'departure-variants' as never
 
+export const scheduleTrustSignals = [
+  'Giá công khai theo từng đợt mở bán',
+  'Giữ chỗ sau khi sales xác nhận tồn chỗ',
+  'Hỗ trợ visa, hồ sơ và điều phối trước ngày đi',
+  'Điều hành gửi xác nhận trước khi chốt booking',
+] as const
+
 const sortDepartures = <T extends { departureDate?: null | string }>(departures: T[] = []) =>
   [...departures].sort((left, right) => {
     const leftTime = left.departureDate
@@ -708,12 +715,7 @@ export const getResolvedScheduleData = async ({
       nextDeparture: getNextDeparture(departures),
       openCount: visibleDepartures.length,
     },
-    trustSignals: [
-      'Gi├í c├┤ng khai theo tß╗½ng ─æß╗út mß╗ƒ b├ín',
-      'Giß╗» chß╗ù sau khi sales x├íc nhß║¡n tß╗ôn chß╗ù',
-      'Hß╗ù trß╗ú visa, hß╗ô s╞í v├á ─æiß╗üu phß╗æi tr╞░ß╗¢c ng├áy ─æi',
-      '─Éiß╗üu h├ánh gß╗ìi x├íc nhß║¡n tr╞░ß╗¢c khi chß╗æt booking',
-    ],
+    trustSignals: [...scheduleTrustSignals],
   }
 }
 

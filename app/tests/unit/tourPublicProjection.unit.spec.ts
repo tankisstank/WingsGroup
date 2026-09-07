@@ -9,10 +9,24 @@ vi.mock('@/utilities/siteContext', () => ({
   getCurrentSite: vi.fn(),
 }))
 
-import { rankRelatedTourFallbacks, selectRelatedTourCards } from '@/tours/queries'
+import {
+  rankRelatedTourFallbacks,
+  scheduleTrustSignals,
+  selectRelatedTourCards,
+} from '@/tours/queries'
 import { getDurationLabel, getTourPricePosture, normalizeTourPublicText } from '@/tours/utils'
 
 describe('public tour projection', () => {
+  it('keeps WingsGo schedule trust signals as valid Vietnamese UTF-8 copy', () => {
+    expect(scheduleTrustSignals).toEqual([
+      'Giá công khai theo từng đợt mở bán',
+      'Giữ chỗ sau khi sales xác nhận tồn chỗ',
+      'Hỗ trợ visa, hồ sơ và điều phối trước ngày đi',
+      'Điều hành gửi xác nhận trước khi chốt booking',
+    ])
+    expect(scheduleTrustSignals.join('')).not.toMatch(/[├╗╞─]/u)
+  })
+
   it('passes the requested public locale into consultative tour chrome', () => {
     const source = readFileSync(
       join(process.cwd(), 'src', 'app', '(frontend)', 'cmsPage.tsx'),
