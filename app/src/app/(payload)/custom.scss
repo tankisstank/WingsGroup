@@ -1462,11 +1462,14 @@ body.wings-admin-shell .login .wings-admin-logo {
 .wings-admin-theme-finexy,
 .wings-admin-theme-ats {
   .template-default__nav-toggler-wrapper {
-    background: transparent !important;
+    align-items: center;
+    background: var(--wings-admin-sidebar) !important;
+    border: 1px solid var(--wings-admin-sidebar-border);
+    border-radius: var(--wings-admin-radius-sm);
     box-shadow: none !important;
     height: 44px;
-    /* Sit on the rail edge, never over the CMS/site heading. */
-    left: calc(258px - 22px);
+    /* Keep the desktop control inside the sidebar, not over its edge. */
+    left: calc(258px - 58px);
     overflow: visible;
     position: fixed;
     top: 16px;
@@ -1494,9 +1497,49 @@ body.wings-admin-shell .login .wings-admin-logo {
   /* This is also a native `.nav-toggler`; override the rail rule above with
    * the same specificity so the hamburger remains visible without hover. */
   .template-default__nav-toggler.nav-toggler {
-    background: var(--wings-admin-panel) !important;
-    border-color: var(--wings-admin-border) !important;
-    color: var(--wings-admin-text) !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    color: #ffffff !important;
+  }
+
+  .template-default__nav-toggler .stroke,
+  .app-header__mobile-nav-toggler .stroke {
+    stroke: currentColor !important;
+  }
+
+  .template-default__nav-toggler .hamburger,
+  .template-default__nav-toggler .hamburger__open-icon,
+  .template-default__nav-toggler .hamburger__close-icon,
+  .app-header__mobile-nav-toggler .hamburger,
+  .app-header__mobile-nav-toggler .hamburger__open-icon,
+  .app-header__mobile-nav-toggler .hamburger__close-icon {
+    color: #ffffff !important;
+  }
+
+  /* Payload marks this control non-interactive on desktop. Keep its intended
+   * mobile-only role so the desktop rail has one unambiguous toggle. */
+  @media (min-width: 681px) {
+    .app-header__mobile-nav-toggler {
+      display: none !important;
+    }
+  }
+
+  @media (min-width: 681px) and (max-width: 1050px) {
+    .template-default__nav-toggler-wrapper {
+      left: calc(224px - 58px);
+    }
+  }
+
+  /* Once the rail is closed, the same control docks to the visible app bar.
+   * It is no longer suspended in the empty gutter left by the collapsed nav. */
+  body.wings-admin-shell:has(.nav:not(.nav--nav-open)) .template-default__nav-toggler-wrapper {
+    left: calc(258px + 16px);
+  }
+
+  @media (min-width: 681px) and (max-width: 1050px) {
+    body.wings-admin-shell:has(.nav:not(.nav--nav-open)) .template-default__nav-toggler-wrapper {
+      left: calc(224px + 16px);
+    }
   }
 
   .template-default__nav-toggler::before,

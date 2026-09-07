@@ -4,14 +4,6 @@
   color: var(--wings-admin-text);
   margin-bottom: base(1.5);
 
-  &__intro {
-    color: var(--wings-admin-muted-strong);
-    font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
-    line-height: 1.5;
-    margin: 0 0 base(0.5);
-    max-width: 72ch;
-  }
-
   &__heading {
     margin-bottom: base(0.75);
 
@@ -47,18 +39,6 @@
     }
   }
 
-  &__instructions {
-    color: var(--wings-admin-muted-strong);
-    font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
-    list-style: decimal;
-    margin-bottom: base(0.5);
-    padding-left: base(0.9);
-
-    & li {
-      width: 100%;
-    }
-  }
-
   & a:hover {
     opacity: 0.85;
   }
@@ -74,7 +54,4 @@
     }
   }
 
-  &__instructions {
-    color: var(--wings-admin-muted-strong);
-  }
 }
