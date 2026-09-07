@@ -12,7 +12,6 @@ import { JsonLd } from '@/components/JsonLd'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import { draftMode } from 'next/headers'
 
 import './globals.css'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
@@ -24,6 +23,7 @@ import { buildOrganizationJSONLD, buildWebSiteJSONLD } from '@/utilities/structu
 import { buildConfiguredAbsoluteMediaURL } from '@/utilities/siteURLs'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { getCurrentSite } from '@/utilities/siteContext'
+import { isAuthorizedDraftMode } from '@/utilities/previewHandoff'
 import { getCanonicalSiteOrigin, getSiteSitemapURL } from '@/utilities/siteSEO'
 import { WingsSideSpecialsPromo } from '@/components/WingsSideSpecialsPromo'
 import { getPublicRoutePathname } from '@/utilities/sitePaths'
@@ -50,7 +50,7 @@ const getSiteFaviconURL = (
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { isEnabled } = await draftMode()
+  const isEnabled = await isAuthorizedDraftMode()
   const site = await getCurrentSite()
   const settings = await getCurrentSiteSettings()
   const locale = await getCurrentLocale()

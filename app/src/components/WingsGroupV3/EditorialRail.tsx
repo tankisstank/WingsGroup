@@ -1,5 +1,5 @@
 import configPromise from '@payload-config'
-import { draftMode, headers } from 'next/headers'
+import { headers } from 'next/headers'
 import { getPayload } from 'payload'
 import React from 'react'
 
@@ -10,6 +10,7 @@ import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
 import type { SupportedLocaleCode } from '@/utilities/locales'
 import { hydrateScopedWingsGroupMediaRelations } from '@/utilities/wingsGroupMediaRelations'
 import { createWingsGroupLocalPreviewPayloadReq } from '@/wingsgroup/localPreview'
+import { isAuthorizedDraftMode } from '@/utilities/previewHandoff'
 
 import {
   isWingsGroupDevelopmentMedia,
@@ -110,7 +111,7 @@ const getCandidates = async (block: ArchiveBlock, locale?: null | string): Promi
 
 const getFallbackEditorialMedia = async (): Promise<Map<string, MediaType>> => {
   const payload = await getPayload({ config: configPromise })
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isAuthorizedDraftMode()
   const previewReq = draft
     ? await createWingsGroupLocalPreviewPayloadReq({ headers: await headers(), payload })
     : undefined

@@ -1309,6 +1309,24 @@ body.wings-admin-shell .login .wings-admin-logo {
   }
 }
 
+.doc-controls__controls .wings-content-locale-compact {
+  align-items: center;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 7px;
+  margin: 0;
+  max-width: min(100%, 360px);
+
+  .wings-content-locale-control__options { gap: 4px; }
+  .wings-content-locale-control__options a { font-size: 0.72rem; padding: 3px 7px; }
+}
+
+.wings-content-locale-compact__label { color: var(--wings-admin-muted-strong); font-size: 0.75rem; font-weight: 700; }
+.wings-content-locale-compact__status { display: inline-flex; gap: 3px; }
+.wings-content-locale-compact__status i { background: var(--wings-admin-warning); border-radius: 50%; display: block; height: 6px; width: 6px; }
+.wings-content-locale-compact__status i[data-status='published'] { background: var(--wings-admin-positive); }
+.wings-content-locale-compact__status i[data-status='draft'] { background: var(--wings-admin-accent); }
+
 .wings-content-locale-control {
   background: var(--wings-admin-panel);
   border: 1px solid var(--wings-admin-border);

@@ -1,137 +1,52 @@
 import type { PayloadRequest } from 'payload'
 import { getPayload } from 'payload'
-
-import { cookies, draftMode } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { NextRequest } from 'next/server'
 
 import configPromise from '@payload-config'
-import {
-  defaultSiteCode,
-  getLocaleFromPathname,
-  getSiteAliasFromPathname,
-  allSiteAliasToCodeMap,
-} from '@/utilities/sitePaths'
-import {
-  NEXT_DRAFT_MODE_COOKIE,
-  WINGSGROUP_LOCAL_PREVIEW_GRANT_COOKIE,
-  mintWingsGroupLocalPreviewGrant,
-} from '@/wingsgroup/localPreview'
+import { normalizeRelationID } from '@/access/roles'
+import { mintPreviewHandoff, type PreviewCollection } from '@/utilities/previewHandoff'
+import { defaultSiteCode, siteCodeToAliasMap } from '@/utilities/sitePaths'
 
-export type PreviewSearchParams = {
-  path: string
-  previewSecret: string
+const collections = new Set<PreviewCollection>(['pages', 'posts', 'tour-campaigns', 'tour-products'])
+const safePath = (value: string | null) =>
+  value && value.startsWith('/') && !value.startsWith('//') && !/[?#\\]/u.test(value) ? value : null
+const siteOrigin = (site: { primaryDomain?: null | string } | null | undefined) => {
+  const host = site?.primaryDomain?.trim().replace(/^https?:\/\//u, '').replace(/\/$/u, '')
+  return host && process.env.NODE_ENV === 'production' ? `https://${host}` : ''
 }
-
-const clearLocalPreviewGrant = async (): Promise<void> => {
-  const cookieStore = await cookies()
-  cookieStore.set({
-    expires: new Date(0),
-    httpOnly: true,
-    maxAge: 0,
-    name: WINGSGROUP_LOCAL_PREVIEW_GRANT_COOKIE,
-    path: '/',
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    value: '',
-  })
-}
-
-const disablePreviewAndClearGrant = async (): Promise<void> => {
-  const draft = await draftMode()
-  draft.disable()
-  await clearLocalPreviewGrant()
-}
+const handoffForm = (action: string, handoff: string) => new Response(
+  `<!doctype html><meta name="referrer" content="no-referrer"><form method="post" action="${action}"><input type="hidden" name="handoff" value="${handoff}"></form><script>document.forms[0].submit()</script>`,
+  { headers: { 'Cache-Control': 'no-store', 'Content-Type': 'text/html; charset=utf-8', 'Referrer-Policy': 'no-referrer' } },
+)
 
 export async function GET(req: NextRequest): Promise<Response> {
+  const params = new URL(req.url).searchParams
+  const collection = params.get('collection') as PreviewCollection
+  const documentID = params.get('id')
+  const requestedPath = safePath(params.get('path'))
+  if (!collections.has(collection) || !documentID || !requestedPath) return new Response('Insufficient preview parameters', { status: 404 })
   const payload = await getPayload({ config: configPromise })
-
-  const { searchParams } = new URL(req.url)
-
-  const path = searchParams.get('path')
-  const previewSecret = searchParams.get('previewSecret')
-
-  if (previewSecret !== process.env.PREVIEW_SECRET) {
-    await clearLocalPreviewGrant()
-    return new Response('You are not allowed to preview this page', { status: 403 })
-  }
-
-  if (!path) {
-    await disablePreviewAndClearGrant()
-    return new Response('Insufficient search params', { status: 404 })
-  }
-
-  if (!path.startsWith('/')) {
-    await disablePreviewAndClearGrant()
-    return new Response('This endpoint can only be used for relative previews', { status: 500 })
-  }
-
   let user
-
+  try { user = (await payload.auth({ req: req as unknown as PayloadRequest, headers: req.headers })).user } catch { return new Response('You are not allowed to preview this page', { status: 403 }) }
+  if (!user) return new Response('You are not allowed to preview this page', { status: 403 })
+  type PreviewDocument = { id: number | string; pathname?: null | string; site?: unknown }
+  let document: PreviewDocument | null = null
   try {
-    user = (
-      await payload.auth({
-        req: req as unknown as PayloadRequest,
-        headers: req.headers,
-      })
-    ).user
-  } catch (error) {
-    payload.logger.error({ err: error }, 'Error verifying token for live preview')
-    await disablePreviewAndClearGrant()
-    return new Response('You are not allowed to preview this page', { status: 403 })
-  }
-
-  const draft = await draftMode()
-
-  if (!user) {
-    await disablePreviewAndClearGrant()
-    return new Response('You are not allowed to preview this page', { status: 403 })
-  }
-
-  // You can add additional checks here to see if the user is allowed to preview this page
-
-  draft.enable()
-
-  if (!draft.isEnabled) {
-    await disablePreviewAndClearGrant()
-    return new Response('Preview mode could not be enabled', { status: 503 })
-  }
-
-  if (process.env.NODE_ENV !== 'production') {
-    const userID = (user as { id?: number | string }).id
-    const pathName = new URL(path, 'http://local-preview.invalid').pathname
-    const siteAlias = getSiteAliasFromPathname(pathName)
-    const siteCode = siteAlias ? allSiteAliasToCodeMap[siteAlias] : defaultSiteCode
-    const locale = getLocaleFromPathname(pathName) || 'vi'
-    const cookieStore = await cookies()
-    const nextDraftCookie = cookieStore.get(NEXT_DRAFT_MODE_COOKIE)?.value
-    const grant =
-      userID !== undefined && nextDraftCookie
-        ? await mintWingsGroupLocalPreviewGrant({
-            draftCookie: nextDraftCookie,
-            locale,
-            siteCode,
-            userID,
-          })
-        : null
-
-    if (!grant) {
-      await disablePreviewAndClearGrant()
-      return new Response('Preview grant could not be issued', { status: 503 })
-    }
-
-    cookieStore.set({
-      httpOnly: true,
-      maxAge: 5 * 60,
-      name: WINGSGROUP_LOCAL_PREVIEW_GRANT_COOKIE,
-      path: '/',
-      sameSite: 'lax',
-      secure: false,
-      value: grant,
-    })
-  } else {
-    await clearLocalPreviewGrant()
-  }
-
-  redirect(path)
+    document = (await payload.findByID({ collection, depth: 1, id: documentID, overrideAccess: false, req: req as unknown as PayloadRequest })) as unknown as PreviewDocument
+  } catch { return new Response('You are not allowed to preview this page', { status: 403 }) }
+  if (!document) return new Response('You are not allowed to preview this page', { status: 403 })
+  const embeddedSite = typeof document.site === 'object' && document.site ? (document.site as { code?: string; primaryDomain?: string }) : null
+  const siteID = normalizeRelationID(document.site as never)
+  const site = embeddedSite || (siteID ? await payload.findByID({ collection: 'sites', depth: 0, id: siteID, overrideAccess: false, req: req as unknown as PayloadRequest }) : null)
+  if (!site?.code) return new Response('You are not allowed to preview this page', { status: 403 })
+  // A Page's hierarchical pathname is authoritative; browser input cannot
+  // downgrade it to a slug-derived URL.
+  const path = collection === 'pages' ? safePath(document.pathname || null) : requestedPath
+  if (!path) return new Response('Preview path is unavailable', { status: 409 })
+  const handoff = await mintPreviewHandoff({ collection, documentID: String(document.id), locale: params.get('locale') || 'vi', path, siteCode: site.code })
+  if (!handoff) return new Response('Preview handoff could not be issued', { status: 503 })
+  const target = siteOrigin(site)
+    ? `${siteOrigin(site)}/next/preview/handoff`
+    : `${site.code === defaultSiteCode ? '' : `/${siteCodeToAliasMap[site.code]}`}/next/preview/handoff`
+  return handoffForm(target, handoff)
 }

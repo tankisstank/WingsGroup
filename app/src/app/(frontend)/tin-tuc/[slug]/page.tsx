@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
@@ -11,6 +10,7 @@ import { getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
+import { isAuthorizedDraftMode } from '@/utilities/previewHandoff'
 import {
   getWingsGroupEditorialOpenGraphMedia,
   getWingsGroupEditorialPostPath,
@@ -45,8 +45,8 @@ const decodeEditorialSlug = (slug: string) => {
 }
 
 const getArticle = async (slug: string) => {
-  const [{ isEnabled: draft }, locale, site, settings] = await Promise.all([
-    draftMode(),
+  const [draft, locale, site, settings] = await Promise.all([
+    isAuthorizedDraftMode(),
     getCurrentLocale(),
     getCurrentSite(),
     getCurrentSiteSettings(),

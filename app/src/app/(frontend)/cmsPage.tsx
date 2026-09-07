@@ -68,6 +68,7 @@ import {
 import { hydrateWingsSideHomeCuration, projectWingsSideHomeCuration } from '@/tours/homeCuration'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import type { Form as PayloadForm } from '@/payload-types'
+import { isAuthorizedDraftMode } from '@/utilities/previewHandoff'
 
 type CmsPathArgs = {
   requestedPath: string
@@ -78,7 +79,7 @@ export async function renderCmsPageByPath({
   requestedPath,
   searchParams: searchParamsPromise,
 }: CmsPathArgs) {
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isAuthorizedDraftMode()
   const searchParams = searchParamsPromise ? await searchParamsPromise : {}
   const locale = await getCurrentLocale()
   const sitePrefix = await getCurrentSitePrefix()
@@ -455,7 +456,7 @@ const resolveStructuredTourPage = async ({
   searchParams?: Record<string, string | string[] | undefined>
   wrapperPageID: number | string
 }) => {
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isAuthorizedDraftMode()
   const segments = requestedPath.split('/').filter(Boolean)
   const site = await getCurrentSite()
 

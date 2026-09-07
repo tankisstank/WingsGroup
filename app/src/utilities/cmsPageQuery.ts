@@ -1,5 +1,5 @@
 import configPromise from '@payload-config'
-import { draftMode, headers } from 'next/headers'
+import { headers } from 'next/headers'
 import { getPayload } from 'payload'
 
 import {
@@ -14,6 +14,7 @@ import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
 import { hydrateScopedWingsGroupMediaRelations } from '@/utilities/wingsGroupMediaRelations'
+import { isAuthorizedDraftMode } from '@/utilities/previewHandoff'
 
 export const queryPageByPath = async ({
   depth = 3,
@@ -24,7 +25,7 @@ export const queryPageByPath = async ({
   locale?: SupportedLocaleCode
   requestedPath: string
 }) => {
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isAuthorizedDraftMode()
   const site = await getCurrentSite()
   const settings = await getCurrentSiteSettings()
 

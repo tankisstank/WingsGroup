@@ -4,7 +4,6 @@ import { RelatedPosts } from '@/blocks/RelatedPosts/Component'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import { draftMode } from 'next/headers'
 import React from 'react'
 import RichText from '@/components/RichText'
 
@@ -13,6 +12,7 @@ import type { Post } from '@/payload-types'
 import { PostHero } from '@/heros/PostHero'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { generateMeta } from '@/utilities/generateMeta'
+import { isAuthorizedDraftMode } from '@/utilities/previewHandoff'
 import {
   appendSiteWhere,
   getCurrentLocale,
@@ -42,7 +42,7 @@ type Args = {
 }
 
 export default async function Post({ params: paramsPromise }: Args) {
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isAuthorizedDraftMode()
   const { slug = '' } = await paramsPromise
   const locale = await getCurrentLocale()
   const sitePrefix = await getCurrentSitePrefix()
@@ -140,7 +140,7 @@ const queryPostBySlug = async ({
   locale?: SupportedLocaleCode
   slug: string
 }) => {
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isAuthorizedDraftMode()
 
   const payload = await getPayload({ config: configPromise })
   const where = await appendSiteWhere(

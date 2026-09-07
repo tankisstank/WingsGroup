@@ -51,6 +51,7 @@ export const TourProducts: CollectionConfig = {
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
+          id: data?.id as number | string | null | undefined,
           collection: 'tour-products',
           req,
           site: data?.site as number | Site | null | undefined,
@@ -59,6 +60,7 @@ export const TourProducts: CollectionConfig = {
     },
     preview: (data, { req }) =>
       generatePreviewPath({
+        id: data?.id as number | string | null | undefined,
         collection: 'tour-products',
         req,
         site: data?.site as number | Site | null | undefined,

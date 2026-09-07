@@ -194,3 +194,33 @@ export function ContentLocaleDocumentControl() {
     </ControlShell>
   )
 }
+
+/** A toolbar-safe alternative to the full document locale panel. */
+export function ContentLocaleCompactDocumentControl() {
+  const { collectionSlug, id } = useDocumentInfo()
+  const { hrefFor, locale, options, selectLocale } = useLocaleLinks()
+  const [statuses, setStatuses] = useState<Partial<Record<SupportedLocaleCode, LocaleStatus>>>({})
+  const { config } = useConfig()
+
+  useEffect(() => {
+    if (!collectionSlug || !id) return
+    const apiURL = formatAdminURL({ apiRoute: config.routes.api, path: '/localization-status' })
+    const params = new URLSearchParams({ collection: collectionSlug, id: String(id) })
+    let cancelled = false
+    void fetch(`${apiURL}?${params}`, { credentials: 'include' })
+      .then(async (response) => (response.ok ? ((await response.json()) as StatusResponse) : null))
+      .then((result) => { if (!cancelled && result?.statuses) setStatuses(result.statuses) })
+      .catch(() => undefined)
+    return () => { cancelled = true }
+  }, [collectionSlug, config.routes.api, id])
+
+  return (
+    <nav aria-label="Ngôn ngữ nội dung" className="wings-content-locale-compact">
+      <span className="wings-content-locale-compact__label">Ngôn ngữ</span>
+      <LocaleLinks currentCode={locale.code} hrefFor={hrefFor} onSelect={selectLocale} options={options} />
+      <span aria-label="Trạng thái locale" className="wings-content-locale-compact__status">
+        {options.map((option) => <i data-status={statuses[option.code] || (id ? 'uncreated' : 'unknown')} key={option.code} title={`${option.label}: ${statusLabel[statuses[option.code] || (id ? 'uncreated' : 'unknown')]}`} />)}
+      </span>
+    </nav>
+  )
+}

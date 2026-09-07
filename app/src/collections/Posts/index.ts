@@ -69,6 +69,7 @@ export const Posts: CollectionConfig<'posts'> = {
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
+          id: data?.id as number | string | null | undefined,
           slug: data?.slug,
           collection: 'posts',
           req,
@@ -77,6 +78,7 @@ export const Posts: CollectionConfig<'posts'> = {
     },
     preview: (data, { req }) =>
       generatePreviewPath({
+        id: data?.id as number | string | null | undefined,
         slug: data?.slug as string,
         collection: 'posts',
         req,

@@ -40,6 +40,28 @@ describe('generatePreviewPath', () => {
       slug: 'wings-side-home',
     })
 
-    expect(new URLSearchParams(path?.split('?')[1]).get('path')).toBe('/wing-side')
+    const params = new URLSearchParams(path?.split('?')[1])
+    expect(params.get('path')).toBe('/')
+    expect(path).not.toContain('localhost')
+    expect(path).not.toContain('wingsgo')
+    expect(params.get('previewSecret')).toBeNull()
+  })
+
+  it('keeps a persisted Page pathname rather than falling back to its site-prefixed slug', async () => {
+    const path = await generatePreviewPath({
+      collection: 'pages', id: 308,
+      pathname: '/tour/tour-6n5d-hang-chau-o-tran-thuong-hai-hang-chau-bay-ca-dcv-265869',
+      req: { locale: 'vi', payload: { findByID: vi.fn() } } as never,
+      site: { code: 'wings-go', id: 2 } as never,
+      slug: 'wings-go-tour-6n5d-hang-chau-o-tran-thuong-hai-hang-chau-bay-ca-dcv-265869',
+    })
+    const params = new URLSearchParams(path?.split('?')[1])
+    expect(params.get('path')).toBe('/tour/tour-6n5d-hang-chau-o-tran-thuong-hai-hang-chau-bay-ca-dcv-265869')
+    expect(params.get('id')).toBe('308')
+  })
+
+  it('uses the documented fallback only when pathname is absent', async () => {
+    const path = await generatePreviewPath({ collection: 'pages', id: 1, pathname: null, req: { locale: 'vi' } as never, slug: 'fallback' })
+    expect(new URLSearchParams(path?.split('?')[1]).get('path')).toBe('/fallback')
   })
 })

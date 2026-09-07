@@ -28,7 +28,8 @@ COPY . .
 ENV DATABASE_URL=file:/tmp/payload-build.db
 ENV PAYLOAD_DB_PUSH=true
 ENV PAYLOAD_SECRET=build-only-secret-not-used-at-runtime
-ENV NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+# Do not bake a public origin into the bundle. Multi-domain preview resolves
+# the target from the server-side Site record at request time.
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry

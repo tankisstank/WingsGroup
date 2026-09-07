@@ -73,8 +73,7 @@ export const Pages: CollectionConfig<'pages'> = {
       beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
       edit: {
         beforeDocumentControls: [
-          '@/components/AdminGuidance/PageEditGuidance',
-          '@/components/ContentLocaleControl#ContentLocaleDocumentControl',
+          '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
         ],
       },
     },
@@ -85,6 +84,7 @@ export const Pages: CollectionConfig<'pages'> = {
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
+          id: data?.id as number | string | null | undefined,
           pathname: data?.pathname,
           slug: data?.slug,
           collection: 'pages',
@@ -94,6 +94,7 @@ export const Pages: CollectionConfig<'pages'> = {
     },
     preview: (data, { req }) =>
       generatePreviewPath({
+        id: data?.id as number | string | null | undefined,
         pathname: data?.pathname as string | undefined,
         slug: data?.slug as string,
         collection: 'pages',
@@ -103,6 +104,11 @@ export const Pages: CollectionConfig<'pages'> = {
     useAsTitle: 'title',
   },
   fields: [
+    {
+      name: 'editorialGuidance',
+      type: 'ui',
+      admin: { components: { Field: '@/components/AdminGuidance/PageEditGuidance' } },
+    },
     {
       name: 'title',
       label: 'Tiêu đề',
