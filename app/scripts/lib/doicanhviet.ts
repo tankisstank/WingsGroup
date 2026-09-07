@@ -11,6 +11,8 @@ export type SourceImage = {
 }
 
 export type TourSourceSystem = 'doicanhviet' | 'bestpricetravel' | 'thesinhtour'
+export const DEFAULT_PARSER_REFERENCE_DATE = '1970-01-01T00:00:00.000Z'
+
 export type TourMarket =
   | 'china'
   | 'japan'
@@ -23,13 +25,33 @@ export type TourMarket =
   | 'indochina'
   | 'other'
 
-export type SourceDeparture = {
+export type NormalizedDeparture = {
   departureDate: string
+  returnDate: string
+  departureCity?: string
   priceFrom: number
   rawDate: string
   rawRow: string[]
   airline?: string
-  currency?: 'USD' | 'VND'
+  currency?: 'VND'
+  availabilityStatus: 'open'
+  isFeatured: boolean
+  sourceRowIndex: number
+}
+
+export type SourceDeparture = NormalizedDeparture
+
+export type SourceInventoryFile = {
+  path: string
+  bytes: number
+  sha256: string
+}
+
+export type SourceInventory = {
+  files: SourceInventoryFile[]
+  fileCount: number
+  totalBytes: number
+  sourceSnapshotHash: string
 }
 
 export type ParsedValue<T> = {
@@ -56,7 +78,7 @@ type RichNormalizedContract = {
     sourceSystem: TourSourceSystem
     sourceId: string
     sourceKey: string
-    sourceUrl?: string
+    sourceUrl: string
     crawledAt?: string
     sourceHash: string
   }
@@ -122,7 +144,7 @@ type RichNormalizedContract = {
 
 export type NormalizedTour = RichNormalizedContract & {
   sourceId: string
-  sourceUrl?: string
+  sourceUrl: string
   sourceFile: string
   sourceHash: string
   crawledAt?: string
@@ -135,8 +157,8 @@ export type NormalizedTour = RichNormalizedContract & {
   durationDays: number | null
   durationNights: number | null
   summary: string
-  priceFrom?: number | null
-  currency?: 'USD' | 'VND'
+  priceFrom: number | null
+  currency?: 'VND'
   itineraryDays: NormalizedItineraryDay[]
   departures: SourceDeparture[]
   sourcePricing: { tables: unknown[] }
@@ -153,6 +175,53 @@ type RawRecord = Record<string, any>
 
 const hashBytes = (value: Uint8Array | string) =>
   crypto.createHash('sha256').update(value).digest('hex')
+
+const stableStringify = (value: unknown): string =>
+  JSON.stringify(value, (_key, nestedValue: unknown) => {
+    if (!nestedValue || typeof nestedValue !== 'object' || Array.isArray(nestedValue)) {
+      return nestedValue
+    }
+
+    return Object.fromEntries(
+      Object.entries(nestedValue as Record<string, unknown>).sort(([left], [right]) =>
+        left.localeCompare(right),
+      ),
+    )
+  })
+
+const normalizedComparableText = (value: unknown) =>
+  cleanText(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/giu, 'd')
+    .toLowerCase()
+
+const isWithinPath = (candidate: string, parent: string) => {
+  const relative = path.relative(parent, candidate)
+  return (
+    relative !== '' &&
+    relative !== '..' &&
+    !relative.startsWith(`..${path.sep}`) &&
+    !path.isAbsolute(relative)
+  )
+}
+
+export const isValidDoicanhvietSourceUrl = (value: unknown) => {
+  if (typeof value !== 'string' || !value.trim()) return false
+
+  try {
+    const url = new URL(value.trim())
+    return (
+      (url.protocol === 'http:' || url.protocol === 'https:') &&
+      (url.hostname === 'doicanhviet.com' || url.hostname === 'www.doicanhviet.com') &&
+      !url.username &&
+      !url.password &&
+      !url.port
+    )
+  } catch {
+    return false
+  }
+}
 
 const cleanText = (value: unknown) =>
   String(value || '')
@@ -302,19 +371,25 @@ export const deterministicMediaFilename = (
 }
 
 const parseMarket = (category: string) => {
-  const normalized = category.toLowerCase()
+  const normalized = normalizedComparableText(category)
   if (/han[-_ ]quoc|korea/.test(normalized)) return 'korea' as const
   if (/nhat[-_ ]ban|japan/.test(normalized)) return 'japan' as const
   if (/trung[-_ ]quoc|china/.test(normalized)) return 'china' as const
+  if (
+    /noi[-_ ]dia|viet[-_ ]nam|mien[-_ ]trung|dien[-_ ]bien|da[-_ ]lat|nha[-_ ]trang|da[-_ ]nang|hoi[-_ ]an|hue/iu.test(
+      normalized,
+    )
+  )
+    return 'vietnam' as const
   return null
 }
 
 const classify = (record: RawRecord): NormalizedTour['kind'] => {
   const category = String(record.category || '').toLowerCase()
-  const url = String(record.url || '').toLowerCase()
   const sourceId = String(record.tour_id || '').trim()
   if (!sourceId) return 'invalid'
-  if (url && !/^https?:\/\/(?:www\.)?doicanhviet\.com(?:\/|$)/iu.test(url)) return 'invalid'
+  if (!isValidDoicanhvietSourceUrl(record.url)) return 'invalid'
+  const url = String(record.url).trim().toLowerCase()
   if (/tin[-_]?tuc|tin[-_]?nuoc[-_]?ngoai|news/.test(category)) return 'news'
   if (/\/pages\/p-\d+\.html(?:[?#].*)?$/iu.test(url)) return 'pagination'
   return 'tour'
@@ -356,7 +431,7 @@ const parseSummary = (record: RawRecord, title: string) => {
 
 const parseItinerary = (body: string) => {
   const days: NormalizedTour['itineraryDays'] = []
-  const marker = /(?:^|\n)\s*NGÀY\s*(\d+)\s*:/giu
+  const marker = /(?:^|\n)\s*NGÀY\s*(\d+)(?=\s*(?::|[-–—.])|\s|$)/giu
   const matches = Array.from(body.matchAll(marker))
   matches.forEach((match, index) => {
     const start = (match.index || 0) + match[0].lastIndexOf('NGÀY')
@@ -364,11 +439,22 @@ const parseItinerary = (body: string) => {
     const chunk = body.slice(start, end).trim()
     const firstLineEnd = chunk.indexOf('\n')
     const header = cleanText(firstLineEnd >= 0 ? chunk.slice(0, firstLineEnd) : chunk)
-    const content = trimSourceUiTail(firstLineEnd >= 0 ? chunk.slice(firstLineEnd + 1) : '')
-    const headerWithoutMarker = header.replace(/^NGÀY\s*\d+\s*:\s*/iu, '')
+    const rawContent = firstLineEnd >= 0 ? chunk.slice(firstLineEnd + 1) : ''
+    const headerWithoutMarker = header.replace(/^NGÀY\s*\d+\s*(?:(?::|[-–—.])\s*)?/iu, '')
+    const headerTitle = cleanText(headerWithoutMarker)
+    const contentBeforeUiTail = trimSourceUiTail(rawContent)
+    const contentLines = contentBeforeUiTail.split(/\n+/u)
+    const fallbackTitleIndex = contentLines.findIndex((line) => cleanText(line))
+    const fallbackTitle =
+      !headerTitle && fallbackTitleIndex >= 0 ? cleanText(contentLines[fallbackTitleIndex]) : ''
+    const title = cleanText((headerTitle || fallbackTitle).replace(/ĂN\s*:.*/iu, ''))
+    const content = trimSourceUiTail(
+      !headerTitle && fallbackTitleIndex >= 0
+        ? contentLines.filter((_line, lineIndex) => lineIndex !== fallbackTitleIndex).join('\n')
+        : rawContent,
+    )
     const mealsMatch = headerWithoutMarker.match(/ĂN\s*:\s*([S\-\/T]+)/iu)
     const meals = mealsMatch ? mealsMatch[1].replace(/\s+/g, '') : undefined
-    const title = cleanText(headerWithoutMarker.replace(/ĂN\s*:.*/iu, ''))
     const route = cleanText(title.replace(/[–—]/g, '-'))
     const transport = extractItinerarySentence(
       content,
@@ -436,6 +522,11 @@ const parseDateCandidates = (value: unknown, defaultYear: number | null) => {
     .filter((value): value is { date: string; rawDate: string } => Boolean(value))
 }
 
+const explicitYearsInDateCell = (value: unknown) =>
+  Array.from(cleanText(value).matchAll(/\d{1,2}\/\d{1,2}\/(\d{2,4})\b/g), (match) =>
+    Number(match[1].length === 2 ? `20${match[1]}` : match[1]),
+  )
+
 const yearsInText = (value: unknown) =>
   Array.from(String(value || '').matchAll(/\b(20\d{2})\b/g), (match) => Number(match[1]))
 
@@ -462,6 +553,7 @@ const findPricingTable = (tables: unknown[]) => {
     const adultIndex = header.findIndex((cell) => /người\s*lớn|adult/iu.test(String(cell)))
     if (dateIndex < 0 || adultIndex < 0) continue
     return {
+      headers: header.map((cell) => String(cell ?? '')),
       rows: rows.slice(headerIndex + 1).filter(Array.isArray) as string[][],
       dateIndex,
       adultIndex,
@@ -470,7 +562,62 @@ const findPricingTable = (tables: unknown[]) => {
   return null
 }
 
-const parseDepartures = (record: RawRecord, warnings: string[], defaultYear: number | null) => {
+const addDays = (date: string, days: number) => {
+  const result = new Date(date)
+  result.setUTCDate(result.getUTCDate() + days)
+  return result.toISOString()
+}
+
+const toUtcDayTimestamp = (value: Date | string) => {
+  const date = value instanceof Date ? new Date(value.getTime()) : new Date(value)
+  if (Number.isNaN(date.getTime())) throw new Error(`Invalid reference date: ${String(value)}`)
+  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+}
+
+const parseDepartureCity = (record: RawRecord, itineraryDays: NormalizedItineraryDay[]) => {
+  const directValues = [
+    record.departure_city,
+    record.departureCity,
+    record.content?.departure_city,
+    record.content?.departureCity,
+    record.meta?.departure_city,
+    record.meta?.departureCity,
+  ]
+    .map(cleanText)
+    .filter(Boolean)
+
+  const body = cleanText(record.content?.body_text)
+  const bodyMatch = body.match(/(?:điểm|nơi|sân bay)\s+(?:đón|khởi hành)\s*[:\-]\s*([^\n]+)/iu)
+  const routeOrigin = itineraryDays[0]?.route
+    ?.split(/\s*(?:-|–|—|→|->)\s*/u)
+    .map(cleanText)
+    .filter(Boolean)[0]
+  const candidates = [...directValues, cleanText(bodyMatch?.[1]), routeOrigin].filter(Boolean)
+  if (!candidates.length) return { value: undefined, ambiguous: false }
+
+  const comparable = new Set(candidates.map(normalizedComparableText))
+  if (comparable.size > 1) return { value: undefined, ambiguous: true }
+  return { value: candidates[0], ambiguous: false }
+}
+
+const hasVndEvidence = (record: RawRecord, headers: string[], adultValue: unknown) => {
+  const currency = [record.currency, record.content?.currency, record.meta?.currency]
+    .map((value) => normalizedComparableText(value))
+    .find(Boolean)
+  if (currency === 'vnd' || currency === 'vnđ') return true
+  return /(?:vnd|vnđ|đồng|₫|(?:^|[\s\d])đ(?:$|[\s.,]))/iu.test(
+    `${headers.join(' ')} ${String(adultValue || '')}`,
+  )
+}
+
+const parseDepartures = (
+  record: RawRecord,
+  warnings: string[],
+  defaultYear: number | null,
+  durationDays: number | null,
+  departureCity: string | undefined,
+  referenceTimestamp: number,
+) => {
   const tables = Array.isArray(record.content?.tables) ? record.content.tables : []
   const table = findPricingTable(tables)
   if (!table) {
@@ -479,7 +626,11 @@ const parseDepartures = (record: RawRecord, warnings: string[], defaultYear: num
   }
   const airline = parseAirline(String(record.content?.body_text || ''))
   const departures: SourceDeparture[] = []
-  for (const row of table.rows) {
+  if (!durationDays || durationDays < 1) {
+    warnings.push('NO_DURATION_FOR_RETURN_DATE')
+    return departures
+  }
+  for (const [rowIndex, row] of table.rows.entries()) {
     const rawDates = String(row[table.dateIndex] || '')
     const priceFrom = parsePrice(row[table.adultIndex])
     if (!priceFrom) {
@@ -489,26 +640,37 @@ const parseDepartures = (record: RawRecord, warnings: string[], defaultYear: num
     if (/\d{1,2}\/\d{2,}\/\d{1,2}/u.test(rawDates)) {
       warnings.push(`MALFORMED_DATE_CELL:${rawDates}`)
     }
-    const explicitYear = rawDates.match(/\/(\d{2,4})\b/u)?.[1]
-    const dateYear = explicitYear
-      ? Number(explicitYear.length === 2 ? `20${explicitYear}` : explicitYear)
-      : defaultYear
-    if (dateYear === null) {
+    const cellYears = [...new Set(explicitYearsInDateCell(rawDates))]
+    const dateYear =
+      cellYears.length === 1 ? cellYears[0] : cellYears.length > 1 ? null : defaultYear
+    const hasUnqualifiedDate = Array.from(
+      rawDates.matchAll(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/g),
+    ).some((match) => !match[3])
+    if (dateYear === null && (cellYears.length === 0 || hasUnqualifiedDate)) {
       warnings.push(`AMBIGUOUS_DEPARTURE_YEAR:${rawDates}`)
-      continue
     }
     const dates = parseDateCandidates(rawDates, dateYear)
     if (!dates.length) {
       warnings.push(`INVALID_DEPARTURE_DATE:${rawDates}`)
       continue
     }
+    const currencySupported = hasVndEvidence(record, table.headers, row[table.adultIndex])
+    if (!currencySupported) warnings.push(`AMBIGUOUS_PRICE_CURRENCY:${rawDates}`)
     for (const date of dates) {
       departures.push({
         departureDate: date.date,
+        returnDate: addDays(date.date, durationDays - 1),
+        departureCity,
         priceFrom,
         rawDate: date.rawDate,
         rawRow: row.map((cell) => String(cell ?? '')),
         airline,
+        currency: currencySupported ? 'VND' : undefined,
+        availabilityStatus: 'open',
+        isFeatured:
+          Date.parse(date.date) >= referenceTimestamp &&
+          !departures.some((item) => item.isFeatured),
+        sourceRowIndex: rowIndex + 1,
       })
     }
   }
@@ -521,6 +683,7 @@ const sectionVisibilityFor = (
     'title' | 'market' | 'durationDays' | 'itineraryDays' | 'departures' | 'images'
   >,
   itineraryValid: boolean,
+  referenceTimestamp: number,
 ) => {
   const sections: string[] = []
   if (tour.title && tour.images.length) sections.push('hero')
@@ -529,22 +692,44 @@ const sectionVisibilityFor = (
   if (tour.itineraryDays.length >= 2) sections.push('route')
   if (tour.departures.length) sections.push('departures')
   if (
-    tour.departures.some((departure) => new Date(departure.departureDate).getTime() > Date.now())
+    tour.departures.some((departure) => Date.parse(departure.departureDate) >= referenceTimestamp)
   ) {
     sections.push('sticky-cta')
   }
   return sections
 }
 
-const resolveImagePath = (crawlerRoot: string, sourceId: string, localPath: string) => {
+const resolveImagePath = async (crawlerRoot: string, sourceId: string, localPath: string) => {
   const normalizedLocalPath = localPath.replace(/\\/g, '/')
-  const candidate = path.resolve(
-    crawlerRoot,
-    'storage',
-    normalizedLocalPath.replace(/^images\//iu, 'images/'),
-  )
-  const expectedRoot = path.resolve(crawlerRoot, 'storage', 'images', sourceId)
-  if (!candidate.startsWith(`${expectedRoot}${path.sep}`)) return null
+  if (
+    !normalizedLocalPath ||
+    !sourceId ||
+    sourceId.includes('/') ||
+    sourceId.includes('\\') ||
+    path.isAbsolute(normalizedLocalPath) ||
+    /^[a-z]:\//iu.test(normalizedLocalPath)
+  ) {
+    return null
+  }
+  const relativeImagePath = normalizedLocalPath.replace(/^images\//iu, '')
+  const storageImagesRoot = path.resolve(crawlerRoot, 'storage', 'images')
+  const expectedRoot = path.resolve(storageImagesRoot, sourceId)
+  const candidate = path.resolve(storageImagesRoot, relativeImagePath)
+  if (!isWithinPath(expectedRoot, storageImagesRoot) || !isWithinPath(candidate, expectedRoot))
+    return null
+
+  try {
+    const [realStorageImagesRoot, realExpectedRoot, realCandidate] = await Promise.all([
+      fs.realpath(storageImagesRoot),
+      fs.realpath(expectedRoot),
+      fs.realpath(candidate),
+    ])
+    if (!isWithinPath(realExpectedRoot, realStorageImagesRoot)) return null
+    if (!isWithinPath(realCandidate, realExpectedRoot)) return null
+  } catch {
+    return null
+  }
+
   return candidate
 }
 
@@ -561,20 +746,81 @@ const normalizeRawPricing = (tables: unknown[]): RichNormalizedContract['rawPric
     ]
   })
 
+const collectRegularFiles = async (directory: string): Promise<string[]> => {
+  let entries
+  try {
+    entries = await fs.readdir(directory, { withFileTypes: true })
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
+    throw error
+  }
+
+  const files: string[] = []
+  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+    const entryPath = path.join(directory, entry.name)
+    if (entry.isDirectory()) files.push(...(await collectRegularFiles(entryPath)))
+    else if (entry.isFile()) files.push(entryPath)
+  }
+  return files
+}
+
+export const buildSourceInventory = async (crawlerRoot: string): Promise<SourceInventory> => {
+  const datasetDirectory = path.join(crawlerRoot, 'storage', 'datasets', 'default')
+  const datasetFiles = (await collectRegularFiles(datasetDirectory)).filter(
+    (file) => file.endsWith('.json') && path.basename(file) !== '__metadata__.json',
+  )
+  const imageFiles = await collectRegularFiles(path.join(crawlerRoot, 'storage', 'images'))
+  const files = await Promise.all(
+    [...datasetFiles, ...imageFiles]
+      .sort((left, right) => left.localeCompare(right))
+      .map(async (file): Promise<SourceInventoryFile> => {
+        const bytes = await fs.readFile(file)
+        return {
+          path: path.relative(crawlerRoot, file).replace(/\\/g, '/'),
+          bytes: bytes.byteLength,
+          sha256: hashBytes(bytes),
+        }
+      }),
+  )
+  const totalBytes = files.reduce((total, file) => total + file.bytes, 0)
+  return {
+    files,
+    fileCount: files.length,
+    totalBytes,
+    sourceSnapshotHash: hashBytes(stableStringify(files)),
+  }
+}
+
 export const parseDoicanhvietRecord = async ({
   crawlerRoot,
   record,
   sourceFile,
+  referenceDate = DEFAULT_PARSER_REFERENCE_DATE,
 }: {
   crawlerRoot: string
   record: RawRecord
   sourceFile: string
+  referenceDate?: Date | string
 }): Promise<NormalizedTour> => {
+  const referenceTimestamp = toUtcDayTimestamp(referenceDate)
   const sourceId = String(record.tour_id || '').trim()
   const category = String(record.category || '').trim()
   const kind = classify(record)
   const warnings: string[] = []
   const blockingErrors: string[] = []
+  const sourceUrl = cleanText(record.url)
+  if (!sourceUrl) blockingErrors.push('MISSING_SOURCE_URL')
+  else if (!isValidDoicanhvietSourceUrl(sourceUrl)) {
+    blockingErrors.push('INVALID_SOURCE_URL')
+    try {
+      const hostname = new URL(sourceUrl).hostname
+      if (hostname !== 'doicanhviet.com' && hostname !== 'www.doicanhviet.com') {
+        blockingErrors.push('INVALID_SOURCE_HOST')
+      }
+    } catch {
+      // INVALID_SOURCE_URL is sufficient for an unparsable value.
+    }
+  }
   const title = cleanText(record.content?.heading || record.meta?.title)
   const body = cleanText(record.content?.body_text)
   const market = parseMarket(category)
@@ -583,13 +829,13 @@ export const parseDoicanhvietRecord = async ({
 
   if (!sourceId) blockingErrors.push('MISSING_SOURCE_ID')
   if (!title) blockingErrors.push('MISSING_TITLE')
-  if (!market && kind === 'tour') warnings.push('UNMAPPED_MARKET')
+  if (!market && kind === 'tour') warnings.push('UNMAPPED_MARKET', 'UNSUPPORTED_MARKET')
   if (!duration.days || duration.nights === null) warnings.push('NO_DURATION')
   if (kind === 'news') warnings.push('IS_NEWS')
 
   const rawImages = Array.isArray(record.images) ? record.images : []
   for (const [imageIndex, image] of rawImages.entries()) {
-    const localPath = resolveImagePath(crawlerRoot, sourceId, String(image.local_path || ''))
+    const localPath = await resolveImagePath(crawlerRoot, sourceId, String(image.local_path || ''))
     if (!localPath) {
       warnings.push(`INVALID_IMAGE_PATH:${String(image.local_path || '')}`)
       continue
@@ -609,13 +855,29 @@ export const parseDoicanhvietRecord = async ({
   const itineraryErrors =
     kind === 'tour' ? itineraryBlockingErrors(itineraryDays, duration.days) : []
   const departureYear = kind === 'tour' ? resolveDepartureYear(record, title, body) : null
-  const departures = kind === 'tour' ? parseDepartures(record, warnings, departureYear) : []
+  const departureCityResult =
+    kind === 'tour'
+      ? parseDepartureCity(record, itineraryDays)
+      : { value: undefined, ambiguous: false }
+  if (departureCityResult.ambiguous) warnings.push('AMBIGUOUS_DEPARTURE_CITY')
+  const departureCity = departureCityResult.value
+  const departures =
+    kind === 'tour'
+      ? parseDepartures(
+          record,
+          warnings,
+          departureYear,
+          duration.days,
+          departureCity,
+          referenceTimestamp,
+        )
+      : []
   if (kind === 'tour' && !images.length) warnings.push('NO_MEDIA')
   if (kind === 'tour' && !itineraryDays.length) warnings.push('NO_ITINERARY')
   if (kind === 'tour' && !departures.length) warnings.push('NO_DEPARTURES')
   blockingErrors.push(...itineraryErrors)
 
-  const sourceHash = hashBytes(JSON.stringify(record))
+  const sourceHash = hashBytes(stableStringify(record))
   const slug = sourceSlug(sourceId || 'unknown', title)
   const pathname = `/tour/${slug}`
   const summary = parseSummary(record, title)
@@ -624,6 +886,10 @@ export const parseDoicanhvietRecord = async ({
   const sectionVisibility = sectionVisibilityFor(
     { title, market, durationDays: duration.days, itineraryDays, departures, images },
     itineraryErrors.length === 0,
+    referenceTimestamp,
+  )
+  const futureDepartures = departures.filter(
+    (departure) => Date.parse(departure.departureDate) >= referenceTimestamp,
   )
   const publishEligible = Boolean(
     kind === 'tour' &&
@@ -632,7 +898,9 @@ export const parseDoicanhvietRecord = async ({
     title &&
     duration.days &&
     itineraryDays.length &&
-    departures.some((departure) => new Date(departure.departureDate).getTime() > Date.now()),
+    images.length &&
+    futureDepartures.length > 0 &&
+    futureDepartures.every((departure) => departure.currency === 'VND'),
   )
   if (kind === 'tour' && !publishEligible) warnings.push('DRAFT_ONLY')
   const duplicateCandidates: string[] = []
@@ -651,7 +919,7 @@ export const parseDoicanhvietRecord = async ({
 
   const normalized: NormalizedTour = {
     sourceId,
-    sourceUrl: record.url,
+    sourceUrl,
     sourceFile,
     sourceHash,
     crawledAt: record.crawled_at,
@@ -664,6 +932,8 @@ export const parseDoicanhvietRecord = async ({
     durationDays: duration.days,
     durationNights: duration.nights,
     summary,
+    priceFrom: departures[0]?.priceFrom ?? null,
+    currency: departures[0]?.currency,
     itineraryDays,
     departures,
     sourcePricing: { tables: sourceTables },
@@ -678,7 +948,7 @@ export const parseDoicanhvietRecord = async ({
       sourceSystem: 'doicanhviet',
       sourceId,
       sourceKey: `doicanhviet:${sourceId}`,
-      sourceUrl: record.url,
+      sourceUrl,
       crawledAt: record.crawled_at,
       sourceHash,
     },
@@ -782,6 +1052,11 @@ export const annotateDuplicateCandidates = (records: NormalizedTour[]) => {
 
   for (const candidates of byFingerprint.values()) {
     if (candidates.length < 2) continue
+    candidates.sort(
+      (left, right) =>
+        left.sourceId.localeCompare(right.sourceId, 'en', { numeric: true }) ||
+        left.sourceFile.localeCompare(right.sourceFile),
+    )
     for (const record of candidates) {
       const duplicateCandidates = candidates
         .filter((candidate) => candidate !== record)
@@ -819,7 +1094,12 @@ export const readCrawlerRecords = async (crawlerRoot: string, only?: Set<string>
     if (only && !only.has(sourceId)) continue
     records.push({ file: fullPath, record })
   }
-  return records
+  return records.sort(
+    (left, right) =>
+      String(left.record.tour_id || '').localeCompare(String(right.record.tour_id || ''), 'en', {
+        numeric: true,
+      }) || left.file.localeCompare(right.file),
+  )
 }
 
 export const parseArgs = (argv: string[]) => {

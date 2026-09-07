@@ -3,6 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # The Dockerfile ends with operational stages; keep the app image on the
+      # public Next.js runtime stage.
+      target: runner
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-wingstravel}:${POSTGRES_PASSWORD:-wingstravel}@postgres:5432/${POSTGRES_DB:-wingstravel}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}

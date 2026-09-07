@@ -7,6 +7,8 @@ import {
   parseArgs,
   parseDoicanhvietRecord,
   annotateDuplicateCandidates,
+  buildSourceInventory,
+  DEFAULT_PARSER_REFERENCE_DATE,
   readCrawlerRecords,
   selectedSourceIDs,
   type NormalizedTour,
@@ -57,10 +59,12 @@ const main = async () => {
   const artifactDir = path.resolve(String(args['artifact-dir'] || defaultArtifactDir))
   const only = args.only ? selectedSourceIDs(args.only) : undefined
   const limit = args.limit ? Number(args.limit) : undefined
+  const referenceDate = String(args['reference-date'] || DEFAULT_PARSER_REFERENCE_DATE)
   if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) {
     throw new Error('--limit must be a positive integer')
   }
 
+  const sourceInventory = await buildSourceInventory(crawlerRoot)
   const sourceRecords = await readCrawlerRecords(crawlerRoot, only)
   const selected = limit ? sourceRecords.slice(0, limit) : sourceRecords
   const normalized: NormalizedTour[] = []
@@ -70,6 +74,7 @@ const main = async () => {
         crawlerRoot,
         record,
         sourceFile: path.relative(crawlerRoot, file),
+        referenceDate,
       }),
     )
   }
@@ -80,8 +85,21 @@ const main = async () => {
 
   await fs.mkdir(artifactDir, { recursive: true })
   await fs.writeFile(
+    path.join(artifactDir, 'source-inventory.json'),
+    `${JSON.stringify(sourceInventory, null, 2)}\n`,
+    'utf8',
+  )
+  await fs.writeFile(
     path.join(artifactDir, 'tours.normalized.json'),
-    `${JSON.stringify(normalized, null, 2)}\n`,
+    `${JSON.stringify(
+      {
+        sourceSnapshotHash: sourceInventory.sourceSnapshotHash,
+        referenceDate,
+        records: normalized,
+      },
+      null,
+      2,
+    )}\n`,
     'utf8',
   )
   await fs.writeFile(path.join(artifactDir, 'import-review.md'), buildReview(normalized), 'utf8')
@@ -100,6 +118,8 @@ const main = async () => {
       {
         artifactDir,
         crawlerRoot,
+        sourceSnapshotHash: sourceInventory.sourceSnapshotHash,
+        referenceDate,
         records: normalized.length,
         tours: normalized.filter((record) => record.kind === 'tour').length,
         news: normalized.filter((record) => record.kind === 'news').length,

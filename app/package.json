@@ -61,6 +61,7 @@
     "smoke:wingsside:group-commerce-pg-crud": "cross-env NODE_OPTIONS=--no-deprecation node scripts/wings-side-group-commerce-pg-crud-smoke.mjs",
     "smoke:wingsside:taxonomy-pg-crud": "cross-env NODE_OPTIONS=--no-deprecation node scripts/wings-side-taxonomy-pg-crud-smoke.mjs",
     "rollback:tours:doicanhviet": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/rollback-doicanhviet-batch.ts",
+    "recover:tours:doicanhviet": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/recover-doicanhviet-rollback.ts",
     "parse:tours:snapshots": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/parse-tour-snapshots.ts",
     "import:tours:snapshots": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/import-doicanhviet.ts",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",

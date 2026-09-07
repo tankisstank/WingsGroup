@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # Do not let Compose select the offline tools/ops stage as the app image.
+      target: runner
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       PAYLOAD_DB_PUSH: ${PAYLOAD_DB_PUSH:-false}
