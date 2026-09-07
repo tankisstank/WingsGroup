@@ -1,6 +1,7 @@
 import { draftMode, headers } from 'next/headers'
 
 import { getLocaleFromPathname, getSiteAliasFromPathname } from './sitePaths'
+import { getProductionPreviewSiteCode } from './previewOrigin'
 
 export const PREVIEW_HANDOFF_COOKIE = '__wingstravel_preview_handoff'
 export const PREVIEW_HANDOFF_TTL_SECONDS = 60
@@ -112,3 +113,34 @@ export const hasAuthorizedPreviewHandoff = async (): Promise<boolean> => {
 /** Draft mode alone is insufficient: all draft reads require this scoped grant. */
 export const isAuthorizedDraftMode = async (): Promise<boolean> =>
   (await draftMode()).isEnabled && (await hasAuthorizedPreviewHandoff())
+
+/**
+ * Live Preview is rendered in Payload's cross-domain iframe. Only a valid,
+ * expiring handoff may relax the normal same-origin frame policy, and only
+ * when the iframe was initiated by the production CMS origin.
+ */
+export const isAuthorizedPreviewFrameRequest = async ({
+  headers: requestHeaders,
+  host,
+  pathname,
+}: {
+  headers: Headers
+  host: string | null
+  pathname: string
+}): Promise<boolean> => {
+  if (process.env.NODE_ENV !== 'production' || !host) return false
+
+  const referer = requestHeaders.get('referer')
+  if (!referer) return false
+
+  try {
+    if (new URL(referer).origin !== 'https://wingsgroup.vn') return false
+  } catch {
+    return false
+  }
+
+  const siteCode = getProductionPreviewSiteCode(host)
+  const claims = await verifyPreviewHandoff(readCookie(requestHeaders.get('cookie'), PREVIEW_HANDOFF_COOKIE))
+
+  return Boolean(claims && siteCode && claims.siteCode === siteCode && claims.path === normalizePath(pathname))
+}

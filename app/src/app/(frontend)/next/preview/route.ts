@@ -11,10 +11,23 @@ import { defaultSiteCode, siteCodeToAliasMap } from '@/utilities/sitePaths'
 const collections = new Set<PreviewCollection>(['pages', 'posts', 'tour-campaigns', 'tour-products'])
 const safePath = (value: string | null) =>
   value && value.startsWith('/') && !value.startsWith('//') && !/[?#\\]/u.test(value) ? value : null
-const handoffForm = (action: string, handoff: string) => new Response(
-  `<!doctype html><meta name="referrer" content="no-referrer"><form method="post" action="${action}"><input type="hidden" name="handoff" value="${handoff}"></form><script>document.forms[0].submit()</script>`,
-  { headers: { 'Cache-Control': 'no-store', 'Content-Type': 'text/html; charset=utf-8', 'Referrer-Policy': 'no-referrer' } },
-)
+const handoffForm = (action: string, handoff: string) => {
+  const actionOrigin = action.startsWith('http') ? new URL(action).origin : null
+  const formActionPolicy = `form-action 'self'${actionOrigin ? ` ${actionOrigin}` : ''}`
+
+  return new Response(
+    `<!doctype html><meta name="referrer" content="no-referrer"><form method="post" action="${action}"><input type="hidden" name="handoff" value="${handoff}"></form><script>document.forms[0].submit()</script>`,
+    {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Content-Security-Policy': formActionPolicy,
+        'Content-Security-Policy-Report-Only': formActionPolicy,
+        'Content-Type': 'text/html; charset=utf-8',
+        'Referrer-Policy': 'no-referrer',
+      },
+    },
+  )
+}
 
 export async function GET(req: NextRequest): Promise<Response> {
   const params = new URL(req.url).searchParams

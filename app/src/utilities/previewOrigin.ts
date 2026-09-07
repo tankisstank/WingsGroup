@@ -42,3 +42,13 @@ const configuredOrigins = () =>
  */
 export const getProductionPreviewOrigin = (siteCode: string): string | null =>
   configuredOrigins().get(siteCode) || null
+
+export const getProductionPreviewSiteCode = (host: string): string | null => {
+  const normalizedHost = host.trim().toLowerCase().replace(/:\d+$/u, '')
+
+  for (const [siteCode, origin] of configuredOrigins()) {
+    if (new URL(origin).hostname === normalizedHost) return siteCode
+  }
+
+  return null
+}

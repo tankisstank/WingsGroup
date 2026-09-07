@@ -13,6 +13,7 @@ import {
   normalizeHost,
 } from '@/utilities/siteDomains'
 import { hasWingsGroupLocalPreviewGrant } from '@/wingsgroup/localPreview'
+import { isAuthorizedPreviewFrameRequest } from '@/utilities/previewHandoff'
 
 const stripLeadingSegments = (pathname: string, count: number) => {
   const segments = pathname.split('/').filter(Boolean)
@@ -258,8 +259,24 @@ export async function proxy(request: NextRequest) {
     siteCode,
     sitePrefix,
   })
+  const previewFrame = await isAuthorizedPreviewFrameRequest({
+    headers: request.headers,
+    host: effectiveHost,
+    pathname: request.nextUrl.pathname,
+  })
   const withRequestID = (response: NextResponse) => {
     response.headers.set('X-Request-ID', requestID)
+    if (previewFrame) {
+      response.headers.delete('X-Frame-Options')
+      response.headers.set('Content-Security-Policy', "frame-ancestors 'self' https://wingsgroup.vn")
+      const reportOnlyCSP = response.headers.get('Content-Security-Policy-Report-Only')
+      if (reportOnlyCSP) {
+        response.headers.set(
+          'Content-Security-Policy-Report-Only',
+          reportOnlyCSP.replace("frame-ancestors 'self'", "frame-ancestors 'self' https://wingsgroup.vn"),
+        )
+      }
+    }
     return response
   }
 
