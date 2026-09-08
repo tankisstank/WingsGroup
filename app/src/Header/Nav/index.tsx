@@ -20,12 +20,12 @@ import { Globe2Icon, MenuIcon, SearchIcon, XIcon } from 'lucide-react'
 import { getWingsGroupSwitcherLocales } from '@/components/WingsGroupV3/model'
 
 export const WINGSGROUP_HOME_NAV = [
-  { href: '#home', label: 'Trang chủ' },
-  { href: '#services', label: 'Dịch vụ' },
-  { href: '#about', label: 'Hệ sinh thái' },
-  { href: '#trust', label: 'Về WingsGroup' },
-  { href: '#news', label: 'Cẩm nang' },
-  { href: '#contact', label: 'Liên hệ' },
+  { href: '/#home', label: 'Trang chủ' },
+  { href: '/#services', label: 'Dịch vụ' },
+  { href: '/#about', label: 'Hệ sinh thái' },
+  { href: '/#trust', label: 'Về WingsGroup' },
+  { href: '/tin-tuc', label: 'Cẩm nang' },
+  { href: '/#contact', label: 'Liên hệ' },
 ] as const
 
 export const WINGSGROUP_V3_ROUTE_NAV = [
@@ -36,17 +36,17 @@ export const WINGSGROUP_V3_ROUTE_NAV = [
   { href: '/#services', label: 'Dịch vụ' },
   { href: '/#about', label: 'Hệ sinh thái' },
   { href: '/#trust', label: 'Về WingsGroup' },
-  { href: '/#news', label: 'Cẩm nang' },
+  { href: '/tin-tuc', label: 'Cẩm nang' },
   { href: '/#contact', label: 'Liên hệ' },
 ] as const
 
 const WINGSGROUP_HOME_NAV_EN = [
-  { href: '#home', label: 'Home' },
-  { href: '#services', label: 'Services' },
-  { href: '#about', label: 'Our ecosystem' },
-  { href: '#trust', label: 'About WingsGroup' },
-  { href: '#news', label: 'Journal' },
-  { href: '#contact', label: 'Contact' },
+  { href: '/#home', label: 'Home' },
+  { href: '/#services', label: 'Services' },
+  { href: '/#about', label: 'Our ecosystem' },
+  { href: '/#trust', label: 'About WingsGroup' },
+  { href: '/tin-tuc', label: 'Journal' },
+  { href: '/#contact', label: 'Contact' },
 ] as const
 
 const WINGSGROUP_V3_ROUTE_NAV_EN = [
@@ -54,7 +54,7 @@ const WINGSGROUP_V3_ROUTE_NAV_EN = [
   { href: '/#services', label: 'Services' },
   { href: '/#about', label: 'Our ecosystem' },
   { href: '/#trust', label: 'About WingsGroup' },
-  { href: '/#news', label: 'Journal' },
+  { href: '/tin-tuc', label: 'Journal' },
   { href: '/#contact', label: 'Contact' },
 ] as const
 

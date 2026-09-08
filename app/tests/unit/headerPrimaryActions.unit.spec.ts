@@ -53,7 +53,7 @@ describe('header primary action registry', () => {
   })
 
   it('keeps the mobile WingsGroup contact route separate from the consultation CTA', () => {
-    expect(WINGSGROUP_HOME_NAV).toContainEqual({ href: '#contact', label: 'Liên hệ' })
-    expect(WINGSGROUP_HOME_NAV).not.toContainEqual({ href: '#contact', label: 'Trao đổi nhu cầu' })
+    expect(WINGSGROUP_HOME_NAV).toContainEqual({ href: '/#contact', label: 'Liên hệ' })
+    expect(WINGSGROUP_HOME_NAV).not.toContainEqual({ href: '/#contact', label: 'Trao đổi nhu cầu' })
   })
 })
