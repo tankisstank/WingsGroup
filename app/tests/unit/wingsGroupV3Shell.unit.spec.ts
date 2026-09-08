@@ -9,6 +9,9 @@ describe('WingsGroup v3 shared public shell', () => {
   it('limits the header to the governed Vietnamese route inventory and one consultation action', () => {
     const header = read('Header/Component.tsx')
     const nav = read('Header/Nav/index.tsx')
+    const renderBlocks = read('blocks/RenderBlocks.tsx')
+    const ecosystem = read('components/WingsGroupV3/EcosystemExplorer.tsx')
+    const trust = read('blocks/WingsGroupTrust/Component.tsx')
 
     expect(header).toContain('isWingsGroupV3SurfacePath(publicPathname)')
     expect(header).toContain("url: '#consultation-dialog'")
@@ -17,6 +20,11 @@ describe('WingsGroup v3 shared public shell', () => {
     expect(nav).toContain("{ href: '/#contact', label: 'Liên hệ' }")
     expect(nav).toContain('data-wingsgroup-consultation-trigger={isWingsGroupV3Surface')
     expect(nav).not.toContain('href="/en"')
+    expect(renderBlocks).toContain('showDeepDiveLinks: wingsGroupV3Home')
+    expect(renderBlocks).toContain('showDeepDiveLink: true')
+    expect(ecosystem).toContain('href="/nang-luc-dich-vu"')
+    expect(ecosystem).toContain('href="/he-sinh-thai"')
+    expect(trust).toContain('href="/ve-wingsgroup"')
   })
 
   it('keeps public WingsGroup routes free of the theme selector and generic related-page rail', () => {

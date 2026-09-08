@@ -21,6 +21,7 @@ type Props = WingsGroupEcosystemBlock & {
   approvedProofKeys?: readonly string[]
   allowWingsGroupDevelopmentMedia?: boolean
   locale?: null | string
+  showDeepDiveLinks?: boolean
 }
 
 const copyByLocale = {
@@ -31,6 +32,8 @@ const copyByLocale = {
     verified: 'Verified information is available.',
     railDescription: 'Select a team to see how it can accompany your next step.',
     railTitle: 'Choose a service team',
+    exploreCapabilities: 'Explore capabilities and services',
+    exploreEcosystem: 'Explore the five-brand ecosystem',
   },
   vi: {
     choose: 'Chọn thương hiệu dịch vụ trong WingsGroup',
@@ -39,6 +42,8 @@ const copyByLocale = {
     verified: 'Đã có thông tin được xác minh.',
     railDescription: 'Chạm để xem cách từng đội ngũ đồng hành cùng bạn.',
     railTitle: 'Chọn một đơn vị',
+    exploreCapabilities: 'Xem chi tiết năng lực và dịch vụ',
+    exploreEcosystem: 'Tìm hiểu hệ sinh thái 5 thương hiệu',
   },
 } as const
 
@@ -49,6 +54,7 @@ export const EcosystemExplorer = ({
   eyebrow,
   locale,
   profiles,
+  showDeepDiveLinks = false,
   title,
 }: Props) => {
   const safeProfiles = resolveWingsGroupEcosystemProfiles(profiles)
@@ -142,6 +148,16 @@ export const EcosystemExplorer = ({
                 ? 'Choose what you need. Each brand connects you with a focused team and a clear next step.'
                 : 'Chọn điều bạn đang cần. Mỗi thương hiệu kết nối bạn với một đội ngũ, dịch vụ và điểm bắt đầu riêng.')}
           </p>
+          {showDeepDiveLinks ? (
+            <div className={styles.sectionHeaderActions}>
+              <SiteLink className={styles.routeCta} href="/nang-luc-dich-vu">
+                {copy.exploreCapabilities} <span aria-hidden="true">↗</span>
+              </SiteLink>
+              <SiteLink className={styles.routeCta} href="/he-sinh-thai">
+                {copy.exploreEcosystem} <span aria-hidden="true">↗</span>
+              </SiteLink>
+            </div>
+          ) : null}
         </header>
 
         <div className={styles.ecosystemUnified} data-od-id="ecosystem-unified-stage">

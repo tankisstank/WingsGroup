@@ -1,6 +1,7 @@
 import type { InfoStripBlock, SiteSetting } from '@/payload-types'
 import React from 'react'
 
+import { SiteLink } from '@/components/SiteLink'
 import { WINGSGROUP_LEGAL_IDENTITY } from '@/wingsgroup/corporateRoutes'
 import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
 
@@ -10,6 +11,7 @@ type Props = {
   items?: InfoStripBlock['items']
   legalIdentity?: LegalIdentity | null
   locale?: null | string
+  showDeepDiveLink?: boolean
 }
 
 const copyByLocale = {
@@ -41,7 +43,12 @@ const copyByLocale = {
   },
 } as const
 
-export const WingsGroupTrustSection = ({ items, legalIdentity, locale }: Props) => {
+export const WingsGroupTrustSection = ({
+  items,
+  legalIdentity,
+  locale,
+  showDeepDiveLink = false,
+}: Props) => {
   const copy = locale === 'en' ? copyByLocale.en : copyByLocale.vi
   const isEnglish = locale === 'en'
   const identity = {
@@ -71,6 +78,14 @@ export const WingsGroupTrustSection = ({ items, legalIdentity, locale }: Props) 
               <span>{identity.registrationNumber}</span>
               <span>{identity.licenceNumber}</span>
             </div>
+            {showDeepDiveLink ? (
+              <SiteLink className={styles.routeCta} href="/ve-wingsgroup">
+                {isEnglish
+                  ? 'View the corporate and legal profile'
+                  : 'Xem hồ sơ pháp lý và câu chuyện doanh nghiệp'}{' '}
+                <span aria-hidden="true">↗</span>
+              </SiteLink>
+            ) : null}
             {items?.some((item) => item.value) ? (
               <div
                 aria-label={isEnglish ? 'WingsGroup figures' : 'Số liệu WingsGroup'}

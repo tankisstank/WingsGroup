@@ -135,7 +135,13 @@ export const RenderBlocks: React.FC<{
                       wingsGroupV3,
                     }
                   : block.blockType === 'wingsGroupEcosystem'
-                    ? { ...block, allowWingsGroupDevelopmentMedia, approvedProofKeys, locale }
+                    ? {
+                        ...block,
+                        allowWingsGroupDevelopmentMedia,
+                        approvedProofKeys,
+                        locale,
+                        showDeepDiveLinks: wingsGroupV3Home,
+                      }
                     : wingsGroupV3 &&
                         (wingsGroupV3Route === 'corporate' || wingsGroupV3Route === 'trust') &&
                         block.blockType === 'content'
@@ -144,7 +150,12 @@ export const RenderBlocks: React.FC<{
                         ? { ...block, locale }
                         : wingsGroupV3Home &&
                             (block.blockType === 'infoStrip' || block.blockType === 'stats')
-                          ? { ...block, legalIdentity: wingsGroupLegalIdentity, locale }
+                          ? {
+                              ...block,
+                              legalIdentity: wingsGroupLegalIdentity,
+                              locale,
+                              showDeepDiveLink: true,
+                            }
                           : block.blockType === 'credentialsCarousel' ||
                               block.blockType === 'wingsGroupProofArchive' ||
                               (wingsGroupV3Home && block.blockType === 'archive')

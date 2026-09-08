@@ -21,6 +21,13 @@
   min-width: 0;
 }
 
+.sectionHeaderActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px 20px;
+}
+
 .eyebrow {
   margin: 0;
   color: var(--site-muted, #737067);
@@ -697,6 +704,11 @@
     margin-top: 16px;
   }
 
+  .sectionHeaderActions {
+    justify-content: flex-start;
+    margin-top: 16px;
+  }
+
   .capabilityRow {
     grid-template-columns: 34px minmax(0, 1fr) 24px;
     gap: 12px;
@@ -743,6 +755,10 @@
 
 .trustCopy {
   min-width: 0;
+}
+
+.trustCopy > .routeCta {
+  margin-top: 18px;
 }
 
 .legalIdentity {
