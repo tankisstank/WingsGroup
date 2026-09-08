@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { proxy } from '@/proxy'
+import { config, proxy } from '@/proxy'
 import { createTrustedSiteContextHeaders, SITE_CONTEXT_TTL_SECONDS } from '@/utilities/siteDomains'
 import {
   mintWingsGroupLocalPreviewGrant,
@@ -38,6 +38,10 @@ describe('tenant proxy rewrites', () => {
 
   beforeEach(() => {
     vi.stubEnv('SITE_CONTEXT_SECRET', 'proxy-test-context-secret')
+  })
+
+  it('runs the signed tenant-context proxy for the WingsGo catalog API', () => {
+    expect(config.matcher).toContain('/api/wingsgo/tour-catalog')
   })
 
   afterEach(() => {
