@@ -1309,16 +1309,38 @@ body.wings-admin-shell .login .wings-admin-logo {
   }
 }
 
-.doc-controls__controls .wings-content-locale-compact {
+.collection-edit .doc-controls__controls .wings-content-locale-compact {
   align-items: center;
-  display: inline-flex;
-  flex-wrap: wrap;
+  // DocumentControls is a sticky toolbar with a fixed height. Keep the locale
+  // switcher on one line so it cannot grow below the toolbar and cover fields.
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
   gap: 4px 7px;
   margin: 0;
   max-width: min(100%, 360px);
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
 
-  .wings-content-locale-control__options { gap: 4px; }
-  .wings-content-locale-control__options a { font-size: 0.72rem; padding: 3px 7px; }
+  .wings-content-locale-control__options {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+
+  .wings-content-locale-control__options a {
+    font-size: 0.72rem;
+    padding: 3px 7px;
+    white-space: nowrap;
+  }
+
+  .wings-content-locale-compact__label,
+  .wings-content-locale-compact__status {
+    flex: 0 0 auto;
+  }
+
+  &::-webkit-scrollbar { display: none; }
 }
 
 .wings-content-locale-compact__label { color: var(--wings-admin-muted-strong); font-size: 0.75rem; font-weight: 700; }
