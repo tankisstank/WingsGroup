@@ -4,11 +4,24 @@ export const redirects: NextConfig['redirects'] = async () => {
   const publicCompatibilityRedirects = [
     {
       destination: '/',
+      has: [
+        {
+          type: 'host',
+          value:
+            '(?:www\\.)?(?:wingsgroup\\.vn|wingsgo\\.vn|wingsplus\\.vn|wingspass\\.wingsgroup\\.vn|wingscare\\.wingsgroup\\.vn)',
+        },
+      ],
       permanent: true,
       source: '/vi',
     },
     {
       destination: '/tin-tuc',
+      has: [
+        {
+          type: 'host',
+          value: '(?:www\\.)?wingsgroup\\.vn',
+        },
+      ],
       permanent: true,
       source: '/posts',
     },
