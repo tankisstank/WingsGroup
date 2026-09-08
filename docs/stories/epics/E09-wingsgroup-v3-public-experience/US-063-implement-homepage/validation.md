@@ -42,3 +42,16 @@ order, the five-service explorer, safe trust/proof surface, editorial rail,
 contact intake and published Vietnamese/English entry routes. The primary
 chooser stays at `/#consultation-dialog`; the hero CTA resolves once to
 `/lien-he#contact-form`.
+
+## Navigation follow-up evidence — 2026-09-09
+
+The deployed follow-up commits `5f427b2`, `912030c`, and `4dfb50d` make the
+primary navigation consistent on the home page and every WingsGroup subpage:
+`/#home`, `/#services`, `/#about`, `/#trust`, `/tin-tuc`, and `/#contact`.
+The home sections remain the concise overview; their explicit deep-dive links
+lead to `/nang-luc-dich-vu`, `/he-sinh-thai`, and `/ve-wingsgroup`.
+
+Targeted navigation and shell unit checks passed (9 assertions). Production
+browser smoke confirmed those six header destinations on an article route and
+the three deep-dive links on the home route. This evidence does not alter the
+separate operational gates tracked by US-066.
