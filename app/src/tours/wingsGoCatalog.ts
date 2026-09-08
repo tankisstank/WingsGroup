@@ -68,6 +68,11 @@ type InventoryProduct = {
   wrapperPage?: Relation
   site?: Relation
 }
+type InventoryMedia = {
+  alt?: null | string
+  site?: Relation
+  url?: null | string
+}
 type InventoryWrapper = {
   _status?: null | string
   id: number | string
@@ -121,17 +126,24 @@ const relationIDs = (value: unknown) =>
     .map((item) => relationID(item as Relation))
     .filter((id): id is number | string => id !== null)
 
-const mediaDTO = (value: unknown, fallbackAlt: string) => {
+const mediaDTO = (value: unknown, fallbackAlt: string, productSite: Relation) => {
   if (!value || typeof value !== 'object') return null
-  const media = value as { alt?: null | string; url?: null | string }
-  return media.url ? { alt: media.alt?.trim() || fallbackAlt, url: media.url } : null
+  const media = value as InventoryMedia
+  return media.url && sameID(media.site, productSite)
+    ? { alt: media.alt?.trim() || fallbackAlt, url: media.url }
+    : null
 }
 
 const firstMedia = (product: InventoryProduct) => {
-  const hero = mediaDTO(product.heroMedia, product.title || 'Tour WingsGo')
+  const fallbackAlt = product.title || 'Tour WingsGo'
+  const hero = mediaDTO(product.heroMedia, fallbackAlt, product.site)
   if (hero) return hero
   const gallery = Array.isArray(product.gallery) ? product.gallery : []
-  return mediaDTO(gallery[0], product.title || 'Tour WingsGo')
+  for (const item of gallery) {
+    const media = mediaDTO(item, fallbackAlt, product.site)
+    if (media) return media
+  }
+  return null
 }
 
 export const isEligibleWingsGoCatalogProduct = ({

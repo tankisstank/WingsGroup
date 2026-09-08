@@ -178,6 +178,36 @@ describe('WingsGo dynamic catalog constraints', () => {
     ).toEqual({})
   })
 
+  it('omits cross-site hero and gallery URLs from the catalog DTO', async () => {
+    const catalogProduct = product({
+      gallery: [{ alt: 'cross-site gallery', site: 8, url: '/media/cross-site-gallery.jpg' }],
+      heroMedia: { alt: 'cross-site hero', site: 8, url: '/media/cross-site-hero.jpg' },
+      wrapperPage: 9,
+    })
+    const payload = {
+      find: vi.fn(async ({ collection }: { collection: string }) => {
+        if (collection === 'pages') return { docs: [wrapper()] }
+        if (collection === 'tour-products') return { docs: [catalogProduct] }
+        return { docs: [departure()] }
+      }),
+    }
+
+    const result = await queryWingsGoTourCatalog({
+      now: new Date('2026-01-01T00:00:00.000Z'),
+      page: {
+        id: 99,
+        pathname: '/tour',
+        site: 7,
+        wingsGoTourCatalog: { enabled: true, featuredTours: [1] },
+      },
+      payload: payload as never,
+      site: { code: 'wings-go', id: 7 },
+    })
+
+    expect(result.featured[0]?.image).toBeNull()
+    expect(JSON.stringify(result)).not.toContain('cross-site')
+  })
+
   it('rejects malformed curation before it can be persisted', async () => {
     const req = {
       locale: 'vi',
