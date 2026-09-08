@@ -29,11 +29,15 @@ export const WINGSGROUP_HOME_NAV = [
 ] as const
 
 export const WINGSGROUP_V3_ROUTE_NAV = [
-  { href: '/', label: 'Trang chủ' },
-  { href: '/nang-luc-dich-vu', label: 'Dịch vụ' },
-  { href: '/he-sinh-thai', label: 'Hệ sinh thái' },
-  { href: '/ve-wingsgroup', label: 'Về WingsGroup' },
-  { href: '/tin-tuc', label: 'Cẩm nang' },
+  // Away from the home surface, preserve the same information architecture by
+  // returning visitors to the matching section rather than changing the menu
+  // into a second, route-only navigation model.
+  { href: '/#home', label: 'Trang chủ' },
+  { href: '/#services', label: 'Dịch vụ' },
+  { href: '/#about', label: 'Hệ sinh thái' },
+  { href: '/#trust', label: 'Về WingsGroup' },
+  { href: '/#news', label: 'Cẩm nang' },
+  { href: '/#contact', label: 'Liên hệ' },
 ] as const
 
 const WINGSGROUP_HOME_NAV_EN = [
@@ -46,11 +50,12 @@ const WINGSGROUP_HOME_NAV_EN = [
 ] as const
 
 const WINGSGROUP_V3_ROUTE_NAV_EN = [
-  { href: '/', label: 'Home' },
-  { href: '/nang-luc-dich-vu', label: 'Services' },
-  { href: '/he-sinh-thai', label: 'Our ecosystem' },
-  { href: '/ve-wingsgroup', label: 'About WingsGroup' },
-  { href: '/tin-tuc', label: 'Journal' },
+  { href: '/#home', label: 'Home' },
+  { href: '/#services', label: 'Services' },
+  { href: '/#about', label: 'Our ecosystem' },
+  { href: '/#trust', label: 'About WingsGroup' },
+  { href: '/#news', label: 'Journal' },
+  { href: '/#contact', label: 'Contact' },
 ] as const
 
 export const getWingsGroupHomeNav = (locale: SupportedLocaleCode) =>

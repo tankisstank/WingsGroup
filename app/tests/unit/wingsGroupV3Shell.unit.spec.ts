@@ -12,8 +12,9 @@ describe('WingsGroup v3 shared public shell', () => {
 
     expect(header).toContain('isWingsGroupV3SurfacePath(publicPathname)')
     expect(header).toContain("url: '#consultation-dialog'")
-    expect(nav).toContain("{ href: '/he-sinh-thai', label: 'Hệ sinh thái' }")
-    expect(nav).toContain("{ href: '/tin-tuc', label: 'Cẩm nang' }")
+    expect(nav).toContain("{ href: '/#about', label: 'Hệ sinh thái' }")
+    expect(nav).toContain("{ href: '/#news', label: 'Cẩm nang' }")
+    expect(nav).toContain("{ href: '/#contact', label: 'Liên hệ' }")
     expect(nav).toContain('data-wingsgroup-consultation-trigger={isWingsGroupV3Surface')
     expect(nav).not.toContain('href="/en"')
   })

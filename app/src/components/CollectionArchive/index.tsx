@@ -4,11 +4,12 @@ import React from 'react'
 import { Card, CardPostData } from '@/components/Card'
 
 export type Props = {
+  postPath?: string
   posts: CardPostData[]
 }
 
 export const CollectionArchive: React.FC<Props> = (props) => {
-  const { posts } = props
+  const { postPath, posts } = props
 
   return (
     <div className={cn('container')}>
@@ -18,7 +19,13 @@ export const CollectionArchive: React.FC<Props> = (props) => {
             if (typeof result === 'object' && result !== null) {
               return (
                 <div className="col-span-4" key={index}>
-                  <Card className="h-full" doc={result} relationTo="posts" showCategories />
+                  <Card
+                    className="h-full"
+                    doc={result}
+                    postPath={postPath}
+                    relationTo="posts"
+                    showCategories
+                  />
                 </div>
               )
             }

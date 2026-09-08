@@ -17,6 +17,7 @@ export const Card: React.FC<{
   alignItems?: 'center'
   className?: string
   doc?: CardPostData
+  postPath?: string
   relationTo?: 'posts'
   showCategories?: boolean
   title?: string
@@ -24,7 +25,14 @@ export const Card: React.FC<{
   const { card, link } = useClickableCard({})
   const toSitePath = useSitePath()
   const locale = useSitePublicLocale()
-  const { className, doc, relationTo, showCategories, title: titleFromProps } = props
+  const {
+    className,
+    doc,
+    postPath = '/posts',
+    relationTo: _relationTo,
+    showCategories,
+    title: titleFromProps,
+  } = props
 
   const { slug, categories, meta, title } = doc || {}
   const { description, image: metaImage } = meta || {}
@@ -32,7 +40,7 @@ export const Card: React.FC<{
   const hasCategories = categories && Array.isArray(categories) && categories.length > 0
   const titleToUse = titleFromProps || title
   const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
-  const href = toSitePath(`/${relationTo}/${slug}`)
+  const href = toSitePath(`${postPath}/${slug}`)
   const copy = {
     en: {
       details: 'View details',

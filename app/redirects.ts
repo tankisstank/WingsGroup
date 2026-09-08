@@ -13,6 +13,17 @@ export const redirects: NextConfig['redirects'] = async () => {
       source: '/posts',
     },
     {
+      destination: '/tin-tuc/:slug*',
+      has: [
+        {
+          type: 'host',
+          value: '(?:www\\.)?wingsgroup\\.vn',
+        },
+      ],
+      permanent: true,
+      source: '/posts/:slug*',
+    },
+    {
       destination: '/wing-side',
       permanent: true,
       source: '/wingsside',

@@ -6,7 +6,8 @@ import React from 'react'
 import RichText from '@/components/RichText'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
-import { appendSiteWhere } from '@/utilities/siteContext'
+import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
+import { WINGSGROUP_EDITORIAL_ARCHIVE_PATH } from '@/utilities/wingsGroupEditorial'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
@@ -24,6 +25,8 @@ export const ArchiveBlock: React.FC<
   } = props
 
   const limit = limitFromProps || 3
+  const site = await getCurrentSite()
+  const postPath = site.code === 'wings-group' ? WINGSGROUP_EDITORIAL_ARCHIVE_PATH : '/posts'
 
   let posts: Post[] = []
 
@@ -75,7 +78,7 @@ export const ArchiveBlock: React.FC<
         </div>
       )}
       <div className={`layout-archive layout-archive--${presentation}`}>
-        <CollectionArchive posts={posts} />
+        <CollectionArchive postPath={postPath} posts={posts} />
       </div>
     </section>
   )
