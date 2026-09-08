@@ -30,4 +30,22 @@ pnpm build
 
 ## Acceptance Evidence
 
-Pending release execution.
+- Production preflight confirmed the release root, rollback image, 14 GB free
+  disk, healthy app/PostgreSQL/Redis containers, current migration state, and
+  `/api/health/live` plus `/api/health/ready`. This source-only release needed
+  no migration.
+- Releases `4454a85c6058c6f73be579b6663021acd9eeb7a3` and
+  `cc543fa218a36fffaaa28a8e76e7a84787a825c2` were built from isolated,
+  checksummed archives. Final production revision is `cc543fa…`; PostgreSQL
+  and Redis were not recreated.
+- 35 unit, 22 integration, and 6 component tests passed before release. The
+  isolated worktree also passed scoped tests, TypeScript, and production build.
+- All six homepages and `llms.txt` endpoints return 200. Default-locale
+  prefixes issue one 308 to the unprefixed canonical path. A WingsGroup news
+  article exposes Article OpenGraph/Twitter metadata, `x-default`, Article
+  JSON-LD, and TravelAgency JSON-LD.
+- A 433-URL sitemap crawl found six legacy entries; all six now return 200 with
+  zero redirects after the tenant-scoped redirect patch.
+- Deferred by requester: Cloudflare Email Address Obfuscation still injects
+  one `/cdn-cgi/l/email-protection` link. FAQPage appears only where visible
+  CMS FAQ blocks exist; pages without visible Q&A emit no invented schema.
