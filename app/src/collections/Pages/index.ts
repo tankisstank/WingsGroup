@@ -33,7 +33,9 @@ import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 import { syncPagePathname } from './hooks/syncPagePathname'
 import { validateWingsSideHomeCuration } from './hooks/validateWingsSideHomeCuration'
+import { validateWingsGoTourCatalog } from './hooks/validateWingsGoTourCatalog'
 import { validateWingsGroupV3Governance } from './hooks/validateWingsGroupV3Governance'
+import { wingsGoTourCatalogField } from '@/fields/wingsGoTourCatalog'
 
 import {
   MetaDescriptionField,
@@ -226,6 +228,10 @@ export const Pages: CollectionConfig<'pages'> = {
           ],
         },
         wingsSideHiFiTab(),
+        {
+          fields: [wingsGoTourCatalogField],
+          label: 'WingsGo tour catalog',
+        },
       ],
     },
     {
@@ -289,6 +295,7 @@ export const Pages: CollectionConfig<'pages'> = {
       syncPagePathname,
       validateWingsGroupV3Governance,
       validateWingsSideHomeCuration,
+      validateWingsGoTourCatalog,
       preventEditorPublish,
       populatePublishedAt,
     ],

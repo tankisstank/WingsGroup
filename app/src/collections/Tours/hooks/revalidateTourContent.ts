@@ -35,7 +35,7 @@ const revalidateMany = (paths: Array<null | string | undefined>) => {
 type Relation = number | string | { id?: number | string | null } | null | undefined
 
 const relationID = (value: Relation) =>
-  typeof value === 'number' || typeof value === 'string' ? value : value?.id ?? null
+  typeof value === 'number' || typeof value === 'string' ? value : (value?.id ?? null)
 
 const homeSelectsTour = (page: { wingsSideHiFi?: unknown }, tourID: number | string) => {
   const home = (page.wingsSideHiFi as { home?: Record<string, unknown> } | undefined)?.home
@@ -120,6 +120,7 @@ export const revalidateWingSideDiscoveryForTourDependency = async ({
 
 export const revalidateTourProduct: CollectionAfterChangeHook = async ({
   doc,
+  previousDoc,
   req: { payload, context },
 }) => {
   if (context.disableRevalidate) {
@@ -145,7 +146,11 @@ export const revalidateTourProduct: CollectionAfterChangeHook = async ({
   revalidateMany([
     ...basePaths,
     `/tour/${doc.slug}`,
+    previousDoc?.slug && previousDoc.slug !== doc.slug ? `/tour/${previousDoc.slug}` : null,
     doc.market ? `/thi-truong/${marketSlugByKey[String(doc.market)]}` : null,
+    previousDoc?.market && previousDoc.market !== doc.market
+      ? `/thi-truong/${marketSlugByKey[String(previousDoc.market)]}`
+      : null,
     ...campaignPaths,
   ])
   await revalidateWingSideDiscoveryForTour({ payload, site: doc.site as Relation, tourID: doc.id })
@@ -153,7 +158,10 @@ export const revalidateTourProduct: CollectionAfterChangeHook = async ({
   return doc
 }
 
-export const revalidateTourProductDelete: CollectionAfterDeleteHook = async ({ doc, req: { context } }) => {
+export const revalidateTourProductDelete: CollectionAfterDeleteHook = async ({
+  doc,
+  req: { context },
+}) => {
   if (!context.disableRevalidate) {
     revalidateMany([...basePaths, doc?.slug ? `/tour/${doc.slug}` : null])
     // Relationship cleanup may already have set the curated Page reference to
@@ -167,6 +175,7 @@ export const revalidateTourProductDelete: CollectionAfterDeleteHook = async ({ d
 
 export const revalidateTourDeparture: CollectionAfterChangeHook = async ({
   doc,
+  previousDoc,
   req: { payload, context },
 }) => {
   if (context.disableRevalidate) {
@@ -181,6 +190,15 @@ export const revalidateTourDeparture: CollectionAfterChangeHook = async ({
           depth: 0,
           id: doc.tourProduct,
         })
+
+  const previousProduct: { market?: string; slug?: string } | null =
+    previousDoc?.tourProduct && String(previousDoc.tourProduct) !== String(doc.tourProduct)
+      ? ((await payload.findByID({
+          collection: 'tour-products' as never,
+          depth: 0,
+          id: previousDoc.tourProduct,
+        })) as { market?: string; slug?: string })
+      : null
 
   const campaignResult = await payload.find({
     collection: 'tour-campaigns' as never,
@@ -209,17 +227,30 @@ export const revalidateTourDeparture: CollectionAfterChangeHook = async ({
 
   revalidateMany([
     ...basePaths,
-    (product as { slug?: string } | null)?.slug ? `/tour/${(product as { slug?: string }).slug}` : null,
+    (product as { slug?: string } | null)?.slug
+      ? `/tour/${(product as { slug?: string }).slug}`
+      : null,
+    (previousProduct as { slug?: string } | null)?.slug
+      ? `/tour/${(previousProduct as { slug?: string }).slug}`
+      : null,
     (product as { market?: string } | null)?.market
       ? `/thi-truong/${marketSlugByKey[String((product as { market?: string }).market)]}`
       : null,
-    ...(campaignResult.docs as Array<{ slug?: string }>).map((campaign) => `/campaign/${campaign.slug}`),
+    (previousProduct as { market?: string } | null)?.market
+      ? `/thi-truong/${marketSlugByKey[String((previousProduct as { market?: string }).market)]}`
+      : null,
+    ...(campaignResult.docs as Array<{ slug?: string }>).map(
+      (campaign) => `/campaign/${campaign.slug}`,
+    ),
   ])
 
   return doc
 }
 
-export const revalidateTourDepartureDelete: CollectionAfterDeleteHook = ({ doc, req: { context } }) => {
+export const revalidateTourDepartureDelete: CollectionAfterDeleteHook = ({
+  doc,
+  req: { context },
+}) => {
   if (!context.disableRevalidate) {
     revalidateMany(basePaths)
   }
@@ -246,7 +277,9 @@ export const revalidateTourVariant: CollectionAfterChangeHook = async ({
 
   revalidateMany([
     ...basePaths,
-    (product as { slug?: string } | null)?.slug ? `/tour/${(product as { slug?: string }).slug}` : null,
+    (product as { slug?: string } | null)?.slug
+      ? `/tour/${(product as { slug?: string }).slug}`
+      : null,
     (product as { market?: string } | null)?.market
       ? `/thi-truong/${marketSlugByKey[String((product as { market?: string }).market)]}`
       : null,
@@ -255,7 +288,10 @@ export const revalidateTourVariant: CollectionAfterChangeHook = async ({
   return doc
 }
 
-export const revalidateTourVariantDelete: CollectionAfterDeleteHook = ({ doc, req: { context } }) => {
+export const revalidateTourVariantDelete: CollectionAfterDeleteHook = ({
+  doc,
+  req: { context },
+}) => {
   if (!context.disableRevalidate) {
     revalidateMany(basePaths)
   }
@@ -271,7 +307,10 @@ export const revalidateTourCampaign: CollectionAfterChangeHook = ({ doc, req: { 
   return doc
 }
 
-export const revalidateTourCampaignDelete: CollectionAfterDeleteHook = ({ doc, req: { context } }) => {
+export const revalidateTourCampaignDelete: CollectionAfterDeleteHook = ({
+  doc,
+  req: { context },
+}) => {
   if (!context.disableRevalidate) {
     revalidateMany([...basePaths, doc?.slug ? `/campaign/${doc.slug}` : null])
   }

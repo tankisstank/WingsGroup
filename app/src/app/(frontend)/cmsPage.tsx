@@ -10,6 +10,8 @@ import React from 'react'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
+import { WingsGoTourCatalogSection } from '@/tours/WingsGoTourCatalogSection'
+import type { WingsGoCatalogPage } from '@/tours/wingsGoCatalog'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getCurrentLocale, getCurrentSite, getCurrentSitePrefix } from '@/utilities/siteContext'
 import { JsonLd } from '@/components/JsonLd'
@@ -113,6 +115,24 @@ export async function renderCmsPageByPath({
 
   // Structured tour detail: tighter vertical rhythm under fixed header.
   const isStructuredTour = Boolean(structuredPage)
+  const pageWithWingsGoCatalog = page as typeof page & {
+    wingsGoTourCatalog?: { enabled?: boolean | null } | null
+  }
+  const useWingsGoTourCatalog =
+    !isStructuredTour &&
+    site.code === 'wings-go' &&
+    requestedPath === '/tour' &&
+    pageWithWingsGoCatalog.wingsGoTourCatalog?.enabled === true
+  const catalogLayout = useWingsGoTourCatalog
+    ? page.layout.filter((block) => {
+        const candidate = block as { blockType?: string; title?: string | null }
+        return !(
+          candidate.blockType === 'featureGrid' &&
+          (candidate.title === 'Các chương trình outbound nổi bật' ||
+            candidate.title === 'Current outbound highlights')
+        )
+      })
+    : page.layout
   const renderedBreadcrumbItems = isStructuredTour
     ? buildStructuredTourBreadcrumbItems({
         baseItems: breadcrumbItems,
@@ -341,8 +361,15 @@ export async function renderCmsPageByPath({
             allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Surface}
             wingsGroupV3Enabled={useWingsGroupV3Surface}
           />
+          {useWingsGoTourCatalog ? (
+            <WingsGoTourCatalogSection
+              page={page as unknown as WingsGoCatalogPage}
+              searchParams={searchParams}
+              site={site}
+            />
+          ) : null}
           <RenderBlocks
-            blocks={page.layout}
+            blocks={catalogLayout}
             locale={locale}
             siteCode={site.code}
             wingsGroupV3={site.code === 'wings-group'}

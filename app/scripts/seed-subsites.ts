@@ -1292,7 +1292,8 @@ async function createSiteSettings(
         ...(siteSeed.brandColor ? { brandColor: siteSeed.brandColor } : {}),
         ...(siteSeed.accentColor ? { accentColor: siteSeed.accentColor } : {}),
         logoImage: overrides.logoImageID === undefined ? null : overrides.logoImageID,
-        faviconImage: overrides.faviconImageID === undefined ? heroImageID : overrides.faviconImageID,
+        faviconImage:
+          overrides.faviconImageID === undefined ? heroImageID : overrides.faviconImageID,
         // Tenant identity is `wing-side`, while the established visual theme
         // option is `wings-side`. Keep those separate instead of submitting an
         // invalid select value during deterministic fixture seeding.
@@ -1310,7 +1311,8 @@ async function createSiteSettings(
         defaultTitle: siteSeed.name,
         titleSuffix: siteSeed.seoSuffix,
         defaultDescription: siteSeed.seoDescription,
-        defaultImage: overrides.defaultImageID === undefined ? heroImageID : overrides.defaultImageID,
+        defaultImage:
+          overrides.defaultImageID === undefined ? heroImageID : overrides.defaultImageID,
         canonicalDomain: `https://${siteSeed.domain.replace('.local', '.vn')}`,
       },
       supportEmail: overrides.supportEmail || `hello@${siteSeed.domain.replace('.local', '.vn')}`,
@@ -4838,63 +4840,11 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         'h1',
       ),
     },
-    layout: [
-      featureGridBlock(
-        'Các chương trình outbound nổi bật',
-        'Nhóm tour này được dựng từ Google Sheet lịch khởi hành 2026 và các poster Hàn, Nhật, Trung mà khách hàng đã cung cấp.',
-        [
-          {
-            title: 'Seoul - Nami - Everland 5N4D',
-            description:
-              'Line Hàn Quốc nhập môn, lịch 08/07, 22/07, 05/08, bay Vietjet / Jeju Air, giá từ 18.900.000.',
-            imageID: seoulNamiEverlandImage.id,
-            meta: 'Korea | 5N4D | từ 18.900.000',
-            url: '/tour/seoul-nami-everland-5n4d',
-          },
-          {
-            title: 'Seoul - Jeju - Nami - Camellia Hill 6N5D',
-            description:
-              'Line campaign hè có Jeju, Nami và Camellia Hill, khởi hành 11/07 và 28/08, bay Jeju Air.',
-            imageID: seoulJejuCamelliaImage.id,
-            meta: 'Korea | 6N5D | từ 23.900.000',
-            url: '/tour/seoul-jeju-nami-camellia-hill-6n5d',
-          },
-          {
-            title: 'Shizuoka - Núi Phú Sĩ - Tokyo 5N4D',
-            description:
-              'Route Nhật ngắn, dễ chốt: Shizuoka, Phú Sĩ, Tokyo, bay Vietjet, giá từ 22.500.000.',
-            imageID: shizuokaFujiTokyoImage.id,
-            meta: 'Japan | 5N4D | từ 22.500.000',
-            url: '/tour/shizuoka-nui-phu-si-tokyo-5n4d',
-          },
-          {
-            title: 'Osaka - Kobe - Kyoto - Nagoya - Fuji - Tokyo 6N5D',
-            description:
-              'Route Nhật dài hơn cho khách muốn đủ chuỗi Osaka, Kyoto, Nagoya, Phú Sĩ và Tokyo.',
-            imageID: osakaKyotoFujiTokyoImage.id,
-            meta: 'Japan | 6N5D | từ 32.900.000',
-            url: '/tour/osaka-kobe-kyoto-nagoya-fuji-tokyo-6n5d',
-          },
-          {
-            title: 'Bắc Kinh - Vạn Lý Trường Thành 5N4D',
-            description:
-              'Entry China route with retail-friendly duration and straightforward selling points.',
-            imageID: beijingGreatWallImage.id,
-            meta: 'China | 5N4D',
-            url: '/tour/bac-kinh-van-ly-truong-thanh-5n4d',
-          },
-          {
-            title: 'Thượng Hải - Ô Trấn - Hàng Châu 5N4D',
-            description:
-              'Tour Trung Quốc cân bằng giữa biểu tượng đô thị và trải nghiệm cảnh quan mềm hơn.',
-            imageID: chinaJiangnanImage.id,
-            meta: 'China | 5N4D',
-            url: '/tour/thuong-hai-o-tran-hang-chau-5n4d',
-          },
-        ],
-      ),
-      wingsGoTrustStrip(),
-    ],
+    layout: [wingsGoTrustStrip()],
+    wingsGoTourCatalog: {
+      enabled: true,
+      featuredTours: [],
+    },
     meta: {
       title: 'Tour WingsGo',
       description:
@@ -7350,59 +7300,6 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       ),
     },
     layout: [
-      featureGridBlock(
-        'Current outbound highlights',
-        'These tours were selected because they represent the strongest current Korea, Japan, and China retail lines in the source material.',
-        [
-          {
-            title: 'Seoul - Nami - Everland 5N4D',
-            description:
-              'A Korea starter route with a simple selling story, visible price, and repeatable departures.',
-            imageID: seoulNamiEverlandImage.id,
-            meta: 'Korea | from 18,900,000 VND',
-            url: '/tour/seoul-nami-everland-5n4d',
-          },
-          {
-            title: 'Seoul - Jeju - Nami - Camellia Hill 6N5D',
-            description:
-              'A seasonal Korea campaign route with Jeju emphasis and a clearer summer selling angle.',
-            imageID: seoulJejuCamelliaImage.id,
-            meta: 'Korea | from 23,900,000 VND',
-            url: '/tour/seoul-jeju-nami-camellia-hill-6n5d',
-          },
-          {
-            title: 'Shizuoka - Mount Fuji - Tokyo 5N4D',
-            description:
-              'A short Japan route for buyers who want an easy budget-and-season comparison.',
-            imageID: shizuokaFujiTokyoImage.id,
-            meta: 'Japan | from 22,500,000 VND',
-            url: '/tour/shizuoka-nui-phu-si-tokyo-5n4d',
-          },
-          {
-            title: 'Osaka - Kobe - Kyoto - Nagoya - Fuji - Tokyo 6N5D',
-            description:
-              'A longer Japan route for visitors comparing city count, pace, and fuller itinerary coverage.',
-            imageID: osakaKyotoFujiTokyoImage.id,
-            meta: 'Japan | from 32,900,000 VND',
-            url: '/tour/osaka-kobe-kyoto-nagoya-fuji-tokyo-6n5d',
-          },
-          {
-            title: 'Beijing - Great Wall 5N4D',
-            description:
-              'A China entry route with short duration, iconic stops, and straightforward selling points.',
-            imageID: beijingGreatWallImage.id,
-            meta: 'China | 5D4N',
-            url: '/tour/bac-kinh-van-ly-truong-thanh-5n4d',
-          },
-          {
-            title: 'Shanghai - Wuzhen - Hangzhou 5N4D',
-            description: 'A China route that blends city landmarks with softer scenic pacing.',
-            imageID: chinaJiangnanImage.id,
-            meta: 'China | 5D4N',
-            url: '/tour/thuong-hai-o-tran-hang-chau-5n4d',
-          },
-        ],
-      ),
       wingsGoTrustStrip(),
       ctaBlock(
         'Need help choosing the right outbound line?',

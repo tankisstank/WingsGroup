@@ -15,6 +15,20 @@ const isWingSideHomeCuration = (page?: Page | null) => {
   return hifi?.enabled && hifi.routeVariant === 'home'
 }
 
+const isTourCatalogDependencyPage = (page?: Page | null) => {
+  const pathname = page?.pathname
+  return pathname === '/tour' || pathname?.startsWith('/tour/')
+}
+
+const revalidateWingsGoTourCatalog = (page?: Page | null) => {
+  if (!isTourCatalogDependencyPage(page)) return
+
+  revalidatePath('/tour')
+  for (const locale of publicLocaleCodes) {
+    revalidatePath(`/${locale}/tour`)
+  }
+}
+
 const revalidatePagePaths = (doc?: Page | null) => {
   const path = getPageCanonicalPath(doc)
 
@@ -36,6 +50,8 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = async ({
     if (isWingSideHomeCuration(doc) || isWingSideHomeCuration(previousDoc)) {
       revalidateWingSideDiscovery()
     }
+    revalidateWingsGoTourCatalog(doc)
+    revalidateWingsGoTourCatalog(previousDoc)
     await revalidateWingSideDiscoveryForTourDependency({
       field: 'wrapperPage',
       payload,
@@ -66,6 +82,7 @@ export const revalidateDelete: CollectionAfterDeleteHook<Page> = ({ doc, req: { 
     // A deleted wrapper may already have been cleared from TourProduct by FK
     // cleanup, so invalidate the bounded WingSide discovery surface set.
     revalidateWingSideDiscovery()
+    revalidateWingsGoTourCatalog(doc)
     revalidatePagePaths(doc)
     revalidateTag('pages-sitemap', 'max')
   }

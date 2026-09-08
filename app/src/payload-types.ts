@@ -846,7 +846,7 @@ export interface Page {
      */
     enabled?: boolean | null;
     /**
-     * Phải khớp pathname hub WingsSide tương ứng.
+   * Phải khớp pathname hub WingsSide tương ứng.
      */
     routeVariant?: ('home' | 'plan' | 'destinations' | 'styles' | 'packages' | 'guide' | 'about' | 'contact') | null;
     hero?: {
@@ -1170,6 +1170,16 @@ export interface Page {
           }[]
         | null;
     };
+  };
+  /**
+   * Chỉ áp dụng cho trang WingsGo /tour. Chọn tối đa 6 tour nổi bật theo thứ tự; tour dự phòng được tính khi render và không ghi vào CMS.
+   */
+  wingsGoTourCatalog?: {
+    enabled?: boolean | null;
+    /**
+     * Giữ đúng thứ tự biên tập. Mỗi tour phải là sản phẩm WingsGo đã publish, có wrapper page cùng site đã publish và có đợt đi tương lai đã publish.
+     */
+    featuredTours?: (number | TourProduct)[] | null;
   };
   /**
    * Các trang cùng site được hiển thị bên dưới nội dung để tăng liên kết nội bộ.
@@ -3578,6 +3588,12 @@ export interface PagesSelect<T extends boolean = true> {
                     id?: T;
                   };
             };
+      };
+  wingsGoTourCatalog?:
+    | T
+    | {
+        enabled?: T;
+        featuredTours?: T;
       };
   relatedPages?: T;
   publishedAt?: T;

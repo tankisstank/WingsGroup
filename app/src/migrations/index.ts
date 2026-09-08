@@ -41,6 +41,7 @@ import * as migration_20260824_160000_wingsgroup_ecosystem_route_archetype from 
 import * as migration_20260906_081500_lead_notification_job_tasks from './20260906_081500_lead_notification_job_tasks'
 import * as migration_20260906_083000_payload_jobs_meta from './20260906_083000_payload_jobs_meta'
 import * as migration_20260906_084000_payload_jobs_stats from './20260906_084000_payload_jobs_stats'
+import * as migration_20260909_090000_wingsgo_tour_catalog from './20260909_090000_wingsgo_tour_catalog'
 
 export const migrations = [
   {
@@ -257,5 +258,10 @@ export const migrations = [
     up: migration_20260906_084000_payload_jobs_stats.up,
     down: migration_20260906_084000_payload_jobs_stats.down,
     name: '20260906_084000_payload_jobs_stats',
+  },
+  {
+    up: migration_20260909_090000_wingsgo_tour_catalog.up,
+    down: migration_20260909_090000_wingsgo_tour_catalog.down,
+    name: '20260909_090000_wingsgo_tour_catalog',
   },
 ]
