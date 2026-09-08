@@ -4,6 +4,7 @@ import {
   isEligibleWingsGoCatalogProduct,
   queryWingsGoTourCatalog,
   selectWingsGoCatalogCards,
+  WINGSGO_CATALOG_MAX_INVENTORY,
 } from '@/tours/wingsGoCatalog'
 import { validateWingsGoTourCatalog } from '@/collections/Pages/hooks/validateWingsGoTourCatalog'
 
@@ -124,10 +125,10 @@ describe('WingsGo dynamic catalog constraints', () => {
       ...departure({ id: index + 201, tourProduct: item.id }),
       departureDate: `2026-${String(index + 2).padStart(2, '0')}-01T00:00:00.000Z`,
     }))
-    const calls: string[] = []
+    const calls: Array<{ collection: string; limit: number }> = []
     const payload = {
-      find: vi.fn(async ({ collection }: { collection: string }) => {
-        calls.push(collection)
+      find: vi.fn(async ({ collection, limit }: { collection: string; limit: number }) => {
+        calls.push({ collection, limit })
         if (collection === 'pages') return { docs: wrappers }
         if (collection === 'tour-products') return { docs: products }
         return { docs: departures }
@@ -148,7 +149,12 @@ describe('WingsGo dynamic catalog constraints', () => {
       site: { code: 'wings-go', id: 7 },
     })
 
-    expect(calls).toEqual(['pages', 'tour-products', 'tour-departures'])
+    expect(WINGSGO_CATALOG_MAX_INVENTORY).toBe(200)
+    expect(calls).toEqual([
+      { collection: 'pages', limit: WINGSGO_CATALOG_MAX_INVENTORY },
+      { collection: 'tour-products', limit: WINGSGO_CATALOG_MAX_INVENTORY },
+      { collection: 'tour-departures', limit: WINGSGO_CATALOG_MAX_INVENTORY },
+    ])
     expect(result.featured.map(({ id }) => id)).toEqual([1, 2, 3, 4, 5, 6])
     expect(result.all.map(({ id }) => id)).toEqual([7, 8])
     expect(new Set(result.all.map(({ id }) => id)).size).toBe(result.all.length)

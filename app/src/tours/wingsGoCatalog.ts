@@ -5,6 +5,8 @@ import { getTourProductPath } from '@/utilities/siteURLs'
 
 export const WINGSGO_CATALOG_BATCH_SIZE = 6
 export const WINGSGO_CATALOG_MAX_FEATURED = 6
+/** Maximum source inventory read for the bounded WingsGo catalog contract. */
+export const WINGSGO_CATALOG_MAX_INVENTORY = 200
 
 export type WingsGoCatalogSort = 'next-departure' | 'price' | 'title'
 
@@ -346,7 +348,7 @@ const queryDocs = async (
     collection,
     depth: 2,
     draft: false,
-    limit: 1000,
+    limit: WINGSGO_CATALOG_MAX_INVENTORY,
     overrideAccess: true,
     pagination: false,
     where: where as never,

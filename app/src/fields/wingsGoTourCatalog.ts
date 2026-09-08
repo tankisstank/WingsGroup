@@ -13,7 +13,7 @@ export const wingsGoTourCatalogField: Field = {
   type: 'group',
   admin: {
     description:
-      'Chỉ áp dụng cho trang WingsGo /tour. Chọn tối đa 6 tour nổi bật theo thứ tự; tour dự phòng được tính khi render và không ghi vào CMS.',
+      'Chỉ áp dụng cho trang WingsGo /tour. Catalog đọc tối đa 200 sản phẩm/đợt khởi hành/wrapper mỗi lần; chọn tối đa 6 tour nổi bật theo thứ tự. Tour dự phòng được tính khi render và không ghi vào CMS.',
   },
   fields: [
     {
