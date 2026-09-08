@@ -88,7 +88,10 @@ export async function GET(request: Request) {
     })
 
     return jsonNoStore(data)
-  } catch {
+  } catch (error) {
+    // Keep the public contract deliberately generic, but retain the causal
+    // error in the server log so an operational failure is diagnosable.
+    console.error('WingsGo catalog request failed', error)
     return jsonNoStore({ error: 'Unable to load the WingsGo catalog.' }, { status: 500 })
   }
 }
