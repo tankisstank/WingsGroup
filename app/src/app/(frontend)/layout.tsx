@@ -96,7 +96,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       >
         <JsonLd
           data={[
-            buildOrganizationJSONLD(settings, { canonicalOrigin }),
+            buildOrganizationJSONLD(settings, { canonicalOrigin, siteCode: site.code }),
             buildWebSiteJSONLD(settings, { canonicalOrigin }),
           ]}
         />

@@ -10,9 +10,10 @@ import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
 import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
-import { MailIcon, PhoneIcon } from 'lucide-react'
+import { PhoneIcon } from 'lucide-react'
 import { isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
 import { isWingsGroupBrandSite } from '@/wingsgroup/brand'
+import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
 
 export async function Footer() {
   const settings = await getCurrentSiteSettings()
@@ -72,10 +73,7 @@ export async function Footer() {
             {settings?.supportEmail || settings?.supportPhone ? (
               <div className="site-footer__contacts ws-hifi-footer__contacts">
                 {settings.supportEmail ? (
-                  <a href={`mailto:${settings.supportEmail}`}>
-                    <MailIcon aria-hidden="true" className="h-4 w-4" />
-                    {settings.supportEmail}
-                  </a>
+                  <ProtectedEmailLink email={settings.supportEmail} />
                 ) : null}
                 {settings.supportPhone ? (
                   <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
@@ -113,7 +111,7 @@ export async function Footer() {
                 </a>
               ) : null}
               {settings?.supportEmail ? (
-                <a href={`mailto:${settings.supportEmail}`}>{settings.supportEmail}</a>
+                <ProtectedEmailLink email={settings.supportEmail} />
               ) : null}
               {settings?.supportPhone ? (
                 <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
@@ -151,16 +149,10 @@ export async function Footer() {
             {settings?.supportEmail || salesEmail || settings?.supportPhone ? (
               <div className="site-footer__contacts">
                 {settings.supportEmail ? (
-                  <a href={`mailto:${settings.supportEmail}`}>
-                    <MailIcon aria-hidden="true" className="h-4 w-4" />
-                    {settings.supportEmail}
-                  </a>
+                  <ProtectedEmailLink email={settings.supportEmail} />
                 ) : null}
                 {salesEmail ? (
-                  <a href={`mailto:${salesEmail}`}>
-                    <MailIcon aria-hidden="true" className="h-4 w-4" />
-                    {salesEmail}
-                  </a>
+                  <ProtectedEmailLink email={salesEmail} />
                 ) : null}
                 {settings.supportPhone ? (
                   <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>

@@ -1,4 +1,5 @@
-import type { Media, Page, Post, SiteSetting } from '@/payload-types'
+import type { FAQBlock, Media, Page, Post, SiteSetting } from '@/payload-types'
+import { WINGSGROUP_LEGAL_IDENTITY } from '@/wingsgroup/corporateRoutes'
 
 import {
   buildConfiguredAbsoluteMediaURL,
@@ -19,7 +20,7 @@ type JsonLdValue =
 
 export type JsonLdNode = {
   '@id'?: string
-  '@type': string
+  '@type': string | string[]
   [key: string]: JsonLdValue | undefined
 }
 
@@ -32,7 +33,7 @@ type BreadcrumbItem = {
 }
 
 const buildUrlFromOrigin = (origin: string, path = '/') => {
-  const normalizedPath = normalizeCanonicalPath(path).replace(/^\/vi(?=\/|$)/, '') || '/'
+  const normalizedPath = normalizeCanonicalPath(path) || '/'
 
   return `${origin}${normalizedPath === '/' ? '' : normalizedPath}`
 }
@@ -71,7 +72,7 @@ export const stringifyJSONLD = serializeJsonLd
 
 export const buildOrganizationJSONLD = (
   settings?: SiteSetting | null,
-  options?: { canonicalOrigin?: null | string },
+  options?: { canonicalOrigin?: null | string; siteCode?: null | string },
 ): JsonLdNode => {
   const siteName = settings?.siteName || settings?.seo?.defaultTitle || 'WingsGroup'
   const siteUrl = buildCanonicalUrl(settings, '/', options)
@@ -98,11 +99,32 @@ export const buildOrganizationJSONLD = (
       : []),
   ]
 
+  const isWingsGroup = options?.siteCode === 'wings-group'
+
   return {
     '@id': `${siteUrl}#organization`,
-    '@type': 'Organization',
+    '@type': isWingsGroup ? ['Organization', 'TravelAgency'] : 'Organization',
     name: siteName,
     url: siteUrl,
+    ...(isWingsGroup
+      ? {
+          address: {
+            '@type': 'PostalAddress',
+            addressCountry: 'VN',
+            addressLocality: 'Hà Nội',
+            streetAddress: WINGSGROUP_LEGAL_IDENTITY.registeredOffice,
+          },
+          identifier: WINGSGROUP_LEGAL_IDENTITY.licenceNumber,
+          legalName: WINGSGROUP_LEGAL_IDENTITY.legalEntityName,
+          ...(settings?.supportEmail ? { email: settings.supportEmail } : {}),
+          ...(settings?.supportPhone ? { telephone: settings.supportPhone } : {}),
+          hasCredential: {
+            '@type': 'Permit',
+            identifier: WINGSGROUP_LEGAL_IDENTITY.licenceNumber,
+            name: 'International tour operator licence',
+          },
+        }
+      : {}),
     ...(logo ? { logo } : {}),
     ...(contactPoints.length ? { contactPoint: contactPoints } : {}),
   }
@@ -185,6 +207,46 @@ export const buildBreadcrumbListJSONLD = (
 }
 
 export const buildBreadcrumbListJsonLd = buildBreadcrumbListJSONLD
+
+/**
+ * Emits semantic FAQPage data only for CMS FAQ blocks that are rendered as
+ * visible question-and-answer content. Search engines may choose not to show
+ * FAQ rich results for commercial sites, but the markup remains an accurate
+ * machine-readable representation of the page.
+ */
+export const buildFAQPageJSONLD = (
+  blocks?: readonly unknown[] | null,
+): JsonLdNode | null => {
+  const mainEntity = (blocks || [])
+    .filter(
+      (block): block is FAQBlock =>
+        Boolean(block) && typeof block === 'object' && (block as FAQBlock).blockType === 'faq',
+    )
+    .flatMap((block) => block.items || [])
+    .map((item) => ({
+      answer: item.answer?.trim(),
+      question: item.question?.trim(),
+    }))
+    .filter(
+      (item): item is { answer: string; question: string } =>
+        Boolean(item.question) && Boolean(item.answer),
+    )
+    .map((item) => ({
+      '@type': 'Question' as const,
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer' as const,
+        text: item.answer,
+      },
+    }))
+
+  return mainEntity.length
+    ? {
+        '@type': 'FAQPage',
+        mainEntity,
+      }
+    : null
+}
 
 export const buildPageJsonLd = ({
   canonicalOrigin,

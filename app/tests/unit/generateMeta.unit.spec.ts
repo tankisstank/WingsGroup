@@ -66,7 +66,7 @@ describe('generateMeta multisite locale contract', () => {
       expect(
         Object.keys(metadata.alternates?.languages || {}).sort(),
         `${site.name} alternates`,
-      ).toEqual([...site.publicLocales].sort())
+      ).toEqual([...site.publicLocales, 'x-default'].sort())
     }
   })
 
@@ -139,6 +139,7 @@ describe('generateMeta multisite locale contract', () => {
     expect(metadata.alternates?.canonical).toBe('https://wingsgroup.vn/he-sinh-thai')
     expect(metadata.alternates?.languages).toEqual({
       vi: 'https://wingsgroup.vn/he-sinh-thai',
+      'x-default': 'https://wingsgroup.vn/he-sinh-thai',
     })
     expect(metadata.alternates?.languages).not.toHaveProperty('en')
   })
@@ -177,8 +178,8 @@ describe('generateMeta multisite locale contract', () => {
     expect(metadata.alternates?.languages).toEqual({
       en: 'https://wingside.vn/contact-us',
       vi: 'https://wingside.vn/vi/contact-us',
+      'x-default': 'https://wingside.vn/contact-us',
     })
-    expect(metadata.alternates?.languages).not.toHaveProperty('x-default')
     expect(metadata.alternates?.languages).not.toHaveProperty('it')
     expect(metadata.alternates?.languages).not.toHaveProperty('es')
     expect(metadata.alternates?.languages).not.toHaveProperty('pt')
@@ -251,7 +252,7 @@ describe('generateMeta multisite locale contract', () => {
     expect(metadata.title).toBe('Vietnam destinations | Tailor-made Vietnam journeys | wingside.vn')
   })
 
-  it('makes unprefixed root English and /vi Vietnamese self-canonical without x-default', async () => {
+  it('makes unprefixed root English and /vi Vietnamese self-canonical with x-default', async () => {
     const site = inventory.sites.find((entry) => entry.name === 'wing-side')!
 
     mocks.getCurrentSite.mockResolvedValue({
@@ -287,7 +288,58 @@ describe('generateMeta multisite locale contract', () => {
     expect(enRoot.alternates?.languages).toEqual({
       en: 'https://wingside.vn',
       vi: 'https://wingside.vn/vi',
+      'x-default': 'https://wingside.vn',
     })
-    expect(enRoot.alternates?.languages).not.toHaveProperty('x-default')
+  })
+
+  it('emits article OpenGraph and Twitter metadata from the article itself', async () => {
+    mocks.getCurrentSite.mockResolvedValue({
+      defaultLocale: 'vi',
+      primaryDomain: 'wingsgroup.vn',
+      supportedLocales: ['vi', 'en'],
+    })
+    mocks.getCurrentSiteSettings.mockResolvedValue({
+      seo: {
+        canonicalDomain: 'https://wingsgroup.vn',
+        defaultDescription: 'Default description',
+        defaultTitle: 'WingsGroup',
+      },
+      siteName: 'WingsGroup',
+    })
+
+    const metadata = await generateMeta({
+      alternateLocales: ['vi'],
+      article: {
+        authors: ['Ban Biên tập WingsGroup'],
+        modifiedTime: '2026-09-09T00:00:00.000Z',
+        publishedTime: '2026-09-08T00:00:00.000Z',
+      },
+      doc: {
+        meta: {
+          description: 'Article description',
+          image: { id: 1, url: '/media/article-og.webp' } as never,
+          title: 'Article title',
+        },
+        title: 'Fallback article title',
+      },
+      locale: 'vi',
+      path: '/tin-tuc/article',
+      socialDescription: 'Article description',
+      socialTitle: 'Article title',
+    })
+
+    expect(metadata.openGraph).toMatchObject({
+      authors: ['Ban Biên tập WingsGroup'],
+      modifiedTime: '2026-09-09T00:00:00.000Z',
+      publishedTime: '2026-09-08T00:00:00.000Z',
+      title: 'Article title',
+      type: 'article',
+    })
+    expect(metadata.twitter).toMatchObject({
+      card: 'summary_large_image',
+      description: 'Article description',
+      images: ['https://wingsgroup.vn/media/article-og.webp'],
+      title: 'Article title',
+    })
   })
 })

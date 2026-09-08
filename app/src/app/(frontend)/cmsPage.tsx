@@ -18,7 +18,11 @@ import { JsonLd } from '@/components/JsonLd'
 import PageClient from './[...slug]/page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { RelatedPages } from '@/components/RelatedPages'
-import { buildBreadcrumbListJSONLD, buildWebPageJSONLD } from '@/utilities/structuredData'
+import {
+  buildBreadcrumbListJSONLD,
+  buildFAQPageJSONLD,
+  buildWebPageJSONLD,
+} from '@/utilities/structuredData'
 import { buildPageBreadcrumbItems, type BreadcrumbPage } from '@/utilities/breadcrumbs'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
@@ -98,8 +102,9 @@ export async function renderCmsPageByPath({
   const settings = await getCurrentSiteSettings()
   const site = await getCurrentSite()
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
-  const canonicalPath = getPageCanonicalPath(page, locale)
+  const canonicalPath = getPageCanonicalPath(page, locale, site.defaultLocale)
   const breadcrumbItems = buildPageBreadcrumbItems({
+    defaultLocale: site.defaultLocale,
     locale,
     page: page as BreadcrumbPage,
     settings,
@@ -312,6 +317,10 @@ export async function renderCmsPageByPath({
             settings,
             { canonicalOrigin },
           ),
+          // Only emit Q&A that this route renders through RenderBlocks. Hi-fi
+          // and structured-tour pages have separate bodies and therefore do
+          // not inherit FAQ markup from their unused CMS layout.
+          !structuredPage && !useHiFiBody ? buildFAQPageJSONLD(catalogLayout) : null,
         ]}
       />
       <PageClient />

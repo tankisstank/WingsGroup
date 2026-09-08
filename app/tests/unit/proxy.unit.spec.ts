@@ -1,7 +1,12 @@
 import { NextRequest } from 'next/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { config, proxy } from '@/proxy'
+import {
+  config,
+  isCacheablePublicPageRequest,
+  proxy,
+  PUBLIC_PAGE_CACHE_CONTROL,
+} from '@/proxy'
 import { createTrustedSiteContextHeaders, SITE_CONTEXT_TTL_SECONDS } from '@/utilities/siteDomains'
 import {
   mintWingsGroupLocalPreviewGrant,
@@ -84,6 +89,9 @@ describe('tenant proxy rewrites', () => {
       'http://localhost:3100/admin/login?returnTo=%2Fadmin%2Fconsole',
     )
     expect(initialResponse.headers.get('set-cookie')).toContain('payload-lng=vi')
+    expect(initialResponse.headers.get('cache-control')).toBe(
+      'private, no-cache, no-store, max-age=0, must-revalidate',
+    )
 
     const settledResponse = await proxy(
       new NextRequest('http://localhost:3100/admin/login?returnTo=%2Fadmin%2Fconsole', {
@@ -93,6 +101,53 @@ describe('tenant proxy rewrites', () => {
 
     expect(settledResponse.status).toBe(200)
     expect(settledResponse.headers.get('x-middleware-next')).toBe('1')
+  })
+
+  it('only enables shared caching for anonymous production public document requests', () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    try {
+      expect(
+        isCacheablePublicPageRequest(
+          new NextRequest('https://wingsgroup.vn/tin-tuc', { headers: { host: 'wingsgroup.vn' } }),
+        ),
+      ).toBe(true)
+      expect(
+        isCacheablePublicPageRequest(
+          new NextRequest('https://wingsgroup.vn/tin-tuc', {
+            headers: { cookie: '__prerender_bypass=preview', host: 'wingsgroup.vn' },
+          }),
+        ),
+      ).toBe(false)
+      expect(
+        isCacheablePublicPageRequest(
+          new NextRequest('https://wingsgroup.vn/api/health/live', {
+            headers: { host: 'wingsgroup.vn' },
+          }),
+        ),
+      ).toBe(false)
+      expect(
+        isCacheablePublicPageRequest(
+          new NextRequest('https://wingsgroup.vn/admin', { headers: { host: 'wingsgroup.vn' } }),
+        ),
+      ).toBe(false)
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
+  it('removes no-store for anonymous production pages without enabling shared caching', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    try {
+      const response = await proxy(
+        new NextRequest('https://wingsgroup.vn/tin-tuc', { headers: { host: 'wingsgroup.vn' } }),
+      )
+
+      expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE_CACHE_CONTROL)
+      expect(response.headers.get('cache-control')).not.toContain('no-store')
+      expect(response.headers.get('cache-control')).toContain('private')
+    } finally {
+      vi.unstubAllEnvs()
+    }
   })
 
   it('preserves the trusted tenant bundle when Next processes the rewrite destination', async () => {
@@ -407,6 +462,23 @@ describe('tenant proxy rewrites', () => {
         )
 
         expect(response.status, `${site.name} on ${host}`).toBe(404)
+      }
+    }
+  })
+
+  it('redirects each public default-locale prefix to its canonical unprefixed URL', async () => {
+    for (const site of multisiteInventory.sites) {
+      for (const host of site.hosts) {
+        const response = await proxy(
+          new NextRequest(`https://${host}/${site.defaultLocale}/sample-route`, {
+            headers: { host },
+          }),
+        )
+
+        expect(response.status, `${site.name} on ${host}`).toBe(308)
+        expect(response.headers.get('location'), `${site.name} on ${host}`).toBe(
+          `https://${host}/sample-route`,
+        )
       }
     }
   })

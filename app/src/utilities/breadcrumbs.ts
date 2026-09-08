@@ -52,14 +52,15 @@ const pushAncestorBreadcrumbs = (
   items: BreadcrumbItem[],
   page?: BreadcrumbPage | number | null,
   locale?: SupportedLocaleCode,
+  defaultLocale?: SupportedLocaleCode,
 ) => {
   if (!page || typeof page !== 'object') {
     return
   }
 
-  pushAncestorBreadcrumbs(items, page.parentPage, locale)
+  pushAncestorBreadcrumbs(items, page.parentPage, locale, defaultLocale)
 
-  const path = getPageCanonicalPath(page, locale)
+  const path = getPageCanonicalPath(page, locale, defaultLocale)
 
   if (path !== '/') {
     items.push({
@@ -70,10 +71,12 @@ const pushAncestorBreadcrumbs = (
 }
 
 export const buildPageBreadcrumbItems = ({
+  defaultLocale,
   locale,
   page,
   settings,
 }: {
+  defaultLocale?: SupportedLocaleCode
   locale?: SupportedLocaleCode
   page: BreadcrumbPage
   settings?: null | SiteSetting
@@ -82,13 +85,13 @@ export const buildPageBreadcrumbItems = ({
   const items: BreadcrumbItem[] = [
     {
       label: settings?.siteName || copy.home,
-      path: getPageCanonicalPath('/', locale),
+      path: getPageCanonicalPath('/', locale, defaultLocale),
     },
   ]
 
-  pushAncestorBreadcrumbs(items, page.parentPage, locale)
+  pushAncestorBreadcrumbs(items, page.parentPage, locale, defaultLocale)
 
-  const currentPath = getPageCanonicalPath(page, locale)
+  const currentPath = getPageCanonicalPath(page, locale, defaultLocale)
 
   if (currentPath !== '/') {
     items.push({
@@ -101,10 +104,12 @@ export const buildPageBreadcrumbItems = ({
 }
 
 export const buildPostBreadcrumbItems = ({
+  defaultLocale,
   locale,
   post,
   settings,
 }: {
+  defaultLocale?: SupportedLocaleCode
   locale?: SupportedLocaleCode
   post: BreadcrumbPost
   settings?: null | SiteSetting
@@ -114,15 +119,15 @@ export const buildPostBreadcrumbItems = ({
   return [
     {
       label: settings?.siteName || copy.home,
-      path: getPageCanonicalPath('/', locale),
+      path: getPageCanonicalPath('/', locale, defaultLocale),
     },
     {
       label: copy.posts,
-      path: getPostCanonicalPath(null, locale),
+      path: getPostCanonicalPath(null, locale, defaultLocale),
     },
     {
       label: post.meta?.breadcrumbLabel || post.title || copy.post,
-      path: getPostCanonicalPath(post.slug, locale),
+      path: getPostCanonicalPath(post.slug, locale, defaultLocale),
     },
   ]
 }

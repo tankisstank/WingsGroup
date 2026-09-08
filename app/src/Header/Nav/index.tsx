@@ -66,6 +66,7 @@ export const getWingsGroupV3RouteNav = (locale: SupportedLocaleCode) =>
 
 export const HeaderNav: React.FC<{
   data: { navItems?: HeaderType['navItems'] }
+  defaultLocale?: SupportedLocaleCode
   englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
   primaryAction?: {
     label: string
@@ -81,6 +82,7 @@ export const HeaderNav: React.FC<{
   wingsGroupV3Surface?: boolean
 }> = ({
   data,
+  defaultLocale,
   englishPublicationState,
   primaryAction,
   publicPathname,
@@ -250,6 +252,7 @@ export const HeaderNav: React.FC<{
         const href = buildLocaleSwitchHref(
           `${localeSwitchPathname}${clientReady ? locationSuffix : ''}`,
           metadata.code,
+          defaultLocale,
         )
 
         return (

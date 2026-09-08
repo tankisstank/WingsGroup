@@ -86,6 +86,35 @@ const nextConfig: NextConfig = {
   redirects,
   async headers() {
     return [
+      // Administrative and API responses can be user-specific. Keep this
+      // explicit even when an individual route does not set its own policy.
+      {
+        source: '/admin/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, no-cache, no-store, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, no-cache, no-store, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/next/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, no-cache, no-store, max-age=0, must-revalidate',
+          },
+        ],
+      },
       {
         source: '/:path*',
         headers: [

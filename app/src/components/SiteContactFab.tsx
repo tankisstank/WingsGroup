@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 
+import { ProtectedEmailLink } from './ProtectedEmailLink'
+
 type Props = { locale?: string | null; siteCode?: string | null }
 
 export const SiteContactFab: React.FC<Props> = ({ locale, siteCode }) => {
@@ -58,18 +60,14 @@ export const SiteContactFab: React.FC<Props> = ({ locale, siteCode }) => {
               >
                 0912910101
               </a>
-              <a
+              <ProtectedEmailLink
                 className="rounded-xl border border-slate-200 px-4 py-3 font-medium hover:border-slate-400"
-                href="mailto:info@wingsgroup.vn"
-              >
-                info@wingsgroup.vn
-              </a>
-              <a
+                email="info@wingsgroup.vn"
+              />
+              <ProtectedEmailLink
                 className="rounded-xl border border-slate-200 px-4 py-3 font-medium hover:border-slate-400"
-                href="mailto:sales@wingsgroup.vn"
-              >
-                sales@wingsgroup.vn
-              </a>
+                email="sales@wingsgroup.vn"
+              />
               <a
                 className="rounded-xl bg-slate-900 px-4 py-3 text-center font-semibold text-white"
                 href={contactPath}

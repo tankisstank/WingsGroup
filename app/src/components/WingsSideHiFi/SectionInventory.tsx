@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
 import { SiteLink } from '@/components/SiteLink'
 import {
   getWingsSideHiFiAlt,
@@ -745,7 +746,12 @@ export const WingsSideHiFiSectionInventory = ({
               {copy.contact.channels.map((channel) => (
                 <li key={channel.label}>
                   <span>{channel.label}</span>
-                  {channel.href ? (
+                  {channel.href?.startsWith('mailto:') ? (
+                    <ProtectedEmailLink
+                      email={channel.href.slice('mailto:'.length)}
+                      label={channel.value}
+                    />
+                  ) : channel.href ? (
                     <a href={channel.href}>{channel.value}</a>
                   ) : (
                     <strong>{channel.value}</strong>

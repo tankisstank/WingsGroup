@@ -58,6 +58,24 @@ describe('site SEO utilities', () => {
     )
   })
 
+  it('adds TravelAgency data only for the approved WingsGroup entity', () => {
+    const wingsGroup = buildOrganizationJSONLD(settings, {
+      canonicalOrigin: 'https://wingsgroup.vn',
+      siteCode: 'wings-group',
+    })
+    const childSite = buildOrganizationJSONLD(settings, {
+      canonicalOrigin: 'https://wingsgo.vn',
+      siteCode: 'wings-go',
+    })
+
+    expect(wingsGroup['@type']).toEqual(['Organization', 'TravelAgency'])
+    expect(wingsGroup.legalName).toBe('CÔNG TY CỔ PHẦN DU LỊCH ĐÔI CÁNH VIỆT')
+    expect(wingsGroup.identifier).toBe('01-2336/2023/TCDL-GP LHQT')
+    expect(wingsGroup.hasCredential).toMatchObject({ '@type': 'Permit' })
+    expect(childSite['@type']).toBe('Organization')
+    expect(childSite.legalName).toBeUndefined()
+  })
+
   it('normalizes canonical domains before metadata and sitemap use', () => {
     expect(normalizeConfiguredCanonicalOrigin('wingsgo.vn/')).toBe('https://wingsgo.vn')
     expect(normalizeConfiguredCanonicalOrigin('https://wingscare.wingsgroup.vn///')).toBe(

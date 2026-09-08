@@ -30,11 +30,18 @@ const getImageURL = ({
 
 export const generateMeta = async (args: {
   alternateLocales?: SupportedLocaleCode[]
+  article?: {
+    authors?: string[]
+    modifiedTime?: null | string
+    publishedTime?: null | string
+  }
   doc: Partial<Page> | Partial<Post> | null
   locale?: null | string
   path?: null | string
+  socialDescription?: null | string
+  socialTitle?: null | string
 }): Promise<Metadata> => {
-  const { alternateLocales, doc, locale, path } = args
+  const { alternateLocales, article, doc, locale, path, socialDescription, socialTitle } = args
   const site = await getCurrentSite()
   const settings = await getCurrentSiteSettings()
 
@@ -88,16 +95,34 @@ export const generateMeta = async (args: {
       }),
     ]),
   )
+  const defaultLocaleURL = siteLocales.includes(site.defaultLocale)
+    ? getSiteSitemapURL({
+        defaultLocale: site.defaultLocale,
+        locale: site.defaultLocale,
+        origin: canonicalOrigin,
+        path: canonicalPath,
+      })
+    : null
+  const socialMetadataTitle = socialTitle || titleBase
+  const socialMetadataDescription = socialDescription || description || ''
 
   return {
     alternates: {
       canonical: canonicalURL,
-      languages,
+      languages: defaultLocaleURL ? { ...languages, 'x-default': defaultLocaleURL } : languages,
     },
     description,
     metadataBase: new URL(canonicalOrigin),
     openGraph: mergeOpenGraph({
-      description: description || '',
+      ...(article
+        ? {
+            authors: article.authors,
+            modifiedTime: article.modifiedTime || undefined,
+            publishedTime: article.publishedTime || undefined,
+            type: 'article' as const,
+          }
+        : {}),
+      description: socialMetadataDescription,
       images: ogImage
         ? [
             {
@@ -106,9 +131,15 @@ export const generateMeta = async (args: {
           ]
         : undefined,
       siteName: settings?.siteName || seoDefaultTitle,
-      title,
+      title: socialMetadataTitle,
       url: canonicalURL,
     }),
     title,
+    twitter: {
+      card: 'summary_large_image',
+      description: socialMetadataDescription,
+      images: ogImage ? [ogImage] : undefined,
+      title: socialMetadataTitle,
+    },
   }
 }

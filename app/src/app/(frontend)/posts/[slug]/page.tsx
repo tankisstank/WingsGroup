@@ -66,8 +66,9 @@ export default async function Post({ params: paramsPromise }: Args) {
   if (!post) return <PayloadRedirects url={url} />
 
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
-  const canonicalPath = getPostCanonicalPath(decodedSlug, locale)
+  const canonicalPath = getPostCanonicalPath(decodedSlug, locale, site.defaultLocale)
   const breadcrumbItems = buildPostBreadcrumbItems({
+    defaultLocale: site.defaultLocale,
     locale,
     post: post as BreadcrumbPost,
     settings,

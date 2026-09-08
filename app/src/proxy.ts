@@ -26,12 +26,54 @@ const localBootstrapHosts = new Set(['127.0.0.1', '::1', 'localhost'])
 const localListenerHosts = new Set(['0.0.0.0', ...localBootstrapHosts])
 const adminLocale = 'vi'
 const adminLocaleCookie = 'payload-lng'
+export const PUBLIC_PAGE_CACHE_CONTROL =
+  'private, max-age=0, must-revalidate'
+const SENSITIVE_PUBLIC_PATH_PREFIXES = ['/admin', '/api', '/media', '/next'] as const
+// The edge cannot query Payload safely on every request. Keep this small
+// public-routing contract aligned with the seeded production domains; tenant
+// content and metadata still use the Site record as the source of truth.
+const defaultLocaleByPublicHost: Record<string, string> = {
+  'wingscare.wingsgroup.vn': 'vi',
+  'wingsgo.vn': 'vi',
+  'wingsgroup.vn': 'vi',
+  'wingspass.wingsgroup.vn': 'vi',
+  'wingsplus.vn': 'vi',
+  'wingside.vn': 'en',
+}
 
 const isLocalDevelopmentHost = (host: null | string) =>
   Boolean(host && (localBootstrapHosts.has(host) || host.endsWith('.local')))
 
 const isLocalListenerHost = (host: null | string) =>
   Boolean(host && (localListenerHosts.has(host) || host.endsWith('.local')))
+
+/**
+ * Dynamic route rendering is required for tenant and preview resolution, which
+ * makes Next emit `no-store` by default. Shared caching is safe only for an
+ * anonymous document request: a preview, Payload session, or any other cookie
+ * must always reach the origin instead of receiving a shared public variant.
+ */
+export const isCacheablePublicPageRequest = (request: NextRequest): boolean => {
+  if (process.env.NODE_ENV !== 'production') return false
+  if (!['GET', 'HEAD'].includes(request.method)) return false
+  if (request.headers.has('authorization') || request.headers.has('cookie')) return false
+
+  const pathname = request.nextUrl.pathname
+  return !SENSITIVE_PUBLIC_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  )
+}
+
+const applyPublicPageCachePolicy = (request: NextRequest, response: NextResponse) => {
+  if (!isCacheablePublicPageRequest(request)) return response
+
+  response.headers.set('Cache-Control', PUBLIC_PAGE_CACHE_CONTROL)
+  // The App Router owns its final Vary header, so an application-level
+  // `Vary: Cookie` cannot safely protect a shared CDN cache here. Private
+  // caching removes the BFCache-blocking `no-store` without sharing content
+  // between preview/authenticated and anonymous sessions.
+  return response
+}
 
 const isServerOwnedLocalDraftPreview = async (
   request: NextRequest,
@@ -175,6 +217,7 @@ export async function proxy(request: NextRequest) {
     request.cookies.get(adminLocaleCookie)?.value !== adminLocale
   ) {
     const response = NextResponse.redirect(request.nextUrl)
+    response.headers.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate')
     response.cookies.set(adminLocaleCookie, adminLocale, {
       maxAge: 60 * 60 * 24 * 365,
       path: '/',
@@ -193,7 +236,7 @@ export async function proxy(request: NextRequest) {
     const response = NextResponse.next({ request: { headers: preservedRewriteContext } })
     const requestID = preservedRewriteContext.get('x-request-id')
     if (requestID) response.headers.set('X-Request-ID', requestID)
-    return response
+    return applyPublicPageCachePolicy(request, response)
   }
 
   const requestID = crypto.randomUUID()
@@ -223,7 +266,10 @@ export async function proxy(request: NextRequest) {
     return notFoundResponse()
   }
 
-  if (!siteAlias && effectiveHost === 'wingsgroup.vn' && locale === 'vi') {
+  const canonicalHost = effectiveHost?.replace(/^www\./u, '') || null
+  const defaultLocale = canonicalHost ? defaultLocaleByPublicHost[canonicalHost] : null
+
+  if (!siteAlias && locale && locale === defaultLocale) {
     const url = request.nextUrl.clone()
     url.pathname = stripLeadingSegments(request.nextUrl.pathname, 1)
     return NextResponse.redirect(url, 308)
@@ -277,7 +323,7 @@ export async function proxy(request: NextRequest) {
         )
       }
     }
-    return response
+    return applyPublicPageCachePolicy(request, response)
   }
 
   // Payload's upload directory is physically public, so route media URLs back

@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { FormBlock } from '@/blocks/Form/Component'
+import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
 import { SiteLink } from '@/components/SiteLink'
 import type { WingsSideHiFiPageModel } from '@/utilities/wingsSideHiFiPageModel'
 import { getWingsSideHiFiAlt, getWingsSideHiFiPublicUrl } from '@/utilities/wingsSideHiFiMedia'
@@ -153,7 +154,15 @@ const ContactBody = ({
                   <strong>{asText(channel.value)}</strong>
                 </>
               )
-              return channel.href ? (
+              const email = channel.href?.match(/^mailto:(.+)$/iu)?.[1]
+              return email ? (
+                <article className="ws-secondary-channel" data-od-id={odId} key={`${channel.label}-${index}`}>
+                  <span className="micro">
+                    {String(index + 1).padStart(2, '0')} - {asText(channel.label)}
+                  </span>
+                  <ProtectedEmailLink email={email} label={asText(channel.value)} />
+                </article>
+              ) : channel.href ? (
                 <a
                   className="ws-secondary-channel"
                   data-od-id={odId}

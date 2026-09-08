@@ -43,6 +43,7 @@ export async function Header() {
   return (
     <HeaderClient
       data={{ navItems: settings?.headerNavItems || [] }}
+      defaultLocale={site.defaultLocale}
       englishPublicationState={settings?.wingsGroupV3?.englishPublicationState}
       accentColor={settings?.branding?.accentColor}
       brandColor={settings?.branding?.brandColor}

@@ -4,6 +4,7 @@ import React from 'react'
 import { FormBlock } from '@/blocks/Form/Component'
 import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
 import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
+import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
 
 type Props = FormBlockType & {
   locale?: null | string
@@ -46,8 +47,8 @@ export const WingsGroupContactSection = ({
               {locale === 'en' ? 'Prefer a direct conversation?' : 'Bạn muốn trao đổi trực tiếp?'}
             </span>
             <a href="tel:0912910101">0912910101</a>
-            <a href="mailto:info@wingsgroup.vn">info@wingsgroup.vn</a>
-            <a href="mailto:sales@wingsgroup.vn">sales@wingsgroup.vn</a>
+            <ProtectedEmailLink email="info@wingsgroup.vn" />
+            <ProtectedEmailLink email="sales@wingsgroup.vn" />
             {sharedZaloCTA ? (
               <a href={sharedZaloCTA.href} rel="noopener noreferrer" target="_blank">
                 {sharedZaloCTA.label}

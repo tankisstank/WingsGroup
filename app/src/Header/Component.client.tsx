@@ -12,6 +12,7 @@ interface HeaderClientProps {
   accentColor?: null | string
   brandColor?: null | string
   data: { navItems?: HeaderType['navItems'] }
+  defaultLocale?: SupportedLocaleCode
   englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
   logoImage?: Media | null
   logoText?: null | string
@@ -33,6 +34,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   accentColor,
   brandColor,
   data,
+  defaultLocale,
   englishPublicationState,
   logoImage,
   logoText,
@@ -89,6 +91,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
         </div>
         <HeaderNav
           data={data}
+          defaultLocale={defaultLocale}
           englishPublicationState={englishPublicationState}
           primaryAction={primaryAction}
           publicPathname={publicPathname}

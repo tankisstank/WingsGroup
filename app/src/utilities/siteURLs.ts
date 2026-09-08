@@ -26,6 +26,7 @@ export const normalizeCanonicalPath = (path?: null | string): string => {
 export const prefixCanonicalPathWithLocale = (
   path?: null | string,
   locale?: null | string,
+  defaultLocale?: null | string,
 ): string => {
   const normalizedPath = normalizeCanonicalPath(path)
 
@@ -33,7 +34,10 @@ export const prefixCanonicalPathWithLocale = (
     return normalizedPath
   }
 
-  if (locale === 'en') {
+  // Preserve the historical English-default behavior for callers without a
+  // site context. Public request renderers pass defaultLocale so the current
+  // tenant's default locale is never emitted as a redirecting URL.
+  if (locale === (defaultLocale || 'en')) {
     return normalizedPath
   }
 
@@ -85,39 +89,47 @@ type PagePathValue =
       slug?: null | string
     }
 
-export const getPageCanonicalPath = (value?: PagePathValue, locale?: null | string) => {
+export const getPageCanonicalPath = (
+  value?: PagePathValue,
+  locale?: null | string,
+  defaultLocale?: null | string,
+) => {
   let path = '/'
 
   if (!value) {
-    return prefixCanonicalPathWithLocale(path, locale)
+    return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
   }
 
   if (typeof value === 'object') {
     if (value.pathname) {
       path = normalizeCanonicalPath(value.pathname)
-      return prefixCanonicalPathWithLocale(path, locale)
+      return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
     }
 
     if (!value.slug || value.slug === 'home') {
-      return prefixCanonicalPathWithLocale(path, locale)
+      return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
     }
 
     path = normalizeCanonicalPath(value.slug)
-    return prefixCanonicalPathWithLocale(path, locale)
+    return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
   }
 
   if (value === 'home') {
-    return prefixCanonicalPathWithLocale(path, locale)
+    return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
   }
 
   path = normalizeCanonicalPath(value)
-  return prefixCanonicalPathWithLocale(path, locale)
+  return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
 }
 
-export const getPostCanonicalPath = (slug?: null | string, locale?: null | string) => {
+export const getPostCanonicalPath = (
+  slug?: null | string,
+  locale?: null | string,
+  defaultLocale?: null | string,
+) => {
   const path = slug ? `/posts/${slug}` : '/posts'
 
-  return prefixCanonicalPathWithLocale(path, locale)
+  return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
 }
 
 export const getPostPath = (slug?: null | string) => {
