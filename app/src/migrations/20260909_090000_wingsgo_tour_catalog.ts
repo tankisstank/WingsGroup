@@ -54,7 +54,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       SELECT values.item_order, values.slug
       FROM (VALUES ${legacyValues}) AS values(item_order, slug)
     )
-    INSERT INTO "pages_rels" ("_order", "parent_id", "path", "locale", "tour_products_id")
+    INSERT INTO "pages_rels" ("order", "parent_id", "path", "locale", "tour_products_id")
     SELECT legacy.item_order, target.page_id, 'wingsGoTourCatalog.featuredTours', NULL, product."id"
     FROM target
     CROSS JOIN legacy
