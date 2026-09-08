@@ -2,10 +2,13 @@ import type { InfoStripBlock as InfoStripBlockProps } from '@/payload-types'
 
 import { BadgeCheckIcon, Globe2Icon, HeadphonesIcon, PlaneTakeoffIcon } from 'lucide-react'
 import React from 'react'
+import { SiteLink } from '@/components/SiteLink'
 
 const infoIcons = [PlaneTakeoffIcon, Globe2Icon, HeadphonesIcon, BadgeCheckIcon] as const
 
-export const InfoStripBlock: React.FC<InfoStripBlockProps> = ({ description, eyebrow, items, title }) => {
+export const InfoStripBlock: React.FC<
+  InfoStripBlockProps & { showDeepDiveLink?: boolean }
+> = ({ description, eyebrow, items, showDeepDiveLink = false, title }) => {
   return (
     <section className="container theme-section--compact">
       <div className="theme-card site-info-strip rounded-[var(--site-radius)] border p-8">
@@ -13,6 +16,14 @@ export const InfoStripBlock: React.FC<InfoStripBlockProps> = ({ description, eye
           {eyebrow ? <p className="site-brand-kicker mb-3 text-xs font-semibold uppercase tracking-[0.24em]">{eyebrow}</p> : null}
           {title ? <h2 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h2> : null}
           {description ? <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">{description}</p> : null}
+          {showDeepDiveLink ? (
+            <SiteLink
+              className="mt-5 inline-flex text-sm font-semibold text-[color:var(--site-brand)] underline-offset-4 hover:underline"
+              href="/ve-wingsgroup"
+            >
+              Xem hồ sơ pháp lý và câu chuyện doanh nghiệp <span aria-hidden="true">↗</span>
+            </SiteLink>
+          ) : null}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

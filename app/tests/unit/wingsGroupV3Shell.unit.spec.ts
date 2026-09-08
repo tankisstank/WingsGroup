@@ -20,11 +20,12 @@ describe('WingsGroup v3 shared public shell', () => {
     expect(nav).toContain("{ href: '/#contact', label: 'Liên hệ' }")
     expect(nav).toContain('data-wingsgroup-consultation-trigger={isWingsGroupV3Surface')
     expect(nav).not.toContain('href="/en"')
-    expect(renderBlocks).toContain('showDeepDiveLinks: wingsGroupV3Home')
+    expect(renderBlocks).toContain("showDeepDiveLinks: wingsGroupV3Route === 'home'")
     expect(renderBlocks).toContain('showDeepDiveLink: true')
     expect(ecosystem).toContain('href="/nang-luc-dich-vu"')
     expect(ecosystem).toContain('href="/he-sinh-thai"')
     expect(trust).toContain('href="/ve-wingsgroup"')
+    expect(read('blocks/InfoStrip/Component.tsx')).toContain('href="/ve-wingsgroup"')
   })
 
   it('keeps public WingsGroup routes free of the theme selector and generic related-page rail', () => {

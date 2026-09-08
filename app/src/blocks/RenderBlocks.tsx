@@ -140,7 +140,7 @@ export const RenderBlocks: React.FC<{
                         allowWingsGroupDevelopmentMedia,
                         approvedProofKeys,
                         locale,
-                        showDeepDiveLinks: wingsGroupV3Home,
+                        showDeepDiveLinks: wingsGroupV3Route === 'home',
                       }
                     : wingsGroupV3 &&
                         (wingsGroupV3Route === 'corporate' || wingsGroupV3Route === 'trust') &&
@@ -148,6 +148,8 @@ export const RenderBlocks: React.FC<{
                       ? { ...block, legalIdentity: wingsGroupLegalIdentity, locale }
                       : wingsGroupV3 && wingsGroupV3Route === 'contact' && blockType === 'content'
                         ? { ...block, locale }
+                        : wingsGroupV3 && wingsGroupV3Route === 'home' && blockType === 'infoStrip'
+                          ? { ...block, showDeepDiveLink: true }
                         : wingsGroupV3Home &&
                             (block.blockType === 'infoStrip' || block.blockType === 'stats')
                           ? {
