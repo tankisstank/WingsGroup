@@ -127,6 +127,14 @@ const localSQLiteTableRenames = [
 
 const localSQLiteColumnRepairs = [
   {
+    table: 'pages',
+    columns: [['wings_go_tour_catalog_enabled', 'INTEGER DEFAULT 0']],
+  },
+  {
+    table: '_pages_v',
+    columns: [['version_wings_go_tour_catalog_enabled', 'INTEGER DEFAULT 0']],
+  },
+  {
     table: 'pages_blocks_testimonial_items',
     columns: [
       ['country', 'TEXT'],
@@ -461,6 +469,19 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
       }>
       if (columns.some(({ name }) => name === 'tag')) {
         db.exec(`UPDATE "${table}" SET "key" = "tag" WHERE "key" IS NULL;`)
+      }
+    }
+
+    ensureColumns('pages_rels', [['tour_products_id', 'INTEGER']])
+    ensureColumns('_pages_v_rels', [['tour_products_id', 'INTEGER']])
+    for (const table of ['pages_rels', '_pages_v_rels']) {
+      const tableRow = db
+        .prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?')
+        .get('table', table) as { name?: string } | undefined
+      if (tableRow?.name) {
+        db.exec(
+          `CREATE INDEX IF NOT EXISTS "${table}_tour_products_id_idx" ON "${table}" ("tour_products_id");`,
+        )
       }
     }
 
