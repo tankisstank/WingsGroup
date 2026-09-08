@@ -247,12 +247,35 @@ export const revalidateTourDeparture: CollectionAfterChangeHook = async ({
   return doc
 }
 
-export const revalidateTourDepartureDelete: CollectionAfterDeleteHook = ({
+export const revalidateTourDepartureDelete: CollectionAfterDeleteHook = async ({
   doc,
-  req: { context },
+  req: { context, payload },
 }) => {
   if (!context.disableRevalidate) {
-    revalidateMany(basePaths)
+    const relation = doc?.tourProduct as Relation
+    const populatedProduct =
+      relation && typeof relation === 'object' && 'slug' in relation
+        ? (relation as { id?: number | string; slug?: string })
+        : null
+    const productID = relationID(relation)
+    let product: { id?: number | string; slug?: string } | null = populatedProduct?.slug
+      ? populatedProduct
+      : null
+
+    if (!product && productID !== null) {
+      try {
+        product = (await payload.findByID({
+          collection: 'tour-products' as never,
+          depth: 0,
+          id: productID,
+          overrideAccess: true,
+        })) as { id?: number | string; slug?: string }
+      } catch {
+        product = null
+      }
+    }
+
+    revalidateMany([...basePaths, product?.slug ? `/tour/${product.slug}` : null])
   }
 
   return doc

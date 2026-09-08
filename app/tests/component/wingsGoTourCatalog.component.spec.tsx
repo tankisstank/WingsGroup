@@ -91,4 +91,26 @@ describe('WingsGoTourCatalogClient', () => {
       expect(screen.queryByText('Tour 1')).toBeNull()
     })
   })
+
+  it('does not append an in-flight response from the previous filter generation', async () => {
+    let resolvePreviousRequest: ((response: Response) => void) | undefined
+    vi.mocked(fetch).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvePreviousRequest = resolve
+        }),
+    )
+
+    const view = render(<WingsGoTourCatalogClient initial={data([1], true)} initialFilters={{}} />)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Tải thêm 6 tour' })[0]!)
+
+    view.rerender(
+      <WingsGoTourCatalogClient initial={data([3], false)} initialFilters={{ market: 'japan' }} />,
+    )
+    await waitFor(() => expect(screen.getByText('Tour 3')).toBeTruthy())
+
+    resolvePreviousRequest?.(new Response(JSON.stringify(data([9], false)), { status: 200 }))
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(screen.queryByText('Tour 9')).toBeNull()
+  })
 })

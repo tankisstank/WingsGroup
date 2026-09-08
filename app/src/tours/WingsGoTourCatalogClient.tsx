@@ -56,18 +56,25 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
+  const requestControllerRef = useRef<AbortController | null>(null)
+  const requestGenerationRef = useRef(0)
   const currentFilterKey = useMemo(() => filterKey(initialFilters), [initialFilters])
   const previousFilterKey = useRef(currentFilterKey)
 
   useEffect(() => {
     if (previousFilterKey.current === currentFilterKey) return
     previousFilterKey.current = currentFilterKey
+    requestGenerationRef.current += 1
+    requestControllerRef.current?.abort()
+    requestControllerRef.current = null
     setCards(initial.all)
     setOffset(initial.nextOffset)
     setHasMore(initial.hasMore)
     setError(null)
     setLoading(false)
   }, [currentFilterKey, initial])
+
+  useEffect(() => () => requestControllerRef.current?.abort(), [])
 
   const updateFilter = (key: keyof WingsGoCatalogFilters, value: string) => {
     const params = new URLSearchParams(window.location.search)
@@ -82,6 +89,10 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return
+    const requestGeneration = requestGenerationRef.current
+    const controller = new AbortController()
+    requestControllerRef.current?.abort()
+    requestControllerRef.current = controller
     setLoading(true)
     setError(null)
     const params = new URLSearchParams()
@@ -102,9 +113,11 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
     try {
       const response = await fetch(`/api/wingsgo/tour-catalog?${params.toString()}`, {
         headers: { Accept: 'application/json' },
+        signal: controller.signal,
       })
       if (!response.ok) throw new Error('Không tải thêm được catalog tour.')
       const data = (await response.json()) as WingsGoCatalogData
+      if (requestGeneration !== requestGenerationRef.current) return
       setCards((current) => {
         const seen = new Set(current.map((card) => String(card.id)))
         return [...current, ...data.all.filter((card) => !seen.has(String(card.id)))]
@@ -112,9 +125,13 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
       setOffset(data.nextOffset)
       setHasMore(data.hasMore)
     } catch (loadError) {
+      if (requestGeneration !== requestGenerationRef.current || controller.signal.aborted) return
       setError(loadError instanceof Error ? loadError.message : 'Không tải thêm được catalog tour.')
     } finally {
-      setLoading(false)
+      if (requestControllerRef.current === controller) {
+        requestControllerRef.current = null
+        setLoading(false)
+      }
     }
   }, [hasMore, initialFilters, loading, offset])
 

@@ -8,6 +8,7 @@ const cache = vi.hoisted(() => ({
 vi.mock('next/cache.js', () => cache)
 
 import { revalidatePage } from '@/collections/Pages/hooks/revalidatePage'
+import { revalidateTourDepartureDelete } from '@/collections/Tours/hooks/revalidateTourContent'
 
 describe('WingsGo catalog revalidation', () => {
   beforeEach(() => {
@@ -35,5 +36,25 @@ describe('WingsGo catalog revalidation', () => {
     expect(cache.revalidatePath).toHaveBeenCalledWith('/tour')
     expect(cache.revalidatePath).toHaveBeenCalledWith('/vi/tour')
     expect(cache.revalidateTag).toHaveBeenCalledWith('pages-sitemap', 'max')
+  })
+
+  it('invalidates the deleted departure product detail when the relation is only an ID', async () => {
+    const payload = {
+      findByID: vi.fn().mockResolvedValue({ id: 44, slug: 'deleted-departure-tour' }),
+    }
+
+    await revalidateTourDepartureDelete({
+      doc: { id: 88, tourProduct: 44 },
+      req: { context: {}, payload },
+    } as never)
+
+    expect(payload.findByID).toHaveBeenCalledWith({
+      collection: 'tour-products',
+      depth: 0,
+      id: 44,
+      overrideAccess: true,
+    })
+    expect(cache.revalidatePath).toHaveBeenCalledWith('/tour')
+    expect(cache.revalidatePath).toHaveBeenCalledWith('/tour/deleted-departure-tour')
   })
 })

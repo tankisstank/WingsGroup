@@ -27,6 +27,7 @@ describe('WingsGo tour catalog endpoint', () => {
     const response = await GET(new Request('http://localhost/api/wingsgo/tour-catalog?limit=7'))
 
     expect(response.status).toBe(400)
+    expect(response.headers.get('cache-control')).toBe('no-store')
     expect(getPayload).not.toHaveBeenCalled()
   })
 
@@ -40,6 +41,17 @@ describe('WingsGo tour catalog endpoint', () => {
     )
 
     expect(response.status).toBe(200)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(await response.json()).toEqual({ all: [], featured: [], hasMore: false, nextOffset: 0 })
+  })
+
+  it('marks the non-WingsGo empty response as non-cacheable too', async () => {
+    getCurrentSite.mockResolvedValue({ code: 'wing-side', id: 8 })
+    getPayload.mockResolvedValue({ find: vi.fn() })
+
+    const response = await GET(new Request('http://localhost/api/wingsgo/tour-catalog'))
+
+    expect(response.headers.get('cache-control')).toBe('no-store')
     expect(await response.json()).toEqual({ all: [], featured: [], hasMore: false, nextOffset: 0 })
   })
 })

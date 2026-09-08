@@ -18,6 +18,15 @@ const emptyCatalog = {
   nextOffset: 0,
 } as const
 
+const jsonNoStore = (body: unknown, init?: ResponseInit) =>
+  NextResponse.json(body, {
+    ...init,
+    headers: {
+      ...(init?.headers || {}),
+      'Cache-Control': 'no-store',
+    },
+  })
+
 const parseNonNegativeInteger = (value: string | null, fallback: number) => {
   if (value === null || value === '') return fallback
   const parsed = Number(value)
@@ -38,7 +47,7 @@ export async function GET(request: Request) {
     requestedLimit > WINGSGO_CATALOG_BATCH_SIZE ||
     offset === null
   ) {
-    return NextResponse.json({ error: 'Invalid catalog pagination.' }, { status: 400 })
+    return jsonNoStore({ error: 'Invalid catalog pagination.' }, { status: 400 })
   }
 
   try {
@@ -46,7 +55,7 @@ export async function GET(request: Request) {
     const site = await getCurrentSite()
     const locale = await getCurrentLocale()
 
-    if (!site || site.code !== 'wings-go') return NextResponse.json(emptyCatalog)
+    if (!site || site.code !== 'wings-go') return jsonNoStore(emptyCatalog)
 
     const pageResult = await payload.find({
       collection: 'pages',
@@ -67,7 +76,7 @@ export async function GET(request: Request) {
     })
     const page = pageResult.docs[0] as unknown as WingsGoCatalogPage | undefined
 
-    if (!page?.wingsGoTourCatalog?.enabled) return NextResponse.json(emptyCatalog)
+    if (!page?.wingsGoTourCatalog?.enabled) return jsonNoStore(emptyCatalog)
 
     const data = await queryWingsGoTourCatalog({
       filters: parseWingsGoCatalogFilters(url.searchParams),
@@ -78,10 +87,8 @@ export async function GET(request: Request) {
       site: site as Site,
     })
 
-    return NextResponse.json(data, {
-      headers: { 'Cache-Control': 'no-store' },
-    })
+    return jsonNoStore(data)
   } catch {
-    return NextResponse.json({ error: 'Unable to load the WingsGo catalog.' }, { status: 500 })
+    return jsonNoStore({ error: 'Unable to load the WingsGo catalog.' }, { status: 500 })
   }
 }
