@@ -9,6 +9,7 @@ scripts/bin/harness-cli.exe
 .playwright-mcp/
 artifacts/tmp/
 artifacts/*.log
+artifacts/*.png
 wingsgroup.vn-audit/
 *.tar.gz
 

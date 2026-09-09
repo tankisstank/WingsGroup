@@ -37,7 +37,17 @@ curl -s http://127.0.0.1:3000/api/health/ready
 - **Linter**: 0 errors, 0 warnings.
 - **Plane Tracking**: 0 missing stories; Story US-071 đã được liên kết với Epic E09.
 - **Production Preflight & Deployment**:
-  - Image Next.js được build thành công từ source archive release.
-  - PostgreSQL và Redis containers được bảo toàn 100% thời gian uptime (không bị recreate).
-  - Health checks `/api/health/live` và `/api/health/ready` trả về `status: "ok"` và `"status": "ready"`.
-  - Các trang công chúng `https://wingsgroup.vn/`, `https://wingsgroup.vn/nang-luc-dich-vu`, `https://wingsgroup.vn/tin-cay-va-phap-ly` phản ánh đúng giao diện mới, không có lỗi console hay tràn khung responsive.
+  - Release Commit: `113887f` (pushed to `origin/master`).
+  - Archive: `wingsgroup-us071-113887f.tar.gz` (SHA256: `c47c85b5a1a4d64d52b7c3903d8341dd8ec75c0f39ecc12701148ab38632bd16`).
+  - Release Directory: `/home/ubuntu/wings-travel/releases/wingsgroup-us071-113887f-20260909T232000Z`.
+  - Next.js Container Image: `wingstravel-app:latest` built via Docker Compose on ARM64.
+  - Runtime Switch: Symlink `/home/ubuntu/wings-travel/current` transitioned atomically.
+  - Data Layer Continuity: `wingstravel-postgres-1` (Up 3 days, healthy) và `wingstravel-redis-1` (Up 2 months, healthy) được giữ nguyên 100%, không bị recreate.
+  - Health Checks: `/api/health/live` trả về HTTP 200 `status: "ok"`, `/api/health/ready` trả về HTTP 200 `{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"status":"ready"}`.
+  - Public Verification: `https://wingsgroup.vn/` và `https://wingsgroup.vn/nang-luc-dich-vu` được kiểm chứng bằng `agent-browser`, xác nhận đầy đủ:
+    + Văn phong Hero và 5 thương hiệu mới.
+    + Khối 5 card tương tác nhu cầu (`JourneyInquiryGrid`) hoạt động chuẩn.
+    + Khối Testimonials mạng lưới khách hàng thực tế và banner chuyển đổi.
+    + Header logo responsive to đẹp, nhãn ngôn ngữ `ENGLISH (en)`.
+    + Footer có địa chỉ VP Du lịch Hà Nội (Ngọc Khánh Plaza), link `tel:0912910101`, link Chính sách bảo mật và CTA liên hệ 24/7.
+
