@@ -14,44 +14,44 @@ const stepsData = {
     {
       step: '01',
       title: 'Tiếp nhận nhu cầu & tư vấn 24/7 📞',
-      desc: 'Lắng nghe mong muốn, gợi ý giải pháp phù hợp ngân sách và thời gian của từng khách hàng.',
+      desc: 'Tiếp nhận nhanh thông tin về số lượng khách, thời gian, điểm đến và ngân sách. Đội ngũ tư vấn chủ động đề xuất phương án phù hợp thay vì áp một lịch trình có sẵn.',
     },
     {
       step: '02',
       title: 'Lên chương trình & báo giá rõ ràng 📋',
-      desc: 'Chi tiết từng dịch vụ, minh bạch chi phí, không có phụ phí phát sinh ngoài thỏa thuận.',
+      desc: 'Từng hạng mục được tư vấn cụ thể: vé máy bay, khách sạn, xe đưa đón, ăn uống, điểm tham quan và dịch vụ đi kèm. Báo giá minh bạch, thống nhất trước khi xác nhận.',
     },
     {
       step: '03',
       title: 'Chốt dịch vụ & chuẩn bị trước chuyến đi ✈️',
-      desc: 'Hướng dẫn đầy đủ thủ tục, giấy tờ, visa và những lưu ý cần thiết cho hành trình.',
+      desc: 'Sau khi thống nhất chương trình, WingsGroup tiến hành đặt dịch vụ và hoàn thiện hồ sơ đoàn. Khách được cập nhật đầy đủ thông tin cần thiết trước ngày khởi hành.',
     },
     {
       step: '04',
       title: 'Theo sát đoàn trong suốt hành trình 🤝',
-      desc: 'Điều phối viên hỗ trợ xuyên suốt, xử lý kịp thời và chu đáo mọi tình huống phát sinh.',
+      desc: 'Đội ngũ điều hành phối hợp cùng hướng dẫn viên và các nhà cung cấp dịch vụ để xử lý nhanh các tình huống phát sinh, đảm bảo hành trình diễn ra đúng kế hoạch.',
     },
   ],
   en: [
     {
       step: '01',
       title: 'Consultation & Inquiry Intake 24/7 📞',
-      desc: 'Listening to your requirements and tailoring options suited to budget and timeline.',
+      desc: 'Prompt intake of guest headcount, dates, destinations and budget. Advisors proactively suggest tailored options rather than imposing a preset itinerary.',
     },
     {
       step: '02',
       title: 'Transparent Itinerary & Quotation 📋',
-      desc: 'Clear breakdown of each service with no hidden or unexpected costs.',
+      desc: 'Clear breakdown of each item: flights, hotels, transfers, dining, attractions and add-ons. Fully transparent and agreed before confirmation.',
     },
     {
       step: '03',
       title: 'Service Confirmation & Pre-trip Briefing ✈️',
-      desc: 'Complete guidance on documents, visas and essential pre-departure notes.',
+      desc: 'Upon confirmation, WingsGroup books services and completes guest dossiers. Travellers receive full briefings and documents well before departure.',
     },
     {
       step: '04',
       title: 'Dedicated On-trip Support 🤝',
-      desc: 'Continuous coordination and prompt resolution of any on-the-ground needs.',
+      desc: 'Operations team coordinates closely with tour guides and suppliers to promptly resolve any emerging situation and keep the schedule seamless.',
     },
   ],
 }
@@ -60,53 +60,53 @@ const standardsData = {
   vi: [
     {
       title: 'An toàn & tin cậy 🛡️',
-      desc: 'Dịch vụ đúng cam kết, pháp lý minh bạch, bảo hiểm du lịch đầy đủ.',
+      desc: 'Ưu tiên các đối tác có thông tin rõ ràng, dịch vụ ổn định và phù hợp với từng chương trình. Mọi dịch vụ quan trọng đều được kiểm tra trước khi đưa vào lịch trình.',
     },
     {
       title: 'Đội ngũ chuyên nghiệp 👨‍💼',
-      desc: 'Nhân sự giàu kinh nghiệm, am hiểu sâu sắc tuyến điểm, hỗ trợ tận tình.',
+      desc: 'Tư vấn viên, điều hành và hướng dẫn viên phối hợp theo từng đoàn. Thông tin được bàn giao đầy đủ để hạn chế tối đa sai sót trong quá trình phục vụ.',
     },
     {
       title: 'Tận tâm với từng hành trình ❤️',
-      desc: 'Mỗi khách hàng là một trải nghiệm riêng biệt, luôn lắng nghe và đồng hành.',
+      desc: 'Mỗi đoàn có nhu cầu khác nhau. WingsGroup chú trọng lắng nghe từ những yêu cầu nhỏ nhất để điều chỉnh lịch trình, dịch vụ và cách phục vụ phù hợp.',
     },
     {
       title: 'Hãng bay & dịch vụ được lựa chọn kỹ ✈️',
-      desc: 'Hợp tác chặt chẽ với các đối tác hàng không, lưu trú và vận tải uy tín.',
+      desc: 'Tùy từng hành trình, WingsGroup lựa chọn hãng hàng không và phương án bay phù hợp về giờ bay, hành lý, chi phí và sự thuận tiện cho đoàn.',
     },
     {
       title: 'Khách sạn phù hợp tiêu chuẩn 🏨',
-      desc: 'Đảm bảo tiện nghi, vị trí thuận tiện và đúng cam kết theo chương trình.',
+      desc: 'Ưu tiên khách sạn có vị trí thuận tiện, chất lượng dịch vụ ổn định và phù hợp với tiêu chuẩn đã tư vấn trong chương trình.',
     },
     {
       title: 'Vận chuyển & điều hành đoàn 🚌',
-      desc: 'Xe đời mới tiện nghi, tài xế kinh nghiệm, điều hành sát sao từng chặng.',
+      desc: 'Chủ động sắp xếp phương tiện theo quy mô đoàn, lịch trình và đặc thù từng điểm đến; đảm bảo việc di chuyển thuận tiện và hạn chế thời gian chờ.',
     },
   ],
   en: [
     {
       title: 'Safety & Trust 🛡️',
-      desc: 'Fully committed services, licensed operations and comprehensive travel insurance.',
+      desc: 'Prioritising partners with clear credentials, proven reliability and strict suitability. Key services are verified before inclusion in itineraries.',
     },
     {
       title: 'Professional Team 👨‍💼',
-      desc: 'Experienced specialists with deep destination knowledge and attentive support.',
+      desc: 'Advisors, operators and tour leaders coordinate for each group. Full handover of requirements ensures flawless execution on the ground.',
     },
     {
       title: 'Care for Every Journey ❤️',
-      desc: 'Treating each traveller as a unique journey with tailored attention.',
+      desc: 'Every group has unique needs. WingsGroup listens carefully to individual requests to tailor scheduling, amenities and support.',
     },
     {
       title: 'Carefully Selected Airlines & Partners ✈️',
-      desc: 'Direct partnerships with leading carriers, hotels and vetted local vendors.',
+      desc: 'Selected according to schedule convenience, baggage allowances, cost-efficiency and maximum comfort for each itinerary.',
     },
     {
       title: 'Standard-Compliant Accommodations 🏨',
-      desc: 'Comfortable, well-located hotels meeting all agreed program standards.',
+      desc: 'Prioritising well-located hotels with dependable service levels and verified standards matching the agreed program.',
     },
     {
       title: 'Reliable Fleet & Tour Operations 🚌',
-      desc: 'Modern vehicles, experienced drivers, and tight operational coordination.',
+      desc: 'Fleet selected according to group size, route terrain and local logistics; minimising waiting time and ensuring smooth transfers.',
     },
   ],
 }
@@ -117,6 +117,31 @@ export const WingsGroupCapabilitySection = ({ description, eyebrow, locale, titl
   const rows = fallbackRows
   const steps = isEnglish ? stepsData.en : stepsData.vi
   const standards = isEnglish ? standardsData.en : standardsData.vi
+
+  const isLegacyTitle =
+    !title ||
+    title.includes('6 Giải pháp') ||
+    title.includes('6 Specialized') ||
+    title.includes('Năng lực dịch vụ')
+  const resolvedEyebrow =
+    !eyebrow || eyebrow === 'NĂNG LỰC CỐT LÕI' || eyebrow === 'CORE CAPABILITIES'
+      ? isEnglish
+        ? 'SPECIALIZED CAPABILITIES'
+        : 'NĂNG LỰC PHỤC VỤ CHUYÊN SÂU'
+      : eyebrow
+  const resolvedTitle = isLegacyTitle
+    ? isEnglish
+      ? 'Clear Service Process - Complete Accompaniment'
+      : 'Quy trình phục vụ rõ ràng - Đồng hành trọn hành trình'
+    : title
+  const resolvedDescription = isLegacyTitle
+    ? isEnglish
+      ? 'From inquiry intake to the end of the tour, WingsGroup always has dedicated coordinators following every step closely.'
+      : 'Từ lúc tiếp nhận nhu cầu đến khi đoàn kết thúc chuyến đi, WingsGroup luôn có người phụ trách theo sát từng bước.'
+    : description ||
+      (isEnglish
+        ? 'Not all journeys are the same. WingsGroup connects travel, airport services, private itineraries and MICE so every need is properly advised.'
+        : 'Không phải mọi chuyến đi đều giống nhau. WingsGroup kết nối hệ sinh thái dịch vụ từ du lịch, sân bay, hành trình riêng đến MICE, để mỗi nhu cầu được tư vấn đúng và triển khai trọn vẹn.')
 
   return (
     <section
@@ -129,22 +154,12 @@ export const WingsGroupCapabilitySection = ({ description, eyebrow, locale, titl
       <div className="container">
         <header className={styles.routeHeader}>
           <div>
-            <p className={styles.eyebrow}>
-              {eyebrow || (isEnglish ? 'SPECIALIZED CAPABILITIES' : 'NĂNG LỰC PHỤC VỤ CHUYÊN SÂU')}
-            </p>
+            <p className={styles.eyebrow}>{resolvedEyebrow}</p>
             <h2 className={styles.sectionTitle} id="wingsgroup-capability-title">
-              {title ||
-                (isEnglish
-                  ? 'Professional Services - Complete Journey with WingsGroup'
-                  : 'Dịch vụ chuyên nghiệp - Trọn vẹn hành trình cùng WingsGroup')}
+              {resolvedTitle}
             </h2>
           </div>
-          <p className={styles.sectionDescription}>
-            {description ||
-              (isEnglish
-                ? 'Not all journeys are the same. WingsGroup connects travel, airport services, private itineraries and MICE so every need is properly advised.'
-                : 'Không phải mọi chuyến đi đều giống nhau. WingsGroup kết nối hệ sinh thái dịch vụ từ du lịch, sân bay, hành trình riêng đến MICE, để mỗi nhu cầu được tư vấn đúng và triển khai trọn vẹn.')}
-          </p>
+          <p className={styles.sectionDescription}>{resolvedDescription}</p>
         </header>
 
         <div className={styles.capabilityBadges}>

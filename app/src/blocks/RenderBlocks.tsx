@@ -96,6 +96,14 @@ export const RenderBlocks: React.FC<{
         {renderedBlocks.map((block, index) => {
           const { blockType } = block
 
+          if (
+            wingsGroupV3 &&
+            wingsGroupV3Route === 'capability' &&
+            (blockType === 'content' || blockType === 'mediaBlock')
+          ) {
+            return null
+          }
+
           if (blockType && blockType in blockComponents) {
             const Block =
               wingsGroupV3Home && blockType === 'archive'
