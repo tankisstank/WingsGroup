@@ -73,13 +73,24 @@ export const Logo = (props: Props) => {
         className={clsx('inline-flex items-center', className)}
         data-fetch-priority={priority}
         data-loading={loading}
-        data-logo-source={resolvedLogoImage ? 'cms' : 'brand-manifest'}
+        data-logo-source={
+          resolvedLogoImage
+            ? 'cms'
+            : isWingsGroupBrandSite(siteCode)
+              ? 'wingsgroup-brand-kit'
+              : 'brand-manifest'
+        }
         data-logo-variant={resolvedVariant}
         data-site-code={siteCode || undefined}
       >
         <NextImage
           alt={label}
-          className="site-logo-image h-12 w-auto max-w-[160px] object-contain"
+          className={clsx(
+            'site-logo-image w-auto object-contain',
+            isWingsGroupBrandSite(siteCode)
+              ? 'h-12 md:h-14 lg:h-16 max-w-[210px]'
+              : 'h-12 max-w-[160px]',
+          )}
           height={resolvedLogoImage?.height || (isWingsGroupBrandSite(siteCode) ? 60 : 280)}
           loading={isPriorityImage ? undefined : loading}
           priority={isPriorityImage}

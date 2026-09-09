@@ -93,10 +93,10 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   .site-header__primary-link {
   border-radius: 0;
   color: #302d26;
-  font-size: 0.78rem;
-  font-weight: 500;
+  font-size: 0.9375rem;
+  font-weight: 600;
   letter-spacing: 0.01em;
-  padding-inline: 8px;
+  padding-inline: 12px;
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true']
@@ -116,14 +116,14 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   align-items: center;
   background: var(--site-accent, #fdb515);
   border: 1px solid var(--site-accent, #fdb515);
-  border-radius: 0;
+  border-radius: 4px;
   color: var(--site-brand, #005090);
   display: inline-flex;
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   font-weight: 700;
   justify-content: center;
   min-height: 44px;
-  padding: 10px 18px;
+  padding: 10px 20px;
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true']
@@ -183,36 +183,22 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   .wingsgroup-v3-surface
   .layout-content {
   display: grid;
-  gap: clamp(24px, 4vw, 64px);
+  gap: clamp(24px, 4vw, 48px);
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 1240px;
+  margin-inline: auto;
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  .wingsgroup-v3-surface
+  .layout-content:has(> :nth-child(2)) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  .wingsgroup-v3-surface
+  .layout-content:has(> :nth-child(3)) {
   grid-template-columns: minmax(0, 460px) minmax(0, 1fr) minmax(260px, 300px);
-}
-
-body[data-site-code='wings-group'][data-wingsgroup-v3='true']
-  .wingsgroup-v3-surface
-  .layout-content
-  > * {
-  grid-column: auto / span 1 !important;
-}
-
-body[data-site-code='wings-group'][data-wingsgroup-v3='true']
-  .wingsgroup-v3-surface
-  .layout-content
-  > :first-child {
-  grid-column: 1 / span 1 !important;
-}
-
-body[data-site-code='wings-group'][data-wingsgroup-v3='true']
-  .wingsgroup-v3-surface
-  .layout-content
-  > :nth-child(2) {
-  grid-column: 2 / span 1 !important;
-}
-
-body[data-site-code='wings-group'][data-wingsgroup-v3='true']
-  .wingsgroup-v3-surface
-  .layout-content
-  > :nth-child(3) {
-  grid-column: 3 / span 1 !important;
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true']
@@ -495,8 +481,8 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   background: transparent;
   box-shadow: none;
   color: #302d26;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  font-size: 0.9375rem;
+  font-weight: 600;
   letter-spacing: 0.01em;
 }
 

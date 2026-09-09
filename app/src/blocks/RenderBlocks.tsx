@@ -30,6 +30,8 @@ import { WingsGroupCapabilitySection } from '@/blocks/WingsGroupCapability/Compo
 import { WingsGroupCorporateSection } from '@/blocks/WingsGroupCorporate/Component'
 import { WingsGroupEditorialArchive } from '@/components/WingsGroupV3/EditorialArchive'
 import { WingsGroupContactIntro } from '@/components/WingsGroupV3/ContactIntro'
+import { JourneyInquiryGrid } from '@/components/WingsGroupV3/JourneyInquiryGrid'
+import { WingsGroupTestimonialsSection } from '@/components/WingsGroupV3/TestimonialsSection'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -169,6 +171,12 @@ export const RenderBlocks: React.FC<{
                 <Fragment>
                   {/* @ts-expect-error there may be some mismatch between the expected types here */}
                   <Block {...blockProps} disableInnerContainer />
+                  {wingsGroupV3Home && blockType === 'wingsGroupEcosystem' ? (
+                    <JourneyInquiryGrid />
+                  ) : null}
+                  {wingsGroupV3Home && (blockType === 'infoStrip' || blockType === 'stats') ? (
+                    <WingsGroupTestimonialsSection locale={locale} />
+                  ) : null}
                 </Fragment>
               )
 

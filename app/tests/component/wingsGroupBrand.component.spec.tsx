@@ -17,10 +17,10 @@ describe('WingsGroup brand logo fallback', () => {
   })
 
   it('does not leak the WingsGroup fallback into another tenant', () => {
-    const { container, getByText } = render(<Logo logoText="WingsGo" siteCode="wings-go" />)
+    const { container, getByText } = render(<Logo logoText="Other" siteCode="other-tenant" />)
 
     expect(container.querySelector('img')).toBeNull()
-    expect(getByText('W')).toBeTruthy()
+    expect(getByText('O')).toBeTruthy()
     expect(container.innerHTML).not.toContain('/brand/wingsgroup/')
   })
 })

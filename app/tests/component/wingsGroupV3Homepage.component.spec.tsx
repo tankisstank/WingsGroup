@@ -270,7 +270,7 @@ describe('WingsGroup v3 public components', () => {
     )
     expect(
       screen.getByText(
-        'WingsGroup là thương hiệu phát triển mới trong cùng hệ sinh thái tổ chức với VietWings và Đôi Cánh Việt. Hệ sinh thái tiếp tục phát triển các thương hiệu WingsGo, WingSide, WingsCare và các dịch vụ liên quan.',
+        'Từ nền tảng Vietwings kiến tạo hệ sinh thái dịch vụ du lịch WingsGo - WingSide - WingsPass - WingsPlus - WingsCare và các dịch vụ liên quan tạo nên hệ sinh thái WingsGroup, hướng đến trải nghiệm thuận tiện - chuyên nghiệp - đồng bộ cho khách hàng.',
       ),
     ).toBeTruthy()
     expect(screen.getByText('CÔNG TY CỔ PHẦN DU LỊCH ĐÔI CÁNH VIỆT')).toBeTruthy()
@@ -485,7 +485,9 @@ describe('WingsGroup v3 public components', () => {
 
     expect(navigationMock.push).toHaveBeenCalledWith('/lien-he#contact-form')
     expect(window.sessionStorage.getItem('wingsgroup-contact-focus')).toBe('contact-form')
-    expect(document.querySelector('[data-od-id="consultation-dialog"] a[href]')).toBeNull()
+    expect(
+      document.querySelector('[data-od-id="consultation-dialog"] a[href]')?.getAttribute('href'),
+    ).toContain('zalo.me')
   })
 
   it('localizes the consultation dialog and preserves the English contact path', () => {
@@ -497,7 +499,7 @@ describe('WingsGroup v3 public components', () => {
     expect(screen.getByText(/Share what you need\./)).toBeTruthy()
     expect(screen.getByRole('button', { name: /^Share your plans/ })).toBeTruthy()
     expect(screen.queryByText('Being updated')).toBeNull()
-    expect(screen.queryByText(/External channels|Zalo|WhatsApp|Messenger/)).toBeNull()
+    expect(screen.queryByText(/WhatsApp|Messenger/)).toBeNull()
 
     fireEvent.click(screen.getByRole('button', { name: /^Share your plans/ }))
     expect(navigationMock.push).toHaveBeenCalledWith('/en/lien-he#contact-form')

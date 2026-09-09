@@ -158,23 +158,23 @@ export const WINGSGROUP_PROFILE_PRESENTATION: Record<
 > = {
   wingsgo: {
     en: { category: 'OUTBOUND TRAVEL', stageTitle: 'Go further, prepared.' },
-    vi: { category: 'DU LỊCH NƯỚC NGOÀI', stageTitle: 'Đi xa, chuẩn bị rõ.' },
+    vi: { category: 'DU LỊCH NƯỚC NGOÀI', stageTitle: 'Đi xa, chuẩn bị kỹ.' },
   },
   'wing-side': {
     en: { category: 'VIETNAM DISCOVERY', stageTitle: 'Vietnam, at your own pace.' },
-    vi: { category: 'KHÁM PHÁ VIỆT NAM', stageTitle: 'Việt Nam theo nhịp riêng.' },
+    vi: { category: 'DU LỊCH VIỆT NAM', stageTitle: 'Đi gần, trải nghiệm sâu.' },
   },
   wingspass: {
     en: { category: 'AIRPORT SERVICES', stageTitle: 'A smoother airport experience.' },
-    vi: { category: 'DỊCH VỤ SÂN BAY', stageTitle: 'Qua sân bay nhẹ nhàng hơn.' },
+    vi: { category: 'DỊCH VỤ SÂN BAY', stageTitle: 'Đúng lúc, đúng nhu cầu.' },
   },
   wingsplus: {
     en: { category: 'PRIVATE GROUPS & MICE', stageTitle: 'One group, one considered plan.' },
-    vi: { category: 'ĐOÀN RIÊNG & MICE', stageTitle: 'Một đoàn, một kế hoạch.' },
+    vi: { category: 'HÀNH TRÌNH RIÊNG & MICE', stageTitle: 'Những hành trình được tạo nên theo cách của bạn.' },
   },
   wingscare: {
     en: { category: 'TRAVEL CARE & SUPPORT', stageTitle: 'Confidence at every step.' },
-    vi: { category: 'BẢO HIỂM & HỖ TRỢ', stageTitle: 'Yên tâm trong từng chặng.' },
+    vi: { category: 'CHĂM SÓC HÀNH TRÌNH', stageTitle: 'Đi cùng bạn, trước và sau chuyến đi.' },
   },
 }
 
@@ -381,8 +381,8 @@ export const resolveSafeHeroLinks = (
           { label: 'Request a consultation', type: 'custom', url: '/lien-he#contact-form' },
         ]
       : [
-          { label: 'Khám phá hệ sinh thái', type: 'custom', url: '#ecosystem' },
-          { label: 'Nhận tư vấn', type: 'custom', url: '/lien-he#contact-form' },
+          { label: 'Tham khảo dịch vụ', type: 'custom', url: '#services' },
+          { label: 'Nhận tư vấn 🎧', type: 'custom', url: '/lien-he#contact-form' },
         ]
 
   return fallback.map((defaultLink, index) => {

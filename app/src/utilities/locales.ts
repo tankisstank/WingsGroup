@@ -33,7 +33,7 @@ export const localeMetadata = [
     isAdsReady: true,
     isCmsEnabled: true,
     isPublicEnabled: true,
-    label: 'Tiếng Anh (en)',
+    label: 'ENGLISH (en)',
   },
   {
     code: 'it',

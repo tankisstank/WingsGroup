@@ -8,46 +8,70 @@ import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
 type LegalIdentity = NonNullable<SiteSetting['wingsGroupV3']>['legalIdentity']
 
 type Props = {
+  description?: string
+  eyebrow?: string
   items?: InfoStripBlock['items']
   legalIdentity?: LegalIdentity | null
   locale?: null | string
   showDeepDiveLink?: boolean
+  title?: string
 }
 
 const copyByLocale = {
   en: {
-    eyebrow: 'Company information',
-    identity: 'Approved legal identity',
-    heading: 'Choose with more confidence.',
+    eyebrow: 'Corporate Trust & Standards',
+    identity: 'Confirmed legal identity',
+    heading: 'Clarity helps you choose with confidence.',
     pending: 'Being updated',
     description:
-      'The public proof index will open only when the source, permission and publication status are complete.',
+      'WingsGroup is a travel services ecosystem operated by Vietwings Tourism JSC, connecting specialized teams for every journey requirement.',
     rows: [
-      ['Legal entity & licence', 'Legal identity and international travel licence are recorded.'],
-      ['Capability & certification', 'Capability records and certificates are awaiting review.'],
-      ['Official contact channels', 'Official channel endpoints remain pending update.'],
+      [
+        '01 - Direct Authentic Service',
+        'Direct connection with airlines, premium hotels and vetted local operators to minimize intermediary risks.',
+      ],
+      [
+        '02 - Clear Contracts & Transparent Pricing',
+        'Every service is confirmed prior to departure with transparent rates and no hidden charges.',
+      ],
+      [
+        '03 - Dedicated 24/7 Specialist Support',
+        'Continuous accompaniment from initial inquiry, throughout the journey, until your safe return.',
+      ],
     ],
   },
   vi: {
-    eyebrow: 'Thông tin doanh nghiệp',
+    eyebrow: 'Thông tin rõ ràng & Pháp nhân minh bạch',
     identity: 'Pháp nhân đã được xác nhận',
     heading: 'Minh bạch để bạn an tâm lựa chọn.',
     pending: 'Đang cập nhật',
     description:
-      'Hồ sơ công khai chỉ được mở khi nguồn, quyền công bố và trạng thái xuất bản đã đầy đủ.',
+      'WingsGroup là hệ sinh thái dịch vụ du lịch được vận hành bởi Công ty Cổ phần Du lịch Đôi Cánh Việt, kết nối nhiều đội ngũ chuyên biệt cho từng nhu cầu hành trình.',
     rows: [
-      ['Pháp nhân & giấy phép', 'Thông tin pháp lý và giấy phép lữ hành quốc tế đã được ghi nhận.'],
-      ['Hồ sơ năng lực & chứng nhận', 'Các hồ sơ năng lực và chứng nhận đang chờ kiểm tra.'],
-      ['Kênh liên hệ chính thức', 'Các đầu mối chính thức vẫn đang chờ cập nhật.'],
+      [
+        '01 - Dịch vụ chính hãng, kết nối trực tiếp',
+        'Làm việc với hệ thống đối tác hàng không, khách sạn và dịch vụ du lịch uy tín giúp hành trình được xây dựng đúng nhu cầu, đúng tiêu chuẩn và hạn chế tối đa rủi ro trung gian.',
+      ],
+      [
+        '02 - Hợp đồng rõ ràng, chi phí minh bạch',
+        'Mọi dịch vụ được tư vấn và xác nhận rõ ràng trước khi khởi hành. Thông tin dịch vụ, điều kiện và chi phí được thống nhất minh bạch, giúp khách hàng chủ động ngân sách.',
+      ],
+      [
+        '03 - Có chuyên viên đồng hành 24/7',
+        'Không chỉ bán một hành trình rồi kết thúc. Chuyên viên WingsGroup luôn sẵn sàng hỗ trợ khi bạn cần - từ trước chuyến đi, trong hành trình đến khi trở về.',
+      ],
     ],
   },
 } as const
 
 export const WingsGroupTrustSection = ({
+  description,
+  eyebrow,
   items,
   legalIdentity,
   locale,
   showDeepDiveLink = false,
+  title,
 }: Props) => {
   const copy = locale === 'en' ? copyByLocale.en : copyByLocale.vi
   const isEnglish = locale === 'en'
@@ -66,22 +90,25 @@ export const WingsGroupTrustSection = ({
       <div className="container">
         <div className={styles.trustGrid}>
           <div className={styles.trustCopy} data-trust-identity="approved">
-            <p className={styles.eyebrow}>{copy.eyebrow}</p>
+            <p className={styles.eyebrow}>{eyebrow || copy.eyebrow}</p>
             <h2 className={styles.sectionTitle} id="wingsgroup-trust-title">
-              {copy.heading}
+              {title || copy.heading}
             </h2>
-            <p className={styles.sectionDescription}>{copy.description}</p>
+            <p className={styles.sectionDescription}>{description || copy.description}</p>
             <div className={styles.legalIdentity}>
               <p className={styles.legalIdentityLabel}>{copy.identity}</p>
               <strong>{identity.legalEntityName}</strong>
-              <span>{identity.internationalName}</span>
-              <span>{identity.registrationNumber}</span>
-              <span>{identity.licenceNumber}</span>
+              <span>Tên viết tắt: {identity.internationalName}</span>
+              <span>Đại diện: {identity.legalRepresentative}</span>
+              <span>MST: {identity.registrationNumber}</span>
+              <span>GP Lữ hành QT: {identity.licenceNumber}</span>
+              <span>Trụ sở: {identity.registeredOffice}</span>
+              <span>VP Du lịch: {identity.travelOffice}</span>
             </div>
             {showDeepDiveLink ? (
               <SiteLink className={styles.routeCta} href="/ve-wingsgroup">
                 {isEnglish
-                  ? 'View the corporate and legal profile'
+                  ? 'View corporate profile and brand story'
                   : 'Xem hồ sơ pháp lý và câu chuyện doanh nghiệp'}{' '}
                 <span aria-hidden="true">↗</span>
               </SiteLink>
@@ -122,6 +149,44 @@ export const WingsGroupTrustSection = ({
             ))}
           </div>
         </div>
+
+        {!showDeepDiveLink ? (
+          <div className={styles.trustCredentialsVisualGrid}>
+            <div className={styles.trustCredentialCard}>
+              <div className={styles.trustCredentialPlaceholder}>
+                <span>📜 {isEnglish ? 'International Travel License' : 'Giấy phép Lữ hành Quốc tế'}</span>
+              </div>
+              <h4>01-2336/2023/TCDL-GP LHQT</h4>
+              <p>
+                {isEnglish
+                  ? 'Issued by Vietnam National Administration of Tourism, legally certified.'
+                  : 'Cấp bởi Cục Du lịch Quốc gia Việt Nam, bảo chứng pháp lý vững chắc cho mọi hành trình.'}
+              </p>
+            </div>
+            <div className={styles.trustCredentialCard}>
+              <div className={styles.trustCredentialPlaceholder}>
+                <span>✈️ {isEnglish ? 'Aviation & Service Partners' : 'Đối tác Hàng không & Dịch vụ'}</span>
+              </div>
+              <h4>{isEnglish ? 'Official Partnerships' : 'Hợp tác chính thức'}</h4>
+              <p>
+                {isEnglish
+                  ? 'Direct connectivity with Vietnam Airlines, Vietjet, Bamboo Airways and major international airlines.'
+                  : 'Kết nối trực tiếp với Vietnam Airlines, Vietjet, Bamboo Airways và các hãng hàng không quốc tế.'}
+              </p>
+            </div>
+            <div className={styles.trustCredentialCard}>
+              <div className={styles.trustCredentialPlaceholder}>
+                <span>🤝 {isEnglish ? '24/7 Accompaniment & Care' : 'Cam kết Đồng hành 24/7'}</span>
+              </div>
+              <h4>{isEnglish ? 'Clear Contracts & Transparency' : 'Hợp đồng & Bảo hiểm rõ ràng'}</h4>
+              <p>
+                {isEnglish
+                  ? 'Transparent terms, full insurance, and proactive assistance throughout the voyage.'
+                  : 'Mọi điều khoản minh bạch, bảo hiểm đầy đủ, hỗ trợ xử lý linh hoạt mọi phát sinh trong suốt hành trình.'}
+              </p>
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   )

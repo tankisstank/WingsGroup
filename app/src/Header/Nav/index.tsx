@@ -275,7 +275,7 @@ export const HeaderNav: React.FC<{
           className="site-language-switcher__link site-language-switcher__link--pending"
           title="English — Sắp có"
         >
-          EN
+          ENGLISH (en)
         </span>
       ) : null}
     </nav>

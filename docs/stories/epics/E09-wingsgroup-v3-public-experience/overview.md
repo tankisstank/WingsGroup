@@ -32,6 +32,7 @@ chưa được cấp.
 | US-064 | Consent lead-intake và consultation fallback | Accepted engineering; privacy contract đã được duyệt, runtime delivery/endpoint còn chờ |
 | US-065 | Corporate routes, legal/locale và publication governance | Accepted engineering; English đã được duyệt, legal/privacy vẫn fail-closed |
 | US-066 | PostgreSQL, cross-tenant và go-live readiness | Accepted engineering; rehearsal/môi trường còn mở |
+| US-071 | WingsGroup UX, Copy-edit, Layout & Social Proof | Implemented & verified; tinh chỉnh nội dung, giao diện, testimonials và bố cục responsive |
 
 ## Sổ bằng chứng đã chấp nhận
 

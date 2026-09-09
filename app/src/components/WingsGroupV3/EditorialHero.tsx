@@ -178,7 +178,7 @@ export const WingsGroupEditorialHero = (props: Props) => {
               data-wingsgroup-consultation-trigger="true"
               href={safeLinks[1].url || '/lien-he#contact-form'}
             >
-              {resolvedLocale === 'en' ? 'Request a consultation' : 'Trao đổi với chuyên viên'}
+              {resolvedLocale === 'en' ? 'Request a consultation' : safeLinks[1].label || 'Nhận tư vấn 🎧'}
             </a>
           </div>
         </div>

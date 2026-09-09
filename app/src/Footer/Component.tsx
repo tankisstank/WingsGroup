@@ -10,7 +10,7 @@ import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
 import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
-import { PhoneIcon } from 'lucide-react'
+import { MapPinIcon, PhoneIcon } from 'lucide-react'
 import { isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
 import { isWingsGroupBrandSite } from '@/wingsgroup/brand'
 import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
@@ -146,6 +146,16 @@ export async function Footer() {
             {settings?.footerNote ? (
               <div className="text-xs text-muted-foreground max-w-md">{settings.footerNote}</div>
             ) : null}
+            {isWingsGroupV3Surface ? (
+              <div className="flex items-start gap-2 text-sm text-muted-foreground max-w-md pt-1">
+                <MapPinIcon aria-hidden="true" className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
+                <span>
+                  {locale === 'en'
+                    ? 'Travel Office: 12th Floor, Ngoc Khanh Plaza, 1 Pham Huy Thong, Giang Vo, Ba Dinh, Hanoi'
+                    : 'VP Du lịch: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Ba Đình, Hà Nội'}
+                </span>
+              </div>
+            ) : null}
             {settings?.supportEmail || salesEmail || settings?.supportPhone ? (
               <div className="site-footer__contacts">
                 {settings.supportEmail ? (
@@ -155,8 +165,11 @@ export async function Footer() {
                   <ProtectedEmailLink email={salesEmail} />
                 ) : null}
                 {settings.supportPhone ? (
-                  <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
-                    <PhoneIcon aria-hidden="true" className="h-4 w-4" />
+                  <a
+                    className="inline-flex items-center gap-1.5 font-medium hover:underline"
+                    href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}
+                  >
+                    <PhoneIcon aria-hidden="true" className="h-4 w-4 shrink-0" />
                     {settings.supportPhone}
                   </a>
                 ) : null}
@@ -168,11 +181,16 @@ export async function Footer() {
             {!isWingsGroupV3Surface ? <ThemeSelector copy={chromeCopy.themeSelector} /> : null}
             <nav
               aria-label={chromeCopy.footerNavigation}
-              className="flex flex-col gap-4 md:flex-row md:flex-wrap md:justify-end"
+              className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-center md:justify-end"
             >
               {navItems.map(({ link }, i) => {
                 return <CMSLink className="theme-nav-link" key={i} {...link} />
               })}
+              {isWingsGroupV3Surface ? (
+                <SiteLink className="theme-nav-link" href="/chinh-sach-bao-mat">
+                  {locale === 'en' ? 'Customer Privacy Policy' : 'Chính sách bảo mật khách hàng'}
+                </SiteLink>
+              ) : null}
               {sharedZaloCTA ? (
                 <a
                   className="theme-nav-link"
@@ -182,6 +200,16 @@ export async function Footer() {
                 >
                   {sharedZaloCTA.label}
                 </a>
+              ) : null}
+              {isWingsGroupV3Surface ? (
+                <SiteLink
+                  className="site-header-cta site-footer-cta font-bold text-sm px-4 py-2 rounded shadow-sm inline-flex items-center gap-1.5"
+                  data-wingsgroup-consultation-trigger="true"
+                  href="/lien-he#contact-form"
+                >
+                  <PhoneIcon aria-hidden="true" className="h-4 w-4" />
+                  {locale === 'en' ? '24/7 CONSULTATION' : 'LIÊN HỆ TƯ VẤN 24/7'}
+                </SiteLink>
               ) : null}
             </nav>
           </div>
