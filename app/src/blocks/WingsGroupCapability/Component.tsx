@@ -124,7 +124,9 @@ export const WingsGroupCapabilitySection = ({ description, eyebrow, locale, titl
     title.includes('6 Specialized') ||
     title.includes('Năng lực dịch vụ')
   const resolvedEyebrow =
-    !eyebrow || eyebrow === 'NĂNG LỰC CỐT LÕI' || eyebrow === 'CORE CAPABILITIES'
+    !eyebrow ||
+    eyebrow.toLowerCase().includes('cốt lõi') ||
+    eyebrow.toLowerCase().includes('core capabilities')
       ? isEnglish
         ? 'SPECIALIZED CAPABILITIES'
         : 'NĂNG LỰC PHỤC VỤ CHUYÊN SÂU'
