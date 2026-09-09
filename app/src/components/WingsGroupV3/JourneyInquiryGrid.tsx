@@ -5,6 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useSitePublicLocale } from '@/providers/SitePath'
 import { useSitePath } from '@/utilities/useSitePath'
 import {
+  ArrowRightIcon,
+  BadgeCheckIcon,
+  CompassIcon,
+  PlaneIcon,
+  PlaneTakeoffIcon,
+  SparklesIcon,
+} from 'lucide-react'
+import {
   WINGSGROUP_CONTACT_FORM_ANCHOR,
   WINGSGROUP_CONTACT_FOCUS_SESSION_KEY,
 } from '@/utilities/wingsGroupConsultation'
@@ -16,7 +24,14 @@ interface InquiryCard {
   description: string
   buttonLabel: string
   inquiryKey: string
-  icon: string
+}
+
+const INQUIRY_ICONS: Record<string, React.FC<{ className?: string }>> = {
+  wingsgo: PlaneIcon,
+  wingside: CompassIcon,
+  wingspass: PlaneTakeoffIcon,
+  wingsplus: SparklesIcon,
+  wingscare: BadgeCheckIcon,
 }
 
 const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards: InquiryCard[] }> = {
@@ -31,7 +46,6 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         description: 'Đi xa, mọi thứ đã có WingsGo lo.',
         buttonLabel: 'Tôi muốn đi nước ngoài',
         inquiryKey: 'wingsgo',
-        icon: '✈️',
       },
       {
         brand: 'WingSide',
@@ -39,7 +53,6 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         description: 'Đi gần, trải nghiệm đáng nhớ hơn.',
         buttonLabel: 'Tôi muốn khám phá Việt Nam',
         inquiryKey: 'wingside',
-        icon: '🇻🇳',
       },
       {
         brand: 'WingsPass',
@@ -47,7 +60,6 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         description: 'Đến sân bay, có người đồng hành.',
         buttonLabel: 'Tôi cần dịch vụ sân bay',
         inquiryKey: 'wingspass',
-        icon: '🛬',
       },
       {
         brand: 'WingsPlus',
@@ -55,7 +67,6 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         description: 'Bạn có mục tiêu. Chúng tôi tạo hành trình.',
         buttonLabel: 'Tôi cần hành trình riêng / MICE',
         inquiryKey: 'wingsplus',
-        icon: '⭐',
       },
       {
         brand: 'WingsCare',
@@ -63,7 +74,6 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         description: 'Cần hỗ trợ? WingsCare luôn ở đó.',
         buttonLabel: 'Tôi cần được hỗ trợ',
         inquiryKey: 'wingscare',
-        icon: '🛡️',
       },
     ],
   },
@@ -78,7 +88,6 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         description: 'Going abroad, fully prepared with WingsGo.',
         buttonLabel: 'I want to travel abroad',
         inquiryKey: 'wingsgo',
-        icon: '✈️',
       },
       {
         brand: 'WingSide',
@@ -86,7 +95,6 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         description: 'Explore Vietnam with authentic local depth.',
         buttonLabel: 'I want to explore Vietnam',
         inquiryKey: 'wingside',
-        icon: '🇻🇳',
       },
       {
         brand: 'WingsPass',
@@ -94,7 +102,6 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         description: 'Dedicated support across airport touchpoints.',
         buttonLabel: 'I need airport services',
         inquiryKey: 'wingspass',
-        icon: '🛬',
       },
       {
         brand: 'WingsPlus',
@@ -102,7 +109,6 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         description: 'You have goals. We craft tailor-made itineraries.',
         buttonLabel: 'I need custom travel / MICE',
         inquiryKey: 'wingsplus',
-        icon: '⭐',
       },
       {
         brand: 'WingsCare',
@@ -110,7 +116,6 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         description: 'Need assistance? WingsCare is always with you.',
         buttonLabel: 'I need travel support',
         inquiryKey: 'wingscare',
-        icon: '🛡️',
       },
     ],
   },
@@ -152,24 +157,29 @@ export const JourneyInquiryGrid: React.FC = () => {
         </header>
 
         <div className={styles.journeyInquiryGrid}>
-          {data.cards.map((card) => (
-            <article className={styles.journeyInquiryCard} key={card.inquiryKey}>
-              <div className={styles.journeyInquiryIcon}>{card.icon}</div>
-              <span className={styles.journeyInquiryCategory}>{card.category}</span>
-              <h3 className={styles.journeyInquiryBrand}>{card.brand}</h3>
-              <p className={styles.journeyInquiryDesc}>{card.description}</p>
-              <button
-                className={styles.journeyInquiryButton}
-                data-od-id={`journey-inquiry-${card.inquiryKey}`}
-                data-wingsgroup-consultation-trigger="true"
-                onClick={() => handleSelectInquiry(card)}
-                type="button"
-              >
-                {card.buttonLabel}
-                <span aria-hidden="true"> ➔</span>
-              </button>
-            </article>
-          ))}
+          {data.cards.map((card) => {
+            const IconComponent = INQUIRY_ICONS[card.inquiryKey] || SparklesIcon
+            return (
+              <article className={styles.journeyInquiryCard} key={card.inquiryKey}>
+                <div className={styles.journeyInquiryIcon}>
+                  <IconComponent aria-hidden="true" className="h-5 w-5" />
+                </div>
+                <span className={styles.journeyInquiryCategory}>{card.category}</span>
+                <h3 className={styles.journeyInquiryBrand}>{card.brand}</h3>
+                <p className={styles.journeyInquiryDesc}>{card.description}</p>
+                <button
+                  className={styles.journeyInquiryButton}
+                  data-od-id={`journey-inquiry-${card.inquiryKey}`}
+                  data-wingsgroup-consultation-trigger="true"
+                  onClick={() => handleSelectInquiry(card)}
+                  type="button"
+                >
+                  {card.buttonLabel}
+                  <ArrowRightIcon aria-hidden="true" className="ml-1.5 inline-block h-3.5 w-3.5" />
+                </button>
+              </article>
+            )
+          })}
         </div>
       </div>
     </section>

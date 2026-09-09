@@ -382,7 +382,7 @@ export const resolveSafeHeroLinks = (
         ]
       : [
           { label: 'Tham khảo dịch vụ', type: 'custom', url: '#services' },
-          { label: 'Nhận tư vấn 🎧', type: 'custom', url: '/lien-he#contact-form' },
+          { label: 'Nhận tư vấn', type: 'custom', url: '/lien-he#contact-form' },
         ]
 
   return fallback.map((defaultLink, index) => {

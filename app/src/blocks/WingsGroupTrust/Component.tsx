@@ -2,6 +2,7 @@ import type { InfoStripBlock, SiteSetting } from '@/payload-types'
 import React from 'react'
 
 import { SiteLink } from '@/components/SiteLink'
+import { BadgeCheckIcon, FileCheckIcon, PlaneIcon, ShieldCheckIcon } from 'lucide-react'
 import { WINGSGROUP_LEGAL_IDENTITY } from '@/wingsgroup/corporateRoutes'
 import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
 
@@ -153,8 +154,9 @@ export const WingsGroupTrustSection = ({
         {!showDeepDiveLink ? (
           <div className={styles.trustCredentialsVisualGrid}>
             <div className={styles.trustCredentialCard}>
-              <div className={styles.trustCredentialPlaceholder}>
-                <span>📜 {isEnglish ? 'International Travel License' : 'Giấy phép Lữ hành Quốc tế'}</span>
+              <div className={styles.trustCredentialHeader}>
+                <FileCheckIcon aria-hidden="true" className="h-6 w-6 text-[var(--site-brand,#005090)]" />
+                <span>{isEnglish ? 'International Travel License' : 'Giấy phép Lữ hành Quốc tế'}</span>
               </div>
               <h4>01-2336/2023/TCDL-GP LHQT</h4>
               <p>
@@ -164,8 +166,9 @@ export const WingsGroupTrustSection = ({
               </p>
             </div>
             <div className={styles.trustCredentialCard}>
-              <div className={styles.trustCredentialPlaceholder}>
-                <span>✈️ {isEnglish ? 'Aviation & Service Partners' : 'Đối tác Hàng không & Dịch vụ'}</span>
+              <div className={styles.trustCredentialHeader}>
+                <PlaneIcon aria-hidden="true" className="h-6 w-6 text-[var(--site-brand,#005090)]" />
+                <span>{isEnglish ? 'Aviation & Service Partners' : 'Đối tác Hàng không & Dịch vụ'}</span>
               </div>
               <h4>{isEnglish ? 'Official Partnerships' : 'Hợp tác chính thức'}</h4>
               <p>
@@ -175,8 +178,9 @@ export const WingsGroupTrustSection = ({
               </p>
             </div>
             <div className={styles.trustCredentialCard}>
-              <div className={styles.trustCredentialPlaceholder}>
-                <span>🤝 {isEnglish ? '24/7 Accompaniment & Care' : 'Cam kết Đồng hành 24/7'}</span>
+              <div className={styles.trustCredentialHeader}>
+                <ShieldCheckIcon aria-hidden="true" className="h-6 w-6 text-[var(--site-brand,#005090)]" />
+                <span>{isEnglish ? '24/7 Accompaniment & Care' : 'Cam kết Đồng hành 24/7'}</span>
               </div>
               <h4>{isEnglish ? 'Clear Contracts & Transparency' : 'Hợp đồng & Bảo hiểm rõ ràng'}</h4>
               <p>

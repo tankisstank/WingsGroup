@@ -120,7 +120,7 @@ export const WingsGroupTestimonialsSection: React.FC<Props> = ({ locale = 'vi' }
               data-wingsgroup-consultation-trigger="true"
               href="/lien-he#contact-form"
             >
-              {isEnglish ? 'GET CONSULTATION 🎧' : 'NHẬN TƯ VẤN 🎧'}
+              {isEnglish ? 'GET CONSULTATION' : 'NHẬN TƯ VẤN'}
             </SiteLink>
           </div>
         </div>

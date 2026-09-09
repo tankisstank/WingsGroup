@@ -184,19 +184,19 @@ export const EcosystemExplorer = ({
             </h4>
             <ul className={styles.frameworkList}>
               <li>
-                <b>{locale === 'en' ? 'Full End-to-End Sync 🔗' : 'Đồng bộ từ đầu đến cuối 🔗'}:</b>{' '}
+                <b>{locale === 'en' ? 'Full End-to-End Sync' : 'Đồng bộ từ đầu đến cuối'}:</b>{' '}
                 {locale === 'en'
                   ? 'No need to juggle multiple vendors; itinerary information is consistently aligned.'
                   : 'Không phải làm việc với nhiều bên, thông tin hành trình được cập nhật xuyên suốt.'}
               </li>
               <li>
-                <b>{locale === 'en' ? 'Time & Budget Optimization ⏱️' : 'Tiết kiệm thời gian & Tối ưu ngân sách ⏱️'}:</b>{' '}
+                <b>{locale === 'en' ? 'Time & Budget Optimization' : 'Tiết kiệm thời gian & Tối ưu ngân sách'}:</b>{' '}
                 {locale === 'en'
                   ? 'Streamlined process and transparent costs eliminate unnecessary intermediaries.'
                   : 'Quy trình gọn gàng, chi phí minh bạch, loại bỏ trung gian không cần thiết.'}
               </li>
               <li>
-                <b>{locale === 'en' ? 'Clear Accountability 🤝' : 'Trách nhiệm rõ ràng 🤝'}:</b>{' '}
+                <b>{locale === 'en' ? 'Clear Accountability' : 'Trách nhiệm rõ ràng'}:</b>{' '}
                 {locale === 'en'
                   ? 'A single dedicated point of contact takes complete responsibility for your satisfaction.'
                   : 'Một đầu mối chịu trách nhiệm toàn diện cho trải nghiệm và sự hài lòng của bạn.'}
@@ -334,7 +334,7 @@ export const EcosystemExplorer = ({
             data-wingsgroup-consultation-trigger="true"
             href="/lien-he#contact-form"
           >
-            {locale === 'en' ? 'Contact for Consultation' : 'Liên hệ tư vấn 🎧'}
+            {locale === 'en' ? 'Contact for Consultation' : 'Liên hệ tư vấn'}
           </SiteLink>
         </div>
       </div>
