@@ -1,0 +1,46 @@
+{
+  "siteCode": "wingsgroup",
+  "displayTitle": "WingsGroup",
+  "sourcePdf": "pdf/WINGSGROUP.pdf",
+  "tagline": "Fly further. Together",
+  "valueLine": null,
+  "colors": {
+    "primary": "#005090",
+    "accent": "#FDB515"
+  },
+  "webAssetContract": {
+    "sourceOfTruth": "This folder's PNG masters",
+    "unit": "css-px",
+    "doNotCrop": true,
+    "doNotUpscale": true,
+    "dimensions": {
+      "logoPrimary": [
+        2400,
+        800
+      ],
+      "logoReverse": [
+        2400,
+        800
+      ],
+      "mark": [
+        1024,
+        1024
+      ],
+      "favicon": [
+        512,
+        512
+      ],
+      "ogImage": [
+        1200,
+        630
+      ]
+    }
+  },
+  "assets": {
+    "logoPrimary": "exports/wingsgroup/wingsgroup-logo-primary.png",
+    "logoReverse": "exports/wingsgroup/wingsgroup-logo-reverse.png",
+    "mark": "exports/wingsgroup/wingsgroup-mark.png",
+    "favicon": "exports/wingsgroup/wingsgroup-favicon.png",
+    "ogImage": "exports/wingsgroup/wingsgroup-og-image.png"
+  }
+}

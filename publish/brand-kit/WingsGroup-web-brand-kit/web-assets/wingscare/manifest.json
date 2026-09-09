@@ -1,0 +1,46 @@
+{
+  "siteCode": "wingscare",
+  "displayTitle": "WingsCare",
+  "sourcePdf": "pdf/WINGS CARE.pdf",
+  "tagline": "We Care. You Enjoy.",
+  "valueLine": "INNOVATION & AGILITY",
+  "colors": {
+    "primary": "#005090",
+    "accent": "#F02020"
+  },
+  "webAssetContract": {
+    "sourceOfTruth": "This folder's PNG masters",
+    "unit": "css-px",
+    "doNotCrop": true,
+    "doNotUpscale": true,
+    "dimensions": {
+      "logoPrimary": [
+        2400,
+        800
+      ],
+      "logoReverse": [
+        2400,
+        800
+      ],
+      "mark": [
+        1024,
+        1024
+      ],
+      "favicon": [
+        512,
+        512
+      ],
+      "ogImage": [
+        1200,
+        630
+      ]
+    }
+  },
+  "assets": {
+    "logoPrimary": "exports/wingscare/wingscare-logo-primary.png",
+    "logoReverse": "exports/wingscare/wingscare-logo-reverse.png",
+    "mark": "exports/wingscare/wingscare-mark.png",
+    "favicon": "exports/wingscare/wingscare-favicon.png",
+    "ogImage": "exports/wingscare/wingscare-og-image.png"
+  }
+}

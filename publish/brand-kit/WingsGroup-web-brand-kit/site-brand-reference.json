@@ -1,0 +1,192 @@
+{
+  "status": "source-reference",
+  "updatedAt": "2026-06-19",
+  "font": {
+    "extracted": "BodoniBT-Bold",
+    "source": "CorelDRAW 2020 PDF exports"
+  },
+  "notes": [
+    "Color values are sampled approximations from rendered PDF previews.",
+    "Logo entries point to source PDFs only; runtime SVG/PNG/WebP assets still need approved export.",
+    "Each runtime site requires a faviconImage in site-settings before the brand asset set is complete."
+  ],
+  "sites": [
+    {
+      "siteCode": "wingsgroup",
+      "displayTitle": "WingsGroup",
+      "brandBoardTitle": "WINGSGROUP",
+      "sourcePdf": "pdf/WINGSGROUP.pdf",
+      "logo": {
+        "description": "WingsGroup umbrella lockup used for the root WingsGroup site.",
+        "assetStatus": "generated-png",
+        "primary": "exports/wingsgroup/wingsgroup-logo-primary.png",
+        "reverse": "exports/wingsgroup/wingsgroup-logo-reverse.png",
+        "mark": "exports/wingsgroup/wingsgroup-mark.png"
+      },
+      "favicon": {
+        "required": true,
+        "assetStatus": "generated-png",
+        "path": "exports/wingsgroup/wingsgroup-favicon.png"
+      },
+      "ogImage": "exports/wingsgroup/wingsgroup-og-image.png",
+      "tagline": "Fly further. Together",
+      "valueLine": null,
+      "crops": {
+        "logoPrimary": [0.04, 0.05, 0.68, 0.46],
+        "mark": [0.09, 0.04, 0.55, 0.34]
+      },
+      "colors": {
+        "primary": "#005090",
+        "accent": "#FDB515"
+      }
+    },
+    {
+      "siteCode": "wingsgo",
+      "displayTitle": "WingsGo",
+      "brandBoardTitle": "WINGSGO",
+      "sourcePdf": "pdf/WINGS GO.pdf",
+      "logo": {
+        "description": "Blue wing/flame mark with WINGSGO wordmark.",
+        "assetStatus": "generated-png",
+        "primary": "exports/wingsgo/wingsgo-logo-primary.png",
+        "reverse": "exports/wingsgo/wingsgo-logo-reverse.png",
+        "mark": "exports/wingsgo/wingsgo-mark.png"
+      },
+      "favicon": {
+        "required": true,
+        "assetStatus": "generated-png",
+        "path": "exports/wingsgo/wingsgo-favicon.png"
+      },
+      "ogImage": "exports/wingsgo/wingsgo-og-image.png",
+      "tagline": "Go More. Feel More.",
+      "valueLine": "GLOBAL MINDSET",
+      "colors": {
+        "primary": "#005090",
+        "accent": "#0090E0"
+      }
+    },
+    {
+      "siteCode": "wingspass",
+      "displayTitle": "WingsPass",
+      "brandBoardTitle": "WINGSPASS",
+      "sourcePdf": "pdf/WINGS PASS.pdf",
+      "logo": {
+        "description": "Green wing mark with WINGSPASS wordmark.",
+        "assetStatus": "generated-png",
+        "primary": "exports/wingspass/wingspass-logo-primary.png",
+        "reverse": "exports/wingspass/wingspass-logo-reverse.png",
+        "mark": "exports/wingspass/wingspass-mark.png"
+      },
+      "favicon": {
+        "required": true,
+        "assetStatus": "generated-png",
+        "path": "exports/wingspass/wingspass-favicon.png"
+      },
+      "ogImage": "exports/wingspass/wingspass-og-image.png",
+      "tagline": "Your Journey. Seamless.",
+      "valueLine": "EXCEPTIONAL EXPERIENCES",
+      "colors": {
+        "primary": "#005090",
+        "accent": "#008070"
+      }
+    },
+    {
+      "siteCode": "wing-side",
+      "displayTitle": "wingside.vn",
+      "brandBoardTitle": "WING SIDE",
+      "sourcePdf": "pdf/WINGS SIDE.pdf",
+      "logo": {
+        "description": "Green/gold location-temple mark with WING SIDE wordmark.",
+        "assetStatus": "generated-png",
+        "primary": "exports/wingsside/wingsside-logo-primary.png",
+        "reverse": "exports/wingsside/wingsside-logo-reverse.png",
+        "mark": "exports/wingsside/wingsside-mark.png"
+      },
+      "favicon": {
+        "required": true,
+        "assetStatus": "generated-png",
+        "path": "exports/wingsside/wingsside-favicon.png"
+      },
+      "ogImage": "exports/wingsside/wingsside-og-image.png",
+      "tagline": "See Vietnam Differently.",
+      "valueLine": "TRUST & CARE",
+      "colors": {
+        "primary": "#005090",
+        "accent": "#104030",
+        "secondaryAccent": "#C09030"
+      }
+    },
+    {
+      "siteCode": "wingscare",
+      "displayTitle": "WingsCare",
+      "brandBoardTitle": "WINGSCARE",
+      "sourcePdf": "pdf/WINGS CARE.pdf",
+      "logo": {
+        "description": "Red heart/wing mark with WINGSCARE wordmark.",
+        "assetStatus": "generated-png",
+        "primary": "exports/wingscare/wingscare-logo-primary.png",
+        "reverse": "exports/wingscare/wingscare-logo-reverse.png",
+        "mark": "exports/wingscare/wingscare-mark.png"
+      },
+      "favicon": {
+        "required": true,
+        "assetStatus": "generated-png",
+        "path": "exports/wingscare/wingscare-favicon.png"
+      },
+      "ogImage": "exports/wingscare/wingscare-og-image.png",
+      "tagline": "We Care. You Enjoy.",
+      "valueLine": "INNOVATION & AGILITY",
+      "colors": {
+        "primary": "#005090",
+        "accent": "#F02020"
+      }
+    },
+    {
+      "siteCode": "wingsplus",
+      "displayTitle": "WingsPlus",
+      "brandBoardTitle": "WINGSPLUS",
+      "sourcePdf": "pdf/WINGS PLUSS.pdf",
+      "logo": {
+        "description": "Purple wing/plus mark with WINGSPLUS wordmark.",
+        "assetStatus": "generated-png",
+        "primary": "exports/wingsplus/wingsplus-logo-primary.png",
+        "reverse": "exports/wingsplus/wingsplus-logo-reverse.png",
+        "mark": "exports/wingsplus/wingsplus-mark.png"
+      },
+      "favicon": {
+        "required": true,
+        "assetStatus": "generated-png",
+        "path": "exports/wingsplus/wingsplus-favicon.png"
+      },
+      "ogImage": "exports/wingsplus/wingsplus-og-image.png",
+      "tagline": "More Benefits. More Journeys.",
+      "valueLine": "TOGETHER WE GO FURTHER",
+      "colors": {
+        "primary": "#005090",
+        "accent": "#6040A0"
+      }
+    }
+  ],
+  "ecosystemBoards": [
+    {
+      "displayTitle": "WingsCorp",
+      "brandBoardTitle": "WINGSCORP",
+      "sourcePdf": "pdf/WINGSCORP.pdf",
+      "tagline": "Fly further. Together",
+      "colors": {
+        "primary": "#005090",
+        "accent": "#FDB515"
+      }
+    },
+    {
+      "displayTitle": "WingsGroup",
+      "brandBoardTitle": "WINGSGROUP",
+      "sourcePdf": "pdf/WINGSGROUP.pdf",
+      "tagline": "Fly further. Together",
+      "colors": {
+        "primary": "#005090",
+        "accent": "#FDB515"
+      }
+    }
+  ]
+}

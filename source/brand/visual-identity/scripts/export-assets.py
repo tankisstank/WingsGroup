@@ -14,6 +14,16 @@ EXPORTS_DIR = ROOT / "exports"
 
 ASSET_KINDS = ("logo-primary", "logo-reverse", "mark", "favicon", "og-image")
 
+# Web master assets are deliberately exported at fixed dimensions. Consumers
+# choose the rendered size with CSS in CSS pixels; they should not resize or
+# crop the source file during import.
+WEB_MASTER_SIZES = {
+    "logo": (2400, 800),
+    "mark": (1024, 1024),
+    "favicon": (512, 512),
+    "og-image": (1200, 630),
+}
+
 DEFAULT_CROPS = {
     "logo-primary": (0.04, 0.05, 0.68, 0.62),
     "logo-reverse": (0.63, 0.08, 0.93, 0.39),
@@ -103,6 +113,21 @@ def square_canvas(image: Image.Image, size: int = 512) -> Image.Image:
     return canvas
 
 
+def master_canvas(
+    image: Image.Image,
+    width: int,
+    height: int,
+    max_width: int,
+    max_height: int,
+    background: tuple[int, int, int, int] = (255, 255, 255, 0),
+) -> Image.Image:
+    """Place a trimmed asset on a fixed-size web master canvas."""
+    source = fit_inside(image.convert("RGBA"), max_width, max_height)
+    canvas = Image.new("RGBA", (width, height), background)
+    canvas.alpha_composite(source, ((width - source.width) // 2, (height - source.height) // 2))
+    return canvas
+
+
 def hex_to_rgb(value: str) -> tuple[int, int, int]:
     value = value.strip().lstrip("#")
     return tuple(int(value[index : index + 2], 16) for index in (0, 2, 4))
@@ -153,7 +178,10 @@ def save_png(image: Image.Image, path: Path) -> None:
 def export_site(site: dict) -> dict:
     pdf_path = ROOT / site["sourcePdf"]
     rendered = render_pdf_page(pdf_path)
-    site_dir = EXPORTS_DIR / site["siteCode"]
+    # Keep the public asset folder aligned with the existing WingsSide alias;
+    # the technical tenant code remains `wing-side` in the manifest.
+    asset_code = "wingsside" if site["siteCode"] == "wing-side" else site["siteCode"]
+    site_dir = EXPORTS_DIR / asset_code
     site_dir.mkdir(parents=True, exist_ok=True)
 
     crops = site.get("crops", {})
@@ -161,13 +189,34 @@ def export_site(site: dict) -> dict:
     reverse_crop = crop_norm(rendered, crops.get("logoReverse", DEFAULT_CROPS["logo-reverse"]))
     mark_crop = crop_norm(rendered, crops.get("mark", DEFAULT_CROPS["mark"]))
 
-    logo_primary = fit_inside(white_to_transparent(trim_white(primary_crop)), 640, 280)
-    logo_reverse = fit_inside(trim_white(reverse_crop), 640, 360)
-    mark = fit_inside(white_to_transparent(trim_white(mark_crop)), 512, 512)
-    favicon = square_canvas(mark)
+    logo_primary = master_canvas(
+        white_to_transparent(trim_white(primary_crop)),
+        *WEB_MASTER_SIZES["logo"],
+        max_width=2160,
+        max_height=560,
+    )
+    logo_reverse = master_canvas(
+        trim_white(reverse_crop),
+        *WEB_MASTER_SIZES["logo"],
+        max_width=2160,
+        max_height=560,
+        background=(255, 255, 255, 255),
+    )
+    mark = master_canvas(
+        white_to_transparent(trim_white(mark_crop)),
+        *WEB_MASTER_SIZES["mark"],
+        max_width=760,
+        max_height=760,
+    )
+    favicon = master_canvas(
+        mark,
+        *WEB_MASTER_SIZES["favicon"],
+        max_width=512,
+        max_height=512,
+    )
     og_image = make_og_image(site, logo_primary)
 
-    site_code = site["siteCode"]
+    site_code = asset_code
     outputs = {
         "logoPrimary": site_dir / f"{site_code}-logo-primary.png",
         "logoReverse": site_dir / f"{site_code}-logo-reverse.png",
@@ -189,6 +238,19 @@ def export_site(site: dict) -> dict:
         "tagline": site.get("tagline"),
         "valueLine": site.get("valueLine"),
         "colors": site["colors"],
+        "webAssetContract": {
+            "sourceOfTruth": "This folder's PNG masters",
+            "unit": "css-px",
+            "doNotCrop": True,
+            "doNotUpscale": True,
+            "dimensions": {
+                "logoPrimary": list(WEB_MASTER_SIZES["logo"]),
+                "logoReverse": list(WEB_MASTER_SIZES["logo"]),
+                "mark": list(WEB_MASTER_SIZES["mark"]),
+                "favicon": list(WEB_MASTER_SIZES["favicon"]),
+                "ogImage": list(WEB_MASTER_SIZES["og-image"]),
+            },
+        },
         "assets": {key: str(path.relative_to(ROOT)).replace("\\", "/") for key, path in outputs.items()},
     }
     (site_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
