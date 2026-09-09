@@ -37,16 +37,19 @@ curl -s http://127.0.0.1:3000/api/health/ready
 - **Linter**: 0 errors, 0 warnings.
 - **Plane Tracking**: 0 missing stories; Story US-071 đã được liên kết với Epic E09.
 - **Production Preflight & Deployment**:
-  - Release Commit: `113887f` (pushed to `origin/master`).
-  - Archive: `wingsgroup-us071-113887f.tar.gz` (SHA256: `c47c85b5a1a4d64d52b7c3903d8341dd8ec75c0f39ecc12701148ab38632bd16`).
-  - Release Directory: `/home/ubuntu/wings-travel/releases/wingsgroup-us071-113887f-20260909T232000Z`.
-  - Next.js Container Image: `wingstravel-app:latest` built via Docker Compose on ARM64.
-  - Runtime Switch: Symlink `/home/ubuntu/wings-travel/current` transitioned atomically.
+  - Initial Release Commit: `113887f` (pushed to `origin/master`).
+  - Production Hotfix Commits: `85e997c` (align copy, suppress legacy blocks, sync site-settings) và `482fd78` (handle case-insensitive legacy eyebrow matching).
+  - Archive: `wingsgroup-us071-85e997c.tar.gz`.
+  - Release Directory: `/home/ubuntu/wings-travel/releases/wingsgroup-us071-85e997c-20260909T171832Z`.
+  - Next.js Container Image: `wingstravel-app:latest` (Image ID `e7c0692ed6ce`), built via Docker Compose on ARM64 with `--build`.
+  - Database Alignment: Đã đồng bộ `wings_group_v3_legal_identity_relationship_statement` và nội dung `pages_blocks_feature_grid` trong PostgreSQL, flush Redis cache.
+  - Runtime Switch: Symlink `/home/ubuntu/wings-travel/current` transitioned atomically sang release mới.
   - Data Layer Continuity: `wingstravel-postgres-1` (Up 3 days, healthy) và `wingstravel-redis-1` (Up 2 months, healthy) được giữ nguyên 100%, không bị recreate.
   - Health Checks: `/api/health/live` trả về HTTP 200 `status: "ok"`, `/api/health/ready` trả về HTTP 200 `{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"status":"ready"}`.
-  - Public Verification: `https://wingsgroup.vn/` và `https://wingsgroup.vn/nang-luc-dich-vu` được kiểm chứng bằng `agent-browser`, xác nhận đầy đủ:
-    + Văn phong Hero và 5 thương hiệu mới.
-    + Khối 5 card tương tác nhu cầu (`JourneyInquiryGrid`) hoạt động chuẩn.
+  - Public Verification: `https://wingsgroup.vn/` và `https://wingsgroup.vn/nang-luc-dich-vu` được kiểm chứng bằng `agent-browser` (ảnh chụp toàn trang `scratch/full_capability.png`), xác nhận đầy đủ:
+    + Eyebrow "NĂNG LỰC PHỤC VỤ CHUYÊN SÂU" và Title "Quy trình phục vụ rõ ràng - Đồng hành trọn hành trình".
+    + 2 cột nội dung chi tiết theo Slide 05: Quy trình phục vụ 4 bước và 6 Tiêu chuẩn chất lượng đầy đủ.
+    + Khối 4 card gallery và 5 hàng thương hiệu với CTA trao đổi nhu cầu.
     + Khối Testimonials mạng lưới khách hàng thực tế và banner chuyển đổi.
     + Header logo responsive to đẹp, nhãn ngôn ngữ `ENGLISH (en)`.
     + Footer có địa chỉ VP Du lịch Hà Nội (Ngọc Khánh Plaza), link `tel:0912910101`, link Chính sách bảo mật và CTA liên hệ 24/7.
