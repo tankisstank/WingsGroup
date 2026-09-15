@@ -39,6 +39,67 @@ const canonicalProfiles = Array.isArray(canonicalEcosystemBlock.profiles)
   ? canonicalEcosystemBlock.profiles.map(asRecord)
   : []
 
+const englishContentBlocks = [
+  {
+    heading: '5-LAYER OPERATING MECHANISM',
+    paragraphs: [
+      'One Team - Complete Journey',
+      'From international trips, Vietnam journeys to airport support, private itineraries and care — WingsGroup coordinates every touchpoint.',
+    ],
+  },
+  {
+    heading: 'SINGLE POINT OF CONTACT',
+    paragraphs: [
+      'Effortless & Easy to Manage',
+      'Full End-to-End Sync: No need to juggle multiple vendors; itinerary information is consistently aligned.',
+      'Time & Budget Optimization: Streamlined process and transparent costs eliminate unnecessary intermediaries.',
+      'Clear Accountability: A single dedicated point of contact takes complete responsibility for your satisfaction.',
+    ],
+  },
+] as const
+
+const lexical = (heading: string, paragraphs: readonly string[]) => ({
+  root: {
+    children: [
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: heading,
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        tag: 'h2',
+        type: 'heading',
+        version: 1,
+      },
+      ...paragraphs.map((text) => ({
+        children: [
+          { detail: 0, format: 0, mode: 'normal', style: '', text, type: 'text', version: 1 },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        textFormat: 0,
+        type: 'paragraph',
+        version: 1,
+      })),
+    ],
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    type: 'root',
+    version: 1,
+  },
+})
+
 const repairEnglishEcosystem = async () => {
   const payload = await getPayload({ config })
   try {
@@ -110,15 +171,42 @@ const repairEnglishEcosystem = async () => {
     }
 
     const currentHero = asRecord(page.hero)
+    const canonicalHero = asRecord(canonicalRoute.en.hero)
     const nextHero = {
       ...currentHero,
       richText: asRecord(canonicalRoute.en.hero).richText,
+      ...(Array.isArray(canonicalHero.links) ? { links: canonicalHero.links } : {}),
     }
 
     const currentLayout = Array.isArray(page.layout) ? page.layout : []
     let ecosystemBlockCount = 0
+    let contentBlockCount = 0
     const nextLayout = currentLayout.map((rawBlock) => {
       const block = asRecord(rawBlock)
+      if (block.blockType === 'content') {
+        const content = englishContentBlocks[contentBlockCount]
+        contentBlockCount += 1
+        if (!content) {
+          throw new Error('English ecosystem content block count changed; refusing repair.')
+        }
+
+        const currentColumns = Array.isArray(block.columns)
+          ? block.columns.map(asRecord)
+          : []
+        if (currentColumns.length === 0) {
+          throw new Error('English ecosystem content block has no columns; refusing repair.')
+        }
+
+        return {
+          ...block,
+          columns: currentColumns.map((column, index) =>
+            index === 0
+              ? { ...column, richText: lexical(content.heading, content.paragraphs) }
+              : column,
+          ),
+        }
+      }
+
       if (block.blockType !== 'wingsGroupEcosystem') return rawBlock
 
       ecosystemBlockCount += 1
@@ -174,6 +262,11 @@ const repairEnglishEcosystem = async () => {
 
     if (ecosystemBlockCount !== 1) {
       throw new Error(`Expected one English ecosystem block, found ${ecosystemBlockCount}.`)
+    }
+    if (contentBlockCount !== englishContentBlocks.length) {
+      throw new Error(
+        `Expected ${englishContentBlocks.length} English ecosystem content blocks, found ${contentBlockCount}.`,
+      )
     }
 
     const currentTarget = JSON.stringify({
