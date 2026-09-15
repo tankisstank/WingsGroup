@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 
 import { isDepartureVerificationCurrent } from './departureCommerce'
+import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { getTourProductPath } from '@/utilities/siteURLs'
 
 export const WINGSGO_CATALOG_BATCH_SIZE = 6
@@ -130,7 +131,7 @@ const mediaDTO = (value: unknown, fallbackAlt: string, productSite: Relation) =>
   if (!value || typeof value !== 'object') return null
   const media = value as InventoryMedia
   return media.url && sameID(media.site, productSite)
-    ? { alt: media.alt?.trim() || fallbackAlt, url: media.url }
+    ? { alt: media.alt?.trim() || fallbackAlt, url: getMediaUrl(media.url) }
     : null
 }
 
