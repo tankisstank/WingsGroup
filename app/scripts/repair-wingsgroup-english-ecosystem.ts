@@ -180,31 +180,28 @@ const repairEnglishEcosystem = async () => {
 
     const currentLayout = Array.isArray(page.layout) ? page.layout : []
     let ecosystemBlockCount = 0
-    let contentBlockCount = 0
+    let contentColumnCount = 0
     const nextLayout = currentLayout.map((rawBlock) => {
       const block = asRecord(rawBlock)
       if (block.blockType === 'content') {
-        const content = englishContentBlocks[contentBlockCount]
-        contentBlockCount += 1
-        if (!content) {
-          throw new Error('English ecosystem content block count changed; refusing repair.')
-        }
-
         const currentColumns = Array.isArray(block.columns)
           ? block.columns.map(asRecord)
           : []
-        if (currentColumns.length === 0) {
+        if (currentColumns.length === 0 || currentColumns.length > englishContentBlocks.length) {
           throw new Error('English ecosystem content block has no columns; refusing repair.')
         }
 
-        return {
-          ...block,
-          columns: currentColumns.map((column, index) =>
-            index === 0
-              ? { ...column, richText: lexical(content.heading, content.paragraphs) }
-              : column,
-          ),
-        }
+        const firstContentColumn = contentColumnCount
+        const nextColumns = currentColumns.map((column, index) => {
+          const content = englishContentBlocks[firstContentColumn + index]
+          if (!content) {
+            throw new Error('English ecosystem content column count changed; refusing repair.')
+          }
+          return { ...column, richText: lexical(content.heading, content.paragraphs) }
+        })
+        contentColumnCount += currentColumns.length
+
+        return { ...block, columns: nextColumns }
       }
 
       if (block.blockType !== 'wingsGroupEcosystem') return rawBlock
@@ -263,9 +260,15 @@ const repairEnglishEcosystem = async () => {
     if (ecosystemBlockCount !== 1) {
       throw new Error(`Expected one English ecosystem block, found ${ecosystemBlockCount}.`)
     }
-    if (contentBlockCount !== englishContentBlocks.length) {
+    const contentColumns = currentLayout
+      .filter((block) => asRecord(block).blockType === 'content')
+      .reduce((total, block) => {
+        const columns = asRecord(block).columns
+        return total + (Array.isArray(columns) ? columns.length : 0)
+      }, 0)
+    if (contentColumns !== englishContentBlocks.length) {
       throw new Error(
-        `Expected ${englishContentBlocks.length} English ecosystem content blocks, found ${contentBlockCount}.`,
+        `Expected ${englishContentBlocks.length} English ecosystem content columns, found ${contentColumns}.`,
       )
     }
 
