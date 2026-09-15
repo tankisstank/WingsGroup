@@ -21,7 +21,10 @@ import {
   WINGSGROUP_POLICY_ROUTES,
   WINGSGROUP_PRIVACY_VERSION,
 } from '@/lead-capture/wingsGroupV3'
-import { seedWingsGroupCorporateRoutes } from '../../scripts/lib/wingsGroupCorporateRouteSeed'
+import {
+  buildWingsGroupCorporateRouteSeeds,
+  seedWingsGroupCorporateRoutes,
+} from '../../scripts/lib/wingsGroupCorporateRouteSeed'
 import { wingsGroupLegacyContactFormFixture } from '../fixtures/wingsgroup-legacy-contact-form'
 
 const routeData = (overrides: Record<string, unknown> = {}) => ({
@@ -667,6 +670,52 @@ describe('WingsGroup corporate route integration', () => {
     ).rejects.toThrow(/site scope/)
   })
 
+  it('seeds the ecosystem CTA with matching Vietnamese and English copy', () => {
+    const route = buildWingsGroupCorporateRouteSeeds().find(
+      ({ path }) => path === '/he-sinh-thai',
+    )
+    expect(route).toBeDefined()
+    if (!route) throw new Error('Missing /he-sinh-thai route seed.')
+
+    const expected = {
+      en: {
+        heading: 'You choose the destination. WingsGroup takes care of the rest!',
+        label: 'Contact for consultation',
+        paragraph:
+          'From leisure travel, airport services to tailor-made journeys — connect with our specialists for a seamless and coordinated travel experience.',
+      },
+      vi: {
+        heading: 'Bạn chọn điểm đến. WingsGroup lo phần còn lại!',
+        label: 'Liên hệ tư vấn',
+        paragraph:
+          'Từ du lịch, dịch vụ sân bay đến những trải nghiệm được thiết kế riêng — kết nối cùng chuyên viên để có trải nghiệm đồng bộ và an tâm xuyên suốt chuyến đi.',
+      },
+    } as const
+
+    for (const locale of ['vi', 'en'] as const) {
+      const layout = route[locale].layout
+      const cta = layout[layout.length - 1]
+
+      expect(layout[0]).toMatchObject({ blockType: 'wingsGroupEcosystem' })
+      expect(cta).toMatchObject({
+        blockType: 'cta',
+        links: [
+          {
+            link: {
+              appearance: 'default',
+              label: expected[locale].label,
+              type: 'custom',
+              url: '/lien-he#contact-form',
+            },
+          },
+        ],
+        presentation: 'card',
+      })
+      expect(JSON.stringify(cta)).toContain(expected[locale].heading)
+      expect(JSON.stringify(cta)).toContain(expected[locale].paragraph)
+    }
+  })
+
   it('reconciles the same technical inventory twice without duplicate Page rows', async () => {
     const pages: Array<Record<string, unknown> & { id: number; pathname: string }> = []
     const settings: { id: number; wingsGroupV3: Record<string, unknown> } = {
@@ -828,6 +877,25 @@ describe('WingsGroup corporate route integration', () => {
     expect(createdEcosystemBlock.profiles.map((profile) => profile.stageMedia)).toEqual([
       101, 102, 103, 104, 105,
     ])
+    const createdEcosystemCTA = (
+      createdLayouts.get('/he-sinh-thai') as Array<Record<string, unknown>>
+    ).find((block) => block.blockType === 'cta')
+    expect(createdEcosystemCTA).toMatchObject({
+      blockType: 'cta',
+      links: [
+        {
+          link: {
+            label: 'Liên hệ tư vấn',
+            type: 'custom',
+            url: '/lien-he#contact-form',
+          },
+        },
+      ],
+      presentation: 'card',
+    })
+    expect(JSON.stringify(createdEcosystemCTA)).toContain(
+      'Bạn chọn điểm đến. WingsGroup lo phần còn lại!',
+    )
     expect(pages.map(({ pathname }) => pathname).sort()).toEqual([
       '/',
       '/chinh-sach-bao-mat',
