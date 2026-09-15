@@ -4,7 +4,7 @@ import {
   headerPrimaryActionsBySiteCode,
   resolveHeaderPrimaryAction,
 } from '@/utilities/headerPrimaryActions'
-import { WINGSGROUP_HOME_NAV } from '@/Header/Nav'
+import { getWingsGroupHomeNav, WINGSGROUP_HOME_NAV } from '@/Header/Nav'
 
 describe('header primary action registry', () => {
   it('keeps theme-specific CTA registries explicit', () => {
@@ -55,5 +55,24 @@ describe('header primary action registry', () => {
   it('keeps the mobile WingsGroup contact route separate from the consultation CTA', () => {
     expect(WINGSGROUP_HOME_NAV).toContainEqual({ href: '/#contact', label: 'Liên hệ' })
     expect(WINGSGROUP_HOME_NAV).not.toContainEqual({ href: '/#contact', label: 'Trao đổi nhu cầu' })
+  })
+
+  it('keeps Vietnamese and English WingsGroup navigation on the same route contract', () => {
+    expect(getWingsGroupHomeNav('vi')).toEqual([
+      { href: '/#home', label: 'Trang chủ' },
+      { href: '/nang-luc-dich-vu', label: 'Dịch vụ' },
+      { href: '/he-sinh-thai', label: 'Hệ sinh thái' },
+      { href: '/ve-wingsgroup', label: 'Về WingsGroup' },
+      { href: '/tin-tuc', label: 'Cẩm nang' },
+      { href: '/#contact', label: 'Liên hệ' },
+    ])
+    expect(getWingsGroupHomeNav('en')).toEqual([
+      { href: '/#home', label: 'Home' },
+      { href: '/nang-luc-dich-vu', label: 'Services' },
+      { href: '/he-sinh-thai', label: 'Our ecosystem' },
+      { href: '/ve-wingsgroup', label: 'About WingsGroup' },
+      { href: '/tin-tuc', label: 'Journal' },
+      { href: '/#contact', label: 'Contact' },
+    ])
   })
 })

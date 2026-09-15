@@ -1,5 +1,6 @@
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getCurrentLocale, getCurrentPublicPathname, getCurrentSite } from '@/utilities/siteContext'
+import { getPublicRoutePathname } from '@/utilities/sitePaths'
 import React from 'react'
 
 import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
@@ -11,7 +12,7 @@ import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
 import { MapPinIcon, PhoneIcon } from 'lucide-react'
-import { isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
+import { WINGSGROUP_LEGAL_IDENTITY, isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
 import { isWingsGroupBrandSite } from '@/wingsgroup/brand'
 import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
 
@@ -20,12 +21,25 @@ export async function Footer() {
   const site = await getCurrentSite()
   const locale = await getCurrentLocale()
   const publicPathname = await getCurrentPublicPathname()
+  const publicRoute = getPublicRoutePathname(publicPathname)
   const chromeCopy = getRuntimeLocaleCopy(publicChromeCopy, locale)
   const isWingSide = site.code === 'wing-side'
+  const isWingsGroup = site.code === 'wings-group'
   const isWingsGroupV3Surface =
-    site.code === 'wings-group' &&
+    isWingsGroup &&
     settings?.wingsGroupV3?.enabled === true &&
-    isWingsGroupV3SurfacePath(publicPathname)
+    isWingsGroupV3SurfacePath(publicRoute)
+  const wingsGroupIdentity = isWingsGroup
+    ? {
+        ...WINGSGROUP_LEGAL_IDENTITY,
+        registeredOffice:
+          settings?.wingsGroupV3?.legalIdentity?.registeredOffice ||
+          WINGSGROUP_LEGAL_IDENTITY.registeredOffice,
+        travelOffice:
+          settings?.wingsGroupV3?.legalIdentity?.travelOffice ||
+          WINGSGROUP_LEGAL_IDENTITY.travelOffice,
+      }
+    : null
   const sharedZaloCTA = getSharedZaloCTA(site.code, locale)
   const hiFiCopy = isWingSide ? getWingsSideHiFiCopy(locale) : null
   const wingSideNav = isWingSide ? getWingsSideHiFiNavItems(locale) : null
@@ -144,17 +158,27 @@ export async function Footer() {
               <div className="text-sm text-muted-foreground">{settings.tagline}</div>
             ) : null}
             {settings?.footerNote ? (
-              <div className="text-xs text-muted-foreground max-w-md">{settings.footerNote}</div>
+              <div className="max-w-md text-sm text-muted-foreground">{settings.footerNote}</div>
             ) : null}
-            {isWingsGroupV3Surface ? (
-              <div className="flex items-start gap-2 text-sm text-muted-foreground max-w-md pt-1">
-                <MapPinIcon aria-hidden="true" className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
-                <span>
-                  {locale === 'en'
-                    ? 'Travel Office: 12th Floor, Ngoc Khanh Plaza, 1 Pham Huy Thong, Giang Vo, Ba Dinh, Hanoi'
-                    : 'VP Du lịch: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Ba Đình, Hà Nội'}
-                </span>
-              </div>
+            {wingsGroupIdentity ? (
+              <address className="flex flex-col gap-2 text-sm text-muted-foreground not-italic">
+                <div className="flex items-start gap-2">
+                  <MapPinIcon aria-hidden="true" className="h-4 w-4 shrink-0" />
+                  <span>
+                    {locale === 'en'
+                      ? 'Head Office: 2nd Floor, 28B Alley 44 Hao Nam, O Cho Dua, Dong Da, Hanoi, Vietnam'
+                      : `Trụ sở chính: ${wingsGroupIdentity.registeredOffice}`}
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <MapPinIcon aria-hidden="true" className="h-4 w-4 shrink-0" />
+                  <span>
+                    {locale === 'en'
+                      ? 'Travel Office: 12th Floor, Ngoc Khanh Plaza, 1 Pham Huy Thong, Giang Vo, Hanoi, Vietnam'
+                      : `Văn phòng du lịch: ${wingsGroupIdentity.travelOffice}`}
+                  </span>
+                </div>
+              </address>
             ) : null}
             {settings?.supportEmail || salesEmail || settings?.supportPhone ? (
               <div className="site-footer__contacts">
@@ -165,11 +189,8 @@ export async function Footer() {
                   <ProtectedEmailLink email={salesEmail} />
                 ) : null}
                 {settings.supportPhone ? (
-                  <a
-                    className="inline-flex items-center gap-1.5 font-medium hover:underline"
-                    href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}
-                  >
-                    <PhoneIcon aria-hidden="true" className="h-4 w-4 shrink-0" />
+                  <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
+                    <PhoneIcon aria-hidden="true" className="h-4 w-4" />
                     {settings.supportPhone}
                   </a>
                 ) : null}
@@ -178,19 +199,14 @@ export async function Footer() {
           </div>
 
           <div className="flex flex-col-reverse items-start gap-4 md:flex-row md:flex-wrap md:items-center md:justify-end">
-            {!isWingsGroupV3Surface ? <ThemeSelector copy={chromeCopy.themeSelector} /> : null}
+            {!isWingsGroup ? <ThemeSelector copy={chromeCopy.themeSelector} /> : null}
             <nav
               aria-label={chromeCopy.footerNavigation}
-              className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-center md:justify-end"
+              className="flex flex-col gap-4 md:flex-row md:flex-wrap md:justify-end"
             >
               {navItems.map(({ link }, i) => {
                 return <CMSLink className="theme-nav-link" key={i} {...link} />
               })}
-              {isWingsGroupV3Surface ? (
-                <SiteLink className="theme-nav-link" href="/chinh-sach-bao-mat">
-                  {locale === 'en' ? 'Customer Privacy Policy' : 'Chính sách bảo mật khách hàng'}
-                </SiteLink>
-              ) : null}
               {sharedZaloCTA ? (
                 <a
                   className="theme-nav-link"
@@ -200,16 +216,6 @@ export async function Footer() {
                 >
                   {sharedZaloCTA.label}
                 </a>
-              ) : null}
-              {isWingsGroupV3Surface ? (
-                <SiteLink
-                  className="site-header-cta site-footer-cta font-bold text-sm px-4 py-2 rounded shadow-sm inline-flex items-center gap-1.5"
-                  data-wingsgroup-consultation-trigger="true"
-                  href="/lien-he#contact-form"
-                >
-                  <PhoneIcon aria-hidden="true" className="h-4 w-4" />
-                  {locale === 'en' ? '24/7 CONSULTATION' : 'LIÊN HỆ TƯ VẤN 24/7'}
-                </SiteLink>
               ) : null}
             </nav>
           </div>

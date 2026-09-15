@@ -55,11 +55,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const settings = await getCurrentSiteSettings()
   const locale = await getCurrentLocale()
   const publicPathname = await getCurrentPublicPathname()
+  const publicRoute = getPublicRoutePathname(publicPathname)
   const isWingsGroupV3Surface =
     site.code === 'wings-group' &&
     settings?.wingsGroupV3?.enabled === true &&
-    isWingsGroupV3SurfacePath(publicPathname)
-  const publicRoute = getPublicRoutePathname(publicPathname)
+    isWingsGroupV3SurfacePath(publicRoute)
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
   const siteTheme = getSiteThemeTokens(settings, { siteCode: site.code })
   const faviconURL = getSiteFaviconURL(settings, site.id, site.code)
@@ -68,6 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       className={cn(GeistSans.variable, GeistMono.variable)}
+      data-theme={site.code === 'wings-group' ? 'light' : undefined}
       lang={locale}
       suppressHydrationWarning
     >
@@ -100,7 +101,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             buildWebSiteJSONLD(settings, { canonicalOrigin }),
           ]}
         />
-        <Providers publicLocale={locale} publicPathname={publicPathname}>
+        <Providers publicLocale={locale} publicPathname={publicPathname} siteCode={site.code}>
           <a
             className="sr-only fixed left-4 top-4 z-[1000] rounded-md bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg focus:not-sr-only"
             href="#main-content"

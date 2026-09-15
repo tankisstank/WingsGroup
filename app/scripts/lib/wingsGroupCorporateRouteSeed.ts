@@ -165,6 +165,31 @@ const contactCTA = (locale: Locale): SeedBlock => ({
   ),
 })
 
+const ecosystemCTA = (locale: Locale): SeedBlock => ({
+  blockType: 'cta',
+  links: [
+    {
+      link: {
+        appearance: 'default',
+        label: locale === 'en' ? 'Contact for consultation' : 'Liên hệ tư vấn',
+        type: 'custom',
+        url: '/lien-he#contact-form',
+      },
+    },
+  ],
+  presentation: 'card',
+  richText: lexical(
+    locale === 'en'
+      ? 'You choose the destination. WingsGroup takes care of the rest!'
+      : 'Bạn chọn điểm đến. WingsGroup lo phần còn lại!',
+    [
+      locale === 'en'
+        ? 'From leisure travel, airport services to tailor-made journeys — connect with our specialists for a seamless and coordinated travel experience.'
+        : 'Từ du lịch, dịch vụ sân bay đến những trải nghiệm được thiết kế riêng — kết nối cùng chuyên viên để có trải nghiệm đồng bộ và an tâm xuyên suốt chuyến đi.',
+    ],
+  ),
+})
+
 export const WINGSGROUP_PRIVACY_APPROVAL_REFERENCE = 'stakeholder-privacy-consent-2026-08-24'
 export const WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE =
   'stakeholder-privacy-consent-2026-08-24'
@@ -341,6 +366,7 @@ const ecosystemRoute = (locale: Locale): LocalizedRouteSeed => ({
           ? 'One ecosystem. Five ways to move forward.'
           : 'Một hệ sinh thái. Năm cách đồng hành.',
     },
+    ecosystemCTA(locale),
   ],
   title: locale === 'en' ? 'The WingsGroup ecosystem' : 'Hệ sinh thái WingsGroup',
 })

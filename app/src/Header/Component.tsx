@@ -2,6 +2,7 @@ import { HeaderClient } from './Component.client'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { resolveHeaderPrimaryAction } from '@/utilities/headerPrimaryActions'
 import { getCurrentLocale, getCurrentPublicPathname, getCurrentSite } from '@/utilities/siteContext'
+import { getPublicRoutePathname } from '@/utilities/sitePaths'
 import { defaultThemeKey } from '@/utilities/themeTokens'
 import { isWingsGroupBrandSite } from '@/wingsgroup/brand'
 import React from 'react'
@@ -15,6 +16,7 @@ export async function Header() {
   const site = await getCurrentSite()
   const locale = await getCurrentLocale()
   const publicPathname = await getCurrentPublicPathname()
+  const publicRoute = getPublicRoutePathname(publicPathname)
   const siteName = settings?.siteName || ''
   const logoText = settings?.branding?.logoText || settings?.siteName
   const hasConfiguredLogoImage = Boolean(
@@ -26,13 +28,11 @@ export async function Header() {
   const usesWingsGroupBrandFallback = isWingsGroupBrandSite(site.code) && !hasConfiguredLogoImage
   const themeKey = settings?.branding?.themeKey || defaultThemeKey
   const isWingsGroupHome =
-    site.code === 'wings-group' &&
-    publicPathname === '/' &&
-    settings?.wingsGroupV3?.enabled === true
+    site.code === 'wings-group' && publicRoute === '/' && settings?.wingsGroupV3?.enabled === true
   const isWingsGroupV3Surface =
     site.code === 'wings-group' &&
     settings?.wingsGroupV3?.enabled === true &&
-    isWingsGroupV3SurfacePath(publicPathname)
+    isWingsGroupV3SurfacePath(publicRoute)
   const primaryAction = isWingsGroupV3Surface
     ? {
         label: locale === 'en' ? 'Speak with a specialist' : 'Trao đổi nhu cầu',

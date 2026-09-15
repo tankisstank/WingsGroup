@@ -9,10 +9,11 @@ export const Providers: React.FC<{
   children: React.ReactNode
   publicLocale: SupportedLocaleCode
   publicPathname: string
-}> = ({ children, publicLocale, publicPathname }) => {
+  siteCode?: string
+}> = ({ children, publicLocale, publicPathname, siteCode }) => {
   return (
     <SitePathProvider publicLocale={publicLocale} publicPathname={publicPathname}>
-      <ThemeProvider>
+      <ThemeProvider siteCode={siteCode}>
         <HeaderThemeProvider>{children}</HeaderThemeProvider>
       </ThemeProvider>
     </SitePathProvider>

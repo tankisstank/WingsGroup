@@ -21,39 +21,38 @@ import { getWingsGroupSwitcherLocales } from '@/components/WingsGroupV3/model'
 
 export const WINGSGROUP_HOME_NAV = [
   { href: '/#home', label: 'Trang chủ' },
-  { href: '/#services', label: 'Dịch vụ' },
-  { href: '/#about', label: 'Hệ sinh thái' },
-  { href: '/#trust', label: 'Về WingsGroup' },
+  { href: '/nang-luc-dich-vu', label: 'Dịch vụ' },
+  { href: '/he-sinh-thai', label: 'Hệ sinh thái' },
+  { href: '/ve-wingsgroup', label: 'Về WingsGroup' },
   { href: '/tin-tuc', label: 'Cẩm nang' },
   { href: '/#contact', label: 'Liên hệ' },
 ] as const
 
 export const WINGSGROUP_V3_ROUTE_NAV = [
-  // Away from the home surface, preserve the same information architecture by
-  // returning visitors to the matching section rather than changing the menu
-  // into a second, route-only navigation model.
+  // Keep the same information architecture away from the home surface while
+  // using the governed corporate routes.
   { href: '/#home', label: 'Trang chủ' },
-  { href: '/#services', label: 'Dịch vụ' },
-  { href: '/#about', label: 'Hệ sinh thái' },
-  { href: '/#trust', label: 'Về WingsGroup' },
+  { href: '/nang-luc-dich-vu', label: 'Dịch vụ' },
+  { href: '/he-sinh-thai', label: 'Hệ sinh thái' },
+  { href: '/ve-wingsgroup', label: 'Về WingsGroup' },
   { href: '/tin-tuc', label: 'Cẩm nang' },
   { href: '/#contact', label: 'Liên hệ' },
 ] as const
 
 const WINGSGROUP_HOME_NAV_EN = [
   { href: '/#home', label: 'Home' },
-  { href: '/#services', label: 'Services' },
-  { href: '/#about', label: 'Our ecosystem' },
-  { href: '/#trust', label: 'About WingsGroup' },
+  { href: '/nang-luc-dich-vu', label: 'Services' },
+  { href: '/he-sinh-thai', label: 'Our ecosystem' },
+  { href: '/ve-wingsgroup', label: 'About WingsGroup' },
   { href: '/tin-tuc', label: 'Journal' },
   { href: '/#contact', label: 'Contact' },
 ] as const
 
 const WINGSGROUP_V3_ROUTE_NAV_EN = [
   { href: '/#home', label: 'Home' },
-  { href: '/#services', label: 'Services' },
-  { href: '/#about', label: 'Our ecosystem' },
-  { href: '/#trust', label: 'About WingsGroup' },
+  { href: '/nang-luc-dich-vu', label: 'Services' },
+  { href: '/he-sinh-thai', label: 'Our ecosystem' },
+  { href: '/ve-wingsgroup', label: 'About WingsGroup' },
   { href: '/tin-tuc', label: 'Journal' },
   { href: '/#contact', label: 'Contact' },
 ] as const
@@ -63,6 +62,18 @@ export const getWingsGroupHomeNav = (locale: SupportedLocaleCode) =>
 
 export const getWingsGroupV3RouteNav = (locale: SupportedLocaleCode) =>
   locale === 'en' ? WINGSGROUP_V3_ROUTE_NAV_EN : WINGSGROUP_V3_ROUTE_NAV
+
+const getNativeLocaleLabel = (code: SupportedLocaleCode, fallback: string): string => {
+  if (code === 'en') return 'ENGLISH (en)'
+  if (code === 'vi') return 'Tiếng Việt (vi)'
+
+  try {
+    const label = new Intl.DisplayNames([code], { type: 'language' }).of(code)
+    return label ? `${label[0]!.toLocaleUpperCase(code)}${label.slice(1)}` : fallback
+  } catch {
+    return fallback
+  }
+}
 
 export const HeaderNav: React.FC<{
   data: { navItems?: HeaderType['navItems'] }
@@ -108,16 +119,16 @@ export const HeaderNav: React.FC<{
       ? getWingsGroupSwitcherLocales(availableLocales, englishPublicationState)
       : availableLocales
   const isWingsSide = siteCode ? siteCode === 'wing-side' : themeKey === 'wings-side'
+  const normalizedPublicPathname = getPublicRoutePathname(pathname || publicPathname || '/')
   const isWingsGroupHome =
-    wingsGroupV3Home ?? (siteCode === 'wings-group' && publicPathname === '/')
+    wingsGroupV3Home ?? (siteCode === 'wings-group' && normalizedPublicPathname === '/')
   const isWingsGroupV3Surface = wingsGroupV3Surface ?? isWingsGroupHome
   const wingsGroupHomeNav = getWingsGroupHomeNav(resolvedLocale)
   const wingsGroupRouteNav = getWingsGroupV3RouteNav(resolvedLocale)
   const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
   const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null
   const resolvedPrimaryAction = wingsSideHiFiCta || primaryAction
-  const sharedZaloCTA =
-    getSharedZaloCTA(siteCode, resolvedLocale)
+  const sharedZaloCTA = getSharedZaloCTA(siteCode, resolvedLocale)
   const shouldRenderPrimaryAction =
     resolvedPrimaryAction &&
     !(wingsSideHiFiNav
@@ -179,9 +190,46 @@ export const HeaderNav: React.FC<{
   }
   const copy =
     copyByLocale[resolvedLocale] || copyByLocale[getCopyLocale(resolvedLocale)] || copyByLocale.en!
+  const maybeSmoothScrollToContact = (event: React.MouseEvent<HTMLAnchorElement>): boolean => {
+    if (
+      !isWingsGroupHome ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return false
+    }
+
+    const targetURL = new URL(event.currentTarget.href, window.location.href)
+    const currentURL = new URL(window.location.href)
+    if (
+      targetURL.origin !== currentURL.origin ||
+      targetURL.pathname !== currentURL.pathname ||
+      targetURL.hash !== '#contact'
+    ) {
+      return false
+    }
+
+    const contact = document.getElementById('contact')
+    if (!contact) return false
+
+    event.preventDefault()
+    setIsOpen(false)
+    contact.scrollIntoView({ behavior: 'smooth' })
+
+    const suffix = `${currentURL.search}#contact`
+    window.history.pushState(window.history.state, '', `${currentURL.pathname}${suffix}`)
+    setLocationSuffix(suffix)
+    return true
+  }
+
   const navigateAndCloseMobile: React.MouseEventHandler<HTMLAnchorElement> = (event) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
       return
+
+    if (maybeSmoothScrollToContact(event)) return
 
     event.preventDefault()
     setIsOpen(false)
@@ -249,6 +297,7 @@ export const HeaderNav: React.FC<{
     >
       <Globe2Icon aria-hidden="true" className="h-4 w-4" />
       {switcherLocales.map((metadata) => {
+        const label = getNativeLocaleLabel(metadata.code, metadata.label)
         const href = buildLocaleSwitchHref(
           `${localeSwitchPathname}${clientReady ? locationSuffix : ''}`,
           metadata.code,
@@ -263,9 +312,9 @@ export const HeaderNav: React.FC<{
             href={href}
             key={metadata.code}
             onClick={navigateAndCloseMobile}
-            title={metadata.label}
+            title={label}
           >
-            {metadata.label}
+            {label}
           </a>
         )
       })}
@@ -275,7 +324,7 @@ export const HeaderNav: React.FC<{
           className="site-language-switcher__link site-language-switcher__link--pending"
           title="English — Sắp có"
         >
-          ENGLISH (en)
+          EN
         </span>
       ) : null}
     </nav>
@@ -304,6 +353,7 @@ export const HeaderNav: React.FC<{
                 }
                 href={item.href}
                 key={item.href}
+                onClick={maybeSmoothScrollToContact}
               >
                 {item.label}
               </SiteLink>
@@ -324,6 +374,7 @@ export const HeaderNav: React.FC<{
                   }
                   href={item.href}
                   key={item.href}
+                  onClick={maybeSmoothScrollToContact}
                 >
                   {item.label}
                 </SiteLink>
