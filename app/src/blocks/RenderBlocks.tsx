@@ -149,7 +149,12 @@ export const RenderBlocks: React.FC<{
                       : wingsGroupV3 && wingsGroupV3Route === 'contact' && blockType === 'content'
                         ? { ...block, locale }
                         : wingsGroupV3 && wingsGroupV3Route === 'home' && blockType === 'infoStrip'
-                          ? { ...block, showDeepDiveLink: true }
+                          ? {
+                              ...block,
+                              legalIdentity: wingsGroupLegalIdentity,
+                              locale,
+                              showDeepDiveLink: true,
+                            }
                         : wingsGroupV3Home &&
                             (block.blockType === 'infoStrip' || block.blockType === 'stats')
                           ? {
