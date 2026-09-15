@@ -4,14 +4,26 @@ import { createLocalReq, getPayload } from 'payload'
 import type { Payload } from 'payload'
 
 import type { Page, Post, Site } from '@/payload-types'
-import { getPageCanonicalPath, getPostPath, normalizeCanonicalPath } from '@/utilities/siteURLs'
-import { siteCodeToAliasMap } from '@/utilities/sitePaths'
+import {
+  getPageCanonicalPath,
+  getPostCanonicalPath,
+  getPostPath,
+  normalizeCanonicalPath,
+} from '@/utilities/siteURLs'
+import { getProductionPreviewOrigin } from '@/utilities/previewOrigin'
+import { isPublicLocale, type SupportedLocaleCode, siteCodeToAliasMap } from '@/utilities/sitePaths'
 
 type ReviewItem = {
+  canonicalPath: string
   editPath: string
   id: number | string
   label: string
+  locale: SupportedLocaleCode
   path: string
+  previewOrigin?: string
+  previewPath: string
+  publicPath: string
+  siteCode: string
   status?: string
   type: 'page' | 'post'
   updatedAt?: string
@@ -19,7 +31,7 @@ type ReviewItem = {
 
 type ReviewSite = {
   children: ReviewItem[]
-  code?: string
+  code: string
   id: number | string
   label: string
   pathPrefix: string
@@ -29,8 +41,40 @@ type SourceName = 'pages' | 'posts' | 'sites'
 type SourceState = 'error' | 'ready'
 
 const getRelationID = (value: number | string | Site | null | undefined) => {
-  if (!value) return null
+  if (value === null || value === undefined) return null
   return typeof value === 'object' ? value.id : value
+}
+
+const getReviewLocale = (site: Pick<Site, 'defaultLocale' | 'supportedLocales'>) => {
+  if (isPublicLocale(site.defaultLocale) && site.supportedLocales.includes(site.defaultLocale)) {
+    return site.defaultLocale
+  }
+
+  return (
+    site.supportedLocales.find((locale): locale is SupportedLocaleCode => isPublicLocale(locale)) ||
+    null
+  )
+}
+
+const buildPreviewPath = ({
+  canonicalPath,
+  collection,
+  documentID,
+  locale,
+}: {
+  canonicalPath: string
+  collection: 'pages' | 'posts'
+  documentID: number | string
+  locale: SupportedLocaleCode
+}) => {
+  const params = new URLSearchParams({
+    collection,
+    id: String(documentID),
+    locale,
+    path: canonicalPath,
+  })
+
+  return `/next/preview?${params.toString()}`
 }
 
 const getSitePathPrefix = (site?: Pick<Site, 'code'> | null) => {
@@ -65,7 +109,7 @@ const getTitle = (value: unknown, fallback: string) => {
 const getStatus = (doc: { _status?: unknown }) =>
   typeof doc._status === 'string' ? doc._status : undefined
 
-const loadCollection = async <T extends Page | Post>({
+export const loadCollection = async <T extends Page | Post>({
   collection,
   payload,
   req,
@@ -73,15 +117,33 @@ const loadCollection = async <T extends Page | Post>({
   collection: 'pages' | 'posts'
   payload: Payload
   req: Awaited<ReturnType<typeof createLocalReq>>
-}) =>
-  payload.find({
-    collection,
-    depth: 1,
-    limit: 1000,
-    overrideAccess: false,
-    req,
-    sort: collection === 'pages' ? 'pathname' : 'slug',
-  }) as unknown as Promise<{ docs: T[] }>
+}): Promise<{ docs: T[] }> => {
+  const docs: T[] = []
+  const pageLimit = 100
+  let page = 1
+
+  while (page <= 10_000) {
+    const result = (await payload.find({
+      collection,
+      depth: 1,
+      limit: pageLimit,
+      overrideAccess: false,
+      page,
+      pagination: true,
+      req,
+      sort: collection === 'pages' ? 'pathname' : 'slug',
+    })) as unknown as { docs: T[]; hasNextPage?: boolean; nextPage?: number | null }
+
+    docs.push(...result.docs)
+    if (!result.hasNextPage) return { docs }
+
+    const nextPage = result.nextPage || page + 1
+    if (nextPage <= page) throw new Error(`Site Review pagination did not advance for ${collection}`)
+    page = nextPage
+  }
+
+  throw new Error(`Site Review pagination exceeded the safety limit for ${collection}`)
+}
 
 export async function GET(): Promise<Response> {
   try {
@@ -125,10 +187,10 @@ export async function GET(): Promise<Response> {
     const pages = pageResult.status === 'fulfilled' ? pageResult.value.docs : []
     const posts = postResult.status === 'fulfilled' ? postResult.value.docs : []
 
-    const sitesByID = new Map<number | string, ReviewSite>()
+    const sitesByID = new Map<string, ReviewSite>()
 
     for (const site of siteResult.value.docs) {
-      sitesByID.set(site.id, {
+      sitesByID.set(String(site.id), {
         children: [],
         code: site.code,
         id: site.id,
@@ -139,16 +201,37 @@ export async function GET(): Promise<Response> {
 
     for (const page of pages) {
       const siteID = getRelationID(page.site)
-      const site = typeof page.site === 'object' ? page.site : null
-      const group = siteID ? sitesByID.get(siteID) : undefined
+      const group = siteID === null ? undefined : sitesByID.get(String(siteID))
 
       if (!group) continue
 
+      const site = siteResult.value.docs.find(
+        (candidate) => String(candidate.id) === String(siteID),
+      )
+      const locale = site ? getReviewLocale(site) : null
+      if (!site || !locale) continue
+      const canonicalPath = normalizeCanonicalPath(getPageCanonicalPath(page))
+      const publicPath = getPageCanonicalPath(page, locale, site.defaultLocale)
+
       group.children.push({
+        canonicalPath,
         editPath: `/admin/collections/pages/${page.id}`,
         id: page.id,
         label: getTitle(page.title, `Trang ${page.id}`),
-        path: withSitePrefix(site, getPageCanonicalPath(page)),
+        locale,
+        path: withSitePrefix(site, publicPath),
+        previewOrigin:
+          process.env.NODE_ENV === 'production'
+            ? getProductionPreviewOrigin(group.code) || undefined
+            : undefined,
+        previewPath: buildPreviewPath({
+          canonicalPath,
+          collection: 'pages',
+          documentID: page.id,
+          locale,
+        }),
+        publicPath,
+        siteCode: group.code,
         status: getStatus(page),
         type: 'page',
         updatedAt: page.updatedAt,
@@ -157,16 +240,37 @@ export async function GET(): Promise<Response> {
 
     for (const post of posts) {
       const siteID = getRelationID(post.site)
-      const site = typeof post.site === 'object' ? post.site : null
-      const group = siteID ? sitesByID.get(siteID) : undefined
+      const group = siteID === null ? undefined : sitesByID.get(String(siteID))
 
       if (!group) continue
 
+      const site = siteResult.value.docs.find(
+        (candidate) => String(candidate.id) === String(siteID),
+      )
+      const locale = site ? getReviewLocale(site) : null
+      if (!site || !locale) continue
+      const canonicalPath = normalizeCanonicalPath(getPostPath(post.slug))
+      const publicPath = getPostCanonicalPath(post.slug, locale, site.defaultLocale)
+
       group.children.push({
+        canonicalPath,
         editPath: `/admin/collections/posts/${post.id}`,
         id: post.id,
         label: getTitle(post.title, `Bài viết ${post.id}`),
-        path: withSitePrefix(site, getPostPath(post.slug)),
+        locale,
+        path: withSitePrefix(site, publicPath),
+        previewOrigin:
+          process.env.NODE_ENV === 'production'
+            ? getProductionPreviewOrigin(group.code) || undefined
+            : undefined,
+        previewPath: buildPreviewPath({
+          canonicalPath,
+          collection: 'posts',
+          documentID: post.id,
+          locale,
+        }),
+        publicPath,
+        siteCode: group.code,
         status: getStatus(post),
         type: 'post',
         updatedAt: post.updatedAt,
@@ -178,12 +282,15 @@ export async function GET(): Promise<Response> {
       children: site.children.sort((left, right) => left.path.localeCompare(right.path, 'vi')),
     }))
 
-    return Response.json({
-      generatedAt: new Date().toISOString(),
-      sourceErrors,
-      sourceState,
-      sites,
-    })
+    return Response.json(
+      {
+        generatedAt: new Date().toISOString(),
+        sourceErrors,
+        sourceState,
+        sites,
+      },
+      { headers: { 'Cache-Control': 'private, no-store' } },
+    )
   } catch {
     return Response.json({ message: 'Không tải được Site Review. Hãy thử lại.' }, { status: 500 })
   }

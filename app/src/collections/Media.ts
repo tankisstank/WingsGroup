@@ -135,7 +135,9 @@ export const Media: CollectionConfig = {
     components: {
       beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
       edit: {
-        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+        beforeDocumentControls: [
+          '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
+        ],
       },
     },
     defaultColumns: ['filename', 'alt', 'site', 'updatedAt'],

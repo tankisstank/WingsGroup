@@ -24,7 +24,9 @@ export const TourDepartures: CollectionConfig = {
     components: {
       beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
       edit: {
-        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+        beforeDocumentControls: [
+          '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
+        ],
       },
     },
     description:

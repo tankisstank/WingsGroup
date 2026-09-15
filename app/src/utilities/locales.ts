@@ -33,7 +33,7 @@ export const localeMetadata = [
     isAdsReady: true,
     isCmsEnabled: true,
     isPublicEnabled: true,
-    label: 'ENGLISH (en)',
+    label: 'Tiếng Anh (en)',
   },
   {
     code: 'it',
@@ -111,6 +111,16 @@ export const adsReadyLocaleCodes = adsReadyLocaleMetadata.map((locale) => locale
 export const localeMetadataByCode = Object.fromEntries(
   localeMetadata.map((locale) => [locale.code, locale]),
 ) as Record<SupportedLocaleCode, LocaleMetadata>
+
+/**
+ * Payload appends the locale code to every non-code label in its native
+ * selector. Keep the public/content labels unchanged and adapt only the
+ * value crossing the Payload localization boundary.
+ */
+export const getPayloadLocaleLabel = (locale: Pick<LocaleMetadata, 'code' | 'label'>): string =>
+  locale.label.endsWith(` (${locale.code})`)
+    ? locale.label.slice(0, -` (${locale.code})`.length)
+    : locale.label
 
 export const isSupportedLocale = (value?: null | string): value is SupportedLocaleCode =>
   Boolean(value && localeCodes.includes(value as SupportedLocaleCode))

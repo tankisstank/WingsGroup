@@ -40,7 +40,7 @@ export const TourProducts: CollectionConfig = {
       edit: {
         beforeDocumentControls: [
           '@/components/AdminGuidance/TourProductEditGuidance',
-          '@/components/ContentLocaleControl#ContentLocaleDocumentControl',
+          '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
         ],
       },
     },

@@ -1,0 +1,209 @@
+.wings-admin-standalone-shell {
+  background: var(--wings-admin-canvas);
+  color: var(--wings-admin-text);
+  display: grid;
+  grid-template-columns: 258px minmax(0, 1fr);
+  min-height: 100vh;
+
+  &__rail {
+    background: var(--wings-admin-sidebar);
+    color: var(--wings-admin-sidebar-text);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-y: auto;
+    padding: 22px 14px 24px;
+  }
+
+  &__workspace {
+    min-width: 0;
+  }
+
+  .wings-admin-nav-intro {
+    border-bottom-color: var(--wings-admin-sidebar-border);
+    margin: 0;
+    padding: 0 0 16px;
+  }
+
+  .wings-admin-nav-intro__head {
+    padding-left: 50px;
+    position: relative;
+  }
+
+  .wings-admin-nav-intro__head::before {
+    align-items: center;
+    background: var(--wings-admin-action);
+    border-radius: 7px;
+    color: var(--wings-admin-action-text);
+    content: 'W';
+    display: inline-flex;
+    font-family: var(--wings-admin-display);
+    font-size: 1rem;
+    font-weight: 800;
+    height: 28px;
+    justify-content: center;
+    left: 12px;
+    position: absolute;
+    top: 10px;
+    width: 28px;
+  }
+
+  .wings-admin-nav-intro__head span {
+    color: var(--wings-admin-sidebar-heading);
+  }
+
+  .wings-admin-nav-intro__head strong {
+    color: #ffffff;
+    font-family: var(--wings-admin-display);
+  }
+
+  .wings-admin-nav-intro__desktop,
+  .wings-admin-nav-intro__group,
+  .wings-admin-nav-intro__links {
+    display: grid;
+  }
+
+  .wings-admin-nav-intro__desktop {
+    gap: 12px;
+  }
+
+  .wings-admin-nav-intro__group {
+    gap: 4px;
+  }
+
+  .wings-admin-nav-intro__group-label {
+    color: var(--wings-admin-sidebar-heading);
+    font-size: 0.68rem;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    padding: 0 12px;
+    text-transform: uppercase;
+  }
+
+  .wings-admin-nav-intro__links {
+    gap: 4px;
+  }
+
+  .wings-admin-nav-intro__links > a {
+    align-items: center;
+    background: transparent;
+    border-radius: var(--wings-admin-radius-nav);
+    box-shadow: none;
+    color: var(--wings-admin-sidebar-text);
+    display: flex;
+    gap: 10px;
+    min-height: 42px;
+    padding: 7px 10px;
+    text-decoration: none;
+    transform: none;
+  }
+
+  .wings-admin-nav-intro__links > a > span:last-child {
+    color: inherit;
+    font-size: 0.84rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .wings-admin-nav-intro__links > a:hover,
+  .wings-admin-nav-intro__links > a:focus-visible,
+  .wings-admin-nav-intro__links > a[aria-current='page'] {
+    background: var(--wings-admin-sidebar-active-bg);
+    box-shadow: none;
+    color: var(--wings-admin-sidebar-active-text);
+    transform: none;
+  }
+
+  .wings-admin-nav-intro__links > a[aria-current='page']::before {
+    content: none;
+    display: none;
+  }
+
+  .wings-admin-nav-intro__icon {
+    align-items: center;
+    background: rgb(14 138 135 / 0.16);
+    border: 1px solid rgb(14 138 135 / 0.32);
+    border-radius: var(--wings-admin-radius-sm);
+    color: #9be4e0;
+    display: inline-flex;
+    flex: 0 0 28px;
+    height: 28px;
+    justify-content: center;
+    width: 28px;
+  }
+
+  .wings-admin-nav-intro__icon svg {
+    height: 15px;
+    width: 15px;
+  }
+
+  .wings-admin-nav-intro__mobile {
+    display: none;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 1050px) {
+  .wings-admin-standalone-shell {
+    grid-template-columns: 220px minmax(0, 1fr);
+
+    &__rail {
+      padding: 18px 12px 20px;
+    }
+
+    .wings-admin-nav-intro__links > a {
+      min-height: 44px;
+    }
+  }
+}
+
+@media (max-width: 680px) {
+  .wings-admin-standalone-shell {
+    display: block;
+
+    &__rail {
+      height: 64px;
+      min-height: 64px;
+      overflow: hidden;
+      padding: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .wings-admin-nav-intro {
+      border: 0;
+      display: block;
+      margin: 0;
+      padding: 0;
+    }
+
+    .wings-admin-nav-intro__head,
+    .wings-admin-nav-intro__desktop {
+      display: none;
+    }
+
+    .wings-admin-nav-intro__mobile {
+      align-items: stretch;
+      display: flex;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .wings-admin-nav-intro__mobile > a {
+      align-items: center;
+      flex: 1 1 0;
+      justify-content: center;
+      min-height: 48px;
+      min-width: 0;
+      padding: 8px 4px;
+    }
+
+    .wings-admin-nav-intro__mobile > a > span:last-child {
+      display: block;
+      font-size: 0.7rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}

@@ -74,7 +74,7 @@ import {
 import { hydrateWingsSideHomeCuration, projectWingsSideHomeCuration } from '@/tours/homeCuration'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import type { Form as PayloadForm } from '@/payload-types'
-import { isAuthorizedDraftMode } from '@/utilities/previewHandoff'
+import { hasAuthorizedPreviewHandoff, isAuthorizedDraftMode } from '@/utilities/previewHandoff'
 
 type CmsPathArgs = {
   requestedPath: string
@@ -86,6 +86,7 @@ export async function renderCmsPageByPath({
   searchParams: searchParamsPromise,
 }: CmsPathArgs) {
   const draft = await isAuthorizedDraftMode()
+  const preview = draft || (await hasAuthorizedPreviewHandoff())
   const searchParams = searchParamsPromise ? await searchParamsPromise : {}
   const locale = await getCurrentLocale()
   const sitePrefix = await getCurrentSitePrefix()
@@ -326,7 +327,18 @@ export async function renderCmsPageByPath({
       <PageClient />
       <PayloadRedirects disableNotFound url={url} />
 
-      {draft && <LivePreviewListener />}
+      {preview ? (
+        <LivePreviewListener
+          previewIdentity={{
+            collection: 'pages',
+            documentID: page.id,
+            locale,
+            mode: page._status === 'draft' ? 'draft' : 'published',
+            path: getPageCanonicalPath(page),
+            siteCode: site.code,
+          }}
+        />
+      ) : null}
 
       {!useHiFiBody ? (
         <Breadcrumbs

@@ -1,24 +1,71 @@
 @import '@payloadcms/ui/scss';
 
+/*
+ * applied-cms-ui-package compatibility layer.
+ *
+ * The package is a design reference, not a runtime dependency. Keep a concrete
+ * sRGB value first so older WebViews still get a usable surface, then opt into
+ * the source OKLCH values only when the browser advertises support. The
+ * Payload-specific theme variables below may still override these defaults.
+ */
 :root {
-  --wings-admin-action: #d9783c;
+  --wings-applied-bg: #eef2f4;
+  --wings-applied-surface: #fdfdfd;
+  --wings-applied-fg: #30373f;
+  --wings-applied-muted: #78808a;
+  --wings-applied-border: #d9dde1;
+  --wings-applied-accent: #e78f2c;
+  --wings-applied-teal: #419b9d;
+  --wings-applied-danger: #d85e40;
+  --wings-applied-navy: #2f3540;
+  --wings-applied-space-1: 4px;
+  --wings-applied-space-2: 8px;
+  --wings-applied-space-3: 12px;
+  --wings-applied-space-4: 16px;
+  --wings-applied-space-5: 20px;
+  --wings-applied-space-6: 24px;
+  --wings-applied-space-8: 32px;
+  --wings-applied-space-10: 40px;
+  --wings-applied-radius-control: 6px;
+  --wings-applied-radius-segmented: 7px;
+  --wings-applied-radius-badge: 4px;
+}
+
+@supports (color: oklch(0.965 0.008 225)) {
+  :root {
+    --wings-applied-bg: oklch(0.965 0.008 225);
+    --wings-applied-surface: oklch(0.995 0.002 250);
+    --wings-applied-fg: oklch(0.235 0.025 250);
+    --wings-applied-muted: oklch(0.54 0.018 250);
+    --wings-applied-border: oklch(0.89 0.014 235);
+    --wings-applied-accent: oklch(0.69 0.19 42);
+    --wings-applied-teal: oklch(0.58 0.105 190);
+    --wings-applied-danger: oklch(0.58 0.19 28);
+    --wings-applied-navy: oklch(0.255 0.027 250);
+  }
+}
+
+:root {
+  --wings-admin-action: var(--wings-applied-accent);
+  --wings-admin-action-text: #111827;
   --wings-admin-action-soft: #fff1e8;
   --wings-admin-focus-ring: #0f766e;
-  --wings-admin-healthy: #0b827f;
-  --wings-admin-accent: #0e8a87;
+  --wings-admin-healthy: var(--wings-applied-teal);
+  --wings-admin-accent: var(--wings-applied-teal);
+  --wings-admin-accent-text: #0f5f61;
   --wings-admin-accent-soft: #e0f3f1;
   --wings-admin-active: #27394d;
   --wings-admin-active-text: #ffffff;
-  --wings-admin-bg: #e8eef3;
-  --wings-admin-border: #d6e0e7;
-  --wings-admin-canvas: #eef3f7;
-  --wings-admin-ink: #243244;
-  --wings-admin-muted: #6b7a88;
+  --wings-admin-bg: var(--wings-applied-bg);
+  --wings-admin-border: var(--wings-applied-border);
+  --wings-admin-canvas: var(--wings-applied-bg);
+  --wings-admin-ink: var(--wings-applied-fg);
+  --wings-admin-muted: var(--wings-applied-muted);
   --wings-admin-muted-strong: #4f5f6c;
-  --wings-admin-negative: #c94c4c;
-  --wings-admin-panel: #ffffff;
+  --wings-admin-negative: var(--wings-applied-danger);
+  --wings-admin-panel: var(--wings-applied-surface);
   --wings-admin-panel-strong: #f5f9fb;
-  --wings-admin-positive: #238b6d;
+  --wings-admin-positive: var(--wings-applied-teal);
   --wings-admin-radius-lg: 7px;
   --wings-admin-radius-md: 6px;
   --wings-admin-radius-nav: 6px;
@@ -26,7 +73,7 @@
   --wings-admin-radius-sm: 4px;
   --wings-admin-radius-xl: 8px;
   --wings-admin-shadow: 0 1px 2px rgb(30 53 74 / 0.05), 0 10px 28px rgb(30 53 74 / 0.05);
-  --wings-admin-sidebar: #27394d;
+  --wings-admin-sidebar: var(--wings-applied-navy);
   --wings-admin-sidebar-active-bg: #344b63;
   --wings-admin-sidebar-active-text: #ffffff;
   --wings-admin-sidebar-border: rgb(255 255 255 / 0.12);
@@ -36,9 +83,13 @@
   --wings-admin-text: #243244;
   --wings-admin-topbar: #ffffff;
   --wings-admin-warning: #d9783c;
-  --wings-admin-display: 'Bahnschrift', 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
-  --wings-admin-body: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
-  --wings-admin-mono: 'Cascadia Code', Consolas, monospace;
+  --wings-admin-display:
+    'Bahnschrift', 'Segoe UI Variable Display', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, sans-serif;
+  --wings-admin-body:
+    'Segoe UI Variable Text', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    sans-serif;
+  --wings-admin-mono: 'Cascadia Code', 'SF Mono', Consolas, 'Courier New', monospace;
 }
 
 /* WP1: shared Payload shell language. Both legacy theme keys stay on the same
@@ -46,10 +97,12 @@
 .wings-admin-shell.wings-admin-theme-finexy,
 .wings-admin-shell.wings-admin-theme-ats {
   --wings-admin-action: #d9783c;
+  --wings-admin-action-text: #111827;
   --wings-admin-action-soft: #fff1e8;
   --wings-admin-focus-ring: #0f766e;
   --wings-admin-healthy: #0b827f;
   --wings-admin-accent: #0e8a87;
+  --wings-admin-accent-text: #0f5f61;
   --wings-admin-accent-soft: #e0f3f1;
   --wings-admin-active: #27394d;
   --wings-admin-active-text: #ffffff;
@@ -79,9 +132,13 @@
   --wings-admin-text: #243244;
   --wings-admin-topbar: #ffffff;
   --wings-admin-warning: #d9783c;
-  --wings-admin-display: 'Bahnschrift', 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
-  --wings-admin-body: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
-  --wings-admin-mono: 'Cascadia Code', Consolas, monospace;
+  --wings-admin-display:
+    'Bahnschrift', 'Segoe UI Variable Display', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, sans-serif;
+  --wings-admin-body:
+    'Segoe UI Variable Text', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    sans-serif;
+  --wings-admin-mono: 'Cascadia Code', 'SF Mono', Consolas, 'Courier New', monospace;
 }
 
 .wings-admin-shell.wings-admin-theme-ats {
@@ -108,7 +165,7 @@ body.wings-admin-shell .wings-admin-skip-link {
   background: var(--wings-admin-action);
   border-radius: var(--wings-admin-radius-sm);
   box-shadow: var(--wings-admin-shadow);
-  color: var(--wings-admin-active-text);
+  color: var(--wings-admin-action-text);
   font-weight: 700;
   left: 14px;
   padding: 10px 14px;
@@ -116,7 +173,9 @@ body.wings-admin-shell .wings-admin-skip-link {
   text-decoration: none;
   top: -80px;
   transform: translateY(-120%);
-  transition: transform 120ms ease, top 120ms ease;
+  transition:
+    transform 120ms ease,
+    top 120ms ease;
   z-index: 100;
 }
 
@@ -163,7 +222,9 @@ body.wings-admin-shell[data-theme='dark'] {
   --theme-elevation-1000: var(--wings-admin-ink);
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(button, input, select, textarea) {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login, .cms-console, .wings-dashboard)
+  :where(button, input, select, textarea) {
   font-family: inherit;
 }
 
@@ -192,6 +253,11 @@ body.wings-admin-shell .template-default__wrap {
   min-height: 100vh;
 }
 
+body.wings-admin-shell .template-default {
+  min-width: 0;
+  width: 100%;
+}
+
 body.wings-admin-shell .template-default,
 body.wings-admin-shell .template-default__wrap,
 body.wings-admin-shell .dashboard,
@@ -207,7 +273,7 @@ body.wings-admin-shell .wings-admin-logo__mark {
   background: var(--wings-admin-action);
   border-radius: 6px;
   box-shadow: none;
-  color: #ffffff;
+  color: var(--wings-admin-action-text);
 }
 
 body.wings-admin-shell .wings-admin-icon {
@@ -293,7 +359,10 @@ body.wings-admin-shell .nav button {
   min-height: 38px;
   padding: 7px 10px;
   text-decoration: none;
-  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
 }
 
 body.wings-admin-shell .nav a:hover,
@@ -451,7 +520,9 @@ body.wings-admin-shell .nav:is([class*='collapsed'], [class*='closed']) a.active
   position: relative;
 }
 
-body.wings-admin-shell .nav:is([class*='collapsed'], [class*='closed']) a[aria-current='page']::before,
+body.wings-admin-shell
+  .nav:is([class*='collapsed'], [class*='closed'])
+  a[aria-current='page']::before,
 body.wings-admin-shell .nav:is([class*='collapsed'], [class*='closed']) a.active::before {
   background: var(--wings-admin-action);
   border-radius: 50%;
@@ -524,7 +595,8 @@ body.wings-admin-shell .collection-edit__wrap {
   padding: 30px 34px 54px;
 }
 
-body.wings-admin-shell :where(.dashboard__header, .collection-list__header, .collection-edit__header, .list-header) {
+body.wings-admin-shell
+  :where(.dashboard__header, .collection-list__header, .collection-edit__header, .list-header) {
   align-items: flex-end;
   background: transparent;
   border: 0;
@@ -535,31 +607,48 @@ body.wings-admin-shell :where(.dashboard__header, .collection-list__header, .col
   padding: 0;
 }
 
-body.wings-admin-shell :where(.dashboard__header h1, .collection-list__header h1, .collection-edit__header h1, .list-header h1) {
+body.wings-admin-shell
+  :where(
+    .dashboard__header h1,
+    .collection-list__header h1,
+    .collection-edit__header h1,
+    .list-header h1
+  ) {
   font-size: clamp(1.9rem, 3vw, 2.75rem);
   font-weight: 600;
   line-height: 1.06;
 }
 
-body.wings-admin-shell :where(.dashboard__header p, .collection-list__header p, .collection-edit__header p) {
+body.wings-admin-shell
+  :where(.dashboard__header p, .collection-list__header p, .collection-edit__header p) {
   color: var(--wings-admin-muted);
   margin-top: 7px;
   max-width: 68ch;
 }
 
-body.wings-admin-shell :where(.dashboard__wrap > *, .collection-list__wrap > *, .collection-edit__wrap > *) {
+body.wings-admin-shell
+  :where(.dashboard__wrap > *, .collection-list__wrap > *, .collection-edit__wrap > *) {
   max-width: 1480px;
 }
 
 /* Surface geometry, restrained at 4–7px */
-body.wings-admin-shell :where(.card, .dashboard__section, .collection-list__table, .table-wrap, .drawer__content, .modal__content) {
+body.wings-admin-shell
+  :where(
+    .card,
+    .dashboard__section,
+    .collection-list__table,
+    .table-wrap,
+    .drawer__content,
+    .modal__content
+  ) {
   background: var(--wings-admin-panel);
   border: 1px solid var(--wings-admin-border);
   border-radius: var(--wings-admin-radius-md);
   box-shadow: 0 1px 2px rgb(30 53 74 / 0.04);
 }
 
-body.wings-admin-shell :where(.card__header, .card__title, .dashboard__section-header, .collection-list__header) {
+body.wings-admin-shell
+  :where(.card__header, .card__title, .dashboard__section-header, .collection-list__header) {
   border-color: var(--wings-admin-border);
 }
 
@@ -567,49 +656,91 @@ body.wings-admin-shell :where(.panel, .notice, .context, .metric) {
   border-radius: var(--wings-admin-radius-md);
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(.btn, .button, button) {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login, .cms-console, .wings-dashboard)
+  :where(.btn, .button, button) {
   border-radius: var(--wings-admin-radius-sm);
   line-height: 1.2;
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(.btn--style-primary, .button--style-primary, .form-submit button[type='submit'], button[type='submit']) {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login, .cms-console, .wings-dashboard)
+  :where(
+    .btn--style-primary,
+    .button--style-primary,
+    .form-submit button[type='submit'],
+    button[type='submit']
+  ) {
   background: var(--wings-admin-action);
   border-color: var(--wings-admin-action);
-  color: #ffffff;
+  color: var(--wings-admin-action-text);
   font-weight: 700;
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(.btn--style-primary, .button--style-primary, .form-submit button[type='submit'], button[type='submit']):hover {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login, .cms-console, .wings-dashboard)
+  :where(
+    .btn--style-primary,
+    .button--style-primary,
+    .form-submit button[type='submit'],
+    button[type='submit']
+  ):hover {
   background: color-mix(in srgb, var(--wings-admin-action) 86%, #000000);
   border-color: color-mix(in srgb, var(--wings-admin-action) 86%, #000000);
-  color: #ffffff;
+  color: var(--wings-admin-action-text);
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(.btn--style-secondary, .button--style-secondary, .btn--style-default, .button--style-default) {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login, .cms-console, .wings-dashboard)
+  :where(
+    .btn--style-secondary,
+    .button--style-secondary,
+    .btn--style-default,
+    .button--style-default
+  ) {
   background: var(--wings-admin-panel);
   border-color: var(--wings-admin-border);
   color: var(--wings-admin-text);
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login, .cms-console, .wings-dashboard) :where(.btn--style-secondary, .button--style-secondary, .btn--style-default, .button--style-default):hover {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login, .cms-console, .wings-dashboard)
+  :where(
+    .btn--style-secondary,
+    .button--style-secondary,
+    .btn--style-default,
+    .button--style-default
+  ):hover {
   border-color: var(--wings-admin-accent);
   color: var(--wings-admin-accent);
 }
 
-body.wings-admin-shell :where(.cms-console__primary-action, .wings-dashboard__actions a:first-child) {
+body.wings-admin-shell
+  :where(.cms-console__primary-action, .wings-dashboard__actions a:first-child) {
   background: var(--wings-admin-action) !important;
   border-color: var(--wings-admin-action) !important;
-  color: #ffffff !important;
+  color: var(--wings-admin-action-text) !important;
 }
 
 /* Native forms and Payload field controls */
-body.wings-admin-shell :where(.template-default__wrap, .login) :where(.field-type__label, .field-label, .label, .field-type label) {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login)
+  :where(.field-type__label, .field-label, .label, .field-type label) {
   color: var(--wings-admin-ink);
   font-size: 0.8rem;
   font-weight: 650;
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login) :where(.field-type input:not([type='checkbox']):not([type='radio']), .field-type select, .field-type textarea, .field-type .react-select__control, .search-filter input, .search-filter select) {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login)
+  :where(
+    .field-type input:not([type='checkbox']):not([type='radio']),
+    .field-type select,
+    .field-type textarea,
+    .field-type .react-select__control,
+    .search-filter input,
+    .search-filter select
+  ) {
   background: var(--wings-admin-panel);
   border: 1px solid var(--wings-admin-border);
   border-radius: 5px;
@@ -619,30 +750,77 @@ body.wings-admin-shell :where(.template-default__wrap, .login) :where(.field-typ
   padding: 8px 10px;
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login) :where(.field-type textarea, textarea) {
+/* SearchFilter owns a leading icon. Restore its reserved text gutter after
+ * the shared field surface rule above, including the focused state. */
+body.wings-admin-shell :where(.search-filter input, .search-filter__input) {
+  padding-block: 8px;
+  padding-inline-end: 12px;
+  padding-inline-start: 40px;
+}
+
+body.wings-admin-shell :where(.search-filter input, .search-filter__input):focus {
+  border-color: var(--wings-admin-focus-ring);
+  box-shadow: 0 0 0 1px var(--wings-admin-focus-ring);
+}
+
+html[dir='rtl'] body.wings-admin-shell :where(.search-filter input, .search-filter__input) {
+  padding-inline-end: 40px;
+  padding-inline-start: 12px;
+}
+
+body.wings-admin-shell
+  :where(.template-default__wrap, .login)
+  :where(.field-type textarea, textarea) {
   min-height: 92px;
   resize: vertical;
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login) :where(.field-type input[type='checkbox'], .field-type input[type='radio'], input[type='checkbox'], input[type='radio']) {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login)
+  :where(
+    .field-type input[type='checkbox'],
+    .field-type input[type='radio'],
+    input[type='checkbox'],
+    input[type='radio']
+  ) {
   accent-color: var(--wings-admin-accent);
 }
 
-body.wings-admin-shell :where(.field-type .description, .field-type__description, .hint, .login .error, .form-field__error) {
+body.wings-admin-shell
+  :where(
+    .field-type .description,
+    .field-type__description,
+    .hint,
+    .login .error,
+    .form-field__error
+  ) {
   color: var(--wings-admin-muted);
   font-size: 0.76rem;
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login) :where(input[aria-invalid='true'], select[aria-invalid='true'], textarea[aria-invalid='true'], .error input, .error select, .error textarea) {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login)
+  :where(
+    input[aria-invalid='true'],
+    select[aria-invalid='true'],
+    textarea[aria-invalid='true'],
+    .error input,
+    .error select,
+    .error textarea
+  ) {
   border-color: var(--wings-admin-negative);
   box-shadow: 0 0 0 1px var(--wings-admin-negative);
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login) :where(.react-select__control, .rs__control) {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login)
+  :where(.react-select__control, .rs__control) {
   min-height: 38px;
 }
 
-body.wings-admin-shell :where(.template-default__wrap, .login) :where(.react-select__menu, .rs__menu, .select-element__menu) {
+body.wings-admin-shell
+  :where(.template-default__wrap, .login)
+  :where(.react-select__menu, .rs__menu, .select-element__menu) {
   background: var(--wings-admin-panel);
   border: 1px solid var(--wings-admin-border);
   border-radius: 5px;
@@ -699,7 +877,15 @@ body.wings-admin-shell :where(.modal__content, .drawer__content, .popup__content
   box-shadow: var(--wings-admin-shadow);
 }
 
-body.wings-admin-shell :where(.modal__header, .modal__footer, .drawer__header, .drawer__footer, .dialog-head, .dialog-foot) {
+body.wings-admin-shell
+  :where(
+    .modal__header,
+    .modal__footer,
+    .drawer__header,
+    .drawer__footer,
+    .dialog-head,
+    .dialog-foot
+  ) {
   border-color: var(--wings-admin-border);
   background: var(--wings-admin-panel);
 }
@@ -829,6 +1015,23 @@ body.wings-admin-shell .login .wings-admin-logo {
 
 /* Mobile keeps a short triage rail and lets native collection work stay desktop/tablet-oriented. */
 @media (max-width: 680px) {
+  body.wings-admin-shell .template-default {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  body.wings-admin-shell .template-default > .nav,
+  body.wings-admin-shell .template-default > .template-default__wrap {
+    grid-column: 1;
+  }
+
+  body.wings-admin-shell .template-default > .template-default__wrap {
+    grid-row: 1;
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
   body.wings-admin-shell .nav,
   body.wings-admin-shell .nav:not(.nav--nav-open) {
     background: var(--wings-admin-sidebar);
@@ -914,6 +1117,58 @@ body.wings-admin-shell .login .wings-admin-logo {
     padding: 10px 16px;
   }
 
+  body.wings-admin-shell .app-header__content {
+    height: auto;
+    min-height: 52px;
+    min-width: 0;
+  }
+
+  body.wings-admin-shell .app-header__wrapper,
+  body.wings-admin-shell .app-header__controls-wrapper,
+  body.wings-admin-shell .app-header__step-nav-wrapper,
+  body.wings-admin-shell .app-header .step-nav {
+    min-width: 0;
+  }
+
+  body.wings-admin-shell .app-header__wrapper {
+    gap: 8px;
+  }
+
+  body.wings-admin-shell .app-header__step-nav-wrapper,
+  body.wings-admin-shell .app-header .step-nav {
+    overflow: hidden;
+  }
+
+  body.wings-admin-shell .app-header__actions-wrapper {
+    margin-right: 0;
+    min-width: 0;
+  }
+
+  body.wings-admin-shell .app-header__account {
+    flex: 0 0 44px;
+  }
+
+  body.wings-admin-shell .app-header__mobile-nav-toggler {
+    align-items: center;
+    background: var(--wings-admin-panel) !important;
+    border: 1px solid var(--wings-admin-border) !important;
+    border-radius: var(--wings-admin-radius-sm);
+    color: var(--wings-admin-ink) !important;
+    display: inline-flex;
+    flex: 0 0 44px;
+    height: 44px;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0;
+    width: 44px;
+  }
+
+  body.wings-admin-shell .app-header__mobile-nav-toggler .hamburger,
+  body.wings-admin-shell .app-header__mobile-nav-toggler .hamburger__open-icon,
+  body.wings-admin-shell .app-header__mobile-nav-toggler .hamburger__close-icon {
+    color: var(--wings-admin-ink) !important;
+  }
+
   body.wings-admin-shell .app-header__localizer.localizer {
     right: calc(16px + 44px + 10px);
   }
@@ -924,7 +1179,8 @@ body.wings-admin-shell .login .wings-admin-logo {
     padding: 20px 16px 38px;
   }
 
-  body.wings-admin-shell :where(.dashboard__header, .collection-list__header, .collection-edit__header, .list-header) {
+  body.wings-admin-shell
+    :where(.dashboard__header, .collection-list__header, .collection-edit__header, .list-header) {
     align-items: flex-start;
     display: grid;
     gap: 14px;
@@ -940,7 +1196,8 @@ body.wings-admin-shell .login .wings-admin-logo {
     padding: 10px 9px;
   }
 
-  body.wings-admin-shell :where(.modal__content, .drawer__content, .popup__content, [role='dialog']) {
+  body.wings-admin-shell
+    :where(.modal__content, .drawer__content, .popup__content, [role='dialog']) {
     border-radius: 7px 7px 0 0;
     max-height: 92vh;
   }
@@ -959,10 +1216,12 @@ body.wings-admin-shell .login .wings-admin-logo {
 
 .wings-admin-theme-finexy {
   --wings-admin-action: #d9612f;
+  --wings-admin-action-text: #111827;
   --wings-admin-action-soft: #fff0e9;
   --wings-admin-focus-ring: #0f766e;
   --wings-admin-healthy: #0f766e;
   --wings-admin-accent: #ff5a35;
+  --wings-admin-accent-text: #a63f1d;
   --wings-admin-accent-soft: #ffe2d6;
   --wings-admin-active: #1e1c18;
   --wings-admin-active-text: #ffffff;
@@ -997,10 +1256,12 @@ body.wings-admin-shell .login .wings-admin-logo {
 
 .wings-admin-theme-ats {
   --wings-admin-action: #d9612f;
+  --wings-admin-action-text: #102b33;
   --wings-admin-action-soft: #fff0e9;
   --wings-admin-focus-ring: #0f766e;
   --wings-admin-healthy: #0f766e;
   --wings-admin-accent: #58c7cf;
+  --wings-admin-accent-text: #0f5f61;
   --wings-admin-accent-soft: #dff5f4;
   --wings-admin-active: #58c7cf;
   --wings-admin-active-text: #ffffff;
@@ -1038,7 +1299,7 @@ body.wings-admin-shell .login .wings-admin-logo {
   background: var(--wings-admin-accent);
   border-radius: var(--wings-admin-radius-sm);
   box-shadow: var(--wings-admin-shadow);
-  color: #fff;
+  color: var(--wings-admin-action-text);
   display: inline-flex;
   font-size: 0.72rem;
   font-weight: 800;
@@ -1060,7 +1321,7 @@ body.wings-admin-shell .login .wings-admin-logo {
     align-items: center;
     background: var(--wings-admin-accent);
     border-radius: var(--wings-admin-radius-sm);
-    color: #fff;
+    color: var(--wings-admin-action-text);
     display: inline-flex;
     font-weight: 700;
     height: 38px;
@@ -1239,7 +1500,11 @@ body.wings-admin-shell .login .wings-admin-logo {
 }
 
 .wings-admin-guidance {
-  background: color-mix(in srgb, var(--wings-admin-panel-strong) 90%, var(--wings-admin-accent-soft));
+  background: color-mix(
+    in srgb,
+    var(--wings-admin-panel-strong) 90%,
+    var(--wings-admin-accent-soft)
+  );
   border: 1px solid var(--wings-admin-border);
   border-left: 3px solid var(--wings-admin-accent);
   border-radius: 7px;
@@ -1287,6 +1552,22 @@ body.wings-admin-shell .login .wings-admin-logo {
     padding: 5px 9px;
     color: var(--wings-admin-accent);
     text-decoration: none;
+  }
+
+  button {
+    background: transparent;
+    border: 1px solid var(--wings-admin-border);
+    border-radius: 999px;
+    color: var(--wings-admin-accent);
+    cursor: pointer;
+    font: inherit;
+    padding: 5px 9px;
+  }
+
+  :where(a, button):hover,
+  :where(a, button):focus-visible {
+    border-color: var(--wings-admin-accent);
+    color: var(--wings-admin-focus-ring);
   }
 
   &--warning {
@@ -1340,14 +1621,53 @@ body.wings-admin-shell .login .wings-admin-logo {
     flex: 0 0 auto;
   }
 
-  &::-webkit-scrollbar { display: none; }
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-.wings-content-locale-compact__label { color: var(--wings-admin-muted-strong); font-size: 0.75rem; font-weight: 700; }
-.wings-content-locale-compact__status { display: inline-flex; gap: 3px; }
-.wings-content-locale-compact__status i { background: var(--wings-admin-warning); border-radius: 50%; display: block; height: 6px; width: 6px; }
-.wings-content-locale-compact__status i[data-status='published'] { background: var(--wings-admin-positive); }
-.wings-content-locale-compact__status i[data-status='draft'] { background: var(--wings-admin-accent); }
+.wings-content-locale-compact__label {
+  color: var(--wings-admin-muted-strong);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.wings-content-locale-compact__status {
+  display: inline-flex;
+  flex: 0 1 auto;
+  gap: 3px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.wings-content-locale-compact__status::-webkit-scrollbar {
+  display: none;
+}
+.wings-content-locale-compact__status > span {
+  background: var(--wings-admin-panel-strong);
+  border: 1px solid var(--wings-admin-border);
+  border-radius: var(--wings-admin-radius-pill);
+  color: var(--wings-admin-muted-strong);
+  flex: 0 0 auto;
+  font-size: 0.66rem;
+  line-height: 1.2;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+.wings-content-locale-compact__status > span[data-status='published'] {
+  background: color-mix(in srgb, var(--wings-admin-positive) 12%, white);
+  border-color: var(--wings-admin-positive);
+  color: color-mix(in srgb, var(--wings-admin-positive) 70%, black);
+}
+.wings-content-locale-compact__status > span[data-status='draft'] {
+  background: color-mix(in srgb, var(--wings-admin-accent) 12%, white);
+  border-color: var(--wings-admin-accent);
+  color: var(--wings-admin-ink);
+}
+.wings-content-locale-compact__status > span[data-status='error'] {
+  background: color-mix(in srgb, var(--theme-error-500) 12%, white);
+  border-color: var(--theme-error-500);
+  color: color-mix(in srgb, var(--theme-error-500) 70%, black);
+}
 
 .wings-content-locale-control {
   background: var(--wings-admin-panel);
@@ -1450,6 +1770,36 @@ body.wings-admin-shell .login .wings-admin-logo {
   background: color-mix(in srgb, var(--wings-admin-warning) 12%, white);
   border-color: var(--wings-admin-warning);
   color: color-mix(in srgb, var(--wings-admin-warning) 70%, black);
+}
+
+.wings-content-locale-control__statuses em[data-status='error'],
+.wings-content-locale-control__statuses em[data-status='loading'] {
+  background: color-mix(in srgb, var(--wings-admin-warning) 12%, white);
+  border-color: var(--wings-admin-warning);
+  color: color-mix(in srgb, var(--wings-admin-warning) 70%, black);
+}
+
+.wings-content-locale-control__error {
+  color: color-mix(in srgb, var(--theme-error-500) 70%, black);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.wings-content-locale-control__error button,
+.wings-content-locale-compact > button {
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: var(--wings-admin-radius-pill);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 3px 7px;
+}
+
+.wings-content-locale-compact__error {
+  color: color-mix(in srgb, var(--theme-error-500) 70%, black);
+  font-size: 0.68rem;
+  white-space: nowrap;
 }
 
 @media (max-width: 520px) {
@@ -1984,7 +2334,11 @@ body.wings-admin-shell .login .wings-admin-logo {
   .theme-manager,
   .site-review {
     background:
-      radial-gradient(circle at 12% 4%, color-mix(in srgb, var(--wings-admin-accent) 9%, transparent), transparent 18rem),
+      radial-gradient(
+        circle at 12% 4%,
+        color-mix(in srgb, var(--wings-admin-accent) 9%, transparent),
+        transparent 18rem
+      ),
       var(--wings-admin-bg);
   }
 
@@ -2019,7 +2373,11 @@ body.wings-admin-shell .login .wings-admin-logo {
   .wings-dashboard__actions a:first-child,
   .theme-manager__actions button:last-of-type,
   .site-review__actions a:first-child {
-    background: linear-gradient(135deg, var(--wings-admin-accent), var(--wings-admin-warning)) !important;
+    background: linear-gradient(
+      135deg,
+      var(--wings-admin-accent),
+      var(--wings-admin-warning)
+    ) !important;
     border-color: transparent !important;
     color: #fff !important;
   }
@@ -2207,4 +2565,261 @@ body.wings-admin-shell .login .wings-admin-logo {
   .before-dashboard__heading p {
     color: var(--wings-admin-muted-strong);
   }
+}
+
+/* US-074: reserve a real, non-overlapping header slot for the locale control
+ * and keep the rail toggler inside the sidebar. Payload renders the visible
+ * locale popup absolutely and the account link in the normal flex row, so
+ * moving only the popup's right edge is more stable than relying on the
+ * hidden spacer element's width at each breakpoint. */
+@media (min-width: 1051px) {
+  body.wings-admin-shell .app-header__localizer.localizer {
+    right: 148px;
+  }
+
+  body.wings-admin-shell .template-default__nav-toggler-wrapper {
+    left: 200px !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1050px) {
+  body.wings-admin-shell .app-header__localizer.localizer {
+    right: 120px;
+  }
+
+  body.wings-admin-shell .template-default__nav-toggler-wrapper {
+    left: 166px !important;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 768px) {
+  body.wings-admin-shell .app-header__localizer.localizer {
+    right: 96px;
+  }
+
+  body.wings-admin-shell .template-default__nav-toggler-wrapper {
+    left: 166px !important;
+  }
+}
+
+@media (max-width: 680px) {
+  body.wings-admin-shell .app-header__localizer.localizer {
+    right: 88px;
+  }
+}
+
+/* US-074: Payload keeps the nav and rail toggle outside the content wrapper.
+ * Use the real open state instead of treating the closed nav's zero-width
+ * grid track as a visible sidebar. The site scope selector is also rendered
+ * before `.template-default`, so the desktop/tablet toggle starts below it. */
+@media (min-width: 1051px) {
+  body.wings-admin-shell .template-default:not(.template-default--nav-open) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  body.wings-admin-shell .template-default:not(.template-default--nav-open) > .nav,
+  body.wings-admin-shell
+    .template-default:not(.template-default--nav-open)
+    > .template-default__wrap {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  body.wings-admin-shell
+    .template-default:not(.template-default--nav-open)
+    > .template-default__wrap {
+    margin-left: 0 !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  body.wings-admin-shell:not(:has(.template-default--nav-open))
+    .template-default__nav-toggler-wrapper {
+    left: 16px !important;
+    top: 42px !important;
+  }
+
+  body.wings-admin-shell:has(.template-default--nav-open) .template-default__nav-toggler-wrapper {
+    left: 200px !important;
+    top: 42px !important;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 1050px) {
+  body.wings-admin-shell .template-default:not(.template-default--nav-open) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  body.wings-admin-shell .template-default:not(.template-default--nav-open) > .nav,
+  body.wings-admin-shell
+    .template-default:not(.template-default--nav-open)
+    > .template-default__wrap {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  body.wings-admin-shell
+    .template-default:not(.template-default--nav-open)
+    > .template-default__wrap {
+    margin-left: 0 !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  body.wings-admin-shell:not(:has(.template-default--nav-open))
+    .template-default__nav-toggler-wrapper {
+    left: 16px !important;
+    top: 42px !important;
+  }
+
+  body.wings-admin-shell:has(.template-default--nav-open) .template-default__nav-toggler-wrapper {
+    left: 166px !important;
+    top: 42px !important;
+  }
+}
+
+@media (min-width: 681px) {
+  body.wings-admin-shell:not(:has(.template-default--nav-open)) .app-header__step-nav-wrapper {
+    margin-left: 56px;
+  }
+}
+
+/* The bespoke operator views predate the shared shell variables and some of
+ * their local selectors still declare Windows-only stacks. Normalize the
+ * applied package font roles at the view boundary so the same CSS contract is
+ * used on Windows, macOS, iOS and Android. */
+body.wings-admin-shell :where(.cms-console, .wings-dashboard) {
+  font-family: var(--wings-admin-body);
+}
+
+body.wings-admin-shell :where(.cms-console, .wings-dashboard) :where(*) {
+  font-family: inherit;
+}
+
+body.wings-admin-shell :where(.cms-console, .wings-dashboard) :where(h1, h2, h3, h4, strong) {
+  font-family: var(--wings-admin-display);
+}
+
+body.wings-admin-shell
+  :where(.cms-console, .wings-dashboard)
+  :where(code, pre, .mono, .pill--code) {
+  font-family: var(--wings-admin-mono);
+}
+
+/* Modern component styles use color-mix(in oklch) for calm status surfaces.
+ * These concrete fallbacks keep the admin actionable in older WebViews; the
+ * component declarations remain the enhancement path on supporting browsers. */
+@supports not (background: color-mix(in oklch, white 10%, black)) {
+  body.wings-admin-shell .site-review__node:hover,
+  body.wings-admin-shell .site-review__node--active {
+    background: #e8f2f2;
+  }
+
+  body.wings-admin-shell .theme-manager__preset-chips span,
+  body.wings-admin-shell .theme-manager__chip--ready,
+  body.wings-admin-shell .theme-manager__message--success {
+    background: #edf8f7;
+    border-color: #b9dcd7;
+  }
+
+  body.wings-admin-shell .theme-manager__requirement--critical,
+  body.wings-admin-shell .theme-manager__message--error {
+    background: #fff0ee;
+    border-color: #f0c9c2;
+  }
+
+  body.wings-admin-shell .theme-manager__requirement--warning {
+    background: #fff7e8;
+    border-color: #f1d8a3;
+  }
+
+  body.wings-admin-shell .theme-manager__requirement--ready {
+    background: #edf8f7;
+    border-color: #b9dcd7;
+  }
+}
+
+/* US-074 package bridge: keep the real Payload navigation as the owner of
+ * collection routes while presenting the package's grouped operator rail. */
+body.wings-admin-shell .nav .wings-admin-nav-intro__desktop {
+  display: grid;
+  gap: 12px;
+}
+
+body.wings-admin-shell .nav .wings-admin-nav-intro__group {
+  display: grid;
+  gap: 4px;
+}
+
+body.wings-admin-shell .nav .wings-admin-nav-intro__group-label {
+  color: var(--wings-admin-sidebar-heading);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  padding: 0 12px;
+  text-transform: uppercase;
+}
+
+body.wings-admin-shell .nav .wings-admin-nav-intro__mobile {
+  display: none;
+}
+
+/* The package uses amber as the single affirmative action. Keep this rule
+ * after the legacy theme layers so the contrast contract is deterministic. */
+body.wings-admin-shell .cms-console__primary-action,
+body.wings-admin-shell .wings-dashboard__primary-action,
+body.wings-admin-shell .wings-dashboard__actions a:first-child,
+body.wings-admin-shell .theme-manager__actions button:last-of-type,
+body.wings-admin-shell .site-review__actions a:first-child {
+  background: var(--wings-admin-action) !important;
+  border-color: var(--wings-admin-action) !important;
+  color: var(--wings-admin-action-text) !important;
+}
+
+body.wings-admin-shell .cms-console__primary-action:hover,
+body.wings-admin-shell .wings-dashboard__primary-action:hover,
+body.wings-admin-shell .wings-dashboard__actions a:first-child:hover,
+body.wings-admin-shell .theme-manager__actions button:last-of-type:hover,
+body.wings-admin-shell .site-review__actions a:first-child:hover {
+  background: #c8682c !important;
+  border-color: #c8682c !important;
+  color: #111827 !important;
+}
+
+@media (max-width: 680px) {
+  body.wings-admin-shell .nav .wings-admin-nav-intro__desktop {
+    display: none;
+  }
+
+  body.wings-admin-shell .nav .wings-admin-nav-intro__mobile {
+    align-items: stretch;
+    display: flex;
+    flex: 1 1 auto;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  body.wings-admin-shell .nav .wings-admin-nav-intro__mobile a {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+/* Production follow-up: active navigation is conveyed by the stable surface
+ * colour used by cms-admin-polish.html. The old amber rule/dot sat inside the
+ * text gutter and made the item appear to move when Payload refreshed the nav. */
+body.wings-admin-shell .nav .wings-admin-nav-intro a[aria-current='page'],
+body.wings-admin-shell .nav .nav__link:has(.nav__link-indicator) {
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body.wings-admin-shell .nav .wings-admin-nav-intro a[aria-current='page']::before,
+body.wings-admin-shell .nav .nav__link:has(.nav__link-indicator)::before {
+  content: none !important;
+  display: none !important;
 }
