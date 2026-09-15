@@ -1,0 +1,45 @@
+{
+  "siteCode": "wings-plus",
+  "displayTitle": "WingsPlus",
+  "sourcePdf": "pdf/WINGS PLUSS.pdf",
+  "tagline": "More Benefits. More Journeys.",
+  "valueLine": "TOGETHER WE GO FURTHER",
+  "colors": {
+    "primary": "#005090",
+    "accent": "#6040A0"
+  },
+  "webAssetContract": {
+    "canvasPolicy": "tight-visible-bounds",
+    "doNotCrop": true,
+    "doNotUpscale": true,
+    "preserveTransparentCanvas": true,
+    "unit": "css-px",
+    "dimensions": {
+      "logoPrimary": [447, 280],
+      "logoReverse": [429, 360],
+      "mark": [512, 428],
+      "favicon": [512, 512],
+      "ogImage": [1200, 630]
+    }
+  },
+  "assets": {
+    "logoPrimary": "/brand/wingsplus/wingsplus-logo-primary.png",
+    "logoReverse": "/brand/wingsplus/wingsplus-logo-reverse.png",
+    "mark": "/brand/wingsplus/wingsplus-mark.png",
+    "favicon": "/brand/wingsplus/wingsplus-favicon.png",
+    "ogImage": "/brand/wingsplus/wingsplus-og-image.png"
+  },
+  "provenance": {
+    "sourceRoot": "source/brand/visual-identity",
+    "sourceManifest": "exports/wingsplus/manifest.json",
+    "sourceManifestSha256": "f860b35a7614778eaccc1e236abf8e4f3741beede15c4ec5dd36f3e2e11fdaa5",
+    "referenceUpdatedAt": "2026-09-12",
+    "sha256": {
+      "logoPrimary": "8de29cc32e6cc9e01854afe5a03d788eb78e35b6672db08833fbe90ca1677f6f",
+      "logoReverse": "4107b5512a4061fc1663cb743f9f328992801d31285eb6e857870db66c56e478",
+      "mark": "19130c195aaa28fb23fc585c758df7a0a41aa8093d557097e979c941915f3c78",
+      "favicon": "4aa58227da4a8e5e5cc8611de07f3fd8b9dc3b22d81456f3ec4dc7e206f9d1ef",
+      "ogImage": "05380d84cca79c92e2e5728394e1b48b30050e6579b9e7e75c48ae54fe412c34"
+    }
+  }
+}

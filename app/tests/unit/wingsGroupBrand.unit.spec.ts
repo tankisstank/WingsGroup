@@ -32,21 +32,21 @@ const assets = {
   },
   logoPrimary: {
     file: 'wingsgroup-logo-primary.png',
-    height: 800,
+    height: 280,
     sha256: WINGSGROUP_BRAND.assetIntegrity.logoPrimary,
-    width: 2400,
+    width: 373,
   },
   logoReverse: {
     file: 'wingsgroup-logo-reverse.png',
-    height: 800,
+    height: 360,
     sha256: WINGSGROUP_BRAND.assetIntegrity.logoReverse,
-    width: 2400,
+    width: 382,
   },
   mark: {
     file: 'wingsgroup-mark.png',
-    height: 1024,
+    height: 447,
     sha256: WINGSGROUP_BRAND.assetIntegrity.mark,
-    width: 1024,
+    width: 512,
   },
   ogImage: {
     file: 'wingsgroup-og-image.png',
@@ -57,7 +57,7 @@ const assets = {
 } as const
 
 describe('WingsGroup web brand kit contract', () => {
-  it('keeps every committed PNG at the supplied checksum and master dimensions', () => {
+  it('keeps every committed PNG at the supplied checksum and tight master dimensions', () => {
     for (const asset of Object.values(assets)) {
       const filePath = path.resolve(process.cwd(), 'public/brand/wingsgroup', asset.file)
       const bytes = fs.readFileSync(filePath)
@@ -169,6 +169,7 @@ describe('WingsGroup web brand kit contract', () => {
     )
     expect(seedSource).toMatch(/defaultImageID: null,\s*faviconImageID: null,\s*logoImageID: null,/)
     expect(WINGSGROUP_BRAND.assets.favicon).toBe('/brand/wingsgroup/wingsgroup-favicon.png')
+    expect(WINGSGROUP_BRAND.assetContract.canvasPolicy).toBe('tight-visible-bounds')
   })
 
   it('records the approved brand release gate without approving locale or privacy gates', async () => {
