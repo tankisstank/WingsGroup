@@ -78,9 +78,9 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
               priority="high"
               siteID={siteID}
               siteCode={siteCode}
+              surface="header"
             />
           </SiteLink>
-              surface="header"
           {siteName ? (
             <div className="site-header__brand-copy hidden md:block">
               <div className="site-brand-kicker text-sm font-semibold">{siteName}</div>

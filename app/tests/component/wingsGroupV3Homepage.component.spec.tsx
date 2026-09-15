@@ -166,25 +166,25 @@ describe('WingsGroup v3 public components', () => {
   it('forwards the English locale and legal identity to the home trust block', () => {
     const infoStrip = {
       blockType: 'infoStrip',
-      description: 'Trust block fixture',
-      title: 'Trust',
     } as Page['layout'][number]
 
     render(
       <RenderBlocks
         blocks={[infoStrip]}
         locale="en"
-        wingsGroupLegalIdentity={{ internationalName: 'VIETWINGS.,JSC' }}
+        wingsGroupLegalIdentity={{ internationalName: 'EN-INTEGRATION-TEST' }}
         wingsGroupV3
         wingsGroupV3Home
         wingsGroupV3Route="home"
       />,
     )
 
-    expect(screen.getByText('Company information')).toBeTruthy()
-    expect(screen.getByRole('heading', { name: 'Choose with more confidence.' })).toBeTruthy()
-    expect(screen.getByText('VIETWINGS.,JSC')).toBeTruthy()
-    expect(screen.getByRole('link', { name: /View the corporate and legal profile/ })).toBeTruthy()
+    expect(screen.getByText('Confirmed legal identity')).toBeTruthy()
+    expect(
+      screen.getByRole('heading', { name: 'Clarity helps you choose with confidence.' }),
+    ).toBeTruthy()
+    expect(screen.getByText(/EN-INTEGRATION-TEST/)).toBeTruthy()
+    expect(screen.getByRole('link', { name: /View corporate profile and brand story/ })).toBeTruthy()
     expect(screen.queryByText('Thông tin doanh nghiệp')).toBeNull()
   })
 

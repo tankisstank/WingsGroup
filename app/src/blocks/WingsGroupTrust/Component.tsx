@@ -2,7 +2,7 @@ import type { InfoStripBlock, SiteSetting } from '@/payload-types'
 import React from 'react'
 
 import { SiteLink } from '@/components/SiteLink'
-import { BadgeCheckIcon, FileCheckIcon, PlaneIcon, ShieldCheckIcon } from 'lucide-react'
+import { FileCheckIcon, PlaneIcon, ShieldCheckIcon } from 'lucide-react'
 import { WINGSGROUP_LEGAL_IDENTITY } from '@/wingsgroup/corporateRoutes'
 import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
 
