@@ -163,6 +163,31 @@ describe('WingsGroup v3 public components', () => {
     expect(screen.getByTestId('editorial-rail-locale').textContent).toBe('en')
   })
 
+  it('forwards the English locale and legal identity to the home trust block', () => {
+    const infoStrip = {
+      blockType: 'infoStrip',
+      description: 'Trust block fixture',
+      title: 'Trust',
+    } as Page['layout'][number]
+
+    render(
+      <RenderBlocks
+        blocks={[infoStrip]}
+        locale="en"
+        wingsGroupLegalIdentity={{ internationalName: 'VIETWINGS.,JSC' }}
+        wingsGroupV3
+        wingsGroupV3Home
+        wingsGroupV3Route="home"
+      />,
+    )
+
+    expect(screen.getByText('Company information')).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Choose with more confidence.' })).toBeTruthy()
+    expect(screen.getByText('VIETWINGS.,JSC')).toBeTruthy()
+    expect(screen.getByRole('link', { name: /View the corporate and legal profile/ })).toBeTruthy()
+    expect(screen.queryByText('Thông tin doanh nghiệp')).toBeNull()
+  })
+
   it('keeps the ecosystem profile, stage, scope, proof state and CTA synchronized', () => {
     render(
       <WingsGroupEcosystemComponent
