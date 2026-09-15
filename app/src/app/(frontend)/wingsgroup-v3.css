@@ -398,10 +398,18 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-logo-mark {
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-logo-image--wingsgroup {
   display: block;
-  height: 60px;
+  height: 64px;
+  max-width: 110px;
   object-fit: contain;
   object-position: center;
-  width: 180px;
+  width: auto;
+}
+
+@media (min-width: 1200px) {
+  body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-logo-image--wingsgroup {
+    height: 68px;
+    max-width: 120px;
+  }
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-logo-text {

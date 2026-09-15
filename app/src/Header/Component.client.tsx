@@ -66,7 +66,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
     >
       <div className="site-header__bar flex justify-between">
         <div className="site-header__brand flex items-center gap-3">
-          <SiteLink href="/">
+          <SiteLink className="inline-flex items-center leading-none" href="/">
             <Logo
               accentColor={accentColor}
               brandColor={brandColor}
@@ -78,6 +78,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
               siteCode={siteCode}
             />
           </SiteLink>
+              surface="header"
           {siteName ? (
             <div className="site-header__brand-copy hidden md:block">
               <div className="site-brand-kicker text-sm font-semibold">{siteName}</div>

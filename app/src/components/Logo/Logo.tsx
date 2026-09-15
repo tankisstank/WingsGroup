@@ -10,10 +10,14 @@ import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { WINGSGROUP_BRAND, isWingsGroupBrandSite } from '@/wingsgroup/brand'
 import {
+  getSiteBrandAssetMetadata,
   getSiteBrandAssetURL,
   getSiteLogoAltText,
   getSiteOwnedMedia,
+  normalizeChildSiteBrandCode,
 } from '@/utilities/siteBranding'
+
+export type LogoSurface = 'compact-header' | 'footer' | 'header' | 'social'
 
 interface Props {
   accentColor?: null | string
@@ -26,7 +30,8 @@ interface Props {
   priority?: 'auto' | 'high' | 'low'
   siteID?: null | number | string
   siteCode?: null | string
-  variant?: 'auto' | 'primary' | 'reverse'
+  surface?: LogoSurface
+  variant?: 'auto' | 'mark' | 'primary' | 'reverse'
 }
 
 export const Logo = (props: Props) => {
@@ -41,12 +46,19 @@ export const Logo = (props: Props) => {
     logoText,
     siteID,
     siteCode,
+    surface = 'header',
     variant = 'auto',
   } = props
 
   const { headerTheme } = useHeaderTheme()
   const resolvedVariant =
-    variant === 'auto' ? (headerTheme === 'dark' ? 'reverse' : 'primary') : variant
+    variant === 'auto'
+      ? surface === 'compact-header'
+        ? 'mark'
+        : headerTheme === 'dark'
+          ? 'reverse'
+          : 'primary'
+      : variant
   const loading = loadingFromProps || 'lazy'
   const priority = priorityFromProps || 'low'
   const selectedLogoImage = resolvedVariant === 'reverse' ? logoReverseImage : logoImage
@@ -54,17 +66,42 @@ export const Logo = (props: Props) => {
   const logoImageUrl = ownedLogoImage?.url
     ? getMediaUrl(ownedLogoImage.url, ownedLogoImage.updatedAt)
     : ''
+  const staticAssetKey =
+    resolvedVariant === 'reverse'
+      ? 'logoReverse'
+      : resolvedVariant === 'mark'
+        ? 'mark'
+        : 'logoPrimary'
   const staticLogoURL =
-    getSiteBrandAssetURL(siteCode, resolvedVariant === 'reverse' ? 'logoReverse' : 'logoPrimary') ||
-    (isWingsGroupBrandSite(siteCode) && resolvedVariant === 'primary'
-      ? WINGSGROUP_BRAND.assets.logoPrimary
-      : '')
+    getSiteBrandAssetURL(siteCode, staticAssetKey) ||
+    (isWingsGroupBrandSite(siteCode) ? WINGSGROUP_BRAND.assets[staticAssetKey] : '')
+  const staticLogoMetadata = isWingsGroupBrandSite(siteCode)
+    ? {
+        dimensions: WINGSGROUP_BRAND.assetContract.dimensions[staticAssetKey],
+        sha256: WINGSGROUP_BRAND.assetIntegrity[staticAssetKey],
+      }
+    : getSiteBrandAssetMetadata(siteCode, staticAssetKey)
   const label = getSiteLogoAltText(siteCode) || logoText || ownedLogoImage?.alt || 'Site logo'
   const isPriorityImage = priority === 'high'
-  const preferStaticBrandAsset = siteCode === 'wings-go' || siteCode === 'wing-side'
+  const preferStaticBrandAsset = normalizeChildSiteBrandCode(siteCode) !== null
   const resolvedLogoImage =
-    !preferStaticBrandAsset && logoImageUrl && ownedLogoImage ? ownedLogoImage : null
+    resolvedVariant !== 'mark' && !preferStaticBrandAsset && logoImageUrl && ownedLogoImage
+      ? ownedLogoImage
+      : null
   const resolvedStaticLogoURL = staticLogoURL || (!resolvedLogoImage ? logoImageUrl : null)
+  const [staticWidth, staticHeight] = staticLogoMetadata?.dimensions || []
+  const imageWidth =
+    resolvedLogoImage?.width || staticWidth || (isWingsGroupBrandSite(siteCode) ? 373 : 448)
+  const imageHeight =
+    resolvedLogoImage?.height || staticHeight || (isWingsGroupBrandSite(siteCode) ? 280 : 280)
+  const logoSizeClass =
+    resolvedVariant === 'mark'
+      ? 'site-logo-image--mark h-10 w-10 md:h-11 md:w-11'
+      : isWingsGroupBrandSite(siteCode)
+        ? 'site-logo-image--wingsgroup h-16 max-w-[110px] md:h-[68px] md:max-w-[120px]'
+        : surface === 'footer'
+          ? 'site-logo-image--child h-12 max-w-[96px]'
+          : 'site-logo-image--child h-14 max-w-[110px]'
 
   if (resolvedLogoImage || resolvedStaticLogoURL) {
     return (
@@ -73,19 +110,26 @@ export const Logo = (props: Props) => {
         className={clsx('inline-flex items-center', className)}
         data-fetch-priority={priority}
         data-loading={loading}
-        data-logo-source={resolvedLogoImage ? 'cms' : 'brand-manifest'}
+        data-logo-source={
+          resolvedLogoImage
+            ? 'cms'
+            : isWingsGroupBrandSite(siteCode)
+              ? 'wingsgroup-brand-kit'
+              : 'brand-manifest'
+        }
+        data-logo-surface={surface}
         data-logo-variant={resolvedVariant}
         data-site-code={siteCode || undefined}
       >
         <NextImage
           alt={label}
-          className="site-logo-image h-12 w-auto max-w-[160px] object-contain"
-          height={resolvedLogoImage?.height || (isWingsGroupBrandSite(siteCode) ? 60 : 280)}
+          className={clsx('site-logo-image w-auto object-contain', logoSizeClass)}
+          height={imageHeight}
           loading={isPriorityImage ? undefined : loading}
           priority={isPriorityImage}
           src={resolvedLogoImage ? logoImageUrl : resolvedStaticLogoURL!}
           unoptimized
-          width={resolvedLogoImage?.width || (isWingsGroupBrandSite(siteCode) ? 180 : 448)}
+          width={imageWidth}
         />
       </span>
     )
@@ -97,6 +141,7 @@ export const Logo = (props: Props) => {
       className={clsx('inline-flex items-center gap-3', className)}
       data-fetch-priority={priority}
       data-loading={loading}
+      data-logo-surface={surface}
       data-logo-variant={resolvedVariant}
       data-site-code={siteCode || undefined}
     >
