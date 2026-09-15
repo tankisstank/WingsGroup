@@ -100,12 +100,17 @@ describe('production SEO perimeter', () => {
     }
   })
 
-  it('keeps legacy sitemap generation away from public runtime artifacts', () => {
-    const config = readProjectFile('next-sitemap.config.cjs')
+  it('keeps sitemap generation owned by the site-scoped runtime routes', () => {
+    for (const path of [
+      'src/app/(frontend)/(sitemaps)/pages-sitemap.xml/route.ts',
+      'src/app/(frontend)/(sitemaps)/posts-sitemap.xml/route.ts',
+    ]) {
+      const source = readProjectFile(path)
 
-    expect(config).toContain("outDir: '.next/legacy-next-sitemap-disabled'")
-    expect(config).toContain('generateRobotsTxt: false')
-    expect(config).not.toMatch(/localhost|127\.0\.0\.1|example\.com/)
+      expect(source).toContain('getServerSideSitemap')
+      expect(source).toContain('equals: site.id')
+      expect(source).toContain("export const dynamic = 'force-dynamic'")
+    }
   })
 
   it('site-scopes both content sitemap queries without a shared cross-host cache', () => {

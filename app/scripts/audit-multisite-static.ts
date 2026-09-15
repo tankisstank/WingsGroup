@@ -137,7 +137,7 @@ const classifyMatch = (file: string): RawMatch['classification'] => {
     normalized.startsWith('scripts/') ||
     normalized.includes('seed-subsites') ||
     normalized.includes('seedPhase1Launch') ||
-    normalized.startsWith('src/endpoints/seed/')
+    normalized === 'src/endpoints/seed/guard.ts'
   ) {
     return 'seed-fixture'
   }

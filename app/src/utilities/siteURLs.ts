@@ -156,23 +156,3 @@ export const getSiteSettingForSite = <T extends Pick<SiteSetting, 'site'>>(
 
   return siteId ? settingsBySiteId?.get(siteId) || null : null
 }
-
-/**
- * @deprecated Use normalizeConfiguredCanonicalOrigin() for helpers that are
- * intentionally scoped to configured canonical settings only. For public SEO
- * output, prefer getCanonicalSiteOrigin() from siteSEO.ts.
- */
-export const normalizeCanonicalDomain = normalizeConfiguredCanonicalOrigin
-
-/**
- * @deprecated Use buildConfiguredCanonicalURL() for helpers that intentionally
- * derive from settings.seo.canonicalDomain. For public SEO output, prefer
- * getSiteSitemapURL() with getCanonicalSiteOrigin().
- */
-export const getCanonicalURL = buildConfiguredCanonicalURL
-
-/**
- * @deprecated Use buildConfiguredAbsoluteMediaURL() for helpers that
- * intentionally derive from settings.seo.canonicalDomain.
- */
-export const getAbsoluteMediaURL = buildConfiguredAbsoluteMediaURL

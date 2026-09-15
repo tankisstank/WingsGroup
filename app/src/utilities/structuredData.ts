@@ -184,7 +184,6 @@ export const buildBreadcrumbListJSONLD = (
   }
 }
 
-export const buildBreadcrumbListJsonLd = buildBreadcrumbListJSONLD
 
 export const buildPageJsonLd = ({
   canonicalOrigin,

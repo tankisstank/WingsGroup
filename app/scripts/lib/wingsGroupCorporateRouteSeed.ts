@@ -759,6 +759,34 @@ const pendingConsultationChannels = (['zalo', 'whatsapp', 'messenger'] as const)
   state: 'unconfigured' as const,
 }))
 
+const seedRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {}
+
+export const buildWingsGroupSettingsGovernance = (existing?: unknown) => ({
+  ...seedRecord(existing),
+  consultationChannels: pendingConsultationChannels,
+  enabled: true,
+  englishPublicationState: 'approved',
+  legalIdentity: WINGSGROUP_LEGAL_IDENTITY,
+  privacy: {
+    approvalReference: WINGSGROUP_PRIVACY_APPROVAL_REFERENCE,
+    approvalState: 'approved',
+    consentRequired: true,
+    consentEvidenceReference: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
+    consentVersion: WINGSGROUP_CONSENT_VERSION,
+    dataSubjectContact: WINGSGROUP_DATA_CONTACT,
+    dataSubjectRightsEvidence: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
+    dataSubjectRightsStatement: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_VI,
+    interBranchTransferAllowed: true,
+    policyRouteEn: CONTACT_POLICY_ROUTES.en,
+    policyRouteVi: CONTACT_POLICY_ROUTES.vi,
+    policyVersion: WINGSGROUP_PRIVACY_VERSION,
+    retentionMonths: WINGSGROUP_LEAD_RETENTION_MONTHS,
+  },
+})
+
 type SeedResult = {
   created: string[]
   policyPending: string[]
@@ -965,28 +993,7 @@ export const seedWingsGroupCorporateRoutes = async ({
   if (!form) throw new Error('WingsGroup contact form could not be resolved.')
   const formID = form.id
 
-  const settingsGovernance = {
-    ...(settings.wingsGroupV3 || {}),
-    consultationChannels: pendingConsultationChannels,
-    enabled: true,
-    englishPublicationState: 'approved',
-    legalIdentity: WINGSGROUP_LEGAL_IDENTITY,
-    privacy: {
-      approvalReference: WINGSGROUP_PRIVACY_APPROVAL_REFERENCE,
-      approvalState: 'approved',
-      consentRequired: true,
-      consentEvidenceReference: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
-      consentVersion: WINGSGROUP_CONSENT_VERSION,
-      dataSubjectContact: WINGSGROUP_DATA_CONTACT,
-      dataSubjectRightsEvidence: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_EVIDENCE,
-      dataSubjectRightsStatement: WINGSGROUP_PRIVACY_DATA_SUBJECT_RIGHTS_STATEMENT_VI,
-      interBranchTransferAllowed: true,
-      policyRouteEn: CONTACT_POLICY_ROUTES.en,
-      policyRouteVi: CONTACT_POLICY_ROUTES.vi,
-      policyVersion: WINGSGROUP_PRIVACY_VERSION,
-      retentionMonths: WINGSGROUP_LEAD_RETENTION_MONTHS,
-    },
-  }
+  const settingsGovernance = buildWingsGroupSettingsGovernance(settings.wingsGroupV3)
 
   for (const locale of ['vi', 'en'] as const) {
     await payload.update({
@@ -1098,6 +1105,7 @@ export const seedWingsGroupCorporateRoutes = async ({
               title: localized.title,
             },
             title: localized.title,
+            wingsGroupRoute: routeGovernanceForSeed(route),
           },
           id: page!.id,
           locale,
@@ -1137,6 +1145,7 @@ export const seedWingsGroupCorporateRoutes = async ({
             title: localized.title,
           },
           title: localized.title,
+          wingsGroupRoute: routeGovernanceForSeed(route),
         },
         id: page!.id,
         locale: 'en',
@@ -1170,6 +1179,16 @@ export const seedWingsGroupCorporateRoutes = async ({
       if (route.path !== '/') throw error
       result.policyPending.push('/')
     }
+
+    await payload.update({
+      collection: 'pages',
+      context: { disableRevalidate: true },
+      data: { wingsGroupRoute: routeGovernanceForSeed(route) },
+      id: page!.id,
+      locale: 'vi',
+      overrideAccess: true,
+      req,
+    } as never)
   }
 
   return result

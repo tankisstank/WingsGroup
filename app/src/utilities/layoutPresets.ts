@@ -284,20 +284,6 @@ const features = (
   })),
 })
 
-const infoStrip = (
-  title: string,
-  description: string,
-  items: Array<{ description: string; label: string; value?: string }>,
-  eyebrow?: string,
-) => ({
-  blockType: 'infoStrip',
-  id: blockID(),
-  description,
-  eyebrow,
-  items,
-  title,
-})
-
 const stats = (
   presentation:
     | 'card-grid'
@@ -528,10 +514,13 @@ export const createLayoutPresetData = (
       return {
         hero: hero(title, lead, 'split-visual'),
         layout: [
-          infoStrip(
-            'Travel planning signals',
-            'Bốn điểm nhấn giúp khách inbound hiểu ngay cách WingSide hỗ trợ một hành trình riêng tại Việt Nam.',
-            [
+          {
+            blockType: 'infoStrip',
+            id: blockID(),
+            description:
+              'Bốn điểm nhấn giúp khách inbound hiểu ngay cách WingSide hỗ trợ một hành trình riêng tại Việt Nam.',
+            eyebrow: 'Inbound value props',
+            items: [
               {
                 label: 'Destination-led',
                 value: 'Vietnam first',
@@ -554,8 +543,8 @@ export const createLayoutPresetData = (
                 description: 'Cấu trúc đủ rõ để chạy paid traffic vào các locale launch.',
               },
             ],
-            'Inbound value props',
-          ),
+            title: 'Travel planning signals',
+          },
           features('bento', 'Explore Vietnam by intent', [
             'Destinations',
             'Travel styles',

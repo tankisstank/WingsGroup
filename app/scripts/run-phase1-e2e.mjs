@@ -6,7 +6,9 @@ import { spawnSync } from 'node:child_process'
 const appRoot = process.cwd()
 const args = process.argv.slice(2)
 const databaseEngine = (process.env.E2E_DATABASE_ENGINE || 'postgres').toLowerCase()
-const explicitDatabaseURL = process.env.DATABASE_URL
+// The explicit SQLite mode must always own its disposable file. Never let an
+// inherited DATABASE_URL redirect `test:e2e:sqlite` to a real database.
+const explicitDatabaseURL = databaseEngine === 'sqlite' ? undefined : process.env.DATABASE_URL
 const generatedDatabaseDir = path.join(os.tmpdir(), 'wingstravel-e2e')
 const runID = `${Date.now()}-${process.pid}`
 const postgresImage = process.env.E2E_POSTGRES_IMAGE || 'postgres:16-alpine'
