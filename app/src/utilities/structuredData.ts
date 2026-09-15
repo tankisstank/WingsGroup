@@ -206,7 +206,6 @@ export const buildBreadcrumbListJSONLD = (
   }
 }
 
-export const buildBreadcrumbListJsonLd = buildBreadcrumbListJSONLD
 
 /**
  * Emits semantic FAQPage data only for CMS FAQ blocks that are rendered as
