@@ -1,11 +1,13 @@
 import type { FeatureGridBlock as FeatureGridBlockProps } from '@/payload-types'
 import React from 'react'
+import { HeartHandshake, ShieldCheck, UserRoundCheck } from 'lucide-react'
 
 import { SiteLink } from '@/components/SiteLink'
 import { WINGSGROUP_CAPABILITY_ROWS } from '@/components/WingsGroupV3/model'
 import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
 
-type Props = Pick<FeatureGridBlockProps, 'description' | 'eyebrow' | 'items' | 'title'> & {
+type Props = Partial<Pick<FeatureGridBlockProps, 'description' | 'eyebrow' | 'items' | 'title'>> & {
+  anchorId?: string
   locale?: null | string
 }
 
@@ -111,7 +113,13 @@ const standardsData = {
   ],
 }
 
-export const WingsGroupCapabilitySection = ({ description, eyebrow, locale, title }: Props) => {
+export const WingsGroupCapabilitySection = ({
+  anchorId = 'services',
+  description,
+  eyebrow,
+  locale,
+  title,
+}: Props) => {
   const isEnglish = locale === 'en'
   const fallbackRows = WINGSGROUP_CAPABILITY_ROWS[isEnglish ? 'en' : 'vi']
   const rows = fallbackRows
@@ -144,6 +152,17 @@ export const WingsGroupCapabilitySection = ({ description, eyebrow, locale, titl
       (isEnglish
         ? 'Not all journeys are the same. WingsGroup connects travel, airport services, private itineraries and MICE so every need is properly advised.'
         : 'Không phải mọi chuyến đi đều giống nhau. WingsGroup kết nối hệ sinh thái dịch vụ từ du lịch, sân bay, hành trình riêng đến MICE, để mỗi nhu cầu được tư vấn đúng và triển khai trọn vẹn.')
+  const valueBadges = isEnglish
+    ? [
+        { Icon: ShieldCheck, label: 'Safety & Trust' },
+        { Icon: UserRoundCheck, label: 'Professional Team' },
+        { Icon: HeartHandshake, label: 'Dedicated to Every Journey' },
+      ]
+    : [
+        { Icon: ShieldCheck, label: 'An toàn & Tin cậy' },
+        { Icon: UserRoundCheck, label: 'Đội ngũ chuyên nghiệp' },
+        { Icon: HeartHandshake, label: 'Tận tâm với từng hành trình' },
+      ]
 
   return (
     <section
@@ -151,7 +170,7 @@ export const WingsGroupCapabilitySection = ({ description, eyebrow, locale, titl
       className={`${styles.section} ${styles.capabilitySection}`}
       data-archetype="capability"
       data-testid="wingsgroup-capability"
-      id="services"
+      id={anchorId}
     >
       <div className="container">
         <header className={styles.routeHeader}>
@@ -163,6 +182,19 @@ export const WingsGroupCapabilitySection = ({ description, eyebrow, locale, titl
           </div>
           <p className={styles.sectionDescription}>{resolvedDescription}</p>
         </header>
+
+        <ul
+          aria-label={isEnglish ? 'WingsGroup value badges' : 'Ba giá trị cốt lõi'}
+          className={styles.valueBadges}
+          data-testid="wingsgroup-value-badges"
+        >
+          {valueBadges.map(({ Icon, label }) => (
+            <li className={styles.valueBadge} key={label}>
+              <Icon aria-hidden="true" className={styles.valueBadgeIcon} />
+              <span>{label}</span>
+            </li>
+          ))}
+        </ul>
 
         {/* 2-Column Process & Standards Layout (Slide 05) */}
         <div className={styles.capabilityColumns}>
