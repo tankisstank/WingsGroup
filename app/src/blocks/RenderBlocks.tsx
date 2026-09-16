@@ -30,6 +30,7 @@ import { WingsGroupCapabilitySection } from '@/blocks/WingsGroupCapability/Compo
 import { WingsGroupCorporateSection } from '@/blocks/WingsGroupCorporate/Component'
 import { WingsGroupEditorialArchive } from '@/components/WingsGroupV3/EditorialArchive'
 import { WingsGroupContactIntro } from '@/components/WingsGroupV3/ContactIntro'
+import { JourneyInquiryGrid } from '@/components/WingsGroupV3/JourneyInquiryGrid'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -177,12 +178,28 @@ export const RenderBlocks: React.FC<{
                 </Fragment>
               )
 
+              const homeAddons =
+                wingsGroupV3Home &&
+                wingsGroupV3Route === 'home' &&
+                blockType === 'wingsGroupEcosystem' ? (
+                  <>
+                    <div data-wingsgroup-home-addon="capability">
+                      <WingsGroupCapabilitySection anchorId="capability" locale={locale} />
+                    </div>
+                    <JourneyInquiryGrid />
+                  </>
+                ) : null
+
               return section ? (
-                <div data-wingsgroup-home-section={section} key={`${section}-${index}`}>
-                  {renderedBlock}
-                </div>
+                <Fragment key={`${section}-${index}`}>
+                  <div data-wingsgroup-home-section={section}>{renderedBlock}</div>
+                  {homeAddons}
+                </Fragment>
               ) : (
-                <Fragment key={index}>{renderedBlock}</Fragment>
+                <Fragment key={index}>
+                  {renderedBlock}
+                  {homeAddons}
+                </Fragment>
               )
             }
           }

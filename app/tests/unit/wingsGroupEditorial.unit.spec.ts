@@ -162,7 +162,8 @@ describe('WingsGroup v3 editorial eligibility', () => {
     )
 
     expect(openGraphMedia?.url).toBe('https://media.wingsgroup.vn/journey-1200.webp')
-    expect(openGraphMedia?.sizes?.og?.url).toBe('https://media.wingsgroup.vn/journey-1200.webp')
+    const sizes = openGraphMedia?.sizes as { og?: { url?: string } } | null | undefined
+    expect(sizes?.og?.url).toBe('https://media.wingsgroup.vn/journey-1200.webp')
   })
 
   it('derives archive OG metadata from the governed editorial fallback register', () => {

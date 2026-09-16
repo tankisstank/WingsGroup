@@ -58,6 +58,37 @@
   line-height: 1.55;
 }
 
+.valueBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 30px;
+  padding: 0;
+  list-style: none;
+}
+
+.valueBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--site-border, #dedbd3);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--site-surface, #fffefa) 88%, var(--site-accent, #fdb515));
+  color: var(--foreground, #302d26);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.valueBadgeIcon {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  color: var(--site-brand, #005090);
+}
+
 .hero {
   padding: 54px 0 66px;
   border-bottom: 1px solid var(--site-border, #dedbd3);
@@ -1248,6 +1279,16 @@
 .consultationDialogInner > p {
   color: var(--muted-foreground, #777269);
   line-height: 1.6;
+}
+
+.consultationContext {
+  margin-top: -8px;
+  font-size: 0.8125rem;
+}
+
+.consultationContext span {
+  color: var(--foreground, #302d26);
+  font-weight: 700;
 }
 
 .consultationClose {

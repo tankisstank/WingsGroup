@@ -65,6 +65,19 @@
     "editorial",
     "contact"
   ],
+  "homeEnhancementOrder": ["capability", "journey-inquiry"],
+  "homeEnhancements": [
+    {
+      "key": "capability",
+      "selector": "[data-testid=wingsgroup-capability]",
+      "heading": "Quy trình phục vụ rõ ràng - Đồng hành trọn hành trình"
+    },
+    {
+      "key": "journey-inquiry",
+      "selector": "[data-testid=wingsgroup-journey-inquiry]",
+      "heading": "Bạn đang chuẩn bị cho hành trình nào?"
+    }
+  ],
   "sections": [
     {
       "key": "hero",
@@ -177,7 +190,7 @@
   "consultationDialog": {
     "selector": "[data-od-id=consultation-dialog]",
     "triggerSelector": "[data-od-id=consultation-fab]",
-    "triggerLabel": "Trao đổi với chuyên viên",
+    "triggerLabel": "LIÊN HỆ TƯ VẤN 24/7",
     "triggerFlow": "specialist-consultation-dialog",
     "flowKey": "specialist-consultation-dialog",
     "title": "Trao đổi với chuyên viên.",

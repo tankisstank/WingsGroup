@@ -1,16 +1,42 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSitePublicLocale } from '@/providers/SitePath'
 import { useSitePath } from '@/utilities/useSitePath'
 import {
+  clearWingsGroupInquiryContext,
   WINGSGROUP_CONTACT_FORM_ANCHOR,
   WINGSGROUP_CONTACT_FOCUS_SESSION_KEY,
+  readWingsGroupInquiryContext,
+  type WingsGroupInquiryKey,
 } from '@/utilities/wingsGroupConsultation'
 import { sharedZaloOa } from '@/utilities/sharedConsultationChannels'
 
 import styles from './WingsGroupV3.module.css'
+
+const inquiryLabels: Record<WingsGroupInquiryKey, { en: string; vi: string }> = {
+  airport: {
+    en: 'Airport services',
+    vi: 'Dịch vụ sân bay',
+  },
+  mice: {
+    en: 'Private journey / MICE',
+    vi: 'Hành trình riêng / MICE',
+  },
+  outbound: {
+    en: 'Outbound travel',
+    vi: 'Du lịch nước ngoài',
+  },
+  support: {
+    en: 'Travel support',
+    vi: 'Hỗ trợ hành trình',
+  },
+  vietnam: {
+    en: 'Vietnam discovery',
+    vi: 'Khám phá Việt Nam',
+  },
+}
 
 export const WingsGroupConsultationDialog = () => {
   const router = useRouter()
@@ -21,6 +47,7 @@ export const WingsGroupConsultationDialog = () => {
   const closeRef = useRef<HTMLButtonElement>(null)
   const lastFocusedRef = useRef<HTMLElement | null>(null)
   const restoreFocusOnCloseRef = useRef(true)
+  const [selectedInquiry, setSelectedInquiry] = useState<WingsGroupInquiryKey | null>(null)
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -35,6 +62,13 @@ export const WingsGroupConsultationDialog = () => {
 
     const openDialog = (event?: Event) => {
       event?.preventDefault()
+      const target = event?.target
+      const trigger =
+        target instanceof Element ? target.closest('[data-wingsgroup-consultation-trigger]') : null
+      if (trigger && !trigger.hasAttribute('data-wingsgroup-inquiry-key')) {
+        clearWingsGroupInquiryContext()
+      }
+      setSelectedInquiry(readWingsGroupInquiryContext())
       lastFocusedRef.current =
         document.activeElement instanceof HTMLElement ? document.activeElement : null
       if (!dialog.open) dialog.showModal()
@@ -144,7 +178,7 @@ export const WingsGroupConsultationDialog = () => {
         type="button"
       >
         <span aria-hidden="true">↗</span>
-        {isEnglish ? 'Speak with a specialist' : 'Trao đổi với chuyên viên'}
+        {isEnglish ? '24/7 CONSULTATION' : 'LIÊN HỆ TƯ VẤN 24/7'}
       </button>
       <dialog
         aria-labelledby="consultation-title"
@@ -177,6 +211,12 @@ export const WingsGroupConsultationDialog = () => {
               ? 'Share what you need. The WingsGroup team will listen carefully and clarify your plans before the journey begins.'
               : 'Để lại nhu cầu. Đội ngũ WingsGroup sẽ trực tiếp tiếp nhận và làm rõ nhu cầu trước hành trình.'}
           </p>
+          {selectedInquiry ? (
+            <p className={styles.consultationContext} data-testid="consultation-inquiry-context">
+              <span>{isEnglish ? 'Selected request:' : 'Nhu cầu đã chọn:'}</span>{' '}
+              {inquiryLabels[selectedInquiry][isEnglish ? 'en' : 'vi']}
+            </p>
+          ) : null}
           <div className={styles.channelList}>
             <a
               aria-label={isEnglish ? 'Open WingsGroup Zalo OA' : 'Mở Zalo OA WingsGroup'}

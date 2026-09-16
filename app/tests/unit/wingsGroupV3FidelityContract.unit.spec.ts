@@ -47,7 +47,7 @@ describe('WingsGroup v3 executable fidelity contract', () => {
       target: '[data-od-id=consultation-dialog]',
     })
     expect(contract.header.primaryCta.flow).toBe(contract.consultationDialog.flowKey)
-    expect(contract.consultationDialog.triggerLabel).toBe('Trao đổi với chuyên viên')
+    expect(contract.consultationDialog.triggerLabel).toBe('LIÊN HỆ TƯ VẤN 24/7')
     expect(contract.consultationDialog.triggerFlow).toBe(contract.consultationDialog.flowKey)
     expect(getSection(contract, 'trust').heading).toBe('Minh bạch để bạn an tâm lựa chọn.')
     expect(

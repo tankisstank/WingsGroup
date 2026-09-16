@@ -67,7 +67,13 @@ export const buildConfiguredAbsoluteMediaURL = ({
   const baseURL = normalizeConfiguredCanonicalOrigin(settings?.seo?.canonicalDomain)
 
   if (media && typeof media === 'object' && 'url' in media && media.url) {
-    const mediaPath = media.sizes?.og?.url || media.url
+    const sizes = media.sizes as
+      | {
+          og?: { url?: null | string } | null
+        }
+      | null
+      | undefined
+    const mediaPath = sizes?.og?.url || media.url
 
     if (/^https?:\/\//i.test(mediaPath)) return mediaPath
 
