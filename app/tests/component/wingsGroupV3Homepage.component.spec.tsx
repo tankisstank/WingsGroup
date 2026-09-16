@@ -10,6 +10,7 @@ import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { WingsGroupTrustSection } from '@/blocks/WingsGroupTrust/Component'
 import { WingsGroupConsultationDialog } from '@/components/WingsGroupV3/ConsultationDialog'
 import { WingsGroupEditorialHero } from '@/components/WingsGroupV3/EditorialHero'
+import { JourneyInquiryGrid } from '@/components/WingsGroupV3/JourneyInquiryGrid'
 import type { Media, Page, WingsGroupEcosystemBlock } from '@/payload-types'
 
 const navigationMock = vi.hoisted(() => ({ push: vi.fn() }))
@@ -121,6 +122,7 @@ const profile = (
 })
 
 beforeEach(() => {
+  window.sessionStorage.clear()
   Object.defineProperty(window, 'matchMedia', {
     configurable: true,
     value: () => ({
@@ -280,11 +282,42 @@ describe('WingsGroup v3 public components', () => {
     expect(screen.getAllByRole('article')).toHaveLength(5)
     expect(screen.getByRole('heading', { name: 'WingsCare', level: 3 })).toBeTruthy()
     expect(screen.getAllByRole('link', { name: /Trao đổi nhu cầu/ })).toHaveLength(5)
+    expect(screen.getAllByRole('listitem')).toHaveLength(3)
+    expect(screen.getByText('An toàn & Tin cậy')).toBeTruthy()
     expect(
       screen
         .getAllByRole('link')
         .every((link) => link.getAttribute('href') === '/lien-he#contact-form'),
     ).toBe(true)
+  })
+
+  it('opens the shared consultation dialog with the selected inquiry', () => {
+    render(
+      <>
+        <JourneyInquiryGrid />
+        <WingsGroupConsultationDialog />
+      </>,
+    )
+
+    expect(screen.getByTestId('wingsgroup-journey-inquiry')).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: /Tôi muốn|Tôi cần/ })).toHaveLength(5)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Tôi muốn đi nước ngoài' }))
+
+    expect(window.sessionStorage.getItem('wingsgroup-inquiry-context')).toBe('outbound')
+    expect(screen.getByTestId('consultation-inquiry-context').textContent).toContain(
+      'Nhu cầu đã chọn: Du lịch nước ngoài',
+    )
+  })
+
+  it('keeps the five inquiry choices bilingual', () => {
+    siteLocaleMock.value = 'en'
+    render(<JourneyInquiryGrid />)
+
+    expect(screen.getByRole('button', { name: 'I want to travel abroad' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'I need a private journey / MICE' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'I need travel support' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Tôi muốn đi nước ngoài' })).toBeNull()
   })
 
   it('renders only the approved corporate relationship wording and identity', () => {
@@ -500,7 +533,7 @@ describe('WingsGroup v3 public components', () => {
   it('routes to the governed contact form without rendering unavailable channels', () => {
     render(<WingsGroupConsultationDialog />)
 
-    const trigger = screen.getByRole('button', { name: 'Trao đổi với chuyên viên' })
+    const trigger = screen.getByRole('button', { name: 'LIÊN HỆ TƯ VẤN 24/7' })
     fireEvent.click(trigger)
     expect(screen.queryByText('Chờ cập nhật')).toBeNull()
     expect(
@@ -519,7 +552,7 @@ describe('WingsGroup v3 public components', () => {
     siteLocaleMock.value = 'en'
     render(<WingsGroupConsultationDialog />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Speak with a specialist' }))
+    fireEvent.click(screen.getByRole('button', { name: '24/7 CONSULTATION' }))
     expect(screen.getByRole('heading', { name: 'Speak with a specialist.' })).toBeTruthy()
     expect(screen.getByText(/Share what you need\./)).toBeTruthy()
     expect(screen.getByRole('button', { name: /^Share your plans/ })).toBeTruthy()

@@ -1,9 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
 import { useSitePublicLocale } from '@/providers/SitePath'
-import { useSitePath } from '@/utilities/useSitePath'
 import {
   ArrowRightIcon,
   BadgeCheckIcon,
@@ -13,8 +11,8 @@ import {
   SparklesIcon,
 } from 'lucide-react'
 import {
-  WINGSGROUP_CONTACT_FORM_ANCHOR,
-  WINGSGROUP_CONTACT_FOCUS_SESSION_KEY,
+  setWingsGroupInquiryContext,
+  type WingsGroupInquiryKey,
 } from '@/utilities/wingsGroupConsultation'
 import styles from './WingsGroupV3.module.css'
 
@@ -23,15 +21,15 @@ interface InquiryCard {
   category: string
   description: string
   buttonLabel: string
-  inquiryKey: string
+  inquiryKey: WingsGroupInquiryKey
 }
 
-const INQUIRY_ICONS: Record<string, React.FC<{ className?: string }>> = {
-  wingsgo: PlaneIcon,
-  wingside: CompassIcon,
-  wingspass: PlaneTakeoffIcon,
-  wingsplus: SparklesIcon,
-  wingscare: BadgeCheckIcon,
+const INQUIRY_ICONS: Record<WingsGroupInquiryKey, React.FC<{ className?: string }>> = {
+  airport: PlaneTakeoffIcon,
+  mice: SparklesIcon,
+  outbound: PlaneIcon,
+  support: BadgeCheckIcon,
+  vietnam: CompassIcon,
 }
 
 const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards: InquiryCard[] }> = {
@@ -45,35 +43,35 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         category: 'DU LỊCH NƯỚC NGOÀI',
         description: 'Đi xa, mọi thứ đã có WingsGo lo.',
         buttonLabel: 'Tôi muốn đi nước ngoài',
-        inquiryKey: 'wingsgo',
+        inquiryKey: 'outbound',
       },
       {
         brand: 'WingSide',
         category: 'DU LỊCH VIỆT NAM',
         description: 'Đi gần, trải nghiệm đáng nhớ hơn.',
         buttonLabel: 'Tôi muốn khám phá Việt Nam',
-        inquiryKey: 'wingside',
+        inquiryKey: 'vietnam',
       },
       {
         brand: 'WingsPass',
         category: 'DỊCH VỤ SÂN BAY',
         description: 'Đến sân bay, có người đồng hành.',
         buttonLabel: 'Tôi cần dịch vụ sân bay',
-        inquiryKey: 'wingspass',
+        inquiryKey: 'airport',
       },
       {
         brand: 'WingsPlus',
         category: 'HÀNH TRÌNH RIÊNG & MICE',
         description: 'Bạn có mục tiêu. Chúng tôi tạo hành trình.',
         buttonLabel: 'Tôi cần hành trình riêng / MICE',
-        inquiryKey: 'wingsplus',
+        inquiryKey: 'mice',
       },
       {
         brand: 'WingsCare',
         category: 'HỖ TRỢ & CHĂM SÓC',
         description: 'Cần hỗ trợ? WingsCare luôn ở đó.',
         buttonLabel: 'Tôi cần được hỗ trợ',
-        inquiryKey: 'wingscare',
+        inquiryKey: 'support',
       },
     ],
   },
@@ -87,62 +85,54 @@ const inquiryData: Record<'en' | 'vi', { title: string; subtitle: string; cards:
         category: 'OUTBOUND TRAVEL',
         description: 'Going abroad, fully prepared with WingsGo.',
         buttonLabel: 'I want to travel abroad',
-        inquiryKey: 'wingsgo',
+        inquiryKey: 'outbound',
       },
       {
         brand: 'WingSide',
         category: 'VIETNAM DISCOVERY',
         description: 'Explore Vietnam with authentic local depth.',
         buttonLabel: 'I want to explore Vietnam',
-        inquiryKey: 'wingside',
+        inquiryKey: 'vietnam',
       },
       {
         brand: 'WingsPass',
         category: 'AIRPORT SERVICES',
         description: 'Dedicated support across airport touchpoints.',
         buttonLabel: 'I need airport services',
-        inquiryKey: 'wingspass',
+        inquiryKey: 'airport',
       },
       {
         brand: 'WingsPlus',
         category: 'PRIVATE JOURNEYS & MICE',
         description: 'You have goals. We craft tailor-made itineraries.',
-        buttonLabel: 'I need custom travel / MICE',
-        inquiryKey: 'wingsplus',
+        buttonLabel: 'I need a private journey / MICE',
+        inquiryKey: 'mice',
       },
       {
         brand: 'WingsCare',
         category: 'TRAVEL CARE & SUPPORT',
         description: 'Need assistance? WingsCare is always with you.',
         buttonLabel: 'I need travel support',
-        inquiryKey: 'wingscare',
+        inquiryKey: 'support',
       },
     ],
   },
 }
 
 export const JourneyInquiryGrid: React.FC = () => {
-  const router = useRouter()
   const locale = useSitePublicLocale()
-  const toSitePath = useSitePath()
   const isEnglish = locale === 'en'
   const data = isEnglish ? inquiryData.en : inquiryData.vi
 
   const handleSelectInquiry = (card: InquiryCard) => {
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.setItem(
-        WINGSGROUP_CONTACT_FOCUS_SESSION_KEY,
-        WINGSGROUP_CONTACT_FORM_ANCHOR,
-      )
-      window.sessionStorage.setItem('wingsgroup_selected_inquiry', card.brand)
-    }
-    router.push(toSitePath(`/lien-he#contact-form?brand=${card.inquiryKey}`))
+    setWingsGroupInquiryContext(card.inquiryKey)
   }
 
   return (
     <section
       aria-labelledby="journey-inquiry-title"
       className={`${styles.section} ${styles.journeyInquirySection}`}
+      data-testid="wingsgroup-journey-inquiry"
       id="journey-inquiry"
     >
       <div className="container">
@@ -168,9 +158,11 @@ export const JourneyInquiryGrid: React.FC = () => {
                 <h3 className={styles.journeyInquiryBrand}>{card.brand}</h3>
                 <p className={styles.journeyInquiryDesc}>{card.description}</p>
                 <button
+                  aria-haspopup="dialog"
                   className={styles.journeyInquiryButton}
                   data-od-id={`journey-inquiry-${card.inquiryKey}`}
                   data-wingsgroup-consultation-trigger="true"
+                  data-wingsgroup-inquiry-key={card.inquiryKey}
                   onClick={() => handleSelectInquiry(card)}
                   type="button"
                 >
