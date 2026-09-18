@@ -48,8 +48,6 @@ export const TourProducts: CollectionConfig = {
       ],
       edit: {
         beforeDocumentControls: [
-          '@/components/AdminGuidance/TourProductEditGuidance',
-          '@/components/TourAuthoring#default',
           '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
         ],
       },
@@ -95,6 +93,11 @@ export const TourProducts: CollectionConfig = {
       localized: true,
       required: true,
       type: 'text',
+    },
+    {
+      name: 'tourProductSiteGuidance',
+      type: 'ui',
+      admin: { components: { Field: '@/components/AdminGuidance/TourProductEditGuidance' } },
     },
     productSiteField,
     {
@@ -226,7 +229,7 @@ export const TourProducts: CollectionConfig = {
     },
     {
       name: 'wrapperPage',
-      label: 'Trang wrapper',
+      label: 'Trang tour trên website',
       type: 'relationship',
       relationTo: 'pages',
       filterOptions: sameSiteFilterOptions,
@@ -237,6 +240,16 @@ export const TourProducts: CollectionConfig = {
     {
       type: 'tabs',
       tabs: [
+        {
+          label: 'Lịch bay & xuất bản',
+          fields: [
+            {
+              name: 'tourAuthoringPanel',
+              type: 'ui',
+              admin: { components: { Field: '@/components/TourAuthoring#default' } },
+            },
+          ],
+        },
         {
           label: 'Tổng quan',
           fields: [
