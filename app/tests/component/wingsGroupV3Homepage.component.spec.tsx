@@ -10,6 +10,7 @@ import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { WingsGroupTrustSection } from '@/blocks/WingsGroupTrust/Component'
 import { WingsGroupConsultationDialog } from '@/components/WingsGroupV3/ConsultationDialog'
 import { WingsGroupEditorialHero } from '@/components/WingsGroupV3/EditorialHero'
+import { JourneyInquiryGrid } from '@/components/WingsGroupV3/JourneyInquiryGrid'
 import type { Media, Page, WingsGroupEcosystemBlock } from '@/payload-types'
 
 const navigationMock = vi.hoisted(() => ({ push: vi.fn() }))
@@ -161,6 +162,20 @@ describe('WingsGroup v3 public components', () => {
     render(<RenderBlocks blocks={[archive]} locale="en" wingsGroupV3Home />)
 
     expect(screen.getByTestId('editorial-rail-locale').textContent).toBe('en')
+  })
+
+  it('stacks the consultation eyebrow above the journey heading', () => {
+    render(<JourneyInquiryGrid />)
+
+    const eyebrow = screen.getByText('Tư vấn theo nhu cầu')
+    const heading = screen.getByRole('heading', {
+      name: 'Bạn đang chuẩn bị cho hành trình nào?',
+    })
+
+    expect(eyebrow.parentElement).toBe(heading.parentElement)
+    expect(
+      eyebrow.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
   })
 
   it('forwards the English locale and legal identity to the home trust block', () => {

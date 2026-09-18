@@ -2049,3 +2049,105 @@
     padding-inline: 20px;
   }
 }
+
+/* Journey Inquiry Grid (Slide 04) */
+.journeyInquirySection {
+  background: #fbfaf6;
+  border-top: 1px solid var(--site-border, #dedbd3);
+  padding: 64px 0;
+}
+
+.journeyInquiryGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-top: 32px;
+}
+
+@media (max-width: 1024px) {
+  .journeyInquiryGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .journeyInquiryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.journeyInquiryCard {
+  background: #ffffff;
+  border: 1px solid var(--site-border, #dedbd3);
+  border-radius: 8px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.journeyInquiryCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 80, 144, 0.08);
+  border-color: var(--site-brand, #005090);
+}
+
+.journeyInquiryIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #f4f2ec;
+  color: var(--site-brand, #005090);
+  margin-bottom: 12px;
+}
+
+.journeyInquiryCategory {
+  font-family: var(--site-font-mono, var(--font-geist-mono)), monospace;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--site-accent-deep, #005090);
+  margin-bottom: 4px;
+}
+
+.journeyInquiryBrand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--foreground, #302d26);
+  margin: 0 0 8px 0;
+}
+
+.journeyInquiryDesc {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted-foreground, #777269);
+  margin: 0 0 20px 0;
+  flex-grow: 1;
+}
+
+.journeyInquiryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--site-brand, #005090);
+  background: var(--site-accent-light, #fbf2d8);
+  border: 1px solid var(--site-accent, #fdb515);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.journeyInquiryButton:hover,
+.journeyInquiryButton:focus-visible {
+  background: var(--site-accent, #fdb515);
+  color: #1a1915;
+}
