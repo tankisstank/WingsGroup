@@ -1,7 +1,7 @@
 'use client'
 
-import { RelationshipProvider, useField, useListRelationships } from '@payloadcms/ui'
-import { useEffect } from 'react'
+import { useField } from '@payloadcms/ui'
+import { useEffect, useState } from 'react'
 
 import { normalizeTourAuthoringRelations } from '@/utilities/tourAuthoring'
 
@@ -13,16 +13,49 @@ type Media = {
   url?: string | null
 }
 
+type MediaRelationship = Media | false | null
+
+const loadState = (IDs: Array<number | string>, value: MediaRelationship) =>
+  Object.fromEntries(IDs.map((id) => [String(id), value])) as Record<string, MediaRelationship>
+
 function TourGalleryFieldContent({ path = 'gallery' }: { path?: string }) {
   const { setValue, value } = useField<unknown[]>({ path })
-  const { documents, getRelationships } = useListRelationships()
   const IDs = normalizeTourAuthoringRelations(value)
   const relationshipKey = IDs.join('|')
+  const [documents, setDocuments] = useState<Record<string, MediaRelationship>>({})
 
   useEffect(() => {
+    let cancelled = false
     const relationshipIDs = relationshipKey ? relationshipKey.split('|') : []
-    getRelationships(relationshipIDs.map((id) => ({ relationTo: 'media', value: id })))
-  }, [getRelationships, relationshipKey])
+    if (!relationshipIDs.length) {
+      setDocuments({})
+      return () => {
+        cancelled = true
+      }
+    }
+
+    setDocuments(loadState(relationshipIDs, null))
+    const params = new URLSearchParams({ depth: '0', limit: String(relationshipIDs.length) })
+    params.set('where[id][in]', relationshipIDs.join(','))
+
+    void fetch(`/api/media?${params.toString()}`, { credentials: 'include' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`Media request failed: ${response.status}`)
+        return response.json() as Promise<{ docs?: Media[] }>
+      })
+      .then((result) => {
+        if (cancelled) return
+        const byID = new Map((result.docs || []).map((media) => [String(media.id), media]))
+        setDocuments(Object.fromEntries(relationshipIDs.map((id) => [String(id), byID.get(String(id)) || false])))
+      })
+      .catch(() => {
+        if (!cancelled) setDocuments(loadState(relationshipIDs, false))
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [relationshipKey])
 
   if (!IDs.length) {
     return <p role="status" style={{ margin: '0.5rem 0', color: 'var(--theme-elevation-600)' }}>Chưa có ảnh gallery · 0 ảnh. Dùng nút thêm ảnh ở trên để chọn từ Media.</p>
@@ -31,7 +64,7 @@ function TourGalleryFieldContent({ path = 'gallery' }: { path?: string }) {
   return (
     <div aria-label="Ảnh gallery đã chọn" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem', marginTop: '0.75rem' }}>
       {IDs.map((id) => {
-        const relation = documents.media?.[id]
+        const relation = documents[String(id)]
         const remove = () => setValue(IDs.filter((currentID) => String(currentID) !== String(id)))
         if (relation === null) return <div key={id} role="status" style={{ minHeight: 80, padding: '0.5rem', border: '1px dashed var(--theme-elevation-300)' }}>Đang tải ảnh #{id}…<button aria-label={`Gỡ ảnh #${id}`} type="button" onClick={remove}>Gỡ ảnh</button></div>
         if (relation === false) return <div key={id} role="alert" style={{ minHeight: 80, padding: '0.5rem', border: '1px dashed var(--theme-error-500)' }}>Không thể đọc ảnh #{id}.<button aria-label={`Gỡ ảnh #${id}`} type="button" onClick={remove}>Gỡ ảnh</button></div>
@@ -53,9 +86,5 @@ function TourGalleryFieldContent({ path = 'gallery' }: { path?: string }) {
 }
 
 export default function TourGalleryField(props: { path?: string }) {
-  return (
-    <RelationshipProvider>
-      <TourGalleryFieldContent {...props} />
-    </RelationshipProvider>
-  )
+  return <TourGalleryFieldContent {...props} />
 }
