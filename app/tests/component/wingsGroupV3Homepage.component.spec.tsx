@@ -11,6 +11,7 @@ import { WingsGroupTrustSection } from '@/blocks/WingsGroupTrust/Component'
 import { WingsGroupConsultationDialog } from '@/components/WingsGroupV3/ConsultationDialog'
 import { WingsGroupEditorialHero } from '@/components/WingsGroupV3/EditorialHero'
 import { JourneyInquiryGrid } from '@/components/WingsGroupV3/JourneyInquiryGrid'
+import { WingsGroupTestimonialsSection } from '@/components/WingsGroupV3/TestimonialsSection'
 import type { Media, Page, WingsGroupEcosystemBlock } from '@/payload-types'
 
 const navigationMock = vi.hoisted(() => ({ push: vi.fn() }))
@@ -171,6 +172,18 @@ describe('WingsGroup v3 public components', () => {
     const heading = screen.getByRole('heading', {
       name: 'Bạn đang chuẩn bị cho hành trình nào?',
     })
+
+    expect(eyebrow.parentElement).toBe(heading.parentElement)
+    expect(
+      eyebrow.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
+  it('stacks the testimonials eyebrow above the client heading', () => {
+    render(<WingsGroupTestimonialsSection locale="vi" />)
+
+    const eyebrow = screen.getByText('ĐÁNH GIÁ & PHẢN HỒI THỰC TẾ')
+    const heading = screen.getByRole('heading', { name: 'Khách hàng nói gì về WingsGroup?' })
 
     expect(eyebrow.parentElement).toBe(heading.parentElement)
     expect(

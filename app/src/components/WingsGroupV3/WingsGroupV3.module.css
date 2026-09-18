@@ -2151,3 +2151,160 @@
   background: var(--site-accent, #fdb515);
   color: #1a1915;
 }
+/* Testimonials Section & Conversion Banner (Slide 12) */
+.testimonialsSection {
+  background: color-mix(in oklch, var(--site-brand, #005090) 4%, var(--site-surface, #fffefa));
+  padding-block: clamp(48px, 6vw, 80px);
+}
+
+.testimonialsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 36px;
+}
+
+@media (max-width: 850px) {
+  .testimonialsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.testimonialCard {
+  background: #ffffff;
+  border: 1px solid var(--site-border, #dedbd3);
+  border-radius: 8px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.testimonialStars {
+  display: flex;
+  gap: 4px;
+  color: #f59e0b;
+  margin-bottom: 16px;
+}
+
+.testimonialQuote {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #302d26;
+  margin: 0 0 20px;
+  flex-grow: 1;
+  font-style: italic;
+}
+
+.testimonialMeta {
+  border-top: 1px solid #f0eee6;
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.testimonialAuthor {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--site-brand, #005090);
+}
+
+.testimonialTrip {
+  font-size: 0.8125rem;
+  color: #555;
+}
+
+.testimonialBrandTag {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 2px 8px;
+  background: #f4f3ee;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.testimonialConversionBanner {
+  margin-top: 48px;
+  background: #fbfaf6;
+  border: 1px solid var(--site-border, #dedbd3);
+  border-left: 4px solid var(--site-brand, #005090);
+  border-radius: 4px;
+  padding: clamp(28px, 3.5vw, 36px) clamp(28px, 4vw, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.conversionCopy {
+  max-width: 650px;
+}
+
+.conversionCopy h3 {
+  font-size: clamp(1.2rem, 2.2vw, 1.45rem);
+  font-weight: 700;
+  color: var(--foreground, #302d26);
+  margin: 0 0 8px;
+  line-height: 1.3;
+}
+
+.conversionCopy p {
+  font-size: 0.9375rem;
+  color: var(--muted-foreground, #666);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.conversionActions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.conversionSecondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border: 1px solid var(--site-border, #dedbd3);
+  border-radius: 4px;
+  color: var(--foreground, #302d26);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.conversionSecondaryBtn:hover {
+  border-color: var(--site-brand, #005090);
+  color: var(--site-brand, #005090);
+}
+
+.conversionPrimaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  background: var(--site-accent, #fdb515);
+  border: 1px solid var(--site-accent, #fdb515);
+  border-radius: 4px;
+  color: var(--site-brand, #005090);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(253, 181, 21, 0.25);
+}
+
+.conversionPrimaryBtn:hover {
+  background: color-mix(in srgb, var(--site-accent, #fdb515) 85%, #000);
+  color: var(--site-brand, #005090);
+}

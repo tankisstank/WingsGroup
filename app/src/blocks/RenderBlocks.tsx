@@ -31,6 +31,7 @@ import { WingsGroupCorporateSection } from '@/blocks/WingsGroupCorporate/Compone
 import { WingsGroupEditorialArchive } from '@/components/WingsGroupV3/EditorialArchive'
 import { WingsGroupContactIntro } from '@/components/WingsGroupV3/ContactIntro'
 import { JourneyInquiryGrid } from '@/components/WingsGroupV3/JourneyInquiryGrid'
+import { WingsGroupTestimonialsSection } from '@/components/WingsGroupV3/TestimonialsSection'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -177,6 +178,9 @@ export const RenderBlocks: React.FC<{
                   <Block {...blockProps} disableInnerContainer />
                   {wingsGroupV3Home && blockType === 'wingsGroupEcosystem' ? (
                     <JourneyInquiryGrid />
+                  ) : null}
+                  {wingsGroupV3Home && (blockType === 'infoStrip' || blockType === 'stats') ? (
+                    <WingsGroupTestimonialsSection locale={locale} />
                   ) : null}
                 </Fragment>
               )
