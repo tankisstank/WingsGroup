@@ -30,6 +30,7 @@ import {
   normalizeTourPublicText,
 } from './utils'
 import { normalizeGovernedTourPrice } from './currency'
+import { isDepartureVerificationCurrent } from './departureCommerce'
 import {
   buildTourTaxonomyWhere,
   type TourDestinationKey,
@@ -226,7 +227,10 @@ const normalizeVariantCard = (
   }
 }
 
-const normalizeDepartureCard = (departure: Record<string, any>): DepartureCardViewModel => ({
+const normalizeDepartureCard = (
+  departure: Record<string, any>,
+  draft = false,
+): DepartureCardViewModel => ({
   airline: departure.airline,
   availabilityBadge: departure.availabilityBadge,
   availabilityStatus: departure.availabilityStatus,
@@ -239,7 +243,8 @@ const normalizeDepartureCard = (departure: Record<string, any>): DepartureCardVi
   id: departure.id,
   isFeatured: departure.isFeatured,
   note: departure.note,
-  priceFrom: departure.priceFrom,
+  priceFrom:
+    draft || isDepartureVerificationCurrent(departure) ? departure.priceFrom : null,
   promoLabel: departure.promoLabel,
   returnDate: departure.returnDate,
   tourProduct: normalizeTourProductCard(departure.tourProduct),
@@ -400,6 +405,7 @@ export const getTourDeparturesForProduct = async ({
   })
 
   return sortDepartures(result.docs as any[])
+    .map((departure) => normalizeDepartureCard(departure, draft))
 }
 
 export const getDepartureVariantsForProduct = async ({
@@ -573,7 +579,9 @@ export const getToursByMarketRoute = async ({
     },
   })
 
-  const allDepartures = sortDepartures(departuresResult.docs as any[]).map(normalizeDepartureCard)
+  const allDepartures = sortDepartures(departuresResult.docs as any[]).map((departure) =>
+    normalizeDepartureCard(departure, draft),
+  )
   const futureDepartures = sortDepartures(getFutureDepartures(allDepartures))
   const visibleDepartures = futureDepartures.length > 0 ? futureDepartures : allDepartures
 
@@ -654,7 +662,9 @@ export const getTourCampaignBySlug = async ({
 
   return {
     campaign,
-    departures: sortDepartures(departureResult.docs as any[]).map(normalizeDepartureCard),
+    departures: sortDepartures(departureResult.docs as any[]).map((departure) =>
+      normalizeDepartureCard(departure, draft),
+    ),
   }
 }
 
@@ -674,7 +684,9 @@ export const getResolvedScheduleData = async ({
     where: {},
   })
 
-  const departures = sortDepartures(result.docs as any[]).map(normalizeDepartureCard)
+  const departures = sortDepartures(result.docs as any[]).map((departure) =>
+    normalizeDepartureCard(departure, draft),
+  )
   const futureDepartures = getFutureDepartures(departures)
   const visibleDepartures = futureDepartures.length > 0 ? futureDepartures : departures
   const featuredDepartures = visibleDepartures

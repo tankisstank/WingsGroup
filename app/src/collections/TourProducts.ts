@@ -23,6 +23,15 @@ import {
 import { tourDestinationOptions, tourTravelStyleOptions } from '@/tours/taxonomy'
 import { enforceTourProductPublishSite } from './Tours/hooks/enforceTourProductPublishSite'
 
+const productSiteField = siteField()
+productSiteField.admin = {
+  ...productSiteField.admin,
+  components: {
+    ...productSiteField.admin?.components,
+    Field: '@/components/TourAuthoring/TourProductSiteField',
+  },
+} as NonNullable<typeof productSiteField.admin>
+
 export const TourProducts: CollectionConfig = {
   slug: 'tour-products',
   access: {
@@ -40,7 +49,8 @@ export const TourProducts: CollectionConfig = {
       edit: {
         beforeDocumentControls: [
           '@/components/AdminGuidance/TourProductEditGuidance',
-          '@/components/ContentLocaleControl#ContentLocaleDocumentControl',
+          '@/components/TourAuthoring#default',
+          '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
         ],
       },
     },
@@ -80,12 +90,13 @@ export const TourProducts: CollectionConfig = {
   fields: [
     {
       name: 'title',
+      admin: { components: { Cell: '@/components/AdminCells/LocalizedTitleCell' } },
       label: 'Tên tour',
       localized: true,
       required: true,
       type: 'text',
     },
-    siteField(),
+    productSiteField,
     {
       name: 'market',
       label: 'Thị trường',
@@ -117,7 +128,7 @@ export const TourProducts: CollectionConfig = {
     },
     {
       name: 'tourType',
-      label: 'Loại tour WingSide',
+      label: 'Phân loại tour',
       type: 'select',
       options: [
         { label: 'Small group', value: 'group' },
@@ -126,8 +137,12 @@ export const TourProducts: CollectionConfig = {
       ],
       admin: {
         description:
-          'Hybrid biểu diễn tour có cả lịch ghép đã xác minh và lựa chọn thiết kế riêng. Không có giá trị được hiểu là private để public discovery fail closed.',
+          'Phân loại nội dung tour. Với WingsGo, trường WingSide-only được ẩn trong Admin nhưng dữ liệu cũ vẫn được giữ.',
         position: 'sidebar',
+        condition: (data) => {
+          const site = data.site
+          return !(site && typeof site === 'object' && 'code' in site && site.code === 'wings-go')
+        },
       },
     },
     {
@@ -211,7 +226,7 @@ export const TourProducts: CollectionConfig = {
     },
     {
       name: 'wrapperPage',
-      label: 'Page wrapper',
+      label: 'Trang wrapper',
       type: 'relationship',
       relationTo: 'pages',
       filterOptions: sameSiteFilterOptions,
@@ -240,10 +255,16 @@ export const TourProducts: CollectionConfig = {
             },
             {
               name: 'gallery',
-              label: 'Gallery',
+              label: 'Gallery hình ảnh',
               type: 'relationship',
               relationTo: 'media',
               hasMany: true,
+              admin: {
+                components: {
+                  afterInput: ['@/components/TourGalleryField#default'],
+                },
+                description: 'Giữ nguyên thứ tự quan hệ. Thêm/xóa bằng Media picker; xóa ở đây không xóa bản ghi Media.',
+              },
             },
             {
               name: 'highlights',
@@ -269,7 +290,7 @@ export const TourProducts: CollectionConfig = {
           ],
         },
         {
-          label: 'Decision Panel',
+          label: 'Tóm tắt dịch vụ',
           fields: [
             {
               name: 'factSummary',
@@ -278,7 +299,7 @@ export const TourProducts: CollectionConfig = {
               fields: [
                 {
                   name: 'routeSummary',
-                  label: 'Route',
+                  label: 'Tuyến tour',
                   localized: true,
                   type: 'text',
                 },
@@ -370,18 +391,18 @@ export const TourProducts: CollectionConfig = {
             },
             {
               name: 'routeViz',
-              label: 'Route visual',
+              label: 'Lộ trình & điểm dừng',
               type: 'group',
               fields: [
                 {
                   name: 'mapImage',
-                  label: 'Ảnh route/map',
+                  label: 'Ảnh lộ trình / bản đồ',
                   type: 'upload',
                   relationTo: 'media',
                 },
                 {
                   name: 'routeCaption',
-                  label: 'Chú thích route',
+                  label: 'Chú thích lộ trình',
                   localized: true,
                   type: 'text',
                 },
@@ -566,6 +587,12 @@ export const TourProducts: CollectionConfig = {
               label: 'Ngày hành trình',
               type: 'array',
               required: true,
+              admin: {
+                components: {
+                  RowLabel: '@/components/TourItineraryRowLabel',
+                },
+                initCollapsed: true,
+              },
               fields: [
                 {
                   name: 'dayNumber',
@@ -583,7 +610,7 @@ export const TourProducts: CollectionConfig = {
                 },
                 {
                   name: 'route',
-                  label: 'Route / thành phố',
+                  label: 'Tuyến / thành phố',
                   localized: true,
                   type: 'text',
                 },
@@ -767,11 +794,11 @@ export const TourProducts: CollectionConfig = {
           ],
         },
         {
-          label: 'Builder',
+              label: 'Builder',
           fields: [
             {
               name: 'bcfg',
-              label: 'Builder config',
+              label: 'Cấu hình hiển thị',
               type: 'group',
               fields: [
                 {
@@ -808,7 +835,7 @@ export const TourProducts: CollectionConfig = {
                   type: 'select',
                   defaultValue: 'route-map',
                   options: [
-                    { label: 'Route map', value: 'route-map' },
+                    { label: 'Bản đồ tuyến', value: 'route-map' },
                     { label: 'Stop timeline', value: 'stop-timeline' },
                   ],
                 },
@@ -854,7 +881,7 @@ export const TourProducts: CollectionConfig = {
                 { label: 'Hero', value: 'hero' },
                 { label: 'Facts', value: 'facts' },
                 { label: 'Why choose', value: 'why-choose' },
-                { label: 'Route', value: 'route' },
+                { label: 'Lộ trình', value: 'route' },
                 { label: 'Itinerary', value: 'itinerary' },
                 { label: 'Services', value: 'services' },
                 { label: 'Departures', value: 'departures' },
@@ -887,7 +914,7 @@ export const TourProducts: CollectionConfig = {
                 { label: 'Facts', value: 'facts' },
                 { label: 'Reviews proof', value: 'reviews' },
                 { label: 'Why choose', value: 'why-choose' },
-                { label: 'Route', value: 'route' },
+                { label: 'Lộ trình', value: 'route' },
                 { label: 'Itinerary', value: 'itinerary' },
                 { label: 'Services', value: 'services' },
                 { label: 'Departures', value: 'departures' },
@@ -898,7 +925,7 @@ export const TourProducts: CollectionConfig = {
             },
             {
               name: 'variantStrategy',
-              label: 'Chiến lược variant',
+              label: 'Cách ưu tiên nội dung biến thể',
               type: 'select',
               defaultValue: 'product-first',
               options: [
@@ -941,8 +968,15 @@ export const TourProducts: CollectionConfig = {
           if ('name' in item && item.name === 'slug') {
             return {
               ...item,
-              label: 'Slug tour',
+              label: 'Đường dẫn tour',
               localized: false,
+            } as typeof item
+          }
+
+          if ('name' in item && item.name === 'generateSlug') {
+            return {
+              ...item,
+              label: 'Tự tạo đường dẫn từ tiêu đề tour',
             } as typeof item
           }
 
@@ -967,6 +1001,8 @@ export const TourProducts: CollectionConfig = {
       autosave: {
         interval: 100,
       },
+      // Do not auto-create an empty draft before a multi-site operator can choose a site.
+      validate: true,
       schedulePublish: true,
     },
     maxPerDoc: 50,

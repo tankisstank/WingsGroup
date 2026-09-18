@@ -89,6 +89,89 @@ describe('WingSide structured tour query perimeter', () => {
     expect(calls.every(([args]) => args.fallbackLocale === false)).toBe(true)
   })
 
+  it('keeps product, departures, variants, and related reads in saved-draft mode', async () => {
+    mocks.find.mockImplementation(async (args: FindArgs) => {
+      if (args.collection === 'tour-products') {
+        const product = products.find(
+          (candidate) =>
+            candidate.site === siteFromWhere(args.where) &&
+            candidate.slug === slugFromWhere(args.where),
+        )
+        return { docs: product ? [{ ...product, relatedTours: [] }] : [] }
+      }
+      if (args.collection === 'tour-departures') {
+        return { docs: [{ id: 601, tourProduct: 498, departureDate: '2030-01-01' }] }
+      }
+      if (args.collection === 'departure-variants') {
+        return { docs: [{ id: 701, tourProduct: 498, status: 'active' }] }
+      }
+      return { docs: [] }
+    })
+
+    await getResolvedTourDetailBySlug({ draft: true, locale: 'en', slug: 'shared-slug' })
+    const calls = mocks.find.mock.calls as unknown as Array<[FindArgs]>
+
+    expect(calls.map(([args]) => args.collection)).toEqual([
+      'tour-products',
+      'tour-departures',
+      'departure-variants',
+      'tour-products',
+    ])
+    expect(calls.every(([args]) => args.draft === true && args.overrideAccess === true)).toBe(true)
+  })
+
+  it('hides expired departure prices on public detail but keeps them in draft preview', async () => {
+    const departureDate = (days: number) =>
+      new Date(Date.now() + days * 86_400_000).toISOString()
+    const expired = {
+      _status: 'published',
+      departureDate: departureDate(31),
+      expiresAt: new Date(Date.now() - 86_400_000).toISOString(),
+      id: 901,
+      priceFrom: 12_000_000,
+      tourProduct: 498,
+      verifiedAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+    }
+    const current = {
+      _status: 'published',
+      departureDate: departureDate(32),
+      expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+      id: 902,
+      priceFrom: 13_000_000,
+      tourProduct: 498,
+      verifiedAt: new Date(Date.now() - 86_400_000).toISOString(),
+    }
+    mocks.find.mockImplementation(async (args: FindArgs) => {
+      if (args.collection === 'tour-products') {
+        return { docs: [{ ...products[0], relatedTours: [] }] }
+      }
+      if (args.collection === 'tour-departures') {
+        return { docs: [expired, current] }
+      }
+      return { docs: [] }
+    })
+
+    const publicResult = await getResolvedTourDetailBySlug({
+      draft: false,
+      locale: 'en',
+      slug: 'shared-slug',
+    })
+    expect(publicResult?.departures.map(({ id, priceFrom }) => ({ id, priceFrom }))).toEqual([
+      { id: 901, priceFrom: null },
+      { id: 902, priceFrom: 13_000_000 },
+    ])
+
+    const draftResult = await getResolvedTourDetailBySlug({
+      draft: true,
+      locale: 'en',
+      slug: 'shared-slug',
+    })
+    expect(draftResult?.departures.map(({ id, priceFrom }) => ({ id, priceFrom }))).toEqual([
+      { id: 901, priceFrom: 12_000_000 },
+      { id: 902, priceFrom: 13_000_000 },
+    ])
+  })
+
   it('keeps delegated Page and Tour queries site-scoped and wrapper-gated', () => {
     const routeSource = readFileSync(
       join(process.cwd(), 'src', 'app', '(frontend)', '[...slug]', 'page.tsx'),
