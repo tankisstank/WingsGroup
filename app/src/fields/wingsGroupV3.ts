@@ -393,6 +393,7 @@ export const protectWingsGroupSiteSettingsBeforeDelete: CollectionBeforeDeleteHo
 
 export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = async ({
   data,
+  operation,
   originalDoc,
   req,
 }) => {
@@ -414,8 +415,18 @@ export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = asy
     sourceIdentity: record.sourceIdentity,
     usageScope: record.usageScope,
   })
+  const isPendingCreateGovernance = Object.entries(parsed).every(([key, value]) => {
+    if (['derivativeState', 'publicationState', 'rightsState'].includes(key)) {
+      return value === undefined || value === null || value === '' || value === 'pending'
+    }
+    if (key === 'responsiveDerivatives') {
+      return value === undefined || value === null || (Array.isArray(value) && value.length === 0)
+    }
+    return value === undefined || value === null || value === ''
+  })
   if (
     req.user?.role !== 'super-admin' &&
+    !(operation === 'create' && isPendingCreateGovernance) &&
     JSON.stringify(governedSnapshot(parsed)) !== JSON.stringify(governedSnapshot(previous))
   ) {
     throw new Error('Chỉ super-admin được thay đổi metadata và trạng thái media governance.')

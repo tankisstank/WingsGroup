@@ -109,6 +109,37 @@ describe('WingsGroup v3 fail-closed governance', () => {
     ).rejects.toThrow(/server-owned/)
   })
 
+  it('allows content editors to upload pending media without granting governance publication', async () => {
+    await expect(
+      validateGovernedMediaBeforeChange({
+        data: {
+          governance: {
+            derivativeState: 'pending',
+            publicationState: 'pending',
+            rightsState: 'pending',
+          },
+        },
+        operation: 'create',
+        req: { payload: {}, user: { role: 'editor' } },
+      } as never),
+    ).resolves.toBeTruthy()
+
+    await expect(
+      validateGovernedMediaBeforeChange({
+        data: {
+          governance: {
+            derivativeState: 'verified',
+            managedBy: 'wingsgroup-v3',
+            publicationState: 'published',
+            rightsState: 'approved',
+          },
+        },
+        operation: 'create',
+        req: { payload: {}, user: { role: 'editor' } },
+      } as never),
+    ).rejects.toThrow(/super-admin/)
+  })
+
   it('accepts publication only with the operation-bound server context after exact ledger validation', async () => {
     await expect(
       validateGovernedMediaBeforeChange({
