@@ -95,7 +95,6 @@ const publicMediaWhere = (requestedFilename?: string): Where => {
       isWingsGroupV3DerivativeFilename(requestedFilename)
         ? {
             or: [
-              { 'governance.responsiveDerivatives.url': { like: `%/media/${requestedFilename}` } },
               ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ name }) => ({
                 [`sizes.${name}.filename`]: { equals: requestedFilename },
               })),

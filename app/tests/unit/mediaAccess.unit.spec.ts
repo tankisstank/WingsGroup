@@ -112,6 +112,38 @@ describe('WingsGroup media read access', () => {
       expect(result).toMatchObject({
         and: [{ site: { equals: 7 } }, { or: expect.any(Array) }],
       })
+
+      const derivativeHeaders = await createTrustedSiteContextHeaders(
+        new Headers({ host: 'wingsgroup.example' }),
+        {
+          host: 'wingsgroup.example',
+          publicPath: '/media/IMG_8755-1-1440.avif',
+          siteCode: 'wings-group',
+        },
+      )
+      const derivativeResult = await wingsGroupMediaReadAccess({
+        req: {
+          headers: derivativeHeaders,
+          payload: {
+            find: async () => ({
+              docs: [
+                {
+                  additionalDomains: [],
+                  code: 'wings-group',
+                  id: 7,
+                  isActive: true,
+                  primaryDomain: 'wingsgroup.example',
+                },
+              ],
+            }),
+          },
+        },
+      } as never)
+
+      const serializedDerivativeResult = JSON.stringify(derivativeResult)
+      expect(serializedDerivativeResult).toContain('sizes.wingsgroup-v3-1440-avif.filename')
+      expect(serializedDerivativeResult).toContain('IMG_8755-1-1440.avif')
+      expect(serializedDerivativeResult).not.toContain('governance.responsiveDerivatives.url')
     } finally {
       vi.unstubAllEnvs()
     }
