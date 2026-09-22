@@ -48,6 +48,18 @@ const publishedMedia = (publicationState: 'pending' | 'published'): Media =>
     filename: 'a.png',
     height: 1024,
     id: 1,
+    sizes: {
+      'wingsgroup-v3-640-avif': {
+        filename: 'current-640.avif',
+        url: '/api/media/file/current-640.avif',
+        width: 640,
+      },
+      'wingsgroup-v3-640-webp': {
+        filename: 'current-640.webp',
+        url: '/api/media/file/current-640.webp',
+        width: 640,
+      },
+    },
     site: {
       code: 'wings-group',
       createdAt: '2026-08-24T00:00:00.000Z',
@@ -68,10 +80,13 @@ describe('WingsGroup ImageMedia responsive delivery', () => {
     const { container } = render(<ImageMedia resource={publishedMedia('published')} />)
 
     expect(container.querySelector('source[type="image/avif"]')?.getAttribute('srcset')).toMatch(
-      /640\.avif\?.* 640w/,
+      /current-640\.avif\?.* 640w/,
     )
     expect(container.querySelector('source[type="image/webp"]')?.getAttribute('srcset')).toMatch(
-      /640\.webp\?.* 640w/,
+      /current-640\.webp\?.* 640w/,
+    )
+    expect(container.querySelector('source[type="image/avif"]')?.getAttribute('srcset')).not.toContain(
+      '/media/a-640.avif',
     )
     expect(container.querySelector('img')?.getAttribute('src')).toContain('/media/a.png')
   })
