@@ -103,6 +103,10 @@ const getPreservedRewriteContext = async (request: NextRequest): Promise<Headers
   const expectedPath = publicPath
     ? stripLeadingSegments(publicPath, publicAlias ? (publicLocale ? 2 : 1) : 1)
     : null
+  const isExpectedRewritePath =
+    expectedPath === request.nextUrl.pathname ||
+    (expectedPath?.startsWith('/media/') === true &&
+      request.nextUrl.pathname === `/api/media/file/${expectedPath.slice('/media/'.length)}`)
   const currentHost = resolveEffectiveHost(request)
 
   // Next invokes Proxy again for the internal rewrite destination. Preserve
@@ -111,7 +115,7 @@ const getPreservedRewriteContext = async (request: NextRequest): Promise<Headers
   // bundle on an ordinary request fails these checks and is rebuilt below.
   if (
     (!publicAlias && !publicLocale) ||
-    expectedPath !== request.nextUrl.pathname ||
+    !isExpectedRewritePath ||
     !isEquivalentPreservedHost(request.headers.get('x-site-host'), currentHost) ||
     (publicAlias
       ? request.headers.get('x-site-code') !== expectedSiteCode
