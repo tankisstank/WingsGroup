@@ -397,9 +397,19 @@ export const validateGovernedMediaBeforeChange: CollectionBeforeChangeHook = asy
   originalDoc,
   req,
 }) => {
+  const previous = asRecord(originalDoc?.governance)
+  if (
+    req.user?.role !== 'super-admin' &&
+    operation === 'update' &&
+    req.file?.data !== undefined &&
+    previous.managedBy === 'wingsgroup-v3' &&
+    data
+  ) {
+    data.governance = originalDoc?.governance
+  }
+
   const governance = data?.governance ?? originalDoc?.governance
   const parsed = asRecord(governance)
-  const previous = asRecord(originalDoc?.governance)
   const governedSnapshot = (record: UnknownRecord) => ({
     derivativeState: record.derivativeState,
     managedBy: record.managedBy,

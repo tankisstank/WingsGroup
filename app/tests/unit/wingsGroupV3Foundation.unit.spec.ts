@@ -140,6 +140,33 @@ describe('WingsGroup v3 fail-closed governance', () => {
     ).rejects.toThrow(/super-admin/)
   })
 
+  it('allows editors to replace an existing governed media file without changing governance', async () => {
+    const data = {
+      governance: {
+        managedBy: 'wingsgroup-v3',
+        publicationState: 'published',
+      },
+    }
+    const originalGovernance = {
+      managedBy: 'wingsgroup-v3',
+      publicationState: 'ready',
+    }
+
+    await expect(
+      validateGovernedMediaBeforeChange({
+        data,
+        operation: 'update',
+        originalDoc: { governance: originalGovernance, id: 22 },
+        req: {
+          file: { data: Buffer.from('replacement'), name: 'replacement.png' },
+          payload: {},
+          user: { role: 'editor' },
+        },
+      } as never),
+    ).resolves.toBe(data)
+    expect(data.governance).toEqual(originalGovernance)
+  })
+
   it('accepts publication only with the operation-bound server context after exact ledger validation', async () => {
     await expect(
       validateGovernedMediaBeforeChange({
