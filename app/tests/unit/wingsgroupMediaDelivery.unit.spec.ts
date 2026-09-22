@@ -182,19 +182,24 @@ describe('WingsGroup governed derivative delivery', () => {
       expect(originalConditions).toContainEqual({
         filename: { equals: 'wg-v3-abcdef123456-wingsgroup-airport-service.png' },
       })
-      expect(derivativeConditions).toContainEqual({
-        'governance.responsiveDerivatives.url': {
-          like: '%/media/wingsgroup-airport-service-abcdef123456-640.webp',
-        },
-      })
-      expect(
-        derivativeConditions.filter(
-          (condition) =>
-            typeof condition === 'object' &&
-            condition !== null &&
-            'governance.responsiveDerivatives.format' in condition,
-        ),
-      ).toHaveLength(0)
+      const derivativeFilenameCondition = derivativeConditions.find(
+        (condition) =>
+          typeof condition === 'object' && condition !== null && 'or' in condition,
+      ) as { or: Array<Record<string, unknown>> }
+      expect(derivativeFilenameCondition.or).toEqual(
+        expect.arrayContaining([
+          {
+            'governance.responsiveDerivatives.url': {
+              like: '%/media/wingsgroup-airport-service-abcdef123456-640.webp',
+            },
+          },
+          {
+            'sizes.wingsgroup-v3-640-webp.filename': {
+              equals: 'wingsgroup-airport-service-abcdef123456-640.webp',
+            },
+          },
+        ]),
+      )
     } finally {
       vi.unstubAllEnvs()
     }
