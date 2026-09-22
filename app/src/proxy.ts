@@ -100,13 +100,18 @@ const getPreservedRewriteContext = async (request: NextRequest): Promise<Headers
   if (publicAlias === 'wingsside') return null
 
   const expectedSiteCode = publicAlias ? allSiteAliasToCodeMap[publicAlias] : null
+  const isCanonicalMediaPath = publicPath?.startsWith('/media/') === true
   const expectedPath = publicPath
-    ? stripLeadingSegments(publicPath, publicAlias ? (publicLocale ? 2 : 1) : 1)
+    ? isCanonicalMediaPath
+      ? publicPath
+      : stripLeadingSegments(publicPath, publicAlias ? (publicLocale ? 2 : 1) : 1)
     : null
   const isExpectedRewritePath =
     expectedPath === request.nextUrl.pathname ||
     (expectedPath?.startsWith('/media/') === true &&
       request.nextUrl.pathname === `/api/media/file/${expectedPath.slice('/media/'.length)}`)
+  const isCanonicalMediaRewrite =
+    isCanonicalMediaPath && isExpectedRewritePath
   const currentHost = resolveEffectiveHost(request)
 
   // Next invokes Proxy again for the internal rewrite destination. Preserve
@@ -114,7 +119,7 @@ const getPreservedRewriteContext = async (request: NextRequest): Promise<Headers
   // the rewritten pathname and the effective host. A client-supplied header
   // bundle on an ordinary request fails these checks and is rebuilt below.
   if (
-    (!publicAlias && !publicLocale) ||
+    (!publicAlias && !publicLocale && !isCanonicalMediaRewrite) ||
     !isExpectedRewritePath ||
     !isEquivalentPreservedHost(request.headers.get('x-site-host'), currentHost) ||
     (publicAlias

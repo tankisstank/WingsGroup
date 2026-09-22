@@ -369,6 +369,25 @@ describe('tenant proxy rewrites', () => {
     expect(internalHeaders.get('x-site-code')).toBe('wings-go')
   })
 
+  it('preserves the trusted bundle for canonical-host media API destinations', async () => {
+    const publicResponse = await proxy(
+      new NextRequest('https://wingsgroup.vn/media/e09-pending.jpg', {
+        headers: { host: 'wingsgroup.vn' },
+      }),
+    )
+    const rewrittenHeaders = overriddenRequestHeaders(publicResponse)
+    const internalResponse = await proxy(
+      new NextRequest('https://wingsgroup.vn/api/media/file/e09-pending.jpg', {
+        headers: rewrittenHeaders,
+      }),
+    )
+    const internalHeaders = overriddenRequestHeaders(internalResponse)
+
+    expect(internalResponse.headers.get('x-middleware-next')).toBe('1')
+    expect(internalHeaders.get('x-public-path')).toBe('/media/e09-pending.jpg')
+    expect(internalHeaders.get('x-site-code')).toBeNull()
+  })
+
   it('prefers a public browser hostname over a local dev listener host when they differ', async () => {
     const response = await proxy(
       new NextRequest('http://wingscare.wingsgroup.vn:3100/en', {
