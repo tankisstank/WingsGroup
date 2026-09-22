@@ -45,14 +45,13 @@ const getGeneratedDerivativeEntries = (resource: unknown) => {
  * ImageMedia
  *
  * This component passes a **relative** `src` (e.g. `/media/...`) to Next.js Image.
- * The `getMediaUrl` utility constructs the full URL by prepending the base URL from env vars
- * (NEXT_PUBLIC_SERVER_URL). Next.js then optimizes this using `remotePatterns` configured
- * in next.config.js — no custom `loader` needed.
+ * Public media stays unoptimized so the browser request passes through the trusted site
+ * context added by the proxy. Next's server-side optimizer cannot forward that context.
  *
  * Flow:
  *   1. Resource URL from Payload: `/media/image-123.jpg`
- *   2. getMediaUrl() adds base URL: `https://yourdomain.com/media/image-123.jpg`
- *   3. Next.js Image optimizes via remotePatterns: `/_next/image?url=...&w=1200&q=75`
+ *   2. getMediaUrl() keeps the public path: `/media/image-123.jpg`
+ *   3. The browser requests the public media route directly.
  *
  * If your storage/plugin returns **external CDN URLs** (e.g. `https://cdn.example.com/...`),
  * choose ONE of the following:
@@ -65,8 +64,8 @@ const getGeneratedDerivativeEntries = (resource: unknown) => {
  *   C) Skip optimization:
  *      <Image unoptimized src="https://cdn.example.com/hero.jpg" width={1200} height={600} alt="" />
  *
- * TL;DR: Template uses relative URLs + getMediaUrl() to construct full URLs, then relies on
- * remotePatterns for optimization. Only add `loader` if using external CDNs with custom transforms.
+ * TL;DR: Template uses relative URLs + getMediaUrl() and serves the trusted `/media/` route
+ * directly. Only add `loader` if using external CDNs with custom transforms.
  */
 
 export const ImageMedia: React.FC<MediaProps> = (props) => {
@@ -84,15 +83,22 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
 
   let width: number | undefined
   let height: number | undefined
-  let alt = altFromProps
+  const resourceAlt =
+    resource && typeof resource === 'object'
+      ? resource.alt ||
+        resource.filename
+          ?.replace(/\.[^.]+$/, '')
+          .replace(/[-_]+/g, ' ')
+          .trim()
+      : undefined
+  const alt = altFromProps ?? resourceAlt
   let src: StaticImageData | string = srcFromProps || ''
 
   if (!src && resource && typeof resource === 'object') {
-    const { alt: altFromResource, height: fullHeight, url, width: fullWidth } = resource
+    const { height: fullHeight, url, width: fullWidth } = resource
 
     width = fullWidth!
     height = fullHeight!
-    alt = altFromResource || ''
 
     const cacheTag = resource.updatedAt
 
@@ -100,6 +106,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
   }
 
   const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
+  const useDirectMediaRoute = typeof src === 'string' && src.startsWith('/media/')
   const useAuthenticatedPreviewImage =
     resource &&
     typeof resource === 'object' &&
@@ -141,12 +148,13 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
         alt={alt || ''}
         className={cn(imgClassName)}
         fill={fill}
+        fetchPriority={priority ? 'high' : undefined}
         height={!fill ? height : undefined}
         placeholder="blur"
         blurDataURL={placeholderBlur}
         priority={priority}
         quality={80}
-        unoptimized={Boolean(useAuthenticatedPreviewImage)}
+        unoptimized={Boolean(useAuthenticatedPreviewImage || useDirectMediaRoute)}
         loading={loading}
         sizes={sizes}
         src={src}
