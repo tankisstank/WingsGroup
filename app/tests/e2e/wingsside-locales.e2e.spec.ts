@@ -17,7 +17,9 @@ test.describe('WingsSide locale continuity', () => {
     const redirect = await request.get(`${e2eBaseURL}${legacyPath}`, { maxRedirects: 0 })
 
     expect(redirect.status()).toBe(308)
-    expect(redirect.headers().location).toBe(`${e2eBaseURL}${canonicalPath}`)
+    expect(new URL(redirect.headers().location || '', e2eBaseURL).toString()).toBe(
+      `${e2eBaseURL}${canonicalPath}`,
+    )
 
     const followed = await request.get(`${e2eBaseURL}${legacyPath}`)
     expect(followed.status()).toBe(200)
@@ -58,14 +60,15 @@ test.describe('WingsSide locale continuity', () => {
 
     await activateLocaleLink(page, page, 'Italiano')
     await expect(page).toHaveURL(`${e2eBaseURL}/wing-side/it/search?q=hanoi#results`)
+    await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined)
     await expect(page.locator('html')).toHaveAttribute('lang', 'it')
     await expect(
       page.getByRole('navigation', { name: 'Navigazione del piè di pagina' }),
     ).toBeVisible()
 
     const footerNavigation = page.getByRole('navigation', { name: 'Navigazione del piè di pagina' })
-    await footerNavigation.getByRole('link', { name: 'Destinazioni' }).click()
-    await expect(page).toHaveURL(`${e2eBaseURL}/wing-side/it/destinations`)
+    await footerNavigation.locator('a.ws-hifi-footer-link', { hasText: 'Destinazioni' }).click()
+    await expect(page).toHaveURL(`${e2eBaseURL}/wing-side/it/destinations`, { timeout: 15_000 })
     await expect(page.locator('html')).toHaveAttribute('lang', 'it')
 
     await page.goBack({ waitUntil: 'domcontentloaded' })

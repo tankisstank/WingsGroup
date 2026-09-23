@@ -3,8 +3,16 @@
 import Link from 'next/link'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import AdminStandaloneShell from '@/components/AdminStandaloneShell'
 import AdminThemeBootstrap from '@/components/AdminThemeBootstrap'
 import {
+  cmsEnabledLocaleCodes,
+  cmsEnabledLocaleMetadata,
+  isSupportedLocale,
+  type SupportedLocaleCode,
+} from '@/utilities/locales'
+import {
+  isLayoutPresetKey,
   layoutPresetDefinitions,
   type LayoutPresetCategory,
   type LayoutPresetKey,
@@ -16,6 +24,8 @@ type SiteOption = {
   code?: string
   id: number | string
   name?: string
+  defaultLocale?: null | string
+  supportedLocales?: null | string[]
 }
 
 const baseClass = 'page-wizard'
@@ -90,7 +100,8 @@ const sectionLabels: Record<string, string> = {
 }
 
 const displayPresetLabel = (presetKey: LayoutPresetKey) => presetLabels[presetKey]
-const displaySections = (sections: readonly string[]) => sections.map((section) => sectionLabels[section] || section)
+const displaySections = (sections: readonly string[]) =>
+  sections.map((section) => sectionLabels[section] || section)
 
 const slugify = (value: string) =>
   value
@@ -101,9 +112,47 @@ const slugify = (value: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 
+const isCmsLocale = (value: unknown): value is SupportedLocaleCode =>
+  typeof value === 'string' && isSupportedLocale(value) && cmsEnabledLocaleCodes.includes(value)
+
+const getAvailableLocales = (site?: SiteOption): typeof cmsEnabledLocaleMetadata => {
+  const supportedLocales = site?.supportedLocales?.filter(isCmsLocale) ?? []
+
+  if (supportedLocales.length === 0) {
+    return cmsEnabledLocaleMetadata
+  }
+
+  const allowedLocales = new Set(supportedLocales)
+
+  return cmsEnabledLocaleMetadata.filter((locale) => allowedLocales.has(locale.code))
+}
+
+const getPreferredLocale = (
+  site: SiteOption | undefined,
+  requestedLocale: string | null,
+  availableLocales: typeof cmsEnabledLocaleMetadata,
+): SupportedLocaleCode => {
+  if (
+    isCmsLocale(requestedLocale) &&
+    availableLocales.some((locale) => locale.code === requestedLocale)
+  ) {
+    return requestedLocale
+  }
+
+  if (
+    isCmsLocale(site?.defaultLocale) &&
+    availableLocales.some((locale) => locale.code === site.defaultLocale)
+  ) {
+    return site.defaultLocale
+  }
+
+  return availableLocales[0]?.code ?? 'vi'
+}
+
 export default function PageWizardView() {
   const [sites, setSites] = useState<SiteOption[]>([])
   const [siteID, setSiteID] = useState('')
+  const [locale, setLocale] = useState<SupportedLocaleCode>('vi')
   const [preset, setPreset] = useState<LayoutPresetKey>('homepage-editorial')
   const [title, setTitle] = useState('')
   const [summary, setSummary] = useState('')
@@ -126,9 +175,22 @@ export default function PageWizardView() {
 
       const data = (await response.json()) as { docs?: SiteOption[] }
       const siteDocs = data.docs ?? []
+      const query = new URLSearchParams(window.location.search)
+      const requestedSiteID = query.get('site') || ''
+      const requestedPreset = query.get('preset')
+      const requestedLocale = query.get('locale')
+      const preferredSiteID = siteDocs.some((site) => String(site.id) === requestedSiteID)
+        ? requestedSiteID
+        : String(siteDocs[0]?.id ?? '')
+      const preferredSite = siteDocs.find((site) => String(site.id) === preferredSiteID)
+      const availableLocales = getAvailableLocales(preferredSite)
 
       setSites(siteDocs)
-      setSiteID((current) => current || String(siteDocs[0]?.id ?? ''))
+      setSiteID((current) => current || preferredSiteID)
+      setLocale(getPreferredLocale(preferredSite, requestedLocale, availableLocales))
+      if (isLayoutPresetKey(requestedPreset)) {
+        setPreset(requestedPreset)
+      }
     }
 
     void loadSites()
@@ -153,8 +215,9 @@ export default function PageWizardView() {
     [],
   )
   const selectedSite = sites.find((site) => String(site.id) === siteID)
-  const canContinueStepOne = Boolean(siteID && preset)
-  const canCreate = Boolean(siteID && preset && title.trim() && slug.trim())
+  const availableLocales = useMemo(() => getAvailableLocales(selectedSite), [selectedSite])
+  const canContinueStepOne = Boolean(siteID && preset && locale)
+  const canCreate = Boolean(siteID && preset && locale && title.trim() && slug.trim())
 
   const createPage = async () => {
     if (isSubmitting) {
@@ -162,7 +225,7 @@ export default function PageWizardView() {
     }
 
     if (!canCreate) {
-      setError('Vui lòng nhập đủ site, loại trang, tiêu đề và đường dẫn.')
+      setError('Vui lòng nhập đủ site, locale, loại trang, tiêu đề và đường dẫn.')
       return
     }
 
@@ -172,6 +235,7 @@ export default function PageWizardView() {
     try {
       const response = await fetch('/api/page-wizard', {
         body: JSON.stringify({
+          locale,
           site: siteID,
           slug,
           summary,
@@ -187,6 +251,7 @@ export default function PageWizardView() {
 
       const data = (await response.json().catch(() => null)) as {
         id?: number | string
+        locale?: string
         message?: string
       } | null
 
@@ -202,9 +267,10 @@ export default function PageWizardView() {
   }
 
   return (
-    <main className={baseClass}>
-      <AdminThemeBootstrap />
-      <div className={`${baseClass}__shell`}>
+    <AdminStandaloneShell>
+      <main className={baseClass} data-od-id="page-wizard-main">
+        <AdminThemeBootstrap />
+        <div className={`${baseClass}__shell`}>
         <header className={`${baseClass}__header`}>
           <div>
             <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
@@ -227,7 +293,7 @@ export default function PageWizardView() {
           </div>
         </header>
 
-        <ol className={`${baseClass}__steps`}>
+        <ol className={`${baseClass}__steps`} data-od-id="page-wizard-steps">
           {['Chọn phạm vi', 'Nhập nội dung', 'Kiểm tra'].map((label, index) => (
             <li className={step === index + 1 ? `${baseClass}__step--active` : ''} key={label}>
               <span>{index + 1}</span>
@@ -243,21 +309,57 @@ export default function PageWizardView() {
         ) : null}
 
         {step === 1 ? (
-          <section className={`${baseClass}__panel`}>
+          <section className={`${baseClass}__panel`} data-od-id="page-wizard-scope">
             <h2>Trang này thuộc site nào?</h2>
             <label>
               Site
-              <select onChange={(event) => setSiteID(event.target.value)} value={siteID}>
+              <select
+                aria-describedby={`${baseClass}-site-help`}
+                data-od-id="page-wizard-site"
+                onChange={(event) => {
+                  const nextSiteID = event.target.value
+                  const nextSite = sites.find((site) => String(site.id) === nextSiteID)
+                  setSiteID(nextSiteID)
+                  setLocale(getPreferredLocale(nextSite, null, getAvailableLocales(nextSite)))
+                }}
+                value={siteID}
+              >
                 {sites.map((site) => (
                   <option key={site.id} value={site.id}>
                     {site.name || site.code || `Site ${site.id}`}
                   </option>
                 ))}
               </select>
+              <small id={`${baseClass}-site-help`}>
+                Phạm vi site quyết định các locale được phép tạo và preview.
+              </small>
+            </label>
+
+            <label>
+              Locale nội dung
+              <select
+                aria-describedby={`${baseClass}-locale-help`}
+                data-od-id="page-wizard-locale"
+                onChange={(event) => {
+                  if (isCmsLocale(event.target.value)) {
+                    setLocale(event.target.value)
+                  }
+                }}
+                value={locale}
+              >
+                {availableLocales.map((item) => (
+                  <option key={item.code} value={item.code}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+              <small id={`${baseClass}-locale-help`}>
+                Nội dung được tạo nháp độc lập theo locale này; bản dịch khác không bị thay đổi.
+              </small>
             </label>
 
             <h2>Chọn loại trang</h2>
-            <div className={`${baseClass}__selection-layout`}>
+            <div className={`${baseClass}__selection-layout`} data-od-id="page-wizard-templates">
               <div className={`${baseClass}__template-groups`}>
                 {groupedPresets.map((group) => (
                   <section key={group.category}>
@@ -305,7 +407,12 @@ export default function PageWizardView() {
             </div>
 
             <div className={`${baseClass}__actions`}>
-              <button disabled={!canContinueStepOne} onClick={() => setStep(2)} type="button">
+              <button
+                data-od-id="page-wizard-continue"
+                disabled={!canContinueStepOne}
+                onClick={() => setStep(2)}
+                type="button"
+              >
                 Tiếp tục
               </button>
             </div>
@@ -313,7 +420,7 @@ export default function PageWizardView() {
         ) : null}
 
         {step === 2 ? (
-          <section className={`${baseClass}__panel`}>
+          <section className={`${baseClass}__panel`} data-od-id="page-wizard-content">
             <h2>Nội dung cơ bản</h2>
             <label>
               Tiêu đề trang
@@ -349,6 +456,7 @@ export default function PageWizardView() {
                 Quay lại
               </button>
               <button
+                data-od-id="page-wizard-check"
                 disabled={!title.trim() || !slug.trim()}
                 onClick={() => setStep(3)}
                 type="button"
@@ -360,12 +468,18 @@ export default function PageWizardView() {
         ) : null}
 
         {step === 3 ? (
-          <section className={`${baseClass}__panel`}>
+          <section className={`${baseClass}__panel`} data-od-id="page-wizard-review">
             <h2>Kiểm tra trước khi tạo</h2>
             <dl className={`${baseClass}__review`}>
               <div>
                 <dt>Site</dt>
                 <dd>{selectedSite?.name || selectedSite?.code || 'Chưa chọn'}</dd>
+              </div>
+              <div>
+                <dt>Locale</dt>
+                <dd>
+                  {cmsEnabledLocaleMetadata.find((item) => item.code === locale)?.label || locale}
+                </dd>
               </div>
               <div>
                 <dt>Loại trang</dt>
@@ -387,6 +501,14 @@ export default function PageWizardView() {
                 <dt>Đường dẫn</dt>
                 <dd>/{slug || 'chua-co-duong-dan'}</dd>
               </div>
+              <div>
+                <dt>Phạm vi quyền</dt>
+                <dd>API sẽ kiểm tra quyền tạo trong site đã chọn trước khi ghi dữ liệu.</dd>
+              </div>
+              <div>
+                <dt>Trạng thái sau khi tạo</dt>
+                <dd>Nháp (draft), chưa public và chưa thay đổi các locale khác.</dd>
+              </div>
             </dl>
             <p className={`${baseClass}__note`}>
               Trang sẽ được tạo ở trạng thái nháp. Editor có thể tiếp tục chỉnh sửa, site manager
@@ -397,13 +519,19 @@ export default function PageWizardView() {
               <button disabled={isSubmitting} onClick={() => setStep(2)} type="button">
                 Sửa lại
               </button>
-              <button disabled={!canCreate || isSubmitting} onClick={createPage} type="button">
+              <button
+                data-od-id="page-wizard-create-draft"
+                disabled={!canCreate || isSubmitting}
+                onClick={createPage}
+                type="button"
+              >
                 {isSubmitting ? 'Đang tạo...' : 'Tạo trang nháp'}
               </button>
             </div>
           </section>
         ) : null}
-      </div>
-    </main>
+        </div>
+      </main>
+    </AdminStandaloneShell>
   )
 }

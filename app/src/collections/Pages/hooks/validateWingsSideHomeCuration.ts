@@ -1,6 +1,7 @@
 import type { CollectionBeforeChangeHook } from 'payload'
 
-import { normalizeRelationID } from '@/access/roles'
+import { normalizeRelationID as relationID } from '@/access/roles'
+import type { RelationValue } from '@/types/auth'
 import { hasWingsSideLocalizationBackfillContext } from '@/utilities/wingsSideLocalizationBackfillContext'
 import {
   WINGSSIDE_HOME_DESTINATION_SELECTION_KEYS,
@@ -8,7 +9,7 @@ import {
   WINGSSIDE_WHY_TRAVEL_SLOT_KEYS,
 } from '@/fields/wingsSideHiFi'
 
-type Relation = number | string | { id?: number | string } | null | undefined
+type Relation = RelationValue
 
 type Selection = {
   key?: string | null
@@ -42,8 +43,6 @@ type PageWithHomeCuration = {
     routeVariant?: string | null
   } | null
 }
-
-const relationID = (value: Relation) => normalizeRelationID(value as never)
 
 const hasText = (value: unknown): boolean => {
   if (typeof value === 'string') return value.trim().length > 0

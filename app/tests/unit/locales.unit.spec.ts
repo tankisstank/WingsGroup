@@ -4,6 +4,7 @@ import {
   adsReadyLocaleCodes,
   copyLocaleCodes,
   getCopyLocale,
+  getPayloadLocaleLabel,
   cmsEnabledLocaleCodes,
   getLocaleFallback,
   getPublicLocaleMetadataForSite,
@@ -18,6 +19,16 @@ describe('locale metadata contract', () => {
   it('enables all target locales in CMS', () => {
     expect(cmsEnabledLocaleCodes).toEqual(['vi', 'en', 'it', 'es', 'pt', 'ja', 'ko', 'fr', 'de'])
     expect(localeSelectOptions.map((locale) => locale.value)).toEqual(cmsEnabledLocaleCodes)
+  })
+
+  it('strips only Payload’s automatic code suffix at the CMS adapter boundary', () => {
+    expect(getPayloadLocaleLabel(localeMetadataByCode.vi)).toBe('Tiếng Việt')
+    expect(getPayloadLocaleLabel(localeMetadataByCode.en)).toBe('Tiếng Anh')
+    expect(getPayloadLocaleLabel({ code: 'en', label: 'English' })).toBe('English')
+    expect(localeMetadataByCode.vi.label).toBe('Tiếng Việt (vi)')
+    expect(localeSelectOptions.find((locale) => locale.value === 'vi')?.label).toBe(
+      'Tiếng Việt (vi)',
+    )
   })
 
   it('exposes only launch public locales by default', () => {

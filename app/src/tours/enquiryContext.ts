@@ -6,7 +6,10 @@ import {
 } from './discoveryCore'
 
 export type TourEnquiryContext = {
+  departureDate?: null | string
+  departureId?: null | number | string
   discovery?: Omit<DiscoveryQuery, 'unknownValueCount'>
+  intent?: TourEnquiryIntent
   source?: null | string
   tourId?: null | number | string
   tourSlug?: null | string
@@ -45,6 +48,23 @@ export const sanitizeTourContextTitle = (value?: null | string): string | undefi
   return title ? title : undefined
 }
 
+export const sanitizeTourContextDepartureDate = (value?: null | string): string | undefined => {
+  const date = stripBoundaryControls(value)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return undefined
+  const parsed = new Date(`${date}T00:00:00.000Z`)
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date
+    ? date
+    : undefined
+}
+
+const sanitizeTourContextIntent = (value?: null | string): TourEnquiryIntent | undefined =>
+  value === 'contact' ||
+  value === 'hold-seat' ||
+  value === 'inquiry' ||
+  value === 'request-quote'
+    ? value
+    : undefined
+
 const toParams = (
   input?: URLSearchParams | Record<string, string | string[] | null | undefined>,
 ) => {
@@ -64,7 +84,10 @@ export const readSafeTourEnquiryContext = (
   const first = (key: string) => params.get(key) || undefined
 
   return {
+    departureDate: sanitizeTourContextDepartureDate(first('departureDate')),
+    departureId: sanitizeTourContextID(first('departureId')),
     discovery: stripDiscoveryQueryMeta(normalizeDiscoveryQuery(params)),
+    intent: sanitizeTourContextIntent(first('intent')),
     source: sanitizeContextSource(first('source')),
     tourId: sanitizeTourContextID(first('tourId')),
     tourSlug: sanitizeTourContextSlug(first('tour')),
@@ -79,6 +102,12 @@ export const appendTourEnquiryContextParams = (
   if (!context) return
   const source = sanitizeContextSource(context.source)
   if (source) params.set('source', source)
+  const departureId = sanitizeTourContextID(context.departureId)
+  if (departureId) params.set('departureId', departureId)
+  const departureDate = sanitizeTourContextDepartureDate(context.departureDate)
+  if (departureDate) params.set('departureDate', departureDate)
+  const intent = sanitizeTourContextIntent(context.intent)
+  if (intent) params.set('intent', intent)
   const tourSlug = sanitizeTourContextSlug(context.tourSlug)
   if (tourSlug) params.set('tour', tourSlug)
   const tourId = sanitizeTourContextID(context.tourId)

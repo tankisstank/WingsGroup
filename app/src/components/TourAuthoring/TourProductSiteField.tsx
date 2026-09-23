@@ -63,10 +63,7 @@ export default function TourProductSiteField({ field, path, readOnly }: Props) {
       {!isEditing && state.kind === 'choose' && !readOnly ? (
         <select
           aria-label={label}
-          onChange={(event) => {
-            const selectedSite = sites.find((site) => String(site.id) === event.target.value)
-            setValue(selectedSite?.id ?? (event.target.value || null))
-          }}
+          onChange={(event) => setValue(event.target.value ? Number(event.target.value) : null)}
           value={currentSiteID == null ? '' : String(currentSiteID)}
         >
           <option value="">Chọn site cho tour mới</option>

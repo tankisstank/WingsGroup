@@ -13,8 +13,10 @@ export const Text: React.FC<
     errors: Partial<FieldErrorsImpl>
     formID?: number | string
     register: UseFormRegister<FieldValues>
+    phonePattern?: RegExp
     requiredLabel?: string
     requiredMessage?: string
+    phoneMessage?: string
   }
 > = ({
   name,
@@ -23,9 +25,11 @@ export const Text: React.FC<
   formID,
   label,
   register,
+  phonePattern,
   required,
   requiredLabel = 'required',
   requiredMessage = 'This field is required',
+  phoneMessage = 'Enter a valid phone number',
   width,
 }) => {
   const fieldID = formID
@@ -35,6 +39,8 @@ export const Text: React.FC<
     : name
   const errorID = `${fieldID}-error`
   const isPhoneField = /(^|[-_])phone$|^tel$/i.test(name)
+  const resolvedPhonePattern = phonePattern || /^\+?[0-9\s().-]{8,20}$/u
+  const isDepartureDateField = name === 'departure-date'
   const autoComplete = isPhoneField
     ? 'tel'
     : /full[-_]?name|^name$/i.test(name)
@@ -62,9 +68,15 @@ export const Text: React.FC<
         defaultValue={defaultValue}
         id={fieldID}
         inputMode={isPhoneField ? 'tel' : undefined}
+        pattern={isPhoneField ? resolvedPhonePattern.source : undefined}
         required={Boolean(required)}
-        type={isPhoneField ? 'tel' : 'text'}
-        {...register(name, { required: required ? requiredMessage : false })}
+        type={isDepartureDateField ? 'date' : isPhoneField ? 'tel' : 'text'}
+        {...register(name, {
+          pattern: isPhoneField
+            ? { message: phoneMessage, value: resolvedPhonePattern }
+            : undefined,
+          required: required ? requiredMessage : false,
+        })}
       />
       {errors[name] && <Error id={errorID} name={name} />}
     </Width>

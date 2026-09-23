@@ -9,7 +9,10 @@ import type {
   RequestState,
 } from '@/components/AdminMetrics/contract'
 import { adminMetricDescriptors } from '@/components/AdminMetrics/contract'
+import AdminStandaloneShell from '@/components/AdminStandaloneShell'
 import AdminThemeBootstrap from '@/components/AdminThemeBootstrap'
+import { getAdminSiteContextID, withAdminSiteContext } from '@/utilities/adminSiteContext'
+import { formatAdminDate } from '@/utilities/formatAdminDate'
 
 import './index.scss'
 
@@ -173,18 +176,6 @@ const requestJSON = async <T,>(
   }
 }
 
-const formatDate = (value?: null | string): string => {
-  if (!value) {
-    return 'Chưa có ngày'
-  }
-
-  return new Intl.DateTimeFormat('vi-VN', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'Asia/Ho_Chi_Minh',
-  }).format(new Date(value))
-}
-
 const roleLabel: Record<Role, string> = {
   editor: 'Biên tập viên',
   'site-manager': 'Quản lý site',
@@ -238,16 +229,21 @@ function RequestMessage({
 
 function MetricPanel({
   descriptor,
+  href,
   onRetry,
   state,
 }: {
   descriptor: AdminMetricDescriptor
+  href: string
   onRetry: () => void
   state: RequestState<number>
 }) {
   return (
-    <article aria-labelledby={`cms-console-metric-${descriptor.key}`}>
-      <Link href={descriptor.href} id={`cms-console-metric-${descriptor.key}`}>
+    <article
+      aria-labelledby={`cms-console-metric-${descriptor.key}`}
+      data-od-id={`console-metric-${descriptor.key}`}
+    >
+      <Link href={href} id={`cms-console-metric-${descriptor.key}`}>
         {descriptor.label}
       </Link>
       {state.state === 'ready' ? (
@@ -277,35 +273,46 @@ export default function AdminOperatorConsole() {
   const [recentPages, setRecentPages] = useState<RequestState<RecentDoc[]>>(loadingState)
   const [recentLeads, setRecentLeads] = useState<RequestState<RecentLead[]>>(loadingState)
   const [sites, setSites] = useState<RequestState<SiteDoc[]>>(loadingState)
+  const [reviewedQueueItems, setReviewedQueueItems] = useState<Record<string, boolean>>({})
+  const siteContextID =
+    typeof window === 'undefined' ? '' : getAdminSiteContextID(window.location.search)
+  const scopedURL = useCallback(
+    (url: string) => withAdminSiteContext(url, siteContextID),
+    [siteContextID],
+  )
 
   const loadMe = useCallback(async () => {
     setMe(loadingState)
     setMe(await requestJSON('/api/users/me', parseCurrentUser))
   }, [])
 
-  const loadMetric = useCallback(async (descriptor: AdminMetricDescriptor) => {
-    setMetrics((current) => ({ ...current, [descriptor.key]: loadingState }))
-    const result = await requestJSON(descriptor.restQuery, parseMetric)
-    setMetrics((current) => ({ ...current, [descriptor.key]: result }))
-  }, [])
+  const loadMetric = useCallback(
+    async (descriptor: AdminMetricDescriptor) => {
+      setMetrics((current) => ({ ...current, [descriptor.key]: loadingState }))
+      const result = await requestJSON(scopedURL(descriptor.restQuery), parseMetric)
+      setMetrics((current) => ({ ...current, [descriptor.key]: result }))
+    },
+    [scopedURL],
+  )
 
   const loadRecentPages = useCallback(async () => {
     setRecentPages(loadingState)
     setRecentPages(
-      await requestJSON('/api/pages?depth=0&limit=5&sort=-updatedAt', (value) =>
+      await requestJSON(scopedURL('/api/pages?depth=0&limit=5&sort=-updatedAt'), (value) =>
         parseCollection(value, isRecentDoc),
       ),
     )
-  }, [])
+  }, [scopedURL])
 
   const loadRecentLeads = useCallback(async () => {
     setRecentLeads(loadingState)
     setRecentLeads(
-      await requestJSON('/api/form-submissions?depth=1&limit=5&sort=-createdAt', (value) =>
-        parseCollection(value, isRecentLead),
+      await requestJSON(
+        scopedURL('/api/form-submissions?depth=1&limit=5&sort=-createdAt'),
+        (value) => parseCollection(value, isRecentLead),
       ),
     )
-  }, [])
+  }, [scopedURL])
 
   const loadSites = useCallback(async () => {
     setSites(loadingState)
@@ -329,6 +336,11 @@ export default function AdminOperatorConsole() {
   const role = me.state === 'ready' ? me.value.role : undefined
   const canManageSite = role === 'site-manager' || role === 'super-admin'
   const isSuperAdmin = role === 'super-admin'
+  const selectedSiteName =
+    siteContextID && sites.state === 'ready'
+      ? sites.value.find((site) => String(site.id) === siteContextID)?.name ||
+        `Site ${siteContextID}`
+      : 'Tất cả site được phân quyền'
   const tasks = useMemo(
     () =>
       adminMetricDescriptors
@@ -357,7 +369,7 @@ export default function AdminOperatorConsole() {
               href: `/admin/collections/pages/${doc.id}`,
               id: `page-${String(doc.id)}`,
               kind: 'page' as const,
-              meta: `Trang · Cập nhật ${formatDate(doc.updatedAt)}`,
+              meta: `Trang · Cập nhật ${formatAdminDate(doc.updatedAt)}`,
               title: doc.title || 'Trang chưa có tiêu đề',
             }))
           : []),
@@ -367,7 +379,7 @@ export default function AdminOperatorConsole() {
               href: `/admin/collections/form-submissions/${doc.id}`,
               id: `lead-${String(doc.id)}`,
               kind: 'lead' as const,
-              meta: `Lead · Gửi ${formatDate(doc.createdAt)}`,
+              meta: `Lead · Gửi ${formatAdminDate(doc.createdAt)}`,
               title:
                 typeof doc.form === 'object' && doc.form?.title ? doc.form.title : 'Lead gửi về',
             }))
@@ -384,7 +396,8 @@ export default function AdminOperatorConsole() {
   )
 
   return (
-    <>
+    <AdminStandaloneShell>
+      <>
       <AdminThemeBootstrap />
       <a className={`${baseClass}__skip-link`} href="#cms-console-main">
         Bỏ qua đến nội dung Console
@@ -392,11 +405,12 @@ export default function AdminOperatorConsole() {
       <main
         aria-labelledby="cms-console-title"
         className={baseClass}
+        data-od-id="console-main"
         id="cms-console-main"
         tabIndex={-1}
       >
         <div className={`${baseClass}__shell`}>
-          <header className={`${baseClass}__header`}>
+          <header className={`${baseClass}__header`} data-od-id="console-header">
             <div>
               <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
                 <Link href="/admin">Bảng điều hành admin</Link>
@@ -431,28 +445,50 @@ export default function AdminOperatorConsole() {
             </div>
           </header>
 
-          <section className={`${baseClass}__quick-actions`} aria-label="Hành động chính">
-            <Link className={`${baseClass}__primary-action`} href="/admin/page-wizard">
+          <section
+            aria-label="Hành động chính"
+            className={`${baseClass}__quick-actions`}
+            data-od-id="console-actions"
+          >
+            <Link className={`${baseClass}__primary-action`} href={scopedURL('/admin/page-wizard')}>
               Tạo trang nháp
             </Link>
-            <Link href="/admin/site-review">Rà soát site/page</Link>
-            {canManageSite ? <Link href="/admin/theme">Quản lý theme</Link> : null}
-            <Link href="/admin/collections/form-submissions">Xem tổng lead</Link>
-            <Link href="/admin/collections/pages?where[_status][equals]=draft">Xem trang nháp</Link>
-            {canManageSite ? <Link href="/admin/collections/imports">Nhập dữ liệu</Link> : null}
-            {canManageSite ? <Link href="/admin/collections/exports">Xuất dữ liệu</Link> : null}
+            <Link href={scopedURL('/admin/site-review')}>Rà soát site/page</Link>
+            {canManageSite ? <Link href={scopedURL('/admin/theme')}>Quản lý theme</Link> : null}
+            <Link href={scopedURL('/admin/collections/form-submissions')}>Xem tổng lead</Link>
+            <Link href={scopedURL('/admin/collections/pages?where[_status][equals]=draft')}>
+              Xem trang nháp
+            </Link>
+            {canManageSite ? (
+              <Link href={scopedURL('/admin/collections/imports')}>Nhập dữ liệu</Link>
+            ) : null}
+            {canManageSite ? (
+              <Link href={scopedURL('/admin/collections/exports')}>Xuất dữ liệu</Link>
+            ) : null}
           </section>
 
-          <section className={`${baseClass}__scope`} aria-label="Phạm vi dữ liệu">
-            <span>Phạm vi: Tất cả site được phân quyền</span>
+          <section
+            aria-label="Phạm vi dữ liệu"
+            className={`${baseClass}__scope`}
+            data-od-id="console-scope"
+          >
+            <span>Phạm vi: {selectedSiteName}</span>
             <span>Locale nội dung: Tất cả locale</span>
             <small>
               Đây là phạm vi đọc tổng hợp; quyền ghi được kiểm tra tại từng màn hình đích.
             </small>
           </section>
 
-          <section aria-label="Không gian vận hành" className={`${baseClass}__workspace`}>
-            <section aria-label="Hàng đợi hoạt động" className={`${baseClass}__queue`}>
+          <section
+            aria-label="Không gian vận hành"
+            className={`${baseClass}__workspace`}
+            data-od-id="console-workspace"
+          >
+            <section
+              aria-label="Hàng đợi hoạt động"
+              className={`${baseClass}__queue`}
+              data-od-id="console-queue"
+            >
               <div className={`${baseClass}__panel-head`}>
                 <div>
                   <p className={`${baseClass}__eyebrow`}>Không gian vận hành</p>
@@ -463,22 +499,50 @@ export default function AdminOperatorConsole() {
               </div>
               {queueItems.length > 0 ? (
                 <div aria-live="polite" className={`${baseClass}__task-list`}>
-                  {queueItems.map((item) => (
-                    <article className={`${baseClass}__task`} key={item.id}>
-                      <span aria-hidden="true" className={`${baseClass}__task-marker`}>
-                        {item.kind === 'page' ? 'P' : 'L'}
-                      </span>
-                      <div>
-                        <strong>
-                          <Link href={item.href}>{item.title}</Link>
-                        </strong>
-                        <span className={`${baseClass}__task-meta`}>{item.meta}</span>
-                      </div>
-                      <span className={`${baseClass}__badge ${baseClass}__badge--${item.kind}`}>
-                        {item.kind === 'page' ? 'Trang' : 'Lead'}
-                      </span>
-                    </article>
-                  ))}
+                  {queueItems.map((item) => {
+                    const isReviewed = Boolean(reviewedQueueItems[String(item.id)])
+
+                    return (
+                      <article
+                        className={
+                          isReviewed
+                            ? `${baseClass}__task ${baseClass}__task--reviewed`
+                            : `${baseClass}__task`
+                        }
+                        data-od-id={`console-task-${String(item.id)}`}
+                        key={item.id}
+                      >
+                        <label className={`${baseClass}__task-check`} title="Đánh dấu đã kiểm tra">
+                          <input
+                            aria-label={`Đánh dấu đã kiểm tra: ${item.title}`}
+                            checked={isReviewed}
+                            onChange={(event) => {
+                              setReviewedQueueItems((current) => ({
+                                ...current,
+                                [String(item.id)]: event.target.checked,
+                              }))
+                            }}
+                            type="checkbox"
+                          />
+                        </label>
+                        <span aria-hidden="true" className={`${baseClass}__task-marker`}>
+                          {item.kind === 'page' ? 'P' : 'L'}
+                        </span>
+                        <div>
+                          <strong>
+                            <Link href={scopedURL(item.href)}>{item.title}</Link>
+                          </strong>
+                          <span className={`${baseClass}__task-meta`}>{item.meta}</span>
+                        </div>
+                        <span
+                          className={`${baseClass}__badge ${baseClass}__badge--${item.kind}${isReviewed ? ` ${baseClass}__badge--ready` : ''}`}
+                          data-status={isReviewed ? 'ready' : 'review'}
+                        >
+                          {item.kind === 'page' ? 'Trang' : 'Lead'}
+                        </span>
+                      </article>
+                    )
+                  })}
                 </div>
               ) : null}
               <div className={`${baseClass}__queue-states`}>
@@ -505,7 +569,7 @@ export default function AdminOperatorConsole() {
               </div>
             </section>
 
-            <aside className={`${baseClass}__stack`}>
+            <aside className={`${baseClass}__stack`} data-od-id="console-context">
               <section className={`${baseClass}__context`}>
                 <p className={`${baseClass}__eyebrow`}>Context đang áp dụng</p>
                 <h2>Site và locale</h2>
@@ -513,6 +577,10 @@ export default function AdminOperatorConsole() {
                   <div>
                     <dt>Quyền</dt>
                     <dd>{me.state === 'ready' ? roleContextLabel[me.value.role] : '—'}</dd>
+                  </div>
+                  <div>
+                    <dt>Site</dt>
+                    <dd>{selectedSiteName}</dd>
                   </div>
                   <div>
                     <dt>Locale</dt>
@@ -544,8 +612,8 @@ export default function AdminOperatorConsole() {
                 </div>
                 {canManageSite ? (
                   <div className={`${baseClass}__link-list`}>
-                    <Link href="/admin/theme">Quản lý giao diện</Link>
-                    <Link href="/admin/collections/site-settings">Cấu hình site</Link>
+                    <Link href={scopedURL('/admin/theme')}>Quản lý giao diện</Link>
+                    <Link href={scopedURL('/admin/collections/site-settings')}>Cấu hình site</Link>
                   </div>
                 ) : null}
               </section>
@@ -560,18 +628,20 @@ export default function AdminOperatorConsole() {
                 <h3>Khu vực Payload</h3>
                 <p>Các màn hình Payload giữ quyền sở hữu editor, collection và tác vụ dữ liệu.</p>
                 <div className={`${baseClass}__link-list`}>
-                  <Link href="/admin/site-review">Rà soát site/page bằng preview</Link>
-                  <Link href="/admin/page-wizard">Tạo trang nháp theo wizard</Link>
-                  <Link href="/admin/collections/pages">Quản lý trang</Link>
-                  <Link href="/admin/collections/posts">Quản lý bài viết</Link>
-                  <Link href="/admin/collections/media">Thư viện media</Link>
-                  <Link href="/admin/collections/form-submissions">Lead gửi về</Link>
-                  {canManageSite ? <Link href="/admin/collections/forms">Biểu mẫu</Link> : null}
+                  <Link href={scopedURL('/admin/site-review')}>Rà soát site/page bằng preview</Link>
+                  <Link href={scopedURL('/admin/page-wizard')}>Tạo trang nháp theo wizard</Link>
+                  <Link href={scopedURL('/admin/collections/pages')}>Quản lý trang</Link>
+                  <Link href={scopedURL('/admin/collections/posts')}>Quản lý bài viết</Link>
+                  <Link href={scopedURL('/admin/collections/media')}>Thư viện media</Link>
+                  <Link href={scopedURL('/admin/collections/form-submissions')}>Lead gửi về</Link>
                   {canManageSite ? (
-                    <Link href="/admin/collections/imports">Nhập dữ liệu</Link>
+                    <Link href={scopedURL('/admin/collections/forms')}>Biểu mẫu</Link>
                   ) : null}
                   {canManageSite ? (
-                    <Link href="/admin/collections/exports">Xuất dữ liệu</Link>
+                    <Link href={scopedURL('/admin/collections/imports')}>Nhập dữ liệu</Link>
+                  ) : null}
+                  {canManageSite ? (
+                    <Link href={scopedURL('/admin/collections/exports')}>Xuất dữ liệu</Link>
                   ) : null}
                   {!canManageSite && me.state === 'ready' ? (
                     <span>Editor không có lối tắt import/export.</span>
@@ -581,7 +651,7 @@ export default function AdminOperatorConsole() {
             </aside>
           </section>
 
-          <section className={`${baseClass}__summary`}>
+          <section className={`${baseClass}__summary`} data-od-id="console-summary">
             <div>
               <p className={`${baseClass}__eyebrow`}>Tóm tắt phân loại</p>
               <h2>Tóm tắt nội dung</h2>
@@ -590,7 +660,7 @@ export default function AdminOperatorConsole() {
             {tasks.length > 0 ? (
               <div className={`${baseClass}__tasks`}>
                 {tasks.map((task) => (
-                  <Link href={task.href} key={task.label}>
+                  <Link href={scopedURL(task.href)} key={task.label}>
                     <span>{task.label}</span>
                     <strong>{task.total}</strong>
                   </Link>
@@ -612,10 +682,15 @@ export default function AdminOperatorConsole() {
             ) : null}
           </section>
 
-          <section className={`${baseClass}__metrics`} aria-label="Số liệu CMS">
+          <section
+            aria-label="Số liệu CMS"
+            className={`${baseClass}__metrics`}
+            data-od-id="console-metrics"
+          >
             {adminMetricDescriptors.map((descriptor) => (
               <MetricPanel
                 descriptor={descriptor}
+                href={scopedURL(descriptor.href)}
                 key={descriptor.key}
                 onRetry={() => void loadMetric(descriptor)}
                 state={metrics[descriptor.key]}
@@ -624,7 +699,7 @@ export default function AdminOperatorConsole() {
           </section>
 
           {isSuperAdmin ? (
-            <section className={`${baseClass}__advanced`}>
+            <section className={`${baseClass}__advanced`} data-od-id="console-advanced">
               <h2>Nâng cao</h2>
               <div className={`${baseClass}__link-list`}>
                 <Link href="/admin/collections/sites">Site</Link>
@@ -638,6 +713,7 @@ export default function AdminOperatorConsole() {
           ) : null}
         </div>
       </main>
-    </>
+      </>
+    </AdminStandaloneShell>
   )
 }

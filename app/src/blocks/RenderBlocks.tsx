@@ -32,6 +32,7 @@ import { WingsGroupEditorialArchive } from '@/components/WingsGroupV3/EditorialA
 import { WingsGroupContactIntro } from '@/components/WingsGroupV3/ContactIntro'
 import { JourneyInquiryGrid } from '@/components/WingsGroupV3/JourneyInquiryGrid'
 import { WingsGroupTestimonialsSection } from '@/components/WingsGroupV3/TestimonialsSection'
+import { WingsGroupGallerySection } from '@/blocks/WingsGroupGallery/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -48,12 +49,16 @@ const blockComponents = {
   stats: StatsBlock,
   testimonial: TestimonialBlock,
   wingsGroupEcosystem: WingsGroupEcosystemComponent,
+  wingsGroupGallery: WingsGroupGallerySection,
   wingsGroupProofArchive: WingsGroupProofArchiveComponent,
 }
 
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
   locale?: null | string
+  publicPathname?: null | string
+  registeredOfficeAddress?: null | string
+  travelOfficeAddress?: null | string
   allowWingsGroupDevelopmentMedia?: boolean
   siteCode?: null | string
   wingsGroupV3?: boolean
@@ -74,7 +79,10 @@ export const RenderBlocks: React.FC<{
     allowWingsGroupDevelopmentMedia = false,
     blocks,
     locale,
+    publicPathname,
+    registeredOfficeAddress,
     siteCode,
+    travelOfficeAddress,
     wingsGroupV3 = false,
     wingsGroupLegalIdentity,
     wingsGroupV3Home = false,
@@ -96,17 +104,24 @@ export const RenderBlocks: React.FC<{
         {renderedBlocks.map((block, index) => {
           const { blockType } = block
 
+          if (
+            blockType === 'wingsGroupGallery' &&
+            !(wingsGroupV3 && wingsGroupV3Route === 'corporate' && siteCode === 'wings-group')
+          ) {
+            return null
+          }
+
           if (blockType && blockType in blockComponents) {
             const Block =
               wingsGroupV3Home && blockType === 'archive'
                 ? WingsGroupEditorialRail
                 : wingsGroupV3Home && blockType === 'formBlock'
                   ? WingsGroupContactSection
-                  : wingsGroupV3Home && (blockType === 'infoStrip' || blockType === 'stats')
+                : wingsGroupV3Home && (blockType === 'infoStrip' || blockType === 'stats')
                     ? WingsGroupTrustSection
-                    : wingsGroupV3 &&
-                        wingsGroupV3Route === 'capability' &&
-                        blockType === 'featureGrid'
+                      : wingsGroupV3 &&
+                          wingsGroupV3Route === 'capability' &&
+                          blockType === 'featureGrid'
                       ? WingsGroupCapabilitySection
                       : wingsGroupV3 && wingsGroupV3Route === 'corporate' && blockType === 'content'
                         ? WingsGroupCorporateSection
@@ -128,12 +143,17 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               const blockProps =
-                block.blockType === 'formBlock'
+                block.blockType === 'wingsGroupGallery'
+                  ? { ...block, locale }
+                  : block.blockType === 'formBlock'
                   ? {
                       ...block,
                       allowWingsGroupDevelopmentMedia,
                       locale,
+                      publicPathname,
+                      registeredOfficeAddress,
                       siteCode,
+                      travelOfficeAddress,
                       wingsGroupV3,
                     }
                   : block.blockType === 'wingsGroupEcosystem'
@@ -176,21 +196,33 @@ export const RenderBlocks: React.FC<{
                 <Fragment>
                   {/* @ts-expect-error there may be some mismatch between the expected types here */}
                   <Block {...blockProps} disableInnerContainer />
-                  {wingsGroupV3Home && blockType === 'wingsGroupEcosystem' ? (
-                    <JourneyInquiryGrid />
-                  ) : null}
-                  {wingsGroupV3Home && (blockType === 'infoStrip' || blockType === 'stats') ? (
-                    <WingsGroupTestimonialsSection locale={locale} />
-                  ) : null}
                 </Fragment>
               )
 
+              const homeAddons =
+                wingsGroupV3Home && wingsGroupV3Route === 'home' ? (
+                  blockType === 'wingsGroupEcosystem' ? (
+                    <>
+                      <div data-wingsgroup-home-addon="capability">
+                        <WingsGroupCapabilitySection anchorId="capability" locale={locale} />
+                      </div>
+                      <JourneyInquiryGrid locale={locale} />
+                    </>
+                  ) : blockType === 'infoStrip' || blockType === 'stats' ? (
+                    <WingsGroupTestimonialsSection locale={locale} />
+                  ) : null
+                ) : null
+
               return section ? (
-                <div data-wingsgroup-home-section={section} key={`${section}-${index}`}>
-                  {renderedBlock}
-                </div>
+                <Fragment key={`${section}-${index}`}>
+                  <div data-wingsgroup-home-section={section}>{renderedBlock}</div>
+                  {homeAddons}
+                </Fragment>
               ) : (
-                <Fragment key={index}>{renderedBlock}</Fragment>
+                <Fragment key={index}>
+                  {renderedBlock}
+                  {homeAddons}
+                </Fragment>
               )
             }
           }

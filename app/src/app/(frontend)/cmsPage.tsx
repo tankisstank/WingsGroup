@@ -1,16 +1,18 @@
 import type { Metadata } from 'next'
 
 import { PayloadRedirects } from '@/components/PayloadRedirects'
+import { PreviewStatusBanner } from '@/components/PreviewStatusBanner'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
+import { resolveHeroPresentationConfig } from '@/heros/presentations/resolver'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { WingsGoTourCatalogSection } from '@/tours/WingsGoTourCatalogSection'
+import { WingsGoHomepageSections } from '@/tours/WingsGoHomepageSections'
 import type { WingsGoCatalogPage } from '@/tours/wingsGoCatalog'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getCurrentLocale, getCurrentSite, getCurrentSitePrefix } from '@/utilities/siteContext'
@@ -18,7 +20,11 @@ import { JsonLd } from '@/components/JsonLd'
 import PageClient from './[...slug]/page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { RelatedPages } from '@/components/RelatedPages'
-import { buildBreadcrumbListJSONLD, buildWebPageJSONLD } from '@/utilities/structuredData'
+import {
+  buildBreadcrumbListJSONLD,
+  buildFAQPageJSONLD,
+  buildWebPageJSONLD,
+} from '@/utilities/structuredData'
 import { buildPageBreadcrumbItems, type BreadcrumbPage } from '@/utilities/breadcrumbs'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
@@ -29,6 +35,7 @@ import { queryPublishedPageLocalesByExactPath } from '@/utilities/pageLocaleInve
 import {
   getWingsGroupRouteDefinition,
   isWingsGroupPendingPolicyRouteRenderable,
+  WINGSGROUP_LEGAL_IDENTITY,
 } from '@/wingsgroup/corporateRoutes'
 import { queryPageByPath } from '@/utilities/cmsPageQuery'
 import {
@@ -70,7 +77,7 @@ import {
 import { hydrateWingsSideHomeCuration, projectWingsSideHomeCuration } from '@/tours/homeCuration'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import type { Form as PayloadForm } from '@/payload-types'
-import { isAuthorizedDraftMode } from '@/utilities/previewHandoff'
+import { getAuthorizedPreviewHandoff } from '@/utilities/previewHandoff'
 
 type CmsPathArgs = {
   requestedPath: string
@@ -81,7 +88,9 @@ export async function renderCmsPageByPath({
   requestedPath,
   searchParams: searchParamsPromise,
 }: CmsPathArgs) {
-  const draft = await isAuthorizedDraftMode()
+  const handoff = await getAuthorizedPreviewHandoff(['pages', 'tour-campaigns', 'tour-products'])
+  const draft = handoff?.mode === 'draft'
+  const preview = Boolean(handoff)
   const searchParams = searchParamsPromise ? await searchParamsPromise : {}
   const locale = await getCurrentLocale()
   const sitePrefix = await getCurrentSitePrefix()
@@ -94,12 +103,16 @@ export async function renderCmsPageByPath({
   if (!page) {
     return <PayloadRedirects url={url} />
   }
+  if (handoff?.collection === 'pages' && String(handoff.documentID) !== String(page.id)) {
+    notFound()
+  }
 
   const settings = await getCurrentSiteSettings()
   const site = await getCurrentSite()
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
-  const canonicalPath = getPageCanonicalPath(page, locale)
+  const canonicalPath = getPageCanonicalPath(page, locale, site.defaultLocale)
   const breadcrumbItems = buildPageBreadcrumbItems({
+    defaultLocale: site.defaultLocale,
     locale,
     page: page as BreadcrumbPage,
     settings,
@@ -112,9 +125,11 @@ export async function renderCmsPageByPath({
     searchParams,
     wrapperPageID: page.id,
   })
+  if (handoff?.collection === 'tour-products' && !structuredPage) notFound()
 
   // Structured tour detail: tighter vertical rhythm under fixed header.
   const isStructuredTour = Boolean(structuredPage)
+  const isWingsGoHomepage = site.code === 'wings-go' && requestedPath === '/'
   const pageWithWingsGoCatalog = page as typeof page & {
     wingsGoTourCatalog?: { enabled?: boolean | null } | null
   }
@@ -133,6 +148,11 @@ export async function renderCmsPageByPath({
         )
       })
     : page.layout
+  const renderedLayout = isWingsGoHomepage
+    ? catalogLayout.filter(
+        (block) => block.blockType !== 'featureGrid' && block.blockType !== 'pricingTable',
+      )
+    : catalogLayout
   const renderedBreadcrumbItems = isStructuredTour
     ? buildStructuredTourBreadcrumbItems({
         baseItems: breadcrumbItems,
@@ -264,6 +284,9 @@ export async function renderCmsPageByPath({
     publicPathname: requestedPath,
     siteCode: site.code,
   })
+  const hiFiHeroPresentation = useHiFiBody
+    ? resolveHeroPresentationConfig({ hero: page.hero, siteDefaults: settings?.heroDefaults })
+    : null
   const consumedHiFiForm =
     hiFiFormVariant && hiFiModel?.routeContent
       ? (hiFiModel.routeContent as { form?: unknown }).form
@@ -274,6 +297,7 @@ export async function renderCmsPageByPath({
     requestedPath === '/' &&
     settings?.wingsGroupV3?.enabled === true &&
     isWingsGroupV3HomeLayout(page.layout)
+  const isWingsGoContactPage = site.code === 'wings-go' && requestedPath === '/lien-he'
   const wingsGroupRoute =
     site.code === 'wings-group' && settings?.wingsGroupV3?.enabled === true
       ? getWingsGroupRouteDefinition(requestedPath)
@@ -281,6 +305,7 @@ export async function renderCmsPageByPath({
   const useWingsGroupV3Surface = Boolean(wingsGroupRoute)
   const isWingsGroupV3LocalPreview = draft && useWingsGroupV3Surface
   const isWingsGroupPendingPolicy = Boolean(page && '__wingsGroupPendingPolicy' in page)
+  const shouldRenderBreadcrumbs = !useHiFiBody && !useWingsGroupV3Home
 
   return (
     <article
@@ -293,6 +318,7 @@ export async function renderCmsPageByPath({
         .filter(Boolean)
         .join(' ')}
       data-hifi-body={useHiFiBody || isWingsGroupV3LocalPreview ? 'true' : 'false'}
+      data-hifi-composer={useHiFiBody ? 'true' : 'false'}
       data-wingsgroup-v3-home={useWingsGroupV3Home ? 'true' : 'false'}
       data-wingsgroup-v3-surface={useWingsGroupV3Surface ? 'true' : 'false'}
       data-wingsgroup-pending-policy={isWingsGroupPendingPolicy ? 'true' : 'false'}
@@ -312,14 +338,38 @@ export async function renderCmsPageByPath({
             settings,
             { canonicalOrigin },
           ),
+          // Only emit Q&A that this route renders through RenderBlocks. Hi-fi
+          // and structured-tour pages have separate bodies and therefore do
+          // not inherit FAQ markup from their unused CMS layout.
+          !structuredPage && !useHiFiBody ? buildFAQPageJSONLD(catalogLayout) : null,
         ]}
       />
       <PageClient />
       <PayloadRedirects disableNotFound url={url} />
 
-      {draft && <LivePreviewListener />}
+      {handoff ? (
+        <PreviewStatusBanner
+          collection={handoff.collection}
+          hasPublishedVersion={handoff.hasPublishedVersion}
+          locale={locale}
+          mode={handoff.mode}
+        />
+      ) : null}
 
-      {!useHiFiBody ? (
+      {preview ? (
+        <LivePreviewListener
+          previewIdentity={{
+            collection: handoff?.collection || 'pages',
+            documentID: handoff?.documentID || page.id,
+            locale,
+            mode: handoff?.mode || (page._status === 'draft' ? 'draft' : 'published'),
+            path: getPageCanonicalPath(page),
+            siteCode: site.code,
+          }}
+        />
+      ) : null}
+
+      {shouldRenderBreadcrumbs ? (
         <Breadcrumbs
           className={
             useWingsGroupV3Surface
@@ -351,16 +401,42 @@ export async function renderCmsPageByPath({
           publicPathname={requestedPath}
           reusableBlocks={hiFiReusableBlocks}
           searchParams={searchParams}
+          heroPresentation={hiFiHeroPresentation}
         />
       ) : (
         <>
-          <RenderHero
-            {...page.hero}
-            resolvedLocale={locale}
-            siteHeroDefaults={settings?.heroDefaults}
-            allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Surface}
-            wingsGroupV3Enabled={useWingsGroupV3Surface}
-          />
+          {isWingsGoContactPage ? (
+            <section
+              aria-labelledby="wingsgo-contact-title"
+              className="container theme-section pb-8 pt-10 md:pb-12 md:pt-14"
+              data-wingsgo-contact-hero="true"
+            >
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--site-brand)]">
+                {locale === 'en' ? 'Explore the world with WingsGo!' : 'Cùng WingsGo khám phá thế giới!'}
+              </p>
+              <h1
+                className="mt-3 max-w-4xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl"
+                id="wingsgo-contact-title"
+              >
+                {locale === 'en' ? (
+                  <>BOOK A TOUR OR GET <span className="text-[var(--site-accent)]">FREE ADVICE</span></>
+                ) : (
+                  <>ĐẶT TOUR HOẶC NHẬN TƯ VẤN <span className="text-[var(--site-accent)]">MIỄN PHÍ</span></>
+                )}
+              </h1>
+            </section>
+          ) : (
+            <RenderHero
+              {...page.hero}
+              resolvedLocale={locale}
+              siteHeroDefaults={settings?.heroDefaults}
+              allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Surface}
+              wingsGroupV3Enabled={useWingsGroupV3Surface}
+            />
+          )}
+          {isWingsGoHomepage ? (
+            <WingsGoHomepageSections locale={getCopyLocale(locale)} site={site} />
+          ) : null}
           {useWingsGoTourCatalog ? (
             <WingsGoTourCatalogSection
               page={page as unknown as WingsGoCatalogPage}
@@ -369,9 +445,18 @@ export async function renderCmsPageByPath({
             />
           ) : null}
           <RenderBlocks
-            blocks={catalogLayout}
+            blocks={renderedLayout}
             locale={locale}
+            publicPathname={requestedPath}
+            registeredOfficeAddress={
+              settings?.registeredOfficeAddress ||
+              (site.code === 'wings-go' ? WINGSGROUP_LEGAL_IDENTITY.registeredOffice : undefined)
+            }
             siteCode={site.code}
+            travelOfficeAddress={
+              settings?.travelOfficeAddress ||
+              (site.code === 'wings-go' ? WINGSGROUP_LEGAL_IDENTITY.travelOffice : undefined)
+            }
             wingsGroupV3={site.code === 'wings-group'}
             wingsGroupLegalIdentity={settings?.wingsGroupV3?.legalIdentity}
             allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Surface}
@@ -483,7 +568,8 @@ const resolveStructuredTourPage = async ({
   searchParams?: Record<string, string | string[] | undefined>
   wrapperPageID: number | string
 }) => {
-  const draft = await isAuthorizedDraftMode()
+  const handoff = await getAuthorizedPreviewHandoff(['pages', 'tour-campaigns', 'tour-products'])
+  const draft = handoff?.mode === 'draft'
   const segments = requestedPath.split('/').filter(Boolean)
   const site = await getCurrentSite()
 
@@ -500,7 +586,12 @@ const resolveStructuredTourPage = async ({
     if (!tourData) {
       return null
     }
-
+    if (
+      handoff?.collection === 'tour-products' &&
+      String(handoff.documentID) !== String(tourData.tour.id)
+    ) {
+      notFound()
+    }
     // Wingside: consultative hi-fi TourDetailPage (Open Design lock).
     // Keep wrapper-page gate so only linked TourProduct pages resolve.
     if (site.code === 'wing-side') {
@@ -563,7 +654,7 @@ const resolveStructuredTourPage = async ({
       locale,
     })
 
-    return <TourSchedulePage schedule={schedule} />
+    return <TourSchedulePage locale={copyLocale} schedule={schedule} />
   }
 
   if (segments[0] === 'thi-truong' && segments[1]) {
@@ -596,6 +687,12 @@ const resolveStructuredTourPage = async ({
 
     if (!campaignData) {
       return null
+    }
+    if (
+      handoff?.collection === 'tour-campaigns' &&
+      String(handoff.documentID) !== String(campaignData.campaign.id)
+    ) {
+      notFound()
     }
 
     return (

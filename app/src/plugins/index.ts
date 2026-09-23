@@ -21,6 +21,7 @@ import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import { wingsGroupLeadGovernanceField } from '@/lead-capture/governanceFields'
+import { SALES_NOTE_MAX_LENGTH, salesStatusOptions } from '@/lead-capture/triage'
 
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -218,6 +219,18 @@ export const plugins: Plugin[] = [
               { name: 'source', type: 'text', maxLength: 32 },
               { name: 'tourId', type: 'text', maxLength: 128 },
               { name: 'tourSlug', type: 'text', maxLength: 160 },
+              { name: 'departureId', type: 'text', maxLength: 64 },
+              { name: 'departureDate', type: 'text', maxLength: 10 },
+              {
+                name: 'intent',
+                type: 'select',
+                options: [
+                  { label: 'Contact', value: 'contact' },
+                  { label: 'Hold seat', value: 'hold-seat' },
+                  { label: 'Inquiry', value: 'inquiry' },
+                  { label: 'Request quote', value: 'request-quote' },
+                ],
+              },
               {
                 name: 'discovery',
                 type: 'group',
@@ -272,6 +285,94 @@ export const plugins: Plugin[] = [
           },
         ]
 
+        const salesTriageFields: Field[] = [
+          {
+            name: 'salesStatus',
+            label: 'Trạng thái xử lý lead',
+            type: 'select',
+            access: {
+              read: ({ req }) => Boolean(req.user),
+              update: () => false,
+            },
+            admin: {
+              description: 'Cập nhật qua bảng Xử lý lead; lead cũ không được tự động backfill.',
+              position: 'sidebar',
+              readOnly: true,
+            },
+            defaultValue: 'new',
+            options: [...salesStatusOptions],
+          },
+          {
+            name: 'assignedTo',
+            label: 'Nhân viên phụ trách',
+            type: 'relationship',
+            relationTo: 'users',
+            access: {
+              read: ({ req }) => Boolean(req.user),
+              update: () => false,
+            },
+            admin: {
+              description: 'Chỉ chọn người dùng hiện có trong cùng site.',
+              position: 'sidebar',
+              readOnly: true,
+            },
+          },
+          {
+            name: 'salesNote',
+            label: 'Ghi chú xử lý nội bộ',
+            type: 'textarea',
+            access: {
+              read: ({ req }) => Boolean(req.user),
+              update: () => false,
+            },
+            admin: {
+              position: 'sidebar',
+              readOnly: true,
+            },
+            maxLength: SALES_NOTE_MAX_LENGTH,
+          },
+          {
+            name: 'salesStatusFrom',
+            label: 'Trạng thái trước đó',
+            type: 'select',
+            access: { read: ({ req }) => Boolean(req.user), update: () => false },
+            admin: { position: 'sidebar', readOnly: true },
+            options: [...salesStatusOptions],
+          },
+          {
+            name: 'salesStatusTo',
+            label: 'Trạng thái sau đó',
+            type: 'select',
+            access: { read: ({ req }) => Boolean(req.user), update: () => false },
+            admin: { position: 'sidebar', readOnly: true },
+            options: [...salesStatusOptions],
+          },
+          {
+            name: 'salesUpdatedAt',
+            label: 'Cập nhật xử lý lúc',
+            type: 'date',
+            access: { read: ({ req }) => Boolean(req.user), update: () => false },
+            admin: { position: 'sidebar', readOnly: true },
+          },
+          {
+            name: 'salesUpdatedBy',
+            label: 'Cập nhật bởi',
+            type: 'relationship',
+            relationTo: 'users',
+            access: { read: ({ req }) => Boolean(req.user), update: () => false },
+            admin: { position: 'sidebar', readOnly: true },
+          },
+          {
+            name: 'salesTriageVersion',
+            label: 'Phiên bản xử lý',
+            type: 'number',
+            access: { read: ({ req }) => Boolean(req.user), update: () => false },
+            admin: { hidden: true, readOnly: true },
+            defaultValue: 0,
+            min: 0,
+          },
+        ]
+
         return [
           {
             ...submissionSiteField,
@@ -282,6 +383,15 @@ export const plugins: Plugin[] = [
             },
           } as Field,
           ...privateDeliveryFields,
+          {
+            name: 'salesTriagePanel',
+            type: 'ui',
+            admin: {
+              components: { Field: '@/components/LeadTriagePanel' },
+              position: 'main',
+            },
+          },
+          ...salesTriageFields,
           ...defaultFields,
         ]
       },
@@ -292,7 +402,7 @@ export const plugins: Plugin[] = [
         components: {
           beforeList: ['@/components/AdminGuidance/LeadListGuidance'],
         },
-        defaultColumns: ['form', 'site', 'createdAt'],
+        defaultColumns: ['form', 'site', 'salesStatus', 'assignedTo', 'createdAt'],
         group: adminGroups.lead,
       },
       labels: {

@@ -40,7 +40,9 @@ export const SiteSettings: CollectionConfig = {
     components: {
       beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
       edit: {
-        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+        beforeDocumentControls: [
+          '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
+        ],
       },
     },
     defaultColumns: ['siteName', 'site', 'updatedAt'],
@@ -285,6 +287,22 @@ export const SiteSettings: CollectionConfig = {
       name: 'supportPhone',
       label: 'Số điện thoại hỗ trợ',
       type: 'text',
+    },
+    {
+      name: 'registeredOfficeAddress',
+      label: 'Địa chỉ trụ sở',
+      type: 'text',
+      admin: {
+        description: 'Hiển thị ở footer và trang liên hệ công khai của WingsGo.',
+      },
+    },
+    {
+      name: 'travelOfficeAddress',
+      label: 'Địa chỉ văn phòng du lịch',
+      type: 'text',
+      admin: {
+        description: 'Hiển thị ở footer và trang liên hệ công khai của WingsGo.',
+      },
     },
     {
       name: 'headerNavItems',

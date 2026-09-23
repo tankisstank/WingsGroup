@@ -42,6 +42,9 @@ import * as migration_20260906_081500_lead_notification_job_tasks from './202609
 import * as migration_20260906_083000_payload_jobs_meta from './20260906_083000_payload_jobs_meta'
 import * as migration_20260906_084000_payload_jobs_stats from './20260906_084000_payload_jobs_stats'
 import * as migration_20260909_090000_wingsgo_tour_catalog from './20260909_090000_wingsgo_tour_catalog'
+import * as migration_20260914_090000_cms_admin_lead_triage from './20260914_090000_cms_admin_lead_triage'
+import * as migration_20260920_090000_wingsgroup_gallery from './20260920_090000_wingsgroup_gallery'
+import * as migration_20260921_090000_wingsgo_departure_lead_context from './20260921_090000_wingsgo_departure_lead_context'
 
 export const migrations = [
   {
@@ -263,5 +266,20 @@ export const migrations = [
     up: migration_20260909_090000_wingsgo_tour_catalog.up,
     down: migration_20260909_090000_wingsgo_tour_catalog.down,
     name: '20260909_090000_wingsgo_tour_catalog',
+  },
+  {
+    up: migration_20260914_090000_cms_admin_lead_triage.up,
+    down: migration_20260914_090000_cms_admin_lead_triage.down,
+    name: '20260914_090000_cms_admin_lead_triage',
+  },
+  {
+    up: migration_20260920_090000_wingsgroup_gallery.up,
+    down: migration_20260920_090000_wingsgroup_gallery.down,
+    name: '20260920_090000_wingsgroup_gallery',
+  },
+  {
+    up: migration_20260921_090000_wingsgo_departure_lead_context.up,
+    down: migration_20260921_090000_wingsgo_departure_lead_context.down,
+    name: '20260921_090000_wingsgo_departure_lead_context',
   },
 ]

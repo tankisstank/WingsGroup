@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
+import { Forbidden, ValidationError } from 'payload'
 
 import {
   buildAuthoringRevision,
   buildAuthoringState,
   authoringIssues,
+  normalizeAuthoringError,
   parseAuthoringBody,
   provisionAuthoring,
 } from '@/tours/authoring'
@@ -20,6 +22,27 @@ const user = { id: 7, role: 'site-manager', sites: [10] }
 const request = { user, locale: 'vi' } as any
 
 describe('WingsGo tour authoring', () => {
+  it('returns actionable, sanitized errors for wrapper validation and permissions', () => {
+    const validationError = new ValidationError({
+      collection: 'pages',
+      errors: [
+        { message: 'Sensitive validator detail', path: 'layout.0.title' },
+        { message: 'Invalid path', path: 'pathname' },
+      ],
+    })
+    const normalized = normalizeAuthoringError(validationError)
+    expect(normalized).toMatchObject({
+      code: 'wrapper_validation_failed',
+      message: 'Không thể tạo trang tour vì dữ liệu chưa hợp lệ. Kiểm tra: bố cục nội dung, đường dẫn.',
+      status: 422,
+    })
+    expect((normalized as Error).message).not.toContain('Sensitive')
+    expect(normalizeAuthoringError(new Forbidden())).toMatchObject({
+      code: 'wrapper_forbidden',
+      status: 403,
+    })
+  })
+
   it('parses only the bounded authoring contract', () => {
     expect(parseAuthoringBody({ action: 'publish', locale: 'vi', revision: 'a'.repeat(64), departureIDs: [1, '2'] })).toEqual({
       action: 'publish',
@@ -85,6 +108,54 @@ describe('WingsGo tour authoring', () => {
     expect(rollback).toHaveBeenCalledWith('tx')
     expect(commit).not.toHaveBeenCalled()
     expect(update).toHaveBeenCalledTimes(1)
+  })
+
+  it('provisions from the registered tour preset and classifies page validation failures', async () => {
+    const rollback = vi.fn(async () => undefined)
+    const pageValidationError = new ValidationError({
+      collection: 'pages',
+      errors: [{ message: 'Invalid page data', path: 'layout.0.title' }],
+    })
+    const payload = {
+      db: {
+        packageName: '@payloadcms/db-postgres',
+        beginTransaction: vi.fn(async () => 'tx'),
+        sessions: { tx: { db: {} } },
+        execute: vi.fn(async () => ({ rows: [] })),
+        commitTransaction: vi.fn(async () => undefined),
+        rollbackTransaction: rollback,
+      },
+      findByID: vi.fn(async ({ collection }: { collection: string }) => {
+        if (collection === 'sites') return { id: 10, code: 'wings-go' }
+        return { id: 1, site: 10, slug: 'demo', title: 'Demo', summary: 'Summary', updatedAt: 'p1', _status: 'draft', wrapperPage: null }
+      }),
+      find: vi.fn(async ({ where }: { where: { and?: Array<{ pathname?: { equals?: string } }> } }) =>
+        where.and?.[0]?.pathname?.equals === '/tour'
+          ? { docs: [{ id: 20, site: 10, pathname: '/tour', _status: 'published' }] }
+          : { docs: [] },
+      ),
+      create: vi.fn(async (_args: { data: Record<string, unknown> }) => { throw pageValidationError }),
+    }
+
+    const failure = await provisionAuthoring({ id: 1, locale: 'vi', payload, req: { ...request, payload } as never }).catch((error) => error)
+    const pageData = payload.create.mock.calls[0][0].data
+
+    expect(pageData).toMatchObject({
+      _status: 'draft',
+      layoutPresetKey: 'tour-conversion',
+      parentPage: 20,
+      site: 10,
+      slug: 'demo',
+      title: 'Demo',
+    })
+    expect(pageData.layout).toHaveLength(5)
+    expect(pageData.hero).toBeTruthy()
+    expect(normalizeAuthoringError(failure)).toMatchObject({
+      code: 'wrapper_validation_failed',
+      message: 'Không thể tạo trang tour vì dữ liệu chưa hợp lệ. Kiểm tra: bố cục nội dung.',
+      status: 422,
+    })
+    expect(rollback).toHaveBeenCalledWith('tx')
   })
 
   it('fails closed when the /tour hub is absent', async () => {

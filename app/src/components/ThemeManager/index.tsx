@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
+import AdminStandaloneShell from '@/components/AdminStandaloneShell'
 import AdminThemeBootstrap from '@/components/AdminThemeBootstrap'
 
 import './index.scss'
@@ -133,7 +134,15 @@ type UsageSummary = {
   inheritCount: number
   legacyCount: number
   overrideCount: number
+  themeAffectedPages: Array<{ id: number | string; pathname: string; title: string }>
+  totalPages: number
   totalHighImpactPages: number
+}
+
+type PaginatedDocs<T> = {
+  docs?: T[]
+  hasNextPage?: boolean
+  nextPage?: number | null
 }
 
 type FetchResult<T> =
@@ -155,7 +164,10 @@ const knownThemePresetLabels: Record<string, string> = Object.fromEntries(
     ...themePresetKeyOptions,
     { label: 'WingSide cổ điển (WingSide Classic)', value: 'wings-side-classic' },
     { label: 'WingSide biên tập (WingSide Editorial)', value: 'wings-side-editorial' },
-    { label: 'WingSide inbound biên tập v2 (WingSide Editorial Inbound v2)', value: 'wings-side-editorial-inbound-v2' },
+    {
+      label: 'WingSide inbound biên tập v2 (WingSide Editorial Inbound v2)',
+      value: 'wings-side-editorial-inbound-v2',
+    },
   ].map((option) => [option.value, option.label]),
 )
 
@@ -181,7 +193,12 @@ const displayHeroPreset = (
 ) => {
   const meta = getHeroPresentationAdminMeta(preset?.baseTemplate)
 
-  return meta?.label || preset?.name || preset?.key || (preset ? `Preset hero ${preset.id}` : 'Chưa chọn')
+  return (
+    meta?.label ||
+    preset?.name ||
+    preset?.key ||
+    (preset ? `Preset hero ${preset.id}` : 'Chưa chọn')
+  )
 }
 
 const getPresetLabel = (value: string, presets: ThemePresetDoc[]) => {
@@ -235,10 +252,56 @@ const fetchJSON = async <T,>(url: string): Promise<FetchResult<T>> => {
   }
 }
 
+const pageURL = (baseURL: string, page: number) => {
+  const url = new URL(baseURL, 'http://wingsgroup-admin.local')
+  url.searchParams.set('limit', '100')
+  url.searchParams.set('page', String(page))
+  return `${url.pathname}${url.search}`
+}
+
+/**
+ * Load every page in a Payload collection before calculating impact.
+ * A partial result is unsafe for an admin confirmation message, so any failed
+ * batch returns an error and the caller must keep the impact summary unknown.
+ */
+export const fetchAllPages = async <T,>(baseURL: string): Promise<FetchResult<T[]>> => {
+  const docs: T[] = []
+  const visitedPages = new Set<number>()
+  let page = 1
+
+  for (let requestCount = 0; requestCount < 1000; requestCount += 1) {
+    if (visitedPages.has(page)) {
+      return {
+        message: 'Phân tích tác động trả về vòng phân trang không hợp lệ.',
+        state: 'error',
+      }
+    }
+    visitedPages.add(page)
+
+    const result = await fetchJSON<PaginatedDocs<T>>(pageURL(baseURL, page))
+    if (result.state !== 'ready') {
+      return result
+    }
+
+    docs.push(...(result.data.docs ?? []))
+    if (!result.data.hasNextPage) {
+      return { data: docs, state: 'ready' }
+    }
+
+    const nextPage = result.data.nextPage
+    page = typeof nextPage === 'number' && nextPage > page ? nextPage : page + 1
+  }
+
+  return {
+    message: 'Phân tích tác động vượt quá giới hạn phân trang an toàn.',
+    state: 'error',
+  }
+}
+
 const resultMessage = (label: string, result: FetchResult<unknown>) =>
   result.state === 'ready' ? null : `${label}: ${result.message}`
 
-const getUsageSummary = (pages: PageUsageDoc[]): UsageSummary => {
+export const getUsageSummary = (pages: PageUsageDoc[]): UsageSummary => {
   const highImpactPages = pages.filter((page) => page.hero?.type === 'highImpact')
   const inheritPages = highImpactPages.filter((page) => page.hero?.presentationMode === 'inherit')
   const overridePages = highImpactPages.filter((page) => page.hero?.presentationMode === 'override')
@@ -255,6 +318,12 @@ const getUsageSummary = (pages: PageUsageDoc[]): UsageSummary => {
     inheritCount: inheritPages.length,
     legacyCount: legacyPages.length,
     overrideCount: overridePages.length,
+    themeAffectedPages: pages.slice(0, 5).map((page) => ({
+      id: page.id,
+      pathname: page.pathname || '/',
+      title: page.title || `Trang ${page.id}`,
+    })),
+    totalPages: pages.length,
     totalHighImpactPages: highImpactPages.length,
   }
 }
@@ -292,10 +361,10 @@ export default function ThemeManagerView() {
         ),
       ])
 
-      const siteDocs = siteResult.state === 'ready' ? siteResult.data.docs ?? [] : []
-      const presetDocs = presetResult.state === 'ready' ? presetResult.data.docs ?? [] : []
+      const siteDocs = siteResult.state === 'ready' ? (siteResult.data.docs ?? []) : []
+      const presetDocs = presetResult.state === 'ready' ? (presetResult.data.docs ?? []) : []
       const heroPresetDocs =
-        heroPresetResult.state === 'ready' ? heroPresetResult.data.docs ?? [] : []
+        heroPresetResult.state === 'ready' ? (heroPresetResult.data.docs ?? []) : []
       const siteID = String(siteDocs[0]?.id ?? '')
 
       // Do not replace a panel's known-good data when an unrelated resource
@@ -346,7 +415,7 @@ export default function ThemeManagerView() {
         fetchJSON<{ docs?: SiteSettingsDoc[] }>(
           `/api/site-settings?depth=1&limit=1&where[site][equals]=${selectedSiteID}`,
         ),
-        fetchJSON<{ docs?: PageUsageDoc[] }>(
+        fetchAllPages<PageUsageDoc>(
           `/api/pages?depth=0&draft=true&limit=100&where[site][equals]=${selectedSiteID}`,
         ),
       ])
@@ -360,7 +429,7 @@ export default function ThemeManagerView() {
       setSiteContextIssues(issues)
 
       if (pagesResult.state === 'ready') {
-        setUsageSummary(getUsageSummary(pagesResult.data.docs ?? []))
+        setUsageSummary(getUsageSummary(pagesResult.data))
       }
 
       if (settingsResult.state !== 'ready') {
@@ -398,10 +467,14 @@ export default function ThemeManagerView() {
         presets.find((preset) => String(preset.id) === String(themePresetDoc?.id)) ||
         presets.find((preset) => preset.key === themePresetKey) ||
         presets[0]
-      const resolvedPreset = resolveThemePresetTokens(settings.branding?.themeKey || defaultThemeKey, {
-        key: matchedPreset?.key || themePresetKey,
-        tokens: themePresetDoc?.tokens || matchedPreset?.tokens || defaultThemePresetByKey.corporate,
-      })
+      const resolvedPreset = resolveThemePresetTokens(
+        settings.branding?.themeKey || defaultThemeKey,
+        {
+          key: matchedPreset?.key || themePresetKey,
+          tokens:
+            themePresetDoc?.tokens || matchedPreset?.tokens || defaultThemePresetByKey.corporate,
+        },
+      )
 
       const nextForm = {
         accentColor: settings.branding?.accentColor || resolvedPreset.accentColor,
@@ -414,7 +487,8 @@ export default function ThemeManagerView() {
         radius: settings.branding?.radius || resolvedPreset.radius,
         spacingScale: settings.branding?.spacingScale || resolvedPreset.spacingScale,
         surfaceColor: settings.branding?.surfaceColor || resolvedPreset.surfaceColor,
-        surfaceStrongColor: settings.branding?.surfaceStrongColor || resolvedPreset.surfaceStrongColor,
+        surfaceStrongColor:
+          settings.branding?.surfaceStrongColor || resolvedPreset.surfaceStrongColor,
         themeKey: settings.branding?.themeKey || defaultThemeKey,
         themePreset: String(matchedPreset?.id || ''),
       }
@@ -533,7 +607,13 @@ export default function ThemeManagerView() {
       event.returnValue = ''
     }
     const warnBeforeNavigation = (event: MouseEvent) => {
-      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey
+      ) {
         return
       }
       const anchor = (event.target as HTMLElement | null)?.closest('a[href]')
@@ -662,9 +742,10 @@ export default function ThemeManagerView() {
       method: 'PATCH',
     })
 
-    const data = (await response.json().catch(() => null)) as
-      | { errors?: Array<{ message?: string }>; message?: string }
-      | null
+    const data = (await response.json().catch(() => null)) as {
+      errors?: Array<{ message?: string }>
+      message?: string
+    } | null
 
     if (!response.ok) {
       setNotice({
@@ -699,9 +780,10 @@ export default function ThemeManagerView() {
 
   if (isLoading) {
     return (
-      <main className={baseClass}>
-        <AdminThemeBootstrap />
-        <div className={`${baseClass}__shell`}>
+      <AdminStandaloneShell>
+        <main className={baseClass} data-od-id="theme-manager-main-loading">
+          <AdminThemeBootstrap />
+          <div className={`${baseClass}__shell`}>
           <header className={`${baseClass}__header`}>
             <div>
               <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
@@ -719,16 +801,18 @@ export default function ThemeManagerView() {
               </Link>
             </div>
           </header>
-        </div>
-      </main>
+          </div>
+        </main>
+      </AdminStandaloneShell>
     )
   }
 
   if (!canEdit) {
     return (
-      <main className={baseClass}>
-        <AdminThemeBootstrap />
-        <div className={`${baseClass}__shell`}>
+      <AdminStandaloneShell>
+        <main className={baseClass} data-od-id="theme-manager-main-readonly">
+          <AdminThemeBootstrap />
+          <div className={`${baseClass}__shell`}>
           <header className={`${baseClass}__header`}>
             <div>
               <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
@@ -747,16 +831,18 @@ export default function ThemeManagerView() {
               <Link href="/admin/console">Quay lại console</Link>
             </div>
           </header>
-        </div>
-      </main>
+          </div>
+        </main>
+      </AdminStandaloneShell>
     )
   }
 
   return (
-    <main className={baseClass}>
-      <AdminThemeBootstrap />
-      <div className={`${baseClass}__shell`}>
-        <header className={`${baseClass}__header`}>
+    <AdminStandaloneShell>
+      <main className={baseClass} data-od-id="theme-manager-main">
+        <AdminThemeBootstrap />
+        <div className={`${baseClass}__shell`}>
+        <header className={`${baseClass}__header`} data-od-id="theme-manager-header">
           <div>
             <nav className={`${baseClass}__breadcrumbs`} aria-label="Điều hướng admin">
               <Link href="/admin">Bảng điều hành admin</Link>
@@ -766,8 +852,8 @@ export default function ThemeManagerView() {
             <p>WingsGroup CMS</p>
             <h1>Quản lý giao diện</h1>
             <span>
-              Cấu hình giao diện theo thứ tự toàn hệ → site → page. Nội dung và locale của page
-              vẫn được quản lý độc lập trong editor.
+              Cấu hình giao diện theo thứ tự toàn hệ → site → page. Nội dung và locale của page vẫn
+              được quản lý độc lập trong editor.
             </span>
           </div>
           <div className={`${baseClass}__header-actions`}>
@@ -782,12 +868,18 @@ export default function ThemeManagerView() {
         {loadIssues.length > 0 ? (
           <div className={`${baseClass}__message ${baseClass}__message--error`} role="alert">
             <strong>Một số dữ liệu chưa tải được.</strong>
-            <ul>{loadIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul>
-            <button onClick={() => window.location.reload()} type="button">Tải lại dữ liệu</button>
+            <ul>
+              {loadIssues.map((issue) => (
+                <li key={issue}>{issue}</li>
+              ))}
+            </ul>
+            <button onClick={() => window.location.reload()} type="button">
+              Tải lại dữ liệu
+            </button>
           </div>
         ) : null}
 
-        <section className={`${baseClass}__layout`}>
+        <section className={`${baseClass}__layout`} data-od-id="theme-manager-layout">
           <div className={`${baseClass}__panel`}>
             <section className={`${baseClass}__field-group`}>
               <div className={`${baseClass}__field-group-head`}>
@@ -806,6 +898,10 @@ export default function ThemeManagerView() {
               </label>
               <div className={`${baseClass}__usage-grid`}>
                 <article>
+                  <strong>{usageSummary ? usageSummary.totalPages : '—'}</strong>
+                  <span>Trang chịu tác động theme site</span>
+                </article>
+                <article>
                   <strong>{usageSummary ? usageSummary.inheritCount : '—'}</strong>
                   <span>Trang kế thừa hero site</span>
                 </article>
@@ -818,19 +914,33 @@ export default function ThemeManagerView() {
                   <span>Trang dùng phương án tương thích</span>
                 </article>
               </div>
-              <div className={`${baseClass}__impact`}>
+              <div className={`${baseClass}__impact`} data-od-id="theme-manager-impact">
                 <strong>Tác động: toàn hệ → site → page</strong>
                 {isSiteContextLoading ? <p>Đang phân tích tác động theo page...</p> : null}
                 {siteContextIssues.length > 0 ? (
                   <p role="alert">{siteContextIssues.join(' ')}</p>
                 ) : usageSummary ? (
                   <p>
-                    Chỉ {usageSummary.inheritCount} trang đang kế thừa sẽ đổi theo.{' '}
+                    Theme site hiện áp dụng cho {usageSummary.totalPages} trang trong phạm vi site.{' '}
+                    Hero mặc định chỉ ảnh hưởng {usageSummary.inheritCount} trang đang kế thừa;{' '}
                     {usageSummary.overrideCount} trang ghi đè riêng không bị ảnh hưởng.
                   </p>
                 ) : (
                   <p>Chưa có dữ liệu để xác nhận phạm vi tác động.</p>
                 )}
+                {usageSummary?.themeAffectedPages?.length ? (
+                  <>
+                    <p>Ví dụ page trong phạm vi theme:</p>
+                    <ul>
+                      {usageSummary.themeAffectedPages.map((page) => (
+                        <li key={`theme-${page.id}`}>
+                          <Link href={`/admin/collections/pages/${page.id}`}>{page.title}</Link>
+                          <span>{page.pathname}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
                 {usageSummary?.affectedPages?.length ? (
                   <ul>
                     {usageSummary.affectedPages.map((page) => (
@@ -854,7 +964,10 @@ export default function ThemeManagerView() {
               <div className={`${baseClass}__segments`}>
                 <label>
                   Mã giao diện
-                  <select onChange={(event) => updateField('themeKey', event.target.value)} value={form.themeKey}>
+                  <select
+                    onChange={(event) => updateField('themeKey', event.target.value)}
+                    value={form.themeKey}
+                  >
                     {themeKeyOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -864,7 +977,10 @@ export default function ThemeManagerView() {
                 </label>
                 <label>
                   Preset giao diện
-                  <select onChange={(event) => updateField('themePreset', event.target.value)} value={form.themePreset}>
+                  <select
+                    onChange={(event) => updateField('themePreset', event.target.value)}
+                    value={form.themePreset}
+                  >
                     {presets.length > 0
                       ? presets.map((preset) => (
                           <option key={preset.id} value={preset.id}>
@@ -881,11 +997,14 @@ export default function ThemeManagerView() {
               </div>
               <label>
                 Chữ logo
-                <input onChange={(event) => updateField('logoText', event.target.value)} value={form.logoText} />
+                <input
+                  onChange={(event) => updateField('logoText', event.target.value)}
+                  value={form.logoText}
+                />
               </label>
             </section>
 
-            <section className={`${baseClass}__field-group`}>
+            <section className={`${baseClass}__field-group`} data-od-id="theme-manager-hero">
               <div className={`${baseClass}__field-group-head`}>
                 <h2>Trình bày hero</h2>
                 <span>{hasUnsavedHeroChanges ? 'Chưa lưu' : 'Đã đồng bộ'}</span>
@@ -914,7 +1033,11 @@ export default function ThemeManagerView() {
                       </div>
                       <div className={`${baseClass}__preset-copy`}>
                         <strong>{displayHeroPreset(preset)}</strong>
-                        <p>{meta?.description || preset.description || 'Chọn preset để xem chi tiết.'}</p>
+                        <p>
+                          {meta?.description ||
+                            preset.description ||
+                            'Chọn preset để xem chi tiết.'}
+                        </p>
                       </div>
                       <div className={`${baseClass}__preset-chips`}>
                         {(meta?.businessFit || []).map((item) => (
@@ -974,12 +1097,16 @@ export default function ThemeManagerView() {
                     <span>
                       <input
                         aria-label={`${label} color picker`}
-                        onChange={(event) => updateField(field as keyof ThemeFormState, event.target.value)}
+                        onChange={(event) =>
+                          updateField(field as keyof ThemeFormState, event.target.value)
+                        }
                         type="color"
                         value={normalizeColorInputValue(form[field as keyof ThemeFormState])}
                       />
                       <input
-                        onChange={(event) => updateField(field as keyof ThemeFormState, event.target.value)}
+                        onChange={(event) =>
+                          updateField(field as keyof ThemeFormState, event.target.value)
+                        }
                         value={form[field as keyof ThemeFormState]}
                       />
                     </span>
@@ -1009,7 +1136,10 @@ export default function ThemeManagerView() {
               <div className={`${baseClass}__segments`}>
                 <label>
                   Bo góc
-                  <select onChange={(event) => updateField('radius', event.target.value)} value={form.radius}>
+                  <select
+                    onChange={(event) => updateField('radius', event.target.value)}
+                    value={form.radius}
+                  >
                     {radiusOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -1019,7 +1149,10 @@ export default function ThemeManagerView() {
                 </label>
                 <label>
                   Khoảng cách
-                  <select onChange={(event) => updateField('spacingScale', event.target.value)} value={form.spacingScale}>
+                  <select
+                    onChange={(event) => updateField('spacingScale', event.target.value)}
+                    value={form.spacingScale}
+                  >
                     {spacingScaleOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -1029,7 +1162,10 @@ export default function ThemeManagerView() {
                 </label>
                 <label>
                   Phông chữ
-                  <select onChange={(event) => updateField('fontPreset', event.target.value)} value={form.fontPreset}>
+                  <select
+                    onChange={(event) => updateField('fontPreset', event.target.value)}
+                    value={form.fontPreset}
+                  >
                     {fontPresetOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -1039,7 +1175,10 @@ export default function ThemeManagerView() {
                 </label>
                 <label>
                   Nút bấm
-                  <select onChange={(event) => updateField('buttonStyle', event.target.value)} value={form.buttonStyle}>
+                  <select
+                    onChange={(event) => updateField('buttonStyle', event.target.value)}
+                    value={form.buttonStyle}
+                  >
                     {buttonStyleOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -1049,7 +1188,10 @@ export default function ThemeManagerView() {
                 </label>
                 <label>
                   Bố cục
-                  <select onChange={(event) => updateField('layoutStyle', event.target.value)} value={form.layoutStyle}>
+                  <select
+                    onChange={(event) => updateField('layoutStyle', event.target.value)}
+                    value={form.layoutStyle}
+                  >
                     {layoutStyleOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -1061,10 +1203,18 @@ export default function ThemeManagerView() {
             </section>
 
             <div className={`${baseClass}__actions`}>
-              <button disabled={savingScope !== null || !selectedSettingsID || !hasUnsavedChanges} onClick={() => save('theme')} type="button">
+              <button
+                disabled={savingScope !== null || !selectedSettingsID || !hasUnsavedChanges}
+                onClick={() => save('theme')}
+                type="button"
+              >
                 {savingScope === 'theme' ? 'Đang lưu giao diện...' : 'Lưu giao diện'}
               </button>
-              <button disabled={savingScope !== null || !selectedSettingsID || !hasUnsavedHeroChanges} onClick={() => save('hero')} type="button">
+              <button
+                disabled={savingScope !== null || !selectedSettingsID || !hasUnsavedHeroChanges}
+                onClick={() => save('hero')}
+                type="button"
+              >
                 {savingScope === 'hero' ? 'Đang lưu hero...' : 'Lưu hero mặc định'}
               </button>
               <button
@@ -1079,7 +1229,9 @@ export default function ThemeManagerView() {
                 {savingScope === 'all' ? 'Đang lưu tất cả...' : 'Lưu tất cả'}
               </button>
               {selectedSite ? (
-                <Link href={`/admin/collections/site-settings/${selectedSettingsID}`}>Mở cấu hình site</Link>
+                <Link href={`/admin/collections/site-settings/${selectedSettingsID}`}>
+                  Mở cấu hình site
+                </Link>
               ) : null}
             </div>
 
@@ -1090,7 +1242,11 @@ export default function ThemeManagerView() {
             ) : null}
           </div>
 
-          <aside className={`${baseClass}__preview`} style={previewStyle}>
+          <aside
+            className={`${baseClass}__preview`}
+            data-od-id="theme-manager-preview"
+            style={previewStyle}
+          >
             <div className={`${baseClass}__preview-head`}>
               <div>
                 <p>{selectedSite?.name || selectedSite?.code || 'Chưa chọn site'}</p>
@@ -1102,7 +1258,9 @@ export default function ThemeManagerView() {
             <div className={`${baseClass}__preview-card`}>
               <span>Giao diện site</span>
               <h2>{form.logoText}</h2>
-              <p>Thương hiệu {previewTokens.brandColor} · Nhấn {previewTokens.accentColor}</p>
+              <p>
+                Thương hiệu {previewTokens.brandColor} · Nhấn {previewTokens.accentColor}
+              </p>
               <button type="button">CTA chính</button>
             </div>
 
@@ -1123,8 +1281,8 @@ export default function ThemeManagerView() {
                 <span>{displayHeroPreset(selectedHeroPreset)}</span>
                 <h2>Trải nghiệm WingsGroup theo từng thị trường</h2>
                 <p>
-                  Xem trước mô phỏng cách mẫu sắp xếp tiêu đề, CTA và vùng media. Nội dung thật
-                  vẫn lấy từ từng trang.
+                  Xem trước mô phỏng cách mẫu sắp xếp tiêu đề, CTA và vùng media. Nội dung thật vẫn
+                  lấy từ từng trang.
                 </p>
                 <div className={`${baseClass}__hero-preview-actions`}>
                   <button type="button">Tư vấn hành trình</button>
@@ -1158,8 +1316,12 @@ export default function ThemeManagerView() {
                 ) : selectedHeroPreset?.baseTemplate === 'layered-visuals' ? (
                   <>
                     <div className={`${baseClass}__hero-media-card`}>Ảnh chính</div>
-                    <div className={`${baseClass}__hero-float ${baseClass}__hero-float--one`}>Ảnh phụ</div>
-                    <div className={`${baseClass}__hero-float ${baseClass}__hero-float--two`}>Nhãn</div>
+                    <div className={`${baseClass}__hero-float ${baseClass}__hero-float--one`}>
+                      Ảnh phụ
+                    </div>
+                    <div className={`${baseClass}__hero-float ${baseClass}__hero-float--two`}>
+                      Nhãn
+                    </div>
                   </>
                 ) : selectedHeroPreset?.baseTemplate === 'gradient-mesh' ? (
                   <div className={`${baseClass}__hero-mesh`}>Gradient mesh</div>
@@ -1169,8 +1331,14 @@ export default function ThemeManagerView() {
               </div>
 
               <div className={`${baseClass}__hero-preview-notes`}>
-                <strong>{selectedHeroDefinition?.label || selectedHeroPreset?.baseTemplate || 'Mẫu'}</strong>
-                <p>{selectedHeroMeta?.visualLabel || selectedHeroPreset?.description || 'Chọn preset để xem mô tả.'}</p>
+                <strong>
+                  {selectedHeroDefinition?.label || selectedHeroPreset?.baseTemplate || 'Mẫu'}
+                </strong>
+                <p>
+                  {selectedHeroMeta?.visualLabel ||
+                    selectedHeroPreset?.description ||
+                    'Chọn preset để xem mô tả.'}
+                </p>
               </div>
             </div>
 
@@ -1182,7 +1350,8 @@ export default function ThemeManagerView() {
             </div>
           </aside>
         </section>
-      </div>
-    </main>
+        </div>
+      </main>
+    </AdminStandaloneShell>
   )
 }

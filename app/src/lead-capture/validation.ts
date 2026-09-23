@@ -17,6 +17,8 @@ const CONTEXT_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/
 const CONTEXT_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,95}$/
 const CONTEXT_SOURCE_PATTERN = /^[A-Za-z0-9-]{1,48}$/
 const CONTEXT_SEARCH_PATTERN = /^.{1,80}$/u
+const CONTEXT_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+const CONTEXT_INTENTS = ['contact', 'hold-seat', 'inquiry', 'request-quote'] as const
 
 export class LeadValidationError extends Error {}
 
@@ -66,7 +68,7 @@ export const parseLeadContext = (input: unknown): LeadSubmissionContext | undefi
   const context = assertPlainObject(input, 'Submission context is invalid.')
   assertOnlyKeys(
     context,
-    ['discovery', 'source', 'tourId', 'tourSlug'],
+    ['departureDate', 'departureId', 'discovery', 'intent', 'source', 'tourId', 'tourSlug'],
     'Submission context is invalid.',
   )
 
@@ -100,8 +102,37 @@ export const parseLeadContext = (input: unknown): LeadSubmissionContext | undefi
     if (!Object.values(discovery).some(Boolean)) discovery = undefined
   }
 
+  const departureDate = optionalContextValue(
+    context.departureDate,
+    CONTEXT_DATE_PATTERN,
+    'Departure date is invalid.',
+  )
+  if (departureDate) {
+    const date = new Date(`${departureDate}T00:00:00.000Z`)
+    if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== departureDate) {
+      throw new LeadValidationError('Departure date is invalid.')
+    }
+  }
+
+  const intent = context.intent
+  if (
+    intent !== undefined &&
+    intent !== null &&
+    intent !== '' &&
+    !CONTEXT_INTENTS.includes(intent as (typeof CONTEXT_INTENTS)[number])
+  ) {
+    throw new LeadValidationError('Submission intent is invalid.')
+  }
+
   const parsed: LeadSubmissionContext = {
+    departureDate,
+    departureId: optionalContextValue(
+      context.departureId,
+      CONTEXT_ID_PATTERN,
+      'Departure identifier is invalid.',
+    ),
     discovery,
+    intent: typeof intent === 'string' && intent ? (intent as LeadSubmissionContext['intent']) : undefined,
     source: optionalContextValue(
       context.source,
       CONTEXT_SOURCE_PATTERN,
@@ -203,6 +234,7 @@ export const parseLeadRequest = (rawBody: string): LeadSubmissionRequest => {
 export const validateFieldsForForm = (
   form: Form,
   fields: LeadSubmissionField[],
+  options: { phonePattern?: RegExp } = {},
 ): Array<{ field: string; label: string; value: string }> => {
   const definitions = new Map(
     (form.fields || []).filter(hasName).map((field) => [field.name, field]),
@@ -226,8 +258,30 @@ export const validateFieldsForForm = (
       }
     }
 
-    if (definition.blockType === 'number' && normalizedValue && !Number.isFinite(Number(normalizedValue))) {
-      throw new LeadValidationError('Number field is invalid.')
+    if (definition.blockType === 'number' && normalizedValue) {
+      const numberValue = Number(normalizedValue)
+      if (!Number.isFinite(numberValue)) throw new LeadValidationError('Number field is invalid.')
+      if (name === 'guests' && (!Number.isInteger(numberValue) || numberValue < 1)) {
+        throw new LeadValidationError('Guest count is invalid.')
+      }
+    }
+
+    if (/(?:^|[-_])phone$|^tel$/i.test(name) && normalizedValue) {
+      const compactPhone = normalizedValue.replace(/[\s().-]/gu, '')
+      const phonePattern = options.phonePattern || /^\+?\d{8,15}$/u
+      if (!phonePattern.test(compactPhone)) {
+        throw new LeadValidationError('Phone field is invalid.')
+      }
+    }
+
+    if (name === 'departure-date' && normalizedValue) {
+      if (!/^\d{4}-\d{2}-\d{2}$/u.test(normalizedValue)) {
+        throw new LeadValidationError('Departure date field is invalid.')
+      }
+      const date = new Date(`${normalizedValue}T00:00:00.000Z`)
+      if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== normalizedValue) {
+        throw new LeadValidationError('Departure date field is invalid.')
+      }
     }
 
     if (definition.blockType === 'checkbox' && typeof value !== 'boolean') {

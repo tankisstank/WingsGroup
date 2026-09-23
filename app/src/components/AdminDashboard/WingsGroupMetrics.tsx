@@ -1,4 +1,4 @@
-import type { WidgetServerProps } from 'payload'
+import type { Where, WidgetServerProps } from 'payload'
 import React from 'react'
 
 import type { RequestState } from '@/components/AdminMetrics/contract'
@@ -12,6 +12,7 @@ import type {
 import { WingsGroupMetricsClient } from '@/components/AdminDashboard/WingsGroupMetricsClient'
 import type { AppUser } from '@/types/auth'
 import { getUserSiteIDs, isSuperAdmin } from '@/access/roles'
+import { getAdminSiteContextID } from '@/utilities/adminSiteContext'
 
 import './index.scss'
 
@@ -129,12 +130,29 @@ const getSitesWhere = (user: AppUser) => {
   }
 }
 
+const getSiteContextID = (url: string | undefined): string => {
+  if (!url) return ''
+
+  try {
+    return getAdminSiteContextID(new URL(url, 'http://wingsgroup-admin.local').search)
+  } catch {
+    return ''
+  }
+}
+
+const withSiteWhere = (where: Where | undefined, siteID: string): Where | undefined => {
+  if (!siteID) return where
+  return where ? { and: [where, { site: { equals: siteID } }] } : { site: { equals: siteID } }
+}
+
 export async function WingsGroupMetrics({ req }: WidgetServerProps) {
   const user = req.user as AppUser | undefined
 
   if (!user) {
     return null
   }
+
+  const siteContextID = getSiteContextID(req.url)
 
   const siteResultPromise = safeResult(
     () =>
@@ -159,7 +177,7 @@ export async function WingsGroupMetrics({ req }: WidgetServerProps) {
             collection: descriptor.payloadCollection,
             overrideAccess: false,
             req,
-            where: descriptor.payloadFilter,
+            where: withSiteWhere(descriptor.payloadFilter, siteContextID),
           }),
         parseCount,
       ),
@@ -175,6 +193,7 @@ export async function WingsGroupMetrics({ req }: WidgetServerProps) {
         overrideAccess: false,
         req,
         sort: '-updatedAt',
+        where: siteContextID ? { site: { equals: siteContextID } } : undefined,
       }),
     (value) => parseCollection(value, isRecentDoc),
   )
@@ -187,6 +206,7 @@ export async function WingsGroupMetrics({ req }: WidgetServerProps) {
         overrideAccess: false,
         req,
         sort: '-updatedAt',
+        where: siteContextID ? { site: { equals: siteContextID } } : undefined,
       }),
     (value) => parseCollection(value, isRecentDoc),
   )
@@ -199,6 +219,7 @@ export async function WingsGroupMetrics({ req }: WidgetServerProps) {
         overrideAccess: false,
         req,
         sort: '-createdAt',
+        where: siteContextID ? { site: { equals: siteContextID } } : undefined,
       }),
     (value) => parseCollection(value, isSubmissionDoc),
   )
@@ -213,7 +234,7 @@ export async function WingsGroupMetrics({ req }: WidgetServerProps) {
 
   return (
     <WingsGroupMetricsClient
-      initialState={{ counts, recentPages, recentPosts, recentSubmissions, sites }}
+      initialState={{ counts, recentPages, recentPosts, recentSubmissions, siteContextID, sites }}
       role={user.role}
     />
   )

@@ -59,7 +59,9 @@ export const Posts: CollectionConfig<'posts'> = {
     components: {
       beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
       edit: {
-        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+        beforeDocumentControls: [
+          '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
+        ],
       },
     },
     description:
@@ -89,6 +91,7 @@ export const Posts: CollectionConfig<'posts'> = {
   fields: [
     {
       name: 'title',
+      admin: { components: { Cell: '@/components/AdminCells/LocalizedTitleCell' } },
       label: 'Tiêu đề',
       type: 'text',
       localized: true,

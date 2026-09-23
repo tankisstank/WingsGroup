@@ -14,6 +14,17 @@ const basePaths = ['/tour', '/thi-truong', '/campaign', '/lich-khoi-hanh']
 export const wingsSideDiscoveryPaths = ['/', '/destinations', '/styles'] as const
 const wingsSidePublicPrefix = `/${siteCodeToAliasMap['wing-side']}`
 
+const hasPublicVersion = (doc?: { _status?: string } | null) =>
+  !doc?._status || doc._status === 'published'
+
+const shouldRevalidatePublicContent = (
+  doc?: { _status?: string } | null,
+  previousDoc?: { _status?: string } | null,
+) => hasPublicVersion(doc) || hasPublicVersion(previousDoc)
+
+const isAdminCreateRender = (url?: string) =>
+  /\/admin\/collections\/[^/]+\/create(?:[/?]|$)/.test(url ?? '')
+
 const revalidateLocalizedPath = (path: string) => {
   revalidatePath(path)
 
@@ -121,9 +132,13 @@ export const revalidateWingSideDiscoveryForTourDependency = async ({
 export const revalidateTourProduct: CollectionAfterChangeHook = async ({
   doc,
   previousDoc,
-  req: { payload, context },
+  req: { payload, context, url },
 }) => {
-  if (context.disableRevalidate) {
+  if (
+    context.disableRevalidate ||
+    isAdminCreateRender(url) ||
+    !shouldRevalidatePublicContent(doc, previousDoc)
+  ) {
     return doc
   }
 
@@ -176,9 +191,13 @@ export const revalidateTourProductDelete: CollectionAfterDeleteHook = async ({
 export const revalidateTourDeparture: CollectionAfterChangeHook = async ({
   doc,
   previousDoc,
-  req: { payload, context },
+  req: { payload, context, url },
 }) => {
-  if (context.disableRevalidate) {
+  if (
+    context.disableRevalidate ||
+    isAdminCreateRender(url) ||
+    !shouldRevalidatePublicContent(doc, previousDoc)
+  ) {
     return doc
   }
 
@@ -283,9 +302,9 @@ export const revalidateTourDepartureDelete: CollectionAfterDeleteHook = async ({
 
 export const revalidateTourVariant: CollectionAfterChangeHook = async ({
   doc,
-  req: { payload, context },
+  req: { payload, context, url },
 }) => {
-  if (context.disableRevalidate) {
+  if (context.disableRevalidate || isAdminCreateRender(url) || !shouldRevalidatePublicContent(doc)) {
     return doc
   }
 
@@ -322,8 +341,15 @@ export const revalidateTourVariantDelete: CollectionAfterDeleteHook = ({
   return doc
 }
 
-export const revalidateTourCampaign: CollectionAfterChangeHook = ({ doc, req: { context } }) => {
-  if (!context.disableRevalidate) {
+export const revalidateTourCampaign: CollectionAfterChangeHook = ({
+  doc,
+  req: { context, url },
+}) => {
+  if (
+    !context.disableRevalidate &&
+    !isAdminCreateRender(url) &&
+    shouldRevalidatePublicContent(doc)
+  ) {
     revalidateMany([...basePaths, `/campaign/${doc.slug}`])
   }
 

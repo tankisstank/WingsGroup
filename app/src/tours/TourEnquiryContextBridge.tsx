@@ -6,6 +6,11 @@ import type { LeadSubmissionContext } from '@/lead-capture/types'
 import type { TourEnquiryContext } from './enquiryContext'
 
 const toSubmissionContext = (context: TourEnquiryContext): LeadSubmissionContext => ({
+  departureDate: context.departureDate || undefined,
+  departureId:
+    context.departureId !== null && context.departureId !== undefined && context.departureId !== ''
+      ? String(context.departureId)
+      : undefined,
   discovery: context.discovery
     ? {
       destination: context.discovery.destination,
@@ -15,6 +20,7 @@ const toSubmissionContext = (context: TourEnquiryContext): LeadSubmissionContext
       type: context.discovery.type,
       }
     : undefined,
+  intent: context.intent,
   source: context.source || undefined,
   tourId:
     context.tourId !== null && context.tourId !== undefined && context.tourId !== ''

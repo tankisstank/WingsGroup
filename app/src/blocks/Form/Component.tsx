@@ -3,7 +3,7 @@ import type { FormFieldBlock, Form as FormType } from '@payloadcms/plugin-form-b
 
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useForm, FormProvider } from 'react-hook-form'
+import { useForm, FormProvider, type FieldValues } from 'react-hook-form'
 import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
@@ -15,9 +15,12 @@ import { WINGSGROUP_CONTACT_FOCUS_SESSION_KEY } from '@/utilities/wingsGroupCons
 import { useSitePublicLocale } from '@/providers/SitePath'
 import { useSitePath } from '@/utilities/useSitePath'
 import { getCopyLocale } from '@/utilities/locales'
+import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
 import { TurnstileWidget } from './TurnstileWidget'
+import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
 import type { LocalizedCopy } from '@/i18n/publicCopy'
 import type { LeadSubmissionContext } from '@/lead-capture/types'
+import { readSafeTourEnquiryContext } from '@/tours/enquiryContext'
 import type {
   ConsultationChannelKey,
   ConsultationChannelPublicState,
@@ -45,6 +48,7 @@ type FormLocalizedCopy = {
   bullets: readonly [string, string, string]
   fieldLabels: Record<string, string>
   loading: string
+  phoneMessage: string
   required: string
   requiredMessage: string
   submit: string
@@ -68,17 +72,22 @@ const formCopy = {
       brief: 'Needs / budget / timing',
       company: 'Company / traveler group',
       country: 'Country of residence',
+      destination: 'Where would you like to go?',
+      'departure-date': 'Expected departure',
       email: 'Email',
       'full-name': 'Full name',
+      guests: 'Number of travelers',
       'group-size': 'Estimated group size',
       message: 'Message',
       phone: 'Phone number',
+      'tour-interest': 'Tour you are interested in',
       'policy-code': 'Tour / contract / policy code if available',
       'service-date': 'Service date',
       'travel-month': 'Preferred travel month/date window',
     } as Record<string, string>,
     required: 'required',
     requiredMessage: 'This field is required',
+    phoneMessage: 'Enter a valid phone number',
     loading: 'Sending your request, please wait...',
     submit: 'Send brief',
     successDescription: 'A specialist will review your plans and return with a tailored proposal.',
@@ -99,17 +108,22 @@ const formCopy = {
       brief: 'Necesidades / presupuesto / fechas',
       company: 'Empresa / grupo de viajeros',
       country: 'País de residencia',
+      destination: '¿A dónde quieres viajar?',
+      'departure-date': 'Fecha prevista de salida',
       email: 'Email',
       'full-name': 'Nombre completo',
+      guests: 'Número de viajeros',
       'group-size': 'Tamaño estimado del grupo',
       message: 'Mensaje',
       phone: 'Teléfono',
+      'tour-interest': 'Tour que te interesa',
       'policy-code': 'Código de tour / contrato / póliza si aplica',
       'service-date': 'Fecha del servicio',
       'travel-month': 'Mes o intervalo de fechas preferido',
     } as Record<string, string>,
     required: 'obligatorio',
     requiredMessage: 'Este campo es obligatorio',
+    phoneMessage: 'Introduce un número de teléfono válido',
     loading: 'Enviando tu solicitud, por favor espera...',
     submit: 'Enviar solicitud',
     successDescription:
@@ -131,17 +145,22 @@ const formCopy = {
       brief: 'Esigenze / budget / periodo',
       company: 'Azienda / gruppo di viaggiatori',
       country: 'Paese di residenza',
+      destination: 'Dove vuoi andare?',
+      'departure-date': 'Partenza prevista',
       email: 'Email',
       'full-name': 'Nome completo',
+      guests: 'Numero di viaggiatori',
       'group-size': 'Dimensione stimata del gruppo',
       message: 'Messaggio',
       phone: 'Telefono',
+      'tour-interest': 'Tour di interesse',
       'policy-code': 'Codice tour / contratto / polizza se disponibile',
       'service-date': 'Data del servizio',
       'travel-month': 'Mese o intervallo di date preferito',
     } as Record<string, string>,
     required: 'obbligatorio',
     requiredMessage: 'Questo campo è obbligatorio',
+    phoneMessage: 'Inserisci un numero di telefono valido',
     loading: 'Invio della richiesta in corso...',
     submit: 'Invia richiesta',
     successDescription:
@@ -163,17 +182,22 @@ const formCopy = {
       brief: 'Necessidades / orçamento / datas',
       company: 'Empresa / grupo de viajantes',
       country: 'País de residência',
+      destination: 'Para onde quer viajar?',
+      'departure-date': 'Partida prevista',
       email: 'Email',
       'full-name': 'Nome completo',
+      guests: 'Número de viajantes',
       'group-size': 'Dimensão estimada do grupo',
       message: 'Mensagem',
       phone: 'Telefone',
+      'tour-interest': 'Tour de interesse',
       'policy-code': 'Código de tour / contrato / apólice se disponível',
       'service-date': 'Data do serviço',
       'travel-month': 'Mês ou intervalo de datas preferido',
     } as Record<string, string>,
     required: 'obrigatório',
     requiredMessage: 'Este campo é obrigatório',
+    phoneMessage: 'Insira um número de telefone válido',
     loading: 'A enviar o seu pedido...',
     submit: 'Enviar pedido',
     successDescription:
@@ -195,11 +219,15 @@ const formCopy = {
       brief: 'Nhu cầu / ngân sách / thời gian',
       company: 'Công ty / nhóm khách',
       country: 'Quốc gia cư trú',
+      destination: 'Bạn muốn đi đâu?',
+      'departure-date': 'Dự kiến khởi hành',
       email: 'Email',
       'full-name': 'Họ và tên',
+      guests: 'Số lượng khách',
       'group-size': 'Số khách dự kiến',
       message: 'Lời nhắn',
       phone: 'Số điện thoại',
+      'tour-interest': 'Tour bạn quan tâm',
       'policy-code': 'Mã tour / hợp đồng / hồ sơ nếu có',
       'service-date': 'Ngày sử dụng dịch vụ',
       'travel-month': 'Khoảng tháng/ngày dự kiến',
@@ -207,6 +235,7 @@ const formCopy = {
     loading: 'Đang gửi yêu cầu, vui lòng chờ...',
     required: 'bắt buộc',
     requiredMessage: 'Vui lòng điền thông tin này',
+    phoneMessage: 'Vui lòng nhập số điện thoại hợp lệ',
     submit: 'Gửi yêu cầu',
     successDescription: 'Đội ngũ tư vấn sẽ đọc nội dung và phản hồi với hướng đề xuất phù hợp.',
     successTitle: 'Đã nhận yêu cầu',
@@ -255,18 +284,32 @@ const wingsGroupLeadCopy = {
 
 const readLeadSubmissionContext = (
   form: HTMLFormElement | null,
+  siteCode?: null | string,
 ): LeadSubmissionContext | undefined => {
   const serialized = form?.dataset.wsEnquiryContext
-  if (!serialized) return undefined
-
-  try {
-    const context = JSON.parse(serialized) as unknown
-    return context && typeof context === 'object' && !Array.isArray(context)
-      ? (context as LeadSubmissionContext)
-      : undefined
-  } catch {
-    return undefined
+  if (serialized) {
+    try {
+      const context = JSON.parse(serialized) as unknown
+      if (context && typeof context === 'object' && !Array.isArray(context)) {
+        return context as LeadSubmissionContext
+      }
+    } catch {
+      // Fall back to the validated tour context in the contact-page URL.
+    }
   }
+
+  if (siteCode !== 'wings-go' || typeof window === 'undefined') return undefined
+  const context = readSafeTourEnquiryContext(new URLSearchParams(window.location.search))
+  const leadContext: LeadSubmissionContext = {
+    departureDate: context.departureDate || undefined,
+    departureId: context.departureId ? String(context.departureId) : undefined,
+    discovery: context.discovery,
+    intent: context.intent,
+    source: context.source || undefined,
+    tourId: context.tourId ? String(context.tourId) : undefined,
+    tourSlug: context.tourSlug || undefined,
+  }
+  return Object.values(leadContext).some(Boolean) ? leadContext : undefined
 }
 
 export const FormBlock: React.FC<
@@ -275,7 +318,10 @@ export const FormBlock: React.FC<
     formOdId?: string
     id?: string
     siteCode?: null | string
+    publicPathname?: null | string
+    registeredOfficeAddress?: null | string
     submitOdId?: string
+    travelOfficeAddress?: null | string
   } & FormBlockType
 > = (props) => {
   const {
@@ -285,8 +331,11 @@ export const FormBlock: React.FC<
     formOdId,
     introContent,
     presentation = 'split-contact',
+    publicPathname,
+    registeredOfficeAddress,
     siteCode,
     submitOdId,
+    travelOfficeAddress,
     wingsGroupV3 = false,
   } = props
   const resolvedAnchorId = anchorId === undefined ? 'contact-form' : anchorId || undefined
@@ -305,10 +354,16 @@ export const FormBlock: React.FC<
   const isWingsGroupV3 =
     wingsGroupV3 ||
     siteCode === WINGSGROUP_SITE_CODE ||
-    getFormSiteCode(formFromProps) === WINGSGROUP_SITE_CODE ||
-    (typeof document !== 'undefined' && document.body.dataset.siteCode === WINGSGROUP_SITE_CODE)
-  const resolvedSubmitLabel =
-    isWingsGroupV3 && copyLocale === 'vi' ? 'Nhận tư vấn phù hợp' : copy.submit || submitButtonLabel
+    getFormSiteCode(formFromProps) === WINGSGROUP_SITE_CODE
+  const isWingsGoContactPage = siteCode === 'wings-go' && publicPathname === '/lien-he'
+  const wingsGoZalo = isWingsGoContactPage ? getSharedZaloCTA(siteCode, locale) : null
+  const resolvedSubmitLabel = isWingsGoContactPage
+    ? copyLocale === 'en'
+      ? '↳ GET ADVICE & A QUOTE'
+      : '↳ NHẬN TƯ VẤN & BÁO GIÁ'
+    : isWingsGroupV3 && copyLocale === 'vi'
+      ? 'Nhận tư vấn phù hợp'
+      : copy.submit || submitButtonLabel
   const localizedFields =
     formFromProps?.fields?.map((field) => {
       const fieldName = getFieldName(field)
@@ -326,15 +381,73 @@ export const FormBlock: React.FC<
     fields: localizedFields,
   }
 
-  const formMethods = useForm({
-    defaultValues: formFromProps?.fields || [],
-  })
+  const defaultFormValues = Object.fromEntries(
+    (formFromProps?.fields || []).flatMap((field) => {
+      const fieldName = getFieldName(field)
+      return fieldName
+        ? [[fieldName, 'defaultValue' in field ? field.defaultValue ?? '' : '']]
+        : []
+    }),
+  )
+  const formMethods = useForm<FieldValues>({ defaultValues: defaultFormValues })
   const {
     control,
     formState: { errors },
+    getValues,
     handleSubmit,
     register,
+    setValue,
   } = formMethods
+  const departureDateFieldName = formFromProps?.fields?.some(
+    (field) => 'name' in field && field.name === 'departure-date',
+  )
+    ? 'departure-date'
+    : null
+
+  useEffect(() => {
+    if (siteCode !== 'wings-go' || typeof window === 'undefined') return
+
+    const context = readSafeTourEnquiryContext(new URLSearchParams(window.location.search))
+    const fieldNames = new Set(
+      (formFromProps?.fields || []).flatMap((field) => {
+        const name = getFieldName(field)
+        return name ? [name] : []
+      }),
+    )
+    const tourLabel = context.tourTitle || context.tourSlug || (context.tourId ? `#${context.tourId}` : '')
+    const destination = context.discovery?.destination || tourLabel
+    const intentLabel =
+      context.intent === 'hold-seat'
+        ? 'Giữ chỗ'
+        : context.intent === 'request-quote'
+          ? 'Nhận báo giá'
+          : context.intent === 'inquiry'
+            ? 'Tư vấn'
+            : ''
+    const message = [
+      tourLabel ? `Tour quan tâm: ${tourLabel}` : '',
+      context.departureDate ? `Ngày dự kiến: ${context.departureDate}` : '',
+      intentLabel ? `Nhu cầu: ${intentLabel}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n')
+
+    const prefill: Record<string, string> = {
+      ...(departureDateFieldName && context.departureDate
+        ? { [departureDateFieldName]: context.departureDate }
+        : {}),
+      ...(fieldNames.has('tour-interest') && tourLabel ? { 'tour-interest': tourLabel } : {}),
+      ...(fieldNames.has('destination') && destination ? { destination } : {}),
+      ...(fieldNames.has('market') && destination ? { market: destination } : {}),
+      ...(fieldNames.has('message') && message ? { message } : {}),
+    }
+
+    for (const [name, value] of Object.entries(prefill)) {
+      if (!getValues(name)) {
+        setValue(name, value, { shouldDirty: false, shouldValidate: true })
+      }
+    }
+  }, [departureDateFieldName, formFromProps?.fields, getValues, setValue, siteCode])
 
   const [isLoading, setIsLoading] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState<boolean>()
@@ -469,7 +582,7 @@ export const FormBlock: React.FC<
   }, [])
 
   const onSubmit = useCallback(
-    (data: FormFieldBlock[]) => {
+    (data: FieldValues) => {
       if (submittingRef.current) return
 
       if (isWingsGroupV3) {
@@ -508,7 +621,7 @@ export const FormBlock: React.FC<
         try {
           const req = await fetch(`${getClientSideURL()}/api/lead-submissions`, {
             body: JSON.stringify({
-              context: readLeadSubmissionContext(formRef.current),
+              context: readLeadSubmissionContext(formRef.current, siteCode),
               formId: formID,
               honeypot,
               idempotencyKey: idempotencyKeyRef.current,
@@ -594,6 +707,7 @@ export const FormBlock: React.FC<
       leadConfig,
       redirect,
       router,
+      siteCode,
       toSitePath,
       turnstileToken,
       wingsGroupCopy.configUnavailable,
@@ -637,11 +751,13 @@ export const FormBlock: React.FC<
         id={resolvedAnchorId}
       >
         <div className="site-lead-form-card theme-card--quiet border p-4 lg:p-6" role="alert">
-          <h2>{copy.asideTitle}</h2>
-          <p>
-            Biểu mẫu liên hệ hiện chưa được cấu hình. Vui lòng thử lại sau hoặc liên hệ trực tiếp
-            với WingsGo.
-          </p>
+          <h2>{isWingsGoContactPage ? (copyLocale === 'en' ? 'Contact WingsGo' : 'Liên hệ WingsGo') : copy.asideTitle}</h2>
+          <p>{copyLocale === 'en' ? 'The contact form is being configured. Call our team for help.' : 'Biểu mẫu liên hệ hiện chưa được cấu hình. Vui lòng gọi hotline WingsGo để được hỗ trợ.'}</p>
+          {isWingsGoContactPage ? (
+            <a className="mt-4 inline-flex min-h-11 items-center rounded-full bg-[var(--site-brand)] px-5 font-semibold text-white" href="tel:0912910101">
+              0912 910 101
+            </a>
+          ) : null}
         </div>
       </section>
     )
@@ -653,30 +769,84 @@ export const FormBlock: React.FC<
       data-block-presentation={presentation}
       id={resolvedAnchorId}
     >
-      <div className="site-lead-form-shell layout-form">
-        <aside className="site-lead-form-aside" aria-label={copy.asideLabel}>
-          <div className="site-panel-icon">
-            <HeadphonesIcon aria-hidden="true" className="h-5 w-5" />
-          </div>
-          <h2>{copy.asideTitle}</h2>
-          <p>{copy.asideDescription}</p>
-          <ul>
-            <li>
-              <ClockIcon aria-hidden="true" className="h-4 w-4" />
-              {copy.bullets[0]}
-            </li>
-            <li>
-              <BadgeCheckIcon aria-hidden="true" className="h-4 w-4" />
-              {copy.bullets[1]}
-            </li>
-            <li>
-              <SendIcon aria-hidden="true" className="h-4 w-4" />
-              {copy.bullets[2]}
-            </li>
-          </ul>
+      <div className={`site-lead-form-shell layout-form${isWingsGoContactPage ? ' wingsgo-contact-form-shell' : ''}`}>
+        <aside
+          aria-label={isWingsGoContactPage ? (copyLocale === 'en' ? '24/7 contact information' : 'Thông tin liên hệ 24/7') : copy.asideLabel}
+          className={`site-lead-form-aside${isWingsGoContactPage ? ' wingsgo-contact-info order-2 lg:order-2' : ''}`}
+        >
+          {isWingsGoContactPage ? (
+            <>
+              <div className="site-panel-icon">
+                <HeadphonesIcon aria-hidden="true" className="h-5 w-5" />
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--site-brand)]">
+                {copyLocale === 'en' ? 'Contact WingsGo 24/7' : 'Liên hệ WingsGo 24/7'}
+              </p>
+              <h2>{copyLocale === 'en' ? 'We are ready to help with your trip.' : 'WingsGo luôn sẵn sàng đồng hành cùng bạn.'}</h2>
+              <ul className="wingsgo-contact-benefits">
+                <li>✈️ {copyLocale === 'en' ? 'Advice on departure dates that fit your plans' : 'Tư vấn lịch khởi hành phù hợp'}</li>
+                <li>🛡️ {copyLocale === 'en' ? 'Fast visa support' : 'Hỗ trợ visa nhanh chóng'}</li>
+                <li>💲 {copyLocale === 'en' ? 'Transparent quotes with no hidden costs' : 'Báo giá minh bạch không phát sinh'}</li>
+                <li>🎧 {copyLocale === 'en' ? 'Support throughout your trip' : 'Đồng hành trọn chuyến đi'}</li>
+              </ul>
+              <div className="mt-6 grid gap-3 text-sm">
+                <a className="flex min-h-11 items-center gap-2 font-semibold text-[var(--site-brand)]" href="tel:0912910101">
+                  <span aria-hidden="true">📞</span> 0912 910 101
+                </a>
+                {registeredOfficeAddress ? (
+                  <p className="flex items-start gap-2 text-muted-foreground">
+                    <span aria-hidden="true">📍</span>
+                    <span>{copyLocale === 'en' ? 'Head office: ' : 'Trụ sở: '}{registeredOfficeAddress}</span>
+                  </p>
+                ) : null}
+                {travelOfficeAddress ? (
+                  <p className="flex items-start gap-2 text-muted-foreground">
+                    <span aria-hidden="true">📍</span>
+                    <span>{copyLocale === 'en' ? 'Travel office: ' : 'Văn phòng du lịch: '}{travelOfficeAddress}</span>
+                  </p>
+                ) : null}
+                <p className="flex items-center gap-2">
+                  <span aria-hidden="true">✉️</span>
+                  <ProtectedEmailLink email="info@wingsgo.vn" />
+                </p>
+                {wingsGoZalo ? (
+                  <a className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--site-brand)] px-5 font-semibold text-[var(--site-brand)] no-underline" href={wingsGoZalo.href} rel="noopener noreferrer" target="_blank">
+                    {copyLocale === 'en' ? 'Chat on Zalo' : 'Nhắn Zalo'}
+                  </a>
+                ) : null}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="site-panel-icon">
+                <HeadphonesIcon aria-hidden="true" className="h-5 w-5" />
+              </div>
+              <h2>{copy.asideTitle}</h2>
+              <p>{copy.asideDescription}</p>
+              <ul>
+                <li>
+                  <ClockIcon aria-hidden="true" className="h-4 w-4" />
+                  {copy.bullets[0]}
+                </li>
+                <li>
+                  <BadgeCheckIcon aria-hidden="true" className="h-4 w-4" />
+                  {copy.bullets[1]}
+                </li>
+                <li>
+                  <SendIcon aria-hidden="true" className="h-4 w-4" />
+                  {copy.bullets[2]}
+                </li>
+              </ul>
+            </>
+          )}
         </aside>
 
-        <div className="site-lead-form-card theme-card--quiet border p-4 lg:p-6">
+        <div className={`site-lead-form-card theme-card--quiet border p-4 lg:p-6${isWingsGoContactPage ? ' wingsgo-contact-form-card order-1 lg:order-1' : ''}`}>
+          {isWingsGoContactPage ? (
+            <h2 className="mb-5 text-2xl font-semibold">
+              {copyLocale === 'en' ? 'Get advice and a quote' : 'Nhận tư vấn và báo giá'}
+            </h2>
+          ) : null}
           {enableIntro && introContent && !hasSubmitted && (
             <RichText className="mb-8 lg:mb-10" data={introContent} enableGutter={false} />
           )}
@@ -756,8 +926,12 @@ export const FormBlock: React.FC<
                               errors={errors}
                               formID={formID}
                               register={register}
+                              phonePattern={
+                                isWingsGoContactPage ? /^0[0-9]{9}$/ : undefined
+                              }
                               requiredLabel={copy.required}
                               requiredMessage={copy.requiredMessage}
+                              phoneMessage={copy.phoneMessage}
                             />
                           </div>
                         )
@@ -859,8 +1033,21 @@ export const FormBlock: React.FC<
                   </div>
                 )}
 
+                {isWingsGoContactPage ? (
+                  <p className="mb-4 rounded-xl bg-orange-50 p-3 text-sm font-semibold text-orange-900">
+                    {copyLocale === 'en' ? 'NEED HELP URGENTLY? CALL OR MESSAGE US: ' : 'NẾU CẦN GẤP LIÊN HỆ NGAY HOTLINE/ZALO: '}
+                    <a className="whitespace-nowrap underline" href="tel:0912910101">0912 910 101</a>
+                    {wingsGoZalo ? (
+                      <>
+                        {' / '}
+                        <a className="underline" href={wingsGoZalo.href} rel="noopener noreferrer" target="_blank">Zalo</a>
+                      </>
+                    ) : null}
+                  </p>
+                ) : null}
+
                 <Button
-                  className="site-form-submit"
+                  className={`site-form-submit${isWingsGoContactPage ? ' wingsgo-contact-submit' : ''}`}
                   data-od-id={submitOdId}
                   disabled={
                     isLoading ||
@@ -876,6 +1063,11 @@ export const FormBlock: React.FC<
                 >
                   {isLoading ? copy.loading : resolvedSubmitLabel}
                 </Button>
+                {isWingsGoContactPage ? (
+                  <p className="mt-4 text-sm font-medium text-muted-foreground">
+                    {copyLocale === 'en' ? '🛡️ Your information is kept confidential.' : '🛡️ Thông tin của bạn được bảo mật tuyệt đối!'}
+                  </p>
+                ) : null}
               </form>
             )}
           </FormProvider>

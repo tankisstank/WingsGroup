@@ -25,7 +25,7 @@ export const queryPageByPath = async ({
   locale?: SupportedLocaleCode
   requestedPath: string
 }) => {
-  const draft = await isAuthorizedDraftMode()
+  const draft = await isAuthorizedDraftMode(['pages', 'tour-campaigns', 'tour-products'])
   const site = await getCurrentSite()
   const settings = await getCurrentSiteSettings()
 

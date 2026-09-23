@@ -390,6 +390,14 @@ export interface SiteSetting {
   supportEmail?: string | null;
   salesEmail?: string | null;
   supportPhone?: string | null;
+  /**
+   * Hiển thị ở footer và trang liên hệ công khai của WingsGo.
+   */
+  registeredOfficeAddress?: string | null;
+  /**
+   * Hiển thị ở footer và trang liên hệ công khai của WingsGo.
+   */
+  travelOfficeAddress?: string | null;
   headerNavItems?:
     | {
         link: {
@@ -550,112 +558,7 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    square?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    small?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    medium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    xlarge?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    og?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-640-webp'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-640-avif'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-960-webp'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-960-avif'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-1440-webp'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-1440-avif'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
+  sizes?: {};
 }
 /**
  * Quản lý trang theo site. Editor chỉ lưu nháp; site-manager hoặc super-admin duyệt publish.
@@ -823,6 +726,7 @@ export interface Page {
     | ArchiveBlock
     | FormBlock
     | WingsGroupEcosystemBlock
+    | WingsGroupGalleryBlock
     | WingsGroupProofArchiveBlock
   )[];
   meta?: {
@@ -838,7 +742,7 @@ export interface Page {
     breadcrumbLabel?: string | null;
   };
   /**
-   * Hợp đồng nội dung typed cho 8 route hub WingsSide. Không dùng JSON editor. Media/form qua relationship Payload.
+   * Hợp đồng nội dung typed cho 8 route hub WingSide. Không dùng JSON editor. Media/form qua relationship Payload.
    */
   wingsSideHiFi?: {
     /**
@@ -846,7 +750,7 @@ export interface Page {
      */
     enabled?: boolean | null;
     /**
-   * Phải khớp pathname hub WingsSide tương ứng.
+     * Phải khớp pathname hub WingSide tương ứng.
      */
     routeVariant?: ('home' | 'plan' | 'destinations' | 'styles' | 'packages' | 'guide' | 'about' | 'contact') | null;
     hero?: {
@@ -1172,7 +1076,7 @@ export interface Page {
     };
   };
   /**
-   * Chỉ áp dụng cho trang WingsGo /tour. Chọn tối đa 6 tour nổi bật theo thứ tự; tour dự phòng được tính khi render và không ghi vào CMS.
+   * Chỉ áp dụng cho trang WingsGo /tour. Catalog đọc tối đa 200 sản phẩm/đợt khởi hành/wrapper mỗi lần; chọn tối đa 6 tour nổi bật theo thứ tự. Tour dự phòng được tính khi render và không ghi vào CMS.
    */
   wingsGoTourCatalog?: {
     enabled?: boolean | null;
@@ -2042,6 +1946,43 @@ export interface WingsGroupEcosystemBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WingsGroupGalleryBlock".
+ */
+export interface WingsGroupGalleryBlock {
+  eyebrow?: string | null;
+  /**
+   * Chỉ dùng trên trang Về WingsGroup. Dùng ảnh có quyền sử dụng; không dùng ảnh minh họa làm bằng chứng sự kiện, thành tựu hoặc hợp tác.
+   */
+  title: string;
+  /**
+   * Giữ trong 1–2 câu; phần này nằm cạnh tiêu đề trên desktop.
+   */
+  description?: string | null;
+  /**
+   * Kéo thả để đổi thứ tự. Dùng kiểu Logo cho nhận diện đối tác; không tải logo chưa được phép sử dụng.
+   */
+  items?:
+    | {
+        title: string;
+        category: 'activity' | 'achievement' | 'partner' | 'airline' | 'hotel';
+        media: number | Media;
+        mediaType: 'photo' | 'logo';
+        /**
+         * Mô tả đúng nội dung ảnh; không ghi thông tin suy đoán.
+         */
+        alt: string;
+        caption?: string | null;
+        illustrative?: boolean | null;
+        visible?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'wingsGroupGallery';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "WingsGroupProofArchiveBlock".
  */
 export interface WingsGroupProofArchiveBlock {
@@ -2073,7 +2014,7 @@ export interface WingsGroupProofArchiveBlock {
   blockType: 'wingsGroupProofArchive';
 }
 /**
- * Tour có cấu trúc dùng chung cho WingsGo và WingsSide. Dữ liệu này là nguồn thật để render trang tour và discovery theo site.
+ * Tour có cấu trúc dùng chung cho WingsGo và WingSide. Dữ liệu này là nguồn thật để render trang tour và discovery theo site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tour-products".
@@ -2095,7 +2036,7 @@ export interface TourProduct {
     | 'other';
   tourCode?: string | null;
   /**
-   * Hybrid biểu diễn tour có cả lịch ghép đã xác minh và lựa chọn thiết kế riêng. Không có giá trị được hiểu là private để public discovery fail closed.
+   * Phân loại nội dung tour. Với WingsGo, trường WingSide-only được ẩn trong Admin nhưng dữ liệu cũ vẫn được giữ.
    */
   tourType?: ('group' | 'private' | 'hybrid') | null;
   /**
@@ -2153,6 +2094,9 @@ export interface TourProduct {
   wrapperPage?: (number | null) | Page;
   summary: string;
   heroMedia?: (number | null) | Media;
+  /**
+   * Giữ nguyên thứ tự quan hệ. Thêm/xóa bằng Media picker; xóa ở đây không xóa bản ghi Media.
+   */
   gallery?: (number | Media)[] | null;
   highlights?:
     | {
@@ -2234,6 +2178,10 @@ export interface TourProduct {
     leadFormVariant?: string | null;
     bookingIntentMode?: string | null;
   };
+  /**
+   * Chỉ chọn file PDF đã tải lên Media cùng site.
+   */
+  itineraryPdf?: (number | null) | Media;
   itineraryDays: {
     dayNumber: number;
     title: string;
@@ -2412,7 +2360,10 @@ export interface TourDeparture {
   departureDate: string;
   returnDate?: string | null;
   airline?: string | null;
+  flightNumber?: string | null;
   priceFrom: number;
+  originalPrice?: number | null;
+  loyaltyPoints?: number | null;
   currency: 'VND' | 'USD';
   priceBasis?: ('per-person' | 'per-booking') | null;
   /**
@@ -2541,6 +2492,9 @@ export interface FormSubmission {
     source?: string | null;
     tourId?: string | null;
     tourSlug?: string | null;
+    departureId?: string | null;
+    departureDate?: string | null;
+    intent?: ('contact' | 'hold-seat' | 'inquiry' | 'request-quote') | null;
     discovery?: {
       destination?: string | null;
       duration?: string | null;
@@ -2555,6 +2509,20 @@ export interface FormSubmission {
   deliveryStatus: 'pending' | 'queued' | 'delivered' | 'queue_failed' | 'delivery_failed';
   deliveryUpdatedAt?: string | null;
   deliveryErrorCode?: string | null;
+  /**
+   * Cập nhật qua bảng Xử lý lead; lead cũ không được tự động backfill.
+   */
+  salesStatus?: ('new' | 'contacting' | 'won' | 'no_answer' | 'lost') | null;
+  /**
+   * Chỉ chọn người dùng hiện có trong cùng site.
+   */
+  assignedTo?: (number | null) | User;
+  salesNote?: string | null;
+  salesStatusFrom?: ('new' | 'contacting' | 'won' | 'no_answer' | 'lost') | null;
+  salesStatusTo?: ('new' | 'contacting' | 'won' | 'no_answer' | 'lost') | null;
+  salesUpdatedAt?: string | null;
+  salesUpdatedBy?: (number | null) | User;
+  salesTriageVersion?: number | null;
   form: number | Form;
   submissionData?:
     | {
@@ -3055,6 +3023,8 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   supportEmail?: T;
   salesEmail?: T;
   supportPhone?: T;
+  registeredOfficeAddress?: T;
+  travelOfficeAddress?: T;
   headerNavItems?:
     | T
     | {
@@ -3232,6 +3202,7 @@ export interface PagesSelect<T extends boolean = true> {
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         wingsGroupEcosystem?: T | WingsGroupEcosystemBlockSelect<T>;
+        wingsGroupGallery?: T | WingsGroupGalleryBlockSelect<T>;
         wingsGroupProofArchive?: T | WingsGroupProofArchiveBlockSelect<T>;
       };
   meta?:
@@ -4011,6 +3982,30 @@ export interface WingsGroupEcosystemBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WingsGroupGalleryBlock_select".
+ */
+export interface WingsGroupGalleryBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        category?: T;
+        media?: T;
+        mediaType?: T;
+        alt?: T;
+        caption?: T;
+        illustrative?: T;
+        visible?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "WingsGroupProofArchiveBlock_select".
  */
 export interface WingsGroupProofArchiveBlockSelect<T extends boolean = true> {
@@ -4176,6 +4171,7 @@ export interface TourProductsSelect<T extends boolean = true> {
         leadFormVariant?: T;
         bookingIntentMode?: T;
       };
+  itineraryPdf?: T;
   itineraryDays?:
     | T
     | {
@@ -4326,7 +4322,10 @@ export interface TourDeparturesSelect<T extends boolean = true> {
   departureDate?: T;
   returnDate?: T;
   airline?: T;
+  flightNumber?: T;
   priceFrom?: T;
+  originalPrice?: T;
+  loyaltyPoints?: T;
   currency?: T;
   priceBasis?: T;
   verifiedAt?: T;
@@ -4437,140 +4436,7 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        square?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        small?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        medium?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        large?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        xlarge?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        og?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-640-webp'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-640-avif'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-960-webp'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-960-avif'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-1440-webp'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-1440-avif'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
+  sizes?: T | {};
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4790,6 +4656,9 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
         source?: T;
         tourId?: T;
         tourSlug?: T;
+        departureId?: T;
+        departureDate?: T;
+        intent?: T;
         discovery?:
           | T
           | {
@@ -4803,6 +4672,14 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
   deliveryStatus?: T;
   deliveryUpdatedAt?: T;
   deliveryErrorCode?: T;
+  salesStatus?: T;
+  assignedTo?: T;
+  salesNote?: T;
+  salesStatusFrom?: T;
+  salesStatusTo?: T;
+  salesUpdatedAt?: T;
+  salesUpdatedBy?: T;
+  salesTriageVersion?: T;
   form?: T;
   submissionData?:
     | T

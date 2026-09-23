@@ -12,6 +12,7 @@ interface HeaderClientProps {
   accentColor?: null | string
   brandColor?: null | string
   data: { navItems?: HeaderType['navItems'] }
+  defaultLocale?: SupportedLocaleCode
   englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
   logoImage?: Media | null
   logoText?: null | string
@@ -33,6 +34,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   accentColor,
   brandColor,
   data,
+  defaultLocale,
   englishPublicationState,
   logoImage,
   logoText,
@@ -64,7 +66,9 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
       {...(wingsGroupV3Surface ? { 'data-od-id': 'site-header' } : {})}
       {...(theme ? { 'data-theme': theme } : {})}
     >
-      <div className="site-header__bar flex justify-between">
+      <div
+        className={`site-header__bar flex items-center justify-between gap-3${siteCode === 'wings-go' ? ' site-header__bar--wingsgo' : ''}`}
+      >
         <div className="site-header__brand flex items-center gap-3">
           <SiteLink className="inline-flex items-center leading-none" href="/">
             <Logo
@@ -76,10 +80,10 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
               priority="high"
               siteID={siteID}
               siteCode={siteCode}
+              surface="header"
             />
           </SiteLink>
-              surface="header"
-          {siteName ? (
+          {siteName && siteCode !== 'wings-go' ? (
             <div className="site-header__brand-copy hidden md:block">
               <div className="site-brand-kicker text-sm font-semibold">{siteName}</div>
               {tagline ? (
@@ -90,6 +94,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
         </div>
         <HeaderNav
           data={data}
+          defaultLocale={defaultLocale}
           englishPublicationState={englishPublicationState}
           primaryAction={primaryAction}
           publicPathname={publicPathname}

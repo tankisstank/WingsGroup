@@ -162,7 +162,39 @@ describe('WingsGroup v3 editorial eligibility', () => {
     )
 
     expect(openGraphMedia?.url).toBe('https://media.wingsgroup.vn/journey-1200.webp')
-    expect(openGraphMedia?.sizes?.og?.url).toBe('https://media.wingsgroup.vn/journey-1200.webp')
+    expect((openGraphMedia?.sizes as { og?: { url?: string | null } } | undefined)?.og?.url).toBe(
+      'https://media.wingsgroup.vn/journey-1200.webp',
+    )
+  })
+
+  it('normalizes an absolute Payload derivative to the public media route', () => {
+    const openGraphMedia = getWingsGroupEditorialOpenGraphMedia(
+      governedMedia({
+        governance: {
+          responsiveDerivatives: [
+            {
+              format: 'webp',
+              height: 800,
+              sha256: sha,
+              url: 'https://wingsgroup.vn/api/media/file/journey-1200.webp',
+              width: 1200,
+            },
+            {
+              format: 'avif',
+              height: 800,
+              sha256: sha,
+              url: 'https://wingsgroup.vn/api/media/file/journey-1200.avif',
+              width: 1200,
+            },
+          ],
+        },
+      }),
+    )
+
+    expect(openGraphMedia?.url).toBe('https://wingsgroup.vn/media/journey-1200.webp')
+    expect((openGraphMedia?.sizes as { og?: { url?: string | null } } | undefined)?.og?.url).toBe(
+      'https://wingsgroup.vn/media/journey-1200.webp',
+    )
   })
 
   it('derives archive OG metadata from the governed editorial fallback register', () => {

@@ -51,9 +51,18 @@ export const Number: React.FC<
         aria-required={required || undefined}
         defaultValue={defaultValue}
         id={fieldID}
+        min={name === 'guests' ? 1 : undefined}
         required={Boolean(required)}
+        step={name === 'guests' ? 1 : undefined}
         type="number"
-        {...register(name, { required: required ? requiredMessage : false })}
+        {...register(name, {
+          min: name === 'guests' ? { message: requiredMessage, value: 1 } : undefined,
+          required: required ? requiredMessage : false,
+          validate:
+            name === 'guests'
+              ? (value) => globalThis.Number.isInteger(globalThis.Number(value)) || requiredMessage
+              : undefined,
+        })}
       />
       {errors[name] && <Error id={errorID} name={name} />}
     </Width>

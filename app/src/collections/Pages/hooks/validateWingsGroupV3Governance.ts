@@ -111,7 +111,13 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
   const originalRecord = asRecord(originalDoc)
   const site = data?.site ?? originalDoc?.site
   const layout = data?.layout ?? originalDoc?.layout
-  if (!site) return data
+  const hasWingsGroupGallery = Array.isArray(layout)
+    ? layout.some((rawBlock) => asRecord(rawBlock).blockType === 'wingsGroupGallery')
+    : false
+  if (!site) {
+    if (hasWingsGroupGallery) throw new Error('WingsGroup Gallery cần site scope.')
+    return data
+  }
 
   const isPublishing = (data?._status ?? originalDoc?._status) === 'published'
   const isLocalDraftPreview = isWingsGroupLocalDraftPreview({
@@ -127,9 +133,13 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
   let pendingRouteGovernance = hasPendingRouteGovernance
     ? data?.wingsGroupRoute
     : originalDoc?.wingsGroupRoute
+  const isGovernedRoute =
+    Boolean(routeDefinition) ||
+    asRecord(pendingRouteGovernance).managedBy === 'wingsgroup-v3' ||
+    asRecord(originalDoc?.wingsGroupRoute).managedBy === 'wingsgroup-v3'
   let siteCode: string | null = null
   let siteID: number | string | undefined
-  if (routeDefinition || asRecord(pendingRouteGovernance).managedBy === 'wingsgroup-v3') {
+  if (isGovernedRoute) {
     siteID = relationID(site)
     if (siteID === undefined) throw new Error('WingsGroup corporate route cần site scope.')
     const siteDoc = await req.payload.findByID({
@@ -142,7 +152,24 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
     siteCode = typeof siteDoc.code === 'string' ? siteDoc.code : null
   }
 
+  if (hasWingsGroupGallery && siteCode !== WINGSGROUP_SITE_CODE) {
+    const gallerySiteID = relationID(site)
+    if (gallerySiteID === undefined) throw new Error('WingsGroup Gallery cần site scope.')
+    const gallerySite = await req.payload.findByID({
+      collection: 'sites',
+      id: gallerySiteID,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    siteCode = typeof gallerySite.code === 'string' ? gallerySite.code : null
+  }
+  if (hasWingsGroupGallery && siteCode !== WINGSGROUP_SITE_CODE) {
+    throw new Error('Gallery này chỉ được sử dụng trên site WingsGroup.')
+  }
+
   if (
+    isGovernedRoute &&
     req.user?.role !== 'super-admin' &&
     governanceSnapshot(pendingRouteGovernance) !== governanceSnapshot(originalDoc?.wingsGroupRoute)
   ) {
@@ -308,6 +335,13 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
       for (const rawProfile of Array.isArray(block.profiles) ? block.profiles : []) {
         const profile = asRecord(rawProfile)
         if (profile.stageMedia) checks.push({ kind: 'editorial', media: profile.stageMedia })
+      }
+    }
+
+    if (block.blockType === 'wingsGroupGallery') {
+      for (const rawItem of Array.isArray(block.items) ? block.items : []) {
+        const item = asRecord(rawItem)
+        if (item.media) checks.push({ kind: 'editorial', media: item.media })
       }
     }
 

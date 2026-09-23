@@ -12,7 +12,10 @@ import type { Post } from '@/payload-types'
 import { PostHero } from '@/heros/PostHero'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { generateMeta } from '@/utilities/generateMeta'
-import { isAuthorizedDraftMode } from '@/utilities/previewHandoff'
+import {
+  hasAuthorizedPreviewHandoff,
+  isAuthorizedDraftMode,
+} from '@/utilities/previewHandoff'
 import {
   appendSiteWhere,
   getCurrentLocale,
@@ -29,7 +32,7 @@ import {
 } from '@/utilities/structuredData'
 import { buildPostBreadcrumbItems, type BreadcrumbPost } from '@/utilities/breadcrumbs'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
-import { getPostCanonicalPath } from '@/utilities/siteURLs'
+import { getPostCanonicalPath, getPostPath } from '@/utilities/siteURLs'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { getCanonicalSiteOrigin } from '@/utilities/siteSEO'
 import { isWingsGroupV3PublicSurfacePathAllowed } from '@/wingsgroup/corporateRoutes'
@@ -43,6 +46,7 @@ type Args = {
 
 export default async function Post({ params: paramsPromise }: Args) {
   const draft = await isAuthorizedDraftMode()
+  const preview = draft || (await hasAuthorizedPreviewHandoff())
   const { slug = '' } = await paramsPromise
   const locale = await getCurrentLocale()
   const sitePrefix = await getCurrentSitePrefix()
@@ -66,8 +70,9 @@ export default async function Post({ params: paramsPromise }: Args) {
   if (!post) return <PayloadRedirects url={url} />
 
   const canonicalOrigin = getCanonicalSiteOrigin({ settings, site })
-  const canonicalPath = getPostCanonicalPath(decodedSlug, locale)
+  const canonicalPath = getPostCanonicalPath(decodedSlug, locale, site.defaultLocale)
   const breadcrumbItems = buildPostBreadcrumbItems({
+    defaultLocale: site.defaultLocale,
     locale,
     post: post as BreadcrumbPost,
     settings,
@@ -97,7 +102,18 @@ export default async function Post({ params: paramsPromise }: Args) {
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
 
-      {draft && <LivePreviewListener />}
+      {preview ? (
+        <LivePreviewListener
+          previewIdentity={{
+            collection: 'posts',
+            documentID: post.id,
+            locale,
+            mode: post._status === 'draft' ? 'draft' : 'published',
+            path: getPostPath(decodedSlug),
+            siteCode: site.code,
+          }}
+        />
+      ) : null}
 
       <Breadcrumbs items={breadcrumbItems} />
       <PostHero locale={locale} post={post} />

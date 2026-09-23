@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import { isWingsGroupPublishedMedia } from '@/components/WingsGroupV3/model'
 import type { Media, Post } from '@/payload-types'
 import { hydrateScopedWingsGroupMediaRelations } from '@/utilities/wingsGroupMediaRelations'
+import { normalizePublicMediaURL } from '@/utilities/getMediaUrl'
 import { getCurrentSite } from '@/utilities/siteContext'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
@@ -192,9 +193,18 @@ export const applyWingsGroupEditorialPublicCopy = (
   post: Post,
   locale: SupportedLocaleCode,
 ): Post => {
-  void locale
-  return post
+  if (post.slug !== WINGSGROUP_TRUST_ARTICLE_SLUG) return post
 
+  const update = getWingsGroupTrustArticleLocalizedUpdate(locale === 'en' ? 'en' : 'vi')
+
+  return {
+    ...post,
+    ...update,
+    meta: {
+      ...post.meta,
+      ...update.meta,
+    },
+  }
 }
 
 export const getWingsGroupTrustArticleLocalizedUpdate = (locale: 'en' | 'vi') => {
@@ -253,14 +263,16 @@ export const getWingsGroupEditorialOpenGraphMedia = (media?: Media | null): Medi
     )
     .sort((left, right) => (right.width || 0) - (left.width || 0))[0]
 
-  return derivative?.url
+  const mediaSizes = media.sizes as { og?: { url?: null | string } } | null | undefined
+  const publicURL = derivative?.url ? normalizePublicMediaURL(derivative.url) : ''
+  return publicURL
     ? {
         ...media,
         sizes: {
           ...(media.sizes || {}),
-          og: { ...(media.sizes?.og || {}), url: derivative.url },
+          og: { ...(mediaSizes?.og || {}), url: publicURL },
         },
-        url: derivative.url,
+        url: publicURL,
       }
     : null
 }

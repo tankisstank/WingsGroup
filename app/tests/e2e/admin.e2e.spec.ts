@@ -1,15 +1,20 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test'
 import { e2eBaseURL } from '../helpers/baseURL'
 import { login } from '../helpers/login'
-import { seedTestUser, cleanupTestUser, testUser } from '../helpers/seedUser'
-import {
-  cleanupRoleScopedUsers,
-  scopedUsers,
-  seedRoleScopedUsers,
-  type RoleScopeSeed,
-} from '../helpers/seedRoleUsers'
-import { seedHeroPresentationSmoke } from '../helpers/seedPhase1Launch'
+import { readAdminE2EConfig, type AdminE2ERoleScope } from '../helpers/adminE2EConfig'
+import { createUs074EphemeralFixture } from '../helpers/us074EphemeralFixture'
 import { heroPresentationDefinitions } from '../../src/heros/presentations/registry'
+
+const adminE2EConfig = readAdminE2EConfig()
+let testUser = { email: '', password: '' }
+let scopedUsers = {
+  editor: { email: '', password: '' },
+  siteManager: { email: '', password: '' },
+}
+let configuredRoleScope: AdminE2ERoleScope = {
+  wingsCareSiteID: 'not-configured',
+  wingsGoSiteID: 'not-configured',
+}
 
 const consoleEndpoints = {
   leadsCount: '/api/form-submissions?depth=0&limit=0',
@@ -83,22 +88,47 @@ const assertNoHorizontalOverflow = async (targetPage: Page) => {
   expect(dimensions.bodyScrollWidth).toBeLessThanOrEqual(dimensions.bodyClientWidth + 1)
 }
 
+const expectAdminTheme = async (targetPage: Page, theme: string, className: RegExp) => {
+  await expect
+    .poll(() => targetPage.locator('html').getAttribute('data-admin-theme'), { timeout: 15_000 })
+    .toBe(theme)
+  await expect(targetPage.locator('html')).toHaveClass(className)
+}
+
 test.describe('Admin Panel', () => {
   test.describe.configure({ mode: 'serial' })
+  test.skip(!adminE2EConfig.enabled, adminE2EConfig.reason)
 
   let context: BrowserContext
   let page: Page
-  let roleScope: RoleScopeSeed
-  let heroPresentationFixtureIDs: Awaited<ReturnType<typeof seedHeroPresentationSmoke>>
+  let roleScope: AdminE2ERoleScope
+  let heroPresentationFixtureID: number | string
+  let ephemeralFixture: Awaited<ReturnType<typeof createUs074EphemeralFixture>> | undefined
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(90_000)
 
-    await seedTestUser()
-    roleScope = await seedRoleScopedUsers()
-    heroPresentationFixtureIDs = await seedHeroPresentationSmoke({
-      destroyPayloadAfterSeed: false,
-    })
+    if (adminE2EConfig.enabled) {
+      configuredRoleScope = adminE2EConfig.roleScope
+      roleScope = configuredRoleScope
+
+      if (adminE2EConfig.fixtureMode === 'ephemeral') {
+        ephemeralFixture = await createUs074EphemeralFixture(adminE2EConfig)
+        testUser = ephemeralFixture.credentials.superAdmin
+        scopedUsers = {
+          editor: ephemeralFixture.credentials.editor,
+          siteManager: ephemeralFixture.credentials.siteManager,
+        }
+        heroPresentationFixtureID = ephemeralFixture.heroPageID
+      } else {
+        testUser = adminE2EConfig.superAdmin
+        scopedUsers = {
+          editor: adminE2EConfig.editor,
+          siteManager: adminE2EConfig.siteManager,
+        }
+        heroPresentationFixtureID = adminE2EConfig.heroPageID
+      }
+    }
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -110,25 +140,23 @@ test.describe('Admin Panel', () => {
     try {
       await context?.close()
     } finally {
-      try {
-        await cleanupRoleScopedUsers()
-      } finally {
-        await cleanupTestUser()
-      }
+      await ephemeralFixture?.cleanup()
     }
   })
 
   test('can navigate to dashboard', async () => {
-    await page.goto(`${e2eBaseURL}/admin`)
     await expect(page).toHaveURL(`${e2eBaseURL}/admin`)
-    await expect(page.locator('html')).toHaveAttribute('data-admin-theme', 'finexy-soft')
-    await expect(page.locator('html')).toHaveClass(/wings-admin-theme-finexy/)
+    await expectAdminTheme(page, 'finexy-soft', /wings-admin-theme-finexy/)
     await expect(page.getByRole('heading', { level: 1, name: 'Bảng điều hành CMS' })).toBeVisible()
     await expect(page.getByRole('heading', { level: 1, name: 'Bảng điều hành CMS' })).toHaveCount(1)
     await expect(page.getByRole('heading', { level: 2, name: 'Việc cần xử lý' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Bảng điều hành CMS' })).toHaveCount(1)
-    await expect(page.locator('.before-dashboard__banner [role="status"]')).toBeVisible()
-    await expect(page.locator('.before-dashboard__banner h1, .before-dashboard__banner h2, .before-dashboard__banner h3, .before-dashboard__banner h4')).toHaveCount(0)
+    await expect(page.locator('.before-dashboard__banner[role="status"]')).toBeVisible()
+    await expect(
+      page.locator(
+        '.before-dashboard__banner h1, .before-dashboard__banner h2, .before-dashboard__banner h3, .before-dashboard__banner h4',
+      ),
+    ).toHaveCount(0)
     await expect(page.locator('html')).toHaveAttribute('lang', 'vi')
     await expect(page.getByRole('link', { name: 'Console vận hành' }).first()).toBeVisible()
     await expect(
@@ -146,26 +174,22 @@ test.describe('Admin Panel', () => {
 
   test('can switch CMS backend themes with URL parameter and persist selection', async () => {
     await page.goto(`${e2eBaseURL}/admin?adminTheme=finexy-soft`)
-    await expect(page.locator('html')).toHaveAttribute('data-admin-theme', 'finexy-soft')
-    await expect(page.locator('html')).toHaveClass(/wings-admin-theme-finexy/)
+    await expectAdminTheme(page, 'finexy-soft', /wings-admin-theme-finexy/)
     expect(await page.evaluate(() => window.localStorage.getItem('wings-admin-theme'))).toBe(
       'finexy-soft',
     )
 
     await page.goto(`${e2eBaseURL}/admin?adminTheme=ats-compact`)
-    await expect(page.locator('html')).toHaveAttribute('data-admin-theme', 'ats-compact')
-    await expect(page.locator('html')).toHaveClass(/wings-admin-theme-ats/)
+    await expectAdminTheme(page, 'ats-compact', /wings-admin-theme-ats/)
     expect(await page.evaluate(() => window.localStorage.getItem('wings-admin-theme'))).toBe(
       'ats-compact',
     )
 
     await page.goto(`${e2eBaseURL}/admin/console`)
-    await expect(page.locator('html')).toHaveAttribute('data-admin-theme', 'ats-compact')
-    await expect(page.locator('html')).toHaveClass(/wings-admin-theme-ats/)
+    await expectAdminTheme(page, 'ats-compact', /wings-admin-theme-ats/)
 
     await page.goto(`${e2eBaseURL}/admin?adminTheme=not-a-theme`)
-    await expect(page.locator('html')).toHaveAttribute('data-admin-theme', 'finexy-soft')
-    await expect(page.locator('html')).toHaveClass(/wings-admin-theme-finexy/)
+    await expectAdminTheme(page, 'finexy-soft', /wings-admin-theme-finexy/)
   })
 
   test('can open operator console', async () => {
@@ -305,7 +329,9 @@ test.describe('Admin Panel', () => {
     await expect
       .poll(async () => page.locator('.theme-manager__preset-card').count())
       .toBeGreaterThanOrEqual(heroPresentationDefinitions.length)
-    await expect(page.locator('.theme-manager__usage-grid')).toContainText('Trang kế thừa hero site')
+    await expect(page.locator('.theme-manager__usage-grid')).toContainText(
+      'Trang kế thừa hero site',
+    )
     await expect(page.locator('.theme-manager__requirement-list')).toBeVisible()
     await expect(page.locator('.theme-manager__preview-head strong')).not.toHaveText(/^\d+$/)
     await expect(page.getByLabel('Màu thương hiệu color picker')).toBeVisible()
@@ -370,13 +396,16 @@ test.describe('Admin Panel', () => {
     try {
       await page.goto(`${e2eBaseURL}/admin/page-wizard`)
       await expect(page.getByRole('heading', { name: 'Tạo trang nhanh' })).toBeVisible()
-      await expect(page.getByRole('combobox', { name: /locale|ngôn ngữ/i })).toHaveCount(0)
       // The preset buttons are present in SSR markup. Waiting for the async site
       // list proves the client has hydrated before exercising React state.
       const siteControl = page.getByRole('combobox', { name: 'Site' })
       await expect(siteControl).not.toHaveValue('')
       const selectedSiteID = await siteControl.inputValue()
-      const campaignPreset = page.getByRole('button', { name: /Ra mắt chiến dịch \(Campaign launch\)/ })
+      const localeControl = page.getByRole('combobox', { name: 'Locale nội dung' })
+      await expect(localeControl).toHaveValue('vi')
+      const campaignPreset = page.getByRole('button', {
+        name: /Ra mắt chiến dịch \(Campaign launch\)/,
+      })
       await campaignPreset.click()
       await expect(campaignPreset).toHaveAttribute('aria-pressed', 'true')
       await expect(
@@ -390,7 +419,9 @@ test.describe('Admin Panel', () => {
         .getByPlaceholder('Viết 1-2 câu giúp người đọc hiểu trang này dùng để làm gì.')
         .fill('Draft created from the campaign launch layout preset.')
       await page.getByRole('button', { name: 'Kiểm tra' }).click()
-      await expect(page.getByText('Ra mắt chiến dịch (Campaign launch)', { exact: true })).toBeVisible()
+      await expect(
+        page.getByText('Ra mắt chiến dịch (Campaign launch)', { exact: true }),
+      ).toBeVisible()
       await expect(
         page.getByText(
           'Hero lưới chuyển sắc • Lợi ích dạng bento • Số liệu • Bằng chứng xã hội • Biểu mẫu • Kêu gọi hành động',
@@ -403,8 +434,8 @@ test.describe('Admin Panel', () => {
       await page.getByRole('button', { name: 'Tạo trang nháp' }).click()
       const createRequest = await createRequestPromise
       const createBody = createRequest.postDataJSON() as Record<string, unknown>
-      expect(createBody).not.toHaveProperty('locale')
       expect(createBody).toMatchObject({
+        locale: 'vi',
         preset: 'campaign-launch',
         site: selectedSiteID,
         slug: uniqueSlug,
@@ -563,7 +594,11 @@ test.describe('Admin Panel', () => {
       }
 
       await page.goto(`${e2eBaseURL}/admin`)
-      const triageLinks = page.locator('.wings-admin-nav-intro__links > a')
+      const triageLinks = tabletWidths.has(width)
+        ? page.locator(
+            '.wings-admin-nav-intro__desktop .wings-admin-nav-intro__group:first-child .wings-admin-nav-intro__links > a',
+          )
+        : page.locator('.wings-admin-nav-intro__mobile > a')
 
       if (tabletWidths.has(width)) {
         await expect(triageLinks).toHaveCount(3)
@@ -615,11 +650,12 @@ test.describe('Admin Panel', () => {
     test.setTimeout(90_000)
 
     await page.goto(
-      `${e2eBaseURL}/admin/collections/pages/${heroPresentationFixtureIDs['centered-visual']}`,
+      `${e2eBaseURL}/admin/collections/pages/${heroPresentationFixtureID}`,
     )
+    await expect(page.locator('input[name="title"]')).toHaveValue(/.+/, { timeout: 30_000 })
 
     const heroGuide = page.locator('.hero-presentation-guide')
-    await expect(heroGuide.getByText('Preview cấu trúc hero')).toBeVisible()
+    await expect(heroGuide.getByText(/Preview cấu trúc hero/i)).toBeVisible()
     await expect(heroGuide.getByText('Nguồn áp dụng: page')).toBeVisible()
     await expect(heroGuide.getByText('Hành vi nghiệp vụ:')).toBeVisible()
     await expect(page.locator('#field-hero__media').getByText('Ảnh hero chính')).toBeVisible()

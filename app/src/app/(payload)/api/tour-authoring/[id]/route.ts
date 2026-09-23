@@ -5,6 +5,7 @@ import {
   AuthoringError,
   buildAuthoringState,
   createAuthoringRequest,
+  normalizeAuthoringError,
   parseAuthoringBody,
   parseAuthoringID,
   parseAuthoringLocale,
@@ -18,24 +19,47 @@ type RouteContext = { params: Promise<{ id: string }> }
 const json = (body: Record<string, unknown>, status = 200) =>
   Response.json(body, { headers: { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' }, status })
 
-const sameOriginCookieMutation = (request: Request) => {
-  if (!request.headers.get('cookie')) return true
-  if (request.headers.get('sec-fetch-site') === 'cross-site') return false
-  const expectedOrigins = new Set([new URL(request.url).origin, ...getTrustedCMSOrigins()])
-  const origin = request.headers.get('origin')
-  if (origin) return expectedOrigins.has(origin)
-  const referer = request.headers.get('referer')
-  if (!referer) return false
+const normalizeOrigin = (value: string | null) => {
+  if (!value) return null
   try {
-    return expectedOrigins.has(new URL(referer).origin)
+    return new URL(value).origin
   } catch {
-    return false
+    return null
   }
 }
 
+export const sameOriginCookieMutation = (request: Request) => {
+  if (!request.headers.get('cookie')) return true
+  if (request.headers.get('sec-fetch-site') === 'cross-site') return false
+  const expectedOrigins = new Set([
+    normalizeOrigin(request.url),
+    ...getTrustedCMSOrigins(),
+  ].filter((origin): origin is string => origin !== null))
+  const originHeader = request.headers.get('origin')
+  if (originHeader !== null) {
+    const origin = normalizeOrigin(originHeader)
+    return origin !== null && expectedOrigins.has(origin)
+  }
+  const referer = request.headers.get('referer')
+  if (!referer) return false
+  const refererOrigin = normalizeOrigin(referer)
+  return refererOrigin !== null && expectedOrigins.has(refererOrigin)
+}
+
 const errorResponse = (error: unknown) => {
-  if (error instanceof AuthoringError) return json({ code: error.code, message: error.message }, error.status)
-  console.error('WingsGo authoring request failed', error)
+  const normalizedError = normalizeAuthoringError(error)
+  if (normalizedError instanceof AuthoringError) {
+    return json({ code: normalizedError.code, message: normalizedError.message }, normalizedError.status)
+  }
+  const record = normalizedError && typeof normalizedError === 'object'
+    ? normalizedError as { code?: unknown; name?: unknown; status?: unknown }
+    : undefined
+  console.error('WingsGo authoring request failed', {
+    code: typeof record?.code === 'string' ? record.code.slice(0, 80) : undefined,
+    name: typeof record?.name === 'string' ? record.name.slice(0, 80) : typeof normalizedError,
+    status: typeof record?.status === 'number' ? record.status : undefined,
+    stack: normalizedError instanceof Error ? normalizedError.stack?.split('\n').slice(1, 7).join('\n') : undefined,
+  })
   return json({ code: 'internal_error', message: 'Không thể hoàn tất yêu cầu authoring.' }, 500)
 }
 

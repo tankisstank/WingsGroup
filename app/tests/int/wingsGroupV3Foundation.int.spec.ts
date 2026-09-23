@@ -18,8 +18,48 @@ const completeGovernance = {
   provenanceReference: 'manifest:v1',
   publicationState: 'published',
   responsiveDerivatives: [
-    { format: 'webp', sha256: 'a'.repeat(64), url: 'https://cdn/a.webp', width: 640 },
-    { format: 'avif', sha256: 'a'.repeat(64), url: 'https://cdn/a.avif', width: 640 },
+    {
+      format: 'webp',
+      height: 400,
+      sha256: 'a'.repeat(64),
+      url: 'https://cdn.example/media/source-640.webp',
+      width: 640,
+    },
+    {
+      format: 'avif',
+      height: 400,
+      sha256: 'a'.repeat(64),
+      url: 'https://cdn.example/media/source-640.avif',
+      width: 640,
+    },
+    {
+      format: 'webp',
+      height: 600,
+      sha256: 'a'.repeat(64),
+      url: 'https://cdn.example/media/source-960.webp',
+      width: 960,
+    },
+    {
+      format: 'avif',
+      height: 600,
+      sha256: 'a'.repeat(64),
+      url: 'https://cdn.example/media/source-960.avif',
+      width: 960,
+    },
+    {
+      format: 'webp',
+      height: 900,
+      sha256: 'a'.repeat(64),
+      url: 'https://cdn.example/media/source-1440.webp',
+      width: 1440,
+    },
+    {
+      format: 'avif',
+      height: 900,
+      sha256: 'a'.repeat(64),
+      url: 'https://cdn.example/media/source-1440.avif',
+      width: 1440,
+    },
   ],
   rightsEvidence: 'approved',
   rightsState: 'approved',
@@ -43,7 +83,11 @@ describe('WingsGroup v3 Payload foundation', () => {
     const blockSlugs =
       layout && layout.type === 'blocks' ? layout.blocks.map((block) => block.slug) : []
     expect(blockSlugs).toEqual(
-      expect.arrayContaining(['wingsGroupEcosystem', 'wingsGroupProofArchive']),
+      expect.arrayContaining([
+        'wingsGroupEcosystem',
+        'wingsGroupGallery',
+        'wingsGroupProofArchive',
+      ]),
     )
   })
 
@@ -106,6 +150,58 @@ describe('WingsGroup v3 Payload foundation', () => {
         },
       } as never),
     ).rejects.toThrow(/tenant khác/)
+  })
+
+  it('restricts the Gallery to WingsGroup and validates every media relation', async () => {
+    const routeGovernance = {
+      archetype: 'corporate',
+      contentApproval: { en: null, vi: null },
+      managedBy: 'wingsgroup-v3',
+      publication: { en: 'pending', vi: 'pending' },
+    }
+    const layout = [
+      {
+        blockType: 'wingsGroupGallery',
+        items: [{ media: 22, visible: true }],
+      },
+    ]
+    const data = {
+      _status: 'draft',
+      layout,
+      pathname: '/ve-wingsgroup',
+      site: 1,
+      wingsGroupRoute: routeGovernance,
+    }
+    const run = (mediaSite: number) =>
+      validateWingsGroupV3Governance({
+        data,
+        originalDoc: data,
+        req: {
+          context: {},
+          locale: 'vi',
+          payload: {
+            find: async () => ({ docs: [{ site: 1 }] }),
+            findByID: async ({ collection }: { collection: string }) =>
+              collection === 'sites'
+                ? { code: 'wings-group', id: 1 }
+                : { governance: {}, id: 22, site: mediaSite },
+          },
+          user: { role: 'super-admin' },
+        },
+      } as never)
+
+    await expect(run(2)).rejects.toThrow(/tenant khác/)
+    await expect(run(1)).resolves.toMatchObject({ pathname: '/ve-wingsgroup' })
+  })
+
+  it('requires a site relation before accepting a WingsGroup Gallery block', async () => {
+    await expect(
+      validateWingsGroupV3Governance({
+        data: { layout: [{ blockType: 'wingsGroupGallery', items: [] }] },
+        originalDoc: {},
+        req: { context: {}, payload: {} },
+      } as never),
+    ).rejects.toThrow(/site scope/)
   })
 
   it('checks Page parent relations at the trusted server boundary', async () => {
@@ -215,7 +311,9 @@ describe('WingsGroup v3 Payload foundation', () => {
               fallbackLocale?: unknown
               locale?: unknown
             }) => {
-              if (args.collection === 'sites') return { code: 'wings-group', id: 1 }
+              if (args.collection === 'sites') {
+                return { code: 'wings-group', id: 1, primaryDomain: 'cdn.example' }
+              }
               calls.push(args)
               return { alt: args.locale === 'en' ? 'Alt EN' : 'unexpected locale read' }
             },

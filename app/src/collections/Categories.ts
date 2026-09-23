@@ -19,7 +19,9 @@ export const Categories: CollectionConfig = {
     components: {
       beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
       edit: {
-        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+        beforeDocumentControls: [
+          '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
+        ],
       },
     },
     defaultColumns: ['title', 'site', 'updatedAt'],

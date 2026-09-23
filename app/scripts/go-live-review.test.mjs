@@ -7,8 +7,10 @@ import test from 'node:test'
 import {
   appendJSONLine,
   buildExplicitRouteInventory,
+  buildSitemapRouteInventory,
   buildSitemapProbePaths,
   classifyExpectedConsoleError,
+  classifyPurpose,
   checkpointScope,
   checkpointVersion,
   deriveSiteDecision,
@@ -116,6 +118,13 @@ test('explicit route inventory deduplicates requested paths for protected page A
   )
 })
 
+test('classifies editorial posts before product keywords embedded in a slug', () => {
+  assert.equal(
+    classifyPurpose('/posts/cach-doc-lich-khoi-hanh-va-gia', 'How to read departures'),
+    'editorial',
+  )
+})
+
 test('console review preserves genuine errors while classifying known local gate noise', () => {
   assert.equal(
     classifyExpectedConsoleError(
@@ -209,6 +218,26 @@ test('sitemap child probes are derived from sitemap index entries only', () => {
   )
 })
 
+test('sitemap inventory turns public URLs into tenant-aware route records', () => {
+  const routes = buildSitemapRouteInventory(
+    { key: 'wingsgo', pathPrefix: '/wingsgo', publicHosts: ['wingsgo.vn'] },
+    [
+      'https://wingsgo.vn/wingsgo/',
+      'https://wingsgo.vn/wingsgo/en/about',
+      'https://other.example.test/wingsgo/ignore',
+    ],
+    '/wingsgo',
+  )
+
+  assert.deepEqual(
+    routes.map(({ pathname, routePath, source }) => ({ pathname, routePath, source })),
+    [
+      { pathname: '/', routePath: '/wingsgo', source: 'public-sitemap' },
+      { pathname: '/en/about', routePath: '/wingsgo/en/about', source: 'public-sitemap' },
+    ],
+  )
+})
+
 test('public hostname comparison normalizes URL, www, case, and trailing dot variants', () => {
   assert.equal(normalizeHostname('HTTPS://WWW.WingSide.VN./en'), 'wingside.vn')
   assert.equal(hostnameBelongsToSite('www.wingside.vn.', ['wingside.vn']), true)
@@ -216,7 +245,13 @@ test('public hostname comparison normalizes URL, www, case, and trailing dot var
 })
 
 test('CTA review recognizes the real WingSide conversion vocabulary', () => {
-  for (const label of ['Plan trip', 'Consult', 'Share your brief', 'Write a message']) {
+  for (const label of [
+    'Plan trip',
+    'Consult',
+    'Request Proposal',
+    'Share your brief',
+    'Write a message',
+  ]) {
     assert.equal(hasStrongCTA(label), true, label)
   }
   assert.equal(hasStrongCTA('Explore our story'), false)

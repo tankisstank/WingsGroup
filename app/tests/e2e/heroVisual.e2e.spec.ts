@@ -73,10 +73,10 @@ test.describe('Hero visual regression', () => {
           .toBe(true)
         await expect(
           page.getByRole('heading', {
-            name: 'WingsGroup - hệ sinh thái du lịch nhiều line business dưới một lớp tin cậy chung',
+            name: 'WingsGroup',
           }),
         ).toBeVisible()
-        await expect(page.getByRole('link', { name: 'Liên hệ tư vấn' })).toBeVisible()
+        await expect(page.getByRole('link', { name: 'Trao đổi với chuyên viên' })).toBeVisible()
         await page.addStyleTag({
           content: '.hero-presentation__video-media { visibility: hidden !important; }',
         })

@@ -17,6 +17,7 @@ import { CredentialsCarousel } from '../../blocks/CredentialsCarousel/config'
 import { Stats } from '../../blocks/Stats/config'
 import { Testimonial } from '../../blocks/Testimonial/config'
 import { WingsGroupEcosystem } from '../../blocks/WingsGroupEcosystem/config'
+import { WingsGroupGallery } from '../../blocks/WingsGroupGallery/config'
 import { WingsGroupProofArchive } from '../../blocks/WingsGroupProofArchive/config'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { wingsSideHiFiTab } from '@/fields/wingsSideHiFi'
@@ -113,6 +114,7 @@ export const Pages: CollectionConfig<'pages'> = {
     },
     {
       name: 'title',
+      admin: { components: { Cell: '@/components/AdminCells/LocalizedTitleCell' } },
       label: 'Tiêu đề',
       type: 'text',
       localized: true,
@@ -180,6 +182,7 @@ export const Pages: CollectionConfig<'pages'> = {
                 Archive,
                 FormBlock,
                 WingsGroupEcosystem,
+                WingsGroupGallery,
                 WingsGroupProofArchive,
               ],
               localized: true,

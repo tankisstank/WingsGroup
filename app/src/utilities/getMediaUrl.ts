@@ -15,7 +15,17 @@ export const normalizePublicMediaURL = (url: string | null | undefined): string 
 
   const payloadFilePrefix = '/api/media/file/'
 
-  return url.startsWith(payloadFilePrefix) ? `/media/${url.slice(payloadFilePrefix.length)}` : url
+  if (url.startsWith(payloadFilePrefix)) return `/media/${url.slice(payloadFilePrefix.length)}`
+
+  try {
+    const parsed = new URL(url)
+    if (!parsed.pathname.startsWith(payloadFilePrefix)) return url
+
+    parsed.pathname = `/media/${parsed.pathname.slice(payloadFilePrefix.length)}`
+    return parsed.toString()
+  } catch {
+    return url
+  }
 }
 
 export const getMediaUrl = (url: string | null | undefined, cacheTag?: string | null): string => {

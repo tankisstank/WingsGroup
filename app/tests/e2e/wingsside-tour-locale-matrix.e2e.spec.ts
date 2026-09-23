@@ -73,7 +73,7 @@ test.describe('WingSide complete tour locale route gate', () => {
       expect(
         alternates.some((tag) => attribute(tag, 'hreflang') === 'x-default'),
         `${value} x-default`,
-      ).toBe(false)
+      ).toBe(true)
       const actualAlternates = Object.fromEntries(
         alternates
           .map((tag) => [attribute(tag, 'hreflang'), attribute(tag, 'href')] as const)
@@ -85,6 +85,7 @@ test.describe('WingSide complete tour locale route gate', () => {
           `${publicOrigin}${locale === 'en' ? '' : `/${locale}`}/tour/${identity.slug}`,
         ]),
       )
+      expectedAlternates['x-default'] = `${publicOrigin}/tour/${identity.slug}`
       expect(actualAlternates, `${value} hreflang`).toEqual(expectedAlternates)
     }
   })

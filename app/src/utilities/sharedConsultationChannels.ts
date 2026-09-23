@@ -12,7 +12,7 @@ export const sharedZaloOa = {
   },
 } as const
 
-const supportedSiteCodes = new Set(['wings-group'])
+const supportedSiteCodes = new Set(['wings-group', 'wings-go'])
 
 export const getSharedZaloCTA = (
   siteCode?: null | string,

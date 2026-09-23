@@ -21,6 +21,19 @@ const form = {
   title: 'Lead form',
 } as Form
 
+const wingsGoContactForm = {
+  fields: [
+    { blockType: 'text', label: 'Họ và tên', name: 'full-name', required: true },
+    { blockType: 'text', label: 'Số điện thoại', name: 'phone', required: true },
+    { blockType: 'text', label: 'Điểm đến', name: 'destination', required: false },
+    { blockType: 'text', label: 'Ngày đi', name: 'departure-date', required: false },
+    { blockType: 'number', label: 'Số khách', name: 'guests', required: true },
+    { blockType: 'text', label: 'Tour', name: 'tour-interest', required: false },
+  ],
+  id: 8,
+  title: 'WingsGo Quick Inquiry',
+} as Form
+
 describe('lead capture validation', () => {
   it('accepts a bounded request and normalizes only form-defined fields', () => {
     const request = parseLeadRequest(JSON.stringify({
@@ -46,6 +59,68 @@ describe('lead capture validation', () => {
     [[{ field: 'name', value: 'Alice' }, { field: 'email', value: 'a@b.co' }, { field: 'admin', value: 'true' }], 'unknown field'],
   ])('rejects %s (%s)', (submissionData) => {
     expect(() => validateFieldsForForm(form, submissionData)).toThrow(LeadValidationError)
+  })
+
+  it('accepts the WingsGo contact form with normalized phone, date and guest count', () => {
+    expect(
+      validateFieldsForForm(wingsGoContactForm, [
+        { field: 'full-name', value: '  Test Guest  ' },
+        { field: 'phone', value: '+84 912 345 678' },
+        { field: 'destination', value: 'Tokyo' },
+        { field: 'departure-date', value: '2027-02-28' },
+        { field: 'guests', value: '2' },
+        { field: 'tour-interest', value: 'Tokyo spring tour' },
+      ]),
+    ).toEqual([
+      { field: 'full-name', label: 'Họ và tên', value: 'Test Guest' },
+      { field: 'phone', label: 'Số điện thoại', value: '+84 912 345 678' },
+      { field: 'destination', label: 'Điểm đến', value: 'Tokyo' },
+      { field: 'departure-date', label: 'Ngày đi', value: '2027-02-28' },
+      { field: 'guests', label: 'Số khách', value: '2' },
+      { field: 'tour-interest', label: 'Tour', value: 'Tokyo spring tour' },
+    ])
+  })
+
+  it.each([
+    { name: 'phone', value: '123' },
+    { name: 'departure-date', value: '2027-02-30' },
+    { name: 'guests', value: '1.5' },
+    { name: 'guests', value: '0' },
+  ])('rejects invalid WingsGo $name value', ({ name, value }) => {
+    expect(() =>
+      validateFieldsForForm(wingsGoContactForm, [
+        { field: 'full-name', value: 'Test Guest' },
+        { field: 'phone', value: name === 'phone' ? value : '0912 345 678' },
+        ...(name === 'departure-date' ? [{ field: 'departure-date', value }] : []),
+        { field: 'guests', value: name === 'guests' ? value : '2' },
+      ]),
+    ).toThrow(LeadValidationError)
+  })
+
+  it('enforces the Vietnamese ten-digit phone contract when the site opts in', () => {
+    expect(() =>
+      validateFieldsForForm(
+        wingsGoContactForm,
+        [
+          { field: 'full-name', value: 'Test Guest' },
+          { field: 'phone', value: '+84 912 345 678' },
+          { field: 'guests', value: '2' },
+        ],
+        { phonePattern: /^0\d{9}$/u },
+      ),
+    ).toThrow(LeadValidationError)
+
+    expect(
+      validateFieldsForForm(
+        wingsGoContactForm,
+        [
+          { field: 'full-name', value: 'Test Guest' },
+          { field: 'phone', value: '0912345678' },
+          { field: 'guests', value: '2' },
+        ],
+        { phonePattern: /^0\d{9}$/u },
+      ),
+    ).toHaveLength(3)
   })
 
   it('rejects request bodies over 32 KiB', () => {

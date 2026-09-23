@@ -34,6 +34,7 @@ import {
 } from './lib/payloadSeedBuilders'
 import type { CopyLocaleCode } from '../src/utilities/locales'
 import { ensureThemePresetSeeds, wingsSideInboundThemePresetKey } from '../src/utilities/themeSeed'
+import { WINGSGROUP_LEGAL_IDENTITY } from '../src/wingsgroup/corporateRoutes'
 
 const seedContext = {
   disableRevalidate: true,
@@ -1018,9 +1019,11 @@ async function createSiteSettings(
     faviconImageID?: number | string | null
     headerNavItems?: Array<ReturnType<typeof linkItem>>
     logoImageID?: number | string | null
+    registeredOfficeAddress?: string
     supportEmail?: string
     supportPhone?: string
     tagline?: string
+    travelOfficeAddress?: string
     wingsGroupV3?: Record<string, unknown>
   } = {},
 ) {
@@ -1064,6 +1067,8 @@ async function createSiteSettings(
       ...(overrides.wingsGroupV3 ? { wingsGroupV3: overrides.wingsGroupV3 } : {}),
       supportEmail: overrides.supportEmail || `hello@${siteSeed.domain.replace('.local', '.vn')}`,
       supportPhone: overrides.supportPhone || '+84 28 0000 0000',
+      registeredOfficeAddress: overrides.registeredOfficeAddress,
+      travelOfficeAddress: overrides.travelOfficeAddress,
       headerNavItems: overrides.headerNavItems || [linkItem('Trang chủ', '/')],
       footerNavItems: overrides.footerNavItems || [linkItem('Trang chủ', '/')],
       footerNote:
@@ -1508,20 +1513,36 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         width: 100,
       },
       {
-        blockName: 'market',
+        blockName: 'destination',
         blockType: 'text',
-        name: 'market',
-        label: 'Thị trường quan tâm',
+        name: 'destination',
+        label: 'Bạn muốn đi đâu?',
         required: false,
-        width: 100,
+        width: 50,
       },
       {
-        blockName: 'message',
-        blockType: 'textarea',
-        name: 'message',
-        label: 'Nhu cầu',
+        blockName: 'departure-date',
+        blockType: 'text',
+        name: 'departure-date',
+        label: 'Dự kiến khởi hành',
         required: false,
-        width: 100,
+        width: 50,
+      },
+      {
+        blockName: 'guests',
+        blockType: 'number',
+        name: 'guests',
+        label: 'Số lượng khách',
+        required: true,
+        width: 50,
+      },
+      {
+        blockName: 'tour-interest',
+        blockType: 'text',
+        name: 'tour-interest',
+        label: 'Tour bạn quan tâm',
+        required: false,
+        width: 50,
       },
     ],
   )
@@ -1533,42 +1554,19 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       type: 'lowImpact',
       links: [
         linkItem('Gửi yêu cầu nhanh', '#contact-form', 'default'),
-        linkItem('Xem lịch khởi hành', '/lich-khoi-hanh', 'outline'),
+      linkItem('Xem lịch khởi hành', '/lich-khoi-hanh', 'outline'),
       ],
       richText: richText(
-        'Giữ chỗ hoặc nhận tư vấn outbound',
-        'Để lại nhu cầu để đội ngũ WingsGo tư vấn lịch khởi hành, visa, hãng bay và mức giá phù hợp.',
+        'Đặt tour hoặc nhận tư vấn miễn phí',
+        'Cùng WingsGo khám phá thế giới. Đội ngũ tư vấn lịch khởi hành, visa, hãng bay và mức giá minh bạch phù hợp với hành trình của bạn.',
         'h1',
       ),
     },
     layout: [
-      infoStripBlock(
-        'Kênh liên hệ nhanh',
-        'WingsGo tiếp nhận yêu cầu qua form, hotline và email để kiểm tra lịch khởi hành, số chỗ, visa và mức giá mới nhất.',
-        [
-          {
-            label: 'Hotline / Zalo',
-            value: '0912910101',
-            description: 'Ưu tiên phản hồi trong giờ làm việc.',
-          },
-          {
-            label: 'Email',
-            value: 'sales@wingsgroup.vn',
-            description: 'Phù hợp khi gửi danh sách khách hoặc yêu cầu đoàn riêng.',
-          },
-          {
-            label: 'Bảo mật',
-            value: 'Chỉ dùng để tư vấn',
-            description:
-              'Thông tin liên hệ được dùng cho phản hồi tour và không hiển thị công khai.',
-          },
-        ],
-        'Hỗ trợ tư vấn',
-      ),
       formBlock(
         quickInquiryForm.id,
-        'Gửi yêu cầu nhanh',
-        'Điền thị trường, tour quan tâm và mốc thời gian dự kiến. WingsGo chỉ dùng thông tin này để tư vấn và xác nhận dịch vụ phù hợp.',
+        'Nhận tư vấn và báo giá',
+        'Để lại thông tin và hành trình bạn quan tâm. WingsGo sẽ liên hệ xác nhận lịch, chỗ và mức giá phù hợp.',
       ),
       faqBlock(
         'Các câu hỏi thường gặp trước khi giữ chỗ',
@@ -4108,6 +4106,8 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     ],
     supportEmail: 'sales@wingsgroup.vn',
     supportPhone: '0912910101',
+    registeredOfficeAddress: WINGSGROUP_LEGAL_IDENTITY.registeredOffice,
+    travelOfficeAddress: WINGSGROUP_LEGAL_IDENTITY.travelOffice,
     tagline: siteSeed.summary,
   })
 

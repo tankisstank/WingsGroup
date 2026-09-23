@@ -8,6 +8,7 @@ import 'dotenv/config'
 
 const e2eBaseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3100'
 const e2ePort = new URL(e2eBaseURL).port || '3100'
+const e2eHostname = new URL(e2eBaseURL).hostname.toLowerCase()
 const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === 'true'
 const disableWebServer = process.env.PLAYWRIGHT_DISABLE_WEB_SERVER === 'true'
 const chromiumExecutablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
@@ -24,6 +25,7 @@ const productionLikeHosts = [
   'www.wingside.vn',
 ]
 const hostResolverRules = productionLikeHosts.map((host) => `MAP ${host} 127.0.0.1`).join(',')
+const useHostResolverRules = !new Set(['localhost', '127.0.0.1', '::1']).has(e2eHostname)
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -52,7 +54,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         ...(chromiumExecutablePath ? {} : { channel: 'chromium' }),
         launchOptions: {
-          args: [`--host-resolver-rules=${hostResolverRules}`],
+          args: useHostResolverRules ? [`--host-resolver-rules=${hostResolverRules}`] : [],
           ...(chromiumExecutablePath ? { executablePath: chromiumExecutablePath } : {}),
         },
       },

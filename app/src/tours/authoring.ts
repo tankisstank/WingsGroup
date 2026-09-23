@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 
 import { sql } from '@payloadcms/db-postgres'
-import type { PayloadRequest } from 'payload'
+import { Forbidden, ValidationError, type PayloadRequest } from 'payload'
 import { commitTransaction, createLocalReq, killTransaction } from 'payload'
 
 import { contentPublishAccess, hasRole } from '@/access/roles'
@@ -23,6 +23,40 @@ export class AuthoringError extends Error {
     super(message)
     this.name = 'AuthoringError'
   }
+}
+
+const wrapperValidationLabels: Record<string, string> = {
+  hero: 'nội dung mở đầu',
+  layout: 'bố cục nội dung',
+  meta: 'thông tin SEO',
+  parentPage: 'trang cha',
+  pathname: 'đường dẫn',
+  site: 'site',
+  slug: 'đường dẫn',
+  title: 'tiêu đề',
+}
+
+export const normalizeAuthoringError = (error: unknown): unknown => {
+  if (error instanceof ValidationError) {
+    const fields = [...new Set(error.data?.errors?.map(({ path }) => path.split('.')[0]) || [])]
+      .map((path) => wrapperValidationLabels[path] || 'nội dung trang')
+    const fieldSummary = fields.length ? ` Kiểm tra: ${fields.join(', ')}.` : ''
+    return new AuthoringError(
+      `Không thể tạo trang tour vì dữ liệu chưa hợp lệ.${fieldSummary}`,
+      422,
+      'wrapper_validation_failed',
+    )
+  }
+
+  if (error instanceof Forbidden) {
+    return new AuthoringError(
+      'Bạn không có quyền tạo trang tour trong site này; hãy nhờ quản trị viên kiểm tra phân quyền.',
+      403,
+      'wrapper_forbidden',
+    )
+  }
+
+  return error
 }
 
 const relationID = (value: unknown): RelationID | null => {

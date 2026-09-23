@@ -36,11 +36,16 @@ export type DepartureCardViewModel = {
   airline?: null | string
   availabilityBadge?: null | string
   availabilityStatus?: null | string
+  commerceVerified?: boolean
   ctaLabelOverride?: null | string
   currency?: null | string
   departureCity?: null | string
   departureDate?: null | string
+  flightNumber?: null | string
   id?: number | string
+  isFeatured?: boolean
+  loyaltyPoints?: null | number
+  originalPrice?: null | number
   priceFrom?: null | number
   promoLabel?: null | string
   returnDate?: null | string

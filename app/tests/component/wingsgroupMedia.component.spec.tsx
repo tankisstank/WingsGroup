@@ -97,4 +97,20 @@ describe('WingsGroup ImageMedia responsive delivery', () => {
     expect(container.querySelectorAll('source')).toHaveLength(0)
     expect(container.querySelector('img')?.getAttribute('src')).toContain('/media/a.png')
   })
+
+  it('derives a readable fallback alt from the filename when localized alt is missing', () => {
+    const { container } = render(
+      <ImageMedia
+        resource={
+          {
+            ...publishedMedia('published'),
+            alt: null,
+            filename: 'wingscare-travel-care-hero-3.png',
+          } as Media
+        }
+      />,
+    )
+
+    expect(container.querySelector('img')?.getAttribute('alt')).toBe('wingscare travel care hero 3')
+  })
 })

@@ -13,7 +13,12 @@ describe('public compatibility redirects', () => {
 
     expect(selected).toEqual([
       { destination: '/', permanent: true, source: '/vi' },
-      { destination: '/tin-tuc', permanent: true, source: '/posts' },
+      {
+        destination: '/tin-tuc',
+        has: [{ type: 'host', value: '(?:www\\.)?wingsgroup\\.vn' }],
+        permanent: true,
+        source: '/posts',
+      },
       {
         destination: '/tin-tuc/:slug*',
         has: [{ type: 'host', value: '(?:www\\.)?wingsgroup\\.vn' }],

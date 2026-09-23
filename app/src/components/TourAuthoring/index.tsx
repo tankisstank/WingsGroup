@@ -18,7 +18,7 @@ export default function TourProductAuthoring() {
   const siteCode = tourAuthoringSiteCode(site)
   const siteID = tourAuthoringRelationID(site)
 
-  return <section aria-label="Tour authoring" style={{ display: 'grid', gap: '0.75rem', marginBottom: '1rem' }}>
+  return <section aria-label="Tour authoring" style={{ boxSizing: 'border-box', display: 'grid', gap: '0.75rem', marginBottom: '1rem', maxWidth: '100%', minWidth: 0 }}>
     <div style={{ padding: '0.9rem 1rem', border: '1px solid var(--theme-elevation-150)', borderRadius: 6 }}>
       <strong>Luồng tạo tour</strong>
       <p style={{ margin: '0.35rem 0' }}>Site: <b>{typeof site === 'object' ? site.name || site.code || `#${siteID || 'chưa chọn'}` : siteID ? `#${siteID}` : 'chưa chọn'}</b> · Ngôn ngữ: <b>{locale || 'vi'}</b></p>

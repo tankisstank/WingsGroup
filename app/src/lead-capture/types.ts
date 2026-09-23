@@ -14,7 +14,10 @@ export type LeadDiscoveryContext = {
 }
 
 export type LeadSubmissionContext = {
+  departureDate?: string
+  departureId?: string
   discovery?: LeadDiscoveryContext
+  intent?: 'contact' | 'hold-seat' | 'inquiry' | 'request-quote'
   source?: string
   tourId?: string
   tourSlug?: string

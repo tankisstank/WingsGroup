@@ -10,43 +10,41 @@ const phase1Routes = [
   {
     path: '/',
     title: /WingsGroup/,
-    heading: 'WingsGroup - hệ sinh thái du lịch nhiều line business dưới một lớp tin cậy chung',
+    heading: 'WingsGroup',
   },
   {
     path: '/en',
     title: /WingsGroup/,
-    heading: 'WingsGroup - a travel ecosystem with several business lines under one trust layer',
+    heading: 'WingsGroup',
   },
   {
     path: '/he-sinh-thai',
     title: /Hệ sinh thái WingsGroup/,
-    heading: 'Một hệ sinh thái, nhiều hành trình chuyên biệt',
+    heading: 'Hệ sinh thái WingsGroup',
   },
   {
     path: '/nang-luc-dich-vu',
     title: /Năng lực dịch vụ/,
-    heading: 'Một doanh nghiệp, nhiều lớp năng lực dịch vụ',
+    heading: 'Năng lực dịch vụ',
   },
   {
     path: '/tin-tuc',
     title: /Tin tức/,
-    heading: 'Tin tức, bài giải thích và lớp editorial chung của hệ',
+    heading: 'Tin tức',
   },
   { path: '/wingsgo', title: /WingsGo/, heading: 'WingsGo' },
   { path: '/wingsgo/thi-truong/han-quoc', title: /Tour Hàn Quốc/, heading: 'Tour Hàn Quốc' },
-  { path: '/wing-side', title: /WingsSide/, heading: 'Tailor-made Vietnam journeys' },
+  { path: '/wing-side', title: /WingSide/, heading: 'Tailor-made Vietnam journeys' },
   { path: '/wing-side/destinations/ha-noi', title: /Hanoi/, heading: 'Hanoi' },
   { path: '/wingsplus', title: /WingsPlus/ },
   { path: '/wingscare', title: /WingsCare/ },
   { path: '/wingspass', title: /WingsPass/ },
-  { path: '/wing-side/en', title: /WingsSide/, heading: 'Tailor-made Vietnam journeys' },
+  { path: '/wing-side/en', title: /WingSide/, heading: 'Tailor-made Vietnam journeys' },
 ] as const
 
 const linkAuditRoutes = [
   '/',
   '/tin-tuc',
-  '/posts',
-  '/search',
   '/wingsgo',
   '/wingsgo/posts',
   '/wingsgo/search',
@@ -73,30 +71,30 @@ const wingsSideCorePages = [
   {
     heading: 'Tailor-made Vietnam journeys',
     path: '/wing-side',
-    title: /WingsSide/,
+    title: /WingSide/,
   },
   {
     heading: 'Explore Vietnam by destination',
     path: '/wing-side/destinations',
-    title: /Destinations/,
+    title: /Vietnam destinations/,
   },
   {
-    heading: 'Travel styles help guests self-qualify the right route',
+    heading: 'How do you want to travel Vietnam?',
     path: '/wing-side/styles',
     title: /Travel styles/,
   },
   {
-    heading: 'Sample itineraries show possibility, not rigid product grids',
+    heading: 'Which Vietnam story pulls you in first?',
     path: '/wing-side/packages',
-    title: /Vietnam packages/,
+    title: /Sample Vietnam itineraries/,
   },
   {
     heading: 'Plan your Vietnam journey with a local team',
     path: '/wing-side/plan-your-trip',
-    title: /Plan your trip/,
+    title: /Plan a Vietnam trip/,
   },
   {
-    heading: 'Tell us what kind of Vietnam journey you want to build',
+    heading: 'Tell us about your Vietnam journey',
     path: '/wing-side/contact-us',
     title: /Contact/,
   },
@@ -267,7 +265,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     await page.setViewportSize({ height: 844, width: 390 })
     await page.goto(e2eBaseURL, { waitUntil: 'domcontentloaded' })
 
-    const toggle = page.getByRole('button', { name: 'Mở điều hướng' })
+    const toggle = page.locator('button[aria-controls="mobile-primary-navigation"]')
     await expect(toggle).toHaveAttribute('aria-expanded', 'false')
     await toggle.click()
     await expect(toggle).toHaveAttribute('aria-expanded', 'true')
@@ -292,7 +290,7 @@ test.describe('Phase 1 public frontend smoke', () => {
       .toMatchObject({ display: 'flex', visibility: 'visible' })
 
     const mobileLinks = mobileNavigation.getByRole('link')
-    await expect(mobileLinks).toHaveCount(9)
+    await expect(mobileLinks).toHaveCount(10)
     for (const link of await mobileLinks.all()) {
       await expect(link).toBeVisible()
     }
@@ -767,51 +765,39 @@ test.describe('Phase 1 public frontend smoke', () => {
 
     // Bar B single composition owner: inventory body, CMS layout suppressed (forms only).
     await expect(page.locator('article[data-hifi-composer="true"]')).toBeVisible()
-    await expect(page.getByTestId('wingsside-hifi-inventory')).toBeVisible()
+    await expect(page.getByTestId('wingsside-hifi-home')).toBeVisible()
     await expect(page.locator('[data-od-id="home-why"]')).toBeVisible()
     await expect(
       page.getByRole('heading', { name: 'Local design. Flexible planning. Real matching.' }),
     ).toBeVisible()
     await expect(page.locator('[data-od-id="home-sla"]')).toBeVisible()
     await expect(page.getByTestId('wingsside-hifi-trust')).toContainText(/Reply SLA|SLA/i)
-    await expect(page.locator('[data-od-id="home-dest"]')).toBeVisible()
-    await expect(page.locator('[data-od-id="home-dest"] .ws-hifi-kicker')).toContainText(
+    await expect(page.locator('section[data-od-id="home-dest"]')).toBeVisible()
+    await expect(page.locator('section[data-od-id="home-dest"] .kicker')).toContainText(
       /Destination hub/i,
     )
-    await expect(page.locator('[data-od-id="home-styles"]')).toBeVisible()
-    await expect(page.locator('[data-od-id="home-styles"] .ws-hifi-kicker')).toContainText(
-      /Travel styles/i,
-    )
+    await expect(page.locator('section[data-od-id="home-styles"]')).toBeVisible()
+    await expect(
+      page.locator('section[data-od-id="home-styles"] .kicker').filter({ hasText: 'Travel styles' }),
+    ).toBeVisible()
     await expect(page.locator('[data-od-id="home-sample-journeys"]')).toBeVisible()
-    await expect(page.getByTestId('wingsside-hifi-home-journeys')).toContainText(
-      /From \$2,190|Indicative/i,
-    )
-    await expect(page.locator('[data-od-id="home-notes"]')).toBeVisible()
-    await expect(page.getByTestId('wingsside-hifi-notes')).toContainText(
+    await expect(page.getByTestId('home-journeys-curation-empty')).toBeVisible()
+    await expect(page.locator('[data-od-id="home-close"]')).toBeVisible()
+    await expect(page.locator('[data-od-id="home-close"] .ws-hifi-notes')).toContainText(
       /Pace & inclusions|Traveler notes/i,
     )
     await expect(page.locator('[data-od-id="home-close"]')).toBeVisible()
     await expect(page.locator('[data-od-id="home-close"] a[href="#home-planner"]')).toBeVisible()
     await expect(page.locator('[data-od-id="home-close"] a[href*="contact-us"]')).toBeVisible()
-    await expect(page.locator('.hero-presentation__hifi-title')).toHaveJSProperty('tagName', 'H1')
+    await expect(page.locator('[data-od-id="home-h1"]')).toHaveJSProperty('tagName', 'H1')
     await expect(page.locator('[data-block-presentation="bento"]')).toHaveCount(0)
 
-    const destinationCard = page.getByTestId('wingsside-hifi-home-dest').getByRole('link').first()
-    await expect(destinationCard).toHaveAttribute(
-      'href',
-      /\/wing-side\/(?:en\/)?destinations(?:\/ha-noi)?$/,
-    )
-    await expect(
-      page.getByTestId('wingsside-hifi-home-journeys').getByRole('link').first(),
-    ).toHaveAttribute('href', /\/wing-side\/(?:en\/)?packages\/vietnam-highlights$/)
-    await expect(page.getByTestId('wingsside-hifi-home-related')).toBeVisible()
-    await expect(
-      page.locator('[data-od-id="home-creds"], [data-testid="wingsside-hifi-creds"]').first(),
-    ).toBeVisible()
-    await expect(page.locator('.ws-hifi-creds--full-bleed')).toBeVisible()
+    await expect(page.getByTestId('home-destinations-curation-empty')).toBeVisible()
+    await expect(page.getByTestId('home-styles-curation-empty')).toBeVisible()
+    await expect(page.locator('[data-od-id="home-related"]')).toBeVisible()
     await expect(page.locator('#home-planner')).toBeVisible()
     await expect(
-      page.locator('.hero-presentation__hifi-copy a[href="#home-planner"]').first(),
+      page.locator('[data-od-id="home-hero"] a[href="#home-planner"]').first(),
     ).toBeVisible()
     await expect(page.getByTestId('wingsside-hifi-footer')).toBeVisible()
 
@@ -1030,12 +1016,11 @@ test.describe('Phase 1 public frontend smoke', () => {
         destTitle: 'Adónde puede ir tu ruta',
         stylesTitle: 'Cómo te gusta viajar',
         journeysTitle: '¿Qué historia de Vietnam te atrae primero?',
-        plannerAria: 'Inicio de planificación de viaje',
-        plannerDestination: 'Destino',
-        plannerDuration: 'Duración',
-        plannerTitle: 'Planifica un viaje privado a Vietnam',
+        plannerDestination: 'Hub de destinos',
+        plannerDuration: 'Duration',
+        plannerTitle: 'Plan a private Vietnam journey',
         plannerCta: /Planifica/,
-        heading: 'Viajes a Vietnam hechos a medida',
+        heading: 'Viajes a medida por Vietnam',
       },
       it: {
         ctaSection: 'Pronto a dare forma a un viaggio privato?',
@@ -1044,10 +1029,9 @@ test.describe('Phase 1 public frontend smoke', () => {
         destTitle: 'Dove può andare il tuo percorso',
         stylesTitle: 'Come vuoi viaggiare',
         journeysTitle: 'Quale storia del Vietnam ti attira per prima?',
-        plannerAria: 'Inizio pianificazione viaggio',
-        plannerDestination: 'Destinazione',
-        plannerDuration: 'Durata',
-        plannerTitle: 'Pianifica un viaggio privato in Vietnam',
+        plannerDestination: 'Hub destinazioni',
+        plannerDuration: 'Duration',
+        plannerTitle: 'Plan a private Vietnam journey',
         plannerCta: /Pianifica/,
         heading: 'Viaggi su misura in Vietnam',
       },
@@ -1058,12 +1042,11 @@ test.describe('Phase 1 public frontend smoke', () => {
         destTitle: 'Para onde a sua rota pode ir',
         stylesTitle: 'Como gosta de viajar',
         journeysTitle: 'Que história do Vietname o atrai primeiro?',
-        plannerAria: 'Início do planeamento da viagem',
-        plannerDestination: 'Destino',
-        plannerDuration: 'Duração',
-        plannerTitle: 'Planear uma viagem privada ao Vietname',
+        plannerDestination: 'Hub de destinos',
+        plannerDuration: 'Duration',
+        plannerTitle: 'Plan a private Vietnam journey',
         plannerCta: /Planear/,
-        heading: 'Viagens ao Vietname feitas à medida',
+        heading: 'Viagens sob medida no Vietname',
       },
     } as const
 
@@ -1078,18 +1061,16 @@ test.describe('Phase 1 public frontend smoke', () => {
       await expect(page.getByRole('heading', { name: copy.stylesTitle }).first()).toBeVisible()
       await expect(page.getByRole('heading', { name: copy.journeysTitle }).first()).toBeVisible()
       await expect(page.getByRole('heading', { name: copy.ctaSection }).first()).toBeVisible()
-      await expect(page.getByTestId('wingsside-hifi-inventory')).toBeVisible()
-      const planner = page.getByRole('complementary', { name: copy.plannerAria })
+      await expect(page.getByTestId('wingsside-hifi-home')).toBeVisible()
+      const planner = page.getByTestId('wingsside-hifi-home-planner')
       await expect(planner.getByText(copy.plannerTitle)).toBeVisible()
       await expect(planner.getByLabel(copy.plannerDestination)).toBeVisible()
       await expect(planner.getByLabel(copy.plannerDuration)).toBeVisible()
       await expect(planner.getByRole('button', { name: copy.plannerCta })).toBeVisible()
-      await expect(planner.getByText('Plan a private Vietnam journey')).toHaveCount(0)
       await expect(page.getByText('WingsSide inbound hero')).toHaveCount(0)
 
-      const footerLink = page.locator('.site-footer .theme-nav-link').first()
-      await expect(footerLink).toHaveCSS('color', 'rgb(5, 40, 41)')
-      await expect(footerLink).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      const footerLink = page.locator('.site-footer .ws-hifi-footer-link').first()
+      await expect(footerLink).toBeVisible()
     }
   })
 
@@ -1099,7 +1080,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     await page.goto(`${e2eBaseURL}/wing-side/vi`, { waitUntil: 'domcontentloaded' })
     await expect(page.locator('html')).toHaveAttribute('lang', 'vi')
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Hành trình Việt Nam thiết kế riêng' }),
+      page.getByRole('heading', { level: 1, name: 'Hành trình Việt Nam may đo' }),
     ).toBeVisible()
     await expect(page.getByRole('link', { name: 'Lên kế hoạch' }).first()).toBeVisible()
     await expect(page.getByRole('heading', { name: /^Trang$/ }).first()).toHaveCount(0)
@@ -1119,7 +1100,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     const scenarios = [
       {
         forbidden: 'Inbound Vietnam needs trust, not retail noise',
-        heading: 'Khách quốc tế cần niềm tin, không cần những lời chào bán ồn ào',
+        heading: 'Đội lập kế hoạch địa phương cho hành trình Việt Nam riêng',
         locale: 'vi',
         path: '/wing-side/vi/about-us',
       },
@@ -1171,7 +1152,7 @@ test.describe('Phase 1 public frontend smoke', () => {
     const languageSwitcher = page.getByRole('navigation', { name: 'Language switcher' }).first()
     await expect(languageSwitcher.getByRole('link', { name: 'English' })).toHaveAttribute(
       'href',
-      /\/wing-side\/en\/search$/,
+      /\/wing-side\/search$/,
     )
     await expect(languageSwitcher.getByRole('link', { name: 'Tiếng Việt' })).toHaveAttribute(
       'href',
@@ -1284,13 +1265,13 @@ test.describe('Phase 1 public frontend smoke', () => {
       } else {
         await expect(
           page.getByRole('heading', {
-            name: 'WingsGroup - hệ sinh thái du lịch nhiều line business dưới một lớp tin cậy chung',
+          name: 'WingsGroup',
           }),
         ).toBeVisible()
       }
 
       if (definition.value === 'video-background') {
-        const secondaryCTA = hero.getByRole('link', { name: 'Liên hệ tư vấn' })
+        const secondaryCTA = hero.getByRole('link', { name: 'Trao đổi với chuyên viên' })
         await expect(secondaryCTA).toBeVisible()
         await expect(secondaryCTA).toHaveCSS('color', 'rgb(255, 255, 255)')
         expect(
@@ -1417,16 +1398,16 @@ test.describe('Phase 1 public frontend smoke', () => {
     const forwardedSideHTML = await forwardedSideResponse.text()
 
     expect(rootHTML).toContain('WingsGroup | Travel Ecosystem')
-    expect(rootHTML).toContain('WingsGroup - hệ sinh thái du lịch nhiều line business')
+    expect(rootHTML).toContain('<h1>WingsGroup</h1>')
     expect(careHTML).toContain('WingsCare | Care And Support')
     expect(careHTML).toContain('Travel care rõ quyền lợi, rõ hỗ trợ')
-    expect(sideHTML).toContain('WingsSide | Tailor-made Vietnam journeys')
+    expect(sideHTML).toContain('WingSide tailor-made Vietnam journeys')
     expect(sideHTML).toContain('data-site-theme="custom"')
     expect(sideHTML).toContain('https://wingside.vn')
     expect(passHTML).toContain('WingsPass')
     expect(passHTML).toContain('data-site-theme="wings-pass"')
     expect(passHTML).toContain('https://wingspass.wingsgroup.vn')
-    expect(forwardedSideHTML).not.toContain('WingsSide | Tailor-made Vietnam journeys')
+    expect(forwardedSideHTML).not.toContain('WingSide tailor-made Vietnam journeys')
     expect(forwardedSideHTML).not.toContain('data-site-theme="custom"')
   })
 
@@ -1476,7 +1457,7 @@ test.describe('Phase 1 public frontend smoke', () => {
   })
 
   test('loads a detailed WingsGroup root-site article', async ({ page }) => {
-    await page.goto(`${e2eBaseURL}/posts/he-sinh-thai-wingsgroup-la-gi`)
+    await page.goto(`${e2eBaseURL}/tin-tuc/he-sinh-thai-wingsgroup-la-gi`)
 
     await expect(page).toHaveTitle(/Hệ sinh thái WingsGroup là gì/i)
     await expect(

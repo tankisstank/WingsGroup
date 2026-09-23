@@ -2,36 +2,44 @@
 import React from 'react'
 
 import { SiteLink } from '@/components/SiteLink'
+import { getDurationLabel, formatTourDate, formatTourPrice } from './utils'
+import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 import type { WingsGoCatalogCard } from './wingsGoCatalog'
 
-const marketLabels: Record<string, string> = {
-  cambodia: 'Campuchia',
-  china: 'Trung Quốc',
-  indochina: 'Đông Dương',
-  japan: 'Nhật Bản',
-  korea: 'Hàn Quốc',
-  laos: 'Lào',
-  myanmar: 'Myanmar',
-  other: 'Outbound',
-  thailand: 'Thái Lan',
-  vietnam: 'Việt Nam',
+const marketLabels: Record<string, { en: string; vi: string }> = {
+  cambodia: { en: 'Cambodia', vi: 'Campuchia' },
+  china: { en: 'China', vi: 'Trung Quốc' },
+  indochina: { en: 'Indochina', vi: 'Đông Dương' },
+  japan: { en: 'Japan', vi: 'Nhật Bản' },
+  korea: { en: 'South Korea', vi: 'Hàn Quốc' },
+  laos: { en: 'Laos', vi: 'Lào' },
+  myanmar: { en: 'Myanmar', vi: 'Myanmar' },
+  other: { en: 'Outbound', vi: 'Outbound' },
+  thailand: { en: 'Thailand', vi: 'Thái Lan' },
+  vietnam: { en: 'Vietnam', vi: 'Việt Nam' },
 }
 
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(new Date(value))
+export const WingsGoTourCard = ({
+  badge,
+  card,
+  locale = 'vi',
+}: {
+  badge?: string
+  card: WingsGoCatalogCard
+  locale?: SupportedLocaleCode
+}) => {
+  const isEn = locale === 'en'
 
-const formatPrice = (value: number, currency: string) =>
-  `${new Intl.NumberFormat('vi-VN').format(value)} ${currency}`
-
-export const WingsGoTourCard = ({ card }: { card: WingsGoCatalogCard }) => (
+  return (
   <article className="group overflow-hidden rounded-[24px] border border-border/70 bg-card shadow-sm transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-[var(--site-brand)]/35 hover:shadow-[0_18px_48px_color-mix(in_oklch,var(--site-brand)_14%,transparent)]">
     <SiteLink className="block no-underline" href={card.href}>
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+        {badge ? (
+          <span className="absolute left-3 top-3 z-10 rounded-full bg-orange-500 px-3 py-1 text-xs font-bold text-white shadow">
+            {badge}
+          </span>
+        ) : null}
         {card.image ? (
           <img
             alt={card.image.alt}
@@ -41,20 +49,20 @@ export const WingsGoTourCard = ({ card }: { card: WingsGoCatalogCard }) => (
           />
         ) : (
           <div
-            aria-label={`Ảnh đang cập nhật cho ${card.title}`}
+            aria-label={`${isEn ? 'Image coming soon for' : 'Ảnh đang cập nhật cho'} ${card.title}`}
             className="flex h-full items-center justify-center bg-[linear-gradient(135deg,color-mix(in_oklch,var(--site-brand)_18%,transparent),color-mix(in_oklch,var(--site-accent)_16%,transparent))] px-6 text-center text-sm font-semibold text-foreground/70"
             role="img"
           >
-            Ảnh tour đang cập nhật
+            {isEn ? 'Tour image coming soon' : 'Ảnh tour đang cập nhật'}
           </div>
         )}
       </div>
       <div className="space-y-4 p-5">
         <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          <span>{marketLabels[card.market] || card.market}</span>
+          <span>{marketLabels[card.market]?.[isEn ? 'en' : 'vi'] || card.market}</span>
           <span aria-hidden="true">•</span>
           <span>
-            {card.duration.days} ngày {card.duration.nights} đêm
+            {getDurationLabel(card.duration.days, card.duration.nights, locale)}
           </span>
         </div>
         <div>
@@ -70,22 +78,22 @@ export const WingsGoTourCard = ({ card }: { card: WingsGoCatalogCard }) => (
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              Giá từ
+              {isEn ? 'From' : 'Giá từ'}
             </p>
             <p className="mt-1 text-lg font-semibold text-foreground">
               {card.price.kind === 'verified'
-                ? formatPrice(card.price.value, card.price.currency)
+                ? formatTourPrice(card.price.value, card.price.currency)
                 : card.price.label}
             </p>
           </div>
-          <span className="text-sm font-semibold text-[var(--site-brand)]">Xem tour →</span>
+          <span className="text-sm font-semibold text-[var(--site-brand)]">{isEn ? 'View tour' : 'Xem tour'} →</span>
         </div>
         <div className="rounded-[16px] border border-border/60 bg-muted/25 px-4 py-3">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Khởi hành gần nhất
+            {isEn ? 'Next departure' : 'Khởi hành gần nhất'}
           </p>
           <p className="mt-1 text-sm font-semibold text-foreground">
-            {formatDate(card.nextDeparture.date)}
+            {formatTourDate(card.nextDeparture.date, locale)}
             {card.nextDeparture.departureCity ? ` • ${card.nextDeparture.departureCity}` : ''}
             {card.nextDeparture.airline ? ` • ${card.nextDeparture.airline}` : ''}
           </p>
@@ -93,4 +101,5 @@ export const WingsGoTourCard = ({ card }: { card: WingsGoCatalogCard }) => (
       </div>
     </SiteLink>
   </article>
-)
+  )
+}

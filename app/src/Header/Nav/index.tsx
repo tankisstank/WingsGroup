@@ -19,41 +19,56 @@ import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
 import { Globe2Icon, MenuIcon, SearchIcon, XIcon } from 'lucide-react'
 import { getWingsGroupSwitcherLocales } from '@/components/WingsGroupV3/model'
 
+const WINGSGO_NAV = [
+  { href: '/', label: 'Trang chủ' },
+  { href: '/thi-truong', label: 'Thị trường' },
+  { href: '/lich-khoi-hanh', label: 'Lịch khởi hành' },
+  { href: '/campaign', label: 'Tour theo mùa' },
+  { href: '/tour', label: 'Tour' },
+] as const
+
+const WINGSGO_NAV_EN = [
+  { href: '/', label: 'Home' },
+  { href: '/thi-truong', label: 'Destinations' },
+  { href: '/lich-khoi-hanh', label: 'Departure schedule' },
+  { href: '/campaign', label: 'Seasonal tours' },
+  { href: '/tour', label: 'Tours' },
+] as const
+
 export const WINGSGROUP_HOME_NAV = [
   { href: '/#home', label: 'Trang chủ' },
-  { href: '/#services', label: 'Dịch vụ' },
-  { href: '/#about', label: 'Hệ sinh thái' },
-  { href: '/#trust', label: 'Về WingsGroup' },
+  { href: '/nang-luc-dich-vu', label: 'Dịch vụ' },
+  { href: '/he-sinh-thai', label: 'Hệ sinh thái' },
+  { href: '/ve-wingsgroup', label: 'Về WingsGroup' },
   { href: '/tin-tuc', label: 'Cẩm nang' },
   { href: '/#contact', label: 'Liên hệ' },
 ] as const
 
 export const WINGSGROUP_V3_ROUTE_NAV = [
-  // Away from the home surface, preserve the same information architecture by
-  // returning visitors to the matching section rather than changing the menu
-  // into a second, route-only navigation model.
+  // Keep the same information architecture away from the home surface while
+  // using the governed corporate routes.
   { href: '/#home', label: 'Trang chủ' },
-  { href: '/#services', label: 'Dịch vụ' },
-  { href: '/#about', label: 'Hệ sinh thái' },
-  { href: '/#trust', label: 'Về WingsGroup' },
+  { href: '/nang-luc-dich-vu', label: 'Dịch vụ' },
+  { href: '/he-sinh-thai', label: 'Hệ sinh thái' },
+  { href: '/ve-wingsgroup', label: 'Về WingsGroup' },
   { href: '/tin-tuc', label: 'Cẩm nang' },
   { href: '/#contact', label: 'Liên hệ' },
 ] as const
 
 const WINGSGROUP_HOME_NAV_EN = [
   { href: '/#home', label: 'Home' },
-  { href: '/#services', label: 'Services' },
-  { href: '/#about', label: 'Our ecosystem' },
-  { href: '/#trust', label: 'About WingsGroup' },
+  { href: '/nang-luc-dich-vu', label: 'Services' },
+  { href: '/he-sinh-thai', label: 'Our ecosystem' },
+  { href: '/ve-wingsgroup', label: 'About WingsGroup' },
   { href: '/tin-tuc', label: 'Journal' },
   { href: '/#contact', label: 'Contact' },
 ] as const
 
 const WINGSGROUP_V3_ROUTE_NAV_EN = [
   { href: '/#home', label: 'Home' },
-  { href: '/#services', label: 'Services' },
-  { href: '/#about', label: 'Our ecosystem' },
-  { href: '/#trust', label: 'About WingsGroup' },
+  { href: '/nang-luc-dich-vu', label: 'Services' },
+  { href: '/he-sinh-thai', label: 'Our ecosystem' },
+  { href: '/ve-wingsgroup', label: 'About WingsGroup' },
   { href: '/tin-tuc', label: 'Journal' },
   { href: '/#contact', label: 'Contact' },
 ] as const
@@ -64,8 +79,21 @@ export const getWingsGroupHomeNav = (locale: SupportedLocaleCode) =>
 export const getWingsGroupV3RouteNav = (locale: SupportedLocaleCode) =>
   locale === 'en' ? WINGSGROUP_V3_ROUTE_NAV_EN : WINGSGROUP_V3_ROUTE_NAV
 
+const getNativeLocaleLabel = (code: SupportedLocaleCode, fallback: string): string => {
+  if (code === 'en') return 'ENGLISH (en)'
+  if (code === 'vi') return 'Tiếng Việt (vi)'
+
+  try {
+    const label = new Intl.DisplayNames([code], { type: 'language' }).of(code)
+    return label ? `${label[0]!.toLocaleUpperCase(code)}${label.slice(1)}` : fallback
+  } catch {
+    return fallback
+  }
+}
+
 export const HeaderNav: React.FC<{
   data: { navItems?: HeaderType['navItems'] }
+  defaultLocale?: SupportedLocaleCode
   englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
   primaryAction?: {
     label: string
@@ -81,6 +109,7 @@ export const HeaderNav: React.FC<{
   wingsGroupV3Surface?: boolean
 }> = ({
   data,
+  defaultLocale,
   englishPublicationState,
   primaryAction,
   publicPathname,
@@ -93,6 +122,8 @@ export const HeaderNav: React.FC<{
   wingsGroupV3Surface,
 }) => {
   const navItems = data?.navItems || []
+  const isWingsGo = siteCode === 'wings-go'
+  const wingsGoNav = resolvedLocale === 'en' ? WINGSGO_NAV_EN : WINGSGO_NAV
   const [isOpen, setIsOpen] = useState(false)
   const [clientReady, setClientReady] = useState(false)
   const [locationSuffix, setLocationSuffix] = useState('')
@@ -106,17 +137,18 @@ export const HeaderNav: React.FC<{
       ? getWingsGroupSwitcherLocales(availableLocales, englishPublicationState)
       : availableLocales
   const isWingsSide = siteCode ? siteCode === 'wing-side' : themeKey === 'wings-side'
+  const normalizedPublicPathname = getPublicRoutePathname(pathname || publicPathname || '/')
   const isWingsGroupHome =
-    wingsGroupV3Home ?? (siteCode === 'wings-group' && publicPathname === '/')
+    wingsGroupV3Home ?? (siteCode === 'wings-group' && normalizedPublicPathname === '/')
   const isWingsGroupV3Surface = wingsGroupV3Surface ?? isWingsGroupHome
   const wingsGroupHomeNav = getWingsGroupHomeNav(resolvedLocale)
   const wingsGroupRouteNav = getWingsGroupV3RouteNav(resolvedLocale)
   const wingsSideHiFiNav = isWingsSide ? getWingsSideHiFiNavItems(resolvedLocale) : null
   const wingsSideHiFiCta = isWingsSide ? getWingsSideHiFiCta(resolvedLocale) : null
   const resolvedPrimaryAction = wingsSideHiFiCta || primaryAction
-  const sharedZaloCTA =
-    getSharedZaloCTA(siteCode, resolvedLocale)
+  const sharedZaloCTA = getSharedZaloCTA(siteCode, resolvedLocale)
   const shouldRenderPrimaryAction =
+    !isWingsGo &&
     resolvedPrimaryAction &&
     !(wingsSideHiFiNav
       ? wingsSideHiFiNav.some(
@@ -177,9 +209,46 @@ export const HeaderNav: React.FC<{
   }
   const copy =
     copyByLocale[resolvedLocale] || copyByLocale[getCopyLocale(resolvedLocale)] || copyByLocale.en!
+  const maybeSmoothScrollToContact = (event: React.MouseEvent<HTMLAnchorElement>): boolean => {
+    if (
+      !isWingsGroupHome ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return false
+    }
+
+    const targetURL = new URL(event.currentTarget.href, window.location.href)
+    const currentURL = new URL(window.location.href)
+    if (
+      targetURL.origin !== currentURL.origin ||
+      targetURL.pathname !== currentURL.pathname ||
+      targetURL.hash !== '#contact'
+    ) {
+      return false
+    }
+
+    const contact = document.getElementById('contact')
+    if (!contact) return false
+
+    event.preventDefault()
+    setIsOpen(false)
+    contact.scrollIntoView({ behavior: 'smooth' })
+
+    const suffix = `${currentURL.search}#contact`
+    window.history.pushState(window.history.state, '', `${currentURL.pathname}${suffix}`)
+    setLocationSuffix(suffix)
+    return true
+  }
+
   const navigateAndCloseMobile: React.MouseEventHandler<HTMLAnchorElement> = (event) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
       return
+
+    if (maybeSmoothScrollToContact(event)) return
 
     event.preventDefault()
     setIsOpen(false)
@@ -247,9 +316,16 @@ export const HeaderNav: React.FC<{
     >
       <Globe2Icon aria-hidden="true" className="h-4 w-4" />
       {switcherLocales.map((metadata) => {
+        const label =
+          siteCode === 'wings-go'
+            ? metadata.code.toUpperCase()
+            : siteCode === 'wings-group'
+            ? getNativeLocaleLabel(metadata.code, metadata.label)
+            : metadata.label
         const href = buildLocaleSwitchHref(
           `${localeSwitchPathname}${clientReady ? locationSuffix : ''}`,
           metadata.code,
+          defaultLocale,
         )
 
         return (
@@ -262,7 +338,7 @@ export const HeaderNav: React.FC<{
             onClick={navigateAndCloseMobile}
             title={metadata.label}
           >
-            {metadata.label}
+            {label}
           </a>
         )
       })}
@@ -272,7 +348,7 @@ export const HeaderNav: React.FC<{
           className="site-language-switcher__link site-language-switcher__link--pending"
           title="English — Sắp có"
         >
-          EN
+          ENGLISH (en)
         </span>
       ) : null}
     </nav>
@@ -280,12 +356,34 @@ export const HeaderNav: React.FC<{
 
   return (
     <div
-      className="site-header__nav"
+      className={isWingsGo ? 'site-header__nav site-header__nav--wingsgo' : 'site-header__nav'}
       data-hifi-nav={isWingsSide ? 'true' : 'false'}
       ref={headerNavRef}
     >
-      <nav aria-label="Primary navigation" className="hidden items-center gap-3 xl:flex">
-        {isWingsGroupHome
+      <nav
+        aria-label="Primary navigation"
+        className={`hidden items-center ${isWingsGo ? 'gap-2' : 'gap-3'} xl:flex`}
+      >
+        {isWingsGo
+          ? wingsGoNav.map((item) => {
+              const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
+              const isActive =
+                item.href === '/'
+                  ? currentPath === '/'
+                  : currentPath === item.href || currentPath.startsWith(`${item.href}/`)
+              return (
+                <SiteLink
+                  aria-current={isActive ? 'page' : undefined}
+                  className="theme-nav-link site-header__primary-link"
+                  data-active={isActive ? 'true' : 'false'}
+                  href={item.href}
+                  key={item.href}
+                >
+                  {item.label}
+                </SiteLink>
+              )
+            })
+          : isWingsGroupHome
           ? wingsGroupHomeNav.map((item) => (
               <SiteLink
                 aria-current={
@@ -301,6 +399,7 @@ export const HeaderNav: React.FC<{
                 }
                 href={item.href}
                 key={item.href}
+                onClick={maybeSmoothScrollToContact}
               >
                 {item.label}
               </SiteLink>
@@ -321,6 +420,7 @@ export const HeaderNav: React.FC<{
                   }
                   href={item.href}
                   key={item.href}
+                  onClick={maybeSmoothScrollToContact}
                 >
                   {item.label}
                 </SiteLink>
@@ -361,6 +461,16 @@ export const HeaderNav: React.FC<{
             {resolvedPrimaryAction.label}
           </SiteLink>
         ) : null}
+        {isWingsGo ? (
+          <a
+            aria-label={resolvedLocale === 'en' ? 'Call WingsGo 0912 910 101' : 'Gọi hotline WingsGo 0912 910 101'}
+            className="inline-flex min-h-10 shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-[var(--site-border)] px-3 text-sm font-semibold text-[var(--site-brand)] no-underline"
+            href="tel:0912910101"
+          >
+            <span aria-hidden="true">☎</span>
+            <span>0912 910 101</span>
+          </a>
+        ) : null}
         {sharedZaloCTA ? (
           <a
             aria-label={sharedZaloCTA.ariaLabel}
@@ -372,7 +482,7 @@ export const HeaderNav: React.FC<{
             {sharedZaloCTA.label}
           </a>
         ) : null}
-        {!isWingsSide && showSearch ? (
+        {!isWingsSide && !isWingsGo && showSearch ? (
           <SiteLink className="site-icon-button" href="/search">
             <span className="sr-only">{copy.search}</span>
             <SearchIcon aria-hidden="true" className="h-5 w-5" />
@@ -391,6 +501,16 @@ export const HeaderNav: React.FC<{
             {resolvedPrimaryAction.label}
           </SiteLink>
         ) : null}
+        {isWingsGo ? (
+          <a
+            aria-label={resolvedLocale === 'en' ? 'Call WingsGo 0912 910 101' : 'Gọi hotline WingsGo 0912 910 101'}
+            className="site-icon-button"
+            href="tel:0912910101"
+            title="0912 910 101"
+          >
+            <span aria-hidden="true">☎</span>
+          </a>
+        ) : null}
         {sharedZaloCTA ? (
           <a
             aria-label={sharedZaloCTA.ariaLabel}
@@ -402,7 +522,7 @@ export const HeaderNav: React.FC<{
             {sharedZaloCTA.label}
           </a>
         ) : null}
-        {!isWingsSide && showSearch ? (
+        {!isWingsSide && !isWingsGo && showSearch ? (
           <SiteLink className="site-icon-button" href="/search">
             <span className="sr-only">{copy.search}</span>
             <SearchIcon aria-hidden="true" className="h-5 w-5" />
@@ -430,7 +550,27 @@ export const HeaderNav: React.FC<{
           className="site-mobile-nav"
           id="mobile-primary-navigation"
         >
-          {isWingsGroupHome
+          {isWingsGo
+            ? wingsGoNav.map((item) => {
+                const currentPath = getPublicRoutePathname(pathname || publicPathname || '/')
+                const isActive =
+                  item.href === '/'
+                    ? currentPath === '/'
+                    : currentPath === item.href || currentPath.startsWith(`${item.href}/`)
+                return (
+                  <SiteLink
+                    aria-current={isActive ? 'page' : undefined}
+                    className="site-mobile-nav__link"
+                    data-active={isActive ? 'true' : 'false'}
+                    href={item.href}
+                    key={item.href}
+                    onClick={navigateAndCloseMobile}
+                  >
+                    {item.label}
+                  </SiteLink>
+                )
+              })
+            : isWingsGroupHome
             ? wingsGroupHomeNav.map((item) => (
                 <SiteLink
                   data-active={
@@ -496,6 +636,15 @@ export const HeaderNav: React.FC<{
                       />
                     )
                   })}
+          {isWingsGo ? (
+            <a
+              className="site-mobile-nav__link"
+              href="tel:0912910101"
+              onClick={() => setIsOpen(false)}
+            >
+              ☎ {resolvedLocale === 'en' ? 'Call 0912 910 101' : 'Gọi 0912 910 101'}
+            </a>
+          ) : null}
           {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
             <SiteLink
               className="site-mobile-nav__link site-mobile-nav__link--primary"

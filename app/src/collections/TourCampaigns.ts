@@ -33,7 +33,9 @@ export const TourCampaigns: CollectionConfig = {
     components: {
       beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
       edit: {
-        beforeDocumentControls: ['@/components/ContentLocaleControl#ContentLocaleDocumentControl'],
+        beforeDocumentControls: [
+          '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
+        ],
       },
     },
     description:
@@ -99,7 +101,7 @@ export const TourCampaigns: CollectionConfig = {
     },
     {
       name: 'wrapperPage',
-      label: 'Page wrapper',
+      label: 'Trang bao ngoài',
       type: 'relationship',
       relationTo: 'pages',
       filterOptions: sameSiteFilterOptions,
@@ -180,6 +182,13 @@ export const TourCampaigns: CollectionConfig = {
               ...item,
               label: 'Slug campaign',
               localized: false,
+            } as typeof item
+          }
+
+          if ('name' in item && item.name === 'generateSlug') {
+            return {
+              ...item,
+              label: 'Tự tạo đường dẫn từ tiêu đề campaign',
             } as typeof item
           }
 

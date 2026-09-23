@@ -92,6 +92,26 @@ const getArticlePresentation = async (
   return { heroMedia, relatedItems }
 }
 
+const getArticleAlternateLocales = async ({
+  draft,
+  settings,
+  slug,
+}: {
+  draft: boolean
+  settings: Awaited<ReturnType<typeof getCurrentSiteSettings>>
+  slug: string
+}): Promise<SupportedLocaleCode[]> => {
+  const candidateLocales: SupportedLocaleCode[] = [
+    'vi',
+    ...(isWingsGroupEnglishPublicRoute({ path: '/tin-tuc', settings }) ? ['en' as const] : []),
+  ]
+  const posts = await Promise.all(
+    candidateLocales.map((locale) => queryWingsGroupEditorialPosts({ draft, locale, slug })),
+  )
+
+  return candidateLocales.filter((_, index) => posts[index]?.length)
+}
+
 export default async function Page({ params: paramsPromise }: Args) {
   const { slug } = await paramsPromise
   const article = await getArticle(decodeEditorialSlug(slug))
@@ -112,8 +132,13 @@ export default async function Page({ params: paramsPromise }: Args) {
   const canonicalPath = getPageCanonicalPath(
     { pathname: getWingsGroupEditorialPostPath(post.slug) },
     locale,
+    site.defaultLocale,
   )
-  const archivePath = getPageCanonicalPath({ pathname: WINGSGROUP_EDITORIAL_ARCHIVE_PATH }, locale)
+  const archivePath = getPageCanonicalPath(
+    { pathname: WINGSGROUP_EDITORIAL_ARCHIVE_PATH },
+    locale,
+    site.defaultLocale,
+  )
   const breadcrumbItems = [
     { label: settings?.siteName || 'WingsGroup', path: '/' },
     {
@@ -174,6 +199,11 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 
   const locale = article.locale === 'en' ? 'en' : 'vi'
   const { heroMedia } = await getArticlePresentation(article.post, locale)
+  const alternateLocales = await getArticleAlternateLocales({
+    draft: article.draft,
+    settings: article.settings,
+    slug: article.post.slug,
+  })
   const openGraphMedia = getWingsGroupEditorialOpenGraphMedia(heroMedia)
   const metadataPost = openGraphMedia
     ? {
@@ -183,8 +213,21 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     : article.post
 
   return generateMeta({
+    alternateLocales,
+    article: {
+      authors:
+        article.post.populatedAuthors
+          ?.map((author) => author.name)
+          .filter((name): name is string => Boolean(name)) || [
+          'Ban Biên tập WingsGroup',
+        ],
+      modifiedTime: article.post.updatedAt,
+      publishedTime: article.post.publishedAt,
+    },
     doc: metadataPost,
     locale: article.locale as SupportedLocaleCode,
     path: getWingsGroupEditorialPostPath(article.post.slug),
+    socialDescription: article.post.meta?.description || undefined,
+    socialTitle: article.post.meta?.title || article.post.title,
   })
 }

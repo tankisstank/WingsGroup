@@ -2,6 +2,7 @@ import type { Site } from '@/payload-types'
 import { PayloadRequest } from 'payload'
 
 import type { PreviewCollection } from './previewHandoff'
+import { isSupportedLocale } from './sitePaths'
 
 const collectionPrefixMap: Record<PreviewCollection, string> = {
   posts: '/posts',
@@ -51,6 +52,9 @@ export const generatePreviewPath = async ({
     id: id === undefined || id === null ? '' : String(id),
     path: encodedPath,
   })
+  if (isSupportedLocale(req.locale)) {
+    encodedParams.set('locale', req.locale)
+  }
 
   const url = `/next/preview?${encodedParams.toString()}`
 

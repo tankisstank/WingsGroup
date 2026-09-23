@@ -17,6 +17,12 @@ describe('public media URL normalization', () => {
     )
   })
 
+  it('rewrites absolute Payload file URLs without losing the origin or query', () => {
+    expect(
+      normalizePublicMediaURL('https://wingsgroup.vn/api/media/file/hero.jpg?cache=123#og'),
+    ).toBe('https://wingsgroup.vn/media/hero.jpg?cache=123#og')
+  })
+
   it('retains existing query strings, hashes, and cache tags', () => {
     expect(getMediaUrl('/api/media/file/hero.jpg?version=1#gallery', 'updated-at')).toBe(
       '/media/hero.jpg?version=1&updated-at#gallery',

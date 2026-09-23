@@ -40,6 +40,8 @@ describe('WingsGroup v3 responsive CSS contract', () => {
     const source = fs.readFileSync(cmsPage, 'utf8')
 
     expect(source).toContain("useWingsGroupV3Home ? 'wingsgroup-v3-home' : ''")
+    expect(source).toContain('const shouldRenderBreadcrumbs = !useHiFiBody && !useWingsGroupV3Home')
+    expect(source).toContain('{shouldRenderBreadcrumbs ? (')
     expect(source).toContain('!useWingsGroupV3Home && !useWingsGroupV3Surface ?')
   })
 

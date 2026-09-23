@@ -150,6 +150,15 @@ describe('lead form hardened submission', () => {
     expect(screen.queryByText(/content manager|sales or content/i)).toBeNull()
   })
 
+  it('does not derive the WingsGroup variant from mutable document state during render', () => {
+    document.body.dataset.siteCode = 'wings-group'
+
+    render(<FormBlock enableIntro={false} form={form as never} />)
+
+    expect(screen.queryByText('Preparing the secure consultation form…')).toBeNull()
+    delete document.body.dataset.siteCode
+  })
+
   it('focuses the contact intake only after a consultation dialog handoff', async () => {
     vi.stubGlobal(
       'fetch',
@@ -191,7 +200,7 @@ describe('lead form hardened submission', () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
     window.history.replaceState({}, '', '/wingsside/vi/plan-your-trip')
-    document.documentElement.lang = 'vi'
+    document.documentElement.lang = 'en'
 
     render(<FormBlock enableIntro={false} form={{ ...mixedForm, id: 9 } as never} />)
 
@@ -259,6 +268,53 @@ describe('lead form hardened submission', () => {
     expect(fullName).toHaveProperty('required', true)
     expect(fullName.getAttribute('aria-required')).toBe('true')
     expect(document.querySelector('form')?.hasAttribute('novalidate')).toBe(false)
+  })
+
+  it('prefills WingsGo enquiry context and exposes strict native phone validation', async () => {
+    document.documentElement.lang = 'en'
+    window.history.replaceState(
+      {},
+      '',
+      '/lien-he?intent=hold-seat&tour=busan-gyeongju-seoul-co-hong-6n5d&tourTitle=Busan%20-%20Seoul&tourId=23&departureId=87&departureDate=2026-10-10&source=tour-detail-hero',
+    )
+
+    const wingsGoForm = {
+      confirmationMessage: null,
+      confirmationType: 'message',
+      fields: [
+        { blockType: 'text', label: 'Họ và tên', name: 'full-name', required: true },
+        { blockType: 'text', label: 'Số điện thoại', name: 'phone', required: true },
+        { blockType: 'text', label: 'Bạn muốn đi đâu?', name: 'destination', required: false },
+        { blockType: 'text', label: 'Dự kiến khởi hành', name: 'departure-date', required: false },
+        { blockType: 'number', label: 'Số lượng khách', name: 'guests', required: true },
+        { blockType: 'text', label: 'Tour bạn quan tâm', name: 'tour-interest', required: false },
+        { blockType: 'textarea', label: 'Lời nhắn', name: 'message', required: false },
+      ],
+      id: 'wingsgo-contact',
+      title: 'WingsGo Contact',
+    }
+
+    render(
+      <FormBlock
+        enableIntro={false}
+        form={wingsGoForm as never}
+        publicPathname="/lien-he"
+        siteCode="wings-go"
+      />,
+    )
+
+    await waitFor(() => expect(document.querySelector('input[name="phone"]')).toBeTruthy())
+    const phone = document.querySelector<HTMLInputElement>('input[name="phone"]')!
+    expect(phone.getAttribute('pattern')).toBe('^0[0-9]{9}$')
+    expect(document.querySelector<HTMLInputElement>('input[name="destination"]')?.value).toBe('Busan - Seoul')
+    expect(document.querySelector<HTMLInputElement>('input[name="departure-date"]')?.value).toBe('2026-10-10')
+    expect(document.querySelector<HTMLInputElement>('input[name="tour-interest"]')?.value).toBe('Busan - Seoul')
+    expect(document.querySelector<HTMLTextAreaElement>('textarea[name="message"]')?.value).toContain(
+      'Tour quan tâm: Busan - Seoul',
+    )
+
+    fireEvent.change(phone, { target: { value: 'abc' } })
+    expect(phone).toHaveProperty('validity.valid', false)
   })
 
   it('labels hidden real plan fields and exposes deterministic consent focus/errors', async () => {

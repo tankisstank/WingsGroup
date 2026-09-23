@@ -93,10 +93,10 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   .site-header__primary-link {
   border-radius: 0;
   color: #302d26;
-  font-size: 0.78rem;
-  font-weight: 500;
+  font-size: 0.9375rem;
+  font-weight: 600;
   letter-spacing: 0.01em;
-  padding-inline: 8px;
+  padding-inline: 12px;
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true']
@@ -116,14 +116,14 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   align-items: center;
   background: var(--site-accent, #fdb515);
   border: 1px solid var(--site-accent, #fdb515);
-  border-radius: 0;
+  border-radius: 4px;
   color: var(--site-brand, #005090);
   display: inline-flex;
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   font-weight: 700;
   justify-content: center;
   min-height: 44px;
-  padding: 10px 18px;
+  padding: 10px 20px;
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true']
@@ -251,6 +251,17 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .wingsgroup-v3-sur
   box-shadow: none;
 }
 
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  .wingsgroup-v3-surface
+  .layout-cta
+  .payload-richtext,
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  .wingsgroup-v3-surface
+  .layout-cta
+  .payload-richtext :is(h1, h2, h3, h4, h5, h6, p) {
+  color: #fbfaf6;
+}
+
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .wingsgroup-v3-surface .layout-cta a {
   border-radius: 0;
 }
@@ -367,6 +378,7 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header {
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__bar {
   max-width: 1240px;
+  min-height: 76px;
   height: 76px;
   margin-inline: auto;
   padding: 0;
@@ -374,12 +386,17 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__bar 
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__brand {
   min-width: 0;
   max-width: none;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-header__brand-copy {
@@ -503,8 +520,8 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true']
   background: transparent;
   box-shadow: none;
   color: #302d26;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  font-size: 0.9375rem;
+  font-weight: 600;
   letter-spacing: 0.01em;
 }
 
@@ -580,7 +597,8 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-mobile-nav__
   background: transparent;
   box-shadow: none;
   color: #302d26;
-  font-weight: 500;
+  font-size: 0.9375rem;
+  font-weight: 600;
 }
 
 body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-mobile-nav__link:hover,

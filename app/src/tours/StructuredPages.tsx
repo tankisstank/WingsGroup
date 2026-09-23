@@ -9,6 +9,7 @@ import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import { defaultTourSectionOrder, defaultTourSectionVisibility } from './sectionRegistry'
 import { ScheduleInteractiveDepartures } from './ScheduleInteractiveDepartures'
 import { TourItineraryDayDetails } from './TourItineraryDayDetails'
+import { TourDepartureMatrix } from './TourDepartureMatrix'
 import { normalizeGovernedTourPrice } from './currency'
 import { isDepartureVerificationCurrent } from './departureCommerce'
 import type {
@@ -26,6 +27,7 @@ import {
   getDurationLabel,
   getMarketConfig,
   getMealChipFlags,
+  getPriorityMarketDeparture,
   getSchedulePath,
   getTourInquiryPath,
   getTourPath,
@@ -39,6 +41,7 @@ import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { TourEnquiryContextBridge } from './TourEnquiryContextBridge'
 import type { TourEnquiryContext } from './enquiryContext'
 import { getWingSideTourCopy, normalizeWingSideConsultativeTour } from './wingsSideTourViewModel'
+import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
 
 /** Retail = WingsGo dense conversion. Consultative = Wingside private inbound. */
 export type TourDetailPresentation = 'consultative' | 'retail'
@@ -1284,6 +1287,11 @@ const TourItinerarySection = ({
   const itineraryDays = asArray<Record<string, any>>(tour.itineraryDays)
   const groupedThemeCount = new Set(itineraryDays.map((day) => day.route).filter(Boolean)).size
   const isEn = locale === 'en'
+  const itineraryPdf = asDoc<Record<string, any>>(tour.itineraryPdf)
+  const itineraryPdfURL =
+    itineraryPdf?.mimeType === 'application/pdf' && typeof itineraryPdf.url === 'string'
+      ? itineraryPdf.url
+      : null
   const wingSideCopy = getWingSideTourCopy(locale)
   const heading = isConsultative
     ? { eyebrow: wingSideCopy.itinerary, title: wingSideCopy.itinerary }
@@ -1434,6 +1442,27 @@ const TourItinerarySection = ({
   return (
     <Panel id="itinerary">
       <SectionHeading eyebrow={heading.eyebrow} title={heading.title} description={null} />
+      <div className="mb-5">
+        {itineraryPdfURL ? (
+          <a
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-5 text-sm font-semibold text-foreground no-underline hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)]"
+            download
+            href={itineraryPdfURL}
+          >
+            {isEn ? 'Download tour itinerary (PDF)' : 'Tải lịch trình tour (file PDF)'}
+          </a>
+        ) : (
+          <button
+            aria-disabled="true"
+            className="inline-flex min-h-11 cursor-not-allowed items-center justify-center rounded-full border border-border px-5 text-sm font-semibold text-muted-foreground opacity-70"
+            disabled
+            title={isEn ? 'The itinerary PDF is being prepared.' : 'Lịch trình PDF đang được cập nhật.'}
+            type="button"
+          >
+            {isEn ? 'Download tour itinerary (PDF)' : 'Tải lịch trình tour (file PDF)'}
+          </button>
+        )}
+      </div>
       <div className="mb-6 grid gap-4 md:grid-cols-4">
         {compactInfoItems([
           [
@@ -1459,7 +1488,7 @@ const TourItinerarySection = ({
           </div>
         ))}
       </div>
-      <div className="space-y-5">
+      <div className="tour-itinerary-accordion space-y-2 sm:space-y-3">
         {itineraryDays.map((day, index) => {
           const gallery = asArray(day.gallery)
           const infoItems = compactInfoItems([
@@ -1468,85 +1497,123 @@ const TourItinerarySection = ({
             ['Lưu trú', day.accommodation],
             ['Tiêu chuẩn nghỉ', day.sleepingStandard],
           ])
+          const dayId = `retail-itinerary-day-${day.dayNumber || index + 1}`
+          const panelId = `${dayId}-panel`
 
           return (
-            <div
-              className={`grid gap-5 rounded-[28px] border border-border/60 bg-muted/15 p-5 ${
-                gallery.length > 0 ? 'lg:grid-cols-[96px_1fr_320px]' : 'lg:grid-cols-[96px_1fr]'
-              }`}
+            <TourItineraryDayDetails
+              className="tour-itinerary-day group rounded-[22px] border border-border/60 bg-muted/15 open:bg-card/90 sm:rounded-[28px]"
+              initiallyOpen={index === 0}
               key={`${day.dayNumber}-${index}`}
             >
-              <div className="rounded-[20px] bg-muted/45 p-4">
-                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                  Day {day.dayNumber}
-                </p>
-                <p className="mt-2 text-3xl font-semibold">
-                  {String(day.dayNumber).padStart(2, '0')}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-foreground">{day.title}</h3>
-                {day.dayTheme ? (
-                  <p className="mt-2 text-sm font-semibold text-[var(--site-brand)]">
-                    {day.dayTheme}
+              <summary
+                aria-controls={panelId}
+                className="flex cursor-pointer list-none items-start gap-3 rounded-[22px] px-3 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--site-accent)] sm:gap-4 sm:px-5 sm:py-4 [&::-webkit-details-marker]:hidden"
+                id={dayId}
+              >
+                <div className="shrink-0 rounded-[16px] bg-muted/50 px-3 py-2 text-center sm:rounded-[20px] sm:px-4 sm:py-3">
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                    {isEn ? 'Day' : 'Ngày'}
                   </p>
-                ) : null}
-                <p className="mt-2 text-sm font-medium text-foreground">{day.route}</p>
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">{day.summary}</p>
-                {day.dayHighlight ? (
-                  <div className="mt-4 rounded-[20px] border border-border/60 bg-background p-4">
-                    <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                      Điểm nhấn bán hàng
+                  <p className="text-xl font-semibold sm:text-2xl">
+                    {String(day.dayNumber || index + 1).padStart(2, '0')}
+                  </p>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="line-clamp-2 text-base font-semibold text-foreground sm:text-lg">
+                    {day.title}
+                  </h3>
+                  {day.route ? (
+                    <p className="mt-1 text-sm font-medium text-foreground">{day.route}</p>
+                  ) : null}
+                  {teaser(day.summary) ? (
+                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground group-open:hidden">
+                      {teaser(day.summary)}
                     </p>
-                    <p className="mt-2 text-sm leading-7 text-foreground">{day.dayHighlight}</p>
-                  </div>
-                ) : null}
-                {infoItems.length > 0 ? (
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    {infoItems.map(([label, value]) => (
-                      <div
-                        className="rounded-[20px] border border-border/60 bg-background p-4"
-                        key={label}
-                      >
-                        <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                          {label}
-                        </p>
-                        <p className="mt-2 text-sm font-medium leading-7 text-foreground">
-                          {value}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-                {day.equipmentNote || day.notes ? (
-                  <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                    {[day.equipmentNote, day.notes].filter(Boolean).join(' ')}
-                  </p>
-                ) : null}
-              </div>
-              {gallery.length > 0 ? (
-                <div className="space-y-3">
-                  <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                    Hình ảnh trong ngày
-                  </p>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                    {gallery.slice(0, 3).map((item, imageIndex) => (
-                      <div
-                        className="relative aspect-[4/3] overflow-hidden rounded-[22px] border border-border/60 bg-muted"
-                        key={imageIndex}
-                      >
-                        <Media
-                          fill
-                          imgClassName="object-cover"
-                          pictureClassName="absolute inset-0"
-                          resource={item as any}
-                        />
-                      </div>
-                    ))}
+                  ) : null}
+                  <div className="mt-2">
+                    <MealChips meals={day.meals} />
                   </div>
                 </div>
-              ) : null}
-            </div>
+                <span
+                  aria-hidden
+                  className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-transform duration-200 group-open:rotate-180"
+                >
+                  ▾
+                </span>
+              </summary>
+              <div
+                aria-labelledby={dayId}
+                className="border-t border-border/50 px-3 pb-4 pt-4 sm:px-5 sm:pb-5"
+                id={panelId}
+              >
+                <div className={`grid gap-5 ${gallery.length > 0 ? 'lg:grid-cols-[1fr_320px]' : ''}`}>
+                  <div>
+                    {day.dayTheme ? (
+                      <p className="text-sm font-semibold text-[var(--site-brand)]">{day.dayTheme}</p>
+                    ) : null}
+                    {day.route ? (
+                      <p className="mt-2 text-sm font-medium text-foreground">{day.route}</p>
+                    ) : null}
+                    {day.summary ? (
+                      <p className="mt-3 text-sm leading-7 text-muted-foreground">{day.summary}</p>
+                    ) : null}
+                    {day.dayHighlight ? (
+                      <div className="mt-4 rounded-[20px] border border-border/60 bg-background p-4">
+                        <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                          {isEn ? 'Day highlight' : 'Điểm nhấn bán hàng'}
+                        </p>
+                        <p className="mt-2 text-sm leading-7 text-foreground">{day.dayHighlight}</p>
+                      </div>
+                    ) : null}
+                    {infoItems.length > 0 ? (
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        {infoItems.map(([label, value]) => (
+                          <div
+                            className="rounded-[20px] border border-border/60 bg-background p-4"
+                            key={label}
+                          >
+                            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                              {label}
+                            </p>
+                            <p className="mt-2 text-sm font-medium leading-7 text-foreground">
+                              {value}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                    {day.equipmentNote || day.notes ? (
+                      <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                        {[day.equipmentNote, day.notes].filter(Boolean).join(' ')}
+                      </p>
+                    ) : null}
+                  </div>
+                  {gallery.length > 0 ? (
+                    <div className="space-y-3">
+                      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                        {isEn ? 'Photos of the day' : 'Hình ảnh trong ngày'}
+                      </p>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                        {gallery.slice(0, 3).map((item, imageIndex) => (
+                          <div
+                            className="relative aspect-[4/3] overflow-hidden rounded-[22px] border border-border/60 bg-muted"
+                            key={imageIndex}
+                          >
+                            <Media
+                              fill
+                              imgClassName="object-cover"
+                              pictureClassName="absolute inset-0"
+                              resource={item as any}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </TourItineraryDayDetails>
           )
         })}
       </div>
@@ -1916,110 +1983,27 @@ const TourDecisionRail = ({
 const DepartureMatrix = ({
   departures,
   locale,
+  tour,
 }: {
   departures: DepartureCardViewModel[]
   locale: SupportedLocaleCode
+  tour: Record<string, any>
 }) => {
   if (departures.length === 0) {
     return null
   }
 
-  return (
-    <div className="space-y-4">
-      {departures.map((departure) => {
-        const variant = asDoc<Record<string, any>>(departure.variantRef)
-        const product = asDoc<Record<string, any>>(departure.tourProduct)
-
-        return (
-          <div
-            className="grid gap-4 rounded-[28px] border border-border/70 bg-card/95 p-5 lg:grid-cols-[1.35fr_repeat(4,minmax(0,1fr))_220px]"
-            key={departure.id}
-          >
-            <div>
-              <p className="text-lg font-semibold text-foreground">
-                {[formatTourDate(departure.departureDate, locale), variant?.label]
-                  .filter(Boolean)
-                  .join(' • ')}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {[departure.departureCity, departure.airline].filter(Boolean).join(' • ')}
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
-                  {departure.availabilityBadge ||
-                    getAvailabilityLabel(departure.availabilityStatus, locale)}
-                </span>
-                {departure.urgencyLabel ? (
-                  <span className="rounded-full border border-[var(--site-accent)]/40 bg-[var(--site-accent)]/10 px-3 py-1 text-xs font-semibold text-foreground">
-                    {departure.urgencyLabel}
-                  </span>
-                ) : null}
-                {departure.promoLabel ? (
-                  <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground">
-                    {departure.promoLabel}
-                  </span>
-                ) : null}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Khởi hành</p>
-              <p className="mt-2 text-base font-semibold">
-                {formatTourDate(departure.departureDate, locale)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Ngày về</p>
-              <p className="mt-2 text-base font-semibold">
-                {formatTourDate(departure.returnDate, locale) || 'Theo lịch bay'}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Điểm đi</p>
-              <p className="mt-2 text-base font-semibold">
-                {departure.departureCity || 'Theo đợt bán'}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Giá từ</p>
-              <p className="mt-2 text-xl font-semibold text-foreground">
-                {formatTourPrice(departure.priceFrom, departure.currency) || 'Liên hệ'}
-              </p>
-            </div>
-            <div className="flex flex-col justify-between gap-3">
-              <div className="space-y-2 text-sm text-muted-foreground">
-                {departure.depositNote ? <p>{departure.depositNote}</p> : null}
-                {departure.holdNote ? <p>{departure.holdNote}</p> : null}
-                {departure.changePolicyNote ? <p>{departure.changePolicyNote}</p> : null}
-                {!departure.depositNote && !departure.holdNote && departure.note ? (
-                  <p>{departure.note}</p>
-                ) : null}
-              </div>
-              <SiteLink
-                className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline"
-                href={getTourInquiryPath({
-                  departureId: departure.id,
-                  intent: 'hold-seat',
-                  source: 'tour-detail-departures',
-                  tourId: product?.id,
-                  tourSlug: product?.slug,
-                })}
-              >
-                {departure.ctaLabelOverride || 'Giữ chỗ'}
-              </SiteLink>
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
+  return <TourDepartureMatrix departures={departures} locale={locale} tour={tour} />
 }
 
 const TourDepartureSection = ({
   departures,
   locale,
+  tour,
 }: {
   departures: DepartureCardViewModel[]
   locale: SupportedLocaleCode
+  tour: Record<string, any>
 }) => (
   <Panel id="departures">
     <SectionHeading
@@ -2027,7 +2011,7 @@ const TourDepartureSection = ({
       title="Các đợt đang mở bán cho line tour này"
       description="Ngày khởi hành, hãng bay và giá từ được hiển thị theo từng đợt mở bán."
     />
-    <DepartureMatrix departures={departures} locale={locale} />
+    <DepartureMatrix departures={departures} locale={locale} tour={tour} />
   </Panel>
 )
 
@@ -2371,7 +2355,7 @@ export const TourDetailPage = ({
     departures: isConsultative ? (
       <TourPricePostureSection locale={locale} nextDeparture={data.nextDeparture} tour={tour} />
     ) : (
-      <TourDepartureSection departures={data.departures} locale={locale} />
+      <TourDepartureSection departures={data.departures} locale={locale} tour={tour} />
     ),
     faq: <TourFAQSection locale={locale} presentation={resolvedPresentation} tour={tour} />,
     related: <TourRelatedSection locale={locale} presentation={resolvedPresentation} tour={tour} />,
@@ -2773,105 +2757,226 @@ export const TourCampaignPage = ({
   </div>
 )
 
-export const TourSchedulePage = ({ schedule }: { schedule: SchedulePageViewModel }) => (
-  <div className="container space-y-8">
-    <Panel>
-      <SectionHeading
-        eyebrow="Lịch khởi hành outbound"
-        level="h1"
-        title="Lịch khởi hành WingsGo"
-        description="So sánh nhanh các đợt đang mở bán theo thị trường, hãng bay và tình trạng chỗ. Giá, ngày đi và CTA đều hiển thị sớm để khách không phải đi vòng."
-      />
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_repeat(3,minmax(0,1fr))]">
-        <div className="rounded-[24px] border border-border/60 bg-background p-5">
-          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-            Toàn cảnh mở bán
-          </p>
-          <p className="mt-2 text-3xl font-semibold text-foreground">
-            {schedule.heroStats.openCount} đợt • giá từ{' '}
-            {formatTourPrice(schedule.heroStats.lowestPrice) || 'Liên hệ'}
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Hàn Quốc, Nhật Bản, Trung Quốc với lịch đi rõ và CTA giữ chỗ ngay.
-          </p>
-        </div>
-        <div className="rounded-[24px] bg-muted/35 p-5">
-          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Đợt gần nhất</p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {formatTourDate(schedule.heroStats.nextDeparture?.departureDate) || 'Đang cập nhật'}
-          </p>
-        </div>
-        <div className="rounded-[24px] bg-muted/35 p-5">
-          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Giá thấp nhất</p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {formatTourPrice(schedule.heroStats.lowestPrice) || 'Liên hệ'}
-          </p>
-        </div>
-        <div className="rounded-[24px] bg-muted/35 p-5">
-          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">CTA nhanh</p>
-          <div className="mt-3 flex flex-col gap-3">
+export const TourSchedulePage = ({
+  locale,
+  schedule,
+}: {
+  locale: 'en' | 'vi'
+  schedule: SchedulePageViewModel
+}) => {
+  const isEn = locale === 'en'
+  const zaloCTA = getSharedZaloCTA('wings-go', locale)
+  const markets = [
+    {
+      key: 'korea',
+      title: isEn ? '🔥 BEST-SELLING SOUTH KOREA TOURS' : '🔥 TOUR HÀN QUỐC BÁN CHẠY',
+      slug: 'han-quoc',
+    },
+    {
+      key: 'japan',
+      title: isEn ? '🔥 BEST-SELLING JAPAN TOURS' : '🔥 TOUR NHẬT BẢN BÁN CHẠY',
+      slug: 'nhat-ban',
+    },
+    {
+      key: 'china',
+      title: isEn ? '🔥 BEST-SELLING CHINA TOURS' : '🔥 TOUR TRUNG QUỐC BÁN CHẠY',
+      slug: 'trung-quoc',
+    },
+  ]
+  const marketHighlights = markets.map((market) => ({
+    ...market,
+    departure: getPriorityMarketDeparture(schedule.departures, market.key),
+  }))
+  const trustSignals = isEn
+    ? [
+        '📅 Itinerary and tour prices',
+        '🌏 Tours and visa support',
+        '🎧 Thoughtful support throughout',
+      ]
+    : ['📅 Lịch trình & giá tour', '🌏 Tour & Visa', '🎧 Hỗ trợ tận tâm']
+
+  return (
+    <div className="container space-y-8">
+      <Panel>
+        <SectionHeading
+          eyebrow={isEn ? 'WingsGo departure schedule' : 'Lịch khởi hành outbound'}
+          level="h1"
+          title={isEn ? '2026 departures & tour prices' : 'Lịch khởi hành & giá Tour 2026'}
+          description={
+            isEn
+              ? 'Choose a destination, scan flight dates and clear tour prices, then explore the full itinerary.'
+              : 'Chọn điểm đến yêu thích, xem nhanh lịch bay và mức giá siêu hấp dẫn → khám phá lịch trình chi tiết.'
+          }
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.2fr_repeat(3,minmax(0,1fr))]">
+          <div className="rounded-[24px] border border-border/60 bg-background p-5">
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              {isEn ? 'Currently listed' : 'Toàn cảnh mở bán'}
+            </p>
+            <p className="mt-2 text-3xl font-semibold text-foreground">
+              {isEn
+                ? `${schedule.heroStats.openCount} departures`
+                : `${schedule.heroStats.openCount} đợt`}{' '}
+              • {isEn ? 'from' : 'giá từ'}{' '}
+              {formatTourPrice(schedule.heroStats.lowestPrice) || (isEn ? 'Contact us' : 'Liên hệ')}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {isEn
+                ? 'South Korea, Japan and China with dates, airline information and a clear next step.'
+                : 'Hàn Quốc, Nhật Bản, Trung Quốc với lịch đi rõ và bước tư vấn nhanh.'}
+            </p>
+          </div>
+          <div className="rounded-[24px] bg-muted/35 p-5">
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              {isEn ? 'Next departure' : 'Đợt gần nhất'}
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">
+              {formatTourDate(schedule.heroStats.nextDeparture?.departureDate, locale) ||
+                (isEn ? 'Updating' : 'Đang cập nhật')}
+            </p>
+          </div>
+          <div className="rounded-[24px] bg-muted/35 p-5">
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              {isEn ? 'Lowest listed price' : 'Giá thấp nhất'}
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">
+              {formatTourPrice(schedule.heroStats.lowestPrice) || (isEn ? 'Contact us' : 'Liên hệ')}
+            </p>
+          </div>
+          <div className="rounded-[24px] bg-muted/35 p-5">
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              {isEn ? 'Quick advice' : 'Tư vấn nhanh'}
+            </p>
             <SiteLink
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline"
-              href={getContactPath()}
+              className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-center text-sm font-semibold text-white no-underline"
+              href={getContactPath('wings-go')}
             >
-              Nhận tư vấn chọn đợt đi
+              {isEn ? 'Get tour advice' : 'Nhận tư vấn chọn đợt đi'}
             </SiteLink>
           </div>
         </div>
-      </div>
-    </Panel>
+      </Panel>
 
-    <Panel>
-      <SectionHeading
-        eyebrow="Đợt nên xem trước"
-        title="Đợt nổi bật nên xem trước"
-        description="Các đợt gần, giá tốt hoặc đang được ưu tiên hiển thị được gom lên đầu để giảm cảm giác phải đọc cả bảng dài."
-      />
-      <DepartureStrip departures={schedule.featuredDepartures} locale="vi" />
-    </Panel>
+      <Panel>
+        <SectionHeading
+          eyebrow={isEn ? 'Featured by destination' : 'Tour nổi bật theo thị trường'}
+          title={isEn ? 'Browse tours by destination' : 'Chọn hành trình theo điểm đến'}
+          description={
+            isEn
+              ? 'Compare the next listed route and its current departure price in each market.'
+              : 'Xem nhanh tuyến, hãng bay và giá từ của đợt gần nhất theo từng thị trường.'
+          }
+        />
+        <div className="grid gap-4 md:grid-cols-3">
+          {marketHighlights.map(({ departure, key, slug, title }) => {
+            const product = departure
+              ? asDoc<Record<string, any>>(departure.tourProduct)
+              : null
+            const href = product?.slug ? getTourPath(product.slug) : `/thi-truong/${slug}`
 
-    <Panel>
-      <SectionHeading
-        eyebrow="Lọc và so sánh"
-        title="Tất cả đợt khởi hành đang mở bán"
-        description="Lọc nhanh theo thị trường, hãng bay và trạng thái rồi so sánh từng đợt trong cùng một màn hình."
-      />
-      <ScheduleInteractiveDepartures departures={schedule.departures} />
-    </Panel>
-
-    <Panel>
-      <SectionHeading
-        eyebrow="Hỗ trợ & cam kết"
-        title="Những điều khách thường cần xác nhận trước khi giữ chỗ"
-      />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {schedule.trustSignals.map((item) => (
-          <div className="rounded-[24px] border border-border/60 bg-background p-5" key={item}>
-            <p className="text-sm font-semibold leading-7 text-foreground">{item}</p>
-          </div>
-        ))}
-      </div>
-      <div className="mt-6 rounded-[24px] border border-border/60 bg-muted/20 p-5">
-        <p className="text-lg font-semibold text-foreground">Chưa chọn được đợt phù hợp?</p>
-        <p className="mt-2 text-sm leading-7 text-muted-foreground">
-          Gửi nhu cầu ngày đi, số khách và thị trường quan tâm để đội sales gợi ý đúng line, đúng
-          đợt và đúng nhịp ngân sách.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <SiteLink
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-5 text-sm font-semibold text-white no-underline"
-            href={getContactPath()}
-          >
-            Nhận tư vấn nhanh
-          </SiteLink>
-          <SiteLink
-            className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-5 text-sm font-semibold no-underline"
-            href="/thi-truong"
-          >
-            Xem theo thị trường
-          </SiteLink>
+            return (
+              <article className="flex h-full flex-col rounded-[24px] border border-border/70 bg-card p-5" key={key}>
+                <h2 className="text-sm font-bold uppercase tracking-wide text-[var(--site-brand)]">{title}</h2>
+                {departure ? (
+                  <dl className="mt-4 grid flex-1 gap-3 text-sm">
+                    <div>
+                      <dt className="text-muted-foreground">{isEn ? 'Route' : 'Tuyến'}</dt>
+                      <dd className="font-semibold">{product?.title || (isEn ? 'Tour details' : 'Chi tiết tour')}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">{isEn ? 'Airline' : 'Hãng bay'}</dt>
+                      <dd className="font-semibold">{departure.airline || (isEn ? 'Updating' : 'Đang cập nhật')}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">{isEn ? 'From' : 'Giá từ'}</dt>
+                      <dd className="text-lg font-bold text-foreground">
+                        {formatTourPrice(departure.priceFrom, departure.currency) || (isEn ? 'Contact us' : 'Liên hệ')}
+                      </dd>
+                    </div>
+                  </dl>
+                ) : (
+                  <p className="mt-4 flex-1 text-sm text-muted-foreground">
+                    {isEn ? 'No upcoming departure is listed yet.' : 'Chưa có lịch khởi hành sắp tới.'}
+                  </p>
+                )}
+                <SiteLink
+                  className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold no-underline"
+                  href={href}
+                >
+                  {isEn ? 'View itinerary ➔' : 'Xem hành trình ➔'}
+                </SiteLink>
+              </article>
+            )
+          })}
         </div>
-      </div>
-    </Panel>
-  </div>
-)
+      </Panel>
+
+      <Panel>
+        <SectionHeading
+          eyebrow={isEn ? 'Upcoming departures' : 'Đợt đi gần'}
+          title={isEn ? 'Open tours and departures' : 'Một số đợt khởi hành đang mở bán'}
+          description={
+            isEn
+              ? 'Compare upcoming dates by destination, airline and confirmed availability.'
+              : 'Xem các đợt gần nhất theo thị trường, hãng bay và tình trạng chỗ đã xác minh.'
+          }
+        />
+        <DepartureStrip departures={schedule.featuredDepartures} locale={locale} />
+      </Panel>
+
+      <Panel>
+        <SectionHeading
+          eyebrow={isEn ? 'Filter and compare' : 'Lọc và so sánh'}
+          title={isEn ? 'All upcoming departures' : 'Tất cả đợt khởi hành đang mở bán'}
+          description={
+            isEn
+              ? 'Filter by destination, month, airline or availability, then compare each departure.'
+              : 'Lọc theo thị trường, tháng, hãng bay và tình trạng chỗ rồi so sánh từng đợt.'
+          }
+        />
+        <ScheduleInteractiveDepartures departures={schedule.departures} locale={locale} />
+      </Panel>
+
+      <Panel>
+        <div className="rounded-[24px] border border-border/60 bg-muted/20 p-5 md:p-8">
+          <h2 className="text-2xl font-semibold text-foreground md:text-3xl">
+            {isEn ? 'Ready for a memorable journey?' : 'Sẵn sàng cho hành trình đáng nhớ?'}
+          </h2>
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {trustSignals.map((item) => (
+              <li className="rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold" key={item}>
+                {item}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground">
+            {isEn
+              ? 'Do not miss a departure that fits. Send a request and the WingsGo team will recommend a program, check availability and provide a quote.'
+              : 'Đừng bỏ lỡ lịch khởi hành phù hợp. Gửi yêu cầu để đội ngũ WingsGo tư vấn chương trình, kiểm tra chỗ và báo giá.'}
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <SiteLink
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-5 text-sm font-semibold text-white no-underline"
+              href={getContactPath('wings-go')}
+            >
+              {isEn ? 'GET ADVICE & A QUOTE' : 'NHẬN TƯ VẤN & BÁO GIÁ'}
+            </SiteLink>
+            <a className="inline-flex min-h-11 items-center font-semibold text-foreground no-underline" href="tel:0912910101">
+              {isEn ? 'Call' : 'Hotline'}: 0912 910 101
+            </a>
+            {zaloCTA ? (
+              <a
+                className="inline-flex min-h-11 items-center font-semibold text-foreground underline"
+                href={zaloCTA.href}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Zalo
+              </a>
+            ) : null}
+          </div>
+        </div>
+      </Panel>
+    </div>
+  )
+}

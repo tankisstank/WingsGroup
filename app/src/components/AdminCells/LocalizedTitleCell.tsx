@@ -1,8 +1,10 @@
 'use client'
 
 import type { DefaultCellComponentProps } from 'payload'
-import { useLocale } from '@payloadcms/ui'
+import { useConfig, useLocale } from '@payloadcms/ui'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { formatAdminURL } from 'payload/shared'
 
 import {
   formatLocalizedAdminTitle,
@@ -102,6 +104,7 @@ export default function LocalizedTitleCell({
   collectionSlug,
   rowData,
 }: DefaultCellComponentProps) {
+  const { config } = useConfig()
   const { code } = useLocale()
   const currentTitle = typeof cellData === 'string' ? cellData : null
   const missing = isMissingLocalizedTitle(currentTitle)
@@ -123,14 +126,28 @@ export default function LocalizedTitleCell({
         loading: shouldLoadFallback && fallbackTitle === undefined,
       })
 
-  return (
-    <span
-      className="wings-localized-title-cell"
-      data-locale={code}
-      data-missing={missing ? 'true' : 'false'}
-      title={missing && fallbackTitle ? `Nguồn ${fallbackTitle.locale}` : undefined}
-    >
-      {text}
-    </span>
-  )
+  const cellProps = {
+    className: 'wings-localized-title-cell',
+    'data-locale': code,
+    'data-missing': missing ? 'true' : 'false',
+    title: missing && fallbackTitle ? `Nguồn ${fallbackTitle.locale}` : undefined,
+  }
+
+  if (collectionSlug === 'tour-products' && id) {
+    return (
+      <Link
+        {...cellProps}
+        aria-label={`Mở chi tiết tour: ${text}`}
+        href={formatAdminURL({
+          adminRoute: config.routes.admin,
+          path: `/collections/tour-products/${encodeURIComponent(id)}`,
+          relative: true,
+        })}
+      >
+        {text}
+      </Link>
+    )
+  }
+
+  return <span {...cellProps}>{text}</span>
 }

@@ -187,6 +187,7 @@ const PAGE_NAME_MAP = {
 }
 
 const STORY_TITLE_MAP = {
+  'US-044': 'Nhập và phát hành catalog tour WingsGo',
   'US-003': 'Đăng ký site và cấu hình',
   'US-004': 'Đa ngôn ngữ và định tuyến theo site',
   'US-005': 'Trình biên soạn trang và landing page',
@@ -231,9 +232,107 @@ const STORY_TITLE_MAP = {
   'US-064': 'Consent lead-intake và consultation fallback',
   'US-065': 'Corporate routes, legal/locale và publication governance',
   'US-066': 'PostgreSQL, cross-tenant và go-live readiness',
+  'US-072': 'Bộ logo năm thương hiệu và căn top header WingsGroup',
+  'US-074': 'Khắc phục UX quản trị CMS và go-live đa site',
 }
 
 const CHILD_TASK_TEXT = {
+  'US-071': [
+    {
+      title: 'Canonicalize English WingsGroup routes',
+      description:
+        'Use canonical route identity for English home and approved corporate routes while preserving the raw pathname for attribution and analytics.',
+    },
+    {
+      title: 'Restore V3 header and footer contract',
+      description:
+        'Expose one consultation CTA, the approved WingsGroup footer identity and links, and no generic ThemeSelector or duplicate responsive controls.',
+    },
+    {
+      title: 'Keep English breadcrumb context',
+      description:
+        'Hide the unwanted home breadcrumb on the English home route and retain the correct contextual breadcrumb on English subpages.',
+    },
+    {
+      title: 'Pass locale through V3 blocks',
+      description:
+        'Forward locale and required identity props through Trust, Capability and other locale-sensitive WingsGroup v3 blocks.',
+    },
+    {
+      title: 'Verify English service capability Hero',
+      description:
+        'Strictly scope the service-capability page to WingsGroup and locale en, with approved English Hero copy or fail-closed behavior.',
+    },
+    {
+      title: 'Run Vietnamese and browser regressions',
+      description:
+        'Keep Vietnamese routes, child sites and fail-closed governance behavior passing the required unit, integration and browser checks.',
+    },
+  ],
+  'US-072': [
+    {
+      title: 'Chốt contract năm brand ecosystem',
+      description:
+        'Xác nhận năm identity WingsGo, WingSide, WingsPass, WingsPlus và WingsCare cùng surface, variant, owner và nguồn artwork.',
+    },
+    {
+      title: 'Tạo bộ primary reverse compact',
+      description:
+        'Tạo export primary, reverse và compact/mark cho từng brand với canvas gọn, clear-space, dimensions, checksum và alt text.',
+    },
+    {
+      title: 'Nối logo theo surface và site scope',
+      description:
+        'Logo resolver phải chọn đúng surface/variant, giữ fallback tenant-safe và fail-closed khi thiếu hoặc chưa duyệt asset.',
+    },
+    {
+      title: 'Gia cố kích thước logo header WingsGroup',
+      description:
+        'Parent header dùng lockup phù hợp, dễ đọc trong shell 76px và không va chạm nav tại desktop/mobile breakpoints.',
+    },
+    {
+      title: 'Căn top năm section headers',
+      description:
+        'Neo eyebrow, heading, mô tả và action của journey, testimonials, proof, news và about lên cùng top anchor desktop.',
+    },
+    {
+      title: 'Chạy regressions visual và accessibility',
+      description:
+        'Chạy unit/component/type/lint/build và agent-browser hoặc E2E ở 390/768/1024/1440px, lưu screenshot và console/overflow proof.',
+    },
+  ],
+  'US-074': [
+    {
+      title: 'Sửa responsive admin và list presentation',
+      description:
+        'Sửa mobile shell, topbar, search, pagination và date/time; chứng minh không có blank, overlap hoặc overflow ở các viewport bắt buộc.',
+    },
+    {
+      title: 'Gia cố preview và domain WingsGo',
+      description:
+        'Dùng preview origin allowlist/signed handoff và cập nhật exact-scope canonical, proxy host sau DNS approval; không thay đổi user/account.',
+    },
+    {
+      title: 'Đồng bộ locale và nhãn quản trị',
+      description:
+        'Áp dụng compact control, no-duplicate locale code, missing-title fallback và Việt hóa nhãn nguồn cho các luồng chính.',
+    },
+    {
+      title: 'Làm đầy đủ impact và site context',
+      description:
+        'Phân biệt full page total với subset trong Theme Manager và giữ server-side site scope khi thêm context/switcher.',
+    },
+    {
+      title: 'Cải thiện tour, Wizard và lead triage',
+      description:
+        'Thêm itinerary collapse, create-another an toàn và triage status/assignee/note bounded; deliveryStatus vẫn là trạng thái kỹ thuật.',
+    },
+    {
+      title: 'Chạy validation và rollout an toàn',
+      description:
+        'Chạy full test/visual/security/migration proof, canary, after-state và rollback; không có account mutation trong mọi bước.',
+    },
+  ],
   'US-003': [
     {
       title: 'Xây dựng bản ghi site đầy đủ định danh',
@@ -1302,7 +1401,16 @@ function resolveStoryPath(story, mapping, manifest) {
   if (story.notes && story.notes.includes('docs/stories/')) {
     const candidate = path.join(repoRoot, story.notes)
     if (fs.existsSync(candidate)) {
-      return candidate
+      const candidateStats = fs.statSync(candidate)
+      if (candidateStats.isFile()) {
+        return candidate
+      }
+      if (candidateStats.isDirectory()) {
+        const overview = path.join(candidate, 'overview.md')
+        if (fs.existsSync(overview) && fs.statSync(overview).isFile()) {
+          return overview
+        }
+      }
     }
   }
 
@@ -1500,13 +1608,14 @@ function buildChildDescription(storyId, index, criterion, sourcePath) {
     .join('\n')
 }
 
-function buildStoryRecords(manifest) {
+function buildStoryRecords(manifest, { ignoreStoryFilter = false } = {}) {
   const stories = loadStoriesFromHarness()
   const mappedStoryIds = new Set(Object.keys(manifest.storyMappings || {}))
   return stories
     .filter(
       (story) =>
-        mappedStoryIds.has(story.id) && (storyIdFilter.size === 0 || storyIdFilter.has(story.id)),
+        mappedStoryIds.has(story.id) &&
+        (ignoreStoryFilter || storyIdFilter.size === 0 || storyIdFilter.has(story.id)),
     )
     .map((story) => {
       const mapping = manifest.storyMappings[story.id] || {
@@ -1577,10 +1686,14 @@ function buildEpicDescription(epicConfig, records) {
   ].join('\n')
 }
 
-async function ensureEpicGroupings(client, manifest, projectMap, storyRecords) {
+async function ensureEpicGroupings(client, manifest, projectMap, storyRecords, onlyEpicKeys) {
   const workspaceSlug = client.config.workspaceSlug
 
   for (const epicConfig of manifest.epics || []) {
+    if (onlyEpicKeys && !onlyEpicKeys.has(epicConfig.key)) {
+      continue
+    }
+
     const project = projectMap.get(epicConfig.projectKey)
     if (!project) {
       continue
@@ -2745,9 +2858,12 @@ async function syncWingsGoItems(client, manifest, projectMap) {
 
 async function syncImportedWorkItems(client, manifest, projectMap) {
   const workspaceSlug = client.config.workspaceSlug
-  const records = buildStoryRecords(manifest).filter(
+  const allRecords = buildStoryRecords(manifest, { ignoreStoryFilter: true }).filter(
     (record) => !projectMap.get(record.mapping.projectKey)?.skipHistorySync,
   )
+  const records = storyIdFilter.size
+    ? allRecords.filter((record) => storyIdFilter.has(record.story.id))
+    : allRecords
   const projectRecords = new Map()
   let patchedCount = 0
   let missingCount = 0
@@ -2807,7 +2923,10 @@ async function syncImportedWorkItems(client, manifest, projectMap) {
     }
   }
 
-  await ensureEpicGroupings(client, manifest, projectMap, records)
+  const affectedEpicKeys = storyIdFilter.size
+    ? new Set(records.map((record) => record.mapping.epicKey))
+    : undefined
+  await ensureEpicGroupings(client, manifest, projectMap, allRecords, affectedEpicKeys)
 
   console.log(JSON.stringify({ patchedCount, missingCount }, null, 2))
 }

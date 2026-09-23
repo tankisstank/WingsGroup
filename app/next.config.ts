@@ -49,6 +49,7 @@ const allowedDevOrigins = [
   'www.wingside.vn',
   // Allow Next.js dev resources and HMR through the local Tailscale interface.
   '100.89.49.21',
+  'ubuntu-docker.taild819fc.ts.net',
 ]
 
 const nextConfig: NextConfig = {
@@ -69,6 +70,9 @@ const nextConfig: NextConfig = {
       {
         pathname: '/media/**',
       },
+      {
+        pathname: '/brand/**',
+      },
     ],
     qualities: [80],
     remotePatterns: remoteImagePatterns,
@@ -86,6 +90,35 @@ const nextConfig: NextConfig = {
   redirects,
   async headers() {
     return [
+      // Administrative and API responses can be user-specific. Keep this
+      // explicit even when an individual route does not set its own policy.
+      {
+        source: '/admin/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, no-cache, no-store, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, no-cache, no-store, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/next/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, no-cache, no-store, max-age=0, must-revalidate',
+          },
+        ],
+      },
       {
         source: '/:path*',
         headers: [

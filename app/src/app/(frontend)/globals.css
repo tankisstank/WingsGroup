@@ -4649,6 +4649,82 @@ body[data-site-code='wing-side'] .wingsside-tour-breadcrumb [aria-current='page'
   margin-bottom: 0.25rem;
 }
 
+@media (min-width: 1280px) {
+  body[data-site-code='wings-go'] .site-header__bar--wingsgo {
+    gap: 1rem;
+  }
+
+  body[data-site-code='wings-go'] .site-header__nav--wingsgo {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  body[data-site-code='wings-go'] .site-header__nav--wingsgo > nav {
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  body[data-site-code='wings-go'] .site-header__primary-link {
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+}
+
+body[data-site-code='wings-go'] .site-footer__contacts a[href^='tel:'] {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+  .wingsgo-contact-form-shell {
+    grid-template-columns: minmax(0, 1.15fr) minmax(270px, 0.85fr);
+  }
+}
+
+.wingsgo-contact-info {
+  align-self: stretch;
+}
+
+.wingsgo-contact-form-card .site-form-fields {
+  display: grid;
+  gap: 0 1rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.wingsgo-contact-form-card .site-form-field,
+.wingsgo-contact-form-card .site-form-field > div {
+  max-width: 100% !important;
+}
+
+@media (min-width: 768px) {
+  .wingsgo-contact-form-card .site-form-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.wingsgo-contact-benefits {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.wingsgo-contact-benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.5;
+}
+
+body[data-site-code='wings-go'] .wingsgo-contact-submit {
+  background: #f97316;
+  color: #fff;
+  box-shadow: 0 12px 28px rgb(249 115 22 / 0.22);
+}
+
+body[data-site-code='wings-go'] .wingsgo-contact-submit:hover {
+  background: #ea580c;
+}
+
 @media (prefers-reduced-motion: reduce) {
   body[data-site-theme='wings-side'] .tour-cta-primary--pulse,
   body[data-site-preset='wings-side-editorial-inbound-v2'] .tour-cta-primary--pulse,

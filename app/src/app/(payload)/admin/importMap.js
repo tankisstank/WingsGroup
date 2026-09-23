@@ -28,12 +28,13 @@ import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 }
 import { SlugField as SlugField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlocksFeatureClient as BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { default as default_6c48040f6618a25e23c2a770435a999b } from '@/components/AdminGuidance/TourProductEditGuidance'
 import { default as default_ba290a9fe200293e4bb86af139824b76 } from '@/components/TourAuthoring/TourProductSiteField'
+import { default as default_0165f3a062ce19f7271a26c2d24f4398 } from '@/components/TourAuthoring'
 import { default as default_26964421676ddaf6bd429d976a2b85bb } from '@/components/TourGalleryField'
 import { default as default_16770289a0956af26e4f7a84c072656c } from '@/components/TourItineraryRowLabel'
 import { default as default_245822b561ac10a6df6e1f638d3707d8 } from '@/components/AdminGuidance/TourProductListGuidance'
-import { default as default_6c48040f6618a25e23c2a770435a999b } from '@/components/AdminGuidance/TourProductEditGuidance'
-import { default as default_0165f3a062ce19f7271a26c2d24f4398 } from '@/components/TourAuthoring'
+import { default as default_c21ee5ce90a3a1dce11557b26b290c61 } from '@/components/TourItineraryValidationNavigator'
 import { default as default_00edbbd5305a6078491f038fdb402eb8 } from '@/components/TourAuthoring/TourDepartureSaveGuidance'
 import { default as default_2fb9775086a3f9f947e6a6f880c5b6b0 } from '@/components/LeadTriagePanel'
 import { default as default_f740633a72c2a0b281d2398c24b80d8a } from '@/components/AdminGuidance/LeadListGuidance'
@@ -103,12 +104,13 @@ export const importMap = {
   "@payloadcms/next/client#SlugField": SlugField_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BlocksFeatureClient": BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/components/AdminGuidance/TourProductEditGuidance#default": default_6c48040f6618a25e23c2a770435a999b,
   "@/components/TourAuthoring/TourProductSiteField#default": default_ba290a9fe200293e4bb86af139824b76,
+  "@/components/TourAuthoring#default": default_0165f3a062ce19f7271a26c2d24f4398,
   "@/components/TourGalleryField#default": default_26964421676ddaf6bd429d976a2b85bb,
   "@/components/TourItineraryRowLabel#default": default_16770289a0956af26e4f7a84c072656c,
   "@/components/AdminGuidance/TourProductListGuidance#default": default_245822b561ac10a6df6e1f638d3707d8,
-  "@/components/AdminGuidance/TourProductEditGuidance#default": default_6c48040f6618a25e23c2a770435a999b,
-  "@/components/TourAuthoring#default": default_0165f3a062ce19f7271a26c2d24f4398,
+  "@/components/TourItineraryValidationNavigator#default": default_c21ee5ce90a3a1dce11557b26b290c61,
   "@/components/TourAuthoring/TourDepartureSaveGuidance#default": default_00edbbd5305a6078491f038fdb402eb8,
   "@/components/LeadTriagePanel#default": default_2fb9775086a3f9f947e6a6f880c5b6b0,
   "@/components/AdminGuidance/LeadListGuidance#default": default_f740633a72c2a0b281d2398c24b80d8a,

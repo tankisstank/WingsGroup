@@ -1,6 +1,7 @@
 import type { Config, Media, Site, SiteSetting } from '@/payload-types'
 
 import { getServerSideURL } from './getURL'
+import { normalizePublicMediaURL } from './getMediaUrl'
 import { isSupportedLocale, type SupportedLocaleCode } from './sitePaths'
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '')
@@ -26,6 +27,7 @@ export const normalizeCanonicalPath = (path?: null | string): string => {
 export const prefixCanonicalPathWithLocale = (
   path?: null | string,
   locale?: null | string,
+  defaultLocale?: null | string,
 ): string => {
   const normalizedPath = normalizeCanonicalPath(path)
 
@@ -33,7 +35,10 @@ export const prefixCanonicalPathWithLocale = (
     return normalizedPath
   }
 
-  if (locale === 'en') {
+  // Preserve the historical English-default behavior for callers without a
+  // site context. Public request renderers pass defaultLocale so the current
+  // tenant's default locale is never emitted as a redirecting URL.
+  if (locale === (defaultLocale || 'en')) {
     return normalizedPath
   }
 
@@ -67,7 +72,13 @@ export const buildConfiguredAbsoluteMediaURL = ({
   const baseURL = normalizeConfiguredCanonicalOrigin(settings?.seo?.canonicalDomain)
 
   if (media && typeof media === 'object' && 'url' in media && media.url) {
-    const mediaPath = media.sizes?.og?.url || media.url
+    const sizes = media.sizes as
+      | {
+          og?: { url?: null | string } | null
+        }
+      | null
+      | undefined
+    const mediaPath = normalizePublicMediaURL(sizes?.og?.url || media.url)
 
     if (/^https?:\/\//i.test(mediaPath)) return mediaPath
 
@@ -85,39 +96,47 @@ type PagePathValue =
       slug?: null | string
     }
 
-export const getPageCanonicalPath = (value?: PagePathValue, locale?: null | string) => {
+export const getPageCanonicalPath = (
+  value?: PagePathValue,
+  locale?: null | string,
+  defaultLocale?: null | string,
+) => {
   let path = '/'
 
   if (!value) {
-    return prefixCanonicalPathWithLocale(path, locale)
+    return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
   }
 
   if (typeof value === 'object') {
     if (value.pathname) {
       path = normalizeCanonicalPath(value.pathname)
-      return prefixCanonicalPathWithLocale(path, locale)
+      return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
     }
 
     if (!value.slug || value.slug === 'home') {
-      return prefixCanonicalPathWithLocale(path, locale)
+      return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
     }
 
     path = normalizeCanonicalPath(value.slug)
-    return prefixCanonicalPathWithLocale(path, locale)
+    return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
   }
 
   if (value === 'home') {
-    return prefixCanonicalPathWithLocale(path, locale)
+    return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
   }
 
   path = normalizeCanonicalPath(value)
-  return prefixCanonicalPathWithLocale(path, locale)
+  return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
 }
 
-export const getPostCanonicalPath = (slug?: null | string, locale?: null | string) => {
+export const getPostCanonicalPath = (
+  slug?: null | string,
+  locale?: null | string,
+  defaultLocale?: null | string,
+) => {
   const path = slug ? `/posts/${slug}` : '/posts'
 
-  return prefixCanonicalPathWithLocale(path, locale)
+  return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
 }
 
 export const getPostPath = (slug?: null | string) => {
@@ -128,16 +147,24 @@ export const getPostPath = (slug?: null | string) => {
   return `/posts/${slug}`
 }
 
-export const getTourProductPath = (slug?: null | string, locale?: null | string) => {
+export const getTourProductPath = (
+  slug?: null | string,
+  locale?: null | string,
+  defaultLocale?: null | string,
+) => {
   const path = slug ? `/tour/${slug}` : '/tour'
 
-  return prefixCanonicalPathWithLocale(path, locale)
+  return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
 }
 
-export const getTourCampaignPath = (slug?: null | string, locale?: null | string) => {
+export const getTourCampaignPath = (
+  slug?: null | string,
+  locale?: null | string,
+  defaultLocale?: null | string,
+) => {
   const path = slug ? `/campaign/${slug}` : '/campaign'
 
-  return prefixCanonicalPathWithLocale(path, locale)
+  return prefixCanonicalPathWithLocale(path, locale, defaultLocale)
 }
 
 export const getSiteId = (site?: null | number | Site): number | null => {

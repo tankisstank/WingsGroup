@@ -3,6 +3,7 @@ import { resolveSiteInquiryContactPath } from '@/utilities/siteContactPaths'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { normalizeGovernedTourPrice } from './currency'
 import { appendTourEnquiryContextParams, type TourEnquiryContext } from './enquiryContext'
+import type { DepartureCardViewModel } from './types'
 
 const marketConfig = {
   china: {
@@ -74,6 +75,7 @@ export const formatTourDate = (
   return new Intl.DateTimeFormat(getCopyLocale(locale) === 'en' ? 'en-GB' : 'vi-VN', {
     day: '2-digit',
     month: '2-digit',
+    timeZone: 'Asia/Ho_Chi_Minh',
     year: 'numeric',
   }).format(date)
 }
@@ -165,6 +167,7 @@ export const getContactPath = (siteCode?: null | string) => resolveSiteInquiryCo
 export type TourInquiryIntent = 'hold-seat' | 'inquiry' | 'request-quote' | 'contact'
 
 export const getTourInquiryPath = ({
+  departureDate,
   departureId,
   intent = 'inquiry',
   siteCode,
@@ -174,6 +177,7 @@ export const getTourInquiryPath = ({
   tourTitle,
   discoveryContext,
 }: {
+  departureDate?: null | string
   departureId?: null | number | string
   discoveryContext?: Omit<TourEnquiryContext, 'source' | 'tourId' | 'tourSlug' | 'tourTitle'>
   intent?: TourInquiryIntent
@@ -202,6 +206,10 @@ export const getTourInquiryPath = ({
 
   if (departureId !== null && departureId !== undefined && departureId !== '') {
     params.set('departureId', String(departureId))
+  }
+
+  if (departureDate) {
+    params.set('departureDate', departureDate)
   }
 
   if (source) {
@@ -431,6 +439,25 @@ export const getFutureDepartures = <T extends { departureDate?: null | string }>
     return date ? date.getTime() >= threshold.getTime() : false
   })
 }
+
+export const getPriorityMarketDeparture = (
+  departures: DepartureCardViewModel[],
+  market: string,
+) =>
+  getFutureDepartures(departures)
+    .filter((departure) => {
+      const product = departure.tourProduct
+      return Boolean(product && typeof product === 'object' && product.market === market)
+    })
+    .sort((left, right) => {
+      const limited =
+        Number(right.availabilityStatus === 'limited') -
+        Number(left.availabilityStatus === 'limited')
+      const featured = Number(right.isFeatured === true) - Number(left.isFeatured === true)
+      const leftDate = left.departureDate ? new Date(left.departureDate).getTime() : Infinity
+      const rightDate = right.departureDate ? new Date(right.departureDate).getTime() : Infinity
+      return limited || featured || leftDate - rightDate
+    })[0]
 
 export const getNextDeparture = <T extends { departureDate?: null | string }>(
   departures?: T[] | null,

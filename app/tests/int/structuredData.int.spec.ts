@@ -3,6 +3,7 @@ import type { Post, SiteSetting } from '@/payload-types'
 import {
   buildArticleJSONLD,
   buildBreadcrumbListJSONLD,
+  buildFAQPageJSONLD,
   buildOrganizationJSONLD,
   buildWebPageJSONLD,
   serializeJsonLd,
@@ -101,6 +102,34 @@ describe('structured data builders', () => {
 
   it('defers BreadcrumbList when there is no visible breadcrumb path', () => {
     expect(buildBreadcrumbListJSONLD([{ name: 'Home', path: '/' }], settings)).toBeNull()
+  })
+
+  it('builds FAQPage only from complete visible CMS FAQ entries', () => {
+    const faq = buildFAQPageJSONLD([
+      {
+        blockType: 'faq',
+        items: [
+          { answer: ' Có hỗ trợ 24/7. ', question: 'Có hỗ trợ khẩn cấp?' },
+          { answer: 'Không nên xuất hiện', question: ' ' },
+        ],
+        title: 'Câu hỏi thường gặp',
+      },
+    ])
+
+    expect(faq).toEqual({
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'Có hỗ trợ khẩn cấp?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Có hỗ trợ 24/7.',
+          },
+        },
+      ],
+    })
+    expect(buildFAQPageJSONLD([])).toBeNull()
   })
 
   it('serializes JSON-LD safely', () => {

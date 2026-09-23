@@ -38,6 +38,10 @@ export default function TourProductListGuidance() {
         Tour legacy chưa gán site sẽ không được public đọc và không thể publish. Hãy gán site trước khi
         xuất bản.
       </p>
+      <p>
+        Bấm tên tour để mở chi tiết. Sau khi chọn một hoặc nhiều dòng, nút “Chỉnh sửa” trên thanh công cụ
+        dùng để cập nhật hàng loạt các tour đã chọn.
+      </p>
       <div aria-label="Lọc nhanh theo thị trường" role="group">
         <button onClick={() => changeMarket()} type="button">
           Tất cả thị trường

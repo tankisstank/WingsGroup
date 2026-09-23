@@ -8,7 +8,10 @@ const cache = vi.hoisted(() => ({
 vi.mock('next/cache.js', () => cache)
 
 import { revalidatePage } from '@/collections/Pages/hooks/revalidatePage'
-import { revalidateTourDepartureDelete } from '@/collections/Tours/hooks/revalidateTourContent'
+import {
+  revalidateTourDepartureDelete,
+  revalidateTourProduct,
+} from '@/collections/Tours/hooks/revalidateTourContent'
 
 describe('WingsGo catalog revalidation', () => {
   beforeEach(() => {
@@ -56,5 +59,25 @@ describe('WingsGo catalog revalidation', () => {
     })
     expect(cache.revalidatePath).toHaveBeenCalledWith('/tour')
     expect(cache.revalidatePath).toHaveBeenCalledWith('/tour/deleted-departure-tour')
+  })
+
+  it('does not invalidate public paths while Payload creates the initial admin draft', async () => {
+    const payload = {
+      find: vi.fn(),
+      logger: { info: vi.fn() },
+    }
+
+    await revalidateTourProduct({
+      doc: { id: 99, _status: 'draft', slug: null },
+      previousDoc: undefined,
+      req: {
+        context: {},
+        payload,
+        url: 'http://localhost:3101/admin/collections/tour-products/create',
+      },
+    } as never)
+
+    expect(payload.find).not.toHaveBeenCalled()
+    expect(cache.revalidatePath).not.toHaveBeenCalled()
   })
 })

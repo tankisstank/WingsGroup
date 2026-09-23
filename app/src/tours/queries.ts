@@ -230,27 +230,34 @@ const normalizeVariantCard = (
 const normalizeDepartureCard = (
   departure: Record<string, any>,
   draft = false,
-): DepartureCardViewModel => ({
-  airline: departure.airline,
-  availabilityBadge: departure.availabilityBadge,
-  availabilityStatus: departure.availabilityStatus,
-  ctaLabelOverride: departure.ctaLabelOverride,
-  currency: departure.currency,
-  departureCity: departure.departureCity,
-  departureDate: departure.departureDate,
-  depositNote: departure.depositNote,
-  holdNote: departure.holdNote,
-  id: departure.id,
-  isFeatured: departure.isFeatured,
-  note: departure.note,
-  priceFrom:
-    draft || isDepartureVerificationCurrent(departure) ? departure.priceFrom : null,
-  promoLabel: departure.promoLabel,
-  returnDate: departure.returnDate,
-  tourProduct: normalizeTourProductCard(departure.tourProduct),
-  urgencyLabel: departure.urgencyLabel,
-  variantRef: normalizeVariantCard(departure.variantRef),
-})
+): DepartureCardViewModel => {
+  const commerceVerified = draft || isDepartureVerificationCurrent(departure)
+
+  return {
+    airline: departure.airline,
+    availabilityBadge: commerceVerified ? departure.availabilityBadge : null,
+    availabilityStatus: commerceVerified ? departure.availabilityStatus : null,
+    commerceVerified,
+    ctaLabelOverride: commerceVerified ? departure.ctaLabelOverride : null,
+    currency: departure.currency,
+    departureCity: departure.departureCity,
+    departureDate: departure.departureDate,
+    depositNote: departure.depositNote,
+    flightNumber: departure.flightNumber,
+    holdNote: departure.holdNote,
+    id: departure.id,
+    isFeatured: departure.isFeatured,
+    loyaltyPoints: commerceVerified ? departure.loyaltyPoints : null,
+    note: departure.note,
+    originalPrice: commerceVerified ? departure.originalPrice : null,
+    priceFrom: commerceVerified ? departure.priceFrom : null,
+    promoLabel: commerceVerified ? departure.promoLabel : null,
+    returnDate: departure.returnDate,
+    tourProduct: normalizeTourProductCard(departure.tourProduct),
+    urgencyLabel: commerceVerified ? departure.urgencyLabel : null,
+    variantRef: normalizeVariantCard(departure.variantRef),
+  }
+}
 
 const mergeTourVariant = ({
   tour,

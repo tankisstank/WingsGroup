@@ -33,3 +33,24 @@ export const setWingsGroupInquiryContext = (value: unknown): boolean => {
     return false
   }
 }
+
+export const readWingsGroupInquiryContext = (): WingsGroupInquiryKey | null => {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const value = window.sessionStorage.getItem(WINGSGROUP_INQUIRY_CONTEXT_SESSION_KEY)
+    return isWingsGroupInquiryKey(value) ? value : null
+  } catch {
+    return null
+  }
+}
+
+export const clearWingsGroupInquiryContext = (): void => {
+  if (typeof window === 'undefined') return
+
+  try {
+    window.sessionStorage.removeItem(WINGSGROUP_INQUIRY_CONTEXT_SESSION_KEY)
+  } catch {
+    // Session storage may be unavailable in privacy-restricted browsers.
+  }
+}

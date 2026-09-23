@@ -6,6 +6,7 @@ import {
   loadWingsGroupV3FidelityContract,
   WINGSGROUP_V3_DIALOG_CHANNELS,
   WINGSGROUP_V3_FIDELITY_SECTION_ORDER,
+  WINGSGROUP_V3_HOME_ENHANCEMENT_ORDER,
   WINGSGROUP_V3_VIEWPORT_MATRIX,
 } from '../../scripts/lib/wingsGroupV3FidelityContract'
 
@@ -18,6 +19,10 @@ describe('WingsGroup v3 executable fidelity contract', () => {
 
     expect(contract.sectionOrder).toEqual([...WINGSGROUP_V3_FIDELITY_SECTION_ORDER])
     expect(contract.runtimeSectionOrder).toEqual([...WINGSGROUP_V3_FIDELITY_SECTION_ORDER])
+    expect(contract.homeEnhancementOrder).toEqual([...WINGSGROUP_V3_HOME_ENHANCEMENT_ORDER])
+    expect(
+      contract.homeEnhancements.map((enhancement: Record<string, any>) => enhancement.key),
+    ).toEqual([...WINGSGROUP_V3_HOME_ENHANCEMENT_ORDER])
     expect(contract.sections.map((section: Record<string, any>) => section.key)).toEqual([
       ...WINGSGROUP_V3_FIDELITY_SECTION_ORDER,
     ])
@@ -47,7 +52,7 @@ describe('WingsGroup v3 executable fidelity contract', () => {
       target: '[data-od-id=consultation-dialog]',
     })
     expect(contract.header.primaryCta.flow).toBe(contract.consultationDialog.flowKey)
-    expect(contract.consultationDialog.triggerLabel).toBe('Trao đổi với chuyên viên')
+    expect(contract.consultationDialog.triggerLabel).toBe('LIÊN HỆ TƯ VẤN 24/7')
     expect(contract.consultationDialog.triggerFlow).toBe(contract.consultationDialog.flowKey)
     expect(getSection(contract, 'trust').heading).toBe('Minh bạch để bạn an tâm lựa chọn.')
     expect(

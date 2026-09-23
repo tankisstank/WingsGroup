@@ -143,6 +143,25 @@ try {
   )
   const beforeSiteRows = await adapter.drizzle.execute(sql`SELECT count(*)::int AS count FROM sites`)
 
+  // Keep one synthetic legacy submission in the pre-head database so an
+  // additive lead migration is proven against an existing row, not only an
+  // empty table. This record exists only inside the disposable smoke DB.
+  const form = await adapter.drizzle.execute(sql`
+    INSERT INTO forms (site_id, title)
+    VALUES ((SELECT id FROM sites WHERE code = ${sentinelCode}), 'Upgrade Proof Form')
+    RETURNING id
+  `)
+  const formID = Number(form.rows?.[0]?.id)
+  if (!Number.isInteger(formID)) throw new Error('Could not create pre-head form sentinel')
+
+  const submission = await adapter.drizzle.execute(sql`
+    INSERT INTO form_submissions (site_id, form_id)
+    VALUES ((SELECT id FROM sites WHERE code = ${sentinelCode}), ${formID})
+    RETURNING id
+  `)
+  const submissionID = Number(submission.rows?.[0]?.id)
+  if (!Number.isInteger(submissionID)) throw new Error('Could not create pre-head submission sentinel')
+
   if ((before.rows?.[0]?.count ?? 0) !== 1) throw new Error('Could not create pre-head sentinel')
   const siteRowsBefore = Number(beforeSiteRows.rows?.[0]?.count ?? 0)
   console.log(
@@ -165,6 +184,17 @@ try {
       AND table_name IN ('tour_products', 'departure_variants', 'tour_departures', 'tour_campaigns')
   `)
   const afterSiteRows = await adapter.drizzle.execute(sql`SELECT count(*)::int AS count FROM sites`)
+  const afterSubmission = await adapter.drizzle.execute(sql`
+    SELECT count(*)::int AS count
+    FROM form_submissions
+    WHERE id = ${submissionID}
+      AND site_id = (SELECT id FROM sites WHERE code = ${sentinelCode})
+      AND form_id = ${formID}
+      AND sales_status IS NULL
+      AND assigned_to_id IS NULL
+      AND sales_note IS NULL
+      AND sales_triage_version = 0
+  `)
   const siteRowsAfter = Number(afterSiteRows.rows?.[0]?.count ?? 0)
 
   if ((after.rows?.[0]?.count ?? 0) !== 1) throw new Error('Pre-head sentinel changed or disappeared')
@@ -172,9 +202,12 @@ try {
     throw new Error(`Existing site row count changed: before=${siteRowsBefore}, after=${siteRowsAfter}`)
   }
   if ((tourTables.rows?.[0]?.count ?? 0) !== 4) throw new Error('Tour platform tables are incomplete')
+  if ((afterSubmission.rows?.[0]?.count ?? 0) !== 1) {
+    throw new Error('Existing form submission was changed or additive triage defaults are incorrect')
+  }
 
   console.log(
-    `[upgrade-smoke] PASS: sites before=${siteRowsBefore}, after=${siteRowsAfter}, sentinel=1; 4/4 tour tables exist`,
+    `[upgrade-smoke] PASS: sites before=${siteRowsBefore}, after=${siteRowsAfter}, sentinel=1; submission preserved with nullable triage defaults; 4/4 tour tables exist`,
   )
   exitCode = 0
 } catch (error) {

@@ -8,6 +8,7 @@ import {
 const mocks = vi.hoisted(() => ({
   draftMode: vi.fn(),
   headers: vi.fn(),
+  isAuthorizedDraftMode: vi.fn(),
   find: vi.fn(),
   settings: {} as Record<string, unknown>,
   site: { code: 'wings-group', id: 1 },
@@ -24,6 +25,9 @@ vi.mock('@/utilities/siteContext', () => ({
     and: [{ site: { equals: mocks.site.id } }, where],
   })),
   getCurrentSite: vi.fn(async () => mocks.site),
+}))
+vi.mock('@/utilities/previewHandoff', () => ({
+  isAuthorizedDraftMode: mocks.isAuthorizedDraftMode,
 }))
 
 import { queryPageByPath } from '@/utilities/cmsPageQuery'
@@ -58,6 +62,7 @@ const contactPage = {
 describe('CMS page requested-path perimeter', () => {
   beforeEach(() => {
     mocks.draftMode.mockResolvedValue({ isEnabled: false })
+    mocks.isAuthorizedDraftMode.mockResolvedValue(false)
     mocks.headers.mockResolvedValue(new Headers())
     mocks.find.mockReset()
     mocks.find.mockResolvedValue({ docs: [contactPage] })
@@ -84,6 +89,7 @@ describe('CMS page requested-path perimeter', () => {
     'preserves trusted draft English lookup for shared path %s',
     async (requestedPath) => {
       mocks.draftMode.mockResolvedValue({ isEnabled: true })
+      mocks.isAuthorizedDraftMode.mockResolvedValue(true)
 
       await expect(queryPageByPath({ locale: 'en', requestedPath })).resolves.toMatchObject({
         ...contactPage,

@@ -125,6 +125,56 @@ const localSQLiteTableRenames = [
   },
 ] as const
 
+const wingsGroupRouteColumns = [
+  ['wings_group_route_managed_by', 'TEXT'],
+  ['wings_group_route_archetype', 'TEXT'],
+  ['wings_group_route_publication_vi', "TEXT DEFAULT 'hidden'"],
+  ['wings_group_route_publication_en', "TEXT DEFAULT 'hidden'"],
+  ['wings_group_route_content_approval_vi', 'TEXT'],
+  ['wings_group_route_content_approval_en', 'TEXT'],
+  ['wings_group_route_policy_legal_owner', 'TEXT'],
+  ['wings_group_route_policy_legal_entity', 'TEXT'],
+  ['wings_group_route_policy_scope', 'TEXT'],
+  ['wings_group_route_policy_effective_date', 'TEXT'],
+  ['wings_group_route_policy_version', 'TEXT'],
+  ['wings_group_route_policy_retention_months', 'NUMERIC'],
+  ['wings_group_route_policy_data_subject_contact', 'TEXT'],
+  ['wings_group_route_policy_data_subject_rights_statement', 'TEXT'],
+  ['wings_group_route_policy_data_subject_rights_evidence', 'TEXT'],
+  ['wings_group_route_policy_policy_version', 'TEXT'],
+  ['wings_group_route_policy_consent_version', 'TEXT'],
+  ['wings_group_route_policy_consent_evidence_reference', 'TEXT'],
+  ['wings_group_route_policy_privacy_approval_reference', 'TEXT'],
+  ['wings_group_route_policy_validation_marker', 'TEXT'],
+  ['wings_group_route_policy_approval_state', "TEXT DEFAULT 'pending'"],
+  ['wings_group_route_policy_approval_reference', 'TEXT'],
+] as const
+
+const wingsGroupV3MediaColumns: ReadonlyArray<readonly [string, string]> = [
+  ['governance_managed_by', 'TEXT'],
+  ['governance_source_identity', 'TEXT'],
+  ['governance_source_attachment_id', 'TEXT'],
+  ['governance_source_archive_sha256', 'TEXT'],
+  ['governance_source_file_sha256', 'TEXT'],
+  ['governance_source_filename', 'TEXT'],
+  ['governance_provenance_reference', 'TEXT'],
+  ['governance_rights_state', "TEXT DEFAULT 'pending'"],
+  ['governance_rights_evidence', 'TEXT'],
+  ['governance_usage_scope', 'TEXT'],
+  ['governance_publication_state', "TEXT DEFAULT 'pending'"],
+  ['governance_derivative_state', "TEXT DEFAULT 'pending'"],
+  ...([640, 960, 1440] as const).flatMap((width) =>
+    (['webp', 'avif'] as const).flatMap((format) => [
+      [`sizes_wingsgroup_v3_${width}_${format}_url`, 'TEXT'] as const,
+      [`sizes_wingsgroup_v3_${width}_${format}_width`, 'NUMERIC'] as const,
+      [`sizes_wingsgroup_v3_${width}_${format}_height`, 'NUMERIC'] as const,
+      [`sizes_wingsgroup_v3_${width}_${format}_mime_type`, 'TEXT'] as const,
+      [`sizes_wingsgroup_v3_${width}_${format}_filesize`, 'NUMERIC'] as const,
+      [`sizes_wingsgroup_v3_${width}_${format}_filename`, 'TEXT'] as const,
+    ]),
+  ),
+]
+
 const localSQLiteColumnRepairs = [
   {
     table: 'pages',
@@ -154,6 +204,9 @@ const localSQLiteColumnRepairs = [
       ['enquiry_context_source', 'TEXT'],
       ['enquiry_context_tour_id', 'TEXT'],
       ['enquiry_context_tour_slug', 'TEXT'],
+      ['enquiry_context_departure_id', 'TEXT'],
+      ['enquiry_context_departure_date', 'TEXT'],
+      ['enquiry_context_intent', 'TEXT'],
       ['enquiry_context_discovery_destination', 'TEXT'],
       ['enquiry_context_discovery_duration', 'TEXT'],
       ['enquiry_context_discovery_q', 'TEXT'],
@@ -168,7 +221,27 @@ const localSQLiteColumnRepairs = [
       ['wings_group_lead_consented_at', 'TEXT'],
       ['wings_group_lead_retention_until', 'TEXT'],
       ['wings_group_lead_preferred_channel', 'TEXT'],
+      ['sales_status', "TEXT DEFAULT 'new'"],
+      ['assigned_to_id', 'INTEGER'],
+      ['sales_note', 'TEXT'],
+      ['sales_status_from', 'TEXT'],
+      ['sales_status_to', 'TEXT'],
+      ['sales_updated_at', 'TEXT'],
+      ['sales_updated_by_id', 'INTEGER'],
+      ['sales_triage_version', 'NUMERIC DEFAULT 0'],
     ],
+  },
+  {
+    table: 'pages',
+    columns: wingsGroupRouteColumns,
+  },
+  {
+    table: '_pages_v',
+    columns: wingsGroupRouteColumns.map(([name, type]) => [`version_${name}`, type] as const),
+  },
+  {
+    table: 'media',
+    columns: wingsGroupV3MediaColumns,
   },
   {
     table: 'tour_products',
@@ -178,6 +251,7 @@ const localSQLiteColumnRepairs = [
       ['currency', "TEXT DEFAULT 'USD'"],
       ['taxonomy_provenance', 'TEXT'],
       ['tour_type', 'TEXT'],
+      ['itinerary_pdf_id', 'INTEGER'],
     ],
   },
   {
@@ -188,6 +262,7 @@ const localSQLiteColumnRepairs = [
       ['version_currency', "TEXT DEFAULT 'USD'"],
       ['version_taxonomy_provenance', 'TEXT'],
       ['version_tour_type', 'TEXT'],
+      ['version_itinerary_pdf_id', 'INTEGER'],
     ],
   },
   {
@@ -197,6 +272,9 @@ const localSQLiteColumnRepairs = [
       ['verified_at', 'TEXT'],
       ['expires_at', 'TEXT'],
       ['inventory_identity', 'TEXT'],
+      ['flight_number', 'TEXT'],
+      ['original_price', 'NUMERIC'],
+      ['loyalty_points', 'NUMERIC'],
       ['source_provenance_source_system', 'TEXT'],
       ['source_provenance_source_url', 'TEXT'],
       ['source_provenance_source_page_sha256', 'TEXT'],
@@ -212,6 +290,9 @@ const localSQLiteColumnRepairs = [
       ['version_verified_at', 'TEXT'],
       ['version_expires_at', 'TEXT'],
       ['version_inventory_identity', 'TEXT'],
+      ['version_flight_number', 'TEXT'],
+      ['version_original_price', 'NUMERIC'],
+      ['version_loyalty_points', 'NUMERIC'],
       ['version_source_provenance_source_system', 'TEXT'],
       ['version_source_provenance_source_url', 'TEXT'],
       ['version_source_provenance_source_page_sha256', 'TEXT'],
@@ -242,6 +323,37 @@ const localSQLiteColumnRepairs = [
       ['issued_on', 'TEXT'],
       ['reference_code', 'TEXT'],
       ['source_filename', 'TEXT'],
+    ],
+  },
+  {
+    table: 'site_settings',
+    columns: [
+      ['sales_email', 'TEXT'],
+      ['registered_office_address', 'TEXT'],
+      ['travel_office_address', 'TEXT'],
+      ['wings_group_v3_enabled', 'INTEGER DEFAULT 0'],
+      ['wings_group_v3_english_publication_state', "TEXT DEFAULT 'hidden'"],
+      ['wings_group_v3_privacy_policy_version', 'TEXT'],
+      ['wings_group_v3_privacy_consent_version', 'TEXT'],
+      ['wings_group_v3_privacy_consent_required', 'INTEGER'],
+      ['wings_group_v3_privacy_retention_months', 'NUMERIC'],
+      ['wings_group_v3_privacy_data_subject_contact', 'TEXT'],
+      ['wings_group_v3_privacy_data_subject_rights_statement', 'TEXT'],
+      ['wings_group_v3_privacy_data_subject_rights_evidence', 'TEXT'],
+      ['wings_group_v3_privacy_consent_evidence_reference', 'TEXT'],
+      ['wings_group_v3_privacy_approval_state', "TEXT DEFAULT 'pending'"],
+      ['wings_group_v3_privacy_approval_reference', 'TEXT'],
+      ['wings_group_v3_privacy_inter_branch_transfer_allowed', 'INTEGER'],
+      ['wings_group_v3_privacy_policy_route_vi', 'TEXT'],
+      ['wings_group_v3_privacy_policy_route_en', 'TEXT'],
+      ['wings_group_v3_legal_identity_legal_entity_name', 'TEXT'],
+      ['wings_group_v3_legal_identity_international_name', 'TEXT'],
+      ['wings_group_v3_legal_identity_registered_office', 'TEXT'],
+      ['wings_group_v3_legal_identity_travel_office', 'TEXT'],
+      ['wings_group_v3_legal_identity_registration_number', 'TEXT'],
+      ['wings_group_v3_legal_identity_licence_number', 'TEXT'],
+      ['wings_group_v3_legal_identity_legal_representative', 'TEXT'],
+      ['wings_group_v3_legal_identity_relationship_statement', 'TEXT'],
     ],
   },
 ] as const
@@ -334,6 +446,207 @@ const credentialsCarouselSQLiteStatements = [
     '_pages_v_blocks_credentials_carousel_items_parent_id_idx ON _pages_v_blocks_credentials_carousel_items (_parent_id)',
     '_pages_v_blocks_credentials_carousel_items_locale_idx ON _pages_v_blocks_credentials_carousel_items (_locale)',
     '_pages_v_blocks_credentials_carousel_items_image_idx ON _pages_v_blocks_credentials_carousel_items (image_id)',
+  ].map((definition) => `CREATE INDEX IF NOT EXISTS ${definition}`),
+] as const
+
+const wingsGroupGallerySQLiteStatements = [
+  `CREATE TABLE IF NOT EXISTS "pages_blocks_wings_group_gallery" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_path" TEXT NOT NULL,
+    "_locale" TEXT NOT NULL, "id" TEXT PRIMARY KEY NOT NULL,
+    "eyebrow" TEXT, "title" TEXT, "description" TEXT, "block_name" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "pages_blocks_wings_group_gallery_items" (
+    "_order" INTEGER NOT NULL, "_parent_id" TEXT NOT NULL, "_locale" TEXT NOT NULL,
+    "id" TEXT PRIMARY KEY NOT NULL, "category" TEXT DEFAULT 'activity',
+    "media_id" INTEGER, "media_type" TEXT DEFAULT 'photo', "title" TEXT, "alt" TEXT,
+    "caption" TEXT, "illustrative" INTEGER DEFAULT 0, "visible" INTEGER DEFAULT 1,
+    FOREIGN KEY ("media_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages_blocks_wings_group_gallery"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_pages_v_blocks_wings_group_gallery" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_path" TEXT NOT NULL,
+    "_locale" TEXT NOT NULL, "id" INTEGER PRIMARY KEY NOT NULL,
+    "eyebrow" TEXT, "title" TEXT, "description" TEXT, "_uuid" TEXT, "block_name" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_pages_v_blocks_wings_group_gallery_items" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_locale" TEXT NOT NULL,
+    "id" INTEGER PRIMARY KEY NOT NULL, "category" TEXT DEFAULT 'activity',
+    "media_id" INTEGER, "media_type" TEXT DEFAULT 'photo', "title" TEXT, "alt" TEXT,
+    "caption" TEXT, "illustrative" INTEGER DEFAULT 0, "visible" INTEGER DEFAULT 1,
+    "_uuid" TEXT,
+    FOREIGN KEY ("media_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v_blocks_wings_group_gallery"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  ...[
+    'pages_blocks_wings_group_gallery_order_idx ON pages_blocks_wings_group_gallery (_order)',
+    'pages_blocks_wings_group_gallery_parent_id_idx ON pages_blocks_wings_group_gallery (_parent_id)',
+    'pages_blocks_wings_group_gallery_path_idx ON pages_blocks_wings_group_gallery (_path)',
+    'pages_blocks_wings_group_gallery_locale_idx ON pages_blocks_wings_group_gallery (_locale)',
+    'pages_blocks_wings_group_gallery_items_order_idx ON pages_blocks_wings_group_gallery_items (_order)',
+    'pages_blocks_wings_group_gallery_items_parent_id_idx ON pages_blocks_wings_group_gallery_items (_parent_id)',
+    'pages_blocks_wings_group_gallery_items_locale_idx ON pages_blocks_wings_group_gallery_items (_locale)',
+    'pages_blocks_wings_group_gallery_items_media_idx ON pages_blocks_wings_group_gallery_items (media_id)',
+    '_pages_v_blocks_wings_group_gallery_order_idx ON _pages_v_blocks_wings_group_gallery (_order)',
+    '_pages_v_blocks_wings_group_gallery_parent_id_idx ON _pages_v_blocks_wings_group_gallery (_parent_id)',
+    '_pages_v_blocks_wings_group_gallery_path_idx ON _pages_v_blocks_wings_group_gallery (_path)',
+    '_pages_v_blocks_wings_group_gallery_locale_idx ON _pages_v_blocks_wings_group_gallery (_locale)',
+    '_pages_v_blocks_wings_group_gallery_items_order_idx ON _pages_v_blocks_wings_group_gallery_items (_order)',
+    '_pages_v_blocks_wings_group_gallery_items_parent_id_idx ON _pages_v_blocks_wings_group_gallery_items (_parent_id)',
+    '_pages_v_blocks_wings_group_gallery_items_locale_idx ON _pages_v_blocks_wings_group_gallery_items (_locale)',
+    '_pages_v_blocks_wings_group_gallery_items_media_idx ON _pages_v_blocks_wings_group_gallery_items (media_id)',
+  ].map((definition) => `CREATE INDEX IF NOT EXISTS ${definition}`),
+] as const
+
+const wingsGroupV3SQLiteStatements = [
+  `CREATE TABLE IF NOT EXISTS "wg_ecosystem" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_path" TEXT NOT NULL,
+    "_locale" TEXT NOT NULL, "id" TEXT PRIMARY KEY NOT NULL,
+    "eyebrow" TEXT, "title" TEXT, "description" TEXT, "block_name" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "wg_eco_profiles" (
+    "_order" INTEGER NOT NULL, "_parent_id" TEXT NOT NULL, "_locale" TEXT NOT NULL,
+    "id" TEXT PRIMARY KEY NOT NULL, "brand_key" TEXT, "brand_name" TEXT,
+    "description" TEXT, "stage_media_id" INTEGER, "proof_state" TEXT DEFAULT 'pending',
+    "cta_label" TEXT, "cta_state" TEXT DEFAULT 'contact-fallback', "cta_contact_path" TEXT,
+    "cta_url" TEXT, "cta_owner" TEXT, "cta_http_evidence" TEXT,
+    "cta_canonical_evidence" TEXT, "cta_tracking_evidence" TEXT,
+    "cta_owner_approval_evidence" TEXT,
+    FOREIGN KEY ("stage_media_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("_parent_id") REFERENCES "wg_ecosystem"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "wg_eco_proof_refs" (
+    "_order" INTEGER NOT NULL, "_parent_id" TEXT NOT NULL, "_locale" TEXT NOT NULL,
+    "id" TEXT PRIMARY KEY NOT NULL, "key" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "wg_eco_profiles"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "wg_eco_services" (
+    "_order" INTEGER NOT NULL, "_parent_id" TEXT NOT NULL, "_locale" TEXT NOT NULL,
+    "id" TEXT PRIMARY KEY NOT NULL, "label" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "wg_eco_profiles"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "wg_proof" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_path" TEXT NOT NULL,
+    "_locale" TEXT NOT NULL, "id" TEXT PRIMARY KEY NOT NULL,
+    "eyebrow" TEXT, "title" TEXT, "description" TEXT, "block_name" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "pages"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "wg_proof_records" (
+    "_order" INTEGER NOT NULL, "_parent_id" TEXT NOT NULL, "_locale" TEXT NOT NULL,
+    "id" TEXT PRIMARY KEY NOT NULL, "key" TEXT, "kind" TEXT,
+    "publication_state" TEXT DEFAULT 'pending', "title" TEXT, "summary" TEXT,
+    "source_issuer" TEXT, "context" TEXT, "evidence_date" TEXT,
+    "permission_state" TEXT DEFAULT 'pending', "permission_evidence" TEXT,
+    "media_id" INTEGER, "media_provenance_reference" TEXT,
+    FOREIGN KEY ("media_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("_parent_id") REFERENCES "wg_proof"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_wg_ecosystem_v" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_path" TEXT NOT NULL,
+    "_locale" TEXT NOT NULL, "id" INTEGER PRIMARY KEY NOT NULL, "eyebrow" TEXT,
+    "title" TEXT, "description" TEXT, "_uuid" TEXT, "block_name" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_wg_eco_profiles_v" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_locale" TEXT NOT NULL,
+    "id" INTEGER PRIMARY KEY NOT NULL, "brand_key" TEXT, "brand_name" TEXT,
+    "description" TEXT, "stage_media_id" INTEGER, "proof_state" TEXT DEFAULT 'pending',
+    "cta_label" TEXT, "cta_state" TEXT DEFAULT 'contact-fallback', "cta_contact_path" TEXT,
+    "cta_url" TEXT, "cta_owner" TEXT, "cta_http_evidence" TEXT,
+    "cta_canonical_evidence" TEXT, "cta_tracking_evidence" TEXT,
+    "cta_owner_approval_evidence" TEXT, "_uuid" TEXT,
+    FOREIGN KEY ("stage_media_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("_parent_id") REFERENCES "_wg_ecosystem_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_wg_eco_proof_refs_v" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_locale" TEXT NOT NULL,
+    "id" INTEGER PRIMARY KEY NOT NULL, "key" TEXT, "_uuid" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "_wg_eco_profiles_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_wg_eco_services_v" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_locale" TEXT NOT NULL,
+    "id" INTEGER PRIMARY KEY NOT NULL, "label" TEXT, "_uuid" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "_wg_eco_profiles_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_wg_proof_v" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_path" TEXT NOT NULL,
+    "_locale" TEXT NOT NULL, "id" INTEGER PRIMARY KEY NOT NULL, "eyebrow" TEXT,
+    "title" TEXT, "description" TEXT, "_uuid" TEXT, "block_name" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "_pages_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_wg_proof_records_v" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "_locale" TEXT NOT NULL,
+    "id" INTEGER PRIMARY KEY NOT NULL, "key" TEXT, "kind" TEXT,
+    "publication_state" TEXT DEFAULT 'pending', "title" TEXT, "summary" TEXT,
+    "source_issuer" TEXT, "context" TEXT, "evidence_date" TEXT,
+    "permission_state" TEXT DEFAULT 'pending', "permission_evidence" TEXT,
+    "media_id" INTEGER, "media_provenance_reference" TEXT, "_uuid" TEXT,
+    FOREIGN KEY ("media_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE set null,
+    FOREIGN KEY ("_parent_id") REFERENCES "_wg_proof_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "media_governance_responsive_derivatives" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "id" TEXT PRIMARY KEY NOT NULL,
+    "format" TEXT NOT NULL, "width" NUMERIC NOT NULL, "height" NUMERIC,
+    "url" TEXT NOT NULL, "sha256" TEXT NOT NULL,
+    FOREIGN KEY ("_parent_id") REFERENCES "media"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "site_settings_wings_group_v3_consultation_channels" (
+    "_order" INTEGER NOT NULL, "_parent_id" INTEGER NOT NULL, "id" TEXT PRIMARY KEY NOT NULL,
+    "key" TEXT NOT NULL, "state" TEXT DEFAULT 'unconfigured' NOT NULL,
+    "url" TEXT, "owner" TEXT, "sla" TEXT, "tracking_reference" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "site_settings"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  ...[
+    'wg_ecosystem_locale_idx ON wg_ecosystem ("_locale")',
+    'wg_ecosystem_order_idx ON wg_ecosystem ("_order")',
+    'wg_ecosystem_parent_id_idx ON wg_ecosystem ("_parent_id")',
+    'wg_ecosystem_path_idx ON wg_ecosystem ("_path")',
+    'wg_eco_profiles_locale_idx ON wg_eco_profiles ("_locale")',
+    'wg_eco_profiles_order_idx ON wg_eco_profiles ("_order")',
+    'wg_eco_profiles_parent_id_idx ON wg_eco_profiles ("_parent_id")',
+    'wg_eco_profiles_stage_media_idx ON wg_eco_profiles ("stage_media_id")',
+    'wg_eco_proof_refs_locale_idx ON wg_eco_proof_refs ("_locale")',
+    'wg_eco_proof_refs_order_idx ON wg_eco_proof_refs ("_order")',
+    'wg_eco_proof_refs_parent_id_idx ON wg_eco_proof_refs ("_parent_id")',
+    'wg_eco_services_locale_idx ON wg_eco_services ("_locale")',
+    'wg_eco_services_order_idx ON wg_eco_services ("_order")',
+    'wg_eco_services_parent_id_idx ON wg_eco_services ("_parent_id")',
+    'wg_proof_locale_idx ON wg_proof ("_locale")',
+    'wg_proof_order_idx ON wg_proof ("_order")',
+    'wg_proof_parent_id_idx ON wg_proof ("_parent_id")',
+    'wg_proof_path_idx ON wg_proof ("_path")',
+    'wg_proof_records_locale_idx ON wg_proof_records ("_locale")',
+    'wg_proof_records_media_idx ON wg_proof_records ("media_id")',
+    'wg_proof_records_order_idx ON wg_proof_records ("_order")',
+    'wg_proof_records_parent_id_idx ON wg_proof_records ("_parent_id")',
+    '_wg_ecosystem_v_locale_idx ON _wg_ecosystem_v ("_locale")',
+    '_wg_ecosystem_v_order_idx ON _wg_ecosystem_v ("_order")',
+    '_wg_ecosystem_v_parent_id_idx ON _wg_ecosystem_v ("_parent_id")',
+    '_wg_ecosystem_v_path_idx ON _wg_ecosystem_v ("_path")',
+    '_wg_eco_profiles_v_locale_idx ON _wg_eco_profiles_v ("_locale")',
+    '_wg_eco_profiles_v_order_idx ON _wg_eco_profiles_v ("_order")',
+    '_wg_eco_profiles_v_parent_id_idx ON _wg_eco_profiles_v ("_parent_id")',
+    '_wg_eco_profiles_v_stage_media_idx ON _wg_eco_profiles_v ("stage_media_id")',
+    '_wg_eco_proof_refs_v_locale_idx ON _wg_eco_proof_refs_v ("_locale")',
+    '_wg_eco_proof_refs_v_order_idx ON _wg_eco_proof_refs_v ("_order")',
+    '_wg_eco_proof_refs_v_parent_id_idx ON _wg_eco_proof_refs_v ("_parent_id")',
+    '_wg_eco_services_v_locale_idx ON _wg_eco_services_v ("_locale")',
+    '_wg_eco_services_v_order_idx ON _wg_eco_services_v ("_order")',
+    '_wg_eco_services_v_parent_id_idx ON _wg_eco_services_v ("_parent_id")',
+    '_wg_proof_v_locale_idx ON _wg_proof_v ("_locale")',
+    '_wg_proof_v_order_idx ON _wg_proof_v ("_order")',
+    '_wg_proof_v_parent_id_idx ON _wg_proof_v ("_parent_id")',
+    '_wg_proof_v_path_idx ON _wg_proof_v ("_path")',
+    '_wg_proof_records_v_locale_idx ON _wg_proof_records_v ("_locale")',
+    '_wg_proof_records_v_media_idx ON _wg_proof_records_v ("media_id")',
+    '_wg_proof_records_v_order_idx ON _wg_proof_records_v ("_order")',
+    '_wg_proof_records_v_parent_id_idx ON _wg_proof_records_v ("_parent_id")',
+    'media_governance_responsive_derivatives_order_idx ON media_governance_responsive_derivatives ("_order")',
+    'media_governance_responsive_derivatives_parent_id_idx ON media_governance_responsive_derivatives ("_parent_id")',
+    'site_settings_wings_group_v3_consultation_channels_order_idx ON site_settings_wings_group_v3_consultation_channels ("_order")',
+    'site_settings_wings_group_v3_consultation_channels_parent_id_idx ON site_settings_wings_group_v3_consultation_channels ("_parent_id")',
   ].map((definition) => `CREATE INDEX IF NOT EXISTS ${definition}`),
 ] as const
 
@@ -437,6 +750,20 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
     }
     for (const statement of credentialsCarouselSQLiteStatements) {
       db.exec(`${statement};`)
+    }
+    for (const statement of wingsGroupGallerySQLiteStatements) {
+      db.exec(`${statement};`)
+    }
+    for (const statement of wingsGroupV3SQLiteStatements) {
+      db.exec(`${statement};`)
+    }
+    const mediaTable = db
+      .prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?')
+      .get('table', 'media') as { name?: string } | undefined
+    if (mediaTable?.name) {
+      db.exec(
+        'CREATE UNIQUE INDEX IF NOT EXISTS media_governance_source_identity_idx ON media ("governance_source_identity")',
+      )
     }
     for (const statement of tourTaxonomySQLiteStatements) {
       db.exec(`${statement};`)

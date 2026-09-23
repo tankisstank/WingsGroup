@@ -2,6 +2,7 @@ import React from 'react'
 
 import type { Page } from '@/payload-types'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
+import type { ResolvedHeroPresentation } from '@/heros/presentations/types'
 import { SiteLink } from '@/components/SiteLink'
 import {
   getWingsSideHiFiAlt,
@@ -55,6 +56,7 @@ const CurationEmptyState = ({ surface }: { surface: 'destinations' | 'journeys' 
 )
 
 export const HomeHiFiPage = ({
+  heroPresentation,
   locale,
   model,
   reusableBlocks,
@@ -62,6 +64,7 @@ export const HomeHiFiPage = ({
   locale?: null | string
   model: WingsSideHiFiPageModel
   reusableBlocks?: Page['layout']
+  heroPresentation?: ResolvedHeroPresentation | null
 }) => {
   const copy = getWingsSideHiFiCopy(locale)
   const home = (model.routeContent || {}) as Record<string, unknown>
@@ -220,6 +223,10 @@ export const HomeHiFiPage = ({
         <section
           aria-label="Vietnam journey highlights"
           className="ws-hifi-home-hero hero"
+          data-hero-presentation={heroPresentation?.key}
+          data-hero-preset={heroPresentation?.presetKey}
+          data-hero-source={heroPresentation?.source}
+          data-hero-template={heroPresentation?.key}
           data-od-id="home-hero"
           data-testid="wingsside-hifi-home-hero"
         >

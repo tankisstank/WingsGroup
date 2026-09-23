@@ -5,20 +5,37 @@ import { useCallback, useEffect, useState } from 'react'
 
 import type { TourAuthoringAction, TourAuthoringReadiness } from './types'
 
-const copy = {
-  actionBlocked: 'Lưu thay đổi TourProduct trước khi thực hiện / Save TourProduct changes before acting.',
-  actionFailed: 'Không thực hiện được thao tác / Action failed.',
-  departure: 'Lịch khởi hành / Departure',
-  loadFailed: 'Không tải được readiness. Kiểm tra site và quyền truy cập rồi thử lại / Readiness could not load. Check site and permissions, then retry.',
-  loading: 'Đang tải readiness / Loading readiness…',
-  noWrapper: 'Chưa có wrapper / No wrapper',
-  provision: 'Provision wrapper / Tạo wrapper',
-  publish: 'Publish wrapper / Xuất bản wrapper',
-  readiness: 'Readiness xuất bản / Publish readiness',
-  reload: 'Tải lại / Reload',
-  revisionConflict: 'Phiên bản đã thay đổi. Hãy tải lại rồi thử lại / Revision changed. Reload and try again.',
-  status: 'Trạng thái / Status',
-  wrapperPath: 'Đường dẫn wrapper / Wrapper path',
+const copyByLocale = {
+  en: {
+    actionBlocked: 'Save tour changes before continuing.',
+    actionFailed: 'The action could not be completed.',
+    departure: 'Departures',
+    loadFailed: 'Could not load publication status. Check the site and your access, then try again.',
+    loading: 'Loading publication status…',
+    noWrapper: 'No tour page yet',
+    provision: 'Create tour page',
+    publish: 'Publish tour',
+    readiness: 'Publication status',
+    reload: 'Reload',
+    revisionConflict: 'The version changed. Reload and try again.',
+    status: 'Status',
+    wrapperPath: 'Tour page URL',
+  },
+  vi: {
+    actionBlocked: 'Lưu thay đổi tour trước khi thực hiện.',
+    actionFailed: 'Không thực hiện được thao tác.',
+    departure: 'Lịch khởi hành',
+    loadFailed: 'Không tải được trạng thái xuất bản. Kiểm tra site và quyền truy cập rồi thử lại.',
+    loading: 'Đang tải trạng thái xuất bản…',
+    noWrapper: 'Chưa có trang tour',
+    provision: 'Tạo trang tour',
+    publish: 'Xuất bản tour',
+    readiness: 'Trạng thái xuất bản',
+    reload: 'Tải lại',
+    revisionConflict: 'Phiên bản đã thay đổi. Hãy tải lại rồi thử lại.',
+    status: 'Trạng thái',
+    wrapperPath: 'Đường dẫn trang tour',
+  },
 } as const
 
 const getErrorBody = async (response: Response) => response.json().catch(() => ({})) as Promise<{ code?: string; message?: string }>
@@ -26,6 +43,8 @@ const getErrorBody = async (response: Response) => response.json().catch(() => (
 export default function TourAuthoringReadiness() {
   const { id } = useDocumentInfo()
   const { code: locale } = useLocale()
+  const copy = locale === 'en' ? copyByLocale.en : copyByLocale.vi
+  const loadFailedMessage = copy.loadFailed
   const formModified = useFormModified()
   const [readiness, setReadiness] = useState<TourAuthoringReadiness | null>(null)
   const [selectedDepartureIDs, setSelectedDepartureIDs] = useState<Set<string>>(() => new Set())
@@ -48,11 +67,11 @@ export default function TourAuthoringReadiness() {
         setLoading(false)
         return
       }
-      throw new Error(body.message || copy.loadFailed)
+      throw new Error(body.message || loadFailedMessage)
     }
     setReadiness(body as unknown as TourAuthoringReadiness)
     setLoading(false)
-  }, [id, locale])
+  }, [id, locale, loadFailedMessage])
 
   useEffect(() => {
     if (id == null || id === 'create') {
@@ -61,15 +80,22 @@ export default function TourAuthoringReadiness() {
     }
     void load().catch((reason: Error) => {
       setLoading(false)
-      setError(reason.message || copy.loadFailed)
+      setError(reason.message || loadFailedMessage)
     })
-  }, [id, load, reloadToken])
+  }, [id, load, loadFailedMessage, reloadToken])
 
   const action = async (actionName: TourAuthoringAction) => {
     if (!readiness || formModified || busy) return
     const departureIDs = readiness.departures.filter(({ id: departureID }) => selectedDepartureIDs.has(String(departureID))).map(({ id: departureID }) => departureID)
     if (actionName === 'publish' && departureIDs.length === 0) return
-    if (actionName === 'publish' && !window.confirm(`Xuất bản ${departureIDs.length} lịch khởi hành đã chọn? / Publish ${departureIDs.length} selected departure(s)?`)) return
+    if (
+      actionName === 'publish' &&
+      !window.confirm(
+        locale === 'en'
+          ? `Publish ${departureIDs.length} selected departure(s)?`
+          : `Xuất bản ${departureIDs.length} lịch khởi hành đã chọn?`,
+      )
+    ) return
     setBusy(actionName)
     setError('')
     try {

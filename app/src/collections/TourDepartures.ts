@@ -48,7 +48,10 @@ export const TourDepartures: CollectionConfig = {
     departureDate: true,
     departureCity: true,
     airline: true,
+    flightNumber: true,
     priceFrom: true,
+    originalPrice: true,
+    loyaltyPoints: true,
     availabilityStatus: true,
   },
   fields: [
@@ -113,11 +116,31 @@ export const TourDepartures: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'flightNumber',
+      label: 'Mã chuyến bay',
+      type: 'text',
+      admin: { position: 'sidebar' },
+    },
+    {
       name: 'priceFrom',
       label: 'Giá từ',
       min: 0,
       required: true,
       type: 'number',
+    },
+    {
+      name: 'originalPrice',
+      label: 'Giá gốc',
+      min: 0,
+      type: 'number',
+      admin: { position: 'sidebar' },
+    },
+    {
+      name: 'loyaltyPoints',
+      label: 'Điểm tích lũy',
+      min: 0,
+      type: 'number',
+      admin: { position: 'sidebar' },
     },
     {
       name: 'currency',

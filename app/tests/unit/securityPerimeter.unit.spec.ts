@@ -162,8 +162,16 @@ describe('application and edge security headers', () => {
       expect(config).toContain('location ^~ /next/seed')
       expect(config).toMatch(/\(site\|siteAlias\)/)
       expect(config).toContain('proxy_set_header X-Site-Code ""')
-      expect(config).toContain('proxy_set_header X-Site-Context-Source ""')
-      expect(config).toContain('proxy_set_header X-Site-Host ""')
+      expect(config).toContain(
+        path.includes('production')
+          ? 'proxy_set_header X-Site-Context-Source "proxy"'
+          : 'proxy_set_header X-Site-Context-Source ""',
+      )
+      expect(config).toContain(
+        path.includes('production')
+          ? 'proxy_set_header X-Site-Host $host'
+          : 'proxy_set_header X-Site-Host ""',
+      )
       expect(config).toContain('add_header X-Content-Type-Options "nosniff" always')
     }
   })

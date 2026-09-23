@@ -9,16 +9,89 @@ import { useConfig, useDocumentInfo, useLocale, useRouteTransition } from '@payl
 import { cmsEnabledLocaleMetadata, type SupportedLocaleCode } from '@/utilities/locales'
 
 type LocaleStatus = 'draft' | 'published' | 'unknown' | 'uncreated'
+type DisplayLocaleStatus = LocaleStatus | 'error' | 'loading'
+type StatusLoadState = 'error' | 'idle' | 'loading' | 'ready'
 
 type StatusResponse = {
   statuses?: Partial<Record<SupportedLocaleCode, LocaleStatus>>
 }
 
-const statusLabel: Record<LocaleStatus, string> = {
+const statusLabel: Record<DisplayLocaleStatus, string> = {
   draft: 'Bản nháp',
+  error: 'Lỗi tải',
+  loading: 'Đang tải',
   published: 'Đã xuất bản',
   unknown: 'Chưa xác định',
   uncreated: 'Chưa tạo',
+}
+
+const localeLabelWithCode = (option: { code: string; label: string }) =>
+  option.label.endsWith(` (${option.code})`) ? option.label : `${option.label} (${option.code})`
+
+const getDisplayStatus = (
+  status: LocaleStatus | undefined,
+  hasDocument: boolean,
+  loadState: StatusLoadState,
+): DisplayLocaleStatus => {
+  if (status) return status
+  if (!hasDocument) return 'unknown'
+  if (loadState === 'error') return 'error'
+  if (loadState !== 'ready') return 'loading'
+  return 'uncreated'
+}
+
+const useDocumentLocaleStatuses = () => {
+  const { collectionSlug, id } = useDocumentInfo()
+  const { config } = useConfig()
+  const [statuses, setStatuses] = useState<Partial<Record<SupportedLocaleCode, LocaleStatus>>>({})
+  const [loadState, setLoadState] = useState<StatusLoadState>('idle')
+  const [retryCount, setRetryCount] = useState(0)
+
+  useEffect(() => {
+    if (!collectionSlug || !id) {
+      setStatuses({})
+      setLoadState('idle')
+      return undefined
+    }
+
+    const apiURL = formatAdminURL({ apiRoute: config.routes.api, path: '/localization-status' })
+    const params = new URLSearchParams({ collection: collectionSlug, id: String(id) })
+    let cancelled = false
+    setStatuses({})
+    setLoadState('loading')
+
+    void fetch(`${apiURL}?${params.toString()}`, { credentials: 'include' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`Locale status request failed: ${response.status}`)
+        return (await response.json()) as StatusResponse
+      })
+      .then((result) => {
+        if (cancelled) return
+        setStatuses(result.statuses || {})
+        setLoadState('ready')
+      })
+      .catch(() => {
+        if (cancelled) return
+        setStatuses({})
+        setLoadState('error')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [collectionSlug, config.routes.api, id, retryCount])
+
+  const statusFor = useCallback(
+    (code: SupportedLocaleCode): DisplayLocaleStatus =>
+      getDisplayStatus(statuses[code], Boolean(id), loadState),
+    [id, loadState, statuses],
+  )
+
+  return {
+    loadState,
+    retryStatuses: () => setRetryCount((current) => current + 1),
+    statusFor,
+  }
 }
 
 const useLocaleLinks = () => {
@@ -45,6 +118,14 @@ const useLocaleLinks = () => {
       }),
     [locales],
   )
+  // Payload can briefly expose an empty locale object while the admin
+  // preferences request is resolving. Keep the content control usable and
+  // avoid rendering `undefined` during that short hydration window.
+  const localeCode =
+    locale?.code ||
+    (config.localization && config.localization.defaultLocale) ||
+    options[0]?.code ||
+    cmsEnabledLocaleMetadata[0].code
 
   const hrefFor = useCallback(
     (code: string) => {
@@ -64,7 +145,7 @@ const useLocaleLinks = () => {
     [hrefFor, router, startRouteTransition],
   )
 
-  return { config, hrefFor, locale, options, selectLocale }
+  return { config, hrefFor, localeCode, options, selectLocale }
 }
 
 const LocaleLinks = ({
@@ -117,16 +198,16 @@ const ControlShell = ({
 )
 
 export function ContentLocaleListControl() {
-  const { hrefFor, locale, options, selectLocale } = useLocaleLinks()
-  const current = options.find((option) => option.code === locale.code)
+  const { hrefFor, localeCode, options, selectLocale } = useLocaleLinks()
+  const current = options.find((option) => option.code === localeCode)
 
   return (
     <ControlShell
-      currentLabel={current?.label || `Locale (${locale.code})`}
+      currentLabel={current?.label || `Locale (${localeCode})`}
       scope="Áp dụng cho các bản ghi hiện tại"
     >
       <LocaleLinks
-        currentCode={locale.code}
+        currentCode={localeCode}
         hrefFor={hrefFor}
         onSelect={selectLocale}
         options={options}
@@ -139,88 +220,83 @@ export function ContentLocaleListControl() {
 }
 
 export function ContentLocaleDocumentControl() {
-  const { collectionSlug, id } = useDocumentInfo()
-  const { hrefFor, locale, options, selectLocale } = useLocaleLinks()
-  const [statuses, setStatuses] = useState<Partial<Record<SupportedLocaleCode, LocaleStatus>>>({})
-  const current = options.find((option) => option.code === locale.code)
-  const { config } = useConfig()
-
-  useEffect(() => {
-    if (!collectionSlug || !id) return
-
-    const apiURL = formatAdminURL({
-      apiRoute: config.routes.api,
-      path: '/localization-status',
-    })
-    const params = new URLSearchParams({
-      collection: collectionSlug,
-      id: String(id),
-    })
-    let cancelled = false
-
-    void fetch(`${apiURL}?${params.toString()}`, { credentials: 'include' })
-      .then(async (response) => (response.ok ? ((await response.json()) as StatusResponse) : null))
-      .then((result) => {
-        if (!cancelled && result?.statuses) setStatuses(result.statuses)
-      })
-      .catch(() => undefined)
-
-    return () => {
-      cancelled = true
-    }
-  }, [collectionSlug, config.routes.api, id])
+  const { hrefFor, localeCode, options, selectLocale } = useLocaleLinks()
+  const current = options.find((option) => option.code === localeCode)
+  const { loadState, retryStatuses, statusFor } = useDocumentLocaleStatuses()
 
   return (
     <ControlShell
-      currentLabel={current?.label || `Locale (${locale.code})`}
+      currentLabel={current?.label || `Locale (${localeCode})`}
       scope="Áp dụng cho bản ghi hiện tại"
     >
       <LocaleLinks
-        currentCode={locale.code}
+        currentCode={localeCode}
         hrefFor={hrefFor}
         onSelect={selectLocale}
         options={options}
       />
       <div aria-label="Trạng thái dịch" className="wings-content-locale-control__statuses">
-        {options.map((option) => (
-          <span key={option.code}>
-            <b>{option.label}</b>
-            <em data-status={statuses[option.code] || (id ? 'uncreated' : 'unknown')}>
-              {statusLabel[statuses[option.code] || (id ? 'uncreated' : 'unknown')]}
-            </em>
-          </span>
-        ))}
+        {options.map((option) => {
+          const status = statusFor(option.code)
+          return (
+            <span key={option.code}>
+              <b>{option.label}</b>
+              <em
+                aria-label={`${localeLabelWithCode(option)}: ${statusLabel[status]}`}
+                data-status={status}
+              >
+                {statusLabel[status]}
+              </em>
+            </span>
+          )
+        })}
       </div>
+      {loadState === 'error' ? (
+        <p className="wings-content-locale-control__error" role="alert">
+          Không tải được trạng thái bản dịch.{' '}
+          <button onClick={retryStatuses} type="button">
+            Thử lại
+          </button>
+        </p>
+      ) : null}
     </ControlShell>
   )
 }
 
 /** A toolbar-safe alternative to the full document locale panel. */
 export function ContentLocaleCompactDocumentControl() {
-  const { collectionSlug, id } = useDocumentInfo()
-  const { hrefFor, locale, options, selectLocale } = useLocaleLinks()
-  const [statuses, setStatuses] = useState<Partial<Record<SupportedLocaleCode, LocaleStatus>>>({})
-  const { config } = useConfig()
-
-  useEffect(() => {
-    if (!collectionSlug || !id) return
-    const apiURL = formatAdminURL({ apiRoute: config.routes.api, path: '/localization-status' })
-    const params = new URLSearchParams({ collection: collectionSlug, id: String(id) })
-    let cancelled = false
-    void fetch(`${apiURL}?${params}`, { credentials: 'include' })
-      .then(async (response) => (response.ok ? ((await response.json()) as StatusResponse) : null))
-      .then((result) => { if (!cancelled && result?.statuses) setStatuses(result.statuses) })
-      .catch(() => undefined)
-    return () => { cancelled = true }
-  }, [collectionSlug, config.routes.api, id])
+  const { hrefFor, localeCode, options, selectLocale } = useLocaleLinks()
+  const { loadState, retryStatuses, statusFor } = useDocumentLocaleStatuses()
 
   return (
     <nav aria-label="Ngôn ngữ nội dung" className="wings-content-locale-compact">
       <span className="wings-content-locale-compact__label">Ngôn ngữ</span>
-      <LocaleLinks currentCode={locale.code} hrefFor={hrefFor} onSelect={selectLocale} options={options} />
-      <span aria-label="Trạng thái locale" className="wings-content-locale-compact__status">
-        {options.map((option) => <i data-status={statuses[option.code] || (id ? 'uncreated' : 'unknown')} key={option.code} title={`${option.label}: ${statusLabel[statuses[option.code] || (id ? 'uncreated' : 'unknown')]}`} />)}
+      <LocaleLinks currentCode={localeCode} hrefFor={hrefFor} onSelect={selectLocale} options={options} />
+      <span aria-label="Trạng thái locale" className="wings-content-locale-compact__status" role="list">
+        {options.map((option) => {
+          const status = statusFor(option.code)
+          return (
+            <span
+              aria-label={`${localeLabelWithCode(option)}: ${statusLabel[status]}`}
+              data-status={status}
+              key={option.code}
+              role="listitem"
+            >
+              {option.code}: {statusLabel[status]}
+            </span>
+          )
+        })}
       </span>
+      {loadState === 'error' ? (
+        <>
+          <span className="wings-content-locale-compact__error" role="alert">
+            Lỗi tải trạng thái locale
+          </span>
+          <button aria-label="Thử lại trạng thái locale" onClick={retryStatuses} type="button">
+            Thử lại
+          </button>
+        </>
+      ) : null}
     </nav>
   )
 }

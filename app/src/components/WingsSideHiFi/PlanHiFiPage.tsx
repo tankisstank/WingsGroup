@@ -4,6 +4,7 @@ import { FormBlock } from '@/blocks/Form/Component'
 import { SiteLink } from '@/components/SiteLink'
 import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
 import { getWingsSideHiFiPublicUrl } from '@/utilities/wingsSideHiFiMedia'
+import type { ResolvedHeroPresentation } from '@/heros/presentations/types'
 import type { WingsSideHiFiPageModel } from '@/utilities/wingsSideHiFiPageModel'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 
@@ -63,6 +64,7 @@ const groupOptionsForLocale = (locale?: null | string) => {
 }
 
 export const PlanHiFiPage = ({
+  heroPresentation,
   locale,
   model,
   searchParams,
@@ -70,6 +72,7 @@ export const PlanHiFiPage = ({
   locale?: null | string
   model: WingsSideHiFiPageModel
   searchParams?: Record<string, string | string[] | undefined>
+  heroPresentation?: ResolvedHeroPresentation | null
 }) => {
   const copy = getWingsSideHiFiCopy(locale)
   const plan = (model.routeContent || {}) as Record<string, unknown>
@@ -119,7 +122,14 @@ export const PlanHiFiPage = ({
           <span>{copy.plan.breadcrumbCurrent}</span>
         </nav>
 
-        <section className="ws-hifi-home-hero hero" data-od-id="plan-hero">
+        <section
+          className="ws-hifi-home-hero hero"
+          data-hero-presentation={heroPresentation?.key}
+          data-hero-preset={heroPresentation?.presetKey}
+          data-hero-source={heroPresentation?.source}
+          data-hero-template={heroPresentation?.key}
+          data-od-id="plan-hero"
+        >
           <div className="ws-hifi-home-hero__copy">
             <p className="eyebrow">{copy.plan.heroKicker}</p>
             <h1 className="h1">{title}</h1>

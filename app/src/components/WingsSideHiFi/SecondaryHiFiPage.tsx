@@ -1,9 +1,11 @@
 import React from 'react'
 
 import { FormBlock } from '@/blocks/Form/Component'
+import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
 import { SiteLink } from '@/components/SiteLink'
 import type { WingsSideHiFiPageModel } from '@/utilities/wingsSideHiFiPageModel'
 import { getWingsSideHiFiAlt, getWingsSideHiFiPublicUrl } from '@/utilities/wingsSideHiFiMedia'
+import type { ResolvedHeroPresentation } from '@/heros/presentations/types'
 import { getPublicRoutePathname, type SupportedLocaleCode } from '@/utilities/sitePaths'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import { TourEnquiryContextBridge } from '@/tours/TourEnquiryContextBridge'
@@ -153,7 +155,15 @@ const ContactBody = ({
                   <strong>{asText(channel.value)}</strong>
                 </>
               )
-              return channel.href ? (
+              const email = channel.href?.match(/^mailto:(.+)$/iu)?.[1]
+              return email ? (
+                <article className="ws-secondary-channel" data-od-id={odId} key={`${channel.label}-${index}`}>
+                  <span className="micro">
+                    {String(index + 1).padStart(2, '0')} - {asText(channel.label)}
+                  </span>
+                  <ProtectedEmailLink email={email} label={asText(channel.value)} />
+                </article>
+              ) : channel.href ? (
                 <a
                   className="ws-secondary-channel"
                   data-od-id={odId}
@@ -194,6 +204,7 @@ const ContactBody = ({
 }
 
 export const SecondaryHiFiPage = ({
+  heroPresentation,
   locale,
   model,
   publicPathname,
@@ -203,6 +214,7 @@ export const SecondaryHiFiPage = ({
   model: WingsSideHiFiPageModel
   publicPathname: string
   searchParams?: Record<string, string | string[] | undefined>
+  heroPresentation?: ResolvedHeroPresentation | null
 }) => {
   const route = getPublicRoutePathname(publicPathname) as WingsSideSecondaryRoute
   const heroCopy = getWingsSideSecondaryHeroCopy(locale, route)
@@ -225,6 +237,10 @@ export const SecondaryHiFiPage = ({
 
         <section
           className="ws-hifi-home-hero hero ws-secondary-hero"
+          data-hero-presentation={heroPresentation?.key}
+          data-hero-preset={heroPresentation?.presetKey}
+          data-hero-source={heroPresentation?.source}
+          data-hero-template={heroPresentation?.key}
           data-od-id={`${model.routeVariant}-hero`}
         >
           <div className="ws-hifi-home-hero__copy">

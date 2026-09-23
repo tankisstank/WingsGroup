@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Site } from '@/payload-types'
 
 import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '@/access/roles'
@@ -32,6 +32,14 @@ productSiteField.admin = {
   },
 } as NonNullable<typeof productSiteField.admin>
 
+const relationID = (value: unknown): number | string | null => {
+  if (typeof value === 'number' || typeof value === 'string') return value
+  return value && typeof value === 'object' && 'id' in value &&
+    (typeof value.id === 'number' || typeof value.id === 'string')
+    ? value.id
+    : null
+}
+
 export const TourProducts: CollectionConfig = {
   slug: 'tour-products',
   access: {
@@ -49,6 +57,7 @@ export const TourProducts: CollectionConfig = {
       edit: {
         beforeDocumentControls: [
           '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
+          '@/components/TourItineraryValidationNavigator',
         ],
       },
     },
@@ -57,23 +66,29 @@ export const TourProducts: CollectionConfig = {
     defaultColumns: ['title', 'site', 'tourType', 'destinationTags', 'travelStyles', 'updatedAt'],
     group: adminGroups.content,
     livePreview: {
-      url: ({ data, req }) =>
-        generatePreviewPath({
-          id: data?.id as number | string | null | undefined,
+      url: ({ data, req }) => {
+        if (relationID(data?.wrapperPage) === null) return null
+
+        return generatePreviewPath({
+          id: data.id as number | string | null | undefined,
           collection: 'tour-products',
           req,
-          site: data?.site as number | Site | null | undefined,
-          slug: data?.slug,
-        }),
+          site: data.site as number | Site | null | undefined,
+          slug: data.slug,
+        })
+      },
     },
-    preview: (data, { req }) =>
-      generatePreviewPath({
-        id: data?.id as number | string | null | undefined,
+    preview: (data, { req }) => {
+      if (relationID(data.wrapperPage) === null) return null
+
+      return generatePreviewPath({
+        id: data.id as number | string | null | undefined,
         collection: 'tour-products',
         req,
-        site: data?.site as number | Site | null | undefined,
-        slug: data?.slug as string,
-      }),
+        site: data.site as number | Site | null | undefined,
+        slug: data.slug as string,
+      })
+    },
     useAsTitle: 'title',
   },
   defaultPopulate: {
@@ -84,6 +99,7 @@ export const TourProducts: CollectionConfig = {
     durationNights: true,
     summary: true,
     heroMedia: true,
+    itineraryPdf: true,
   },
   fields: [
     {
@@ -234,6 +250,7 @@ export const TourProducts: CollectionConfig = {
       relationTo: 'pages',
       filterOptions: sameSiteFilterOptions,
       admin: {
+        description: 'Cần tạo hoặc liên kết trang tour trước khi dùng Preview.',
         position: 'sidebar',
       },
     },
@@ -596,15 +613,57 @@ export const TourProducts: CollectionConfig = {
           label: 'Lịch trình',
           fields: [
             {
+              name: 'itineraryPdf',
+              label: 'Tải lịch trình PDF (tùy chọn)',
+              type: 'upload',
+              relationTo: 'media',
+              filterOptions: sameSiteFilterOptions,
+              admin: {
+                description: 'Chỉ chọn file PDF đã tải lên Media cùng site.',
+              },
+              validate: async (
+                value: unknown,
+                { req, siblingData }: { req: PayloadRequest; siblingData: Record<string, unknown> },
+              ) => {
+                if (!value) return true
+                const id =
+                  typeof value === 'object' && 'id' in value
+                    ? (value as { id?: number | string }).id
+                    : value
+                if (typeof id !== 'string' && typeof id !== 'number') {
+                  return 'Tệp lịch trình không hợp lệ.'
+                }
+                if (id === '') return true
+                try {
+                  const media = await req.payload.findByID({
+                    collection: 'media',
+                    depth: 0,
+                    id,
+                    overrideAccess: true,
+                  })
+                  if (
+                    !relationID(siblingData.site) ||
+                    String(relationID(media.site)) !== String(relationID(siblingData.site))
+                  ) {
+                    return 'Tệp lịch trình phải thuộc cùng site với tour.'
+                  }
+                  return media?.mimeType === 'application/pdf' || 'Lịch trình phải là file PDF.'
+                } catch {
+                  return 'Không thể xác minh file lịch trình.'
+                }
+              },
+            },
+            {
               name: 'itineraryDays',
               label: 'Ngày hành trình',
               type: 'array',
               required: true,
               admin: {
+                className: 'tour-itinerary-days',
                 components: {
                   RowLabel: '@/components/TourItineraryRowLabel',
                 },
-                initCollapsed: true,
+                initCollapsed: false,
               },
               fields: [
                 {

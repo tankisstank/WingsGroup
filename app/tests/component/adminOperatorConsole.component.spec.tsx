@@ -140,6 +140,15 @@ describe('AdminOperatorConsole request states', () => {
     expect(queue.querySelectorAll('.cms-console__task')).toHaveLength(2)
     expect(queue.querySelector('.cms-console__badge--page')?.textContent).toBe('Trang')
     expect(queue.querySelector('.cms-console__badge--lead')?.textContent).toBe('Lead')
+    const pageReviewCheckbox = within(queue).getByRole('checkbox', {
+      name: 'Đánh dấu đã kiểm tra: Trang Hà Nội',
+    })
+    expect((pageReviewCheckbox as HTMLInputElement).checked).toBe(false)
+    fireEvent.click(pageReviewCheckbox)
+    expect((pageReviewCheckbox as HTMLInputElement).checked).toBe(true)
+    expect(queue.querySelector('.cms-console__badge--ready')?.getAttribute('data-status')).toBe(
+      'ready',
+    )
     expect(screen.getByRole('heading', { name: 'Site và locale' })).toBeTruthy()
     expect(screen.getByRole('region', { name: 'Số liệu CMS' })).toBeTruthy()
   })

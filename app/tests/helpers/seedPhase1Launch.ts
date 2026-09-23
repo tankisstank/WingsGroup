@@ -429,7 +429,7 @@ async function ensureNavigationCorrections({
 }
 
 export const heroPresentationFixturePaths: Record<HeroPresentationKey, string> = Object.fromEntries(
-  heroPresentationDefinitions.map(({ value }) => [value, `/hero-${value}`]),
+  heroPresentationDefinitions.map(({ value }) => [value, `/wingsgo/hero-${value}`]),
 ) as Record<HeroPresentationKey, string>
 
 export async function ensureHeroPresentationFixtures({
@@ -457,6 +457,23 @@ export async function ensureHeroPresentationFixtures({
     throw new Error(
       'The WingsGroup root site must exist before seeding hero presentation fixtures.',
     )
+  }
+
+  const fixtureSites = await payload.find({
+    collection: 'sites',
+    depth: 0,
+    limit: 1,
+    req,
+    where: {
+      code: {
+        equals: 'wings-go',
+      },
+    },
+  })
+  const fixtureSite = fixtureSites.docs[0]
+
+  if (!fixtureSite) {
+    throw new Error('The WingsGo site must exist before seeding hero presentation fixtures.')
   }
 
   const homePages = await payload.find({
@@ -494,7 +511,7 @@ export async function ensureHeroPresentationFixtures({
     req,
     where: {
       site: {
-        equals: rootSite.id,
+        equals: fixtureSite.id,
       },
     },
   })
@@ -517,25 +534,29 @@ export async function ensureHeroPresentationFixtures({
       limit: 1,
       req,
       where: {
-        and: [
-          {
-            site: {
-              equals: rootSite.id,
-            },
-          },
-          {
-            slug: {
-              equals: slug,
-            },
-          },
-        ],
+        slug: {
+          equals: slug,
+        },
       },
     })
     const data = {
       _status: 'published' as const,
       hero: {
-        links: homePage.hero.links?.map(({ link }) => ({ link })),
-        media: homePage.hero.media,
+        links: [
+          ...(homePage.hero.links?.map(({ link }) => ({ link })) || []),
+          ...(definition.value === 'video-background'
+            ? [
+                {
+                  link: {
+                    label: 'Trao đổi với chuyên viên',
+                    type: 'custom' as const,
+                    url: '/lien-he',
+                  },
+                },
+              ]
+            : []),
+        ],
+        media: supportingMedia[0] || homePage.hero.media,
         presentation: definition.value,
         presentationMode: 'override' as const,
         presentationPreset: heroPresetIDs[presentationPreset.key],
@@ -571,7 +592,7 @@ export async function ensureHeroPresentationFixtures({
         title: definition.label,
       },
       pathname: `/${slug}`,
-      site: rootSite.id,
+      site: fixtureSite.id,
       slug,
       title: definition.label,
     }

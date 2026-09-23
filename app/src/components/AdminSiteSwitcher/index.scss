@@ -1,0 +1,55 @@
+.wings-admin-site-switcher {
+  align-items: center;
+  display: flex;
+  flex: 0 1 280px;
+  gap: 0.5rem;
+  max-width: 280px;
+  min-width: 0;
+  padding: 0;
+}
+
+.wings-admin-site-switcher label {
+  color: var(--theme-elevation-700);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.wings-admin-site-switcher select {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+body.wings-admin-shell .app-header__actions {
+  align-items: center;
+  display: flex;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+body.wings-admin-shell .app-header__actions .wings-admin-site-switcher {
+  margin-inline-start: 0.75rem;
+}
+
+@media (max-width: 1050px) {
+  .wings-admin-site-switcher {
+    flex-basis: min(240px, 32vw);
+    max-width: min(240px, 32vw);
+  }
+}
+
+@media (max-width: 680px) {
+  .wings-admin-site-switcher {
+    flex-basis: 132px;
+    max-width: 132px;
+  }
+
+  .wings-admin-site-switcher label {
+    display: none;
+  }
+
+  .wings-admin-site-switcher select {
+    flex: 1 1 auto;
+  }
+}

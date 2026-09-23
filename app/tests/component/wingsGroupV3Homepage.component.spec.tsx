@@ -11,7 +11,6 @@ import { WingsGroupTrustSection } from '@/blocks/WingsGroupTrust/Component'
 import { WingsGroupConsultationDialog } from '@/components/WingsGroupV3/ConsultationDialog'
 import { WingsGroupEditorialHero } from '@/components/WingsGroupV3/EditorialHero'
 import { JourneyInquiryGrid } from '@/components/WingsGroupV3/JourneyInquiryGrid'
-import { WingsGroupTestimonialsSection } from '@/components/WingsGroupV3/TestimonialsSection'
 import type { Media, Page, WingsGroupEcosystemBlock } from '@/payload-types'
 
 const navigationMock = vi.hoisted(() => ({ push: vi.fn() }))
@@ -123,6 +122,7 @@ const profile = (
 })
 
 beforeEach(() => {
+  window.sessionStorage.clear()
   Object.defineProperty(window, 'matchMedia', {
     configurable: true,
     value: () => ({
@@ -165,32 +165,6 @@ describe('WingsGroup v3 public components', () => {
     expect(screen.getByTestId('editorial-rail-locale').textContent).toBe('en')
   })
 
-  it('stacks the consultation eyebrow above the journey heading', () => {
-    render(<JourneyInquiryGrid />)
-
-    const eyebrow = screen.getByText('Tư vấn theo nhu cầu')
-    const heading = screen.getByRole('heading', {
-      name: 'Bạn đang chuẩn bị cho hành trình nào?',
-    })
-
-    expect(eyebrow.parentElement).toBe(heading.parentElement)
-    expect(
-      eyebrow.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy()
-  })
-
-  it('stacks the testimonials eyebrow above the client heading', () => {
-    render(<WingsGroupTestimonialsSection locale="vi" />)
-
-    const eyebrow = screen.getByText('ĐÁNH GIÁ & PHẢN HỒI THỰC TẾ')
-    const heading = screen.getByRole('heading', { name: 'Khách hàng nói gì về WingsGroup?' })
-
-    expect(eyebrow.parentElement).toBe(heading.parentElement)
-    expect(
-      eyebrow.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy()
-  })
-
   it('forwards the English locale and legal identity to the home trust block', () => {
     const infoStrip = {
       blockType: 'infoStrip',
@@ -212,8 +186,106 @@ describe('WingsGroup v3 public components', () => {
     expect(screen.getByText('Company information')).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Choose with more confidence.' })).toBeTruthy()
     expect(screen.getByText('VIETWINGS.,JSC')).toBeTruthy()
-    expect(screen.getByRole('link', { name: /View the corporate and legal profile/ })).toBeTruthy()
+    expect(screen.getByRole('link', { name: /Learn more about WingsGroup/ })).toBeTruthy()
     expect(screen.queryByText('Thông tin doanh nghiệp')).toBeNull()
+  })
+
+  it('renders homepage capability and journey inquiry add-ons after the ecosystem', () => {
+    const ecosystem = {
+      blockType: 'wingsGroupEcosystem',
+      profiles: [profile('wingsgo', 'WingsGo')],
+      title: 'Một hệ sinh thái. Năm cách đồng hành.',
+    } as WingsGroupEcosystemBlock
+
+    render(
+      <>
+        <RenderBlocks
+          blocks={[ecosystem]}
+          locale="vi"
+          wingsGroupV3
+          wingsGroupV3Home
+          wingsGroupV3Route="home"
+        />
+        <WingsGroupConsultationDialog />
+      </>,
+    )
+
+    const ecosystemSection = screen.getByTestId('wingsgroup-ecosystem')
+    const capabilitySection = screen.getByTestId('wingsgroup-capability')
+    const inquirySection = screen.getByTestId('wingsgroup-journey-inquiry')
+    expect(
+      ecosystemSection.compareDocumentPosition(capabilitySection) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(
+      capabilitySection.compareDocumentPosition(inquirySection) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(document.querySelectorAll('#services')).toHaveLength(1)
+    expect(document.querySelector('#capability')).toBe(capabilitySection)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Tôi muốn đi nước ngoài' }))
+    expect(window.sessionStorage.getItem('wingsgroup-inquiry-context')).toBe('outbound')
+    expect(screen.getByTestId('consultation-inquiry-context').textContent).toContain(
+      'Nhu cầu đã chọn: Du lịch nước ngoài',
+    )
+  })
+
+  it('renders testimonials after home trust and uses the requested WingsGroup link label', () => {
+    const ecosystem = {
+      blockType: 'wingsGroupEcosystem',
+      profiles: [profile('wingsgo', 'WingsGo')],
+      title: 'Một hệ sinh thái. Năm cách đồng hành.',
+    } as WingsGroupEcosystemBlock
+    const infoStrip = {
+      blockType: 'infoStrip',
+      description: 'Trust block fixture',
+      title: 'Trust',
+    } as Page['layout'][number]
+
+    render(
+      <RenderBlocks
+        blocks={[ecosystem, infoStrip]}
+        locale="vi"
+        wingsGroupV3
+        wingsGroupV3Home
+        wingsGroupV3Route="home"
+      />,
+    )
+
+    const trust = screen.getByRole('region', { name: 'Minh bạch để bạn an tâm lựa chọn.' })
+    const testimonials = screen.getByRole('region', {
+      name: 'Khách hàng nói gì về WingsGroup?',
+    })
+    expect(
+      trust.compareDocumentPosition(testimonials) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(
+      screen.getByRole('link', { name: 'Tìm hiểu thêm về WingsGroup' }).getAttribute('href'),
+    ).toBe('/ve-wingsgroup')
+    expect(testimonials.querySelectorAll('article')).toHaveLength(3)
+  })
+
+  it('keeps the inquiry grid bilingual and exposes five consultation triggers', () => {
+    const { rerender } = render(<JourneyInquiryGrid locale="vi" />)
+
+    const inquiryEyebrow = screen.getByText('Bắt đầu từ điều bạn cần')
+    const inquiryHeading = screen.getByRole('heading', {
+      name: 'Bạn đang tìm điều gì cho hành trình tiếp theo?',
+    })
+    expect(inquiryEyebrow.parentElement).toBe(inquiryHeading.parentElement)
+    expect(
+      inquiryEyebrow.compareDocumentPosition(inquiryHeading) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+
+    expect(screen.getAllByRole('button')).toHaveLength(5)
+    expect(screen.getByRole('button', { name: 'Tôi muốn khám phá Việt Nam' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Tôi cần được hỗ trợ' })).toBeTruthy()
+
+    rerender(<JourneyInquiryGrid locale="en" />)
+
+    expect(screen.getByRole('button', { name: 'I want to travel abroad' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'I need travel support' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Tôi muốn đi nước ngoài' })).toBeNull()
   })
 
   it('keeps the ecosystem profile, stage, scope, proof state and CTA synchronized', () => {
@@ -305,7 +377,7 @@ describe('WingsGroup v3 public components', () => {
       />,
     )
 
-    expect(screen.getAllByRole('article')).toHaveLength(5)
+    expect(document.querySelectorAll('[data-service-row]')).toHaveLength(5)
     expect(screen.getByRole('heading', { name: 'WingsCare', level: 3 })).toBeTruthy()
     expect(screen.getAllByRole('link', { name: /Trao đổi nhu cầu/ })).toHaveLength(5)
     expect(
@@ -313,6 +385,91 @@ describe('WingsGroup v3 public components', () => {
         .getAllByRole('link')
         .every((link) => link.getAttribute('href') === '/lien-he#contact-form'),
     ).toBe(true)
+  })
+
+  it('renders the three bilingual capability value badges without changing service rows', () => {
+    const { rerender } = render(
+      <WingsGroupCapabilitySection locale="vi" title="Năng lực dịch vụ" />,
+    )
+
+    const badges = screen.getByTestId('wingsgroup-value-badges')
+    expect(badges.querySelectorAll('li')).toHaveLength(3)
+    expect(badges.textContent).toContain('An toàn & Tin cậy')
+    expect(badges.textContent).toContain('Đội ngũ chuyên nghiệp')
+    expect(badges.textContent).toContain('Tận tâm với từng hành trình')
+    expect(document.querySelectorAll('[data-service-row]')).toHaveLength(5)
+
+    rerender(<WingsGroupCapabilitySection locale="en" title="Service capability" />)
+
+    expect(badges.textContent).toContain('Safety & Trust')
+    expect(badges.textContent).toContain('Professional Team')
+    expect(badges.textContent).toContain('Dedicated to Every Journey')
+    expect(screen.queryByText('An toàn & Tin cậy')).toBeNull()
+    expect(document.querySelectorAll('[data-service-row]')).toHaveLength(5)
+  })
+
+  it('renders the four-step service process in both locales', () => {
+    const { rerender } = render(<WingsGroupCapabilitySection locale="vi" />)
+
+    const process = screen.getByTestId('wingsgroup-service-process')
+    expect(process.querySelector('ol')?.getAttribute('aria-label')).toBe('Quy trình phục vụ 4 bước')
+    expect(process.querySelectorAll('[data-process-step]')).toHaveLength(4)
+    expect(
+      screen.getByRole('heading', {
+        name: 'QUY TRÌNH PHỤC VỤ RÕ RÀNG - ĐỒNG HÀNH TRỌN HÀNH TRÌNH',
+      }),
+    ).toBeTruthy()
+    expect(
+      screen.getByRole('heading', { name: 'Tiếp nhận nhu cầu & tư vấn 24/7', level: 3 }),
+    ).toBeTruthy()
+    expect(
+      screen.getByRole('heading', { name: 'Theo sát đoàn trong suốt hành trình', level: 3 }),
+    ).toBeTruthy()
+
+    rerender(<WingsGroupCapabilitySection locale="en" />)
+
+    expect(process.querySelector('ol')?.getAttribute('aria-label')).toBe(
+      'Four-step service process',
+    )
+    expect(
+      screen.getByRole('heading', { name: 'CLEAR SERVICE PROCESS - COMPLETE JOURNEY SUPPORT' }),
+    ).toBeTruthy()
+    expect(
+      screen.getByRole('heading', { name: 'Consultation & Inquiry Intake 24/7', level: 3 }),
+    ).toBeTruthy()
+    expect(
+      screen.getByRole('heading', { name: 'Dedicated On-trip Support', level: 3 }),
+    ).toBeTruthy()
+    expect(
+      screen.queryByRole('heading', { name: 'Tiếp nhận nhu cầu & tư vấn 24/7', level: 3 }),
+    ).toBeNull()
+  })
+
+  it('renders all six quality standards with accessible images in both locales', () => {
+    const { rerender } = render(<WingsGroupCapabilitySection locale="vi" />)
+
+    const standards = screen.getByTestId('wingsgroup-quality-standards')
+    expect(standards.querySelectorAll('[data-standard-card]')).toHaveLength(6)
+    expect(
+      screen.getByRole('heading', { name: 'Những tiêu chuẩn WingsGroup luôn ưu tiên' }),
+    ).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'An toàn & tin cậy', level: 4 })).toBeTruthy()
+    expect(standards.querySelectorAll('img')).toHaveLength(6)
+    expect(standards.querySelectorAll('svg')).toHaveLength(6)
+    expect(
+      screen.getByAltText('Chuyên viên WingsGroup và đối tác rà soát lịch trình trước chuyến đi.'),
+    ).toBeTruthy()
+
+    rerender(<WingsGroupCapabilitySection locale="en" />)
+
+    expect(
+      screen.getByRole('heading', { name: 'Standards WingsGroup Always Prioritises' }),
+    ).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Safety & Trust', level: 4 })).toBeTruthy()
+    expect(
+      screen.getByAltText('A WingsGroup advisor and partner reviewing a trip itinerary.'),
+    ).toBeTruthy()
+    expect(screen.queryByRole('heading', { name: 'An toàn & tin cậy', level: 4 })).toBeNull()
   })
 
   it('renders only the approved corporate relationship wording and identity', () => {
@@ -525,32 +682,40 @@ describe('WingsGroup v3 public components', () => {
     expect(document.activeElement).toBe(trigger)
   })
 
-  it('routes to the governed contact form without rendering unavailable channels', () => {
+  it('renders the approved Zalo channel and routes form enquiries separately', () => {
     render(<WingsGroupConsultationDialog />)
 
-    const trigger = screen.getByRole('button', { name: 'Trao đổi với chuyên viên' })
+    const trigger = screen.getByRole('button', { name: 'LIÊN HỆ TƯ VẤN 24/7' })
     fireEvent.click(trigger)
     expect(screen.queryByText('Chờ cập nhật')).toBeNull()
+    expect(screen.getByRole('link', { name: 'Mở Zalo OA WingsGroup' }).getAttribute('href')).toBe(
+      'https://zalo.me/4142059657526524531',
+    )
     expect(
-      screen.queryByRole('button', { name: /Zalo|WhatsApp|Messenger|Chuyên viên gọi lại/ }),
+      screen.queryByRole('button', { name: /WhatsApp|Messenger|Chuyên viên gọi lại/ }),
     ).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: /^Để lại nhu cầu/ }))
 
     expect(navigationMock.push).toHaveBeenCalledWith('/lien-he#contact-form')
     expect(window.sessionStorage.getItem('wingsgroup-contact-focus')).toBe('contact-form')
-    expect(document.querySelector('[data-od-id="consultation-dialog"] a[href]')).toBeNull()
+    expect(
+      document.querySelector('[data-od-id="consultation-dialog"] a[href]')?.getAttribute('href'),
+    ).toBe('https://zalo.me/4142059657526524531')
   })
 
   it('localizes the consultation dialog and preserves the English contact path', () => {
     siteLocaleMock.value = 'en'
     render(<WingsGroupConsultationDialog />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Speak with a specialist' }))
+    fireEvent.click(screen.getByRole('button', { name: '24/7 CONSULTATION' }))
     expect(screen.getByRole('heading', { name: 'Speak with a specialist.' })).toBeTruthy()
     expect(screen.getByText(/Share what you need\./)).toBeTruthy()
     expect(screen.getByRole('button', { name: /^Share your plans/ })).toBeTruthy()
     expect(screen.queryByText('Being updated')).toBeNull()
-    expect(screen.queryByText(/External channels|Zalo|WhatsApp|Messenger/)).toBeNull()
+    expect(screen.getByRole('link', { name: 'Open WingsGroup Zalo OA' }).getAttribute('href')).toBe(
+      'https://zalo.me/4142059657526524531',
+    )
+    expect(screen.queryByText(/WhatsApp|Messenger/)).toBeNull()
 
     fireEvent.click(screen.getByRole('button', { name: /^Share your plans/ }))
     expect(navigationMock.push).toHaveBeenCalledWith('/en/lien-he#contact-form')

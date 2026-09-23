@@ -1,7 +1,7 @@
 import React from 'react'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('next/navigation', () => ({
@@ -38,6 +38,48 @@ vi.mock('@/components/Link', () => ({
 import { HeaderNav } from '@/Header/Nav'
 
 describe('WingSide hi-fi header chrome (site isolation)', () => {
+  it('uses each tenant default locale as the unprefixed language-switch URL', () => {
+    const { container, rerender, unmount } = render(
+      <HeaderNav
+        data={{ navItems: [] }}
+        defaultLocale="en"
+        publicPathname="/packages"
+        resolvedLocale="en"
+        siteCode="wing-side"
+        supportedLocales={['en', 'vi', 'it']}
+      />,
+    )
+
+    expect(container.querySelector('a[data-locale-code="en"]')?.getAttribute('href')).toBe(
+      '/packages',
+    )
+    expect(container.querySelector('a[data-locale-code="vi"]')?.getAttribute('href')).toBe(
+      '/vi/packages',
+    )
+    expect(container.querySelector('a[data-locale-code="it"]')?.getAttribute('href')).toBe(
+      '/it/packages',
+    )
+
+    rerender(
+      <HeaderNav
+        data={{ navItems: [] }}
+        defaultLocale="vi"
+        publicPathname="/packages"
+        resolvedLocale="vi"
+        siteCode="wings-go"
+        supportedLocales={['vi', 'en']}
+      />,
+    )
+
+    expect(container.querySelector('a[data-locale-code="vi"]')?.getAttribute('href')).toBe(
+      '/packages',
+    )
+    expect(container.querySelector('a[data-locale-code="en"]')?.getAttribute('href')).toBe(
+      '/en/packages',
+    )
+    unmount()
+  })
+
   it('renders full 7-route nav + Plan trip CTA for the wing-side tenant only', () => {
     render(
       <HeaderNav
@@ -142,5 +184,41 @@ describe('WingSide hi-fi header chrome (site isolation)', () => {
       const mediaIndex = css.indexOf('@media (min-width: 1280px)')
       expect(unscopedIndex).toBeGreaterThan(mediaIndex)
     }
+  })
+
+  it('smooth-scrolls the WingsGroup contact link without navigating away', () => {
+    const scrollIntoView = vi.fn()
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: scrollIntoView,
+    })
+    window.history.replaceState({}, '', '/')
+
+    const contact = document.createElement('section')
+    contact.id = 'contact'
+    document.body.append(contact)
+
+    const { unmount } = render(
+      <HeaderNav
+        data={{ navItems: [] }}
+        publicPathname="/"
+        resolvedLocale="vi"
+        siteCode="wings-group"
+        supportedLocales={['vi', 'en']}
+        englishPublicationState="approved"
+        wingsGroupV3Home
+        wingsGroupV3Surface
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('link', { name: 'Liên hệ' }))
+
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' })
+    expect(window.location.hash).toBe('#contact')
+    expect(screen.getByRole('link', { name: 'ENGLISH (en)' })).toBeTruthy()
+
+    unmount()
+    contact.remove()
+    window.history.replaceState({}, '', '/')
   })
 })

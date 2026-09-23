@@ -51,6 +51,10 @@ export const Sites: CollectionConfig = {
     {
       name: 'additionalDomains',
       label: 'Domain bổ sung',
+      labels: {
+        plural: 'Domain bổ sung',
+        singular: 'Domain bổ sung',
+      },
       type: 'array',
       admin: {
         initCollapsed: true,

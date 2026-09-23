@@ -1,5 +1,6 @@
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { getCurrentLocale, getCurrentPublicPathname, getCurrentSite } from '@/utilities/siteContext'
+import { getPublicRoutePathname } from '@/utilities/sitePaths'
 import React from 'react'
 
 import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
@@ -10,27 +11,52 @@ import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
 import { getRuntimeLocaleCopy, publicChromeCopy } from '@/i18n/publicCopy'
 import { getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
-import { MailIcon, PhoneIcon } from 'lucide-react'
-import { isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
+import { MapPinIcon, PhoneIcon } from 'lucide-react'
+import { WINGSGROUP_LEGAL_IDENTITY, isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
 import { isWingsGroupBrandSite } from '@/wingsgroup/brand'
+import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
 
 export async function Footer() {
   const settings = await getCurrentSiteSettings()
   const site = await getCurrentSite()
   const locale = await getCurrentLocale()
   const publicPathname = await getCurrentPublicPathname()
+  const publicRoute = getPublicRoutePathname(publicPathname)
   const chromeCopy = getRuntimeLocaleCopy(publicChromeCopy, locale)
   const isWingSide = site.code === 'wing-side'
+  const isWingsGo = site.code === 'wings-go'
+  const isWingsGroup = site.code === 'wings-group'
+  const wingsGoRegisteredOffice =
+    settings?.registeredOfficeAddress ||
+    (isWingsGo ? WINGSGROUP_LEGAL_IDENTITY.registeredOffice : null)
+  const wingsGoTravelOffice =
+    settings?.travelOfficeAddress || (isWingsGo ? WINGSGROUP_LEGAL_IDENTITY.travelOffice : null)
   const isWingsGroupV3Surface =
-    site.code === 'wings-group' &&
+    isWingsGroup &&
     settings?.wingsGroupV3?.enabled === true &&
-    isWingsGroupV3SurfacePath(publicPathname)
+    isWingsGroupV3SurfacePath(publicRoute)
+  const wingsGroupIdentity = isWingsGroup
+    ? {
+        ...WINGSGROUP_LEGAL_IDENTITY,
+        registeredOffice:
+          settings?.wingsGroupV3?.legalIdentity?.registeredOffice ||
+          WINGSGROUP_LEGAL_IDENTITY.registeredOffice,
+        travelOffice:
+          settings?.wingsGroupV3?.legalIdentity?.travelOffice ||
+          WINGSGROUP_LEGAL_IDENTITY.travelOffice,
+      }
+    : null
   const sharedZaloCTA = getSharedZaloCTA(site.code, locale)
   const hiFiCopy = isWingSide ? getWingsSideHiFiCopy(locale) : null
   const wingSideNav = isWingSide ? getWingsSideHiFiNavItems(locale) : null
   const wingSideFooterCopy = isWingSide ? getWingSideFooterCopy(locale) : null
 
-  const navItems = settings?.footerNavItems || []
+  const navItems = (settings?.footerNavItems || []).filter(({ link }) => {
+    if (!isWingsGo) return true
+    const label = String(link?.label || '').trim().toLowerCase()
+    const url = String(link?.url || '').replace(/\/+$/, '') || '/'
+    return label !== 'liên hệ' && label !== 'contact' && url !== '/lien-he'
+  })
   const salesEmail =
     settings?.salesEmail && settings.salesEmail !== settings.supportEmail
       ? settings.salesEmail
@@ -72,10 +98,7 @@ export async function Footer() {
             {settings?.supportEmail || settings?.supportPhone ? (
               <div className="site-footer__contacts ws-hifi-footer__contacts">
                 {settings.supportEmail ? (
-                  <a href={`mailto:${settings.supportEmail}`}>
-                    <MailIcon aria-hidden="true" className="h-4 w-4" />
-                    {settings.supportEmail}
-                  </a>
+                  <ProtectedEmailLink email={settings.supportEmail} />
                 ) : null}
                 {settings.supportPhone ? (
                   <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
@@ -113,7 +136,7 @@ export async function Footer() {
                 </a>
               ) : null}
               {settings?.supportEmail ? (
-                <a href={`mailto:${settings.supportEmail}`}>{settings.supportEmail}</a>
+                <ProtectedEmailLink email={settings.supportEmail} />
               ) : null}
               {settings?.supportPhone ? (
                 <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
@@ -146,26 +169,73 @@ export async function Footer() {
               <div className="text-sm text-muted-foreground">{settings.tagline}</div>
             ) : null}
             {settings?.footerNote ? (
-              <div className="text-xs text-muted-foreground max-w-md">{settings.footerNote}</div>
+              <div className="max-w-md text-sm text-muted-foreground">{settings.footerNote}</div>
             ) : null}
-            {settings?.supportEmail || salesEmail || settings?.supportPhone ? (
+            {isWingsGo &&
+            (wingsGoRegisteredOffice || wingsGoTravelOffice) ? (
+              <address className="flex max-w-md flex-col gap-2 text-sm text-muted-foreground not-italic">
+                {wingsGoRegisteredOffice ? (
+                  <div className="flex items-start gap-2">
+                    <MapPinIcon aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>
+                      {locale === 'en' ? 'Head office: ' : 'Trụ sở chính: '}
+                      {wingsGoRegisteredOffice}
+                    </span>
+                  </div>
+                ) : null}
+                {wingsGoTravelOffice ? (
+                  <div className="flex items-start gap-2">
+                    <MapPinIcon aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>
+                      {locale === 'en' ? 'Travel office: ' : 'Văn phòng du lịch: '}
+                      {wingsGoTravelOffice}
+                    </span>
+                  </div>
+                ) : null}
+              </address>
+            ) : null}
+            {isWingsGo ? (
+              <p className="max-w-md text-sm leading-6 text-muted-foreground">
+                {locale === 'en'
+                  ? 'Where will your next trip take you? Tell WingsGo where, when, and your budget—we will find a suitable itinerary.'
+                  : 'Chuyến đi tiếp theo của bạn sẽ ở đâu? Bạn chỉ cần cho WingsGo biết: Muốn đi đâu; Muốn đi khi nào; Ngân sách bao nhiêu - WingsGo tìm hành trình phù hợp cho bạn!'}
+              </p>
+            ) : null}
+            {wingsGroupIdentity ? (
+              <address className="flex flex-col gap-2 text-sm text-muted-foreground not-italic">
+                <div className="flex items-start gap-2">
+                  <MapPinIcon aria-hidden="true" className="h-4 w-4 shrink-0" />
+                  <span>
+                    {locale === 'en'
+                      ? 'Head Office: 2nd Floor, 28B Alley 44 Hao Nam, O Cho Dua, Dong Da, Hanoi, Vietnam'
+                      : `Trụ sở chính: ${wingsGroupIdentity.registeredOffice}`}
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <MapPinIcon aria-hidden="true" className="h-4 w-4 shrink-0" />
+                  <span>
+                    {locale === 'en'
+                      ? 'Travel Office: 12th Floor, Ngoc Khanh Plaza, 1 Pham Huy Thong, Giang Vo, Hanoi, Vietnam'
+                      : `Văn phòng du lịch: ${wingsGroupIdentity.travelOffice}`}
+                  </span>
+                </div>
+              </address>
+            ) : null}
+            {settings?.supportEmail || salesEmail || settings?.supportPhone || isWingsGo ? (
               <div className="site-footer__contacts">
                 {settings.supportEmail ? (
-                  <a href={`mailto:${settings.supportEmail}`}>
-                    <MailIcon aria-hidden="true" className="h-4 w-4" />
-                    {settings.supportEmail}
-                  </a>
+                  <ProtectedEmailLink email={settings.supportEmail} />
                 ) : null}
                 {salesEmail ? (
-                  <a href={`mailto:${salesEmail}`}>
-                    <MailIcon aria-hidden="true" className="h-4 w-4" />
-                    {salesEmail}
-                  </a>
+                  <ProtectedEmailLink email={salesEmail} />
                 ) : null}
-                {settings.supportPhone ? (
-                  <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
+                {isWingsGo || settings.supportPhone ? (
+                  <a
+                    className={isWingsGo ? 'wingsgo-footer__phone' : undefined}
+                    href={isWingsGo ? 'tel:0912910101' : `tel:${settings.supportPhone!.replace(/[^\d+]/g, '')}`}
+                  >
                     <PhoneIcon aria-hidden="true" className="h-4 w-4" />
-                    {settings.supportPhone}
+                    {isWingsGo ? '0912 910 101' : settings.supportPhone}
                   </a>
                 ) : null}
               </div>
@@ -173,7 +243,7 @@ export async function Footer() {
           </div>
 
           <div className="flex flex-col-reverse items-start gap-4 md:flex-row md:flex-wrap md:items-center md:justify-end">
-            {!isWingsGroupV3Surface ? <ThemeSelector copy={chromeCopy.themeSelector} /> : null}
+            {!isWingsGroup ? <ThemeSelector copy={chromeCopy.themeSelector} /> : null}
             <nav
               aria-label={chromeCopy.footerNavigation}
               className="flex flex-col gap-4 md:flex-row md:flex-wrap md:justify-end"
@@ -192,6 +262,23 @@ export async function Footer() {
                 </a>
               ) : null}
             </nav>
+            {isWingsGo ? (
+              <div className="flex flex-col items-start gap-2">
+                {sharedZaloCTA ? (
+                  <a
+                    className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-5 text-sm font-semibold text-white no-underline"
+                    href={sharedZaloCTA.href}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {locale === 'en' ? 'Get Tour Advice' : 'Nhận tư vấn Tour'}
+                  </a>
+                ) : null}
+                <a className="text-sm font-semibold text-[var(--site-brand)]" href="tel:0912910101">
+                  {locale === 'en' ? 'Call now: 0912 910 101' : 'Hotline: 0912 910 101'}
+                </a>
+              </div>
+            ) : null}
           </div>
         </div>
       )}

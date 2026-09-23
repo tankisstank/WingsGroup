@@ -81,9 +81,9 @@ export const WingsGroupTrustSection = ({
             {showDeepDiveLink ? (
               <SiteLink className={styles.routeCta} href="/ve-wingsgroup">
                 {isEnglish
-                  ? 'View the corporate and legal profile'
-                  : 'Xem hồ sơ pháp lý và câu chuyện doanh nghiệp'}{' '}
-                <span aria-hidden="true">↗</span>
+                  ? 'Learn more about WingsGroup'
+                  : 'Tìm hiểu thêm về WingsGroup'}{' '}
+                <span aria-hidden="true">▶</span>
               </SiteLink>
             ) : null}
             {items?.some((item) => item.value) ? (

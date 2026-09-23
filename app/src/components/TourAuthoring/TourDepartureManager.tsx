@@ -50,7 +50,7 @@ export function TourDepartureForm({ createActions = false, initial, onCancel, on
     setError('')
     await onSubmit({ ...form, priceFrom: String(price) }, submitMode)
   }
-  return <div role="group" aria-label="Form lịch khởi hành" style={{ display: 'grid', gap: '0.6rem', padding: '0.75rem 0', borderTop: '1px solid var(--theme-elevation-150)' }}>
+  return <div className="tour-authoring-quick-add-card" role="group" aria-label="Form lịch khởi hành" style={{ display: 'grid', gap: '0.6rem' }}>
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.6rem' }}>
       <label>Ngày khởi hành<input required type="date" value={form.departureDate} onChange={(event) => set('departureDate', event.target.value)} /></label>
       <label>Điểm đi<input value={form.departureCity} onChange={(event) => set('departureCity', event.target.value)} /></label>
@@ -59,7 +59,7 @@ export function TourDepartureForm({ createActions = false, initial, onCancel, on
       <label>Tiền tệ<select value={form.currency} onChange={(event) => set('currency', event.target.value as DepartureFormValue['currency'])}><option value="VND">VND</option><option value="USD">USD</option></select></label>
       <label>Availability<select value={form.availabilityStatus} onChange={(event) => set('availabilityStatus', event.target.value as DepartureFormValue['availabilityStatus'])}>{Object.entries(availabilityLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
     </div>
-    <label><input type="checkbox" checked={form.verified} onChange={(event) => set('verified', event.target.checked)} /> Tôi xác nhận giá và tình trạng chỗ đã được kiểm tra</label>
+    <label className="tour-authoring-verification"><input type="checkbox" checked={form.verified} onChange={(event) => set('verified', event.target.checked)} /> Tôi xác nhận giá và tình trạng chỗ đã được kiểm tra</label>
     {form.verified && <label>Hết hạn xác minh<input type="datetime-local" value={form.expiresAt} onChange={(event) => set('expiresAt', event.target.value)} /></label>}
     {error && <p role="alert" style={{ color: 'var(--theme-error-500)', margin: 0 }}>{error}</p>}
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>{createActions ? <><button type="button" onClick={() => void submit('next')}>Lưu & thêm tiếp</button><button type="button" onClick={() => void submit('done')}>Lưu & hoàn tất</button></> : <button type="button" onClick={() => void submit('done')}>Lưu lịch khởi hành</button>}<button type="button" onClick={onCancel}>Hủy</button></div>
@@ -108,9 +108,9 @@ export default function TourDepartureManager() {
     await load()
   }
 
-  if (productID == null) return <section style={{ marginTop: '1rem', padding: '1rem', border: '1px solid var(--theme-elevation-150)' }}><strong>Ngày khởi hành & giá</strong><p style={{ marginBottom: 0 }}>Lưu TourProduct trước khi thêm lịch khởi hành.</p></section>
+  if (productID == null) return <section style={{ boxSizing: 'border-box', marginTop: '1rem', maxWidth: '100%', minWidth: 0, padding: '1rem', border: '1px solid var(--theme-elevation-150)' }}><strong>Ngày khởi hành & giá</strong><p style={{ marginBottom: 0 }}>Lưu TourProduct trước khi thêm lịch khởi hành.</p></section>
 
-  return <section aria-label="Quản lý ngày khởi hành" style={{ marginTop: '1rem', padding: '1rem', border: '1px solid var(--theme-elevation-150)', borderRadius: 6 }}>
+  return <section aria-label="Quản lý ngày khởi hành" style={{ boxSizing: 'border-box', marginTop: '1rem', maxWidth: '100%', minWidth: 0, padding: '1rem', border: '1px solid var(--theme-elevation-150)', borderRadius: 6 }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}><div><h3 style={{ margin: 0 }}>Ngày khởi hành & giá</h3><p style={{ margin: '0.35rem 0', color: 'var(--theme-elevation-600)' }}>Lưu độc lập với form TourProduct. Mọi dòng đều thuộc cùng site và tour này.</p></div><button type="button" onClick={() => { setEditingID(null); setForm(blankDeparture()); setError('') }}>Thêm lịch</button></div>
     {error && <p role="alert" style={{ color: 'var(--theme-error-500)' }}>{error}</p>}
     {form && <TourDepartureForm createActions={editingID == null} initial={form} onCancel={() => { setForm(null); setEditingID(null) }} onSubmit={(value, mode) => save(value, editingID == null && mode === 'next').catch((reason: Error) => setError(reason.message))} />}

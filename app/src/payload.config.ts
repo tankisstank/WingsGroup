@@ -33,7 +33,7 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
-import { cmsEnabledLocaleMetadata } from './utilities/locales'
+import { cmsEnabledLocaleMetadata, getPayloadLocaleLabel } from './utilities/locales'
 import { resolveLocalDatabaseURL } from './utilities/localDatabase'
 import { repairLocalSQLiteSchema } from './utilities/repairLocalSQLiteSchema'
 import {
@@ -76,10 +76,14 @@ if (
 
 export default buildConfig({
   admin: {
+    dateFormat: 'dd/MM/yyyy HH:mm',
     meta: {
       titleSuffix: 'WingsGroup CMS',
     },
     suppressHydrationWarning: true,
+    timezones: {
+      defaultTimezone: 'Asia/Ho_Chi_Minh',
+    },
     components: {
       beforeLogin: ['@/components/AdminThemeBootstrap', '@/components/BeforeLogin'],
       beforeDashboard: ['@/components/BeforeDashboard'],
@@ -88,6 +92,7 @@ export default buildConfig({
         '@/components/AdminNavIntro',
         '@/components/AdminNavTooltip',
       ],
+      header: ['@/components/AdminSiteSwitcher'],
       graphics: {
         Icon: '@/components/AdminBranding/Icon#AdminIcon',
         Logo: '@/components/AdminBranding/Logo#AdminLogo',
@@ -225,7 +230,7 @@ export default buildConfig({
     locales: cmsEnabledLocaleMetadata.map((locale) => ({
       code: locale.code,
       fallbackLocale: locale.fallbackLocale,
-      label: locale.label,
+      label: getPayloadLocaleLabel(locale),
       rtl: false,
     })),
     defaultLocale: 'vi',

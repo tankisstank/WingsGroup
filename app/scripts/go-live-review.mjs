@@ -285,11 +285,11 @@ const fetchJSON = async (url) => {
 const classifyPurpose = (pathname, title = '') => {
   const haystack = `${pathname} ${title}`.toLowerCase()
   if (/campaign|landing|khuyen-mai|he-2026/.test(haystack)) return 'campaign'
+  if (/posts|tin-tuc|guide|search|travel-guide/.test(haystack)) return 'editorial'
   if (/tour|lich-khoi-hanh|thi-truong|packages|destinations|styles|plan-your-trip/.test(haystack))
     return 'travel-product'
   if (/contact|lien-he|tu-van/.test(haystack)) return 'lead-contact'
   if (/policy|chinh-sach|dieu-khoan|tin-cay|legal|testimonials/.test(haystack)) return 'trust'
-  if (/posts|tin-tuc|guide|search|travel-guide/.test(haystack)) return 'editorial'
   if (/about|gioi-thieu|ve-/.test(haystack)) return 'brand-trust'
   return pathname === '/' ? 'homepage' : 'content'
 }
@@ -380,41 +380,122 @@ const worstStatus = (...statuses) =>
     'pass',
   )
 
+const buildSitemapRouteInventory = (site, urls, routePrefix = '') => {
+  const seen = new Set()
+  const sitePrefix = normalizePath(site.pathPrefix || '/')
+  const docs = []
+
+  for (const value of urls) {
+    let url
+    try {
+      url = new URL(value, baseURL)
+    } catch {
+      continue
+    }
+
+    const hostname = normalizeHostname(url.hostname)
+    const hostAllowed = hostnameBelongsToSite(hostname, site.publicHosts)
+    if (!hostAllowed && hostname !== normalizeHostname(baseHost)) continue
+
+    let pathname = normalizePath(url.pathname)
+    if (routingMode === 'path' && sitePrefix !== '/') {
+      if (pathname === sitePrefix) pathname = '/'
+      else if (pathname.startsWith(`${sitePrefix}/`)) pathname = pathname.slice(sitePrefix.length)
+    }
+
+    if (seen.has(pathname)) continue
+    seen.add(pathname)
+    docs.push({
+      id: `${site.key}-sitemap-${slugify(pathname)}`,
+      pathname,
+      purpose: classifyPurpose(pathname, pathname),
+      routePath: joinRoute(routePrefix, pathname),
+      source: 'public-sitemap',
+      status: 'published',
+      title: pathname === '/' ? 'Homepage' : pathname,
+    })
+  }
+
+  return docs
+}
+
+async function loadPublicSitemapPages(site) {
+  const root = await fetchTextProbe('/sitemap.xml')
+  if (root.status !== 200) {
+    throw new Error(
+      `Public sitemap inventory unavailable for ${site.label}: HTTP ${root.status || 'unknown'}${root.error ? ` (${root.error})` : ''}.`,
+    )
+  }
+
+  const childPaths = buildSitemapProbePaths(root.text)
+  const endpoints = childPaths.length
+    ? await Promise.all(childPaths.map((pathname) => fetchTextProbe(pathname)))
+    : [root]
+  for (const endpoint of endpoints) {
+    if (endpoint.status !== 200) {
+      throw new Error(
+        `Public sitemap inventory unavailable for ${site.label}: ${endpoint.pathname} returned HTTP ${endpoint.status || 'unknown'}${endpoint.error ? ` (${endpoint.error})` : ''}.`,
+      )
+    }
+  }
+
+  const advertisedURLs = endpoints.flatMap((endpoint) =>
+    extractAdvertisedURLs(endpoint.text, endpoint.pathname),
+  )
+  const routePrefix = routingMode === 'path' ? site.pathPrefix : ''
+  const docs = buildSitemapRouteInventory(site, advertisedURLs, routePrefix)
+  if (!docs.length) {
+    throw new Error(`Public sitemap inventory for ${site.label} did not advertise any page URLs.`)
+  }
+  return docs
+}
+
 async function loadInventory() {
   let pages = null
+  let sitemapPages = new Map()
   try {
     const pagesData = await fetchJSON(`${baseURL}/api/pages?limit=1000&depth=1`)
     pages = pagesData.docs || []
   } catch (error) {
-    if (!selectedPaths.length || !isProtectedInventoryError(error)) throw error
+    if (!isProtectedInventoryError(error)) throw error
+    sitemapPages = new Map(
+      await Promise.all(
+        selectedSites.map(async (site) => [site.key, await loadPublicSitemapPages(site)]),
+      ),
+    )
   }
 
   return selectedSites
     .map((site) => {
       const routePrefix = routingMode === 'path' ? site.pathPrefix : ''
-      const docs = (pages || [])
-        .filter((doc) => {
-          if (doc.site && typeof doc.site === 'object') {
-            const code = String(doc.site.code || '').toLowerCase()
-            if (code) return code === site.siteCode
-          }
-          return site.siteIds.includes(Number(relationId(doc.site)))
-        })
-        .filter((doc) => !doc._status || doc._status === 'published')
-        .filter((doc) => !(doc.pathname || '').startsWith('/hero-'))
-        .map((doc) => {
-          const pathname = normalizePath(doc.pathname || doc.slug || '/')
-          const title = localizedText(doc.title, localizedText(doc.meta?.title, `Page ${doc.id}`))
-          return {
-            id: doc.id,
-            title,
-            pathname,
-            routePath: joinRoute(routePrefix, pathname),
-            purpose: classifyPurpose(pathname, title),
-            source: 'payload-pages',
-            status: doc._status || 'published',
-          }
-        })
+      const docs = pages
+        ? pages
+            .filter((doc) => {
+              if (doc.site && typeof doc.site === 'object') {
+                const code = String(doc.site.code || '').toLowerCase()
+                if (code) return code === site.siteCode
+              }
+              return site.siteIds.includes(Number(relationId(doc.site)))
+            })
+            .filter((doc) => !doc._status || doc._status === 'published')
+            .filter((doc) => !(doc.pathname || '').startsWith('/hero-'))
+            .map((doc) => {
+              const pathname = normalizePath(doc.pathname || doc.slug || '/')
+              const title = localizedText(
+                doc.title,
+                localizedText(doc.meta?.title, `Page ${doc.id}`),
+              )
+              return {
+                id: doc.id,
+                title,
+                pathname,
+                routePath: joinRoute(routePrefix, pathname),
+                purpose: classifyPurpose(pathname, title),
+                source: 'payload-pages',
+                status: doc._status || 'published',
+              }
+            })
+        : sitemapPages.get(site.key) || []
       const explicitDocs = buildExplicitRouteInventory(site, selectedPaths, routePrefix)
       const routeDocs = [
         ...docs,
@@ -506,6 +587,9 @@ async function inspectPage(page, target, mode, screenshotPath) {
     }))
     const images = Array.from(document.querySelectorAll('img')).map((image) => ({
       alt: image.getAttribute('alt') || '',
+      decorative:
+        image.getAttribute('aria-hidden') === 'true' ||
+        Boolean(image.closest('[aria-hidden="true"], button[aria-label], a[aria-label]')),
       src: image.currentSrc || image.getAttribute('src') || '',
       visible: visible(image),
     }))
@@ -595,7 +679,9 @@ async function inspectPage(page, target, mode, screenshotPath) {
       tenantPrefixedLinks,
       visibleImageSources,
       crossTenantMedia,
-      missingAltImages: images.filter((image) => image.visible && !image.alt.trim()).length,
+      missingAltImages: images.filter(
+        (image) => image.visible && !image.decorative && !image.alt.trim(),
+      ).length,
       imageCount: images.filter((image) => image.visible).length,
       jsonLdCount: document.querySelectorAll('script[type="application/ld+json"]').length,
     }
@@ -761,7 +847,7 @@ function reviewContent(result) {
 }
 
 const hasStrongCTA = (text) =>
-  /(tư vấn|tu van|liên hệ|lien he|đăng ký|dang ky|giữ chỗ|giu cho|book|contact|inquiry|nhận|nhan|plan(?: your)? trip|consult|brief|write a message|browse destinations|browse styles)/i.test(
+  /(tư vấn|tu van|liên hệ|lien he|đăng ký|dang ky|giữ chỗ|giu cho|book|contact|inquiry|nhận|nhan|plan(?: your)? trip|consult|brief|proposal|write a message|browse destinations|browse styles)/i.test(
     text || '',
   )
 
@@ -1760,7 +1846,9 @@ if (isMainModule) {
 export {
   appendJSONLine,
   buildExplicitRouteInventory,
+  buildSitemapRouteInventory,
   classifyExpectedConsoleError,
+  classifyPurpose,
   checkpointKey,
   checkpointScope,
   checkpointVersion,

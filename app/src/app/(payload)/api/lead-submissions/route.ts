@@ -44,10 +44,76 @@ const json = (body: Record<string, unknown>, status: number): Response =>
 
 const accepted = (extra: Record<string, unknown> = {}): Response =>
   json({ status: 'accepted', ...extra }, 202)
-const relationID = (value: Form['site']): number | string | null =>
-  value && typeof value === 'object' ? value.id : value || null
+const relationID = (value: unknown): number | string | null => {
+  if (typeof value === 'number' || typeof value === 'string') return value
+  if (!value || typeof value !== 'object' || !('id' in value)) return null
+  const id = (value as { id?: unknown }).id
+  return typeof id === 'number' || typeof id === 'string' ? id : null
+}
 
 type PayloadClient = Awaited<ReturnType<typeof getPayload>>
+
+const resolveDepartureLeadContext = async ({
+  context,
+  payload,
+  siteID,
+}: {
+  context: ReturnType<typeof parseLeadRequest>['context']
+  payload: PayloadClient
+  siteID: number | string
+}) => {
+  if (!context) return undefined
+  if (!context.departureId) return context.departureDate ? null : context
+
+  try {
+    const departure = await payload.findByID({
+      collection: 'tour-departures',
+      depth: 0,
+      id: context.departureId,
+      overrideAccess: true,
+    })
+    if (!departure || String(relationID(departure.site)) !== String(siteID)) return null
+
+    const tourID = relationID(departure.tourProduct)
+    if (tourID === null) return null
+    const tour = await payload.findByID({
+      collection: 'tour-products',
+      depth: 0,
+      draft: false,
+      id: tourID,
+      overrideAccess: true,
+    })
+    if (
+      !tour ||
+      String(relationID(tour.site)) !== String(siteID) ||
+      tour._status !== 'published'
+    ) {
+      return null
+    }
+
+    const departureDate = String(departure.departureDate || '').slice(0, 10)
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(departureDate) ||
+      (context.departureDate && context.departureDate !== departureDate) ||
+      (context.tourId && context.tourId !== String(tour.id)) ||
+      (context.tourSlug && context.tourSlug !== tour.slug)
+    ) {
+      return null
+    }
+
+    return {
+      departureDate,
+      departureId: String(departure.id),
+      discovery: context.discovery,
+      intent: context.intent,
+      source: context.source,
+      tourId: String(tour.id),
+      tourSlug: tour.slug || undefined,
+    }
+  } catch {
+    return null
+  }
+}
 
 const persistenceErrorDetails = (error: unknown) => {
   const record = error && typeof error === 'object' ? (error as Record<string, unknown>) : null
@@ -266,7 +332,9 @@ export async function POST(request: Request): Promise<Response> {
 
   let normalizedFields
   try {
-    normalizedFields = validateFieldsForForm(form, input.submissionData)
+    normalizedFields = validateFieldsForForm(form, input.submissionData, {
+      phonePattern: site.code === 'wings-go' ? /^0\d{9}$/u : undefined,
+    })
   } catch {
     return json({ error: 'Invalid submission.' }, 400)
   }
@@ -358,6 +426,15 @@ export async function POST(request: Request): Promise<Response> {
     return json({ error: 'Service temporarily unavailable.' }, 503)
   }
 
+  const resolvedContext = isWingsGroupV3
+    ? input.context
+    : await resolveDepartureLeadContext({
+        context: input.context,
+        payload,
+        siteID: site.id,
+      })
+  if (resolvedContext === null) return json({ error: 'Invalid submission.' }, 400)
+
   let reserved
   try {
     reserved = await store!.reserveIdempotency(input.idempotencyKey)
@@ -376,7 +453,7 @@ export async function POST(request: Request): Promise<Response> {
             tourSlug: input.context.tourSlug,
           }
         : undefined
-      : input.context
+      : resolvedContext
     submission = await payload.create({
       collection: 'form-submissions',
       data: {

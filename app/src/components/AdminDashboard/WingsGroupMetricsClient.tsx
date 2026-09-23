@@ -8,6 +8,8 @@ import type {
   AdminMetricKey,
   RequestState,
 } from '@/components/AdminMetrics/contract'
+import { formatAdminDate } from '@/utilities/formatAdminDate'
+import { withAdminSiteContext } from '@/utilities/adminSiteContext'
 
 export type DashboardRecentDoc = {
   id: number | string
@@ -35,6 +37,7 @@ export type DashboardInitialState = {
   recentPages: RequestState<DashboardRecentDoc[]>
   recentPosts: RequestState<DashboardRecentDoc[]>
   recentSubmissions: RequestState<DashboardSubmissionDoc[]>
+  siteContextID?: string
   sites: RequestState<DashboardSiteDoc[]>
 }
 
@@ -150,18 +153,6 @@ const requestJSON = async <T,>(
   }
 }
 
-const formatDate = (value?: null | string): string => {
-  if (!value) {
-    return 'Chưa có ngày'
-  }
-
-  return new Intl.DateTimeFormat('vi-VN', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'Asia/Ho_Chi_Minh',
-  }).format(new Date(value))
-}
-
 const relationTitle = (value: DashboardSubmissionDoc['form']): string => {
   if (value && typeof value === 'object' && value.title) {
     return value.title
@@ -244,6 +235,11 @@ export function WingsGroupMetricsClient({
   const [recentPosts, setRecentPosts] = useState(initialState.recentPosts)
   const [recentSubmissions, setRecentSubmissions] = useState(initialState.recentSubmissions)
   const [sites, setSites] = useState(initialState.sites)
+  const siteContextID = initialState.siteContextID || ''
+  const scopedURL = useCallback(
+    (url: string) => withAdminSiteContext(url, siteContextID),
+    [siteContextID],
+  )
 
   const retryMetric = useCallback(async (descriptor: AdminMetricDescriptor) => {
     setCounts((current) =>
@@ -251,11 +247,11 @@ export function WingsGroupMetricsClient({
         item.key === descriptor.key ? { ...item, result: loadingState } : item,
       ),
     )
-    const result = await requestJSON(descriptor.restQuery, parseCount)
+    const result = await requestJSON(scopedURL(descriptor.restQuery), parseCount)
     setCounts((current) =>
       current.map((item) => (item.key === descriptor.key ? { ...item, result } : item)),
     )
-  }, [])
+  }, [scopedURL])
 
   const retrySites = useCallback(async () => {
     setSites(loadingState)
@@ -265,25 +261,25 @@ export function WingsGroupMetricsClient({
   const retryRecentPages = useCallback(async () => {
     setRecentPages(loadingState)
     setRecentPages(
-      await requestJSON(recentEndpoints.pages, (value) => parseCollection(value, isRecentDoc)),
+      await requestJSON(scopedURL(recentEndpoints.pages), (value) => parseCollection(value, isRecentDoc)),
     )
-  }, [])
+  }, [scopedURL])
 
   const retryRecentPosts = useCallback(async () => {
     setRecentPosts(loadingState)
     setRecentPosts(
-      await requestJSON(recentEndpoints.posts, (value) => parseCollection(value, isRecentDoc)),
+      await requestJSON(scopedURL(recentEndpoints.posts), (value) => parseCollection(value, isRecentDoc)),
     )
-  }, [])
+  }, [scopedURL])
 
   const retryRecentSubmissions = useCallback(async () => {
     setRecentSubmissions(loadingState)
     setRecentSubmissions(
-      await requestJSON(recentEndpoints.submissions, (value) =>
+      await requestJSON(scopedURL(recentEndpoints.submissions), (value) =>
         parseCollection(value, isSubmissionDoc),
       ),
     )
-  }, [])
+  }, [scopedURL])
 
   const summaryCounts = counts.filter((item) => summaryMetricKeys.includes(item.key))
   const summaryIncomplete = summaryCounts.some((item) => item.result.state !== 'ready')
@@ -296,9 +292,13 @@ export function WingsGroupMetricsClient({
       ),
     [summaryCounts],
   )
+  const selectedSiteName =
+    siteContextID && sites.state === 'ready'
+      ? sites.value.find((site) => String(site.id) === siteContextID)?.name || `Site ${siteContextID}`
+      : 'Tất cả site được phân quyền'
 
   return (
-    <section className={baseClass}>
+    <section className={baseClass} data-site-context={siteContextID || 'all'}>
       <div className={`${baseClass}__header`}>
         <div>
           <p className={`${baseClass}__eyebrow`}>WingsGroup CMS</p>
@@ -312,19 +312,19 @@ export function WingsGroupMetricsClient({
       </div>
 
       <div aria-label="Hành động chính" className={`${baseClass}__actions`}>
-        <Link className={`${baseClass}__primary-action`} href="/admin/page-wizard">
+        <Link className={`${baseClass}__primary-action`} href={scopedURL('/admin/page-wizard')}>
           Tạo trang nháp
         </Link>
-        <Link href="/admin/console">Console vận hành</Link>
-        <Link href="/admin/site-review">Rà soát site/page</Link>
-        <Link href="/admin/collections/form-submissions">Lead gửi về</Link>
-        <Link href="/admin/collections/pages/create">Tạo trang</Link>
-        <Link href="/admin/collections/posts/create">Tạo bài viết</Link>
-        <Link href="/admin/collections/media">Thư viện media</Link>
+        <Link href={scopedURL('/admin/console')}>Console vận hành</Link>
+        <Link href={scopedURL('/admin/site-review')}>Rà soát site/page</Link>
+        <Link href={scopedURL('/admin/collections/form-submissions')}>Lead gửi về</Link>
+        <Link href={scopedURL('/admin/collections/pages/create')}>Tạo trang</Link>
+        <Link href={scopedURL('/admin/collections/posts/create')}>Tạo bài viết</Link>
+        <Link href={scopedURL('/admin/collections/media')}>Thư viện media</Link>
       </div>
 
       <div className={`${baseClass}__scope`} aria-label="Phạm vi số liệu" role="group">
-        <span>Tất cả site được phân quyền</span>
+        <span>{selectedSiteName}</span>
         <span>Tất cả locale</span>
       </div>
 
@@ -355,7 +355,7 @@ export function WingsGroupMetricsClient({
           {contentSummaries.length > 0 ? (
             <div className={`${baseClass}__task-list`}>
               {contentSummaries.map((task) => (
-                <Link href={task.href} key={task.label}>
+                <Link href={scopedURL(task.href)} key={task.label}>
                   <span>{task.label}</span>
                   <strong>{task.total}</strong>
                 </Link>
@@ -377,7 +377,7 @@ export function WingsGroupMetricsClient({
       <div aria-label="Số liệu CMS" className={`${baseClass}__metrics`} role="region">
         {counts.map((item) => (
           <article key={item.key}>
-            <Link href={item.href}>
+            <Link href={scopedURL(item.href)}>
               <span>{item.label}</span>
               {item.result.state === 'ready' ? (
                 <strong>{item.result.value}</strong>
@@ -409,10 +409,10 @@ export function WingsGroupMetricsClient({
             <ul>
               {recentPages.value.map((doc) => (
                 <li key={doc.id}>
-                  <Link href={`/admin/collections/pages/${doc.id}`}>
+                  <Link href={scopedURL(`/admin/collections/pages/${doc.id}`)}>
                     {doc.title || 'Trang chưa có tiêu đề'}
                   </Link>
-                  <span>{formatDate(doc.updatedAt)}</span>
+                  <span>{formatAdminDate(doc.updatedAt)}</span>
                 </li>
               ))}
             </ul>
@@ -435,10 +435,10 @@ export function WingsGroupMetricsClient({
             <ul>
               {recentPosts.value.map((doc) => (
                 <li key={doc.id}>
-                  <Link href={`/admin/collections/posts/${doc.id}`}>
+                  <Link href={scopedURL(`/admin/collections/posts/${doc.id}`)}>
                     {doc.title || 'Bài viết chưa có tiêu đề'}
                   </Link>
-                  <span>{formatDate(doc.updatedAt)}</span>
+                  <span>{formatAdminDate(doc.updatedAt)}</span>
                 </li>
               ))}
             </ul>
@@ -461,10 +461,10 @@ export function WingsGroupMetricsClient({
             <ul>
               {recentSubmissions.value.map((doc) => (
                 <li key={doc.id}>
-                  <Link href={`/admin/collections/form-submissions/${doc.id}`}>
+                  <Link href={scopedURL(`/admin/collections/form-submissions/${doc.id}`)}>
                     {relationTitle(doc.form)}
                   </Link>
-                  <span>{formatDate(doc.createdAt)}</span>
+                  <span>{formatAdminDate(doc.createdAt)}</span>
                 </li>
               ))}
             </ul>

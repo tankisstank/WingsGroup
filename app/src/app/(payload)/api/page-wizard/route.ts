@@ -8,8 +8,14 @@ import {
   isLayoutPresetKey,
   type LayoutPresetKey,
 } from '@/utilities/layoutPresets'
+import {
+  cmsEnabledLocaleCodes,
+  isSupportedLocale,
+  type SupportedLocaleCode,
+} from '@/utilities/locales'
 
 type PageWizardPayload = {
+  locale?: string
   preset?: LayoutPresetKey
   site?: number | string
   slug?: string
@@ -75,6 +81,9 @@ const normalizeSiteID = (value: unknown): number | string | undefined => {
   return undefined
 }
 
+const isCmsLocale = (value: unknown): value is SupportedLocaleCode =>
+  typeof value === 'string' && isSupportedLocale(value) && cmsEnabledLocaleCodes.includes(value)
+
 const valueContains = (value: unknown, expected: string): boolean => {
   if (typeof value === 'string') return value === expected
 
@@ -99,7 +108,7 @@ const hasSameID = (value: unknown, expected: number | string): boolean =>
   String(value && typeof value === 'object' && 'id' in value ? value.id : value) ===
   String(expected)
 
-const parsePageWizardPayload = (body: unknown) => {
+export const parsePageWizardPayload = (body: unknown) => {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     throw new PageWizardError('Dữ liệu tạo trang không hợp lệ.')
   }
@@ -110,6 +119,7 @@ const parsePageWizardPayload = (body: unknown) => {
   const slug = slugify(slugSource)
   const summary = typeof value.summary === 'string' ? value.summary.trim() : ''
   const siteID = normalizeSiteID(value.site)
+  const locale = value.locale === undefined ? 'vi' : value.locale
 
   if (!siteID || !title || !slug) {
     throw new PageWizardError('Thiếu site, tiêu đề hoặc đường dẫn.')
@@ -119,7 +129,11 @@ const parsePageWizardPayload = (body: unknown) => {
     throw new PageWizardError('Loại trang không hợp lệ.')
   }
 
-  return { preset: value.preset, siteID, slug, summary, title }
+  if (!isCmsLocale(locale)) {
+    throw new PageWizardError('Locale không hợp lệ hoặc chưa được bật trong CMS.')
+  }
+
+  return { locale, preset: value.preset, siteID, slug, summary, title }
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -138,14 +152,15 @@ export async function POST(request: Request): Promise<Response> {
     } catch {
       throw new PageWizardError('Dữ liệu tạo trang phải là JSON hợp lệ.')
     }
-    const { preset, siteID, slug, summary, title } = parsePageWizardPayload(body)
+    const { locale, preset, siteID, slug, summary, title } = parsePageWizardPayload(body)
 
     const payloadReq = await createLocalReq({ user }, payload)
 
     // Read through the caller's access rules so arbitrary IDs and cross-site
     // submissions cannot create a page outside the current operator scope.
+    let site
     try {
-      await payload.findByID({
+      site = await payload.findByID({
         collection: 'sites',
         depth: 0,
         id: siteID,
@@ -154,6 +169,14 @@ export async function POST(request: Request): Promise<Response> {
       })
     } catch {
       throw new PageWizardError('Bạn không có quyền sử dụng site đã chọn.', 403)
+    }
+
+    const siteLocales = Array.isArray(site.supportedLocales)
+      ? site.supportedLocales.filter(isCmsLocale)
+      : []
+
+    if (siteLocales.length > 0 && !siteLocales.includes(locale)) {
+      throw new PageWizardError('Locale này chưa được site cho phép tạo nội dung.')
     }
 
     const existing = await payload.find({
@@ -192,7 +215,7 @@ export async function POST(request: Request): Promise<Response> {
         title,
         ...presetData,
       } as never,
-      locale: 'vi',
+      locale,
       overrideAccess: false,
       req: payloadReq,
     })
@@ -230,6 +253,7 @@ export async function POST(request: Request): Promise<Response> {
 
     return Response.json({
       id: createdPage.id,
+      locale,
       preset,
     })
   } catch (error) {
