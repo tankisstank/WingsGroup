@@ -82,7 +82,7 @@ export const Pages: CollectionConfig<'pages'> = {
     },
     description:
       'Quản lý trang theo site. Editor chỉ lưu nháp; site-manager hoặc super-admin duyệt publish.',
-    defaultColumns: ['title', 'site', 'slug', 'updatedAt'],
+    defaultColumns: ['title', 'site', 'slug', 'updatedAt', 'id'],
     group: adminGroups.content,
     livePreview: {
       url: ({ data, req }) =>

@@ -27,6 +27,21 @@ describe('LocalizedTitleCell', () => {
     ).toBe('/admin/collections/tour-products/51')
   })
 
+  it('links a page title to its detail editor', () => {
+    render(
+      <LocalizedTitleCell
+        cellData="Hệ sinh thái WingsGroup"
+        collectionSlug="pages"
+        field={{ name: 'title', type: 'text' }}
+        rowData={{ id: 181 }}
+      />,
+    )
+
+    expect(screen.getByText('Hệ sinh thái WingsGroup').closest('a')?.getAttribute('href')).toBe(
+      '/admin/collections/pages/181',
+    )
+  })
+
   it('keeps other collection title cells as plain text', () => {
     render(
       <LocalizedTitleCell

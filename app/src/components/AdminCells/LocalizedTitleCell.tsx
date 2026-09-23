@@ -133,14 +133,14 @@ export default function LocalizedTitleCell({
     title: missing && fallbackTitle ? `Nguồn ${fallbackTitle.locale}` : undefined,
   }
 
-  if (collectionSlug === 'tour-products' && id) {
+  if ((collectionSlug === 'pages' || collectionSlug === 'tour-products') && id) {
     return (
       <Link
         {...cellProps}
         aria-label={`Mở chi tiết tour: ${text}`}
         href={formatAdminURL({
           adminRoute: config.routes.admin,
-          path: `/collections/tour-products/${encodeURIComponent(id)}`,
+          path: `/collections/${collectionSlug}/${encodeURIComponent(id)}`,
           relative: true,
         })}
       >
