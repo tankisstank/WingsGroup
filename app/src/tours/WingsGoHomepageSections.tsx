@@ -10,9 +10,11 @@ import { WingsGoTourCard } from './WingsGoTourCard'
 import {
   formatTourDate,
   formatTourPrice,
+  getFutureDepartures,
   getPriorityMarketDeparture,
   getAvailabilityLabel,
   getTourInquiryPath,
+  isDeparturePublishable,
 } from './utils'
 import { queryWingsGoTourCatalog, type WingsGoCatalogPage } from './wingsGoCatalog'
 
@@ -76,6 +78,10 @@ export const WingsGoHomepageSections = async ({
   const nearestByMarket = marketCards.map((market) => ({
     ...market,
     departure: getPriorityMarketDeparture(schedule.departures, market.key),
+    hasUnpublishedDeparture: getFutureDepartures(schedule.departures).some((departure) => {
+      const product = asDoc<{ market?: string }>(departure.tourProduct)
+      return product?.market === market.key && !isDeparturePublishable(departure)
+    }),
   }))
 
   return (
@@ -121,7 +127,7 @@ export const WingsGoHomepageSections = async ({
         </ul>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          {nearestByMarket.map(({ departure, emoji, key, label }) => {
+          {nearestByMarket.map(({ departure, emoji, hasUnpublishedDeparture, key, label }) => {
             const product = departure
               ? asDoc<{
                   id?: number | string
@@ -217,6 +223,25 @@ export const WingsGoHomepageSections = async ({
                       ) : null}
                     </div>
                   </>
+                ) : hasUnpublishedDeparture ? (
+                  <div className="mt-4 flex flex-1 flex-col justify-between gap-4">
+                    <div className="space-y-3">
+                      <span className="inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-amber-700 dark:text-amber-300">
+                        {isEn ? 'Unpublished' : 'Chưa publish'}
+                      </span>
+                      <p className="text-sm leading-7 text-muted-foreground">
+                        {isEn
+                          ? 'Airline, flight code and price must be completed before this departure can be shown as on sale.'
+                          : 'Cần hoàn tất hãng bay, mã chuyến và giá trước khi lịch này được publish mở bán.'}
+                      </p>
+                    </div>
+                    <SiteLink
+                      className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold no-underline"
+                      href="/lien-he"
+                    >
+                      {isEn ? 'Ask WingsGo' : 'Hỏi WingsGo'}
+                    </SiteLink>
+                  </div>
                 ) : (
                   <div className="mt-4 flex flex-1 flex-col justify-between gap-4">
                     <p className="text-sm leading-7 text-muted-foreground">

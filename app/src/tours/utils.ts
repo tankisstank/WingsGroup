@@ -440,6 +440,21 @@ export const getFutureDepartures = <T extends { departureDate?: null | string }>
   })
 }
 
+/**
+ * A homepage "on sale" card must have every customer-facing flight and price
+ * claim ready. Incomplete departures stay in CMS as drafts until editorial
+ * data is complete; public surfaces must fail closed instead of showing
+ * placeholders as if the departure were published.
+ */
+export const isDeparturePublishable = (
+  departure: Pick<DepartureCardViewModel, 'airline' | 'currency' | 'flightNumber' | 'priceFrom'>,
+) =>
+  Boolean(
+    departure.airline?.trim() &&
+      departure.flightNumber?.trim() &&
+      formatTourPrice(departure.priceFrom, departure.currency),
+  )
+
 export const getPriorityMarketDeparture = (
   departures: DepartureCardViewModel[],
   market: string,
@@ -447,7 +462,10 @@ export const getPriorityMarketDeparture = (
   getFutureDepartures(departures)
     .filter((departure) => {
       const product = departure.tourProduct
-      return Boolean(product && typeof product === 'object' && product.market === market)
+      return (
+        Boolean(product && typeof product === 'object' && product.market === market) &&
+        isDeparturePublishable(departure)
+      )
     })
     .sort((left, right) => {
       const limited =
