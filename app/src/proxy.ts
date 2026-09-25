@@ -40,6 +40,7 @@ const defaultLocaleByPublicHost: Record<string, string> = {
   'wingsplus.vn': 'vi',
   'wingside.vn': 'en',
 }
+const wingsGoPublicHosts = new Set(['wingsgo.vn', 'www.wingsgo.vn'])
 
 const isLocalDevelopmentHost = (host: null | string) =>
   Boolean(host && (localBootstrapHosts.has(host) || host.endsWith('.local')))
@@ -73,6 +74,38 @@ const applyPublicPageCachePolicy = (request: NextRequest, response: NextResponse
   // caching removes the BFCache-blocking `no-store` without sharing content
   // between preview/authenticated and anonymous sessions.
   return response
+}
+
+const resolvePermanentTourRedirect = async (request: NextRequest, effectiveHost: string | null): Promise<NextResponse | null> => {
+  const pathname = request.nextUrl.pathname
+  if (!wingsGoPublicHosts.has(effectiveHost || '') || !pathname.startsWith('/tour/') || pathname === '/tour/') return null
+
+  const endpoint = new URL('/api/redirects', request.url)
+  endpoint.searchParams.set('where[from][equals]', pathname)
+  endpoint.searchParams.set('depth', '0')
+  endpoint.searchParams.set('limit', '1')
+
+  try {
+    const response = await fetch(endpoint, {
+      cache: 'no-store',
+      headers: { accept: 'application/json' },
+    })
+    if (!response.ok) return null
+
+    const body = (await response.json()) as {
+      docs?: Array<{ to?: { url?: string | null }; type?: string | null }>
+    }
+    const redirect = body.docs?.[0]
+    if (redirect?.type !== '301' || !redirect.to?.url) return null
+
+    const destination = new URL(redirect.to.url, request.url)
+    if (!['http:', 'https:'].includes(destination.protocol) || destination.href === request.url) return null
+
+    return NextResponse.redirect(destination, 301)
+  } catch {
+    // A lookup failure must leave the normal CMS route available.
+    return null
+  }
 }
 
 const isServerOwnedLocalDraftPreview = async (
@@ -282,6 +315,11 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = stripLeadingSegments(request.nextUrl.pathname, 1)
     return NextResponse.redirect(url, 308)
+  }
+
+  if (!siteAlias && !locale) {
+    const permanentTourRedirect = await resolvePermanentTourRedirect(request, effectiveHost)
+    if (permanentTourRedirect) return permanentTourRedirect
   }
 
   const siteCode = siteAlias ? allSiteAliasToCodeMap[siteAlias] : null
