@@ -197,3 +197,17 @@ Production disk còn khoảng `1.1 GB` trống (`98%` sử dụng). Full rebuild
 đã dừng an toàn vì thiếu không gian khi unpack; rollback tag được giữ nguyên và
 release được triển khai bằng overlay image, không xóa image/cache cũ trong bước
 release này.
+
+### Production deployment — operator warning and hero media guidance — 2026-09-25
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Release identity | PASS | Source commit `ec039c368c63858c0b1ed478587ee3a6b723181d`; archive SHA-256 `75779dc516e304c2cb34b52286a1f57bbea49b7d48cba65bf695169850a0985b`; release `/home/ubuntu/wings-travel/releases/wingsgroup-us075-ec039c3`; image `sha256:e540df4de79164ee883ede7b17eb921a48a2452a191352377dcd3f3d88b5dcca`. |
+| Build and focused regression | PASS | Production ARM64 build completed with TypeScript and static generation `20/20`; unit `16/16`, component `6/6`, targeted ESLint had zero errors, and `git diff --check` passed. |
+| Production promotion | PASS | `current` atomically points to the new release; app was recreated with `--no-deps --no-build --pull never --force-recreate`. Previous release and image rollback tag were retained. |
+| Runtime safety | PASS | Public live/ready checks for WingsGroup, WingsGo and WingSide returned `200`; WingsGo home and Product #112 route returned `200`; PostgreSQL `ab500698…` and Redis `b59a6251…` container identities were unchanged; no migration, CMS write or Redis flush ran. |
+| Editor guidance | PASS_CODE | `TourProduct` now labels the field `Ảnh hero public của tour`, explains that Wrapper Page media is not a substitute, and the readiness panel reports missing hero media as an actionable publish blocker. The published preview banner explicitly says it is the public version. |
+| Product #112 data state | OPEN_DATA | Public Product #112 still has no `heroMedia`/gallery relation. The release clarifies the repair path but does not alter CMS content; an editor must select media in this TourProduct, save draft, preview, and publish. |
+
+The story remains `in_progress`: the release is live, but authenticated itinerary,
+quick-add persistence and cross-role UAT gates remain open.

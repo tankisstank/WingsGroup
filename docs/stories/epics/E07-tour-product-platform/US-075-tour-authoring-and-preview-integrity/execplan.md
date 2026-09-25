@@ -185,8 +185,9 @@ Hard gates:
 3. Cập nhật Harness proof/status và đồng bộ Plane; giữ story `in_progress` khi
    authenticated draft proof còn thiếu.
 4. Production release proof đã hoàn tất với release
-   `wingsgroup-us075-20260917T071748Z`; bước còn lại là chạy UAT CMS có xác thực
-   bằng fixture được owner phê duyệt.
+   `wingsgroup-us075-ec039c3`; bước còn lại là chạy UAT CMS có xác thực bằng
+   fixture được owner phê duyệt, tập trung vào itinerary, quick-add persistence
+   và quyền theo vai trò.
 
 ## Dependencies
 

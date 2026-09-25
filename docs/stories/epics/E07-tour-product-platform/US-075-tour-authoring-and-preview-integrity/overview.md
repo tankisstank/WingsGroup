@@ -311,6 +311,7 @@ tự động hiện có:
   brand và source-contract expectation đã bị stale; hai sửa này nằm ngoài
   phạm vi nghiệp vụ TourProduct của US-075.
 
-Authenticated CMS UAT 11 bước, responsive browser proof và staging/production
-release proof chưa thực hiện; vì vậy story vẫn `in_progress`. Không có schema,
-migration hoặc CMS production write trong implementation này.
+Authenticated CMS UAT 11 bước và responsive browser proof vẫn là các gate riêng;
+production release proof đã được ghi nhận ở validation checkpoint 2026-09-25.
+Story vẫn `in_progress` vì itinerary/quick-add/cross-role UAT chưa đóng. Không
+có schema, migration hoặc CMS production write trong implementation này.
