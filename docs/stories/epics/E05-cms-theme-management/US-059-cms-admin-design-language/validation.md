@@ -246,3 +246,34 @@ the single rollback release.
   `invalid_scope=0` (every returned record is published and has a Site).
   The VPS retains only the current CMS release and the immediate rollback;
   16 GB disk space remained after cleanup.
+
+## Production re-check — 2026-09-25
+
+- Authenticated read-only review used the saved production `site-manager` profile.
+  `/admin`, `/admin/console`, `/admin/theme`, `/admin/site-review`,
+  `/admin/page-wizard`, `/admin/collections/pages`, and page `181` all rendered;
+  page `181` opened in edit view without saving or publishing.
+- With the admin rail open at 1440px, the site selector is inside the Payload
+  header and the document remains 1440px wide. At 390px, Console content and its
+  mobile triage navigation render within a 390px document. No browser page errors
+  were reported on the checked routes. All six production `/api/health/ready`
+  endpoints returned HTTP 200.
+- Focused local proof passed: Admin Operator Console component 9/9, navigation
+  and applied-UI unit tests 8/8, lifecycle unit tests 2/2, and TypeScript.
+- The prescribed broad `pnpm test:component` gate did not pass: 174/176 tests;
+  failures were `tourAuthoringReadiness` and `wingsSideHiFiChrome`, outside the
+  US-059 admin surfaces. Production Editor-role UAT was not performed (the
+  authenticated profile was site-manager).
+
+The historical production shell concern is resolved for the checked routes.
+On 2026-09-25, the stakeholder explicitly accepted a waiver for the missing
+production Editor-role UAT. This is recorded as `waived/unverified`, not as a
+claim that the Editor role passed. The waiver covers only the live-role test;
+it does not waive the documented access-control contract or focused local
+role/permission coverage.
+
+The broad component gate remains `174/176`, with failures in
+`tourAuthoringReadiness` and `wingsSideHiFiChrome`, both outside the US-059
+admin surfaces. Harness therefore remains `in_progress` and Plane proof
+remains `Partial` pending final reconciliation/acceptance of the unrelated
+baseline failures.

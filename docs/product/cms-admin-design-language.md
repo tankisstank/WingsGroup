@@ -66,6 +66,11 @@ the final enforcement point.
   this as `Tất cả site được phân quyền` and `Tất cả locale`; admin-interface
   language is separate from content locale. This aggregate context grants no
   write authority.
+- A site switcher may carry an explicit site context into supported collection
+  and workflow links. It must be visible on write-capable surfaces and the
+  server must re-check the requested site; a query-string context is not an
+  authorization boundary. Global users/account routes do not inherit a site
+  filter.
 - A write-capable destination must show its own site, content locale, role,
   and source of scope before confirmation. Page Wizard retains its current
   Payload-default locale (`vi`) because its API does not accept locale input;
@@ -96,9 +101,15 @@ existing Payload rules continue to guard the data:
 
 | Role | Console shortcuts |
 | --- | --- |
-| `editor` | Create a page draft and access granted content and lead surfaces. No import/export or advanced shortcuts. |
+| `editor` | Create a page draft and read granted content/lead surfaces. Lead triage writes are disabled until explicitly approved. No import/export or advanced shortcuts. |
 | `site-manager` | Editor shortcuts plus site-scoped settings and import/export where existing access permits them. |
 | `super-admin` | All operational shortcuts, including users, redirects, search, globals, and cross-site administration. |
+
+Lead triage metadata is separate from notification delivery metadata. Its status,
+assignee and bounded note must be updated through the scoped command/API, with
+server-managed actor/time and conflict handling. Do not expose submission PII in
+lookup responses, logs or analytics, and do not use this surface to mutate user
+accounts.
 
 The route inventory is 24 operational routes plus `/admin/console` and the
 native `/admin` landing surface:

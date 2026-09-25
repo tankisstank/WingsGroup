@@ -1,0 +1,44 @@
+{
+  "release": "20260914",
+  "environment": "local SQLite fixture, Chromium, authenticated read-only admin session",
+  "viewportHeight": 900,
+  "result": "pass for measured local candidate",
+  "closedNav": [
+    { "width": 360, "scrollWidth": 360, "bodyClientWidth": 360, "wrapX": 0, "wrapWidth": 360, "wrapHeight": 1785.78, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 390, "scrollWidth": 390, "bodyClientWidth": 390, "wrapX": 0, "wrapWidth": 390, "wrapHeight": 1695.36, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 430, "scrollWidth": 430, "bodyClientWidth": 430, "wrapX": 0, "wrapWidth": 430, "wrapHeight": 1677.36, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 600, "scrollWidth": 600, "bodyClientWidth": 600, "wrapX": 0, "wrapWidth": 600, "wrapHeight": 1469.33, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 679, "scrollWidth": 679, "bodyClientWidth": 679, "wrapX": 0, "wrapWidth": 679, "wrapHeight": 1433.78, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 680, "scrollWidth": 680, "bodyClientWidth": 680, "wrapX": 0, "wrapWidth": 680, "wrapHeight": 1433.78, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 681, "scrollWidth": 681, "bodyClientWidth": 681, "wrapX": 0, "wrapWidth": 681, "wrapHeight": 1381.23, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 768, "scrollWidth": 768, "bodyClientWidth": 768, "wrapX": 0, "wrapWidth": 768, "wrapHeight": 1291.95, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 820, "scrollWidth": 820, "bodyClientWidth": 820, "wrapX": 0, "wrapWidth": 820, "wrapHeight": 1141.31, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 1024, "scrollWidth": 1024, "bodyClientWidth": 1024, "wrapX": 0, "wrapWidth": 1024, "wrapHeight": 992.94, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 1366, "scrollWidth": 1366, "bodyClientWidth": 1366, "wrapX": 0, "wrapWidth": 1366, "wrapHeight": 1034.95, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 1440, "scrollWidth": 1440, "bodyClientWidth": 1440, "wrapX": 0, "wrapWidth": 1440, "wrapHeight": 1034.95, "contentVisible": true, "horizontalOverflow": false, "overlap": false },
+    { "width": 1920, "scrollWidth": 1920, "bodyClientWidth": 1920, "wrapX": 0, "wrapWidth": 1920, "wrapHeight": 1034.95, "contentVisible": true, "horizontalOverflow": false, "overlap": false }
+  ],
+  "openNav": [
+    { "width": 681, "wrapX": 224, "wrapWidth": 457, "navWidth": 224, "toggleX": 167, "breadcrumbX": 264, "overlap": false },
+    { "width": 768, "wrapX": 224, "wrapWidth": 544, "navWidth": 224, "toggleX": 167, "breadcrumbX": 264, "overlap": false },
+    { "width": 820, "wrapX": 224, "wrapWidth": 596, "navWidth": 224, "toggleX": 166, "breadcrumbX": 264, "overlap": false },
+    { "width": 1024, "wrapX": 224, "wrapWidth": 800, "navWidth": 224, "toggleX": 166, "breadcrumbX": 264, "overlap": false },
+    { "width": 1366, "wrapX": 258, "wrapWidth": 1108, "navWidth": 258, "toggleX": 200, "breadcrumbX": 298, "overlap": false },
+    { "width": 1440, "wrapX": 258, "wrapWidth": 1182, "navWidth": 258, "toggleX": 200, "breadcrumbX": 298, "overlap": false },
+    { "width": 1920, "wrapX": 258, "wrapWidth": 1662, "navWidth": 258, "toggleX": 200, "breadcrumbX": 298, "overlap": false }
+  ],
+  "atsCompactThemeSmoke": [
+    { "width": 360, "wrapWidthPositive": true, "contentVisible": true, "overlap": false },
+    { "width": 768, "wrapWidthPositive": true, "contentVisible": true, "overlap": false },
+    { "width": 1440, "wrapWidthPositive": true, "contentVisible": true, "overlap": false }
+  ],
+  "screenshots": [
+    "../../../../../../../app/output/playwright/us074-admin-360-final.png",
+    "../../../../../../../app/output/playwright/us074-admin-768-final.png",
+    "../../../../../../../app/output/playwright/us074-admin-1440-final.png"
+  ],
+  "limitations": [
+    "At <=680px the native Payload mobile navigation owns the menu toggle; content remained visible, while the desktop/tablet open-nav geometry was measured from 681px upward.",
+    "No Safari/iOS measurement was available in this run."
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "artifact": "US-074 R-07 pagination spacing no-repro probe",
+  "generatedAt": "2026-09-14T23:19:36+07:00",
+  "environment": {
+    "payloadUiVersion": "3.84.1",
+    "source": "app/node_modules/@payloadcms/ui/dist/elements/PageControls/index.js",
+    "sourceContract": "PageControlsComponent emits number, hyphen, number, space, i18n.t(general:of), space, total",
+    "browserData": "source-contract probe; no authenticated CMS data was accessed"
+  },
+  "translation": {
+    "key": "general:of",
+    "value": "trong số",
+    "spaceBeforeConnector": true,
+    "spaceAfterConnector": true
+  },
+  "cases": [
+    { "name": "zero", "totalDocs": 0, "page": 1, "limit": 10, "renderedText": null },
+    { "name": "one", "totalDocs": 1, "page": 1, "limit": 10, "renderedText": "1-1 trong số 1" },
+    { "name": "ten", "totalDocs": 10, "page": 1, "limit": 10, "renderedText": "1-10 trong số 10" },
+    { "name": "eleven-first", "totalDocs": 11, "page": 1, "limit": 10, "renderedText": "1-10 trong số 11" },
+    { "name": "eleven-last", "totalDocs": 11, "page": 2, "limit": 10, "renderedText": "11-11 trong số 11" },
+    { "name": "large-first", "totalDocs": 295, "page": 1, "limit": 10, "renderedText": "1-10 trong số 295" },
+    { "name": "large-last", "totalDocs": 295, "page": 30, "limit": 10, "renderedText": "291-295 trong số 295" }
+  ],
+  "checks": {
+    "allNonEmptyRangesHaveConnectorSpaces": true,
+    "customStylesContainNoPaginationWhitespaceOverride": true,
+    "productionWrites": false
+  },
+  "disposition": "No reproduction in the installed Payload source contract. Authenticated browser probe on real datasets and owner confirmation remain open."
+}
