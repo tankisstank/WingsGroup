@@ -11,6 +11,7 @@ import {
   parseAuthoringLocale,
   provisionAuthoring,
   publishAuthoring,
+  relinkAuthoring,
 } from '@/tours/authoring'
 import { getTrustedCMSOrigins } from '@/utilities/previewHandoff'
 
@@ -93,7 +94,9 @@ export async function POST(request: Request, context: RouteContext) {
     const req = await createAuthoringRequest(payload, user, input.locale)
     const result = input.action === 'provision'
       ? await provisionAuthoring({ id, locale: input.locale, payload, req })
-      : await publishAuthoring({ departureIDs: input.departureIDs!, id, locale: input.locale, payload, req, revision: input.revision })
+      : input.action === 'relink'
+        ? await relinkAuthoring({ id, locale: input.locale, payload, req, wrapperID: input.wrapperID! })
+        : await publishAuthoring({ departureIDs: input.departureIDs!, id, locale: input.locale, payload, req, revision: input.revision })
     const { _private: privateState, ...publicResult } = result
     void privateState
     return json(publicResult)

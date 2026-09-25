@@ -3,12 +3,14 @@ import { createHash } from 'node:crypto'
 import { sql } from '@payloadcms/db-postgres'
 import { Forbidden, ValidationError, type PayloadRequest } from 'payload'
 import { commitTransaction, createLocalReq, killTransaction } from 'payload'
+import { revalidateTag } from 'next/cache.js'
 
 import { contentPublishAccess, hasRole } from '@/access/roles'
 import { createLayoutPresetData } from '@/utilities/layoutPresets'
 
 export type AuthoringLocale = 'vi' | 'en'
 export type AuthoringIssue = { code: string; severity: 'error' | 'info' | 'warning'; message: string }
+export type WrapperHealth = 'valid' | 'invalid_path' | 'invalid_site' | 'orphan' | 'shared'
 
 type RelationID = number | string
 type AnyDoc = Record<string, any> & { id: RelationID }
@@ -77,6 +79,10 @@ const isLocale = (value: unknown): value is AuthoringLocale => value === 'vi' ||
 const stringValue = (value: unknown): string | null =>
   typeof value === 'string' && value.trim() ? value.trim() : null
 
+export const hasHeroMedia = (product: AnyDoc): boolean =>
+  relationID(product.heroMedia) !== null ||
+  (Array.isArray(product.gallery) && product.gallery.some((item) => relationID(item) !== null))
+
 const localizedString = (value: unknown, locale: AuthoringLocale): string | null => {
   if (typeof value === 'string') return stringValue(value)
   if (!value || typeof value !== 'object') return null
@@ -131,11 +137,11 @@ export const parseAuthoringBody = (body: unknown) => {
     throw new AuthoringError('Dữ liệu authoring phải là JSON hợp lệ.')
   }
   const input = body as Record<string, unknown>
-  if (input.action !== 'provision' && input.action !== 'publish') {
-    throw new AuthoringError('Action phải là provision hoặc publish.')
+  if (input.action !== 'provision' && input.action !== 'relink' && input.action !== 'publish') {
+    throw new AuthoringError('Action phải là provision, relink hoặc publish.')
   }
   const locale = parseAuthoringLocale(input.locale)
-  const allowed = new Set(['action', 'locale', 'revision', 'departureIDs'])
+  const allowed = new Set(['action', 'locale', 'revision', 'departureIDs', 'wrapperID'])
   const unknown = Object.keys(input).find((key) => !allowed.has(key))
   if (unknown) throw new AuthoringError(`Trường không được phép: ${unknown}.`)
 
@@ -156,7 +162,16 @@ export const parseAuthoringBody = (body: unknown) => {
   if (input.action === 'publish' && (!departureIDs || departureIDs.length === 0)) {
     throw new AuthoringError('Publish phải chọn ít nhất một departure.')
   }
-  return { action: input.action, departureIDs, locale, revision: input.revision as string | undefined }
+  let wrapperID: RelationID | undefined
+  if (input.wrapperID !== undefined) {
+    const parsedWrapperID = relationID(input.wrapperID)
+    if (parsedWrapperID === null) throw new AuthoringError('wrapperID không hợp lệ.')
+    wrapperID = parsedWrapperID
+  }
+  if (input.action === 'relink' && wrapperID === undefined) {
+    throw new AuthoringError('Relink cần wrapperID.')
+  }
+  return { action: input.action, departureIDs, locale, revision: input.revision as string | undefined, wrapperID }
 }
 
 const findOne = async (payload: PayloadLike, req: PayloadRequest, collection: string, id: RelationID) =>
@@ -227,8 +242,19 @@ const expectedPath = (product: AnyDoc) => {
   return `/tour/${slug}`
 }
 
+export const getExpectedTourPath = (product: AnyDoc) => expectedPath(product)
+
 const wrapperIsValid = (wrapper: AnyDoc | null, product: AnyDoc, siteID: RelationID) =>
   Boolean(wrapper && sameID(wrapper.site, siteID) && wrapper.pathname === expectedPath(product))
+
+export const getWrapperHealth = ({ linkedProductIDs, product, siteID, wrapper }: { linkedProductIDs: RelationID[]; product: AnyDoc; siteID: RelationID; wrapper: AnyDoc | null }): WrapperHealth | null => {
+  if (!wrapper) return null
+  if (!sameID(wrapper.site, siteID)) return 'invalid_site'
+  if (wrapper.pathname !== expectedPath(product)) return 'invalid_path'
+  if (linkedProductIDs.length === 0) return 'orphan'
+  if (linkedProductIDs.length > 1) return 'shared'
+  return 'valid'
+}
 
 export const authoringIssues = ({
   canPublish,
@@ -236,18 +262,24 @@ export const authoringIssues = ({
   locale,
   product,
   wrapper,
+  wrapperHealth,
 }: {
   canPublish: boolean
   departures: AnyDoc[]
   locale: AuthoringLocale
   product: AnyDoc
   wrapper: AnyDoc | null
+  wrapperHealth?: WrapperHealth | null
 }) => {
   const issues: AuthoringIssue[] = []
   if (!expectedPath(product)) issues.push({ code: 'invalid_slug', severity: 'error', message: 'Tour chưa có slug hợp lệ để tạo đường dẫn.' })
   if (!localizedString(product.title, locale)) issues.push({ code: 'missing_title', severity: 'error', message: `Tour chưa có tiêu đề ${locale.toUpperCase()}.` })
+  if (!hasHeroMedia(product)) issues.push({ code: 'missing_hero_media', severity: 'error', message: 'Tour chưa có ảnh hero public. Nhập ảnh tại trường Hero media hoặc Gallery trong TourProduct, không nhập ở Wrapper Page.' })
   if (!wrapper) issues.push({ code: 'missing_wrapper', severity: 'warning', message: 'Tour chưa có trang wrapper; hãy provision trước khi publish.' })
-  else if (!wrapperIsValid(wrapper, product, relationSite(product) as RelationID)) issues.push({ code: 'invalid_wrapper', severity: 'error', message: 'Wrapper không đúng site hoặc đường dẫn /tour/<slug>.' })
+  else if (wrapperHealth === 'shared') issues.push({ code: 'shared_wrapper', severity: 'error', message: 'Wrapper đang được nhiều tour dùng chung; hãy gán một wrapper riêng trước khi publish.' })
+  else if (wrapperHealth === 'orphan') issues.push({ code: 'orphan_wrapper', severity: 'error', message: 'Wrapper chưa được liên kết với TourProduct; hãy gán lại wrapper trước khi publish.' })
+  else if (wrapperHealth === 'invalid_site') issues.push({ code: 'invalid_wrapper_site', severity: 'error', message: 'Wrapper thuộc site khác; hãy gán một wrapper trong cùng site.' })
+  else if (wrapperHealth === 'invalid_path' || !wrapperIsValid(wrapper, product, relationSite(product) as RelationID)) issues.push({ code: 'invalid_wrapper', severity: 'error', message: 'Wrapper không đúng đường dẫn dự kiến /tour/<slug>.' })
   if (!departures.length) issues.push({ code: 'no_departures', severity: 'warning', message: 'Tour chưa có departure để chọn publish.' })
   if (!canPublish) issues.push({ code: 'editor_cannot_publish', severity: 'info', message: 'Editor chỉ có thể lưu nháp; site manager hoặc super-admin mới được publish.' })
   return issues
@@ -255,18 +287,98 @@ export const authoringIssues = ({
 
 export const canPublishForUser = (req: PayloadRequest) => contentPublishAccess({ req }) === true
 
+const loadLinkedProductIDs = async (payload: PayloadLike, req: PayloadRequest, wrapperID: RelationID) => {
+  const result = await payload.find({
+    collection: 'tour-products',
+    depth: 0,
+    draft: true,
+    fallbackLocale: false,
+    limit: 100,
+    locale: req.locale || 'vi',
+    overrideAccess: false,
+    pagination: false,
+    req,
+    select: { id: true, wrapperPage: true },
+    where: { wrapperPage: { equals: wrapperID } },
+  })
+  return (result.docs as AnyDoc[]).map((doc) => doc.id).filter((value): value is RelationID => relationID(value) !== null)
+}
+
+const loadWrapperLinkMap = async (payload: PayloadLike, req: PayloadRequest, siteID: RelationID) => {
+  const result = await payload.find({
+    collection: 'tour-products',
+    depth: 0,
+    draft: true,
+    fallbackLocale: false,
+    limit: 1000,
+    locale: req.locale || 'vi',
+    overrideAccess: false,
+    pagination: false,
+    req,
+    select: { id: true, wrapperPage: true },
+    where: { site: { equals: siteID } },
+  })
+  const links = new Map<string, RelationID[]>()
+  for (const doc of result.docs as AnyDoc[]) {
+    const wrapperID = relationID(doc.wrapperPage)
+    const productID = relationID(doc.id)
+    if (wrapperID === null || productID === null) continue
+    const key = String(wrapperID)
+    links.set(key, [...(links.get(key) || []), productID])
+  }
+  return links
+}
+
+const describeWrapper = async ({ linkedProductIDs, product, siteID, wrapper }: { linkedProductIDs: RelationID[]; product: AnyDoc; siteID: RelationID; wrapper: AnyDoc }) => ({
+  id: wrapper.id,
+  path: wrapper.pathname || null,
+  status: wrapper._status || 'draft',
+  site: relationID(wrapper.site),
+  health: getWrapperHealth({ linkedProductIDs, product, siteID, wrapper }),
+  linkedProductIDs,
+})
+
+const loadWrapperCandidates = async (payload: PayloadLike, req: PayloadRequest, siteID: RelationID, product: AnyDoc, locale: AuthoringLocale) => {
+  const tourHub = await findTourHub(payload, { ...req, locale }, siteID)
+  if (!tourHub) return []
+  const links = await loadWrapperLinkMap(payload, req, siteID)
+  const result = await payload.find({
+    collection: 'pages',
+    depth: 0,
+    draft: true,
+    fallbackLocale: false,
+    limit: 100,
+    locale,
+    overrideAccess: false,
+    pagination: false,
+    req,
+    where: { and: [{ parentPage: { equals: tourHub.id } }, { site: { equals: siteID } }] },
+  })
+  const candidates: Array<Record<string, unknown>> = []
+  for (const candidate of result.docs as AnyDoc[]) {
+    if (typeof candidate.pathname !== 'string' || !candidate.pathname.startsWith('/tour/')) continue
+    const linkedProductIDs = links.get(String(candidate.id)) || []
+    const health = getWrapperHealth({ linkedProductIDs, product, siteID, wrapper: candidate })
+    candidates.push({ id: candidate.id, path: candidate.pathname, status: candidate._status || 'draft', site: relationID(candidate.site), health, linkedProductIDs })
+  }
+  return candidates
+}
+
 export const buildAuthoringState = async ({ id, locale, payload, req }: { id: RelationID; locale: AuthoringLocale; payload: PayloadLike; req: PayloadRequest }) => {
   const { product, site, siteID } = await loadProductContext({ id, locale, payload, req })
   const wrapper = await loadWrapper(payload, req, product, locale)
+  const linkedProductIDs = wrapper ? await loadLinkedProductIDs(payload, req, wrapper.id) : []
+  const wrapperHealth = getWrapperHealth({ linkedProductIDs, product, siteID, wrapper })
+  const wrapperState = wrapper ? await describeWrapper({ linkedProductIDs, product, siteID, wrapper }) : null
+  const wrapperCandidates = await loadWrapperCandidates(payload, req, siteID, product, locale)
   const departures = await loadDepartures(payload, { ...req, locale }, product, siteID)
   const canPublish = canPublishForUser(req)
-  const issues = authoringIssues({ canPublish, departures, locale, product, wrapper })
-  const hasPublishPrerequisites = Boolean(wrapper && departures.length)
+  const issues = authoringIssues({ canPublish, departures, locale, product, wrapper, wrapperHealth })
+  const hasPublishPrerequisites = Boolean(wrapperHealth === 'valid' && departures.length)
   return {
-    product: { id: product.id, updatedAt: product.updatedAt, status: product._status || 'draft', site: site.id },
-    wrapper: wrapper && wrapperIsValid(wrapper, product, siteID)
-      ? { id: wrapper.id, status: wrapper._status || 'draft', path: wrapper.pathname }
-      : null,
+    product: { id: product.id, updatedAt: product.updatedAt, status: product._status || 'draft', site: site.id, slug: stringValue(product.slug), expectedPath: expectedPath(product), hasHeroMedia: hasHeroMedia(product) },
+    wrapper: wrapperState,
+    wrapperCandidates,
     departures: departures.map((departure) => ({ id: departure.id, updatedAt: departure.updatedAt, status: departure._status || 'draft' })),
     issues,
     canPublish: canPublish && hasPublishPrerequisites && !issues.some((issue) => issue.severity === 'error'),
@@ -317,10 +429,7 @@ export const provisionAuthoring = async ({ id, locale, payload, req }: { id: Rel
     const currentWrapper = await loadWrapper(payload, req, current.product, locale)
     let wrapper: AnyDoc | null = null
 
-    if (relationID(current.product.wrapperPage) !== null) {
-      if (!wrapperIsValid(currentWrapper, current.product, current.siteID)) {
-        throw new AuthoringError('Tour đang liên kết wrapper không hợp lệ; không tự sửa nội dung hiện có.', 409, 'invalid_wrapper')
-      }
+    if (relationID(current.product.wrapperPage) !== null && wrapperIsValid(currentWrapper, current.product, current.siteID)) {
       wrapper = currentWrapper
     } else {
       const occupied = await payload.find({
@@ -377,6 +486,46 @@ export const provisionAuthoring = async ({ id, locale, payload, req }: { id: Rel
   }
 }
 
+export const relinkAuthoring = async ({ id, locale, payload, req, wrapperID }: { id: RelationID; locale: AuthoringLocale; payload: PayloadLike; req: PayloadRequest; wrapperID: RelationID }) => {
+  const initial = await loadProductContext({ id, locale, payload, req })
+  const path = expectedPath(initial.product)
+  if (!path) throw new AuthoringError('Tour chưa có slug hợp lệ để gán wrapper.', 422, 'invalid_slug')
+
+  await startPostgresTransaction(payload, req, `wingsgo:${initial.siteID}:${path}`)
+  try {
+    const current = await loadProductContext({ id, locale, payload, req })
+    if (current.siteID !== initial.siteID || expectedPath(current.product) !== path) {
+      throw new AuthoringError('Tour đã đổi site hoặc đường dẫn trong lúc gán wrapper; tải lại rồi thử lại.', 409, 'stale_scope')
+    }
+    let wrapper: AnyDoc
+    try {
+      wrapper = (await findOne(payload, { ...req, locale }, 'pages', wrapperID)) as AnyDoc
+    } catch {
+      throw new AuthoringError('Không tìm thấy wrapper trong phạm vi site được phép.', 404, 'wrapper_not_found')
+    }
+    if (!sameID(wrapper.site, current.siteID)) throw new AuthoringError('Wrapper phải thuộc cùng site với tour.', 409, 'wrapper_site_mismatch')
+    if (wrapper.pathname !== path) throw new AuthoringError(`Wrapper phải có đường dẫn ${path}.`, 409, 'wrapper_path_mismatch')
+    const linkedProductIDs = await loadLinkedProductIDs(payload, req, wrapper.id)
+    const otherProductIDs = linkedProductIDs.filter((linkedID) => !sameID(linkedID, current.product.id))
+    if (otherProductIDs.length) throw new AuthoringError('Wrapper đã được gán cho tour khác; hãy dùng wrapper riêng.', 409, 'wrapper_conflict')
+    await payload.update({
+      collection: 'tour-products',
+      context: { disableRevalidate: true, wingsGoAuthoring: true },
+      data: { wrapperPage: wrapper.id },
+      id: current.product.id,
+      locale,
+      overrideAccess: false,
+      req,
+    })
+    await finishTransaction(req, true)
+    const responseReq = await createAuthoringRequest(payload, req.user, locale)
+    return buildAuthoringState({ id, locale, payload, req: responseReq })
+  } catch (error) {
+    await finishTransaction(req, false)
+    throw error
+  }
+}
+
 const findTourHub = async (payload: PayloadLike, req: PayloadRequest, siteID: RelationID) => {
   const result = await payload.find({
     collection: 'pages',
@@ -392,15 +541,87 @@ const findTourHub = async (payload: PayloadLike, req: PayloadRequest, siteID: Re
   return result.docs[0] as AnyDoc | undefined
 }
 
+const loadPublishedProduct = async ({ id, locale, payload, req }: { id: RelationID; locale: AuthoringLocale; payload: PayloadLike; req: PayloadRequest }) => {
+  try {
+    return (await payload.findByID({
+      collection: 'tour-products',
+      depth: 0,
+      draft: false,
+      fallbackLocale: false,
+      id,
+      locale,
+      overrideAccess: false,
+      req,
+    })) as AnyDoc
+  } catch {
+    return null
+  }
+}
+
+export const ensurePublishedTourRedirect = async ({
+  from,
+  payload,
+  req,
+  to,
+}: {
+  from: string | null
+  payload: PayloadLike
+  req: PayloadRequest
+  to: string | null
+}) => {
+  if (!from || !to || from === to) return false
+
+  const existingResult = await payload.find({
+    collection: 'redirects',
+    depth: 0,
+    limit: 1,
+    overrideAccess: true,
+    pagination: false,
+    req,
+    where: { from: { equals: from } },
+  })
+  const existing = existingResult.docs?.[0] as AnyDoc | undefined
+  if (existing) {
+    const existingTarget = existing.to?.url
+    if (existingTarget !== to) {
+      throw new AuthoringError(`URL cũ ${from} đã được dùng cho redirect khác.`, 409, 'redirect_conflict')
+    }
+
+    if (existing.type !== '301') {
+      await payload.update({
+        collection: 'redirects',
+        context: { disableRevalidate: true, wingsGoAuthoring: true },
+        data: { type: '301' },
+        id: existing.id,
+        overrideAccess: true,
+        req,
+      })
+      return true
+    }
+
+    return false
+  }
+
+  await payload.create({
+    collection: 'redirects',
+    context: { disableRevalidate: true, wingsGoAuthoring: true },
+    data: { from, to: { type: 'custom', url: to }, type: '301' },
+    overrideAccess: true,
+    req,
+  })
+  return true
+}
+
 export const publishAuthoring = async ({ id, locale, payload, req, revision, departureIDs }: { id: RelationID; locale: AuthoringLocale; payload: PayloadLike; req: PayloadRequest; revision?: string; departureIDs: string[] }) => {
   if (!canPublishForUser(req)) throw new AuthoringError('Bạn không có quyền publish; Editor chỉ có thể lưu nháp.', 403, 'forbidden')
   if (!revision) throw new AuthoringError('Publish cần revision hiện tại để tránh ghi đè cập nhật mới.', 428, 'revision_required')
   const initial = await loadProductContext({ id, locale, payload, req })
   const path = expectedPath(initial.product)
   if (!path) throw new AuthoringError('Tour chưa có slug hợp lệ.', 422, 'invalid_slug')
-  await startPostgresTransaction(payload, req, `wingsgo:${initial.siteID}:${path}`)
+  await startPostgresTransaction(payload, req, `wingsgo:${initial.siteID}:tour:${id}`)
   let previousProduct: AnyDoc
   let publishedProduct: AnyDoc
+  let redirectCreated = false
   try {
     const state = await buildAuthoringState({ id, locale, payload, req })
     if (state.revision !== revision) throw new AuthoringError('Dữ liệu tour đã thay đổi; tải lại trước khi publish.', 409, 'stale_revision')
@@ -413,6 +634,14 @@ export const publishAuthoring = async ({ id, locale, payload, req, revision, dep
     if (selected.length !== departureIDs.length) throw new AuthoringError('Có departure không thuộc tour/site hoặc không còn quyền truy cập.', 409, 'departure_scope')
     previousProduct = privateState.product
 
+    const publishedBefore = await loadPublishedProduct({ id, locale, payload, req })
+    redirectCreated = await ensurePublishedTourRedirect({
+      from: publishedBefore ? expectedPath(publishedBefore) : null,
+      payload,
+      req,
+      to: path,
+    })
+
     await payload.update({ collection: 'pages', context: { disableRevalidate: true, wingsGoAuthoring: true }, data: { _status: 'published', publishedAt: new Date().toISOString() }, draft: true, id: privateState.wrapper.id, locale, overrideAccess: false, req })
     publishedProduct = (await payload.update({ collection: 'tour-products', context: { disableRevalidate: true, wingsGoAuthoring: true }, data: { _status: 'published' }, draft: true, id: privateState.product.id, locale, overrideAccess: false, req })) as AnyDoc
     for (const departure of selected) {
@@ -423,6 +652,8 @@ export const publishAuthoring = async ({ id, locale, payload, req, revision, dep
     await finishTransaction(req, false)
     throw error
   }
+
+  if (redirectCreated) revalidateTag('redirects', 'max')
 
   let refreshFailed = false
   try {

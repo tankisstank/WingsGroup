@@ -45,6 +45,7 @@ import * as migration_20260909_090000_wingsgo_tour_catalog from './20260909_0900
 import * as migration_20260914_090000_cms_admin_lead_triage from './20260914_090000_cms_admin_lead_triage'
 import * as migration_20260920_090000_wingsgroup_gallery from './20260920_090000_wingsgroup_gallery'
 import * as migration_20260921_090000_wingsgo_departure_lead_context from './20260921_090000_wingsgo_departure_lead_context'
+import * as migration_20260923_090000_tour_authoring_redirect_type from './20260923_090000_tour_authoring_redirect_type'
 
 export const migrations = [
   {
@@ -281,5 +282,10 @@ export const migrations = [
     up: migration_20260921_090000_wingsgo_departure_lead_context.up,
     down: migration_20260921_090000_wingsgo_departure_lead_context.down,
     name: '20260921_090000_wingsgo_departure_lead_context',
+  },
+  {
+    up: migration_20260923_090000_tour_authoring_redirect_type.up,
+    down: migration_20260923_090000_tour_authoring_redirect_type.down,
+    name: '20260923_090000_tour_authoring_redirect_type',
   },
 ]

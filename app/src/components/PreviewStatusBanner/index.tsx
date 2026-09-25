@@ -30,7 +30,7 @@ export const PreviewStatusBanner: React.FC<Props> = ({
           : 'content'
   const title = isVietnamese
     ? mode === 'published'
-      ? 'Đang xem bản đã xuất bản'
+      ? 'Đang xem bản public (đã xuất bản)'
       : isNewDocument
         ? collection === 'tour-products'
           ? 'Tour mới — bản nháp chưa xuất bản'
@@ -39,7 +39,7 @@ export const PreviewStatusBanner: React.FC<Props> = ({
             : 'Bản nháp mới — chưa xuất bản'
         : 'Đang xem bản nháp đã lưu'
     : mode === 'published'
-      ? 'Viewing the published version'
+      ? 'Viewing the public version'
       : isNewDocument
         ? collection === 'tour-products'
           ? 'New tour — unpublished draft'
@@ -49,12 +49,12 @@ export const PreviewStatusBanner: React.FC<Props> = ({
         : 'Viewing the saved draft'
   const body = isVietnamese
     ? mode === 'published'
-      ? 'Preview này đang hiển thị nội dung public hiện tại.'
+      ? 'Đây không phải bản nháp. Nội dung mới trong CMS chỉ xuất hiện sau khi lưu nháp và publish.'
       : isNewDocument
         ? `${subject} này chưa có bản xuất bản. Nội dung chỉ hiển thị trong preview được cấp quyền.`
         : 'Các thay đổi đã lưu đang được hiển thị. Bản public vẫn giữ nguyên cho tới khi publish.'
     : mode === 'published'
-      ? 'This preview shows the current public content.'
+      ? 'This is not a draft. CMS changes appear here only after saving and publishing.'
       : isNewDocument
         ? `This ${subject} has no published version. It is visible only in this authorized preview.`
         : 'Saved changes are shown here. The public version remains unchanged until publish.'

@@ -1,4 +1,4 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionBeforeValidateHook, CollectionConfig, PayloadRequest } from 'payload'
 import type { Site } from '@/payload-types'
 
 import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '@/access/roles'
@@ -38,6 +38,15 @@ const relationID = (value: unknown): number | string | null => {
     (typeof value.id === 'number' || typeof value.id === 'string')
     ? value.id
     : null
+}
+
+const normalizeTourProductSlug: CollectionBeforeValidateHook = ({ data }) => {
+  if (!data || typeof data.slug !== 'string') return data
+
+  return {
+    ...data,
+    slug: data.slug.toLowerCase(),
+  }
 }
 
 export const TourProducts: CollectionConfig = {
@@ -250,7 +259,7 @@ export const TourProducts: CollectionConfig = {
       relationTo: 'pages',
       filterOptions: sameSiteFilterOptions,
       admin: {
-        description: 'Cần tạo hoặc liên kết trang tour trước khi dùng Preview.',
+        description: 'Wrapper là trang Page hiển thị tour ở /tour/<slug>. Có thể tạo từ panel Lịch bay & xuất bản hoặc gán một Page cùng site và đúng đường dẫn trước khi dùng Preview/publish.',
         position: 'sidebar',
       },
     },
@@ -279,9 +288,12 @@ export const TourProducts: CollectionConfig = {
             },
             {
               name: 'heroMedia',
-              label: 'Hero media',
+              label: 'Ảnh hero public của tour',
               type: 'upload',
               relationTo: 'media',
+              admin: {
+                description: 'Ảnh lớn ở đầu trang /tour/<slug>. Nhập tại TourProduct này; ảnh Hero của Wrapper Page không được dùng thay thế. Hãy lưu nháp rồi mở Preview bản nháp trước khi publish.',
+              },
             },
             {
               name: 'gallery',
@@ -1042,6 +1054,14 @@ export const TourProducts: CollectionConfig = {
               ...item,
               label: 'Đường dẫn tour',
               localized: false,
+              admin: {
+                ...('admin' in item && item.admin ? item.admin : {}),
+                components: {
+                  ...('admin' in item && item.admin?.components ? item.admin.components : {}),
+                  Field: '@/components/TourAuthoring/TourSlugField',
+                },
+                description: 'Slug quyết định URL /tour/<slug> và phải khớp pathname của wrapper Page.',
+              },
             } as typeof item
           }
 
@@ -1066,6 +1086,7 @@ export const TourProducts: CollectionConfig = {
   hooks: {
     afterChange: [revalidateTourProduct],
     afterDelete: [revalidateTourProductDelete],
+    beforeValidate: [normalizeTourProductSlug],
     beforeChange: [enforceSiteAccess, enforceTourProductPublishSite, preventEditorPublish],
   },
   versions: {

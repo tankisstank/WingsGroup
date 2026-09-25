@@ -18,14 +18,20 @@ Một test gallery chỉ pass khi thumbnail/metadata, add/remove và relation st
 mode được kiểm chứng đồng thời. Không coi thumbnail, `draftMode()` hoặc HTTP 200
 đơn độc là bằng chứng draft đúng.
 
+Wrapper lifecycle phải được kiểm tra như một state machine riêng. Readiness không
+được làm mất thông tin wrapper invalid: editor phải thấy record đang liên kết,
+expected path, actual path, site, status, health và candidate wrapper có thể gán.
+Các trạng thái draft/public cũng phải được phân biệt ở action preview.
+
 ## Test Matrix
 
 | Layer | Cases bắt buộc |
 | --- | --- |
-| Static | Không sửa schema/migration hoặc merge collection; collection field inventory không có label WingSide trên WingsGo presentation; `gallery` vẫn là relationship tới `media`; import map/typecheck không lỗi; wrapper/departure helper không tạo write ngoài flow được duyệt |
-| Unit | Site capability/default resolution; field visibility/neutral label; readiness calculation; wrapper provision/reuse idempotency; departure freshness state; dirty/save state; preview mode/status; locale/path normalization; invalid/expired handoff |
-| Integration | TourProducts/TourDepartures/DepartureVariants/Pages config; wrapper same-site/path and draft-only behavior; quick-add gán đúng product/site; `draft: true` và fallbackLocale policy; site-scoped access; preview initializer/handoff; public resolver giữ draft flag |
+| Static | Không đổi schema tour hoặc merge collection; migration duy nhất là enum/type redirect `301`/`307` (legacy mặc định `307`); collection field inventory không có label WingSide trên WingsGo presentation; `gallery` vẫn là relationship tới `media`; import map/typecheck không lỗi; wrapper/departure helper không tạo write ngoài flow được duyệt |
+| Unit | Site capability/default resolution; field visibility/neutral label; lowercase slug normalizer; readiness calculation; wrapper provision/reuse idempotency; redirect create/conflict/no-op; departure freshness state; dirty/save state; preview mode/status; locale/path normalization; invalid/expired handoff |
+| Integration | TourProducts/TourDepartures/DepartureVariants/Pages/Redirects config; wrapper same-site/path and draft-only behavior; relink/publish transaction; published slug change creates one `301` redirect in the same transaction and revalidates after commit; quick-add gán đúng product/site; `draft: true` và fallbackLocale policy; site-scoped access; preview initializer/handoff; public resolver giữ draft flag |
 | Component | WingsGo form không có `Loại tour WingSide`; WingSide có field đúng; site context/default; readiness links; business labels/progressive disclosure; departure table/quick-add; freshness copy; gallery empty/thumbnail/add/remove/loading/missing state; Preview disabled/warning khi dirty; status badge draft/published; error state rõ ràng |
+| Wrapper lifecycle component | Hiển thị no-wrapper, valid-draft, valid-published, invalid-path/site, orphan và shared-wrapper; expected/actual path; candidate list; action tạo/gán/sửa/mở; phân biệt `Xem bản nháp` và `Xem trang public`; cảnh báo slug đổi |
 | Authenticated E2E | Editor tạo/sửa draft WingsGo, xử lý readiness, provision/reuse wrapper, thêm ít nhất năm departure/giá, thêm hai ảnh, xem thumbnail, xóa đúng một ảnh, Save, Preview thấy marker mới; anonymous URL vẫn thấy marker published; Site Manager cross-site denial; editor publish guard |
 | Linked data E2E | Draft TourProduct + departure/variant/wrapper Page được render cùng mode; không trộn draft với published nếu dependency có saved draft |
 | Locale E2E | VI và EN độc lập, không fallback sai locale, preview status/copy đúng locale |
@@ -35,12 +41,25 @@ mode được kiểm chứng đồng thời. Không coi thumbnail, `draftMode()`
 | Release | Canary/after-state/rollback readiness; production CMS write chỉ khi có approval và exact fixture cleanup |
 | Logs | Có thể truy vết site/collection/mode/result nhưng không ghi token, credential hoặc PII/free-text |
 
+### URL lifecycle gate
+
+- Slug input phải chuyển `SEOUL-TOUR` thành `seoul-tour` trước khi form ghi
+  state; API update trực tiếp với chữ hoa cũng phải được server normalize.
+- Relink và publish phải giữ cùng transaction ID cho mọi update liên quan. Khi
+  đã có published snapshot và path đổi, transaction phải tạo đúng một Redirect
+  record `{ from, to.url, type: '301' }`; retry không tạo bản sao.
+- Nếu `from` đã có redirect tới đích khác, transaction rollback và trả lỗi
+  `redirect_conflict`; không được ghi đè redirect đang tồn tại.
+
 ## Deterministic Fixtures
 
 - Một `wings-go` TourProduct đã published, có wrapper Page và tối thiểu một
   departure; tạo draft marker khác biệt trong local/staging non-Production.
 - Một `wings-go` TourProduct chưa có wrapper và một record đã có wrapper hợp lệ;
   kiểm tra provision/reuse, conflict, retry và không auto-publish.
+- Các wrapper diagnostic cùng site gồm một wrapper đúng path, một wrapper sai
+  path, một wrapper mồ côi và một wrapper được hai product tham chiếu; fixture
+  phải có candidate ID/path/status để kiểm tra relink guard mà không ghi production.
 - Tối thiểu năm departure mới hoặc ephemeral cho quick-add, gồm một dòng còn
   hiệu lực, một dòng cần xác minh và một dòng hết hạn; xác nhận public fallback
   theo freshness policy.
@@ -88,6 +107,22 @@ site_context_source:
 readiness_missing_items:
 wrapper_provision_status:
 wrapper_page_id_hash:
+wrapper_expected_path:
+wrapper_actual_path:
+wrapper_health:
+wrapper_linked_product_count:
+wrapper_candidate_ids_hash:
+wrapper_relink_result:
+slug_change_warning_result:
+slug_input_normalized:
+slug_server_normalized:
+published_path_before:
+published_path_after:
+redirect_id:
+redirect_type:
+redirect_created_in_transaction:
+redirect_conflict_result:
+transaction_id:
 departure_ids_created:
 departure_quick_add_retry_result:
 freshness_states:
@@ -125,7 +160,7 @@ resource riêng.
 | Preview | PASS | Component/unit/integration tests xác nhận signed handoff, `draft: true`, locale/site identity, status banner và không silent published fallback. |
 | Automated quality | PASS | Component 31 file / 160 test; targeted US-075 unit 28/28; integration 39/39 file; full unit 135 file / 1.010 test; TypeScript, ESLint (0 errors) và build pass. |
 | PostgreSQL-shaped check | PASS | Advisory lock probe xác nhận dùng `hashtext`; không chạy migration. |
-| Authenticated CMS UAT | PASS_WITH_NOTES | Production fixture WingsGo đã chạy đủ 11 bước; bước freshness ban đầu phát hiện public detail chưa mask giá hết hạn, đã sửa và retest pass ở release hotfix bên dưới. |
+| Authenticated CMS UAT | REOPENED_WITH_NOTES | Fixture WingsGo đã chạy đủ 11 bước và freshness đã pass sau hotfix; post-UAT retest ghi nhận provision 500 cần tái kiểm chứng, itinerary row collapsed và quick-add persistence cần proof runtime mới. |
 | Browser responsive/release proof | PASS_WITH_NOTES | `agent-browser` đã kiểm tra desktop/mobile trên production cho WingsGroup, WingsGo, WingSide, tour listing và authenticated CMS UAT; native date control cần DOM setter trong harness browser, không phải lỗi sản phẩm. |
 
 Implementation hiện dùng thao tác rõ ràng `Tạo trang tour nháp` trong readiness
@@ -197,3 +232,189 @@ Production disk còn khoảng `1.1 GB` trống (`98%` sử dụng). Full rebuild
 đã dừng an toàn vì thiếu không gian khi unpack; rollback tag được giữ nguyên và
 release được triển khai bằng overlay image, không xóa image/cache cũ trong bước
 release này.
+
+### Independent post-UAT audit — 2026-09-19
+
+| Finding | Result | Evidence / next proof |
+| --- | --- | --- |
+| Create flow — itinerary row | CONFIRMED UX GAP | `app/src/collections/TourProducts.ts` khai báo `itineraryDays` bắt buộc và `initCollapsed: true`. Không thấy literal `minRows` trong source; cần giữ cách mô tả là required array cho đến khi runtime validation chứng minh option khác. Acceptance: row đầu mở sẵn và Save error đưa tới đúng tab/dòng/field. |
+| Provision wrapper HTTP 500 | REPORTED LIVE, ROOT CAUSE UNCONFIRMED | `app/src/tours/authoring.ts` đã truyền `createLayoutPresetData('tour-conversion')`; vì vậy không kết luận thiếu default layout. Reproduce trên staging/fixture an toàn và capture error class/code đã sanitize cho Page validation, thiếu `/tour` hub, site access và transaction. Generic 500 không đạt release gate. |
+| Quick-add departure persistence | NOT CONFIRMED AS REPORTED | `TourDepartureManager` hiện POST/PATCH trực tiếp `/api/tour-departures`, sau đó gọi `load()`. Authoring endpoint chỉ nhận `provision`/`publish` là đúng boundary hiện tại. Cần network proof status 2xx + GET/reload thấy row trong cùng `site`/`tourProduct`; nếu fail thì sửa direct path hoặc runtime drift, không thêm endpoint ghi trùng. |
+
+#### UAT closure decision
+
+Vòng UAT ngày 2026-09-18 vẫn được giữ nguyên làm historical evidence; kết quả
+post-UAT không xóa evidence cũ nhưng mở lại các gate liên quan. US-075 chưa đủ
+điều kiện Done cho đến khi:
+
+1. provision thành công/reuse idempotent hoặc trả lỗi actionable, không còn
+   generic 500;
+2. dòng itinerary đầu tiên có thể nhập ngay và lỗi Save điều hướng đúng;
+3. quick-add được chứng minh persist bằng response + đọc lại dữ liệu, không chỉ
+   bằng việc modal đóng.
+
+Không ghi nhận yêu cầu mở rộng `/api/tour-authoring/[id]` cho departure ở thời
+điểm này; đó sẽ là thay đổi kiến trúc chỉ được xem xét nếu direct collection
+contract đã được tái hiện là không đáp ứng.
+
+### Production visual smoke — 2026-09-19
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Release identity | PASS | Active release `wingsgroup-us075-visual-20260919T032700Z`; isolated production-source snapshot `8ffa9bba7f7de5d6da2aa6de7f6dbb9739dbc4c3`; archive SHA-256 `9a948e7cc5e2d62952fbbc3037975a08c5769cb942d1fc6ca1741935d83b7475`; ARM64 image `sha256:48eed8678f752511e6b67f719ca7b67d6712f450b568ac0ee4504623f16777ab`. Previous image `sha256:6075b26e847c602da29c57070573777623669b553e8e7bd65221d3ccf0361116` remains tagged for rollback. |
+| Build and focused tests | PASS | Production ARM64 Next build, TypeScript, static generation; candidate-source TypeScript; focused component 6/6 and unit 13/13 tests. |
+| Health and stateful services | PASS | Live/ready, `wingsgroup.vn/` and `/en` returned 200; `PAYLOAD_DB_PUSH=false`; PostgreSQL and Redis container IDs unchanged; no migration, schema edit, or Redis flush. |
+| CMS create screen | PASS | `/admin/collections/tour-products/create` rendered successfully (document 200); site selector and tabs appeared. No tour was created. |
+| Itinerary interaction | PASS_WITH_NOTES | Existing tour 91 rendered without overlap and its six itinerary rows were expanded. A temporary blank seventh row showed its required fields expanded; Payload autosave validation returned 400. A following authenticated GET confirmed `updatedAt=2026-09-16T09:26:40.717Z`, six rows, and last day 6; no tour change persisted. |
+| Quick-add visual | PASS_VISUAL_ONLY | Departure form displayed as an opaque bordered card with actions; no departure was submitted. Persistence remains unverified on production. Wrapper provision/publish actions were not invoked. |
+| Browser console | PASS | No browser errors observed. Screenshots were captured locally under `/tmp/wingsgroup-us075-*` and are not committed. |
+
+US-075 remains in progress / `Chờ xác nhận`. Production visual checks confirm the
+create page and expanded itinerary UX, but do not close the reported wrapper
+provision 500 or prove a successful production departure write. The host had
+`976 MB` free (`98%` used) after build; no image/cache cleanup was performed.
+
+### Tour list detail and bulk actions — 2026-09-21
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Open individual tour | PASS_COMPONENT | `LocalizedTitleCell` renders an accessible title link to `/admin/collections/tour-products/:id`; component test verifies the route. |
+| Clarify bulk action | PASS_COPY | Tour list guidance says the toolbar `Chỉnh sửa` action applies to selected rows. The core button label remains unchanged because Payload shares its `general:edit` translation with single-record relationship/folder actions. |
+| Regression scope | PASS_WITH_NOTES | Other collection title cells remain plain text; focused component test 3/3 and targeted ESLint pass. Production ARM64 Next build, TypeScript and static generation pass. Serial full component run: 32/34 files and 160/164 tests passed; 4 failures are in `tourGalleryField` (2) and `wingsGroupV3Homepage` (2), outside this release diff and not changed here. |
+| Production / data | DEPLOYED — VISUAL UAT PENDING | No CMS record was edited. Release is live and public/admin routes respond; a logged-in CMS user still needs to verify title-click detail navigation and toolbar bulk edit in the browser. |
+
+### Production deployment — 2026-09-21
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Release identity | PASS | Source commit `07a2e7a59717cbc32c5fd87946298c168db8a3dd`; archive SHA-256 `9bb0f642080cf02d3f843042f112100e59d7d4438dace52b6a8eccef5a342d55`; release `/home/ubuntu/wings-travel/releases/wingsgroup-us075-tour-list-07a2e7a-20260921`; ARM64 image `sha256:f4ab5b48d30ad17b7b09fbae58834371b2daab787d10d4acf85c656216ad4396`. |
+| Health and public route | PASS | `https://wingsgroup.vn/api/health/live`, `/api/health/ready`, and `/` returned 200 after promotion. |
+| CMS route availability | PASS_WITH_NOTES | `/admin/login` and the tour list returned 200 when the request retained the `payload-lng=vi` cookie. A cookie-less curl repeats the same-URL 307 by design while bootstrapping this admin locale cookie; no authenticated browser session was used. |
+| Stateful services and safety | PASS | PostgreSQL container `ab500698…` and Redis container `b59a6251…` remained unchanged and healthy; app-only recreate, no migration/schema change, no CMS write, no Redis flush. Previous app image `sha256:2d9e47e4…` is retained as rollback. |
+| Disk cleanup | PASS | Removed only unreferenced historical image tags after verifying no container used them; 2.7 GB remained free after deploy. Current and previous rollback images were preserved. |
+
+Production confirms deployment and route availability, not the authenticated
+interaction itself. US-075 remains in progress / `Chờ xác nhận` until an operator
+verifies that clicking one tour title opens its detail editor and that selecting
+rows then using the toolbar `Chỉnh sửa` performs bulk editing.
+
+### Draft preview 404 root-cause fix — 2026-09-22
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Root cause | CONFIRMED | TourProduct `111` is a WingsGo draft with `wrapper_page_id = null`. The preview handoff can be minted, but the public `/tour/<slug>` renderer requires a Page wrapper and exits before structured tour rendering, so the final URL returns 404. Missing departure/variant rows are not the cause. |
+| Admin preview guard | PASS | `TourProducts.admin.preview` and `admin.livePreview.url` now return no preview URL until `wrapperPage` is linked; the field description points the operator to create/link the tour page. |
+| Server preview guard | PASS | `/next/preview` returns HTTP `409` with an actionable “linked wrapper page” message for a `tour-products` draft without a wrapper, instead of issuing a handoff that will end in 404. |
+| Regression checks | PASS | `tourProductPreview.unit.spec.ts` (1/1), `localPreviewRoute.unit.spec.ts` (10/10), TypeScript (`tsc --noEmit`) and targeted ESLint (0 errors; one existing `no-explicit-any` warning at `TourProducts.ts:862`). |
+| Production | PENDING | No production CMS write was performed in that verification; the code was later deployed in the production checkpoint below. Product `111` still needs an idempotent wrapper provision/reuse and an authenticated preview recheck. |
+
+This fixes the misleading preview path while preserving the existing explicit
+`Tạo trang tour nháp` authoring action. US-075 remains in progress / `Chờ xác nhận`;
+the production provision and browser proof are still required before closure.
+
+### Production deployment — preview guard — 2026-09-22
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Release identity | PASS | Release `/home/ubuntu/wings-travel/releases/wingsgroup-us075-preview-guard-20260922-r2`, based on live `wingsgroup-media-upload-8e6e3c9-20260922`; overlay archive SHA-256 `5bcded9c91d18800fe4a807d25249aed04d5d68babd73338697f33a9b1026c19`. |
+| Build | PASS | Production ARM64 Docker build completed with TypeScript and static generation `20/20`; image `sha256:15ae02c827dbfd2e822ebf1183afc6061564324a7d6a58988d9f338b729b0421`, release label matches `wingsgroup-us075-preview-guard-20260922-r2`. |
+| Health and public domains | PASS | Local `/api/health/live` and `/api/health/ready` returned 200; `wingsgroup.vn`, `wingsgo.vn`, `wingside.vn`, `wingsplus.vn`, `wingspass.wingsgroup.vn` and `wingscare.wingsgroup.vn` returned 200. |
+| Stateful services | PASS | PostgreSQL `ab500698a619…` and Redis `b59a6251dcfd…` remained running and unchanged; no migration, schema change, CMS write or Redis flush. |
+| Rollback | PASS | Previous app image `sha256:c474f0c137ce74bd71a5137e7c572091084b806d966a098434c239468725c816` retained as `rollback-before-wingsgroup-us075-preview-guard-20260922-r2`; the prior production image remains separately tagged. |
+| Product 111 preview proof | PENDING | Deployment changes the preview guard only. No production CMS record was edited; an authenticated operator still needs to provision/reuse the wrapper and verify the signed preview flow for product 111. |
+
+US-075 remains in progress / `Chờ xác nhận`. Production runtime is healthy and
+the misleading handoff path is guarded, but the wrapper lifecycle and
+authenticated product proof remain open.
+
+### Wrapper lifecycle UX implementation — 2026-09-23
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Invalid relation visibility | PASS_CODE | `buildAuthoringState` now returns the linked wrapper even when its site/path is wrong, plus expected path, actual path, status, site, health, linked product IDs and same-site candidates. |
+| Safe actions | PASS_CODE | Added `relink` through the authenticated authoring route. Relink requires same site and exact `/tour/<slug>`, rejects shared wrappers, and runs inside the existing PostgreSQL advisory transaction. Provision can create a replacement draft when the existing relation is invalid; it never edits the old Page. |
+| Preview separation | PASS_COMPONENT | Readiness exposes CMS draft, signed `/next/preview` draft and public URL separately. Publish confirmation names Product, wrapper Page/path and selected departure IDs. |
+| Editor guidance | PASS_CODE | TourProduct slug/wrapper help, slug drift warning, and Page wrapper guidance explain the Product → Page → Departure relationship and tell operators where to act. |
+| Regression checks | PASS | `tourAuthoring.unit.spec.ts` 13/13 and `tourAuthoring.component.spec.tsx` 5/5; TypeScript pass; targeted ESLint 0 errors (existing `no-explicit-any` warnings only). |
+| Production safety | NOT_RUN | Product #112 and Pages #314/#237 were not edited. Authenticated production browser proof and deployment remain separate gates. |
+
+Health is intentionally fail-closed: `valid` is publishable, `orphan` is an
+assignable candidate, and `invalid_path`, `invalid_site` or `shared` require a
+new explicit action. `draft`/`published` remains a separate status field so an
+operator can distinguish lifecycle from relation health.
+
+### URL lifecycle prerequisites — 2026-09-23
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Lowercase at form input | PASS_COMPONENT | `TourSlugField` normalizes every change event; component regression passes `6/6`. |
+| Lowercase at server boundary | PASS_CODE | `TourProducts` `beforeValidate` normalizes direct REST/import writes before validation. |
+| Transaction boundary | PASS_CODE | `relinkAuthoring` and `publishAuthoring` use PostgreSQL `beginTransaction`, advisory lock, commit/rollback; publish lock is stable per site/product. |
+| Auto-create 301 record | PASS_UNIT | `ensurePublishedTourRedirect` creates `{from,to.url,type:'301'}` once, upgrades same-target legacy records, and rejects conflicting targets; unit suite `15/15`. |
+| Exact delivery status | PASS_UNIT | Proxy looks up only `type:'301'` records and returns `NextResponse.redirect(..., 301)` before the CMS route; proxy suite `28/28`. |
+| Redirect schema | PASS_CODE_PENDING_MIGRATION | `redirectsPlugin({ redirectTypes: ['301', '307'] })`, generated Payload type and migration `20260923_090000_tour_authoring_redirect_type` are present; existing records default to `307`. Production migration proof is not run in this code-only checkpoint. |
+| Production/browser proof | NOT_RUN | No CMS record, redirect or production database was written; deploy + migration + authenticated slug-change proof remain release gates. |
+
+The auto-created record is the data contract for delivery. The production
+release must apply the migration before calling the publish action. A live
+HTTP check must still verify the deployed proxy returns `301` for the old path
+and lands on the new path; the server-component fallback is not accepted as
+proof by itself.
+
+### Production deployment — URL lifecycle prerequisites — 2026-09-24
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Release identity | PASS | Overlay archive SHA-256 `279e8959a8dc691e0a5d6b6f4799feedd0f3510e6f09da8d27413d19b1705e52`; release `/home/ubuntu/wings-travel/releases/wingsgo-us075-authoring-20260923T1720Z`; source base `efdfe67e6791868124e132a569954a9abe317956`. |
+| Build and regression | PASS | Production ARM64 Docker build completed with TypeScript and static generation `20/20`; focused unit `43/43`, component `6/6`, and `git diff --check` passed. Image `sha256:d915b31598b37d41226386f44cd49d1e7816aa4f900ffbc52858f1793db31be9`, runtime container `f6b4172574d2`. |
+| Database safety and migration | PASS | Pre-migration PostgreSQL dump `/home/ubuntu/wings-travel/shared/backups/wingstravel-us075-authoring-20260923T1720Z-pre-migration.dump`, 3,759,088 bytes, SHA-256 `0d024b13abd6e9aded0c04150b4750cc18fae154856c45e179a4054597126397`; migration `20260923_090000_tour_authoring_redirect_type` applied at batch 24. `redirects.type` is `NOT NULL` with default `307` and enum values `301/307`. |
+| Stateful services and rollback | PASS | PostgreSQL `ab500698a619` and Redis `b59a6251dcfd` stayed unchanged and healthy. Previous app image `sha256:fde66fcdd7ccaae642da951bae83142028713e719f1fc3dc2ba3b70c304ee06f` is retained as `wingstravel-app:rollback-before-wingsgo-us075-authoring-20260923T1720Z`. |
+| Health and public smoke | PASS | Local live/ready and all six public host health endpoints returned `200`; WingsGo `/`, `/lien-he`, `/lich-khoi-hanh`, existing tour route returned `200`; anonymous `/api/tour-authoring/111` returned `401`. |
+| Browser smoke | PASS | `agent-browser` production snapshot confirmed WingsGo header hotline/Zalo, hot-tour section with four cards, destination cards and CTAs. Screenshot: `app/output/production-us075-authoring-20260924-home.png`. |
+| Live 301 fixture | NOT RUN | Production currently has 4 redirect records, all `307`, and no `301` record. No CMS slug-change fixture was created or changed during this release; HTTP `301` delivery remains covered by the `28/28` proxy unit suite and will be verified when an approved public slug change exists. |
+
+The release is live and the story remains `Chờ xác nhận`: production migration and
+runtime rollout passed, while authenticated wrapper provision/reuse, product 111
+preview proof, and the approved live slug-change fixture remain separate UAT gates.
+
+### Production storage cleanup — 2026-09-24
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Cleanup scope | PASS | Removed Docker builder cache (`3.474 GB`), 15 unprotected historical app image tags, 2 dangling image IDs, 82 old release snapshot entries, 17 stale `incoming` entries, and the obsolete `verified-source-b967ec8` snapshot. |
+| Protected runtime | PASS | Kept current release `/home/ubuntu/wings-travel/releases/wingsgo-us075-authoring-20260923T1720Z`, rollback source `/home/ubuntu/wings-travel/releases/wingsgo-ux-bc2a523-20260923`, current image, rollback image, media, PostgreSQL/Redis volumes, backups and shared artifacts. |
+| Capacity | PASS | Free space increased from `2.5 GB (95%)` to `18 GB (61%)`. Remaining large shared artifacts/imports were intentionally retained for audit/restore safety. |
+| Runtime after cleanup | PASS | App `f6b4172574d2`, PostgreSQL `ab500698a619`, Redis `b59a6251dcfd` unchanged; local live/ready and all six public health endpoints returned `200`. |
+
+### Production repair — TourProduct #112 preview/public 404 — 2026-09-25
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Root cause | CONFIRMED | Product #112 had slug `HN-SEOUL-NAMI-EVERLAND-haitao` normalized to `hn-seoul-nami-everland-haitao` but still pointed at shared wrapper Page #237 (`/tour/seoul-nami-everland-5n4d-215372`) also linked to Product #20. The orphan draft Page #314 had the wrong pathname and was not linked. Production authoring code also rejected invalid wrappers instead of provisioning a replacement. |
+| Safety backup | PASS | PostgreSQL dump `/home/ubuntu/wings-travel/shared/backups/us075-tour112-repair-20260925T081816Z.dump`; SHA-256 `581c00d81cead09a9ec714cf974bebc65d88f2870a5c0764feacc3631be2f12c`. |
+| Application fix | PASS | Source `7ad2793ef1dc0c6ed7e59f24b0baf77ca6a19ffc`; production release `/home/ubuntu/wings-travel/releases/wingsgroup-us075-7ad2793-20260925T091000Z`. Authoring provision now creates a replacement wrapper in the PostgreSQL transaction, relink remains same-site/exact-path guarded, redirect type `301/307` is exposed, and the proxy resolves permanent tour redirects through the local app origin when HTTPS is terminated at Nginx. |
+| Wrapper and publish state | PASS | Product #112 is published with wrapper Page #316 at `/tour/hn-seoul-nami-everland-haitao`; Page #316 is published and valid. Product #20 remains linked to Page #237; Page #314 was not deleted or modified. |
+| Departure scope | PASS | Departure #123 (`2026-10-29`, `open`) is published. #121 and #122 remain draft/sold-out. |
+| Redirect contract | PASS | Redirect #5 maps `/tour/HN-SEOUL-NAMI-EVERLAND-haitao` to `/tour/hn-seoul-nami-everland-haitao` with type `301`. |
+| Authenticated preview | PASS | `GET /next/preview?collection=tour-products&id=112&locale=vi&path=/tour/hn-seoul-nami-everland-haitao` returned `200`, emitted a preview handoff, and contained no 404/Not Found marker. |
+| Public route | PASS | Production HTTP: uppercase path `301` to lowercase; lowercase path `200`; existing Product #20 path `200`. `agent-browser` opened the lowercase route and verified title `HÀ NỘI – SEOUL – NAMI – EVERLAND - HÁI TÁO`, itinerary, PDF control, monthly departure tabs and the published 29/10/2026 row. |
+| Runtime safety | PASS | `/api/health/live` and `/api/health/ready` returned `200`; PostgreSQL `ab500698a619` and Redis `b59a6251dcfd` container IDs were unchanged; no migration or Redis flush was run during the repair. Disk cleanup retained the current release and one rollback image; free space increased to about `9.8 GB`. |
+
+US-075 remains `in_progress` / `Chờ xác nhận` because broader itinerary-row,
+quick-add persistence and cross-role browser UAT gates are still open. This repair
+closes the Product #112 wrapper, preview and public 404 path specifically.
+
+### Operator warning and repair guidance UX — 2026-09-25
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Readiness status | PASS_CODE | TourProduct authoring now shows an explicit `Đủ điều kiện xuất bản`, `Cần xử lý` or `Đang chờ duyệt` state with a reason. |
+| Guided repair steps | PASS_CODE | The panel shows four ordered steps: save tour, create a matching wrapper, add/select a departure, then preview and publish. |
+| Actionable warnings | PASS_CODE | Each server issue is rendered with severity, plain-language cause, repair guidance and a direct action to edit the slug/title, create a wrapper, inspect candidates or add a departure. |
+| Wrapper safety guidance | PASS_CODE | Page wrapper screens now explain that wrapper relation, pathname and publish actions belong in TourProduct; URL changes are called out as 301-producing changes. |
+| Accessibility and responsive layout | PASS_CODE | Status uses `role=alert`/`role=status`, disabled Publish exposes its reason through `aria-describedby`, and action links scroll/focus the relevant field or section. |
+| Verification | PASS | Targeted ESLint passed, `pnpm exec tsc --noEmit` passed, and production build/static generation completed successfully. Production deployment is a separate release gate. |
+
+The UX change is source-ready but is not marked as a production release until the
+application-only release checklist is run and the deployed admin screen is
+verified in an authenticated browser session.

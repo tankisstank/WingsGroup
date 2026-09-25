@@ -56,6 +56,37 @@ và không được âm thầm render bản published khi draft đã tồn tại
    `variantStrategy` và `Slug tour`; cấu trúc nhiều tab cũng chưa cho biết
    trường nào là tối thiểu để tour sẵn sàng Preview/Publish.
 
+7. Production review ngày 2026-09-23 cho thấy wrapper lifecycle vẫn khó hiểu
+   với editor: trạng thái wrapper sai path bị trả về như chưa có wrapper, panel
+   chỉ hiển thị một dòng path/status, action `Tạo trang tour` không phân biệt
+   trường hợp chưa có wrapper với wrapper mồ côi hoặc wrapper đang dùng chung,
+   và thay đổi slug có thể làm lệch `Product.slug` với `Page.pathname` mà không
+   có cảnh báo trực quan. Product #112 là ví dụ: đang trỏ tới Page #237 sai
+   pathname, trong khi Page #314 là wrapper draft cùng site nhưng đang mồ côi.
+   Đây là gap của authoring UX và data-integrity feedback, không mở thành US
+   mới.
+8. URL tour phải được ổn định ngay tại điểm nhập: slug editor nhập phải được
+   chuẩn hóa lowercase ở client và server. Relink/publish chéo phải chạy trong
+   cùng PostgreSQL transaction; nếu tour đã public đổi URL, transaction phải
+   tạo hoặc xác nhận một redirect `301` từ path cũ sang path mới.
+
+## Independent post-UAT review — 2026-09-19
+
+Đợt đối soát mới bổ sung ba finding. Các finding này không được gộp thành một
+nguyên nhân chung; mỗi finding có mức độ bằng chứng và hướng xử lý riêng:
+
+| Finding | Phân loại độc lập | Quyết định trong US-075 |
+| --- | --- | --- |
+| Dòng itinerary mới bị thu gọn, người dùng không thấy ngay các field bắt buộc | Đã xác nhận từ source: `itineraryDays` là array bắt buộc và admin config đang dùng `initCollapsed: true`. Source không có literal `minRows`, nên không gọi đó là một option đã được cấu hình nếu chưa có runtime trace. | P1 UX. Khi thêm ngày đầu tiên phải mở rộng dòng; khi Save lỗi phải đưa người dùng tới tab/dòng/field lỗi. Giữ server validation hiện có, không nới schema chỉ để Save draft đi qua. |
+| Nút “Tạo trang tour” trả HTTP 500 khi `wrapperPage` rỗng | Đã ghi nhận từ live retest; nguyên nhân gốc chưa được chứng minh. Luồng provision hiện đã truyền `createLayoutPresetData('tour-conversion')`, vì vậy giả thuyết “thiếu default layout” không được chấp nhận như root cause. | P0/P1 release gate. Tái hiện ở staging với log lỗi đã sanitize, phân biệt lỗi Page validation, tour hub, site access và transaction; trả mã/lời giải thích actionable thay vì generic 500. |
+| Quick-add được cho là không ghi được departure vì không đi qua authoring endpoint | Không khớp source hiện tại: `TourDepartureManager` POST/PATCH trực tiếp `/api/tour-departures`, sau đó reload bảng. Đây là boundary đã định trong US-075, không phải thiếu action của `/api/tour-authoring/[id]`. | Không thêm endpoint ghi trùng. Xác minh bằng network response + reload/API read trên production hoặc staging; nếu fail thì sửa direct collection path, access hoặc runtime drift. |
+
+Kết luận: US-075 vẫn `in_progress`. AC-1 chưa đóng do provision 500; AC-3
+chưa đóng lại cho đến khi quick-add được chứng minh persist trong runtime đang
+phục vụ; AC-4/AC-6 bổ sung gate UX itinerary và regression validation. Kết quả
+UAT 11 bước ngày 2026-09-18 vẫn là bằng chứng lịch sử của fixture đã chạy,
+nhưng không đủ để bác bỏ một regression mới trên production.
+
 ### Operator outcome
 
 Với một tour mới, đường đi mặc định cần là: chọn site đã được xác định → nhập
@@ -75,8 +106,10 @@ vận hành phải tự suy ra quan hệ giữa `TourProduct`, `TourDeparture` v
 | Default/site context | Code/Admin presentation theo site scope; một site thì prefill, nhiều site thì chọn rõ | AC-1 |
 | Việt hóa nhãn và progressive disclosure | Code/Admin presentation; giữ payload key, VI/EN parity | AC-4, AC-6 |
 | Readiness checklist | Code/Admin UX; chỉ báo thiếu dependency và dẫn tới nơi xử lý | AC-1, AC-4, AC-6 |
+| Wrapper lifecycle polish | Hiển thị expected/actual path, health, orphan/shared state và action tạo/gán/sửa wrapper rõ ràng; không che wrapper sai thành “chưa có” | AC-1, AC-4, AC-6 |
 | Gallery thumbnail/add/remove | Code/Admin field presentation trên relationship Media hiện có | AC-4, AC-6 |
 | Save draft → Preview đúng bản lưu | Code/runtime preview handoff và resolver; giữ anonymous published isolation | AC-2, AC-3, AC-5, AC-6 |
+| Slug và URL lifecycle | Field slug lowercase ngay khi nhập, server-side normalize; relink/publish có transaction và auto-create redirect `301` khi URL public đổi | AC-1, AC-2, AC-6 |
 
 Các đề xuất trên là một scope có liên kết, nhưng implementation phải đi theo
 vertical slice và có thể tách decision riêng nếu phát hiện giới hạn schema,
@@ -146,6 +179,30 @@ collection `Media`/các quy trình nền tảng hiện có.
 - Readiness checklist cho biết còn thiếu wrapper Page, nội dung cốt lõi,
   gallery, departure/giá hoặc freshness nào trước Preview/Publish; từng lỗi
   phải trỏ tới nơi xử lý, không chỉ hiển thị một lỗi đỏ chung.
+- Readiness hiển thị rõ `URL dự kiến`, wrapper đang liên kết (ID, path, site,
+  status), trạng thái kiểm tra (`valid`, `draft`, `invalid path/site`, `orphan`,
+  `shared`) và các wrapper cùng site có thể gán. Editor không được thấy
+  “Chưa có trang tour” khi thực tế đang có một wrapper sai liên kết.
+- Action wrapper được phân biệt theo trạng thái: `Tạo wrapper bản nháp`,
+  `Gán wrapper có sẵn`, `Sửa liên kết wrapper`, `Mở wrapper`, `Xem bản nháp` và
+  `Xem trang public`. Provision không được tạo page mới khi đã có candidate cùng
+  site/path mà chưa có xác nhận của editor.
+- Khi slug thay đổi, UI hiển thị URL Product và pathname wrapper trước/sau,
+  cảnh báo rủi ro đổi URL public và yêu cầu chọn đồng bộ, gán wrapper khác hoặc
+  tạo wrapper mới; không tự đổi pathname published một cách âm thầm.
+- Slug được hạ chữ thường ngay trong input và được normalize lại ở server. Khi
+  publish một slug mới cho tour đã public, hệ thống tạo redirect `301` duy nhất
+  từ URL public cũ tới URL mới trong cùng transaction với relink/publish; nếu
+  path cũ đã trỏ sang đích khác thì publish bị chặn để operator xử lý conflict.
+- Ở màn hình tạo mới, khi thêm ngày itinerary đầu tiên, dòng mới được mở rộng
+  sẵn để người vận hành thấy `dayNumber`, tiêu đề và tóm tắt; nếu Save bị chặn,
+  form chuyển tới tab/dòng/field lỗi với hướng dẫn thao tác tiếp theo.
+- Provision wrapper thành công phải tạo/reuse Page draft bằng preset hiện có;
+  lỗi validation, thiếu `/tour` hub, site access hoặc transaction phải được
+  phân loại và hiển thị actionable, không bị che bởi HTTP 500 chung.
+- Quick-add phải được kiểm chứng là ghi thật vào `TourDepartures` qua endpoint
+  trực tiếp hiện hữu, giữ đúng `tourProduct`/`site`, và thấy lại được sau reload;
+  không tạo thêm một đường ghi qua authoring route nếu không có lỗi đã tái hiện.
 - Preview vẫn dùng site-scoped authorization, signed handoff, allowlisted
   production origin và fail-closed behavior hiện có. Không dùng URL/domain từ
   browser để mở redirect tùy ý và không nới quyền để làm preview chạy.
@@ -201,8 +258,11 @@ collection `Media`/các quy trình nền tảng hiện có.
 
 ## Explicit Non-Goals
 
-- Không sửa `payload.config.ts`, không đổi collection schema, không tạo migration
-  và không đổi tên/xóa field trong database.
+- Không sửa `payload.config.ts`, không đổi collection schema tour và không đổi
+  tên/xóa field dữ liệu. Migration duy nhất trong phạm vi này là thêm type
+  redirect `301`/`307` cho collection Redirects để giữ tương thích redirect cũ;
+  chỉ URL tour đổi sau publish mới tự tạo `301`, không backfill tour hoặc sửa
+  dữ liệu CMS production.
 - Không xóa hoặc sửa hàng loạt TourProduct, departure, variant, Page, account hay
   dữ liệu CMS production.
 - Không thay đổi schema collection `Media`, upload storage, asset provenance,
@@ -226,8 +286,10 @@ collection `Media`/các quy trình nền tảng hiện có.
   `Loại tour WingSide`, WingSide vẫn giữ đúng control cần thiết, field dùng
   chung có label trung tính mà không làm thay đổi dữ liệu đã lưu, và site
   context/default đúng theo quyền tài khoản. Với WingsGo, wrapper Page draft
-  được provision hoặc có quick action tạo/reuse idempotent trong cùng site; không
-  auto-publish và không tạo duplicate.
+  được provision hoặc có quick action tạo/reuse idempotent trong cùng site; readiness
+  hiển thị expected/actual path, wrapper ID/status/health, candidate orphan/shared
+  và action sửa tương ứng; không auto-publish, không tạo duplicate và không trả
+  wrapper sai liên kết thành trạng thái “chưa có”.
 - Sau khi Save thành công, Preview của `TourProduct` hiển thị đúng bản draft đã
   lưu mới nhất theo site và locale; thay đổi draft không bị rơi về bản
   published.
@@ -241,18 +303,24 @@ collection `Media`/các quy trình nền tảng hiện có.
   phải hiển thị thumbnail/metadata của ảnh đã chọn và hỗ trợ add/remove rõ ràng;
   freshness của mỗi departure/giá và tác động public khi hết hạn phải được giải
   thích, còn nhãn kỹ thuật phải được thay bằng copy nghiệp vụ hoặc nằm trong
-  nhóm nâng cao có progressive disclosure.
+  nhóm nâng cao có progressive disclosure. Wrapper action và preview action phải
+  nói rõ đang mở draft hay public, không dùng một nút `Preview` mơ hồ.
 - Signed preview handoff, tenant/site authorization, locale binding, allowlisted
   origin, expiry và fail-closed behavior vẫn pass; không có open redirect hoặc
   cross-tenant data leak.
+- Slug input/server normalization, PostgreSQL transaction boundary của relink /
+  publish và redirect `301` cũ → mới có unit/integration proof; redirect cũ
+  không bị duplicate hoặc ghi đè đích khác.
 - Unit/integration/component/E2E và staging/release smoke chứng minh luồng tạo,
   sửa, thêm nhanh departure, readiness, preview, publish boundary và rollback an
-  toàn; không có schema change, migration hoặc CMS production write ngoài
-  release được phê duyệt. Quality proof bao phủ gallery ở trạng thái rỗng,
+  toàn; không có schema change ngoài migration type redirect `301`/`307`, và không có
+  CMS production write ngoài release được phê duyệt. Quality proof bao phủ
+  gallery ở trạng thái rỗng,
   một/nhiều ảnh, add, remove, media lỗi/thiếu và Save → Preview; freshness
-  current/needs-verification/expired; wrapper provision/reuse; VI/EN,
-  desktop/mobile và quyền media vẫn đúng, không làm lộ URL/token hoặc dữ liệu
-  cross-tenant.
+  current/needs-verification/expired; wrapper provision/reuse, relink wrapper,
+  path mismatch, orphan/shared candidate, slug-change warning và retry không tạo
+  duplicate; VI/EN, desktop/mobile và quyền media vẫn đúng, không làm lộ
+  URL/token hoặc dữ liệu cross-tenant.
 
 ## Design Notes
 
@@ -280,6 +348,19 @@ collection `Media`/các quy trình nền tảng hiện có.
 - Progressive disclosure chỉ thay đổi cách trình bày: field nâng cao như builder,
   variant và SEO được nhóm theo nhiệm vụ, có label nghiệp vụ; payload key và
   data contract không đổi.
+- `TourProduct` là nguồn dữ liệu tour; wrapper Page là route shell; departure là
+  đơn vị lịch/giá có thể publish. Mọi màn hình tạo/sửa phải hiển thị quan hệ này
+  bằng ngôn ngữ nghiệp vụ và cung cấp liên kết mở đúng record.
+- Wrapper health được tính từ cùng site, pathname chính xác `/tour/<slug>`,
+  trạng thái publication và số product đang tham chiếu. Repair/relink chỉ được
+  thực hiện qua Payload transaction với kiểm tra same-site/path; không sửa SQL
+  trực tiếp và không tự nhận page mồ côi.
+- URL migration chỉ phát sinh khi một bản public thật sự đổi slug. Redirect
+  được tạo qua Payload trong transaction, có unique `from`, và được revalidate
+  sau commit; không tạo redirect cho draft chưa public hoặc khi path không đổi.
+- Delivery đọc Redirects ở proxy trước khi render CMS và trả đúng HTTP `301`
+  cho record `type = '301'`; fallback server component không được dùng làm
+  bằng chứng status.
 
 ## Harness Delta
 
@@ -291,12 +372,18 @@ collection `Media`/các quy trình nền tảng hiện có.
   freshness/readiness và terminology/progressive disclosure. Không tạo child
   task mới để tránh phá mapping sáu acceptance criteria hiện có; các mở rộng
   được gắn vào AC-1, AC-3, AC-4 và AC-6.
+- Đợt post-UAT ngày 2026-09-19 tiếp tục gắn vào AC-1/AC-3/AC-4/AC-6; không
+  tạo child task mới và không mở rộng `/api/tour-authoring` để trùng với
+  `/api/tour-departures` hiện có.
+- Scope polish wrapper ngày 2026-09-23 được gắn vào AC-1/AC-4/AC-6 của US-075;
+  không tạo US hoặc child task mới. Production case #112/#314/#237 là fixture
+  chẩn đoán dữ liệu/UX, không được tự ý sửa trong lúc triển khai UI.
 - Khi triển khai, proof phải tách được code regression, authenticated CMS UAT,
   public published isolation và production release proof.
 
 ## Evidence
 
-Implementation đã được tích hợp trong workspace ở dạng chưa release. Bằng chứng
+Implementation đã được tích hợp và đã có release production trước đó; bằng chứng
 tự động hiện có:
 
 - Admin authoring có site context/default, nhãn trung tính theo capability,
@@ -311,6 +398,35 @@ tự động hiện có:
   brand và source-contract expectation đã bị stale; hai sửa này nằm ngoài
   phạm vi nghiệp vụ TourProduct của US-075.
 
-Authenticated CMS UAT 11 bước, responsive browser proof và staging/production
-release proof chưa thực hiện; vì vậy story vẫn `in_progress`. Không có schema,
-migration hoặc CMS production write trong implementation này.
+Authenticated CMS UAT 11 bước và release proof đã có, nhưng post-UAT audit đã
+mở lại gate provision/itinerary/quick-add nên story vẫn `in_progress`. Migration
+schema duy nhất của phạm vi này là type redirect `301`/`307`; không có CMS production
+write ngoài fixture/release được phê duyệt.
+
+### Tour list detail and bulk actions — 2026-09-21
+
+The localized TourProduct title cell replaced Payload's standard title link
+with plain text, so selecting a row and pressing `Chỉnh sửa` opened the bulk-edit
+drawer instead of the individual tour editor. The title cell now links directly
+to that tour's admin detail route, with an accessible name. Collection-level
+guidance distinguishes clicking one tour title from using the toolbar action on
+selected rows. Keep Payload's shared `general:edit` translation unchanged; a
+global rename would also mislabel relationship and folder edit actions.
+
+### Draft preview 404 root-cause fix — 2026-09-22
+
+Product `111` was confirmed as a WingsGo draft with `wrapper_page_id = null`. The
+preview handoff itself succeeded, but the public `/tour/<slug>` renderer requires
+the linked Page wrapper, so the final URL returned 404; missing departure or
+variant rows were not the cause. Payload Preview/live preview now stays disabled
+until `wrapperPage` exists, and `/next/preview` returns an actionable HTTP `409`
+when a tour draft has no wrapper. Targeted regression checks pass (11 unit tests,
+TypeScript and ESLint with 0 errors). Production provision/reuse and authenticated
+browser proof remain pending, so US-075 stays `Chờ xác nhận`.
+
+Production release `wingsgroup-us075-preview-guard-20260922-r2` is now live. The
+ARM64 image `sha256:15ae02c827dbfd2e822ebf1183afc6061564324a7d6a58988d9f338b729b0421`
+passed build/static generation; local health, all six public domains, and the
+PostgreSQL/Redis unchanged check passed. The previous app image is retained for
+rollback. Authenticated wrapper provision and product 111 preview proof are
+still pending, so the story remains `Chờ xác nhận`.

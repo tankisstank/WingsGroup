@@ -18,10 +18,125 @@ security.
 - Phase 3: unit/component/integration/typecheck/lint/build đã chạy; automated UI
   tests bao phủ fill, save, retry, add-next, dirty guard, readiness confirmation,
   thumbnail và remove relation.
-- Phase 4: technical production release, canary/after-state, browser smoke và
-  rollback readiness đã pass; authenticated CMS UAT vẫn pending.
-- Phase 5: release evidence đã được ghi; Harness/Plane handover đang được cập
-  nhật. Không đánh dấu story hoàn tất khi authenticated CMS UAT còn thiếu.
+- Phase 4: technical production release, canary/after-state, browser smoke,
+  rollback readiness và một vòng authenticated CMS UAT đã pass với fixture;
+  post-UAT retest ngày 2026-09-19 mở lại gate provision/quick-add.
+- Phase 5: release evidence đã được ghi; Harness/Plane handover vẫn giữ story
+  `in_progress` cho đến khi các post-UAT gate được tái kiểm chứng. Không coi
+  việc modal hiển thị là bằng chứng dữ liệu đã persist.
+
+## URL lifecycle prerequisites — 2026-09-23
+
+Hai điều kiện này là release gate của cùng luồng authoring, không mở US mới:
+
+1. **Lowercase tại form:** custom slug field hạ chữ thường ngay trong
+   `onChange`; collection `beforeValidate` lặp lại normalize để API/import không
+   thể lưu slug hoa. `generateSlug` vẫn giữ hành vi hiện có.
+2. **Transaction + redirect:** `relinkAuthoring` và `publishAuthoring` phải
+   dùng PostgreSQL transaction/advisory lock. Khi publish một tour đã có bản
+   public và `Product.slug` đổi, cùng transaction tạo hoặc kiểm tra redirect
+   duy nhất `from = /tour/<slug-cu>`, `to = /tour/<slug-moi>`, `type = 301`.
+   Redirect conflict không được ghi đè đích khác; cache redirect chỉ revalidate
+   sau commit.
+
+Migration `20260923_090000_tour_authoring_redirect_type` chỉ thêm enum/type
+`301`/`307` cho collection Redirects: record cũ nhận `307` để giữ behavior,
+record URL tour mới nhận `301`. Không chạy migration hoặc CMS write production
+trong proof code-only.
+
+## Preview 404 checkpoint — 2026-09-22
+
+- Đã xác nhận lỗi preview của TourProduct `111` thuộc US-075: bản nháp WingsGo
+  chưa có `wrapperPage` (`wrapper_page_id = null`), nên handoff thành công nhưng
+  public renderer không có Page tại `/tour/<slug>` và trả 404. Không có departure
+  hoặc variant không phải nguyên nhân.
+- Đã thêm guard ở Payload Preview/live preview để không phát URL khi thiếu wrapper
+  và guard ở `/next/preview` trả `409` với hướng xử lý rõ ràng. Không tự động ghi
+  production data hoặc bypass flow `Tạo trang tour nháp`.
+- Regression đã pass: 11 unit tests mục tiêu, TypeScript và ESLint mục tiêu (0
+  errors). Cần deploy release, provision/reuse wrapper cho record thực tế và chạy
+  authenticated browser proof trước khi chuyển US-075 sang hoàn tất.
+
+### Production deployment checkpoint — 2026-09-22
+
+- Đã promote release `/home/ubuntu/wings-travel/releases/wingsgroup-us075-preview-guard-20260922-r2` với overlay archive SHA-256 `5bcded9c91d18800fe4a807d25249aed04d5d68babd73338697f33a9b1026c19`.
+- ARM64 image `sha256:15ae02c827dbfd2e822ebf1183afc6061564324a7d6a58988d9f338b729b0421` build pass; live/ready và sáu public domains trả 200. PostgreSQL/Redis giữ nguyên container; không migration, CMS write hoặc Redis flush.
+- Rollback image `sha256:c474f0c137ce74bd71a5137e7c572091084b806d966a098434c239468725c816` đã được tag. Còn lại: provision/reuse wrapper và authenticated preview proof cho product 111; US-075 giữ `Chờ xác nhận`.
+
+## Post-UAT delta — 2026-09-19
+
+1. **Itinerary create UX (P1):** xác nhận `itineraryDays` bắt buộc nhưng dòng
+   mới đang collapsed. Sửa tối thiểu ở presentation/interaction để dòng đầu
+   mở sẵn và validation error chuyển tới đúng tab/dòng; không đổi collection
+   schema hay nới điều kiện server.
+2. **Wrapper provision (P0/P1):** tái hiện lỗi 500 trên staging hoặc fixture
+   an toàn, thu thập error class/code đã sanitize và kiểm tra lần lượt tour hub,
+   Page validation, site access, transaction/rollback. `tour-conversion` preset
+   đã tồn tại trong code path; không thêm layout mặc định khi chưa có bằng chứng.
+3. **Departure quick-add (P1 verification):** kiểm tra POST/PATCH trực tiếp
+   `/api/tour-departures`, response status, bản ghi sau reload và site/product
+   scope. Chỉ sửa direct collection path nếu có lỗi runtime; không tạo action
+   thứ ba trong `/api/tour-authoring/[id]` để tránh hai đường ghi.
+4. Cập nhật component/integration/authenticated UAT evidence cho ba điểm trên,
+   sau đó mới đánh giá lại AC-1, AC-3, AC-4 và AC-6.
+
+## Wrapper lifecycle UX polish — 2026-09-23
+
+Phạm vi này được gán vào US-075, không tạo US hoặc child task mới. Mục tiêu là
+để editor hiểu được quan hệ `TourProduct → wrapper Page → TourDeparture` và có
+thể xử lý wrapper sai mà không phải suy ra từ raw ID, 404 hoặc lỗi HTTP 500.
+
+### P0 — Readiness và trạng thái liên kết
+
+1. Readiness phải trả cả wrapper hiện tại dù wrapper sai path/site; không biến
+   wrapper invalid thành `null` rồi hiển thị “Chưa có trang tour”.
+2. Hiển thị site, Product slug, URL dự kiến, wrapper ID/path/status/site và
+   health (`valid`, `draft`, `invalid path/site`, `orphan`, `shared`).
+3. Hiển thị candidate cùng site/path, số product đang tham chiếu và action phù
+   hợp: tạo draft, mở, gán wrapper có sẵn hoặc sửa liên kết.
+4. Tách `Xem bản nháp` khỏi `Xem trang public`; draft chưa publish phải giải
+   thích rõ vì sao anonymous URL chưa dùng được.
+5. Khi editor là `Editor`, nút publish bị khóa phải nêu vai trò hiện tại và
+   người có quyền publish.
+
+### P1 — Tạo/sửa/relink an toàn
+
+1. Đổi tên action thành ngôn ngữ nghiệp vụ: `Tạo wrapper bản nháp`, `Gán
+   wrapper có sẵn`, `Sửa liên kết wrapper`, `Mở wrapper`.
+2. Khi slug thay đổi, hiển thị pathname trước/sau và yêu cầu chọn đồng bộ,
+   wrapper khác hoặc tạo wrapper mới; không tự đổi pathname published.
+3. Relink chỉ chấp nhận wrapper cùng site và pathname đúng `/tour/<slug>`, chạy
+   qua Payload transaction, không sửa SQL và không tự nhận page mồ côi.
+4. Không provision page mới khi đã có candidate cùng site/path nếu editor chưa
+   xác nhận; retry không được tạo duplicate.
+5. Modal publish phải liệt kê rõ Product, Page và các departure sẽ được publish.
+
+### Proof bắt buộc trước khi đóng phạm vi
+
+- Fixture không có wrapper, wrapper hợp lệ, wrapper sai path, wrapper mồ côi và
+  wrapper dùng chung; mỗi trạng thái hiển thị đúng health/action.
+- Product #112/#314/#237 được dùng làm read-only production diagnostic, không
+  tự ý sửa dữ liệu production trong implementation proof.
+- Browser proof xác nhận editor thấy expected/actual path, mở đúng record,
+  preview draft có auth và public route vẫn fail-closed trước publish.
+- Unit/integration proof bao phủ relink guard, same-site/path check, slug warning,
+  stale revision và duplicate/retry safety.
+
+### Wrapper lifecycle UX implementation checkpoint — 2026-09-23
+
+- Đã triển khai readiness state mở rộng trong `app/src/tours/authoring.ts`:
+  wrapper invalid không còn bị biến thành “chưa có”, API trả expected/actual
+  path, site, status, health, linked product IDs và candidate wrapper.
+- Đã thêm action `relink` có kiểm tra cùng site + đúng pathname, conflict khi
+  wrapper dùng chung và PostgreSQL transaction/advisory lock. Provision từ
+  UI có thể tạo wrapper draft thay thế khi relation cũ sai mà không sửa Page cũ.
+- Admin readiness hiển thị link CMS, signed draft preview và public URL tách
+  biệt; confirmation publish nêu Product, Page và departure IDs. Slug drift,
+  wrapper guidance và Page wrapper guidance được hiển thị ngay trong form.
+- Regression pass: targeted unit `13/13`, component `5/5`, TypeScript pass,
+  targeted ESLint `0 errors` (còn warning `no-explicit-any` đã có trong source).
+- Chưa ghi production CMS và chưa deploy trong checkpoint này; browser proof
+  authenticated cho Product #112 vẫn là gate tiếp theo.
 
 ## Scope
 
@@ -45,7 +160,8 @@ security.
 
 ### Out of scope
 
-- Schema/migration/data cleanup.
+- Schema/data cleanup ngoài migration type redirect `301`/`307` bắt buộc cho URL
+  lifecycle.
 - Media schema, upload storage, asset provenance hoặc Media library redesign.
 - Generic Payload admin redesign đã thuộc US-059/US-074.
 - Full all-in-one tour wizard; story chỉ làm readiness, related table và quick
@@ -68,7 +184,8 @@ Risk flags:
 
 Hard gates:
 
-- Không được tạo migration hoặc xóa/đổi dữ liệu hiện hữu để làm test pass.
+- Không được tạo migration ngoài redirect types `301`/`307` đã chốt, hoặc xóa/đổi dữ
+  liệu hiện hữu để làm test pass.
 - Không được nới `overrideAccess`, bỏ signed handoff hoặc cho open redirect.
 - Không production write nếu chưa có owner approval, backup, exact-scope plan và
   rollback.
@@ -118,8 +235,9 @@ Hard gates:
    verification/expired.
 8. Chốt site default/context, readiness checklist, business label và nhóm
    progressive disclosure cho các tab/field nâng cao; copy phải parity VI/EN.
-9. Nếu phát hiện cần đổi schema hoặc data migration, dừng Phase 2 và tạo
-   decision/US riêng; không tự mở rộng scope.
+9. Nếu phát hiện cần đổi schema hoặc data migration ngoài redirect types
+   `301`/`307`,
+   dừng Phase 2 và tạo decision/US riêng; không tự mở rộng scope.
 
 ### Phase 2 — Minimal implementation
 
@@ -143,6 +261,8 @@ Hard gates:
 8. Thêm trạng thái Preview, freshness và readiness rõ ràng; thêm label/helper
    nghiệp vụ và progressive disclosure cho field nâng cao mà không đổi payload.
 9. Giữ nguyên editor publish guard và public published behavior.
+10. Normalize slug ngay tại input và server hook; trong publish transaction tạo
+    redirect `301` cho URL public cũ khi slug đổi.
 
 ### Phase 3 — Automated validation
 
@@ -184,9 +304,9 @@ Hard gates:
 2. Cập nhật product/editorial docs nếu workflow thay đổi.
 3. Cập nhật Harness proof/status và đồng bộ Plane; giữ story `in_progress` khi
    authenticated draft proof còn thiếu.
-4. Production release proof đã hoàn tất với release
-   `wingsgroup-us075-20260917T071748Z`; bước còn lại là chạy UAT CMS có xác thực
-   bằng fixture được owner phê duyệt.
+4. Production release proof và vòng UAT fixture trước đó đã hoàn tất, nhưng
+   release gate hiện tại vẫn chờ post-UAT retest: provision không còn 500,
+   itinerary create usable và quick-add có persist proof.
 
 ## Dependencies
 
@@ -212,6 +332,11 @@ Hard gates:
 - `app/src/utilities/previewHandoff.ts`
 - `app/src/app/(frontend)/cmsPage.tsx`
 - `app/src/tours/queries.ts`
+- `app/src/components/TourAuthoring/TourSlugField.tsx`
+- `app/src/migrations/20260923_090000_tour_authoring_redirect_type.ts`
+- `app/src/utilities/repairLocalSQLiteSchema.ts`
+- `app/src/components/PayloadRedirects/index.tsx`
+- `app/src/proxy.ts`
 - `app/src/tours/StructuredPages.tsx`
 - `app/tests/unit/*preview*`
 - `app/tests/int/tourDetailBuilder.int.spec.ts`
@@ -230,6 +355,12 @@ Pause and ask for a new decision if:
 - Có yêu cầu mở quyền editor hoặc cho preview public anonymous.
 - Wrapper provision không thể bảo đảm idempotent/same-site/draft-only bằng API
   hiện có; tách thành decision về Page lifecycle thay vì âm thầm tạo Page.
+- Provision trả generic HTTP 500 mà không phân loại được lỗi Page validation,
+  tour hub, quyền site hoặc transaction sau một lần tái hiện có log sanitize;
+  khi đó dừng release và tách incident/runtime fix khỏi UX itinerary.
+- Create flow vẫn bắt người dùng tự mở dòng itinerary để thấy required fields,
+  hoặc Save error không điều hướng được tới field lỗi trong một vòng kiểm thử
+  authenticated.
 - Quick-add departure yêu cầu transaction/schema mới hoặc không thể tránh
   duplicate khi retry; tách thành story về departure authoring.
 - Người dùng yêu cầu full wizard hoặc tự động Publish; đó là scope/product
@@ -244,7 +375,9 @@ Pause and ask for a new decision if:
 - `pnpm run test:unit`, `pnpm run test:component`, targeted integration/E2E,
   TypeScript và ESLint pass theo phạm vi thay đổi.
 - Staging/release candidate proof và production technical rollout có evidence;
-  authenticated CMS UAT vẫn là gate riêng trước khi đóng story.
+  authenticated CMS UAT ban đầu đã pass nhưng post-UAT closure gate vẫn là
+  điều kiện riêng trước khi đóng story.
 - Task-based UAT chứng minh operator có thể hoàn thành luồng core, thấy
   readiness/freshness rõ ràng, provision/reuse wrapper và thêm nhiều departure
-  mà không cần hiểu raw relationship hoặc technical field key.
+  mà không cần hiểu raw relationship hoặc technical field key; create flow phải
+  hiển thị ngay itinerary fields và failure phải chỉ đúng nơi sửa.

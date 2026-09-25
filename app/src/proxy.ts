@@ -40,6 +40,7 @@ const defaultLocaleByPublicHost: Record<string, string> = {
   'wingsplus.vn': 'vi',
   'wingside.vn': 'en',
 }
+const wingsGoPublicHosts = new Set(['wingsgo.vn', 'www.wingsgo.vn'])
 
 const isLocalDevelopmentHost = (host: null | string) =>
   Boolean(host && (localBootstrapHosts.has(host) || host.endsWith('.local')))
@@ -73,6 +74,43 @@ const applyPublicPageCachePolicy = (request: NextRequest, response: NextResponse
   // caching removes the BFCache-blocking `no-store` without sharing content
   // between preview/authenticated and anonymous sessions.
   return response
+}
+
+const resolvePermanentTourRedirect = async (request: NextRequest, effectiveHost: string | null): Promise<NextResponse | null> => {
+  const pathname = request.nextUrl.pathname
+  if (!wingsGoPublicHosts.has(effectiveHost || '') || !pathname.startsWith('/tour/') || pathname === '/tour/') return null
+
+  const endpoint = new URL('/api/redirects', request.url)
+  if (request.headers.get('x-forwarded-proto')) {
+    endpoint.protocol = 'http:'
+    endpoint.hostname = '127.0.0.1'
+    endpoint.port = '3000'
+  }
+  endpoint.searchParams.set('where[from][equals]', pathname)
+  endpoint.searchParams.set('depth', '0')
+  endpoint.searchParams.set('limit', '1')
+
+  try {
+    const response = await fetch(endpoint, {
+      cache: 'no-store',
+      headers: { accept: 'application/json' },
+    })
+    if (!response.ok) return null
+
+    const body = (await response.json()) as {
+      docs?: Array<{ to?: { url?: string | null }; type?: string | null }>
+    }
+    const redirect = body.docs?.[0]
+    if (redirect?.type !== '301' || !redirect.to?.url) return null
+
+    const destination = new URL(redirect.to.url, request.url)
+    if (!['http:', 'https:'].includes(destination.protocol) || destination.href === request.url) return null
+
+    return NextResponse.redirect(destination, 301)
+  } catch {
+    // A lookup failure must leave the normal CMS route available.
+    return null
+  }
 }
 
 const isServerOwnedLocalDraftPreview = async (
@@ -235,6 +273,14 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
+  const effectiveHost = resolveEffectiveHost(request)
+  const forwardedHost = normalizeHost(request.headers.get('x-forwarded-host'))
+  const redirectHost = wingsGoPublicHosts.has(effectiveHost || '')
+    ? effectiveHost
+    : forwardedHost
+  const permanentTourRedirect = await resolvePermanentTourRedirect(request, redirectHost)
+  if (permanentTourRedirect) return permanentTourRedirect
+
   const preservedRewriteContext = await getPreservedRewriteContext(request)
 
   if (preservedRewriteContext) {
@@ -251,8 +297,6 @@ export async function proxy(request: NextRequest) {
   const requestID = crypto.randomUUID()
   const siteAlias = getSiteAliasFromPathname(request.nextUrl.pathname)
   const locale = getLocaleFromPathname(request.nextUrl.pathname)
-  const effectiveHost = resolveEffectiveHost(request)
-
   if (siteAlias === 'wingsside') {
     const url = request.nextUrl.clone()
     const segments = url.pathname.split('/').filter(Boolean)

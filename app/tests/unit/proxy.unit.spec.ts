@@ -150,6 +150,25 @@ describe('tenant proxy rewrites', () => {
     }
   })
 
+  it('returns an exact 301 for an auto-created tour slug redirect', async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({
+      docs: [{ to: { type: 'custom', url: '/tour/new-slug' }, type: '301' }],
+    }), { headers: { 'content-type': 'application/json' }, status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    try {
+      const response = await proxy(
+        new NextRequest('https://wingsgo.vn/tour/old-slug', { headers: { host: 'wingsgo.vn' } }),
+      )
+
+      expect(response.status).toBe(301)
+      expect(response.headers.get('location')).toBe('https://wingsgo.vn/tour/new-slug')
+      expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/api/redirects?')
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
   it('preserves the trusted tenant bundle when Next processes the rewrite destination', async () => {
     const publicResponse = await proxy(
       new NextRequest('http://localhost:3100/wing-side', {

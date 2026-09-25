@@ -177,6 +177,10 @@ const wingsGroupV3MediaColumns: ReadonlyArray<readonly [string, string]> = [
 
 const localSQLiteColumnRepairs = [
   {
+    table: 'redirects',
+    columns: [['type', "TEXT NOT NULL DEFAULT '307'"]],
+  },
+  {
     table: 'pages',
     columns: [['wings_go_tour_catalog_enabled', 'INTEGER DEFAULT 0']],
   },

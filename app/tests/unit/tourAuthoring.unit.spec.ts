@@ -5,6 +5,8 @@ import {
   buildAuthoringRevision,
   buildAuthoringState,
   authoringIssues,
+  ensurePublishedTourRedirect,
+  getWrapperHealth,
   normalizeAuthoringError,
   parseAuthoringBody,
   provisionAuthoring,
@@ -52,17 +54,74 @@ describe('WingsGo tour authoring', () => {
     })
     expect(() => parseAuthoringBody({ action: 'publish', locale: 'vi' })).toThrow('ít nhất một departure')
     expect(() => parseAuthoringBody({ action: 'provision', locale: 'vi', site: 10 })).toThrow('site')
+    expect(parseAuthoringBody({ action: 'relink', locale: 'vi', wrapperID: 314 })).toMatchObject({ action: 'relink', wrapperID: 314 })
+    expect(() => parseAuthoringBody({ action: 'relink', locale: 'vi' })).toThrow('wrapperID')
+  })
+
+  it('classifies wrapper health before allowing a relink or publish', () => {
+    const product = { id: 112, site: 2, slug: 'demo' }
+    expect(getWrapperHealth({ linkedProductIDs: [112], product, siteID: 2, wrapper: { id: 314, site: 2, pathname: '/tour/demo' } })).toBe('valid')
+    expect(getWrapperHealth({ linkedProductIDs: [112], product, siteID: 2, wrapper: { id: 314, site: 2, pathname: '/tour/old' } })).toBe('invalid_path')
+    expect(getWrapperHealth({ linkedProductIDs: [112], product, siteID: 2, wrapper: { id: 314, site: 3, pathname: '/tour/demo' } })).toBe('invalid_site')
+    expect(getWrapperHealth({ linkedProductIDs: [], product, siteID: 2, wrapper: { id: 314, site: 2, pathname: '/tour/demo' } })).toBe('orphan')
+    expect(getWrapperHealth({ linkedProductIDs: [112, 113], product, siteID: 2, wrapper: { id: 314, site: 2, pathname: '/tour/demo' } })).toBe('shared')
   })
 
   it('keeps publish readiness closed until wrapper and departure prerequisites exist', () => {
-    const issues = authoringIssues({ canPublish: true, departures: [], locale: 'vi', product: { id: 1, site: 10, slug: 'demo', title: 'Demo' }, wrapper: null })
+    const issues = authoringIssues({ canPublish: true, departures: [], locale: 'vi', product: { id: 1, heroMedia: 7, site: 10, slug: 'demo', title: 'Demo' }, wrapper: null })
     expect(issues.map((issue) => issue.code)).toEqual(['missing_wrapper', 'no_departures'])
+  })
+
+  it('requires a product hero image before public publication', () => {
+    const issues = authoringIssues({
+      canPublish: true,
+      departures: [{ id: 3 }],
+      locale: 'vi',
+      product: { id: 1, site: 10, slug: 'demo', title: 'Demo' },
+      wrapper: { id: 2, pathname: '/tour/demo', site: 10 },
+      wrapperHealth: 'valid',
+    })
+    expect(issues).toEqual([
+      {
+        code: 'missing_hero_media',
+        message: 'Tour chưa có ảnh hero public. Nhập ảnh tại trường Hero media hoặc Gallery trong TourProduct, không nhập ở Wrapper Page.',
+        severity: 'error',
+      },
+    ])
+  })
+
+  it('creates one permanent redirect for a changed published tour path', async () => {
+    const create = vi.fn(async () => ({ id: 9 }))
+    const payload = {
+      find: vi.fn(async () => ({ docs: [] })),
+      create,
+    }
+
+    await expect(ensurePublishedTourRedirect({ from: '/tour/old', payload, req: request, to: '/tour/new' })).resolves.toBe(true)
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({
+      collection: 'redirects',
+      data: { from: '/tour/old', to: { type: 'custom', url: '/tour/new' }, type: '301' },
+    }))
+  })
+
+  it('fails closed when the old path already redirects elsewhere', async () => {
+    const create = vi.fn()
+    const payload = {
+      find: vi.fn(async () => ({ docs: [{ id: 10, to: { url: '/tour/another' }, type: '301' }] })),
+      create,
+    }
+
+    await expect(ensurePublishedTourRedirect({ from: '/tour/old', payload, req: request, to: '/tour/new' })).rejects.toMatchObject({
+      code: 'redirect_conflict',
+      status: 409,
+    })
+    expect(create).not.toHaveBeenCalled()
   })
 
   it('scopes state to WingsGo and changes revision with locale or persisted versions', async () => {
     const payload = {
       findByID: vi.fn(async ({ collection }: { collection: string }) => {
-        if (collection === 'tour-products') return { id: 1, site: 10, slug: 'demo', title: 'Demo', updatedAt: 'p1', _status: 'draft', wrapperPage: 2 }
+        if (collection === 'tour-products') return { id: 1, heroMedia: 7, site: 10, slug: 'demo', title: 'Demo', updatedAt: 'p1', _status: 'draft', wrapperPage: 2 }
         if (collection === 'sites') return { id: 10, code: 'wings-go' }
         return { id: 2, site: 10, pathname: '/tour/demo', updatedAt: 'w1', _status: 'draft' }
       }),

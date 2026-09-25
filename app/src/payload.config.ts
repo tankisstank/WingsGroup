@@ -178,6 +178,11 @@ export default buildConfig({
     translations: {
       vi: {
         ...vi.translations,
+        fields: {
+          ...vi.translations.fields,
+          collapseAll: 'Thu gọn tất cả',
+          showAll: 'Mở rộng tất cả',
+        },
         general: {
           ...vi.translations.general,
           menu: 'điều hướng',
