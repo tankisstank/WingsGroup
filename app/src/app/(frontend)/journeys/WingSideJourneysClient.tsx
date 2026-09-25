@@ -642,32 +642,29 @@ const formatJourneyDuration = (
   duration: { days: number; nights: null | number },
   locale: WingSideJourneyLocale,
 ) => {
-  if (locale === 'vi') {
-    return duration.nights == null
-      ? `${duration.days} ngày`
-      : `${duration.days} ngày / ${duration.nights} đêm`
-  }
-
   const copyByLocale = {
-    en: { days: 'days', nights: 'nights' },
-    es: { days: 'días', nights: 'noches' },
-    it: { days: 'giorni', nights: 'notti' },
-    pt: { days: 'dias', nights: 'noites' },
-    vi: { days: 'ngày', nights: 'đêm' },
+    en: { day: 'day', days: 'days', night: 'night', nights: 'nights' },
+    es: { day: 'día', days: 'días', night: 'noche', nights: 'noches' },
+    it: { day: 'giorno', days: 'giorni', night: 'notte', nights: 'notti' },
+    pt: { day: 'dia', days: 'dias', night: 'noite', nights: 'noites' },
+    vi: { day: 'ngày', days: 'ngày', night: 'đêm', nights: 'đêm' },
   } as const
-  const units = copyByLocale[locale] || copyByLocale.en
+  const units = copyByLocale[locale]
+  const formatUnit = (count: number, singular: string, plural: string) =>
+    `${count} ${count === 1 ? singular : plural}`
+  const days = formatUnit(duration.days, units.day, units.days)
 
   return duration.nights == null
-    ? `${duration.days} ${units.days}`
-    : `${duration.days} ${units.days} / ${duration.nights} ${units.nights}`
+    ? days
+    : `${days} / ${formatUnit(duration.nights, units.night, units.nights)}`
 }
 
 const priceCopy = {
   en: { from: 'From', onRequest: 'Price on request' },
   es: { from: 'Desde', onRequest: 'Precio bajo solicitud' },
   it: { from: 'Da', onRequest: 'Prezzo su richiesta' },
-  pt: { from: 'Desde', onRequest: 'Preco sob consulta' },
-  vi: { from: 'Gia tu', onRequest: 'Gia theo yeu cau' },
+  pt: { from: 'Desde', onRequest: 'Preço sob consulta' },
+  vi: { from: 'Giá từ', onRequest: 'Giá theo yêu cầu' },
 } as const
 
 const localeNumberFormat = {
