@@ -268,6 +268,9 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
+  const permanentTourRedirect = await resolvePermanentTourRedirect(request, resolveEffectiveHost(request))
+  if (permanentTourRedirect) return permanentTourRedirect
+
   const preservedRewriteContext = await getPreservedRewriteContext(request)
 
   if (preservedRewriteContext) {
@@ -315,11 +318,6 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = stripLeadingSegments(request.nextUrl.pathname, 1)
     return NextResponse.redirect(url, 308)
-  }
-
-  if (!siteAlias && !locale) {
-    const permanentTourRedirect = await resolvePermanentTourRedirect(request, effectiveHost)
-    if (permanentTourRedirect) return permanentTourRedirect
   }
 
   const siteCode = siteAlias ? allSiteAliasToCodeMap[siteAlias] : null
