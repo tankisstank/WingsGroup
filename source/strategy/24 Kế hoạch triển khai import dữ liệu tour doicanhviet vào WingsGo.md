@@ -5,6 +5,15 @@
 Tài liệu này là nguồn triển khai chính cho việc đưa dữ liệu tour đã crawl từ
 `doicanhviet.com` vào site `WingsGo` trong hệ multisite WingsTravel.
 
+### Phạm vi US-044 đã xác nhận
+
+- Site đích duy nhất của US-044 là `WingsGo`, với site code `wings-go`.
+- Các tham chiếu lịch sử gọi US-044 là import cho `WingSide` hoặc dùng
+  `wing-side` không thay đổi target này và không được dùng để chạy dry-run,
+  import, rollback hoặc publish.
+- Mọi implementation và bằng chứng vận hành tiếp theo phải resolve đúng
+  `wings-go` trước khi đọc hoặc ghi Payload.
+
 Các ràng buộc bắt buộc:
 
 - không crawl lại website và không gọi mạng để bổ sung dữ liệu trong pipeline;
@@ -1508,3 +1517,36 @@ Thứ tự mặc định:
 10. Chỉ mở phase 7–10 bằng intake/story/decision riêng.
 
 Không bỏ qua phase review, dry-run hoặc pilot để chạy full batch trực tiếp.
+
+## 26. Hồ sơ hoàn tất US-044 — 09/09/2026
+
+US-044 được hoàn tất trên target duy nhất `WingsGo` (`wings-go`); không phải
+WingSide. Snapshot nguồn được phê duyệt tạo 51 tour và đã được import/publish
+sau quy trình draft-first. Kết quả production sau hậu kiểm là 51 TourProduct,
+51 Page wrapper public và 52 TourDeparture future/published thuộc batch.
+
+Các bằng chứng release được lưu trên VPS tại:
+
+```text
+/home/ubuntu/wings-travel/shared/artifacts/
+  us044-wingsgo-catalog-10c15b9-20260909T191152Z/
+  us044-wingsgo-catalog-proxy-fbb88df-20260909T193000Z/
+```
+
+- PostgreSQL migration `20260909_090000_wingsgo_tour_catalog` áp dụng đúng một
+  lần, sau full backup pre-migration có checksum.
+- `/tour` giữ sáu tour nổi bật được chọn từ Payload và hiển thị catalog động:
+  tải thêm sáu tour mỗi lần, chỉ tour WingsGo published có wrapper và departure
+  future/published; giới hạn inventory server là 200.
+- API production và browser QA xác nhận `/tour` và
+  `/api/wingsgo/tour-catalog?limit=6` trả HTTP 200, có 6 featured, 6 card ở
+  batch đầu, `hasMore: true`, `nextOffset: 6`, và thao tác tải thêm không trùng
+  card.
+- Kiểm tra browser cũng xác nhận card, filter/sort và canonical pathname tour
+  hoạt động. Image/release rollback cùng backup database được giữ lại cho vận
+  hành.
+
+Không tính các phase 7–10 (price rows đầy đủ, provenance schema mở rộng,
+variant consolidation, domestic/news) vào scope closure này; chúng cần intake
+và story độc lập. Full integration suite còn baseline failure ngoài US-044,
+được ghi tách riêng và không làm thay đổi bằng chứng US-044 ở trên.

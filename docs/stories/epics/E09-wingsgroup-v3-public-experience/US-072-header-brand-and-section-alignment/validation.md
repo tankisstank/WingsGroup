@@ -149,3 +149,29 @@ Implementation and production evidence (2026-09-12):
 - `/api/health/live` and `/api/health/ready` returned HTTP 200 after cutover.
   No production CMS write, database schema change, migration or Redis flush
   was performed. The prior runtime was not needed for rollback.
+
+## Production brand provenance hotfix evidence — 2026-09-17
+
+- The focused unit failures were caused by stale `sourceManifestSha256` values
+  in the deployed WingsGo/WingSide public manifests and a stale shell
+  source-contract expectation. The runtime assets themselves were intact.
+- The production hotfix was based on the active release
+  `wingsgroup-full-e95b99a-20260916`, with only the two public manifest
+  provenance values changed in the derived ARM64 image
+  `sha256:8d0b9e0ce2cc4249f215939ec4d123824baedaf6071a1155d75b108e56cffe46`.
+  The current target is
+  `/home/ubuntu/wings-travel/releases/wingsgroup-brand-provenance-hotfix-20260917T065200Z`;
+  rollback tag `wingstravel-app:rollback-wingsgroup-brand-provenance-hotfix-20260917T065200Z`
+  preserves the prior image `sha256:6aae8a1004e331e1a8aa3776fa7619ea934ff52e1ac73b419b98fa0845b49af8`.
+- Post-cutover `/api/health/live`, `/api/health/ready` and all six public
+  domains returned HTTP 200. Public WingsGo/WingSide manifest requests returned
+  HTTP 200 with the canonical provenance hashes; PostgreSQL and Redis container
+  IDs were unchanged.
+- Agent-browser production proof passed at 1440px/390px for WingsGroup and
+  390px for WingsGo/WingSide: one H1, no horizontal overflow, light theme,
+  correct tenant logos and no browser/console errors. Screenshots are in
+  `output/playwright/production-brand-provenance-*.png`.
+- The repository go-live pipeline could not start because its local Playwright
+  Chromium executable is not installed; this does not invalidate the completed
+  agent-browser proof. No CMS write, schema change, migration or Redis flush
+  occurred.

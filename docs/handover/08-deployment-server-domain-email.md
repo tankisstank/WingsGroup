@@ -44,6 +44,10 @@
 - Admin credential file: `/home/ubuntu/wings-travel/shared/admin.env`
 - Application binding: `127.0.0.1:3000`
 - Docker project: `wingstravel`
+- SSH account: `ubuntu` on port `22`; use the authorized private key with
+  `IdentitiesOnly=yes`, `BatchMode=yes`, and the repository/operator managed
+  dedicated known-hosts file. Do not rely on an implicit SSH agent or accept a
+  changed host key interactively.
 - Database: PostgreSQL 16
 - Cache: Redis 7
 - Panel: aaPanel at port `14199`
@@ -129,11 +133,17 @@
 
 ## Email Server Or Transactional Email
 
-- Provider: pending. Phase 1 remains console-only for email until the customer
-  chooses SMTP or a transactional provider.
-- Purpose: account/admin notifications and any future form notifications.
-- Sender domain: pending.
-- SMTP or API method: pending provider choice.
+- Provider: MayChuEmail SMTP, configured for WingsGroup lead notifications.
+- Purpose: outbound lead-notification delivery only. POP3/IMAP are mailbox
+  retrieval protocols and are outside this application's outbound path.
+- Sender domain: `wingsgroup.vn`.
+- SMTP method: use encrypted SMTPS on port 465, or port 587 with STARTTLS. The
+  provider's unencrypted port 25 must be used only for an explicitly isolated
+  compatibility test, never as the production transport.
+- Runtime configuration: keep SMTP credentials and recipients only in
+  `/home/ubuntu/wings-travel/shared/.env`; never commit them or print them in
+  deployment logs. Recreate the app service after changing these variables so
+  the container receives the updated environment.
 - DNS records required: SPF, DKIM, DMARC or provider-specific records when an
   email provider is selected.
 - Test status: console-only validated by local Payload warning; production email
@@ -160,3 +170,55 @@ execution. The minimum check list is:
 
 Do not treat a previous production state as current without re-checking the live
 server, domains, and running containers.
+
+## Reusable Production Release Procedure (verified 2026-09-06)
+
+This procedure is for application-only releases. It intentionally leaves the
+PostgreSQL and Redis containers running and does not run schema changes.
+
+1. Confirm the target host, `current` release target, compose project
+   `wingstravel`, app image ID, database/Redis container IDs, health endpoints,
+   and free disk space. Do not start a build when Docker cannot safely unpack a
+   second app image; image/cache pruning is destructive and requires an explicit
+   decision.
+2. Package a clean, committed source worktree, record its source SHA and archive
+   SHA-256, upload it to `shared/artifacts/`, and extract it under
+   `releases/<release-id>`. Verify the intended source file exists after
+   extraction before building.
+3. Tag the active app image as a rollback image before building. Build only the
+   `app` service from the new release using the shared production environment.
+4. After a successful build, atomically repoint `current` to the new release and
+   run `docker compose --env-file /home/ubuntu/wings-travel/shared/.env -p
+   wingstravel -f docker-compose.production.yml up -d --no-deps --no-build
+   --pull never --force-recreate app` from that release's `app/` directory.
+5. Verify `/api/health/live`, `/api/health/ready`, public proxy behavior, and
+   that the PostgreSQL and Redis container IDs did not change. For a lead-flow
+   change, execute one authorized synthetic browser submission through the
+   normal Turnstile path and inspect only sanitized application logs/status.
+6. If the app fails health checks, restore the prior `current` symlink, retag
+   the preserved rollback image as `wingstravel-app`, recreate only `app`, and
+   re-check health. Do not roll back database data as part of this procedure.
+
+### Payload job and migration safeguards (verified 2026-09-06)
+
+- The production Compose file must keep `build.target: runner`. The Dockerfile
+  also contains an offline `tools` stage; without the explicit target, Compose
+  can select it instead of the public Next.js runtime image.
+- Run Payload migrations from a temporary `tools` image before switching the
+  runtime image. Pass the same `DATABASE_URL` that Compose derives from the
+  PostgreSQL variables, plus `NODE_ENV=production` and `PAYLOAD_DB_PUSH=false`.
+  This avoids accidental local SQLite fallback in a one-off container.
+- The current Payload job schema requires `payload_jobs.meta`, the three
+  WingsGroup lead task enum values, and `payload_jobs_stats`. These are covered
+  by migrations `20260906_081500`, `20260906_083000`, and `20260906_084000`.
+- A root-owned deployment is not required to process jobs. The production
+  `ubuntu` crontab invokes the protected local job endpoint every minute through
+  `/home/ubuntu/wings-travel/shared/bin/run-payload-jobs.sh`; the script reads
+  `CRON_SECRET` only from the non-versioned shared environment file.
+- Do not invoke `docker compose ... up --force-recreate app` without
+  `--no-deps`: Compose may recreate PostgreSQL even when only the app should be
+  replaced. Use `--no-deps --no-build --force-recreate app` with the explicit
+  shared `--env-file`.
+- Before cache cleanup, keep at least the running app image and one tagged
+  rollback image. It is safe to remove exited migration containers, obsolete
+  tools images, and builder cache only after those protected images are listed.

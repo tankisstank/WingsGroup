@@ -34,6 +34,28 @@ The team must be able to:
 - maintain translated content per page or page section
 - avoid cross-locale leakage on the main public routes
 
+The admin locale control is compact on content collections. A missing
+translation is shown as `[Chưa dịch] — <title nguồn>` for operator clarity; this
+fallback is presentation-only and is never written into the missing locale.
+
+### Site Review and Site Context
+
+Site Review is read-only. It resolves the selected site, document and locale
+before opening a short-lived, server-authorized preview handoff. A site switcher
+may scope aggregate admin navigation, but it never replaces Payload access
+control. Production preview hosts must come from the approved origin allowlist;
+the mutable CMS domain value is not an arbitrary iframe URL.
+
+### Lead Triage
+
+Form submissions remain the public lead intake record and delivery state remains
+technical. Operators may have a separate, site-scoped triage layer containing a
+sales status, nullable assignee and bounded internal note. Site managers and
+approved higher roles may update it; editors are read-only until a product
+decision grants more capability. Customer submission payload and delivery fields
+are immutable through triage. No CRM, automatic routing or account cleanup is
+part of this workflow.
+
 ### Access Governance
 
 The platform must support:

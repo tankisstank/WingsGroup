@@ -72,6 +72,9 @@ These content areas are expected to remain scoped by `site`:
 - Header, footer, and other shared surfaces must read from site settings rather
   than hardcoded defaults.
 - Local development may use path prefixes for site simulation.
+- Preview links must use a server-validated site/document/locale/path contract.
+  Production origins come from the approved allowlist and signed private-preview
+  handoffs are short-lived; `site.domain` is metadata, not an open redirect.
 
 ## Editorial Rules
 
