@@ -372,6 +372,42 @@ describe('WingsGroup corporate route integration', () => {
     }
   })
 
+  it('allows an editor to autosave hero media when unchanged route governance keys arrive in a different order', async () => {
+    const originalPage = routeData({
+      pathname: '/chinh-sach-bao-mat',
+      wingsGroupRoute: {
+        managedBy: 'wingsgroup-v3',
+        archetype: 'policy',
+        publication: { en: 'hidden', vi: 'approved' },
+        contentApproval: { en: null, vi: null },
+        policy: {
+          approvalState: 'pending',
+          legalEntity: WINGSGROUP_LEGAL_IDENTITY.legalEntityName,
+        },
+      },
+    })
+    const saved = await validateWingsGroupV3Governance({
+      data: {
+        _status: 'draft',
+        hero: { type: 'image', media: 30 },
+        wingsGroupRoute: {
+          managedBy: 'wingsgroup-v3',
+          archetype: 'policy',
+          policy: {
+            legalEntity: WINGSGROUP_LEGAL_IDENTITY.legalEntityName,
+            approvalState: 'pending',
+          },
+          publication: { en: 'hidden', vi: 'approved' },
+          contentApproval: { en: null, vi: null },
+        },
+      },
+      originalDoc: originalPage,
+      req: { ...request('editor'), locale: 'vi' },
+    } as never)
+
+    expect(saved?.hero).toEqual({ type: 'image', media: 30 })
+  })
+
   it('rejects policy publication until complete trusted approval is present', async () => {
     await expect(
       validateWingsGroupV3Governance({
