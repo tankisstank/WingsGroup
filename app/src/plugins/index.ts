@@ -96,6 +96,10 @@ const restrictDataExchangeCollection = (collection: CollectionConfig): Collectio
 export const plugins: Plugin[] = [
   redirectsPlugin({
     collections: ['pages', 'posts'],
+    // Tour URL changes are recorded as permanent redirects by the authoring
+    // transaction. Keep legacy redirects on the existing temporary fallback
+    // while new tour URL changes use an explicit 301.
+    redirectTypes: ['301', '307'],
     overrides: {
       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
