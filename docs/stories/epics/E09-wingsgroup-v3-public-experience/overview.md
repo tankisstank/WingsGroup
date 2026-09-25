@@ -32,6 +32,9 @@ chưa được cấp.
 | US-064 | Consent lead-intake và consultation fallback | Accepted engineering; privacy contract đã được duyệt, runtime delivery/endpoint còn chờ |
 | US-065 | Corporate routes, legal/locale và publication governance | Accepted engineering; English đã được duyệt, legal/privacy vẫn fail-closed |
 | US-066 | PostgreSQL, cross-tenant và go-live readiness | Accepted engineering; rehearsal/môi trường còn mở |
+| US-071 | English route identity và locale parity remediation | In progress; engineering implementation and disposable validation are complete, stakeholder/release approval and any production write remain separate |
+| US-072 | Bộ logo năm thương hiệu, kích thước header WingsGroup và căn top section header | Implemented and deployed as `1e5d54e7`; responsive follow-up `32cd54e` is live on 2026-09-12 and clears the compact English conversion-row overflow |
+| US-076 | Quản trị Gallery WingsGroup bằng CMS | In progress; implementation and disposable schema validation pass; editor content, whole-page visual review and release gates remain open. Tracked by existing Plane item LMCONTENTU-25. |
 
 ## Sổ bằng chứng đã chấp nhận
 

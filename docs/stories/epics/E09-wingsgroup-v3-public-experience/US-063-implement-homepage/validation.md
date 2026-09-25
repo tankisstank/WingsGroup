@@ -2,16 +2,17 @@
 
 ## Proof Strategy
 
-Prove the approved composition, synchronized ecosystem behavior, safe proof and
-CTA fallbacks, responsive stability, and tenant isolation.
+Prove the approved composition, the Capability → Journey Inquiry homepage
+enhancement order, synchronized ecosystem behavior, safe proof and CTA
+fallbacks, responsive stability, and tenant isolation.
 
 ## Test Plan
 
 | Layer | Cases |
 | --- | --- |
-| Unit | Publication filtering, CTA resolution, active-profile state, and reduced-motion behavior. |
+| Unit | Publication filtering, CTA resolution, active-profile state, homepage enhancement order, and reduced-motion behavior. |
 | Integration | Payload blocks/media resolve in exact order and remain WingsGroup-scoped. |
-| E2E | Five ecosystem profiles, keyboard selection, pending proof, editorial links, CTA fallback, and no duplicate CTA. |
+| E2E | Five ecosystem profiles, keyboard selection, capability badges, five inquiry triggers, pending proof, editorial links, CTA fallback, and no duplicate CTA. |
 | Platform | Build, desktop/mobile screenshots, 360–1920px overflow matrix, cross-tenant smoke. |
 | Performance | Responsive image sizes, lazy loading below hero, and layout stability. |
 | Logs/Audit | Ecosystem/CTA events contain the expected non-PII context. |
@@ -55,3 +56,24 @@ Targeted navigation and shell unit checks passed (9 assertions). Production
 browser smoke confirmed those six header destinations on an article route and
 the three deep-dive links on the home route. This evidence does not alter the
 separate operational gates tracked by US-066.
+
+## Homepage enhancement follow-up — 2026-09-16
+
+The implementation now renders the governed Capability and Journey Inquiry
+enhancements after Ecosystem while preserving the canonical six-section order.
+The consultation FAB uses the approved `LIÊN HỆ TƯ VẤN 24/7` / `24/7
+CONSULTATION` labels, and Journey Inquiry stores only a whitelisted,
+session-scoped request key for the shared consultation dialog. No CMS schema,
+database migration, or production data write was introduced.
+
+Evidence:
+
+- Component: 27 files, 152 tests passed.
+- Integration: 33 files passed, 6 skipped; 175 tests passed, 10 skipped.
+- Targeted fidelity unit: 6 tests passed.
+- TypeScript: `pnpm exec tsc --noEmit` passed.
+- Targeted WingsGroup ESLint: passed with no errors.
+- Local browser visual review was blocked by the existing SQLite fixture: the
+  local page is rejected by the WingsGroup v3 public policy and returns 404;
+  the governed preview seed also lacks the required 12 media files. Component
+  tests remain the visual structure proof until the fixture is restored.

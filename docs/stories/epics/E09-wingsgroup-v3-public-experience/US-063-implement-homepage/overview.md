@@ -21,11 +21,13 @@ composition and interaction.
 
 ## Target Behavior
 
-The Vietnamese and English WingsGroup homepages render Hero → Ecosystem → Trust
-→ Proof Archive → Editorial → Contact using governed Payload content. English
-uses natural human marketing copy with a refined, courteous luxury-travel tone.
-Unverified proof and destinations fail closed while the page remains useful and
-credible.
+The Vietnamese and English WingsGroup homepages retain the canonical Hero →
+Ecosystem → Trust → Proof Archive → Editorial → Contact order using governed
+Payload content. The homepage may include governed product enhancements between
+Ecosystem and Trust; the current enhancement order is Capability followed by
+Journey Inquiry. English uses natural human marketing copy with a refined,
+courteous luxury-travel tone. Unverified proof and destinations fail closed
+while the page remains useful and credible.
 
 ## User Story
 
@@ -35,6 +37,7 @@ right service without encountering unsupported claims or dead links.
 ## Acceptance Criteria
 
 - Render the exact approved section order without a duplicate service router before Ecosystem.
+- Render the governed homepage enhancements after Ecosystem in the order Capability → Journey Inquiry without changing the canonical six-section order.
 - Synchronize each ecosystem tab, stage image, profile, service scope, proof state, and single contact CTA.
 - Keep the desktop ecosystem frame at 800px with no internal scrollbar and natural height at or below 850px.
 - Keep 48–72px transition spacing before Trust on desktop and standard section spacing on compact viewports.

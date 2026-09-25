@@ -303,6 +303,7 @@ try {
           req,
           siteID: site.id,
         })
+        addFixtureMediaAliases(verifiedInventory, contract)
         state.content = {
           ...content.verifyWingsGroupV3ContentInventory({
             contract,
