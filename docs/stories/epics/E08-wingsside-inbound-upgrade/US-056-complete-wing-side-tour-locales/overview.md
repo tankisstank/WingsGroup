@@ -2,7 +2,9 @@
 
 ## Status
 
-planned — production incident audited on 2026-07-29
+in_progress — production restoration and strict verification are documented on
+2026-07-29; the 2026-09-25 live UI spot-check found remaining locale display
+defects, with a local fix awaiting release and full acceptance QA still open.
 
 ## Lane
 

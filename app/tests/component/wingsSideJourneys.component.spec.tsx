@@ -103,6 +103,48 @@ describe('WingSideJourneysClient', () => {
     expect(card.textContent).not.toMatch(/book now|available seats|instant booking/i)
   })
 
+  it.each([
+    ['en', '1 day / 0 nights', '2 days / 1 night', 'Price on request'],
+    ['vi', '1 ngày / 0 đêm', '2 ngày / 1 đêm', 'Giá theo yêu cầu'],
+    ['es', '1 día / 0 noches', '2 días / 1 noche', 'Precio bajo solicitud'],
+    ['it', '1 giorno / 0 notti', '2 giorni / 1 notte', 'Prezzo su richiesta'],
+    ['pt', '1 dia / 0 noites', '2 dias / 1 noite', 'Preço sob consulta'],
+  ] as const)(
+    'formats singular durations and accented on-request copy in %s',
+    (locale, oneDay, twoDaysOneNight, onRequest) => {
+      const baseTour = context().result.items[0]!
+      const items = [
+        { ...baseTour, duration: { days: 1, nights: 0 }, id: 11, slug: 'one-day-hanoi' },
+        {
+          ...baseTour,
+          commerce: {
+            availability: 'Check with the team',
+            canBook: false,
+            departureDate: '2026-12-23',
+            price: { kind: 'on-request' as const },
+          },
+          duration: { days: 2, nights: 1 },
+          href: '/tour/two-day-hanoi',
+          id: 12,
+          slug: 'two-day-hanoi',
+          title: 'Two-day Hanoi',
+          tourType: 'group' as const,
+        },
+      ]
+
+      render(
+        <WingSideJourneysClient
+          context={context({ result: { ...context().result, items } })}
+          locale={locale}
+        />,
+      )
+
+      expect(screen.getByText(oneDay)).toBeTruthy()
+      expect(screen.getByText(twoDaysOneNight)).toBeTruthy()
+      expect(screen.getByText(onRequest)).toBeTruthy()
+    },
+  )
+
   it('renders localized honest on-request price state without availability claims', () => {
     render(
       <WingSideJourneysClient

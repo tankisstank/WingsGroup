@@ -126,8 +126,12 @@ E:\repo\WingsTravel\docs\product\tour-product-platform.md
 E:\repo\WingsTravel\docs\product\tour-detail-builder-foundation.md
 E:\repo\WingsTravel\docs\stories\epics\E07-tour-product-platform\US-024-tour-detail-builder.md
 E:\repo\WingsTravel\docs\stories\epics\E07-tour-product-platform\US-037-dense-retail-tour-detail-ux.md
-E:\repo\WingsTravel\docs\stories\epics\E07-tour-product-platform\US-044-wingsside-doicanhviet-import\
+E:\repo\WingsTravel\source\strategy\24 Kế hoạch triển khai import dữ liệu tour doicanhviet vào WingsGo.md
 ```
+
+`US-044` là pipeline import doicanhviet cho **WingsGo** (`wings-go`). Tham chiếu
+path `US-044-wingsside-doicanhviet-import` trước đây là lịch sử và không phải
+contract hoặc target vận hành hiện hành.
 
 **Audit snapshot cũ (WingsGo-centric — chỉ tham chiếu):**
 
