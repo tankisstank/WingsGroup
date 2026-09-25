@@ -288,9 +288,12 @@ export const TourProducts: CollectionConfig = {
             },
             {
               name: 'heroMedia',
-              label: 'Hero media',
+              label: 'Ảnh hero public của tour',
               type: 'upload',
               relationTo: 'media',
+              admin: {
+                description: 'Ảnh lớn ở đầu trang /tour/<slug>. Nhập tại TourProduct này; ảnh Hero của Wrapper Page không được dùng thay thế. Hãy lưu nháp rồi mở Preview bản nháp trước khi publish.',
+              },
             },
             {
               name: 'gallery',

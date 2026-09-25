@@ -79,6 +79,10 @@ const isLocale = (value: unknown): value is AuthoringLocale => value === 'vi' ||
 const stringValue = (value: unknown): string | null =>
   typeof value === 'string' && value.trim() ? value.trim() : null
 
+export const hasHeroMedia = (product: AnyDoc): boolean =>
+  relationID(product.heroMedia) !== null ||
+  (Array.isArray(product.gallery) && product.gallery.some((item) => relationID(item) !== null))
+
 const localizedString = (value: unknown, locale: AuthoringLocale): string | null => {
   if (typeof value === 'string') return stringValue(value)
   if (!value || typeof value !== 'object') return null
@@ -270,6 +274,7 @@ export const authoringIssues = ({
   const issues: AuthoringIssue[] = []
   if (!expectedPath(product)) issues.push({ code: 'invalid_slug', severity: 'error', message: 'Tour chưa có slug hợp lệ để tạo đường dẫn.' })
   if (!localizedString(product.title, locale)) issues.push({ code: 'missing_title', severity: 'error', message: `Tour chưa có tiêu đề ${locale.toUpperCase()}.` })
+  if (!hasHeroMedia(product)) issues.push({ code: 'missing_hero_media', severity: 'error', message: 'Tour chưa có ảnh hero public. Nhập ảnh tại trường Hero media hoặc Gallery trong TourProduct, không nhập ở Wrapper Page.' })
   if (!wrapper) issues.push({ code: 'missing_wrapper', severity: 'warning', message: 'Tour chưa có trang wrapper; hãy provision trước khi publish.' })
   else if (wrapperHealth === 'shared') issues.push({ code: 'shared_wrapper', severity: 'error', message: 'Wrapper đang được nhiều tour dùng chung; hãy gán một wrapper riêng trước khi publish.' })
   else if (wrapperHealth === 'orphan') issues.push({ code: 'orphan_wrapper', severity: 'error', message: 'Wrapper chưa được liên kết với TourProduct; hãy gán lại wrapper trước khi publish.' })
@@ -371,7 +376,7 @@ export const buildAuthoringState = async ({ id, locale, payload, req }: { id: Re
   const issues = authoringIssues({ canPublish, departures, locale, product, wrapper, wrapperHealth })
   const hasPublishPrerequisites = Boolean(wrapperHealth === 'valid' && departures.length)
   return {
-    product: { id: product.id, updatedAt: product.updatedAt, status: product._status || 'draft', site: site.id, slug: stringValue(product.slug), expectedPath: expectedPath(product) },
+    product: { id: product.id, updatedAt: product.updatedAt, status: product._status || 'draft', site: site.id, slug: stringValue(product.slug), expectedPath: expectedPath(product), hasHeroMedia: hasHeroMedia(product) },
     wrapper: wrapperState,
     wrapperCandidates,
     departures: departures.map((departure) => ({ id: departure.id, updatedAt: departure.updatedAt, status: departure._status || 'draft' })),

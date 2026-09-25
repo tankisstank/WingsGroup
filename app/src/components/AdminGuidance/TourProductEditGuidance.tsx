@@ -12,7 +12,11 @@ export default function TourProductEditGuidance() {
         <span className="wings-admin-guidance__badge">Bước 1 đã xong</span>
         <strong>Site đã được chọn</strong>
         <p>Tiếp theo, lưu nội dung tour rồi mở tab “Lịch bay & xuất bản” để tạo wrapper, thêm lịch và kiểm tra điều kiện publish.</p>
-        <div><a href="#tour-authoring">Mở luồng tạo và xuất bản</a></div>
+        <div>
+          <a href="#field-heroMedia">Nhập ảnh hero public</a>
+          <a href="#tour-authoring">Mở luồng tạo và xuất bản</a>
+        </div>
+        <p className="wings-admin-guidance__note"><strong>Ảnh trên trang nào được dùng?</strong> Trang /tour/&lt;slug&gt; đọc ảnh từ trường “Ảnh hero public của tour” hoặc Gallery của TourProduct. Ảnh nhập ở Wrapper Page không thay thế ảnh này.</p>
       </section>
     )
   }

@@ -68,8 +68,26 @@ describe('WingsGo tour authoring', () => {
   })
 
   it('keeps publish readiness closed until wrapper and departure prerequisites exist', () => {
-    const issues = authoringIssues({ canPublish: true, departures: [], locale: 'vi', product: { id: 1, site: 10, slug: 'demo', title: 'Demo' }, wrapper: null })
+    const issues = authoringIssues({ canPublish: true, departures: [], locale: 'vi', product: { id: 1, heroMedia: 7, site: 10, slug: 'demo', title: 'Demo' }, wrapper: null })
     expect(issues.map((issue) => issue.code)).toEqual(['missing_wrapper', 'no_departures'])
+  })
+
+  it('requires a product hero image before public publication', () => {
+    const issues = authoringIssues({
+      canPublish: true,
+      departures: [{ id: 3 }],
+      locale: 'vi',
+      product: { id: 1, site: 10, slug: 'demo', title: 'Demo' },
+      wrapper: { id: 2, pathname: '/tour/demo', site: 10 },
+      wrapperHealth: 'valid',
+    })
+    expect(issues).toEqual([
+      {
+        code: 'missing_hero_media',
+        message: 'Tour chưa có ảnh hero public. Nhập ảnh tại trường Hero media hoặc Gallery trong TourProduct, không nhập ở Wrapper Page.',
+        severity: 'error',
+      },
+    ])
   })
 
   it('creates one permanent redirect for a changed published tour path', async () => {
@@ -103,7 +121,7 @@ describe('WingsGo tour authoring', () => {
   it('scopes state to WingsGo and changes revision with locale or persisted versions', async () => {
     const payload = {
       findByID: vi.fn(async ({ collection }: { collection: string }) => {
-        if (collection === 'tour-products') return { id: 1, site: 10, slug: 'demo', title: 'Demo', updatedAt: 'p1', _status: 'draft', wrapperPage: 2 }
+        if (collection === 'tour-products') return { id: 1, heroMedia: 7, site: 10, slug: 'demo', title: 'Demo', updatedAt: 'p1', _status: 'draft', wrapperPage: 2 }
         if (collection === 'sites') return { id: 10, code: 'wings-go' }
         return { id: 2, site: 10, pathname: '/tour/demo', updatedAt: 'w1', _status: 'draft' }
       }),

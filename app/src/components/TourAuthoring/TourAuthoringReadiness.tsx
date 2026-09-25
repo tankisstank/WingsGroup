@@ -19,6 +19,9 @@ const copyByLocale = {
     expectedPath: 'Expected URL',
     fixSlug: 'Edit slug',
     fixTitle: 'Edit title',
+    heroMedia: 'Public hero image',
+    heroMissing: 'Not selected',
+    heroReady: 'Selected',
     health: 'Health',
     healthInvalidPath: 'Path does not match this tour slug.',
     healthInvalidSite: 'Wrapper belongs to another site.',
@@ -33,6 +36,8 @@ const copyByLocale = {
     issueInvalidSlugTitle: 'Slug is missing or invalid',
     issueMissingTitleDetail: 'The tour needs a title in the selected content language before a wrapper can be created.',
     issueMissingTitleTitle: 'Tour title is missing',
+    issueMissingHeroMediaDetail: 'The /tour/<slug> page reads Hero media or Gallery from this TourProduct. An image entered on the wrapper Page does not replace it.',
+    issueMissingHeroMediaTitle: 'Public hero image is missing',
     issueMissingWrapperDetail: 'A wrapper Page renders the tour on the public website. Create it before publication.',
     issueMissingWrapperTitle: 'No public wrapper yet',
     issueNoDeparturesDetail: 'Add at least one departure with a date and price, then select it below when publishing.',
@@ -68,6 +73,7 @@ const copyByLocale = {
     severityInfo: 'Info',
     severityWarning: 'Warning',
     stepDeparture: 'Add and select a departure',
+    stepHero: 'Add the public hero image',
     stepPublish: 'Preview, then publish',
     stepSave: 'Save tour changes',
     stepTitle: 'Follow these steps',
@@ -88,6 +94,9 @@ const copyByLocale = {
     expectedPath: 'Đường dẫn dự kiến',
     fixSlug: 'Sửa slug',
     fixTitle: 'Sửa tiêu đề',
+    heroMedia: 'Ảnh hero public',
+    heroMissing: 'Chưa chọn',
+    heroReady: 'Đã chọn',
     health: 'Tình trạng',
     healthInvalidPath: 'Đường dẫn wrapper không khớp slug tour.',
     healthInvalidSite: 'Wrapper thuộc site khác.',
@@ -102,6 +111,8 @@ const copyByLocale = {
     issueInvalidSlugTitle: 'Slug đang thiếu hoặc không hợp lệ',
     issueMissingTitleDetail: 'Tour cần có tiêu đề ở ngôn ngữ đang chọn trước khi tạo wrapper.',
     issueMissingTitleTitle: 'Tour chưa có tiêu đề',
+    issueMissingHeroMediaDetail: 'Trang /tour/<slug> chỉ đọc ảnh Hero media hoặc Gallery của TourProduct. Ảnh nhập ở Wrapper Page không thay thế được ảnh này.',
+    issueMissingHeroMediaTitle: 'Tour chưa có ảnh hero public',
     issueMissingWrapperDetail: 'Wrapper là Page render tour trên website public. Hãy tạo wrapper trước khi xuất bản.',
     issueMissingWrapperTitle: 'Chưa có wrapper public',
     issueNoDeparturesDetail: 'Thêm ít nhất một lịch có ngày và giá, sau đó chọn lịch ở bên dưới khi xuất bản.',
@@ -137,6 +148,7 @@ const copyByLocale = {
     severityInfo: 'Thông tin',
     severityWarning: 'Cảnh báo',
     stepDeparture: 'Thêm và chọn lịch khởi hành',
+    stepHero: 'Nhập ảnh hero public',
     stepPublish: 'Preview rồi xuất bản',
     stepSave: 'Lưu thay đổi tour',
     stepTitle: 'Các bước cần làm',
@@ -147,7 +159,7 @@ const copyByLocale = {
 } as const
 
 type LocaleCopy = { [Key in keyof (typeof copyByLocale)['vi']]: string }
-type IssueAction = 'candidates' | 'departures' | 'provision' | 'slug' | 'title'
+type IssueAction = 'candidates' | 'departures' | 'hero' | 'provision' | 'slug' | 'title'
 
 const getErrorBody = async (response: Response) => response.json().catch(() => ({})) as Promise<{ code?: string; message?: string }>
 
@@ -163,6 +175,7 @@ const issueGuidance = (issue: TourAuthoringIssue, copy: LocaleCopy): { action?: 
   switch (issue.code) {
     case 'invalid_slug': return { action: 'slug', detail: copy.issueInvalidSlugDetail, title: copy.issueInvalidSlugTitle }
     case 'missing_title': return { action: 'title', detail: copy.issueMissingTitleDetail, title: copy.issueMissingTitleTitle }
+    case 'missing_hero_media': return { action: 'hero', detail: copy.issueMissingHeroMediaDetail, title: copy.issueMissingHeroMediaTitle }
     case 'missing_wrapper': return { action: 'provision', detail: copy.issueMissingWrapperDetail, title: copy.issueMissingWrapperTitle }
     case 'invalid_wrapper': return { action: 'provision', detail: copy.issueInvalidWrapperDetail, title: copy.issueInvalidWrapperTitle }
     case 'invalid_wrapper_site': return { action: 'candidates', detail: copy.issueInvalidSiteDetail, title: copy.issueInvalidSiteTitle }
@@ -310,6 +323,7 @@ export default function TourAuthoringReadiness() {
         : null
   const steps = [
     { label: copy.stepSave, state: formModified ? 'current' : 'done' },
+    { label: copy.stepHero, state: readiness.product.hasHeroMedia ? 'done' : 'current' },
     { label: copy.stepWrapper, state: wrapperIsValid ? 'done' : 'current' },
     { label: copy.stepDeparture, state: readiness.departures.length > 0 && selectedDepartureCount > 0 ? 'done' : 'current' },
     { label: copy.stepPublish, state: readiness.canPublish && selectedDepartureCount > 0 ? 'done' : 'current' },
@@ -319,6 +333,7 @@ export default function TourAuthoringReadiness() {
     if (action === 'provision') return void runAction('provision')
     if (action === 'candidates') return scrollToElement('tour-authoring-candidates')
     if (action === 'departures') return scrollToElement('tour-departures')
+    if (action === 'hero') return scrollToElement('field-heroMedia')
     if (action === 'slug') return scrollToElement('field-slug')
     if (action === 'title') return scrollToElement('field-title')
   }
@@ -340,6 +355,7 @@ export default function TourAuthoringReadiness() {
       <div><dt>{copy.wrapper}</dt><dd>#{readiness.wrapper?.id || '—'}</dd></div>
       <div><dt>{copy.wrapperPath}</dt><dd>{readiness.wrapper?.path || copy.noWrapper}</dd></div>
       <div><dt>{copy.health}</dt><dd><span className={`tour-authoring-readiness__health tour-authoring-readiness__health--${readiness.wrapper?.health || 'missing'}`}>{healthLabel(readiness.wrapper, copy)}</span></dd></div>
+      <div><dt>{copy.heroMedia}</dt><dd><span className={`tour-authoring-readiness__health tour-authoring-readiness__health--${readiness.product.hasHeroMedia ? 'valid' : 'missing'}`}>{readiness.product.hasHeroMedia ? copy.heroReady : copy.heroMissing}</span></dd></div>
     </dl>
 
     {readiness.wrapper && <div className="tour-authoring-readiness__links">
