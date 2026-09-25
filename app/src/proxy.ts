@@ -297,7 +297,6 @@ export async function proxy(request: NextRequest) {
   const requestID = crypto.randomUUID()
   const siteAlias = getSiteAliasFromPathname(request.nextUrl.pathname)
   const locale = getLocaleFromPathname(request.nextUrl.pathname)
-
   if (siteAlias === 'wingsside') {
     const url = request.nextUrl.clone()
     const segments = url.pathname.split('/').filter(Boolean)

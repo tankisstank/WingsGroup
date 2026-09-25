@@ -1,6 +1,6 @@
 'use client'
 
-import { useDocumentInfo, useFormModified } from '@payloadcms/ui'
+import { useDocumentInfo, useField, useFormModified } from '@payloadcms/ui'
 import { useLocale } from '@payloadcms/ui'
 
 import TourDepartureManager from './TourDepartureManager'
@@ -14,16 +14,31 @@ export default function TourProductAuthoring() {
   const { data } = useDocumentInfo()
   const { code: locale } = useLocale()
   const formModified = useFormModified()
+  const { value: draftSlug } = useField<string>({ path: 'slug' })
   const site = data?.site as { code?: string; name?: string; id?: number | string } | number | string | undefined
   const siteCode = tourAuthoringSiteCode(site)
   const siteID = tourAuthoringRelationID(site)
+  const savedSlug = typeof data?.slug === 'string' ? data.slug : null
+  const currentWrapperPath = data?.wrapperPage && typeof data.wrapperPage === 'object' && 'pathname' in data.wrapperPage
+    ? (data.wrapperPage as { pathname?: unknown }).pathname
+    : null
+  const slugChanged = formModified && typeof draftSlug === 'string' && draftSlug.trim() && savedSlug && draftSlug !== savedSlug
 
-  return <section aria-label="Tour authoring" style={{ boxSizing: 'border-box', display: 'grid', gap: '0.75rem', marginBottom: '1rem', maxWidth: '100%', minWidth: 0 }}>
-    <div style={{ padding: '0.9rem 1rem', border: '1px solid var(--theme-elevation-150)', borderRadius: 6 }}>
-      <strong>Luồng tạo tour</strong>
-      <p style={{ margin: '0.35rem 0' }}>Site: <b>{typeof site === 'object' ? site.name || site.code || `#${siteID || 'chưa chọn'}` : siteID ? `#${siteID}` : 'chưa chọn'}</b> · Ngôn ngữ: <b>{locale || 'vi'}</b></p>
-      <p style={{ margin: 0, color: 'var(--theme-elevation-600)' }}>{siteCode === 'wings-go' ? 'WingsGo: phân loại WingSide được ẩn; dữ liệu tourType cũ vẫn được giữ.' : siteCode === 'wing-side' ? 'WingSide: hiển thị phân loại tour WingSide.' : 'Các trường tour dùng nhãn nghiệp vụ trung tính cho site chưa xác định.'}</p>
-      {formModified && <p role="status" style={{ margin: '0.5rem 0 0' }}>Form TourProduct đang có thay đổi chưa lưu. Lưu tour trước khi dùng Preview hoặc readiness server.</p>}
+  return <section aria-label="Tour authoring" className="tour-authoring-workspace" id="tour-authoring">
+    <div className="tour-authoring-context">
+      <div>
+        <span className="tour-authoring-context__eyebrow">QUẢN TRỊ TOUR</span>
+        <strong>Luồng tạo, kiểm tra và xuất bản</strong>
+        <p>Thực hiện lần lượt các bước bên dưới. Trạng thái và lỗi kỹ thuật sẽ hiển thị ngay trong khu vực Lịch bay & xuất bản.</p>
+      </div>
+      <div className="tour-authoring-context__meta">
+        <span>Site: <b>{typeof site === 'object' ? site.name || site.code || `#${siteID || 'chưa chọn'}` : siteID ? `#${siteID}` : 'chưa chọn'}</b></span>
+        <span>Ngôn ngữ: <b>{locale || 'vi'}</b></span>
+      </div>
+      <p className="tour-authoring-context__site-note">{siteCode === 'wings-go' ? 'WingsGo: trường phân loại WingSide được ẩn; dữ liệu cũ vẫn được giữ.' : siteCode === 'wing-side' ? 'WingSide: trường phân loại tour được hiển thị.' : 'Chọn site trước khi nhập nội dung để xác định website và quyền xuất bản.'}</p>
+      {!siteID && <p className="tour-authoring-context__warning" role="alert">Chưa chọn site. Hãy chọn site tại trường Site trước khi lưu tour.</p>}
+      {formModified && <p className="tour-authoring-context__warning" role="status">Có thay đổi chưa lưu. Lưu TourProduct trước khi dùng Preview, tạo wrapper hoặc kiểm tra readiness.</p>}
+      {slugChanged && <p className="tour-authoring-context__warning" role="alert">Slug đang đổi từ <b>/tour/{savedSlug}</b> thành <b>/tour/{draftSlug}</b>. Wrapper hiện tại {typeof currentWrapperPath === 'string' ? <b>{currentWrapperPath}</b> : 'chưa có'} không tự đổi pathname. Lưu tour, sau đó tạo/gán wrapper đúng đường dẫn.</p>}
     </div>
     <TourDepartureManager />
     <TourAuthoringReadiness />

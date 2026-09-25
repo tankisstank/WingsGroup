@@ -10,11 +10,14 @@ vi.mock('@payloadcms/ui', () => ({
   useAuth: () => ({ user: { role: 'super-admin', sites: [1, 2] } }),
   useDocumentInfo: () => ({ data: { site: 2 }, id: 41 }),
   useField: () => ({ errorMessage: null, setValue: uiMocks.setValue, showError: false, value: null }),
+  useFormModified: () => false,
   useLocale: () => ({ code: 'vi' }),
 }))
 
 import TourDepartureManager, { TourDepartureForm } from '@/components/TourAuthoring/TourDepartureManager'
+import TourAuthoringReadiness from '@/components/TourAuthoring/TourAuthoringReadiness'
 import TourProductSiteField from '@/components/TourAuthoring/TourProductSiteField'
+import TourSlugField from '@/components/TourAuthoring/TourSlugField'
 
 afterEach(() => {
   cleanup()
@@ -60,6 +63,14 @@ describe('Tour departure authoring actions', () => {
     fireEvent.change(await screen.findByRole('combobox', { name: 'Site' }), { target: { value: '2' } })
 
     expect(uiMocks.setValue).toHaveBeenCalledWith(2)
+  })
+
+  it('normalizes the tour slug while the editor types', () => {
+    render(<TourSlugField field={{ label: 'Đường dẫn tour' }} path="slug" />)
+
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Seoul-Nami-2026' } })
+
+    expect(uiMocks.setValue).toHaveBeenCalledWith('seoul-nami-2026')
   })
 
   it('exposes both create actions, preserves failed input, and translates availability', async () => {
@@ -145,5 +156,29 @@ describe('Tour departure authoring actions', () => {
     })
     expect(listReads).toBe(2)
     expect(screen.queryByRole('button', { name: 'Lưu & hoàn tất' })).toBeNull()
+  })
+
+  it('shows wrapper drift and relinks only a matching candidate', async () => {
+    const response = (body: unknown, status = 200) => ({ ok: status < 400, status, json: async () => body })
+    const state = {
+      canPublish: false,
+      departures: [],
+      issues: [{ code: 'invalid_wrapper', message: 'Wrapper không đúng đường dẫn dự kiến /tour/<slug>.', severity: 'error' }],
+      product: { expectedPath: '/tour/demo', id: 41, site: 2, slug: 'demo', status: 'draft', updatedAt: 'now' },
+      revision: 'a'.repeat(64),
+      wrapper: { health: 'invalid_path', id: 314, path: '/tour/old', site: 2, status: 'draft' },
+      wrapperCandidates: [{ health: 'valid', id: 315, path: '/tour/demo', site: 2, status: 'draft' }],
+    }
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(response(state))
+      .mockResolvedValueOnce(response({ ...state, canPublish: true, issues: [], wrapper: state.wrapperCandidates[0], wrapperCandidates: [] }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(<TourAuthoringReadiness />)
+    await waitFor(() => expect(screen.getByText('/tour/old')).toBeTruthy())
+    expect(screen.getByText('/tour/demo')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Gán wrapper này' }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    expect(JSON.parse(String(fetchMock.mock.calls[1][1]?.body))).toMatchObject({ action: 'relink', wrapperID: 315, locale: 'vi' })
   })
 })

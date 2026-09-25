@@ -1539,6 +1539,14 @@ body.wings-admin-shell .login .wings-admin-logo {
     line-height: 1.42;
   }
 
+  ol {
+    color: var(--wings-admin-muted);
+    font-size: 0.8rem;
+    line-height: 1.45;
+    margin: base(0.45) 0 0;
+    padding-left: 1.15rem;
+  }
+
   div {
     display: flex;
     flex-wrap: wrap;
@@ -1625,6 +1633,454 @@ body.wings-admin-shell .login .wings-admin-logo {
   button {
     min-height: 44px;
     padding: 0.55rem 0.8rem;
+  }
+}
+
+.tour-authoring-workspace {
+  box-sizing: border-box;
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.tour-authoring-context {
+  background: var(--wings-admin-panel);
+  border: 1px solid var(--wings-admin-border);
+  border-radius: var(--wings-admin-radius-lg);
+  box-sizing: border-box;
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+
+  &__eyebrow {
+    color: var(--wings-admin-accent);
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.18rem;
+  }
+
+  strong {
+    color: var(--wings-admin-text);
+    display: block;
+    font-size: 1rem;
+  }
+
+  p {
+    color: var(--wings-admin-muted);
+    font-size: 0.84rem;
+    line-height: 1.45;
+    margin: 0.3rem 0 0;
+  }
+
+  &__meta {
+    align-items: center;
+    color: var(--wings-admin-text);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    gap: 0.4rem 1rem;
+  }
+
+  &__site-note {
+    border-top: 1px solid var(--wings-admin-border);
+    padding-top: 0.45rem;
+  }
+
+  &__warning {
+    background: color-mix(in srgb, var(--theme-warning-500) 9%, var(--wings-admin-panel));
+    border-left: 3px solid var(--theme-warning-500);
+    color: var(--wings-admin-text) !important;
+    margin-top: 0.25rem !important;
+    padding: 0.55rem 0.7rem;
+  }
+}
+
+.tour-authoring-readiness {
+  background: var(--wings-admin-panel);
+  border: 1px solid var(--wings-admin-border);
+  border-left: 4px solid var(--wings-admin-accent);
+  border-radius: var(--wings-admin-radius-lg);
+  box-sizing: border-box;
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+  padding: 1rem;
+
+  &--blocked {
+    border-left-color: var(--theme-warning-500);
+  }
+
+  &--waiting {
+    border-left-color: var(--wings-admin-focus-ring);
+  }
+
+  &__status {
+    align-items: flex-start;
+    display: flex;
+    gap: 0.65rem;
+
+    strong {
+      color: var(--wings-admin-text);
+      display: block;
+      font-size: 0.98rem;
+    }
+
+    p,
+    small {
+      color: var(--wings-admin-muted);
+      display: block;
+      line-height: 1.45;
+      margin: 0.2rem 0 0;
+    }
+  }
+
+  &__status-icon {
+    align-items: center;
+    background: color-mix(in srgb, var(--wings-admin-accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--wings-admin-accent) 38%, transparent);
+    border-radius: 50%;
+    color: var(--wings-admin-accent);
+    display: inline-flex;
+    flex: 0 0 28px;
+    font-weight: 800;
+    height: 28px;
+    justify-content: center;
+    width: 28px;
+  }
+
+  &--blocked .tour-authoring-readiness__status-icon {
+    background: color-mix(in srgb, var(--theme-warning-500) 14%, transparent);
+    border-color: color-mix(in srgb, var(--theme-warning-500) 42%, transparent);
+    color: var(--theme-warning-500);
+  }
+
+  &--waiting .tour-authoring-readiness__status-icon {
+    background: color-mix(in srgb, var(--wings-admin-focus-ring) 14%, transparent);
+    border-color: color-mix(in srgb, var(--wings-admin-focus-ring) 42%, transparent);
+    color: var(--wings-admin-focus-ring);
+  }
+
+  &__steps {
+    border-top: 1px solid var(--wings-admin-border);
+    padding-top: 0.7rem;
+
+    > strong {
+      color: var(--wings-admin-muted);
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    ol {
+      display: grid;
+      gap: 0.4rem;
+      list-style: none;
+      margin: 0.55rem 0 0;
+      padding: 0;
+    }
+  }
+
+  &__step {
+    align-items: center;
+    color: var(--wings-admin-muted);
+    display: flex;
+    font-size: 0.82rem;
+    gap: 0.5rem;
+
+    > span {
+      align-items: center;
+      border: 1px solid var(--wings-admin-border);
+      border-radius: 50%;
+      display: inline-flex;
+      flex: 0 0 22px;
+      height: 22px;
+      justify-content: center;
+      width: 22px;
+    }
+
+    &--done {
+      color: var(--wings-admin-text);
+
+      > span {
+        background: color-mix(in srgb, var(--wings-admin-accent) 14%, transparent);
+        border-color: var(--wings-admin-accent);
+        color: var(--wings-admin-accent);
+      }
+    }
+
+    &--current {
+      color: var(--wings-admin-text);
+      font-weight: 700;
+
+      > span {
+        border-color: var(--theme-warning-500);
+        color: var(--theme-warning-500);
+      }
+    }
+  }
+
+  &__facts {
+    border-top: 1px solid var(--wings-admin-border);
+    display: grid;
+    gap: 0.45rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin: 0;
+    padding-top: 0.7rem;
+
+    div {
+      min-width: 0;
+    }
+
+    dt {
+      color: var(--wings-admin-muted);
+      font-size: 0.7rem;
+      margin-bottom: 0.15rem;
+    }
+
+    dd {
+      color: var(--wings-admin-text);
+      font-size: 0.82rem;
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__health {
+    border: 1px solid var(--wings-admin-border);
+    border-radius: var(--wings-admin-radius-pill);
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 7px;
+
+    &--valid {
+      border-color: var(--wings-admin-accent);
+      color: var(--wings-admin-accent);
+    }
+
+    &--missing,
+    &--invalid_path,
+    &--invalid_site,
+    &--orphan,
+    &--shared {
+      border-color: var(--theme-warning-500);
+      color: var(--theme-warning-500);
+    }
+  }
+
+  &__links,
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  &__links a,
+  &__actions button,
+  &__issue button,
+  &__candidate button {
+    border: 1px solid var(--wings-admin-border);
+    border-radius: var(--wings-admin-radius-pill);
+    cursor: pointer;
+    font: inherit;
+    min-height: 36px;
+    padding: 0.4rem 0.75rem;
+  }
+
+  &__links a {
+    color: var(--wings-admin-accent);
+    text-decoration: none;
+  }
+
+  &__links a:hover,
+  &__links a:focus-visible,
+  &__actions button:hover:not(:disabled),
+  &__actions button:focus-visible,
+  &__issue button:hover:not(:disabled),
+  &__issue button:focus-visible,
+  &__candidate button:hover:not(:disabled),
+  &__candidate button:focus-visible {
+    border-color: var(--wings-admin-accent);
+    color: var(--wings-admin-focus-ring);
+  }
+
+  &__publish-action {
+    display: grid;
+    gap: 0.3rem;
+
+    small {
+      color: var(--wings-admin-muted);
+      line-height: 1.35;
+      max-width: 360px;
+    }
+  }
+
+  &__publish-button {
+    background: var(--wings-admin-accent) !important;
+    border-color: var(--wings-admin-accent) !important;
+    color: #fff !important;
+    font-weight: 700;
+  }
+
+  &__publish-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  &__issues {
+    display: grid;
+    gap: 0.55rem;
+
+    > strong {
+      color: var(--wings-admin-muted);
+      font-size: 0.78rem;
+    }
+  }
+
+  &__issue {
+    background: color-mix(in srgb, var(--wings-admin-panel-strong) 92%, var(--wings-admin-accent-soft));
+    border: 1px solid var(--wings-admin-border);
+    border-left: 3px solid var(--wings-admin-accent);
+    border-radius: var(--wings-admin-radius-sm);
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.65rem 0.75rem;
+
+    &--error {
+      border-left-color: var(--theme-error-500);
+    }
+
+    &--warning {
+      border-left-color: var(--theme-warning-500);
+    }
+
+    p,
+    small {
+      color: var(--wings-admin-muted);
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    p {
+      color: var(--wings-admin-text);
+      font-size: 0.83rem;
+    }
+
+    small {
+      font-size: 0.78rem;
+    }
+
+    button {
+      justify-self: start;
+      margin-top: 0.25rem;
+    }
+  }
+
+  &__issue-heading {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+
+    > span {
+      color: var(--wings-admin-muted);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    > strong {
+      color: var(--wings-admin-text);
+      font-size: 0.86rem;
+    }
+  }
+
+  &__candidates,
+  &__departures {
+    border: 1px solid var(--wings-admin-border);
+    border-radius: var(--wings-admin-radius-sm);
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    min-width: 0;
+    padding: 0.7rem;
+
+    legend {
+      color: var(--wings-admin-text);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0 0.25rem;
+    }
+
+    > p {
+      color: var(--wings-admin-muted);
+      font-size: 0.78rem;
+      line-height: 1.4;
+      margin: 0;
+    }
+  }
+
+  &__candidate {
+    align-items: center;
+    border-top: 1px solid var(--wings-admin-border);
+    color: var(--wings-admin-text);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    gap: 0.5rem;
+    justify-content: space-between;
+    padding-top: 0.45rem;
+
+    span {
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__departures label {
+    align-items: center;
+    color: var(--wings-admin-text);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    gap: 0.35rem;
+
+    small {
+      color: var(--wings-admin-muted);
+    }
+  }
+
+  &__empty,
+  &__inline-warning,
+  &__error {
+    background: color-mix(in srgb, var(--theme-warning-500) 9%, var(--wings-admin-panel));
+    border-left: 3px solid var(--theme-warning-500);
+    color: var(--wings-admin-text);
+    line-height: 1.4;
+    padding: 0.55rem 0.7rem;
+  }
+
+  &__error {
+    border-left-color: var(--theme-error-500);
+
+    p,
+    small {
+      display: block;
+      margin: 0.2rem 0 0;
+    }
+
+    p {
+      color: var(--wings-admin-text);
+    }
+
+    small {
+      color: var(--wings-admin-muted);
+    }
   }
 }
 

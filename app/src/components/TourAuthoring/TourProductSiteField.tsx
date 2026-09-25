@@ -58,7 +58,7 @@ export default function TourProductSiteField({ field, path, readOnly }: Props) {
   const label = field?.label || 'Site'
 
   return (
-    <div>
+    <div id={`field-${path}`}>
       <FieldLabel label={label} path={path} required={field?.required} />
       {!isEditing && state.kind === 'choose' && !readOnly ? (
         <select

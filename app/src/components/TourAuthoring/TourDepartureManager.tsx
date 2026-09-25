@@ -108,9 +108,9 @@ export default function TourDepartureManager() {
     await load()
   }
 
-  if (productID == null) return <section style={{ boxSizing: 'border-box', marginTop: '1rem', maxWidth: '100%', minWidth: 0, padding: '1rem', border: '1px solid var(--theme-elevation-150)' }}><strong>Ngày khởi hành & giá</strong><p style={{ marginBottom: 0 }}>Lưu TourProduct trước khi thêm lịch khởi hành.</p></section>
+  if (productID == null) return <section id="tour-departures" style={{ boxSizing: 'border-box', marginTop: '1rem', maxWidth: '100%', minWidth: 0, padding: '1rem', border: '1px solid var(--theme-elevation-150)' }}><strong>Ngày khởi hành & giá</strong><p style={{ marginBottom: 0 }}>Lưu TourProduct trước khi thêm lịch khởi hành.</p></section>
 
-  return <section aria-label="Quản lý ngày khởi hành" style={{ boxSizing: 'border-box', marginTop: '1rem', maxWidth: '100%', minWidth: 0, padding: '1rem', border: '1px solid var(--theme-elevation-150)', borderRadius: 6 }}>
+  return <section aria-label="Quản lý ngày khởi hành" id="tour-departures" style={{ boxSizing: 'border-box', marginTop: '1rem', maxWidth: '100%', minWidth: 0, padding: '1rem', border: '1px solid var(--theme-elevation-150)', borderRadius: 6 }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}><div><h3 style={{ margin: 0 }}>Ngày khởi hành & giá</h3><p style={{ margin: '0.35rem 0', color: 'var(--theme-elevation-600)' }}>Lưu độc lập với form TourProduct. Mọi dòng đều thuộc cùng site và tour này.</p></div><button type="button" onClick={() => { setEditingID(null); setForm(blankDeparture()); setError('') }}>Thêm lịch</button></div>
     {error && <p role="alert" style={{ color: 'var(--theme-error-500)' }}>{error}</p>}
     {form && <TourDepartureForm createActions={editingID == null} initial={form} onCancel={() => { setForm(null); setEditingID(null) }} onSubmit={(value, mode) => save(value, editingID == null && mode === 'next').catch((reason: Error) => setError(reason.message))} />}
