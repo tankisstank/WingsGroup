@@ -268,7 +268,12 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
-  const permanentTourRedirect = await resolvePermanentTourRedirect(request, resolveEffectiveHost(request))
+  const effectiveHost = resolveEffectiveHost(request)
+  const forwardedHost = normalizeHost(request.headers.get('x-forwarded-host'))
+  const redirectHost = wingsGoPublicHosts.has(effectiveHost || '')
+    ? effectiveHost
+    : forwardedHost
+  const permanentTourRedirect = await resolvePermanentTourRedirect(request, redirectHost)
   if (permanentTourRedirect) return permanentTourRedirect
 
   const preservedRewriteContext = await getPreservedRewriteContext(request)
@@ -287,7 +292,6 @@ export async function proxy(request: NextRequest) {
   const requestID = crypto.randomUUID()
   const siteAlias = getSiteAliasFromPathname(request.nextUrl.pathname)
   const locale = getLocaleFromPathname(request.nextUrl.pathname)
-  const effectiveHost = resolveEffectiveHost(request)
 
   if (siteAlias === 'wingsside') {
     const url = request.nextUrl.clone()
