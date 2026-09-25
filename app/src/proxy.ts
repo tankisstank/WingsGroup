@@ -78,15 +78,14 @@ const applyPublicPageCachePolicy = (request: NextRequest, response: NextResponse
 
 const resolvePermanentTourRedirect = async (request: NextRequest, effectiveHost: string | null): Promise<NextResponse | null> => {
   const pathname = request.nextUrl.pathname
-  console.info('tour_redirect_probe', {
-    effectiveHost,
-    forwardedHost: request.headers.get('x-forwarded-host'),
-    pathname,
-    url: request.url,
-  })
   if (!wingsGoPublicHosts.has(effectiveHost || '') || !pathname.startsWith('/tour/') || pathname === '/tour/') return null
 
   const endpoint = new URL('/api/redirects', request.url)
+  if (request.headers.get('x-forwarded-proto')) {
+    endpoint.protocol = 'http:'
+    endpoint.hostname = '127.0.0.1'
+    endpoint.port = '3000'
+  }
   endpoint.searchParams.set('where[from][equals]', pathname)
   endpoint.searchParams.set('depth', '0')
   endpoint.searchParams.set('limit', '1')
@@ -96,22 +95,19 @@ const resolvePermanentTourRedirect = async (request: NextRequest, effectiveHost:
       cache: 'no-store',
       headers: { accept: 'application/json' },
     })
-    console.info('tour_redirect_lookup', { status: response.status })
     if (!response.ok) return null
 
     const body = (await response.json()) as {
       docs?: Array<{ to?: { url?: string | null }; type?: string | null }>
     }
     const redirect = body.docs?.[0]
-    console.info('tour_redirect_match', { type: redirect?.type, hasTarget: Boolean(redirect?.to?.url) })
     if (redirect?.type !== '301' || !redirect.to?.url) return null
 
     const destination = new URL(redirect.to.url, request.url)
     if (!['http:', 'https:'].includes(destination.protocol) || destination.href === request.url) return null
 
     return NextResponse.redirect(destination, 301)
-  } catch (error) {
-    console.error('tour_redirect_error', error instanceof Error ? error.name : 'unknown')
+  } catch {
     // A lookup failure must leave the normal CMS route available.
     return null
   }
