@@ -38,18 +38,18 @@ describe('TourAuthoringReadiness', () => {
     vi.stubGlobal('confirm', confirmMock)
 
     const { rerender } = render(<TourAuthoringReadiness />)
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Tạo trang tour' })).toBeTruthy())
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Tạo wrapper thay thế' })).toBeTruthy())
     const checkboxes = screen.getAllByRole('checkbox') as HTMLInputElement[]
     expect(checkboxes.map((checkbox) => checkbox.checked)).toEqual([false, false])
     expect((screen.getByRole('button', { name: 'Xuất bản tour' }) as HTMLButtonElement).disabled).toBe(true)
     fireEvent.click(checkboxes[0])
     expect((screen.getByRole('button', { name: 'Xuất bản tour' }) as HTMLButtonElement).disabled).toBe(false)
-    fireEvent.click(screen.getByRole('button', { name: 'Tạo trang tour' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Tạo wrapper thay thế' }))
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
     const request = fetchMock.mock.calls[1][1] as RequestInit
     expect(JSON.parse(String(request.body))).toMatchObject({ action: 'provision', departureIDs: [11], locale: 'vi', revision: 'rev-1' })
     fireEvent.click(screen.getByRole('button', { name: 'Xuất bản tour' }))
-    expect(confirmMock).toHaveBeenCalledWith('Xuất bản 1 lịch khởi hành đã chọn?')
+    expect(confirmMock).toHaveBeenCalledWith('Xuất bản TourProduct #75, Page #91 (/tours/sample) và các lịch #11?')
     expect(fetchMock).toHaveBeenCalledTimes(2)
     confirmMock.mockReturnValue(true)
     fireEvent.click(screen.getByRole('button', { name: 'Xuất bản tour' }))

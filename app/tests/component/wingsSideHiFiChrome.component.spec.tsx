@@ -136,9 +136,10 @@ describe('WingSide hi-fi header chrome (site isolation)', () => {
     expect(root?.getAttribute('data-hifi-nav')).toBe('false')
     expect(container.querySelector('a[href="/destinations"]')).toBeNull()
     expect(container.querySelector('a[href="/travel-guide"]')).toBeNull()
-    expect(container.querySelector('a[href="/search"]')).toBeTruthy()
-    expect(container.textContent).toContain('WingsGo Home')
-    expect(container.textContent).toContain('Book now')
+    expect(container.querySelector('a[href="/search"]')).toBeNull()
+    expect(container.textContent).toContain('Home')
+    expect(container.textContent).toContain('Departure schedule')
+    expect(container.textContent).toContain('0912 910 101')
     unmount()
   })
 
