@@ -36,8 +36,6 @@ const getPathname = (data: UnknownRecord, originalDoc: UnknownRecord): string =>
   return slug === 'home' ? '/' : typeof slug === 'string' ? `/${slug}` : ''
 }
 
-const governanceSnapshot = (value: unknown): string => JSON.stringify(asRecord(value))
-
 const canonicalize = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(canonicalize)
   if (!value || typeof value !== 'object') return value
@@ -47,6 +45,9 @@ const canonicalize = (value: unknown): unknown => {
       .map(([key, item]) => [key, canonicalize(item)]),
   )
 }
+
+const governanceSnapshot = (value: unknown): string =>
+  JSON.stringify(canonicalize(asRecord(value)))
 
 const LOCALIZED_CONTENT_FIELDS = ['hero', 'layout', 'meta', 'title'] as const
 const SHARED_CONTENT_FIELDS = [
