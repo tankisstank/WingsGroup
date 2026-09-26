@@ -6,7 +6,9 @@ import { ImageMedia } from '@/components/Media/ImageMedia'
 import type { Media } from '@/payload-types'
 
 vi.mock('next/image', () => ({
-  default: (props: React.ComponentProps<'img'>) => <img {...props} />,
+  default: (props: React.ComponentProps<'img'> & { unoptimized?: boolean }) => (
+    <img {...props} data-unoptimized={props.unoptimized ? 'true' : undefined} />
+  ),
 }))
 
 const sha = 'a'.repeat(64)
@@ -81,5 +83,12 @@ describe('WingsGroup ImageMedia responsive delivery', () => {
 
     expect(container.querySelectorAll('source')).toHaveLength(0)
     expect(container.querySelector('img')?.getAttribute('src')).toContain('/media/a.png')
+  })
+  it('keeps absolute WingsGroup media on the governed direct route', () => {
+    const { container } = render(
+      <ImageMedia resource={{ ...publishedMedia('pending'), url: 'https://wingsgroup.vn/media/a.png' }} />,
+    )
+
+    expect(container.querySelector('img')?.getAttribute('data-unoptimized')).toBe('true')
   })
 })

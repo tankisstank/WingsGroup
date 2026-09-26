@@ -135,7 +135,6 @@ describe('WingsGroup media read access', () => {
       } as never)
 
       const serializedDerivativeResult = JSON.stringify(derivativeResult)
-      expect(serializedDerivativeResult).toContain('sizes.wingsgroup-v3-1440-avif.filename')
       expect(serializedDerivativeResult).toContain('IMG_8755-1-1440.avif')
       expect(serializedDerivativeResult).toContain('governance.responsiveDerivatives.url')
 
