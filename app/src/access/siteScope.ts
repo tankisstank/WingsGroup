@@ -142,7 +142,7 @@ const resolveTrustedPublicMediaSiteID = async (req: PayloadRequest): Promise<Rel
   return defaultSite.docs[0]?.id || null
 }
 
-const getPublicMediaWhere = async (req: PayloadRequest): Promise<Where | false> => {
+const getPublicMediaWhere = async (req: PayloadRequest): Promise<Where | false | true> => {
   const publicPathHeader = req.headers.get('x-public-path')
   if (!isExternalHTTPRequest(req) && !publicPathHeader) {
     // Payload's upload handler creates a local request without route headers.
