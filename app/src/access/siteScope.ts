@@ -85,7 +85,6 @@ const publicMediaWhere = (requestedFilename?: string): Where => {
     { 'governance.provenanceReference': { exists: true } },
     { 'governance.rightsEvidence': { exists: true } },
     { site: { exists: true } },
-    { url: { exists: true } },
   ]
   if (requestedFilename) {
     governedConditions.push(
