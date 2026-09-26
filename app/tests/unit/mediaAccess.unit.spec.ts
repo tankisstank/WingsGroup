@@ -63,16 +63,10 @@ describe('WingsGroup media read access', () => {
     }
   })
 
-  it('returns only governed published media gates to anonymous readers', async () => {
+  it('allows Payload local media file requests to reach the after-read governance gate', async () => {
     const result = await wingsGroupMediaReadAccess({ req: request({ external: false }) } as never)
 
-    expect(result).toMatchObject({
-      or: expect.arrayContaining([
-        expect.objectContaining({
-          and: expect.arrayContaining([{ 'governance.publicationState': { equals: 'published' } }]),
-        }),
-      ]),
-    })
+    expect(result).toBe(true)
   })
 
   it('rejects raw or forged anonymous media requests', async () => {
@@ -112,6 +106,60 @@ describe('WingsGroup media read access', () => {
       expect(result).toMatchObject({
         and: [{ site: { equals: 7 } }, { or: expect.any(Array) }],
       })
+
+      const derivativeHeaders = await createTrustedSiteContextHeaders(
+        new Headers({ host: 'wingsgroup.example' }),
+        {
+          host: 'wingsgroup.example',
+          publicPath: '/media/IMG_8755-1-1440.avif',
+          siteCode: 'wings-group',
+        },
+      )
+      const derivativeResult = await wingsGroupMediaReadAccess({
+        req: {
+          headers: derivativeHeaders,
+          payload: {
+            find: async () => ({
+              docs: [
+                {
+                  additionalDomains: [],
+                  code: 'wings-group',
+                  id: 7,
+                  isActive: true,
+                  primaryDomain: 'wingsgroup.example',
+                },
+              ],
+            }),
+          },
+        },
+      } as never)
+
+      const serializedDerivativeResult = JSON.stringify(derivativeResult)
+      expect(serializedDerivativeResult).toContain('IMG_8755-1-1440.avif')
+      expect(serializedDerivativeResult).toContain('governance.responsiveDerivatives.url')
+
+      const adapterHeaders = new Headers(derivativeHeaders)
+      adapterHeaders.delete('host')
+      const adapterResult = await wingsGroupMediaReadAccess({
+        req: {
+          headers: adapterHeaders,
+          url: 'http://localhost/',
+          payload: {
+            find: async () => ({
+              docs: [
+                {
+                  additionalDomains: [],
+                  code: 'wings-group',
+                  id: 7,
+                  isActive: true,
+                  primaryDomain: 'wingsgroup.example',
+                },
+              ],
+            }),
+          },
+        },
+      } as never)
+      expect(JSON.stringify(adapterResult)).toContain('governance.responsiveDerivatives.url')
     } finally {
       vi.unstubAllEnvs()
     }

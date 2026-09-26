@@ -142,9 +142,18 @@ const getPreservedRewriteContext = async (request: NextRequest): Promise<Headers
   if (publicAlias === 'wingsside') return null
 
   const expectedSiteCode = publicAlias ? allSiteAliasToCodeMap[publicAlias] : null
+  const isCanonicalMediaPath = publicPath?.startsWith('/media/') === true
   const expectedPath = publicPath
-    ? stripLeadingSegments(publicPath, publicAlias ? (publicLocale ? 2 : 1) : 1)
+    ? isCanonicalMediaPath
+      ? publicPath
+      : stripLeadingSegments(publicPath, publicAlias ? (publicLocale ? 2 : 1) : 1)
     : null
+  const isExpectedRewritePath =
+    expectedPath === request.nextUrl.pathname ||
+    (expectedPath?.startsWith('/media/') === true &&
+      request.nextUrl.pathname === `/api/public-media/${expectedPath.slice('/media/'.length)}`)
+  const isCanonicalMediaRewrite =
+    isCanonicalMediaPath && isExpectedRewritePath
   const currentHost = resolveEffectiveHost(request)
 
   // Next invokes Proxy again for the internal rewrite destination. Preserve
@@ -152,8 +161,8 @@ const getPreservedRewriteContext = async (request: NextRequest): Promise<Headers
   // the rewritten pathname and the effective host. A client-supplied header
   // bundle on an ordinary request fails these checks and is rebuilt below.
   if (
-    (!publicAlias && !publicLocale) ||
-    expectedPath !== request.nextUrl.pathname ||
+    (!publicAlias && !publicLocale && !isCanonicalMediaRewrite) ||
+    !isExpectedRewritePath ||
     !isEquivalentPreservedHost(request.headers.get('x-site-host'), currentHost) ||
     (publicAlias
       ? request.headers.get('x-site-code') !== expectedSiteCode
@@ -195,7 +204,7 @@ const rewriteMediaRequest = (request: NextRequest, requestHeaders: Headers): Nex
   if (!filename) return notFoundResponse()
 
   const url = request.nextUrl.clone()
-  url.pathname = `/api/media/file/${filename}`
+  url.pathname = `/api/public-media/${filename}`
   const response = NextResponse.rewrite(url, {
     request: {
       headers: requestHeaders,
@@ -326,9 +335,9 @@ export async function proxy(request: NextRequest) {
     return applyPublicPageCachePolicy(request, response)
   }
 
-  // Payload's upload directory is physically public, so route media URLs back
-  // through Payload's governed file handler. This keeps anonymous requests
-  // subject to the same publication gate as /api/media/file/*.
+  // Route public media through the context-preserving application handler. Do
+  // not use Payload's native file endpoint here: its static-file access check
+  // receives a local request without the original route params/headers.
   if (isMediaPath(request.nextUrl.pathname)) {
     return withRequestID(rewriteMediaRequest(request, requestHeaders))
   }

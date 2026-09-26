@@ -401,10 +401,47 @@ describe('tenant proxy rewrites', () => {
     )
 
     expect(internalResponse.headers.get('x-middleware-rewrite')).toBe(
-      'http://localhost:3100/api/media/file/e09-pending.jpg',
+      'http://localhost:3100/api/public-media/e09-pending.jpg',
     )
   })
 
+  it('preserves the trusted tenant bundle for the governed media API destination', async () => {
+    const publicResponse = await proxy(
+      new NextRequest('http://localhost:3100/wingsgo/media/e09-pending.jpg', {
+        headers: { host: 'localhost:3100' },
+      }),
+    )
+    const rewrittenHeaders = overriddenRequestHeaders(publicResponse)
+    const internalResponse = await proxy(
+      new NextRequest('http://localhost:3100/api/public-media/e09-pending.jpg', {
+        headers: rewrittenHeaders,
+      }),
+    )
+    const internalHeaders = overriddenRequestHeaders(internalResponse)
+
+    expect(internalResponse.headers.get('x-middleware-next')).toBe('1')
+    expect(internalHeaders.get('x-public-path')).toBe('/wingsgo/media/e09-pending.jpg')
+    expect(internalHeaders.get('x-site-code')).toBe('wings-go')
+  })
+
+  it('preserves the trusted bundle for canonical-host media API destinations', async () => {
+    const publicResponse = await proxy(
+      new NextRequest('https://wingsgroup.vn/media/e09-pending.jpg', {
+        headers: { host: 'wingsgroup.vn' },
+      }),
+    )
+    const rewrittenHeaders = overriddenRequestHeaders(publicResponse)
+    const internalResponse = await proxy(
+      new NextRequest('https://wingsgroup.vn/api/public-media/e09-pending.jpg', {
+        headers: rewrittenHeaders,
+      }),
+    )
+    const internalHeaders = overriddenRequestHeaders(internalResponse)
+
+    expect(internalResponse.headers.get('x-middleware-next')).toBe('1')
+    expect(internalHeaders.get('x-public-path')).toBe('/media/e09-pending.jpg')
+    expect(internalHeaders.get('x-site-code')).toBeNull()
+  })
   it('prefers a public browser hostname over a local dev listener host when they differ', async () => {
     const response = await proxy(
       new NextRequest('http://wingscare.wingsgroup.vn:3100/en', {
