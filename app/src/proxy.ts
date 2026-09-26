@@ -189,7 +189,7 @@ const getPreservedRewriteContext = async (request: NextRequest): Promise<Headers
   const isExpectedRewritePath =
     expectedPath === request.nextUrl.pathname ||
     (expectedPath?.startsWith('/media/') === true &&
-      request.nextUrl.pathname === `/api/media/file/${expectedPath.slice('/media/'.length)}`)
+      request.nextUrl.pathname === `/api/public-media/${expectedPath.slice('/media/'.length)}`)
   const isCanonicalMediaRewrite =
     isCanonicalMediaPath && isExpectedRewritePath
   const currentHost = resolveEffectiveHost(request)
@@ -242,7 +242,7 @@ const rewriteMediaRequest = (request: NextRequest, requestHeaders: Headers): Nex
   if (!filename) return notFoundResponse()
 
   const url = request.nextUrl.clone()
-  url.pathname = `/api/media/file/${filename}`
+  url.pathname = `/api/public-media/${filename}`
   const response = NextResponse.rewrite(url, {
     request: {
       headers: requestHeaders,
@@ -379,9 +379,9 @@ export async function proxy(request: NextRequest) {
     return applyPublicPageCachePolicy(request, response)
   }
 
-  // Payload's upload directory is physically public, so route media URLs back
-  // through Payload's governed file handler. This keeps anonymous requests
-  // subject to the same publication gate as /api/media/file/*.
+  // Route public media through the context-preserving application handler. Do
+  // not use Payload's native file endpoint here: its static-file access check
+  // receives a local request without the original route params/headers.
   if (isMediaPath(request.nextUrl.pathname)) {
     return withRequestID(rewriteMediaRequest(request, requestHeaders))
   }

@@ -420,7 +420,7 @@ describe('tenant proxy rewrites', () => {
     )
 
     expect(internalResponse.headers.get('x-middleware-rewrite')).toBe(
-      'http://localhost:3100/api/media/file/e09-pending.jpg',
+      'http://localhost:3100/api/public-media/e09-pending.jpg',
     )
   })
 
@@ -432,7 +432,7 @@ describe('tenant proxy rewrites', () => {
     )
     const rewrittenHeaders = overriddenRequestHeaders(publicResponse)
     const internalResponse = await proxy(
-      new NextRequest('http://localhost:3100/api/media/file/e09-pending.jpg', {
+      new NextRequest('http://localhost:3100/api/public-media/e09-pending.jpg', {
         headers: rewrittenHeaders,
       }),
     )
@@ -451,7 +451,7 @@ describe('tenant proxy rewrites', () => {
     )
     const rewrittenHeaders = overriddenRequestHeaders(publicResponse)
     const internalResponse = await proxy(
-      new NextRequest('https://wingsgroup.vn/api/media/file/e09-pending.jpg', {
+      new NextRequest('https://wingsgroup.vn/api/public-media/e09-pending.jpg', {
         headers: rewrittenHeaders,
       }),
     )
