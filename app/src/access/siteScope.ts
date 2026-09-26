@@ -144,7 +144,11 @@ const resolveTrustedPublicMediaSiteID = async (req: PayloadRequest): Promise<Rel
 
 const getPublicMediaWhere = async (req: PayloadRequest): Promise<Where | false> => {
   const publicPathHeader = req.headers.get('x-public-path')
-  if (!isExternalHTTPRequest(req) && !publicPathHeader) return publicMediaWhere()
+  if (!isExternalHTTPRequest(req) && !publicPathHeader) {
+    // Payload's upload handler creates a local request without route headers.
+    // enforceAnonymousGovernedMediaRead remains the publication/rights gate.
+    return req.headers.get('cookie') ? publicMediaWhere() : true
+  }
 
   const publicPath = publicPathHeader || ''
   const publicAlias = getSiteAliasFromPathname(publicPath)
