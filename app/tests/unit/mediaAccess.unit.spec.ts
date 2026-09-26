@@ -143,7 +143,30 @@ describe('WingsGroup media read access', () => {
       const serializedDerivativeResult = JSON.stringify(derivativeResult)
       expect(serializedDerivativeResult).toContain('sizes.wingsgroup-v3-1440-avif.filename')
       expect(serializedDerivativeResult).toContain('IMG_8755-1-1440.avif')
-      expect(serializedDerivativeResult).not.toContain('governance.responsiveDerivatives.url')
+      expect(serializedDerivativeResult).toContain('governance.responsiveDerivatives.url')
+
+      const adapterHeaders = new Headers(derivativeHeaders)
+      adapterHeaders.delete('host')
+      const adapterResult = await wingsGroupMediaReadAccess({
+        req: {
+          headers: adapterHeaders,
+          url: 'http://localhost/',
+          payload: {
+            find: async () => ({
+              docs: [
+                {
+                  additionalDomains: [],
+                  code: 'wings-group',
+                  id: 7,
+                  isActive: true,
+                  primaryDomain: 'wingsgroup.example',
+                },
+              ],
+            }),
+          },
+        },
+      } as never)
+      expect(JSON.stringify(adapterResult)).toContain('governance.responsiveDerivatives.url')
     } finally {
       vi.unstubAllEnvs()
     }
