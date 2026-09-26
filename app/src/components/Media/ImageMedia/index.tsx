@@ -21,6 +21,20 @@ const placeholderBlur =
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 
+const isPublicMediaRoute = (value: string): boolean => {
+  if (value.startsWith('/media/')) return true
+
+  try {
+    const url = new URL(value)
+    return (
+      (url.hostname === 'wingsgroup.vn' || url.hostname === 'www.wingsgroup.vn') &&
+      url.pathname.startsWith('/media/')
+    )
+  } catch {
+    return false
+  }
+}
+
 const getGeneratedDerivativeEntries = (resource: unknown) => {
   const record = isRecord(resource) ? resource : {}
 
@@ -106,7 +120,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
   }
 
   const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
-  const useDirectMediaRoute = typeof src === 'string' && src.startsWith('/media/')
+  const useDirectMediaRoute = typeof src === 'string' && isPublicMediaRoute(src)
   const useAuthenticatedPreviewImage =
     resource &&
     typeof resource === 'object' &&
