@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -28,5 +31,13 @@ describe('public media delivery boundary', () => {
     expect(publicMediaContentType('hero-640.webp')).toBe('image/webp')
     expect(publicMediaContentType('hero.jpg')).toBe('image/jpeg')
     expect(publicMediaContentType('hero.unknown')).toBe('application/octet-stream')
+  })
+
+  it('keeps the public lookup contract compatible with governed derivative URLs', () => {
+    const route = readFileSync(
+      path.resolve(process.cwd(), 'src/app/(payload)/api/public-media/[filename]/route.ts'),
+      'utf8',
+    )
+    expect(route).toContain("'governance.responsiveDerivatives.url'")
   })
 })
