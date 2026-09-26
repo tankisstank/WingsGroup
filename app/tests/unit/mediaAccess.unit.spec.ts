@@ -63,16 +63,10 @@ describe('WingsGroup media read access', () => {
     }
   })
 
-  it('returns only governed published media gates to anonymous readers', async () => {
+  it('allows Payload local media file requests to reach the after-read governance gate', async () => {
     const result = await wingsGroupMediaReadAccess({ req: request({ external: false }) } as never)
 
-    expect(result).toMatchObject({
-      or: expect.arrayContaining([
-        expect.objectContaining({
-          and: expect.arrayContaining([{ 'governance.publicationState': { equals: 'published' } }]),
-        }),
-      ]),
-    })
+    expect(result).toBe(true)
   })
 
   it('rejects raw or forged anonymous media requests', async () => {
