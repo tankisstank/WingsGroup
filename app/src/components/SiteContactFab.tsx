@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { ProtectedEmailLink } from './ProtectedEmailLink'
 
+import { ProtectedEmailLink } from './ProtectedEmailLink'
+
 type Props = { locale?: string | null; siteCode?: string | null }
 
 export const SiteContactFab: React.FC<Props> = ({ locale, siteCode }) => {

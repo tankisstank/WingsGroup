@@ -196,6 +196,17 @@ export const RenderBlocks: React.FC<{
                 <Fragment>
                   {/* @ts-expect-error there may be some mismatch between the expected types here */}
                   <Block {...blockProps} disableInnerContainer />
+                  {wingsGroupV3Home && blockType === 'wingsGroupEcosystem' ? (
+                    <>
+                      <div data-wingsgroup-home-addon="capability">
+                        <WingsGroupCapabilitySection anchorId="capability" locale={locale} />
+                      </div>
+                      <JourneyInquiryGrid />
+                    </>
+                  ) : null}
+                  {wingsGroupV3Home && (blockType === 'infoStrip' || blockType === 'stats') ? (
+                    <WingsGroupTestimonialsSection locale={locale} />
+                  ) : null}
                 </Fragment>
               )
 

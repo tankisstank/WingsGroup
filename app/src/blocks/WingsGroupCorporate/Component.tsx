@@ -16,6 +16,22 @@ export const WingsGroupCorporateSection = ({ legalIdentity, locale }: Props) => 
   const identity = { ...WINGSGROUP_LEGAL_IDENTITY, ...(legalIdentity || {}) }
   const isEnglish = locale === 'en'
 
+  const brandBranches = isEnglish
+    ? [
+        { name: 'WingsGo', role: 'Outbound Travel' },
+        { name: 'WingSide', role: 'Vietnam Discovery' },
+        { name: 'WingsPass', role: 'Airport Services' },
+        { name: 'WingsPlus', role: 'Custom Travel / MICE' },
+        { name: 'WingsCare', role: 'Travel Care & Support' },
+      ]
+    : [
+        { name: 'WingsGo', role: 'Du lịch nước ngoài' },
+        { name: 'WingSide', role: 'Du lịch Việt Nam' },
+        { name: 'WingsPass', role: 'Dịch vụ sân bay' },
+        { name: 'WingsPlus', role: 'Hành trình riêng / MICE' },
+        { name: 'WingsCare', role: 'Chăm sóc hành trình' },
+      ]
+
   return (
     <section
       aria-labelledby="wingsgroup-corporate-title"
@@ -59,6 +75,15 @@ export const WingsGroupCorporateSection = ({ legalIdentity, locale }: Props) => 
               <dd>{identity.travelOffice}</dd>
             </div>
           </dl>
+
+          <div className={styles.brandRelationshipGrid}>
+            {brandBranches.map((item) => (
+              <div className={styles.brandRelationshipCard} key={item.name}>
+                <b>{item.name}</b>
+                <span>{item.role}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

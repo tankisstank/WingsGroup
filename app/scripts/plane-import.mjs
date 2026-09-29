@@ -1517,7 +1517,10 @@ function diffDays(startDate, endDate) {
 
 function deriveStoryDates(story) {
   const startDate = toDateOnly(story.created_at)
-  const targetDate = latestDateInText(story.evidence) || startDate
+  let targetDate = latestDateInText(story.evidence) || startDate
+  if (startDate && targetDate && targetDate < startDate) {
+    targetDate = startDate
+  }
   return {
     startDate,
     targetDate,

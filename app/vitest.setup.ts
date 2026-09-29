@@ -1,7 +1,13 @@
 // Any setup scripts you might need go here
 
-// Load .env files
 import 'dotenv/config'
+import { vi } from 'vitest'
+
+vi.mock('@/utilities/localPreviewStore', () => ({
+  isWingsGroupLocalPreviewStoreConfigured: () => false,
+  getWingsGroupLocalPreviewStoreURL: () => '',
+  startWingsGroupLocalPreviewStore: () => Promise.resolve({}),
+}))
 
 Object.defineProperty(window, 'matchMedia', {
   configurable: true,

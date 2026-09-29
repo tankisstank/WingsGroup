@@ -242,7 +242,7 @@ export const WingsGroupCapabilitySection = ({
       <div className="container">
         <header className={styles.routeHeader}>
           <div>
-            {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
+            <p className={styles.eyebrow}>{resolvedEyebrow}</p>
             <h2 className={styles.sectionTitle} id="wingsgroup-capability-title">
               {title || processTitleByLocale[isEnglish ? 'en' : 'vi']}
             </h2>
@@ -351,11 +351,30 @@ export const WingsGroupCapabilitySection = ({
                 data-cta-state="contact-fallback"
                 href="/lien-he#contact-form"
               >
-                {locale === 'en' ? 'Request a consultation' : 'Trao đổi nhu cầu'}
+                {isEnglish ? 'Request a consultation' : 'Trao đổi nhu cầu'}
                 <span aria-hidden="true">↗</span>
               </SiteLink>
             </article>
           ))}
+        </div>
+
+        {/* CTA Banner (Slide 05 / 06) */}
+        <div className={styles.capabilityBannerCTA}>
+          <div className={styles.capabilityBannerText}>
+            <h3>{isEnglish ? 'Ready for your next journey?' : 'Bạn chọn điểm đến. WingsGroup lo phần còn lại!'}</h3>
+            <p>
+              {isEnglish
+                ? 'Get in touch with our specialists for tailored itineraries and dedicated support.'
+                : 'Đội ngũ chuyên viên WingsGroup sẵn sàng tư vấn giải pháp phù hợp nhất cho chuyến đi của bạn.'}
+            </p>
+          </div>
+          <SiteLink
+            className={styles.capabilityBannerButton}
+            data-wingsgroup-consultation-trigger="true"
+            href="/lien-he#contact-form"
+          >
+            {isEnglish ? 'Consult with us' : 'Gặp nhân viên tư vấn'}
+          </SiteLink>
         </div>
       </div>
     </section>

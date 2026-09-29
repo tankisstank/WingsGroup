@@ -26,4 +26,12 @@ describe('WingsGroup brand logo fallback', () => {
     expect(container.querySelector('img')?.getAttribute('alt')).toBe('WingsGo logo')
     expect(container.innerHTML).not.toContain('/brand/wingsgroup/')
   })
+
+  it('does not leak the WingsGroup fallback into an unknown tenant', () => {
+    const { container, getByText } = render(<Logo logoText="Other" siteCode="other-tenant" />)
+
+    expect(container.querySelector('img')).toBeNull()
+    expect(getByText('O')).toBeTruthy()
+    expect(container.innerHTML).not.toContain('/brand/wingsgroup/')
+  })
 })

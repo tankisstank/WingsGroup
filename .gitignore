@@ -8,6 +8,10 @@ scripts/bin/harness-cli.exe
 # Local agent/browser/runtime artifacts
 .playwright-mcp/
 artifacts/tmp/
+artifacts/*.log
+artifacts/*.png
+wingsgroup.vn-audit/
+*.tar.gz
 
 # Nested repositories kept outside this workspace commit
 payload/

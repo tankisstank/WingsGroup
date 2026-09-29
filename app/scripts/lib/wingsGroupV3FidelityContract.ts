@@ -81,6 +81,31 @@ export const assessWingsGroupV3FidelityContract = (
     }
   }
 
+  if (!exactStringArray(value.homeEnhancementOrder, WINGSGROUP_V3_HOME_ENHANCEMENT_ORDER)) {
+    errors.push('Contract homeEnhancementOrder must match the governed homepage add-on order.')
+  }
+
+  const homeEnhancements = array(value.homeEnhancements).filter(isRecord)
+  if (homeEnhancements.length !== WINGSGROUP_V3_HOME_ENHANCEMENT_ORDER.length) {
+    errors.push('Contract must define exactly two governed homepage enhancements.')
+  }
+  if (
+    !exactStringArray(
+      homeEnhancements.map((enhancement) => enhancement.key),
+      WINGSGROUP_V3_HOME_ENHANCEMENT_ORDER,
+    )
+  ) {
+    errors.push('Contract homeEnhancements must match homeEnhancementOrder exactly.')
+  }
+  for (const enhancement of homeEnhancements) {
+    if (!text(enhancement.selector)) {
+      errors.push(`Homepage enhancement ${text(enhancement.key) || '<unknown>'} needs a selector.`)
+    }
+    if (!text(enhancement.heading)) {
+      errors.push(`Homepage enhancement ${text(enhancement.key) || '<unknown>'} needs a heading.`)
+    }
+  }
+
   const sections = array(value.sections).filter(isRecord)
   if (sections.length !== WINGSGROUP_V3_FIDELITY_SECTION_ORDER.length) {
     errors.push('Contract must define exactly six public runtime sections.')

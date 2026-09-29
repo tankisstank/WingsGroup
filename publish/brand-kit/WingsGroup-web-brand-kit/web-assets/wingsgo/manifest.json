@@ -1,0 +1,46 @@
+{
+  "siteCode": "wingsgo",
+  "displayTitle": "WingsGo",
+  "sourcePdf": "pdf/WINGS GO.pdf",
+  "tagline": "Go More. Feel More.",
+  "valueLine": "GLOBAL MINDSET",
+  "colors": {
+    "primary": "#005090",
+    "accent": "#0090E0"
+  },
+  "webAssetContract": {
+    "sourceOfTruth": "This folder's PNG masters",
+    "unit": "css-px",
+    "doNotCrop": true,
+    "doNotUpscale": true,
+    "dimensions": {
+      "logoPrimary": [
+        2400,
+        800
+      ],
+      "logoReverse": [
+        2400,
+        800
+      ],
+      "mark": [
+        1024,
+        1024
+      ],
+      "favicon": [
+        512,
+        512
+      ],
+      "ogImage": [
+        1200,
+        630
+      ]
+    }
+  },
+  "assets": {
+    "logoPrimary": "exports/wingsgo/wingsgo-logo-primary.png",
+    "logoReverse": "exports/wingsgo/wingsgo-logo-reverse.png",
+    "mark": "exports/wingsgo/wingsgo-mark.png",
+    "favicon": "exports/wingsgo/wingsgo-favicon.png",
+    "ogImage": "exports/wingsgo/wingsgo-og-image.png"
+  }
+}

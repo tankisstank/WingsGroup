@@ -36,12 +36,12 @@ const copyByLocale = {
     exploreEcosystem: 'Explore the five-brand ecosystem',
   },
   vi: {
-    choose: 'Chọn thương hiệu dịch vụ trong WingsGroup',
+    choose: 'Chọn dịch vụ phù hợp với hành trình của bạn',
     mediaFallback: 'Hình ảnh dịch vụ được kiểm soát sẽ xuất hiện khi sẵn sàng.',
     proof: 'Phản hồi sau dịch vụ:',
     verified: 'Đã có thông tin được xác minh.',
-    railDescription: 'Chạm để xem cách từng đội ngũ đồng hành cùng bạn.',
-    railTitle: 'Chọn một đơn vị',
+    railDescription: 'Từ chuyến đi xa đến những nhu cầu rất riêng — luôn có một Wings dành cho bạn.',
+    railTitle: 'Chọn dịch vụ phù hợp với hành trình của bạn.',
     exploreCapabilities: 'Xem chi tiết năng lực và dịch vụ',
     exploreEcosystem: 'Tìm hiểu hệ sinh thái 5 thương hiệu',
   },
@@ -160,6 +160,51 @@ export const EcosystemExplorer = ({
           ) : null}
         </header>
 
+        {/* 5-Layer Operating Mechanism & Single Point of Contact (Slide 06, 07) */}
+        <div className={styles.ecosystemFramework}>
+          <div className={styles.frameworkCard}>
+            <p className={styles.frameworkKicker}>
+              {locale === 'en' ? '5-LAYER OPERATING MECHANISM' : 'CƠ CHẾ VẬN HÀNH 5 LỚP'}
+            </p>
+            <h4>
+              {locale === 'en' ? 'One Team - Complete Journey' : 'Một đội ngũ — Trọn hành trình'}
+            </h4>
+            <p>
+              {locale === 'en'
+                ? 'From international trips, Vietnam journeys to airport support, private itineraries and care — WingsGroup coordinates every touchpoint.'
+                : 'Từ du lịch nước ngoài, du lịch Việt Nam, dịch vụ sân bay đến hành trình riêng và chăm sóc — WingsGroup tổ chức toàn diện mọi điểm chạm trong hành trình của bạn.'}
+            </p>
+          </div>
+          <div className={styles.frameworkCard}>
+            <p className={styles.frameworkKicker}>
+              {locale === 'en' ? 'SINGLE POINT OF CONTACT' : 'MỘT ĐẦU MỐI DUY NHẤT'}
+            </p>
+            <h4>
+              {locale === 'en' ? 'Effortless & Easy to Manage' : 'Đỡ việc, dễ quản lý'}
+            </h4>
+            <ul className={styles.frameworkList}>
+              <li>
+                <b>{locale === 'en' ? 'Full End-to-End Sync' : 'Đồng bộ từ đầu đến cuối'}:</b>{' '}
+                {locale === 'en'
+                  ? 'No need to juggle multiple vendors; itinerary information is consistently aligned.'
+                  : 'Không phải làm việc với nhiều bên, thông tin hành trình được cập nhật xuyên suốt.'}
+              </li>
+              <li>
+                <b>{locale === 'en' ? 'Time & Budget Optimization' : 'Tiết kiệm thời gian & Tối ưu ngân sách'}:</b>{' '}
+                {locale === 'en'
+                  ? 'Streamlined process and transparent costs eliminate unnecessary intermediaries.'
+                  : 'Quy trình gọn gàng, chi phí minh bạch, loại bỏ trung gian không cần thiết.'}
+              </li>
+              <li>
+                <b>{locale === 'en' ? 'Clear Accountability' : 'Trách nhiệm rõ ràng'}:</b>{' '}
+                {locale === 'en'
+                  ? 'A single dedicated point of contact takes complete responsibility for your satisfaction.'
+                  : 'Một đầu mối chịu trách nhiệm toàn diện cho trải nghiệm và sự hài lòng của bạn.'}
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <div className={styles.ecosystemUnified} data-od-id="ecosystem-unified-stage">
           <article aria-live="polite" className={styles.unifiedStage}>
             {media ? (
@@ -268,6 +313,29 @@ export const EcosystemExplorer = ({
               </article>
             </div>
           </div>
+        </div>
+
+        {/* Banner CTA (Slide 08) */}
+        <div className={styles.ecosystemBannerCTA}>
+          <div className={styles.ecosystemBannerCopy}>
+            <h3>
+              {locale === 'en'
+                ? 'You choose the destination. WingsGroup takes care of the rest!'
+                : 'Bạn chọn điểm đến. WingsGroup lo phần còn lại!'}
+            </h3>
+            <p>
+              {locale === 'en'
+                ? 'Connect with our specialists for a seamless and coordinated travel experience.'
+                : 'Kết nối cùng chuyên viên để có trải nghiệm đồng bộ và an tâm xuyên suốt chuyến đi.'}
+            </p>
+          </div>
+          <SiteLink
+            className={styles.ecosystemBannerBtn}
+            data-wingsgroup-consultation-trigger="true"
+            href="/lien-he#contact-form"
+          >
+            {locale === 'en' ? 'Contact for Consultation' : 'Liên hệ tư vấn'}
+          </SiteLink>
         </div>
       </div>
     </section>

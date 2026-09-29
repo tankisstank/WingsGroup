@@ -46,6 +46,10 @@ source-artifact provenance, not the current tenant or public naming contract.
 
 ## Files
 
+For web implementation, start with [`WEB-BRAND-GUIDE.md`](./WEB-BRAND-GUIDE.md).
+It defines the fixed-size PNG master contract, CSS-pixel usage, brand colors,
+site mapping, favicon and Open Graph conventions.
+
 | File                  | Scope                            | Extracted signals                                                          |
 | --------------------- | -------------------------------- | -------------------------------------------------------------------------- |
 | `pdf/WINGS - ALL.pdf` | Full Wings ecosystem brand board | WingsCorp, WingsGroup, WingsGo, WingsPass, WingSide, WingsCare, WingsPlus |

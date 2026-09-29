@@ -55,12 +55,12 @@ export const WINGSGROUP_LEGAL_IDENTITY = {
   registeredOffice: 'Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà Nội',
   registrationNumber: '0109983118',
   relationshipStatement:
-    'WingsGroup là thương hiệu phát triển mới trong cùng hệ sinh thái tổ chức với VietWings và Đôi Cánh Việt. Hệ sinh thái tiếp tục phát triển các thương hiệu WingsGo, WingSide, WingsCare và các dịch vụ liên quan.',
+    'Từ nền tảng Vietwings kiến tạo hệ sinh thái dịch vụ du lịch WingsGo - WingSide - WingsPass - WingsPlus - WingsCare và các dịch vụ liên quan tạo nên hệ sinh thái WingsGroup, hướng đến trải nghiệm thuận tiện - chuyên nghiệp - đồng bộ cho khách hàng.',
   travelOffice: 'Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội',
 } as const
 
 export const WINGSGROUP_RELATIONSHIP_STATEMENT_EN =
-  'WingsGroup is a newly developed brand within the same organisational ecosystem as VietWings and Đôi Cánh Việt. The ecosystem continues to develop WingsGo, WingSide, WingsCare and related services.'
+  'From the foundation of Vietwings, the travel ecosystem WingsGo - WingSide - WingsPass - WingsPlus - WingsCare and related services form WingsGroup, dedicated to seamless, professional and synchronized customer experiences.'
 
 export const WINGSGROUP_POLICY_VALIDATION_MARKER = 'wingsgroup-policy-governance-v1'
 export const WINGSGROUP_CONTENT_VALIDATION_MARKER = 'wingsgroup-content-approved-v1'

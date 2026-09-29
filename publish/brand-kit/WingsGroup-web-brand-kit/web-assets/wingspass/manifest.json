@@ -1,0 +1,46 @@
+{
+  "siteCode": "wingspass",
+  "displayTitle": "WingsPass",
+  "sourcePdf": "pdf/WINGS PASS.pdf",
+  "tagline": "Your Journey. Seamless.",
+  "valueLine": "EXCEPTIONAL EXPERIENCES",
+  "colors": {
+    "primary": "#005090",
+    "accent": "#008070"
+  },
+  "webAssetContract": {
+    "sourceOfTruth": "This folder's PNG masters",
+    "unit": "css-px",
+    "doNotCrop": true,
+    "doNotUpscale": true,
+    "dimensions": {
+      "logoPrimary": [
+        2400,
+        800
+      ],
+      "logoReverse": [
+        2400,
+        800
+      ],
+      "mark": [
+        1024,
+        1024
+      ],
+      "favicon": [
+        512,
+        512
+      ],
+      "ogImage": [
+        1200,
+        630
+      ]
+    }
+  },
+  "assets": {
+    "logoPrimary": "exports/wingspass/wingspass-logo-primary.png",
+    "logoReverse": "exports/wingspass/wingspass-logo-reverse.png",
+    "mark": "exports/wingspass/wingspass-mark.png",
+    "favicon": "exports/wingspass/wingspass-favicon.png",
+    "ogImage": "exports/wingspass/wingspass-og-image.png"
+  }
+}

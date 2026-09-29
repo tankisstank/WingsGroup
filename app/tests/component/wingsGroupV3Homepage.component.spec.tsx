@@ -168,15 +168,13 @@ describe('WingsGroup v3 public components', () => {
   it('forwards the English locale and legal identity to the home trust block', () => {
     const infoStrip = {
       blockType: 'infoStrip',
-      description: 'Trust block fixture',
-      title: 'Trust',
     } as Page['layout'][number]
 
     render(
       <RenderBlocks
         blocks={[infoStrip]}
         locale="en"
-        wingsGroupLegalIdentity={{ internationalName: 'VIETWINGS.,JSC' }}
+        wingsGroupLegalIdentity={{ internationalName: 'EN-INTEGRATION-TEST' }}
         wingsGroupV3
         wingsGroupV3Home
         wingsGroupV3Route="home"
@@ -380,6 +378,8 @@ describe('WingsGroup v3 public components', () => {
     expect(document.querySelectorAll('[data-service-row]')).toHaveLength(5)
     expect(screen.getByRole('heading', { name: 'WingsCare', level: 3 })).toBeTruthy()
     expect(screen.getAllByRole('link', { name: /Trao đổi nhu cầu/ })).toHaveLength(5)
+    expect(screen.getAllByRole('listitem')).toHaveLength(3)
+    expect(screen.getByText('An toàn & Tin cậy')).toBeTruthy()
     expect(
       screen
         .getAllByRole('link')
@@ -480,7 +480,7 @@ describe('WingsGroup v3 public components', () => {
     )
     expect(
       screen.getByText(
-        'WingsGroup là thương hiệu phát triển mới trong cùng hệ sinh thái tổ chức với VietWings và Đôi Cánh Việt. Hệ sinh thái tiếp tục phát triển các thương hiệu WingsGo, WingSide, WingsCare và các dịch vụ liên quan.',
+        'Từ nền tảng Vietwings kiến tạo hệ sinh thái dịch vụ du lịch WingsGo - WingSide - WingsPass - WingsPlus - WingsCare và các dịch vụ liên quan tạo nên hệ sinh thái WingsGroup, hướng đến trải nghiệm thuận tiện - chuyên nghiệp - đồng bộ cho khách hàng.',
       ),
     ).toBeTruthy()
     expect(screen.getByText('CÔNG TY CỔ PHẦN DU LỊCH ĐÔI CÁNH VIỆT')).toBeTruthy()

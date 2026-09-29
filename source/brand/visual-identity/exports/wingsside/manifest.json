@@ -1,6 +1,6 @@
 {
-  "siteCode": "wingsside",
-  "displayTitle": "WingSide",
+  "siteCode": "wing-side",
+  "displayTitle": "wingside.vn",
   "sourcePdf": "pdf/WINGS SIDE.pdf",
   "tagline": "See Vietnam Differently.",
   "valueLine": "TRUST & CARE",
@@ -8,6 +8,34 @@
     "primary": "#005090",
     "accent": "#104030",
     "secondaryAccent": "#C09030"
+  },
+  "webAssetContract": {
+    "sourceOfTruth": "This folder's PNG masters",
+    "unit": "css-px",
+    "doNotCrop": true,
+    "doNotUpscale": true,
+    "dimensions": {
+      "logoPrimary": [
+        2400,
+        800
+      ],
+      "logoReverse": [
+        2400,
+        800
+      ],
+      "mark": [
+        1024,
+        1024
+      ],
+      "favicon": [
+        512,
+        512
+      ],
+      "ogImage": [
+        1200,
+        630
+      ]
+    }
   },
   "assets": {
     "logoPrimary": "exports/wingsside/wingsside-logo-primary.png",
