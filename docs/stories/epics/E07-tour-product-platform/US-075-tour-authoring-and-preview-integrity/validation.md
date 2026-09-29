@@ -496,7 +496,7 @@ Artifact: `artifacts/wingsgo-image-audit-20260929/unicode-filename-fix.json`.
 | Check | Result | Evidence |
 | --- | --- | --- |
 | Newer release compatibility | PASS | `wingsgroup-lock-notice-20260929T160900Z` was preserved as the source base; only the Unicode-safe filename utility and schema-compatible public-media route were overlaid. |
-| Schema conflict removal | PASS | The newer `Media` schema has no `governance` field. The final route queries only `filename` and configured image-size filename fields, preventing the previous `governance` query from causing HTTP 500 on `-640.avif` derivatives. |
+| Schema conflict removal | PASS | The newer deployed `Media` schema has no `governance` field. Its merged production route queries only `filename` and configured image-size filename fields, preventing the previous `governance` query from causing HTTP 500 on `-640.avif` derivatives; the repository branch retains its existing governed WingsGroup route contract. |
 | Multilingual filename proof | PASS | Tour #117 Unicode original returns HTTP 200 `image/jpeg`; its `-640.avif` derivative returns HTTP 200 `image/avif` and browser natural size `640×853`; older ASCII JPG and PNG media remain HTTP 200. |
 | Runtime | PASS | Active release label is `wingsgroup-lock-notice-unicode-20260929T093600Z`; live/ready are HTTP 200; PostgreSQL `ab500698a619` and Redis `b59a6251dcfd` are unchanged; no migration or database write. |
 
