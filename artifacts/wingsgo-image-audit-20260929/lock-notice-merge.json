@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-29",
+  "environment": "production",
+  "sourceReleaseBase": "wingsgroup-lock-notice-20260929T160900Z",
+  "release": "wingsgroup-lock-notice-unicode-20260929T093600Z",
+  "activeImage": "sha256:763097556c880fe603110e4c2fb0b9b45bec9c00d6435697a02e53388324a153",
+  "rollbackImage": "sha256:c7955a9a4a886b6c86a1d59f01727a0565c9ad937b4115e08b6709bf75fac9a6",
+  "overlays": {
+    "routeSha256": "777fb05dbabb194441e8bd31b24a1fd13601cc3a9277fced56a3fe1233ed8845",
+    "publicMediaDeliverySha256": "b09d4b69af9b31eb87c94e72beeb8e8f5c46335c4178759fe41c5a3d009fef07",
+    "routePolicy": "Resolve site by request hostname; query only schema-supported media filename and sizes fields; no governance field query because the lock-notice Media schema removed governance."
+  },
+  "proof": {
+    "unicodeOriginal": { "status": 200, "contentType": "image/jpeg", "bytes": 584501 },
+    "unicodeDerivative640Avif": { "status": 200, "contentType": "image/avif", "bytes": 90885 },
+    "oldAsciiTourImage": { "status": 200, "contentType": "image/jpeg" },
+    "detailHero": { "status": 200, "contentType": "image/png" },
+    "browserHero": { "naturalWidth": 640, "naturalHeight": 853, "failedImages": 0 },
+    "healthLive": 200,
+    "healthReady": 200
+  },
+  "statefulServices": {
+    "postgresContainer": "ab500698a619",
+    "redisContainer": "b59a6251dcfd"
+  },
+  "databaseWrite": false,
+  "migration": false
+}

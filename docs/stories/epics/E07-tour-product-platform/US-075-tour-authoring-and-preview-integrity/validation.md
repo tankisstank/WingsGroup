@@ -51,6 +51,16 @@ Các trạng thái draft/public cũng phải được phân biệt ở action pr
 - Nếu `from` đã có redirect tới đích khác, transaction rollback và trả lỗi
   `redirect_conflict`; không được ghi đè redirect đang tồn tại.
 
+### Implementation checkpoint — 2026-09-29 — slug and candidate anchors
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Shared Vietnamese slug normalization | PASS | `app/src/utilities/normalizeTourSlug.ts` applies explicit `đ/Đ` mapping, Unicode NFD mark removal, lowercase, separator collapsing, and edge trimming. Client, TourProducts `beforeValidate`, and the two active tour import builders use it. |
+| Slug regression coverage | PASS | `tests/unit/normalizeTourSlug.unit.spec.ts`; server hook coverage includes `Đà Nẵng / 5N4Đ` → `da-nang-5n4d`. |
+| Public slug lifecycle preservation | PASS | Existing `ensurePublishedTourRedirect` transaction, `301` creation/reuse, `redirect_conflict`, publish authorization, signed preview, and editor publish guard were not changed; targeted `tourAuthoring.unit.spec.ts` and `proxy.unit.spec.ts` pass. |
+| Readiness candidate CMS anchors | PASS | Peer candidate accepted after direct inspection: every numeric/string wrapper candidate has a non-mutating `/admin/collections/pages/<id>` link and retains a separate relink control. Focused component test passes 2/2; full component suite passes 34 files / 183 tests. |
+| Production/staging proof | NOT RUN | No production CMS write, deployment, migration, or Redis flush was performed. Plane work-item sync was attempted after this validation update but was rate-limited and then stopped on an existing invalid date pair; production UAT remains a separate gate and is not closed by these automated checks. |
+
 ## Deterministic Fixtures
 
 - Một `wings-go` TourProduct đã published, có wrapper Page và tối thiểu một
@@ -418,3 +428,91 @@ closes the Product #112 wrapper, preview and public 404 path specifically.
 The UX change is source-ready but is not marked as a production release until the
 application-only release checklist is run and the deployed admin screen is
 verified in an authenticated browser session.
+
+### Production E2R recheck — 2026-09-27
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| VI public routes | PASS | `https://wingsgo.vn/`, `/lien-he`, and `/lich-khoi-hanh` returned HTTP 200. |
+| EN public routes | PASS | `/en`, `/en/lien-he`, and `/en/lich-khoi-hanh` returned HTTP 200; browser rendered `2026 departures & tour prices`, destination sections, and open departures. |
+| Temporary UAT fixture isolation | PASS | `/tour/uat-us-075-tour-demo-20260917` returned HTTP 404 after historical fixture cleanup. |
+| Write safety | PASS | This recheck was read-only; no CMS save, publish, lead submission, or content mutation was performed. |
+
+Artifact: `artifacts/production-e2e-20260927-us075-summary.json` (SHA-256 `5e92edd3c5b38b586c409d630add70a9771e98a7bb54ea91a7f1646ae7898504`). Historical authenticated CMS evidence remains the 11-step UAT recorded on 2026-09-18; its temporary product, wrapper, and departures were cleaned up and the route remains 404.
+
+### Production public-media hotfix — 2026-09-28
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Root cause | CONFIRMED | `wingsgo.vn/tour` card media requests were rejected with HTTP 403 because `/api/public-media/[filename]` hard-coded WingsGroup host validation. |
+| Application fix | PASS | Public media route resolves the active site by request hostname and enforces same-site media; ordinary Page media no longer depends on the retired WingsGroup governance gate. |
+| Release build | PASS | Application-only release `wingsgroup-public-media-20260928T120000Z`; TypeScript, targeted ESLint and 40/40 media/proxy/catalog unit tests passed before build. |
+| Production health | PASS | `/api/health/live` and `/api/health/ready` returned 200. |
+| WingsGo media | PASS | Representative media changed from HTTP 403 to HTTP 200 `image/jpeg`; browser audit loaded 11/11 tour media images with zero failed images after lazy-load scroll. |
+| Runtime safety | PASS | PostgreSQL container `ab500698a619...` and Redis container `b59a6251dcfd...` remained unchanged; only the app container was recreated. |
+
+Artifact: `artifacts/wingsgo-image-audit-20260928/production-image-fix.json` (SHA-256 `0283df00a583a7cb1d852d3fbeb03f2d623cc631c0492e097468938158eebfbc`). Screenshots: `tour-list.png` shows the pre-release blank media state; `tour-list-after-loaded.png` shows the post-release loaded images.
+
+### Newly requested CMS authoring requirements — 2026-09-29
+
+Hai yêu cầu mới được ghi nhận vào US-075; không tạo US mới vì đều thuộc cùng
+luồng TourProduct → wrapper Page → readiness:
+
+| Requirement | Acceptance / edge cases | Current gap and proof required |
+| --- | --- | --- |
+| Vietnamese slug không dấu | `Hà Nội – Seoul – Nami – Everland – Hái Táo` phải thành `ha-noi-seoul-nami-everland-hai-tao`; không mất ký tự `đ/Đ`, không còn dấu, khoảng trắng/ký tự liên tiếp gộp thành một dấu `-`, trim dấu `-` ở hai đầu. UI, REST/API và import phải cho cùng kết quả. | `TourSlugField` hiện chỉ `.toLowerCase()` và server hook cũng chỉ lowercase, nên chưa đáp ứng transliteration. Bổ sung unit/component/integration proof cho form và server boundary; kiểm tra collision và redirect `301` khi slug public đổi vẫn giữ nguyên. |
+| Candidate Page là link edit CMS | Với mỗi candidate (đặc biệt #314, #315, #316), ID/path phải là anchor tới `/admin/collections/pages/<id>` và mở đúng edit record; nút `Gán wrapper này` vẫn là control riêng, link không được gọi mutation. | Component test phải kiểm tra href theo ID, accessible name/link và cả trường hợp ID string; browser/UAT xác nhận mở đúng Page edit. Không dùng public path làm href edit vì candidate có thể draft, orphan hoặc sai pathname. |
+
+**Implementation boundary:** dùng một normalizer slug dùng chung cho client,
+`TourProducts.beforeValidate` và mọi import/API path; readiness chỉ bổ sung
+anchor dùng route CMS hiện có. Không đổi dữ liệu production tự động trong
+phạm vi ghi nhận yêu cầu; release và production UAT là gate riêng.
+
+### Public media regression redeploy — 2026-09-29
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Root cause | CONFIRMED | Production was serving `wingsgroup-direct-cta-20260929T051258Z`, whose public-media handler still enforced the WingsGroup-only host gate; WingsGo catalog images returned 11/11 HTTP 403. |
+| Release | PASS | App-only release `wingsgo-public-media-20260929T081000Z`, source archive SHA-256 `46e1cb783d547e88739a7b053d7b32988193fd1c2462bab2691d7b539c539d62`, active image `sha256:a4ba402e356e6de5286683409c66252ccc95e20d75e8c7f37d01885b14489965`. |
+| Media behavior | PASS | Hostname-based site resolution serves WingsGo media; WingsGroup keeps the governed publication/validation gate. Catalog smoke is 11/11 HTTP 200; tour detail media smoke is 4/4 HTTP 200; two WingsGroup media checks are HTTP 200. |
+| Runtime safety | PASS | `/api/health/live` and `/api/health/ready` are 200; PostgreSQL `ab500698a619` and Redis `b59a6251dcfd` are unchanged; no migration and no database write. Rollback image `sha256:9d94e8af5717…` is retained. |
+
+Artifact: `artifacts/wingsgo-image-audit-20260929/production-media-redeploy.json`.
+
+### Unicode media filename fix — 2026-09-29
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Root cause | CONFIRMED | TourProduct #117 catalog image used a filename containing Chinese characters, emoji and full-width punctuation; the ASCII-only filename validator returned HTTP 404 while older ASCII filenames returned HTTP 200. |
+| Safe filename boundary | PASS | `isSafePublicMediaFilename` now accepts Unicode filenames and rejects slash, backslash, NUL, control characters, DEL, `.` and `..`; unit/proxy checkpoint is 32/32. |
+| Production release | PASS | `wingsgo-media-unicode-20260929T091500Z`, source commit `66abcd129d826c202694c49b850f7f93f53ea5b7`, active image `sha256:3067681fe1b6…`. |
+| Tour #117 browser proof | PASS | `/tour/h-ni-osaka-kobe-kyoto-ni-ph-s-tokyo` renders the Unicode-named hero at natural size `1080×1440`; direct media request returns HTTP 200 `image/jpeg`. |
+| Regression proof | PASS | Existing ASCII tour image and PNG detail hero return HTTP 200; live/ready health remains HTTP 200; PostgreSQL/Redis containers unchanged; no migration or database write. |
+
+Artifact: `artifacts/wingsgo-image-audit-20260929/unicode-filename-fix.json`.
+
+### Merge with newer production release — 2026-09-29
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Newer release compatibility | PASS | `wingsgroup-lock-notice-20260929T160900Z` was preserved as the source base; only the Unicode-safe filename utility and schema-compatible public-media route were overlaid. |
+| Schema conflict removal | PASS | The newer `Media` schema has no `governance` field. The final route queries only `filename` and configured image-size filename fields, preventing the previous `governance` query from causing HTTP 500 on `-640.avif` derivatives. |
+| Multilingual filename proof | PASS | Tour #117 Unicode original returns HTTP 200 `image/jpeg`; its `-640.avif` derivative returns HTTP 200 `image/avif` and browser natural size `640×853`; older ASCII JPG and PNG media remain HTTP 200. |
+| Runtime | PASS | Active release label is `wingsgroup-lock-notice-unicode-20260929T093600Z`; live/ready are HTTP 200; PostgreSQL `ab500698a619` and Redis `b59a6251dcfd` are unchanged; no migration or database write. |
+
+Artifact: `artifacts/wingsgo-image-audit-20260929/lock-notice-merge.json`.
+
+### Authenticated production UAT — 2026-09-29
+
+| Check | Result | Direct evidence / limitation |
+| --- | --- | --- |
+| Live identity | PASS | Before/after the browser flow, `current` was `/home/ubuntu/wings-travel/releases/wingsgroup-no-proof-20260929T040313Z`; app `c95e341378c...` ran image `sha256:2ff0d665...`; `/api/health/live` and `/api/health/ready` both returned `200`. The live release contains the accepted normalizer and readiness-anchor sources. |
+| Wrapper provision, prior generic 500 concern | PASS_FOR_FIXTURE | Authenticated CMS user opened TourProduct `111` (WingsGo) and clicked `Tạo wrapper bản nháp`. Browser network recorded `POST /api/tour-authoring/111` `200`; readiness then showed draft Wrapper `#319` at `/tour/tour-du-lch-wingsgo-vip-1789744001298` with CMS edit and draft-preview links. No generic HTTP 500 was reproduced for this fixture. This is not proof for every possible Page/site/transaction failure class. |
+| Itinerary create and error handling | PARTIAL | Clicking `Thêm: Itinerary Day` created a blank second row. Its first autosave returned `PATCH /api/tour-products/111?...autosave=true...` `400` (twice); the `Lịch trình` tab then rendered `3 Lỗi` and required-field errors for the new row. Reload showed only the original day, so the invalid row did not persist. The initial added row was collapsed before validation; cross-tab error navigation was not directly exercised because the test was already on `Lịch trình`. This does not close the row-expanded-on-create/navigation gate. |
+| Quick-add persistence | PASS | With one safe draft departure (`2026-12-31`, `UAT production`, `UAT`, `1,234,567 VND`, verified expiry `2026-12-31T23:59`), browser network recorded `POST /api/tour-departures` `201`, followed by scoped `GET /api/tour-departures?...tourProduct=111...site=2...` `200`. A full reload still rendered the row, its draft status, and `Xác minh còn hiệu lực`. |
+| Cleanup | NOT RUN | The newly created draft wrapper `#319` and draft departure remain on the pre-existing UAT fixture TourProduct `111`. Historical cleanup instructions name different, already-deleted fixture IDs; no current documented cleanup authorizes deleting these records. |
+
+Browser screenshots are local evidence under `/tmp/us075-uat-*` (including
+`wrapper-provision.png`, `itinerary-added.png`, and
+`quickadd-persisted-after-reload.png`). No source, deployment, migration,
+Redis operation, or Plane-date repair occurred during this UAT.

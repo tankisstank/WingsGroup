@@ -15,6 +15,8 @@ describe('public media delivery boundary', () => {
     expect(isSafePublicMediaFilename('hero-1440.avif')).toBe(true)
     expect(isSafePublicMediaFilename('hero.jpg')).toBe(true)
     expect(isSafePublicMediaFilename('红叶季🍁富士山下🗻Live｜定格📸.jpg')).toBe(true)
+    expect(isSafePublicMediaFilename('서울-남산-에버랜드.jpg')).toBe(true)
+    expect(isSafePublicMediaFilename('東京・富士山・秋景色.webp')).toBe(true)
     expect(isSafePublicMediaFilename('../hero.jpg')).toBe(false)
     expect(isSafePublicMediaFilename('nested/hero.jpg')).toBe(false)
     expect(isSafePublicMediaFilename('hero\u0001.jpg')).toBe(false)
