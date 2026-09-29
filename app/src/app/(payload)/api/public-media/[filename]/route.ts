@@ -6,10 +6,10 @@ import { Readable } from 'node:stream'
 import config from '@payload-config'
 import { getPayload, type Where } from 'payload'
 
-import { validateWingsGroupV3PublicMedia, WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES } from '@/fields/wingsGroupV3'
+import { WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES } from '@/fields/wingsGroupV3'
 import {
   isSafePublicMediaFilename,
-  isWingsGroupPublicHost,
+  normalizePublicMediaHost,
   publicMediaContentType,
 } from '@/utilities/publicMediaDelivery'
 
@@ -33,22 +33,23 @@ export async function GET(
   const siteResult = await payload.find({
     collection: 'sites',
     depth: 0,
-    limit: 1,
+    limit: 100,
     overrideAccess: true,
     pagination: false,
-    where: {
-      and: [{ code: { equals: 'wings-group' } }, { isActive: { equals: true } }],
-    },
+    where: { isActive: { equals: true } },
   })
-  const site = siteResult.docs[0]
   const requestHost = request.headers.get('host') || new URL(request.url).host
-  if (!site || !isWingsGroupPublicHost(requestHost, site.primaryDomain)) {
+  const normalizedHost = normalizePublicMediaHost(requestHost)
+  const site = siteResult.docs.find((candidate) => {
+    const domains = [candidate.primaryDomain, ...(candidate.additionalDomains || []).map((entry) => entry.domain)]
+    return domains.some((domain) => normalizePublicMediaHost(domain) === normalizedHost)
+  })
+  if (!site) {
     return json('Forbidden.', 403)
   }
 
   const filenameConditions = [
     { filename: { equals: filename } },
-    { 'governance.responsiveDerivatives.url': { like: `%/media/${filename}` } },
     ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ name }) => ({
       [`sizes.${name}.filename`]: { equals: filename },
     })),
@@ -62,20 +63,12 @@ export async function GET(
     where: {
       and: [
         { site: { equals: site.id } },
-        { 'governance.managedBy': { equals: 'wingsgroup-v3' } },
-        { 'governance.publicationState': { equals: 'published' } },
         { or: filenameConditions },
       ],
     } satisfies Where,
   })
   const media = mediaResult.docs[0]
   if (!media) return json('Not found.', 404)
-
-  const governanceResult = validateWingsGroupV3PublicMedia(
-    media.governance,
-    `https://${site.primaryDomain}`,
-  )
-  if (governanceResult !== true) return json('Forbidden.', 403)
 
   const mediaCollection = payload.config.collections.find(({ slug }) => slug === 'media')
   const staticDir = mediaCollection?.upload
