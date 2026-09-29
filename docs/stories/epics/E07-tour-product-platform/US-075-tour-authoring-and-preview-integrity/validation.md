@@ -496,7 +496,7 @@ Artifact: `artifacts/wingsgo-image-audit-20260929/unicode-filename-fix.json`.
 | Check | Result | Evidence |
 | --- | --- | --- |
 | Newer release compatibility | PASS | `wingsgroup-lock-notice-20260929T160900Z` was preserved as the source base; only the Unicode-safe filename utility and schema-compatible public-media route were overlaid. |
-| Schema conflict removal | PASS | The newer deployed `Media` schema has no `governance` field. Its merged production route queries only `filename` and configured image-size filename fields, preventing the previous `governance` query from causing HTTP 500 on `-640.avif` derivatives; the repository branch retains its existing governed WingsGroup route contract. |
+| Schema conflict removal | PASS | The newer `Media` schema has no `governance` field. The final route queries only `filename` and configured image-size filename fields, preventing the previous `governance` query from causing HTTP 500 on `-640.avif` derivatives. |
 | Multilingual filename proof | PASS | Tour #117 Unicode original returns HTTP 200 `image/jpeg`; its `-640.avif` derivative returns HTTP 200 `image/avif` and browser natural size `640×853`; older ASCII JPG and PNG media remain HTTP 200. |
 | Runtime | PASS | Active release label is `wingsgroup-lock-notice-unicode-20260929T093600Z`; live/ready are HTTP 200; PostgreSQL `ab500698a619` and Redis `b59a6251dcfd` are unchanged; no migration or database write. |
 
@@ -516,3 +516,36 @@ Browser screenshots are local evidence under `/tmp/us075-uat-*` (including
 `wrapper-provision.png`, `itinerary-added.png`, and
 `quickadd-persisted-after-reload.png`). No source, deployment, migration,
 Redis operation, or Plane-date repair occurred during this UAT.
+## Follow-up — title-derived slug for future records (2026-09-29)
+
+- `titleToTourSlug` now derives a new TourProduct slug from the canonical
+  Vietnamese title and preserves an explicitly supplied custom slug.
+- Page slug/path synchronization uses the same transliteration helper when a
+  new Page has no slug, so a wrapper does not retain accented or uppercase
+  path segments.
+- Targeted proof: `pnpm exec vitest run --config vitest.unit.config.mts
+  --testNamePattern 'normalizes|derives|prefers'
+  tests/unit/normalizeTourSlug.unit.spec.ts` — 10 tests passed.
+- `pnpm run generate:types`, `pnpm exec tsc --noEmit`, and `pnpm build` now
+  pass. Legacy media import/repair code reads governance only through an
+  explicit compatibility type; the current Media collection schema no longer
+  exposes or requires those fields.
+- No production CMS record, migration, redirect, publish, or deployment was
+  performed in this follow-up.
+
+## Production promotion — 2026-09-29
+
+- Encrypted PostgreSQL backup created before cutover:
+  `/home/ubuntu/wings-travel/shared/backups/wingstravel-pre-slug-release-2026-09-29T11-30-41Z.dump.age`
+  (SHA-256 `06a64977ae21fa2439e2b62b3b8290db7c2504e2140ed57b8ad939023b186e95`).
+- ARM64 runner image built from commit SHA
+  `66abcd129d826c202694c49b850f7f93f53ea5b7`:
+  `sha256:2977b2f1420bec0cb140c5b0341047a0a0515e101a7fb5e54eaaee791b05a07c`.
+- Production current release:
+  `/home/ubuntu/wings-travel/releases/wingsgroup-slug-20260929T113700Z`.
+- App, PostgreSQL and Redis container IDs were checked after cutover; only the
+  app image changed. `/api/health/live` and `/api/health/ready` returned `200`.
+- Public smoke returned `200` for `wingsgroup.vn`, `wingsgo.vn`, `wingside.vn`,
+  `wingsplus.vn`, `wingspass.wingsgroup.vn` and `wingscare.wingsgroup.vn`.
+- Rollback release remains available at
+  `/home/ubuntu/wings-travel/releases/wingsgroup-lock-notice-20260929T160900Z`.
