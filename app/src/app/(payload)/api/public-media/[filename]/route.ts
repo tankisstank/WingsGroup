@@ -6,7 +6,7 @@ import { Readable } from 'node:stream'
 import config from '@payload-config'
 import { getPayload, type Where } from 'payload'
 
-import { WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES } from '@/fields/wingsGroupV3'
+import { validateWingsGroupV3PublicMedia, WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES } from '@/fields/wingsGroupV3'
 import {
   isSafePublicMediaFilename,
   normalizePublicMediaHost,
@@ -50,6 +50,7 @@ export async function GET(
 
   const filenameConditions = [
     { filename: { equals: filename } },
+    { 'governance.responsiveDerivatives.url': { like: `%/media/${filename}` } },
     ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ name }) => ({
       [`sizes.${name}.filename`]: { equals: filename },
     })),
@@ -63,12 +64,26 @@ export async function GET(
     where: {
       and: [
         { site: { equals: site.id } },
+        ...(site.code === 'wings-group'
+          ? [
+              { 'governance.managedBy': { equals: 'wingsgroup-v3' } },
+              { 'governance.publicationState': { equals: 'published' } },
+            ]
+          : []),
         { or: filenameConditions },
       ],
     } satisfies Where,
   })
   const media = mediaResult.docs[0]
   if (!media) return json('Not found.', 404)
+
+  if (site.code === 'wings-group') {
+    const governanceResult = validateWingsGroupV3PublicMedia(
+      media.governance,
+      `https://${site.primaryDomain}`,
+    )
+    if (governanceResult !== true) return json('Forbidden.', 403)
+  }
 
   const mediaCollection = payload.config.collections.find(({ slug }) => slug === 'media')
   const staticDir = mediaCollection?.upload

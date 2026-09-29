@@ -9,10 +9,7 @@ export const isSafePublicMediaFilename = (value: unknown): value is string =>
   value.length <= 255 &&
   value !== '.' &&
   value !== '..' &&
-  !value.includes('/') &&
-  !value.includes('\\') &&
-  !value.includes('\u0000') &&
-  /^[A-Za-z0-9][A-Za-z0-9._-]*$/u.test(value)
+  !/[\\/\u0000-\u001F\u007F]/u.test(value)
 
 export const isWingsGroupPublicHost = (
   requestHost: string | null | undefined,

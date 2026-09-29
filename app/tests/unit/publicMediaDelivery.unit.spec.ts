@@ -14,8 +14,10 @@ describe('public media delivery boundary', () => {
   it('accepts only flat safe filenames', () => {
     expect(isSafePublicMediaFilename('hero-1440.avif')).toBe(true)
     expect(isSafePublicMediaFilename('hero.jpg')).toBe(true)
+    expect(isSafePublicMediaFilename('红叶季🍁富士山下🗻Live｜定格📸.jpg')).toBe(true)
     expect(isSafePublicMediaFilename('../hero.jpg')).toBe(false)
     expect(isSafePublicMediaFilename('nested/hero.jpg')).toBe(false)
+    expect(isSafePublicMediaFilename('hero\u0001.jpg')).toBe(false)
     expect(isSafePublicMediaFilename('')).toBe(false)
   })
 
@@ -33,11 +35,13 @@ describe('public media delivery boundary', () => {
     expect(publicMediaContentType('hero.unknown')).toBe('application/octet-stream')
   })
 
-  it('keeps the public lookup contract compatible with governed derivative URLs', () => {
+  it('looks up ordinary media and generated derivative filenames while retaining the WingsGroup gate', () => {
     const route = readFileSync(
       path.resolve(process.cwd(), 'src/app/(payload)/api/public-media/[filename]/route.ts'),
       'utf8',
     )
-    expect(route).toContain("'governance.responsiveDerivatives.url'")
+    expect(route).toContain("site.code === 'wings-group'")
+    expect(route).toContain('governance.publicationState')
+    expect(route).toContain('sizes.${name}.filename')
   })
 })
