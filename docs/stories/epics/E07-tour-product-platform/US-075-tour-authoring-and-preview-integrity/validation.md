@@ -559,3 +559,14 @@ Redis operation, or Plane-date repair occurred during this UAT.
 | Root cause | CONFIRMED | The handler queried optional `governance.*` fields although the current slug release Media schema does not expose them. |
 | Source fix | PASS | `cf3c50c` removes optional governance predicates, keeps filename/derivative matching, and validates governance only when present. |
 | Production rollout | PENDING | The fix is pushed to `origin/master`; a new production image/cutover and post-cutover hero smoke are required. |
+
+### Production hero media repair and cutover — 2026-09-30
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Release build | PASS | Built release `wingsgroup-media-schema-20260930T073000Z` from source fix `cf3c50c`; image digest `sha256:1ac67de1b20e152eaaa4961e7702ffcf37a9b89c2ef84d54c11332ce7f0398e4`. |
+| Cutover | PASS | `/home/ubuntu/wings-travel/current` points to the new release; app container runs the new digest. |
+| WingsGroup hero | PASS | Representative original, AVIF and WebP media requests returned HTTP 200. |
+| WingsGo hero | PASS | Representative hero and catalog media requests returned HTTP 200. |
+| Runtime safety | PASS | `/api/health/live` and `/api/health/ready` returned HTTP 200; PostgreSQL `ab500698a619...` and Redis `b59a6251dcfd...` container IDs were unchanged. |
+| Rollback | READY | Previous app image `sha256:2977b2f1420bec0cb140c5b0341047a0a0515e101a7fb5e54eaaee791b05a07c` remains available. |
