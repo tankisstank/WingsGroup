@@ -554,4 +554,8 @@ Redis operation, or Plane-date repair occurred during this UAT.
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| WingsGroup hero medi
+| WingsGroup hero media | FAIL | Production `/media/*` requests were rewritten to `/api/public-media/*`; hero requests returned HTTP 500/404. |
+| WingsGo hero media | FAIL | Production WingsGo hero requests reproduced the same failure, confirming a shared handler issue. |
+| Root cause | CONFIRMED | The handler queried optional `governance.*` fields although the current slug release Media schema does not expose them. |
+| Source fix | PASS | `cf3c50c` removes optional governance predicates, keeps filename/derivative matching, and validates governance only when present. |
+| Production rollout | PENDING | The fix is pushed to `origin/master`; a new production image/cutover and post-cutover hero smoke are required. |
