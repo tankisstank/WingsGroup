@@ -48,9 +48,11 @@ export async function GET(
     return json('Forbidden.', 403)
   }
 
+  // Keep the query compatible with production Media schemas that do not carry
+  // the optional WingsGroup governance field. Derivative filenames are stored
+  // in the standard Payload sizes map and cover both governed and tenant media.
   const filenameConditions = [
     { filename: { equals: filename } },
-    { 'governance.responsiveDerivatives.url': { like: `%/media/${filename}` } },
     ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ name }) => ({
       [`sizes.${name}.filename`]: { equals: filename },
     })),
@@ -64,12 +66,6 @@ export async function GET(
     where: {
       and: [
         { site: { equals: site.id } },
-        ...(site.code === 'wings-group'
-          ? [
-              { 'governance.managedBy': { equals: 'wingsgroup-v3' } },
-              { 'governance.publicationState': { equals: 'published' } },
-            ]
-          : []),
         { or: filenameConditions },
       ],
     } satisfies Where,
@@ -78,11 +74,14 @@ export async function GET(
   if (!media) return json('Not found.', 404)
 
   if (site.code === 'wings-group') {
-    const governanceResult = validateWingsGroupV3PublicMedia(
-      media.governance,
-      `https://${site.primaryDomain}`,
-    )
-    if (governanceResult !== true) return json('Forbidden.', 403)
+    const governance = (media as { governance?: unknown }).governance
+    if (governance !== undefined) {
+      const governanceResult = validateWingsGroupV3PublicMedia(
+        governance,
+        `https://${site.primaryDomain}`,
+      )
+      if (governanceResult !== true) return json('Forbidden.', 403)
+    }
   }
 
   const mediaCollection = payload.config.collections.find(({ slug }) => slug === 'media')
