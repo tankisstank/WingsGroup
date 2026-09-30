@@ -570,3 +570,13 @@ Redis operation, or Plane-date repair occurred during this UAT.
 | WingsGo hero | PASS | Representative hero and catalog media requests returned HTTP 200. |
 | Runtime safety | PASS | `/api/health/live` and `/api/health/ready` returned HTTP 200; PostgreSQL `ab500698a619...` and Redis `b59a6251dcfd...` container IDs were unchanged. |
 | Rollback | READY | Previous app image `sha256:2977b2f1420bec0cb140c5b0341047a0a0515e101a7fb5e54eaaee791b05a07c` remains available. |
+
+### Site Manager publish permission regression — 2026-09-30
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Site Manager authorization | PASS | Production Site Manager session for TourProduct #118 returned `canPublish=true` and no readiness issues. |
+| Failure cause | CONFIRMED | Publish requests from `wingsgo.vn` returned HTTP 403 `csrf` before authorization because the internal rewrite origin was WingsGroup and `PREVIEW_CMS_ORIGINS` was not passed to the app container. |
+| Configuration fix | PASS | Added `PREVIEW_CMS_ORIGINS` to production compose and configured the verified multisite CMS origins. |
+| Safe publish probe | PASS | A probe with an intentionally invalid departure ID and the real readiness revision returned HTTP 409 `departure_scope`, proving the request passed CSRF and role checks and rolled back without publishing. |
+| Runtime | PASS | App container was recreated with the same image; PostgreSQL and Redis were unchanged; live/ready returned HTTP 200. |
