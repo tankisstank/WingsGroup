@@ -549,3 +549,9 @@ Redis operation, or Plane-date repair occurred during this UAT.
   `wingsplus.vn`, `wingspass.wingsgroup.vn` and `wingscare.wingsgroup.vn`.
 - Rollback release remains available at
   `/home/ubuntu/wings-travel/releases/wingsgroup-lock-notice-20260929T160900Z`.
+
+### Production media regression — 2026-09-30
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| WingsGroup hero medi
