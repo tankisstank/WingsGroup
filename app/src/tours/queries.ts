@@ -22,14 +22,15 @@ import type {
   TourResolvedData,
 } from './types'
 import {
+  filterDepartureVariants,
   getFutureDepartures,
   getLowestPrice,
   getNextDeparture,
   groupDeparturesByMonth,
   marketRouteSlugToKey,
   normalizeTourPublicText,
+  selectPublishableDepartures,
 } from './utils'
-import { normalizeGovernedTourPrice } from './currency'
 import { isDepartureVerificationCurrent } from './departureCommerce'
 import {
   buildTourTaxonomyWhere,
@@ -213,11 +214,17 @@ export const selectRelatedTourCards = ({
 
 const normalizeVariantCard = (
   variant: Record<string, any> | number | string | null | undefined,
+  draft = false,
 ) => {
   const doc = asDoc<Record<string, any>>(variant)
 
   if (!doc) {
     return variant || null
+  }
+
+  // In public mode, variant must be active
+  if (!draft && doc.status && doc.status !== 'active') {
+    return null
   }
 
   return {
@@ -255,7 +262,7 @@ const normalizeDepartureCard = (
     returnDate: departure.returnDate,
     tourProduct: normalizeTourProductCard(departure.tourProduct),
     urgencyLabel: commerceVerified ? departure.urgencyLabel : null,
-    variantRef: normalizeVariantCard(departure.variantRef),
+    variantRef: normalizeVariantCard(departure.variantRef, draft),
   }
 }
 
@@ -440,9 +447,7 @@ export const getDepartureVariantsForProduct = async ({
     },
   })
 
-  return (result.docs as any[])
-    .filter((variant) => variant.status !== 'archived')
-    .sort((left, right) => Number(left.displayPriority || 0) - Number(right.displayPriority || 0))
+  return filterDepartureVariants(result.docs as any[], { draft })
 }
 
 export const getResolvedTourDetailBySlug = async ({
@@ -484,8 +489,7 @@ export const getResolvedTourDetailBySlug = async ({
   const featuredVariant =
     variants.find((variant) => variant.status === 'active' && variant.displayPriority === 0) ||
     variants.find((variant) => variant.status === 'active') ||
-    variants[0] ||
-    null
+    (draft ? variants[0] || null : null)
 
   const resolved = mergeTourVariant({
     tour,
@@ -515,26 +519,19 @@ export const getResolvedTourDetailBySlug = async ({
     source: resolvedTour,
   })
 
-  const featuredDepartures = getFutureDepartures(
-    departures.filter(
-      (departure) => departure.isFeatured || departure.availabilityStatus === 'open',
-    ),
+  const validPublicDepartures = selectPublishableDepartures(departures, { draft })
+  const featuredDepartures = validPublicDepartures.filter(
+    (departure) => departure.isFeatured || departure.availabilityStatus === 'open',
   )
-  const fallbackPrice = normalizeGovernedTourPrice({
-    currency: tour.currency,
-    value: tour.priceFrom,
-  })
 
   return {
     builderConfig: resolved.builderConfig,
-    departures,
+    departures: validPublicDepartures,
     featuredDepartures:
       featuredDepartures.length > 0
         ? featuredDepartures
-        : getFutureDepartures(departures).slice(0, 4),
-    nextDeparture:
-      getNextDeparture(departures) ||
-      (fallbackPrice ? { priceFrom: fallbackPrice.value, currency: fallbackPrice.currency } : null),
+        : validPublicDepartures.slice(0, 4),
+    nextDeparture: getNextDeparture(validPublicDepartures),
     sectionOrder: resolved.sectionOrder,
     sectionVisibility: resolved.sectionVisibility,
     tour: {

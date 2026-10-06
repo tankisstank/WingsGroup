@@ -246,45 +246,6 @@ export const buildFAQPageJSONLD = (
     : null
 }
 
-/**
- * Emits semantic FAQPage data only for CMS FAQ blocks that are rendered as
- * visible question-and-answer content. Search engines may choose not to show
- * FAQ rich results for commercial sites, but the markup remains an accurate
- * machine-readable representation of the page.
- */
-export const buildFAQPageJSONLD = (
-  blocks?: readonly unknown[] | null,
-): JsonLdNode | null => {
-  const mainEntity = (blocks || [])
-    .filter(
-      (block): block is FAQBlock =>
-        Boolean(block) && typeof block === 'object' && (block as FAQBlock).blockType === 'faq',
-    )
-    .flatMap((block) => block.items || [])
-    .map((item) => ({
-      answer: item.answer?.trim(),
-      question: item.question?.trim(),
-    }))
-    .filter(
-      (item): item is { answer: string; question: string } =>
-        Boolean(item.question) && Boolean(item.answer),
-    )
-    .map((item) => ({
-      '@type': 'Question' as const,
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer' as const,
-        text: item.answer,
-      },
-    }))
-
-  return mainEntity.length
-    ? {
-        '@type': 'FAQPage',
-        mainEntity,
-      }
-    : null
-}
 
 export const buildPageJsonLd = ({
   canonicalOrigin,

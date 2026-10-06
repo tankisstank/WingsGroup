@@ -4,8 +4,6 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { ProtectedEmailLink } from './ProtectedEmailLink'
 
-import { ProtectedEmailLink } from './ProtectedEmailLink'
-
 type Props = { locale?: string | null; siteCode?: string | null }
 
 export const SiteContactFab: React.FC<Props> = ({ locale, siteCode }) => {
@@ -61,7 +59,7 @@ export const SiteContactFab: React.FC<Props> = ({ locale, siteCode }) => {
         aria-expanded={open}
         aria-controls="site-contact-dialog"
         aria-haspopup="dialog"
-        className="fixed bottom-5 right-5 z-[80] rounded-full bg-[var(--site-brand)] px-5 py-3 text-sm font-semibold text-white shadow-xl transition hover:scale-[1.02]"
+        className="fixed bottom-20 right-4 sm:bottom-5 sm:right-5 z-[80] rounded-full bg-[var(--site-brand)] px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-xl transition hover:scale-[1.02]"
         onClick={() => setOpen(true)}
         ref={triggerRef}
         type="button"

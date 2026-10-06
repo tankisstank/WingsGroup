@@ -10,6 +10,7 @@ export default defineConfig({
   plugins: [tsconfigPaths(), react()],
   resolve: {
     alias: {
+      '@payloadcms/ui/icons/Copy': path.resolve(__dirname, 'tests/mocks/emptyNodeSqlite.ts'),
       'node:sqlite': path.resolve(__dirname, 'tests/mocks/emptyNodeSqlite.ts'),
     },
   },

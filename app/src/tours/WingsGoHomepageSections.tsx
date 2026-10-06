@@ -190,14 +190,19 @@ export const WingsGoHomepageSections = async ({
                               (isEn ? 'Contact us' : 'Liên hệ')}
                           </dd>
                         </div>
-                        <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">
-                          {!verified
+                        {(() => {
+                          const label = !verified
                             ? isEn
                               ? 'Confirm availability'
                               : 'Liên hệ xác nhận'
                             : departure.availabilityBadge ||
-                              getAvailabilityLabel(departure.availabilityStatus, locale)}
-                        </span>
+                              getAvailabilityLabel(departure.availabilityStatus, locale)
+                          return label ? (
+                            <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">
+                              {label}
+                            </span>
+                          ) : null
+                        })()}
                       </div>
                     </dl>
                     <div className="mt-auto flex flex-wrap gap-2 pt-5">

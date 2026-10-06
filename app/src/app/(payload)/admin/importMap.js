@@ -33,6 +33,7 @@ import { default as default_ba290a9fe200293e4bb86af139824b76 } from '@/component
 import { default as default_0165f3a062ce19f7271a26c2d24f4398 } from '@/components/TourAuthoring'
 import { default as default_26964421676ddaf6bd429d976a2b85bb } from '@/components/TourGalleryField'
 import { default as default_16770289a0956af26e4f7a84c072656c } from '@/components/TourItineraryRowLabel'
+import { default as default_809f6eac2cdcbd1c80436c07b4ca9e77 } from '@/components/TourAuthoring/TourSlugField'
 import { default as default_245822b561ac10a6df6e1f638d3707d8 } from '@/components/AdminGuidance/TourProductListGuidance'
 import { default as default_c21ee5ce90a3a1dce11557b26b290c61 } from '@/components/TourItineraryValidationNavigator'
 import { default as default_00edbbd5305a6078491f038fdb402eb8 } from '@/components/TourAuthoring/TourDepartureSaveGuidance'
@@ -109,6 +110,7 @@ export const importMap = {
   "@/components/TourAuthoring#default": default_0165f3a062ce19f7271a26c2d24f4398,
   "@/components/TourGalleryField#default": default_26964421676ddaf6bd429d976a2b85bb,
   "@/components/TourItineraryRowLabel#default": default_16770289a0956af26e4f7a84c072656c,
+  "@/components/TourAuthoring/TourSlugField#default": default_809f6eac2cdcbd1c80436c07b4ca9e77,
   "@/components/AdminGuidance/TourProductListGuidance#default": default_245822b561ac10a6df6e1f638d3707d8,
   "@/components/TourItineraryValidationNavigator#default": default_c21ee5ce90a3a1dce11557b26b290c61,
   "@/components/TourAuthoring/TourDepartureSaveGuidance#default": default_00edbbd5305a6078491f038fdb402eb8,

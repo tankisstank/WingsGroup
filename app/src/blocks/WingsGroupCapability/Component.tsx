@@ -214,6 +214,7 @@ export const WingsGroupCapabilitySection = ({
 }: Props) => {
   const isEnglish = locale === 'en'
   const fallbackRows = WINGSGROUP_CAPABILITY_ROWS[isEnglish ? 'en' : 'vi']
+  const resolvedEyebrow = eyebrow || (isEnglish ? 'Our Capabilities' : 'Năng lực vận hành')
   // This route is a governed projection, not a generic feature-card renderer.
   // Keep the public service rows branded and stable even if CMS input changes.
   const rows = fallbackRows

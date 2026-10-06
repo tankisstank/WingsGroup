@@ -11,19 +11,29 @@ export const TourItineraryDayDetails = ({
   children,
   className,
   initiallyOpen = false,
+  isOpen,
+  onToggle,
 }: {
   children: React.ReactNode
   className?: string
   initiallyOpen?: boolean
+  isOpen?: boolean
+  onToggle?: (open: boolean) => void
 }) => {
-  const [open, setOpen] = useState(initiallyOpen)
+  const [internalOpen, setInternalOpen] = useState(initiallyOpen)
+  const isControlled = typeof isOpen === 'boolean'
+  const currentOpen = isControlled ? isOpen : internalOpen
 
   return (
     <details
       className={className}
-      open={open}
+      open={currentOpen}
       onToggle={(event) => {
-        setOpen((event.currentTarget as HTMLDetailsElement).open)
+        const nextState = (event.currentTarget as HTMLDetailsElement).open
+        if (!isControlled) {
+          setInternalOpen(nextState)
+        }
+        onToggle?.(nextState)
       }}
     >
       {children}

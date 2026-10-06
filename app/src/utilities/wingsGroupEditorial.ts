@@ -254,16 +254,13 @@ export const getWingsGroupEditorialOpenGraphMedia = (media?: Media | null): Medi
   if (!isEditorialMedia(media)) return null
 
   const derivative = (media.governance?.responsiveDerivatives || [])
-    .filter(
+    .find(
       (entry) =>
         entry.format === 'webp' &&
         typeof entry.url === 'string' &&
         entry.url.startsWith('https://') &&
         typeof entry.width === 'number',
     )
-    .sort((left, right) => (right.width || 0) - (left.width || 0))[0]
-  const mediaSizes = media.sizes as { og?: { url?: null | string } } | null | undefined
-
   const mediaSizes = media.sizes as { og?: { url?: null | string } } | null | undefined
   const publicURL = derivative?.url ? normalizePublicMediaURL(derivative.url) : ''
   return publicURL

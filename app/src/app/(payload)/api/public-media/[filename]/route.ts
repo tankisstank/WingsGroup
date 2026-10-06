@@ -12,6 +12,10 @@ import {
   normalizePublicMediaHost,
   publicMediaContentType,
 } from '@/utilities/publicMediaDelivery'
+import {
+  hasValidTrustedSiteContext,
+  requestHostCandidates,
+} from '@/utilities/siteDomains'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -38,12 +42,58 @@ export async function GET(
     pagination: false,
     where: { isActive: { equals: true } },
   })
-  const requestHost = request.headers.get('host') || new URL(request.url).host
-  const normalizedHost = normalizePublicMediaHost(requestHost)
-  const site = siteResult.docs.find((candidate) => {
-    const domains = [candidate.primaryDomain, ...(candidate.additionalDomains || []).map((entry) => entry.domain)]
-    return domains.some((domain) => normalizePublicMediaHost(domain) === normalizedHost)
-  })
+  const isTrustedContext = await hasValidTrustedSiteContext(request.headers)
+  const siteCode = isTrustedContext ? request.headers.get('x-site-code') || null : null
+  const sites = siteResult.docs
+  let site = siteCode ? sites.find((s) => s.code === siteCode) : null
+
+  if (!site) {
+    const candidateHosts: string[] = []
+    if (isTrustedContext) {
+      candidateHosts.push(...requestHostCandidates(request.headers))
+    } else {
+      const untrustedHost = normalizePublicMediaHost(request.headers.get('host'))
+      if (untrustedHost) candidateHosts.push(untrustedHost)
+    }
+    if (candidateHosts.length === 0) {
+      const urlHost = normalizePublicMediaHost(new URL(request.url).host)
+      if (urlHost) candidateHosts.push(urlHost)
+    }
+
+    site = sites.find((candidate) => {
+      const domains = [
+        candidate.primaryDomain,
+        ...(candidate.additionalDomains || []).map((entry) => entry.domain),
+      ].map((d) => normalizePublicMediaHost(d))
+      return domains.some((domain) => candidateHosts.includes(domain))
+    })
+
+    // Local loopback host fallback (only exact 'localhost' or '127.0.0.1' without foreign domain suffixes)
+    const isExactLocalLoopback = candidateHosts.some(
+      (h) => h === 'localhost' || h === '127.0.0.1' || h.startsWith('localhost:') || h.startsWith('127.0.0.1:'),
+    )
+    if (!site && isExactLocalLoopback && process.env.NODE_ENV !== 'production') {
+      const filenameConditionsForSearch = [
+        { filename: { equals: filename } },
+        ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ name }) => ({
+          [`sizes.${name}.filename`]: { equals: filename },
+        })),
+      ]
+      const localMediaCheck = await payload.find({
+        collection: 'media',
+        depth: 0,
+        limit: 1,
+        overrideAccess: true,
+        pagination: false,
+        where: { or: filenameConditionsForSearch } satisfies Where,
+      })
+      if (localMediaCheck.docs[0]?.site) {
+        const foundSiteId = localMediaCheck.docs[0].site
+        site = sites.find((s) => s.id === foundSiteId) || null
+      }
+    }
+  }
+
   if (!site) {
     return json('Forbidden.', 403)
   }
@@ -73,15 +123,13 @@ export async function GET(
   const media = mediaResult.docs[0]
   if (!media) return json('Not found.', 404)
 
-  if (site.code === 'wings-group') {
-    const governance = (media as { governance?: unknown }).governance
-    if (governance !== undefined) {
-      const governanceResult = validateWingsGroupV3PublicMedia(
-        governance,
-        `https://${site.primaryDomain}`,
-      )
-      if (governanceResult !== true) return json('Forbidden.', 403)
-    }
+  const governance = (media as { governance?: Record<string, unknown> }).governance
+  if (governance && governance.managedBy === 'wingsgroup-v3') {
+    const governanceResult = validateWingsGroupV3PublicMedia(
+      governance,
+      `https://${site.primaryDomain}`,
+    )
+    if (governanceResult !== true) return json('Forbidden.', 403)
   }
 
   const mediaCollection = payload.config.collections.find(({ slug }) => slug === 'media')

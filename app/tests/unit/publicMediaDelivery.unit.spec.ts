@@ -9,6 +9,10 @@ import {
   normalizePublicMediaHost,
   publicMediaContentType,
 } from '@/utilities/publicMediaDelivery'
+import {
+  hasValidTrustedSiteContext,
+  requestHostCandidates,
+} from '@/utilities/siteDomains'
 
 describe('public media delivery boundary', () => {
   it('accepts only flat safe filenames', () => {
@@ -37,13 +41,34 @@ describe('public media delivery boundary', () => {
     expect(publicMediaContentType('hero.unknown')).toBe('application/octet-stream')
   })
 
-  it('looks up ordinary media and generated derivative filenames while retaining the WingsGroup gate', () => {
+  it('looks up ordinary media and generated derivative filenames while retaining governance validation', () => {
     const route = readFileSync(
       path.resolve(process.cwd(), 'src/app/(payload)/api/public-media/[filename]/route.ts'),
       'utf8',
     )
-    expect(route).toContain("site.code === 'wings-group'")
-    expect(route).toContain('governance.publicationState')
+    expect(route).not.toContain("request.headers.get('x-forwarded-host')")
+    expect(route).toContain('hasValidTrustedSiteContext(request.headers)')
+    expect(route).toContain("governance.managedBy === 'wingsgroup-v3'")
+    expect(route).toContain('validateWingsGroupV3PublicMedia(')
     expect(route).toContain('sizes.${name}.filename')
+  })
+
+  it('rejects untrusted x-forwarded-host spoofing when host belongs to another tenant', () => {
+    const headers = new Headers()
+    headers.set('host', 'wingsgo.vn')
+    headers.set('x-forwarded-host', 'wingsgroup.vn')
+
+    // requestHostCandidates should strictly prioritize trusted host/x-site-host and ignore x-forwarded-host
+    const candidates = requestHostCandidates(headers)
+    expect(candidates).toContain('wingsgo.vn')
+    expect(candidates).not.toContain('wingsgroup.vn')
+  })
+
+  it('verifies that untrusted caller cannot spoof tenant via direct x-site-code header', async () => {
+    const headers = new Headers()
+    headers.set('x-site-code', 'wings-group') // Attacker tries to pretend to be WingsGroup
+    // Without proxy signature HMAC, hasValidTrustedSiteContext must reject
+    const isValid = await hasValidTrustedSiteContext(headers)
+    expect(isValid).toBe(false)
   })
 })

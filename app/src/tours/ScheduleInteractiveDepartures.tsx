@@ -180,11 +180,16 @@ export const ScheduleInteractiveDepartures = ({
                         {[variant?.label, departure.departureCity || null].filter(Boolean).join(' · ')}
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
-                          {commerceVerified
+                        {(() => {
+                          const label = commerceVerified
                             ? departure.availabilityBadge || getAvailabilityLabel(departure.availabilityStatus, locale)
-                            : isEn ? 'Confirm with us' : 'Liên hệ xác nhận'}
-                        </span>
+                            : isEn ? 'Confirm with us' : 'Liên hệ xác nhận'
+                          return label ? (
+                            <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
+                              {label}
+                            </span>
+                          ) : null
+                        })()}
                         {departure.urgencyLabel ? (
                           <span className="rounded-full border border-[var(--site-accent)]/40 bg-[var(--site-accent)]/10 px-3 py-1 text-xs font-semibold text-foreground">
                             {departure.urgencyLabel}

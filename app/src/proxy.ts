@@ -424,6 +424,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     '/api/lead-submissions',
+    '/api/public-media/:path*',
     // The catalog endpoint resolves the tenant through the proxy-signed host
     // context just like server-rendered public pages. Keep this explicit: the
     // catch-all intentionally excludes all other APIs.

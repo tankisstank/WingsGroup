@@ -153,7 +153,7 @@ export const getAvailabilityLabel = (
   }
 
   if (!status) {
-    return getCopyLocale(locale) === 'en' ? 'Open' : 'Mở bán'
+    return ''
   }
 
   return (getCopyLocale(locale) === 'en' ? en : vi)[status] || status
@@ -328,6 +328,95 @@ export const resolveConsultativeCtaHref = ({
   return fallbackPath
 }
 
+export const resolveRetailCtaHref = ({
+  cmsHref,
+  expectedDepartureDate,
+  expectedDepartureId,
+  expectedTourId,
+  expectedTourSlug,
+  hasFutureDeparture,
+  inquiryPath,
+  isSellable = true,
+}: {
+  cmsHref?: null | string
+  expectedDepartureDate?: null | string
+  expectedDepartureId?: null | number | string
+  expectedTourId?: null | number | string
+  expectedTourSlug?: null | string
+  hasFutureDeparture: boolean
+  inquiryPath: string
+  isSellable?: boolean
+}) => {
+  const href = String(cmsHref || '').trim()
+
+  // When no future departure exists, force honest inquiry path (prevent false hold-seat override)
+  if (!hasFutureDeparture) {
+    return inquiryPath
+  }
+
+  // When departure exists, honor external / tel / mailto
+  if (/^(https?:|mailto:|tel:)/i.test(href)) {
+    return href
+  }
+
+  // If tour is not sellable (sold out or unverified), internal CMS href must not force hold-seat intent
+  if (!isSellable) {
+    try {
+      const parsed = new URL(href, 'https://wingsgroup.vn')
+      const targetIntent = parsed.searchParams.get('intent')
+      if (targetIntent === 'hold-seat' || targetIntent === 'hold - seat') {
+        return inquiryPath
+      }
+    } catch {
+      if (/[?&]intent=(hold[-%2d]seat|hold-seat)\b/i.test(href)) {
+        return inquiryPath
+      }
+    }
+  }
+
+  // If href is internal link, verify it strictly matches the expected departureId and departureDate (if provided in url)
+  if (
+    href.startsWith('/') &&
+    expectedDepartureId !== null &&
+    expectedDepartureId !== undefined &&
+    expectedDepartureId !== ''
+  ) {
+    try {
+      const url = new URL(href, 'https://wingsgroup.vn')
+      const targetIntent = url.searchParams.get('intent')
+      if (!isSellable && targetIntent === 'hold-seat') {
+        return inquiryPath
+      }
+      const targetDepartureId = url.searchParams.get('departureId')
+      const targetDepartureDate = url.searchParams.get('departureDate')
+      const targetTourId = url.searchParams.get('tourId')
+      const targetTourSlug = url.searchParams.get('tour') || url.searchParams.get('tourSlug')
+
+      const idMatches = targetDepartureId && String(targetDepartureId) === String(expectedDepartureId)
+      const dateMatches =
+        !targetDepartureDate ||
+        !expectedDepartureDate ||
+        String(targetDepartureDate) === String(expectedDepartureDate)
+      const tourIdMatches =
+        !targetTourId ||
+        !expectedTourId ||
+        String(targetTourId) === String(expectedTourId)
+      const tourSlugMatches =
+        !targetTourSlug ||
+        !expectedTourSlug ||
+        String(targetTourSlug) === String(expectedTourSlug)
+
+      if (idMatches && dateMatches && tourIdMatches && tourSlugMatches) {
+        return href
+      }
+    } catch {
+      // invalid URL
+    }
+  }
+
+  return inquiryPath
+}
+
 export const getTourPricePosture = ({
   currency,
   locale = 'en',
@@ -440,6 +529,17 @@ export const getFutureDepartures = <T extends { departureDate?: null | string }>
   })
 }
 
+export const selectPublishableDepartures = <
+  T extends { commerceVerified?: boolean | null; departureDate?: null | string },
+>(
+  departures?: T[] | null,
+  options?: { draft?: boolean },
+): T[] => {
+  const draft = options?.draft ?? false
+  if (draft) return departures || []
+  return getFutureDepartures(departures).filter((departure) => departure.commerceVerified)
+}
+
 /**
  * A homepage "on sale" card must have every customer-facing flight and price
  * claim ready. Incomplete departures stay in CMS as drafts until editorial
@@ -477,9 +577,19 @@ export const getPriorityMarketDeparture = (
       return limited || featured || leftDate - rightDate
     })[0]
 
+export const filterDepartureVariants = <T extends { displayPriority?: null | number; status?: null | string }>(
+  variants?: T[] | null,
+  options?: { draft?: boolean },
+): T[] => {
+  const draft = options?.draft ?? false
+  return (variants || [])
+    .filter((variant) => (draft ? variant.status !== 'archived' : variant.status === 'active'))
+    .sort((left, right) => Number(left.displayPriority || 0) - Number(right.displayPriority || 0))
+}
+
 export const getNextDeparture = <T extends { departureDate?: null | string }>(
   departures?: T[] | null,
-) => getFutureDepartures(departures)[0] || (departures?.[0] ?? null)
+) => getFutureDepartures(departures)[0] ?? null
 
 export const groupDeparturesByMonth = <T extends { departureDate?: null | string }>(
   departures?: T[] | null,

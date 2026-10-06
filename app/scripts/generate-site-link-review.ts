@@ -532,6 +532,7 @@ const buildHTML = ({ generatedAt, sites }: { generatedAt: string; sites: SiteNod
 </html>`
 }
 
+// @ts-ignore -- @libsql/client/node is resolved at runtime when libsql is present
 const { createClient } = await import('@libsql/client/node')
 const client = createClient({ url: getDatabaseURL() })
 
