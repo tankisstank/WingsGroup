@@ -34,7 +34,6 @@ export const TourDepartureMatrix = ({
     if (departure) {
       onSelectDeparture?.(departure)
       context?.setSelectedDeparture?.(departure)
-      context?.setIsPrivateTour?.(false)
       context?.setAnnounceMessage?.(
         locale === 'en'
           ? `Selected departure ${formatTourDate(departure.departureDate, locale)}`

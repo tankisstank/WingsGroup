@@ -209,7 +209,9 @@ export const getTourInquiryPath = ({
   }
 
   if (departureDate) {
-    params.set('departureDate', departureDate)
+    const cleanDate =
+      typeof departureDate === 'string' ? departureDate.slice(0, 10) : departureDate
+    params.set('departureDate', cleanDate)
   }
 
   if (source) {

@@ -1650,9 +1650,9 @@ const TourItinerarySection = ({
                           ))}
                         </div>
                       ) : null}
-                      {day.equipmentNote || day.notes ? (
+                      {[day.equipmentNote, day.notes].some(isUsableText) ? (
                         <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                          {[day.equipmentNote, day.notes].filter(Boolean).join(' ')}
+                          {[day.equipmentNote, day.notes].filter(isUsableText).join(' ')}
                         </p>
                       ) : null}
                     </div>
@@ -1824,9 +1824,9 @@ const TourItinerarySection = ({
                           ))}
                         </div>
                       ) : null}
-                      {day.equipmentNote || day.notes ? (
+                      {[day.equipmentNote, day.notes].some(isUsableText) ? (
                         <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                          {[day.equipmentNote, day.notes].filter(Boolean).join(' ')}
+                          {[day.equipmentNote, day.notes].filter(isUsableText).join(' ')}
                         </p>
                       ) : null}
                     </div>
@@ -2701,55 +2701,6 @@ export const TourDetailPage = ({
     ]
   }
 
-  const sections: Record<TourSectionID, React.ReactNode> = {
-    hero: (
-      <TourDecisionHeader
-        locale={locale}
-        nextDeparture={data.nextDeparture}
-        presentation={resolvedPresentation}
-        siteCode={siteCode}
-        tour={tour}
-        variants={isConsultative ? [] : data.variants}
-      />
-    ),
-    facts: <TourFactGrid locale={locale} presentation={resolvedPresentation} tour={tour} />,
-    reviews: (
-      <TourReviewsProofSection locale={locale} presentation={resolvedPresentation} tour={tour} />
-    ),
-    'why-choose': (
-      <TourWhyChooseSection locale={locale} presentation={resolvedPresentation} tour={tour} />
-    ),
-    route: (
-      <TourRouteVisualSection locale={locale} presentation={resolvedPresentation} tour={tour} />
-    ),
-    itinerary: (
-      <TourItinerarySection locale={locale} presentation={resolvedPresentation} tour={tour} />
-    ),
-    services: (
-      <TourServicesSection locale={locale} presentation={resolvedPresentation} tour={tour} />
-    ),
-    departures: isConsultative ? (
-      <TourPricePostureSection locale={locale} nextDeparture={data.nextDeparture} tour={tour} />
-    ) : (
-      <TourDepartureSection
-        departures={data.departures}
-        locale={locale}
-        tour={tour}
-      />
-    ),
-    faq: <TourFAQSection locale={locale} presentation={resolvedPresentation} tour={tour} />,
-    related: <TourRelatedSection locale={locale} presentation={resolvedPresentation} tour={tour} />,
-    'sticky-cta': (
-      <StickyBookingCTASection
-        locale={locale}
-        nextDeparture={data.nextDeparture}
-        presentation={resolvedPresentation}
-        siteCode={siteCode}
-        tour={tour}
-      />
-    ),
-  }
-
   const navSections = sectionOrder.filter((section) => !['hero', 'sticky-cta'].includes(section))
   const navLabels: Record<string, { long: string; short: string }> = isConsultative
     ? {
@@ -2780,7 +2731,10 @@ export const TourDetailPage = ({
   )
 
   return (
-    <TourDepartureSelectionProvider initialDeparture={data.nextDeparture}>
+    <TourDepartureSelectionProvider
+      departures={data.departures}
+      initialDeparture={data.nextDeparture}
+    >
       {(() => {
         const sections: Record<TourSectionID, React.ReactNode> = {
           hero: (
