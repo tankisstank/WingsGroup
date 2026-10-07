@@ -174,29 +174,70 @@ describe('US-027 Slice 4: Departure Matrix Sync & Sticky Conversion Bar componen
 
     const stickyPrimaryCta = container.querySelector('[data-od-id="tour-sticky-primary-cta"]') as HTMLAnchorElement
     expect(stickyPrimaryCta).toBeTruthy()
-    expect(stickyPrimaryCta.textContent).toContain('Gửi yêu cầu đợt này')
+    expect(stickyPrimaryCta.textContent).toContain('Tư vấn đợt khác')
     expect(stickyPrimaryCta.getAttribute('href')).toContain('intent=inquiry')
   })
 
-  it('handles tour without future departures honestly without fake availability badges or hold-seat intent', () => {
-    const pastOrEmptyTourData: TourResolvedData = {
+  it('filters departures using AND logic (City AND Month) and falls back selection accurately', () => {
+    const multiCityData: TourResolvedData = {
       ...sampleTourData,
-      departures: [],
-      nextDeparture: null,
+      departures: [
+        {
+          id: 501,
+          departureCity: 'Hà Nội',
+          departureDate: '2026-11-15T00:00:00.000Z',
+          airline: 'Vietnam Airlines',
+          priceFrom: 17990000,
+          currency: 'VND',
+          availabilityStatus: 'open',
+          commerceVerified: true,
+        },
+        {
+          id: 502,
+          departureCity: 'TP.HCM',
+          departureDate: '2026-11-29T00:00:00.000Z',
+          airline: 'Vietjet',
+          priceFrom: 16990000,
+          currency: 'VND',
+          availabilityStatus: 'sold-out',
+          commerceVerified: true,
+        },
+        {
+          id: 503,
+          departureCity: 'TP.HCM',
+          departureDate: '2026-12-06T00:00:00.000Z',
+          airline: 'Vietjet',
+          priceFrom: 17490000,
+          currency: 'VND',
+          availabilityStatus: 'open',
+          commerceVerified: true,
+        },
+      ],
+      nextDeparture: {
+        id: 501,
+        departureCity: 'Hà Nội',
+        departureDate: '2026-11-15T00:00:00.000Z',
+        airline: 'Vietnam Airlines',
+        priceFrom: 17990000,
+        currency: 'VND',
+        availabilityStatus: 'open',
+        commerceVerified: true,
+      },
     }
 
     const { container } = render(
-      <TourDetailPage data={pastOrEmptyTourData} locale="vi" siteCode="wingsgo" />,
+      <TourDetailPage data={multiCityData} locale="vi" siteCode="wingsgo" />,
     )
 
-    const stickyPrimaryCta = container.querySelector('[data-od-id="tour-sticky-primary-cta"]') as HTMLAnchorElement
-    expect(stickyPrimaryCta).toBeTruthy()
-    expect(stickyPrimaryCta.textContent).toContain('Nhận tư vấn lịch mới')
-    const href = stickyPrimaryCta.getAttribute('href')
-    expect(href).not.toContain('departureId=')
-    expect(href).toContain('intent=inquiry')
+    // Verify City filter selector exists
+    const citySelect = container.querySelector('#matrix-city-filter') as HTMLSelectElement
+    expect(citySelect).toBeTruthy()
 
-    // Departure section should display honest empty state
-    expect(container.textContent).toContain('Hiện chưa có lịch khởi hành mở bán mới')
+    // Departure count display
+    const departureCount = container.querySelector('[data-od-id="departureCount"]')
+    expect(departureCount?.textContent).toContain('3 đợt khởi hành')
+
+    // Initial table has all 3 rows
+    expect(container.querySelectorAll('[data-od-id="tour-departure-row"]').length).toBe(3)
   })
 })

@@ -510,7 +510,7 @@ const getConsultativePrimaryIntent = (mode?: null | string): TourInquiryIntent =
 
 const TourDecisionHeader = ({
   locale,
-  nextDeparture,
+  nextDeparture: nextDepartureProp,
   presentation = 'retail',
   siteCode: siteCodeProp,
   tour,
@@ -523,6 +523,12 @@ const TourDecisionHeader = ({
   tour: Record<string, any>
   variants?: Array<Record<string, any>>
 }) => {
+  const context = useTourDepartureSelection()
+  const nextDeparture = context?.isPrivateTour
+    ? null
+    : context?.isSelectionExplicit
+      ? context.selectedDeparture
+      : context?.selectedDeparture || nextDepartureProp
   const isConsultative = presentation === 'consultative'
   const wingSideCopy = getWingSideTourCopy(locale)
   const reviewSnapshot = tour.reviewSnapshot || null
@@ -736,17 +742,22 @@ const TourDecisionHeader = ({
       !Number.isNaN(nextDepDate.getTime()) &&
       new Date(Date.UTC(nextDepDate.getUTCFullYear(), nextDepDate.getUTCMonth(), nextDepDate.getUTCDate())).getTime() >= todayUtc.getTime(),
   )
+  const isPrivateTour = Boolean(context?.isPrivateTour)
   const isSoldOut = nextDeparture?.availabilityStatus === 'sold-out'
   const commerceVerified = Boolean(nextDeparture?.commerceVerified)
-  const isSellable = hasFutureDeparture && !isSoldOut && commerceVerified
-  const effectiveRetailIntent: TourInquiryIntent = isSellable
-    ? retailCtaIntent
-    : 'inquiry'
-  const effectivePrimaryLabel = isSellable
-    ? nextDeparture?.ctaLabelOverride || cta.label || 'Giữ chỗ ngay'
-    : hasFutureDeparture && isSoldOut
-      ? 'Gửi yêu cầu đợt này'
-      : 'Nhận tư vấn lịch mới'
+  const isSellable = !isPrivateTour && hasFutureDeparture && !isSoldOut && commerceVerified
+  const effectiveRetailIntent: TourInquiryIntent = isPrivateTour
+    ? 'request-quote'
+    : isSellable
+      ? retailCtaIntent
+      : 'inquiry'
+  const effectivePrimaryLabel = isPrivateTour
+    ? 'Tư vấn lịch riêng'
+    : isSellable
+      ? nextDeparture?.ctaLabelOverride || cta.label || 'Giữ chỗ ngay'
+      : hasFutureDeparture && isSoldOut
+        ? 'Tư vấn đợt khác'
+        : 'Nhận tư vấn lịch mới'
 
   const usableRouteSummary = isUsableText(tour.factSummary?.routeSummary)
     ? tour.factSummary?.routeSummary
@@ -764,24 +775,26 @@ const TourDecisionHeader = ({
   const hasFactSummary = Boolean(usableRouteSummary || usableHotelSummary || usableMealsSummary)
 
   const retailInquiryHref = getTourInquiryPath({
-    departureId: hasFutureDeparture ? nextDeparture?.id : undefined,
-    departureDate: hasFutureDeparture ? nextDeparture?.departureDate : undefined,
+    departureId: !isPrivateTour && hasFutureDeparture ? nextDeparture?.id : undefined,
+    departureDate: !isPrivateTour && hasFutureDeparture ? nextDeparture?.departureDate : undefined,
     intent: effectiveRetailIntent,
     source: 'tour-detail-hero',
     tourId: tour.id,
     tourSlug: tour.slug,
     discoveryContext: tour.discoveryContext,
   })
-  const retailPrimaryHref = resolveRetailCtaHref({
-    cmsHref: cta.href,
-    expectedDepartureDate: hasFutureDeparture ? nextDeparture?.departureDate : undefined,
-    expectedDepartureId: hasFutureDeparture ? nextDeparture?.id : undefined,
-    expectedTourId: tour.id,
-    expectedTourSlug: tour.slug,
-    hasFutureDeparture,
-    inquiryPath: retailInquiryHref,
-    isSellable,
-  })
+  const retailPrimaryHref = isPrivateTour
+    ? retailInquiryHref
+    : resolveRetailCtaHref({
+        cmsHref: cta.href,
+        expectedDepartureDate: hasFutureDeparture ? nextDeparture?.departureDate : undefined,
+        expectedDepartureId: hasFutureDeparture ? nextDeparture?.id : undefined,
+        expectedTourId: tour.id,
+        expectedTourSlug: tour.slug,
+        hasFutureDeparture,
+        inquiryPath: retailInquiryHref,
+        isSellable,
+      })
 
   return (
     <div className="space-y-6" data-tour-presentation="retail">
@@ -815,8 +828,8 @@ const TourDecisionHeader = ({
         ) : null}
       </div>
 
-      {/* Hero Split Layout: Left (Gallery + Route Chips) | Right (Decision Card) */}
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] xl:grid-cols-[1.25fr_0.75fr] items-start">
+      {/* Hero Split Layout: Left (Gallery + Route Chips) | Right (Decision Card 340px) */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] items-start">
         {/* Left Column: Media Presentation, Headline, Route Chips */}
         <div className="space-y-4 min-w-0">
           <h1 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl text-foreground">
@@ -904,44 +917,66 @@ const TourDecisionHeader = ({
           ) : null}
         </div>
 
-        {/* Right Column: Sticky Decision Rail Box */}
-        <div className="lg:sticky lg:top-6 space-y-4">
+        {/* Right Column: Decision Rail Box */}
+        <div className="space-y-4">
           <Panel className="p-6 border-border/80 shadow-md">
             {/* Price section */}
             <div className="border-b border-border/60 pb-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                Giá từ
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  {isPrivateTour ? 'Báo giá theo đoàn' : 'Giá từ'}
+                </p>
+                {context ? (
+                  <button
+                    type="button"
+                    onClick={() => context.setIsPrivateTour(!isPrivateTour)}
+                    className="text-xs font-medium text-[var(--site-brand)] hover:underline"
+                    data-od-id="tour-toggle-private-tour"
+                  >
+                    {isPrivateTour ? 'Xem lịch tour ghép' : 'Tư vấn lịch riêng'}
+                  </button>
+                ) : null}
+              </div>
               <div className="mt-1 flex items-baseline gap-2">
                 <span className="font-mono text-3xl font-extrabold text-[var(--site-brand)]">
-                  {hasFutureDeparture
+                  {isSellable
                     ? formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency) || 'Liên hệ'
                     : 'Liên hệ'}
                 </span>
-                {hasFutureDeparture && nextDeparture?.priceFrom ? (
+                {isSellable && nextDeparture?.priceFrom ? (
                   <span className="text-xs text-muted-foreground">/ khách</span>
                 ) : null}
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                {hasFutureDeparture
-                  ? nextDeparture?.depositNote ||
-                    tour.factSummary?.holdNote ||
-                    'Sales xác nhận lại tình trạng chỗ và giá trước khi đặt cọc.'
-                  : 'Hiện chưa có lịch khởi hành mở bán. Vui lòng liên hệ chuyên viên để nhận lịch mới.'}
+                {isPrivateTour
+                  ? 'Không áp dụng giá tour ghép cho lịch riêng. Lịch và báo giá theo nhu cầu.'
+                  : isSellable
+                    ? nextDeparture?.depositNote ||
+                      tour.factSummary?.holdNote ||
+                      'Sales xác nhận lại tình trạng chỗ và giá trước khi đặt cọc.'
+                    : hasFutureDeparture && isSoldOut
+                      ? 'Đợt này đã hết chỗ. Vui lòng liên hệ để tư vấn đợt khác phù hợp.'
+                      : hasFutureDeparture && !commerceVerified
+                        ? 'Giá và tình trạng chỗ đang được chuyên viên cập nhật. Vui lòng liên hệ.'
+                        : 'Hiện chưa có lịch khởi hành mở bán. Vui lòng liên hệ chuyên viên để nhận lịch mới.'}
               </p>
             </div>
 
             {/* Next Departure Info */}
             <div className="py-4 border-b border-border/60 space-y-2">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Khởi hành gần nhất:</span>
+                <span className="text-muted-foreground">
+                  {isPrivateTour ? 'Hình thức:' : 'Khởi hành gần nhất:'}
+                </span>
                 <span className="font-semibold text-foreground">
-                  {hasFutureDeparture
-                    ? formatTourDate(nextDeparture?.departureDate, locale)
-                    : 'Chưa có lịch mới'}
+                  {isPrivateTour
+                    ? 'Lịch riêng theo đoàn'
+                    : hasFutureDeparture
+                      ? formatTourDate(nextDeparture?.departureDate, locale)
+                      : 'Chưa có lịch mới'}
                 </span>
               </div>
-              {hasFutureDeparture &&
+              {!isPrivateTour && hasFutureDeparture &&
               [nextDeparture?.airline, nextDeparture?.departureCity].filter(Boolean).length > 0 ? (
                 <div className="flex justify-between items-center text-xs text-muted-foreground">
                   <span>Khởi hành & bay:</span>
@@ -1012,9 +1047,9 @@ const TourDecisionHeader = ({
                 <SiteLink
                   className="flex min-h-10 items-center justify-center rounded-lg border border-border px-3 text-center text-xs font-semibold no-underline hover:bg-muted/30"
                   href={getTourInquiryPath({
-                    departureId: hasFutureDeparture ? nextDeparture?.id : undefined,
-                    departureDate: hasFutureDeparture ? nextDeparture?.departureDate : undefined,
-                    intent: 'inquiry',
+                    departureId: !isPrivateTour && hasFutureDeparture ? nextDeparture?.id : undefined,
+                    departureDate: !isPrivateTour && hasFutureDeparture ? nextDeparture?.departureDate : undefined,
+                    intent: isPrivateTour ? 'request-quote' : 'inquiry',
                     source: 'tour-detail-hero',
                     tourId: tour.id,
                     tourSlug: tour.slug,
@@ -2465,7 +2500,9 @@ const StickyBookingCTASection = ({
   tour: Record<string, any>
 }) => {
   const context = useTourDepartureSelection()
-  const nextDeparture = context?.selectedDeparture || nextDepartureProp
+  const nextDeparture = context?.isSelectionExplicit
+    ? context.selectedDeparture
+    : context?.selectedDeparture || nextDepartureProp
 
   const isConsultative = presentation === 'consultative'
   const siteCode = isConsultative ? resolveTourSiteCode(siteCodeProp, presentation) : undefined
@@ -2515,26 +2552,33 @@ const StickyBookingCTASection = ({
     )
   }
 
+  const isPrivateTour = Boolean(context?.isPrivateTour)
   const nextDepDate = nextDeparture?.departureDate ? new Date(nextDeparture.departureDate) : null
   const now = new Date()
   const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
   const hasFutureDeparture = Boolean(
-    nextDeparture &&
+    !isPrivateTour &&
+      nextDeparture &&
       nextDepDate &&
       !Number.isNaN(nextDepDate.getTime()) &&
       new Date(Date.UTC(nextDepDate.getUTCFullYear(), nextDepDate.getUTCMonth(), nextDepDate.getUTCDate())).getTime() >= todayUtc.getTime(),
   )
+  const isSoldOut = nextDeparture?.availabilityStatus === 'sold-out'
   const commerceVerified = Boolean(nextDeparture?.commerceVerified)
-  const isVerifiedFutureDeparture = hasFutureDeparture && commerceVerified
-  const stickySubtitle = isVerifiedFutureDeparture
-    ? [
-        formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency),
-        formatTourDate(nextDeparture?.departureDate),
-        nextDeparture?.airline || null,
-      ]
-        .filter(Boolean)
-        .join(' • ')
-    : 'Chưa có lịch mới • Nhận tư vấn trực tiếp'
+  const isSellable = !isPrivateTour && hasFutureDeparture && !isSoldOut && commerceVerified
+  const stickySubtitle = isPrivateTour
+    ? 'Lịch riêng theo đoàn • Nhận báo giá'
+    : isSellable
+      ? [
+          formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency),
+          formatTourDate(nextDeparture?.departureDate),
+          nextDeparture?.airline || null,
+        ]
+          .filter(Boolean)
+          .join(' • ')
+      : hasFutureDeparture && isSoldOut
+        ? `Đã hết chỗ • ${formatTourDate(nextDeparture?.departureDate)}${nextDeparture?.airline ? ` • ${nextDeparture.airline}` : ''}`
+        : 'Chưa có lịch mới • Nhận tư vấn trực tiếp'
 
   return (
     <div className="sticky bottom-2 z-20 max-w-full md:bottom-4">
@@ -2552,27 +2596,33 @@ const StickyBookingCTASection = ({
             {(() => {
               const isSoldOut = nextDeparture?.availabilityStatus === 'sold-out'
               const commerceVerified = Boolean(nextDeparture?.commerceVerified)
-              const isSellable = hasFutureDeparture && !isSoldOut && commerceVerified
+              const isSellable = !isPrivateTour && hasFutureDeparture && !isSoldOut && commerceVerified
 
-              const stickyIntent: TourInquiryIntent = isSellable
-                ? (tour.bcfg?.ctaStyle || 'hold-seat')
-                : 'inquiry'
-              const stickyLabel = isSellable
-                ? (nextDeparture?.ctaLabelOverride || 'Giữ chỗ ngay')
-                : hasFutureDeparture && isSoldOut
-                  ? 'Gửi yêu cầu đợt này'
-                  : 'Nhận tư vấn lịch mới'
-              const stickyMobileLabel = isSellable
-                ? (nextDeparture?.ctaLabelOverride || 'Tư vấn')
-                : 'Tư vấn'
+              const stickyIntent: TourInquiryIntent = isPrivateTour
+                ? 'request-quote'
+                : isSellable
+                  ? (tour.bcfg?.ctaStyle || 'hold-seat')
+                  : 'inquiry'
+              const stickyLabel = isPrivateTour
+                ? 'Tư vấn lịch riêng'
+                : isSellable
+                  ? (nextDeparture?.ctaLabelOverride || 'Giữ chỗ ngay')
+                  : hasFutureDeparture && isSoldOut
+                    ? 'Tư vấn đợt khác'
+                    : 'Nhận tư vấn lịch mới'
+              const stickyMobileLabel = isPrivateTour
+                ? 'Lịch riêng'
+                : isSellable
+                  ? (nextDeparture?.ctaLabelOverride || 'Tư vấn')
+                  : 'Tư vấn'
 
               return (
                 <SiteLink
                   className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-3 text-sm font-semibold text-white no-underline transition-colors hover:bg-[var(--site-brand)]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)] sm:px-4"
                   data-od-id="tour-sticky-primary-cta"
                   href={getTourInquiryPath({
-                    departureDate: hasFutureDeparture ? (nextDeparture?.departureDate || nextDeparture?.date) : undefined,
-                    departureId: hasFutureDeparture ? nextDeparture?.id : undefined,
+                    departureDate: !isPrivateTour && hasFutureDeparture ? (nextDeparture?.departureDate || nextDeparture?.date) : undefined,
+                    departureId: !isPrivateTour && hasFutureDeparture ? nextDeparture?.id : undefined,
                     intent: stickyIntent,
                     source: 'tour-detail-sticky',
                     tourId: tour.id,
@@ -2731,98 +2781,151 @@ export const TourDetailPage = ({
 
   return (
     <TourDepartureSelectionProvider initialDeparture={data.nextDeparture}>
-      <div
-        className={
-          isConsultative
-            ? 'container tour-detail--consultative max-w-[1120px] space-y-5 pb-28 md:space-y-6 lg:pb-8'
-            : 'container space-y-8 pb-24 md:pb-28'
-        }
-        data-tour-presentation={resolvedPresentation}
-        data-od-id={isConsultative ? 'tour-root' : undefined}
-      >
-        {sections.hero}
-
-        <div
-          className="sticky top-0 z-10 rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-3"
-          data-od-id={isConsultative ? 'tour-jump-nav' : undefined}
-        >
-          <nav
-            aria-label={
-              isConsultative ? wingSideCopy.overview : isEn ? 'Tour sections' : 'Mục lục tour'
-            }
-            className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm lg:flex-wrap lg:items-center lg:gap-3 [&::-webkit-scrollbar]:hidden"
-          >
-            {navSections.map((section) => (
-              <React.Fragment key={section}>
-                <a
-                  className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
-                  href={`#${section}`}
-                >
-                  <span className="sm:hidden">{navLabels[section]?.short || section}</span>
-                  <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
-                </a>
-                {isConsultative && section === 'facts' ? (
-                  <a
-                    className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
-                    href="#gallery"
-                  >
-                    {wingSideCopy.gallery}
-                  </a>
-                ) : null}
-                {isConsultative && section === 'departures' ? (
-                  <a
-                    className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
-                    href="#enquire"
-                  >
-                    {wingSideCopy.request}
-                  </a>
-                ) : null}
-              </React.Fragment>
-            ))}
-          </nav>
-        </div>
-
-        {isConsultative ? (
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="min-w-0 space-y-8">
-              {bodySections.map((section) => (
-                <React.Fragment key={section}>
-                  {sections[section]}
-                  {section === 'facts' ? (
-                    <TourJourneyGallerySection locale={locale} tour={tour} />
-                  ) : null}
-                  {section === 'departures' ? (
-                    <TourConsultationSection
-                      enquiryForm={enquiryForm}
-                      locale={locale}
-                      siteCode={siteCode}
-                      tour={tour}
-                    />
-                  ) : null}
-                </React.Fragment>
-              ))}
-            </div>
-            <TourDecisionRail
+      {(() => {
+        const sections: Record<TourSectionID, React.ReactNode> = {
+          hero: (
+            <TourDecisionHeader
               locale={locale}
               nextDeparture={data.nextDeparture}
+              presentation={resolvedPresentation}
+              siteCode={siteCode}
+              tour={tour}
+              variants={isConsultative ? [] : data.variants}
+            />
+          ),
+          facts: <TourFactGrid locale={locale} presentation={resolvedPresentation} tour={tour} />,
+          reviews: (
+            <TourReviewsProofSection locale={locale} presentation={resolvedPresentation} tour={tour} />
+          ),
+          'why-choose': (
+            <TourWhyChooseSection locale={locale} presentation={resolvedPresentation} tour={tour} />
+          ),
+          route: (
+            <TourRouteVisualSection locale={locale} presentation={resolvedPresentation} tour={tour} />
+          ),
+          itinerary: (
+            <TourItinerarySection locale={locale} presentation={resolvedPresentation} tour={tour} />
+          ),
+          services: (
+            <TourServicesSection locale={locale} presentation={resolvedPresentation} tour={tour} />
+          ),
+          departures: isConsultative ? (
+            <TourPricePostureSection locale={locale} nextDeparture={data.nextDeparture} tour={tour} />
+          ) : (
+            <TourDepartureSection
+              departures={data.departures}
+              locale={locale}
+              tour={tour}
+            />
+          ),
+          faq: <TourFAQSection locale={locale} presentation={resolvedPresentation} tour={tour} />,
+          related: <TourRelatedSection locale={locale} presentation={resolvedPresentation} tour={tour} />,
+          'sticky-cta': (
+            <StickyBookingCTASection
+              locale={locale}
+              nextDeparture={data.nextDeparture}
+              presentation={resolvedPresentation}
               siteCode={siteCode}
               tour={tour}
             />
-          </div>
-        ) : (
-          bodySections.map((section) => (
-            <React.Fragment key={section}>{sections[section]}</React.Fragment>
-          ))
-        )}
+          ),
+        }
 
-        {visibleSections.has('sticky-cta') ? (
-          isConsultative ? (
-            <div className="lg:hidden">{sections['sticky-cta']}</div>
-          ) : (
-            sections['sticky-cta']
-          )
-        ) : null}
-      </div>
+        return (
+          <div
+            className={
+              isConsultative
+                ? 'container tour-detail--consultative max-w-[1120px] space-y-5 pb-28 md:space-y-6 lg:pb-8'
+                : 'container max-w-[1200px] space-y-8 pb-24 md:pb-28'
+            }
+            data-tour-presentation={resolvedPresentation}
+            data-od-id={isConsultative ? 'tour-root' : undefined}
+          >
+            {sections.hero}
+
+            <div
+              className="sticky top-0 z-10 rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-3"
+              data-od-id={isConsultative ? 'tour-jump-nav' : undefined}
+            >
+              <nav
+                aria-label={
+                  isConsultative ? wingSideCopy.overview : isEn ? 'Tour sections' : 'Mục lục tour'
+                }
+                className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm lg:flex-wrap lg:items-center lg:gap-3 [&::-webkit-scrollbar]:hidden"
+              >
+                {navSections.map((section) => (
+                  <React.Fragment key={section}>
+                    <a
+                      className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
+                      href={`#${section}`}
+                    >
+                      <span className="sm:hidden">{navLabels[section]?.short || section}</span>
+                      <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
+                    </a>
+                    {isConsultative && section === 'facts' ? (
+                      <a
+                        className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
+                        href="#gallery"
+                      >
+                        {wingSideCopy.gallery}
+                      </a>
+                    ) : null}
+                    {isConsultative && section === 'departures' ? (
+                      <a
+                        className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
+                        href="#enquire"
+                      >
+                        {wingSideCopy.request}
+                      </a>
+                    ) : null}
+                  </React.Fragment>
+                ))}
+              </nav>
+            </div>
+
+            {isConsultative ? (
+              <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]">
+                <div className="min-w-0 space-y-8">
+                  {bodySections.map((section) => (
+                    <React.Fragment key={section}>
+                      {sections[section]}
+                      {section === 'facts' ? (
+                        <TourJourneyGallerySection locale={locale} tour={tour} />
+                      ) : null}
+                      {section === 'departures' ? (
+                        <TourConsultationSection
+                          enquiryForm={enquiryForm}
+                          locale={locale}
+                          siteCode={siteCode}
+                          tour={tour}
+                        />
+                      ) : null}
+                    </React.Fragment>
+                  ))}
+                </div>
+                <TourDecisionRail
+                  locale={locale}
+                  nextDeparture={data.nextDeparture}
+                  siteCode={siteCode}
+                  tour={tour}
+                />
+              </div>
+            ) : (
+              bodySections.map((section) => (
+                <React.Fragment key={section}>{sections[section]}</React.Fragment>
+              ))
+            )}
+
+            {visibleSections.has('sticky-cta') ? (
+              isConsultative ? (
+                <div className="lg:hidden">{sections['sticky-cta']}</div>
+              ) : (
+                sections['sticky-cta']
+              )
+            ) : null}
+          </div>
+        )
+      })()}
     </TourDepartureSelectionProvider>
   )
 }

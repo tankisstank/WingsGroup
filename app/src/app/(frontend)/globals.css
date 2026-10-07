@@ -4732,3 +4732,8 @@ body[data-site-code='wings-go'] .wingsgo-contact-submit:hover {
     animation: none !important;
   }
 }
+
+.container[data-tour-presentation='retail'],
+[data-tour-presentation='retail'].container {
+  max-width: 1200px !important;
+}

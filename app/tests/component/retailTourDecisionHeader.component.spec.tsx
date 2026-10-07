@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -293,5 +293,161 @@ describe('US-027 Slice 2: TourDecisionHeader retail component rendering & honest
     expect(stickyUrl.searchParams.get('intent')).toBe('inquiry')
     expect(stickyUrl.searchParams.has('departureId')).toBe(false)
     expect(stickyUrl.searchParams.has('departureDate')).toBe(false)
+  })
+
+  it('supports Branch 2 (sold out departure) and Branch 3 (toggle to private tour) cleanly', async () => {
+    const futureDepartureDate = new Date(Date.now() + 20 * 86400000).toISOString().slice(0, 10)
+    const dataWithSoldOut: TourResolvedData = {
+      departures: [
+        {
+          availabilityStatus: 'sold-out',
+          commerceVerified: true,
+          currency: 'VND',
+          date: futureDepartureDate,
+          departureCity: 'TP.HCM',
+          departureDate: futureDepartureDate,
+          id: 202,
+          price: 18000000,
+          priceFrom: 18000000,
+          status: 'sold-out',
+        },
+      ],
+      featuredDepartures: [],
+      nextDeparture: {
+        airline: 'Bamboo Airways',
+        availabilityStatus: 'sold-out',
+        commerceVerified: true,
+        currency: 'VND',
+        date: futureDepartureDate,
+        departureCity: 'TP.HCM',
+        departureDate: futureDepartureDate,
+        id: 202,
+        priceFrom: 18000000,
+        status: 'sold-out',
+      },
+      sectionOrder: ['hero', 'sticky-cta'],
+      sectionVisibility: ['hero', 'sticky-cta'],
+      tour: {
+        durationDays: 4,
+        durationNights: 3,
+        id: 60,
+        slug: 'singapore-4n3d',
+        title: 'Singapore Khám Phá',
+      },
+      variants: [],
+    }
+
+    const { rerender } = render(
+      <TourDetailPage
+        data={dataWithSoldOut}
+        locale="vi"
+        presentation="retail"
+        siteCode="wings-go"
+      />,
+    )
+
+    // Branch 2: Sold out departure -> Hero CTA is "Tư vấn đợt khác" with intent=inquiry
+    const heroCta = document.querySelector('[data-od-id="tour-decision-primary-cta"]') as HTMLAnchorElement
+    expect(heroCta.textContent).toContain('Tư vấn đợt khác')
+    const heroCtaUrl = new URL(heroCta.getAttribute('href') || '', 'https://example.com')
+    expect(heroCtaUrl.searchParams.get('intent')).toBe('inquiry')
+    expect(heroCtaUrl.searchParams.get('departureId')).toBe('202')
+
+    // Sticky CTA also displays "Tư vấn đợt khác" with intent=inquiry
+    const stickyCta = document.querySelector('[data-od-id="tour-sticky-primary-cta"]') as HTMLAnchorElement
+    expect(stickyCta.textContent).toContain('Tư vấn đợt khác')
+    const stickyUrl = new URL(stickyCta.getAttribute('href') || '', 'https://example.com')
+    expect(stickyUrl.searchParams.get('intent')).toBe('inquiry')
+    expect(stickyUrl.searchParams.get('departureId')).toBe('202')
+
+    // Branch 3: Toggle "Tư vấn lịch riêng"
+    const togglePrivateBtn = document.querySelector('[data-od-id="tour-toggle-private-tour"]') as HTMLButtonElement
+    expect(togglePrivateBtn).toBeTruthy()
+    expect(togglePrivateBtn.textContent).toBe('Tư vấn lịch riêng')
+
+    fireEvent.click(togglePrivateBtn)
+
+    // After clicking toggle, hero updates to Branch 3:
+    expect(screen.getByText('Báo giá theo đoàn')).toBeTruthy()
+    expect(screen.getAllByText('Liên hệ').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('Không áp dụng giá tour ghép cho lịch riêng. Lịch và báo giá theo nhu cầu.')).toBeTruthy()
+    expect(screen.getByText('Lịch riêng theo đoàn')).toBeTruthy()
+
+    // Hero CTA now switches to "Tư vấn lịch riêng" with intent=request-quote and NO departureId
+    expect(heroCta.textContent).toContain('Tư vấn lịch riêng')
+    const privateHeroCtaUrl = new URL(heroCta.getAttribute('href') || '', 'https://example.com')
+    expect(privateHeroCtaUrl.searchParams.get('intent')).toBe('request-quote')
+    expect(privateHeroCtaUrl.searchParams.has('departureId')).toBe(false)
+    expect(privateHeroCtaUrl.searchParams.has('departureDate')).toBe(false)
+
+    // Sticky bar switches to "Lịch riêng theo đoàn • Nhận báo giá" and CTA "Tư vấn lịch riêng"
+    const stickyContainer = document.querySelector('.sticky.bottom-2')
+    expect(stickyContainer?.textContent).toContain('Lịch riêng theo đoàn • Nhận báo giá')
+    expect(stickyCta.textContent).toContain('Tư vấn lịch riêng')
+    const privateStickyUrl = new URL(stickyCta.getAttribute('href') || '', 'https://example.com')
+    expect(privateStickyUrl.searchParams.get('intent')).toBe('request-quote')
+    expect(privateStickyUrl.searchParams.has('departureId')).toBe(false)
+    expect(privateStickyUrl.searchParams.has('departureDate')).toBe(false)
+  })
+
+  it('Stage 3: renders retail layout with max-w-[1200px], 340px decision rail and functional itinerary accordion toggle', () => {
+    const data: TourResolvedData = {
+      departures: [],
+      featuredDepartures: [],
+      nextDeparture: null,
+      sectionOrder: ['hero', 'itinerary', 'sticky-cta'],
+      sectionVisibility: ['hero', 'itinerary', 'sticky-cta'],
+      tour: {
+        durationDays: 3,
+        durationNights: 2,
+        id: 70,
+        itineraryDays: [
+          { dayNumber: 1, title: 'Ngày 1: Hà Nội - Sapa', summary: 'Khởi hành lên Sapa' },
+          { dayNumber: 2, title: 'Ngày 2: Fansipan', summary: 'Chinh phục đỉnh Fansipan' },
+          { dayNumber: 3, title: 'Ngày 3: Cát Cát - Hà Nội', summary: 'Tham quan bản Cát Cát' },
+        ],
+        slug: 'sapa-3n2d',
+        title: 'Sapa Hùng Vĩ 3N2D',
+      },
+      variants: [],
+    }
+
+    const { container } = render(
+      <TourDetailPage data={data} locale="vi" presentation="retail" siteCode="wings-go" />,
+    )
+
+    // 1. Container layout has max-w-[1200px]
+    const rootContainer = container.querySelector('[data-tour-presentation="retail"]')
+    expect(rootContainer?.className).toContain('max-w-[1200px]')
+
+    // 2. Hero split layout contains minmax(0,1fr)_340px grid for 340px decision rail
+    const heroGrid = container.querySelector('.lg\\:grid-cols-\\[minmax\\(0\\,1fr\\)_340px\\]')
+    expect(heroGrid).toBeTruthy()
+
+    // 3. Itinerary Accordion and Toggle All button
+    const toggleAllBtn = container.querySelector('[data-od-id="tour-itinerary-toggle-all"]') as HTMLButtonElement
+    expect(toggleAllBtn).toBeTruthy()
+    expect(toggleAllBtn.textContent).toContain('Mở rộng tất cả')
+
+    // Initially day 1 is open, day 2 and day 3 are closed
+    const dayDetails = container.querySelectorAll<HTMLDetailsElement>('details.tour-itinerary-day')
+    expect(dayDetails.length).toBe(3)
+    expect(dayDetails[0].open).toBe(true)
+    expect(dayDetails[1].open).toBe(false)
+    expect(dayDetails[2].open).toBe(false)
+
+    // Click "Mở rộng tất cả" -> all days open
+    fireEvent.click(toggleAllBtn)
+    expect(dayDetails[0].open).toBe(true)
+    expect(dayDetails[1].open).toBe(true)
+    expect(dayDetails[2].open).toBe(true)
+    expect(toggleAllBtn.textContent).toContain('Thu gọn tất cả')
+
+    // Click "Thu gọn tất cả" -> all days close
+    fireEvent.click(toggleAllBtn)
+    expect(dayDetails[0].open).toBe(false)
+    expect(dayDetails[1].open).toBe(false)
+    expect(dayDetails[2].open).toBe(false)
+    expect(toggleAllBtn.textContent).toContain('Mở rộng tất cả')
   })
 })

@@ -29,20 +29,68 @@ export const TourDepartureMatrix = ({
     selectedDepartureId !== undefined && selectedDepartureId !== null
       ? selectedDepartureId
       : context?.selectedDeparture?.id
-  const handleSelect = (departure: DepartureCardViewModel) => {
-    onSelectDeparture?.(departure)
-    context?.setSelectedDeparture?.(departure)
+
+  const handleSelect = (departure: DepartureCardViewModel | null) => {
+    if (departure) {
+      onSelectDeparture?.(departure)
+      context?.setSelectedDeparture?.(departure)
+      context?.setIsPrivateTour?.(false)
+      context?.setAnnounceMessage?.(
+        locale === 'en'
+          ? `Selected departure ${formatTourDate(departure.departureDate, locale)}`
+          : `Đã chọn đợt khởi hành ngày ${formatTourDate(departure.departureDate, locale)}`,
+      )
+    } else {
+      context?.setSelectedDeparture?.(null)
+      context?.setAnnounceMessage?.(
+        locale === 'en' ? 'No departure selected' : 'Chưa chọn đợt khởi hành',
+      )
+    }
   }
 
   const [activeMonth, setActiveMonth] = useState('all')
+
+  // Derive unique cities
+  const cities = Array.from(
+    new Set(departures.map((d) => d.departureCity).filter(Boolean)),
+  ) as string[]
+
+  const activeCity = context?.selectedCity || 'all'
+
+  // AND Filter: (Month === activeMonth) AND (City === activeCity)
+  const visible = departures.filter((departure) => {
+    const matchMonth =
+      activeMonth === 'all' || monthKey(departure.departureDate) === activeMonth
+    const matchCity =
+      activeCity === 'all' || !activeCity || departure.departureCity === activeCity
+    return matchMonth && matchCity
+  })
+
+  // Selection Policy:
+  // When filters change or when returning from private tour:
+  // Fallback to first sellable departure in visible; if none sellable, first departure; if visible empty, null.
+  React.useEffect(() => {
+    if (context?.isPrivateTour) return
+
+    const currentSelected = context?.selectedDeparture
+    const isStillVisible = currentSelected && visible.some((d) => String(d.id) === String(currentSelected.id))
+
+    if (!isStillVisible) {
+      if (visible.length === 0) {
+        handleSelect(null)
+      } else {
+        const firstSellable = visible.find(
+          (d) => d.commerceVerified && d.availabilityStatus !== 'sold-out' && Number(d.priceFrom) > 0,
+        )
+        handleSelect(firstSellable || visible[0])
+      }
+    }
+  }, [activeMonth, activeCity, departures, context?.isPrivateTour])
+
   const months = Array.from(new Set(departures.map((departure) => monthKey(departure.departureDate))))
     .filter((value) => /^\d{4}-\d{2}$/.test(value))
     .sort()
   const allTabs = ['all', ...months]
-  const visible =
-    activeMonth === 'all'
-      ? departures
-      : departures.filter((departure) => monthKey(departure.departureDate) === activeMonth)
   const isEn = locale === 'en'
 
   const handleTabKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, currentIndex: number) => {
@@ -66,8 +114,48 @@ export const TourDepartureMatrix = ({
     }
   }
 
+  const handleClearFilters = () => {
+    setActiveMonth('all')
+    context?.setSelectedCity?.('all')
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-od-id="section-departures-inner">
+      {/* City + Month Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-3">
+        {cities.length > 0 ? (
+          <div className="flex items-center gap-2 text-sm">
+            <label htmlFor="matrix-city-filter" className="font-semibold text-muted-foreground">
+              {isEn ? 'Departure point:' : 'Nơi khởi hành:'}
+            </label>
+            <select
+              id="matrix-city-filter"
+              data-od-id="departureCity"
+              className="rounded-lg border border-border/70 bg-background px-3 py-1.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              value={activeCity}
+              onChange={(e) => context?.setSelectedCity?.(e.target.value)}
+            >
+              <option value="all">{isEn ? 'All departure points' : 'Tất cả nơi đi'}</option>
+              {cities.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+
+        <div className="text-xs text-muted-foreground" data-od-id="departureCount" role="status">
+          {visible.length}{' '}
+          {isEn
+            ? visible.length === 1
+              ? 'departure available'
+              : 'departures available'
+            : 'đợt khởi hành'}
+        </div>
+      </div>
+
+      {/* Month Tablist */}
       <div
         aria-label={isEn ? 'Filter departures by month' : 'Lọc lịch khởi hành theo tháng'}
         className="flex gap-2 overflow-x-auto pb-1"
@@ -78,7 +166,7 @@ export const TourDepartureMatrix = ({
             month === 'all'
               ? isEn
                 ? 'All'
-                : 'Tất cả'
+                : 'Tất cả tháng'
               : `${isEn ? 'Month' : 'Tháng'} ${Number(month.slice(5))} ${month.slice(0, 4)}`
           return (
             <button
@@ -104,21 +192,46 @@ export const TourDepartureMatrix = ({
       </div>
 
       {visible.length === 0 ? (
-        <p className="rounded-2xl border border-border/70 bg-muted/20 p-4 text-sm text-muted-foreground">
-          {isEn ? 'No departures are listed for this month.' : 'Tháng này chưa có lịch khởi hành.'}
-        </p>
+        <div
+          aria-labelledby={`departure-tab-${activeMonth}`}
+          className="rounded-2xl border border-border/70 bg-muted/20 p-6 text-center"
+          data-od-id="departureEmpty"
+          id="tour-departure-panel"
+          role="tabpanel"
+          tabIndex={0}
+        >
+          <h3 className="text-base font-bold text-foreground">
+            {isEn ? 'No departures match your filter' : 'Chưa có lịch phù hợp'}
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {isEn
+              ? 'No departures match the selected departure point and month.'
+              : 'Không có đợt đi khớp nơi khởi hành và tháng đang chọn. Bạn có thể bỏ bộ lọc hoặc trao đổi về lịch mới.'}
+          </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              data-od-id="clearDepartureFilters"
+              onClick={handleClearFilters}
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-border bg-background px-4 text-sm font-semibold hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              {isEn ? 'Clear filters' : 'Bỏ bộ lọc'}
+            </button>
+          </div>
+        </div>
       ) : (
-        <div className="relative">
+        <div
+          aria-labelledby={`departure-tab-${activeMonth}`}
+          className="relative"
+          id="tour-departure-panel"
+          role="tabpanel"
+          tabIndex={0}
+        >
           <div className="mb-1 text-xs text-muted-foreground lg:hidden">
             {isEn ? '← Swipe horizontally to see pricing and booking options →' : '← Vuốt sang ngang để xem giá và thao tác giữ chỗ →'}
           </div>
-          <div
-            aria-labelledby={`departure-tab-${activeMonth}`}
-            className="overflow-x-auto rounded-2xl border border-border/70"
-            id="tour-departure-panel"
-            role="tabpanel"
-            tabIndex={0}
-          >
+          {/* Desktop Table View (>= 680px) */}
+          <div className="hidden sm:block overflow-x-auto rounded-2xl border border-border/70">
             <table className="w-full min-w-[760px] border-collapse text-left text-sm">
               <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
@@ -243,6 +356,74 @@ export const TourDepartureMatrix = ({
               })}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards View (< 680px) to prevent horizontal scrolling */}
+        <div className="grid gap-3 sm:hidden" data-od-id="departureList">
+          {visible.map((departure) => {
+            const isSoldOut = departure.availabilityStatus === 'sold-out'
+            const commerceVerified = Boolean(departure.commerceVerified)
+            const isSellable = commerceVerified && !isSoldOut
+            const currentPrice = formatTourPrice(departure.priceFrom, departure.currency)
+            const isSelected = effectiveSelectedId !== undefined && effectiveSelectedId !== null && String(effectiveSelectedId) === String(departure.id)
+            const dateStr = formatTourDate(departure.departureDate, locale) || '—'
+
+            const statusLabel = commerceVerified
+              ? departure.availabilityBadge || getAvailabilityLabel(departure.availabilityStatus, locale)
+              : isEn ? 'Confirm with us' : 'Cần xác nhận lại giá'
+
+            return (
+              <article
+                key={departure.id}
+                data-od-id={`departure-${departure.id}`}
+                className={`rounded-xl border p-4 transition-colors ${
+                  isSelected
+                    ? 'border-foreground bg-muted/40 ring-1 ring-foreground'
+                    : 'border-border/70 bg-card hover:bg-muted/20'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h3 className="text-base font-bold text-foreground" data-od-id={`title-${departure.id}`}>
+                      {dateStr} {departure.departureCity ? `· ${departure.departureCity}` : ''}
+                    </h3>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {departure.airline || '—'} {departure.flightNumber ? `(${departure.flightNumber})` : ''}
+                    </p>
+                  </div>
+                  <span className="inline-flex rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold">
+                    {statusLabel}
+                  </span>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-3">
+                  <div>
+                    <span className="text-xs text-muted-foreground">{isEn ? 'From' : 'Giá từ'}: </span>
+                    <span className="font-mono text-base font-bold text-primary">
+                      {currentPrice || (isEn ? 'Contact us' : 'Liên hệ')}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    data-od-id={`select-${departure.id}`}
+                    aria-pressed={isSelected}
+                    onClick={() => handleSelect(departure)}
+                    className={`inline-flex min-h-11 items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                      isSelected
+                        ? 'bg-foreground text-background'
+                        : 'border border-border bg-background text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {isSelected
+                      ? isEn ? 'Selected' : 'Đang chọn'
+                      : isSellable
+                        ? isEn ? 'Select this' : 'Chọn đợt này'
+                        : isEn ? 'View status' : 'Xem tình trạng'}
+                  </button>
+                </div>
+              </article>
+            )
+          })}
         </div>
       </div>
     )}
