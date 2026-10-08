@@ -13,8 +13,6 @@ import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
 import type { SupportedLocaleCode } from '@/utilities/locales'
 
 import {
-  areAllHeroMediaRenderable,
-  areAllHeroMediaGoverned,
   isWingsGroupPublishedMedia,
   isWingsGroupRenderableMedia,
   resolveSafeHeroLinks,
@@ -68,9 +66,6 @@ export const WingsGroupEditorialHero = (props: Props) => {
   const [manualPaused, setManualPaused] = useState(false)
   const [pageVisible, setPageVisible] = useState(true)
   const safeLinks = resolveSafeHeroLinks(links, resolvedLocale)
-  const allHeroMediaRenderable = allowWingsGroupDevelopmentMedia
-    ? areAllHeroMediaRenderable(props)
-    : areAllHeroMediaGoverned(props)
   const isRenderableMedia = allowWingsGroupDevelopmentMedia
     ? isWingsGroupRenderableMedia
     : isWingsGroupPublishedMedia
@@ -86,7 +81,7 @@ export const WingsGroupEditorialHero = (props: Props) => {
         description: slide.description,
         eyebrow: slide.eyebrow,
         id: slide.id || `slide-${index}`,
-        media: allHeroMediaRenderable && isRenderableMedia(slide.media) ? slide.media : null,
+        media: isRenderableMedia(slide.media) ? slide.media : null,
         title: slide.title,
       }))
     }
@@ -96,11 +91,11 @@ export const WingsGroupEditorialHero = (props: Props) => {
         description: null,
         eyebrow: null,
         id: 'primary',
-        media: allHeroMediaRenderable && isRenderableMedia(media) ? media : null,
+        media: isRenderableMedia(media) ? media : null,
         title: null,
       },
     ]
-  }, [allHeroMediaRenderable, isRenderableMedia, media, slides])
+  }, [isRenderableMedia, media, slides])
 
   const activeStory = heroStories[activeIndex] || heroStories[0]
   const autoplay =
