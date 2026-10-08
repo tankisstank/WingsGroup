@@ -2995,6 +2995,7 @@ const RetailTourJumpNav = ({
   navSections: string[]
 }) => {
   const [isSticky, setIsSticky] = React.useState(false)
+  const [activeSection, setActiveSection] = React.useState<string>(navSections[0] || '')
   const wrapperRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
@@ -3007,6 +3008,18 @@ const RetailTourJumpNav = ({
             const rect = wrapperRef.current.getBoundingClientRect()
             setIsSticky(rect.top <= 12)
           }
+
+          let current = navSections[0] || ''
+          for (const section of navSections) {
+            const el = document.getElementById(section)
+            if (el) {
+              const rect = el.getBoundingClientRect()
+              if (rect.top <= 140) {
+                current = section
+              }
+            }
+          }
+          setActiveSection(current)
           ticking = false
         })
         ticking = true
@@ -3016,18 +3029,28 @@ const RetailTourJumpNav = ({
     window.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [navSections])
 
-  const navLinks = navSections.map((section) => (
-    <a
-      className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2 transition-colors"
-      href={`#${section}`}
-      key={section}
-    >
-      <span className="sm:hidden">{navLabels[section]?.short || section}</span>
-      <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
-    </a>
-  ))
+  const renderNavLinks = () =>
+    navSections.map((section) => {
+      const isActive = activeSection === section
+      return (
+        <a
+          className={`flex min-h-9 sm:min-h-10 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-xs sm:text-sm font-semibold transition-all duration-200 no-underline ${
+            isActive
+              ? 'bg-[var(--site-brand,#0f172a)] text-white shadow-sm'
+              : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+          }`}
+          href={`#${section}`}
+          key={section}
+          aria-current={isActive ? 'true' : undefined}
+          onClick={() => setActiveSection(section)}
+        >
+          <span className="sm:hidden">{navLabels[section]?.short || section}</span>
+          <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
+        </a>
+      )
+    })
 
   return (
     <div
@@ -3044,29 +3067,33 @@ const RetailTourJumpNav = ({
         /* Initial state (in-flow, wraps to 2 lines on desktop) */
         <div
           data-od-id="tour-jump-nav"
-          className="rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-3"
+          className="rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-2.5"
         >
           <nav
             aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
             className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm lg:flex-wrap lg:items-center lg:gap-2.5 xl:gap-3 [&::-webkit-scrollbar]:hidden"
           >
-            {navLinks}
+            {renderNavLinks()}
           </nav>
         </div>
       )}
 
-      {/* Sticky floating state (single line across container on desktop, flush at top-0, matching max-w-[1200px]) */}
+      {/* Sticky floating state (flush at top-0, perfectly bounded within container max-w-[1200px]) */}
       {isSticky ? (
-        <div
-          data-od-id="tour-jump-nav"
-          className="fixed top-0 inset-x-0 mx-auto w-full max-w-[1200px] z-40 border-b border-x border-border/80 bg-background/95 px-4 py-2 sm:px-6 lg:px-8 shadow-md backdrop-blur-md transition-all duration-200 rounded-b-xl"
-        >
-          <nav
-            aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
-            className="flex flex-nowrap items-center justify-start lg:justify-between gap-1 sm:gap-2 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-xs sm:text-sm font-semibold"
-          >
-            {navLinks}
-          </nav>
+        <div className="fixed top-0 inset-x-0 z-40 pointer-events-none">
+          <div className="container max-w-[1200px]">
+            <div
+              data-od-id="tour-jump-nav"
+              className="w-full border-b border-x border-border/80 bg-background/95 shadow-md backdrop-blur-md transition-all duration-200 rounded-b-2xl pointer-events-auto p-1.5 sm:p-2"
+            >
+              <nav
+                aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
+                className="flex flex-nowrap items-center justify-start lg:justify-between gap-1 sm:gap-2 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-xs sm:text-sm font-semibold"
+              >
+                {renderNavLinks()}
+              </nav>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>
