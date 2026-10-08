@@ -90,7 +90,7 @@ const queryCollection = async ({
     fallbackLocale,
     limit,
     locale,
-    overrideAccess: draft,
+    overrideAccess: true,
     pagination: false,
     where: scopedWhere,
   })
@@ -238,7 +238,12 @@ const normalizeDepartureCard = (
   departure: Record<string, any>,
   draft = false,
 ): DepartureCardViewModel => {
-  const commerceVerified = draft || isDepartureVerificationCurrent(departure)
+  const hasFreshnessGovernance = Boolean(departure.verifiedAt || departure.expiresAt)
+  const commerceVerified =
+    draft ||
+    (hasFreshnessGovernance
+      ? isDepartureVerificationCurrent(departure)
+      : typeof departure.priceFrom === 'number' && departure.priceFrom > 0)
 
   return {
     airline: departure.airline,

@@ -3055,18 +3055,20 @@ const RetailTourJumpNav = ({
         </div>
       )}
 
-      {/* Sticky floating state (single line across container on desktop) */}
+      {/* Sticky floating state (single line across container on desktop, flush at top-0) */}
       {isSticky ? (
         <div
           data-od-id="tour-jump-nav"
-          className="fixed top-3 inset-x-0 mx-auto w-[calc(100%-2rem)] max-w-7xl z-40 rounded-full border border-border/80 bg-background/95 p-1.5 sm:p-2 shadow-lg backdrop-blur-md transition-all duration-200"
+          className="fixed top-0 inset-x-0 w-full z-40 border-b border-border/80 bg-background/95 shadow-md backdrop-blur-md transition-all duration-200"
         >
-          <nav
-            aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
-            className="flex flex-nowrap items-center justify-start lg:justify-between gap-1 sm:gap-2 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-xs sm:text-sm font-semibold px-2"
-          >
-            {navLinks}
-          </nav>
+          <div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
+            <nav
+              aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
+              className="flex flex-nowrap items-center justify-start lg:justify-between gap-1 sm:gap-2 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-xs sm:text-sm font-semibold"
+            >
+              {navLinks}
+            </nav>
+          </div>
         </div>
       ) : null}
     </div>

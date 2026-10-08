@@ -219,7 +219,10 @@ const buildCard = ({
   if (!nextDeparture?.departureDate) return null
 
   const verifiedPrice = futureDepartures
-    .filter((departure) => isDepartureVerificationCurrent(departure))
+    .filter((departure) => {
+      const hasFreshness = Boolean(departure.verifiedAt || departure.expiresAt)
+      return hasFreshness ? isDepartureVerificationCurrent(departure) : true
+    })
     .find((departure) => typeof departure.priceFrom === 'number' && departure.priceFrom > 0)
   const price = verifiedPrice
     ? {
