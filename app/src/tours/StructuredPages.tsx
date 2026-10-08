@@ -3055,20 +3055,18 @@ const RetailTourJumpNav = ({
         </div>
       )}
 
-      {/* Sticky floating state (single line across container on desktop, flush at top-0) */}
+      {/* Sticky floating state (single line across container on desktop, flush at top-0, matching max-w-[1200px]) */}
       {isSticky ? (
         <div
           data-od-id="tour-jump-nav"
-          className="fixed top-0 inset-x-0 w-full z-40 border-b border-border/80 bg-background/95 shadow-md backdrop-blur-md transition-all duration-200"
+          className="fixed top-0 inset-x-0 mx-auto w-full max-w-[1200px] z-40 border-b border-x border-border/80 bg-background/95 px-4 py-2 sm:px-6 lg:px-8 shadow-md backdrop-blur-md transition-all duration-200 rounded-b-xl"
         >
-          <div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
-            <nav
-              aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
-              className="flex flex-nowrap items-center justify-start lg:justify-between gap-1 sm:gap-2 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-xs sm:text-sm font-semibold"
-            >
-              {navLinks}
-            </nav>
-          </div>
+          <nav
+            aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
+            className="flex flex-nowrap items-center justify-start lg:justify-between gap-1 sm:gap-2 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-xs sm:text-sm font-semibold"
+          >
+            {navLinks}
+          </nav>
         </div>
       ) : null}
     </div>
