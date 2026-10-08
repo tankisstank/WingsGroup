@@ -241,14 +241,14 @@ export const TourDepartureMatrix = ({
           </div>
           {/* Desktop Table View (>= 680px) */}
           <div className="hidden sm:block overflow-x-auto rounded-2xl border border-border/70">
-            <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+            <table className="w-full border-collapse text-left text-sm">
               <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">{isEn ? 'Departure date' : 'Ngày khởi hành'}</th>
-                  <th className="px-4 py-3">{isEn ? 'Tour class / airline' : 'Hạng tour / hãng bay'}</th>
-                  <th className="px-4 py-3">{isEn ? 'Tour price' : 'Giá tour'}</th>
-                  <th className="px-4 py-3">{isEn ? 'Availability' : 'Tình trạng'}</th>
-                  <th className="px-4 py-3">{isEn ? 'Action' : 'Thao tác'}</th>
+                  <th className="px-3 sm:px-3.5 py-3">{isEn ? 'Departure date' : 'Ngày khởi hành'}</th>
+                  <th className="px-3 sm:px-3.5 py-3">{isEn ? 'Tour class / airline' : 'Hạng tour / hãng bay'}</th>
+                  <th className="px-3 sm:px-3.5 py-3">{isEn ? 'Tour price' : 'Giá tour'}</th>
+                  <th className="px-3 sm:px-3.5 py-3">{isEn ? 'Availability' : 'Tình trạng'}</th>
+                  <th className="px-3 sm:px-3.5 py-3 text-right sm:text-center">{isEn ? 'Action' : 'Thao tác'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -298,20 +298,20 @@ export const TourDepartureMatrix = ({
                     role="row"
                     tabIndex={0}
                   >
-                    <td className="whitespace-nowrap px-4 py-4 font-semibold" data-od-id="tour-departure-date">
+                    <td className="whitespace-nowrap px-3 sm:px-3.5 py-3.5 font-semibold" data-od-id="tour-departure-date">
                       {formatTourDate(departure.departureDate, locale) || '—'}
                     </td>
-                    <td className="px-4 py-4" data-od-id="tour-departure-airline">
-                      <div className="font-semibold">
+                    <td className="px-3 sm:px-3.5 py-3.5" data-od-id="tour-departure-airline">
+                      <div className="font-semibold text-foreground">
                         {[variant?.label, departure.airline].filter(Boolean).join(' / ') || '—'}
                       </div>
                       {departure.flightNumber ? (
-                        <div className="mt-1 text-xs text-muted-foreground">
+                        <div className="mt-0.5 text-xs text-muted-foreground">
                           {isEn ? 'Flight' : 'Chuyến bay'}: {departure.flightNumber}
                         </div>
                       ) : null}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-4" data-od-id="tour-departure-price">
+                    <td className="whitespace-nowrap px-3 sm:px-3.5 py-3.5" data-od-id="tour-departure-price">
                       {originalPrice ? (
                         <del className="block text-xs text-muted-foreground">{originalPrice}</del>
                       ) : null}
@@ -319,13 +319,13 @@ export const TourDepartureMatrix = ({
                         {currentPrice || (isEn ? 'Contact us' : 'Liên hệ')}
                       </span>
                       {departure.loyaltyPoints ? (
-                        <span className="mt-1 block text-xs text-muted-foreground">
+                        <span className="mt-0.5 block text-xs text-muted-foreground">
                           {isEn ? 'Earn' : 'Tích lũy'} {departure.loyaltyPoints.toLocaleString('vi-VN')}{' '}
                           {isEn ? 'points' : 'điểm'}
                         </span>
                       ) : null}
                     </td>
-                    <td className="px-4 py-4" data-od-id="tour-departure-status">
+                    <td className="whitespace-nowrap px-3 sm:px-3.5 py-3.5" data-od-id="tour-departure-status">
                       {(() => {
                         const label = commerceVerified
                           ? departure.availabilityBadge ||
@@ -334,20 +334,20 @@ export const TourDepartureMatrix = ({
                             ? 'Confirm with us'
                             : 'Liên hệ xác nhận'
                         return label ? (
-                          <span className="inline-flex rounded-full bg-muted px-3 py-1 text-xs font-semibold">
+                          <span className="inline-flex rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-foreground">
                             {label}
                           </span>
                         ) : null
                       })()}
                       {departure.urgencyLabel ? (
-                        <span className="mt-1 block text-xs text-muted-foreground">
+                        <span className="mt-0.5 block text-xs text-muted-foreground">
                           {departure.urgencyLabel}
                         </span>
                       ) : null}
                     </td>
-                    <td className="px-4 py-4" data-od-id="tour-departure-action">
+                    <td className="whitespace-nowrap px-3 sm:px-3.5 py-3.5 text-right sm:text-center" data-od-id="tour-departure-action">
                       <a
-                        className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-full bg-[var(--site-brand)] px-4 font-semibold text-white no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)]"
+                        className="inline-flex h-9 sm:h-10 items-center justify-center whitespace-nowrap rounded-full bg-[var(--site-brand)] px-3.5 sm:px-4 text-xs sm:text-sm font-semibold text-white no-underline transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)]"
                         data-od-id="tour-departure-cta"
                         href={href}
                       >
