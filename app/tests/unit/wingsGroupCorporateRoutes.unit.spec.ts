@@ -416,10 +416,10 @@ describe('WingsGroup corporate route contract', () => {
 
   it('uses only the exact approved relationship statement and keeps its faithful English copy hidden', () => {
     expect(WINGSGROUP_LEGAL_IDENTITY.relationshipStatement).toBe(
-      'WingsGroup là thương hiệu phát triển mới trong cùng hệ sinh thái tổ chức với VietWings và Đôi Cánh Việt. Hệ sinh thái tiếp tục phát triển các thương hiệu WingsGo, WingSide, WingsCare và các dịch vụ liên quan.',
+      'Từ nền tảng Vietwings kiến tạo hệ sinh thái dịch vụ du lịch WingsGo - WingSide - WingsPass - WingsPlus - WingsCare và các dịch vụ liên quan tạo nên hệ sinh thái WingsGroup, hướng đến trải nghiệm thuận tiện - chuyên nghiệp - đồng bộ cho khách hàng.',
     )
     expect(WINGSGROUP_RELATIONSHIP_STATEMENT_EN).toBe(
-      'WingsGroup is a newly developed brand within the same organisational ecosystem as VietWings and Đôi Cánh Việt. The ecosystem continues to develop WingsGo, WingSide, WingsCare and related services.',
+      'From the foundation of Vietwings, the travel ecosystem WingsGo - WingSide - WingsPass - WingsPlus - WingsCare and related services form WingsGroup, dedicated to seamless, professional and synchronized customer experiences.',
     )
     const about = buildWingsGroupCorporateRouteSeeds().find(
       ({ path }) => path === '/ve-wingsgroup',

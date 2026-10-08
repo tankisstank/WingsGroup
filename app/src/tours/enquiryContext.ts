@@ -9,6 +9,7 @@ export type TourEnquiryContext = {
   departureDate?: null | string
   departureId?: null | number | string
   discovery?: Omit<DiscoveryQuery, 'unknownValueCount'>
+  guests?: null | number
   intent?: TourEnquiryIntent
   source?: null | string
   tourId?: null | number | string
@@ -77,6 +78,19 @@ const toParams = (
   return params
 }
 
+export const sanitizeTourContextGuests = (value?: null | number | string): number | undefined => {
+  if (typeof value === 'number') {
+    return Number.isInteger(value) && value >= 1 && value <= 99 ? value : undefined
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    if (!/^[1-9]\d{0,1}$/.test(trimmed)) return undefined
+    const parsed = Number(trimmed)
+    return Number.isInteger(parsed) && parsed >= 1 && parsed <= 99 ? parsed : undefined
+  }
+  return undefined
+}
+
 export const readSafeTourEnquiryContext = (
   input?: URLSearchParams | Record<string, string | string[] | null | undefined>,
 ): TourEnquiryContext => {
@@ -87,6 +101,7 @@ export const readSafeTourEnquiryContext = (
     departureDate: sanitizeTourContextDepartureDate(first('departureDate')),
     departureId: sanitizeTourContextID(first('departureId')),
     discovery: stripDiscoveryQueryMeta(normalizeDiscoveryQuery(params)),
+    guests: sanitizeTourContextGuests(first('guests')),
     intent: sanitizeTourContextIntent(first('intent')),
     source: sanitizeContextSource(first('source')),
     tourId: sanitizeTourContextID(first('tourId')),
@@ -106,6 +121,8 @@ export const appendTourEnquiryContextParams = (
   if (departureId) params.set('departureId', departureId)
   const departureDate = sanitizeTourContextDepartureDate(context.departureDate)
   if (departureDate) params.set('departureDate', departureDate)
+  const guests = sanitizeTourContextGuests(context.guests)
+  if (guests) params.set('guests', String(guests))
   const intent = sanitizeTourContextIntent(context.intent)
   if (intent) params.set('intent', intent)
   const tourSlug = sanitizeTourContextSlug(context.tourSlug)

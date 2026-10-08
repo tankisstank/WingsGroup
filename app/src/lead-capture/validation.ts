@@ -68,7 +68,7 @@ export const parseLeadContext = (input: unknown): LeadSubmissionContext | undefi
   const context = assertPlainObject(input, 'Submission context is invalid.')
   assertOnlyKeys(
     context,
-    ['departureDate', 'departureId', 'discovery', 'intent', 'source', 'tourId', 'tourSlug'],
+    ['departureDate', 'departureId', 'discovery', 'guests', 'intent', 'source', 'tourId', 'tourSlug'],
     'Submission context is invalid.',
   )
 
@@ -132,6 +132,12 @@ export const parseLeadContext = (input: unknown): LeadSubmissionContext | undefi
       'Departure identifier is invalid.',
     ),
     discovery,
+    guests:
+      typeof context.guests === 'number' && Number.isInteger(context.guests) && context.guests >= 1 && context.guests <= 99
+        ? context.guests
+        : typeof context.guests === 'string' && /^[1-9]\d{0,1}$/.test(context.guests.trim())
+          ? parseInt(context.guests.trim(), 10)
+          : undefined,
     intent: typeof intent === 'string' && intent ? (intent as LeadSubmissionContext['intent']) : undefined,
     source: optionalContextValue(
       context.source,

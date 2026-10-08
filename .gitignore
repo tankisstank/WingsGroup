@@ -12,6 +12,8 @@ artifacts/*.log
 artifacts/*.png
 wingsgroup.vn-audit/
 *.tar.gz
+scratch/
+app/scratch/
 
 # Nested repositories kept outside this workspace commit
 payload/

@@ -15,7 +15,7 @@ type Props = {
   tour: { id?: number | string; slug?: null | string }
 }
 
-const monthKey = (date?: null | string) => (date ? String(date).slice(0, 7) : '')
+export const monthKey = (date?: null | string) => (date ? String(date).slice(0, 7) : '')
 
 export const TourDepartureMatrix = ({
   departures,
@@ -47,7 +47,15 @@ export const TourDepartureMatrix = ({
     }
   }
 
-  const [activeMonth, setActiveMonth] = useState('all')
+  const [localActiveMonth, setLocalActiveMonth] = useState('all')
+  const activeMonth = context ? context.activeMonth : localActiveMonth
+  const setActiveMonth = (m: string) => {
+    if (context) {
+      context.setActiveMonth(m)
+    } else {
+      setLocalActiveMonth(m)
+    }
+  }
 
   // Derive unique cities
   const cities = Array.from(
@@ -69,10 +77,12 @@ export const TourDepartureMatrix = ({
   // When filters change or when returning from private tour:
   // Fallback to first sellable departure in visible; if none sellable, first departure; if visible empty, null.
   React.useEffect(() => {
-    if (context?.isPrivateTour) return
+    if (context) return
 
-    const currentSelected = context?.selectedDeparture
-    const isStillVisible = currentSelected && visible.some((d) => String(d.id) === String(currentSelected.id))
+    const isStillVisible =
+      effectiveSelectedId !== undefined &&
+      effectiveSelectedId !== null &&
+      visible.some((d) => String(d.id) === String(effectiveSelectedId))
 
     if (!isStillVisible) {
       if (visible.length === 0) {
@@ -84,7 +94,7 @@ export const TourDepartureMatrix = ({
         handleSelect(firstSellable || visible[0])
       }
     }
-  }, [activeMonth, activeCity, departures, context?.isPrivateTour])
+  }, [activeMonth, activeCity, departures, context, effectiveSelectedId])
 
   const months = Array.from(new Set(departures.map((departure) => monthKey(departure.departureDate))))
     .filter((value) => /^\d{4}-\d{2}$/.test(value))
@@ -129,7 +139,7 @@ export const TourDepartureMatrix = ({
             </label>
             <select
               id="matrix-city-filter"
-              data-od-id="departureCity"
+              data-od-id="matrixDepartureCity"
               className="rounded-lg border border-border/70 bg-background px-3 py-1.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               value={activeCity}
               onChange={(e) => context?.setSelectedCity?.(e.target.value)}

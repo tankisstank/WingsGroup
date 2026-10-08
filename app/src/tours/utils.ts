@@ -176,10 +176,12 @@ export const getTourInquiryPath = ({
   tourSlug,
   tourTitle,
   discoveryContext,
+  guests,
 }: {
   departureDate?: null | string
   departureId?: null | number | string
   discoveryContext?: Omit<TourEnquiryContext, 'source' | 'tourId' | 'tourSlug' | 'tourTitle'>
+  guests?: null | number | string
   intent?: TourInquiryIntent
   siteCode?: null | string
   source?: null | string
@@ -212,6 +214,10 @@ export const getTourInquiryPath = ({
     const cleanDate =
       typeof departureDate === 'string' ? departureDate.slice(0, 10) : departureDate
     params.set('departureDate', cleanDate)
+  }
+
+  if (guests !== null && guests !== undefined && guests !== '') {
+    params.set('guests', String(guests))
   }
 
   if (source) {

@@ -20,6 +20,7 @@ const toSubmissionContext = (context: TourEnquiryContext): LeadSubmissionContext
       type: context.discovery.type,
       }
     : undefined,
+  guests: context.guests || undefined,
   intent: context.intent,
   source: context.source || undefined,
   tourId:

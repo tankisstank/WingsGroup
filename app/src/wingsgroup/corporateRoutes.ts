@@ -151,15 +151,24 @@ export const isValidWingsGroupPolicyDate = (value: unknown): boolean => {
     : parsed.toISOString() === date
 }
 
+export const WINGSGROUP_LEGACY_RELATIONSHIP_STATEMENT =
+  'WingsGroup là thương hiệu phát triển mới trong cùng hệ sinh thái tổ chức với VietWings và Đôi Cánh Việt. Hệ sinh thái tiếp tục phát triển các thương hiệu WingsGo, WingSide, WingsCare và các dịch vụ liên quan.'
+
 export const hasTrustedWingsGroupSettings = (value: unknown): boolean => {
   const settings = asRecord(value)
   const wingsGroupV3 = asRecord(settings.wingsGroupV3)
   if (wingsGroupV3.enabled !== true) return false
 
   const legalIdentity = asRecord(wingsGroupV3.legalIdentity)
-  return Object.entries(WINGSGROUP_LEGAL_IDENTITY).every(
-    ([field, expected]) => legalIdentity[field] === expected,
-  )
+  return Object.entries(WINGSGROUP_LEGAL_IDENTITY).every(([field, expected]) => {
+    if (field === 'relationshipStatement') {
+      return (
+        legalIdentity[field] === expected ||
+        legalIdentity[field] === WINGSGROUP_LEGACY_RELATIONSHIP_STATEMENT
+      )
+    }
+    return legalIdentity[field] === expected
+  })
 }
 
 export const hasApprovedWingsGroupPrivacyGovernance = (value: unknown): boolean => {

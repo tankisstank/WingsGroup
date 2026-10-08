@@ -233,4 +233,51 @@ describe('US-027 Slice 3: Itinerary Accordion & Services Module retail component
     const notesBox = container.querySelector('[data-od-id="tour-services-notes"]')
     expect(notesBox).toBeNull()
   })
+
+  it('renders itinerary service summary pills for accommodation, transport, and meals on day items', () => {
+    const { container } = render(
+      <TourDetailPage data={baseTourData} locale="vi" siteCode="wingsgo" />,
+    )
+
+    // Day 1 pills
+    const day1Pills = container.querySelector('[data-od-id="retail-itinerary-day-1-pills"]')
+    expect(day1Pills).toBeTruthy()
+    expect(day1Pills?.textContent).toContain('Nghỉ đêm trên máy bay')
+    expect(day1Pills?.textContent).toContain('Máy bay Vietnam Airlines')
+
+    // Day 2 pills
+    const day2Pills = container.querySelector('[data-od-id="retail-itinerary-day-2-pills"]')
+    expect(day2Pills).toBeTruthy()
+    expect(day2Pills?.textContent).toContain('Khách sạn 4 sao Seoul')
+    expect(day2Pills?.textContent).toContain('Xe du lịch 45 chỗ')
+
+    // Day 3 pills
+    const day3Pills = container.querySelector('[data-od-id="retail-itinerary-day-3-pills"]')
+    expect(day3Pills).toBeTruthy()
+    expect(day3Pills?.textContent).toContain('Khách sạn 4 sao Seoul')
+    expect(day3Pills?.textContent).toContain('Xe du lịch')
+  })
+
+  it('renders services comparison in a 2-column balanced grid spanning full main content column', () => {
+    const { container } = render(
+      <TourDetailPage data={baseTourData} locale="vi" siteCode="wingsgo" />,
+    )
+
+    const includedBox = container.querySelector('[data-od-id="tour-services-included"]')
+    const excludedBox = container.querySelector('[data-od-id="tour-services-excluded"]')
+
+    expect(includedBox).toBeTruthy()
+    expect(excludedBox).toBeTruthy()
+
+    // Both should be children of the same 2-column compare grid
+    const compareGrid = includedBox?.parentElement
+    expect(compareGrid).toBeTruthy()
+    expect(compareGrid).toBe(excludedBox?.parentElement)
+    expect(compareGrid?.className).toContain('grid')
+    expect(compareGrid?.className).toContain('sm:grid-cols-2')
+
+    // Verify icons exist
+    expect(includedBox?.querySelector('svg')).toBeTruthy()
+    expect(excludedBox?.querySelector('svg')).toBeTruthy()
+  })
 })

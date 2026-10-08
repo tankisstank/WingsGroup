@@ -12,11 +12,12 @@ import { defaultTourSectionOrder, defaultTourSectionVisibility } from './section
 import { ScheduleInteractiveDepartures } from './ScheduleInteractiveDepartures'
 import { TourItineraryAccordion } from './TourItineraryAccordion'
 import { TourItineraryDayDetails } from './TourItineraryDayDetails'
-import { TourDepartureMatrix } from './TourDepartureMatrix'
+import { TourDepartureMatrix, monthKey } from './TourDepartureMatrix'
 import {
   TourDepartureSelectionProvider,
   useTourDepartureSelection,
 } from './TourDepartureSelectionContext'
+import { RetailTourConsultationDialog } from './RetailTourConsultationDialog'
 import { normalizeGovernedTourPrice } from './currency'
 import { isDepartureVerificationCurrent } from './departureCommerce'
 import type {
@@ -249,7 +250,13 @@ const splitSummaryParagraphs = (summary?: null | string) =>
 
 const unusableContentPatterns = [
   /^dang cap nhat$/iu,
+  /^chua cap nhat$/iu,
+  /^tba$/iu,
+  /^tbd$/iu,
+  /^(na|n\/?a)$/iu,
+  /^khong ap dung$/iu,
   /^theo line ban$/iu,
+  /theo line ban tai (khong ap dung|dang cap nhat|chua cap nhat|tba|tbd|na)$/iu,
   /^route fallback$/iu,
   /^khach retail can route ro$/iu,
   /^can bang tham quan, nghi va thoi gian tu do$/iu,
@@ -262,6 +269,8 @@ const normalizeComparableText = (value: string) =>
     .replace(/\p{Diacritic}/gu, '')
     .replace(/[đĐ]/g, 'd')
     .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, '')
+    .replace(/\s+/g, ' ')
     .trim()
 
 const isUsableText = (value: unknown): value is string => {
@@ -269,6 +278,8 @@ const isUsableText = (value: unknown): value is string => {
   if (!text) return false
 
   const comparable = normalizeComparableText(text)
+  if (!comparable) return false
+
   return !unusableContentPatterns.some((pattern) => pattern.test(comparable))
 }
 
@@ -508,6 +519,463 @@ const getConsultativePrimaryIntent = (mode?: null | string): TourInquiryIntent =
   return 'inquiry'
 }
 
+export const RetailDecisionRail = ({
+  className,
+  cta = {},
+  hasCollage: _hasCollage,
+  locale,
+  nextDeparture: nextDepartureProp,
+  presentation = 'retail',
+  reviewSnapshot,
+  siteCode: siteCodeProp,
+  tour,
+  variants = [],
+}: {
+  className?: string
+  cta?: Record<string, any>
+  hasCollage?: boolean
+  locale: SupportedLocaleCode
+  nextDeparture: Record<string, any> | null
+  presentation?: TourDetailPresentation
+  reviewSnapshot?: Record<string, any> | null
+  siteCode?: null | string
+  tour: Record<string, any>
+  variants?: Array<Record<string, any>>
+}) => {
+  const context = useTourDepartureSelection()
+  const nextDeparture = context
+    ? context.isPrivateTour
+      ? null
+      : context.selectedDeparture
+    : nextDepartureProp
+  const siteCode = resolveTourSiteCode(siteCodeProp, presentation)
+  const retailCtaIntent: TourInquiryIntent = cta.mode || tour.bcfg?.ctaStyle || 'hold-seat'
+
+  const nextDepDate = nextDeparture?.departureDate ? new Date(nextDeparture.departureDate) : null
+  const now = new Date()
+  const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+  const hasFutureDeparture = Boolean(
+    nextDeparture &&
+      nextDepDate &&
+      !Number.isNaN(nextDepDate.getTime()) &&
+      new Date(Date.UTC(nextDepDate.getUTCFullYear(), nextDepDate.getUTCMonth(), nextDepDate.getUTCDate())).getTime() >= todayUtc.getTime(),
+  )
+  const isPrivateTour = Boolean(context?.isPrivateTour)
+  const isSoldOut = nextDeparture?.availabilityStatus === 'sold-out'
+  const commerceVerified = Boolean(nextDeparture?.commerceVerified)
+  const isSellable = !isPrivateTour && hasFutureDeparture && !isSoldOut && commerceVerified
+  const effectiveRetailIntent: TourInquiryIntent = isPrivateTour
+    ? 'request-quote'
+    : isSellable
+      ? retailCtaIntent
+      : 'inquiry'
+  const effectivePrimaryLabel = isPrivateTour
+    ? 'Tư vấn lịch riêng'
+    : isSellable
+      ? nextDeparture?.ctaLabelOverride || cta.label || 'Giữ chỗ ngay'
+      : hasFutureDeparture && isSoldOut
+        ? 'Tư vấn đợt khác'
+        : 'Nhận tư vấn lịch mới'
+
+  const allDepartures = context?.departures && context.departures.length > 0 ? context.departures : []
+  const activeCity = context?.selectedCity || 'all'
+  const activeMonth = context?.activeMonth || 'all'
+
+  const cities = Array.from(
+    new Set(allDepartures.map((d) => d.departureCity).filter(Boolean)),
+  ) as string[]
+
+  const months = Array.from(
+    new Set(allDepartures.map((d) => monthKey(d.departureDate))),
+  )
+    .filter((value) => /^\d{4}-\d{2}$/.test(value))
+    .sort()
+
+  const visibleDepartures = allDepartures.filter((d) => {
+    const matchCity = activeCity === 'all' || !activeCity || d.departureCity === activeCity
+    const matchMonth = activeMonth === 'all' || !activeMonth || monthKey(d.departureDate) === activeMonth
+    return matchCity && matchMonth
+  })
+
+  const usableRouteSummary = isUsableText(tour.factSummary?.routeSummary)
+    ? tour.factSummary?.routeSummary
+    : null
+  const usableHotelSummary = isUsableText(tour.factSummary?.hotelSummary)
+    ? tour.factSummary?.hotelSummary
+    : isUsableText(tour.servicesSummary?.hotelSummary)
+      ? tour.servicesSummary?.hotelSummary
+      : null
+  const usableMealsSummary = isUsableText(tour.factSummary?.mealsSummary)
+    ? tour.factSummary?.mealsSummary
+    : isUsableText(tour.servicesSummary?.mealsSummary)
+      ? tour.servicesSummary?.mealsSummary
+      : null
+  const hasFactSummary = Boolean(usableRouteSummary || usableHotelSummary || usableMealsSummary)
+
+  const retailInquiryHref = getTourInquiryPath({
+    departureId: !isPrivateTour && hasFutureDeparture ? nextDeparture?.id : undefined,
+    departureDate: !isPrivateTour && hasFutureDeparture ? nextDeparture?.departureDate : undefined,
+    intent: effectiveRetailIntent,
+    source: 'tour-detail-hero',
+    tourId: tour.id,
+    tourSlug: tour.slug,
+    discoveryContext: tour.discoveryContext,
+  })
+  const retailPrimaryHref = isPrivateTour
+    ? retailInquiryHref
+    : resolveRetailCtaHref({
+        cmsHref: cta.href,
+        expectedDepartureDate: hasFutureDeparture ? nextDeparture?.departureDate : undefined,
+        expectedDepartureId: hasFutureDeparture ? nextDeparture?.id : undefined,
+        expectedTourId: tour.id,
+        expectedTourSlug: tour.slug,
+        hasFutureDeparture,
+        inquiryPath: retailInquiryHref,
+        isSellable,
+      })
+
+  return (
+    <aside
+      className={`w-full space-y-4 lg:w-[340px] shrink-0 ${className || ''}`.trim()}
+      data-od-id="decision-rail"
+      data-tour-presentation={presentation}
+    >
+      <div className="lg:sticky lg:top-[92px] space-y-4">
+        <Panel className="p-6 border-border/80 shadow-md flex flex-col max-h-[calc(100dvh-108px)]">
+          {/* Price section - Fixed top tier (never scrolls) */}
+          <div className="shrink-0 border-b border-border/60 pb-5">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {isPrivateTour ? 'Báo giá theo đoàn' : 'Giá từ'}
+              </p>
+              {context ? (
+                <button
+                  type="button"
+                  onClick={() => context.setIsPrivateTour(!isPrivateTour)}
+                  className="text-xs font-medium text-[var(--site-brand)] hover:underline"
+                  data-od-id="tour-toggle-private-tour"
+                >
+                  {isPrivateTour ? 'Xem lịch tour ghép' : 'Tư vấn lịch riêng'}
+                </button>
+              ) : null}
+            </div>
+            <div className="mt-1 flex items-baseline gap-2">
+              <span className="font-mono text-3xl font-extrabold text-[var(--site-brand)]">
+                {isSellable
+                  ? formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency) || 'Liên hệ'
+                  : 'Liên hệ'}
+              </span>
+              {isSellable && nextDeparture?.priceFrom ? (
+                <span className="text-xs text-muted-foreground">/ khách</span>
+              ) : null}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {isPrivateTour
+                ? 'Không áp dụng giá tour ghép cho lịch riêng. Lịch và báo giá theo nhu cầu.'
+                : isSellable
+                  ? nextDeparture?.depositNote ||
+                    tour.factSummary?.holdNote ||
+                    'Sales xác nhận lại tình trạng chỗ và giá trước khi đặt cọc.'
+                  : hasFutureDeparture && isSoldOut
+                    ? 'Đợt này đã hết chỗ. Vui lòng liên hệ để tư vấn đợt khác phù hợp.'
+                    : hasFutureDeparture && !commerceVerified
+                      ? 'Giá và tình trạng chỗ đang được chuyên viên cập nhật. Vui lòng liên hệ.'
+                      : 'Hiện chưa có lịch khởi hành mở bán. Vui lòng liên hệ chuyên viên để nhận lịch mới.'}
+            </p>
+          </div>
+
+          {/* Middle Tier - Scrollable if content overflows viewport */}
+          <div className="min-h-0 flex-1 overflow-y-auto py-2 space-y-4 pr-1">
+            {/* Booking Controls (Giai đoạn 2) */}
+            <div className="space-y-3 border-b border-border/60 pb-4">
+              {/* 1. Nơi khởi hành */}
+              {cities.length > 0 ? (
+                <div className="space-y-1.5">
+                  <label htmlFor="departureCity" className="text-xs font-semibold text-foreground">
+                    Nơi khởi hành
+                  </label>
+                  <select
+                    id="departureCity"
+                    data-od-id="departureCity"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    value={activeCity}
+                    onChange={(e) => context?.setSelectedCity?.(e.target.value)}
+                  >
+                    <option value="all">Tất cả nơi đi</option>
+                    {cities.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
+
+              {/* 2. Tháng khởi hành */}
+              <div className="space-y-1.5">
+                <label htmlFor="departureMonth" className="text-xs font-semibold text-foreground">
+                  Tháng khởi hành
+                </label>
+                <select
+                  id="departureMonth"
+                  data-od-id="departureMonth"
+                  aria-label="Tháng khởi hành"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  value={activeMonth}
+                  onChange={(e) => context?.setActiveMonth?.(e.target.value)}
+                >
+                  <option value="all">Tất cả tháng</option>
+                  {months.map((m) => {
+                    const [year, month] = m.split('-')
+                    const label = locale === 'en' ? `${month}/${year}` : `Tháng ${month}/${year}`
+                    return (
+                      <option key={m} value={m}>
+                        {label}
+                      </option>
+                    )
+                  })}
+                </select>
+              </div>
+
+              {/* 3. Nhu cầu của bạn */}
+              <div className="space-y-1.5">
+                <label htmlFor="requestType" className="text-xs font-semibold text-foreground">
+                  Nhu cầu của bạn
+                </label>
+                <select
+                  id="requestType"
+                  data-od-id="requestType"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  value={isPrivateTour ? 'private' : 'group'}
+                  onChange={(e) => context?.setIsPrivateTour?.(e.target.value === 'private')}
+                >
+                  <option value="group">Chọn lịch tour ghép</option>
+                  <option value="private">Tư vấn lịch riêng</option>
+                </select>
+              </div>
+
+              {/* 4. Đợt khởi hành (ẩn khi chọn tour riêng) */}
+              {!isPrivateTour ? (
+                <div className="space-y-1.5" id="departureSelectGroup">
+                  <label htmlFor="departureSelect" className="text-xs font-semibold text-foreground">
+                    Đợt khởi hành
+                  </label>
+                  <select
+                    id="departureSelect"
+                    data-od-id="departureSelect"
+                    aria-describedby="airlineHint"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    disabled={visibleDepartures.length === 0}
+                    value={nextDeparture?.id ? String(nextDeparture.id) : ''}
+                    onChange={(e) => {
+                      const selectedId = e.target.value
+                      const targetDep = visibleDepartures.find((d) => String(d.id) === String(selectedId))
+                      if (targetDep) {
+                        context?.setSelectedDeparture?.(targetDep)
+                      }
+                    }}
+                  >
+                    {visibleDepartures.length > 0 ? (
+                      visibleDepartures.map((d) => {
+                        const dateStr = formatTourDate(d.departureDate, locale) || d.departureDate
+                        const cityStr = d.departureCity || ''
+                        const stateStr = !d.commerceVerified
+                          ? 'Cần xác nhận lại giá'
+                          : d.availabilityStatus === 'sold-out'
+                            ? 'Đã hết chỗ'
+                            : d.availabilityStatus === 'limited'
+                              ? 'Sắp hết chỗ'
+                              : d.availabilityStatus === 'open'
+                                ? 'Đang mở bán'
+                                : ''
+                        const [dY, dM, dD] = String(d.departureDate || '').slice(0, 10).split('-')
+                        const formattedOptDate = dD && dM ? `D${dD}.M${dM}` : (dateStr || '')
+                        const optLabel = [`Đợt ${d.id}`, formattedOptDate, cityStr, stateStr].filter(Boolean).join(' · ')
+                        return (
+                          <option key={d.id} value={String(d.id)}>
+                            {optLabel}
+                          </option>
+                        )
+                      })
+                    ) : (
+                      <option value="">Chưa có lịch phù hợp</option>
+                    )}
+                  </select>
+                  {!isPrivateTour && hasFutureDeparture && nextDeparture?.airline ? (
+                    <p id="airlineHint" className="text-xs text-muted-foreground">
+                      {[nextDeparture.departureCity, nextDeparture.airline].filter(Boolean).join(' · ')}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {/* 4. Số khách dự kiến */}
+              <div className="space-y-1.5">
+                <label htmlFor="paxCount" className="text-xs font-semibold text-foreground">
+                  Số khách dự kiến
+                </label>
+                <input
+                  id="paxCount"
+                  data-od-id="paxCount"
+                  type="number"
+                  min="1"
+                  max="99"
+                  step="1"
+                  inputMode="numeric"
+                  required
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  value={context?.guestCount ?? 2}
+                  onChange={(e) => {
+                    const parsed = parseInt(e.target.value, 10)
+                    if (!Number.isNaN(parsed)) {
+                      context?.setGuestCount?.(parsed)
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Departure Info & Facts */}
+            <div className="py-2 border-b border-border/60 space-y-2">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">
+                  {isPrivateTour ? 'Hình thức:' : 'Khởi hành gần nhất:'}
+                </span>
+                <span className="font-semibold text-foreground">
+                  {isPrivateTour
+                    ? 'Lịch riêng theo đoàn'
+                    : hasFutureDeparture
+                      ? formatTourDate(nextDeparture?.departureDate, locale)
+                      : 'Chưa có lịch mới'}
+                </span>
+              </div>
+              {!isPrivateTour && hasFutureDeparture &&
+              [nextDeparture?.airline, nextDeparture?.departureCity].filter(Boolean).length > 0 ? (
+                <div className="flex justify-between items-center text-xs text-muted-foreground">
+                  <span>Khởi hành & bay:</span>
+                  <span>
+                    {[
+                      nextDeparture?.departureCity,
+                      nextDeparture?.airline
+                        ? `${nextDeparture.airline}${nextDeparture?.flightNumber ? ` (${nextDeparture.flightNumber})` : ''}`
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' • ')}
+                  </span>
+                </div>
+              ) : null}
+              {hasFutureDeparture &&
+              getAvailabilityLabel(nextDeparture?.availabilityStatus, locale) ? (
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-muted-foreground">Tình trạng chỗ:</span>
+                  <span className="inline-flex rounded-full bg-muted px-2.5 py-0.5 font-semibold text-foreground">
+                    {getAvailabilityLabel(nextDeparture?.availabilityStatus, locale)}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+
+            {/* Quick Fact Summary - Only render if usable facts exist */}
+            {hasFactSummary ? (
+              <div className="py-2 border-b border-border/60 space-y-1.5 text-xs text-muted-foreground">
+                {usableRouteSummary ? (
+                  <p>
+                    <strong className="font-medium text-foreground">Tuyến:</strong>{' '}
+                    {usableRouteSummary}
+                  </p>
+                ) : null}
+                {usableHotelSummary ? (
+                  <p>
+                    <strong className="font-medium text-foreground">Lưu trú:</strong>{' '}
+                    {usableHotelSummary}
+                  </p>
+                ) : null}
+                {usableMealsSummary ? (
+                  <p>
+                    <strong className="font-medium text-foreground">Bữa ăn:</strong>{' '}
+                    {usableMealsSummary}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
+            {/* Variants pill list if any */}
+            {variants.length > 0 ? (
+              <div className="pt-2 border-t border-border/60">
+                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
+                  Biến thể hành trình
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {variants.map((variant) => (
+                    <span
+                      className="rounded-md border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-foreground"
+                      key={variant.id}
+                    >
+                      {[variant.label, variant.airline, variant.departureCity]
+                        .filter(Boolean)
+                        .join(' • ')}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          {/* Bottom Tier - Fixed CTAs (never scrolls away) */}
+          <div className="shrink-0 pt-4 border-t border-border/60 space-y-2.5">
+            <SiteLink
+              className="flex w-full min-h-12 items-center justify-center rounded-xl bg-[var(--site-brand)] px-5 text-sm font-bold text-white no-underline shadow-sm transition hover:opacity-95"
+              data-od-id="tour-decision-primary-cta"
+              href={retailPrimaryHref}
+            >
+              {effectivePrimaryLabel}
+            </SiteLink>
+
+            <div className="grid grid-cols-2 gap-2">
+              <SiteLink
+                className="flex min-h-10 items-center justify-center rounded-lg border border-border px-3 text-center text-xs font-semibold no-underline hover:bg-muted/30"
+                href={getSchedulePath()}
+              >
+                Xem các đợt đi
+              </SiteLink>
+              <SiteLink
+                className="flex min-h-10 items-center justify-center rounded-lg border border-border px-3 text-center text-xs font-semibold no-underline hover:bg-muted/30"
+                data-od-id="tour-decision-consultation-trigger"
+                href={getTourInquiryPath({
+                  departureDate: !isPrivateTour && hasFutureDeparture ? nextDeparture?.departureDate : undefined,
+                  departureId: !isPrivateTour && hasFutureDeparture ? nextDeparture?.id : undefined,
+                  discoveryContext: tour.discoveryContext,
+                  guests: context?.guestCount ?? 2,
+                  intent: isPrivateTour ? 'request-quote' : 'inquiry',
+                  siteCode,
+                  source: 'tour-detail-hero',
+                  tourId: tour.id,
+                  tourSlug: tour.slug,
+                  tourTitle: tour.title,
+                })}
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
+                    e.preventDefault()
+                    context?.setIsConsultationOpen?.(true)
+                  }
+                }}
+              >
+                Nhận tư vấn
+              </SiteLink>
+            </div>
+          </div>
+        </Panel>
+
+        {/* Social Proof / Review Snapshot Card if exists */}
+        {reviewSnapshot?.score || asArray(reviewSnapshot?.proofQuotes).length > 0 ? (
+          <ReviewSnapshotCard reviewSnapshot={reviewSnapshot} />
+        ) : null}
+      </div>
+    </aside>
+  )
+}
+
 const TourDecisionHeader = ({
   locale,
   nextDeparture: nextDepartureProp,
@@ -531,13 +999,9 @@ const TourDecisionHeader = ({
       : context?.selectedDeparture || nextDepartureProp
   const isConsultative = presentation === 'consultative'
   const wingSideCopy = getWingSideTourCopy(locale)
-  const reviewSnapshot = tour.reviewSnapshot || null
-  const summaryParagraphs = splitSummaryParagraphs(tour.summary)
-  const badgeGroups = getBadgeGroups(asArray<Record<string, any>>(tour.badges))
   const durationLabel = getDurationLabel(tour.durationDays, tour.durationNights, locale)
   const cta = tour.primaryCTA || {}
   const siteCode = resolveTourSiteCode(siteCodeProp, presentation)
-  const retailCtaIntent: TourInquiryIntent = cta.mode || tour.bcfg?.ctaStyle || 'hold-seat'
   const consultativeCtaIntent = getConsultativePrimaryIntent(cta.mode || tour.bcfg?.ctaStyle)
   const routeChips = getTourRouteChips(tour)
   const displayTitle = isConsultative
@@ -593,6 +1057,8 @@ const TourDecisionHeader = ({
     .join(' · ')
 
   if (isConsultative) {
+    const summaryParagraphs = splitSummaryParagraphs(tour.summary)
+    const badgeGroups = getBadgeGroups(asArray<Record<string, any>>(tour.badges))
     // Single split surface (image | body) — no dual-panel gap on wide screens.
     return (
       <div
@@ -742,59 +1208,8 @@ const TourDecisionHeader = ({
       !Number.isNaN(nextDepDate.getTime()) &&
       new Date(Date.UTC(nextDepDate.getUTCFullYear(), nextDepDate.getUTCMonth(), nextDepDate.getUTCDate())).getTime() >= todayUtc.getTime(),
   )
-  const isPrivateTour = Boolean(context?.isPrivateTour)
-  const isSoldOut = nextDeparture?.availabilityStatus === 'sold-out'
-  const commerceVerified = Boolean(nextDeparture?.commerceVerified)
-  const isSellable = !isPrivateTour && hasFutureDeparture && !isSoldOut && commerceVerified
-  const effectiveRetailIntent: TourInquiryIntent = isPrivateTour
-    ? 'request-quote'
-    : isSellable
-      ? retailCtaIntent
-      : 'inquiry'
-  const effectivePrimaryLabel = isPrivateTour
-    ? 'Tư vấn lịch riêng'
-    : isSellable
-      ? nextDeparture?.ctaLabelOverride || cta.label || 'Giữ chỗ ngay'
-      : hasFutureDeparture && isSoldOut
-        ? 'Tư vấn đợt khác'
-        : 'Nhận tư vấn lịch mới'
-
-  const usableRouteSummary = isUsableText(tour.factSummary?.routeSummary)
-    ? tour.factSummary?.routeSummary
-    : null
-  const usableHotelSummary = isUsableText(tour.factSummary?.hotelSummary)
-    ? tour.factSummary?.hotelSummary
-    : isUsableText(tour.servicesSummary?.hotelSummary)
-      ? tour.servicesSummary?.hotelSummary
-      : null
-  const usableMealsSummary = isUsableText(tour.factSummary?.mealsSummary)
-    ? tour.factSummary?.mealsSummary
-    : isUsableText(tour.servicesSummary?.mealsSummary)
-      ? tour.servicesSummary?.mealsSummary
-      : null
-  const hasFactSummary = Boolean(usableRouteSummary || usableHotelSummary || usableMealsSummary)
-
-  const retailInquiryHref = getTourInquiryPath({
-    departureId: !isPrivateTour && hasFutureDeparture ? nextDeparture?.id : undefined,
-    departureDate: !isPrivateTour && hasFutureDeparture ? nextDeparture?.departureDate : undefined,
-    intent: effectiveRetailIntent,
-    source: 'tour-detail-hero',
-    tourId: tour.id,
-    tourSlug: tour.slug,
-    discoveryContext: tour.discoveryContext,
-  })
-  const retailPrimaryHref = isPrivateTour
-    ? retailInquiryHref
-    : resolveRetailCtaHref({
-        cmsHref: cta.href,
-        expectedDepartureDate: hasFutureDeparture ? nextDeparture?.departureDate : undefined,
-        expectedDepartureId: hasFutureDeparture ? nextDeparture?.id : undefined,
-        expectedTourId: tour.id,
-        expectedTourSlug: tour.slug,
-        hasFutureDeparture,
-        inquiryPath: retailInquiryHref,
-        isSellable,
-      })
+  const summaryParagraphs = splitSummaryParagraphs(tour.summary)
+  const badgeGroups = getBadgeGroups(asArray<Record<string, any>>(tour.badges))
 
   return (
     <div className="space-y-6" data-tour-presentation="retail">
@@ -828,69 +1243,38 @@ const TourDecisionHeader = ({
         ) : null}
       </div>
 
-      {/* Hero Split Layout: Left (Gallery + Route Chips) | Right (Decision Card 340px) */}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] items-start">
-        {/* Left Column: Media Presentation, Headline, Route Chips */}
-        <div className="space-y-4 min-w-0">
-          <h1 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl text-foreground">
-            {tour.title}
-          </h1>
+      {/* Hero Media & Summary Presentation */}
+      <div className="space-y-4 min-w-0">
+        <h1 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl text-foreground">
+          {tour.title}
+        </h1>
 
-          {summaryParagraphs[0] ? (
-            <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-              {summaryParagraphs[0]}
-            </p>
-          ) : null}
+        {summaryParagraphs[0] ? (
+          <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+            {summaryParagraphs[0]}
+          </p>
+        ) : null}
 
-          {/* Route Chips in retail mode */}
-          {routeChips.length > 0 ? (
-            <div className="flex flex-wrap items-center gap-1.5 pt-1" aria-label="Tuyến hành trình" data-od-id="tour-route-chips">
-              <span className="text-xs font-medium text-muted-foreground mr-1">Tuyến:</span>
-              {routeChips.map((chip, idx) => (
-                <span
-                  className="rounded-full border border-border/70 bg-muted/40 px-3 py-1 text-xs font-medium text-foreground"
-                  key={`${chip}-${idx}`}
-                >
-                  {chip}
-                </span>
-              ))}
-            </div>
-          ) : null}
+        {/* Route Chips in retail mode */}
+        {routeChips.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-1.5 pt-1" aria-label="Tuyến hành trình" data-od-id="tour-route-chips">
+            <span className="text-xs font-medium text-muted-foreground mr-1">Tuyến:</span>
+            {routeChips.map((chip, idx) => (
+              <span
+                className="rounded-full border border-border/70 bg-muted/40 px-3 py-1 text-xs font-medium text-foreground"
+                key={`${chip}-${idx}`}
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
+        ) : null}
 
-          {/* Media Presentation: Collage if >=3 images, otherwise single hero frame */}
-          <div className="overflow-hidden rounded-2xl border border-border/70 bg-muted shadow-sm">
-            {hasCollage ? (
-              <div className="grid grid-cols-3 gap-1.5 aspect-[16/10] sm:aspect-[16/9]" data-od-id="tour-gallery-collage">
-                <div className="relative col-span-2 h-full bg-muted">
-                  <Media
-                    fill
-                    imgClassName="object-cover"
-                    pictureClassName="absolute inset-0"
-                    priority
-                    resource={heroImage}
-                  />
-                </div>
-                <div className="grid grid-rows-2 gap-1.5 h-full">
-                  <div className="relative h-full bg-muted">
-                    <Media
-                      fill
-                      imgClassName="object-cover"
-                      pictureClassName="absolute inset-0"
-                      resource={galleryImages[1] as any}
-                    />
-                  </div>
-                  <div className="relative h-full bg-muted">
-                    <Media
-                      fill
-                      imgClassName="object-cover"
-                      pictureClassName="absolute inset-0"
-                      resource={galleryImages[2] as any}
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="relative aspect-[16/10] sm:aspect-[16/9] bg-muted" data-od-id="tour-hero-fallback">
+        {/* Media Presentation: Collage if >=3 images, otherwise single hero frame */}
+        <div className="overflow-hidden rounded-2xl border border-border/70 bg-muted shadow-sm">
+          {hasCollage ? (
+            <div className="grid grid-cols-3 gap-1.5 aspect-[16/10] sm:aspect-[16/9]" data-od-id="tour-gallery-collage">
+              <div className="relative col-span-2 h-full bg-muted">
                 <Media
                   fill
                   imgClassName="object-cover"
@@ -899,195 +1283,51 @@ const TourDecisionHeader = ({
                   resource={heroImage}
                 />
               </div>
-            )}
-          </div>
-
-          {/* Badges / Trust signals */}
-          {badgeGroups.trust.length > 0 ? (
-            <div className="flex flex-wrap gap-2 pt-1">
-              {badgeGroups.trust.slice(0, 6).map((label, index) => (
-                <span
-                  className="rounded-full border border-border/70 bg-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
-                  key={`${label}-${index}`}
-                >
-                  {label}
-                </span>
-              ))}
+              <div className="grid grid-rows-2 gap-1.5 h-full">
+                <div className="relative h-full bg-muted">
+                  <Media
+                    fill
+                    imgClassName="object-cover"
+                    pictureClassName="absolute inset-0"
+                    resource={galleryImages[1] as any}
+                  />
+                </div>
+                <div className="relative h-full bg-muted">
+                  <Media
+                    fill
+                    imgClassName="object-cover"
+                    pictureClassName="absolute inset-0"
+                    resource={galleryImages[2] as any}
+                  />
+                </div>
+              </div>
             </div>
-          ) : null}
+          ) : (
+            <div className="relative aspect-[16/10] sm:aspect-[16/9] bg-muted" data-od-id="tour-hero-fallback">
+              <Media
+                fill
+                imgClassName="object-cover"
+                pictureClassName="absolute inset-0"
+                priority
+                resource={heroImage}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Right Column: Decision Rail Box */}
-        <div className="space-y-4">
-          <Panel className="p-6 border-border/80 shadow-md">
-            {/* Price section */}
-            <div className="border-b border-border/60 pb-5">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                  {isPrivateTour ? 'Báo giá theo đoàn' : 'Giá từ'}
-                </p>
-                {context ? (
-                  <button
-                    type="button"
-                    onClick={() => context.setIsPrivateTour(!isPrivateTour)}
-                    className="text-xs font-medium text-[var(--site-brand)] hover:underline"
-                    data-od-id="tour-toggle-private-tour"
-                  >
-                    {isPrivateTour ? 'Xem lịch tour ghép' : 'Tư vấn lịch riêng'}
-                  </button>
-                ) : null}
-              </div>
-              <div className="mt-1 flex items-baseline gap-2">
-                <span className="font-mono text-3xl font-extrabold text-[var(--site-brand)]">
-                  {isSellable
-                    ? formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency) || 'Liên hệ'
-                    : 'Liên hệ'}
-                </span>
-                {isSellable && nextDeparture?.priceFrom ? (
-                  <span className="text-xs text-muted-foreground">/ khách</span>
-                ) : null}
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {isPrivateTour
-                  ? 'Không áp dụng giá tour ghép cho lịch riêng. Lịch và báo giá theo nhu cầu.'
-                  : isSellable
-                    ? nextDeparture?.depositNote ||
-                      tour.factSummary?.holdNote ||
-                      'Sales xác nhận lại tình trạng chỗ và giá trước khi đặt cọc.'
-                    : hasFutureDeparture && isSoldOut
-                      ? 'Đợt này đã hết chỗ. Vui lòng liên hệ để tư vấn đợt khác phù hợp.'
-                      : hasFutureDeparture && !commerceVerified
-                        ? 'Giá và tình trạng chỗ đang được chuyên viên cập nhật. Vui lòng liên hệ.'
-                        : 'Hiện chưa có lịch khởi hành mở bán. Vui lòng liên hệ chuyên viên để nhận lịch mới.'}
-              </p>
-            </div>
-
-            {/* Next Departure Info */}
-            <div className="py-4 border-b border-border/60 space-y-2">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">
-                  {isPrivateTour ? 'Hình thức:' : 'Khởi hành gần nhất:'}
-                </span>
-                <span className="font-semibold text-foreground">
-                  {isPrivateTour
-                    ? 'Lịch riêng theo đoàn'
-                    : hasFutureDeparture
-                      ? formatTourDate(nextDeparture?.departureDate, locale)
-                      : 'Chưa có lịch mới'}
-                </span>
-              </div>
-              {!isPrivateTour && hasFutureDeparture &&
-              [nextDeparture?.airline, nextDeparture?.departureCity].filter(Boolean).length > 0 ? (
-                <div className="flex justify-between items-center text-xs text-muted-foreground">
-                  <span>Khởi hành & bay:</span>
-                  <span>
-                    {[
-                      nextDeparture?.departureCity,
-                      nextDeparture?.airline
-                        ? `${nextDeparture.airline}${nextDeparture?.flightNumber ? ` (${nextDeparture.flightNumber})` : ''}`
-                        : null,
-                    ]
-                      .filter(Boolean)
-                      .join(' • ')}
-                  </span>
-                </div>
-              ) : null}
-              {hasFutureDeparture &&
-              getAvailabilityLabel(nextDeparture?.availabilityStatus, locale) ? (
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-muted-foreground">Tình trạng chỗ:</span>
-                  <span className="inline-flex rounded-full bg-muted px-2.5 py-0.5 font-semibold text-foreground">
-                    {getAvailabilityLabel(nextDeparture?.availabilityStatus, locale)}
-                  </span>
-                </div>
-              ) : null}
-            </div>
-
-            {/* Quick Fact Summary - Only render if usable facts exist */}
-            {hasFactSummary ? (
-              <div className="py-4 border-b border-border/60 space-y-1.5 text-xs text-muted-foreground">
-                {usableRouteSummary ? (
-                  <p>
-                    <strong className="font-medium text-foreground">Tuyến:</strong>{' '}
-                    {usableRouteSummary}
-                  </p>
-                ) : null}
-                {usableHotelSummary ? (
-                  <p>
-                    <strong className="font-medium text-foreground">Lưu trú:</strong>{' '}
-                    {usableHotelSummary}
-                  </p>
-                ) : null}
-                {usableMealsSummary ? (
-                  <p>
-                    <strong className="font-medium text-foreground">Bữa ăn:</strong>{' '}
-                    {usableMealsSummary}
-                  </p>
-                ) : null}
-              </div>
-            ) : null}
-
-            {/* CTAs */}
-            <div className="pt-4 space-y-2.5">
-              <SiteLink
-                className="flex w-full min-h-12 items-center justify-center rounded-xl bg-[var(--site-brand)] px-5 text-sm font-bold text-white no-underline shadow-sm transition hover:opacity-95"
-                data-od-id="tour-decision-primary-cta"
-                href={retailPrimaryHref}
+        {/* Badges / Trust signals */}
+        {badgeGroups.trust.length > 0 ? (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {badgeGroups.trust.slice(0, 6).map((label, index) => (
+              <span
+                className="rounded-full border border-border/70 bg-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+                key={`${label}-${index}`}
               >
-                {effectivePrimaryLabel}
-              </SiteLink>
-
-              <div className="grid grid-cols-2 gap-2">
-                <SiteLink
-                  className="flex min-h-10 items-center justify-center rounded-lg border border-border px-3 text-center text-xs font-semibold no-underline hover:bg-muted/30"
-                  href={getSchedulePath()}
-                >
-                  Xem các đợt đi
-                </SiteLink>
-                <SiteLink
-                  className="flex min-h-10 items-center justify-center rounded-lg border border-border px-3 text-center text-xs font-semibold no-underline hover:bg-muted/30"
-                  href={getTourInquiryPath({
-                    departureId: !isPrivateTour && hasFutureDeparture ? nextDeparture?.id : undefined,
-                    departureDate: !isPrivateTour && hasFutureDeparture ? nextDeparture?.departureDate : undefined,
-                    intent: isPrivateTour ? 'request-quote' : 'inquiry',
-                    source: 'tour-detail-hero',
-                    tourId: tour.id,
-                    tourSlug: tour.slug,
-                    discoveryContext: tour.discoveryContext,
-                  })}
-                >
-                  Nhận tư vấn
-                </SiteLink>
-              </div>
-            </div>
-
-            {/* Variants pill list if any */}
-            {variants.length > 0 ? (
-              <div className="mt-4 pt-4 border-t border-border/60">
-                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
-                  Biến thể hành trình
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {variants.map((variant) => (
-                    <span
-                      className="rounded-md border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-foreground"
-                      key={variant.id}
-                    >
-                      {[variant.label, variant.airline, variant.departureCity]
-                        .filter(Boolean)
-                        .join(' • ')}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </Panel>
-
-          {/* Social Proof / Review Snapshot Card if exists */}
-          {reviewSnapshot?.score || asArray(reviewSnapshot?.proofQuotes).length > 0 ? (
-            <ReviewSnapshotCard reviewSnapshot={reviewSnapshot} />
-          ) : null}
-        </div>
+                {label}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   )
@@ -1679,7 +1919,7 @@ const TourItinerarySection = ({
   }
 
   return (
-    <Panel className="scroll-mt-28 md:scroll-mt-24" id="itinerary">
+    <Panel className="scroll-mt-48 lg:scroll-mt-36" id="itinerary">
       <SectionHeading eyebrow={heading.eyebrow} title={heading.title} description={null} />
       <div className="mb-5">
         {itineraryPdfURL ? (
@@ -1772,8 +2012,25 @@ const TourItinerarySection = ({
                         {teaser(day.summary)}
                       </p>
                     ) : null}
-                    <div className="mt-2">
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5" data-od-id={`${dayId}-pills`}>
                       <MealChips meals={day.meals} />
+                      {isUsableText(day.accommodation) ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/40 px-2.5 py-0.5 text-xs text-muted-foreground">
+                          <span aria-hidden="true">🏨</span>
+                          <span className="line-clamp-1">{day.accommodation}</span>
+                        </span>
+                      ) : isUsableText(day.sleepingStandard) ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/40 px-2.5 py-0.5 text-xs text-muted-foreground">
+                          <span aria-hidden="true">🏨</span>
+                          <span className="line-clamp-1">{day.sleepingStandard}</span>
+                        </span>
+                      ) : null}
+                      {isUsableText(day.transport) ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/40 px-2.5 py-0.5 text-xs text-muted-foreground">
+                          <span aria-hidden="true">🚌</span>
+                          <span className="line-clamp-1">{day.transport}</span>
+                        </span>
+                      ) : null}
                     </div>
                   </div>
                   <span
@@ -1788,7 +2045,7 @@ const TourItinerarySection = ({
                   className="border-t border-border/50 px-3 pb-4 pt-4 sm:px-5 sm:pb-5"
                   id={panelId}
                 >
-                  <div className={`grid gap-5 ${gallery.length > 0 ? 'lg:grid-cols-[1fr_320px]' : ''}`}>
+                  <div className={`grid gap-5 ${gallery.length > 0 ? 'xl:grid-cols-[1fr_260px]' : ''}`}>
                     <div>
                       {isUsableText(day.dayTheme) ? (
                         <p className="text-sm font-semibold text-[var(--site-brand)]">{day.dayTheme}</p>
@@ -1808,7 +2065,7 @@ const TourItinerarySection = ({
                         </div>
                       ) : null}
                       {infoItems.length > 0 ? (
-                        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
                           {infoItems.map(([label, value]) => (
                             <div
                               className="rounded-[20px] border border-border/60 bg-background p-4"
@@ -1835,7 +2092,7 @@ const TourItinerarySection = ({
                         <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
                           {isEn ? 'Photos of the day' : 'Hình ảnh trong ngày'}
                         </p>
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                        <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
                           {gallery.slice(0, 3).map((item, imageIndex) => (
                             <div
                               className="relative aspect-[4/3] overflow-hidden rounded-[22px] border border-border/60 bg-muted"
@@ -1889,7 +2146,7 @@ const TourServicesSection = ({
 
   if (isConsultative) {
     return (
-      <Panel data-od-id="tour-services" id="services">
+      <Panel className="scroll-mt-48 lg:scroll-mt-36" data-od-id="tour-services" id="services">
         <SectionHeading
           eyebrow={`${wingSideCopy.includes} & ${wingSideCopy.excludes}`}
           title={`${wingSideCopy.includes} — ${wingSideCopy.excludes}`}
@@ -1976,26 +2233,39 @@ const TourServicesSection = ({
   }
 
   return (
-    <Panel data-od-id="tour-services" id="services">
+    <Panel className="scroll-mt-48 lg:scroll-mt-36" data-od-id="tour-services" id="services">
       <SectionHeading
         eyebrow="Dịch vụ & lưu trú"
         title="Giá đã gồm gì, ngủ ở đâu, lưu ý điều hành nào cần biết"
         description={null}
       />
-      <div className="grid gap-5 xl:grid-cols-2">
-        <div className="grid gap-5 md:grid-cols-2">
+      <div className="space-y-6">
+        {/* Row 1: 2-column compare grid across full main content width */}
+        <div className="grid gap-5 sm:grid-cols-2">
           {(() => {
             const usableIncludes = includes.filter((item) => isUsableText(item.label))
             return (
               <div
-                className="rounded-[24px] border border-border/60 bg-muted/20 p-5"
+                className="rounded-[24px] border border-border/60 bg-muted/20 p-5 sm:p-6"
                 data-od-id="tour-services-included"
               >
-                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Giá đã gồm</p>
-                <ul className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                    <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">
+                    {isEn ? 'Services included' : 'Giá đã gồm'}
+                  </p>
+                </div>
+                <ul className="mt-3.5 space-y-3 text-sm leading-7 text-muted-foreground">
                   {usableIncludes.length > 0 ? (
                     usableIncludes.map((item, index) => (
-                      <li key={`${item.label}-${index}`}>{item.label}</li>
+                      <li className="flex items-start gap-2" key={`${item.label}-${index}`}>
+                        <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                        <span>{item.label}</span>
+                      </li>
                     ))
                   ) : (
                     <li>{isEn ? 'Confirmed on consultation.' : 'Xác nhận khi tư vấn.'}</li>
@@ -2008,16 +2278,26 @@ const TourServicesSection = ({
             const usableExcludes = excludes.filter((item) => isUsableText(item.label))
             return (
               <div
-                className="rounded-[24px] border border-border/60 bg-muted/20 p-5"
+                className="rounded-[24px] border border-border/60 bg-muted/20 p-5 sm:p-6"
                 data-od-id="tour-services-excluded"
               >
-                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                  Chi phí tự túc
-                </p>
-                <ul className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400">
+                    <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <line x1="5" x2="19" y1="12" y2="12" />
+                    </svg>
+                  </span>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">
+                    {isEn ? 'Not included' : 'Chi phí tự túc'}
+                  </p>
+                </div>
+                <ul className="mt-3.5 space-y-3 text-sm leading-7 text-muted-foreground">
                   {usableExcludes.length > 0 ? (
                     usableExcludes.map((item, index) => (
-                      <li key={`${item.label}-${index}`}>{item.label}</li>
+                      <li className="flex items-start gap-2" key={`${item.label}-${index}`}>
+                        <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-400" />
+                        <span>{item.label}</span>
+                      </li>
                     ))
                   ) : (
                     <li>{isEn ? 'Confirmed on consultation.' : 'Xác nhận khi tư vấn.'}</li>
@@ -2026,17 +2306,23 @@ const TourServicesSection = ({
               </div>
             )
           })()}
+        </div>
+
+        {/* Row 2: Hotel & Transport */}
+        <div className="grid gap-5 sm:grid-cols-2">
           <div
             className="rounded-[24px] border border-border/60 bg-background p-5"
             data-od-id="tour-services-hotel"
           >
             <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              Khách sạn / nghỉ đêm
+              {isEn ? 'Hotel / Accommodation' : 'Khách sạn / nghỉ đêm'}
             </p>
             <p className="mt-3 text-sm leading-7 text-muted-foreground">
               {(isUsableText(servicesSummary.hotelSummary) && servicesSummary.hotelSummary) ||
                 (isUsableText(tour.factSummary?.hotelSummary) && tour.factSummary?.hotelSummary) ||
-                'Tiêu chuẩn lưu trú được xác nhận theo từng chương trình.'}
+                (isEn
+                  ? 'Accommodation standards confirmed per program.'
+                  : 'Tiêu chuẩn lưu trú được xác nhận theo từng chương trình.')}
             </p>
           </div>
           <div
@@ -2044,7 +2330,7 @@ const TourServicesSection = ({
             data-od-id="tour-services-transport"
           >
             <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              Di chuyển & ăn uống
+              {isEn ? 'Transport & Meals' : 'Di chuyển & ăn uống'}
             </p>
             <p className="mt-3 text-sm leading-7 text-muted-foreground">
               {[
@@ -2052,63 +2338,75 @@ const TourServicesSection = ({
                 isUsableText(servicesSummary.mealsSummary) ? servicesSummary.mealsSummary : null,
               ]
                 .filter(Boolean)
-                .join(' ') || 'Theo lịch trình chi tiết và tư vấn cụ thể.'}
+                .join(' ') ||
+                (isEn
+                  ? 'Per detailed itinerary and direct consultation.'
+                  : 'Theo lịch trình chi tiết và tư vấn cụ thể.')}
             </p>
           </div>
         </div>
-        <div className="space-y-5">
-          {accommodationStops.length > 0 ? (
-            <div
-              className="rounded-[24px] border border-border/60 bg-background p-5"
-              data-od-id="tour-services-stops"
-            >
-              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                Điểm ngủ đêm trong tour
-              </p>
-              <div className="mt-4 grid gap-3">
-                {accommodationStops.map((stop, index) => (
-                  <div
-                    className="rounded-[20px] bg-muted/25 p-4"
-                    key={`${stop.accommodation}-${index}`}
-                  >
-                    <p className="text-sm font-semibold text-foreground">
-                      Đêm {stop.dayNumber}: {stop.accommodation}
-                    </p>
-                    {stop.sleepingStandard ? (
-                      <p className="mt-1 text-sm text-muted-foreground">{stop.sleepingStandard}</p>
-                    ) : null}
-                    {stop.route ? (
-                      <p className="mt-1 text-sm text-muted-foreground">{stop.route}</p>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-          {isUsableText(servicesSummary.operatorNotes) ||
-          asArray<Record<string, any>>(servicesSummary.notes).filter((n) => isUsableText(n.label)).length > 0 ? (
-            <div
-              className="rounded-[24px] border border-border/60 bg-background p-5"
-              data-od-id="tour-services-notes"
-            >
-              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                Lưu ý điều hành
-              </p>
-              {isUsableText(servicesSummary.operatorNotes) ? (
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                  {servicesSummary.operatorNotes}
+
+        {/* Row 3: Overnight stops & Operator notes */}
+        {(accommodationStops.length > 0 ||
+          isUsableText(servicesSummary.operatorNotes) ||
+          asArray<Record<string, any>>(servicesSummary.notes).filter((n) => isUsableText(n.label)).length > 0) && (
+          <div className="grid gap-5 sm:grid-cols-2">
+            {accommodationStops.length > 0 ? (
+              <div
+                className="rounded-[24px] border border-border/60 bg-background p-5"
+                data-od-id="tour-services-stops"
+              >
+                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                  {isEn ? 'Overnight stops in tour' : 'Điểm ngủ đêm trong tour'}
                 </p>
-              ) : null}
-              <ul className="mt-3 space-y-2 text-sm leading-7 text-muted-foreground">
-                {asArray<Record<string, any>>(servicesSummary.notes)
-                  .filter((item) => isUsableText(item.label))
-                  .map((item, index) => (
-                    <li key={`${item.label}-${index}`}>{item.label}</li>
+                <div className="mt-4 grid gap-3">
+                  {accommodationStops.map((stop, index) => (
+                    <div
+                      className="rounded-[20px] bg-muted/25 p-4"
+                      key={`${stop.accommodation}-${index}`}
+                    >
+                      <p className="text-sm font-semibold text-foreground">
+                        {isEn ? `Night ${stop.dayNumber}: ` : `Đêm ${stop.dayNumber}: `}
+                        {stop.accommodation}
+                      </p>
+                      {stop.sleepingStandard ? (
+                        <p className="mt-1 text-sm text-muted-foreground">{stop.sleepingStandard}</p>
+                      ) : null}
+                      {stop.route ? (
+                        <p className="mt-1 text-sm text-muted-foreground">{stop.route}</p>
+                      ) : null}
+                    </div>
                   ))}
-              </ul>
-            </div>
-          ) : null}
-        </div>
+                </div>
+              </div>
+            ) : null}
+            {isUsableText(servicesSummary.operatorNotes) ||
+            asArray<Record<string, any>>(servicesSummary.notes).filter((n) => isUsableText(n.label)).length > 0 ? (
+              <div
+                className={`rounded-[24px] border border-border/60 bg-background p-5 ${
+                  accommodationStops.length === 0 ? 'sm:col-span-2' : ''
+                }`}
+                data-od-id="tour-services-notes"
+              >
+                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                  {isEn ? 'Operator notes' : 'Lưu ý điều hành'}
+                </p>
+                {isUsableText(servicesSummary.operatorNotes) ? (
+                  <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                    {servicesSummary.operatorNotes}
+                  </p>
+                ) : null}
+                <ul className="mt-3 space-y-2 text-sm leading-7 text-muted-foreground">
+                  {asArray<Record<string, any>>(servicesSummary.notes)
+                    .filter((item) => isUsableText(item.label))
+                    .map((item, index) => (
+                      <li key={`${item.label}-${index}`}>{item.label}</li>
+                    ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </Panel>
   )
@@ -2500,9 +2798,11 @@ const StickyBookingCTASection = ({
   tour: Record<string, any>
 }) => {
   const context = useTourDepartureSelection()
-  const nextDeparture = context?.isSelectionExplicit
-    ? context.selectedDeparture
-    : context?.selectedDeparture || nextDepartureProp
+  const nextDeparture = context
+    ? context.isPrivateTour
+      ? null
+      : context.selectedDeparture
+    : nextDepartureProp
 
   const isConsultative = presentation === 'consultative'
   const siteCode = isConsultative ? resolveTourSiteCode(siteCodeProp, presentation) : undefined
@@ -2581,7 +2881,7 @@ const StickyBookingCTASection = ({
         : 'Chưa có lịch mới • Nhận tư vấn trực tiếp'
 
   return (
-    <div className="sticky bottom-2 z-20 max-w-full md:bottom-4">
+    <div className="sticky bottom-2 fixed inset-x-3 bottom-3 z-40 max-w-full pb-[env(safe-area-inset-bottom)] lg:hidden">
       <div className="overflow-hidden rounded-[22px] border border-border/70 bg-background/95 px-3 py-2 shadow-lg backdrop-blur sm:rounded-[28px] sm:px-5 sm:py-4">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0">
@@ -2623,12 +2923,23 @@ const StickyBookingCTASection = ({
                   href={getTourInquiryPath({
                     departureDate: !isPrivateTour && hasFutureDeparture ? (nextDeparture?.departureDate || nextDeparture?.date) : undefined,
                     departureId: !isPrivateTour && hasFutureDeparture ? nextDeparture?.id : undefined,
+                    discoveryContext: tour.discoveryContext,
+                    guests: context?.guestCount ?? 2,
                     intent: stickyIntent,
+                    siteCode,
                     source: 'tour-detail-sticky',
                     tourId: tour.id,
                     tourSlug: tour.slug,
-                    discoveryContext: tour.discoveryContext,
+                    tourTitle: tour.title,
                   })}
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                    if (stickyIntent === 'inquiry' || stickyIntent === 'request-quote') {
+                      if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
+                        e.preventDefault()
+                        context?.setIsConsultationOpen?.(true)
+                      }
+                    }
+                  }}
                 >
                   <span className="sm:hidden">{stickyMobileLabel}</span>
                   <span className="hidden sm:inline">{stickyLabel}</span>
@@ -2647,6 +2958,30 @@ const StickyBookingCTASection = ({
         </div>
       </div>
     </div>
+  )
+}
+
+const RetailTourConsultationDialogMount = ({
+  locale,
+  nextDeparture,
+  siteCode,
+  tour,
+}: {
+  locale: SupportedLocaleCode
+  nextDeparture: Record<string, any> | null
+  siteCode?: null | string
+  tour: Record<string, any>
+}) => {
+  const context = useTourDepartureSelection()
+  return (
+    <RetailTourConsultationDialog
+      isOpen={Boolean(context?.isConsultationOpen)}
+      locale={locale}
+      nextDeparture={nextDeparture}
+      onClose={() => context?.setIsConsultationOpen?.(false)}
+      siteCode={siteCode}
+      tour={tour}
+    />
   )
 }
 
@@ -2734,6 +3069,7 @@ export const TourDetailPage = ({
     <TourDepartureSelectionProvider
       departures={data.departures}
       initialDeparture={data.nextDeparture}
+      locale={locale}
     >
       {(() => {
         const sections: Record<TourSectionID, React.ReactNode> = {
@@ -2795,87 +3131,128 @@ export const TourDetailPage = ({
             data-tour-presentation={resolvedPresentation}
             data-od-id={isConsultative ? 'tour-root' : undefined}
           >
-            {sections.hero}
-
-            <div
-              className="sticky top-0 z-10 rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-3"
-              data-od-id={isConsultative ? 'tour-jump-nav' : undefined}
-            >
-              <nav
-                aria-label={
-                  isConsultative ? wingSideCopy.overview : isEn ? 'Tour sections' : 'Mục lục tour'
-                }
-                className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm lg:flex-wrap lg:items-center lg:gap-3 [&::-webkit-scrollbar]:hidden"
-              >
-                {navSections.map((section) => (
-                  <React.Fragment key={section}>
-                    <a
-                      className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
-                      href={`#${section}`}
-                    >
-                      <span className="sm:hidden">{navLabels[section]?.short || section}</span>
-                      <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
-                    </a>
-                    {isConsultative && section === 'facts' ? (
-                      <a
-                        className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
-                        href="#gallery"
-                      >
-                        {wingSideCopy.gallery}
-                      </a>
-                    ) : null}
-                    {isConsultative && section === 'departures' ? (
-                      <a
-                        className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
-                        href="#enquire"
-                      >
-                        {wingSideCopy.request}
-                      </a>
-                    ) : null}
-                  </React.Fragment>
-                ))}
-              </nav>
-            </div>
-
             {isConsultative ? (
-              <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]">
-                <div className="min-w-0 space-y-8">
-                  {bodySections.map((section) => (
-                    <React.Fragment key={section}>
-                      {sections[section]}
-                      {section === 'facts' ? (
-                        <TourJourneyGallerySection locale={locale} tour={tour} />
-                      ) : null}
-                      {section === 'departures' ? (
-                        <TourConsultationSection
-                          enquiryForm={enquiryForm}
-                          locale={locale}
-                          siteCode={siteCode}
-                          tour={tour}
-                        />
-                      ) : null}
-                    </React.Fragment>
-                  ))}
+              <>
+                {sections.hero}
+                <div
+                  className="sticky top-0 z-10 rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-3"
+                  data-od-id="tour-jump-nav"
+                >
+                  <nav
+                    aria-label={wingSideCopy.overview}
+                    className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm lg:flex-wrap lg:items-center lg:gap-3 [&::-webkit-scrollbar]:hidden"
+                  >
+                    {navSections.map((section) => (
+                      <React.Fragment key={section}>
+                        <a
+                          className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
+                          href={`#${section}`}
+                        >
+                          <span className="sm:hidden">{navLabels[section]?.short || section}</span>
+                          <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
+                        </a>
+                        {section === 'facts' ? (
+                          <a
+                            className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
+                            href="#gallery"
+                          >
+                            {wingSideCopy.gallery}
+                          </a>
+                        ) : null}
+                        {section === 'departures' ? (
+                          <a
+                            className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
+                            href="#enquire"
+                          >
+                            {wingSideCopy.request}
+                          </a>
+                        ) : null}
+                      </React.Fragment>
+                    ))}
+                  </nav>
                 </div>
-                <TourDecisionRail
+
+                <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]">
+                  <div className="min-w-0 space-y-8">
+                    {bodySections.map((section) => (
+                      <React.Fragment key={section}>
+                        {sections[section]}
+                        {section === 'facts' ? (
+                          <TourJourneyGallerySection locale={locale} tour={tour} />
+                        ) : null}
+                        {section === 'departures' ? (
+                          <TourConsultationSection
+                            enquiryForm={enquiryForm}
+                            locale={locale}
+                            siteCode={siteCode}
+                            tour={tour}
+                          />
+                        ) : null}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                  <TourDecisionRail
+                    locale={locale}
+                    nextDeparture={data.nextDeparture}
+                    siteCode={siteCode}
+                    tour={tour}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_340px] gap-8 xl:gap-10">
+                {/* On mobile: Hero (order 1) -> Rail (order 2) -> Jump Nav (order 3) -> Body (order 4) */}
+                {/* In DOM order for test / accessibility: Hero -> Rail -> Body */}
+                <div className="order-1 min-w-0 lg:col-start-1 lg:row-start-1">
+                  {sections.hero}
+                </div>
+
+                <RetailDecisionRail
+                  className="order-2 w-full lg:col-start-2 lg:row-span-3 lg:row-start-1"
+                  cta={tour.primaryCTA}
                   locale={locale}
                   nextDeparture={data.nextDeparture}
+                  presentation={resolvedPresentation}
+                  reviewSnapshot={tour.reviewSnapshot}
                   siteCode={siteCode}
                   tour={tour}
+                  variants={data.variants}
                 />
+
+                <div className="order-3 sticky top-0 z-10 rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-3 lg:col-start-1 lg:row-start-2">
+                  <nav
+                    aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
+                    className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm xl:flex-wrap xl:items-center xl:gap-3 [&::-webkit-scrollbar]:hidden"
+                  >
+                    {navSections.map((section) => (
+                      <a
+                        className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
+                        href={`#${section}`}
+                        key={section}
+                      >
+                        <span className="sm:hidden">{navLabels[section]?.short || section}</span>
+                        <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
+                      </a>
+                    ))}
+                  </nav>
+                </div>
+
+                <div className="order-4 min-w-0 space-y-8 lg:col-start-1 lg:row-start-3">
+                  {bodySections.map((section) => (
+                    <React.Fragment key={section}>{sections[section]}</React.Fragment>
+                  ))}
+                </div>
               </div>
-            ) : (
-              bodySections.map((section) => (
-                <React.Fragment key={section}>{sections[section]}</React.Fragment>
-              ))
             )}
 
-            {visibleSections.has('sticky-cta') ? (
-              isConsultative ? (
-                <div className="lg:hidden">{sections['sticky-cta']}</div>
-              ) : (
-                sections['sticky-cta']
-              )
+            {visibleSections.has('sticky-cta') ? sections['sticky-cta'] : null}
+            {!isConsultative ? (
+              <RetailTourConsultationDialogMount
+                locale={locale}
+                nextDeparture={data.nextDeparture}
+                siteCode={siteCode}
+                tour={tour}
+              />
             ) : null}
           </div>
         )

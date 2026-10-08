@@ -3,7 +3,8 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const sourceRoot = path.resolve(import.meta.dirname, '../../src')
-const read = (relativePath: string) => fs.readFileSync(path.join(sourceRoot, relativePath), 'utf8')
+const read = (relativePath: string) =>
+  fs.readFileSync(path.join(sourceRoot, relativePath), 'utf8').replace(/\r\n/g, '\n')
 
 describe('WingsGroup v3 shared public shell', () => {
   it('limits the header to the governed Vietnamese route inventory and one consultation action', () => {

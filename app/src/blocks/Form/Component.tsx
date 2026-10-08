@@ -304,6 +304,7 @@ const readLeadSubmissionContext = (
     departureDate: context.departureDate || undefined,
     departureId: context.departureId ? String(context.departureId) : undefined,
     discovery: context.discovery,
+    guests: context.guests || undefined,
     intent: context.intent,
     source: context.source || undefined,
     tourId: context.tourId ? String(context.tourId) : undefined,
@@ -427,6 +428,7 @@ export const FormBlock: React.FC<
     const message = [
       tourLabel ? `Tour quan tâm: ${tourLabel}` : '',
       context.departureDate ? `Ngày dự kiến: ${context.departureDate}` : '',
+      context.guests ? `Số khách: ${context.guests} khách` : '',
       intentLabel ? `Nhu cầu: ${intentLabel}` : '',
     ]
       .filter(Boolean)
@@ -439,6 +441,8 @@ export const FormBlock: React.FC<
       ...(fieldNames.has('tour-interest') && tourLabel ? { 'tour-interest': tourLabel } : {}),
       ...(fieldNames.has('destination') && destination ? { destination } : {}),
       ...(fieldNames.has('market') && destination ? { market: destination } : {}),
+      ...(fieldNames.has('guests') && context.guests ? { guests: String(context.guests) } : {}),
+      ...(fieldNames.has('pax') && context.guests ? { pax: String(context.guests) } : {}),
       ...(fieldNames.has('message') && message ? { message } : {}),
     }
 
