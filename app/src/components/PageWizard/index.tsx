@@ -99,18 +99,13 @@ const sectionLabels: Record<string, string> = {
   CTA: 'Kêu gọi hành động',
 }
 
+import { vietnameseSlugify } from '@/utilities/slugify'
+
 const displayPresetLabel = (presetKey: LayoutPresetKey) => presetLabels[presetKey]
 const displaySections = (sections: readonly string[]) =>
   sections.map((section) => sectionLabels[section] || section)
 
-const slugify = (value: string) =>
-  value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+const slugify = (value: string) => vietnameseSlugify(value)
 
 const isCmsLocale = (value: unknown): value is SupportedLocaleCode =>
   typeof value === 'string' && isSupportedLocale(value) && cmsEnabledLocaleCodes.includes(value)

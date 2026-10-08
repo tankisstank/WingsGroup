@@ -595,9 +595,40 @@ export const filterDepartureVariants = <T extends { displayPriority?: null | num
     .sort((left, right) => Number(left.displayPriority || 0) - Number(right.displayPriority || 0))
 }
 
-export const getNextDeparture = <T extends { departureDate?: null | string }>(
+export const getNextDeparture = <
+  T extends {
+    availabilityStatus?: unknown
+    commerceVerified?: unknown
+    departureDate?: null | string
+    priceFrom?: unknown
+  },
+>(
   departures?: T[] | null,
-) => getFutureDepartures(departures)[0] ?? null
+) => {
+  const future = getFutureDepartures(departures)
+  if (future.length === 0) return null
+
+  const openSellable = future.filter(
+    (d) =>
+      (d.commerceVerified && d.availabilityStatus !== 'sold-out' && Number(d.priceFrom) > 0) ||
+      d.availabilityStatus === 'open' ||
+      d.availabilityStatus === 'limited',
+  )
+
+  if (openSellable.length > 0) {
+    const sorted = [...openSellable].sort((a, b) => {
+      const priceA = Number(a.priceFrom) || Infinity
+      const priceB = Number(b.priceFrom) || Infinity
+      if (priceA !== priceB) return priceA - priceB
+      const dateA = a.departureDate ? new Date(a.departureDate).getTime() : Infinity
+      const dateB = b.departureDate ? new Date(b.departureDate).getTime() : Infinity
+      return dateA - dateB
+    })
+    return sorted[0]
+  }
+
+  return future[0]
+}
 
 export const groupDeparturesByMonth = <T extends { departureDate?: null | string }>(
   departures?: T[] | null,

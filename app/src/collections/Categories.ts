@@ -6,6 +6,7 @@ import { siteScopedAccess } from '@/access/siteScope'
 import { siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import { slugField } from 'payload'
+import { vietnameseSlugify } from '@/utilities/slugify'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
@@ -39,6 +40,7 @@ export const Categories: CollectionConfig = {
     },
     siteField(),
     slugField({
+      slugify: vietnameseSlugify,
       overrides: (field) => {
         field.fields = field.fields.map((item) => {
           if ('name' in item && item.name === 'slug') {

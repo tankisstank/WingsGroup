@@ -22,6 +22,7 @@ import {
 } from './Tours/hooks/revalidateTourContent'
 import { tourDestinationOptions, tourTravelStyleOptions } from '@/tours/taxonomy'
 import { enforceTourProductPublishSite } from './Tours/hooks/enforceTourProductPublishSite'
+import { vietnameseSlugify } from '@/utilities/slugify'
 
 const productSiteField = siteField()
 productSiteField.admin = {
@@ -45,7 +46,7 @@ const normalizeTourProductSlug: CollectionBeforeValidateHook = ({ data }) => {
 
   return {
     ...data,
-    slug: data.slug.toLowerCase(),
+    slug: vietnameseSlugify(data.slug),
   }
 }
 
@@ -1047,6 +1048,7 @@ export const TourProducts: CollectionConfig = {
       ],
     },
     slugField({
+      slugify: vietnameseSlugify,
       overrides: (field) => {
         field.fields = field.fields.map((item) => {
           if ('name' in item && item.name === 'slug') {

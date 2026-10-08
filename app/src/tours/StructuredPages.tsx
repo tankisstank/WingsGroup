@@ -14,6 +14,7 @@ import { TourItineraryAccordion } from './TourItineraryAccordion'
 import { TourItineraryDayDetails } from './TourItineraryDayDetails'
 import { TourDepartureMatrix, monthKey } from './TourDepartureMatrix'
 import {
+  findBestDeparture,
   TourDepartureSelectionProvider,
   useTourDepartureSelection,
 } from './TourDepartureSelectionContext'
@@ -634,6 +635,39 @@ export const RetailDecisionRail = ({
         isSellable,
       })
 
+  const openDepartures = allDepartures.filter(
+    (d) =>
+      (d.commerceVerified && d.availabilityStatus !== 'sold-out' && Number(d.priceFrom) > 0) ||
+      d.availabilityStatus === 'open' ||
+      d.availabilityStatus === 'limited',
+  )
+  const lowestDeparturePrice = openDepartures.reduce((min, d) => {
+    const p = Number(d.priceFrom)
+    return p > 0 && p < min ? p : min
+  }, Infinity)
+
+  const floorPrice =
+    lowestDeparturePrice !== Infinity
+      ? lowestDeparturePrice
+      : Number(tour.priceFrom) > 0
+        ? Number(tour.priceFrom)
+        : 0
+
+  const selectedPrice = Number(nextDeparture?.priceFrom) || 0
+  const isHigherPrice = floorPrice > 0 && selectedPrice > floorPrice
+  const isEn = locale === 'en'
+  const priceLabel = isPrivateTour
+    ? isEn
+      ? 'Private quote'
+      : 'Báo giá theo đoàn'
+    : isHigherPrice
+      ? isEn
+        ? 'Departure price'
+        : 'Giá đợt này'
+      : isEn
+        ? 'From'
+        : 'Giá từ'
+
   return (
     <aside
       className={`w-full space-y-4 lg:w-[340px] shrink-0 ${className || ''}`.trim()}
@@ -646,7 +680,7 @@ export const RetailDecisionRail = ({
           <div className="shrink-0 border-b border-border/60 pb-5">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                {isPrivateTour ? 'Báo giá theo đoàn' : 'Giá từ'}
+                {priceLabel}
               </p>
               {context ? (
                 <button
@@ -655,32 +689,57 @@ export const RetailDecisionRail = ({
                   className="text-xs font-medium text-[var(--site-brand)] hover:underline"
                   data-od-id="tour-toggle-private-tour"
                 >
-                  {isPrivateTour ? 'Xem lịch tour ghép' : 'Tư vấn lịch riêng'}
+                  {isPrivateTour
+                    ? isEn
+                      ? 'View group tour dates'
+                      : 'Xem lịch tour ghép'
+                    : isEn
+                      ? 'Private quote'
+                      : 'Tư vấn lịch riêng'}
                 </button>
               ) : null}
             </div>
             <div className="mt-1 flex items-baseline gap-2">
               <span className="font-mono text-3xl font-extrabold text-[var(--site-brand)]">
                 {isSellable
-                  ? formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency) || 'Liên hệ'
-                  : 'Liên hệ'}
+                  ? formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency) || (isEn ? 'Contact' : 'Liên hệ')
+                  : isEn
+                    ? 'Contact'
+                    : 'Liên hệ'}
               </span>
               {isSellable && nextDeparture?.priceFrom ? (
-                <span className="text-xs text-muted-foreground">/ khách</span>
+                <span className="text-xs text-muted-foreground">{isEn ? '/ guest' : '/ khách'}</span>
               ) : null}
             </div>
+            {isHigherPrice ? (
+              <p className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+                {isEn
+                  ? `Tour starts from ${formatTourPrice(floorPrice, nextDeparture?.currency)} on other dates`
+                  : `Tour có đợt từ ${formatTourPrice(floorPrice, nextDeparture?.currency)} cho các ngày khác`}
+              </p>
+            ) : null}
             <p className="mt-1 text-xs text-muted-foreground">
               {isPrivateTour
-                ? 'Không áp dụng giá tour ghép cho lịch riêng. Lịch và báo giá theo nhu cầu.'
+                ? isEn
+                  ? 'Private tours are priced based on custom request and party size.'
+                  : 'Không áp dụng giá tour ghép cho lịch riêng. Lịch và báo giá theo nhu cầu.'
                 : isSellable
                   ? nextDeparture?.depositNote ||
                     tour.factSummary?.holdNote ||
-                    'Sales xác nhận lại tình trạng chỗ và giá trước khi đặt cọc.'
+                    (isEn
+                      ? 'Sales will confirm availability and price before deposit.'
+                      : 'Sales xác nhận lại tình trạng chỗ và giá trước khi đặt cọc.')
                   : hasFutureDeparture && isSoldOut
-                    ? 'Đợt này đã hết chỗ. Vui lòng liên hệ để tư vấn đợt khác phù hợp.'
+                    ? isEn
+                      ? 'This departure is sold out. Please contact us for other options.'
+                      : 'Đợt này đã hết chỗ. Vui lòng liên hệ để tư vấn đợt khác phù hợp.'
                     : hasFutureDeparture && !commerceVerified
-                      ? 'Giá và tình trạng chỗ đang được chuyên viên cập nhật. Vui lòng liên hệ.'
-                      : 'Hiện chưa có lịch khởi hành mở bán. Vui lòng liên hệ chuyên viên để nhận lịch mới.'}
+                      ? isEn
+                        ? 'Pricing and availability are being updated. Please contact us.'
+                        : 'Giá và tình trạng chỗ đang được chuyên viên cập nhật. Vui lòng liên hệ.'
+                      : isEn
+                        ? 'No scheduled departures on sale yet. Please contact us for future dates.'
+                        : 'Hiện chưa có lịch khởi hành mở bán. Vui lòng liên hệ chuyên viên để nhận lịch mới.'}
             </p>
           </div>
 

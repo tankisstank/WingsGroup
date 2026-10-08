@@ -22,18 +22,29 @@ export const getVisibleDepartures = (
 
 export const findBestDeparture = (deps: DepartureCardViewModel[]) => {
   if (!deps || deps.length === 0) return null
-  return (
-    deps.find(
-      (d) =>
-        (d.commerceVerified && d.availabilityStatus !== 'sold-out' && Number(d.priceFrom) > 0) ||
-        d.availabilityStatus === 'open' ||
-        d.availabilityStatus === 'limited' ||
-        (d as any).status === 'open' ||
-        (d as any).status === 'limited',
-    ) ||
-    deps[0] ||
-    null
+
+  const openDeps = deps.filter(
+    (d) =>
+      (d.commerceVerified && d.availabilityStatus !== 'sold-out' && Number(d.priceFrom) > 0) ||
+      d.availabilityStatus === 'open' ||
+      d.availabilityStatus === 'limited' ||
+      (d as any).status === 'open' ||
+      (d as any).status === 'limited',
   )
+
+  if (openDeps.length > 0) {
+    const sorted = [...openDeps].sort((a, b) => {
+      const priceA = Number(a.priceFrom) || Infinity
+      const priceB = Number(b.priceFrom) || Infinity
+      if (priceA !== priceB) return priceA - priceB
+      const dateA = a.departureDate ? new Date(a.departureDate).getTime() : Infinity
+      const dateB = b.departureDate ? new Date(b.departureDate).getTime() : Infinity
+      return dateA - dateB
+    })
+    return sorted[0]
+  }
+
+  return deps[0] || null
 }
 
 type TourDepartureSelectionContextType = {
@@ -88,7 +99,7 @@ export const TourDepartureSelectionProvider = ({
   locale?: SupportedLocaleCode | string
 }) => {
   const [selectedDeparture, setSelectedDepartureState] = useState<DepartureCardViewModel | null>(
-    initialDeparture,
+    initialDeparture ?? findBestDeparture(departures),
   )
   const [isSelectionExplicit, setIsSelectionExplicit] = useState<boolean>(false)
   const [selectedCity, setSelectedCity] = useState<string>(initialCity || 'all')

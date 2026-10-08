@@ -34,6 +34,7 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { slugField } from 'payload'
+import { vietnameseSlugify } from '@/utilities/slugify'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -280,6 +281,7 @@ export const Posts: CollectionConfig<'posts'> = {
       ],
     },
     slugField({
+      slugify: vietnameseSlugify,
       overrides: (field) => {
         field.fields = field.fields.map((item) => {
           if ('name' in item && item.name === 'slug') {

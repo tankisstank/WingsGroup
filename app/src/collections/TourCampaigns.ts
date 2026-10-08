@@ -7,6 +7,7 @@ import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
 import { slugField } from 'payload'
+import { vietnameseSlugify } from '@/utilities/slugify'
 
 import {
   MetaDescriptionField,
@@ -175,6 +176,7 @@ export const TourCampaigns: CollectionConfig = {
       ],
     },
     slugField({
+      slugify: vietnameseSlugify,
       overrides: (field) => {
         field.fields = field.fields.map((item) => {
           if ('name' in item && item.name === 'slug') {

@@ -29,6 +29,7 @@ import {
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
+import { vietnameseSlugify } from '@/utilities/slugify'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
@@ -259,6 +260,7 @@ export const Pages: CollectionConfig<'pages'> = {
     },
     wingsGroupCorporateRouteField,
     slugField({
+      slugify: vietnameseSlugify,
       overrides: (field) => {
         field.fields = field.fields.map((item) => {
           if ('name' in item && item.name === 'slug') {

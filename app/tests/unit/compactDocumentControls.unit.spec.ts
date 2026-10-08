@@ -52,7 +52,9 @@ describe('compact document controls', () => {
   })
 
   it('keeps Tour authoring panels inside the document body, not sticky controls', () => {
-    const tourProduct = fs.readFileSync(path.join(root, 'src/collections/TourProducts.ts'), 'utf8')
+    const tourProduct = fs
+      .readFileSync(path.join(root, 'src/collections/TourProducts.ts'), 'utf8')
+      .replace(/\r\n/g, '\n')
     const controls = tourProduct.slice(
       tourProduct.indexOf('beforeDocumentControls:'),
       tourProduct.indexOf('],\n      },\n    },\n    description:'),

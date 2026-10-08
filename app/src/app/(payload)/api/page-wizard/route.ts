@@ -14,6 +14,8 @@ import {
   type SupportedLocaleCode,
 } from '@/utilities/locales'
 
+import { vietnameseSlugify } from '@/utilities/slugify'
+
 type PageWizardPayload = {
   locale?: string
   preset?: LayoutPresetKey
@@ -33,14 +35,7 @@ class PageWizardError extends Error {
   }
 }
 
-const slugify = (value: string) =>
-  value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+const slugify = (value: string) => vietnameseSlugify(value)
 
 const findSiteForm = async (
   payload: Payload,
