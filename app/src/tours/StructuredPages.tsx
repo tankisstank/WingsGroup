@@ -641,7 +641,7 @@ export const RetailDecisionRail = ({
       data-tour-presentation={presentation}
     >
       <div className="lg:sticky lg:top-[92px] space-y-4">
-        <Panel className="p-6 border-border/80 shadow-md flex flex-col max-h-[calc(100dvh-108px)]">
+        <Panel className="p-6 border-border/80 shadow-md flex flex-col [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {/* Price section - Fixed top tier (never scrolls) */}
           <div className="shrink-0 border-b border-border/60 pb-5">
             <div className="flex items-center justify-between">
@@ -684,8 +684,8 @@ export const RetailDecisionRail = ({
             </p>
           </div>
 
-          {/* Middle Tier - Scrollable if content overflows viewport */}
-          <div className="min-h-0 flex-1 overflow-y-auto py-2 space-y-4 pr-1">
+          {/* Middle Tier - Natural height without internal vertical scrollbar */}
+          <div className="py-2 space-y-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {/* Booking Controls (Giai đoạn 2) */}
             <div className="space-y-3 border-b border-border/60 pb-4">
               {/* 1. Nơi khởi hành */}
@@ -2985,6 +2985,94 @@ const RetailTourConsultationDialogMount = ({
   )
 }
 
+const RetailTourJumpNav = ({
+  isEn,
+  navLabels,
+  navSections,
+}: {
+  isEn: boolean
+  navLabels: Record<string, { long: string; short: string }>
+  navSections: string[]
+}) => {
+  const [isSticky, setIsSticky] = React.useState(false)
+  const wrapperRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    let ticking = false
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (wrapperRef.current) {
+            const rect = wrapperRef.current.getBoundingClientRect()
+            setIsSticky(rect.top <= 12)
+          }
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const navLinks = navSections.map((section) => (
+    <a
+      className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2 transition-colors"
+      href={`#${section}`}
+      key={section}
+    >
+      <span className="sm:hidden">{navLabels[section]?.short || section}</span>
+      <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
+    </a>
+  ))
+
+  return (
+    <div
+      ref={wrapperRef}
+      className="order-3 min-h-[56px] lg:col-start-1 lg:row-start-2"
+    >
+      {/* When sticky: placeholder keeps natural spacing in grid so layout never shifts */}
+      {isSticky ? (
+        <div
+          className="invisible pointer-events-none min-h-[100px]"
+          aria-hidden="true"
+        />
+      ) : (
+        /* Initial state (in-flow, wraps to 2 lines on desktop) */
+        <div
+          data-od-id="tour-jump-nav"
+          className="rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-3"
+        >
+          <nav
+            aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
+            className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm lg:flex-wrap lg:items-center lg:gap-2.5 xl:gap-3 [&::-webkit-scrollbar]:hidden"
+          >
+            {navLinks}
+          </nav>
+        </div>
+      )}
+
+      {/* Sticky floating state (single line across container on desktop) */}
+      {isSticky ? (
+        <div
+          data-od-id="tour-jump-nav"
+          className="fixed top-3 inset-x-0 mx-auto w-[calc(100%-2rem)] max-w-7xl z-40 rounded-full border border-border/80 bg-background/95 p-1.5 sm:p-2 shadow-lg backdrop-blur-md transition-all duration-200"
+        >
+          <nav
+            aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
+            className="flex flex-nowrap items-center justify-start lg:justify-between gap-1 sm:gap-2 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-xs sm:text-sm font-semibold px-2"
+          >
+            {navLinks}
+          </nav>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 export const TourDetailPage = ({
   data,
   discoveryContext,
@@ -3219,23 +3307,11 @@ export const TourDetailPage = ({
                   variants={data.variants}
                 />
 
-                <div className="order-3 sticky top-0 z-10 rounded-[20px] border border-border/70 bg-background/95 p-1.5 shadow-sm backdrop-blur sm:rounded-[28px] sm:p-3 lg:col-start-1 lg:row-start-2">
-                  <nav
-                    aria-label={isEn ? 'Tour sections' : 'Mục lục tour'}
-                    className="flex snap-x gap-1.5 overflow-x-auto whitespace-nowrap text-xs font-semibold [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:text-sm xl:flex-wrap xl:items-center xl:gap-3 [&::-webkit-scrollbar]:hidden"
-                  >
-                    {navSections.map((section) => (
-                      <a
-                        className="flex min-h-11 shrink-0 snap-start items-center justify-center rounded-full px-3 py-1.5 text-center text-muted-foreground no-underline hover:bg-muted/35 hover:text-foreground sm:px-4 sm:py-2"
-                        href={`#${section}`}
-                        key={section}
-                      >
-                        <span className="sm:hidden">{navLabels[section]?.short || section}</span>
-                        <span className="hidden sm:inline">{navLabels[section]?.long || section}</span>
-                      </a>
-                    ))}
-                  </nav>
-                </div>
+                <RetailTourJumpNav
+                  isEn={isEn}
+                  navLabels={navLabels}
+                  navSections={navSections}
+                />
 
                 <div className="order-4 min-w-0 space-y-8 lg:col-start-1 lg:row-start-3">
                   {bodySections.map((section) => (

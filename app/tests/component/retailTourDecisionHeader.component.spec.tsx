@@ -450,4 +450,39 @@ describe('US-027 Slice 2: TourDecisionHeader retail component rendering & honest
     expect(dayDetails[2].open).toBe(false)
     expect(toggleAllBtn.textContent).toContain('Mở rộng tất cả')
   })
+
+  it('verifies RetailDecisionRail has no vertical scroller and RetailTourJumpNav desktop layout contract', () => {
+    const data: TourResolvedData = {
+      departures: [],
+      featuredDepartures: [],
+      nextDeparture: null,
+      sectionOrder: ['hero', 'route', 'itinerary', 'services', 'departures'],
+      sectionVisibility: ['hero', 'route', 'itinerary', 'services', 'departures'],
+      tour: {
+        durationDays: 3,
+        durationNights: 2,
+        id: 71,
+        slug: 'ha-long-cruise',
+        title: 'Hạ Long Cruise 3N2D',
+      },
+      variants: [],
+    }
+
+    const { container } = render(
+      <TourDetailPage data={data} locale="vi" presentation="retail" siteCode="wings-go" />,
+    )
+
+    // 1. Verify RetailDecisionRail does not contain max-height restriction or overflow-y-auto
+    const decisionRail = container.querySelector('[data-od-id="decision-rail"]')
+    expect(decisionRail).toBeTruthy()
+    expect(decisionRail?.innerHTML).not.toContain('max-h-[calc(100dvh-108px)]')
+    expect(decisionRail?.innerHTML).not.toContain('overflow-y-auto')
+
+    // 2. Verify RetailTourJumpNav initial in-flow desktop state wraps (2 lines)
+    const jumpNav = container.querySelector('[data-od-id="tour-jump-nav"]')
+    expect(jumpNav).toBeTruthy()
+    const navElement = jumpNav?.querySelector('nav')
+    expect(navElement).toBeTruthy()
+    expect(navElement?.className).toContain('lg:flex-wrap')
+  })
 })
