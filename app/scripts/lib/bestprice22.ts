@@ -121,17 +121,12 @@ const htmlToText = (html: string) =>
       .replace(/<[^>]+>/gu, ' '),
   )
 
-export const bestPriceSlug = (value: string) =>
-  cleanBestPriceText(value)
-    .replace(/^(?:bpt|bestprice|bestpricetravel)[-_ ]+/iu, '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/gu, '')
-    .toLowerCase()
-    .replace(/đ/gu, 'd')
-    .replace(/[^a-z0-9]+/gu, '-')
-    .replace(/^-+|-+$/gu, '')
-    .slice(0, 90)
-    .replace(/-+$/gu, '') || 'tour'
+import { normalizeTourSlug } from '../../src/utilities/normalizeTourSlug'
+
+export const bestPriceSlug = (value: string) => {
+  const stripped = cleanBestPriceText(value).replace(/^(?:bpt|bestprice|bestpricetravel)[-_ ]+/iu, '')
+  return normalizeTourSlug(stripped).slice(0, 90).replace(/-+$/gu, '') || 'tour'
+}
 
 const parseCsvLine = (line: string) => {
   const cells: string[] = []

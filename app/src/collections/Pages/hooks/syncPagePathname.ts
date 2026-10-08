@@ -4,6 +4,8 @@ import type { Page } from '@/payload-types'
 
 import { normalizeRelationID } from '@/access/roles'
 
+import { vietnameseSlugify } from '@/utilities/slugify'
+
 const trimSlashes = (value: string) => value.replace(/^\/+|\/+$/g, '')
 
 const normalizePagePath = (value?: null | string) => {
@@ -12,6 +14,10 @@ const normalizePagePath = (value?: null | string) => {
   }
 
   const normalized = trimSlashes(value)
+    .split('/')
+    .map((segment) => (segment === 'home' ? 'home' : vietnameseSlugify(segment)))
+    .filter(Boolean)
+    .join('/')
 
   return normalized ? `/${normalized}` : '/'
 }
@@ -28,25 +34,39 @@ export const syncPagePathname: CollectionBeforeChangeHook<Page> = async ({
     }
   }
 
-  const nextSlug = typeof data?.slug === 'string' ? data.slug : originalDoc?.slug
+  const rawSlug =
+    typeof data?.slug === 'string' && data.slug.trim().length > 0
+      ? data.slug
+      : typeof originalDoc?.slug === 'string' && originalDoc.slug.trim().length > 0
+        ? originalDoc.slug
+        : typeof data?.title === 'string' && data.title.trim().length > 0
+          ? vietnameseSlugify(data.title)
+          : ''
 
-  if (!nextSlug) {
+  if (!rawSlug) {
     return data
   }
+
+  const nextSlug = rawSlug === 'home' ? 'home' : vietnameseSlugify(rawSlug)
+
+  const updatedData: Page = {
+    ...data,
+    ...(data?.slug ? {} : { slug: nextSlug }),
+  } as Page
 
   const parentRelation = data?.parentPage ?? originalDoc?.parentPage
   const parentPageID = normalizeRelationID(parentRelation)
 
   if (nextSlug === 'home') {
     return {
-      ...data,
+      ...updatedData,
       pathname: '/',
     }
   }
 
   if (!parentPageID) {
     return {
-      ...data,
+      ...updatedData,
       pathname: normalizePagePath(nextSlug),
     }
   }
@@ -62,7 +82,7 @@ export const syncPagePathname: CollectionBeforeChangeHook<Page> = async ({
   const parentPath = normalizePagePath(parentPage?.pathname || parentPage?.slug || '')
 
   return {
-    ...data,
+    ...updatedData,
     pathname:
       parentPath === '/'
         ? normalizePagePath(nextSlug)

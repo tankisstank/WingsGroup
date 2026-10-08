@@ -294,16 +294,10 @@ const extractItinerarySentence = (content: string, pattern: RegExp, reject?: Reg
   return cleanText(sentence)
 }
 
-const slugify = (value: string) => {
-  const normalized = value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/đ/g, 'd')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+import { normalizeTourSlug } from '../../src/utilities/normalizeTourSlug'
 
-  return normalized || 'tour'
+const slugify = (value: string) => {
+  return normalizeTourSlug(value) || 'tour'
 }
 
 export const sourceTourCode = (sourceId: string, sourceSystem: TourSourceSystem = 'doicanhviet') =>
