@@ -430,3 +430,10 @@ passed build/static generation; local health, all six public domains, and the
 PostgreSQL/Redis unchanged check passed. The previous app image is retained for
 rollback. Authenticated wrapper provision and product 111 preview proof are
 still pending, so the story remains `Chờ xác nhận`.
+
+### WingsGroup hero standard CMS media rendering repair — 2026-10-08
+
+Trang chủ WingsGroup (`https://wingsgroup.vn`) gặp hiện tượng hiển thị ô fallback màu đen ("Hình ảnh WingsGroup đang chờ trạng thái xuất bản được kiểm soát.") đối với các ảnh hero mới tải lên từ CMS Admin thay vì hiển thị hình ảnh thực tế.
+
+- **Nguyên nhân gốc rễ**: Tại `app/src/components/WingsGroupV3/model.ts`, hàm `isWingsGroupPublishedMedia` chỉ chấp nhận các tài sản chứa bộ metadata mock governance chặt chẽ (`governance.managedBy === 'wingsgroup-v3'`, SHA-256 hashes, và mảng phái sinh `responsiveDerivatives` AVIF/WebP). Khi biên tập viên tải ảnh thực tế lên qua CMS Admin, Payload thiết lập mặc định `managedBy = NULL` và `publicationState = 'pending'`. Do đó, `areAllHeroMediaGoverned` kích hoạt cơ chế fail-closed, triệt tiêu `slide.media = null` cho toàn bộ hero carousel.
+- **Giải pháp căn cơ (Source Fix)**: Cập nhật `isWingsGroupPublishedMedia` trong `model.ts` để công nhận các media chuẩn thuộc site `wings-group` (có `url` và `alt` hoặc `filename`) là hợp lệ để render công khai; đồng thời duy trì kiểm tra khắt khe đối với các tài sản do hệ thống quản trị (`governance.managedBy === 'wingsgroup-v3'`) và chặn ảnh ngoại lai từ tenant khác (`wings-go`, v.v.). Bổ sung unit test suite hoàn chỉnh trong `wingsGroupV3PublicModel.unit.spec.ts`.

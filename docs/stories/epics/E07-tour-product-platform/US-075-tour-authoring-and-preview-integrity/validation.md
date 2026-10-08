@@ -580,3 +580,12 @@ Redis operation, or Plane-date repair occurred during this UAT.
 | Configuration fix | PASS | Added `PREVIEW_CMS_ORIGINS` to production compose and configured the verified multisite CMS origins. |
 | Safe publish probe | PASS | A probe with an intentionally invalid departure ID and the real readiness revision returned HTTP 409 `departure_scope`, proving the request passed CSRF and role checks and rolled back without publishing. |
 | Runtime | PASS | App container was recreated with the same image; PostgreSQL and Redis were unchanged; live/ready returned HTTP 200. |
+
+### WingsGroup hero standard CMS media rendering repair — 2026-10-08
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Root cause diagnosis | CONFIRMED | `isWingsGroupPublishedMedia` trong `app/src/components/WingsGroupV3/model.ts` chỉ cho phép media có `managedBy: 'wingsgroup-v3'`, SHA-256 hashes và `responsiveDerivatives` AVIF/WebP. Ảnh upload từ CMS thông thường có `managedBy = NULL` bị fail-closed và kích hoạt fallback màu đen. |
+| Source fix | PASS | Cập nhật `isWingsGroupPublishedMedia` nhận diện ảnh CMS chuẩn cho `wings-group` (có URL và alt/filename), giữ nguyên bảo vệ chặt chẽ cho tài sản do hệ sinh thái quản lý và chặn media ngoại lai từ tenant khác. |
+| Model unit test | PASS | `tests/unit/wingsGroupV3PublicModel.unit.spec.ts` pass 12/12 tests bao gồm ca kiểm thử cho standard CMS media và foreign tenant isolation. |
+| TypeScript check | PASS | `pnpm tsc --noEmit` hoàn thành với 0 lỗi. |

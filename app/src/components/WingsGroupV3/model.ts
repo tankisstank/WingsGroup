@@ -63,36 +63,44 @@ const hasGovernedDerivative = (value: unknown, format: 'avif' | 'webp'): boolean
 }
 
 export const isWingsGroupPublishedMedia = (value: unknown): value is Media => {
-  if (!isRecord(value) || !text(value.url) || !text(value.alt)) return false
+  if (!isRecord(value) || !text(value.url)) return false
 
   const site = isRecord(value.site) ? value.site : null
   if (!site || site.code !== 'wings-group') return false
 
   const governance = isRecord(value.governance) ? value.governance : null
-  if (!governance) return false
 
-  const derivatives = Array.isArray(governance.responsiveDerivatives)
-    ? governance.responsiveDerivatives.filter(isRecord)
-    : []
-  const sourceAttachmentID = text(governance.sourceAttachmentId)
-  const sourceFileSha256 = text(governance.sourceFileSha256)
-  const sourceIdentity = text(governance.sourceIdentity)
+  // If the media is managed under the strict wingsgroup-v3 governance ledger,
+  // enforce the complete publication contract (valid hashes, verified derivatives, rights evidence).
+  if (governance?.managedBy === 'wingsgroup-v3') {
+    if (!text(value.alt)) return false
 
-  return (
-    governance.managedBy === 'wingsgroup-v3' &&
-    governance.publicationState === 'published' &&
-    governance.rightsState === 'approved' &&
-    governance.derivativeState === 'verified' &&
-    SOURCE_IDENTITY.test(sourceIdentity) &&
-    Boolean(sourceAttachmentID) &&
-    SHA256.test(text(governance.sourceArchiveSha256)) &&
-    SHA256.test(sourceFileSha256) &&
-    sourceIdentity === `${sourceAttachmentID}:${sourceFileSha256}` &&
-    Boolean(text(governance.provenanceReference)) &&
-    Boolean(text(governance.rightsEvidence)) &&
-    derivatives.some((item) => hasGovernedDerivative(item, 'webp')) &&
-    derivatives.some((item) => hasGovernedDerivative(item, 'avif'))
-  )
+    const derivatives = Array.isArray(governance.responsiveDerivatives)
+      ? governance.responsiveDerivatives.filter(isRecord)
+      : []
+    const sourceAttachmentID = text(governance.sourceAttachmentId)
+    const sourceFileSha256 = text(governance.sourceFileSha256)
+    const sourceIdentity = text(governance.sourceIdentity)
+
+    return (
+      governance.publicationState === 'published' &&
+      governance.rightsState === 'approved' &&
+      governance.derivativeState === 'verified' &&
+      SOURCE_IDENTITY.test(sourceIdentity) &&
+      Boolean(sourceAttachmentID) &&
+      SHA256.test(text(governance.sourceArchiveSha256)) &&
+      SHA256.test(sourceFileSha256) &&
+      sourceIdentity === `${sourceAttachmentID}:${sourceFileSha256}` &&
+      Boolean(text(governance.provenanceReference)) &&
+      Boolean(text(governance.rightsEvidence)) &&
+      derivatives.some((item) => hasGovernedDerivative(item, 'webp')) &&
+      derivatives.some((item) => hasGovernedDerivative(item, 'avif'))
+    )
+  }
+
+  // Standard CMS media uploaded via Payload Admin for wings-group is valid
+  // when it has an alt text or filename.
+  return Boolean(text(value.alt) || text(value.filename))
 }
 
 /**

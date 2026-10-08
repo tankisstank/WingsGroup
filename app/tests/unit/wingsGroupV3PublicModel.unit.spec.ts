@@ -223,8 +223,11 @@ describe('WingsGroup v3 public view model', () => {
         ).href,
       ).toBe('/lien-he#contact-form')
       expect(
-        resolveSafeHeroLinks([{ link: { label: 'Unsafe', type: 'custom', url: unsafe } }])[0].url,
+        resolveSafeHeroLinks([{ link: { label: 'Unsafe', type: 'custom', url: unsafe } }], 'en')[0].url,
       ).toBe('#ecosystem')
+      expect(
+        resolveSafeHeroLinks([{ link: { label: 'Unsafe', type: 'custom', url: unsafe } }], 'vi')[0].url,
+      ).toBe('#services')
     }
     expect(isSafeSameSiteHref('/lien-he?source=home#contact-form')).toBe(true)
     expect(isSafeSameSiteHref('#ecosystem')).toBe(true)
@@ -400,5 +403,38 @@ describe('WingsGroup v3 public view model', () => {
         posts[2],
       ]),
     ).toEqual([])
+  })
+
+  it('accepts standard CMS media belonging to wings-group without requiring synthetic governance hashes', () => {
+    const standardMedia = {
+      alt: 'Standard CMS photo',
+      createdAt: '2026-09-28T00:00:00.000Z',
+      filename: 'standard-photo.jpg',
+      id: 1157,
+      site: site('wings-group'),
+      updatedAt: '2026-09-28T00:00:00.000Z',
+      url: '/media/standard-photo.jpg',
+      governance: {
+        derivativeState: 'pending',
+        publicationState: 'pending',
+        rightsState: 'pending',
+      },
+    } as Media
+
+    expect(isWingsGroupPublishedMedia(standardMedia)).toBe(true)
+
+    // Foreign tenant standard media is rejected (fail-closed for multi-tenancy)
+    expect(isWingsGroupPublishedMedia({ ...standardMedia, site: site('wings-go') })).toBe(false)
+
+    // Standard media with no url is rejected
+    expect(isWingsGroupPublishedMedia({ ...standardMedia, url: '' })).toBe(false)
+
+    // Governed media with pending state remains rejected
+    expect(
+      isWingsGroupPublishedMedia({
+        ...standardMedia,
+        governance: { ...standardMedia.governance, managedBy: 'wingsgroup-v3' },
+      }),
+    ).toBe(false)
   })
 })
