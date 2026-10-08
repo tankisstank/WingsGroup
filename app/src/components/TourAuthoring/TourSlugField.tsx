@@ -12,17 +12,9 @@ type Props = {
   readOnly?: boolean
 }
 
-import { vietnameseSlugify } from '@/utilities/slugify'
+import { normalizeTourSlug, normalizeTourSlugInput } from '@/utilities/normalizeTourSlug'
 
-export const normalizeTourSlugInput = (value: string) => {
-  return value
-    .replace(/[đĐ]/g, 'd')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, '-')
-    .replace(/-+/g, '-')
-}
+export { normalizeTourSlugInput }
 
 export default function TourSlugField({ field, path, readOnly }: Props) {
   const { errorMessage, setValue, showError, value } = useField<string>({ path })
@@ -36,7 +28,7 @@ export default function TourSlugField({ field, path, readOnly }: Props) {
         aria-invalid={showError || undefined}
         autoComplete="off"
         id={path}
-        onBlur={() => setValue(vietnameseSlugify(currentValue))}
+        onBlur={() => setValue(normalizeTourSlug(currentValue))}
         onChange={(event) => setValue(normalizeTourSlugInput(event.currentTarget.value))}
         readOnly={readOnly}
         spellCheck={false}
