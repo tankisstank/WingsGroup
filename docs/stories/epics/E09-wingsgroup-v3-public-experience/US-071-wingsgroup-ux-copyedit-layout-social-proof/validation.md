@@ -53,4 +53,20 @@ curl -s http://127.0.0.1:3000/api/health/ready
     + Khối Testimonials mạng lưới khách hàng thực tế và banner chuyển đổi.
     + Header logo responsive to đẹp, nhãn ngôn ngữ `ENGLISH (en)`.
     + Footer có địa chỉ VP Du lịch Hà Nội (Ngọc Khánh Plaza), link `tel:0912910101`, link Chính sách bảo mật và CTA liên hệ 24/7.
+- **Production Maintenance & Asset Remediation (2026-10-09)**:
+  - **Brand Assets Update**:
+    - Commit `a21612e`: `feat(wingsgroup): update quality standards brand illustration assets`.
+    - Chuẩn hóa 6 hình ảnh WebP tỉ lệ 16:9 (`1440x810`, 130KB - 211KB) tại `app/public/brand/wingsgroup/standards/`.
+    - Release: `/home/ubuntu/wings-travel/releases/release-wingsgroup-standards-a21612e-20261009T014514Z`.
+    - Xác nhận HTTP 200 cho cả 6 ảnh trên `https://wingsgroup.vn/brand/wingsgroup/standards/...`.
+  - **Corporate Route Governance Alignment**:
+    - Khắc phục lỗi HTTP 404 cho trang `/ve-wingsgroup` (Page ID 182).
+    - Đồng bộ `_status = 'published'` và bổ sung nhãn phê duyệt nội dung tiếng Việt `wings_group_route_content_approval_vi = 'wingsgroup-content-approved-v1'`.
+    - Xác nhận HTTP 200 OK cho cả `https://wingsgroup.vn/ve-wingsgroup` và `https://wingsgroup.vn/en/ve-wingsgroup`.
+  - **Homepage Duplicate Section Remediation**:
+    - Commit `5700dc2`: `fix(wingsgroup): eliminate duplicate capability and inquiry sections on homepage`.
+    - Sửa file `app/src/blocks/RenderBlocks.tsx`: xóa đoạn render lặp thừa của `WingsGroupCapabilitySection` và `JourneyInquiryGrid` trong `renderedBlock`, chỉ giữ lại duy nhất 1 lần qua `homeAddons`.
+    - Release: `/home/ubuntu/wings-travel/releases/release-wingsgroup-fix-duplicate-5700dc2-20261009T022858Z`.
+    - Xác nhận trên `https://wingsgroup.vn/`: Khối Tiêu chuẩn chất lượng và Khối Tiếp nhận nhu cầu du khách hiển thị chuẩn xác 1 lần duy nhất, không còn lặp lại.
+    - PostgreSQL và Redis giữ nguyên 100%, `/api/health/live` và `/api/health/ready` trả về HTTP 200 OK.
 
