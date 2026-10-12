@@ -157,3 +157,12 @@
 - TESTS: cập nhật unit test `wingsGoPriorityMarketDeparture.unit.spec.ts`,
   chạy component test và build verification.
 - PLANE SYNC: đồng bộ work-items và story metadata.
+
+## Refine checkpoint 2 — 2026-10-12 ICT
+
+- SCOPE: hoàn thiện trải nghiệm thị giác và điều hướng thân thiện người dùng trên trang chủ WingsGo (TASK-06 và TASK-07):
+  1. TASK-06 (Tour đang được quan tâm nhất): Bổ sung fallback tự động lấy các tour nổi bật từ catalog khi tour ghim cũ bị unpublish; cập nhật 4 tour nổi bật mới (117, 119, 121, 139) vào `pages_rels` Page 208 (`/tour`). Loại bỏ hoàn toàn thông báo lỗi thiếu tour; hiển thị đầy đủ 4 thẻ tour dạng card kèm ảnh, giá, hãng bay và ngày khởi hành gần nhất.
+  2. TASK-07 (Chọn điểm đến / Bạn đang muốn đi đâu?): Nâng cấp toàn diện 3 thẻ thị trường (Hàn Quốc, Nhật Bản, Trung Quốc) từ thẻ text đơn điệu thành thẻ visual destination cards có ảnh phong cảnh đặc trưng sắc nét (Đảo Nami, Núi Phú Sĩ, Bến Thượng Hải), lớp phủ gradient tương phản cao, badge phân loại ("Yêu thích nhất", "Mùa đẹp nhất", "Tuyến Hot"), điểm nhấn tuyến điểm ("Seoul • Đảo Nami...", "Tokyo • Núi Phú Sĩ...", "Thượng Hải • Ô Trấn..."), và nút CTA tương tác kèm hiệu ứng hover mượt mà.
+- TESTS: `pnpm exec tsc --noEmit` PASS (0 errors), targeted unit tests `wingsGoCatalog.unit.spec.ts` (8/8) và `wingsGoPriorityMarketDeparture.unit.spec.ts` (3/3) PASS, component tests `wingsGoTourCatalog.component.spec.tsx` (3/3) PASS.
+- PLANE SYNC: chuẩn bị đồng bộ work items và roadmap.
+

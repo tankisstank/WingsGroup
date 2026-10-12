@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
@@ -19,9 +20,36 @@ import {
 import { queryWingsGoTourCatalog, type WingsGoCatalogPage } from './wingsGoCatalog'
 
 const marketCards = [
-  { emoji: '🇰🇷', key: 'korea', label: { en: 'South Korea', vi: 'Hàn Quốc' }, slug: 'han-quoc' },
-  { emoji: '🇯🇵', key: 'japan', label: { en: 'Japan', vi: 'Nhật Bản' }, slug: 'nhat-ban' },
-  { emoji: '🇨🇳', key: 'china', label: { en: 'China', vi: 'Trung Quốc' }, slug: 'trung-quoc' },
+  {
+    badge: { en: 'Top Pick', vi: 'Yêu thích nhất' },
+    departuresHint: { en: 'Weekly departures', vi: 'Khởi hành đều hàng tuần' },
+    emoji: '🇰🇷',
+    highlights: { en: 'Seoul • Nami • Everland • Jeju', vi: 'Seoul • Đảo Nami • Everland • Jeju' },
+    image: '/media/dao-nami-17.jpg',
+    key: 'korea',
+    label: { en: 'South Korea', vi: 'Hàn Quốc' },
+    slug: 'han-quoc',
+  },
+  {
+    badge: { en: 'Seasonal Peak', vi: 'Mùa đẹp nhất' },
+    departuresHint: { en: 'Golden route: Autumn leaves & Snow', vi: 'Cung đường vàng mùa lá đỏ & tuyết trắng' },
+    emoji: '🇯🇵',
+    highlights: { en: 'Tokyo • Mt. Fuji • Kyoto • Osaka', vi: 'Tokyo • Núi Phú Sĩ • Kyoto • Osaka' },
+    image: '/media/nuiphusimuathu.jpg',
+    key: 'japan',
+    label: { en: 'Japan', vi: 'Nhật Bản' },
+    slug: 'nhat-ban',
+  },
+  {
+    badge: { en: 'Hot Route', vi: 'Tuyến Hot' },
+    departuresHint: { en: 'Direct flights, premier routes', vi: 'Bay thẳng tiện lợi, khám phá cổ trấn & kỳ quan' },
+    emoji: '🇨🇳',
+    highlights: { en: 'Shanghai • Wuzhen • Beijing • Hangzhou', vi: 'Thượng Hải • Ô Trấn • Bắc Kinh • Hàng Châu' },
+    image: '/media/thebund.jpg',
+    key: 'china',
+    label: { en: 'China', vi: 'Trung Quốc' },
+    slug: 'trung-quoc',
+  },
 ] as const
 
 const asDoc = <T extends object>(value: T | number | string | null | undefined): T | null =>
@@ -330,27 +358,63 @@ export const WingsGoHomepageSections = async ({
             {isEn ? 'Explore all destinations ➤' : 'Khám phá tất cả các điểm đến ➤'}
           </SiteLink>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {marketCards.map(({ emoji, key, label, slug }) => (
-            <SiteLink
-              className="group flex min-h-40 items-center justify-between gap-4 rounded-[24px] border border-border/70 bg-card p-6 no-underline shadow-sm transition hover:-translate-y-1 hover:border-[var(--site-brand)]/40 hover:shadow-lg"
-              href={`/thi-truong/${slug}`}
-              key={key}
-            >
-              <span>
-                <span className="text-3xl" aria-hidden="true">{emoji}</span>
-                <span className="mt-3 block text-xl font-semibold text-foreground">
-                  {label[isEn ? 'en' : 'vi']}
-                </span>
-                <span className="mt-1 block text-sm text-muted-foreground">
-                  {isEn ? 'Explore tours and departures' : 'Khám phá tour và lịch khởi hành'}
-                </span>
-              </span>
-              <span aria-hidden="true" className="text-xl font-semibold text-[var(--site-brand)] transition group-hover:translate-x-1">
-                →
-              </span>
-            </SiteLink>
-          ))}
+        <div className="grid gap-5 md:grid-cols-3">
+          {marketCards.map(
+            ({ badge, departuresHint, emoji, highlights, image, key, label, slug }) => (
+              <SiteLink
+                className="group relative flex min-h-[320px] flex-col justify-between overflow-hidden rounded-[24px] border border-border/70 p-6 no-underline shadow-sm transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1.5 hover:border-[var(--site-brand)]/50 hover:shadow-2xl"
+                href={`/thi-truong/${slug}`}
+                key={key}
+              >
+                <img
+                  alt={label[isEn ? 'en' : 'vi']}
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                  src={image}
+                />
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/20 transition-opacity duration-300 group-hover:from-black/95 group-hover:via-black/50"
+                />
+
+                <div className="relative z-10 flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/40 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
+                    <span aria-hidden="true" className="text-base">
+                      {emoji}
+                    </span>
+                    <span>{label[isEn ? 'en' : 'vi']}</span>
+                  </span>
+                  <span className="inline-flex rounded-full bg-[var(--site-brand)]/90 px-2.5 py-1 text-[11px] font-bold text-white shadow">
+                    {badge[isEn ? 'en' : 'vi']}
+                  </span>
+                </div>
+
+                <div className="relative z-10 mt-auto pt-16">
+                  <h3 className="text-2xl font-bold tracking-tight text-white drop-shadow-sm md:text-3xl">
+                    {label[isEn ? 'en' : 'vi']}
+                  </h3>
+                  <p className="mt-1 text-sm font-medium text-white/90">
+                    {highlights[isEn ? 'en' : 'vi']}
+                  </p>
+                  <p className="mt-1 text-xs text-white/70">
+                    {departuresHint[isEn ? 'en' : 'vi']}
+                  </p>
+
+                  <div className="mt-4 flex items-center justify-between border-t border-white/15 pt-3">
+                    <span className="text-xs font-semibold text-white/95 transition group-hover:text-white">
+                      {isEn ? 'Explore tours & departures' : 'Khám phá tour & lịch bay'}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition duration-300 group-hover:translate-x-1 group-hover:bg-[var(--site-brand)]"
+                    >
+                      →
+                    </span>
+                  </div>
+                </div>
+              </SiteLink>
+            ),
+          )}
         </div>
       </section>
     </div>
