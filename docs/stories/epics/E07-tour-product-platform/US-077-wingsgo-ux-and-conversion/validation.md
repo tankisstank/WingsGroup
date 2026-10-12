@@ -9,8 +9,11 @@
    tên/điện thoại/số khách được validate; ngày và số khách được chuẩn hóa;
    API lưu site WingsGo lead và không nhận sai tenant hoặc departure không khớp.
 3. TASK-06: trang chủ hiển thị tối đa một departure hợp lệ mỗi Hàn/Nhật/Trung;
-   hãng, ngày, mã chuyến, giá và tình trạng cùng nguồn departure; ba huy hiệu
-   và `/lich-khoi-hanh` link chính xác.
+   hãng, ngày, giá và tình trạng cùng nguồn departure (mã chuyến bay hiển thị
+   khi đã có); khi một thị trường chưa có lịch hoàn tất mở bán, fallback thể hiện
+   trạng thái thân thiện với khách hàng "Lịch đang cập nhật" và nút "Hỏi WingsGo"
+   thay vì thuật ngữ quản trị nội bộ "Chưa publish"; ba huy hiệu và `/lich-khoi-hanh`
+   link chính xác.
 4. TASK-07: trang chủ hiển thị đúng tối đa bốn tour do CMS curate và ba thị
    trường với URL chính xác; không dựng fake popularity.
 5. TASK-13: itinerary accordion mở/đóng; bảng lọc tháng theo năm; giá gốc/ưu
@@ -139,3 +142,18 @@
   three market cards, no horizontal overflow and the fail-closed label.
 - PASS: the priority-departure unit suite is 2/2, component regression is
   25/25, TypeScript, targeted ESLint and production build pass.
+
+## Refine checkpoint — 2026-10-12 ICT
+
+- SCOPE: điều chỉnh hợp đồng hiển thị khối "Tour đang mở bán" (TASK-06) trên
+  trang chủ WingsGo:
+  1. `isDeparturePublishable`: chỉ bắt buộc Hãng bay (`airline`) và Giá mở bán
+     hợp lệ (`priceFrom`); Mã chuyến bay (`flightNumber`) là tùy chọn và hiển
+     thị khi đã có thông tin từ điều hành.
+  2. Fallback copy khi chưa có lịch mở bán: thay thế nhãn quản trị nội bộ
+     `Chưa publish` / `Unpublished` bằng nhãn thân thiện khách hàng
+     `Lịch đang cập nhật` / `Upcoming schedule`, hướng dẫn khách liên hệ để nhận
+     lịch mới nhất qua nút `Hỏi WingsGo`.
+- TESTS: cập nhật unit test `wingsGoPriorityMarketDeparture.unit.spec.ts`,
+  chạy component test và build verification.
+- PLANE SYNC: đồng bộ work-items và story metadata.

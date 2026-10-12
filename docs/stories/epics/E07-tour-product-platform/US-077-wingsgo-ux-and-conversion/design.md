@@ -36,7 +36,12 @@
   bốn tour trang chủ; không tạo nguồn giá trùng lặp.
 - Khối lịch trang chủ chọn một departure kế tiếp cho từng thị trường, ưu tiên
   CMS `isFeatured`, sau đó tình trạng giới hạn chỗ và ngày gần nhất; ngày, hãng
-  bay, mã chuyến và giá phải lấy từ cùng một record.
+  bay và giá mở bán phải lấy từ cùng một record. Mã chuyến bay (`flightNumber`)
+  là tùy chọn và hiển thị khi đã có dữ liệu.
+- Trạng thái fallback của khối lịch trang chủ: Khi một thị trường chưa có lịch mở
+  bán hoàn tất, giao diện hiển thị thông điệp thân thiện với khách hàng "Lịch đang
+  cập nhật" và dẫn hướng "Hỏi WingsGo" thay vì dùng thuật ngữ quản trị nội bộ
+  "Chưa publish".
 - Trang tour hiển thị giá theo tháng năm, không trộn các năm. Departure quá
   hạn/không xác minh sẽ không công bố giá hoặc chỗ.
 - Nút của departure mở native `<dialog>` và truyền ID/ngữ cảnh đã chọn; sold

@@ -549,17 +549,15 @@ export const selectPublishableDepartures = <
 }
 
 /**
- * A homepage "on sale" card must have every customer-facing flight and price
- * claim ready. Incomplete departures stay in CMS as drafts until editorial
- * data is complete; public surfaces must fail closed instead of showing
- * placeholders as if the departure were published.
+ * A homepage "on sale" card requires governed airline and price claims.
+ * Flight number is optional and displayed when provided by operations.
  */
 export const isDeparturePublishable = (
-  departure: Pick<DepartureCardViewModel, 'airline' | 'currency' | 'flightNumber' | 'priceFrom'>,
+  departure: Pick<DepartureCardViewModel, 'airline' | 'currency' | 'priceFrom'> &
+    Partial<Pick<DepartureCardViewModel, 'flightNumber'>>,
 ) =>
   Boolean(
     departure.airline?.trim() &&
-      departure.flightNumber?.trim() &&
       formatTourPrice(departure.priceFrom, departure.currency),
   )
 

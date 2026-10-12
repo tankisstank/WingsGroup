@@ -177,9 +177,7 @@ export const WingsGoHomepageSections = async ({
                         <dt className="text-muted-foreground">{isEn ? 'Airline / flight' : 'Hãng bay / mã chuyến'}</dt>
                         <dd className="font-semibold">
                           {departure.airline || (isEn ? 'Updating' : 'Đang cập nhật')}
-                          {' · '}
-                          {departure.flightNumber ||
-                            (isEn ? 'Flight code updating' : 'Mã chuyến bay đang cập nhật')}
+                          {departure.flightNumber ? ` · ${departure.flightNumber}` : ''}
                         </dd>
                       </div>
                       <div className="flex items-end justify-between gap-3">
@@ -231,17 +229,17 @@ export const WingsGoHomepageSections = async ({
                 ) : hasUnpublishedDeparture ? (
                   <div className="mt-4 flex flex-1 flex-col justify-between gap-4">
                     <div className="space-y-3">
-                      <span className="inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-amber-700 dark:text-amber-300">
-                        {isEn ? 'Unpublished' : 'Chưa publish'}
+                      <span className="inline-flex rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-sky-700 dark:text-sky-300">
+                        {isEn ? 'Upcoming schedule' : 'Lịch đang cập nhật'}
                       </span>
                       <p className="text-sm leading-7 text-muted-foreground">
                         {isEn
-                          ? 'Airline, flight code and price must be completed before this departure can be shown as on sale.'
-                          : 'Cần hoàn tất hãng bay, mã chuyến và giá trước khi lịch này được publish mở bán.'}
+                          ? 'Schedule and pricing for this route are being updated. Please contact us for the latest departure dates.'
+                          : 'Lịch bay và giá cho tuyến này đang được chuyên viên cập nhật. Quý khách vui lòng liên hệ để nhận lịch mở bán mới nhất.'}
                       </p>
                     </div>
                     <SiteLink
-                      className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold no-underline"
+                      className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold no-underline transition-colors hover:bg-muted/40"
                       href="/lien-he"
                     >
                       {isEn ? 'Ask WingsGo' : 'Hỏi WingsGo'}

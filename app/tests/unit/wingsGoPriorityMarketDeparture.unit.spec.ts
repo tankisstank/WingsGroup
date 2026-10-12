@@ -29,11 +29,24 @@ describe('getPriorityMarketDeparture', () => {
     expect(getPriorityMarketDeparture([nearest, japan], 'korea')).toBe(nearest)
   })
 
-  it('skips future departures that are missing airline, flight code or price', () => {
-    const incomplete = departure({ airline: null, id: 'incomplete' })
+  it('skips future departures that are missing airline or price', () => {
+    const missingAirline = departure({ airline: null, id: 'missing-airline' })
+    const missingPrice = departure({ priceFrom: null, id: 'missing-price' })
     const complete = departure({ id: 'complete', departureDate: '2099-01-02' })
 
-    expect(getPriorityMarketDeparture([incomplete, complete], 'korea')).toBe(complete)
-    expect(getPriorityMarketDeparture([incomplete], 'korea')).toBeUndefined()
+    expect(getPriorityMarketDeparture([missingAirline, complete], 'korea')).toBe(complete)
+    expect(getPriorityMarketDeparture([missingPrice, complete], 'korea')).toBe(complete)
+    expect(getPriorityMarketDeparture([missingAirline], 'korea')).toBeUndefined()
+  })
+
+  it('accepts valid departures where flight code is not yet assigned', () => {
+    const noFlightCode = departure({
+      airline: 'Vietjet Air',
+      flightNumber: undefined,
+      id: 'no-flight-code',
+      priceFrom: 16500000,
+    })
+
+    expect(getPriorityMarketDeparture([noFlightCode], 'korea')).toBe(noFlightCode)
   })
 })
