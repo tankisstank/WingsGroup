@@ -73,8 +73,11 @@ export const WingsGoHomepageSections = async ({
       return typeof id === 'number' || typeof id === 'string' ? [String(id)] : []
     }),
   )
-  const featuredTours =
-    catalog?.featured.filter((tour) => curatedTourIDs.has(String(tour.id))).slice(0, 4) || []
+  const curatedMatches =
+    catalog?.featured.filter((tour) => curatedTourIDs.has(String(tour.id))) || []
+  const fallbackFeatured =
+    catalog?.featured.filter((tour) => !curatedTourIDs.has(String(tour.id))) || []
+  const featuredTours = [...curatedMatches, ...fallbackFeatured].slice(0, 4)
   const nearestByMarket = marketCards.map((market) => ({
     ...market,
     departure: getPriorityMarketDeparture(schedule.departures, market.key),
