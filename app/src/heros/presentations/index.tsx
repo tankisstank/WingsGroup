@@ -575,6 +575,217 @@ export const VideoBackgroundHero: React.FC<HeroPresentationProps> = ({
   )
 }
 
+export const VerticalVideoSplitHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  businessPanel,
+  links,
+  media,
+  postcards,
+  richText,
+}) => {
+  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
+  const isVideo = Boolean(
+    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
+  )
+  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
+
+  return (
+    <div
+      className="container hero-presentation hero-presentation--split"
+      data-hero-option="vertical-video-split"
+    >
+      <HeroCopy badge={badge} links={links} richText={richText} />
+      <div className="hero-presentation__frame flex flex-col items-center justify-center">
+        <div className="relative mx-auto aspect-[4/5] w-full max-w-[380px] overflow-hidden rounded-[32px] border border-white/60 bg-slate-950 shadow-[0_24px_64px_rgba(0,0,0,0.18)] dark:border-white/10 md:max-w-[420px]">
+          {isVideo && videoSrc ? (
+            <video
+              autoPlay
+              className="h-full w-full object-cover"
+              controls={false}
+              loop
+              muted
+              playsInline
+            >
+              <source src={videoSrc} type="video/mp4" />
+            </video>
+          ) : (
+            <Media fill imgClassName="object-cover" priority resource={media} />
+          )}
+
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
+          />
+
+          {postcards.length > 0 ? (
+            <div className="absolute inset-x-0 bottom-3.5 z-10 flex flex-wrap justify-center gap-1.5 px-3">
+              {postcards.map((label) => (
+                <span
+                  className="inline-flex items-center rounded-full border border-white/25 bg-black/45 px-3 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-md"
+                  key={label}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
+    </div>
+  )
+}
+
+export const DeviceMockupSplitHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  businessPanel,
+  links,
+  media,
+  postcards,
+  richText,
+}) => {
+  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
+  const isVideo = Boolean(
+    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
+  )
+  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
+
+  return (
+    <div
+      className="container hero-presentation hero-presentation--split"
+      data-hero-option="device-mockup-split"
+    >
+      <HeroCopy badge={badge} links={links} richText={richText} />
+      <div className="hero-presentation__frame flex flex-col items-center justify-center">
+        <div className="relative mx-auto aspect-[9/18.5] w-[290px] rounded-[48px] border-4 border-slate-600/40 bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 p-3 shadow-[0_32px_80px_rgba(15,23,42,0.35)] sm:w-[320px] md:w-[340px]">
+          <div
+            aria-hidden="true"
+            className="absolute left-1/2 top-4 z-20 flex h-4 w-24 -translate-x-1/2 items-center justify-center rounded-full bg-black/90 shadow-inner"
+          >
+            <div className="ml-auto mr-3 h-2 w-2 rounded-full border border-slate-700/60 bg-slate-900" />
+          </div>
+
+          <div className="relative h-full w-full overflow-hidden rounded-[38px] bg-black">
+            {isVideo && videoSrc ? (
+              <video
+                autoPlay
+                className="h-full w-full object-cover"
+                controls={false}
+                loop
+                muted
+                playsInline
+              >
+                <source src={videoSrc} type="video/mp4" />
+              </video>
+            ) : (
+              <Media fill imgClassName="object-cover" priority resource={media} />
+            )}
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
+            />
+
+            {postcards.length > 0 ? (
+              <div className="absolute inset-x-0 bottom-3 z-10 flex flex-wrap justify-center gap-1 px-2">
+                {postcards.map((label) => (
+                  <span
+                    className="inline-flex items-center rounded-full border border-white/20 bg-black/50 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur-md"
+                    key={label}
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
+    </div>
+  )
+}
+
+export const AmbientVideoSplitHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  businessPanel,
+  links,
+  media,
+  postcards,
+  richText,
+}) => {
+  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
+  const isVideo = Boolean(
+    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
+  )
+  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
+
+  return (
+    <div
+      className="container hero-presentation hero-presentation--split"
+      data-hero-option="ambient-video-split"
+    >
+      <HeroCopy badge={badge} links={links} richText={richText} />
+      <div className="hero-presentation__frame">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[28px] border border-border/70 bg-slate-950 shadow-xl">
+          {isVideo && videoSrc ? (
+            <video
+              aria-hidden="true"
+              autoPlay
+              className="absolute inset-0 h-full w-full scale-125 object-cover opacity-50 blur-2xl filter"
+              controls={false}
+              loop
+              muted
+              playsInline
+            >
+              <source src={videoSrc} type="video/mp4" />
+            </video>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--site-brand)]/20 via-slate-900 to-black" />
+          )}
+
+          <div className="relative z-10 flex h-full w-full items-center justify-center p-2">
+            {isVideo && videoSrc ? (
+              <video
+                autoPlay
+                className="h-full max-h-full rounded-[18px] object-contain shadow-2xl"
+                controls={false}
+                loop
+                muted
+                playsInline
+              >
+                <source src={videoSrc} type="video/mp4" />
+              </video>
+            ) : (
+              <Media fill imgClassName="object-contain" priority resource={media} />
+            )}
+          </div>
+
+          {postcards.length > 0 ? (
+            <div className="absolute inset-x-0 bottom-2.5 z-20 flex flex-wrap justify-center gap-1.5 px-3">
+              {postcards.map((label) => (
+                <span
+                  className="inline-flex items-center rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md"
+                  key={label}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
+    </div>
+  )
+}
+
 export const heroPresentationComponents: Record<
   HeroPresentationKey,
   React.FC<HeroPresentationProps>
@@ -586,4 +797,7 @@ export const heroPresentationComponents: Record<
   'planner-split': PlannerSplitHero,
   'split-visual': SplitVisualHero,
   'video-background': VideoBackgroundHero,
+  'vertical-video-split': VerticalVideoSplitHero,
+  'device-mockup-split': DeviceMockupSplitHero,
+  'ambient-video-split': AmbientVideoSplitHero,
 }

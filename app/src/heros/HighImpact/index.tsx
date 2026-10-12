@@ -374,8 +374,20 @@ export const HighImpactHero: React.FC<
     props.siteHeroDefaults?.variant ||
     'standard') as keyof typeof heroVariantCopy
   const copy = heroVariantCopy[variant] || heroVariantCopy.standard
-  const presentation = resolved.key
-  const Presentation = heroPresentationComponents[presentation]
+  const [overridePresentation, setOverridePresentation] = React.useState<HeroPresentationKey | null>(null)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const heroParam = params.get('hero') as HeroPresentationKey | null
+      if (heroParam && heroParam in heroPresentationComponents) {
+        setOverridePresentation(heroParam)
+      }
+    }
+  }, [])
+
+  const presentation = overridePresentation || resolved.key
+  const Presentation = heroPresentationComponents[presentation] || heroPresentationComponents[resolved.key]
   const { setHeaderTheme } = useHeaderTheme()
   const isRetailDepartures = variant === 'retail-departures'
   const isPlanner = variant === 'planner'

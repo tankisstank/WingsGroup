@@ -23,8 +23,11 @@ describe('hero presentation registry', () => {
       'planner-split',
       'cinematic-carousel',
       'video-background',
+      'vertical-video-split',
+      'device-mockup-split',
+      'ambient-video-split',
     ])
-    expect(heroPresentationOptions).toHaveLength(7)
+    expect(heroPresentationOptions).toHaveLength(10)
   })
 
   it('resolves explicit presentation keys and legacy fallbacks', () => {

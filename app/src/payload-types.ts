@@ -283,7 +283,10 @@ export interface HeroPresentationPreset {
     | 'gradient-mesh'
     | 'planner-split'
     | 'cinematic-carousel'
-    | 'video-background';
+    | 'video-background'
+    | 'vertical-video-split'
+    | 'device-mockup-split'
+    | 'ambient-video-split';
   slots?: {
     showBadge?: boolean | null;
     showPostcards?: boolean | null;
@@ -716,6 +719,9 @@ export interface Page {
           | 'planner-split'
           | 'cinematic-carousel'
           | 'video-background'
+          | 'vertical-video-split'
+          | 'device-mockup-split'
+          | 'ambient-video-split'
         )
       | null;
     /**

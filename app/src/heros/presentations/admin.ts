@@ -115,6 +115,21 @@ export const getHeroPresentationAdminMeta = (value: unknown): HeroPresentationAd
       requirementSummary: ['poster bắt buộc', 'desktop video khuyến nghị', 'mobile video tùy chọn'],
       visualLabel: 'Poster và video nền toàn khung',
     },
+    'vertical-video-split': {
+      businessFit: ['standard', 'retail-departures'],
+      requirementSummary: ['1 video hoặc poster tỉ lệ dọc 4:5 hoặc 9:16'],
+      visualLabel: 'Video dọc nguyên bản (4:5) cân xứng copy',
+    },
+    'device-mockup-split': {
+      businessFit: ['standard', 'retail-departures'],
+      requirementSummary: ['1 video dọc đặt trong khung thiết bị di động'],
+      visualLabel: 'Video đặt trong khung smartphone mockup tinh tế',
+    },
+    'ambient-video-split': {
+      businessFit: ['standard', 'retail-departures'],
+      requirementSummary: ['1 video dọc với hiệu ứng ambient blur nền cinematic'],
+      visualLabel: 'Khung ngang với video dọc ở giữa và nền ambient mờ',
+    },
   }
 
   return {

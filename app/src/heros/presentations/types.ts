@@ -9,6 +9,9 @@ export type HeroPresentationKey =
   | 'planner-split'
   | 'cinematic-carousel'
   | 'video-background'
+  | 'vertical-video-split'
+  | 'device-mockup-split'
+  | 'ambient-video-split'
 
 export type HeroContentMode = 'single' | 'slides' | 'video'
 export type HeroTransition = 'crossfade' | 'slide' | 'zoom'

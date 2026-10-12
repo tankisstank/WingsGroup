@@ -82,6 +82,27 @@ export const heroPresentationDefinitions: readonly HeroPresentationDefinition[] 
     label: 'Video nền (Video background)',
     value: 'video-background',
   },
+  {
+    capabilities: singleMediaCapabilities,
+    description:
+      'Bố cục 2 cột với khung hình/video tỉ lệ dọc 4:5 cân xứng, bo góc tròn và chip ở chân.',
+    label: 'PA1 — Video dọc cân xứng (Vertical video split)',
+    value: 'vertical-video-split',
+  },
+  {
+    capabilities: singleMediaCapabilities,
+    description:
+      'Bố cục 2 cột với khung mô phỏng thiết bị smartphone, video phát trọn vẹn bên trong.',
+    label: 'PA2 — Khung smartphone mockup (Device mockup split)',
+    value: 'device-mockup-split',
+  },
+  {
+    capabilities: singleMediaCapabilities,
+    description:
+      'Khung ngang với video dọc ở tâm và hiệu ứng nền mờ chuyển động phản chiếu.',
+    label: 'PA3 — Khung ngang nền ambient mờ (Ambient video split)',
+    value: 'ambient-video-split',
+  },
 ] as const
 
 export const defaultHeroPresentation: HeroPresentationKey = 'centered-visual'
