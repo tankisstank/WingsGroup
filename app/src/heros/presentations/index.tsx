@@ -658,16 +658,16 @@ export const DeviceMockupSplitHero: React.FC<HeroPresentationProps> = ({
       data-hero-option="device-mockup-split"
     >
       <HeroCopy badge={badge} links={links} richText={richText} />
-      <div className="hero-presentation__frame flex flex-col items-center justify-center">
-        <div className="relative mx-auto aspect-[9/18.5] w-[290px] rounded-[48px] border-4 border-slate-600/40 bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 p-3 shadow-[0_32px_80px_rgba(15,23,42,0.35)] sm:w-[320px] md:w-[340px]">
+      <div className="hero-presentation__frame flex flex-col items-center justify-center overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
+        <div className="relative mx-auto aspect-[9/18.5] w-[290px] rounded-[52px] border-[6px] border-slate-700/80 bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 p-2.5 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.45),0_12px_28px_-6px_rgba(15,23,42,0.25)] sm:w-[320px] md:w-[340px]">
           <div
             aria-hidden="true"
-            className="absolute left-1/2 top-4 z-20 flex h-4 w-24 -translate-x-1/2 items-center justify-center rounded-full bg-black/90 shadow-inner"
+            className="absolute left-1/2 top-3.5 z-20 flex h-4 w-24 -translate-x-1/2 items-center justify-center rounded-full bg-black/95 shadow-inner"
           >
             <div className="ml-auto mr-3 h-2 w-2 rounded-full border border-slate-700/60 bg-slate-900" />
           </div>
 
-          <div className="relative h-full w-full overflow-hidden rounded-[38px] bg-black">
+          <div className="relative h-full w-full overflow-hidden rounded-[40px] bg-black">
             {isVideo && videoSrc ? (
               <video
                 autoPlay
