@@ -595,8 +595,8 @@ export const VerticalVideoSplitHero: React.FC<HeroPresentationProps> = ({
       data-hero-option="vertical-video-split"
     >
       <HeroCopy badge={badge} links={links} richText={richText} />
-      <div className="hero-presentation__frame flex flex-col items-center justify-center">
-        <div className="relative mx-auto aspect-[4/5] w-full max-w-[380px] overflow-hidden rounded-[32px] border border-white/60 bg-slate-950 shadow-[0_24px_64px_rgba(0,0,0,0.18)] dark:border-white/10 md:max-w-[420px]">
+      <div className="hero-presentation__frame flex flex-col items-center justify-center overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
+        <div className="relative mx-auto aspect-[4/5] w-full max-w-[380px] overflow-hidden rounded-[32px] border border-slate-700/60 bg-slate-950 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.4),0_12px_28px_-6px_rgba(15,23,42,0.2)] md:max-w-[420px]">
           {isVideo && videoSrc ? (
             <video
               autoPlay
@@ -730,8 +730,8 @@ export const AmbientVideoSplitHero: React.FC<HeroPresentationProps> = ({
       data-hero-option="ambient-video-split"
     >
       <HeroCopy badge={badge} links={links} richText={richText} />
-      <div className="hero-presentation__frame">
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[28px] border border-border/70 bg-slate-950 shadow-xl">
+      <div className="hero-presentation__frame overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[28px] border border-slate-700/60 bg-slate-950 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.45),0_12px_28px_-6px_rgba(15,23,42,0.25)]">
           {isVideo && videoSrc ? (
             <video
               aria-hidden="true"
