@@ -410,7 +410,12 @@ export const HighImpactHero: React.FC<
     setHeaderTheme('light')
   }, [setHeaderTheme])
 
-  const catalogTours = props.featuredTours || []
+  const catalogTours =
+    (props.heroFeaturedTours && props.heroFeaturedTours.length > 0)
+      ? props.heroFeaturedTours
+      : (props.featuredTours && props.featuredTours.length > 0)
+        ? props.featuredTours
+        : []
 
   const displayTours = catalogTours.length > 0
     ? catalogTours.slice(0, 3).map((tour, idx) => {
