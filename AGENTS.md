@@ -20,6 +20,10 @@ Project rules:
   - `SQLite` only for local bootstrap
   - `PostgreSQL` for staging and production
   - `Redis` as cache / KV support for production scale
+- For deploying to Oracle Cloud VPS (ARM64 / aarch64 from Windows x64):
+  - Always follow `docs/runbooks/oracle-vps-arm64-deployment.md`.
+  - Use `deploy/oracle/package-release.ps1` to package clean releases (exclude `public/media` to avoid disk full).
+  - Use `deploy/oracle/generate-symlinks.js` to ensure Linux ARM64 native binaries (`sharp`, `libvips`, `@libsql`) are provisioned.
 
 For Windows in this repo:
 

@@ -1,0 +1,36 @@
+# Script tự động đóng gói release gọn nhẹ cho VPS Oracle Cloud ARM64
+$ErrorActionPreference = "Stop"
+
+Write-Host ">>> 1. Sinh relink.sh chứa binary ARM64 và pnpm symlinks..." -ForegroundColor Cyan
+node deploy/oracle/generate-symlinks.js
+
+Write-Host ">>> 2. Chuẩn bị thư mục tạm để đóng gói..." -ForegroundColor Cyan
+$tempDir = "deploy/oracle/temp-release"
+if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir }
+New-Item -ItemType Directory -Path $tempDir | Out-Null
+
+# Copy standalone .next, node_modules, server.js, package.json
+Copy-Item -Recurse "app/.next/standalone/.next" "$tempDir/.next"
+Copy-Item -Recurse "app/.next/standalone/node_modules" "$tempDir/node_modules"
+Copy-Item "app/.next/standalone/server.js" "$tempDir/server.js"
+Copy-Item "app/.next/standalone/package.json" "$tempDir/package.json"
+
+# Copy public static assets (loại trừ public/media)
+New-Item -ItemType Directory -Path "$tempDir/public" | Out-Null
+Copy-Item -Recurse "app/public/brand" "$tempDir/public/brand"
+Copy-Item -Recurse "app/public/samples" "$tempDir/public/samples"
+Copy-Item -Recurse "app/public/wingsside-hifi" "$tempDir/public/wingsside-hifi"
+Copy-Item "app/public/favicon.ico" "$tempDir/public/favicon.ico"
+Copy-Item "app/public/favicon.svg" "$tempDir/public/favicon.svg"
+Copy-Item "app/public/website-template-OG.webp" "$tempDir/public/website-template-OG.webp"
+
+Write-Host ">>> 3. Nén file release-clean.zip..." -ForegroundColor Cyan
+$zipFile = "deploy/oracle/release-clean.zip"
+if (Test-Path $zipFile) { Remove-Item -Force $zipFile }
+Compress-Archive -Path "$tempDir/*" -DestinationPath $zipFile -CompressionLevel Optimal
+
+# Dọn dẹp thư mục tạm
+Remove-Item -Recurse -Force $tempDir
+
+$sizeMB = [math]::Round((Get-Item $zipFile).Length / 1MB, 2)
+Write-Host ">>> Hoàn tất! File release tạo tại: $zipFile ($sizeMB MB)" -ForegroundColor Green
