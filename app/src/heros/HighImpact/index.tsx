@@ -425,11 +425,11 @@ export const HighImpactHero: React.FC<
         {displayTours.length > 0 ? (
           displayTours.map((item) => (
             <SiteLink
-              className="site-departure-row group flex items-center gap-3.5 py-3 transition-colors hover:bg-muted/30 no-underline rounded-xl px-2.5 -mx-2.5"
+              className="site-departure-row group flex items-center gap-4 py-4 transition-colors hover:bg-muted/40 no-underline rounded-2xl px-3 -mx-3"
               href={item.href}
               key={item.id}
             >
-              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-border/70 bg-muted">
+              <div className="relative h-16 w-16 md:h-18 md:w-18 shrink-0 overflow-hidden rounded-2xl border border-border/70 bg-muted shadow-xs">
                 {item.image ? (
                   <img
                     alt={item.image.alt || item.title}
@@ -439,24 +439,24 @@ export const HighImpactHero: React.FC<
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-muted/60 text-muted-foreground">
-                    <PlaneIcon className="h-5 w-5 opacity-40" />
+                    <PlaneIcon className="h-6 w-6 opacity-40" />
                   </div>
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-2">
                   {item.badge ? (
-                    <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                    <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
                       {item.badge}
                     </span>
                   ) : null}
-                  <h3 className="line-clamp-1 text-sm font-semibold text-foreground group-hover:text-[var(--site-brand)] transition-colors">
+                  <h3 className="line-clamp-1 text-base md:text-lg font-bold text-foreground group-hover:text-[var(--site-brand)] transition-colors">
                     {item.title}
                   </h3>
                 </div>
-                <div className="mt-1 flex items-center justify-between gap-2">
-                  <p className="text-xs text-muted-foreground line-clamp-1">{item.dateMeta}</p>
-                  <strong className="text-xs font-bold text-[var(--site-accent)] shrink-0">
+                <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm text-muted-foreground line-clamp-1">{item.dateMeta}</p>
+                  <strong className="text-base md:text-lg font-bold text-[var(--site-accent)] shrink-0">
                     {item.price}
                   </strong>
                 </div>
