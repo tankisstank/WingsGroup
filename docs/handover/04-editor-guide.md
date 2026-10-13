@@ -42,3 +42,7 @@ website forms and should not be created manually in the CMS.
 - SEO or sharing fields are reviewed when required
 - Wrong-site and wrong-locale errors are checked
 - The draft has been sent to the correct publisher
+
+## Specialized Guides
+
+- **WingsGo Hot & Featured Tours:** Xem hướng dẫn chi tiết tại [wingsgo-tour-curation-editor-guide.md](file:///E:/repo/WingsTravel/docs/handover/wingsgo-tour-curation-editor-guide.md) để biết cách ghim tour lên khối Hero và gắn Badge khuyến mại (`Promo label`).
