@@ -168,15 +168,21 @@
 
 ## Refine checkpoint 3 — 2026-10-13 ICT
 
-- SCOPE: Nâng cấp Hero trang chủ WingsGo tối ưu hóa cho định dạng video dọc (Adaptive Hero Layout):
-  1. Khắc phục triệt để lỗi hiển thị video dọc bị cắt cúp (crop) vào khung ngang 16:10 cũ, bảo toàn trọn vẹn hình ảnh thành Osaka, các biểu tượng danh thắng và typography.
-  2. Xây dựng 3 cấu trúc Hero độc lập (`vertical-video-split`, `device-mockup-split`, `ambient-video-split`), bảo toàn 100% cấu trúc `split-visual` gốc để đảm bảo khả năng rollback không ảnh hưởng bất kỳ site nào khác.
-  3. Tinh chỉnh nền trong suốt (Seamless Floating): Loại bỏ khung viền chữ nhật màu trắng bao quanh, cho phép khối visual nổi trực tiếp trên nền gradient pastel của website với bóng đổ đa tầng mềm mại.
-  4. Cơ chế thích ứng đa thiết bị (Adaptive Responsive):
-     - Viewport Desktop (≥ 768px): Hiển thị dạng Smartphone Mockup viền titanium cao cấp kèm Dynamic Island, tạo cảm giác ứng dụng công nghệ du lịch hiện đại.
-     - Viewport Mobile (< 768px): Tự động ẩn viền mockup và Dynamic Island, mở rộng video thành thẻ 4:5 tràn viền bo góc mượt mà, tối đa hóa diện tích hiển thị trên điện thoại thật của người dùng.
-  5. Quản trị CMS & Schema Data: Cập nhật PostgreSQL enum types trên VPS, thêm preset `wingsgo-device-mockup` (ID: 8), cấu hình mặc định cho Page 221 (WingsGo Home) và Site 2 trong `pages_locales` và `site_settings`.
-- TESTS: `pnpm exec tsc --noEmit` PASS (0 errors), `node scripts/run-integration-tests.mjs tests/int/heroPresentations.int.spec.ts` PASS (4/4), Docker production build và restart thành công, endpoint `/api/health/ready` HTTP 200.
-- EVIDENCE: Chụp ảnh đối chiếu Desktop (1440x900) và Mobile (390x844) qua `agent-browser` trực tiếp trên URL chính thức `https://wingsgo.vn/`.
+- SCOPE: Tối ưu hóa và chuyển đổi cấu trúc Hero section trên trang chủ WingsGo phù hợp với video dọc gốc (`video webs.mp4`):
+  1. Xác minh video gốc: SHA-256 khớp 100% byte-for-byte (`d76568d04e14...`, kích thước 1122x1402, tỉ lệ ~4:5).
+  2. Triển khai 3 phương án Hero Presentation mới độc lập mà không chỉnh sửa hay phá vỡ cấu trúc cũ `split-visual`:
+     - `vertical-video-split`: Khung video dọc 4:5 cân xứng copy.
+     - `device-mockup-split`: Khung Smartphone Mockup sang trọng.
+     - `ambient-video-split`: Khung ngang với hiệu ứng cinematic ambient blur.
+  3. Tinh chỉnh khung trong suốt: Loại bỏ hoàn toàn nền card trắng và border bao quanh ngoài, tạo hiệu ứng floating mockup cao cấp trên nền gradient website.
+  4. Cơ chế thích ứng tự động (Adaptive Responsive Hero):
+     - Desktop (>= 768px): Hiển thị khung Smartphone Mockup viền titanium với Dynamic Island, tạo cảm giác ứng dụng du lịch hiện đại.
+     - Mobile (< 768px): Tự động ẩn viền mockup và Dynamic Island, chuyển sang khung video dọc 4:5 tràn viền bo góc mượt mà, tối ưu diện tích màn hình cho người dùng đang cầm điện thoại thật.
+  5. Phát hành chính thức: Thêm PostgreSQL enum values, khởi tạo Preset `wingsgo-device-mockup` (id 8), cập nhật Page 221 (`wings-go-home`) và `site_settings` để kích hoạt làm giao diện mặc định trên Production `https://wingsgo.vn/`.
+- TESTS & VERIFICATION:
+  - `pnpm exec tsc --noEmit`: PASS (0 errors).
+  - Integration test `tests/int/heroPresentations.int.spec.ts`: PASS (4/4 tests).
+  - Browser verification (Desktop 1440px & Mobile 390px): Xác thực giao diện hiển thị đúng chuẩn responsive, video phát mượt mà, không lỗi layout hay tràn ngang.
+- DEPLOYMENT: Release `release-adaptive-hero-20261013` (commit `7df7592`) hoạt động ổn định trên VPS `168.110.212.116`, health check `/api/health/ready` trả về HTTP 200 `ready`.
 
 
