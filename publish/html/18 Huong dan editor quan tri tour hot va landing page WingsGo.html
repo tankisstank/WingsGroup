@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sổ Tay Vận Hành CMS WingsGo & Hướng Dẫn Biên Tập Tour Hot - WingsTravel Group</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,300&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --paper: #ffffff;
+      --card-bg: #ffffff;
+      --ink: #1e293b;
+      --ink-dark: #0f172a;
+      --muted: #64748b;
+      --subtle: #94a3b8;
+      --line: #e2e8f0;
+      --line-strong: #cbd5e1;
+      --primary: #0284c7;
+      --primary-tint: #f0f9ff;
+      --accent: #f97316;
+      --accent-tint: #fff7ed;
+      --emerald: #10b981;
+      --emerald-tint: #ecfdf5;
+      --purple: #8b5cf6;
+      --purple-tint: #f5f3ff;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 12px 24px -4px rgba(0,0,0,0.08), 0 4px 8px -2px rgba(0,0,0,0.04);
+      --serif: "Merriweather", Georgia, serif;
+      --sans: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --mono: "Geist Mono", monospace;
+      --max: 1280px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.68;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Container */
+    .container {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* Header & Navigation */
+    header.hero-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0369a1 100%);
+      color: #ffffff;
+      padding: 56px 44px;
+      border-radius: 24px;
+      margin-bottom: 40px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+    header.hero-header::after {
+      content: "";
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(249,115,22,0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .badge-hub {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      backdrop-filter: blur(8px);
+    }
+    .badge-hub span.dot {
+      width: 8px;
+      height: 8px;
+      background: #f97316;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px #f97316;
+    }
+    h1.main-title {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 3.8vw, 3rem);
+      line-height: 1.2;
+      margin: 0 0 16px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    p.lead-desc {
+      font-size: 17px;
+      color: #cbd5e1;
+      max-width: 840px;
+      margin: 0 0 28px;
+      line-height: 1.7;
+    }
+    .quick-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .quick-meta div {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .quick-meta strong {
+      color: #ffffff;
+    }
+
+    /* Table of contents bar */
+    .toc-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: var(--paper);
+      padding: 16px 20px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 40px;
+      position: sticky;
+      top: 16px;
+      z-index: 40;
+    }
+    .toc-bar a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .toc-bar a:hover {
+      color: var(--primary);
+      background: var(--primary-tint);
+    }
+    .toc-bar a.active {
+      color: var(--primary);
+      background: var(--primary-tint);
+    }
+
+    /* Sections */
+    section.doc-section {
+      background: var(--paper);
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      padding: 40px;
+      margin-bottom: 36px;
+      box-shadow: var(--shadow-sm);
+    }
+    .section-head {
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .section-tag {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 8px;
+      display: block;
+    }
+    h2.section-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: var(--ink-dark);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    p.section-desc {
+      color: var(--muted);
+      margin: 0;
+      font-size: 15px;
+    }
+
+    /* Role Cards Grid */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+    @media (max-width: 900px) {
+      .roles-grid { grid-template-columns: 1fr; }
+    }
+    .role-card {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .role-card.editor { border-top: 4px solid var(--primary); }
+    .role-card.site-manager { border-top: 4px solid var(--accent); }
+    .role-card.super-admin { border-top: 4px solid var(--purple); }
+
+    .role-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      align-self: flex-start;
+    }
+    .role-card.editor .role-badge { background: var(--primary-tint); color: var(--primary); }
+    .role-card.site-manager .role-badge { background: var(--accent-tint); color: var(--accent); }
+    .role-card.super-admin .role-badge { background: var(--purple-tint); color: var(--purple); }
+
+    .role-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: var(--ink-dark);
+    }
+    .role-summary {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 18px;
+      line-height: 1.55;
+    }
+    .role-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13px;
+      color: var(--ink);
+      display: grid;
+      gap: 8px;
+    }
+    .role-list li strong {
+      color: var(--ink-dark);
+    }
+    .limit-warning {
+      margin-top: 18px;
+      padding: 10px 14px;
+      background: #fef2f2;
+      border-radius: 8px;
+      border-left: 3px solid #ef4444;
+      font-size: 12px;
+      color: #991b1b;
+      line-height: 1.5;
+    }
+
+    /* Screenshots & Visual Layout */
+    .visual-showcase {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      margin: 28px 0;
+    }
+    @media (max-width: 860px) {
+      .visual-showcase { grid-template-columns: 1fr; }
+    }
+    .visual-box {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+    .visual-box img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      border-bottom: 1px solid var(--line);
+    }
+    .visual-box-content {
+      padding: 18px 20px;
+    }
+    .visual-box-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink-dark);
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .visual-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--accent-tint);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .visual-box-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Workflow Stepper */
+    .steps-chain {
+      display: grid;
+      gap: 24px;
+      margin-top: 24px;
+    }
+    .step-item {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 20px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+    }
+    .step-number {
+      width: 44px;
+      height: 44px;
+      background: var(--primary);
+      color: #ffffff;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+    .step-number.orange {
+      background: var(--accent);
+      box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
+    }
+    .step-number.green {
+      background: var(--emerald);
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+    }
+    .step-body h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: var(--ink-dark);
+    }
+    .step-body p {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
+    .step-callout {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .step-callout ul {
+      margin: 6px 0 0;
+      padding-left: 20px;
+      display: grid;
+      gap: 4px;
+    }
+
+    /* Data Map Table */
+    .data-table-wrap {
+      overflow-x: auto;
+      margin: 24px 0;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+    table.data-table th {
+      background: #f1f5f9;
+      color: var(--ink-dark);
+      padding: 12px 16px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--line);
+    }
+    table.data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+    }
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+    table.data-table tr:hover {
+      background: #f8fafc;
+    }
+    code {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-pill.orange { background: var(--accent-tint); color: var(--accent); }
+    .badge-pill.blue { background: var(--primary-tint); color: var(--primary); }
+    .badge-pill.green { background: var(--emerald-tint); color: var(--emerald); }
+
+    /* Highlights & Tips */
+    .tip-box {
+      background: var(--accent-tint);
+      border: 1px solid rgba(249, 115, 22, 0.2);
+      border-left: 4px solid var(--accent);
+      padding: 18px 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .tip-box .tip-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+    .tip-box .tip-content {
+      font-size: 13.5px;
+      color: #9a3412;
+      line-height: 1.6;
+    }
+    .tip-box .tip-content strong {
+      color: #7c2d12;
+    }
+
+    /* Footer */
+    footer.doc-footer {
+      text-align: center;
+      padding: 40px 0;
+      font-size: 13px;
+      color: var(--subtle);
+      border-top: 1px solid var(--line);
+      margin-top: 60px;
+    }
+    footer.doc-footer p { margin: 4px 0; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Hero Header -->
+    <header class="hero-header">
+      <div class="badge-hub">
+        <span class="dot"></span> Tài liệu bàn giao & Vận hành CMS
+      </div>
+      <h1 class="main-title">Sổ Tay Vận Hành CMS WingsGo & Hướng Dẫn Biên Tập Tour Hot</h1>
+      <p class="lead-desc">
+        Tài liệu chuẩn hóa quy trình biên tập, tạo Trang, tạo Tour, cấu hình Tour Hot & Tour Nổi bật (Featured), và gắn nhãn khuyến mại (Promo Label) theo đúng phân quyền (Role) trên hệ thống CMS WingsTravel Group.
+      </p>
+      <div class="quick-meta">
+        <div>Hệ thống: <strong>WingsTravel CMS (Payload 3.x)</strong></div>
+        <div>Phân hệ: <strong>WingsGo (Outbound Tours)</strong></div>
+        <div>Môi trường: <strong>Production (PostgreSQL & VPS ARM64)</strong></div>
+        <div>Dành cho: <strong>Editor, Site Manager, Super Admin</strong></div>
+      </div>
+    </header>
+
+    <!-- Navigation / TOC Bar -->
+    <nav class="toc-bar">
+      <a href="#phan-quyen" class="active">1. Phân Quyền Vai Trò (Roles)</a>
+      <a href="#vi-tri-hien-thi">2. Bản Đồ Vị Trí Tour Hot Trên Web</a>
+      <a href="#quy-trinh-tour-hot">3. Các Bước Ghim Tour Hot Trong CMS</a>
+      <a href="#gan-badge-promo">4. Gắn Badge Khuyến Mại (Promo Label)</a>
+      <a href="#tao-trang-va-tour">5. Quy Trình Tạo Trang & Tour Mới</a>
+      <a href="#duyet-va-xuat-ban">6. Quy Trình Kiểm Duyệt & Xuất Bản</a>
+    </nav>
+
+    <!-- PHẦN 1: PHÂN QUYỀN VAI TRÒ -->
+    <section class="doc-section" id="phan-quyen">
+      <div class="section-head">
+        <span class="section-tag">Phần 1 · Governance & Matrix</span>
+        <h2 class="section-title">Phân Quyền Vai Trò Trong CMS Quản Trị</h2>
+        <p class="section-desc">Hệ thống áp dụng mô hình phân quyền ma trận: Quyền hạn hành động kết hợp với Phạm vi Site (Site Scope).</p>
+      </div>
+
+      <div class="roles-grid">
+        <!-- Editor -->
+        <div class="role-card editor">
+          <span class="role-badge">Editor (Biên tập viên)</span>
+          <h3 class="role-title">Biên Tập & Soạn Thảo</h3>
+          <p class="role-summary">Chịu trách nhiệm trực tiếp về chất lượng nội dung, hình ảnh, thông tin giá và lịch trình trong phạm vi site được giao.</p>
+          <ul class="role-list">
+            <li><strong>Tạo bản nháp:</strong> Tạo Page mới, thêm Tour Product, tạo bài viết tin tức.</li>
+            <li><strong>Chọn Tour Hot:</strong> Mở trang <code>/tour</code> để chọn và xếp thứ tự các Tour nổi bật.</li>
+            <li><strong>Cấu hình Promo:</strong> Nhập <code>Promo label</code> (Hot, Giảm giá...) và đợt khởi hành.</li>
+            <li><strong>Preview:</strong> Xem trước giao diện nháp trước khi gửi duyệt.</li>
+          </ul>
+          <div class="limit-warning">
+            <strong>Giới hạn quyền:</strong> Editor không có quyền bấm <strong>Publish</strong> trực tiếp lên website chính thức. Mọi nội dung sau khi chỉnh sửa đều ở trạng thái Draft và cần chuyển Site Manager duyệt.
+          </div>
+        </div>
+
+        <!-- Site Manager -->
+        <div class="role-card site-manager">
+          <span class="role-badge">Site Manager (Quản lý Site)</span>
+          <h3 class="role-title">Kiểm Duyệt & Xuất Bản</h3>
+          <p class="role-summary">Toàn quyền vận hành nội dung, xuất bản và đảm bảo tính nhất quán của một website cụ thể (như WingsGo hoặc WingsSide).</p>
+          <ul class="role-list">
+            <li><strong>Phê duyệt & Xuất bản:</strong> Duyệt các trang, tour do Editor gửi lên và bấm <strong>Publish</strong>.</li>
+            <li><strong>Quản lý Menu & Navigation:</strong> Điều chỉnh menu đầu trang, chân trang của Site.</li>
+            <li><strong>Cấu hình SEO:</strong> Tối ưu Metadata, OpenGraph, Canonical URL của Site.</li>
+            <li><strong>Theo dõi Đơn / Leads:</strong> Xem và xuất dữ liệu liên hệ từ khách hàng gửi về.</li>
+          </ul>
+        </div>
+
+        <!-- Super Admin -->
+        <div class="role-card super-admin">
+          <span class="role-badge">Super Admin (Quản trị hệ thống)</span>
+          <h3 class="role-title">Hạ Tầng & Toàn Hệ Thống</h3>
+          <p class="role-summary">Quản trị toàn bộ các site trong tập đoàn WingsTravel, người dùng, quyền hạn và kết nối kỹ thuật.</p>
+          <ul class="role-list">
+            <li><strong>Quản lý User & Role:</strong> Tạo tài khoản, cấp quyền Editor / Site Manager cho nhân sự.</li>
+            <li><strong>Cấu hình Đa Site:</strong> Thêm site mới, liên kết tên miền (wingsgo.vn, wingstravel.vn...).</li>
+            <li><strong>Hệ thống & Theme:</strong> Cấu hình cache Redis, đồng bộ dữ liệu, phân quyền bảo mật.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHẦN 2: BẢN ĐỒ VỊ TRÍ TOUR HOT TRÊN GIAO DIỆN -->
+    <section class="doc-section" id="vi-tri-hien-thi">
+      <div class="section-head">
+        <span class="section-tag">Phần 2 · Frontend Discovery</span>
+        <h2 class="section-title">Bản Đồ Hiển Thị Tour Hot & Nổi Bật Trên WingsGo</h2>
+        <p class="section-desc">Hai khu vực thương mại quan trọng nhất trên trang chủ `https://wingsgo.vn` được điều phối hoàn toàn từ CMS.</p>
+      </div>
+
+      <div class="visual-showcase">
+        <!-- Khối 1: Hero -->
+        <div class="visual-box">
+          <img src="assets/wingsgo_hero_panel.jpg" alt="Khối Ưu đãi hot Hero WingsGo">
+          <div class="visual-box-content">
+            <div class="visual-box-title">
+              <span>Khối 1: Hero Commerce Panel</span>
+              <span class="visual-tag">Vị trí 1, 2, 3</span>
+            </div>
+            <p class="visual-box-desc">
+              Khối <strong>"Ưu đãi hot / Tour đang được quan tâm"</strong> đặt ngay dưới Hero Banner. Hiển thị <strong>3 tour đầu tiên</strong> trong danh sách Tour nổi bật. Các đợt có gắn <code>Promo label</code> sẽ xuất hiện thêm Badge viền cam nổi bật (Ví dụ: <em>Hot</em>, <em>Mùa lá đỏ</em>).
+            </p>
+          </div>
+        </div>
+
+        <!-- Khối 2: Catalog Grid -->
+        <div class="visual-box">
+          <img src="assets/wingsgo_catalog_grid.jpg" alt="Khối Lưới tour nổi bật WingsGo">
+          <div class="visual-box-content">
+            <div class="visual-box-title">
+              <span>Khối 2: Catalog Grid Nổi Bật</span>
+              <span class="visual-tag">Tối đa 4 - 6 Tour</span>
+            </div>
+            <p class="visual-box-desc">
+              Khối <strong>"🔥 Tour đang được quan tâm nhất"</strong> ở giữa trang chủ. Hiển thị card ảnh lớn, lộ trình chi tiết, giá khởi điểm và đợt bay gần nhất cho toàn bộ danh sách 4 - 6 tour được Editor ghim.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <div class="tip-icon">💡</div>
+        <div class="tip-content">
+          <strong>Nguyên lý hiển thị thực tế:</strong> Cả hai khối trên đều đọc chung từ <strong>một vị trí cấu hình duy nhất</strong> trong CMS: Khối <code>WingsGo tour catalog</code> ➔ trường <code>Featured Tours (Tour nổi bật)</code> của Trang có đường dẫn <code>/tour</code>. Editor chỉ cần sắp xếp thứ tự một lần là cả hai khối sẽ tự động cập nhật!
+        </div>
+      </div>
+    </section>
+
+    <!-- PHẦN 3: CÁC BƯỚC GHIM TOUR HOT TRONG CMS -->
+    <section class="doc-section" id="quy-trinh-tour-hot">
+      <div class="section-head">
+        <span class="section-tag">Phần 3 · CMS Step-by-Step</span>
+        <h2 class="section-title">Các Bước Ghim & Sắp Xếp Thứ Tự Tour Hot Trong CMS</h2>
+        <p class="section-desc">Hướng dẫn chi tiết từng bước thao tác thực tế trong giao diện quản trị Payload CMS.</p>
+      </div>
+
+      <div class="steps-chain">
+        <!-- Bước 1 -->
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h3>Đăng nhập CMS & Chọn Trang Catalog</h3>
+            <p>Truy cập vào liên kết quản trị CMS (<code>https://wingsgo.vn/admin</code> hoặc domain CMS được cấp), đăng nhập tài khoản Editor.</p>
+            <div class="step-callout">
+              <ul>
+                <li>Trên thanh Menu điều hướng bên trái, nhấp vào mục <strong>Pages (Trang)</strong>.</li>
+                <li>Tìm kiếm trang có đường dẫn (Pathname): <code>/tour</code> thuộc Site <strong>WingsGo</strong>.</li>
+                <li>Nhấp chuột vào tiêu đề trang để mở màn hình chỉnh sửa chi tiết.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bước 2 -->
+        <div class="step-item">
+          <div class="step-number orange">2</div>
+          <div class="step-body">
+            <h3>Cuộn xuống khối "WingsGo tour catalog"</h3>
+            <p>Trong form chỉnh sửa trang, cuộn xuống khu vực cấu hình catalog tour chuyên dụng cho WingsGo:</p>
+            <div class="step-callout">
+              <ul>
+                <li><strong>Bật catalog động (Enabled):</strong> Đảm bảo ô checkbox này đang được <strong>Tích chọn (Checked)</strong>.</li>
+                <li><strong>Tour nổi bật (Featured Tours):</strong> Đây là trường chọn quan hệ đa giá trị (Relationship), cho phép chọn tối đa <strong>6 tour</strong>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bước 3 -->
+        <div class="step-item">
+          <div class="step-number green">3</div>
+          <div class="step-body">
+            <h3>Chọn Tour và Kéo - Thả (Drag & Drop) Thứ Tự</h3>
+            <p>Thao tác thêm tour mới hoặc thay đổi thứ tự ưu tiên hiển thị ra website:</p>
+            <div class="step-callout">
+              <ul>
+                <li><strong>Thêm tour:</strong> Nhấp vào <code>Add existing</code> và gõ tìm kiếm tên tour (Ví dụ: <em>Hà Nội - Osaka</em>, <em>Thượng Hải - Ô Trấn</em>, <em>Seoul - Nami</em>...).</li>
+                <li><strong>Sắp xếp thứ tự:</strong> Giữ chuột vào biểu tượng icon kéo thả ở đầu mỗi dòng tour để di chuyển lên / xuống:
+                  <br>• <strong>Vị trí 1, 2, 3:</strong> Sẽ hiển thị tại <strong>Khối Ưu đãi hot (Hero)</strong> ở đầu trang.
+                  <br>• <strong>Toàn bộ 4 - 6 vị trí:</strong> Sẽ hiển thị tại <strong>Lưới Tour đang được quan tâm nhất</strong> ở giữa trang.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dữ liệu thực tế tham khảo -->
+      <h3 style="margin: 32px 0 12px; font-size: 16px; font-weight: 700; color: var(--ink-dark);">Bảng dữ liệu thực tế đang cấu hình trên Production:</h3>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Thứ tự (Order)</th>
+              <th>Sản phẩm Tour (Tour Product)</th>
+              <th>Vị trí hiển thị trên Web</th>
+              <th>Đặc điểm nổi bật</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>#1 (Đầu tiên)</strong></td>
+              <td><code>Hà Nội – Osaka – Kobe – Kyoto – Núi Phú Sĩ – Tokyo (VJ)</code></td>
+              <td><span class="badge-pill orange">Hero Khối 1</span> + Lưới Grid</td>
+              <td>Badge "Hot" · Bay Vietjet · 6N5Đ</td>
+            </tr>
+            <tr>
+              <td><strong>#2 (Thứ hai)</strong></td>
+              <td><code>Tour 6N5Đ: Osaka - Kobe - Kyoto - Núi Phú Sĩ - Tokyo (KIX-NRT)</code></td>
+              <td><span class="badge-pill orange">Hero Khối 1</span> + Lưới Grid</td>
+              <td>Bay Vietnam Airlines · Lịch mùa thu</td>
+            </tr>
+            <tr>
+              <td><strong>#3 (Thứ ba)</strong></td>
+              <td><code>Hà Nội – Seoul – Nami – Everland - Thư Viện Sách - Hái Táo (7C)</code></td>
+              <td><span class="badge-pill orange">Hero Khối 1</span> + Lưới Grid</td>
+              <td>Tuyến Hàn Quốc mùa hoa · Giá tốt</td>
+            </tr>
+            <tr>
+              <td><strong>#4 (Thứ tư)</strong></td>
+              <td><code>Thượng Hải – Ô Trấn – Hàng Châu - Ngủ 1 Đêm Ô Trấn (CA)</code></td>
+              <td><span class="badge-pill blue">Lưới Grid</span></td>
+              <td>Tuyến Trung Quốc cổ trấn nổi tiếng</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PHẦN 4: GẮN BADGE KHUYẾN MẠI (PROMO LABEL) -->
+    <section class="doc-section" id="gan-badge-promo">
+      <div class="section-head">
+        <span class="section-tag">Phần 4 · Commercial Badges</span>
+        <h2 class="section-title">Cách Gắn Badge Khuyến Mại ("Hot", "Giảm 2Tr", "Mùa Lá Đỏ")</h2>
+        <p class="section-desc">Badge màu cam nổi bật trên card được sinh ra từ trường `Promo label` thuộc đợt khởi hành của tour.</p>
+      </div>
+
+      <div class="steps-chain">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h3>Mở mục Quản Lý Đợt Khởi Hành (Tour Departures)</h3>
+            <p>Trên menu bên trái CMS, tìm đến mục <strong>Tour Departures (Đợt khởi hành)</strong> (hoặc nhấp trực tiếp từ danh sách departures bên trong Tour Product).</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number orange">2</div>
+          <div class="step-body">
+            <h3>Nhập Trường "Promo label" & Ưu Tiên Hiển Thị</h3>
+            <p>Mở đợt khởi hành của tour bạn muốn gắn nhãn và điền các trường thương mại:</p>
+            <div class="step-callout">
+              <ul>
+                <li><strong>Promo label (Nhãn khuyến mại):</strong> Nhập từ khóa ngắn gọn, súc tích (Ví dụ: <code>Hot</code>, <code>Giảm 2 triệu</code>, <code>Mùa lá đỏ</code>, <code>Bay VNA</code>, <code>Tặng vé show</code>).</li>
+                <li><strong>Ưu tiên hiển thị (isFeatured):</strong> Tích chọn ô này nếu muốn đợt khởi hành này được ưu tiên lấy làm ngày đi và giá đại diện trên trang chủ.</li>
+                <li><strong>Tình trạng chỗ (Availability status):</strong> Chọn <code>Mở bán (Open)</code> hoặc <code>Sắp hết chỗ (Limited)</code>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <div class="tip-icon">✨</div>
+        <div class="tip-content">
+          <strong>Lưu ý cho Editor:</strong> Nhãn <code>Promo label</code> nên ngắn gọn dưới 15 ký tự để đảm bảo hiển thị đẹp mắt, không bị rớt dòng trên các thiết bị di động.
+        </div>
+      </div>
+    </section>
+
+    <!-- PHẦN 5: QUY TRÌNH TẠO TRANG & TOUR MỚI -->
+    <section class="doc-section" id="tao-trang-va-tour">
+      <div class="section-head">
+        <span class="section-tag">Phần 5 · End-to-End Workflow</span>
+        <h2 class="section-title">Quy Trình Tạo Trang & Tour Mới Từ A Đến Z</h2>
+        <p class="section-desc">Hướng dẫn chuẩn để triển khai một Landing Page hoặc Sản Phẩm Tour hoàn chỉnh trên CMS.</p>
+      </div>
+
+      <div class="roles-grid" style="margin-bottom: 24px;">
+        <div class="role-card" style="border-top: 4px solid var(--emerald);">
+          <h3 class="role-title">Tạo Trang Nhanh (Page Wizard)</h3>
+          <p class="role-summary">Sử dụng tính năng <strong>Tạo trang nhanh</strong> trên Console vận hành CMS:</p>
+          <ul class="role-list">
+            <li>1. Chọn Site: Chọn <code>WingsGo</code> (hoặc site cần tạo).</li>
+            <li>2. Nhập Tiêu đề & Slug (Đường dẫn trang).</li>
+            <li>3. Chọn Layout Template: Landing page bán hàng, Trang giới thiệu hoặc Trang danh mục.</li>
+            <li>4. Nhập nội dung các block: Hero, Content, Đăng ký tư vấn.</li>
+            <li>5. Lưu bản nháp (Save Draft).</li>
+          </ul>
+        </div>
+
+        <div class="role-card" style="border-top: 4px solid var(--primary);">
+          <h3 class="role-title">Tạo Tour Product Mới</h3>
+          <p class="role-summary">Các bước tạo một sản phẩm tour mới đầy đủ dữ liệu thương mại:</p>
+          <ul class="role-list">
+            <li>1. Vào <strong>Tour Products</strong> ➔ Nhấp <strong>Create New</strong>.</li>
+            <li>2. Điền Tên tour, Mã tour, Điểm đến (Destination), Số ngày đêm.</li>
+            <li>3. Đính kèm Lịch trình chi tiết (Itinerary) và Album ảnh sắc nét.</li>
+            <li>4. Tạo ít nhất 01 đợt khởi hành trong <strong>Tour Departures</strong> (kèm giá bán & ngày khởi hành).</li>
+            <li>5. Lưu sản phẩm ở trạng thái Draft.</li>
+          </ul>
+        </div>
+
+        <div class="role-card" style="border-top: 4px solid var(--accent);">
+          <h3 class="role-title">Checklist Chất Lượng Trước Khi Gửi</h3>
+          <p class="role-summary">Editor cần kiểm tra các tiêu chí sau trước khi chuyển Site Manager duyệt:</p>
+          <ul class="role-list">
+            <li>✅ Đúng Site (Tránh nhầm lẫn giữa WingsGo, WingsSide, WingsTravel).</li>
+            <li>✅ Có ảnh đại diện rõ nét, đúng tỷ lệ khung hình.</li>
+            <li>✅ Giá tour và đợt khởi hành chính xác, còn mở bán.</li>
+            <li>✅ Đã điền thông tin SEO cơ bản (Meta Title & Meta Description).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHẦN 6: QUY TRÌNH KIỂM DUYỆT & XUẤT BẢN -->
+    <section class="doc-section" id="duyet-va-xuat-ban">
+      <div class="section-head">
+        <span class="section-tag">Phần 6 · Publishing Pipeline</span>
+        <h2 class="section-title">Quy Trình Kiểm Duyệt & Xuất Bản Lên Website</h2>
+        <p class="section-desc">Cơ chế an toàn 4 bước đảm bảo không xảy ra sai sót nội dung trên Production.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0;">
+        <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 12px; padding: 20px; text-align: center;">
+          <div style="width: 36px; height: 36px; background: #e2e8f0; color: #475569; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-weight: 700;">1</div>
+          <strong style="display: block; margin-bottom: 6px; font-size: 14px;">SOẠN THẢO (DRAFT)</strong>
+          <span style="font-size: 12.5px; color: var(--muted);">Editor tạo nội dung, chọn ảnh, ghim tour hot, lưu Draft.</span>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 12px; padding: 20px; text-align: center;">
+          <div style="width: 36px; height: 36px; background: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-weight: 700;">2</div>
+          <strong style="display: block; margin-bottom: 6px; font-size: 14px;">XEM TRƯỚC (PREVIEW)</strong>
+          <span style="font-size: 12.5px; color: var(--muted);">Nhấp nút <strong>Preview</strong> để xem chính xác giao diện hiển thị thực tế.</span>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 12px; padding: 20px; text-align: center;">
+          <div style="width: 36px; height: 36px; background: #fef3c7; color: #d97706; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-weight: 700;">3</div>
+          <strong style="display: block; margin-bottom: 6px; font-size: 14px;">KIỂM DUYỆT (REVIEW)</strong>
+          <span style="font-size: 12.5px; color: var(--muted);">Site Manager kiểm tra tính chính xác của thông tin giá và thương hiệu.</span>
+        </div>
+
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 20px; text-align: center;">
+          <div style="width: 36px; height: 36px; background: #10b981; color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-weight: 700;">4</div>
+          <strong style="display: block; margin-bottom: 6px; font-size: 14px; color: #065f46;">XUẤT BẢN (PUBLISH)</strong>
+          <span style="font-size: 12.5px; color: #047857;">Site Manager nhấn <strong>Publish</strong>. Hệ thống tự xóa cache và lên sóng ngay.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="doc-footer">
+      <p><strong>WingsTravel Group CMS Documentation</strong> · Phiên bản 1.0 (Tháng 10/2026)</p>
+      <p>Tài liệu nội bộ phục vụ bàn giao và đào tạo vận hành hệ thống đa site WingsTravel, WingsGo, WingsSide.</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>
