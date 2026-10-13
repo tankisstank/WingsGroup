@@ -659,15 +659,18 @@ export const DeviceMockupSplitHero: React.FC<HeroPresentationProps> = ({
     >
       <HeroCopy badge={badge} links={links} richText={richText} />
       <div className="hero-presentation__frame flex flex-col items-center justify-center overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
-        <div className="relative mx-auto aspect-[9/18.5] w-[290px] rounded-[52px] border-[6px] border-slate-700/80 bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 p-2.5 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.45),0_12px_28px_-6px_rgba(15,23,42,0.25)] sm:w-[320px] md:w-[340px]">
+        {/* Adaptive frame: Mobile is 4:5 vertical video card; Desktop (md:) is 9:18.5 smartphone mockup */}
+        <div className="relative mx-auto aspect-[4/5] w-full max-w-[380px] overflow-hidden rounded-[32px] border border-slate-700/60 bg-slate-950 p-0 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.4),0_12px_28px_-6px_rgba(15,23,42,0.2)] md:aspect-[9/18.5] md:w-[320px] md:max-w-none md:overflow-visible md:rounded-[52px] md:border-[6px] md:border-slate-700/80 md:bg-gradient-to-b md:from-slate-700 md:via-slate-800 md:to-slate-900 md:p-2.5 md:shadow-[0_30px_70px_-10px_rgba(15,23,42,0.45),0_12px_28px_-6px_rgba(15,23,42,0.25)] lg:w-[340px]">
+          {/* Dynamic Island: hidden on mobile, visible on desktop mockup */}
           <div
             aria-hidden="true"
-            className="absolute left-1/2 top-3.5 z-20 flex h-4 w-24 -translate-x-1/2 items-center justify-center rounded-full bg-black/95 shadow-inner"
+            className="absolute left-1/2 top-3.5 z-20 hidden h-4 w-24 -translate-x-1/2 items-center justify-center rounded-full bg-black/95 shadow-inner md:flex"
           >
             <div className="ml-auto mr-3 h-2 w-2 rounded-full border border-slate-700/60 bg-slate-900" />
           </div>
 
-          <div className="relative h-full w-full overflow-hidden rounded-[40px] bg-black">
+          {/* Screen content container */}
+          <div className="relative h-full w-full overflow-hidden rounded-[32px] bg-black md:rounded-[40px]">
             {isVideo && videoSrc ? (
               <video
                 autoPlay
@@ -685,14 +688,14 @@ export const DeviceMockupSplitHero: React.FC<HeroPresentationProps> = ({
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
             />
 
             {postcards.length > 0 ? (
-              <div className="absolute inset-x-0 bottom-3 z-10 flex flex-wrap justify-center gap-1 px-2">
+              <div className="absolute inset-x-0 bottom-3.5 z-10 flex flex-wrap justify-center gap-1.5 px-3">
                 {postcards.map((label) => (
                   <span
-                    className="inline-flex items-center rounded-full border border-white/20 bg-black/50 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur-md"
+                    className="inline-flex items-center rounded-full border border-white/25 bg-black/45 px-3 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-md"
                     key={label}
                   >
                     {label}
