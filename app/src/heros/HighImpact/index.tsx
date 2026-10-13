@@ -11,35 +11,18 @@ import { type HeroPresentationKey } from '@/heros/presentations/registry'
 import { resolveHeroPresentationConfig } from '@/heros/presentations/resolver'
 import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
 import type { SupportedLocaleCode } from '@/utilities/locales'
+import type { WingsGoCatalogCard } from '@/tours/wingsGoCatalog'
+import { SiteLink } from '@/components/SiteLink'
+import { formatTourDate, formatTourPrice } from '@/tours/utils'
 import {
   BadgeCheckIcon,
   CalendarDaysIcon,
   CameraIcon,
+  FlameIcon,
   MapPinnedIcon,
   PlaneIcon,
   UsersIcon,
 } from 'lucide-react'
-
-const retailDepartures = [
-  {
-    airline: 'VJ',
-    date: '12/06/2026',
-    price: 'từ 13.990.000đ',
-    title: 'Seoul - Nami - Everland',
-  },
-  {
-    airline: 'VN',
-    date: '19/06/2026',
-    price: 'từ 18.990.000đ',
-    title: 'Seoul - Jeju - Camellia Hill',
-  },
-  {
-    airline: 'CA',
-    date: '26/06/2026',
-    price: 'từ 11.990.000đ',
-    title: 'Bắc Kinh - Vạn Lý Trường Thành',
-  },
-]
 
 const retailHighlights = [
   { icon: CalendarDaysIcon, label: 'Lịch rõ ngày' },
@@ -361,6 +344,7 @@ const getPlannerPanelCopy = (locale?: null | SupportedLocaleCode): PlannerPanelC
 
 export const HighImpactHero: React.FC<
   Page['hero'] & {
+    featuredTours?: WingsGoCatalogCard[]
     resolvedLocale?: SupportedLocaleCode
     siteHeroDefaults?: SiteHeroDefaultsLike | null
   }
@@ -393,36 +377,61 @@ export const HighImpactHero: React.FC<
   const isPlanner = variant === 'planner'
   const plannerCopy = getPlannerPanelCopy(props.resolvedLocale)
   const toSitePath = useSitePath()
+  const isEn = props.resolvedLocale === 'en'
 
   useEffect(() => {
     setHeaderTheme('light')
   }, [setHeaderTheme])
 
+  const catalogTours = props.featuredTours || []
+
+  const displayTours = catalogTours.length > 0
+    ? catalogTours.slice(0, 3).map((tour) => {
+        const departureDate = formatTourDate(tour.nextDeparture?.date, props.resolvedLocale || 'vi')
+        const airline = tour.nextDeparture?.airline
+        const dateMeta = departureDate
+          ? `${departureDate}${airline ? ` · ${airline}` : ''}`
+          : (airline || (isEn ? 'Latest departure' : 'Lịch mở bán mới nhất'))
+        const priceText = tour.price?.kind === 'verified'
+          ? (formatTourPrice(tour.price.value, tour.price.currency) || `${tour.price.value.toLocaleString('vi-VN')} ₫`)
+          : (isEn ? 'Contact us' : 'Liên hệ')
+        return {
+          dateMeta,
+          href: tour.href || `/tour/${tour.slug}`,
+          id: String(tour.id),
+          price: priceText,
+          title: tour.title,
+        }
+      })
+    : []
+
   const businessPanel = isRetailDepartures ? (
-    <aside aria-label="Lịch khởi hành nổi bật" className="site-hero__commerce-panel">
+    <aside aria-label={isEn ? 'Featured tours' : 'Tour nổi bật'} className="site-hero__commerce-panel">
       <div className="site-hero__panel-head">
         <div className="site-panel-icon">
-          <CalendarDaysIcon aria-hidden="true" className="h-5 w-5" />
+          <FlameIcon aria-hidden="true" className="h-5 w-5 text-amber-500" />
         </div>
         <div>
-          <p className="site-mini-label">Lịch gần nhất</p>
-          <h2>Tour đang mở bán</h2>
+          <p className="site-mini-label">{isEn ? 'Hot offers' : 'Ưu đãi hot'}</p>
+          <h2>{isEn ? 'Trending tours' : 'Tour đang được quan tâm'}</h2>
         </div>
       </div>
       <div className="site-departure-stack">
-        {retailDepartures.map((departure) => (
-          <div className="site-departure-row" key={`${departure.title}-${departure.date}`}>
+        {displayTours.map((item) => (
+          <SiteLink
+            className="site-departure-row transition-colors hover:opacity-80 no-underline"
+            href={item.href}
+            key={item.id}
+          >
             <div>
-              <h2>{departure.title}</h2>
-              <p>
-                {departure.date} · {departure.airline}
-              </p>
+              <h2>{item.title}</h2>
+              <p>{item.dateMeta}</p>
             </div>
-            <strong>{departure.price}</strong>
-          </div>
+            <strong>{item.price}</strong>
+          </SiteLink>
         ))}
       </div>
-      <div className="site-trust-row" aria-label="Điểm mạnh WingsGo">
+      <div className="site-trust-row" aria-label={isEn ? 'WingsGo values' : 'Điểm mạnh WingsGo'}>
         {retailHighlights.map(({ icon: Icon, label }) => (
           <span key={label}>
             <Icon aria-hidden="true" className="h-4 w-4" />
@@ -433,9 +442,9 @@ export const HighImpactHero: React.FC<
       <CMSLink
         appearance="default"
         className="site-panel-cta"
-        label="Xem toàn bộ lịch"
+        label={isEn ? 'View all tours' : 'Xem tất cả các tour'}
         type="custom"
-        url="/lich-khoi-hanh"
+        url="/tour"
       />
     </aside>
   ) : isPlanner ? (

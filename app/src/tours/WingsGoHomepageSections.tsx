@@ -1,13 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-
 import type { Site } from '@/payload-types'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 import { SiteLink } from '@/components/SiteLink'
 import { getResolvedScheduleData } from './queries'
-import { WingsGoTourCard } from './WingsGoTourCard'
 import {
   formatTourDate,
   formatTourPrice,
@@ -17,7 +13,6 @@ import {
   getTourInquiryPath,
   isDeparturePublishable,
 } from './utils'
-import { queryWingsGoTourCatalog, type WingsGoCatalogPage } from './wingsGoCatalog'
 
 const marketCards = [
   {
@@ -65,47 +60,7 @@ export const WingsGoHomepageSections = async ({
   site: Site
 }) => {
   const isEn = locale === 'en'
-  const payload = await getPayload({ config: configPromise })
-  const [schedule, catalogPageResult] = await Promise.all([
-    getResolvedScheduleData({ draft: false, locale }),
-    payload.find({
-      collection: 'pages',
-      depth: 0,
-      draft: false,
-      fallbackLocale: 'vi',
-      limit: 1,
-      locale,
-      overrideAccess: true,
-      pagination: false,
-      where: {
-        and: [
-          { _status: { equals: 'published' } },
-          { pathname: { equals: '/tour' } },
-          { site: { equals: site.id } },
-        ],
-      },
-    }),
-  ])
-  const catalogPage = catalogPageResult.docs[0] as unknown as WingsGoCatalogPage | undefined
-  const catalog = catalogPage
-    ? await queryWingsGoTourCatalog({
-        limit: 4,
-        page: catalogPage,
-        payload,
-        site: { code: String(site.code), id: site.id },
-      })
-    : null
-  const curatedTourIDs = new Set(
-    (catalogPage?.wingsGoTourCatalog?.featuredTours || []).flatMap((tour) => {
-      const id = tour && typeof tour === 'object' && 'id' in tour ? tour.id : tour
-      return typeof id === 'number' || typeof id === 'string' ? [String(id)] : []
-    }),
-  )
-  const curatedMatches =
-    catalog?.featured.filter((tour) => curatedTourIDs.has(String(tour.id))) || []
-  const fallbackFeatured =
-    catalog?.featured.filter((tour) => !curatedTourIDs.has(String(tour.id))) || []
-  const featuredTours = [...curatedMatches, ...fallbackFeatured].slice(0, 4)
+  const schedule = await getResolvedScheduleData({ draft: false, locale })
   const nearestByMarket = marketCards.map((market) => ({
     ...market,
     departure: getPriorityMarketDeparture(schedule.departures, market.key),
@@ -295,45 +250,6 @@ export const WingsGoHomepageSections = async ({
             )
           })}
         </div>
-      </section>
-
-      <section aria-labelledby="wingsgo-hot-tours-title" className="container theme-section">
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
-              {isEn ? 'WingsGo picks' : 'WingsGo gợi ý'}
-            </p>
-            <h2 className={sectionHeadingClass} id="wingsgo-hot-tours-title">
-              {isEn
-                ? '🔥 Tours guests are asking about'
-                : '🔥 Tour đang được quan tâm nhất'}
-            </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">
-              {isEn
-                ? 'Four tours prioritized in the WingsGo catalog, ordered by the editorial selection.'
-                : 'Những hành trình được WingsGo ưu tiên giới thiệu, theo thứ tự biên tập trong catalog tour.'}
-            </p>
-          </div>
-          <SiteLink
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-border px-5 text-sm font-semibold no-underline"
-            href="/tour"
-          >
-            {isEn ? 'View all tours ➤' : 'Xem tất cả các Tour ➤'}
-          </SiteLink>
-        </div>
-        {featuredTours.length > 0 ? (
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-            {featuredTours.map((card) => (
-              <WingsGoTourCard badge="Hot" card={card} key={String(card.id)} locale={locale} />
-            ))}
-          </div>
-        ) : (
-          <p className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-5 text-sm text-muted-foreground">
-            {isEn
-              ? 'The catalog has no eligible tours with future departures yet.'
-              : 'Catalog chưa có đủ tour được publish kèm lịch khởi hành sắp tới.'}
-          </p>
-        )}
       </section>
 
       <section aria-labelledby="wingsgo-destinations-title" className="container theme-section">

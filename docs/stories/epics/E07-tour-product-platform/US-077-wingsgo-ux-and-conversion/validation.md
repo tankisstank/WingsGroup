@@ -185,4 +185,18 @@
   - Browser verification (Desktop 1440px & Mobile 390px): Xác thực giao diện hiển thị đúng chuẩn responsive, video phát mượt mà, không lỗi layout hay tràn ngang.
 - DEPLOYMENT: Release `release-adaptive-hero-20261013` (commit `7df7592`) hoạt động ổn định trên VPS `168.110.212.116`, health check `/api/health/ready` trả về HTTP 200 `ready`.
 
+## Refine checkpoint 4 — 2026-10-13 ICT
+
+- SCOPE: Khắc phục sự lặp lại 2 lần khối "Tour đang mở bán" trên trang chủ WingsGo (TASK-06):
+  1. Loại bỏ tiêu đề trùng lặp: Đổi khối Hero Commerce Panel từ "Lịch gần nhất / Tour đang mở bán" thành "Ưu đãi hot / Tour đang được quan tâm" với icon Flame nổi bật.
+  2. Gỡ bỏ hoàn toàn mảng dữ liệu hardcode tĩnh `retailDepartures` trong `HighImpactHero`.
+  3. Đấu nối dữ liệu động CMS: Bổ sung helper `getWingsGoFeaturedTours` để query danh sách `wingsGoTourCatalog.featuredTours` (biên tập tại trang `/tour` thuộc CMS Payload), tự động kế thừa thứ tự ưu tiên của editor và fallback catalog an toàn.
+  4. Nâng cấp tương tác: Từng hàng tour trong Hero panel được liên kết trực tiếp (`SiteLink`) tới trang chi tiết `/tour/[slug]`; nút CTA dẫn tới catalog `/tour` ("Xem tất cả các tour").
+  5. Giữ nguyên tính độc lập của Khối 2: Section 1 bên dưới giữ nguyên vai trò "Lịch gần nhất / Tour đang mở bán" theo 3 thị trường (Hàn/Nhật/Trung) từ `tour-departures`.
+- TESTS:
+  - `pnpm exec tsc --noEmit`: PASS (0 errors).
+  - Component tests `tests/component/heroPresentations.component.spec.tsx` (6/6) & `tests/component/wingsGoTourCatalog.component.spec.tsx` (3/3): PASS.
+  - Unit tests `tests/unit/wingsGoCatalog.unit.spec.ts` (9/9) & `tests/unit/wingsGoPriorityMarketDeparture.unit.spec.ts` (3/3): PASS.
+- PLANE SYNC: đồng bộ work-items và story metadata.
+
 

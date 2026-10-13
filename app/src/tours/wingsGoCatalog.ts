@@ -471,3 +471,53 @@ export const queryWingsGoTourCatalog = async ({
     nextOffset: offset + all.cards.length,
   }
 }
+
+export const getWingsGoFeaturedTours = async ({
+  limit = 4,
+  locale = 'vi',
+  payload,
+  site,
+}: {
+  limit?: number
+  locale?: string
+  payload: Payload
+  site: { code: string; id: number | string }
+}): Promise<WingsGoCatalogCard[]> => {
+  const catalogPageResult = await payload.find({
+    collection: 'pages',
+    depth: 0,
+    draft: false,
+    fallbackLocale: 'vi',
+    limit: 1,
+    locale: locale as never,
+    overrideAccess: true,
+    pagination: false,
+    where: {
+      and: [
+        { _status: { equals: 'published' } },
+        { pathname: { equals: '/tour' } },
+        { site: { equals: site.id } },
+      ],
+    },
+  })
+  const catalogPage = catalogPageResult.docs[0] as unknown as WingsGoCatalogPage | undefined
+  if (!catalogPage) return []
+
+  const catalog = await queryWingsGoTourCatalog({
+    limit,
+    page: catalogPage,
+    payload,
+    site,
+  })
+  if (!catalog) return []
+
+  const curatedTourIDs = new Set(
+    (catalogPage.wingsGoTourCatalog?.featuredTours || []).flatMap((tour) => {
+      const id = tour && typeof tour === 'object' && 'id' in tour ? tour.id : tour
+      return typeof id === 'number' || typeof id === 'string' ? [String(id)] : []
+    }),
+  )
+  const curatedMatches = catalog.featured.filter((tour) => curatedTourIDs.has(String(tour.id)))
+  const fallbackFeatured = catalog.featured.filter((tour) => !curatedTourIDs.has(String(tour.id)))
+  return [...curatedMatches, ...fallbackFeatured].slice(0, limit)
+}

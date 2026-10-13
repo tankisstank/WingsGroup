@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import {
+  getWingsGoFeaturedTours,
   isEligibleWingsGoCatalogProduct,
   queryWingsGoTourCatalog,
   selectWingsGoCatalogCards,
@@ -278,5 +279,49 @@ describe('WingsGo dynamic catalog constraints', () => {
         },
       } as never),
     ).rejects.toThrow('khởi hành tương lai')
+  })
+
+  it('loads featured tours via getWingsGoFeaturedTours helper', async () => {
+    const products = [product({ id: 1, slug: 'tour-1', wrapperPage: 101 })]
+    const wrappers = [wrapper({ id: 101, pathname: '/tour/tour-1' })]
+    const departures = [
+      {
+        ...departure({ id: 201, tourProduct: 1 }),
+        departureDate: '2026-11-01T00:00:00.000Z',
+      },
+    ]
+
+    const payload = {
+      find: vi.fn(async ({ collection, where }: { collection: string; where?: any }) => {
+        if (collection === 'pages') {
+          const isCatalogPage = JSON.stringify(where || {}).includes('"/tour"')
+          if (isCatalogPage) {
+            return {
+              docs: [
+                {
+                  id: 99,
+                  pathname: '/tour',
+                  site: 7,
+                  wingsGoTourCatalog: { enabled: true, featuredTours: [{ id: 1 }] },
+                },
+              ],
+            }
+          }
+          return { docs: wrappers }
+        }
+        if (collection === 'tour-products') return { docs: products }
+        return { docs: departures }
+      }),
+    }
+
+    const featured = await getWingsGoFeaturedTours({
+      limit: 3,
+      payload: payload as never,
+      site: { code: 'wings-go', id: 7 },
+    })
+
+    expect(featured).toHaveLength(1)
+    expect(featured[0].id).toBe(1)
+    expect(featured[0].slug).toBe('tour-1')
   })
 })

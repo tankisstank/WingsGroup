@@ -7,6 +7,7 @@ import { LowImpactHero } from '@/heros/LowImpact'
 import { MediumImpactHero } from '@/heros/MediumImpact'
 import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
 import type { SupportedLocaleCode } from '@/utilities/locales'
+import type { WingsGoCatalogCard } from '@/tours/wingsGoCatalog'
 import { WingsGroupEditorialHero } from '@/components/WingsGroupV3/EditorialHero'
 
 const heroes = {
@@ -17,10 +18,12 @@ const heroes = {
 
 export const RenderHero: React.FC<
   Page['hero'] & {
+    featuredTours?: WingsGoCatalogCard[]
     resolvedLocale?: SupportedLocaleCode
     siteHeroDefaults?: SiteHeroDefaultsLike | null
     wingsGroupV3Enabled?: boolean
     allowWingsGroupDevelopmentMedia?: boolean
+    heroFeaturedTours?: WingsGoCatalogCard[]
   }
 > = (props) => {
   const { type, wingsGroupV3Enabled } = props || {}

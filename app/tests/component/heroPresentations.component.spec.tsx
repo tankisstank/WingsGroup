@@ -8,6 +8,7 @@ import {
   PlannerSplitHero,
   VideoBackgroundHero,
 } from '@/heros/presentations'
+import { HighImpactHero } from '@/heros/HighImpact'
 import { heroPresentationDefinitions } from '@/heros/presentations/registry'
 import { defaultHeroBehavior } from '@/heros/presentations/registry'
 
@@ -160,5 +161,34 @@ describe('hero presentation components', () => {
     fireEvent.error(video as HTMLVideoElement)
     expect(document.querySelector('video')).toBeNull()
     expect(screen.getByAltText('Video poster')).toBeTruthy()
+  })
+
+  it('renders HighImpactHero retail-departures with dynamic featured tours', () => {
+    render(
+      <HighImpactHero
+        heroFeaturedTours={[
+          {
+            duration: { days: 5, nights: 4 },
+            href: '/tour/seoul-nami',
+            id: 1,
+            image: null,
+            market: 'korea',
+            nextDeparture: { airline: 'VJ', date: '2026-11-15T00:00:00.000Z', departureCity: 'Hà Nội' },
+            price: { currency: 'VND', kind: 'verified', value: 14900000 },
+            slug: 'seoul-nami',
+            summary: 'Tour Seoul',
+            title: 'Hà Nội - Seoul - Nami',
+          },
+        ]}
+        type="highImpact"
+        variant="retail-departures"
+      />,
+    )
+
+    expect(screen.getByText('Ưu đãi hot')).toBeTruthy()
+    expect(screen.getByText('Tour đang được quan tâm')).toBeTruthy()
+    expect(screen.getByText('Hà Nội - Seoul - Nami')).toBeTruthy()
+    expect(screen.getByText('14.900.000 ₫')).toBeTruthy()
+    expect(screen.getByText('Xem tất cả các tour')).toBeTruthy()
   })
 })

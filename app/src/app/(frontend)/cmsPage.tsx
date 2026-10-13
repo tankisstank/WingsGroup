@@ -13,7 +13,7 @@ import { resolveHeroPresentationConfig } from '@/heros/presentations/resolver'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { WingsGoTourCatalogSection } from '@/tours/WingsGoTourCatalogSection'
 import { WingsGoHomepageSections } from '@/tours/WingsGoHomepageSections'
-import type { WingsGoCatalogPage } from '@/tours/wingsGoCatalog'
+import { getWingsGoFeaturedTours, type WingsGoCatalogPage } from '@/tours/wingsGoCatalog'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getCurrentLocale, getCurrentSite, getCurrentSitePrefix } from '@/utilities/siteContext'
 import { JsonLd } from '@/components/JsonLd'
@@ -130,6 +130,14 @@ export async function renderCmsPageByPath({
   // Structured tour detail: tighter vertical rhythm under fixed header.
   const isStructuredTour = Boolean(structuredPage)
   const isWingsGoHomepage = site.code === 'wings-go' && requestedPath === '/'
+  const wingsGoFeaturedTours = isWingsGoHomepage
+    ? await getWingsGoFeaturedTours({
+        limit: 4,
+        locale: getCopyLocale(locale),
+        payload: await getPayload({ config: configPromise }),
+        site: { code: String(site.code), id: site.id },
+      })
+    : undefined
   const pageWithWingsGoCatalog = page as typeof page & {
     wingsGoTourCatalog?: { enabled?: boolean | null } | null
   }
@@ -428,6 +436,7 @@ export async function renderCmsPageByPath({
           ) : (
             <RenderHero
               {...page.hero}
+              heroFeaturedTours={wingsGoFeaturedTours}
               resolvedLocale={locale}
               siteHeroDefaults={settings?.heroDefaults}
               allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Surface}
