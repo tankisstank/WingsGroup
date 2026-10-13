@@ -39,6 +39,7 @@ export type WingsGoCatalogCard = {
     airline: string | null
     date: string
     departureCity: string | null
+    promoLabel?: string | null
   }
   price: { currency: string; kind: 'verified'; value: number } | { kind: 'contact'; label: string }
   slug: string
@@ -89,6 +90,7 @@ type InventoryDeparture = {
   expiresAt?: null | string
   id: number | string
   priceFrom?: null | number
+  promoLabel?: null | string
   tourProduct?: Relation
   verifiedAt?: null | string
   site?: Relation
@@ -245,6 +247,7 @@ const buildCard = ({
       airline: nextDeparture.airline || null,
       date: nextDeparture.departureDate,
       departureCity: nextDeparture.departureCity || null,
+      promoLabel: nextDeparture.promoLabel || null,
     },
     price,
     slug: product.slug,
