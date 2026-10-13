@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import React, { useEffect } from 'react'
@@ -401,6 +402,8 @@ export const HighImpactHero: React.FC<
           dateMeta,
           href: tour.href || `/tour/${tour.slug}`,
           id: String(tour.id),
+          image: tour.image,
+          market: tour.market,
           price: priceText,
           title: tour.title,
         }
@@ -422,22 +425,42 @@ export const HighImpactHero: React.FC<
         {displayTours.length > 0 ? (
           displayTours.map((item) => (
             <SiteLink
-              className="site-departure-row transition-colors hover:opacity-80 no-underline"
+              className="site-departure-row group flex items-center gap-3.5 py-3 transition-colors hover:bg-muted/30 no-underline rounded-xl px-2.5 -mx-2.5"
               href={item.href}
               key={item.id}
             >
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2>{item.title}</h2>
+              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-border/70 bg-muted">
+                {item.image ? (
+                  <img
+                    alt={item.image.alt || item.title}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                    src={item.image.url}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-muted/60 text-muted-foreground">
+                    <PlaneIcon className="h-5 w-5 opacity-40" />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
                   {item.badge ? (
-                    <span className="inline-flex items-center rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                    <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
                       {item.badge}
                     </span>
                   ) : null}
+                  <h3 className="line-clamp-1 text-sm font-semibold text-foreground group-hover:text-[var(--site-brand)] transition-colors">
+                    {item.title}
+                  </h3>
                 </div>
-                <p>{item.dateMeta}</p>
+                <div className="mt-1 flex items-center justify-between gap-2">
+                  <p className="text-xs text-muted-foreground line-clamp-1">{item.dateMeta}</p>
+                  <strong className="text-xs font-bold text-[var(--site-accent)] shrink-0">
+                    {item.price}
+                  </strong>
+                </div>
               </div>
-              <strong>{item.price}</strong>
             </SiteLink>
           ))
         ) : (

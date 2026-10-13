@@ -113,4 +113,26 @@ describe('WingsGoTourCatalogClient', () => {
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(screen.queryByText('Tour 9')).toBeNull()
   })
+
+  it('renders WingsGoTourCard with dynamic promo badge and duration', async () => {
+    const { WingsGoTourCard } = await import('@/tours/WingsGoTourCard')
+    const card: WingsGoCatalogCard = {
+      ...makeCard(101),
+      nextDeparture: {
+        airline: 'VN',
+        date: '2026-11-20T00:00:00.000Z',
+        departureCity: 'Hà Nội',
+        promoLabel: 'Khuyến mại 2 triệu',
+      },
+      summary: 'Khám phá mùa thu vàng',
+      title: 'Hà Nội - Seoul - Everland',
+    }
+
+    render(<WingsGoTourCard card={card} locale="vi" />)
+
+    expect(screen.getByText('Khuyến mại 2 triệu')).toBeTruthy()
+    expect(screen.getByText('Hà Nội - Seoul - Everland')).toBeTruthy()
+    expect(screen.getByText('Khám phá mùa thu vàng')).toBeTruthy()
+    expect(screen.getByText('Xem tour →')).toBeTruthy()
+  })
 })

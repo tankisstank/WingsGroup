@@ -14,10 +14,10 @@
    trạng thái thân thiện với khách hàng "Lịch đang cập nhật" và nút "Hỏi WingsGo"
    thay vì thuật ngữ quản trị nội bộ "Chưa publish"; ba huy hiệu và `/lich-khoi-hanh`
    link chính xác.
-4. TASK-07: Hero trang chủ hiển thị tối đa ba tour do CMS curate từ Page `/tour`,
-   dùng departure đủ điều kiện để hiển thị ngày/hãng/giá, link đúng tới tour và
-   không còn khối featured trùng lặp phía dưới Hero; ba thị trường vẫn có URL
-   chính xác, không dựng fake popularity.
+4. TASK-07: Hero trang chủ hiển thị tối đa ba mini-card tour do CMS curate từ Page `/tour`
+   kèm thumbnail ảnh và badge ưu đãi thực tế; khối lịch bên dưới hiển thị với tiêu đề "Lịch khởi hành sắp tới"
+   (loại bỏ trùng lặp nhãn "Tour đang mở bán"); khối "🔥 Tour đang được quan tâm nhất" khôi phục lại Grid 4
+   WingsGoTourCard đầy đủ hình ảnh, badge, giá và tóm tắt; ba thị trường điểm đến vẫn có URL chính xác, không dựng fake popularity.
 5. TASK-13: itinerary accordion mở/đóng; bảng lọc tháng theo năm; giá gốc/ưu
    đãi/điểm/status chỉ hiện khi có dữ liệu hợp lệ; PDF download hoạt động khi
    fixture có PDF và ẩn khi thiếu; CTA truyền departure đã chọn và sinh lead.
@@ -38,27 +38,21 @@
 | Regression | WingsSide/WingsGroup shared chrome, existing legacy lead submissions, sitemap/canonical/page builder behavior; no invented price, airline, availability or popularity |
 | Platform | typecheck, lint, targeted tests, build; staging/read-only production smoke and schema/migration health |
 
-## Hero curation checkpoint — 2026-10-13 ICT
+## Hero curation and Visual Card Grid checkpoint — 2026-10-13 ICT
 
-- SOURCE: `cmsPage.tsx` gọi `getWingsGoFeaturedTours` với `locale` cho riêng homepage WingsGo
-  và truyền card đã chuẩn hóa vào `RenderHero`/`HighImpact` qua một prop duy nhất `heroFeaturedTours`.
-- SOURCE: `getWingsGoFeaturedTours` và `queryWingsGoTourCatalog` truyền `locale` xuyên suốt xuống
-  `queryDocs` (`pages`, `tour-products`, `tour-departures`). `buildCard` căn chỉnh cùng một departure
-  thương mại hợp lệ cho ngày, giá và `promoLabel`.
-- SOURCE: Hero đã bỏ `retailDepartures` hardcode; panel `retail-departures`
-  hiển thị tối đa ba tour CMS với departure gần nhất và giá xác minh/liên hệ. Bỏ nhãn "Hot" tự sinh khi
-  CMS không có `promoLabel`. Đã thêm empty state thân thiện khi chưa có tour nổi bật.
-- SOURCE: `WingsGoHomepageSections` giữ schedule và destination cards, bỏ khối
-  hot tour lặp cùng curation ở Hero.
+- SOURCE: `cmsPage.tsx` gọi `getWingsGoFeaturedTours` với `locale` cho riêng homepage WingsGo,
+  truyền card đã chuẩn hóa vào `RenderHero`/`HighImpact` qua `heroFeaturedTours` và truyền `featuredTours`
+  vào `WingsGoHomepageSections`.
+- SOURCE: `HighImpactHero` nâng cấp panel thương mại thành danh sách mini-card có thumbnail ảnh bo góc,
+  badge ưu đãi cam/amber nổi bật khi có `promoLabel`, tiêu đề, ngày bay/hãng và giá rõ nét.
+- SOURCE: `WingsGoHomepageSections` đổi tên khối 1 thành `Lịch khởi hành sắp tới` (tránh lặp nhãn "Tour đang mở bán")
+  và khôi phục khối `🔥 Tour đang được quan tâm nhất` với Grid 4 `WingsGoTourCard` đầy đủ ảnh lớn, badge, tóm tắt và giá.
 - PASS: `pnpm exec tsc --noEmit --pretty false` và `git diff --check`.
-- PASS: targeted ESLint trên toàn bộ file liên quan (7 files gồm code và test), 0 errors / 0 warnings.
-- PASS: `wingsGoCatalog.unit.spec.ts` (10/10) và `wingsGoPriorityMarketDeparture.unit.spec.ts` (3/3),
-  13/13 tests; `heroPresentations.component.spec.tsx` (7/7) và
-  `wingsGoTourCatalog.component.spec.tsx` (3/3), 10/10 tests.
-- PASS: `pnpm run build`; Next compile, TypeScript, static pages 20/20 và
-  postbuild standalone preparation đều thành công.
-- PENDING: browser smoke mới cho homepage VI/EN ở 390px và 1440px; chưa đánh
-  dấu các task Plane Hoàn tất chỉ từ bằng chứng local này.
+- PASS: targeted ESLint trên toàn bộ 8 file liên quan, 0 errors / 0 warnings.
+- PASS: `wingsGoCatalog.unit.spec.ts` (10/10) và `wingsGoPriorityMarketDeparture.unit.spec.ts` (3/3), 13/13 unit tests;
+  `heroPresentations.component.spec.tsx` (7/7) và `wingsGoTourCatalog.component.spec.tsx` (4/4), 11/11 component tests.
+- PASS: `pnpm run build`; Next compile, TypeScript, static pages 20/20 và postbuild standalone preparation đều thành công.
+- PENDING: browser smoke mới cho homepage VI/EN ở 390px và 1440px; chưa đánh dấu các task Plane Hoàn tất chỉ từ bằng chứng local này.
 
 ## Safe Test Data
 

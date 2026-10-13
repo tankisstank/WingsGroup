@@ -1,210 +1,199 @@
-# Re-Review vòng 2 — US-077 Hero tour curation
+# Code Review vòng 3 — US-077 Hero và Card curation
 
 Ngày review: 2026-10-13
-Phạm vi: các thay đổi mới nhất sau vòng review P1/P2, tập trung vào Hero Commerce Panel WingsGo và catalog Payload.
+Phạm vi: thay đổi mới nhất nâng cấp Hero Commerce Panel thành mini-card, đổi tên section lịch khởi hành và khôi phục Grid 4 card `WingsGoTourCard`.
 
-## Kết luận
+## 1. Kết luận
 
-**Đạt có điều kiện để đóng US-077.** Các điểm P1/P2 chính của vòng trước đã được xử lý đúng trong code:\n
-- hợp đồng chỉ còn `heroFeaturedTours`;
-- locale được truyền từ helper xuống query pages, tour-products và tour-departures;
-- bỏ badge `Hot` tự sinh;
-- có empty state VI/EN;
-- ngày, giá và `promoLabel` lấy từ cùng commercial departure;
-- test và lint được mở rộng;
-- typecheck và production build pass.
+**Đạt về chức năng và chất lượng triển khai; chưa nên đóng hoàn toàn trước khi hoàn tất browser smoke và chỉnh lại bằng chứng Harness.**
 
-Không còn blocker P1. Còn một điểm P2 cần xác nhận với chính sách dữ liệu: departure không có `verifiedAt`/`expiresAt` hiện vẫn được coi là có thể dùng giá nếu có `priceFrom`. Điều này giữ tương thích với dữ liệu hiện hữu, nhưng chưa phải cách diễn giải chặt nhất của “giá xác minh còn hiệu lực”. Nên thêm test và quyết định rõ đây là dữ liệu hợp lệ hay phải chuyển sang contact fallback.
+Luồng mới đúng với feedback production:\n
+- Hero hiển thị mini-card có thumbnail 56x56, badge CMS, title, ngày/hãng bay và giá.
+- Section lịch đổi thành `Lịch khởi hành sắp tới`.
+- Section card khôi phục Grid tối đa 4 `WingsGoTourCard` với ảnh lớn, badge, market, duration, summary, giá và departure.
+- Hero và Grid dùng chung DTO `WingsGoCatalogCard` từ một lần lấy dữ liệu CMS ở `cmsPage.tsx`; không tạo nguồn catalog thứ hai.
+- Không ảnh hưởng tenant khác theo code hiện tại.
+
+Không phát hiện lỗi P1. Có ba điểm P2 cần ghi nhận: Hero và Grid hiện có thể hiển thị cùng các tour; badge cấp curation ngoài `promoLabel` chưa được mô hình hóa; acceptance criterion và Plane evidence còn chứa nội dung cũ.
 
 ---
 
-## 1. Kiến trúc và hợp đồng dữ liệu CMS
+## 2. Kiến trúc và hợp đồng dữ liệu
 
-### Kết quả kiểm tra
+### Điểm đạt
 
-Luồng hiện tại vẫn đúng Payload-first:\n
-```text
-Pages (/tour)
-  └─ wingsGoTourCatalog.featuredTours
-       └─ tour-products
-            └─ tour-departures
-                 └─ queryWingsGoTourCatalog(locale)
-                      └─ getWingsGoFeaturedTours(locale)
-                           └─ cmsPage.tsx
-                                └─ RenderHero
-                                     └─ HighImpactHero
-```
+`cmsPage.tsx` gọi `getWingsGoFeaturedTours` một lần cho homepage WingsGo rồi truyền:\n
+- `heroFeaturedTours` cho `RenderHero`/`HighImpactHero`;
+- `featuredTours` cho `WingsGoHomepageSections`.
 
-`cmsPage.tsx` chỉ gọi catalog Hero cho homepage WingsGo. `RenderHero` và `HighImpactHero` hiện chỉ nhận một prop `heroFeaturedTours`, loại bỏ hợp đồng kép của vòng trước.
+Cả hai dùng cùng `WingsGoCatalogCard`, nên ngày, giá, media, promoLabel và site filtering đi qua cùng catalog domain. Đây là cách phù hợp với kiến trúc Payload-first.
 
-`queryDocs` nhận locale và truyền cả `locale` cùng `fallbackLocale: 'vi'` tới ba collection. Điều này khắc phục rủi ro Hero EN hiển thị nội dung localized mặc định ở collection con.
-
-Các điều kiện tenant vẫn được giữ:
-
-- site code phải là `wings-go`;
-- Page phải là `/tour`;
-- Page, wrapper, product và departure được lọc theo site;
-- product/departure phải publish;
+Các điều kiện dữ liệu vẫn được kế thừa từ catalog helper:\n
+- Page `/tour` phải thuộc site WingsGo;
 - catalog phải enabled;
-- media cross-site tiếp tục bị loại khỏi DTO.
+- wrapper, product và departure phải publish và cùng site;
+- departure phải ở tương lai;
+- locale được truyền xuống query;
+- media cross-site không được đưa vào DTO.
 
-Không thấy ảnh hưởng mới tới WingSide hoặc WingsGroup.
+`WingsGoTourCard` được tái sử dụng cho Grid thay vì tạo một component card thứ hai. Điều này giữ trải nghiệm trang `/tour` và homepage nhất quán.
 
-### Đánh giá
+### Multi-site isolation
 
-**Đạt.** Kiến trúc dùng lại catalog domain hiện hữu, không tạo nguồn curation thứ hai và không đưa dữ liệu WingsGo vào hero của tenant khác.
+Không thấy thay đổi nào làm lộ dữ liệu WingsSide hoặc WingsGroup. `cmsPage.tsx` vẫn chỉ tạo dữ liệu curation cho `site.code === 'wings-go'`, còn các query catalog vẫn lọc theo site ID.
 
----
+### P2 — Hai vị trí có thể lặp cùng tour
 
-## 2. Đánh giá code và UX/UI
+Hero lấy tối đa 3 card từ `wingsGoFeaturedTours`, còn Grid lấy tối đa 4 card từ cùng mảng `featuredTours`. Vì vậy ba tour đầu có thể xuất hiện ở cả Hero và Grid.
 
-### Các điểm đã sửa đúng
+Đây không phải lỗi dữ liệu hoặc tenant isolation, nhưng có thể làm người dùng cảm thấy trang lặp nội dung dù tiêu đề đã khác.
 
-#### Hợp đồng props
+Có ba hướng xử lý:
 
-`heroFeaturedTours` là prop duy nhất trong `cmsPage.tsx`, `RenderHero.tsx` và `HighImpact/index.tsx`. Không còn fallback qua tên prop cũ.
+1. Chấp nhận lặp có chủ đích vì Hero là teaser và Grid là phần khám phá chi tiết.
+2. Hero ưu tiên chỉ các tour có `promoLabel`, Grid hiển thị toàn bộ featured.
+3. Thêm curation riêng `heroFeaturedTours` trong Pages nếu business cần kiểm soát không trùng tuyệt đối.
 
-#### Badge khuyến mại
-
-Hero chỉ render badge khi `nextDeparture.promoLabel` có giá trị sau trim. Tour không có promoLabel không nhận badge giả. Component test đã xác nhận tour thứ hai không render chữ `Hot`.
-
-#### Empty state
-
-Khi catalog rỗng, panel hiển thị thông báo thân thiện:\n
-- VI: `Hiện chưa có tour nổi bật. Xem toàn bộ tour đang mở bán bên dưới.`
-- EN: `No featured tours available at the moment. Explore our full catalog below.`
-
-CTA `/tour` và trust row vẫn giữ nguyên, nên người dùng có đường tiếp tục rõ ràng.
-
-#### Commercial departure
-
-`buildCard` chọn một `commercialDeparture` duy nhất và dùng record đó cho:\n
-- ngày;
-- hãng bay;
-- departure city;
-- promoLabel;
-- giá khi giá được xác nhận.
-
-Điểm này loại bỏ lỗi ghép ngày/promo từ departure này với giá từ departure khác của vòng trước.
-
-### Điểm còn lại cần xác nhận
-
-#### P2 — Chính sách giá không có metadata xác minh
-
-Đoạn chọn giá hiện có dạng:\n
-```ts
-const hasFreshness = Boolean(departure.verifiedAt || departure.expiresAt)
-return hasFreshness ? isDepartureVerificationCurrent(departure) : true
-```
-
-Nghĩa là departure có `verifiedAt`/`expiresAt` phải nằm trong cửa sổ xác minh; nhưng departure không có cả hai trường vẫn được xem là hợp lệ nếu có `priceFrom` dương.
-
-Đây có thể là chủ ý để tương thích dữ liệu legacy, và không gây lỗi nếu hệ thống coi `priceFrom` không có freshness metadata là giá hợp lệ. Tuy nhiên, nếu acceptance criterion yêu cầu mọi giá hiển thị phải “xác minh còn hiệu lực”, điều kiện này vẫn còn rộng.
-
-**Đề xuất:**
-
-- nếu freshness metadata bắt buộc: bỏ nhánh `: true`, chuyển về contact fallback;
-- nếu legacy được phép: giữ code, ghi rõ chính sách trong schema/validation và thêm test cho cả hai trường hợp.
-
-Đây là điểm cần quyết định nghiệp vụ, không phải lỗi kiến trúc tenant.
+**Khuyến nghị:** dùng hướng 2 trước vì không cần đổi schema. Chỉ thêm field curation riêng khi đội vận hành cần chọn độc lập từng vị trí.
 
 ---
 
-## 3. Kiểm thử và Harness
+## 3. Review UI/UX
 
-### Kiểm tra đã chạy lại
+### Hero mini-card
 
-Các lệnh và kết quả:
+Triển khai đáp ứng đúng feedback production:\n
+- thumbnail bo góc 56x56;
+- fallback icon khi thiếu ảnh;
+- badge gradient cam/amber khi có `promoLabel`;
+- title giới hạn một dòng;
+- ngày/hãng bay giới hạn một dòng;
+- giá nổi bật ở cạnh phải;
+- toàn bộ item là `SiteLink`;
+- hover và focus kế thừa hành vi link nội bộ.
+
+Không còn danh sách text trơn như phiên bản trước.
+
+### Grid card
+
+`WingsGoTourCard` có đầy đủ:
+
+- ảnh tỷ lệ 16:10;
+- badge ở góc ảnh;
+- market và duration;
+- title và summary;
+- giá từ hoặc contact fallback;
+- khởi hành gần nhất;
+- CTA xem tour;
+- responsive grid `1 → 2 → 4` cột.
+
+Điều này phù hợp với giai đoạn khám phá tour và đáp ứng yêu cầu “giàu hình ảnh” của người dùng.
+
+### P2 — Badge “feature” chưa có nguồn riêng
+
+Card chỉ hiển thị `badge` truyền vào hoặc `card.nextDeparture.promoLabel`. Vì vậy các nhãn `Hot`, `Feature`, `Nổi bật` chỉ xuất hiện nếu CMS lưu trong `promoLabel` của departure.
+
+Nếu business phân biệt “tour được chọn biên tập” với “khuyến mại của một departure”, nên tách dữ liệu:\n
+- `departure.promoLabel`: ưu đãi của departure cụ thể;
+- metadata curation cấp tour: `featuredBadge` hoặc `featuredReason`;
+- `Pages.wingsGoTourCatalog.featuredTours`: thứ tự tour được chọn.
+
+Không nên tự sinh “Hot” theo vị trí card vì sẽ tạo popularity giả.
+
+### Responsive và hình ảnh
+
+CSS đã có breakpoint mobile cho `.site-departure-row`, và Grid dùng `sm:grid-cols-2 xl:grid-cols-4`. Tuy nhiên chưa có browser screenshot/visual smoke mới để xác nhận:\n
+- title dài không làm panel cao bất thường;
+- giá không bị tràn ở mobile;
+- ảnh thumbnail không bị méo;
+- Grid 4 card không làm thay đổi nhịp dọc homepage quá nhiều;
+- Hero panel và section card không tạo cảm giác lặp quá mạnh.
+
+Đây là lý do chưa thể kết luận visual acceptance hoàn toàn từ test component.
+
+### P2 — Dùng raw `<img>` và disable lint
+
+Hero và `WingsGoTourCard` dùng `<img>` với eslint disable cho `@next/next/no-img-element`. Cách này nhất quán với implementation hiện có và build pass, nhưng bỏ qua tối ưu ảnh của Next.js.
+
+Không phải blocker US-077. Nếu ảnh Hero tăng lớn hoặc cần Core Web Vitals, nên chuyển thumbnail/cover sang component ảnh chuẩn có kích thước và priority phù hợp.
+
+---
+
+## 4. Kiểm thử và Harness
+
+### Kết quả đã chạy lại
 
 ```text
-pnpm run test:unit -- tests/unit/wingsGoCatalog.unit.spec.ts
-  1 file, 10 tests passed
-
-pnpm run test:component -- tests/component/heroPresentations.component.spec.tsx
-  1 file, 7 tests passed
-
-pnpm run test:unit -- tests/unit/wingsGoCatalog.unit.spec.ts tests/unit/wingsGoPriorityMarketDeparture.unit.spec.ts
+Unit:\n  pnpm run test:unit -- tests/unit/wingsGoCatalog.unit.spec.ts tests/unit/wingsGoPriorityMarketDeparture.unit.spec.ts
   2 files, 13 tests passed
 
-pnpm run test:component -- tests/component/heroPresentations.component.spec.tsx tests/component/wingsGoTourCatalog.component.spec.tsx
-  2 files, 10 tests passed
+Component:\n  pnpm run test:component -- tests/component/heroPresentations.component.spec.tsx tests/component/wingsGoTourCatalog.component.spec.tsx
+  2 files, 11 tests passed
 
-pnpm exec tsc --noEmit --pretty false
+TypeScript:\n  pnpm exec tsc --noEmit --pretty false
   passed
 
-ESLint trên 7 file liên quan
+ESLint:\n  các file code/test liên quan
   0 errors, 0 warnings
 
-git diff --check
-  passed
+git diff --check:\n  passed
 
-pnpm run build
+Build:\n  pnpm run build
   Next compile passed
   TypeScript passed
-  static pages: 20/20
+  static pages 20/20
   postbuild standalone preparation passed
 ```
 
-### Coverage mới đã có
+Component test mới xác nhận badge động của `WingsGoTourCard`. Các test Hero trước đó vẫn bảo vệ promo badge và empty state.
 
-- locale được truyền và được quan sát trong mock Payload;
-- promoLabel được giữ trong DTO;
-- catalog page thiếu hoặc disabled trả về mảng rỗng;
-- component render promo badge thật;
-- component không render badge giả;
-- component render empty state;
-- hợp đồng prop mới được dùng xuyên suốt.
+### Khoảng trống kiểm thử
 
-### Khoảng trống còn lại
+Chưa có test component cho toàn bộ `WingsGoHomepageSections` với:\n
+- chính xác 4 card featured;
+- card thiếu ảnh;
+- title/summary dài;
+- Grid locale EN;
+- CTA `/tour`;
+- kiểm tra Hero/Grid có hoặc không lặp ID theo chính sách đã chọn.
 
-Chưa có test riêng cho:\n
-- departure có freshness metadata nhưng đã expired bị loại khỏi giá;
-- departure không có freshness metadata nhưng có `priceFrom`, để chốt chính sách nêu ở trên;
-- site mismatch ở chính `getWingsGoFeaturedTours` với Page `/tour` hợp lệ;
-- curated ID thiếu hoặc duplicate trong helper mới;
-- kiểm tra trực tiếp href của từng card trong Hero.
+Chưa có browser smoke để xác nhận layout thực tế ở 390px và 1440px.
 
-Các khoảng trống này không làm fail luồng hiện tại, nhưng test freshness nên bổ sung nếu giá là dữ liệu nhạy cảm về thương mại.
+### Harness evidence không đồng bộ
 
-### Harness
+`validation.md` đã cập nhật checkpoint mới với 13/13 unit và 11/11 component, nhưng acceptance criterion TASK-07 vẫn còn câu “không còn khối featured trùng lặp phía dưới Hero”. Thiết kế mới đã khôi phục Grid featured bên dưới Hero, nên tiêu chí này cần đổi thành:\n
+> Không còn khối lịch/tour mở bán trùng nhãn; Grid featured bên dưới Hero là section khám phá riêng, dùng tiêu đề và vai trò khác.
 
-`validation.md` hiện phản ánh đúng:\n
-- một prop `heroFeaturedTours`;
-- locale xuyên suốt;
-- commercial departure;
-- badge không tự sinh;
-- empty state;
-- 13/13 unit tests;
-- 10/10 component tests;
-- 0 errors/0 warnings;
-- build 20/20 static pages.
-
-Browser smoke VI/EN ở 390px và 1440px vẫn được ghi là pending. Đây là bằng chứng vận hành còn thiếu, nhưng không phải lỗi code được phát hiện trong vòng re-review.
+`harness query matrix` vẫn hiển thị evidence US-077 từ checkpoint cũ với số test 9/9 và 6/6 + 3/3. Cần đồng bộ lại evidence customer-facing trước khi chuyển trạng thái hoàn tất.
 
 ---
 
-## 4. Đánh giá theo tiêu chí
+## 5. Đánh giá theo tiêu chí
 
-| Tiêu chí | Kết quả vòng 2 |
+| Tiêu chí | Đánh giá |
 |---|---|
 | Payload-first | Đạt |
-| Một nguồn curation CMS | Đạt |
-| Multi-site isolation | Đạt về code; nên bổ sung test mismatch trực tiếp |
-| Một prop duy nhất | Đạt |
-| Locale xuyên suốt | Đạt |
-| Không có badge Hot giả | Đạt |
-| Empty state | Đạt |
-| Ngày/giá/promo cùng departure | Đạt |
-| Giá xác minh còn hiệu lực | Đạt nếu legacy price không có freshness được cho phép; cần chốt chính sách |
-| Unit/component tests | Đạt, 13/13 và 10/10 |
+| Tái sử dụng catalog DTO | Đạt |
+| Multi-site isolation | Đạt về code |
+| Hero mini-card | Đạt về cấu trúc và dữ liệu |
+| Grid card giàu hình ảnh | Đạt |
+| Badge không dựng giả | Đạt với promoLabel; badge curation cấp tour chưa có field riêng |
+| Responsive layout | Chưa có browser evidence |
+| Unit/component tests | Đạt, 13/13 và 11/11 |
 | TypeScript/lint/build | Đạt |
-| Harness evidence | Đạt cho local checks; browser smoke còn pending |
+| Harness acceptance/docs | Cần đồng bộ TASK-07 và matrix evidence |
+| Plane/browser release evidence | Chưa hoàn tất |
 
-## Quyết định re-review
+## 6. Quyết định review
 
-**Approve có điều kiện / Ready for final acceptance.** Không còn P1 và không còn lỗi P2 bắt buộc phải sửa để bảo vệ luồng Hero. Trước khi đóng hoàn toàn US-077, nên thực hiện hai việc nhỏ:
+**Approve về code với điều kiện hoàn thiện release evidence.** Không phát hiện lỗi P1 hoặc lỗi làm sai dữ liệu CMS. Bản triển khai hiện đáp ứng feedback chính: Hero trực quan hơn và section Grid card đã trở lại.
 
-1. Chốt và ghi rõ chính sách đối với `priceFrom` không có freshness metadata, đồng thời thêm test tương ứng.
-2. Chạy browser smoke homepage WingsGo VI/EN ở 390px và 1440px, rồi cập nhật bằng chứng Harness/Plane.
+Trước khi đóng US-077, nên làm theo thứ tự:
 
-Đã kiểm tra: diff code/test hiện tại, unit/component test mục tiêu, typecheck, ESLint, diff check và production build. Chưa kiểm tra: browser smoke trực tiếp và read-after-write Plane. Rủi ro còn lại là diễn giải dữ liệu giá legacy không có cửa sổ xác minh.
+1. Quyết định có chấp nhận cùng tour xuất hiện ở Hero và Grid hay lọc Hero chỉ lấy tour có `promoLabel`.
+2. Cập nhật TASK-07 trong `validation.md` để phản ánh Grid featured mới.
+3. Đồng bộ lại Harness matrix với test evidence 13/13 và 11/11.
+4. Chạy browser smoke VI/EN ở 390px và 1440px, kiểm tra ảnh, title dài, giá và khoảng cách giữa Hero/Grid.
+5. Nếu business cần badge `Hot/Feature` độc lập với departure, bổ sung field curation cấp tour trong Pages hoặc `tour-products`.
+
+Đã kiểm tra: diff code/test hiện tại, CodeGraph call paths, unit/component tests, typecheck, ESLint, `git diff --check`, Harness matrix và production build. Chưa kiểm tra: browser screenshot trực tiếp và read-after-write Plane. Rủi ro còn lại chủ yếu là trải nghiệm visual và việc lặp cùng tour giữa Hero với Grid.

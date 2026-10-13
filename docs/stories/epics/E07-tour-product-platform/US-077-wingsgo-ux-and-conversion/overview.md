@@ -41,9 +41,10 @@ vi US-077.
   theo site, cùng liên kết trang liên hệ.
 - TASK-04: `/lien-he` có banner, bốn selling points, form đúng trường và
   validation; submission tạo lead site-scoped trong luồng Payload hiện hữu.
-- TASK-06/07: trang chủ có một khối lịch gần nhất cho Hàn/Nhật/Trung, Hero hiển
-  thị tối đa ba tour nổi bật do catalog CMS chọn và ba card thị trường; không lặp
-  khối schedule hoặc cùng một danh sách featured ở dưới Hero.
+- TASK-06/07: trang chủ có một khối lịch khởi hành sắp tới cho Hàn/Nhật/Trung
+  (không dùng nhãn trùng lặp), Hero hiển thị tối đa ba mini-card ưu đãi có thumbnail
+  và badge do CMS chọn, và section `🔥 Tour đang được quan tâm nhất` khôi phục lại Grid 4
+  card tour lớn đầy đủ ảnh/badge/giá, cùng ba card thị trường điểm đến.
 - TASK-13: tour detail có accordion, tải PDF khi tour được gắn PDF, bảng giá
   theo tháng/năm và CTA theo trạng thái chỗ. CTA truyền departure đã chọn vào
   form; thông tin loyalty chỉ là dữ liệu do sales nhập.

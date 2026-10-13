@@ -2,6 +2,8 @@
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 import { SiteLink } from '@/components/SiteLink'
+import { WingsGoTourCard } from './WingsGoTourCard'
+import type { WingsGoCatalogCard } from './wingsGoCatalog'
 import { getResolvedScheduleData } from './queries'
 import {
   formatTourDate,
@@ -52,8 +54,10 @@ const asDoc = <T extends object>(value: T | number | string | null | undefined):
 const sectionHeadingClass = 'text-2xl font-semibold tracking-tight text-foreground md:text-3xl'
 
 export const WingsGoHomepageSections = async ({
+  featuredTours = [],
   locale,
 }: {
+  featuredTours?: WingsGoCatalogCard[]
   locale: SupportedLocaleCode
 }) => {
   const isEn = locale === 'en'
@@ -79,7 +83,7 @@ export const WingsGoHomepageSections = async ({
               {isEn ? 'Departures opening soon' : 'Lịch gần nhất'}
             </p>
             <h2 className={sectionHeadingClass} id="wingsgo-nearest-departures-title">
-              {isEn ? 'Upcoming tours now on sale' : 'Tour đang mở bán'}
+              {isEn ? 'Upcoming departure schedule' : 'Lịch khởi hành sắp tới'}
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">
               {isEn
@@ -248,6 +252,37 @@ export const WingsGoHomepageSections = async ({
           })}
         </div>
       </section>
+
+      {featuredTours.length > 0 ? (
+        <section aria-labelledby="wingsgo-hot-tours-title" className="container theme-section">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
+                {isEn ? 'WingsGo picks' : 'WingsGo gợi ý'}
+              </p>
+              <h2 className={sectionHeadingClass} id="wingsgo-hot-tours-title">
+                {isEn ? '🔥 Tours guests are asking about' : '🔥 Tour đang được quan tâm nhất'}
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">
+                {isEn
+                  ? 'Priority itineraries curated by WingsGo from our latest published tours.'
+                  : 'Những hành trình được WingsGo ưu tiên giới thiệu, theo thứ tự biên tập trong catalog tour.'}
+              </p>
+            </div>
+            <SiteLink
+              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-border px-5 text-sm font-semibold no-underline"
+              href="/tour"
+            >
+              {isEn ? 'View all tours ➤' : 'Xem tất cả các Tour ➤'}
+            </SiteLink>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {featuredTours.slice(0, 4).map((card) => (
+              <WingsGoTourCard card={card} key={String(card.id)} locale={locale} />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section aria-labelledby="wingsgo-destinations-title" className="container theme-section">
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

@@ -30,14 +30,15 @@ export const WingsGoTourCard = ({
   locale?: SupportedLocaleCode
 }) => {
   const isEn = locale === 'en'
+  const displayBadge = badge || card.nextDeparture?.promoLabel || undefined
 
   return (
   <article className="group overflow-hidden rounded-[24px] border border-border/70 bg-card shadow-sm transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-[var(--site-brand)]/35 hover:shadow-[0_18px_48px_color-mix(in_oklch,var(--site-brand)_14%,transparent)]">
     <SiteLink className="block no-underline" href={card.href}>
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-        {badge ? (
-          <span className="absolute left-3 top-3 z-10 rounded-full bg-orange-500 px-3 py-1 text-xs font-bold text-white shadow">
-            {badge}
+        {displayBadge ? (
+          <span className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1 text-xs font-bold text-white shadow-md">
+            {displayBadge}
           </span>
         ) : null}
         {card.image ? (

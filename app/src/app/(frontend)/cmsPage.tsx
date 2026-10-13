@@ -444,7 +444,10 @@ export async function renderCmsPageByPath({
             />
           )}
           {isWingsGoHomepage ? (
-            <WingsGoHomepageSections locale={getCopyLocale(locale)} />
+            <WingsGoHomepageSections
+              featuredTours={wingsGoFeaturedTours}
+              locale={getCopyLocale(locale)}
+            />
           ) : null}
           {useWingsGoTourCatalog ? (
             <WingsGoTourCatalogSection
