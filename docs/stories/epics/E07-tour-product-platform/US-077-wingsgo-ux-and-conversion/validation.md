@@ -166,3 +166,17 @@
 - TESTS: `pnpm exec tsc --noEmit` PASS (0 errors), targeted unit tests `wingsGoCatalog.unit.spec.ts` (8/8) và `wingsGoPriorityMarketDeparture.unit.spec.ts` (3/3) PASS, component tests `wingsGoTourCatalog.component.spec.tsx` (3/3) PASS.
 - PLANE SYNC: chuẩn bị đồng bộ work items và roadmap.
 
+## Refine checkpoint 3 — 2026-10-13 ICT
+
+- SCOPE: Nâng cấp Hero trang chủ WingsGo tối ưu hóa cho định dạng video dọc (Adaptive Hero Layout):
+  1. Khắc phục triệt để lỗi hiển thị video dọc bị cắt cúp (crop) vào khung ngang 16:10 cũ, bảo toàn trọn vẹn hình ảnh thành Osaka, các biểu tượng danh thắng và typography.
+  2. Xây dựng 3 cấu trúc Hero độc lập (`vertical-video-split`, `device-mockup-split`, `ambient-video-split`), bảo toàn 100% cấu trúc `split-visual` gốc để đảm bảo khả năng rollback không ảnh hưởng bất kỳ site nào khác.
+  3. Tinh chỉnh nền trong suốt (Seamless Floating): Loại bỏ khung viền chữ nhật màu trắng bao quanh, cho phép khối visual nổi trực tiếp trên nền gradient pastel của website với bóng đổ đa tầng mềm mại.
+  4. Cơ chế thích ứng đa thiết bị (Adaptive Responsive):
+     - Viewport Desktop (≥ 768px): Hiển thị dạng Smartphone Mockup viền titanium cao cấp kèm Dynamic Island, tạo cảm giác ứng dụng công nghệ du lịch hiện đại.
+     - Viewport Mobile (< 768px): Tự động ẩn viền mockup và Dynamic Island, mở rộng video thành thẻ 4:5 tràn viền bo góc mượt mà, tối đa hóa diện tích hiển thị trên điện thoại thật của người dùng.
+  5. Quản trị CMS & Schema Data: Cập nhật PostgreSQL enum types trên VPS, thêm preset `wingsgo-device-mockup` (ID: 8), cấu hình mặc định cho Page 221 (WingsGo Home) và Site 2 trong `pages_locales` và `site_settings`.
+- TESTS: `pnpm exec tsc --noEmit` PASS (0 errors), `node scripts/run-integration-tests.mjs tests/int/heroPresentations.int.spec.ts` PASS (4/4), Docker production build và restart thành công, endpoint `/api/health/ready` HTTP 200.
+- EVIDENCE: Chụp ảnh đối chiếu Desktop (1440x900) và Mobile (390x844) qua `agent-browser` trực tiếp trên URL chính thức `https://wingsgo.vn/`.
+
+
