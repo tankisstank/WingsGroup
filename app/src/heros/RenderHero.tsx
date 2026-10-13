@@ -18,12 +18,11 @@ const heroes = {
 
 export const RenderHero: React.FC<
   Page['hero'] & {
-    featuredTours?: WingsGoCatalogCard[]
+    heroFeaturedTours?: WingsGoCatalogCard[]
     resolvedLocale?: SupportedLocaleCode
     siteHeroDefaults?: SiteHeroDefaultsLike | null
     wingsGroupV3Enabled?: boolean
     allowWingsGroupDevelopmentMedia?: boolean
-    heroFeaturedTours?: WingsGoCatalogCard[]
   }
 > = (props) => {
   const { type, wingsGroupV3Enabled } = props || {}

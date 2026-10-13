@@ -163,7 +163,7 @@ describe('hero presentation components', () => {
     expect(screen.getByAltText('Video poster')).toBeTruthy()
   })
 
-  it('renders HighImpactHero retail-departures with dynamic featured tours', () => {
+  it('renders HighImpactHero retail-departures with dynamic featured tours and promoLabel', () => {
     render(
       <HighImpactHero
         heroFeaturedTours={[
@@ -173,11 +173,33 @@ describe('hero presentation components', () => {
             id: 1,
             image: null,
             market: 'korea',
-            nextDeparture: { airline: 'VJ', date: '2026-11-15T00:00:00.000Z', departureCity: 'Hà Nội' },
+            nextDeparture: {
+              airline: 'VJ',
+              date: '2026-11-15T00:00:00.000Z',
+              departureCity: 'Hà Nội',
+              promoLabel: 'Mùa lá đỏ',
+            },
             price: { currency: 'VND', kind: 'verified', value: 14900000 },
             slug: 'seoul-nami',
             summary: 'Tour Seoul',
             title: 'Hà Nội - Seoul - Nami',
+          },
+          {
+            duration: { days: 6, nights: 5 },
+            href: '/tour/tokyo-fuji',
+            id: 2,
+            image: null,
+            market: 'japan',
+            nextDeparture: {
+              airline: 'VN',
+              date: '2026-11-20T00:00:00.000Z',
+              departureCity: 'Hà Nội',
+              promoLabel: null,
+            },
+            price: { currency: 'VND', kind: 'verified', value: 24900000 },
+            slug: 'tokyo-fuji',
+            summary: 'Tour Tokyo',
+            title: 'Hà Nội - Tokyo - Núi Phú Sĩ',
           },
         ]}
         type="highImpact"
@@ -188,7 +210,27 @@ describe('hero presentation components', () => {
     expect(screen.getByText('Ưu đãi hot')).toBeTruthy()
     expect(screen.getByText('Tour đang được quan tâm')).toBeTruthy()
     expect(screen.getByText('Hà Nội - Seoul - Nami')).toBeTruthy()
+    expect(screen.getByText('Mùa lá đỏ')).toBeTruthy()
     expect(screen.getByText('14.900.000 ₫')).toBeTruthy()
+    expect(screen.getByText('Hà Nội - Tokyo - Núi Phú Sĩ')).toBeTruthy()
+    // Tour 2 doesn't have promoLabel, so it should not render a fake Hot badge
+    expect(screen.queryByText('Hot')).toBeNull()
+    expect(screen.getByText('Xem tất cả các tour')).toBeTruthy()
+  })
+
+  it('renders friendly empty state when heroFeaturedTours is empty', () => {
+    render(
+      <HighImpactHero
+        heroFeaturedTours={[]}
+        type="highImpact"
+        variant="retail-departures"
+      />,
+    )
+
+    expect(screen.getByText('Ưu đãi hot')).toBeTruthy()
+    expect(
+      screen.getByText('Hiện chưa có tour nổi bật. Xem toàn bộ tour đang mở bán bên dưới.'),
+    ).toBeTruthy()
     expect(screen.getByText('Xem tất cả các tour')).toBeTruthy()
   })
 })

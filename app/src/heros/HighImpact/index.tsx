@@ -24,33 +24,6 @@ import {
   UsersIcon,
 } from 'lucide-react'
 
-const fallbackDepartures = [
-  {
-    airline: 'VJ',
-    badge: 'Hot',
-    date: '12/06/2026',
-    href: '/tour',
-    price: 'từ 13.990.000 ₫',
-    title: 'Seoul - Nami - Everland',
-  },
-  {
-    airline: 'VN',
-    badge: 'Mùa lá đỏ',
-    date: '19/06/2026',
-    href: '/tour',
-    price: 'từ 18.990.000 ₫',
-    title: 'Seoul - Jeju - Camellia Hill',
-  },
-  {
-    airline: 'CA',
-    badge: 'Giảm 2 triệu',
-    date: '26/06/2026',
-    href: '/tour',
-    price: 'từ 11.990.000 ₫',
-    title: 'Bắc Kinh - Vạn Lý Trường Thành',
-  },
-]
-
 const retailHighlights = [
   { icon: CalendarDaysIcon, label: 'Lịch rõ ngày' },
   { icon: PlaneIcon, label: 'Bay theo hãng' },
@@ -371,7 +344,7 @@ const getPlannerPanelCopy = (locale?: null | SupportedLocaleCode): PlannerPanelC
 
 export const HighImpactHero: React.FC<
   Page['hero'] & {
-    featuredTours?: WingsGoCatalogCard[]
+    heroFeaturedTours?: WingsGoCatalogCard[]
     resolvedLocale?: SupportedLocaleCode
     siteHeroDefaults?: SiteHeroDefaultsLike | null
   }
@@ -410,15 +383,10 @@ export const HighImpactHero: React.FC<
     setHeaderTheme('light')
   }, [setHeaderTheme])
 
-  const catalogTours =
-    (props.heroFeaturedTours && props.heroFeaturedTours.length > 0)
-      ? props.heroFeaturedTours
-      : (props.featuredTours && props.featuredTours.length > 0)
-        ? props.featuredTours
-        : []
+  const catalogTours = props.heroFeaturedTours || []
 
   const displayTours = catalogTours.length > 0
-    ? catalogTours.slice(0, 3).map((tour, idx) => {
+    ? catalogTours.slice(0, 3).map((tour) => {
         const departureDate = formatTourDate(tour.nextDeparture?.date, props.resolvedLocale || 'vi')
         const airline = tour.nextDeparture?.airline
         const dateMeta = departureDate
@@ -427,7 +395,7 @@ export const HighImpactHero: React.FC<
         const priceText = tour.price?.kind === 'verified'
           ? (formatTourPrice(tour.price.value, tour.price.currency) || `${tour.price.value.toLocaleString('vi-VN')} ₫`)
           : (isEn ? 'Contact us' : 'Liên hệ')
-        const promoBadge = tour.nextDeparture?.promoLabel?.trim() || (idx === 0 ? 'Hot' : '')
+        const promoBadge = tour.nextDeparture?.promoLabel?.trim() || ''
         return {
           badge: promoBadge,
           dateMeta,
@@ -437,14 +405,7 @@ export const HighImpactHero: React.FC<
           title: tour.title,
         }
       })
-    : fallbackDepartures.map((item, idx) => ({
-        badge: item.badge,
-        dateMeta: `${item.date} · ${item.airline}`,
-        href: item.href,
-        id: `fallback-${idx}`,
-        price: item.price,
-        title: item.title,
-      }))
+    : []
 
   const businessPanel = isRetailDepartures ? (
     <aside aria-label={isEn ? 'Featured tours' : 'Tour nổi bật'} className="site-hero__commerce-panel">
@@ -458,26 +419,34 @@ export const HighImpactHero: React.FC<
         </div>
       </div>
       <div className="site-departure-stack">
-        {displayTours.map((item) => (
-          <SiteLink
-            className="site-departure-row transition-colors hover:opacity-80 no-underline"
-            href={item.href}
-            key={item.id}
-          >
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h2>{item.title}</h2>
-                {item.badge ? (
-                  <span className="inline-flex items-center rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-300">
-                    {item.badge}
-                  </span>
-                ) : null}
+        {displayTours.length > 0 ? (
+          displayTours.map((item) => (
+            <SiteLink
+              className="site-departure-row transition-colors hover:opacity-80 no-underline"
+              href={item.href}
+              key={item.id}
+            >
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2>{item.title}</h2>
+                  {item.badge ? (
+                    <span className="inline-flex items-center rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                      {item.badge}
+                    </span>
+                  ) : null}
+                </div>
+                <p>{item.dateMeta}</p>
               </div>
-              <p>{item.dateMeta}</p>
-            </div>
-            <strong>{item.price}</strong>
-          </SiteLink>
-        ))}
+              <strong>{item.price}</strong>
+            </SiteLink>
+          ))
+        ) : (
+          <div className="p-4 text-sm text-muted-foreground text-center">
+            {isEn
+              ? 'No featured tours available at the moment. Explore our full catalog below.'
+              : 'Hiện chưa có tour nổi bật. Xem toàn bộ tour đang mở bán bên dưới.'}
+          </div>
+        )}
       </div>
       <div className="site-trust-row" aria-label={isEn ? 'WingsGo values' : 'Điểm mạnh WingsGo'}>
         {retailHighlights.map(({ icon: Icon, label }) => (

@@ -217,20 +217,23 @@ const buildCard = ({
       new Date(date).getTime() > now.getTime()
     )
   })
-  const nextDeparture = futureDepartures[0]
-  if (!nextDeparture?.departureDate) return null
-
-  const verifiedPrice = futureDepartures
+  // Align commercial departure: prefer the earliest verified departure with a valid price;
+  // if none has verified price, use the earliest valid future departure.
+  const verifiedPriceDeparture = futureDepartures
     .filter((departure) => {
       const hasFreshness = Boolean(departure.verifiedAt || departure.expiresAt)
       return hasFreshness ? isDepartureVerificationCurrent(departure) : true
     })
     .find((departure) => typeof departure.priceFrom === 'number' && departure.priceFrom > 0)
-  const price = verifiedPrice
+
+  const commercialDeparture = verifiedPriceDeparture || futureDepartures[0]
+  if (!commercialDeparture?.departureDate) return null
+
+  const price = verifiedPriceDeparture
     ? {
-        currency: verifiedPrice.currency || 'VND',
+        currency: verifiedPriceDeparture.currency || 'VND',
         kind: 'verified' as const,
-        value: verifiedPrice.priceFrom!,
+        value: verifiedPriceDeparture.priceFrom!,
       }
     : { kind: 'contact' as const, label: 'Liên hệ để nhận giá mới nhất' }
 
@@ -244,10 +247,10 @@ const buildCard = ({
     image: firstMedia(product),
     market: product.market || 'other',
     nextDeparture: {
-      airline: nextDeparture.airline || null,
-      date: nextDeparture.departureDate,
-      departureCity: nextDeparture.departureCity || null,
-      promoLabel: nextDeparture.promoLabel || null,
+      airline: commercialDeparture.airline || null,
+      date: commercialDeparture.departureDate,
+      departureCity: commercialDeparture.departureCity || null,
+      promoLabel: commercialDeparture.promoLabel || null,
     },
     price,
     slug: product.slug,
@@ -362,11 +365,13 @@ const queryDocs = async (
   payload: Payload,
   collection: 'pages' | 'tour-departures' | 'tour-products',
   where: unknown,
+  locale?: string,
 ) =>
   payload.find({
     collection,
     depth: 2,
     draft: false,
+    ...(locale ? { fallbackLocale: 'vi', locale: locale as never } : {}),
     limit: WINGSGO_CATALOG_MAX_INVENTORY,
     overrideAccess: true,
     pagination: false,
@@ -376,6 +381,7 @@ const queryDocs = async (
 export const queryWingsGoTourCatalog = async ({
   filters = {},
   limit = WINGSGO_CATALOG_BATCH_SIZE,
+  locale = 'vi',
   now = new Date(),
   offset = 0,
   page,
@@ -384,6 +390,7 @@ export const queryWingsGoTourCatalog = async ({
 }: {
   filters?: WingsGoCatalogFilters
   limit?: number
+  locale?: string
   now?: Date
   offset?: number
   page: WingsGoCatalogPage
@@ -394,36 +401,51 @@ export const queryWingsGoTourCatalog = async ({
     return { all: [], featured: [], hasMore: false, nextOffset: 0 }
   }
 
-  const wrapperResult = await queryDocs(payload, 'pages', {
-    and: [
-      { _status: { equals: 'published' } },
-      { site: { equals: site.id } },
-      { pathname: { like: '/tour/%' } },
-    ],
-  })
+  const wrapperResult = await queryDocs(
+    payload,
+    'pages',
+    {
+      and: [
+        { _status: { equals: 'published' } },
+        { site: { equals: site.id } },
+        { pathname: { like: '/tour/%' } },
+      ],
+    },
+    locale,
+  )
   const wrappers = wrapperResult.docs as unknown as InventoryWrapper[]
   const wrapperIDs = wrappers.map((wrapper) => wrapper.id)
   if (wrapperIDs.length === 0) return { all: [], featured: [], hasMore: false, nextOffset: 0 }
 
-  const productsResult = await queryDocs(payload, 'tour-products', {
-    and: [
-      { _status: { equals: 'published' } },
-      { site: { equals: site.id } },
-      { wrapperPage: { in: wrapperIDs } },
-    ],
-  })
+  const productsResult = await queryDocs(
+    payload,
+    'tour-products',
+    {
+      and: [
+        { _status: { equals: 'published' } },
+        { site: { equals: site.id } },
+        { wrapperPage: { in: wrapperIDs } },
+      ],
+    },
+    locale,
+  )
   const products = productsResult.docs as unknown as InventoryProduct[]
   const productIDs = products.map((product) => product.id)
   if (productIDs.length === 0) return { all: [], featured: [], hasMore: false, nextOffset: 0 }
 
-  const departuresResult = await queryDocs(payload, 'tour-departures', {
-    and: [
-      { _status: { equals: 'published' } },
-      { site: { equals: site.id } },
-      { tourProduct: { in: productIDs } },
-      { departureDate: { greater_than: now.toISOString() } },
-    ],
-  })
+  const departuresResult = await queryDocs(
+    payload,
+    'tour-departures',
+    {
+      and: [
+        { _status: { equals: 'published' } },
+        { site: { equals: site.id } },
+        { tourProduct: { in: productIDs } },
+        { departureDate: { greater_than: now.toISOString() } },
+      ],
+    },
+    locale,
+  )
   const departures = departuresResult.docs as unknown as InventoryDeparture[]
   const wrappersByID = new Map(wrappers.map((wrapper) => [String(wrapper.id), wrapper]))
   const departuresByProduct = new Map<string, InventoryDeparture[]>()
@@ -508,6 +530,7 @@ export const getWingsGoFeaturedTours = async ({
 
   const catalog = await queryWingsGoTourCatalog({
     limit,
+    locale,
     page: catalogPage,
     payload,
     site,

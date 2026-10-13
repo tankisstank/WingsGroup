@@ -32,6 +32,12 @@
 
 - Reuse `TourItineraryDayDetails`, `ScheduleInteractiveDepartures`, query
   helpers và `wingsGoTourCatalog` hiện có.
+- Homepage Hero phải tái sử dụng `getWingsGoFeaturedTours` từ Page `/tour`; không
+  thêm field curation vào Hero hoặc `site-settings`, không query thô
+  `tour-products` trong component client. Hero hiển thị tối đa ba card curation
+  và link về `/tour`.
+- Khối hot tour bên dưới Hero không render lại cùng danh sách featured. Homepage
+  giữ một khối schedule lấy từ `tour-departures` và các market cards.
 - Thêm curation qua trường/block CMS tối thiểu, có lọc site và validate tối đa
   bốn tour trang chủ; không tạo nguồn giá trùng lặp.
 - Khối lịch trang chủ chọn một departure kế tiếp cho từng thị trường, ưu tiên

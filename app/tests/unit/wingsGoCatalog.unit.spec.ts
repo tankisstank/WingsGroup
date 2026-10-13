@@ -281,47 +281,112 @@ describe('WingsGo dynamic catalog constraints', () => {
     ).rejects.toThrow('khởi hành tương lai')
   })
 
-  it('loads featured tours via getWingsGoFeaturedTours helper', async () => {
-    const products = [product({ id: 1, slug: 'tour-1', wrapperPage: 101 })]
-    const wrappers = [wrapper({ id: 101, pathname: '/tour/tour-1' })]
+  it('loads featured tours via getWingsGoFeaturedTours helper with locale and promoLabel', async () => {
+    const products = [
+      product({ id: 1, slug: 'tour-1', title: 'Tour Seoul', wrapperPage: 101 }),
+      product({ id: 2, slug: 'tour-2', title: 'Tour Tokyo', wrapperPage: 102 }),
+    ]
+    const wrappers = [
+      wrapper({ id: 101, pathname: '/tour/tour-1' }),
+      wrapper({ id: 102, pathname: '/tour/tour-2' }),
+    ]
     const departures = [
       {
-        ...departure({ id: 201, tourProduct: 1 }),
+        ...departure({ id: 201, promoLabel: 'Mùa hoa anh đào', tourProduct: 1 }),
         departureDate: '2026-11-01T00:00:00.000Z',
+      },
+      {
+        ...departure({ id: 202, promoLabel: null, tourProduct: 2 }),
+        departureDate: '2026-11-05T00:00:00.000Z',
       },
     ]
 
+    const receivedLocales: string[] = []
     const payload = {
-      find: vi.fn(async ({ collection, where }: { collection: string; where?: any }) => {
-        if (collection === 'pages') {
-          const isCatalogPage = JSON.stringify(where || {}).includes('"/tour"')
-          if (isCatalogPage) {
-            return {
-              docs: [
-                {
-                  id: 99,
-                  pathname: '/tour',
-                  site: 7,
-                  wingsGoTourCatalog: { enabled: true, featuredTours: [{ id: 1 }] },
-                },
-              ],
+      find: vi.fn(
+        async ({
+          collection,
+          locale,
+          where,
+        }: {
+          collection: string
+          locale?: string
+          where?: { and?: Array<{ pathname?: { equals?: string } }> }
+        }) => {
+          if (locale) receivedLocales.push(locale)
+          if (collection === 'pages') {
+            const hasCatalogPath = where?.and?.some(
+              (cond) => cond.pathname?.equals === '/tour',
+            )
+            if (hasCatalogPath) {
+              return {
+                docs: [
+                  {
+                    id: 99,
+                    pathname: '/tour',
+                    site: 7,
+                    wingsGoTourCatalog: { enabled: true, featuredTours: [{ id: 1 }] },
+                  },
+                ],
+              }
             }
+            return { docs: wrappers }
           }
-          return { docs: wrappers }
-        }
-        if (collection === 'tour-products') return { docs: products }
-        return { docs: departures }
-      }),
+          if (collection === 'tour-products') return { docs: products }
+          return { docs: departures }
+        },
+      ),
     }
 
     const featured = await getWingsGoFeaturedTours({
       limit: 3,
+      locale: 'en',
       payload: payload as never,
       site: { code: 'wings-go', id: 7 },
     })
 
-    expect(featured).toHaveLength(1)
+    expect(featured).toHaveLength(2)
     expect(featured[0].id).toBe(1)
     expect(featured[0].slug).toBe('tour-1')
+    expect(featured[0].nextDeparture.promoLabel).toBe('Mùa hoa anh đào')
+    expect(featured[1].id).toBe(2)
+    expect(featured[1].nextDeparture.promoLabel).toBeNull()
+    expect(receivedLocales).toContain('en')
+  })
+
+  it('returns empty array when catalog is disabled or catalog page is missing', async () => {
+    const payloadMissing = {
+      find: vi.fn(async () => ({ docs: [] })),
+    }
+
+    const featuredMissing = await getWingsGoFeaturedTours({
+      payload: payloadMissing as never,
+      site: { code: 'wings-go', id: 7 },
+    })
+    expect(featuredMissing).toEqual([])
+
+    const payloadDisabled = {
+      find: vi.fn(async ({ collection }: { collection: string }) => {
+        if (collection === 'pages') {
+          return {
+            docs: [
+              {
+                id: 99,
+                pathname: '/tour',
+                site: 7,
+                wingsGoTourCatalog: { enabled: false, featuredTours: [{ id: 1 }] },
+              },
+            ],
+          }
+        }
+        return { docs: [] }
+      }),
+    }
+
+    const featuredDisabled = await getWingsGoFeaturedTours({
+      payload: payloadDisabled as never,
+      site: { code: 'wings-go', id: 7 },
+    })
+    expect(featuredDisabled).toEqual([])
   })
 })

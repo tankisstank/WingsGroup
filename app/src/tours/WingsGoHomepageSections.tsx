@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-import type { Site } from '@/payload-types'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 import { SiteLink } from '@/components/SiteLink'
@@ -54,10 +53,8 @@ const sectionHeadingClass = 'text-2xl font-semibold tracking-tight text-foregrou
 
 export const WingsGoHomepageSections = async ({
   locale,
-  site,
 }: {
   locale: SupportedLocaleCode
-  site: Site
 }) => {
   const isEn = locale === 'en'
   const schedule = await getResolvedScheduleData({ draft: false, locale })
