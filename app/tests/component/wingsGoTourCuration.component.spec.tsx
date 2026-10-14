@@ -13,6 +13,10 @@ vi.mock('@payloadcms/ui', () => ({
     showError: false,
     value: curationState.value,
   }),
+  useDocumentInfo: () => ({
+    data: { site: 1 },
+    isEditing: true,
+  }),
   FieldLabel: ({ label }: { label: string }) => <label>{label}</label>,
   FieldError: () => null,
 }))
@@ -125,6 +129,10 @@ describe('LiveSimulatorPreview Component', () => {
     expect(screen.getByText('Tour Thái Lan Bangkok Pattaya')).toBeTruthy()
 
     // Check device switcher
+    const tabletBtn = screen.getByTitle('Xem giao diện Tablet (768px)')
+    fireEvent.click(tabletBtn)
+    expect(tabletBtn.classList.contains('active')).toBe(true)
+
     const mobileBtn = screen.getByTitle('Xem giao diện Mobile điện thoại (375px)')
     fireEvent.click(mobileBtn)
     expect(mobileBtn.classList.contains('active')).toBe(true)

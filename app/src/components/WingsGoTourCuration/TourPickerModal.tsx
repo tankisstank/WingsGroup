@@ -1,14 +1,51 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import type { TourPickerCandidate } from './types'
+
+type RawPickerProduct = {
+  id: number | string
+  title?: string | null
+  slug?: string | null
+  market?: string | null
+  durationDays?: number | null
+  durationNights?: number | null
+  _status?: string | null
+  wrapperPage?: unknown
+  heroMedia?: {
+    url?: string | null
+    thumbnailURL?: string | null
+  } | null
+}
+
+type RawPickerDeparture = {
+  id: number | string
+  tourProduct?: number | string | { id?: number | string | null } | null
+  departureDate?: string | null
+  priceFrom?: number | null
+  currency?: string | null
+  promoLabel?: string | null
+  _status?: string | null
+}
 
 interface Props {
   isOpen: boolean
   onClose: () => void
   onSelectTour: (tour: TourPickerCandidate) => void
   selectedIds: Array<number | string>
+  siteId?: number | string | null
 }
+
+const SOUTHEAST_ASIA_MARKETS = [
+  'vietnam',
+  'thailand',
+  'cambodia',
+  'laos',
+  'myanmar',
+  'indochina',
+]
+
+const KNOWN_MARKETS = ['korea', 'japan', 'china', ...SOUTHEAST_ASIA_MARKETS]
 
 const MARKET_TABS = [
   { key: 'all', label: 'Tất cả thị trường' },
@@ -24,13 +61,33 @@ export const TourPickerModal: React.FC<Props> = ({
   onClose,
   onSelectTour,
   selectedIds,
+  siteId,
 }) => {
   const [candidates, setCandidates] = useState<TourPickerCandidate[]>([])
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
   const [selectedMarket, setSelectedMarket] = useState('all')
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalDocs, setTotalDocs] = useState(0)
 
-  // Fetch tour candidates when modal opens
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery)
+      setPage(1)
+    }, 250)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // Reset page to 1 when changing market tab
+  const handleMarketChange = (marketKey: string) => {
+    setSelectedMarket(marketKey)
+    setPage(1)
+  }
+
+  // Fetch tour candidates with server-side pagination, site filtering, and future departure verification
   useEffect(() => {
     if (!isOpen) return
     let cancelled = false
@@ -38,40 +95,93 @@ export const TourPickerModal: React.FC<Props> = ({
 
     const fetchTours = async () => {
       try {
-        // Fetch published tours
-        const toursRes = await fetch(
-          '/api/tour-products?limit=100&depth=1&sort=-updatedAt',
-          { credentials: 'include' },
-        )
-        const toursData = toursRes.ok ? await toursRes.json() : { docs: [] }
+        const params = new URLSearchParams()
+        params.set('limit', '20')
+        params.set('page', String(page))
+        params.set('depth', '1')
+        params.set('sort', '-updatedAt')
+        params.set('where[_status][equals]', 'published')
 
-        // Fetch published departures to match future dates
-        const departuresRes = await fetch(
-          '/api/tour-departures?limit=250&where[_status][equals]=published&sort=departureDate',
-          { credentials: 'include' },
-        )
-        const departuresData = departuresRes.ok ? await departuresRes.json() : { docs: [] }
+        // Constrain to current page's site if provided
+        if (siteId !== undefined && siteId !== null && siteId !== '') {
+          params.set('where[site][equals]', String(siteId))
+        }
+
+        // Server-side market filter
+        if (selectedMarket === 'korea') {
+          params.set('where[market][equals]', 'korea')
+        } else if (selectedMarket === 'japan') {
+          params.set('where[market][equals]', 'japan')
+        } else if (selectedMarket === 'china') {
+          params.set('where[market][equals]', 'china')
+        } else if (selectedMarket === 'southeast-asia') {
+          params.set('where[market][in]', SOUTHEAST_ASIA_MARKETS.join(','))
+        } else if (selectedMarket === 'other') {
+          params.set('where[market][in]', 'other')
+        }
+
+        // Server-side search filter
+        const trimmedQuery = debouncedQuery.trim()
+        if (trimmedQuery) {
+          params.set('where[or][0][title][like]', trimmedQuery)
+          params.set('where[or][1][slug][like]', trimmedQuery)
+        }
+
+        // 1. Fetch products
+        const toursRes = await fetch(`/api/tour-products?${params.toString()}`, {
+          credentials: 'include',
+        })
+        const toursData = toursRes.ok ? await toursRes.json() : { docs: [], totalPages: 1, totalDocs: 0 }
 
         if (cancelled) return
 
-        const now = new Date()
-        const futureDeparturesByTour = new Map<string, any[]>()
+        setTotalPages(toursData.totalPages || 1)
+        setTotalDocs(toursData.totalDocs || 0)
 
-        for (const dep of departuresData.docs || []) {
-          const prodId = typeof dep.tourProduct === 'object' && dep.tourProduct ? dep.tourProduct.id : dep.tourProduct
-          if (!prodId) continue
-          const depDate = dep.departureDate ? new Date(dep.departureDate) : null
-          if (depDate && depDate >= now) {
-            const list = futureDeparturesByTour.get(String(prodId)) || []
-            list.push(dep)
-            futureDeparturesByTour.set(String(prodId), list)
+        const products = (toursData.docs || []) as RawPickerProduct[]
+        const productIds = products.map((t) => t.id)
+
+        // 2. Fetch only future published departures for the returned products
+        const futureDeparturesByTour = new Map<string, RawPickerDeparture[]>()
+
+        if (productIds.length > 0) {
+          const nowIso = new Date().toISOString()
+          const depParams = new URLSearchParams()
+          depParams.set('where[tourProduct][in]', productIds.join(','))
+          depParams.set('where[_status][equals]', 'published')
+          depParams.set('where[departureDate][greater_than]', nowIso)
+          depParams.set('sort', 'departureDate')
+          depParams.set('limit', '100')
+
+          if (siteId !== undefined && siteId !== null && siteId !== '') {
+            depParams.set('where[site][equals]', String(siteId))
+          }
+
+          const departuresRes = await fetch(`/api/tour-departures?${depParams.toString()}`, {
+            credentials: 'include',
+          })
+          const departuresData = departuresRes.ok ? await departuresRes.json() : { docs: [] }
+
+          if (!cancelled) {
+            for (const dep of departuresData.docs || []) {
+              const prodId =
+                typeof dep.tourProduct === 'object' && dep.tourProduct
+                  ? dep.tourProduct.id
+                  : dep.tourProduct
+              if (!prodId) continue
+              const list = futureDeparturesByTour.get(String(prodId)) || []
+              list.push(dep)
+              futureDeparturesByTour.set(String(prodId), list)
+            }
           }
         }
 
-        const mapped: TourPickerCandidate[] = (toursData.docs || []).map((t: any) => {
+        if (cancelled) return
+
+        const mapped: TourPickerCandidate[] = products.map((t) => {
           const futureDeps = futureDeparturesByTour.get(String(t.id)) || []
           const nextDep = futureDeps[0]
-          
+
           let thumb: string | null = null
           if (t.heroMedia && typeof t.heroMedia === 'object') {
             thumb = t.heroMedia.thumbnailURL || t.heroMedia.url || null
@@ -95,7 +205,13 @@ export const TourPickerModal: React.FC<Props> = ({
           }
         })
 
-        setCandidates(mapped)
+        // Filter fallback for 'other' tab in case market has unexpected custom value
+        const finalCandidates =
+          selectedMarket === 'other'
+            ? mapped.filter((item) => item.market === 'other' || !KNOWN_MARKETS.includes(item.market || ''))
+            : mapped
+
+        setCandidates(finalCandidates)
       } catch (err) {
         console.error('Failed to load candidate tours:', err)
       } finally {
@@ -107,7 +223,7 @@ export const TourPickerModal: React.FC<Props> = ({
     return () => {
       cancelled = true
     }
-  }, [isOpen])
+  }, [debouncedQuery, isOpen, page, selectedMarket, siteId])
 
   // Close on Escape key
   useEffect(() => {
@@ -117,29 +233,6 @@ export const TourPickerModal: React.FC<Props> = ({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose])
-
-  const filteredCandidates = useMemo(() => {
-    return candidates.filter((item) => {
-      // Market filter
-      if (selectedMarket !== 'all') {
-        const m = (item.market || '').toLowerCase()
-        if (selectedMarket === 'korea' && !m.includes('korea') && !m.includes('hàn')) return false
-        if (selectedMarket === 'japan' && !m.includes('japan') && !m.includes('nhật')) return false
-        if (selectedMarket === 'china' && !m.includes('china') && !m.includes('trung')) return false
-        if (selectedMarket === 'southeast-asia' && !['thailand', 'singapore', 'malaysia', 'indochina', 'đông nam á'].some(k => m.includes(k))) return false
-      }
-
-      // Search filter
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim()
-        const matchTitle = item.title.toLowerCase().includes(q)
-        const matchSlug = item.slug.toLowerCase().includes(q)
-        if (!matchTitle && !matchSlug) return false
-      }
-
-      return true
-    })
-  }, [candidates, searchQuery, selectedMarket])
 
   if (!isOpen) return null
 
@@ -169,12 +262,12 @@ export const TourPickerModal: React.FC<Props> = ({
           </button>
         </div>
 
-        {/* Filters */}
+        {/* Filters & Search */}
         <div className="dialog-filters">
           <input
             type="text"
             className="search-input"
-            placeholder="🔍 Tìm nhanh theo tên tour hoặc slug..."
+            placeholder="🔍 Tìm theo tên tour hoặc slug (tìm kiếm tức thì)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             autoFocus
@@ -187,7 +280,7 @@ export const TourPickerModal: React.FC<Props> = ({
                 role="tab"
                 aria-selected={selectedMarket === tab.key}
                 className={selectedMarket === tab.key ? 'active' : ''}
-                onClick={() => setSelectedMarket(tab.key)}
+                onClick={() => handleMarketChange(tab.key)}
               >
                 {tab.label}
               </button>
@@ -199,20 +292,21 @@ export const TourPickerModal: React.FC<Props> = ({
         <div className="dialog-candidates-list">
           {loading ? (
             <div className="empty-results">Đang nạp danh sách tour từ hệ thống…</div>
-          ) : filteredCandidates.length === 0 ? (
+          ) : candidates.length === 0 ? (
             <div className="empty-results">
-              Không tìm thấy tour phù hợp với từ khóa &quot;{searchQuery}&quot;.
+              Không tìm thấy tour phù hợp với điều kiện tìm kiếm.
             </div>
           ) : (
-            filteredCandidates.map((tour) => {
+            candidates.map((tour) => {
               const isAlreadySelected = selectedSet.has(String(tour.id))
+              const isEligible = tour.hasWrapperPage && tour.hasFutureDeparture
 
               return (
                 <div
                   key={tour.id}
-                  className={`candidate-row ${isAlreadySelected ? 'selected' : ''}`}
+                  className={`candidate-row ${isAlreadySelected ? 'selected' : ''} ${!isEligible ? 'ineligible' : ''}`}
                   onClick={() => {
-                    if (!isAlreadySelected) {
+                    if (!isAlreadySelected && isEligible) {
                       onSelectTour(tour)
                       onClose()
                     }
@@ -224,7 +318,17 @@ export const TourPickerModal: React.FC<Props> = ({
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={tour.thumbnailUrl} alt={tour.title} loading="lazy" />
                     ) : (
-                      <div style={{ width: '100%', height: '100%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          background: '#e2e8f0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '10px',
+                        }}
+                      >
                         Tour
                       </div>
                     )}
@@ -234,7 +338,11 @@ export const TourPickerModal: React.FC<Props> = ({
                     <p>
                       {tour.priceFrom ? (
                         <span style={{ color: '#059669', fontWeight: 600 }}>
-                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(tour.priceFrom)}
+                          {new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND',
+                            maximumFractionDigits: 0,
+                          }).format(tour.priceFrom)}
                         </span>
                       ) : (
                         'Giá liên hệ'
@@ -243,8 +351,15 @@ export const TourPickerModal: React.FC<Props> = ({
                       {tour.hasFutureDeparture ? (
                         <span>✈️ {new Date(tour.nextDepartureDate!).toLocaleDateString('vi-VN')}</span>
                       ) : (
-                        <span style={{ color: '#b91c1c' }}>⛔ Chưa có lịch bay tương lai</span>
+                        <span style={{ color: '#b91c1c', fontWeight: 600 }}>
+                          ⛔ Hết lịch bay tương lai
+                        </span>
                       )}
+                      {!tour.hasWrapperPage ? (
+                        <span style={{ color: '#b91c1c', fontWeight: 600, marginLeft: 6 }}>
+                          ⛔ Thiếu wrapper /tour/{tour.slug}
+                        </span>
+                      ) : null}
                       {tour.promoLabel ? (
                         <span style={{ marginLeft: 6, color: '#ea580c', fontWeight: 700 }}>
                           🔥 {tour.promoLabel}
@@ -255,22 +370,76 @@ export const TourPickerModal: React.FC<Props> = ({
                   <button
                     type="button"
                     className="btn-select"
-                    disabled={isAlreadySelected}
+                    disabled={isAlreadySelected || !isEligible}
                     onClick={(e) => {
                       e.stopPropagation()
-                      if (!isAlreadySelected) {
+                      if (!isAlreadySelected && isEligible) {
                         onSelectTour(tour)
                         onClose()
                       }
                     }}
                   >
-                    {isAlreadySelected ? '✓ Đã chọn' : '+ Chọn tour'}
+                    {isAlreadySelected
+                      ? '✓ Đã chọn'
+                      : !isEligible
+                      ? 'Chưa đủ điều kiện'
+                      : '+ Chọn tour'}
                   </button>
                 </div>
               )
             })
           )}
         </div>
+
+        {/* Pagination Footer */}
+        {totalPages > 1 && (
+          <div
+            className="dialog-pagination-footer"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.65rem 1.25rem',
+              borderTop: '1px solid var(--theme-elevation-150, #e2e8f0)',
+              background: 'var(--theme-elevation-50, #f8fafc)',
+              fontSize: '0.85rem',
+            }}
+          >
+            <button
+              type="button"
+              disabled={page <= 1 || loading}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              style={{
+                padding: '0.35rem 0.75rem',
+                borderRadius: 6,
+                border: '1px solid var(--theme-elevation-250, #cbd5e1)',
+                background: 'var(--theme-elevation-0, #fff)',
+                cursor: page <= 1 ? 'not-allowed' : 'pointer',
+                opacity: page <= 1 ? 0.5 : 1,
+              }}
+            >
+              « Trang trước
+            </button>
+            <span style={{ color: 'var(--theme-elevation-700, #334155)', fontWeight: 500 }}>
+              Trang {page} / {totalPages} ({totalDocs} tour)
+            </span>
+            <button
+              type="button"
+              disabled={page >= totalPages || loading}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              style={{
+                padding: '0.35rem 0.75rem',
+                borderRadius: 6,
+                border: '1px solid var(--theme-elevation-250, #cbd5e1)',
+                background: 'var(--theme-elevation-0, #fff)',
+                cursor: page >= totalPages ? 'not-allowed' : 'pointer',
+                opacity: page >= totalPages ? 0.5 : 1,
+              }}
+            >
+              Trang sau »
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

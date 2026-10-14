@@ -16,7 +16,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { FieldError, FieldLabel, useField } from '@payloadcms/ui'
+import { FieldError, FieldLabel, useDocumentInfo, useField } from '@payloadcms/ui'
 
 import { TourSortableCard } from './TourSortableCard'
 import { TourPickerModal } from './TourPickerModal'
@@ -49,18 +49,53 @@ const extractIDs = (val: unknown): Array<number | string> => {
     .filter((id): id is number | string => id !== null && id !== undefined)
 }
 
+type RawTourDoc = {
+  id: number | string
+  title?: string | null
+  slug?: string | null
+  market?: string | null
+  durationDays?: number | null
+  durationNights?: number | null
+  _status?: string | null
+  heroMedia?: {
+    url?: string | null
+    thumbnailURL?: string | null
+  } | null
+  wrapperPage?: {
+    pathname?: string | null
+  } | null
+}
+
+type RawDepartureDoc = {
+  id: number | string
+  tourProduct?: number | string | { id?: number | string | null } | null
+  departureDate?: string | null
+  departureCity?: string | null
+  airline?: string | null
+  priceFrom?: number | null
+  currency?: string | null
+  promoLabel?: string | null
+  _status?: string | null
+}
+
 export const FeaturedToursCurationField: React.FC<Props> = ({
   field,
   path = 'wingsGoTourCatalog.featuredTours',
   readOnly = false,
 }) => {
   const dndContextId = useId()
+  const { data } = useDocumentInfo()
+  const siteId =
+    typeof data?.site === 'object' && data?.site !== null
+      ? (data.site as { id: number | string }).id
+      : (data?.site as number | string | undefined)
+
   const { errorMessage, setValue, showError, value } = useField<RelationshipItem[]>({ path })
   const selectedIDs = useMemo(() => extractIDs(value), [value])
 
   const [toursData, setToursData] = useState<CuratedTourCardData[]>([])
   const [isPickerOpen, setIsPickerOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [_loading, setLoading] = useState(false)
 
   // Configure DnD Sensors
   const sensors = useSensors(
@@ -87,12 +122,13 @@ export const FeaturedToursCurationField: React.FC<Props> = ({
 
     const loadTourDetails = async () => {
       try {
+        const nowIso = new Date().toISOString()
         const [toursRes, depsRes] = await Promise.all([
           fetch(`/api/tour-products?where[id][in]=${idsQuery}&depth=1&limit=20`, {
             credentials: 'include',
           }),
           fetch(
-            `/api/tour-departures?where[tourProduct][in]=${idsQuery}&where[_status][equals]=published&sort=departureDate&limit=100`,
+            `/api/tour-departures?where[tourProduct][in]=${idsQuery}&where[_status][equals]=published&where[departureDate][greater_than]=${encodeURIComponent(nowIso)}&sort=departureDate&limit=100`,
             { credentials: 'include' },
           ),
         ])
@@ -103,9 +139,9 @@ export const FeaturedToursCurationField: React.FC<Props> = ({
         if (cancelled) return
 
         const now = new Date()
-        const futureDepsByTour = new Map<string, any[]>()
+        const futureDepsByTour = new Map<string, RawDepartureDoc[]>()
 
-        for (const dep of depsJson.docs || []) {
+        for (const dep of (depsJson.docs || []) as RawDepartureDoc[]) {
           const prodId =
             typeof dep.tourProduct === 'object' && dep.tourProduct
               ? dep.tourProduct.id
@@ -119,8 +155,8 @@ export const FeaturedToursCurationField: React.FC<Props> = ({
           }
         }
 
-        const toursMap = new Map<string, Record<string, any>>(
-          (toursJson.docs || []).map((t: any) => [String(t.id), t]),
+        const toursMap = new Map<string, RawTourDoc>(
+          ((toursJson.docs || []) as RawTourDoc[]).map((t) => [String(t.id), t]),
         )
 
         // Keep the exact order of selectedIDs
@@ -439,6 +475,7 @@ export const FeaturedToursCurationField: React.FC<Props> = ({
         onClose={() => setIsPickerOpen(false)}
         onSelectTour={handleSelectTour}
         selectedIds={selectedIDs}
+        siteId={siteId}
       />
     </div>
   )

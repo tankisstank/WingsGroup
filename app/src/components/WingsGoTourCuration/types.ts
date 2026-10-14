@@ -37,7 +37,7 @@ export interface TourPickerCandidate {
   hasWrapperPage: boolean
 }
 
-export type SimulatorViewportMode = 'desktop' | 'mobile'
+export type SimulatorViewportMode = 'desktop' | 'tablet' | 'mobile'
 
 export interface CurationValidationReport {
   isValid: boolean

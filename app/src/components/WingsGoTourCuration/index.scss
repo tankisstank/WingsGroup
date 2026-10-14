@@ -466,6 +466,18 @@
           max-width: 100%;
         }
 
+        &.mode-tablet {
+          max-width: 768px;
+
+          .sim-hero-cards {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+
+          .sim-catalog-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+
         &.mode-mobile {
           max-width: 375px;
         }

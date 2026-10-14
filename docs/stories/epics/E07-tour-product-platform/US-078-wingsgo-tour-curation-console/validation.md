@@ -71,3 +71,20 @@ export const importMap = {
   "@/components/WingsGoTourCuration/FeaturedToursCurationField#default": default_4f889175352c2e72d9690f43fdcf17c2,
 }
 ```
+
+---
+
+## 4. Codex Review & Audit Resolution
+
+Commit `f376c9f` được chuyển sang Codex Agent để thực hiện độc lập quy trình code review và audit chuyên sâu. Codex trả về 5 khuyến nghị (P2) và toàn bộ đã được khắc phục triệt để:
+
+| Finding | Khuyến nghị của Codex | Giải pháp triển khai & Bằng chứng |
+|---|---|---|
+| **P2-1: Restrict picker results to eligible same-site tours** | Lọc tour cùng `site` đang biên tập và chỉ cho phép chọn tour hợp lệ (có wrapper page & lịch bay tương lai). | Lấy `siteId` từ `useDocumentInfo()`, truyền qua `TourPickerModal` với query `where[site][equals]=${siteId}` và kiểm tra `hasWrapperPage && hasFutureDeparture`. Vô hiệu hóa nút chọn nếu không đủ điều kiện. |
+| **P2-2: Paginate picker inventory** | Tránh fetch toàn bộ dữ liệu 100 tours một lúc trong picker modal. | Chuyển picker sang phân trang server-side (`limit=20`, `page`, `totalPages`, `totalDocs`) với debounced server-side search (250ms) và thanh điều hướng `« Trang trước` / `Trang sau »`. |
+| **P2-3: Future departure query filter** | Query tour departures không dùng bộ lọc ngày nên có thể lấy trúng các đợt bay trong quá khứ. | Bổ sung `where[departureDate][greater_than]=${new Date().toISOString()}` vào REST queries của cả `FeaturedToursCurationField` và `TourPickerModal`. |
+| **P2-4: Add tablet viewport to simulator** | Bổ sung viewport tablet (768px) để kiểm tra giao diện 2 cột. | Mở rộng `SimulatorViewportMode` thêm `'tablet'`, thêm nút toggle `📋 Tablet (768px)` và CSS grid 2 cột responsive. |
+| **P2-5: Expand market tab filters** | Đồng bộ hóa toàn bộ các tab thị trường với enum `market` thực tế. | Khai báo hằng `SOUTHEAST_ASIA_MARKETS`, bao gồm `vietnam`, `thailand`, `cambodia`, `laos`, `myanmar`, `indochina` và hỗ trợ tab `Khác` (`other`). |
+
+Chi tiết báo cáo audit: `docs/codex_review_wingsgo_curation_console.md`.
+

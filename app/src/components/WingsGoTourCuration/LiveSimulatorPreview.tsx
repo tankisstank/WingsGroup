@@ -52,6 +52,14 @@ export const LiveSimulatorPreview: React.FC<Props> = ({ tours }) => {
           </button>
           <button
             type="button"
+            className={mode === 'tablet' ? 'active' : ''}
+            onClick={() => setMode('tablet')}
+            title="Xem giao diện Tablet (768px)"
+          >
+            📋 Tablet
+          </button>
+          <button
+            type="button"
             className={mode === 'mobile' ? 'active' : ''}
             onClick={() => setMode('mobile')}
             title="Xem giao diện Mobile điện thoại (375px)"
