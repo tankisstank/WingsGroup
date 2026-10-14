@@ -31,6 +31,9 @@ export const wingsGoTourCatalogField: Field = {
       maxRows: 6,
       filterOptions: sameSiteFilterOptions,
       admin: {
+        components: {
+          Field: '@/components/WingsGoTourCuration/FeaturedToursCurationField',
+        },
         description:
           'Giữ đúng thứ tự biên tập. Mỗi tour phải là sản phẩm WingsGo đã publish, có wrapper page cùng site đã publish và có đợt đi tương lai đã publish.',
       },
