@@ -34,22 +34,33 @@ Trên trang chủ `https://wingsgo.vn`, các tour nổi bật/hot xuất hiện 
 1. Truy cập trang quản trị: `https://wingsgo.vn/admin` (hoặc domain CMS được cấp).
 2. Đăng nhập với tài khoản Editor / Site Manager.
 
-### Bước 2: Tìm Trang Catalog `/tour`
-1. Trên thanh điều hướng menu bên trái, nhấp vào **Pages (Trang)**.
-2. Tìm trang có đường dẫn:
-   - **Title / Tiêu đề:** `Tour` hoặc `Danh mục Tour`
-   - **Pathname:** `/tour`
-   - **Site:** `WingsGo`
-3. Nhấp vào để mở giao diện chỉnh sửa trang.
+### Bước 2: Mở Trang Cấu Hình (Tiêu Đề CMS: "Chi tiết tour" · ID: 208)
 
-### Bước 3: Cấu hình Khối "WingsGo tour catalog"
-Cuộn xuống phần cài đặt **WingsGo tour catalog (Catalog tour WingsGo)**:
+> [!WARNING]
+> **Lưu ý quan trọng:** Trong CMS, trang này **KHÔNG** mang tên "Catalog" hay "Trang Catalog", mà có tiêu đề chính xác là **`Chi tiết tour`**!
+> - **ID:** `208`
+> - **Tiêu đề (Title):** `Chi tiết tour`
+> - **Đường dẫn (Pathname / Slug):** `/tour`
+> - **Site:** `WingsGo`
+
+Editor có 2 cách để mở:
+- **Cách 1 (Nhanh nhất):** Nhấp trực tiếp vào đường link sau khi đã đăng nhập:  
+  👉 **`https://wingsgo.vn/admin/collections/pages/208`**
+- **Cách 2 (Tìm trong danh sách):**  
+  1. Trên menu bên trái, nhấp vào **Nội dung** ➔ **Trang (Pages)**.  
+  2. Tại ô "Tìm với Tiêu đề", gõ: **`Chi tiết tour`** (hoặc tìm theo ID `208` / đường dẫn `tour`).  
+  3. Bấm vào dòng trang thuộc Site `WingsGo` để mở chỉnh sửa.
+
+### Bước 3: Chuyển Sang Tab "WingsGo tour catalog" (Tab ngang thứ 5)
+
+Trên màn hình chỉnh sửa trang, Payload CMS chia thành các Tab ngang ở đầu trang: `Hero` | `Nội dung` | `SEO` | `WingSide Hi-Fi` | **`WingsGo tour catalog`**.  
+*Mặc định hệ thống mở Tab Hero, Editor cần nhấp vào Tab **`WingsGo tour catalog`**!*
 
 1. **Bật catalog động (Enabled):** Đảm bảo ô checkbox này đã được **Tích chọn (Checked)**.
 2. **Tour nổi bật (Featured Tours):**
    - Đây là ô chọn quan hệ (**Relationship**) cho phép chọn tối đa **6 Tour**.
-   - **Thao tác chọn:** Nhấp vào `Add existing` hoặc tìm kiếm tên sản phẩm tour (ví dụ: *Hà Nội - Osaka*, *Thượng Hải - Ô Trấn*...).
-   - **Sắp xếp thứ tự ưu tiên:** Editor có thể **kéo - thả (Drag & Drop)** các dòng tour để thay đổi thứ tự:
+   - **Thao tác chọn:** Nhấp vào dấu `+` để tìm kiếm tên sản phẩm tour (ví dụ: *Hà Nội - Osaka*, *Thượng Hải - Ô Trấn*...).
+   - **Sắp xếp thứ tự ưu tiên:** Editor có thể **kéo - thả (Drag & Drop icon ⠿)** các dòng tour để thay đổi thứ tự:
      - 📌 **Vị trí 1, 2, 3:** Sẽ tự động xuất hiện trên khối **"Ưu đãi hot / Tour đang được quan tâm"** ở đầu trang (Hero).
      - 📌 **Toàn bộ 4 - 6 tour:** Sẽ xuất hiện tại khối **"🔥 Tour đang được quan tâm nhất"** ở lưới giữa trang.
 

@@ -618,19 +618,42 @@
         <p class="section-desc">Hướng dẫn chi tiết từng bước thao tác thực tế trong giao diện quản trị Payload CMS.</p>
       </div>
 
+      <!-- Lưu ý đặc biệt giải thích vì sao editor khó tìm -->
+      <div class="tip-box" style="background:#fffbeb; border-color:#fef3c7; border-left:4px solid #f59e0b; margin-bottom: 28px;">
+        <div class="tip-icon">⚠️</div>
+        <div class="tip-content" style="color:#92400e;">
+          <strong style="color:#78350f; font-size:14.5px;">GIẢI THÍCH VÌ SAO EDITOR TÌM CHƯA RA "TRANG CATALOG":</strong><br>
+          Trong cơ sở dữ liệu và giao diện CMS thực tế, trang này <strong>KHÔNG</strong> có chữ "Catalog" trên tiêu đề, mà mang tên chính xác là:
+          <br>• <strong>Tiêu đề hiển thị (Title):</strong> <code style="font-weight:700; color:#b45309; background:#fef3c7;">Chi tiết tour</code>
+          <br>• <strong>Đường dẫn (Slug / Pathname):</strong> <code>/tour</code>
+          <br>• <strong>Mã bản ghi (ID):</strong> <code>208</code> (Site: <code>WingsGo</code>)
+          <br>• <strong>Đường link truy cập trực tiếp:</strong> <a href="https://wingsgo.vn/admin/collections/pages/208" target="_blank" style="color:#0284c7; font-weight:700; text-decoration:underline;">https://wingsgo.vn/admin/collections/pages/208</a>
+        </div>
+      </div>
+
       <div class="steps-chain">
         <!-- Bước 1 -->
         <div class="step-item">
           <div class="step-number">1</div>
           <div class="step-body">
-            <h3>Đăng nhập CMS & Chọn Trang Catalog</h3>
-            <p>Truy cập vào liên kết quản trị CMS (<code>https://wingsgo.vn/admin</code> hoặc domain CMS được cấp), đăng nhập tài khoản Editor.</p>
+            <h3>Bước 1: Mở Trang "Chi tiết tour" (ID: 208)</h3>
+            <p>Sau khi đăng nhập CMS Admin (<code>https://wingsgo.vn/admin</code>), Editor có 2 cách để mở màn hình cấu hình:</p>
             <div class="step-callout">
               <ul>
-                <li>Trên thanh Menu điều hướng bên trái, nhấp vào mục <strong>Pages (Trang)</strong>.</li>
-                <li>Tìm kiếm trang có đường dẫn (Pathname): <code>/tour</code> thuộc Site <strong>WingsGo</strong>.</li>
-                <li>Nhấp chuột vào tiêu đề trang để mở màn hình chỉnh sửa chi tiết.</li>
+                <li><strong>Cách 1 (Nhanh nhất):</strong> Nhấp trực tiếp vào liên kết: <a href="https://wingsgo.vn/admin/collections/pages/208" target="_blank" style="color:#0284c7; font-weight:600;">https://wingsgo.vn/admin/collections/pages/208</a></li>
+                <li><strong>Cách 2 (Tìm trong danh mục):</strong> 
+                  <br>1. Vào menu bên trái ➔ <strong>Nội dung</strong> ➔ chọn <strong>Trang (Pages)</strong>.
+                  <br>2. Tại thanh tìm kiếm trên đầu bảng, gõ từ khóa: <code>Chi tiết tour</code> (hoặc lọc theo đường dẫn <code>tour</code> / mã <code>ID: 208</code>).
+                  <br>3. Bấm vào dòng <strong>Chi tiết tour</strong> thuộc Site <strong>WingsGo</strong> để mở giao diện chỉnh sửa.
+                </li>
               </ul>
+            </div>
+            <!-- Ảnh minh họa danh sách trang -->
+            <div style="margin-top: 18px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm);">
+              <img src="assets/admin_pages_table.png" alt="Màn hình tìm kiếm trang Chi tiết tour trong CMS" style="width: 100%; display: block;">
+              <div style="padding: 10px 14px; background: #f8fafc; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line);">
+                📸 <em>Hình 1: Giao diện thực tế danh sách Trang (Pages) trong CMS WingsGo. Tìm theo tiêu đề "Chi tiết tour" hoặc ID 208.</em>
+              </div>
             </div>
           </div>
         </div>
@@ -639,12 +662,12 @@
         <div class="step-item">
           <div class="step-number orange">2</div>
           <div class="step-body">
-            <h3>Cuộn xuống khối "WingsGo tour catalog"</h3>
-            <p>Trong form chỉnh sửa trang, cuộn xuống khu vực cấu hình catalog tour chuyên dụng cho WingsGo:</p>
+            <h3>Bước 2: Chuyển Sang Tab "WingsGo tour catalog" (Tab thứ 5)</h3>
+            <p>Khi vào trang "Chi tiết tour", form soạn thảo được chia thành nhiều Tab ngang. Mặc định hệ thống mở Tab <em>Hero</em> hoặc <em>Nội dung</em>. Editor cần bấm đúng Tab chức năng:</p>
             <div class="step-callout">
               <ul>
-                <li><strong>Bật catalog động (Enabled):</strong> Đảm bảo ô checkbox này đang được <strong>Tích chọn (Checked)</strong>.</li>
-                <li><strong>Tour nổi bật (Featured Tours):</strong> Đây là trường chọn quan hệ đa giá trị (Relationship), cho phép chọn tối đa <strong>6 tour</strong>.</li>
+                <li><strong>Bấm vào Tab:</strong> Nhìn lên thanh Tab ngang ở giữa trang và bấm chọn <strong><code>WingsGo tour catalog</code></strong> (Tab thứ 5, nằm sau <em>Hero</em>, <em>Nội dung</em>, <em>SEO</em>, <em>WingSide Hi-Fi</em>).</li>
+                <li><strong>Bật catalog động (Enabled):</strong> Đảm bảo ô checkbox này đang có dấu <strong>Tích xanh (Checked)</strong>.</li>
               </ul>
             </div>
           </div>
@@ -654,16 +677,24 @@
         <div class="step-item">
           <div class="step-number green">3</div>
           <div class="step-body">
-            <h3>Chọn Tour và Kéo - Thả (Drag & Drop) Thứ Tự</h3>
-            <p>Thao tác thêm tour mới hoặc thay đổi thứ tự ưu tiên hiển thị ra website:</p>
+            <h3>Bước 3: Chọn & Kéo Thả (Drag & Drop) 4 - 6 Tour Nổi Bật</h3>
+            <p>Tại khung <strong>Tour nổi bật (Featured Tours)</strong>, Editor chọn các tour chiến lược và sắp xếp thứ tự hiển thị:</p>
             <div class="step-callout">
               <ul>
-                <li><strong>Thêm tour:</strong> Nhấp vào <code>Add existing</code> và gõ tìm kiếm tên tour (Ví dụ: <em>Hà Nội - Osaka</em>, <em>Thượng Hải - Ô Trấn</em>, <em>Seoul - Nami</em>...).</li>
-                <li><strong>Sắp xếp thứ tự:</strong> Giữ chuột vào biểu tượng icon kéo thả ở đầu mỗi dòng tour để di chuyển lên / xuống:
-                  <br>• <strong>Vị trí 1, 2, 3:</strong> Sẽ hiển thị tại <strong>Khối Ưu đãi hot (Hero)</strong> ở đầu trang.
-                  <br>• <strong>Toàn bộ 4 - 6 vị trí:</strong> Sẽ hiển thị tại <strong>Lưới Tour đang được quan tâm nhất</strong> ở giữa trang.
+                <li><strong>Thêm tour:</strong> Bấm nút <code>+</code> ở cạnh bên phải khung chọn để tìm kiếm và thêm sản phẩm tour mong muốn.</li>
+                <li><strong>Sắp xếp thứ tự:</strong> Giữ chuột vào icon <code>⠿</code> ở đầu mỗi thẻ tour để kéo lên / xuống:
+                  <br>📌 <strong>Vị trí #1, #2, #3:</strong> Sẽ hiển thị tại <strong>Khối Ưu đãi hot (Hero)</strong> ở ngay đầu trang chủ.
+                  <br>📌 <strong>Toàn bộ 4 - 6 vị trí:</strong> Sẽ hiển thị tại <strong>Lưới Catalog (Tour đang được quan tâm nhất)</strong> ở giữa trang.
                 </li>
+                <li><strong>Bấm Lưu:</strong> Sau khi hoàn tất, bấm nút <strong>Lưu bản nháp</strong> (hoặc gửi Site Manager duyệt Publish).</li>
               </ul>
+            </div>
+            <!-- Ảnh minh họa form Tab WingsGo tour catalog -->
+            <div style="margin-top: 18px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm);">
+              <img src="assets/admin_catalog_fields.png" alt="Màn hình cấu hình Tab WingsGo tour catalog thực tế" style="width: 100%; display: block;">
+              <div style="padding: 10px 14px; background: #f8fafc; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line);">
+                📸 <em>Hình 2: Giao diện thực tế Tab WingsGo tour catalog trong trang ID 208. Đã tích chọn "Bật catalog động" và ghim 4 tour thực tế.</em>
+              </div>
             </div>
           </div>
         </div>
