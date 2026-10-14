@@ -33,21 +33,28 @@ let shContent = '#!/bin/sh\nset -e\ncd /app\n\n# 1. Download and unpack Linux ar
 
 for (const item of commands) {
   shContent += `mkdir -p "$(dirname "${item.link}")"\n`;
+  shContent += `rm -rf "${item.link}"\n`;
   shContent += `ln -sfn "${item.target}" "${item.link}"\n`;
 }
 
 // Add Linux arm64 specific links
 shContent += `\n# 3. Add Linux arm64 links\n`;
 shContent += `mkdir -p node_modules/.pnpm/sharp@0.34.2/node_modules/@img\n`;
+shContent += `rm -rf node_modules/.pnpm/sharp@0.34.2/node_modules/@img/sharp-linuxmusl-arm64\n`;
 shContent += `ln -sfn ../../../@img+sharp-linuxmusl-arm64@0.34.2/node_modules/@img/sharp-linuxmusl-arm64 node_modules/.pnpm/sharp@0.34.2/node_modules/@img/sharp-linuxmusl-arm64\n`;
+shContent += `rm -rf node_modules/.pnpm/sharp@0.34.2/node_modules/@img/sharp-libvips-linuxmusl-arm64\n`;
 shContent += `ln -sfn ../../../@img+sharp-libvips-linuxmusl-arm64@1.1.0/node_modules/@img/sharp-libvips-linuxmusl-arm64 node_modules/.pnpm/sharp@0.34.2/node_modules/@img/sharp-libvips-linuxmusl-arm64\n`;
 shContent += `mkdir -p node_modules/@img\n`;
+shContent += `rm -rf node_modules/@img/sharp-linuxmusl-arm64\n`;
 shContent += `ln -sfn ../.pnpm/@img+sharp-linuxmusl-arm64@0.34.2/node_modules/@img/sharp-linuxmusl-arm64 node_modules/@img/sharp-linuxmusl-arm64\n`;
+shContent += `rm -rf node_modules/@img/sharp-libvips-linuxmusl-arm64\n`;
 shContent += `ln -sfn ../.pnpm/@img+sharp-libvips-linuxmusl-arm64@1.1.0/node_modules/@img/sharp-libvips-linuxmusl-arm64 node_modules/@img/sharp-libvips-linuxmusl-arm64\n`;
 
 shContent += `mkdir -p node_modules/.pnpm/node_modules/@libsql\n`;
+shContent += `rm -rf node_modules/.pnpm/node_modules/@libsql/linux-arm64-musl\n`;
 shContent += `ln -sfn ../../@libsql+linux-arm64-musl@0.4.7/node_modules/@libsql/linux-arm64-musl node_modules/.pnpm/node_modules/@libsql/linux-arm64-musl\n`;
 shContent += `mkdir -p node_modules/@libsql\n`;
+shContent += `rm -rf node_modules/@libsql/linux-arm64-musl\n`;
 shContent += `ln -sfn ../.pnpm/@libsql+linux-arm64-musl@0.4.7/node_modules/@libsql/linux-arm64-musl node_modules/@libsql/linux-arm64-musl\n`;
 
 fs.writeFileSync('deploy/oracle/relink.sh', shContent, { encoding: 'utf8' });
