@@ -1,6 +1,14 @@
-# Overview
+# US-059 — Chuẩn hóa ngôn ngữ thiết kế CMS admin (CMS Admin Design Language & Operator Console)
 
-## Current behaviour
+## 1. Trạng thái (Status)
+
+`implemented` (Chờ xác nhận nghiệm thu / Validation Pending)
+
+## 2. Phân làn (Lane)
+
+`high-risk`
+
+## 3. Hành vi Hiện tại (Current behaviour)
 
 Payload already exposes the native `/admin` shell, thirteen configured
 collections, six plugin collections, two globals, and four custom views:
