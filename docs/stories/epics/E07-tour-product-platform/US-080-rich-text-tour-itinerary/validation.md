@@ -47,3 +47,29 @@ Theo biên bản thẩm định tại [`docs/codex_release_review_us080_itinerar
    - Đã chuyển `mergeTourVariant` sang `app/src/tours/utils.ts` và import kiểm thử trực tiếp logic production cho cả 4 trường hợp ưu tiên (overrides, base preservation, null/empty, summaryOverride).
    - Đã bổ sung 2 component test mới trong `retailTourItineraryAndServices.component.spec.tsx` kiểm thử định dạng RichText thật và fallback fail-safe khi AST rỗng/malformed.
 
+---
+
+## 4. Bằng chứng Triển khai Production (Production Deployment Evidence)
+
+- **Môi trường triển khai:** Oracle Cloud VPS ARM64 (`168.110.212.116`).
+- **Mã phát hành (Release):** `release-63ac55d` (Commit `63ac55d`).
+- **Gói release sạch:** `deploy/oracle/release-clean.zip` (105.73 MB, tuân thủ nghiêm ngặt runbook loại trừ `public/media`).
+- **Symlinks & Native packages:** Script `relink.sh` tự động tải và kích hoạt binary native C++ cho Linux ARM64 Musl (`sharp-linuxmusl-arm64`, `sharp-libvips-linuxmusl-arm64`, `linux-arm64-musl`).
+- **PostgreSQL Migration:**
+  - File SQL: `deploy/oracle/migrate-us080.sql` (tương ứng migration `20261015_120000_tour_itinerary_content_richtext.ts`).
+  - Đã thêm cột `content jsonb` an toàn vào `tour_products_itinerary_days_locales` và `_tour_products_v_version_itinerary_days_locales`.
+  - Ghi nhận `20261015_120000_tour_itinerary_content_richtext` (batch 26) vào `payload_migrations`.
+- **Khởi động Container Production:**
+  - Container `wingstravel-app-1` được recreate và khởi động thành công từ image `wingstravel-app:latest` và `app-app:latest`.
+  - Cache Redis được xóa sạch toàn bộ (`flushall`).
+- **Xác nhận Health Check & Endpoints:**
+  - `GET http://127.0.0.1:3000/api/health/ready` -> `200 OK`, `{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"status":"ready"}`.
+  - `GET https://wingsgo.vn/` -> `200 OK`.
+  - `GET https://wingsgo.vn/tour` -> `200 OK`.
+  - `GET https://wingsgo.vn/tour/tour-6n5d-osaka-kobe-kyoto-nui-phu-si-tokyo-kix-nrt` -> `200 OK`.
+  - `GET https://wingside.vn/` -> `200 OK`.
+  - `GET https://wingsgroup.vn/admin` -> `200 OK` / `307 Temporary Redirect` (sẵn sàng phục vụ editor).
+- **Hình ảnh kiểm chứng Live Website & Admin CMS (agent-browser):**
+  - Trang chi tiết tour WingsGo: `production_wingsgo_tour_detail_us080.png` (hiển thị đầy đủ thông tin tour, các mốc thời gian và đoạn văn bản xuống dòng chuẩn chỉ).
+  - Admin CMS Login: `admin_login_form.png` (giao diện đăng nhập CMS load 200 OK, sẵn sàng cho biên tập viên).
+

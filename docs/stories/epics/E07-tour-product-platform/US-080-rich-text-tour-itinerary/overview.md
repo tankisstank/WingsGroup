@@ -2,7 +2,7 @@
 
 ## 1. Trạng thái (Status)
 
-`planned`
+`completed`
 
 ## 2. Phân làn (Lane)
 
