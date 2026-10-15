@@ -10,6 +10,7 @@
 
 - xem danh sách site được phân công
 - quản lý trang nội dung và landing page
+- điều phối bộ tour nổi bật (Tour Curations) độc lập hoặc gắn trực tiếp vào từng trang chiến dịch
 - cập nhật bài viết, media và nội dung liên quan
 - preview trước khi publish
 - gửi yêu cầu hỗ trợ khi cần thay đổi vượt quyền
@@ -24,7 +25,8 @@
 ## Màn hình quan trọng
 
 - Dashboard CMS
-- Pages
+- Bộ tour nổi bật (Tour Curations) & Live Simulator 1:1
+- Pages (bao gồm tab WingsGo tour catalog)
 - Landing Pages
 - Posts
 - Media

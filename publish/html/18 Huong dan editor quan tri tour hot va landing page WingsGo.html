@@ -654,14 +654,24 @@
         <div class="step-item">
           <div class="step-number orange">2</div>
           <div class="step-body">
-            <h3>Cách 2: Gán Bộ Tour Nổi Bật Tùy Biến Vào Từng Trang Chiến Dịch (Pages)</h3>
-            <p>Nếu bạn tạo một Landing Page khuyến mại hoặc chiến dịch sự kiện và muốn hiển thị một nhóm tour đặc thù khác với bộ mặc định toàn site:</p>
+            <h3>Cách 2: Gán Hoặc Tạo Bộ Tour Trực Tiếp Trong Từng Trang (Pages)</h3>
+            <p>Nếu bạn tạo một Landing Page khuyến mại hoặc chiến dịch sự kiện và muốn hiển thị một nhóm tour đặc thù riêng cho trang đó:</p>
             <div class="step-callout">
               <ul>
                 <li><strong>Bước 2.1:</strong> Vào <strong>Nội dung</strong> ➔ <strong>Trang (Pages)</strong> ➔ Mở trang cần chỉnh sửa (hoặc trang <code>Chi tiết tour</code> / ID: 208).</li>
                 <li><strong>Bước 2.2:</strong> Chọn Tab <strong><code>WingsGo tour catalog</code></strong> (Tab thứ 5).</li>
-                <li><strong>Bước 2.3 - Chọn bộ tour (Curation):</strong> Tại trường <strong>Bộ tour nổi bật (Curation)</strong>, nhấp chọn bộ tour tương ứng đã tạo ở Cách 1.
-                  <br><em>* Nếu để trống, trang sẽ tự động áp dụng Bộ tour mặc định toàn site (Fallback layer 2), đảm bảo trang web luôn tràn ngập dữ liệu sinh động và không bao giờ bị trống.</em>
+                <li><strong>Bước 2.3 - Tùy chọn 2A: Tạo mới bộ tour ngay tại trang (Khuyên dùng):</strong>
+                  <br>Bấm vào biểu tượng dấu cộng <strong><code>[+]</code></strong> nằm ngay cạnh ô <em>Bộ tour nổi bật áp dụng</em>. Cửa sổ popup sẽ mở ra cho phép bạn đặt tên, chọn tour, kéo thả mô phỏng Live Simulator. Bấm <strong>Lưu</strong>, bộ tour mới sẽ <strong>tự động được gán ngay vào trang</strong> mà không cần rời trang hay chuyển menu!
+                  <br><em>* Lưu ý: Giữ checkbox "Bộ mặc định của site" là TẮT để bộ tour chỉ áp dụng cho riêng trang này.</em>
+                </li>
+                <li><strong>Bước 2.4 - Tùy chọn 2B: Chọn bộ tour đã có:</strong>
+                  <br>Nhấp vào ô <strong>Bộ tour nổi bật áp dụng</strong> và chọn một bộ tour tương ứng đã tạo trước đó.
+                </li>
+                <li><strong>Bước 2.5 - Tùy chọn 2C: Sử dụng khung "Tour nổi bật (Legacy)" theo cách cũ 100%:</strong>
+                  <br>Nếu muốn cấu hình thủ công theo cách cũ trực tiếp trong trang: Bấm nút <code>✕</code> để <strong>xóa trống</strong> ô <em>Bộ tour nổi bật áp dụng</em>. Sau đó kéo thả chọn tour ở khung <strong>Tour nổi bật (Legacy)</strong> ngay bên dưới.
+                </li>
+                <li><strong>Cơ chế phân giải 4 tầng (4-Tier Resolver):</strong>
+                  <br><code>1. Curation riêng của Trang</code> ➔ <code>2. Curation mặc định của Site</code> ➔ <code>3. Danh sách thủ công Legacy</code> ➔ <code>4. Fallback tự động nạp tour active</code>. Đảm bảo website không bao giờ bị trống dữ liệu.
                 </li>
               </ul>
             </div>
