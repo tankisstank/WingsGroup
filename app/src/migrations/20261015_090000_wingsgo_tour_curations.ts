@@ -56,6 +56,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
 
     ALTER TABLE "pages_rels" ADD COLUMN IF NOT EXISTS "tour_curations_id" integer;
     ALTER TABLE "_pages_v_rels" ADD COLUMN IF NOT EXISTS "tour_curations_id" integer;
+    ALTER TABLE "payload_locked_documents_rels" ADD COLUMN IF NOT EXISTS "tour_curations_id" integer;
 
     DO $$ BEGIN
       ALTER TABLE "pages_rels" ADD CONSTRAINT "pages_rels_tour_curations_id_tour_curations_id_fk"
@@ -65,6 +66,11 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     DO $$ BEGIN
       ALTER TABLE "_pages_v_rels" ADD CONSTRAINT "_pages_v_rels_tour_curations_id_tour_curations_id_fk"
         FOREIGN KEY ("tour_curations_id") REFERENCES "tour_curations"("id") ON DELETE SET NULL ON UPDATE no action;
+    EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+    DO $$ BEGIN
+      ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_tour_curations_fk"
+        FOREIGN KEY ("tour_curations_id") REFERENCES "tour_curations"("id") ON DELETE CASCADE ON UPDATE no action;
     EXCEPTION WHEN duplicate_object THEN null; END $$;
 
     CREATE INDEX IF NOT EXISTS "tour_curations_site_id_idx" ON "tour_curations" ("site_id");
@@ -77,6 +83,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     CREATE INDEX IF NOT EXISTS "_pages_v_version_wings_go_tour_catalog_curation_idx" ON "_pages_v" ("version_wings_go_tour_catalog_curation_id");
     CREATE INDEX IF NOT EXISTS "pages_rels_tour_curations_id_idx" ON "pages_rels" ("tour_curations_id");
     CREATE INDEX IF NOT EXISTS "_pages_v_rels_tour_curations_id_idx" ON "_pages_v_rels" ("tour_curations_id");
+    CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_tour_curations_id_idx" ON "payload_locked_documents_rels" ("tour_curations_id");
   `)
 
   // Idempotently create default TourCurations record for WingsGo if none exists
@@ -136,6 +143,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
+    ALTER TABLE "payload_locked_documents_rels" DROP COLUMN IF EXISTS "tour_curations_id";
     ALTER TABLE "pages" DROP COLUMN IF EXISTS "wings_go_tour_catalog_curation_id";
     ALTER TABLE "_pages_v" DROP COLUMN IF EXISTS "version_wings_go_tour_catalog_curation_id";
     ALTER TABLE "pages_rels" DROP COLUMN IF EXISTS "tour_curations_id";
