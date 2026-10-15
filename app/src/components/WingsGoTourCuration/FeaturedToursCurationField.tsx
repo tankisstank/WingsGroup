@@ -90,6 +90,17 @@ export const FeaturedToursCurationField: React.FC<Props> = ({
       ? (data.site as { id: number | string }).id
       : (data?.site as number | string | undefined)
 
+  const resolvedSiteId = useMemo(() => {
+    if (siteId !== undefined && siteId !== null && siteId !== '') return siteId
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search)
+      return (
+        searchParams.get('site') || searchParams.get('where[site][equals]') || undefined
+      )
+    }
+    return undefined
+  }, [siteId])
+
   const { errorMessage, setValue, showError, value } = useField<RelationshipItem[]>({ path })
   const selectedIDs = useMemo(() => extractIDs(value), [value])
 
@@ -475,7 +486,7 @@ export const FeaturedToursCurationField: React.FC<Props> = ({
         onClose={() => setIsPickerOpen(false)}
         onSelectTour={handleSelectTour}
         selectedIds={selectedIDs}
-        siteId={siteId}
+        siteId={resolvedSiteId}
       />
     </div>
   )

@@ -59,3 +59,23 @@ Triển khai hoàn chỉnh component Custom Field **Level 3: WingsGo Visual Tour
 2. Cập nhật bằng chứng vào `validation.md`.
 3. Cập nhật trạng thái story trong Harness: `pwsh -File scripts/harness.ps1 story update --id US-078 ...`.
 4. Đồng bộ Plane workitems qua `pnpm run plane:sync:workitems`.
+
+---
+
+### Phase 7: Independent Collection `TourCurations` (Level 3+)
+1. Xây dựng collection `app/src/collections/TourCurations.ts`:
+   - Trường: `site`, `name`, `isDefault`, `featuredTours` (dùng `FeaturedToursCurationField`), `description`.
+   - Hook `beforeChange`: đảm bảo duy nhất 1 bản ghi `isDefault=true` trên mỗi site, và validate 6 tour hợp lệ.
+   - Hook `afterChange` / `afterDelete`: tự động xóa Redis cache và revalidate paths (`/`, `/tour`, và các page liên kết).
+2. Đăng ký Collection trong `app/src/payload.config.ts`.
+3. Bổ sung nhãn quản trị trong `app/src/utilities/adminLabels.ts` và khớp đường dẫn trong `adminSiteContext.ts`.
+4. Bổ sung trường `curation` trên `app/src/fields/wingsGoTourCatalog.ts` (relationship tới `tour-curations`).
+5. Tạo migration hoặc backfill script tự động di chuyển 6 tour hiện tại từ page `/tour` 208 sang bản ghi `TourCurations` mặc định.
+
+### Phase 8: Multi-Tier Resolver & End-to-End Verification
+1. Cập nhật `getWingsGoFeaturedTours` trong `wingsGoCatalog.ts` hỗ trợ fallback 4 tầng (Page curation ➔ Site default ➔ Legacy `/tour` ➔ Algorithmic).
+2. Kiểm tra typecheck `tsc --noEmit` đạt 0 errors.
+3. Chạy unit tests và component tests cập nhật.
+4. Kiểm thử trực quan trên CMS và ngoài frontend.
+5. Cập nhật Harness và đồng bộ Plane.
+

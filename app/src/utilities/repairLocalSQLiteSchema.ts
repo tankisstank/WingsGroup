@@ -22,6 +22,36 @@ const localSQLiteRelationColumns = [
   'tour_departures_id',
   'tour_campaigns_id',
   'departure_variants_id',
+  'tour_curations_id',
+] as const
+
+const tourCurationsSQLiteStatements = [
+  `CREATE TABLE IF NOT EXISTS "tour_curations" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    "name" TEXT NOT NULL,
+    "is_default" INTEGER DEFAULT 0,
+    "description" TEXT,
+    "site_id" INTEGER,
+    "updated_at" TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+    "created_at" TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+    FOREIGN KEY ("site_id") REFERENCES "sites"("id") ON UPDATE no action ON DELETE set null
+  )`,
+  `CREATE TABLE IF NOT EXISTS "tour_curations_rels" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    "order" INTEGER,
+    "parent_id" INTEGER NOT NULL,
+    "path" TEXT NOT NULL,
+    "tour_products_id" INTEGER,
+    FOREIGN KEY ("parent_id") REFERENCES "tour_curations"("id") ON UPDATE no action ON DELETE cascade,
+    FOREIGN KEY ("tour_products_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE set null
+  )`,
+  `CREATE INDEX IF NOT EXISTS "tour_curations_site_idx" ON "tour_curations" ("site_id")`,
+  `CREATE INDEX IF NOT EXISTS "tour_curations_is_default_idx" ON "tour_curations" ("is_default")`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS "tour_curations_site_is_default_unique_idx" ON "tour_curations" ("site_id") WHERE ("is_default" = 1)`,
+  `CREATE INDEX IF NOT EXISTS "tour_curations_rels_order_idx" ON "tour_curations_rels" ("order")`,
+  `CREATE INDEX IF NOT EXISTS "tour_curations_rels_parent_idx" ON "tour_curations_rels" ("parent_id")`,
+  `CREATE INDEX IF NOT EXISTS "tour_curations_rels_path_idx" ON "tour_curations_rels" ("path")`,
+  `CREATE INDEX IF NOT EXISTS "tour_curations_rels_tour_products_id_idx" ON "tour_curations_rels" ("tour_products_id")`,
 ] as const
 
 const wingsSideHomeCurationSQLiteStatements = [
@@ -182,11 +212,25 @@ const localSQLiteColumnRepairs = [
   },
   {
     table: 'pages',
-    columns: [['wings_go_tour_catalog_enabled', 'INTEGER DEFAULT 0']],
+    columns: [
+      ['wings_go_tour_catalog_enabled', 'INTEGER DEFAULT 0'],
+      ['wings_go_tour_catalog_curation_id', 'INTEGER'],
+    ],
   },
   {
     table: '_pages_v',
-    columns: [['version_wings_go_tour_catalog_enabled', 'INTEGER DEFAULT 0']],
+    columns: [
+      ['version_wings_go_tour_catalog_enabled', 'INTEGER DEFAULT 0'],
+      ['version_wings_go_tour_catalog_curation_id', 'INTEGER'],
+    ],
+  },
+  {
+    table: 'pages_rels',
+    columns: [['tour_curations_id', 'INTEGER']],
+  },
+  {
+    table: '_pages_v_rels',
+    columns: [['tour_curations_id', 'INTEGER']],
   },
   {
     table: 'pages_blocks_testimonial_items',
@@ -773,6 +817,9 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
       db.exec(`${statement};`)
     }
     for (const statement of wingsSideHomeCurationSQLiteStatements) {
+      db.exec(`${statement};`)
+    }
+    for (const statement of tourCurationsSQLiteStatements) {
       db.exec(`${statement};`)
     }
     const tourDeparturesTable = db

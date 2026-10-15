@@ -77,6 +77,7 @@ export interface Config {
     'departure-variants': DepartureVariant;
     'tour-departures': TourDeparture;
     'tour-campaigns': TourCampaign;
+    'tour-curations': TourCuration;
     media: Media;
     categories: Category;
     users: User;
@@ -104,6 +105,7 @@ export interface Config {
     'departure-variants': DepartureVariantsSelect<false> | DepartureVariantsSelect<true>;
     'tour-departures': TourDeparturesSelect<false> | TourDeparturesSelect<true>;
     'tour-campaigns': TourCampaignsSelect<false> | TourCampaignsSelect<true>;
+    'tour-curations': TourCurationsSelect<false> | TourCurationsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -1187,12 +1189,16 @@ export interface Page {
     };
   };
   /**
-   * Chỉ áp dụng cho trang WingsGo /tour. Catalog đọc tối đa 200 sản phẩm/đợt khởi hành/wrapper mỗi lần; chọn tối đa 6 tour nổi bật theo thứ tự. Tour dự phòng được tính khi render và không ghi vào CMS.
+   * Chỉ định catalog động và bộ tour nổi bật. Nếu để trống bộ tour nổi bật, hệ thống sẽ tự động dùng bộ mặc định của site.
    */
   wingsGoTourCatalog?: {
     enabled?: boolean | null;
     /**
-     * Giữ đúng thứ tự biên tập. Mỗi tour phải là sản phẩm WingsGo đã publish, có wrapper page cùng site đã publish và có đợt đi tương lai đã publish.
+     * Chọn bộ tour riêng cho trang này. Nếu để trống, trang sẽ tự động sử dụng bộ tour Mặc định của site.
+     */
+    curation?: (number | null) | TourCuration;
+    /**
+     * Dữ liệu legacy. Khuyến khích quản trị tại menu "Bộ tour nổi bật" để tái sử dụng trên nhiều trang.
      */
     featuredTours?: (number | TourProduct)[] | null;
   };
@@ -2409,6 +2415,31 @@ export interface TourProduct {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Quản lý các bộ tour nổi bật, ưu đãi, hot pick độc lập theo từng site hoặc chiến dịch.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tour-curations".
+ */
+export interface TourCuration {
+  id: number;
+  site: number | Site;
+  name: string;
+  /**
+   * Nếu bật, bộ tour này sẽ tự động hiển thị trên Trang chủ và trang Catalog /tour khi không có chỉ định riêng. Mỗi site chỉ có tối đa một bộ mặc định.
+   */
+  isDefault?: boolean | null;
+  /**
+   * Kéo thả để sắp xếp vị trí hiển thị. 3 vị trí đầu tiên sẽ xuất hiện trên Hero panel.
+   */
+  featuredTours?: (number | TourProduct)[] | null;
+  /**
+   * Mô tả mục đích sử dụng của bộ tour này (nội bộ, không hiển thị ngoài web).
+   */
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Biến thể tour có kiểm soát để dùng lại một tour gốc cho nhiều điểm đi, hãng bay, hoặc nhịp hành trình khác nhau mà không nhân bản toàn bộ trang tour.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2942,6 +2973,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tour-campaigns';
         value: number | TourCampaign;
+      } | null)
+    | ({
+        relationTo: 'tour-curations';
+        value: number | TourCuration;
       } | null)
     | ({
         relationTo: 'media';
@@ -3685,6 +3720,7 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         enabled?: T;
+        curation?: T;
         featuredTours?: T;
       };
   relatedPages?: T;
@@ -4514,6 +4550,19 @@ export interface TourCampaignsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tour-curations_select".
+ */
+export interface TourCurationsSelect<T extends boolean = true> {
+  site?: T;
+  name?: T;
+  isDefault?: T;
+  featuredTours?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -5317,6 +5366,7 @@ export interface TaskCreateCollectionExport {
       | 'departure-variants'
       | 'tour-departures'
       | 'tour-campaigns'
+      | 'tour-curations'
       | 'media'
       | 'categories'
       | 'users'

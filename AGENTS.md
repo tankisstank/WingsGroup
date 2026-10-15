@@ -104,3 +104,19 @@ Before finishing, verify that Plane has the correct project, Epic, US work item,
 sub-work item names, status, `start_date`, and `target_date`. At minimum,
 confirm `missingCount` is `0`, no child task is named like `Tiêu chí chấp nhận
 <number>`, and the relevant US items are children of the correct Epic.
+
+## Codex Consultation Gate (Điểm Chốt Kế Hoạch & Release Review)
+
+Bắt buộc thực hiện tham vấn Codex Agent đối với:
+1. **Điểm chốt kế hoạch (Planning Milestones & Architectural Checkpoints):**
+   - Khi đề xuất kiến trúc mới, tách/thêm Collection, thay đổi schema dữ liệu cốt lõi, hoặc điều chỉnh luồng dữ liệu multisite.
+   - Sử dụng Codex để có góc nhìn phản biện kiến trúc độc lập, so sánh các giải pháp (P1/P2/P3/P4), kiểm tra tính khả thi và tương thích ngược trước khi bắt tay vào code.
+2. **Rà soát phát hành (Phase Release Review & Pre-deployment Audit):**
+   - Trước khi đóng Story hoặc triển khai code mới lên môi trường Staging / Production VPS (Oracle Cloud ARM64).
+   - Tham vấn Codex để audit toàn diện: Race conditions, edge cases, cache invalidation / stale reads, migration safety, tính cô lập đa site (`siteField`), và rủi ro gián đoạn dịch vụ.
+   - Toàn bộ finding từ Codex (P1/P2/P3) phải được phân tích, ghi nhận vào tài liệu Story (`validation.md` / `audit.md`), và giải quyết triệt để trước khi hoàn tất phát hành.
+
+Cách thức thực hiện:
+- Sử dụng CLI: `codext --dangerously-bypass-approvals-and-sandbox` hoặc `herdr` với context chi tiết và câu hỏi phản biện rõ ràng.
+- Lưu lại toàn bộ biên bản tham vấn vào `docs/` hoặc `deploy/` để phục vụ audit và theo dõi tiến độ.
+

@@ -132,6 +132,7 @@ describe('WingsGo dynamic catalog constraints', () => {
         calls.push({ collection, limit })
         if (collection === 'pages') return { docs: wrappers }
         if (collection === 'tour-products') return { docs: products }
+        if (collection === 'tour-curations') return { docs: [] }
         return { docs: departures }
       }),
     }
@@ -155,6 +156,7 @@ describe('WingsGo dynamic catalog constraints', () => {
       { collection: 'pages', limit: WINGSGO_CATALOG_MAX_INVENTORY },
       { collection: 'tour-products', limit: WINGSGO_CATALOG_MAX_INVENTORY },
       { collection: 'tour-departures', limit: WINGSGO_CATALOG_MAX_INVENTORY },
+      { collection: 'tour-curations', limit: 1 },
     ])
     expect(result.featured.map(({ id }) => id)).toEqual([1, 2, 3, 4, 5, 6])
     expect(result.all.map(({ id }) => id)).toEqual([7, 8])

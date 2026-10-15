@@ -26,6 +26,7 @@ export type WingsGoCatalogPage = {
   site: number | string | { code?: null | string; id: number | string }
   wingsGoTourCatalog?: {
     enabled?: boolean | null
+    curation?: number | string | { id?: number | string | null; featuredTours?: unknown } | null
     featuredTours?: Array<number | string | { id?: number | string | null }> | null
   } | null
 }
@@ -397,7 +398,10 @@ export const queryWingsGoTourCatalog = async ({
   payload: Payload
   site: { code: string; id: number | string }
 }): Promise<WingsGoCatalogData> => {
-  if (site.code !== 'wings-go' || page.pathname !== '/tour' || !page.wingsGoTourCatalog?.enabled) {
+  if (
+    site.code !== 'wings-go' ||
+    (!page.wingsGoTourCatalog?.enabled && page.pathname !== '/tour')
+  ) {
     return { all: [], featured: [], hasMore: false, nextOffset: 0 }
   }
 
@@ -468,7 +472,11 @@ export const queryWingsGoTourCatalog = async ({
     )
     .filter((card): card is WingsGoCatalogCard => Boolean(card))
 
-  const configuredIDs = relationIDs(page.wingsGoTourCatalog.featuredTours)
+  const configuredIDs = await resolveCuratedTourIDs({
+    page,
+    payload,
+    siteID: site.id,
+  })
   const configuredFeatured: WingsGoCatalogCard[] = []
   const configuredSeenIDs = new Set<string>()
   for (const id of configuredIDs) {
@@ -497,12 +505,91 @@ export const queryWingsGoTourCatalog = async ({
   }
 }
 
+export const resolveCuratedTourIDs = async ({
+  page,
+  payload,
+  siteID,
+}: {
+  page?: WingsGoCatalogPage | null
+  payload: Payload
+  siteID: number | string
+}): Promise<Array<number | string>> => {
+  // Tier 1: Page-bound curation
+  const pageCurationRef = page?.wingsGoTourCatalog?.curation
+  if (pageCurationRef) {
+    if (
+      typeof pageCurationRef === 'object' &&
+      pageCurationRef !== null &&
+      'featuredTours' in pageCurationRef &&
+      Array.isArray((pageCurationRef as { featuredTours?: unknown }).featuredTours)
+    ) {
+      const pageCurationSite = relationID((pageCurationRef as { site?: Relation }).site)
+      if (!pageCurationSite || String(pageCurationSite) === String(siteID)) {
+        const ids = relationIDs((pageCurationRef as { featuredTours?: unknown }).featuredTours)
+        if (ids.length > 0) return ids
+      }
+    }
+    const curationID = relationID(pageCurationRef as Relation)
+    if (curationID) {
+      try {
+        const curationDoc = await payload.findByID({
+          collection: 'tour-curations',
+          depth: 0,
+          id: curationID,
+          overrideAccess: true,
+        })
+        if (curationDoc) {
+          const curationSite = relationID((curationDoc as { site?: Relation }).site)
+          if (!curationSite || String(curationSite) === String(siteID)) {
+            const ids = relationIDs((curationDoc as { featuredTours?: unknown }).featuredTours)
+            if (ids.length > 0) return ids
+          }
+        }
+      } catch {
+        // Fallback to Tier 2
+      }
+    }
+  }
+
+  // Tier 2: Site default curation
+  try {
+    const defaultCurationResult = await payload.find({
+      collection: 'tour-curations',
+      depth: 0,
+      limit: 1,
+      overrideAccess: true,
+      pagination: false,
+      where: {
+        and: [{ site: { equals: siteID } }, { isDefault: { equals: true } }],
+      },
+    })
+    const defaultDoc = defaultCurationResult.docs[0]
+    if (defaultDoc) {
+      const ids = relationIDs((defaultDoc as { featuredTours?: unknown }).featuredTours)
+      if (ids.length > 0) return ids
+    }
+  } catch {
+    // Fallback to Tier 3
+  }
+
+  // Tier 3: Legacy featuredTours array on page
+  const legacyIDs = relationIDs(page?.wingsGoTourCatalog?.featuredTours)
+  if (legacyIDs.length > 0) {
+    return legacyIDs
+  }
+
+  // Tier 4: Algorithmic fallback
+  return []
+}
+
 export const getWingsGoFeaturedTours = async ({
+  curationID,
   limit = 4,
   locale = 'vi',
   payload,
   site,
 }: {
+  curationID?: number | string
   limit?: number
   locale?: string
   payload: Payload
@@ -526,23 +613,40 @@ export const getWingsGoFeaturedTours = async ({
     },
   })
   const catalogPage = catalogPageResult.docs[0] as unknown as WingsGoCatalogPage | undefined
-  if (!catalogPage) return []
+  const effectivePage: WingsGoCatalogPage = catalogPage
+    ? {
+        ...catalogPage,
+        wingsGoTourCatalog: {
+          ...catalogPage.wingsGoTourCatalog,
+          enabled: true,
+          ...(curationID !== undefined ? { curation: curationID } : {}),
+        },
+      }
+    : {
+        id: 0,
+        pathname: '/tour',
+        site: site.id,
+        wingsGoTourCatalog: {
+          enabled: true,
+          curation: curationID,
+        },
+      }
 
   const catalog = await queryWingsGoTourCatalog({
     limit,
     locale,
-    page: catalogPage,
+    page: effectivePage,
     payload,
     site,
   })
   if (!catalog) return []
 
-  const curatedTourIDs = new Set(
-    (catalogPage.wingsGoTourCatalog?.featuredTours || []).flatMap((tour) => {
-      const id = tour && typeof tour === 'object' && 'id' in tour ? tour.id : tour
-      return typeof id === 'number' || typeof id === 'string' ? [String(id)] : []
-    }),
-  )
+  const configuredIDs = await resolveCuratedTourIDs({
+    page: effectivePage,
+    payload,
+    siteID: site.id,
+  })
+  const curatedTourIDs = new Set(configuredIDs.map(String))
   const curatedMatches = catalog.featured.filter((tour) => curatedTourIDs.has(String(tour.id)))
   const fallbackFeatured = catalog.featured.filter((tour) => !curatedTourIDs.has(String(tour.id)))
   return [...curatedMatches, ...fallbackFeatured].slice(0, limit)

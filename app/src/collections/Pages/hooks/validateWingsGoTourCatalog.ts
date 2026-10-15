@@ -5,6 +5,7 @@ import type { Page } from '@/payload-types'
 type Relation = number | string | { id?: number | string | null } | null | undefined
 
 type CatalogSelection = {
+  curation?: Relation | null
   featuredTours?: Relation[] | null
   enabled?: boolean | null
 }
@@ -79,20 +80,16 @@ export const validateWingsGoTourCatalog: CollectionBeforeChangeHook<Page> = asyn
   const catalog = { ...previous, ...incoming }
   const selectedIDs = relationIDs(catalog.featuredTours)
 
-  if (!catalog.enabled && selectedIDs.length === 0) {
+  if (!catalog.enabled && selectedIDs.length === 0 && !catalog.curation) {
     return data
-  }
-
-  if (selectedIDs.length > 6) {
-    throw new Error('WingsGo tour catalog chỉ được chọn tối đa 6 tour nổi bật.')
   }
 
   const siteID =
     relationID(nextPage?.site as Relation) ?? relationID(previousPage?.site as Relation)
   const pagePath = catalogPath(nextPage, previousPage)
 
-  if (!siteID || pagePath !== '/tour') {
-    throw new Error('WingsGo tour catalog chỉ được cấu hình trên page /tour.')
+  if (!siteID) {
+    throw new Error('A site must be selected before saving.')
   }
 
   const site = await req.payload.findByID({
@@ -107,8 +104,37 @@ export const validateWingsGoTourCatalog: CollectionBeforeChangeHook<Page> = asyn
     throw new Error('WingsGo tour catalog không được dùng cho site khác.')
   }
 
-  if (new Set(selectedIDs.map(String)).size !== selectedIDs.length) {
-    throw new Error('WingsGo tour catalog không được chọn trùng tour.')
+  // Validate attached curation if selected
+  if (catalog.curation) {
+    const curationID = relationID(catalog.curation)
+    if (curationID) {
+      const curationDoc = await req.payload.findByID({
+        collection: 'tour-curations' as never,
+        depth: 0,
+        id: curationID,
+        overrideAccess: true,
+        req,
+      })
+
+      if (!curationDoc || !sameID((curationDoc as any).site, siteID)) {
+        throw new Error('Bộ tour nổi bật phải thuộc cùng site với trang.')
+      }
+    }
+  }
+
+  // Legacy featuredTours array constraints
+  if (selectedIDs.length > 0) {
+    if (pagePath !== '/tour') {
+      throw new Error('Dữ liệu tour nổi bật legacy chỉ được cấu hình trên page /tour.')
+    }
+
+    if (selectedIDs.length > 6) {
+      throw new Error('WingsGo tour catalog chỉ được chọn tối đa 6 tour nổi bật.')
+    }
+
+    if (new Set(selectedIDs.map(String)).size !== selectedIDs.length) {
+      throw new Error('WingsGo tour catalog không được chọn trùng tour.')
+    }
   }
 
   if (selectedIDs.length === 0) {

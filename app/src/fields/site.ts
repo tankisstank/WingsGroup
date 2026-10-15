@@ -5,6 +5,10 @@ import type { AppUser, RelationValue } from '@/types/auth'
 import { getUserSiteIDs, isSuperAdmin, normalizeRelationID } from '@/access/roles'
 
 const currentUserSiteFilter = ({ req }: FilterOptionsProps): boolean | Where => {
+  if (req?.context?.seed) {
+    return true
+  }
+
   const user = req.user as AppUser | undefined
 
   if (!user) {

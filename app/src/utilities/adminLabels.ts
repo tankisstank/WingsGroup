@@ -29,6 +29,8 @@ const vietnameseAdminCopy: Record<string, string> = {
   'Theme presets': 'Preset giao diện',
   'Tour Campaign': 'Chiến dịch tour',
   'Tour Campaigns': 'Chiến dịch tour',
+  'Tour Curation': 'Bộ tour nổi bật',
+  'Tour Curations': 'Bộ tour nổi bật',
   'Tour Departure': 'Lịch khởi hành tour',
   'Tour Departures': 'Lịch khởi hành tour',
   'Tour Product': 'Sản phẩm tour',

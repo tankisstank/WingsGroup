@@ -174,4 +174,298 @@ describe('WingsGo Visual Tour Curation & Simulator Logic (US-078)', () => {
       expect(report.errors).toContain('Số lượng tour vượt quá giới hạn tối đa 6.')
     })
   })
+
+  describe('Multi-Tier Resolver Fallback (AC-10)', () => {
+    it('Tier 1: Page-bound curation takes highest precedence', async () => {
+      const { resolveCuratedTourIDs } = await import('@/tours/wingsGoCatalog')
+      const mockPayload = {
+        findByID: async () => ({ id: 99, featuredTours: [101, 102, 103] }),
+        find: async () => ({ docs: [{ id: 1, featuredTours: [201, 202] }] }),
+      } as any
+
+      const result = await resolveCuratedTourIDs({
+        page: {
+          id: 10,
+          pathname: '/tour',
+          site: 1,
+          wingsGoTourCatalog: {
+            enabled: true,
+            curation: 99,
+            featuredTours: [301, 302],
+          },
+        },
+        payload: mockPayload,
+        siteID: 1,
+      })
+
+      expect(result).toEqual([101, 102, 103])
+    })
+
+    it('Tier 2: Site default curation is used when page curation is omitted', async () => {
+      const { resolveCuratedTourIDs } = await import('@/tours/wingsGoCatalog')
+      const mockPayload = {
+        findByID: async () => null,
+        find: async () => ({ docs: [{ id: 1, featuredTours: [201, 202, 203] }] }),
+      } as any
+
+      const result = await resolveCuratedTourIDs({
+        page: {
+          id: 10,
+          pathname: '/tour',
+          site: 1,
+          wingsGoTourCatalog: {
+            enabled: true,
+            curation: null,
+            featuredTours: [301, 302],
+          },
+        },
+        payload: mockPayload,
+        siteID: 1,
+      })
+
+      expect(result).toEqual([201, 202, 203])
+    })
+
+    it('Tier 3: Legacy featuredTours array on page is used when neither page curation nor default exists', async () => {
+      const { resolveCuratedTourIDs } = await import('@/tours/wingsGoCatalog')
+      const mockPayload = {
+        findByID: async () => null,
+        find: async () => ({ docs: [] }),
+      } as any
+
+      const result = await resolveCuratedTourIDs({
+        page: {
+          id: 10,
+          pathname: '/tour',
+          site: 1,
+          wingsGoTourCatalog: {
+            enabled: true,
+            curation: null,
+            featuredTours: [301, 302, 303],
+          },
+        },
+        payload: mockPayload,
+        siteID: 1,
+      })
+
+      expect(result).toEqual([301, 302, 303])
+    })
+
+    it('Cross-site Isolation: Rejects curation reference from a different site and falls back to site default', async () => {
+      const { resolveCuratedTourIDs } = await import('@/tours/wingsGoCatalog')
+      const mockPayload = {
+        findByID: async () => ({
+          id: 999,
+          name: 'WingSide Curation',
+          site: 2, // Different site!
+          featuredTours: [901, 902],
+        }),
+        find: async () => ({
+          docs: [
+            {
+              id: 100,
+              isDefault: true,
+              site: 1, // Same site default!
+              featuredTours: [101, 102],
+            },
+          ],
+        }),
+      } as any
+
+      const result = await resolveCuratedTourIDs({
+        page: {
+          id: 10,
+          pathname: '/tour',
+          site: 1,
+          wingsGoTourCatalog: {
+            enabled: true,
+            curation: 999,
+          },
+        },
+        payload: mockPayload,
+        siteID: 1,
+      })
+
+      // Should reject 999 (site 2) and fall back to site 1 default [101, 102]
+      expect(result).toEqual([101, 102])
+    })
+
+    it('Tier 4: Returns empty array to trigger algorithmic fallback when no curation or legacy list exists', async () => {
+      const { resolveCuratedTourIDs } = await import('@/tours/wingsGoCatalog')
+      const mockPayload = {
+        findByID: async () => null,
+        find: async () => ({ docs: [] }),
+      } as any
+
+      const result = await resolveCuratedTourIDs({
+        page: {
+          id: 10,
+          pathname: '/tour',
+          site: 1,
+          wingsGoTourCatalog: {
+            enabled: true,
+            curation: null,
+            featuredTours: [],
+          },
+        },
+        payload: mockPayload,
+        siteID: 1,
+      })
+
+      expect(result).toEqual([])
+    })
+  })
+
+  describe('TourCurations Collection Hooks (AC-7 & AC-8)', () => {
+    it('enforceSingleDefaultPerSite disables previous defaults for the same site', async () => {
+      const { enforceSingleDefaultPerSite } = await import('@/collections/TourCurations/hooks')
+      const updatedDocs: Array<{ id: number; data: any }> = []
+
+      const mockPayload = {
+        find: async () => ({
+          docs: [
+            { id: 10, isDefault: true, site: 1 },
+            { id: 20, isDefault: true, site: 1 },
+          ],
+        }),
+        update: async ({ id, data }: any) => {
+          updatedDocs.push({ id, data })
+          return { id, ...data }
+        },
+      }
+
+      const req = { payload: mockPayload } as any
+      const data = { name: 'New Default', isDefault: true, site: 1 }
+
+      await enforceSingleDefaultPerSite({
+        data,
+        originalDoc: { id: 30, site: 1 },
+        req,
+        operation: 'create',
+      } as any)
+
+      expect(updatedDocs).toEqual([
+        { id: 10, data: { isDefault: false } },
+        { id: 20, data: { isDefault: false } },
+      ])
+    })
+
+    it('validateTourCurationTours rejects lists exceeding 6 slots', async () => {
+      const { validateTourCurationTours } = await import('@/collections/TourCurations/hooks')
+      const data = { site: 1, featuredTours: [1, 2, 3, 4, 5, 6, 7] }
+
+      await expect(
+        validateTourCurationTours({
+          data,
+          originalDoc: undefined,
+          req: { payload: {} } as any,
+          operation: 'create',
+        } as any),
+      ).rejects.toThrow('Bộ sưu tập tour chỉ được chọn tối đa 6 tour nổi bật.')
+    })
+
+    it('validateTourCurationTours rejects duplicate tours in collection', async () => {
+      const { validateTourCurationTours } = await import('@/collections/TourCurations/hooks')
+      const data = { site: 1, featuredTours: [1, 2, 3, 1] }
+
+      await expect(
+        validateTourCurationTours({
+          data,
+          originalDoc: undefined,
+          req: { payload: {} } as any,
+          operation: 'create',
+        } as any),
+      ).rejects.toThrow('Không được chọn trùng lặp tour trong bộ sưu tập.')
+    })
+
+    it('validateTourCurationTours rejects tours from a different site', async () => {
+      const { validateTourCurationTours } = await import('@/collections/TourCurations/hooks')
+      const mockPayload = {
+        find: async () => ({
+          docs: [{ id: 1, site: 1 }], // Only 1 matched out of 2 requested
+        }),
+      }
+
+      const data = { site: 1, featuredTours: [1, 2] }
+
+      await expect(
+        validateTourCurationTours({
+          data,
+          originalDoc: undefined,
+          req: { payload: mockPayload } as any,
+          operation: 'create',
+        } as any),
+      ).rejects.toThrow('Tất cả các tour trong bộ sưu tập phải thuộc cùng site đã chọn.')
+    })
+
+    it('validateTourCurationTours uses originalDoc.featuredTours on partial patch', async () => {
+      const { validateTourCurationTours } = await import('@/collections/TourCurations/hooks')
+      const mockPayload = {
+        find: async () => ({
+          docs: [{ id: 1, site: 2 }], // 1 tour matched for site 2
+        }),
+      }
+
+      // data only updates site to 2, featuredTours is undefined
+      const data = { site: 2 }
+      const originalDoc = { id: 10, site: 1, featuredTours: [1] }
+
+      const result = await validateTourCurationTours({
+        data,
+        originalDoc,
+        req: { payload: mockPayload } as any,
+        operation: 'update',
+      } as any)
+
+      expect(result).toEqual({ site: 2 })
+    })
+
+    it('preventCurationDelete blocks deleting default curation', async () => {
+      const { preventCurationDelete } = await import('@/collections/TourCurations/hooks')
+      const mockPayload = {
+        findByID: async () => ({ id: 10, isDefault: true, site: 1 }),
+        find: async () => ({ docs: [] }),
+      }
+
+      await expect(
+        preventCurationDelete({
+          id: 10,
+          req: { payload: mockPayload } as any,
+          collection: { slug: 'tour-curations' } as any,
+        } as any),
+      ).rejects.toThrow('Không thể xóa bộ sưu tập đang được thiết lập làm mặc định của site.')
+    })
+
+    it('preventCurationDelete blocks deleting curation bound to active page', async () => {
+      const { preventCurationDelete } = await import('@/collections/TourCurations/hooks')
+      const mockPayload = {
+        findByID: async () => ({ id: 20, isDefault: false, site: 1 }),
+        find: async () => ({ docs: [{ id: 100, pathname: '/tour' }] }),
+      }
+
+      await expect(
+        preventCurationDelete({
+          id: 20,
+          req: { payload: mockPayload } as any,
+          collection: { slug: 'tour-curations' } as any,
+        } as any),
+      ).rejects.toThrow('Không thể xóa bộ sưu tập vì đang được sử dụng bởi trang (/tour).')
+    })
+
+    it('preventCurationDelete allows deleting unbound non-default curation', async () => {
+      const { preventCurationDelete } = await import('@/collections/TourCurations/hooks')
+      const mockPayload = {
+        findByID: async () => ({ id: 30, isDefault: false, site: 1 }),
+        find: async () => ({ docs: [] }),
+      }
+
+      await expect(
+        preventCurationDelete({
+          id: 30,
+          req: { payload: mockPayload } as any,
+          collection: { slug: 'tour-curations' } as any,
+        } as any),
+      ).resolves.toBeUndefined()
+    })
+  })
 })

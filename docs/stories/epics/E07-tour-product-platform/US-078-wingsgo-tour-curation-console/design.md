@@ -109,3 +109,124 @@ Thực hiện kiểm tra client-side tương ứng với hook `validateWingsGoTo
 - Không thay đổi kiểu dữ liệu của `wingsGoTourCatalog.featuredTours` (vẫn là relationship array ID lưu vào `pages_rels`).
 - Không ảnh hưởng tới frontend runtime: code frontend `wingsGoCatalog.ts` đọc dữ liệu như bình thường.
 - Trong trường hợp component React gặp sự cố render, Payload fallback an toàn không gây mất dữ liệu trang `/tour`.
+
+---
+
+## 6. Kiến trúc Mở rộng: Collection Độc lập `TourCurations` (Level 3+)
+
+Để giải phóng tính năng Curation khỏi sự phụ thuộc vào document trang `/tour`, kiến trúc được nâng cấp thành mô hình **Hybrid (Collection tập trung + Default Site + Page Binding)**:
+
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Navigation Menu Sidebar CMS                     │
+│  [Nội dung]                                                            │
+│    ├── Trang (Pages)                                                   │
+│    ├── Bài viết (Posts)                                                │
+│    ├── Chiến dịch tour (Tour Campaigns)                                │
+│    └── ⭐ Bộ curation tour (Tour Curations)  <── MỤC MỚI ĐỘC LẬP      │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+### 6.1. Schema Collection `TourCurations` (`app/src/collections/TourCurations.ts`):
+```typescript
+export const TourCurations: CollectionConfig = {
+  slug: 'tour-curations',
+  admin: {
+    group: adminGroups.content,
+    useAsTitle: 'name',
+    defaultColumns: ['name', 'site', 'isDefault', 'updatedAt'],
+  },
+  fields: [
+    siteField(), // Tự động khóa theo site hiện tại qua withAdminSiteContext
+    {
+      name: 'name',
+      label: 'Tên bộ curation',
+      type: 'text',
+      required: true,
+      admin: { placeholder: 'Ví dụ: Tour Hot Trang chủ - Mùa Thu 2026' },
+    },
+    {
+      name: 'isDefault',
+      label: 'Đặt làm bộ mặc định cho Site',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description: 'Khi bật, bộ này sẽ tự động cung cấp tour cho Trang chủ và trang Catalog của site nếu trang đó không chọn bộ riêng.',
+      },
+    },
+    {
+      name: 'featuredTours',
+      label: 'Danh sách tour nổi bật (Tối đa 6 tour)',
+      type: 'relationship',
+      relationTo: 'tour-products',
+      hasMany: true,
+      maxRows: 6,
+      filterOptions: sameSiteFilterOptions,
+      admin: {
+        components: {
+          Field: '@/components/WingsGoTourCuration/FeaturedToursCurationField',
+        },
+      },
+    },
+    {
+      name: 'description',
+      label: 'Ghi chú nội bộ cho Editor',
+      type: 'textarea',
+    },
+  ],
+  hooks: {
+    beforeChange: [enforceSingleDefaultPerSite, validateTourCurationTours],
+    afterChange: [revalidateTourCuration],
+    afterDelete: [revalidateTourCuration],
+  },
+}
+```
+
+### 6.2. Trường liên kết trên `Pages` (`wingsGoTourCatalogField`):
+Trên `app/src/fields/wingsGoTourCatalog.ts`:
+```typescript
+{
+  name: 'curation',
+  label: 'Bộ curation áp dụng',
+  type: 'relationship',
+  relationTo: 'tour-curations',
+  filterOptions: sameSiteFilterOptions,
+  admin: {
+    description: 'Chọn bộ curation riêng cho trang này. Nếu để trống, trang sẽ tự động sử dụng bộ curation Mặc định của site.',
+  },
+}
+```
+
+---
+
+## 7. Logic Resolver Đa tầng & Fallback 4 Lớp
+
+Hàm `resolveWingsGoTourCuration({ site, curationID, locale })` trong `wingsGoCatalog.ts` thực hiện truy xuất theo thứ tự an toàn:
+
+```text
+[Yêu cầu lấy Tour Nổi bật]
+          │
+          ▼
+   1. Curation gắn riêng trên Page? ──(Có & Published)──> Dùng Curation của Page
+          │ (Không)
+          ▼
+   2. Curation mặc định (isDefault=true) của Site? ──(Có & Published)──> Dùng Curation Mặc định Site
+          │ (Không)
+          ▼
+   3. Dữ liệu cũ trong pages_rels của trang /tour? ──(Có)──> Dùng Legacy Featured Tours
+          │ (Không)
+          ▼
+   4. Thuật toán tự động tìm các tour có ngày bay gần nhất
+```
+
+---
+
+## 8. Cơ chế Xóa Cache (Redis & Next.js ISR)
+
+Khi một bản ghi `TourCurations` được lưu hoặc xóa:
+1. **Redis Cache:** Xóa toàn bộ key cache dạng `wingsgo-curation:${siteID}:*`.
+2. **Next.js Revalidation:**
+   - Luôn revalidate trang chủ: `revalidatePath('/')`.
+   - Luôn revalidate trang catalog: `revalidatePath('/tour')`.
+   - Revalidate tất cả các Page đang có `wingsGoTourCatalog.curation == curation.id`.
+

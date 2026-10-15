@@ -23,6 +23,7 @@ import { SiteSettings } from './collections/SiteSettings'
 import { Sites } from './collections/Sites'
 import { DepartureVariants } from './collections/DepartureVariants'
 import { TourCampaigns } from './collections/TourCampaigns'
+import { TourCurations } from './collections/TourCurations'
 import { TourDepartures } from './collections/TourDepartures'
 import { TourProducts } from './collections/TourProducts'
 import { ThemePresets } from './collections/ThemePresets'
@@ -227,6 +228,7 @@ export default buildConfig({
     DepartureVariants,
     TourDepartures,
     TourCampaigns,
+    TourCurations,
     Media,
     Categories,
     Users,

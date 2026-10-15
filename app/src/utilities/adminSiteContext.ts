@@ -1,5 +1,5 @@
 const siteScopedCollectionPattern =
-  /^(?:\/admin\/collections\/(?:pages|posts|tour-products|departure-variants|tour-departures|tour-campaigns|media|categories|forms|form-submissions|site-settings)|\/api\/(?:pages|posts|tour-products|departure-variants|tour-departures|tour-campaigns|media|categories|forms|form-submissions|site-settings))(?:\/|$)/u
+  /^(?:\/admin\/collections\/(?:pages|posts|tour-products|departure-variants|tour-departures|tour-campaigns|tour-curations|media|categories|forms|form-submissions|site-settings)|\/api\/(?:pages|posts|tour-products|departure-variants|tour-departures|tour-campaigns|tour-curations|media|categories|forms|form-submissions|site-settings))(?:\/|$)/u
 
 const adminSiteContextPattern =
   /^\/admin(?:\/?$|\/(?:console|page-wizard|theme|site-review)(?:\/|$))/u

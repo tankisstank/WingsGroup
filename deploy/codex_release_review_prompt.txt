@@ -1,0 +1,42 @@
+# CODEX CONSULTATION & RELEASE REVIEW REQUEST
+
+## 1. Context & Objective
+Dự án WingsTravel vừa hoàn thành việc nâng cấp tính năng Tour Hot / Nổi bật từ việc lưu trữ hardcode trên trang `/tour` sang:
+1. **Collection độc lập `TourCurations` (`tour-curations`)**: Nằm trên Sidebar CMS (menu "Nội dung" -> "Bộ tour nổi bật"). Hỗ trợ quản trị nhiều bộ tour có tên cho các chiến dịch (Tết, Thu, Khuyến mại) và gắn cờ `isDefault` duy nhất cho mỗi site.
+2. **Gán Curation vào `Pages`**: Trường quan hệ `wingsGoTourCatalog.curation` trên collection `Pages` cho phép bất kỳ Landing Page nào của WingsGo gán bộ curation riêng.
+3. **Multi-tier 4-layer Resolver**: `resolveCuratedTourIDs` và `getWingsGoFeaturedTours` trong `app/src/tours/wingsGoCatalog.ts` thực hiện fallback 4 tầng:
+   - Layer 1: Curation riêng gắn trực tiếp trên Page (`page.wingsGoTourCatalog.curation`).
+   - Layer 2: Curation mặc định của Site (`isDefault = true`).
+   - Layer 3: Legacy configuration trên trang `/tour` (`page.wingsGoTourCatalog.featuredTours`).
+   - Layer 4: Thuật toán fallback tự động (tour có ngày bay gần nhất).
+4. **Cache & Revalidation**:
+   - Collection hooks `revalidateTourCuration` & `revalidateTourCurationDelete` xóa Redis cache `wingsgo-curation:*` và revalidate ISR Next.js (`/`, `/tour`, và các Pages đang liên kết).
+5. **Database Migration & Backfill**:
+   - `app/src/migrations/20261015_090000_wingsgo_tour_curations.ts` cho PostgreSQL production.
+   - `app/src/utilities/repairLocalSQLiteSchema.ts` cho SQLite local.
+   - `app/scripts/backfill-wingsgo-tour-curations.ts` đã tạo bản ghi mặc định ID: 1, 6 tour `[17, 16, 15, 14, 13, 12]` và liên kết vào page ID 311 (`/tour`).
+
+## 2. Các file cốt lõi cần Codex Audit & Review
+- `app/src/collections/TourCurations.ts`
+- `app/src/collections/TourCurations/hooks.ts`
+- `app/src/fields/wingsGoTourCatalog.ts`
+- `app/src/collections/Pages/hooks/validateWingsGoTourCatalog.ts`
+- `app/src/tours/wingsGoCatalog.ts`
+- `app/src/migrations/20261015_090000_wingsgo_tour_curations.ts`
+- `app/src/components/WingsGoTourCuration/FeaturedToursCurationField.tsx`
+
+## 3. Câu hỏi và Trọng tâm Phản biện cần Codex đánh giá
+1. **Kiến trúc & Rủi ro Concurrency / Data Integrity:**
+   - Hook `enforceSingleDefaultPerSite` kiểm tra và tắt `isDefault` của các bản ghi cũ. Có rủi ro race condition nếu 2 editor cùng lưu 2 curation khác nhau với `isDefault = true` không? Trong Payload/Postgres, có cần partial unique index `UNIQUE (site_id) WHERE is_default = true` ở cấp DB không?
+   - Tính cô lập đa site (`siteField`): Đảm bảo các site khác (`wing-side`, `wingsgroup`) không thể truy cập hoặc gán nhầm curation của `wings-go`.
+2. **Khả năng Tương thích ngược (Backward Compatibility):**
+   - Nếu production có trang `/tour` cũ chưa chạy migration/backfill, hoặc trường `curation` bị `null`, resolver 4 lớp có đảm bảo 100% không làm crash hoặc trắng trang không?
+   - Việc giữ lại trường `featuredTours` cũ trên `pages` có gây xung đột hay nhầm lẫn gì cho editor không?
+3. **Hiệu năng & Cache Invalidation:**
+   - Redis key naming & pattern invalidation: `delByPattern('wingsgo-curation:*')`. Có rủi ro performance khi gọi `keys` hoặc `scan` trên Redis cluster/production không?
+   - Next.js ISR `safeRevalidatePath`: Các path nào cần được revalidate khi một curation thay đổi? Trang chủ (`/`), `/tour`, localized paths (`/vi/*`, `/en/*`) đã đủ chưa?
+4. **Checklist Triển khai lên Production VPS (Oracle Cloud ARM64):**
+   - Quy trình deploy chuẩn từ Windows x64 sang Linux ARM64: thứ tự chạy migration DB (`payload migrate`), clear Redis cache, package release, và kiểm tra sau deploy.
+   - Các điểm kiểm tra (Smoke test & Health check) cần thực hiện ngay sau khi release.
+
+Hãy đưa ra đánh giá khách quan, chỉ rõ các rủi ro (P1 - Critical, P2 - Major, P3 - Minor) cùng khuyến nghị và giải pháp khắc phục cụ thể.

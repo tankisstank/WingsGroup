@@ -56,6 +56,7 @@
     "update:wingsgroup:trust-article": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/update-wingsgroup-trust-article.ts",
     "seed:wingsside:hifi-content": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/seed-wingsside-hifi-content.ts",
     "seed:wingsside:home-curation": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/apply-wingsside-home-curation.ts",
+    "backfill:wingsgo:tour-curations": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/backfill-wingsgo-tour-curations.ts",
     "seed:wingsside:tour-editorial:rehearsal": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/seed-wingsside-tour-editorial-rehearsal.ts",
     "rehearsal:wingsside:us055": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/run-wingsside-us055-rehearsal.mjs",
     "rehearsal:wingsside:us055:catalog:preflight": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/rehearse-wingsside-us055-catalog-lifecycle.ts",

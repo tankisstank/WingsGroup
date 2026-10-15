@@ -13,7 +13,7 @@ export const wingsGoTourCatalogField: Field = {
   type: 'group',
   admin: {
     description:
-      'Chỉ áp dụng cho trang WingsGo /tour. Catalog đọc tối đa 200 sản phẩm/đợt khởi hành/wrapper mỗi lần; chọn tối đa 6 tour nổi bật theo thứ tự. Tour dự phòng được tính khi render và không ghi vào CMS.',
+      'Chỉ định catalog động và bộ tour nổi bật. Nếu để trống bộ tour nổi bật, hệ thống sẽ tự động dùng bộ mặc định của site.',
   },
   fields: [
     {
@@ -23,8 +23,19 @@ export const wingsGoTourCatalogField: Field = {
       defaultValue: false,
     },
     {
+      name: 'curation',
+      label: 'Bộ tour nổi bật áp dụng',
+      type: 'relationship',
+      relationTo: 'tour-curations',
+      filterOptions: sameSiteFilterOptions,
+      admin: {
+        description:
+          'Chọn bộ tour riêng cho trang này. Nếu để trống, trang sẽ tự động sử dụng bộ tour Mặc định của site.',
+      },
+    },
+    {
       name: 'featuredTours',
-      label: 'Tour nổi bật',
+      label: 'Tour nổi bật (Legacy)',
       type: 'relationship',
       relationTo: 'tour-products',
       hasMany: true,
@@ -35,7 +46,7 @@ export const wingsGoTourCatalogField: Field = {
           Field: '@/components/WingsGoTourCuration/FeaturedToursCurationField',
         },
         description:
-          'Giữ đúng thứ tự biên tập. Mỗi tour phải là sản phẩm WingsGo đã publish, có wrapper page cùng site đã publish và có đợt đi tương lai đã publish.',
+          'Dữ liệu legacy. Khuyến khích quản trị tại menu "Bộ tour nổi bật" để tái sử dụng trên nhiều trang.',
       },
     },
   ],
