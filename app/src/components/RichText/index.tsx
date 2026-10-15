@@ -76,6 +76,9 @@ const protectEmailText = (text: string) => {
   return <>{parts}</>
 }
 
+import { sanitizeHref } from './sanitizeHref'
+export { sanitizeHref }
+
 const renderLink = ({
   children,
   href,
@@ -86,7 +89,7 @@ const renderLink = ({
   newTab?: boolean
 }) => (
   <a
-    href={href}
+    href={sanitizeHref(href)}
     rel={newTab ? 'noopener noreferrer' : undefined}
     target={newTab ? '_blank' : undefined}
   >

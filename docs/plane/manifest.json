@@ -382,7 +382,8 @@
     "US-075": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
     "US-077": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
     "US-078": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
-    "US-079": { "projectKey": "wingsside", "module": "Tours & Services", "epicKey": "E10", "site": "WingSide", "phase": "Phase 2", "workstream": "CMS", "customerVisible": "Yes" }
+    "US-079": { "projectKey": "wingsside", "module": "Tours & Services", "epicKey": "E10", "site": "WingSide", "phase": "Phase 2", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-080": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" }
   }
 }
 

@@ -24,3 +24,4 @@ scripts/bin/harness
 scripts/bin/harness.exe
 .seo-cache/
 deploy/oracle/*.zip
+deploy/oracle/temp-release/

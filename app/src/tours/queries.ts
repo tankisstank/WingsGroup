@@ -28,6 +28,7 @@ import {
   getNextDeparture,
   groupDeparturesByMonth,
   marketRouteSlugToKey,
+  mergeTourVariant,
   normalizeTourPublicText,
   selectPublishableDepartures,
 } from './utils'
@@ -271,76 +272,7 @@ const normalizeDepartureCard = (
   }
 }
 
-const mergeTourVariant = ({
-  tour,
-  variant,
-}: {
-  tour: Record<string, any>
-  variant?: null | Record<string, any>
-}) => {
-  if (!variant) {
-    return {
-      builderConfig: tour.bcfg || null,
-      sectionOrder: normalizeSectionIDs(tour.sectionOrder || defaultTourSectionOrder),
-      sectionVisibility: normalizeSectionIDs(
-        tour.sectionVisibility || defaultTourSectionVisibility,
-      ),
-      tour,
-    }
-  }
-
-  const itineraryDays = Array.isArray(tour.itineraryDays) ? [...tour.itineraryDays] : []
-  const overrides = Array.isArray(variant.itineraryDayOverrides)
-    ? variant.itineraryDayOverrides
-    : []
-
-  for (const override of overrides) {
-    const index = itineraryDays.findIndex(
-      (day) => String(day.dayNumber) === String(override.dayNumber),
-    )
-
-    if (index >= 0) {
-      itineraryDays[index] = {
-        ...itineraryDays[index],
-        ...Object.fromEntries(
-          Object.entries(override).filter(
-            ([, value]) => value !== null && value !== undefined && value !== '',
-          ),
-        ),
-      }
-    }
-  }
-
-  const variantRouteViz = variant.rvo || {}
-  const routeViz = {
-    ...(tour.routeViz || {}),
-    ...variantRouteViz,
-    stops: variantRouteViz.st || variantRouteViz.stops || tour.routeViz?.stops || [],
-  }
-
-  const servicesSummary = {
-    ...(tour.servicesSummary || {}),
-    ...(variant.servicesOverride || {}),
-  }
-
-  const mergedTour = {
-    ...tour,
-    summary: variant.summaryOverride || tour.summary,
-    heroMedia: variant.heroMediaOverride || tour.heroMedia,
-    itineraryDays,
-    routeViz,
-    servicesSummary,
-    variantLabel: variant.label || null,
-    variantMeta: variant,
-  }
-
-  return {
-    builderConfig: tour.bcfg || null,
-    sectionOrder: normalizeSectionIDs(tour.sectionOrder || defaultTourSectionOrder),
-    sectionVisibility: normalizeSectionIDs(tour.sectionVisibility || defaultTourSectionVisibility),
-    tour: mergedTour,
-  }
-}
+export { mergeTourVariant }
 
 export const getTourProductBySlug = async ({
   draft,

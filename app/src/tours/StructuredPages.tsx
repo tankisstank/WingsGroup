@@ -4,6 +4,7 @@ import React from 'react'
 
 import { FormBlock } from '@/blocks/Form/Component'
 import { Media } from '@/components/Media'
+import RichText from '@/components/RichText'
 import { SiteLink } from '@/components/SiteLink'
 import type { Media as MediaType } from '@/payload-types'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
@@ -1844,6 +1845,52 @@ const TourItinerarySection = ({
     return `${text.slice(0, 137).trim()}…`
   }
 
+  const extractLexicalText = (node: unknown): string => {
+    if (!node || typeof node !== 'object') return ''
+    if ('text' in node && typeof (node as { text: unknown }).text === 'string') {
+      return (node as { text: string }).text
+    }
+    if ('children' in node && Array.isArray((node as { children: unknown[] }).children)) {
+      return (node as { children: unknown[] }).children.map(extractLexicalText).join(' ')
+    }
+    return ''
+  }
+
+  const getItineraryDayTeaser = (day: Record<string, any>) => {
+    if (isUsableText(day.summary)) return teaser(day.summary)
+    if (day.content && typeof day.content === 'object') {
+      const plain = extractLexicalText(day.content.root).trim()
+      if (plain) return teaser(plain)
+    }
+    return null
+  }
+
+  const renderItineraryDayContent = (day: Record<string, any>) => {
+    const hasRichText =
+      day.content &&
+      typeof day.content === 'object' &&
+      Array.isArray(day.content.root?.children) &&
+      extractLexicalText(day.content.root).trim().length > 0
+
+    if (hasRichText) {
+      return (
+        <div className="mt-3 text-sm leading-7 text-muted-foreground prose prose-sm max-w-none [&_p]:my-2 [&_ul]:my-2 [&_li]:my-0.5">
+          <RichText data={day.content} enableGutter={false} />
+        </div>
+      )
+    }
+
+    if (isUsableText(day.summary)) {
+      return (
+        <p className="mt-3 text-sm leading-7 text-muted-foreground whitespace-pre-line">
+          {day.summary}
+        </p>
+      )
+    }
+
+    return null
+  }
+
   if (isConsultative) {
     return (
       <Panel className="scroll-mt-28 md:scroll-mt-24" data-od-id="tour-itinerary" id="itinerary">
@@ -1884,9 +1931,9 @@ const TourItinerarySection = ({
                     <h3 className="line-clamp-2 text-base font-semibold text-foreground sm:text-lg">
                       {day.title}
                     </h3>
-                    {teaser(day.summary) ? (
+                    {getItineraryDayTeaser(day) ? (
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground group-open:hidden">
-                        {teaser(day.summary)}
+                        {getItineraryDayTeaser(day)}
                       </p>
                     ) : null}
                     <div className="mt-2">
@@ -1917,17 +1964,13 @@ const TourItinerarySection = ({
                       {isUsableText(day.route) ? (
                         <p className="mt-1 text-sm font-medium text-foreground">{day.route}</p>
                       ) : null}
-                      {isUsableText(day.summary) ? (
-                        <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                          {day.summary}
-                        </p>
-                      ) : null}
+                      {renderItineraryDayContent(day)}
                       {day.dayHighlight ? (
                         <div className="mt-4 rounded-[20px] border border-border/60 bg-background p-4">
                           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
                             {isEn ? 'Highlight' : 'Điểm nhấn'}
                           </p>
-                          <p className="mt-2 text-sm leading-7 text-foreground">
+                          <p className="mt-2 text-sm leading-7 text-foreground whitespace-pre-line">
                             {day.dayHighlight}
                           </p>
                         </div>
@@ -1950,8 +1993,8 @@ const TourItinerarySection = ({
                         </div>
                       ) : null}
                       {[day.equipmentNote, day.notes].some(isUsableText) ? (
-                        <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                          {[day.equipmentNote, day.notes].filter(isUsableText).join(' ')}
+                        <p className="mt-4 text-sm leading-7 text-muted-foreground whitespace-pre-line">
+                          {[day.equipmentNote, day.notes].filter(isUsableText).join('\n')}
                         </p>
                       ) : null}
                     </div>
@@ -2066,9 +2109,9 @@ const TourItinerarySection = ({
                     {isUsableText(day.route) ? (
                       <p className="mt-1 text-sm font-medium text-foreground">{day.route}</p>
                     ) : null}
-                    {isUsableText(day.summary) && teaser(day.summary) ? (
+                    {getItineraryDayTeaser(day) ? (
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground group-open:hidden">
-                        {teaser(day.summary)}
+                        {getItineraryDayTeaser(day)}
                       </p>
                     ) : null}
                     <div className="mt-2 flex flex-wrap items-center gap-1.5" data-od-id={`${dayId}-pills`}>
@@ -2112,15 +2155,13 @@ const TourItinerarySection = ({
                       {isUsableText(day.route) ? (
                         <p className="mt-2 text-sm font-medium text-foreground">{day.route}</p>
                       ) : null}
-                      {isUsableText(day.summary) ? (
-                        <p className="mt-3 text-sm leading-7 text-muted-foreground">{day.summary}</p>
-                      ) : null}
+                      {renderItineraryDayContent(day)}
                       {isUsableText(day.dayHighlight) ? (
                         <div className="mt-4 rounded-[20px] border border-border/60 bg-background p-4">
                           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
                             {isEn ? 'Day highlight' : 'Điểm nhấn bán hàng'}
                           </p>
-                          <p className="mt-2 text-sm leading-7 text-foreground">{day.dayHighlight}</p>
+                          <p className="mt-2 text-sm leading-7 text-foreground whitespace-pre-line">{day.dayHighlight}</p>
                         </div>
                       ) : null}
                       {infoItems.length > 0 ? (
@@ -2141,8 +2182,8 @@ const TourItinerarySection = ({
                         </div>
                       ) : null}
                       {[day.equipmentNote, day.notes].some(isUsableText) ? (
-                        <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                          {[day.equipmentNote, day.notes].filter(isUsableText).join(' ')}
+                        <p className="mt-4 text-sm leading-7 text-muted-foreground whitespace-pre-line">
+                          {[day.equipmentNote, day.notes].filter(isUsableText).join('\n')}
                         </p>
                       ) : null}
                     </div>

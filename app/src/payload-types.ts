@@ -2310,6 +2310,24 @@ export interface TourProduct {
     title: string;
     route?: string | null;
     summary: string;
+    /**
+     * Hỗ trợ định dạng in đậm mốc giờ, gạch đầu dòng danh sách hoạt động và chèn link an toàn.
+     */
+    content?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     meals?: string | null;
     transport?: string | null;
     accommodation?: string | null;
@@ -4336,6 +4354,7 @@ export interface TourProductsSelect<T extends boolean = true> {
         title?: T;
         route?: T;
         summary?: T;
+        content?: T;
         meals?: T;
         transport?: T;
         accommodation?: T;

@@ -681,9 +681,10 @@ export const buildWingSideTourViewModel = ({
       media: getDayMedia(day),
       route: sanitizeWingSidePublicText(asText(day.route)),
       summary: sanitizeWingSidePublicText(asText(day.summary)),
+      content: day.content ?? null,
       title: sanitizeWingSidePublicText(asText(day.title)),
     }))
-    .filter((day) => day.title || day.summary || day.route)
+    .filter((day) => day.title || day.summary || day.content || day.route)
   const id = relationID(tour.id)
   const slug = sanitizeWingSidePublicText(asText(tour.slug))
   const durationDays = Number(tour.durationDays)

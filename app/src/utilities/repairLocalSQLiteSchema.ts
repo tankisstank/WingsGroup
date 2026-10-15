@@ -314,6 +314,14 @@ const localSQLiteColumnRepairs = [
     ],
   },
   {
+    table: 'tour_products_itinerary_days_locales',
+    columns: [['content', 'TEXT']],
+  },
+  {
+    table: '_tour_products_v_version_itinerary_days_locales',
+    columns: [['content', 'TEXT']],
+  },
+  {
     table: 'tour_departures',
     columns: [
       ['price_basis', 'TEXT'],
@@ -754,7 +762,13 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
 
       for (const [column, type] of columns) {
         if (!existingColumns.has(column)) {
-          db.exec(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${type};`)
+          try {
+            db.exec(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${type};`)
+          } catch (e: unknown) {
+            if (!String(e).includes('duplicate column name')) {
+              throw e
+            }
+          }
         }
       }
     }
@@ -774,7 +788,13 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
       const existing = new Set(tableInfo.map((column) => column.name).filter(Boolean))
       for (const [column, type] of columns) {
         if (!existing.has(column)) {
-          db.exec(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${type.toUpperCase()};`)
+          try {
+            db.exec(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${type.toUpperCase()};`)
+          } catch (e: unknown) {
+            if (!String(e).includes('duplicate column name')) {
+              throw e
+            }
+          }
         }
       }
     }

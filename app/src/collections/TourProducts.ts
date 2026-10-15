@@ -15,6 +15,16 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
+import {
+  BoldFeature,
+  ItalicFeature,
+  LinkFeature,
+  OrderedListFeature,
+  ParagraphFeature,
+  UnderlineFeature,
+  UnorderedListFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 
 import {
   revalidateTourProduct,
@@ -705,6 +715,72 @@ export const TourProducts: CollectionConfig = {
                   localized: true,
                   required: true,
                   type: 'textarea',
+                },
+                {
+                  name: 'content',
+                  label: 'Nội dung chi tiết trong ngày',
+                  localized: true,
+                  required: false,
+                  type: 'richText',
+                  editor: lexicalEditor({
+                    features: [
+                      ParagraphFeature(),
+                      BoldFeature(),
+                      ItalicFeature(),
+                      UnderlineFeature(),
+                      UnorderedListFeature(),
+                      OrderedListFeature(),
+                      LinkFeature({
+                        enabledCollections: ['pages', 'posts'],
+                        fields: ({ defaultFields }) => {
+                          const defaultFieldsWithoutUrl = defaultFields.filter((field) => {
+                            if ('name' in field && field.name === 'url') return false
+                            return true
+                          })
+
+                          return [
+                            ...defaultFieldsWithoutUrl,
+                            {
+                              name: 'url',
+                              type: 'text',
+                              admin: {
+                                condition: (_data, siblingData) =>
+                                  siblingData?.linkType !== 'internal',
+                              },
+                              label: ({ t }) => t('fields:enterURL'),
+                              required: true,
+                              validate: ((value: unknown, options: { siblingData?: Record<string, unknown> }) => {
+                                if (options?.siblingData?.linkType === 'internal') {
+                                  return true
+                                }
+                                if (!value) return 'URL is required'
+                                if (typeof value !== 'string') return 'URL không hợp lệ'
+                                const cleaned = value.replace(/[\u0000-\u001F\u007F]/g, '').trim()
+                                if (!cleaned) return 'URL is required'
+                                if (cleaned.startsWith('/') && !cleaned.startsWith('//')) return true
+                                if (cleaned.startsWith('#') || cleaned.startsWith('./')) return true
+                                if (cleaned.startsWith('//')) return 'Protocol-relative URLs are not allowed'
+                                try {
+                                  const parsed = new URL(cleaned, 'https://wingstravel.vn')
+                                  const protocol = parsed.protocol.toLowerCase()
+                                  if (['http:', 'https:', 'mailto:', 'tel:'].includes(protocol)) {
+                                    return true
+                                  }
+                                  return 'Chỉ chấp nhận các liên kết https, http, mailto, tel hoặc đường dẫn nội bộ (bắt đầu bằng /).'
+                                } catch {
+                                  return 'Định dạng URL không hợp lệ.'
+                                }
+                              }) as any,
+                            },
+                          ]
+                        },
+                      }),
+                    ],
+                  }),
+                  admin: {
+                    description:
+                      'Hỗ trợ định dạng in đậm mốc giờ, gạch đầu dòng danh sách hoạt động và chèn link an toàn.',
+                  },
                 },
                 {
                   name: 'meals',

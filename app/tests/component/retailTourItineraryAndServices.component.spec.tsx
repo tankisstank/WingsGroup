@@ -280,4 +280,117 @@ describe('US-027 Slice 3: Itinerary Accordion & Services Module retail component
     expect(includedBox?.querySelector('svg')).toBeTruthy()
     expect(excludedBox?.querySelector('svg')).toBeTruthy()
   })
+
+  it('renders rich text content with bold and paragraphs when content is provided', () => {
+    const tourWithRichText: TourResolvedData = {
+      ...baseTourData,
+      tour: {
+        ...baseTourData.tour,
+        itineraryDays: [
+          {
+            dayNumber: 1,
+            title: 'Hà Nội - Seoul (Nghỉ đêm trên máy bay)',
+            summary: 'Fallback summary plaintext',
+            content: {
+              root: {
+                type: 'root',
+                format: '',
+                indent: 0,
+                version: 1,
+                direction: 'ltr',
+                children: [
+                  {
+                    type: 'paragraph',
+                    format: '',
+                    indent: 0,
+                    version: 1,
+                    direction: 'ltr',
+                    children: [
+                      {
+                        type: 'text',
+                        text: '20h30: ',
+                        format: 1, // bold
+                        detail: 0,
+                        mode: 'normal',
+                        style: '',
+                        version: 1,
+                      },
+                      {
+                        type: 'text',
+                        text: 'Tập trung tại cổng D2 ga quốc tế sân bay Nội Bài.',
+                        format: 0,
+                        detail: 0,
+                        mode: 'normal',
+                        style: '',
+                        version: 1,
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      },
+    }
+
+    const { container } = render(
+      <TourDetailPage data={tourWithRichText} locale="vi" siteCode="wingsgo" />,
+    )
+
+    // Verify rich text container rendered
+    const richTextContainer = container.querySelector('.prose')
+    expect(richTextContainer).toBeTruthy()
+    expect(richTextContainer?.textContent).toContain('20h30: Tập trung tại cổng D2')
+    // Strong tag for bold
+    const strongTag = richTextContainer?.querySelector('strong')
+    expect(strongTag).toBeTruthy()
+    expect(strongTag?.textContent).toContain('20h30:')
+  })
+
+  it('safely falls back to summary when content has empty or malformed Lexical AST', () => {
+    const tourWithMalformedContent: TourResolvedData = {
+      ...baseTourData,
+      tour: {
+        ...baseTourData.tour,
+        itineraryDays: [
+          {
+            dayNumber: 1,
+            title: 'Hà Nội - Seoul',
+            summary: 'Đoàn khởi hành từ Hà Nội an toàn.',
+            // Empty paragraph produced by editor when nothing is typed
+            content: {
+              root: {
+                type: 'root',
+                format: '',
+                indent: 0,
+                version: 1,
+                direction: 'ltr',
+                children: [
+                  {
+                    type: 'paragraph',
+                    format: '',
+                    indent: 0,
+                    version: 1,
+                    direction: 'ltr',
+                    children: [],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      },
+    }
+
+    const { container } = render(
+      <TourDetailPage data={tourWithMalformedContent} locale="vi" siteCode="wingsgo" />,
+    )
+
+    // Should NOT render empty .prose, should fallback to whitespace-pre-line summary paragraph
+    expect(container.textContent).toContain('Đoàn khởi hành từ Hà Nội an toàn.')
+    const summaryP = container.querySelector('p.whitespace-pre-line')
+    expect(summaryP).toBeTruthy()
+    expect(summaryP?.textContent).toContain('Đoàn khởi hành từ Hà Nội an toàn.')
+  })
 })
