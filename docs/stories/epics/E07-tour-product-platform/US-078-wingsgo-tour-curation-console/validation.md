@@ -142,8 +142,24 @@ Theo quy định bắt buộc tại `AGENTS.md`, phiên kiểm toán phát hành
   - `GET https://wingsgo.vn/tour` -> `200 OK`.
   - `GET https://wingsgo.vn/` -> `200 OK`.
   - `GET https://wingsgo.vn/admin/collections/tour-curations` -> `307 Temporary Redirect` (sẵn sàng phục vụ editor).
-- **Hình ảnh kiểm chứng Live Website (agent-browser):**
+- **Hình ảnh kiểm chứng Live Website & Admin CMS (agent-browser):**
   - Trang `/tour`: `production_wingsgo_tour_full.png` (hiển thị trọn vẹn 6 tour nổi bật, giá và lịch bay).
   - Trang chủ `/`: `production_wingsgo_home_full.png` (khối Ưu đãi hot Hero và lưới tour ưu đãi hiển thị sắc nét, chuẩn xác).
+  - Admin CMS Dashboard: `admin_logged_in.png` (bảng điều khiển CMS load 200 OK, phân quyền site đầy đủ).
+  - Admin Curation List: `admin_tour_curations.png` (danh sách Bộ tour nổi bật hoạt động chuẩn chỉ).
+  - Admin Visual Board & Simulator: `admin_tour_curation_detail.png` (chi tiết bộ tour, kéo thả, live simulator hiển thị 1:1 hoàn hảo).
+
+### 5.1 Hotfix ghi nhận: Payload 3.x Document Locking Schema on PostgreSQL
+
+- **Hiện tượng:** Khi truy cập `/admin`, server báo lỗi `ERROR 3479064536`. Log container báo `error: column payload_locked_documents__rels.tour_curations_id does not exist`.
+- **Nguyên nhân gốc rễ:** Payload CMS 3.x kích hoạt Document Locking mặc định cho mọi Collection. Khi tạo collection mới `tour-curations`, Payload yêu cầu bảng quan hệ khóa tài liệu `payload_locked_documents_rels` phải có cột quan hệ `tour_curations_id`.
+- **Xử lý:**
+  - Hotfix trực tiếp trên DB PostgreSQL Production:
+    - Bổ sung cột: `ALTER TABLE "payload_locked_documents_rels" ADD COLUMN IF NOT EXISTS "tour_curations_id" integer;`
+    - Khóa ngoại: `FOREIGN KEY ("tour_curations_id") REFERENCES "tour_curations"("id") ON DELETE CASCADE;`
+    - Chỉ mục: `CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_tour_curations_id_idx" ON "payload_locked_documents_rels" ("tour_curations_id");`
+  - Đồng bộ mã nguồn: Cập nhật file migration `app/src/migrations/20261015_090000_wingsgo_tour_curations.ts` và `deploy/oracle/migrate-us078.sql` (cả hàm `up` và `down`).
+- **Xác thực sau sửa chữa:** Đăng nhập admin live thành công, truy cập và chỉnh sửa bộ tour nổi bật `Tour nổi bật mặc định WingsGo` với giao diện Live Simulator mượt mà, không phát sinh bất kỳ lỗi server nào.
+
 
 
