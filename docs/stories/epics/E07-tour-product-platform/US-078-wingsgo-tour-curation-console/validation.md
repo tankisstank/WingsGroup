@@ -120,3 +120,30 @@ Theo quy định bắt buộc tại `AGENTS.md`, phiên kiểm toán phát hành
 
 **Kết luận kiểm toán:** Đủ điều kiện phát hành (**SHIP READY**) sau khi chạy preflight check P1-1. Toàn bộ 23 unit tests, 10 catalog tests, 2 component tests và TypeScript build đều pass tuyệt đối (exit 0).
 
+---
+
+## 5. Bằng chứng Triển khai Production (Production Deployment Evidence)
+
+- **Môi trường triển khai:** Oracle Cloud VPS ARM64 (`168.110.212.116`).
+- **Mã phát hành (Release):** `release-0ed0b7d` (Commit `0ed0b7d`).
+- **Gói release sạch:** `deploy/oracle/release-clean.zip` (105.73 MB, tuân thủ nghiêm ngặt runbook loại trừ `public/media`).
+- **Symlinks & Native packages:** Script `relink.sh` tự động tải và kích hoạt binary native C++ cho Linux ARM64 Musl (`sharp-linuxmusl-arm64`, `sharp-libvips-linuxmusl-arm64`, `linux-arm64-musl`).
+- **PostgreSQL Migration:**
+  - File SQL: `migrate.sql` (tương ứng migration `20261015_090000_wingsgo_tour_curations.ts`).
+  - Đã tạo bảng `tour_curations`, `tour_curations_rels`, các chỉ mục và partial unique index `tour_curations_site_is_default_unique_idx`.
+  - Dữ liệu Backfill: Tự động tạo bản ghi default `Tour nổi bật mặc định WingsGo` (ID 1, site 2), liên kết 6 tours theo đúng thứ tự (`[119, 121, 117, 122, 136, 126]`), và gắn `wings_go_tour_catalog_curation_id = 1` vào page 208 (`/tour`).
+  - Ghi nhận `20261015_090000_wingsgo_tour_curations` (batch 25) vào `payload_migrations`.
+- **Khởi động Container Production:**
+  - Container `wingstravel-app-1` được recreate và khởi động thành công từ image `wingstravel-app:latest`.
+  - Cache Redis `*wingsgo-curation*` được xóa sạch toàn bộ.
+- **Xác nhận Health Check & Endpoints:**
+  - `GET http://127.0.0.1:3000/api/health/ready` -> `200 OK`, `{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"status":"ready"}`.
+  - `GET http://127.0.0.1:3000/api/wingsgo/tour-catalog` -> `200 OK`.
+  - `GET https://wingsgo.vn/tour` -> `200 OK`.
+  - `GET https://wingsgo.vn/` -> `200 OK`.
+  - `GET https://wingsgo.vn/admin/collections/tour-curations` -> `307 Temporary Redirect` (sẵn sàng phục vụ editor).
+- **Hình ảnh kiểm chứng Live Website (agent-browser):**
+  - Trang `/tour`: `production_wingsgo_tour_full.png` (hiển thị trọn vẹn 6 tour nổi bật, giá và lịch bay).
+  - Trang chủ `/`: `production_wingsgo_home_full.png` (khối Ưu đãi hot Hero và lưới tour ưu đãi hiển thị sắc nét, chuẩn xác).
+
+
