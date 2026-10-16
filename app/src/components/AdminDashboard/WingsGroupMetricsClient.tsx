@@ -54,7 +54,12 @@ type RequestMessageProps = {
 
 const baseClass = 'wings-dashboard'
 const loadingState = { state: 'loading' } as const
-const summaryMetricKeys: readonly AdminMetricKey[] = ['pageDrafts', 'postDrafts', 'leads']
+const summaryMetricKeys: readonly AdminMetricKey[] = [
+  'pageDrafts',
+  'postDrafts',
+  'tourDrafts',
+  'leads',
+]
 
 const recentEndpoints = {
   pages: '/api/pages?depth=0&limit=4&sort=-updatedAt',
@@ -317,8 +322,10 @@ export function WingsGroupMetricsClient({
         </Link>
         <Link href={scopedURL('/admin/console')}>Console vận hành</Link>
         <Link href={scopedURL('/admin/site-review')}>Rà soát site/page</Link>
+        <Link href={scopedURL('/admin/collections/tour-products')}>Quản lý tour</Link>
         <Link href={scopedURL('/admin/collections/form-submissions')}>Lead gửi về</Link>
         <Link href={scopedURL('/admin/collections/pages/create')}>Tạo trang</Link>
+        <Link href={scopedURL('/admin/collections/tour-products/create')}>Tạo tour</Link>
         <Link href={scopedURL('/admin/collections/posts/create')}>Tạo bài viết</Link>
         <Link href={scopedURL('/admin/collections/media')}>Thư viện media</Link>
       </div>

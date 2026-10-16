@@ -1,6 +1,7 @@
 import type { Field } from 'payload'
+import { disableListColumnRecursively } from '@/utilities/disableListColumn'
 
-export const wingsGroupCorporateRouteField: Field = {
+export const wingsGroupCorporateRouteField: Field = disableListColumnRecursively({
   name: 'wingsGroupRoute',
   label: 'WingsGroup corporate route governance',
   type: 'group',
@@ -8,6 +9,8 @@ export const wingsGroupCorporateRouteField: Field = {
     description:
       'Fail-closed publication contract for the ten E09 WingsGroup routes. Approval fields are operator controlled.',
     position: 'sidebar',
+    disableListColumn: true,
+    disableListFilter: true,
   },
   fields: [
     {
@@ -132,4 +135,4 @@ export const wingsGroupCorporateRouteField: Field = {
       ],
     },
   ],
-}
+})

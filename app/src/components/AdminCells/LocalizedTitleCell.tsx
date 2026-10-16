@@ -133,11 +133,23 @@ export default function LocalizedTitleCell({
     title: missing && fallbackTitle ? `Nguồn ${fallbackTitle.locale}` : undefined,
   }
 
-  if ((collectionSlug === 'pages' || collectionSlug === 'tour-products') && id) {
+  if (
+    (collectionSlug === 'pages' ||
+      collectionSlug === 'tour-products' ||
+      collectionSlug === 'posts') &&
+    id
+  ) {
+    const labelMap: Record<string, string> = {
+      pages: 'trang',
+      posts: 'bài viết',
+      'tour-products': 'tour',
+    }
+    const entityLabel = labelMap[collectionSlug] || 'mục'
+
     return (
       <Link
         {...cellProps}
-        aria-label={`Mở chi tiết tour: ${text}`}
+        aria-label={`Mở chi tiết ${entityLabel}: ${text}`}
         href={formatAdminURL({
           adminRoute: config.routes.admin,
           path: `/collections/${collectionSlug}/${encodeURIComponent(id)}`,

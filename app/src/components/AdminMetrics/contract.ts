@@ -6,9 +6,17 @@ export type RequestState<T> =
   | { state: 'error' }
   | { state: 'unavailable' }
 
-export type AdminMetricKey = 'pages' | 'pageDrafts' | 'posts' | 'postDrafts' | 'media' | 'leads'
+export type AdminMetricKey =
+  | 'pages'
+  | 'pageDrafts'
+  | 'posts'
+  | 'postDrafts'
+  | 'tours'
+  | 'tourDrafts'
+  | 'media'
+  | 'leads'
 
-type AdminMetricCollection = 'form-submissions' | 'media' | 'pages' | 'posts'
+type AdminMetricCollection = 'form-submissions' | 'media' | 'pages' | 'posts' | 'tour-products'
 
 type AdminMetricFilter = {
   _status: {
@@ -63,6 +71,25 @@ export const adminMetricDescriptors: readonly AdminMetricDescriptor[] = [
       },
     },
     restQuery: '/api/posts?depth=0&limit=0&where[_status][equals]=draft',
+  },
+  {
+    href: '/admin/collections/tour-products',
+    key: 'tours',
+    label: 'Tour',
+    payloadCollection: 'tour-products',
+    restQuery: '/api/tour-products?depth=0&limit=0',
+  },
+  {
+    href: '/admin/collections/tour-products?where[_status][equals]=draft',
+    key: 'tourDrafts',
+    label: 'Tour nháp',
+    payloadCollection: 'tour-products',
+    payloadFilter: {
+      _status: {
+        equals: 'draft',
+      },
+    },
+    restQuery: '/api/tour-products?depth=0&limit=0&where[_status][equals]=draft',
   },
   {
     href: '/admin/collections/media',

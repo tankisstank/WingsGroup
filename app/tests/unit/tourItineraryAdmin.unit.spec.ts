@@ -5,13 +5,13 @@ import { describe, expect, it } from 'vitest'
 describe('tour itinerary admin contract', () => {
   const root = path.resolve(__dirname, '../..')
 
-  it('opens required itinerary rows by default and keeps a meaningful row summary', () => {
+  it('collapses itinerary rows by default to prevent fatigue and keeps a meaningful row summary', () => {
     const collection = fs.readFileSync(path.join(root, 'src/collections/TourProducts.ts'), 'utf8')
     const rowLabel = fs.readFileSync(path.join(root, 'src/components/TourItineraryRowLabel.tsx'), 'utf8')
 
     expect(collection).toContain("name: 'itineraryDays'")
     expect(collection).toContain("className: 'tour-itinerary-days'")
-    expect(collection).toContain('initCollapsed: false')
+    expect(collection).toContain('initCollapsed: true')
     expect(collection).toContain("RowLabel: '@/components/TourItineraryRowLabel'")
     expect(rowLabel).toContain('useRowLabel')
     expect(rowLabel).toContain('Ngày ${day}')

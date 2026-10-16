@@ -441,9 +441,9 @@ body.wings-admin-shell .nav .wings-admin-nav-intro a:focus-visible {
 }
 
 body.wings-admin-shell .nav .wings-admin-nav-intro__icon {
-  background: rgb(14 138 135 / 0.16);
-  border-color: rgb(14 138 135 / 0.32);
-  color: #9be4e0;
+  background: transparent;
+  border: 0;
+  color: var(--wings-admin-sidebar-text);
 }
 
 /* Native Payload nav toggler: keep the component's state and keyboard
@@ -1415,20 +1415,19 @@ body.wings-admin-shell .login .wings-admin-logo {
 
   &__icon {
     align-items: center;
-    background: color-mix(in srgb, var(--wings-admin-accent) 12%, var(--wings-admin-panel));
-    border: 1px solid color-mix(in srgb, var(--wings-admin-accent) 26%, transparent);
-    border-radius: var(--wings-admin-radius-sm);
-    color: var(--wings-admin-accent);
+    background: transparent;
+    border: 0;
+    color: var(--wings-admin-sidebar-text);
     display: inline-flex;
-    flex: 0 0 28px;
-    height: 28px;
+    flex: 0 0 20px;
+    height: 20px;
     justify-content: center;
-    width: 28px;
+    width: 20px;
 
     svg {
-      height: 15px;
+      height: 16px;
       stroke-width: 2;
-      width: 15px;
+      width: 16px;
     }
   }
 
@@ -1507,11 +1506,12 @@ body.wings-admin-shell .login .wings-admin-logo {
   );
   border: 1px solid var(--wings-admin-border);
   border-left: 3px solid var(--wings-admin-accent);
-  border-radius: 7px;
-  margin: 0;
-  max-width: 520px;
-  padding: base(0.45) base(0.55);
-  width: min(100%, 520px);
+  border-radius: var(--wings-admin-radius-md);
+  box-shadow: var(--wings-admin-shadow);
+  margin: 0 0 16px;
+  max-width: 100%;
+  padding: 12px 14px;
+  width: 100%;
 
   strong {
     display: block;
@@ -1556,26 +1556,32 @@ body.wings-admin-shell .login .wings-admin-logo {
 
   a {
     border: 1px solid var(--wings-admin-border);
-    border-radius: 999px;
-    padding: 5px 9px;
-    color: var(--wings-admin-accent);
+    border-radius: var(--wings-admin-radius-pill);
+    padding: 5px 10px;
+    color: var(--wings-admin-text);
+    font-size: 0.78rem;
+    font-weight: 700;
     text-decoration: none;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
   }
 
   button {
     background: transparent;
     border: 1px solid var(--wings-admin-border);
-    border-radius: 999px;
-    color: var(--wings-admin-accent);
+    border-radius: var(--wings-admin-radius-pill);
+    color: var(--wings-admin-text);
     cursor: pointer;
-    font: inherit;
-    padding: 5px 9px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 5px 10px;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
   }
 
   :where(a, button):hover,
   :where(a, button):focus-visible {
+    background: var(--wings-admin-accent-soft);
     border-color: var(--wings-admin-accent);
-    color: var(--wings-admin-focus-ring);
+    color: var(--wings-admin-ink);
   }
 
   &--warning {
@@ -3332,3 +3338,25 @@ body.wings-admin-shell .nav .nav__link:has(.nav__link-indicator)::before {
   content: none !important;
   display: none !important;
 }
+
+/* Phase 1 CMS UI Polish: Prevent duplicate navigation entries.
+ * AdminNavIntro pins the primary daily workflows (Pages, Tours, Curations, Posts, Media, Site Settings,
+ * Form Submissions). We hide only these duplicate links inside native .nav__wrap, preserving
+ * server-side access control and allowing role-gated collections (Users, Sites, Forms, Imports,
+ * Redirects, Tour Departures) to display safely for authorized users. */
+body.wings-admin-shell .nav .nav__wrap a[href*='/admin/collections/pages'],
+body.wings-admin-shell .nav .nav__wrap a[href*='/admin/collections/tour-products'],
+body.wings-admin-shell .nav .nav__wrap a[href*='/admin/collections/tour-curations'],
+body.wings-admin-shell .nav .nav__wrap a[href*='/admin/collections/posts'],
+body.wings-admin-shell .nav .nav__wrap a[href*='/admin/collections/media'],
+body.wings-admin-shell .nav .nav__wrap a[href*='/admin/collections/site-settings'],
+body.wings-admin-shell .nav .nav__wrap a[href*='/admin/collections/form-submissions'] {
+  display: none !important;
+}
+
+body.wings-admin-shell .nav .nav__wrap {
+  border-top: 1px solid var(--wings-admin-sidebar-border);
+  margin-top: 12px;
+  padding-top: 8px;
+}
+

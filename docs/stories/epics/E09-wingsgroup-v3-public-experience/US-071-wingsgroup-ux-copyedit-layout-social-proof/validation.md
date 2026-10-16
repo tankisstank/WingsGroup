@@ -69,4 +69,22 @@ curl -s http://127.0.0.1:3000/api/health/ready
     - Release: `/home/ubuntu/wings-travel/releases/release-wingsgroup-fix-duplicate-5700dc2-20261009T022858Z`.
     - Xác nhận trên `https://wingsgroup.vn/`: Khối Tiêu chuẩn chất lượng và Khối Tiếp nhận nhu cầu du khách hiển thị chuẩn xác 1 lần duy nhất, không còn lặp lại.
     - PostgreSQL và Redis giữ nguyên 100%, `/api/health/live` và `/api/health/ready` trả về HTTP 200 OK.
+- **Bilingual & Localization Remediation (2026-10-16)**:
+  - **News & Insights Editorial English Support (`/tin-tuc` & `/en/tin-tuc`)**:
+    - Problem: Route `/en/tin-tuc` was rendering Vietnamese article cards because `RenderBlocks.tsx` only forwarded `locale` when `wingsGroupV3Home === true` (home page `/`), causing `/tin-tuc` to receive `locale = undefined` and fallback to `vi`.
+    - Fix 1: Extended `RenderBlocks.tsx` to forward `locale` for all WingsGroup V3 archive blocks: `((wingsGroupV3 || wingsGroupV3Home) && block.blockType === 'archive') ? { ...block, allowWingsGroupDevelopmentMedia, locale } : block`.
+    - Fix 2: Updated `revalidatePost.ts` hook to detect `wings-group` site and automatically revalidate both Vietnamese and English paths: `/tin-tuc`, `/tin-tuc/${slug}`, `/en/tin-tuc`, `/en/tin-tuc/${slug}`.
+    - Automated Tests: `tests/component/wingsGroupEditorial.component.spec.tsx` (2/2 PASS), `tests/unit/wingsGroupEditorialSlug.unit.spec.ts` (2/2 PASS).
+    - Release: `/home/ubuntu/wings-travel/releases/release-news-en-fix-20261016`.
+    - Verification: `https://wingsgroup.vn/en/tin-tuc` displays 100% English article titles, descriptions, reading time, and "Read story" CTA buttons across all 11 articles.
+  - **Service Capabilities English Support (`/nang-luc-dich-vu` & `/en/nang-luc-dich-vu`)**:
+    - Problem: Route `/en/nang-luc-dich-vu` was rendering Vietnamese cards and process steps because `RenderBlocks.tsx` omitted `wingsGroupV3Route === 'capability' && blockType === 'featureGrid'` from `blockProps`, causing `WingsGroupCapabilitySection` to receive `locale = undefined`. Additionally, the hero primary CTA link had `Khám phá dịch vụ` in DB.
+    - Fix 1: Forwarded `locale` to `featureGrid` in `RenderBlocks.tsx` when `wingsGroupV3 && wingsGroupV3Route === 'capability'`.
+    - Fix 2: Added `HERO_LINK_LABEL_EN_MAP` in `resolveSafeHeroLinks` (`model.ts`) to map Vietnamese hero link labels to English when `locale === 'en'`.
+    - Fix 3: Standardized `pages_hero_links` records in PostgreSQL on production VPS (`_parent_id = 183` set to `Explore services`, `_parent_id = 184` set to `Review the record`).
+    - Automated Tests: `tests/component/wingsGroupCapabilityRoute.component.spec.tsx` (2/2 PASS), `tests/unit/wingsGroupV3PublicModel.unit.spec.ts` (13/13 PASS).
+    - Release: `/home/ubuntu/wings-travel/releases/release-capability-en-20261016-143523`.
+    - Verification: `https://wingsgroup.vn/en/nang-luc-dich-vu` verified live via `agent-browser` and curl with 0 Vietnamese elements in `<main>`, "Explore services" hero CTA, "FOUR STEPS, ONE DEDICATED TEAM" process timeline, "QUALITY STANDARDS" cards, and "Ready for your next journey?" banner.
+    - Vietnamese version `https://wingsgroup.vn/nang-luc-dich-vu` remains 100% pure Vietnamese.
+
 

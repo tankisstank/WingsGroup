@@ -428,6 +428,19 @@
   }
 }
 
+@media (max-width: 1100px) {
+  .page-wizard {
+    &__selection-layout {
+      grid-template-columns: 1fr;
+    }
+
+    &__preset-summary {
+      position: static;
+      margin-top: base(1);
+    }
+  }
+}
+
 @media (max-width: 768px) {
   .page-wizard {
     padding: base(1);
@@ -462,7 +475,6 @@
 @media (max-width: 480px) {
   .page-wizard {
     box-sizing: border-box;
-    padding-left: 56px;
-    padding-right: base(0.75);
+    padding: base(0.75);
   }
 }

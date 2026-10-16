@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import {
-  DatabaseIcon,
+  BookOpenIcon,
   FilePlus2Icon,
   FileTextIcon,
   ImageIcon,
@@ -12,24 +12,26 @@ import {
   PaletteIcon,
   SearchCheckIcon,
   Settings2Icon,
+  SparklesIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import React from 'react'
 
 const text = {
-  console: 'Console vận hành',
+  console: 'Bàn điều hành',
   createPage: 'Tạo trang nhanh',
   leadInbox: 'Lead gửi về',
   media: 'Thư viện media',
   managementLayer: 'Nền quản trị',
   multisiteCMS: 'Multisite CMS',
   pages: 'Quản lý trang',
-  siteSettings: 'Cấu hình site',
+  siteSettings: 'Cài đặt site',
   siteReview: 'Rà soát site',
-  theme: 'Theme & Hero',
+  theme: 'Giao diện & Theme',
   tours: 'Quản lý tour',
-  dataOps: 'Nhập / xuất dữ liệu',
+  tourCurations: 'Bộ tour nổi bật',
+  posts: 'Bài viết',
 } as const
 
 type QuickLinkKey = keyof typeof text
@@ -58,6 +60,8 @@ const navigationGroups: NavigationGroup[] = [
     links: [
       { href: '/admin/collections/pages', Icon: FileTextIcon, key: 'pages' },
       { href: '/admin/collections/tour-products', Icon: MapIcon, key: 'tours' },
+      { href: '/admin/collections/tour-curations', Icon: SparklesIcon, key: 'tourCurations' },
+      { href: '/admin/collections/posts', Icon: BookOpenIcon, key: 'posts' },
       { href: '/admin/collections/media', Icon: ImageIcon, key: 'media' },
       { href: '/admin/page-wizard', Icon: FilePlus2Icon, key: 'createPage' },
     ],
@@ -68,10 +72,6 @@ const navigationGroups: NavigationGroup[] = [
       { href: '/admin/theme', Icon: PaletteIcon, key: 'theme' },
       { href: '/admin/collections/site-settings', Icon: Settings2Icon, key: 'siteSettings' },
     ],
-  },
-  {
-    label: 'Hệ thống',
-    links: [{ href: '/admin/collections/imports', Icon: DatabaseIcon, key: 'dataOps' }],
   },
 ] as const
 

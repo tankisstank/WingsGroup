@@ -277,3 +277,48 @@ The broad component gate remains `174/176`, with failures in
 admin surfaces. Harness therefore remains `in_progress` and Plane proof
 remains `Partial` pending final reconciliation/acceptance of the unrelated
 baseline failures.
+
+## Implementation record — 2026-10-16 (CMS UI/UX Refactor & Standardization)
+
+A comprehensive audit and UX overhaul was conducted across the CMS Admin interface to resolve 4 critical friction points and visual/semantic inconsistencies:
+
+1. **Pages List Column Selector Bloat (>100 fields eliminated):**
+   - Created `disableListColumnRecursively` utility in `app/src/utilities/disableListColumn.ts`.
+   - Applied to `wingsSideHiFi`, `wingsGroupCorporateRoute`, `wingsGoTourCatalog`, `heros/config.ts`, and `Pages/index.ts`.
+   - Reduced candidate column chips in `/admin/collections/pages` from >100 noisy nested fields to 5 core business columns (`title`, `site`, `slug`, `updatedAt`, `id`).
+   - Legacy `hero.presentation` protected via `disableListColumn: true, disableListFilter: true` (no `admin.hidden: true` data loss risk).
+
+2. **Sidebar Morphing & Schism Resolution:**
+   - In `custom.scss`, targeted only duplicate selectors (`pages`, `tour-products`, `tour-curations`, `posts`, `media`, `site-settings`, `form-submissions`).
+   - Maintained native Payload `.nav__wrap` container with role-gated server-side access control for advanced items (`Users`, `Sites`, `Forms`, `Redirects`, `Header`, `Footer`).
+   - Fixed `AdminStandaloneShell` layout collision: removed class `nav` from rail `<aside>` (replaced with scoped `.wings-admin-standalone-shell__rail`) to prevent global `body.wings-admin-shell .nav { position: fixed }` from detaching the rail from the grid flow.
+   - Removed extraneous top brand logo container from `AdminStandaloneShell` so both standalone pages (`/admin/page-wizard`, `/admin/console`, `/admin/theme`, `/admin/site-review`) and native Payload pages (`/admin/collections/*`) start at the identical vertical coordinate (Y=0) with "Nền quản trị Multisite CMS" at width 258px.
+   - Verified 100% visual parity on Production VPS via `agent-browser` screenshots (`prod_page_wizard_v2.png` and `prod_media_v2.png`).
+
+3. **Tour Entity Integration on Console & Dashboard:**
+   - Updated `app/src/components/AdminMetrics/contract.ts`: added `tours` and `tourDrafts` to `AdminMetricKey`, `AdminMetricCollection`, and `adminMetricDescriptors`.
+   - Added `tourDrafts` to `taskMetricKeys` in `AdminOperatorConsole/index.tsx` and `summaryMetricKeys` in `WingsGroupMetricsClient.tsx`.
+   - Added Quick Action deep-links for *"Quản lý tour"* (`/admin/collections/tour-products`), *"Xem tour nháp"* (`/admin/collections/tour-products?where[_status][equals]=draft`), and *"Bộ tour nổi bật"* (`/admin/collections/tour-curations`).
+
+4. **Tour Itinerary Authoring Friction & Accordion Fatigue:**
+   - In `app/src/collections/TourProducts.ts`:
+     - Changed `itineraryDays` array configuration from `initCollapsed: false` to `initCollapsed: true`, preventing thousands of pixels of vertical bloat on 10-15 day tours.
+     - Clarified role separation between `summary` (*"Mô tả tóm tắt (Teaser / Fallback)"*, plain-text teaser for category cards & fallback) and `content` (Rich Text Lexical for detail tab).
+     - Preserved `summary` `required: true` schema contract to prevent frontend regressions.
+
+5. **Visual Styling & Semantic Standardization:**
+   - Added `tour-curations` (`Bộ tour nổi bật`, icon `SparklesIcon`) and `posts` (`Bài viết`) to `AdminNavIntro/index.tsx`.
+   - Standardized icons to minimalist Flat Lucide Icons (removed bulky teal square containers `[ ⊞ ]`).
+   - Fixed locale label casing: `'Tiếng Anh (en)'` in `app/src/utilities/locales.ts`.
+   - Unified guidance filter chips to pill format with label `'⚠️ Chưa gán site'`.
+
+### Automated Verification:
+- `pnpm exec tsc --noEmit`: 0 errors.
+- Unit tests: 22/22 passed 100% across:
+  - `tests/unit/adminMetricsAndTours.unit.spec.ts`
+  - `tests/unit/tourItineraryAdmin.unit.spec.ts`
+  - `tests/unit/disableListColumn.unit.spec.ts`
+  - `tests/unit/adminNavigationChrome.unit.spec.ts`
+  - `tests/unit/appliedCmsUiCompatibility.unit.spec.ts`
+  - `tests/unit/locales.unit.spec.ts`
+- Codex Consultation Gate: 2-round adversarial review completed with approvals documented in `docs/codex_critique_cms_ui_ux_refactor.md` and `docs/codex_final_audit_cms_ui_ux.md`.

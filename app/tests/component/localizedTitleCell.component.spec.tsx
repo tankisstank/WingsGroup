@@ -42,18 +42,33 @@ describe('LocalizedTitleCell', () => {
     )
   })
 
-  it('keeps other collection title cells as plain text', () => {
+  it('links a post title to its detail editor', () => {
     render(
       <LocalizedTitleCell
-        cellData="Bài viết"
+        cellData="Bài viết mới"
         collectionSlug="posts"
         field={{ name: 'title', type: 'text' }}
         rowData={{ id: 8 }}
       />,
     )
 
+    expect(
+      screen.getByRole('link', { name: 'Mở chi tiết bài viết: Bài viết mới' }).getAttribute('href'),
+    ).toBe('/admin/collections/posts/8')
+  })
+
+  it('keeps unsupported collection title cells as plain text', () => {
+    render(
+      <LocalizedTitleCell
+        cellData="Mục khác"
+        collectionSlug={'media' as any}
+        field={{ name: 'title', type: 'text' }}
+        rowData={{ id: 99 }}
+      />,
+    )
+
     expect(screen.queryByRole('link')).toBeNull()
-    expect(screen.getByText('Bài viết')).toBeTruthy()
+    expect(screen.getByText('Mục khác')).toBeTruthy()
   })
 
   it('distinguishes opening one tour from bulk editing selected tours', () => {

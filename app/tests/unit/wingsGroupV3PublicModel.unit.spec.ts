@@ -437,4 +437,20 @@ describe('WingsGroup v3 public view model', () => {
       }),
     ).toBe(false)
   })
+
+  it('maps well-known Vietnamese hero button labels to English when locale is en', () => {
+    const links = [
+      { link: { label: 'Khám phá dịch vụ', type: 'custom' as const, url: '#services' } },
+      { link: { label: 'Xem thông tin', type: 'custom' as const, url: '#trust' } },
+    ]
+
+    const resolvedEn = resolveSafeHeroLinks(links, 'en')
+    expect(resolvedEn[0].label).toBe('Explore services')
+    expect(resolvedEn[1].label).toBe('Review the record')
+
+    const resolvedVi = resolveSafeHeroLinks(links, 'vi')
+    expect(resolvedVi[0].label).toBe('Khám phá dịch vụ')
+    expect(resolvedVi[1].label).toBe('Xem thông tin')
+  })
 })
+

@@ -686,7 +686,7 @@ export const TourProducts: CollectionConfig = {
                 components: {
                   RowLabel: '@/components/TourItineraryRowLabel',
                 },
-                initCollapsed: false,
+                initCollapsed: true,
               },
               fields: [
                 {
@@ -711,10 +711,14 @@ export const TourProducts: CollectionConfig = {
                 },
                 {
                   name: 'summary',
-                  label: 'Mô tả',
+                  label: 'Mô tả tóm tắt (Teaser / Fallback)',
                   localized: true,
                   required: true,
                   type: 'textarea',
+                  admin: {
+                    description:
+                      'Đoạn tóm tắt ngắn làm teaser hiển thị ngoài danh mục và làm bản plain-text fallback.',
+                  },
                 },
                 {
                   name: 'content',
@@ -722,6 +726,10 @@ export const TourProducts: CollectionConfig = {
                   localized: true,
                   required: false,
                   type: 'richText',
+                  admin: {
+                    description:
+                      'Nội dung chi tiết trong ngày hiển thị trong tab lịch trình tour. Hỗ trợ định dạng in đậm mốc giờ, gạch đầu dòng và chèn link an toàn.',
+                  },
                   editor: lexicalEditor({
                     features: [
                       ParagraphFeature(),
@@ -777,10 +785,6 @@ export const TourProducts: CollectionConfig = {
                       }),
                     ],
                   }),
-                  admin: {
-                    description:
-                      'Hỗ trợ định dạng in đậm mốc giờ, gạch đầu dòng danh sách hoạt động và chèn link an toàn.',
-                  },
                 },
                 {
                   name: 'meals',

@@ -64,7 +64,12 @@ type RequestMessageProps = {
 
 const baseClass = 'cms-console'
 const loadingState = { state: 'loading' } as const
-const taskMetricKeys: readonly AdminMetricKey[] = ['pageDrafts', 'postDrafts', 'leads']
+const taskMetricKeys: readonly AdminMetricKey[] = [
+  'pageDrafts',
+  'postDrafts',
+  'tourDrafts',
+  'leads',
+]
 
 const createMetricStates = (): MetricStates =>
   Object.fromEntries(
@@ -453,6 +458,10 @@ export default function AdminOperatorConsole() {
             <Link className={`${baseClass}__primary-action`} href={scopedURL('/admin/page-wizard')}>
               Tạo trang nháp
             </Link>
+            <Link href={scopedURL('/admin/collections/tour-products')}>Quản lý tour</Link>
+            <Link href={scopedURL('/admin/collections/tour-products?where[_status][equals]=draft')}>
+              Xem tour nháp
+            </Link>
             <Link href={scopedURL('/admin/site-review')}>Rà soát site/page</Link>
             {canManageSite ? <Link href={scopedURL('/admin/theme')}>Quản lý theme</Link> : null}
             <Link href={scopedURL('/admin/collections/form-submissions')}>Xem tổng lead</Link>
@@ -631,6 +640,8 @@ export default function AdminOperatorConsole() {
                   <Link href={scopedURL('/admin/site-review')}>Rà soát site/page bằng preview</Link>
                   <Link href={scopedURL('/admin/page-wizard')}>Tạo trang nháp theo wizard</Link>
                   <Link href={scopedURL('/admin/collections/pages')}>Quản lý trang</Link>
+                  <Link href={scopedURL('/admin/collections/tour-products')}>Quản lý tour</Link>
+                  <Link href={scopedURL('/admin/collections/tour-curations')}>Bộ tour nổi bật</Link>
                   <Link href={scopedURL('/admin/collections/posts')}>Quản lý bài viết</Link>
                   <Link href={scopedURL('/admin/collections/media')}>Thư viện media</Link>
                   <Link href={scopedURL('/admin/collections/form-submissions')}>Lead gửi về</Link>
@@ -677,7 +688,7 @@ export default function AdminOperatorConsole() {
               </span>
             ) : tasks.length === 0 ? (
               <span aria-live="polite" role="status">
-                Không có trang nháp, bài viết nháp hoặc lead trong phạm vi hiện tại.
+                Không có trang nháp, bài viết nháp, tour nháp hoặc lead trong phạm vi hiện tại.
               </span>
             ) : null}
           </section>

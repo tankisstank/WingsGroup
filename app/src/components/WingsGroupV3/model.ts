@@ -378,6 +378,18 @@ type HeroLink = NonNullable<Page['hero']['links']>[number]['link']
 
 export type SafeHeroLink = HeroLink & { url?: string | null }
 
+const HERO_LINK_LABEL_EN_MAP: Record<string, string> = {
+  'Khám phá dịch vụ': 'Explore services',
+  'Tham khảo dịch vụ': 'Explore services',
+  'Khám phá hệ sinh thái': 'Explore the ecosystem',
+  'Xem thông tin': 'Review the record',
+  'Đọc tin mới': 'Read the latest',
+  'Trao đổi với chuyên viên': 'Request a consultation',
+  'Nhận tư vấn': 'Request a consultation',
+  'Liên hệ tư vấn': 'Request a consultation',
+  'Gặp nhân viên tư vấn': 'Consult with us',
+}
+
 export const resolveSafeHeroLinks = (
   links: Page['hero']['links'],
   locale?: null | string,
@@ -402,8 +414,15 @@ export const resolveSafeHeroLinks = (
     const url = text(candidate.url)
     if (!isSafeSameSiteHref(url)) return defaultLink
 
+    const rawLabel = text(candidate.label)
+    const label =
+      locale === 'en' && HERO_LINK_LABEL_EN_MAP[rawLabel]
+        ? HERO_LINK_LABEL_EN_MAP[rawLabel]
+        : rawLabel
+
     return {
       ...candidate,
+      label,
       url: normalizeWingSidePath(url),
     }
   }) as [SafeHeroLink, SafeHeroLink]

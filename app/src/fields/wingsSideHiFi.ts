@@ -2,6 +2,7 @@ import type { Field, FilterOptionsProps, Tab, Where } from 'payload'
 
 import { sameSiteFilterOptions } from '@/fields/site'
 import { normalizeRelationID } from '@/access/roles'
+import { disableListColumnRecursively } from '@/utilities/disableListColumn'
 
 export const WINGSSIDE_HOME_DESTINATION_SELECTION_KEYS = [
   'hanoi',
@@ -53,6 +54,10 @@ const text = (name: string, label: string, opts?: { required?: boolean; localize
     type: 'text' as const,
     localized: opts?.localized ?? true,
     required: opts?.required ?? false,
+    admin: {
+      disableListColumn: true,
+      disableListFilter: true,
+    },
   }) satisfies Field
 
 const textarea = (name: string, label: string, opts?: { required?: boolean; localized?: boolean }) =>
@@ -62,12 +67,20 @@ const textarea = (name: string, label: string, opts?: { required?: boolean; loca
     type: 'textarea' as const,
     localized: opts?.localized ?? true,
     required: opts?.required ?? false,
+    admin: {
+      disableListColumn: true,
+      disableListFilter: true,
+    },
   }) satisfies Field
 
 const ctaFields = (prefix: string, label: string): Field => ({
   name: prefix,
   label,
   type: 'group',
+  admin: {
+    disableListColumn: true,
+    disableListFilter: true,
+  },
   fields: [
     text('label', 'Nhãn CTA'),
     text('href', 'Đường dẫn CTA', { localized: false }),
@@ -89,6 +102,8 @@ const cardArray = (
   dbName,
   admin: {
     initCollapsed: true,
+    disableListColumn: true,
+    disableListFilter: true,
   },
   fields,
 })
@@ -566,9 +581,11 @@ export const wingsSideHiFiFields = (): Field[] => [
 export const wingsSideHiFiTab = (): Tab => ({
   name: 'wingsSideHiFi',
   label: 'WingSide Hi-Fi',
-  fields: wingsSideHiFiFields(),
+  fields: disableListColumnRecursively(wingsSideHiFiFields()),
   admin: {
     description:
       'Hợp đồng nội dung typed cho 8 route hub WingSide. Không dùng JSON editor. Media/form qua relationship Payload.',
+    disableListColumn: true,
+    disableListFilter: true,
   },
 })

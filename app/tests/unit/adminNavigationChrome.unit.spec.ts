@@ -3,7 +3,8 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const root = path.resolve(__dirname, '../..')
-const read = (relativePath: string) => fs.readFileSync(path.join(root, relativePath), 'utf8')
+const read = (relativePath: string) =>
+  fs.readFileSync(path.join(root, relativePath), 'utf8').replace(/\r\n/g, '\n')
 
 describe('admin navigation chrome', () => {
   it('keeps the desktop toggle inside the sidebar and reserves the header toggle for mobile', () => {

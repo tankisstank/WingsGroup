@@ -14,6 +14,7 @@ Copy-Item -Recurse "app/.next/standalone/.next" "$tempDir/.next"
 Copy-Item -Recurse "app/.next/standalone/node_modules" "$tempDir/node_modules"
 Copy-Item "app/.next/standalone/server.js" "$tempDir/server.js"
 Copy-Item "app/.next/standalone/package.json" "$tempDir/package.json"
+Copy-Item "deploy/oracle/relink.sh" "$tempDir/relink.sh"
 
 # Copy public static assets (loại trừ public/media)
 New-Item -ItemType Directory -Path "$tempDir/public" | Out-Null
@@ -27,7 +28,11 @@ Copy-Item "app/public/website-template-OG.webp" "$tempDir/public/website-templat
 Write-Host ">>> 3. Nén file release-clean.zip..." -ForegroundColor Cyan
 $zipFile = "deploy/oracle/release-clean.zip"
 if (Test-Path $zipFile) { Remove-Item -Force $zipFile }
-Compress-Archive -Path "$tempDir/*" -DestinationPath $zipFile -CompressionLevel Optimal
+if (Get-Command tar.exe -ErrorAction SilentlyContinue) {
+    & tar.exe -a -c -f $zipFile -C $tempDir .
+} else {
+    Compress-Archive -Path "$tempDir/*" -DestinationPath $zipFile -CompressionLevel Fastest
+}
 
 # Dọn dẹp thư mục tạm
 Remove-Item -Recurse -Force $tempDir

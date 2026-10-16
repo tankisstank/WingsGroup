@@ -13,11 +13,16 @@ import {
   heroPresentationDefinitions,
   heroPresentationOptions,
 } from '@/heros/presentations/registry'
+import { disableListColumnRecursively } from '@/utilities/disableListColumn'
 
-export const hero: Field = {
+export const hero: Field = disableListColumnRecursively({
   name: 'hero',
   type: 'group',
   localized: true,
+  admin: {
+    disableListColumn: true,
+    disableListFilter: true,
+  },
   fields: [
     {
       name: 'type',
@@ -71,6 +76,8 @@ export const hero: Field = {
         condition: (_, { type } = {}) => type === 'highImpact',
         description:
           'Trường tương thích dữ liệu cũ. Flow mới dùng Nguồn presentation + Presentation override.',
+        disableListColumn: true,
+        disableListFilter: true,
       },
       validate: (value: unknown) =>
         !value ||
@@ -254,4 +261,4 @@ export const hero: Field = {
     },
   ],
   label: false,
-}
+})

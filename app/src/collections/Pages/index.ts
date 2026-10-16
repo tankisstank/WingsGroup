@@ -111,7 +111,10 @@ export const Pages: CollectionConfig<'pages'> = {
     {
       name: 'editorialGuidance',
       type: 'ui',
-      admin: { components: { Field: '@/components/AdminGuidance/PageEditGuidance' } },
+      admin: {
+        disableListColumn: true,
+        components: { Field: '@/components/AdminGuidance/PageEditGuidance' },
+      },
     },
     {
       name: 'title',
@@ -190,6 +193,8 @@ export const Pages: CollectionConfig<'pages'> = {
               required: true,
               admin: {
                 initCollapsed: true,
+                disableListColumn: true,
+                disableListFilter: true,
               },
             },
           ],

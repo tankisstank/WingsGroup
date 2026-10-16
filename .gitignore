@@ -12,6 +12,7 @@ artifacts/*.log
 artifacts/*.png
 wingsgroup.vn-audit/
 *.tar.gz
+*.docx
 scratch/
 app/scratch/
 

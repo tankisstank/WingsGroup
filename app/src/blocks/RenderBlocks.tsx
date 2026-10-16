@@ -187,9 +187,13 @@ export const RenderBlocks: React.FC<{
                             }
                           : block.blockType === 'credentialsCarousel' ||
                               block.blockType === 'wingsGroupProofArchive' ||
-                              (wingsGroupV3Home && block.blockType === 'archive')
+                              ((wingsGroupV3 || wingsGroupV3Home) && block.blockType === 'archive')
                             ? { ...block, allowWingsGroupDevelopmentMedia, locale }
-                            : block
+                            : wingsGroupV3 &&
+                                wingsGroupV3Route === 'capability' &&
+                                block.blockType === 'featureGrid'
+                              ? { ...block, locale }
+                              : block
               const section = wingsGroupV3Home ? getWingsGroupHomeSection(block) : null
 
               const renderedBlock = (

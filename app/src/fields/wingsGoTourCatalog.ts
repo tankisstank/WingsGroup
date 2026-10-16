@@ -1,4 +1,5 @@
 import type { Field } from 'payload'
+import { disableListColumnRecursively } from '@/utilities/disableListColumn'
 
 import { sameSiteFilterOptions } from './site'
 
@@ -7,13 +8,15 @@ import { sameSiteFilterOptions } from './site'
  * stored in this relationship; the renderer fills gaps from the eligible
  * catalog at read time.
  */
-export const wingsGoTourCatalogField: Field = {
+export const wingsGoTourCatalogField: Field = disableListColumnRecursively({
   name: 'wingsGoTourCatalog',
   label: 'WingsGo tour catalog',
   type: 'group',
   admin: {
     description:
       'Chỉ định catalog động và bộ tour nổi bật. Nếu để trống bộ tour nổi bật, hệ thống sẽ tự động dùng bộ mặc định của site.',
+    disableListColumn: true,
+    disableListFilter: true,
   },
   fields: [
     {
@@ -50,4 +53,4 @@ export const wingsGoTourCatalogField: Field = {
       },
     },
   ],
-}
+})
