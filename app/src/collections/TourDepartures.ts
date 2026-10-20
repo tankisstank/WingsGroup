@@ -42,6 +42,14 @@ export const TourDepartures: CollectionConfig = {
     ],
     group: adminGroups.content,
     useAsTitle: 'departureDate',
+    listSearchableFields: [
+      'tourProduct.title',
+      'departureCity',
+      'flightNumber',
+      'airline',
+      'variantKey',
+      'inventoryIdentity',
+    ],
   },
   defaultPopulate: {
     tourProduct: true,
