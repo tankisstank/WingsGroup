@@ -282,23 +282,6 @@ export const TourProducts: CollectionConfig = {
           label: 'Lịch bay & xuất bản',
           fields: [
             {
-              name: 'tourAuthoringPanel',
-              type: 'ui',
-              admin: { components: { Field: '@/components/TourAuthoring#default' } },
-            },
-          ],
-        },
-        {
-          label: 'Tổng quan',
-          fields: [
-            {
-              name: 'summary',
-              label: 'Tóm tắt bán hàng',
-              localized: true,
-              required: true,
-              type: 'textarea',
-            },
-            {
               name: 'editorialBadges',
               label: 'Nhãn biên tập trên card',
               type: 'array',
@@ -339,6 +322,23 @@ export const TourProducts: CollectionConfig = {
                   },
                 },
               ],
+            },
+            {
+              name: 'tourAuthoringPanel',
+              type: 'ui',
+              admin: { components: { Field: '@/components/TourAuthoring#default' } },
+            },
+          ],
+        },
+        {
+          label: 'Tổng quan',
+          fields: [
+            {
+              name: 'summary',
+              label: 'Tóm tắt bán hàng',
+              localized: true,
+              required: true,
+              type: 'textarea',
             },
             {
               name: 'heroMedia',
