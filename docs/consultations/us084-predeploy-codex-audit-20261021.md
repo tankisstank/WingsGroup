@@ -55,3 +55,8 @@ The storage key falls back to `default` if the site ID is unavailable. In the no
 7. If application rollback is needed, restore the previous app release while retaining the additive schema. Do not run the migration’s `down` function unless badge data has been backed up and its loss is intended.
 
 **Audit limits:** I did not run tests, browser checks, migrations, or production commands; the validation record’s results were not independently reproduced. The release risk is the missing migration step in the Oracle deployment sequence, plus the concurrency and destructive-rollback behaviors described above.
+## Release follow-up — 2026-10-21
+
+- P2 hotline validation mismatch was fixed by rendering valid CMS accepted international numbers consistently.
+- P2 authoring busy state was fixed by clearing the action state when locale/site context changes; stale response guards remain active.
+- Candidate `513238bc483f4d755081d24e291ff40e9475ba6c` passed build, component, integration, targeted unit checks, encrypted backup/restore drill, ARM64 operations image validation, migration status, readiness, and production browser smoke.

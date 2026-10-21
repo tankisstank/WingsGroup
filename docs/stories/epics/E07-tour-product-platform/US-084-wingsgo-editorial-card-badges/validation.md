@@ -152,3 +152,13 @@ Các ảnh chụp màn hình được lưu trong thư mục `docs/stories/epics/
 ## 4. Kết luận
 
 Toàn bộ 8 Tiêu chí Chấp nhận (AC1 - AC8) của US-084 đã được hiện thực và kiểm chứng thành công. Không có lỗi biên dịch, không có rủi ro suy diễn giá, không có rò rỉ đa site/đa ngôn ngữ, không flush Redis toàn hệ thống. Story sẵn sàng để đồng bộ tiến độ.
+## Production release evidence — 2026-10-21
+
+- Candidate: `513238bc483f4d755081d24e291ff40e9475ba6c`, descendant of `58633ae`.
+- Package: `release-clean.zip` SHA-256 `0D0479D2CFC2A7EE45F61D829EC1D09EE189450588F53129D7989A3042BD1083`.
+- ARM64 operations image: `sha256:228190939b6750e2bbeb093c2333764acdf037e617c51447965cb13519b6e5e8`, label revision matches candidate.
+- Encrypted PostgreSQL backup created; restore drill passed with `activeSites=6`, `homepages=6`, and checksum `562a51804d8a0284096d9187caf387973d076783f7c203b2541a081fb28bc60a`.
+- Migration `20261021_120000_tour_editorial_badges` applied in batch 28; migration status has no pending entries.
+- Production current: `/home/ubuntu/wings-travel/releases/release-513238bc483f`.
+- Readiness: database up, Redis up, lead delivery configured.
+- Browser smoke: production homepage, `/tour`, Japan market, and tour detail passed on desktop and mobile; mobile `scrollWidth=375`, viewport width `390`, no overflow; browser errors empty.
