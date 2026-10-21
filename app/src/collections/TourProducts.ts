@@ -299,6 +299,48 @@ export const TourProducts: CollectionConfig = {
               type: 'textarea',
             },
             {
+              name: 'editorialBadges',
+              label: 'Nhãn biên tập trên card',
+              type: 'array',
+              maxRows: 3,
+              admin: {
+                description:
+                  'Nhãn biên tập trên card tour (homepage, /tour, thị trường). hot = viền gradient cầu vồng 2px; specialized/vip = sticker góc trên trái. Tối đa 3 nhãn, mỗi loại (hot, specialized, vip) tối đa 1 nhãn.',
+              },
+              validate: validateEditorialBadges,
+              fields: [
+                {
+                  name: 'kind',
+                  label: 'Loại nhãn',
+                  type: 'select',
+                  required: true,
+                  options: [
+                    { label: 'Tour hot (hot)', value: 'hot' },
+                    { label: 'Chuyên biệt (specialized)', value: 'specialized' },
+                    { label: 'VIP (vip)', value: 'vip' },
+                  ],
+                  admin: {
+                    components: {
+                      Field: '@/components/TourAuthoring/EditorialBadgeKindField',
+                    },
+                    description:
+                      'Chọn loại nhãn biên tập. Khi chọn, CMS tự động điền sẵn nhãn hiển thị theo locale.',
+                  },
+                },
+                {
+                  name: 'label',
+                  label: 'Nhãn hiển thị',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  admin: {
+                    description:
+                      'Nhãn hiển thị cho loại badge tương ứng. Có thể giữ giá trị mặc định hoặc tùy chỉnh theo locale.',
+                  },
+                },
+              ],
+            },
+            {
               name: 'heroMedia',
               label: 'Ảnh hero public của tour',
               type: 'upload',
@@ -519,48 +561,6 @@ export const TourProducts: CollectionConfig = {
                       type: 'text',
                     },
                   ],
-                },
-              ],
-            },
-            {
-              name: 'editorialBadges',
-              label: 'Nhãn biên tập trên card',
-              type: 'array',
-              maxRows: 3,
-              admin: {
-                description:
-                  'Nhãn biên tập trên card tour (homepage, /tour, thị trường). hot = viền gradient cầu vồng 2px; specialized/vip = sticker góc trên trái. Tối đa 3 nhãn, mỗi loại (hot, specialized, vip) tối đa 1 nhãn.',
-              },
-              validate: validateEditorialBadges,
-              fields: [
-                {
-                  name: 'kind',
-                  label: 'Loại nhãn',
-                  type: 'select',
-                  required: true,
-                  options: [
-                    { label: 'Tour hot (hot)', value: 'hot' },
-                    { label: 'Chuyên biệt (specialized)', value: 'specialized' },
-                    { label: 'VIP (vip)', value: 'vip' },
-                  ],
-                  admin: {
-                    components: {
-                      Field: '@/components/TourAuthoring/EditorialBadgeKindField',
-                    },
-                    description:
-                      'Chọn loại nhãn biên tập. Khi chọn, CMS tự động điền sẵn nhãn hiển thị theo locale.',
-                  },
-                },
-                {
-                  name: 'label',
-                  label: 'Nhãn hiển thị',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  admin: {
-                    description:
-                      'Nhãn hiển thị cho loại badge tương ứng. Có thể giữ giá trị mặc định hoặc tùy chỉnh theo locale.',
-                  },
                 },
               ],
             },
