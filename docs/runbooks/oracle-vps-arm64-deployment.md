@@ -49,15 +49,15 @@ powershell -ExecutionPolicy Bypass -File deploy/oracle/package-release.ps1
 
 Build thêm operations image ARM64 từ cùng source candidate. Image này giữ source,
 dependencies và migration để chạy Payload CLI; nó tách biệt với standalone app
-image. Chỉ tiếp tục nếu Docker Buildx hoàn tất và image revision gắn đúng commit
-của candidate:
+image và không cần chạy lại Next build. Chỉ tiếp tục nếu Docker Buildx hoàn tất
+và image revision gắn đúng commit của candidate:
 
 ```powershell
 $RELEASE_SHA = (git rev-parse HEAD).Trim()
 $RELEASE_NAME = "release-" + (git rev-parse --short HEAD)
 $OPS_TAG = "wingstravel-ops:$RELEASE_NAME"
 $RELEASE_SHA | Set-Content "$env:TEMP\wingstravel-release-sha.txt" -NoNewline
-docker buildx build --platform linux/arm64 --target us057-ops --build-arg WINGSTRAVEL_RELEASE_SHA=$RELEASE_SHA --tag $OPS_TAG --output type=docker,dest=deploy/oracle/operations-image.tar -f app/Dockerfile app
+docker buildx build --platform linux/arm64 --build-arg WINGSTRAVEL_RELEASE_SHA=$RELEASE_SHA --tag $OPS_TAG --output type=docker,dest=deploy/oracle/operations-image.tar -f deploy/oracle/Dockerfile.operations app
 ```
 
 ### Bước 4: Upload lên VPS qua SCP

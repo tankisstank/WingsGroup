@@ -1,0 +1,19 @@
+FROM node:22.17.0-alpine
+
+RUN apk add --no-cache libc6-compat age postgresql16-client
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN corepack enable && corepack prepare pnpm@10.28.1 --activate && pnpm install --frozen-lockfile
+
+COPY . .
+
+ARG WINGSTRAVEL_RELEASE_SHA
+ENV NODE_ENV=production
+ENV PAYLOAD_DB_PUSH=false
+ENV WINGSTRAVEL_RELEASE_SHA=${WINGSTRAVEL_RELEASE_SHA}
+LABEL org.opencontainers.image.revision=${WINGSTRAVEL_RELEASE_SHA}
+
+CMD ["pnpm", "payload", "migrate:status"]
