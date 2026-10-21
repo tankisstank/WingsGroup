@@ -3,6 +3,7 @@ import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'paylo
 import { revalidatePath } from 'next/cache.js'
 
 import { publicLocaleCodes, siteCodeToAliasMap } from '@/utilities/sitePaths'
+import { clearRedisCurationCache } from '@/collections/TourCurations/hooks'
 
 const marketSlugByKey: Record<string, string> = {
   china: 'trung-quoc',
@@ -10,7 +11,7 @@ const marketSlugByKey: Record<string, string> = {
   korea: 'han-quoc',
 }
 
-const basePaths = ['/tour', '/thi-truong', '/campaign', '/lich-khoi-hanh']
+const basePaths = ['/', '/tour', '/thi-truong', '/campaign', '/lich-khoi-hanh']
 export const wingsSideDiscoveryPaths = ['/', '/destinations', '/styles'] as const
 const wingsSidePublicPrefix = `/${siteCodeToAliasMap['wing-side']}`
 
@@ -169,6 +170,12 @@ export const revalidateTourProduct: CollectionAfterChangeHook = async ({
     ...campaignPaths,
   ])
   await revalidateWingSideDiscoveryForTour({ payload, site: doc.site as Relation, tourID: doc.id })
+  const siteID = relationID(doc.site as Relation)
+  const prevSiteID = relationID(previousDoc?.site as Relation)
+  await clearRedisCurationCache(siteID ?? undefined)
+  if (prevSiteID !== null && prevSiteID !== siteID) {
+    await clearRedisCurationCache(prevSiteID)
+  }
 
   return doc
 }
@@ -183,6 +190,7 @@ export const revalidateTourProductDelete: CollectionAfterDeleteHook = async ({
     // null by the time an afterDelete hook runs, so dependency lookup cannot
     // reliably find the deleted ID. Invalidate the small WingSide surface set.
     if (relationID(doc?.site as Relation) !== null) revalidateWingSideDiscovery()
+    await clearRedisCurationCache(relationID(doc?.site as Relation) ?? undefined)
   }
 
   return doc
@@ -263,6 +271,8 @@ export const revalidateTourDeparture: CollectionAfterChangeHook = async ({
     ),
   ])
 
+  await clearRedisCurationCache(relationID(doc.site as Relation) ?? undefined)
+
   return doc
 }
 
@@ -295,6 +305,7 @@ export const revalidateTourDepartureDelete: CollectionAfterDeleteHook = async ({
     }
 
     revalidateMany([...basePaths, product?.slug ? `/tour/${product.slug}` : null])
+    await clearRedisCurationCache(relationID(doc?.site as Relation) ?? undefined)
   }
 
   return doc

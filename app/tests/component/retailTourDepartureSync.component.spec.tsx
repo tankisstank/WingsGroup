@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -176,6 +176,38 @@ describe('US-027 Slice 4: Departure Matrix Sync & Sticky Conversion Bar componen
     expect(stickyPrimaryCta).toBeTruthy()
     expect(stickyPrimaryCta.textContent).toContain('Tư vấn đợt khác')
     expect(stickyPrimaryCta.getAttribute('href')).toContain('intent=inquiry')
+  })
+
+  it('clears the hero promotion and rail discount when city/month filters leave no departure', async () => {
+    const promotedDeparture = {
+      ...sampleTourData.departures[0],
+      departureCity: 'Hà Nội',
+      originalPrice: 18990000,
+      promoLabel: 'Ưu đãi đúng đợt',
+    }
+    const data: TourResolvedData = {
+      ...sampleTourData,
+      departures: [
+        promotedDeparture,
+        { ...sampleTourData.departures[1], departureCity: 'TP.HCM' },
+      ],
+      nextDeparture: promotedDeparture,
+    }
+    const { container } = render(<TourDetailPage data={data} locale="vi" siteCode="wingsgo" />)
+    const hero = container.querySelector('[data-tour-presentation="retail"]')
+    expect(hero?.textContent).toContain('Ưu đãi đúng đợt')
+    expect(container.querySelector('aside del')).not.toBeNull()
+
+    fireEvent.change(container.querySelector('#departureCity')!, { target: { value: 'Hà Nội' } })
+    fireEvent.change(container.querySelector('#departureMonth')!, {
+      target: { value: futureDate2.slice(0, 7) },
+    })
+
+    await waitFor(() => {
+      expect(hero?.textContent).not.toContain('Ưu đãi đúng đợt')
+      expect(container.querySelector('aside del')).toBeNull()
+      expect(container.querySelector('aside')?.textContent).toContain('Liên hệ')
+    })
   })
 
   it('filters departures using AND logic (City AND Month) and falls back selection accurately', () => {

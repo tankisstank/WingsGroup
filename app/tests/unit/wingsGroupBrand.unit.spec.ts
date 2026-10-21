@@ -172,7 +172,7 @@ describe('WingsGroup web brand kit contract', () => {
     expect(WINGSGROUP_BRAND.assetContract.canvasPolicy).toBe('tight-visible-bounds')
   })
 
-  it('records the approved brand release gate without approving locale or privacy gates', async () => {
+  it('records source approvals with evidence separately for brand, locale and privacy', async () => {
     const register = JSON.parse(
       fs.readFileSync(
         path.resolve(process.cwd(), '../docs/product/wingsgroup-v3-release-gates.json'),
@@ -191,7 +191,9 @@ describe('WingsGroup web brand kit contract', () => {
 
     expect(brandGate.state).toBe('approved')
     expect(brandGate.evidence.length).toBeGreaterThan(0)
-    expect(localeGate.state).toBe('route-ready')
-    expect(privacyGate.state).not.toBe('approved')
+    expect(localeGate.state).toBe('approved')
+    expect(localeGate.evidence.length).toBeGreaterThan(0)
+    expect(privacyGate.state).toBe('approved')
+    expect(privacyGate.evidence.length).toBeGreaterThan(0)
   })
 })

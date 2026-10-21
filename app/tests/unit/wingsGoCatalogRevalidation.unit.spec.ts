@@ -5,18 +5,26 @@ const cache = vi.hoisted(() => ({
   revalidateTag: vi.fn(),
 }))
 
+const curationHooks = vi.hoisted(() => ({
+  clearRedisCurationCache: vi.fn(),
+}))
+
 vi.mock('next/cache.js', () => cache)
+vi.mock('@/collections/TourCurations/hooks', () => curationHooks)
 
 import { revalidatePage } from '@/collections/Pages/hooks/revalidatePage'
 import {
+  revalidateTourDeparture,
   revalidateTourDepartureDelete,
   revalidateTourProduct,
+  revalidateTourProductDelete,
 } from '@/collections/Tours/hooks/revalidateTourContent'
 
 describe('WingsGo catalog revalidation', () => {
   beforeEach(() => {
     cache.revalidatePath.mockReset()
     cache.revalidateTag.mockReset()
+    curationHooks.clearRedisCurationCache.mockReset()
   })
 
   it('invalidates the catalog when a published tour wrapper changes', async () => {
@@ -47,7 +55,7 @@ describe('WingsGo catalog revalidation', () => {
     }
 
     await revalidateTourDepartureDelete({
-      doc: { id: 88, tourProduct: 44 },
+      doc: { id: 88, site: 9, tourProduct: 44 },
       req: { context: {}, payload },
     } as never)
 
@@ -57,8 +65,36 @@ describe('WingsGo catalog revalidation', () => {
       id: 44,
       overrideAccess: true,
     })
+    expect(cache.revalidatePath).toHaveBeenCalledWith('/')
+    expect(cache.revalidatePath).toHaveBeenCalledWith('/vi')
+    expect(cache.revalidatePath).toHaveBeenCalledWith('/en')
     expect(cache.revalidatePath).toHaveBeenCalledWith('/tour')
     expect(cache.revalidatePath).toHaveBeenCalledWith('/tour/deleted-departure-tour')
+    expect(curationHooks.clearRedisCurationCache).toHaveBeenCalledWith(9)
+  })
+
+  it('invalidates homepage and localized routes when a departure changes', async () => {
+    const payload = {
+      find: vi.fn().mockResolvedValue({ docs: [] }),
+    }
+
+    await revalidateTourDeparture({
+      doc: {
+        _status: 'published',
+        id: 77,
+        site: 7,
+        tourProduct: { id: 33, slug: 'han-quoc-5n4d' },
+      },
+      previousDoc: undefined,
+      req: { context: {}, payload },
+    } as never)
+
+    expect(cache.revalidatePath).toHaveBeenCalledWith('/')
+    expect(cache.revalidatePath).toHaveBeenCalledWith('/vi')
+    expect(cache.revalidatePath).toHaveBeenCalledWith('/en')
+    expect(cache.revalidatePath).toHaveBeenCalledWith('/tour')
+    expect(cache.revalidatePath).toHaveBeenCalledWith('/tour/han-quoc-5n4d')
+    expect(curationHooks.clearRedisCurationCache).toHaveBeenCalledWith(7)
   })
 
   it('does not invalidate public paths while Payload creates the initial admin draft', async () => {
@@ -79,5 +115,15 @@ describe('WingsGo catalog revalidation', () => {
 
     expect(payload.find).not.toHaveBeenCalled()
     expect(cache.revalidatePath).not.toHaveBeenCalled()
+  })
+
+  it('clears only the product tenant curation cache on change and deletion', async () => {
+    const payload = { find: vi.fn().mockResolvedValue({ docs: [] }) }
+    const doc = { id: 55, site: 7, slug: 'seoul', _status: 'published' }
+    await revalidateTourProduct({ doc, req: { context: {}, payload } } as never)
+    expect(curationHooks.clearRedisCurationCache).toHaveBeenCalledWith(7)
+    curationHooks.clearRedisCurationCache.mockClear()
+    await revalidateTourProductDelete({ doc, req: { context: {} } } as never)
+    expect(curationHooks.clearRedisCurationCache).toHaveBeenCalledWith(7)
   })
 })

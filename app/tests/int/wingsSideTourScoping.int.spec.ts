@@ -120,11 +120,12 @@ describe('WingSide structured tour query perimeter', () => {
     expect(calls.every(([args]) => args.draft === true && args.overrideAccess === true)).toBe(true)
   })
 
-  it('hides expired departure prices on public detail but keeps them in draft preview', async () => {
+  it.each([undefined, true])('hides expired departure prices even with commerceVerified=%s', async (commerceVerified) => {
     const departureDate = (days: number) =>
       new Date(Date.now() + days * 86_400_000).toISOString()
     const expired = {
       _status: 'published',
+      commerceVerified,
       departureDate: departureDate(31),
       expiresAt: new Date(Date.now() - 86_400_000).toISOString(),
       id: 901,
@@ -170,6 +171,44 @@ describe('WingSide structured tour query perimeter', () => {
       { id: 901, priceFrom: 12_000_000 },
       { id: 902, priceFrom: 13_000_000 },
     ])
+  })
+
+  it.each([
+    {
+      priceFrom: 0,
+      verifiedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+    },
+    { priceFrom: 12_000_000 },
+    {
+      priceFrom: 12_000_000,
+      currency: 'ABC',
+      verifiedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+    },
+  ])('does not promote contact or unverified legacy prices: %j', async (pricing) => {
+    mocks.find.mockImplementation(async (args: FindArgs) => {
+      if (args.collection === 'tour-products') {
+        return { docs: [{ ...products[0], relatedTours: [] }] }
+      }
+      if (args.collection === 'tour-departures') {
+        return { docs: [{
+          id: 903,
+          tourProduct: 498,
+          departureDate: '2030-01-01',
+          currency: 'VND',
+          originalPrice: 15_000_000,
+          promoLabel: 'PROMOTION',
+          ...pricing,
+        }] }
+      }
+      return { docs: [] }
+    })
+    const result = await getResolvedTourDetailBySlug({ draft: false, locale: 'en', slug: 'shared-slug' })
+    expect(result?.departures[0]).toMatchObject({ originalPrice: null, promoLabel: null })
+    if (!('verifiedAt' in pricing)) {
+      expect(result?.departures[0]).toMatchObject({ commerceVerified: false, priceFrom: null })
+    }
   })
 
   it('keeps delegated Page and Tour queries site-scoped and wrapper-gated', () => {

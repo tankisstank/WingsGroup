@@ -181,11 +181,14 @@ describe('WingsGroup v3 public components', () => {
       />,
     )
 
-    expect(screen.getByText('Company information')).toBeTruthy()
-    expect(screen.getByRole('heading', { name: 'Choose with more confidence.' })).toBeTruthy()
-    expect(screen.getByText('VIETWINGS.,JSC')).toBeTruthy()
+    expect(screen.getByText('Confirmed legal identity')).toBeTruthy()
+    expect(
+      screen.getByRole('heading', { name: 'Clarity helps you choose with confidence.' }),
+    ).toBeTruthy()
+    expect(screen.getByText(/EN-INTEGRATION-TEST/)).toBeTruthy()
     expect(screen.getByRole('link', { name: /Learn more about WingsGroup/ })).toBeTruthy()
     expect(screen.queryByText('Thông tin doanh nghiệp')).toBeNull()
+    expect(screen.queryByText('Pháp nhân đã được xác nhận')).toBeNull()
   })
 
   it('renders homepage capability and journey inquiry add-ons after the ecosystem', () => {
@@ -237,7 +240,6 @@ describe('WingsGroup v3 public components', () => {
     const infoStrip = {
       blockType: 'infoStrip',
       description: 'Trust block fixture',
-      title: 'Trust',
     } as Page['layout'][number]
 
     render(
@@ -378,7 +380,7 @@ describe('WingsGroup v3 public components', () => {
     expect(document.querySelectorAll('[data-service-row]')).toHaveLength(5)
     expect(screen.getByRole('heading', { name: 'WingsCare', level: 3 })).toBeTruthy()
     expect(screen.getAllByRole('link', { name: /Trao đổi nhu cầu/ })).toHaveLength(5)
-    expect(screen.getAllByRole('listitem')).toHaveLength(3)
+    expect(screen.getByTestId('wingsgroup-value-badges').querySelectorAll('li')).toHaveLength(3)
     expect(screen.getByText('An toàn & Tin cậy')).toBeTruthy()
     expect(
       screen
@@ -701,6 +703,40 @@ describe('WingsGroup v3 public components', () => {
     expect(
       document.querySelector('[data-od-id="consultation-dialog"] a[href]')?.getAttribute('href'),
     ).toBe('https://zalo.me/4142059657526524531')
+  })
+
+  it('renders all configured WingsGroup hotlines in the consultation dialog', () => {
+    render(
+      <WingsGroupConsultationDialog
+        hotlines={[
+          { href: 'tel:0912910101', normalized: '0912910101', raw: '0912910101' },
+          {
+            href: 'tel:0915250101',
+            label: 'Tư vấn tour',
+            normalized: '0915250101',
+            raw: '0915250101',
+          },
+          {
+            href: 'tel:0915260101',
+            label: 'Hỗ trợ dịch vụ',
+            normalized: '0915260101',
+            raw: '0915260101',
+          },
+        ]}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'LIÊN HỆ TƯ VẤN 24/7' }))
+
+    expect(screen.getByRole('link', { name: /Gọi hotline 0912 910 101/ }).getAttribute('href')).toBe(
+      'tel:0912910101',
+    )
+    expect(screen.getByRole('link', { name: /Gọi Tư vấn tour 0915 250 101/ }).getAttribute('href')).toBe(
+      'tel:0915250101',
+    )
+    expect(screen.getByRole('link', { name: /Gọi Hỗ trợ dịch vụ 0915 260 101/ }).getAttribute('href')).toBe(
+      'tel:0915260101',
+    )
   })
 
   it('localizes the consultation dialog and preserves the English contact path', () => {

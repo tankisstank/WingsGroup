@@ -27,6 +27,7 @@ import {
 } from '@/utilities/structuredData'
 import { buildPageBreadcrumbItems, type BreadcrumbPage } from '@/utilities/breadcrumbs'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
+import { resolveSiteHotlines } from '@/utilities/siteHotlines'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
 import { getCopyLocale } from '@/utilities/locales'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
@@ -314,6 +315,7 @@ export async function renderCmsPageByPath({
   const isWingsGroupV3LocalPreview = draft && useWingsGroupV3Surface
   const isWingsGroupPendingPolicy = Boolean(page && '__wingsGroupPendingPolicy' in page)
   const shouldRenderBreadcrumbs = !useHiFiBody && !useWingsGroupV3Home
+  const hotlines = resolveSiteHotlines(settings, site?.code)
 
   return (
     <article
@@ -458,6 +460,7 @@ export async function renderCmsPageByPath({
           ) : null}
           <RenderBlocks
             blocks={renderedLayout}
+            hotlines={hotlines}
             locale={locale}
             publicPathname={requestedPath}
             registeredOfficeAddress={
@@ -475,7 +478,7 @@ export async function renderCmsPageByPath({
             wingsGroupV3Home={useWingsGroupV3Home}
             wingsGroupV3Route={wingsGroupRoute?.archetype}
           />
-          {useWingsGroupV3Surface ? <WingsGroupConsultationDialog /> : null}
+          {useWingsGroupV3Surface ? <WingsGroupConsultationDialog hotlines={hotlines} /> : null}
           {!useWingsGroupV3Home && !useWingsGroupV3Surface ? (
             <RelatedPages locale={locale} pages={relatedPages} />
           ) : null}
@@ -584,6 +587,8 @@ const resolveStructuredTourPage = async ({
   const draft = handoff?.mode === 'draft'
   const segments = requestedPath.split('/').filter(Boolean)
   const site = await getCurrentSite()
+  const settings = await getCurrentSiteSettings()
+  const hotlines = resolveSiteHotlines(settings, site?.code)
 
   if (segments.length === 2 && segments[0] === 'tour' && segments[1]) {
     if (!isStructuredTourDetailEnabledSiteCode(site.code)) return null
@@ -649,6 +654,7 @@ const resolveStructuredTourPage = async ({
     return (
       <TourDetailPage
         data={tourData}
+        hotlines={hotlines}
         locale={getCopyLocale(locale)}
         presentation="retail"
         siteCode={site?.code}
@@ -666,7 +672,7 @@ const resolveStructuredTourPage = async ({
       locale,
     })
 
-    return <TourSchedulePage locale={copyLocale} schedule={schedule} />
+    return <TourSchedulePage hotlines={hotlines} locale={copyLocale} schedule={schedule} />
   }
 
   if (segments[0] === 'thi-truong' && segments[1]) {

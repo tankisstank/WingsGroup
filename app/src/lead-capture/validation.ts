@@ -180,6 +180,7 @@ export const parseLeadRequest = (rawBody: string): LeadSubmissionRequest => {
       'honeypot',
       'idempotencyKey',
       'leadContract',
+      'locale',
       'submissionData',
       'turnstileToken',
     ],
@@ -187,6 +188,9 @@ export const parseLeadRequest = (rawBody: string): LeadSubmissionRequest => {
   )
   const formId = body.formId
   const idempotencyKey = body.idempotencyKey
+  if (body.locale !== undefined && body.locale !== 'en' && body.locale !== 'vi') {
+    throw new LeadValidationError('Locale is invalid.')
+  }
 
   if (!['number', 'string'].includes(typeof formId) || String(formId).length > 64) {
     throw new LeadValidationError('Form identifier is invalid.')
@@ -233,6 +237,7 @@ export const parseLeadRequest = (rawBody: string): LeadSubmissionRequest => {
             }
           })(),
     submissionData,
+    locale: body.locale as 'en' | 'vi' | undefined,
     turnstileToken: typeof body.turnstileToken === 'string' ? body.turnstileToken : undefined,
   }
 }

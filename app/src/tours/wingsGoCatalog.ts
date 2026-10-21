@@ -1,3 +1,4 @@
+import { type EditorialBadgeDTO, normalizeEditorialBadges } from './editorialBadges'
 import type { Payload } from 'payload'
 
 import { isDepartureVerificationCurrent } from './departureCommerce'
@@ -33,6 +34,8 @@ export type WingsGoCatalogPage = {
 
 export type WingsGoCatalogCard = {
   duration: { days: number; nights: number }
+  editorialBadges?: EditorialBadgeDTO[]
+  hasHotEditorialBadge?: boolean
   id: number | string
   image: { alt: string; url: string } | null
   market: string
@@ -42,7 +45,9 @@ export type WingsGoCatalogCard = {
     departureCity: string | null
     promoLabel?: string | null
   }
-  price: { currency: string; kind: 'verified'; value: number } | { kind: 'contact'; label: string }
+  price:
+    | { currency: string; kind: 'verified'; originalPrice?: number | null; value: number }
+    | { kind: 'contact'; label: string }
   slug: string
   summary: string
   title: string
@@ -60,6 +65,7 @@ type Relation = number | string | { id?: number | string | null } | null | undef
 type InventoryProduct = {
   _status?: null | string
   durationDays?: number | null
+  editorialBadges?: unknown
   durationNights?: number | null
   gallery?: unknown
   heroMedia?: unknown
@@ -86,13 +92,17 @@ type InventoryDeparture = {
   _status?: null | string
   airline?: null | string
   currency?: null | string
+  commerceVerified?: boolean | null
   departureCity?: null | string
   departureDate?: null | string
   expiresAt?: null | string
   id: number | string
   priceFrom?: null | number
+  originalPrice?: null | number
+  originalCurrency?: null | string
   promoLabel?: null | string
   tourProduct?: Relation
+  availabilityStatus?: null | string
   verifiedAt?: null | string
   site?: Relation
 }
@@ -186,11 +196,13 @@ export const isEligibleWingsGoCatalogProduct = ({
 
 const buildCard = ({
   departures,
+  locale,
   now,
   product,
   wrapper,
 }: {
   departures: InventoryDeparture[]
+  locale?: string
   now: Date
   product: InventoryProduct
   wrapper: InventoryWrapper | null
@@ -214,6 +226,7 @@ const buildCard = ({
     return (
       departure._status === 'published' &&
       sameID(departure.tourProduct, product.id) &&
+      sameID(departure.site, product.site) &&
       date !== null &&
       new Date(date).getTime() > now.getTime()
     )
@@ -223,26 +236,49 @@ const buildCard = ({
   const verifiedPriceDeparture = futureDepartures
     .filter((departure) => {
       const hasFreshness = Boolean(departure.verifiedAt || departure.expiresAt)
-      return hasFreshness ? isDepartureVerificationCurrent(departure) : true
+      return departure.commerceVerified !== false &&
+        (hasFreshness
+          ? isDepartureVerificationCurrent(departure, now.getTime())
+          : departure.commerceVerified === true)
     })
     .find((departure) => typeof departure.priceFrom === 'number' && departure.priceFrom > 0)
 
   const commercialDeparture = verifiedPriceDeparture || futureDepartures[0]
   if (!commercialDeparture?.departureDate) return null
 
-  const price = verifiedPriceDeparture
+  // Payload stores the verification window; commerceVerified is a derived DTO value.
+  const commerciallyVerified = Boolean(verifiedPriceDeparture)
+  const canShowDiscount =
+    commerciallyVerified &&
+    commercialDeparture.availabilityStatus !== 'sold-out' &&
+    typeof commercialDeparture.priceFrom === 'number' &&
+    commercialDeparture.priceFrom > 0 &&
+    typeof commercialDeparture.originalPrice === 'number' &&
+    commercialDeparture.originalPrice > commercialDeparture.priceFrom &&
+    Boolean(commercialDeparture.currency) &&
+    (!commercialDeparture.originalCurrency || commercialDeparture.originalCurrency === commercialDeparture.currency)
+
+  const price = verifiedPriceDeparture && commerciallyVerified
     ? {
         currency: verifiedPriceDeparture.currency || 'VND',
         kind: 'verified' as const,
+        originalPrice: canShowDiscount ? commercialDeparture.originalPrice : null,
         value: verifiedPriceDeparture.priceFrom!,
       }
     : { kind: 'contact' as const, label: 'Liên hệ để nhận giá mới nhất' }
+
+  const { editorialBadges, hasHotEditorialBadge } = normalizeEditorialBadges(
+    product.editorialBadges,
+    locale,
+  )
 
   return {
     duration: {
       days: Number(product.durationDays || 0),
       nights: Number(product.durationNights || 0),
     },
+    editorialBadges,
+    hasHotEditorialBadge: Boolean(hasHotEditorialBadge),
     href: getTourProductPath(product.slug),
     id: product.id,
     image: firstMedia(product),
@@ -251,7 +287,10 @@ const buildCard = ({
       airline: commercialDeparture.airline || null,
       date: commercialDeparture.departureDate,
       departureCity: commercialDeparture.departureCity || null,
-      promoLabel: commercialDeparture.promoLabel || null,
+      promoLabel:
+        price.kind === 'verified' && commercialDeparture.availabilityStatus !== 'sold-out'
+          ? commercialDeparture.promoLabel || null
+          : null,
     },
     price,
     slug: product.slug,
@@ -372,7 +411,7 @@ const queryDocs = async (
     collection,
     depth: 2,
     draft: false,
-    ...(locale ? { fallbackLocale: 'vi', locale: locale as never } : {}),
+    ...(locale ? { fallbackLocale: locale === 'en' ? false : 'vi', locale: locale as never } : {}),
     limit: WINGSGO_CATALOG_MAX_INVENTORY,
     overrideAccess: true,
     pagination: false,
@@ -468,6 +507,7 @@ export const queryWingsGoTourCatalog = async ({
         now,
         product,
         wrapper: wrappersByID.get(String(relationID(product.wrapperPage))) || null,
+        locale,
       }),
     )
     .filter((card): card is WingsGoCatalogCard => Boolean(card))
@@ -599,7 +639,7 @@ export const getWingsGoFeaturedTours = async ({
     collection: 'pages',
     depth: 0,
     draft: false,
-    fallbackLocale: 'vi',
+    fallbackLocale: locale === 'en' ? false : 'vi',
     limit: 1,
     locale: locale as never,
     overrideAccess: true,

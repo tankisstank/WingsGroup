@@ -6,7 +6,7 @@ import React from 'react'
 import RichText from '@/components/RichText'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
-import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
+import { appendSiteWhere, getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
 import { WINGSGROUP_EDITORIAL_ARCHIVE_PATH } from '@/utilities/wingsGroupEditorial'
 
 export const ArchiveBlock: React.FC<
@@ -26,13 +26,13 @@ export const ArchiveBlock: React.FC<
 
   const limit = limitFromProps || 3
   const site = await getCurrentSite()
+  const locale = await getCurrentLocale()
   const postPath = site.code === 'wings-group' ? WINGSGROUP_EDITORIAL_ARCHIVE_PATH : '/posts'
 
   let posts: Post[] = []
+  const payload = await getPayload({ config: configPromise })
 
   if (populateBy === 'collection') {
-    const payload = await getPayload({ config: configPromise })
-
     const flattenedCategories = categories?.map((category) => {
       if (typeof category === 'object') return category.id
       else return category
@@ -51,18 +51,45 @@ export const ArchiveBlock: React.FC<
     const fetchedPosts = await payload.find({
       collection: 'posts',
       depth: 1,
+      fallbackLocale: false,
       limit,
-      ...(where ? { where } : {}),
+      locale,
+      overrideAccess: false,
+      where: {
+        and: [{ _status: { equals: 'published' } }, where],
+      },
     })
 
     posts = fetchedPosts.docs
   } else {
     if (selectedDocs?.length) {
-      const filteredSelectedPosts = selectedDocs.map((post) => {
-        if (typeof post.value === 'object') return post.value
-      }) as Post[]
+      const selectedIDs = selectedDocs
+        .map((post) => (typeof post.value === 'object' ? post.value.id : post.value))
+        .filter((value) => typeof value === 'number' || typeof value === 'string') as Array<number | string>
 
-      posts = filteredSelectedPosts
+      if (selectedIDs.length) {
+        const selectedResult = await payload.find({
+          collection: 'posts',
+          depth: 1,
+          fallbackLocale: false,
+          limit: selectedIDs.length,
+          locale,
+          overrideAccess: false,
+          where: {
+            and: [
+              { id: { in: selectedIDs } },
+              { _status: { equals: 'published' } },
+              { site: { equals: site.id } },
+            ],
+          },
+        })
+        const selectedByID = new Map<string, Post>(
+          selectedResult.docs.map((post) => [String(post.id), post]),
+        )
+        posts = selectedIDs
+          .map((id) => selectedByID.get(String(id)))
+          .filter((post): post is Post => Boolean(post))
+      }
     }
   }
 

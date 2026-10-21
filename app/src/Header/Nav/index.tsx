@@ -16,6 +16,8 @@ import {
 } from '@/utilities/sitePaths'
 import { getWingsSideHiFiCta, getWingsSideHiFiNavItems } from '@/utilities/wingsSideHiFiNav'
 import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
+import type { HotlineItem } from '@/utilities/siteHotlines'
+import { formatHotlineDisplay, resolveSiteHotlines } from '@/utilities/siteHotlines'
 import { Globe2Icon, MenuIcon, SearchIcon, XIcon } from 'lucide-react'
 import { getWingsGroupSwitcherLocales } from '@/components/WingsGroupV3/model'
 
@@ -95,6 +97,7 @@ export const HeaderNav: React.FC<{
   data: { navItems?: HeaderType['navItems'] }
   defaultLocale?: SupportedLocaleCode
   englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
+  hotlines?: HotlineItem[]
   primaryAction?: {
     label: string
     url: string
@@ -111,6 +114,7 @@ export const HeaderNav: React.FC<{
   data,
   defaultLocale,
   englishPublicationState,
+  hotlines,
   primaryAction,
   publicPathname,
   resolvedLocale = 'vi',
@@ -123,11 +127,48 @@ export const HeaderNav: React.FC<{
 }) => {
   const navItems = data?.navItems || []
   const isWingsGo = siteCode === 'wings-go'
+  const isWingsGroup = siteCode === 'wings-group'
+  const isHotlineSite = isWingsGo || isWingsGroup
   const wingsGoNav = resolvedLocale === 'en' ? WINGSGO_NAV_EN : WINGSGO_NAV
   const [isOpen, setIsOpen] = useState(false)
+  const [isHotlinesOpen, setIsHotlinesOpen] = useState(false)
   const [clientReady, setClientReady] = useState(false)
   const [locationSuffix, setLocationSuffix] = useState('')
   const headerNavRef = useRef<HTMLDivElement>(null)
+  const hotlineToggleRef = useRef<HTMLButtonElement>(null)
+  const hotlineDropdownRef = useRef<HTMLDivElement>(null)
+
+  const resolvedHotlines =
+    hotlines !== undefined ? hotlines : resolveSiteHotlines(undefined, siteCode)
+  const mainHotline = resolvedHotlines[0]
+  const secondaryHotlines = resolvedHotlines.slice(1)
+
+  useEffect(() => {
+    if (!isHotlinesOpen) return
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setIsHotlinesOpen(false)
+        hotlineToggleRef.current?.focus()
+      }
+    }
+    const handleMouseDown = (event: MouseEvent) => {
+      if (
+        hotlineDropdownRef.current &&
+        !hotlineDropdownRef.current.contains(event.target as Node) &&
+        hotlineToggleRef.current &&
+        !hotlineToggleRef.current.contains(event.target as Node)
+      ) {
+        setIsHotlinesOpen(false)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handleMouseDown)
+    }
+  }, [isHotlinesOpen])
   const pathname = useSitePublicPathname()
   const searchParams = useSearchParams()
   const localeSwitchPathname = pathname || publicPathname || '/'
@@ -461,15 +502,63 @@ export const HeaderNav: React.FC<{
             {resolvedPrimaryAction.label}
           </SiteLink>
         ) : null}
-        {isWingsGo ? (
-          <a
-            aria-label={resolvedLocale === 'en' ? 'Call WingsGo 0912 910 101' : 'Gọi hotline WingsGo 0912 910 101'}
-            className="inline-flex min-h-10 shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-[var(--site-border)] px-3 text-sm font-semibold text-[var(--site-brand)] no-underline"
-            href="tel:0912910101"
-          >
-            <span aria-hidden="true">☎</span>
-            <span>0912 910 101</span>
-          </a>
+        {isHotlineSite && mainHotline ? (
+          <div className="relative inline-flex items-center">
+            <a
+              aria-label={
+                resolvedLocale === 'en'
+                  ? `Call ${isWingsGroup ? 'WingsGroup' : 'WingsGo'} ${formatHotlineDisplay(mainHotline.normalized)}`
+                  : `Gọi hotline ${isWingsGroup ? 'WingsGroup' : 'WingsGo'} ${formatHotlineDisplay(mainHotline.normalized)}`
+              }
+              className={`inline-flex min-h-10 shrink-0 items-center gap-1 whitespace-nowrap border border-[var(--site-border)] px-3 text-sm font-semibold text-[var(--site-brand)] no-underline ${secondaryHotlines.length > 0 ? 'rounded-l-full border-r-0' : 'rounded-full'}`}
+              href={mainHotline.href}
+            >
+              <span aria-hidden="true">☎</span>
+              <span>{formatHotlineDisplay(mainHotline.normalized)}</span>
+            </a>
+            {secondaryHotlines.length > 0 ? (
+              <>
+                <button
+                  ref={hotlineToggleRef}
+                  aria-controls={isWingsGroup ? 'wingsgroup-header-hotlines-dropdown' : 'wingsgo-header-hotlines-dropdown'}
+                  aria-expanded={isHotlinesOpen}
+                  aria-label={
+                    resolvedLocale === 'en'
+                      ? 'Additional hotlines'
+                      : 'Danh sách hotline bổ sung'
+                  }
+                  className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-r-full border border-[var(--site-border)] px-2 text-xs font-semibold text-[var(--site-brand)] transition hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)]"
+                  onClick={() => setIsHotlinesOpen((prev) => !prev)}
+                  type="button"
+                >
+                  <span aria-hidden="true">{isHotlinesOpen ? '▲' : '▼'}</span>
+                </button>
+                {isHotlinesOpen ? (
+                  <div
+                    id={isWingsGroup ? 'wingsgroup-header-hotlines-dropdown' : 'wingsgo-header-hotlines-dropdown'}
+                    ref={hotlineDropdownRef}
+                    className="absolute right-0 top-full z-50 mt-1 min-w-[200px] rounded-xl border border-[var(--site-border)] bg-background p-2 shadow-lg"
+                  >
+                    {secondaryHotlines.map((item) => (
+                      <a
+                        key={item.normalized}
+                        className="flex min-h-9 items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold text-foreground no-underline transition hover:bg-muted/50"
+                        href={item.href}
+                        onClick={() => setIsHotlinesOpen(false)}
+                      >
+                        <span aria-hidden="true">📞</span>
+                        <span>
+                          {item.label
+                            ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
+                            : formatHotlineDisplay(item.normalized)}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                ) : null}
+              </>
+            ) : null}
+          </div>
         ) : null}
         {sharedZaloCTA ? (
           <a
@@ -501,12 +590,16 @@ export const HeaderNav: React.FC<{
             {resolvedPrimaryAction.label}
           </SiteLink>
         ) : null}
-        {isWingsGo ? (
+        {isHotlineSite && mainHotline ? (
           <a
-            aria-label={resolvedLocale === 'en' ? 'Call WingsGo 0912 910 101' : 'Gọi hotline WingsGo 0912 910 101'}
+            aria-label={
+              resolvedLocale === 'en'
+                ? `Call ${isWingsGroup ? 'WingsGroup' : 'WingsGo'} ${formatHotlineDisplay(mainHotline.normalized)}`
+                : `Gọi hotline ${isWingsGroup ? 'WingsGroup' : 'WingsGo'} ${formatHotlineDisplay(mainHotline.normalized)}`
+            }
             className="site-icon-button"
-            href="tel:0912910101"
-            title="0912 910 101"
+            href={mainHotline.href}
+            title={formatHotlineDisplay(mainHotline.normalized)}
           >
             <span aria-hidden="true">☎</span>
           </a>
@@ -636,15 +729,23 @@ export const HeaderNav: React.FC<{
                       />
                     )
                   })}
-          {isWingsGo ? (
-            <a
-              className="site-mobile-nav__link"
-              href="tel:0912910101"
-              onClick={() => setIsOpen(false)}
-            >
-              ☎ {resolvedLocale === 'en' ? 'Call 0912 910 101' : 'Gọi 0912 910 101'}
-            </a>
-          ) : null}
+          {isHotlineSite
+            ? resolvedHotlines.map((item) => (
+                <a
+                  key={item.normalized}
+                  className="site-mobile-nav__link"
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
+                >
+                  ☎{' '}
+                  {item.label
+                    ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
+                    : resolvedLocale === 'en'
+                      ? `Call ${formatHotlineDisplay(item.normalized)}`
+                      : `Gọi ${formatHotlineDisplay(item.normalized)}`}
+                </a>
+              ))
+            : null}
           {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
             <SiteLink
               className="site-mobile-nav__link site-mobile-nav__link--primary"

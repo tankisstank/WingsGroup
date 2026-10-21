@@ -25,6 +25,7 @@ import {
   WINGSGROUP_SITE_CODE,
 } from '@/lead-capture/wingsGroupV3'
 import { getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
+import { isCopyLocale } from '@/utilities/locales'
 import { domainCandidates } from '@/utilities/siteDomains'
 import { incrementMetric, logOperationalEvent } from '@/observability'
 import {
@@ -231,11 +232,19 @@ export async function POST(request: Request): Promise<Response> {
   const payload = await getPayload({ config: configPromise })
   const isWingsGroupV3 = site.code === WINGSGROUP_SITE_CODE
   const currentLocale = await getCurrentLocale()
+  const requestedLocale = input.locale
+  if (requestedLocale && !isCopyLocale(requestedLocale)) {
+    return json({ error: 'Invalid submission.' }, 400)
+  }
+  const trustedLocale = request.headers.get('x-locale')
+  const resolvedLocale = isCopyLocale(trustedLocale)
+    ? trustedLocale
+    : requestedLocale || (currentLocale === 'en' ? 'en' : 'vi')
   const previewSignal =
     isWingsGroupV3 &&
     (await hasExplicitWingsGroupLocalDraftPreviewSignal({
       headers: request.headers,
-      locale: currentLocale,
+      locale: resolvedLocale,
       siteCode: site.code,
     }))
   const previewUser = previewSignal
@@ -253,7 +262,7 @@ export async function POST(request: Request): Promise<Response> {
     previewUser &&
     (await isExplicitWingsGroupLocalDraftPreviewRequest({
       headers: request.headers,
-      locale: currentLocale,
+      locale: resolvedLocale,
       siteCode: site.code,
       user: previewUser,
     }))
@@ -353,7 +362,7 @@ export async function POST(request: Request): Promise<Response> {
   if (isWingsGroupV3) {
     const [settings, locale] = await Promise.all([
       getWingsGroupSettings(payload, site.id),
-      Promise.resolve(currentLocale),
+      Promise.resolve(resolvedLocale),
     ])
     const sourcePath = resolveTrustedLeadSourcePath({ currentLocale: locale, request, site })
     const governance = resolveWingsGroupLeadGovernance(settings, locale, {
@@ -576,9 +585,17 @@ export async function GET(request: Request): Promise<Response> {
 
   const payload = await getPayload({ config: configPromise })
   const locale = await getCurrentLocale()
+  const requestedLocale = new URL(request.url).searchParams.get('locale')
+  if (requestedLocale && !isCopyLocale(requestedLocale)) {
+    return json({ error: 'Invalid request.' }, 400)
+  }
+  const trustedLocale = request.headers.get('x-locale')
+  const resolvedLocale = isCopyLocale(trustedLocale)
+    ? trustedLocale
+    : requestedLocale || (locale === 'en' ? 'en' : 'vi')
   const previewSignal = await hasExplicitWingsGroupLocalDraftPreviewSignal({
     headers: request.headers,
-    locale,
+    locale: resolvedLocale,
     siteCode: site.code,
   })
   const previewUser = previewSignal
@@ -596,7 +613,7 @@ export async function GET(request: Request): Promise<Response> {
     previewUser &&
     (await isExplicitWingsGroupLocalDraftPreviewRequest({
       headers: request.headers,
-      locale,
+      locale: resolvedLocale,
       siteCode: site.code,
       user: previewUser,
     }))
@@ -610,7 +627,7 @@ export async function GET(request: Request): Promise<Response> {
   const settings = await getWingsGroupSettings(payload, site.id).catch(() => null)
 
   return json(
-    toWingsGroupLeadPublicConfig(settings, locale, {
+    toWingsGroupLeadPublicConfig(settings, resolvedLocale, {
       allowPendingPrivacy: Boolean(previewLeadPath),
     }),
     200,

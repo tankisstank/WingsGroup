@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { fetchAllPages, getUsageSummary } from '@/components/ThemeManager'
 
+vi.mock('@payloadcms/ui', () => ({ useAuth: () => ({ user: null }) }))
+
 describe('Theme Manager impact calculation', () => {
   afterEach(() => {
     vi.restoreAllMocks()

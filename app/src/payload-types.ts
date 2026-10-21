@@ -396,6 +396,22 @@ export interface SiteSetting {
   salesEmail?: string | null;
   supportPhone?: string | null;
   /**
+   * Các số hotline bổ sung hiển thị cùng hotline chính trên WingsGo (tối đa 5 số).
+   */
+  additionalHotlines?:
+    | {
+        /**
+         * Số hotline (ví dụ: 0915250101 hoặc 0915 250 101).
+         */
+        phoneNumber: string;
+        /**
+         * Nhãn tùy chọn (ví dụ: Tư vấn tour, Hỗ trợ dịch vụ).
+         */
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Hiển thị ở footer và trang liên hệ công khai của WingsGo.
    */
   registeredOfficeAddress?: string | null;
@@ -563,112 +579,7 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    square?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    small?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    medium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    xlarge?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    og?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-640-webp'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-640-avif'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-960-webp'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-960-avif'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-1440-webp'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    'wingsgroup-v3-1440-avif'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
+  sizes?: {};
 }
 /**
  * Quản lý trang theo site. Editor chỉ lưu nháp; site-manager hoặc super-admin duyệt publish.
@@ -2270,6 +2181,22 @@ export interface TourProduct {
         }[]
       | null;
   };
+  /**
+   * Nhãn biên tập trên card tour (homepage, /tour, thị trường). hot = viền gradient cầu vồng 2px; specialized/vip = sticker góc trên trái. Tối đa 3 nhãn, mỗi loại (hot, specialized, vip) tối đa 1 nhãn.
+   */
+  editorialBadges?:
+    | {
+        /**
+         * Chọn loại nhãn biên tập. Khi chọn, CMS tự động điền sẵn nhãn hiển thị theo locale.
+         */
+        kind: 'hot' | 'specialized' | 'vip';
+        /**
+         * Nhãn hiển thị cho loại badge tương ứng. Có thể giữ giá trị mặc định hoặc tùy chỉnh theo locale.
+         */
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
   badges?:
     | {
         label: string;
@@ -2309,9 +2236,12 @@ export interface TourProduct {
     dayNumber: number;
     title: string;
     route?: string | null;
+    /**
+     * Đoạn tóm tắt ngắn làm teaser hiển thị ngoài danh mục và làm bản plain-text fallback.
+     */
     summary: string;
     /**
-     * Hỗ trợ định dạng in đậm mốc giờ, gạch đầu dòng danh sách hoạt động và chèn link an toàn.
+     * Nội dung chi tiết trong ngày hiển thị trong tab lịch trình tour. Hỗ trợ định dạng in đậm mốc giờ, gạch đầu dòng và chèn link an toàn.
      */
     content?: {
       root: {
@@ -3197,6 +3127,13 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   supportEmail?: T;
   salesEmail?: T;
   supportPhone?: T;
+  additionalHotlines?:
+    | T
+    | {
+        phoneNumber?: T;
+        label?: T;
+        id?: T;
+      };
   registeredOfficeAddress?: T;
   travelOfficeAddress?: T;
   headerNavItems?:
@@ -4317,6 +4254,13 @@ export interface TourProductsSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  editorialBadges?:
+    | T
+    | {
+        kind?: T;
+        label?: T;
+        id?: T;
+      };
   badges?:
     | T
     | {
@@ -4625,140 +4569,7 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        square?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        small?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        medium?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        large?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        xlarge?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        og?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-640-webp'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-640-avif'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-960-webp'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-960-avif'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-1440-webp'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        'wingsgroup-v3-1440-avif'?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
+  sizes?: T | {};
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -3,6 +3,7 @@ import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 import { SiteLink } from '@/components/SiteLink'
 import { WingsGoTourCard } from './WingsGoTourCard'
+import { PromotionBadge, PromotionPrice } from './PromotionPrice'
 import type { WingsGoCatalogCard } from './wingsGoCatalog'
 import { getResolvedScheduleData } from './queries'
 import {
@@ -28,9 +29,15 @@ const marketCards = [
   },
   {
     badge: { en: 'Seasonal Peak', vi: 'Mùa đẹp nhất' },
-    departuresHint: { en: 'Golden route: Autumn leaves & Snow', vi: 'Cung đường vàng mùa lá đỏ & tuyết trắng' },
+    departuresHint: {
+      en: 'Golden route: Autumn leaves & Snow',
+      vi: 'Cung đường vàng mùa lá đỏ & tuyết trắng',
+    },
     emoji: '🇯🇵',
-    highlights: { en: 'Tokyo • Mt. Fuji • Kyoto • Osaka', vi: 'Tokyo • Núi Phú Sĩ • Kyoto • Osaka' },
+    highlights: {
+      en: 'Tokyo • Mt. Fuji • Kyoto • Osaka',
+      vi: 'Tokyo • Núi Phú Sĩ • Kyoto • Osaka',
+    },
     image: '/media/nuiphusimuathu.jpg',
     key: 'japan',
     label: { en: 'Japan', vi: 'Nhật Bản' },
@@ -38,9 +45,15 @@ const marketCards = [
   },
   {
     badge: { en: 'Hot Route', vi: 'Tuyến Hot' },
-    departuresHint: { en: 'Direct flights, premier routes', vi: 'Bay thẳng tiện lợi, khám phá cổ trấn & kỳ quan' },
+    departuresHint: {
+      en: 'Direct flights, premier routes',
+      vi: 'Bay thẳng tiện lợi, khám phá cổ trấn & kỳ quan',
+    },
     emoji: '🇨🇳',
-    highlights: { en: 'Shanghai • Wuzhen • Beijing • Hangzhou', vi: 'Thượng Hải • Ô Trấn • Bắc Kinh • Hàng Châu' },
+    highlights: {
+      en: 'Shanghai • Wuzhen • Beijing • Hangzhou',
+      vi: 'Thượng Hải • Ô Trấn • Bắc Kinh • Hàng Châu',
+    },
     image: '/media/thebund.jpg',
     key: 'china',
     label: { en: 'China', vi: 'Trung Quốc' },
@@ -99,7 +112,10 @@ export const WingsGoHomepageSections = async ({
           </SiteLink>
         </div>
 
-        <ul className="mb-4 flex flex-wrap gap-2" aria-label={isEn ? 'WingsGo commitments' : 'Cam kết WingsGo'}>
+        <ul
+          className="mb-4 flex flex-wrap gap-2"
+          aria-label={isEn ? 'WingsGo commitments' : 'Cam kết WingsGo'}
+        >
           {(isEn
             ? ['Clear dates', 'Airline shown', 'Transparent prices']
             : ['Lịch rõ ngày', 'Bay theo hãng', 'Giá minh bạch']
@@ -123,9 +139,7 @@ export const WingsGoHomepageSections = async ({
                   market?: string
                 }>(departure.tourProduct)
               : null
-            const verified = departure
-              ? departure.commerceVerified ?? Boolean(departure.availabilityStatus)
-              : false
+            const verified = departure?.commerceVerified === true
             const soldOut = verified && departure?.availabilityStatus === 'sold-out'
             const inquiryHref = departure
               ? getTourInquiryPath({
@@ -153,15 +167,24 @@ export const WingsGoHomepageSections = async ({
                     <h3 className="mt-3 text-lg font-semibold leading-snug text-foreground">
                       {product.title}
                     </h3>
+                    {verified && !soldOut ? (
+                      <div className="mt-3">
+                        <PromotionBadge label={departure.promoLabel} />
+                      </div>
+                    ) : null}
                     <dl className="mt-4 grid gap-3 text-sm">
                       <div>
-                        <dt className="text-muted-foreground">{isEn ? 'Departure date' : 'Ngày khởi hành'}</dt>
+                        <dt className="text-muted-foreground">
+                          {isEn ? 'Departure date' : 'Ngày khởi hành'}
+                        </dt>
                         <dd className="font-semibold">
                           {formatTourDate(departure.departureDate, locale) || '—'}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-muted-foreground">{isEn ? 'Airline / flight' : 'Hãng bay / mã chuyến'}</dt>
+                        <dt className="text-muted-foreground">
+                          {isEn ? 'Airline / flight' : 'Hãng bay / mã chuyến'}
+                        </dt>
                         <dd className="font-semibold">
                           {departure.airline || (isEn ? 'Updating' : 'Đang cập nhật')}
                           {departure.flightNumber ? ` · ${departure.flightNumber}` : ''}
@@ -169,10 +192,21 @@ export const WingsGoHomepageSections = async ({
                       </div>
                       <div className="flex items-end justify-between gap-3">
                         <div>
-                          <dt className="text-muted-foreground">{isEn ? 'Tour price' : 'Giá tour'}</dt>
+                          <dt className="text-muted-foreground">
+                            {isEn ? 'Tour price' : 'Giá tour'}
+                          </dt>
                           <dd className="text-lg font-bold text-[var(--site-brand)]">
-                            {formatTourPrice(departure.priceFrom, departure.currency) ||
-                              (isEn ? 'Contact us' : 'Liên hệ')}
+                            {verified && !soldOut ? (
+                              <PromotionPrice
+                                contactLabel={isEn ? 'Contact us' : 'Liên hệ'}
+                                currency={departure.currency}
+                                originalPrice={departure.originalPrice}
+                                price={departure.priceFrom}
+                              />
+                            ) : (
+                              formatTourPrice(departure.priceFrom, departure.currency) ||
+                              (isEn ? 'Contact us' : 'Liên hệ')
+                            )}
                           </dd>
                         </div>
                         {(() => {
@@ -344,9 +378,7 @@ export const WingsGoHomepageSections = async ({
                   <p className="mt-1 text-sm font-medium text-white/90">
                     {highlights[isEn ? 'en' : 'vi']}
                   </p>
-                  <p className="mt-1 text-xs text-white/70">
-                    {departuresHint[isEn ? 'en' : 'vi']}
-                  </p>
+                  <p className="mt-1 text-xs text-white/70">{departuresHint[isEn ? 'en' : 'vi']}</p>
 
                   <div className="mt-4 flex items-center justify-between border-t border-white/15 pt-3">
                     <span className="text-xs font-semibold text-white/95 transition group-hover:text-white">

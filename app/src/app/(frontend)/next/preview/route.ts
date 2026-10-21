@@ -275,7 +275,9 @@ export async function GET(req: NextRequest): Promise<Response> {
     defaultLocale: locales.defaultLocale,
     hasPublishedVersion,
     locale: locales.locale,
-    mode: document._status === 'draft' ? 'draft' : 'published',
+    // A TourProduct preview must include draft departures saved through the
+    // Tour authoring panel, even when the parent TourProduct is published.
+    mode: collection === 'tour-products' || document._status === 'draft' ? 'draft' : 'published',
     path,
     siteCode: site.code,
   })

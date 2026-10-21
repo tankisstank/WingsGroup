@@ -15,6 +15,7 @@ import { MapPinIcon, PhoneIcon } from 'lucide-react'
 import { WINGSGROUP_LEGAL_IDENTITY, isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
 import { isWingsGroupBrandSite } from '@/wingsgroup/brand'
 import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
+import { formatHotlineDisplay, resolveSiteHotlines } from '@/utilities/siteHotlines'
 
 export async function Footer() {
   const settings = await getCurrentSiteSettings()
@@ -22,6 +23,7 @@ export async function Footer() {
   const locale = await getCurrentLocale()
   const publicPathname = await getCurrentPublicPathname()
   const publicRoute = getPublicRoutePathname(publicPathname)
+  const hotlines = resolveSiteHotlines(settings, site.code)
   const chromeCopy = getRuntimeLocaleCopy(publicChromeCopy, locale)
   const isWingSide = site.code === 'wing-side'
   const isWingsGo = site.code === 'wings-go'
@@ -97,7 +99,7 @@ export async function Footer() {
             </p>
             {settings?.supportEmail || settings?.supportPhone ? (
               <div className="site-footer__contacts ws-hifi-footer__contacts">
-                {settings.supportEmail ? (
+                {settings?.supportEmail ? (
                   <ProtectedEmailLink email={settings.supportEmail} />
                 ) : null}
                 {settings.supportPhone ? (
@@ -221,21 +223,34 @@ export async function Footer() {
                 </div>
               </address>
             ) : null}
-            {settings?.supportEmail || salesEmail || settings?.supportPhone || isWingsGo ? (
+            {settings?.supportEmail || salesEmail || (isWingsGo || isWingsGroup ? hotlines.length > 0 : Boolean(settings?.supportPhone)) ? (
               <div className="site-footer__contacts">
-                {settings.supportEmail ? (
+                {settings?.supportEmail ? (
                   <ProtectedEmailLink email={settings.supportEmail} />
                 ) : null}
                 {salesEmail ? (
                   <ProtectedEmailLink email={salesEmail} />
                 ) : null}
-                {isWingsGo || settings.supportPhone ? (
-                  <a
-                    className={isWingsGo ? 'wingsgo-footer__phone' : undefined}
-                    href={isWingsGo ? 'tel:0912910101' : `tel:${settings.supportPhone!.replace(/[^\d+]/g, '')}`}
-                  >
+                {isWingsGroup && hotlines.length > 0 ? (
+                  hotlines.map((item) => (
+                    <a className="wingsgroup-footer__phone" href={item.href} key={item.normalized}>
+                      <PhoneIcon aria-hidden="true" className="h-4 w-4" />
+                      <span>
+                        {item.label
+                          ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
+                          : formatHotlineDisplay(item.normalized)}
+                      </span>
+                    </a>
+                  ))
+                ) : isWingsGo && hotlines[0] ? (
+                  <a className="wingsgo-footer__phone" href={hotlines[0].href}>
                     <PhoneIcon aria-hidden="true" className="h-4 w-4" />
-                    {isWingsGo ? '0912 910 101' : settings.supportPhone}
+                    {formatHotlineDisplay(hotlines[0].normalized)}
+                  </a>
+                ) : settings?.supportPhone ? (
+                  <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
+                    <PhoneIcon aria-hidden="true" className="h-4 w-4" />
+                    {settings.supportPhone}
                   </a>
                 ) : null}
               </div>
@@ -289,9 +304,21 @@ export async function Footer() {
                     {locale === 'en' ? 'Get Tour Advice' : 'Nhận tư vấn Tour'}
                   </a>
                 ) : null}
-                <a className="text-sm font-semibold text-[var(--site-brand)]" href="tel:0912910101">
-                  {locale === 'en' ? 'Call now: 0912 910 101' : 'Hotline: 0912 910 101'}
-                </a>
+                {hotlines.map((item, idx) => (
+                  <a
+                    key={item.normalized}
+                    className="text-sm font-semibold text-[var(--site-brand)]"
+                    href={item.href}
+                  >
+                    {item.label
+                      ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
+                      : idx === 0
+                        ? locale === 'en'
+                          ? `Call now: ${formatHotlineDisplay(item.normalized)}`
+                          : `Hotline: ${formatHotlineDisplay(item.normalized)}`
+                        : formatHotlineDisplay(item.normalized)}
+                  </a>
+                ))}
               </div>
             ) : null}
           </div>

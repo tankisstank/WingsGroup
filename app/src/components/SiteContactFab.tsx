@@ -3,10 +3,13 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 import { ProtectedEmailLink } from './ProtectedEmailLink'
+import type { HotlineItem } from '@/utilities/siteHotlines'
+import { formatHotlineDisplay, resolveSiteHotlines } from '@/utilities/siteHotlines'
+import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
 
-type Props = { locale?: string | null; siteCode?: string | null }
+type Props = { locale?: string | null; siteCode?: string | null; hotlines?: HotlineItem[] }
 
-export const SiteContactFab: React.FC<Props> = ({ locale, siteCode }) => {
+export const SiteContactFab: React.FC<Props> = ({ locale, siteCode, hotlines }) => {
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const dialogRef = useRef<HTMLElement>(null)
@@ -15,6 +18,9 @@ export const SiteContactFab: React.FC<Props> = ({ locale, siteCode }) => {
   const isVi = locale === 'vi'
   const isWingsGo = siteCode === 'wings-go'
   const contactPath = siteCode === 'wing-side' ? '/contact-us' : '/lien-he'
+  const sharedZalo = isWingsGo ? getSharedZaloCTA(siteCode, locale) : null
+  const resolvedHotlines =
+    hotlines !== undefined ? hotlines : resolveSiteHotlines(undefined, siteCode)
 
   useEffect(() => {
     if (!open) {
@@ -110,14 +116,52 @@ export const SiteContactFab: React.FC<Props> = ({ locale, siteCode }) => {
                   : 'The WingsSide team will receive your request and follow up.'}
             </p>
             <div className="mt-5 grid gap-3">
-              <a
-                aria-label={isVi ? 'Gọi hotline 0912 910 101' : 'Call hotline 0912 910 101'}
-                className="flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 font-medium hover:border-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)]"
-                href="tel:0912910101"
-              >
-                <span aria-hidden="true">📞</span>
-                <span>0912 910 101</span>
-              </a>
+              {isWingsGo ? (
+                resolvedHotlines.map((item) => (
+                  <a
+                    key={item.normalized}
+                    aria-label={
+                      isVi
+                        ? item.label
+                          ? `Gọi ${item.label} ${formatHotlineDisplay(item.normalized)}`
+                          : `Gọi hotline ${formatHotlineDisplay(item.normalized)}`
+                        : item.label
+                          ? `Call ${item.label} ${formatHotlineDisplay(item.normalized)}`
+                          : `Call hotline ${formatHotlineDisplay(item.normalized)}`
+                    }
+                    className="flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 font-medium hover:border-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)]"
+                    href={item.href}
+                  >
+                    <span aria-hidden="true">📞</span>
+                    <span>
+                      {item.label
+                        ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
+                        : formatHotlineDisplay(item.normalized)}
+                    </span>
+                  </a>
+                ))
+              ) : (
+                <a
+                  aria-label={isVi ? 'Gọi hotline 0912 910 101' : 'Call hotline 0912 910 101'}
+                  className="flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 font-medium hover:border-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)]"
+                  href="tel:0912910101"
+                >
+                  <span aria-hidden="true">📞</span>
+                  <span>0912 910 101</span>
+                </a>
+              )}
+              {sharedZalo ? (
+                <a
+                  aria-label={sharedZalo.ariaLabel}
+                  className="flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 font-medium hover:border-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)]"
+                  href={sharedZalo.href}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <span aria-hidden="true">💬</span>
+                  <span>{sharedZalo.label}</span>
+                </a>
+              ) : null}
               <div className="flex min-h-12 min-w-0 items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 font-medium hover:border-slate-400">
                 <span aria-hidden="true">✉️</span>
                 <ProtectedEmailLink

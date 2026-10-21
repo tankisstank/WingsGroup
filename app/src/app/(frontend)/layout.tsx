@@ -29,6 +29,7 @@ import { WingsSideSpecialsPromo } from '@/components/WingsSideSpecialsPromo'
 import { getPublicRoutePathname } from '@/utilities/sitePaths'
 import { getSiteBrandAssetURL, getSiteOwnedMedia } from '@/utilities/siteBranding'
 import { SiteContactFab } from '@/components/SiteContactFab'
+import { resolveSiteHotlines } from '@/utilities/siteHotlines'
 import { isWingsGroupV3SurfacePath } from '@/wingsgroup/corporateRoutes'
 import { WINGSGROUP_BRAND, isWingsGroupBrandSite } from '@/wingsgroup/brand'
 
@@ -64,6 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const siteTheme = getSiteThemeTokens(settings, { siteCode: site.code })
   const faviconURL = getSiteFaviconURL(settings, site.id, site.code)
   const chromeCopy = getRuntimeLocaleCopy(publicChromeCopy, locale)
+  const hotlines = resolveSiteHotlines(settings, site.code)
 
   return (
     <html
@@ -111,7 +113,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {!isWingsGroupV3Surface ? <AdminBar adminBarProps={{ preview: isEnabled }} /> : null}
 
           <Header />
-          <SiteContactFab locale={locale} siteCode={site.code} />
+          <SiteContactFab hotlines={hotlines} locale={locale} siteCode={site.code} />
           <main id="main-content" tabIndex={-1}>
             {children}
           </main>

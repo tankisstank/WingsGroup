@@ -12,6 +12,8 @@ import {
   type WingsGroupInquiryKey,
 } from '@/utilities/wingsGroupConsultation'
 import { sharedZaloOa } from '@/utilities/sharedConsultationChannels'
+import type { HotlineItem } from '@/utilities/siteHotlines'
+import { formatHotlineDisplay } from '@/utilities/siteHotlines'
 
 import styles from './WingsGroupV3.module.css'
 
@@ -38,7 +40,9 @@ const inquiryLabels: Record<WingsGroupInquiryKey, { en: string; vi: string }> = 
   },
 }
 
-export const WingsGroupConsultationDialog = () => {
+export const WingsGroupConsultationDialog: React.FC<{
+  hotlines?: HotlineItem[]
+}> = ({ hotlines }) => {
   const router = useRouter()
   const locale = useSitePublicLocale()
   const toSitePath = useSitePath()
@@ -243,6 +247,41 @@ export const WingsGroupConsultationDialog = () => {
                 ↗
               </span>
             </a>
+            {hotlines?.map((item) => (
+              <a
+                key={item.normalized}
+                aria-label={
+                  isEnglish
+                    ? item.label
+                      ? `Call ${item.label} ${formatHotlineDisplay(item.normalized)}`
+                      : `Call hotline ${formatHotlineDisplay(item.normalized)}`
+                    : item.label
+                      ? `Gọi ${item.label} ${formatHotlineDisplay(item.normalized)}`
+                      : `Gọi hotline ${formatHotlineDisplay(item.normalized)}`
+                }
+                className={styles.channelChoice}
+                href={item.href}
+              >
+                <span className={styles.channelMark} aria-hidden="true">
+                  ☎
+                </span>
+                <span>
+                  <b>
+                    {item.label
+                      ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
+                      : formatHotlineDisplay(item.normalized)}
+                  </b>
+                  <small>
+                    {isEnglish
+                      ? 'Call our specialist directly.'
+                      : 'Liên hệ trực tiếp qua điện thoại.'}
+                  </small>
+                </span>
+                <span className={styles.channelArrow} aria-hidden="true">
+                  ↗
+                </span>
+              </a>
+            ))}
             <button className={styles.channelChoice} data-consult-form="true" type="button">
               <span className={styles.channelMark} aria-hidden="true">
                 ↗

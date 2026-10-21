@@ -47,6 +47,19 @@ powershell -ExecutionPolicy Bypass -File deploy/oracle/package-release.ps1
 ```
 *(File zip đầu ra `deploy/oracle/release-clean.zip` chỉ nặng ~45MB).*
 
+Build thêm operations image ARM64 từ cùng source candidate. Image này giữ source,
+dependencies và migration để chạy Payload CLI; nó tách biệt với standalone app
+image. Chỉ tiếp tục nếu Docker Buildx hoàn tất và image revision gắn đúng commit
+của candidate:
+
+```powershell
+$RELEASE_SHA = (git rev-parse HEAD).Trim()
+$RELEASE_NAME = "release-" + (git rev-parse --short HEAD)
+$OPS_TAG = "wingstravel-ops:$RELEASE_NAME"
+$RELEASE_SHA | Set-Content "$env:TEMP\wingstravel-release-sha.txt" -NoNewline
+docker buildx build --platform linux/arm64 --target us057-ops --build-arg WINGSTRAVEL_RELEASE_SHA=$RELEASE_SHA --tag $OPS_TAG --output type=docker,dest=deploy/oracle/operations-image.tar -f app/Dockerfile app
+```
+
 ### Bước 4: Upload lên VPS qua SCP
 ```powershell
 $VPS_KEY = "C:\Users\VIETD\Downloads\ssh-key-2026-06-04.key"
@@ -56,8 +69,9 @@ $VPS_IP = "168.110.212.116"
 $RELEASE_NAME = "release-" + (git rev-parse --short HEAD)
 ssh -i $VPS_KEY ubuntu@$VPS_IP "mkdir -p /home/ubuntu/wings-travel/releases/$RELEASE_NAME"
 
-# Upload release zip và các file hỗ trợ
-scp -i $VPS_KEY deploy/oracle/release-clean.zip deploy/oracle/Dockerfile.standalone deploy/oracle/relink.sh app/docker-compose.production.yml ubuntu@$VPS_IP:/home/ubuntu/wings-travel/releases/$RELEASE_NAME/
+# Upload release zip, operations image và các file hỗ trợ
+scp -i $VPS_KEY deploy/oracle/release-clean.zip deploy/oracle/operations-image.tar deploy/oracle/Dockerfile.standalone deploy/oracle/relink.sh app/docker-compose.production.yml ubuntu@$VPS_IP:/home/ubuntu/wings-travel/releases/$RELEASE_NAME/
+scp -i $VPS_KEY "$env:TEMP\wingstravel-release-sha.txt" ubuntu@${VPS_IP}:/home/ubuntu/wings-travel/releases/$RELEASE_NAME/release-sha.txt
 ```
 
 ### Bước 5: Giải nén và Build Docker Image trên VPS
@@ -70,16 +84,72 @@ mkdir -p public/media
 
 # Build Docker image
 docker build -f Dockerfile.standalone -t wingstravel-app:latest -t app-app:latest .
+
+# Load and bind the candidate's immutable operations image
+sudo docker load -i operations-image.tar
+RELEASE_SHA="$(tr -d '\r\n' < release-sha.txt)"
+OPS_IMAGE_ID="$(sudo docker image inspect --format='{{.Id}}' "wingstravel-ops:$RELEASE_NAME")"
+test "$(sudo docker image inspect --format='{{index .Config.Labels "org.opencontainers.image.revision"}}' "$OPS_IMAGE_ID")" = "$RELEASE_SHA"
+printf '%s\n' "$OPS_IMAGE_ID" > OPS_IMAGE_ID
+rm operations-image.tar
 ```
 
-### Bước 6: Chuyển symlink Current & Recreate Container
+### Bước 6: Backup và áp dụng migration trước cutover
+
+Không chuyển symlink hoặc recreate app trước khi hoàn tất bước này. Candidate
+phải có một operations image ARM64 bất biến, build từ đúng source/release
+candidate và chứa migration đã đăng ký trong `app/src/migrations/index.ts`.
+Ghi digest SHA-256 image vào `OPS_IMAGE_ID` trong thư mục release; không dùng
+image `latest` hoặc image của release khác. Cách tạo và xác minh operations
+image phải theo mẫu immutable tools image trong
+[`wingsgroup-v3-production-media.md`](wingsgroup-v3-production-media.md).
+
+Trước khi ghi schema, cần có backup PostgreSQL mã hóa và bằng chứng restore
+thử nghiệm thành công cho cùng database production, gắn với release candidate.
+Nếu thiếu một trong hai bằng chứng, dừng tại đây.
+
+Chạy hai lệnh dưới đây trên VPS bằng protected environment file; không in nội
+dung file môi trường hoặc credentials ra terminal/log:
+
+```bash
+cd /home/ubuntu/wings-travel/releases/$RELEASE_NAME
+OPS_IMAGE_ID="$(tr -d '\r\n' < OPS_IMAGE_ID)"
+case "$OPS_IMAGE_ID" in
+  sha256:*) ;;
+  *) echo 'OPS_IMAGE_ID must be an immutable sha256 digest' >&2; exit 1 ;;
+esac
+
+sudo docker run --rm \
+  --network wingstravel_default \
+  --env-file /home/ubuntu/wings-travel/shared/.env \
+  -e NODE_ENV=production \
+  -e PAYLOAD_DB_PUSH=false \
+  "$OPS_IMAGE_ID" \
+  pnpm payload migrate
+
+sudo docker run --rm \
+  --network wingstravel_default \
+  --env-file /home/ubuntu/wings-travel/shared/.env \
+  -e NODE_ENV=production \
+  -e PAYLOAD_DB_PUSH=false \
+  "$OPS_IMAGE_ID" \
+  pnpm payload migrate:status
+```
+
+Chỉ tiếp tục khi output xác nhận migration của candidate đã applied và không
+còn migration pending. Nếu command lỗi, trạng thái không rõ, image digest không
+khớp candidate, hoặc backup/restore evidence không hợp lệ, dừng và giữ nguyên
+release đang chạy. Migration rollback có thể xóa dữ liệu badge; khi rollback
+ứng dụng, ưu tiên khôi phục image cũ và giữ schema additive.
+
+### Bước 7: Chuyển symlink Current & Recreate Container
 ```bash
 ln -sfn /home/ubuntu/wings-travel/releases/$RELEASE_NAME /home/ubuntu/wings-travel/current
 cd /home/ubuntu/wings-travel/current
 docker compose -f docker-compose.production.yml -p wingstravel --env-file /home/ubuntu/wings-travel/shared/.env up -d --no-deps --no-build --pull never --force-recreate app
 ```
 
-### Bước 7: Kiểm tra Health Check & Xác nhận UI
+### Bước 8: Kiểm tra Health Check & Xác nhận UI
 ```bash
 # Kiểm tra healthcheck
 curl -s http://127.0.0.1:3000/api/health/ready

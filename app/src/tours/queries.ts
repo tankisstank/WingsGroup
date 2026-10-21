@@ -1,3 +1,4 @@
+import { normalizeEditorialBadges } from './editorialBadges'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
@@ -33,6 +34,7 @@ import {
   selectPublishableDepartures,
 } from './utils'
 import { isDepartureVerificationCurrent } from './departureCommerce'
+import { normalizeGovernedTourPrice } from './currency'
 import {
   buildTourTaxonomyWhere,
   type TourDestinationKey,
@@ -68,9 +70,9 @@ const queryCollection = async ({
   collection,
   depth = 2,
   draft,
-  fallbackLocale,
   limit = 20,
   locale,
+  fallbackLocale = locale === 'en' ? false : 'vi',
   where,
 }: {
   collection: never
@@ -91,7 +93,7 @@ const queryCollection = async ({
     fallbackLocale,
     limit,
     locale,
-    overrideAccess: true,
+    overrideAccess: draft,
     pagination: false,
     where: scopedWhere,
   })
@@ -242,9 +244,24 @@ const normalizeDepartureCard = (
   const hasFreshnessGovernance = Boolean(departure.verifiedAt || departure.expiresAt)
   const commerceVerified =
     draft ||
-    (hasFreshnessGovernance
-      ? isDepartureVerificationCurrent(departure)
-      : typeof departure.priceFrom === 'number' && departure.priceFrom > 0)
+    ((departure.commerceVerified === undefined || departure.commerceVerified === true) &&
+      (hasFreshnessGovernance
+        ? isDepartureVerificationCurrent(departure)
+        : departure.commerceVerified === true))
+  const canPromote =
+    commerceVerified &&
+    (draft || hasFreshnessGovernance || departure.commerceVerified === true) &&
+    departure.availabilityStatus !== 'sold-out' &&
+    Boolean(normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }))
+  const originalPrice =
+    canPromote &&
+    typeof departure.originalPrice === 'number' &&
+    Number.isFinite(departure.originalPrice) &&
+    departure.originalPrice > departure.priceFrom &&
+    Boolean(departure.currency) &&
+    (!departure.originalCurrency || departure.originalCurrency === departure.currency)
+      ? departure.originalPrice
+      : null
 
   return {
     airline: departure.airline,
@@ -262,9 +279,9 @@ const normalizeDepartureCard = (
     isFeatured: departure.isFeatured,
     loyaltyPoints: commerceVerified ? departure.loyaltyPoints : null,
     note: departure.note,
-    originalPrice: commerceVerified ? departure.originalPrice : null,
+    originalPrice,
     priceFrom: commerceVerified ? departure.priceFrom : null,
-    promoLabel: commerceVerified ? departure.promoLabel : null,
+    promoLabel: canPromote ? departure.promoLabel : null,
     returnDate: departure.returnDate,
     tourProduct: normalizeTourProductCard(departure.tourProduct),
     urgencyLabel: commerceVerified ? departure.urgencyLabel : null,
@@ -463,7 +480,7 @@ export const getResolvedTourDetailBySlug = async ({
 
   return {
     builderConfig: resolved.builderConfig,
-    departures: validPublicDepartures,
+    departures: draft ? departures : getFutureDepartures(departures),
     featuredDepartures:
       featuredDepartures.length > 0
         ? featuredDepartures
@@ -477,6 +494,25 @@ export const getResolvedTourDetailBySlug = async ({
     },
     variants,
   }
+}
+
+export const selectMarketNextDeparture = (
+  linkedFuture: DepartureCardViewModel[],
+  linkedVisible: DepartureCardViewModel[],
+): DepartureCardViewModel | null => {
+  const preferredCommercialDeparture = linkedFuture.find(
+    (departure) =>
+      departure.commerceVerified === true &&
+      departure.availabilityStatus !== 'sold-out' &&
+      Boolean(
+        normalizeGovernedTourPrice({
+          currency: departure.currency,
+          value: departure.priceFrom,
+        }),
+      ),
+  )
+
+  return preferredCommercialDeparture || getNextDeparture(linkedVisible)
 }
 
 export const getToursByMarketRoute = async ({
@@ -498,6 +534,7 @@ export const getToursByMarketRoute = async ({
     collection: tourProductsCollection,
     depth: 2,
     draft,
+    fallbackLocale: locale === 'en' ? false : 'vi',
     limit: 20,
     locale,
     where: {
@@ -511,6 +548,7 @@ export const getToursByMarketRoute = async ({
     collection: tourDeparturesCollection,
     depth: 2,
     draft,
+    fallbackLocale: locale === 'en' ? false : 'vi',
     limit: 100,
     locale,
     where: {
@@ -542,12 +580,19 @@ export const getToursByMarketRoute = async ({
       const hasFutureDepartures = linkedFuture.length > 0
       const linkedVisible = hasFutureDepartures ? linkedFuture : linkedAll
 
+      const { editorialBadges, hasHotEditorialBadge } = normalizeEditorialBadges(
+        tour.editorialBadges,
+        locale,
+      )
+
       return {
         ...tour,
         departureCount: linkedVisible.length,
+        editorialBadges,
         hasFutureDepartures,
+        hasHotEditorialBadge: Boolean(hasHotEditorialBadge),
         lowestPrice: getLowestPrice(linkedVisible),
-        nextDeparture: getNextDeparture(linkedVisible),
+        nextDeparture: selectMarketNextDeparture(linkedFuture, linkedVisible),
       }
     }),
   }

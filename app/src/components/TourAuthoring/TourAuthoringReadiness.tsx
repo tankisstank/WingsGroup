@@ -1,7 +1,7 @@
 'use client'
 
-import { useDocumentInfo, useFormModified, useLocale } from '@payloadcms/ui'
-import { useCallback, useEffect, useState } from 'react'
+import { useDocumentEvents, useDocumentInfo, useFormModified, useLocale } from '@payloadcms/ui'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { TourAuthoringAction, TourAuthoringIssue, TourAuthoringReadiness, TourAuthoringWrapper } from './types'
 
@@ -208,9 +208,18 @@ const scrollToElement = (target: string) => {
   element.focus({ preventScroll: true })
 }
 
-export default function TourAuthoringReadiness() {
+export default function TourAuthoringReadiness({ departureRevision = 0 }: { departureRevision?: number }) {
   const { id } = useDocumentInfo()
   const { code: locale } = useLocale()
+  const { reportUpdate } = useDocumentEvents()
+  const contextKey = `${id}:${locale}`
+  const currentContext = useRef(contextKey)
+  const contextVersion = useRef(0)
+  if (currentContext.current !== contextKey) {
+    currentContext.current = contextKey
+    contextVersion.current += 1
+  }
+  const generation = contextVersion.current
   const copy = locale === 'en' ? copyByLocale.en : copyByLocale.vi
   const loadFailedMessage = copy.loadFailed
   const formModified = useFormModified()
@@ -222,6 +231,10 @@ export default function TourAuthoringReadiness() {
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<TourAuthoringAction | null>(null)
   const [reloadToken, setReloadToken] = useState(0)
+
+  useEffect(() => {
+    setBusy(null)
+  }, [contextKey])
 
   const load = useCallback(async () => {
     if (id == null || id === 'create') return
@@ -239,7 +252,8 @@ export default function TourAuthoringReadiness() {
       }
       throw Object.assign(new Error(body.message || loadFailedMessage), { code: body.code || 'load_failed' })
     }
-    setReadiness(body as unknown as TourAuthoringReadiness)
+
+      setReadiness(body as unknown as TourAuthoringReadiness)
     setLoading(false)
   }, [id, locale, loadFailedMessage])
 
@@ -253,10 +267,12 @@ export default function TourAuthoringReadiness() {
       setErrorCode(reason.code || 'load_failed')
       setError(reason.message || loadFailedMessage)
     })
-  }, [id, load, loadFailedMessage, reloadToken])
+  }, [departureRevision, id, load, loadFailedMessage, reloadToken])
 
   const runAction = async (actionName: TourAuthoringAction, wrapperID?: number | string) => {
     if (!readiness || formModified || busy) return
+    const requestGeneration = generation
+    const requestId = id
     const departureIDs = readiness.departures.filter(({ id: departureID }) => selectedDepartureIDs.has(String(departureID))).map(({ id: departureID }) => departureID)
     if (actionName === 'publish' && departureIDs.length === 0) return
     if (actionName === 'relink' && wrapperID == null) return
@@ -281,16 +297,32 @@ export default function TourAuthoringReadiness() {
       const body = await getErrorBody(response)
       if (!response.ok) {
         const code = body.code || 'action_failed'
-        setErrorCode(code)
-        setError(code === 'stale_revision' ? copy.revisionConflict : body.message || copy.actionFailed)
+        if (contextVersion.current === requestGeneration) {
+          setErrorCode(code)
+          setError(code === 'stale_revision' ? copy.revisionConflict : body.message || copy.actionFailed)
+        }
         return
       }
+      if (contextVersion.current !== requestGeneration) return
+
       setReadiness(body as unknown as TourAuthoringReadiness)
+      if (requestId != null && requestId !== 'create') {
+        reportUpdate?.({
+          entitySlug: 'tour-products',
+          id: requestId,
+          operation: 'update',
+          updatedAt: new Date().toISOString(),
+        })
+      }
     } catch {
-      setErrorCode('action_failed')
-      setError(copy.actionFailed)
+      if (contextVersion.current === requestGeneration) {
+        setErrorCode('action_failed')
+        setError(copy.actionFailed)
+      }
     } finally {
-      setBusy(null)
+      if (contextVersion.current === requestGeneration) {
+        setBusy(null)
+      }
     }
   }
 

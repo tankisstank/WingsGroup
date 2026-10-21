@@ -30,6 +30,9 @@ const wrapper = (overrides: Record<string, unknown> = {}) => ({
 })
 
 const departure = (overrides: Record<string, unknown> = {}) => ({
+  availabilityStatus: 'open',
+  commerceVerified: true,
+  currency: 'VND',
   _status: 'published',
   departureDate: '2026-10-01T00:00:00.000Z',
   id: 11,
@@ -294,7 +297,7 @@ describe('WingsGo dynamic catalog constraints', () => {
     ]
     const departures = [
       {
-        ...departure({ id: 201, promoLabel: 'Mùa hoa anh đào', tourProduct: 1 }),
+        ...departure({ id: 201, priceFrom: 12000000, promoLabel: 'Mùa hoa anh đào', tourProduct: 1 }),
         departureDate: '2026-11-01T00:00:00.000Z',
       },
       {
@@ -390,5 +393,298 @@ describe('WingsGo dynamic catalog constraints', () => {
       site: { code: 'wings-go', id: 7 },
     })
     expect(featuredDisabled).toEqual([])
+  })
+
+  describe('WingsGo promotion and discount rules (US-083)', () => {
+    it('derives verified pricing from the stored verification window without a schema flag', async () => {
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrapper()] }
+          if (collection === 'tour-products') return { docs: [product({ wrapperPage: 9 })] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: [departure({
+            commerceVerified: undefined,
+            verifiedAt: '2025-12-01T00:00:00.000Z',
+            expiresAt: '2026-02-01T00:00:00.000Z',
+            priceFrom: 12000000,
+            originalPrice: 15000000,
+            promoLabel: 'Verified promotion',
+          })] }
+        }),
+      }
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-01-01T00:00:00.000Z'),
+        offset: 0,
+        page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+      const resultCard = [...result.featured, ...result.all][0]
+      expect(resultCard.price).toEqual({
+        kind: 'verified', currency: 'VND', value: 12000000, originalPrice: 15000000,
+      })
+      expect(resultCard.nextDeparture.promoLabel).toBe('Verified promotion')
+    })
+
+    it.each([
+      { priceFrom: 0 },
+      { priceFrom: 12000000, verifiedAt: '2025-01-01', expiresAt: '2025-12-31' },
+    ])('suppresses promotion for contact-only pricing: %j', async (overrides) => {
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrapper()] }
+          if (collection === 'tour-products') return { docs: [product({ wrapperPage: 9 })] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: [departure({ originalPrice: 15000000, promoLabel: 'Sale', ...overrides })] }
+        }),
+      }
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-01-01T00:00:00.000Z'),
+        offset: 0,
+        page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+      const resultCard = [...result.featured, ...result.all][0]
+      expect(resultCard.price.kind).toBe('contact')
+      expect(resultCard.nextDeparture.promoLabel).toBeNull()
+    })
+
+    it('enforces same-departure rule for price, discount, and promoLabel', async () => {
+      const tour = product({ id: 50, slug: 'same-departure-tour', title: 'Tour Độc Đáo', wrapperPage: 150 })
+      const wrap = wrapper({ id: 150, pathname: '/tour/same-departure-tour' })
+      const deps = [
+        departure({
+          id: 501,
+          tourProduct: 50,
+          departureDate: '2026-11-01T00:00:00.000Z',
+          priceFrom: 12000000,
+          originalPrice: 15000000,
+          currency: 'VND',
+          promoLabel: 'Ưu đãi mùa thu',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+        departure({
+          id: 502,
+          tourProduct: 50,
+          departureDate: '2026-12-01T00:00:00.000Z',
+          priceFrom: 20000000,
+          originalPrice: 25000000,
+          currency: 'VND',
+          promoLabel: 'Ưu đãi Giáng sinh',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+      ]
+
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') return { docs: [tour] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-01-01T00:00:00.000Z'),
+        offset: 0,
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      const card = [...result.featured, ...result.all].find((c) => c.id === 50)
+      expect(card).toBeDefined()
+      expect(card?.price).toEqual({
+        currency: 'VND',
+        kind: 'verified',
+        originalPrice: 15000000,
+        value: 12000000,
+      })
+      expect(card?.nextDeparture.date).toBe('2026-11-01T00:00:00.000Z')
+      expect(card?.nextDeparture.promoLabel).toBe('Ưu đãi mùa thu')
+    })
+
+    it('suppresses discount and promoLabel when departure is sold-out', async () => {
+      const tour = product({ id: 51, slug: 'sold-out-tour', title: 'Tour Hết Chỗ', wrapperPage: 151 })
+      const wrap = wrapper({ id: 151, pathname: '/tour/sold-out-tour' })
+      const deps = [
+        departure({
+          id: 511,
+          tourProduct: 51,
+          departureDate: '2026-11-01T00:00:00.000Z',
+          priceFrom: 12000000,
+          originalPrice: 15000000,
+          currency: 'VND',
+          promoLabel: 'Flash sale',
+          commerceVerified: true,
+          availabilityStatus: 'sold-out',
+        }),
+      ]
+
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') return { docs: [tour] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-01-01T00:00:00.000Z'),
+        offset: 0,
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      const card = [...result.featured, ...result.all].find((c) => c.id === 51)
+      expect(card).toBeDefined()
+      expect(card?.price).toEqual({
+        currency: 'VND',
+        kind: 'verified',
+        originalPrice: null,
+        value: 12000000,
+      })
+      expect(card?.nextDeparture.promoLabel).toBeNull()
+    })
+
+    it('degrades to contact price when commerceVerified is false or unverified', async () => {
+      const tour = product({ id: 52, slug: 'unverified-tour', title: 'Tour Chưa Xác Thực', wrapperPage: 152 })
+      const wrap = wrapper({ id: 152, pathname: '/tour/unverified-tour' })
+      const deps = [
+        departure({
+          id: 521,
+          tourProduct: 52,
+          departureDate: '2026-11-01T00:00:00.000Z',
+          priceFrom: 12000000,
+          originalPrice: 15000000,
+          currency: 'VND',
+          promoLabel: 'Super Sale',
+          commerceVerified: false,
+          availabilityStatus: 'open',
+        }),
+      ]
+
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') return { docs: [tour] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-01-01T00:00:00.000Z'),
+        offset: 0,
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      const card = [...result.featured, ...result.all].find((c) => c.id === 52)
+      expect(card).toBeDefined()
+      expect(card?.price).toEqual({
+        kind: 'contact',
+        label: 'Liên hệ để nhận giá mới nhất',
+      })
+      expect(card?.nextDeparture.promoLabel).toBeNull()
+    })
+
+    it('validates currency matching and price inversion rules', async () => {
+      const tourMismatched = product({ id: 53, slug: 'currency-mismatch', title: 'Tour Mismatched', wrapperPage: 153 })
+      const tourInverted = product({ id: 54, slug: 'price-inverted', title: 'Tour Inverted', wrapperPage: 154 })
+      const wrapMismatched = wrapper({ id: 153, pathname: '/tour/currency-mismatch' })
+      const wrapInverted = wrapper({ id: 154, pathname: '/tour/price-inverted' })
+
+      const deps = [
+        // Currency mismatch: currency VND, originalCurrency USD
+        departure({
+          id: 531,
+          tourProduct: 53,
+          departureDate: '2026-11-01T00:00:00.000Z',
+          priceFrom: 12000000,
+          originalPrice: 500,
+          currency: 'VND',
+          originalCurrency: 'USD',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+        // Inverted: originalPrice <= priceFrom
+        departure({
+          id: 541,
+          tourProduct: 54,
+          departureDate: '2026-11-01T00:00:00.000Z',
+          priceFrom: 15000000,
+          originalPrice: 15000000,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+      ]
+
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrapMismatched, wrapInverted] }
+          if (collection === 'tour-products') return { docs: [tourMismatched, tourInverted] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-01-01T00:00:00.000Z'),
+        offset: 0,
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      const cardMismatched = [...result.featured, ...result.all].find((c) => c.id === 53)
+      expect(cardMismatched?.price).toEqual({
+        currency: 'VND',
+        kind: 'verified',
+        originalPrice: null,
+        value: 12000000,
+      })
+
+      const cardInverted = [...result.featured, ...result.all].find((c) => c.id === 54)
+      expect(cardInverted?.price).toEqual({
+        currency: 'VND',
+        kind: 'verified',
+        originalPrice: null,
+        value: 15000000,
+      })
+    })
   })
 })

@@ -21,6 +21,7 @@ import {
   invalidateSettingsAfterChange,
   invalidateSettingsAfterDelete,
 } from '@/collections/hooks/invalidateTenantCache'
+import { normalizePhoneNumber } from '@/utilities/siteHotlines'
 import {
   protectWingsGroupSiteSettingsBeforeChange,
   protectWingsGroupSiteSettingsBeforeDelete,
@@ -287,6 +288,44 @@ export const SiteSettings: CollectionConfig = {
       name: 'supportPhone',
       label: 'Số điện thoại hỗ trợ',
       type: 'text',
+    },
+    {
+      name: 'additionalHotlines',
+      label: 'Hotline bổ sung',
+      type: 'array',
+      maxRows: 5,
+      admin: {
+        description: 'Các số hotline bổ sung hiển thị cùng hotline chính trên WingsGo (tối đa 5 số).',
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: 'phoneNumber',
+          label: 'Số điện thoại',
+          type: 'text',
+          required: true,
+          validate: (value: unknown) => {
+            if (!value || typeof value !== 'string' || !value.trim()) {
+              return 'Số điện thoại không được để trống'
+            }
+            if (!normalizePhoneNumber(value)) {
+              return 'Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam (ví dụ 0915250101) hoặc số quốc tế chuẩn (+...).'
+            }
+            return true
+          },
+          admin: {
+            description: 'Số hotline (ví dụ: 0915250101 hoặc 0915 250 101).',
+          },
+        },
+        {
+          name: 'label',
+          label: 'Nhãn hiển thị',
+          type: 'text',
+          admin: {
+            description: 'Nhãn tùy chọn (ví dụ: Tư vấn tour, Hỗ trợ dịch vụ).',
+          },
+        },
+      ],
     },
     {
       name: 'registeredOfficeAddress',

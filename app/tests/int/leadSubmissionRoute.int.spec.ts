@@ -68,7 +68,11 @@ const request = ({
     method: 'POST',
   })
 
-const configureWingsGroupContactTest = () => {
+const configureWingsGroupContactTest = ({
+  includeLegacyConsentField = false,
+}: {
+  includeLegacyConsentField?: boolean
+} = {}) => {
   mocks.getCurrentSite.mockResolvedValue({
     code: 'wings-group',
     id: 9,
@@ -111,6 +115,9 @@ const configureWingsGroupContactTest = () => {
                 { blockType: 'email', label: 'Email', name: 'email', required: false },
                 { blockType: 'text', label: 'Phone', name: 'phone', required: false },
                 { blockType: 'textarea', label: 'Need', name: 'brief', required: true },
+                ...(includeLegacyConsentField
+                  ? [{ blockType: 'checkbox', label: 'Consent', name: 'consent', required: true }]
+                  : []),
               ],
               id: 7,
               site: 9,
@@ -1025,5 +1032,165 @@ describe('lead submission endpoint integration', () => {
         }),
       )
     }
+  })
+
+  it('correctly resolves and validates requested English locale for GET config and POST submissions', async () => {
+    configureWingsGroupContactTest()
+
+    // 1. GET with locale=en query parameter
+    const enGet = await GET(
+      new Request('https://wingsgroup.vn/api/lead-submissions?locale=en', {
+        headers: new Headers({
+          'x-client-ip': '198.51.100.10',
+          'x-site-context-source': 'proxy',
+          'x-site-host': 'wingsgroup.vn',
+        }),
+      }),
+    )
+    expect(enGet.status).toBe(200)
+    const enConfig = await enGet.json()
+    expect(enConfig.consentCopy).toContain('WingsGroup')
+    expect(enConfig.policyHref).toBe('/en/chinh-sach-bao-mat')
+
+    // 2. POST with locale: 'en' in submission payload
+    const enPost = await POST(
+      request({
+        bodyOverrides: {
+          leadContract: {
+            consent: true,
+            consentVersion: 'wingsgroup-contact-v1',
+          },
+          locale: 'en',
+          submissionData: [
+            { field: 'full-name', value: 'John Doe' },
+            { field: 'email', value: 'john@example.com' },
+            { field: 'brief', value: 'English consultation request' },
+          ],
+        },
+        host: 'wingsgroup.vn',
+      }),
+    )
+    expect(enPost.status).toBe(202)
+    expect(mocks.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          wingsGroupLead: expect.objectContaining({
+            locale: 'en',
+          }),
+        }),
+      }),
+    )
+
+    // 3. GET with invalid locale rejects with 400
+    const invalidGet = await GET(
+      new Request('https://wingsgroup.vn/api/lead-submissions?locale=invalid_locale', {
+        headers: new Headers({
+          'x-client-ip': '198.51.100.10',
+          'x-site-context-source': 'proxy',
+          'x-site-host': 'wingsgroup.vn',
+        }),
+      }),
+    )
+    expect(invalidGet.status).toBe(400)
+
+    // 4. POST with invalid locale rejects with 400
+    const invalidPost = await POST(
+      request({
+        bodyOverrides: {
+          locale: 'invalid_locale',
+        },
+        host: 'wingsgroup.vn',
+      }),
+    )
+    expect(invalidPost.status).toBe(400)
+  })
+
+  it('enforces legacy required checkbox name consent with governed leadContract and persists locale en', async () => {
+    configureWingsGroupContactTest({ includeLegacyConsentField: true })
+
+    // 1. Missing legacy consent checkbox field -> 400
+    const missingLegacyConsent = await POST(
+      request({
+        bodyOverrides: {
+          leadContract: {
+            consent: true,
+            consentVersion: 'wingsgroup-contact-v1',
+          },
+          locale: 'en',
+          submissionData: [
+            { field: 'full-name', value: 'Alice' },
+            { field: 'email', value: 'alice@example.com' },
+            { field: 'brief', value: 'English consultation request' },
+          ],
+        },
+        host: 'wingsgroup.vn',
+      }),
+    )
+    expect(missingLegacyConsent.status).toBe(400)
+    expect(mocks.create).not.toHaveBeenCalled()
+
+    // 2. Legacy consent checkbox field false -> 400
+    const falseLegacyConsent = await POST(
+      request({
+        bodyOverrides: {
+          leadContract: {
+            consent: true,
+            consentVersion: 'wingsgroup-contact-v1',
+          },
+          locale: 'en',
+          submissionData: [
+            { field: 'full-name', value: 'Alice' },
+            { field: 'email', value: 'alice@example.com' },
+            { field: 'brief', value: 'English consultation request' },
+            { field: 'consent', value: false },
+          ],
+        },
+        host: 'wingsgroup.vn',
+      }),
+    )
+    expect(falseLegacyConsent.status).toBe(400)
+    expect(mocks.create).not.toHaveBeenCalled()
+
+    // 3. Legacy consent true + valid governed leadContract -> 202 and governance locale en stored
+    const validLegacyAndGovernedConsent = await POST(
+      request({
+        bodyOverrides: {
+          leadContract: {
+            consent: true,
+            consentVersion: 'wingsgroup-contact-v1',
+          },
+          locale: 'en',
+          submissionData: [
+            { field: 'full-name', value: 'Alice' },
+            { field: 'email', value: 'alice@example.com' },
+            { field: 'brief', value: 'English consultation request' },
+            { field: 'consent', value: true },
+          ],
+        },
+        host: 'wingsgroup.vn',
+      }),
+    )
+    expect(validLegacyAndGovernedConsent.status).toBe(202)
+    expect(mocks.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          site: 9,
+          submissionData: expect.arrayContaining([
+            { field: 'full-name', value: 'Alice' },
+            { field: 'consent', value: 'true' },
+          ]),
+          wingsGroupLead: expect.objectContaining({
+            consentVersion: 'wingsgroup-contact-v1',
+            locale: 'en',
+          }),
+        }),
+      }),
+    )
+    const createdCall = mocks.create.mock.calls[0]?.[0]?.data.wingsGroupLead as {
+      consentVersion: string
+      locale: string
+    }
+    expect(createdCall.locale).toBe('en')
+    expect(createdCall.consentVersion).toBe('wingsgroup-contact-v1')
   })
 })

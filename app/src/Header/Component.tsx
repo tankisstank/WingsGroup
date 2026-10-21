@@ -1,6 +1,7 @@
 import { HeaderClient } from './Component.client'
 import { getCurrentSiteSettings } from '@/utilities/getSiteSettings'
 import { resolveHeaderPrimaryAction } from '@/utilities/headerPrimaryActions'
+import { resolveSiteHotlines } from '@/utilities/siteHotlines'
 import { getCurrentLocale, getCurrentPublicPathname, getCurrentSite } from '@/utilities/siteContext'
 import { getPublicRoutePathname } from '@/utilities/sitePaths'
 import { defaultThemeKey } from '@/utilities/themeTokens'
@@ -39,6 +40,7 @@ export async function Header() {
         url: '#consultation-dialog',
       }
     : resolveHeaderPrimaryAction(site.code, locale)
+  const hotlines = resolveSiteHotlines(settings, site.code)
 
   return (
     <HeaderClient
@@ -47,6 +49,7 @@ export async function Header() {
       englishPublicationState={settings?.wingsGroupV3?.englishPublicationState}
       accentColor={settings?.branding?.accentColor}
       brandColor={settings?.branding?.brandColor}
+      hotlines={hotlines}
       logoImage={
         settings?.branding?.logoImage && typeof settings.branding.logoImage === 'object'
           ? settings.branding.logoImage

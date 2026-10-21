@@ -175,9 +175,12 @@ describe('RetailTourConsultationDialog Component (Phase 4)', () => {
 
     const hotline = document.querySelector('[data-od-id="consultation-hotline-btn"]')!
     expect(hotline.getAttribute('href')).toBe('tel:0912910101')
+    const channels = document.querySelector('[data-od-id="consultation-channels"]')!
+    expect(Array.from(channels.querySelectorAll('a[href^="tel:"]'), (link) => link.getAttribute('href')))
+      .toEqual(['tel:0912910101', 'tel:0915250101', 'tel:0915260101'])
 
     const zalo = document.querySelector('[data-od-id="consultation-zalo-btn"]')!
-    expect(zalo.getAttribute('href')).toContain('zalo.me')
+    expect(zalo.getAttribute('href')).toBe('https://zalo.me/4142059657526524531')
 
     const formCta = document.querySelector('[data-od-id="consultation-form-cta"]')!
     const formHref = formCta.getAttribute('href') || ''
@@ -188,6 +191,23 @@ describe('RetailTourConsultationDialog Component (Phase 4)', () => {
     expect(formHref).toContain('departureDate=2026-11-20')
     expect(formHref).toContain('guests=2')
     expect(formHref).toContain('source=retail-modal')
+  })
+
+  it('honors an empty hotline list without restoring defaults', () => {
+    render(
+      <TourDepartureSelectionProvider departures={[sampleDeparture]} initialDeparture={sampleDeparture}>
+        <RetailTourConsultationDialog
+          hotlines={[]}
+          isOpen={true}
+          nextDeparture={sampleDeparture}
+          onClose={() => {}}
+          tour={baseTour}
+        />
+      </TourDepartureSelectionProvider>,
+    )
+    expect(document.querySelector('[data-od-id="consultation-channels"] a[href^="tel:"]')).toBeNull()
+    expect(document.querySelector('[data-od-id="consultation-zalo-btn"]')?.getAttribute('href'))
+      .toBe('https://zalo.me/4142059657526524531')
   })
 
   it('calls onClose when close button clicked or ESC key canceled', () => {
@@ -226,7 +246,14 @@ describe('RetailTourConsultationDialog Component (Phase 4)', () => {
       tour: baseTour,
     }
 
-    render(<TourDetailPage data={resolvedData} locale="vi" siteCode="wingsgo" />)
+    render(
+      <TourDetailPage
+        data={resolvedData}
+        hotlines={[{ raw: '0919000000', normalized: '0919000000', href: 'tel:0919000000' }]}
+        locale="vi"
+        siteCode="wings-go"
+      />,
+    )
 
     const trigger = document.querySelector('[data-od-id="tour-decision-consultation-trigger"]')!
     expect(trigger).toBeTruthy()
@@ -240,5 +267,7 @@ describe('RetailTourConsultationDialog Component (Phase 4)', () => {
     await waitFor(() => {
       expect(dialog.open).toBe(true)
     })
+    expect(Array.from(dialog.querySelectorAll('a[href^="tel:"]'), (link) => link.getAttribute('href')))
+      .toEqual(['tel:0919000000'])
   })
 })

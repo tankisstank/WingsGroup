@@ -7,8 +7,12 @@ import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import type { TourEnquiryIntent } from './enquiryContext'
 import { useTourDepartureSelection } from './TourDepartureSelectionContext'
 import { formatTourDate, formatTourPrice, getTourInquiryPath } from './utils'
+import type { HotlineItem } from '@/utilities/siteHotlines'
+import { formatHotlineDisplay, resolveSiteHotlines } from '@/utilities/siteHotlines'
+import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
 
 export type RetailTourConsultationDialogProps = {
+  hotlines?: HotlineItem[]
   isOpen: boolean
   locale?: SupportedLocaleCode
   nextDeparture?: Record<string, any> | null
@@ -18,6 +22,7 @@ export type RetailTourConsultationDialogProps = {
 }
 
 export const RetailTourConsultationDialog: React.FC<RetailTourConsultationDialogProps> = ({
+  hotlines,
   isOpen,
   locale = 'vi',
   nextDeparture: nextDepartureProp,
@@ -28,6 +33,9 @@ export const RetailTourConsultationDialog: React.FC<RetailTourConsultationDialog
   const dialogRef = useRef<HTMLDialogElement>(null)
   const triggerElementRef = useRef<Element | null>(null)
   const [copied, setCopied] = useState(false)
+  const resolvedHotlines =
+    hotlines !== undefined ? hotlines : resolveSiteHotlines(undefined, siteCode || 'wings-go')
+  const sharedZalo = getSharedZaloCTA(siteCode || 'wings-go', locale)
 
   const context = useTourDepartureSelection()
   const isPrivateTour = Boolean(context?.isPrivateTour)
@@ -298,24 +306,31 @@ export const RetailTourConsultationDialog: React.FC<RetailTourConsultationDialog
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-2.5">
           Kênh liên hệ trực tiếp
         </p>
-        <div className="grid grid-cols-2 gap-2.5">
-          <a
-            className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 text-xs font-semibold text-foreground no-underline transition hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)] sm:text-sm"
-            data-od-id="consultation-hotline-btn"
-            href="tel:0912910101"
-          >
-            <span aria-hidden="true">📞</span>
-            <span>0912 910 101</span>
-          </a>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {resolvedHotlines.map((item, idx) => (
+            <a
+              key={item.normalized}
+              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 text-xs font-semibold text-foreground no-underline transition hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)] sm:text-sm"
+              {...(idx === 0 ? { 'data-od-id': 'consultation-hotline-btn' } : {})}
+              href={item.href}
+            >
+              <span aria-hidden="true">📞</span>
+              <span>
+                {item.label
+                  ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
+                  : formatHotlineDisplay(item.normalized)}
+              </span>
+            </a>
+          ))}
           <a
             className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 text-xs font-semibold text-foreground no-underline transition hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-accent)] sm:text-sm"
             data-od-id="consultation-zalo-btn"
-            href="https://zalo.me/0912910101"
+            href={sharedZalo?.href || 'https://zalo.me/4142059657526524531'}
             rel="noopener noreferrer"
             target="_blank"
           >
             <span aria-hidden="true">💬</span>
-            <span>Zalo OA</span>
+            <span>{sharedZalo?.label || 'Zalo OA'}</span>
           </a>
         </div>
       </div>

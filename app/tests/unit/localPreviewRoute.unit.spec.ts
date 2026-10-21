@@ -36,6 +36,28 @@ describe('preview handoff initializer', () => {
     expect(html).not.toContain('/forged')
   })
 
+  it('keeps TourProduct preview in draft mode when the parent tour is published', async () => {
+    mocks.findByID.mockResolvedValue({
+      _status: 'published',
+      id: 308,
+      pathname: '/tour/published-tour',
+      slug: 'published-tour',
+      site: { code: 'wings-go', isActive: true, primaryDomain: 'wingsgo.vn' },
+      wrapperPage: 909,
+    })
+
+    const response = await GET(
+      new NextRequest('https://wingsgroup.vn/next/preview?collection=tour-products&id=308&locale=vi&path=%2Ftour%2Fpublished-tour'),
+    )
+    expect(response.status).toBe(200)
+    const token = (await response.text()).match(/name="handoff" value="([^"]+)"/u)?.[1]
+
+    await expect(verifyPreviewHandoff(token)).resolves.toMatchObject({
+      collection: 'tour-products',
+      mode: 'draft',
+    })
+  })
+
   it('rejects unauthenticated and malformed requests before issuing a handoff', async () => {
     mocks.auth.mockResolvedValue({ user: null })
     expect((await GET(new NextRequest('https://wingsgroup.vn/next/preview?collection=pages&id=308&path=%2Ftour'))).status).toBe(403)

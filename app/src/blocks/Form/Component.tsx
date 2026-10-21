@@ -356,6 +356,13 @@ export const FormBlock: React.FC<
     wingsGroupV3 ||
     siteCode === WINGSGROUP_SITE_CODE ||
     getFormSiteCode(formFromProps) === WINGSGROUP_SITE_CODE
+  const hasGovernedConsentField =
+    isWingsGroupV3 &&
+    Boolean(
+      formFromProps?.fields?.some(
+        (field) => field.blockType === 'checkbox' && getFieldName(field) === 'consent',
+      ),
+    )
   const isWingsGoContactPage = siteCode === 'wings-go' && publicPathname === '/lien-he'
   const wingsGoZalo = isWingsGoContactPage ? getSharedZaloCTA(siteCode, locale) : null
   const resolvedSubmitLabel = isWingsGoContactPage
@@ -539,22 +546,30 @@ export const FormBlock: React.FC<
       return
     }
 
+    setConsentAccepted(false)
+    setConsentError(false)
+    setLeadConfig(undefined)
     const controller = new AbortController()
+    const requestedLocale = copyLocale
     const loadConfig = async () => {
       try {
-        const response = await fetch(`${getClientSideURL()}/api/lead-submissions`, {
-          cache: 'no-store',
-          method: 'GET',
-          signal: controller.signal,
-        })
+        const response = await fetch(
+          `${getClientSideURL()}/api/lead-submissions?locale=${encodeURIComponent(requestedLocale)}`,
+          {
+            cache: 'no-store',
+            method: 'GET',
+            signal: controller.signal,
+          },
+        )
         const body = (await response.json()) as WingsGroupLeadPublicConfig
+        if (controller.signal.aborted) return
         setLeadConfig(
           response.ok && body?.enabled === true
             ? body
             : { available: false, enabled: true, reason: 'configuration-unavailable' },
         )
       } catch (loadError) {
-        if ((loadError as { name?: string }).name !== 'AbortError') {
+        if (!controller.signal.aborted && (loadError as { name?: string }).name !== 'AbortError') {
           setLeadConfig({
             available: false,
             enabled: true,
@@ -566,7 +581,7 @@ export const FormBlock: React.FC<
 
     void loadConfig()
     return () => controller.abort()
-  }, [isWingsGroupV3])
+  }, [copyLocale, isWingsGroupV3])
 
   useEffect(() => {
     const syncPreferredChannel = (event: Event) => {
@@ -618,7 +633,9 @@ export const FormBlock: React.FC<
         setError(undefined)
         setIsLoading(true)
 
-        const dataToSend = Object.entries(data)
+        const dataToSend = Object.entries(
+          hasGovernedConsentField ? { ...data, consent: consentAccepted } : data,
+        )
           .filter(([name]) => name !== '_website')
           .map(([name, value]) => ({ field: name, value }))
 
@@ -629,6 +646,7 @@ export const FormBlock: React.FC<
               formId: formID,
               honeypot,
               idempotencyKey: idempotencyKeyRef.current,
+              locale: copyLocale,
               ...(isWingsGroupV3 &&
               leadConfig?.enabled &&
               'available' in leadConfig &&
@@ -705,6 +723,7 @@ export const FormBlock: React.FC<
       confirmationType,
       copyLocale,
       formID,
+      hasGovernedConsentField,
       honeypot,
       isWingsGroupV3,
       approvedPreferredChannel,
@@ -913,6 +932,12 @@ export const FormBlock: React.FC<
                   {localizedForm &&
                     localizedForm.fields &&
                     localizedForm.fields?.map((field, index) => {
+                      if (
+                        hasGovernedConsentField &&
+                        field.blockType === 'checkbox' &&
+                        getFieldName(field) === 'consent'
+                      )
+                        return null
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       const Field: React.FC<any> = fields?.[field.blockType as keyof typeof fields]
                       if (Field) {
@@ -1003,6 +1028,7 @@ export const FormBlock: React.FC<
                           }
                           aria-invalid={consentError || undefined}
                           aria-checked={consentAccepted}
+                          aria-required="true"
                           className="site-wingsgroup-consent__control"
                           id={`${formID}-wingsgroup-consent`}
                           onClick={() => {

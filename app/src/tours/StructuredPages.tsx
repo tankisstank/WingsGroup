@@ -1,4 +1,5 @@
 'use client'
+import { cn } from '@/utilities/ui'
 
 import React from 'react'
 
@@ -35,6 +36,7 @@ import {
   getAvailabilityLabel,
   getContactPath,
   getDurationLabel,
+  getFutureDepartures,
   getMarketConfig,
   getMealChipFlags,
   getPriorityMarketDeparture,
@@ -53,6 +55,9 @@ import { TourEnquiryContextBridge } from './TourEnquiryContextBridge'
 import type { TourEnquiryContext } from './enquiryContext'
 import { getWingSideTourCopy, normalizeWingSideConsultativeTour } from './wingsSideTourViewModel'
 import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
+import type { HotlineItem } from '@/utilities/siteHotlines'
+import { formatHotlineDisplay, resolveSiteHotlines } from '@/utilities/siteHotlines'
+import { PromotionBadge, PromotionPrice } from './PromotionPrice'
 
 /** Retail = WingsGo dense conversion. Consultative = Wingside private inbound. */
 export type TourDetailPresentation = 'consultative' | 'retail'
@@ -700,14 +705,21 @@ export const RetailDecisionRail = ({
                 </button>
               ) : null}
             </div>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="font-mono text-3xl font-extrabold text-[var(--site-brand)]">
-                {isSellable
-                  ? formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency) || (isEn ? 'Contact' : 'Liên hệ')
-                  : isEn
-                    ? 'Contact'
-                    : 'Liên hệ'}
-              </span>
+            <div className="mt-1 flex flex-wrap items-baseline gap-2">
+              {isSellable ? (
+                <span className="font-mono text-3xl font-extrabold text-[var(--site-brand)]">
+                  <PromotionPrice
+                    contactLabel={isEn ? 'Contact' : 'Liên hệ'}
+                    currency={nextDeparture?.currency}
+                    originalPrice={nextDeparture?.originalPrice}
+                    price={nextDeparture?.priceFrom}
+                  />
+                </span>
+              ) : (
+                <span className="font-mono text-3xl font-extrabold text-[var(--site-brand)]">
+                  {isEn ? 'Contact' : 'Liên hệ'}
+                </span>
+              )}
               {isSellable && nextDeparture?.priceFrom ? (
                 <span className="text-xs text-muted-foreground">{isEn ? '/ guest' : '/ khách'}</span>
               ) : null}
@@ -1052,11 +1064,11 @@ const TourDecisionHeader = ({
   variants?: Array<Record<string, any>>
 }) => {
   const context = useTourDepartureSelection()
-  const nextDeparture = context?.isPrivateTour
-    ? null
-    : context?.isSelectionExplicit
-      ? context.selectedDeparture
-      : context?.selectedDeparture || nextDepartureProp
+  const nextDeparture = context
+    ? context.isPrivateTour
+      ? null
+      : context.selectedDeparture
+    : nextDepartureProp
   const isConsultative = presentation === 'consultative'
   const wingSideCopy = getWingSideTourCopy(locale)
   const durationLabel = getDurationLabel(tour.durationDays, tour.durationNights, locale)
@@ -1331,7 +1343,12 @@ const TourDecisionHeader = ({
         ) : null}
 
         {/* Media Presentation: Collage if >=3 images, otherwise single hero frame */}
-        <div className="overflow-hidden rounded-2xl border border-border/70 bg-muted shadow-sm">
+        <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-muted shadow-sm">
+          {hasFutureDeparture && nextDeparture?.commerceVerified && nextDeparture?.availabilityStatus !== 'sold-out' && normalizeGovernedTourPrice({ currency: nextDeparture?.currency, value: nextDeparture?.priceFrom }) ? (
+            <div className="absolute inset-x-3 top-3 z-10 flex justify-start">
+              <PromotionBadge label={nextDeparture?.promoLabel} />
+            </div>
+          ) : null}
           {hasCollage ? (
             <div className="grid grid-cols-3 gap-1.5 aspect-[16/10] sm:aspect-[16/9]" data-od-id="tour-gallery-collage">
               <div className="relative col-span-2 h-full bg-muted">
@@ -3062,11 +3079,13 @@ const StickyBookingCTASection = ({
 }
 
 const RetailTourConsultationDialogMount = ({
+  hotlines,
   locale,
   nextDeparture,
   siteCode,
   tour,
 }: {
+  hotlines?: HotlineItem[]
   locale: SupportedLocaleCode
   nextDeparture: Record<string, any> | null
   siteCode?: null | string
@@ -3075,6 +3094,7 @@ const RetailTourConsultationDialogMount = ({
   const context = useTourDepartureSelection()
   return (
     <RetailTourConsultationDialog
+      hotlines={hotlines}
       isOpen={Boolean(context?.isConsultationOpen)}
       locale={locale}
       nextDeparture={nextDeparture}
@@ -3204,6 +3224,7 @@ export const TourDetailPage = ({
   data,
   discoveryContext,
   enquiryForm,
+  hotlines,
   locale,
   presentation = 'retail',
   siteCode: siteCodeProp,
@@ -3211,6 +3232,7 @@ export const TourDetailPage = ({
   data: TourResolvedData
   discoveryContext?: Omit<TourEnquiryContext, 'source' | 'tourId' | 'tourSlug' | 'tourTitle'>
   enquiryForm?: FormType | null
+  hotlines?: HotlineItem[]
   locale: SupportedLocaleCode
   presentation?: TourDetailPresentation
   siteCode?: null | string
@@ -3451,6 +3473,7 @@ export const TourDetailPage = ({
             {visibleSections.has('sticky-cta') ? sections['sticky-cta'] : null}
             {!isConsultative ? (
               <RetailTourConsultationDialogMount
+                hotlines={hotlines}
                 locale={locale}
                 nextDeparture={data.nextDeparture}
                 siteCode={siteCode}
@@ -3477,6 +3500,12 @@ const DepartureStrip = ({
     <div className="grid gap-4 lg:grid-cols-3">
       {items.map((departure) => {
         const product = asDoc<Record<string, any>>(departure.tourProduct)
+        const canHoldSeat = Boolean(
+          departure.commerceVerified &&
+          departure.availabilityStatus !== 'sold-out' &&
+          getFutureDepartures([departure]).length > 0 &&
+          normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }),
+        )
 
         return (
           <article
@@ -3500,17 +3529,24 @@ const DepartureStrip = ({
                   .join(' • ')}
               </p>
               <p className="mt-4 text-2xl font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
-                {formatTourPrice(departure.priceFrom, departure.currency) || 'Liên hệ'}
+                {canHoldSeat ? (
+                  <PromotionPrice
+                    contactLabel={locale === 'en' ? 'Contact us' : 'Liên hệ'}
+                    currency={departure.currency}
+                    originalPrice={departure.originalPrice}
+                    price={departure.priceFrom}
+                  />
+                ) : (
+                  formatTourPrice(departure.priceFrom, departure.currency) || 'Liên hệ'
+                )}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
                   {departure.availabilityBadge ||
                     getAvailabilityLabel(departure.availabilityStatus, locale)}
                 </span>
-                {departure.promoLabel ? (
-                  <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground">
-                    {departure.promoLabel}
-                  </span>
+                {canHoldSeat ? (
+                  <PromotionBadge label={departure.promoLabel} />
                 ) : null}
               </div>
               <div className="mt-5 flex gap-3">
@@ -3518,13 +3554,15 @@ const DepartureStrip = ({
                   className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_color-mix(in_oklch,var(--site-brand)_18%,transparent)]"
                   href={getTourInquiryPath({
                     departureId: departure.id,
-                    intent: 'hold-seat',
+                    intent: canHoldSeat ? 'hold-seat' : 'inquiry',
                     source: 'departure-strip',
                     tourId: product?.id,
                     tourSlug: product?.slug,
                   })}
                 >
-                  {departure.ctaLabelOverride || 'Giữ chỗ'}
+                  {canHoldSeat
+                    ? departure.ctaLabelOverride || (locale === 'en' ? 'Hold a seat' : 'Giữ chỗ')
+                    : locale === 'en' ? 'Request consultation' : 'Liên hệ tư vấn'}
                 </SiteLink>
                 {product?.slug ? (
                   <SiteLink
@@ -3568,12 +3606,32 @@ export const TourMarketPage = ({
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {tours.map((tour) => {
             const tourBadges = getMarketTourBadges(tour)
+            const departure = tour.nextDeparture
+            const editorialBadges = tour.editorialBadges || []
+            const hasHot = Boolean(tour.hasHotEditorialBadge)
+            const hotBadge = editorialBadges.find((b: any) => b.kind === 'hot')
+            const cornerStickers = editorialBadges.filter(
+              (b: any) => b.kind === 'specialized' || b.kind === 'vip',
+            )
+            const canPromote = Boolean(
+              departure?.commerceVerified === true &&
+              departure.availabilityStatus !== 'sold-out' &&
+              getFutureDepartures([departure]).length > 0 &&
+              normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }),
+            )
 
             return (
               <article
-                className="group relative rounded-[24px] border border-border/60 bg-background p-5 shadow-sm transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-1 hover:border-[color:var(--site-accent)]/40 hover:bg-card hover:shadow-[0_18px_46px_color-mix(in_oklch,var(--site-brand)_14%,transparent)]"
+                className={cn(
+                  'group relative rounded-[24px] border border-border/60 bg-background p-5 shadow-sm transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-1 hover:border-[color:var(--site-accent)]/40 hover:bg-card hover:shadow-[0_18px_46px_color-mix(in_oklch,var(--site-brand)_14%,transparent)]',
+                  hasHot && 'hot-rainbow-card border-transparent',
+                )}
+                data-has-hot={hasHot ? 'true' : undefined}
                 key={tour.id}
               >
+                {hasHot && hotBadge?.label ? (
+                  <span className="sr-only">{hotBadge.label}</span>
+                ) : null}
                 <div className="relative z-10">
                   <div className="relative mb-4 aspect-[16/10] overflow-hidden rounded-[20px] bg-muted">
                     <Media
@@ -3582,6 +3640,38 @@ export const TourMarketPage = ({
                       pictureClassName="absolute inset-0"
                       resource={tour.heroMedia || asArray(tour.gallery)[0] || null}
                     />
+                    {cornerStickers.length > 0 || canPromote ? (
+                      <div className="absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2 pointer-events-none">
+                        {cornerStickers.length > 0 ? (
+                          <div
+                            className={cn(
+                              'flex flex-col items-start gap-1.5 min-w-0',
+                              canPromote ? 'max-w-[calc(100%-110px)]' : 'max-w-full',
+                            )}
+                            data-editorial-stickers="true"
+                          >
+                            {cornerStickers.map((sticker: any, idx: number) => (
+                              <span
+                                className={cn(
+                                  'inline-flex max-w-full items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-wide shadow-sm backdrop-blur-[2px] truncate',
+                                  sticker.kind === 'vip'
+                                    ? 'bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-slate-950 uppercase tracking-wider font-extrabold shadow-amber-500/20'
+                                    : 'bg-slate-900/90 text-white dark:bg-slate-100/95 dark:text-slate-900',
+                                )}
+                                key={`${sticker.kind}-${idx}`}
+                              >
+                                {sticker.label}
+                              </span>
+                            ))}
+                          </div>
+                        ) : <div />}
+                        {canPromote ? (
+                          <div className="flex justify-end shrink-0 max-w-[50%]">
+                            <PromotionBadge label={departure?.promoLabel} />
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent p-3">
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/90">
                         {tour.hasFutureDepartures === false
@@ -3617,12 +3707,19 @@ export const TourMarketPage = ({
                     </p>
                   )}
                   <p className="mt-2 text-sm leading-7 text-muted-foreground">{tour.summary}</p>
-                  <div className="mt-4 flex items-end justify-between gap-3">
+                  <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
                     <p className="text-2xl font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
-                      {formatTourPrice(tour.lowestPrice) || 'Liên hệ'}
+                      {canPromote ? (
+                        <PromotionPrice
+                          contactLabel={locale === 'en' ? 'Contact us' : 'Liên hệ'}
+                          currency={departure?.currency}
+                          originalPrice={departure?.originalPrice}
+                          price={departure?.priceFrom}
+                        />
+                      ) : (locale === 'en' ? 'Contact us' : 'Liên hệ')}
                     </p>
                     <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
-                      Giá tham khảo
+                      {locale === 'en' ? 'Selected departure' : 'Giá theo đợt'}
                     </span>
                   </div>
                   {tour.nextDeparture ? (
@@ -3727,13 +3824,17 @@ export const TourCampaignPage = ({
 )
 
 export const TourSchedulePage = ({
+  hotlines,
   locale,
   schedule,
 }: {
+  hotlines?: HotlineItem[]
   locale: 'en' | 'vi'
   schedule: SchedulePageViewModel
 }) => {
   const isEn = locale === 'en'
+  const resolvedHotlines =
+    hotlines !== undefined ? hotlines : resolveSiteHotlines(undefined, 'wings-go')
   const zaloCTA = getSharedZaloCTA('wings-go', locale)
   const markets = [
     {
@@ -3930,9 +4031,17 @@ export const TourSchedulePage = ({
             >
               {isEn ? 'GET ADVICE & A QUOTE' : 'NHẬN TƯ VẤN & BÁO GIÁ'}
             </SiteLink>
-            <a className="inline-flex min-h-11 items-center font-semibold text-foreground no-underline" href="tel:0912910101">
-              {isEn ? 'Call' : 'Hotline'}: 0912 910 101
-            </a>
+            {resolvedHotlines.map((item, idx) => (
+              <a
+                key={item.normalized}
+                className="inline-flex min-h-11 items-center font-semibold text-foreground no-underline"
+                href={item.href}
+              >
+                {item.label
+                  ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
+                  : `${idx === 0 ? (isEn ? 'Call' : 'Hotline') : (isEn ? 'Alt' : 'Hotline 2')}: ${formatHotlineDisplay(item.normalized)}`}
+              </a>
+            ))}
             {zaloCTA ? (
               <a
                 className="inline-flex min-h-11 items-center font-semibold text-foreground underline"

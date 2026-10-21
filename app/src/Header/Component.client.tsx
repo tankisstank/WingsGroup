@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import type { Header as HeaderType, Media } from '@/payload-types'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+import type { HotlineItem } from '@/utilities/siteHotlines'
 import { Logo } from '@/components/Logo/Logo'
 import { SiteLink } from '@/components/SiteLink'
 import { HeaderNav } from './Nav'
@@ -14,6 +15,7 @@ interface HeaderClientProps {
   data: { navItems?: HeaderType['navItems'] }
   defaultLocale?: SupportedLocaleCode
   englishPublicationState?: 'approved' | 'hidden' | 'route-ready' | null
+  hotlines?: HotlineItem[]
   logoImage?: Media | null
   logoText?: null | string
   primaryAction?: { label: string; url: string }
@@ -36,6 +38,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   data,
   defaultLocale,
   englishPublicationState,
+  hotlines,
   logoImage,
   logoText,
   primaryAction,
@@ -96,6 +99,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
           data={data}
           defaultLocale={defaultLocale}
           englishPublicationState={englishPublicationState}
+          hotlines={hotlines}
           primaryAction={primaryAction}
           publicPathname={publicPathname}
           resolvedLocale={resolvedLocale}

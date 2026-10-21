@@ -55,9 +55,17 @@ export type DepartureCardViewModel = {
   [key: string]: any
 }
 
+export type EditorialBadgeKind = 'hot' | 'specialized' | 'vip'
+export type EditorialBadgeDTO = {
+  kind: EditorialBadgeKind
+  label: string
+}
+
 export type TourCardViewModel = {
   departureCount?: number
+  editorialBadges?: EditorialBadgeDTO[]
   hasFutureDepartures?: boolean
+  hasHotEditorialBadge?: boolean
   heroMedia?: any
   id?: number | string
   lowestPrice?: null | number

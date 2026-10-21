@@ -40,6 +40,7 @@ export type LeadSubmissionRequest = {
   honeypot?: string
   idempotencyKey: string
   leadContract?: WingsGroupLeadContract
+  locale?: 'en' | 'vi'
   submissionData: LeadSubmissionField[]
   turnstileToken?: string
 }

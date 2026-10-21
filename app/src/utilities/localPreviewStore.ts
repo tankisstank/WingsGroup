@@ -1,7 +1,9 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import http from 'node:http'
+import path from 'node:path'
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite'
+import { pathToFileURL } from 'node:url'
 
 /**
  * Local preview deliberately gives SQLite `:memory:` only. The optional
@@ -295,15 +297,98 @@ const pipelineResponse = (
   }),
 })
 
-const loadBaseDatabase = (database: DatabaseSync, baseDatabasePath: string | undefined): void => {
+const VIRTUAL_TABLE_PATTERN = /^\s*CREATE\s+VIRTUAL\s+TABLE\b/iu
+
+const quoteIdentifier = (name: string): string => `"${name.replaceAll('"', '""')}"`
+
+/**
+ * Clones a closed base database into an in-memory SQLite database via an immutable URI attach.
+ *
+ * Known limit: The base database image is assumed to be closed and checkpointed.
+ * WAL/SHM companion files are not merged during immutable URI attach.
+ */
+export const loadBaseDatabase = (database: DatabaseSync, baseDatabasePath: string | undefined): void => {
   if (!baseDatabasePath) return
   const stat = fs.lstatSync(baseDatabasePath)
   if (!stat.isFile() || stat.isSymbolicLink()) {
     throw new Error('E09 preview base database must be a regular non-symlink file.')
   }
-  ;(database as DatabaseSync & { deserialize: (bytes: Buffer) => void }).deserialize(
-    fs.readFileSync(baseDatabasePath),
-  )
+
+  const absPath = path.resolve(baseDatabasePath)
+  const sourceUri = `${pathToFileURL(absPath).href}?immutable=1`
+
+  database.exec('PRAGMA foreign_keys = OFF;')
+  database.prepare('ATTACH DATABASE ? AS source').run(sourceUri)
+
+  try {
+    database.exec('BEGIN TRANSACTION;')
+
+    const tables = database
+      .prepare(
+        "SELECT name, sql FROM source.sqlite_schema WHERE type = 'table' AND name NOT GLOB 'sqlite_*'",
+      )
+      .all() as Array<{ name: string; sql: string }>
+
+    for (const table of tables) {
+      if (VIRTUAL_TABLE_PATTERN.test(table.sql)) {
+        throw new Error(`Unsupported virtual table in base database: ${table.name}`)
+      }
+      database.exec(table.sql)
+
+      const cols = database
+        .prepare(`PRAGMA source.table_xinfo(${quoteIdentifier(table.name)})`)
+        .all() as Array<{ hidden: number; name: string }>
+
+      const normalCols = cols
+        .filter((column) => Number(column.hidden) === 0)
+        .map((column) => quoteIdentifier(column.name))
+
+      if (normalCols.length > 0) {
+        const colList = normalCols.join(', ')
+        database.exec(
+          `INSERT INTO main.${quoteIdentifier(table.name)} (${colList}) SELECT ${colList} FROM source.${quoteIdentifier(table.name)};`,
+        )
+      }
+    }
+
+    const hasSeq = database
+      .prepare(
+        "SELECT 1 FROM source.sqlite_schema WHERE type = 'table' AND name = 'sqlite_sequence'",
+      )
+      .get()
+
+    if (hasSeq) {
+      database.exec(
+        'DELETE FROM main.sqlite_sequence; INSERT INTO main.sqlite_sequence SELECT * FROM source.sqlite_sequence;',
+      )
+    }
+
+    const otherItems = database
+      .prepare(
+        "SELECT type, name, sql FROM source.sqlite_schema WHERE type IN ('index', 'view', 'trigger') AND sql IS NOT NULL AND name NOT GLOB 'sqlite_*'",
+      )
+      .all() as Array<{ name: string; sql: string; type: string }>
+
+    for (const item of otherItems) {
+      database.exec(item.sql)
+    }
+
+    database.exec('COMMIT;')
+  } catch (error) {
+    try {
+      database.exec('ROLLBACK;')
+    } catch {
+      // ignore rollback failure
+    }
+    throw error
+  } finally {
+    try {
+      database.exec('DETACH DATABASE source;')
+    } catch {
+      // ignore detach failure
+    }
+    database.exec('PRAGMA foreign_keys = ON;')
+  }
 }
 
 export const isWingsGroupLocalPreviewStoreConfigured = (): boolean => {
@@ -371,7 +456,12 @@ export const startWingsGroupLocalPreviewStore = async (
   options: PreviewStoreOptions = {},
 ): Promise<WingsGroupLocalPreviewStore> => {
   const database = new DatabaseSync(':memory:')
-  loadBaseDatabase(database, options.baseDatabasePath)
+  try {
+    loadBaseDatabase(database, options.baseDatabasePath)
+  } catch (error) {
+    database.close()
+    throw error
+  }
   const token = crypto.randomBytes(PREVIEW_STORE_TOKEN_BYTES).toString('hex')
   const expiresAt =
     options.ttlMs === undefined ? Number.POSITIVE_INFINITY : Date.now() + options.ttlMs

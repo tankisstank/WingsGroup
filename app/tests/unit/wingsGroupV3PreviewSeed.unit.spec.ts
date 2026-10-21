@@ -14,7 +14,7 @@ import {
   parseWingsGroupV3PreviewSeedCommand,
   WINGSGROUP_PREVIEW_MEDIA_FILENAMES,
 } from '../../scripts/seed-wingsgroup-v3-home-preview'
-import { startWingsGroupLocalPreviewStore } from '@/utilities/localPreviewStore'
+import { loadBaseDatabase, startWingsGroupLocalPreviewStore } from '@/utilities/localPreviewStore'
 
 const sourceRoot = path.resolve(process.cwd())
 const seedScript = path.resolve(sourceRoot, 'scripts/seed-wingsgroup-v3-home-preview.ts')
@@ -28,7 +28,9 @@ type ChildResult = {
 
 type PipelineBody = {
   results: Array<{
+    error?: { code?: string; message?: string }
     response?: { result?: { rows: Array<Array<{ value?: unknown }>> } }
+    type?: string
   }>
 }
 
@@ -282,19 +284,41 @@ describe('E09 local preview correction 3', () => {
       // These are the exact names the old /proc/self/fd SQLite consumer
       // re-resolved after its accepted DB leaf was unlinked.
       fs.rmSync(preparedDatabase)
-      fs.symlinkSync(externalDatabase, path.join(root, 'e09-preview.db'))
-      fs.symlinkSync(externalDatabase, path.join(root, 'e09-preview.db (deleted)'))
-      fs.rmSync(path.join(root, 'media'), { recursive: true })
-      fs.symlinkSync(externalMedia, path.join(root, 'media'), 'dir')
+      if (process.platform === 'win32') {
+        fs.linkSync(externalDatabase, path.join(root, 'e09-preview.db'))
+        fs.linkSync(externalDatabase, path.join(root, 'e09-preview.db (deleted)'))
+        fs.rmSync(path.join(root, 'media'), { recursive: true })
+        fs.symlinkSync(externalMedia, path.join(root, 'media'), 'junction')
+      } else {
+        fs.symlinkSync(externalDatabase, path.join(root, 'e09-preview.db'))
+        fs.symlinkSync(externalDatabase, path.join(root, 'e09-preview.db (deleted)'))
+        fs.rmSync(path.join(root, 'media'), { recursive: true })
+        fs.symlinkSync(externalMedia, path.join(root, 'media'), 'dir')
+      }
 
       const pragma = await pipeline(store, 'PRAGMA journal_mode=WAL;')
-      const schema = await pipeline(
-        store,
-        "CREATE TABLE IF NOT EXISTS correction3_probe(value TEXT); INSERT INTO correction3_probe VALUES ('memory-only');",
-      )
       expect(pragma.status).toBe(200)
+      expect(pragma.body.results[0]?.type).toBe('ok')
       expect(pipelineValue(pragma.body)).toBe('memory')
-      expect(schema.status).toBe(200)
+
+      const createTable = await pipeline(
+        store,
+        'CREATE TABLE IF NOT EXISTS correction3_probe(value TEXT);',
+      )
+      expect(createTable.status).toBe(200)
+      expect(createTable.body.results[0]?.type).toBe('ok')
+
+      const insertRow = await pipeline(
+        store,
+        "INSERT INTO correction3_probe VALUES ('memory-only');",
+      )
+      expect(insertRow.status).toBe(200)
+      expect(insertRow.body.results[0]?.type).toBe('ok')
+
+      const selectRow = await pipeline(store, 'SELECT value FROM correction3_probe;')
+      expect(selectRow.status).toBe(200)
+      expect(selectRow.body.results[0]?.type).toBe('ok')
+      expect(pipelineValue(selectRow.body)).toBe('memory-only')
 
       const mediaResponse = await fetch(`${store.url}/preview-media/proof.png`, {
         body: new Uint8Array([1, 2, 3]),
@@ -362,7 +386,11 @@ describe('E09 local preview correction 3', () => {
     const mediaRoot = path.join(mediaParent, 'media')
     const externalMediaRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-media-target-'))
     fs.writeFileSync(path.join(externalMediaRoot, 'sentinel.txt'), 'external media sentinel')
-    fs.symlinkSync(externalMediaRoot, mediaRoot, 'dir')
+    if (process.platform === 'win32') {
+      fs.symlinkSync(externalMediaRoot, mediaRoot, 'junction')
+    } else {
+      fs.symlinkSync(externalMediaRoot, mediaRoot, 'dir')
+    }
     const store = await startWingsGroupLocalPreviewStore({ baseDatabasePath: baseline.database })
     const environment = previewEnvironment(store)
     environment.E09_PREVIEW_MEDIA_DIRECTORY = mediaRoot
@@ -449,4 +477,110 @@ describe('E09 local preview correction 3', () => {
       fs.rmSync(externalMediaRoot, { force: true, recursive: true })
     }
   }, 120000)
+
+  it('clones a base database image preserving quoted identifiers, generated columns, triggers, indexes, and autoincrement without mutating the source', async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-clone-'))
+    const sourceDbPath = path.join(root, 'source.db')
+    const sourceDb = new DatabaseSync(sourceDbPath)
+
+    try {
+      sourceDb.exec(`
+        CREATE TABLE "table""name" (
+          "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+          "col""name" TEXT,
+          "gen""col" TEXT GENERATED ALWAYS AS ("col""name" || '_calc') STORED
+        );
+        INSERT INTO "table""name" ("id", "col""name") VALUES (42, 'hello');
+        CREATE INDEX "idx""custom" ON "table""name" ("col""name");
+        CREATE TABLE "audit" ("msg" TEXT);
+        CREATE TRIGGER "trg""test" AFTER INSERT ON "table""name" BEGIN INSERT INTO "audit" VALUES ('added'); END;
+        CREATE TABLE "normal_with_keyword" ("text" TEXT DEFAULT 'CREATE VIRTUAL TABLE sentinel');
+      `)
+    } finally {
+      sourceDb.close()
+    }
+
+    const beforeBytes = fs.readFileSync(sourceDbPath)
+    const targetDb = new DatabaseSync(':memory:')
+
+    try {
+      loadBaseDatabase(targetDb, sourceDbPath)
+
+      // Verify row and generated column computation
+      const initialRows = targetDb.prepare('SELECT * FROM "table""name"').all() as Array<{
+        'col"name': string
+        'gen"col': string
+        id: number
+      }>
+      expect(initialRows).toEqual([
+        {
+          'col"name': 'hello',
+          'gen"col': 'hello_calc',
+          id: 42,
+        },
+      ])
+
+      // Verify autoincrement sequence preservation and trigger firing
+      targetDb.prepare('INSERT INTO "table""name" ("col""name") VALUES (?)').run('world')
+      const updatedRows = targetDb.prepare('SELECT * FROM "table""name" ORDER BY id ASC').all()
+      expect(updatedRows).toEqual([
+        {
+          'col"name': 'hello',
+          'gen"col': 'hello_calc',
+          id: 42,
+        },
+        {
+          'col"name': 'world',
+          'gen"col': 'world_calc',
+          id: 43,
+        },
+      ])
+
+      // Verify trigger executed on insert
+      const auditRows = targetDb.prepare('SELECT * FROM "audit"').all()
+      expect(auditRows).toEqual([{ msg: 'added' }])
+
+      // Verify table with keyword in default value was not rejected as virtual table
+      const keywordRows = targetDb.prepare('SELECT * FROM "normal_with_keyword"').all()
+      expect(keywordRows).toEqual([])
+
+      // Verify index exists
+      const indexes = targetDb
+        .prepare("SELECT name FROM sqlite_schema WHERE type = 'index' AND name = ?")
+        .all('idx"custom')
+      expect(indexes.length).toBe(1)
+
+      // Verify source database was not mutated
+      const afterBytes = fs.readFileSync(sourceDbPath)
+      expect(afterBytes.equals(beforeBytes)).toBe(true)
+    } finally {
+      targetDb.close()
+    }
+
+    // Verify virtual table is rejected and startup closes database on error
+    const virtualRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'e09-preview-virtual-'))
+    const virtualDbPath = path.join(virtualRoot, 'virtual.db')
+    const virtualDb = new DatabaseSync(virtualDbPath)
+    try {
+      virtualDb.exec('CREATE VIRTUAL TABLE fts USING fts5(content);')
+    } finally {
+      virtualDb.close()
+    }
+
+    try {
+      const virtualTarget = new DatabaseSync(':memory:')
+      try {
+        expect(() => loadBaseDatabase(virtualTarget, virtualDbPath)).toThrow(/Unsupported virtual table/)
+      } finally {
+        virtualTarget.close()
+      }
+
+      await expect(
+        startWingsGroupLocalPreviewStore({ baseDatabasePath: virtualDbPath }),
+      ).rejects.toThrow(/Unsupported virtual table/)
+    } finally {
+      fs.rmSync(virtualRoot, { force: true, recursive: true })
+      fs.rmSync(root, { force: true, recursive: true })
+    }
+  })
 })

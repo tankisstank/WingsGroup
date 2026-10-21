@@ -8,6 +8,7 @@ vi.mock('@payloadcms/ui', () => ({
   FieldError: () => null,
   FieldLabel: ({ label }: { label?: string }) => React.createElement('label', null, label),
   useAuth: () => ({ user: { role: 'super-admin', sites: [1, 2] } }),
+  useDocumentEvents: () => ({ reportUpdate: vi.fn() }),
   useDocumentInfo: () => ({ data: { site: 2 }, id: 41 }),
   useField: () => ({ errorMessage: null, setValue: uiMocks.setValue, showError: false, value: null }),
   useFormModified: () => false,
@@ -48,7 +49,7 @@ describe('Tour departure authoring actions', () => {
     expect(screen.getByRole('alert').textContent).toContain('Đã xác minh cần có thời điểm hết hạn')
     expect(onSubmit).not.toHaveBeenCalled()
 
-    fireEvent.change(screen.getByLabelText('Hết hạn xác minh'), { target: { value: '2026-10-01T00:00' } })
+    fireEvent.change(screen.getByLabelText('Hết hạn xác minh'), { target: { value: '2099-10-01T00:00' } })
     fireEvent.click(screen.getByRole('button', { name: 'Lưu lịch khởi hành' }))
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ priceFrom: '12000000', verified: true }), 'done'))
   })
@@ -145,7 +146,7 @@ describe('Tour departure authoring actions', () => {
 
     await waitFor(() => expect(screen.getByText('Vietnam Airlines')).toBeTruthy())
     expect(screen.getByText('15.000.000')).toBeTruthy()
-    expect(postedURL).toBe('/api/tour-departures')
+    expect(postedURL).toBe('/api/tour-departures?locale=vi&draft=true')
     expect(postedBody).toMatchObject({
       _status: 'draft',
       departureCity: 'Hà Nội',

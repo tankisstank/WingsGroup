@@ -2,6 +2,10 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+vi.mock('@payloadcms/ui', () => ({
+  useAuth: () => ({ user: { email: 'admin@wingstravel.vn', role: 'editor' } }),
+}))
+
 import AdminOperatorConsole from '@/components/AdminOperatorConsole'
 
 const endpoints = {
@@ -15,6 +19,8 @@ const endpoints = {
   recentLeads: '/api/form-submissions?depth=1&limit=5&sort=-createdAt',
   recentPages: '/api/pages?depth=0&limit=5&sort=-updatedAt',
   sites: '/api/sites?depth=0&limit=20&sort=name',
+  tourDrafts: '/api/tour-products?depth=0&limit=0&where[_status][equals]=draft',
+  toursCount: '/api/tour-products?depth=0&limit=0',
 } as const
 
 type Reply = () => Promise<Response> | Response
@@ -47,6 +53,8 @@ const defaultBodies: Record<string, unknown> = {
     docs: [{ id: 'page-1', title: 'Trang Hà Nội', updatedAt: '2026-08-05T01:00:00.000Z' }],
   },
   [endpoints.sites]: { docs: [{ code: 'wings-travel', id: 'site-1', name: 'WingsTravel' }] },
+  [endpoints.tourDrafts]: { totalDocs: 1 },
+  [endpoints.toursCount]: { totalDocs: 5 },
 }
 
 const getURL = (input: RequestInfo | URL) => {
@@ -103,7 +111,7 @@ describe('AdminOperatorConsole request states', () => {
     expect(screen.getByText('Đang tải danh sách site.')).toBeTruthy()
     expect(screen.getByText('Đang tải trang cập nhật gần đây.')).toBeTruthy()
     expect(screen.getByText('Đang tải lead gần đây.')).toBeTruthy()
-    expect(screen.getAllByText('Đang tải dữ liệu.')).toHaveLength(6)
+    expect(screen.getAllByText('Đang tải dữ liệu.')).toHaveLength(8)
 
     const main = screen.getByRole('main')
     expect(main.getAttribute('id')).toBe('cms-console-main')

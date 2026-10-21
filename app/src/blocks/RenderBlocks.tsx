@@ -33,6 +33,7 @@ import { WingsGroupContactIntro } from '@/components/WingsGroupV3/ContactIntro'
 import { JourneyInquiryGrid } from '@/components/WingsGroupV3/JourneyInquiryGrid'
 import { WingsGroupTestimonialsSection } from '@/components/WingsGroupV3/TestimonialsSection'
 import { WingsGroupGallerySection } from '@/blocks/WingsGroupGallery/Component'
+import type { HotlineItem } from '@/utilities/siteHotlines'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -55,6 +56,7 @@ const blockComponents = {
 
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
+  hotlines?: HotlineItem[]
   locale?: null | string
   publicPathname?: null | string
   registeredOfficeAddress?: null | string
@@ -78,6 +80,7 @@ export const RenderBlocks: React.FC<{
   const {
     allowWingsGroupDevelopmentMedia = false,
     blocks,
+    hotlines,
     locale,
     publicPathname,
     registeredOfficeAddress,
@@ -149,6 +152,7 @@ export const RenderBlocks: React.FC<{
                   ? {
                       ...block,
                       allowWingsGroupDevelopmentMedia,
+                      hotlines,
                       locale,
                       publicPathname,
                       registeredOfficeAddress,

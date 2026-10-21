@@ -5,8 +5,11 @@ import { FormBlock } from '@/blocks/Form/Component'
 import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
 import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
 import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
+import type { HotlineItem } from '@/utilities/siteHotlines'
+import { formatHotlineDisplay } from '@/utilities/siteHotlines'
 
 type Props = FormBlockType & {
+  hotlines?: HotlineItem[]
   locale?: null | string
   siteCode?: null | string
   wingsGroupV3?: boolean
@@ -14,6 +17,7 @@ type Props = FormBlockType & {
 
 export const WingsGroupContactSection = ({
   blockType: _blockType,
+  hotlines,
   id: _id,
   locale,
   siteCode,
@@ -46,7 +50,17 @@ export const WingsGroupContactSection = ({
             <span>
               {locale === 'en' ? 'Prefer a direct conversation?' : 'Bạn muốn trao đổi trực tiếp?'}
             </span>
-            <a href="tel:0912910101">0912910101</a>
+            {hotlines && hotlines.length > 0 ? (
+              hotlines.map((item) => (
+                <a href={item.href} key={item.normalized}>
+                  {item.label
+                    ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
+                    : formatHotlineDisplay(item.normalized)}
+                </a>
+              ))
+            ) : (
+              <a href="tel:0912910101">0912 910 101</a>
+            )}
             <ProtectedEmailLink email="info@wingsgroup.vn" />
             <ProtectedEmailLink email="sales@wingsgroup.vn" />
             {sharedZaloCTA ? (

@@ -706,6 +706,59 @@ const wingsGroupV3SQLiteStatements = [
   ].map((definition) => `CREATE INDEX IF NOT EXISTS ${definition}`),
 ] as const
 
+const tourEditorialBadgesSQLiteStatements = [
+  `CREATE TABLE IF NOT EXISTS "tour_products_editorial_badges" (
+    "_order" INTEGER NOT NULL,
+    "_parent_id" INTEGER NOT NULL,
+    "id" TEXT PRIMARY KEY NOT NULL,
+    "kind" TEXT NOT NULL,
+    FOREIGN KEY ("_parent_id") REFERENCES "tour_products"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "tour_products_editorial_badges_locales" (
+    "label" TEXT,
+    "id" INTEGER PRIMARY KEY NOT NULL,
+    "_locale" TEXT NOT NULL,
+    "_parent_id" TEXT NOT NULL,
+    FOREIGN KEY ("_parent_id") REFERENCES "tour_products_editorial_badges"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_tour_products_v_version_editorial_badges" (
+    "_order" INTEGER NOT NULL,
+    "_parent_id" INTEGER NOT NULL,
+    "id" INTEGER PRIMARY KEY NOT NULL,
+    "_uuid" TEXT,
+    "kind" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "_tour_products_v"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE TABLE IF NOT EXISTS "_tour_products_v_version_editorial_badges_locales" (
+    "label" TEXT,
+    "id" INTEGER PRIMARY KEY NOT NULL,
+    "_locale" TEXT NOT NULL,
+    "_parent_id" INTEGER NOT NULL,
+    FOREIGN KEY ("_parent_id") REFERENCES "_tour_products_v_version_editorial_badges"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE INDEX IF NOT EXISTS "tour_products_editorial_badges_order_idx" ON "tour_products_editorial_badges" ("_order")`,
+  `CREATE INDEX IF NOT EXISTS "tour_products_editorial_badges_parent_id_idx" ON "tour_products_editorial_badges" ("_parent_id")`,
+  `CREATE INDEX IF NOT EXISTS "tour_products_editorial_badges_locales_locale_idx" ON "tour_products_editorial_badges_locales" ("_locale")`,
+  `CREATE INDEX IF NOT EXISTS "tour_products_editorial_badges_locales_parent_id_idx" ON "tour_products_editorial_badges_locales" ("_parent_id")`,
+  `CREATE INDEX IF NOT EXISTS "_tour_products_v_version_editorial_badges_order_idx" ON "_tour_products_v_version_editorial_badges" ("_order")`,
+  `CREATE INDEX IF NOT EXISTS "_tour_products_v_version_editorial_badges_parent_id_idx" ON "_tour_products_v_version_editorial_badges" ("_parent_id")`,
+  `CREATE INDEX IF NOT EXISTS "_tour_products_v_version_editorial_badges_locales_locale_idx" ON "_tour_products_v_version_editorial_badges_locales" ("_locale")`,
+  `CREATE INDEX IF NOT EXISTS "_tour_products_v_version_editorial_badges_locales_parent_id_idx" ON "_tour_products_v_version_editorial_badges_locales" ("_parent_id")`,
+] as const
+
+const siteSettingsHotlinesSQLiteStatements = [
+  `CREATE TABLE IF NOT EXISTS "site_settings_additional_hotlines" (
+    "_order" INTEGER NOT NULL,
+    "_parent_id" INTEGER NOT NULL,
+    "id" TEXT PRIMARY KEY NOT NULL,
+    "phone_number" TEXT NOT NULL,
+    "label" TEXT,
+    FOREIGN KEY ("_parent_id") REFERENCES "site_settings"("id") ON UPDATE no action ON DELETE cascade
+  )`,
+  `CREATE INDEX IF NOT EXISTS "site_settings_additional_hotlines_order_idx" ON "site_settings_additional_hotlines" ("_order")`,
+  `CREATE INDEX IF NOT EXISTS "site_settings_additional_hotlines_parent_id_idx" ON "site_settings_additional_hotlines" ("_parent_id")`,
+] as const
+
 const toSQLitePath = (databaseURL: string) => {
   if (!databaseURL.startsWith('file:')) {
     return null
@@ -842,6 +895,54 @@ export const repairLocalSQLiteSchema = async (databaseURL: string) => {
     for (const statement of tourCurationsSQLiteStatements) {
       db.exec(`${statement};`)
     }
+    for (const statement of tourEditorialBadgesSQLiteStatements) {
+      db.exec(`${statement};`)
+    }
+
+    db.exec('BEGIN IMMEDIATE;')
+    try {
+      const hotlinesTable = db
+        .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'site_settings_additional_hotlines'")
+        .get() as { name?: string } | undefined
+      const isFirstHotlinesStorageCreation = !hotlinesTable?.name
+
+      for (const statement of siteSettingsHotlinesSQLiteStatements) {
+        db.exec(`${statement};`)
+      }
+
+      if (isFirstHotlinesStorageCreation) {
+        const siteSettingsTable = db
+          .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'site_settings'")
+          .get() as { name?: string } | undefined
+        const sitesTable = db
+          .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'sites'")
+          .get() as { name?: string } | undefined
+
+        if (siteSettingsTable?.name && sitesTable?.name) {
+          const wingsGoRows = db
+            .prepare(
+              `SELECT ss.id FROM site_settings ss JOIN sites s ON ss.site_id = s.id WHERE s.code = 'wings-go'`,
+            )
+            .all() as Array<{ id: number }>
+
+          for (const row of wingsGoRows) {
+            const parentId = row.id
+            db.prepare(
+              `INSERT INTO site_settings_additional_hotlines (_order, _parent_id, id, phone_number, label) VALUES (?, ?, ?, ?, ?)`,
+            ).run(1, parentId, `wingsgo-${parentId}-hotline-2`, '0915250101', 'Tư vấn tour')
+            db.prepare(
+              `INSERT INTO site_settings_additional_hotlines (_order, _parent_id, id, phone_number, label) VALUES (?, ?, ?, ?, ?)`,
+            ).run(2, parentId, `wingsgo-${parentId}-hotline-3`, '0915260101', 'Hỗ trợ dịch vụ')
+          }
+        }
+      }
+
+      db.exec('COMMIT;')
+    } catch (error) {
+      db.exec('ROLLBACK;')
+      throw error
+    }
+
     const tourDeparturesTable = db
       .prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?')
       .get('table', 'tour_departures') as { name?: string } | undefined

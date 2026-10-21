@@ -157,12 +157,12 @@ export const preventCurationDelete: CollectionBeforeDeleteHook = async ({
   }
 }
 
-const clearRedisCurationCache = async (siteID?: number | string) => {
-  if (!process.env.REDIS_URL) return
+export const clearRedisCurationCache = async (siteID?: number | string) => {
+  if (!process.env.REDIS_URL || siteID == null) return
   try {
     const redis = getSharedRedisClient()
     await ensureRedisConnected(redis)
-    const pattern = siteID ? `*wingsgo-curation:${siteID}:*` : `*wingsgo-curation:*`
+    const pattern = `*wingsgo-curation:${siteID}:*`
     let cursor = '0'
     do {
       const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100)

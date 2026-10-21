@@ -1,7 +1,8 @@
 'use client'
 
-import { useDocumentInfo, useField, useFormModified } from '@payloadcms/ui'
+import { useDocumentEvents, useDocumentInfo, useField, useFormModified } from '@payloadcms/ui'
 import { useLocale } from '@payloadcms/ui'
+import { useState } from 'react'
 
 import TourDepartureManager from './TourDepartureManager'
 import TourAuthoringReadiness from './TourAuthoringReadiness'
@@ -11,6 +12,8 @@ export { default as TourDepartureManager } from './TourDepartureManager'
 export * from './types'
 
 export default function TourProductAuthoring() {
+  const [departureRevision, setDepartureRevision] = useState(0)
+  const { reportUpdate } = useDocumentEvents()
   const { data } = useDocumentInfo()
   const { code: locale } = useLocale()
   const formModified = useFormModified()
@@ -40,7 +43,14 @@ export default function TourProductAuthoring() {
       {formModified && <p className="tour-authoring-context__warning" role="status">Có thay đổi chưa lưu. Lưu TourProduct trước khi dùng Preview, tạo wrapper hoặc kiểm tra readiness.</p>}
       {slugChanged && <p className="tour-authoring-context__warning" role="alert">Slug đang đổi từ <b>/tour/{savedSlug}</b> thành <b>/tour/{draftSlug}</b>. Wrapper hiện tại {typeof currentWrapperPath === 'string' ? <b>{currentWrapperPath}</b> : 'chưa có'} không tự đổi pathname. Lưu tour, sau đó tạo/gán wrapper đúng đường dẫn.</p>}
     </div>
-    <TourDepartureManager />
-    <TourAuthoringReadiness />
+    <TourDepartureManager onSaved={() => {
+      setDepartureRevision((revision) => revision + 1)
+      reportUpdate({
+        entitySlug: 'tour-departures',
+        operation: 'update',
+        updatedAt: new Date().toISOString(),
+      })
+    }} />
+    <TourAuthoringReadiness departureRevision={departureRevision} />
   </section>
 }

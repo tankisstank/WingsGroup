@@ -14,7 +14,8 @@ import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
 import type { SupportedLocaleCode } from '@/utilities/locales'
 import type { WingsGoCatalogCard } from '@/tours/wingsGoCatalog'
 import { SiteLink } from '@/components/SiteLink'
-import { formatTourDate, formatTourPrice } from '@/tours/utils'
+import { formatTourDate } from '@/tours/utils'
+import { PromotionBadge, PromotionPrice } from '@/tours/PromotionPrice'
 import {
   BadgeCheckIcon,
   CalendarDaysIcon,
@@ -359,7 +360,8 @@ export const HighImpactHero: React.FC<
     props.siteHeroDefaults?.variant ||
     'standard') as keyof typeof heroVariantCopy
   const copy = heroVariantCopy[variant] || heroVariantCopy.standard
-  const [overridePresentation, setOverridePresentation] = React.useState<HeroPresentationKey | null>(null)
+  const [overridePresentation, setOverridePresentation] =
+    React.useState<HeroPresentationKey | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -372,7 +374,8 @@ export const HighImpactHero: React.FC<
   }, [])
 
   const presentation = overridePresentation || resolved.key
-  const Presentation = heroPresentationComponents[presentation] || heroPresentationComponents[resolved.key]
+  const Presentation =
+    heroPresentationComponents[presentation] || heroPresentationComponents[resolved.key]
   const { setHeaderTheme } = useHeaderTheme()
   const isRetailDepartures = variant === 'retail-departures'
   const isPlanner = variant === 'planner'
@@ -386,32 +389,48 @@ export const HighImpactHero: React.FC<
 
   const catalogTours = props.heroFeaturedTours || []
 
-  const displayTours = catalogTours.length > 0
-    ? catalogTours.slice(0, 3).map((tour) => {
-        const departureDate = formatTourDate(tour.nextDeparture?.date, props.resolvedLocale || 'vi')
-        const airline = tour.nextDeparture?.airline
-        const dateMeta = departureDate
-          ? `${departureDate}${airline ? ` · ${airline}` : ''}`
-          : (airline || (isEn ? 'Latest departure' : 'Lịch mở bán mới nhất'))
-        const priceText = tour.price?.kind === 'verified'
-          ? (formatTourPrice(tour.price.value, tour.price.currency) || `${tour.price.value.toLocaleString('vi-VN')} ₫`)
-          : (isEn ? 'Contact us' : 'Liên hệ')
-        const promoBadge = tour.nextDeparture?.promoLabel?.trim() || ''
-        return {
-          badge: promoBadge,
-          dateMeta,
-          href: tour.href || `/tour/${tour.slug}`,
-          id: String(tour.id),
-          image: tour.image,
-          market: tour.market,
-          price: priceText,
-          title: tour.title,
-        }
-      })
-    : []
+  const displayTours =
+    catalogTours.length > 0
+      ? catalogTours.slice(0, 3).map((tour) => {
+          const departureDate = formatTourDate(
+            tour.nextDeparture?.date,
+            props.resolvedLocale || 'vi',
+          )
+          const airline = tour.nextDeparture?.airline
+          const dateMeta = departureDate
+            ? `${departureDate}${airline ? ` · ${airline}` : ''}`
+            : airline || (isEn ? 'Latest departure' : 'Lịch mở bán mới nhất')
+          const priceText =
+            tour.price?.kind === 'verified' ? (
+              <PromotionPrice
+                currency={tour.price.currency}
+                originalPrice={tour.price.originalPrice}
+                price={tour.price.value}
+              />
+            ) : isEn ? (
+              'Contact us'
+            ) : (
+              'Liên hệ'
+            )
+          const promoBadge = tour.nextDeparture?.promoLabel?.trim() || ''
+          return {
+            badge: promoBadge,
+            dateMeta,
+            href: tour.href || `/tour/${tour.slug}`,
+            id: String(tour.id),
+            image: tour.image,
+            market: tour.market,
+            price: priceText,
+            title: tour.title,
+          }
+        })
+      : []
 
   const businessPanel = isRetailDepartures ? (
-    <aside aria-label={isEn ? 'Featured tours' : 'Tour nổi bật'} className="site-hero__commerce-panel">
+    <aside
+      aria-label={isEn ? 'Featured tours' : 'Tour nổi bật'}
+      className="site-hero__commerce-panel"
+    >
       <div className="site-hero__panel-head">
         <div className="site-panel-icon">
           <FlameIcon aria-hidden="true" className="h-5 w-5 text-amber-500" />
@@ -442,21 +461,19 @@ export const HighImpactHero: React.FC<
                     <PlaneIcon className="h-6 w-6 opacity-40" />
                   </div>
                 )}
+                <div className="absolute inset-x-1 top-1 flex justify-start">
+                  <PromotionBadge label={item.badge} />
+                </div>
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  {item.badge ? (
-                    <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
-                      {item.badge}
-                    </span>
-                  ) : null}
                   <h3 className="line-clamp-1 text-base md:text-lg font-bold text-foreground group-hover:text-[var(--site-brand)] transition-colors">
                     {item.title}
                   </h3>
                 </div>
                 <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm text-muted-foreground line-clamp-1">{item.dateMeta}</p>
-                  <strong className="text-base md:text-lg font-bold text-[var(--site-accent)] shrink-0">
+                  <strong className="max-w-full text-base md:text-lg font-bold text-[var(--site-accent)]">
                     {item.price}
                   </strong>
                 </div>
@@ -499,15 +516,17 @@ export const HighImpactHero: React.FC<
         <h2 className="site-hero__planner-title">{plannerCopy.title}</h2>
         <ul className="site-hero__planner-points">
           {plannerCopy.points.map((point, index) => (
-            <li key={point}>
-              {index === 0 ? <strong>{point}</strong> : point}
-            </li>
+            <li key={point}>{index === 0 ? <strong>{point}</strong> : point}</li>
           ))}
         </ul>
       </div>
       <div className="site-hero__planner-form-wrap">
         <h3 className="site-hero__planner-form-title">{plannerCopy.formTitle}</h3>
-        <form action={toSitePath('/plan-your-trip')} className="site-hero__planner-form" method="get">
+        <form
+          action={toSitePath('/plan-your-trip')}
+          className="site-hero__planner-form"
+          method="get"
+        >
           <label className="site-hero__planner-field">
             <span>{plannerCopy.destinationLabel}</span>
             <select
@@ -556,7 +575,11 @@ export const HighImpactHero: React.FC<
           </label>
           <fieldset className="site-hero__planner-styles">
             <legend>{plannerCopy.styleLabel}</legend>
-            <div className="site-hero__planner-style-chips" role="group" aria-label={plannerCopy.styleLabel}>
+            <div
+              className="site-hero__planner-style-chips"
+              role="group"
+              aria-label={plannerCopy.styleLabel}
+            >
               {plannerCopy.styles.map((style, index) => (
                 <label className="site-hero__planner-style-chip" key={style.value}>
                   <input

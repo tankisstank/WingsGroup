@@ -1022,6 +1022,7 @@ async function createSiteSettings(
     registeredOfficeAddress?: string
     supportEmail?: string
     supportPhone?: string
+    additionalHotlines?: Array<{ phoneNumber: string; label?: string }>
     tagline?: string
     travelOfficeAddress?: string
     wingsGroupV3?: Record<string, unknown>
@@ -1067,6 +1068,7 @@ async function createSiteSettings(
       ...(overrides.wingsGroupV3 ? { wingsGroupV3: overrides.wingsGroupV3 } : {}),
       supportEmail: overrides.supportEmail || `hello@${siteSeed.domain.replace('.local', '.vn')}`,
       supportPhone: overrides.supportPhone || '+84 28 0000 0000',
+      ...(overrides.additionalHotlines ? { additionalHotlines: overrides.additionalHotlines } : {}),
       registeredOfficeAddress: overrides.registeredOfficeAddress,
       travelOfficeAddress: overrides.travelOfficeAddress,
       headerNavItems: overrides.headerNavItems || [linkItem('Trang chủ', '/')],
@@ -4106,6 +4108,10 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
     ],
     supportEmail: 'sales@wingsgroup.vn',
     supportPhone: '0912910101',
+    additionalHotlines: [
+      { phoneNumber: '0915250101', label: 'Tư vấn tour' },
+      { phoneNumber: '0915260101', label: 'Hỗ trợ dịch vụ' },
+    ],
     registeredOfficeAddress: WINGSGROUP_LEGAL_IDENTITY.registeredOffice,
     travelOfficeAddress: WINGSGROUP_LEGAL_IDENTITY.travelOffice,
     tagline: siteSeed.summary,

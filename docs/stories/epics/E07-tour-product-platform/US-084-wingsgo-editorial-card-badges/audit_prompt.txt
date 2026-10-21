@@ -1,0 +1,36 @@
+Independent Codex READ ONLY Phase Release Review & Pre-deployment Audit for US-084 (WingsGo Editorial Card Badges), no edits/delegation/env reads.
+
+Review the complete implementation of US-084 in this workspace:
+1. Schema & Validation:
+   - app/src/tours/editorialBadges.ts (kind enum hot|specialized|vip, EDITORIAL_BADGE_PRESETS, validateEditorialBadges, normalizeEditorialBadges)
+   - app/src/collections/TourProducts.ts (editorialBadges array definition, maxRows: 3, validateEditorialBadges, custom EditorialBadgeKindField component)
+   - app/src/components/TourAuthoring/EditorialBadgeKindField.tsx (CMS auto-fill preset on kind select, editable label)
+   - app/src/migrations/20261021_120000_tour_editorial_badges.ts (PostgreSQL migration for staging/production)
+   - app/src/migrations/index.ts (registered in Payload migrations)
+   - app/src/utilities/repairLocalSQLiteSchema.ts (SQLite schema for local development)
+2. View Models & Shared DTO:
+   - app/src/tours/types.ts (TourCardViewModel.editorialBadges, hasHotEditorialBadge)
+   - app/src/tours/wingsGoCatalog.ts (WingsGoCatalogCard, buildCard calling normalizeEditorialBadges, query fallbackLocale protection)
+   - app/src/tours/queries.ts (getToursByMarketRoute normalizing editorialBadges)
+3. Frontend Rendering & CSS:
+   - app/src/app/(frontend)/globals.css (.hot-rainbow-card 2px conic-gradient outer border, animation hotRainbowSpin, prefers-reduced-motion media query)
+   - app/src/tours/WingsGoTourCard.tsx (hot rainbow border, sr-only accessible text, top-left stickers with max-w-[calc(100%-140px)], top-right promo badge separation)
+   - app/src/tours/StructuredPages.tsx (TourMarketPage rendering identical shared DTO, hot-rainbow-card, stickers, promo separation)
+4. Revalidation & Caching:
+   - app/src/collections/Tours/hooks/revalidateTourContent.ts (tenant-scoped cache purge on doc.site and previousDoc.site, zero global redis flush)
+5. Tests:
+   - app/tests/unit/editorialBadges.unit.spec.ts (19 tests)
+   - app/tests/unit/editorialBadgesRevalidation.unit.spec.ts (4 tests)
+   - app/tests/unit/wingsGoCatalog.unit.spec.ts (17 tests)
+   - app/tests/component/editorialBadges.component.spec.tsx (9 tests)
+   - app/tests/int/editorialBadgesIntegration.int.spec.ts (4 tests)
+
+Audit requirements:
+1. Check for any race conditions, edge cases, array length or duplicate kinds.
+2. Check for cache invalidation / stale reads / Redis leakage (verify no flushall).
+3. Check for locale isolation (zero Vietnamese badge leakage on /en routes).
+4. Check multi-site isolation (siteField scoping, no leakage to wing-side or wings-group).
+5. Check visual contract: exact 2px rainbow outer border, no layout shift or dimension expansion, corner stickers top-left, commercial promo top-right, collision avoidance, prefers-reduced-motion support.
+6. Check migration safety for PostgreSQL and SQLite.
+
+Report concrete actionable findings categorized by severity: P1 (Blocker), P2 (High), P3 (Minor), or Clean/Approved.
