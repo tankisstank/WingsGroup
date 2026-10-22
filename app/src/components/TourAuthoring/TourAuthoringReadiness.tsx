@@ -209,7 +209,7 @@ const scrollToElement = (target: string) => {
 }
 
 export default function TourAuthoringReadiness({ departureRevision = 0 }: { departureRevision?: number }) {
-  const { id } = useDocumentInfo()
+  const { data, id } = useDocumentInfo()
   const { code: locale } = useLocale()
   const { reportUpdate } = useDocumentEvents()
   const contextKey = `${id}:${locale}`
@@ -306,10 +306,11 @@ export default function TourAuthoringReadiness({ departureRevision = 0 }: { depa
       if (contextVersion.current !== requestGeneration) return
 
       setReadiness(body as unknown as TourAuthoringReadiness)
-      if (requestId != null && requestId !== 'create') {
+      if (requestId != null && requestId !== 'create' && data?.id != null && String(data.id) === String(requestId)) {
         reportUpdate?.({
+          doc: { ...data, id: data.id },
           entitySlug: 'tour-products',
-          id: requestId,
+          id: data.id,
           operation: 'update',
           updatedAt: new Date().toISOString(),
         })

@@ -45,11 +45,16 @@ export default function TourProductAuthoring() {
     </div>
     <TourDepartureManager onSaved={() => {
       setDepartureRevision((revision) => revision + 1)
-      reportUpdate({
-        entitySlug: 'tour-departures',
-        operation: 'update',
-        updatedAt: new Date().toISOString(),
-      })
+      if (data?.id != null) {
+        // Refresh the owning tour preview, including after a departure is deleted.
+        reportUpdate({
+          doc: { ...data, id: data.id },
+          entitySlug: 'tour-products',
+          id: data.id,
+          operation: 'update',
+          updatedAt: new Date().toISOString(),
+        })
+      }
     }} />
     <TourAuthoringReadiness departureRevision={departureRevision} />
   </section>

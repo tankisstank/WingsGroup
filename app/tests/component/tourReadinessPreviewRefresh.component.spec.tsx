@@ -1,9 +1,10 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 const uiMocks = vi.hoisted(() => ({
-  documentId: 75,
+  documentData: { id: 75, site: 2, title: 'Tour Khám Phá Tokyo - Phú Sĩ' } as Record<string, unknown> | null,
+  documentId: 75 as number | string | null | undefined,
   formModified: false,
   localeCode: 'vi',
   reportUpdate: vi.fn(),
@@ -14,7 +15,7 @@ vi.mock('@payloadcms/ui', () => ({
     mostRecentUpdate: null,
     reportUpdate: uiMocks.reportUpdate,
   }),
-  useDocumentInfo: () => ({ data: {}, id: uiMocks.documentId }),
+  useDocumentInfo: () => ({ data: uiMocks.documentData, id: uiMocks.documentId }),
   useFormModified: () => uiMocks.formModified,
   useLocale: () => ({ code: uiMocks.localeCode }),
 }))
@@ -23,6 +24,7 @@ import TourAuthoringReadiness from '@/components/TourAuthoring/TourAuthoringRead
 
 afterEach(() => {
   cleanup()
+  uiMocks.documentData = { id: 75, site: 2, title: 'Tour Khám Phá Tokyo - Phú Sĩ' }
   uiMocks.documentId = 75
   uiMocks.formModified = false
   uiMocks.localeCode = 'vi'
@@ -75,6 +77,11 @@ describe('TourAuthoringReadiness - Preview Refresh & DocumentEvents', () => {
     await waitFor(() => expect(uiMocks.reportUpdate).toHaveBeenCalledTimes(1))
     expect(uiMocks.reportUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
+        doc: expect.objectContaining({
+          id: 75,
+          site: 2,
+          title: 'Tour Khám Phá Tokyo - Phú Sĩ',
+        }),
         entitySlug: 'tour-products',
         id: 75,
         operation: 'update',
@@ -82,7 +89,12 @@ describe('TourAuthoringReadiness - Preview Refresh & DocumentEvents', () => {
       }),
     )
 
+    // Regression assertions: Relationship/Input.js dereferences mostRecentUpdate.doc.id unconditionally
     const callArg = uiMocks.reportUpdate.mock.calls[0][0]
+    expect(callArg.doc).toBeDefined()
+    expect(callArg.doc.id).toBe(75)
+    expect(callArg.doc.title).toBe('Tour Khám Phá Tokyo - Phú Sĩ')
+    expect(callArg.id).toBe(75)
     expect(Number.isFinite(Date.parse(callArg.updatedAt))).toBe(true)
   })
 
@@ -104,11 +116,24 @@ describe('TourAuthoringReadiness - Preview Refresh & DocumentEvents', () => {
     await waitFor(() => expect(uiMocks.reportUpdate).toHaveBeenCalledTimes(1))
     expect(uiMocks.reportUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
+        doc: expect.objectContaining({
+          id: 75,
+          site: 2,
+          title: 'Tour Khám Phá Tokyo - Phú Sĩ',
+        }),
         entitySlug: 'tour-products',
         id: 75,
         operation: 'update',
+        updatedAt: expect.any(String),
       }),
     )
+
+    const callArg = uiMocks.reportUpdate.mock.calls[0][0]
+    expect(callArg.doc).toBeDefined()
+    expect(callArg.doc.id).toBe(75)
+    expect(callArg.doc.title).toBe('Tour Khám Phá Tokyo - Phú Sĩ')
+    expect(callArg.id).toBe(75)
+    expect(Number.isFinite(Date.parse(callArg.updatedAt))).toBe(true)
   })
 
   it('does NOT call reportUpdate when POST action returns an error status', async () => {
@@ -203,5 +228,76 @@ describe('TourAuthoringReadiness - Preview Refresh & DocumentEvents', () => {
     // 4. Stale completion should drop response and never call reportUpdate
     await new Promise((r) => setTimeout(r, 60))
     expect(uiMocks.reportUpdate).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    { data: null, description: 'null document data' },
+    { data: { site: 2, title: 'No ID Tour' }, description: 'missing data.id' },
+    { data: { id: 76, site: 2, title: 'Mismatched Tour' }, description: 'mismatched data.id (76 vs 75)' },
+  ])('does NOT call reportUpdate when useDocumentInfo data is $description (identity guard)', async ({ data }) => {
+    uiMocks.documentData = data
+    uiMocks.documentId = 75
+    const readiness = makeReadiness()
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === 'POST') {
+        return mockResponse({ ...readiness, wrapper: { id: 99, path: '/tours/sample', status: 'draft' } })
+      }
+      return mockResponse(readiness)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(<TourAuthoringReadiness />)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Tạo wrapper thay thế' })).toBeTruthy())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Tạo wrapper thay thế' }))
+
+    // Wait for POST action completion rendered in UI (#99 replacement wrapper) instead of arbitrary sleep
+    await waitFor(() => expect(screen.getByText('#99')).toBeTruthy())
+    expect(uiMocks.reportUpdate).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    { dataId: 75, description: 'numeric route id 75 with numeric data.id 75', routeId: 75 },
+    { dataId: 75, description: 'string route id "75" with numeric data.id 75', routeId: '75' },
+  ])('emits canonical numeric id on valid identity match ($description)', async ({ routeId, dataId }) => {
+    uiMocks.documentId = routeId
+    uiMocks.documentData = { id: dataId, site: 2, title: 'Tour Khám Phá Tokyo - Phú Sĩ' }
+    const readiness = makeReadiness()
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === 'POST') {
+        return mockResponse({ ...readiness, wrapper: { id: 99, path: '/tours/sample', status: 'draft' } })
+      }
+      return mockResponse(readiness)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(<TourAuthoringReadiness />)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Tạo wrapper thay thế' })).toBeTruthy())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Tạo wrapper thay thế' }))
+
+    await waitFor(() => expect(uiMocks.reportUpdate).toHaveBeenCalledTimes(1))
+    expect(uiMocks.reportUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        doc: expect.objectContaining({
+          id: 75,
+          site: 2,
+          title: 'Tour Khám Phá Tokyo - Phú Sĩ',
+        }),
+        entitySlug: 'tour-products',
+        id: 75,
+        operation: 'update',
+        updatedAt: expect.any(String),
+      }),
+    )
+
+    const callArg = uiMocks.reportUpdate.mock.calls[0][0]
+    expect(callArg.doc).toBeDefined()
+    expect(callArg.doc.id).toBe(75)
+    expect(typeof callArg.doc.id).toBe('number')
+    expect(callArg.doc.title).toBe('Tour Khám Phá Tokyo - Phú Sĩ')
+    expect(callArg.id).toBe(75)
+    expect(typeof callArg.id).toBe('number')
+    expect(Number.isFinite(Date.parse(callArg.updatedAt))).toBe(true)
   })
 })

@@ -71,3 +71,11 @@ Chưa chạy lại toàn bộ integration/E2E repository, authenticated CMS save
 Đã sửa lỗi preview trong CMS không tự cập nhật sau khi sửa giá/ưu đãi của một lịch khởi hành. Mutation `tour-departures` giờ phát Payload document event sau khi lưu/xóa thành công; readiness reload theo `departureRevision`, còn phản hồi stale khi đổi tour/ngôn ngữ bị bỏ qua. Preview của `tour-products` dùng draft mode ngay cả khi TourProduct cha đã publish, để đọc được bản nháp của departure liên quan. Không mở rộng TTL token, không migration và không ghi dữ liệu production.
 
 Component authoring/promotion/preview đạt27/27; preview handoff unit đạt19/19; TypeScript và production build exit0. Chi tiết tại `artifacts/tmp/us083-preview-refresh-20261021/validation.md`. Follow-up này chưa deploy production.
+
+## Sự cố CMS SAVE — 22/10/2026
+
+Đã tái hiện bằng browser đăng nhập trên TourProduct161: lưu lịch311 với live preview bật trả request thành công rồi CMS lỗi `Cannot read properties of undefined (reading 'id')`. Payload Relationship Input đọc `event.doc.id`, trong khi event refresh tùy chỉnh thiếu `doc`. Readiness actions dùng cùng contract lỗi.
+
+Candidate bổ sung document đầy đủ, ID và collection khớp khi refresh preview của tour cha sau lưu/xóa lịch và readiness actions. Giữ stale guards, locale/site scope, quyền truy cập và schema. Đã reload lại CMS, lịch311 vẫn có bản nháp cùng giá20.590.000VND; không publish dữ liệu để chẩn đoán.
+
+Full component293/293 và build/postbuild cuối exit0, BUILD_ID `J8S1JEJCCJN96WuCFCEcW`. Sau khi AGY bổ sung identity boundary cases, root chạy lại2 suite liên quan15/15, TypeScript và lint cuối exit0/0warning. Đóng gói106.34MiB exit0, không public/media hoặc env. Plane đã sync `missingCount:0`. **Hotfix chưa deploy**: review Codex độc lập chưa chạy được do lỗi phiên/API key và model capacity, kể cả sau xác nhận đăng nhập lại. Không nhận các lần gọi review thất bại là đã qua gate. Bằng chứng, phạm vi và rollback tại `docs/reviews/cms-save-crash-20261022/audit.md`; vẫn phải kiểm browser SAVE sau cutover.

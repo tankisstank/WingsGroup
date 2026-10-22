@@ -14,7 +14,7 @@ vi.mock('@payloadcms/ui', () => ({
   useAuth: () => ({ user: { role: 'super-admin', sites: [1, 2] } }),
   useDocumentEvents: () => ({ reportUpdate: uiMocks.reportUpdate }),
   useDocumentInfo: () => ({
-    data: { id: 41, site: 2, slug: 'tour-seoul' },
+    data: { id: 41, site: 2, slug: 'tour-seoul', title: 'Hành trình Seoul mùa lá đỏ' },
     id: 41,
   }),
   useField: () => ({ errorMessage: null, setValue: uiMocks.setValue, showError: false, value: 'tour-seoul' }),
@@ -113,12 +113,29 @@ describe('TourProductAuthoring preview refresh event contracts (US083)', () => {
 
     await waitFor(() => {
       expect(uiMocks.reportUpdate).toHaveBeenCalledTimes(1)
-      expect(uiMocks.reportUpdate).toHaveBeenCalledWith({
-        entitySlug: 'tour-departures',
-        operation: 'update',
-        updatedAt: expect.any(String),
-      })
+      expect(uiMocks.reportUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          doc: expect.objectContaining({
+            id: 41,
+            site: 2,
+            slug: 'tour-seoul',
+            title: 'Hành trình Seoul mùa lá đỏ',
+          }),
+          entitySlug: 'tour-products',
+          id: 41,
+          operation: 'update',
+          updatedAt: expect.any(String),
+        }),
+      )
     })
+
+    // Regression guard: Relationship/Input.js dereferences mostRecentUpdate.doc.id unconditionally
+    const firstCall = uiMocks.reportUpdate.mock.calls[0][0]
+    expect(firstCall.doc).toBeDefined()
+    expect(firstCall.doc.id).toBe(41)
+    expect(firstCall.doc.title).toBe('Hành trình Seoul mùa lá đỏ')
+    expect(firstCall.id).toBe(41)
+    expect(Number.isFinite(Date.parse(firstCall.updatedAt))).toBe(true)
 
     expect(screen.getByTestId('readiness-mock').getAttribute('data-revision')).toBe('1')
 
@@ -131,12 +148,28 @@ describe('TourProductAuthoring preview refresh event contracts (US083)', () => {
 
     await waitFor(() => {
       expect(uiMocks.reportUpdate).toHaveBeenCalledTimes(2)
-      expect(uiMocks.reportUpdate).toHaveBeenLastCalledWith({
-        entitySlug: 'tour-departures',
-        operation: 'update',
-        updatedAt: expect.any(String),
-      })
+      expect(uiMocks.reportUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          doc: expect.objectContaining({
+            id: 41,
+            site: 2,
+            slug: 'tour-seoul',
+            title: 'Hành trình Seoul mùa lá đỏ',
+          }),
+          entitySlug: 'tour-products',
+          id: 41,
+          operation: 'update',
+          updatedAt: expect.any(String),
+        }),
+      )
     })
+
+    const secondCall = uiMocks.reportUpdate.mock.calls[1][0]
+    expect(secondCall.doc).toBeDefined()
+    expect(secondCall.doc.id).toBe(41)
+    expect(secondCall.doc.title).toBe('Hành trình Seoul mùa lá đỏ')
+    expect(secondCall.id).toBe(41)
+    expect(Number.isFinite(Date.parse(secondCall.updatedAt))).toBe(true)
 
     expect(screen.getByTestId('readiness-mock').getAttribute('data-revision')).toBe('2')
   })
@@ -202,12 +235,28 @@ describe('TourProductAuthoring preview refresh event contracts (US083)', () => {
 
     await waitFor(() => {
       expect(uiMocks.reportUpdate).toHaveBeenCalledTimes(1)
-      expect(uiMocks.reportUpdate).toHaveBeenCalledWith({
-        entitySlug: 'tour-departures',
-        operation: 'update',
-        updatedAt: expect.any(String),
-      })
+      expect(uiMocks.reportUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          doc: expect.objectContaining({
+            id: 41,
+            site: 2,
+            slug: 'tour-seoul',
+            title: 'Hành trình Seoul mùa lá đỏ',
+          }),
+          entitySlug: 'tour-products',
+          id: 41,
+          operation: 'update',
+          updatedAt: expect.any(String),
+        }),
+      )
     })
+
+    const deleteCall = uiMocks.reportUpdate.mock.calls[0][0]
+    expect(deleteCall.doc).toBeDefined()
+    expect(deleteCall.doc.id).toBe(41)
+    expect(deleteCall.doc.title).toBe('Hành trình Seoul mùa lá đỏ')
+    expect(deleteCall.id).toBe(41)
+    expect(Number.isFinite(Date.parse(deleteCall.updatedAt))).toBe(true)
 
     expect(screen.getByTestId('readiness-mock').getAttribute('data-revision')).toBe('1')
   })
