@@ -8,9 +8,15 @@ const uiMocks = vi.hoisted(() => ({
   formModified: false,
   localeCode: 'vi',
   reportUpdate: vi.fn(),
+  setPreviewURL: vi.fn(),
 }))
 
 vi.mock('@payloadcms/ui', () => ({
+  useLivePreviewContext: () => ({
+    isLivePreviewing: true,
+    setURL: uiMocks.setPreviewURL,
+    url: `/next/preview?collection=tour-products&id=75&path=%2Ftour%2Fsample&locale=${uiMocks.localeCode}`,
+  }),
   useDocumentEvents: () => ({
     mostRecentUpdate: null,
     reportUpdate: uiMocks.reportUpdate,
@@ -29,6 +35,7 @@ afterEach(() => {
   uiMocks.formModified = false
   uiMocks.localeCode = 'vi'
   uiMocks.reportUpdate.mockReset()
+  uiMocks.setPreviewURL.mockReset()
   vi.unstubAllGlobals()
 })
 
@@ -91,6 +98,7 @@ describe('TourAuthoringReadiness - Preview Refresh & DocumentEvents', () => {
 
     // Regression assertions: Relationship/Input.js dereferences mostRecentUpdate.doc.id unconditionally
     const callArg = uiMocks.reportUpdate.mock.calls[0][0]
+    expect(new URL(uiMocks.setPreviewURL.mock.calls[0][0]).searchParams.has('refresh')).toBe(true)
     expect(callArg.doc).toBeDefined()
     expect(callArg.doc.id).toBe(75)
     expect(callArg.doc.title).toBe('Tour Khám Phá Tokyo - Phú Sĩ')

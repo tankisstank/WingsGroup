@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 const uiMocks = vi.hoisted(() => ({ setValue: vi.fn() }))
 
 vi.mock('@payloadcms/ui', () => ({
+  useLivePreviewContext: () => ({ isLivePreviewing: false }),
   FieldError: () => null,
   FieldLabel: ({ label }: { label?: string }) => React.createElement('label', null, label),
   useAuth: () => ({ user: { role: 'super-admin', sites: [1, 2] } }),

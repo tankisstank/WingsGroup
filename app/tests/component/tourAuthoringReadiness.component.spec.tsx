@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 const uiState = vi.hoisted(() => ({ formModified: false }))
 
 vi.mock('@payloadcms/ui', () => ({
+  useLivePreviewContext: () => ({ isLivePreviewing: false }),
   useDocumentEvents: () => ({ reportUpdate: vi.fn() }),
   useDocumentInfo: () => ({ data: {}, id: 75 }),
   useFormModified: () => uiState.formModified,

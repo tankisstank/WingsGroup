@@ -4,6 +4,7 @@ import { useDocumentEvents, useDocumentInfo, useFormModified, useLocale } from '
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { TourAuthoringAction, TourAuthoringIssue, TourAuthoringReadiness, TourAuthoringWrapper } from './types'
+import { useTourPreviewRefresh } from './useTourPreviewRefresh'
 
 const copyByLocale = {
   en: {
@@ -211,6 +212,7 @@ const scrollToElement = (target: string) => {
 export default function TourAuthoringReadiness({ departureRevision = 0 }: { departureRevision?: number }) {
   const { data, id } = useDocumentInfo()
   const { code: locale } = useLocale()
+  const refreshPreview = useTourPreviewRefresh(data?.id, locale)
   const { reportUpdate } = useDocumentEvents()
   const contextKey = `${id}:${locale}`
   const currentContext = useRef(contextKey)
@@ -314,6 +316,7 @@ export default function TourAuthoringReadiness({ departureRevision = 0 }: { depa
           operation: 'update',
           updatedAt: new Date().toISOString(),
         })
+        refreshPreview()
       }
     } catch {
       if (contextVersion.current === requestGeneration) {

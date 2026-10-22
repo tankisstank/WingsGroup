@@ -38,12 +38,20 @@ describe('preview handoff initializer', () => {
     expect(html).not.toContain('/forged')
 
     const requestSubmitCalls: HTMLFormElement[] = []
+    const queuedTimeoutTasks: Array<() => void> = []
+
     const dom = new JSDOM(html, {
       runScripts: 'dangerously',
       beforeParse(window: Window & typeof globalThis) {
         window.HTMLFormElement.prototype.requestSubmit = function (this: HTMLFormElement) {
           requestSubmitCalls.push(this)
         }
+        window.setTimeout = vi.fn((handler: TimerHandler, timeout?: number) => {
+          if (typeof handler === 'function') {
+            queuedTimeoutTasks.push(handler as () => void)
+          }
+          return 1
+        }) as unknown as typeof window.setTimeout
       },
     })
 
@@ -61,17 +69,26 @@ describe('preview handoff initializer', () => {
     expect(hiddenTokenInput).not.toBeNull()
     expect(hiddenTokenInput?.value).toBeTruthy()
 
-    // Verify requestSubmit is NOT called early before window load event
+    // 1. Verify requestSubmit is NOT called early before window load event
+    expect(requestSubmitCalls).toHaveLength(0)
+    expect(queuedTimeoutTasks).toHaveLength(0)
+
+    // 2. Dispatch window load event: queues setTimeout(..., 0), but does NOT submit immediately inside load
+    dom.window.dispatchEvent(new dom.window.Event('load'))
+    expect(dom.window.setTimeout).toHaveBeenCalledTimes(1)
+    expect(dom.window.setTimeout).toHaveBeenCalledWith(expect.any(Function), 0)
+    expect(queuedTimeoutTasks).toHaveLength(1)
+    expect(requestSubmitCalls).toHaveLength(0) // Crucial invariant: NOT submitted synchronously during load/parser
+
+    // 3. Verify { once: true } ensures subsequent load events do not queue duplicate tasks
+    dom.window.dispatchEvent(new dom.window.Event('load'))
+    expect(queuedTimeoutTasks).toHaveLength(1)
     expect(requestSubmitCalls).toHaveLength(0)
 
-    // Verify requestSubmit is called upon window load on the correct form
-    dom.window.dispatchEvent(new dom.window.Event('load'))
+    // 4. Execute the queued task in the next event loop cycle: now submits the exact form
+    queuedTimeoutTasks[0]()
     expect(requestSubmitCalls).toHaveLength(1)
     expect(requestSubmitCalls[0]).toBe(form)
-
-    // Verify { once: true } ensures subsequent load events do not trigger duplicate submits
-    dom.window.dispatchEvent(new dom.window.Event('load'))
-    expect(requestSubmitCalls).toHaveLength(1)
   })
 
   it('keeps TourProduct preview in draft mode when the parent tour is published', async () => {

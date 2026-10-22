@@ -6,6 +6,7 @@ import { useState } from 'react'
 
 import TourDepartureManager from './TourDepartureManager'
 import TourAuthoringReadiness from './TourAuthoringReadiness'
+import { useTourPreviewRefresh } from './useTourPreviewRefresh'
 import { tourAuthoringRelationID, tourAuthoringSiteCode } from '@/utilities/tourAuthoring'
 
 export { default as TourDepartureManager } from './TourDepartureManager'
@@ -16,6 +17,7 @@ export default function TourProductAuthoring() {
   const { reportUpdate } = useDocumentEvents()
   const { data } = useDocumentInfo()
   const { code: locale } = useLocale()
+  const refreshPreview = useTourPreviewRefresh(data?.id, locale)
   const formModified = useFormModified()
   const { value: draftSlug } = useField<string>({ path: 'slug' })
   const site = data?.site as { code?: string; name?: string; id?: number | string } | number | string | undefined
@@ -54,6 +56,7 @@ export default function TourProductAuthoring() {
           operation: 'update',
           updatedAt: new Date().toISOString(),
         })
+        refreshPreview()
       }
     }} />
     <TourAuthoringReadiness departureRevision={departureRevision} />

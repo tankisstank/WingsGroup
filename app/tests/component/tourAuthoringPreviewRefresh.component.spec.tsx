@@ -5,10 +5,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const uiMocks = vi.hoisted(() => ({
   localeCode: 'vi',
   reportUpdate: vi.fn(),
+  setPreviewURL: vi.fn(),
   setValue: vi.fn(),
 }))
 
 vi.mock('@payloadcms/ui', () => ({
+  useLivePreviewContext: () => ({
+    isLivePreviewing: true,
+    setURL: uiMocks.setPreviewURL,
+    url: `/next/preview?collection=tour-products&id=41&path=%2Ftour%2Ftour-seoul&locale=${uiMocks.localeCode}`,
+  }),
   FieldError: () => null,
   FieldLabel: ({ label }: { label?: string }) => React.createElement('label', null, label),
   useAuth: () => ({ user: { role: 'super-admin', sites: [1, 2] } }),
@@ -42,6 +48,7 @@ describe('TourProductAuthoring preview refresh event contracts (US083)', () => {
   beforeEach(() => {
     uiMocks.localeCode = 'vi'
     uiMocks.reportUpdate.mockReset()
+    uiMocks.setPreviewURL.mockReset()
     uiMocks.setValue.mockReset()
     window.confirm = vi.fn().mockReturnValue(true)
   })
@@ -131,6 +138,7 @@ describe('TourProductAuthoring preview refresh event contracts (US083)', () => {
 
     // Regression guard: Relationship/Input.js dereferences mostRecentUpdate.doc.id unconditionally
     const firstCall = uiMocks.reportUpdate.mock.calls[0][0]
+    expect(new URL(uiMocks.setPreviewURL.mock.calls[0][0]).searchParams.has('refresh')).toBe(true)
     expect(firstCall.doc).toBeDefined()
     expect(firstCall.doc.id).toBe(41)
     expect(firstCall.doc.title).toBe('Hành trình Seoul mùa lá đỏ')

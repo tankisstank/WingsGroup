@@ -86,7 +86,9 @@ const handoffForm = (action: string, handoff: string) => {
 </form>
 <script>
   window.addEventListener('load', () => {
-    document.getElementById('preview-handoff').requestSubmit()
+    window.setTimeout(() => {
+      document.getElementById('preview-handoff').requestSubmit()
+    }, 0)
   }, { once: true })
 </script>
 </html>`,
