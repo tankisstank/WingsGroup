@@ -68,6 +68,23 @@ describe('production preview handoff', () => {
     await expect(getAuthorizedPreviewHandoff('pages')).resolves.toBeNull()
   })
 
+  it('ignores a legacy unpartitioned grant when the new grant is absent', async () => {
+    vi.stubEnv('PREVIEW_HANDOFF_SECRET', 'unit-handoff-secret')
+    const token = await mintPreviewHandoff({
+      collection: 'pages',
+      documentID: '308',
+      locale: 'vi',
+      path: '/tour/valid',
+      siteCode: 'wings-go',
+    })
+    mocks.headers.mockResolvedValue(new Headers({
+      cookie: `__wingstravel_preview_handoff=${token}`,
+      'x-public-path': '/tour/valid',
+    }))
+
+    await expect(getAuthorizedPreviewHandoff()).resolves.toBeNull()
+  })
+
   it('binds published mode and rejects encoded traversal in paths', async () => {
     vi.stubEnv('PREVIEW_HANDOFF_SECRET', 'unit-handoff-secret')
     const token = await mintPreviewHandoff({

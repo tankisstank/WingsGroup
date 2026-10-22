@@ -11,7 +11,8 @@ import {
 import { hasValidTrustedSiteContext } from './siteDomains'
 import { getProductionPreviewOrigin, getProductionPreviewSiteCode } from './previewOrigin'
 
-export const PREVIEW_HANDOFF_COOKIE = '__wingstravel_preview_handoff'
+// A new name prevents legacy unpartitioned grants shadowing iframe grants.
+export const PREVIEW_HANDOFF_COOKIE = '__wingstravel_preview_handoff_v2'
 export const PREVIEW_HANDOFF_TTL_SECONDS = 60
 
 export type PreviewCollection = 'pages' | 'posts' | 'tour-campaigns' | 'tour-products'

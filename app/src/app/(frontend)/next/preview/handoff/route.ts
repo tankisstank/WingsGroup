@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { redirect } from 'next/navigation'
 
 import { PREVIEW_HANDOFF_COOKIE, verifyPreviewHandoff } from '@/utilities/previewHandoff'
+import { partitionDraftModeCookie } from '@/utilities/previewCookies'
 import { getCurrentSite } from '@/utilities/siteContext'
 import { defaultSiteCode, siteCodeToAliasMap } from '@/utilities/sitePaths'
 import { prefixCanonicalPathWithLocale } from '@/utilities/siteURLs'
@@ -21,14 +22,15 @@ export async function POST(req: NextRequest): Promise<Response> {
   } else {
     draft.disable()
   }
-  ;(await cookies()).set({
+  const cookieStore = await cookies()
+  partitionDraftModeCookie(cookieStore, handoff.mode === 'draft')
+  cookieStore.set({
     httpOnly: true,
-    maxAge: 5 * 60,
+    maxAge: Math.max(0, handoff.exp - Math.floor(Date.now() / 1000)),
     name: PREVIEW_HANDOFF_COOKIE,
+    partitioned: process.env.NODE_ENV === 'production',
     path: '/',
-    // The CMS and tenant are different sites in production. Lax cookies are
-    // not sent by the cross-site iframe, so the short-lived grant must opt in
-    // to third-party iframe delivery. Local aliases stay first-party.
+    // Partitioned storage keeps preview working with third-party cookies blocked.
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     secure: process.env.NODE_ENV === 'production',
     value: token as string,
