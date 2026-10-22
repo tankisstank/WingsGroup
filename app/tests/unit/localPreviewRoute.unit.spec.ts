@@ -37,14 +37,14 @@ describe('preview handoff initializer', () => {
     expect(html).not.toContain('PREVIEW_SECRET')
     expect(html).not.toContain('/forged')
 
-    const requestSubmitCalls: HTMLFormElement[] = []
+    const submitCalls: HTMLFormElement[] = []
     const queuedTimeoutTasks: Array<() => void> = []
 
     const dom = new JSDOM(html, {
       runScripts: 'dangerously',
       beforeParse(window: Window & typeof globalThis) {
-        window.HTMLFormElement.prototype.requestSubmit = function (this: HTMLFormElement) {
-          requestSubmitCalls.push(this)
+        window.HTMLFormElement.prototype.submit = function (this: HTMLFormElement) {
+          submitCalls.push(this)
         }
         window.setTimeout = vi.fn((handler: TimerHandler, timeout?: number) => {
           if (typeof handler === 'function') {
@@ -69,26 +69,20 @@ describe('preview handoff initializer', () => {
     expect(hiddenTokenInput).not.toBeNull()
     expect(hiddenTokenInput?.value).toBeTruthy()
 
-    // 1. Verify requestSubmit is NOT called early before window load event
-    expect(requestSubmitCalls).toHaveLength(0)
-    expect(queuedTimeoutTasks).toHaveLength(0)
-
-    // 2. Dispatch window load event: queues setTimeout(..., 0), but does NOT submit immediately inside load
-    dom.window.dispatchEvent(new dom.window.Event('load'))
+    // 1. Top-level inline script queues setTimeout(..., 0) immediately upon parsing the form
     expect(dom.window.setTimeout).toHaveBeenCalledTimes(1)
     expect(dom.window.setTimeout).toHaveBeenCalledWith(expect.any(Function), 0)
     expect(queuedTimeoutTasks).toHaveLength(1)
-    expect(requestSubmitCalls).toHaveLength(0) // Crucial invariant: NOT submitted synchronously during load/parser
 
-    // 3. Verify { once: true } ensures subsequent load events do not queue duplicate tasks
-    dom.window.dispatchEvent(new dom.window.Event('load'))
-    expect(queuedTimeoutTasks).toHaveLength(1)
-    expect(requestSubmitCalls).toHaveLength(0)
+    // 2. Form state is marked as 'scheduled' prior to timer execution, and no synchronous submit occurred
+    expect(form?.dataset.handoffState).toBe('scheduled')
+    expect(submitCalls).toHaveLength(0)
 
-    // 4. Execute the queued task in the next event loop cycle: now submits the exact form
+    // 3. Executing the queued macro task updates handoffState to 'submitted' and calls exact form.submit()
     queuedTimeoutTasks[0]()
-    expect(requestSubmitCalls).toHaveLength(1)
-    expect(requestSubmitCalls[0]).toBe(form)
+    expect(form?.dataset.handoffState).toBe('submitted')
+    expect(submitCalls).toHaveLength(1)
+    expect(submitCalls[0]).toBe(form)
   })
 
   it('keeps TourProduct preview in draft mode when the parent tour is published', async () => {

@@ -85,11 +85,14 @@ const handoffForm = (action: string, handoff: string) => {
   <button type="submit">Mở bản xem trước</button>
 </form>
 <script>
-  window.addEventListener('load', () => {
+  const form = document.getElementById('preview-handoff')
+  if (form) {
+    form.dataset.handoffState = 'scheduled'
     window.setTimeout(() => {
-      document.getElementById('preview-handoff').requestSubmit()
+      form.dataset.handoffState = 'submitted'
+      form.submit()
     }, 0)
-  }, { once: true })
+  }
 </script>
 </html>`,
     {
