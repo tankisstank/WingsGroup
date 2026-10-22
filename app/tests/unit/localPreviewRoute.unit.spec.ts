@@ -1,5 +1,9 @@
+import { createRequire } from 'node:module'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
+
+const require = createRequire(import.meta.url)
+const { JSDOM } = require('jsdom')
 
 const mocks = vi.hoisted(() => ({ auth: vi.fn(), findByID: vi.fn(), getPayload: vi.fn() }))
 vi.mock('@payload-config', () => ({ default: {} }))
@@ -27,13 +31,47 @@ describe('preview handoff initializer', () => {
     const response = await GET(new NextRequest('https://wingsgroup.vn/next/preview?collection=pages&id=308&path=%2Fforged'))
     const html = await response.text()
     expect(response.status).toBe(200)
-    expect(html).toContain('action="https://wingsgo.vn/next/preview/handoff"')
     expect(response.headers.get('Content-Security-Policy')).toBe("form-action 'self' https://wingsgo.vn")
     expect(response.headers.get('Referrer-Policy')).toBe('strict-origin-when-cross-origin')
-    expect(html).toContain('name="handoff"')
     expect(html).not.toContain('localhost')
     expect(html).not.toContain('PREVIEW_SECRET')
     expect(html).not.toContain('/forged')
+
+    const requestSubmitCalls: HTMLFormElement[] = []
+    const dom = new JSDOM(html, {
+      runScripts: 'dangerously',
+      beforeParse(window: Window & typeof globalThis) {
+        window.HTMLFormElement.prototype.requestSubmit = function (this: HTMLFormElement) {
+          requestSubmitCalls.push(this)
+        }
+      },
+    })
+
+    const form = dom.window.document.getElementById('preview-handoff') as HTMLFormElement | null
+    expect(form).not.toBeNull()
+    expect(form?.getAttribute('action')).toBe('https://wingsgo.vn/next/preview/handoff')
+    expect(form?.getAttribute('action')).not.toContain('?')
+    expect(form?.getAttribute('method')?.toLowerCase()).toBe('post')
+
+    const fallbackButton = form?.querySelector('button[type="submit"]')
+    expect(fallbackButton).not.toBeNull()
+    expect(fallbackButton?.textContent?.trim()).toBe('Mở bản xem trước')
+
+    const hiddenTokenInput = form?.querySelector('input[type="hidden"][name="handoff"]') as HTMLInputElement | null
+    expect(hiddenTokenInput).not.toBeNull()
+    expect(hiddenTokenInput?.value).toBeTruthy()
+
+    // Verify requestSubmit is NOT called early before window load event
+    expect(requestSubmitCalls).toHaveLength(0)
+
+    // Verify requestSubmit is called upon window load on the correct form
+    dom.window.dispatchEvent(new dom.window.Event('load'))
+    expect(requestSubmitCalls).toHaveLength(1)
+    expect(requestSubmitCalls[0]).toBe(form)
+
+    // Verify { once: true } ensures subsequent load events do not trigger duplicate submits
+    dom.window.dispatchEvent(new dom.window.Event('load'))
+    expect(requestSubmitCalls).toHaveLength(1)
   })
 
   it('keeps TourProduct preview in draft mode when the parent tour is published', async () => {

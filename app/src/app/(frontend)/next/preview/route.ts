@@ -75,7 +75,21 @@ const handoffForm = (action: string, handoff: string) => {
   const formActionPolicy = `form-action 'self'${actionOrigin ? ` ${actionOrigin}` : ''}`
 
   return new Response(
-    `<!doctype html><meta name="referrer" content="origin"><form method="post" action="${escapeHTMLAttribute(action)}"><input type="hidden" name="handoff" value="${escapeHTMLAttribute(handoff)}"></form><script>document.forms[0].submit()</script>`,
+    `<!doctype html>
+<html lang="vi">
+<meta name="referrer" content="origin">
+<title>Mở bản xem trước</title>
+<p>Đang mở bản xem trước. Nếu chưa chuyển trang, hãy nhấn nút bên dưới.</p>
+<form id="preview-handoff" method="post" action="${escapeHTMLAttribute(action)}">
+  <input type="hidden" name="handoff" value="${escapeHTMLAttribute(handoff)}">
+  <button type="submit">Mở bản xem trước</button>
+</form>
+<script>
+  window.addEventListener('load', () => {
+    document.getElementById('preview-handoff').requestSubmit()
+  }, { once: true })
+</script>
+</html>`,
     {
       headers: {
         'Cache-Control': 'no-store',
