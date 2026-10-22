@@ -1,0 +1,121 @@
+{
+  "cleanupVerified": true,
+  "dryRun": true,
+  "executedAt": "2026-10-22T10:41:27.581Z",
+  "ok": true,
+  "ownedIDs": {
+    "departureID": null,
+    "productID": null,
+    "siteID": 2,
+    "slug": "cms-qa-20261022-proof1741",
+    "wrapperID": null
+  },
+  "phases": [
+    {
+      "phase": "auth",
+      "startedAt": "2026-10-22T10:41:27.582Z",
+      "status": "success",
+      "finishedAt": "2026-10-22T10:41:28.116Z",
+      "durationMs": 534,
+      "details": {
+        "adminUserId": 1,
+        "authenticated": true
+      }
+    },
+    {
+      "phase": "preflight",
+      "startedAt": "2026-10-22T10:41:28.116Z",
+      "status": "success",
+      "finishedAt": "2026-10-22T10:41:28.774Z",
+      "durationMs": 658,
+      "details": {
+        "adminUserId": 1,
+        "cmsBaseUrl": "https://wingsgroup.vn",
+        "heroMediaId": 1375,
+        "publicBaseUrl": "https://wingsgo.vn",
+        "siteCode": "wings-go",
+        "siteId": 2,
+        "slug": "cms-qa-20261022-proof1741",
+        "tourHubId": 208,
+        "ownerMarker": "[proof:59515d43-5c4b-44ca-9fb5-c5cf9388436b]"
+      }
+    }
+  ],
+  "plan": [
+    {
+      "action": "AUTH_LOGIN",
+      "description": "Authenticate as superadmin using ADMIN_EMAIL and ADMIN_PASSWORD (never logged) to obtain token",
+      "endpoint": "https://wingsgroup.vn/api/users/login",
+      "method": "POST",
+      "order": 1,
+      "readOnly": true
+    },
+    {
+      "action": "PREFLIGHT_DISCOVERY",
+      "description": "Verify WingsGo site (id 2), unauth-verified public media, and /tour hub page via CMS HTTP APIs",
+      "endpoint": "https://wingsgroup.vn/api/sites, https://wingsgroup.vn/api/media, https://wingsgroup.vn/api/pages",
+      "method": "GET",
+      "order": 2,
+      "readOnly": true
+    },
+    {
+      "action": "CREATE_FIXTURE_TOUR",
+      "description": "Create draft tour product with slug cms-qa-20261022-proof1741, WingsGo site 2, marker \"QA ONLY / KHÔNG ĐẶT TOUR\", and media id 1375",
+      "endpoint": "https://wingsgroup.vn/api/tour-products?locale=vi&draft=true",
+      "method": "POST",
+      "order": 3,
+      "readOnly": false
+    },
+    {
+      "action": "EDIT_TOUR_AND_CREATE_DEPARTURE",
+      "description": "Patch tour price and create draft future departure with verified price/availability window and marker",
+      "endpoint": "https://wingsgroup.vn/api/tour-products/:id?locale=vi&draft=true, https://wingsgroup.vn/api/tour-departures?locale=vi&draft=true",
+      "method": "PATCH, POST",
+      "order": 4,
+      "readOnly": false
+    },
+    {
+      "action": "PROVISION_WRAPPER_PAGE",
+      "description": "Call authoring provision route to create wrapper page at /tour/cms-qa-20261022-proof1741 under tour hub",
+      "endpoint": "https://wingsgroup.vn/api/tour-authoring/:id",
+      "method": "POST",
+      "order": 5,
+      "readOnly": false
+    },
+    {
+      "action": "PUBLISH_LIFECYCLE",
+      "description": "Call authoring publish route to publish product, departure, and wrapper page with cache invalidation",
+      "endpoint": "https://wingsgroup.vn/api/tour-authoring/:id",
+      "method": "POST",
+      "order": 6,
+      "readOnly": false
+    },
+    {
+      "action": "PUBLIC_READ_EVIDENCE",
+      "description": "Fetch public website https://wingsgo.vn/tour/cms-qa-20261022-proof1741 with no-cache, verify HTTP 200 and \"QA ONLY / KHÔNG ĐẶT TOUR\"",
+      "endpoint": "https://wingsgo.vn/tour/cms-qa-20261022-proof1741",
+      "method": "GET",
+      "order": 7,
+      "readOnly": true
+    },
+    {
+      "action": "FINALLY_CLEANUP_AND_VERIFY",
+      "description": "Delete owned departure, wrapper, and product via CMS DELETE APIs; verify HTTP 404 on https://wingsgo.vn/tour/cms-qa-20261022-proof1741",
+      "endpoint": "https://wingsgroup.vn/api/* (DELETE), https://wingsgo.vn/tour/cms-qa-20261022-proof1741 (GET 404)",
+      "method": "DELETE, GET",
+      "order": 8,
+      "readOnly": false
+    }
+  ],
+  "preflight": {
+    "adminUserId": 1,
+    "cmsBaseUrl": "https://wingsgroup.vn",
+    "heroMediaId": 1375,
+    "publicBaseUrl": "https://wingsgo.vn",
+    "siteCode": "wings-go",
+    "siteId": 2,
+    "slug": "cms-qa-20261022-proof1741",
+    "tourHubId": 208,
+    "ownerMarker": "[proof:59515d43-5c4b-44ca-9fb5-c5cf9388436b]"
+  }
+}

@@ -1,0 +1,6 @@
+ Container wingstravel-app-1 Recreate 
+ Container wingstravel-app-1 Recreated 
+ Container wingstravel-app-1 Starting 
+ Container wingstravel-app-1 Started 
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":16,"requestId":"2279da9f-c950-4cee-b23f-d861cafb8614","status":"ready","timestamp":"2026-10-22T11:25:19.038Z"}{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":208,"requestId":"2640c1b0-8624-4227-ab4a-84ac4cb8e563","status":"ready","timestamp":"2026-10-22T11:25:22.391Z"}sha256:cde12c8cbe430dfd3d17a3b4ce5bb48dedfd2d326e25f95a07847d09e451fa33 2026-10-22T11:25:19.621546799Z 0
+Cutover completed: 2026-10-22T11:25:22Z

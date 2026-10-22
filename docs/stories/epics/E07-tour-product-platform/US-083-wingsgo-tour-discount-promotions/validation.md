@@ -83,3 +83,32 @@ Full component293/293 và build/postbuild cuối exit0, BUILD_ID `J8S1JEJCCJN96W
 **Đã phát hành** `release-b63181ce14db` lúc2026-10-22T08:59:21Z (15:59:21+07), running image `sha256:0b695486ddf16fad24fedec0a65a7ae72d7620bf3f5f2d140db2f14e573ea338`, BUILD_ID khớp. Backup mã hóa4748214bytes/full archive decode đạt; mọi migration đã applied, không chạy schema migration. Chỉ recreate app, không restart DB/Redis hoặc flush cache; rollback pin image trước `cc2a212cedf0...`. Candidate ARM64 direct libsql memory CRUD/sharp90bytes đạt. Bằng chứng, lệnh và giới hạn tại `docs/reviews/cms-save-crash-20261022/audit.md`.
 
 Browser đăng nhập production161: reload asset mới, live preview bật, lưu cùng giá trị lịch311 → thông báo “Đã lưu bản nháp lịch khởi hành”, không crash, không lỗi console mới; giá20.590.000VND và4 lịch còn nguyên. Preview cửa sổ riêng render đúng bản nháp. **Preview nhúng vẫn trắng**, WingsGo trả `X-Frame-Options:SAMEORIGIN`; chưa thay framing policy và không đánh dấu iframe rendering/refresh là browser-passed. Không tạo/xóa/publish bản ghi để thử; chỉ tạo same-content draft versions. Harness trace308 ghi outcome partial cho giới hạn preview. Plane đã đồng bộ US-083/WingsGo/E07 với `patchedCount:1`, `missingCount:0`.
+
+## Production CMS SAVE và kiểm thử dữ liệu mới — 22/10/2026
+
+Release đang chạy `release-0701404`, source `0701404b550f65447fb5b21692c7ec44fa6f1bb5`,
+cutover2026-10-22T11:44:18Z, image `sha256:b2625ab337b68f47029d9310e616efcc1ba9cd8680f5c8c5286eeb98b44f5458`,
+BUILD_ID `Q-SeLifnoALhOdnPP-IwB`. Bao gồm bản sửa SAVE b63181c và tìm kiếm58633ae.
+Đã có review Codex độc lập, backup mã hóa/full decode,52migration applied/native ARM64/
+readiness/rollback. Không migration mới, không restart DB/Redis hoặc flush cache toàn hệ thống.
+
+Theo yêu cầu người dùng, chạy thật HTTP CREATE/EDIT/provision/PUBLISH/public-read/DELETE
+trên production với fixture riêng, đánh dấu QA ONLY / KHÔNG ĐẶT TOUR. Năm lượt tạo
+TourProduct165..169, departure336..340, wrapper358..362; tất cả publish committed và public
+hiển thị đúng QA marker, cuối cùng cleanup API/public404. Lượt cuối JSON `ok:true`,
+`cleanupVerified:true`; wrapper SSH có lỗi CR-only sau khi runner hoàn thành, ghi rõ trong audit.
+Postcheck độc lập2026-10-22T11:57:58.487Z exit0 xác nhận15bản ghi QA đều vắng mặt,
+Tour161 updatedAt vẫn2026-10-21T14:11:11.494Z. Không sửa giá/publish tour kinh doanh để thử.
+
+Browser Edge: QA169 lưu lịch340 hai lần thành công, gồm sửa hãng bay, không crash,
+console error/warn thu được rỗng. Preview URL nhận refresh mới sau từng SAVE;
+nhấn nút fallback cho thấy bản nháp mới `QA Airways SAVE 1900` trên hero/rail/bảng lịch.
+Ảnh rõ nội dung `docs/reviews/cms-preview-20261022/cms-070-preview-top-after-save.jpg`.
+Ảnh được chụp từ preview đã tải; fixture đã được cleanup và không còn public.
+
+**Giới hạn còn mở:** chuyển trang preview tự động vẫn dừng ở initializer với
+`data-handoff-state=submitted`, dù timer chạy; nút `Mở bản xem trước` hoạt động.
+Không đánh dấu automatic preview là đạt. Không nới CSP/origin/TTL để né lỗi.
+Unit preview/lifecycle44/44; component liên quan35/35; TypeScript, scoped lint,
+build/postbuild exit0. Không chạy lại toàn bộ integration/E2E repository hoặc restore DB drill.
+Chi tiết review, log, command, release và giới hạn tại `docs/reviews/cms-preview-20261022/audit.md`.

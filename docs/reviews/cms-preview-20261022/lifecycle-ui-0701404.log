@@ -1,0 +1,145 @@
+{
+  "cleanupVerified": true,
+  "dryRun": false,
+  "executedAt": "2026-10-22T11:54:38.804Z",
+  "ok": true,
+  "ownedIDs": {
+    "departureID": 340,
+    "productID": 169,
+    "siteID": 2,
+    "slug": "cms-qa-20261022-proof1900",
+    "wrapperID": 362
+  },
+  "phases": [
+    {
+      "phase": "auth",
+      "startedAt": "2026-10-22T11:54:38.805Z",
+      "status": "success",
+      "finishedAt": "2026-10-22T11:54:39.379Z",
+      "durationMs": 574,
+      "details": {
+        "adminUserId": 1,
+        "authenticated": true
+      }
+    },
+    {
+      "phase": "preflight",
+      "startedAt": "2026-10-22T11:54:39.380Z",
+      "status": "success",
+      "finishedAt": "2026-10-22T11:54:40.055Z",
+      "durationMs": 675,
+      "details": {
+        "adminUserId": 1,
+        "cmsBaseUrl": "https://wingsgroup.vn",
+        "heroMediaId": 1375,
+        "publicBaseUrl": "https://wingsgo.vn",
+        "siteCode": "wings-go",
+        "siteId": 2,
+        "slug": "cms-qa-20261022-proof1900",
+        "tourHubId": 208,
+        "ownerMarker": "[proof:305e7935-da9e-4002-bf36-2ff33722f890]"
+      }
+    },
+    {
+      "phase": "create",
+      "startedAt": "2026-10-22T11:54:40.055Z",
+      "status": "success",
+      "finishedAt": "2026-10-22T11:54:40.324Z",
+      "durationMs": 269,
+      "details": {
+        "id": 169,
+        "site": 2,
+        "slug": "cms-qa-20261022-proof1900",
+        "status": "draft"
+      }
+    },
+    {
+      "phase": "edit",
+      "startedAt": "2026-10-22T11:54:40.324Z",
+      "status": "success",
+      "finishedAt": "2026-10-22T11:54:40.641Z",
+      "durationMs": 317,
+      "details": {
+        "departureDate": "2026-12-21",
+        "id": 340,
+        "tourProductId": 169
+      }
+    },
+    {
+      "phase": "provision",
+      "startedAt": "2026-10-22T11:54:40.641Z",
+      "status": "success",
+      "finishedAt": "2026-10-22T11:54:42.492Z",
+      "durationMs": 1851,
+      "details": {
+        "path": "/tour/cms-qa-20261022-proof1900",
+        "wrapperId": 362
+      }
+    },
+    {
+      "phase": "publish",
+      "startedAt": "2026-10-22T11:54:42.492Z",
+      "status": "success",
+      "finishedAt": "2026-10-22T11:54:46.237Z",
+      "durationMs": 3745,
+      "details": {
+        "committed": true,
+        "revision": "ca6c6b68f5ab36e15df78e3955c0f164b83284211441d8385764e406e1369293"
+      }
+    },
+    {
+      "phase": "public_read",
+      "startedAt": "2026-10-22T11:54:46.237Z",
+      "status": "success",
+      "finishedAt": "2026-10-22T11:55:47.539Z",
+      "durationMs": 61302,
+      "details": {
+        "publicEndpointStatus": 200,
+        "publicEndpointVerified": true,
+        "publicUrl": "https://wingsgo.vn/tour/cms-qa-20261022-proof1900",
+        "qaMarkerVerified": true
+      }
+    },
+    {
+      "phase": "cleanup",
+      "startedAt": "2026-10-22T11:55:47.539Z",
+      "status": "success",
+      "finishedAt": "2026-10-22T11:55:48.443Z",
+      "durationMs": 904,
+      "details": {
+        "cleanedOwnedIDs": {
+          "departureID": 340,
+          "productID": 169,
+          "siteID": 2,
+          "slug": "cms-qa-20261022-proof1900",
+          "wrapperID": 362
+        }
+      }
+    },
+    {
+      "phase": "cleanup_verify",
+      "startedAt": "2026-10-22T11:55:48.443Z",
+      "status": "success",
+      "finishedAt": "2026-10-22T11:55:48.880Z",
+      "durationMs": 437,
+      "details": {
+        "departureDeleted": true,
+        "wrapperDeleted": true,
+        "productDeleted": true,
+        "publicRouteCleaned": true
+      }
+    }
+  ],
+  "preflight": {
+    "adminUserId": 1,
+    "cmsBaseUrl": "https://wingsgroup.vn",
+    "heroMediaId": 1375,
+    "publicBaseUrl": "https://wingsgo.vn",
+    "siteCode": "wings-go",
+    "siteId": 2,
+    "slug": "cms-qa-20261022-proof1900",
+    "tourHubId": 208,
+    "ownerMarker": "[proof:305e7935-da9e-4002-bf36-2ff33722f890]"
+  }
+}
+sh: line 11: $'\r': command not found
