@@ -37,6 +37,7 @@ export async function Footer() {
     isWingsGroup &&
     settings?.wingsGroupV3?.enabled === true &&
     isWingsGroupV3SurfacePath(publicRoute)
+  const hasCompactContacts = isWingsGo || isWingsGroupV3Surface
   const wingsGroupIdentity = isWingsGroup
     ? {
         ...WINGSGROUP_LEGAL_IDENTITY,
@@ -57,19 +58,20 @@ export async function Footer() {
     if (!isWingsGo) return true
     const label = String(link?.label || '').trim().toLowerCase()
     const url = String(link?.url || '').replace(/\/+$/, '') || '/'
-    return label !== 'liên hệ' && label !== 'contact' && url !== '/lien-he'
+    return label !== 'liên hệ' && label !== 'contact' && url !== '/lien-he' &&
+      !/^https?:\/\/(?:www\.)?zalo\.me(?:\/|$)/i.test(url)
   })
   const salesEmail =
     settings?.salesEmail && settings.salesEmail !== settings.supportEmail
       ? settings.salesEmail
       : null
-  const footerEmail = isWingsGroupV3Surface
+  const footerEmail = hasCompactContacts
     ? settings?.supportEmail || salesEmail
     : settings?.supportEmail
-  const footerHotlines = isWingsGroupV3Surface ? hotlines.slice(0, 1) : hotlines
+  const footerHotlines = hasCompactContacts ? hotlines.slice(0, 1) : hotlines
   const hasFooterContacts = Boolean(
     footerEmail ||
-      (!isWingsGroupV3Surface && salesEmail) ||
+      (!hasCompactContacts && salesEmail) ||
       (isWingsGo || isWingsGroup ? footerHotlines.length > 0 : Boolean(settings?.supportPhone)),
   )
   const hasConfiguredLogoImage = Boolean(
@@ -237,7 +239,7 @@ export async function Footer() {
                 {footerEmail ? (
                   <ProtectedEmailLink email={footerEmail} />
                 ) : null}
-                {!isWingsGroupV3Surface && salesEmail ? (
+                {!hasCompactContacts && salesEmail ? (
                   <ProtectedEmailLink email={salesEmail} />
                 ) : null}
                 {isWingsGroup && footerHotlines.length > 0 ? (
@@ -254,9 +256,9 @@ export async function Footer() {
                 ) : isWingsGo && hotlines[0] ? (
                   <a className="wingsgo-footer__phone" href={hotlines[0].href}>
                     <PhoneIcon aria-hidden="true" className="h-4 w-4" />
-                    {formatHotlineDisplay(hotlines[0].normalized)}
+                    {locale === 'en' ? 'Call now' : 'Gọi ngay'}: {formatHotlineDisplay(hotlines[0].normalized)}
                   </a>
-                ) : !isWingsGroupV3Surface && settings?.supportPhone ? (
+                ) : !hasCompactContacts && settings?.supportPhone ? (
                   <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
                     <PhoneIcon aria-hidden="true" className="h-4 w-4" />
                     {settings.supportPhone}
@@ -267,7 +269,7 @@ export async function Footer() {
           </div>
 
           <div className="flex flex-col-reverse items-start gap-4 md:flex-row md:flex-wrap md:items-center md:justify-end">
-            {!isWingsGroup ? <ThemeSelector copy={chromeCopy.themeSelector} /> : null}
+            {!isWingsGroup && !isWingsGo ? <ThemeSelector copy={chromeCopy.themeSelector} /> : null}
             <nav
               aria-label={chromeCopy.footerNavigation}
               className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-center md:justify-end"
@@ -280,7 +282,7 @@ export async function Footer() {
                   {locale === 'en' ? 'Customer Privacy Policy' : 'Chính sách bảo mật khách hàng'}
                 </SiteLink>
               ) : null}
-              {!isWingsGroupV3Surface && sharedZaloCTA ? (
+              {!hasCompactContacts && sharedZaloCTA ? (
                 <a
                   className="theme-nav-link"
                   href={sharedZaloCTA.href}
@@ -291,35 +293,6 @@ export async function Footer() {
                 </a>
               ) : null}
             </nav>
-            {isWingsGo ? (
-              <div className="flex flex-col items-start gap-2">
-                {sharedZaloCTA ? (
-                  <a
-                    className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-5 text-sm font-semibold text-white no-underline"
-                    href={sharedZaloCTA.href}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    {locale === 'en' ? 'Get Tour Advice' : 'Nhận tư vấn Tour'}
-                  </a>
-                ) : null}
-                {hotlines.map((item, idx) => (
-                  <a
-                    key={item.normalized}
-                    className="text-sm font-semibold text-[var(--site-brand)]"
-                    href={item.href}
-                  >
-                    {item.label
-                      ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
-                      : idx === 0
-                        ? locale === 'en'
-                          ? `Call now: ${formatHotlineDisplay(item.normalized)}`
-                          : `Hotline: ${formatHotlineDisplay(item.normalized)}`
-                        : formatHotlineDisplay(item.normalized)}
-                  </a>
-                ))}
-              </div>
-            ) : null}
           </div>
         </div>
       )}

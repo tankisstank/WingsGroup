@@ -11,6 +11,7 @@ type Props = { locale?: string | null; siteCode?: string | null; hotlines?: Hotl
 
 export const SiteContactFab: React.FC<Props> = ({ locale, siteCode, hotlines }) => {
   const [open, setOpen] = useState(false)
+  const [footerVisible, setFooterVisible] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const dialogRef = useRef<HTMLElement>(null)
   const wasOpenRef = useRef(false)
@@ -23,10 +24,24 @@ export const SiteContactFab: React.FC<Props> = ({ locale, siteCode, hotlines }) 
     hotlines !== undefined ? hotlines : resolveSiteHotlines(undefined, siteCode)
 
   useEffect(() => {
+    if (!isWingsGo || typeof IntersectionObserver === 'undefined') return
+    const footer = document.querySelector('footer.site-footer')
+    if (!footer) return
+    const observer = new IntersectionObserver(([entry]) => {
+      setFooterVisible(entry.isIntersecting)
+    })
+    observer.observe(footer)
+    return () => observer.disconnect()
+  }, [isWingsGo])
+
+  useEffect(() => {
     if (!open) {
       if (wasOpenRef.current) {
         wasOpenRef.current = false
-        triggerRef.current?.focus()
+        const focusTarget = isWingsGo && footerVisible
+          ? document.querySelector<HTMLAnchorElement>('footer .wingsgo-footer__phone')
+          : triggerRef.current
+        ;(focusTarget || triggerRef.current)?.focus()
       }
       return
     }
@@ -55,7 +70,7 @@ export const SiteContactFab: React.FC<Props> = ({ locale, siteCode, hotlines }) 
     }
     document.addEventListener('keydown', handleDialogKeys)
     return () => document.removeEventListener('keydown', handleDialogKeys)
-  }, [open])
+  }, [open, footerVisible, isWingsGo])
 
   if (!isSupportedSite) return null
 
@@ -66,6 +81,7 @@ export const SiteContactFab: React.FC<Props> = ({ locale, siteCode, hotlines }) 
         aria-controls="site-contact-dialog"
         aria-haspopup="dialog"
         className="fixed bottom-20 right-4 sm:bottom-5 sm:right-5 z-[80] rounded-full bg-[var(--site-brand)] px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-xl transition hover:scale-[1.02]"
+        hidden={isWingsGo && footerVisible && !open}
         onClick={() => setOpen(true)}
         ref={triggerRef}
         type="button"

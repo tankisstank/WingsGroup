@@ -270,6 +270,35 @@ describe('lead form hardened submission', () => {
     expect(document.querySelector('form')?.hasAttribute('novalidate')).toBe(false)
   })
 
+  it.each([false, true])('uses the CMS main on WingsGo contact form, missing form=%s', (missingForm) => {
+    const { container } = render(
+      <FormBlock
+        enableIntro={false}
+        form={missingForm ? null : form as never}
+        hotlines={[{ raw: '0919000000', normalized: '0919000000', href: 'tel:0919000000' }]}
+        publicPathname="/lien-he"
+        siteCode="wings-go"
+      />,
+    )
+    const phones = Array.from(container.querySelectorAll('a[href^="tel:"]'), link => link.getAttribute('href'))
+    expect(phones).toHaveLength(missingForm ? 1 : 2)
+    expect(new Set(phones)).toEqual(new Set(['tel:0919000000']))
+    expect(container.textContent).not.toContain('0912 910 101')
+  })
+
+  it('respects an explicitly empty WingsGo contact phone list', () => {
+    const { container } = render(
+      <FormBlock
+        enableIntro={false}
+        form={form as never}
+        hotlines={[]}
+        publicPathname="/lien-he"
+        siteCode="wings-go"
+      />,
+    )
+    expect(container.querySelector('a[href^="tel:"]')).toBeNull()
+  })
+
   it('prefills WingsGo enquiry context and exposes strict native phone validation', async () => {
     document.documentElement.lang = 'en'
     window.history.replaceState(

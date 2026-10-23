@@ -4671,8 +4671,21 @@ body[data-site-code='wing-side'] .wingsside-tour-breadcrumb [aria-current='page'
 }
 
 body[data-site-code='wings-go'] .site-footer__contacts a[href^='tel:'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: var(--site-brand);
+  color: #fff;
   flex: 0 0 auto;
   white-space: nowrap;
+}
+
+body[data-site-code='wings-go'] .wingsgo-footer__phone:focus-visible {
+  outline: 2px solid var(--site-brand);
+  outline-offset: 3px;
 }
 
 @media (min-width: 1024px) {

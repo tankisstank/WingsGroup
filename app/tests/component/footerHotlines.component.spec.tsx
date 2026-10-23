@@ -18,14 +18,18 @@ vi.mock('@/utilities/siteContext', () => ({
   getCurrentLocale: async () => context.locale,
   getCurrentPublicPathname: async () => context.publicPathname,
 }))
-vi.mock('@/providers/Theme/ThemeSelector', () => ({ ThemeSelector: () => null }))
+vi.mock('@/providers/Theme/ThemeSelector', () => ({
+  ThemeSelector: () => <button data-testid="theme-selector" type="button">Theme</button>,
+}))
 vi.mock('@/components/Logo/Logo', () => ({ Logo: () => <span>Logo</span> }))
 vi.mock('@/components/SiteLink', () => ({
   SiteLink: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={String(href)} {...props}>{children}</a>
   ),
 }))
-vi.mock('@/components/Link', () => ({ CMSLink: () => null }))
+vi.mock('@/components/Link', () => ({
+  CMSLink: ({ url, label }: { url?: string; label?: string }) => <a href={url}>{label}</a>,
+}))
 
 import { Footer } from '@/Footer/Component'
 
@@ -38,11 +42,50 @@ afterEach(() => {
 })
 
 describe('Footer CMS hotlines', () => {
-  it('lists all three WingsGo numbers and the shared Zalo OA', async () => {
+  it('shows one current WingsGo call and omits repeated channels and theme selector', async () => {
     const { container } = render(await Footer())
     const numbers = Array.from(container.querySelectorAll('a[href^="tel:"]'), (link) => link.getAttribute('href'))
-    expect(new Set(numbers)).toEqual(new Set(['tel:0912910101', 'tel:0915250101', 'tel:0915260101']))
-    expect(container.querySelector('a[href="https://zalo.me/4142059657526524531"]')).toBeTruthy()
+    expect(numbers).toEqual(['tel:0948786775'])
+    expect(container.querySelector('a[href*="zalo.me"]')).toBeNull()
+    expect(container.querySelector('[data-testid="theme-selector"]')).toBeNull()
+    expect(container.textContent).not.toContain('Nhận tư vấn Tour')
+  })
+
+  it.each(['vi', 'en'])('keeps one CMS phone/email and navigation for WingsGo %s', async (locale) => {
+    context.locale = locale
+    context.settings = {
+      supportPhone: '0948786775',
+      supportEmail: 'info@wingsgroup.vn',
+      salesEmail: 'sales@wingsgroup.vn',
+      additionalHotlines: [
+        { phoneNumber: '0915250101' },
+        { phoneNumber: '0915260101' },
+      ],
+      footerNavItems: [
+        { link: { type: 'custom', url: '/thi-truong', label: 'Markets' } },
+        { link: { type: 'custom', url: 'https://zalo.me/4142059657526524531', label: 'Zalo' } },
+      ],
+    }
+    const { container } = render(await Footer())
+    expect(Array.from(container.querySelectorAll('a[href^="tel:"]'), link => link.getAttribute('href')))
+      .toEqual(['tel:0948786775'])
+    expect(Array.from(container.querySelectorAll('a[href^="mailto:"]'), link => link.getAttribute('href')))
+      .toEqual(['mailto:info@wingsgroup.vn'])
+    expect(container.querySelector('a[href^="tel:"]')?.textContent)
+      .toContain(`${locale === 'en' ? 'Call now' : 'Gọi ngay'}: 0948 786 775`)
+    expect(container.querySelector('a[href="/thi-truong"]')).toBeTruthy()
+    expect(container.querySelector('a[href*="zalo.me"]')).toBeNull()
+    expect(container.querySelector('[data-testid="theme-selector"]')).toBeNull()
+    expect(container.textContent).not.toContain('0915 250 101')
+    expect(container.textContent).not.toContain('0915 260 101')
+    expect(container.textContent).toContain(locale === 'en' ? 'Head office' : 'Trụ sở chính')
+  })
+
+  it('uses one sales email for WingsGo when support email is cleared', async () => {
+    context.settings = { supportPhone: '0948786775', supportEmail: '', salesEmail: 'sales@wingsgroup.vn' }
+    const { container } = render(await Footer())
+    expect(container.querySelectorAll('a[href^="mailto:"]')).toHaveLength(1)
+    expect(container.querySelector('a[href="mailto:sales@wingsgroup.vn"]')).toBeTruthy()
   })
 
   it('uses a custom main and keeps deleted supplementary numbers absent', async () => {

@@ -8,7 +8,7 @@ export interface HotlineItem {
 }
 
 export const WINGSGO_DEFAULT_HOTLINES: readonly [string, string, string] = [
-  '0912910101',
+  '0948786775',
   '0915250101',
   '0915260101',
 ] as const
@@ -83,7 +83,7 @@ export function formatHotlineDisplay(phone: string | null | undefined): string {
  * - Deduplicates by normalized phone number.
  * - Main supportPhone comes first, followed by additional hotlines in order.
  * - Valid Vietnamese and international numbers are rendered consistently with CMS validation.
- * - WingsGo falls back to 0912910101 if main is missing/invalid.
+ * - WingsGo falls back to 0948786775 if main is missing/invalid.
  * - ONLY undefined permits supplementary defaults for WingsGo.
  * - null or [] is authoritative empty: no secondary fallback is added.
  * - Other tenants preserve valid international phone numbers and do not receive WingsGo defaults.

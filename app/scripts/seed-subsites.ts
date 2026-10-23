@@ -1482,7 +1482,7 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
         },
         {
           label: 'Liên hệ',
-          value: '0912910101',
+          value: '0948786775',
           description: 'Có thể gửi yêu cầu qua form, hotline hoặc email sales@wingsgroup.vn.',
         },
       ],
@@ -4107,7 +4107,7 @@ async function seedWingsGo(payload: Payload, req: PayloadRequest, siteSeed: Site
       linkItem('Liên hệ', '/lien-he'),
     ],
     supportEmail: 'sales@wingsgroup.vn',
-    supportPhone: '0912910101',
+    supportPhone: '0948786775',
     additionalHotlines: [
       { phoneNumber: '0915250101', label: 'Tư vấn tour' },
       { phoneNumber: '0915260101', label: 'Hỗ trợ dịch vụ' },

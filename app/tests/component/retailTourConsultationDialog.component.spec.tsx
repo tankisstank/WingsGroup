@@ -174,10 +174,10 @@ describe('RetailTourConsultationDialog Component (Phase 4)', () => {
     )
 
     const hotline = document.querySelector('[data-od-id="consultation-hotline-btn"]')!
-    expect(hotline.getAttribute('href')).toBe('tel:0912910101')
+    expect(hotline.getAttribute('href')).toBe('tel:0948786775')
     const channels = document.querySelector('[data-od-id="consultation-channels"]')!
     expect(Array.from(channels.querySelectorAll('a[href^="tel:"]'), (link) => link.getAttribute('href')))
-      .toEqual(['tel:0912910101', 'tel:0915250101', 'tel:0915260101'])
+      .toEqual(['tel:0948786775', 'tel:0915250101', 'tel:0915260101'])
 
     const zalo = document.querySelector('[data-od-id="consultation-zalo-btn"]')!
     expect(zalo.getAttribute('href')).toBe('https://zalo.me/4142059657526524531')

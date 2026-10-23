@@ -70,7 +70,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       className={cn(GeistSans.variable, GeistMono.variable)}
-      data-theme={site.code === 'wings-group' ? 'light' : undefined}
+      data-theme={site.code === 'wings-group' || site.code === 'wings-go' ? 'light' : undefined}
       lang={locale}
       suppressHydrationWarning
     >

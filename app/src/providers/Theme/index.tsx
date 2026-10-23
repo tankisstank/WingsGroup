@@ -22,15 +22,15 @@ export const ThemeProvider = ({
   children: React.ReactNode
   siteCode?: string
 }) => {
-  const isWingsGroup = siteCode === 'wings-group'
+  const isAlwaysLight = siteCode === 'wings-group' || siteCode === 'wings-go'
   const [theme, setThemeState] = useState<Theme | undefined>(
     canUseDOM
-      ? (isWingsGroup ? 'light' : document.documentElement.getAttribute('data-theme')) as Theme
+      ? (isAlwaysLight ? 'light' : document.documentElement.getAttribute('data-theme')) as Theme
       : undefined,
   )
 
   const setTheme = useCallback((themeToSet: Theme | null) => {
-    if (isWingsGroup) {
+    if (isAlwaysLight) {
       setThemeState('light')
       document.documentElement.setAttribute('data-theme', 'light')
       return
@@ -46,10 +46,10 @@ export const ThemeProvider = ({
       window.localStorage.setItem(themeLocalStorageKey, themeToSet)
       document.documentElement.setAttribute('data-theme', themeToSet)
     }
-  }, [isWingsGroup])
+  }, [isAlwaysLight])
 
   useEffect(() => {
-    if (isWingsGroup) {
+    if (isAlwaysLight) {
       document.documentElement.setAttribute('data-theme', 'light')
       setThemeState('light')
       return
@@ -64,7 +64,7 @@ export const ThemeProvider = ({
 
     document.documentElement.setAttribute('data-theme', themeToSet)
     setThemeState(themeToSet)
-  }, [isWingsGroup])
+  }, [isAlwaysLight])
 
   return <ThemeContext value={{ setTheme, theme }}>{children}</ThemeContext>
 }

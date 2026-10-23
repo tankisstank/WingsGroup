@@ -16,6 +16,7 @@ import { useSitePublicLocale } from '@/providers/SitePath'
 import { useSitePath } from '@/utilities/useSitePath'
 import { getCopyLocale } from '@/utilities/locales'
 import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
+import { formatHotlineDisplay, resolveSiteHotlines, type HotlineItem } from '@/utilities/siteHotlines'
 import { TurnstileWidget } from './TurnstileWidget'
 import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
 import type { LocalizedCopy } from '@/i18n/publicCopy'
@@ -317,6 +318,7 @@ export const FormBlock: React.FC<
   {
     anchorId?: null | string
     formOdId?: string
+    hotlines?: HotlineItem[]
     id?: string
     siteCode?: null | string
     publicPathname?: null | string
@@ -330,6 +332,7 @@ export const FormBlock: React.FC<
     enableIntro,
     form: formFromProps,
     formOdId,
+    hotlines,
     introContent,
     presentation = 'split-contact',
     publicPathname,
@@ -365,6 +368,9 @@ export const FormBlock: React.FC<
     )
   const isWingsGoContactPage = siteCode === 'wings-go' && publicPathname === '/lien-he'
   const wingsGoZalo = isWingsGoContactPage ? getSharedZaloCTA(siteCode, locale) : null
+  const wingsGoPrimaryHotline = isWingsGoContactPage
+    ? (hotlines ?? resolveSiteHotlines(undefined, siteCode))[0]
+    : undefined
   const resolvedSubmitLabel = isWingsGoContactPage
     ? copyLocale === 'en'
       ? '↳ GET ADVICE & A QUOTE'
@@ -776,9 +782,9 @@ export const FormBlock: React.FC<
         <div className="site-lead-form-card theme-card--quiet border p-4 lg:p-6" role="alert">
           <h2>{isWingsGoContactPage ? (copyLocale === 'en' ? 'Contact WingsGo' : 'Liên hệ WingsGo') : copy.asideTitle}</h2>
           <p>{copyLocale === 'en' ? 'The contact form is being configured. Call our team for help.' : 'Biểu mẫu liên hệ hiện chưa được cấu hình. Vui lòng gọi hotline WingsGo để được hỗ trợ.'}</p>
-          {isWingsGoContactPage ? (
-            <a className="mt-4 inline-flex min-h-11 items-center rounded-full bg-[var(--site-brand)] px-5 font-semibold text-white" href="tel:0912910101">
-              0912 910 101
+          {wingsGoPrimaryHotline ? (
+            <a className="mt-4 inline-flex min-h-11 items-center rounded-full bg-[var(--site-brand)] px-5 font-semibold text-white" href={wingsGoPrimaryHotline.href}>
+              {formatHotlineDisplay(wingsGoPrimaryHotline.normalized)}
             </a>
           ) : null}
         </div>
@@ -813,9 +819,11 @@ export const FormBlock: React.FC<
                 <li>🎧 {copyLocale === 'en' ? 'Support throughout your trip' : 'Đồng hành trọn chuyến đi'}</li>
               </ul>
               <div className="mt-6 grid gap-3 text-sm">
-                <a className="flex min-h-11 items-center gap-2 font-semibold text-[var(--site-brand)]" href="tel:0912910101">
-                  <span aria-hidden="true">📞</span> 0912 910 101
-                </a>
+                {wingsGoPrimaryHotline ? (
+                  <a className="flex min-h-11 items-center gap-2 font-semibold text-[var(--site-brand)]" href={wingsGoPrimaryHotline.href}>
+                    <span aria-hidden="true">📞</span> {formatHotlineDisplay(wingsGoPrimaryHotline.normalized)}
+                  </a>
+                ) : null}
                 {registeredOfficeAddress ? (
                   <p className="flex items-start gap-2 text-muted-foreground">
                     <span aria-hidden="true">📍</span>
@@ -1066,7 +1074,11 @@ export const FormBlock: React.FC<
                 {isWingsGoContactPage ? (
                   <p className="mb-4 rounded-xl bg-orange-50 p-3 text-sm font-semibold text-orange-900">
                     {copyLocale === 'en' ? 'NEED HELP URGENTLY? CALL OR MESSAGE US: ' : 'NẾU CẦN GẤP LIÊN HỆ NGAY HOTLINE/ZALO: '}
-                    <a className="whitespace-nowrap underline" href="tel:0912910101">0912 910 101</a>
+                    {wingsGoPrimaryHotline ? (
+                      <a className="whitespace-nowrap underline" href={wingsGoPrimaryHotline.href}>
+                        {formatHotlineDisplay(wingsGoPrimaryHotline.normalized)}
+                      </a>
+                    ) : null}
                     {wingsGoZalo ? (
                       <>
                         {' / '}
