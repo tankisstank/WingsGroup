@@ -63,7 +63,9 @@ try {
   const before = await readSettings()
   const beforeTarget = before.find((setting) => setting.site === wingsGoSite.id)
   assert.ok(beforeTarget, 'WingsGo settings document is missing')
-  const beforeDigest = digest(before.map((setting) => withoutMutableFields(setting, false)))
+  const beforeDigest = digest(
+    before.map((setting) => withoutMutableFields(setting, setting.site === wingsGoSite.id)),
+  )
   let writes = 0
   let result: unknown = null
 
@@ -86,7 +88,10 @@ try {
       'Only WingsGo supportPhone and updatedAt may change',
     )
     assert.equal(afterTarget.supportPhone, '0948786775')
-    assert.equal(digest(after.map((setting) => withoutMutableFields(setting, false))), beforeDigest)
+    assert.equal(
+      digest(after.map((setting) => withoutMutableFields(setting, setting.site === wingsGoSite.id))),
+      beforeDigest,
+    )
 
     const repeat = await updateWingsGoHotlineInPayload(scoped, { apply: true })
     assert.equal(repeat.status, 'noop', 'The repeat operation must be idempotent')
