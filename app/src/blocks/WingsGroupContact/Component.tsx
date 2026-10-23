@@ -58,9 +58,9 @@ export const WingsGroupContactSection = ({
                     : formatHotlineDisplay(item.normalized)}
                 </a>
               ))
-            ) : (
-              <a href="tel:0912910101">0912 910 101</a>
-            )}
+            ) : hotlines === undefined ? (
+              <a href="tel:0948786775">0948 786 775</a>
+            ) : null}
             <ProtectedEmailLink email="info@wingsgroup.vn" />
             <ProtectedEmailLink email="sales@wingsgroup.vn" />
             {sharedZaloCTA ? (

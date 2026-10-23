@@ -31,7 +31,8 @@
       { "label": "Dịch vụ", "target": "#services", "kind": "menu" },
       { "label": "Hệ sinh thái", "target": "#about", "kind": "menu" },
       { "label": "Về WingsGroup", "target": "#trust" },
-      { "label": "Cẩm nang", "target": "#news" }
+      { "label": "Cẩm nang", "target": "#news" },
+      { "label": "Liên hệ", "target": "#contact" }
     ],
     "mobileNavigation": [
       { "label": "Trang chủ", "target": "#home" },
@@ -43,10 +44,10 @@
     ],
     "languageControl": { "current": "VI", "available": ["vi", "en"], "englishState": "coming-soon" },
     "primaryCta": {
-      "label": "Trao đổi nhu cầu",
-      "target": "[data-od-id=consultation-dialog]",
-      "kind": "dialog",
-      "flow": "specialist-consultation-dialog"
+      "label": "Gọi ngay",
+      "target": "tel:0948786775",
+      "kind": "tel",
+      "flow": "split-call-contact"
     }
   },
   "sectionOrder": [

@@ -90,6 +90,15 @@ resolve through trusted WingsGroup site context.
 
 ## CTA Safety Rules
 
+- US-085 records the Option A header approved on 2026-10-23: one yellow
+  split control with a direct call link and a separate contact disclosure.
+  WingsGroup's approved main number is `0948786775`, displayed as
+  `0948 786 775`, read from `site-settings.supportPhone`. Preserve CMS-cleared
+  contacts and custom additional hotlines. The disclosure offers configured
+  additional numbers, shared Zalo OA and the locale-aware contact form at
+  `/lien-he#contact-form`. Header navigation keeps all six links; hero and
+  floating consultation triggers retain the existing dialog. This is the
+  local implementation contract; production rollout is a separate step.
 - The built-in consent-aware contact form is the required consultation path.
   Unconfigured external channels show `Chờ cập nhật` or record a preference;
   they do not open an external URL and do not block release.

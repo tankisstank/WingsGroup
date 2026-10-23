@@ -30,12 +30,12 @@ describe('WingsGroup v3 executable fidelity contract', () => {
       contract.sections.some((section: Record<string, any>) => section.key === 'service-router'),
     ).toBe(false)
     expect(contract.header.primaryCta).toEqual({
-      flow: 'specialist-consultation-dialog',
-      kind: 'dialog',
-      label: 'Trao đổi nhu cầu',
-      target: '[data-od-id=consultation-dialog]',
+      flow: 'split-call-contact',
+      kind: 'tel',
+      label: 'Gọi ngay',
+      target: 'tel:0948786775',
     })
-    expect(contract.header.primaryNavigation).toHaveLength(5)
+    expect(contract.header.primaryNavigation).toHaveLength(6)
     expect(contract.header.mobileNavigation).toHaveLength(6)
   })
 
@@ -51,7 +51,7 @@ describe('WingsGroup v3 executable fidelity contract', () => {
       kind: 'dialog',
       target: '[data-od-id=consultation-dialog]',
     })
-    expect(contract.header.primaryCta.flow).toBe(contract.consultationDialog.flowKey)
+    expect(getSection(contract, 'hero').ctas[1].flow).toBe(contract.consultationDialog.flowKey)
     expect(contract.consultationDialog.triggerLabel).toBe('LIÊN HỆ TƯ VẤN 24/7')
     expect(contract.consultationDialog.triggerFlow).toBe(contract.consultationDialog.flowKey)
     expect(getSection(contract, 'trust').heading).toBe('Minh bạch để bạn an tâm lựa chọn.')
@@ -120,6 +120,18 @@ describe('WingsGroup v3 executable fidelity contract', () => {
     ) as Record<string, any>
     contract.sectionOrder = [...contract.sectionOrder, 'unexpected']
     expect(() => assertWingsGroupV3FidelityContract(contract)).toThrow(/six-section/)
+  })
+
+  it('rejects the superseded header dialog CTA', async () => {
+    const contract = await loadWingsGroupV3FidelityContract()
+    const header = contract.header as { primaryCta: unknown }
+    header.primaryCta = {
+      flow: 'specialist-consultation-dialog',
+      kind: 'dialog',
+      label: 'Trao đổi nhu cầu',
+      target: '[data-od-id=consultation-dialog]',
+    }
+    expect(() => assertWingsGroupV3FidelityContract(contract)).toThrow(/Option A split-call/)
   })
 
   it('rejects a stale standalone service router in the public runtime contract', async () => {
