@@ -264,6 +264,30 @@ describe('US-085 WingsGroup Header Option A Implementation', () => {
     expect(document.activeElement).toBe(hamburger)
   })
 
+  it.each([
+    ['vi', 'Gọi ngay: 0948 786 775'],
+    ['en', 'Call now: 0948 786 775'],
+  ])('keeps only the main call alternative beside the %s contact form', (locale, callLabel) => {
+    const { container } = render(
+      <WingsGroupContactSection
+        blockType="formBlock"
+        form={mockForm}
+        hotlines={defaultWingsGroupHotlines}
+        locale={locale}
+        siteCode="wings-group"
+        wingsGroupV3
+      />,
+    )
+    const directContacts = screen.getByTestId('wingsgroup-direct-contacts')
+    const links = within(directContacts).getAllByRole('link')
+    expect(links).toHaveLength(1)
+    expect(links[0].textContent).toBe(callLabel)
+    expect(links[0].getAttribute('href')).toBe('tel:0948786775')
+    expect(container.querySelector('a[href^="mailto:"]')).toBeNull()
+    expect(container.querySelector('a[href*="zalo.me"]')).toBeNull()
+    expect(screen.getByTestId('mock-form')).toBeTruthy()
+  })
+
   it('F1 (contact block): respects empty hotlines array and does not render hardcoded phone link', () => {
     // hotlines = [] (authoritative empty)
     const { container: emptyContainer } = render(
@@ -278,6 +302,7 @@ describe('US-085 WingsGroup Header Option A Implementation', () => {
       />,
     )
     expect(emptyContainer.querySelector('a[href^="tel:"]')).toBeNull()
+    expect(emptyContainer.querySelector('[data-testid="wingsgroup-direct-contacts"]')).toBeNull()
 
     // hotlines = undefined (fallback to default)
     const { container: fallbackContainer } = render(
@@ -293,6 +318,21 @@ describe('US-085 WingsGroup Header Option A Implementation', () => {
     const fallbackLink = fallbackContainer.querySelector('a[href="tel:0948786775"]')
     expect(fallbackLink).toBeTruthy()
     expect(fallbackLink?.textContent).toContain('0948 786 775')
+  })
+
+  it('uses a custom CMS main hotline beside the form', () => {
+    render(
+      <WingsGroupContactSection
+        blockType="formBlock"
+        form={mockForm}
+        hotlines={[{ href: 'tel:0919000000', normalized: '0919000000', raw: '0919000000' }]}
+        siteCode="wings-group"
+        wingsGroupV3
+      />,
+    )
+    const link = within(screen.getByTestId('wingsgroup-direct-contacts')).getByRole('link')
+    expect(link.getAttribute('href')).toBe('tel:0919000000')
+    expect(link.textContent).toBe('Gọi ngay: 0919 000 000')
   })
 
   it('provides accessible language switcher labels with VI and EN compact buttons', () => {

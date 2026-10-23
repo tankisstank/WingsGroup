@@ -264,6 +264,15 @@ body[data-site-code='wings-group'][data-wingsgroup-v3='true'] .site-footer--wing
   border-color: #dedbd3;
 }
 
+body[data-site-code='wings-group'][data-wingsgroup-v3='true']
+  .site-footer--wingsgroup-v3
+  .wingsgroup-footer__phone {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 6px;
+}
+
 @media (min-width: 1200px) {
   body[data-site-code='wings-group'][data-wingsgroup-v3='true']
     .site-header--wingsgroup-v3

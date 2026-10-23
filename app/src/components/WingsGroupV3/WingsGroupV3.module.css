@@ -1588,11 +1588,19 @@
 }
 
 .contactDirect a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   color: var(--background, #fbfaf6);
   font-weight: 650;
   text-decoration: underline;
   text-decoration-color: var(--site-accent, #fdb515);
   text-underline-offset: 4px;
+}
+
+.contactDirect a:focus-visible {
+  outline: 2px solid var(--site-accent, #fdb515);
+  outline-offset: 4px;
 }
 
 .contactSection .sectionTitle,

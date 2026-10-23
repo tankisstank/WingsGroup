@@ -63,6 +63,15 @@ export async function Footer() {
     settings?.salesEmail && settings.salesEmail !== settings.supportEmail
       ? settings.salesEmail
       : null
+  const footerEmail = isWingsGroupV3Surface
+    ? settings?.supportEmail || salesEmail
+    : settings?.supportEmail
+  const footerHotlines = isWingsGroupV3Surface ? hotlines.slice(0, 1) : hotlines
+  const hasFooterContacts = Boolean(
+    footerEmail ||
+      (!isWingsGroupV3Surface && salesEmail) ||
+      (isWingsGo || isWingsGroup ? footerHotlines.length > 0 : Boolean(settings?.supportPhone)),
+  )
   const hasConfiguredLogoImage = Boolean(
     settings?.branding?.logoImage &&
     typeof settings.branding.logoImage === 'object' &&
@@ -223,16 +232,16 @@ export async function Footer() {
                 </div>
               </address>
             ) : null}
-            {settings?.supportEmail || salesEmail || (isWingsGo || isWingsGroup ? hotlines.length > 0 : Boolean(settings?.supportPhone)) ? (
+            {hasFooterContacts ? (
               <div className="site-footer__contacts">
-                {settings?.supportEmail ? (
-                  <ProtectedEmailLink email={settings.supportEmail} />
+                {footerEmail ? (
+                  <ProtectedEmailLink email={footerEmail} />
                 ) : null}
-                {salesEmail ? (
+                {!isWingsGroupV3Surface && salesEmail ? (
                   <ProtectedEmailLink email={salesEmail} />
                 ) : null}
-                {isWingsGroup && hotlines.length > 0 ? (
-                  hotlines.map((item) => (
+                {isWingsGroup && footerHotlines.length > 0 ? (
+                  footerHotlines.map((item) => (
                     <a className="wingsgroup-footer__phone" href={item.href} key={item.normalized}>
                       <PhoneIcon aria-hidden="true" className="h-4 w-4" />
                       <span>
@@ -247,7 +256,7 @@ export async function Footer() {
                     <PhoneIcon aria-hidden="true" className="h-4 w-4" />
                     {formatHotlineDisplay(hotlines[0].normalized)}
                   </a>
-                ) : settings?.supportPhone ? (
+                ) : !isWingsGroupV3Surface && settings?.supportPhone ? (
                   <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`}>
                     <PhoneIcon aria-hidden="true" className="h-4 w-4" />
                     {settings.supportPhone}
@@ -271,7 +280,7 @@ export async function Footer() {
                   {locale === 'en' ? 'Customer Privacy Policy' : 'Chính sách bảo mật khách hàng'}
                 </SiteLink>
               ) : null}
-              {sharedZaloCTA ? (
+              {!isWingsGroupV3Surface && sharedZaloCTA ? (
                 <a
                   className="theme-nav-link"
                   href={sharedZaloCTA.href}
@@ -280,16 +289,6 @@ export async function Footer() {
                 >
                   {sharedZaloCTA.label}
                 </a>
-              ) : null}
-              {isWingsGroupV3Surface ? (
-                <SiteLink
-                  className="site-header-cta site-footer-cta font-bold text-sm px-4 py-2 rounded shadow-sm inline-flex items-center gap-1.5"
-                  data-wingsgroup-consultation-trigger="true"
-                  href="/lien-he#contact-form"
-                >
-                  <PhoneIcon aria-hidden="true" className="h-4 w-4" />
-                  {locale === 'en' ? '24/7 CONSULTATION' : 'LIÊN HỆ TƯ VẤN 24/7'}
-                </SiteLink>
               ) : null}
             </nav>
             {isWingsGo ? (
