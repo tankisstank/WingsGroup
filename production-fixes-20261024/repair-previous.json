@@ -1,0 +1,9 @@
+{
+  "timestampUTC": "2026-10-24T09:24:21.661911+00:00",
+  "oldTarget": "/home/ubuntu/wings-travel/releases/release-capability-en-20261016-143523",
+  "newTarget": "/home/ubuntu/wings-travel/releases/release-us081-wingsgo-16ff60a",
+  "current": "/home/ubuntu/wings-travel/releases/release-rainbow-643a40d",
+  "rollbackAppImage": "sha256:6ff0106b45f4eba6a5019e502891903a7103105ca893a65602bbabac5e1a8f27",
+  "rollbackOpsImage": "sha256:f9a0f53174fcacd34465a6745f45f4c80f8592aedec54baa077ce5600ea57ec8",
+  "atomicReplacement": true
+}

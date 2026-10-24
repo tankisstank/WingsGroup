@@ -1,0 +1,33 @@
+app_postgres_data
+app_redis_data
+wingstravel-rollback-probe_postgres_data
+wingstravel-rollback-probe_redis_data
+{
+  "timestampUTC": "2026-10-24T09:27:00.135837+00:00",
+  "volumes": [
+    {
+      "name": "app_postgres_data",
+      "emptyBeforeDeletion": true,
+      "noContainerReferences": true,
+      "removed": true
+    },
+    {
+      "name": "app_redis_data",
+      "emptyBeforeDeletion": true,
+      "noContainerReferences": true,
+      "removed": true
+    },
+    {
+      "name": "wingstravel-rollback-probe_postgres_data",
+      "emptyBeforeDeletion": true,
+      "noContainerReferences": true,
+      "removed": true
+    },
+    {
+      "name": "wingstravel-rollback-probe_redis_data",
+      "emptyBeforeDeletion": true,
+      "noContainerReferences": true,
+      "removed": true
+    }
+  ]
+}

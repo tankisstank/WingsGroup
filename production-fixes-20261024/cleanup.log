@@ -1,0 +1,59 @@
+{
+  "startedUTC": "2026-10-24T09:23:12.482240+00:00",
+  "freeBytesBefore": 1180839936,
+  "pipDiskBytesBefore": 162803712
+}
+ID						RECLAIMABLE	SIZE		LAST ACCESSED
+hih9qirabui9m53m5ozb0wtiv*              	true 		388.2MB   	25 hours ago
+kjcx5ud5bthzj64sutjmwmt3s*              	true 	8.192kB   	19 hours ago
+tvofle84yf2b6y77sryll261f*              	true 	4.096kB   	25 hours ago
+rbc8csrfvzcyvtna890uox3e2*              	true 	8.192kB   	25 hours ago
+mjrsifc1zhu904d29xewd5ohk*              	true 	388.2MB   	19 hours ago
+4ydstdzcx8m9t7fhf6sv3ylpq*              	true 	8.192kB   	16 hours ago
+2o88qz3yubgkf0kaas8xclz49               	true 	224.9MB   	46 hours ago
+m9vn1m7rxoqrqqrwg2j3q3ztr               	true 	178.6MB   	19 hours ago
+i7rriwtoc5ngsg1epratn838b*              	true 	388.2MB   	16 hours ago
+gih8xesnqieeljrk0kfb5qojg*              	true 	4.096kB   	46 hours ago
+h5ddjkaz8dycha9qgrwybyz8z               	true 	37.03MB   	46 hours ago
+srx3qsdrbowy9lhacrfm0eyxz               	true 	37.03MB   	19 hours ago
+vs81o0s169shn2o93nsuztx5d*              	true 	4.096kB   	16 hours ago
+0ks6n0jcwjymfemjh38mddist               	true 	178.7MB   	16 hours ago
+bpfvgrgfwsknxqvdtws3a4hbp*              	true 	4.096kB   	19 hours ago
+l36g17fovc2w6i2us7x0r9yij               	true 	178.6MB   	25 hours ago
+6v2dgkuq8ymgave7of60n4khn               	true 	37.03MB   	25 hours ago
+nki2azonpzs1srvv00zrcgbmk               	true 	52.68kB   	19 hours ago
+2jp0qp33nqdnqp2s0by2a9zrp               	true 	52.68kB   	46 hours ago
+qogvq895kzkkrijqcsowkrchj               	true 	37.03MB   	16 hours ago
+hyvk8vkpyht99nh6u80x3gpsx               	true 	52.68kB   	25 hours ago
+3u8kjpc7q4azr1muvh6zr0n0z               	true 	24.26kB   	46 hours ago
+dyl0xcoseilos3nekoc0fc14o               	true 	52.68kB   	16 hours ago
+845hcw6zikf41rfk25l4xt405               	true 	24.29kB   	19 hours ago
+c3r0qv9cct1rc42ua9lmpf5tw               	true 	24.29kB   	16 hours ago
+l1c7gzy8ktn0x08qv6riiqlbu               	true 	27.39kB   	46 hours ago
+i1qctexnzjvgjr4msvvcgfkrh               	true 	24.29kB   	25 hours ago
+vwknvkiw34siwh7yk9om9ok3o               	true 	27.4kB    	19 hours ago
+qr7v4bf16qg390wdf5izub7m4               	true 	27.4kB    	16 hours ago
+72b394ge956hei4z1xd9uxrkf               	true 	27.4kB    	25 hours ago
+6opve3x1gvg2lm4t9k3a425n4               	true 	423.6MB   	19 hours ago
+oyt8754lcu3m8xtuwxc94thvn               	true 	423.9MB   	46 hours ago
+xfzgk4myknzxbchxqgdgvul32               	true 	52.53MB   	19 hours ago
+mzsxxc2yhhxfzhui783nqo4hq               	true 	423.5MB   	25 hours ago
+ulxos9sk4iccu272jg2i1xlrw               	true 	98.38MB   	46 hours ago
+77i59fcn1x53vlsscuf29xm9v               	true 	423.5MB   	16 hours ago
+5kehoqi0gocdadt9q4iflj3zk               	true 	52.55MB   	16 hours ago
+prhay4o8ux6ay8mxlhwrd1pik               	true 	52.54MB   	25 hours ago
+h01udxvxoldzab19v6rwe3xx7               	true 	11.82MB   	46 hours ago
+t3wh8w2vuophgwob9q4dpgef7               	true 	11.82MB   	32 minutes ago
+yvsnft7w3cfbvu5sy12d7pcu2               	true 	46.03kB   	25 hours ago
+7n5hxvfs3x77v7wnjdcwh4m6z               	true 	20.94kB   	2 days ago
+hg3kd06y5zrx2zezfemgsxtbo               	true 	8.285kB   	2 days ago
+Total:	4.048GB
+{
+  "finishedUTC": "2026-10-24T09:23:17.230218+00:00",
+  "freeBytesAfter": 4759638016,
+  "freeBytesDelta": 3578798080,
+  "runningContainersUnchanged": true,
+  "imageReferencesUnchanged": true,
+  "currentUnchanged": true,
+  "pipCacheRemoved": true
+}

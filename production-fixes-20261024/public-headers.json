@@ -1,0 +1,40 @@
+{
+  "iframes": [],
+  "responses": [
+    {
+      "path": "/",
+      "permissionsPolicy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
+      "status": 200
+    },
+    {
+      "path": "/tour",
+      "permissionsPolicy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
+      "status": 200
+    },
+    {
+      "path": "/en/tour",
+      "permissionsPolicy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
+      "status": 200
+    }
+  ],
+  "scripts": [
+    "https://wingsgo.vn/_next/static/chunks/13owt4twte9p8.js",
+    "https://wingsgo.vn/_next/static/chunks/0u.g_am2z7qfd.js",
+    "https://wingsgo.vn/_next/static/chunks/0h8qohwgu93r8.js",
+    "https://wingsgo.vn/_next/static/chunks/07z~sllhe8xbv.js",
+    "https://wingsgo.vn/_next/static/chunks/turbopack-03u9.h.~knq_l.js",
+    "https://wingsgo.vn/_next/static/chunks/0svnyrsla~4ub.js",
+    "https://wingsgo.vn/_next/static/chunks/0_1-oxkni2d~l.js",
+    "https://wingsgo.vn/_next/static/chunks/0iomqzg8xt85_.js",
+    "https://wingsgo.vn/_next/static/chunks/14sbaljhknnta.js",
+    "https://wingsgo.vn/_next/static/chunks/146g.za3d1hvx.js",
+    "https://wingsgo.vn/_next/static/chunks/14.fqeqzwe-00.js",
+    "https://wingsgo.vn/_next/static/chunks/0qv0m578ww02e.js",
+    "https://wingsgo.vn/_next/static/chunks/0lqfn8llorstf.js",
+    "https://wingsgo.vn/_next/static/chunks/0~2c864~~vipq.js",
+    "https://wingsgo.vn/_next/static/chunks/0f9~7ld.ejmwg.js",
+    "https://wingsgo.vn/_next/static/chunks/03~yq9q893hmn.js",
+    "https://wingsgo.vn/_next/static/chunks/05bkoz9njfi9a.js"
+  ],
+  "timestamp": "2026-10-24T09:25:54.298Z"
+}

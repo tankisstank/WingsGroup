@@ -1,0 +1,26 @@
+{
+  "timestampUTC": "2026-10-24T09:37:02.814385+00:00",
+  "freeBytes": 4758126592,
+  "current": "/home/ubuntu/wings-travel/releases/release-rainbow-643a40d",
+  "previous": "/home/ubuntu/wings-travel/releases/release-us081-wingsgo-16ff60a",
+  "runtimeImage": "sha256:0ef04a9a1cfded2efec835f32d68e0cac72cc05f1314530871a949493f9c523b",
+  "runtimeStartedAt": "2026-10-24T08:56:25.498045229Z",
+  "restartCount": 0,
+  "health": {
+    "checks": {
+      "database": "up",
+      "leadDelivery": "configured",
+      "redis": "up"
+    },
+    "durationMs": 4,
+    "requestId": "836fce92-c176-416b-9df3-504813947882",
+    "status": "ready",
+    "timestamp": "2026-10-24T09:37:02.795Z"
+  },
+  "retainedVolumes": [
+    "buildx_buildkit_builder0_state",
+    "wingstravel_postgres_data",
+    "wingstravel_redis_data"
+  ],
+  "allFourAppAndOpsImagesPresent": true
+}

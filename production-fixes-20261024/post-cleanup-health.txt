@@ -1,0 +1,10 @@
+Sat Oct 24 09:25:05 UTC 2026
+Filesystem       1B-blocks        Used  Available Use% Mounted on
+/dev/sda1      47321268224 42544889856 4759601152  90% /
+
+Shared:		1.266GB
+Private:	0B
+Reclaimable:	0B
+Total:		1.266GB
+/home/ubuntu/wings-travel/releases/release-us081-wingsgo-16ff60a
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":9,"requestId":"f187a432-755e-43de-a36f-489d2ade5c12","status":"ready","timestamp":"2026-10-24T09:25:05.298Z"}sha256:0ef04a9a1cfded2efec835f32d68e0cac72cc05f1314530871a949493f9c523b 2026-10-24T08:56:25.498045229Z 0

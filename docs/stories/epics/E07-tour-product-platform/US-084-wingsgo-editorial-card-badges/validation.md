@@ -174,3 +174,33 @@ Cutover completed at 15:56:28+07. Runtime immutable image `sha256:0ef04a9a1cfded
 On-VPS build hit disk full during chown; production stayed unchanged. The same standalone package/Dockerfile was successfully built locally for ARM64 and uploaded as a complete image. Only this session's extraction and exact failed-build cache IDs were removed. VPS remains low on space (~1.1GB available).
 
 Full commands, review findings, backup checksum, rollback and limits: `wingsgo-rainbow-release-20261024/release-report.md`; fresh logs and screenshots beside that report. No full suite, real devices, Safari/Firefox or sustained performance profile.
+
+## Production maintenance and reduced-motion diagnosis — 2026-10-24
+
+User authorized priority cache/empty-volume cleanup and repair of dangling `previous`.
+Docker build cache reported 4.048 GB reclaimed; pip cache 162.8 MB removed; all four
+named empty volumes were rechecked and removed through Docker without force.
+Filesystem free space increased by 3,578,798,080 bytes to approximately 4.76 GB
+(98% to 90% used). Runtime image/restart count/current stayed unchanged; production
+PostgreSQL/Redis volumes, media, backups and historical data remain.
+
+`previous` now atomically resolves to `release-us081-wingsgo-16ff60a`, matching
+current release metadata; rollback app and ops images exist. The deployment
+runbook now checks release/image pairing, records immutable app identity, replaces
+both links atomically and restores the prior link/image on failed activation.
+Independent Codex review's two P2 findings were fixed; final P1/P2/P3 count 0.
+Six isolated local runbook scenarios pass, including failed build/cutover/readiness
+and identity mismatch; these simulate commands and do not crash production.
+
+Actual user Edge profile reports `prefers-reduced-motion: reduce` on homepage and
+catalog, so computed border animation is `none`. Under normal-motion emulation,
+fresh public homepage/catalog checks at 1280/390 pass 4/4 with changing gradient
+angle and colors, fixed geometry, no overflow and pointer-events none; reduced
+motion passes separately 1/1. CSS remains correct and unchanged. No global
+accessibility preference or extension was changed. Public GET headers on `/`,
+`/tour`, `/en/tour` and origin have no reported ad-feature directives; those
+warnings were not reproduced. `content.js` log was traced to a chrome-extension
+URL. No new app release, DB/CMS write, full suite or restore drill in this pass.
+
+Report, exact commands, review findings and fresh proof:
+`production-fixes-20261024/report.md`.

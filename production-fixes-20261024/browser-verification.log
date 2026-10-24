@@ -1,0 +1,120 @@
+✓ Done
+✓ Done
+✓ WingsGo | Outbound Tours
+  https://wingsgo.vn/
+{
+  "after": {
+    "angle": "115.877deg",
+    "animation": "hotRainbowSpin",
+    "background": "conic-gradient(from 115.877deg, rgb(255, 69, 69), rgb(255, 138, 0), rgb(255, 230, 0), rgb(20, 241, 149), rgb(0, 194, 255), rgb(121, 40, 202), rgb(255, 0, 128), rgb(255, 69, 69))",
+    "pointerEvents": "none",
+    "transform": "none"
+  },
+  "before": {
+    "angle": "54.6119deg",
+    "animation": "hotRainbowSpin",
+    "background": "conic-gradient(from 54.6119deg, rgb(255, 69, 69), rgb(255, 138, 0), rgb(255, 230, 0), rgb(20, 241, 149), rgb(0, 194, 255), rgb(121, 40, 202), rgb(255, 0, 128), rgb(255, 69, 69))",
+    "pointerEvents": "none",
+    "transform": "none"
+  },
+  "pass": true,
+  "reducedMotion": false,
+  "timestampUTC": "2026-10-24T09:30:04.895Z",
+  "url": "https://wingsgo.vn/",
+  "width": 1280
+}
+✓ Tour WingsGo | Outbound Tours
+  https://wingsgo.vn/tour
+{
+  "after": {
+    "angle": "91.2401deg",
+    "animation": "hotRainbowSpin",
+    "background": "conic-gradient(from 91.2401deg, rgb(255, 69, 69), rgb(255, 138, 0), rgb(255, 230, 0), rgb(20, 241, 149), rgb(0, 194, 255), rgb(121, 40, 202), rgb(255, 0, 128), rgb(255, 69, 69))",
+    "pointerEvents": "none",
+    "transform": "none"
+  },
+  "before": {
+    "angle": "29.4065deg",
+    "animation": "hotRainbowSpin",
+    "background": "conic-gradient(from 29.4065deg, rgb(255, 69, 69), rgb(255, 138, 0), rgb(255, 230, 0), rgb(20, 241, 149), rgb(0, 194, 255), rgb(121, 40, 202), rgb(255, 0, 128), rgb(255, 69, 69))",
+    "pointerEvents": "none",
+    "transform": "none"
+  },
+  "pass": true,
+  "reducedMotion": false,
+  "timestampUTC": "2026-10-24T09:30:08.113Z",
+  "url": "https://wingsgo.vn/tour",
+  "width": 1280
+}
+✓ Done
+✓ Done
+✓ WingsGo | Outbound Tours
+  https://wingsgo.vn/
+{
+  "after": {
+    "angle": "98.4506deg",
+    "animation": "hotRainbowSpin",
+    "background": "conic-gradient(from 98.4506deg, rgb(255, 69, 69), rgb(255, 138, 0), rgb(255, 230, 0), rgb(20, 241, 149), rgb(0, 194, 255), rgb(121, 40, 202), rgb(255, 0, 128), rgb(255, 69, 69))",
+    "pointerEvents": "none",
+    "transform": "none"
+  },
+  "before": {
+    "angle": "36.617deg",
+    "animation": "hotRainbowSpin",
+    "background": "conic-gradient(from 36.617deg, rgb(255, 69, 69), rgb(255, 138, 0), rgb(255, 230, 0), rgb(20, 241, 149), rgb(0, 194, 255), rgb(121, 40, 202), rgb(255, 0, 128), rgb(255, 69, 69))",
+    "pointerEvents": "none",
+    "transform": "none"
+  },
+  "pass": true,
+  "reducedMotion": false,
+  "timestampUTC": "2026-10-24T09:30:11.974Z",
+  "url": "https://wingsgo.vn/",
+  "width": 390
+}
+✓ Tour WingsGo | Outbound Tours
+  https://wingsgo.vn/tour
+{
+  "after": {
+    "angle": "88.2432deg",
+    "animation": "hotRainbowSpin",
+    "background": "conic-gradient(from 88.2432deg, rgb(255, 69, 69), rgb(255, 138, 0), rgb(255, 230, 0), rgb(20, 241, 149), rgb(0, 194, 255), rgb(121, 40, 202), rgb(255, 0, 128), rgb(255, 69, 69))",
+    "pointerEvents": "none",
+    "transform": "none"
+  },
+  "before": {
+    "angle": "26.4096deg",
+    "animation": "hotRainbowSpin",
+    "background": "conic-gradient(from 26.4096deg, rgb(255, 69, 69), rgb(255, 138, 0), rgb(255, 230, 0), rgb(20, 241, 149), rgb(0, 194, 255), rgb(121, 40, 202), rgb(255, 0, 128), rgb(255, 69, 69))",
+    "pointerEvents": "none",
+    "transform": "none"
+  },
+  "pass": true,
+  "reducedMotion": false,
+  "timestampUTC": "2026-10-24T09:30:14.875Z",
+  "url": "https://wingsgo.vn/tour",
+  "width": 390
+}
+✓ Screenshot saved to production-fixes-20261024/tour-mobile.png
+✓ Done
+{
+  "after": {
+    "angle": "0deg",
+    "animation": "none",
+    "background": "conic-gradient(rgb(255, 69, 69), rgb(255, 138, 0), rgb(255, 230, 0), rgb(20, 241, 149), rgb(0, 194, 255), rgb(121, 40, 202), rgb(255, 0, 128), rgb(255, 69, 69))",
+    "pointerEvents": "none",
+    "transform": "none"
+  },
+  "before": {
+    "angle": "0deg",
+    "animation": "none",
+    "background": "conic-gradient(rgb(255, 69, 69), rgb(255, 138, 0), rgb(255, 230, 0), rgb(20, 241, 149), rgb(0, 194, 255), rgb(121, 40, 202), rgb(255, 0, 128), rgb(255, 69, 69))",
+    "pointerEvents": "none",
+    "transform": "none"
+  },
+  "pass": true,
+  "reducedMotion": true,
+  "timestampUTC": "2026-10-24T09:30:16.430Z",
+  "url": "https://wingsgo.vn/tour",
+  "width": 390
+}
+✓ Done

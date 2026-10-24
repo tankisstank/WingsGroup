@@ -1,0 +1,7 @@
+{"scenario":"success","pass":true,"exitCode":0}
+{"scenario":"activation-failure","pass":true,"exitCode":1}
+{"scenario":"readiness-failure","pass":true,"exitCode":1}
+{"scenario":"wrong-image","pass":true,"exitCode":1}
+{"scenario":"preflight-mismatch","pass":true,"exitCode":1}
+{"scenario":"build-failure","pass":true,"exitCode":9}
+PASS: 6 isolated runbook scenarios; no production access

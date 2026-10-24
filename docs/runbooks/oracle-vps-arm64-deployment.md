@@ -77,6 +77,7 @@ scp -i $VPS_KEY "$env:TEMP\wingstravel-release-sha.txt" ubuntu@${VPS_IP}:/home/u
 ### Bước 5: Giải nén và Build Docker Image trên VPS
 ```bash
 # Thao tác trên VPS (hoặc chạy qua SSH)
+set -eu
 cd /home/ubuntu/wings-travel/releases/$RELEASE_NAME
 unzip -q release-clean.zip && rm release-clean.zip
 sed -i 's/\r$//' relink.sh
@@ -84,6 +85,7 @@ mkdir -p public/media
 
 # Build Docker image
 docker build -f Dockerfile.standalone -t wingstravel-app:latest -t app-app:latest .
+sudo docker image inspect --format='{{.Id}}' wingstravel-app:latest > APP_IMAGE_ID
 
 # Load and bind the candidate's immutable operations image
 sudo docker load -i operations-image.tar
@@ -143,10 +145,82 @@ release đang chạy. Migration rollback có thể xóa dữ liệu badge; khi r
 ứng dụng, ưu tiên khôi phục image cũ và giữ schema additive.
 
 ### Bước 7: Chuyển symlink Current & Recreate Container
+
+Ghi nhận release và image đang chạy trước khi chuyển. `previous` phải trỏ đến
+release tồn tại, có cả app image và ops image phục vụ rollback. Không dùng một
+symlink `previous` cũ làm nguồn xác định rollback. Không xóa release/image được
+`current`, `previous`, `PREVIOUS_RELEASE` hoặc `PREVIOUS_IMAGE_ID` tham chiếu.
+
 ```bash
-ln -sfn /home/ubuntu/wings-travel/releases/$RELEASE_NAME /home/ubuntu/wings-travel/current
-cd /home/ubuntu/wings-travel/current
-docker compose -f docker-compose.production.yml -p wingstravel --env-file /home/ubuntu/wings-travel/shared/.env up -d --no-deps --no-build --pull never --force-recreate app
+set -eu
+base=/home/ubuntu/wings-travel
+candidate="$base/releases/$RELEASE_NAME"
+previous_release="$(readlink -e "$base/current")"
+previous_image="$(sudo docker inspect wingstravel-app-1 --format '{{.Image}}')"
+test -d "$candidate"
+test "$(readlink -e "$candidate")" = "$candidate"
+test "$previous_release" != "$candidate"
+test "$(dirname "$previous_release")" = "$base/releases"
+test -f "$previous_release/docker-compose.production.yml"
+test "$previous_image" = "$(tr -d '\r\n' < "$previous_release/APP_IMAGE_ID")"
+candidate_image="$(tr -d '\r\n' < "$candidate/APP_IMAGE_ID")"
+previous_ops="$(tr -d '\r\n' < "$previous_release/OPS_IMAGE_ID")"
+for image in "$previous_image" "$candidate_image" "$previous_ops"; do
+  case "$image" in sha256:*) ;; *) exit 1 ;; esac
+  test "$(sudo docker image inspect --format '{{.Id}}' "$image")" = "$image"
+done
+printf '%s\n' "$previous_release" > "$candidate/PREVIOUS_RELEASE"
+printf '%s\n' "$previous_image" > "$candidate/PREVIOUS_IMAGE_ID"
+printf 'services:\n  app:\n    image: %s\n' "$candidate_image" > "$candidate/pinned-compose.yml"
+printf 'services:\n  app:\n    image: %s\n' "$previous_image" > "$candidate/rollback-compose.yml"
+
+# Replace symlinks atomically; never leave an unlink/create gap.
+point_link() {
+  test -L "$1" || test ! -e "$1"
+  ln -s "$2" "$1.$RELEASE_NAME.$$"
+  mv -Tf "$1.$RELEASE_NAME.$$" "$1"
+}
+activate() {
+  sudo docker compose -f "$1/docker-compose.production.yml" -f "$2" \
+    -p wingstravel --env-file "$base/shared/.env" \
+    up -d --no-deps --no-build --pull never --force-recreate app
+}
+cutover_started=false
+restore_on_failure() {
+  status=$?
+  trap - EXIT HUP INT TERM
+  if test "$status" -ne 0 && test "$cutover_started" = true; then
+    point_link "$base/current" "$previous_release"
+    if ! activate "$previous_release" "$candidate/rollback-compose.yml"; then
+      echo 'Rollback activation failed: manual recovery required.' >&2
+      exit 1
+    fi
+    test "$(sudo docker inspect wingstravel-app-1 --format '{{.Image}}')" = "$previous_image"
+    echo 'Restored previous release and immutable image; verify readiness.' >&2
+  fi
+  exit "$status"
+}
+trap restore_on_failure EXIT
+trap 'exit 1' HUP INT TERM
+point_link "$base/previous" "$previous_release"
+cutover_started=true
+point_link "$base/current" "$candidate"
+activate "$candidate" "$candidate/pinned-compose.yml"
+ready=false
+for attempt in $(seq 1 25); do
+  if curl -fsS http://127.0.0.1:3000/api/health/ready > "$candidate/active-ready.json"; then
+    if python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["status"]=="ready"; assert d["checks"]["database"]==d["checks"]["redis"]=="up"; assert d["checks"]["leadDelivery"]=="configured"' "$candidate/active-ready.json"; then
+      ready=true
+      break
+    fi
+  fi
+  sleep 2
+done
+test "$ready" = true
+test "$(sudo docker inspect wingstravel-app-1 --format '{{.Image}}')" = "$candidate_image"
+test "$(readlink -e "$base/previous")" = "$previous_release"
+cutover_started=false
+trap - EXIT HUP INT TERM
 ```
 
 ### Bước 8: Kiểm tra Health Check & Xác nhận UI
@@ -157,3 +231,8 @@ curl -s http://127.0.0.1:3000/api/health/ready
 ```
 
 Sau đó sử dụng `agent-browser open https://wingsgo.vn` để chụp màn hình và đo đạc visual.
+
+Kiểm tra thêm `readlink -e /home/ubuntu/wings-travel/previous` khớp với
+`current/PREVIOUS_RELEASE`. Nếu readiness hoặc xác minh image thất bại, dùng
+`PREVIOUS_RELEASE` và image bất biến trong `PREVIOUS_IMAGE_ID` để rollback;
+không suy đoán image bằng tag `latest`. Giữ nguyên schema additive.

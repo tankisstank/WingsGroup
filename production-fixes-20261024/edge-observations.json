@@ -1,0 +1,28 @@
+{
+  "method": "Read-only CUA inspection in the user's actual Edge profile",
+  "date": "2026-10-24",
+  "observations": [
+    {
+      "url": "https://wingsgo.vn/tour",
+      "reducedMotion": true,
+      "hotCardCount": 2,
+      "computedAnimations": ["none", "none"],
+      "computedAngles": ["0deg", "0deg"]
+    },
+    {
+      "url": "https://wingsgo.vn/",
+      "reducedMotion": true,
+      "hotCardCount": 1,
+      "computedAnimations": ["none"]
+    }
+  ],
+  "capturedConsoleEntry": {
+    "level": "log",
+    "message": "Object",
+    "timestamp": "2026-10-24T09:24:30.542Z",
+    "url": "chrome-extension://mhmlkckkafjpdbeggdhcicfediihdmck/content.js"
+  },
+  "reportedAdPermissionsWarningsReproduced": false,
+  "globalSettingsOrExtensionsChanged": false,
+  "note": "Reduced-motion preference source could be operating system or browser emulation. The inspection proves the effective media preference, not the exact settings control responsible."
+}
